@@ -21,11 +21,13 @@ Editoria11y (editorial accessibility) is a user-friendly accessibility checker t
 Should look like this:
 
 ```
-<link rel="stylesheet" media="screen" href="https://code.jquery.com/jquery-3.5.1.min.js">
+<script src="https://code.jquery.com/jquery-3.5.1.min.js">
 <link rel="stylesheet" media="screen" href="/css/editoria11y.css">
-<link rel="stylesheet" media="screen" href="/css/editoria11y-prefs.js>
-<link rel="stylesheet" media="screen" href="/css/editoria11y.js">
+<script src="/js/editoria11y-prefs.js">
+<script src="/js/editoria11y.js">
 ```
+
+/core/modules/contextual/js/toolbar/views/VisualView.js?v=8.9.1"></script>
 
 You can directly edit editoria11y-prefs to change various selectors and strings, though I cannot promise things won't change in there until there is a full release.
 
@@ -102,7 +104,6 @@ Editoria11y's JavaScript is a fork of the [Sa11y](https://ryersondmp.github.io/s
 
 Sa11y itself is an adaptation of [Tota11y by Khan Academy.](https://github.com/Khan/tota11y), built with [FontAwesome icons](https://github.com/FortAwesome/Font-Awesome) and powered with jQuery.
 
-<link rel="stylesheet" media="screen" href="https://code.jquery.com/jquery-3.5.1.min.js">
 <link rel="stylesheet" media="screen" href="/css/editoria11y.css">
-<link rel="stylesheet" media="screen" href="/css/editoria11y-prefs.js>
-<link rel="stylesheet" media="screen" href="/css/editoria11y.js">
+<script src="/js/editoria11y-prefs.js"></script>
+<script src="/js/editoria11y.js"></script>
