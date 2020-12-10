@@ -104,6 +104,6 @@ Editoria11y's JavaScript is a fork of the [Sa11y](https://ryersondmp.github.io/s
 
 Sa11y itself is an adaptation of [Tota11y by Khan Academy.](https://github.com/Khan/tota11y), built with [FontAwesome icons](https://github.com/FortAwesome/Font-Awesome) and powered with jQuery.
 
-<link rel="stylesheet" media="screen" href="/css/editoria11y.css | relative_url">
-<script src="/js/editoria11y-prefs.js | relative_url"></script>
-<script src="/js/editoria11y.js | relative_url"></script>
+<link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css">
+<script src="{{ site.baseurl}}/js/editoria11y-prefs.js"></script>
+<script src="{{ site.baseurl}}/js/editoria11y.js"></script>
