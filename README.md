@@ -1,5 +1,3 @@
-# Editoria11y
-
 *This project is in development; I do not recommend using it in production until January 2021*
 
 Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly accessibility checker that addresses three critical needs for content authors:
@@ -110,6 +108,7 @@ Editoria11y will not run if it sees any elements on this list.
 
 ### Public Beta (January-February)
 - fail gracefully if checkroot is not found
+- tip-under alignment under inline tooltips
 - check ignore logic in headings
 - Create JS event hooks for Scan, Jump and Tooltip, and move Princeton-specific code to PS_Core
 - Add detection to prevent conflict with other common inline editors

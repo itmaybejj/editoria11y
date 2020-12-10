@@ -17,7 +17,7 @@ $( document ).ready(function() {
 
       setTimeout(function () {
         // Don't trigger tests until page has had time to settle.
-        if (document.querySelectorAll(ed11yNoRun).length === 0) {
+        if (document.querySelectorAll(ed11yNoRun).length === 0 && document.querySelectorAll(ed11yCheckRoot).length !== 0) {
           ed11y.checkAll(true, ed11y.ed11yStart);
         }
       }, 500);

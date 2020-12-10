@@ -166,7 +166,7 @@ button.ed11y-pop:focus {
 /* ===== Info panel ============================================= */
 
 #ed11y-panel {
-  z-index: 8890;
+  z-index: 1000;
   box-shadow: 2px 2px 6px #0004, 0 0 0 1px #0002 !important;
   position: fixed;
   bottom: 16px;
@@ -275,7 +275,7 @@ button.ed11y-pop:focus {
   padding: 2px !important;
   margin: 0 !important;
   border:none !important;
-  z-index: 99999;
+  z-index: 1001;
   transition: all .1s ease-in-out;
   outline: none !important;
 }
@@ -641,7 +641,7 @@ span.ed11y-headings-label {
   padding: 16px !important;
   box-shadow: 3px 3px 3px #0003 !important;
   color: #112f4e !important;
-  z-index: 500;
+  z-index: 1001;
   display: none;
   opacity: 0;
   transition: opacity .15s ease-out;
