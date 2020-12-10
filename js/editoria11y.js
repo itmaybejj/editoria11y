@@ -98,21 +98,18 @@ $( document ).ready(function() {
       if (this.errorCount > 0) {
         //
         document.getElementById("ed11y-main-toggle").classList.add("ed11y-toggle-errors");
-        document.getElementById("ed11y-errors-found").classList.add("ed11y-active");
-        document.getElementById("ed11y-no-errors").classList.remove("ed11y-active");
-        document.getElementById("ed11y-warnings").classList.remove("ed11y-active");
+        $('#ed11y-warnings, #ed11y-no-errors').removeClass('ed11y-active');
+        $('#ed11y-errors-found').addClass('ed11y-active');
       }
       else if (this.warningCount > 0) {
         document.getElementById("ed11y-main-toggle").classList.add("ed11y-toggle-warnings");
-        document.getElementById("ed11y-errors-found").classList.remove("ed11y-active");
-        document.getElementById("ed11y-no-errors").classList.remove("ed11y-active");
-        document.getElementById("ed11y-warnings").classList.add("ed11y-active");
+        $('#ed11y-errors-found, #ed11y-no-errors').removeClass('ed11y-active');
+        $('#ed11y-warnings').addClass('ed11y-active');
       }
       else {
         $('.ed11y-count').hide();
-        document.getElementById("ed11y-errors-found").classList.remove("ed11y-active");
-        document.getElementById("ed11y-no-errors").classList.add("ed11y-active");
-        document.getElementById("ed11y-warnings").classList.remove("ed11y-active");
+        $('#ed11y-errors-found, #ed11y-warnings').removeClass('ed11y-active');
+        $('#ed11y-no-errors').addClass('ed11y-active');
       }
     }
 
