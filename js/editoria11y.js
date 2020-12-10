@@ -1,4 +1,4 @@
-
+// Generic init.
 $( document ).ready(function() {
   if (window.navigator.userAgent.match(/MSIE|Trident/) === null) {
     // IE 11 is going to suffer under this load.
@@ -6,7 +6,7 @@ $( document ).ready(function() {
   }
 
   /***
-   * Ed11y base library, unchanged.
+   * Ed11y base library.
    * @constructor
    */
 
@@ -1133,6 +1133,6 @@ $( document ).ready(function() {
       }
     }
   }
-  // End of Ed11y library..
+  // End of Ed11y library.
 
 });

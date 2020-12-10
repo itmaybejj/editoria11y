@@ -2,18 +2,18 @@
 
 *This project is in development; I do not recommend using it in production until January 2021*
 
-Editoria11y (editorial accessibility) is a user-friendly accessibility checker that addresses three critical needs for content authors:
+Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly accessibility checker that addresses three critical needs for content authors:
 
 1. It runs automatically. Modern spellcheck works so well because it is always running; put spellcheck behind a button and few users remember to run it!
-1. It focuses exclusively on straightforward issues a content author can easily understand and easily fix. Comprehensive testing should be a key part of site creation, but if a tool is going to run automatically, it will drive an author bonkers if it is constantly alerting on code they do not understand and cannot fix.
+1. It focuses exclusively on straightforward issues a content author can easily understand and easily fix. Yes; comprehensive testing should be a key part of site creation, but if a tool is going to run automatically, it will drive an author bonkers if it is constantly alerting on code they do not understand and cannot fix.
 1. It runs in context. Views, Layout Builder, Paragraphs and all the other modules Drupal uses to assemble a page means that tools that run inside CKEditor cannot "see" many of the issues on a typical page.
 
 ## The authoring experience
-* On each page load Editoria11y places a small toggle button at the bottom right of the screen with an issue count. Users can press the button to view details of any alerts or access additional tools ("full check"), including visualizers for the document outline and image alt attributes, and the panel's state persists from page to page (open or shut).
-* If the issues are considered "major," the panel opens automatically.
+* On each page load, Editoria11y places a small toggle button at the bottom right of the screen with an issue count. Users can press the button to view details of any alerts or access additional tools ("full check"), including visualizers for the document outline and image alt attributes, and the panel's state persists from page to page (open or shut).
+* If issues are found, a panel slides open with more details. If users minimize the panel, it will only open on future pages if the issues are high priority.
 * If the user minimizes the panel, it will not open automatically on future page visits until the content changes.
 
-Try it! Click the toggle at the bottom right to highlight these example issues:
+If you are on the demo site, you will see these example issues highlighted:
 
 • A fake list using bullet symbols instead of list elements.
 
@@ -37,7 +37,7 @@ Try it! Click the toggle at the bottom right to highlight these example issues:
   * Links with only generic text: "click here," "learn more," "download," etc.
 * Structure
   * Fake lists
-  * Text with large blocks of SHOUTY CAPS LOCK TEXT
+  * More than three words of CAPS LOCK TEXT in a row
   * Tables without headers
   * Tables with document headers (&lt;h2&gt;) instead of table headers (&lt;th&gt;)
   
@@ -54,6 +54,12 @@ It also flags some additional items that need manual checks and may be OK as is:
 * A custom warning -- same as above, but checking against selectors you provide in the "ed11yCustomEmbeddedContent" variable.
 
 ## Installation and configuration
+
+If possible, start with a turnkey implementation:
+* [Editoria11y Drupal Module](https://www.drupal.org/project/editoria11y)
+* Editoria11y WordPress Plugin (coming soon) 
+
+To install manually:
 * Add JS (in this order please...)
   * jQuery
   * editoria11y-prefs.js
@@ -70,9 +76,9 @@ Should look something like this:
 <script src="/js/editoria11y.js">
 ```
 
-You can directly edit editoria11y-prefs to change various selectors and strings, though I cannot promise things won't change in there until there is a full release.
+Remember to only call the script for logged-in editors!
 
-Otherwise, it is best to create your own JS file with these variables to inject some ready-to-go overrides. For example, this page uses the following:
+I don't recommend editing the Editoria11y-prefs file yet; a lot is still changing in there. Stick to declaring your own custom overrides of the following variables in your own JS file. For example, this page uses the following:
 
 ```
   let ed11yCustomCheckRoot = 'body';
@@ -103,6 +109,7 @@ Editoria11y will not run if it sees any elements on this list.
 ## Spring 2021 todo list
 
 ### Public Beta (January-February)
+- fail gracefully if checkroot is not found
 - check ignore logic in headings
 - Create JS event hooks for Scan, Jump and Tooltip, and move Princeton-specific code to PS_Core
 - Add detection to prevent conflict with other common inline editors

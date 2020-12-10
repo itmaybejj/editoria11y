@@ -28,7 +28,7 @@ const ed11yDevEnvironment = ""
 // About this tool
 // todo: add link when this has a homepage.
 const ed11yAbout = "" +
-    "<p><a href='https://www.drupal.org/project/editoria11y'>Editoria11y</a>" +
+    "<p><a href='https://itmaybejj.github.io/editoria11y/'>Editoria11y</a>" +
     " is an automated accessibility checker currently being developed by " +
     "Princeton University. Please do take a moment to " +
     "<a href='https://www.drupal.org/project/editoria11y'>request changes " +
