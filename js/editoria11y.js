@@ -279,6 +279,7 @@ $( document ).ready(function() {
             //Image contains both hyperlink
             $el.addClass("ed11y-error-border");
             // Todo beta: handle blank alts?
+            // Todo: this should not be flagged if the image has other text and this has a blank alt
             let missingAltLinkButHasTextError = "<div class='ed11ytip-heading'>Error: missing alt text.</div> All visual elements must <a href='https://accessibility.princeton.edu/how/content/alternative-text'>provide a text alternative</a>."
             $el.closest("a").addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" data-ed11ytip="' + missingAltLinkButHasTextError + '" >' + ed11y.ErrorIcon + '</button></div>');
           }
@@ -290,6 +291,7 @@ $( document ).ready(function() {
           }
         }
         else if (!text) {
+          // Todo: an empty alt may be ok...
           // Checks to see if image contains an alt attribute. If not, then image fails.
           this.errorCount++;
           $el.addClass("ed11y-error-border");

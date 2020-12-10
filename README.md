@@ -1,4 +1,7 @@
 # Editoria11y
+
+*This project is in development; I do not recommend using it in production until January 2021*
+
 Editoria11y (editorial accessibility) is a user-friendly accessibility checker that addresses three critical needs for content authors:
 
 1. It runs automatically. Modern spellcheck works so well because it is always running; put spellcheck behind a button and few users remember to run it!
@@ -10,6 +13,46 @@ Editoria11y (editorial accessibility) is a user-friendly accessibility checker t
 * If the issues are considered "major," the panel opens automatically.
 * If the user minimizes the panel, it will not open automatically on future page visits until the content changes.
 
+Try it! Click the toggle at the bottom right to highlight these example issues:
+
+• A fake list using bullet symbols instead of list elements.
+
+• link with only the text "[click here](https://www.youtube.com/watch?v=DLzxrzFCyOs)."
+
+### Issues flagged in the quick check
+* Headings
+  * Skipped heading levels
+  * Empty headings
+  * Very long headings
+* Image alt text
+  * Images with no alt text (pending: a configuration option to allow empty alts on decorative images)
+  * Images with a filename as alt text
+  * Images with very long alt text
+  * Alt text that contains redundant text like "image of" or "photo of"
+  * Linked images without alt text when the link has no text (meaning the link has no accessible text)
+  * Linked images with alt text when the link also has text (warning the author that the text of a link should be about the link, and not have lots of extra detail)
+* Links
+  * Links with no text
+  * Links with a filename as their accessible text
+  * Links with only generic text: "click here," "learn more," "download," etc.
+* Structure
+  * Fake lists
+  * LARGE BLOCKS OF CAPS LOCK TEXT OMG PLEASE DON'T DO THIS
+  * Tables without headers
+  * Tables with document headers (&lt;h2&gt;) instead of table headers (&lt;th&gt;)
+  
+### Items noted in the full check
+Clicking the full check button flips open an expanded panel where the user can see the document outline (headers) and all image alt text.
+
+It also flags some additional items that need manual checks and may be OK as is:
+
+* The first link to a PDF on a page, reminding the user to provide an accessible PDF or an alternate format
+* Suspiciously short blockquotes that might be fake headings
+* Embedded videos, reminding the user to add closed captions
+* Embedded audio, reminding the user to provide a transcript (pending)
+* Certain complex embedded content (e.g., social media and data visualization) that often present accessibility problems
+* A custom warning -- same as above, but checking against selectors you provide in the "ed11yCustomEmbeddedContent" variable.
+
 ## Installation and configuration
 * Add JS (in this order please...)
   * jQuery
@@ -18,7 +61,7 @@ Editoria11y (editorial accessibility) is a user-friendly accessibility checker t
 * Add CSS
   * editoria11y.css
 
-Should look like this:
+Should look something like this:
 
 ```
 <script src="https://code.jquery.com/jquery-3.5.1.min.js">
@@ -27,11 +70,9 @@ Should look like this:
 <script src="/js/editoria11y.js">
 ```
 
-/core/modules/contextual/js/toolbar/views/VisualView.js?v=8.9.1"></script>
-
 You can directly edit editoria11y-prefs to change various selectors and strings, though I cannot promise things won't change in there until there is a full release.
 
-Otherwise, create your own JS file with these variables to inject some ready-to-go overrides:
+Otherwise, it is best to create your own JS file with these variables to inject some ready-to-go overrides:
 
 #### Root elements to scan (default is `main`)
 `let ed11yCustomCheckRoot = ";`
@@ -53,10 +94,8 @@ let ed11yCustomEmbeddedContent = "";
 
 ## Todo
 
-### Alpha
-- check line 183 for ignore logic: let $headings = this.checkRoot.find("h1, h2, h3, h4, h5, h6, [role='heading'][aria-level]").not(ed11yHeaderIgnore + ed11yContainerIgnore);
-
 ### Public Beta (January-February)
+- check ignore logic in headings
 - Create JS event hooks for Scan, Jump and Tooltip, and move Princeton-specific code to PS_Core
 - Add detection to prevent conflict with other common inline editors
 - Evaluate 0-length alt logic
@@ -104,6 +143,4 @@ Editoria11y's JavaScript is a fork of the [Sa11y](https://ryersondmp.github.io/s
 
 Sa11y itself is an adaptation of [Tota11y by Khan Academy.](https://github.com/Khan/tota11y), built with [FontAwesome icons](https://github.com/FortAwesome/Font-Awesome) and powered with jQuery.
 
-<link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css">
-<script src="{{ site.baseurl}}/js/editoria11y-prefs.js"></script>
-<script src="{{ site.baseurl}}/js/editoria11y.js"></script>
+<div hidden><script src="https://code.jquery.com/jquery-3.5.1.min.js"><link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css"><script src="{{ site.baseurl}}/js/editoria11y-prefs.js"></script><script src="{{ site.baseurl}}/js/editoria11y.js"></script></div>
