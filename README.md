@@ -37,7 +37,7 @@ Try it! Click the toggle at the bottom right to highlight these example issues:
   * Links with only generic text: "click here," "learn more," "download," etc.
 * Structure
   * Fake lists
-  * LARGE BLOCKS OF CAPS LOCK TEXT OMG PLEASE DON'T DO THIS
+  * Text with large blocks of SHOUTY CAPS LOCK TEXT
   * Tables without headers
   * Tables with document headers (&lt;h2&gt;) instead of table headers (&lt;th&gt;)
   
@@ -72,25 +72,33 @@ Should look something like this:
 
 You can directly edit editoria11y-prefs to change various selectors and strings, though I cannot promise things won't change in there until there is a full release.
 
-Otherwise, it is best to create your own JS file with these variables to inject some ready-to-go overrides:
+Otherwise, it is best to create your own JS file with these variables to inject some ready-to-go overrides. For example, this page uses the following:
+
+```
+  let ed11yCustomCheckRoot = 'body';
+  let ed11yCustomContainerIgnore = '.project-tagline';
+```
 
 #### Root elements to scan (default is `main`)
 `let ed11yCustomCheckRoot = ";`
 
 e.g., "main, #footer"
 
-#### Pages not to scan
-Editoria11y will not run if it sees any elements on this list:
+#### Elements to ignore on scan
 
-let ed11yCustomNoRun = "";
+`let ed11yCustomContainerIgnore = "";`
+
+#### Pages not to scan
+
+`let ed11yCustomNoRun = "";`
 
 e.g., "#an-inline-editing-tool, .a-page-not-to-scan"
 
-#### Elements to ignore on scan
-let ed11yCustomContainerIgnore = "";
+Editoria11y will not run if it sees any elements on this list.
 
 #### Elements to flag in full view as needing a manual check
-let ed11yCustomEmbeddedContent = "";
+
+`let ed11yCustomEmbeddedContent = "";`
 
 ## Todo
 
@@ -146,7 +154,7 @@ Sa11y itself is an adaptation of [Tota11y by Khan Academy.](https://github.com/K
 <div hidden>
 <script>
   let ed11yCustomCheckRoot = 'body';
-  let ed11yCustomContainerIgnore = 'project-tagline';
+  let ed11yCustomContainerIgnore = '.project-tagline';
 </script>
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script><link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css"><script src="{{ site.baseurl}}/js/editoria11y-prefs.js"></script><script src="{{ site.baseurl}}/js/editoria11y.js"></script></div>
