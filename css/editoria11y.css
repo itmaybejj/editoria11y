@@ -148,7 +148,7 @@ button.ed11y-pop:focus {
 .ed11y-error-text-btn svg {
   width: 20px;
   position: absolute;
-  margin: -10px 0 0 -10px;
+  margin: -10px 0 0 -10px !important;
   background: #ffc800;
   border-radius: 48px;
   height: 20px;
