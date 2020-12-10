@@ -89,24 +89,23 @@ let ed11yMessageLinkTextIsURL = "<div class='ed11ytip-heading'>Link may be a " +
 
 let ed11yMessageLinkTextIsGeneric = "<div class='ed11ytip-heading'>Manual check " +
     "needed: link title may be generic</div>" +
-    "<p>Many assistive devices help users jump directly from link to link," +
-    "meaning their users first encounter links as a list, out of context.</p>" +
-    "<p>The checker noticed some common words in this link (e.g. " +
-    "&quot;click here&quot; or &quot;download&quot;).</p> " +
-    "<p>To fix: make sure this link is " +
+    "<p>This link appears to be made of common words like " +
+    "&quot;click here&quot; or &quot;download&quot;. Since many users skim " +
+    "by links, and most assistive devices navigate pages by a list of link " +
+    "titles, please check to make sure this link is " +
     "<a href='https://accessibility.princeton.edu/how/content/links'>unique, " +
-    "clear and meaningful</a>.</p>"
+    "clear and meaningful</a>, even out of context.</p>"
 
 // QA Tests.
 function ed11yMessageQAShouldBeList(prefix) {
   return "<div class='ed11ytip-heading'>Possible list item prefix: &quot;" +
       "<span class='ed11yMessage-bold ed11yMessage-red-text'>" + prefix +
       "</span>&quot;</div>" +
-      "<p><a href='https://accessibility.princeton.edu/how/content/lists'>" +
-      "HTML lists structure content</a> for assistive devices. " +
-      "If this paragraph is starting a list, " +
-      "please use the bullet or number formatting buttons instead " +
-      "of writing out plain text list-like prefixes.</p>";
+      "<p>List formatting is more than symbols: it tells browsers how to " +
+      "group content that breaks over multiple lines, and lets assistive " +
+      "devices jump from item to item. If this paragraph starts a list, " +
+      "please format it as a 'real' list rather than " +
+      "spelling out letters, numbers or symbols.</p>";
 }
 
 let ed11yMessageQANewTab = "<div class='ed11ytip-heading'>Link opens in a " +

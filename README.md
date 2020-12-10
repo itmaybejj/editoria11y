@@ -120,6 +120,7 @@ Editoria11y will not run if it sees any elements on this list.
 - Evaluate the Forms tests
 - Clean up panel logic; don't need multiple panels if the text mutates and the SVGs are in the CSS.
 - Princeton only: deal with the back-to-top button sitting "under" the Sally button. What to do? Offset the button? Hide the back-to-top button for logged in users?
+- Proofread tips
 
 ### Release (Spring)
 - Create platform documentation and point warnings to it
