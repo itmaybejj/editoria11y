@@ -79,16 +79,16 @@ Otherwise, it is best to create your own JS file with these variables to inject 
   let ed11yCustomContainerIgnore = '.project-tagline';
 ```
 
-#### Root elements to scan (default is `main`)
+### Root elements to scan (default is `main`)
 `let ed11yCustomCheckRoot = ";`
 
 e.g., "main, #footer"
 
-#### Elements to ignore on scan
+### Elements to ignore on scan
 
 `let ed11yCustomContainerIgnore = "";`
 
-#### Pages not to scan
+### Pages not to scan
 
 `let ed11yCustomNoRun = "";`
 
@@ -96,11 +96,11 @@ e.g., "#an-inline-editing-tool, .a-page-not-to-scan"
 
 Editoria11y will not run if it sees any elements on this list.
 
-#### Elements to flag in full view as needing a manual check
+### Elements to flag in full view as needing a manual check
 
 `let ed11yCustomEmbeddedContent = "";`
 
-## Todo
+## Spring 2021 todo list
 
 ### Public Beta (January-February)
 - check ignore logic in headings
