@@ -10,7 +10,6 @@ $( document ).ready(function() {
    * @constructor
    */
 
-
   function Ed11y() {
     $(function () {
 
@@ -783,8 +782,11 @@ $( document ).ready(function() {
       }
       this.linkIgnore = ed11yLinkIgnore + "[aria-hidden], .ed11y-exclude";
       if (ed11yContainerIgnore.length > 0) {
-        ed11yContainerIgnore += " *";
-        ed11yContainerIgnore = ed11yContainerIgnore.replace(/,/g,' *,');
+        let containerSelectors = ed11yContainerIgnore.split(',');
+        for (let i = 0; i < containerSelectors.length; i++) {
+          containerSelectors[i] = containerSelectors[i] + " *, " + containerSelectors[i];
+        }
+        ed11yContainerIgnore = containerSelectors.join();
         this.linkIgnore += separator + ed11yContainerIgnore;
         if (ed11yHeaderIgnore.length > 0) {
           this.headerIgnore += separator + ed11yContainerIgnore;

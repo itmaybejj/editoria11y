@@ -4,11 +4,11 @@
 let ed11yCheckRoot = "";
 
 // If any elements match these selectors, Ed11y will not start.
-let ed11yNoRun = "#layout-builder, #quickedit-entity-toolbar";
+let ed11yNoRun = "";
 
 // Ignore elements in these containers.
 // Drupal: "#layout-builder, #quickedit-entity-toolbar";
-let ed11yContainerIgnore = "#toolbar-administration, .contextual-region > nav";
+let ed11yContainerIgnore = "";
 
 // jQuery selectors to filter from default queries.
 // E.g., to ignore images in a social media feed, add
