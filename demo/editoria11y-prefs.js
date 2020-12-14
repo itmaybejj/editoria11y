@@ -9,7 +9,7 @@ let ed11yNoRun = "";
 // Ignore elements in these containers.
 // Princeton let ed11yContainerIgnore = ".ps-social";
 // Nav and toolbar can move into link and header ignore to help performance.
-let ed11yContainerIgnore = "";
+let ed11yContainerIgnore = ".project-tagline";
 
 // Flag these elements with a warning in Full Check.
 let ed11yEmbeddedContentWarning = "";
