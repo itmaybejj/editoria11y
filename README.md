@@ -107,13 +107,9 @@ Editoria11y will not run if it sees any elements on this list.
 ## Spring 2021 todo list
 
 ### Public Beta (January-February)
-- fail gracefully if checkroot is not found
-- tip-under alignment under inline tooltips
-- check ignore logic in headings
+- Check tip-under alignment under inline tooltips
 - Create JS event hooks for Scan, Jump and Tooltip, and move Princeton-specific code to PS_Core
-- Add detection to prevent conflict with other common inline editors
 - Evaluate 0-length alt logic
-- JS security questions with emitting selectors as variables -- how to sanitize?
 - Adopt content-type config code from Asset Injector
 - Browser testing on older browsers.
 - Evaluate Fullcheck tests (Tableau, data visualization)
@@ -125,15 +121,15 @@ Editoria11y will not run if it sees any elements on this list.
 ### Release (Spring)
 - Create platform documentation and point warnings to it
 - Drupal code style conformance
-- Improve visual styling, especially floaty tooltip close and tooltip heading
+- Test container sizing when text is browser resized
 - Dev environment link checking (optional)
-- Implement local language detection (optional)
-- move the rest of the errors into the paints function
 
 ### Post-release (Summer)
 - Clean up variables to allow for overrides (if still needed post-config)
 - D7 Port
 - Make tips draggable?
+- Implement primitive local language detection (optional)
+- Move the rest of the errors into the paints function to improve performance
 
 ## Contact
 Editoria11y is maintained by [John Jameson](jjameson@princeton.edu), and is provided to the community thanks to the [Digital Accessibility](https://accessibility.princeton.edu/) initiatives at Princeton University's [Office of Web Development Services](https://wds.princeton.edu/)
@@ -158,10 +154,4 @@ Editoria11y's JavaScript is a fork of the [Sa11y](https://ryersondmp.github.io/s
 
 Sa11y itself is an adaptation of [Tota11y by Khan Academy.](https://github.com/Khan/tota11y), built with [FontAwesome icons](https://github.com/FortAwesome/Font-Awesome) and powered with jQuery.
 
-<div hidden>
-<script>
-  let ed11yCustomCheckRoot = 'body';
-  let ed11yCustomContainerIgnore = '.project-tagline';
-</script>
-
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script><link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css"><script src="{{ site.baseurl}}/js/editoria11y-prefs.js"></script><script src="{{ site.baseurl}}/js/editoria11y.js"></script></div>
+<div hidden><script src="https://code.jquery.com/jquery-3.5.1.min.js"></script><link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css"><script src="{{ site.baseurl}}/demo/js/editoria11y-prefs.js"></script><script src="{{ site.baseurl}}/js/editoria11y.js"></script></div>
