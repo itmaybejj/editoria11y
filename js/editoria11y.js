@@ -10,7 +10,6 @@ $( document ).ready(function() {
    * @constructor
    */
 
-
   function Ed11y() {
     $(function () {
 
@@ -210,13 +209,11 @@ $( document ).ready(function() {
           ed11yTip = '<div class="ed11y-instance"><button type="button" class="ed11y-link-warning-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + errorMessage + '" >' + ed11y.WarningIcon + '</button></div>';
         }
         else if ($el.text().trim().length < 1) {
-          this.warningCount++;
           headingError = 'warning';
           outlinePrefix = '(empty heading)';
           ed11yTip = '<div class="ed11y-instance"><button type="button" class="ed11y-link-warning-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + this.ed11yMessageHeadingEmpty + '" >' + ed11y.WarningIcon + '</button></div>';
         }
         else if ($el.text().trim().length > 160) {
-          this.warningCount++;
           headingError = 'warning';
           outlinePrefix = '(flagged for length) ';
           let errorMessage = this.ed11yMessageHeadingTooLong(headingLength);
@@ -238,10 +235,12 @@ $( document ).ready(function() {
           if (headingError === 'fail') {
             liClass += " ed11y-red-text";
             liPrefix = "<span class='ed11y-sr-only'> Error:</span> ";
+            this.errorCount++;
           }
           else {
             liClass += " ed11y-text-warning";
             liPrefix = "<span class='ed11y-sr-only'> Warning: </span> ";
+            this.warningCount++;
           }
         }
         if (outlinePrefix) {
@@ -1196,7 +1195,7 @@ $( document ).ready(function() {
           if ($(this).hasClass('ed11y-about-ready') !== true) {
             $(this).addClass('ed11y-about-ready')
                 .after('<div class="ed11y-about-text">' +
-                    this.ed11yAbout + '</div>');
+                    ed11y.ed11yAbout + '</div>');
           }
           if ($(this).attr('aria-expanded') === 'false') {
             $(this).attr('aria-expanded', 'true');
