@@ -8,13 +8,13 @@ let ed11yNoRun = "";
 
 // Ignore elements in these containers.
 // Drupal: "#layout-builder, #quickedit-entity-toolbar";
-let ed11yContainerIgnore = ".project-tagline";
+let ed11yContainerIgnore = "";
 
 // jQuery selectors to filter from default queries.
 // E.g., to ignore images in a social media feed, add
 // ".my-feed-container img" to imageIgnore.
 let ed11yImageIgnore = "";
-let ed11yHeaderIgnore = ""; // We also need to ignore the Drupal tabs.
+let ed11yHeaderIgnore = ".project-tagline"; // We also need to ignore the Drupal tabs.
 let ed11yLinkIgnore = "";
 let ed11yEmbeddedContentWarning = "";
 
