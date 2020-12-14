@@ -7,18 +7,27 @@ let ed11yCheckRoot = "body";
 let ed11yNoRun = "";
 
 // Ignore elements in these containers.
-// Drupal: "#layout-builder, #quickedit-entity-toolbar";
+// Princeton let ed11yContainerIgnore = ".ps-social";
+// Nav and toolbar can move into link and header ignore to help performance.
 let ed11yContainerIgnore = "";
 
-// jQuery selectors to filter from default queries.
-// E.g., to ignore images in a social media feed, add
-// ".my-feed-container img" to imageIgnore.
-let ed11yImageIgnore = "";
-let ed11yHeaderIgnore = ".project-tagline"; // We also need to ignore the Drupal tabs.
-let ed11yLinkIgnore = "";
+// Flag these elements with a warning in Full Check.
 let ed11yEmbeddedContentWarning = "";
 
+// Headers to ignore in the page outline.
+// Todo add to configuration
+let ed11yOutlineIgnore = "";
+
+// Additional selectors to ignore in specific tests.
+// E.g., to just ignore images in a social media feed, add
+// ".my-feed-container img" to imageIgnore.
+let ed11yImageIgnore = "";
+let ed11yHeaderIgnore = ".project-timeline";
+let ed11yLinkIgnore = "";
+
+// Outline is ignoring hidden containers.
 // These tests are not enabled yet.
 // let ed11yFormsIgnore = "";
 // let ed11yTableIgnore = "";
-// const ed11yDevEnvironment = "";
+// Patterns for links to development environments
+// const ed11yDevEnvironment = ""

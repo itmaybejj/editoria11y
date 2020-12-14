@@ -10,6 +10,7 @@ $( document ).ready(function() {
    * @constructor
    */
 
+
   function Ed11y() {
     $(function () {
 
@@ -36,7 +37,7 @@ $( document ).ready(function() {
           this.checkHeaders(),
           this.checkQA()
         ]).then();
-        this.checkLinkText()
+        this.checkLinkText();
         // todo beta: address race condition between alts and links so they can run async
         //this.checkLabels();
         ed11y.updatePanel(onLoad, showPanel);
@@ -72,23 +73,31 @@ $( document ).ready(function() {
       }
 
       // Now we can open or close the panel.
-      if (showPanel === "hide") {
+      if (showPanel !== "show") {
         ed11y.reset();
       }
-      else if (showPanel === "show") {
+      else {
         // Delaying paint takes ~2% off script run time.
         this.checkRoot.find('.ed11y-instance, .ed11y-instance-inline').removeAttr('hidden');
-        this.paints.forEach( function (el) {
-          if (el[2] === 'after') {
-            el[0].addClass(el[1]).after(el[3]);
-          }
-          else {
-            el[0].addClass(el[1]).prepend(el[3]);
-          }
-        })
-        this.readyTips();
-        $('.ed11y-minimized').removeClass('ed11y-minimized');
-        document.getElementById("ed11y-panel").classList.add("ed11y-active");
+        window.setTimeout(function() {
+          // Delaying paint releases the thread.
+          ed11y.paints.forEach( function (el) {
+            if (el[2] === 'after') {
+              el[0].addClass(el[1]).after(el[3]);
+            }
+            else if (el[2] === 'before') {
+              el[0].addClass(el[1]).before(el[3]);
+            }
+            else {
+              el[0].addClass(el[1]).prepend(el[3]);
+            }
+          })
+          ed11y.readyTips();
+        }, 0);
+        window.setTimeout(function () {
+          $('.ed11y-minimized').removeClass('ed11y-minimized');
+          document.getElementById("ed11y-panel").classList.add("ed11y-active");
+        }, 0);
       }
       $('.ed11y-preload').removeClass('ed11y-preload');
     }
@@ -173,7 +182,7 @@ $( document ).ready(function() {
       $("#ed11y-outline-list li, .ed11y-headings-label").remove();
 
       // Only fetch headers within the content area.
-      let $headings = this.checkRoot.find("h1, h2, h3, h4, h5, h6, [role='heading'][aria-level]").not(this.headerIgnore);
+      let $headings = this.checkRoot.find("h1, h2, h3, h4, h5, h6, [role='heading'][aria-level]");
       let prevLevel = 0;
       this.headingOutline = "";
 
@@ -181,6 +190,7 @@ $( document ).ready(function() {
       $headings.each((i, el) => {
         let $el = $(el);
         let level;
+
         // Match up aria-headers to equivalent <h#> tag.
         if ($el.attr('aria-level')) {
           level = + $el.attr('aria-level');
@@ -189,43 +199,40 @@ $( document ).ready(function() {
           level = + $el.prop("tagName").slice(1);
         }
         let headingError = "";
+        let errorMessage = "";
         let outlinePrefix ="";
-        let tippyIcon = "";
+        let ed11yTip = "";
         let headingLength = $el.text().trim().length;
         if (level - prevLevel > 1 && i !== 0) {
           headingError = 'warning';
           outlinePrefix = '(flagged for skipped level) ';
-          let ed11yHeadingLevelSkipped = ed11y.ed11yMessageHeadingLevelSkipped(prevLevel,level);
-          tippyIcon = '<div class="ed11y-instance"><button type="button" class="ed11y-link-warning-btn ed11y-pop" data-ed11y-tip="' + ed11yHeadingLevelSkipped + '" >' + ed11y.WarningIcon + '</button></div>';
-          $el.addClass("ed11y-link-text-warning");
+          errorMessage = ed11y.ed11yMessageHeadingLevelSkipped(prevLevel,level);
+          ed11yTip = '<div class="ed11y-instance"><button type="button" class="ed11y-link-warning-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + errorMessage + '" >' + ed11y.WarningIcon + '</button></div>';
         }
         else if ($el.text().trim().length < 1) {
           this.warningCount++;
           headingError = 'warning';
           outlinePrefix = '(empty heading)';
-          tippyIcon = '<div class="ed11y-instance"><button type="button" class="ed11y-link-warning-btn ed11y-pop" data-ed11y-tip="' + this.ed11yMessageHeadingEmpty + '" >' + ed11y.WarningIcon + '</button></div>';
-          $el.addClass("ed11y-link-text-warning");
+          ed11yTip = '<div class="ed11y-instance"><button type="button" class="ed11y-link-warning-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + this.ed11yMessageHeadingEmpty + '" >' + ed11y.WarningIcon + '</button></div>';
         }
         else if ($el.text().trim().length > 160) {
           this.warningCount++;
           headingError = 'warning';
           outlinePrefix = '(flagged for length) ';
-          let ed11yHeadingTooLong = this.ed11yMessageHeadingTooLong(headingLength);
-          tippyIcon = '<div class="ed11y-instance"><button type="button" class="ed11y-link-warning-btn ed11y-pop" data-ed11y-tip="' + ed11yHeadingTooLong + '" >' + ed11y.WarningIcon + '</button></div>';
+          let errorMessage = this.ed11yMessageHeadingTooLong(headingLength);
+          ed11yTip = '<div class="ed11y-instance"><button type="button" class="ed11y-link-warning-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + errorMessage + '" >' + ed11y.WarningIcon + '</button></div>';
         }
-
         prevLevel = level;
         let liClass = "ed11y-outline-" + level;
         let liPrefix = "";
         //If the heading error is within a hyperlink, make sure to
         // append button after anchor tag.
-        if (headingError !== "") {
-          $el.addClass("ed11y-link-text-" + headingError);
+        if (headingError !== "" && $el.not(this.headerIgnore).length !== 0) {
           if ($el.closest("a").length > 0) {
-            $el.closest('a').after(tippyIcon);
+            this.paints.push([$el.closest('a'),"ed11y-link-text-" + headingError,'after',ed11yTip]);
           }
           else {
-            $el.before(tippyIcon);
+            this.paints.push([$el,"ed11y-link-text-" + headingError,'before',ed11yTip]);
           }
           // Outline element if there is an error.
           if (headingError === 'fail') {
@@ -241,11 +248,12 @@ $( document ).ready(function() {
           outlinePrefix = "<span class='ed11y-small'><em>" + outlinePrefix +
               "</em></span>";
         }
-        this.headingOutline += "<li class='" + liClass + "'>" +
-            "<span class='ed11y-small'>" + level + "</span> " +
-            liPrefix + outlinePrefix + $el.text() +
-            "</li>";
-
+        if ($el.not(ed11yOutlineIgnore).length !== 0) {
+          this.headingOutline += "<li class='" + liClass + "'>" +
+              "<span class='ed11y-small'>" + level + "</span> " +
+              liPrefix + outlinePrefix + $el.text() +
+              "</li>";
+        }
       });
     };
 
@@ -277,7 +285,15 @@ $( document ).ready(function() {
         let text = $el.attr("alt");
         let ed11yMessage = "";
 
-        if ($el.parents('a[href]').length && (!text)) {
+        if (typeof text !== "string") {
+          this.errorCount++;
+          $el.addClass("ed11y-error-border");
+          let generalAltText = "<div class='ed11y-tip-heading'>Error: Alt text attribute is missing</div>" +
+              "<p>All visual elements must <a href='https://accessibility.princeton.edu/how/content/alternative-text'>provide a text alternative</a> for assistive devices.</p>" +
+              "<p>If a blank alt is provided (alt=&quot;&quot;), screen readers ignore the image. But if the alt attribute is missing, screen readers dictate the url of the image file, one letter at a time.</p>"
+          $el.before('<div hidden class="ed11y-instance"><button type="button" class="ed11y-error-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + generalAltText + '" >' + ed11y.ErrorIcon + '</button></div>');
+        }
+        else if ($el.parents('a[href]').length && (!text)) {
           // Link fails if image alt is empty.
           if (text.length === 0 && $el.parents("a").text().trim().length > 1) {
             //Image contains both hyperlink
@@ -285,23 +301,22 @@ $( document ).ready(function() {
             // Todo beta: handle blank alts?
             // Todo: this should not be flagged if the image has other text and this has a blank alt
             let missingAltLinkButHasTextError = "<div class='ed11y-tip-heading'>Error: missing alt text.</div><p>All visual elements must <a href='https://accessibility.princeton.edu/how/content/alternative-text'>provide a text alternative</a>.</p>"
-            $el.closest("a").addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" data-ed11y-tip="' + missingAltLinkButHasTextError + '" >' + ed11y.ErrorIcon + '</button></div>');
+            $el.closest("a").addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + missingAltLinkButHasTextError + '" >' + ed11y.ErrorIcon + '</button></div>');
           }
           else {
             $el.addClass("ed11y-error-border");
             let missingAltLinkError = "<div class='ed11y-tip-heading'>Error: image and link have no text</div>" +
                 "<p>All visual elements must <a href='https://accessibility.princeton.edu/how/content/alternative-text'>provide a text alternative</a>. " +
                 "This is critically important when the image's alternative text serves as the link title -- this link will be read by assistive devices as &quot;Link: [awkward silence]&quot;.</p>"
-            $el.closest('a').addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" data-ed11y-tip="' + missingAltLinkError + '" >' + ed11y.ErrorIcon + '</button></div>');
+            $el.closest('a').addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + missingAltLinkError + '" >' + ed11y.ErrorIcon + '</button></div>');
           }
         }
-        else if (!text) {
-          // Todo: an empty alt may be ok...
-          // Checks to see if image contains an alt attribute. If not, then image fails.
-          this.errorCount++;
+        else if (text.length === 0) {
+          // An empty alt may be ok...
+          this.warningCount++;
           $el.addClass("ed11y-error-border");
-          let generalAltText = "<div class='ed11y-tip-heading'>Error: missing alt text.</div><p>All visual elements must <a href='https://accessibility.princeton.edu/how/content/alternative-text'>provide a text alternative</a>.</p>"
-          $el.before('<div hidden class="ed11y-instance"><button type="button" class="ed11y-error-btn ed11y-pop" data-ed11y-tip="' + generalAltText + '" >' + ed11y.ErrorIcon + '</button></div>');
+          let generalAltText = "<div class='ed11y-tip-heading'>Image marked as decorative</div><p>All visual elements must <a href='https://accessibility.princeton.edu/how/content/alternative-text'>provide a text alternative</a>.</p>"
+          $el.before('<div hidden class="ed11y-instance"><button type="button" class="ed11y-error-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + generalAltText + '" >' + ed11y.ErrorIcon + '</button></div>');
         }
 
         // If alt attribute is present, further tests are done.
@@ -318,7 +333,7 @@ $( document ).ready(function() {
                   "<p>In the context of a link, an image's alt text should create a " +
                   "<a href='https://accessibility.princeton.edu/how/content/links'>clear and meaningful link title</a>.</p>" +
                   "<p class='ed11y-small'>The alt text for this image is: <span class='ed11y-bold'>&quot;" + altText + "&quot;</span></p>";
-              $el.closest('a').addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.ErrorIcon + '</button></div>');
+              $el.closest('a').addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.ErrorIcon + '</button></div>');
             } else if (error[1] !== null) {
               // "image of"
               this.errorCount++;
@@ -328,14 +343,14 @@ $( document ).ready(function() {
                   "rather than describing the image.</p>" +
                   "<p class='ed11y-small'>The alt text for this image is: <span class='ed11y-bold'>&quot;" + altText + "&quot;</span></p>";
 
-              $el.closest('a').addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.ErrorIcon + '</button></div>');
+              $el.closest('a').addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.ErrorIcon + '</button></div>');
             }
             else if (text.replace(/'|"|-|\.|\s+/g, "").length === 0 && $el.parents("a").text().replace(/"|'|\s+/g, "").length === 0) {
               // Whitespace, empty or meaningless
               this.errorCount++;
               $el.addClass("ed11y-error-border");
-              ed11yMessage = "<div class='ed11y-tip-heading'><p>Error: link has no text</div> Please add alt text to this image to create a <a href='https://accessibility.princeton.edu/how/content/links'>clear and meaningful link title</a>.</p>"
-              $el.closest('a').addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.ErrorIcon + '</button></div>');
+              ed11yMessage = "<div class='ed11y-tip-heading'>Error: link has no text</div><p>Please add alt text to this image to create a <a href='https://accessibility.princeton.edu/how/content/links'>clear and meaningful link title</a>.</p>"
+              $el.closest('a').addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.ErrorIcon + '</button></div>');
             }
             else if (text.length > 160) {
               // Image warning if it is a link and contains long alt text.
@@ -345,7 +360,7 @@ $( document ).ready(function() {
                   "<p>The alt text on hyperlinked images should provide a <a href='https://accessibility.princeton.edu/how/content/links'>&quot;concise, clear and meaningful link title&quot;</a>, " +
                   "rather than a description of the image.</p>" +
                   "<p class='ed11y-small'>The alt text for this image is: <span class='ed11y-bold'>&quot;" + altText + "&quot;</span>.</p>";
-              $el.closest('a').addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.ErrorIcon + '</button></div>');
+              $el.closest('a').addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-warning-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.WarningIcon + '</button></div>');
             }
             // Image warning if it is a link, contains alt text AND surrounding link text.
             else if (text !== "" && $el.parents("a").text().trim().length > 1) {
@@ -356,7 +371,7 @@ $( document ).ready(function() {
                   "Please make sure the two together still create a " +
                   "<a href='https://accessibility.princeton.edu/how/content/links'>&quot;concise, clear and meaningful link title&quot;</a>.</p>" +
                   "<p class='ed11y-small'>The alt text for this image is: <span class='ed11y-bold'>&quot;" + altText + "&quot;</span></p>"
-              $el.closest('a').addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-warning-btn ed11y-pop" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.WarningIcon + '</button></div>');
+              $el.closest('a').addClass('ed11y-exclude').before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-warning-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.WarningIcon + '</button></div>');
             }
           }
           // Now if there is no link...
@@ -367,7 +382,7 @@ $( document ).ready(function() {
                 "<p>All visual elements must <a href='https://accessibility.princeton.edu/how/content/alternative-text'>provide a text alternative</a> " +
                 "that describes the meaning of the image in context.</p>" +
                 "<p class='ed11y-small'>The alt text for this image is: <span class='ed11y-bold'>&quot;" + altText + "&quot;</span></p>"
-            $el.before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.ErrorIcon + '</button></div>');
+            $el.before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.ErrorIcon + '</button></div>');
           }
           else if (error[1] !== null) {
             this.warningCount++;
@@ -375,7 +390,7 @@ $( document ).ready(function() {
             ed11yMessage = "<p>The alt text for this image is: <span class='ed11y-bold'>&quot;" + altText + "&quot;</span></p>" +
                 "<p>Assistive devices announce that they are describing an image when reading alt text, so  <span class='ed11y-bold'>&quot;" + error[1] + "&quot;</span> may be redundant.</p> " +
                 "<p class='ed11y-small'>Reference: <a href='https://accessibility.princeton.edu/how/content/alternative-text'>Alt text should describe an image in context</a>.</p>";
-            $el.before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-warning-btn ed11y-pop" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.WarningIcon + '</button></div>');
+            $el.before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-warning-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.WarningIcon + '</button></div>');
           }
           // Alert with deadspace alt.
           else if (text !== "" && text.replace(/"|'|\s+/g, "") === "") {
@@ -384,7 +399,7 @@ $( document ).ready(function() {
             ed11yMessage = "<div class='ed11y-tip-heading'>Error: invalid alt text</div> " +
                 "<p>Please add alt text to this image to create a " +
                 "<a href='https://accessibility.princeton.edu/how/content/alternative-text'>concise description of the meaning of the image in context</a>.</p>"
-            $el.before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.ErrorIcon + '</button></div>');
+            $el.before('<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-error-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.ErrorIcon + '</button></div>');
           }
           // Image error if alt text is too long.
           else if (text.length > 160) {
@@ -394,7 +409,7 @@ $( document ).ready(function() {
                 "<p>Alt text should provide a <a href='https://accessibility.princeton.edu/how/content/alternative-text'>concise description of the meaning of the image in context</a>." +
                 "<p>If more than 160 characters are needed to describe an image (e.g., for a graph), the long description should be moved into the page's content or onto a separate page.</p>" +
                 "<p class='ed11y-small'>The alt text for this image is: <span class='ed11y-bold'>&quot;" + altText + "&quot;</span>.</p>";
-            $el.before('<div hidden class="ed11y-instance"><button type="button" class="ed11y-warning-btn ed11y-pop" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.WarningIcon + '</button></div>');
+            $el.before('<div hidden class="ed11y-instance"><button type="button" class="ed11y-warning-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.WarningIcon + '</button></div>');
           }
         }
       });
@@ -471,8 +486,8 @@ $( document ).ready(function() {
 
         if ($el.children().length === 0 && linkStrippedText.length === 0) {
           this.errorCount++;
-          this.paints.push([$el,"ed11y-link-text-fail",'prepend','<div class="ed11y-instance-inline">' +
-          '<button type="button" class="ed11y-error-text-btn ed11y-pop" data-ed11y-tip="' + this.ed11yMessageLinkHasNoText + '" >' + ed11y.ErrorIcon + '</button></div>']);
+          this.paints.push([$el,"ed11y-link-text-fail",'before','<div class="ed11y-instance-inline">' +
+          '<button type="button" class="ed11y-error-text-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + this.ed11yMessageLinkHasNoText + '" >' + ed11y.ErrorIcon + '</button></div>']);
         }
         // if link contains any link text stop words, then it fails.
         else if (error !== "none" && !hasarialabelledby && !hasarialabel) {
@@ -485,15 +500,15 @@ $( document ).ready(function() {
           else if (error === "generic") {
             stopWordMessage = this.ed11yMessageLinkTextIsGeneric;
           }
-          this.paints.push([$el,"ed11y-link-text-warning",'prepend','<div class="ed11y-instance-inline">' +
-          '<button type="button" class="ed11y-link-warning-btn ed11y-pop" data-ed11y-tip="' + stopWordMessage + '" >' + ed11y.WarningIcon + '</button></div>']);
+          this.paints.push([$el,"ed11y-link-text-warning",'before','<div class="ed11y-instance-inline">' +
+          '<button type="button" class="ed11y-link-warning-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + stopWordMessage + '" >' + ed11y.WarningIcon + '</button></div>']);
         }
         if (newWindowWarned === false && $el.attr('target') === '_blank' && href.indexOf('.pdf') === -1 && href.indexOf('.doc') === -1 && linktext.indexOf('tab') === -1 && linktext.indexOf('window') === -1) {
           // Warn about unwarned new windows.
           this.warningCount++;
-          this.paints.push([$el,'ed11y-link-text-warning','prepend','<div class="ed11y-instance-inline">' +
+          this.paints.push([$el,'ed11y-link-text-warning','before','<div class="ed11y-instance-inline">' +
           '<button type="button" class="ed11y-link-warning-btn ed11y-pop" ' +
-          'data-ed11y-tip="' + this.ed11yMessageQANewTab + '" >' +
+          'aria-expanded="false" data-ed11y-tip="' + this.ed11yMessageQANewTab + '" >' +
           ed11y.WarningIcon + '</button></div>']);
           newWindowWarned = true;
         }
@@ -585,7 +600,7 @@ $( document ).ready(function() {
             let ed11yShouldBeList = ed11y.ed11yMessageQAShouldBeList(firstPrefix);
             ed11yShouldBeList = '<div class="ed11y-instance-inline">' +
                 '<button type="button" class="ed11y-link-warning-btn ed11y-pop" ' +
-                'data-ed11y-tip="' + ed11yShouldBeList + '" >' +
+                'aria-expanded="false" data-ed11y-tip="' + ed11yShouldBeList + '" >' +
                 ed11y.WarningIcon + '</button></div>';
             ed11y.paints.push([$first,'','prepend',ed11yShouldBeList]);
             activeMatch = firstPrefix;
@@ -611,7 +626,7 @@ $( document ).ready(function() {
         if (detectUpperCase && detectUpperCase[0].length > 10) {
           ed11y.warningCount++;
           let beforePattern = "<span class='ed11y-uppercase-warning'>" +
-              '<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-link-warning-btn ed11y-pop" data-ed11y-tip="' + ed11y.ed11yMessageQAUppercase + '" >' + ed11y.WarningIcon + '</button></div>';
+              '<div hidden class="ed11y-instance-inline"><button type="button" class="ed11y-link-warning-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + ed11y.ed11yMessageQAUppercase + '" >' + ed11y.WarningIcon + '</button></div>';
           let afterPattern = "</span>"
           $(this).html($(this).html().replace(uppercasePattern, beforePattern + "$1" + afterPattern));
         }
@@ -626,7 +641,7 @@ $( document ).ready(function() {
         if (findTHeaders.length === 0) {
           this.errorCount++;
           $el.addClass("ed11y-error-border");
-          $el.before('<div hidden class="ed11y-instance"><button type="button" class="ed11y-error-btn ed11y-pop" data-ed11y-tip="' + ed11y.ed11yMessageMissingQATableHeadings + '" >' + ed11y.ErrorIcon + '</button></div>');
+          $el.before('<div hidden class="ed11y-instance"><button type="button" class="ed11y-error-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + ed11y.ed11yMessageMissingQATableHeadings + '" >' + ed11y.ErrorIcon + '</button></div>');
         }
         else {
           // Make sure all table headers are not empty.
@@ -634,14 +649,14 @@ $( document ).ready(function() {
             let $th = $(th);
             if ($th.text().trim().length < 1) {
               $th.addClass("ed11y-error-border");
-              $th.append('<div hidden class="ed11y-instance"><button type="button" class="ed11y-error-text-btn ed11y-pop" data-ed11y-tip="' + ed11y.ed11yMessageEmptyTableHeader + '" >' + ed11y.ErrorIcon + '</button></div>');
+              $th.append('<div hidden class="ed11y-instance"><button type="button" class="ed11y-error-text-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + ed11y.ed11yMessageEmptyTableHeader + '" >' + ed11y.ErrorIcon + '</button></div>');
             }
           });
         }
         if (findHeadingTags.length > 0) {
           findHeadingTags.addClass("ed11y-headings-fail");
           findHeadingTags.parent().addClass("ed11y-error-border");
-          findHeadingTags.before('<div hidden class="ed11y-instance"><button type="button" class="ed11y-error-btn ed11y-pop" data-ed11y-tip="' + ed11y.ed11yMessageQAHeaderInTable + '" >' + ed11y.ErrorIcon + '</button></div>');
+          findHeadingTags.before('<div hidden class="ed11y-instance"><button type="button" class="ed11y-error-btn ed11y-pop" aria-expanded="false" data-ed11y-tip="' + ed11y.ed11yMessageQAHeaderInTable + '" >' + ed11y.ErrorIcon + '</button></div>');
         }
       });
 
@@ -667,7 +682,7 @@ $( document ).ready(function() {
         this.warningCount++;
         checkPDF.addClass("ed11y-text-warning");
         checkPDF.has("img").removeClass("ed11y-text-warning");
-        checkPDF.after('<div class="ed11y-instance-inline"><button type="button" class="ed11y-link-warning-btn ed11y-pop" data-ed11y-tip-lazyloaded="true" data-ed11y-tip="' + ed11y.ed11yMessageFullCheckPDF + '" >' + ed11y.WarningIcon + '</button></div>');
+        checkPDF.after('<div class="ed11y-instance-inline"><button type="button" class="ed11y-link-warning-btn ed11y-pop" data-ed11y-tip-lazyloaded="true" aria-expanded="false" data-ed11y-tip="' + ed11y.ed11yMessageFullCheckPDF + '" >' + ed11y.WarningIcon + '</button></div>');
       }
 
       //Check for blockquotes used as headings. If it's less than 25 characters - it's probably not a quote.
@@ -677,7 +692,7 @@ $( document ).ready(function() {
         if ($el.text().trim().length < 25 ) {
           this.errorCount++;
           $el.addClass("ed11y-error-border")
-          $el.before('<div class="ed11y-instance"><button type="button" class="ed11y-error-text-btn ed11y-pop" data-ed11y-tip-lazyloaded="true" data-ed11y-tip="' + ed11y.ed11yMessageFullCheckPDF + '" >' + ed11y.ErrorIcon + '</button></div>');
+          $el.before('<div class="ed11y-instance"><button type="button" class="ed11y-error-text-btn ed11y-pop" data-ed11y-tip-lazyloaded="true" aria-expanded="false" data-ed11y-tip="' + ed11y.ed11yMessageFullCheckPDF + '" >' + ed11y.ErrorIcon + '</button></div>');
         }
       });
 
@@ -688,7 +703,7 @@ $( document ).ready(function() {
         this.warningCount++;
         mediaCount++;
         $el.addClass("ed11y-warning-border");
-        $el.before('<div class="ed11y-instance"><button type="button" class="ed11y-warning-btn ed11y-pop" data-ed11y-tip-lazyloaded="true" data-ed11y-tip="' + ed11y.ed11yMessageFullCheckCaptions + '" >' + ed11y.WarningIcon + '</button></div>');
+        $el.before('<div class="ed11y-instance"><button type="button" class="ed11y-warning-btn ed11y-pop" data-ed11y-tip-lazyloaded="true" aria-expanded="false" data-ed11y-tip="' + ed11y.ed11yMessageFullCheckCaptions + '" >' + ed11y.WarningIcon + '</button></div>');
       });
 
       //Warning: Make sure all podcasts have captions.
@@ -699,7 +714,7 @@ $( document ).ready(function() {
         mediaCount++;
         soundcloudWarning.addClass("ed11y-warning-border");
         SoundCloudMessage = "<div class='ed11y-tip-heading'><p>Warning</div> Please ensure to provide a <span class='ed11y-bold'>transcript for all podcasts.</span> Providing transcripts for audio content is a mandatory Level A requirement. Transcripts are meant to support people who are D/deaf or hard-of-hearing, but can benefit everyone. Consider placing the transcript below or within an accordion panel.</p>"
-        soundcloudWarning.before('<div class="ed11y-instance"><button type="button" class="ed11y-warning-btn ed11y-pop" data-ed11y-tip-lazyloaded="true" data-ed11y-tip="' + SoundCloudMessage + '" >' + ed11y.WarningIcon + '</button></div>');
+        soundcloudWarning.before('<div class="ed11y-instance"><button type="button" class="ed11y-warning-btn ed11y-pop" data-ed11y-tip-lazyloaded="true" aria-expanded="false" data-ed11y-tip="' + SoundCloudMessage + '" >' + ed11y.WarningIcon + '</button></div>');
       }
 
       //Warning: Check Google Data Studio widget.
@@ -709,7 +724,7 @@ $( document ).ready(function() {
         this.warningCount++;
         dataStudioWarning.addClass("ed11y-warning-border");
         dataStudioWarningMessage = "<div class='ed11y-tip-heading'><p>Error</div> Google Data Studio widgets can be problematic for people who use a keyboard to navigate and people who have difficulty perceiving visual content. Please <span class='ed11y-bold'>provide a text alternative</span> immediately below the Data Studio frame.</p>"
-        dataStudioWarning.before('<div class="ed11y-instance"><button type="button" class="ed11y-warning-btn ed11y-pop" data-ed11y-tip-lazyloaded="true" data-ed11y-tip="' + dataStudioWarningMessage + '" >' + ed11y.WarningIcon + '</button></div>');
+        dataStudioWarning.before('<div class="ed11y-instance"><button type="button" class="ed11y-warning-btn ed11y-pop" data-ed11y-tip-lazyloaded="true" aria-expanded="false" data-ed11y-tip="' + dataStudioWarningMessage + '" >' + ed11y.WarningIcon + '</button></div>');
       }
 
       //Warning: Discourage use of Twitter timelines.
@@ -722,7 +737,7 @@ $( document ).ready(function() {
           this.warningCount++;
           $el.addClass("ed11y-text-warning");
           twittererror = "<div class='ed11y-tip-heading'>Warning</div><p>The default Twitter timeline may cause accessibility issues for keyboard users. Secondly, the inline scrolling of the Twitter timeline may cause usability issues for mobile. It's recommended to add the following data attributes to the embed code. </p><hr aria-hidden='true' class='ed11y-tip-tool-hr'><span class='ed11y-bold'>It's recommended to:</span><ul><li>Add <kbd>data-tweet-limit=&#34;2&#34;</kbd> to limit the amount of tweets.</li><li>Add <kbd>data-chrome=&#34;nofooter noheader&#34;</kbd> to remove the widget's header and footer.</li></ul>"
-          $el.before('<div class="ed11y-instance"><button type="button" class="ed11y-link-warning-btn ed11y-pop" data-ed11y-tip-lazyloaded="true" data-ed11y-tip="' + twittererror + '" >' + ed11y.WarningIcon + '</button></div>');
+          $el.before('<div class="ed11y-instance"><button type="button" class="ed11y-link-warning-btn ed11y-pop" data-ed11y-tip-lazyloaded="true" aria-expanded="false" data-ed11y-tip="' + twittererror + '" >' + ed11y.WarningIcon + '</button></div>');
         }
       });
 
@@ -739,7 +754,7 @@ $( document ).ready(function() {
               "University Social Media Guidelines</a> " +
               "regarding alt text and captioning.</p>";
           $el.addClass("ed11y-warning-border").before('' +
-              '<div class="ed11y-instance"><button type="button" class="ed11y-warning-btn ed11y-pop" data-ed11y-tip-lazyloaded="true" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.WarningIcon + '</button></div>');
+              '<div class="ed11y-instance"><button type="button" class="ed11y-warning-btn ed11y-pop" data-ed11y-tip-lazyloaded="true" aria-expanded="false" data-ed11y-tip="' + ed11yMessage + '" >' + ed11y.WarningIcon + '</button></div>');
         })
       }
 
@@ -776,6 +791,7 @@ $( document ).ready(function() {
       if (ed11yImageIgnore.length > 1) {
         ed11yImageIgnore += separator;
       }
+      this.headerIgnore = ed11yHeaderIgnore;
       this.imageIgnore = ed11yImageIgnore + "[aria-hidden] img, [aria-hidden], [role='presentation']";
       if (ed11yLinkIgnore.length > 0) {
         ed11yLinkIgnore += separator;
@@ -801,122 +817,120 @@ $( document ).ready(function() {
           this.imageIgnore = ed11yContainerIgnore;
         }
         this.containerIgnore = ed11yContainerIgnore;
-
-        // About this tool
-        this.ed11yAbout = "" +
-            "<p><a href='https://itmaybejj.github.io/editoria11y/'>Editoria11y</a>" +
-            " is an automated accessibility checker currently being developed by " +
-            "Princeton University. Please do take a moment to " +
-            "<a href='https://www.drupal.org/project/editoria11y'>request changes " +
-            "or report bugs</a>.</p>" +
-            "<p>And do note: automated tools can catch some common mistakes, " +
-            "but cannot replace old-fashioned proofreading and accessibility " +
-            "testing. Please do not assume that a clear result means " +
-            "your work is done!</p>";
-
-        this.ed11yMessageHeadingEmpty = "<div class='ed11y-tip-heading'>Empty heading</div> " +
-            "<p>Even though headings without text aren't visible, they still appear " +
-            "in <a href='https://accessibility.princeton.edu/how/content/headings'>" +
-            "document outlines</a>, and the vertical gaps they create between " +
-            "paragraphs are often larger than the designer intended.</p>" +
-            "<p>To fix: edit the page and delete this line, or change its format " +
-            "from &quot;Heading&quot; to &quot;Normal&quot;.</p>";
-
-        // Messages for links.
-        this.ed11yMessageLinkHasNoText = "<div class='ed11y-tip-heading'>Link title not " +
-            "found</div> " +
-            "<p>Screen readers will either read the entire url of this link, one " +
-            "character at a time, or say <span class='ed11yMessage-bold'>&quot;Link: " +
-            "[...awkward silence...].&quot;</span></p>" +
-            "<p>To fix: delete this link if it is just stray tags wrapped around an " +
-            "empty space due to a copy/paste bug, or add alt text if it is a real " +
-            "link wrapped around an image or icon.</p>";
-
-        this.ed11yMessageLinkTextIsURL = "<div class='ed11y-tip-heading'>Link may be a " +
-            "URL</div>" +
-            "<p>Assistive devices expect link titles to be " +
-            "<a href='https://accessibility.princeton.edu/how/content/links'>" +
-            "&quot;clear and meaningful&quot;</a>, even out of context.</p>" +
-            "<p>Note that spelling out a very short URL is OK if the URL itself " +
-            "<em>is</em> what you are communicating, e.g., when providing an email " +
-            "address.</p>"
-
-        this.ed11yMessageLinkTextIsGeneric = "<div class='ed11y-tip-heading'>Manual check " +
-            "needed: link title may be generic</div>" +
-            "<p>This link appears to be made of common words like " +
-            "&quot;click here&quot; or &quot;download&quot;. Since many users skim " +
-            "by links, and most assistive devices navigate pages by a list of link " +
-            "titles, please check to make sure this link is " +
-            "<a href='https://accessibility.princeton.edu/how/content/links'>unique, " +
-            "clear and meaningful</a>, even out of context.</p>"
-
-        this.ed11yMessageQANewTab = "<div class='ed11y-tip-heading'>Link opens in a " +
-            "new window</div>" +
-            "<p>Opening new tabs or windows without warning can be disorienting, " +
-            "especially for users relying on assistive devices.</p> " +
-            "<p>Unless certain " +
-            "<a href='https://www.w3.org/TR/WCAG20-TECHS/G200.html#G200-description'>" +
-            "exceptions related to context-sensitive workflows</a> apply, " +
-            "it is better to let the user decide when to open new windows.</p>"
-
-        this.ed11yMessageQAUppercase = "<div class='ed11y-tip-heading'>Large block of " +
-            "uppercase text</div>" +
-            "<p>Some users find lengthy segments of capitalized content difficult to " +
-            "read, and some screen readers interpret fully capitalized words as " +
-            "acronyms and read them one letter at a time.</p>";
-
-        //todo: princeton only
-        this.ed11yMessageMissingQATableHeadings = "<div class='ed11y-tip-heading'>Error: " +
-            "table has no headers</div> " +
-            "<p>Screen reader users rely on " +
-            "<a href='https://accessibility.princeton.edu/how/content/tables'>table " +
-            "headers</a> to label cells, so they can explore the table without " +
-            "having to count rows and columns.</p> " +
-            "<p>Note that tables should be used for tabular data only, as they cannot " +
-            "reflow for small screens. If this " +
-            "<a href='https://accessibility.princeton.edu/how/content/layout-tables'>" +
-            "table is only for visual layout</a>, use an accessible " +
-            "<a href='https://sitebuilder.princeton.edu/layout-themes/layouts-landing-pages'>" +
-            "multi-column layout</a> to achieve the same affect.</p>"
-
-        this.ed11yMessageQAHeaderInTable = "<div class='ed11y-tip-heading'>Error: heading " +
-            "formatting inside table cells</div> " +
-            "<p>Label table rows and columns using table headers. Formatting text as " +
-            "semantic headings (Heading 2, Heading 3) creates a page outline for " +
-            "assistive devices, and users of those devices are not expecting to land " +
-            "inside a table when jumping to a heading. </p>"
-
-        this.ed11yMessageEmptyTableHeader = "<div class='ed11y-tip-heading'>Error: Empty " +
-            "table header</div>" +
-            "<p>Screen reader users rely on " +
-            "<a href='https://accessibility.princeton.edu/how/content/tables'>table " +
-            "headers</a> to label cells, so they can explore the table without " +
-            "having to count rows and columns.</p>";
-
-        // Fullcheck tests.
-        this.ed11yMessageFullCheckPDF = "<div class='ed11y-tip-heading'>Warning</div><p>PDF " +
-            "files are considered web content and must be made accessible as well. If " +
-            "this file is a form, consider using Google Forms as an accessible " +
-            "alternative. If this PDF file is a document, consider converting it into" +
-            " a web page instead. Otherwise, please <span class='ed11y-bold'>check " +
-            "file for accessibility in Acrobat DC.</span></p>"
-
-        // Not implemented yet.
-        /*this.ed11yMessageFullCheckBlockquote = "<div class='ed11y-tip-heading'>Error</div> " +
-            "Blockquotes should be used for quotes only. They should never be used as " +
-            "headings. Please replace with a semantic heading (e.g. Heading 2 or Heading 3)."*/
-
-        this.ed11yMessageFullCheckCaptions = "<div class='ed11y-tip-heading'>Manual check</div>Please check to make sure " +
-            "<span class='ed11y-bold'>all videos provide closed captioning.</span> " +
-            "Providing captions for all audio and video content is a mandatory Level A " +
-            "requirement. Captions are meant to support people who are D/deaf or " +
-            "hard-of-hearing."
-
-        /* Templated SVG icons from FontAwesome 5 for better cross-browser support and minimize conflicting libraries. */
-        ed11y.ErrorIcon = "<svg xmlns='http://www.w3.org/2000/svg' role='img' focusable='false' aria-hidden='true' viewBox='0 0 576 576' width='24px' height='24px'><path fill='#ffffff' d='M569.517 440.013C587.975 472.007 564.806 512 527.94 512H48.054c-36.937 0-59.999-40.055-41.577-71.987L246.423 23.985c18.467-32.009 64.72-31.951 83.154 0l239.94 416.028zM288 354c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z'></path></svg><span class='ed11y-sr-only'>Error</span>";
-        ed11y.WarningIcon = "<svg xmlns='http://www.w3.org/2000/svg' width='28px' height='28px' role='img' focusable='false' aria-hidden='true' viewBox='0 0 512 512'><path fill='#505050' d='M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zM262.655 90c-54.497 0-89.255 22.957-116.549 63.758-3.536 5.286-2.353 12.415 2.715 16.258l34.699 26.31c5.205 3.947 12.621 3.008 16.665-2.122 17.864-22.658 30.113-35.797 57.303-35.797 20.429 0 45.698 13.148 45.698 32.958 0 14.976-12.363 22.667-32.534 33.976C247.128 238.528 216 254.941 216 296v4c0 6.627 5.373 12 12 12h56c6.627 0 12-5.373 12-12v-1.333c0-28.462 83.186-29.647 83.186-106.667 0-58.002-60.165-102-116.531-102zM256 338c-25.365 0-46 20.635-46 46 0 25.364 20.635 46 46 46s46-20.636 46-46c0-25.365-20.635-46-46-46z'/></svg><span class='ed11y-sr-only'>Warning</span>";
-
       }
+      // About this tool
+      this.ed11yAbout = "" +
+          "<p><a href='https://itmaybejj.github.io/editoria11y/'>Editoria11y</a>" +
+          " is an automated accessibility checker currently being developed by " +
+          "Princeton University. Please do take a moment to " +
+          "<a href='https://www.drupal.org/project/editoria11y'>request changes " +
+          "or report bugs</a>.</p>" +
+          "<p>And do note: automated tools can catch some common mistakes, " +
+          "but cannot replace old-fashioned proofreading and accessibility " +
+          "testing. Please do not assume that a clear result means " +
+          "your work is done!</p>";
+
+      this.ed11yMessageHeadingEmpty = "<div class='ed11y-tip-heading'>Empty heading</div> " +
+          "<p>Even though headings without text aren't visible, they still appear " +
+          "in <a href='https://accessibility.princeton.edu/how/content/headings'>" +
+          "document outlines</a>, and the vertical gaps they create between " +
+          "paragraphs are often larger than the designer intended.</p>" +
+          "<p>To fix: edit the page and delete this line, or change its format " +
+          "from &quot;Heading&quot; to &quot;Normal&quot;.</p>";
+
+      // Messages for links.
+      this.ed11yMessageLinkHasNoText = "<div class='ed11y-tip-heading'>Link title not " +
+          "found</div> " +
+          "<p>Screen readers will either read the entire url of this link, one " +
+          "character at a time, or say <span class='ed11yMessage-bold'>&quot;Link: " +
+          "[...awkward silence...].&quot;</span></p>" +
+          "<p>To fix: delete this link if it is just stray tags wrapped around an " +
+          "empty space due to a copy/paste bug, or add alt text if it is a real " +
+          "link wrapped around an image or icon.</p>";
+
+      this.ed11yMessageLinkTextIsURL = "<div class='ed11y-tip-heading'>Link may be a " +
+          "URL</div>" +
+          "<p>Assistive devices expect link titles to be " +
+          "<a href='https://accessibility.princeton.edu/how/content/links'>" +
+          "&quot;clear and meaningful&quot;</a>, even out of context.</p>" +
+          "<p>Note that spelling out a very short URL is OK if the URL itself " +
+          "<em>is</em> what you are communicating, e.g., when providing an email " +
+          "address.</p>"
+
+      this.ed11yMessageLinkTextIsGeneric = "<div class='ed11y-tip-heading'>Manual check " +
+          "needed: link title may be generic</div>" +
+          "<p>This link appears to be made of common words like " +
+          "&quot;click here&quot; or &quot;download&quot;. Since many users skim " +
+          "by links, and most assistive devices navigate pages by a list of link " +
+          "titles, please check to make sure this link is " +
+          "<a href='https://accessibility.princeton.edu/how/content/links'>unique, " +
+          "clear and meaningful</a>, even out of context.</p>"
+
+      this.ed11yMessageQANewTab = "<div class='ed11y-tip-heading'>Link opens in a " +
+          "new window</div>" +
+          "<p>Opening new tabs or windows without warning can be disorienting, " +
+          "especially for users relying on assistive devices.</p> " +
+          "<p>Unless certain " +
+          "<a href='https://www.w3.org/TR/WCAG20-TECHS/G200.html#G200-description'>" +
+          "exceptions related to context-sensitive workflows</a> apply, " +
+          "it is better to let the user decide when to open new windows.</p>"
+
+      this.ed11yMessageQAUppercase = "<div class='ed11y-tip-heading'>Large block of " +
+          "uppercase text</div>" +
+          "<p>Some users find lengthy segments of capitalized content difficult to " +
+          "read, and some screen readers interpret fully capitalized words as " +
+          "acronyms and read them one letter at a time.</p>";
+
+      //todo: princeton only
+      this.ed11yMessageMissingQATableHeadings = "<div class='ed11y-tip-heading'>Error: " +
+          "table has no headers</div> " +
+          "<p>Screen reader users rely on " +
+          "<a href='https://accessibility.princeton.edu/how/content/tables'>table " +
+          "headers</a> to label cells, so they can explore the table without " +
+          "having to count rows and columns.</p> " +
+          "<p>Note that tables should be used for tabular data only, as they cannot " +
+          "reflow for small screens. If this " +
+          "<a href='https://accessibility.princeton.edu/how/content/layout-tables'>" +
+          "table is only for visual layout</a>, use an accessible " +
+          "<a href='https://sitebuilder.princeton.edu/layout-themes/layouts-landing-pages'>" +
+          "multi-column layout</a> to achieve the same affect.</p>"
+
+      this.ed11yMessageQAHeaderInTable = "<div class='ed11y-tip-heading'>Error: heading " +
+          "formatting inside table cells</div> " +
+          "<p>Label table rows and columns using table headers. Formatting text as " +
+          "semantic headings (Heading 2, Heading 3) creates a page outline for " +
+          "assistive devices, and users of those devices are not expecting to land " +
+          "inside a table when jumping to a heading. </p>"
+
+      this.ed11yMessageEmptyTableHeader = "<div class='ed11y-tip-heading'>Error: Empty " +
+          "table header</div>" +
+          "<p>Screen reader users rely on " +
+          "<a href='https://accessibility.princeton.edu/how/content/tables'>table " +
+          "headers</a> to label cells, so they can explore the table without " +
+          "having to count rows and columns.</p>";
+
+      // Fullcheck tests.
+      this.ed11yMessageFullCheckPDF = "<div class='ed11y-tip-heading'>Warning</div><p>PDF " +
+          "files are considered web content and must be made accessible as well. If " +
+          "this file is a form, consider using Google Forms as an accessible " +
+          "alternative. If this PDF file is a document, consider converting it into" +
+          " a web page instead. Otherwise, please <span class='ed11y-bold'>check " +
+          "file for accessibility in Acrobat DC.</span></p>"
+
+      // Not implemented yet.
+      /*this.ed11yMessageFullCheckBlockquote = "<div class='ed11y-tip-heading'>Error</div> " +
+          "Blockquotes should be used for quotes only. They should never be used as " +
+          "headings. Please replace with a semantic heading (e.g. Heading 2 or Heading 3)."*/
+
+      this.ed11yMessageFullCheckCaptions = "<div class='ed11y-tip-heading'>Manual check</div>Please check to make sure " +
+          "<span class='ed11y-bold'>all videos provide closed captioning.</span> " +
+          "Providing captions for all audio and video content is a mandatory Level A " +
+          "requirement. Captions are meant to support people who are D/deaf or " +
+          "hard-of-hearing."
+
+      /* Templated SVG icons from FontAwesome 5 for better cross-browser support and minimize conflicting libraries. */
+      ed11y.ErrorIcon = "<svg xmlns='http://www.w3.org/2000/svg' role='img' focusable='false' aria-hidden='true' viewBox='0 0 576 576' width='20px' height='20px'><path fill='#ffffff' d='M569.517 440.013C587.975 472.007 564.806 512 527.94 512H48.054c-36.937 0-59.999-40.055-41.577-71.987L246.423 23.985c18.467-32.009 64.72-31.951 83.154 0l239.94 416.028zM288 354c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z'></path></svg><span class='ed11y-sr-only'>Error</span>";
+      ed11y.WarningIcon = "<svg xmlns='http://www.w3.org/2000/svg' width='20px' height='20px' role='img' focusable='false' aria-hidden='true' viewBox='0 0 512 512'><path fill='#505050' d='M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zM262.655 90c-54.497 0-89.255 22.957-116.549 63.758-3.536 5.286-2.353 12.415 2.715 16.258l34.699 26.31c5.205 3.947 12.621 3.008 16.665-2.122 17.864-22.658 30.113-35.797 57.303-35.797 20.429 0 45.698 13.148 45.698 32.958 0 14.976-12.363 22.667-32.534 33.976C247.128 238.528 216 254.941 216 296v4c0 6.627 5.373 12 12 12h56c6.627 0 12-5.373 12-12v-1.333c0-28.462 83.186-29.647 83.186-106.667 0-58.002-60.165-102-116.531-102zM256 338c-25.365 0-46 20.635-46 46 0 25.364 20.635 46 46 46s46-20.636 46-46c0-25.365-20.635-46-46-46z'/></svg><span class='ed11y-sr-only'>Warning</span>";
     }
     this.ed11yMessageHeadingTooLong = function(headingLength) {
       return "<div class='ed11y-tip-heading'>Long " +
@@ -950,20 +964,34 @@ $( document ).ready(function() {
     }
 
     this.readyTips = function () {
-      $('button.ed11y-pop').not('ed11y-pop-ready').each(function(i) {
+      // This function is VERY expensive.
+      // Todo: optimize.
+      // For now: throw to the end of the render queue to prevent thread locking.
+      let windowWidth = $(window).width();
+      $('button.ed11y-pop').not('[id^="ed11y"]').each(function(i) {
         let $el = $(this);
-        $(this).attr('id', 'ed11y-pop-' + i).attr('aria-expanded','false').addClass('ed11y-pop-ready');
-        $(this).click(function() {
+        let offset = $el.offset();
+        let offsetData = 0;
+        if (offset.left < 8) {
+          // Nudge right
+          offsetData = 8 - offset.left;
+        }
+        else if (offset.left + 40 > windowWidth) {
+          // Nudge left
+          offsetData = offset.left - windowWidth;
+        }
+        if (offsetData === 0) {
+          $el.data('ed11yTipNudge',offsetData).attr('id', 'ed11y-pop-' + i);
+        } else {
+          $el.css("transform","translate(" + offsetData + "px, 0)").data('ed11yTipNudge',offsetData).attr('id', 'ed11y-pop-' + i);
+        }
+        $el.click(function() {
           ed11y.popThis($el, 'click');
           return false;
         });
-        $(this).filter('[aria-expanded="false"], .ed11y-hover').mouseenter(function() {
+        $el.filter('[aria-expanded="false"], .ed11y-hover').mouseenter(function() {
           ed11y.popThis($el, 'hover');
         })
-        $(this).filter('[aria-expanded="false"], .ed11y-hover').focus(function() {
-          ed11y.popThis($el, 'hover');
-        })
-        //$(this).addClass('ed11y-tip-ready').attr('data-ed11y-tip',  '<button class="ed11y-tip-closer ed11y-close-button ed11y-button" type="button" onClick="jQuery(this).closest(&#34;[id^=&#39;tippy&#39;]&#34;).siblings(&#39;button&#39;).focus().click();"><span class="aria-hidden">&times;</span><span class="ed11y-sr-only">close</span></button>' + $(this).attr('data-ed11y-tip'));
       })
     }
 
@@ -1009,31 +1037,36 @@ $( document ).ready(function() {
         }
         if (needToAlign === true) {
           $tip.attr('style','').removeClass('ed11y-tip-left ed11y-tip-under').find('.ed11y-arrow').css('left','initial');
-          let buttonPosition = $el.offset();
+          let buttonOffset = $el.offset();
+          let buttonNudged = $el.data('ed11yTipNudge');
+          let buttonPosition = buttonOffset.left + buttonNudged;
           let tipWidth = $tip.width();
           let windowWidth = $(window).width();
-          let roomToLeft = buttonPosition.left - tipWidth - 90;
-          let roomToRight = windowWidth - (buttonPosition.left + tipWidth) - 90;
+          let roomToLeft = buttonPosition - tipWidth - 90;
+          let roomToRight = windowWidth - (buttonPosition + tipWidth) - 90;
           if (roomToRight < 0) {
             if (roomToLeft > 0 ) {
               // Go left if there is room.
               $tip.addClass('ed11y-tip-left');
-              $tip.css('transform', 'translate(-' + tipWidth + 'px)');
+              let nudge = tipWidth - buttonNudged;
+              $tip.css('transform', 'translate(-' + nudge + 'px)');
             }
             else {
               // Go under if there is not.
               $tip.addClass('ed11y-tip-under');
               let tipPosition = $tip.offset();
-              if (tipPosition.left + 400 > windowWidth) {
-                let offset = tipPosition.left - 10;
-                $tip.css('transform', 'translate(-' + offset + 'px)');
-                $tip.find('.ed11y-arrow').css('left', buttonPosition.left + 'px');
+              let tipOffset = tipWidth - 5;
+              let arrowOffset = tipWidth;
+              if (tipPosition.left < tipWidth) {
+                tipOffset = tipPosition.left - 5;
+                arrowOffset = buttonPosition + 10;
               }
-              else {
-                //$tip.find('.ed11y-arrow').css('left', buttonPosition.left + 'px');
-              }
-              //$tip.addClass('ed11y-tip-under');
+              $tip.css('transform', 'translate(-' + tipOffset + 'px)');
+              $tip.find('.ed11y-arrow').css('left', arrowOffset + 'px');
             }
+          }
+          else {
+            $tip.css('transform', 'translate(' + buttonNudged + 'px)');
           }
         }
       }
@@ -1205,52 +1238,55 @@ $( document ).ready(function() {
             $(".ed11y-full-active").removeClass('ed11y-full-active').addClass('ed11y-full-only');
           }
           else {
-            ed11y.checkFull();
-            $('h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]').each(function () {
-              let $el = $(this);
-              if (!$el.find('.ed11y-headings-label').length) {
-                let level;
-                // Match up aria-headers to equivalent <h#> tag.
-                if ($el.attr('aria-level')) {
-                  level = +$el.attr('aria-level');
+            window.setTimeout(function() {
+              ed11y.checkFull();
+              $('h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]').each(function () {
+                // Todo use this to fill in outline with hidden headers.
+                let $el = $(this);
+                if (!$el.find('.ed11y-headings-label').length) {
+                  let level;
+                  // Match up aria-headers to equivalent <h#> tag.
+                  if ($el.attr('aria-level')) {
+                    level = +$el.attr('aria-level');
+                  }
+                  else {
+                    level = +$el.prop("tagName").slice(1);
+                  }
+                  $(this).prepend(" <span class='ed11y-headings-label'>H" + level + "</span> ");
+                  // todo Beta: create JS event and move to PS-Core
+                  $('body').addClass('no-stick');
+                  $('#header').removeClass('stuck');
+                }
+              })
+              $('.main-container img').each(function() {
+                let alt = $(this).attr('alt');
+                let src = $(this).attr('src');
+                let width = $(this).innerWidth() + 'px';
+                let height = $(this).innerHeight() + 'px';
+                let inject = "<div class='ed11y-container ed11y-reveal-formatting' " +
+                    "style='width:"+width+";height:"+height+";'>" +
+                    "<span>"+MainToggleIcon+"Image alt text: "+alt+"</span></div>";
+                if ($(this).prev().hasClass('ed11y-instance-inline') === true) {
+                  $(this).prev().before(inject);
                 }
                 else {
-                  level = +$el.prop("tagName").slice(1);
+                  $(this).before(inject);
                 }
-                $(this).prepend(" <span class='ed11y-headings-label'>H" + level + "</span> ");
-                // todo Beta: create JS event and move to PS-Core
-                $('body').addClass('no-stick');
-                $('#header').removeClass('stuck');
-              }
-            })
+                let imgClass = "";
+                if ($(this).hasClass('ed11y-error-border')) {
+                  imgClass = " ed11y-error-border";
+                } else if ($(this).hasClass('ed11y-warning-border')) {
+                  imgClass = " ed11y-warning-border";
+                }
+                $('#ed11y-image-list').append("" +
+                    "<li class='" + imgClass  + " ed11y-text-warning'>" +
+                    "<img src='" + src + "' alt='' class='ed11y-thumbnail'/>Alt: " + alt + "</li>");
+              });
+            }, 0)
             document.getElementById('ed11y-fullcheck-headers').classList.add('ed11y-active');
             $('.ed11y-full-only').removeClass('ed11y-full-only').addClass('ed11y-full-active');
             $("#ed11y-outline-list").html('').append(ed11y.headingOutline).focus();
             $('.ed11y-headings-label').show();
-            $('.main-container img').each(function() {
-              let alt = $(this).attr('alt');
-              let src = $(this).attr('src');
-              let width = $(this).innerWidth() + 'px';
-              let height = $(this).innerHeight() + 'px';
-              let inject = "<div class='ed11y-container ed11y-reveal-formatting' " +
-                  "style='width:"+width+";height:"+height+";'>" +
-                  "<span>"+MainToggleIcon+"Image alt text: "+alt+"</span></div>";
-              if ($(this).prev().hasClass('ed11y-instance-inline') === true) {
-                $(this).prev().before(inject);
-              }
-              else {
-                $(this).before(inject);
-              }
-              let imgClass = "";
-              if ($(this).hasClass('ed11y-error-border')) {
-                imgClass = " ed11y-error-border";
-              } else if ($(this).hasClass('ed11y-warning-border')) {
-                imgClass = " ed11y-warning-border";
-              }
-              $('#ed11y-image-list').append("" +
-                  "<li class='" + imgClass  + " ed11y-text-warning'>" +
-                  "<img src='" + src + "' alt='' class='ed11y-thumbnail'/>Alt: " + alt + "</li>");
-            });
           }
         });
 

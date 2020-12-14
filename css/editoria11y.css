@@ -102,6 +102,9 @@
 .ed11y-instance-inline + .ed11y-instance-inline .ed11y-tip {
   margin-top: 8px !important;
 }
+.ed11y-instance-inline + .ed11y-instance-inline .ed11y-tip-under {
+  margin-top: 65px !important;
+}
 
 
 
@@ -689,14 +692,14 @@ span.ed11y-headings-label {
 }
 .ed11y-warning-btn + .ed11y-tip-under,
 .ed11y-error-btn + .ed11y-tip-under {
-  margin-top: 66px !important;
+  margin-top: 58px !important;
 }
 .ed11y-tip-left .ed11y-arrow {
   right: -10px;
   transform: rotate(-135deg);
 }
 .ed11y-tip-under .ed11y-arrow {
-  margin: -26px 0 0;
+  margin: -26px 0 0 -5px;
   left: 50%;
   transform: rotate(135deg);
 }
