@@ -22,7 +22,7 @@ let ed11yOutlineIgnore = "";
 // E.g., to just ignore images in a social media feed, add
 // ".my-feed-container img" to imageIgnore.
 let ed11yImageIgnore = "";
-let ed11yHeaderIgnore = ".project-timeline";
+let ed11yHeaderIgnore = ".project-tagline";
 let ed11yLinkIgnore = "";
 
 // Outline is ignoring hidden containers.
