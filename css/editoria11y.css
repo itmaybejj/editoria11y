@@ -598,7 +598,7 @@ button.ed11y-panel-button {
 .ed11y-reveal-alts {
   position: absolute !important;
   font-size: 14px !important;
-  display: flex !important;
+  display: inline-flex !important;
   flex-direction: column !important;
   justify-content: flex-end !important;
 }

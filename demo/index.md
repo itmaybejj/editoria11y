@@ -41,11 +41,12 @@ Links titled with a URL:
 
 <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">https://www.youtube.com/watch?v=DLzxrzFCyOs</a>
 
-Links only titled with only generic text: “click here,” “learn more,” “download,” etc.
+Links only titled with only generic text: “click here,” “learn more,” “download,” etc:
 
 <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here</a>
 
-Links that open in a new window without an external link icon
+Links that open in a new window without an external link icon:
+
 <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">Yeah you can guess where this link goes.</a>
 
 ## List formatting
@@ -71,21 +72,19 @@ SEVERAL WORDS IN A ROW OF CAPS LOCK TEXT
 
 #### A skipped heading level
 
+### A very long heading. Headings should not be used for emphasis, but rather for a document outline, so if you find yourself talking this much, this probably is being used for visual formatting, not a heading.
+
 An empty heading:
 
 <h3></h3>
 
-### A very long heading. Headings should not be used for emphasis, but rather for a document outline, so if you find yourself talking this much, this probably is being used for visual formatting, not a heading.
+## Full check: some additional tests
 
-## Full check additional tests
+Links to PDF files: <a href="not-a-real-link.pdf">This will alert in full check</a>
 
-Links to PDF files
+Suspiciously short blockquotes:
 
-<a href="not-a-real-link.pdf">This will alert in full check</a>
-
-Suspiciously short blockquotes
-
-<blockquote>This is probably not a blockquote</blockquote>
+<blockquote>Not a blockquote</blockquote>
 
 Not included in this demo: embedded audio, video and social media iframes, reminding users to provide text alternatives and test for keyboard and screen reader compatibility.
 
