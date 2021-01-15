@@ -575,14 +575,18 @@ $( document ).ready(function() {
           findTHeaders.each((i, th) => {
             let $th = $(th);
             if ($th.text().trim().length < 1) {
+              this.errorCount++;
               $th.addClass("ed11y-error-border");
               ed11y.paints.push([$th,'prepend','ed11y-instance',"ed11y-error-border",'ed11y-error-text-btn',ed11y.ed11yMessageEmptyTableHeader]);
             }
           });
         }
         if (findHeadingTags.length > 0) {
-          // todo: have paints function prefer stronger alert classes
-          ed11y.paints.push([findHeadingTags,'before','ed11y-instance',"ed11y-error-border ed11y-headings-fail",'ed11y-error-text-btn',ed11y.ed11yMessageQAHeaderInTable]);
+          // todo: have paints function prefer stronger alert classes when there are multiple
+          findHeadingTags.each(function (item) {
+            this.warningCount++;
+            ed11y.paints.push([item,'before','ed11y-instance-inline',"ed11y-warning-border",'ed11y-link-warning-btn',ed11y.ed11yMessageQAHeaderInTable]);
+          })
         }
       });
 

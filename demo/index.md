@@ -61,7 +61,20 @@ c. rather than real formatting.
 SEVERAL WORDS IN A ROW OF CAPS LOCK TEXT
 
 ## Tables
+
 <table><tr><td>A table without a header isn't really a table</td><td><h3>And no, an "H3" is not a table header.</h3></td></tr></table>
+
+<table><tr><th>Empty table heading cells will also be flagged</th><th></th></tr></table>
+
+
+## Headings
+
+#### A skipped heading level
+
+An empty heading:
+<h3></h3>
+
+### A very long heading. Headings should not be used for emphasis, but rather for a document outline, so if you find yourself talking this much, this probably is being used for visual formatting, not a heading.
 
 ## Full check additional tests
 
