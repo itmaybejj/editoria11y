@@ -72,6 +72,7 @@ SEVERAL WORDS IN A ROW OF CAPS LOCK TEXT
 #### A skipped heading level
 
 An empty heading:
+
 <h3></h3>
 
 ### A very long heading. Headings should not be used for emphasis, but rather for a document outline, so if you find yourself talking this much, this probably is being used for visual formatting, not a heading.

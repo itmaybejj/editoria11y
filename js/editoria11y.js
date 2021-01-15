@@ -562,20 +562,19 @@ $( document ).ready(function() {
 
       // Check if a table has a table header.
       let $tablesCheck = this.checkRoot.find("table").not(this.containerIgnore);
-      $tablesCheck.each((i, el) => {
+      $tablesCheck.each( function(i, el) {
         let $el = $(el);
-        let findTHeaders = $el.find("th");
-        let findHeadingTags = $el.find("h1, h2, h3, h4, h5, h6");
-        if (findTHeaders.length === 0) {
-          this.errorCount++;
+        let $findTHeaders = $el.find("th");
+        let $findHeadingTags = $el.find("h1, h2, h3, h4, h5, h6");
+        if ($findTHeaders.length === 0) {
+          ed11y.errorCount++;
           ed11y.paints.push([$el,'before','ed11y-instance',"ed11y-error-border",'ed11y-error-btn',ed11y.ed11yMessageMissingQATableHeadings]);
         }
         else {
           // Make sure all table headers are not empty.
-          findTHeaders.each((i, th) => {
-            let $th = $(th);
+          findTHeaders.each( function (i, $th) {
             if ($th.text().trim().length < 1) {
-              this.errorCount++;
+              ed11y.errorCount++;
               $th.addClass("ed11y-error-border");
               ed11y.paints.push([$th,'prepend','ed11y-instance',"ed11y-error-border",'ed11y-error-text-btn',ed11y.ed11yMessageEmptyTableHeader]);
             }
@@ -583,9 +582,9 @@ $( document ).ready(function() {
         }
         if (findHeadingTags.length > 0) {
           // todo: have paints function prefer stronger alert classes when there are multiple
-          findHeadingTags.each(function (item) {
-            this.warningCount++;
-            ed11y.paints.push([item,'before','ed11y-instance-inline',"ed11y-warning-border",'ed11y-link-warning-btn',ed11y.ed11yMessageQAHeaderInTable]);
+          $findHeadingTags.each(function (i, $h) {
+            ed11y.warningCount++;
+            ed11y.paints.push([$h,'before','ed11y-instance',"ed11y-warning-border",'ed11y-link-warning-btn',ed11y.ed11yMessageQAHeaderInTable]);
           })
         }
       });
