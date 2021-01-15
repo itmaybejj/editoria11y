@@ -34,12 +34,15 @@ Also: embedded visualizations that usually require a text alternative (hard to d
 ## Meaningful Links
 
 Links with no text:
+
 <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"></a>
 
-Links titled with a filename:
-<a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">YouTube.pdf</a>
+Links titled with a URL:
+
+<a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">https://www.youtube.com/watch?v=DLzxrzFCyOs</a>
 
 Links only titled with only generic text: “click here,” “learn more,” “download,” etc.
+
 <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here</a>
 
 Links that open in a new window without an external link icon
@@ -58,15 +61,17 @@ c. rather than real formatting.
 SEVERAL WORDS IN A ROW OF CAPS LOCK TEXT
 
 ## Tables
-<table><tr><td>A table without a header isn't really a table</td></tr><tr><td><h3>And no, an "H3" is not a table header.</h3></td></tr></table>
+<table><tr><td>A table without a header isn't really a table</td><td><h3>And no, an "H3" is not a table header.</h3></td></tr></table>
 
 ## Full check additional tests
 
 Links to PDF files
-<a href="not-a-real-link.pdf">This link doesn't actually work</a>
+
+<a href="not-a-real-link.pdf">This will alert in full check</a>
 
 Suspiciously short blockquotes
-<blockquote>This is probably not a blockquote.</blockquote>
+
+<blockquote>This is probably not a blockquote</blockquote>
 
 Not included in this demo: embedded audio, video and social media iframes, reminding users to provide text alternatives and test for keyboard and screen reader compatibility.
 
