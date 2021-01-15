@@ -1,54 +1,54 @@
-*This project is in development; I do not recommend using it in production until January 2021*
-
 Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly accessibility checker that addresses three critical needs for content authors:
 
 1. It runs automatically. Modern spellcheck works so well because it is always running; put spellcheck behind a button and few users remember to run it!
 1. It focuses exclusively on straightforward issues a content author can easily understand and easily fix. Yes; comprehensive testing should be a key part of site creation, but if a tool is going to run automatically, it will drive an author bonkers if it is constantly alerting on code they do not understand and cannot fix.
-1. It runs in context. Views, Layout Builder, Paragraphs and all the other modules Drupal uses to assemble a page means that tools that run inside CKEditor cannot "see" many of the issues on a typical page.
+1. It runs in context. Modern content management systems often assemble pages from many sources. Only the assembled page can be checked for things like the header outline order.
 
 ## The authoring experience
 * On each page load, Editoria11y places a small toggle button at the bottom right of the screen with an issue count. Users can press the button to view details of any alerts or access additional tools ("full check"), including visualizers for the document outline and image alt attributes, and the panel's state persists from page to page (open or shut).
 * If issues are found, a panel slides open with more details. If users minimize the panel, it will only open on future pages if the issues are high priority.
 * If the user minimizes the panel, it will not open automatically on future page visits until the content changes.
 
-If you are on the demo site, you will see these example issues highlighted:
+If you are reading this ReadMe on the [demo site](https://itmaybejj.github.io/editoria11y/), the following items will have triggered an alert:
 
 • A fake list using bullet symbols instead of list elements.
 
 • link with only the text "[click here](https://www.youtube.com/watch?v=DLzxrzFCyOs)."
+
+Try clicking the toggle in the lower righthand corner of the page. Tooltips will appear near these items with explanations of the issue and suggestions for improving the content.
 
 ### Issues flagged in the quick check
 * Headings
   * Skipped heading levels
   * Empty headings
   * Very long headings
-* Image alt text
-  * Images with no alt text (pending: a configuration option to allow empty alts on decorative images)
+* Text alternatives
+  * Images without an alt element
+  * Images with an empty alt element (flagged for manual review)
   * Images with a filename as alt text
   * Images with very long alt text
   * Alt text that contains redundant text like "image of" or "photo of"
-  * Linked images without alt text when the link has no text (meaning the link has no accessible text)
-  * Linked images with alt text when the link also has text (warning the author that the text of a link should be about the link, and not have lots of extra detail)
-* Links
+  * Images in links with alt text that appears to be describing the image instead of the link destination
+  * Embedded visualizations that usually require a text alternative
+* Meaningful links
   * Links with no text
-  * Links with a filename as their accessible text
-  * Links with only generic text: "click here," "learn more," "download," etc.
-* Structure
-  * Fake lists
-  * More than three words of CAPS LOCK TEXT in a row
-  * Tables without headers
-  * Tables with document headers (&lt;h2&gt;) instead of table headers (&lt;th&gt;)
+  * Links titled with a filename 
+  * Links only titled with only generic text: “click here,” “learn more,” “download,” etc.
+  * Links that open in a new window without an external link icon
+* Lists made from asterisks, numbers and letters rather than list elements
+* LARGE QUANTITIES OF CAPS LOCK TEXT
+* Tables without headers and tables with document headers ("Header 3") instead of table headers (<th>)
   
 ### Items noted in the full check
 Clicking the full check button flips open an expanded panel where the user can see the document outline (headers) and all image alt text.
 
-It also flags some additional items that need manual checks and may be OK as is:
+It also flags some additional items:
 
 * The first link to a PDF on a page, reminding the user to provide an accessible PDF or an alternate format
-* Suspiciously short blockquotes that might be fake headings
+* Suspiciously short blockquotes that may not be block quotes.
 * Embedded videos, reminding the user to add closed captions
-* Embedded audio, reminding the user to provide a transcript (pending)
-* Certain complex embedded content (e.g., social media and data visualization) that often present accessibility problems
+* Embedded audio, reminding the user to provide a transcript
+* Embedded social media, reminding the user to check their social media content as well
 * A custom warning -- same as above, but checking against selectors you provide in the "ed11yCustomEmbeddedContent" variable.
 
 ## Installation and configuration
@@ -58,7 +58,7 @@ If possible, start with a turnkey implementation:
 * Editoria11y WordPress Plugin (coming soon) 
 
 To install manually:
-* Add JS (in this order please...)
+* Add JS (in this order...)
   * jQuery
   * editoria11y-prefs.js
   * editoria11y.js
@@ -74,62 +74,43 @@ Should look something like this:
 <script src="/js/editoria11y.js">
 ```
 
-Remember to only call the script for logged-in editors!
+And remember to only call the script for logged-in editors!
 
-I don't recommend editing the Editoria11y-prefs file yet; a lot is still changing in there. Stick to declaring your own custom overrides of the following variables in your own JS file. For example, this page uses the following:
+Editoria11y's default configuration should work fine on both sites. Do explore the preferences file, though; there are several tweaks to make it play nice with most themes. The most important ones:
 
-```
-  let ed11yCustomCheckRoot = 'body';
-  let ed11yCustomContainerIgnore = '.project-tagline';
-```
+* "ed11yCheckRoot." By default Editorially scans the entire page, since themes name their content wrapper various things. If all your content is in, say, `main` or `#content`, provide that selector so site editors don't see alerts for things they can't fix. 
+* Some content just does not play nice with this type of tool; embedded social media feeds, for example, or custom "known-good" code with custom aria roles and labels. Add these to the "ed11yContainerIgnore" list. 
+* Editorially can be set to disable itself if it detects certain selectors. If have inline editing tools where you don't want tooltips inserted, or certain pages where the tool should not appear, add relevent selectors to the "ed11yNoRun" list.
 
-### Root elements to scan (default is `main`)
-`let ed11yCustomCheckRoot = ";`
+### Dealing with alerts on hidden or size-constrained content
 
-e.g., "main, #footer"
+Many interactive components (tabs, sliders, accordions) hide content. The Editoria11y info panel includes a link to jump directly to an alert. If a user can't see an alert on the page, they can click this link, and it will highlight the container for any hidden alerts -- e.g., the box around the slideshow.m
 
-### Elements to ignore on scan
+There are also two helper variables for site administrators:
+* If the hidden content should be ignored, add relevant selectors to the "ignore this" lists. E.g., it is not uncommon to have two links, with one hidden from screen readers, so you may want to add something like `a[aria-hidden='true']` to the ed11yLinkIgnore or ed11yContainerIgnore lists.
+* If tooltips are getting cut off because a wrapper is set to `visibility:hidden`, add the wrapper's selector to the `ed11yAllowOverflow` list, and Editoria11y will (temporarily) force the container to allow overflow while the tip is open.
 
-`let ed11yCustomContainerIgnore = "";`
+## Roadmap
 
-### Pages not to scan
+### Beta (January '21)
+- MVP features are now complete and all known bugs have been addressed; Drupal 8 module is live.
 
-`let ed11yCustomNoRun = "";`
+### 1.0 (February '21)
+- Implement any fixes from Beta feedback.
 
-e.g., "#an-inline-editing-tool, .a-page-not-to-scan"
-
-Editoria11y will not run if it sees any elements on this list.
-
-### Elements to flag in full view as needing a manual check
-
-`let ed11yCustomEmbeddedContent = "";`
-
-## Spring 2021 todo list
-
-### Public Beta (January-February)
-- Check tip-under alignment under inline tooltips
-- Create JS event hooks for Scan, Jump and Tooltip, and move Princeton-specific code to PS_Core
-- Evaluate 0-length alt logic
-- Adopt content-type config code from Asset Injector
-- Browser testing on older browsers.
-- Evaluate Fullcheck tests (Tableau, data visualization)
-- Evaluate the Forms tests
-- Clean up panel logic; don't need multiple panels if the text mutates and the SVGs are in the CSS.
-- Princeton only: deal with the back-to-top button sitting "under" the Sally button. What to do? Offset the button? Hide the back-to-top button for logged in users?
-- Proofread tips
-
-### Release (Spring)
-- Create platform documentation and point warnings to it
-- Drupal code style conformance
-- Test container sizing when text is browser resized
-- Dev environment link checking (optional)
-
-### Post-release (Summer)
-- Clean up variables to allow for overrides (if still needed post-config)
-- D7 Port
-- Make tips draggable?
-- Implement primitive local language detection (optional)
-- Move the rest of the errors into the paints function to improve performance
+### 1.1 (Spring/Summer '21)
+- Drupal 7 Backport
+- WordPress port
+- Evaluate possible additional tests
+  - Flag links to dev and QA environments
+  - Form field labels
+  - Undeclared language detection based on certain words and characters?
+  - Contrast tests?
+- Drupal 8 configuration page enhancements
+  - Add a variable to control which items are included in the page outline
+  - Evaluate adopting content-type config code from Asset Injector
+  - Evaluate adding a separate permission to administer Editoria11y
+- Optimization and code style improvements
 
 ## Contact
 Editoria11y is maintained by [John Jameson](jjameson@princeton.edu), and is provided to the community thanks to the [Digital Accessibility](https://accessibility.princeton.edu/) initiatives at Princeton University's [Office of Web Development Services](https://wds.princeton.edu/)

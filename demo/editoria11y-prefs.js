@@ -1,13 +1,18 @@
 /* User preferences */
 
 // Base container(s) for tests.
-let ed11yCheckRoot = "body";
+let ed11yCheckRoot = "";
+
+// Alert modes.
+// "polite" never automatically pops open the panel.
+// "assertive" pops open the panel if there are errors the user has not seen.
+// CMS integrations can pick mode on load based on context.
+let ed11yAlertMode = "polite";
 
 // If any elements match these selectors, Ed11y will not start.
 let ed11yNoRun = "";
 
 // Ignore elements in these containers.
-// Princeton let ed11yContainerIgnore = ".ps-social";
 // Nav and toolbar can move into link and header ignore to help performance.
 let ed11yContainerIgnore = ".project-tagline";
 
@@ -15,7 +20,7 @@ let ed11yContainerIgnore = ".project-tagline";
 let ed11yEmbeddedContentWarning = "";
 
 // Headers to ignore in the page outline.
-// Todo add to configuration
+// Todo add to Drupal configuration page
 let ed11yOutlineIgnore = "";
 
 // Additional selectors to ignore in specific tests.
@@ -24,6 +29,8 @@ let ed11yOutlineIgnore = "";
 let ed11yImageIgnore = "";
 let ed11yHeaderIgnore = ".project-tagline";
 let ed11yLinkIgnore = "";
+
+let ed11yAllowOverflow = "";
 
 // Outline is ignoring hidden containers.
 // These tests are not enabled yet.
