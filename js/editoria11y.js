@@ -282,13 +282,13 @@ $( document ).ready(function() {
               "But in this case the alt attribute is <span class='ed11y-bold'>missing</span>, so screen readers will dictate the url of the image file, one letter at a time.</p>" +
               "<p>To fix: edit this image and place <a href='https://accessibility.princeton.edu/how/content/alternative-text'>a concise description of its meaning in context</a> " +
               "in its alternative text field.</p>"
-          this.paints.push([$el,'before','ed11y-instance',"ed11y-error-border",'ed11y-error-btn',generalAltText]);
+          this.paints.push([$el,'before','ed11y-instance-inline',"ed11y-error-border",'ed11y-error-btn',generalAltText]);
         }
         else if (text.length === 0 && linkChild === 0) {
           // An empty alt may be ok, and we handle empty links in the link tests.
           this.warningCount++;
           let generalAltText = "<div class='ed11y-tip-heading'>Manual check: image marked as decorative</div><p>All meaningful visual elements must <a href='https://accessibility.princeton.edu/how/content/alternative-text'>provide a text alternative</a>. Images with empty alt attributes are ignored by screen readers; if this image conveys a message to sighted users beyond use as a spacer or background, please add alt text.</p>"
-          this.paints.push([$el,'before','ed11y-instance',"ed11y-warning-border",'ed11y-warning-btn',generalAltText]);
+          this.paints.push([$el,'before','ed11y-instance-inline',"ed11y-warning-border",'ed11y-warning-btn',generalAltText]);
         }
 
         // If alt attribute is present, further tests are done.
@@ -550,7 +550,7 @@ $( document ).ready(function() {
       // Todo check performance of new regex.
       this.checkRoot.find('h1, h2, h3, h4, h5, h6, p, li:not([class^="ed11y"]), blockquote').each(function () {
         let $this = $(this);
-        let uppercasePattern = /([A-Z]{3,}[ ])([A-Z]{3,}[ ])([A-Z]{3,}[ ])([A-Z]{3,})/g;
+        let uppercasePattern = /([A-Z]{2,}[ ])([A-Z]{2,}[ ])([A-Z]{2,}[ ])([A-Z]{2,})/g;
         // was /(?!<a[^>]*?>)(\b[A-Z]['!:A-Z\s]{20,}|\b[A-Z]{20,}\b)(?![^<]*?<\/a>)/g
         let detectUpperCase = $this.text().match(uppercasePattern);
 
@@ -613,8 +613,7 @@ $( document ).ready(function() {
         ed11y.paints.push([checkPDF,'after','ed11y-instance-inline',"",'ed11y-link-warning-btn',ed11y.ed11yMessageFullCheckPDF]);
       }
 
-      //Check for blockquotes used as headings. If it's less than 25 characters - it's probably not a quote.
-      // todo: test
+      // Check for blockquotes used as headings. If it's less than 25 characters - it's probably not a blockquote.
       let $blockquotes = this.checkRoot.find("blockquote").not(this.containerIgnore);
       $blockquotes.each((i, el) => {
         let $el = $(el);

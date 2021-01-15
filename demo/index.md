@@ -7,30 +7,26 @@ Click the toggle in the right-hand corner of this page to highlight all the obvi
 Then click the "Full check" button on the panel to run some additional tests and reveal the document's hidden structure and text alternatives.
 
 
-## Headings
-
-#### A skipped heading level
-
-An empty heading:
-<h3></h3>
-
-### A very long heading. Headings should not be used for emphasis, but rather for a document outline, so if you find yourself talking this much, this probably is being used for visual formatting, not a heading.
-
 ## Text alternatives
 
 Image with no alt: 
+
 <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
 
 Image with a filename as an alt:
+
 <img alt="filename.jpg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
 
 Image with very long alt text:
+
 <img alt="Alt text should be brief. Screen readers cannot jump from sentence to sentence in alt text, so listeners just hear one monster pile of text and if they miss something they have to start over." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
 
 Image with redundant text in the alt:
+
 <img alt="Image of a photo of a picture." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
 
 Images in links where the alt text may be describing the image instead of the link:
+
 <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">This link has text and an image.<img alt="A lovely gray box" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a>
 
 Also: embedded visualizations that usually require a text alternative (hard to demonstrate on GitHub).
