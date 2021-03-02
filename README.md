@@ -63,6 +63,7 @@ To install manually:
 * Add JS (in this order...)
   * jQuery
   * editoria11y-prefs.js
+  * editoria11y-localization.js  
   * editoria11y.js
 * Add CSS
   * editoria11y.css
@@ -73,6 +74,7 @@ Should look something like this:
 <script src="https://code.jquery.com/jquery-3.5.1.min.js">
 <link rel="stylesheet" media="screen" href="/css/editoria11y.css">
 <script src="/js/editoria11y-prefs.js">
+<script src="/js/editoria11y-localization.js">
 <script src="/js/editoria11y.js">
 ```
 
@@ -92,27 +94,6 @@ There are also two helper variables for site administrators:
 * If the hidden content should be ignored, add relevant selectors to the "ignore this" lists. E.g., it is not uncommon to have two links, with one hidden from screen readers, so you may want to add something like `a[aria-hidden='true']` to the ed11yLinkIgnore or ed11yContainerIgnore lists.
 * If tooltips are getting cut off because a wrapper is set to `visibility:hidden`, add the wrapper's selector to the `ed11yAllowOverflow` list, and Editoria11y will (temporarily) force the container to allow overflow while the tip is open.
 
-## Roadmap
-
-### Beta (January '21)
-- MVP features are now complete and all known bugs have been addressed; Drupal 8 module is live.
-
-### 1.0 (February '21)
-- Implement any fixes from Beta feedback.
-
-### 1.1 (Spring/Summer '21)
-- Drupal 7 Backport
-- WordPress port
-- Evaluate possible additional tests
-  - Flag links to dev and QA environments
-  - Form field labels
-  - Undeclared language detection based on certain words and characters?
-  - Contrast tests?
-- Drupal 8 configuration page enhancements
-  - Add a variable to control which items are included in the page outline
-  - Evaluate adopting content-type config code from Asset Injector
-  - Evaluate adding a separate permission to administer Editoria11y
-- Optimization and code style improvements
 
 ## Contact
 Editoria11y is maintained by [John Jameson](jjameson@princeton.edu), and is provided to the community thanks to the [Digital Accessibility](https://accessibility.princeton.edu/) initiatives at Princeton University's [Office of Web Development Services](https://wds.princeton.edu/)
@@ -124,17 +105,7 @@ Editoria11y's JavaScript is a fork of the [Sa11y](https://ryersondmp.github.io/s
 - Arshad Mohammed, web accessibility assistant
 - Kyle Padernilla, web accessibility assistant
 
-### Key changes in the fork: 
-- Tests auto-run on load. This increases its effectiveness as an ambient quality assurance tool, but requires being very choosy about which tests to run, and dropping IE11 support to allow for parallelizing the tests.
-- Additional states have been added to the main panel. Rather than open/shut it now has:
-  - Shut
-  - Shut with notifications for number of detected errors
-  - Open
-  - Open but minimized (tooltips available but the info panel is hidden) 
-- In addition to saving the user's open/shut preference, Editoria11y remembers the number of issues on each page, and overrides their preference if the number has changed since last visit.
-- Additional manual tests available in the panel ("full check").
-- Selectors and messages have been abstracted into variables to enable creating CMS-native configuration pages.
 
 Sa11y itself is an adaptation of [Tota11y by Khan Academy.](https://github.com/Khan/tota11y), built with [FontAwesome icons](https://github.com/FortAwesome/Font-Awesome) and powered with jQuery.
 
-<div hidden><script src="https://code.jquery.com/jquery-3.5.1.min.js"></script><link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css"><script src="{{ site.baseurl}}/demo/editoria11y-prefs.js"></script><script src="{{ site.baseurl}}/js/editoria11y.js"></script></div>
+<div hidden><script src="https://code.jquery.com/jquery-3.5.1.min.js"></script><link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css"><script src="{{ site.baseurl}}/demo/editoria11y-prefs.js"></script><script src="{{ site.baseurl}}/demo/editoria11y-localization.js"></script><script src="{{ site.baseurl}}/js/editoria11y.js"></script></div>

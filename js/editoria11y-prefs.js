@@ -20,7 +20,6 @@ let ed11yContainerIgnore = "";
 let ed11yEmbeddedContentWarning = "";
 
 // Headers to ignore in the page outline.
-// Todo add to Drupal configuration page
 let ed11yOutlineIgnore = "";
 
 // Additional selectors to ignore in specific tests.
@@ -31,6 +30,8 @@ let ed11yHeaderIgnore = "";
 let ed11yLinkIgnore = "";
 
 let ed11yAllowOverflow = "";
+
+let ed11yDownloadLinks = "a[href$='.pdf'], a[href*='.doc']";
 
 // Outline is ignoring hidden containers.
 // These tests are not enabled yet.
