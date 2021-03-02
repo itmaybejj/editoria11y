@@ -32,6 +32,8 @@ let ed11yLinkIgnore = "";
 
 let ed11yAllowOverflow = "";
 
+let ed11yDownloadLinks = "a[href$='.pdf'], a[href*='.doc']";
+
 // Outline is ignoring hidden containers.
 // These tests are not enabled yet.
 // let ed11yFormsIgnore = "";
