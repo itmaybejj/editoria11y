@@ -231,6 +231,7 @@ $( document ).ready(function() {
         let liPrefix = "";
         // If the heading error is within a hyperlink, make sure to
         // append button after anchor tag.
+        // Todo add this case to the test page
         if (headingError !== "" && $el.not(this.headerIgnore).length !== 0) {
           if ($el.closest("a").length > 0) {
             this.paints.push([$el.closest('a'), 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip]);
@@ -254,10 +255,22 @@ $( document ).ready(function() {
               "</li>";
         }
       });
+
+      // Check for blockquotes used as headings. If it's less than 25
+      // characters - it's probably not a blockquote.
+      let $blockquotes = this.checkRoot.find("blockquote").not(this.containerIgnore);
+      $blockquotes.each((i, el) => {
+        let $el = $(el);
+        if ($el.text().trim().length < 25) {
+          this.warningCount++;
+          ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageFullCheckBlockquote]);
+        }
+      });
+
     };
 
     /*======================== INPUTS MODULE =======================*/
-    // todo Beta: test and implement module.
+    // todo: implement this module.
 
     /*================== ALTERNATIVE TEXT MODULE ====================*/
 
@@ -267,14 +280,14 @@ $( document ).ready(function() {
       // Test each image for alternative text.
       this.$img.each((i, el) => {
         let $el = $(el);
-        let text = $el.attr("alt");
+        let alt = $el.attr("alt");
         let linkChild = $el.parents('a[href]').length;
 
-        if (typeof text !== "string") {
+        if (typeof alt !== "string") {
           this.errorCount++;
           this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yGeneralAltText]);
         }
-        else if (text.length === 0 && linkChild === 0) {
+        else if (alt.length === 0 && linkChild === 0) {
           // An empty alt may be ok, and we handle empty links in the
           // link tests.
           this.warningCount++;
@@ -283,13 +296,11 @@ $( document ).ready(function() {
 
         // If alt attribute is present, further tests are done.
         else {
-          let altText = text.replace(/'/g, "&#39;"); //replace apostrophe
-                                                     // with HTML ascii
-                                                     // to prevent
-                                                     // breaking popover.
-          let error = this.containsAltTextStopWords(altText);
+          let error = this.containsAltTextStopWords(alt);
+          let altText = ed11y.sanitizeForHTML(alt);
 
           // Image fails if a url was found.
+          // Todo: add images in links to test coverage.
           if ($el.parents().is("a[href]")) {
             if (error[0] !== null) {
               this.errorCount++;
@@ -300,14 +311,14 @@ $( document ).ready(function() {
               this.warningCount++;
               this.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltImageOfLinked(error, altText)]);
             }
-            else if (text.length > 160) {
+            else if (alt.length > 160) {
               // Image warning if it is a link and contains long alt text.
               this.warningCount++;
-              this.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltLongLinked(text, altText)]);
+              this.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltLongLinked(alt, altText)]);
             }
                 // Image warning if it is a link, contains alt text AND
             // surrounding link text.
-            else if (text !== "" && $el.parents("a").text().trim().length > 1) {
+            else if (alt !== "" && $el.parents("a").text().trim().length > 1) {
               this.warningCount++;
               this.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltLinkComplex(altText)]);
             }
@@ -322,14 +333,14 @@ $( document ).ready(function() {
             this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltImageOf(error, altText)]);
           }
           // Alert with deadspace alt.
-          else if (text !== "" && text.replace(/"|'|\s+/g, "") === "") {
+          else if (alt !== "" && alt.replace(/"|'|\s+/g, "") === "") {
             this.errorCount++;
             this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltDeadspace]);
           }
           // Image error if alt text is too long.
-          else if (text.length > 160) {
+          else if (alt.length > 160) {
             this.warningCount++;
-            this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltTooLong(text, altText)]);
+            this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltTooLong(alt, altText)]);
           }
         }
       });
@@ -337,17 +348,17 @@ $( document ).ready(function() {
 
     // Checks if text is not descriptive and returns the word(s) that are
     // making the text inaccessible.
-    this.containsAltTextStopWords = function (textContent) {
+    this.containsAltTextStopWords = function (alt) {
       let altUrl = [".png", ".jpg", ".jpeg", ".gif"];
       let suspiciousWords = ["image of", "graphic of", "picture of", "placeholder", "photo of"];
       let hit = [null, null];
       $.each(altUrl, function (index, word) {
-        if (textContent.toLowerCase().indexOf(word) >= 0) {
+        if (alt.toLowerCase().indexOf(word) >= 0) {
           hit[0] = word;
         }
       });
       $.each(suspiciousWords, function (index, word) {
-        if (textContent.toLowerCase().indexOf(word) >= 0) {
+        if (alt.toLowerCase().indexOf(word) >= 0) {
           hit[1] = word;
         }
       });
@@ -402,6 +413,7 @@ $( document ).ready(function() {
         // $el.ignore(ed11ylinkTextIgnore).text().trim();
 
         // Tests to see if this link is empty
+        // Todo add to test coverage
         if (linkStrippedText.length === 0) {
           this.errorCount++;
           if (hasImg) {
@@ -599,7 +611,7 @@ $( document ).ready(function() {
         }
       });
 
-      let visualizationWarning = this.$iframe.filter('[src*="datastudio.google.com"], [src*="tableau"]').not(this.containerIgnore);
+      let visualizationWarning = this.$embed.filter('[src*="datastudio.google.com"], [src*="tableau"]');
       if (visualizationWarning.length > 0) {
         this.warningCount++;
         // Todo 1.1 provide documentation link regarding equivalent
@@ -607,19 +619,8 @@ $( document ).ready(function() {
         ed11y.paints.push([visualizationWarning, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageVisualization]);
       }
 
-      // Check for blockquotes used as headings. If it's less than 25
-      // characters - it's probably not a blockquote.
-      let $blockquotes = this.checkRoot.find("blockquote").not(this.containerIgnore);
-      $blockquotes.each((i, el) => {
-        let $el = $(el);
-        if ($el.text().trim().length < 25) {
-          this.warningCount++;
-          ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageFullCheckBlockquote]);
-        }
-      });
-
       //Warn users to provide captions for videos.
-      let $findVideos = $("video, iframe[src*='youtube.com'], iframe[src*='vimeo.com'], iframe[src*='kaltura.com']").not(this.containerIgnore);
+      let $findVideos = this.$embed.filter("video, [src*='youtube.com'], [src*='vimeo.com'], [src*='kaltura.com']");
       $findVideos.each((i, el) => {
         let $el = $(el);
         this.warningCount++;
@@ -631,7 +632,7 @@ $( document ).ready(function() {
       // Todo 1.1 test and include more providers
       // Todo 1.1: make this a quick check test, but don't throw if the
       // word transcript is found on the page?
-      let podcastWarning = $('audio, iframe[src*="soundcloud.com"], iframe[src*="buzzsprout.com"], iframe[src*="podbean.com"]').not(this.containerIgnore).first();
+      let podcastWarning = this.$embed.filter('audio, iframe[src*="soundcloud.com"], iframe[src*="buzzsprout.com"], iframe[src*="podbean.com"]');
       if (podcastWarning.length > 0) {
         this.warningCount++;
         ed11y.mediaCount++;
@@ -683,7 +684,7 @@ $( document ).ready(function() {
       this.$p = this.checkRoot.find('p').not(this.containerIgnore);
       this.$h = this.checkRoot.find("h1, h2, h3, h4, h5, h6, [role='heading'][aria-level]").not(this.containerIgnore);
       this.$img = this.checkRoot.find("img").not(this.imageIgnore);
-      this.$iframe = this.checkRoot.find("iframe").not(this.containerIgnore);
+      this.$embed = this.checkRoot.find("iframe, audio, video").not(this.containerIgnore);
       this.$table = this.checkRoot.find("table").not(this.containerIgnore);
     };
     // End of findElements()
@@ -777,7 +778,7 @@ $( document ).ready(function() {
         window.setTimeout(function () {
           ed11y.$img.each(function () {
             let $img = $(this);
-            let alt = $img.attr('alt');
+            let alt = ed11y.sanitizeForHTML($img.attr('alt'));
             let src = $img.attr('src');
             let width = $img.innerWidth() + 'px';
             let height = $img.innerHeight() + 'px';
@@ -901,34 +902,38 @@ $( document ).ready(function() {
 
     this.alignTip = function ($el, $tip) {
       $tip.attr('style', '').removeClass('ed11y-tip-left ed11y-tip-under').find('.ed11y-arrow').css('left', 'initial');
-      let containerOffset = $el.parent().offset();
       let buttonOffset = $el.offset();
-      let buttonLeft = buttonOffset.left - containerOffset.left;
+      let buttonWidth = $el.outerWidth(true);
+      let tipOffset = $tip.offset();
       let tipWidth = $tip.width();
       let windowWidth = $(window).width();
-      let roomToLeft = buttonOffset.left - tipWidth - 90;
+      let roomToLeft = buttonOffset.left - tipWidth - 50;
       let roomToRight = windowWidth - (buttonOffset.left + tipWidth + 90);
       if (roomToRight < 0) {
+        // Can't go right.
         if (roomToLeft > 0) {
           // Go left if there is room.
           $tip.addClass('ed11y-tip-left');
-          let nudge = tipWidth + 36;
-          $tip.attr('style', 'transform: translate(-' + nudge + 'px) !important;');
+          let targetOffset = buttonOffset.left - tipWidth - buttonWidth - 2;
+          let nudge = targetOffset - tipOffset.left;
+          $tip.attr('style', 'transform: translate(' + nudge + 'px) !important;').find('.ed11y-arrow').removeAttr('style');
         }
         else {
           // Go under if there is not.
           $tip.addClass('ed11y-tip-under');
-          let tipTranslateY = 58;
-          let tipTranslateX = Math.min(buttonOffset.left - 15, tipWidth - 15);
-          let arrowTranslateX = Math.min(buttonOffset.left + 11, tipTranslateX + 28);
+          let nudgeY = 58;
+          // we don't want to hit the right edge maybe that's all we should worry about?
+          let targetOffsetX = 5;
+          let nudgeX = targetOffsetX - tipOffset.left;
           let arrowTranslateY = -26;
-          $tip.attr('style', 'transform: translate(-' + tipTranslateX + 'px, ' + tipTranslateY + 'px) !important;');
-          $tip.find('.ed11y-arrow').attr('style', 'transform: translate(' + arrowTranslateX + 'px, ' + arrowTranslateY + 'px) rotate(135deg) !important;');
+          let arrowTranslateX = buttonOffset.left + 11;
+          $tip.attr('style', 'transform: translate(' + nudgeX + 'px, ' + nudgeY + 'px) !important;').find('.ed11y-arrow').attr('style', 'transform: translate(' + arrowTranslateX + 'px, ' + arrowTranslateY + 'px) rotate(135deg) !important;');
         }
       }
       else {
-        let tipTranslateX = 47 + buttonLeft;
-        $tip.attr('style', 'transform: translate(' + tipTranslateX + 'px, 4px) !important;');
+        // Go right.
+        let tipTranslateX = buttonWidth + 13;
+        $tip.attr('style', 'transform: translate(' + tipTranslateX + 'px, 4px) !important;').find('.ed11y-arrow').removeAttr('style');
       }
     };
 
@@ -1175,6 +1180,23 @@ $( document ).ready(function() {
         });
       }
     };
+
+    this.sanitizeForHTML = function (string) {
+      let entityMap = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+        '/': '&#x2F;',
+        '`': '&#x60;',
+        '=': '&#x3D;'
+      };
+      return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+        return entityMap[s];
+      });
+    }
+
   }
   // End of Ed11y library.
 

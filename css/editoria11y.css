@@ -681,7 +681,7 @@ body .ed11y-warning-border {
 
 .ed11y-reset .ed11y-tip {
   width: 400px !important;
-  max-width: 90vw !important;
+  max-width: 98vw !important;
   position: absolute !important;
   background: #fafafa !important;
   border-radius: 3px 0 3px 0 !important;
@@ -690,6 +690,9 @@ body .ed11y-warning-border {
   color: #112f4e !important;
   z-index: 1001 !important;
   display: none !important;
+}
+.ed11y-reset .ed11y-tip-under {
+  width: calc(100vw - 30px) !important;
 }
 
 .ed11y-tip .ed11y-arrow {
@@ -704,12 +707,7 @@ body .ed11y-warning-border {
   border-top: 0 !important;
   background: #3679b0 !important;
 }
-.ed11y-pop[data-ed11y-inserted="after"] + .ed11y-tip-under .ed11y-arrow {
-  margin-left: -42px !important;
-}
-.ed11y-reset .ed11y-pop[data-ed11y-inserted="after"] + .ed11y-tip-left {
-  margin-left: -18px !important;
-}
+
 .ed11y-reset .ed11y-about[aria-expanded="true"] {
   background: #3679b0 !important;
   color: #fff !important;
