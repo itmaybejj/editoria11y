@@ -7,7 +7,7 @@ This page simulates what an *author* would experience if they were logged in to 
 1. Click the toggle to open the info panel and highlight all the obvious content issues on the page.
 2. Then click the "Show tags" button on the panel to reveal the document's hidden structure and text alternatives.
 
-Note that the info panel and contextual highlighting can be set to activate *automatically* when new issues were found; that is turned off in this demo so you could read this intro first!
+Note that the info panel and contextual highlighting can be set to activate *automatically* when new issues were found; that was turned off for this demo so you could read this intro first!
 
 ## Heading Tests
 
