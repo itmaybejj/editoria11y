@@ -2,9 +2,13 @@
 
 [« Back to the documentation](https://itmaybejj.github.io/editoria11y/)
 
-Click the toggle in the right-hand corner of this page to highlight all the obvious content issues on the page.
+This page simulates what an *author* would experience if they were logged in to a site with Editoria11y installed: a toggle automatically appears in the lower-right-hand corner of the page with an issue count. Normally it is an innocuous little a11y symbol; since there were critical issues detected on this page it has become a red explanation point.
+
+Click the toggle in the right-hand corner of this page to open the info panel and highlight all the obvious content issues on the page.
 
 Then click the "Show tags" button on the panel to run some additional tests and reveal the document's hidden structure and text alternatives.
+
+Note that the info panel and contextual highlighting can be set to activate *automatically* when new issues were found; that is turned off in this demo so you could read this intro first!
 
 ## Heading Tests
 

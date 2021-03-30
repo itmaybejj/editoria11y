@@ -1,12 +1,12 @@
-Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly accessibility checker that addresses three critical needs for content authors:
+Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly accessibility "auto-correct" checker that addresses three critical needs for content authors:
 
 1. It runs automatically. Modern spellcheck works so well because it is always running; put spellcheck behind a button and few users remember to run it!
 1. It focuses exclusively on straightforward issues a content author can easily understand and easily fix. Yes; comprehensive testing should be a key part of site creation, but if a tool is going to run automatically, it will drive an author bonkers if it is constantly alerting on code they do not understand and cannot fix.
 1. It runs in context. Modern content management systems often assemble pages from many sources. Only the assembled page can be checked for things like the header outline order.
 
 ## The authoring experience
-* On each page load, Editoria11y places a small toggle button at the bottom right of the screen with an issue count. Users can press the button to view details of any alerts or access additional tools ("full check"), including visualizers for the document outline and image alt attributes, and the panel's state persists from page to page (open or shut).
-* If issues are found, a panel slides open with more details. If users minimize the panel, it will only open on future pages if the issues are high priority.
+* When an author is logged in to their site, Editoria11y places a small toggle button at the bottom right of each page with an issue count. Users can press the button to view details of any alerts or access additional tools ("full check"), including visualizers for the document outline and image alt attributes, and the panel's state persists from page to page (open or shut).
+* If the page has a *new* issue, a panel automatically slides open with more details.
 * If the user minimizes the panel, it will not open automatically on future page visits until the content changes.
 
 If you are reading this ReadMe on the [GitHub site](https://itmaybejj.github.io/editoria11y/), the following items will have triggered an alert:
