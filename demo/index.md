@@ -2,9 +2,12 @@
 
 [« Back to the documentation](https://itmaybejj.github.io/editoria11y/)
 
-Click the toggle in the right-hand corner of this page to highlight all the obvious content issues on the page.
+This page simulates what an *author* would experience if they were logged in to a site with Editoria11y installed: a toggle automatically appears in the lower-right-hand corner of the page with an issue count. Normally it is an innocuous little a11y symbol; since there were critical issues detected on this page it has become a red explanation point.
 
-Then click the "Show tags" button on the panel to run some additional tests and reveal the document's hidden structure and text alternatives.
+1. Click the toggle to open the info panel and highlight all the obvious content issues on the page.
+2. Then click the "Show tags" button on the panel to reveal the document's hidden structure and text alternatives.
+
+Note that the info panel and contextual highlighting can be set to activate *automatically* when new issues were found; that was turned off for this demo so you could read this intro first!
 
 ## Heading Tests
 
@@ -127,4 +130,4 @@ SEVERAL WORDS IN A ROW OF CAPS LOCK TEXT WILL TRIGGER A MANUAL CHECK WARNING.
 
 
 
-<div hidden><style>img {max-width: 240px; width: 50%;}.main-content h2, .main-content h3 {padding-top: 2em; margin-top: 0; color: #222;}</style><script src="https://code.jquery.com/jquery-3.5.1.min.js"></script><link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css"><script src="{{ site.baseurl}}/demo/editoria11y-prefs.js"></script><script src="{{ site.baseurl}}/js/editoria11y-localization.js"></script><script src="{{ site.baseurl}}/js/editoria11y.js"></script></div>
+<div hidden><style>img {max-width: 240px; width: 50%;}.main-content h2, .main-content h3 {padding-top: 2em; margin-top: 0; color: #222;} .site-footer {margin-top: 9rem;}</style><script src="https://code.jquery.com/jquery-3.5.1.min.js"></script><link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css"><script src="{{ site.baseurl}}/demo/editoria11y-prefs.js"></script><script src="{{ site.baseurl}}/js/editoria11y-localization.js"></script><script src="{{ site.baseurl}}/js/editoria11y.js"></script></div>
