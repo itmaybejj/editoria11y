@@ -1,9 +1,12 @@
 {
   "name": "editoria11y",
-  "version": "1.0.0",
+  "homepage": "https://itmaybejj.github.io/editoria11y/",
   "repository": {
     "type": "git",
     "url": "git+https://itmaybejj@github.com/itmaybejj/editoria11y.git"
+  },
+  "bugs": {
+    "url": "https://github.com/itmaybejj/editoria11y/issues"
   },
   "license": "GPLv2"
 }
