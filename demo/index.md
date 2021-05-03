@@ -29,6 +29,13 @@ This heading has no text:
 
 <blockquote>Not a blockquote</blockquote>
 
+### Suspicious paragraphs that look like headings
+
+<strong>This looks suspiciously like a heading</strong>
+
+Note that this test only flags an all-bold paragraph that has no punctuation at all,
+
+<strong>so this paragraph will not be flagged as a false positive.</strong>
 
 ## Text alternatives
 

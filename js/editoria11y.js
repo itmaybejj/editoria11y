@@ -15,6 +15,7 @@ $( document ).ready(function() {
       setTimeout(function () {
         // Don't trigger tests until page has had time to settle.
         if ($(ed11yNoRun).length === 0) {
+          ed11y.running = true;
           ed11y.loadGlobals();
           ed11y.checkAll(true, 'hide');
         }
@@ -30,19 +31,29 @@ $( document ).ready(function() {
         this.mediaCount = 0;
         this.checkRoot = $(ed11yCheckRoot);
         this.findElements();
-        await Promise.all([
-          this.checklinkText(),
-          this.checkAltText(),
-          this.checkHeaders(),
-          this.checkQA(),
-          this.buildPanels(onLoad),
-        ]).then(function () {
-          ed11y.updatePanel(onLoad, showPanel);
-          $('#ed11y-main-toggle').removeClass('disabled').removeAttr('aria-disabled').removeAttr('title');
-        });
+        // This is madness, but it prevents jank by allowing other scripts
+        // to run between each test group.
+        window.setTimeout(function () {
+          ed11y.checklinkText();
+          window.setTimeout(function () {
+            ed11y.checkAltText();
+            window.setTimeout(function () {
+              ed11y.checkHeaders();
+              window.setTimeout(function () {
+                ed11y.checkQA();
+                window.setTimeout(function () {
+                  ed11y.buildPanels(onLoad);
+                  window.setTimeout(function () {
+                    ed11y.updatePanel(onLoad, showPanel);
+                    $('#ed11y-main-toggle').removeClass('disabled').removeAttr('aria-disabled').removeAttr('title');
+                  },0);
+                },0);
+              },0);
+            },0);
+          },0);
+        },0);
         // forms is disabled:
         // this.checkLabels();
-
       }
       else {
         ed11y.reset();
@@ -69,6 +80,9 @@ $( document ).ready(function() {
         }
         ed11ySeenParsed[ed11yPage] = totalFound;
         localStorage.setItem('ed11ySeen', JSON.stringify(ed11ySeenParsed));
+        window.setTimeout(function() {
+          $('#ed11y-aria-live').text('Editorially reports: ' + $('.ed11y-checkmessage').text());
+        }, 1500);
       }
       else if (onLoad === true && totalFound === 0) {
         showPanel = "pass";
@@ -87,16 +101,22 @@ $( document ).ready(function() {
           document.dispatchEvent(new CustomEvent("ed11yPanelOpened"));
           ed11y.readyTips();
         }, 0);
+        if (onLoad === false) {
+          window.setTimeout(function() {
+            $('.ed11y-checkmessage').focus();
+          }, 500);
+        }
       }
+      ed11y.running = false;
     };
 
     this.paintButton = function (el, index) {
       //this.paints.push([$el,'before','ed11y-instance','ed11y-error-border','ed11y-warning-btn',generalAltText]);
       // 0 $el 1 insertion position 2 block or inline 3 wrapper class 4
       // button 5 message
-      let icon = '<span class="ed11y-sr-only">Accessibility error</span>';
+      let icon = '<span class="ed11y-sr-only">Show editorially error</span>';
       if (el[4].indexOf('warning') !== -1) {
-        icon = '<span class="ed11y-sr-only">Accessibility warning</span>';
+        icon = '<span class="ed11y-sr-only">Show editorially warning</span>';
       }
       let injection = '<div class="' + el[2] + ' ed11y-reset"><button type="button" class="' +
           el[4] +
@@ -162,6 +182,7 @@ $( document ).ready(function() {
       $("#ed11y-panel").removeClass("ed11y-panel-minimized ed11y-panel-active").addClass('ed11y-panel-shut');
       $(".ed11y-upper-active").removeClass("ed11y-upper-active");
       $("#ed11y-panel-buttonbar [aria-pressed='true']").attr('aria-pressed', 'false');
+      ed11y.running = false;
     };
 
     this.resetTips = function () {
@@ -274,7 +295,7 @@ $( document ).ready(function() {
 
     /*================== ALTERNATIVE TEXT MODULE ====================*/
 
-    // Toggles the outline of images.
+    // todo: consider flagging alts referencing to position and color.
     this.checkAltText = async function () {
 
       // Test each image for alternative text.
@@ -369,8 +390,9 @@ $( document ).ready(function() {
 
     // Toggles the outline of all inaccessible link texts.
     this.checklinkText = async function () {
-      // Todo See if there is an alternative to :visible that shows only
-      // visually hidden content
+      // Todo: See if there is an alternative to :visible that shows only
+      // visually hidden content.
+      // Todo: Add test for consecutive links to same href?
       let $links = this.checkRoot.find("a[href]").not(this.linkIgnore);
 
       /* Mini function if you need to exclude any text contained with a span. We created this function to ignore automatically appended sr-only text for external links and document filetypes.
@@ -524,6 +546,8 @@ $( document ).ready(function() {
         });
       };
       this.$p.each(function (i, el) {
+
+        // Detect possible lists.
         let $first = $(el);
         let hit = false;
         // Grab first two characters.
@@ -561,6 +585,14 @@ $( document ).ready(function() {
         }
         else {
           activeMatch = "";
+
+          // Now check for possible header.
+          let possibleHeader = $first.children('strong:only-child, b:only-child').text();
+          let maybeSentence = possibleHeader.match(/[.:;"']$/) !== null;
+          if (possibleHeader.length > 0 && maybeSentence === false && possibleHeader.length === $first.text().length) {
+            ed11y.warningCount++;
+            ed11y.paints.push([$first, 'prepend', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageQAMayBeHeader]);
+          }
         }
 
       });
@@ -569,17 +601,26 @@ $( document ).ready(function() {
       // than 4 uppercase words in a row, indicate warning.
       // Uppercase word is anything that is more than 3 characters.
       // Todo check performance of new regex.
-      this.checkRoot.find('h1, h2, h3, h4, h5, h6, p, li:not([class^="ed11y"]), blockquote').each(function () {
+      this.checkRoot.find('h1, h2, h3, h4, h5, h6, p, li, blockquote').not(this.containerIgnore).each(function () {
         let $this = $(this);
+        let thisText;
+        if ($this.is('li')) {
+          // Prevent recursion through nested lists.
+          thisText = $this.contents().filter(function () {return this.nodeType === 3}).text();
+        }
+        else {
+          thisText = $this.text();
+        }
         let uppercasePattern = /([A-Z]{2,}[ ])([A-Z]{2,}[ ])([A-Z]{2,}[ ])([A-Z]{2,})/g;
         // was
         // /(?!<a[^>]*?>)(\b[A-Z]['!:A-Z\s]{20,}|\b[A-Z]{20,}\b)(?![^<]*?<\/a>)/g
-        let detectUpperCase = $this.text().match(uppercasePattern);
+        let detectUpperCase = thisText.match(uppercasePattern);
 
         if (detectUpperCase && detectUpperCase[0].length > 10) {
           ed11y.warningCount++;
           ed11y.paints.push([$this, 'prepend', 'ed11y-instance-inline', "ed11y-uppercase-warning", 'ed11y-warning-btn', ed11yMessageQAUppercase]);
         }
+
       });
 
       // Check if a table has a table header.
@@ -611,32 +652,38 @@ $( document ).ready(function() {
         }
       });
 
-      let visualizationWarning = this.$embed.filter('[src*="datastudio.google.com"], [src*="tableau"]');
-      if (visualizationWarning.length > 0) {
-        this.warningCount++;
-        // Todo 1.1 provide documentation link regarding equivalent
-        // formats, and add a matching warning to the link tests.
-        ed11y.paints.push([visualizationWarning, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageVisualization]);
+      let $visualizationWarning = this.$embed.filter('[src*="datastudio.google.com"], [src*="tableau"]');
+      if ($visualizationWarning.length > 0) {
+        // Without an each() this only throws a single warning.
+        $visualizationWarning.each((i, el) => {
+          let $el =$(el)
+          ed11y.warningCount++;
+          // Todo provide documentation link regarding equivalent
+          // formats, and add a matching warning to the link tests.
+          ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageVisualization]);
+        })
       }
 
       //Warn users to provide captions for videos.
       let $findVideos = this.$embed.filter("video, [src*='youtube.com'], [src*='vimeo.com'], [src*='kaltura.com']");
       $findVideos.each((i, el) => {
         let $el = $(el);
-        this.warningCount++;
+        ed11y.warningCount++;
         ed11y.mediaCount++;
         ed11y.paints.push([$el, 'before', 'ed11y-instance', "", 'ed11y-warning-btn', ed11yMessageFullCheckCaptions]);
       });
 
       //Warning: Make sure all podcasts have captions.
-      // Todo 1.1 test and include more providers
-      // Todo 1.1: make this a quick check test, but don't throw if the
-      // word transcript is found on the page?
-      let podcastWarning = this.$embed.filter('audio, iframe[src*="soundcloud.com"], iframe[src*="buzzsprout.com"], iframe[src*="podbean.com"]');
-      if (podcastWarning.length > 0) {
-        this.warningCount++;
-        ed11y.mediaCount++;
-        ed11y.paints.push([podcastWarning, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessagePodcast]);
+      // Todo: include more providers and embed types?
+      // Todo: don't throw if "transcript" is found on the page?
+      let $podcastWarning = this.$embed.filter('audio, iframe[src*="soundcloud.com"], iframe[src*="buzzsprout.com"], iframe[src*="podbean.com"]');
+      if ($podcastWarning.length > 0) {
+        $podcastWarning.each((i, el) => {
+          let $el = $(el);
+          ed11y.warningCount++;
+          ed11y.mediaCount++;
+          ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessagePodcast]);
+        })
       }
 
       //Warning: Discourage use of Twitter timelines.
@@ -732,6 +779,7 @@ $( document ).ready(function() {
       else {
         this.headerIgnore = ed11yContainerIgnore;
       }
+
     };
     this.readyPop = function ($el, text) {
       let thisText = "";
@@ -802,6 +850,17 @@ $( document ).ready(function() {
                 "<li class='" + imgClass + "'>" +
                 "<img src='" + src + "' alt='' class='ed11y-thumbnail'/>Alt: " + alt + "</li>");
           });
+          window.setTimeout( function () {
+            $('.ed11y-reveal-alts').each(function() {
+              let $revealed = $(this);
+              let $img = $(this).nextAll('img').first();
+              let revealedOffset = $revealed.offset();
+              let imgOffset = $img.offset();
+              let newOffset = imgOffset.left - revealedOffset.left;
+              let newStyle = $revealed.attr('style') + ' margin-left: ' + newOffset + 'px !important;'
+              $revealed.attr('style', newStyle);
+            })
+          }, 0);
         }, 0);
       }
       window.setTimeout(function () {
@@ -855,7 +914,7 @@ $( document ).ready(function() {
       if (isNew === true) {
         ed11y.watchPop($el, $tip);
       }
-      if (trigger === 'click' && ($el.attr('aria-expanded') === 'true' || $el.hasClass('ed11y-hover'))) {
+      if ($el.attr('aria-expanded') === 'true') {
         // Close on click.
         $el.attr('aria-expanded', 'false').addClass('ed11y-clicked').removeClass('ed11y-hover');
         $tip.addClass('ed11y-hidden').removeClass('ed11y-tip-open').attr('style', '');
@@ -892,6 +951,7 @@ $( document ).ready(function() {
               .removeClass('.ed11y-hover ed11y-clicked ed11y-tip-open')
               .attr('aria-expanded', 'false');
           $el.addClass('ed11y-hover').attr('aria-expanded', 'true');
+          $tip.removeClass('ed11y-hidden').addClass('ed11y-tip-open');
           needToAlign = true;
         }
         if (needToAlign === true) {
@@ -975,11 +1035,18 @@ $( document ).ready(function() {
         // Handle main toggle button.
         $("#ed11y-main-toggle").click(function (event) {
           event.preventDefault();
-          if ($('#ed11y-panel').hasClass('ed11y-panel-shut') === true) {
-            ed11y.checkAll(false, "show");
-          }
-          else {
-            ed11y.reset();
+
+          // Prevent clicking during scan.
+          if (ed11y.running !== true) {
+            ed11y.running = true;
+
+            // Rescan on open, or shut.
+            if ($('#ed11y-panel').hasClass('ed11y-panel-shut') === true) {
+              ed11y.checkAll(false, "show");
+            }
+            else {
+              ed11y.reset();
+            }
           }
         });
 
@@ -1079,8 +1146,11 @@ $( document ).ready(function() {
           event.preventDefault();
           if ($(this).attr('aria-pressed') === 'false') {
             $(this).attr('aria-pressed', 'true');
-            $('#ed11y-panel-upper').prepend('<div class="ed11y-about-text">' +
+            $('#ed11y-panel-upper').prepend('<div class="ed11y-about-text" tabindex="-1">' +
                 ed11yAbout + '</div>');
+            window.setTimeout(function() {
+              $('.ed11y-about-text').focus();
+            }, 1500);
           }
           else {
             $(this).attr('aria-pressed', 'false');
