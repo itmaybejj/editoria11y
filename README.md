@@ -24,22 +24,29 @@ Then try a [full demo illustrating most of the tests and results](https://itmayb
   * Skipped heading levels
   * Empty headings
   * Very long headings
+  * Suspiciously short blockquotes that may actually be headings
+  * All-bold paragraphs with no punctuation that may actually be headings
 * Text alternatives
   * Images without an alt element
   * Images with an empty alt element (flagged for manual review)
   * Images with a filename as alt text
   * Images with very long alt text
   * Alt text that contains redundant text like "image of" or "photo of"
-  * Images in links with alt text that appears to be describing the image instead of the link destination
+  * Video embeds, reminding the user to add closed captions
+  * Audio embeds, reminding the user to provide a transcript
+  * Social media embeds, reminding the user to provide alt elements
   * Embedded visualizations that usually require a text alternative
 * Meaningful links
   * Links with no text
   * Links titled with a filename 
   * Links only titled with only generic text: “click here,” “learn more,” “download,” etc.
   * Links that open in a new window without an external link icon
-* Lists made from asterisks, numbers and letters rather than list elements
-* LARGE QUANTITIES OF CAPS LOCK TEXT
-* Tables without headers and tables with document headers ("Header 3") instead of table headers (<th>)
+  * Images in links with alt text that appears to be describing the image instead of the link destination
+* General content quality assurance
+  * Lists made from asterisks, numbers and letters rather than list elements
+  * AVOID LOTS OF CAPS LOCK TEXT
+  * Tables without headers and tables with document headers ("Header 3") instead of table headers (<th>)
+  * Links to PDFs and other documents, reminding the user to test the download for accessibility or provide an alternate, accessible format
   
 ### Items noted in the full check
 Clicking the full check button flips open an expanded panel where the user can see the document outline (headers) and all image alt text.
@@ -94,6 +101,8 @@ There are also two helper variables for site administrators:
 * If the hidden content should be ignored, add relevant selectors to the "ignore this" lists. E.g., it is not uncommon to have two links, with one hidden from screen readers, so you may want to add something like `a[aria-hidden='true']` to the ed11yLinkIgnore or ed11yContainerIgnore lists.
 * If tooltips are getting cut off because a wrapper is set to `visibility:hidden`, add the wrapper's selector to the `ed11yAllowOverflow` list, and Editoria11y will (temporarily) force the container to allow overflow while the tip is open.
 
+## Change log
+* v1.0.5: Added "possible header" test, tweaked the link-to-document test and improved the accessibility of the Editoria11y tool itself. Significant performance improvements on pages with many competing scripts. Customized implementations need the new `ed11yMessageQAMayBeHeader` variable added to their localization.js files; there were also small changes to `ed11yPanel` and `ed11yMessageLinkDownload` in the localization file as well as `ed11yDownloadLinks` in the prefs file. See [full v1.0.5 notes](https://www.drupal.org/project/editoria11y/releases/1.0.5).
 
 ## Contact
 Editoria11y is maintained by [John Jameson](jjameson@princeton.edu), and is provided to the community thanks to the [Digital Accessibility](https://accessibility.princeton.edu/) initiatives at Princeton University's [Office of Web Development Services](https://wds.princeton.edu/)

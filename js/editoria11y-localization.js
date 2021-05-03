@@ -1,5 +1,6 @@
 ed11yPanel = "" +
     "<div id='ed11y-panel' class='ed11y-reset ed11y-preload ed11y-panel-shut ed11y-pass'>" +
+    "<h1 class='ed11y-sr-only'>Editorially Tools</h1>" +
     "<div id='ed11y-panel-upper'>" +
     "<div id='ed11y-fullcheck-headers' class='ed11y-outline-header ed11y-fullcheck'>" +
     "<div id='ed11y-fullcheck-outline-header' class='ed11y-bold ed11y-fullcheck-header' tabindex='-1'>Headers" +
@@ -20,7 +21,7 @@ ed11yPanel = "" +
     "<div id='ed11y-panel-content'>" +
     "<div class='ed11y-panel-icon'></div>" +
     "<div id='ed11y-panel-text'>" +
-    "<span class='ed11y-checkmessage'><span class='ed11y-panel-count'>No</span> <span class='ed11y-panel-messagetype'>accessibility errors detected</span>.</span><br>" +
+    "<span class='ed11y-checkmessage' tabindex='-1'><span class='ed11y-panel-count'>No</span> <span class='ed11y-panel-messagetype'>accessibility errors detected</span>.</span><br>" +
     "<a href='#' class='ed11y-jumplink ed11y-small'>Show <span class='ed11y-jumpnext'>first</span> <span aria-hidden='true'> »</span></a>" +
     "</div>" +
     "</div>" +
@@ -28,10 +29,11 @@ ed11yPanel = "" +
     "<button type='button' aria-expanded='false' id='ed11y-summary-toggle' class='ed11y-button ed11y-panel-button' aria-pressed='false'>Show tags</button>" +
     "<button type='button' class='ed11y-button ed11y-about' title='About this tool' aria-label='about' aria-pressed='false'>?</button>" +
     "<button type='button' class='ed11y-minimize ed11y-button' title='Minimize panel' aria-label='Minimize panel' aria-pressed='false'><span></span></button>" +
-    "<button type='button' id='ed11y-shutpanel' title='Exit checker' class='ed11y-button ed11y-panel-button' aria-hidden='true' tabindex='-1'>&times;</button>" +
-    "<button type='button' id='ed11y-main-toggle' class='ed11y-preload'aria-expanded='false' title='Accessibility checker'><span class='ed11y-toggle-icon'></span><span class='ed11y-sr-only'>Show accessibility scan panel with</span><span class='ed11y-count'></span><span class='ed11y-sr-only'>issues</span></button>" +
+    "<button type='button' id='ed11y-shutpanel' title='Close panel' class='ed11y-button ed11y-panel-button' aria-label='close panel'>&times;</button>" +
+    "<button type='button' id='ed11y-main-toggle' class='ed11y-preload' aria-expanded='false' title='Accessibility checker'><span class='ed11y-toggle-icon'></span><span class='ed11y-sr-only'>Show accessibility scan panel with</span><span class='ed11y-count'></span><span class='ed11y-sr-only'>issues</span></button>" +
     "</div>" +
-    "</div>";
+    "<div aria-live='polite' class='ed11y-sr-only' id='ed11y-aria-live'></div>"
+"</div>";
 
 ed11yAbout = "" +
     "<p>Assistive devices like screen readers depend on the invisible structure of the page matching its visual look and feel.</p>" +
@@ -190,11 +192,15 @@ ed11yMessageEmptyTableHeader = "<div class='ed11y-tip-heading'>Error: Empty " +
     "having to count rows and columns.</p>";
 
 // Fullcheck tests.
-ed11yMessageLinkDownload = "<div class='ed11y-tip-heading'>Manual check needed: file download</div>" +
-    "<p>Documents and image files present intrinsic problems for screen reader and screen magnifier users. " +
-    "If this content cannot be published as a web page, than it must contain " +
-    "<a href='https://webaim.org/techniques/acrobat/'>structural tags and " +
-    "alternative text</a>, or an alternative plain text format must be provided.</p>"
+ed11yMessageLinkDownload = "<div class='ed11y-tip-heading'>Manual check needed: " +
+    "link to document</div>" +
+    "<p>Please make sure this document contains structural tags and image alt " +
+    "text, or a copy of its content is provided as a Web page. See tips " +
+    "for <a href='https://webaim.org/techniques/acrobat/'>tagging PDFs</a>, " +
+    "<a href='https://webaim.org/techniques/word/'>text documents</a> and " +
+    "<a href='https://webaim.org/techniques/powerpoint/'>slideshows</a>.</p>" +
+    "<p>Untagged documents often cannot be read by screen readers, and even " +
+    "tagged PDFs and slides may be difficult to read on small screens.</p>";
 
 ed11yMessageFullCheckBlockquote = "<div class='ed11y-tip-heading'>Manual check needed: short &lt;blockquote&gt;</div> " +
     "<p>Blockquote formatting is announced as a quote by assistive " +
@@ -239,6 +245,8 @@ ed11yMessageQAShouldBeList = function (prefix) {
       "please format it as a 'real' list rather than " +
       "spelling out letters, numbers or symbols.</p>";
 }
+
+ed11yMessageQAMayBeHeader = "<div class='ed11y-tip-heading'>Manual check needed: Possible heading</div><p>This whole paragraph is bold. If this is for emphasis, this is fine. If it is acting as a heading or subheading, however, please format it as such so that it can become part of the page outline.</p>";
 
 ed11yMessagePodcast = "<div class='ed11y-tip-heading'>Manual check needed: embedded audio</div><p>Check to make sure a transcript is included or linked for all audio content and/or podcasts. Providing a text alternative for audio is mandatory in the United States, Canada and the European Union.</p>";
 ed11yMessageTwitter = "<div class='ed11y-tip-heading'>Manual check needed: embedded social media</div><p>Check to make sure keyboards can get past this component (if more than a few posts are embedded, this may be a keyboard trap.)</p>";
