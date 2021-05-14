@@ -1099,7 +1099,7 @@ $( document ).ready(function() {
               $firstVisible = ed11y.$goto.closest('[aria-hidden="true"]').parents(':visible').first();
               alertMessage = ed11yHiddenTip;
             }
-            if ($firstVisible) {
+            if ($firstVisible.length > 0) {
               alert(alertMessage);
               $firstVisible.addClass('ed11y-hidden-highlight').prepend('<div tabindex="-1" class="ed11y-sr-only ed11y-hidden-highlight-' + ed11y.goto + '">Highlighted container</div>');
               ed11y.gotoOffset = $firstVisible.offset().top - parseInt($('body').css('padding-top')) - 50;
