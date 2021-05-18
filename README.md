@@ -9,15 +9,7 @@ Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly 
 * If the page has a *new* issue, a panel automatically slides open with more details.
 * If the user minimizes the panel, it will not open automatically on future page visits until the content changes.
 
-If you are reading this ReadMe on the [GitHub site](https://itmaybejj.github.io/editoria11y/), the following items will have triggered an alert:
-
-• A fake list using bullet symbols instead of list elements.
-
-• link with only the text "[click here](https://www.youtube.com/watch?v=DLzxrzFCyOs)."
-
-Try clicking the toggle in the lower righthand corner of the page. Tooltips will appear near these items with explanations of the issue and suggestions for improving the content.
-
-Then try a [full demo illustrating most of the tests and results](https://itmaybejj.github.io/editoria11y/demo/).
+Try a [clickable demo of what a logged-in author would see](https://itmaybejj.github.io/editoria11y/demo/).
 
 ### Issues flagged in the quick check
 * Headings
