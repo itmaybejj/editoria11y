@@ -137,4 +137,4 @@ SEVERAL WORDS IN A ROW OF CAPS LOCK TEXT WILL TRIGGER A MANUAL CHECK WARNING.
 
 
 
-<div hidden><style>img {max-width: 240px; width: 50%;}.main-content h2, .main-content h3 {padding-top: 2em; margin-top: 0; color: #222;} .site-footer {margin-top: 9rem;}</style><script src="https://code.jquery.com/jquery-3.5.1.min.js"></script><link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css"><script src="{{ site.baseurl}}/demo/editoria11y-prefs.js"></script><script src="{{ site.baseurl}}/js/editoria11y-localization.js"></script><script src="{{ site.baseurl}}/js/editoria11y.js"></script></div>
+<div hidden><style>img {max-width: 240px; width: 50%;}#project-title {text-transform: capitalize;}.inner{max-width:50rem;}li{margin-top:.75rem;}h2,h3,h4{padding-top:1em;}</style><script src="https://code.jquery.com/jquery-3.5.1.min.js"></script><link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css"><script src="{{ site.baseurl}}/demo/editoria11y-prefs.js"></script><script src="{{ site.baseurl}}/js/editoria11y-localization.js"></script><script src="{{ site.baseurl}}/js/editoria11y.js"></script></div>
