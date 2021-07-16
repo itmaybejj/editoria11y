@@ -9,7 +9,15 @@ Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly 
 * If the page has a *new* issue, a panel automatically slides open with more details.
 * If the user minimizes the panel, it will not open automatically on future page visits until the content changes.
 
-Try a [clickable demo of what a logged-in author would see](https://itmaybejj.github.io/editoria11y/demo/).
+If you are reading this ReadMe on the [GitHub site](https://itmaybejj.github.io/editoria11y/), the following items will have triggered an alert:
+
+• A fake list using bullet symbols instead of list elements.
+
+• link with only the text "[click here](https://www.youtube.com/watch?v=DLzxrzFCyOs)."
+
+Try clicking the toggle in the lower righthand corner of the page. Tooltips will appear near these items with explanations of the issue and suggestions for improving the content.
+
+Then try a [full demo illustrating most of the tests and results](https://itmaybejj.github.io/editoria11y/demo/).
 
 ### Issues flagged in the quick check
 * Headings
@@ -93,9 +101,6 @@ There are also two helper variables for site administrators:
 * If the hidden content should be ignored, add relevant selectors to the "ignore this" lists. E.g., it is not uncommon to have two links, with one hidden from screen readers, so you may want to add something like `a[aria-hidden='true']` to the ed11yLinkIgnore or ed11yContainerIgnore lists.
 * If tooltips are getting cut off because a wrapper is set to `visibility:hidden`, add the wrapper's selector to the `ed11yAllowOverflow` list, and Editoria11y will (temporarily) force the container to allow overflow while the tip is open.
 
-## Recent changes of note
-* v1.0.5: Added "possible header" test, tweaked the link-to-document test and improved the accessibility of the Editoria11y tool itself. Significant performance improvements on pages with many competing scripts. Customized implementations need the new `ed11yMessageQAMayBeHeader` variable added to their localization.js files; there were also small changes to `ed11yPanel` and `ed11yMessageLinkDownload` in the localization file as well as `ed11yDownloadLinks` in the prefs file. See [full v1.0.5 notes](https://www.drupal.org/project/editoria11y/releases/1.0.5).
-
 ## Contact
 Editoria11y is maintained by [John Jameson](https://www.linkedin.com/in/johnwjameson/), and is provided to the community thanks to the [Digital Accessibility](https://accessibility.princeton.edu/) initiatives at Princeton University's [Office of Web Development Services](https://wds.princeton.edu/)
 
@@ -107,3 +112,5 @@ Editoria11y's JavaScript began as a fork of the [Sa11y](https://ryersondmp.githu
 - Kyle Padernilla, web accessibility assistant
 
 Sa11y itself began as a fork of [Tota11y by Khan Academy](https://github.com/Khan/tota11y), and uses [FontAwesome icons](https://github.com/FortAwesome/Font-Awesome) and jQuery.
+
+<div hidden><script src="https://code.jquery.com/jquery-3.5.1.min.js"></script><link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css"><script src="{{ site.baseurl}}/demo/editoria11y-prefs.js"></script><script src="{{ site.baseurl}}/js/editoria11y-localization.js"></script><script src="{{ site.baseurl}}/js/editoria11y.js"></script></div>

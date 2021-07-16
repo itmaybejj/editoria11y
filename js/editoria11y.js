@@ -437,12 +437,15 @@ $( document ).ready(function() {
         // Tests to see if this link is empty
         // Todo add to test coverage
         if (linkStrippedText.length === 0) {
-          this.errorCount++;
-          if (hasImg) {
-            this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
-          }
-          else {
-            this.paints.push([$el, 'before', 'ed11y-instance-inline ed11y-inline-block', "ed11y-link-text-fail", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
+          linkStrippedText += ed11y.computeTitle($el);
+          if (linkStrippedText.length === 0) {
+            this.errorCount++;
+            if (hasImg) {
+              this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
+            }
+            else {
+              this.paints.push([$el, 'before', 'ed11y-instance-inline ed11y-inline-block', "ed11y-link-text-fail", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
+            }
           }
         }
         else {
@@ -525,6 +528,19 @@ $( document ).ready(function() {
       }
       else {
         return 'noAria';
+      }
+    };
+
+    // recursively look for titles
+    this.computeTitle = function ($el) {
+      if ($el.is('[title]')) {
+        return $el.attr('title');
+      }
+      else if ($el.find('[title]')) {
+        return $el.find('[title]').first().attr('title');
+      }
+      else {
+        return "";
       }
     };
 
@@ -636,7 +652,7 @@ $( document ).ready(function() {
           // Make sure all table headers are not empty.
           $findTHeaders.each(function () {
             let $th = $(this);
-            if ($th.text().trim().length < 1) {
+            if ($th.text().trim().length < 1 && !ed11y.computeTitle($th)) {
               ed11y.errorCount++;
               ed11y.paints.push([$th, 'prepend', 'ed11y-instance', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageEmptyTableHeader]);
             }
@@ -798,11 +814,19 @@ $( document ).ready(function() {
       let thisContent = '<div class="ed11y-tip ed11y-reset"><span ' +
           'class="ed11y-arrow"></span>' +
           '<button class="ed11y-button ed11y-close-tip" ' +
-          'type="button" aria-label="close" ' +
-          'onclick="jQuery(this).parent().prev().focus().click(); return false;">' +
+          'type="button" aria-expanded="false" aria-label="close" ' +
+          'onclick=\'jQuery(this).parent().addClass("ed11y-hidden")' +
+          '.removeClass("ed11y-tip-open").attr("style", "").prev()' +
+          '.attr("aria-expanded", "false").addClass("ed11y-clicked")' +
+          '.removeClass("ed11y-hover").focus()' +
+          '.parents("ed11y-force-overflow")' +
+          '.removeClass("ed11y-force-overflow"); return false;\'>' +
           '&times;</button><div class="ed11y-tip-content">' +
           thisText +
           '</div></div>';
+      // $el.attr('aria-expanded', 'false').addClass('ed11y-clicked').removeClass('ed11y-hover');
+      //               $tip.addClass('ed11y-hidden').removeClass('ed11y-tip-open').attr('style', '');
+      //               $el.parents('.ed11y-force-overflow').removeClass('ed11y-force-overflow');
       if (merge > 1) {
         $el.next().children('ed11y-tip-content').html(thisText);
       }
@@ -871,11 +895,19 @@ $( document ).ready(function() {
         ed11y.popNudges = [];
         ed11y.$pops.each(function () {
           let $el = $(this);
-          $el.click(function () {
-            ed11y.popThis($el, 'click');
-            return false;
-          });
-          $el.filter('[aria-expanded="false"], .ed11y-hover').not('.ed11y-clicked').mouseenter(function () {
+          $el.on('touchend click', (function (event) {
+                if (!ed11y.doubleClickPrevent) {
+                  ed11y.popThis($el, 'click');
+                }
+                ed11y.doubleClickPrevent = true;
+                window.setTimeout(function() {
+                  ed11y.doubleClickPrevent = false;
+                },200);
+                return false;
+              })
+          );
+
+          $el.filter('[aria-expanded="false"]').mouseenter(function () {
             ed11y.popThis($el, 'hover');
           });
           // If the button will be offscreen, nudge it left or right to
@@ -914,48 +946,66 @@ $( document ).ready(function() {
       if (isNew === true) {
         ed11y.watchPop($el, $tip);
       }
-      if ($el.attr('aria-expanded') === 'true') {
+      if ($el.attr('aria-expanded') === 'true' && trigger === 'click') {
         // Close on click.
         $el.attr('aria-expanded', 'false').addClass('ed11y-clicked').removeClass('ed11y-hover');
         $tip.addClass('ed11y-hidden').removeClass('ed11y-tip-open').attr('style', '');
         $el.parents('.ed11y-force-overflow').removeClass('ed11y-force-overflow');
       }
-      else {
-        // Dispatch an event that a tooltip has appeared.
-        document.dispatchEvent(new CustomEvent("ed11yPop", {
-          detail: {id: $el.attr('id')}
-        }));
-
-        if (ed11yAllowOverflow.length > 0) {
-          $el.parents(ed11yAllowOverflow).addClass('ed11y-force-overflow');
-        }
-        else {
-          $el.parents().not('body').each(function () {
-            if ($(this).css('overflow') === 'hidden') {
-              $(this).addClass('ed11y-force-overflow');
-            }
-          });
-        }
+      else if ($el.attr('aria-expanded') === 'false') {
 
         let needToAlign;
-        $('.ed11y-tip-open').removeClass('ed11y-tip-open').prev().attr('aria-expanded', 'false');
         if (trigger === 'click') {
           // Open on click.
-          $el.attr('aria-expanded', 'true');
+          $('.ed11y-tip-open').removeClass('ed11y-tip-open').prev().attr('aria-expanded', 'false');
+          $el.attr('aria-expanded', 'true').removeClass('ed11y-hover');
           $tip.removeClass('ed11y-hidden').addClass('ed11y-tip-open');
           needToAlign = true;
         }
-        else {
+        else if ($el.not('.ed11y-hover')) {
           // Open on hover
-          $('.ed11y-hover, .ed11y-tip-open')
+          $('.ed11y-pop').filter('.ed11y-hover, [aria-expanded="true"]')
               .removeClass('.ed11y-hover ed11y-clicked ed11y-tip-open')
-              .attr('aria-expanded', 'false');
-          $el.addClass('ed11y-hover').attr('aria-expanded', 'true');
+              .attr('aria-expanded', 'false')
+              .next()
+              .removeClass('ed11y-tip-open');
+          $el.addClass('ed11y-hover');
           $tip.removeClass('ed11y-hidden').addClass('ed11y-tip-open');
           needToAlign = true;
         }
         if (needToAlign === true) {
+          // Dispatch an event that a tooltip has appeared.
+          document.dispatchEvent(new CustomEvent("ed11yPop", {
+            detail: {id: $el.attr('id')}
+          }));
+
+          if (ed11yAllowOverflow.length > 0) {
+            $el.parents(ed11yAllowOverflow).addClass('ed11y-force-overflow');
+          }
+          else {
+            $el.parents().not('body').each(function () {
+              if ($(this).css('overflow') === 'hidden') {
+                $(this).addClass('ed11y-force-overflow');
+              }
+            });
+          }
           this.alignTip($el, $tip);
+          ed11y.goto = parseInt($el.attr('id').substring(10));
+          // Update the panel
+          let ed11yGotoText = 'next';
+          if (ed11y.gotoCount === 1) {
+            ed11yGotoText = '';
+          }
+          else if (ed11y.gotoCount - 1 === ed11y.goto) {
+            ed11y.goto = 0;
+            ed11yGotoText = 'first';
+          }
+          else {
+            ed11y.goto++;
+          }
+          window.setTimeout(function () {
+            $('.ed11y-jumpnext').text(ed11yGotoText);
+          }, 250);
         }
       }
     };
@@ -998,10 +1048,12 @@ $( document ).ready(function() {
     };
 
     this.tipHoverAffordance = function ($el, $tip) {
-      if ($tip.is(':hover') === false && $el.is(':hover') === false) {
+      if ($tip.is(':hover') === false && $el.is(':hover') === false && $el.is('.ed11y-hover') === true) {
         window.setTimeout(function () {
           if ($tip.is(':hover') === false && $el.is(':hover') === false) {
+            // Close on de-hover
             $el.removeClass('ed11y-hover ed11y-clicked').attr('aria-expanded', 'false');
+            $tip.removeClass('ed11y-tip-open');
             $el.parents('.ed11y-force-overflow').removeClass('ed11y-force-overflow');
           }
         }.bind($el, $tip), 500);
@@ -1014,12 +1066,6 @@ $( document ).ready(function() {
       });
       $tip.mouseleave(function () {
         ed11y.tipHoverAffordance($el, $tip);
-      });
-      $el.parent().find('a, button').blur(function () {
-        if ($el.parent().is(':focus-within') === false) {
-          $el.removeClass('ed11y-hover');
-          $el.parents('.ed11y-force-overflow').removeClass('ed11y-force-overflow');
-        }
       });
     };
     // Todo move this to CSS
@@ -1034,20 +1080,25 @@ $( document ).ready(function() {
 
         // Handle main toggle button.
         $("#ed11y-main-toggle").click(function (event) {
-          event.preventDefault();
+          if (!ed11y.doubleClickPrevent) {
+            // Prevent clicking during scan.
+            if (ed11y.running !== true) {
+              ed11y.running = true;
 
-          // Prevent clicking during scan.
-          if (ed11y.running !== true) {
-            ed11y.running = true;
-
-            // Rescan on open, or shut.
-            if ($('#ed11y-panel').hasClass('ed11y-panel-shut') === true) {
-              ed11y.checkAll(false, "show");
-            }
-            else {
-              ed11y.reset();
+              // Rescan on open, or shut.
+              if ($('#ed11y-panel').hasClass('ed11y-panel-shut') === true) {
+                ed11y.checkAll(false, "show");
+              }
+              else {
+                ed11y.reset();
+              }
             }
           }
+          ed11y.doubleClickPrevent = true;
+          window.setTimeout(function() {
+            ed11y.doubleClickPrevent = false;
+          },200);
+          return false;
         });
 
         // Handle jumplinks
@@ -1057,10 +1108,9 @@ $( document ).ready(function() {
 
           // Find our button.
           let $goto = $('button[class^="ed11y"][data-ed11y-tip]').not('#ed11y-panel button');
-          let gotoCount = $goto.length;
+          ed11y.gotoCount = $goto.length;
           ed11y.$goto = $goto.eq(ed11y.goto);
           ed11y.gotoOffset = ed11y.$goto.offset().top - parseInt($('body').css('padding-top')) - 50;
-
           // Throw an alert if the button or target is hidden.
           let $firstVisible = false;
           let $target;
@@ -1117,21 +1167,6 @@ $( document ).ready(function() {
             }
           }
 
-          // Update the panel
-          let ed11yGotoText = 'next';
-          if (gotoCount === 1) {
-            ed11yGotoText = '';
-          }
-          else if (gotoCount - 1 === ed11y.goto) {
-            ed11y.goto = 0;
-            ed11yGotoText = 'first';
-          }
-          else {
-            ed11y.goto++;
-          }
-          window.setTimeout(function () {
-            $('.ed11y-jumpnext').text(ed11yGotoText);
-          }, 250);
         });
 
         $('.ed11y-minimize').click(function (event) {
