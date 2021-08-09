@@ -71,10 +71,10 @@ Should look something like this:
 
 ```
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<link rel="stylesheet" media="screen" href="/css/editoria11y.css">
-<script src="/js/editoria11y-prefs.js"></script>
-<script src="/js/editoria11y-localization.js"></script>
-<script src="/js/editoria11y.js"></script>
+<link rel="stylesheet" media="screen" href="https://itmaybejj.github.io/editoria11y/css/editoria11y.css">
+<script src="https://itmaybejj.github.io/editoria11y/js/editoria11y-prefs.js"></script>
+<script src="https://itmaybejj.github.io/editoria11y/js/editoria11y-localization.js"></script>
+<script src="https://itmaybejj.github.io/editoria11y/js/editoria11y.js"></script>
 ```
 
 And remember to only call the script for logged-in editors!
