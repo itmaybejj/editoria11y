@@ -38,7 +38,7 @@ Then try a [full demo illustrating most of the tests and results](https://itmayb
   * Embedded visualizations that usually require a text alternative
 * Meaningful links
   * Links with no text
-  * Links titled with a filename 
+  * Links titled with a filename
   * Links only titled with only generic text: “click here,” “learn more,” “download,” etc.
   * Links that open in a new window without an external link icon
   * Images in links with alt text that appears to be describing the image instead of the link destination
@@ -47,7 +47,7 @@ Then try a [full demo illustrating most of the tests and results](https://itmayb
   * AVOID LOTS OF CAPS LOCK TEXT
   * Tables without headers and tables with document headers ("Header 3") instead of table headers (<th>)
   * Links to PDFs and other documents, reminding the user to test the download for accessibility or provide an alternate, accessible format
-  
+
 ### Items noted in the full check
 Clicking the full check button flips open an expanded panel where the user can see the document outline (headers) and all image alt text.
 
@@ -64,13 +64,13 @@ It also flags some additional items:
 
 If possible, start with a turnkey implementation:
 * [Editoria11y Drupal Module](https://www.drupal.org/project/editoria11y)
-* Editoria11y WordPress Plugin (coming soon) 
+* Editoria11y WordPress Plugin (coming soon)
 
 To install manually:
 * Add JS (in this order...)
   * jQuery
   * editoria11y-prefs.js
-  * editoria11y-localization.js  
+  * editoria11y-localization.js
   * editoria11y.js
 * Add CSS
   * editoria11y.css
@@ -79,18 +79,18 @@ Should look something like this:
 
 ```
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<link rel="stylesheet" media="screen" href="/css/editoria11y.css">
-<script src="/js/editoria11y-prefs.js"></script>
-<script src="/js/editoria11y-localization.js"></script>
-<script src="/js/editoria11y.js"></script>
+<link rel="stylesheet" media="screen" href="https://itmaybejj.github.io/editoria11y/css/editoria11y.css">
+<script src="https://itmaybejj.github.io/editoria11y/js/editoria11y-prefs.js"></script>
+<script src="https://itmaybejj.github.io/editoria11y/js/editoria11y-localization.js"></script>
+<script src="https://itmaybejj.github.io/editoria11y/js/editoria11y.js"></script>
 ```
 
 And remember to only call the script for logged-in editors!
 
 Editoria11y's default configuration should work fine on both sites. Do explore the preferences file, though; there are several tweaks to make it play nice with most themes. The most important ones:
 
-* "ed11yCheckRoot." By default Editorially scans the entire page, since themes name their content wrapper various things. If all your content is in, say, `main` or `#content`, provide that selector so site editors don't see alerts for things they can't fix. 
-* Some content just does not play nice with this type of tool; embedded social media feeds, for example, or custom "known-good" code with custom aria roles and labels. Add these to the "ed11yContainerIgnore" list. 
+* "ed11yCheckRoot." By default Editorially scans the entire page, since themes name their content wrapper various things. If all your content is in, say, `main` or `#content`, provide that selector so site editors don't see alerts for things they can't fix.
+* Some content just does not play nice with this type of tool; embedded social media feeds, for example, or custom "known-good" code with custom aria roles and labels. Add these to the "ed11yContainerIgnore" list.
 * Editorially can be set to disable itself if it detects certain selectors. If have inline editing tools where you don't want tooltips inserted, or certain pages where the tool should not appear, add relevent selectors to the "ed11yNoRun" list.
 
 ### Dealing with alerts on hidden or size-constrained content
