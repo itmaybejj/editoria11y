@@ -61,8 +61,8 @@ If possible, start with a turnkey implementation:
 To install manually:
 * Add JS (in this order...)
   * jQuery
-  * editoria11y-prefs.js
-  * editoria11y-localization.js  
+  * editoria11y-prefs.js (default or your own)
+  * editoria11y-localization.js (default or your own)
   * editoria11y.js
 * Add CSS
   * editoria11y.css

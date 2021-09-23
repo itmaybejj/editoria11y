@@ -1,5 +1,5 @@
 // Generic init.
-$( document ).ready(function() {
+jQuery( document ).ready(function($) {
   if (window.navigator.userAgent.match(/MSIE|Trident/) === null) {
     // IE 11 is going to suffer under this load.
     var ed11y = new Ed11y();
