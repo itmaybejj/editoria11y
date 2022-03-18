@@ -32,7 +32,7 @@ ed11yPanel = "" +
     "<button type='button' id='ed11y-shutpanel' title='Close panel' class='ed11y-button ed11y-panel-button' aria-label='close panel'>&times;</button>" +
     "<button type='button' id='ed11y-main-toggle' class='ed11y-preload' aria-expanded='false' title='Accessibility checker'><span class='ed11y-toggle-icon'></span><span class='ed11y-sr-only'>Show accessibility scan panel with</span><span class='ed11y-count'></span><span class='ed11y-sr-only'>issues</span></button>" +
     "</div>" +
-    "<div aria-live='polite' class='ed11y-sr-only' id='ed11y-aria-live'></div>"
+    "<div aria-live='polite' class='ed11y-sr-only' id='ed11y-aria-live'></div>" +
 "</div>";
 
 ed11yAbout = "" +

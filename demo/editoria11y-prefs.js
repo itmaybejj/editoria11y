@@ -30,11 +30,16 @@ let ed11yImageIgnore = "";
 let ed11yHeaderIgnore = ".project-tagline";
 let ed11yLinkIgnore = "";
 
+// Programmatically generated strings to remove from link text before testing.
+// Provide pipe-separated strings: opens in new window|opens in new tab.
+let ed11yIgnoreLinkStrings = /\(link is external\)|\(link sends email\)/g;
+
 let ed11yAllowOverflow = "";
 
 let ed11yHiddenHandlers = "";
 
-let ed11yDownloadLinks = "a[href$='.pdf'], a[href*='.doc']";
+let ed11yDownloadLinks = "a[href$='.pdf'], a[href*='.pdf?'], a[href$='.doc'], a[href$='.docx'], a[href*='.doc?'], a[href*='.docx?'], a[href$='.ppt'], a[href$='.pptx'], a[href*='.ppt?'], a[href*='.pptx?'], a[href^='https://docs.google']";
+
 
 // Outline is ignoring hidden containers.
 // These tests are not enabled yet.

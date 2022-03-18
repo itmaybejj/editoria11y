@@ -339,7 +339,7 @@ $( document ).ready(function() {
             }
                 // Image warning if it is a link, contains alt text AND
             // surrounding link text.
-            else if (alt !== "" && $el.parents("a").text().trim().length > 1) {
+            else if (alt !== "" && $el.parents("a").text().replace(ed11yIgnoreLinkStrings,"").trim().length > 1) {
               this.warningCount++;
               this.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltLinkComplex(altText)]);
             }
@@ -395,16 +395,14 @@ $( document ).ready(function() {
       // Todo: Add test for consecutive links to same href?
       let $links = this.checkRoot.find("a[href]").not(this.linkIgnore);
 
-      /* Mini function if you need to exclude any text contained with a span. We created this function to ignore automatically appended sr-only text for external links and document filetypes.
-
-      $.fn.ignore = function(sel){
+      /* Mini function if you need to exclude any text contained with a span. We created this function to ignore automatically appended sr-only text for external links and document filetypes.*/
+      $.fn.ignore = function (sel) {
         return this.clone().find(sel||">*").remove().end();
       };
 
-      Example: If you need to ignore any text within <span class="sr-only">test</span>.
-          $el.ignore("span.sr-only").text().trim();
-
-      */
+      /* Example: If you need to ignore any text within <span class="sr-only">test</span>.
+          $el.ignoreString("span.sr-only").text().trim();
+       */
 
       $links.each((i, el) => {
         let $el = $(el);
@@ -413,7 +411,7 @@ $( document ).ready(function() {
         let hasImg = $img.length > 0;
         let downloadMatch = $el.filter(ed11yDownloadLinks).length;
         if (linkText === 'noAria') {
-          linkText = $el.text().toLowerCase();
+          linkText = $el.text().trim();
           if (hasImg) {
             let imgText = this.computeAriaLabel($img);
             if (imgText !== 'noAria') {
@@ -431,13 +429,18 @@ $( document ).ready(function() {
             hasImg = true;
           }
         }
+        if ($el.attr('target') === '_blank' && downloadMatch === 0 && linkText.indexOf('tab') === -1 && linkText.indexOf('window') === -1 && linkText.indexOf('external') === -1) {
+          // Warn about unwarned new windows before ignoreString strip.
+          this.warningCount++;
+          this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-link-text-warning", 'ed11y-warning-btn', ed11yMessageQANewTab]);
+        }
+        linkText = linkText.replace(ed11yIgnoreLinkStrings,"");
         let linkStrippedText = linkText.replace(/'|"|-|\.|\s+/g, '');
-        // $el.ignore(ed11ylinkTextIgnore).text().trim();
 
         // Tests to see if this link is empty
         // Todo add to test coverage
         if (linkStrippedText.length === 0) {
-          linkStrippedText += ed11y.computeTitle($el);
+          linkStrippedText += !!ed11y.computeTitle($el) ? ed11y.computeTitle($el) : "";
           if (linkStrippedText.length === 0) {
             this.errorCount++;
             if (hasImg) {
@@ -470,11 +473,6 @@ $( document ).ready(function() {
           this.warningCount++;
           $el.addClass("ed11y-text-warning");
           ed11y.paints.push([$el, 'after', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageLinkDownload]);
-        }
-        if ($el.attr('target') === '_blank' && downloadMatch === 0 && linkText.indexOf('tab') === -1 && linkText.indexOf('window') === -1 && linkText.indexOf('external') === -1) {
-          // Warn about unwarned new windows.
-          this.warningCount++;
-          this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-link-text-warning", 'ed11y-warning-btn', ed11yMessageQANewTab]);
         }
       });
     };
@@ -550,6 +548,7 @@ $( document ).ready(function() {
 
       // Detect paragraphs that should be lists: a. A. a) A) * - -- •.
       let activeMatch = "";
+      let firstText = "";
       let prefixDecrement = {
         b: "a",
         B: "A",
@@ -565,26 +564,30 @@ $( document ).ready(function() {
 
         // Detect possible lists.
         let $first = $(el);
+        if (firstText.length === 0) {
+          firstText = $(el).text().trim();
+        }
         let hit = false;
         // Grab first two characters.
-        let firstPrefix = $first.text().substring(0, 2);
-        if (firstPrefix.trim().length > 0 && firstPrefix !== activeMatch && firstPrefix.match(prefixMatch)) {
-          // We have a prefix and a possible hit
-          // Split p by carriage return if present and compare.
-          let hasBreak = $first.html().indexOf("<br>");
-          if (hasBreak !== -1) {
-            let subParagraph = $first.html().substring(hasBreak + 4).trim();
-            let subPrefix = subParagraph.substring(0, 2);
-            if (firstPrefix === decrement(subPrefix)) {
+        let firstPrefix = firstText.substring(0, 2);
+        if (firstPrefix.length > 0 && firstPrefix !== activeMatch && firstPrefix.match(prefixMatch)) {
+          // We have a prefix and a possible hit; check next paragraph.
+          let $second = ed11y.$p.eq(i + 1);
+          if ($second) {
+            let secondText = $second.text().trim();
+            let secondPrefix = decrement(secondText.substring(0, 2));
+            if (firstPrefix === secondPrefix) {
               hit = true;
             }
           }
-          // Decrement the second p prefix and compare .
           if (!hit) {
-            let $second = $(el).next('p');
-            if ($second) {
-              let secondPrefix = decrement($first.next().text().substring(0, 2));
-              if (firstPrefix === secondPrefix) {
+            // Split p by carriage return if present and compare.
+            let hasBreak = $first.html().indexOf("<br>");
+            if (hasBreak !== -1) {
+              // Note: this cannot strip rich text formatting.
+              let subParagraph = $first.html().substring(hasBreak + 4).replace(/<\/?[^>]+(>|$)/g, "").trim();
+              let subPrefix = subParagraph.substring(0, 2);
+              if (firstPrefix === decrement(subPrefix)) {
                 hit = true;
               }
             }
@@ -600,16 +603,19 @@ $( document ).ready(function() {
           }
         }
         else {
-          activeMatch = "";
 
           // Now check for possible header.
-          let possibleHeader = $first.children('strong:only-child, b:only-child').text();
+          let possibleHeader = $first.find('strong, b').first().text().trim();
           let maybeSentence = possibleHeader.match(/[.:;"']$/) !== null;
-          if (possibleHeader.length > 0 && maybeSentence === false && possibleHeader.length === $first.text().length) {
+          if (possibleHeader.length > 0 && maybeSentence === false && possibleHeader.length === firstText.length) {
             ed11y.warningCount++;
             ed11y.paints.push([$first, 'prepend', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageQAMayBeHeader]);
           }
         }
+
+        // Reset for next loop, carry over text query if available.
+        activeMatch = "";
+        firstText = typeof secondText === 'undefined' ? "" : secondText;
 
       });
 
@@ -768,7 +774,7 @@ $( document ).ready(function() {
         for (let i = 0; i < containerSelectors.length; i++) {
           containerSelectors[i] = containerSelectors[i] + " *, " + containerSelectors[i];
         }
-        ed11yContainerIgnore = '[aria-hidden]' + separator + containerSelectors.join();
+        ed11yContainerIgnore = containerSelectors.join() + separator + '[aria-hidden]';
       }
       else {
         ed11yContainerIgnore = '[aria-hidden]';
@@ -783,11 +789,11 @@ $( document ).ready(function() {
 
       this.headerIgnore = ed11yHeaderIgnore;
 
-      // Links ignore defaults plus Ed11y links.
+      // LinkIgnore is superset of containerIgnore, which is never empty.
+      this.linkIgnore = ed11yContainerIgnore;
       if (ed11yLinkIgnore.length > 0) {
-        ed11yLinkIgnore += separator;
+        this.linkIgnore += separator + ed11yLinkIgnore;
       }
-      this.linkIgnore = ed11yLinkIgnore + ed11yContainerIgnore + separator + '[aria-hidden]';
 
       if (ed11yHeaderIgnore.length > 0) {
         this.headerIgnore += separator + ed11yContainerIgnore;
