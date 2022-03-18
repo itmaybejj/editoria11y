@@ -94,6 +94,7 @@ There are also two helper variables for site administrators:
 * If tooltips are getting cut off because a wrapper is set to `visibility:hidden`, add the wrapper's selector to the `ed11yAllowOverflow` list, and Editoria11y will (temporarily) force the container to allow overflow while the tip is open.
 
 ## Recent changes of note
+* v1.0.8: Adds a configuration variable to strip certain strings (e.g., "opens in new window") from links before analyzing their text.
 * v1.0.5: Added "possible header" test, tweaked the link-to-document test and improved the accessibility of the Editoria11y tool itself. Significant performance improvements on pages with many competing scripts. Customized implementations need the new `ed11yMessageQAMayBeHeader` variable added to their localization.js files; there were also small changes to `ed11yPanel` and `ed11yMessageLinkDownload` in the localization file as well as `ed11yDownloadLinks` in the prefs file. See [full v1.0.5 notes](https://www.drupal.org/project/editoria11y/releases/1.0.5).
 
 ## Contact
