@@ -32,7 +32,7 @@ let ed11yLinkIgnore = "";
 
 // Programmatically generated strings to remove from link text before testing.
 // Provide pipe-separated strings: opens in new window|opens in new tab.
-let ed11yIgnoreLinkStrings = /\(link is external\)|\(link sends email\)/g;
+let ed11yIgnoreLinkStrings = "";
 
 let ed11yAllowOverflow = "";
 
