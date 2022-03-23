@@ -453,7 +453,8 @@ jQuery( document ).ready(function($) {
         }
         else {
           // Check for links with generic or URL titles
-          let error = this.containslinkTextStopWords(linkText.trim());
+          // todo: rest of accessible name calculation
+          let error = this.containslinkTextStopWords(linkStrippedText.toLowerCase());
           if (error !== "none") {
             this.warningCount++;
             let stopWordMessage = "";

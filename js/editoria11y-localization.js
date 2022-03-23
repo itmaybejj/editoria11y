@@ -33,7 +33,7 @@ ed11yPanel = "" +
     "<button type='button' id='ed11y-main-toggle' class='ed11y-preload' aria-expanded='false' title='Accessibility checker'><span class='ed11y-toggle-icon'></span><span class='ed11y-sr-only'>Show accessibility scan panel with</span><span class='ed11y-count'></span><span class='ed11y-sr-only'>issues</span></button>" +
     "</div>" +
     "<div aria-live='polite' class='ed11y-sr-only' id='ed11y-aria-live'></div>" +
-"</div>";
+    "</div>";
 
 ed11yAbout = "" +
     "<p>Assistive devices like screen readers depend on the invisible structure of the page matching its visual look and feel.</p>" +
@@ -73,7 +73,7 @@ ed11yMessagelinkTextIsURL = "<div class='ed11y-tip-heading'>Link may be a " +
     "&quot;clear and meaningful&quot;</a>, even out of context.</p>" +
     "<p>Note that spelling out a very short URL is OK if the URL itself " +
     "<em>is</em> what you are communicating, e.g., when providing an email " +
-    "address.</p>"
+    "address.</p>";
 
 ed11yMessagelinkTextIsGeneric = "<div class='ed11y-tip-heading'>Manual check " +
     "needed: link title may be generic</div>" +
@@ -83,7 +83,7 @@ ed11yMessagelinkTextIsGeneric = "<div class='ed11y-tip-heading'>Manual check " +
     "<span class='ed11y-bold'>unique, clear and meaningful</span>, even out of context.</p><p>Compare which words stand out:<br>" +
     "<span class='ed11y-small'>&quot;To learn more about writing effective links, " +
     "<a href='https://accessibility.princeton.edu/how/content/links'>read more</a>.&quot;</span><br>" +
-    "<span class='ed11y-small'>&quot;Learn more about <a href='https://accessibility.princeton.edu/how/content/links'>writing effective links</a>.&quot;</span></p>"
+    "<span class='ed11y-small'>&quot;Learn more about <a href='https://accessibility.princeton.edu/how/content/links'>writing effective links</a>.&quot;</span></p>";
 
 // Messages for images
 ed11yGeneralAltText = "<div class='ed11y-tip-heading'>Error: Alt text attribute is missing</div>" +
@@ -100,7 +100,7 @@ ed11yMessageAltUrl = function (altText) {
       "<p class='ed11y-small'>The alt text for this image is: <span class='ed11y-bold'>&quot;" + altText + "&quot;</span></p>";
 }
 
-ed11yMessageAltDecorative = "<div class='ed11y-tip-heading'>Manual check: image marked as decorative</div><p>All meaningful visual elements must <a href='https://accessibility.princeton.edu/how/content/alternative-text'>provide a text alternative</a>. Images with empty alt attributes are ignored by screen readers; if this image conveys a message to sighted users beyond use as a spacer or background, please add alt text.</p>"
+ed11yMessageAltDecorative = "<div class='ed11y-tip-heading'>Manual check: image marked as decorative</div><p>All meaningful visual elements must <a href='https://accessibility.princeton.edu/how/content/alternative-text'>provide a text alternative</a>. Images with empty alt attributes are ignored by screen readers; if this image conveys a message to sighted users beyond use as a spacer or background, please add alt text.</p>";
 
 ed11yMessageAltImageOfLinked = function (error, altText) {
   return "<div class='ed11y-tip-heading'>Warning: <span class='ed11y-bold'>&quot" + error[1] + "&quot;</span> found in linked image</div> " +
@@ -123,7 +123,7 @@ ed11yMessageAltLongLinked = function (text, altText) {
 }
 
 ed11yMessageAltLinkComplex = function (altText) {
-  return "<div class='ed11y-tip-heading'>Please review (may be OK)</div> " +
+  return "<div class='ed11y-tip-heading'>Please review (might be OK)</div> " +
       "<p>This link contains <span class='ed11y-bold'>both</span> text and an image, which will be combined by screen readers to create a single link title. " +
       "Please make sure the two together still create a " +
       "<a href='https://accessibility.princeton.edu/how/content/links'>&quot;concise, clear and meaningful link title&quot;</a>.</p>" +
@@ -155,7 +155,7 @@ ed11yMessageQANewTab = "<div class='ed11y-tip-heading'>Link opens in a " +
     "<p>Unless certain " +
     "<a href='https://www.w3.org/TR/WCAG20-TECHS/G200.html#G200-description'>" +
     "exceptions related to context-sensitive workflows</a> apply, " +
-    "it is better to let the user decide when to open new windows.</p>"
+    "it is better to let the user decide when to open new windows.</p>";
 
 ed11yMessageQAUppercase = "<div class='ed11y-tip-heading'>" +
     "Manual check needed: all-cap text</div>" +
@@ -164,7 +164,7 @@ ed11yMessageQAUppercase = "<div class='ed11y-tip-heading'>" +
     "acronyms (and read them one letter at a time!), and many " +
     "users INTERPRET CAPS LOCK AS SHOUTING.</p>" +
     "<p>Unless the all-cap text in this element is an acronym or should be capitalized " +
-    "for some similar reason, sentence case is recommended.</p>"
+    "for some similar reason, sentence case is recommended.</p>";
 
 ed11yMessageMissingQATableHeadings = "<div class='ed11y-tip-heading'>Error: " +
     "table has no headers</div> " +
@@ -175,14 +175,14 @@ ed11yMessageMissingQATableHeadings = "<div class='ed11y-tip-heading'>Error: " +
     "<p>Note that tables should be used for tabular data only, as they cannot " +
     "reflow for small screens. If this " +
     "<a href='https://accessibility.princeton.edu/how/content/layout-tables'>" +
-    "table is only for visual layout</a>, use CSS to create columns instead.</p>"
+    "table is only for visual layout</a>, use CSS to create columns instead.</p>";
 
 ed11yMessageQAHeaderInTable = "<div class='ed11y-tip-heading'>Error: heading " +
     "formatting inside table cells</div> " +
     "<p>Label table rows and columns using table headers. Formatting text as " +
     "semantic headings (Heading 2, Heading 3) creates a page outline for " +
     "assistive devices, and users of those devices are not expecting to land " +
-    "inside a table when jumping to a heading. </p>"
+    "inside a table when jumping to a heading. </p>";
 
 ed11yMessageEmptyTableHeader = "<div class='ed11y-tip-heading'>Error: Empty " +
     "table header</div>" +
@@ -191,7 +191,7 @@ ed11yMessageEmptyTableHeader = "<div class='ed11y-tip-heading'>Error: Empty " +
     "headers</a> to label cells, so they can explore the table without " +
     "having to count rows and columns.</p>";
 
-// Fullcheck tests.
+// Full check tests.
 ed11yMessageLinkDownload = "<div class='ed11y-tip-heading'>Manual check needed: " +
     "link to document</div>" +
     "<p>Please make sure this document contains structural tags and image alt " +
