@@ -1,50 +1,80 @@
-// Generic init.
-jQuery( document ).ready(function($) {
-  if (window.navigator.userAgent.match(/MSIE|Trident/) === null) {
-    // IE 11 is going to suffer under this load.
-    var ed11y = new Ed11y();
-  }
-
-  /***
-   * Ed11y base library.
-   * @constructor
-   */
-
-  function Ed11y() {
-    $(function () {
-      setTimeout(function () {
-        // Don't trigger tests until page has had time to settle.
-        if ($(ed11yNoRun).length === 0) {
-          ed11y.running = true;
-          ed11y.loadGlobals();
-          ed11y.checkAll(true, 'hide');
+class Ed11y {
+  'use strict';
+  constructor(options) {
+    let defaultOptions = {
+      ed11yCheckRoot: "",
+      ed11yAlertMode : "polite",
+      ed11yNoRun : "",
+      ed11yContainerIgnore : ".project-tagline",
+      ed11yEmbeddedContentWarning : "",
+      ed11yOutlineIgnore : "",
+      ed11yImageIgnore : "",
+      ed11yHeaderIgnore : ".project-tagline",
+      ed11yLinkIgnore : "",
+      ed11yIgnoreLinkStrings : "",
+      ed11yAllowOverflow : "",
+      ed11yHiddenHandlers : "",
+      ed11yDownloadLinks : "a[href$='.pdf'], a[href*='.pdf?'], a[href$='.doc'], a[href$='.docx'], a[href*='.doc?'], a[href*='.docx?'], a[href$='.ppt'], a[href$='.pptx'], a[href*='.ppt?'], a[href*='.pptx?'], a[href^='https://docs.google']",
+    };
+    options = {
+      ...defaultOptions,
+      ...options
+    };
+    // todo: const M = ed11yLang;
+    // todo: move html to another file
+    this.initialize = () => {
+      //Need to evaluate if "load" event took place for bookmarklet version. Otherwise, only call Sa11y once page has loaded.
+      const documentLoadingCheck = (callback) => {
+        if (document.readyState === 'complete') {
+          callback();
+        } else {
+          window.addEventListener("load", callback);
         }
-      }, 500);
-    });
+      };
+
+      //Once document has fully loaded.
+      documentLoadingCheck(() => {
+        let noRun = options.ed11yNoRun.trim.length > 0 ? document.querySelector(options.ed11yNoRun) : false;
+        if (!noRun) {
+          Ed11y.running = true;
+          Ed11y.loadGlobals();
+          Ed11y.checkAll(true, 'hide');
+        }
+      });
+    };
+    this.initialize();
+
+
 
     // Toggles the outline of all headers, link texts, and images.
-    this.checkAll = async function (onLoad, showPanel) {
+    Ed11y.checkAll = async function (onLoad, showPanel) {
       if ($(ed11yNoRun).length === 0) {
-        this.paints = [];
-        this.errorCount = 0;
-        this.warningCount = 0;
-        this.mediaCount = 0;
-        this.checkRoot = $(ed11yCheckRoot);
-        this.findElements();
+        Ed11y.paints = [];
+        Ed11y.errorCount = 0;
+        Ed11y.warningCount = 0;
+        Ed11y.dismissedCount = 0;
+        Ed11y.mediaCount = 0;
+        Ed11y.checkRoot = $(ed11yCheckRoot);
+        Ed11y.findElements();
+
+        // Get list of elements already hidden
+        let ed11yDismissed = localStorage.getItem("ed11ydismissed");
+        Ed11y.dismissedAlerts = ed11yDismissed ? JSON.parse(ed11yDismissed) : {};
+
         // This is madness, but it prevents jank by allowing other scripts
         // to run between each test group.
         window.setTimeout(function () {
-          ed11y.checklinkText();
+          Ed11y.checklinkText();
           window.setTimeout(function () {
-            ed11y.checkAltText();
+            Ed11y.checkAltText();
             window.setTimeout(function () {
-              ed11y.checkHeaders();
+              Ed11y.checkHeaders();
               window.setTimeout(function () {
-                ed11y.checkQA();
+                Ed11y.checkQA();
                 window.setTimeout(function () {
-                  ed11y.buildPanels(onLoad);
+                  Ed11y.buildPanels(onLoad);
                   window.setTimeout(function () {
-                    ed11y.updatePanel(onLoad, showPanel);
+                    Ed11y.updatePanel(onLoad, showPanel);
                     $('#ed11y-main-toggle').removeClass('disabled').removeAttr('aria-disabled').removeAttr('title');
                   },0);
                 },0);
@@ -53,23 +83,42 @@ jQuery( document ).ready(function($) {
           },0);
         },0);
         // forms is disabled:
-        // this.checkLabels();
+        // Ed11y.checkLabels();
       }
       else {
-        ed11y.reset();
+        Ed11y.reset();
         $('#ed11y-main-toggle').addClass('disabled').attr('aria-disabled', 'true').attr('title', 'Editoria11y is disabled during live editing.');
       }
     };
 
-    this.updatePanel = async function (onLoad, showPanel) {
-      let totalFound = this.errorCount + this.warningCount;
-      this.updateCount('quick');
+    Ed11y.countAlerts = function () {
+      Ed11y.dismissedCount = 0;
+      // Remove dismissed alerts from the paint array and update count.
+      for (let i = Ed11y.paints.length - 1; i >= 0; i--) {
+        let dismissKey = Ed11y.paints[i][7];
+        dismissKey = typeof dismissKey !== "undefined" ? Ed11y.dismissalKey(dismissKey) : false;
+        let testType = Ed11y.paints[i][6];
+        // Hide alert if its ID key is in the array.
+        if (dismissKey !== false && typeof Ed11y.dismissedAlerts[Ed11y.currentPage] !== "undefined" && typeof Ed11y.dismissedAlerts[Ed11y.currentPage][testType] !== "undefined" && Ed11y.dismissedAlerts[Ed11y.currentPage][testType][dismissKey] !== "undefined") {
+          Ed11y.dismissedCount++;
+          Ed11y.paints.splice(i, 1);
+        } else if (Ed11y.paints[i][3].indexOf("warning") > 0) {
+          Ed11y.warningCount++;
+        } else {
+          Ed11y.errorCount++;
+        }
+      }
+    }
+
+    Ed11y.updatePanel = async function (onLoad, showPanel, showHidden) {
+      if (showHidden !== true) {
+        Ed11y.countAlerts();
+      }
+      let totalFound = Ed11y.errorCount + Ed11y.warningCount;
+      Ed11y.updateCount('quick');
       if (onLoad === true && totalFound > 0) {
         // Determine if panel should open automatically.
-        const ed11ySeen = localStorage.getItem("ed11ySeen");
-        const ed11ySeenParsed = ed11ySeen ? JSON.parse(ed11ySeen) : {};
-        const ed11yPage = btoa(encodeURIComponent(window.location.pathname));
-        if (ed11ySeenParsed[ed11yPage] === totalFound) {
+        if (Ed11y.localDataParsed[Ed11y.currentPage] === totalFound) {
           // User has already seen these errors, panel will not open.
           showPanel = "seen";
         }
@@ -78,8 +127,7 @@ jQuery( document ).ready(function($) {
           // CMS integrations can set this dynamically.
           showPanel = "show";
         }
-        ed11ySeenParsed[ed11yPage] = totalFound;
-        localStorage.setItem('ed11ySeen', JSON.stringify(ed11ySeenParsed));
+        Ed11y.localDataParsed[Ed11y.currentPage] = totalFound;
         window.setTimeout(function() {
           $('#ed11y-aria-live').text('Editorially reports: ' + $('.ed11y-checkmessage').text());
         }, 1500);
@@ -90,7 +138,7 @@ jQuery( document ).ready(function($) {
 
       // Now we can open or close the panel.
       if (showPanel !== "show") {
-        ed11y.reset();
+        Ed11y.reset();
       }
       else {
         $('.ed11y-panel-minimized').removeClass('ed11y-panel-minimized');
@@ -99,7 +147,7 @@ jQuery( document ).ready(function($) {
         $('#ed11y-main-toggle').attr('aria-expanded', 'true');
         window.setTimeout(function () {
           document.dispatchEvent(new CustomEvent("ed11yPanelOpened"));
-          ed11y.readyTips();
+          Ed11y.readyTips();
         }, 0);
         if (onLoad === false) {
           window.setTimeout(function() {
@@ -107,13 +155,21 @@ jQuery( document ).ready(function($) {
           }, 500);
         }
       }
-      ed11y.running = false;
+      Ed11y.running = false;
     };
 
-    this.paintButton = function (el, index) {
-      //this.paints.push([$el,'before','ed11y-instance','ed11y-error-border','ed11y-warning-btn',generalAltText]);
-      // 0 $el 1 insertion position 2 block or inline 3 wrapper class 4
-      // button 5 message
+    Ed11y.paintButton = function (el, index) {
+      // We parse this long array:
+      // [0] $el element
+      // [1] insertion position
+      // [2] is element block or inline
+      // [3] wrapper class
+      // [4] button class
+      // [5] message
+      // [6] test shortname
+      // [7] ID key for dismissing
+      // e.g.: Ed11y.paints.push([$el,'before','ed11y-instance','ed11y-error-border','ed11y-warning-btn',generalAltText]);
+      // Warning, error or hidden?
       let icon = '<span class="ed11y-sr-only">Show editorially error</span>';
       if (el[4].indexOf('warning') !== -1) {
         icon = '<span class="ed11y-sr-only">Show editorially warning</span>';
@@ -123,6 +179,7 @@ jQuery( document ).ready(function($) {
           ' ed11y-pop" style="display:none;" aria-expanded="false" data-ed11y-inserted="' + el[1] + '" data-ed11y-tip="' +
           index +
           '">' + icon + '</button></div>';
+      console.log(index + el[0]);
       let pretagged = el[0].attr('data-ed11y-marked');
       if (pretagged === 'before') {
         el[0].prev().find('.ed11y-pop').attr('data-ed11y-tip', el[0].prev().find('.ed11y-pop').attr('data-ed11y-tip') + ',' + index);
@@ -148,16 +205,16 @@ jQuery( document ).ready(function($) {
     };
 
     // Show a warning/error count on the toggle button.
-    this.updateCount = function () {
-      let totalCount = this.errorCount + this.warningCount;
+    Ed11y.updateCount = function () {
+      let totalCount = Ed11y.errorCount + Ed11y.warningCount;
       if (totalCount > 0) {
         $('.ed11y-count').text(totalCount).attr('style', 'display: inline-block !important;');
         $('.ed11y-jumpnext').text(totalCount > 1 ? 'first' : '');
-        if (this.errorCount > 0) {
+        if (Ed11y.errorCount > 0) {
           $('#ed11y-panel').removeClass('ed11y-pass ed11y-warnings').addClass('ed11y-errors');
           $('.ed11y-checkmessage').text(totalCount === 1 ? 'One accessibility issue detected.' : totalCount + ' accessibility issues detected.');
         }
-        else if (this.warningCount > 0) {
+        else if (Ed11y.warningCount > 0) {
           $('#ed11y-panel').removeClass('ed11y-pass ed11y-errors').addClass('ed11y-warnings');
           $('.ed11y-checkmessage').text(totalCount === 1 ? 'One manual check needed.' : totalCount + ' manual checks needed.');
         }
@@ -167,14 +224,19 @@ jQuery( document ).ready(function($) {
         $('.ed11y-count').attr('style', 'display: none !important;');
         $('#ed11y-panel').removeClass('ed11y-warnings ed11y-errors').addClass('ed11y-pass');
       }
+      if (Ed11y.dismissedCount.length > 0) {
+        $('#ed11y-show-dismissed').attr('style', 'display: inline-block !important;');
+      } else {
+        $('#ed11y-show-dismissed').attr('style', 'display: none !important;');
+      }
       $('.ed11y-preload').removeClass('ed11y-preload');
     };
 
     // Resets all changes made by the tool. Removing outlines and
     // additional spans.
-    this.reset = function () {
+    Ed11y.reset = function () {
 
-      this.resetTips();
+      Ed11y.resetTips();
 
       // Remove and reset panels and active items.
       $(".ed11y-fullcheck li, .ed11y-about-text").remove();
@@ -182,39 +244,39 @@ jQuery( document ).ready(function($) {
       $("#ed11y-panel").removeClass("ed11y-panel-minimized ed11y-panel-active").addClass('ed11y-panel-shut');
       $(".ed11y-upper-active").removeClass("ed11y-upper-active");
       $("#ed11y-panel-buttonbar [aria-pressed='true']").attr('aria-pressed', 'false');
-      ed11y.running = false;
+      Ed11y.running = false;
     };
 
-    this.resetTips = function () {
+    Ed11y.resetTips = function () {
       // Remove error outlines.
-      this.checkRoot.find(".ed11y-text-warning").removeClass("ed11y-text-warning");
-      this.checkRoot.find(".ed11y-link-text-warning").removeClass("ed11y-link-text-warning");
-      this.checkRoot.find(".ed11y-error-border").removeClass("ed11y-error-border");
-      this.checkRoot.find(".ed11y-warning-border").removeClass("ed11y-warning-border");
-      this.checkRoot.find(".ed11y-headings-fail").removeClass("ed11y-headings-fail");
-      this.checkRoot.find(".ed11y-link-text-fail").removeClass("ed11y-link-text-fail");
-      this.checkRoot.find(".ed11y-hidden-highlight").removeClass("ed11y-hidden-highlight");
-      this.checkRoot.find(".ed11y-uppercase-warning").removeClass("ed11y-uppercase-warning");
+      Ed11y.checkRoot.find(".ed11y-text-warning").removeClass("ed11y-text-warning");
+      Ed11y.checkRoot.find(".ed11y-link-text-warning").removeClass("ed11y-link-text-warning");
+      Ed11y.checkRoot.find(".ed11y-error-border").removeClass("ed11y-error-border");
+      Ed11y.checkRoot.find(".ed11y-warning-border").removeClass("ed11y-warning-border");
+      Ed11y.checkRoot.find(".ed11y-headings-fail").removeClass("ed11y-headings-fail");
+      Ed11y.checkRoot.find(".ed11y-link-text-fail").removeClass("ed11y-link-text-fail");
+      Ed11y.checkRoot.find(".ed11y-hidden-highlight").removeClass("ed11y-hidden-highlight");
+      Ed11y.checkRoot.find(".ed11y-uppercase-warning").removeClass("ed11y-uppercase-warning");
       $('body').removeClass("ed11y-pops-ready");
 
       // Remove buttons.
       $('[data-ed11y-marked]').removeAttr('data-ed11y-marked');
-      this.checkRoot.find(".ed11y-instance, .ed11y-instance-inline, .ed11y-headings-label, .ed11y-reveal-alts").remove();
+      Ed11y.checkRoot.find(".ed11y-instance, .ed11y-instance-inline, .ed11y-headings-label, .ed11y-reveal-alts").remove();
     };
 
     /*================== HEADING STRUCTURE MODULE ===================*/
 
-    this.checkHeaders = async function () {
+    Ed11y.checkHeaders = async function () {
       // Reset panel; we rebuild on each run.
       $("#ed11y-outline-list li, .ed11y-headings-label").remove();
 
       // Only fetch headers within the content area.
 
       let prevLevel = 0;
-      this.headingOutline = "";
+      Ed11y.headingOutline = "";
 
       // Test each header level for accessibility issues.
-      this.$h.each((i, el) => {
+      Ed11y.$h.each((i, el) => {
         let $el = $(el);
         let level;
 
@@ -228,13 +290,16 @@ jQuery( document ).ready(function($) {
         let headingError = "";
         let outlinePrefix = "";
         let ed11yTip = "";
-        let headingLength = $el.text().trim().length;
+        let headingText = $el.text();
+        let headingLength = headingText.trim().length;
+        let dismissKey = false;
         if (level - prevLevel > 1 && i !== 0) {
           headingError = 'ed11y-warning-btn';
           outlinePrefix = '(flagged for skipped level) ';
+          dismissKey = Ed11y.dismissalKey(level + headingText);
           ed11yTip = ed11yMessageHeadingLevelSkipped(prevLevel, level);
         }
-        if ($el.text().trim().length < 1) {
+        if (headingLength < 1) {
           let headingSubText = $el.find('img').attr('alt');
           if (!headingSubText || headingSubText.length === 0) {
             headingError = 'ed11y-warning-btn';
@@ -242,9 +307,10 @@ jQuery( document ).ready(function($) {
             ed11yTip = ed11yMessageHeadingEmpty;
           }
         }
-        else if ($el.text().trim().length > 160) {
+        else if (headingLength > 160) {
           headingError = 'ed11y-warning-btn';
           outlinePrefix = '(flagged for length) ';
+          dismissKey = Ed11y.dismissalKey(level + headingText);
           ed11yTip = ed11yMessageHeadingTooLong(headingLength);
         }
         prevLevel = level;
@@ -253,24 +319,23 @@ jQuery( document ).ready(function($) {
         // If the heading error is within a hyperlink, make sure to
         // append button after anchor tag.
         // Todo add this case to the test page
-        if (headingError !== "" && $el.not(this.headerIgnore).length !== 0) {
+        if (headingError !== "" && $el.not(Ed11y.headerIgnore).length !== 0) {
           if ($el.closest("a").length > 0) {
-            this.paints.push([$el.closest('a'), 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip]);
+            Ed11y.paints.push([$el.closest('a'), 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
           }
           else {
-            this.paints.push([$el, 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip]);
+            Ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
           }
           // Outline element if there is an error.
           liClass += " ed11y-text-warning";
           liPrefix = "<span class='ed11y-sr-only'> Warning: </span> ";
-          this.warningCount++;
         }
         if (outlinePrefix) {
           outlinePrefix = "<span class='ed11y-small'><em>" + outlinePrefix +
               "</em></span>";
         }
         if ($el.not(ed11yOutlineIgnore).length !== 0) {
-          this.headingOutline += "<li class='" + liClass + "'>" +
+          Ed11y.headingOutline += "<li class='" + liClass + "'>" +
               "<span class='ed11y-small'>" + level + "</span> " +
               liPrefix + outlinePrefix + $el.text() +
               "</li>";
@@ -279,12 +344,13 @@ jQuery( document ).ready(function($) {
 
       // Check for blockquotes used as headings. If it's less than 25
       // characters - it's probably not a blockquote.
-      let $blockquotes = this.checkRoot.find("blockquote").not(this.containerIgnore);
+      let $blockquotes = Ed11y.checkRoot.find("blockquote").not(Ed11y.containerIgnore);
       $blockquotes.each((i, el) => {
         let $el = $(el);
-        if ($el.text().trim().length < 25) {
-          this.warningCount++;
-          ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageFullCheckBlockquote]);
+        let text = $el.text().trim();
+        if (text.length < 25) {
+          let dismissalKey = Ed11y.dismissalKey(text);
+          Ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageFullCheckBlockquote, "blockquoteLength", dismissalKey]);
         }
       });
 
@@ -296,72 +362,71 @@ jQuery( document ).ready(function($) {
     /*================== ALTERNATIVE TEXT MODULE ====================*/
 
     // todo: consider flagging alts referencing to position and color.
-    this.checkAltText = async function () {
+    Ed11y.checkAltText = async function () {
 
       // Test each image for alternative text.
-      this.$img.each((i, el) => {
+      Ed11y.$img.each((i, el) => {
         let $el = $(el);
         let alt = $el.attr("alt");
+        let src = $el.attr("src");
         let linkChild = $el.parents('a[href]').length;
 
         if (typeof alt !== "string") {
-          this.errorCount++;
-          this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yGeneralAltText]);
+          Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yGeneralAltText]);
         }
         else if (alt.length === 0 && linkChild === 0) {
           // An empty alt may be ok, and we handle empty links in the
           // link tests.
-          this.warningCount++;
-          this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltDecorative]);
+          let dismissalKey = Ed11y.dismissalKey(src);
+          Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltDecorative, "decorativeImage", dismissalKey]);
         }
 
         // If alt attribute is present, further tests are done.
         else {
-          let error = this.containsAltTextStopWords(alt);
-          let altText = ed11y.sanitizeForHTML(alt);
+          let error = Ed11y.containsAltTextStopWords(alt);
+          let altText = Ed11y.sanitizeForHTML(alt);
 
           // Image fails if a url was found.
           // Todo: add images in links to test coverage.
           if ($el.parents().is("a[href]")) {
             if (error[0] !== null) {
-              this.errorCount++;
-              this.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-error-border ed11y-imageTip", 'ed11y-error-btn', ed11yMessageAltUrl(altText)]);
+              Ed11y.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-error-border ed11y-imageTip", 'ed11y-error-btn', ed11yMessageAltUrl(altText)]);
             }
             else if (error[1] !== null) {
               // "image of"
-              this.warningCount++;
-              this.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltImageOfLinked(error, altText)]);
+              let dismissalKey = Ed11y.dismissalKey(src + altText);
+              Ed11y.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltImageOfLinked(error, altText), "AltImageOfLinked", dismissalKey]);
             }
             else if (alt.length > 160) {
               // Image warning if it is a link and contains long alt text.
-              this.warningCount++;
-              this.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltLongLinked(alt, altText)]);
+              let dismissalKey = Ed11y.dismissalKey(src + altText);
+              Ed11y.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltLongLinked(alt, altText), "AltLongLinked", dismissalKey]);
             }
                 // Image warning if it is a link, contains alt text AND
             // surrounding link text.
             else if (alt !== "" && $el.parents("a").text().replace(ed11yIgnoreLinkStrings,"").trim().length > 1) {
-              this.warningCount++;
-              this.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltLinkComplex(altText)]);
+              let dismissalKey = Ed11y.dismissalKey(src + altText);
+              Ed11y.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltLinkComplex(altText), "AltLinkComplex", dismissalKey]);
             }
           }
           // Now if there is no link...
           else if (error[0] !== null) {
-            this.errorCount++;
-            this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border ed11y-imageTip", 'ed11y-error-btn', ed11yMessageAltFilename(altText)]);
+
+            Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border ed11y-imageTip", 'ed11y-error-btn', ed11yMessageAltFilename(altText)]);
           }
           else if (error[1] !== null) {
-            this.warningCount++;
-            this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltImageOf(error, altText)]);
+            let dismissalKey = Ed11y.dismissalKey(src + altText);
+            Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltImageOf(error, altText),"AltImageOf", dismissalKey]);
           }
           // Alert with deadspace alt.
           else if (alt !== "" && alt.replace(/"|'|\s+/g, "") === "") {
-            this.errorCount++;
-            this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltDeadspace]);
+
+            Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltDeadspace]);
           }
           // Image error if alt text is too long.
           else if (alt.length > 160) {
-            this.warningCount++;
-            this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltTooLong(alt, altText)]);
+            let dismissalKey = Ed11y.dismissalKey(src + altText);
+            Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltTooLong(alt, altText),"AltTooLong", dismissalKey]);
           }
         }
       });
@@ -369,7 +434,7 @@ jQuery( document ).ready(function($) {
 
     // Checks if text is not descriptive and returns the word(s) that are
     // making the text inaccessible.
-    this.containsAltTextStopWords = function (alt) {
+    Ed11y.containsAltTextStopWords = function (alt) {
       let altUrl = [".png", ".jpg", ".jpeg", ".gif"];
       let suspiciousWords = ["image of", "graphic of", "picture of", "placeholder", "photo of"];
       let hit = [null, null];
@@ -389,15 +454,15 @@ jQuery( document ).ready(function($) {
     /*====================== LINK TEXT MODULE =======================*/
 
     // Toggles the outline of all inaccessible link texts.
-    this.checklinkText = async function () {
+    Ed11y.checklinkText = async function () {
       // Todo: See if there is an alternative to :visible that shows only
       // visually hidden content.
       // Todo: Add test for consecutive links to same href?
-      let $links = this.checkRoot.find("a[href]").not(this.linkIgnore);
+      let $links = Ed11y.checkRoot.find("a[href]").not(Ed11y.linkIgnore);
 
       /* Mini function if you need to exclude any text contained with a span. We created this function to ignore automatically appended sr-only text for external links and document filetypes.*/
       $.fn.ignore = function (sel) {
-        return this.clone().find(sel||">*").remove().end();
+        return Ed11y.clone().find(sel||">*").remove().end();
       };
 
       /* Example: If you need to ignore any text within <span class="sr-only">test</span>.
@@ -406,14 +471,14 @@ jQuery( document ).ready(function($) {
 
       $links.each((i, el) => {
         let $el = $(el);
-        let linkText = this.computeAriaLabel($el);
+        let linkText = Ed11y.computeAriaLabel($el);
         let $img = $el.find('img');
         let hasImg = $img.length > 0;
         let downloadMatch = $el.filter(ed11yDownloadLinks).length;
         if (linkText === 'noAria') {
           linkText = $el.text().trim();
           if (hasImg) {
-            let imgText = this.computeAriaLabel($img);
+            let imgText = Ed11y.computeAriaLabel($img);
             if (imgText !== 'noAria') {
               linkText += imgText;
             }
@@ -431,8 +496,8 @@ jQuery( document ).ready(function($) {
         }
         if ($el.attr('target') === '_blank' && downloadMatch === 0 && linkText.indexOf('tab') === -1 && linkText.indexOf('window') === -1 && linkText.indexOf('external') === -1) {
           // Warn about unwarned new windows before ignoreString strip.
-          this.warningCount++;
-          this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-link-text-warning", 'ed11y-warning-btn', ed11yMessageQANewTab]);
+          let dismissalKey = Ed11y.dismissalKey(linkText);
+          Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-link-text-warning", 'ed11y-warning-btn', ed11yMessageQANewTab, "QANewTab", dismissalKey]);
         }
         linkText = linkText.replace(ed11yIgnoreLinkStrings,"");
         let linkStrippedText = linkText.replace(/'|"|-|\.|\s+/g, '');
@@ -440,23 +505,22 @@ jQuery( document ).ready(function($) {
         // Tests to see if this link is empty
         // Todo add to test coverage
         if (linkStrippedText.length === 0) {
-          linkStrippedText += !!ed11y.computeTitle($el) ? ed11y.computeTitle($el) : "";
+          linkStrippedText += !!Ed11y.computeTitle($el) ? Ed11y.computeTitle($el) : "";
           if (linkStrippedText.length === 0) {
-            this.errorCount++;
+
             if (hasImg) {
-              this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
+              Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
             }
             else {
-              this.paints.push([$el, 'before', 'ed11y-instance-inline ed11y-inline-block', "ed11y-link-text-fail", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
+              Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline ed11y-inline-block', "ed11y-link-text-fail", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
             }
           }
         }
         else {
           // Check for links with generic or URL titles
-          // todo: rest of accessible name calculation
-          let error = this.containslinkTextStopWords(linkStrippedText.toLowerCase());
+          let error = Ed11y.containslinkTextStopWords(linkText.trim());
           if (error !== "none") {
-            this.warningCount++;
+            let dismissalKey = Ed11y.dismissalKey(linkText);
             let stopWordMessage = "";
             if (error === "url") {
               // Url
@@ -465,15 +529,15 @@ jQuery( document ).ready(function($) {
             else if (error === "generic") {
               stopWordMessage = ed11yMessagelinkTextIsGeneric;
             }
-            this.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-link-text-warning", 'ed11y-warning-btn', stopWordMessage]);
+            Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-link-text-warning", 'ed11y-warning-btn', stopWordMessage, "LinkTextIsGeneric", dismissalKey]);
           }
         }
         //Warning: Find all PDFs. Although only append warning icon to
         // first PDF on page.
         if (!hasImg && downloadMatch > 0) {
-          this.warningCount++;
+          let dismissalKey = Ed11y.dismissalKey($el.attr("src"));
           $el.addClass("ed11y-text-warning");
-          ed11y.paints.push([$el, 'after', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageLinkDownload]);
+          Ed11y.paints.push([$el, 'after', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageLinkDownload, "LinkDownload", dismissalKey]);
         }
       });
     };
@@ -482,7 +546,7 @@ jQuery( document ).ready(function($) {
     // making the text inaccessible. stopWords will flag hyperlinks in
     // link titles. partialStopWords looks for links entirely made of
     // generic words. Note that this was extensively rewritten.
-    this.containslinkTextStopWords = function (textContent) {
+    Ed11y.containslinkTextStopWords = function (textContent) {
       // todo: use regex to find any three-letter TLD followed by a slash.
       let stopWords = ["http://", "https://", ".asp", ".htm", ".php", ".edu/", ".com/"];
       let partialStopRegex = /learn|to|more|now|this|page|link|site|website|check|out|view|our|read|\.|,|:|download|form|here|click|>|<|\s/g;
@@ -505,7 +569,7 @@ jQuery( document ).ready(function($) {
     };
 
     // Handle aria-label or labelled by
-    this.computeAriaLabel = function ($el) {
+    Ed11y.computeAriaLabel = function ($el) {
       // Todo: what if there is a span inside element with a label?
       if ($el.is('[aria-label]')) {
         return $el.attr('aria-label');
@@ -531,7 +595,7 @@ jQuery( document ).ready(function($) {
     };
 
     // recursively look for titles
-    this.computeTitle = function ($el) {
+    Ed11y.computeTitle = function ($el) {
       if ($el.is('[title]')) {
         return $el.attr('title');
       }
@@ -545,7 +609,7 @@ jQuery( document ).ready(function($) {
 
     /*================== QUALITY ASSURANCE MODULE ===================*/
 
-    this.checkQA = async function () {
+    Ed11y.checkQA = async function () {
 
       // Detect paragraphs that should be lists: a. A. a) A) * - -- •.
       let activeMatch = "";
@@ -561,7 +625,7 @@ jQuery( document ).ready(function($) {
           return prefixDecrement[match];
         });
       };
-      this.$p.each(function (i, el) {
+      Ed11y.$p.each(function (i, el) {
 
         // Detect possible lists.
         let $first = $(el);
@@ -573,7 +637,7 @@ jQuery( document ).ready(function($) {
         let firstPrefix = firstText.substring(0, 2);
         if (firstPrefix.length > 0 && firstPrefix !== activeMatch && firstPrefix.match(prefixMatch)) {
           // We have a prefix and a possible hit; check next paragraph.
-          let $second = ed11y.$p.eq(i + 1);
+          let $second = Ed11y.$p.eq(i + 1);
           if ($second) {
             let secondText = $second.text().trim();
             let secondPrefix = decrement(secondText.substring(0, 2));
@@ -594,9 +658,9 @@ jQuery( document ).ready(function($) {
             }
           }
           if (hit) {
-            ed11y.warningCount++;
+            let dismissalKey = Ed11y.dismissalKey(firstText);
             let ed11yShouldBeList = ed11yMessageQAShouldBeList(firstPrefix);
-            ed11y.paints.push([$first, 'prepend', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yShouldBeList]);
+            Ed11y.paints.push([$first, 'prepend', 'ed11y-instance-inline', "", "ed11y-warning-btn", ed11yShouldBeList, "ShouldBeList", dismissalKey]);
             activeMatch = firstPrefix;
           }
           else {
@@ -609,8 +673,8 @@ jQuery( document ).ready(function($) {
           let possibleHeader = $first.find('strong, b').first().text().trim();
           let maybeSentence = possibleHeader.match(/[.:;"']$/) !== null;
           if (possibleHeader.length > 0 && maybeSentence === false && possibleHeader.length === firstText.length) {
-            ed11y.warningCount++;
-            ed11y.paints.push([$first, 'prepend', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageQAMayBeHeader]);
+            let dismissalKey = Ed11y.dismissalKey(firstText);
+            Ed11y.paints.push([$first, 'prepend', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageQAMayBeHeader, "QAMayBeHeader", dismissalKey]);
           }
         }
 
@@ -624,12 +688,12 @@ jQuery( document ).ready(function($) {
       // than 4 uppercase words in a row, indicate warning.
       // Uppercase word is anything that is more than 3 characters.
       // Todo check performance of new regex.
-      this.checkRoot.find('h1, h2, h3, h4, h5, h6, p, li, blockquote').not(this.containerIgnore).each(function () {
+      Ed11y.checkRoot.find('h1, h2, h3, h4, h5, h6, p, li, blockquote').not(Ed11y.containerIgnore).each(function () {
         let $this = $(this);
         let thisText;
         if ($this.is('li')) {
           // Prevent recursion through nested lists.
-          thisText = $this.contents().filter(function () {return this.nodeType === 3}).text();
+          thisText = $Ed11y.contents().filter(function () {return Ed11y.nodeType === 3}).text();
         }
         else {
           thisText = $this.text();
@@ -640,28 +704,26 @@ jQuery( document ).ready(function($) {
         let detectUpperCase = thisText.match(uppercasePattern);
 
         if (detectUpperCase && detectUpperCase[0].length > 10) {
-          ed11y.warningCount++;
-          ed11y.paints.push([$this, 'prepend', 'ed11y-instance-inline', "ed11y-uppercase-warning", 'ed11y-warning-btn', ed11yMessageQAUppercase]);
+          let dismissalKey = Ed11y.dismissalKey(thisText);
+          Ed11y.paints.push([$this, 'prepend', 'ed11y-instance-inline', "ed11y-uppercase-warning", 'ed11y-warning-btn', ed11yMessageQAUppercase, "QAUppercase", dismissalKey]);
         }
 
       });
 
       // Check if a table has a table header.
-      this.$table.each(function () {
+      Ed11y.$table.each(function () {
         let $el = $(this);
         let $findTHeaders = $el.find("th");
         let $findHeadingTags = $el.find("h1, h2, h3, h4, h5, h6");
         if ($findTHeaders.length === 0) {
-          ed11y.errorCount++;
-          ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageMissingQATableHeadings]);
+          Ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageMissingQATableHeadings]);
         }
         else {
           // Make sure all table headers are not empty.
           $findTHeaders.each(function () {
             let $th = $(this);
-            if ($th.text().trim().length < 1 && !ed11y.computeTitle($th)) {
-              ed11y.errorCount++;
-              ed11y.paints.push([$th, 'prepend', 'ed11y-instance', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageEmptyTableHeader]);
+            if ($th.text().trim().length < 1 && !Ed11y.computeTitle($th)) {
+              Ed11y.paints.push([$th, 'prepend', 'ed11y-instance', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageEmptyTableHeader]);
             }
           });
         }
@@ -669,65 +731,64 @@ jQuery( document ).ready(function($) {
           // todo: have paints function prefer stronger alert classes
           // when there are multiple
           $findHeadingTags.each(function () {
-            ed11y.errorCount++;
-            ed11y.paints.push([$(this), 'before', 'ed11y-instance', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageQAHeaderInTable]);
+            Ed11y.paints.push([$(this), 'before', 'ed11y-instance', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageQAHeaderInTable]);
           });
         }
       });
 
-      let $visualizationWarning = this.$embed.filter('[src*="datastudio.google.com"], [src*="tableau"]');
+      let $visualizationWarning = Ed11y.$embed.filter('[src*="datastudio.google.com"], [src*="tableau"]');
       if ($visualizationWarning.length > 0) {
         // Without an each() this only throws a single warning.
         $visualizationWarning.each((i, el) => {
           let $el =$(el)
-          ed11y.warningCount++;
           // Todo provide documentation link regarding equivalent
           // formats, and add a matching warning to the link tests.
-          ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageVisualization]);
+          let dismissKey = Ed11y.dismissalKey($el.attr('src'));
+          Ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageVisualization, "visualization", dismissKey]);
         })
       }
 
       //Warn users to provide captions for videos.
-      let $findVideos = this.$embed.filter("video, [src*='youtube.com'], [src*='vimeo.com'], [src*='kaltura.com']");
+      let $findVideos = Ed11y.$embed.filter("video, [src*='youtube.com'], [src*='vimeo.com'], [src*='kaltura.com']");
       $findVideos.each((i, el) => {
         let $el = $(el);
-        ed11y.warningCount++;
-        ed11y.mediaCount++;
-        ed11y.paints.push([$el, 'before', 'ed11y-instance', "", 'ed11y-warning-btn', ed11yMessageFullCheckCaptions]);
+        Ed11y.mediaCount++;
+        // Dismissable alert.
+        let dismissKey = Ed11y.dismissalKey($el.children('source').length > 0 ? $el.children('source').first().attr('src') : $el.attr('src'));
+        Ed11y.paints.push([$el, 'before', 'ed11y-instance', "", 'ed11y-warning-btn', ed11yMessageFullCheckCaptions, "captions", dismissKey]);
       });
 
       //Warning: Make sure all podcasts have captions.
       // Todo: include more providers and embed types?
       // Todo: don't throw if "transcript" is found on the page?
-      let $podcastWarning = this.$embed.filter('audio, iframe[src*="soundcloud.com"], iframe[src*="buzzsprout.com"], iframe[src*="podbean.com"]');
+      let $podcastWarning = Ed11y.$embed.filter('audio, iframe[src*="soundcloud.com"], iframe[src*="buzzsprout.com"], iframe[src*="podbean.com"]');
       if ($podcastWarning.length > 0) {
         $podcastWarning.each((i, el) => {
           let $el = $(el);
-          ed11y.warningCount++;
-          ed11y.mediaCount++;
-          ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessagePodcast]);
+          Ed11y.mediaCount++;
+          // Dismissable alert.
+          let dismissKey = Ed11y.dismissalKey($el.children('source').length > 0 ? $el.children('source').first().attr('src') : $el.attr('src'));
+          Ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessagePodcast, "transcripts", dismissKey]);
         })
       }
 
       //Warning: Discourage use of Twitter timelines.
       // Todo 1.1 recreate test, and rewrite to include other platforms
-      /*let $twitterWarning = $('[id^="twitter-widget"]').not(this.containerIgnore);
+      /*let $twitterWarning = $('[id^="twitter-widget"]').not(Ed11y.containerIgnore);
       $twitterWarning.each((i, el) => {
         let $el = $(el);
         var numberofTweets = $el.contents().find(".timeline-TweetList-tweet").length;
         if (numberofTweets > 3) {
-          this.warningCount++;
           $el.addClass("ed11y-text-warning");
-          ed11y.paints.push([$el,'before','ed11y-instance',"ed11y-text-warning",'ed11y-warning-btn',ed11yMessageTwitter]);
+          Ed11y.paints.push([$el,'before','ed11y-instance',"ed11y-text-warning",'ed11y-warning-btn',ed11yMessageTwitter]);
         }
       });*/
 
       if (ed11yEmbeddedContentWarning.length > 1) {
-        let $embeddedWarning = this.checkRoot.find(ed11yEmbeddedContentWarning);
+        let $embeddedWarning = Ed11y.checkRoot.find(ed11yEmbeddedContentWarning);
         $embeddedWarning.each((i, el) => {
           let $el = $(el);
-          ed11y.warningCount++;
-          ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageEmbeddedContent]);
+          Ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageEmbeddedContent]);
         });
       }
 
@@ -735,31 +796,31 @@ jQuery( document ).ready(function($) {
 
     /*================== FULL CHECK MODULE ===================*/
 
-    this.checkFull = function () {
+    Ed11y.checkFull = function () {
 
-      if (ed11y.mediaCount > 0) {
+      if (Ed11y.mediaCount > 0) {
         // todo: localize
         $('#ed11y-image-list').prepend("" +
-            "<li>There are <span class='ed11y-red-text'>" + ed11y.mediaCount + "</span> multimedia elements on this page. " +
+            "<li>There are <span class='ed11y-red-text'>" + Ed11y.mediaCount + "</span> multimedia elements on this page. " +
             "Please make sure each provides closed captions (for video) or a transcript (for audio).</li>");
       }
 
-      this.updateCount('full');
-      this.readyTips(true);
+      Ed11y.updateCount('full');
+      Ed11y.readyTips(true);
     };
     // End of fullCheck()
 
-    this.findElements = function () {
+    Ed11y.findElements = function () {
       // Find and cache so we don't have tests looking willynilly.
-      this.$p = this.checkRoot.find('p').not(this.containerIgnore);
-      this.$h = this.checkRoot.find("h1, h2, h3, h4, h5, h6, [role='heading'][aria-level]").not(this.containerIgnore);
-      this.$img = this.checkRoot.find("img").not(this.imageIgnore);
-      this.$embed = this.checkRoot.find("iframe, audio, video").not(this.containerIgnore);
-      this.$table = this.checkRoot.find("table").not(this.containerIgnore);
+      Ed11y.$p = Ed11y.checkRoot.find('p').not(Ed11y.containerIgnore);
+      Ed11y.$h = Ed11y.checkRoot.find("h1, h2, h3, h4, h5, h6, [role='heading'][aria-level]").not(Ed11y.containerIgnore);
+      Ed11y.$img = Ed11y.checkRoot.find("img").not(Ed11y.imageIgnore);
+      Ed11y.$embed = Ed11y.checkRoot.find("iframe, audio, video").not(Ed11y.containerIgnore);
+      Ed11y.$table = Ed11y.checkRoot.find("table").not(Ed11y.containerIgnore);
     };
     // End of findElements()
 
-    this.loadGlobals = function () {
+    Ed11y.loadGlobals = function () {
 
       // Look for a content container
       if (typeof (ed11yCheckRoot) !== 'string' || $(ed11yCheckRoot).length === 0) {
@@ -780,31 +841,35 @@ jQuery( document ).ready(function($) {
       else {
         ed11yContainerIgnore = '[aria-hidden]';
       }
-      this.containerIgnore = ed11yContainerIgnore;
+      Ed11y.containerIgnore = ed11yContainerIgnore;
 
       // Images ignore defaults plus presentation role.
       if (ed11yImageIgnore.length > 1) {
         ed11yImageIgnore += separator;
       }
-      this.imageIgnore = ed11yImageIgnore + this.containerIgnore + separator + "[role='presentation']";
+      Ed11y.imageIgnore = ed11yImageIgnore + Ed11y.containerIgnore + separator + "[role='presentation']";
 
-      this.headerIgnore = ed11yHeaderIgnore;
+      Ed11y.headerIgnore = ed11yHeaderIgnore;
 
       // LinkIgnore is superset of containerIgnore, which is never empty.
-      this.linkIgnore = ed11yContainerIgnore;
+      Ed11y.linkIgnore = ed11yContainerIgnore;
       if (ed11yLinkIgnore.length > 0) {
-        this.linkIgnore += separator + ed11yLinkIgnore;
+        Ed11y.linkIgnore += separator + ed11yLinkIgnore;
       }
 
       if (ed11yHeaderIgnore.length > 0) {
-        this.headerIgnore += separator + ed11yContainerIgnore;
+        Ed11y.headerIgnore += separator + ed11yContainerIgnore;
       }
       else {
-        this.headerIgnore = ed11yContainerIgnore;
+        Ed11y.headerIgnore = ed11yContainerIgnore;
       }
 
+      Ed11y.localData = localStorage.getItem("Ed11y.localData");
+      Ed11y.localDataParsed = Ed11y.localData ? JSON.parse(Ed11y.localData) : {};
+      Ed11y.currentPage = btoa(encodeURIComponent(window.location.pathname));
+
     };
-    this.readyPop = function ($el, text) {
+    Ed11y.readyPop = function ($el, text) {
       let thisText = "";
       let merge = 0;
       if (text) {
@@ -813,8 +878,12 @@ jQuery( document ).ready(function($) {
       }
       if ($el.attr('data-ed11y-tip')) {
         let thisPaint = $el.attr('data-ed11y-tip').split(',');
-        thisPaint.forEach(function (item) {
-          thisText += ed11y.paints[item][5];
+        thisPaint.forEach(function (i) {
+          thisText += Ed11y.paints[i][5];
+          if (!!Ed11y.paints[i][7]) {
+            thisText += "<button class='ed11y-dismissthis' data-ed11y-action='ok' data-ed11y-test='" + Ed11y.paints[i][6] + "' data-ed11y-id='" + i + "'>Mark as OK</button>" +
+                "<button class='ed11y-dismissthis' data-ed11y-action='ignore' data-ed11y-test='" + Ed11y.paints[i][6] + "'data-ed11y-id='" + i + "'>Can't be fixed</button>";
+          }
         });
         merge++;
       }
@@ -831,39 +900,78 @@ jQuery( document ).ready(function($) {
           '&times;</button><div class="ed11y-tip-content">' +
           thisText +
           '</div></div>';
-      // $el.attr('aria-expanded', 'false').addClass('ed11y-clicked').removeClass('ed11y-hover');
-      //               $tip.addClass('ed11y-hidden').removeClass('ed11y-tip-open').attr('style', '');
-      //               $el.parents('.ed11y-force-overflow').removeClass('ed11y-force-overflow');
       if (merge > 1) {
         $el.next().children('ed11y-tip-content').html(thisText);
+        $el.next().find('.ed11y-dismissthis').click(function(el) {
+          let id = Ed11y.dataset.ed11yDismissId;
+          let type = Ed11y.dataset.ed11yDismissType;
+          Ed11y.dismissThis(id, type);
+        })
       }
       else {
         $el.addClass('ed11y-tip-ready').after(thisContent);
+        $el.next().find('.ed11y-dismissthis').click(function () {
+          let id = Ed11y.dataset.ed11yId;
+          let action = Ed11y.dataset.ed11yAction;
+          let test = Ed11y.dataset.ed11yTest;
+          Ed11y.dismissThis(action, test, id);
+        });
       }
     };
+    Ed11y.dismissalKey = function (text) {
+      return String(btoa(unescape(encodeURIComponent(text)))).substring(0,128);
+    }
+    Ed11y.dismissThis = function (action, test, id) {
+      let dismissalKey = Ed11y.paints[id][7];
+      console.log(dismissalKey + " : " + action);
+      // We may get false positives, but let's not store huge keys.
+      let dismissal = {};
+      dismissal[dismissalKey] = action;
+      if (typeof Ed11y.dismissedAlerts[Ed11y.currentPage] == "undefined") {
+        let store = {};
+        store[test] = dismissal;
+        Ed11y.dismissedAlerts[Ed11y.currentPage] = store;
+      } else if (typeof Ed11y.dismissedAlerts[Ed11y.currentPage][test] === "undefined" ) {
+        Ed11y.dismissedAlerts[Ed11y.currentPage][test] = dismissal;
+      } else {
+        Ed11y.dismissedAlerts[Ed11y.currentPage][test][dismissalKey] = action;
+      }
+      $('.ed11y-tip-open').parent().remove();
+      // todo put focus somewhere that makes sense
+      // todo clear wrapper styles e.g. heading
+      // todo Ed11y.warning or errorCount--;
+      // todo Ed11y.dismissedCount++;
+      localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
+      Ed11y.paints.splice(id, 1);
+      Ed11y.updateCount('quick');
+      window.setTimeout( function() {
+        $(".ed11y-checkmessage").focus();
+      }, 100);
+    };
 
-    this.readyTips = async function (fullcheck) {
+    Ed11y.readyTips = async function (fullcheck) {
       // This function is VERY expensive.
       // Todo: optimize?
       // For now: throw chunks to the end of the render queue to prevent
       // thread locking.
-      ed11y.paints.forEach(function (el, index) {
-        ed11y.paintButton(el, index);
+
+      Ed11y.paints.forEach(function (el, index) {
+        Ed11y.paintButton(el, index);
       });
       // As soon as the buttons are in place, dispatch an event so themes
       // can react
       document.dispatchEvent(new CustomEvent("ed11yPanelOpened"));
       if (fullcheck === true) {
         window.setTimeout(function () {
-          ed11y.$img.each(function () {
+          Ed11y.$img.each(function () {
             let $img = $(this);
-            let alt = ed11y.sanitizeForHTML($img.attr('alt'));
+            let alt = Ed11y.sanitizeForHTML($img.attr('alt'));
             let src = $img.attr('src');
             let width = $img.innerWidth() + 'px';
             let height = $img.innerHeight() + 'px';
             let inject = "<div class='ed11y-container ed11y-reveal-alts ed11y-reset' " +
                 "style='width:" + width + " !important;height:" + height + " !important;'>" +
-                "<span>" + ed11y.mainToggleIcon + "Alt: " + alt + "</span></div>";
+                "<span>" + Ed11y.mainToggleIcon + "Alt: " + alt + "</span></div>";
             if ($img.prev().hasClass('ed11y-instance-inline') === true) {
               $img.prev().before(inject);
             }
@@ -895,27 +1003,27 @@ jQuery( document ).ready(function($) {
         }, 0);
       }
       window.setTimeout(function () {
-        ed11y.$pops = $('button.ed11y-pop').not('[id^="ed11y"]');
+        Ed11y.$pops = $('button.ed11y-pop').not('[id^="ed11y"]');
         let windowWidth = $(window).width();
         // Reading and writing styles creates thrashing. We must read
         // first.
-        ed11y.popNudges = [];
-        ed11y.$pops.each(function () {
+        Ed11y.popNudges = [];
+        Ed11y.$pops.each(function () {
           let $el = $(this);
           $el.on('touchend click', (function (event) {
-                if (!ed11y.doubleClickPrevent) {
-                  ed11y.popThis($el, 'click');
+                if (!Ed11y.doubleClickPrevent) {
+                  Ed11y.popThis($el, 'click');
                 }
-                ed11y.doubleClickPrevent = true;
+                Ed11y.doubleClickPrevent = true;
                 window.setTimeout(function() {
-                  ed11y.doubleClickPrevent = false;
+                  Ed11y.doubleClickPrevent = false;
                 },200);
                 return false;
               })
           );
 
           $el.filter('[aria-expanded="false"]').mouseenter(function () {
-            ed11y.popThis($el, 'hover');
+            Ed11y.popThis($el, 'hover');
           });
           // If the button will be offscreen, nudge it left or right to
           // fit.
@@ -929,9 +1037,9 @@ jQuery( document ).ready(function($) {
             // Nudge left
             offsetData = offset.left - windowWidth - 40;
           }
-          ed11y.popNudges.push([$el, offsetData]);
+          Ed11y.popNudges.push([$el, offsetData]);
         });
-        ed11y.popNudges.forEach(function (el, i) {
+        Ed11y.popNudges.forEach(function (el, i) {
           if (el[1] === 0) {
             el[0].data('ed11yTipNudge', el[1]).attr('id', 'ed11y-pop-' + i);
           }
@@ -943,15 +1051,15 @@ jQuery( document ).ready(function($) {
       }, 0);
     };
 
-    this.popThis = function ($el, trigger) {
+    Ed11y.popThis = function ($el, trigger) {
       let isNew = false;
       if ($el.hasClass('ed11y-tip-ready') === false) {
         isNew = true;
-        this.readyPop($el, '');
+        Ed11y.readyPop($el, '');
       }
       let $tip = $el.next();
       if (isNew === true) {
-        ed11y.watchPop($el, $tip);
+        Ed11y.watchPop($el, $tip);
       }
       if ($el.attr('aria-expanded') === 'true' && trigger === 'click') {
         // Close on click.
@@ -996,19 +1104,20 @@ jQuery( document ).ready(function($) {
               }
             });
           }
-          this.alignTip($el, $tip);
-          ed11y.goto = parseInt($el.attr('id').substring(10));
+          Ed11y.alignTip($el, $tip);
+          // todo looping throws an error after elements are removed
+          Ed11y.goto = parseInt($el.attr('id').substring(10));
           // Update the panel
           let ed11yGotoText = 'next';
-          if (ed11y.gotoCount === 1) {
+          if (Ed11y.gotoCount === 1) {
             ed11yGotoText = '';
           }
-          else if (ed11y.gotoCount - 1 === ed11y.goto) {
-            ed11y.goto = 0;
+          else if (Ed11y.gotoCount - 1 === Ed11y.goto) {
+            Ed11y.goto = 0;
             ed11yGotoText = 'first';
           }
           else {
-            ed11y.goto++;
+            Ed11y.goto++;
           }
           window.setTimeout(function () {
             $('.ed11y-jumpnext').text(ed11yGotoText);
@@ -1017,7 +1126,7 @@ jQuery( document ).ready(function($) {
       }
     };
 
-    this.alignTip = function ($el, $tip) {
+    Ed11y.alignTip = function ($el, $tip) {
       $tip.attr('style', '').removeClass('ed11y-tip-left ed11y-tip-under').find('.ed11y-arrow').css('left', 'initial');
       let buttonOffset = $el.offset();
       let buttonWidth = $el.outerWidth(true);
@@ -1054,7 +1163,7 @@ jQuery( document ).ready(function($) {
       }
     };
 
-    this.tipHoverAffordance = function ($el, $tip) {
+    Ed11y.tipHoverAffordance = function ($el, $tip) {
       if ($tip.is(':hover') === false && $el.is(':hover') === false && $el.is('.ed11y-hover') === true) {
         window.setTimeout(function () {
           if ($tip.is(':hover') === false && $el.is(':hover') === false) {
@@ -1067,18 +1176,18 @@ jQuery( document ).ready(function($) {
       }
     };
 
-    this.watchPop = function ($el, $tip) {
+    Ed11y.watchPop = function ($el, $tip) {
       $el.mouseleave(function () {
-        ed11y.tipHoverAffordance($el, $tip);
+        Ed11y.tipHoverAffordance($el, $tip);
       });
       $tip.mouseleave(function () {
-        ed11y.tipHoverAffordance($el, $tip);
+        Ed11y.tipHoverAffordance($el, $tip);
       });
     };
     // Todo move this to CSS
-    this.mainToggleIcon = "<svg role='img' focusable='false' width='28px' height='28px' aria-hidden='true' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='#ffffff' d='M256 48c114.953 0 208 93.029 208 208 0 114.953-93.029 208-208 208-114.953 0-208-93.029-208-208 0-114.953 93.029-208 208-208m0-40C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 56C149.961 64 64 149.961 64 256s85.961 192 192 192 192-85.961 192-192S362.039 64 256 64zm0 44c19.882 0 36 16.118 36 36s-16.118 36-36 36-36-16.118-36-36 16.118-36 36-36zm117.741 98.023c-28.712 6.779-55.511 12.748-82.14 15.807.851 101.023 12.306 123.052 25.037 155.621 3.617 9.26-.957 19.698-10.217 23.315-9.261 3.617-19.699-.957-23.316-10.217-8.705-22.308-17.086-40.636-22.261-78.549h-9.686c-5.167 37.851-13.534 56.208-22.262 78.549-3.615 9.255-14.05 13.836-23.315 10.217-9.26-3.617-13.834-14.056-10.217-23.315 12.713-32.541 24.185-54.541 25.037-155.621-26.629-3.058-53.428-9.027-82.141-15.807-8.6-2.031-13.926-10.648-11.895-19.249s10.647-13.926 19.249-11.895c96.686 22.829 124.283 22.783 220.775 0 8.599-2.03 17.218 3.294 19.249 11.895 2.029 8.601-3.297 17.219-11.897 19.249z'/></svg>";
+    Ed11y.mainToggleIcon = "<svg role='img' focusable='false' width='28px' height='28px' aria-hidden='true' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='#ffffff' d='M256 48c114.953 0 208 93.029 208 208 0 114.953-93.029 208-208 208-114.953 0-208-93.029-208-208 0-114.953 93.029-208 208-208m0-40C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 56C149.961 64 64 149.961 64 256s85.961 192 192 192 192-85.961 192-192S362.039 64 256 64zm0 44c19.882 0 36 16.118 36 36s-16.118 36-36 36-36-16.118-36-36 16.118-36 36-36zm117.741 98.023c-28.712 6.779-55.511 12.748-82.14 15.807.851 101.023 12.306 123.052 25.037 155.621 3.617 9.26-.957 19.698-10.217 23.315-9.261 3.617-19.699-.957-23.316-10.217-8.705-22.308-17.086-40.636-22.261-78.549h-9.686c-5.167 37.851-13.534 56.208-22.262 78.549-3.615 9.255-14.05 13.836-23.315 10.217-9.26-3.617-13.834-14.056-10.217-23.315 12.713-32.541 24.185-54.541 25.037-155.621-26.629-3.058-53.428-9.027-82.141-15.807-8.6-2.031-13.926-10.648-11.895-19.249s10.647-13.926 19.249-11.895c96.686 22.829 124.283 22.783 220.775 0 8.599-2.03 17.218 3.294 19.249 11.895 2.029 8.601-3.297 17.219-11.897 19.249z'/></svg>";
 
-    this.buildPanels = function (onLoad) {
+    Ed11y.buildPanels = function (onLoad) {
       if (onLoad === true) {
         // Create a floating button and hidden divs that contain
         // success/warning message.
@@ -1087,90 +1196,91 @@ jQuery( document ).ready(function($) {
 
         // Handle main toggle button.
         $("#ed11y-main-toggle").click(function (event) {
-          if (!ed11y.doubleClickPrevent) {
+          if (!Ed11y.doubleClickPrevent) {
             // Prevent clicking during scan.
-            if (ed11y.running !== true) {
-              ed11y.running = true;
+            if (Ed11y.running !== true) {
+              Ed11y.running = true;
 
               // Rescan on open, or shut.
               if ($('#ed11y-panel').hasClass('ed11y-panel-shut') === true) {
-                ed11y.checkAll(false, "show");
+                Ed11y.checkAll(false, "show");
               }
               else {
-                ed11y.reset();
+                Ed11y.reset();
               }
             }
           }
-          ed11y.doubleClickPrevent = true;
+          Ed11y.doubleClickPrevent = true;
           window.setTimeout(function() {
-            ed11y.doubleClickPrevent = false;
+            Ed11y.doubleClickPrevent = false;
           },200);
           return false;
         });
 
         // Handle jumplinks
-        this.goto = 0;
+        Ed11y.goto = 0;
         $('.ed11y-jumplink').click(function (event) {
           event.preventDefault();
 
           // Find our button.
+          // todo rewrite this to figure out next based on paint array
           let $goto = $('button[class^="ed11y"][data-ed11y-tip]').not('#ed11y-panel button');
-          ed11y.gotoCount = $goto.length;
-          ed11y.$goto = $goto.eq(ed11y.goto);
-          ed11y.gotoOffset = ed11y.$goto.offset().top - parseInt($('body').css('padding-top')) - 50;
+          Ed11y.gotoCount = $goto.length;
+          Ed11y.$goto = $goto.eq(Ed11y.goto);
+          Ed11y.gotoOffset = Ed11y.$goto.offset().top - parseInt($('body').css('padding-top')) - 50;
           // Throw an alert if the button or target is hidden.
           let $firstVisible = false;
           let $target;
-          let insert = ed11y.$goto.attr('data-ed11y-inserted');
+          let insert = Ed11y.$goto.attr('data-ed11y-inserted');
           if (insert === "before") {
-            $target = ed11y.$goto.parent().next();
+            $target = Ed11y.$goto.parent().next();
           }
           else if (insert === "prepend") {
-            $target = ed11y.$goto.parent().parent();
+            $target = Ed11y.$goto.parent().parent();
           }
           else {
-            $target = ed11y.$goto.parent().prev();
+            $target = Ed11y.$goto.parent().prev();
           }
           let alertMessage;
 
           if (ed11yHiddenHandlers.length > 0 && ($target.filter(ed11yHiddenHandlers).length > 0 || $target.parents(ed11yHiddenHandlers).length > 0)) {
             document.dispatchEvent(new CustomEvent("ed11yShowHidden", {
-              detail: {id: ed11y.$goto.attr('id')}
+              detail: {id: Ed11y.$goto.attr('id')}
             }));
             window.setTimeout(function () {
               // Go to the button.
-              ed11y.gotoOffset = ed11y.$goto.offset().top - parseInt($('body').css('padding-top')) - 50;
+              Ed11y.gotoOffset = Ed11y.$goto.offset().top - parseInt($('body').css('padding-top')) - 50;
               $('html, body').animate({
-                scrollTop: (ed11y.gotoOffset)
+                scrollTop: (Ed11y.gotoOffset)
               }, 1);
-              ed11y.popThis(ed11y.$goto, 'click');
-              ed11y.$goto.focus();
+              Ed11y.popThis(Ed11y.$goto, 'click');
+              Ed11y.$goto.focus();
             }, 500);
           }
           else {
             if ($target.filter(':visible').length === 0) {
-              $firstVisible = ed11y.$goto.parent().closest(':visible');
+              $firstVisible = Ed11y.$goto.parent().closest(':visible');
               alertMessage = ed11yInvisibleTip;
             }
-            else if (ed11y.$goto.closest('[aria-hidden="true"]').length > 0 || $target.filter('[aria-hidden="true"]').length > 0) {
-              $firstVisible = ed11y.$goto.closest('[aria-hidden="true"]').parents(':visible').first();
+            else if (Ed11y.$goto.closest('[aria-hidden="true"]').length > 0 || $target.filter('[aria-hidden="true"]').length > 0) {
+              $firstVisible = Ed11y.$goto.closest('[aria-hidden="true"]').parents(':visible').first();
               alertMessage = ed11yHiddenTip;
             }
             if ($firstVisible.length > 0) {
               alert(alertMessage);
-              $firstVisible.addClass('ed11y-hidden-highlight').prepend('<div tabindex="-1" class="ed11y-sr-only ed11y-hidden-highlight-' + ed11y.goto + '">Highlighted container</div>');
-              ed11y.gotoOffset = $firstVisible.offset().top - parseInt($('body').css('padding-top')) - 50;
-              ed11y.popThis(ed11y.$goto, 'click');
-              let thisGoTo = '.ed11y-hidden-highlight-' + ed11y.goto;
+              $firstVisible.addClass('ed11y-hidden-highlight').prepend('<div tabindex="-1" class="ed11y-sr-only ed11y-hidden-highlight-' + Ed11y.goto + '">Highlighted container</div>');
+              Ed11y.gotoOffset = $firstVisible.offset().top - parseInt($('body').css('padding-top')) - 50;
+              Ed11y.popThis(Ed11y.$goto, 'click');
+              let thisGoTo = '.ed11y-hidden-highlight-' + Ed11y.goto;
               $(thisGoTo).focus();
             }
             else {
               // Go to the button.
               $('html, body').animate({
-                scrollTop: (ed11y.gotoOffset)
+                scrollTop: (Ed11y.gotoOffset)
               }, 1);
-              ed11y.popThis(ed11y.$goto, 'click');
-              ed11y.$goto.focus();
+              Ed11y.popThis(Ed11y.$goto, 'click');
+              Ed11y.$goto.focus();
             }
           }
 
@@ -1227,10 +1337,10 @@ jQuery( document ).ready(function($) {
             $(".ed11y-full-active").removeClass('ed11y-full-active').addClass('ed11y-full-only');
           }
           else {
-            ed11y.resetTips();
+            Ed11y.resetTips();
             window.setTimeout(function () {
-              ed11y.checkFull();
-              ed11y.$h.each(function () {
+              Ed11y.checkFull();
+              Ed11y.$h.each(function () {
                 // Todo implement outline ignore function.
                 let $el = $(this);
                 if (!$el.find('.ed11y-headings-label').length) {
@@ -1246,7 +1356,7 @@ jQuery( document ).ready(function($) {
                 }
               });
               $('#ed11y-fullcheck-headers').addClass('ed11y-upper-active');
-              $("#ed11y-outline-list").html('').append(ed11y.headingOutline).focus();
+              $("#ed11y-outline-list").html('').append(Ed11y.headingOutline).focus();
               $('.ed11y-full-only').removeClass('ed11y-full-only').addClass('ed11y-full-active');
               $('.ed11y-headings-label').removeAttr('style');
               $('#ed11y-fullcheck-outline-header').focus();
@@ -1256,7 +1366,7 @@ jQuery( document ).ready(function($) {
 
         window.addEventListener('resize', function () {
           if ($('#ed11y-summary-toggle').attr('aria-expanded') === 'true') {
-            ed11y.checkRoot.find('img').each(function () {
+            Ed11y.checkRoot.find('img').each(function () {
               let width = $(this).innerWidth() + 'px';
               let height = $(this).innerHeight() + 'px';
               $(this).prevAll('.ed11y-reveal-alts').css({
@@ -1268,7 +1378,7 @@ jQuery( document ).ready(function($) {
           let $tip = $('.ed11y-tip-open');
           if ($tip.length > 0) {
             let $el = $tip.prev();
-            ed11y.alignTip($el, $tip);
+            Ed11y.alignTip($el, $tip);
           }
         });
 
@@ -1293,7 +1403,7 @@ jQuery( document ).ready(function($) {
       }
     };
 
-    this.sanitizeForHTML = function (string) {
+    Ed11y.sanitizeForHTML = function (string) {
       let entityMap = {
         '&': '&amp;',
         '<': '&lt;',
@@ -1309,7 +1419,8 @@ jQuery( document ).ready(function($) {
       });
     }
 
-  }
-  // End of Ed11y library.
 
-});
+  }
+
+}
+
