@@ -330,8 +330,8 @@ class Ed11y {
 
       // Remove buttons.
       $('[data-ed11y-marked]').removeAttr('data-ed11y-marked');
-      Ed11y.checkRoot.querySelectorAll('.ed11y-instance, .ed11y-instance-inline, .ed11y-headings-label, .ed11y-reveal-alts').forEach((el) => el.remove());
-      Ed11y.checkRoot.querySelectorAll('[data-ed11y-marked]').forEach((el) => el.removeAttribute('data-ed11y-marked'));
+      Ed11y.root.querySelectorAll('.ed11y-instance, .ed11y-instance-inline, .ed11y-headings-label, .ed11y-reveal-alts').forEach((el) => el.remove());
+      Ed11y.root.querySelectorAll('[data-ed11y-marked]').forEach((el) => el.removeAttribute('data-ed11y-marked'));
     };
 
     Ed11y.resetClass = function (selectors) {
