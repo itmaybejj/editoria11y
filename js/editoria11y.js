@@ -2,7 +2,7 @@ class Ed11y {
   'use strict';
   constructor(options) {
     let defaultOptions = {
-      ed11yCheckRoot: "",
+      checkRoot : "body",
       ed11yAlertMode : "polite",
       ed11yNoRun : "",
       ed11yContainerIgnore : ".project-tagline",
@@ -16,10 +16,16 @@ class Ed11y {
       ed11yHiddenHandlers : "",
       ed11yDownloadLinks : "a[href$='.pdf'], a[href*='.pdf?'], a[href$='.doc'], a[href$='.docx'], a[href*='.doc?'], a[href*='.docx?'], a[href$='.ppt'], a[href$='.pptx'], a[href*='.ppt?'], a[href*='.pptx?'], a[href^='https://docs.google']",
     };
+
     options = {
       ...defaultOptions,
       ...options
     };
+
+    Ed11y.checkRunPrevent = function() {
+      return options.ed11yNoRun.trim().length > 0 ? document.querySelector(options.ed11yNoRun) : false;
+    }
+
     // todo: const M = ed11yLang;
     // todo: move html to another file
     this.initialize = () => {
@@ -34,8 +40,7 @@ class Ed11y {
 
       //Once document has fully loaded.
       documentLoadingCheck(() => {
-        let noRun = options.ed11yNoRun.trim.length > 0 ? document.querySelector(options.ed11yNoRun) : false;
-        if (!noRun) {
+        if (!Ed11y.checkRunPrevent()) {
           Ed11y.running = true;
           Ed11y.loadGlobals();
           Ed11y.checkAll(true, 'hide');
@@ -48,13 +53,21 @@ class Ed11y {
 
     // Toggles the outline of all headers, link texts, and images.
     Ed11y.checkAll = async function (onLoad, showPanel) {
-      if ($(ed11yNoRun).length === 0) {
+      if (!Ed11y.checkRunPrevent()) {
         Ed11y.paints = [];
+        Ed11y.paintsJS = [];
         Ed11y.errorCount = 0;
         Ed11y.warningCount = 0;
         Ed11y.dismissedCount = 0;
         Ed11y.mediaCount = 0;
-        Ed11y.checkRoot = $(ed11yCheckRoot);
+        Ed11y.root = document.querySelector(options.checkRoot);
+        // If target root can't be found, fall back to default.
+        if (!Ed11y.root) {
+          Ed11y.root = document.querySelector("body");
+          console.error('Check Editoria11y configuration; specified root element not found');
+        }
+        // Todo: remove. Placeholder for unconverted jQuery references.
+        Ed11y.checkRoot = $(Ed11y.root);
         Ed11y.findElements();
 
         // Get list of elements already hidden
@@ -75,7 +88,9 @@ class Ed11y {
                   Ed11y.buildPanels(onLoad);
                   window.setTimeout(function () {
                     Ed11y.updatePanel(onLoad, showPanel);
-                    $('#ed11y-main-toggle').removeClass('disabled').removeAttr('aria-disabled').removeAttr('title');
+                    Ed11y.panelToggle.classList.remove('disabled');
+                    Ed11y.panelToggle.removeAttribute("aria-disabled");
+                    Ed11y.panelToggle.removeAttribute("title");
                   },0);
                 },0);
               },0);
@@ -87,7 +102,9 @@ class Ed11y {
       }
       else {
         Ed11y.reset();
-        $('#ed11y-main-toggle').addClass('disabled').attr('aria-disabled', 'true').attr('title', 'Editoria11y is disabled during live editing.');
+        Ed11y.panelToggle.classList.add('disabled');
+        Ed11y.panelToggle.setAttribute("aria-expanded", "true");
+        Ed11y.panelToggle.setAttribute("title", "Editorially is disabled during live editing.");
       }
     };
 
@@ -129,7 +146,7 @@ class Ed11y {
         }
         Ed11y.localDataParsed[Ed11y.currentPage] = totalFound;
         window.setTimeout(function() {
-          $('#ed11y-aria-live').text('Editorially reports: ' + $('.ed11y-checkmessage').text());
+          document.getElementById('ed11y-aria-live').innerHTML = Ed11y.getText(Ed11y.panelMessage);
         }, 1500);
       }
       else if (onLoad === true && totalFound === 0) {
@@ -141,17 +158,16 @@ class Ed11y {
         Ed11y.reset();
       }
       else {
-        $('.ed11y-panel-minimized').removeClass('ed11y-panel-minimized');
-        $('#ed11y-panel').removeClass('ed11y-panel-shut');
-        document.getElementById("ed11y-panel").classList.add("ed11y-panel-active");
-        $('#ed11y-main-toggle').attr('aria-expanded', 'true');
+        Ed11y.panel.classList.remove('ed11y-panel-shut', 'ed11y-panel-shut');
+        Ed11y.panel.classList.add("ed11y-panel-active");
+        Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
         window.setTimeout(function () {
           document.dispatchEvent(new CustomEvent("ed11yPanelOpened"));
           Ed11y.readyTips();
         }, 0);
         if (onLoad === false) {
           window.setTimeout(function() {
-            $('.ed11y-checkmessage').focus();
+            Ed11y.panelMessage.focus();
           }, 500);
         }
       }
@@ -159,6 +175,7 @@ class Ed11y {
     };
 
     Ed11y.paintButton = function (el, index) {
+      // todo: paints are based on jQuery objects. Will need to change all at once.
       // We parse this long array:
       // [0] $el element
       // [1] insertion position
@@ -179,7 +196,6 @@ class Ed11y {
           ' ed11y-pop" style="display:none;" aria-expanded="false" data-ed11y-inserted="' + el[1] + '" data-ed11y-tip="' +
           index +
           '">' + icon + '</button></div>';
-      console.log(index + el[0]);
       let pretagged = el[0].attr('data-ed11y-marked');
       if (pretagged === 'before') {
         el[0].prev().find('.ed11y-pop').attr('data-ed11y-tip', el[0].prev().find('.ed11y-pop').attr('data-ed11y-tip') + ',' + index);
@@ -203,33 +219,91 @@ class Ed11y {
         }
       }
     };
+    Ed11y.paintButtonJS = function (el, index) {
+      // todo: paints are based on jQuery objects. Will need to change all at once.
+      // We parse this long array:
+      // [0] $el element
+      // [1] insertion position
+      // [2] is element block or inline
+      // [3] wrapper class
+      // [4] button class
+      // [5] message
+      // [6] test shortname
+      // [7] ID key for dismissing
+      // e.g.: Ed11y.paints.push([$el,'before','ed11y-instance','ed11y-error-border','ed11y-warning-btn',generalAltText]);
+      // Warning, error or hidden?
+      let icon = '<span class="ed11y-sr-only">Show editorially error</span>';
+      if (el[4].indexOf('warning') !== -1) {
+        icon = '<span class="ed11y-sr-only">Show editorially warning</span>';
+      }
+      let injection = '<div class="' + el[2] + ' ed11y-reset"><button type="button" class="' +
+          el[4] +
+          ' ed11y-pop" style="display:none;" aria-expanded="false" data-ed11y-inserted="' + el[1] + '" data-ed11y-tip="' +
+          index +
+          '">' + icon + '</button></div>';
+      let pretagged = el[0].getAttribute('data-ed11y-marked');
+      if (pretagged === 'before') {
+        let pop = el[0].previousElementSibling;
+        let tip = pop.querySelector('.ed11y-pop');
+        tip.setAttribute('data-ed11y-tip', index);
+      }
+      else if (pretagged === 'after') {
+        let pop = el[0].nextElementSibling;
+        let tip = pop.querySelector('.ed11y-pop');
+        tip.setAttribute('data-ed11y-tip', index);
+      }
+      else if (pretagged === 'prepend') {
+        let tip = el[0].querySelector('.ed11y-pop');
+        tip.setAttribute('data-ed11y-tip', index);
+      }
+      else {
+        el[0].classList.add(el[3]);
+        if (el[1] === 'after') {
+          el[0].setAttribute('data-ed11y-marked','after');
+          el[0].insertAdjacentElement('afterend', injection);
+        }
+        else if (el[1] === 'before') {
+          el[0].setAttribute('data-ed11y-marked','before');
+          el[0].insertAdjacentElement('beforebegin', injection);
+        }
+        else {
+          el[0].setAttribute('data-ed11y-marked','prepend');
+          el[0].insertBefore(injection, el[0].firstChild);
+        }
+      }
+    };
 
     // Show a warning/error count on the toggle button.
     Ed11y.updateCount = function () {
       let totalCount = Ed11y.errorCount + Ed11y.warningCount;
       if (totalCount > 0) {
-        $('.ed11y-count').text(totalCount).attr('style', 'display: inline-block !important;');
-        $('.ed11y-jumpnext').text(totalCount > 1 ? 'first' : '');
+        Ed11y.panelCount.innerText = totalCount;
+        Ed11y.panelCount.style.display = 'inline-block !important';
+        Ed11y.panelNextButton.innerText = totalCount > 1 ? 'first' : '';
         if (Ed11y.errorCount > 0) {
-          $('#ed11y-panel').removeClass('ed11y-pass ed11y-warnings').addClass('ed11y-errors');
-          $('.ed11y-checkmessage').text(totalCount === 1 ? 'One accessibility issue detected.' : totalCount + ' accessibility issues detected.');
+          Ed11y.panel.classList.remove('ed11y-pass', 'ed11y-warnings');
+          Ed11y.panel.classList.add('ed11y-errors');
+          Ed11y.panelMessage.innerHTML = totalCount === 1 ? 'One accessibility issue detected.' : totalCount + ' accessibility issues detected.';
         }
         else if (Ed11y.warningCount > 0) {
-          $('#ed11y-panel').removeClass('ed11y-pass ed11y-errors').addClass('ed11y-warnings');
-          $('.ed11y-checkmessage').text(totalCount === 1 ? 'One manual check needed.' : totalCount + ' manual checks needed.');
+          Ed11y.panel.classList.remove('ed11y-pass', 'ed11y-errors');
+          Ed11y.panel.classList.add('ed11y-warnings');
+          Ed11y.panelMessage.innerHTML = totalCount === 1 ? 'One manual check needed.' : totalCount + ' manual checks needed.';
         }
       }
       else {
-        $('.ed11y-checkmessage').text('No Accessibility errors detected.');
-        $('.ed11y-count').attr('style', 'display: none !important;');
-        $('#ed11y-panel').removeClass('ed11y-warnings ed11y-errors').addClass('ed11y-pass');
+        Ed11y.panelMessage.innerText = 'No Accessibility errors detected.';
+        Ed11y.panelCount.style.display = 'display: none !important;';
+        Ed11y.panel.classList.remove('ed11y-warnings ed11y-errors');
+        Ed11y.panel.classList.add('ed11y-pass');
       }
       if (Ed11y.dismissedCount.length > 0) {
+        // Todo dejQuery
         $('#ed11y-show-dismissed').attr('style', 'display: inline-block !important;');
       } else {
         $('#ed11y-show-dismissed').attr('style', 'display: none !important;');
       }
-      $('.ed11y-preload').removeClass('ed11y-preload');
+      Ed11y.panel.classList.remove('ed11y-preload');
     };
 
     // Resets all changes made by the tool. Removing outlines and
@@ -239,31 +313,34 @@ class Ed11y {
       Ed11y.resetTips();
 
       // Remove and reset panels and active items.
-      $(".ed11y-fullcheck li, .ed11y-about-text").remove();
-      $("#ed11y-main-toggle").attr("aria-expanded", "false").removeClass("ed11y-toggle-active ed11y-errors ed11y-warnings");
-      $("#ed11y-panel").removeClass("ed11y-panel-minimized ed11y-panel-active").addClass('ed11y-panel-shut');
-      $(".ed11y-upper-active").removeClass("ed11y-upper-active");
-      $("#ed11y-panel-buttonbar [aria-pressed='true']").attr('aria-pressed', 'false');
+      Ed11y.panel.querySelectorAll('.ed11y-fullcheck li, .ed11y-about-text').forEach((el) => el.remove());
+      Ed11y.panel.classList.add('ed11y-panel-shut');
+      Ed11y.panel.classList.remove('ed11y-panel-minimized', 'ed11y-panel-active');
+      Ed11y.panelToggle.setAttribute('aria-expanded', false);
+      Ed11y.panelToggle.classList.remove('ed11y-toggle-active', 'ed11y-errors', 'ed11y-warnings');
+      Ed11y.panel.querySelectorAll('.ed11y-upper-active').forEach((el) => el.classList.remove('ed11y-upper-active'));
+      Ed11y.panel.querySelectorAll('#ed11y-panel-buttonbar [aria-pressed="true"]').forEach((el) => el.setAttribute('aria-pressed', 'false'));
       Ed11y.running = false;
     };
 
     Ed11y.resetTips = function () {
       // Remove error outlines.
-      Ed11y.checkRoot.find(".ed11y-text-warning").removeClass("ed11y-text-warning");
-      Ed11y.checkRoot.find(".ed11y-link-text-warning").removeClass("ed11y-link-text-warning");
-      Ed11y.checkRoot.find(".ed11y-error-border").removeClass("ed11y-error-border");
-      Ed11y.checkRoot.find(".ed11y-warning-border").removeClass("ed11y-warning-border");
-      Ed11y.checkRoot.find(".ed11y-headings-fail").removeClass("ed11y-headings-fail");
-      Ed11y.checkRoot.find(".ed11y-link-text-fail").removeClass("ed11y-link-text-fail");
-      Ed11y.checkRoot.find(".ed11y-hidden-highlight").removeClass("ed11y-hidden-highlight");
-      Ed11y.checkRoot.find(".ed11y-uppercase-warning").removeClass("ed11y-uppercase-warning");
-      $('body').removeClass("ed11y-pops-ready");
+      Ed11y.resetClass(['ed11y-text-warning', 'ed11y-link-text-warning','ed11y-error-border','ed11y-warning-border','ed11y-headings-fail','ed11y-link-text-fail', 'ed11y-hidden-highlight','ed11y-uppercase-warning'])
+      document.querySelector('body').classList.remove('ed11y-pops-ready');
 
       // Remove buttons.
       $('[data-ed11y-marked]').removeAttr('data-ed11y-marked');
-      Ed11y.checkRoot.find(".ed11y-instance, .ed11y-instance-inline, .ed11y-headings-label, .ed11y-reveal-alts").remove();
+      Ed11y.checkRoot.querySelectorAll('.ed11y-instance, .ed11y-instance-inline, .ed11y-headings-label, .ed11y-reveal-alts').forEach((el) => el.remove());
+      Ed11y.checkRoot.querySelectorAll('[data-ed11y-marked]').forEach((el) => el.removeAttribute('data-ed11y-marked'));
     };
 
+    Ed11y.resetClass = function (selectors) {
+      selectors.forEach((selector) => {
+        document.querySelectorAll('.' + selector).forEach((el) => el.classList.remove(selector));
+      })
+    }
+
+    // todo continue from heeeere.
     /*================== HEADING STRUCTURE MODULE ===================*/
 
     Ed11y.checkHeaders = async function () {
@@ -822,11 +899,6 @@ class Ed11y {
 
     Ed11y.loadGlobals = function () {
 
-      // Look for a content container
-      if (typeof (ed11yCheckRoot) !== 'string' || $(ed11yCheckRoot).length === 0) {
-        ed11yCheckRoot = 'body';
-      }
-
       // Combine default and custom ignores.
       let separator = ", ";
 
@@ -923,7 +995,6 @@ class Ed11y {
     }
     Ed11y.dismissThis = function (action, test, id) {
       let dismissalKey = Ed11y.paints[id][7];
-      console.log(dismissalKey + " : " + action);
       // We may get false positives, but let's not store huge keys.
       let dismissal = {};
       dismissal[dismissalKey] = action;
@@ -945,7 +1016,7 @@ class Ed11y {
       Ed11y.paints.splice(id, 1);
       Ed11y.updateCount('quick');
       window.setTimeout( function() {
-        $(".ed11y-checkmessage").focus();
+        $("#ed11y-resultmessage").focus();
       }, 100);
     };
 
@@ -955,8 +1026,13 @@ class Ed11y {
       // For now: throw chunks to the end of the render queue to prevent
       // thread locking.
 
-      Ed11y.paints.forEach(function (el, index) {
+      Ed11y.paints?.forEach(function (el, index) {
+        // todo: need to change all at once.
         Ed11y.paintButton(el, index);
+      });
+      Ed11y.paintsJS.forEach(function (el, index) {
+        // todo: need to change all at once.
+        Ed11y.paintButtonJS(el, index);
       });
       // As soon as the buttons are in place, dispatch an event so themes
       // can react
@@ -971,7 +1047,7 @@ class Ed11y {
             let height = $img.innerHeight() + 'px';
             let inject = "<div class='ed11y-container ed11y-reveal-alts ed11y-reset' " +
                 "style='width:" + width + " !important;height:" + height + " !important;'>" +
-                "<span>" + Ed11y.mainToggleIcon + "Alt: " + alt + "</span></div>";
+                "<span>" + Ed11y.panelToggleIcon + "Alt: " + alt + "</span></div>";
             if ($img.prev().hasClass('ed11y-instance-inline') === true) {
               $img.prev().before(inject);
             }
@@ -1185,7 +1261,7 @@ class Ed11y {
       });
     };
     // Todo move this to CSS
-    Ed11y.mainToggleIcon = "<svg role='img' focusable='false' width='28px' height='28px' aria-hidden='true' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='#ffffff' d='M256 48c114.953 0 208 93.029 208 208 0 114.953-93.029 208-208 208-114.953 0-208-93.029-208-208 0-114.953 93.029-208 208-208m0-40C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 56C149.961 64 64 149.961 64 256s85.961 192 192 192 192-85.961 192-192S362.039 64 256 64zm0 44c19.882 0 36 16.118 36 36s-16.118 36-36 36-36-16.118-36-36 16.118-36 36-36zm117.741 98.023c-28.712 6.779-55.511 12.748-82.14 15.807.851 101.023 12.306 123.052 25.037 155.621 3.617 9.26-.957 19.698-10.217 23.315-9.261 3.617-19.699-.957-23.316-10.217-8.705-22.308-17.086-40.636-22.261-78.549h-9.686c-5.167 37.851-13.534 56.208-22.262 78.549-3.615 9.255-14.05 13.836-23.315 10.217-9.26-3.617-13.834-14.056-10.217-23.315 12.713-32.541 24.185-54.541 25.037-155.621-26.629-3.058-53.428-9.027-82.141-15.807-8.6-2.031-13.926-10.648-11.895-19.249s10.647-13.926 19.249-11.895c96.686 22.829 124.283 22.783 220.775 0 8.599-2.03 17.218 3.294 19.249 11.895 2.029 8.601-3.297 17.219-11.897 19.249z'/></svg>";
+    Ed11y.panelToggleIcon = "<svg role='img' focusable='false' width='28px' height='28px' aria-hidden='true' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='#ffffff' d='M256 48c114.953 0 208 93.029 208 208 0 114.953-93.029 208-208 208-114.953 0-208-93.029-208-208 0-114.953 93.029-208 208-208m0-40C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 56C149.961 64 64 149.961 64 256s85.961 192 192 192 192-85.961 192-192S362.039 64 256 64zm0 44c19.882 0 36 16.118 36 36s-16.118 36-36 36-36-16.118-36-36 16.118-36 36-36zm117.741 98.023c-28.712 6.779-55.511 12.748-82.14 15.807.851 101.023 12.306 123.052 25.037 155.621 3.617 9.26-.957 19.698-10.217 23.315-9.261 3.617-19.699-.957-23.316-10.217-8.705-22.308-17.086-40.636-22.261-78.549h-9.686c-5.167 37.851-13.534 56.208-22.262 78.549-3.615 9.255-14.05 13.836-23.315 10.217-9.26-3.617-13.834-14.056-10.217-23.315 12.713-32.541 24.185-54.541 25.037-155.621-26.629-3.058-53.428-9.027-82.141-15.807-8.6-2.031-13.926-10.648-11.895-19.249s10.647-13.926 19.249-11.895c96.686 22.829 124.283 22.783 220.775 0 8.599-2.03 17.218 3.294 19.249 11.895 2.029 8.601-3.297 17.219-11.897 19.249z'/></svg>";
 
     Ed11y.buildPanels = function (onLoad) {
       if (onLoad === true) {
@@ -1193,17 +1269,23 @@ class Ed11y {
         // success/warning message.
 
         $('body').append(ed11yPanel);
+        Ed11y.panel = document.getElementById('ed11y-panel');
+        Ed11y.panelToggle = Ed11y.panel.querySelector('#ed11y-main-toggle');
+        Ed11y.panelMessage = Ed11y.panel.querySelector('#ed11y-resultmessage');
+        Ed11y.panelCount = Ed11y.panel.querySelector('.ed11y-count');
+        Ed11y.panelNextButton = Ed11y.panel.querySelector('.ed11y-jumpnext');
 
         // Handle main toggle button.
-        $("#ed11y-main-toggle").click(function (event) {
+        // todo jQuery handled keyboard press, abstract this and emulate
+        Ed11y.panelToggle.onclick = function (event) {
           if (!Ed11y.doubleClickPrevent) {
             // Prevent clicking during scan.
             if (Ed11y.running !== true) {
               Ed11y.running = true;
 
               // Rescan on open, or shut.
-              if ($('#ed11y-panel').hasClass('ed11y-panel-shut') === true) {
-                Ed11y.checkAll(false, "show");
+              if (Ed11y.panel.classList.contains('ed11y-panel-shut') === true) {
+                Ed11y.checkAll(false, "show").catch(console.error);
               }
               else {
                 Ed11y.reset();
@@ -1215,7 +1297,7 @@ class Ed11y {
             Ed11y.doubleClickPrevent = false;
           },200);
           return false;
-        });
+        };
 
         // Handle jumplinks
         Ed11y.goto = 0;
@@ -1402,6 +1484,10 @@ class Ed11y {
         });
       }
     };
+
+    Ed11y.getText = function(elem) {
+      return elem.innerText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
+    }
 
     Ed11y.sanitizeForHTML = function (string) {
       let entityMap = {

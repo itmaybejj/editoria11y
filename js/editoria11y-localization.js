@@ -21,7 +21,7 @@ ed11yPanel = "" +
     "<div id='ed11y-panel-content'>" +
     "<div class='ed11y-panel-icon'></div>" +
     "<div id='ed11y-panel-text'>" +
-    "<span class='ed11y-checkmessage' tabindex='-1'><span class='ed11y-panel-count'>No</span> <span class='ed11y-panel-messagetype'>accessibility errors detected</span>.</span><br>" +
+    "<span id='ed11y-resultmessage' tabindex='-1'><span class='ed11y-panel-count'>No</span> <span class='ed11y-panel-messagetype'>accessibility errors detected</span>.</span><br>" +
     "<a href='#' class='ed11y-jumplink ed11y-small'>Show <span class='ed11y-jumpnext'>first</span> <span aria-hidden='true'> »</span></a>" +
     "</div>" +
     "</div>" +
@@ -30,7 +30,7 @@ ed11yPanel = "" +
     "<button type='button' class='ed11y-button ed11y-about' title='About this tool' aria-label='about' aria-pressed='false'>?</button>" +
     "<button type='button' class='ed11y-minimize ed11y-button' title='Minimize panel' aria-label='Minimize panel' aria-pressed='false'><span></span></button>" +
     "<button type='button' id='ed11y-shutpanel' title='Close panel' class='ed11y-button ed11y-panel-button' aria-label='close panel'>&times;</button>" +
-    "<button type='button' id='ed11y-main-toggle' class='ed11y-preload' aria-expanded='false' title='Accessibility checker'><span class='ed11y-toggle-icon'></span><span class='ed11y-sr-only'>Show accessibility scan panel with</span><span class='ed11y-count'></span><span class='ed11y-sr-only'>issues</span></button>" +
+    "<button type='button' id='ed11y-main-toggle' aria-expanded='false' title='Accessibility checker'><span class='ed11y-toggle-icon'></span><span class='ed11y-sr-only'>Show accessibility scan panel with</span><span class='ed11y-count'></span><span class='ed11y-sr-only'>issues</span></button>" +
     "</div>" +
     "<div aria-live='polite' class='ed11y-sr-only' id='ed11y-aria-live'></div>" +
     "</div>";
