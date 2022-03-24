@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: webUi-${{ matrix.browser }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        browser: ["chrome", "firefox"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: npm-install
+        run: npm install
+
+      - name: start-selenkum
+        run: java -jar ./tests/lib/selenium/selenium-server-4.1.2.jar

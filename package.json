@@ -9,5 +9,14 @@
   "bugs": {
     "url": "https://github.com/itmaybejj/editoria11y/issues"
   },
-  "license": "GPLv2"
+  "license": "GPLv2",
+  "devDependencies": {
+    "@cucumber/cucumber": "^7.3.2",
+    "@cucumber/pretty-formatter": "^1.0.0-alpha.2",
+    "axios": "^0.26.0",
+    "chromedriver": "^99.0.0",
+    "geckodriver": "^3.0.1",
+    "nightwatch": "^2.0.10",
+    "nightwatch-api": "^3.0.1"
+  }
 }
