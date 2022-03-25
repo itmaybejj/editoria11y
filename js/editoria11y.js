@@ -7,9 +7,9 @@ class Ed11y {
       ed11yNoRun : "",
       ed11yContainerIgnore : ".project-tagline",
       ed11yEmbeddedContentWarning : "",
-      ed11yOutlineIgnore : "",
+      outlineIgnore : "",
       ed11yImageIgnore : "",
-      ed11yHeaderIgnore : ".project-tagline",
+      headerIgnore : "",
       ed11yLinkIgnore : "",
       ed11yIgnoreLinkStrings : "",
       ed11yAllowOverflow : "",
@@ -74,8 +74,7 @@ class Ed11y {
         let ed11yDismissed = localStorage.getItem("ed11ydismissed");
         Ed11y.dismissedAlerts = ed11yDismissed ? JSON.parse(ed11yDismissed) : {};
 
-        // This is madness, but it prevents jank by allowing other scripts
-        // to run between each test group.
+        // Waiting to enqueue lets user interactions interrupt execution.
         window.setTimeout(function () {
           Ed11y.checklinkText();
           window.setTimeout(function () {
@@ -232,15 +231,20 @@ class Ed11y {
       // [7] ID key for dismissing
       // e.g.: Ed11y.paints.push([$el,'before','ed11y-instance','ed11y-error-border','ed11y-warning-btn',generalAltText]);
       // Warning, error or hidden?
-      let icon = '<span class="ed11y-sr-only">Show editorially error</span>';
+      let icon = document.createElement("span");
+      icon.classList.add('ed11y-sr-only');
       if (el[4].indexOf('warning') !== -1) {
-        icon = '<span class="ed11y-sr-only">Show editorially warning</span>';
+        icon.textContent = 'Show editorially warning';
+      } else {
+        icon.textContent = 'Show editorially error';
       }
-      let injection = '<div class="' + el[2] + ' ed11y-reset"><button type="button" class="' +
+      let injection = document.createElement('div');
+      injection.classList.add(el[2], 'ed11y-reset');
+      injection.innerHTML = '<button type="button" class="' +
           el[4] +
           ' ed11y-pop" style="display:none;" aria-expanded="false" data-ed11y-inserted="' + el[1] + '" data-ed11y-tip="' +
           index +
-          '">' + icon + '</button></div>';
+          '">' + icon + '</button>';
       let pretagged = el[0].getAttribute('data-ed11y-marked');
       if (pretagged === 'before') {
         let pop = el[0].previousElementSibling;
@@ -329,23 +333,16 @@ class Ed11y {
       document.querySelector('body').classList.remove('ed11y-pops-ready');
 
       // Remove buttons.
-      $('[data-ed11y-marked]').removeAttr('data-ed11y-marked');
       Ed11y.root.querySelectorAll('.ed11y-instance, .ed11y-instance-inline, .ed11y-headings-label, .ed11y-reveal-alts').forEach((el) => el.remove());
       Ed11y.root.querySelectorAll('[data-ed11y-marked]').forEach((el) => el.removeAttribute('data-ed11y-marked'));
     };
 
-    Ed11y.resetClass = function (selectors) {
-      selectors.forEach((selector) => {
-        document.querySelectorAll('.' + selector).forEach((el) => el.classList.remove(selector));
-      })
-    }
 
-    // todo continue from heeeere.
     /*================== HEADING STRUCTURE MODULE ===================*/
 
     Ed11y.checkHeaders = async function () {
       // Reset panel; we rebuild on each run.
-      $("#ed11y-outline-list li, .ed11y-headings-label").remove();
+      Ed11y.panel?.querySelectorAll("#ed11y-outline-list li, .ed11y-headings-label").forEach((el) => el.remove());
 
       // Only fetch headers within the content area.
 
@@ -353,22 +350,22 @@ class Ed11y {
       Ed11y.headingOutline = "";
 
       // Test each header level for accessibility issues.
-      Ed11y.$h.each((i, el) => {
-        let $el = $(el);
+      Ed11y.allH.forEach((el, i) => {
         let level;
 
-        // Match up aria-headers to equivalent <h#> tag.
-        if ($el.attr('aria-level')) {
-          level = +$el.attr('aria-level');
+        // Match aria-headers to <h#> level.
+        if (el.hasAttribute('aria-level')) {
+          // Plus forces numerical type
+          level = +el.getAttribute('aria-level');
         }
         else {
-          level = +$el[0].tagName.slice(1);
+          level = +el.tagName.slice(1);
         }
         let headingError = "";
         let outlinePrefix = "";
         let ed11yTip = "";
-        let headingText = $el.text();
-        let headingLength = headingText.trim().length;
+        let headingText = Ed11y.getText(el);
+        let headingLength = headingText.length;
         let dismissKey = false;
         if (level - prevLevel > 1 && i !== 0) {
           headingError = 'ed11y-warning-btn';
@@ -377,7 +374,9 @@ class Ed11y {
           ed11yTip = ed11yMessageHeadingLevelSkipped(prevLevel, level);
         }
         if (headingLength < 1) {
-          let headingSubText = $el.find('img').attr('alt');
+          // todo: proper text recursion
+          // todo: test with no alt attribute at all
+          let headingSubText = el.querySelector('img')?.getAttribute('alt');
           if (!headingSubText || headingSubText.length === 0) {
             headingError = 'ed11y-warning-btn';
             outlinePrefix = '(empty heading)';
@@ -396,38 +395,42 @@ class Ed11y {
         // If the heading error is within a hyperlink, make sure to
         // append button after anchor tag.
         // Todo add this case to the test page
-        if (headingError !== "" && $el.not(Ed11y.headerIgnore).length !== 0) {
-          if ($el.closest("a").length > 0) {
-            Ed11y.paints.push([$el.closest('a'), 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
+        // Todo test new header ignore
+        if (headingError !== "") {
+          // todo: just use container ignore?
+          if (!(options.headerIgnore !== "" && el?.closest(options.headerIgnore))) {
+            if (!el?.closest("a")) {
+              Ed11y.paintsJS.push([el, 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
+            }
+            else {
+              Ed11y.paintsJS.push([el.closest('a'), 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
+            }
+            // Outline element if there is an error.
+            liClass += " ed11y-text-warning";
+            liPrefix = "<span class='ed11y-sr-only'> Warning: </span> ";
           }
-          else {
-            Ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
-          }
-          // Outline element if there is an error.
-          liClass += " ed11y-text-warning";
-          liPrefix = "<span class='ed11y-sr-only'> Warning: </span> ";
         }
         if (outlinePrefix) {
           outlinePrefix = "<span class='ed11y-small'><em>" + outlinePrefix +
               "</em></span>";
         }
-        if ($el.not(ed11yOutlineIgnore).length !== 0) {
+        // todo: is this the golden ignore check?
+        if (!(options.ed11yOutlineIgnore !== "" && el?.closest(options.ed11yOutlineIgnore))) {
           Ed11y.headingOutline += "<li class='" + liClass + "'>" +
               "<span class='ed11y-small'>" + level + "</span> " +
-              liPrefix + outlinePrefix + $el.text() +
+              liPrefix + outlinePrefix + el.textContent +
               "</li>";
         }
       });
 
       // Check for blockquotes used as headings. If it's less than 25
       // characters - it's probably not a blockquote.
-      let $blockquotes = Ed11y.checkRoot.find("blockquote").not(Ed11y.containerIgnore);
-      $blockquotes.each((i, el) => {
-        let $el = $(el);
-        let text = $el.text().trim();
+      let blockquotes = Ed11y.root.querySelectorAll("blockquote");
+      blockquotes.forEach((el, i) => {
+        let text = Ed11y.getText(el);
         if (text.length < 25) {
           let dismissalKey = Ed11y.dismissalKey(text);
-          Ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageFullCheckBlockquote, "blockquoteLength", dismissalKey]);
+          Ed11y.paintsJS.push([el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageFullCheckBlockquote, "blockquoteLength", dismissalKey]);
         }
       });
 
@@ -890,7 +893,7 @@ class Ed11y {
     Ed11y.findElements = function () {
       // Find and cache so we don't have tests looking willynilly.
       Ed11y.$p = Ed11y.checkRoot.find('p').not(Ed11y.containerIgnore);
-      Ed11y.$h = Ed11y.checkRoot.find("h1, h2, h3, h4, h5, h6, [role='heading'][aria-level]").not(Ed11y.containerIgnore);
+      Ed11y.allH = Ed11y.root.querySelectorAll("h1, h2, h3, h4, h5, h6, [role='heading'][aria-level]");
       Ed11y.$img = Ed11y.checkRoot.find("img").not(Ed11y.imageIgnore);
       Ed11y.$embed = Ed11y.checkRoot.find("iframe, audio, video").not(Ed11y.containerIgnore);
       Ed11y.$table = Ed11y.checkRoot.find("table").not(Ed11y.containerIgnore);
@@ -1422,19 +1425,18 @@ class Ed11y {
             Ed11y.resetTips();
             window.setTimeout(function () {
               Ed11y.checkFull();
-              Ed11y.$h.each(function () {
+              Ed11y.allH.forEach((el) => {
                 // Todo implement outline ignore function.
-                let $el = $(this);
-                if (!$el.find('.ed11y-headings-label').length) {
+                if (!el?.querySelector('.ed11y-headings-label')) {
                   let level;
                   // Match up aria-headers to equivalent <h#> tag.
-                  if ($el.attr('aria-level')) {
-                    level = +$el.attr('aria-level');
+                  if (el.hasAttribute('aria-level')) {
+                    level = el.getAttribute('aria-level');
                   }
                   else {
-                    level = +$el[0].tagName.slice(1);
+                    level = +el.tagName.slice(1);
                   }
-                  $(this).prepend(" <span class='ed11y-headings-label'>H" + level + "</span> ");
+                  $(el).prepend(" <span class='ed11y-headings-label'>H" + level + "</span> ");
                 }
               });
               $('#ed11y-fullcheck-headers').addClass('ed11y-upper-active');
@@ -1485,9 +1487,18 @@ class Ed11y {
       }
     };
 
+
+    /*=============== Utilities ================*/
+
     Ed11y.getText = function(elem) {
       return elem.innerText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
     }
+
+    Ed11y.resetClass = (el) => {
+      el.forEach(el => {
+        document.querySelectorAll('.' + el).forEach((x) => x.classList.remove(el));
+      })
+    };
 
     Ed11y.sanitizeForHTML = function (string) {
       let entityMap = {
