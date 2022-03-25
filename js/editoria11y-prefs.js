@@ -38,7 +38,7 @@ let ed11yAllowOverflow = "";
 
 let ed11yHiddenHandlers = "";
 
-let ed11yDownloadLinks = "a[href$='.pdf'], a[href*='.doc'], a[href*='.ppt'], a[href^='https://docs.google']";
+let ed11yDownloadLinks = ['.pdf', '.doc', '.docx', '.ppt', '.pptx', 'https://docs.google'];
 
 // Outline is ignoring hidden containers.
 // These tests are not enabled yet.
