@@ -7,7 +7,7 @@ let ed11yCheckRoot = "";
 // "polite" never automatically pops open the panel.
 // "assertive" pops open the panel if there are errors the user has not seen.
 // CMS integrations can pick mode on load based on context.
-let ed11yAlertMode = "polite";
+let ed11yAlertMode = "assertive";
 
 // If any elements match these selectors, Ed11y will not start.
 let ed11yNoRun = "";
@@ -27,6 +27,7 @@ let ed11yOutlineIgnore = "";
 // E.g., to just ignore images in a social media feed, add
 // ".my-feed-container img" to imageIgnore.
 let ed11yImageIgnore = "";
+// todo delete rename fail?
 let ed11yHeaderIgnore = ".project-tagline";
 let ed11yLinkIgnore = "";
 
