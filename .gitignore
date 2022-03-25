@@ -4,3 +4,5 @@ node_modules/
 
 # Ignore things that may be in the folder where we expect selenium.
 tests/lib/selenium/
+logs/*
+tests_output/*
