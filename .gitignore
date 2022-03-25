@@ -1,2 +1,5 @@
 .DS_Store
 .idea
+logs/
+node_modules/
+tests_output/

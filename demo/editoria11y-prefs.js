@@ -1,7 +1,7 @@
 /* User preferences */
 
 // Base container(s) for tests.
-let ed11yCheckRoot = "";
+let ed11yCheckRoot = "main";
 
 // Alert modes.
 // "polite" never automatically pops open the panel.

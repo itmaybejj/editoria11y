@@ -3,7 +3,7 @@ class Ed11y {
   constructor(options) {
     let defaultOptions = {
       checkRoot : "body",
-      ed11yAlertMode : "polite",
+      ed11yAlertMode : "",
       ed11yNoRun : "",
       ed11yContainerIgnore : ".project-tagline",
       ed11yEmbeddedContentWarning : "",
@@ -43,6 +43,7 @@ class Ed11y {
         if (!Ed11y.checkRunPrevent()) {
           Ed11y.running = true;
           Ed11y.loadGlobals();
+          // todo does this respect assertive pref?
           Ed11y.checkAll(true, 'hide');
         }
       });
@@ -52,7 +53,7 @@ class Ed11y {
 
 
     // Toggles the outline of all headers, link texts, and images.
-    Ed11y.checkAll = async function (onLoad, showPanel) {
+    Ed11y.checkAll = (onLoad, showPanel) => {
       if (!Ed11y.checkRunPrevent()) {
         Ed11y.paints = [];
         Ed11y.paintsJS = [];
@@ -110,15 +111,15 @@ class Ed11y {
     Ed11y.countAlerts = function () {
       Ed11y.dismissedCount = 0;
       // Remove dismissed alerts from the paint array and update count.
-      for (let i = Ed11y.paints.length - 1; i >= 0; i--) {
-        let dismissKey = Ed11y.paints[i][7];
+      for (let i = Ed11y.paintsJS.length - 1; i >= 0; i--) {
+        let dismissKey = Ed11y.paintsJS[i][7];
         dismissKey = typeof dismissKey !== "undefined" ? Ed11y.dismissalKey(dismissKey) : false;
-        let testType = Ed11y.paints[i][6];
+        let testType = Ed11y.paintsJS[i][6];
         // Hide alert if its ID key is in the array.
         if (dismissKey !== false && typeof Ed11y.dismissedAlerts[Ed11y.currentPage] !== "undefined" && typeof Ed11y.dismissedAlerts[Ed11y.currentPage][testType] !== "undefined" && Ed11y.dismissedAlerts[Ed11y.currentPage][testType][dismissKey] !== "undefined") {
           Ed11y.dismissedCount++;
-          Ed11y.paints.splice(i, 1);
-        } else if (Ed11y.paints[i][3].indexOf("warning") > 0) {
+          Ed11y.paintsJS.splice(i, 1);
+        } else if (Ed11y.paintsJS[i][3].indexOf("warning") > 0) {
           Ed11y.warningCount++;
         } else {
           Ed11y.errorCount++;
@@ -1315,7 +1316,7 @@ class Ed11y {
 
               // Rescan on open, or shut.
               if (Ed11y.panel.classList.contains('ed11y-panel-shut') === true) {
-                Ed11y.checkAll(false, "show").catch(console.error);
+                Ed11y.checkAll(false, "show");
               }
               else {
                 Ed11y.reset();
