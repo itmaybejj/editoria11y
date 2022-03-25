@@ -25,5 +25,5 @@ jobs:
       - name: npm-install
         run: npm install
 
-      - name: start-selenkum
-        run: java -jar ./tests/lib/selenium/selenium-server-4.1.2.jar
+      - name: run chrome tests
+        run: npx nightwatch tests --env chrome
