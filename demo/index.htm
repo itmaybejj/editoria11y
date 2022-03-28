@@ -3,6 +3,10 @@
 <body>
     <banner><h1 id="editoria11y-demo">Editoria11y tests</h1></banner>
     <main>
+
+        <ul><li>This should not be double flagged.<ul><li>HOW IS THE RECURSION DETECTION WORKING</li></ul></li></ul>
+
+
         <section id="headings">
 
             <h2 id="heading-tests">Headings</h2>
@@ -77,6 +81,9 @@
 
         <p>Flagged as manual check needed for captioning:</p>
 
+        <iframe src="/youtube.com/" class="positive"></iframe>
+        <video class="positive"></video>
+
         <!--<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" width="300" height="240" frameborder="0"></iframe>-->
 [iframe commented out during development]
         <p>Also flagged: embedded audio and social media.</p>
@@ -121,11 +128,14 @@
 
         <h3 id="lists">Lists</h3>
 
-        <p>a. Fake lists</p>
-
-        <p>b. use letters or numbers.</p>
-
-        <p>c. rather than real formatting.</p>
+        <div class="positive"><p>a. Fake lists</p><p>b. use letters or numbers.</p><p>c. rather than real formatting.</p></div>
+        <div class="positive"><p>1. Fake lists<br>2. Sometimes use<br>BR instead of P tags.</p></div>
+        <div><p class="positive">* Fake lists</p><p class="negative">* Should only</p><p class="negative">* be flagged</p><p class="negative">* one time.</p></div>
+        <div class="negative"><p>1. This is split<hr>2. with HR<hr>3. and won't be detected at the moment.</p></div>
+        <div class="positive"><p>1. This has rich text after the BR<br><a href="#"><strong>2.</strong> Fancy.</a></p></div>
+        <div class="negative"><p>1. This has nothing after the BR<br></p></div>
+        <div class="negative"><p></p></div>
+        <div class="negative"><p>1.</p></div>
 
         <h3 id="caps-lock">Caps lock</h3>
 
@@ -148,8 +158,8 @@
             <style>
                 main, h1 {max-width: 40rem; margin: auto; padding: 1rem; background:#fefefe; color:#222;}
                 body {background: #eee;}
-                .positive {background: darksalmon; padding: 1rem;}
-                .negative {background: #b1d1ea; padding: 1rem;}
+                .positive {background: darksalmon; padding: 1rem; margin-bottom: 1rem;}
+                .negative {background: #b1d1ea; padding: 1rem; margin-bottom: 1rem;}
                 .negative .ed11y-pop { outline: 4px solid red !important; }
             </style>
         </div>
