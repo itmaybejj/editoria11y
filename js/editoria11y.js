@@ -60,7 +60,7 @@ class Ed11y {
     // Toggles the outline of all headers, link texts, and images.
     Ed11y.checkAll = (onLoad, showPanel) => {
       if (!Ed11y.checkRunPrevent()) {
-        Ed11y.flags = [];
+        Ed11y.results = [];
         Ed11y.errorCount = 0;
         Ed11y.warningCount = 0;
         Ed11y.dismissedCount = 0;
@@ -77,7 +77,7 @@ class Ed11y {
         let ed11yDismissed = localStorage.getItem("ed11ydismissed");
         Ed11y.dismissedAlerts = ed11yDismissed ? JSON.parse(ed11yDismissed) : {};
 
-        // Waiting to enqueue lets user interactions interrupt execution.
+        // Waiting to enqueue next test allows execution interrupts.
         window.setTimeout(function () {
           Ed11y.checkLinkText();
           window.setTimeout(function () {
@@ -113,15 +113,15 @@ class Ed11y {
     Ed11y.countAlerts = function () {
       Ed11y.dismissedCount = 0;
       // Remove dismissed alerts from the flag array and update count.
-      for (let i = Ed11y.flags.length - 1; i >= 0; i--) {
-        let dismissKey = Ed11y.flags[i][7];
+      for (let i = Ed11y.results.length - 1; i >= 0; i--) {
+        let dismissKey = Ed11y.results[i][7];
         dismissKey = typeof dismissKey !== "undefined" ? Ed11y.dismissalKey(dismissKey) : false;
-        let testType = Ed11y.flags[i][6];
+        let testType = Ed11y.results[i][6];
         // Hide alert if its ID key is in the array.
         if (dismissKey !== false && typeof Ed11y.dismissedAlerts[Ed11y.currentPage] !== "undefined" && typeof Ed11y.dismissedAlerts[Ed11y.currentPage][testType] !== "undefined" && Ed11y.dismissedAlerts[Ed11y.currentPage][testType][dismissKey] !== "undefined") {
           Ed11y.dismissedCount++;
-          Ed11y.flags.splice(i, 1);
-        } else if (Ed11y.flags[i][3].indexOf("warning") > 0) {
+          Ed11y.results.splice(i, 1);
+        } else if (Ed11y.results[i][3].indexOf("warning") > 0) {
           Ed11y.warningCount++;
         } else {
           Ed11y.errorCount++;
@@ -176,8 +176,8 @@ class Ed11y {
       Ed11y.running = false;
     };
 
-    Ed11y.flagButton = function (el, index) {
-      // todo: flags are based on jQuery objects. Will need to change all at once.
+    Ed11y.markResult = function (el, index) {
+      // todo: results are based on jQuery objects. Will need to change all at once.
       // We parse this long array:
       // [0] el element
       // [1] insertion position
@@ -187,7 +187,7 @@ class Ed11y {
       // [5] message
       // [6] test shortname
       // [7] ID key for dismissing
-      // e.g.: Ed11y.flags.push([$el,'before','ed11y-instance','ed11y-error-border','ed11y-warning-btn',generalAltText]);
+      // e.g.: Ed11y.results.push([$el,'before','ed11y-instance','ed11y-error-border','ed11y-warning-btn',generalAltText]);
       // Warning, error or hidden?
       // console.log(index + " " + el[6]);
       let icon = document.createElement("span");
@@ -214,6 +214,7 @@ class Ed11y {
         let pop = el[0].nextElementSibling;
         let tip = pop.querySelector('.ed11y-pop');
         tip.setAttribute('data-ed11y-tip', index);
+
       }
       else if (alreadyFlagged === 'prepend') {
         let tip = el[0].querySelector('.ed11y-pop');
@@ -264,9 +265,9 @@ class Ed11y {
       }
       if (Ed11y.dismissedCount.length > 0) {
         // Todo dejQuery dismissed workflow
-        $('#ed11y-show-dismissed').attr('style', 'display: inline-block !important;');
+        document.getElementById('ed11y-show-dismissed')?.setAttribute('style', 'display: inline-block !important;');
       } else {
-        $('#ed11y-show-dismissed').attr('style', 'display: none !important;');
+        document.getElementById('ed11y-show-dismissed')?.setAttribute('style', 'display: none !important;');
       }
       Ed11y.panel.classList.remove('ed11y-preload');
     };
@@ -361,10 +362,10 @@ class Ed11y {
           // todo: just use container ignore?
           if (!(options.headerIgnore !== "" && el?.closest(options.headerIgnore))) {
             if (!el?.closest("a")) {
-              Ed11y.flags.push([el, 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
+              Ed11y.results.push([el, 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
             }
             else {
-              Ed11y.flags.push([el.closest('a'), 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
+              Ed11y.results.push([el.closest('a'), 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
             }
             // Outline element if there is an error.
             liClass += " ed11y-text-warning";
@@ -391,7 +392,7 @@ class Ed11y {
         let text = Ed11y.getText(el);
         if (text.length < 25) {
           let dismissalKey = Ed11y.dismissalKey(text);
-          Ed11y.flags.push([el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageFullCheckBlockquote, "blockquoteLength", dismissalKey]);
+          Ed11y.results.push([el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageFullCheckBlockquote, "blockquoteLength", dismissalKey]);
         }
       });
 
@@ -415,12 +416,12 @@ class Ed11y {
         // todo this is now true/false rather than a length measure
 
         if (typeof alt !== "string") {
-          Ed11y.flags.push([el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yGeneralAltText]);
+          Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yGeneralAltText]);
         }
         else if (alt.length === 0 && !parentLink) {
           // Empty alt inside a link tested in link checks.
           let dismissalKey = Ed11y.dismissalKey(src);
-          Ed11y.flags.push([el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltDecorative, "decorativeImage", dismissalKey]);
+          Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltDecorative, "decorativeImage", dismissalKey]);
         }
 
         // If alt attribute is present, further tests are done.
@@ -432,44 +433,44 @@ class Ed11y {
           // Todo: add images-in-links to test page coverage.
           if (!!parentLink) {
             if (error[0] !== null) {
-              Ed11y.flags.push([parentLink, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltUrl(altText)]);
+              Ed11y.results.push([parentLink, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltUrl(altText)]);
             }
             else if (error[1] !== null) {
               // "image of"
               let dismissalKey = Ed11y.dismissalKey(src + altText);
-              Ed11y.flags.push([parentLink, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltImageOfLinked(error, altText), "AltImageOfLinked", dismissalKey]);
+              Ed11y.results.push([parentLink, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltImageOfLinked(error, altText), "AltImageOfLinked", dismissalKey]);
             }
             else if (alt.length > 160) {
               // Image warning if it is a link and contains long alt text.
               let dismissalKey = Ed11y.dismissalKey(src + altText);
-              Ed11y.flags.push([parentLink, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltLongLinked(alt, altText), "AltLongLinked", dismissalKey]);
+              Ed11y.results.push([parentLink, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltLongLinked(alt, altText), "AltLongLinked", dismissalKey]);
             }
             // Image warning if it is a link, contains alt text AND
             // surrounding link text.
                 // todo: need to remove ignored link text
             else if (alt !== "" && Ed11y.linkText(parentLink.textContent).length > 1) {
               let dismissalKey = Ed11y.dismissalKey(src + altText);
-              Ed11y.flags.push([parentLink, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltLinkComplex(altText), "AltLinkComplex", dismissalKey]);
+              Ed11y.results.push([parentLink, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltLinkComplex(altText), "AltLinkComplex", dismissalKey]);
             }
           }
           // Now if there is no link...
           else if (error[0] !== null) {
 
-            Ed11y.flags.push([el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltFilename(altText)]);
+            Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltFilename(altText)]);
           }
           else if (error[1] !== null) {
             let dismissalKey = Ed11y.dismissalKey(src + altText);
-            Ed11y.flags.push([el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltImageOf(error, altText),"AltImageOf", dismissalKey]);
+            Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltImageOf(error, altText),"AltImageOf", dismissalKey]);
           }
           // Alert with deadspace alt.
           else if (alt !== "" && alt.replace(/"|'|\s+/g, "") === "") {
 
-            Ed11y.flags.push([el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltDeadspace]);
+            Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltDeadspace]);
           }
           // Image error if alt text is too long.
           else if (alt.length > 160) {
             let dismissalKey = Ed11y.dismissalKey(src + altText);
-            Ed11y.flags.push([el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltTooLong(alt, altText),"AltTooLong", dismissalKey]);
+            Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltTooLong(alt, altText),"AltTooLong", dismissalKey]);
           }
         }
       });
@@ -508,10 +509,6 @@ class Ed11y {
       // Todo: Add test for consecutive links to same href?
       // Todo: remove linkIgnore
       // todo: parameterize stopwords as in Sa11y
-
-      /* Example: If you need to ignore any text within <span class="sr-only">test</span>.
-          $el.ignoreString("span.sr-only").text().trim();
-       */
 
       Ed11y.allLinks.forEach((el) => {
         // todo: investigate sa11y computation
@@ -552,7 +549,7 @@ class Ed11y {
         if (el?.getAttribute('target') === '_blank' && downloadMatch === false && linkText.indexOf('tab') === -1 && linkText.indexOf('window') === -1 && linkText.indexOf('external') === -1) {
           // Warn about unwarned new windows before ignoreString strip.
           let dismissalKey = Ed11y.dismissalKey(linkText);
-          Ed11y.flags.push([el, 'before', 'ed11y-instance-inline', "ed11y-link-text-warning", 'ed11y-warning-btn', ed11yMessageQANewTab, "QANewTab", dismissalKey]);
+          Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-link-text-warning", 'ed11y-warning-btn', ed11yMessageQANewTab, "QANewTab", dismissalKey]);
         }
         linkText = linkText.replace(ed11yIgnoreLinkStrings,"");
         let linkStrippedText = linkText.replace(/'|"|-|\.|\s+/g, '');
@@ -564,10 +561,10 @@ class Ed11y {
           if (linkStrippedText.length === 0) {
 
             if (hasImg) {
-              Ed11y.flags.push([el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
+              Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
             }
             else {
-              Ed11y.flags.push([el, 'before', 'ed11y-inline-block', "ed11y-link-text-fail", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
+              Ed11y.results.push([el, 'before', 'ed11y-inline-block', "ed11y-link-text-fail", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
             }
           }
         }
@@ -584,15 +581,15 @@ class Ed11y {
             else if (error === "generic") {
               stopWordMessage = ed11yMessagelinkTextIsGeneric;
             }
-            Ed11y.flags.push([el, 'before', 'ed11y-instance-inline', "ed11y-link-text-warning", 'ed11y-warning-btn', stopWordMessage, "LinkTextIsGeneric", dismissalKey]);
+            Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-link-text-warning", 'ed11y-warning-btn', stopWordMessage, "LinkTextIsGeneric", dismissalKey]);
           }
         }
         //Warning: Find all PDFs. Although only append warning icon to
         // first PDF on page.
         if (!hasImg && downloadMatch > 0) {
-          let dismissalKey = Ed11y.dismissalKey($el.attr("src"));
+          let dismissalKey = Ed11y.dismissalKey(el?.getAttribute("src"));
           el.classList.add('ed11y-text-warning');
-          Ed11y.flags.push([el, 'after', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageLinkDownload, "LinkDownload", dismissalKey]);
+          Ed11y.results.push([el, 'after', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageLinkDownload, "LinkDownload", dismissalKey]);
         }
       });
     };
@@ -718,7 +715,7 @@ class Ed11y {
           if (hit) {
             let dismissalKey = Ed11y.dismissalKey(firstText);
             let ed11yShouldBeList = ed11yMessageQAShouldBeList(firstPrefix);
-            Ed11y.flags.push([p, 'prepend', 'ed11y-instance-inline', '', 'ed11y-warning-btn', ed11yShouldBeList, "ShouldBeList", dismissalKey]);
+            Ed11y.results.push([p, 'prepend', 'ed11y-instance-inline', '', 'ed11y-warning-btn', ed11yShouldBeList, "ShouldBeList", dismissalKey]);
             activeMatch = firstPrefix;
           }
           else {
@@ -734,7 +731,7 @@ class Ed11y {
             let maybeSentence = possibleHeader.match(/[.:;"']$/) !== null;
             if (121 > possibleHeader.length > 0 && maybeSentence === false && possibleHeader.length === firstText.length) {
               let dismissalKey = Ed11y.dismissalKey(firstText);
-              Ed11y.flags.push([p, 'prepend', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageQAMayBeHeader, "QAMayBeHeader", dismissalKey]);
+              Ed11y.results.push([p, 'prepend', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageQAMayBeHeader, "QAMayBeHeader", dismissalKey]);
             }
           }
         }
@@ -765,20 +762,20 @@ class Ed11y {
         let findTHeaders = el?.querySelectorAll("th");
         let findHeadingTags = el?.querySelectorAll("h1, h2, h3, h4, h5, h6");
         if (!findTHeaders) {
-          Ed11y.flags.push([el, 'before', 'ed11y-instance', 'ed11y-error-border', 'ed11y-error-btn', ed11yMessageMissingQATableHeadings]);
+          Ed11y.results.push([el, 'before', 'ed11y-instance', 'ed11y-error-border', 'ed11y-error-btn', ed11yMessageMissingQATableHeadings]);
         }
         else {
           // Make sure all table headers are not empty.
           findTHeaders.forEach((th) => {
             if (Ed11y.getText(th).length < 1 && !Ed11y.computeTitle(th)) {
-              Ed11y.flags.push([th, 'prepend', 'ed11y-instance', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageEmptyTableHeader]);
+              Ed11y.results.push([th, 'prepend', 'ed11y-instance', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageEmptyTableHeader]);
             }
           });
         }
         if (!!findHeadingTags) {
-          // todo: have flags escalate errors over warnings when both present
+          // todo: have results escalate errors over warnings when both present
           findHeadingTags.forEach((h) => {
-            Ed11y.flags.push([h, 'before', 'ed11y-instance', 'ed11y-error-border', 'ed11y-error-btn', ed11yMessageQAHeaderInTable]);
+            Ed11y.results.push([h, 'before', 'ed11y-instance', 'ed11y-error-border', 'ed11y-error-btn', ed11yMessageQAHeaderInTable]);
           });
         }
       });
@@ -791,7 +788,7 @@ class Ed11y {
           Ed11y.mediaCount++;
           // Dismiss-able alert. False positive accepted on undefined sources.
           let dismissKey = Ed11y.dismissalKey(el.hasAttribute('src') ? el.getAttribute('src') : el.querySelector('[src]')?.getAttribute('src'));
-          Ed11y.flags.push([el, 'before', 'ed11y-instance', "", 'ed11y-warning-btn', ed11yMessageFullCheckCaptions, "captions", dismissKey]);
+          Ed11y.results.push([el, 'before', 'ed11y-instance', "", 'ed11y-warning-btn', ed11yMessageFullCheckCaptions, "captions", dismissKey]);
         })
       }
 
@@ -802,7 +799,7 @@ class Ed11y {
           Ed11y.mediaCount++;
           // Dismiss-able alert. False positive accepted on undefined sources.
           let dismissKey = Ed11y.dismissalKey(el.hasAttribute('src') ? el.getAttribute('src') : el.querySelector('[src]')?.getAttribute('src'));
-          Ed11y.flags.push([el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessagePodcast, "transcripts", dismissKey]);
+          Ed11y.results.push([el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessagePodcast, "transcripts", dismissKey]);
         })
       }
 
@@ -811,7 +808,7 @@ class Ed11y {
         visualizations.forEach(el => {
           // Dismiss-able alert. False positive accepted on undefined sources.
           let dismissKey = Ed11y.dismissalKey(el.getAttribute('src'));
-          Ed11y.flags.push([el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageVisualization, "visualization", dismissKey]);
+          Ed11y.results.push([el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageVisualization, "visualization", dismissKey]);
         })
       }
 
@@ -821,7 +818,7 @@ class Ed11y {
         twits.forEach(twit => {
           let numberOfTweets = twit.querySelectorAll(".timeline-TweetList-tweet");
           if (!!numberOfTweets && numberOfTweets > 3) {
-            Ed11y.flags.push([twit,'before','ed11y-instance',"ed11y-text-warning",'ed11y-warning-btn',ed11yMessageTwitter]);
+            Ed11y.results.push([twit,'before','ed11y-instance',"ed11y-text-warning",'ed11y-warning-btn',ed11yMessageTwitter]);
           }
         })
       }
@@ -830,7 +827,7 @@ class Ed11y {
       if (options.embeddedContent.length > 1) {
         let embed = Ed11y.srcMatchesOptions(Ed11y.allFrames, options.embeddedContent);
         embed.forEach((el) => {
-          Ed11y.flags.push([el, 'before', 'ed11y-instance', 'ed11y-warning-border', 'ed11y-warning-btn', ed11yMessageEmbeddedContent]);
+          Ed11y.results.push([el, 'before', 'ed11y-instance', 'ed11y-warning-border', 'ed11y-warning-btn', ed11yMessageEmbeddedContent]);
         });
       }
 
@@ -854,7 +851,7 @@ class Ed11y {
 
       if (detectUpperCase && detectUpperCase[0].length > 10) {
         let dismissalKey = Ed11y.dismissalKey(thisText);
-        Ed11y.flags.push([el, 'prepend', 'ed11y-instance-inline', 'ed11y-uppercase-warning', 'ed11y-warning-btn', ed11yMessageQAUppercase, "QAUppercase", dismissalKey]);
+        Ed11y.results.push([el, 'prepend', 'ed11y-instance-inline', 'ed11y-uppercase-warning', 'ed11y-warning-btn', ed11yMessageQAUppercase, "QAUppercase", dismissalKey]);
       }
     }
 
@@ -946,53 +943,52 @@ class Ed11y {
       if (el.hasAttribute('data-ed11y-tip')) {
         let thisFlag = el.getAttribute('data-ed11y-tip').split(',');
         thisFlag.forEach(function (i) {
-          thisText += Ed11y.flags[i][5];
-          if (!!Ed11y.flags[i][7]) {
-            thisText += "<button class='ed11y-dismissthis' data-ed11y-action='ok' data-ed11y-test='" + Ed11y.flags[i][6] + "' data-ed11y-id='" + i + "'>Mark as OK</button>" +
-                "<button class='ed11y-dismissthis' data-ed11y-action='ignore' data-ed11y-test='" + Ed11y.flags[i][6] + "' data-ed11y-id='" + i + "'>Can't be fixed</button>";
+          thisText += Ed11y.results[i][5];
+          if (!!Ed11y.results[i][7]) {
+            thisText += "<button class='ed11y-dismiss-this' data-ed11y-action='ok' data-ed11y-test='" + Ed11y.results[i][6] + "' data-ed11y-id='" + i + "'>Mark as OK</button>" +
+                "<button class='ed11y-dismiss-this' data-ed11y-action='ignore' data-ed11y-test='" + Ed11y.results[i][6] + "' data-ed11y-id='" + i + "'>Can't be fixed</button>";
           }
         });
         merge++;
       }
       let thisContent = document.createElement('div');
       thisContent.classList.add('ed11y-tip', 'ed11y-reset');
-      thisContent.innerHTML = '<span ' +
-          'class="ed11y-arrow"></span>' +
-          '<button class="ed11y-button ed11y-close-tip" ' +
-          'type="button" aria-expanded="false" aria-label="close" ' +
-          'onclick=\'jQuery(this).parent().addClass("ed11y-hidden")' +
-          '.removeClass("ed11y-tip-open").attr("style", "").prev()' +
-          '.attr("aria-expanded", "false").addClass("ed11y-clicked")' +
-          '.removeClass("ed11y-hover").focus()' +
-          '.parents("ed11y-force-overflow")' +
-          '.removeClass("ed11y-force-overflow"); return false;\'>' +
-          '&times;</button><div class="ed11y-tip-content">' +
-          thisText +
-          '</div>';
+      thisContent.innerHTML = '<span class="ed11y-arrow"></span><button class="ed11y-button ed11y-close-tip" type="button" aria-expanded="false" aria-label="close">&times;</button><div class="ed11y-tip-content">' +
+          thisText + '</div>';
       if (merge > 1) {
-        $el.next().children('ed11y-tip-content').html(thisText);
-        $el.next().find('.ed11y-dismissthis').click(function(el) {
-          let id = Ed11y.dataset.ed11yDismissId;
-          let type = Ed11y.dataset.ed11yDismissType;
-          Ed11y.dismissThis(id, type);
-        })
+        // todo move thisText into a textContent sanitized injection.
+        // todo add to test coverage
+        el.nextElementSibling.querySelector('.ed11y-tip-content').HTML = thisContent;
       }
       else {
         el.classList.add('ed11y-tip-ready');
-        el.insertAdjacentElement('afterend', thisContent)
-        el.nextElementSibling.querySelector('.ed11y-dismissthis').click(function (el) {
-          let id = el.dataset.ed11yId;
-          let action = el.dataset.ed11yAction;
-          let test = el.dataset.ed11yTest;
-          Ed11y.dismissThis(action, test, id);
-        });
+        el.insertAdjacentElement('afterend', thisContent);
+        let closeButton = el.nextElementSibling.querySelector('.ed11y-close-tip');
+        closeButton.addEventListener('click', () => {Ed11y.closeTip(closeButton)});
       }
+      let dismissButton = el.nextElementSibling.querySelector('.ed11y-dismiss-this');
+      dismissButton?.addEventListener('click', btn => {
+        let id = dismissButton.dataset.ed11yId;
+        let action = dismissButton.dataset.ed11yAction;
+        let test = dismissButton.dataset.ed11yTest;
+        Ed11y.dismissThis(action, test, id);
+      });
     };
+    Ed11y.closeTip = function (closeButton) {
+      let tip = closeButton.parentElement;
+      tip.classList.add('ed11y-hidden');
+      tip.classList.remove('ed11y-tip-open');
+      tip.style.transform = 'initial';
+      let toggle = tip.previousElementSibling;
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.classList.add('ed11y-clicked');
+      Ed11y.resetClass(['ed11y-force-overflow']);
+    }
     Ed11y.dismissalKey = function (text) {
       return String(btoa(unescape(encodeURIComponent(text)))).substring(0,128);
     }
     Ed11y.dismissThis = function (action, test, id) {
-      let dismissalKey = Ed11y.flags[id][7];
+      let dismissalKey = Ed11y.results[id][7];
       // We may get false positives, but let's not store huge keys.
       let dismissal = {};
       dismissal[dismissalKey] = action;
@@ -1005,16 +1001,18 @@ class Ed11y {
       } else {
         Ed11y.dismissedAlerts[Ed11y.currentPage][test][dismissalKey] = action;
       }
-      $('.ed11y-tip-open').parent().remove();
+      // todo this removes the tip and button but leaves classes
+      let removal = document.querySelector('.ed11y-tip-open').parentNode;
+      removal.parentNode.removeChild(removal)
       // todo put focus somewhere that makes sense
       // todo clear wrapper styles e.g. heading
       // todo Ed11y.warning or errorCount--;
       // todo Ed11y.dismissedCount++;
       localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
-      Ed11y.flags.splice(id, 1);
+      Ed11y.results.splice(id, 1);
       Ed11y.updateCount('quick');
       window.setTimeout( function() {
-        $("#ed11y-resultmessage").focus();
+        document.getElementById("ed11y-resultmessage").focus();
       }, 100);
     };
 
@@ -1024,50 +1022,54 @@ class Ed11y {
       // For now: throw chunks to the end of the render queue to prevent
       // thread locking.
       
-      Ed11y.flags?.forEach(function (el, index) {
+      Ed11y.results?.forEach(function (el, index) {
         // todo: need to change all at once.
-        Ed11y.flagButton(el, index);
+        Ed11y.markResult(el, index);
       });
       // As soon as the buttons are in place, dispatch an event so themes
       // can react
       document.dispatchEvent(new CustomEvent("ed11yPanelOpened"));
       if (fullcheck === true) {
         window.setTimeout(function () {
-          Ed11y.$img.each(function () {
-            let $img = $(this);
-            let alt = Ed11y.sanitizeForHTML($img.attr('alt'));
-            let src = $img.attr('src');
-            let width = $img.innerWidth() + 'px';
-            let height = $img.innerHeight() + 'px';
-            let inject = "<div class='ed11y-container ed11y-reveal-alts ed11y-reset' " +
-                "style='width:" + width + " !important;height:" + height + " !important;'>" +
-                "<span>" + Ed11y.panelToggleIcon + "Alt: " + alt + "</span></div>";
-            if ($img.prev().hasClass('ed11y-instance-inline') === true) {
-              $img.prev().before(inject);
+          Ed11y.AllImages.forEach((img) => {
+            // todo what if there is no alt? jQuery fails gracefully this will send null...
+            let alt = Ed11y.sanitizeForHTML(img.getAttribute('alt'));
+            let src = img.getAttribute('src');
+            let imgStyles = getComputedStyle(img, null);
+            let width = imgStyles.width;
+            let height = imgStyles.height;
+            let injectAlt = document.createElement('div');
+            injectAlt.classList.add('ed11y-container', 'ed11y-reveal-alts', 'ed11y-reset');
+            injectAlt.setAttribute('style', 'width:' + width + ' !important; height:' + height + ' !important;');
+            injectAlt.innerHTML = '<span>' + Ed11y.panelToggleIcon + 'Alt: ' + alt + '</span></div>';
+            if (img.previousElementSibling?.classList.contains('ed11y-instance-inline') === true) {
+              img.previousElementSibling.insertAdjacentElement('beforebegin', injectAlt);
             }
             else {
-              $img.before(inject);
+              img.insertAdjacentElement('beforebegin', injectAlt);
             }
-            let imgClass = "";
-            if ($img.hasClass('ed11y-error-border')) {
-              imgClass = "ed11y-error-border";
+            let panelIMG = document.createElement('li');
+            if (img.classList.contains('ed11y-error-border')) {
+              panelIMG.classList.add('ed11y-error-border');
             }
-            else if ($img.hasClass('ed11y-warning-border')) {
-              imgClass = "ed11y-warning-border";
+            else if (img.classList.contains('ed11y-warning-border')) {
+              panelIMG.classList.add('ed11y-warning-border');
             }
-            $('#ed11y-image-list').append("" +
-                "<li class='" + imgClass + "'>" +
-                "<img src='" + src + "' alt='' class='ed11y-thumbnail'/>Alt: " + alt + "</li>");
+            panelIMG.innerHTML = '<img src="' + src + ' alt="" class="ed11y-thumbnail"/>Alt: ' + alt + '</li>';
+            Ed11y.panel.querySelector('#ed11y-image-list').appendChild(panelIMG);
           });
           window.setTimeout( function () {
-            $('.ed11y-reveal-alts').each(function() {
-              let $revealed = $(this);
-              let $img = $(this).nextAll('img').first();
-              let revealedOffset = $revealed.offset();
-              let imgOffset = $img.offset();
+            // todo mvp: styles are messed up in panel
+            document.querySelectorAll('.ed11y-reveal-alts').forEach(revealed => {
+              let img = revealed.nextElementSibling;
+              if (img && !img.matches('img')) {
+                img = img.nextElementSibling;
+              }
+              let revealedOffset = revealed.getBoundingClientRect();
+              let imgOffset = img.getBoundingClientRect();
               let newOffset = imgOffset.left - revealedOffset.left;
-              let newStyle = $revealed.attr('style') + ' margin-left: ' + newOffset + 'px !important;'
-              $revealed.attr('style', newStyle);
+              let newStyle = revealed.getAttribute('style') + ' margin-left: ' + newOffset + 'px !important;'
+              revealed.setAttribute('style', newStyle);
             })
           }, 0);
         }, 0);
@@ -1080,27 +1082,6 @@ class Ed11y {
         // first.
         Ed11y.popNudges = [];
         Ed11y.pops.forEach(el => {
-          //$el.on('touchend click', (function (event) {
-          // todo: can you have dual event listeners???
-          // todo: need need touchend back to fix mouse functions
-          el.addEventListener('click', function (event) {
-            if (!Ed11y.doubleClickPrevent) {
-              Ed11y.popThis(el, 'click');
-            }
-            Ed11y.doubleClickPrevent = true;
-            window.setTimeout(function () {
-              Ed11y.doubleClickPrevent = false;
-            }, 200);
-            return false;
-          });
-          // todo: Probably need to remove listener at some point.
-          if (el.getAttribute('aria-expanded' === 'false')) {
-            el.addEventListener('mouseenter', function () {
-              Ed11y.popThis(el, 'hover');
-            });
-          };
-          // If the button will be offscreen, nudge it left or right to
-          // fit.
           let offset = el.parentNode.getBoundingClientRect();
           let offsetData = 0;
           if (offset.left < 8) {
@@ -1127,153 +1108,196 @@ class Ed11y {
             el[0].setAttribute('id', 'ed11y-pop-' + i);
           }
         });
+        let toggles = Array.from(document.getElementsByClassName('ed11y-pop'));
+        toggles.forEach(toggle => {
+          toggle.addEventListener('click', event => {
+            Ed11y.popThis(toggle, 'click');
+          });
+        })
+        //$el.on('touchend click', (function (event) {
+        // todo: can you have dual event listeners???
+        // todo: need need touchend back to fix mouse functions
+        //.onclick = Ed11y.popThis(el, 'click');
+        // todo: Probably need to remove listener at some point.
+        // todo: commented out hovers
+        /*if (el.getAttribute('aria-expanded' === 'false')) {
+          el.addEventListener('mouseenter', function () {
+            Ed11y.popThis(el, 'hover');
+          });
+        };*/
+        // If the button will be offscreen, nudge it left or right to
+        // fit.
         document.querySelector('body').classList.add('ed11y-pops-ready');
       }, 0);
     };
 
     Ed11y.popThis = function (el, trigger) {
-      let isNew = false;
-      if (!el.classList.contains('ed11y-tip-ready')) {
-        isNew = true;
-        Ed11y.readyPop(el, '');
-      }
-      let tip = el.nextElementSibling;
-      if (isNew === true) {
-        Ed11y.watchPop(el, tip);
-      }
-      if (el.getAttribute('aria-expanded') === 'true' && trigger === 'click') {
-        // Close on click.
-        el.setAttribute('aria-expanded', 'false');
-        el.classList.add('ed11y-clicked');
-        el.classList.remove('ed11y-hover');
-        tip.classList.add('ed11y-hidden');
-        tip.classList.remove('ed11y-tip-open');
-        tip.setAttribute('style', '');
-        // todo: check this...
-        el.closest('.ed11y-force-overflow')?.classList.remove('ed11y-force-overflow');
-      }
-      else if (!el.getAttribute('aria-expanded')) {
-        let needToAlign;
-        if (trigger === 'click') {
-          // Open on click.
-          let openTips = document.querySelectorAll('.ed11y-tip-open');
-          if (!!openTips) {
-            openTips.forEach(tip => {
-              tip.classList.remove('ed11y-tip-open');
-              tip.previousElementSibling.setAttribute('aria-expanded','false');
-            })
-          }
-          el.setAttribute('aria-expanded', 'true');
+      if (!Ed11y.doubleClickPrevent) {
+        let isNew = false;
+        if (!el?.classList.contains('ed11y-tip-ready')) {
+          isNew = true;
+          Ed11y.readyPop(el, '');
+        }
+        let tip = el.nextElementSibling;
+        if (isNew === true) {
+          Ed11y.watchPop(el, tip);
+        }
+        if (el.getAttribute('aria-expanded') === 'true' && trigger === 'click') {
+          // Close on click.
+          el.setAttribute('aria-expanded', 'false');
+          el.classList.add('ed11y-clicked');
           el.classList.remove('ed11y-hover');
-          tip.classList.remove('ed11y-hidden');
-          tip.classList.add('ed11y-tip-open');
-          needToAlign = true;
+          tip.classList.add('ed11y-hidden');
+          tip.classList.remove('ed11y-tip-open');
+          tip.setAttribute('style', '');
+          // todo: check this...
+          el.closest('.ed11y-force-overflow')?.classList.remove('ed11y-force-overflow');
         }
-        else if (!el.classList.contains('ed11y-hover')) {
-          // Open on hover
-          $('.ed11y-pop').filter('.ed11y-hover, [aria-expanded="true"]')
-              .removeClass('.ed11y-hover ed11y-clicked ed11y-tip-open')
-              .attr('aria-expanded', 'false')
-              .next()
-              .removeClass('ed11y-tip-open');
-          $el.addClass('ed11y-hover');
-          $tip.removeClass('ed11y-hidden').addClass('ed11y-tip-open');
-          needToAlign = true;
-        }
-        if (needToAlign === true) {
-          // Dispatch an event that a tooltip has appeared.
-          document.dispatchEvent(new CustomEvent("ed11yPop", {
-            detail: {id: $el.attr('id')}
-          }));
-
-          if (ed11yAllowOverflow.length > 0) {
-            $el.parents(ed11yAllowOverflow).addClass('ed11y-force-overflow');
+        else if (!!el.getAttribute('aria-expanded')) {
+          let needToAlign;
+          if (trigger === 'click') {
+            // Open on click.
+            let openTips = document.getElementsByClassName('ed11y-tip-open');
+            if (!!openTips) {
+              Array.from(openTips).forEach(tip => {
+                tip.classList.remove('ed11y-tip-open');
+                tip.previousElementSibling.setAttribute('aria-expanded','false');
+              })
+            }
+            el.setAttribute('aria-expanded', 'true');
+            el.classList.remove('ed11y-hover');
+            tip.classList.remove('ed11y-hidden');
+            tip.classList.add('ed11y-tip-open');
+            needToAlign = true;
           }
-          else {
-            $el.parents().not('body').each(function () {
-              if ($(this).css('overflow') === 'hidden') {
-                $(this).addClass('ed11y-force-overflow');
+          else if (!el.classList.contains('ed11y-hover')) {
+            // Open on hover
+            let otherPops = document.querySelectorAll('.ed11y-pop:not(.ed11y-hover)');
+            otherPops.forEach(el => {
+              if (el.getAttribute('aria-expanded') === 'false') {
+                el.classList.remove('ed11y-hover', 'ed11y-clicked', 'ed11y-tip-open');
+                el.setAttribute('aria-expanded', 'false');
+                el.nextElementSibling.classList.remove('ed11y-tip-open');
               }
-            });
+            })
+            el.classList.add('ed11y-hover');
+            tip.classList.remove('ed11y-hidden');
+            tip.classList.add('ed11y-tip-open');
+            needToAlign = true;
           }
-          Ed11y.alignTip($el, $tip);
-          // todo looping throws an error after elements are removed
-          Ed11y.goto = parseInt($el.attr('id').substring(10));
-          // Update the panel
-          let ed11yGotoText = 'next';
-          if (Ed11y.gotoCount === 1) {
-            ed11yGotoText = '';
+          if (needToAlign === true) {
+            // Dispatch an event that a tooltip has appeared.
+            document.dispatchEvent(new CustomEvent("ed11yPop", {
+              detail: {id: el.getAttribute('id')}
+            }));
+
+            if (ed11yAllowOverflow.length > 0) {
+              // todo parameter
+              el.closest(ed11yAllowOverflow).classList.add('ed11y-force-overflow');
+            }
+            else {
+              let parents = Ed11y.parents(el);
+              parents.forEach(parent => {
+                let parentStyles = window.getComputedStyle(parent);
+                if (parentStyles.getPropertyValue('overflow') === 'hidden') {
+                  parent.classList.add('ed11y-force-overflow');
+                }
+              });
+            }
+            Ed11y.alignTip(el, tip);
+            // todo looping throws an error after elements are removed
+            Ed11y.goto = parseInt(el.getAttribute('id').substring(10));
+            // Update the panel
+            let ed11yGotoText = 'next';
+            if (Ed11y.gotoCount === 1) {
+              ed11yGotoText = '';
+            }
+            else if (Ed11y.gotoCount - 1 === Ed11y.goto) {
+              Ed11y.goto = 0;
+              ed11yGotoText = 'first';
+            }
+            else {
+              Ed11y.goto++;
+            }
+            window.setTimeout(function () {
+              document.querySelector('.ed11y-jumpnext').textcontent = ed11yGotoText;
+            }, 250);
           }
-          else if (Ed11y.gotoCount - 1 === Ed11y.goto) {
-            Ed11y.goto = 0;
-            ed11yGotoText = 'first';
-          }
-          else {
-            Ed11y.goto++;
-          }
-          window.setTimeout(function () {
-            $('.ed11y-jumpnext').text(ed11yGotoText);
-          }, 250);
         }
       }
+      Ed11y.doubleClickPrevent = true;
+      window.setTimeout(function () {
+        Ed11y.doubleClickPrevent = false;
+      }, 200);
+      return false;
     };
 
-    Ed11y.alignTip = function ($el, $tip) {
-      $tip.attr('style', '').removeClass('ed11y-tip-left ed11y-tip-under').find('.ed11y-arrow').css('left', 'initial');
-      let buttonOffset = $el.offset();
-      let buttonWidth = $el.outerWidth(true);
-      let tipOffset = $tip.offset();
-      let tipWidth = $tip.width();
-      let windowWidth = $(window).width();
-      let roomToLeft = buttonOffset.left - tipWidth - 50;
-      let roomToRight = windowWidth - (buttonOffset.left + tipWidth + 90);
+    Ed11y.alignTip = function (el, tip) {
+      tip.setAttribute('style','');
+      tip.classList.remove('ed11y-tip-left', 'ed11y-tip-under');
+      let arrow = tip.querySelector('.ed11y-arrow');
+      arrow.style.left = 'initial';
+      let buttonOffset = el.getBoundingClientRect();
+      let buttonLeft = buttonOffset.left + document.body.scrollLeft;
+      let buttonWidth = el.offsetWidth;
+      let tipOffset = tip.getBoundingClientRect();
+      let tipLeft = tipOffset.left + document.body.scrollLeft;
+      let tipWidth = tip.offsetWidth;
+      let windowWidth = window.innerWidth;
+      let roomToLeft = buttonLeft - tipWidth - 50;
+      let roomToRight = windowWidth - (buttonLeft + tipWidth + 90);
       if (roomToRight < 0) {
         // Can't go right.
         if (roomToLeft > 0) {
           // Go left if there is room.
-          $tip.addClass('ed11y-tip-left');
-          let targetOffset = buttonOffset.left - tipWidth - buttonWidth - 2;
-          let nudge = targetOffset - tipOffset.left;
-          $tip.attr('style', 'transform: translate(' + nudge + 'px) !important;').find('.ed11y-arrow').removeAttr('style');
+          tip.classList.add('ed11y-tip-left');
+          let targetOffset = buttonLeft - tipWidth - buttonWidth - 2;
+          let nudge = targetOffset - tipLeft;
+          tip.style.transform = 'translate(' + nudge + 'px) !important;';
+          arrow.removeAttribute('style');
         }
         else {
           // Go under if there is not.
-          $tip.addClass('ed11y-tip-under');
+          tip.classList.add('ed11y-tip-under');
           let nudgeY = 58;
           // we don't want to hit the right edge maybe that's all we should worry about?
           let targetOffsetX = 5;
-          let nudgeX = targetOffsetX - tipOffset.left;
+          let nudgeX = targetOffsetX - tipLeft;
           let arrowTranslateY = -26;
-          let arrowTranslateX = buttonOffset.left + 11;
-          $tip.attr('style', 'transform: translate(' + nudgeX + 'px, ' + nudgeY + 'px) !important;').find('.ed11y-arrow').attr('style', 'transform: translate(' + arrowTranslateX + 'px, ' + arrowTranslateY + 'px) rotate(135deg) !important;');
+          let arrowTranslateX = buttonLeft + 11;
+          tip.setAttribute('style', 'transform: translate(' + nudgeX + 'px, ' + nudgeY + 'px) !important;');
+          arrow.setAttribute('style', 'transform: translate(' + arrowTranslateX + 'px, ' + arrowTranslateY + 'px) rotate(135deg) !important;');
         }
       }
       else {
         // Go right.
-        let tipTranslateX = buttonWidth + 13;
-        $tip.attr('style', 'transform: translate(' + tipTranslateX + 'px, 4px) !important;').find('.ed11y-arrow').removeAttr('style');
+        let tipTranslateX = buttonWidth + 26;
+        tip.setAttribute('style', 'transform: translate(' + tipTranslateX + 'px, 4px) !important;');
+        arrow.removeAttribute('style');
       }
     };
 
-    Ed11y.tipHoverAffordance = function ($el, $tip) {
-      if ($tip.is(':hover') === false && $el.is(':hover') === false && $el.is('.ed11y-hover') === true) {
+    Ed11y.tipHoverAffordance = function (el, tip) {
+      if (tip.matches('div:hover') === false && el.matches('div:hover') === false && el.matches('button.ed11y-hover') === true) {
         window.setTimeout(function () {
-          if ($tip.is(':hover') === false && $el.is(':hover') === false) {
+          if (tip.matches('div:hover') === false && el.matches('button:hover') === false) {
             // Close on de-hover
-            $el.removeClass('ed11y-hover ed11y-clicked').attr('aria-expanded', 'false');
-            $tip.removeClass('ed11y-tip-open');
-            $el.parents('.ed11y-force-overflow').removeClass('ed11y-force-overflow');
+            el.classList.remove('ed11y-hover', 'ed11y-clicked');
+            el.setAttribute('aria-expanded', 'false');
+            tip.classList.remove('ed11y-tip-open');
+            // todo does this need to use the reset?
+            el.closest('.ed11y-force-overflow')?.classList.remove('ed11y-force-overflow');
           }
-        }.bind($el, $tip), 500);
+        }.bind(el, tip), 500);
       }
     };
 
-    Ed11y.watchPop = function ($el, $tip) {
-      $el.mouseleave(function () {
-        Ed11y.tipHoverAffordance($el, $tip);
+    Ed11y.watchPop = function (el, tip) {
+      el.addEventListener('mouseleave', function () {
+        Ed11y.tipHoverAffordance(el, tip);
       });
-      $tip.mouseleave(function () {
-        Ed11y.tipHoverAffordance($el, $tip);
+      tip.addEventListener('mouseleave', function () {
+        Ed11y.tipHoverAffordance(el, tip);
       });
     };
     // Todo move this to CSS
@@ -1461,21 +1485,24 @@ class Ed11y {
           }
         });
 
-        window.addEventListener('resize', function () {
-          if ($('#ed11y-summary-toggle').attr('aria-expanded') === 'true') {
-            Ed11y.checkRoot.find('img').each(function () {
-              let width = $(this).innerWidth() + 'px';
-              let height = $(this).innerHeight() + 'px';
-              $(this).prevAll('.ed11y-reveal-alts').css({
+        window.addEventListener('resize', () => {
+          console.log('hi');
+          if (document.getElementById('ed11y-summary-toggle').getAttribute('aria-expanded') === 'true') {
+            Ed11y.root.querySelectorAll('img').forEach((img) => {
+              let width = img.innerWidth() + 'px';
+              let height = img.innerHeight() + 'px';
+              // todo mvp
+              /*
+              img.previousSibling('.ed11y-reveal-alts').css({
                 'width': width + ' !important',
                 'height': height + ' !important'
-              });
+              });*/
             });
           }
-          let $tip = $('.ed11y-tip-open');
-          if ($tip.length > 0) {
-            let $el = $tip.prev();
-            Ed11y.alignTip($el, $tip);
+          let tip = Ed11y.root.querySelector('.ed11y-tip-open');
+          if (!!tip) {
+            let el = tip.previousElementSibling;
+            Ed11y.alignTip(el, tip);
           }
         });
 
@@ -1502,6 +1529,16 @@ class Ed11y {
 
 
     /*=============== Utilities ================*/
+
+    Ed11y.parents = function(el) {
+      let nodes = [];
+      nodes.push(el);
+      while(el.parentElement) {
+        nodes.unshift(el.parentElement);
+        el = el.parentElement;
+      }
+      return nodes;
+    }
 
     Ed11y.getText = function(elem) {
       return elem.innerText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();

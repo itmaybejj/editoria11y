@@ -416,7 +416,7 @@ div.ed11y-sr-only {
   background-color: rgba(0, 0, 0, .5) !important;
   -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5) !important;
 }
-.ed11y-tip button {
+.ed11y-tip .ed11y-close-tip {
   top: 0 !important;
   position: absolute !important;
   width: 34px !important;
