@@ -1,5 +1,7 @@
-ed11yPanel = "" +
-    "<div id='ed11y-panel' class='ed11y-reset ed11y-preload ed11y-panel-shut ed11y-pass'>" +
+var ed11yPanel = document.createElement('div');
+ed11yPanel.classList.add('ed11y-reset', 'ed11y-preload', 'ed11y-panel-shut', 'ed11y-pass');
+ed11yPanel.setAttribute('id', 'ed11y-panel');
+ed11yPanel.innerHTML = "" +
     "<h1 class='ed11y-sr-only'>Editorially Tools</h1>" +
     "<div id='ed11y-panel-upper'>" +
     "<div id='ed11y-fullcheck-headers' class='ed11y-outline-header ed11y-fullcheck'>" +
@@ -32,8 +34,7 @@ ed11yPanel = "" +
     "<button type='button' id='ed11y-shutpanel' title='Close panel' class='ed11y-button ed11y-panel-button' aria-label='close panel'>&times;</button>" +
     "<button type='button' id='ed11y-main-toggle' aria-expanded='false' title='Accessibility checker'><span class='ed11y-toggle-icon'></span><span class='ed11y-sr-only'>Show accessibility scan panel with</span><span class='ed11y-count'></span><span class='ed11y-sr-only'>issues</span></button>" +
     "</div>" +
-    "<div aria-live='polite' class='ed11y-sr-only' id='ed11y-aria-live'></div>" +
-    "</div>";
+    "<div aria-live='polite' class='ed11y-sr-only' id='ed11y-aria-live'></div>";
 
 ed11yAbout = "" +
     "<p>Assistive devices like screen readers depend on the invisible structure of the page matching its visual look and feel.</p>" +

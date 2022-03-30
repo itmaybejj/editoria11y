@@ -1308,7 +1308,7 @@ class Ed11y {
         // Create a floating button and hidden divs that contain
         // success/warning message.
 
-        $('body').append(ed11yPanel);
+        document.querySelector('body').appendChild(ed11yPanel);
         Ed11y.panel = document.getElementById('ed11y-panel');
         Ed11y.panelToggle = Ed11y.panel.querySelector('#ed11y-main-toggle');
         Ed11y.panelMessage = Ed11y.panel.querySelector('#ed11y-resultmessage');
@@ -1341,122 +1341,141 @@ class Ed11y {
 
         // Handle jumplinks
         Ed11y.goto = 0;
-        $('.ed11y-jumplink').click(function (event) {
+        const handleJump = event => {
           event.preventDefault();
-
           // Find our button.
           // todo rewrite this to figure out next based on flag array
-          let $goto = $('button[class^="ed11y"][data-ed11y-tip]').not('#ed11y-panel button');
-          Ed11y.gotoCount = $goto.length;
-          Ed11y.$goto = $goto.eq(Ed11y.goto);
-          Ed11y.gotoOffset = Ed11y.$goto.offset().top - parseInt($('body').css('padding-top')) - 50;
+          let goto = Array.from(document.getElementsByClassName('ed11y-pop'));
+          Ed11y.gotoCount = goto.length;
+          Ed11y.goto = goto[Ed11y.goto];
+          let offsetCalc = Ed11y.goto.getBoundingClientRect();
+          let bodyStyles = window.getComputedStyle(document.querySelector('body'));
+          Ed11y.gotoOffset = offsetCalc.top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
+          console.log(Ed11y.gotoOffset);
           // Throw an alert if the button or target is hidden.
-          let $firstVisible = false;
-          let $target;
-          let insert = Ed11y.$goto.attr('data-ed11y-inserted');
+          let firstVisible = false;
+          let target = Ed11y.goto.parentNode;
+          let insert = Ed11y.goto.getAttribute('data-ed11y-inserted');
           if (insert === "before") {
-            $target = Ed11y.$goto.parent().next();
+            target = target.nextElementSibling;
           }
           else if (insert === "prepend") {
-            $target = Ed11y.$goto.parent().parent();
+            target = target.parentNode;
           }
           else {
-            $target = Ed11y.$goto.parent().prev();
+            target = parent.previousElementSibling;
           }
           let alertMessage;
-
-          if (ed11yHiddenHandlers.length > 0 && ($target.filter(ed11yHiddenHandlers).length > 0 || $target.parents(ed11yHiddenHandlers).length > 0)) {
+          // todo mvp do these match tests work?
+          if (ed11yHiddenHandlers.length > 0 && !!target.closest(ed11yHiddenHandlers)) {
             document.dispatchEvent(new CustomEvent("ed11yShowHidden", {
-              detail: {id: Ed11y.$goto.attr('id')}
+              detail: {id: Ed11y.goto.getAttribute('id')}
             }));
             window.setTimeout(function () {
-              // Go to the button.
-              Ed11y.gotoOffset = Ed11y.$goto.offset().top - parseInt($('body').css('padding-top')) - 50;
+              // Recalculate before jump.
+              offsetCalc = Ed11y.goto.getBoundingClientRect();
+              Ed11y.gotoOffset = offsetCalc.top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
               $('html, body').animate({
                 scrollTop: (Ed11y.gotoOffset)
               }, 1);
-              Ed11y.popThis(Ed11y.$goto, 'click');
-              Ed11y.$goto.focus();
+              Ed11y.popThis(Ed11y.goto, 'click');
+              Ed11y.goto.focus();
             }, 500);
           }
           else {
-            if ($target.filter(':visible').length === 0) {
-              $firstVisible = Ed11y.$goto.parent().closest(':visible');
+            if (!Ed11y.visible(target)) {
+              firstVisible = Ed11y.firstVisibleParent(Ed11y.goto);
               alertMessage = ed11yInvisibleTip;
             }
-            else if (Ed11y.$goto.closest('[aria-hidden="true"]').length > 0 || $target.filter('[aria-hidden="true"]').length > 0) {
-              $firstVisible = Ed11y.$goto.closest('[aria-hidden="true"]').parents(':visible').first();
+            else if (!!Ed11y.goto.closest('[aria-hidden="true"]') || !!target.closest('[aria-hidden="true"]')) {
+              firstVisible = Ed11y.firstVisibleParent(Ed11y.goto.closest('[aria-hidden="true"]'));
               alertMessage = ed11yHiddenTip;
             }
-            if ($firstVisible.length > 0) {
+            if (!!firstVisible) {
               alert(alertMessage);
-              $firstVisible.addClass('ed11y-hidden-highlight').prepend('<div tabindex="-1" class="ed11y-sr-only ed11y-hidden-highlight-' + Ed11y.goto + '">Highlighted container</div>');
-              Ed11y.gotoOffset = $firstVisible.offset().top - parseInt($('body').css('padding-top')) - 50;
-              Ed11y.popThis(Ed11y.$goto, 'click');
+              firstVisible.classList.add('ed11y-hidden-highlight');
+              let highlightContainer = document.createElement('div');
+              highlightContainer.setAttribute('tabindex', '-1');
+              highlightContainer.classList.add('ed11y-sr-only', 'ed11y-hidden-highlight-' + Ed11y.goto);
+              highlightContainer.textContent = "Highlighted container";
+              offsetCalc = Ed11y.goto.getBoundingClientRect();
+              Ed11y.gotoOffset = offsetCalc.top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
+              Ed11y.popThis(Ed11y.goto, 'click');
               let thisGoTo = '.ed11y-hidden-highlight-' + Ed11y.goto;
-              $(thisGoTo).focus();
+              document.querySelector(thisGoTo).focus();
             }
             else {
               // Go to the button.
-              $('html, body').animate({
+              document.querySelector('html, body').animate({
                 scrollTop: (Ed11y.gotoOffset)
               }, 1);
-              Ed11y.popThis(Ed11y.$goto, 'click');
-              Ed11y.$goto.focus();
+              Ed11y.goto.focus();
+              Ed11y.popThis(Ed11y.goto, 'click');
             }
           }
 
-        });
+        };
+        let jumpLink = Ed11y.panel.querySelector('.ed11y-jumplink');
+        jumpLink.addEventListener('click', handleJump);
 
-        $('.ed11y-minimize').click(function (event) {
+        let minimizeButton = Ed11y.panel.querySelector('.ed11y-minimize');
+        Ed11y.minimize = function (event) {
           event.preventDefault();
-          $(this).attr('aria-pressed', function (i, attr) {
-            return attr === 'true' ? 'false' : 'true';
-          });
-          $('#ed11y-panel').toggleClass('ed11y-panel-minimized');
-        });
+          let pressed = minimizeButton.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'
+          minimizeButton.setAttribute('aria-pressed', pressed);
+          Ed11y.panel.classList.toggle('ed11y-panel-minimized');
+        };
+        minimizeButton.addEventListener('click', Ed11y.minimize);
 
-        $('.ed11y-about').click(function (event) {
+        let aboutButton = Ed11y.panel.querySelector('.ed11y-about');
+        let aboutPanel = function(event) {
           event.preventDefault();
-          if ($(this).attr('aria-pressed') === 'false') {
-            $(this).attr('aria-pressed', 'true');
-            $('#ed11y-panel-upper').prepend('<div class="ed11y-about-text" tabindex="-1">' +
-                ed11yAbout + '</div>');
+          if (aboutButton.getAttribute('aria-pressed') === 'false') {
+            aboutButton.setAttribute('aria-pressed', 'true');
+            let aboutText = document.createElement('div');
+            aboutText.classList.add('ed11y-about-text');
+            aboutText.setAttribute('tabindex', '-1');
+            aboutText.innerHTML = ed11yAbout;
+            let panelUpper = Ed11y.panel.querySelector('#ed11y-panel-upper');
+            panelUpper.insertBefore(aboutText, panelUpper.firstChild);
             window.setTimeout(function() {
-              $('.ed11y-about-text').focus();
+              Ed11y.panel.querySelector('.ed11y-about-text').focus();
             }, 1500);
           }
           else {
-            $(this).attr('aria-pressed', 'false');
-            $('.ed11y-about-text').remove();
+            aboutButton.setAttribute('aria-pressed', 'false');
+            Ed11y.panel.querySelector('.ed11y-about-text').remove();
           }
-        });
+        };
+        aboutButton.addEventListener('click', aboutPanel);
 
-        $('#ed11y-shutpanel').click(function (event) {
+        let shutButton = Ed11y.panel.querySelector('#ed11y-shutpanel');
+        let shutPanel = function (event) {
           event.preventDefault();
-          $('#ed11y-main-toggle').focus().click();
-        });
+          Ed11y.panelToggle.focus();
+          Ed11y.panelToggle.click();
+        };
+        shutButton.addEventListener('click', shutPanel);
 
-        $('.ed11y-upper-next-button').click(function (event) {
+        let upperPanelNextButton = Ed11y.panel.querySelectorAll('.ed11y-upper-next-button');
+        let nextUpperPanel = function (event) {
           event.preventDefault();
-          // Todo optional: maybe write next/previous logic when there
-          // are more than two
-          $(this).parent().siblings('.ed11y-fullcheck').addClass('ed11y-upper-active');
-          $(this).parent().removeClass('ed11y-upper-active');
+          let upperPanels = Ed11y.panel.querySelectorAll('.ed11y-outline-header')
+          upperPanels.forEach(el => {el.classList.toggle('ed11y-upper-active')});
+        };
+        upperPanelNextButton.forEach(button => {
+          button.addEventListener('click', nextUpperPanel)
         });
 
         // Handle fullcheck requests.
-        $("#ed11y-summary-toggle").click(function () {
-          $(this).attr('aria-pressed', function (i, attr) {
-            return attr === 'true' ? 'false' : 'true';
-          });
-          if ($(this).attr('aria-pressed') === 'false') {
+        let showTagButton = Ed11y.panel.querySelector('#ed11y-summary-toggle');
+        let showTags = function () {
+          let pressed = showTagButton.getAttribute('aria-pressed') === 'true' ? 'false' : 'true';
+          showTagButton.setAttribute('aria-pressed', pressed);
+          if (pressed === 'false') {
             // Close and remove
-            $(".ed11y-upper-active").removeClass("ed11y-upper-active");
-            $('.ed11y-reveal-alts').remove();
-            $('.ed11y-headings-label').attr('style', 'display: none !important');
-            $("#ed11y-image-list li").remove();
-            $(".ed11y-full-active").removeClass('ed11y-full-active').addClass('ed11y-full-only');
+            document.querySelectorAll('.ed11y-reveal-alts, .ed11y-headings-label, #ed11y-image-list li')?.forEach(el => {el.remove()});
+            Ed11y.panel.querySelector('.ed11y-upper-active').classList.remove('ed11y-upper-active');
           }
           else {
             Ed11y.resetTips();
@@ -1473,20 +1492,24 @@ class Ed11y {
                   else {
                     level = +el.tagName.slice(1);
                   }
-                  $(el).prepend(" <span class='ed11y-headings-label'>H" + level + "</span> ");
+                  let headingLabel = document.createElement('span');
+                  headingLabel.classList.add('ed11y-headings-label');
+                  headingLabel.textContent = 'H' + level;
+                  el.insertBefore(headingLabel, el.firstChild);
                 }
               });
-              $('#ed11y-fullcheck-headers').addClass('ed11y-upper-active');
-              $("#ed11y-outline-list").html('').append(Ed11y.headingOutline).focus();
-              $('.ed11y-full-only').removeClass('ed11y-full-only').addClass('ed11y-full-active');
-              $('.ed11y-headings-label').removeAttr('style');
-              $('#ed11y-fullcheck-outline-header').focus();
+              Ed11y.panel.querySelector('#ed11y-fullcheck-headers').classList.add('ed11y-upper-active');
+              Ed11y.panel.querySelector("#ed11y-outline-list").innerHTML = Ed11y.headingOutline
+              Ed11y.panel.querySelector('#ed11y-outline-list').focus();
+              // heeeeere
+              document.querySelectorAll('.ed11y-headings-label').forEach(h => {h.setAttribute('style','')});
+              Ed11y.panel.querySelector('#ed11y-fullcheck-outline-header').focus();
             }, 0);
           }
-        });
+        };
+        showTagButton.addEventListener('click', showTags);
 
         window.addEventListener('resize', () => {
-          console.log('hi');
           if (document.getElementById('ed11y-summary-toggle').getAttribute('aria-expanded') === 'true') {
             Ed11y.root.querySelectorAll('img').forEach((img) => {
               let width = img.innerWidth() + 'px';
@@ -1540,8 +1563,15 @@ class Ed11y {
       return nodes;
     }
 
-    Ed11y.getText = function(elem) {
-      return elem.innerText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
+    Ed11y.siblings = function(el) {
+      if (el.parentNode === null) return [];
+      return Array.prototype.filter.call(el.parentNode.children, function (child) {
+        return child !== el;
+      });
+    };
+
+    Ed11y.getText = function(el) {
+      return el.innerText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
     }
 
     Ed11y.resetClass = (el) => {
@@ -1549,6 +1579,63 @@ class Ed11y {
         document.querySelectorAll('.' + el).forEach((x) => x.classList.remove(el));
       })
     };
+
+    Ed11y.visible = function(elem) {
+      // courtesy https://stackoverflow.com/questions/178325/how-do-i-check-if-an-element-is-hidden-in-jquery/22969337#22969337
+      let x = window.pageXOffset ? window.pageXOffset + window.innerWidth - 1 : 0,
+          y = window.pageYOffset ? window.pageYOffset + window.innerHeight - 1 : 0,
+          relative = !!((!x && !y) || !document.elementFromPoint(x, y));
+      function inside(child, parent) {
+        while(child){
+          if (child === parent) return true;
+          child = child.parentNode;
+        }
+        return false;
+      }
+      return function (elem) {
+        if (
+            document.hidden ||
+            elem.offsetWidth === 0 ||
+            elem.offsetHeight === 0 ||
+            elem.style.visibility === 'hidden' ||
+            elem.style.display === 'none' ||
+            elem.style.opacity === 0
+        ) return false;
+        let rect = elem.getBoundingClientRect();
+        if (relative) {
+          if (!inside(document.elementFromPoint(rect.left + elem.offsetWidth/2, rect.top + elem.offsetHeight/2),elem)) return false;
+        } else if (
+            !inside(document.elementFromPoint(rect.left + elem.offsetWidth/2 + window.pageXOffset, rect.top + elem.offsetHeight/2 + window.pageYOffset), elem) ||
+            (
+                rect.top + elem.offsetHeight/2 < 0 ||
+                rect.left + elem.offsetWidth/2 < 0 ||
+                rect.bottom - elem.offsetHeight/2 > (window.innerHeight || document.documentElement.clientHeight) ||
+                rect.right - elem.offsetWidth/2 > (window.innerWidth || document.documentElement.clientWidth)
+            )
+        ) return false;
+        if (window.getComputedStyle) {
+          let el = elem,
+              comp = null;
+          while (el) {
+            if (el === document) {break;} else if(!el.parentNode) return false;
+            comp = window.getComputedStyle ? window.getComputedStyle(el, null) : el.currentStyle;
+            if (comp && (comp.visibility === 'hidden' || comp.display === 'none' || (typeof comp.opacity !=='undefined' && comp.opacity != 1))) return false;
+            el = el.parentNode;
+          }
+        }
+        return true;
+      }
+    }
+
+    Ed11y.firstVisibleParent = function(el) {
+      let parents = Ed11y.parents(el);
+      parents.forEach(parent => {
+        if (Ed11y.visible(parent)) {
+          return (parent);
+        }
+      })
+      return false;
+    }
 
     Ed11y.srcMatchesOptions = function(source, option) {
       if (option.length > 0 && source.length > 0) {
@@ -1581,12 +1668,12 @@ class Ed11y {
 
     //Helper: Used to ignore child elements within an anchor.
     Ed11y.fnIgnore = (element, selector) => {
-      const $clone = element.cloneNode(true);
-      const $excluded = Array.from(selector ? $clone.querySelectorAll(selector) : $clone.children);
-      $excluded.forEach(($c) => {
-        $c.parentElement.removeChild($c);
+      const clone = element.cloneNode(true);
+      const excluded = Array.from(selector ? clone.querySelectorAll(selector) : clone.children);
+      excluded.forEach((c) => {
+        c.parentElement.removeChild(c);
       });
-      return $clone;
+      return clone;
     };
 
 
