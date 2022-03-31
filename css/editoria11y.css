@@ -85,12 +85,12 @@
 }
 
 #ed11y-panel .ed11y-panel-inactive,
-.ed11y-reset .ed11y-fullcheck,
+.ed11y-reset .ed11y-show,
 .ed11y-panel-shut #ed11y-panel-content,
 .ed11y-panel-shut #ed11y-panel-buttonbar button:not(#ed11y-main-toggle),
 .ed11y-panel-minimized #ed11y-panel-upper,
 .ed11y-panel-minimized #ed11y-panel-content,
-.ed11y-panel-minimized #ed11y-shutpanel,
+.ed11y-panel-minimized #ed11y-shut-panel,
 .ed11y-panel-minimized #ed11y-summary-toggle,
 .ed11y-panel-minimized .ed11y-about,
 .ed11y-pass .ed11y-jumplink {
@@ -136,7 +136,7 @@
 #ed11y-summary-toggle {
   font-size: 12px !important;
 }
-#ed11y-shutpanel {
+#ed11y-shut-panel {
   padding-right: 7px !important;
 }
 #ed11y-panel-buttonbar #ed11y-main-toggle {
@@ -248,7 +248,7 @@ a.ed11y-jumplink {
   color: #111 !important;
 }
 
-#ed11y-panel .ed11y-fullcheck-header {
+#ed11y-panel .ed11y-show-header {
   padding: 0 15px !important;
   line-height: 28px !important;
   background: #3679b0 !important;
@@ -257,13 +257,13 @@ a.ed11y-jumplink {
   font-weight: 600 !important;
   border-radius: 4px 4px 0 0 !important;
 }
-#ed11y-panel .ed11y-fullcheck-header p {
+#ed11y-panel .ed11y-show-header p {
   padding: 4px 0 8px !important;
   font-size: 14px !important;
   color: #fff !important;
 }
-.ed11y-fullcheck-header a:hover,
-.ed11y-fullcheck-header a:focus {
+.ed11y-show-header a:hover,
+.ed11y-show-header a:focus {
   color: inherit !important;
   text-decoration: none !important;
   box-shadow: inset 0 -2px #fff, 0 1px #fff !important;
@@ -274,7 +274,7 @@ a.ed11y-jumplink {
   color: inherit !important;
 }
 
-.ed11y-reset .ed11y-fullcheck {
+.ed11y-reset .ed11y-show {
   position: relative !important;
   padding-bottom: 0 !important;
   width: 100% !important;
@@ -282,7 +282,7 @@ a.ed11y-jumplink {
   border-bottom: 1px solid #dbdbdb !important;
   background: #f4f4f4 !important;
 }
-.ed11y-fullcheck .ed11y-header-button {
+.ed11y-show .ed11y-header-button {
   background: rgba(0,0,0,.25) !important;
   color: #fff !important;
   opacity: 1 !important;
@@ -296,8 +296,8 @@ a.ed11y-jumplink {
 .ed11y-header-button span {
   color: inherit !important;
 }
-.ed11y-fullcheck button:hover,
-.ed11y-fullcheck button:focus {
+.ed11y-show button:hover,
+.ed11y-show button:focus {
   background: #444 !important;
 }
 
@@ -362,13 +362,13 @@ div.ed11y-sr-only {
   float: left !important;
   margin-left: -12px !important;
 }
-.ed11y-fullcheck li,
-.ed11y-fullcheck ul {
+.ed11y-show li,
+.ed11y-show ul {
   padding: 5px 0 5px 20px !important;
   font-size: 14px !important;
   text-indent: -23px !important;
 }
-.ed11y-fullcheck ul {
+.ed11y-show ul {
   list-style-type: none !important;
   padding: 7px 10px 0 15px !important;
   background: #f4f4f4 !important;
@@ -715,7 +715,7 @@ body .ed11y-warning-border {
   background: #3679b0 !important;
   color: #fff !important;
 }
-.ed11y-about-text + #ed11y-fullcheck-headers {
+.ed11y-about-text + #ed11y-show-headers {
   display: none !important;
 }
 .ed11y-reset .ed11y-about-text {

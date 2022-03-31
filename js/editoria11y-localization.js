@@ -4,34 +4,34 @@ ed11yPanel.setAttribute('id', 'ed11y-panel');
 ed11yPanel.innerHTML = "" +
     "<h1 class='ed11y-sr-only'>Editorially Tools</h1>" +
     "<div id='ed11y-panel-upper'>" +
-    "<div id='ed11y-fullcheck-headers' class='ed11y-outline-header ed11y-fullcheck'>" +
-    "<div id='ed11y-fullcheck-outline-header' class='ed11y-bold ed11y-fullcheck-header' tabindex='-1'>Headers" +
+    "<div id='ed11y-show-headers' class='ed11y-outline-header ed11y-show'>" +
+    "<div id='ed11y-show-outline-header' class='ed11y-bold ed11y-show-header' tabindex='-1'>Headers" +
     "<p>Check that this forms <a href='https://accessibility.princeton.edu/how/content/headings'>a complete outline</a>:</p>" +
     "</div>" +
     "<button type='button' class='ed11y-upper-next-button ed11y-header-button'>Media<span aria-hidden='true'> &raquo;</span></button>" +
-    "<ul id='ed11y-outline-list' tabindex='-1' aria-labelledby='ed11y-fullcheck-headers'></ul>" +
+    "<ul id='ed11y-outline-list' tabindex='-1' aria-labelledby='ed11y-show-headers'></ul>" +
     "</div>" +
-    "<div id='ed11y-fullcheck-images' class='ed11y-outline-header ed11y-fullcheck'>" +
-    "<div id='ed11y-image-header' class='ed11y-bold ed11y-fullcheck-header'>Media" +
+    "<div id='ed11y-show-images' class='ed11y-outline-header ed11y-show'>" +
+    "<div id='ed11y-image-header' class='ed11y-bold ed11y-show-header'>Media" +
     "<p>Check <a href='https://accessibility.princeton.edu/how/content/alternative-text'>alt text</a>, " +
     "<a href='https://accessibility.princeton.edu/how/content/images-text'>images of text</a>, &amp; <a href='https://webaim.org/techniques/captions/'>captions</a>.</p>" +
     "</div>" +
     "<button type='button' class='ed11y-upper-next-button ed11y-header-button'>Content outline<span aria-hidden='true'> &raquo;</span></button>" +
-    "<ul id='ed11y-image-list' tabindex='-1' aria-labelledby='ed11y-fullcheck-outline-header'></ul>" +
+    "<ul id='ed11y-image-list' tabindex='-1' aria-labelledby='ed11y-show-outline-header'></ul>" +
     "</div>" +
     "</div>" +
     "<div id='ed11y-panel-content'>" +
     "<div class='ed11y-panel-icon'></div>" +
     "<div id='ed11y-panel-text'>" +
-    "<span id='ed11y-resultmessage' tabindex='-1'><span class='ed11y-panel-count'>No</span> <span class='ed11y-panel-messagetype'>accessibility errors detected</span>.</span><br>" +
-    "<a href='#' class='ed11y-jumplink ed11y-small'>Show <span class='ed11y-jumpnext'>first</span> <span aria-hidden='true'> »</span></a>" +
+    "<span id='ed11y-results' tabindex='-1'><span class='ed11y-panel-count'>No</span> <span class='ed11y-panel-messagetype'>accessibility errors detected</span>.</span><br>" +
+    "<a href='#' class='ed11y-jump ed11y-small' data-ed11y-goto='0'>Show <span class='ed11y-jump-next'>first</span> <span aria-hidden='true'> »</span></a>" +
     "</div>" +
     "</div>" +
     "<div id='ed11y-panel-buttonbar'>" +
     "<button type='button' aria-expanded='false' id='ed11y-summary-toggle' class='ed11y-button ed11y-panel-button' aria-pressed='false'>Show tags</button>" +
     "<button type='button' class='ed11y-button ed11y-about' title='About this tool' aria-label='about' aria-pressed='false'>?</button>" +
     "<button type='button' class='ed11y-minimize ed11y-button' title='Minimize panel' aria-label='Minimize panel' aria-pressed='false'><span></span></button>" +
-    "<button type='button' id='ed11y-shutpanel' title='Close panel' class='ed11y-button ed11y-panel-button' aria-label='close panel'>&times;</button>" +
+    "<button type='button' id='ed11y-shut-panel' title='Close panel' class='ed11y-button ed11y-panel-button' aria-label='close panel'>&times;</button>" +
     "<button type='button' id='ed11y-main-toggle' aria-expanded='false' title='Accessibility checker'><span class='ed11y-toggle-icon'></span><span class='ed11y-sr-only'>Show accessibility scan panel with</span><span class='ed11y-count'></span><span class='ed11y-sr-only'>issues</span></button>" +
     "</div>" +
     "<div aria-live='polite' class='ed11y-sr-only' id='ed11y-aria-live'></div>";
@@ -203,14 +203,14 @@ ed11yMessageLinkDownload = "<div class='ed11y-tip-heading'>Manual check needed: 
     "<p>Untagged documents often cannot be read by screen readers, and even " +
     "tagged PDFs and slides may be difficult to read on small screens.</p>";
 
-ed11yMessageFullCheckBlockquote = "<div class='ed11y-tip-heading'>Manual check needed: short &lt;blockquote&gt;</div> " +
+ed11yMessageshowBlockquote = "<div class='ed11y-tip-heading'>Manual check needed: short &lt;blockquote&gt;</div> " +
     "<p>Blockquote formatting is announced as a quote by assistive " +
     "devices, and should only be used for quotes.</p>" +
     "<p>This was flagged because short blockquotes are often mislabeled " +
     "headings. If that is the case here, please use " +
     "<a href='https://accessibility.princeton.edu/how/content/headings'>heading formatting</a> instead.</p>"
 
-ed11yMessageFullCheckCaptions = "<div class='ed11y-tip-heading'>Manual check: text alternatives</div><p>Please check to make sure " +
+ed11yMessageshowCaptions = "<div class='ed11y-tip-heading'>Manual check: text alternatives</div><p>Please check to make sure " +
     "<span class='ed11y-bold'>all videos provide closed captioning.</span> " +
     "Providing captions for all audio and video content is a mandatory Level A " +
     "requirement. Captions are meant to support people who are D/deaf or " +

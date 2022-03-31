@@ -245,7 +245,7 @@ class Ed11y {
       if (totalCount > 0) {
         Ed11y.panelCount.innerText = totalCount;
         Ed11y.panelCount.style.display = 'inline-block !important';
-        Ed11y.panelNextButton.innerText = totalCount > 1 ? 'first' : '';
+        Ed11y.panelJumpNext.innerText = totalCount > 1 ? 'first' : '';
         if (Ed11y.errorCount > 0) {
           Ed11y.panel.classList.remove('ed11y-pass', 'ed11y-warnings');
           Ed11y.panel.classList.add('ed11y-errors');
@@ -279,7 +279,7 @@ class Ed11y {
       Ed11y.resetTips();
 
       // Remove and reset panels and active items.
-      Ed11y.panel.querySelectorAll('.ed11y-fullcheck li, .ed11y-about-text').forEach((el) => el.remove());
+      Ed11y.panel.querySelectorAll('.ed11y-show li, .ed11y-about-text').forEach((el) => el.remove());
       Ed11y.panel.classList.add('ed11y-panel-shut');
       Ed11y.panel.classList.remove('ed11y-panel-minimized', 'ed11y-panel-active');
       Ed11y.panelToggle.setAttribute('aria-expanded', 'false');
@@ -392,7 +392,7 @@ class Ed11y {
         let text = Ed11y.getText(el);
         if (text.length < 25) {
           let dismissalKey = Ed11y.dismissalKey(text);
-          Ed11y.results.push([el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageFullCheckBlockquote, "blockquoteLength", dismissalKey]);
+          Ed11y.results.push([el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageshowBlockquote, "blockquoteLength", dismissalKey]);
         }
       });
 
@@ -570,7 +570,7 @@ class Ed11y {
         }
         else {
           // Check for links with generic or URL titles
-          let error = Ed11y.containslinkTextStopWords(linkText.trim());
+          let error = Ed11y.containsLinkTextStopWords(linkText.trim());
           if (error !== "none") {
             let dismissalKey = Ed11y.dismissalKey(linkText);
             let stopWordMessage = "";
@@ -598,10 +598,10 @@ class Ed11y {
     // making the text inaccessible. stopWords will flag hyperlinks in
     // link titles. partialStopWords looks for links entirely made of
     // generic words. Note that this was extensively rewritten.
-    Ed11y.containslinkTextStopWords = function (textContent) {
+    Ed11y.containsLinkTextStopWords = function (textContent) {
       // todo: use regex to find any three-letter TLD followed by a slash.
       // todo: parameterize TLD list
-      let stopWords = ["http://", "https://", ".asp", ".htm", ".php", ".edu/", ".com/"];
+      let stopWords = ["http:/", "https:/", ".asp", ".htm", ".php", ".edu/", ".com/"];
       let partialStopRegex = /learn|to|more|now|this|page|link|site|website|check|out|view|our|read|\.|,|:|download|form|here|click|>|<|\s/g;
       let hit = 'none';
 
@@ -788,7 +788,7 @@ class Ed11y {
           Ed11y.mediaCount++;
           // Dismiss-able alert. False positive accepted on undefined sources.
           let dismissKey = Ed11y.dismissalKey(el.hasAttribute('src') ? el.getAttribute('src') : el.querySelector('[src]')?.getAttribute('src'));
-          Ed11y.results.push([el, 'before', 'ed11y-instance', "", 'ed11y-warning-btn', ed11yMessageFullCheckCaptions, "captions", dismissKey]);
+          Ed11y.results.push([el, 'before', 'ed11y-instance', "", 'ed11y-warning-btn', ed11yMessageshowCaptions, "captions", dismissKey]);
         })
       }
 
@@ -871,7 +871,7 @@ class Ed11y {
       Ed11y.updateCount('full');
       Ed11y.readyTips(true);
     };
-    // End of fullCheck()
+    // End of show()
 
     Ed11y.findElements = function () {
       // Find and cache so we don't have tests looking willynilly.
@@ -967,7 +967,7 @@ class Ed11y {
         closeButton.addEventListener('click', () => {Ed11y.closeTip(closeButton)});
       }
       let dismissButton = el.nextElementSibling.querySelector('.ed11y-dismiss-this');
-      dismissButton?.addEventListener('click', btn => {
+      dismissButton?.addEventListener('click', () => {
         let id = dismissButton.dataset.ed11yId;
         let action = dismissButton.dataset.ed11yAction;
         let test = dismissButton.dataset.ed11yTest;
@@ -1012,11 +1012,11 @@ class Ed11y {
       Ed11y.results.splice(id, 1);
       Ed11y.updateCount('quick');
       window.setTimeout( function() {
-        document.getElementById("ed11y-resultmessage").focus();
+        document.getElementById("ed11y-results").focus();
       }, 100);
     };
 
-    Ed11y.readyTips = function (fullcheck) {
+    Ed11y.readyTips = function (show) {
       // This function is VERY expensive.
       // Todo: optimize?
       // For now: throw chunks to the end of the render queue to prevent
@@ -1029,7 +1029,7 @@ class Ed11y {
       // As soon as the buttons are in place, dispatch an event so themes
       // can react
       document.dispatchEvent(new CustomEvent("ed11yPanelOpened"));
-      if (fullcheck === true) {
+      if (show === true) {
         window.setTimeout(function () {
           Ed11y.AllImages.forEach((img) => {
             // todo what if there is no alt? jQuery fails gracefully this will send null...
@@ -1055,7 +1055,7 @@ class Ed11y {
             else if (img.classList.contains('ed11y-warning-border')) {
               panelIMG.classList.add('ed11y-warning-border');
             }
-            panelIMG.innerHTML = '<img src="' + src + ' alt="" class="ed11y-thumbnail"/>Alt: ' + alt + '</li>';
+            panelIMG.innerHTML = '<img src="' + src + '" alt="" class="ed11y-thumbnail"/>Alt: ' + alt + '</li>';
             Ed11y.panel.querySelector('#ed11y-image-list').appendChild(panelIMG);
           });
           window.setTimeout( function () {
@@ -1110,12 +1110,13 @@ class Ed11y {
         });
         let toggles = Array.from(document.getElementsByClassName('ed11y-pop'));
         toggles.forEach(toggle => {
-          toggle.addEventListener('click', event => {
+          toggle.addEventListener('click', (event) => {
+            event.preventDefault();
             Ed11y.popThis(toggle, 'click');
           });
         })
         //$el.on('touchend click', (function (event) {
-        // todo: can you have dual event listeners???
+        // todo: handle keyboard, and can you have dual event listeners???
         // todo: need need touchend back to fix mouse functions
         //.onclick = Ed11y.popThis(el, 'click');
         // todo: Probably need to remove listener at some point.
@@ -1206,22 +1207,22 @@ class Ed11y {
             }
             Ed11y.alignTip(el, tip);
             // todo looping throws an error after elements are removed
-            Ed11y.goto = parseInt(el.getAttribute('id').substring(10));
+            /*Ed11y.goto = parseInt(el.getAttribute('id').substring(10));
             // Update the panel
-            let ed11yGotoText = 'next';
+            Ed11y.gotoText = 'next';
             if (Ed11y.gotoCount === 1) {
-              ed11yGotoText = '';
+              Ed11y.gotoText = '';
             }
             else if (Ed11y.gotoCount - 1 === Ed11y.goto) {
               Ed11y.goto = 0;
-              ed11yGotoText = 'first';
+              Ed11y.gotoText = 'first';
             }
             else {
               Ed11y.goto++;
             }
             window.setTimeout(function () {
-              document.querySelector('.ed11y-jumpnext').textcontent = ed11yGotoText;
-            }, 250);
+              document.querySelector('.ed11y-jump').textcontent = Ed11y.gotoText;
+            }, 250);*/
           }
         }
       }
@@ -1311,13 +1312,14 @@ class Ed11y {
         document.querySelector('body').appendChild(ed11yPanel);
         Ed11y.panel = document.getElementById('ed11y-panel');
         Ed11y.panelToggle = Ed11y.panel.querySelector('#ed11y-main-toggle');
-        Ed11y.panelMessage = Ed11y.panel.querySelector('#ed11y-resultmessage');
+        Ed11y.panelMessage = Ed11y.panel.querySelector('#ed11y-results');
         Ed11y.panelCount = Ed11y.panel.querySelector('.ed11y-count');
-        Ed11y.panelNextButton = Ed11y.panel.querySelector('.ed11y-jumpnext');
+        Ed11y.panelJumpNext = Ed11y.panel.querySelector('.ed11y-jump-next');
 
         // Handle main toggle button.
         // todo jQuery handled keyboard press, abstract this and emulate
         Ed11y.panelToggle.onclick = function (event) {
+          event.preventDefault();
           if (!Ed11y.doubleClickPrevent) {
             // Prevent clicking during scan.
             if (Ed11y.running !== true) {
@@ -1339,19 +1341,19 @@ class Ed11y {
           return false;
         };
 
-        // Handle jumplinks
-        Ed11y.goto = 0;
+        // Handle jumps
+        let jumpLink = Ed11y.panel.querySelector('.ed11y-jump');
         const handleJump = event => {
           event.preventDefault();
           // Find our button.
-          // todo rewrite this to figure out next based on flag array
-          let goto = Array.from(document.getElementsByClassName('ed11y-pop'));
-          Ed11y.gotoCount = goto.length;
-          Ed11y.goto = goto[Ed11y.goto];
+          // todo do we need to jump over dismissed alerts?
+          let goNum = parseInt(jumpLink.dataset.ed11yGoto);
+          let goMax = Ed11y.results.length - 1;
+          goNum = goNum > goMax ? 0 : goNum;
+          Ed11y.goto = Ed11y.root.querySelector('#ed11y-pop-' + goNum);
           let offsetCalc = Ed11y.goto.getBoundingClientRect();
           let bodyStyles = window.getComputedStyle(document.querySelector('body'));
           Ed11y.gotoOffset = offsetCalc.top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
-          console.log(Ed11y.gotoOffset);
           // Throw an alert if the button or target is hidden.
           let firstVisible = false;
           let target = Ed11y.goto.parentNode;
@@ -1375,7 +1377,7 @@ class Ed11y {
               // Recalculate before jump.
               offsetCalc = Ed11y.goto.getBoundingClientRect();
               Ed11y.gotoOffset = offsetCalc.top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
-              $('html, body').animate({
+              document.querySelector('html, body').animate({
                 scrollTop: (Ed11y.gotoOffset)
               }, 1);
               Ed11y.popThis(Ed11y.goto, 'click');
@@ -1413,9 +1415,15 @@ class Ed11y {
               Ed11y.popThis(Ed11y.goto, 'click');
             }
           }
-
+          goNum = goNum === goMax ? 0 : goNum + 1;
+          jumpLink.dataset.ed11yGoto = goNum;
+          if (goNum === 0) {
+            // Todo translate
+            Ed11y.panelJumpNext.innerText = "first";
+          } else {
+            Ed11y.panelJumpNext.innerText = "next";
+          }
         };
-        let jumpLink = Ed11y.panel.querySelector('.ed11y-jumplink');
         jumpLink.addEventListener('click', handleJump);
 
         let minimizeButton = Ed11y.panel.querySelector('.ed11y-minimize');
@@ -1449,7 +1457,7 @@ class Ed11y {
         };
         aboutButton.addEventListener('click', aboutPanel);
 
-        let shutButton = Ed11y.panel.querySelector('#ed11y-shutpanel');
+        let shutButton = Ed11y.panel.querySelector('#ed11y-shut-panel');
         let shutPanel = function (event) {
           event.preventDefault();
           Ed11y.panelToggle.focus();
@@ -1467,7 +1475,7 @@ class Ed11y {
           button.addEventListener('click', nextUpperPanel)
         });
 
-        // Handle fullcheck requests.
+        // Handle show requests.
         let showTagButton = Ed11y.panel.querySelector('#ed11y-summary-toggle');
         let showTags = function () {
           let pressed = showTagButton.getAttribute('aria-pressed') === 'true' ? 'false' : 'true';
@@ -1498,28 +1506,28 @@ class Ed11y {
                   el.insertBefore(headingLabel, el.firstChild);
                 }
               });
-              Ed11y.panel.querySelector('#ed11y-fullcheck-headers').classList.add('ed11y-upper-active');
+              Ed11y.panel.querySelector('#ed11y-show-headers').classList.add('ed11y-upper-active');
               Ed11y.panel.querySelector("#ed11y-outline-list").innerHTML = Ed11y.headingOutline
               Ed11y.panel.querySelector('#ed11y-outline-list').focus();
-              // heeeeere
               document.querySelectorAll('.ed11y-headings-label').forEach(h => {h.setAttribute('style','')});
-              Ed11y.panel.querySelector('#ed11y-fullcheck-outline-header').focus();
+              Ed11y.panel.querySelector('#ed11y-show-outline-header').focus();
             }, 0);
           }
         };
         showTagButton.addEventListener('click', showTags);
 
-        window.addEventListener('resize', () => {
-          if (document.getElementById('ed11y-summary-toggle').getAttribute('aria-expanded') === 'true') {
-            Ed11y.root.querySelectorAll('img').forEach((img) => {
-              let width = img.innerWidth() + 'px';
-              let height = img.innerHeight() + 'px';
-              // todo mvp
-              /*
-              img.previousSibling('.ed11y-reveal-alts').css({
-                'width': width + ' !important',
-                'height': height + ' !important'
-              });*/
+        let pinAltToImage = function() {
+          console.log('tried');
+          if (document.getElementById('ed11y-summary-toggle').getAttribute('aria-pressed') === 'true') {
+            Ed11y.root.querySelectorAll('img, [role="img"]').forEach((el) => {
+              let revealedAlt = el.previousElementSibling?.previousElementSibling;
+              if (!!revealedAlt && revealedAlt.matches('.ed11y-reveal-alts')) {
+                let elComputedStyle = getComputedStyle(el, null);
+                let width = 'width:' + elComputedStyle.width + ' !important; ';
+                let height = 'height:' + elComputedStyle.height + ' !important; ';
+                // todo mvp
+                revealedAlt.setAttribute('style', height + width);
+              }
             });
           }
           let tip = Ed11y.root.querySelector('.ed11y-tip-open');
@@ -1527,26 +1535,29 @@ class Ed11y {
             let el = tip.previousElementSibling;
             Ed11y.alignTip(el, tip);
           }
-        });
+        };
+        window.addEventListener('resize', pinAltToImage);
 
         // Escape key on main closes panels.
-        $(document).keyup(function (escape) {
-          if (escape.keyCode === 27) {
-            let $openTipButton = $('.ed11y-instance:focus-within, .ed11y-instance-inline:focus-within').children('.ed11y-pop[aria-expanded="true"]');
-            if ($openTipButton.length > 0) {
-              $openTipButton.focus().click();
-            }
-            else if ($('.ed11y-fullcheck.ed11y-panel-active').length > 0 && $('.ed11y-fullcheck:focus-within, #ed11y-summary-toggle:focus').length > 0) {
-              $('#ed11y-summary-toggle').focus().click();
-            }
-            else if ($('.ed11y-about[aria-expanded="true"]:focus, .ed11y-about-text:focus-within').length > 0) {
-              $('.ed11y-about').focus().click();
-            }
-            else if ($('#ed11y-panel:focus-within').length > 0) {
-              $('#ed11y-main-toggle').focus().click();
+        let escapeWatch = function(event) {
+          if (event.keyCode === 27) {
+            if (document.activeElement.closest('#ed11y-panel-upper, #ed11y-summary-toggle, .ed11y-about')) {
+              // close upper panel
+              let openUpper = Ed11y.panel.querySelectorAll('#ed11y-summary-toggle[aria-pressed], .ed11y-about[aria-pressed]');
+              openUpper.forEach(el => {
+                el.focus();
+                el.click();
+              })
+            } else if (document.activeElement.closest('.ed11y-instance, .ed11y-instance-inline')) {
+              let closeTip = Ed11y.root.querySelector('.ed11y-tip-open button.ed11y-close-tip');
+              closeTip.click();
+            } else if (Ed11y.panelToggle.getAttribute('aria-expanded') === 'true') {
+              Ed11y.panelToggle.focus();
+              Ed11y.panelToggle.click();
             }
           }
-        });
+        }
+        document.addEventListener('keyup', escapeWatch);
       }
     };
 
@@ -1580,7 +1591,7 @@ class Ed11y {
       })
     };
 
-    Ed11y.visible = function(elem) {
+    Ed11y.visible = function() {
       // courtesy https://stackoverflow.com/questions/178325/how-do-i-check-if-an-element-is-hidden-in-jquery/22969337#22969337
       let x = window.pageXOffset ? window.pageXOffset + window.innerWidth - 1 : 0,
           y = window.pageYOffset ? window.pageYOffset + window.innerHeight - 1 : 0,
@@ -1593,13 +1604,14 @@ class Ed11y {
         return false;
       }
       return function (elem) {
+        // todo check is opacity a string or number
         if (
             document.hidden ||
             elem.offsetWidth === 0 ||
             elem.offsetHeight === 0 ||
             elem.style.visibility === 'hidden' ||
             elem.style.display === 'none' ||
-            elem.style.opacity === 0
+            elem.style.opacity === '0'
         ) return false;
         let rect = elem.getBoundingClientRect();
         if (relative) {
@@ -1618,8 +1630,8 @@ class Ed11y {
               comp = null;
           while (el) {
             if (el === document) {break;} else if(!el.parentNode) return false;
-            comp = window.getComputedStyle ? window.getComputedStyle(el, null) : el.currentStyle;
-            if (comp && (comp.visibility === 'hidden' || comp.display === 'none' || (typeof comp.opacity !=='undefined' && comp.opacity != 1))) return false;
+            comp = window.getComputedStyle(el, null);
+            if (comp && (comp.visibility === 'hidden' || comp.display === 'none' || (typeof comp.opacity !=='undefined' && comp.opacity !== '1'))) return false;
             el = el.parentNode;
           }
         }
