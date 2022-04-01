@@ -205,6 +205,7 @@ class Ed11y {
           index +
           '">' + icon + '</button>';
       let alreadyFlagged = el[0].getAttribute('data-ed11y-marked');
+      // todo mvp test this code
       if (alreadyFlagged === 'before') {
         let pop = el[0].previousElementSibling;
         let tip = pop.querySelector('.ed11y-pop');
@@ -234,7 +235,7 @@ class Ed11y {
         }
         else {
           el[0].setAttribute('data-ed11y-marked','prepend');
-          el[0].insertBefore(injection, el[0].firstChild);
+          el[0].insertAdjacentElement('afterbegin', injection);
         }
       }
     };
@@ -336,8 +337,7 @@ class Ed11y {
           ed11yTip = ed11yMessageHeadingLevelSkipped(prevLevel, level);
         }
         if (headingLength < 1) {
-          // todo: proper text recursion
-          // todo: test with no alt attribute at all
+          // todo: let image merge up into shared alert.
           let headingSubText = el.querySelector('img')?.getAttribute('alt');
           if (!headingSubText || headingSubText.length === 0) {
             headingError = 'ed11y-warning-btn';
@@ -361,11 +361,11 @@ class Ed11y {
         if (headingError !== "") {
           // todo: just use container ignore?
           if (!(options.headerIgnore !== "" && el?.closest(options.headerIgnore))) {
-            if (!el?.closest("a")) {
-              Ed11y.results.push([el, 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
+            if (!!el?.closest("a")) {
+              Ed11y.results.push([el.closest('a'), 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
             }
             else {
-              Ed11y.results.push([el.closest('a'), 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
+              Ed11y.results.push([el, 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
             }
             // Outline element if there is an error.
             liClass += " ed11y-text-warning";
@@ -376,7 +376,7 @@ class Ed11y {
           outlinePrefix = "<span class='ed11y-small'><em>" + outlinePrefix +
               "</em></span>";
         }
-        // todo: is this the golden ignore check? also build and test outline ignore
+        // todo mvp: is this the golden ignore check? also build and test outline ignore
         if (!(options.outlineIgnore !== "" && el?.closest(options.outlineIgnore))) {
           Ed11y.headingOutline += "<li class='" + liClass + "'>" +
               "<span class='ed11y-small'>" + level + "</span> " +
@@ -445,9 +445,8 @@ class Ed11y {
               let dismissalKey = Ed11y.dismissalKey(src + altText);
               Ed11y.results.push([parentLink, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltLongLinked(alt, altText), "AltLongLinked", dismissalKey]);
             }
-            // Image warning if it is a link, contains alt text AND
-            // surrounding link text.
-                // todo: need to remove ignored link text
+            // Warning: link and linked image both contain text.
+            // todo: need to remove ignored link text
             else if (alt !== "" && Ed11y.linkText(parentLink.textContent).length > 1) {
               let dismissalKey = Ed11y.dismissalKey(src + altText);
               Ed11y.results.push([parentLink, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltLinkComplex(altText), "AltLinkComplex", dismissalKey]);
@@ -455,7 +454,6 @@ class Ed11y {
           }
           // Now if there is no link...
           else if (error[0] !== null) {
-
             Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltFilename(altText)]);
           }
           else if (error[1] !== null) {
@@ -464,7 +462,6 @@ class Ed11y {
           }
           // Alert with deadspace alt.
           else if (alt !== "" && alt.replace(/"|'|\s+/g, "") === "") {
-
             Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltDeadspace]);
           }
           // Image error if alt text is too long.
@@ -507,7 +504,7 @@ class Ed11y {
     Ed11y.checkLinkText = function () {
       // Todo: See if there is an alternative to :visible that shows only visually hidden content.
       // Todo: Add test for consecutive links to same href?
-      // Todo: remove linkIgnore
+      // Todo: parameterize linkIgnore
       // todo: parameterize stopwords as in Sa11y
 
       Ed11y.allLinks.forEach((el) => {
@@ -1548,7 +1545,7 @@ class Ed11y {
                 el.focus();
                 el.click();
               })
-            } else if (document.activeElement.closest('.ed11y-instance, .ed11y-instance-inline')) {
+            } else if (document.activeElement.closest('.ed11y-tip-open')) {
               let closeTip = Ed11y.root.querySelector('.ed11y-tip-open button.ed11y-close-tip');
               closeTip.click();
             } else if (Ed11y.panelToggle.getAttribute('aria-expanded') === 'true') {
