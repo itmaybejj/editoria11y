@@ -22,13 +22,13 @@ class Ed11y {
       twitterContent: "twitter-timeline",
       embeddedContent: '',
     };
-    options = {
+    Ed11y.options = {
       ...defaultOptions,
       ...options
     };
 
     Ed11y.checkRunPrevent = function() {
-      return options.ed11yNoRun.trim().length > 0 ? document.querySelector(options.ed11yNoRun) : false;
+      return Ed11y.options.ed11yNoRun.trim().length > 0 ? document.querySelector(Ed11y.options.ed11yNoRun) : false;
     }
 
     // todo: const M = ed11yLang;
@@ -49,6 +49,10 @@ class Ed11y {
           Ed11y.running = true;
           Ed11y.loadGlobals();
           // todo does this respect assertive pref?
+          Ed11y.testQA = new Ed11yTestQA;
+          Ed11y.testHeadings = new Ed11yTestHeadings;
+          Ed11y.testImages = new Ed11yTestImages;
+          Ed11y.testLinks = new Ed11yTestLinks;
           Ed11y.checkAll(true, 'hide');
         }
       });
@@ -65,7 +69,7 @@ class Ed11y {
         Ed11y.warningCount = 0;
         Ed11y.dismissedCount = 0;
         Ed11y.mediaCount = 0;
-        Ed11y.root = document.querySelector(options.checkRoot);
+        Ed11y.root = document.querySelector(Ed11y.options.checkRoot);
         // If target root can't be found, fall back to default.
         if (!Ed11y.root) {
           Ed11y.root = document.querySelector("body");
@@ -79,13 +83,13 @@ class Ed11y {
 
         // Waiting to enqueue next test allows execution interrupts.
         window.setTimeout(function () {
-          Ed11y.checkLinkText();
+          Ed11y.testLinks.check();
           window.setTimeout(function () {
-            Ed11y.checkAltText();
+            Ed11y.testImages.check();
             window.setTimeout(function () {
-              Ed11y.checkHeaders();
+              Ed11y.testHeadings.check();
               window.setTimeout(function () {
-                Ed11y.checkQA();
+                Ed11y.testQA.check();
                 window.setTimeout(function () {
                   Ed11y.buildPanels(onLoad);
                   window.setTimeout(function () {
@@ -176,7 +180,7 @@ class Ed11y {
       Ed11y.running = false;
     };
 
-    Ed11y.markResult = function (el, index) {
+    Ed11y.flagResult = function (el, index) {
       // todo: results are based on jQuery objects. Will need to change all at once.
       // We parse this long array:
       // [0] el element
@@ -190,20 +194,7 @@ class Ed11y {
       // e.g.: Ed11y.results.push([$el,'before','ed11y-instance','ed11y-error-border','ed11y-warning-btn',generalAltText]);
       // Warning, error or hidden?
       // console.log(index + " " + el[6]);
-      let icon = document.createElement("span");
-      icon.classList.add('ed11y-sr-only');
-      if (el[4].indexOf('warning') !== -1) {
-        icon.textContent = 'Show editorially warning';
-      } else {
-        icon.textContent = 'Show editorially error';
-      }
-      let injection = document.createElement('div');
-      injection.classList.add(el[2], 'ed11y-reset');
-      injection.innerHTML = '<button type="button" class="' +
-          el[4] +
-          ' ed11y-pop" style="display:none;" aria-expanded="false" data-ed11y-inserted="' + el[1] + '" data-ed11y-tip="' +
-          index +
-          '">' + icon + '</button>';
+
       let alreadyFlagged = el[0].getAttribute('data-ed11y-marked');
       // todo mvp test this code
       if (alreadyFlagged === 'before') {
@@ -215,7 +206,6 @@ class Ed11y {
         let pop = el[0].nextElementSibling;
         let tip = pop.querySelector('.ed11y-pop');
         tip.setAttribute('data-ed11y-tip', index);
-
       }
       else if (alreadyFlagged === 'prepend') {
         let tip = el[0].querySelector('.ed11y-pop');
@@ -225,6 +215,20 @@ class Ed11y {
         if (el[3].length > 0) {
           el[0].classList.add(el[3]);
         }
+
+        // Create button
+        let iconText = el[4].indexOf('warning') !== -1 ? 'Show editorially warning' : 'Show editorially error';
+        let icon = Ed11y.builder('span',false,'ed11y-sr-only', iconText);
+        let buttonAttributes = {
+          'aria-expanded':'false',
+          'data-ed11y-inserted':el[1],
+          'data-ed11y-tip':index,
+        };
+        let button = Ed11y.builder('button',false,[el[4], 'ed11y-pop'],buttonAttributes);
+        button.insertAdjacentElement('afterbegin', icon);
+        let injection = Ed11y.builder('div',false,[el[2], 'ed11y-reset']);
+        injection.insertAdjacentElement('afterbegin', button);
+
         if (el[1] === 'after') {
           el[0].setAttribute('data-ed11y-marked','after');
           el[0].insertAdjacentElement('afterend', injection);
@@ -299,324 +303,18 @@ class Ed11y {
       Ed11y.root.querySelectorAll('.ed11y-instance, .ed11y-instance-inline, .ed11y-headings-label, .ed11y-reveal-alts').forEach((el) => el.remove());
       Ed11y.root.querySelectorAll('[data-ed11y-marked]').forEach((el) => el.removeAttribute('data-ed11y-marked'));
     };
-
-
-    /*================== HEADING STRUCTURE MODULE ===================*/
-
-    Ed11y.checkHeaders = function () {
-      // Reset panel; we rebuild on each run.
-      Ed11y.panel?.querySelectorAll("#ed11y-outline-list li, .ed11y-headings-label").forEach((el) => el.remove());
-
-      // Only fetch headers within the content area.
-
-      let prevLevel = 0;
-      Ed11y.headingOutline = "";
-
-      // Test each header level for accessibility issues.
-      Ed11y.allH.forEach((el, i) => {
-        let level;
-
-        // Match aria-headers to <h#> level.
-        if (el.hasAttribute('aria-level')) {
-          // Plus forces numerical type
-          level = +el.getAttribute('aria-level');
-        }
-        else {
-          level = +el.tagName.slice(1);
-        }
-        let headingError = "";
-        let outlinePrefix = "";
-        let ed11yTip = "";
-        let headingText = Ed11y.getText(el);
-        let headingLength = headingText.length;
-        let dismissKey = false;
-        if (level - prevLevel > 1 && i !== 0) {
-          headingError = 'ed11y-warning-btn';
-          outlinePrefix = '(flagged for skipped level) ';
-          dismissKey = Ed11y.dismissalKey(level + headingText);
-          ed11yTip = ed11yMessageHeadingLevelSkipped(prevLevel, level);
-        }
-        if (headingLength < 1) {
-          // todo: let image merge up into shared alert.
-          let headingSubText = el.querySelector('img')?.getAttribute('alt');
-          if (!headingSubText || headingSubText.length === 0) {
-            headingError = 'ed11y-warning-btn';
-            outlinePrefix = '(empty heading)';
-            ed11yTip = ed11yMessageHeadingEmpty;
-          }
-        }
-        else if (headingLength > 160) {
-          headingError = 'ed11y-warning-btn';
-          outlinePrefix = '(flagged for length) ';
-          dismissKey = Ed11y.dismissalKey(level + headingText);
-          ed11yTip = ed11yMessageHeadingTooLong(headingLength);
-        }
-        prevLevel = level;
-        let liClass = "ed11y-outline-" + level;
-        let liPrefix = "";
-        // If the heading error is within a hyperlink, make sure to
-        // append button after anchor tag.
-        // Todo add this case to the test page
-        // Todo test new header ignore
-        if (headingError !== "") {
-          // todo: just use container ignore?
-          if (!(options.headerIgnore !== "" && el?.closest(options.headerIgnore))) {
-            if (!!el?.closest("a")) {
-              Ed11y.results.push([el.closest('a'), 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
-            }
-            else {
-              Ed11y.results.push([el, 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
-            }
-            // Outline element if there is an error.
-            liClass += " ed11y-text-warning";
-            liPrefix = "<span class='ed11y-sr-only'> Warning: </span> ";
-          }
-        }
-        if (outlinePrefix) {
-          outlinePrefix = "<span class='ed11y-small'><em>" + outlinePrefix +
-              "</em></span>";
-        }
-        // todo mvp: is this the golden ignore check? also build and test outline ignore
-        if (!(options.outlineIgnore !== "" && el?.closest(options.outlineIgnore))) {
-          Ed11y.headingOutline += "<li class='" + liClass + "'>" +
-              "<span class='ed11y-small'>" + level + "</span> " +
-              liPrefix + outlinePrefix + el.textContent +
-              "</li>";
-        }
-      });
-
-      // Check for blockquotes used as headings. If it's less than 25
-      // characters - it's probably not a blockquote.
-      let blockquotes = Ed11y.root.querySelectorAll('blockquote');
-      blockquotes.forEach((el) => {
-        let text = Ed11y.getText(el);
-        if (text.length < 25) {
-          let dismissalKey = Ed11y.dismissalKey(text);
-          Ed11y.results.push([el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageshowBlockquote, "blockquoteLength", dismissalKey]);
-        }
-      });
-
-    };
+    
 
     /*======================== INPUTS MODULE =======================*/
     // todo: implement this module.
 
-    /*================== ALTERNATIVE TEXT MODULE ====================*/
-    // todo: https://ryersondmp.github.io/sa11y/examples/headings-images.html
-
-    // todo: flagging alts referencing position or color?
-    // todo: empty alt with figcaption present blows up figure. code in Sa11y. see https://thoughtbot.com/blog/alt-vs-figcaption#the-figcaption-element and https://www.scottohara.me/blog/2019/01/21/how-do-you-figure.html
-    Ed11y.checkAltText = () => {
-
-      // Test each image for alternative text.
-      Ed11y.AllImages.forEach((el) => {
-        let alt = el.getAttribute("alt");
-        let src = el.getAttribute("src");
-        let parentLink = el.closest('a[href]');
-        // todo this is now true/false rather than a length measure
-
-        if (typeof alt !== "string") {
-          Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yGeneralAltText]);
-        }
-        else if (alt.length === 0 && !parentLink) {
-          // Empty alt inside a link tested in link checks.
-          let dismissalKey = Ed11y.dismissalKey(src);
-          Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltDecorative, "decorativeImage", dismissalKey]);
-        }
-
-        // If alt attribute is present, further tests are done.
-        else {
-          let error = Ed11y.containsAltTextStopWords(alt);
-          let altText = Ed11y.sanitizeForHTML(alt);
-
-          // Image fails if a url was found.
-          // Todo: add images-in-links to test page coverage.
-          if (!!parentLink) {
-            if (error[0] !== null) {
-              Ed11y.results.push([parentLink, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltUrl(altText)]);
-            }
-            else if (error[1] !== null) {
-              // "image of"
-              let dismissalKey = Ed11y.dismissalKey(src + altText);
-              Ed11y.results.push([parentLink, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltImageOfLinked(error, altText), "AltImageOfLinked", dismissalKey]);
-            }
-            else if (alt.length > 160) {
-              // Image warning if it is a link and contains long alt text.
-              let dismissalKey = Ed11y.dismissalKey(src + altText);
-              Ed11y.results.push([parentLink, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltLongLinked(alt, altText), "AltLongLinked", dismissalKey]);
-            }
-            // Warning: link and linked image both contain text.
-            // todo: need to remove ignored link text
-            else if (alt !== "" && Ed11y.linkText(parentLink.textContent).length > 1) {
-              let dismissalKey = Ed11y.dismissalKey(src + altText);
-              Ed11y.results.push([parentLink, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltLinkComplex(altText), "AltLinkComplex", dismissalKey]);
-            }
-          }
-          // Now if there is no link...
-          else if (error[0] !== null) {
-            Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltFilename(altText)]);
-          }
-          else if (error[1] !== null) {
-            let dismissalKey = Ed11y.dismissalKey(src + altText);
-            Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltImageOf(error, altText),"AltImageOf", dismissalKey]);
-          }
-          // Alert with deadspace alt.
-          else if (alt !== "" && alt.replace(/"|'|\s+/g, "") === "") {
-            Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltDeadspace]);
-          }
-          // Image error if alt text is too long.
-          else if (alt.length > 160) {
-            let dismissalKey = Ed11y.dismissalKey(src + altText);
-            Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltTooLong(alt, altText),"AltTooLong", dismissalKey]);
-          }
-        }
-      });
-    };
-
     Ed11y.linkText = (linkText) => {
+      // todo: This is only used in Images???
       linkText = linkText.replace(ed11yIgnoreLinkStrings,"");
       linkText = linkText.replace(/'|"|-|\.|\s+/g, '');
       return linkText;
     }
 
-    // Checks if text is not descriptive and returns the word(s) that are
-    // making the text inaccessible.
-    Ed11y.containsAltTextStopWords = function (alt) {
-      let altUrl = [".png", ".jpg", ".jpeg", ".gif"];
-      let suspiciousWords = ["image of", "graphic of", "picture of", "placeholder", "photo of"];
-      let hit = [null, null];
-      altUrl.forEach((string) => {
-        if (alt.toLowerCase().indexOf(string) >= 0) {
-          hit[0] = string;
-        }
-      })
-      suspiciousWords.forEach((string) => {
-        if (alt.toLowerCase().indexOf(string) >= 0) {
-          hit[1] = string;
-        }
-      })
-      return hit;
-    };
-
-    /*====================== LINK TEXT MODULE =======================*/
-
-    // Toggles the outline of all inaccessible link texts.
-    Ed11y.checkLinkText = function () {
-      // Todo: See if there is an alternative to :visible that shows only visually hidden content.
-      // Todo: Add test for consecutive links to same href?
-      // Todo: parameterize linkIgnore
-      // todo: parameterize stopwords as in Sa11y
-
-      Ed11y.allLinks.forEach((el) => {
-        // todo: investigate sa11y computation
-        let linkText = Ed11y.computeAriaLabel(el);
-        let img = el.querySelectorAll('img');
-        let hasImg = img.length > 0;
-        // todo: test downloadmatch
-        let downloadMatch = false;
-        // todo parameter
-        ed11yDownloadLinks.forEach((string) => {
-          let withQuery = string + "?";
-          if (linkText.lastIndexOf(string) === 0 || linkText.indexOf(withQuery) > -1) {
-            return true;
-          }
-        });
-        // todo: ends with, or contains including a ?
-        if (linkText === 'noAria') {
-          linkText = Ed11y.getText(el);
-          if (hasImg) {
-            img.forEach((el) => {
-              let imgText = Ed11y.computeAriaLabel(el);
-              if (imgText !== 'noAria') {
-                linkText += imgText;
-              }
-              else {
-                if (el.hasAttribute('alt')) {
-                  linkText += el.getAttribute('alt');
-                }
-                else if (el.hasAttribute('src')) {
-                  linkText += el.getAttribute('src');
-                }
-              }
-            });
-            // This only checks the alt, not aria-label
-            hasImg = true;
-          }
-        }
-        if (el?.getAttribute('target') === '_blank' && downloadMatch === false && linkText.indexOf('tab') === -1 && linkText.indexOf('window') === -1 && linkText.indexOf('external') === -1) {
-          // Warn about unwarned new windows before ignoreString strip.
-          let dismissalKey = Ed11y.dismissalKey(linkText);
-          Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-link-text-warning", 'ed11y-warning-btn', ed11yMessageQANewTab, "QANewTab", dismissalKey]);
-        }
-        linkText = linkText.replace(ed11yIgnoreLinkStrings,"");
-        let linkStrippedText = linkText.replace(/'|"|-|\.|\s+/g, '');
-
-        // Tests to see if this link is empty
-        // Todo add to test coverage
-        if (linkStrippedText.length === 0) {
-          linkStrippedText += !!Ed11y.computeTitle(el) ? Ed11y.computeTitle(el) : "";
-          if (linkStrippedText.length === 0) {
-
-            if (hasImg) {
-              Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
-            }
-            else {
-              Ed11y.results.push([el, 'before', 'ed11y-inline-block', "ed11y-link-text-fail", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
-            }
-          }
-        }
-        else {
-          // Check for links with generic or URL titles
-          let error = Ed11y.containsLinkTextStopWords(linkText.trim());
-          if (error !== "none") {
-            let dismissalKey = Ed11y.dismissalKey(linkText);
-            let stopWordMessage = "";
-            if (error === "url") {
-              // Url
-              stopWordMessage = ed11yMessagelinkTextIsURL;
-            }
-            else if (error === "generic") {
-              stopWordMessage = ed11yMessagelinkTextIsGeneric;
-            }
-            Ed11y.results.push([el, 'before', 'ed11y-instance-inline', "ed11y-link-text-warning", 'ed11y-warning-btn', stopWordMessage, "LinkTextIsGeneric", dismissalKey]);
-          }
-        }
-        //Warning: Find all PDFs. Although only append warning icon to
-        // first PDF on page.
-        if (!hasImg && downloadMatch > 0) {
-          let dismissalKey = Ed11y.dismissalKey(el?.getAttribute("src"));
-          el.classList.add('ed11y-text-warning');
-          Ed11y.results.push([el, 'after', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageLinkDownload, "LinkDownload", dismissalKey]);
-        }
-      });
-    };
-
-    // Checks if text is not descriptive and returns the word(s) that are
-    // making the text inaccessible. stopWords will flag hyperlinks in
-    // link titles. partialStopWords looks for links entirely made of
-    // generic words. Note that this was extensively rewritten.
-    Ed11y.containsLinkTextStopWords = function (textContent) {
-      // todo: use regex to find any three-letter TLD followed by a slash.
-      // todo: parameterize TLD list
-      let stopWords = ["http:/", "https:/", ".asp", ".htm", ".php", ".edu/", ".com/"];
-      let partialStopRegex = /learn|to|more|now|this|page|link|site|website|check|out|view|our|read|\.|,|:|download|form|here|click|>|<|\s/g;
-      let hit = 'none';
-
-      if (textContent.replace(partialStopRegex, '').length === 0) {
-        // If no partial words were found, then check for total words.
-        hit = 'generic';
-      }
-      else {
-        for (let i = 0; i < stopWords.length; i++) {
-          if (textContent.indexOf(stopWords[i]) > -1) {
-            hit = 'url';
-            break;
-          }
-        }
-      }
-
-      return hit;
-    };
 
     // Handle aria-label or labelled by
     Ed11y.computeAriaLabel = function (el) {
@@ -658,199 +356,7 @@ class Ed11y {
       }
     };
 
-    /*================== QUALITY ASSURANCE MODULE ===================*/
 
-    Ed11y.checkQA = function () {
-
-      // Detect paragraphs that should be lists: a. A. a) A) * - -- •.
-      let activeMatch = "";
-      let firstText = "";
-      let prefixDecrement = {
-        b: "a",
-        B: "A",
-        2: "1"
-      };
-      let prefixMatch = /a\.|a\)|A\.|A\)|1\.|1\)|\*\s|-\s|--|•\s|→\s|✓\s|✔\s|✗\s|✖\s|✘\s|❯\s|›\s|»\s/;
-      let decrement = function (el) {
-        return el.replace(/^b|^B|^2/, function (match) {
-          return prefixDecrement[match];
-        });
-      };
-      Ed11y.allP.forEach((p,i) => {
-
-        // Detect possible lists.
-        let firstPrefix = "";
-        let secondText = false;
-        let hit = false;
-        if (!firstText) {
-          let firstText = Ed11y.getText(p);
-          firstPrefix = firstText.substring(0, 2);
-        }
-        // Grab first two characters.
-        if (firstPrefix.length > 0 && firstPrefix !== activeMatch && firstPrefix.match(prefixMatch)) {
-          // We have a prefix and a possible hit; check next detected paragraph.
-          // Note these paragraphs may not be siblings in the DOM...
-          let secondP = Ed11y.allP[i + 1];
-          if (!!secondP) {
-            secondText = Ed11y.getText(secondP);
-            let secondPrefix = decrement(secondText.substring(0, 2));
-            if (firstPrefix === secondPrefix) {
-              // Note: this will flag <p>1. + <p>1.
-              hit = true;
-            }
-          }
-          if (!hit) {
-            // Split p by carriage return if present and compare.
-            let hasBreak = p?.querySelector("br")?.nextSibling?.nodeValue;
-            if (hasBreak) {
-              hasBreak = hasBreak.replace(/<\/?[^>]+(>|$)/g, "").trim();
-              if (firstPrefix === decrement(hasBreak.substring(0, 2))) {
-                hit = true;
-              }
-            }
-          }
-          if (hit) {
-            let dismissalKey = Ed11y.dismissalKey(firstText);
-            let ed11yShouldBeList = ed11yMessageQAShouldBeList(firstPrefix);
-            Ed11y.results.push([p, 'prepend', 'ed11y-instance-inline', '', 'ed11y-warning-btn', ed11yShouldBeList, "ShouldBeList", dismissalKey]);
-            activeMatch = firstPrefix;
-          }
-          else {
-            activeMatch = "";
-          }
-        }
-        else {
-
-          // Now check for possible header.
-          let possibleHeader = p.querySelector('strong, b');
-          if (!!possibleHeader) {
-            possibleHeader = Ed11y.getText(possibleHeader);
-            let maybeSentence = possibleHeader.match(/[.:;"']$/) !== null;
-            if (121 > possibleHeader.length > 0 && maybeSentence === false && possibleHeader.length === firstText.length) {
-              let dismissalKey = Ed11y.dismissalKey(firstText);
-              Ed11y.results.push([p, 'prepend', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageQAMayBeHeader, "QAMayBeHeader", dismissalKey]);
-            }
-          }
-        }
-
-        // Reset for next loop, carry over text query if available.
-        firstText = secondText ? "" : secondText;
-      });
-
-      // Warning: Detect uppercase. For each element, if it contains more
-      // than 4 uppercase words in a row, indicate warning.
-      // Uppercase word is anything that is more than 3 characters.
-      // Todo check performance of new regex.
-      Ed11y.allH.forEach((el) => {
-        Ed11y.checkCaps(el);
-      });
-      Ed11y.allP.forEach((el) => {
-        Ed11y.checkCaps(el);
-      });
-      Ed11y.allBlockquote.forEach((el) => {
-        Ed11y.checkCaps(el);
-      });
-      Ed11y.allLists.forEach((el) => {
-        Ed11y.checkCaps(el);
-      });
-      
-            // Check if a table has a table header.
-      Ed11y.allTables.forEach((el) => {
-        let findTHeaders = el?.querySelectorAll("th");
-        let findHeadingTags = el?.querySelectorAll("h1, h2, h3, h4, h5, h6");
-        if (!findTHeaders) {
-          Ed11y.results.push([el, 'before', 'ed11y-instance', 'ed11y-error-border', 'ed11y-error-btn', ed11yMessageMissingQATableHeadings]);
-        }
-        else {
-          // Make sure all table headers are not empty.
-          findTHeaders.forEach((th) => {
-            if (Ed11y.getText(th).length < 1 && !Ed11y.computeTitle(th)) {
-              Ed11y.results.push([th, 'prepend', 'ed11y-instance', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageEmptyTableHeader]);
-            }
-          });
-        }
-        if (!!findHeadingTags) {
-          // todo: have results escalate errors over warnings when both present
-          findHeadingTags.forEach((h) => {
-            Ed11y.results.push([h, 'before', 'ed11y-instance', 'ed11y-error-border', 'ed11y-error-btn', ed11yMessageQAHeaderInTable]);
-          });
-        }
-      });
-
-      // Check frames, audio and video
-      let video = Ed11y.srcMatchesOptions(Ed11y.allFrames, options.videoContent);
-      video = video.concat(Ed11y.allVideo);
-      if (video.length > 0) {
-        video.forEach(el => {
-          Ed11y.mediaCount++;
-          // Dismiss-able alert. False positive accepted on undefined sources.
-          let dismissKey = Ed11y.dismissalKey(el.hasAttribute('src') ? el.getAttribute('src') : el.querySelector('[src]')?.getAttribute('src'));
-          Ed11y.results.push([el, 'before', 'ed11y-instance', "", 'ed11y-warning-btn', ed11yMessageshowCaptions, "captions", dismissKey]);
-        })
-      }
-
-      let audio = Ed11y.srcMatchesOptions(Ed11y.allFrames, options.audioContent);
-      audio = audio.concat(Ed11y.allAudio);
-      if (audio.length > 0) {
-        audio.forEach(el => {
-          Ed11y.mediaCount++;
-          // Dismiss-able alert. False positive accepted on undefined sources.
-          let dismissKey = Ed11y.dismissalKey(el.hasAttribute('src') ? el.getAttribute('src') : el.querySelector('[src]')?.getAttribute('src'));
-          Ed11y.results.push([el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessagePodcast, "transcripts", dismissKey]);
-        })
-      }
-
-      let visualizations = Ed11y.srcMatchesOptions(Ed11y.allFrames, options.dataVizContent);
-      if (visualizations.length > 0) {
-        visualizations.forEach(el => {
-          // Dismiss-able alert. False positive accepted on undefined sources.
-          let dismissKey = Ed11y.dismissalKey(el.getAttribute('src'));
-          Ed11y.results.push([el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageVisualization, "visualization", dismissKey]);
-        })
-      }
-
-      // Warning: Twitter keyboard trap
-      let twits = Ed11y.srcMatchesOptions(Ed11y.allFrames, options.twitterContent);
-      if (twits.length > 0) {
-        twits.forEach(twit => {
-          let numberOfTweets = twit.querySelectorAll(".timeline-TweetList-tweet");
-          if (!!numberOfTweets && numberOfTweets > 3) {
-            Ed11y.results.push([twit,'before','ed11y-instance',"ed11y-text-warning",'ed11y-warning-btn',ed11yMessageTwitter]);
-          }
-        })
-      }
-
-
-      if (options.embeddedContent.length > 1) {
-        let embed = Ed11y.srcMatchesOptions(Ed11y.allFrames, options.embeddedContent);
-        embed.forEach((el) => {
-          Ed11y.results.push([el, 'before', 'ed11y-instance', 'ed11y-warning-border', 'ed11y-warning-btn', ed11yMessageEmbeddedContent]);
-        });
-      }
-
-    };
-
-    Ed11y.checkCaps = function(el) {
-      let thisText = "";
-      if (el.tagName ==='LI') {
-        // Prevent recursion through nested lists.
-        el.childNodes.forEach ((node) => {
-          if (node.nodeType === 3) {
-            thisText += node.textContent;
-          }
-        });
-      }
-      else {
-        thisText = Ed11y.getText(el);
-      }
-      let uppercasePattern = /([A-Z]{2,}[ ])([A-Z]{2,}[ ])([A-Z]{2,}[ ])([A-Z]{2,})/g;
-      let detectUpperCase = thisText.match(uppercasePattern);
-
-      if (detectUpperCase && detectUpperCase[0].length > 10) {
-        let dismissalKey = Ed11y.dismissalKey(thisText);
-        Ed11y.results.push([el, 'prepend', 'ed11y-instance-inline', 'ed11y-uppercase-warning', 'ed11y-warning-btn', ed11yMessageQAUppercase, "QAUppercase", dismissalKey]);
-      }
-    }
 
     /*================== FULL CHECK MODULE ===================*/
 
@@ -1021,7 +527,7 @@ class Ed11y {
       
       Ed11y.results?.forEach(function (el, index) {
         // todo: need to change all at once.
-        Ed11y.markResult(el, index);
+        Ed11y.flagResult(el, index);
       });
       // As soon as the buttons are in place, dispatch an event so themes
       // can react
@@ -1393,10 +899,12 @@ class Ed11y {
             if (!!firstVisible) {
               alert(alertMessage);
               firstVisible.classList.add('ed11y-hidden-highlight');
+              // todo what used to call this?
               let highlightContainer = document.createElement('div');
               highlightContainer.setAttribute('tabindex', '-1');
               highlightContainer.classList.add('ed11y-sr-only', 'ed11y-hidden-highlight-' + Ed11y.goto);
               highlightContainer.textContent = "Highlighted container";
+              // let highlightContainer = Ed11y.builder('div',false,'ed11y-sr-only, ed11y-hidden-highlight' + Ed11y.goto, "Highlighted container");
               offsetCalc = Ed11y.goto.getBoundingClientRect();
               Ed11y.gotoOffset = offsetCalc.top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
               Ed11y.popThis(Ed11y.goto, 'click');
@@ -1514,7 +1022,6 @@ class Ed11y {
         showTagButton.addEventListener('click', showTags);
 
         let pinAltToImage = function() {
-          console.log('tried');
           if (document.getElementById('ed11y-summary-toggle').getAttribute('aria-pressed') === 'true') {
             Ed11y.root.querySelectorAll('img, [role="img"]').forEach((el) => {
               let revealedAlt = el.previousElementSibling?.previousElementSibling;
@@ -1675,6 +1182,32 @@ class Ed11y {
       });
     }
 
+    Ed11y.builder = function (type, id, classes, attributes, textContent) {
+      let el = document.createElement(type);
+      if (id) {
+        el.setAttribute('id', id);
+      }
+      if (classes) {
+        if (typeof(classes) === 'string') {
+          el.classList.add(classes);
+        } else {
+          classes.forEach(str => {
+            el.classList.add(str);
+          })
+        }
+      }
+      if (typeof(attributes) === "object") {
+        Object.entries(attributes).forEach(([key, value]) => {
+          //let attribute = value.toString();
+          el.setAttribute(key, value);
+        })
+      }
+      if (textContent) {
+        el.textContent = textContent;
+      }
+      return (el);
+    };
+
     //Helper: Used to ignore child elements within an anchor.
     Ed11y.fnIgnore = (element, selector) => {
       const clone = element.cloneNode(true);
@@ -1684,9 +1217,5 @@ class Ed11y {
       });
       return clone;
     };
-
-
   }
-
 }
-

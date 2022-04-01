@@ -1,4 +1,6 @@
-var ed11yPanel = document.createElement('div');
+
+
+const ed11yPanel = document.createElement('div');
 ed11yPanel.classList.add('ed11y-reset', 'ed11y-preload', 'ed11y-panel-shut', 'ed11y-pass');
 ed11yPanel.setAttribute('id', 'ed11y-panel');
 ed11yPanel.innerHTML = "" +
