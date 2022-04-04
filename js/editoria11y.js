@@ -3,7 +3,7 @@ class Ed11y {
   constructor(options) {
     let defaultOptions = {
       checkRoot : "body",
-      ed11yAlertMode : "polite",
+      ed11yAlertMode : "",
       ed11yNoRun : "",
       ed11yContainerIgnore : ".project-tagline",
       ed11yEmbeddedContentWarning : "",
@@ -14,16 +14,21 @@ class Ed11y {
       ed11yIgnoreLinkStrings : "",
       ed11yAllowOverflow : "",
       ed11yHiddenHandlers : "",
-      ed11yDownloadLinks : "a[href$='.pdf'], a[href*='.pdf?'], a[href$='.doc'], a[href$='.docx'], a[href*='.doc?'], a[href*='.docx?'], a[href$='.ppt'], a[href$='.pptx'], a[href*='.ppt?'], a[href*='.pptx?'], a[href^='https://docs.google']",
+      ed11yDownloadLinks : ['.pdf', '.doc', '.docx', '.ppt', '.pptx', 'https://docs.google'],
+      //Embedded content
+      videoContent: "youtube.com, vimeo.com, yuja.com, panopto.com",
+      audioContent: "soundcloud.com, simplecast.com, podbean.com, buzzsprout.com, blubrry.com, transistor.fm, fusebox.fm, libsyn.com",
+      dataVizContent: "datastudio.google.com, tableau",
+      twitterContent: "twitter-timeline",
+      embeddedContent: '',
     };
-
-    options = {
+    Ed11y.options = {
       ...defaultOptions,
       ...options
     };
 
     Ed11y.checkRunPrevent = function() {
-      return options.ed11yNoRun.trim().length > 0 ? document.querySelector(options.ed11yNoRun) : false;
+      return Ed11y.options.ed11yNoRun.trim().length > 0 ? document.querySelector(Ed11y.options.ed11yNoRun) : false;
     }
 
     // todo: const M = ed11yLang;
@@ -43,6 +48,11 @@ class Ed11y {
         if (!Ed11y.checkRunPrevent()) {
           Ed11y.running = true;
           Ed11y.loadGlobals();
+          // todo does this respect assertive pref?
+          Ed11y.testQA = new Ed11yTestQA;
+          Ed11y.testHeadings = new Ed11yTestHeadings;
+          Ed11y.testImages = new Ed11yTestImages;
+          Ed11y.testLinks = new Ed11yTestLinks;
           Ed11y.checkAll(true, 'hide');
         }
       });
@@ -52,37 +62,34 @@ class Ed11y {
 
 
     // Toggles the outline of all headers, link texts, and images.
-    Ed11y.checkAll = async function (onLoad, showPanel) {
+    Ed11y.checkAll = (onLoad, showPanel) => {
       if (!Ed11y.checkRunPrevent()) {
-        Ed11y.paints = [];
-        Ed11y.paintsJS = [];
+        Ed11y.results = [];
         Ed11y.errorCount = 0;
         Ed11y.warningCount = 0;
         Ed11y.dismissedCount = 0;
         Ed11y.mediaCount = 0;
-        Ed11y.root = document.querySelector(options.checkRoot);
+        Ed11y.root = document.querySelector(Ed11y.options.checkRoot);
         // If target root can't be found, fall back to default.
         if (!Ed11y.root) {
           Ed11y.root = document.querySelector("body");
           console.error('Check Editoria11y configuration; specified root element not found');
         }
-        // Todo: remove. Placeholder for unconverted jQuery references.
-        Ed11y.checkRoot = $(Ed11y.root);
         Ed11y.findElements();
 
         // Get list of elements already hidden
         let ed11yDismissed = localStorage.getItem("ed11ydismissed");
         Ed11y.dismissedAlerts = ed11yDismissed ? JSON.parse(ed11yDismissed) : {};
 
-        // Waiting to enqueue lets user interactions interrupt execution.
+        // Waiting to enqueue next test allows execution interrupts.
         window.setTimeout(function () {
-          Ed11y.checklinkText();
+          Ed11y.testLinks.check();
           window.setTimeout(function () {
-            Ed11y.checkAltText();
+            Ed11y.testImages.check();
             window.setTimeout(function () {
-              Ed11y.checkHeaders();
+              Ed11y.testHeadings.check();
               window.setTimeout(function () {
-                Ed11y.checkQA();
+                Ed11y.testQA.check();
                 window.setTimeout(function () {
                   Ed11y.buildPanels(onLoad);
                   window.setTimeout(function () {
@@ -109,16 +116,16 @@ class Ed11y {
 
     Ed11y.countAlerts = function () {
       Ed11y.dismissedCount = 0;
-      // Remove dismissed alerts from the paint array and update count.
-      for (let i = Ed11y.paints.length - 1; i >= 0; i--) {
-        let dismissKey = Ed11y.paints[i][7];
+      // Remove dismissed alerts from the flag array and update count.
+      for (let i = Ed11y.results.length - 1; i >= 0; i--) {
+        let dismissKey = Ed11y.results[i][7];
         dismissKey = typeof dismissKey !== "undefined" ? Ed11y.dismissalKey(dismissKey) : false;
-        let testType = Ed11y.paints[i][6];
+        let testType = Ed11y.results[i][6];
         // Hide alert if its ID key is in the array.
         if (dismissKey !== false && typeof Ed11y.dismissedAlerts[Ed11y.currentPage] !== "undefined" && typeof Ed11y.dismissedAlerts[Ed11y.currentPage][testType] !== "undefined" && Ed11y.dismissedAlerts[Ed11y.currentPage][testType][dismissKey] !== "undefined") {
           Ed11y.dismissedCount++;
-          Ed11y.paints.splice(i, 1);
-        } else if (Ed11y.paints[i][3].indexOf("warning") > 0) {
+          Ed11y.results.splice(i, 1);
+        } else if (Ed11y.results[i][3].indexOf("warning") > 0) {
           Ed11y.warningCount++;
         } else {
           Ed11y.errorCount++;
@@ -126,7 +133,7 @@ class Ed11y {
       }
     }
 
-    Ed11y.updatePanel = async function (onLoad, showPanel, showHidden) {
+    Ed11y.updatePanel = function (onLoad, showPanel, showHidden) {
       if (showHidden !== true) {
         Ed11y.countAlerts();
       }
@@ -173,10 +180,10 @@ class Ed11y {
       Ed11y.running = false;
     };
 
-    Ed11y.paintButton = function (el, index) {
-      // todo: paints are based on jQuery objects. Will need to change all at once.
+    Ed11y.flagResult = function (el, index) {
+      // todo: results are based on jQuery objects. Will need to change all at once.
       // We parse this long array:
-      // [0] $el element
+      // [0] el element
       // [1] insertion position
       // [2] is element block or inline
       // [3] wrapper class
@@ -184,84 +191,44 @@ class Ed11y {
       // [5] message
       // [6] test shortname
       // [7] ID key for dismissing
-      // e.g.: Ed11y.paints.push([$el,'before','ed11y-instance','ed11y-error-border','ed11y-warning-btn',generalAltText]);
+      // e.g.: Ed11y.results.push([$el,'before','ed11y-instance','ed11y-error-border','ed11y-warning-btn',generalAltText]);
       // Warning, error or hidden?
-      let icon = '<span class="ed11y-sr-only">Show editorially error</span>';
-      if (el[4].indexOf('warning') !== -1) {
-        icon = '<span class="ed11y-sr-only">Show editorially warning</span>';
-      }
-      let injection = '<div class="' + el[2] + ' ed11y-reset"><button type="button" class="' +
-          el[4] +
-          ' ed11y-pop" style="display:none;" aria-expanded="false" data-ed11y-inserted="' + el[1] + '" data-ed11y-tip="' +
-          index +
-          '">' + icon + '</button></div>';
-      let pretagged = el[0].attr('data-ed11y-marked');
-      if (pretagged === 'before') {
-        el[0].prev().find('.ed11y-pop').attr('data-ed11y-tip', el[0].prev().find('.ed11y-pop').attr('data-ed11y-tip') + ',' + index);
-      }
-      else if (pretagged === 'after') {
-        el[0].next().find('.ed11y-pop').attr('data-ed11y-tip', el[0].next().find('.ed11y-pop').attr('data-ed11y-tip') + ',' + index);
-      }
-      else if (pretagged === 'prepend') {
-        el[0].find('.ed11y-pop').attr('data-ed11y-tip', el[0].find('.ed11y-pop').attr('data-ed11y-tip') + ',' + index);
-      }
-      else {
-        if (el[1] === 'after') {
-          el[0].attr('data-ed11y-marked', 'after').addClass(el[3]).after(injection);
-        }
-        else if (el[1] === 'before') {
-          el[0].attr('data-ed11y-marked', 'before').addClass(el[3]).before(injection);
+      // console.log(index + " " + el[6]);
 
-        }
-        else {
-          el[0].attr('data-ed11y-marked', 'prepend').addClass(el[3]).prepend(injection);
-        }
-      }
-    };
-    Ed11y.paintButtonJS = function (el, index) {
-      // todo: paints are based on jQuery objects. Will need to change all at once.
-      // We parse this long array:
-      // [0] $el element
-      // [1] insertion position
-      // [2] is element block or inline
-      // [3] wrapper class
-      // [4] button class
-      // [5] message
-      // [6] test shortname
-      // [7] ID key for dismissing
-      // e.g.: Ed11y.paints.push([$el,'before','ed11y-instance','ed11y-error-border','ed11y-warning-btn',generalAltText]);
-      // Warning, error or hidden?
-      let icon = document.createElement("span");
-      icon.classList.add('ed11y-sr-only');
-      if (el[4].indexOf('warning') !== -1) {
-        icon.textContent = 'Show editorially warning';
-      } else {
-        icon.textContent = 'Show editorially error';
-      }
-      let injection = document.createElement('div');
-      injection.classList.add(el[2], 'ed11y-reset');
-      injection.innerHTML = '<button type="button" class="' +
-          el[4] +
-          ' ed11y-pop" style="display:none;" aria-expanded="false" data-ed11y-inserted="' + el[1] + '" data-ed11y-tip="' +
-          index +
-          '">' + icon + '</button>';
-      let pretagged = el[0].getAttribute('data-ed11y-marked');
-      if (pretagged === 'before') {
+      let alreadyFlagged = el[0].getAttribute('data-ed11y-marked');
+      // todo mvp test this code
+      if (alreadyFlagged === 'before') {
         let pop = el[0].previousElementSibling;
         let tip = pop.querySelector('.ed11y-pop');
         tip.setAttribute('data-ed11y-tip', index);
       }
-      else if (pretagged === 'after') {
+      else if (alreadyFlagged === 'after') {
         let pop = el[0].nextElementSibling;
         let tip = pop.querySelector('.ed11y-pop');
         tip.setAttribute('data-ed11y-tip', index);
       }
-      else if (pretagged === 'prepend') {
+      else if (alreadyFlagged === 'prepend') {
         let tip = el[0].querySelector('.ed11y-pop');
         tip.setAttribute('data-ed11y-tip', index);
       }
       else {
-        el[0].classList.add(el[3]);
+        if (el[3].length > 0) {
+          el[0].classList.add(el[3]);
+        }
+
+        // Create button
+        let iconText = el[4].indexOf('warning') !== -1 ? 'Show editorially warning' : 'Show editorially error';
+        let icon = Ed11y.builder('span',false,'ed11y-sr-only', iconText);
+        let buttonAttributes = {
+          'aria-expanded':'false',
+          'data-ed11y-inserted':el[1],
+          'data-ed11y-tip':index,
+        };
+        let button = Ed11y.builder('button',false,[el[4], 'ed11y-pop'],buttonAttributes);
+        button.insertAdjacentElement('afterbegin', icon);
+        let injection = Ed11y.builder('div',false,[el[2], 'ed11y-reset']);
+        injection.insertAdjacentElement('afterbegin', button);
+
         if (el[1] === 'after') {
           el[0].setAttribute('data-ed11y-marked','after');
           el[0].insertAdjacentElement('afterend', injection);
@@ -272,7 +239,7 @@ class Ed11y {
         }
         else {
           el[0].setAttribute('data-ed11y-marked','prepend');
-          el[0].insertBefore(injection, el[0].firstChild);
+          el[0].insertAdjacentElement('afterbegin', injection);
         }
       }
     };
@@ -283,7 +250,7 @@ class Ed11y {
       if (totalCount > 0) {
         Ed11y.panelCount.innerText = totalCount;
         Ed11y.panelCount.style.display = 'inline-block !important';
-        Ed11y.panelNextButton.innerText = totalCount > 1 ? 'first' : '';
+        Ed11y.panelJumpNext.innerText = totalCount > 1 ? 'first' : '';
         if (Ed11y.errorCount > 0) {
           Ed11y.panel.classList.remove('ed11y-pass', 'ed11y-warnings');
           Ed11y.panel.classList.add('ed11y-errors');
@@ -298,14 +265,14 @@ class Ed11y {
       else {
         Ed11y.panelMessage.innerText = 'No Accessibility errors detected.';
         Ed11y.panelCount.style.display = 'display: none !important;';
-        Ed11y.panel.classList.remove('ed11y-warnings ed11y-errors');
+        Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-errors');
         Ed11y.panel.classList.add('ed11y-pass');
       }
       if (Ed11y.dismissedCount.length > 0) {
-        // Todo dejQuery
-        $('#ed11y-show-dismissed').attr('style', 'display: inline-block !important;');
+        // Todo dejQuery dismissed workflow
+        document.getElementById('ed11y-show-dismissed')?.setAttribute('style', 'display: inline-block !important;');
       } else {
-        $('#ed11y-show-dismissed').attr('style', 'display: none !important;');
+        document.getElementById('ed11y-show-dismissed')?.setAttribute('style', 'display: none !important;');
       }
       Ed11y.panel.classList.remove('ed11y-preload');
     };
@@ -317,10 +284,10 @@ class Ed11y {
       Ed11y.resetTips();
 
       // Remove and reset panels and active items.
-      Ed11y.panel.querySelectorAll('.ed11y-fullcheck li, .ed11y-about-text').forEach((el) => el.remove());
+      Ed11y.panel.querySelectorAll('.ed11y-show li, .ed11y-about-text').forEach((el) => el.remove());
       Ed11y.panel.classList.add('ed11y-panel-shut');
       Ed11y.panel.classList.remove('ed11y-panel-minimized', 'ed11y-panel-active');
-      Ed11y.panelToggle.setAttribute('aria-expanded', false);
+      Ed11y.panelToggle.setAttribute('aria-expanded', 'false');
       Ed11y.panelToggle.classList.remove('ed11y-toggle-active', 'ed11y-errors', 'ed11y-warnings');
       Ed11y.panel.querySelectorAll('.ed11y-upper-active').forEach((el) => el.classList.remove('ed11y-upper-active'));
       Ed11y.panel.querySelectorAll('#ed11y-panel-buttonbar [aria-pressed="true"]').forEach((el) => el.setAttribute('aria-pressed', 'false'));
@@ -336,332 +303,33 @@ class Ed11y {
       Ed11y.root.querySelectorAll('.ed11y-instance, .ed11y-instance-inline, .ed11y-headings-label, .ed11y-reveal-alts').forEach((el) => el.remove());
       Ed11y.root.querySelectorAll('[data-ed11y-marked]').forEach((el) => el.removeAttribute('data-ed11y-marked'));
     };
-
-
-    /*================== HEADING STRUCTURE MODULE ===================*/
-
-    Ed11y.checkHeaders = async function () {
-      // Reset panel; we rebuild on each run.
-      Ed11y.panel?.querySelectorAll("#ed11y-outline-list li, .ed11y-headings-label").forEach((el) => el.remove());
-
-      // Only fetch headers within the content area.
-
-      let prevLevel = 0;
-      Ed11y.headingOutline = "";
-
-      // Test each header level for accessibility issues.
-      Ed11y.allH.forEach((el, i) => {
-        let level;
-
-        // Match aria-headers to <h#> level.
-        if (el.hasAttribute('aria-level')) {
-          // Plus forces numerical type
-          level = +el.getAttribute('aria-level');
-        }
-        else {
-          level = +el.tagName.slice(1);
-        }
-        let headingError = "";
-        let outlinePrefix = "";
-        let ed11yTip = "";
-        let headingText = Ed11y.getText(el);
-        let headingLength = headingText.length;
-        let dismissKey = false;
-        if (level - prevLevel > 1 && i !== 0) {
-          headingError = 'ed11y-warning-btn';
-          outlinePrefix = '(flagged for skipped level) ';
-          dismissKey = Ed11y.dismissalKey(level + headingText);
-          ed11yTip = ed11yMessageHeadingLevelSkipped(prevLevel, level);
-        }
-        if (headingLength < 1) {
-          // todo: proper text recursion
-          // todo: test with no alt attribute at all
-          let headingSubText = el.querySelector('img')?.getAttribute('alt');
-          if (!headingSubText || headingSubText.length === 0) {
-            headingError = 'ed11y-warning-btn';
-            outlinePrefix = '(empty heading)';
-            ed11yTip = ed11yMessageHeadingEmpty;
-          }
-        }
-        else if (headingLength > 160) {
-          headingError = 'ed11y-warning-btn';
-          outlinePrefix = '(flagged for length) ';
-          dismissKey = Ed11y.dismissalKey(level + headingText);
-          ed11yTip = ed11yMessageHeadingTooLong(headingLength);
-        }
-        prevLevel = level;
-        let liClass = "ed11y-outline-" + level;
-        let liPrefix = "";
-        // If the heading error is within a hyperlink, make sure to
-        // append button after anchor tag.
-        // Todo add this case to the test page
-        // Todo test new header ignore
-        if (headingError !== "") {
-          // todo: just use container ignore?
-          if (!(options.headerIgnore !== "" && el?.closest(options.headerIgnore))) {
-            if (!el?.closest("a")) {
-              Ed11y.paintsJS.push([el, 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
-            }
-            else {
-              Ed11y.paintsJS.push([el.closest('a'), 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
-            }
-            // Outline element if there is an error.
-            liClass += " ed11y-text-warning";
-            liPrefix = "<span class='ed11y-sr-only'> Warning: </span> ";
-          }
-        }
-        if (outlinePrefix) {
-          outlinePrefix = "<span class='ed11y-small'><em>" + outlinePrefix +
-              "</em></span>";
-        }
-        // todo: is this the golden ignore check?
-        if (!(options.ed11yOutlineIgnore !== "" && el?.closest(options.ed11yOutlineIgnore))) {
-          Ed11y.headingOutline += "<li class='" + liClass + "'>" +
-              "<span class='ed11y-small'>" + level + "</span> " +
-              liPrefix + outlinePrefix + el.textContent +
-              "</li>";
-        }
-      });
-
-      // Check for blockquotes used as headings. If it's less than 25
-      // characters - it's probably not a blockquote.
-      let blockquotes = Ed11y.root.querySelectorAll("blockquote");
-      blockquotes.forEach((el, i) => {
-        let text = Ed11y.getText(el);
-        if (text.length < 25) {
-          let dismissalKey = Ed11y.dismissalKey(text);
-          Ed11y.paintsJS.push([el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageFullCheckBlockquote, "blockquoteLength", dismissalKey]);
-        }
-      });
-
-    };
+    
 
     /*======================== INPUTS MODULE =======================*/
     // todo: implement this module.
 
-    /*================== ALTERNATIVE TEXT MODULE ====================*/
+    Ed11y.linkText = (linkText) => {
+      // todo: This is only used in Images???
+      linkText = linkText.replace(ed11yIgnoreLinkStrings,"");
+      linkText = linkText.replace(/'|"|-|\.|\s+/g, '');
+      return linkText;
+    }
 
-    // todo: consider flagging alts referencing to position and color.
-    Ed11y.checkAltText = async function () {
-
-      // Test each image for alternative text.
-      Ed11y.$img.each((i, el) => {
-        let $el = $(el);
-        let alt = $el.attr("alt");
-        let src = $el.attr("src");
-        let linkChild = $el.parents('a[href]').length;
-
-        if (typeof alt !== "string") {
-          Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yGeneralAltText]);
-        }
-        else if (alt.length === 0 && linkChild === 0) {
-          // An empty alt may be ok, and we handle empty links in the
-          // link tests.
-          let dismissalKey = Ed11y.dismissalKey(src);
-          Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltDecorative, "decorativeImage", dismissalKey]);
-        }
-
-        // If alt attribute is present, further tests are done.
-        else {
-          let error = Ed11y.containsAltTextStopWords(alt);
-          let altText = Ed11y.sanitizeForHTML(alt);
-
-          // Image fails if a url was found.
-          // Todo: add images in links to test coverage.
-          if ($el.parents().is("a[href]")) {
-            if (error[0] !== null) {
-              Ed11y.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-error-border ed11y-imageTip", 'ed11y-error-btn', ed11yMessageAltUrl(altText)]);
-            }
-            else if (error[1] !== null) {
-              // "image of"
-              let dismissalKey = Ed11y.dismissalKey(src + altText);
-              Ed11y.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltImageOfLinked(error, altText), "AltImageOfLinked", dismissalKey]);
-            }
-            else if (alt.length > 160) {
-              // Image warning if it is a link and contains long alt text.
-              let dismissalKey = Ed11y.dismissalKey(src + altText);
-              Ed11y.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltLongLinked(alt, altText), "AltLongLinked", dismissalKey]);
-            }
-                // Image warning if it is a link, contains alt text AND
-            // surrounding link text.
-            else if (alt !== "" && $el.parents("a").text().replace(ed11yIgnoreLinkStrings,"").trim().length > 1) {
-              let dismissalKey = Ed11y.dismissalKey(src + altText);
-              Ed11y.paints.push([$el.closest('a'), 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltLinkComplex(altText), "AltLinkComplex", dismissalKey]);
-            }
-          }
-          // Now if there is no link...
-          else if (error[0] !== null) {
-
-            Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border ed11y-imageTip", 'ed11y-error-btn', ed11yMessageAltFilename(altText)]);
-          }
-          else if (error[1] !== null) {
-            let dismissalKey = Ed11y.dismissalKey(src + altText);
-            Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-warning-border ed11y-imageTip", 'ed11y-warning-btn', ed11yMessageAltImageOf(error, altText),"AltImageOf", dismissalKey]);
-          }
-          // Alert with deadspace alt.
-          else if (alt !== "" && alt.replace(/"|'|\s+/g, "") === "") {
-
-            Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageAltDeadspace]);
-          }
-          // Image error if alt text is too long.
-          else if (alt.length > 160) {
-            let dismissalKey = Ed11y.dismissalKey(src + altText);
-            Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageAltTooLong(alt, altText),"AltTooLong", dismissalKey]);
-          }
-        }
-      });
-    };
-
-    // Checks if text is not descriptive and returns the word(s) that are
-    // making the text inaccessible.
-    Ed11y.containsAltTextStopWords = function (alt) {
-      let altUrl = [".png", ".jpg", ".jpeg", ".gif"];
-      let suspiciousWords = ["image of", "graphic of", "picture of", "placeholder", "photo of"];
-      let hit = [null, null];
-      $.each(altUrl, function (index, word) {
-        if (alt.toLowerCase().indexOf(word) >= 0) {
-          hit[0] = word;
-        }
-      });
-      $.each(suspiciousWords, function (index, word) {
-        if (alt.toLowerCase().indexOf(word) >= 0) {
-          hit[1] = word;
-        }
-      });
-      return hit;
-    };
-
-    /*====================== LINK TEXT MODULE =======================*/
-
-    // Toggles the outline of all inaccessible link texts.
-    Ed11y.checklinkText = async function () {
-      // Todo: See if there is an alternative to :visible that shows only
-      // visually hidden content.
-      // Todo: Add test for consecutive links to same href?
-      let $links = Ed11y.checkRoot.find("a[href]").not(Ed11y.linkIgnore);
-
-      /* Mini function if you need to exclude any text contained with a span. We created this function to ignore automatically appended sr-only text for external links and document filetypes.*/
-      $.fn.ignore = function (sel) {
-        return Ed11y.clone().find(sel||">*").remove().end();
-      };
-
-      /* Example: If you need to ignore any text within <span class="sr-only">test</span>.
-          $el.ignoreString("span.sr-only").text().trim();
-       */
-
-      $links.each((i, el) => {
-        let $el = $(el);
-        let linkText = Ed11y.computeAriaLabel($el);
-        let $img = $el.find('img');
-        let hasImg = $img.length > 0;
-        let downloadMatch = $el.filter(ed11yDownloadLinks).length;
-        if (linkText === 'noAria') {
-          linkText = $el.text().trim();
-          if (hasImg) {
-            let imgText = Ed11y.computeAriaLabel($img);
-            if (imgText !== 'noAria') {
-              linkText += imgText;
-            }
-            else {
-              if ($img.is('[alt]')) {
-                linkText += $img.attr('alt');
-              }
-              else {
-                linkText += $img.attr('src');
-              }
-            }
-            // This only checks the alt, not aria-label
-            hasImg = true;
-          }
-        }
-        if ($el.attr('target') === '_blank' && downloadMatch === 0 && linkText.indexOf('tab') === -1 && linkText.indexOf('window') === -1 && linkText.indexOf('external') === -1) {
-          // Warn about unwarned new windows before ignoreString strip.
-          let dismissalKey = Ed11y.dismissalKey(linkText);
-          Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-link-text-warning", 'ed11y-warning-btn', ed11yMessageQANewTab, "QANewTab", dismissalKey]);
-        }
-        linkText = linkText.replace(ed11yIgnoreLinkStrings,"");
-        let linkStrippedText = linkText.replace(/'|"|-|\.|\s+/g, '');
-
-        // Tests to see if this link is empty
-        // Todo add to test coverage
-        if (linkStrippedText.length === 0) {
-          linkStrippedText += !!Ed11y.computeTitle($el) ? Ed11y.computeTitle($el) : "";
-          if (linkStrippedText.length === 0) {
-
-            if (hasImg) {
-              Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
-            }
-            else {
-              Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline ed11y-inline-block', "ed11y-link-text-fail", 'ed11y-error-btn', ed11yMessageLinkHasNoText]);
-            }
-          }
-        }
-        else {
-          // Check for links with generic or URL titles
-          let error = Ed11y.containslinkTextStopWords(linkText.trim());
-          if (error !== "none") {
-            let dismissalKey = Ed11y.dismissalKey(linkText);
-            let stopWordMessage = "";
-            if (error === "url") {
-              // Url
-              stopWordMessage = ed11yMessagelinkTextIsURL;
-            }
-            else if (error === "generic") {
-              stopWordMessage = ed11yMessagelinkTextIsGeneric;
-            }
-            Ed11y.paints.push([$el, 'before', 'ed11y-instance-inline', "ed11y-link-text-warning", 'ed11y-warning-btn', stopWordMessage, "LinkTextIsGeneric", dismissalKey]);
-          }
-        }
-        //Warning: Find all PDFs. Although only append warning icon to
-        // first PDF on page.
-        if (!hasImg && downloadMatch > 0) {
-          let dismissalKey = Ed11y.dismissalKey($el.attr("src"));
-          $el.addClass("ed11y-text-warning");
-          Ed11y.paints.push([$el, 'after', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageLinkDownload, "LinkDownload", dismissalKey]);
-        }
-      });
-    };
-
-    // Checks if text is not descriptive and returns the word(s) that are
-    // making the text inaccessible. stopWords will flag hyperlinks in
-    // link titles. partialStopWords looks for links entirely made of
-    // generic words. Note that this was extensively rewritten.
-    Ed11y.containslinkTextStopWords = function (textContent) {
-      // todo: use regex to find any three-letter TLD followed by a slash.
-      let stopWords = ["http://", "https://", ".asp", ".htm", ".php", ".edu/", ".com/"];
-      let partialStopRegex = /learn|to|more|now|this|page|link|site|website|check|out|view|our|read|\.|,|:|download|form|here|click|>|<|\s/g;
-      let hit = "none";
-
-      if (textContent.replace(partialStopRegex, '').length === 0) {
-        // If no partial words were found, then check for total words.
-        hit = "generic";
-      }
-      else {
-        for (let i = 0; i < stopWords.length; i++) {
-          if (textContent.indexOf(stopWords[i]) > -1) {
-            hit = "url";
-            break;
-          }
-        }
-      }
-
-      return hit;
-    };
 
     // Handle aria-label or labelled by
-    Ed11y.computeAriaLabel = function ($el) {
+    Ed11y.computeAriaLabel = function (el) {
       // Todo: what if there is a span inside element with a label?
-      if ($el.is('[aria-label]')) {
-        return $el.attr('aria-label');
+      if (el.hasAttribute('[aria-label]')) {
+        return el.getAttribute('aria-label');
       }
-      else if ($el.is('[aria-labelledby]')) {
-        let target = $el.attr('aria-labelledby');
+      else if (el.hasAttribute('[aria-labelledby]')) {
+        let target = el.getAttribute('aria-labelledby');
         if (target.length > 0) {
           target = '#' + target;
           target = target.replace(/ /g, ', #');
           let returnText = '';
-          $(target).each(function () {
-            returnText += $(this).text() + ' ';
+          target.forEach((id) => {
+            returnText += Ed11y.getText(document.getElementById(id)) + ' ';
           });
           return returnText;
         }
@@ -675,204 +343,20 @@ class Ed11y {
     };
 
     // recursively look for titles
-    Ed11y.computeTitle = function ($el) {
-      if ($el.is('[title]')) {
-        return $el.attr('title');
+    Ed11y.computeTitle = function (el) {
+      // todo last working here:
+      if (el.hasAttribute('title')) {
+        return el.getAttribute('title');
       }
-      else if ($el.find('[title]')) {
-        return $el.find('[title]').first().attr('title');
+      else if (el.querySelector('[title]')) {
+        return el.querySelector('[title]').getAttribute('title');
       }
       else {
         return "";
       }
     };
 
-    /*================== QUALITY ASSURANCE MODULE ===================*/
 
-    Ed11y.checkQA = async function () {
-
-      // Detect paragraphs that should be lists: a. A. a) A) * - -- •.
-      let activeMatch = "";
-      let firstText = "";
-      let prefixDecrement = {
-        b: "a",
-        B: "A",
-        2: "1"
-      };
-      let prefixMatch = /a\.|a\)|A\.|A\)|1\.|1\)|\*\s|-\s|--|•\s|→\s|✓\s|✔\s|✗\s|✖\s|✘\s|❯\s|›\s|»\s/;
-      let decrement = function (el) {
-        return el.replace(/^b|^B|^2/, function (match) {
-          return prefixDecrement[match];
-        });
-      };
-      Ed11y.$p.each(function (i, el) {
-
-        // Detect possible lists.
-        let $first = $(el);
-        if (firstText.length === 0) {
-          firstText = $(el).text().trim();
-        }
-        let hit = false;
-        // Grab first two characters.
-        let firstPrefix = firstText.substring(0, 2);
-        if (firstPrefix.length > 0 && firstPrefix !== activeMatch && firstPrefix.match(prefixMatch)) {
-          // We have a prefix and a possible hit; check next paragraph.
-          let $second = Ed11y.$p.eq(i + 1);
-          if ($second) {
-            let secondText = $second.text().trim();
-            let secondPrefix = decrement(secondText.substring(0, 2));
-            if (firstPrefix === secondPrefix) {
-              hit = true;
-            }
-          }
-          if (!hit) {
-            // Split p by carriage return if present and compare.
-            let hasBreak = $first.html().indexOf("<br>");
-            if (hasBreak !== -1) {
-              // Note: this cannot strip rich text formatting.
-              let subParagraph = $first.html().substring(hasBreak + 4).replace(/<\/?[^>]+(>|$)/g, "").trim();
-              let subPrefix = subParagraph.substring(0, 2);
-              if (firstPrefix === decrement(subPrefix)) {
-                hit = true;
-              }
-            }
-          }
-          if (hit) {
-            let dismissalKey = Ed11y.dismissalKey(firstText);
-            let ed11yShouldBeList = ed11yMessageQAShouldBeList(firstPrefix);
-            Ed11y.paints.push([$first, 'prepend', 'ed11y-instance-inline', "", "ed11y-warning-btn", ed11yShouldBeList, "ShouldBeList", dismissalKey]);
-            activeMatch = firstPrefix;
-          }
-          else {
-            activeMatch = "";
-          }
-        }
-        else {
-
-          // Now check for possible header.
-          let possibleHeader = $first.find('strong, b').first().text().trim();
-          let maybeSentence = possibleHeader.match(/[.:;"']$/) !== null;
-          if (possibleHeader.length > 0 && maybeSentence === false && possibleHeader.length === firstText.length) {
-            let dismissalKey = Ed11y.dismissalKey(firstText);
-            Ed11y.paints.push([$first, 'prepend', 'ed11y-instance-inline', "", 'ed11y-warning-btn', ed11yMessageQAMayBeHeader, "QAMayBeHeader", dismissalKey]);
-          }
-        }
-
-        // Reset for next loop, carry over text query if available.
-        activeMatch = "";
-        firstText = typeof secondText === 'undefined' ? "" : secondText;
-
-      });
-
-      // Warning: Detect uppercase. For each element, if it contains more
-      // than 4 uppercase words in a row, indicate warning.
-      // Uppercase word is anything that is more than 3 characters.
-      // Todo check performance of new regex.
-      Ed11y.checkRoot.find('h1, h2, h3, h4, h5, h6, p, li, blockquote').not(Ed11y.containerIgnore).each(function () {
-        let $this = $(this);
-        let thisText;
-        if ($this.is('li')) {
-          // Prevent recursion through nested lists.
-          thisText = $Ed11y.contents().filter(function () {return Ed11y.nodeType === 3}).text();
-        }
-        else {
-          thisText = $this.text();
-        }
-        let uppercasePattern = /([A-Z]{2,}[ ])([A-Z]{2,}[ ])([A-Z]{2,}[ ])([A-Z]{2,})/g;
-        // was
-        // /(?!<a[^>]*?>)(\b[A-Z]['!:A-Z\s]{20,}|\b[A-Z]{20,}\b)(?![^<]*?<\/a>)/g
-        let detectUpperCase = thisText.match(uppercasePattern);
-
-        if (detectUpperCase && detectUpperCase[0].length > 10) {
-          let dismissalKey = Ed11y.dismissalKey(thisText);
-          Ed11y.paints.push([$this, 'prepend', 'ed11y-instance-inline', "ed11y-uppercase-warning", 'ed11y-warning-btn', ed11yMessageQAUppercase, "QAUppercase", dismissalKey]);
-        }
-
-      });
-
-      // Check if a table has a table header.
-      Ed11y.$table.each(function () {
-        let $el = $(this);
-        let $findTHeaders = $el.find("th");
-        let $findHeadingTags = $el.find("h1, h2, h3, h4, h5, h6");
-        if ($findTHeaders.length === 0) {
-          Ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageMissingQATableHeadings]);
-        }
-        else {
-          // Make sure all table headers are not empty.
-          $findTHeaders.each(function () {
-            let $th = $(this);
-            if ($th.text().trim().length < 1 && !Ed11y.computeTitle($th)) {
-              Ed11y.paints.push([$th, 'prepend', 'ed11y-instance', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageEmptyTableHeader]);
-            }
-          });
-        }
-        if ($findHeadingTags.length > 0) {
-          // todo: have paints function prefer stronger alert classes
-          // when there are multiple
-          $findHeadingTags.each(function () {
-            Ed11y.paints.push([$(this), 'before', 'ed11y-instance', "ed11y-error-border", 'ed11y-error-btn', ed11yMessageQAHeaderInTable]);
-          });
-        }
-      });
-
-      let $visualizationWarning = Ed11y.$embed.filter('[src*="datastudio.google.com"], [src*="tableau"]');
-      if ($visualizationWarning.length > 0) {
-        // Without an each() this only throws a single warning.
-        $visualizationWarning.each((i, el) => {
-          let $el =$(el)
-          // Todo provide documentation link regarding equivalent
-          // formats, and add a matching warning to the link tests.
-          let dismissKey = Ed11y.dismissalKey($el.attr('src'));
-          Ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageVisualization, "visualization", dismissKey]);
-        })
-      }
-
-      //Warn users to provide captions for videos.
-      let $findVideos = Ed11y.$embed.filter("video, [src*='youtube.com'], [src*='vimeo.com'], [src*='kaltura.com']");
-      $findVideos.each((i, el) => {
-        let $el = $(el);
-        Ed11y.mediaCount++;
-        // Dismissable alert.
-        let dismissKey = Ed11y.dismissalKey($el.children('source').length > 0 ? $el.children('source').first().attr('src') : $el.attr('src'));
-        Ed11y.paints.push([$el, 'before', 'ed11y-instance', "", 'ed11y-warning-btn', ed11yMessageFullCheckCaptions, "captions", dismissKey]);
-      });
-
-      //Warning: Make sure all podcasts have captions.
-      // Todo: include more providers and embed types?
-      // Todo: don't throw if "transcript" is found on the page?
-      let $podcastWarning = Ed11y.$embed.filter('audio, iframe[src*="soundcloud.com"], iframe[src*="buzzsprout.com"], iframe[src*="podbean.com"]');
-      if ($podcastWarning.length > 0) {
-        $podcastWarning.each((i, el) => {
-          let $el = $(el);
-          Ed11y.mediaCount++;
-          // Dismissable alert.
-          let dismissKey = Ed11y.dismissalKey($el.children('source').length > 0 ? $el.children('source').first().attr('src') : $el.attr('src'));
-          Ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessagePodcast, "transcripts", dismissKey]);
-        })
-      }
-
-      //Warning: Discourage use of Twitter timelines.
-      // Todo 1.1 recreate test, and rewrite to include other platforms
-      /*let $twitterWarning = $('[id^="twitter-widget"]').not(Ed11y.containerIgnore);
-      $twitterWarning.each((i, el) => {
-        let $el = $(el);
-        var numberofTweets = $el.contents().find(".timeline-TweetList-tweet").length;
-        if (numberofTweets > 3) {
-          $el.addClass("ed11y-text-warning");
-          Ed11y.paints.push([$el,'before','ed11y-instance',"ed11y-text-warning",'ed11y-warning-btn',ed11yMessageTwitter]);
-        }
-      });*/
-
-      if (ed11yEmbeddedContentWarning.length > 1) {
-        let $embeddedWarning = Ed11y.checkRoot.find(ed11yEmbeddedContentWarning);
-        $embeddedWarning.each((i, el) => {
-          let $el = $(el);
-          Ed11y.paints.push([$el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageEmbeddedContent]);
-        });
-      }
-
-    };
 
     /*================== FULL CHECK MODULE ===================*/
 
@@ -880,23 +364,31 @@ class Ed11y {
 
       if (Ed11y.mediaCount > 0) {
         // todo: localize
-        $('#ed11y-image-list').prepend("" +
-            "<li>There are <span class='ed11y-red-text'>" + Ed11y.mediaCount + "</span> multimedia elements on this page. " +
-            "Please make sure each provides closed captions (for video) or a transcript (for audio).</li>");
+        let prepend = document.createElement('span');
+        // todo translation string.
+        prepend.innerHTML = "<li>There are <span class='ed11y-red-text'>" + Ed11y.mediaCount + "</span> multimedia elements on this page. " +
+            "Please make sure each provides closed captions (for video) or a transcript (for audio).</li>";
+        document.getElementById('ed11y-image-list').insertAdjacentElement('beforebegin', prepend);
       }
 
       Ed11y.updateCount('full');
       Ed11y.readyTips(true);
     };
-    // End of fullCheck()
+    // End of show()
 
     Ed11y.findElements = function () {
       // Find and cache so we don't have tests looking willynilly.
-      Ed11y.$p = Ed11y.checkRoot.find('p').not(Ed11y.containerIgnore);
+      Ed11y.allP = Ed11y.root.querySelectorAll('p');
       Ed11y.allH = Ed11y.root.querySelectorAll("h1, h2, h3, h4, h5, h6, [role='heading'][aria-level]");
-      Ed11y.$img = Ed11y.checkRoot.find("img").not(Ed11y.imageIgnore);
-      Ed11y.$embed = Ed11y.checkRoot.find("iframe, audio, video").not(Ed11y.containerIgnore);
-      Ed11y.$table = Ed11y.checkRoot.find("table").not(Ed11y.containerIgnore);
+      Ed11y.AllImages = Ed11y.root.querySelectorAll("img");
+      Ed11y.allLinks = Ed11y.root.querySelectorAll("a[href]");
+      Ed11y.allLists = Ed11y.root.querySelectorAll("li");
+      Ed11y.allBlockquote = Ed11y.root.querySelectorAll("blockquote");
+      // todo .not(Ed11y.imageIgnore)
+      Ed11y.allFrames = Ed11y.root.querySelectorAll("iframe");
+      Ed11y.allAudio = Array.from(Ed11y.root.querySelectorAll("audio"));
+      Ed11y.allVideo = Array.from(Ed11y.root.querySelectorAll("video"));
+      Ed11y.allTables = Ed11y.root.querySelectorAll("table");
     };
     // End of findElements()
 
@@ -944,60 +436,62 @@ class Ed11y {
       Ed11y.currentPage = btoa(encodeURIComponent(window.location.pathname));
 
     };
-    Ed11y.readyPop = function ($el, text) {
+    Ed11y.readyPop = function (el, text) {
       let thisText = "";
       let merge = 0;
       if (text) {
         thisText += text;
         merge++;
       }
-      if ($el.attr('data-ed11y-tip')) {
-        let thisPaint = $el.attr('data-ed11y-tip').split(',');
-        thisPaint.forEach(function (i) {
-          thisText += Ed11y.paints[i][5];
-          if (!!Ed11y.paints[i][7]) {
-            thisText += "<button class='ed11y-dismissthis' data-ed11y-action='ok' data-ed11y-test='" + Ed11y.paints[i][6] + "' data-ed11y-id='" + i + "'>Mark as OK</button>" +
-                "<button class='ed11y-dismissthis' data-ed11y-action='ignore' data-ed11y-test='" + Ed11y.paints[i][6] + "'data-ed11y-id='" + i + "'>Can't be fixed</button>";
+      if (el.hasAttribute('data-ed11y-tip')) {
+        let thisFlag = el.getAttribute('data-ed11y-tip').split(',');
+        thisFlag.forEach(function (i) {
+          thisText += Ed11y.results[i][5];
+          if (!!Ed11y.results[i][7]) {
+            thisText += "<button class='ed11y-dismiss-this' data-ed11y-action='ok' data-ed11y-test='" + Ed11y.results[i][6] + "' data-ed11y-id='" + i + "'>Mark as OK</button>" +
+                "<button class='ed11y-dismiss-this' data-ed11y-action='ignore' data-ed11y-test='" + Ed11y.results[i][6] + "' data-ed11y-id='" + i + "'>Can't be fixed</button>";
           }
         });
         merge++;
       }
-      let thisContent = '<div class="ed11y-tip ed11y-reset"><span ' +
-          'class="ed11y-arrow"></span>' +
-          '<button class="ed11y-button ed11y-close-tip" ' +
-          'type="button" aria-expanded="false" aria-label="close" ' +
-          'onclick=\'jQuery(this).parent().addClass("ed11y-hidden")' +
-          '.removeClass("ed11y-tip-open").attr("style", "").prev()' +
-          '.attr("aria-expanded", "false").addClass("ed11y-clicked")' +
-          '.removeClass("ed11y-hover").focus()' +
-          '.parents("ed11y-force-overflow")' +
-          '.removeClass("ed11y-force-overflow"); return false;\'>' +
-          '&times;</button><div class="ed11y-tip-content">' +
-          thisText +
-          '</div></div>';
+      let thisContent = document.createElement('div');
+      thisContent.classList.add('ed11y-tip', 'ed11y-reset');
+      thisContent.innerHTML = '<span class="ed11y-arrow"></span><button class="ed11y-button ed11y-close-tip" type="button" aria-expanded="false" aria-label="close">&times;</button><div class="ed11y-tip-content">' +
+          thisText + '</div>';
       if (merge > 1) {
-        $el.next().children('ed11y-tip-content').html(thisText);
-        $el.next().find('.ed11y-dismissthis').click(function(el) {
-          let id = Ed11y.dataset.ed11yDismissId;
-          let type = Ed11y.dataset.ed11yDismissType;
-          Ed11y.dismissThis(id, type);
-        })
+        // todo move thisText into a textContent sanitized injection.
+        // todo add to test coverage
+        el.nextElementSibling.querySelector('.ed11y-tip-content').HTML = thisContent;
       }
       else {
-        $el.addClass('ed11y-tip-ready').after(thisContent);
-        $el.next().find('.ed11y-dismissthis').click(function () {
-          let id = Ed11y.dataset.ed11yId;
-          let action = Ed11y.dataset.ed11yAction;
-          let test = Ed11y.dataset.ed11yTest;
-          Ed11y.dismissThis(action, test, id);
-        });
+        el.classList.add('ed11y-tip-ready');
+        el.insertAdjacentElement('afterend', thisContent);
+        let closeButton = el.nextElementSibling.querySelector('.ed11y-close-tip');
+        closeButton.addEventListener('click', () => {Ed11y.closeTip(closeButton)});
       }
+      let dismissButton = el.nextElementSibling.querySelector('.ed11y-dismiss-this');
+      dismissButton?.addEventListener('click', () => {
+        let id = dismissButton.dataset.ed11yId;
+        let action = dismissButton.dataset.ed11yAction;
+        let test = dismissButton.dataset.ed11yTest;
+        Ed11y.dismissThis(action, test, id);
+      });
     };
+    Ed11y.closeTip = function (closeButton) {
+      let tip = closeButton.parentElement;
+      tip.classList.add('ed11y-hidden');
+      tip.classList.remove('ed11y-tip-open');
+      tip.style.transform = 'initial';
+      let toggle = tip.previousElementSibling;
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.classList.add('ed11y-clicked');
+      Ed11y.resetClass(['ed11y-force-overflow']);
+    }
     Ed11y.dismissalKey = function (text) {
       return String(btoa(unescape(encodeURIComponent(text)))).substring(0,128);
     }
     Ed11y.dismissThis = function (action, test, id) {
-      let dismissalKey = Ed11y.paints[id][7];
+      let dismissalKey = Ed11y.results[id][7];
       // We may get false positives, but let's not store huge keys.
       let dismissal = {};
       dismissal[dismissalKey] = action;
@@ -1010,257 +504,304 @@ class Ed11y {
       } else {
         Ed11y.dismissedAlerts[Ed11y.currentPage][test][dismissalKey] = action;
       }
-      $('.ed11y-tip-open').parent().remove();
+      // todo this removes the tip and button but leaves classes
+      let removal = document.querySelector('.ed11y-tip-open').parentNode;
+      removal.parentNode.removeChild(removal)
       // todo put focus somewhere that makes sense
       // todo clear wrapper styles e.g. heading
       // todo Ed11y.warning or errorCount--;
       // todo Ed11y.dismissedCount++;
       localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
-      Ed11y.paints.splice(id, 1);
+      Ed11y.results.splice(id, 1);
       Ed11y.updateCount('quick');
       window.setTimeout( function() {
-        $("#ed11y-resultmessage").focus();
+        document.getElementById("ed11y-results").focus();
       }, 100);
     };
 
-    Ed11y.readyTips = async function (fullcheck) {
+    Ed11y.readyTips = function (show) {
       // This function is VERY expensive.
       // Todo: optimize?
       // For now: throw chunks to the end of the render queue to prevent
       // thread locking.
-
-      Ed11y.paints?.forEach(function (el, index) {
+      
+      Ed11y.results?.forEach(function (el, index) {
         // todo: need to change all at once.
-        Ed11y.paintButton(el, index);
-      });
-      Ed11y.paintsJS.forEach(function (el, index) {
-        // todo: need to change all at once.
-        Ed11y.paintButtonJS(el, index);
+        Ed11y.flagResult(el, index);
       });
       // As soon as the buttons are in place, dispatch an event so themes
       // can react
       document.dispatchEvent(new CustomEvent("ed11yPanelOpened"));
-      if (fullcheck === true) {
+      if (show === true) {
         window.setTimeout(function () {
-          Ed11y.$img.each(function () {
-            let $img = $(this);
-            let alt = Ed11y.sanitizeForHTML($img.attr('alt'));
-            let src = $img.attr('src');
-            let width = $img.innerWidth() + 'px';
-            let height = $img.innerHeight() + 'px';
-            let inject = "<div class='ed11y-container ed11y-reveal-alts ed11y-reset' " +
-                "style='width:" + width + " !important;height:" + height + " !important;'>" +
-                "<span>" + Ed11y.panelToggleIcon + "Alt: " + alt + "</span></div>";
-            if ($img.prev().hasClass('ed11y-instance-inline') === true) {
-              $img.prev().before(inject);
+          Ed11y.AllImages.forEach((img) => {
+            // todo what if there is no alt? jQuery fails gracefully this will send null...
+            let alt = Ed11y.sanitizeForHTML(img.getAttribute('alt'));
+            let src = img.getAttribute('src');
+            let imgStyles = getComputedStyle(img, null);
+            let width = imgStyles.width;
+            let height = imgStyles.height;
+            let injectAlt = document.createElement('div');
+            injectAlt.classList.add('ed11y-container', 'ed11y-reveal-alts', 'ed11y-reset');
+            injectAlt.setAttribute('style', 'width:' + width + ' !important; height:' + height + ' !important;');
+            injectAlt.innerHTML = '<span>' + Ed11y.panelToggleIcon + 'Alt: ' + alt + '</span></div>';
+            if (img.previousElementSibling?.classList.contains('ed11y-instance-inline') === true) {
+              img.previousElementSibling.insertAdjacentElement('beforebegin', injectAlt);
             }
             else {
-              $img.before(inject);
+              img.insertAdjacentElement('beforebegin', injectAlt);
             }
-            let imgClass = "";
-            if ($img.hasClass('ed11y-error-border')) {
-              imgClass = "ed11y-error-border";
+            let panelIMG = document.createElement('li');
+            if (img.classList.contains('ed11y-error-border')) {
+              panelIMG.classList.add('ed11y-error-border');
             }
-            else if ($img.hasClass('ed11y-warning-border')) {
-              imgClass = "ed11y-warning-border";
+            else if (img.classList.contains('ed11y-warning-border')) {
+              panelIMG.classList.add('ed11y-warning-border');
             }
-            $('#ed11y-image-list').append("" +
-                "<li class='" + imgClass + "'>" +
-                "<img src='" + src + "' alt='' class='ed11y-thumbnail'/>Alt: " + alt + "</li>");
+            panelIMG.innerHTML = '<img src="' + src + '" alt="" class="ed11y-thumbnail"/>Alt: ' + alt + '</li>';
+            Ed11y.panel.querySelector('#ed11y-image-list').appendChild(panelIMG);
           });
           window.setTimeout( function () {
-            $('.ed11y-reveal-alts').each(function() {
-              let $revealed = $(this);
-              let $img = $(this).nextAll('img').first();
-              let revealedOffset = $revealed.offset();
-              let imgOffset = $img.offset();
+            // todo mvp: styles are messed up in panel
+            document.querySelectorAll('.ed11y-reveal-alts').forEach(revealed => {
+              let img = revealed.nextElementSibling;
+              if (img && !img.matches('img')) {
+                img = img.nextElementSibling;
+              }
+              let revealedOffset = revealed.getBoundingClientRect();
+              let imgOffset = img.getBoundingClientRect();
               let newOffset = imgOffset.left - revealedOffset.left;
-              let newStyle = $revealed.attr('style') + ' margin-left: ' + newOffset + 'px !important;'
-              $revealed.attr('style', newStyle);
+              let newStyle = revealed.getAttribute('style') + ' margin-left: ' + newOffset + 'px !important;'
+              revealed.setAttribute('style', newStyle);
             })
           }, 0);
         }, 0);
       }
       window.setTimeout(function () {
-        Ed11y.$pops = $('button.ed11y-pop').not('[id^="ed11y"]');
-        let windowWidth = $(window).width();
+        // todo: this selector is ew
+        Ed11y.pops = Array.from(Ed11y.root.querySelectorAll('button.ed11y-pop')).filter(el => !el.querySelector('[id^="ed11y"]'));
+        let windowWidth = window.innerWidth;
         // Reading and writing styles creates thrashing. We must read
         // first.
         Ed11y.popNudges = [];
-        Ed11y.$pops.each(function () {
-          let $el = $(this);
-          $el.on('touchend click', (function (event) {
-                if (!Ed11y.doubleClickPrevent) {
-                  Ed11y.popThis($el, 'click');
-                }
-                Ed11y.doubleClickPrevent = true;
-                window.setTimeout(function() {
-                  Ed11y.doubleClickPrevent = false;
-                },200);
-                return false;
-              })
-          );
-
-          $el.filter('[aria-expanded="false"]').mouseenter(function () {
-            Ed11y.popThis($el, 'hover');
-          });
-          // If the button will be offscreen, nudge it left or right to
-          // fit.
-          let offset = $el.parent().offset();
+        Ed11y.pops.forEach(el => {
+          let offset = el.parentNode.getBoundingClientRect();
           let offsetData = 0;
           if (offset.left < 8) {
             // Nudge right
+            // do we need document.body.scrollLeft ?
             offsetData = 8 - offset.left;
           }
           else if (offset.left + 40 > windowWidth) {
             // Nudge left
             offsetData = offset.left - windowWidth - 40;
           }
-          Ed11y.popNudges.push([$el, offsetData]);
+          Ed11y.popNudges.push([el, offsetData]);
         });
         Ed11y.popNudges.forEach(function (el, i) {
           if (el[1] === 0) {
-            el[0].data('ed11yTipNudge', el[1]).attr('id', 'ed11y-pop-' + i);
+            // todo convert from camel to dash in getter
+            // todo: is this still used anywhere? CSS?
+            el[0].dataset.ed11yTipNudge = el[1];
+            el[0].setAttribute('id', 'ed11y-pop-' + i);
           }
           else {
-            el[0].attr('style', 'transform:translate(' + el[1] + 'px, 0) !important;').data('ed11yTipNudge', el[1]).attr('id', 'ed11y-pop-' + i);
+            el[0].setAttribute('style', 'transform:translate(' + el[1] + 'px, 0) !important;');
+            el[0].dataset.ed11yTipNudge = el[1];
+            el[0].setAttribute('id', 'ed11y-pop-' + i);
           }
         });
-        $('body').addClass('ed11y-pops-ready');
+        let toggles = Array.from(document.getElementsByClassName('ed11y-pop'));
+        toggles.forEach(toggle => {
+          toggle.addEventListener('click', (event) => {
+            event.preventDefault();
+            Ed11y.popThis(toggle, 'click');
+          });
+        })
+        //$el.on('touchend click', (function (event) {
+        // todo: handle keyboard, and can you have dual event listeners???
+        // todo: need need touchend back to fix mouse functions
+        //.onclick = Ed11y.popThis(el, 'click');
+        // todo: Probably need to remove listener at some point.
+        // todo: commented out hovers
+        /*if (el.getAttribute('aria-expanded' === 'false')) {
+          el.addEventListener('mouseenter', function () {
+            Ed11y.popThis(el, 'hover');
+          });
+        };*/
+        // If the button will be offscreen, nudge it left or right to
+        // fit.
+        document.querySelector('body').classList.add('ed11y-pops-ready');
       }, 0);
     };
 
-    Ed11y.popThis = function ($el, trigger) {
-      let isNew = false;
-      if ($el.hasClass('ed11y-tip-ready') === false) {
-        isNew = true;
-        Ed11y.readyPop($el, '');
-      }
-      let $tip = $el.next();
-      if (isNew === true) {
-        Ed11y.watchPop($el, $tip);
-      }
-      if ($el.attr('aria-expanded') === 'true' && trigger === 'click') {
-        // Close on click.
-        $el.attr('aria-expanded', 'false').addClass('ed11y-clicked').removeClass('ed11y-hover');
-        $tip.addClass('ed11y-hidden').removeClass('ed11y-tip-open').attr('style', '');
-        $el.parents('.ed11y-force-overflow').removeClass('ed11y-force-overflow');
-      }
-      else if ($el.attr('aria-expanded') === 'false') {
-
-        let needToAlign;
-        if (trigger === 'click') {
-          // Open on click.
-          $('.ed11y-tip-open').removeClass('ed11y-tip-open').prev().attr('aria-expanded', 'false');
-          $el.attr('aria-expanded', 'true').removeClass('ed11y-hover');
-          $tip.removeClass('ed11y-hidden').addClass('ed11y-tip-open');
-          needToAlign = true;
+    Ed11y.popThis = function (el, trigger) {
+      if (!Ed11y.doubleClickPrevent) {
+        let isNew = false;
+        if (!el?.classList.contains('ed11y-tip-ready')) {
+          isNew = true;
+          Ed11y.readyPop(el, '');
         }
-        else if ($el.not('.ed11y-hover')) {
-          // Open on hover
-          $('.ed11y-pop').filter('.ed11y-hover, [aria-expanded="true"]')
-              .removeClass('.ed11y-hover ed11y-clicked ed11y-tip-open')
-              .attr('aria-expanded', 'false')
-              .next()
-              .removeClass('ed11y-tip-open');
-          $el.addClass('ed11y-hover');
-          $tip.removeClass('ed11y-hidden').addClass('ed11y-tip-open');
-          needToAlign = true;
+        let tip = el.nextElementSibling;
+        if (isNew === true) {
+          Ed11y.watchPop(el, tip);
         }
-        if (needToAlign === true) {
-          // Dispatch an event that a tooltip has appeared.
-          document.dispatchEvent(new CustomEvent("ed11yPop", {
-            detail: {id: $el.attr('id')}
-          }));
-
-          if (ed11yAllowOverflow.length > 0) {
-            $el.parents(ed11yAllowOverflow).addClass('ed11y-force-overflow');
+        if (el.getAttribute('aria-expanded') === 'true' && trigger === 'click') {
+          // Close on click.
+          el.setAttribute('aria-expanded', 'false');
+          el.classList.add('ed11y-clicked');
+          el.classList.remove('ed11y-hover');
+          tip.classList.add('ed11y-hidden');
+          tip.classList.remove('ed11y-tip-open');
+          tip.setAttribute('style', '');
+          // todo: check this...
+          el.closest('.ed11y-force-overflow')?.classList.remove('ed11y-force-overflow');
+        }
+        else if (!!el.getAttribute('aria-expanded')) {
+          let needToAlign;
+          if (trigger === 'click') {
+            // Open on click.
+            let openTips = document.getElementsByClassName('ed11y-tip-open');
+            if (!!openTips) {
+              Array.from(openTips).forEach(tip => {
+                tip.classList.remove('ed11y-tip-open');
+                tip.previousElementSibling.setAttribute('aria-expanded','false');
+              })
+            }
+            el.setAttribute('aria-expanded', 'true');
+            el.classList.remove('ed11y-hover');
+            tip.classList.remove('ed11y-hidden');
+            tip.classList.add('ed11y-tip-open');
+            needToAlign = true;
           }
-          else {
-            $el.parents().not('body').each(function () {
-              if ($(this).css('overflow') === 'hidden') {
-                $(this).addClass('ed11y-force-overflow');
+          else if (!el.classList.contains('ed11y-hover')) {
+            // Open on hover
+            let otherPops = document.querySelectorAll('.ed11y-pop:not(.ed11y-hover)');
+            otherPops.forEach(el => {
+              if (el.getAttribute('aria-expanded') === 'false') {
+                el.classList.remove('ed11y-hover', 'ed11y-clicked', 'ed11y-tip-open');
+                el.setAttribute('aria-expanded', 'false');
+                el.nextElementSibling.classList.remove('ed11y-tip-open');
               }
-            });
+            })
+            el.classList.add('ed11y-hover');
+            tip.classList.remove('ed11y-hidden');
+            tip.classList.add('ed11y-tip-open');
+            needToAlign = true;
           }
-          Ed11y.alignTip($el, $tip);
-          // todo looping throws an error after elements are removed
-          Ed11y.goto = parseInt($el.attr('id').substring(10));
-          // Update the panel
-          let ed11yGotoText = 'next';
-          if (Ed11y.gotoCount === 1) {
-            ed11yGotoText = '';
+          if (needToAlign === true) {
+            // Dispatch an event that a tooltip has appeared.
+            document.dispatchEvent(new CustomEvent("ed11yPop", {
+              detail: {id: el.getAttribute('id')}
+            }));
+
+            if (ed11yAllowOverflow.length > 0) {
+              // todo parameter
+              el.closest(ed11yAllowOverflow).classList.add('ed11y-force-overflow');
+            }
+            else {
+              let parents = Ed11y.parents(el);
+              parents.forEach(parent => {
+                let parentStyles = window.getComputedStyle(parent);
+                if (parentStyles.getPropertyValue('overflow') === 'hidden') {
+                  parent.classList.add('ed11y-force-overflow');
+                }
+              });
+            }
+            Ed11y.alignTip(el, tip);
+            // todo looping throws an error after elements are removed
+            /*Ed11y.goto = parseInt(el.getAttribute('id').substring(10));
+            // Update the panel
+            Ed11y.gotoText = 'next';
+            if (Ed11y.gotoCount === 1) {
+              Ed11y.gotoText = '';
+            }
+            else if (Ed11y.gotoCount - 1 === Ed11y.goto) {
+              Ed11y.goto = 0;
+              Ed11y.gotoText = 'first';
+            }
+            else {
+              Ed11y.goto++;
+            }
+            window.setTimeout(function () {
+              document.querySelector('.ed11y-jump').textcontent = Ed11y.gotoText;
+            }, 250);*/
           }
-          else if (Ed11y.gotoCount - 1 === Ed11y.goto) {
-            Ed11y.goto = 0;
-            ed11yGotoText = 'first';
-          }
-          else {
-            Ed11y.goto++;
-          }
-          window.setTimeout(function () {
-            $('.ed11y-jumpnext').text(ed11yGotoText);
-          }, 250);
         }
       }
+      Ed11y.doubleClickPrevent = true;
+      window.setTimeout(function () {
+        Ed11y.doubleClickPrevent = false;
+      }, 200);
+      return false;
     };
 
-    Ed11y.alignTip = function ($el, $tip) {
-      $tip.attr('style', '').removeClass('ed11y-tip-left ed11y-tip-under').find('.ed11y-arrow').css('left', 'initial');
-      let buttonOffset = $el.offset();
-      let buttonWidth = $el.outerWidth(true);
-      let tipOffset = $tip.offset();
-      let tipWidth = $tip.width();
-      let windowWidth = $(window).width();
-      let roomToLeft = buttonOffset.left - tipWidth - 50;
-      let roomToRight = windowWidth - (buttonOffset.left + tipWidth + 90);
+    Ed11y.alignTip = function (el, tip) {
+      tip.setAttribute('style','');
+      tip.classList.remove('ed11y-tip-left', 'ed11y-tip-under');
+      let arrow = tip.querySelector('.ed11y-arrow');
+      arrow.style.left = 'initial';
+      let buttonOffset = el.getBoundingClientRect();
+      let buttonLeft = buttonOffset.left + document.body.scrollLeft;
+      let buttonWidth = el.offsetWidth;
+      let tipOffset = tip.getBoundingClientRect();
+      let tipLeft = tipOffset.left + document.body.scrollLeft;
+      let tipWidth = tip.offsetWidth;
+      let windowWidth = window.innerWidth;
+      let roomToLeft = buttonLeft - tipWidth - 50;
+      let roomToRight = windowWidth - (buttonLeft + tipWidth + 90);
       if (roomToRight < 0) {
         // Can't go right.
         if (roomToLeft > 0) {
           // Go left if there is room.
-          $tip.addClass('ed11y-tip-left');
-          let targetOffset = buttonOffset.left - tipWidth - buttonWidth - 2;
-          let nudge = targetOffset - tipOffset.left;
-          $tip.attr('style', 'transform: translate(' + nudge + 'px) !important;').find('.ed11y-arrow').removeAttr('style');
+          tip.classList.add('ed11y-tip-left');
+          let targetOffset = buttonLeft - tipWidth - buttonWidth - 2;
+          let nudge = targetOffset - tipLeft;
+          tip.style.transform = 'translate(' + nudge + 'px) !important;';
+          arrow.removeAttribute('style');
         }
         else {
           // Go under if there is not.
-          $tip.addClass('ed11y-tip-under');
+          tip.classList.add('ed11y-tip-under');
           let nudgeY = 58;
           // we don't want to hit the right edge maybe that's all we should worry about?
           let targetOffsetX = 5;
-          let nudgeX = targetOffsetX - tipOffset.left;
+          let nudgeX = targetOffsetX - tipLeft;
           let arrowTranslateY = -26;
-          let arrowTranslateX = buttonOffset.left + 11;
-          $tip.attr('style', 'transform: translate(' + nudgeX + 'px, ' + nudgeY + 'px) !important;').find('.ed11y-arrow').attr('style', 'transform: translate(' + arrowTranslateX + 'px, ' + arrowTranslateY + 'px) rotate(135deg) !important;');
+          let arrowTranslateX = buttonLeft + 11;
+          tip.setAttribute('style', 'transform: translate(' + nudgeX + 'px, ' + nudgeY + 'px) !important;');
+          arrow.setAttribute('style', 'transform: translate(' + arrowTranslateX + 'px, ' + arrowTranslateY + 'px) rotate(135deg) !important;');
         }
       }
       else {
         // Go right.
-        let tipTranslateX = buttonWidth + 13;
-        $tip.attr('style', 'transform: translate(' + tipTranslateX + 'px, 4px) !important;').find('.ed11y-arrow').removeAttr('style');
+        let tipTranslateX = buttonWidth + 26;
+        tip.setAttribute('style', 'transform: translate(' + tipTranslateX + 'px, 4px) !important;');
+        arrow.removeAttribute('style');
       }
     };
 
-    Ed11y.tipHoverAffordance = function ($el, $tip) {
-      if ($tip.is(':hover') === false && $el.is(':hover') === false && $el.is('.ed11y-hover') === true) {
+    Ed11y.tipHoverAffordance = function (el, tip) {
+      if (tip.matches('div:hover') === false && el.matches('div:hover') === false && el.matches('button.ed11y-hover') === true) {
         window.setTimeout(function () {
-          if ($tip.is(':hover') === false && $el.is(':hover') === false) {
+          if (tip.matches('div:hover') === false && el.matches('button:hover') === false) {
             // Close on de-hover
-            $el.removeClass('ed11y-hover ed11y-clicked').attr('aria-expanded', 'false');
-            $tip.removeClass('ed11y-tip-open');
-            $el.parents('.ed11y-force-overflow').removeClass('ed11y-force-overflow');
+            el.classList.remove('ed11y-hover', 'ed11y-clicked');
+            el.setAttribute('aria-expanded', 'false');
+            tip.classList.remove('ed11y-tip-open');
+            // todo does this need to use the reset?
+            el.closest('.ed11y-force-overflow')?.classList.remove('ed11y-force-overflow');
           }
-        }.bind($el, $tip), 500);
+        }.bind(el, tip), 500);
       }
     };
 
-    Ed11y.watchPop = function ($el, $tip) {
-      $el.mouseleave(function () {
-        Ed11y.tipHoverAffordance($el, $tip);
+    Ed11y.watchPop = function (el, tip) {
+      el.addEventListener('mouseleave', function () {
+        Ed11y.tipHoverAffordance(el, tip);
       });
-      $tip.mouseleave(function () {
-        Ed11y.tipHoverAffordance($el, $tip);
+      tip.addEventListener('mouseleave', function () {
+        Ed11y.tipHoverAffordance(el, tip);
       });
     };
     // Todo move this to CSS
@@ -1271,16 +812,17 @@ class Ed11y {
         // Create a floating button and hidden divs that contain
         // success/warning message.
 
-        $('body').append(ed11yPanel);
+        document.querySelector('body').appendChild(ed11yPanel);
         Ed11y.panel = document.getElementById('ed11y-panel');
         Ed11y.panelToggle = Ed11y.panel.querySelector('#ed11y-main-toggle');
-        Ed11y.panelMessage = Ed11y.panel.querySelector('#ed11y-resultmessage');
+        Ed11y.panelMessage = Ed11y.panel.querySelector('#ed11y-results');
         Ed11y.panelCount = Ed11y.panel.querySelector('.ed11y-count');
-        Ed11y.panelNextButton = Ed11y.panel.querySelector('.ed11y-jumpnext');
+        Ed11y.panelJumpNext = Ed11y.panel.querySelector('.ed11y-jump-next');
 
         // Handle main toggle button.
         // todo jQuery handled keyboard press, abstract this and emulate
         Ed11y.panelToggle.onclick = function (event) {
+          event.preventDefault();
           if (!Ed11y.doubleClickPrevent) {
             // Prevent clicking during scan.
             if (Ed11y.running !== true) {
@@ -1288,7 +830,7 @@ class Ed11y {
 
               // Rescan on open, or shut.
               if (Ed11y.panel.classList.contains('ed11y-panel-shut') === true) {
-                Ed11y.checkAll(false, "show").catch(console.error);
+                Ed11y.checkAll(false, "show");
               }
               else {
                 Ed11y.reset();
@@ -1302,124 +844,151 @@ class Ed11y {
           return false;
         };
 
-        // Handle jumplinks
-        Ed11y.goto = 0;
-        $('.ed11y-jumplink').click(function (event) {
+        // Handle jumps
+        let jumpLink = Ed11y.panel.querySelector('.ed11y-jump');
+        const handleJump = event => {
           event.preventDefault();
-
           // Find our button.
-          // todo rewrite this to figure out next based on paint array
-          let $goto = $('button[class^="ed11y"][data-ed11y-tip]').not('#ed11y-panel button');
-          Ed11y.gotoCount = $goto.length;
-          Ed11y.$goto = $goto.eq(Ed11y.goto);
-          Ed11y.gotoOffset = Ed11y.$goto.offset().top - parseInt($('body').css('padding-top')) - 50;
+          // todo do we need to jump over dismissed alerts?
+          let goNum = parseInt(jumpLink.dataset.ed11yGoto);
+          let goMax = Ed11y.results.length - 1;
+          goNum = goNum > goMax ? 0 : goNum;
+          Ed11y.goto = Ed11y.root.querySelector('#ed11y-pop-' + goNum);
+          let offsetCalc = Ed11y.goto.getBoundingClientRect();
+          let bodyStyles = window.getComputedStyle(document.querySelector('body'));
+          Ed11y.gotoOffset = offsetCalc.top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
           // Throw an alert if the button or target is hidden.
-          let $firstVisible = false;
-          let $target;
-          let insert = Ed11y.$goto.attr('data-ed11y-inserted');
+          let firstVisible = false;
+          let target = Ed11y.goto.parentNode;
+          let insert = Ed11y.goto.getAttribute('data-ed11y-inserted');
           if (insert === "before") {
-            $target = Ed11y.$goto.parent().next();
+            target = target.nextElementSibling;
           }
           else if (insert === "prepend") {
-            $target = Ed11y.$goto.parent().parent();
+            target = target.parentNode;
           }
           else {
-            $target = Ed11y.$goto.parent().prev();
+            target = parent.previousElementSibling;
           }
           let alertMessage;
-
-          if (ed11yHiddenHandlers.length > 0 && ($target.filter(ed11yHiddenHandlers).length > 0 || $target.parents(ed11yHiddenHandlers).length > 0)) {
+          // todo mvp do these match tests work?
+          if (ed11yHiddenHandlers.length > 0 && !!target.closest(ed11yHiddenHandlers)) {
             document.dispatchEvent(new CustomEvent("ed11yShowHidden", {
-              detail: {id: Ed11y.$goto.attr('id')}
+              detail: {id: Ed11y.goto.getAttribute('id')}
             }));
             window.setTimeout(function () {
-              // Go to the button.
-              Ed11y.gotoOffset = Ed11y.$goto.offset().top - parseInt($('body').css('padding-top')) - 50;
-              $('html, body').animate({
+              // Recalculate before jump.
+              offsetCalc = Ed11y.goto.getBoundingClientRect();
+              Ed11y.gotoOffset = offsetCalc.top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
+              document.querySelector('html, body').animate({
                 scrollTop: (Ed11y.gotoOffset)
               }, 1);
-              Ed11y.popThis(Ed11y.$goto, 'click');
-              Ed11y.$goto.focus();
+              Ed11y.popThis(Ed11y.goto, 'click');
+              Ed11y.goto.focus();
             }, 500);
           }
           else {
-            if ($target.filter(':visible').length === 0) {
-              $firstVisible = Ed11y.$goto.parent().closest(':visible');
+            if (!Ed11y.visible(target)) {
+              firstVisible = Ed11y.firstVisibleParent(Ed11y.goto);
               alertMessage = ed11yInvisibleTip;
             }
-            else if (Ed11y.$goto.closest('[aria-hidden="true"]').length > 0 || $target.filter('[aria-hidden="true"]').length > 0) {
-              $firstVisible = Ed11y.$goto.closest('[aria-hidden="true"]').parents(':visible').first();
+            else if (!!Ed11y.goto.closest('[aria-hidden="true"]') || !!target.closest('[aria-hidden="true"]')) {
+              firstVisible = Ed11y.firstVisibleParent(Ed11y.goto.closest('[aria-hidden="true"]'));
               alertMessage = ed11yHiddenTip;
             }
-            if ($firstVisible.length > 0) {
+            if (!!firstVisible) {
               alert(alertMessage);
-              $firstVisible.addClass('ed11y-hidden-highlight').prepend('<div tabindex="-1" class="ed11y-sr-only ed11y-hidden-highlight-' + Ed11y.goto + '">Highlighted container</div>');
-              Ed11y.gotoOffset = $firstVisible.offset().top - parseInt($('body').css('padding-top')) - 50;
-              Ed11y.popThis(Ed11y.$goto, 'click');
+              firstVisible.classList.add('ed11y-hidden-highlight');
+              // todo what used to call this?
+              let highlightContainer = document.createElement('div');
+              highlightContainer.setAttribute('tabindex', '-1');
+              highlightContainer.classList.add('ed11y-sr-only', 'ed11y-hidden-highlight-' + Ed11y.goto);
+              highlightContainer.textContent = "Highlighted container";
+              // let highlightContainer = Ed11y.builder('div',false,'ed11y-sr-only, ed11y-hidden-highlight' + Ed11y.goto, "Highlighted container");
+              offsetCalc = Ed11y.goto.getBoundingClientRect();
+              Ed11y.gotoOffset = offsetCalc.top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
+              Ed11y.popThis(Ed11y.goto, 'click');
               let thisGoTo = '.ed11y-hidden-highlight-' + Ed11y.goto;
-              $(thisGoTo).focus();
+              document.querySelector(thisGoTo).focus();
             }
             else {
               // Go to the button.
-              $('html, body').animate({
+              document.querySelector('html, body').animate({
                 scrollTop: (Ed11y.gotoOffset)
               }, 1);
-              Ed11y.popThis(Ed11y.$goto, 'click');
-              Ed11y.$goto.focus();
+              Ed11y.goto.focus();
+              Ed11y.popThis(Ed11y.goto, 'click');
             }
           }
+          goNum = goNum === goMax ? 0 : goNum + 1;
+          jumpLink.dataset.ed11yGoto = goNum;
+          if (goNum === 0) {
+            // Todo translate
+            Ed11y.panelJumpNext.innerText = "first";
+          } else {
+            Ed11y.panelJumpNext.innerText = "next";
+          }
+        };
+        jumpLink.addEventListener('click', handleJump);
 
-        });
-
-        $('.ed11y-minimize').click(function (event) {
+        let minimizeButton = Ed11y.panel.querySelector('.ed11y-minimize');
+        Ed11y.minimize = function (event) {
           event.preventDefault();
-          $(this).attr('aria-pressed', function (i, attr) {
-            return attr === 'true' ? 'false' : 'true';
-          });
-          $('#ed11y-panel').toggleClass('ed11y-panel-minimized');
-        });
+          let pressed = minimizeButton.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'
+          minimizeButton.setAttribute('aria-pressed', pressed);
+          Ed11y.panel.classList.toggle('ed11y-panel-minimized');
+        };
+        minimizeButton.addEventListener('click', Ed11y.minimize);
 
-        $('.ed11y-about').click(function (event) {
+        let aboutButton = Ed11y.panel.querySelector('.ed11y-about');
+        let aboutPanel = function(event) {
           event.preventDefault();
-          if ($(this).attr('aria-pressed') === 'false') {
-            $(this).attr('aria-pressed', 'true');
-            $('#ed11y-panel-upper').prepend('<div class="ed11y-about-text" tabindex="-1">' +
-                ed11yAbout + '</div>');
+          if (aboutButton.getAttribute('aria-pressed') === 'false') {
+            aboutButton.setAttribute('aria-pressed', 'true');
+            let aboutText = document.createElement('div');
+            aboutText.classList.add('ed11y-about-text');
+            aboutText.setAttribute('tabindex', '-1');
+            aboutText.innerHTML = ed11yAbout;
+            let panelUpper = Ed11y.panel.querySelector('#ed11y-panel-upper');
+            panelUpper.insertBefore(aboutText, panelUpper.firstChild);
             window.setTimeout(function() {
-              $('.ed11y-about-text').focus();
+              Ed11y.panel.querySelector('.ed11y-about-text').focus();
             }, 1500);
           }
           else {
-            $(this).attr('aria-pressed', 'false');
-            $('.ed11y-about-text').remove();
+            aboutButton.setAttribute('aria-pressed', 'false');
+            Ed11y.panel.querySelector('.ed11y-about-text').remove();
           }
-        });
+        };
+        aboutButton.addEventListener('click', aboutPanel);
 
-        $('#ed11y-shutpanel').click(function (event) {
+        let shutButton = Ed11y.panel.querySelector('#ed11y-shut-panel');
+        let shutPanel = function (event) {
           event.preventDefault();
-          $('#ed11y-main-toggle').focus().click();
-        });
+          Ed11y.panelToggle.focus();
+          Ed11y.panelToggle.click();
+        };
+        shutButton.addEventListener('click', shutPanel);
 
-        $('.ed11y-upper-next-button').click(function (event) {
+        let upperPanelNextButton = Ed11y.panel.querySelectorAll('.ed11y-upper-next-button');
+        let nextUpperPanel = function (event) {
           event.preventDefault();
-          // Todo optional: maybe write next/previous logic when there
-          // are more than two
-          $(this).parent().siblings('.ed11y-fullcheck').addClass('ed11y-upper-active');
-          $(this).parent().removeClass('ed11y-upper-active');
+          let upperPanels = Ed11y.panel.querySelectorAll('.ed11y-outline-header')
+          upperPanels.forEach(el => {el.classList.toggle('ed11y-upper-active')});
+        };
+        upperPanelNextButton.forEach(button => {
+          button.addEventListener('click', nextUpperPanel)
         });
 
-        // Handle fullcheck requests.
-        $("#ed11y-summary-toggle").click(function () {
-          $(this).attr('aria-pressed', function (i, attr) {
-            return attr === 'true' ? 'false' : 'true';
-          });
-          if ($(this).attr('aria-pressed') === 'false') {
+        // Handle show requests.
+        let showTagButton = Ed11y.panel.querySelector('#ed11y-summary-toggle');
+        let showTags = function () {
+          let pressed = showTagButton.getAttribute('aria-pressed') === 'true' ? 'false' : 'true';
+          showTagButton.setAttribute('aria-pressed', pressed);
+          if (pressed === 'false') {
             // Close and remove
-            $(".ed11y-upper-active").removeClass("ed11y-upper-active");
-            $('.ed11y-reveal-alts').remove();
-            $('.ed11y-headings-label').attr('style', 'display: none !important');
-            $("#ed11y-image-list li").remove();
-            $(".ed11y-full-active").removeClass('ed11y-full-active').addClass('ed11y-full-only');
+            document.querySelectorAll('.ed11y-reveal-alts, .ed11y-headings-label, #ed11y-image-list li')?.forEach(el => {el.remove()});
+            Ed11y.panel.querySelector('.ed11y-upper-active').classList.remove('ed11y-upper-active');
           }
           else {
             Ed11y.resetTips();
@@ -1436,62 +1005,88 @@ class Ed11y {
                   else {
                     level = +el.tagName.slice(1);
                   }
-                  $(el).prepend(" <span class='ed11y-headings-label'>H" + level + "</span> ");
+                  let headingLabel = document.createElement('span');
+                  headingLabel.classList.add('ed11y-headings-label');
+                  headingLabel.textContent = 'H' + level;
+                  el.insertBefore(headingLabel, el.firstChild);
                 }
               });
-              $('#ed11y-fullcheck-headers').addClass('ed11y-upper-active');
-              $("#ed11y-outline-list").html('').append(Ed11y.headingOutline).focus();
-              $('.ed11y-full-only').removeClass('ed11y-full-only').addClass('ed11y-full-active');
-              $('.ed11y-headings-label').removeAttr('style');
-              $('#ed11y-fullcheck-outline-header').focus();
+              Ed11y.panel.querySelector('#ed11y-show-headers').classList.add('ed11y-upper-active');
+              Ed11y.panel.querySelector("#ed11y-outline-list").innerHTML = Ed11y.headingOutline
+              Ed11y.panel.querySelector('#ed11y-outline-list').focus();
+              document.querySelectorAll('.ed11y-headings-label').forEach(h => {h.setAttribute('style','')});
+              Ed11y.panel.querySelector('#ed11y-show-outline-header').focus();
             }, 0);
           }
-        });
+        };
+        showTagButton.addEventListener('click', showTags);
 
-        window.addEventListener('resize', function () {
-          if ($('#ed11y-summary-toggle').attr('aria-expanded') === 'true') {
-            Ed11y.checkRoot.find('img').each(function () {
-              let width = $(this).innerWidth() + 'px';
-              let height = $(this).innerHeight() + 'px';
-              $(this).prevAll('.ed11y-reveal-alts').css({
-                'width': width + ' !important',
-                'height': height + ' !important'
-              });
+        let pinAltToImage = function() {
+          if (document.getElementById('ed11y-summary-toggle').getAttribute('aria-pressed') === 'true') {
+            Ed11y.root.querySelectorAll('img, [role="img"]').forEach((el) => {
+              let revealedAlt = el.previousElementSibling?.previousElementSibling;
+              if (!!revealedAlt && revealedAlt.matches('.ed11y-reveal-alts')) {
+                let elComputedStyle = getComputedStyle(el, null);
+                let width = 'width:' + elComputedStyle.width + ' !important; ';
+                let height = 'height:' + elComputedStyle.height + ' !important; ';
+                // todo mvp
+                revealedAlt.setAttribute('style', height + width);
+              }
             });
           }
-          let $tip = $('.ed11y-tip-open');
-          if ($tip.length > 0) {
-            let $el = $tip.prev();
-            Ed11y.alignTip($el, $tip);
+          let tip = Ed11y.root.querySelector('.ed11y-tip-open');
+          if (!!tip) {
+            let el = tip.previousElementSibling;
+            Ed11y.alignTip(el, tip);
           }
-        });
+        };
+        window.addEventListener('resize', pinAltToImage);
 
         // Escape key on main closes panels.
-        $(document).keyup(function (escape) {
-          if (escape.keyCode === 27) {
-            let $openTipButton = $('.ed11y-instance:focus-within, .ed11y-instance-inline:focus-within').children('.ed11y-pop[aria-expanded="true"]');
-            if ($openTipButton.length > 0) {
-              $openTipButton.focus().click();
-            }
-            else if ($('.ed11y-fullcheck.ed11y-panel-active').length > 0 && $('.ed11y-fullcheck:focus-within, #ed11y-summary-toggle:focus').length > 0) {
-              $('#ed11y-summary-toggle').focus().click();
-            }
-            else if ($('.ed11y-about[aria-expanded="true"]:focus, .ed11y-about-text:focus-within').length > 0) {
-              $('.ed11y-about').focus().click();
-            }
-            else if ($('#ed11y-panel:focus-within').length > 0) {
-              $('#ed11y-main-toggle').focus().click();
+        let escapeWatch = function(event) {
+          if (event.keyCode === 27) {
+            if (document.activeElement.closest('#ed11y-panel-upper, #ed11y-summary-toggle, .ed11y-about')) {
+              // close upper panel
+              let openUpper = Ed11y.panel.querySelectorAll('#ed11y-summary-toggle[aria-pressed], .ed11y-about[aria-pressed]');
+              openUpper.forEach(el => {
+                el.focus();
+                el.click();
+              })
+            } else if (document.activeElement.closest('.ed11y-tip-open')) {
+              let closeTip = Ed11y.root.querySelector('.ed11y-tip-open button.ed11y-close-tip');
+              closeTip.click();
+            } else if (Ed11y.panelToggle.getAttribute('aria-expanded') === 'true') {
+              Ed11y.panelToggle.focus();
+              Ed11y.panelToggle.click();
             }
           }
-        });
+        }
+        document.addEventListener('keyup', escapeWatch);
       }
     };
 
 
     /*=============== Utilities ================*/
 
-    Ed11y.getText = function(elem) {
-      return elem.innerText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
+    Ed11y.parents = function(el) {
+      let nodes = [];
+      nodes.push(el);
+      while(el.parentElement) {
+        nodes.unshift(el.parentElement);
+        el = el.parentElement;
+      }
+      return nodes;
+    }
+
+    Ed11y.siblings = function(el) {
+      if (el.parentNode === null) return [];
+      return Array.prototype.filter.call(el.parentNode.children, function (child) {
+        return child !== el;
+      });
+    };
+
+    Ed11y.getText = function(el) {
+      return el.innerText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
     }
 
     Ed11y.resetClass = (el) => {
@@ -1499,6 +1094,77 @@ class Ed11y {
         document.querySelectorAll('.' + el).forEach((x) => x.classList.remove(el));
       })
     };
+
+    Ed11y.visible = function() {
+      // courtesy https://stackoverflow.com/questions/178325/how-do-i-check-if-an-element-is-hidden-in-jquery/22969337#22969337
+      let x = window.pageXOffset ? window.pageXOffset + window.innerWidth - 1 : 0,
+          y = window.pageYOffset ? window.pageYOffset + window.innerHeight - 1 : 0,
+          relative = !!((!x && !y) || !document.elementFromPoint(x, y));
+      function inside(child, parent) {
+        while(child){
+          if (child === parent) return true;
+          child = child.parentNode;
+        }
+        return false;
+      }
+      return function (elem) {
+        // todo check is opacity a string or number
+        if (
+            document.hidden ||
+            elem.offsetWidth === 0 ||
+            elem.offsetHeight === 0 ||
+            elem.style.visibility === 'hidden' ||
+            elem.style.display === 'none' ||
+            elem.style.opacity === '0'
+        ) return false;
+        let rect = elem.getBoundingClientRect();
+        if (relative) {
+          if (!inside(document.elementFromPoint(rect.left + elem.offsetWidth/2, rect.top + elem.offsetHeight/2),elem)) return false;
+        } else if (
+            !inside(document.elementFromPoint(rect.left + elem.offsetWidth/2 + window.pageXOffset, rect.top + elem.offsetHeight/2 + window.pageYOffset), elem) ||
+            (
+                rect.top + elem.offsetHeight/2 < 0 ||
+                rect.left + elem.offsetWidth/2 < 0 ||
+                rect.bottom - elem.offsetHeight/2 > (window.innerHeight || document.documentElement.clientHeight) ||
+                rect.right - elem.offsetWidth/2 > (window.innerWidth || document.documentElement.clientWidth)
+            )
+        ) return false;
+        if (window.getComputedStyle) {
+          let el = elem,
+              comp = null;
+          while (el) {
+            if (el === document) {break;} else if(!el.parentNode) return false;
+            comp = window.getComputedStyle(el, null);
+            if (comp && (comp.visibility === 'hidden' || comp.display === 'none' || (typeof comp.opacity !=='undefined' && comp.opacity !== '1'))) return false;
+            el = el.parentNode;
+          }
+        }
+        return true;
+      }
+    }
+
+    Ed11y.firstVisibleParent = function(el) {
+      let parents = Ed11y.parents(el);
+      parents.forEach(parent => {
+        if (Ed11y.visible(parent)) {
+          return (parent);
+        }
+      })
+      return false;
+    }
+
+    Ed11y.srcMatchesOptions = function(source, option) {
+      if (option.length > 0 && source.length > 0) {
+        let selectorArray = option.split(/\s*[\s,]\s*/).map((el) => {
+          return "[src*='" + el + "']";
+        });
+        let selectors = selectorArray.join(", ");
+        let finder = Array.from(source);
+        return finder.filter((el) => el.matches(selectors));
+      } else {
+        return '[]';
+      }
+    }
 
     Ed11y.sanitizeForHTML = function (string) {
       let entityMap = {
@@ -1516,8 +1182,40 @@ class Ed11y {
       });
     }
 
+    Ed11y.builder = function (type, id, classes, attributes, textContent) {
+      let el = document.createElement(type);
+      if (id) {
+        el.setAttribute('id', id);
+      }
+      if (classes) {
+        if (typeof(classes) === 'string') {
+          el.classList.add(classes);
+        } else {
+          classes.forEach(str => {
+            el.classList.add(str);
+          })
+        }
+      }
+      if (typeof(attributes) === "object") {
+        Object.entries(attributes).forEach(([key, value]) => {
+          //let attribute = value.toString();
+          el.setAttribute(key, value);
+        })
+      }
+      if (textContent) {
+        el.textContent = textContent;
+      }
+      return (el);
+    };
 
+    //Helper: Used to ignore child elements within an anchor.
+    Ed11y.fnIgnore = (element, selector) => {
+      const clone = element.cloneNode(true);
+      const excluded = Array.from(selector ? clone.querySelectorAll(selector) : clone.children);
+      excluded.forEach((c) => {
+        c.parentElement.removeChild(c);
+      });
+      return clone;
+    };
   }
-
 }
-

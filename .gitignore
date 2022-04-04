@@ -6,3 +6,6 @@ node_modules/
 tests/lib/selenium/
 logs/*
 tests_output/*
+logs/
+node_modules/
+tests_output/

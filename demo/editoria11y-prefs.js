@@ -1,7 +1,7 @@
 /* User preferences */
 
 // Base container(s) for tests.
-let ed11yCheckRoot = "";
+let ed11yCheckRoot = "main";
 
 // Alert modes.
 // "polite" never automatically pops open the panel.
@@ -39,7 +39,7 @@ let ed11yAllowOverflow = "";
 
 let ed11yHiddenHandlers = "";
 
-let ed11yDownloadLinks = "a[href$='.pdf'], a[href*='.pdf?'], a[href$='.doc'], a[href$='.docx'], a[href*='.doc?'], a[href*='.docx?'], a[href$='.ppt'], a[href$='.pptx'], a[href*='.ppt?'], a[href*='.pptx?'], a[href^='https://docs.google']";
+let ed11yDownloadLinks = ['.pdf', '.doc', '.docx', '.ppt', '.pptx', 'https://docs.google'];
 
 
 // Outline is ignoring hidden containers.
