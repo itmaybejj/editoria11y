@@ -27,8 +27,8 @@ jobs:
         run: npm install
 
       - name: run chrome tests
-        - run: |
-            export DISPLAY=:99
-            chromedriver --url-base=/wd/hub &
-            sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & 
-            npx nightwatch tests --env chrome
+        run: |
+          export DISPLAY=:99
+          chromedriver --url-base=/wd/hub &
+          sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & 
+          npx nightwatch tests --env chrome
