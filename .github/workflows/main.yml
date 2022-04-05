@@ -52,7 +52,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
 
       - name: npm-install
         run: npm install
@@ -61,6 +60,7 @@ jobs:
         shell: bash
         run: |
           mkdir screens
+          pwd
           npx nightwatch tests --env ${{ matrix.browser }}
 
       - name: Save Artifacts
