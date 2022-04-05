@@ -48,7 +48,7 @@ jobs:
 
     strategy:
       matrix:
-        browser: ["chrome", "firefox"]
+        browser: ["edge"]
 
     steps:
       - uses: actions/checkout@v2
@@ -60,8 +60,8 @@ jobs:
         run: |
           mkdir screens
           pwd
-          echo "Expected gecko driver:"
-          dir D:\a\editoria11y\editoria11y\node_modules\geckodriver\bin\
+          echo "Expected edge driver:"
+          dir D:\a\editoria11y\editoria11y\editora11y\node_modules\ms-chromium-edge-driver\bin
           npx nightwatch tests --env ${{ matrix.browser }} --config tests/nightwatch.windows.conf.js --verbose
 
       - name: Save Artifacts
