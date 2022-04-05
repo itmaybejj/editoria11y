@@ -61,8 +61,8 @@ jobs:
           mkdir screens
           pwd
           echo "Expected gecko driver:"
-          ls -la ./node_modules/geckodriver/bin
-          ls -la node_modules/geckodriver/bin
+          dir .\node_modules\geckodriver\bin
+          dir  \node_modules\geckodriver\bin
           npx nightwatch tests --env ${{ matrix.browser }} --config tests/nightwatch.windows.conf.js
 
       - name: Save Artifacts
