@@ -25,10 +25,10 @@ jobs:
       - name: npm-install
         run: npm install
 
-      - name: run chrome tests
+      - name: run browser tests
         run: |
           mkdir screens
-          npx nightwatch tests --env chrome
+          npx nightwatch tests
 
       - name: Save Artifacts
         if: always()
