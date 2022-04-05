@@ -38,3 +38,4 @@ jobs:
           path: | 
             screens
             tests_output
+            logs
