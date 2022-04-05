@@ -82,14 +82,14 @@ jobs:
 
     strategy:
       matrix:
-        browser: ["safari", "chrome", "firefox"]
+        browser: ["safari", "chrome", "firefox", "edge"]
 
     steps:
       - uses: actions/checkout@v2
 
       - name: npm-install
         run: |          
-          npm install
+          EDGEDRIVER_DOWNLOAD_ON_INSTALL=1 npm install
 
       - name: run browser tests
         run: |
