@@ -83,7 +83,7 @@ module.exports = {
       
       webdriver: {
         start_process: true,
-        server_path: '',
+        server_path: './node_modules/geckodriver/bin/geckodriver',
         host: '127.0.01',
         port: 4444,
         cli_args: [
