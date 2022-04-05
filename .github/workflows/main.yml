@@ -54,11 +54,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: npm-install
-        shell: bash
         run: npm install
 
       - name: run browser tests
-        shell: bash
         run: |
           mkdir screens
           pwd
