@@ -28,7 +28,7 @@ jobs:
       - name: run browser tests
         run: |
           mkdir screens
-          npx nightwatch tests
+          npx nightwatch tests --env ${{ matrix.browser }}
 
       - name: Save Artifacts
         if: always()
