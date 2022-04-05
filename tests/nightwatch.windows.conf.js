@@ -59,23 +59,25 @@ module.exports = {
     firefox: {
       desiredCapabilities : {
         browserName : 'firefox',
-        acceptInsecureCerts: true,
-        'moz:firefoxOptions': {
-          args: [
-            '-headless',
-            '-verbose'
-          ]
+        alwaysMatch: {
+          acceptInsecureCerts: true,
+          'moz:firefoxOptions': {
+            args: [
+              // '-headless',
+              // '-verbose'
+            ]
+          }
         }
       },
       webdriver: {
         start_process: true,
-        server_path: '.\node_modules\geckodriver\bin\geckodriver.exe',
+        server_path: 'node_modules\geckodriver\bin\geckodriver.exe',
         cli_args: [
           // very verbose geckodriver logs
           // '-vv'
         ]
       }
-    },
+    },    
 
     chrome: {
       desiredCapabilities : {
