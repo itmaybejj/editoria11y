@@ -62,7 +62,7 @@ jobs:
           pwd
           echo "Expected gecko driver:"
           dir D:\a\editoria11y\editoria11y\node_modules\geckodriver\bin\
-          npx nightwatch tests --env ${{ matrix.browser }} --verbose
+          npx nightwatch tests --env ${{ matrix.browser }} --config tests/nightwatch.windows.conf.js --verbose
 
       - name: Save Artifacts
         if: always()
