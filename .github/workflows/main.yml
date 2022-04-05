@@ -74,9 +74,9 @@ jobs:
             tests_output
             logs
 
-  build-ac:
+  build-mac:
     name: mac-${{ matrix.browser }}
-    runs-on: mac-latest
+    runs-on: macos-latest
     env:
       EDGEDRIVER_DOWNLOAD_ON_INSTALL: 1
 
