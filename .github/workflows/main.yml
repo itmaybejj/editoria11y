@@ -29,6 +29,8 @@ jobs:
         run: |
           mkdir screens
           npx nightwatch tests --env chrome
+          echo "Confirming screenshots"
+          ls -la screens
 
       - name: Save Screenshots
         uses: actions/upload-artifact@v3
