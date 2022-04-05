@@ -40,9 +40,10 @@ module.exports = {
       launch_url: 'https://nightwatchjs.org',
 
       screenshots: {
-        enabled: false,
+        enabled: true,
         path: 'screens',
-        on_failure: true
+        on_failure: true,
+        on_error: true,
       },
 
       desiredCapabilities: {
@@ -58,14 +59,12 @@ module.exports = {
     firefox: {
       desiredCapabilities : {
         browserName : 'firefox',
-        alwaysMatch: {
-          acceptInsecureCerts: true,
-          'moz:firefoxOptions': {
-            args: [
-              // '-headless',
-              // '-verbose'
-            ]
-          }
+        acceptInsecureCerts: true,
+        'moz:firefoxOptions': {
+          args: [
+            '-headless',
+            '-verbose'
+          ]
         }
       },
       webdriver: {
@@ -87,10 +86,10 @@ module.exports = {
           // w3c:false tells Chromedriver to run using the legacy JSONWire protocol (not required in Chrome 78)
           w3c: true,
           args: [
-            //'--no-sandbox',
-            //'--ignore-certificate-errors',
-            //'--allow-insecure-localhost',
-            //'--headless'
+            '--no-sandbox',
+            '--ignore-certificate-errors',
+            '--allow-insecure-localhost',
+            '--headless'
           ]
         }
       },
@@ -111,7 +110,7 @@ module.exports = {
           w3c: true,
           // More info on EdgeDriver: https://docs.microsoft.com/en-us/microsoft-edge/webdriver-chromium/capabilities-edge-options
           args: [
-            //'--headless'
+            '--headless'
           ]
         }
       },
