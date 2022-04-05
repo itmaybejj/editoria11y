@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-linux:
-    name: webUi-${{ matrix.browser }}
+    name: linux-${{ matrix.browser }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -41,7 +41,7 @@ jobs:
             logs
 
   build-windows:
-    name: webUi-${{ matrix.browser }}
+    name: windows-${{ matrix.browser }}
     runs-on: windows-latest
     env:
       EDGEDRIVER_DOWNLOAD_ON_INSTALL: 1
@@ -58,6 +58,7 @@ jobs:
         run: npm install
 
       - name: run browser tests
+        shell: bash
         run: |
           mkdir screens
           npx nightwatch tests --env ${{ matrix.browser }}
