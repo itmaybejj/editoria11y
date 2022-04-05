@@ -135,7 +135,7 @@ module.exports = {
         start_process: true,
         // Download msedgedriver from https://docs.microsoft.com/en-us/microsoft-edge/webdriver-chromium/
         //  and set the location below:
-        server_path: '',
+        server_path: './node_modules/ms-chromium-edge-driver/bin/msedgedriver',
         cli_args: [
           // --verbose
         ]

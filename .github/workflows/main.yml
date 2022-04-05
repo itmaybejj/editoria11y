@@ -11,9 +11,40 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-linux:
     name: webUi-${{ matrix.browser }}
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        browser: ["chrome", "firefox"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: npm-install
+        run: npm install
+
+      - name: run browser tests
+        run: |
+          mkdir screens
+          npx nightwatch tests --env ${{ matrix.browser }}
+
+      - name: Save Artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: | 
+            screens
+            tests_output
+            logs
+
+  build-windows:
+    name: webUi-${{ matrix.browser }}
+    runs-on: windows-latest
+    env:
+      EDGEDRIVER_DOWNLOAD_ON_INSTALL: 1
 
     strategy:
       matrix:

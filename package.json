@@ -16,6 +16,7 @@
     "axios": "^0.26.0",
     "chromedriver": "^99.0.0",
     "geckodriver": "^3.0.1",
+    "ms-chromium-edge-driver": "^0.5.1",
     "nightwatch": "^2.0.10"
   }
 }
