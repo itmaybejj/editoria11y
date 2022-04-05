@@ -71,23 +71,24 @@ module.exports = {
 
     firefox: {
       desiredCapabilities : {
-        browserName : 'firefox',
-        alwaysMatch: {
-          acceptInsecureCerts: true,
-          'moz:firefoxOptions': {
-            args: [
-              // '-headless',
-              // '-verbose'
-            ]
-          }
+      browserName : 'firefox',
+      acceptInsecureCerts: true,
+      'moz:firefoxOptions': {
+          args: [
+            '-headless',
+            '-verbose'
+          ]
         }
       },
+      
       webdriver: {
         start_process: true,
         server_path: '',
+        host: '127.0.01',
+        port: 4444,
         cli_args: [
           // very verbose geckodriver logs
-          // '-vv'
+          '-vv'
         ]
       }
     },
