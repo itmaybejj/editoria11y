@@ -8,7 +8,7 @@ describe('Load Demo Page', function() {
   it('Load Demo Page', function(browser) {
     browser
       .waitForElementVisible('body')
-      .assert.textContains('body', 'Editoria11y tests')
+      .assert.textContains('body', 'Editoria11y Unit Tests')
   });
 
   after(browser => browser.end());
