@@ -64,7 +64,7 @@ jobs:
           mkdir screens
           pwd
           echo "Expected edge driver:"
-          dir D:\a\editoria11y\editoria11y\editora11y\node_modules\ms-chromium-edge-driver\bin
+          dir D:\a\editoria11y\editoria11y\node_modules\ms-chromium-edge-driver\bin
           npx nightwatch tests --env ${{ matrix.browser }} --config tests/nightwatch.windows.conf.js --verbose
 
       - name: Save Artifacts
