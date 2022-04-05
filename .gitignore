@@ -9,3 +9,4 @@ tests_output/*
 logs/
 node_modules/
 tests_output/
+screens/

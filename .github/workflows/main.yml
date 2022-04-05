@@ -27,7 +27,17 @@ jobs:
 
       - name: run chrome tests
         run: |
-          # export DISPLAY=:99
-          # chromedriver --url-base=/wd/hub &
-          # sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & 
+          mkdir screens
           npx nightwatch tests --env chrome
+
+      - name: Save Nightwatch Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: nightwatch-report
+          path: output/test/code-coverage.html  
+
+      - name: Save Screenshots
+        uses: actions/upload-artifact@v3
+        with:
+          name: nightwatch-screenshots
+          path: screens
