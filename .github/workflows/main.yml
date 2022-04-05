@@ -30,12 +30,6 @@ jobs:
           mkdir screens
           npx nightwatch tests --env chrome
 
-      - name: Save Nightwatch Results
-        uses: actions/upload-artifact@v3
-        with:
-          name: nightwatch-report
-          path: output/test/code-coverage.html  
-
       - name: Save Screenshots
         uses: actions/upload-artifact@v3
         with:
