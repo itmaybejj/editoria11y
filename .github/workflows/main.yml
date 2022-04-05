@@ -27,13 +27,14 @@ jobs:
 
       - name: run chrome tests
         run: |
-          mkdir screens
-          npx nightwatch tests --env chrome || true
+          mkdir ${{ runner.temp }}/screens
+          npx nightwatch tests --env chrome
           echo "Confirming screenshots"
           ls -la screens
 
       - name: Save Screenshots
+        if: ${{ failure() }}
         uses: actions/upload-artifact@v3
         with:
           name: nightwatch-screenshots
-          path: screens
+          path: ${{ runner.temp }}/screens
