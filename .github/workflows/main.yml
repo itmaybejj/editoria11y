@@ -17,7 +17,7 @@ jobs:
 
     strategy:
       matrix:
-        browser: ["chrome"]
+        browser: ["chrome", "firefox"]
 
     steps:
       - uses: actions/checkout@v2
