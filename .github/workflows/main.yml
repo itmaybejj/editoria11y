@@ -56,6 +56,7 @@ jobs:
       - name: npm-install
         run: |
           echo "EDGEDRIVER_DOWNLOAD_ON_INSTALL=1" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+          gci env:* | sort-object name
           npm install
 
       - name: run browser tests
