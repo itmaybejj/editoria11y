@@ -62,7 +62,7 @@ jobs:
       - name: run browser tests
         run: |
           mkdir screens
-          npx nightwatch tests --env ${{ matrix.browser }} --config tests/nightwatch.windows.conf.js --verbose
+          npx nightwatch tests --env ${{ matrix.browser }} --config tests/nightwatch.windows.conf.js
 
       - name: Save Artifacts
         if: always()
@@ -90,11 +90,12 @@ jobs:
       - name: npm-install
         run: |          
           EDGEDRIVER_DOWNLOAD_ON_INSTALL=1 npm install
+          ls 
 
       - name: run browser tests
         run: |
           mkdir screens
-          npx nightwatch tests --env ${{ matrix.browser }} --verbose
+          npx nightwatch tests --env ${{ matrix.browser }}
 
       - name: Save Artifacts
         if: always()
