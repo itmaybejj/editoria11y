@@ -48,7 +48,7 @@ jobs:
 
     strategy:
       matrix:
-        browser: ["chrome", "firefox"]
+        browser: ["firefox"]
 
     steps:
       - uses: actions/checkout@v2
@@ -62,6 +62,9 @@ jobs:
         run: |
           mkdir screens
           pwd
+          echo "Expected gecko driver:"
+          ls -la ./node_modules/geckodriver/bin
+          ls -la node_modules/geckodriver/bin
           npx nightwatch tests --env ${{ matrix.browser }} --config tests/nightwatch.windows.conf.js
 
       - name: Save Artifacts
