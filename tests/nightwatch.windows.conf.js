@@ -40,10 +40,9 @@ module.exports = {
       launch_url: 'https://nightwatchjs.org',
 
       screenshots: {
-        enabled: true,
+        enabled: false,
         path: 'screens',
-        on_failure: true,
-        on_error: true,
+        on_failure: true
       },
 
       desiredCapabilities: {
@@ -56,39 +55,25 @@ module.exports = {
       }
     },
 
-    safari: {
-      desiredCapabilities : {
-        browserName : 'safari',
-        alwaysMatch: {
-          acceptInsecureCerts: false
-        }
-      },
-      webdriver: {
-        start_process: true,
-        server_path: ''
-      }
-    },
-
     firefox: {
       desiredCapabilities : {
-      browserName : 'firefox',
-      acceptInsecureCerts: true,
-      'moz:firefoxOptions': {
-          args: [
-            '-headless',
-            '-verbose'
-          ]
+        browserName : 'firefox',
+        alwaysMatch: {
+          acceptInsecureCerts: true,
+          'moz:firefoxOptions': {
+            args: [
+              // '-headless',
+              // '-verbose'
+            ]
+          }
         }
       },
-      
       webdriver: {
         start_process: true,
-        server_path: '',
-        host: '127.0.01',
-        port: 4444,
+        server_path: './node_modules/geckodriver/bin/geckodriver.exe',
         cli_args: [
           // very verbose geckodriver logs
-          '-vv'
+          // '-vv'
         ]
       }
     },
@@ -102,10 +87,10 @@ module.exports = {
           // w3c:false tells Chromedriver to run using the legacy JSONWire protocol (not required in Chrome 78)
           w3c: true,
           args: [
-            '--no-sandbox',
-            '--ignore-certificate-errors',
-            '--allow-insecure-localhost',
-            '--headless'
+            //'--no-sandbox',
+            //'--ignore-certificate-errors',
+            //'--allow-insecure-localhost',
+            //'--headless'
           ]
         }
       },
@@ -126,7 +111,7 @@ module.exports = {
           w3c: true,
           // More info on EdgeDriver: https://docs.microsoft.com/en-us/microsoft-edge/webdriver-chromium/capabilities-edge-options
           args: [
-            '--headless'
+            //'--headless'
           ]
         }
       },
@@ -135,7 +120,7 @@ module.exports = {
         start_process: true,
         // Download msedgedriver from https://docs.microsoft.com/en-us/microsoft-edge/webdriver-chromium/
         //  and set the location below:
-        server_path: './node_modules/msedgedriver/bin/msedgedriver',
+        server_path: '',
         cli_args: [
           // --verbose
         ]

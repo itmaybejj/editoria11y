@@ -61,7 +61,7 @@ jobs:
         run: |
           mkdir screens
           pwd
-          npx nightwatch tests --env ${{ matrix.browser }}
+          npx nightwatch tests --env ${{ matrix.browser }} --config tests/nightwatch.windows.conf.js
 
       - name: Save Artifacts
         if: always()
