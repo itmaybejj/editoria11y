@@ -124,7 +124,7 @@ module.exports = {
         start_process: true,
         // Download msedgedriver from https://docs.microsoft.com/en-us/microsoft-edge/webdriver-chromium/
         //  and set the location below:
-        server_path: '',
+        server_path: 'D:\\a\\editoria11y\\editoria11y\\node_modules\\ms-chromium-edge-driver\\bin\\msedgedriver.exe',
         cli_args: [
           // --verbose
         ]
