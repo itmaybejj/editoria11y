@@ -115,7 +115,10 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: test-results   
+    - run: |
+        pwd
+        ls -la    
     - uses: EnricoMi/publish-unit-test-result-action@v1
       with:
-        files: "tests_output/xml"           
+        files: "/home/runner/work/editoria11y/editoria11y/tests_output/xml"           
 
