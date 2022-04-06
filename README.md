@@ -1,3 +1,7 @@
+# Editora11y
+
+![Unit Tests](https://github.com/github/docs/actions/workflows/main.yml/badge.svg?event=push)
+
 Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly accessibility "auto-correct" checker that addresses three critical needs for content authors:
 
 1. It runs automatically. Modern spellcheck works so well because it is always running; put spellcheck behind a button and few users remember to run it!
