@@ -31,7 +31,7 @@ jobs:
           npx nightwatch tests --env ${{ matrix.browser }}
 
       - name: Save Artifacts
-        if: always()
+        if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
           name: test-results
@@ -106,3 +106,16 @@ jobs:
             screens
             tests_output
             logs
+
+  reporting:
+    if: ${{ always() }}
+    needs: [build-linux, build-windows, build-mac]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: dorny/test-reporter@v1
+      with:
+        artifact: test-results            # artifact name
+        name: JUNIT Tests                 # Name of the check run which will be created
+        path: 'tests_output/*.xml'        # Path to test results (inside artifact .zip)
+        reporter: jest-junit              # Format of test results
+
