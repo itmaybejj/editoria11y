@@ -2,8 +2,7 @@
 .idea
 node_modules/
 
-# Ignore things that may be in the folder where we expect selenium.
-tests/lib/selenium/
+# Ignore testing artifacts.
 logs/*
 tests_output/*
 logs/
