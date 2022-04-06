@@ -1,6 +1,6 @@
 # Editora11y
 
-![Unit Tests](https://github.com/itmaybejj/editora11y/actions/workflows/main.yml/badge.svg?event=push)
+![Unit Tests](https://github.com/itmaybejj/editoria11y/actions/workflows/main.yml/badge.svg?event=push)
 
 Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly accessibility "auto-correct" checker that addresses three critical needs for content authors:
 
