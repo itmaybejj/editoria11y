@@ -112,8 +112,10 @@ jobs:
     needs: [build-linux, build-windows, build-mac]
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/download-artifact@v2
+      with:
+        name: test-results   
     - uses: EnricoMi/publish-unit-test-result-action@v1
       with:
-        artifact: test-results            # artifact name
         files: "tests_output/xml"           
 
