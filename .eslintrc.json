@@ -24,5 +24,8 @@
             "error",
             "always"
         ]
+    },
+    "globals": {
+        "Ed11y": true
     }
 }
