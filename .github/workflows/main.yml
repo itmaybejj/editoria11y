@@ -20,7 +20,7 @@ jobs:
     - name: lint
       run: |
         npm install
-        npx lint js
+        npx eslint js
 
   build-linux:
     name: linux-${{ matrix.browser }}
