@@ -11,6 +11,17 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: lint
+      run: |
+        npm install
+        npx lint js
+
   build-linux:
     name: linux-${{ matrix.browser }}
     runs-on: ubuntu-latest
