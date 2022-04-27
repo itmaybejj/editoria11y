@@ -1,84 +1,33 @@
-const ed11yLang = {
-    en : {
-        headingLevelSkippedTitle: "Heading level skipped",
-        headingLevelSkipped: (prevLevel, level) =>
-            `<p>${Ed11y.M.headingLevelSkippedTitle} (H${level} following H${prevLevel}).</p>
-            <p>Headings and subheadings create a navigable table of contents for assistive devices.
-            The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>  
-            <ul><li>Heading level 1<ul><li>Heading level 2 (a subheading)<ul><li>Heading level 3 (a sub-subheading)</li></ul></li><li>Heading level 2 (another topic)</li></ul></li></ul>
-            <p><strong>To fix:</strong> select the appropriate depth for this heading; most likely ${prevLevel} or ${parseInt(prevLevel + 1)}.</p>
-            `,
-        headingEmptyTitle: "Heading tag without any text",
-        headingEmpty: () =>
-            `<p>${Ed11y.M.headingEmptyTitle}.</p>
-            <p>Headings and subheadings create a navigable table of contents for assistive devices. "Blank" headings create confusing gaps.
-            The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>  
-            <ul><li>Heading level 1<ul><li>Heading level 2 (a subheading)<ul><li>Heading level 3 (a sub-subheading)</li></ul></li><li>Heading level 2 (another topic)</li></ul></li></ul>
-            <p><strong>To fix:</strong> delete the empty line or provide text for the section label.</p>
-            `,
-        headingIsLongTitle: "Manual check needed: long heading",
-        headingIsLong: (length) =>
-            `<p>${Ed11y.M.headingIsLongTitle} (${length} characters)</p>
-            <p>Headings and subheadings create a navigable table of contents for assistive devices.
-            The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>  
-            <ul><li>Heading level 1<ul><li>Heading level 2 (a subheading)<ul><li>Heading level 3 (a sub-subheading)</li></ul></li><li>Heading level 2 (another topic)</li></ul></li></ul>
-            <p>For the outline to be useful, headings should be brief and clear.</p>
-            <p><strong>To fix:</strong> short heading if possible, or remove heading style if it is only being used for emphasis.</p>
-            `,
-    },
+const ed11yStrings = {
+
+  // Panel
+  aboutPanel: `
+    <p>Assistive devices like screen readers depend on the invisible structure of the page matching its visual look and feel.</p>
+    <p>This tool checks for common structural issues like 
+        <a href='https://accessibility.princeton.edu/how/content/alternative-text'>missing alternative text</a>, 
+        <a href='https://accessibility.princeton.edu/how/content/headings'>jumbled page outlines</a> and
+        <a href='https://accessibility.princeton.edu/how/content/links'>generic link titles</a>.</p><p>Note that it <span class='ed11y-bold'>only</span> checks editorial content; your site's theme needs its own <a href='https://webaim.org/resources/evalquickref/'>accessibility testing</a>.<p>
+    <p><a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Report an issue <span aria-hidden='true'>»</span></a></p>
+  `,
+
+  // Test results
+  
+
 }
 
-const ed11yPanel = document.createElement('div');
-ed11yPanel.classList.add('ed11y-reset', 'ed11y-preload', 'ed11y-panel-shut', 'ed11y-pass');
-ed11yPanel.setAttribute('id', 'ed11y-panel');
-ed11yPanel.innerHTML = "" +
-    "<h1 class='ed11y-sr-only'>Editorially Tools</h1>" +
-    "<div id='ed11y-panel-upper'>" +
-    "<div id='ed11y-show-headers' class='ed11y-outline-header ed11y-show'>" +
-    "<div id='ed11y-show-outline-header' class='ed11y-bold ed11y-show-header' tabindex='-1'>Headers" +
-    "<p>Check that this forms <a href='https://accessibility.princeton.edu/how/content/headings'>a complete outline</a>:</p>" +
-    "</div>" +
-    "<button type='button' class='ed11y-upper-next-button ed11y-header-button'>Media<span aria-hidden='true'> &raquo;</span></button>" +
-    "<ul id='ed11y-outline-list' tabindex='-1' aria-labelledby='ed11y-show-headers'></ul>" +
-    "</div>" +
-    "<div id='ed11y-show-images' class='ed11y-outline-header ed11y-show'>" +
-    "<div id='ed11y-image-header' class='ed11y-bold ed11y-show-header'>Media" +
-    "<p>Check <a href='https://accessibility.princeton.edu/how/content/alternative-text'>alt text</a>, " +
-    "<a href='https://accessibility.princeton.edu/how/content/images-text'>images of text</a>, &amp; <a href='https://webaim.org/techniques/captions/'>captions</a>.</p>" +
-    "</div>" +
-    "<button type='button' class='ed11y-upper-next-button ed11y-header-button'>Content outline<span aria-hidden='true'> &raquo;</span></button>" +
-    "<ul id='ed11y-image-list' tabindex='-1' aria-labelledby='ed11y-show-outline-header'></ul>" +
-    "</div>" +
-    "</div>" +
-    "<div id='ed11y-panel-content'>" +
-    "<div class='ed11y-panel-icon'></div>" +
-    "<div id='ed11y-panel-text'>" +
-    "<span id='ed11y-results' tabindex='-1'><span class='ed11y-panel-count'>No</span> <span class='ed11y-panel-messagetype'>accessibility errors detected</span>.</span><br>" +
-    "<a href='#' class='ed11y-jump ed11y-small' data-ed11y-goto='0'>Show <span class='ed11y-jump-next'>first</span> <span aria-hidden='true'> »</span></a>" +
-    "</div>" +
-    "</div>" +
-    "<div id='ed11y-panel-buttonbar'>" +
-    "<button type='button' aria-expanded='false' id='ed11y-summary-toggle' class='ed11y-button ed11y-panel-button' aria-pressed='false'>Show tags</button>" +
-    "<button type='button' class='ed11y-button ed11y-about' title='About this tool' aria-label='about' aria-pressed='false'>?</button>" +
-    "<button type='button' class='ed11y-minimize ed11y-button' title='Minimize panel' aria-label='Minimize panel' aria-pressed='false'><span></span></button>" +
-    "<button type='button' id='ed11y-shut-panel' title='Close panel' class='ed11y-button ed11y-panel-button' aria-label='close panel'>&times;</button>" +
-    "<button type='button' id='ed11y-main-toggle' aria-expanded='false' title='Accessibility checker'><span class='ed11y-toggle-icon'></span><span class='ed11y-sr-only'>Show accessibility scan panel with</span><span class='ed11y-count'></span><span class='ed11y-sr-only'>issues</span></button>" +
-    "</div>" +
-    "<div aria-live='polite' class='ed11y-sr-only' id='ed11y-aria-live'></div>";
-
-ed11yAbout = "" +
-    "<p>Assistive devices like screen readers depend on the invisible structure of the page matching its visual look and feel.</p>" +
-    "<p>This tool checks for common structural issues like " +
-    "<a href='https://accessibility.princeton.edu/how/content/alternative-text'>missing alternative text</a>, " +
-    "<a href='https://accessibility.princeton.edu/how/content/headings'>jumbled page outlines</a> and " +
-    "<a href='https://accessibility.princeton.edu/how/content/links'>generic link titles</a>.</p><p>Note that it <span class='ed11y-bold'>only</span> checks editorial content; your site's theme needs its own <a href='https://webaim.org/resources/evalquickref/'>accessibility testing</a>.<p>" +
-    "<p><a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Report an issue <span aria-hidden='true'>»</span></a></p>";
 
 ed11yInvisibleTip = "The element with this issue is not currently visible; it may be hidden or inside a tab or accordion. I will outline its container.";
 ed11yHiddenTip = "The element with this issue has been marked as hidden from screen readers. It may be in an unopened tab or accordion, so I will outline its container.";
 
 // Messages for Headings
 
+ed11yMessageHeadingEmpty = "<div class='ed11y-tip-heading'>Empty heading</div> " +
+    "<p>Even though headings without text aren't visible, they still appear " +
+    "in <a href='https://accessibility.princeton.edu/how/content/headings'>" +
+    "document outlines</a>, and the vertical gaps they create between " +
+    "paragraphs are often larger than the designer intended.</p>" +
+    "<p>To fix: edit the page and delete this line, or change its format " +
+    "from &quot;Heading&quot; to &quot;Normal&quot;.</p>";
 
 // Messages for links.
 ed11yMessageLinkHasNoText = "<div class='ed11y-tip-heading'>Link title not " +
@@ -239,8 +188,25 @@ ed11yMessageshowCaptions = "<div class='ed11y-tip-heading'>Manual check: text al
     "requirement. Captions are meant to support people who are D/deaf or " +
     "hard-of-hearing.</p>"
 
-
-
+ed11yMessageHeadingTooLong = function (headingLength) {
+  return "<div class='ed11y-tip-heading'>Long " +
+      "<span class='ed11y-bold'>(" + headingLength +
+      " character)</span> heading</div><p>Since " +
+      "<a href='https://accessibility.princeton.edu/how/content/headings'>" +
+      "headings are used as a page outline</a>, they should be brief, clear, " +
+      "informative and unique.</p>";
+}
+// Messages for outline Headers.
+ed11yMessageHeadingLevelSkipped = function (prevLevel, level) {
+  return "<div class='ed11y-tip-heading'>" +
+      "Heading jumped from level " + prevLevel + " to " + level + "</div>" +
+      "<p><a href='https://accessibility.princeton.edu/how/content/headings'>" +
+      "Headings should form a page outline</a> for screen readers.</p> " +
+      "<p>To fix: If this is related to the previous heading, make it " +
+      "a <span class='ed11y-bold'>Heading " + parseInt(prevLevel + 1) +
+      "</span>. If it starts a new section, make it <span class='ed11y-bold'>" +
+      "Heading " + prevLevel + "</span>.</p>";
+}
 // QA Tests.
 ed11yMessageQAShouldBeList = function (prefix) {
   return "<div class='ed11y-tip-heading'>Possible list item prefix: &quot;" +

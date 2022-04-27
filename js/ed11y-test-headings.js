@@ -25,31 +25,33 @@ class Ed11yTestHeadings {
         level = +el.tagName.slice(1);
       }
       let headingError = "";
+      let severity = "";
       let outlinePrefix = "";
       let ed11yTip = "";
       let headingText = Ed11y.getText(el);
       let headingLength = headingText.length;
       let dismissKey = false;
       if (level - prevLevel > 1 && i !== 0) {
-        headingError = 'ed11y-warning-btn';
+        headingError = "headingLevelSkipped";
+        dismissKey = level + headingText;
         outlinePrefix = '(flagged for skipped level) ';
-        dismissKey = Ed11y.dismissalKey(level + headingText);
-        ed11yTip = ed11yMessageHeadingLevelSkipped(prevLevel, level);
+        severity = "alert";
+        ed11yTip = Ed11y.M.headingLevelSkipped(prevLevel, level);
       }
       if (headingLength < 1) {
         // todo: let image merge up into shared alert.
         let headingSubText = el.querySelector('img')?.getAttribute('alt');
         if (!headingSubText || headingSubText.length === 0) {
-          headingError = 'ed11y-warning-btn';
+          headingError = "headingEmpty";
           outlinePrefix = '(empty heading)';
-          ed11yTip = ed11yMessageHeadingEmpty;
+          ed11yTip = Ed11y.M.headingEmpty();
         }
       }
       else if (headingLength > 160) {
-        headingError = 'ed11y-warning-btn';
         outlinePrefix = '(flagged for length) ';
-        dismissKey = Ed11y.dismissalKey(level + headingText);
-        ed11yTip = ed11yMessageHeadingTooLong(headingLength);
+        dismissKey = level + headingText;
+        headingError = "headingIsLong";
+        ed11yTip = Ed11y.M.headingIsLong(headingLength);
       }
       prevLevel = level;
       let liClass = "ed11y-outline-" + level;
@@ -61,12 +63,7 @@ class Ed11yTestHeadings {
       if (headingError !== "") {
         // todo: just use container ignore?
         if (!(Ed11y.options.headerIgnore !== "" && el?.closest(Ed11y.options.headerIgnore))) {
-          if (!!el?.closest("a")) {
-            Ed11y.results.push([el.closest('a'), 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
-          }
-          else {
-            Ed11y.results.push([el, 'before', 'ed11y-instance', "ed11y-link-text-warning", headingError, ed11yTip, "heading", dismissKey]);
-          }
+            Ed11y.results.push([el, headingError, ed11yTip, dismissKey]);
           // Outline element if there is an error.
           liClass += " ed11y-text-warning";
           liPrefix = "<span class='ed11y-sr-only'> Warning: </span> ";
@@ -92,7 +89,6 @@ class Ed11yTestHeadings {
       let text = Ed11y.getText(el);
       if (text.length < 25) {
         let dismissalKey = Ed11y.dismissalKey(text);
-        Ed11y.results.push([el, 'before', 'ed11y-instance', "ed11y-warning-border", 'ed11y-warning-btn', ed11yMessageshowBlockquote, "blockquoteLength", dismissalKey]);
       }
     });
 

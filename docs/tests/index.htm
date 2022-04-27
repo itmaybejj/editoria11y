@@ -2,54 +2,12 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <style>
-            main, h1 {max-width: 50rem; margin: auto; background:#fefefe; color:#222; font-family: sans-serif;box-shadow: 0 8px 8px rgba(0,0,25,.25);}
-            main {padding: 3rem 2.5rem 3rem 3.5rem; }
-            h1 {padding: 3rem 3.5rem 0 2.5rem; margin-bottom: -3rem;}
-            h2, h3 {
-                margin: 4rem -2.5rem 0 -3.5rem;
-                background: #112f4e;
-                color: white;
-                padding: 1.25em 4.5rem 1em 1.5rem;
-                box-shadow: 0 2px 5px rgba(0,0,25,.125);
-            }
-            h3 {
-                color: #333;
-                background: aliceblue;
-                font-size: 1rem;
-                line-height: 1;
-                margin-bottom: 2rem;
-            }
-            h2 + h3 {margin-top: 0;}
-            body {background: #eee;}
-            .positive {padding: .75rem 1rem .5rem; margin: 1rem 0; border-radius:3px;}
-            .ed11y-pops-ready .positive:not([data-ed11y-marked])::before,
-            .ed11y-pops-ready .negative [data-ed11y-marked]::before {
-                content: "False negative:";
-                font-weight: 700;
-                font-style: italic;
-                font-size: 1.25rem;
-                background: darkred;
-                color: #fff;
-                margin: -1.25rem 1rem -1rem -4.5rem;
-                padding: 1.01rem 1.25rem;
-                float: left;
-            }
-            .ed11y-pops-ready .negative [data-ed11y-marked]::before {
-                content: "False positive: ";
-            }
-            .ed11y-pops-ready .positive:not([data-ed11y-marked]) {display: block; margin: 1.5rem 0; box-shadow: 0 0 0 8px darkred;}
-            .negative {padding: .75rem 1rem .5rem; margin-bottom: 1rem; border-radius:3px;}
-            .negative .ed11y-pop { outline: 8px dotted red !important; }
-            img {max-width: 45%;}
-            td, th {border: 1px solid silver;padding: .25rem .75rem;}
-            th {background: #5294ca;}
-            a:not(:hover) {color: inherit;}
-            :focus {outline: 2px solid;}
-        </style>
+        <link rel="stylesheet" media="all" href="../docs.css">
     </head>
 <body>
-<header><h1 id="editoria11y-demo"><a href="https://itmaybejj.github.io/editoria11y/">Editoria11y</a> <a href="https://en.wikipedia.org/wiki/Unit_testing">Unit Tests</a></h1></header>
+    <header>
+        <h1 id="editoria11y-demo">Editoria11y Unit Tests</h1>
+    </header>
     <main>
         <section id="headings">
 
@@ -95,37 +53,37 @@
 
             <p>Screen readers end up reading this as a filename.</p>
 
-            <p><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
 
             <h3 id="image-marked-as-decorative-with-an-empty-alt">Image marked as decorative with an empty alt</h3>
 
             <p>This might be OK; flagged as needing manual review.</p>
 
-            <p><img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
 
             <h3 id="image-with-an-invalid-alt-attribute">Image with an invalid alt attribute</h3>
 
             <p>E.g., <code class="language-plaintext highlighter-rouge">alt="'"</code></p>
 
-            <p><img alt="'" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><img alt="'" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
 
             <h3 id="image-with-a-filename-as-an-alt">Image with a filename as an alt</h3>
 
-            <p><img alt="filename.jpg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><img alt="filename.jpg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
 
             <h3 id="image-with-redundant-text-in-its-alt">Image with redundant text in its alt</h3>
 
             <p>E.g., “image of.”</p>
 
-            <p><img alt="Image of a photo of a picture." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><img alt="Image of a photo of a picture." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
 
             <h3 id="image-with-very-long-alt-text">Image with very long alt text</h3>
 
-            <p><img alt="Alt text should be brief. Screen readers cannot jump from sentence to sentence in alt text, so listeners just hear one monster pile of text and if they miss something they have to start over." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><img alt="Alt text should be brief. Screen readers cannot jump from sentence to sentence in alt text, so listeners just hear one monster pile of text and if they miss something they have to start over." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
 
             <h3 id="images-in-links-where-the-alt-text-may-be-describing-the-image-instead-of-the-link">Images in links where the alt text may be describing the image instead of the link</h3>
 
-            <p><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">This link has text and an image.<img alt="A lovely gray box" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+            <p><a class="positive" href="https://www.youtube.com/watch?v=DLzxrzFCyOs">This link has text and an image.<img alt="A lovely gray box" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
 
         </section>
         <section>
@@ -248,14 +206,17 @@
 
 
         <div hidden>
-            <link rel="stylesheet" media="screen" href="../css/editoria11y.css">
+            <link rel="stylesheet" media="screen" href="../../css/editoria11y.css">
             <script src="../demo/editoria11y-prefs.js"></script>
-            <script src="../js/editoria11y-localization.js"></script>
-            <script src="../js/ed11y-test-links.js"></script>
-            <script src="../js/ed11y-test-images.js"></script>
-            <script src="../js/ed11y-test-headings.js"></script>
-            <script src="../js/ed11y-test-qa.js"></script>
-            <script src="../js/editoria11y.js"></script>
+            <script src="../../js/editoria11y-localization.js"></script>
+            <script src="../../js/ed11y-element-panel.js"></script>
+            <script src="../../js/ed11y-element-result.js"></script>
+            <script src="../../js/ed11y-element-alt.js"></script>
+            <script src="../../js/ed11y-test-links.js"></script>
+            <script src="../../js/ed11y-test-images.js"></script>
+            <script src="../../js/ed11y-test-headings.js"></script>
+            <script src="../../js/ed11y-test-qa.js"></script>
+            <script src="../../js/editoria11y.js"></script>
             <!-- Instantiate-->
             <script>
               if (window.navigator.userAgent.match(/MSIE|Trident/) === null) {

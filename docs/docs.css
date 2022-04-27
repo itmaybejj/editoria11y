@@ -1,0 +1,54 @@
+body {background: #f9f9fe; font-family: sans-serif; color:#222;}
+main {max-width: 50rem; margin: auto; background:#fefeff;  box-shadow: 0 8px 8px rgba(0,0,25,.25); padding: 2rem 2.5rem 3rem 3.5rem;}
+header {max-width: 52rem; margin: auto;}
+section {padding-top: 2rem;}
+h1 {
+    font-family: georgia, serif;
+    font-size: 3rem;
+    font-weight: 400;
+}
+h2 {
+    margin: 4rem -2.5rem 0 -3.5rem;
+    background: #112f4e;
+    color: #f2f7fb;
+    padding: 1.25rem 4.5rem 1rem 2.5rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+h2:first-child {
+    margin-top:0;
+}
+h3 {
+    color: #112f4e;
+    font-size: 1rem;
+    line-height: 1;
+    margin: 4rem 0 2rem -3.5rem;
+    padding: 1.125rem 1rem .875rem 1rem;
+    background: #bde0fc;
+    border-left: 2rem solid #112f4e;
+}
+h2 + h3 {margin-top: 2.5rem;}
+.positive {padding: .75rem 1rem .5rem; margin: 1rem 0; border-radius:3px;}
+.ed11y-pops-ready .positive:not([data-ed11y-marked])::before,
+.ed11y-pops-ready .negative [data-ed11y-marked]::before {
+    content: "False negative:";
+    font-weight: 700;
+    font-style: italic;
+    font-size: 1.25rem;
+    background: darkred;
+    color: #fff;
+    margin: -1.25rem 1rem -1rem -4.5rem;
+    padding: 1.01rem 1.25rem;
+    float: left;
+}
+.ed11y-pops-ready .negative [data-ed11y-marked]::before {
+    content: "False positive: ";
+}
+.ed11y-pops-ready .positive:not([data-ed11y-marked]) {display: block; margin: 1.5rem 0; box-shadow: 0 0 0 8px darkred;}
+.negative {padding: .75rem 1rem .5rem; margin-bottom: 1rem; border-radius:3px;}
+.negative .ed11y-pop { outline: 8px dotted red !important; }
+img {max-width: 45%;}
+td, th {border: 1px solid silver;padding: .25rem .75rem;}
+th {background: #5294ca;}
+a:not(:hover) {color: inherit;}
+:focus {outline: 2px solid;}

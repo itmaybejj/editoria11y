@@ -450,32 +450,6 @@ button#ed11y-panel-button {
   right: 22px !important;
 }
 
-.ed11y-reveal-alts {
-  position: absolute !important;
-  font-size: 14px !important;
-  display: inline-flex !important;
-  flex-direction: column !important;
-  justify-content: flex-end !important;
-}
-
-.ed11y-reveal-alts span {
-  background: #00bffff3 !important;
-  color: #111 !important;
-  z-index: 100 !important;
-  text-indent: 28px !important;
-  font-weight: 500 !important;
-  padding: 6px !important;
-  width: 100% !important;
-}
-.ed11y-reveal-alts svg {
-  width: 22px !important;
-  margin: 0 0 0 -27px !important;
-  position: absolute !important;
-}
-.ed11y-reveal-alts path {
-  fill: #111 !important;
-}
-
 button#ed11y-panel-button:focus,
 button#ed11y-panel-button:hover {
   background: #e1e1e1 !important;
@@ -768,4 +742,15 @@ body .ed11y-warning-border {
 .ed11y-hidden,
 .ed11y-reset .ed11y-hidden {
   display: none !important;
+}
+
+
+
+/* TODO TEMP TEMP TEMP TEMP */
+ed11y-result {
+  transform: translate(60px, 0);
+}
+
+.ed11y-instance .ed11y-pop {
+  margin-left: 100px !important;
 }
