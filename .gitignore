@@ -1,5 +1,11 @@
 .DS_Store
 .idea
+node_modules/
+
+# Ignore testing artifacts.
+logs/*
+tests_output/*
 logs/
 node_modules/
 tests_output/
+screens/
