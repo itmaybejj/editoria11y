@@ -7,22 +7,22 @@ class Ed11yElementPanel extends HTMLElement {
   // todo use Ed11yMessages for all the strings
   template() {
     return `
-    <div class='buttonbar'>
-      <button type='button' id='ed11y-main-toggle' aria-expanded='false'>
-          <span class='icon'></span><span class='ed11y-count'></span>Issues
+    <div class='buttonbar' role='tablist' aria-label='Editorial Ally panel controls'>
+      <button role="tab" id='ed11y-issues' aria-selected='false'>
+          Issues
       </button>
-      <button type='button' id='ed11y-headings' aria-expanded='false'>
+      <button role="tab" id='ed11y-headings' aria-selected='false'>
           Outline
       </button>
-      <button type='button' id='ed11y-alts' aria-expanded='false' tabindex='-1'>
+      <button role="tab" id='ed11y-alts' aria-selected='false'>
           Alt Text
       </button>
-      <button type='button' id='ed11y-help' aria-expanded='false' aria-controls='ed11y-help-tab' title='About this tool'>?</button>
-      <button type='button'  id='ed11y-minimize' title='Minimize panel' aria-label='minimize' aria-pressed="false"><span>&ndash;</span></button>
-      <button type='button' id='ed11y-shut-panel' title='Close checker'  aria-label='Close checker'>&times;</button>
+      <button role="tab" id='ed11y-help' aria-selected='false' aria-controls='ed11y-help-tab' title='About this tool'>?</button>
+      <button role="tab"  id='ed11y-minimize' aria-selected='false' title='Minimize panel' aria-label="minimize" aria-pressed="false"><span>&ndash;</span></button>
+      <button type='button' id='ed11y-main-toggle' title='Toggle checker'><span class='close'>&times;</span><span class='open'><span class='icon'></span><span class='toggle-count'></span></span></button>
     </div>
     <div class="content">
-      <div id='ed11y-main-toggle-tab' class="show" aria-labelledby='ed11y-main-toggle'>
+      <div id='ed11y-issues-tab' tabindex="0" role="tabpanel" class="show" aria-labelledby='ed11y-issues'>
           <div>
               <div class='content-text'><span class='count'>No</span> <span class='content-type'>accessibility errors detected</span>.</div>
               <button id="restore" hidden>Restore hidden alerts</button>
@@ -33,15 +33,15 @@ class Ed11yElementPanel extends HTMLElement {
             <button class='jump next' data-ed11y-goto='0'><span class='jump-next'>First</span> <span aria-hidden='true'> »</span></button>
           </div>
         </div>
-      <div id='ed11y-headings-tab' class="hidden" aria-labelledby='ed11y-headings' tabindex='0'>
+      <div id='ed11y-headings-tab' role="tabpanel" class="hidden" aria-labelledby='ed11y-headings' tabindex='0'>
         <p>Check that this forms <a href='https://accessibility.princeton.edu/how/content/headings'>a complete outline</a>:</p>
-        <ul></ul>
+        <ul id='ed11y-outline'></ul>
       </div>
-      <div id='ed11y-alts-tab' class="hidden" aria-labelledby='ed11y-alts' tabindex='0'>
+      <div id='ed11y-alts-tab' role="tabpanel" class="hidden" aria-labelledby='ed11y-alts' tabindex='0'>
         <p>Check <a href='https://accessibility.princeton.edu/how/content/alternative-text'>alt text</a>, <a href='https://accessibility.princeton.edu/how/content/images-text'>images of text</a>, &amp; <a href='https://webaim.org/techniques/captions/'>captions</a>.</p>
-        <ul></ul>
+        <ul id='ed11y-alt-list'></ul>
       </div>
-      <div id='ed11y-help-tab' class="hidden" aria-labelledby='ed11y-help' tabindex='0'>
+      <div id='ed11y-help-tab' role="tabpanel" class="hidden" aria-labelledby='ed11y-help' tabindex='0'>
       // todo inject content
       </div>
     </div>
@@ -55,6 +55,7 @@ class Ed11yElementPanel extends HTMLElement {
       let wrapper = document.createElement('div');
       wrapper.setAttribute('class','wrapper');
       wrapper.innerHTML = this.template();
+      // todo??
       //let restore = document.createElement('button');
       //restore.setAttribute('id', 'restore');
       //restore.textContent = `Some alerts hidden; show all`;
@@ -79,12 +80,29 @@ class Ed11yElementPanel extends HTMLElement {
           border-radius: 3px;
           box-shadow: 0 0 0 2px ${Ed11y.color.bg}, 1px 1px 4px 2px ${Ed11y.color.text}77;
         }
+        .ed11y-warnings {
+          background: ${Ed11y.color.bgWarning};
+        }
+        .ed11y-errors {
+          background: ${Ed11y.color.bgAlert};
+        }
+        a {
+          color: inherit;
+        }
         .content {
           padding: 6px 6px 6px 12px;
           border: 2px solid ${Ed11y.color.primary};
           border-top: 0;
           border-radius: 0 0 3px 3px;
           color: ${Ed11y.color.text};
+          max-height: max(240px, 50vh);
+          overflow: auto;
+        }
+        .ed11y-warnings .content {
+          border-color: ${Ed11y.color.primaryWarning};
+        }
+        .ed11y-errors .content {
+          border-color: ${Ed11y.color.primaryAlert};
         }
         @media (min-width: 400px) {
           #ed11y-main-toggle-tab {
@@ -113,6 +131,9 @@ class Ed11yElementPanel extends HTMLElement {
           flex: auto;
           cursor: pointer;
         }
+        .ed11y-errors button {
+          background: ${Ed11y.color.primaryAlert};
+        }
         button:hover {
           background: ${Ed11y.color.text};
         }
@@ -125,16 +146,68 @@ class Ed11yElementPanel extends HTMLElement {
         .buttonbar button:hover {
           background: ${Ed11y.color.secondary};
         }
+        .buttonbar button:first-child {
+          border-radius: 3px 0 0 0; 
+          border-left: 2px solid transparent;
+        }          
+        .buttonbar button:last-child {border-radius: 0 3px 0 0;}
+        .buttonbar button[aria-selected="true"] {
+          background: ${Ed11y.color.bg};
+          color: ${Ed11y.color.text};
+          border-color: ${Ed11y.color.primary};
+        }
+        .ed11y-warnings button[aria-selected="true"] {
+          border-color: ${Ed11y.color.primaryWarning};
+        }
+        .ed11y-errors button[aria-selected="true"] {
+          border-color: ${Ed11y.color.primaryAlert};
+        }
+        .panel-minimized, .ed11y-panel-shut {
+          border-radius: 100%;
+          background: transparent;
+          width: auto;
+          box-shadow: none;
+        }
+        .panel-minimized .content, 
+        .panel-minimized .buttonbar button, 
+        .panel-minimized .close,
+        .ed11y-panel-shut button, 
+        .ed11y-panel-shut .content, 
+        .ed11y-panel-active .toggle-count,
+        .ed11y-panel-shut .close {
+          display: none;
+        }
+        .ed11y-panel-shut #ed11y-main-toggle, .panel-minimized #ed11y-main-toggle {
+          display: block;
+          min-width: 30px;
+          height: 30px;
+          border-radius: 100%;
+          padding: 5px;
+        }
+        .ed11y-panel-shut.ed11y-warnings #ed11y-main-toggle, .panel-minimized.ed11y-warnings #ed11y-main-toggle {
+          background-color: ${Ed11y.yellow};
+          box-shadow: inset 0 0 0 2px ${Ed11y.yellow}, inset 0 0 0 3px #000b, 0 0 2px #000;
+        }
+        .ed11y-panel-shut.ed11y-errors #ed11y-main-toggle, .panel-minimized.ed11y-errors #ed11y-main-toggle {
+          color: ${Ed11y.red};
+          box-shadow: inset 0 0 0 1px ${Ed11y.red}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.red}, 1px 1px 5px 0 rgba(0,0,0,.5);
+          background: #fefefe;
+        }
+        .panel-minimized .toggle-count {
+          display: block;
+        }
         .jumplinks {
           text-align: right;
         }
         .content button {
           padding: 4px 6px;
-          border-radius: 3px;
-          background: ${Ed11y.color.secondary};
+          border-radius: 2px;
+          background: ${Ed11y.color.button};
         }
         .content button:hover {
-          background: ${Ed11y.color.primary};
+          background: ${Ed11y.color.bg};
+          color: ${Ed11y.color.text};
+          box-shadow: inset 0 0 0 1px ${Ed11y.color.text};
         }
         #restore {
           margin: 5px 0 4px 1px;
@@ -143,16 +216,33 @@ class Ed11yElementPanel extends HTMLElement {
           border-color: #76b9f0;
           box-shadow: inset 0 0 0 2px #76b9f0;
         }
-        .buttonbar button:first-child {border-radius: 3px 0 0 0;}          
-        .buttonbar button:last-child {border-radius: 0 3px 0 0;}
-        .panel-minimized .content, .panel-minimized .buttonbar button[aria-expanded]  {
-          display: none;
+        .has-issues {
+          background: ${Ed11y.color.primaryAlert};
+          color: ${Ed11y.color.bg};
         }
-        .ed11y-panel-shut button, .ed11y-panel-shut .content {
-          display: none;
+        #ed11y-outline, #ed11y-alt-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
         }
-        .ed11y-panel-shut #ed11y-main-toggle, .panel-minimized #ed11y-main-toggle {
-          display: block;
+        #ed11y-outline li {
+          padding: 5px;
+        }
+        #ed11y-alt-list li {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 1em;
+          padding: 8px;
+          margin: 8px 0;
+          box-shadow: 0 4px ${Ed11y.color.bg}, 0 5px ${Ed11y.color.primary}dd;
+        }
+        #ed11y-alt-list li span {
+          flex: 0 1 240px;
+        }
+        #ed11y-alt-list li img {
+          flex: 0 1 80px;
+          width: 80px;
+          align-self: flex-start;
         }
       `;
       shadow.appendChild(style);
@@ -173,7 +263,6 @@ class Ed11yElementPanel extends HTMLElement {
       Ed11y.panelTabs = wrapper.querySelectorAll('.buttonbar button');
       Ed11y.panelTabs.forEach(tab => {
         // todo: needed?
-        tab.addEventListener('keyup', Ed11y.keyboardClick);
         tab.addEventListener('click', this.handleBarClick);
       })
       this.initialized = true;
@@ -183,7 +272,6 @@ class Ed11yElementPanel extends HTMLElement {
   jumpTo(event) {
     // Handle jump
     event.preventDefault();
-
     if (!Ed11y.jumpList) {
       Ed11y.buildJumpList();
     }
@@ -192,20 +280,21 @@ class Ed11yElementPanel extends HTMLElement {
     let goNum = parseInt(this.dataset.ed11yGoto);
     // Send to ed11y to make timeouts easier
     let goto = Ed11y.jumpList[goNum];
+    let gotoResult = Ed11y.results[goto.getAttribute('data-ed11y-result')];
     let offsetCalc = goto.getBoundingClientRect();
     let bodyStyles = window.getComputedStyle(document.querySelector('body'));
     let gotoOffset = offsetCalc.top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
     // Throw an alert if the button or target is hidden.
     let firstVisible = false;
-    let insert = goto.getAttribute('data-ed11y-inserted');
+    let insert = gotoResult[3];
     let target;
     // todo this all belongs in the result open logic not here
     if (insert === "beforebegin") {
-      target = Ed11y.nextUntil(goto, "[data-ed11y-marked]");
+      target = Ed11y.nextUntil(goto, ":not(ed11y-element-result)");
     }
     else if (insert === "afterbegin") {
       // todo mvp these are not being inserted right; revisit. maybe always before, just sometimes before link?
-      target = goto.closest("[data-ed11y-marked]");
+      target = goto.parentElement;
     }
     let alertMessage;
     // todo mvp do these match tests work? parameterize, test
@@ -224,12 +313,12 @@ class Ed11yElementPanel extends HTMLElement {
       }, 500, goto);
     }
     else {
-      // todo mvp test
+      // todo mvp test to see if this actually works
       if (!Ed11y.visible(target)) {
         firstVisible = Ed11y.firstVisibleParent(Ed11y.goto);
         alertMessage = ed11yInvisibleTip;
       }
-      // todo MVP code broken
+      // todo MVP this code is broken
       /*else if (!!goto.closest('[aria-hidden="true"]') || !!target?.closest('[aria-hidden="true"]')) {
         firstVisible = Ed11y.firstVisibleParent(Ed11y.goto.closest('[aria-hidden="true"]'));
         alertMessage = ed11yHiddenTip;
@@ -263,18 +352,11 @@ class Ed11yElementPanel extends HTMLElement {
 
   handleBarClick(event) {
     event.preventDefault();
-    let id = event.target.getAttribute('id');
+    let id = event.currentTarget.getAttribute('id');
     switch (id) {
       case "ed11y-main-toggle":
-        if (Ed11y.panel.classList.contains('ed11y-panel-shut') === true) {
-          Ed11y.togglePanel();
-        } else {
-          Ed11y.switchPanel(id);
-        }
-        break;
-      case "ed11y-shut-panel":
         Ed11y.togglePanel();
-        break;
+        break
       case "ed11y-minimize":
         Ed11y.minimize();
         break;
@@ -294,3 +376,84 @@ class Ed11yElementPanel extends HTMLElement {
   }
 }
 customElements.define('ed11y-element-panel', Ed11yElementPanel);
+
+class Ed11yElementHeadingLabel extends HTMLElement {
+  constructor() {
+    super();
+  }
+  connectedCallback() {
+    if (!this.initialized) {
+      const shadow = this.attachShadow({mode: 'open'});
+      let wrapper = document.createElement('div');
+      wrapper.setAttribute('class','wrapper');
+      let i = this.dataset.ed11yHeadingOutline;
+      let result = Ed11y.headingOutline[i];
+      wrapper.innerHTML = "H" + result[1];
+      let issues = !!result[2];
+      wrapper.classList.add('issue' + issues);
+      let style = document.createElement('style');
+      style.textContent = Ed11y.baseCSS + `
+        :host {
+          position: absolute;
+          margin-top:-.5em;
+        }
+        .wrapper {          
+          background: ${Ed11y.color.secondary};
+          color: ${Ed11y.color.bg};
+          box-shadow: 0 0 0 1px ${Ed11y.color.bg}, 0 0 0 3px ${Ed11y.color.secondary}, 1px 1px 5px 2px #000;
+          padding: 0 7px;
+          border-radius: 2px;
+          margin-left: 35px;
+          font-weight: 400;
+          font-size: 12px;
+        }
+      `;
+      shadow.appendChild(style);
+      shadow.appendChild(wrapper);
+      this.initialized = true;
+    }
+  }
+}
+customElements.define('ed11y-element-heading-label', Ed11yElementHeadingLabel);
+
+class Ed11yElementAltLabel extends HTMLElement {
+  constructor() {
+    super();
+  }
+  connectedCallback() {
+    if (!this.initialized) {
+      const shadow = this.attachShadow({mode: 'open'});
+      let wrapper = document.createElement('div');
+      wrapper.setAttribute('class','wrapper');
+      let i = this.dataset.ed11yAlt;
+      let result = Ed11y.imageAlts[i];
+      wrapper.innerHTML = "Alt text: " + result[1];
+      let issues = !!result[2];
+      wrapper.classList.add('issue' + issues);
+      let style = document.createElement('style');
+      style.textContent = Ed11y.baseCSS + `
+        :host {
+          position: absolute;
+          margin-top:-.5em;
+        }
+        .wrapper {          
+          background: ${Ed11y.color.bg};
+          color: ${Ed11y.color.text};
+          box-shadow: 0 0 0 1px ${Ed11y.color.primary}, 0 0 0 4px ${Ed11y.color.bg}, 0 0 0 5px ${Ed11y.color.primary}; 
+          padding: .25em .5em;
+          border-radius: 3px;
+          margin-left: 35px;
+          font-weight: 400;
+        }
+        .issuetrue {
+          background: ${Ed11y.color.primaryAlert};
+          color: ${Ed11y.color.bg};
+        }
+      `;
+      shadow.appendChild(style);
+      shadow.appendChild(wrapper);
+      this.initialized = true;
+    }
+  }
+}
+customElements.define('ed11y-element-alt-label', Ed11yElementAltLabel);

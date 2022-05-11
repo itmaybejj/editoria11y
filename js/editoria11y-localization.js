@@ -1,261 +1,331 @@
 const ed11yLang = {
     en : {
-        headingLevelSkippedTitle: "Heading level skipped",
-        headingLevelSkipped: (prevLevel, level) =>
-            `<p>${Ed11y.M.headingLevelSkippedTitle} (H${level} following H${prevLevel}).</p>
-            <p>Headings and subheadings create a navigable table of contents for assistive devices.
-            The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>  
-            <ul><li>Heading level 1<ul><li>Heading level 2 (a subheading)<ul><li>Heading level 3 (a sub-subheading)</li></ul></li><li>Heading level 2 (another topic)</li></ul></li></ul>
-            <p><strong>To fix:</strong> select the appropriate depth for this heading; most likely ${prevLevel} or ${parseInt(prevLevel + 1)}.</p>
+
+        // Main Panel
+        panelCount0 : "No issues detected.",
+        panelCount1 : "One issue detected.",
+        panelCountMultiple: " issues detected.",
+        panelHelp : `
+            <p>Assistive devices that can reformat content for people with disabilities need well structured content to work.</p>
+            <p>This tool checks for common issues, such as <a href='https://accessibility.princeton.edu/how/content/alternative-text'>missing alternative text</a>, <a href='https://accessibility.princeton.edu/how/content/headings'>jumbled page outlines</a> and <a href='https://accessibility.princeton.edu/how/content/links'>generic link titles</a>, and reminds content creators to check audio and video for closed captioning.</p>
+            <p>Note that it <strong>only</strong> checks editorial content; your site's theme needs its own <a href='https://webaim.org/resources/evalquickref/'>accessibility testing</a>.<p>
+            <p>Have a bug or feature request? <a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Contact the Editoria11y maintainers</a>.</p>
+        `,
+
+        // Tooltips for heading tests
+
+        headingExample : `
+        <ul>
+            <li>Heading level 1
+                <ul>
+                    <li>Heading level 2 (a topic)
+                        <ul><li>Heading level 3 (a subtopic)</li></ul></li>
+                    <li>Heading level 2 (a new topic)</li>
+                </ul>
+            </li>
+        </ul>`,
+        headingLevelSkipped : {
+            title: "Manual check: heading level skipped",
+            tip: (prevLevel, level) =>
+            `<p>This heading is marked as level ${level}, but the previous was level ${prevLevel}.</p><p>Headings and subheadings create a navigable table of contents for assistive devices. The <em>level numbers</em> show how the headings are related, akin to indents in a nested outline:</p>
+            ${Ed11y.M.headingExample}
+            <p>Skipping directly to ${level} will make the reader believe they missed ${parseInt(level - 1)}, and whichever topic change it introduced.</p>
             `,
-        headingEmptyTitle: "Heading tag without any text",
-        headingEmpty: () =>
-            `<p>${Ed11y.M.headingEmptyTitle}.</p>
-            <p>Headings and subheadings create a navigable table of contents for assistive devices. "Blank" headings create confusing gaps.
-            The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>  
-            <ul><li>Heading level 1<ul><li>Heading level 2 (a subheading)<ul><li>Heading level 3 (a sub-subheading)</li></ul></li><li>Heading level 2 (another topic)</li></ul></li></ul>
+        },
+
+        headingEmpty : {
+            title: "Heading tag without any text",
+            tip: () => 
+            `<p>Headings and subheadings create a navigable table of contents for assistive devices. "Blank" headings create confusing gaps. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
+            ${Ed11y.M.headingExample}
             <p><strong>To fix:</strong> delete the empty line or provide text for the section label.</p>
             `,
-        headingIsLongTitle: "Manual check needed: long heading",
-        headingIsLong: (length) =>
-            `<p>${Ed11y.M.headingIsLongTitle} (${length} characters)</p>
-            <p>Headings and subheadings create a navigable table of contents for assistive devices.
-            The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>  
-            <ul><li>Heading level 1<ul><li>Heading level 2 (a subheading)<ul><li>Heading level 3 (a sub-subheading)</li></ul></li><li>Heading level 2 (another topic)</li></ul></li></ul>
-            <p>For the outline to be useful, headings should be brief and clear.</p>
-            <p><strong>To fix:</strong> short heading if possible, or remove heading style if it is only being used for emphasis.</p>
+        },
+
+        headingIsLong : {
+            title: "Manual check: long heading",
+            tip: () =>
+            `<p>Headings should be brief and clear. Assistive devices use them to create a navigable table of contents for the page. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>  
+            ${Ed11y.M.headingExample}
+            <p><strong>To fix:</strong> shorten this heading if possible, or remove the heading style if it was only applied to this text to provide visual emphasis.</p>
             `,
+        },
+            
+        blockquoteIsShort : {
+            title: "Manual check: is this a blockquote?",
+            tip: () =>
+            `<p>Blockquote formatting tells screen readers that this text should be announced as a quotation. This was flagged because short blockquotes are sometimes actually headings that belong in the page outline. If that is the case here, please use heading formatting instead.</p>`,
+        },
+
+        // Tooltips for image tests
+
+        // Reusable example for tips:
+        altAttributeExample : 
+            `<p>Note that it is the <em>meaning</em> that matters. For example, the context would determine which of these best describes a picture of a child kicking a ball:</p>
+            <ul>
+                <li>Child kicking a ball</li>
+                <li>AJ's game-winning kick curved in from the left sideline</li>
+                <li>The "medium" ball is the right size for a 9-year-old child</li>
+            </ul>`,
+        
+        altAttributeProvided: (alt) => 
+        `<p>This image's alt text is: "<strong>${alt}</strong>"</p>`,
+
+        altMissing : {
+            title: "Image has no alternative text attribute",
+            tip: () =>
+            `<p>When screen readers encounter an image with no alt attribute, they dictate the url of the image file instead, often one letter at a time.
+            Please set this image's alternative text to a concise description of what this image means in this context.</p>
+            ${Ed11y.M.altAttributeExample}`,
+        },
+
+        altNull : {
+            title: "Manual check: image is marked as decoration",
+            tip: () =>
+            `<p>This image provides no text alternative. This tells screen readers that it is present only for visual decoration, 
+            and should be ignored. If that is incorrect because this image is meaningful for sighted users, please provide a concise description of what this image means in this context.</p> 
+            ${Ed11y.M.altAttributeExample}`,
+        },
+
+        altURL : {
+            title: "Image's text alternative is a URL",
+            tip: (alt) =>
+            `<p>Please set this image's alternative text to a concise description of what this image means in this context.</p>
+            ${Ed11y.M.altAttributeExample}
+            ${Ed11y.M.altAttributeProvided(alt)}`
+            ,
+        },
+        altURLLinked : {
+            title: "Linked image's text alternative is a URL",
+            tip: (alt) =>
+            `<p>When a link includes an image, the image's alt text becomes part of the link text announced by screen readers.
+            Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
+            <ul>
+                <li>Good link text: "About us"</li>
+                <li>Bad link text: "aitch tee tee pee colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess</li>
+            </ul>
+            ${Ed11y.M.altAttributeProvided(alt)}`,
+        },
+
+        altImageOf : {
+            title: "Manual check: possibly redundant text in alt",
+            tip: (alt) =>
+            `<p>Since screen readers automatically announce they are describing an image, 
+            words like "image," "photo" or "graphic" are only helpful 
+            in a text alternative if they describe what is contained in the image, rather
+            than repeating the fact that the image is an image.</p>
+            <ul><li>Redundant: "<em>Photo of</em> my new spoon."</li>
+            <li>Helpful: "Cracked and faded <em>photo of</em> the first computer."</li></ul>
+            ${Ed11y.M.altAttributeProvided(alt)}`
+        },
+        altImageOfLinked : {
+            title: "Manual check: possibly redundant text in linked image",
+            tip: (alt) =>
+            `<p>Links should clearly and concisely describe their destination. Since words like "image," "graphic" or "photo" are redundant in text alternatives (screen readers already identify the image as an image), they often indicate that the image's text alternative is describing the image instead of the link.</p>
+            <ul>
+                <li>Good link text: "About us"</li>
+                <li>Bad link text: "Stock photo of five people jumping and high fiving around a conference table, image"</li>
+            </ul>
+            <hr>
+            ${Ed11y.M.altAttributeProvided(alt)}`
+        },
+
+        altDeadspace : {
+            title: "Image's text alternative is unpronouncable",
+            tip: () =>
+            `<p>This image's alt consists of only silent characters (spaces and quotation marks).
+            It will be announced by screen readers as present, but the description will unintelligible. If the intention was to hide this image from screen readers, provide a <em>completely</em> empty alt (alt="") instead. Otherwise, set this image's alternative text to a concise description of what this image means in this context.</p>
+            ${Ed11y.M.altAttributeExample}
+            ${Ed11y.M.altAttributeProvided(alt)}`,
+        },
+        altDeadspace : {
+            title: "Linked image's text alternative is unpronouncable",
+            tip: (alt) =>
+            `<p>This image's alt consists of only silent characters (spaces and quotation marks). It will be announced by screen readers as as part of the link's text, but the description of what the image is will be unintelligible. Please set this image's alternative text to something that describes the link's destination, or provide a <em>completely</em> empty alt (alt="") if the image should not be mentioned at all.</p>
+            <ul>
+                <li>Good link text: "About us"</li>
+                <li>Bad link text: "About us, image: [short confusing silence]"</li>
+            </ul>
+            ${Ed11y.M.altAttributeProvided(alt)}`,
+        },
+
+        altLong : {
+            title: "Manual check: very long alternative text",
+            tip: (alt) =>
+            `<p>Image text alternatives are announced by screen readers as a single run-on sentence; listeners must listen to the entire alt a second time if they miss something. When more that a few words are needed to describe an image, it is usually better to provide and reference a <em>visible</em> text alternative, an approach that is often preferred by mobile device users and readers with low-vision. For example:</p>
+            <ul><li>"Event poster; details provided in caption"</li>
+            <li>"Chart showing our issues on this page going to zero; details in table"</li></ul>
+            ${Ed11y.M.altAttributeProvided(alt)}
+            `,
+        },
+        altLongLinked : {
+            title: "Manual check: very long alternative text in linked image",
+            tip: (alt) =>
+            `<p>The alt text on a linked image is used to describe the link destination. Links should be brief, clear and concise, as screen reader users often listen to the list of links on the page to find content of interest. Long alternative text inside a link often indicates that the image's text alternative is describing the image instead rather than the link.</p>
+            ${Ed11y.M.altAttributeProvided(alt)}
+            `,
+        },
+
+        altPartOfLinkWithText : {
+            title: "Manual check: link contains both text and an image",
+            tip: (alt) => 
+            `<p>When a link includes an image, the image's alt text becomes part of the link.
+            This can be confusing if the image's text alternative is adding irrelevant details.</p>
+            <ul>
+                <li>Confusing: "Link, 'Stock photo of five people jumping and high fiving around a conference table, image', About us</li>
+                <li>Ideal: "Link, About us" (image was marked decorative with a blank alt and not announced)</li>
+            </ul>
+            ${Ed11y.M.altAttributeProvided(alt)}
+            `,
+        },
+
+        linkNoText : {
+            title: "Link with no accessible text",
+            tip: () =>
+            `<p>This link is either entirely empty (e.g., a copy paste error of a link around a space character) or wrapped around something with no text alternative (an image with no alt attribute).</p>
+            <p>Screen reader users will be confused when they encounter this, hearing either an awkward silence "Link, [...awkward silence]," or the URL, spelled out character by character: "Link, aitch tee tee pee colon forward slash forward slash example dot com"</p>
+            <p>To fix: delete this link if it is empty, add alt text to the image that equals the visible title of the link if it is a linked image.</p>`,
+        },
+
+        linkTextIsURL : {
+            title: "Link's accessible text may be URL",
+            tip: (text) => 
+                `<p>Readers expect links to clearly and concisely describe their destination, and often skim pages by headings and links. This is especially true of screen reader users, who frequently navigate using automatically generated lists of the links on the page, pulled out of context.</p>
+                <ul><li>Concise and meaningful link: <a href="https://www.google.com/search?q=writing+meaningful+links">writing meaningful links</a></strong></li><li>Unhelpful link text: <a href="https://www.google.com/search?q=writing+meaningful+links">https://www.google.com/search?q=writing+meaningful+links</a></li></ul>
+                <p>This link's text is: <strong>${text}</strong></p>
+                `,
+        },
+
+        linkTextIsGeneric : {
+            title: "Manual check: is this link meaningful and concise?",
+            tip: (text) => 
+                `<p>Readers often skim pages by headings and links, and will miss or ignore links that are meaningless or have their meaning obscured. Meaningless links like "click here," "read more" or "download" expect the reader to stop, go back, and determine what the link does from context. Many readers will not do this, or be frustrated that they have to.</p>
+                <p>This is especially true of screen reader users, who navigate using automatically generated lists links pulled out of context.</p>
+                <ul><li>Meaningful and concise: "Learn more about <a href="https://www.google.com/search?q=writing+meaningful+links">writing meaningful links"</a></strong></li>
+                <li>Not meaningful: "To learn more writing meaningful links, <a href="https://www.google.com/search?q=writing+meaningful+links">click here</a>.</li>
+                <li>Not concise: "<a href="https://www.google.com/search?q=writing+meaningful+links">Click here to learn more about writing meaningful links</a>"</li></ul>
+                <p>This link's text is: <strong>${text}</strong></p>`
+            ,
+        },
+
+        linkDocument : {
+            title : "Manual check: is the linked document accessible?",
+            tip: () => 
+                `<p>This automated checker helps ensure Web pages contain the features assistive technologies need to make content accessible for everybody; things like headings, table headers and image alternative text. It is not able to check linked documents.</p>
+                <p>If the linked document cannot be converted to a Web page (something usually preferred by mobile device and screen reader users), please make sure it at least contains structural tags and image alt text. See tips for remediating:
+                <ul>
+                    <li><a href='https://webaim.org/techniques/word/'>text documents</a></li>
+                    <li><a href='https://webaim.org/techniques/powerpoint/'>slideshows</a></li>
+                    <li><a href='https://webaim.org/techniques/acrobat/'>documents intended for printers instead of screens (PDF)</a></li>
+                </ul>`
+            ,
+        },
+
+        linkNewWindow : {
+            title: "Manual check: is opening a new window expected?",
+            tip: () => 
+                `<p>Normally readers can choose to open a link in the same window or a new window. When a link forces the browser to open in a new window without warning, it can be confusing, especially for assistive device users who may not realize a new window has opened and wonder why their browse "back" button is suddenly disabled, or who need many clicks to get back to the previous window.</p>
+                <p>There are generally only two situations where it is not confusing or annoying to force a link to open a new window:</p>
+                <ul>
+                    <li>When the user is in a multi-step form (e.g., a store checkout process), and they would lose their place if they followed a link.</li>
+                    <li>When the user is warned by text or an icon with a text-equivalent for screen readers the link will open in a new window.</li>
+                </ul>
+                `
+            ,
+        },
+
+        // Tooltips for Text QA
+
+        tableNoHeaderCells : {
+            title: "Table has no header cells",
+            tip: () => `
+                <p>Tables are announced by screen readers as special objects with horizontal and vertical navigation options. The screen readers rely on table header cells to label the rows and columns as users move about the table. Without them, it is very easy to get lost.</p>
+                <p>To fix:</p>
+                <ul><li>If this table contains actual tabular information (the rows and columns are meaningful), edit the table's properties and specify whether the first row, column or both contains the labels needed to understand the content cells.</li>
+                <li>If this table does not contain tabular information, and was simply used to make "fake" columns, copy and paste the text out of the table and delete the table. Tables used for layout are confusing for screen readers and incompatible with mobile devices and screen magnifiers, since they do not "stack" into a single column like real columned layouts.</li></ul>
+            `,
+        },
+
+        tableContainsContentHeading : {
+            title: "Content heading inside a table",
+            tip: () => 
+            `<p>"Table headers" and "content headings" mean different things:</p>
+            <ul><li>Table header cells label a <strong>column or row</strong>. In the example below, a table header in position 3 would label cell C.</li><li>Content headings ("Heading 1", "Heading 2") are the chapter titles for the page, labelling all content <strong>until the next heading</strong>, with no respect for columns or rows. A content heading in position 3 would label cells A, B <strong><em>and</em></strong> C.</li></ul>
+            <table><tr><th>1</th><th>2</th><th>3</th></tr>
+            <tr><td>A</td><td>B</td><td>C</td></table>
+            `
+        },
+
+        tableEmptyHeaderCell : {
+            title: "Empty table header cell",
+            tip: () => `
+                <p>Tables are announced by screen readers as special objects with horizontal and vertical navigation options. The screen readers rely on table header cells to label the rows and columns as users move about the table. Without them, it is very easy to get lost.</p>
+            `,
+        },
+
+        textPossibleList : {
+            title: "Manual check: should this be a list?",
+            tip : (text) => 
+            `<p>List formatting is more than symbols:</p> 
+            <ol><li>Formatted lists reflow elegantly for small screens, maintaining gaps and spacing and line breaks.</li><li>Formatted lists structure content in a navigable way. Screen readers announce how many items are in the list, and users can jump from item to item.</li></ol>
+            <p>If the "${text}" in this paragraph indicates it starts a list, please replace the "${text}" with the equivalent list formatting.</p>`,
+        },
+
+        textPossibleHeading : {
+            title: "Manual check: should this be a heading?",
+            tip : () => 
+            `<p>Headings and subheadings create a navigable table of contents for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
+            ${Ed11y.M.headingExample}
+            <p>If this all-bold text is functioning visually as a heading, please replace the bold formatting with the appropriately numbered heading.</p>
+            `,
+        },
+
+        textUppercase : {
+            title: "Manual check: is this uppercase text needed?",
+            tip : () => 
+            `<p>ALL UPPERCASE TEXT CAN BE MORE DIFFICULT TO READ FOR MANY PEOPLE, AND IS OFTEN INTERPRETED AS SHOUTING.</p>`,
+        },
+
+        embedVideo : {
+            title: "Manual check: is this video accurately captioned?",
+            tip : () => 
+            `<p>If a recorded video contains speech or meaningful sounds, it must be captioned.</p>
+            <p>Note that machine-generated captions are an excellent start, but must be proofread and edited to identify who is speaking before being considered an equal alternative.</p>`,
+        },
+        embedAudio : {
+            title: "Manual check: is an accurate transcript provided?",
+            tip : () => 
+            `<p>If this audio contains speech, a text alternative must be provided, either as content on this page, a link or a download.</p>
+            <p>Note that machine-generated transcripts are an excellent start, but must be proofread and edited to identify who is speaking before being considered an equal alternative</p>`,
+        },
+        embedVisualization : {
+            title: "Manual check: is this visualization accessible?",
+            tip : () => 
+            `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
+            <p>Unless this particular widget has an adjustable font size, high visual contrast, can be operated by a keyboard and can be understood by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
+        },
+        embedTwitter : {
+            title: "Manual check: is this embed a keyboard trap?",
+            tip : () => 
+            `<p>If embedded feeds are set to show a high number of items, keyboard users may have to click the tab key dozens or hundreds of times to exit the component.</p>
+            <p>Check to make sure only a small number of items auto-load immediately or while scrolling. Having additional items load on request ("show more") is fine.</p>`,
+        },
+        embedCustom : {
+            title: "Manual check: is this embedded content accessible?",
+            tip : () => 
+            `<p>Please make sure images inside this embed have alt text, videos have captions, and interactive components can be <a href='https://webaim.org/techniques/keyboard/'>operated by a keyboard</a>.</p>`,
+        }
+
     },
 }
 
-const ed11yPanel = document.createElement('div');
-ed11yPanel.classList.add('ed11y-reset', 'ed11y-preload', 'ed11y-panel-shut', 'ed11y-pass');
-ed11yPanel.setAttribute('id', 'ed11y-panel');
-ed11yPanel.innerHTML = "" +
-    "<h1 class='ed11y-sr-only'>Editorially Tools</h1>" +
-    "<div id='ed11y-panel-upper'>" +
-    "<div id='ed11y-show-headers' class='ed11y-outline-header ed11y-show'>" +
-    "<div id='ed11y-show-outline-header' class='ed11y-bold ed11y-show-header' tabindex='-1'>Headers" +
-    "<p>Check that this forms <a href='https://accessibility.princeton.edu/how/content/headings'>a complete outline</a>:</p>" +
-    "</div>" +
-    "<button type='button' class='ed11y-upper-next-button ed11y-header-button'>Media<span aria-hidden='true'> &raquo;</span></button>" +
-    "<ul id='ed11y-outline-list' tabindex='-1' aria-labelledby='ed11y-show-headers'></ul>" +
-    "</div>" +
-    "<div id='ed11y-show-images' class='ed11y-outline-header ed11y-show'>" +
-    "<div id='ed11y-image-header' class='ed11y-bold ed11y-show-header'>Media" +
-    "<p>Check <a href='https://accessibility.princeton.edu/how/content/alternative-text'>alt text</a>, " +
-    "<a href='https://accessibility.princeton.edu/how/content/images-text'>images of text</a>, &amp; <a href='https://webaim.org/techniques/captions/'>captions</a>.</p>" +
-    "</div>" +
-    "<button type='button' class='ed11y-upper-next-button ed11y-header-button'>Content outline<span aria-hidden='true'> &raquo;</span></button>" +
-    "<ul id='ed11y-image-list' tabindex='-1' aria-labelledby='ed11y-show-outline-header'></ul>" +
-    "</div>" +
-    "</div>" +
-    "<div id='ed11y-panel-content'>" +
-    "<div class='ed11y-panel-icon'></div>" +
-    "<div id='ed11y-panel-text'>" +
-    "<span id='ed11y-results' tabindex='-1'><span class='ed11y-panel-count'>No</span> <span class='ed11y-panel-messagetype'>accessibility errors detected</span>.</span><br>" +
-    "<a href='#' class='ed11y-jump ed11y-small' data-ed11y-goto='0'>Show <span class='ed11y-jump-next'>first</span> <span aria-hidden='true'> »</span></a>" +
-    "</div>" +
-    "</div>" +
-    "<div id='ed11y-panel-buttonbar'>" +
-    "<button type='button' aria-expanded='false' id='ed11y-summary-toggle' class='ed11y-button ed11y-panel-button' aria-pressed='false'>Show tags</button>" +
-    "<button type='button' class='ed11y-button ed11y-about' title='About this tool' aria-label='about' aria-pressed='false'>?</button>" +
-    "<button type='button' class='ed11y-minimize ed11y-button' title='Minimize panel' aria-label='Minimize panel' aria-pressed='false'><span></span></button>" +
-    "<button type='button' id='ed11y-shut-panel' title='Close panel' class='ed11y-button ed11y-panel-button' aria-label='close panel'>&times;</button>" +
-    "<button type='button' id='ed11y-main-toggle' aria-expanded='false' title='Accessibility checker'><span class='ed11y-toggle-icon'></span><span class='ed11y-sr-only'>Show accessibility scan panel with</span><span class='ed11y-count'></span><span class='ed11y-sr-only'>issues</span></button>" +
-    "</div>" +
-    "<div aria-live='polite' class='ed11y-sr-only' id='ed11y-aria-live'></div>";
 
-ed11yAbout = "" +
-    "<p>Assistive devices like screen readers depend on the invisible structure of the page matching its visual look and feel.</p>" +
-    "<p>This tool checks for common structural issues like " +
-    "<a href='https://accessibility.princeton.edu/how/content/alternative-text'>missing alternative text</a>, " +
-    "<a href='https://accessibility.princeton.edu/how/content/headings'>jumbled page outlines</a> and " +
-    "<a href='https://accessibility.princeton.edu/how/content/links'>generic link titles</a>.</p><p>Note that it <span class='ed11y-bold'>only</span> checks editorial content; your site's theme needs its own <a href='https://webaim.org/resources/evalquickref/'>accessibility testing</a>.<p>" +
-    "<p><a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Report an issue <span aria-hidden='true'>»</span></a></p>";
+
+
+
+
+    // todo rewrite
 
 ed11yInvisibleTip = "The element with this issue is not currently visible; it may be hidden or inside a tab or accordion. I will outline its container.";
 ed11yHiddenTip = "The element with this issue has been marked as hidden from screen readers. It may be in an unopened tab or accordion, so I will outline its container.";
 
-// Messages for Headings
-
-
-// Messages for links.
-ed11yMessageLinkHasNoText = "<div class='ed11y-tip-heading'>Link title not " +
-    "found</div> " +
-    "<p>Screen readers will either read the entire url of this link, one " +
-    "character at a time, or say <span class='ed11y-bold'>&quot;Link: " +
-    "[...awkward silence...].&quot;</span></p>" +
-    "<p>To fix: delete this link if it is just stray tags wrapped around an " +
-    "empty space due to a copy/paste bug, or add alt text if it is a real " +
-    "link wrapped around an image or icon.</p>";
-
-ed11yMessagelinkTextIsURL = "<div class='ed11y-tip-heading'>Link may be a " +
-    "URL</div>" +
-    "<p>Assistive devices expect link titles to be " +
-    "<a href='https://accessibility.princeton.edu/how/content/links'>" +
-    "&quot;clear and meaningful&quot;</a>, even out of context.</p>" +
-    "<p>Note that spelling out a very short URL is OK if the URL itself " +
-    "<em>is</em> what you are communicating, e.g., when providing an email " +
-    "address.</p>";
-
-ed11yMessagelinkTextIsGeneric = "<div class='ed11y-tip-heading'>Manual check " +
-    "needed: link title may be generic</div>" +
-    "<p>This link appears to be made of common words like " +
-    "&quot;click here&quot; or &quot;download&quot;.</p>" +
-    "<p>Many users skim for links, and most assistive devices provide lists of link titles, so please check to make sure this link is " +
-    "<span class='ed11y-bold'>unique, clear and meaningful</span>, even out of context.</p><p>Compare which words stand out:<br>" +
-    "<span class='ed11y-small'>&quot;To learn more about writing effective links, " +
-    "<a href='https://accessibility.princeton.edu/how/content/links'>read more</a>.&quot;</span><br>" +
-    "<span class='ed11y-small'>&quot;Learn more about <a href='https://accessibility.princeton.edu/how/content/links'>writing effective links</a>.&quot;</span></p>";
-
-// Messages for images
-ed11yGeneralAltText = "<div class='ed11y-tip-heading'>Error: Alt text attribute is missing</div>" +
-    "<p>All visual elements must provide a text alternative for assistive devices.</p>" +
-    "<p>If a blank alt was provided (alt=&quot;&quot;), screen readers would ignore the image. " +
-    "But in this case the alt attribute is <span class='ed11y-bold'>missing</span>, so screen readers will dictate the url of the image file, one letter at a time.</p>" +
-    "<p>To fix: edit this image and place <a href='https://accessibility.princeton.edu/how/content/alternative-text'>a concise description of its meaning in context</a> " +
-    "in its alternative text field.</p>"
-
-ed11yMessageAltUrl = function (altText) {
-  return "<div class='ed11y-tip-heading'>Error: alternative text may be a filename</div>" +
-      "<p>In the context of a link, an image's alt text should create a " +
-      "<a href='https://accessibility.princeton.edu/how/content/links'>clear and meaningful link title</a>.</p>" +
-      "<p class='ed11y-small'>The alt text for this image is: <span class='ed11y-bold'>&quot;" + altText + "&quot;</span></p>";
-}
-
-ed11yMessageAltDecorative = "<div class='ed11y-tip-heading'>Manual check: image marked as decorative</div><p>All meaningful visual elements must <a href='https://accessibility.princeton.edu/how/content/alternative-text'>provide a text alternative</a>. Images with empty alt attributes are ignored by screen readers; if this image conveys a message to sighted users beyond use as a spacer or background, please add alt text.</p>";
-
-ed11yMessageAltImageOfLinked = function (error, altText) {
-  return "<div class='ed11y-tip-heading'>Warning: <span class='ed11y-bold'>&quot" + error[1] + "&quot;</span> found in linked image</div> " +
-      "<p>As this image is acting as a link, its alt text should create a <a href='https://accessibility.princeton.edu/how/content/links'>clear and meaningful link title</a> " +
-      "rather than describing the image.</p>" +
-      "<p class='ed11y-small'>The alt text for this image is: <br><span class='ed11y-bold'>" + altText + "</span></p>";
-}
-ed11yMessageAltImageOf = function (error, altText) {
-  return "<div class='ed11y-tip-heading'>Alt text needs manual review</div><p>The alt text for this image is: <span class='ed11y-bold'>&quot;" + altText + "&quot;</span></p>" +
-      "<p>Assistive devices announce that they are describing an image when reading alt text, so  <span class='ed11y-bold'>&quot;" + error[1] + "&quot;</span> may be redundant.</p> " +
-      "<p class='ed11y-small'>Reference: <a href='https://accessibility.princeton.edu/how/content/alternative-text'>Alt text should describe an image in context</a>.</p>";
-}
-
-
-ed11yMessageAltLongLinked = function (text, altText) {
-  return "<div class='ed11y-tip-heading'>Linked image's alt text is <span class='ed11y-bold'>" + text.length + " characters</span>.</div> " +
-      "<p>The alt text on hyperlinked images should provide a <a href='https://accessibility.princeton.edu/how/content/links'>&quot;concise, clear and meaningful link title&quot;</a>, " +
-      "rather than a description of the image.</p>" +
-      "<p class='ed11y-small'>The alt text for this image is: <span class='ed11y-bold'>&quot;" + altText + "&quot;</span>.</p>";
-}
-
-ed11yMessageAltLinkComplex = function (altText) {
-  return "<div class='ed11y-tip-heading'>Please review (might be OK)</div> " +
-      "<p>This link contains <span class='ed11y-bold'>both</span> text and an image, which will be combined by screen readers to create a single link title. " +
-      "Please make sure the two together still create a " +
-      "<a href='https://accessibility.princeton.edu/how/content/links'>&quot;concise, clear and meaningful link title&quot;</a>.</p>" +
-      "<p class='ed11y-small'>The alt text for this image is: <span class='ed11y-bold'>&quot;" + altText + "&quot;</span></p>";
-}
-ed11yMessageAltFilename = function (altText) {
-  return "<div class='ed11y-tip-heading'>Error: alt appears to contain a filename</div> " +
-      "<p>All visual elements must <a href='https://accessibility.princeton.edu/how/content/alternative-text'>provide a text alternative</a> " +
-      "that describes the meaning of the image in context.</p>" +
-      "<p class='ed11y-small'>The alt text for this image is: <span class='ed11y-bold'>&quot;" + altText + "&quot;</span></p>";
-}
-
-ed11yMessageAltTooLong = function (text, altText) {
-  return "<div class='ed11y-tip-heading'>Image's alt text is <span class='ed11y-bold'>" + text.length + " characters</span>.</div> " +
-      "<p>Alt text should provide a <a href='https://accessibility.princeton.edu/how/content/alternative-text'>concise description of the meaning of the image in context</a>." +
-      "<p>If more than 160 characters are needed to describe an image (e.g., for a graph), the long description should be moved into the page's content or onto a separate page.</p>" +
-      "<p class='ed11y-small'>The alt text for this image is: <span class='ed11y-bold'>&quot;" + altText + "&quot;</span>.</p>";
-}
-
-ed11yMessageAltDeadspace = "<div class='ed11y-tip-heading'>Error: invalid alt text</div> " +
-    "<p>Please add alt text to this image to create a " +
-    "<a href='https://accessibility.princeton.edu/how/content/alternative-text'>concise description of the meaning of the image in context</a>, set the alt to nothing at all to mark the image as decorative.</p>";
-
-// QA messages
-ed11yMessageQANewTab = "<div class='ed11y-tip-heading'>Link opens in a " +
-    "new window</div>" +
-    "<p>Opening new tabs or windows without warning can be disorienting, " +
-    "especially for users relying on assistive devices.</p> " +
-    "<p>Unless certain " +
-    "<a href='https://www.w3.org/TR/WCAG20-TECHS/G200.html#G200-description'>" +
-    "exceptions related to context-sensitive workflows</a> apply, " +
-    "it is better to let the user decide when to open new windows.</p>";
-
-ed11yMessageQAUppercase = "<div class='ed11y-tip-heading'>" +
-    "Manual check needed: all-cap text</div>" +
-    "<p>Some users find all-cap content somewhat difficult to " +
-    "read, some screen readers interpret all-cap words as " +
-    "acronyms (and read them one letter at a time!), and many " +
-    "users INTERPRET CAPS LOCK AS SHOUTING.</p>" +
-    "<p>Unless the all-cap text in this element is an acronym or should be capitalized " +
-    "for some similar reason, sentence case is recommended.</p>";
-
-ed11yMessageMissingQATableHeadings = "<div class='ed11y-tip-heading'>Error: " +
-    "table has no headers</div> " +
-    "<p>Screen reader users rely on " +
-    "<a href='https://accessibility.princeton.edu/how/content/tables'>table " +
-    "headers</a> to label cells, so they can explore the table without " +
-    "having to count rows and columns.</p> " +
-    "<p>Note that tables should be used for tabular data only, as they cannot " +
-    "reflow for small screens. If this " +
-    "<a href='https://accessibility.princeton.edu/how/content/layout-tables'>" +
-    "table is only for visual layout</a>, use CSS to create columns instead.</p>";
-
-ed11yMessageQAHeaderInTable = "<div class='ed11y-tip-heading'>Error: heading " +
-    "formatting inside table cells</div> " +
-    "<p>Label table rows and columns using table headers. Formatting text as " +
-    "semantic headings (Heading 2, Heading 3) creates a page outline for " +
-    "assistive devices, and users of those devices are not expecting to land " +
-    "inside a table when jumping to a heading. </p>";
-
-ed11yMessageEmptyTableHeader = "<div class='ed11y-tip-heading'>Error: Empty " +
-    "table header</div>" +
-    "<p>Screen reader users rely on " +
-    "<a href='https://accessibility.princeton.edu/how/content/tables'>table " +
-    "headers</a> to label cells, so they can explore the table without " +
-    "having to count rows and columns.</p>";
-
-// Full check tests.
-ed11yMessageLinkDownload = "<div class='ed11y-tip-heading'>Manual check needed: " +
-    "link to document</div>" +
-    "<p>Please make sure this document contains structural tags and image alt " +
-    "text, or a copy of its content is provided as a Web page. See tips " +
-    "for <a href='https://webaim.org/techniques/acrobat/'>tagging PDFs</a>, " +
-    "<a href='https://webaim.org/techniques/word/'>text documents</a> and " +
-    "<a href='https://webaim.org/techniques/powerpoint/'>slideshows</a>.</p>" +
-    "<p>Untagged documents often cannot be read by screen readers, and even " +
-    "tagged PDFs and slides may be difficult to read on small screens.</p>";
-
-ed11yMessageshowBlockquote = "<div class='ed11y-tip-heading'>Manual check needed: short &lt;blockquote&gt;</div> " +
-    "<p>Blockquote formatting is announced as a quote by assistive " +
-    "devices, and should only be used for quotes.</p>" +
-    "<p>This was flagged because short blockquotes are often mislabeled " +
-    "headings. If that is the case here, please use " +
-    "<a href='https://accessibility.princeton.edu/how/content/headings'>heading formatting</a> instead.</p>"
-
-ed11yMessageshowCaptions = "<div class='ed11y-tip-heading'>Manual check: text alternatives</div><p>Please check to make sure " +
-    "<span class='ed11y-bold'>all videos provide closed captioning.</span> " +
-    "Providing captions for all audio and video content is a mandatory Level A " +
-    "requirement. Captions are meant to support people who are D/deaf or " +
-    "hard-of-hearing.</p>"
-
-
-
-// QA Tests.
-ed11yMessageQAShouldBeList = function (prefix) {
-  return "<div class='ed11y-tip-heading'>Possible list item prefix: &quot;" +
-      "<span class='ed11y-bold'>" + prefix +
-      "</span>&quot;</div>" +
-      "<p>List formatting is more than symbols: it tells browsers how to " +
-      "group content that breaks over multiple lines, and lets assistive " +
-      "devices jump from item to item. If this paragraph starts a list, " +
-      "please format it as a 'real' list rather than " +
-      "spelling out letters, numbers or symbols.</p>";
-}
-
-ed11yMessageQAMayBeHeader = "<div class='ed11y-tip-heading'>Manual check needed: Possible heading</div><p>This whole paragraph is bold. If this is for emphasis, this is fine. If it is acting as a heading or subheading, however, please format it as such so that it can become part of the page outline.</p>";
-
-ed11yMessagePodcast = "<div class='ed11y-tip-heading'>Manual check needed: embedded audio</div><p>Check to make sure a transcript is included or linked for all audio content and/or podcasts. Providing a text alternative for audio is mandatory in the United States, Canada and the European Union.</p>";
-ed11yMessageTwitter = "<div class='ed11y-tip-heading'>Manual check needed: embedded social media</div><p>Check to make sure keyboards can get past this component (if more than a few posts are embedded, this may be a keyboard trap.)</p>";
-ed11yMessageVisualization = "<div class='ed11y-tip-heading'>Warning: Data visualization</div><p>Widgets like this are often impossible for keyboard or screen readers to navigate, and can present significant difficulties for users with low vision or colorblindness. Unless this particular widget has been tested and shown to be resizable, keyboard navigable and screen reader compatible, you should assume that you also need to provide the information in an alternative (text or table) format.</p>";
-ed11yMessageEmbeddedContent = "<div class='ed11y-tip-heading'>Manual check needed</div><p>This tool cannot check this embedded content. Please make sure embedded images have alt text, videos have captions, and interactive components can be <a href='https://webaim.org/techniques/keyboard/'>operated by a keyboard</a>.</p>";
