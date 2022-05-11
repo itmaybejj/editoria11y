@@ -1,4 +1,6 @@
 class Ed11yElementPanel extends HTMLElement {
+  /* global Ed11y */
+
   constructor() {
     super();
   }
@@ -45,8 +47,8 @@ class Ed11yElementPanel extends HTMLElement {
       // todo inject content
       </div>
     </div>
-    `
-  };
+    `;
+  }
 
   connectedCallback() {
     if (!this.initialized) {
@@ -264,7 +266,7 @@ class Ed11yElementPanel extends HTMLElement {
       Ed11y.panelTabs.forEach(tab => {
         // todo: needed?
         tab.addEventListener('click', this.handleBarClick);
-      })
+      });
       this.initialized = true;
     }
   }
@@ -289,17 +291,17 @@ class Ed11yElementPanel extends HTMLElement {
     let insert = gotoResult[3];
     let target;
     // todo this all belongs in the result open logic not here
-    if (insert === "beforebegin") {
-      target = Ed11y.nextUntil(goto, ":not(ed11y-element-result)");
+    if (insert === 'beforebegin') {
+      target = Ed11y.nextUntil(goto, ':not(ed11y-element-result)');
     }
-    else if (insert === "afterbegin") {
+    else if (insert === 'afterbegin') {
       // todo mvp these are not being inserted right; revisit. maybe always before, just sometimes before link?
       target = goto.parentElement;
     }
     let alertMessage;
     // todo mvp do these match tests work? parameterize, test
-    if (ed11yHiddenHandlers.length > 0 && !!target.closest(ed11yHiddenHandlers)) {
-      document.dispatchEvent(new CustomEvent("ed11yShowHidden", {
+    if (Ed11y.options.hiddenHandlers.length > 0 && !!target.closest(Ed11y.options.hiddenHandlers)) {
+      document.dispatchEvent(new CustomEvent('ed11yShowHidden', {
         detail: {id: goto.getAttribute('id')}
       }));
       window.setTimeout(function () {
@@ -316,21 +318,21 @@ class Ed11yElementPanel extends HTMLElement {
       // todo mvp test to see if this actually works
       if (!Ed11y.visible(target)) {
         firstVisible = Ed11y.firstVisibleParent(Ed11y.goto);
-        alertMessage = ed11yInvisibleTip;
+        alertMessage = Ed11y.M.jumpedToInvisibleTip;
       }
       // todo MVP this code is broken
       /*else if (!!goto.closest('[aria-hidden="true"]') || !!target?.closest('[aria-hidden="true"]')) {
         firstVisible = Ed11y.firstVisibleParent(Ed11y.goto.closest('[aria-hidden="true"]'));
-        alertMessage = ed11yHiddenTip;
+        alertMessage = Ed11y.M.jumpedToAriaHiddenTip;
       }*/
-      if (!!firstVisible) {
+      if (firstVisible) {
         alert(alertMessage);
         firstVisible.classList.add('ed11y-hidden-highlight');
         // todo what used to call this?
         let highlightContainer = document.createElement('div');
         highlightContainer.setAttribute('tabindex', '-1');
         highlightContainer.classList.add('ed11y-sr-only', 'ed11y-hidden-highlight-' + Ed11y.goto);
-        highlightContainer.textContent = "Highlighted container";
+        highlightContainer.textContent = 'Highlighted container';
         // let highlightContainer = Ed11y.builder('div',false,'ed11y-sr-only, ed11y-hidden-highlight' + Ed11y.goto, "Highlighted container");
         offsetCalc = Ed11y.goto.getBoundingClientRect();
         Ed11y.gotoOffset = offsetCalc.top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
@@ -354,15 +356,15 @@ class Ed11yElementPanel extends HTMLElement {
     event.preventDefault();
     let id = event.currentTarget.getAttribute('id');
     switch (id) {
-      case "ed11y-main-toggle":
-        Ed11y.togglePanel();
-        break
-      case "ed11y-minimize":
-        Ed11y.minimize();
-        break;
-      default:
-        Ed11y.switchPanel(id);
-        break;
+    case 'ed11y-main-toggle':
+      Ed11y.togglePanel();
+      break;
+    case 'ed11y-minimize':
+      Ed11y.minimize();
+      break;
+    default:
+      Ed11y.switchPanel(id);
+      break;
     }
   }
 
@@ -388,7 +390,7 @@ class Ed11yElementHeadingLabel extends HTMLElement {
       wrapper.setAttribute('class','wrapper');
       let i = this.dataset.ed11yHeadingOutline;
       let result = Ed11y.headingOutline[i];
-      wrapper.innerHTML = "H" + result[1];
+      wrapper.innerHTML = 'H' + result[1];
       let issues = !!result[2];
       wrapper.classList.add('issue' + issues);
       let style = document.createElement('style');
@@ -427,7 +429,7 @@ class Ed11yElementAltLabel extends HTMLElement {
       wrapper.setAttribute('class','wrapper');
       let i = this.dataset.ed11yAlt;
       let result = Ed11y.imageAlts[i];
-      wrapper.innerHTML = "Alt text: " + result[1];
+      wrapper.innerHTML = 'Alt text: ' + result[1];
       let issues = !!result[2];
       wrapper.classList.add('issue' + issues);
       let style = document.createElement('style');

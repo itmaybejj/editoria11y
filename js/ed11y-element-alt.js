@@ -1,6 +1,6 @@
-
-// Create a class for the element
 class Ed11yElementAlt extends HTMLElement {
+  /* global Ed11y */
+
   constructor() {
     super();
   }
@@ -12,14 +12,14 @@ class Ed11yElementAlt extends HTMLElement {
       altTextWrapper.setAttribute('class','wrapper');
       let css = this.getAttribute('style');
       let alt = this.dataset.alt;
-      if (alt === "null") {
-        alt = "(missing!)"
-      } else if (alt === "") {
-        alt = "(none; image is marked decorative)";
+      if (alt === 'null') {
+        alt = '(missing!)';
+      } else if (alt === '') {
+        alt = '(none; image is marked decorative)';
       }
       altTextWrapper.setAttribute('style', css);
       let altText = document.createElement('span');
-      altText.textContent = "Alt text: " + alt;
+      altText.textContent = 'Alt text: ' + alt;
       altTextWrapper.appendChild(altText);
       const style = document.createElement('style');
       // todo have wrapper calculate z-index and offset of image

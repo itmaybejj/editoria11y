@@ -1,7 +1,10 @@
 class Ed11yTestLinks {
-  'use strict';
 
-  check = function () {
+  // ESLint config:
+  /* global Ed11y */
+  /* exported Ed11yTestLinks */
+
+  check () {
     // Todo: See if there is an alternative to :visible that shows only visually hidden content.
     // Todo: Add test for consecutive links to same href?
     // Todo: parameterize linkIgnore
@@ -10,18 +13,18 @@ class Ed11yTestLinks {
       // todo: investigate sa11y computation
       let linkText = Ed11y.computeAriaLabel(el);
       let img = el.querySelectorAll('img');
-      let href = el.getAttribute("href");
+      let href = el.getAttribute('href');
       let hasImg = img.length > 0;
       let document = false;
 
       // todo: use regex to find any three-letter TLD followed by a slash?
       if (Ed11y.options.documentLinks && href) {
         Ed11y.options.documentLinks.forEach((fileType) => {
-          let withQuery = fileType + "?";
+          let withQuery = fileType + '?';
           if (href.endsWith(fileType) || fileType.indexOf(withQuery) > -1) {
             document = true;
           }
-        })
+        });
       }
 
       // todo: ends with, or contains including a ?
@@ -53,15 +56,15 @@ class Ed11yTestLinks {
         //todo mvp
         Ed11y.results.push([el, 'linkNewWindow', Ed11y.M.linkNewWindow.tip(), 'beforebegin', dismissKey]);
       }
-      linkText = linkText.replace(ed11yIgnoreLinkStrings,"");
+      linkText = linkText.replace(Ed11y.M.linkIgnoreStrings,'');
       let linkStrippedText = linkText.replace(/'|"|-|\.|\s+/g, '');
 
       // Tests to see if this link is empty
       // Todo add to test coverage
       if (linkStrippedText.length === 0) {
-        linkStrippedText += !!Ed11y.computeTitle(el) ? Ed11y.computeTitle(el) : "";
+        linkStrippedText += Ed11y.computeTitle(el) ? Ed11y.computeTitle(el) : '';
         if (linkStrippedText.length === 0) {
-          Ed11y.results.push([el, "linkNoText", Ed11y.M.linkNoText.tip(), 'beforebegin', false]);
+          Ed11y.results.push([el, 'linkNoText', Ed11y.M.linkNoText.tip(), 'beforebegin', false]);
         }
       }
       else {
@@ -69,7 +72,7 @@ class Ed11yTestLinks {
         let linkTextCheck = function (textContent) {
           // todo: use regex to find any three-letter TLD followed by a slash.
           // todo: parameterize TLD list
-          let stopWords = ["http:/", "https:/", ".asp", ".htm", ".php", ".edu/", ".com/"];
+          let stopWords = ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'];
           let partialStopRegex = /learn|to|more|now|this|page|link|site|website|check|out|view|our|read|\.|,|:|download|form|here|click|>|<|\s/g;
           let hit = 'none';
 
@@ -88,11 +91,11 @@ class Ed11yTestLinks {
           return hit;
         };
         let textCheck = linkTextCheck(linkText.trim().toLowerCase());
-        if (textCheck !== "none") {
+        if (textCheck !== 'none') {
           let dismissKey = Ed11y.dismissalKey(linkText);
-          let error = "linkTextIsURL";
-          if (error === "generic") {
-            error = "linkTextIsGeneric";
+          let error = 'linkTextIsURL';
+          if (error === 'generic') {
+            error = 'linkTextIsGeneric';
           }
           Ed11y.results.push([el, error, Ed11y.M[error].tip(Ed11y.sanitizeForHTML(linkText)), 'beforebegin', dismissKey]);
         }
@@ -100,9 +103,9 @@ class Ed11yTestLinks {
       //Warning: Find all PDFs. Although only append warning icon to
       // first PDF on page.
       if (!hasImg && document) {
-        let dismissKey = Ed11y.dismissalKey(el?.getAttribute("src"));
-        Ed11y.results.push([el, "linkDocument", Ed11y.M.linkDocument.tip(), 'beforebegin', dismissKey]);
+        let dismissKey = Ed11y.dismissalKey(el?.getAttribute('src'));
+        Ed11y.results.push([el, 'linkDocument', Ed11y.M.linkDocument.tip(), 'beforebegin', dismissKey]);
       }
     });
-  };
+  }
 }

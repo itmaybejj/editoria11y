@@ -1,4 +1,5 @@
 class Ed11yElementResult extends HTMLElement {
+  /* global Ed11y */
   constructor() {
     super();
   }
@@ -234,10 +235,10 @@ class Ed11yElementResult extends HTMLElement {
 
   closeOtherTips() {
     let openTips = document.querySelectorAll('[data-ed11y-open="true"]');
-    if (!!openTips) {
+    if (openTips) {
       Array.from(openTips).forEach(openTip => {
         openTip.setAttribute('data-ed11y-action', 'close');
-      })
+      });
     }
   }
 
@@ -245,7 +246,7 @@ class Ed11yElementResult extends HTMLElement {
     return `>
       <div class="title" id="tip-title-${id}">${title}</div>
       <div class="message">${body}</div>
-    `
+    `;
   }
 
   buildTip() {
@@ -272,20 +273,20 @@ class Ed11yElementResult extends HTMLElement {
       let dismissOKButton = document.createElement('button');
       dismissOKButton.classList.add('dismiss');
       // Parameterize
-      dismissOKButton.textContent = "Mark as Checked and OK";
+      dismissOKButton.textContent = 'Mark as Checked and OK';
       dismissers.append(dismissOKButton);
-      dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis(resultID, 'ok')});
+      dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis(resultID, 'ok');});
       let dismissIgnoreButton = document.createElement('button');
       dismissIgnoreButton.classList.add('dismiss');
-      dismissIgnoreButton.textContent = "Ignore";
+      dismissIgnoreButton.textContent = 'Ignore';
       dismissers.append(dismissIgnoreButton);
-      dismissIgnoreButton.addEventListener('click', function(){Ed11y.dismissThis(resultID, 'ok')});
+      dismissIgnoreButton.addEventListener('click', function(){Ed11y.dismissThis(resultID, 'ok');});
       content.append(dismissers);
     }
     let closeButton = document.createElement('button');
     closeButton.setAttribute('aria-label','close');
     closeButton.classList.add('close');
-    closeButton.innerHTML = "&times;";
+    closeButton.innerHTML = '&times;';
     let arrow = document.createElement('div');
     arrow.classList.add('arrow');
 
@@ -310,7 +311,7 @@ class Ed11yElementResult extends HTMLElement {
       this.buildTip();
     }
     this.toggle.setAttribute('aria-expanded', changeTo);
-    let highlightOutline = this.dismissable ? "ed11y-ring-yellow" : "ed11y-ring-red";
+    let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
     this.result[0].classList.toggle(highlightOutline);
     if (changeTo === true) {
       this.closeOtherTips();
@@ -322,25 +323,25 @@ class Ed11yElementResult extends HTMLElement {
       Ed11y.goto = this.getAttribute('data-ed11y-jump-position');
       Ed11y.setCurrentJump();
       // todo mvp does this still work?
-      document.dispatchEvent(new CustomEvent("ed11yPop", {
+      document.dispatchEvent(new CustomEvent('ed11yPop', {
         detail: {id: this.toggle.getAttribute('id')}
       }));
     } else {
       this.closest('.ed11y-force-overflow')?.classList.remove('ed11y-force-overflow');
     }
     this.setAttribute('data-ed11y-open', changeTo);        
-  };
+  }
   
-  handleHover(event) {
-    if (this.getAttribute("data-ed11y-open") === "false") {
+  handleHover() {
+    if (this.getAttribute('data-ed11y-open') === 'false') {
       this.toggleTip(true);
     }
   }
 
   allowOverflow() {
     // todo parameter
-    if (ed11yAllowOverflow.length > 0) {
-      this.closest(ed11yAllowOverflow).classList.add('ed11y-force-overflow');
+    if (Ed11y.options.allowOverflow.length > 0) {
+      this.closest(Ed11y.options.allowOverflow).classList.add('ed11y-force-overflow');
     }
     else {
       let parents = Ed11y.parents(this);
@@ -358,13 +359,13 @@ class Ed11yElementResult extends HTMLElement {
   attributeChangedCallback(attr, oldValue, newValue) {
     if (this.initialized) {
       switch (attr) {
-        case 'data-ed11y-action':
-          if (newValue !== 'false') {
-            let changeTo = newValue === 'open' ? true : false;
-            this.setAttribute('data-ed11y-action', 'false');
-            this.toggleTip(changeTo);
-          }
-          break;
+      case 'data-ed11y-action':
+        if (newValue !== 'false') {
+          let changeTo = newValue === 'open' ? true : false;
+          this.setAttribute('data-ed11y-action', 'false');
+          this.toggleTip(changeTo);
+        }
+        break;
       }
     }
   }
