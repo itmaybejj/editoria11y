@@ -103,7 +103,7 @@ class Ed11y {
     Ed11y.theme = {
       dark: {
         primary: '#eed0b1',
-        primaryWarning: '#ffc800',
+        primaryWarning: '#fad859',
         primaryAlert: '#ff9393',
         text: '#cdc1b6',
         button: '#faf2e2',
@@ -126,7 +126,7 @@ class Ed11y {
     };
 
     Ed11y.color = Ed11y.theme[Ed11y.options.theme];
-    Ed11y.yellow = '#ffc800';
+    Ed11y.yellow = '#fad859'; // was '#ffc800'
     Ed11y.red = '#b80519';
 
     // Toggles the outline of all headers, link texts, and images.
@@ -608,9 +608,8 @@ class Ed11y {
       let tip = arrow.nextElementSibling;
       tip.setAttribute('style','');
       arrow.setAttribute('style','');
-      tip.classList.remove('ed11y-tip-left', 'ed11y-tip-under');
 
-      // todo mvp rewrite the left check. should be able to hardcode button width and ditch most of this.
+      // todo mvp evaluate the left check. should be able to hardcode button width and ditch most of this.
       let buttonOffset = el.getBoundingClientRect();
       let buttonLeft = buttonOffset.left + document.body.scrollLeft;
       let tipOffset = tip.getBoundingClientRect();
@@ -619,20 +618,36 @@ class Ed11y {
       let windowWidth = window.innerWidth;
       let roomToLeft = buttonLeft - tipWidth - 50;
       let roomToRight = windowWidth - (buttonLeft + tipWidth + 90);
+      // Preference order is Right, Left, Under, Over.
       if (roomToRight < 0) {
-        // Can't go right.
+        // No room to the right. Check left:
         if (roomToLeft > 0) {
-          // Go left if there is room to the left.
           let targetOffset = tipWidth + 7;
           tip.setAttribute('style', 'margin-left: -' + targetOffset + 'px;');
           arrow.setAttribute('style', 'left: -18px;');
         }
         else {
-          // Go under if there is not.
-          let nudgeX = 15 - tipLeft;
-          arrow.setAttribute('style','margin: 33px 0 0 -32px;');
-          tip.setAttribute('style', 'transform: translate(' + nudgeX + 'px, 54px); width: calc(95vw - 45px);');
+          // Can't go right or left; decide over/under.
+          tip.setAttribute('style', 'width: calc(95vw - 45px)');
+          let tipBottom = tipOffset.top + tip.offsetHeight;
+          let tipTop = tipOffset.top - tip.offsetHeight;
+          let windowBottom = document.body.scrollTop + window.innerHeight;
+          if (tipBottom > windowBottom && tipTop > document.body.scrollTop) {
+            // Tip would run off bottom but fits above
+            let nudgeX = 15 - tipLeft;
+            let nudgeY = tip.offsetHeight + 15;
+            arrow.setAttribute('style','margin: -33px 0 0 -32px;');
+            tip.setAttribute('style', `transform: translate(${nudgeX}px, -${nudgeY}px); width: calc(95vw - 45px);`);
+          }
+          else {
+            console.log('under');
+            // Tip fits under or there is no room above.
+            let nudgeX = 15 - tipLeft;
+            arrow.setAttribute('style','margin: 33px 0 0 -32px;');
+            tip.setAttribute('style', `transform: translate(${nudgeX}px, 50px); width: calc(95vw - 45px);`)
+          }
         }
+        
       }
     };
 

@@ -67,20 +67,20 @@ class Ed11yElementResult extends HTMLElement {
         .title {
           background: ${this.primaryColor};
           color: ${Ed11y.color.bg};
-          padding: 0 37px 1px 14px;
+          padding: 0 35px 1px 14px;
           font-weight: bold;
-          font-size: 15px;
-          min-height: 36px;
+          font-size: 14px;
+          min-height: 28px;
           line-height: 1;
           display: grid;
           place-content: center left;
         }
         .content {
-          padding: 2px 14px 16px;
+          padding: 4px 12px 18px;
         }
         p {
-          margin-block-start: 1em;
-          margin-block-end: 1em;
+          margin-block-start: .5em;
+          margin-block-end: .5em;
         }
         p:last-child {
           margin-block-end: 0;
@@ -89,11 +89,11 @@ class Ed11yElementResult extends HTMLElement {
           content: "";
           position: absolute;
           transform: rotate(45deg);
-          width: 22px;
-          height: 22px;
+          width: 20px;
+          height: 20px;
           left: 46px;
           background: ${this.primaryColor};
-          top: 8px;
+          top: 6px;
           box-shadow: 0 0 0 2px ${this.bgColor}, 2px 2px 4px ${this.primaryColor}77;
         }
         button {
@@ -109,17 +109,17 @@ class Ed11yElementResult extends HTMLElement {
           background: ${this.primaryColor};
         }
         ul {
-          margin-block-start: .5em;
-          margin-block-end: .5em;
+          margin-block-start: .64em;
+          margin-block-end: .64em;
           padding-inline-start: 20px;
         }
         ul ul {
-          margin-block-start: .5em;
-          margin-block-end: .5em;
+          margin-block-start: .25em;
+          margin-block-end: .25em;
         }
         li {
           line-height: 1.3;
-          margin-bottom: .5em;
+          margin-bottom: .25em;
         }
         table {
           border-spacing: 0;
@@ -139,10 +139,10 @@ class Ed11yElementResult extends HTMLElement {
           text-decoration-skip-ink: none;
         }
         .close {
-          padding: 0 0 1px 2px;
+          padding: 0 0 0 2px;
           font-size: 14px;
           line-height: 1;
-          height: 40px;
+          height: 32px;
           display: grid;
           place-content: center;
           font-weight: 400;
@@ -151,7 +151,7 @@ class Ed11yElementResult extends HTMLElement {
           right: -2px;
           box-shadow: -1px 0 ${this.bgColor};
           background: transparent;
-          width: 37px;
+          width: 32px;
         }
         .close:hover {
           background: ${this.bgColor};
@@ -162,7 +162,7 @@ class Ed11yElementResult extends HTMLElement {
           border: 0;
           border-radius: 50%;
           position: absolute;
-          margin: 5px 0 0 10px;
+          margin: 0 0 0 10px;
           z-index: 1;
           padding: 0;
           vertical-align: middle;
@@ -201,7 +201,7 @@ class Ed11yElementResult extends HTMLElement {
   toggleImage() {
     let manual = `
       .toggle {
-        box-shadow: inset 0 0 0 2px #ffc800, inset 0 0 0 3px #444, inset 0 0 0 6px #ffc800, 1px 1px 5px 0 rgba(0,0,0,.5);
+        box-shadow: inset 0 0 0 2px ${Ed11y.yellow}, inset 0 0 0 3px #444, inset 0 0 0 6px ${Ed11y.yellow}, 1px 1px 5px 0 rgba(0,0,0,.5);
         background: ${Ed11y.yellow};
         color: #333;
       }

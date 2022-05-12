@@ -16,7 +16,7 @@ describe('Tests Run', function() {
             elText = result.value;
           });
           browser.elementIdElement(value, 'css selector', 'ed11y-element-result', function(result) {
-            browser.verify.ok(Object.entries(result.value).length !== 0, `FALSE NEGATIVE: ${elText}`);
+            browser.verify.ok(Object.entries(result.value).length !== 0, `POSITIVE: ${elText}`);
           });
         }
 
@@ -48,7 +48,7 @@ it('No false positives', function(browser) {
           elText = result.value;
         });
         browser.elementIdElement(value, 'css selector', 'ed11y-element-result', function(result) {
-          browser.verify.ok(Object.entries(result.value).length === 0, `FALSE POSITIVE: ${elText}`);
+          browser.verify.ok(Object.entries(result.value).length === 0, `NEGATIVE: ${elText}`);
         });
       }
 
