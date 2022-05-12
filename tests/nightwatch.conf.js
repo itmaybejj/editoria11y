@@ -32,6 +32,7 @@ module.exports = {
   // See https://nightwatchjs.org/guide/#external-globals
   globals_path : '',
 
+
   webdriver: {},
 
   test_settings: {
@@ -46,7 +47,7 @@ module.exports = {
       },
 
       desiredCapabilities: {
-        browserName : 'firefox'
+        browserName : 'firefox',
       },
 
       webdriver: {
