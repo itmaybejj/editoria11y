@@ -283,9 +283,8 @@ class Ed11yElementPanel extends HTMLElement {
     // Send to ed11y to make timeouts easier
     let goto = Ed11y.jumpList[goNum];
     let gotoResult = Ed11y.results[goto.getAttribute('data-ed11y-result')];
-    let offsetCalc = goto.getBoundingClientRect();
     let bodyStyles = window.getComputedStyle(document.querySelector('body'));
-    let gotoOffset = offsetCalc.top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
+    let gotoOffset = goto.getBoundingClientRect().top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
     // Throw an alert if the button or target is hidden.
     let firstVisible = false;
     let insert = gotoResult[3];
@@ -306,8 +305,7 @@ class Ed11yElementPanel extends HTMLElement {
       }));
       window.setTimeout(function () {
         // Recalculate before jump.
-        let offsetCalc = goto.getBoundingClientRect();
-        let gotoOffset = offsetCalc.top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
+        let gotoOffset = goto.getBoundingClientRect().top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
         document.querySelector('html, body').animate({
           scrollTop: (gotoOffset)
         }, 1);
@@ -328,14 +326,13 @@ class Ed11yElementPanel extends HTMLElement {
       if (firstVisible) {
         alert(alertMessage);
         firstVisible.classList.add('ed11y-hidden-highlight');
-        // todo what used to call this?
+        // todo MVP this is not implemented
         let highlightContainer = document.createElement('div');
         highlightContainer.setAttribute('tabindex', '-1');
         highlightContainer.classList.add('ed11y-sr-only', 'ed11y-hidden-highlight-' + Ed11y.goto);
         highlightContainer.textContent = 'Highlighted container';
         // let highlightContainer = Ed11y.builder('div',false,'ed11y-sr-only, ed11y-hidden-highlight' + Ed11y.goto, "Highlighted container");
-        offsetCalc = Ed11y.goto.getBoundingClientRect();
-        Ed11y.gotoOffset = offsetCalc.top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
+        Ed11y.gotoOffset = Ed11y.goto.getBoundingClientRect().top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
         goto.setAttribute('data-ed11y-action','open');
         let thisGoTo = '.ed11y-hidden-highlight-' + Ed11y.goto;
         document.querySelector(thisGoTo).focus();

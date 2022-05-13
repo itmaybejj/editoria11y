@@ -270,7 +270,6 @@ class Ed11y {
     // Show a warning/error count on the toggle button.
     Ed11y.updateCount = function () {
       Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
-      console.log(Ed11y.errorCount);
       if (Ed11y.totalCount > 0) {
         Ed11y.panelJumpNext.removeAttribute('hidden');
         if(Ed11y.totalCount < 2) {
@@ -616,38 +615,46 @@ class Ed11y {
       let tipLeft = tipOffset.left + document.body.scrollLeft;
       let tipWidth = tip.offsetWidth;
       let windowWidth = window.innerWidth;
-      let roomToLeft = buttonLeft - tipWidth - 50;
-      let roomToRight = windowWidth - (buttonLeft + tipWidth + 90);
-      // Preference order is Right, Left, Under, Over.
-      if (roomToRight < 0) {
-        // No room to the right. Check left:
-        if (roomToLeft > 0) {
-          let targetOffset = tipWidth + 7;
-          tip.setAttribute('style', 'margin-left: -' + targetOffset + 'px;');
-          arrow.setAttribute('style', 'left: -18px;');
+      let tipBottom = tipOffset.top + tip.offsetHeight;
+      let tipTop = tipOffset.top - tip.offsetHeight;
+      let windowBottom = document.body.scrollTop + window.innerHeight;
+
+      let roomToLeft = buttonLeft - tipWidth - 50 > 0 ? true : false;
+      let roomToRight = windowWidth - (buttonLeft + tipWidth + 90) > 0 ? true : false;
+      let roomBelow = tipBottom < windowBottom ? true : false;
+      let roomAbove = tipTop > document.body.scrollTop ? true : false;
+
+      let direction = "under";
+      if (roomBelow) {
+        if (roomToRight) {
+          direction = "right";
         }
-        else {
-          // Can't go right or left; decide over/under.
-          tip.setAttribute('style', 'width: calc(95vw - 45px)');
-          let tipBottom = tipOffset.top + tip.offsetHeight;
-          let tipTop = tipOffset.top - tip.offsetHeight;
-          let windowBottom = document.body.scrollTop + window.innerHeight;
-          if (tipBottom > windowBottom && tipTop > document.body.scrollTop) {
-            // Tip would run off bottom but fits above
-            let nudgeX = 15 - tipLeft;
-            let nudgeY = tip.offsetHeight + 15;
-            arrow.setAttribute('style','margin: -33px 0 0 -32px;');
-            tip.setAttribute('style', `transform: translate(${nudgeX}px, -${nudgeY}px); width: calc(95vw - 45px);`);
-          }
-          else {
-            console.log('under');
-            // Tip fits under or there is no room above.
-            let nudgeX = 15 - tipLeft;
-            arrow.setAttribute('style','margin: 33px 0 0 -32px;');
-            tip.setAttribute('style', `transform: translate(${nudgeX}px, 50px); width: calc(95vw - 45px);`)
-          }
+        else if (roomToLeft) {
+          direction = "left";
         }
-        
+        // otherwise "under"
+      }
+      else if (roomAbove) {
+        direction = "above";
+      }
+      // otherwise "under"
+      
+      if (direction === "left") {
+        let targetOffset = tipWidth + 7;
+        tip.setAttribute('style', 'margin-left: -' + targetOffset + 'px;');
+        arrow.setAttribute('style', 'left: -18px;');
+      }
+      else if (direction === "under") {
+        // Pin to the left edge, unless the tip is not wide enough to reach:
+        let nudgeX = tipWidth > tipLeft ? tipLeft - 15 : tipWidth + 8;
+        arrow.setAttribute('style','margin: 33px 0 0 -32px;');
+        tip.setAttribute('style', `transform: translate(-${nudgeX}px, 50px);`);
+      }
+      else if (direction === "above") {
+        let nudgeX = tipWidth > tipLeft ? tipLeft - 15 : tipWidth + 8;
+        let nudgeY = tip.offsetHeight + 18;
+        arrow.setAttribute('style','margin: -33px 0 0 -32px;');
+        tip.setAttribute('style', `transform: translate(-${nudgeX}px, -${nudgeY}px);`);
       }
     };
 
@@ -815,7 +822,6 @@ class Ed11y {
       Ed11y.minimize = function () {
         // todo MVP minimize and close are not fully implemented yet.
         let minimized = Ed11y.panel.classList.contains('panel-minimized') === 'true' ? false : true;
-        console.log(minimized);
         Ed11y.panel.classList.toggle('panel-minimized');
         if (minimized === false) {
           window.setTimeout(function() {
