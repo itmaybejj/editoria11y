@@ -187,11 +187,8 @@ class Ed11y {
 
       if (onLoad === true && Ed11y.options.cloudSync === true) {
         // First export a copy of the results for synchronizers
-        document.dispatchEvent(new CustomEvent('ed11yResultList'), {
-          detail: {
-            results: Ed11y.results,
-          }
-        });
+        let syncResults = new CustomEvent('ed11yResults', { detail: Ed11y.results });
+        document.dispatchEvent(syncResults);
       }
 
       Ed11y.dismissedCount = 0;
@@ -468,14 +465,14 @@ class Ed11y {
       // todo update count, deal with 0
       // todo MVP change for direct set of localStorage to handing off to preferred handler?
       localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
-      document.dispatchEvent(new CustomEvent('ed11yDismissalUpdate'), {
-        detail: {
-          dismissPage: Ed11y.options.currentPage,
-          dismissTest: test,
-          dismissKey: dismissalKey,
-          dismissAction: dismissalType,
-        }
-      });
+      let dismissalDetail = {
+        dismissPage: Ed11y.options.currentPage,
+        dismissTest: test,
+        dismissKey: dismissalKey,
+        dismissAction: dismissalType,
+      };
+      let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
+      document.dispatchEvent(ed11yDismissalUpdate);
       Ed11y.reset();
       Ed11y.checkAll(false, 'show');
       window.setTimeout( function() {

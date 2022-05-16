@@ -63,6 +63,7 @@ class Ed11yElementPanel extends HTMLElement {
       // restore.textContent = `Some alerts hidden; show all`;
       // Ed11y.panelJumpPrev.insertAdjacentElement('beforebegin', restore);
       // todo MVP: style hover states 
+      // todo MVP: shut panel warning toggle wrong color in light mode
       let style = document.createElement('style');
       style.textContent = Ed11y.baseCSS + `
         :host {
