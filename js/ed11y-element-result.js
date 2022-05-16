@@ -19,6 +19,7 @@ class Ed11yElementResult extends HTMLElement {
       this.primaryColor = this.dismissable ? Ed11y.color.primaryWarning : Ed11y.color.primaryAlert;
       this.bgColor = this.dismissable ? Ed11y.color.bgWarning : Ed11y.color.bgAlert;
       this.wrapper.classList.add('wrapper');
+      this.wrapper.classList.add('ed11y-result');
 
       // needed?
       //this.wrapper.classList.add(this.type);
@@ -182,11 +183,11 @@ class Ed11yElementResult extends HTMLElement {
         .dismiss:hover, .dismiss:focus-visible {
           color: ${Ed11y.color.text};
           background: ${this.bgColor};
-          box-shadow: inset 0 0 0 1px ${Ed11y.color.text};
+          box-shadow: inset 0 0 0 2px ${Ed11y.color.primary};
         }
-        .toggle:focus-visible {
-          outline: 2px solid #11264e;
-          box-shadow: 0 0 0 4px #e2f2ff;
+        .wrapper :focus-visible {
+          outline: 2px solid transparent;
+          box-shadow: inset 0 0 0 2px ${Ed11y.color.focusRing}, 0 0 0 3px ${Ed11y.color.primary};
         }
         [aria-expanded="false"] ~ aside, [aria-expanded="false"] ~ div {
           display: none;
@@ -256,7 +257,8 @@ class Ed11yElementResult extends HTMLElement {
     // [2] tip contents
     // [3] position
     // [4] dismiss key
-    // e.g.: Ed11y.results.push([el],'warningImageNullAlt','click here'
+    // e.g.: Ed11y.results.push([el],'linkTextIsGeneric','click here', 'a_semi-unique_attribute_of_this_element'
+
     let resultID = this.toggle.getAttribute('data-ed11y-result');
 
     let tip = document.createElement('aside');
@@ -296,14 +298,10 @@ class Ed11yElementResult extends HTMLElement {
     this.toggle.insertAdjacentElement('afterend', tip);
     this.toggle.insertAdjacentElement('afterend', arrow);
     this.toggle.classList.add('ready');
-    closeButton.addEventListener('click', () => {
-      this.tipCloseButton();
+    closeButton.addEventListener('click', (event) => {
+      event.preventDefault;
+      this.setAttribute('data-ed11y-action', 'shut');
     });
-  }
-  
-  tipCloseButton() {
-    this.toggle.focus();
-    this.toggle.click();
   }
 
   toggleTip(changeTo) {
@@ -328,6 +326,7 @@ class Ed11yElementResult extends HTMLElement {
       }));
     } else {
       this.closest('.ed11y-force-overflow')?.classList.remove('ed11y-force-overflow');
+      this.toggle.focus();
     }
     this.setAttribute('data-ed11y-open', changeTo);        
   }

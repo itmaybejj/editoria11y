@@ -9,14 +9,19 @@ class Ed11y {
 
       // Interface and Sync
       lang: 'en',
-      theme: 'dark',
+      theme: 'light',
       // todo MVP polite mode not working
-      alertMode: 'assertive',
+      alertMode: 'polite',
       allowOverflow : '',
       hiddenHandlers : '',
 
       // cloud sync. return {} when enabled but empty.
+      cloudSync: false,
+      // todo add custom results to results array during count
+      // todo document, including adding strings to localization array
+      customResults: false,
       syncedDismissals: false,
+
       // cloud can override.
       currentPage: window.location.pathname,
 
@@ -25,9 +30,7 @@ class Ed11y {
       containerIgnore: false,
       outlineExclude: '',
       linkIgnoreStrings: '',
-      doNotRun: '',
-      // not implemented
-      
+      doNotRun: '',     
 
       // Embedded content
       embeddedContent: '',
@@ -104,24 +107,30 @@ class Ed11y {
       dark: {
         primary: '#eed0b1',
         primaryWarning: '#fad859',
-        primaryAlert: '#ff9393',
+        primaryAlert: '#fad859',
         text: '#cdc1b6',
         button: '#faf2e2',
+        focusRing: 'cyan',
+        activeTab: '#20160c',
         secondary: '#b3d8ff',
         bg: '#20160c',
+        bgHighlight: '',
         bgWarning: '#20160c',
         bgAlert: '#20160c',
       },
       light: {
-        primary: '#20160c',
-        primaryWarning: '#8b6302',
-        primaryAlert: '#a70416',
+        primary: '#0a307a',
+        primaryWarning: '#0a307a', // can drop
+        primaryAlert: '#0a307a', // can drop
         text: '#20160c',
-        button: '#20160c',
-        secondary: '#20160c',
+        button: '#0a307a',
+        focusRing: 'cyan',
+        activeTab: '#b9c0cf',
+        secondary: '#20160c', // can drop?
         bg: '#fff4e0',
-        bgWarning: '#fff4e0',
-        bgAlert: '#fff4e0',
+        bgHighlight: '#7b1919',
+        bgWarning: '#fff4e0', // can drop
+        bgAlert: '#fff4e0', // can drop
       },
     };
 
@@ -153,6 +162,7 @@ class Ed11y {
           'testText',
           'testEmbeds',
         ];
+        // todo: handle custom rules and inbound synced results (e.g, broken links)
         queue.forEach((test) => {
           window.setTimeout(function(){
             Ed11y[test].check();
@@ -172,15 +182,24 @@ class Ed11y {
       }
     };
 
-    Ed11y.countAlerts = function () {
-      // Todo mvp need to communicate items found before mangling this array.
+    Ed11y.countAlerts = function (onLoad) {
+      // Review results array to remove dismissed items
+
+      if (onLoad === true && Ed11y.options.cloudSync === true) {
+        // First export a copy of the results for synchronizers
+        document.dispatchEvent(new CustomEvent('ed11yResultList'), {
+          detail: {
+            results: Ed11y.results,
+          }
+        });
+      }
+
       Ed11y.dismissedCount = 0;
-      // Remove dismissed alerts from the flag array and update count.
       for (let i = Ed11y.results.length - 1; i >= 0; i--) {
         let test = Ed11y.results[i][1];
         let dismissKey = Ed11y.results[i][4];
-        // Hide alert if its ID key is in the array.
         if (dismissKey !== false && typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage] !== 'undefined' && typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] !== 'undefined' && Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey] !== 'undefined') {
+          // Remove result if it has been marked OK or ignored, increment dismissed match counter.
           Ed11y.dismissedCount++;
           Ed11y.results.splice(i, 1);
         } else if (Ed11y.results[i][4]) {
@@ -196,7 +215,7 @@ class Ed11y {
       if (onLoad === true) {
         Ed11y.buildPanels();
       }
-      Ed11y.countAlerts();
+      Ed11y.countAlerts(onLoad);
       if (Ed11y.dismissedCount > 0) {
         Ed11y.restoreDismissed.removeAttribute('hidden');
       }
@@ -224,6 +243,9 @@ class Ed11y {
       // Now we can open or close the panel.
       if (showPanel !== 'show') {
         Ed11y.reset();
+        if (!Ed11y.bodyStyle) {
+          Ed11y.paintReady();
+        }
       }
       else {
         Ed11y.panel.classList.remove('ed11y-panel-shut', 'ed11y-panel-shut');
@@ -252,7 +274,7 @@ class Ed11y {
       // [2] tip contents
       // [3] position prefered (afterbegin, beforebegin)
       // [4] dismisskey
-      // e.g.: Ed11y.results.push([el],'warningImageNullAlt','click here'
+      // e.g.: Ed11y.results.push([el],'myCustomLinkTip','<p>my custom tip contents</p>','beforeBegin','example-unique-href.example/example'
 
       let mark = document.createElement('ed11y-element-result');
       let location = el[0].closest('a');
@@ -312,22 +334,18 @@ class Ed11y {
     Ed11y.reset = function () {
 
       // Remove error outlines.
-      Ed11y.resetClass(Ed11y.root, ['ed11y-text-warning', 'ed11y-link-text-warning','ed11y-error-border','ed11y-warning-border','ed11y-headings-fail','ed11y-link-text-fail', 'ed11y-hidden-highlight','ed11y-uppercase-warning']);
+      Ed11y.resetClass(Ed11y.root, ['ed11y-ring-red', 'ed11y-ring-yellow', 'ed11y-hidden-highlight']);
 
       // Remove buttons.
       Ed11y.root.querySelectorAll('ed11y-element-result, .ed11y-headings-label, .ed11y-reveal-alts').forEach((el) => el.remove());
 
       // Remove and reset panels and active items.
       // todo mvp remove and prune
-      Ed11y.panel.querySelectorAll('.ed11y-show li, .ed11y-about-text').forEach((el) => el.remove());
       Ed11y.panelJumpNext.setAttribute('data-ed11y-goto', '0');
       Ed11y.panelJumpPrev.setAttribute('data-ed11y-goto', '0');
       Ed11y.panel.classList.add('ed11y-panel-shut');
       Ed11y.panel.classList.remove('ed11y-panel-minimized', 'ed11y-panel-active');
       Ed11y.panelToggle.setAttribute('aria-expanded', 'false');
-      Ed11y.panelToggle.classList.remove('ed11y-toggle-active', 'ed11y-errors', 'ed11y-warnings');
-      Ed11y.panel.querySelectorAll('.ed11y-upper-active').forEach((el) => el.classList.remove('ed11y-upper-active'));
-      Ed11y.panel.querySelectorAll('#ed11y-panel-buttonbar [aria-pressed="true"]').forEach((el) => el.setAttribute('aria-pressed', 'false'));
       Ed11y.running = false;
     };
 
@@ -409,28 +427,14 @@ class Ed11y {
 
     Ed11y.findElements = function () {
       // Find and cache so we don't have tests looking willynilly.
-      // todo what about ignores?
-      /*
-      Ed11y.allP = [];
-      Ed11y.allH = [];
-      Ed11y.AllImages = [];
-      Ed11y.allLinks = [];
-      Ed11y.allLists = [];
-      Ed11y.allBlockquote = [];
-      // todo .not(Ed11y.imageIgnore)
-      Ed11y.allFrames = Ed11y.root.querySelectorAll("iframe");
-      Ed11y.allAudio = Array.from(Ed11y.root.querySelectorAll("audio"));
-      Ed11y.allVideo = Array.from(Ed11y.root.querySelectorAll("video"));
-      Ed11y.allTables = Ed11y.root.querySelectorAll("table");*/
       let ignore = Ed11y.options.containerIgnore;
       ignore = ignore ? `:not(${Ed11y.options.containerIgnore})` : '';
       Ed11y.allP = Ed11y.root.querySelectorAll('p' + ignore);
       Ed11y.allH = Ed11y.root.querySelectorAll(':is(h1, h2, h3, h4, h5, h6, [role=\'heading\'][aria-level])' + ignore);
-      Ed11y.AllImages = Ed11y.root.querySelectorAll('img' + ignore);
+      Ed11y.allImages = Ed11y.root.querySelectorAll('img' + ignore);
       Ed11y.allLinks = Ed11y.root.querySelectorAll('a[href]' + ignore);
       Ed11y.allLists = Ed11y.root.querySelectorAll('li' + ignore);
       Ed11y.allBlockquote = Ed11y.root.querySelectorAll('blockquote' + ignore);
-      // todo .not(Ed11y.imageIgnore)
       Ed11y.allFrames = Ed11y.root.querySelectorAll('iframe' + ignore);
       Ed11y.allAudio = Array.from(Ed11y.root.querySelectorAll('audio' + ignore));
       Ed11y.allVideo = Array.from(Ed11y.root.querySelectorAll('video' + ignore));
@@ -515,7 +519,7 @@ class Ed11y {
       document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
       if (show === true) {
         window.setTimeout(function () {
-          Ed11y.AllImages.forEach((img) => {
+          Ed11y.allImages.forEach((img) => {
             // todo what if there is no alt? jQuery fails gracefully this will send null...
             let alt = Ed11y.sanitizeForHTML(img.getAttribute('alt'));
             let src = img.getAttribute('src');
@@ -583,23 +587,27 @@ class Ed11y {
           el[0].style.transform = 'translate(' + el[1] + 'px, 0)';
         });
         if (!Ed11y.bodyStyle) {
-          let paintDelay = document.createElement('style');
-          paintDelay.textContent = 
-            `ed11y-element-result, ed11y-element-panel {opacity: 1;}
-            .ed11y-ring-red {
-              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.red}, 0 0 0 3px ${Ed11y.red}, 0 0 1px 3px;
-              outline: 2px solid ${Ed11y.red};
-              outline-offset: 1px;
-            }
-            .ed11y-ring-yellow {
-              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.yellow}, 0 0 0 3px ${Ed11y.yellow}, 0 0 1px 3px;
-              outline: 2px solid ${Ed11y.yellow};
-              outline-offset: 1px;
-            }`;
-          document.querySelector('body').appendChild(paintDelay);
-          Ed11y.bodyStyle = true;
+          Ed11y.paintReady();
         }
       }, 0);
+    };
+
+    Ed11y.paintReady = function() {
+      let paintDelay = document.createElement('style');
+      paintDelay.textContent = 
+          `ed11y-element-result, ed11y-element-panel {opacity: 1;}
+          .ed11y-ring-red {
+            box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.red}, 0 0 0 3px ${Ed11y.red}, 0 0 1px 3px;
+            outline: 2px solid ${Ed11y.red};
+            outline-offset: 1px;
+          }
+          .ed11y-ring-yellow {
+            box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.yellow}, 0 0 0 3px ${Ed11y.yellow}, 0 0 1px 3px;
+            outline: 2px solid ${Ed11y.yellow};
+            outline-offset: 1px;
+          }`;
+      document.querySelector('body').appendChild(paintDelay);
+      Ed11y.bodyStyle = true;
     };
 
     Ed11y.alignTip = function (el) {
@@ -624,33 +632,33 @@ class Ed11y {
       let roomBelow = tipBottom < windowBottom ? true : false;
       let roomAbove = tipTop > document.body.scrollTop ? true : false;
 
-      let direction = "under";
+      let direction = 'under';
       if (roomBelow) {
         if (roomToRight) {
-          direction = "right";
+          direction = 'right';
         }
         else if (roomToLeft) {
-          direction = "left";
+          direction = 'left';
         }
         // otherwise "under"
       }
       else if (roomAbove) {
-        direction = "above";
+        direction = 'above';
       }
       // otherwise "under"
       
-      if (direction === "left") {
+      if (direction === 'left') {
         let targetOffset = tipWidth + 7;
         tip.setAttribute('style', 'margin-left: -' + targetOffset + 'px;');
         arrow.setAttribute('style', 'left: -18px;');
       }
-      else if (direction === "under") {
+      else if (direction === 'under') {
         // Pin to the left edge, unless the tip is not wide enough to reach:
         let nudgeX = tipWidth > tipLeft ? tipLeft - 15 : tipWidth + 8;
         arrow.setAttribute('style','margin: 33px 0 0 -32px;');
         tip.setAttribute('style', `transform: translate(-${nudgeX}px, 50px);`);
       }
-      else if (direction === "above") {
+      else if (direction === 'above') {
         let nudgeX = tipWidth > tipLeft ? tipLeft - 15 : tipWidth + 8;
         let nudgeY = tip.offsetHeight + 18;
         arrow.setAttribute('style','margin: -33px 0 0 -32px;');
@@ -713,13 +721,13 @@ class Ed11y {
         // Show extras
         switch (id) {
         case 'ed11y-alts':
-          Ed11y.showAltPanel;
+          Ed11y.showAltPanel();
           break;
         case 'ed11y-headings':
-          Ed11y.showHeadingsPanel;
+          Ed11y.showHeadingsPanel();
           break;
         case 'ed11y-help':
-          Ed11y.showHelpPanel;
+          Ed11y.showHelpPanel();
           break;
         default:
           // hide extras
@@ -728,7 +736,7 @@ class Ed11y {
       };
 
       Ed11y.showHeadingsPanel = function() {
-        // outline
+        // Visualize the document outline
         let panelOutline = Ed11y.panel.querySelector('#ed11y-outline');
         panelOutline.innerHTML = '';
         Ed11y.headingOutline.forEach((el, i) => {
@@ -755,7 +763,7 @@ class Ed11y {
       };
 
       Ed11y.showAltPanel = function() {
-        // alts
+        // visualize image alts
         let altList = Ed11y.panel.querySelector('#ed11y-alt-list');
         altList.innerHTML = '';
         Ed11y.imageAlts.forEach((el, i) => {
@@ -853,28 +861,21 @@ class Ed11y {
       };
       window.addEventListener('resize', function() {Ed11y.windowResize();});
 
-      // Escape key on main closes panels.
+      // Escape key closes panels.
       // todo mvp rewrite
-      let escapeWatch = function(event) {
+      Ed11y.escapeWatch = function(event) {
         if (event.keyCode === 27) {
-          if (document.activeElement.closest('#ed11y-panel-upper, #ed11y-summary-toggle, .ed11y-about')) {
-            // close upper panel
-            let openUpper = Ed11y.panel.querySelectorAll('#ed11y-summary-toggle[aria-pressed], .ed11y-about[aria-pressed]');
-            openUpper.forEach(el => {
-              el.focus();
-              el.click();
-            });
-          } else if (document.activeElement.closest('.ed11y-tip-open')) {
-            let closeTip = Ed11y.root.querySelector('.ed11y-tip-open button.ed11y-close-tip');
-            closeTip.click();
-          } else if (Ed11y.panelToggle.getAttribute('aria-expanded') === 'true') {
+          if (event.target.closest('.ed11y-panel-active, ed11y-element-panel')) {
+            // panel
             Ed11y.panelToggle.focus();
             Ed11y.panelToggle.click();
+          } else if (event.target.closest('.ed11y-result, ed11y-element-result')) {
+            let activeTip = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
+            activeTip?.setAttribute('data-ed11y-action', 'shut');
           }
         }
       };
-      document.addEventListener('keyup', escapeWatch);
-      
+      document.addEventListener('keyup', function(event) {Ed11y.escapeWatch(event);});
     };
 
     /*============== Panel interactions ========*/

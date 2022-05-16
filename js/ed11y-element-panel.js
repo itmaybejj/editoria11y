@@ -10,7 +10,7 @@ class Ed11yElementPanel extends HTMLElement {
   template() {
     return `
     <div class='buttonbar' role='tablist' aria-label='Editorial Ally panel controls'>
-      <button role="tab" id='ed11y-issues' aria-selected='false'>
+      <button role="tab" id='ed11y-issues' aria-selected='true'>
           Issues
       </button>
       <button role="tab" id='ed11y-headings' aria-selected='false'>
@@ -58,10 +58,11 @@ class Ed11yElementPanel extends HTMLElement {
       wrapper.setAttribute('class','wrapper');
       wrapper.innerHTML = this.template();
       // todo??
-      //let restore = document.createElement('button');
-      //restore.setAttribute('id', 'restore');
-      //restore.textContent = `Some alerts hidden; show all`;
-      //Ed11y.panelJumpPrev.insertAdjacentElement('beforebegin', restore);
+      // let restore = document.createElement('button');
+      // restore.setAttribute('id', 'restore');
+      // restore.textContent = `Some alerts hidden; show all`;
+      // Ed11y.panelJumpPrev.insertAdjacentElement('beforebegin', restore);
+      // todo MVP: style hover states 
       let style = document.createElement('style');
       style.textContent = Ed11y.baseCSS + `
         :host {
@@ -80,7 +81,7 @@ class Ed11yElementPanel extends HTMLElement {
           background: ${Ed11y.color.bg};
           color: ${Ed11y.color.text};
           border-radius: 3px;
-          box-shadow: 0 0 0 2px ${Ed11y.color.bg}, 1px 1px 4px 2px ${Ed11y.color.text}77;
+          box-shadow: 1px 1px 4px 2px ${Ed11y.color.text}77;
         }
         .ed11y-warnings {
           background: ${Ed11y.color.bgWarning};
@@ -152,11 +153,17 @@ class Ed11yElementPanel extends HTMLElement {
           border-radius: 3px 0 0 0; 
           border-left: 2px solid transparent;
         }          
-        .buttonbar button:last-child {border-radius: 0 3px 0 0;}
+        .buttonbar button:last-child {
+          border-radius: 0 3px 0 0;
+        }
         .buttonbar button[aria-selected="true"] {
-          background: ${Ed11y.color.bg};
+          background: ${Ed11y.color.activeTab};
           color: ${Ed11y.color.text};
-          border-color: ${Ed11y.color.primary};
+          margin-top: -2px;
+          /*border-color: ${Ed11y.color.primary};*/
+          border: 2px solid;
+          border-bottom: 1px solid;
+          border-radius: 3px 3px 0 0;
         }
         .ed11y-warnings button[aria-selected="true"] {
           border-color: ${Ed11y.color.primaryWarning};
@@ -181,8 +188,8 @@ class Ed11yElementPanel extends HTMLElement {
         }
         .ed11y-panel-shut #ed11y-main-toggle, .panel-minimized #ed11y-main-toggle {
           display: block;
-          min-width: 30px;
-          height: 30px;
+          min-width: 34px;
+          height: 34px;
           border-radius: 100%;
           padding: 5px;
         }
@@ -215,11 +222,11 @@ class Ed11yElementPanel extends HTMLElement {
           margin: 5px 0 4px 1px;
         }
         button:focus-visible {
-          border-color: #76b9f0;
+          border-color: #76b9f0; /* todo should be using theme colors */
           box-shadow: inset 0 0 0 2px #76b9f0;
         }
         .has-issues {
-          background: ${Ed11y.color.primaryAlert};
+          background: ${Ed11y.color.bgHighlight};
           color: ${Ed11y.color.bg};
         }
         #ed11y-outline, #ed11y-alt-list {

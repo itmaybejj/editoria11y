@@ -12,7 +12,7 @@ class Ed11yTestImages {
     Ed11y.imageAlts = [];
 
     // Test each image for alternative text.
-    Ed11y.AllImages.forEach((el) => {
+    Ed11y.allImages.forEach((el) => {
 
       let alt = el.getAttribute('alt');
       let src = el.getAttribute('src');

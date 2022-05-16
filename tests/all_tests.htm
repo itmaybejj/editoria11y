@@ -234,7 +234,9 @@
             <script>
               if (window.navigator.userAgent.match(/MSIE|Trident/) === null) {
                 // IE 11 is going to suffer under this load.
-                const ed11y = new Ed11y();
+                const ed11y = new Ed11y({
+                    alertMode : 'assertive',
+                });
               }
             </script>
         </div>

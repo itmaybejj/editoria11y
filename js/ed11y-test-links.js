@@ -94,7 +94,7 @@ class Ed11yTestLinks {
         if (textCheck !== 'none') {
           let dismissKey = Ed11y.dismissalKey(linkText);
           let error = 'linkTextIsURL';
-          if (error === 'generic') {
+          if (textCheck === 'generic') {
             error = 'linkTextIsGeneric';
           }
           Ed11y.results.push([el, error, Ed11y.M[error].tip(Ed11y.sanitizeForHTML(linkText)), 'beforebegin', dismissKey]);
