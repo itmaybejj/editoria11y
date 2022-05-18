@@ -27,12 +27,12 @@ class Ed11yElementPanel extends HTMLElement {
       <div id='ed11y-issues-tab' tabindex="0" role="tabpanel" class="show" aria-labelledby='ed11y-issues'>
           <div>
               <div class='content-text'><span class='count'>No</span> <span class='content-type'>accessibility errors detected</span>.</div>
-              <button id="restore" hidden>Restore hidden alerts</button>
               <div aria-live='polite' class='announce hidden'></div>
           </div>
           <div class='jumplinks'>
             <button class='jump prev' data-ed11y-goto='0'><span aria-hidden='true'>« </span><span class='jump-prev'>Previous</span></button>
             <button class='jump next' data-ed11y-goto='0'><span class='jump-next'>First</span> <span aria-hidden='true'> »</span></button>
+            <button id="restore" hidden>Restore hidden alerts</button>
           </div>
         </div>
       <div id='ed11y-headings-tab' role="tabpanel" class="hidden" aria-labelledby='ed11y-headings' tabindex='0'>
@@ -125,12 +125,12 @@ class Ed11yElementPanel extends HTMLElement {
           margin: 0;
           background: ${Ed11y.color.primary};
           color: ${Ed11y.color.bg};
-          padding: 6px;
+          padding: 8px 4px;
           font-family: inherit;
           font-size: 11px;
           font-weight: 600;
           border: 0;
-          border-right: 1px solid ${Ed11y.color.bg}44;
+          border-right: 1px solid ${Ed11y.color.bg}55;
           text-align: center;
           flex: auto;
           cursor: pointer;
@@ -209,26 +209,40 @@ class Ed11yElementPanel extends HTMLElement {
         .jumplinks {
           text-align: right;
         }
+        .jumplinks button {
+          width: 
+        }
         .content button {
-          padding: 4px 6px;
+          padding: 6px 11px;
           border-radius: 2px;
-          background: ${Ed11y.color.button};
+          background: inherit;
+          color: inherit;
+          box-shadow: 0 0 1px;
+          margin: 4px 2px;
+          margin: 2% 1%;
+          width: 46%;
+        }
+        #restore {
+          width: 96%;
         }
         .content button:hover {
           background: ${Ed11y.color.bg};
           color: ${Ed11y.color.text};
           box-shadow: inset 0 0 0 1px ${Ed11y.color.text};
         }
-        #restore {
-          margin: 5px 0 4px 1px;
-        }
-        button:focus-visible {
-          border-color: #76b9f0; /* todo should be using theme colors */
-          box-shadow: inset 0 0 0 2px #76b9f0;
-        }
+
         .has-issues {
           background: ${Ed11y.color.bgHighlight};
           color: ${Ed11y.color.bg};
+        }
+        #ed11y-issues-tab:not(.hidden) {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        #ed11y-issues-tab > div {
+          flex: 1 1 174px;
+          align-self: center;
         }
         #ed11y-outline, #ed11y-alt-list {
           list-style: none;

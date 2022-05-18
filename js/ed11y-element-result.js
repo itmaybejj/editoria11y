@@ -270,19 +270,23 @@ class Ed11yElementResult extends HTMLElement {
     let content = document.createElement('div');
     content.classList.add('content');
     content.innerHTML = this.result[2];
-    if (this.dismissable) {
+    if (this.dismissable && (Ed11y.options.allowOK || Ed11y.options.allowIgnore)) {
       let dismissers = document.createElement('div');
-      let dismissOKButton = document.createElement('button');
-      dismissOKButton.classList.add('dismiss');
-      // Parameterize
-      dismissOKButton.textContent = 'Mark as Checked and OK';
-      dismissers.append(dismissOKButton);
-      dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis(resultID, 'ok');});
-      let dismissIgnoreButton = document.createElement('button');
-      dismissIgnoreButton.classList.add('dismiss');
-      dismissIgnoreButton.textContent = 'Ignore';
-      dismissers.append(dismissIgnoreButton);
-      dismissIgnoreButton.addEventListener('click', function(){Ed11y.dismissThis(resultID, 'ok');});
+      if (Ed11y.options.allowOK) {
+        let dismissOKButton = document.createElement('button');
+        dismissOKButton.classList.add('dismiss');
+        // todo Parameterize
+        dismissOKButton.textContent = 'Mark as Checked and OK';
+        dismissers.append(dismissOKButton);
+        dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis(resultID, 'ok');});
+      }
+      if (Ed11y.options.allowIgnore) {
+        let dismissIgnoreButton = document.createElement('button');
+        dismissIgnoreButton.classList.add('dismiss');
+        dismissIgnoreButton.textContent = 'Ignore';
+        dismissers.append(dismissIgnoreButton);
+        dismissIgnoreButton.addEventListener('click', function(){Ed11y.dismissThis(resultID, 'ok');});
+      }
       content.append(dismissers);
     }
     let closeButton = document.createElement('button');

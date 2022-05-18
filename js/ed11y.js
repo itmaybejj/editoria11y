@@ -20,6 +20,8 @@ class Ed11y {
       // todo add custom results to results array during count
       // todo document, including adding strings to localization array
       customResults: false,
+      allowIgnore: true,
+      allowOK: true,
       syncedDismissals: false,
 
       // cloud can override.
@@ -127,10 +129,10 @@ class Ed11y {
         focusRing: 'cyan',
         activeTab: '#b9c0cf',
         secondary: '#20160c', // can drop?
-        bg: '#fff4e0',
+        bg: '#fffbf5',
         bgHighlight: '#7b1919',
-        bgWarning: '#fff4e0', // can drop
-        bgAlert: '#fff4e0', // can drop
+        bgWarning: '#fffbf5', // can drop?
+        bgAlert: '#fffbf5', // can drop?
       },
     };
 
