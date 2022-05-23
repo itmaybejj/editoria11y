@@ -87,13 +87,14 @@ class Ed11y {
           // Todo MVP prepare for sync
           Ed11y.localData = localStorage.getItem('Ed11y.localData');
           Ed11y.localDataParsed = Ed11y.localData ? JSON.parse(Ed11y.localData) : {};
-
-          // Get list of dismissed alerts
+          
+          // Build list of dismissed alerts
           if (Ed11y.options.syncedDismissals === false) {
             Ed11y.dismissedAlerts = localStorage.getItem('ed11ydismissed');
             Ed11y.dismissedAlerts = Ed11y.dismissedAlerts ? JSON.parse(Ed11y.dismissedAlerts) : {};
           } else {
-            Ed11y.dismissedAlerts = Ed11y.options.syncedDismissals;
+            Ed11y.dismissedAlerts = {};
+            Ed11y.dismissedAlerts[Ed11y.options.currentPage] = Ed11y.options.syncedDismissals;
           }
           
           
@@ -499,12 +500,13 @@ class Ed11y {
     Ed11y.clearDismissals = function() {
       Ed11y.dismissedAlerts[Ed11y.options.currentPage] = {};
       localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
-      document.dispatchEvent(new CustomEvent('ed11yDismissalUpdate'), {
-        detail: {
-          dismissPage: Ed11y.options.currentPage,
-          dismissAction: 'restore',
-        }
-      });
+      let dismissalDetail = {
+        dismissPage: Ed11y.options.currentPage,
+        dismissAction: 'reset',
+      };
+      let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
+      document.dispatchEvent(ed11yDismissalUpdate);
+      // todo MVP API sync these removals!
       Ed11y.restoreDismissed.setAttribute('hidden', '');
       Ed11y.reset();
       Ed11y.checkAll(false, 'show');
