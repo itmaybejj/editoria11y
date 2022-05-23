@@ -5,6 +5,7 @@ class Ed11y {
   /* exported Ed11y */
   
   constructor(options) {
+    
     let defaultOptions = {
 
       // Interface and Sync
@@ -15,17 +16,18 @@ class Ed11y {
       allowOverflow : '',
       hiddenHandlers : '',
 
-      // cloud sync. return {} when enabled but empty.
+      // Provide empty {} to enable, or {object} of custom results (match Ed11y.results)
       cloudSync: false,
       // todo add custom results to results array during count
       // todo document, including adding strings to localization array
       customResults: false,
       allowIgnore: true,
       allowOK: true,
+      // todo MVP: if allowOK is false, user never sees and cannot restore ignored element
       syncedDismissals: false,
 
-      // cloud can override.
-      currentPage: window.location.pathname,
+      // cloud can override with a unique string.
+      currentPage: false,
 
       // Root area to check and exclusions
       checkRoot: 'body',
@@ -58,6 +60,9 @@ class Ed11y {
       ...defaultOptions,
       ...options
     };
+    if (Ed11y.options.currentPage === false) {
+      Ed11y.options.currentPage = window.location.pathname;
+    }
     Ed11y.M = ed11yLang[Ed11y.options.lang];
 
     Ed11y.initialize = () => {
@@ -187,12 +192,6 @@ class Ed11y {
     Ed11y.countAlerts = function (onLoad) {
       // Review results array to remove dismissed items
 
-      if (onLoad === true && Ed11y.options.cloudSync === true) {
-        // First export a copy of the results for synchronizers
-        let syncResults = new CustomEvent('ed11yResults', { detail: Ed11y.results });
-        document.dispatchEvent(syncResults);
-      }
-
       Ed11y.dismissedCount = 0;
       for (let i = Ed11y.results.length - 1; i >= 0; i--) {
         let test = Ed11y.results[i][1];
@@ -200,12 +199,19 @@ class Ed11y {
         if (dismissKey !== false && typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage] !== 'undefined' && typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] !== 'undefined' && Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey] !== 'undefined') {
           // Remove result if it has been marked OK or ignored, increment dismissed match counter.
           Ed11y.dismissedCount++;
-          Ed11y.results.splice(i, 1);
+          Ed11y.results[i][5] = Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey];
         } else if (Ed11y.results[i][4]) {
           Ed11y.warningCount++;
+          Ed11y.results[i][5] = false;
         } else {
           Ed11y.errorCount++;
+          Ed11y.results[i][5] = false;
         }
+      }
+      if (onLoad === true && Ed11y.options.cloudSync === true) {
+        // First export a copy of the results for synchronizers
+        let syncResults = new CustomEvent('ed11yResults');
+        document.dispatchEvent(syncResults);
       }
     };
 
@@ -218,11 +224,11 @@ class Ed11y {
       if (Ed11y.dismissedCount > 0) {
         Ed11y.restoreDismissed.removeAttribute('hidden');
       }
-      let totalFound = Ed11y.errorCount + Ed11y.warningCount;
+      Ed11y.totalFound = Ed11y.errorCount + Ed11y.warningCount;
       Ed11y.updateCount('quick');
-      if (onLoad === true && totalFound > 0) {
+      if (onLoad === true && Ed11y.totalFound > 0) {
         // Determine if panel should open automatically.
-        if (Ed11y.localDataParsed[Ed11y.options.currentPage] === totalFound) {
+        if (Ed11y.localDataParsed[Ed11y.options.currentPage] === Ed11y.totalFound) {
           // User has already seen these errors, panel will not open.
           showPanel = 'seen';
         }
@@ -231,12 +237,12 @@ class Ed11y {
           // CMS integrations can set this dynamically.
           showPanel = 'show';
         }
-        Ed11y.localDataParsed[Ed11y.options.currentPage] = totalFound;
+        Ed11y.localDataParsed[Ed11y.options.currentPage] = Ed11y.totalFound;
         window.setTimeout(function() {
           Ed11y.announce.innerHTML = Ed11y.getText(Ed11y.panelMessage);
         }, 1500);
       }
-      else if (onLoad === true && totalFound === 0) {
+      else if (onLoad === true && Ed11y.totalFound === 0) {
         showPanel = 'pass';
       }
       // Now we can open or close the panel.
@@ -273,6 +279,7 @@ class Ed11y {
       // [2] tip contents
       // [3] position prefered (afterbegin, beforebegin)
       // [4] dismisskey
+      // [5] dismissed (bool)
       // e.g.: Ed11y.results.push([el],'myCustomLinkTip','<p>my custom tip contents</p>','beforeBegin','example-unique-href.example/example'
 
       let mark = document.createElement('ed11y-element-result');
@@ -510,7 +517,9 @@ class Ed11y {
       // thread locking.
       
       Ed11y.results?.forEach(function (el, i) {
-        Ed11y.result(el, i);
+        if (!Ed11y.results[i][5]) {
+          Ed11y.result(el, i);
+        }
       });
 
       // As soon as the buttons are in place, dispatch an event so themes
@@ -792,7 +801,7 @@ class Ed11y {
 
 
       Ed11y.buildJumpList = function() {
-        // Ed11y.results is in detected order, this will be in DOM order.
+        // Ed11y.results is in detected order and includes dismissed results, this will be in DOM order.
         Ed11y.jumpList = document.querySelectorAll('ed11y-element-result');
         Ed11y.jumpList.forEach((result, i) => {
           result.dataset.ed11yJumpPosition = i; 

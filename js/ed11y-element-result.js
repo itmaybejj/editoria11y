@@ -257,6 +257,7 @@ class Ed11yElementResult extends HTMLElement {
     // [2] tip contents
     // [3] position
     // [4] dismiss key
+    // [5] dismissal status
     // e.g.: Ed11y.results.push([el],'linkTextIsGeneric','click here', 'a_semi-unique_attribute_of_this_element'
 
     let resultID = this.toggle.getAttribute('data-ed11y-result');
@@ -285,7 +286,7 @@ class Ed11yElementResult extends HTMLElement {
         dismissIgnoreButton.classList.add('dismiss');
         dismissIgnoreButton.textContent = 'Ignore';
         dismissers.append(dismissIgnoreButton);
-        dismissIgnoreButton.addEventListener('click', function(){Ed11y.dismissThis(resultID, 'ok');});
+        dismissIgnoreButton.addEventListener('click', function(){Ed11y.dismissThis(resultID, 'ignore');});
       }
       content.append(dismissers);
     }

@@ -189,10 +189,10 @@ class Ed11yElementPanel extends HTMLElement {
         }
         .ed11y-panel-shut #ed11y-main-toggle, .panel-minimized #ed11y-main-toggle {
           display: block;
-          min-width: 34px;
-          height: 34px;
+          min-width: 40px;
+          height: 40px;
           border-radius: 100%;
-          padding: 5px;
+          padding: 8px;
         }
         .ed11y-panel-shut.ed11y-warnings #ed11y-main-toggle, .panel-minimized.ed11y-warnings #ed11y-main-toggle {
           background-color: ${Ed11y.yellow};
