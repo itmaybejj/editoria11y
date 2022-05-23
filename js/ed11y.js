@@ -303,7 +303,7 @@ class Ed11y {
         if(Ed11y.totalCount < 2) {
           Ed11y.panelJumpPrev.setAttribute('hidden','');
         } else {
-          Ed11y.panelJumpPrev.removeAttribute('hidden', '');
+          Ed11y.panelJumpPrev.removeAttribute('hidden');
         }
         if (Ed11y.errorCount > 0) {
           Ed11y.panel.classList.remove('ed11y-warnings');
@@ -755,16 +755,17 @@ class Ed11y {
           el[0].insertAdjacentElement('afterbegin', mark);
           let level = el[1];
           let leftPad = 10 * level - 10;
-          let message = el[2] ? el[2] : '';
-          let userText = document.createElement('span');
-          userText.textContent = el[0].textContent;
           let li = document.createElement('li');
           li.classList.add('level' + level);
+          let message = el[2] && !el[5] ? el[2] : ''; // Has an error message and is not ignored.
           if (message) {
+            // todo: communicate level? Add alert title?
             li.classList.add('has-issues');
           }
-          li.style.setProperty('margin-left', leftPad + 'px');
+          li.style.setProperty('margin-left', leftPad + 'px');        
           li.innerHTML = `<strong>H${level}:</strong> ${message}`;
+          let userText = document.createElement('span');
+          userText.textContent = el[0].textContent;
           li.append(userText);
           panelOutline.append(li);
         });
@@ -782,7 +783,9 @@ class Ed11y {
           let userText = document.createElement('span');
           userText.textContent = el[1];
           let li = document.createElement('li');
-          if (el[3]) {
+          if (el[3] && !el[5]) {
+            // Has an error and is not ignored.
+            // todo: communicate level
             li.classList.add('has-issues');
           }
           let img = document.createElement('img');
@@ -813,7 +816,9 @@ class Ed11y {
         // TodoMVP handle one and zero goMax
         let goMax = Ed11y.jumpList.length - 1;
         let goNext = 0;
-        Ed11y.panelJumpPrev.removeAttribute('hidden');
+        if (Ed11y.totalCount > 1) {
+          Ed11y.panelJumpPrev.removeAttribute('hidden');
+        }
         if (Ed11y.goto == goMax) {
           // Reached end of loop
           goNext = 0;

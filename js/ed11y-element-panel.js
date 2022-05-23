@@ -194,8 +194,12 @@ class Ed11yElementPanel extends HTMLElement {
           border-radius: 100%;
           padding: 8px;
         }
+        .ed11y-panel-shut #ed11y-main-toggle:hover, .panel-minimized #ed11y-main-toggle:hover {
+          outline: 3px solid;
+        }
         .ed11y-panel-shut.ed11y-warnings #ed11y-main-toggle, .panel-minimized.ed11y-warnings #ed11y-main-toggle {
           background-color: ${Ed11y.yellow};
+          color: #000b;
           box-shadow: inset 0 0 0 2px ${Ed11y.yellow}, inset 0 0 0 3px #000b, 0 0 2px #000;
         }
         .ed11y-panel-shut.ed11y-errors #ed11y-main-toggle, .panel-minimized.ed11y-errors #ed11y-main-toggle {
