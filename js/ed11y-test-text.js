@@ -20,7 +20,7 @@ class Ed11yTestText {
         return prefixDecrement[match];
       });
     };
-    Ed11y.allP.forEach((p, i) => {
+    Ed11y.elements.p?.forEach((p, i) => {
 
       // Detect possible lists.
       let firstPrefix = '';
@@ -34,7 +34,7 @@ class Ed11yTestText {
       if (firstPrefix.length > 0 && firstPrefix !== activeMatch && firstPrefix.match(prefixMatch)) {
         // We have a prefix and a possible hit; check next detected paragraph.
         // Note these paragraphs may not be siblings in the DOM...
-        let secondP = Ed11y.allP[i + 1];
+        let secondP = Ed11y.elements.p[i + 1];
         if (secondP) {
           secondText = Ed11y.getText(secondP).substring(0, 2);
           let secondPrefix = decrement(secondText);
@@ -110,21 +110,21 @@ class Ed11yTestText {
         }
       }
     };
-    Ed11y.allH.forEach((el) => {
+    Ed11y.elements.h?.forEach((el) => {
       checkCaps(el);
     });
-    Ed11y.allP.forEach((el) => {
+    Ed11y.elements.p?.forEach((el) => {
       checkCaps(el);
     });
-    Ed11y.allBlockquote.forEach((el) => {
+    Ed11y.elements.blockquote?.forEach((el) => {
       checkCaps(el);
     });
-    Ed11y.allLists.forEach((el) => {
+    Ed11y.elements.li?.forEach((el) => {
       checkCaps(el);
     });
 
     // Check if a table has a table header.
-    Ed11y.allTables.forEach((el) => {
+    Ed11y.elements.table.forEach((el) => {
       let findTHeaders = el.querySelectorAll('th');
       let findHeadingTags = el.querySelectorAll('h1, h2, h3, h4, h5, h6');
       if (findTHeaders.length === 0) {

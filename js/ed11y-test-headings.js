@@ -7,14 +7,14 @@ class Ed11yTestHeadings {
   check () {
     // Reset panel; we rebuild on each run.
     // todo mvp rewrite
-    Ed11y.panel?.querySelectorAll('#ed11y-outline-list li, .ed11y-headings-label').forEach((el) => el.remove());
+    Ed11y.panel?.querySelectorAll('#ed11y-outline-list li, .ed11y-headings-label')?.forEach((el) => el.remove());
     
     let prevLevel = 0;
     Ed11y.headingOutline = [];
     let position = 'beforebegin';
 
     // Test each header level for accessibility issues.
-    Ed11y.allH.forEach((el, i) => {
+    Ed11y.elements.h?.forEach((el, i) => {
       let level;
 
       // Match aria-headers to <h#> level.
@@ -77,7 +77,7 @@ class Ed11yTestHeadings {
 
     // Check for blockquotes used as headings. If it's less than 25
     // characters - it's probably not a blockquote.
-    Ed11y.allBlockquote.forEach((el) => {
+    Ed11y.elements.blockquote?.forEach((el) => {
       let text = Ed11y.getText(el);
       if (text.length < 25) {
         let dismissKey = Ed11y.dismissalKey(text);

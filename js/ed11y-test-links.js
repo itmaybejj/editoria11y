@@ -9,7 +9,7 @@ class Ed11yTestLinks {
     // Todo: Add test for consecutive links to same href?
     // Todo: parameterize linkIgnore
     // todo: parameterize stopwords as in Sa11y
-    Ed11y.allLinks.forEach((el) => {
+    Ed11y.elements.a?.forEach((el) => {
       // todo: investigate sa11y computation
       let linkText = Ed11y.computeAriaLabel(el);
       let img = el.querySelectorAll('img');

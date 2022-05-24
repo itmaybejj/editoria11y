@@ -22,7 +22,7 @@ class Ed11yElementResult extends HTMLElement {
       this.wrapper.classList.add('ed11y-result');
 
       // needed?
-      //this.wrapper.classList.add(this.type);
+      // this.wrapper.classList.add(this.type);
 
       // Create tooltip toggle
       this.toggle = document.createElement('button');
@@ -168,8 +168,8 @@ class Ed11yElementResult extends HTMLElement {
           padding: 0;
           vertical-align: middle;
           cursor: pointer;
-          width: 30px;
-          height: 30px;
+          width: 32px;
+          height: 32px;
           line-height: 1;
           font-size: 16px;
         }
@@ -208,12 +208,18 @@ class Ed11yElementResult extends HTMLElement {
       }
       .toggle::before {
         content: "?";
+      }
+      .toggle:hover, .toggle[aria-expanded='true'] {
+        border: 2px solid ${Ed11y.color.primary};
       }`;
     let alert = `
       .toggle {
         box-shadow: inset 0 0 0 1px ${Ed11y.red}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 1px 1px 5px 0 rgba(0,0,0,.5);
         background: #fefefe;
         color: ${Ed11y.red};
+      }
+      .toggle:hover, .toggle[aria-expanded='true'] {
+        box-shadow: inset 0 0 0 1px ${Ed11y.red}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 2px ${Ed11y.color.primary};
       }
       .toggle::before {
         content: "!";
@@ -305,6 +311,8 @@ class Ed11yElementResult extends HTMLElement {
     this.toggle.classList.add('ready');
     closeButton.addEventListener('click', (event) => {
       event.preventDefault;
+      this.toggle.focus();
+      // todo: track if this tip was opened by the next button. If so, transfer focus back to it instead?
       this.setAttribute('data-ed11y-action', 'shut');
     });
   }
@@ -331,7 +339,6 @@ class Ed11yElementResult extends HTMLElement {
       }));
     } else {
       this.closest('.ed11y-force-overflow')?.classList.remove('ed11y-force-overflow');
-      this.toggle.focus();
     }
     this.setAttribute('data-ed11y-open', changeTo);        
   }

@@ -206,6 +206,10 @@
         <h3 id="caps-lock">Caps lock</h3>
 
         <div class="positive"><p>SEVERAL WORDS IN A ROW OF CAPS LOCK TEXT WILL TRIGGER A MANUAL CHECK WARNING.</p></div>
+        
+        <section id="shadow-root">
+            <h2>Shadow root handling</h2>
+        </section>
 
 
         <section id="recursion">
@@ -219,6 +223,26 @@
 
 
         <div hidden>
+            <script>
+                class shadowTest extends HTMLElement {
+                constructor() {
+                    super();
+                }
+                connectedCallback() {
+                    if (!this.initialized) {
+                        const shadow = this.attachShadow({mode: 'open'});
+                        let wrapper = document.createElement('div');
+                        wrapper.setAttribute('class','wrapper');
+                        wrapper.innerHTML = `<h5>Header skip in the shadow DOM</h5><p>ALL CAPS IN THE SHADOW DOM</p>`
+                        shadow.appendChild(wrapper);
+                        this.initialized = true;
+                    }
+                }
+                }
+                customElements.define('shadow-test', shadowTest);
+                let testShadowElement = document.createElement('shadow-test');
+                document.getElementById('shadow-root').append(testShadowElement);
+            </script>
             <link href="./tests.css" rel="stylesheet">
             <script src="../js/ed11y-localization.js"></script>
             <script src="../js/ed11y-element-panel.js"></script>
@@ -232,13 +256,17 @@
             <script src="../js/ed11y.js"></script>
             <!-- Instantiate-->
             <script>
-              if (window.navigator.userAgent.match(/MSIE|Trident/) === null) {
-                // IE 11 is going to suffer under this load.
+                let shadowHosts = document.querySelectorAll('shadow-test');
+                let shadowRoots = [];
+                shadowHosts.forEach(root => {
+                    shadowRoots.push(root.shadowRoot.querySelector('.wrapper'));
+                })
                 const ed11y = new Ed11y({
-                    alertMode : 'assertive'
+                    alertMode : 'assertive',
+                    shadowRoots : shadowRoots,
                 });
-              }
             </script>
+            
         </div>
     </main>
 

@@ -11,26 +11,25 @@ class Ed11y {
       // Interface and Sync
       lang: 'en',
       theme: 'light',
-      // todo MVP polite mode not working
       alertMode: 'polite',
       allowOverflow : '',
       hiddenHandlers : '',
 
-      // Provide empty {} to enable, or {object} of custom results (match Ed11y.results)
-      cloudSync: false,
       // todo add custom results to results array during count
-      // todo document, including adding strings to localization array
       customResults: false,
       allowIgnore: true,
       allowOK: true,
-      // todo MVP: if allowOK is false, user never sees and cannot restore ignored element
-      syncedDismissals: false,
 
-      // cloud can override with a unique string.
-      currentPage: false,
+      // todo MVP: if allowOK is false, user never sees and cannot restore ignored element
+      syncedDismissals: false, // provide {} to initiate sync
+      // todo document what to send
+
+      currentPage: false, // uses window.location.pathname unless a string is provided.
 
       // Root area to check and exclusions
       checkRoot: 'body',
+      shadowRoots: [], // provide array built from from querySelectors
+      shadowHosts: '',
       containerIgnore: false,
       outlineExclude: '',
       linkIgnoreStrings: '',
@@ -84,7 +83,6 @@ class Ed11y {
       documentLoadingCheck(() => {
         if (!Ed11y.checkRunPrevent()) {
           Ed11y.running = true;
-          // Todo MVP prepare for sync
           Ed11y.localData = localStorage.getItem('Ed11y.localData');
           Ed11y.localDataParsed = Ed11y.localData ? JSON.parse(Ed11y.localData) : {};
           
@@ -97,8 +95,8 @@ class Ed11y {
             Ed11y.dismissedAlerts[Ed11y.options.currentPage] = Ed11y.options.syncedDismissals;
           }
           
-          
-          // Create test objects
+          // Create test class objects
+          // Todo: dispatch event to load an array of custom test results
           Ed11y.testEmbeds = new Ed11yTestEmbeds;
           Ed11y.testHeadings = new Ed11yTestHeadings;
           Ed11y.testImages = new Ed11yTestImages;
@@ -128,7 +126,7 @@ class Ed11y {
       },
       light: {
         primary: '#0a307a',
-        primaryWarning: '#0a307a', // can drop
+        primaryWarning: '#0a307a', // todo: can we drop these now?
         primaryAlert: '#0a307a', // can drop
         text: '#20160c',
         button: '#0a307a',
@@ -155,13 +153,6 @@ class Ed11y {
         Ed11y.dismissedCount = 0;
         Ed11y.mediaCount = 0;
         Ed11y.jumpList = false;
-        Ed11y.root = document.querySelector(Ed11y.options.checkRoot);
-        // If target root can't be found, fall back to default.
-        if (!Ed11y.root) {
-          // TODO MVP convert to array of multiple roots so we can dive shadow DOM?
-          Ed11y.root = document.querySelector('body');
-          console.error('Check Editoria11y configuration; specified root element not found');
-        }
         Ed11y.findElements();
         let queue = [
           'testLinks',
@@ -209,7 +200,7 @@ class Ed11y {
           Ed11y.results[i][5] = false;
         }
       }
-      if (onLoad === true && Ed11y.options.cloudSync === true) {
+      if (onLoad === true) {
         // First export a copy of the results for synchronizers
         let syncResults = new CustomEvent('ed11yResults');
         document.dispatchEvent(syncResults);
@@ -254,8 +245,8 @@ class Ed11y {
         }
       }
       else {
-        Ed11y.panel.classList.remove('ed11y-panel-shut', 'ed11y-panel-shut');
-        Ed11y.panel.classList.add('ed11y-panel-active');
+        Ed11y.panel.classList.remove('minimized', 'shut');
+        Ed11y.panel.classList.add('active');
         Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
         window.setTimeout(function () {
           document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
@@ -307,12 +298,12 @@ class Ed11y {
           Ed11y.panelJumpPrev.removeAttribute('hidden');
         }
         if (Ed11y.errorCount > 0) {
-          Ed11y.panel.classList.remove('ed11y-warnings');
-          Ed11y.panel.classList.add('ed11y-errors');
+          Ed11y.panel.classList.remove('warnings');
+          Ed11y.panel.classList.add('errors');
         }
         else if (Ed11y.warningCount > 0) {
-          Ed11y.panel.classList.remove('ed11y-errors');
-          Ed11y.panel.classList.add('ed11y-warnings');
+          Ed11y.panel.classList.remove('errors');
+          Ed11y.panel.classList.add('warnings');
         }
         Ed11y.panelCount.textCount = Ed11y.totalCount;
         Ed11y.panelCount.style.display = 'inline-block';
@@ -323,15 +314,9 @@ class Ed11y {
         Ed11y.panelJumpNext.setAttribute('hidden', '');
         Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
         Ed11y.panelCount.style.display = 'display: none;';
-        Ed11y.panel.classList.remove('ed11y-warnings');
-        Ed11y.panel.classList.remove('ed11y-errors');
+        Ed11y.panel.classList.remove('warnings');
+        Ed11y.panel.classList.remove('errors');
         Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
-      }
-      if (Ed11y.dismissedCount.length > 0) {
-        // Todo dejQuery dismissed workflow
-        document.getElementById('ed11y-show-dismissed')?.setAttribute('style', 'display: inline-block !important;');
-      } else {
-        document.getElementById('ed11y-show-dismissed')?.setAttribute('style', 'display: none !important;');
       }
       Ed11y.panel.classList.remove('ed11y-preload');
     };
@@ -344,14 +329,16 @@ class Ed11y {
       Ed11y.resetClass(Ed11y.root, ['ed11y-ring-red', 'ed11y-ring-yellow', 'ed11y-hidden-highlight']);
 
       // Remove buttons.
-      Ed11y.root.querySelectorAll('ed11y-element-result, .ed11y-headings-label, .ed11y-reveal-alts').forEach((el) => el.remove());
+      Ed11y.root.forEach(root => {
+        root.querySelectorAll('ed11y-element-result, .ed11y-headings-label, .ed11y-reveal-alts').forEach((el) => el.remove());
+      })
 
       // Remove and reset panels and active items.
       // todo mvp remove and prune
       Ed11y.panelJumpNext.setAttribute('data-ed11y-goto', '0');
       Ed11y.panelJumpPrev.setAttribute('data-ed11y-goto', '0');
-      Ed11y.panel.classList.add('ed11y-panel-shut');
-      Ed11y.panel.classList.remove('ed11y-panel-minimized', 'ed11y-panel-active');
+      Ed11y.panel.classList.add('shut');
+      Ed11y.panel.classList.remove('minimized', 'active');
       Ed11y.panelToggle.setAttribute('aria-expanded', 'false');
       Ed11y.running = false;
     };
@@ -417,7 +404,7 @@ class Ed11y {
         // todo translation string.
         prepend.innerHTML = '<li>There are <span class=\'ed11y-red-text\'>' + Ed11y.mediaCount + '</span> multimedia elements on this page. ' +
             'Please make sure each provides closed captions (for video) or a transcript (for audio).</li>';
-        document.getElementById('ed11y-image-list').insertAdjacentElement('beforebegin', prepend);
+        document.getElementById('image-list').insertAdjacentElement('beforebegin', prepend);
       }
 
       Ed11y.updateCount('full');
@@ -432,20 +419,64 @@ class Ed11y {
       return false;
     };
 
+    Ed11y.findFromRoot = function(array, selector) {
+      Ed11y.root.forEach(root => {
+        if (Ed11y.elements[array]) {
+          Ed11y.elements[array] = Ed11y.elements[array].concat(Array.from(root.querySelectorAll(`${selector} ${Ed11y.ignore}`)));
+        } else {
+          Ed11y.elements[array] = Array.from(root.querySelectorAll(`${selector} ${Ed11y.ignore}`));
+        }
+      })
+    };
+
     Ed11y.findElements = function () {
       // Find and cache so we don't have tests looking willynilly.
-      let ignore = Ed11y.options.containerIgnore;
-      ignore = ignore ? `:not(${Ed11y.options.containerIgnore})` : '';
-      Ed11y.allP = Ed11y.root.querySelectorAll('p' + ignore);
-      Ed11y.allH = Ed11y.root.querySelectorAll(':is(h1, h2, h3, h4, h5, h6, [role=\'heading\'][aria-level])' + ignore);
-      Ed11y.allImages = Ed11y.root.querySelectorAll('img' + ignore);
-      Ed11y.allLinks = Ed11y.root.querySelectorAll('a[href]' + ignore);
+      Ed11y.root = Array.from(document.querySelectorAll(Ed11y.options.checkRoot));
+      if (!!Ed11y.options.shadowRoots) {
+        Ed11y.root = Ed11y.root.concat(Ed11y.options.shadowRoots);
+      }
+      if (Ed11y.root.length === 0) {
+        Ed11y.root = document.querySelectorAll('body');
+        console.error('Check Editoria11y configuration; specified root element not found');
+      }
+
+      Ed11y.elements = [];
+
+      Ed11y.ignore = Ed11y.options.containerIgnore ? `:not(${Ed11y.options.containerIgnore})` : '';
+      
+      Ed11y.findFromRoot('p', 'p');
+      Ed11y.findFromRoot('h', ':is(h1, h2, h3, h4, h5, h6, [role="heading"][aria-level])');
+      Ed11y.findFromRoot('img', 'img');
+      Ed11y.findFromRoot('a', 'a[href]');
+      Ed11y.findFromRoot('li', 'li');
+      Ed11y.findFromRoot('blockquote', 'blockquote');
+      Ed11y.findFromRoot('iframe', 'iframe');
+      Ed11y.findFromRoot('audio', 'audio');
+      Ed11y.findFromRoot('video', 'video');
+      Ed11y.findFromRoot('table', 'table');
+
+      /*Ed11y.elements.p = document.querySelectorAll(`:is(${Ed11y.options.checkRoot}) p ${ignore}`);
+      Ed11y.elements.h = Ed11y.root.querySelectorAll(':is(h1, h2, h3, h4, h5, h6, [role=\'heading\'][aria-level])' + ignore);
+      Ed11y.elements.img = Ed11y.root.querySelectorAll('img' + ignore);
+      Ed11y.elements.a = Ed11y.root.querySelectorAll('a[href]' + ignore);
       Ed11y.allLists = Ed11y.root.querySelectorAll('li' + ignore);
-      Ed11y.allBlockquote = Ed11y.root.querySelectorAll('blockquote' + ignore);
-      Ed11y.allFrames = Ed11y.root.querySelectorAll('iframe' + ignore);
-      Ed11y.allAudio = Array.from(Ed11y.root.querySelectorAll('audio' + ignore));
-      Ed11y.allVideo = Array.from(Ed11y.root.querySelectorAll('video' + ignore));
-      Ed11y.allTables = Ed11y.root.querySelectorAll('table' + ignore);
+      Ed11y.elements.blockquote = Ed11y.root.querySelectorAll('blockquote' + ignore);
+      Ed11y.elements.frames = Ed11y.root.querySelectorAll('iframe' + ignore);
+      Ed11y.elements.audio = Array.from(Ed11y.root.querySelectorAll('audio' + ignore));
+      Ed11y.elements.video = Array.from(Ed11y.root.querySelectorAll('video' + ignore));
+      Ed11y.elements.table = Ed11y.root.querySelectorAll('table' + ignore);*/
+
+      /* Original, performant query, but only one checkroot
+      Ed11y.elements.p = Ed11y.root.querySelectorAll('p' + ignore);
+      Ed11y.elements.h = Ed11y.root.querySelectorAll(':is(h1, h2, h3, h4, h5, h6, [role=\'heading\'][aria-level])' + ignore);
+      Ed11y.elements.img = Ed11y.root.querySelectorAll('img' + ignore);
+      Ed11y.elements.a = Ed11y.root.querySelectorAll('a[href]' + ignore);
+      Ed11y.allLists = Ed11y.root.querySelectorAll('li' + ignore);
+      Ed11y.elements.blockquote = Ed11y.root.querySelectorAll('blockquote' + ignore);
+      Ed11y.elements.frames = Ed11y.root.querySelectorAll('iframe' + ignore);
+      Ed11y.elements.audio = Array.from(Ed11y.root.querySelectorAll('audio' + ignore));
+      Ed11y.elements.video = Array.from(Ed11y.root.querySelectorAll('video' + ignore));
+      Ed11y.elements.table = Ed11y.root.querySelectorAll('table' + ignore);*/
     };
     // End of findElements()
     Ed11y.dismissalKey = function (text) {
@@ -462,36 +493,35 @@ class Ed11y {
         let store = {};
         store[test] = dismissal;
         Ed11y.dismissedAlerts[Ed11y.options.currentPage] = store;
-      } else if (typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] === 'undefined' ) {
+      } else if (typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] === 'undefined') {
         Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] = dismissal;
       } else {
         Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissalKey] = dismissalType;
       }
-      // todo mvp test class reset
       let removal = document.getElementById('ed11y-result-' + id);
-      Ed11y.resetClass(el, ['ed11y-text-warning', 'ed11y-link-text-warning','ed11y-error-border','ed11y-warning-border','ed11y-headings-fail','ed11y-link-text-fail', 'ed11y-hidden-highlight','ed11y-uppercase-warning']);
+      Ed11y.resetClass(el, ['ed11y-hidden-highlight','ed11y-ring-red','ed11y-ring-yellow']);
       removal.parentNode.removeChild(removal);
-      // todo this removes the tip and button but leaves classes
-      // todo update count, deal with 0
       // todo MVP change for direct set of localStorage to handing off to preferred handler?
-      localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
-      let dismissalDetail = {
-        dismissPage: Ed11y.options.currentPage,
-        dismissTest: test,
-        dismissKey: dismissalKey,
-        dismissAction: dismissalType,
-      };
-      let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
-      document.dispatchEvent(ed11yDismissalUpdate);
+      if (Ed11y.options.syncedDismissals === false) {
+        localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
+      } else {
+        let dismissalDetail = {
+          dismissPage: Ed11y.options.currentPage,
+          dismissTest: test,
+          dismissKey: dismissalKey,
+          dismissAction: dismissalType,
+        };
+        let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
+        document.dispatchEvent(ed11yDismissalUpdate);
+      }
       Ed11y.reset();
       Ed11y.checkAll(false, 'show');
       window.setTimeout( function() {
         if (Ed11y.results.length > 0) {
-          let focus = document.querySelector('ed11y-element-panel').shadowRoot.querySelector('.jump.next');
-          focus.focus();
+          Ed11y.panelJumpNext.focus();
         } else {
           // todo mvp test
-          let focus = document.querySelector('ed11y-element-panel').shadowRoot.querySelector('.toggle');
+          let focus = Ed11y.panel.querySelector('#issues');
           focus.focus();
         }
       }, 1000);
@@ -499,37 +529,36 @@ class Ed11y {
 
     Ed11y.clearDismissals = function() {
       Ed11y.dismissedAlerts[Ed11y.options.currentPage] = {};
-      localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
-      let dismissalDetail = {
-        dismissPage: Ed11y.options.currentPage,
-        dismissAction: 'reset',
-      };
-      let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
-      document.dispatchEvent(ed11yDismissalUpdate);
-      // todo MVP API sync these removals!
+      if (Ed11y.options.syncedDismissals === false) {
+        localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
+      } else {
+        let dismissalDetail = {
+          dismissPage: Ed11y.options.currentPage,
+          dismissAction: 'reset',
+        };
+        let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
+        document.dispatchEvent(ed11yDismissalUpdate);
+      }
+      
       Ed11y.restoreDismissed.setAttribute('hidden', '');
       Ed11y.reset();
       Ed11y.checkAll(false, 'show');
     };
 
     Ed11y.showResults = function (show) {
-      // This function is VERY expensive.
-      // Todo: optimize?
-      // For now: throw chunks to the end of the render queue to prevent
-      // thread locking.
-      
+      // Todo: optimize? This function is expensive.
+
       Ed11y.results?.forEach(function (el, i) {
         if (!Ed11y.results[i][5]) {
           Ed11y.result(el, i);
         }
       });
 
-      // As soon as the buttons are in place, dispatch an event so themes
-      // can react
+      // Announce that buttons have been placed.
       document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
       if (show === true) {
         window.setTimeout(function () {
-          Ed11y.allImages.forEach((img) => {
+          Ed11y.elements.img.forEach((img) => {
             // todo what if there is no alt? jQuery fails gracefully this will send null...
             let alt = Ed11y.sanitizeForHTML(img.getAttribute('alt'));
             let src = img.getAttribute('src');
@@ -538,6 +567,7 @@ class Ed11y {
             injectAlt.style.width = imgStyles.width;
             injectAlt.style.height = imgStyles.height;
             injectAlt.dataset.alt = alt;
+            //?? still
             if (img.previousElementSibling?.classList.contains('ed11y-instance-inline') === true) {
               img.previousElementSibling.insertAdjacentElement('beforebegin', injectAlt);
             }
@@ -545,6 +575,7 @@ class Ed11y {
               img.insertAdjacentElement('beforebegin', injectAlt);
             }
             let panelIMG = document.createElement('li');
+            //?? still
             if (img.classList.contains('ed11y-error-border')) {
               panelIMG.classList.add('ed11y-error-border');
             }
@@ -552,10 +583,9 @@ class Ed11y {
               panelIMG.classList.add('ed11y-warning-border');
             }
             panelIMG.innerHTML = '<img src="' + src + '" alt="" class="ed11y-thumbnail"/>Alt: ' + alt + '</li>';
-            Ed11y.panel.querySelector('#ed11y-image-list').appendChild(panelIMG);
+            Ed11y.panel.querySelector('#image-list').appendChild(panelIMG);
           });
           window.setTimeout( function () {
-            // todo mvp: styles are messed up in panel
             document.querySelectorAll('.ed11y-reveal-alts').forEach(revealed => {
               let img = revealed.nextElementSibling;
               if (img && !img.matches('img')) {
@@ -577,7 +607,7 @@ class Ed11y {
       window.setTimeout(function () {
         // Nudge offscreen tips back on screen.
         let windowWidth = window.innerWidth;
-        let marks = Array.from(Ed11y.root.querySelectorAll('ed11y-element-result'));
+        let marks = Array.from(document.querySelectorAll(`:is(${Ed11y.options.checkRoot}) ` + 'ed11y-element-result'));
         let marksToNudge = [];
         // Reading and writing in a loop creates paint thrashing. Read first.
         marks.forEach(mark => {
@@ -603,20 +633,23 @@ class Ed11y {
     };
 
     Ed11y.paintReady = function() {
-      let paintDelay = document.createElement('style');
-      paintDelay.textContent = 
-          `ed11y-element-result, ed11y-element-panel {opacity: 1;}
-          .ed11y-ring-red {
-            box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.red}, 0 0 0 3px ${Ed11y.red}, 0 0 1px 3px;
-            outline: 2px solid ${Ed11y.red};
-            outline-offset: 1px;
-          }
-          .ed11y-ring-yellow {
-            box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.yellow}, 0 0 0 3px ${Ed11y.yellow}, 0 0 1px 3px;
-            outline: 2px solid ${Ed11y.yellow};
-            outline-offset: 1px;
-          }`;
-      document.querySelector('body').appendChild(paintDelay);
+      Ed11y.root.forEach(root => {
+        // Shadow elements don't inherit styles, so they need their own copy.
+        let paintDelay = document.createElement('style');
+        paintDelay.textContent = 
+            `ed11y-element-result, ed11y-element-panel {opacity: 1;}
+            .ed11y-ring-red {
+              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.red}, 0 0 0 3px ${Ed11y.red}, 0 0 1px 3px;
+              outline: 2px solid ${Ed11y.red};
+              outline-offset: 1px;
+            }
+            .ed11y-ring-yellow {
+              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.yellow}, 0 0 0 3px ${Ed11y.yellow}, 0 0 1px 3px;
+              outline: 2px solid ${Ed11y.yellow};
+              outline-offset: 1px;
+            }`;
+        root.appendChild(paintDelay);
+      })
       Ed11y.bodyStyle = true;
     };
 
@@ -626,7 +659,7 @@ class Ed11y {
       tip.setAttribute('style','');
       arrow.setAttribute('style','');
 
-      // todo mvp evaluate the left check. should be able to hardcode button width and ditch most of this.
+      // todo evaluate the left check. May be able to hardcode button width and ditch some of this.
       let buttonOffset = el.getBoundingClientRect();
       let buttonLeft = buttonOffset.left + document.body.scrollLeft;
       let tipOffset = tip.getBoundingClientRect();
@@ -665,18 +698,18 @@ class Ed11y {
       else if (direction === 'under') {
         // Pin to the left edge, unless the tip is not wide enough to reach:
         let nudgeX = tipWidth > tipLeft ? tipLeft - 15 : tipWidth + 8;
-        arrow.setAttribute('style','margin: 33px 0 0 -32px;');
+        arrow.setAttribute('style','margin: 33px 0 0 -30px;');
         tip.setAttribute('style', `transform: translate(-${nudgeX}px, 50px);`);
       }
       else if (direction === 'above') {
         let nudgeX = tipWidth > tipLeft ? tipLeft - 15 : tipWidth + 8;
         let nudgeY = tip.offsetHeight + 18;
-        arrow.setAttribute('style','margin: -33px 0 0 -32px;');
+        arrow.setAttribute('style','margin: -33px 0 0 -30px;');
         tip.setAttribute('style', `transform: translate(-${nudgeX}px, -${nudgeY}px);`);
       }
     };
 
-    // Todo implement OK Icon
+    // Todo implement better OK Icon
     Ed11y.baseCSS = `
       :host{all: initial;} 
       .hidden{display:none;}
@@ -688,24 +721,22 @@ class Ed11y {
 
     // Runs once
     Ed11y.buildPanels = function () {
-      // Create a floating button and hidden divs that contain
-      // success/warning message.
       let panel = document.createElement('ed11y-element-panel');
       // todo mvp move to body tag
-      document.querySelector('header').appendChild(panel);
+      document.querySelector('body').appendChild(panel);
       
       Ed11y.togglePanel = function () {
         if (!Ed11y.doubleClickPrevent) {
           // on minimize the toggle toggles the panel, not the scan.
-          // todo MVP: focus management and aria states.
-          if (Ed11y.panel.classList.contains('panel-minimized')) {
+          // todo MVP: revisit aria states and announcements.
+          if (Ed11y.panel.classList.contains('minimized')) {
             Ed11y.minimize();
           }
-          // Prevent clicking during scan.
+          // Prevent clicks piling up while scan is running.
           else if (Ed11y.running !== true) {
             Ed11y.running = true;
-            // Rescan on open.
-            if (Ed11y.panel.classList.contains('ed11y-panel-shut') === true) {
+            // Re-scan each time the panel reopens.
+            if (Ed11y.panel.classList.contains('shut') === true) {
               Ed11y.checkAll(false, 'show');
             }
             else {
@@ -730,13 +761,13 @@ class Ed11y {
         
         // Show extras
         switch (id) {
-        case 'ed11y-alts':
+        case 'alts':
           Ed11y.showAltPanel();
           break;
-        case 'ed11y-headings':
+        case 'headings':
           Ed11y.showHeadingsPanel();
           break;
-        case 'ed11y-help':
+        case 'help':
           Ed11y.showHelpPanel();
           break;
         default:
@@ -747,7 +778,12 @@ class Ed11y {
 
       Ed11y.showHeadingsPanel = function() {
         // Visualize the document outline
-        let panelOutline = Ed11y.panel.querySelector('#ed11y-outline');
+
+        // todo MVP: if there are multiple checkRoots, headings appear grouped by checkroot, not in document order.
+        // probably need to switch to rebuilding the outline from scratch when the panel opens, and ignore shadow dom components.
+        // may need to walk the DOM for all shadow hosts, flag them so they are CSS selectable, then walk again for all headings and shadow hosts, then process in order. fun.
+        
+        let panelOutline = Ed11y.panel.querySelector('#outline');
         panelOutline.innerHTML = '';
         Ed11y.headingOutline.forEach((el, i) => {
           // Todo implement outline ignore function.
@@ -775,7 +811,7 @@ class Ed11y {
 
       Ed11y.showAltPanel = function() {
         // visualize image alts
-        let altList = Ed11y.panel.querySelector('#ed11y-alt-list');
+        let altList = Ed11y.panel.querySelector('#alt-list');
         altList.innerHTML = '';
         Ed11y.imageAlts.forEach((el, i) => {
           let mark = document.createElement('ed11y-element-alt-label');
@@ -800,7 +836,7 @@ class Ed11y {
       };
 
       Ed11y.showHelpPanel = function() {
-        let helpTab = Ed11y.panel.querySelector('#ed11y-help-tab');
+        let helpTab = Ed11y.panel.querySelector('#help-tab');
         helpTab.innerHTML = Ed11y.M.panelHelp;
       };
 
@@ -844,8 +880,8 @@ class Ed11y {
 
       Ed11y.minimize = function () {
         // todo MVP minimize and close are not fully implemented yet.
-        let minimized = Ed11y.panel.classList.contains('panel-minimized') === 'true' ? false : true;
-        Ed11y.panel.classList.toggle('panel-minimized');
+        let minimized = Ed11y.panel.classList.contains('minimized') === 'true' ? false : true;
+        Ed11y.panel.classList.toggle('minimized');
         if (minimized === false) {
           window.setTimeout(function() {
             // todo MVP this is not working
@@ -857,7 +893,7 @@ class Ed11y {
       Ed11y.windowResize = function() {
         // todo MVP rewrite for alts; tips works now
         if (Ed11y.panel.querySelector('#ed11y-alts').getAttribute('aria-expanded') === 'true') {
-          Ed11y.root.querySelectorAll('img, [role="img"]').forEach((el) => {
+          document.querySelectorAll(`:is(${Ed11y.options.checkRoot}) ` + 'img, [role="img"]').forEach((el) => {
             let revealedAlt = el.previousElementSibling;
             if (!!revealedAlt && revealedAlt.matches('ed11y-alt-text')) {
               let elComputedStyle = getComputedStyle(el, null);
@@ -868,7 +904,7 @@ class Ed11y {
             }
           });
         }
-        let openTip = Ed11y.root.querySelector('ed11y-element-result[data-ed11y-open="true"]');
+        let openTip = document.querySelector(`:is(${Ed11y.options.checkRoot}) ` + 'ed11y-element-result[data-ed11y-open="true"]');
         if (openTip) {
           let toggle = openTip.shadowRoot.querySelector('.toggle');
           Ed11y.alignTip(toggle, openTip);
@@ -880,7 +916,7 @@ class Ed11y {
       // todo mvp rewrite
       Ed11y.escapeWatch = function(event) {
         if (event.keyCode === 27) {
-          if (event.target.closest('.ed11y-panel-active, ed11y-element-panel')) {
+          if (event.target.closest('.active, ed11y-element-panel')) {
             // panel
             Ed11y.panelToggle.focus();
             Ed11y.panelToggle.click();
@@ -953,9 +989,11 @@ class Ed11y {
       return el.innerText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
     };
 
-    Ed11y.resetClass = (root, el) => {
+    Ed11y.resetClass = (roots, el) => {
       el.forEach(el => {
-        root.querySelectorAll('.' + el).forEach((x) => x.classList.remove(el));
+        Array.from(roots).forEach(root => {
+          root.querySelectorAll(`.${el}`).forEach((x) => x.classList.remove(el));
+        })
       });
     };
 
@@ -1034,7 +1072,7 @@ class Ed11y {
     };
 
     Ed11y.srcMatchesOptions = function(source, option) {
-      if (option.length > 0 && source.length > 0) {
+      if (option.length > 0 && source?.length > 0) {
         let selectorArray = option.split(/\s*[\s,]\s*/).map((el) => {
           return '[src*=\'' + el + '\']';
         });
@@ -1098,6 +1136,9 @@ class Ed11y {
       return clone;
     };
 
-    Ed11y.initialize();
+    if (CSS.supports('selector(:is(body))')) {
+      // Older browsers will gracefully stop execution here.
+      Ed11y.initialize();
+    }
   }
 }
