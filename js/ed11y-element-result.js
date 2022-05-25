@@ -11,8 +11,11 @@ class Ed11yElementResult extends HTMLElement {
       const shadow = this.attachShadow({mode: 'open'});
 
       // Create this.wrapper with type class
-      this.wrapper = document.createElement('div');
-      this.result = Ed11y.results[this.dataset.ed11yResult];
+      this.resultID = this.dataset.ed11yResult;
+      this.result = Ed11y.results[this.resultID];
+
+      this.wrapper = document.createElement('aside');
+      
       this.dismissable = this.result[4] !== false ? true : false;
       // todo MVP this would only work in darkmode -- need more theme variables
       // #ffd4d4 red. turn background to alert color in lightmode.
@@ -27,7 +30,9 @@ class Ed11yElementResult extends HTMLElement {
       // Create tooltip toggle
       this.toggle = document.createElement('button');
       this.toggle.setAttribute('class','toggle');
-      this.toggle.setAttribute('aria-label','Accessibility issue');
+      // todo parameterize
+      let label = this.dismissable ? 'manual check needed' : 'alert';
+      this.toggle.setAttribute('aria-label', `Accessibility issue ${this.resultID}, ${label}`);
       this.toggle.setAttribute('aria-expanded','false');
       this.toggle.setAttribute('data-ed11y-result', this.dataset.ed11yResult);
       this.toggle.setAttribute('data-ed11y-ready', 'false');
@@ -55,7 +60,7 @@ class Ed11yElementResult extends HTMLElement {
           overflow: visible;
           color: ${Ed11y.color.text};
         }
-        aside {
+        .tip {
           font-size: 14px;
           border: 2px solid ${this.primaryColor};
           background: ${this.bgColor};
@@ -75,6 +80,7 @@ class Ed11yElementResult extends HTMLElement {
           line-height: 1;
           display: grid;
           place-content: center left;
+          outline: transparent;
         }
         .content {
           padding: 4px 12px 18px;
@@ -189,7 +195,7 @@ class Ed11yElementResult extends HTMLElement {
           outline: 2px solid transparent;
           box-shadow: inset 0 0 0 2px ${Ed11y.color.focusRing}, 0 0 0 3px ${Ed11y.color.primary};
         }
-        [aria-expanded="false"] ~ aside, [aria-expanded="false"] ~ div {
+        [aria-expanded="false"] ~ .tip, [aria-expanded="false"] ~ .arrow {
           display: none;
         }
       `;
@@ -266,14 +272,13 @@ class Ed11yElementResult extends HTMLElement {
     // [5] dismissal status
     // e.g.: Ed11y.results.push([el],'linkTextIsGeneric','click here', 'a_semi-unique_attribute_of_this_element'
 
-    let resultID = this.toggle.getAttribute('data-ed11y-result');
-
-    let tip = document.createElement('aside');
-    tip.setAttribute('aria-labelledby', 'tip-title-' + [resultID]);
-    let thisTitle = document.createElement('div');
-    thisTitle.setAttribute('id','tip-' + resultID);
-    thisTitle.classList.add('title');
-    thisTitle.innerHTML = Ed11y.M[this.result[1]].title;
+    this.tip = document.createElement('div');
+    this.tip.classList.add('tip');
+    this.tip.setAttribute('aria-labelledby', 'tip-title-' + [this.resultID]);
+    this.heading = document.createElement('div');
+    this.heading.setAttribute('id','tip-' + this.resultID);
+    this.heading.classList.add('title');
+    this.heading.innerHTML = Ed11y.M[this.result[1]].title;
     let content = document.createElement('div');
     content.classList.add('content');
     content.innerHTML = this.result[2];
@@ -285,14 +290,14 @@ class Ed11yElementResult extends HTMLElement {
         // todo Parameterize
         dismissOKButton.textContent = 'Mark as Checked and OK';
         dismissers.append(dismissOKButton);
-        dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis(resultID, 'ok');});
+        dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis(this.resultID, 'ok');});
       }
       if (Ed11y.options.allowIgnore) {
         let dismissIgnoreButton = document.createElement('button');
         dismissIgnoreButton.classList.add('dismiss');
         dismissIgnoreButton.textContent = 'Ignore';
         dismissers.append(dismissIgnoreButton);
-        dismissIgnoreButton.addEventListener('click', function(){Ed11y.dismissThis(resultID, 'ignore');});
+        dismissIgnoreButton.addEventListener('click', function(){Ed11y.dismissThis(this.resultID, 'ignore');});
       }
       content.append(dismissers);
     }
@@ -303,10 +308,10 @@ class Ed11yElementResult extends HTMLElement {
     let arrow = document.createElement('div');
     arrow.classList.add('arrow');
 
-    tip.append(closeButton);
-    tip.append(thisTitle);
-    tip.append(content);
-    this.toggle.insertAdjacentElement('afterend', tip);
+    this.tip.append(closeButton);
+    this.tip.append(this.heading);
+    this.tip.append(content);
+    this.toggle.insertAdjacentElement('afterend', this.tip);
     this.toggle.insertAdjacentElement('afterend', arrow);
     this.toggle.classList.add('ready');
     closeButton.addEventListener('click', (event) => {

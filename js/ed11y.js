@@ -27,9 +27,8 @@ class Ed11y {
       currentPage: false, // uses window.location.pathname unless a string is provided.
 
       // Root area to check and exclusions
-      checkRoot: 'body',
-      shadowRoots: [], // provide array built from from querySelectors
-      shadowHosts: '',
+      checkRoots: 'body',
+      shadowComponents: [], // provide array built from from querySelectorAll
       containerIgnore: false,
       outlineExclude: '',
       linkIgnoreStrings: '',
@@ -152,7 +151,8 @@ class Ed11y {
         Ed11y.warningCount = 0;
         Ed11y.dismissedCount = 0;
         Ed11y.mediaCount = 0;
-        Ed11y.jumpList = false;
+        Ed11y.elements = [];
+        Ed11y.elements.jumpList = false;
         Ed11y.findElements();
         let queue = [
           'testLinks',
@@ -326,12 +326,12 @@ class Ed11y {
     Ed11y.reset = function () {
 
       // Remove error outlines.
-      Ed11y.resetClass(Ed11y.root, ['ed11y-ring-red', 'ed11y-ring-yellow', 'ed11y-hidden-highlight']);
+      Ed11y.resetClass(Ed11y.roots, ['ed11y-ring-red', 'ed11y-ring-yellow', 'ed11y-hidden-highlight']);
 
       // Remove buttons.
-      Ed11y.root.forEach(root => {
+      Ed11y.roots.forEach(root => {
         root.querySelectorAll('ed11y-element-result, .ed11y-headings-label, .ed11y-reveal-alts').forEach((el) => el.remove());
-      })
+      });
 
       // Remove and reset panels and active items.
       // todo mvp remove and prune
@@ -420,32 +420,55 @@ class Ed11y {
     };
 
     Ed11y.findFromRoot = function(array, selector) {
-      Ed11y.root.forEach(root => {
+      let shadowComponents = '';
+      if (Ed11y.options.shadowComponents.length > 0) {
+        shadowComponents = `, ${Ed11y.options.shadowComponents}`;
+      }
+      Ed11y.roots.forEach(root => {
         if (Ed11y.elements[array]) {
-          Ed11y.elements[array] = Ed11y.elements[array].concat(Array.from(root.querySelectorAll(`${selector} ${Ed11y.ignore}`)));
+          Ed11y.elements[array] = Ed11y.elements[array].concat(Array.from(root.querySelectorAll(`:is(${selector} ${shadowComponents}) ${Ed11y.ignore}`)));
         } else {
-          Ed11y.elements[array] = Array.from(root.querySelectorAll(`${selector} ${Ed11y.ignore}`));
+          Ed11y.elements[array] = Array.from(root.querySelectorAll(`:is(${selector} ${shadowComponents}) ${Ed11y.ignore}`));
         }
-      })
+      });
+      if (Ed11y.options.shadowComponents.length > 0) {
+        let shadowFind = [];
+        Ed11y.elements[array].forEach((el, i) => {
+          if (el.matches(Ed11y.options.shadowComponents)) {
+            shadowFind[i] = el.shadowRoot.querySelectorAll(`:is(${selector} ${Ed11y.ignore})`);
+          }
+        });
+        if (shadowFind.length > 0) {
+          for (let index = shadowFind.length - 1; index >= 0; index--) {
+            //shadowFind[index];
+            if (shadowFind[index]) {
+              Ed11y.elements[array].splice(index, 1, ...shadowFind[index]);
+            }
+          }
+        } 
+      }
     };
 
     Ed11y.findElements = function () {
-      // Find and cache so we don't have tests looking willynilly.
-      Ed11y.root = Array.from(document.querySelectorAll(Ed11y.options.checkRoot));
-      if (!!Ed11y.options.shadowRoots) {
-        Ed11y.root = Ed11y.root.concat(Ed11y.options.shadowRoots);
-      }
-      if (Ed11y.root.length === 0) {
-        Ed11y.root = document.querySelectorAll('body');
+      // Find and cache roots elements.
+      let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
+      if (roots.length === 0) {
+        Ed11y.roots = document.querySelectorAll('body');
         console.error('Check Editoria11y configuration; specified root element not found');
+      } else {
+        Ed11y.roots = [];
+        roots.forEach((el, i) => {
+          if (el.shadowRoot) {
+            Ed11y.roots[i] = el.shadowRoot;
+          } else {
+            Ed11y.roots[i] = el;
+          }
+        });
       }
-
-      Ed11y.elements = [];
-
       Ed11y.ignore = Ed11y.options.containerIgnore ? `:not(${Ed11y.options.containerIgnore})` : '';
-      
+            
       Ed11y.findFromRoot('p', 'p');
-      Ed11y.findFromRoot('h', ':is(h1, h2, h3, h4, h5, h6, [role="heading"][aria-level])');
+      Ed11y.findFromRoot('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]');
       Ed11y.findFromRoot('img', 'img');
       Ed11y.findFromRoot('a', 'a[href]');
       Ed11y.findFromRoot('li', 'li');
@@ -454,30 +477,9 @@ class Ed11y {
       Ed11y.findFromRoot('audio', 'audio');
       Ed11y.findFromRoot('video', 'video');
       Ed11y.findFromRoot('table', 'table');
-
-      /*Ed11y.elements.p = document.querySelectorAll(`:is(${Ed11y.options.checkRoot}) p ${ignore}`);
-      Ed11y.elements.h = Ed11y.root.querySelectorAll(':is(h1, h2, h3, h4, h5, h6, [role=\'heading\'][aria-level])' + ignore);
-      Ed11y.elements.img = Ed11y.root.querySelectorAll('img' + ignore);
-      Ed11y.elements.a = Ed11y.root.querySelectorAll('a[href]' + ignore);
-      Ed11y.allLists = Ed11y.root.querySelectorAll('li' + ignore);
-      Ed11y.elements.blockquote = Ed11y.root.querySelectorAll('blockquote' + ignore);
-      Ed11y.elements.frames = Ed11y.root.querySelectorAll('iframe' + ignore);
-      Ed11y.elements.audio = Array.from(Ed11y.root.querySelectorAll('audio' + ignore));
-      Ed11y.elements.video = Array.from(Ed11y.root.querySelectorAll('video' + ignore));
-      Ed11y.elements.table = Ed11y.root.querySelectorAll('table' + ignore);*/
-
-      /* Original, performant query, but only one checkroot
-      Ed11y.elements.p = Ed11y.root.querySelectorAll('p' + ignore);
-      Ed11y.elements.h = Ed11y.root.querySelectorAll(':is(h1, h2, h3, h4, h5, h6, [role=\'heading\'][aria-level])' + ignore);
-      Ed11y.elements.img = Ed11y.root.querySelectorAll('img' + ignore);
-      Ed11y.elements.a = Ed11y.root.querySelectorAll('a[href]' + ignore);
-      Ed11y.allLists = Ed11y.root.querySelectorAll('li' + ignore);
-      Ed11y.elements.blockquote = Ed11y.root.querySelectorAll('blockquote' + ignore);
-      Ed11y.elements.frames = Ed11y.root.querySelectorAll('iframe' + ignore);
-      Ed11y.elements.audio = Array.from(Ed11y.root.querySelectorAll('audio' + ignore));
-      Ed11y.elements.video = Array.from(Ed11y.root.querySelectorAll('video' + ignore));
-      Ed11y.elements.table = Ed11y.root.querySelectorAll('table' + ignore);*/
     };
+
+
     // End of findElements()
     Ed11y.dismissalKey = function (text) {
       return String(text).substring(0,512);
@@ -524,7 +526,7 @@ class Ed11y {
           let focus = Ed11y.panel.querySelector('#issues');
           focus.focus();
         }
-      }, 1000);
+      }, 500);
     };
 
     Ed11y.clearDismissals = function() {
@@ -607,7 +609,7 @@ class Ed11y {
       window.setTimeout(function () {
         // Nudge offscreen tips back on screen.
         let windowWidth = window.innerWidth;
-        let marks = Array.from(document.querySelectorAll(`:is(${Ed11y.options.checkRoot}) ` + 'ed11y-element-result'));
+        let marks = Array.from(document.querySelectorAll(`:is(${Ed11y.options.checkRoots}) ` + 'ed11y-element-result'));
         let marksToNudge = [];
         // Reading and writing in a loop creates paint thrashing. Read first.
         marks.forEach(mark => {
@@ -633,7 +635,7 @@ class Ed11y {
     };
 
     Ed11y.paintReady = function() {
-      Ed11y.root.forEach(root => {
+      Ed11y.roots.forEach(root => {
         // Shadow elements don't inherit styles, so they need their own copy.
         let paintDelay = document.createElement('style');
         paintDelay.textContent = 
@@ -649,7 +651,7 @@ class Ed11y {
               outline-offset: 1px;
             }`;
         root.appendChild(paintDelay);
-      })
+      });
       Ed11y.bodyStyle = true;
     };
 
@@ -779,7 +781,7 @@ class Ed11y {
       Ed11y.showHeadingsPanel = function() {
         // Visualize the document outline
 
-        // todo MVP: if there are multiple checkRoots, headings appear grouped by checkroot, not in document order.
+        // todo MVP: if there are multiple checkRootss, headings appear grouped by checkRoots, not in document order.
         // probably need to switch to rebuilding the outline from scratch when the panel opens, and ignore shadow dom components.
         // may need to walk the DOM for all shadow hosts, flag them so they are CSS selectable, then walk again for all headings and shadow hosts, then process in order. fun.
         
@@ -843,8 +845,11 @@ class Ed11y {
 
       Ed11y.buildJumpList = function() {
         // Ed11y.results is in detected order and includes dismissed results, this will be in DOM order.
-        Ed11y.jumpList = document.querySelectorAll('ed11y-element-result');
-        Ed11y.jumpList.forEach((result, i) => {
+        // todo MVP shadow roots are out of order
+
+        //Ed11y.elements.jumpList = document.querySelectorAll('ed11y-element-result');
+        Ed11y.findFromRoot('jumpList','ed11y-element-result');
+        Ed11y.elements.jumpList.forEach((result, i) => {
           result.dataset.ed11yJumpPosition = i; 
         });
       };
@@ -852,9 +857,10 @@ class Ed11y {
       Ed11y.setCurrentJump = function() {
         // Set next/previous buttons
         // TodoMVP handle one and zero goMax
-        let goMax = Ed11y.jumpList.length - 1;
+        let goMax = Ed11y.elements.jumpList.length - 1;
         let goNext = 0;
         if (Ed11y.totalCount > 1) {
+          // todo: shouldn't show on load
           Ed11y.panelJumpPrev.removeAttribute('hidden');
         }
         if (Ed11y.goto == goMax) {
@@ -893,7 +899,7 @@ class Ed11y {
       Ed11y.windowResize = function() {
         // todo MVP rewrite for alts; tips works now
         if (Ed11y.panel.querySelector('#ed11y-alts').getAttribute('aria-expanded') === 'true') {
-          document.querySelectorAll(`:is(${Ed11y.options.checkRoot}) ` + 'img, [role="img"]').forEach((el) => {
+          document.querySelectorAll(`:is(${Ed11y.options.checkRoots}) ` + 'img, [role="img"]').forEach((el) => {
             let revealedAlt = el.previousElementSibling;
             if (!!revealedAlt && revealedAlt.matches('ed11y-alt-text')) {
               let elComputedStyle = getComputedStyle(el, null);
@@ -904,7 +910,7 @@ class Ed11y {
             }
           });
         }
-        let openTip = document.querySelector(`:is(${Ed11y.options.checkRoot}) ` + 'ed11y-element-result[data-ed11y-open="true"]');
+        let openTip = document.querySelector(`:is(${Ed11y.options.checkRoots}) ` + 'ed11y-element-result[data-ed11y-open="true"]');
         if (openTip) {
           let toggle = openTip.shadowRoot.querySelector('.toggle');
           Ed11y.alignTip(toggle, openTip);
@@ -993,7 +999,7 @@ class Ed11y {
       el.forEach(el => {
         Array.from(roots).forEach(root => {
           root.querySelectorAll(`.${el}`).forEach((x) => x.classList.remove(el));
-        })
+        });
       });
     };
 

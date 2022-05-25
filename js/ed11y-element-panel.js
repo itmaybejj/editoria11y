@@ -305,14 +305,14 @@ class Ed11yElementPanel extends HTMLElement {
   jumpTo(event) {
     // Handle jump
     event.preventDefault();
-    if (!Ed11y.jumpList) {
+    if (!Ed11y.elements.jumpList) {
       Ed11y.buildJumpList();
     }
     // Find our button.
     // todo do we need to jump over dismissed alerts?
     let goNum = parseInt(this.dataset.ed11yGoto);
     // Send to ed11y to make timeouts easier
-    let goto = Ed11y.jumpList[goNum];
+    let goto = Ed11y.elements.jumpList[goNum];
     let gotoResult = Ed11y.results[goto.getAttribute('data-ed11y-result')];
     let bodyStyles = window.getComputedStyle(document.querySelector('body'));
     let gotoOffset = goto.getBoundingClientRect().top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;

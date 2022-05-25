@@ -207,9 +207,13 @@
 
         <div class="positive"><p>SEVERAL WORDS IN A ROW OF CAPS LOCK TEXT WILL TRIGGER A MANUAL CHECK WARNING.</p></div>
         
-        <section id="shadow-root">
-            <h2>Shadow root handling</h2>
+        <section class="shadow-root">
+            <h2 id="shadow-root-1">Shadow root handling 1</h2>
         </section>
+        <section class="shadow-root">
+            <h2 id="shadow-root-2">Shadow root handling 2</h2>
+        </section>
+        
 
 
         <section id="recursion">
@@ -219,6 +223,10 @@
             </div>
             <ul><li><span class="negative">Caps lock test should not flag LI parent</span><ul class="positive"><li >ONLY THE INTERIOR LI SHOULD BE FLAGGED</li></ul></li></ul>
             <table class="positive"><tr><td><h4>ALL CAPS HEADING OUTLINE IN TABLE OUT OF ORDER SHOULD HAVE 3 HITS</h4></td></tr></table>
+        </section>
+
+        <section class="shadow-root">
+            <h2 id="shadow-root-3">Shadow root handling 3</h2>
         </section>
 
 
@@ -241,7 +249,9 @@
                 }
                 customElements.define('shadow-test', shadowTest);
                 let testShadowElement = document.createElement('shadow-test');
-                document.getElementById('shadow-root').append(testShadowElement);
+                document.querySelectorAll('shadow-root').forEach((el) => {
+                    el.append(testShadowElement);
+                });
             </script>
             <link href="./tests.css" rel="stylesheet">
             <script src="../js/ed11y-localization.js"></script>
@@ -257,13 +267,16 @@
             <!-- Instantiate-->
             <script>
                 let shadowHosts = document.querySelectorAll('shadow-test');
-                let shadowRoots = [];
-                shadowHosts.forEach(root => {
-                    shadowRoots.push(root.shadowRoot.querySelector('.wrapper'));
-                })
+                //let shadowRoots = [];
+                //shadowHosts.forEach(root => {
+                //    shadowRoots.push(root.shadowRoot.querySelector('.wrapper'));
+                //})
+                let shadowHostSelectors = 'shadow-test';
                 const ed11y = new Ed11y({
                     alertMode : 'assertive',
-                    shadowRoots : shadowRoots,
+                    //shadowRoots : shadowRoots,
+                    shadowComponents : 'shadow-test', 
+                    checkRoots : 'body', 
                 });
             </script>
             
