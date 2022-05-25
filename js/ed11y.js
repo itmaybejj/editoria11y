@@ -28,7 +28,7 @@ class Ed11y {
 
       // Root area to check and exclusions
       checkRoots: 'body',
-      shadowComponents: [], // provide array built from from querySelectorAll
+      shadowComponents: '', // provide selectors
       containerIgnore: false,
       outlineExclude: '',
       linkIgnoreStrings: '',
@@ -419,38 +419,40 @@ class Ed11y {
       return false;
     };
 
-    Ed11y.findFromRoot = function(array, selector) {
-      let shadowComponents = '';
-      if (Ed11y.options.shadowComponents.length > 0) {
-        shadowComponents = `, ${Ed11y.options.shadowComponents}`;
-      }
+    Ed11y.findFromRoot = function(key, selector) {
+      // Searches within cached root elements for elements to be tested.
       Ed11y.roots.forEach(root => {
-        if (Ed11y.elements[array]) {
-          Ed11y.elements[array] = Ed11y.elements[array].concat(Array.from(root.querySelectorAll(`:is(${selector} ${shadowComponents}) ${Ed11y.ignore}`)));
+        if (Ed11y.elements[key]) {
+          // First pass creates a key, additional passes are concatenated to the key's array.
+          Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector} ${Ed11y.shadowComponents}) ${Ed11y.ignore}`)));
         } else {
-          Ed11y.elements[array] = Array.from(root.querySelectorAll(`:is(${selector} ${shadowComponents}) ${Ed11y.ignore}`));
+          Ed11y.elements[key] = Array.from(root.querySelectorAll(`:is(${selector} ${Ed11y.shadowComponents}) ${Ed11y.ignore}`));
         }
       });
+
+      // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
+      // This repeats the search inside the placeholders, and replaces them with their results.
       if (Ed11y.options.shadowComponents.length > 0) {
         let shadowFind = [];
-        Ed11y.elements[array].forEach((el, i) => {
+        Ed11y.elements[key].forEach((el, i) => {
           if (el.matches(Ed11y.options.shadowComponents)) {
+            // Dive into the shadow root and collect an array of its results.
             shadowFind[i] = el.shadowRoot.querySelectorAll(`:is(${selector} ${Ed11y.ignore})`);
           }
         });
         if (shadowFind.length > 0) {
           for (let index = shadowFind.length - 1; index >= 0; index--) {
-            //shadowFind[index];
             if (shadowFind[index]) {
-              Ed11y.elements[array].splice(index, 1, ...shadowFind[index]);
+              // Replace the placeholder with any sub-hits in the element-to-test array, or nothing.
+              Ed11y.elements[key].splice(index, 1, ...shadowFind[index]);
             }
           }
-        } 
+        }  
       }
     };
 
     Ed11y.findElements = function () {
-      // Find and cache roots elements.
+      // Find and cache all root elements based on user-provided selectors.
       let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
       if (roots.length === 0) {
         Ed11y.roots = document.querySelectorAll('body');
@@ -465,8 +467,17 @@ class Ed11y {
           }
         });
       }
+
+      // Convert the container ignore user option to a CSS :not selector.
       Ed11y.ignore = Ed11y.options.containerIgnore ? `:not(${Ed11y.options.containerIgnore})` : '';
-            
+
+      // Make a copy of the shadowComponents user option as part of an :is() string.
+      Ed11y.shadowComponents = '';
+      if (Ed11y.options.shadowComponents.length > 0) {
+        Ed11y.shadowComponents = `, ${Ed11y.options.shadowComponents}`;
+      }
+      
+      // Call selection iterator function.
       Ed11y.findFromRoot('p', 'p');
       Ed11y.findFromRoot('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]');
       Ed11y.findFromRoot('img', 'img');

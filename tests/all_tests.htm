@@ -213,6 +213,9 @@
         <section class="shadow-root">
             <h2 id="shadow-root-2">Shadow root handling 2</h2>
         </section>
+        <section class="shadow-root-no-hits">
+            <div>This shadow component has no elements to find.</div>
+        </section>
         
 
 
@@ -248,10 +251,33 @@
                 }
                 }
                 customElements.define('shadow-test', shadowTest);
-                let testShadowElement = document.createElement('shadow-test');
-                document.querySelectorAll('shadow-root').forEach((el) => {
+                class shadowTestNoHits extends HTMLElement {
+                    constructor() {
+                        super();
+                    }
+                    connectedCallback() {
+                    if (!this.initialized) {
+                        const shadow = this.attachShadow({mode: 'open'});
+                        let wrapper = document.createElement('div');
+                        wrapper.setAttribute('class','wrapper');
+                        shadow.appendChild(wrapper);
+                        this.initialized = true;
+                        }
+                    }
+                }
+                customElements.define('shadow-test-no-hits', shadowTestNoHits);
+
+                document.querySelectorAll('.shadow-root').forEach((el) => {
+                    let testShadowElement = document.createElement('shadow-test');
                     el.append(testShadowElement);
+                    el.append('hi');
+                })
+
+                document.querySelectorAll('.shadow-root-no-hits').forEach((el) => {
+                    let testShadowElement2 = document.createElement('shadow-test-no-hits');
+                    el.append(testShadowElement2);
                 });
+
             </script>
             <link href="./tests.css" rel="stylesheet">
             <script src="../js/ed11y-localization.js"></script>
@@ -275,7 +301,7 @@
                 const ed11y = new Ed11y({
                     alertMode : 'assertive',
                     //shadowRoots : shadowRoots,
-                    shadowComponents : 'shadow-test', 
+                    shadowComponents : 'shadow-test, shadow-test-no-hits', 
                     checkRoots : 'body', 
                 });
             </script>
