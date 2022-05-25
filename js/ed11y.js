@@ -397,7 +397,7 @@ class Ed11y {
       Ed11y.elements[key] = [];
 
       Ed11y.roots.forEach(root => {
-        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector} ${Ed11y.shadowComponents}) ${Ed11y.ignore}`)));
+        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`${Ed11y.ignore} :is(${selector} ${Ed11y.shadowComponents})${Ed11y.ignore}`)));
       });
       // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
       // This repeats the search inside the placeholders, and replaces them with their results.
@@ -442,6 +442,7 @@ class Ed11y {
 
       // Convert the container ignore user option to a CSS :not selector.
       Ed11y.ignore = Ed11y.options.containerIgnore ? `:not(${Ed11y.options.containerIgnore})` : '';
+      console.log(Ed11y.ignore);
 
       // Make a copy of the shadowComponents user option as part of an :is() string.
       // Todo offer an option to autodetect shadow hosts? 
