@@ -60,6 +60,41 @@ class Ed11yElementResult extends HTMLElement {
           overflow: visible;
           color: ${Ed11y.color.text};
         }
+        .arrow {
+          content: "";
+          position: absolute;
+          transform: rotate(45deg);
+          width: 20px;
+          height: 20px;
+          left: 46px;
+          display: none;
+          background: ${this.primaryColor};
+          background: linear-gradient(135deg, transparent 0%, transparent 48%, ${this.primaryColor} 49%);
+          top: 6px;
+          box-shadow: 0 0 0 2px ${this.bgColor}, 2px 2px 4px ${this.primaryColor}77;
+        }
+        .arrow[data-direction="left"] {
+          left: -18px;
+          background: linear-gradient(45deg, transparent 0%, transparent 48%, ${this.primaryColor} 49%);
+        }
+        .arrow[data-direction="under"] {
+          margin: 33px 0 0 -30px;
+          background: linear-gradient(-135deg, transparent 0%, transparent 48%, ${this.primaryColor} 49%);
+        }
+        .arrow[data-direction="above"] {
+          margin: -33px 0 0 -30px;
+        }
+        .arrow[data-direction="right"] {
+          background: linear-gradient(-135deg, transparent 0%, transparent 48%, ${this.primaryColor} 49%);
+        }
+        @keyframes fade-in {
+          0% {
+            opacity: 0;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
         .tip {
           font-size: 14px;
           border: 2px solid ${this.primaryColor};
@@ -68,8 +103,18 @@ class Ed11yElementResult extends HTMLElement {
           position:relative;
           margin-left: 58px;
           width: clamp(12rem, 96vw, 30rem);
+          display: none;
           box-shadow: 0 0 0 2px ${this.bgColor}, 2px 2px 4px ${this.primaryColor}77;
         }
+        [aria-expanded="true"] ~ .tip, [aria-expanded="true"] ~ .arrow {
+          display: block;
+          animation: fade-in 0.25s ease;
+        }
+        [aria-expanded="true"] ~ .arrow {
+          display: block;
+          animation: fade-in 0.3s ease;
+        }
+
         .title {
           background: ${this.primaryColor};
           color: ${Ed11y.color.bg};
@@ -91,17 +136,6 @@ class Ed11yElementResult extends HTMLElement {
         }
         p:last-child {
           margin-block-end: 0;
-        }
-        .arrow {
-          content: "";
-          position: absolute;
-          transform: rotate(45deg);
-          width: 20px;
-          height: 20px;
-          left: 46px;
-          background: ${this.primaryColor};
-          top: 6px;
-          box-shadow: 0 0 0 2px ${this.bgColor}, 2px 2px 4px ${this.primaryColor}77;
         }
         button {
           margin: 0;
@@ -195,9 +229,6 @@ class Ed11yElementResult extends HTMLElement {
           outline: 2px solid transparent;
           box-shadow: inset 0 0 0 2px ${Ed11y.color.focusRing}, 0 0 0 3px ${Ed11y.color.primary};
         }
-        [aria-expanded="false"] ~ .tip, [aria-expanded="false"] ~ .arrow {
-          display: none;
-        }
       `;
       shadow.appendChild(style);
       shadow.appendChild(this.wrapper);
@@ -225,7 +256,7 @@ class Ed11yElementResult extends HTMLElement {
         color: ${Ed11y.red};
       }
       .toggle:hover, .toggle[aria-expanded='true'] {
-        box-shadow: inset 0 0 0 1px ${Ed11y.red}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 2px ${Ed11y.color.primary};
+        box-shadow: inset 0 0 0 1px ${Ed11y.red}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 3px transparent;
       }
       .toggle::before {
         content: "!";
@@ -247,9 +278,9 @@ class Ed11yElementResult extends HTMLElement {
   }
 
   closeOtherTips() {
-    let openTips = document.querySelectorAll('[data-ed11y-open="true"]');
-    if (openTips) {
-      Array.from(openTips).forEach(openTip => {
+    Ed11y.findElements('openTips','[data-ed11y-open="true"]');
+    if (Ed11y.elements.openTips) {
+      Array.from(Ed11y.elements.openTips).forEach(openTip => {
         openTip.setAttribute('data-ed11y-action', 'close');
       });
     }
@@ -290,14 +321,15 @@ class Ed11yElementResult extends HTMLElement {
         // todo Parameterize
         dismissOKButton.textContent = 'Mark as Checked and OK';
         dismissers.append(dismissOKButton);
-        dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis(this.resultID, 'ok');});
+        dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
       }
       if (Ed11y.options.allowIgnore) {
         let dismissIgnoreButton = document.createElement('button');
         dismissIgnoreButton.classList.add('dismiss');
         dismissIgnoreButton.textContent = 'Ignore';
         dismissers.append(dismissIgnoreButton);
-        dismissIgnoreButton.addEventListener('click', function(){Ed11y.dismissThis(this.resultID, 'ignore');});
+
+        dismissIgnoreButton.addEventListener('click', function(){Ed11y.dismissThis('ignore');});
       }
       content.append(dismissers);
     }
@@ -333,7 +365,7 @@ class Ed11yElementResult extends HTMLElement {
       this.closeOtherTips();
       this.allowOverflow();
       Ed11y.alignTip(this.toggle, this);
-      if (!Ed11y.jumpList) {
+      if (!Ed11y.elements.jumpList) {
         Ed11y.buildJumpList();
       }
       Ed11y.goto = this.getAttribute('data-ed11y-jump-position');

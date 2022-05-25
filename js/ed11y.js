@@ -28,7 +28,7 @@ class Ed11y {
 
       // Root area to check and exclusions
       checkRoots: 'body',
-      shadowComponents: '', // provide selectors
+      shadowComponents: false, // provide selectors as string
       containerIgnore: false,
       outlineExclude: '',
       linkIgnoreStrings: '',
@@ -151,9 +151,8 @@ class Ed11y {
         Ed11y.warningCount = 0;
         Ed11y.dismissedCount = 0;
         Ed11y.mediaCount = 0;
-        Ed11y.elements = [];
-        Ed11y.elements.jumpList = false;
-        Ed11y.findElements();
+        
+        Ed11y.buildElementList();
         let queue = [
           'testLinks',
           'testImages',
@@ -326,12 +325,11 @@ class Ed11y {
     Ed11y.reset = function () {
 
       // Remove error outlines.
-      Ed11y.resetClass(Ed11y.roots, ['ed11y-ring-red', 'ed11y-ring-yellow', 'ed11y-hidden-highlight']);
+      Ed11y.resetClass(['ed11y-ring-red', 'ed11y-ring-yellow', 'ed11y-hidden-highlight']);
 
       // Remove buttons.
-      Ed11y.roots.forEach(root => {
-        root.querySelectorAll('ed11y-element-result, .ed11y-headings-label, .ed11y-reveal-alts').forEach((el) => el.remove());
-      });
+      Ed11y.findElements('reset', 'ed11y-element-result, .ed11y-headings-label, .ed11y-reveal-alts');
+      Ed11y.elements.reset.forEach((el) => el.remove());
 
       // Remove and reset panels and active items.
       // todo mvp remove and prune
@@ -380,7 +378,7 @@ class Ed11y {
 
     // recursively look for titles
     Ed11y.computeTitle = function (el) {
-      // todo last working here:
+      // todo MVP rest of name calculation
       if (el.hasAttribute('title')) {
         return el.getAttribute('title');
       }
@@ -392,47 +390,18 @@ class Ed11y {
       }
     };
 
+    Ed11y.findElements = function(key, selector) {
+      // Like querySelectorAll but hits all roots.
+      
+      // Initialize or reset elements array.
+      Ed11y.elements[key] = [];
 
-
-    /*================== FULL CHECK MODULE ===================*/
-
-    Ed11y.checkFull = function () {
-
-      if (Ed11y.mediaCount > 0) {
-        // todo: localize
-        let prepend = document.createElement('span');
-        // todo translation string.
-        prepend.innerHTML = '<li>There are <span class=\'ed11y-red-text\'>' + Ed11y.mediaCount + '</span> multimedia elements on this page. ' +
-            'Please make sure each provides closed captions (for video) or a transcript (for audio).</li>';
-        document.getElementById('image-list').insertAdjacentElement('beforebegin', prepend);
-      }
-
-      Ed11y.updateCount('full');
-      Ed11y.showResults(true);
-    };
-    // End of show()
-
-    Ed11y.excludeSelector = function(option) {
-      if (option) {
-        return `:not(${option})`;
-      }
-      return false;
-    };
-
-    Ed11y.findFromRoot = function(key, selector) {
-      // Searches within cached root elements for elements to be tested.
       Ed11y.roots.forEach(root => {
-        if (Ed11y.elements[key]) {
-          // First pass creates a key, additional passes are concatenated to the key's array.
-          Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector} ${Ed11y.shadowComponents}) ${Ed11y.ignore}`)));
-        } else {
-          Ed11y.elements[key] = Array.from(root.querySelectorAll(`:is(${selector} ${Ed11y.shadowComponents}) ${Ed11y.ignore}`));
-        }
+        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector} ${Ed11y.shadowComponents}) ${Ed11y.ignore}`)));
       });
-
       // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
       // This repeats the search inside the placeholders, and replaces them with their results.
-      if (Ed11y.options.shadowComponents.length > 0) {
+      if (Ed11y.options.shadowComponents) {
         let shadowFind = [];
         Ed11y.elements[key].forEach((el, i) => {
           if (el.matches(Ed11y.options.shadowComponents)) {
@@ -451,7 +420,10 @@ class Ed11y {
       }
     };
 
-    Ed11y.findElements = function () {
+    Ed11y.buildElementList = function () {
+
+      Ed11y.elements = [];
+
       // Find and cache all root elements based on user-provided selectors.
       let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
       if (roots.length === 0) {
@@ -472,34 +444,44 @@ class Ed11y {
       Ed11y.ignore = Ed11y.options.containerIgnore ? `:not(${Ed11y.options.containerIgnore})` : '';
 
       // Make a copy of the shadowComponents user option as part of an :is() string.
+      // Todo offer an option to autodetect shadow hosts? 
       Ed11y.shadowComponents = '';
       if (Ed11y.options.shadowComponents.length > 0) {
         Ed11y.shadowComponents = `, ${Ed11y.options.shadowComponents}`;
       }
       
       // Call selection iterator function.
-      Ed11y.findFromRoot('p', 'p');
-      Ed11y.findFromRoot('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]');
-      Ed11y.findFromRoot('img', 'img');
-      Ed11y.findFromRoot('a', 'a[href]');
-      Ed11y.findFromRoot('li', 'li');
-      Ed11y.findFromRoot('blockquote', 'blockquote');
-      Ed11y.findFromRoot('iframe', 'iframe');
-      Ed11y.findFromRoot('audio', 'audio');
-      Ed11y.findFromRoot('video', 'video');
-      Ed11y.findFromRoot('table', 'table');
+      Ed11y.findElements('p', 'p');
+      Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]');
+      Ed11y.findElements('img', 'img');
+      Ed11y.findElements('a', 'a[href]');
+      Ed11y.findElements('li', 'li');
+      Ed11y.findElements('blockquote', 'blockquote');
+      Ed11y.findElements('iframe', 'iframe');
+      Ed11y.findElements('audio', 'audio');
+      Ed11y.findElements('video', 'video');
+      Ed11y.findElements('table', 'table');
     };
 
 
-    // End of findElements()
+    // End of buildElementList()
     Ed11y.dismissalKey = function (text) {
       return String(text).substring(0,512);
     };
-    Ed11y.dismissThis = function (id, dismissalType) {
-      let el = Ed11y.results[id][0];
+    Ed11y.dismissThis = function (dismissalType) {
+
+      // Find the active tip and draw its identifying information from the result list
+      Ed11y.findElements('activeTip', 'ed11y-element-result[data-ed11y-open="true"]');
+      let removal = Ed11y.elements.activeTip[0];
+      let id = removal.dataset.ed11yResult;
       let test = Ed11y.results[id][1];
       let dismissalKey = Ed11y.dismissalKey(Ed11y.results[id][4]);
-      // We may get false positives, but let's not store huge keys.
+
+      // Remove tip and reset borders around element
+      Ed11y.resetClass(['ed11y-hidden-highlight','ed11y-ring-red','ed11y-ring-yellow']);
+      removal.parentNode.removeChild(removal);
+
+      // Build dismissal record.
       let dismissal = {};
       dismissal[dismissalKey] = dismissalType;
       if (typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage] == 'undefined') {
@@ -511,10 +493,8 @@ class Ed11y {
       } else {
         Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissalKey] = dismissalType;
       }
-      let removal = document.getElementById('ed11y-result-' + id);
-      Ed11y.resetClass(el, ['ed11y-hidden-highlight','ed11y-ring-red','ed11y-ring-yellow']);
-      removal.parentNode.removeChild(removal);
-      // todo MVP change for direct set of localStorage to handing off to preferred handler?
+
+      // Send record to storage or dispatch an event to an API.
       if (Ed11y.options.syncedDismissals === false) {
         localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
       } else {
@@ -527,17 +507,22 @@ class Ed11y {
         let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
         document.dispatchEvent(ed11yDismissalUpdate);
       }
+
       Ed11y.reset();
       Ed11y.checkAll(false, 'show');
+      let rememberGoto = Ed11y.goto;
       window.setTimeout( function() {
         if (Ed11y.results.length > 0) {
+          Ed11y.goto = (rememberGoto - 1);
+          //Ed11y.panelJumpNext.dataset.ed11yGoto = Ed11y.goto;
+          Ed11y.setCurrentJump();
           Ed11y.panelJumpNext.focus();
         } else {
           // todo mvp test
           let focus = Ed11y.panel.querySelector('#issues');
           focus.focus();
         }
-      }, 500);
+      }, 500, rememberGoto);
     };
 
     Ed11y.clearDismissals = function() {
@@ -567,11 +552,14 @@ class Ed11y {
         }
       });
 
+      Ed11y.buildJumpList();
+
       // Announce that buttons have been placed.
       document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
       if (show === true) {
         window.setTimeout(function () {
           Ed11y.elements.img.forEach((img) => {
+            // todo MVP does any of this still fire???
             // todo what if there is no alt? jQuery fails gracefully this will send null...
             let alt = Ed11y.sanitizeForHTML(img.getAttribute('alt'));
             let src = img.getAttribute('src');
@@ -598,7 +586,10 @@ class Ed11y {
             panelIMG.innerHTML = '<img src="' + src + '" alt="" class="ed11y-thumbnail"/>Alt: ' + alt + '</li>';
             Ed11y.panel.querySelector('#image-list').appendChild(panelIMG);
           });
-          window.setTimeout( function () {
+
+          // todo MVP re-implement alt visualizer
+          /*window.setTimeout( function () {
+            // need to use findElements
             document.querySelectorAll('.ed11y-reveal-alts').forEach(revealed => {
               let img = revealed.nextElementSibling;
               if (img && !img.matches('img')) {
@@ -610,7 +601,7 @@ class Ed11y {
               let newStyle = revealed.getAttribute('style') + ' margin-left: ' + newOffset + 'px !important;';
               revealed.setAttribute('style', newStyle);
             });
-          }, 0);
+          }, 0);*/
         }, 0);
       }
       Ed11y.alignTips();
@@ -620,10 +611,11 @@ class Ed11y {
       window.setTimeout(function () {
         // Nudge offscreen tips back on screen.
         let windowWidth = window.innerWidth;
-        let marks = Array.from(document.querySelectorAll(`:is(${Ed11y.options.checkRoots}) ` + 'ed11y-element-result'));
+        // todo MVP replace with findElements
+        
         let marksToNudge = [];
         // Reading and writing in a loop creates paint thrashing. Read first.
-        marks.forEach(mark => {
+        Ed11y.elements.jumpList.forEach(mark => {
           let offset = mark.getBoundingClientRect();
           let offsetData = 0;
           if (offset.left < 8) {
@@ -637,6 +629,7 @@ class Ed11y {
           marksToNudge.push([mark, offsetData]);
         });
         marksToNudge.forEach(el => {
+          // todo only do this if there's an old value and the new value is not 0
           el[0].style.transform = 'translate(' + el[1] + 'px, 0)';
         });
         if (!Ed11y.bodyStyle) {
@@ -646,10 +639,7 @@ class Ed11y {
     };
 
     Ed11y.paintReady = function() {
-      Ed11y.roots.forEach(root => {
-        // Shadow elements don't inherit styles, so they need their own copy.
-        let paintDelay = document.createElement('style');
-        paintDelay.textContent = 
+      let readyStyle = 
             `ed11y-element-result, ed11y-element-panel {opacity: 1;}
             .ed11y-ring-red {
               box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.red}, 0 0 0 3px ${Ed11y.red}, 0 0 1px 3px;
@@ -661,6 +651,23 @@ class Ed11y {
               outline: 2px solid ${Ed11y.yellow};
               outline-offset: 1px;
             }`;
+
+      Ed11y.roots.forEach((root) => {
+        // Shadow elements don't inherit styles, so they need their own copy.
+        let paintDelay = document.createElement('style');
+        paintDelay.textContent = readyStyle;
+        root.appendChild(paintDelay);
+        if (Ed11y.options.shadowComponents) {
+          root.querySelectorAll(Ed11y.options.shadowComponents).forEach((shadowHost) => {
+            let paintDelay = document.createElement('style');
+            paintDelay.textContent = readyStyle;
+            shadowHost.shadowRoot.appendChild(paintDelay);
+          });
+        }
+      });
+      Ed11y.roots.forEach(root => {
+        // Shadow elements don't inherit styles, so they need their own copy.
+        let paintDelay = document.createElement('style');
         root.appendChild(paintDelay);
       });
       Ed11y.bodyStyle = true;
@@ -706,19 +713,22 @@ class Ed11y {
       if (direction === 'left') {
         let targetOffset = tipWidth + 7;
         tip.setAttribute('style', 'margin-left: -' + targetOffset + 'px;');
-        arrow.setAttribute('style', 'left: -18px;');
+        arrow.dataset.direction = 'left';
       }
       else if (direction === 'under') {
         // Pin to the left edge, unless the tip is not wide enough to reach:
         let nudgeX = tipWidth > tipLeft ? tipLeft - 15 : tipWidth + 8;
-        arrow.setAttribute('style','margin: 33px 0 0 -30px;');
+        arrow.dataset.direction = 'under';
         tip.setAttribute('style', `transform: translate(-${nudgeX}px, 50px);`);
       }
       else if (direction === 'above') {
         let nudgeX = tipWidth > tipLeft ? tipLeft - 15 : tipWidth + 8;
         let nudgeY = tip.offsetHeight + 18;
-        arrow.setAttribute('style','margin: -33px 0 0 -30px;');
+        arrow.dataset.direction = 'above';
         tip.setAttribute('style', `transform: translate(-${nudgeX}px, -${nudgeY}px);`);
+      }
+      else {
+        arrow.dataset.direction = 'right';
       }
     };
 
@@ -732,10 +742,8 @@ class Ed11y {
       Ed11y.activateTab(event.target, false);
     };
 
-    // Runs once
     Ed11y.buildPanels = function () {
       let panel = document.createElement('ed11y-element-panel');
-      // todo mvp move to body tag
       document.querySelector('body').appendChild(panel);
       
       Ed11y.togglePanel = function () {
@@ -770,7 +778,9 @@ class Ed11y {
         Ed11y.panel.querySelector('[aria-selected=true]')?.setAttribute('aria-selected', 'false');
         Ed11y.panel.querySelector('#' + id).setAttribute('aria-selected', 'true');
         Ed11y.panel.querySelector('#' + id + '-tab')?.classList.remove('hidden');
-        document.querySelectorAll('ed11y-element-heading-label')?.forEach(el => {el.remove();});
+        // todo MVP change to findElements
+        Ed11y.findElements('remove','ed11y-element-heading-label');
+        Ed11y.elements.remove?.forEach(el => {el.remove();});
         
         // Show extras
         switch (id) {
@@ -791,11 +801,7 @@ class Ed11y {
 
       Ed11y.showHeadingsPanel = function() {
         // Visualize the document outline
-
-        // todo MVP: if there are multiple checkRootss, headings appear grouped by checkRoots, not in document order.
-        // probably need to switch to rebuilding the outline from scratch when the panel opens, and ignore shadow dom components.
-        // may need to walk the DOM for all shadow hosts, flag them so they are CSS selectable, then walk again for all headings and shadow hosts, then process in order. fun.
-        
+   
         let panelOutline = Ed11y.panel.querySelector('#outline');
         panelOutline.innerHTML = '';
         Ed11y.headingOutline.forEach((el, i) => {
@@ -810,7 +816,7 @@ class Ed11y {
           li.classList.add('level' + level);
           let message = el[2] && !el[5] ? el[2] : ''; // Has an error message and is not ignored.
           if (message) {
-            // todo: communicate level? Add alert title?
+            // todo: communicate alert level? Add alert title?
             li.classList.add('has-issues');
           }
           li.style.setProperty('margin-left', leftPad + 'px');        
@@ -853,13 +859,8 @@ class Ed11y {
         helpTab.innerHTML = Ed11y.M.panelHelp;
       };
 
-
       Ed11y.buildJumpList = function() {
-        // Ed11y.results is in detected order and includes dismissed results, this will be in DOM order.
-        // todo MVP shadow roots are out of order
-
-        //Ed11y.elements.jumpList = document.querySelectorAll('ed11y-element-result');
-        Ed11y.findFromRoot('jumpList','ed11y-element-result');
+        Ed11y.findElements('jumpList','ed11y-element-result');
         Ed11y.elements.jumpList.forEach((result, i) => {
           result.dataset.ed11yJumpPosition = i; 
         });
@@ -867,15 +868,15 @@ class Ed11y {
 
       Ed11y.setCurrentJump = function() {
         // Set next/previous buttons
-        // TodoMVP handle one and zero goMax
+        // TodoMVP check on behavior for one and zero goMax
         let goMax = Ed11y.elements.jumpList.length - 1;
         let goNext = 0;
         if (Ed11y.totalCount > 1) {
           // todo: shouldn't show on load
           Ed11y.panelJumpPrev.removeAttribute('hidden');
         }
-        if (Ed11y.goto == goMax) {
-          // Reached end of loop
+        if (Ed11y.goto == goMax || Ed11y.goto > goMax) {
+          // Reached end of loop or dismissal pushed us out of loop
           goNext = 0;
           Ed11y.nextText = 'First';
         } else {
@@ -896,32 +897,31 @@ class Ed11y {
       };
 
       Ed11y.minimize = function () {
-        // todo MVP minimize and close are not fully implemented yet.
-        let minimized = Ed11y.panel.classList.contains('minimized') === 'true' ? false : true;
+        let minimized = Ed11y.panel.classList.contains('minimized') === 'true' ? true : false;
         Ed11y.panel.classList.toggle('minimized');
         if (minimized === false) {
           window.setTimeout(function() {
-            // todo MVP this is not working
-            Ed11y.panel.getElementById('ed11y-main-toggle').focus();
-          }, 1000);
+            Ed11y.panelToggle.focus();
+          }, 500);
         }
       };
 
       Ed11y.windowResize = function() {
         // todo MVP rewrite for alts; tips works now
-        if (Ed11y.panel.querySelector('#ed11y-alts').getAttribute('aria-expanded') === 'true') {
+        /*if (Ed11y.panel.querySelector('#alts').getAttribute('aria-expanded') === 'true') {
+          // change to findElements
           document.querySelectorAll(`:is(${Ed11y.options.checkRoots}) ` + 'img, [role="img"]').forEach((el) => {
             let revealedAlt = el.previousElementSibling;
             if (!!revealedAlt && revealedAlt.matches('ed11y-alt-text')) {
               let elComputedStyle = getComputedStyle(el, null);
               let width = 'width:' + elComputedStyle.width + '; ';
               let height = 'height:' + elComputedStyle.height + '; ';
-              // todo mvp
               revealedAlt.setAttribute('style', height + width);
             }
           });
-        }
-        let openTip = document.querySelector(`:is(${Ed11y.options.checkRoots}) ` + 'ed11y-element-result[data-ed11y-open="true"]');
+        }*/
+        
+        let openTip = Ed11y.getOpenTip();
         if (openTip) {
           let toggle = openTip.shadowRoot.querySelector('.toggle');
           Ed11y.alignTip(toggle, openTip);
@@ -933,13 +933,16 @@ class Ed11y {
       // todo mvp rewrite
       Ed11y.escapeWatch = function(event) {
         if (event.keyCode === 27) {
-          if (event.target.closest('.active, ed11y-element-panel')) {
+          if (event.target.closest('ed11y-element-panel')) {
             // panel
             Ed11y.panelToggle.focus();
             Ed11y.panelToggle.click();
-          } else if (event.target.closest('.ed11y-result, ed11y-element-result')) {
-            let activeTip = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
-            activeTip?.setAttribute('data-ed11y-action', 'shut');
+          } else if (event.target.closest('ed11y-element-result')) {
+            // todo mvp findElements
+            let openTip = Ed11y.getOpenTip();
+            if (openTip) {
+              openTip.setAttribute('data-ed11y-action', 'shut');
+            }
           }
         }
       };
@@ -1006,13 +1009,18 @@ class Ed11y {
       return el.innerText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
     };
 
-    Ed11y.resetClass = (roots, el) => {
-      el.forEach(el => {
-        Array.from(roots).forEach(root => {
-          root.querySelectorAll(`.${el}`).forEach((x) => x.classList.remove(el));
+    Ed11y.resetClass = function (classes) {
+      classes?.forEach((el) => {
+        let thisClass = el;
+        Ed11y.findElements('reset', `.${thisClass}`);
+        Ed11y.elements.reset?.forEach(el => {
+          el.classList.remove(thisClass);
         });
       });
     };
+
+    
+    
 
     // Is this still needed when we use real buttons? getting doubleclick on FF
     Ed11y.keyboardClick = function(event) {
@@ -1088,6 +1096,12 @@ class Ed11y {
       return el.closest('a[href]');
     };
 
+    Ed11y.getOpenTip = function() {
+      Ed11y.findElements('openTip', 'ed11y-element-result[data-ed11y-open="true"]');
+      let openTip = Ed11y.elements.openTip[0];
+      return openTip ? openTip : false;
+    };
+
     Ed11y.srcMatchesOptions = function(source, option) {
       if (option.length > 0 && source?.length > 0) {
         let selectorArray = option.split(/\s*[\s,]\s*/).map((el) => {
@@ -1154,7 +1168,7 @@ class Ed11y {
     };
 
     if (CSS.supports('selector(:is(body))')) {
-      // Older browsers will gracefully stop execution here.
+      // Older browsers will stop execution here.
       Ed11y.initialize();
     }
   }

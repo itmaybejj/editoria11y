@@ -209,7 +209,7 @@ class Ed11yElementPanel extends HTMLElement {
           background: #fefefe;
         }
         .shut.errors #main-toggle:hover, .minimized.errors #main-toggle:hover {
-          box-shadow: inset 0 0 0 1px #b80519, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 4px ${Ed11y.red};
+          box-shadow: inset 0 0 0 1px #b80519, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 3px ${Ed11y.red}, 0 0 0 4px transparent;
         }
         .minimized .toggle-count {
           display: block;
