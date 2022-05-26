@@ -10,29 +10,27 @@ class Ed11yElementAlt extends HTMLElement {
       const shadow = this.attachShadow({mode: 'open'});
       let altTextWrapper = document.createElement('div');
       altTextWrapper.setAttribute('class','wrapper');
-      let css = this.getAttribute('style');
-      let alt = this.dataset.alt;
-      if (alt === 'null') {
-        alt = '(missing!)';
-      } else if (alt === '') {
-        alt = '(none; image is marked decorative)';
-      }
-      altTextWrapper.setAttribute('style', css);
-      let altText = document.createElement('span');
-      altText.textContent = 'Alt text: ' + alt;
-      altTextWrapper.appendChild(altText);
+      let img = Ed11y.imageAlts[this.dataset.ed11yImg];
+      // img[el, src, altLabel, altStyle]
+     
+      let altSpan = document.createElement('span');
+      altSpan.textContent = img[2];
+      altSpan.classList.add(img[3]);
+      altTextWrapper.appendChild(altSpan);
       const style = document.createElement('style');
-      // todo have wrapper calculate z-index and offset of image
       style.textContent = Ed11y.baseCSS + `
         :host {
           position: absolute;
         }
         div {
-          position: relative;
+          position: absolute;
+          bottom: 0;
+          left:0;
+          right:0;
         }
         span {
-          background: #3679b0f3;
-          color: #fff;
+          background: ${Ed11y.color.primary}f3;
+          color: ${Ed11y.color.bg};
           z-index: 100;
           font-weight: 500;
           padding: 6px;
@@ -40,7 +38,10 @@ class Ed11yElementAlt extends HTMLElement {
           bottom: 12px;
           left: 0;
           right: 0;
+          box-shadow: 0 1px, 0 -1px; 
         }
+        .warning { background: ${Ed11y.yellow}; color: #111;}
+        .error { background: ${Ed11y.color.bgHighlight};}
       `;
       shadow.appendChild(style);
       shadow.appendChild(altTextWrapper);
@@ -48,13 +49,5 @@ class Ed11yElementAlt extends HTMLElement {
     }
   }
 
-  static get observedAttributes() { return ['style']; }
-
-  attributeChangedCallback(attrName, oldValue, newValue) {
-    if (attrName === 'style' && this.initialized === true ) {
-      let div = this.shadowRoot?.querySelector('div');
-      div.setAttribute('style', newValue);
-    }
-  }
 }
 customElements.define('ed11y-element-alt', Ed11yElementAlt);

@@ -579,31 +579,10 @@ class Ed11y {
             }
             let panelIMG = document.createElement('li');
             //?? still
-            if (img.classList.contains('ed11y-error-border')) {
-              panelIMG.classList.add('ed11y-error-border');
-            }
-            else if (img.classList.contains('ed11y-warning-border')) {
-              panelIMG.classList.add('ed11y-warning-border');
-            }
             panelIMG.innerHTML = '<img src="' + src + '" alt="" class="ed11y-thumbnail"/>Alt: ' + alt + '</li>';
             Ed11y.panel.querySelector('#image-list').appendChild(panelIMG);
           });
 
-          // todo MVP re-implement alt visualizer
-          /*window.setTimeout( function () {
-            // need to use findElements
-            document.querySelectorAll('.ed11y-reveal-alts').forEach(revealed => {
-              let img = revealed.nextElementSibling;
-              if (img && !img.matches('img')) {
-                img = img.nextElementSibling;
-              }
-              let revealedOffset = revealed.getBoundingClientRect();
-              let imgOffset = img.getBoundingClientRect();
-              let newOffset = imgOffset.left - revealedOffset.left;
-              let newStyle = revealed.getAttribute('style') + ' margin-left: ' + newOffset + 'px !important;';
-              revealed.setAttribute('style', newStyle);
-            });
-          }, 0);*/
         }, 0);
       }
       Ed11y.alignTips();
@@ -830,30 +809,51 @@ class Ed11y {
         });
       };
 
+      Ed11y.alignAlts = function() {
+        // Attempts to put alt text visualization on top of images.
+        // Todo: this handles inline images in links quite poorly.
+        Ed11y.findElements('altMark', 'ed11y-element-alt');
+        if (Ed11y.elements.altMark) {
+          Ed11y.elements.altMark.forEach((el) => {
+            let id = el.dataset.ed11yImg;
+            el.setAttribute('style','');
+            let img = Ed11y.imageAlts[id][0];
+            let markOffset = el.getBoundingClientRect();
+            let imgOffset = img.getBoundingClientRect();
+            let newOffset = imgOffset.left - markOffset.left;
+            let height = getComputedStyle(img).height;
+            height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
+            el.setAttribute('style', `transform: translate(${newOffset}px, 0px); height: ${height}px; width: ${img.offsetWidth}px;`);
+          });
+        }
+      };
+
       Ed11y.showAltPanel = function() {
         // visualize image alts
         let altList = Ed11y.panel.querySelector('#alt-list');
         altList.innerHTML = '';
+        
         Ed11y.imageAlts.forEach((el, i) => {
-          let mark = document.createElement('ed11y-element-alt-label');
-          mark.dataset.ed11yAlt = i;
-          //[el, alt, src, error]
-          el[0].insertAdjacentElement('afterbegin', mark);
+          // el[el, src, altLabel, altStyle]
+          
+          // Label images
+          let mark = document.createElement('ed11y-element-alt');
+          mark.dataset.ed11yImg = i;
+          el[0].insertAdjacentElement('beforebegin', mark);         
+
+          // Build alt list in panel
           let userText = document.createElement('span');
-          userText.textContent = el[1];
+          userText.textContent = el[2];
           let li = document.createElement('li');
-          if (el[3] && !el[5]) {
-            // Has an error and is not ignored.
-            // todo: communicate level
-            li.classList.add('has-issues');
-          }
+          li.classList.add(el[3]);
           let img = document.createElement('img');
-          img.setAttribute('src', el[2]);
+          img.setAttribute('src', el[1]);
           img.setAttribute('alt', '');
           li.append(img);
           li.append(userText);
           altList.append(li);
         });
+        Ed11y.alignAlts();
       };
 
       Ed11y.showHelpPanel = function() {
@@ -909,19 +909,7 @@ class Ed11y {
       };
 
       Ed11y.windowResize = function() {
-        // todo MVP rewrite for alts; tips works now
-        /*if (Ed11y.panel.querySelector('#alts').getAttribute('aria-expanded') === 'true') {
-          // change to findElements
-          document.querySelectorAll(`:is(${Ed11y.options.checkRoots}) ` + 'img, [role="img"]').forEach((el) => {
-            let revealedAlt = el.previousElementSibling;
-            if (!!revealedAlt && revealedAlt.matches('ed11y-alt-text')) {
-              let elComputedStyle = getComputedStyle(el, null);
-              let width = 'width:' + elComputedStyle.width + '; ';
-              let height = 'height:' + elComputedStyle.height + '; ';
-              revealedAlt.setAttribute('style', height + width);
-            }
-          });
-        }*/
+        Ed11y.alignAlts();
         
         let openTip = Ed11y.getOpenTip();
         if (openTip) {

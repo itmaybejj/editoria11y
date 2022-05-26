@@ -15,6 +15,7 @@ class Ed11yTestImages {
     Ed11y.elements.img.forEach((el) => {
 
       let alt = el.getAttribute('alt');
+      let altLabel = 'Alt text: ';
       let src = el.getAttribute('src');
       let error = false;
       let dismissable = true;
@@ -25,12 +26,16 @@ class Ed11yTestImages {
         // No alt attribute at all.
         error = 'altMissing';
         dismissable = false;
+        // todo parameterize
+        altLabel += '(missing!)';
       }
       else if (alt.length === 0 && !parentLink) {
         // Empty alt not part of link. 
         error = 'altNull';
+        altLabel += '(none; image marked as decorative)';
       }
       else {
+        altLabel += alt;
         // Check if alt text is descriptive.
         // todo parameterize
         let altUrl = ['.png', '.jpg', '.jpeg', '.gif'];
@@ -67,8 +72,6 @@ class Ed11yTestImages {
           error = 'altLong';
         }
 
-        Ed11y.imageAlts.push([el, alt, src, error]);
-
         // If there is a parent link...
         if (parentLink) {
           el = parentLink;
@@ -84,12 +87,16 @@ class Ed11yTestImages {
         }
       }
       // Return results
+      let altStyle = 'pass';
+
       if (error) {
         let message = Ed11y.M[error].tip(Ed11y.sanitizeForHTML(alt));
         let baseSrc = src.split('?')[0];
         dismissable = dismissable ? Ed11y.dismissalKey(baseSrc + alt) : false;
         Ed11y.results.push([el, error, message, 'beforebegin', dismissable]); 
+        altStyle = dismissable === false ? 'error' : 'warning'; 
       }
+      Ed11y.imageAlts.push([el, src, altLabel, altStyle]);
 
     });
     

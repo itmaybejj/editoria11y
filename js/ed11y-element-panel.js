@@ -239,9 +239,13 @@ class Ed11yElementPanel extends HTMLElement {
           box-shadow: inset 0 0 0 1px ${Ed11y.color.text};
         }
 
-        .has-issues {
+        .warning {
+          background: ${Ed11y.yellow};
+          color: #111;
+        }
+        .error {
           background: ${Ed11y.color.bgHighlight};
-          color: ${Ed11y.color.bg};
+          color: #fff;
         }
         #issues-tab:not(.hidden) {
           display: flex;
@@ -267,7 +271,7 @@ class Ed11yElementPanel extends HTMLElement {
           gap: 1em;
           padding: 8px;
           margin: 8px 0;
-          box-shadow: 0 4px ${Ed11y.color.bg}, 0 5px ${Ed11y.color.primary}dd;
+          box-shadow: 0 4px ${Ed11y.color.bg}, 0 5px ${Ed11y.color.primary}22;
         }
         #alt-list li span {
           flex: 0 1 calc(100% - 100px);
@@ -422,20 +426,22 @@ class Ed11yElementHeadingLabel extends HTMLElement {
       let issues = !!result[2];
       wrapper.classList.add('issue' + issues);
       let style = document.createElement('style');
+      let fontSize = Math.max(52 - 8 * result[1], 12);
       style.textContent = Ed11y.baseCSS + `
         :host {
           position: absolute;
           margin-top:-.5em;
         }
         .wrapper {          
-          background: ${Ed11y.color.secondary};
+          background: ${Ed11y.color.primary}ee;
           color: ${Ed11y.color.bg};
-          box-shadow: 0 0 0 1px ${Ed11y.color.bg}, 0 0 0 3px ${Ed11y.color.secondary}, 1px 1px 5px 2px #000;
-          padding: 0 7px;
+          box-shadow: 0 0 0 1px ${Ed11y.color.bg}ee, 0 0 0 4px ${Ed11y.color.primary}ee, 1px 1px 5px 2px #000;
+          padding: 0 .5em;
+          line-height: 1.2;
           border-radius: 2px;
           margin-left: 35px;
           font-weight: 400;
-          font-size: 12px;
+          font-size: ${fontSize}px;
         }
       `;
       shadow.appendChild(style);
@@ -445,45 +451,3 @@ class Ed11yElementHeadingLabel extends HTMLElement {
   }
 }
 customElements.define('ed11y-element-heading-label', Ed11yElementHeadingLabel);
-
-class Ed11yElementAltLabel extends HTMLElement {
-  constructor() {
-    super();
-  }
-  connectedCallback() {
-    if (!this.initialized) {
-      const shadow = this.attachShadow({mode: 'open'});
-      let wrapper = document.createElement('div');
-      wrapper.setAttribute('class','wrapper');
-      let i = this.dataset.ed11yAlt;
-      let result = Ed11y.imageAlts[i];
-      wrapper.innerHTML = 'Alt text: ' + result[1];
-      let issues = !!result[2];
-      wrapper.classList.add('issue' + issues);
-      let style = document.createElement('style');
-      style.textContent = Ed11y.baseCSS + `
-        :host {
-          position: absolute;
-          margin-top:-.5em;
-        }
-        .wrapper {          
-          background: ${Ed11y.color.bg};
-          color: ${Ed11y.color.text};
-          box-shadow: 0 0 0 1px ${Ed11y.color.primary}, 0 0 0 4px ${Ed11y.color.bg}, 0 0 0 5px ${Ed11y.color.primary}; 
-          padding: .25em .5em;
-          border-radius: 3px;
-          margin-left: 35px;
-          font-weight: 400;
-        }
-        .issuetrue {
-          background: ${Ed11y.color.primaryAlert};
-          color: ${Ed11y.color.bg};
-        }
-      `;
-      shadow.appendChild(style);
-      shadow.appendChild(wrapper);
-      this.initialized = true;
-    }
-  }
-}
-customElements.define('ed11y-element-alt-label', Ed11yElementAltLabel);
