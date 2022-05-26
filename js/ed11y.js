@@ -29,7 +29,8 @@ class Ed11y {
       // Root area to check and exclusions
       checkRoots: 'body',
       shadowComponents: false, // provide selectors as string
-      containerIgnore: false,
+      ignoreElements: false, // provide selectors against element, e.g., "nav a, .card *"
+      // todo
       outlineExclude: '',
       linkIgnoreStrings: '',
       doNotRun: '',     
@@ -397,7 +398,7 @@ class Ed11y {
       Ed11y.elements[key] = [];
 
       Ed11y.roots.forEach(root => {
-        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`${Ed11y.ignore} :is(${selector} ${Ed11y.shadowComponents})${Ed11y.ignore}`)));
+        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector} ${Ed11y.shadowComponents})${Ed11y.ignore}`)));
       });
       // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
       // This repeats the search inside the placeholders, and replaces them with their results.
@@ -441,7 +442,7 @@ class Ed11y {
       }
 
       // Convert the container ignore user option to a CSS :not selector.
-      Ed11y.ignore = Ed11y.options.containerIgnore ? `:not(${Ed11y.options.containerIgnore})` : '';
+      Ed11y.ignore = Ed11y.options.ignoreElements ? `:not(${Ed11y.options.ignoreElements})` : '';
       console.log(Ed11y.ignore);
 
       // Make a copy of the shadowComponents user option as part of an :is() string.
