@@ -16,8 +16,8 @@ const ed11yLang = {
             <p>Note that it <strong>only</strong> checks editorial content; your site's theme needs its own <a href='https://webaim.org/resources/evalquickref/'>accessibility testing</a>.<p>
             <p>Have a bug or feature request? <a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Contact the Editoria11y maintainers</a>.</p>
         `,
-    jumpedToInvisibleTip: 'The element with this issue is not currently visible; it may be hidden or inside a tab or accordion. I will outline its container.',
-    jumpedToAriaHiddenTip: 'The element with this issue has been marked as hidden from screen readers. It may be in an unopened tab or accordion, so I will outline its container.',
+    jumpedToInvisibleTip: 'The element with this issue may currently be invisible.',
+    jumpedToAriaHiddenTip: 'The element with this issue has an "aria-hidden" attribute and may be invisible or off screen.',
 
     // Tooltips for heading tests
 

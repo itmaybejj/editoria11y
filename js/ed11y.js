@@ -154,6 +154,7 @@ class Ed11y {
         Ed11y.mediaCount = 0;
         
         Ed11y.buildElementList();
+        
         let queue = [
           'testLinks',
           'testImages',
@@ -161,17 +162,18 @@ class Ed11y {
           'testText',
           'testEmbeds',
         ];
-        // todo: handle custom rules and inbound synced results (e.g, broken links)
         queue.forEach((test) => {
           window.setTimeout(function(){
             Ed11y[test].check();
           },0,test);
         });
+        // todo: handle custom rules and inbound synced results (e.g, broken links)
+        // todo: test form labels
+
         window.setTimeout(function() {
           Ed11y.updatePanel(onLoad, showPanel);
         },0);
-        // forms is disabled:
-        // Ed11y.checkLabels();
+
       }
       else {
         Ed11y.reset();
@@ -200,27 +202,64 @@ class Ed11y {
           Ed11y.results[i][5] = false;
         }
       }
+
+      Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
+
+      if (Ed11y.totalCount > 0) {
+        Ed11y.panelJumpNext.removeAttribute('hidden');
+        if (Ed11y.totalCount < 2) {
+          Ed11y.panelJumpPrev.setAttribute('hidden','');
+        } else {
+          Ed11y.panelJumpPrev.removeAttribute('hidden');
+        }
+        if (Ed11y.errorCount > 0) {
+          Ed11y.panel.classList.remove('warnings');
+          Ed11y.panel.classList.add('errors');
+        }
+        else if (Ed11y.warningCount > 0) {
+          Ed11y.panel.classList.remove('errors');
+          Ed11y.panel.classList.add('warnings');
+        }
+        Ed11y.panelCount.textCount = Ed11y.totalCount;
+        Ed11y.panelCount.style.display = 'inline-block';
+        Ed11y.panelMessage.innerHTML = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
+        Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
+      }
+      else {
+        Ed11y.panelJumpNext.setAttribute('hidden', '');
+        Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
+        Ed11y.panelCount.style.display = 'display: none;';
+        Ed11y.panel.classList.remove('warnings');
+        Ed11y.panel.classList.remove('errors');
+        Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
+      }
+      if (Ed11y.dismissedCount > 0) {
+        Ed11y.restoreDismissed.removeAttribute('hidden');
+      }
+      Ed11y.panel.classList.remove('ed11y-preload');
+
       if (onLoad === true) {
         // First export a copy of the results for synchronizers
-        let syncResults = new CustomEvent('ed11yResults');
-        document.dispatchEvent(syncResults);
+        window.setTimeout(function() {
+          let syncResults = new CustomEvent('ed11yResults');
+          document.dispatchEvent(syncResults);
+        },0);
       }
     };
 
     Ed11y.updatePanel = function (onLoad, showPanel) {
-      // Todo move these things to data attributes to move into panel JS
+      
       if (onLoad === true) {
-        Ed11y.buildPanels();
+        // Create the panel if it doesn't exist yet
+        let panel = document.createElement('ed11y-element-panel');
+        document.querySelector('body').appendChild(panel);
       }
+
       Ed11y.countAlerts(onLoad);
-      if (Ed11y.dismissedCount > 0) {
-        Ed11y.restoreDismissed.removeAttribute('hidden');
-      }
-      Ed11y.totalFound = Ed11y.errorCount + Ed11y.warningCount;
-      Ed11y.updateCount('quick');
-      if (onLoad === true && Ed11y.totalFound > 0) {
+      
+      if (onLoad === true && Ed11y.totalCount > 0) {
         // Determine if panel should open automatically.
-        if (Ed11y.localDataParsed[Ed11y.options.currentPage] === Ed11y.totalFound) {
+        if (Ed11y.localDataParsed[Ed11y.options.currentPage] === Ed11y.totalCount) {
           // User has already seen these errors, panel will not open.
           showPanel = 'seen';
         }
@@ -229,14 +268,17 @@ class Ed11y {
           // CMS integrations can set this dynamically.
           showPanel = 'show';
         }
-        Ed11y.localDataParsed[Ed11y.options.currentPage] = Ed11y.totalFound;
+        Ed11y.localDataParsed[Ed11y.options.currentPage] = Ed11y.totalCount;
         window.setTimeout(function() {
           Ed11y.announce.innerHTML = Ed11y.getText(Ed11y.panelMessage);
         }, 1500);
       }
-      else if (onLoad === true && Ed11y.totalFound === 0) {
+      else if (onLoad === true && Ed11y.totalCount === 0) {
         showPanel = 'pass';
       }
+
+      
+
       // Now we can open or close the panel.
       if (showPanel !== 'show') {
         Ed11y.reset();
@@ -287,53 +329,13 @@ class Ed11y {
       location.insertAdjacentElement(position, mark);
     };
 
-    // Show a warning/error count on the toggle button.
-    Ed11y.updateCount = function () {
-      Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
-      if (Ed11y.totalCount > 0) {
-        Ed11y.panelJumpNext.removeAttribute('hidden');
-        if(Ed11y.totalCount < 2) {
-          Ed11y.panelJumpPrev.setAttribute('hidden','');
-        } else {
-          Ed11y.panelJumpPrev.removeAttribute('hidden');
-        }
-        if (Ed11y.errorCount > 0) {
-          Ed11y.panel.classList.remove('warnings');
-          Ed11y.panel.classList.add('errors');
-        }
-        else if (Ed11y.warningCount > 0) {
-          Ed11y.panel.classList.remove('errors');
-          Ed11y.panel.classList.add('warnings');
-        }
-        Ed11y.panelCount.textCount = Ed11y.totalCount;
-        Ed11y.panelCount.style.display = 'inline-block';
-        Ed11y.panelMessage.innerHTML = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
-        Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
-      }
-      else {
-        Ed11y.panelJumpNext.setAttribute('hidden', '');
-        Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
-        Ed11y.panelCount.style.display = 'display: none;';
-        Ed11y.panel.classList.remove('warnings');
-        Ed11y.panel.classList.remove('errors');
-        Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
-      }
-      Ed11y.panel.classList.remove('ed11y-preload');
-    };
-
-    // Resets all changes made by the tool. Removing outlines and
-    // additional spans.
     Ed11y.reset = function () {
-
-      // Remove error outlines.
+      // Reset insertions into body content.
       Ed11y.resetClass(['ed11y-ring-red', 'ed11y-ring-yellow', 'ed11y-hidden-highlight']);
-
-      // Remove buttons.
-      Ed11y.findElements('reset', 'ed11y-element-result, .ed11y-headings-label, .ed11y-reveal-alts');
+      Ed11y.findElements('reset', 'ed11y-element-result, .ed11y-element-heading-label, .ed11y-element-alt');
       Ed11y.elements.reset.forEach((el) => el.remove());
 
-      // Remove and reset panels and active items.
-      // todo mvp remove and prune
+      // Reset main panel.
       Ed11y.panelJumpNext.setAttribute('data-ed11y-goto', '0');
       Ed11y.panelJumpPrev.setAttribute('data-ed11y-goto', '0');
       Ed11y.panel.classList.add('shut');
@@ -342,16 +344,15 @@ class Ed11y {
       Ed11y.running = false;
     };
 
-    
-
     Ed11y.linkText = (linkText) => {
-      // todo: This is only used in Images???
+      // todo: This is only used in Images??? Review all text value diving.
       linkText = linkText.replace(Ed11y.options.linkIgnoreStrings,'');
       linkText = linkText.replace(/'|"|-|\.|\s+/g, '');
       return linkText;
     };
 
-    // Handle aria-label or labelled by
+    // Handle aria-label or labelled-by
+    // todo: evaluate new Sa11y code
     Ed11y.computeAriaLabel = function (el) {
       // Todo: what if there is a span inside element with a label?
       if (el.hasAttribute('[aria-label]')) {
@@ -392,8 +393,10 @@ class Ed11y {
     };
 
     Ed11y.findElements = function(key, selector) {
-      // Like querySelectorAll but hits all roots.
+      // Like querySelectorAll limited to checkRoots, with recursion to dive shadow components.
       
+      // Todo: function and parameter to auto-detect shadow components.
+
       // Initialize or reset elements array.
       Ed11y.elements[key] = [];
 
@@ -407,7 +410,7 @@ class Ed11y {
         Ed11y.elements[key].forEach((el, i) => {
           if (el.matches(Ed11y.options.shadowComponents)) {
             // Dive into the shadow root and collect an array of its results.
-            shadowFind[i] = el.shadowRoot.querySelectorAll(`:is(${selector} ${Ed11y.ignore})`);
+            shadowFind[i] = el.shadowRoot.querySelectorAll(`:is(${selector})${Ed11y.ignore}`);
           }
         });
         if (shadowFind.length > 0) {
@@ -443,7 +446,6 @@ class Ed11y {
 
       // Convert the container ignore user option to a CSS :not selector.
       Ed11y.ignore = Ed11y.options.ignoreElements ? `:not(${Ed11y.options.ignoreElements})` : '';
-      console.log(Ed11y.ignore);
 
       // Make a copy of the shadowComponents user option as part of an :is() string.
       // Todo offer an option to autodetect shadow hosts? 
@@ -471,6 +473,8 @@ class Ed11y {
       return String(text).substring(0,512);
     };
     Ed11y.dismissThis = function (dismissalType) {
+      // Todo MVP: help button or link
+      // Todo: if panel is minimized, it pops open. Should preserve state.
 
       // Find the active tip and draw its identifying information from the result list
       Ed11y.findElements('activeTip', 'ed11y-element-result[data-ed11y-open="true"]');
@@ -545,7 +549,18 @@ class Ed11y {
       Ed11y.checkAll(false, 'show');
     };
 
-    Ed11y.showResults = function (show) {
+    Ed11y.dismissHelp = function(el) {
+      let help = document.createElement('p');
+      help.setAttribute('tabindex', '-1');
+      help.classList.add('help');
+      // todo parameterize and write more gooder
+      help.textContent = ('Dismissing this manual check only affects the current page. To mark this item as OK site-wide, add it to the global "ignore" list in the module settings.');
+      el.parentElement.append(help);
+      help.focus();
+      el.remove();
+    };
+
+    Ed11y.showResults = function () {
       // Todo: optimize? This function is expensive.
 
       Ed11y.results?.forEach(function (el, i) {
@@ -558,33 +573,7 @@ class Ed11y {
 
       // Announce that buttons have been placed.
       document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
-      if (show === true) {
-        window.setTimeout(function () {
-          Ed11y.elements.img.forEach((img) => {
-            // todo MVP does any of this still fire???
-            // todo what if there is no alt? jQuery fails gracefully this will send null...
-            let alt = Ed11y.sanitizeForHTML(img.getAttribute('alt'));
-            let src = img.getAttribute('src');
-            let imgStyles = getComputedStyle(img, null);
-            let injectAlt = document.createElement('ed11y-element-alt');
-            injectAlt.style.width = imgStyles.width;
-            injectAlt.style.height = imgStyles.height;
-            injectAlt.dataset.alt = alt;
-            //?? still
-            if (img.previousElementSibling?.classList.contains('ed11y-instance-inline') === true) {
-              img.previousElementSibling.insertAdjacentElement('beforebegin', injectAlt);
-            }
-            else {
-              img.insertAdjacentElement('beforebegin', injectAlt);
-            }
-            let panelIMG = document.createElement('li');
-            //?? still
-            panelIMG.innerHTML = '<img src="' + src + '" alt="" class="ed11y-thumbnail"/>Alt: ' + alt + '</li>';
-            Ed11y.panel.querySelector('#image-list').appendChild(panelIMG);
-          });
-
-        }, 0);
-      }
+      
       Ed11y.alignTips();
     };
 
@@ -597,17 +586,18 @@ class Ed11y {
         let marksToNudge = [];
         // Reading and writing in a loop creates paint thrashing. Read first.
         Ed11y.elements.jumpList.forEach(mark => {
+          if (mark.hasAttribute('style')) {
+            mark.removeAttribute('style');
+          }
           let offset = mark.getBoundingClientRect();
-          let offsetData = 0;
           if (offset.left < 8) {
-            // Offscreen to left
-            offsetData = 8 - offset.left;
+            // Offscreen to left. push to the right.
+            marksToNudge.push([mark, 8 - offset.left]);
           }
           else if (offset.left + 80 > windowWidth) {
-            // Offscreen to right
-            offsetData = windowWidth - offset.left - 80;
+            // Offscreen to right. push to the left
+            marksToNudge.push([mark, windowWidth - offset.left - 80]);
           }
-          marksToNudge.push([mark, offsetData]);
         });
         marksToNudge.forEach(el => {
           // todo only do this if there's an old value and the new value is not 0
@@ -622,6 +612,9 @@ class Ed11y {
     Ed11y.paintReady = function() {
       let readyStyle = 
             `ed11y-element-result, ed11y-element-panel {opacity: 1;}
+            .ed11y-hidden-highlight {
+              box-shadow: inset 0 0 0 1px ${Ed11y.yellow}, inset 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 1px ${Ed11y.yellow}, 0 0 0 3px ${Ed11y.color.primary}, 0 0 1px 3px !important;
+            }
             .ed11y-ring-red {
               box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.red}, 0 0 0 3px ${Ed11y.red}, 0 0 1px 3px;
               outline: 2px solid ${Ed11y.red};
@@ -723,221 +716,215 @@ class Ed11y {
       Ed11y.activateTab(event.target, false);
     };
 
-    Ed11y.buildPanels = function () {
-      let panel = document.createElement('ed11y-element-panel');
-      document.querySelector('body').appendChild(panel);
-      
-      Ed11y.togglePanel = function () {
-        if (!Ed11y.doubleClickPrevent) {
-          // on minimize the toggle toggles the panel, not the scan.
-          // todo MVP: revisit aria states and announcements.
-          if (Ed11y.panel.classList.contains('minimized')) {
-            Ed11y.minimize();
+    Ed11y.togglePanel = function () {
+      if (!Ed11y.doubleClickPrevent) {
+        // todo MVP: revisit aria states and announcements.
+        if (Ed11y.panel.classList.contains('minimized')) {
+          Ed11y.minimize();
+        }
+        // Prevent clicks piling up while scan is running.
+        else if (Ed11y.running !== true) {
+          Ed11y.running = true;
+          // Re-scan each time the panel reopens.
+          if (Ed11y.panel.classList.contains('shut') === true) {
+            Ed11y.checkAll(false, 'show');
           }
-          // Prevent clicks piling up while scan is running.
-          else if (Ed11y.running !== true) {
-            Ed11y.running = true;
-            // Re-scan each time the panel reopens.
-            if (Ed11y.panel.classList.contains('shut') === true) {
-              Ed11y.checkAll(false, 'show');
-            }
-            else {
-              Ed11y.reset();
-            }
+          else {
+            Ed11y.reset();
           }
         }
-        Ed11y.doubleClickPrevent = true;
-        window.setTimeout(function() {
-          Ed11y.doubleClickPrevent = false;
-        },200);
-        return false;
-      };
-
-      Ed11y.switchPanel = function(id) {
-        // Switch main panel tab
-        Ed11y.panel.querySelector('.content > div:not(.hidden)')?.classList.add('hidden');
-        Ed11y.panel.querySelector('[aria-selected=true]')?.setAttribute('aria-selected', 'false');
-        Ed11y.panel.querySelector('#' + id).setAttribute('aria-selected', 'true');
-        Ed11y.panel.querySelector('#' + id + '-tab')?.classList.remove('hidden');
-        // todo MVP change to findElements
-        Ed11y.findElements('remove','ed11y-element-heading-label');
-        Ed11y.elements.remove?.forEach(el => {el.remove();});
-        
-        // Show extras
-        switch (id) {
-        case 'alts':
-          Ed11y.showAltPanel();
-          break;
-        case 'headings':
-          Ed11y.showHeadingsPanel();
-          break;
-        case 'help':
-          Ed11y.showHelpPanel();
-          break;
-        default:
-          // hide extras
-          break;
-        }
-      };
-
-      Ed11y.showHeadingsPanel = function() {
-        // Visualize the document outline
-   
-        let panelOutline = Ed11y.panel.querySelector('#outline');
-        panelOutline.innerHTML = '';
-        Ed11y.headingOutline.forEach((el, i) => {
-          // Todo implement outline ignore function.
-          let mark = document.createElement('ed11y-element-heading-label');
-          mark.dataset.ed11yHeadingOutline = i;
-          // Array: el, level, outlinePrefix
-          el[0].insertAdjacentElement('afterbegin', mark);
-          let level = el[1];
-          let leftPad = 10 * level - 10;
-          let li = document.createElement('li');
-          li.classList.add('level' + level);
-          let message = el[2] && !el[5] ? el[2] : ''; // Has an error message and is not ignored.
-          if (message) {
-            // todo: communicate alert level? Add alert title?
-            li.classList.add('has-issues');
-          }
-          li.style.setProperty('margin-left', leftPad + 'px');        
-          li.innerHTML = `<strong>H${level}:</strong> ${message}`;
-          let userText = document.createElement('span');
-          userText.textContent = el[0].textContent;
-          li.append(userText);
-          panelOutline.append(li);
-        });
-      };
-
-      Ed11y.alignAlts = function() {
-        // Attempts to put alt text visualization on top of images.
-        // Todo: this handles inline images in links quite poorly.
-        Ed11y.findElements('altMark', 'ed11y-element-alt');
-        if (Ed11y.elements.altMark) {
-          Ed11y.elements.altMark.forEach((el) => {
-            let id = el.dataset.ed11yImg;
-            el.setAttribute('style','');
-            let img = Ed11y.imageAlts[id][0];
-            let markOffset = el.getBoundingClientRect();
-            let imgOffset = img.getBoundingClientRect();
-            let newOffset = imgOffset.left - markOffset.left;
-            let height = getComputedStyle(img).height;
-            height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
-            el.setAttribute('style', `transform: translate(${newOffset}px, 0px); height: ${height}px; width: ${img.offsetWidth}px;`);
-          });
-        }
-      };
-
-      Ed11y.showAltPanel = function() {
-        // visualize image alts
-        let altList = Ed11y.panel.querySelector('#alt-list');
-        altList.innerHTML = '';
-        
-        Ed11y.imageAlts.forEach((el, i) => {
-          // el[el, src, altLabel, altStyle]
-          
-          // Label images
-          let mark = document.createElement('ed11y-element-alt');
-          mark.dataset.ed11yImg = i;
-          el[0].insertAdjacentElement('beforebegin', mark);         
-
-          // Build alt list in panel
-          let userText = document.createElement('span');
-          userText.textContent = el[2];
-          let li = document.createElement('li');
-          li.classList.add(el[3]);
-          let img = document.createElement('img');
-          img.setAttribute('src', el[1]);
-          img.setAttribute('alt', '');
-          li.append(img);
-          li.append(userText);
-          altList.append(li);
-        });
-        Ed11y.alignAlts();
-      };
-
-      Ed11y.showHelpPanel = function() {
-        let helpTab = Ed11y.panel.querySelector('#help-tab');
-        helpTab.innerHTML = Ed11y.M.panelHelp;
-      };
-
-      Ed11y.buildJumpList = function() {
-        Ed11y.findElements('jumpList','ed11y-element-result');
-        Ed11y.elements.jumpList.forEach((result, i) => {
-          result.dataset.ed11yJumpPosition = i; 
-        });
-      };
-
-      Ed11y.setCurrentJump = function() {
-        // Set next/previous buttons
-        // TodoMVP check on behavior for one and zero goMax
-        let goMax = Ed11y.elements.jumpList.length - 1;
-        let goNext = 0;
-        if (Ed11y.totalCount > 1) {
-          // todo: shouldn't show on load
-          Ed11y.panelJumpPrev.removeAttribute('hidden');
-        }
-        if (Ed11y.goto == goMax || Ed11y.goto > goMax) {
-          // Reached end of loop or dismissal pushed us out of loop
-          goNext = 0;
-          Ed11y.nextText = 'First';
-        } else {
-          goNext = parseInt(Ed11y.goto) + 1;
-          Ed11y.nextText = 'Next';
-        }
-        let goPrev = goNext - 2;
-        if (goPrev < 0) {
-          // loop around
-          goPrev = goMax + 1 + goPrev;
-        }
-        Ed11y.panelJumpNext.dataset.ed11yGoto = goNext;
-        Ed11y.panelJumpPrev.dataset.ed11yGoto = goPrev;
-        window.setTimeout(function () {
-          // parameterize
-          Ed11y.panelJumpNext.querySelector('.jump-next').textContent = Ed11y.nextText;
-        }, 250);
-      };
-
-      Ed11y.minimize = function () {
-        let minimized = Ed11y.panel.classList.contains('minimized') === 'true' ? true : false;
-        Ed11y.panel.classList.toggle('minimized');
-        if (minimized === false) {
-          window.setTimeout(function() {
-            Ed11y.panelToggle.focus();
-          }, 500);
-        }
-      };
-
-      Ed11y.windowResize = function() {
-        Ed11y.alignAlts();
-        
-        let openTip = Ed11y.getOpenTip();
-        if (openTip) {
-          let toggle = openTip.shadowRoot.querySelector('.toggle');
-          Ed11y.alignTip(toggle, openTip);
-        }
-      };
-      window.addEventListener('resize', function() {Ed11y.windowResize();});
-
-      // Escape key closes panels.
-      // todo mvp rewrite
-      Ed11y.escapeWatch = function(event) {
-        if (event.keyCode === 27) {
-          if (event.target.closest('ed11y-element-panel')) {
-            // panel
-            Ed11y.panelToggle.focus();
-            Ed11y.panelToggle.click();
-          } else if (event.target.closest('ed11y-element-result')) {
-            // todo mvp findElements
-            let openTip = Ed11y.getOpenTip();
-            if (openTip) {
-              openTip.setAttribute('data-ed11y-action', 'shut');
-            }
-          }
-        }
-      };
-      document.addEventListener('keyup', function(event) {Ed11y.escapeWatch(event);});
+      }
+      Ed11y.doubleClickPrevent = true;
+      window.setTimeout(function() {
+        Ed11y.doubleClickPrevent = false;
+      },200);
+      return false;
     };
+
+    Ed11y.showHeadingsPanel = function() {
+      // Visualize the document outline
+ 
+      let panelOutline = Ed11y.panel.querySelector('#outline');
+      panelOutline.innerHTML = '';
+      Ed11y.headingOutline.forEach((el, i) => {
+        // Todo implement outline ignore function.
+        let mark = document.createElement('ed11y-element-heading-label');
+        mark.dataset.ed11yHeadingOutline = i;
+        // Array: el, level, outlinePrefix
+        el[0].insertAdjacentElement('afterbegin', mark);
+        let level = el[1];
+        let leftPad = 10 * level - 10;
+        let li = document.createElement('li');
+        li.classList.add('level' + level);
+        let message = el[2] && !el[5] ? el[2] : ''; // Has an error message and is not ignored.
+        if (message) {
+          // todo: communicate alert level? Add alert title?
+          li.classList.add('has-issues');
+        }
+        li.style.setProperty('margin-left', leftPad + 'px');        
+        li.innerHTML = `<strong>H${level}:</strong> ${message}`;
+        let userText = document.createElement('span');
+        userText.textContent = el[0].textContent;
+        li.append(userText);
+        panelOutline.append(li);
+      });
+    };
+    Ed11y.switchPanel = function(id) {
+      // Switch main panel tab
+      Ed11y.panel.querySelector('.content > div:not(.hidden)')?.classList.add('hidden');
+      Ed11y.panel.querySelector('[aria-selected=true]')?.setAttribute('aria-selected', 'false');
+      Ed11y.panel.querySelector('#' + id).setAttribute('aria-selected', 'true');
+      Ed11y.panel.querySelector('#' + id + '-tab')?.classList.remove('hidden');
+      // todo MVP change to findElements
+      Ed11y.findElements('reset','ed11y-element-heading-label, ed11y-element-alt');
+      Ed11y.elements.reset?.forEach(el => {el.remove();});
+      
+      // Show extras
+      switch (id) {
+      case 'alts':
+        Ed11y.showAltPanel();
+        break;
+      case 'headings':
+        Ed11y.showHeadingsPanel();
+        break;
+      case 'help':
+        Ed11y.showHelpPanel();
+        break;
+      default:
+        // hide extras
+        break;
+      }
+    };
+
+    
+    Ed11y.alignAlts = function() {
+      // Attempts to put alt text visualization on top of images.
+      // Todo: this handles inline images in links quite poorly.
+      Ed11y.findElements('altMark', 'ed11y-element-alt');
+      if (Ed11y.elements.altMark) {
+        Ed11y.elements.altMark.forEach((el) => {
+          let id = el.dataset.ed11yImg;
+          el.setAttribute('style','');
+          let img = Ed11y.imageAlts[id][0];
+          let markOffset = el.getBoundingClientRect();
+          let imgOffset = img.getBoundingClientRect();
+          let newOffset = imgOffset.left - markOffset.left;
+          let height = getComputedStyle(img).height;
+          height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
+          el.setAttribute('style', `transform: translate(${newOffset}px, 0px); height: ${height}px; width: ${img.offsetWidth}px;`);
+        });
+      }
+    };
+
+    Ed11y.showAltPanel = function() {
+      // visualize image alts
+      let altList = Ed11y.panel.querySelector('#alt-list');
+      altList.innerHTML = '';
+      
+      Ed11y.imageAlts.forEach((el, i) => {
+        // el[el, src, altLabel, altStyle]
+        
+        // Label images
+        let mark = document.createElement('ed11y-element-alt');
+        mark.dataset.ed11yImg = i;
+        el[0].insertAdjacentElement('beforebegin', mark);         
+
+        // Build alt list in panel
+        let userText = document.createElement('span');
+        userText.textContent = el[2];
+        let li = document.createElement('li');
+        li.classList.add(el[3]);
+        let img = document.createElement('img');
+        img.setAttribute('src', el[1]);
+        img.setAttribute('alt', '');
+        li.append(img);
+        li.append(userText);
+        altList.append(li);
+      });
+      Ed11y.alignAlts();
+    };
+
+    Ed11y.showHelpPanel = function() {
+      let helpTab = Ed11y.panel.querySelector('#help-tab');
+      helpTab.innerHTML = Ed11y.M.panelHelp;
+    };
+
+    Ed11y.buildJumpList = function() {
+      Ed11y.findElements('jumpList','ed11y-element-result');
+      Ed11y.elements.jumpList.forEach((result, i) => {
+        result.dataset.ed11yJumpPosition = i; 
+      });
+    };
+
+    Ed11y.setCurrentJump = function() {
+      // Set next/previous buttons
+      // TodoMVP check on behavior for one and zero goMax
+      let goMax = Ed11y.elements.jumpList.length - 1;
+      let goNext = 0;
+      if (Ed11y.totalCount > 1) {
+        // todo: shouldn't show on load
+        Ed11y.panelJumpPrev.removeAttribute('hidden');
+      }
+      if (Ed11y.goto == goMax || Ed11y.goto > goMax) {
+        // Reached end of loop or dismissal pushed us out of loop
+        goNext = 0;
+        Ed11y.nextText = 'First';
+      } else {
+        goNext = parseInt(Ed11y.goto) + 1;
+        Ed11y.nextText = 'Next';
+      }
+      let goPrev = goNext - 2;
+      if (goPrev < 0) {
+        // loop around
+        goPrev = goMax + 1 + goPrev;
+      }
+      Ed11y.panelJumpNext.dataset.ed11yGoto = goNext;
+      Ed11y.panelJumpPrev.dataset.ed11yGoto = goPrev;
+      window.setTimeout(function () {
+        // parameterize
+        Ed11y.panelJumpNext.querySelector('.jump-next').textContent = Ed11y.nextText;
+      }, 250);
+    };
+
+    Ed11y.minimize = function () {
+      let minimized = Ed11y.panel.classList.contains('minimized') === 'true' ? true : false;
+      Ed11y.panel.classList.toggle('minimized');
+      if (minimized === false) {
+        window.setTimeout(function() {
+          Ed11y.panelToggle.focus();
+        }, 500);
+      }
+    };
+
+    Ed11y.windowResize = function() {
+      Ed11y.alignAlts();
+      
+      let openTip = Ed11y.getOpenTip();
+      if (openTip) {
+        let toggle = openTip.shadowRoot.querySelector('.toggle');
+        Ed11y.alignTip(toggle, openTip);
+      }
+    };
+    window.addEventListener('resize', function() {Ed11y.windowResize();});
+
+    // Escape key closes panels.
+    // todo mvp rewrite
+    Ed11y.escapeWatch = function(event) {
+      if (event.keyCode === 27) {
+        if (event.target.closest('ed11y-element-panel')) {
+          // panel
+          Ed11y.panelToggle.focus();
+          Ed11y.panelToggle.click();
+        } else if (event.target.closest('ed11y-element-result')) {
+          // todo mvp findElements
+          let openTip = Ed11y.getOpenTip();
+          if (openTip) {
+            openTip.setAttribute('data-ed11y-action', 'shut');
+          }
+        }
+      }
+    };
+    document.addEventListener('keyup', function(event) {Ed11y.escapeWatch(event);});
 
     /*============== Panel interactions ========*/
     Ed11y.activateTab = function(tab, setFocus) {
@@ -967,8 +954,8 @@ class Ed11y {
     Ed11y.parents = function(el) {
       let nodes = [];
       nodes.push(el);
-      while(el.parentElement) {
-        nodes.unshift(el.parentElement);
+      while(el && !!el.parentElement && el.parentElement.tagName !== 'HTML') {
+        nodes.push(el.parentElement);
         el = el.parentElement;
       }
       return nodes;
@@ -1024,62 +1011,63 @@ class Ed11y {
       }
     };
 
-    Ed11y.visible = function() {
-      // courtesy https://stackoverflow.com/questions/178325/how-do-i-check-if-an-element-is-hidden-in-jquery/22969337#22969337
-      let x = window.pageXOffset ? window.pageXOffset + window.innerWidth - 1 : 0,
-        y = window.pageYOffset ? window.pageYOffset + window.innerHeight - 1 : 0,
-        relative = !!((!x && !y) || !document.elementFromPoint(x, y));
-      function inside(child, parent) {
-        while(child){
-          if (child === parent) return true;
-          child = child.parentNode;
-        }
-        return false;
-      }
-      return function (elem) {
-        // todo check is opacity a string or number
+    Ed11y.visibleElement = function(el) {
+      // Checks if this element is visible. Used in parent iterators.
+      // Todo: Check for offscreen?
+      if (el) {
+        let style = window.getComputedStyle(el);
+        /*console.log(style.getPropertyValue('display'));
+        console.log(style.getPropertyValue('visibility'));
+        console.log(style.getPropertyValue('opacity'));
+        console.log(el.offsetWidth);
+        console.log(el.offsetHeight);
+        console.log(el.hasAttribute('hidden'));*/
         if (
-          document.hidden ||
-            elem.offsetWidth === 0 ||
-            elem.offsetHeight === 0 ||
-            elem.style.visibility === 'hidden' ||
-            elem.style.display === 'none' ||
-            elem.style.opacity === '0'
-        ) return false;
-        let rect = elem.getBoundingClientRect();
-        if (relative) {
-          if (!inside(document.elementFromPoint(rect.left + elem.offsetWidth/2, rect.top + elem.offsetHeight/2),elem)) return false;
-        } else if (
-          !inside(document.elementFromPoint(rect.left + elem.offsetWidth/2 + window.pageXOffset, rect.top + elem.offsetHeight/2 + window.pageYOffset), elem) ||
-            (
-              rect.top + elem.offsetHeight/2 < 0 ||
-                rect.left + elem.offsetWidth/2 < 0 ||
-                rect.bottom - elem.offsetHeight/2 > (window.innerHeight || document.documentElement.clientHeight) ||
-                rect.right - elem.offsetWidth/2 > (window.innerWidth || document.documentElement.clientWidth)
-            )
-        ) return false;
-        if (window.getComputedStyle) {
-          let el = elem,
-            comp = null;
-          while (el) {
-            if (el === document) {break;} else if(!el.parentNode) return false;
-            comp = window.getComputedStyle(el, null);
-            if (comp && (comp.visibility === 'hidden' || comp.display === 'none' || (typeof comp.opacity !=='undefined' && comp.opacity !== '1'))) return false;
-            el = el.parentNode;
-          }
+          style.getPropertyValue('display') === 'none' || 
+          style.getPropertyValue('visibility') === 'hidden' ||
+          style.getPropertyValue('opacity') === '0' ||
+          el.offsetWidth === 0 ||
+          el.offsetHeight === 0 ||
+          el.hasAttribute('hidden')) {
+          return false;
+        } else {
+          return true;
         }
+      }
+    };
+    
+    Ed11y.visible = function(el) {
+      // Recurse element and ancestors to make sure it is visible
+      if (!Ed11y.visibleElement(el)) {
+        // Element is hidden
+        return false;
+      } else {
+        let parents = Ed11y.parents(el);
+        parents.forEach((parent) => {
+          if (!Ed11y.visibleElement(parent)) {
+            return false;
+          }
+        });
         return true;
-      };
+      }
     };
 
     Ed11y.firstVisibleParent = function(el) {
-      let parents = Ed11y.parents(el);
-      parents.forEach(parent => {
-        if (Ed11y.visible(parent)) {
-          return (parent);
+      let parent = el.parentElement;
+      if (parent) {
+        // Parent exists
+        if (!Ed11y.visibleElement(parent)) {
+          // Recurse
+          parent = Ed11y.firstVisibleParent(parent);
+          return parent;
+        } else {
+          // Element is visible
+          return parent;
         }
-      });
-      return false;
+      } else {
+        // No visible parents.
+        return false;
+      }
     };
 
     Ed11y.parentLink = function(el) {

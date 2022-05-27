@@ -309,6 +309,7 @@ class Ed11yElementPanel extends HTMLElement {
   jumpTo(event) {
     // Handle jump
     event.preventDefault();
+    Ed11y.resetClass(['ed11y-hidden-highlight']);
     if (!Ed11y.elements.jumpList) {
       Ed11y.buildJumpList();
     }
@@ -348,38 +349,28 @@ class Ed11yElementPanel extends HTMLElement {
       }, 500, goto);
     }
     else {
-      // todo mvp test to see if this actually works
+      // todo should we try to force visibility?
       if (!Ed11y.visible(target)) {
-        firstVisible = Ed11y.firstVisibleParent(Ed11y.goto);
+        firstVisible = Ed11y.firstVisibleParent(target);
         alertMessage = Ed11y.M.jumpedToInvisibleTip;
       }
-      // todo MVP this code is broken
-      /*else if (!!goto.closest('[aria-hidden="true"]') || !!target?.closest('[aria-hidden="true"]')) {
-        firstVisible = Ed11y.firstVisibleParent(Ed11y.goto.closest('[aria-hidden="true"]'));
+      else if (target.closest('[aria-hidden="true"]')) {
+        firstVisible = target.closest('[aria-hidden="true"]');
+        firstVisible = firstVisible.closest(':not([aria-hidden="true"])');
         alertMessage = Ed11y.M.jumpedToAriaHiddenTip;
-      }*/
+      }
+
       if (firstVisible) {
         alert(alertMessage);
         firstVisible.classList.add('ed11y-hidden-highlight');
-        // todo MVP this is not implemented
-        let highlightContainer = document.createElement('div');
-        highlightContainer.setAttribute('tabindex', '-1');
-        highlightContainer.classList.add('sr-only', 'hidden-highlight-' + Ed11y.goto);
-        highlightContainer.textContent = 'Highlighted container';
-        // let highlightContainer = Ed11y.builder('div',false,'sr-only, ed11y-hidden-highlight' + Ed11y.goto, "Highlighted container");
-        Ed11y.gotoOffset = Ed11y.goto.getBoundingClientRect().top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
-        goto.setAttribute('data-ed11y-action','open');
-        let thisGoTo = '.ed11y-hidden-highlight-' + Ed11y.goto;
-        document.querySelector(thisGoTo).focus();
       }
-      else {
-        // Go to the button.
-        document.querySelector('html, body').animate({
-          scrollTop: (gotoOffset)
-        }, 1);
-        goto.shadowRoot.querySelector('.toggle').focus();
-        goto.setAttribute('data-ed11y-action','open');
-      }
+      // Go to the button.
+      document.querySelector('html, body').animate({
+        scrollTop: (gotoOffset)
+      }, 1);
+      goto.shadowRoot.querySelector('.toggle').focus();
+      goto.setAttribute('data-ed11y-action','open');
+      
     }  
   }
 

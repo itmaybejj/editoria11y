@@ -61,17 +61,15 @@ class Ed11yElementResult extends HTMLElement {
           color: ${Ed11y.color.text};
         }
         .arrow {
+          display: none;
           content: "";
           position: absolute;
           transform: rotate(45deg);
+          left: 46px;
+          box-shadow: 0 0 0 2px ${this.bgColor}, 2px 2px 4px ${this.primaryColor}77;
           width: 20px;
           height: 20px;
-          left: 46px;
-          display: none;
-          background: ${this.primaryColor};
-          background: linear-gradient(135deg, transparent 0%, transparent 48%, ${this.primaryColor} 49%);
           top: 6px;
-          box-shadow: 0 0 0 2px ${this.bgColor}, 2px 2px 4px ${this.primaryColor}77;
         }
         .arrow[data-direction="left"] {
           left: -18px;
@@ -79,21 +77,14 @@ class Ed11yElementResult extends HTMLElement {
         }
         .arrow[data-direction="under"] {
           margin: 33px 0 0 -30px;
-          background: linear-gradient(-135deg, transparent 0%, transparent 48%, ${this.primaryColor} 49%);
+          background: linear-gradient(-45deg, transparent 0%, transparent 48%, ${this.primaryColor} 49%);
         }
         .arrow[data-direction="above"] {
           margin: -33px 0 0 -30px;
+          background: linear-gradient(135deg, transparent 0%, transparent 48%, ${this.primaryColor} 49%);
         }
         .arrow[data-direction="right"] {
           background: linear-gradient(-135deg, transparent 0%, transparent 48%, ${this.primaryColor} 49%);
-        }
-        @keyframes fade-in {
-          0% {
-            opacity: 0;
-          }
-          100% {
-            opacity: 1;
-          }
         }
         .tip {
           font-size: 14px;
@@ -106,13 +97,19 @@ class Ed11yElementResult extends HTMLElement {
           display: none;
           box-shadow: 0 0 0 2px ${this.bgColor}, 2px 2px 4px ${this.primaryColor}77;
         }
-        [aria-expanded="true"] ~ .tip, [aria-expanded="true"] ~ .arrow {
+        @keyframes fade-in {
+          0% { opacity: 0;}
+          100% { opacity: 1;}
+        }
+        [aria-expanded="true"] ~ .tip {
           display: block;
-          animation: fade-in 0.25s ease;
+        }
+        [aria-expanded="true"] ~ .tip .content {
+          animation: fade-in 0.25s ease-out;
         }
         [aria-expanded="true"] ~ .arrow {
           display: block;
-          animation: fade-in 0.3s ease;
+          opacity: 1;
         }
 
         .title {
@@ -320,6 +317,7 @@ class Ed11yElementResult extends HTMLElement {
         dismissOKButton.classList.add('dismiss');
         // todo Parameterize
         dismissOKButton.textContent = 'Mark as Checked and OK';
+        dismissOKButton.setAttribute('title', 'Hide for all editors on this page');
         dismissers.append(dismissOKButton);
         dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
       }
@@ -327,10 +325,17 @@ class Ed11yElementResult extends HTMLElement {
         let dismissIgnoreButton = document.createElement('button');
         dismissIgnoreButton.classList.add('dismiss');
         dismissIgnoreButton.textContent = 'Ignore';
+        dismissIgnoreButton.setAttribute('title', 'Hide for the current editor on this page');
         dismissers.append(dismissIgnoreButton);
-
         dismissIgnoreButton.addEventListener('click', function(){Ed11y.dismissThis('ignore');});
       }
+      let dismissHelp = document.createElement('button');
+      dismissHelp.classList.add('dismiss');
+      // todo parameterize
+      dismissHelp.textContent = '?';
+      dismissers.append(dismissHelp);
+      dismissHelp.addEventListener('click', function(){Ed11y.dismissHelp(dismissHelp);});
+      
       content.append(dismissers);
     }
     let closeButton = document.createElement('button');
