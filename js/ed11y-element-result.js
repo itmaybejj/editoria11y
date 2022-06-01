@@ -48,7 +48,7 @@ class Ed11yElementResult extends HTMLElement {
         :host {
           position: absolute;
           opacity: 0;
-          transition: opacity .15s ease-out;
+          transition: opacity .25s ease-in;
           z-index: 9998;
         }
         :host([data-ed11y-open='true']) {
@@ -88,6 +88,7 @@ class Ed11yElementResult extends HTMLElement {
         }
         .tip {
           font-size: 14px;
+          z-index: 1;
           border: 2px solid ${this.primaryColor};
           background: ${this.bgColor};
           border-radius: 0 0 3px 3px;

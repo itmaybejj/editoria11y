@@ -130,7 +130,7 @@ class Ed11y {
         primaryAlert: '#0a307a', // can drop
         text: '#20160c',
         button: '#0a307a',
-        focusRing: 'cyan',
+        focusRing: '#007aff',
         activeTab: '#b9c0cf',
         secondary: '#20160c', // can drop?
         bg: '#fffbf5',
@@ -171,9 +171,10 @@ class Ed11y {
         // todo: test form labels
 
         window.setTimeout(function() {
-          Ed11y.updatePanel(onLoad, showPanel);
+          Ed11y.updatePanel(onLoad, showPanel); 
+          // todo parameterize
+          Ed11y.panelToggle.setAttribute('title', 'Toggle accessibility tools');
         },0);
-
       }
       else {
         Ed11y.reset();
@@ -213,11 +214,11 @@ class Ed11y {
           Ed11y.panelJumpPrev.removeAttribute('hidden');
         }
         if (Ed11y.errorCount > 0) {
-          Ed11y.panel.classList.remove('warnings');
+          Ed11y.panel.classList.remove('warnings', 'pass');
           Ed11y.panel.classList.add('errors');
         }
         else if (Ed11y.warningCount > 0) {
-          Ed11y.panel.classList.remove('errors');
+          Ed11y.panel.classList.remove('errors', 'pass');
           Ed11y.panel.classList.add('warnings');
         }
         Ed11y.panelCount.textCount = Ed11y.totalCount;
@@ -227,10 +228,11 @@ class Ed11y {
       }
       else {
         Ed11y.panelJumpNext.setAttribute('hidden', '');
+        Ed11y.panelJumpPrev.setAttribute('hidden', '');
         Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
         Ed11y.panelCount.style.display = 'display: none;';
-        Ed11y.panel.classList.remove('warnings');
-        Ed11y.panel.classList.remove('errors');
+        Ed11y.panel.classList.remove('warnings', 'errors');
+        Ed11y.panel.classList.add('pass');
         Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
       }
       if (Ed11y.dismissedCount > 0) {
@@ -287,7 +289,7 @@ class Ed11y {
         }
       }
       else {
-        Ed11y.panel.classList.remove('minimized', 'shut');
+        Ed11y.panel.classList.remove('shut');
         Ed11y.panel.classList.add('active');
         Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
         window.setTimeout(function () {
@@ -302,7 +304,7 @@ class Ed11y {
       }
       Ed11y.panelToggle.classList.remove('disabled');
       Ed11y.panelToggle.removeAttribute('aria-disabled');
-      Ed11y.panelToggle.removeAttribute('title');
+      // todo parameterize
       Ed11y.running = false;
     };
 
@@ -339,7 +341,7 @@ class Ed11y {
       Ed11y.panelJumpNext.setAttribute('data-ed11y-goto', '0');
       Ed11y.panelJumpPrev.setAttribute('data-ed11y-goto', '0');
       Ed11y.panel.classList.add('shut');
-      Ed11y.panel.classList.remove('minimized', 'active');
+      Ed11y.panel.classList.remove('active');
       Ed11y.panelToggle.setAttribute('aria-expanded', 'false');
       Ed11y.running = false;
     };
@@ -473,7 +475,6 @@ class Ed11y {
       return String(text).substring(0,512);
     };
     Ed11y.dismissThis = function (dismissalType) {
-      // Todo MVP: help button or link
       // Todo: if panel is minimized, it pops open. Should preserve state.
 
       // Find the active tip and draw its identifying information from the result list
@@ -611,7 +612,10 @@ class Ed11y {
 
     Ed11y.paintReady = function() {
       let readyStyle = 
-            `ed11y-element-result, ed11y-element-panel {opacity: 1;}
+            `ed11y-element-result, ed11y-element-panel {
+              opacity: 1; 
+              outline: 0 !important;
+            }
             .ed11y-hidden-highlight {
               box-shadow: inset 0 0 0 1px ${Ed11y.yellow}, inset 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 1px ${Ed11y.yellow}, 0 0 0 3px ${Ed11y.color.primary}, 0 0 1px 3px !important;
             }
@@ -719,14 +723,14 @@ class Ed11y {
     Ed11y.togglePanel = function () {
       if (!Ed11y.doubleClickPrevent) {
         // todo MVP: revisit aria states and announcements.
-        if (Ed11y.panel.classList.contains('minimized')) {
+        if (Ed11y.panel.classList.contains('active') && Ed11y.panel.classList.contains('shut')) {
           Ed11y.minimize();
         }
         // Prevent clicks piling up while scan is running.
         else if (Ed11y.running !== true) {
           Ed11y.running = true;
           // Re-scan each time the panel reopens.
-          if (Ed11y.panel.classList.contains('shut') === true) {
+          if (Ed11y.panel.classList.contains('active') === false) {
             Ed11y.checkAll(false, 'show');
           }
           else {
@@ -887,8 +891,8 @@ class Ed11y {
     };
 
     Ed11y.minimize = function () {
-      let minimized = Ed11y.panel.classList.contains('minimized') === 'true' ? true : false;
-      Ed11y.panel.classList.toggle('minimized');
+      let minimized = Ed11y.panel.classList.contains('shut') === 'true' ? true : false;
+      Ed11y.panel.classList.toggle('shut');
       if (minimized === false) {
         window.setTimeout(function() {
           Ed11y.panelToggle.focus();

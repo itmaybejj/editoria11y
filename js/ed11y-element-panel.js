@@ -5,8 +5,7 @@ class Ed11yElementPanel extends HTMLElement {
     super();
   }
 
-  // todo tabs JS
-  // todo use Ed11yMessages for all the strings
+  // todo parameterize
   template() {
     return `
     <div class='buttonbar' role='tablist' aria-label='Editorial Ally panel controls'>
@@ -21,7 +20,7 @@ class Ed11yElementPanel extends HTMLElement {
       </button>
       <button role="tab" id='help' aria-selected='false' aria-controls='help-tab' title='About this tool'>?</button>
       <button role="tab"  id='minimize' aria-selected='false' title='Minimize panel' aria-label="minimize" aria-pressed="false"><span>&ndash;</span></button>
-      <button type='button' id='main-toggle' title='Toggle checker'><span class='close'>&times;</span><span class='open'><span class='icon'></span><span class='toggle-count'></span></span></button>
+      <button type='button' id='toggle'><span class='close'>&times;</span><span class='open'><span class='icon'></span><span class='toggle-count'></span></span></button>
     </div>
     <div class="content">
       <div id='issues-tab' tabindex="0" role="tabpanel" class="show" aria-labelledby='issues'>
@@ -57,13 +56,8 @@ class Ed11yElementPanel extends HTMLElement {
       let wrapper = document.createElement('div');
       wrapper.setAttribute('class','wrapper');
       wrapper.innerHTML = this.template();
-      // todo??
-      // let restore = document.createElement('button');
-      // restore.setAttribute('id', 'restore');
-      // restore.textContent = `Some alerts hidden; show all`;
-      // Ed11y.panelJumpPrev.insertAdjacentElement('beforebegin', restore);
       // todo MVP: style hover states 
-      // todo MVP: shut panel warning toggle wrong color in light mode
+      // todo MVP: shut panel warning toggle wrong color in light mode?
       let style = document.createElement('style');
       style.textContent = Ed11y.baseCSS + `
         :host {
@@ -71,10 +65,10 @@ class Ed11yElementPanel extends HTMLElement {
           right: 1%;
           bottom: 1%;
           opacity: 0;
-          transition: opacity .15s ease-out;
+          transition: opacity .25s ease-in;
           z-index: 9999;
         }
-        :host:focus {
+        :host:focus, div:focus {
           outline: transparent;
         }
         .wrapper {
@@ -109,7 +103,7 @@ class Ed11yElementPanel extends HTMLElement {
           border-color: ${Ed11y.color.primaryAlert};
         }
         @media (min-width: 400px) {
-          #main-toggle-tab {
+          #toggle-tab {
             display: grid;
             grid-gap: 1em;
             grid-template-columns: 16em 1fr;
@@ -172,22 +166,19 @@ class Ed11yElementPanel extends HTMLElement {
         .errors button[aria-selected="true"] {
           border-color: ${Ed11y.color.primaryAlert};
         }
-        .minimized, .shut {
+        .shut {
           border-radius: 100%;
           background: transparent;
           width: auto;
           box-shadow: none;
         }
-        .minimized .content, 
-        .minimized .buttonbar button, 
-        .minimized .close,
         .shut button, 
         .shut .content, 
         .active .toggle-count,
         .shut .close {
           display: none;
         }
-        .shut #main-toggle, .minimized #main-toggle {
+        .shut #toggle {
           display: block;
           min-width: 40px;
           height: 40px;
@@ -195,30 +186,39 @@ class Ed11yElementPanel extends HTMLElement {
           padding: 8px;
           border: 0;
         }
-        .shut.warnings #main-toggle, .minimized.warnings #main-toggle {
+        .pass.shut #toggle {
+          font-size: 16px;
+          background: teal;
+          line-height: 1;
+          box-shadow: inset 0 0 0 2px teal, inset 0 0 0 3px #fffe;
+        }
+        .pass.shut #toggle:hover {
+          box-shadow: 0 0 0 1px #fffe, 0 0 0 2px teal; 
+        }
+        .shut.warnings #toggle {
           background-color: ${Ed11y.yellow};
           color: #000b;
           box-shadow: inset 0 0 0 2px ${Ed11y.yellow}, inset 0 0 0 3px #000b, 0 0 2px #000;
         }
-        .shut.warnings #main-toggle:hover, .minimized.warnings #main-toggle:hover {
+        .shut.warnings #toggle:hover {
           box-shadow: inset 0 0 0 2px ${Ed11y.yellow}, inset 0 0 0 3px #000b, 0 0 0 3px #000b;
         }
-        .shut.errors #main-toggle, .minimized.errors #main-toggle {
+        .shut.errors #toggle {
           color: ${Ed11y.red};
           box-shadow: inset 0 0 0 1px ${Ed11y.red}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.red}, 1px 1px 5px 0 rgba(0,0,0,.5);
           background: #fefefe;
         }
-        .shut.errors #main-toggle:hover, .minimized.errors #main-toggle:hover {
+        .shut.errors #toggle:hover {
           box-shadow: inset 0 0 0 1px #b80519, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 3px ${Ed11y.red}, 0 0 0 4px transparent;
         }
-        .minimized .toggle-count {
+        .shut .toggle-count {
           display: block;
         }
         .jumplinks {
           text-align: right;
         }
         .jumplinks button {
-          width: 
+          min-width: 8em;
         }
         .content button {
           padding: 6px 11px;
@@ -285,7 +285,7 @@ class Ed11yElementPanel extends HTMLElement {
       shadow.appendChild(style);
       shadow.appendChild(wrapper);
       Ed11y.panel = wrapper;
-      Ed11y.panelToggle = wrapper.querySelector('#main-toggle');
+      Ed11y.panelToggle = wrapper.querySelector('#toggle');
       Ed11y.panelMessage = wrapper.querySelector('.content-text');
       Ed11y.panelCount = wrapper.querySelector('.count');
       Ed11y.panelJumpNext = wrapper.querySelector('.jump.next');
@@ -379,7 +379,7 @@ class Ed11yElementPanel extends HTMLElement {
     event.preventDefault();
     let id = event.currentTarget.getAttribute('id');
     switch (id) {
-    case 'main-toggle':
+    case 'toggle':
       Ed11y.togglePanel();
       break;
     case 'minimize':
