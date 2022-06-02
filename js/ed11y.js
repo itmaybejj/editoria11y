@@ -402,8 +402,10 @@ class Ed11y {
       // Initialize or reset elements array.
       Ed11y.elements[key] = [];
 
+      let spacer = Ed11y.options.shadowComponents ? ', ' : '';
+
       Ed11y.roots.forEach(root => {
-        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector} ${Ed11y.shadowComponents})${Ed11y.ignore}`)));
+        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector} ${spacer} ${Ed11y.shadowComponents})${Ed11y.ignore}`)));
       });
       // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
       // This repeats the search inside the placeholders, and replaces them with their results.
