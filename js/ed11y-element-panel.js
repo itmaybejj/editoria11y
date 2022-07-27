@@ -5,7 +5,7 @@ class Ed11yElementPanel extends HTMLElement {
     super();
   }
 
-  // todo parameterize
+  // todo mvp parameterize
   template() {
     return `
     <div class='buttonbar' role='tablist' aria-label='Editorial Ally panel controls'>
@@ -56,8 +56,6 @@ class Ed11yElementPanel extends HTMLElement {
       let wrapper = document.createElement('div');
       wrapper.setAttribute('class','wrapper');
       wrapper.innerHTML = this.template();
-      // todo MVP: style hover states 
-      // todo MVP: shut panel warning toggle wrong color in light mode?
       let style = document.createElement('style');
       style.textContent = Ed11y.baseCSS + `
         :host {
@@ -66,41 +64,30 @@ class Ed11yElementPanel extends HTMLElement {
           bottom: 1%;
           opacity: 0;
           transition: opacity .25s ease-in;
-          z-index: 9999;
+          z-index: 9998;
         }
         :host:focus, div:focus {
           outline: transparent;
         }
         .wrapper {
-          width: clamp(160px, 92vw, 384px);
+          width: clamp(160px, 25em, 92vw);
           background: ${Ed11y.color.bg};
           color: ${Ed11y.color.text};
           border-radius: 3px;
           box-shadow: 1px 1px 4px 2px ${Ed11y.color.text}77;
-        }
-        .warnings {
-          background: ${Ed11y.color.bgWarning};
-        }
-        .errors {
-          background: ${Ed11y.color.bgAlert};
+          padding: 2px;
         }
         a {
           color: inherit;
         }
         .content {
-          padding: 8px 8px 8px 15px;
+          padding: 4px 4px 4px 12px;
           border: 2px solid ${Ed11y.color.primary};
           border-top: 0;
           border-radius: 0 0 3px 3px;
           color: ${Ed11y.color.text};
           max-height: max(240px, 50vh);
           overflow: auto;
-        }
-        .warnings .content {
-          border-color: ${Ed11y.color.primaryWarning};
-        }
-        .errors .content {
-          border-color: ${Ed11y.color.primaryAlert};
         }
         @media (min-width: 400px) {
           #toggle-tab {
@@ -118,19 +105,16 @@ class Ed11yElementPanel extends HTMLElement {
         button {
           margin: 0;
           background: ${Ed11y.color.primary};
-          color: ${Ed11y.color.bg};
-          padding: 8px 4px;
+          color: ${Ed11y.color.primaryText};
+          padding: 6px 4px;
           font-family: inherit;
           font-size: 11px;
-          font-weight: 600;
+          font-weight: 500;
           border: 0;
-          border-right: 1px solid ${Ed11y.color.bg}55;
+          border-right: 1px solid ${Ed11y.color.primaryText}55;
           text-align: center;
           flex: auto;
           cursor: pointer;
-        }
-        .errors button {
-          background: ${Ed11y.color.primaryAlert};
         }
         button:hover {
           background: ${Ed11y.color.text};
@@ -139,7 +123,7 @@ class Ed11yElementPanel extends HTMLElement {
           border-right: 0;
         }
         .buttonbar button {
-          color: ${Ed11y.color.bg};
+          color: ${Ed11y.color.primaryText}ee;
         }
         .buttonbar button:hover {
           background: ${Ed11y.color.secondary};
@@ -153,18 +137,12 @@ class Ed11yElementPanel extends HTMLElement {
         }
         .buttonbar button[aria-selected="true"] {
           background: ${Ed11y.color.activeTab};
+          box-shadow: inset 0 0 0 1px ${Ed11y.color.primary}, inset 0 -2px ${Ed11y.color.primary}22;
           color: ${Ed11y.color.text};
-          margin-top: -2px;
-          /*border-color: ${Ed11y.color.primary};*/
-          border: 2px solid;
-          border-bottom: 1px solid;
-          border-radius: 3px 3px 0 0;
+          border: 0;
         }
-        .warnings button[aria-selected="true"] {
-          border-color: ${Ed11y.color.primaryWarning};
-        }
-        .errors button[aria-selected="true"] {
-          border-color: ${Ed11y.color.primaryAlert};
+        .buttonbar button + button[aria-selected="true"] {
+          margin-left: -1px;
         }
         .shut {
           border-radius: 100%;
@@ -180,20 +158,21 @@ class Ed11yElementPanel extends HTMLElement {
         }
         .shut #toggle {
           display: block;
-          min-width: 40px;
-          height: 40px;
+          min-width: 36px;
+          height: 36px;
           border-radius: 100%;
           padding: 8px;
           border: 0;
         }
         .pass.shut #toggle {
           font-size: 16px;
-          background: teal;
+          background: ${Ed11y.color.primary};
           line-height: 1;
-          box-shadow: inset 0 0 0 2px teal, inset 0 0 0 3px #fffe;
+          box-shadow: inset 0 0 0 2px ${Ed11y.color.primary}, inset 0 0 0 4px #fffe;
+          font-family: georgia, serif;
         }
         .pass.shut #toggle:hover {
-          box-shadow: 0 0 0 1px #fffe, 0 0 0 2px teal; 
+          box-shadow: inset 0 0 0 2px #fffe, 0 0 0 2px ${Ed11y.color.primary}; 
         }
         .shut.warnings #toggle {
           background-color: ${Ed11y.yellow};
@@ -216,22 +195,27 @@ class Ed11yElementPanel extends HTMLElement {
         }
         .jumplinks {
           text-align: right;
+          width: min(12em, 50%);
         }
         .jumplinks button {
-          min-width: 8em;
+          min-width: max(7.25em, calc(49% - 3px));
         }
         .content button {
-          padding: 6px 11px;
+          padding: 5px 11px;
           border-radius: 2px;
           background: inherit;
           color: inherit;
-          box-shadow: 0 0 1px;
-          margin: 4px 2px;
-          margin: 2% 1%;
-          width: 46%;
+          border: 1px ${Ed11y.color.button}55 solid;
+          margin: 2px 0 2px 1px;
+        }
+        .jump.prev {
+          min-width: 81px;
+        }
+        .jump.next {
+          min-width: 60px;
         }
         #restore {
-          width: 96%;
+          min-width: min(146px, 100%);
         }
         .content button:hover {
           background: ${Ed11y.color.bg};
@@ -249,13 +233,12 @@ class Ed11yElementPanel extends HTMLElement {
         }
         #issues-tab:not(.hidden) {
           display: flex;
-          flex-wrap: wrap;
+          
           gap: 8px;
         }
         #issues-tab > div {
           flex: 1 1 auto;
           align-self: center;
-          max-width: 15em;
         }
         #outline, #alt-list {
           list-style: none;
@@ -299,7 +282,7 @@ class Ed11yElementPanel extends HTMLElement {
       Ed11y.announce = wrapper.querySelector('.announce');
       Ed11y.panelTabs = wrapper.querySelectorAll('.buttonbar button');
       Ed11y.panelTabs.forEach(tab => {
-        // todo: needed?
+        // todo postpone: needed?
         tab.addEventListener('click', this.handleBarClick);
       });
       this.initialized = true;
@@ -325,7 +308,7 @@ class Ed11yElementPanel extends HTMLElement {
     let firstVisible = false;
     let insert = gotoResult[3];
     let target;
-    // todo this all belongs in the result open logic not here
+    // todo postpone this all belongs in the result open logic not here
     if (insert === 'beforebegin') {
       target = Ed11y.nextUntil(goto, ':not(ed11y-element-result)');
     }
@@ -349,7 +332,7 @@ class Ed11yElementPanel extends HTMLElement {
       }, 500, goto);
     }
     else {
-      // todo should we try to force visibility?
+      // todo beta should we try to force visibility?
       if (!Ed11y.visible(target)) {
         firstVisible = Ed11y.firstVisibleParent(target);
         alertMessage = Ed11y.M.jumpedToInvisibleTip;
@@ -425,7 +408,7 @@ class Ed11yElementHeadingLabel extends HTMLElement {
         }
         .wrapper {          
           background: ${Ed11y.color.primary}ee;
-          color: ${Ed11y.color.bg};
+          color: ${Ed11y.color.primaryText};
           box-shadow: 0 0 0 1px ${Ed11y.color.bg}ee, 0 0 0 4px ${Ed11y.color.primary}ee, 1px 1px 5px 2px #000;
           padding: 0 .5em;
           line-height: 1.2;

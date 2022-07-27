@@ -5,9 +5,9 @@ class Ed11yTestImages {
   /* exported Ed11yTestImages */
   
   check () {
-    // todo: https://ryersondmp.github.io/sa11y/examples/headings-images.html
-    // todo: flagging alts referencing position or color?
-    // todo: empty alt with figcaption present blows up figure. code in Sa11y. see https://thoughtbot.com/blog/alt-vs-figcaption#the-figcaption-element and https://www.scottohara.me/blog/2019/01/21/how-do-you-figure.html
+    // todo postpone: https://ryersondmp.github.io/sa11y/examples/headings-images.html
+    // todo postpone: flagging alts referencing position or color?
+    // todo beta: empty alt with figcaption present blows up figure. code in Sa11y. see https://thoughtbot.com/blog/alt-vs-figcaption#the-figcaption-element and https://www.scottohara.me/blog/2019/01/21/how-do-you-figure.html
 
     Ed11y.imageAlts = [];
 
@@ -21,7 +21,7 @@ class Ed11yTestImages {
       let dismissable = true;
       let parentLink = Ed11y.parentLink(el);
       
-      // todo this is now true/false rather than a length measure
+      // todo mvp this is now true/false rather than a length measure
       if (typeof alt !== 'string') {
         // No alt attribute at all.
         error = 'altMissing';

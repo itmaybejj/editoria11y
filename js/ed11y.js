@@ -15,14 +15,14 @@ class Ed11y {
       allowOverflow : '',
       hiddenHandlers : '',
 
-      // todo add custom results to results array during count
+      // todo postpone: add custom results to results array during count
       customResults: false,
       allowIgnore: true,
       allowOK: true,
 
-      // todo MVP: if allowOK is false, user never sees and cannot restore ignored element
+      // todo MVP test: if allowOK is false, user never sees and cannot restore ignored element. this may be OK
       syncedDismissals: false, // provide {} to initiate sync
-      // todo document what to send
+      // todo: documentation
 
       currentPage: false, // uses window.location.pathname unless a string is provided.
 
@@ -30,7 +30,7 @@ class Ed11y {
       checkRoots: 'body',
       shadowComponents: false, // provide selectors as string
       ignoreElements: false, // provide selectors against element, e.g., "nav a, .card *"
-      // todo
+      // todo mvp: outline and link ignore
       outlineExclude: '',
       linkIgnoreStrings: '',
       doNotRun: '',     
@@ -96,7 +96,7 @@ class Ed11y {
           }
           
           // Create test class objects
-          // Todo: dispatch event to load an array of custom test results
+          // todo postpone: dispatch event to load an array of custom test results
           Ed11y.testEmbeds = new Ed11yTestEmbeds;
           Ed11y.testHeadings = new Ed11yTestHeadings;
           Ed11y.testImages = new Ed11yTestImages;
@@ -111,32 +111,28 @@ class Ed11y {
 
     Ed11y.theme = {
       dark: {
-        primary: '#eed0b1',
-        primaryWarning: '#fad859',
-        primaryAlert: '#fad859',
-        text: '#cdc1b6',
-        button: '#faf2e2',
+        bg: '#0a2051',
+        primary: '#20160c',
+        secondary: '#0a2051',
+        text: '#dde8ff',
+        primaryText: '#dde8ff',
+        button: '#dde8ff',
         focusRing: 'cyan',
-        activeTab: '#20160c',
-        secondary: '#b3d8ff',
-        bg: '#20160c',
-        bgHighlight: '',
-        bgWarning: '#20160c',
-        bgAlert: '#20160c',
+        activeTab: '#3052a0',
+        tipHeader: '#3052a0',
+        bgHighlight: '#7b1919',
       },
       light: {
+        bg: '#fffbf5',
         primary: '#0a307a',
-        primaryWarning: '#0a307a', // todo: can we drop these now?
-        primaryAlert: '#0a307a', // can drop
+        secondary: '#20160c',
+        primaryText: '#fffbf5',
         text: '#20160c',
         button: '#0a307a',
         focusRing: '#007aff',
         activeTab: '#b9c0cf',
-        secondary: '#20160c', // can drop?
-        bg: '#fffbf5',
+        tipHeader: '#0a307a',
         bgHighlight: '#7b1919',
-        bgWarning: '#fffbf5', // can drop?
-        bgAlert: '#fffbf5', // can drop?
       },
     };
 
@@ -334,7 +330,8 @@ class Ed11y {
     Ed11y.reset = function () {
       // Reset insertions into body content.
       Ed11y.resetClass(['ed11y-ring-red', 'ed11y-ring-yellow', 'ed11y-hidden-highlight']);
-      Ed11y.findElements('reset', 'ed11y-element-result, .ed11y-element-heading-label, .ed11y-element-alt');
+      Ed11y.findElements('reset', 'ed11y-element-result, .ed11y-element-heading-label, .ed11y-element-alt, ed11y-element-heading-label, ed11y-element-alt');
+      // todo beta on re-open: recreate heading or alts if panel is showing
       Ed11y.elements.reset.forEach((el) => el.remove());
 
       // Reset main panel.
@@ -354,9 +351,9 @@ class Ed11y {
     };
 
     // Handle aria-label or labelled-by
-    // todo: evaluate new Sa11y code
+    // todo beta: replace with new Sa11y code of better name calculation
     Ed11y.computeAriaLabel = function (el) {
-      // Todo: what if there is a span inside element with a label?
+      // Todo beta: what if there is a span inside element with a label?
       if (el.hasAttribute('[aria-label]')) {
         return el.getAttribute('aria-label');
       }
@@ -382,7 +379,7 @@ class Ed11y {
 
     // recursively look for titles
     Ed11y.computeTitle = function (el) {
-      // todo MVP rest of name calculation
+      // todo beta replace with Sa11y name calculation
       if (el.hasAttribute('title')) {
         return el.getAttribute('title');
       }
@@ -397,7 +394,7 @@ class Ed11y {
     Ed11y.findElements = function(key, selector) {
       // Like querySelectorAll limited to checkRoots, with recursion to dive shadow components.
       
-      // Todo: function and parameter to auto-detect shadow components.
+      // Todo beta: function and parameter to auto-detect shadow components.
 
       // Initialize or reset elements array.
       Ed11y.elements[key] = [];
@@ -452,7 +449,7 @@ class Ed11y {
       Ed11y.ignore = Ed11y.options.ignoreElements ? `:not(${Ed11y.options.ignoreElements})` : '';
 
       // Make a copy of the shadowComponents user option as part of an :is() string.
-      // Todo offer an option to autodetect shadow hosts? 
+      // Todo postponed: offer an option to autodetect shadow hosts? 
       Ed11y.shadowComponents = '';
       if (Ed11y.options.shadowComponents.length > 0) {
         Ed11y.shadowComponents = `, ${Ed11y.options.shadowComponents}`;
@@ -477,8 +474,6 @@ class Ed11y {
       return String(text).substring(0,512);
     };
     Ed11y.dismissThis = function (dismissalType) {
-      // Todo: if panel is minimized, it pops open. Should preserve state.
-
       // Find the active tip and draw its identifying information from the result list
       Ed11y.findElements('activeTip', 'ed11y-element-result[data-ed11y-open="true"]');
       let removal = Ed11y.elements.activeTip[0];
@@ -521,15 +516,16 @@ class Ed11y {
       Ed11y.checkAll(false, 'show');
       let rememberGoto = Ed11y.goto;
       window.setTimeout( function() {
-        if (Ed11y.results.length > 0) {
+        Ed11y.buildJumpList();
+        if (Ed11y.elements.jumpList.length > 0) {
           Ed11y.goto = (rememberGoto - 1);
-          //Ed11y.panelJumpNext.dataset.ed11yGoto = Ed11y.goto;
           Ed11y.setCurrentJump();
           Ed11y.panelJumpNext.focus();
         } else {
-          // todo mvp test
-          let focus = Ed11y.panel.querySelector('#issues');
-          focus.focus();
+          window.setTimeout(function() {
+            let focus = Ed11y.panel.querySelector('#issues-tab');
+            focus.focus();
+          }, 100);
         }
       }, 500, rememberGoto);
     };
@@ -556,7 +552,7 @@ class Ed11y {
       let help = document.createElement('p');
       help.setAttribute('tabindex', '-1');
       help.classList.add('help');
-      // todo parameterize and write more gooder
+      // todo MVP: parameterize and write more gooder
       help.textContent = ('Dismissing this manual check only affects the current page. To mark this item as OK site-wide, add it to the global "ignore" list in the module settings.');
       el.parentElement.append(help);
       help.focus();
@@ -564,7 +560,6 @@ class Ed11y {
     };
 
     Ed11y.showResults = function () {
-      // Todo: optimize? This function is expensive.
 
       Ed11y.results?.forEach(function (el, i) {
         if (!Ed11y.results[i][5]) {
@@ -584,8 +579,7 @@ class Ed11y {
       window.setTimeout(function () {
         // Nudge offscreen tips back on screen.
         let windowWidth = window.innerWidth;
-        // todo MVP replace with findElements
-        
+        // Todo later: collision detection.
         let marksToNudge = [];
         // Reading and writing in a loop creates paint thrashing. Read first.
         Ed11y.elements.jumpList.forEach(mark => {
@@ -603,7 +597,6 @@ class Ed11y {
           }
         });
         marksToNudge.forEach(el => {
-          // todo only do this if there's an old value and the new value is not 0
           el[0].style.transform = 'translate(' + el[1] + 'px, 0)';
         });
         if (!Ed11y.bodyStyle) {
@@ -617,6 +610,9 @@ class Ed11y {
             `ed11y-element-result, ed11y-element-panel {
               opacity: 1; 
               outline: 0 !important;
+            }
+            ed11y-element-result + ed11y-element-result {
+              margin-top: 34px;
             }
             .ed11y-hidden-highlight {
               box-shadow: inset 0 0 0 1px ${Ed11y.yellow}, inset 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 1px ${Ed11y.yellow}, 0 0 0 3px ${Ed11y.color.primary}, 0 0 1px 3px !important;
@@ -659,7 +655,6 @@ class Ed11y {
       tip.setAttribute('style','');
       arrow.setAttribute('style','');
 
-      // todo evaluate the left check. May be able to hardcode button width and ditch some of this.
       let buttonOffset = el.getBoundingClientRect();
       let buttonLeft = buttonOffset.left + document.body.scrollLeft;
       let tipOffset = tip.getBoundingClientRect();
@@ -712,7 +707,6 @@ class Ed11y {
       }
     };
 
-    // Todo implement better OK Icon
     Ed11y.baseCSS = `
       :host{all: initial;} 
       .hidden{display:none;}
@@ -724,7 +718,7 @@ class Ed11y {
 
     Ed11y.togglePanel = function () {
       if (!Ed11y.doubleClickPrevent) {
-        // todo MVP: revisit aria states and announcements.
+        // todo beta: revisit aria states and announcements.
         if (Ed11y.panel.classList.contains('active') && Ed11y.panel.classList.contains('shut')) {
           Ed11y.minimize();
         }
@@ -781,7 +775,8 @@ class Ed11y {
       Ed11y.panel.querySelector('[aria-selected=true]')?.setAttribute('aria-selected', 'false');
       Ed11y.panel.querySelector('#' + id).setAttribute('aria-selected', 'true');
       Ed11y.panel.querySelector('#' + id + '-tab')?.classList.remove('hidden');
-      // todo MVP change to findElements
+      // todo beta what to show when no outline or images
+      // todo postpone: error when no headings found at all?
       Ed11y.findElements('reset','ed11y-element-heading-label, ed11y-element-alt');
       Ed11y.elements.reset?.forEach(el => {el.remove();});
       
@@ -805,7 +800,7 @@ class Ed11y {
     
     Ed11y.alignAlts = function() {
       // Attempts to put alt text visualization on top of images.
-      // Todo: this handles inline images in links quite poorly.
+      // Todo mvp: this handles inline images in links quite poorly.
       Ed11y.findElements('altMark', 'ed11y-element-alt');
       if (Ed11y.elements.altMark) {
         Ed11y.elements.altMark.forEach((el) => {
@@ -864,16 +859,15 @@ class Ed11y {
 
     Ed11y.setCurrentJump = function() {
       // Set next/previous buttons
-      // TodoMVP check on behavior for one and zero goMax
       let goMax = Ed11y.elements.jumpList.length - 1;
       let goNext = 0;
       if (Ed11y.totalCount > 1) {
-        // todo: shouldn't show on load
         Ed11y.panelJumpPrev.removeAttribute('hidden');
       }
       if (Ed11y.goto == goMax || Ed11y.goto > goMax) {
         // Reached end of loop or dismissal pushed us out of loop
         goNext = 0;
+        // todo parameterize
         Ed11y.nextText = 'First';
       } else {
         goNext = parseInt(Ed11y.goto) + 1;
@@ -887,7 +881,6 @@ class Ed11y {
       Ed11y.panelJumpNext.dataset.ed11yGoto = goNext;
       Ed11y.panelJumpPrev.dataset.ed11yGoto = goPrev;
       window.setTimeout(function () {
-        // parameterize
         Ed11y.panelJumpNext.querySelector('.jump-next').textContent = Ed11y.nextText;
       }, 250);
     };
@@ -1019,7 +1012,8 @@ class Ed11y {
 
     Ed11y.visibleElement = function(el) {
       // Checks if this element is visible. Used in parent iterators.
-      // Todo: Check for offscreen?
+      // Todo postpone: Check for offscreen?
+      // Todo mvp: test this and parameters
       if (el) {
         let style = window.getComputedStyle(el);
         /*console.log(style.getPropertyValue('display'));
@@ -1152,8 +1146,9 @@ class Ed11y {
     };
 
     if (CSS.supports('selector(:is(body))')) {
-      // Older browsers will stop execution here.
       Ed11y.initialize();
+    } else {
+      console.warn('This browser can not run Editoria11y.');
     }
   }
 }

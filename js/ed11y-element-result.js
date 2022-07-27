@@ -19,8 +19,6 @@ class Ed11yElementResult extends HTMLElement {
       this.dismissable = this.result[4] !== false ? true : false;
       // todo MVP this would only work in darkmode -- need more theme variables
       // #ffd4d4 red. turn background to alert color in lightmode.
-      this.primaryColor = this.dismissable ? Ed11y.color.primaryWarning : Ed11y.color.primaryAlert;
-      this.bgColor = this.dismissable ? Ed11y.color.bgWarning : Ed11y.color.bgAlert;
       this.wrapper.classList.add('wrapper');
       this.wrapper.classList.add('ed11y-result');
 
@@ -66,37 +64,37 @@ class Ed11yElementResult extends HTMLElement {
           position: absolute;
           transform: rotate(45deg);
           left: 46px;
-          box-shadow: 0 0 0 2px ${this.bgColor}, 2px 2px 4px ${this.primaryColor}77;
+          box-shadow: 0 0 0 2px ${Ed11y.color.bg}, 2px 2px 4px ${Ed11y.color.tipHeader}77;
           width: 20px;
           height: 20px;
           top: 6px;
         }
         .arrow[data-direction="left"] {
           left: -18px;
-          background: linear-gradient(45deg, transparent 0%, transparent 48%, ${this.primaryColor} 49%);
+          background: linear-gradient(45deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
         }
         .arrow[data-direction="under"] {
           margin: 33px 0 0 -30px;
-          background: linear-gradient(-45deg, transparent 0%, transparent 48%, ${this.primaryColor} 49%);
+          background: linear-gradient(-45deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
         }
         .arrow[data-direction="above"] {
           margin: -33px 0 0 -30px;
-          background: linear-gradient(135deg, transparent 0%, transparent 48%, ${this.primaryColor} 49%);
+          background: linear-gradient(135deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
         }
         .arrow[data-direction="right"] {
-          background: linear-gradient(-135deg, transparent 0%, transparent 48%, ${this.primaryColor} 49%);
+          background: linear-gradient(-135deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
         }
         .tip {
           font-size: 14px;
           z-index: 1;
-          border: 2px solid ${this.primaryColor};
-          background: ${this.bgColor};
+          border: 2px solid ${Ed11y.color.tipHeader};
+          background: ${Ed11y.color.bg};
           border-radius: 0 0 3px 3px;
           position:relative;
           margin-left: 58px;
-          width: clamp(12rem, 96vw, 30rem);
+          width: clamp(12rem, 30rem, 89vw);
           display: none;
-          box-shadow: 0 0 0 2px ${this.bgColor}, 2px 2px 4px ${this.primaryColor}77;
+          box-shadow: 0 0 0 2px ${Ed11y.color.bg}, 2px 2px 4px ${Ed11y.color.primary}77;
         }
         @keyframes fade-in {
           0% { opacity: 0;}
@@ -112,10 +110,9 @@ class Ed11yElementResult extends HTMLElement {
           display: block;
           opacity: 1;
         }
-
         .title {
-          background: ${this.primaryColor};
-          color: ${Ed11y.color.bg};
+          background: ${Ed11y.color.tipHeader};
+          color: ${Ed11y.color.primaryText};
           padding: 0 35px 1px 14px;
           font-weight: bold;
           font-size: 14px;
@@ -144,8 +141,8 @@ class Ed11yElementResult extends HTMLElement {
           font-weight: 600;
           text-align: center;
           cursor: pointer;
-          color: ${Ed11y.color.bg};
-          background: ${this.primaryColor};
+          color: ${Ed11y.color.primaryText};
+          background: ${Ed11y.color.tipHeader};
         }
         ul {
           margin-block-start: .64em;
@@ -173,7 +170,7 @@ class Ed11yElementResult extends HTMLElement {
           color: inherit;
         }
         a:hover, a:focus-visible {
-          color: ${this.primaryColor};
+          color: ${Ed11y.color.primary};
           text-decoration-style: double;
           text-decoration-skip-ink: none;
         }
@@ -188,13 +185,13 @@ class Ed11yElementResult extends HTMLElement {
           position: absolute;
           top: -3px;
           right: -2px;
-          box-shadow: -1px 0 ${this.bgColor};
+          box-shadow: -1px 0 ${Ed11y.color.bg};
           background: transparent;
           width: 32px;
         }
         .close:hover {
-          background: ${this.bgColor};
-          color: ${this.primaryColor};
+          background: ${Ed11y.color.bg};
+          color: ${Ed11y.color.text};
         }
         .toggle {
           display: block;
@@ -212,7 +209,6 @@ class Ed11yElementResult extends HTMLElement {
           font-size: 16px;
         }
         .dismiss {
-          background: ${Ed11y.color.button};
           margin: .5em 1em .25em 0;
           padding: 5px 9px;
           border-radius: 3px;
@@ -220,8 +216,8 @@ class Ed11yElementResult extends HTMLElement {
         }
         .dismiss:hover, .dismiss:focus-visible {
           color: ${Ed11y.color.text};
-          background: ${this.bgColor};
-          box-shadow: inset 0 0 0 2px ${Ed11y.color.primary};
+          background: ${Ed11y.color.bg};
+          box-shadow: inset 0 0 0 2px ${Ed11y.color.tipHeader};
         }
         .wrapper :focus-visible {
           outline: 2px solid transparent;
@@ -316,7 +312,7 @@ class Ed11yElementResult extends HTMLElement {
       if (Ed11y.options.allowOK) {
         let dismissOKButton = document.createElement('button');
         dismissOKButton.classList.add('dismiss');
-        // todo Parameterize
+        // todo mvp Parameterize
         dismissOKButton.textContent = 'Mark as Checked and OK';
         dismissOKButton.setAttribute('title', 'Hide for all editors on this page');
         dismissers.append(dismissOKButton);
@@ -355,7 +351,7 @@ class Ed11yElementResult extends HTMLElement {
     closeButton.addEventListener('click', (event) => {
       event.preventDefault;
       this.toggle.focus();
-      // todo: track if this tip was opened by the next button. If so, transfer focus back to it instead?
+      // todo postpone: track if this tip was opened by the next button. If so, transfer focus back to it instead
       this.setAttribute('data-ed11y-action', 'shut');
     });
   }

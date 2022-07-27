@@ -30,7 +30,7 @@ class Ed11yElementAlt extends HTMLElement {
         }
         span {
           background: ${Ed11y.color.primary}f3;
-          color: ${Ed11y.color.bg};
+          color: ${Ed11y.color.primaryText};
           z-index: 100;
           font-weight: 500;
           padding: 6px;
