@@ -40,7 +40,7 @@ class Ed11yElementAlt extends HTMLElement {
           right: 0;
           box-shadow: 0 1px, 0 -1px; 
         }
-        .warning { background: ${Ed11y.yellow}; color: #111;}
+        .warning { background: ${Ed11y.color.warning}; color: #111;}
         .error { background: ${Ed11y.color.bgHighlight};}
       `;
       shadow.appendChild(style);

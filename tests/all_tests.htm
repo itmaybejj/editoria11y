@@ -137,9 +137,15 @@
 
         <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here</a></p>
 
+        <p class="positive">Link with ignored substring: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here (opens in new window)</a></p>
+
+        <p class="negative"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">A great video</a></p>
+
         <h3 id="links-that-open-in-a-new-window-without-an-external-link-icon-or-text-warning">Links that open in a new window without an external link icon or text warning</h3>
 
         <p class="positive"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">An informative video.</a></p>
+
+        <p class="negative"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">An informative video (opens in new window).</a></p>
 
         <h3 id="links-to-a-documents">Links to a documents</h3>
 
@@ -279,6 +285,10 @@
                     el.append(testShadowElement2);
                 });
 
+                document.addEventListener('ed11yPop', function(e) {
+                    console.log('Event dispatched: ed11yPop for #' + e.detail.id);
+                }, false);
+
             </script>
             <link href="./tests.css" rel="stylesheet">
             <script src="../js/ed11y-localization.js"></script>
@@ -295,9 +305,12 @@
             <script>
                 const ed11y = new Ed11y({
                     alertMode : 'assertive',
+                    outlineExclude : '.utility',
+                    linkIgnoreStrings: ['(opens in new window)'],
                     //ignoreElements : '.positive *, .positive',
-                    //shadowComponents : 'shadow-test, shadow-test-no-hits', 
-                    checkRoots : 'body', 
+                    shadowComponents : 'shadow-test, shadow-test-no-hits', 
+                    checkRoots : 'body',
+                    // todo add test for root element not found 
                 });
             </script>
             

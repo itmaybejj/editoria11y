@@ -8,37 +8,88 @@ class Ed11y {
     
     let defaultOptions = {
 
-      // Interface and Sync
-      lang: 'en',
-      theme: 'light',
+      // Only check within these containers, e.g. "#main, footer"
+      checkRoots: 'body',
+
+      // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
+      shadowComponents: false, 
+
+      // Containers to globally ignore, e.g., "header *, .card *"
+      ignoreElements: false,
+
+      // Disable tests on specific elements
+      // Include and modify this entire object in your call
+      ignoreByKey: {
+        // 'p': false,
+        // 'h': false,
+        'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
+        'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
+        // 'li': false,
+        // 'blockquote': false,
+        // 'iframe': false,
+        // 'audio': false,
+        // 'video': false,
+        // 'table': false,
+      },
+
+      // "Assertive" opens the panel automatically if new items are found.
       alertMode: 'polite',
-      allowOverflow : '',
+
+      // Dismissed alerts
+      currentPage: false, // uses window.location.pathname unless a string is provided.
+      allowIgnore: true, // enables end-user ignore button
+      allowOK: true,  // enables end-user mark OK button
+      syncedDismissals: false, // provide empty or populated object {} to enable synch functions
+
+      // Disable check if these elements are present, e.g., ".live-editing-toolbar, .frontpage"
+      doNotRun: '',   
+
+      // Array of strings to remove from links before checking to see if link titles are meaningful. e.g. ["(opens in new window)", "link is external"]
+      linkIgnoreStrings: [],
+
+      // Selector list for elements that should have "overflow: visible" CSS applied when they contain an open tip
+      // todo test -- this appears to no longer be needed
+      // allowOverflow : '',
+
+      // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip
       hiddenHandlers : '',
 
-      // todo postpone: add custom results to results array during count
-      customResults: false,
-      allowIgnore: true,
-      allowOK: true,
+      // Interface
+      lang: 'en',
+      theme: 'lightTheme',
+      darkTheme: {
+        bg: '#0a2051',
+        bgHighlight: '#7b1919',
+        text: '#f4f7ff',
+        primary: '#3052a0',
+        primaryText: '#f4f7ff',
+        secondary: '#20160c',
+        warning: '#fad859',
+        alert: '#b80519',
+        button: '#dde8ff',
+        focusRing: 'cyan',
+        activeTab: '#0a2051',
+        tipHeader: '#3052a0',
+      },
+      lightTheme: {
+        bg: '#fffffe',
+        bgHighlight: '#7b1919',
+        text: '#20160c',
+        primary: '#0a307a',
+        primaryText: '#fffdf7',
+        secondary: '#20160c',
+        warning: '#fad859',
+        alert: '#b80519',
+        button: '#0a307a',
+        focusRing: '#007aff',
+        activeTab: '#b9c0cf',
+        tipHeader: '#0a307a',
+      },
 
-      // todo MVP test: if allowOK is false, user never sees and cannot restore ignored element. this may be OK
-      syncedDismissals: false, // provide {} to initiate sync
-      // todo: documentation
-
-      currentPage: false, // uses window.location.pathname unless a string is provided.
-
-      // Root area to check and exclusions
-      checkRoots: 'body',
-      shadowComponents: false, // provide selectors as string
-      ignoreElements: false, // provide selectors against element, e.g., "nav a, .card *"
-      // todo mvp: outline and link ignore
-      outlineExclude: '',
-      linkIgnoreStrings: '',
-      doNotRun: '',     
-
-      // Embedded content
-      embeddedContent: '',
-      embeddedContentTitle: '',
-      embeddedContentMessage: '',
+      // Test customizations
+      embeddedContent: '', // todo remove in favor of custom checks
+      embeddedContentTitle: '', // todo test
+      embeddedContentMessage: '', // todo test
       videoContent: 'youtube.com, vimeo.com, yuja.com, panopto.com',
       audioContent: 'soundcloud.com, simplecast.com, podbean.com, buzzsprout.com, blubrry.com, transistor.fm, fusebox.fm, libsyn.com',
       dataVizContent: 'datastudio.google.com, tableau',
@@ -46,23 +97,23 @@ class Ed11y {
       documentLinks: ['.pdf', '.doc', '.docx', '.ppt', '.pptx', 'https://docs.google'],
 
       // * Not implemented Yet:
-      //   custom Checks
-      //   ruleset toggling
-      //   form labels
+      // custom Checks
+      // custom results
+      // ruleset toggling
+      // form label tests
       // detectSPArouting: false,
 
-      // * Not on roadmap:
-      //   Contrast
-      //   Readability
     };
     Ed11y.options = {
       ...defaultOptions,
       ...options
     };
+    Ed11y.M = ed11yLang[Ed11y.options.lang];
+    Ed11y.color = Ed11y.options[Ed11y.options.theme];
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
     }
-    Ed11y.M = ed11yLang[Ed11y.options.lang];
+    
 
     Ed11y.initialize = () => {
 
@@ -109,63 +160,53 @@ class Ed11y {
       });
     };
 
-    Ed11y.theme = {
-      dark: {
-        bg: '#0a2051',
-        primary: '#20160c',
-        secondary: '#0a2051',
-        text: '#dde8ff',
-        primaryText: '#dde8ff',
-        button: '#dde8ff',
-        focusRing: 'cyan',
-        activeTab: '#3052a0',
-        tipHeader: '#3052a0',
-        bgHighlight: '#7b1919',
-      },
-      light: {
-        bg: '#fffbf5',
-        primary: '#0a307a',
-        secondary: '#20160c',
-        primaryText: '#fffbf5',
-        text: '#20160c',
-        button: '#0a307a',
-        focusRing: '#007aff',
-        activeTab: '#b9c0cf',
-        tipHeader: '#0a307a',
-        bgHighlight: '#7b1919',
-      },
-    };
-
-    Ed11y.color = Ed11y.theme[Ed11y.options.theme];
-    Ed11y.yellow = '#fad859'; // was '#ffc800'
-    Ed11y.red = '#b80519';
-
     // Toggles the outline of all headers, link texts, and images.
     Ed11y.checkAll = (onLoad, showPanel) => {
+      
       if (!Ed11y.checkRunPrevent()) {
+        // Reset counts
         Ed11y.results = [];
+        Ed11y.elements = [];
         Ed11y.errorCount = 0;
         Ed11y.warningCount = 0;
         Ed11y.dismissedCount = 0;
         Ed11y.mediaCount = 0;
-        
-        Ed11y.buildElementList();
-        
-        let queue = [
-          'testLinks',
-          'testImages',
-          'testHeadings',
-          'testText',
-          'testEmbeds',
-        ];
-        queue.forEach((test) => {
-          window.setTimeout(function(){
-            Ed11y[test].check();
-          },0,test);
-        });
-        // todo: handle custom rules and inbound synced results (e.g, broken links)
-        // todo: test form labels
+        // Convert the container ignore user option to a CSS :not selector.
+        Ed11y.ignore = Ed11y.options.ignoreElements ? `:not(${Ed11y.options.ignoreElements})` : '';
 
+        // Find and cache all root elements based on user-provided selectors.
+        let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
+        if (roots.length === 0) {
+          Ed11y.roots = [document.querySelector('html, body')];
+          Ed11y.elements = [];
+          console.error('Check Editoria11y configuration; specified root element not found');
+          Ed11y.reset();
+        } else {
+          Ed11y.roots = [];
+          roots.forEach((el, i) => {
+            if (el.shadowRoot) {
+              Ed11y.roots[i] = el.shadowRoot;
+            } else {
+              Ed11y.roots[i] = el;
+            }
+          });
+          Ed11y.buildElementList();
+        
+          let queue = [
+            'testLinks',
+            'testImages',
+            'testHeadings',
+            'testText',
+            'testEmbeds',
+          ];
+          queue.forEach((test) => {
+            window.setTimeout(function(){
+              Ed11y[test].check();
+            },0,test);
+          });
+          // todo: handle custom rules and inbound synced results (e.g, broken links)
+          // todo: test form labels
+        }
         window.setTimeout(function() {
           Ed11y.updatePanel(onLoad, showPanel); 
           // todo parameterize
@@ -176,7 +217,7 @@ class Ed11y {
         Ed11y.reset();
         Ed11y.panelToggle.classList.add('disabled');
         Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
-        Ed11y.panelToggle.setAttribute('title', 'Editorially is disabled during live editing.');
+        Ed11y.panelToggle.setAttribute('title', 'Editorially is disabled.');
       }
     };
 
@@ -335,11 +376,11 @@ class Ed11y {
       Ed11y.elements.reset.forEach((el) => el.remove());
 
       // Reset main panel.
-      Ed11y.panelJumpNext.setAttribute('data-ed11y-goto', '0');
-      Ed11y.panelJumpPrev.setAttribute('data-ed11y-goto', '0');
-      Ed11y.panel.classList.add('shut');
-      Ed11y.panel.classList.remove('active');
-      Ed11y.panelToggle.setAttribute('aria-expanded', 'false');
+      Ed11y.panelJumpNext?.setAttribute('data-ed11y-goto', '0');
+      Ed11y.panelJumpPrev?.setAttribute('data-ed11y-goto', '0');
+      Ed11y.panel?.classList.add('shut');
+      Ed11y.panel?.classList.remove('active');
+      Ed11y.panelToggle?.setAttribute('aria-expanded', 'false');
       Ed11y.running = false;
     };
 
@@ -391,27 +432,36 @@ class Ed11y {
       }
     };
 
+    // QuerySelectAll non-ignored elements within checkroots, with recursion into shadow components
     Ed11y.findElements = function(key, selector) {
-      // Like querySelectorAll limited to checkRoots, with recursion to dive shadow components.
       
       // Todo beta: function and parameter to auto-detect shadow components.
+      let shadowSelector = Ed11y.options.shadowComponents ? `, ${Ed11y.options.shadowComponents}` : '';
+
+      // Concatenate global and specific ignores
+      let ignore = '';
+      if (Ed11y.options.ignoreElements) {
+        ignore = Ed11y.options.ignoreByKey[key] ? `:not(${Ed11y.options.ignoreElements}, ${Ed11y.options.ignoreByKey[key]})`: `:not(${Ed11y.options.ignoreElements})`; 
+      } else {
+        ignore = Ed11y.options.ignoreByKey[key] ? `:not(${Ed11y.options.ignoreByKey[key]})`: '';
+      }
 
       // Initialize or reset elements array.
       Ed11y.elements[key] = [];
 
-      let spacer = Ed11y.options.shadowComponents ? ', ' : '';
-
+      // Add array of elements matching selector, excluding the provided ignore list.
       Ed11y.roots.forEach(root => {
-        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector} ${spacer} ${Ed11y.shadowComponents})${Ed11y.ignore}`)));
+        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector}${shadowSelector})${ignore}`)));
       });
+      
       // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
-      // This repeats the search inside the placeholders, and replaces them with their results.
+      // Repeat the search inside each placeholder, and replace the placeholder with its search results.
       if (Ed11y.options.shadowComponents) {
         let shadowFind = [];
         Ed11y.elements[key].forEach((el, i) => {
           if (el.matches(Ed11y.options.shadowComponents)) {
             // Dive into the shadow root and collect an array of its results.
-            shadowFind[i] = el.shadowRoot.querySelectorAll(`:is(${selector})${Ed11y.ignore}`);
+            shadowFind[i] = el.shadowRoot.querySelectorAll(`:is(${selector})${ignore}`);
           }
         });
         if (shadowFind.length > 0) {
@@ -426,36 +476,6 @@ class Ed11y {
     };
 
     Ed11y.buildElementList = function () {
-
-      Ed11y.elements = [];
-
-      // Find and cache all root elements based on user-provided selectors.
-      let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
-      if (roots.length === 0) {
-        Ed11y.roots = document.querySelectorAll('body');
-        console.error('Check Editoria11y configuration; specified root element not found');
-      } else {
-        Ed11y.roots = [];
-        roots.forEach((el, i) => {
-          if (el.shadowRoot) {
-            Ed11y.roots[i] = el.shadowRoot;
-          } else {
-            Ed11y.roots[i] = el;
-          }
-        });
-      }
-
-      // Convert the container ignore user option to a CSS :not selector.
-      Ed11y.ignore = Ed11y.options.ignoreElements ? `:not(${Ed11y.options.ignoreElements})` : '';
-
-      // Make a copy of the shadowComponents user option as part of an :is() string.
-      // Todo postponed: offer an option to autodetect shadow hosts? 
-      Ed11y.shadowComponents = '';
-      if (Ed11y.options.shadowComponents.length > 0) {
-        Ed11y.shadowComponents = `, ${Ed11y.options.shadowComponents}`;
-      }
-      
-      // Call selection iterator function.
       Ed11y.findElements('p', 'p');
       Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]');
       Ed11y.findElements('img', 'img');
@@ -469,10 +489,10 @@ class Ed11y {
     };
 
 
-    // End of buildElementList()
     Ed11y.dismissalKey = function (text) {
       return String(text).substring(0,512);
     };
+
     Ed11y.dismissThis = function (dismissalType) {
       // Find the active tip and draw its identifying information from the result list
       Ed11y.findElements('activeTip', 'ed11y-element-result[data-ed11y-open="true"]');
@@ -513,8 +533,11 @@ class Ed11y {
       }
 
       Ed11y.reset();
+
       Ed11y.checkAll(false, 'show');
+
       let rememberGoto = Ed11y.goto;
+      
       window.setTimeout( function() {
         Ed11y.buildJumpList();
         if (Ed11y.elements.jumpList.length > 0) {
@@ -615,18 +638,20 @@ class Ed11y {
               margin-top: 34px;
             }
             .ed11y-hidden-highlight {
-              box-shadow: inset 0 0 0 1px ${Ed11y.yellow}, inset 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 1px ${Ed11y.yellow}, 0 0 0 3px ${Ed11y.color.primary}, 0 0 1px 3px !important;
+              box-shadow: inset 0 0 0 1px ${Ed11y.color.warning}, inset 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 1px ${Ed11y.color.warning}, 0 0 0 3px ${Ed11y.color.primary}, 0 0 1px 3px !important;
             }
             .ed11y-ring-red {
-              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.red}, 0 0 0 3px ${Ed11y.red}, 0 0 1px 3px;
-              outline: 2px solid ${Ed11y.red};
+              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.color.alert}, 0 0 0 3px ${Ed11y.color.alert}, 0 0 1px 3px;
+              outline: 2px solid ${Ed11y.color.alert};
               outline-offset: 1px;
             }
             .ed11y-ring-yellow {
-              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.yellow}, 0 0 0 3px ${Ed11y.yellow}, 0 0 1px 3px;
-              outline: 2px solid ${Ed11y.yellow};
+              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.color.warning}, 0 0 0 3px ${Ed11y.color.warning}, 0 0 1px 3px;
+              outline: 2px solid ${Ed11y.color.warning};
               outline-offset: 1px;
-            }`;
+            }
+            `;
+      // .ed11y-force-overflow disabled for testing
 
       Ed11y.roots.forEach((root) => {
         // Shadow elements don't inherit styles, so they need their own copy.
@@ -746,7 +771,7 @@ class Ed11y {
  
       let panelOutline = Ed11y.panel.querySelector('#outline');
       panelOutline.innerHTML = '';
-      Ed11y.headingOutline.forEach((el, i) => {
+      Ed11y.headingOutline?.forEach((el, i) => {
         // Todo implement outline ignore function.
         let mark = document.createElement('ed11y-element-heading-label');
         mark.dataset.ed11yHeadingOutline = i;
@@ -822,7 +847,7 @@ class Ed11y {
       let altList = Ed11y.panel.querySelector('#alt-list');
       altList.innerHTML = '';
       
-      Ed11y.imageAlts.forEach((el, i) => {
+      Ed11y.imageAlts?.forEach((el, i) => {
         // el[el, src, altLabel, altStyle]
         
         // Label images

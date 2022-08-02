@@ -69,10 +69,7 @@ class Ed11yTestHeadings {
         outlinePrefix = '<span class=\'ed11y-small\'><em>' + outlinePrefix +
             '</em></span>';
       }
-      // todo mvp: is this the golden ignore check? also build and test outline ignore
-      if (!(Ed11y.options.outlineIgnore !== '' && el?.closest(Ed11y.options.outlineIgnore))) {
-        Ed11y.headingOutline.push([el, level, outlinePrefix]);
-      }
+      Ed11y.headingOutline.push([el, level, outlinePrefix]);
     });
 
     // Check for blockquotes used as headings. If it's less than 25

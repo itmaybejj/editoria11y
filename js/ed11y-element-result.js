@@ -233,8 +233,8 @@ class Ed11yElementResult extends HTMLElement {
   toggleImage() {
     let manual = `
       .toggle {
-        box-shadow: inset 0 0 0 2px ${Ed11y.yellow}, inset 0 0 0 3px #444, inset 0 0 0 6px ${Ed11y.yellow}, 1px 1px 5px 0 rgba(0,0,0,.5);
-        background: ${Ed11y.yellow};
+        box-shadow: inset 0 0 0 2px ${Ed11y.color.warning}, inset 0 0 0 3px #444, inset 0 0 0 6px ${Ed11y.color.warning}, 1px 1px 5px 0 rgba(0,0,0,.5);
+        background: ${Ed11y.color.warning};
         color: #333;
       }
       .toggle::before {
@@ -245,12 +245,12 @@ class Ed11yElementResult extends HTMLElement {
       }`;
     let alert = `
       .toggle {
-        box-shadow: inset 0 0 0 1px ${Ed11y.red}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 1px 1px 5px 0 rgba(0,0,0,.5);
+        box-shadow: inset 0 0 0 1px ${Ed11y.color.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 1px 1px 5px 0 rgba(0,0,0,.5);
         background: #fefefe;
-        color: ${Ed11y.red};
+        color: ${Ed11y.color.alert};
       }
       .toggle:hover, .toggle[aria-expanded='true'] {
-        box-shadow: inset 0 0 0 1px ${Ed11y.red}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 3px transparent;
+        box-shadow: inset 0 0 0 1px ${Ed11y.color.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 3px transparent;
       }
       .toggle::before {
         content: "!";
@@ -372,12 +372,21 @@ class Ed11yElementResult extends HTMLElement {
       }
       Ed11y.goto = this.getAttribute('data-ed11y-jump-position');
       Ed11y.setCurrentJump();
-      // todo mvp does this still work?
       document.dispatchEvent(new CustomEvent('ed11yPop', {
-        detail: {id: this.toggle.getAttribute('id')}
+        detail: {id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result')}
       }));
     } else {
-      this.closest('.ed11y-force-overflow')?.classList.remove('ed11y-force-overflow');
+      // Allow for themes to restore original DOM/CSS
+      if (Ed11y.options.hiddenHandlers && !!this.closest(Ed11y.options.hiddenHandlers)) {
+        document.dispatchEvent(new CustomEvent('ed11yShut', {
+          detail: {id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result')}
+        }));
+      } 
+      // todo test: forced overflow system no longer needed?
+      /*else {
+        // Undo forced overflow
+        this.closest('.ed11y-force-overflow')?.classList.remove('ed11y-force-overflow');
+      }*/
     }
     this.setAttribute('data-ed11y-open', changeTo);        
   }
@@ -389,8 +398,16 @@ class Ed11yElementResult extends HTMLElement {
   }
 
   allowOverflow() {
-    // todo parameter
-    if (Ed11y.options.allowOverflow.length > 0) {
+    // todo beta: need "undo" event on close
+    if (Ed11y.options.hiddenHandlers && !!this.closest(Ed11y.options.hiddenHandlers)) {
+      if (Ed11y.hiddenHandled !== this.getAttribute('id')) {
+        document.dispatchEvent(new CustomEvent('ed11yShowHidden', {
+          detail: {id: this.getAttribute('id')}
+        }));
+      }
+    }
+    // todo test: forced overflow system no longer needed?
+    /*    else if (Ed11y.options.allowOverflow.length > 0) {
       this.closest(Ed11y.options.allowOverflow).classList.add('ed11y-force-overflow');
     }
     else {
@@ -401,7 +418,7 @@ class Ed11yElementResult extends HTMLElement {
           parent.classList.add('ed11y-force-overflow');
         }
       });
-    }
+    }*/
   }
 
   static get observedAttributes() { return ['data-ed11y-action']; }

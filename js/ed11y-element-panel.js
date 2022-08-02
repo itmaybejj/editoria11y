@@ -175,20 +175,20 @@ class Ed11yElementPanel extends HTMLElement {
           box-shadow: inset 0 0 0 2px #fffe, 0 0 0 2px ${Ed11y.color.primary}; 
         }
         .shut.warnings #toggle {
-          background-color: ${Ed11y.yellow};
+          background-color: ${Ed11y.color.warning};
           color: #000b;
-          box-shadow: inset 0 0 0 2px ${Ed11y.yellow}, inset 0 0 0 3px #000b, 0 0 2px #000;
+          box-shadow: inset 0 0 0 2px ${Ed11y.color.warning}, inset 0 0 0 3px #000b, 0 0 2px #000;
         }
         .shut.warnings #toggle:hover {
-          box-shadow: inset 0 0 0 2px ${Ed11y.yellow}, inset 0 0 0 3px #000b, 0 0 0 3px #000b;
+          box-shadow: inset 0 0 0 2px ${Ed11y.color.warning}, inset 0 0 0 3px #000b, 0 0 0 3px #000b;
         }
         .shut.errors #toggle {
-          color: ${Ed11y.red};
-          box-shadow: inset 0 0 0 1px ${Ed11y.red}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.red}, 1px 1px 5px 0 rgba(0,0,0,.5);
+          color: ${Ed11y.color.alert};
+          box-shadow: inset 0 0 0 1px ${Ed11y.color.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.color.alert}, 1px 1px 5px 0 rgba(0,0,0,.5);
           background: #fefefe;
         }
         .shut.errors #toggle:hover {
-          box-shadow: inset 0 0 0 1px #b80519, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 3px ${Ed11y.red}, 0 0 0 4px transparent;
+          box-shadow: inset 0 0 0 1px #b80519, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 3px ${Ed11y.color.alert}, 0 0 0 4px transparent;
         }
         .shut .toggle-count {
           display: block;
@@ -224,7 +224,7 @@ class Ed11yElementPanel extends HTMLElement {
         }
 
         .warning {
-          background: ${Ed11y.yellow};
+          background: ${Ed11y.color.warning};
           color: #111;
         }
         .error {
@@ -322,6 +322,7 @@ class Ed11yElementPanel extends HTMLElement {
       document.dispatchEvent(new CustomEvent('ed11yShowHidden', {
         detail: {id: goto.getAttribute('id')}
       }));
+      Ed11y.hiddenHandled = goto.getAttribute('id');
       window.setTimeout(function () {
         // Recalculate before jump.
         let gotoOffset = goto.getBoundingClientRect().top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
@@ -329,6 +330,9 @@ class Ed11yElementPanel extends HTMLElement {
           scrollTop: (gotoOffset)
         }, 1);
         goto.setAttribute('data-ed11y-action','open');
+        window.setTimeout(function () {
+          Ed11y.hiddenHandled = false;
+        }, 500);
       }, 500, goto);
     }
     else {
