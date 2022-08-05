@@ -5,7 +5,7 @@
 This page simulates what an *author* would experience if they were logged in to a site with Editoria11y installed: a toggle automatically appears in the lower-right-hand corner of the page with an issue count. Normally it is an innocuous little a11y symbol; since there were critical issues detected on this page it has become a red explanation point.
 
 1. Click the toggle to open the info panel and highlight all the obvious content issues on the page.
-2. Then click the "Show tags" button on the panel to reveal the document's hidden structure and text alternatives.
+2. Then click the "Outline" button on the panel to reveal the document's hidden structure and text alternatives.
 
 Note that the info panel and contextual highlighting can be set to activate *automatically* when new issues were found; that was turned off for this demo so you could read this intro first!
 
@@ -137,4 +137,16 @@ SEVERAL WORDS IN A ROW OF CAPS LOCK TEXT WILL TRIGGER A MANUAL CHECK WARNING.
 
 
 
-<div hidden><style>img {max-width: 240px; width: 50%;}#project_title {text-transform: capitalize;}.inner{max-width:50rem;}li{margin-top:.75rem;}section h2,section h3,section h4{padding-top:1em;}</style><script src="https://code.jquery.com/jquery-3.5.1.min.js"></script><link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css"><script src="{{ site.baseurl}}/demo/editoria11y-prefs.js"></script><script src="{{ site.baseurl}}/js/editoria11y-localization.js"></script><script src="{{ site.baseurl}}/js/editoria11y.js"></script></div>
+<div hidden><style>img {max-width: 240px; width: 50%;}#project_title {text-transform: capitalize;}.inner{max-width:50rem;}li{margin-top:.75rem;}section h2,section h3,section h4{padding-top:1em;}</style><link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css">
+<script src="{{ site.baseurl}}/dist/editoria11y.min.js"></script>
+            <!-- Instantiate-->
+            <script>
+              if (window.navigator.userAgent.match(/MSIE|Trident/) === null) {
+                // TODO mvp Need to replace this with a test for ECMA level
+                const ed11y = new Ed11y({
+                    alertMode : 'polite',
+                    ignoreElements : '.project-tagline *',
+                    checkRoots : 'main',
+                });
+              }
+            </script></div>

@@ -824,22 +824,23 @@ class Ed11y {
 
     
     Ed11y.alignAlts = function() {
-      // Attempts to put alt text visualization on top of images.
-      // Todo mvp: this handles inline images in links quite poorly.
+      // Positions alt label to match absolute, inline or floated images.
       Ed11y.findElements('altMark', 'ed11y-element-alt');
-      if (Ed11y.elements.altMark) {
-        Ed11y.elements.altMark.forEach((el) => {
-          let id = el.dataset.ed11yImg;
-          el.setAttribute('style','');
-          let img = Ed11y.imageAlts[id][0];
-          let markOffset = el.getBoundingClientRect();
-          let imgOffset = img.getBoundingClientRect();
-          let newOffset = imgOffset.left - markOffset.left;
-          let height = getComputedStyle(img).height;
-          height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
-          el.setAttribute('style', `transform: translate(${newOffset}px, 0px); height: ${height}px; width: ${img.offsetWidth}px;`);
-        });
-      }
+      Ed11y.elements.altMark?.forEach((el) => {
+        let id = el.dataset.ed11yImg;
+        el.setAttribute('style','');
+        let img = Ed11y.imageAlts[id][0];
+        if (img.tagName !== 'IMG') {
+          // Mark is placed outside the link in linked images.
+          img = img.querySelector('img');
+        }
+        let markOffset = el.getClientRects();
+        let imgOffset = img.getClientRects();
+        let newOffset = imgOffset.left - markOffset.left;
+        let height = getComputedStyle(img).height;
+        height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
+        el.setAttribute('style', `transform: translate(${newOffset}px, 0px); height: ${height}px; width: ${img.offsetWidth}px;`);
+      });
     };
 
     Ed11y.showAltPanel = function() {

@@ -70,7 +70,7 @@ class Ed11yElementPanel extends HTMLElement {
           outline: transparent;
         }
         .wrapper {
-          width: clamp(160px, 25em, 92vw);
+          width: clamp(160px, 23em, 92vw);
           background: ${Ed11y.color.bg};
           color: ${Ed11y.color.text};
           border-radius: 3px;

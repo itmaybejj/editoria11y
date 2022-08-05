@@ -170,10 +170,10 @@ class Ed11yElementResult extends HTMLElement {
           color: inherit;
         }
         a:hover, a:focus-visible {
-          color: ${Ed11y.color.primary};
           text-decoration-style: double;
           text-decoration-skip-ink: none;
         }
+
         .close {
           padding: 0 0 0 2px;
           font-size: 14px;
