@@ -114,8 +114,9 @@
         <div class="positive">YouTube<iframe src="/youtube.com/"></iframe></div>
         <hr>
         <div class="positive">HTML5 video<video></video></div>
-        
+                
         <hr>
+        <div class="positive"><div id="embed" style="width: 50%; height: 4rem; background: aquamarine;">E.g., a social media feed</div></div>
 
         <!--<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" width="300" height="240" frameborder="0"></iframe>-->
 [iframe commented out during development]
@@ -307,7 +308,8 @@
                     alertMode : 'assertive',
 //                    theme : 'darkTheme',
                     outlineExclude : '.utility',
-                    linkIgnoreStrings: ['(opens in new window)'],
+                    linkIgnoreStrings: '\(opens in new window\)',
+                    embeddedContent: '#embed',
                     //ignoreElements : '.positive *, .positive',
                     shadowComponents : 'shadow-test, shadow-test-no-hits', 
                     checkRoots : 'body',

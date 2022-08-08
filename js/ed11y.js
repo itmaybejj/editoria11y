@@ -44,8 +44,9 @@ class Ed11y {
       // Disable check if these elements are present, e.g., ".live-editing-toolbar, .frontpage"
       doNotRun: '',   
 
-      // Array of strings to remove from links before checking to see if link titles are meaningful. e.g. ["(opens in new window)", "link is external"]
-      linkIgnoreStrings: [],
+      // Regex of strings to remove from links before checking to see if link titles are meaningful. E.g.:
+      // "\(link is external\)|\(link sends email\)"
+      linkIgnoreStrings: false,
 
       // Selector list for elements that should have "overflow: visible" CSS applied when they contain an open tip
       // todo test -- this appears to no longer be needed
@@ -94,7 +95,8 @@ class Ed11y {
       audioContent: 'soundcloud.com, simplecast.com, podbean.com, buzzsprout.com, blubrry.com, transistor.fm, fusebox.fm, libsyn.com',
       dataVizContent: 'datastudio.google.com, tableau',
       twitterContent: 'twitter-timeline',
-      documentLinks: ['.pdf', '.doc', '.docx', '.ppt', '.pptx', 'https://docs.google'],
+      // Selector list to identify links to documents you would like flagged for manual review.
+      documentLinks: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\'], a[href$=\'.doc\'], a[href$=\'.docx\'], a[href*=\'.doc?\'], a[href*=\'.docx?\'], a[href$=\'.ppt\'], a[href$=\'.pptx\'], a[href*=\'.ppt?\'], a[href*=\'.pptx?\'], a[href^=\'https://docs.google\']',
 
       // * Not implemented Yet:
       // custom Checks
@@ -486,6 +488,9 @@ class Ed11y {
       Ed11y.findElements('audio', 'audio');
       Ed11y.findElements('video', 'video');
       Ed11y.findElements('table', 'table');
+      if (Ed11y.options.embeddedContent) {
+        Ed11y.findElements('embed', Ed11y.options.embeddedContent);
+      }
     };
 
 

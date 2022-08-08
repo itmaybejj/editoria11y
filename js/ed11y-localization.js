@@ -248,10 +248,12 @@ const ed11yLang = {
     tableContainsContentHeading : {
       title: 'Content heading inside a table',
       tip: () => 
-        `<p>"Table headers" and "content headings" mean different things:</p>
-            <ul><li>Table header cells label a <strong>column or row</strong>. In the example below, a table header in position 3 would label cell C.</li><li>Content headings ("Heading 1", "Heading 2") are the chapter titles for the page, labelling all content <strong>until the next heading</strong>, with no respect for columns or rows. A content heading in position 3 would label cells A, B <strong><em>and</em></strong> C.</li></ul>
-            <table><tr><th>1</th><th>2</th><th>3</th></tr>
+        `<p>Content headings ("Heading 1", "Heading 2") form a navigable table of contents for screen reader users,  
+        labelling all content <strong>until the next heading</strong>. Table headers label specific columns or rows within a table.</p> 
+            <p></p>
+            <table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">To illustrate: a <strong>table</strong> header in cell 2 would label its column: cell B. A <strong>content</strong> heading in cell 2 would label cells 3, A, B and C, as well the text after the table.</td></tr>
             <tr><td>A</td><td>B</td><td>C</td></table>
+            <p>To fix: remove nested formatting from inside table headers.</p>
             `
     },
 

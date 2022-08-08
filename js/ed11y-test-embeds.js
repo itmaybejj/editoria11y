@@ -48,10 +48,9 @@ class Ed11yTestEmbeds {
       });
     }
 
-    if (Ed11y.options.embeddedContent.length > 1) {
-      let embed = Ed11y.srcMatchesOptions(Ed11y.elements.frame, Ed11y.options.embeddedContent);
-      embed.forEach((el) => {
-        let dismissKey = Ed11y.dismissalKey(el.getAttribute('src'));
+    if (Ed11y.options.embeddedContent) {
+      Ed11y.elements.embed?.forEach((el) => {
+        let dismissKey = Ed11y.dismissalKey(el.getAttribute('src') + el.getAttribute('id') + el.getAttribute('class'));
         Ed11y.results.push([el, 'embedCustom', Ed11y.M.embedCustom.tip(), 'beforebegin', dismissKey]);
       });
     }

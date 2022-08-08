@@ -12,18 +12,11 @@ class Ed11yTestLinks {
       // todo: replace with full accessible name calculation
       let linkText = Ed11y.computeAriaLabel(el); // returns text or 'noAria';
       let img = el.querySelectorAll('img');
-      let href = el.getAttribute('href');
       let hasImg = img.length > 0;
       let document = false;
 
-      // todo: use regex to find any three-letter TLD followed by a slash?
-      if (Ed11y.options.documentLinks && href) {
-        Ed11y.options.documentLinks.forEach((fileType) => {
-          let withQuery = fileType + '?';
-          if (href.endsWith(fileType) || fileType.indexOf(withQuery) > -1) {
-            document = true;
-          }
-        });
+      if (el.matches(Ed11y.options.documentLinks)) {
+        document = true;
       }
 
       // todo: replace with full accessible name calculation
@@ -49,22 +42,19 @@ class Ed11yTestLinks {
         }
       }
       
+      // Todo replace with accessible name calculation?
       linkText += Ed11y.computeTitle(el) ? Ed11y.computeTitle(el) : '';
 
       // Create version of text without "open in new window" warnings.
-      let linkStrippedText = linkText;
-      Ed11y.options.linkIgnoreStrings.forEach((string) => {
-        linkText = linkText.replace(string, '');
-      });
-      
-      if (el?.getAttribute('target') === '_blank' && linkText === linkStrippedText) {
-        // Warn about unwarned new windows before ignoreString strip.
-        let dismissKey = Ed11y.dismissalKey(linkText);
-        
+      let linkStrippedText = Ed11y.options.linkIgnoreStrings ? linkText.replace(Ed11y.options.linkIgnoreStrings, '') : linkText;
+      if (el?.getAttribute('target') === '_blank' && linkText === linkStrippedText && linkStrippedText.indexOf('window') === -1 && linkStrippedText.indexOf('tab') === -1) {
+        // todo bring back defaults? new window? 
+        // If nothing was stripped and we opened a new window, we weren't warned.
+        let dismissKey = Ed11y.dismissalKey(linkText);        
         Ed11y.results.push([el, 'linkNewWindow', Ed11y.M.linkNewWindow.tip(), 'beforebegin', dismissKey]);
       }
       
-      linkStrippedText = linkText.replace(/'|"|-|\.|\s+/g, '');
+      linkStrippedText = linkStrippedText.replace(/'|"|-|\.|\s+/g, '').toLowerCase();
 
       // Tests to see if this link is empty
       if (linkStrippedText.length === 0) {        
@@ -93,7 +83,7 @@ class Ed11yTestLinks {
           }
           return hit;
         };
-        let textCheck = linkTextCheck(linkText.trim().toLowerCase());
+        let textCheck = linkTextCheck(linkStrippedText);
         if (textCheck !== 'none') {
           let dismissKey = Ed11y.dismissalKey(linkText);
           let error = 'linkTextIsURL';
