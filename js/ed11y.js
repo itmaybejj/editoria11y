@@ -41,11 +41,13 @@ class Ed11y {
       allowOK: true,  // enables end-user mark OK button
       syncedDismissals: false, // provide empty or populated object {} to enable synch functions
 
-      // Disable check if these elements are present, e.g., ".live-editing-toolbar, .frontpage"
+      // Disable check if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
       doNotRun: '',
+      neededToRun: '',
 
-      // Disable check if these elements are absent, e.g., ".edit-button"
-      neededToRun: false,
+      // Hide all alerts if these elements are absent, e.g., ".edit-button"
+      // Used to not heckle editors on pages they cannot fix
+      ignoreAllIfAbsent: false,
 
       // Regex of strings to remove from links before checking to see if link titles are meaningful. E.g.:
       // "\(link is external\)|\(link sends email\)"
@@ -118,7 +120,6 @@ class Ed11y {
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
     }
-    
 
     Ed11y.initialize = () => {
 
@@ -159,6 +160,12 @@ class Ed11y {
           Ed11y.testLinks = new Ed11yTestLinks;
           Ed11y.testText = new Ed11yTestText;
 
+          // Convert the container ignore user option to a CSS :not selector.
+          Ed11y.ignore = Ed11y.options.ignoreElements ? `:not(${Ed11y.options.ignoreElements})` : '';
+
+          // Check for ignoreAll element only once.
+          Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null ? true : false;
+          
           // Run tests
           Ed11y.checkAll(true, 'hide');
         }
@@ -175,9 +182,8 @@ class Ed11y {
         Ed11y.errorCount = 0;
         Ed11y.warningCount = 0;
         Ed11y.dismissedCount = 0;
+        Ed11y.ignoreAllCount = 0;
         Ed11y.mediaCount = 0;
-        // Convert the container ignore user option to a CSS :not selector.
-        Ed11y.ignore = Ed11y.options.ignoreElements ? `:not(${Ed11y.options.ignoreElements})` : '';
 
         // Find and cache all root elements based on user-provided selectors.
         let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
@@ -237,23 +243,27 @@ class Ed11y {
     Ed11y.countAlerts = function (onLoad) {
       // Review results array to remove dismissed items
 
-      Ed11y.dismissedCount = 0;
-      for (let i = Ed11y.results.length - 1; i >= 0; i--) {
-        let test = Ed11y.results[i][1];
-        let dismissKey = Ed11y.results[i][4];
-        if (dismissKey !== false && typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage] !== 'undefined' && typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] !== 'undefined' && Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey] !== 'undefined') {
-          // Remove result if it has been marked OK or ignored, increment dismissed match counter.
-          Ed11y.dismissedCount++;
-          Ed11y.results[i][5] = Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey];
-        } else if (Ed11y.results[i][4]) {
-          Ed11y.warningCount++;
-          Ed11y.results[i][5] = false;
-        } else {
-          Ed11y.errorCount++;
-          Ed11y.results[i][5] = false;
+      if (Ed11y.ignoreAll) {
+        Ed11y.dismissedCount = 1;
+      } else {
+        Ed11y.dismissedCount = 0;
+        for (let i = Ed11y.results.length - 1; i >= 0; i--) {
+          let test = Ed11y.results[i][1];
+          let dismissKey = Ed11y.results[i][4];
+          if (dismissKey !== false && typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage] !== 'undefined' && typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] !== 'undefined' && Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey] !== 'undefined') {
+            // Remove result if it has been marked OK or ignored, increment dismissed match counter.
+            Ed11y.dismissedCount++;
+            Ed11y.results[i][5] = Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey];
+          } else if (Ed11y.results[i][4]) {
+            Ed11y.warningCount++;
+            Ed11y.results[i][5] = false;
+          } else {
+            Ed11y.errorCount++;
+            Ed11y.results[i][5] = false;
+          }
         }
       }
-
+      
       Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
 
       if (Ed11y.totalCount > 0) {
@@ -271,7 +281,7 @@ class Ed11y {
           Ed11y.panel.classList.remove('errors', 'pass');
           Ed11y.panel.classList.add('warnings');
         }
-        Ed11y.panelCount.textCount = Ed11y.totalCount;
+        Ed11y.panelCount.textCount = Ed11y.totalCount;    
         Ed11y.panelCount.style.display = 'inline-block';
         Ed11y.panelMessage.innerHTML = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
         Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
@@ -279,13 +289,20 @@ class Ed11y {
       else {
         Ed11y.panelJumpNext.setAttribute('hidden', '');
         Ed11y.panelJumpPrev.setAttribute('hidden', '');
-        Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
+        
         Ed11y.panelCount.style.display = 'display: none;';
         Ed11y.panel.classList.remove('warnings', 'errors');
         Ed11y.panel.classList.add('pass');
-        Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
+        if (Ed11y.dismissedCount > 0) {
+          // todo: title attribute to explain the difference?
+          Ed11y.panel.querySelector('.toggle-count').textContent = 'i';
+          Ed11y.panelMessage.innerText = Ed11y.M.panelCountAllDismissed;
+        } else {
+          Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
+          Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
+        }
       }
-      if (Ed11y.dismissedCount > 0) {
+      if (Ed11y.dismissedCount > 0 || Ed11y.ignoreAll) {
         Ed11y.restoreDismissed.removeAttribute('hidden');
       }
       Ed11y.panel.classList.remove('ed11y-preload');
@@ -309,7 +326,7 @@ class Ed11y {
 
       Ed11y.countAlerts(onLoad);
       
-      if (onLoad === true && Ed11y.totalCount > 0) {
+      if (onLoad === true && Ed11y.totalCount > 0 && !Ed11y.ignoreAll) {
         // Determine if panel should open automatically.
         if (Ed11y.localDataParsed[Ed11y.options.currentPage] === Ed11y.totalCount) {
           // User has already seen these errors, panel will not open.
@@ -329,8 +346,6 @@ class Ed11y {
         showPanel = 'pass';
       }
 
-      
-
       // Now we can open or close the panel.
       if (showPanel !== 'show') {
         Ed11y.reset();
@@ -344,7 +359,9 @@ class Ed11y {
         Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
         window.setTimeout(function () {
           document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
-          Ed11y.showResults();
+          if (!Ed11y.ignoreAll) {
+            Ed11y.showResults();
+          }
         }, 0);
         if (onLoad === false) {
           window.setTimeout(function() {
@@ -508,7 +525,6 @@ class Ed11y {
       }
     };
 
-
     Ed11y.dismissalKey = function (text) {
       return String(text).substring(0,512);
     };
@@ -574,6 +590,8 @@ class Ed11y {
     };
 
     Ed11y.clearDismissals = function() {
+      // todo: if user has allowIgnore but not allowOK or vice versa, this temporarily clears both.
+      Ed11y.ignoreAll = false;
       Ed11y.dismissedAlerts[Ed11y.options.currentPage] = {};
       if (Ed11y.options.syncedDismissals === false) {
         localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));

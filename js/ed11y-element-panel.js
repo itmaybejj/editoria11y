@@ -31,7 +31,7 @@ class Ed11yElementPanel extends HTMLElement {
           <div class='jumplinks'>
             <button class='jump prev' data-ed11y-goto='0'><span aria-hidden='true'>« </span><span class='jump-prev'>Previous</span></button>
             <button class='jump next' data-ed11y-goto='0'><span class='jump-next'>First</span> <span aria-hidden='true'> »</span></button>
-            <button id='restore' hidden>Restore hidden alerts</button>
+            <button id='restore' hidden>Show hidden alerts</button>
           </div>
         </div>
       <div id='headings-tab' role="tabpanel" class="hidden" aria-labelledby='headings' tabindex='0'>

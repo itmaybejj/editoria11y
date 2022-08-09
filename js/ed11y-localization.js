@@ -8,6 +8,7 @@ const ed11yLang = {
 
     // Main Panel
     panelCount0 : 'No issues detected.',
+    panelCountAllDismissed : 'All issues hidden.',
     panelCount1 : 'One issue detected.',
     panelCountMultiple: ' issues detected.',
     panelHelp : `
