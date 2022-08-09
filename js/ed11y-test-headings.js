@@ -6,7 +6,7 @@ class Ed11yTestHeadings {
 
   check () {
     // Reset panel; we rebuild on each run.
-    // todo mvp rewrite
+    // todo mvp rewrite to search the whole outline
     Ed11y.panel?.querySelectorAll('#ed11y-outline-list li, .ed11y-headings-label')?.forEach((el) => el.remove());
     
     let prevLevel = 0;
@@ -33,6 +33,8 @@ class Ed11yTestHeadings {
       let headingText = Ed11y.getText(el);
       let headingLength = headingText.length;
       let dismissKey = false;
+      console.log(level);
+      console.log(prevLevel);
       if (level - prevLevel > 1 && i !== 0) {
         error = 'headingLevelSkipped';
         dismissKey = level + headingText;
@@ -61,13 +63,20 @@ class Ed11yTestHeadings {
       // Todo test new header ignore
       if (error !== '') {
         // todo: just use container ignore?
-        if (!(Ed11y.options.headerIgnore !== '' && el?.closest(Ed11y.options.headerIgnore))) {
+        console.log(error);
+        console.log(el.closest(Ed11y.options.checkRoots));
+        console.log(el.getRootNode()?.host?.matches(Ed11y.options.shadowComponents));
+        //  || 
+        if (el.closest(Ed11y.options.checkRoots) || (Ed11y.options.shadowComponents && el.getRootNode()?.host?.matches(Ed11y.options.shadowComponents))) {
+          console.log('found');
           Ed11y.results.push([el, error, message, position, dismissKey]);
+          if (outlinePrefix) {
+            outlinePrefix = '<span class=\'ed11y-small\'><em>' + outlinePrefix +
+                '</em></span>';
+          }
+        } else {
+          outlinePrefix = "";
         }
-      }
-      if (outlinePrefix) {
-        outlinePrefix = '<span class=\'ed11y-small\'><em>' + outlinePrefix +
-            '</em></span>';
       }
       Ed11y.headingOutline.push([el, level, outlinePrefix]);
     });

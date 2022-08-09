@@ -252,7 +252,7 @@
                         const shadow = this.attachShadow({mode: 'open'});
                         let wrapper = document.createElement('div');
                         wrapper.setAttribute('class','wrapper');
-                        wrapper.innerHTML = `<h5>Header skip in the shadow DOM</h5><p>ALL CAPS IN THE SHADOW DOM</p>`
+                        wrapper.innerHTML = `<h4>Header skip in the shadow DOM</h4><p>ALL CAPS IN THE SHADOW DOM</p>`
                         shadow.appendChild(wrapper);
                         this.initialized = true;
                     }
@@ -306,19 +306,20 @@
             <script>
                 const ed11y = new Ed11y({
                     alertMode : 'assertive',
-//                    theme : 'darkTheme',
+                    theme : 'darkTheme',
                     outlineExclude : '.utility',
                     linkIgnoreStrings: '\(opens in new window\)',
                     embeddedContent: '#embed',
                     //ignoreElements : '.positive *, .positive',
                     shadowComponents : 'shadow-test, shadow-test-no-hits', 
-                    checkRoots : 'body',
+                    checkRoots : 'main',
                     // todo add test for root element not found 
                 });
             </script>
             
         </div>
     </main>
+    <footer><div class="negative"><h6>Heading level skip outside of checkroot area should appear in outline but not be flagged.</h6></div></footer>
 
 
 

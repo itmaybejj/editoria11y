@@ -179,6 +179,7 @@ class Ed11y {
         // Find and cache all root elements based on user-provided selectors.
         let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
         if (roots.length === 0) {
+          // todo MVP: aren't we disabling this now?
           Ed11y.roots = [document.querySelector('html, body')];
           Ed11y.elements = [];
           console.error('Check Editoria11y configuration; specified root element not found');
@@ -435,7 +436,7 @@ class Ed11y {
     };
 
     // QuerySelectAll non-ignored elements within checkroots, with recursion into shadow components
-    Ed11y.findElements = function(key, selector) {
+    Ed11y.findElements = function(key, selector, rootRestrict = true) {
       
       // Todo beta: function and parameter to auto-detect shadow components.
       let shadowSelector = Ed11y.options.shadowComponents ? `, ${Ed11y.options.shadowComponents}` : '';
@@ -451,10 +452,14 @@ class Ed11y {
       // Initialize or reset elements array.
       Ed11y.elements[key] = [];
 
-      // Add array of elements matching selector, excluding the provided ignore list.
-      Ed11y.roots.forEach(root => {
-        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector}${shadowSelector})${ignore}`)));
-      });
+      if (rootRestrict) {
+        // Add array of elements matching selector, excluding the provided ignore list.
+        Ed11y.roots.forEach(root => {
+          Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector}${shadowSelector})${ignore}`)));
+        });
+      } else {
+        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(document.querySelectorAll(`:is(${selector}${shadowSelector})${ignore}`)));
+      }
       
       // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
       // Repeat the search inside each placeholder, and replace the placeholder with its search results.
@@ -479,7 +484,7 @@ class Ed11y {
 
     Ed11y.buildElementList = function () {
       Ed11y.findElements('p', 'p');
-      Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]');
+      Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', false);
       Ed11y.findElements('img', 'img');
       Ed11y.findElements('a', 'a[href]');
       Ed11y.findElements('li', 'li');

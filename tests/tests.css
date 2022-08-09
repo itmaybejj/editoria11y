@@ -1,6 +1,6 @@
 body {background: #f9f9fe; font-family: sans-serif; color:#222;}
 main {max-width: 50rem; margin: auto; background:#fefeff;  box-shadow: 0 8px 8px rgba(0,0,25,.25); padding: 2rem 2.5rem 3rem 3.5rem;}
-header {max-width: 52rem; margin: auto;}
+header, footer {max-width: 52rem; margin: auto;}
 section {padding-top: 2rem;}
 h1 {
     font-family: georgia, serif;
