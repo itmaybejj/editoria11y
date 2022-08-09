@@ -33,8 +33,6 @@ class Ed11yTestHeadings {
       let headingText = Ed11y.getText(el);
       let headingLength = headingText.length;
       let dismissKey = false;
-      console.log(level);
-      console.log(prevLevel);
       if (level - prevLevel > 1 && i !== 0) {
         error = 'headingLevelSkipped';
         dismissKey = level + headingText;
@@ -60,22 +58,15 @@ class Ed11yTestHeadings {
       // If the heading error is within a hyperlink, make sure to
       // append button after anchor tag.
       // Todo add this case to the test page
-      // Todo test new header ignore
       if (error !== '') {
-        // todo: just use container ignore?
-        console.log(error);
-        console.log(el.closest(Ed11y.options.checkRoots));
-        console.log(el.getRootNode()?.host?.matches(Ed11y.options.shadowComponents));
-        //  || 
         if (el.closest(Ed11y.options.checkRoots) || (Ed11y.options.shadowComponents && el.getRootNode()?.host?.matches(Ed11y.options.shadowComponents))) {
-          console.log('found');
           Ed11y.results.push([el, error, message, position, dismissKey]);
           if (outlinePrefix) {
             outlinePrefix = '<span class=\'ed11y-small\'><em>' + outlinePrefix +
                 '</em></span>';
           }
         } else {
-          outlinePrefix = "";
+          outlinePrefix = '';
         }
       }
       Ed11y.headingOutline.push([el, level, outlinePrefix]);

@@ -42,7 +42,10 @@ class Ed11y {
       syncedDismissals: false, // provide empty or populated object {} to enable synch functions
 
       // Disable check if these elements are present, e.g., ".live-editing-toolbar, .frontpage"
-      doNotRun: '',   
+      doNotRun: '',
+
+      // Disable check if these elements are absent, e.g., ".edit-button"
+      neededToRun: false,
 
       // Regex of strings to remove from links before checking to see if link titles are meaningful. E.g.:
       // "\(link is external\)|\(link sends email\)"
@@ -178,11 +181,18 @@ class Ed11y {
 
         // Find and cache all root elements based on user-provided selectors.
         let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
-        if (roots.length === 0) {
-          // todo MVP: aren't we disabling this now?
+        let neededToRun = Ed11y.options.neededToRun ? document.querySelector(`:is(${Ed11y.options.neededToRun})`) : false;
+        // todo: if neededToRun is absent, should we have a button to run scan anyway?
+        if (roots.length === 0 || neededToRun === null) {
+          // todo MVP: set panel message?
           Ed11y.roots = [document.querySelector('html, body')];
           Ed11y.elements = [];
-          console.error('Check Editoria11y configuration; specified root element not found');
+          // Todo parameterize.
+          if (roots.length === 0) {
+            console.warn('Check Editoria11y configuration; specified root element not found');
+          } else {
+            console.warn('No user editable content on this page');
+          }
           Ed11y.reset();
         } else {
           Ed11y.roots = [];
