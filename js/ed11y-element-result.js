@@ -314,7 +314,7 @@ class Ed11yElementResult extends HTMLElement {
         dismissOKButton.classList.add('dismiss');
         // todo mvp Parameterize
         dismissOKButton.textContent = 'Mark as Checked and OK';
-        dismissOKButton.setAttribute('title', 'Hide for all editors on this page');
+        dismissOKButton.setAttribute('title', 'Dismisses alert for all editors');
         dismissers.append(dismissOKButton);
         dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
       }
@@ -323,7 +323,7 @@ class Ed11yElementResult extends HTMLElement {
         dismissHideButton.classList.add('dismiss');
         // todo parameterize
         dismissHideButton.textContent = 'Hide alert';
-        dismissHideButton.setAttribute('title', 'Hide for the current editor on this page');
+        dismissHideButton.setAttribute('title', 'Dismisses alert for you');
         dismissers.append(dismissHideButton);
         dismissHideButton.addEventListener('click', function(){Ed11y.dismissThis('hide');});
       }

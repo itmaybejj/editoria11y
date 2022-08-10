@@ -22,7 +22,7 @@ class Ed11y {
       ignoreByKey: {
         // 'p': false,
         // 'h': false,
-        'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
+        'img': '[aria-hidden], [aria-label], [aria-labelledby], [aria-hidden] img, [aria-label] img, [aria-labelledby] img', // disable alt text tests on overriden images
         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
         // 'li': false,
         // 'blockquote': false,
@@ -94,7 +94,7 @@ class Ed11y {
       },
 
       // Test customizations
-      embeddedContent: '', // todo remove in favor of custom checks
+      embeddedContent: false, // todo remove in favor of custom checks
       embeddedContentTitle: '', // todo test
       embeddedContentMessage: '', // todo test
       videoContent: 'youtube.com, vimeo.com, yuja.com, panopto.com',
@@ -1096,6 +1096,7 @@ class Ed11y {
         console.log(el.offsetHeight);
         console.log(el.hasAttribute('hidden'));*/
         if (
+          // todo: if the element is display:none, can we push the tooltip to the nearest visible container and then open it?
           style.getPropertyValue('display') === 'none' || 
           style.getPropertyValue('visibility') === 'hidden' ||
           style.getPropertyValue('opacity') === '0' ||
