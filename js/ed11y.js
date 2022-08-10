@@ -8,8 +8,8 @@ class Ed11y {
     
     let defaultOptions = {
 
-      // Only check within these containers, e.g. "#main, footer"
-      checkRoots: 'body',
+      // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
+      checkRoots: false,
 
       // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
       shadowComponents: false, 
@@ -167,6 +167,10 @@ class Ed11y {
 
           // Convert the container ignore user option to a CSS :not selector.
           Ed11y.ignore = Ed11y.options.ignoreElements ? `:not(${Ed11y.options.ignoreElements})` : '';
+
+          if (!Ed11y.options.checkRoots) {
+            Ed11y.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
+          }
 
           // Check for ignoreAll element only once.
           Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null ? true : false;
@@ -920,7 +924,7 @@ class Ed11y {
     };
 
     Ed11y.buildJumpList = function() {
-      Ed11y.findElements('jumpList','ed11y-element-result');
+      Ed11y.findElements('jumpList','ed11y-element-result', false);
       Ed11y.elements.jumpList.forEach((result, i) => {
         result.dataset.ed11yJumpPosition = i; 
       });
