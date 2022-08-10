@@ -116,7 +116,7 @@ A complete implementation will only be called for logged-in editors (you don't w
       // Content editors cannot edit these elements
       ignoreElements : 'nav *, #social-block',
       // We don't want to ignore alerts, only fix or mark OK
-      allowIgnore : false,
+      allowHide : false,
       allowOK : true,
       // Don't scan while the editor toolbar is open
       doNotRun : ".editor-toolbar",

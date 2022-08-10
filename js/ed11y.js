@@ -37,17 +37,18 @@ class Ed11y {
 
       // Dismissed alerts
       currentPage: false, // uses window.location.pathname unless a string is provided.
-      allowIgnore: true, // enables end-user ignore button
+      allowHide: true, // enables end-user ignore button
       allowOK: true,  // enables end-user mark OK button
       syncedDismissals: false, // provide empty or populated object {} to enable synch functions
 
-      // Disable check if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
-      doNotRun: '',
-      neededToRun: '',
-
       // Hide all alerts if these elements are absent, e.g., ".edit-button"
-      // Used to not heckle editors on pages they cannot fix
+      // Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
       ignoreAllIfAbsent: false,
+      ignoreAllIfPresent: false,
+
+      // Disable checker altogother if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
+      preventCheckingIfPresent: false,
+      preventCheckingIfAbsent: false,
 
       // Regex of strings to remove from links before checking to see if link titles are meaningful. E.g.:
       // "\(link is external\)|\(link sends email\)"
@@ -124,7 +125,11 @@ class Ed11y {
     Ed11y.initialize = () => {
 
       Ed11y.checkRunPrevent = () => {
-        return Ed11y.options.doNotRun.trim().length > 0 ? document.querySelector(Ed11y.options.doNotRun) : false;
+        let preventCheck = Ed11y.options.preventCheckingIfPresent ? document.querySelector(Ed11y.options.preventCheckingIfPresent) : false;
+        if (!preventCheck && !!Ed11y.options.preventCheckingIfAbsent) {
+          preventCheck = document.querySelector(`:is(${Ed11y.options.preventCheckingIfAbsent})`) === null ? true : false;
+        }
+        return preventCheck;
       };
 
       //Need to evaluate if "load" event took place for bookmarklet version. Otherwise, only call Sa11y once page has loaded.
@@ -165,6 +170,9 @@ class Ed11y {
 
           // Check for ignoreAll element only once.
           Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null ? true : false;
+          if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
+            Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) === null ? false : true;
+          }
           
           // Run tests
           Ed11y.checkAll(true, 'hide');
@@ -182,14 +190,11 @@ class Ed11y {
         Ed11y.errorCount = 0;
         Ed11y.warningCount = 0;
         Ed11y.dismissedCount = 0;
-        Ed11y.ignoreAllCount = 0;
         Ed11y.mediaCount = 0;
 
         // Find and cache all root elements based on user-provided selectors.
         let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
-        let neededToRun = Ed11y.options.neededToRun ? document.querySelector(`:is(${Ed11y.options.neededToRun})`) : false;
-        // todo: if neededToRun is absent, should we have a button to run scan anyway?
-        if (roots.length === 0 || neededToRun === null) {
+        if (roots.length === 0) {
           // todo MVP: set panel message?
           Ed11y.roots = [document.querySelector('html, body')];
           Ed11y.elements = [];
@@ -244,7 +249,7 @@ class Ed11y {
       // Review results array to remove dismissed items
 
       if (Ed11y.ignoreAll) {
-        Ed11y.dismissedCount = 1;
+        Ed11y.dismissedCount = Ed11y.results.length > 0 ? 1 : 0;
       } else {
         Ed11y.dismissedCount = 0;
         for (let i = Ed11y.results.length - 1; i >= 0; i--) {
@@ -590,7 +595,7 @@ class Ed11y {
     };
 
     Ed11y.clearDismissals = function() {
-      // todo: if user has allowIgnore but not allowOK or vice versa, this temporarily clears both.
+      // todo: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
       Ed11y.ignoreAll = false;
       Ed11y.dismissedAlerts[Ed11y.options.currentPage] = {};
       if (Ed11y.options.syncedDismissals === false) {

@@ -307,7 +307,7 @@ class Ed11yElementResult extends HTMLElement {
     let content = document.createElement('div');
     content.classList.add('content');
     content.innerHTML = this.result[2];
-    if (this.dismissable && (Ed11y.options.allowOK || Ed11y.options.allowIgnore)) {
+    if (this.dismissable && (Ed11y.options.allowOK || Ed11y.options.allowHide)) {
       let dismissers = document.createElement('div');
       if (Ed11y.options.allowOK) {
         let dismissOKButton = document.createElement('button');
@@ -318,13 +318,14 @@ class Ed11yElementResult extends HTMLElement {
         dismissers.append(dismissOKButton);
         dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
       }
-      if (Ed11y.options.allowIgnore) {
-        let dismissIgnoreButton = document.createElement('button');
-        dismissIgnoreButton.classList.add('dismiss');
-        dismissIgnoreButton.textContent = 'Ignore';
-        dismissIgnoreButton.setAttribute('title', 'Hide for the current editor on this page');
-        dismissers.append(dismissIgnoreButton);
-        dismissIgnoreButton.addEventListener('click', function(){Ed11y.dismissThis('ignore');});
+      if (Ed11y.options.allowHide) {
+        let dismissHideButton = document.createElement('button');
+        dismissHideButton.classList.add('dismiss');
+        // todo parameterize
+        dismissHideButton.textContent = 'Hide alert';
+        dismissHideButton.setAttribute('title', 'Hide for the current editor on this page');
+        dismissers.append(dismissHideButton);
+        dismissHideButton.addEventListener('click', function(){Ed11y.dismissThis('hide');});
       }
       let dismissHelp = document.createElement('button');
       dismissHelp.classList.add('dismiss');
