@@ -169,6 +169,9 @@
         </a> linked image with empty alt.</p>
         <p class="positive"><a href="#"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
         </a> linked image with no alt.</p>
+
+        <p class="positive"><a href="#"><img alt="'" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a> Linked image with an unpronounceable (unvoiced characters) alt text.</p>
+
         <p class="positive"><a href="#"><img alt="http://jpg.gif" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
         </a> linked image with filename.</p>
         <p class="positive"><a href="#"><img alt="click here" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
@@ -316,7 +319,7 @@
                     linkIgnoreStrings: '\(opens in new window\)',
                     embeddedContent: '#embed',
                     //ignoreElements : '.positive *, .positive',
-                    //shadowComponents : 'shadow-test, shadow-test-no-hits', 
+                    shadowComponents : 'shadow-test, shadow-test-no-hits', 
                     checkRoots : 'main',
                     //ignoreAllIfAbsent : 'maain',
                     //ignoreAllIfPresent : 'main',

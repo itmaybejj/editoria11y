@@ -619,11 +619,23 @@ class Ed11y {
     };
 
     Ed11y.dismissHelp = function(el) {
-      let help = document.createElement('p');
+      let help = document.createElement('ul');
       help.setAttribute('tabindex', '-1');
       help.classList.add('help');
       // todo MVP: parameterize and write more gooder
-      help.textContent = ('Dismissing this manual check only affects the current page. To mark this item as OK site-wide, add it to the global "ignore" list in the module settings.');
+      if (Ed11y.options.allowHide) {
+        let li = document.createElement('li');
+        li.textContent = Ed11y.M.elementDismissalHelpHide;
+        help.append(li);
+      }
+      if (Ed11y.options.allowOK) {
+        let li = document.createElement('li');
+        li.textContent = Ed11y.M.elementDismissalHelpOK;
+        help.append(li);
+      }
+      let li = document.createElement('li');
+      li.textContent = Ed11y.M.elementDismissalHelpAll;
+      help.append(li);
       el.parentElement.append(help);
       help.focus();
       el.remove();

@@ -20,24 +20,37 @@ const ed11yLang = {
     jumpedToInvisibleTip: 'The element with this issue may be hidden. I will outline its nearest visible container',
     jumpedToAriaHiddenTip: 'The element with this issue has an "aria-hidden" attribute and may be invisible or off screen.',
 
+    // Tooltips
+
+    elementDismissalHelpOK : `
+    "Mark as checked and OK" hides a manual check on one page, for all site editors. The alert may reappear if the page's content changes, or if another editor restores hidden alerts on this page.
+    `,
+    elementDismissalHelpHide : `
+    "Hide alert" hides a manual check on a single page, for the current user. The alert may reappear if the page content changes.
+    `,
+    elementDismissalHelpAll : 'To dismiss an alert site-wide, have an administrator adjust the configuration options to ignore this element.',
+
     // Tooltips for heading tests
 
     headingExample : `
         <ul>
             <li>Heading level 1
                 <ul>
-                    <li>Heading level 2 (a topic)
-                        <ul><li>Heading level 3 (a subtopic)</li></ul></li>
-                    <li>Heading level 2 (a new topic)</li>
+                    <li>Heading level 2
+                        <ul><li>Heading level 3 (a <em>subtopic</em>)</li></ul></li>
+                    <li>Heading level 2 (a <em>new</em> topic)</li>
                 </ul>
             </li>
         </ul>`,
     headingLevelSkipped : {
-      title: 'Manual check: heading level skipped',
+      title: 'Manual check: was a heading level skipped?',
       tip: (prevLevel, level) =>
-        `<p>This heading is marked as level ${level}, but the previous was level ${prevLevel}.</p><p>Headings and subheadings create a navigable table of contents for assistive devices. The <em>level numbers</em> show how the headings are related, akin to indents in a nested outline:</p>
+        `<p>Headings and subheadings are the page's table of contents. The <em>numbers</em> indicate indents in a nesting relationship:</p>
             ${Ed11y.M.headingExample}
-            <p>Skipping directly to ${level} will make the reader believe they missed ${parseInt(level - 1)}, and whichever topic change it introduced.</p>
+            <p>This heading is level ${level}; the previous heading was level ${prevLevel}. 
+            A screen reader user will not know if level ${parseInt(level - 1)} is missing, or if they were not paying attention and missed it.
+            They may to go back and check.</p>
+            <p>To fix: adjust levels to form a continuous outline.</p>
             `,
     },
 
@@ -46,7 +59,7 @@ const ed11yLang = {
       tip: () => 
         `<p>Headings and subheadings create a navigable table of contents for assistive devices. "Blank" headings create confusing gaps. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
             ${Ed11y.M.headingExample}
-            <p><strong>To fix:</strong> delete the empty line or provide text for the section label.</p>
+            <p><strong>To fix:</strong> add text to this heading, or delete it.</p>
             `,
     },
 
@@ -69,11 +82,12 @@ const ed11yLang = {
 
     // Reusable example for tips:
     altAttributeExample : 
-            `<p>Note that it is the <em>meaning</em> that matters. For example, the context would determine which of these best describes a picture of a child kicking a ball:</p>
+            `<p>Note that a good alt conveys what an image communicates, not what it contains. For example, a picture of a child kicking a ball might be there to show a generic scene, or the kick, or the child or the ball:</p>
             <ul>
-                <li>Child kicking a ball</li>
-                <li>AJ's game-winning kick curved in from the left sideline</li>
-                <li>The "medium" ball is the right size for a 9-year-old child</li>
+                <li>A child kicking a ball</li>
+                <li>AJ's game-winning kick curved in from the left sideline!</li>
+                <li>AJ</li>
+                <li>The "medium" ball is the right size for this 9-year-old child</li>
             </ul>`,
         
     altAttributeProvided: (alt) => 
@@ -90,8 +104,8 @@ const ed11yLang = {
     altNull : {
       title: 'Manual check: image is marked as decoration',
       tip: () =>
-        `<p>This image provides no text alternative. This tells screen readers that it is present only for visual decoration, 
-            and should be ignored. If that is incorrect because this image is meaningful for sighted users, please provide a concise description of what this image means in this context.</p> 
+        `<p>This image provides no text alternative; screen readers will skip over the image without speaking anything. This may be correct!</p>
+        <p>But if this image is meaningful, provide alt text.</p> 
             ${Ed11y.M.altAttributeExample}`,
     },
 
@@ -110,7 +124,7 @@ const ed11yLang = {
             Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
             <ul>
                 <li>Good link text: "About us"</li>
-                <li>Bad link text: "aitch tee tee pee colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess</li>
+                <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess</li>
             </ul>
             ${Ed11y.M.altAttributeProvided(alt)}`,
     },
@@ -139,7 +153,7 @@ const ed11yLang = {
     },
 
     altDeadspace : {
-      title: 'Linked image\'s text alternative is unpronouncable',
+      title: 'Image\'s text alternative is unpronouncable',
       tip: (alt) =>
         `<p>This image's alt consists of only silent characters (spaces and quotation marks). It will be announced by screen readers as as part of the link's text, but the description of what the image is will be unintelligible. Please set this image's alternative text to something that describes the link's destination, or provide a <em>completely</em> empty alt (alt="") if the image should not be mentioned at all.</p>
             <ul>
@@ -147,6 +161,27 @@ const ed11yLang = {
                 <li>Bad link text: "About us, image: [short confusing silence]"</li>
             </ul>
             ${Ed11y.M.altAttributeProvided(alt)}`,
+    },
+    altDeadspaceLinked : {
+      title: 'Linked Image\'s text alternative is unpronouncable',
+      tip: (alt) =>
+        `<p>This image's alt consists of only silent characters (spaces and quotation marks). It will be announced by screen readers as as part of the link's text, but the description of what the image is will be unintelligible. Please set this image's alternative text to something that describes the link's destination, or provide a <em>completely</em> empty alt (alt="") if the image should not be mentioned at all.</p>
+            <ul>
+                <li>Good link text: "About us"</li>
+                <li>Bad link text: "About us, image: [short confusing silence]"</li>
+            </ul>
+            ${Ed11y.M.altAttributeProvided(alt)}`,
+    },
+    altEmptyLinked : {
+      title: 'Linked Image has no alt text',
+      tip: () =>
+        `<p>When a link is wrapped around an image, the image's alt text provides the link's title for screen readers</p>
+        <p>Please set this image's alternative text to something that describes the link's destination, or add text to the link.</p>
+            <ul>
+                <li>Good linked alt: "Meaningful link tips"</li>
+                <li>Bad linked alt: "Three happy dogs rolling in the grass"</li>
+            </ul>
+            `,
     },
 
     altLong : {
@@ -182,28 +217,32 @@ const ed11yLang = {
     linkNoText : {
       title: 'Link with no accessible text',
       tip: () =>
-        `<p>This link is either entirely empty (e.g., a copy paste error of a link around a space character) or wrapped around something with no text alternative (an image with no alt attribute).</p>
-            <p>Screen reader users will be confused when they encounter this, hearing either an awkward silence "Link, [...awkward silence]," or the URL, spelled out character by character: "Link, aitch tee tee pee colon forward slash forward slash example dot com"</p>
-            <p>To fix: delete this link if it is empty, add alt text to the image that equals the visible title of the link if it is a linked image.</p>`,
+        `<p>This link is either invisible and empty (e.g., a linked space character), or wrapped around something with no text alternative (an image with no alt attribute).</p>
+            <p>Screen readers will not be able to read this, speaking either an uninformative silence "Link, [...awkward pause where the link title should be...]," or the URL, spelled out character by character: "Link, H-T-T-P-S forward-slash forward-slash example dot com"</p>
+            <p>To fix: add text if this should be a link; delete the spaces if not.</p>`,
     },
 
     linkTextIsURL : {
-      title: 'Link\'s accessible text may be URL',
+      title: 'Manual check: is this link text a URL?',
       tip: (text) => 
-        `<p>Readers expect links to clearly and concisely describe their destination, and often skim pages by headings and links. This is especially true of screen reader users, who frequently navigate using automatically generated lists of the links on the page, pulled out of context.</p>
-                <ul><li>Concise and meaningful link: <a href="https://www.google.com/search?q=writing+meaningful+links">writing meaningful links</a></strong></li><li>Unhelpful link text: <a href="https://www.google.com/search?q=writing+meaningful+links">https://www.google.com/search?q=writing+meaningful+links</a></li></ul>
-                <p>This link's text is: <strong>${text}</strong></p>
+        `<p>Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
+         <p>A linked URL expects the reader to read the preceding paragraph to figure out the link's purpose from context.</p>
+            <ul>
+                <li>Meaningful and concise link text: "Tips for writing meaningful links"</li>
+                <li>Linked URL, as pronounced by a screen reader: "H T T P S colon forward-slash forward-slash example dot com forward-slash tips forward-slash meaningful-links"</li>
+            </ul>
+                <p>This link's text is:<br> <strong>${text}</strong></p>
                 `,
     },
 
     linkTextIsGeneric : {
       title: 'Manual check: is this link meaningful and concise?',
       tip: (text) => 
-        `<p>Readers often skim pages by headings and links, and will miss or ignore links that are meaningless or have their meaning obscured. Meaningless links like "click here," "read more" or "download" expect the reader to stop, go back, and determine what the link does from context. Many readers will not do this, or be frustrated that they have to.</p>
-                <p>This is especially true of screen reader users, who navigate using automatically generated lists links pulled out of context.</p>
-                <ul><li>Meaningful and concise: "Learn more about <a href="https://www.google.com/search?q=writing+meaningful+links">writing meaningful links"</a></strong></li>
-                <li>Not meaningful: "To learn more writing meaningful links, <a href="https://www.google.com/search?q=writing+meaningful+links">click here</a>.</li>
-                <li>Not concise: "<a href="https://www.google.com/search?q=writing+meaningful+links">Click here to learn more about writing meaningful links</a>"</li></ul>
+        `<p>Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
+                <p>Generic text like "click here," "read more" or "download" expect the reader to figure out the link's purpose from context.</p>
+                <ul><li>Not meaningful: "To learn more about meaningful links, <a href="https://www.google.com/search?q=writing+meaningful+links">click here</a>.</li>
+                <li>Not concise: "<a href="https://www.google.com/search?q=writing+meaningful+links">Click here to learn more about meaningful links</a>"</li>
+                <li>Ideal: "Learn about <a href="https://www.google.com/search?q=writing+meaningful+links">meaningful links"</a></strong></li></ul>
                 <p>This link's text is: <strong>${text}</strong></p>`
       ,
     },
@@ -239,10 +278,10 @@ const ed11yLang = {
     tableNoHeaderCells : {
       title: 'Table has no header cells',
       tip: () => `
-                <p>Tables are announced by screen readers as special objects with horizontal and vertical navigation options. The screen readers rely on table header cells to label the rows and columns as users move about the table. Without them, it is very easy to get lost.</p>
+                <p>Tables are announced by screen readers as navigable data sets. Screen readers repeat row and column headers as needed to orient users while reading content cells.</p>
                 <p>To fix:</p>
-                <ul><li>If this table contains actual tabular information (the rows and columns are meaningful), edit the table's properties and specify whether the first row, column or both contains the labels needed to understand the content cells.</li>
-                <li>If this table does not contain tabular information, and was simply used to make "fake" columns, copy and paste the text out of the table and delete the table. Tables used for layout are confusing for screen readers and incompatible with mobile devices and screen magnifiers, since they do not "stack" into a single column like real columned layouts.</li></ul>
+                <ul><li>If this table contains information that is meaningfully organized by row and column, edit the table's properties and specify whether the headers are in the first row, column or both.</li>
+                <li>If this table does not contain rows and columns of data, but is simply being used for visual layout, it would be best to remove it. Tables overflow the page rather than reflowing the text to fit on mobile devices, and should only be used when horizontal relationships are necessary to understand the content.</li></ul>
             `,
     },
 
@@ -252,25 +291,31 @@ const ed11yLang = {
         `<p>Content headings ("Heading 1", "Heading 2") form a navigable table of contents for screen reader users,  
         labelling all content <strong>until the next heading</strong>. Table headers label specific columns or rows within a table.</p> 
             <p></p>
-            <table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">To illustrate: a <strong>table</strong> header in cell 2 would label its column: cell B. A <strong>content</strong> heading in cell 2 would label cells 3, A, B and C, as well the text after the table.</td></tr>
+            <table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">To illustrate: a <strong>table</strong> header in cell 2 would only label its column: cell B. <br><br>
+            A <strong>content</strong> heading in cell 2 would label all subsequent text, reading from left to right: cells 3, A, B and C, as well as this text!</td></tr>
             <tr><td>A</td><td>B</td><td>C</td></table>
-            <p>To fix: remove nested formatting from inside table headers.</p>
+            <p>To fix: remove heading formatting on text inside table cells.</p>
             `
     },
 
     tableEmptyHeaderCell : {
       title: 'Empty table header cell',
       tip: () => `
-                <p>Tables are announced by screen readers as special objects with horizontal and vertical navigation options. The screen readers rely on table header cells to label the rows and columns as users move about the table. Without them, it is very easy to get lost.</p>
+                <p>When exploring tables, screen readers repeat table header cells as needed to orient users. 
+                Without headers, it is very easy to get lost; screen reader users have to count columns and rows and try to remember which columns went with which rows.</p>
+                <p>To fix: make sure each header cell in this table contains text.</p>
             `,
     },
 
     textPossibleList : {
-      title: 'Manual check: should this be a list?',
+      title: 'Manual check: should this have list formatting?',
       tip : (text) => 
-        `<p>List formatting is more than symbols:</p> 
-            <ol><li>Formatted lists reflow elegantly for small screens, maintaining gaps and spacing and line breaks.</li><li>Formatted lists structure content in a navigable way. Screen readers announce how many items are in the list, and users can jump from item to item.</li></ol>
-            <p>If the "${text}" in this paragraph indicates it starts a list, please replace the "${text}" with the equivalent list formatting.</p>`,
+        `<p>List formatting is structural:</p> 
+            <ol><li>List formatting indents and reflows on overflow. Text aligns vertically with text, rather than the "${text}"</li>
+            <li>Lists are machine-readable. Screen readers can orient their users, announcing this as "list item, 2 of 2."</li></ol>
+            <p>3. Whereas this unformatted item (just a number, typed as text) is not visually or audibly included in the list.</p>
+            <p>To fix: if this "${text}" starts a list, replace it with list formatting.</p>
+            `,
     },
 
     textPossibleHeading : {
@@ -285,7 +330,8 @@ const ed11yLang = {
     textUppercase : {
       title: 'Manual check: is this uppercase text needed?',
       tip : () => 
-        '<p>ALL UPPERCASE TEXT CAN BE MORE DIFFICULT TO READ FOR MANY PEOPLE, AND IS OFTEN INTERPRETED AS SHOUTING.</p>',
+        `<p>UPPERCASE TEXT CAN BE MORE DIFFICULT TO READ FOR MANY PEOPLE, AND IS OFTEN INTERPRETED AS SHOUTING.</p>
+         <p>Consider using sentence case instead, and using bold text or font changes for visual emphasis, or structural formatting like headings for emphasis that will also be announced by screen readers.</p>`,
     },
 
     embedVideo : {

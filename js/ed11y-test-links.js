@@ -57,8 +57,13 @@ class Ed11yTestLinks {
       linkStrippedText = linkStrippedText.replace(/'|"|-|\.|\s+/g, '').toLowerCase();
 
       // Tests to see if this link is empty
-      if (linkStrippedText.length === 0) {        
-        Ed11y.results.push([el, 'linkNoText', Ed11y.M.linkNoText.tip(), 'beforebegin', false]);
+      if (linkStrippedText.length === 0) {   
+        // already flagged by link test
+        if (hasImg === false) {
+          Ed11y.results.push([el, 'linkNoText', Ed11y.M.linkNoText.tip(), 'beforebegin', false]);
+        } else {
+          Ed11y.results.push([el, 'altEmptyLinked', Ed11y.M.altEmptyLinked.tip(), 'beforebegin', false]);
+        }
       }
       else {
         // Checks if link text is not descriptive.
@@ -85,12 +90,19 @@ class Ed11yTestLinks {
         };
         let textCheck = linkTextCheck(linkStrippedText);
         if (textCheck !== 'none') {
-          let dismissKey = Ed11y.dismissalKey(linkText);
-          let error = 'linkTextIsURL';
+          let dismissKey = false;
+          let error = false;
+          if (!hasImg) {
+            error = 'linkTextIsURL';
+            dismissKey = Ed11y.dismissalKey(linkText);
+          }
           if (textCheck === 'generic') {
             error = 'linkTextIsGeneric';
+            dismissKey = Ed11y.dismissalKey(linkText);
           }
-          Ed11y.results.push([el, error, Ed11y.M[error].tip(Ed11y.sanitizeForHTML(linkText)), 'beforebegin', dismissKey]);
+          if (error) {
+            Ed11y.results.push([el, error, Ed11y.M[error].tip(Ed11y.sanitizeForHTML(linkText)), 'beforebegin', dismissKey]);
+          }
         }
       }
       //Warning: Find all PDFs. Although only append warning icon to

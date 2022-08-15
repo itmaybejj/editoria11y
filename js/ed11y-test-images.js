@@ -30,7 +30,7 @@ class Ed11yTestImages {
         altLabel += '(missing!)';
       }
       else if (alt.length === 0 && !parentLink) {
-        // Empty alt not part of link. 
+        // Empty alt not part of link. Link test will not flag this if the link has other text.
         error = 'altNull';
         altLabel += '(none; image marked as decorative)';
       }

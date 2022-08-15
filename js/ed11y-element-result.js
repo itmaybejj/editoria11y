@@ -123,11 +123,11 @@ class Ed11yElementResult extends HTMLElement {
           outline: transparent;
         }
         .content {
-          padding: 4px 12px 18px;
+          padding: 0 12px 16px 16px;
         }
         p {
-          margin-block-start: .5em;
-          margin-block-end: .5em;
+          margin-block-start: 1em;
+          margin-block-end: 1em;
         }
         p:last-child {
           margin-block-end: 0;
@@ -145,17 +145,15 @@ class Ed11yElementResult extends HTMLElement {
           background: ${Ed11y.color.tipHeader};
         }
         ul {
-          margin-block-start: .64em;
-          margin-block-end: .64em;
+          margin-block-start: .643em;
+          margin-block-end: .643em;
           padding-inline-start: 20px;
         }
-        ul ul {
-          margin-block-start: .25em;
-          margin-block-end: .25em;
-        }
         li {
-          line-height: 1.3;
-          margin-bottom: .25em;
+          line-height: 1.357;
+        }
+        li + li {
+          margin-top: .643em;
         }
         table {
           border-spacing: 0;
