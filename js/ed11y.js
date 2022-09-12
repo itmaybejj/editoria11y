@@ -430,30 +430,38 @@ class Ed11y {
       return linkText;
     };
 
-    // Handle aria-label or labelled-by
-    // todo beta: replace with new Sa11y code of better name calculation
-    Ed11y.computeAriaLabel = function (el) {
-      // Todo beta: what if there is a span inside element with a label?
-      if (el.hasAttribute('[aria-label]')) {
-        return el.getAttribute('aria-label');
-      }
-      else if (el.hasAttribute('[aria-labelledby]')) {
-        let target = el.getAttribute('aria-labelledby');
-        if (target.length > 0) {
-          target = '#' + target;
-          target = target.replace(/ /g, ', #');
+    // Handle aria-label or labelled-by. Latter "wins" and can self-label.
+    Ed11y.computeAriaLabel = function (el, recursing = false) {
+      let label = el.hasAttribute('aria-label');
+      let labelledBy = el.hasAttribute('aria-labelledby')
+
+      if (!recursing) {
+        // On first pass only, we compute labelledby and recurse if applicable.
+        if (labelledBy) {
+          let idList = el.getAttribute('aria-labelledby');
           let returnText = '';
-          target.forEach((id) => {
-            returnText += Ed11y.getText(document.getElementById(id)) + ' ';
-          });
+          if (idList.length > 0) {
+            idList = '#' + idList;
+            idList = idList.replace(/ /g, ', #');
+            let targets = document.querySelectorAll(idList);
+            targets?.forEach((target) => {
+              returnText += Ed11y.computeAriaLabel(target, true) + ' ';
+            });
+          }
           return returnText;
-        }
-        else {
-          return '';
+        } else if (!label) {
+          // No aria found.
+          return 'noAria';
         }
       }
-      else {
-        return 'noAria';
+
+      // When no labelledby and not recursing, return label if exists.
+      if (label) {
+        return el.getAttribute('aria-label');
+      } else if (recursing) {
+        // Todo: rest of naming algorithm? Title etc?
+        // In loop, labelledBy should populate with element text.
+        return Ed11y.getText(el);
       }
     };
 
@@ -738,6 +746,8 @@ class Ed11y {
       let tip = arrow.nextElementSibling;
       tip.setAttribute('style','');
       arrow.setAttribute('style','');
+
+      
 
       let buttonOffset = el.getBoundingClientRect();
       let buttonLeft = buttonOffset.left + document.body.scrollLeft;
@@ -1067,7 +1077,7 @@ class Ed11y {
     };
 
     Ed11y.getText = function(el) {
-      return el.innerText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
+      return el.textContent.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
     };
 
     Ed11y.resetClass = function (classes) {
