@@ -433,7 +433,7 @@ class Ed11y {
     // Handle aria-label or labelled-by. Latter "wins" and can self-label.
     Ed11y.computeAriaLabel = function (el, recursing = false) {
       let label = el.hasAttribute('aria-label');
-      let labelledBy = el.hasAttribute('aria-labelledby')
+      let labelledBy = el.hasAttribute('aria-labelledby');
 
       if (!recursing) {
         // On first pass only, we compute labelledby and recurse if applicable.
@@ -741,64 +741,92 @@ class Ed11y {
       Ed11y.bodyStyle = true;
     };
 
-    Ed11y.alignTip = function (el) {
-      let arrow = el.nextElementSibling;
+    Ed11y.alignTip = function (button, toolTip) { 
+      let arrow = toolTip.shadowRoot.querySelector('.arrow');
       let tip = arrow.nextElementSibling;
+      //let wrapper = button.getRootNode().host.parentNode;
       tip.setAttribute('style','');
       arrow.setAttribute('style','');
 
-      
+      // todo heeeere
 
-      let buttonOffset = el.getBoundingClientRect();
+      let buttonOffset = button.getBoundingClientRect();
+      let scrollTop = window.scrollY;
       let buttonLeft = buttonOffset.left + document.body.scrollLeft;
-      let tipOffset = tip.getBoundingClientRect();
-      let tipLeft = tipOffset.left + document.body.scrollLeft;
+      toolTip.style.setProperty('top', buttonOffset.top + scrollTop + 'px');
+      // todo: need left scroll too
+      toolTip.style.setProperty('left', buttonOffset.left + 'px');
+      //let tipOffset = tip.getBoundingClientRect();
+      //let tipLeft = tipOffset.left + document.body.scrollLeft;
       let tipWidth = tip.offsetWidth;
+      let tipHeight = tip.offsetHeight;
       let windowWidth = window.innerWidth;
-      let tipBottom = tipOffset.top + tip.offsetHeight;
-      let tipTop = tipOffset.top - tip.offsetHeight;
-      let windowBottom = document.body.scrollTop + window.innerHeight;
-
-      let roomToLeft = buttonLeft - tipWidth - 50 > 0 ? true : false;
-      let roomToRight = windowWidth - (buttonLeft + tipWidth + 90) > 0 ? true : false;
-      let roomBelow = tipBottom < windowBottom ? true : false;
-      let roomAbove = tipTop > document.body.scrollTop ? true : false;
+      //let tipBottom = tipOffset.top + tip.offsetHeight;
+      //let tipTop = tipOffset.top - tip.offsetHeight;
+      let windowBottom = scrollTop + window.innerHeight;
 
       let direction = 'under';
-      if (roomBelow) {
-        if (roomToRight) {
+      if (buttonOffset.top + tipHeight + scrollTop + 50 > windowBottom) {
+        // no room below!
+        if (windowWidth - (buttonLeft + tipWidth + 90) > 0) {
           direction = 'right';
-        }
-        else if (roomToLeft) {
+        } else if (buttonOffset.top > tipHeight + 15) {
+          direction = 'above';
+        } else if (buttonLeft - tipWidth - 50 > 0) {
           direction = 'left';
-        }
-        // otherwise "under"
+        } 
+        // If no room anywhere, we stay below.
       }
-      else if (roomAbove) {
-        direction = 'above';
-      }
-      // otherwise "under"
+
+      let nudgeX = 0;
+      let nudgeY = 0;
       
-      if (direction === 'left') {
-        let targetOffset = tipWidth + 7;
-        tip.setAttribute('style', 'margin-left: -' + targetOffset + 'px;');
-        arrow.dataset.direction = 'left';
-      }
-      else if (direction === 'under') {
+      if (direction === 'under') {
         // Pin to the left edge, unless the tip is not wide enough to reach:
-        let nudgeX = tipWidth > tipLeft ? tipLeft - 15 : tipWidth + 8;
+        // todo: this works great. copy to over, emulate on left/right.
+        if (tipWidth > buttonOffset.left) {
+          nudgeX = 15 - buttonOffset.left;
+          arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
+        } else {
+          arrow.style.setProperty('left', tipWidth - 26 + 'px');
+          nudgeX = 30 - tipWidth;
+        }
         arrow.dataset.direction = 'under';
-        tip.setAttribute('style', `transform: translate(-${nudgeX}px, 50px);`);
+        nudgeY = 50;
       }
       else if (direction === 'above') {
-        let nudgeX = tipWidth > tipLeft ? tipLeft - 15 : tipWidth + 8;
-        let nudgeY = tip.offsetHeight + 18;
+        // Slide left or right to center tip on page.
+        nudgeY = -1 * (tipHeight + 18);
+        arrow.style.setProperty('top', tipHeight);
+        // todo: this works great. copy to over, emulate on left/right.
+        if (tipWidth > buttonOffset.left) {
+          nudgeX = 15 - buttonOffset.left;
+          arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
+        } else {
+          arrow.style.setProperty('left', tipWidth - 26 + 'px');
+          nudgeX = 30 - tipWidth;
+        }
         arrow.dataset.direction = 'above';
-        tip.setAttribute('style', `transform: translate(-${nudgeX}px, -${nudgeY}px);`);
+        arrow.style.setProperty('top', `${tipHeight + 18}px`);
+      } else {
+        let tipBottom = buttonOffset.top + scrollTop + tipHeight;
+        if (tipBottom > windowBottom) {
+          nudgeY = windowBottom - (tipBottom + 10);
+          let arrowY = nudgeY * -1 + 7;
+          arrow.style.setProperty('top', `${arrowY}px`);
+        }
+        if (direction === 'left') {
+          nudgeX = 0 - (tipWidth + 17);
+          arrow.style.setProperty('left', `${tipWidth - 9}px`);
+          arrow.dataset.direction = 'left';
+        } else {
+          // direction is right
+          nudgeX = 50;
+          arrow.dataset.direction = 'right';
+        }
       }
-      else {
-        arrow.dataset.direction = 'right';
-      }
+      toolTip.style.setProperty('transform', `translate(${nudgeX}px, ${nudgeY}px)`);
+      
     };
 
     Ed11y.baseCSS = `
@@ -995,8 +1023,7 @@ class Ed11y {
       
       let openTip = Ed11y.getOpenTip();
       if (openTip) {
-        let toggle = openTip.shadowRoot.querySelector('.toggle');
-        Ed11y.alignTip(toggle, openTip);
+        Ed11y.alignTip(Ed11y.elements.openButton[0].shadowRoot.querySelector('button'), openTip);
       }
     };
     window.addEventListener('resize', function() {Ed11y.windowResize();});
@@ -1009,11 +1036,12 @@ class Ed11y {
           // panel
           Ed11y.panelToggle.focus();
           Ed11y.panelToggle.click();
-        } else if (event.target.closest('ed11y-element-result')) {
+        } else if (event.target.hasAttribute('data-ed11y-open')) {
           // todo mvp findElements
           let openTip = Ed11y.getOpenTip();
           if (openTip) {
-            openTip.setAttribute('data-ed11y-action', 'shut');
+            Ed11y.elements.openButton[0].shadowRoot.querySelector('button').focus();
+            Ed11y.elements.openButton[0].shadowRoot.querySelector('button').click();
           }
         }
       }
@@ -1171,9 +1199,9 @@ class Ed11y {
     };
 
     Ed11y.getOpenTip = function() {
-      Ed11y.findElements('openTip', 'ed11y-element-result[data-ed11y-open="true"]');
-      let openTip = Ed11y.elements.openTip[0];
-      return openTip ? openTip : false;
+      Ed11y.findElements('openButton','ed11y-element-result[data-ed11y-open="true"]');
+      let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+      return activeTip;
     };
 
     Ed11y.srcMatchesOptions = function(source, option) {

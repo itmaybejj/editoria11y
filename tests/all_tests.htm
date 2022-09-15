@@ -247,92 +247,94 @@
         <section class="shadow-root">
             <h2 id="shadow-root-3">Shadow root handling 3</h2>
         </section>
-
-
-        <div hidden>
-            <script>
-                class shadowTest extends HTMLElement {
-                constructor() {
-                    super();
-                }
-                connectedCallback() {
-                    if (!this.initialized) {
-                        const shadow = this.attachShadow({mode: 'open'});
-                        let wrapper = document.createElement('div');
-                        wrapper.setAttribute('class','wrapper');
-                        wrapper.innerHTML = `<h4>Header skip in the shadow DOM</h4><p>ALL CAPS IN THE SHADOW DOM</p>`
-                        shadow.appendChild(wrapper);
-                        this.initialized = true;
-                    }
-                }
-                }
-                customElements.define('shadow-test', shadowTest);
-                class shadowTestNoHits extends HTMLElement {
-                    constructor() {
-                        super();
-                    }
-                    connectedCallback() {
-                    if (!this.initialized) {
-                        const shadow = this.attachShadow({mode: 'open'});
-                        let wrapper = document.createElement('div');
-                        wrapper.setAttribute('class','wrapper');
-                        shadow.appendChild(wrapper);
-                        this.initialized = true;
-                        }
-                    }
-                }
-                customElements.define('shadow-test-no-hits', shadowTestNoHits);
-
-                document.querySelectorAll('.shadow-root').forEach((el) => {
-                    let testShadowElement = document.createElement('shadow-test');
-                    el.append(testShadowElement);
-                    el.append('hi');
-                })
-
-                document.querySelectorAll('.shadow-root-no-hits').forEach((el) => {
-                    let testShadowElement2 = document.createElement('shadow-test-no-hits');
-                    el.append(testShadowElement2);
-                });
-
-                document.addEventListener('ed11yPop', function(e) {
-                    console.log('Event dispatched: ed11yPop for #' + e.detail.id);
-                }, false);
-
-            </script>
-            <link href="./tests.css" rel="stylesheet">
-            <script src="../js/ed11y-localization.js"></script>
-            <script src="../js/ed11y-element-panel.js"></script>
-            <script src="../js/ed11y-element-result.js"></script>
-            <script src="../js/ed11y-element-alt.js"></script>
-            <script src="../js/ed11y-test-links.js"></script>
-            <script src="../js/ed11y-test-images.js"></script>
-            <script src="../js/ed11y-test-headings.js"></script>
-            <script src="../js/ed11y-test-text.js"></script>
-            <script src="../js/ed11y-test-embeds.js"></script>
-            <script src="../js/ed11y.js"></script>
-            <!-- Instantiate-->
-            <script>
-                const ed11y = new Ed11y({
-                    alertMode : 'assertive',
-                    theme : 'darkTheme',
-                    outlineExclude : '.utility',
-                    linkIgnoreStrings: '\(opens in new window\)',
-                    embeddedContent: '#embed',
-                    //ignoreElements : '.positive *, .positive',
-                    shadowComponents : 'shadow-test, shadow-test-no-hits', 
-                    checkRoots : 'main',
-                    //ignoreAllIfAbsent : 'maain',
-                    //ignoreAllIfPresent : 'main',
-                    //preventCheckingIfAbsent : 'maian',
-                });
-            </script>
-            
-        </div>
     </main>
-    <footer><div class="negative"><h6>Heading level skip outside of checkroot area should appear in outline but not be flagged.</h6></div></footer>
+    <footer><div class="negative"><h6>Heading level skip in footer should not be flagged.</h6></div></footer>
 
 
+    <div hidden>
+        <script>
+          class shadowTest extends HTMLElement {
+            constructor() {
+              super();
+            }
+            connectedCallback() {
+              if (!this.initialized) {
+                const shadow = this.attachShadow({mode: 'open'});
+                let wrapper = document.createElement('div');
+                wrapper.setAttribute('class','wrapper');
+                wrapper.innerHTML = `<h4>Header skip in the shadow DOM</h4><p>ALL CAPS IN THE SHADOW DOM</p>`
+                shadow.appendChild(wrapper);
+                this.initialized = true;
+              }
+            }
+          }
+          customElements.define('shadow-test', shadowTest);
+          class shadowTestNoHits extends HTMLElement {
+            constructor() {
+              super();
+            }
+            connectedCallback() {
+              if (!this.initialized) {
+                const shadow = this.attachShadow({mode: 'open'});
+                let wrapper = document.createElement('div');
+                wrapper.setAttribute('class','wrapper');
+                shadow.appendChild(wrapper);
+                this.initialized = true;
+              }
+            }
+          }
+          customElements.define('shadow-test-no-hits', shadowTestNoHits);
 
+          document.querySelectorAll('.shadow-root').forEach((el) => {
+            let testShadowElement = document.createElement('shadow-test');
+            el.append(testShadowElement);
+            el.append('hi');
+          })
+
+          document.querySelectorAll('.shadow-root-no-hits').forEach((el) => {
+            let testShadowElement2 = document.createElement('shadow-test-no-hits');
+            el.append(testShadowElement2);
+          });
+
+          document.addEventListener('ed11yPop', function(e) {
+            console.log('Event dispatched: ed11yPop for #' + e.detail.id);
+          }, false);
+
+        </script>
+        <style>
+            main {position: relative; z-index: 0;}
+            footer { position: fixed; z-index: 1; bottom: 0; left: 0; right: 0; background: silver;}
+        </style>
+        <link href="./tests.css" rel="stylesheet">
+        <script src="../js/ed11y-localization.js"></script>
+        <script src="../js/ed11y-element-panel.js"></script>
+        <script src="../js/ed11y-element-result.js"></script>
+        <script src="../js/ed11y-element-tip.js"></script>
+        <script src="../js/ed11y-element-alt.js"></script>
+        <script src="../js/ed11y-test-links.js"></script>
+        <script src="../js/ed11y-test-images.js"></script>
+        <script src="../js/ed11y-test-headings.js"></script>
+        <script src="../js/ed11y-test-text.js"></script>
+        <script src="../js/ed11y-test-embeds.js"></script>
+        <script src="../js/ed11y.js"></script>
+        <!-- Instantiate-->
+        <script>
+          const ed11y = new Ed11y({
+            alertMode : 'assertive',
+            theme : 'darkTheme',
+            outlineExclude : '.utility',
+            linkIgnoreStrings: '\(opens in new window\)',
+            embeddedContent: '#embed',
+            //ignoreElements : '.positive *, .positive',
+            shadowComponents : 'shadow-test, shadow-test-no-hits',
+            checkRoots : 'main',
+            //ignoreAllIfAbsent : 'maain',
+            //ignoreAllIfPresent : 'main',
+            //preventCheckingIfAbsent : 'maian',
+          });
+        </script>
+
+    </div>
 
 </body>
 

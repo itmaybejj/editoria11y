@@ -1,4 +1,4 @@
-class Ed11yElementResult extends HTMLElement {
+class Ed11yElementTip extends HTMLElement {
   /* global Ed11y */
   constructor() {
     super();
@@ -6,7 +6,8 @@ class Ed11yElementResult extends HTMLElement {
 
   connectedCallback() {
     if (!this.initialized) {
-      this.open = false;
+      
+      this.open = true;
       this.setAttribute('style', 'outline: 0px solid transparent;');
       const shadow = this.attachShadow({mode: 'open'});
 
@@ -26,35 +27,37 @@ class Ed11yElementResult extends HTMLElement {
       // this.wrapper.classList.add(this.type);
 
       // Create tooltip toggle
-      this.toggle = document.createElement('button');
-      this.toggle.setAttribute('class','toggle');
+      //this.toggle = document.createElement('button');
+      //this.toggle.setAttribute('class','toggle');
       // todo parameterize
-      let label = this.dismissable ? 'manual check needed' : 'alert';
-      this.toggle.setAttribute('aria-label', `Accessibility issue ${this.resultID}, ${label}`);
+      //let label = this.dismissable ? 'manual check needed' : 'alert';
+      /*this.toggle.setAttribute('aria-label', `Accessibility issue ${this.resultID}, ${label}`);
       this.toggle.setAttribute('aria-expanded','false');
       this.toggle.setAttribute('data-ed11y-result', this.dataset.ed11yResult);
       this.toggle.setAttribute('data-ed11y-ready', 'false');
       this.wrapper.appendChild(this.toggle);
-      this.toggle.addEventListener('click', this.toggleClick);
+      this.toggle.addEventListener('click', this.toggleClick);*/
       this.addEventListener('mouseover', this.handleHover);
-      this.tipNeedsBuild = true;
 
       // Create CSS with embedded icon
       const style = document.createElement('style');
-      let icon = this.toggleImage();
-      style.textContent = Ed11y.baseCSS + icon + `
+      //let icon = this.toggleImage();
+      style.textContent = Ed11y.baseCSS + `
         :host {
           position: absolute;
+          top: 10vh;
+          left: 2vw;
           opacity: 0;
           transition: opacity .25s ease-in;
           z-index: 9998;
         }
         :host([data-ed11y-open='true']) {
           z-index: 9999;
+          opacity: 1;
         }
         .wrapper {
-          width: 44px;
-          height: 44px;
+          width: 1px;
+          height: 1px;
           overflow: visible;
           color: ${Ed11y.color.text};
         }
@@ -63,7 +66,7 @@ class Ed11yElementResult extends HTMLElement {
           content: "";
           position: absolute;
           transform: rotate(45deg);
-          left: 46px;
+          left: -10px;
           box-shadow: 0 0 0 2px ${Ed11y.color.bg}, 2px 2px 4px ${Ed11y.color.tipHeader}77;
           width: 20px;
           height: 20px;
@@ -74,11 +77,11 @@ class Ed11yElementResult extends HTMLElement {
           background: linear-gradient(45deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
         }
         .arrow[data-direction="under"] {
-          margin: 33px 0 0 -30px;
+          margin-top: -18px;
           background: linear-gradient(-45deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
         }
         .arrow[data-direction="above"] {
-          margin: -33px 0 0 -30px;
+          margin-top: -27px;
           background: linear-gradient(135deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
         }
         .arrow[data-direction="right"] {
@@ -91,7 +94,6 @@ class Ed11yElementResult extends HTMLElement {
           background: ${Ed11y.color.bg};
           border-radius: 0 0 3px 3px;
           position:relative;
-          margin-left: 58px;
           width: clamp(12rem, 30rem, 89vw);
           display: none;
           box-shadow: 0 0 0 2px ${Ed11y.color.bg}, 2px 2px 4px ${Ed11y.color.primary}77;
@@ -100,13 +102,13 @@ class Ed11yElementResult extends HTMLElement {
           0% { opacity: 0;}
           100% { opacity: 1;}
         }
-        [aria-expanded="true"] ~ .tip {
+        .open .tip {
           display: block;
         }
-        [aria-expanded="true"] ~ .tip .content {
+        .open .tip .content {
           animation: fade-in 0.25s ease-out;
         }
-        [aria-expanded="true"] ~ .arrow {
+        .open .arrow {
           display: block;
           opacity: 1;
         }
@@ -222,10 +224,104 @@ class Ed11yElementResult extends HTMLElement {
           box-shadow: inset 0 0 0 2px ${Ed11y.color.focusRing}, 0 0 0 3px ${Ed11y.color.primary};
         }
       `;
+      // [0] el element
+      // [1] test ID
+      // [2] tip contents
+      // [3] position
+      // [4] dismiss key
+      // [5] dismissal status
+      // e.g.: Ed11y.results.push([el],'linkTextIsGeneric','click here', 'a_semi-unique_attribute_of_this_element'
+
+      this.tip = document.createElement('div');
+      this.tip.classList.add('tip');
+      this.tip.setAttribute('aria-labelledby', 'tip-title-' + [this.resultID]);
+      this.heading = document.createElement('div');
+      this.heading.setAttribute('id','tip-' + this.resultID);
+      this.heading.classList.add('title');
+      this.heading.setAttribute('tabindex', '-1');
+      this.heading.innerHTML = Ed11y.M[this.result[1]].title;
+      let content = document.createElement('div');
+      content.classList.add('content');
+      content.innerHTML = this.result[2];
+      if (this.dismissable && (Ed11y.options.allowOK || Ed11y.options.allowHide)) {
+        let dismissers = document.createElement('div');
+        if (Ed11y.options.allowOK) {
+          let dismissOKButton = document.createElement('button');
+          dismissOKButton.classList.add('dismiss');
+          // todo mvp Parameterize
+          dismissOKButton.textContent = 'Mark as Checked and OK';
+          dismissOKButton.setAttribute('title', 'Dismisses alert for all editors');
+          dismissers.append(dismissOKButton);
+          dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
+        }
+        if (Ed11y.options.allowHide) {
+          let dismissHideButton = document.createElement('button');
+          dismissHideButton.classList.add('dismiss');
+          // todo parameterize
+          dismissHideButton.textContent = 'Hide alert';
+          dismissHideButton.setAttribute('title', 'Dismisses alert for you');
+          dismissers.append(dismissHideButton);
+          dismissHideButton.addEventListener('click', function(){Ed11y.dismissThis('hide');});
+        }
+        let dismissHelp = document.createElement('button');
+        dismissHelp.classList.add('dismiss');
+        // todo parameterize
+        dismissHelp.textContent = '?';
+        dismissers.append(dismissHelp);
+        dismissHelp.addEventListener('click', function(){Ed11y.dismissHelp(dismissHelp);});
+      
+        content.append(dismissers);
+      }
+      let closeButton = document.createElement('button');
+      closeButton.setAttribute('aria-label','close');
+      closeButton.classList.add('close');
+      closeButton.innerHTML = '&times;';
+      let arrow = document.createElement('div');
+      arrow.classList.add('arrow');
+
+      this.tip.append(this.heading);
+      this.tip.append(closeButton);
+      this.tip.append(content);
+      closeButton.addEventListener('click', (event) => {
+        event.preventDefault;
+        if(this.open) {
+          let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
+          toggle?.shadowRoot.querySelector('button').focus();
+          // todo postpone: track if this tip was opened by the next button. If so, transfer focus back to it instead
+          toggle?.setAttribute('data-ed11y-action', 'shut');
+          this.setAttribute('data-ed11y-action', 'shut');
+        }
+      });
       shadow.appendChild(style);
       shadow.appendChild(this.wrapper);
+      this.wrapper.appendChild(arrow);
+      this.wrapper.appendChild(this.tip);
+      this.focusables = this.wrapper.querySelectorAll('a, button');
+      this.focusables.forEach((el) => {
+        el.addEventListener('blur', () => {
+          el.classList.remove('focused');
+          window.setTimeout(function() {
+            if (shadow.querySelector('.focused') === null && shadow.querySelector('.open') !== null) {
+              el.closest('.open')?.querySelector('.close').click();
+            }
+          },100);
+        });
+        el.addEventListener('focus', () => {
+          el.classList.add('focused');
+        });
+      });
       this.initialized = true;
     }
+  }
+
+  toggleTip(changeTo) {
+    if (changeTo) {
+      this.wrapper.classList.add('open');
+    } else {
+      this.wrapper.classList.remove('open');
+    }
+    
+    this.setAttribute('data-ed11y-open',changeTo);   
   }
 
   toggleImage() {
@@ -256,28 +352,6 @@ class Ed11yElementResult extends HTMLElement {
     return this.dismissable ? manual : alert;
   }
 
-  toggleClick(event) {
-    event.preventDefault();
-    let host = this.getRootNode().host;
-    let stateChange = host.getAttribute('data-ed11y-open') === 'false' ? 'open' : 'close';
-    host.setAttribute('data-ed11y-action', stateChange);
-    if (stateChange === 'open') {
-      window.setTimeout(function() {
-        let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-        activeTip.shadowRoot.querySelector('.title').focus();
-      },500);
-    }
-  }
-
-  closeOtherTips() {
-    Ed11y.findElements('openTips','[data-ed11y-open="true"]');
-    if (Ed11y.elements.openTips) {
-      Array.from(Ed11y.elements.openTips).forEach(openTip => {
-        openTip.setAttribute('data-ed11y-action', 'close');
-      });
-    }
-  }
-
   tipDOM (id, title, body) {
     return `>
       <div class="title" id="tip-title-${id}">${title}</div>
@@ -285,89 +359,6 @@ class Ed11yElementResult extends HTMLElement {
     `;
   }
 
-  buildTip() {
-    this.tipNeedsBuild = false;
-    // [0] el element
-    // [1] test ID
-    // [2] tip contents
-    // [3] position
-    // [4] dismiss key
-    // [5] dismissal status
-    // e.g.: Ed11y.results.push([el],'linkTextIsGeneric','click here', 'a_semi-unique_attribute_of_this_element'
-
-    let tip = document.createElement('ed11y-element-tip');
-    tip.setAttribute('data-ed11y-result', this.resultID);
-    let body = document.querySelector('body');
-    body.insertAdjacentElement('beforeend', tip);
-    this.tip = tip;
-  }
-
-  toggleTip(changeTo) {
-    if (this.tipNeedsBuild) {
-      this.buildTip();
-    }
-    this.toggle.setAttribute('aria-expanded', changeTo);
-    let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
-    this.result[0].classList.toggle(highlightOutline);
-    if (changeTo === true) {
-      this.closeOtherTips();
-      this.allowOverflow(); // todo still needed?
-      this.tip.setAttribute('data-ed11y-action', 'open');
-      window.setTimeout(Ed11y.alignTip(this.toggle, this.tip)),100;
-      if (!Ed11y.elements.jumpList) {
-        Ed11y.buildJumpList();
-      }
-      Ed11y.goto = this.getAttribute('data-ed11y-jump-position');
-      Ed11y.setCurrentJump();
-      document.dispatchEvent(new CustomEvent('ed11yPop', {
-        detail: {id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result')}
-      }));
-    } else {
-      // Allow for themes to restore original DOM/CSS
-      if (Ed11y.options.hiddenHandlers && !!this.closest(Ed11y.options.hiddenHandlers)) {
-        document.dispatchEvent(new CustomEvent('ed11yShut', {
-          detail: {id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result')}
-        }));
-      } 
-      this.tip.setAttribute('data-ed11y-action', 'shut');
-      // todo test: forced overflow system no longer needed?
-      /*else {
-        // Undo forced overflow
-        this.closest('.ed11y-force-overflow')?.classList.remove('ed11y-force-overflow');
-      }*/
-    }
-    this.setAttribute('data-ed11y-open', changeTo);      
-  }
-  
-  handleHover() {
-    if (this.getAttribute('data-ed11y-open') === 'false') {
-      this.toggleTip(true);
-    }
-  }
-
-  allowOverflow() {
-    // todo beta: need "undo" event on close
-    if (Ed11y.options.hiddenHandlers && !!this.closest(Ed11y.options.hiddenHandlers)) {
-      if (Ed11y.hiddenHandled !== this.getAttribute('id')) {
-        document.dispatchEvent(new CustomEvent('ed11yShowHidden', {
-          detail: {id: this.getAttribute('id')}
-        }));
-      }
-    }
-    // todo test: forced overflow system no longer needed?
-    /*    else if (Ed11y.options.allowOverflow.length > 0) {
-      this.closest(Ed11y.options.allowOverflow).classList.add('ed11y-force-overflow');
-    }
-    else {
-      let parents = Ed11y.parents(this);
-      parents.forEach(parent => {
-        let parentStyles = window.getComputedStyle(parent);
-        if (parentStyles.getPropertyValue('overflow') === 'hidden') {
-          parent.classList.add('ed11y-force-overflow');
-        }
-      });
-    }*/
-  }
 
   static get observedAttributes() { return ['data-ed11y-action']; }
 
@@ -377,6 +368,7 @@ class Ed11yElementResult extends HTMLElement {
       case 'data-ed11y-action':
         if (newValue !== 'false') {
           let changeTo = newValue === 'open' ? true : false;
+          this.open = changeTo;
           this.setAttribute('data-ed11y-action', 'false');
           this.toggleTip(changeTo);
         }
@@ -385,4 +377,4 @@ class Ed11yElementResult extends HTMLElement {
     }
   }
 }
-customElements.define('ed11y-element-result', Ed11yElementResult);
+customElements.define('ed11y-element-tip', Ed11yElementTip);
