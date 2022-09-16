@@ -745,39 +745,41 @@ class Ed11y {
     Ed11y.alignTip = function (button, toolTip) { 
       let arrow = toolTip.shadowRoot.querySelector('.arrow');
       let tip = arrow.nextElementSibling;
-      //let wrapper = button.getRootNode().host.parentNode;
+      
+      // Reset any previous alignments
       tip.setAttribute('style','');
       arrow.setAttribute('style','');
 
-      // todo heeeere
-
-      let buttonOffset = button.getBoundingClientRect();
+      // Find button on page
       let scrollTop = window.scrollY;
+      let buttonOffset = button.getBoundingClientRect();
+      if (buttonOffset.top === 0 && buttonOffset.left === 0) {
+        // ruh roh invisible button
+        let firstVisibleParent = Ed11y.firstVisibleParent(button.getRootNode().host);
+        if (firstVisibleParent) {
+          buttonOffset = firstVisibleParent.getBoundingClientRect();
+        }
+      }
       let buttonLeft = buttonOffset.left + document.body.scrollLeft;
       toolTip.style.setProperty('top', buttonOffset.top + scrollTop + 'px');
-      // todo: need left scroll too
+      // todo: need left scroll too for horizontally scrolled pages
       toolTip.style.setProperty('left', buttonOffset.left + 'px');
-      //let tipOffset = tip.getBoundingClientRect();
-      //let tipLeft = tipOffset.left + document.body.scrollLeft;
       let tipWidth = tip.offsetWidth;
       let tipHeight = tip.offsetHeight;
       let windowWidth = window.innerWidth;
-      //let tipBottom = tipOffset.top + tip.offsetHeight;
-      //let tipTop = tipOffset.top - tip.offsetHeight;
       let windowBottom = scrollTop + window.innerHeight;
 
       let direction = 'under';
+      // Default to displaying under
       if (buttonOffset.top + tipHeight + scrollTop + 50 > windowBottom) {
-        // no room below!
+        // No room below
         if (windowWidth - (buttonLeft + tipWidth + 90) > 0 && buttonOffset.top + 40 < window.innerHeight) {
-          // Room to Right
           direction = 'right';
         } else if (buttonOffset.top > tipHeight + 15) {
           direction = 'above';
         } else if (buttonLeft - tipWidth - 50 > 0) {
           direction = 'left';
         } 
-        // If no room anywhere, we stay below.
       }
 
       let nudgeX = 0;
@@ -788,10 +790,9 @@ class Ed11y {
         // todo: this works great. copy to over, emulate on left/right.
         if (tipWidth * 4 / 5 + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
-          console.log('cant center');
           if (tipWidth - 15 > buttonOffset.left) {
             nudgeX = 15 - buttonOffset.left;
-            arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
+            arrow.style.setProperty('left', Math.max(buttonOffset.left,15) - 9 + 'px');
           } else {
             arrow.style.setProperty('left', tipWidth - 26 + 'px');
             nudgeX = 31 - tipWidth;
@@ -830,8 +831,6 @@ class Ed11y {
           // Offset up
           nudgeY = windowBottom - (tipBottom + 10);
           let arrowY = nudgeY * -1 + 7;
-          console.log(arrowY);
-          console.log(tipHeight);
           arrowY = Math.min(arrowY,tipHeight - 25);
           arrow.style.setProperty('top', `${arrowY}px`);
         }
@@ -1063,7 +1062,7 @@ class Ed11y {
             Ed11y.elements.openButton[0].shadowRoot.querySelector('button').focus();
             Ed11y.elements.openButton[0].shadowRoot.querySelector('button').click();
           }
-        }
+        } 
       }
     };
     document.addEventListener('keyup', function(event) {Ed11y.escapeWatch(event);});
