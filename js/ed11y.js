@@ -410,7 +410,7 @@ class Ed11y {
     Ed11y.reset = function () {
       // Reset insertions into body content.
       Ed11y.resetClass(['ed11y-ring-red', 'ed11y-ring-yellow', 'ed11y-hidden-highlight']);
-      Ed11y.findElements('reset', 'ed11y-element-result, .ed11y-element-heading-label, .ed11y-element-alt, ed11y-element-heading-label, ed11y-element-alt');
+      Ed11y.findElements('reset', 'ed11y-element-result, ed11y-element-tip, .ed11y-element-heading-label, .ed11y-element-alt, ed11y-element-heading-label, ed11y-element-alt', false);
       // todo beta on re-open: recreate heading or alts if panel is showing
       Ed11y.elements.reset.forEach((el) => el.remove());
 
@@ -548,8 +548,7 @@ class Ed11y {
 
     Ed11y.dismissThis = function (dismissalType) {
       // Find the active tip and draw its identifying information from the result list
-      Ed11y.findElements('activeTip', 'ed11y-element-result[data-ed11y-open="true"]');
-      let removal = Ed11y.elements.activeTip[0];
+      let removal = Ed11y.getOpenTip();
       let id = removal.dataset.ed11yResult;
       let test = Ed11y.results[id][1];
       let dismissalKey = Ed11y.dismissalKey(Ed11y.results[id][4]);
@@ -557,6 +556,8 @@ class Ed11y {
       // Remove tip and reset borders around element
       Ed11y.resetClass(['ed11y-hidden-highlight','ed11y-ring-red','ed11y-ring-yellow']);
       removal.parentNode.removeChild(removal);
+      let removeButton = Ed11y.elements.openButton[0];
+      removeButton.parentNode.removeChild(removeButton);
 
       // Build dismissal record.
       let dismissal = {};
@@ -784,7 +785,7 @@ class Ed11y {
       if (direction === 'under') {
         // Pin to the left edge, unless the tip is not wide enough to reach:
         // todo: this works great. copy to over, emulate on left/right.
-        if (tipWidth > buttonOffset.left) {
+        if (tipWidth - 15 > buttonOffset.left) {
           nudgeX = 15 - buttonOffset.left;
           arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
         } else {
@@ -799,7 +800,7 @@ class Ed11y {
         nudgeY = -1 * (tipHeight + 18);
         arrow.style.setProperty('top', tipHeight);
         // todo: this works great. copy to over, emulate on left/right.
-        if (tipWidth > buttonOffset.left) {
+        if (tipWidth - 15 > buttonOffset.left) {
           nudgeX = 15 - buttonOffset.left;
           arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
         } else {
