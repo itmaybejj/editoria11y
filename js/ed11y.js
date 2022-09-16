@@ -769,7 +769,8 @@ class Ed11y {
       let direction = 'under';
       if (buttonOffset.top + tipHeight + scrollTop + 50 > windowBottom) {
         // no room below!
-        if (windowWidth - (buttonLeft + tipWidth + 90) > 0) {
+        if (windowWidth - (buttonLeft + tipWidth + 90) > 0 && buttonOffset.top + 40 < window.innerHeight) {
+          // Room to Right
           direction = 'right';
         } else if (buttonOffset.top > tipHeight + 15) {
           direction = 'above';
@@ -785,13 +786,21 @@ class Ed11y {
       if (direction === 'under') {
         // Pin to the left edge, unless the tip is not wide enough to reach:
         // todo: this works great. copy to over, emulate on left/right.
-        if (tipWidth - 15 > buttonOffset.left) {
-          nudgeX = 15 - buttonOffset.left;
-          arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
+        if (tipWidth * 4 / 5 + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
+          // Can't center
+          console.log('cant center');
+          if (tipWidth - 15 > buttonOffset.left) {
+            nudgeX = 15 - buttonOffset.left;
+            arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
+          } else {
+            arrow.style.setProperty('left', tipWidth - 26 + 'px');
+            nudgeX = 31 - tipWidth;
+          }
         } else {
-          arrow.style.setProperty('left', tipWidth - 26 + 'px');
-          nudgeX = 30 - tipWidth;
+          nudgeX = 40 - tipWidth / 5;
+          arrow.style.setProperty('left', tipWidth / 5 - 34 + 'px');
         }
+        
         arrow.dataset.direction = 'under';
         nudgeY = 50;
       }
@@ -799,21 +808,31 @@ class Ed11y {
         // Slide left or right to center tip on page.
         nudgeY = -1 * (tipHeight + 18);
         arrow.style.setProperty('top', tipHeight);
-        // todo: this works great. copy to over, emulate on left/right.
-        if (tipWidth - 15 > buttonOffset.left) {
-          nudgeX = 15 - buttonOffset.left;
-          arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
+        if (tipWidth * 4 / 5 + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
+          // Can't center
+          if (tipWidth - 15 > buttonOffset.left) {
+            nudgeX = 15 - buttonOffset.left;
+            arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
+          } else {
+            arrow.style.setProperty('left', tipWidth - 26 + 'px');
+            nudgeX = 31 - tipWidth;
+          }
         } else {
-          arrow.style.setProperty('left', tipWidth - 26 + 'px');
-          nudgeX = 30 - tipWidth;
+          nudgeX = 40 - tipWidth / 5;
+          arrow.style.setProperty('left', tipWidth / 5 - 34 + 'px');
         }
         arrow.dataset.direction = 'above';
         arrow.style.setProperty('top', `${tipHeight + 18}px`);
       } else {
+        // Left or right
         let tipBottom = buttonOffset.top + scrollTop + tipHeight;
         if (tipBottom > windowBottom) {
+          // Offset up
           nudgeY = windowBottom - (tipBottom + 10);
           let arrowY = nudgeY * -1 + 7;
+          console.log(arrowY);
+          console.log(tipHeight);
+          arrowY = Math.min(arrowY,tipHeight - 25);
           arrow.style.setProperty('top', `${arrowY}px`);
         }
         if (direction === 'left') {
