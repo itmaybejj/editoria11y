@@ -1204,6 +1204,13 @@ class Ed11y {
       return activeTip;
     };
 
+    Ed11y.focusActiveResult = function() {
+      Ed11y.getOpenTip();
+      window.setTimeout(function() {
+        Ed11y.elements.openButton[0]?.shadowRoot.querySelector('button').focus();
+      },0);
+    };
+
     Ed11y.srcMatchesOptions = function(source, option) {
       if (option.length > 0 && source?.length > 0) {
         let selectorArray = option.split(/\s*[\s,]\s*/).map((el) => {

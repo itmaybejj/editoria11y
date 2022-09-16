@@ -32,6 +32,7 @@ class Ed11yElementResult extends HTMLElement {
       let label = this.dismissable ? 'manual check needed' : 'alert';
       this.toggle.setAttribute('aria-label', `Accessibility issue ${this.resultID}, ${label}`);
       this.toggle.setAttribute('aria-expanded','false');
+      this.toggle.setAttribute('aria-haspopup', 'dialog');
       this.toggle.setAttribute('data-ed11y-result', this.dataset.ed11yResult);
       this.toggle.setAttribute('data-ed11y-ready', 'false');
       this.wrapper.appendChild(this.toggle);
@@ -58,80 +59,6 @@ class Ed11yElementResult extends HTMLElement {
           overflow: visible;
           color: ${Ed11y.color.text};
         }
-        .arrow {
-          display: none;
-          content: "";
-          position: absolute;
-          transform: rotate(45deg);
-          left: 46px;
-          box-shadow: 0 0 0 2px ${Ed11y.color.bg}, 2px 2px 4px ${Ed11y.color.tipHeader}77;
-          width: 20px;
-          height: 20px;
-          top: 6px;
-        }
-        .arrow[data-direction="left"] {
-          left: -18px;
-          background: linear-gradient(45deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
-        }
-        .arrow[data-direction="under"] {
-          margin: 33px 0 0 -30px;
-          background: linear-gradient(-45deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
-        }
-        .arrow[data-direction="above"] {
-          margin: -33px 0 0 -30px;
-          background: linear-gradient(135deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
-        }
-        .arrow[data-direction="right"] {
-          background: linear-gradient(-135deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
-        }
-        .tip {
-          font-size: 14px;
-          z-index: 1;
-          border: 2px solid ${Ed11y.color.tipHeader};
-          background: ${Ed11y.color.bg};
-          border-radius: 0 0 3px 3px;
-          position:relative;
-          margin-left: 58px;
-          width: clamp(12rem, 30rem, 89vw);
-          display: none;
-          box-shadow: 0 0 0 2px ${Ed11y.color.bg}, 2px 2px 4px ${Ed11y.color.primary}77;
-        }
-        @keyframes fade-in {
-          0% { opacity: 0;}
-          100% { opacity: 1;}
-        }
-        [aria-expanded="true"] ~ .tip {
-          display: block;
-        }
-        [aria-expanded="true"] ~ .tip .content {
-          animation: fade-in 0.25s ease-out;
-        }
-        [aria-expanded="true"] ~ .arrow {
-          display: block;
-          opacity: 1;
-        }
-        .title {
-          background: ${Ed11y.color.tipHeader};
-          color: ${Ed11y.color.primaryText};
-          padding: 0 35px 1px 14px;
-          font-weight: bold;
-          font-size: 14px;
-          min-height: 28px;
-          line-height: 1;
-          display: grid;
-          place-content: center left;
-          outline: transparent;
-        }
-        .content {
-          padding: 0 12px 16px 16px;
-        }
-        p {
-          margin-block-start: 1em;
-          margin-block-end: 1em;
-        }
-        p:last-child {
-          margin-block-end: 0;
-        }
         button {
           margin: 0;
           border: 0;
@@ -143,53 +70,6 @@ class Ed11yElementResult extends HTMLElement {
           cursor: pointer;
           color: ${Ed11y.color.primaryText};
           background: ${Ed11y.color.tipHeader};
-        }
-        ul {
-          margin-block-start: .643em;
-          margin-block-end: .643em;
-          padding-inline-start: 20px;
-        }
-        li {
-          line-height: 1.357;
-        }
-        li + li {
-          margin-top: .643em;
-        }
-        table {
-          border-spacing: 0;
-          margin: 20px;
-        }
-        th, td {
-          border: 0;
-          box-shadow: 0 0 0 1px;
-          padding: 5px 10px;
-        }
-        a {
-          color: inherit;
-        }
-        a:hover, a:focus-visible {
-          text-decoration-style: double;
-          text-decoration-skip-ink: none;
-        }
-
-        .close {
-          padding: 0 0 0 2px;
-          font-size: 14px;
-          line-height: 1;
-          height: 32px;
-          display: grid;
-          place-content: center;
-          font-weight: 400;
-          position: absolute;
-          top: -3px;
-          right: -2px;
-          box-shadow: -1px 0 ${Ed11y.color.bg};
-          background: transparent;
-          width: 32px;
-        }
-        .close:hover {
-          background: ${Ed11y.color.bg};
-          color: ${Ed11y.color.text};
         }
         .toggle {
           display: block;
@@ -205,17 +85,6 @@ class Ed11yElementResult extends HTMLElement {
           height: 32px;
           line-height: 1;
           font-size: 16px;
-        }
-        .dismiss {
-          margin: .5em 1em .25em 0;
-          padding: 5px 9px;
-          border-radius: 3px;
-          font-weight: bold;
-        }
-        .dismiss:hover, .dismiss:focus-visible {
-          color: ${Ed11y.color.text};
-          background: ${Ed11y.color.bg};
-          box-shadow: inset 0 0 0 2px ${Ed11y.color.tipHeader};
         }
         .wrapper :focus-visible {
           outline: 2px solid transparent;
@@ -264,7 +133,7 @@ class Ed11yElementResult extends HTMLElement {
     if (stateChange === 'open') {
       window.setTimeout(function() {
         let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-        activeTip.shadowRoot.querySelector('.title').focus();
+        activeTip.shadowRoot.querySelector('.close').focus();
       },500);
     }
   }
@@ -336,7 +205,8 @@ class Ed11yElementResult extends HTMLElement {
         this.closest('.ed11y-force-overflow')?.classList.remove('ed11y-force-overflow');
       }*/
     }
-    this.setAttribute('data-ed11y-open', changeTo);      
+    this.setAttribute('data-ed11y-open', changeTo);
+    this.open = changeTo;   
   }
   
   handleHover() {

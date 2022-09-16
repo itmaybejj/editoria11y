@@ -15,28 +15,13 @@ class Ed11yElementTip extends HTMLElement {
       this.resultID = this.dataset.ed11yResult;
       this.result = Ed11y.results[this.resultID];
 
-      this.wrapper = document.createElement('aside');
+      this.wrapper = document.createElement('div');
+      this.wrapper.setAttribute('role', 'dialog');
       
       this.dismissable = this.result[4] !== false ? true : false;
-      // todo MVP this would only work in darkmode -- need more theme variables
-      // #ffd4d4 red. turn background to alert color in lightmode.
       this.wrapper.classList.add('wrapper');
       this.wrapper.classList.add('ed11y-result');
 
-      // needed?
-      // this.wrapper.classList.add(this.type);
-
-      // Create tooltip toggle
-      //this.toggle = document.createElement('button');
-      //this.toggle.setAttribute('class','toggle');
-      // todo parameterize
-      //let label = this.dismissable ? 'manual check needed' : 'alert';
-      /*this.toggle.setAttribute('aria-label', `Accessibility issue ${this.resultID}, ${label}`);
-      this.toggle.setAttribute('aria-expanded','false');
-      this.toggle.setAttribute('data-ed11y-result', this.dataset.ed11yResult);
-      this.toggle.setAttribute('data-ed11y-ready', 'false');
-      this.wrapper.appendChild(this.toggle);
-      this.toggle.addEventListener('click', this.toggleClick);*/
       this.addEventListener('mouseover', this.handleHover);
 
       // Create CSS with embedded icon
@@ -193,21 +178,6 @@ class Ed11yElementTip extends HTMLElement {
           background: ${Ed11y.color.bg};
           color: ${Ed11y.color.text};
         }
-        .toggle {
-          display: block;
-          border: 0;
-          border-radius: 50%;
-          position: absolute;
-          margin: 0 0 0 10px;
-          z-index: 1;
-          padding: 0;
-          vertical-align: middle;
-          cursor: pointer;
-          width: 32px;
-          height: 32px;
-          line-height: 1;
-          font-size: 16px;
-        }
         .dismiss {
           margin: .5em 1em .25em 0;
           padding: 5px 9px;
@@ -224,6 +194,8 @@ class Ed11yElementTip extends HTMLElement {
           box-shadow: inset 0 0 0 2px ${Ed11y.color.focusRing}, 0 0 0 3px ${Ed11y.color.primary};
         }
       `;
+      
+      // Results array
       // [0] el element
       // [1] test ID
       // [2] tip contents
@@ -269,7 +241,6 @@ class Ed11yElementTip extends HTMLElement {
         dismissHelp.textContent = '?';
         dismissers.append(dismissHelp);
         dismissHelp.addEventListener('click', function(){Ed11y.dismissHelp(dismissHelp);});
-      
         content.append(dismissers);
       }
       let closeButton = document.createElement('button');
@@ -294,21 +265,21 @@ class Ed11yElementTip extends HTMLElement {
       });
       shadow.appendChild(style);
       shadow.appendChild(this.wrapper);
+      let focusLoopLeft = document.createElement('div');
+      focusLoopLeft.setAttribute('tabIndex', '0');
+      let focusLoopRight = document.createElement('div');
+      focusLoopRight.setAttribute('tabindex', '0');
+      this.wrapper.appendChild(focusLoopLeft);
       this.wrapper.appendChild(arrow);
       this.wrapper.appendChild(this.tip);
-      this.focusables = this.wrapper.querySelectorAll('a, button');
-      this.focusables.forEach((el) => {
-        el.addEventListener('blur', () => {
-          el.classList.remove('focused');
-          window.setTimeout(function() {
-            if (shadow.querySelector('.focused') === null && shadow.querySelector('.open') !== null) {
-              el.closest('.open')?.querySelector('.close').click();
-            }
-          },100);
-        });
-        el.addEventListener('focus', () => {
-          el.classList.add('focused');
-        });
+      this.wrapper.appendChild(focusLoopRight);
+      let focusables = this.wrapper.querySelectorAll('a, button, [tabindex="0"]');
+      let count = focusables.length;
+      focusables[0].addEventListener('focus', () => {
+        focusables[count - 2].focus();
+      });
+      focusables[count - 1].addEventListener('focus', () => {
+        focusables[1].focus();
       });
       this.initialized = true;
     }
@@ -320,7 +291,6 @@ class Ed11yElementTip extends HTMLElement {
     } else {
       this.wrapper.classList.remove('open');
     }
-    
     this.setAttribute('data-ed11y-open',changeTo);   
   }
 
