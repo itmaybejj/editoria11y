@@ -86,7 +86,7 @@ class Ed11yElementResult extends HTMLElement {
           line-height: 1;
           font-size: 16px;
         }
-        .wrapper :focus-visible {
+        button:focus-visible {
           outline: 2px solid transparent;
           box-shadow: inset 0 0 0 2px ${Ed11y.color.focusRing}, 0 0 0 3px ${Ed11y.color.primary};
         }

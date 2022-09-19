@@ -886,29 +886,34 @@ class Ed11y {
       // Visualize the document outline
  
       let panelOutline = Ed11y.panel.querySelector('#outline');
-      panelOutline.innerHTML = '';
-      Ed11y.headingOutline?.forEach((el, i) => {
-        // Todo implement outline ignore function.
-        let mark = document.createElement('ed11y-element-heading-label');
-        mark.dataset.ed11yHeadingOutline = i;
-        // Array: el, level, outlinePrefix
-        el[0].insertAdjacentElement('afterbegin', mark);
-        let level = el[1];
-        let leftPad = 10 * level - 10;
-        let li = document.createElement('li');
-        li.classList.add('level' + level);
-        let message = el[2] && !el[5] ? el[2] : ''; // Has an error message and is not ignored.
-        if (message) {
-          // todo: communicate alert level? Add alert title?
-          li.classList.add('has-issues');
-        }
-        li.style.setProperty('margin-left', leftPad + 'px');        
-        li.innerHTML = `<strong>H${level}:</strong> ${message}`;
-        let userText = document.createElement('span');
-        userText.textContent = el[0].textContent;
-        li.append(userText);
-        panelOutline.append(li);
-      });
+      
+      if (Ed11y.headingOutline.length) {
+        panelOutline.innerHTML = '';
+        Ed11y.headingOutline.forEach((el, i) => {
+          // Todo implement outline ignore function.
+          let mark = document.createElement('ed11y-element-heading-label');
+          mark.dataset.ed11yHeadingOutline = i;
+          // Array: el, level, outlinePrefix
+          el[0].insertAdjacentElement('afterbegin', mark);
+          let level = el[1];
+          let leftPad = 10 * level - 10;
+          let li = document.createElement('li');
+          li.classList.add('level' + level);
+          let message = el[2] && !el[5] ? el[2] : ''; // Has an error message and is not ignored.
+          if (message) {
+            // todo: communicate alert level? Add alert title?
+            li.classList.add('has-issues');
+          }
+          li.style.setProperty('margin-left', leftPad + 'px');        
+          li.innerHTML = `<strong>H${level}:</strong> ${message}`;
+          let userText = document.createElement('span');
+          userText.textContent = el[0].textContent;
+          li.append(userText);
+          panelOutline.append(li);
+        });
+      } else {
+        panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>';
+      }
     };
     Ed11y.switchPanel = function(id) {
       // Switch main panel tab
@@ -962,29 +967,33 @@ class Ed11y {
     Ed11y.showAltPanel = function() {
       // visualize image alts
       let altList = Ed11y.panel.querySelector('#alt-list');
-      altList.innerHTML = '';
       
-      Ed11y.imageAlts?.forEach((el, i) => {
-        // el[el, src, altLabel, altStyle]
-        
-        // Label images
-        let mark = document.createElement('ed11y-element-alt');
-        mark.dataset.ed11yImg = i;
-        el[0].insertAdjacentElement('beforebegin', mark);         
-
-        // Build alt list in panel
-        let userText = document.createElement('span');
-        userText.textContent = el[2];
-        let li = document.createElement('li');
-        li.classList.add(el[3]);
-        let img = document.createElement('img');
-        img.setAttribute('src', el[1]);
-        img.setAttribute('alt', '');
-        li.append(img);
-        li.append(userText);
-        altList.append(li);
-      });
-      Ed11y.alignAlts();
+      if (Ed11y.imageAlts.length) {
+        altList.innerHTML = '';
+        Ed11y.imageAlts.forEach((el, i) => {
+          // el[el, src, altLabel, altStyle]
+          
+          // Label images
+          let mark = document.createElement('ed11y-element-alt');
+          mark.dataset.ed11yImg = i;
+          el[0].insertAdjacentElement('beforebegin', mark);         
+  
+          // Build alt list in panel
+          let userText = document.createElement('span');
+          userText.textContent = el[2];
+          let li = document.createElement('li');
+          li.classList.add(el[3]);
+          let img = document.createElement('img');
+          img.setAttribute('src', el[1]);
+          img.setAttribute('alt', '');
+          li.append(img);
+          li.append(userText);
+          altList.append(li);
+        });
+        Ed11y.alignAlts();
+      } else {
+        altList.innerHTML = '<p><em>No images found.</em></p>';
+      }
     };
 
     Ed11y.showHelpPanel = function() {
