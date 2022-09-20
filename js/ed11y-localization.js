@@ -12,9 +12,9 @@ const ed11yLang = {
     panelCount1 : 'One issue detected.',
     panelCountMultiple: ' issues detected.',
     panelHelp : `
-            <p>Assistive devices that can reformat content for people with disabilities need well structured content to work.</p>
-            <p>This tool checks for common issues, such as <a href='https://accessibility.princeton.edu/how/content/alternative-text'>missing alternative text</a>, <a href='https://accessibility.princeton.edu/how/content/headings'>jumbled page outlines</a> and <a href='https://accessibility.princeton.edu/how/content/links'>generic link titles</a>, and reminds content creators to check audio and video for closed captioning.</p>
-            <p>Note that it <strong>only</strong> checks editorial content; your site's theme needs its own <a href='https://webaim.org/resources/evalquickref/'>accessibility testing</a>.<p>
+            <p>Assistive technologies for people with disabilites .</p>
+            <p>This tool checks for common issues, such as missing alternative text, jumbled heading outlines and generic link titles.</p>
+            <p>Note that it <strong>only</strong> checks editorial content; your site's code needs its own <a href='https://webaim.org/resources/evalquickref/'>accessibility testing</a>.<p>
             <p>Have a bug or feature request? <a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Contact the Editoria11y maintainers</a>.</p>
         `,
     jumpedToInvisibleTip: 'The element with this issue may be hidden. I will outline its nearest visible container',
