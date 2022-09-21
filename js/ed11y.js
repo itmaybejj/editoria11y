@@ -121,6 +121,7 @@ class Ed11y {
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
     }
+    Ed11y.elements = [];
 
     Ed11y.initialize = () => {
 
@@ -201,7 +202,6 @@ class Ed11y {
         if (roots.length === 0) {
           // todo MVP: set panel message?
           Ed11y.roots = [document.querySelector('html, body')];
-          Ed11y.elements = [];
           // Todo parameterize.
           if (roots.length === 0) {
             console.warn('Check Editoria11y configuration; specified root element not found');

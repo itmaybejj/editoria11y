@@ -27,7 +27,7 @@ class Ed11yTestText {
       let secondText = false;
       let hit = false;
       if (!firstText) {
-        let firstText = Ed11y.getText(p);
+        firstText = Ed11y.getText(p);
         firstPrefix = firstText.substring(0, 2);
       }
       // Grab first two characters.
@@ -68,8 +68,9 @@ class Ed11yTestText {
         let possibleHeading = p.querySelector('strong, b');
         if (possibleHeading) {
           possibleHeading = Ed11y.getText(possibleHeading);
+          let length = possibleHeading.length;
           let maybeSentence = possibleHeading.match(/[.:;?!"']/) !== null;
-          if (121 > possibleHeading.length > 0 && maybeSentence === false) {
+          if (121 > length && length > 5 && length === firstText.length && maybeSentence === false) {
             let dismissKey = Ed11y.dismissalKey(possibleHeading);
             Ed11y.results.push([p, 'textPossibleHeading', Ed11y.M.textPossibleHeading.tip(), 'afterbegin', dismissKey]);
           }
