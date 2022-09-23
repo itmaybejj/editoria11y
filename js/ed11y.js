@@ -88,8 +88,9 @@ class Ed11y {
         activeTab: '#b9c0cf',
         tipHeader: '#0a307a',
       },
-      // Base zIndex for buttons.
-      zIndex : 9999,
+      // Base buttonZIndex for buttons.
+      buttonZIndex : 9999,
+      panelbuttonZIndex : 9999,
 
       // Test customizations
       embeddedContent: false, // todo remove in favor of custom checks

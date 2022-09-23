@@ -31,7 +31,7 @@ class Ed11yElementAlt extends HTMLElement {
         span {
           background: ${Ed11y.color.primary}f3;
           color: ${Ed11y.color.primaryText};
-          z-index: ${Ed11y.options.zIndex - 1};
+          z-index: ${Ed11y.options.buttonZIndex - 1};
           font-weight: 500;
           padding: 6px;
           position: absolute;
