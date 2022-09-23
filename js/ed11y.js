@@ -90,7 +90,7 @@ class Ed11y {
       },
       // Base buttonZIndex for buttons.
       buttonZIndex : 9999,
-      panelbuttonZIndex : 9999,
+      panelZIndex : 9999,
 
       // Test customizations
       embeddedContent: false, // todo remove in favor of custom checks
