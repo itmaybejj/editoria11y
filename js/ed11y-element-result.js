@@ -179,31 +179,24 @@ class Ed11yElementResult extends HTMLElement {
     let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
     this.result[0].classList.toggle(highlightOutline);
     if (changeTo === true) {
+      // Allow for themes to reveal hidden tips
+      document.dispatchEvent(new CustomEvent('ed11yPop', {
+        detail: {id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result')}
+      }));
       this.closeOtherTips();
-      this.allowOverflow(); // todo still needed?
       this.tip.setAttribute('data-ed11y-action', 'open');
-      window.setTimeout(Ed11y.alignTip(this.toggle, this.tip)),100;
+      window.setTimeout(Ed11y.alignTip(this.toggle, this.tip)),250;
       if (!Ed11y.elements.jumpList) {
         Ed11y.buildJumpList();
       }
       Ed11y.goto = this.getAttribute('data-ed11y-jump-position');
       Ed11y.setCurrentJump();
-      document.dispatchEvent(new CustomEvent('ed11yPop', {
-        detail: {id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result')}
-      }));
     } else {
       // Allow for themes to restore original DOM/CSS
-      if (Ed11y.options.hiddenHandlers && !!this.closest(Ed11y.options.hiddenHandlers)) {
-        document.dispatchEvent(new CustomEvent('ed11yShut', {
-          detail: {id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result')}
-        }));
-      } 
+      document.dispatchEvent(new CustomEvent('ed11yShut', {
+        detail: {id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result')}
+      }));
       this.tip.setAttribute('data-ed11y-action', 'shut');
-      // todo test: forced overflow system no longer needed?
-      /*else {
-        // Undo forced overflow
-        this.closest('.ed11y-force-overflow')?.classList.remove('ed11y-force-overflow');
-      }*/
     }
     this.setAttribute('data-ed11y-open', changeTo);
     this.open = changeTo;   
@@ -213,30 +206,6 @@ class Ed11yElementResult extends HTMLElement {
     if (this.getAttribute('data-ed11y-open') === 'false') {
       this.toggleTip(true);
     }
-  }
-
-  allowOverflow() {
-    // todo beta: need "undo" event on close
-    if (Ed11y.options.hiddenHandlers && !!this.closest(Ed11y.options.hiddenHandlers)) {
-      if (Ed11y.hiddenHandled !== this.getAttribute('id')) {
-        document.dispatchEvent(new CustomEvent('ed11yShowHidden', {
-          detail: {id: this.getAttribute('id')}
-        }));
-      }
-    }
-    // todo test: forced overflow system no longer needed?
-    /*    else if (Ed11y.options.allowOverflow.length > 0) {
-      this.closest(Ed11y.options.allowOverflow).classList.add('ed11y-force-overflow');
-    }
-    else {
-      let parents = Ed11y.parents(this);
-      parents.forEach(parent => {
-        let parentStyles = window.getComputedStyle(parent);
-        if (parentStyles.getPropertyValue('overflow') === 'hidden') {
-          parent.classList.add('ed11y-force-overflow');
-        }
-      });
-    }*/
   }
 
   static get observedAttributes() { return ['data-ed11y-action']; }

@@ -301,11 +301,9 @@ class Ed11yElementPanel extends HTMLElement {
     let goNum = parseInt(this.dataset.ed11yGoto);
     // Send to ed11y to make timeouts easier
     let goto = Ed11y.elements.jumpList[goNum];
+    goto.setAttribute('data-ed11y-action','open');
     let gotoResult = Ed11y.results[goto.getAttribute('data-ed11y-result')];
-    let bodyStyles = window.getComputedStyle(document.querySelector('body'));
-    let gotoOffset = goto.getBoundingClientRect().top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
     // Throw an alert if the button or target is hidden.
-    let firstVisible = false;
     let insert = gotoResult[3];
     let target;
     // todo postpone this all belongs in the result open logic not here
@@ -316,26 +314,33 @@ class Ed11yElementPanel extends HTMLElement {
       // todo mvp these are not being inserted right; revisit. maybe always before, just sometimes before link?
       target = goto.parentElement;
     }
-    let alertMessage;
-    // todo mvp do these match tests work? parameterize, test
+    let delay = 100;
     if (Ed11y.options.hiddenHandlers.length > 0 && !!target.closest(Ed11y.options.hiddenHandlers)) {
+      // Increase hesitation before scrolling, in case theme animates open an element.
+      delay = 333;
       document.dispatchEvent(new CustomEvent('ed11yShowHidden', {
-        detail: {id: goto.getAttribute('id')}
+        detail: {result: goto.getAttribute('data-ed11y-result')}
       }));
-      Ed11y.hiddenHandled = goto.getAttribute('id');
-      window.setTimeout(function () {
-        // Recalculate before jump.
-        let gotoOffset = goto.getBoundingClientRect().top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
-        document.querySelector('html, body').animate({
-          scrollTop: (gotoOffset)
-        }, 1);
-        goto.setAttribute('data-ed11y-action','open');
-        window.setTimeout(function () {
-          Ed11y.hiddenHandled = false;
-        }, 500);
-      }, 500, goto);
     }
-    else {
+    
+    // todo mvp do these match tests work? parameterize, test
+    window.setTimeout(function () {
+      let gotoResult = Ed11y.results[goto.getAttribute('data-ed11y-result')];
+      let bodyStyles = window.getComputedStyle(document.querySelector('body'));
+      // Throw an alert if the button or target is hidden.
+      let insert = gotoResult[3];
+      let target;
+      // todo postpone this all belongs in the result open logic not here
+      if (insert === 'beforebegin') {
+        target = Ed11y.nextUntil(goto, ':not(ed11y-element-result)');
+      }
+      else if (insert === 'afterbegin') {
+        // todo mvp these are not being inserted right; revisit. maybe always before, just sometimes before link?
+        target = goto.parentElement;
+      }
+      let firstVisible = false;
+      let alertMessage;
+      let gotoOffset = goto.getBoundingClientRect().top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
       // todo beta should we try to force visibility?
       if (!Ed11y.visible(target)) {
         firstVisible = Ed11y.firstVisibleParent(target);
@@ -356,9 +361,8 @@ class Ed11yElementPanel extends HTMLElement {
         scrollTop: (gotoOffset)
       }, 1);
       goto.shadowRoot.querySelector('.toggle').focus();
-      goto.setAttribute('data-ed11y-action','open');
-      
-    }  
+    }, delay, goto);
+
   }
 
 

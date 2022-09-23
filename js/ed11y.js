@@ -54,10 +54,6 @@ class Ed11y {
       // "\(link is external\)|\(link sends email\)"
       linkIgnoreStrings: false,
 
-      // Selector list for elements that should have "overflow: visible" CSS applied when they contain an open tip
-      // todo test -- this appears to no longer be needed
-      // allowOverflow : '',
-
       // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip
       hiddenHandlers : '',
 
@@ -663,10 +659,10 @@ class Ed11y {
       // Announce that buttons have been placed.
       document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
       
-      Ed11y.alignTips();
+      Ed11y.alignButtons();
     };
 
-    Ed11y.alignTips = function() {
+    Ed11y.alignButtons = function() {
       window.setTimeout(function () {
         // Nudge offscreen tips back on screen.
         let windowWidth = window.innerWidth;
@@ -719,7 +715,6 @@ class Ed11y {
               outline-offset: 1px;
             }
             `;
-      // .ed11y-force-overflow disabled for testing
 
       Ed11y.roots.forEach((root) => {
         // Shadow elements don't inherit styles, so they need their own copy.
@@ -742,10 +737,17 @@ class Ed11y {
       Ed11y.bodyStyle = true;
     };
 
-    Ed11y.alignTip = function (button, toolTip) { 
+    Ed11y.alignTip = function (button, toolTip, recheck = 0) { 
       let arrow = toolTip.shadowRoot.querySelector('.arrow');
       let tip = arrow.nextElementSibling;
-      
+      let loopCount = recheck + 1;
+
+      // hiddenHandlers may cause element to animate.
+      if (recheck < 3 && Ed11y.options.hiddenHandlers.length > 0 && !!button.getRootNode().host.closest(Ed11y.options.hiddenHandlers)) {
+        window.setTimeout(function() {
+          Ed11y.alignTip(button, toolTip, loopCount);
+        },150, loopCount);
+      }
       // Reset any previous alignments
       tip.setAttribute('style','');
       arrow.setAttribute('style','');
@@ -1048,6 +1050,7 @@ class Ed11y {
 
     Ed11y.windowResize = function() {
       Ed11y.alignAlts();
+      Ed11y.alignButtons();
       
       let openTip = Ed11y.getOpenTip();
       if (openTip) {

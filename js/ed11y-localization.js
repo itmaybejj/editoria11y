@@ -12,13 +12,12 @@ const ed11yLang = {
     panelCount1 : 'One issue detected.',
     panelCountMultiple: ' issues detected.',
     panelHelp : `
-            <p>Assistive technologies for people with disabilites .</p>
-            <p>This tool checks for common issues, such as missing alternative text, jumbled heading outlines and generic link titles.</p>
-            <p>Note that it <strong>only</strong> checks editorial content; your site's code needs its own <a href='https://webaim.org/resources/evalquickref/'>accessibility testing</a>.<p>
+            <p>Assistive technologies and search engine crawlers work best with well-structured content. <a href="https://itmaybejj.github.io/editoria11y/demo/">Editoria11y</a> checks for common needs, such as descriptive image alternative text, meaningful heading outlines and well-named links.</p>
+            <p>Note that it <strong>only</strong> checks the editorial content; different tools and techniques are needed <a href='https://webaim.org/resources/evalquickref/'>test the design and code</a>.<p>
             <p>Have a bug or feature request? <a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Contact the Editoria11y maintainers</a>.</p>
         `,
-    jumpedToInvisibleTip: 'The element with this issue may be hidden. I will outline its nearest visible container',
-    jumpedToAriaHiddenTip: 'The element with this issue has an "aria-hidden" attribute and may be invisible or off screen.',
+    jumpedToInvisibleTip: 'The marked item may not be visible. Look for it inside the outlined container.',
+    jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.',
 
     // Tooltips
 

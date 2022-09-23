@@ -18,7 +18,7 @@
             <div class="positive">skipped heading<h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div>
 
             <h3>Empty headings</h3>
-            <div class="positive">space character
+            <div class="positive" id="hidden-handler">space character (with hidden handler)
                 <h4> </h4>
             </div>
             <div class="positive">empty alt
@@ -302,6 +302,13 @@
             console.log('Event dispatched: ed11yPop for #' + e.detail.id);
           }, false);
 
+          document.addEventListener('ed11yShowHidden', function(e) {
+            console.log('Event dispatched: ed11yShowHidden for ' + e.detail.result);
+            document.querySelector('#hidden-handler').style.transition="padding-top .25s";
+            document.querySelector('#hidden-handler').style.paddingTop="10em";
+            document.querySelector('#hidden-handler h4').style.padding="1em";
+          }, false);
+
         </script>
         <style>
             main {position: relative; z-index: 0;}
@@ -329,6 +336,7 @@
             embeddedContent: '#embed',
             //ignoreElements : '.positive *, .positive',
             shadowComponents : 'shadow-test, shadow-test-no-hits',
+            hiddenHandlers : '#hidden-handler',
             checkRoots : 'main',
             //ignoreAllIfAbsent : 'maain',
             //ignoreAllIfPresent : 'main',
