@@ -88,6 +88,8 @@ class Ed11y {
         activeTab: '#b9c0cf',
         tipHeader: '#0a307a',
       },
+      // Base zIndex for buttons.
+      zIndex : 9999,
 
       // Test customizations
       embeddedContent: false, // todo remove in favor of custom checks
@@ -177,6 +179,7 @@ class Ed11y {
           
           // Run tests
           Ed11y.checkAll(true, 'hide');
+          window.addEventListener('resize', function() {Ed11y.windowResize();});
         }
       });
     };
@@ -1049,15 +1052,15 @@ class Ed11y {
     };
 
     Ed11y.windowResize = function() {
-      Ed11y.alignAlts();
-      Ed11y.alignButtons();
-      
+      if (Ed11y.panel?.classList.contains('active') === true) {
+        Ed11y.alignAlts();
+        Ed11y.alignButtons();
+      }
       let openTip = Ed11y.getOpenTip();
       if (openTip) {
         Ed11y.alignTip(Ed11y.elements.openButton[0].shadowRoot.querySelector('button'), openTip);
       }
     };
-    window.addEventListener('resize', function() {Ed11y.windowResize();});
 
     // Escape key closes panels.
     // todo mvp rewrite

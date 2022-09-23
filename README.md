@@ -12,12 +12,16 @@ Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly 
 * The 2.x branch is in alpha as of August 2022. It should be ready for production use in September.
 
 ### Major new features in 2.x
-* Removed jQuery dependency.
-* Tips are now white-labeled (no Princeton University links).
-* The checker can now look within shadow components.
-* Content editors can now mark items as ignored for themself or (given a cloud API) OK for all site users.
+* Tips extensively rewritten; external links to Princeton content removed.
+* Content editors can now hide "manual check" alerts.
+* When connected to a cloud API, "manual check" alerts can be marked as OK for all users, and results can be sent to a site-wide dashboard.
+* Separated the "show tags" feature into "outline" and "alt text" tabs. 
+* Added theme variations and the ability to insert custom colors.
+* The checker can now scan within shadow components.
+* Tooltips are now overlaid on the page rather than inserted next to the element, removing various issues with marking clipped or partially hidden elements.
+* Removed jQuery dependency and rewrote tests to cut run time in *half*.
 
-Coming soon: WordPress integration and custom tests.
+Coming soon: WordPress integration.
 
 ## The authoring experience
 * When an author is logged in to their site, Editoria11y places a small toggle button at the bottom right of each page with an issue count. Users can press the button to view details of any alerts or access additional tools ("full check"), including visualizers for the document outline and image alt attributes, and the panel's state persists from page to page (open or shut).

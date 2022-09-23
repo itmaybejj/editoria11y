@@ -64,7 +64,7 @@ class Ed11yElementPanel extends HTMLElement {
           bottom: 1%;
           opacity: 0;
           transition: opacity .25s ease-in;
-          z-index: 9998;
+          z-index: ${Ed11y.options.zIndex - 1};
         }
         :host:focus, div:focus {
           outline: transparent;

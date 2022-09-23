@@ -48,10 +48,10 @@ class Ed11yElementResult extends HTMLElement {
           position: absolute;
           opacity: 0;
           transition: opacity .25s ease-in;
-          z-index: 9998;
+          z-index: ${Ed11y.options.zIndex - 1};
         }
         :host([data-ed11y-open='true']) {
-          z-index: 9999;
+          z-index: ${Ed11y.options.zIndex};
         }
         .wrapper {
           width: 44px;
