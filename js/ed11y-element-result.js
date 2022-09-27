@@ -7,6 +7,7 @@ class Ed11yElementResult extends HTMLElement {
   connectedCallback() {
     if (!this.initialized) {
       this.open = false;
+      this.racing = false;
       this.setAttribute('style', 'outline: 0px solid transparent;');
       const shadow = this.attachShadow({mode: 'open'});
 
@@ -35,9 +36,10 @@ class Ed11yElementResult extends HTMLElement {
       this.toggle.setAttribute('aria-haspopup', 'dialog');
       this.toggle.setAttribute('data-ed11y-result', this.dataset.ed11yResult);
       this.toggle.setAttribute('data-ed11y-ready', 'false');
+      this.toggle.setAttribute('data-ed11y-race', 'false');
       this.wrapper.appendChild(this.toggle);
       this.toggle.addEventListener('click', this.toggleClick);
-      this.addEventListener('mouseover', this.handleHover);
+      this.toggle.addEventListener('mouseover', this.handleHover);
       this.tipNeedsBuild = true;
 
       // Create CSS with embedded icon
@@ -125,17 +127,37 @@ class Ed11yElementResult extends HTMLElement {
     return this.dismissable ? manual : alert;
   }
 
+  handleHover(event) {
+    event.preventDefault();
+    let host = this.getRootNode().host;
+
+    if (host.getAttribute('data-ed11y-open') === 'false' && host.racing === false) {
+      host.racing = true;
+      host.toggleTip(true);
+      window.setTimeout(function() {
+        host.racing = false;
+      }, 250, host);
+    }
+  }
+
   toggleClick(event) {
     event.preventDefault();
     let host = this.getRootNode().host;
-    let stateChange = host.getAttribute('data-ed11y-open') === 'false' ? 'open' : 'close';
-    host.setAttribute('data-ed11y-action', stateChange);
-    if (stateChange === 'open') {
+    if (host.racing === false) {
+      host.racing = true;
+      let stateChange = host.getAttribute('data-ed11y-open') === 'false' ? 'open' : 'close';
+      host.setAttribute('data-ed11y-action', stateChange);
+      if (stateChange === 'open') {
+        window.setTimeout(function() {
+          let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+          activeTip.shadowRoot.querySelector('.close').focus();
+        },500);
+      }
       window.setTimeout(function() {
-        let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-        activeTip.shadowRoot.querySelector('.close').focus();
-      },500);
+        host.racing = false;
+      }, 250, host);
     }
+    
   }
 
   closeOtherTips() {
@@ -201,12 +223,7 @@ class Ed11yElementResult extends HTMLElement {
     this.setAttribute('data-ed11y-open', changeTo);
     this.open = changeTo;   
   }
-  
-  handleHover() {
-    if (this.getAttribute('data-ed11y-open') === 'false') {
-      this.toggleTip(true);
-    }
-  }
+
 
   static get observedAttributes() { return ['data-ed11y-action']; }
 
