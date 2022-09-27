@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" media="all" href="../docs.css">
+    </head>
+<body>
+    <header>
+        <h1 id="editoria11y-demo">Editoria11y Unit Tests</h1>
+    </header>
+    <main>
+               
+        <section id="headings">
+
+            <h2 id="heading-tests">Headings</h2>
+            <h3>Outline structure &amp; empty headings.</h3>
+
+            <div class="positive">skipped heading<h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div>
+
+            <div class="positive"><h4 id="a-very-long-heading">Suspiciously long heading. Headings should not be used for emphasis, but rather for a document outline, so if you find yourself talking this much, this probably is being used for visual formatting, not a heading.</h4>
+            </div>
+
+        <div hidden>
+            <link href="./tests.css" rel="stylesheet">
+            <script src="../js/ed11y-localization.js"></script>
+            <script src="../js/ed11y-element-panel.js"></script>
+            <script src="../js/ed11y-element-result.js"></script>
+            <script src="../js/ed11y-element-alt.js"></script>
+            <script src="../js/ed11y-test-links.js"></script>
+            <script src="../js/ed11y-test-images.js"></script>
+            <script src="../js/ed11y-test-headings.js"></script>
+            <script src="../js/ed11y-test-text.js"></script>
+            <script src="../js/ed11y-test-embeds.js"></script>
+            <script src="../js/ed11y.js"></script>
+            <!-- Instantiate-->
+            <script>
+                const ed11y = new Ed11y({
+                    alertMode : 'polite',
+                    shadowComponents : 'shadow-test, shadow-test-no-hits', 
+                    checkRoots : 'body', 
+                });
+            </script>
+            
+        </div>
+    </main>
+
+
+
+
+</body>
+
+</html>
