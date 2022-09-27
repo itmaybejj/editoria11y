@@ -1,0 +1,136 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - 'features/**'
+  pull_request:
+    branches: [master]
+
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: lint
+      run: |
+        npm install
+        npx eslint js
+
+  build-linux:
+    name: linux-${{ matrix.browser }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        browser: ["chrome", "firefox"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: npm-install
+        run: npm install
+
+      - name: run browser tests
+        run: |
+          mkdir screens
+          npx nightwatch tests --env ${{ matrix.browser }}
+
+      - name: Save Artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: | 
+            screens
+            tests_output
+            logs
+
+  build-windows:
+    name: windows-${{ matrix.browser }}
+    runs-on: windows-latest
+    env:
+      EDGEDRIVER_DOWNLOAD_ON_INSTALL: 1
+
+    strategy:
+      matrix:
+        browser: ["firefox", "edge", "chrome"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: npm-install
+        # The "EDGEDRIVER_DOWNLOAD_ON_INSTALL" is necessary to properly install with npm install
+        run: |          
+          echo "EDGEDRIVER_DOWNLOAD_ON_INSTALL=1" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+          npm install
+
+      - name: run browser tests
+        run: |
+          mkdir screens
+          npx nightwatch tests --env ${{ matrix.browser }} --config nightwatch.windows.conf.js
+
+      - name: Save Artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: | 
+            screens
+            tests_output
+            logs
+
+  build-mac:
+    name: mac-${{ matrix.browser }}
+    runs-on: macos-latest
+    env:
+      # The "EDGEDRIVER_DOWNLOAD_ON_INSTALL" is necessary to properly install with npm install
+      EDGEDRIVER_DOWNLOAD_ON_INSTALL: 1
+
+    strategy:
+      matrix:
+        browser: ["safari", "chrome", "firefox", "edge"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: npm-install
+        run: |          
+          EDGEDRIVER_DOWNLOAD_ON_INSTALL=1 npm install
+          ls 
+
+      - name: run browser tests
+        run: |
+          mkdir screens
+          npx nightwatch tests --env ${{ matrix.browser }}
+
+      - name: Save Artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: | 
+            screens
+            tests_output
+            logs
+
+  reporting:
+    if: ${{ always() }}
+    needs: [build-linux, build-windows, build-mac]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/download-artifact@v2
+      with:
+        name: test-results   
+    - run: |
+        pwd
+        ls -la    
+    - uses: EnricoMi/publish-unit-test-result-action@v1
+      with:
+        files: "./tests_output/*.xml"           
+

@@ -1,3 +1,6 @@
+/* todo mvp: focus indication missing on panel  */
+
+
 /*
 1. Reset and base elements
 2. Panel
@@ -82,12 +85,12 @@
 }
 
 #ed11y-panel .ed11y-panel-inactive,
-.ed11y-reset .ed11y-fullcheck,
+.ed11y-reset .ed11y-show,
 .ed11y-panel-shut #ed11y-panel-content,
 .ed11y-panel-shut #ed11y-panel-buttonbar button:not(#ed11y-main-toggle),
 .ed11y-panel-minimized #ed11y-panel-upper,
 .ed11y-panel-minimized #ed11y-panel-content,
-.ed11y-panel-minimized #ed11y-shutpanel,
+.ed11y-panel-minimized #ed11y-shut-panel,
 .ed11y-panel-minimized #ed11y-summary-toggle,
 .ed11y-panel-minimized .ed11y-about,
 .ed11y-pass .ed11y-jumplink {
@@ -133,7 +136,7 @@
 #ed11y-summary-toggle {
   font-size: 12px !important;
 }
-#ed11y-shutpanel {
+#ed11y-shut-panel {
   padding-right: 7px !important;
 }
 #ed11y-panel-buttonbar #ed11y-main-toggle {
@@ -245,7 +248,7 @@ a.ed11y-jumplink {
   color: #111 !important;
 }
 
-#ed11y-panel .ed11y-fullcheck-header {
+#ed11y-panel .ed11y-show-header {
   padding: 0 15px !important;
   line-height: 28px !important;
   background: #3679b0 !important;
@@ -254,13 +257,13 @@ a.ed11y-jumplink {
   font-weight: 600 !important;
   border-radius: 4px 4px 0 0 !important;
 }
-#ed11y-panel .ed11y-fullcheck-header p {
+#ed11y-panel .ed11y-show-header p {
   padding: 4px 0 8px !important;
   font-size: 14px !important;
   color: #fff !important;
 }
-.ed11y-fullcheck-header a:hover,
-.ed11y-fullcheck-header a:focus {
+.ed11y-show-header a:hover,
+.ed11y-show-header a:focus {
   color: inherit !important;
   text-decoration: none !important;
   box-shadow: inset 0 -2px #fff, 0 1px #fff !important;
@@ -271,7 +274,7 @@ a.ed11y-jumplink {
   color: inherit !important;
 }
 
-.ed11y-reset .ed11y-fullcheck {
+.ed11y-reset .ed11y-show {
   position: relative !important;
   padding-bottom: 0 !important;
   width: 100% !important;
@@ -279,7 +282,7 @@ a.ed11y-jumplink {
   border-bottom: 1px solid #dbdbdb !important;
   background: #f4f4f4 !important;
 }
-.ed11y-fullcheck .ed11y-header-button {
+.ed11y-show .ed11y-header-button {
   background: rgba(0,0,0,.25) !important;
   color: #fff !important;
   opacity: 1 !important;
@@ -293,8 +296,8 @@ a.ed11y-jumplink {
 .ed11y-header-button span {
   color: inherit !important;
 }
-.ed11y-fullcheck button:hover,
-.ed11y-fullcheck button:focus {
+.ed11y-show button:hover,
+.ed11y-show button:focus {
   background: #444 !important;
 }
 
@@ -359,13 +362,13 @@ div.ed11y-sr-only {
   float: left !important;
   margin-left: -12px !important;
 }
-.ed11y-fullcheck li,
-.ed11y-fullcheck ul {
+.ed11y-show li,
+.ed11y-show ul {
   padding: 5px 0 5px 20px !important;
   font-size: 14px !important;
   text-indent: -23px !important;
 }
-.ed11y-fullcheck ul {
+.ed11y-show ul {
   list-style-type: none !important;
   padding: 7px 10px 0 15px !important;
   background: #f4f4f4 !important;
@@ -416,7 +419,7 @@ div.ed11y-sr-only {
   background-color: rgba(0, 0, 0, .5) !important;
   -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5) !important;
 }
-.ed11y-tip button {
+.ed11y-tip .ed11y-close-tip {
   top: 0 !important;
   position: absolute !important;
   width: 34px !important;
@@ -445,32 +448,6 @@ button#ed11y-panel-button {
   width: auto !important;
   min-height: 0 !important;
   right: 22px !important;
-}
-
-.ed11y-reveal-alts {
-  position: absolute !important;
-  font-size: 14px !important;
-  display: inline-flex !important;
-  flex-direction: column !important;
-  justify-content: flex-end !important;
-}
-
-.ed11y-reveal-alts span {
-  background: #00bffff3 !important;
-  color: #111 !important;
-  z-index: 100 !important;
-  text-indent: 28px !important;
-  font-weight: 500 !important;
-  padding: 6px !important;
-  width: 100% !important;
-}
-.ed11y-reveal-alts svg {
-  width: 22px !important;
-  margin: 0 0 0 -27px !important;
-  position: absolute !important;
-}
-.ed11y-reveal-alts path {
-  fill: #111 !important;
 }
 
 button#ed11y-panel-button:focus,
@@ -712,7 +689,7 @@ body .ed11y-warning-border {
   background: #3679b0 !important;
   color: #fff !important;
 }
-.ed11y-about-text + #ed11y-fullcheck-headers {
+.ed11y-about-text + #ed11y-show-headers {
   display: none !important;
 }
 .ed11y-reset .ed11y-about-text {
@@ -765,4 +742,15 @@ body .ed11y-warning-border {
 .ed11y-hidden,
 .ed11y-reset .ed11y-hidden {
   display: none !important;
+}
+
+
+
+/* TODO TEMP TEMP TEMP TEMP */
+ed11y-result {
+  transform: translate(60px, 0);
+}
+
+.ed11y-instance .ed11y-pop {
+  margin-left: 100px !important;
 }

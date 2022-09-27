@@ -1,7 +1,7 @@
 {
   "name": "editoria11y",
   "homepage": "https://itmaybejj.github.io/editoria11y/",
-  "version": "1.0.8",
+  "version": "2.0.0-alpha",
   "repository": {
     "type": "git",
     "url": "git+https://itmaybejj@github.com/itmaybejj/editoria11y.git"
@@ -9,5 +9,15 @@
   "bugs": {
     "url": "https://github.com/itmaybejj/editoria11y/issues"
   },
-  "license": "GPLv2"
+  "license": "GPLv2",
+  "devDependencies": {
+    "@cucumber/cucumber": "^7.3.2",
+    "@cucumber/pretty-formatter": "^1.0.0-alpha.2",
+    "axios": "^0.26.0",
+    "chromedriver": "^99.0.0",
+    "eslint": "^8.12.0",
+    "geckodriver": "^3.0.1",
+    "ms-chromium-edge-driver": "^0.5.1",
+    "nightwatch": "^2.0.10"
+  }
 }

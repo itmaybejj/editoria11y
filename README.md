@@ -1,8 +1,27 @@
+# Editora11y
+
 Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly accessibility "auto-correct" checker that addresses three critical needs for content authors:
 
 1. It runs automatically. Modern spellcheck works so well because it is always running; put spellcheck behind a button and few users remember to run it!
 1. It focuses exclusively on straightforward issues a content author can easily understand and easily fix. Yes; comprehensive testing should be a key part of site creation, but if a tool is going to run automatically, it will drive an author bonkers if it is constantly alerting on code they do not understand and cannot fix.
 1. It runs in context. Modern content management systems often assemble pages from many sources. Only the assembled page can be checked for things like the header outline order.
+
+## Versions
+
+* The 1.x branch is quite stable, and has been running in production for years.
+* The 2.x branch is in alpha as of August 2022. It should be ready for production use in September.
+
+### Major new features in 2.x
+* Tips extensively rewritten; external links to Princeton content removed.
+* Content editors can now hide "manual check" alerts.
+* When connected to a cloud API, "manual check" alerts can be marked as OK for all users, and results can be sent to a site-wide dashboard.
+* Separated the "show tags" feature into "outline" and "alt text" tabs. 
+* Added theme variations and the ability to insert custom colors.
+* The checker can now scan within shadow components.
+* Tooltips are now overlaid on the page rather than inserted next to the element, removing various issues with marking clipped or partially hidden elements.
+* Removed jQuery dependency and rewrote tests to cut run time in *half*.
+
+Coming soon: WordPress integration.
 
 ## The authoring experience
 * When an author is logged in to their site, Editoria11y places a small toggle button at the bottom right of each page with an issue count. Users can press the button to view details of any alerts or access additional tools ("full check"), including visualizers for the document outline and image alt attributes, and the panel's state persists from page to page (open or shut).
@@ -58,44 +77,73 @@ If possible, start with a turnkey implementation:
 * [Editoria11y Drupal Module](https://www.drupal.org/project/editoria11y)
 * Editoria11y WordPress Plugin (coming soon) 
 
-To install manually:
-* Add JS (in this order...)
-  * jQuery
-  * editoria11y-prefs.js (default or your own)
-  * editoria11y-localization.js (default or your own)
-  * editoria11y.js
-* Add CSS
-  * editoria11y.css
-
-Should look something like this:
+To make your own implementation, simply call your copy (or a CDN version) of "editoria11y.min.js" as a script, and then define a create a new "Ed11y" instance:
 
 ```
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<link rel="stylesheet" media="screen" href="https://itmaybejj.github.io/editoria11y/css/editoria11y.css">
-<script src="https://itmaybejj.github.io/editoria11y/js/editoria11y-prefs.js"></script>
-<script src="https://itmaybejj.github.io/editoria11y/js/editoria11y-localization.js"></script>
-<script src="https://itmaybejj.github.io/editoria11y/js/editoria11y.js"></script>
+  <script src="/PATH/TO/YOUR/COPY/editoria11y.min.js"></script>
+  <script>
+    const ed11y = new Ed11y({
+      // options,
+    });           
+  </script>
+
+A complete implementation will only be called for logged-in editors (you don't want your site visitors seeing your checker!) and will have set various custom options. It might look more like this:
+
 ```
+  <script src="/PATH/TO/YOUR/COPY/editoria11y.min.js"></script>
+  <script>
+    const ed11y = new Ed11y({
+      // We have two content regions
+      checkRoots : 'main, .footer-content-zone',
+      // We have two custom shadow components
+      shadowComponents : 'accordion-widget, lightbox-widget',
+      // We want the box to open automatically for errors
+      alertMode : 'assertive',
+      // We wanted to pick our own colors
+      theme : 'darkTheme',
+      darkTheme: {
+          bg: '#0a2051',
+          bgHighlight: '#7b1919',
+          text: '#f4f7ff',
+          primary: '#4930a0',
+          primaryText: '#f4f7ff',
+          secondary: '#20160c',
+          warning: '#fad859',
+          alert: '#b80519',
+          button: '#dde8ff',
+          focusRing: 'cyan',
+          activeTab: '#0a2051',
+          tipHeader: '#4930a0',
+      },
+      // We have an external link icon with visually hidden text
+      linkIgnoreStrings: ['(opens in new window)'],
+      // Content editors cannot edit these elements
+      ignoreElements : 'nav *, #social-block',
+      // We don't want to ignore alerts, only fix or mark OK
+      allowHide : false,
+      allowOK : true,
+      // Don't scan while the editor toolbar is open
+      doNotRun : ".editor-toolbar",
+      // Send a JS event when highlighting tips in this element,
+      // so our own JS can open the accordion and show it.
+      hiddenHandlers : ".accordion-panel",
+    });
+  </script>
 
-And remember to only call the script for logged-in editors!
-
-Editoria11y's default configuration should work fine on both sites. Do explore the preferences file, though; there are several tweaks to make it play nice with most themes. The most important ones:
-
-* "ed11yCheckRoot." By default Editorially scans the entire page, since themes name their content wrapper various things. If all your content is in, say, `main` or `#content`, provide that selector so site editors don't see alerts for things they can't fix. 
-* Some content just does not play nice with this type of tool; embedded social media feeds, for example, or custom "known-good" code with custom aria roles and labels. Add these to the "ed11yContainerIgnore" list. 
-* Editorially can be set to disable itself if it detects certain selectors. If have inline editing tools where you don't want tooltips inserted, or certain pages where the tool should not appear, add relevent selectors to the "ed11yNoRun" list.
 
 ### Dealing with alerts on hidden or size-constrained content
 
-Many interactive components (tabs, sliders, accordions) hide content. The Editoria11y info panel includes a link to jump directly to an alert. If a user can't see an alert on the page, they can click this link, and it will highlight the container for any hidden alerts -- e.g., the box around the slideshow.m
+Note the "hiddenHandlers" option in the example above.
 
-There are also two helper variables for site administrators:
-* If the hidden content should be ignored, add relevant selectors to the "ignore this" lists. E.g., it is not uncommon to have two links, with one hidden from screen readers, so you may want to add something like `a[aria-hidden='true']` to the ed11yLinkIgnore or ed11yContainerIgnore lists.
-* If tooltips are getting cut off because a wrapper is set to `visibility:hidden`, add the wrapper's selector to the `ed11yAllowOverflow` list, and Editoria11y will (temporarily) force the container to allow overflow while the tip is open.
+Many interactive components (tabs, sliders, accordions) hide content. The Editoria11y info panel includes a link to jump directly to an issue. If Editoria11y thinks the issue's tooltip is currently invisible, it will alert the user something is wrong, and then highlight the first visible ancestor -- e.g., the div around an accordion.
 
-## Recent changes of note
-* v1.0.8: Adds a configuration variable to strip certain strings (e.g., "opens in new window") from links before analyzing their text.
-* v1.0.5: Added "possible header" test, tweaked the link-to-document test and improved the accessibility of the Editoria11y tool itself. Significant performance improvements on pages with many competing scripts. Customized implementations need the new `ed11yMessageQAMayBeHeader` variable added to their localization.js files; there were also small changes to `ed11yPanel` and `ed11yMessageLinkDownload` in the localization file as well as `ed11yDownloadLinks` in the prefs file. See [full v1.0.5 notes](https://www.drupal.org/project/editoria11y/releases/1.0.5).
+You may wish to include custom JS in your theme to open various hidden panels when they contain alerts. 
+
+When the panel first opens, it dispatches a JS event ("ed11yPanelOpened"). At this time, you may wish to run a querySelectorAll for "ed11y-element-result" elements, and open accordions or advance sliders to reveal the alert tip.
+
+When the next/previous buttons are clicked on the panel, if it recognizes the tip is inside a container with one of the listed "hiddenHandlers" selectors you provided in your options list, it will also dispatch an "ed11yShowHidden" event, which includes the ID of the tip that it is about to open. Themes can react to this based on the element's location in the DOM: advance to the relevant carousel slide, open the relevant tab panel, etc.
+
+I can provide code samples on request.
 
 ## Contact
 Editoria11y is maintained by [John Jameson](https://www.linkedin.com/in/johnwjameson/), and is provided to the community thanks to the [Digital Accessibility](https://accessibility.princeton.edu/) initiatives at Princeton University's [Office of Web Development Services](https://wds.princeton.edu/)

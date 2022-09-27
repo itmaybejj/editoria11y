@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" media="all" href="../docs.css">
+    </head>
+<body>
+    <header>
+        <h1 id="editoria11y-demo">Editoria11y Unit Tests: No errors</h1>
+    </header>
+    <main>
+               
+        <section id="headings">
+
+            <h2 id="heading-tests">Headings</h2>
+            
+            <h3>Possible fake headings</h3>
+
+            <p class="negative">
+                <strong>A bold paragraph of very many characters is probably not a heading and probably shouldn't be flagged even if it does not end in a period</strong>
+            </p>
+
+
+        </section>
+
+
+        <section>
+            <h2 id="text-alternatives">Image Text alternatives</h2>
+
+        </section>
+        <section>
+            <h2>Figures</h2>
+            
+        </section>
+        <h3 id="embeds">Embeds</h3>
+
+        <p>Flagged as manual check needed for captioning:</p>
+<hr>
+                
+        <hr>
+
+        <!--<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" width="300" height="240" frameborder="0"></iframe>-->
+[iframe commented out during development]
+        <p>Also flagged: embedded audio and social media.</p>
+
+        <h2 id="meaningful-links">Meaningful Links</h2>
+<h3>
+            Links with accessible text added programmatically
+        </h3>
+        <p>These should all pass.</p>
+        <ul>
+            <li class="negative">Title <a href="#"  title="text is in the title"></a></li>
+
+        </ul>
+
+
+
+   
+
+        <h2 id="legibility">Legibility</h2>
+
+        <h3 id="lists">Lists</h3>
+
+        <div class="negative"><p>1. This has nothing after the BR<br></p></div>
+        <div class="negative"><p></p></div>
+        <div class="negative"><p>1.</p></div>
+
+        <h3 id="caps-lock">Caps lock</h3>
+        
+        <section class="shadow-root">
+            <h2 id="shadow-root-1">Shadow root handling 1</h2>
+        </section>
+        <section class="shadow-root">
+            <h2 id="shadow-root-2">Shadow root handling 2</h2>
+        </section>
+        <section class="shadow-root-no-hits">
+            <div>This shadow component has no elements to find.</div>
+        </section>
+        
+
+
+
+        <section class="shadow-root">
+            <h2 id="shadow-root-3">Shadow root handling 3</h2>
+        </section>
+
+
+        <div hidden>
+            <script>
+                class shadowTest extends HTMLElement {
+                constructor() {
+                    super();
+                }
+                connectedCallback() {
+                    if (!this.initialized) {
+                        const shadow = this.attachShadow({mode: 'open'});
+                        let wrapper = document.createElement('div');
+                        wrapper.setAttribute('class','wrapper');
+                        wrapper.innerHTML = `<h3>Header skip in the shadow DOM</h5><p>All fine in the shadow DOM</p>`
+                        shadow.appendChild(wrapper);
+                        this.initialized = true;
+                    }
+                }
+                }
+                customElements.define('shadow-test', shadowTest);
+                class shadowTestNoHits extends HTMLElement {
+                    constructor() {
+                        super();
+                    }
+                    connectedCallback() {
+                    if (!this.initialized) {
+                        const shadow = this.attachShadow({mode: 'open'});
+                        let wrapper = document.createElement('div');
+                        wrapper.setAttribute('class','wrapper');
+                        shadow.appendChild(wrapper);
+                        this.initialized = true;
+                        }
+                    }
+                }
+                customElements.define('shadow-test-no-hits', shadowTestNoHits);
+
+                document.querySelectorAll('.shadow-root').forEach((el) => {
+                    let testShadowElement = document.createElement('shadow-test');
+                    el.append(testShadowElement);
+                    el.append('hi');
+                })
+
+                document.querySelectorAll('.shadow-root-no-hits').forEach((el) => {
+                    let testShadowElement2 = document.createElement('shadow-test-no-hits');
+                    el.append(testShadowElement2);
+                });
+
+            </script>
+            <link href="./tests.css" rel="stylesheet">
+            <script src="../js/ed11y-localization.js"></script>
+            <script src="../js/ed11y-element-panel.js"></script>
+            <script src="../js/ed11y-element-result.js"></script>
+            <script src="../js/ed11y-element-alt.js"></script>
+            <script src="../js/ed11y-test-links.js"></script>
+            <script src="../js/ed11y-test-images.js"></script>
+            <script src="../js/ed11y-test-headings.js"></script>
+            <script src="../js/ed11y-test-text.js"></script>
+            <script src="../js/ed11y-test-embeds.js"></script>
+            <script src="../js/ed11y.js"></script>
+            <!-- Instantiate-->
+            <script>
+                const ed11y = new Ed11y({
+                    alertMode : 'polite',
+                    shadowComponents : 'shadow-test, shadow-test-no-hits', 
+                    checkRoots : 'body',
+                    //ignoreAllIfAbsent : 'boody',
+                    //ignoreAllIfPresent : 'body',
+                });
+            </script>
+            
+        </div>
+    </main>
+
+
+
+
+</body>
+
+</html>
