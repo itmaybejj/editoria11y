@@ -740,6 +740,15 @@ class Ed11y {
       Ed11y.bodyStyle = true;
     };
 
+    Ed11y.scrollTo = function (goto) {
+      let gotoOffset = goto.getBoundingClientRect().top;
+      if (gotoOffset < window.innerHeight * .25) {
+        window.scrollBy(0, gotoOffset - window.innerHeight * .25);
+      } else if (gotoOffset > window.innerHeight * .75) {
+        window.scrollBy(0, gotoOffset - window.innerHeight * .75);
+      }
+    };
+
     Ed11y.alignTip = function (button, toolTip, recheck = 0) { 
       let arrow = toolTip.shadowRoot.querySelector('.arrow');
       let tip = arrow.nextElementSibling;
@@ -777,14 +786,18 @@ class Ed11y {
       let direction = 'under';
       // Default to displaying under
       if (buttonOffset.top + tipHeight + scrollTop + 50 > windowBottom) {
-        // No room below
+        // If there's no room under in the viewport...
         if (windowWidth - (buttonLeft + tipWidth + 90) > 0 && buttonOffset.top + 40 < window.innerHeight) {
           direction = 'right';
         } else if (buttonOffset.top > tipHeight + 15) {
           direction = 'above';
         } else if (buttonLeft - tipWidth - 50 > 0) {
           direction = 'left';
-        } 
+        } else if (buttonOffset.bottom + tipHeight > document.documentElement.clientHeight - 50) {
+          // No room anywhere in viewport we're at the end of the page.
+          direction = 'above';
+        }
+        // Back to default.
       }
 
       let nudgeX = 0;
