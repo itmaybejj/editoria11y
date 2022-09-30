@@ -62,6 +62,7 @@
             <script src="../js/ed11y-localization.js"></script>
             <script src="../js/ed11y-element-panel.js"></script>
             <script src="../js/ed11y-element-result.js"></script>
+            <script src="../js/ed11y-element-tip.js"></script>
             <script src="../js/ed11y-element-alt.js"></script>
             <script src="../js/ed11y-test-links.js"></script>
             <script src="../js/ed11y-test-images.js"></script>
@@ -72,9 +73,9 @@
             <!-- Instantiate-->
             <script>
                 document.addEventListener('ed11yShowHidden', function(e) {
-                    console.log('Event dispatched: ed11yShowHidden for #' + e.detail.id);
-                    let pop = document.querySelector(`#${e.detail.id}`);
-                    pop.closest('[hidden]')?.removeAttribute('hidden');
+                    console.log('Event dispatched: ed11yShowHidden for #' + e.detail.result);
+                    let pop = Ed11y.findElements('hiddenPop',`#ed11y-result-${e.detail.result}`);
+                    Ed11y.elements['hiddenPop'][0].closest('[hidden]')?.removeAttribute('hidden');
                 }, false);
                 const ed11y = new Ed11y({
                     alertMode : 'assertive',

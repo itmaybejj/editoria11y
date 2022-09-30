@@ -1168,17 +1168,22 @@ class Ed11y {
 
     Ed11y.visibleElement = function(el) {
       // Checks if this element is visible. Used in parent iterators.
+      // false is definitely invisible, true requires continued iteration to tell.
       // Todo postpone: Check for offscreen?
-      // Todo mvp: test this and parameters
       if (el) {
         let style = window.getComputedStyle(el);
-        /*console.log(style.getPropertyValue('display'));
-        console.log(style.getPropertyValue('visibility'));
-        console.log(style.getPropertyValue('opacity'));
-        console.log(el.offsetWidth);
-        console.log(el.offsetHeight);
-        console.log(el.hasAttribute('hidden'));*/
-        if (
+        if (el.classList.contains('ed11y-ring-red') || el.classList.contains('ed11y-ring-yellow')) {
+          if (
+            style.getPropertyValue('display') === 'none' || 
+              style.getPropertyValue('visibility') === 'hidden' ||
+              style.getPropertyValue('opacity') === '0' ||
+              el.hasAttribute('hidden')
+          ) {
+            return false;
+          } else {
+            return true;
+          }
+        } else if (
           // todo: if the element is display:none, can we push the tooltip to the nearest visible container and then open it?
           style.getPropertyValue('display') === 'none' || 
           style.getPropertyValue('visibility') === 'hidden' ||
@@ -1199,13 +1204,11 @@ class Ed11y {
         // Element is hidden
         return false;
       } else {
+        // Element is not known to be hidden.
         let parents = Ed11y.parents(el);
-        parents.forEach((parent) => {
-          if (!Ed11y.visibleElement(parent)) {
-            return false;
-          }
-        });
-        return true;
+        let visibleParent = (parent) => Ed11y.visibleElement(parent);
+        let visible = parents.every(visibleParent);
+        return visible;
       }
     };
 
