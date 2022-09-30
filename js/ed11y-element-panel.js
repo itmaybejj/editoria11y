@@ -77,6 +77,9 @@ class Ed11yElementPanel extends HTMLElement {
           box-shadow: 1px 1px 4px 2px ${Ed11y.color.text}77;
           padding: 2px;
         }
+        [tabindex]:focus-visible {
+          box-shadow: 0 0 0 3px ${Ed11y.color.bg}, 0 0 0 4px ${Ed11y.color.text};
+        }
         a {
           color: inherit;
         }
