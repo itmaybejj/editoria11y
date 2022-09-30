@@ -1066,15 +1066,14 @@ class Ed11y {
     // todo mvp rewrite
     Ed11y.escapeWatch = function(event) {
       if (event.keyCode === 27) {
-        if (event.target.closest('ed11y-element-panel')) {
-          // panel
+        if (event.target.closest('ed11y-element-panel') && Ed11y.panelToggle.getAttribute('aria-expanded') === 'true') {
           Ed11y.panelToggle.focus();
           Ed11y.panelToggle.click();
         } else if (event.target.hasAttribute('data-ed11y-open')) {
           // todo mvp findElements
           let openTip = Ed11y.getOpenTip();
           if (openTip) {
-            Ed11y.elements.openButton[0].shadowRoot.querySelector('button').focus();
+            Ed11y.toggledFrom.focus();
             Ed11y.elements.openButton[0].shadowRoot.querySelector('button').click();
           }
         } 
