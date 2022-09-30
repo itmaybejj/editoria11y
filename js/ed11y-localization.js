@@ -22,10 +22,10 @@ const ed11yLang = {
     // Tooltips
 
     elementDismissalHelpOK : `
-    "Mark as checked and OK" hides a manual check on one page, for all site editors. The alert may reappear if the page's content changes, or if another editor restores hidden alerts on this page.
+    "Mark as checked and OK" hides this alert on this page, for all site editors. The alert may reappear if the page's content changes, or if any editor presses "show hidden alerts" for this page.
     `,
     elementDismissalHelpHide : `
-    "Hide alert" hides a manual check on a single page, for the current user. The alert may reappear if the page content changes.
+    "Hide alert" hides this alert on this page, for you alone. The alert may reappear if the page content changes or if you switch devices.
     `,
     elementDismissalHelpAll : 'To dismiss an alert site-wide, have an administrator adjust the configuration options to ignore this element.',
 
@@ -35,30 +35,29 @@ const ed11yLang = {
         <ul>
             <li>Heading level 1
                 <ul>
-                    <li>Heading level 2
-                        <ul><li>Heading level 3 (a <em>subtopic</em>)</li></ul></li>
-                    <li>Heading level 2 (a <em>new</em> topic)</li>
+                    <li>Heading level 2: a topic
+                        <ul><li>Heading level 3: a subtopic</li></ul></li>
+                    <li>Heading level 2: a new topic</li>
                 </ul>
             </li>
         </ul>`,
     headingLevelSkipped : {
       title: 'Manual check: was a heading level skipped?',
       tip: (prevLevel, level) =>
-        `<p>Headings and subheadings are the page's table of contents. The <em>numbers</em> indicate indents in a nesting relationship:</p>
+        `<p>Headings and subheadings are the page's table of contents. The <em>numbers</em> indicate indents, in a nesting relationship:</p>
             ${Ed11y.M.headingExample}
-            <p>This heading is level ${level}; the previous heading was level ${prevLevel}. 
-            A screen reader user will not know if level ${parseInt(level - 1)} is missing, or if they were not paying attention and missed it.
-            They may to go back and check.</p>
-            <p>To fix: adjust levels to form a continuous outline.</p>
+            <p>This heading skipped from level ${prevLevel} to level ${level}. From a screen reader, this sounds like content is missing.</p>
+            <p>To fix: adjust levels to form an accurate outline, without gaps.</p>
             `,
     },
 
     headingEmpty : {
       title: 'Heading tag without any text',
       tip: () => 
-        `<p>Headings and subheadings create a navigable table of contents for assistive devices. "Blank" headings create confusing gaps. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
+        `<p>Headings and subheadings create a navigable table of contents for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
             ${Ed11y.M.headingExample}
-            <p><strong>To fix:</strong> add text to this heading, or delete it.</p>
+            <p>"Blank" headings create confusing gaps in this outline: they could mean the following content is still part of the previous section, or that the text was unpronounceable for some reason.</p>
+            <p><strong>To fix:</strong> add text to this heading, or remove it.</p>
             `,
     },
 
@@ -74,18 +73,18 @@ const ed11yLang = {
     blockquoteIsShort : {
       title: 'Manual check: is this a blockquote?',
       tip: () =>
-        '<p>Blockquote formatting tells screen readers that this text should be announced as a quotation. This was flagged because short blockquotes are sometimes actually headings that belong in the page outline. If that is the case here, please use heading formatting instead.</p>',
+        '<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. This was flagged because short blockquotes are sometimes actually headings. If this is a heading and not a quotation, please use heading formatting instead, so this appears in the page outline.</p>',
     },
 
     // Tooltips for image tests
 
     // Reusable example for tips:
     altAttributeExample : 
-            `<p>Note that a good alt conveys what an image communicates, not what it contains. For example, a picture of a child kicking a ball might be there to show a generic scene, or the kick, or the child or the ball:</p>
+            `<p>Note that a good alt conveys what an image <strong>communicates</strong>, not what it <strong>contains</strong>. A picture of a child kicking a ball might have been selected because of the setting, the child, the kick or the ball:</p>
             <ul>
-                <li>A child kicking a ball</li>
-                <li>AJ's game-winning kick curved in from the left sideline!</li>
-                <li>AJ</li>
+                <li>Child happily kicking a ball on a summer day</li>
+                <li>A.J. playing in the new team uniform</li>
+                <li>A.J.'s game-winning kick curved in from the left sideline!</li>
                 <li>The "medium" ball is the right size for this 9-year-old child</li>
             </ul>`,
         
@@ -95,16 +94,15 @@ const ed11yLang = {
     altMissing : {
       title: 'Image has no alternative text attribute',
       tip: () =>
-        `<p>When screen readers encounter an image with no alt attribute, they dictate the url of the image file instead, often one letter at a time.
-            Please set this image's alternative text to a concise description of what this image means in this context.</p>
+        `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.
+            To fix: either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>
             ${Ed11y.M.altAttributeExample}`,
     },
 
     altNull : {
-      title: 'Manual check: image is marked as decoration',
+      title: 'Manual check: image has no alt text',
       tip: () =>
-        `<p>This image provides no text alternative; screen readers will skip over the image without speaking anything. This may be correct!</p>
-        <p>But if this image is meaningful, provide alt text.</p> 
+        `<p>Screen readers assume images with empty alt text are only for decoration (spacers and backgrounds), and do not mention they exist. If this image is meaningful, an alt should be provided.</p>
             ${Ed11y.M.altAttributeExample}`,
     },
 
@@ -131,12 +129,11 @@ const ed11yLang = {
     altImageOf : {
       title: 'Manual check: possibly redundant text in alt',
       tip: (alt) =>
-        `<p>Since screen readers automatically announce they are describing an image, 
-            words like "image," "photo" or "graphic" are only helpful 
-            in a text alternative if they describe what is contained in the image, rather
-            than repeating the fact that the image is an image.</p>
-            <ul><li>Redundant: "<em>Photo of</em> my new spoon."</li>
-            <li>Helpful: "Cracked and faded <em>photo of</em> the first computer."</li></ul>
+        `<p>Screen readers <strong>announce</strong> they are describing an image when reading alt text, so 
+            phrases like "image of" and "photo of" are usually redundant, sounding like "this image's alt is the alt of an image."</p>
+            <p>Note the sometimes the phrase is not redundant and should be kept, because the image is an image of an image:</p>
+            <ul><li>Redundant: "image of a VHS tape"</li>
+            <li>Relevant: "image of a VHS tape being shown in history class"</li></ul>
             ${Ed11y.M.altAttributeProvided(alt)}`
     },
     altImageOfLinked : {
@@ -154,11 +151,9 @@ const ed11yLang = {
     altDeadspace : {
       title: 'Image\'s text alternative is unpronouncable',
       tip: (alt) =>
-        `<p>This image's alt consists of only silent characters (spaces and quotation marks). It will be announced by screen readers as as part of the link's text, but the description of what the image is will be unintelligible. Please set this image's alternative text to something that describes the link's destination, or provide a <em>completely</em> empty alt (alt="") if the image should not be mentioned at all.</p>
-            <ul>
-                <li>Good link text: "About us"</li>
-                <li>Bad link text: "About us, image: [short confusing silence]"</li>
-            </ul>
+        `<p>This image's alt only contains characters which are not spoken by screen readers. The presence of an image will be announced, but its description of will be unintelligible.</p>
+        <p>To fix: add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") to tell screen readers to ignore this image.</p>
+            ${Ed11y.M.altAttributeExample}
             ${Ed11y.M.altAttributeProvided(alt)}`,
     },
     altDeadspaceLinked : {
@@ -186,9 +181,9 @@ const ed11yLang = {
     altLong : {
       title: 'Manual check: very long alternative text',
       tip: (alt) =>
-        `<p>Image text alternatives are announced by screen readers as a single run-on sentence; listeners must listen to the entire alt a second time if they miss something. When more that a few words are needed to describe an image, it is usually better to provide and reference a <em>visible</em> text alternative, an approach that is often preferred by mobile device users and readers with low-vision. For example:</p>
+        `<p>Image text alternatives are announced by screen readers as a single run-on sentence; listeners must listen to the entire alt a second time if they miss something. It is usually better to provide and reference a <em>visible</em> text alternative for complex images that need long descriptions. For example:</p>
             <ul><li>"Event poster; details provided in caption"</li>
-            <li>"Chart showing our issues on this page going to zero; details in table"</li></ul>
+            <li>"Chart showing our issues going to zero; details follow in table"</li></ul>
             ${Ed11y.M.altAttributeProvided(alt)}
             `,
     },
@@ -203,13 +198,15 @@ const ed11yLang = {
     altPartOfLinkWithText : {
       title: 'Manual check: link contains both text and an image',
       tip: (alt) => 
-        `<p>When a link includes an image, the image's alt text becomes part of the link.
-            This can be confusing if the image's text alternative is adding irrelevant details.</p>
+        `<p>When a link includes an image, screen readers speak the the image's alt text as part of the link.
+            This can be confusing if the image's alt describes the image rather than the link.</p>
+            <p>E.g., for a card-style link with both text and a stock photo, compare:</p>
             <ul>
-                <li>Confusing: "Link, 'Stock photo of five people jumping and high fiving around a conference table, image', About us</li>
-                <li>Ideal: "Link, About us" (image was marked decorative with a blank alt and not announced)</li>
+                <li>"Link, five people jumping and high fiving around a conference table, image, about us"</li>
+                <li>"Link, about us"</li>
             </ul>
             ${Ed11y.M.altAttributeProvided(alt)}
+            <p>If this link is clearer without this alt, it may be better to use a blank alt, to tell screen readers to ignore the image.</p>
             `,
     },
 
@@ -217,17 +214,17 @@ const ed11yLang = {
       title: 'Link with no accessible text',
       tip: () =>
         `<p>This link is either invisible and empty (e.g., a linked space character), or wrapped around something with no text alternative (an image with no alt attribute).</p>
-            <p>Screen readers will not be able to read this, speaking either an uninformative silence "Link, [...awkward pause where the link title should be...]," or the URL, spelled out character by character: "Link, H-T-T-P-S forward-slash forward-slash example dot com"</p>
-            <p>To fix: add text if this should be a link; delete the spaces if not.</p>`,
+            <p>Screen readers will either pause with an uninformative silence when they reach this link: <br>"Link, [...awkward pause where the link title should be...],"<br>or spell out the URL, character by character: <br>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</p>
+            <p>To fix: add text if this should be a link, or delete it if it should not.</p>`,
     },
 
     linkTextIsURL : {
       title: 'Manual check: is this link text a URL?',
       tip: (text) => 
-        `<p>Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
-         <p>A linked URL expects the reader to read the preceding paragraph to figure out the link's purpose from context.</p>
+        `<p>Links should be meaningful and concise. Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
+         <p>A linked URL breaks this pattern; the reader has to read the preceding paragraph to figure out the link's purpose from context.</p>
             <ul>
-                <li>Meaningful and concise link text: "Tips for writing meaningful links"</li>
+                <li>Meaningful and concise link: "Tips for writing meaningful links"</li>
                 <li>Linked URL, as pronounced by a screen reader: "H T T P S colon forward-slash forward-slash example dot com forward-slash tips forward-slash meaningful-links"</li>
             </ul>
                 <p>This link's text is:<br> <strong>${text}</strong></p>
@@ -237,8 +234,8 @@ const ed11yLang = {
     linkTextIsGeneric : {
       title: 'Manual check: is this link meaningful and concise?',
       tip: (text) => 
-        `<p>Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
-                <p>Generic text like "click here," "read more" or "download" expect the reader to figure out the link's purpose from context.</p>
+        `<p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
+                <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully, such that they figure out each link's purpose from context for themselves. Few readers do this, so click-through rates on meaningless links are extremely poor.</p>
                 <ul><li>Not meaningful: "To learn more about meaningful links, <a href="https://www.google.com/search?q=writing+meaningful+links">click here</a>.</li>
                 <li>Not concise: "<a href="https://www.google.com/search?q=writing+meaningful+links">Click here to learn more about meaningful links</a>"</li>
                 <li>Ideal: "Learn about <a href="https://www.google.com/search?q=writing+meaningful+links">meaningful links"</a></strong></li></ul>
@@ -249,12 +246,12 @@ const ed11yLang = {
     linkDocument : {
       title : 'Manual check: is the linked document accessible?',
       tip: () => 
-        `<p>This automated checker helps ensure Web pages contain the features assistive technologies need to make content accessible for everybody; things like headings, table headers and image alternative text. It is not able to check linked documents.</p>
-                <p>If the linked document cannot be converted to a Web page (something usually preferred by mobile device and screen reader users), please make sure it at least contains structural tags and image alt text. See tips for remediating:
+        `<p>This automated checker helps ensure <strong><em>websites</em></strong> contain the features needed for accessible content, things like heading structure and text alternatives for images and audio. <strong>It is not able to help you check the documents you link.</strong></p>
+                <p>Most mobile and assistive device users prefer to read text on Web pages, where content reflows to fit the screen. If the document linked here cannot be converted to a Web page, please manually check its structure (headings, lists, table headers) and image alt text.</p>
                 <ul>
-                    <li><a href='https://webaim.org/techniques/word/'>text documents</a></li>
-                    <li><a href='https://webaim.org/techniques/powerpoint/'>slideshows</a></li>
-                    <li><a href='https://webaim.org/techniques/acrobat/'>documents intended for printers instead of screens (PDF)</a></li>
+                    <li>Tips for <a href='https://webaim.org/techniques/word/'>MS Word</a> &amp; <a href="https://support.google.com/docs/answer/6199477?hl=en&ref_topic=6039805">Google Docs</a></li>
+                    <li><a href='https://webaim.org/techniques/powerpoint/'>Slideshows</a> &amp; <a href='https://support.microsoft.com/en-us/office/make-your-excel-documents-accessible-to-people-with-disabilities-6cc05fc5-1314-48b5-8eb3-683e49b3e593'>Spreadsheets</a>
+                    <li><a href='https://webaim.org/techniques/acrobat/'>Documents formatted for print instead of screens (PDF)</a></li>
                 </ul>`
       ,
     },
@@ -262,12 +259,13 @@ const ed11yLang = {
     linkNewWindow : {
       title: 'Manual check: is opening a new window expected?',
       tip: () => 
-        `<p>Normally readers can choose to open a link in the same window or a new window. When a link forces the browser to open in a new window without warning, it can be confusing, especially for assistive device users who may not realize a new window has opened and wonder why their browse "back" button is suddenly disabled, or who need many clicks to get back to the previous window.</p>
-                <p>There are generally only two situations where it is not confusing or annoying to force a link to open a new window:</p>
+        `<p>Readers can always choose to open a link a new window. When a link forces open a new window, it can be confusing and annoying, especially for assistive device users who may wonder why their browser's "back" button is suddenly disabled.</p>
+                <p>There are two general exceptions:</p>
                 <ul>
-                    <li>When the user is in a multi-step form (e.g., a store checkout process), and they would lose their place if they followed a link.</li>
-                    <li>When the user is warned by text or an icon with a text-equivalent for screen readers the link will open in a new window.</li>
+                    <li>When the user is filling out a form, and opening a link in the same window would cause them to lose their work.</li>
+                    <li>When the user is clearly warned a link will open a new window.</li>
                 </ul>
+                <p>To fix: set this link back its default target, or add a screen-reader accessible warning (text or an icon with alt text).</p>
                 `
       ,
     },
@@ -336,20 +334,20 @@ const ed11yLang = {
     embedVideo : {
       title: 'Manual check: is this video accurately captioned?',
       tip : () => 
-        `<p>If a recorded video contains speech or meaningful sounds, it must be captioned.</p>
-            <p>Note that machine-generated captions are an excellent start, but must be proofread and edited to identify who is speaking before being considered an equal alternative.</p>`,
+        `<p>If a recorded video contains speech or meaningful sounds, it must provide captioning.</p>
+            <p>Note that automatic, machine-generated captions must be proofread, and speaker identifications must be added, before being considered an equal alternative.</p>`,
     },
     embedAudio : {
       title: 'Manual check: is an accurate transcript provided?',
       tip : () => 
-        `<p>If this audio contains speech, a text alternative must be provided, either as content on this page, a link or a download.</p>
-            <p>Note that machine-generated transcripts are an excellent start, but must be proofread and edited to identify who is speaking before being considered an equal alternative</p>`,
+        `<p>If this audio contains speech, a text alternative must be provided on this page or linked.</p>
+            <p>Note that automatic, machine-generated transcripts must be proofread, and speaker identifications must be added, before being considered an equal alternative</p>`,
     },
     embedVisualization : {
       title: 'Manual check: is this visualization accessible?',
       tip : () => 
         `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
-            <p>Unless this particular widget has an adjustable font size, high visual contrast, can be operated by a keyboard and can be understood by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
+            <p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
     },
     embedTwitter : {
       title: 'Manual check: is this embed a keyboard trap?',

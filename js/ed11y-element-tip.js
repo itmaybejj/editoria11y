@@ -257,7 +257,7 @@ class Ed11yElementTip extends HTMLElement {
         event.preventDefault;
         if(this.open) {
           let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
-          toggle?.shadowRoot.querySelector('button').focus();
+          Ed11y.toggledFrom.focus();
           // todo postpone: track if this tip was opened by the next button. If so, transfer focus back to it instead
           toggle?.setAttribute('data-ed11y-action', 'shut');
           this.setAttribute('data-ed11y-action', 'shut');

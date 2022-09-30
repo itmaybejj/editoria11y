@@ -130,10 +130,10 @@ class Ed11yElementResult extends HTMLElement {
   handleHover(event) {
     event.preventDefault();
     let host = this.getRootNode().host;
-
     if (host.getAttribute('data-ed11y-open') === 'false' && host.racing === false) {
       host.racing = true;
       host.toggleTip(true);
+      Ed11y.toggledFrom = this;
       window.setTimeout(function() {
         host.racing = false;
       }, 250, host);
@@ -143,8 +143,10 @@ class Ed11yElementResult extends HTMLElement {
   toggleClick(event) {
     event.preventDefault();
     let host = this.getRootNode().host;
+    // Todo: extremely fast clicks throw TypeError: e is null
     if (host.racing === false) {
       host.racing = true;
+      Ed11y.toggledFrom = this;
       let stateChange = host.getAttribute('data-ed11y-open') === 'false' ? 'open' : 'close';
       host.setAttribute('data-ed11y-action', stateChange);
       if (stateChange === 'open') {

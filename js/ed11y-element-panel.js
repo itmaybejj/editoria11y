@@ -292,6 +292,7 @@ class Ed11yElementPanel extends HTMLElement {
   jumpTo(event) {
     // Handle jump
     event.preventDefault();
+    Ed11y.toggledFrom = this;
     Ed11y.resetClass(['ed11y-hidden-highlight']);
     if (!Ed11y.elements.jumpList) {
       Ed11y.buildJumpList();
@@ -351,7 +352,6 @@ class Ed11yElementPanel extends HTMLElement {
         firstVisible = firstVisible.closest(':not([aria-hidden="true"])');
         alertMessage = Ed11y.M.jumpedToAriaHiddenTip;
       }
-
       if (firstVisible) {
         alert(alertMessage);
         firstVisible.classList.add('ed11y-hidden-highlight');
@@ -360,7 +360,8 @@ class Ed11yElementPanel extends HTMLElement {
       document.querySelector('html, body').animate({
         scrollTop: (gotoOffset)
       }, 1);
-      goto.shadowRoot.querySelector('.toggle').focus();
+      let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+      activeTip.shadowRoot.querySelector('.close').focus();
     }, delay, goto);
 
   }
