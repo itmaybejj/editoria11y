@@ -36,7 +36,7 @@ class Ed11yTestHeadings {
       if (level - prevLevel > 1 && i !== 0) {
         error = 'headingLevelSkipped';
         dismissKey = level + headingText;
-        outlinePrefix = '(flagged for skipped level) ';
+        outlinePrefix = Ed11y.M.errorOutlinePrefixSkippedLevel;
         message = Ed11y.M.headingLevelSkipped.tip(prevLevel, level);
       }
       if (headingLength < 1) {
@@ -44,12 +44,12 @@ class Ed11yTestHeadings {
         let headingSubText = el.querySelector('img')?.getAttribute('alt');
         if (!headingSubText || headingSubText.length === 0) {
           error = 'headingEmpty';
-          outlinePrefix = '(empty heading)';
+          outlinePrefix =  Ed11y.M.errorOutlinePrefixHeadingEmpty;
           message = Ed11y.M.headingEmpty.tip();
         }
       }
       else if (headingLength > 160) {
-        outlinePrefix = '(flagged for length) ';
+        outlinePrefix = Ed11y.M.errorOutlinePrefixHeadingIsLong;
         dismissKey = level + headingText;
         error = 'headingIsLong';
         message = Ed11y.M.headingIsLong.tip();

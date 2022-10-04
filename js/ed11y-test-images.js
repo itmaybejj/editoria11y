@@ -15,7 +15,7 @@ class Ed11yTestImages {
     Ed11y.elements.img.forEach((el) => {
 
       let alt = el.getAttribute('alt');
-      let altLabel = 'Alt text: ';
+      let altLabel = Ed11y.M.altLabelPrefix;
       let src = el.getAttribute('src');
       let error = false;
       let dismissable = true;
@@ -27,12 +27,12 @@ class Ed11yTestImages {
         error = 'altMissing';
         dismissable = false;
         // todo parameterize
-        altLabel += '(missing!)';
+        altLabel += Ed11y.M.errorAltMissing;
       }
       else if (alt.length === 0 && !parentLink) {
         // Empty alt not part of link. Link test will not flag this if the link has other text.
         error = 'altNull';
-        altLabel += '(none; image marked as decorative)';
+        altLabel += Ed11y.M.errorAltNull;
       }
       else {
         altLabel += alt;
@@ -40,7 +40,7 @@ class Ed11yTestImages {
         // todo parameterize
         let altUrl = ['.png', '.jpg', '.jpeg', '.gif'];
         // todo localize
-        let suspiciousWords = ['image of', 'graphic of', 'picture of', 'placeholder', 'photo of'];
+        let suspiciousWords = Ed11y.M.suspiciousWords;
         let check = [null, null];
         
         altUrl.forEach((string) => {

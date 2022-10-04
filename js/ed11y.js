@@ -58,7 +58,7 @@ class Ed11y {
       hiddenHandlers : '',
 
       // Interface
-      lang: 'en',
+      lang: 'en', // Can become deprecated ??
       theme: 'lightTheme',
       darkTheme: {
         bg: '#0a2051',
@@ -114,7 +114,11 @@ class Ed11y {
       ...defaultOptions,
       ...options
     };
-    Ed11y.M = ed11yLang[Ed11y.options.lang];
+    Ed11y.M = {
+      // Fall back to default strings if language unavailable
+      ...ed11yLang['en'],
+      ...ed11yLang[Ed11y.options.lang] 
+    };
     Ed11y.color = Ed11y.options[Ed11y.options.theme];
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
@@ -237,14 +241,14 @@ class Ed11y {
         window.setTimeout(function() {
           Ed11y.updatePanel(onLoad, showPanel); 
           // todo parameterize
-          Ed11y.panelToggle.setAttribute('title', 'Toggle accessibility tools');
+          Ed11y.panelToggle.setAttribute('title', Ed11y.M.toggleAccessibilityTools);
         },0);
       }
       else {
         Ed11y.reset();
         Ed11y.panelToggle.classList.add('disabled');
         Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
-        Ed11y.panelToggle.setAttribute('title', 'Editorially is disabled.');
+        Ed11y.panelToggle.setAttribute('title', Ed11y.M.toggleDisabled);
       }
     };
 
@@ -1037,10 +1041,10 @@ class Ed11y {
         // Reached end of loop or dismissal pushed us out of loop
         goNext = 0;
         // todo parameterize
-        Ed11y.nextText = 'First';
+        Ed11y.nextText = Ed11y.M.buttonFirstContent;
       } else {
         goNext = parseInt(Ed11y.goto) + 1;
-        Ed11y.nextText = 'Next';
+        Ed11y.nextText = Ed11y.M.buttonNextContent;
       }
       let goPrev = goNext - 2;
       if (goPrev < 0) {
@@ -1328,7 +1332,7 @@ class Ed11y {
     if (CSS.supports('selector(:is(body))')) {
       Ed11y.initialize();
     } else {
-      console.warn('This browser can not run Editoria11y.');
+      console.warn(Ed11y.M.consoleNotSupported);
     }
   }
 }

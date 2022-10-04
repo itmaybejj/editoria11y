@@ -100,7 +100,7 @@ class Ed11yElementTip extends HTMLElement {
         .title {
           background: ${Ed11y.color.tipHeader};
           color: ${Ed11y.color.primaryText};
-          padding: 0 35px 1px 14px;
+          padding: 2px 35px 3px 14px;
           font-weight: bold;
           font-size: 14px;
           min-height: 28px;
@@ -163,7 +163,7 @@ class Ed11yElementTip extends HTMLElement {
           padding: 0 0 0 2px;
           font-size: 14px;
           line-height: 1;
-          height: 32px;
+          height: 36px;
           display: grid;
           place-content: center;
           font-weight: 400;
@@ -221,8 +221,8 @@ class Ed11yElementTip extends HTMLElement {
           let dismissOKButton = document.createElement('button');
           dismissOKButton.classList.add('dismiss');
           // todo mvp Parameterize
-          dismissOKButton.textContent = 'Mark as Checked and OK';
-          dismissOKButton.setAttribute('title', 'Dismisses alert for all editors');
+          dismissOKButton.textContent = Ed11y.M.dismissOkButtonContent;
+          dismissOKButton.setAttribute('title', Ed11y.M.dismissOkButtonTitle);
           dismissers.append(dismissOKButton);
           dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
         }
@@ -230,8 +230,8 @@ class Ed11yElementTip extends HTMLElement {
           let dismissHideButton = document.createElement('button');
           dismissHideButton.classList.add('dismiss');
           // todo parameterize
-          dismissHideButton.textContent = 'Hide alert';
-          dismissHideButton.setAttribute('title', 'Dismisses alert for you');
+          dismissHideButton.textContent = Ed11y.M.dismissHideButtonContent;
+          dismissHideButton.setAttribute('title', Ed11y.M.dismissHideButtonTitle);
           dismissers.append(dismissHideButton);
           dismissHideButton.addEventListener('click', function(){Ed11y.dismissThis('hide');});
         }

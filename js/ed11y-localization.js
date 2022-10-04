@@ -6,21 +6,56 @@ const ed11yLang = {
 
   en : {
 
-    // Main Panel
+    // Main Panel =========================================
+    toggleAccessibilityTools: 'Toggle accessibility tools',
+    toggleDisabled: 'Editorially is disabled.',
     panelCount0 : 'No issues detected.',
     panelCountAllDismissed : 'All issues hidden.',
     panelCount1 : 'One issue detected.',
     panelCountMultiple: ' issues detected.',
+    panelCountBase: '<span class=\'count\'>No</span> <span class=\'content-type\'>issues detected</span>.',
+    panelControls: 'Editorially panel controls',
+    buttonIssuesContent: 'Issues',
+    buttonOutlineContent: 'Outline',
+    buttonAltsContent: 'Alt Text',
+    buttonAboutTitle: 'About this tool',
+    buttonPrevContent: 'Previous',
+    buttonFirstContent: 'First',
+    buttonNextContent: 'Next',
+    buttonShowHiddenAlertsContent: 'Show hidden alerts',
+    panelCheckOutline: '<p>Check that this forms <a href=\'https://accessibility.princeton.edu/how/content/headings\'>a complete outline</a>:</p>',
+    panelCheckAltText: '<p>Check <a href=\'https://accessibility.princeton.edu/how/content/alternative-text\'>alt text</a>, <a href=\'https://accessibility.princeton.edu/how/content/images-text\'>images of text</a>, &amp; <a href=\'https://webaim.org/techniques/captions/\'>captions</a>.</p>',
     panelHelp : `
-            <p>Assistive technologies and search engine crawlers work best with well-structured content. <a href="https://itmaybejj.github.io/editoria11y/demo/">Editoria11y</a> checks for common needs, such as descriptive image alternative text, meaningful heading outlines and well-named links.</p>
-            <p>Note that it <strong>only</strong> checks the editorial content; different tools and techniques are needed <a href='https://webaim.org/resources/evalquickref/'>test the design and code</a>.<p>
-            <p>Have a bug or feature request? <a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Contact the Editoria11y maintainers</a>.</p>
-        `,
+    <p>Assistive technologies and search engine crawlers work best with well-structured content. <a href="https://itmaybejj.github.io/editoria11y/demo/">Editoria11y</a> checks for common needs, such as descriptive image alternative text, meaningful heading outlines and well-named links.</p>
+    <p>Note that it <strong>only</strong> checks the editorial content; different tools and techniques are needed <a href='https://webaim.org/resources/evalquickref/'>test the design and code</a>.<p>
+    <p>Have a bug or feature request? <a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Contact the Editoria11y maintainers</a>.</p>
+    `,
+    altLabelPrefix: 'Alt text: ',
+    errorAltMissing: '(missing!)',
+    errorAltNull: '(none; image marked as decorative)',
+    errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
+    errorOutlinePrefixHeadingEmpty: '(empty heading)',
+    errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
+
+    // Errors and alerts ==================================
+
+    consoleNotSupported: 'This browser can not run Editoria11y.',
     jumpedToInvisibleTip: 'The marked item may not be visible. Look for it inside the outlined container.',
     jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.',
 
-    // Tooltips
+    // Strings used in tests ==============================
 
+    suspiciousWords: ['image of','graphic of','picture of','placeholder','photo of'],
+    
+    // Tooltips base ======================================
+
+    toggleManualCheck: 'manual check needed',
+    toggleAlert: 'alert',
+    toggleAriaLabel: (resultID, label) => `Accessibility issue ${resultID}, ${label}`,
+    dismissOkButtonContent: 'Mark as Checked and OK',
+    dismissOkButtonTitle: 'Dismisses alert for all editors',
+    dismissHideButtonContent: 'Hide alert',
+    dismissHideButtonTitle: 'Dismisses alert for you',
     elementDismissalHelpOK : `
     "Mark as checked and OK" hides this alert on this page, for all site editors. The alert may reappear if the page's content changes, or if any editor presses "show hidden alerts" for this page.
     `,
@@ -29,7 +64,7 @@ const ed11yLang = {
     `,
     elementDismissalHelpAll : 'To dismiss an alert site-wide, have an administrator adjust the configuration options to ignore this element.',
 
-    // Tooltips for heading tests
+    // Tooltips for heading tests =========================
 
     headingExample : `
         <ul>
@@ -41,6 +76,7 @@ const ed11yLang = {
                 </ul>
             </li>
         </ul>`,
+
     headingLevelSkipped : {
       title: 'Manual check: was a heading level skipped?',
       tip: (prevLevel, level) =>
@@ -76,9 +112,8 @@ const ed11yLang = {
         '<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. This was flagged because short blockquotes are sometimes actually headings. If this is a heading and not a quotation, please use heading formatting instead, so this appears in the page outline.</p>',
     },
 
-    // Tooltips for image tests
+    // Tooltips for image tests =========================
 
-    // Reusable example for tips:
     altAttributeExample : 
             `<p>Note that a good alt conveys what an image <strong>communicates</strong>, not what it <strong>contains</strong>. A picture of a child kicking a ball might have been selected because of the setting, the child, the kick or the ball:</p>
             <ul>
@@ -114,6 +149,7 @@ const ed11yLang = {
             ${Ed11y.M.altAttributeProvided(alt)}`
       ,
     },
+
     altURLLinked : {
       title: 'Linked image\'s text alternative is a URL',
       tip: (alt) =>
@@ -156,6 +192,7 @@ const ed11yLang = {
             ${Ed11y.M.altAttributeExample}
             ${Ed11y.M.altAttributeProvided(alt)}`,
     },
+
     altDeadspaceLinked : {
       title: 'Linked Image\'s text alternative is unpronouncable',
       tip: (alt) =>
@@ -166,6 +203,7 @@ const ed11yLang = {
             </ul>
             ${Ed11y.M.altAttributeProvided(alt)}`,
     },
+
     altEmptyLinked : {
       title: 'Linked Image has no alt text',
       tip: () =>
@@ -187,6 +225,7 @@ const ed11yLang = {
             ${Ed11y.M.altAttributeProvided(alt)}
             `,
     },
+
     altLongLinked : {
       title: 'Manual check: very long alternative text in linked image',
       tip: (alt) =>
@@ -270,7 +309,7 @@ const ed11yLang = {
       ,
     },
 
-    // Tooltips for Text QA
+    // Tooltips for Text QA ===============================
 
     tableNoHeaderCells : {
       title: 'Table has no header cells',
@@ -337,24 +376,28 @@ const ed11yLang = {
         `<p>If a recorded video contains speech or meaningful sounds, it must provide captioning.</p>
             <p>Note that automatic, machine-generated captions must be proofread, and speaker identifications must be added, before being considered an equal alternative.</p>`,
     },
+
     embedAudio : {
       title: 'Manual check: is an accurate transcript provided?',
       tip : () => 
         `<p>If this audio contains speech, a text alternative must be provided on this page or linked.</p>
             <p>Note that automatic, machine-generated transcripts must be proofread, and speaker identifications must be added, before being considered an equal alternative</p>`,
     },
+
     embedVisualization : {
       title: 'Manual check: is this visualization accessible?',
       tip : () => 
         `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
             <p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
     },
+
     embedTwitter : {
       title: 'Manual check: is this embed a keyboard trap?',
       tip : () => 
         `<p>If embedded feeds are set to show a high number of items, keyboard users may have to click the tab key dozens or hundreds of times to exit the component.</p>
             <p>Check to make sure only a small number of items auto-load immediately or while scrolling. Having additional items load on request ("show more") is fine.</p>`,
     },
+
     embedCustom : {
       title: 'Manual check: is this embedded content accessible?',
       tip : () => 

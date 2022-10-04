@@ -8,38 +8,38 @@ class Ed11yElementPanel extends HTMLElement {
   // todo mvp parameterize
   template() {
     return `
-    <div class='buttonbar' role='tablist' aria-label='Editorial Ally panel controls'>
+    <div class='buttonbar' role='tablist' aria-label='${Ed11y.M.panelControls}'>
       <button role="tab" id='issues' aria-selected='true'>
-          Issues
+          ${Ed11y.M.buttonIssuesContent}
       </button>
       <button role="tab" id='headings' aria-selected='false'>
-          Outline
+          ${Ed11y.M.buttonOutlineContent}
       </button>
       <button role="tab" id='alts' aria-selected='false'>
-          Alt Text
+          ${Ed11y.M.buttonAltsContent}
       </button>
-      <button role="tab" id='help' aria-selected='false' aria-controls='help-tab' title='About this tool'>?</button>
+      <button role="tab" id='help' aria-selected='false' aria-controls='help-tab' title='${Ed11y.M.buttonAboutTitle}'>?</button>
       <button role="tab"  id='minimize' aria-selected='false' title='Minimize panel' aria-label="minimize" aria-pressed="false"><span>&ndash;</span></button>
       <button type='button' id='toggle'><span class='close'>&times;</span><span class='open'><span class='icon'></span><span class='toggle-count'></span></span></button>
     </div>
     <div class="content">
       <div id='issues-tab' tabindex="0" role="tabpanel" class="show" aria-labelledby='issues'>
           <div>
-              <div class='content-text'><span class='count'>No</span> <span class='content-type'>accessibility errors detected</span>.</div>
+              <div class='content-text'>${Ed11y.M.panelCountBase}</div>
               <div aria-live='polite' class='announce hidden'></div>
           </div>
           <div class='jumplinks'>
-            <button class='jump prev' data-ed11y-goto='0'><span aria-hidden='true'>« </span><span class='jump-prev'>Previous</span></button>
-            <button class='jump next' data-ed11y-goto='0'><span class='jump-next'>First</span> <span aria-hidden='true'> »</span></button>
-            <button id='restore' hidden>Show hidden alerts</button>
+            <button class='jump prev' data-ed11y-goto='0'><span aria-hidden='true'>« </span><span class='jump-prev'>${Ed11y.M.buttonPrevContent}</span></button>
+            <button class='jump next' data-ed11y-goto='0'><span class='jump-next'>${Ed11y.M.buttonFirstContent}</span> <span aria-hidden='true'> »</span></button>
+            <button id='restore' hidden>${Ed11y.M.buttonShowHiddenAlertsContent}</button>
           </div>
         </div>
       <div id='headings-tab' role="tabpanel" class="hidden" aria-labelledby='headings' tabindex='0'>
-        <p>Check that this forms <a href='https://accessibility.princeton.edu/how/content/headings'>a complete outline</a>:</p>
+        ${Ed11y.M.panelCheckOutline}
         <ul id='outline'></ul>
       </div>
       <div id='alts-tab' role="tabpanel" class="hidden" aria-labelledby='alts' tabindex='0'>
-        <p>Check <a href='https://accessibility.princeton.edu/how/content/alternative-text'>alt text</a>, <a href='https://accessibility.princeton.edu/how/content/images-text'>images of text</a>, &amp; <a href='https://webaim.org/techniques/captions/'>captions</a>.</p>
+        ${Ed11y.M.panelCheckAltText}
         <ul id='alt-list'></ul>
       </div>
       <div id='help-tab' role="tabpanel" class="hidden" aria-labelledby='help' tabindex='0'>
