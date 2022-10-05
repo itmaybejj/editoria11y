@@ -27,7 +27,7 @@ const ed11yLang = {
     panelCheckAltText: '<p>Check <a href=\'https://accessibility.princeton.edu/how/content/alternative-text\'>alt text</a>, <a href=\'https://accessibility.princeton.edu/how/content/images-text\'>images of text</a>, &amp; <a href=\'https://webaim.org/techniques/captions/\'>captions</a>.</p>',
     panelHelp : `
     <p>Assistive technologies and search engine crawlers work best with well-structured content. <a href="https://itmaybejj.github.io/editoria11y/demo/">Editoria11y</a> checks for common needs, such as descriptive image alternative text, meaningful heading outlines and well-named links.</p>
-    <p>Note that it <strong>only</strong> checks the editorial content; different tools and techniques are needed <a href='https://webaim.org/resources/evalquickref/'>test the design and code</a>.<p>
+    <p>Note that it <strong>only</strong> checks the editorial content; different tools and techniques are needed to <a href='https://webaim.org/resources/evalquickref/'>test the design and code</a>.<p>
     <p>Have a bug or feature request? <a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Contact the Editoria11y maintainers</a>.</p>
     `,
     altLabelPrefix: 'Alt text: ',
@@ -46,6 +46,9 @@ const ed11yLang = {
     // Strings used in tests ==============================
 
     suspiciousWords: ['image of','graphic of','picture of','placeholder','photo of'],
+    linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
+    linksMeaningless: /learn|to|more|now|this|page|link|site|website|check|out|view|our|read|\.|,|:|download|form|here|click|>|<|\s/g,
+          
     
     // Tooltips base ======================================
 

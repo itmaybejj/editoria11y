@@ -44,6 +44,8 @@ ed11yLang['nl'] = {
   // Strings used in tests ==============================
 
   suspiciousWords: ['afbeelding van','tekening van','foto van','plaatshouder','foto van'],
+  linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/', '.nl/'],
+  linksMeaningless: /leer|meer|klik|hier|op|deze|link|nu|this|bladzijde|webpagina|website|bekijk|\.|,|:|downloaden|het|formulier|webformulier|>|<|\s/g,
   
   // Tooltips base ======================================
 
@@ -96,7 +98,7 @@ ed11yLang['nl'] = {
   },
 
   headingIsLong : {
-    title: 'Manual check: long heading',
+    title: 'Handmatige controle: lange hoofding',
     tip: () =>
       `<p>Headings should be brief and clear. Assistive devices use them to create a navigable table of contents for the page. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>  
           ${Ed11y.M.headingExample}

@@ -101,6 +101,8 @@ class Ed11y {
       twitterContent: 'twitter-timeline',
       // Selector list to identify links to documents you would like flagged for manual review.
       documentLinks: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\'], a[href$=\'.doc\'], a[href$=\'.docx\'], a[href*=\'.doc?\'], a[href*=\'.docx?\'], a[href$=\'.ppt\'], a[href$=\'.pptx\'], a[href*=\'.ppt?\'], a[href*=\'.pptx?\'], a[href^=\'https://docs.google\']',
+      linksUrls: false, // get from language pack
+      linksMeaningless: false, // get from language pack
 
       // * Not implemented Yet:
       // custom Checks
@@ -115,7 +117,7 @@ class Ed11y {
       ...options
     };
     Ed11y.M = {
-      // Fall back to default strings if language unavailable
+      // Fall back to En strings if language or string is unavailable
       ...ed11yLang['en'],
       ...ed11yLang[Ed11y.options.lang] 
     };

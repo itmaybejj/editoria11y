@@ -70,17 +70,17 @@ class Ed11yTestLinks {
         let linkTextCheck = function (textContent) {
           // todo later: use regex to find any three-letter TLD followed by a slash.
           // todo later: parameterize TLD list
-          let stopWords = ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'];
-          let partialStopRegex = /learn|to|more|now|this|page|link|site|website|check|out|view|our|read|\.|,|:|download|form|here|click|>|<|\s/g;
+          let linksUrls = Ed11y.options.linksUrls ? Ed11y.options.linksUrls : Ed11y.M.linksUrls;
+          let linksMeaningless = Ed11y.options.linksMeaningless ? Ed11y.options.linksMeaningless : Ed11y.M.linksMeaningless;
           let hit = 'none';
 
-          if (textContent.replace(partialStopRegex, '').length === 0) {
+          if (textContent.replace(linksMeaningless, '').length === 0) {
             // If no partial words were found, then check for total words.
             hit = 'generic';
           }
           else {
-            for (let i = 0; i < stopWords.length; i++) {
-              if (textContent.indexOf(stopWords[i]) > -1) {
+            for (let i = 0; i < linksUrls.length; i++) {
+              if (textContent.indexOf(linksUrls[i]) > -1) {
                 hit = 'url';
                 break;
               }
