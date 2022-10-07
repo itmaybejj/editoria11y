@@ -58,7 +58,7 @@ class Ed11y {
       hiddenHandlers : '',
 
       // Interface
-      lang: 'en', // Can become deprecated ??
+      lang: 'en', 
       theme: 'lightTheme',
       darkTheme: {
         bg: '#0a2051',

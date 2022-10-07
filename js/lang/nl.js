@@ -22,7 +22,7 @@ ed11yLang['nl'] = {
   buttonNextContent: 'Volgende',
   buttonShowHiddenAlertsContent: 'Toon verborgen waarschuwingen',
   panelCheckOutline: '<p>Controleer of dit <a href=\'https://accessibility.princeton.edu/how/content/headings\'>een volledig overzicht</a> vormt:</p>',
-  panelCheckAltText: '<p>Controleer <a href=\'https://accessibility.princeton.edu/how/content/alternative-text\'>alt-tekst</a>, <a href=\'https://accessibility.princeton. edu/how/content/images-text\'>afbeeldingen van tekst</a>, &amp; <a href=\'https://webaim.org/techniques/captions/\'>captions</a>.</p>',
+  panelCheckAltText: '<p>Controleer <a href=\'https://accessibility.princeton.edu/how/content/alternative-text\'>alt-tekst</a>, <a href=\'https://accessibility.princeton.edu/how/content/images-text\'>afbeeldingen van tekst</a>, &amp; <a href=\'https://webaim.org/techniques/captions/\'>captions</a>.</p>',
   panelHelp : `
     <p>Ondersteunende technologieën en crawlers van zoekmachines werken het beste met goed gestructureerde inhoud. <a href='https://itmaybejj.github.io/editoria11y/demo/'>Editoria11y</a> controleert op algemene behoeften, zoals als beschrijvende alternatieve tekst voor afbeeldingen, betekenisvolle kopcontouren en goed benoemde links.</p>
     <p>Merk op dat het <strong>alleen</strong> de redactionele inhoud controleert; er zijn verschillende tools en technieken nodig <a href='https://webaim.org/resources/evalquickref/'>het ontwerp en de code testen </a>.<p>
@@ -43,7 +43,7 @@ ed11yLang['nl'] = {
 
   // Strings used in tests ==============================
 
-  suspiciousWords: ['afbeelding van','tekening van','foto van','plaatshouder','foto van'],
+  suspiciousWords: ['afbeelding van','beeld van','tekening van','foto van','plaatshouder','foto van'],
   linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/', '.nl/'],
   linksMeaningless: /leer|meer|klik|hier|op|deze|link|nu|this|bladzijde|webpagina|website|bekijk|\.|,|:|downloaden|het|formulier|webformulier|>|<|\s/g,
   
@@ -100,211 +100,216 @@ ed11yLang['nl'] = {
   headingIsLong : {
     title: 'Handmatige controle: lange hoofding',
     tip: () =>
-      `<p>Headings should be brief and clear. Assistive devices use them to create a navigable table of contents for the page. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>  
-          ${Ed11y.M.headingExample}
-          <p><strong>To fix:</strong> shorten this heading if possible, or remove the heading style if it was only applied to this text to provide visual emphasis.</p>
-          `,
+      `<p>Hoofdings moeten kort en duidelijk zijn. Hulpmiddelen gebruiken ze om een navigeerbare inhoudsopgave voor de pagina te maken. Het <strong><em>nummer</em></strong> van de hoofding geeft de <strong><em >diepte</em></strong> in het paginaoverzicht; bijv.:</p>
+      ${Ed11y.M.headingExample}
+      <p><strong>Oplossen:</strong> verkort deze hoofding indien mogelijk, of verwijder de hoofdingstijl als deze alleen op deze tekst werd toegepast om visuele nadruk te leggen.</p>
+      `,
   },
           
   blockquoteIsShort : {
-    title: 'Manual check: is this a blockquote?',
+    title: 'Handmatige controle: is dit een blockquote?',
     tip: () =>
-      '<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. This was flagged because short blockquotes are sometimes actually headings. If this is a heading and not a quotation, please use heading formatting instead, so this appears in the page outline.</p>',
+      '<p>Opmaak van blokcitaten vertelt schermlezers dat de tekst moet worden aangekondigd als een citaat. Dit werd gemarkeerd omdat korte blokcitaten soms koppen zijn. Als dit een kop is en geen aanhalingsteken, gebruik dan kopopmaak, zodat dit verschijnt in het paginaoverzicht.</p>'
   },
 
   // Tooltips for image tests =========================
 
   altAttributeExample : 
-          `<p>Note that a good alt conveys what an image <strong>communicates</strong>, not what it <strong>contains</strong>. A picture of a child kicking a ball might have been selected because of the setting, the child, the kick or the ball:</p>
+          `<p>Houd er rekening mee dat een goede alt weergeeft wat een afbeelding <strong>communiceert</strong>, niet wat het <strong>bevat</strong>. Een foto van een kind dat tegen een bal trapt, is mogelijk geselecteerd vanwege de instelling , het kind, de trap of de bal:</p>
           <ul>
-              <li>Child happily kicking a ball on a summer day</li>
-              <li>A.J. playing in the new team uniform</li>
-              <li>A.J.'s game-winning kick curved in from the left sideline!</li>
-              <li>The "medium" ball is the right size for this 9-year-old child</li>
+              <li>Kind schopt vrolijk tegen een bal op een zomerse dag</li>
+              <li>A.J. speelt in het nieuwe teamuniform</li>
+              <li>A.J.'s spel-winnende trap kwam binnen vanaf de linkerzijlijn!</li>
+              <li>De bal "medium" heeft de juiste maat voor dit 9-jarige kind</li>
           </ul>`,
       
   altAttributeProvided: (alt) => 
-    `<p>This image's alt text is: "<strong>${alt}</strong>"</p>`,
+    `<p>De alternatieve tekst van deze afbeelding is: <strong>${alt}</strong></p>`,
 
   altMissing : {
-    title: 'Image has no alternative text attribute',
+    title: 'Afbeelding heeft geen alternatief tekstkenmerk',
     tip: () =>
-      `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.
-          To fix: either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>
+      `<p>Als schermlezers een afbeelding tegenkomen zonder alt-attribuut, dicteren ze in plaats daarvan de url van het afbeeldingsbestand, vaak letter voor letter. Om dit op te lossen: voeg ofwel een lege alt toe (alt="") om aan te geven dat deze afbeelding door schermlezers moet worden genegeerd, of voeg beschrijvende alternatieve tekst toe.</p>
           ${Ed11y.M.altAttributeExample}`,
   },
 
   altNull : {
-    title: 'Manual check: image has no alt text',
+    title: 'Handmatige controle: afbeelding heeft geen alt-tekst',
     tip: () =>
-      `<p>Screen readers assume images with empty alt text are only for decoration (spacers and backgrounds), and do not mention they exist. If this image is meaningful, an alt should be provided.</p>
+      `<p>Schermlezers gaan ervan uit dat afbeeldingen met lege alt-tekst alleen voor decoratie zijn (spacers en achtergronden), en vermelden niet dat ze bestaan. Als deze afbeelding zinvol is, moet een alt worden opgegeven.</p>
           ${Ed11y.M.altAttributeExample}`,
   },
 
   altURL : {
-    title: 'Image\'s text alternative is a URL',
+    title: 'Het tekstalternatief van de afbeelding is een URL',
     tip: (alt) =>
-      `<p>Please set this image's alternative text to a concise description of what this image means in this context.</p>
+      `<p>Stel de alternatieve tekst van deze afbeelding in op een beknopte beschrijving van wat deze afbeelding in deze context betekent.</p>
           ${Ed11y.M.altAttributeExample}
           ${Ed11y.M.altAttributeProvided(alt)}`
     ,
   },
 
   altURLLinked : {
-    title: 'Linked image\'s text alternative is a URL',
+    title: 'Het tekstalternatief van de gekoppelde afbeelding is een URL',
     tip: (alt) =>
-      `<p>When a link includes an image, the image's alt text becomes part of the link text announced by screen readers.
-          Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
-          <ul>
-              <li>Good link text: "About us"</li>
-              <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess</li>
-          </ul>
-          ${Ed11y.M.altAttributeProvided(alt)}`,
+      `<p>Schermlezers <strong>kondigen aan</strong> dat ze een afbeelding beschrijven bij het lezen van alternatieve tekst, dus zinnen als "afbeelding van" en "foto van" zijn meestal overbodig en klinken als "deze afbeelding is alt is de alt van een afbeelding.</p>
+        <p>Merk op dat de zin soms niet overbodig is en moet worden bewaard, omdat de afbeelding een afbeelding van een afbeelding is:</p>
+        <ul>
+        <li>Overbodig: "beeld van een cassettebandje"</li>
+        <li>Relevant: "beeld van een cassettebandje die wordt getoond in de geschiedenisles"</li>
+        </ul>
+        ${Ed11y.M.altAttributeProvided(alt)}`,
   },
 
   altImageOf : {
-    title: 'Manual check: possibly redundant text in alt',
+    title: 'Handmatige controle: mogelijk overbodige tekst in gekoppelde afbeelding',
     tip: (alt) =>
-      `<p>Screen readers <strong>announce</strong> they are describing an image when reading alt text, so 
-          phrases like "image of" and "photo of" are usually redundant, sounding like "this image's alt is the alt of an image."</p>
-          <p>Note the sometimes the phrase is not redundant and should be kept, because the image is an image of an image:</p>
-          <ul><li>Redundant: "image of a VHS tape"</li>
-          <li>Relevant: "image of a VHS tape being shown in history class"</li></ul>
+      `<p>Schermlezers <strong>kondigen aan</strong> dat ze een afbeelding beschrijven bij het lezen van alternatieve tekst, dus zinnen als "afbeelding van" en "foto van" zijn meestal overbodig en klinken als "deze afbeelding is alt is de alt van een afbeelding."</p>
+      <p>Merk op dat de zin soms niet overbodig is en moet worden bewaard, omdat de afbeelding een afbeelding van een afbeelding is:</p>
+      <ul>
+       <li>Overbodig: "beeld van een cassettebandje"</li>
+       <li>Relevant: "beeld van een cassettebandje die wordt getoond in de geschiedenisles"</li>
+      </ul>
           ${Ed11y.M.altAttributeProvided(alt)}`
   },
   altImageOfLinked : {
-    title: 'Manual check: possibly redundant text in linked image',
+    title: 'Handmatige controle: mogelijk overbodige tekst in gekoppelde afbeelding',
     tip: (alt) =>
-      `<p>Links should clearly and concisely describe their destination. Since words like "image," "graphic" or "photo" are redundant in text alternatives (screen readers already identify the image as an image), they often indicate that the image's text alternative is describing the image instead of the link.</p>
-          <ul>
-              <li>Good link text: "About us"</li>
-              <li>Bad link text: "Stock photo of five people jumping and high fiving around a conference table, image"</li>
-          </ul>
-          <hr>
+      `<p>Links moeten hun bestemming duidelijk en beknopt beschrijven. Aangezien woorden als "afbeelding", "afbeelding" of "foto" overbodig zijn in tekstalternatieven (schermlezers identificeren de afbeelding al als een afbeelding), ze geven vaak aan dat het tekstalternatief van de afbeelding de afbeelding beschrijft in plaats van de link.</p>
+      <ul>
+       <li>Goede linktekst: "Over ons"</li>
+       <li>Slechte linktekst: "Stockfoto van vijf mensen die springen en high fiven rond een vergadertafel, afbeelding"</li>
+      </ul>
+      <hr>
           ${Ed11y.M.altAttributeProvided(alt)}`
   },
 
   altDeadspace : {
-    title: 'Image\'s text alternative is unpronouncable',
+    title: 'Het tekstalternatief van de afbeelding is onuitspreekbaar',
     tip: (alt) =>
-      `<p>This image's alt only contains characters which are not spoken by screen readers. The presence of an image will be announced, but its description of will be unintelligible.</p>
-      <p>To fix: add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") to tell screen readers to ignore this image.</p>
+      `<p>De alt van deze afbeelding bevat alleen tekens die niet door schermlezers worden uitgesproken. De aanwezigheid van een afbeelding wordt aangekondigd, maar de beschrijving ervan is onbegrijpelijk.</p>
+      <p>Oplossen: voeg een beschrijvende alt toe of geef een <em>volledig</em> lege alt (alt="") om schermlezers te vertellen deze afbeelding te negeren.</p>      
           ${Ed11y.M.altAttributeExample}
           ${Ed11y.M.altAttributeProvided(alt)}`,
   },
 
   altDeadspaceLinked : {
-    title: 'Linked Image\'s text alternative is unpronouncable',
+    title: 'Het tekstalternatief van de gekoppelde afbeelding is onuitspreekbaar',
     tip: (alt) =>
-      `<p>This image's alt consists of only silent characters (spaces and quotation marks). It will be announced by screen readers as as part of the link's text, but the description of what the image is will be unintelligible. Please set this image's alternative text to something that describes the link's destination, or provide a <em>completely</em> empty alt (alt="") if the image should not be mentioned at all.</p>
-          <ul>
-              <li>Good link text: "About us"</li>
-              <li>Bad link text: "About us, image: [short confusing silence]"</li>
-          </ul>
-          ${Ed11y.M.altAttributeProvided(alt)}`,
+      `<p>De alt van deze afbeelding bestaat alleen uit stille tekens (spaties en aanhalingstekens). Het wordt door schermlezers aangekondigd als onderdeel van de tekst van de link, maar de beschrijving van wat de afbeelding is, is onbegrijpelijk. alternatieve tekst voor iets dat de bestemming van de link beschrijft, of geef een <em>volledig</em> lege alt (alt="") als de afbeelding helemaal niet mag worden vermeld.</p>
+        <ul>
+        <li>Goede linktekst: "Over ons"</li>
+        <li>Slechte linktekst: "Over ons, afbeelding: [korte verwarrende stilte]"</li>
+        </ul>
+        ${Ed11y.M.altAttributeProvided(alt)}`,
   },
 
   altEmptyLinked : {
-    title: 'Linked Image has no alt text',
+    title: 'Gelinkte afbeelding heeft geen alt-tekst',
     tip: () =>
-      `<p>When a link is wrapped around an image, the image's alt text provides the link's title for screen readers</p>
-      <p>Please set this image's alternative text to something that describes the link's destination, or add text to the link.</p>
-          <ul>
-              <li>Good linked alt: "Meaningful link tips"</li>
-              <li>Bad linked alt: "Three happy dogs rolling in the grass"</li>
-          </ul>
+      `<p>Als een link om een afbeelding wordt gewikkeld, geeft de alt-tekst van de afbeelding de titel van de link voor schermlezers</p>
+      <p>Stel de alternatieve tekst van deze afbeelding in op iets dat de bestemming van de link beschrijft, of voeg tekst toe aan de link.</p>
+      <ul>
+       <li>Goede gelinkte alt: "Betekenisvolle linktips"</li>
+       <li>Slechte gekoppelde alt: "Drie gelukkige honden rollen in het gras"</li>
+      </ul>
           `,
   },
 
   altLong : {
-    title: 'Manual check: very long alternative text',
+    title: 'Handmatige controle: zeer lange alternatieve tekst',
     tip: (alt) =>
-      `<p>Image text alternatives are announced by screen readers as a single run-on sentence; listeners must listen to the entire alt a second time if they miss something. It is usually better to provide and reference a <em>visible</em> text alternative for complex images that need long descriptions. For example:</p>
-          <ul><li>"Event poster; details provided in caption"</li>
-          <li>"Chart showing our issues going to zero; details follow in table"</li></ul>
+      `<p>Alternatieven voor afbeeldingstekst worden door schermlezers aangekondigd als een enkele vervolgzin; luisteraars moeten de hele alt een tweede keer beluisteren als ze iets missen. Het is meestal beter om een <em>zichtbare</em> te geven en ernaar te verwijzen em> tekstalternatief voor complexe afbeeldingen die lange beschrijvingen nodig hebben. Bijvoorbeeld:</p>
+      <ul>
+       <li>"Evenement poster; details in bijschrift"</li>
+       <li>"Grafiek waarin onze problemen naar nul gaan; details volgen in tabel"</li>
+      </ul>
           ${Ed11y.M.altAttributeProvided(alt)}
           `,
   },
 
   altLongLinked : {
-    title: 'Manual check: very long alternative text in linked image',
+    title: 'Handmatige controle: zeer lange alternatieve tekst in gekoppelde afbeelding',
     tip: (alt) =>
-      `<p>The alt text on a linked image is used to describe the link destination. Links should be brief, clear and concise, as screen reader users often listen to the list of links on the page to find content of interest. Long alternative text inside a link often indicates that the image's text alternative is describing the image instead rather than the link.</p>
+      `<p>De alt-tekst op een gekoppelde afbeelding wordt gebruikt om de bestemming van de link te beschrijven. Links moeten kort, duidelijk en beknopt zijn, aangezien gebruikers van schermlezers vaak naar de lijst met links op de pagina luisteren om interessante inhoud te vinden. Lang alternatief tekst in een link geeft vaak aan dat het tekstalternatief van de afbeelding de afbeelding beschrijft in plaats van de link.</p>
           ${Ed11y.M.altAttributeProvided(alt)}
           `,
   },
 
   altPartOfLinkWithText : {
-    title: 'Manual check: link contains both text and an image',
+    title: 'Handmatige controle: link bevat zowel tekst als een afbeelding',
     tip: (alt) => 
-      `<p>When a link includes an image, screen readers speak the the image's alt text as part of the link.
-          This can be confusing if the image's alt describes the image rather than the link.</p>
-          <p>E.g., for a card-style link with both text and a stock photo, compare:</p>
-          <ul>
-              <li>"Link, five people jumping and high fiving around a conference table, image, about us"</li>
-              <li>"Link, about us"</li>
-          </ul>
+      `<p>Als een link een afbeelding bevat, spreken schermlezers de alt-tekst van de afbeelding uit als onderdeel van de link. Dit kan verwarrend zijn als de alt van de afbeelding de afbeelding beschrijft in plaats van de link.</p>
+      <p>Voor een link in kaartstijl met zowel tekst als een stockfoto, vergelijk:</p>
+      <ul>
+       <li>"Link, vijf mensen springen en high fiven rond een vergadertafel, afbeelding, over ons"</li>
+       <li>"Link, over ons"</li>
+      </ul>
           ${Ed11y.M.altAttributeProvided(alt)}
-          <p>If this link is clearer without this alt, it may be better to use a blank alt, to tell screen readers to ignore the image.</p>
+          <p>Als deze link duidelijker is zonder deze alt, is het misschien beter om een lege alt te gebruiken om schermlezers te vertellen de afbeelding te negeren.</p>
           `,
   },
 
   linkNoText : {
-    title: 'Link with no accessible text',
+    title: 'Link zonder toegankelijke tekst',
     tip: () =>
-      `<p>This link is either invisible and empty (e.g., a linked space character), or wrapped around something with no text alternative (an image with no alt attribute).</p>
-          <p>Screen readers will either pause with an uninformative silence when they reach this link: <br>"Link, [...awkward pause where the link title should be...],"<br>or spell out the URL, character by character: <br>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</p>
-          <p>To fix: add text if this should be a link, or delete it if it should not.</p>`,
+      `<p>Deze link is ofwel onzichtbaar en leeg (bijvoorbeeld een gekoppeld spatieteken), of is om iets heen gewikkeld zonder tekstalternatief (een afbeelding zonder alt-attribuut).</p>
+      <p>Schermlezers pauzeren met een nietszeggende stilte wanneer ze deze link bereiken: <br>"Link, [...onhandige pauze waar de titel van de link zou moeten staan...],"<br>of spellen uit de URL, teken voor teken: <br>"Link, H-T-T-P-S forward-slash forward-slash voorbeeld punt com"</p>
+      <p>Oplossen: voeg tekst toe als dit een link zou moeten zijn, of verwijder deze als dit niet het geval is.</p>
+      `,
   },
 
   linkTextIsURL : {
-    title: 'Manual check: is this link text a URL?',
+    title: 'Handmatige controle: is deze linktekst een URL?',
     tip: (text) => 
-      `<p>Links should be meaningful and concise. Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
-        <p>A linked URL breaks this pattern; the reader has to read the preceding paragraph to figure out the link's purpose from context.</p>
-          <ul>
-              <li>Meaningful and concise link: "Tips for writing meaningful links"</li>
-              <li>Linked URL, as pronounced by a screen reader: "H T T P S colon forward-slash forward-slash example dot com forward-slash tips forward-slash meaningful-links"</li>
-          </ul>
-              <p>This link's text is:<br> <strong>${text}</strong></p>
+      `<p>Links moeten zinvol en beknopt zijn. Lezers bladeren vaak door titels van links. Dit geldt met name voor gebruikers van schermlezers, die navigeren met behulp van een lijst met links op de pagina.</p>\
+        <p>Een gekoppelde URL doorbreekt dit patroon; de lezer moet de voorgaande alinea lezen om het doel van de link uit de context te achterhalen.</p>
+        <ul>
+          <li>Betekenisvolle en beknopte link: "Tips voor het schrijven van zinvolle links"</li>
+          <li>Gelinkte URL, zoals uitgesproken door een schermlezer: "H T T P S dubbele punt forward-slash forward-slash voorbeeld dot com forward-slash tips forward-slash zinvolle-links"</li>
+        </ul>
+        <p>De tekst van deze link is:<br>  <strong>${text}</strong></p>
               `,
   },
 
   linkTextIsGeneric : {
-    title: 'Manual check: is this link meaningful and concise?',
+    title: 'Handmatige controle: is deze link zinvol en beknopt?',
     tip: (text) => 
-      `<p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
-              <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully, such that they figure out each link's purpose from context for themselves. Few readers do this, so click-through rates on meaningless links are extremely poor.</p>
-              <ul><li>Not meaningful: "To learn more about meaningful links, <a href="https://www.google.com/search?q=writing+meaningful+links">click here</a>.</li>
-              <li>Not concise: "<a href="https://www.google.com/search?q=writing+meaningful+links">Click here to learn more about meaningful links</a>"</li>
-              <li>Ideal: "Learn about <a href="https://www.google.com/search?q=writing+meaningful+links">meaningful links"</a></strong></li></ul>
-              <p>This link's text is: <strong>${text}</strong></p>`
+      `<p>Lezers zoeken snel naar links. Dit geldt met name voor gebruikers van schermlezers, die navigeren met behulp van een lijst met links op de pagina.</p>
+      <p>Algemene links zoals "klik hier," "lees meer" of "download" verwachten dat de lezer langzaam en zorgvuldig leest, zodat ze het doel van elke link uit de context voor zichzelf kunnen achterhalen. doe dit, zodat de klikfrequenties op nietszeggende links extreem laag zijn.</p>
+      <ul>
+       <li>Niet zinvol: "Voor meer informatie over zinvolle links, <a href='https://www.google.com/search?q=zinvolle+links+schrijven'>klik hier</a>".</li>
+       <li>Niet beknopt: "<a href='https://www.google.com/search?q=zinvolle+links+schrijven'>Klik hier voor meer informatie over zinvolle links</a>"</li>
+       <li>Ideaal: "Meer informatie over <a href='https://www.google.com/search?q=zinvolle+links+schrijven'>betekenisvolle links</a>"</li>
+      </ul>
+      <p>De tekst van deze link is:<br><strong>${text}</strong></p>`
     ,
   },
 
   linkDocument : {
-    title : 'Manual check: is the linked document accessible?',
+    title : 'Handmatige controle: is het gekoppelde document toegankelijk?',
     tip: () => 
-      `<p>This automated checker helps ensure <strong><em>websites</em></strong> contain the features needed for accessible content, things like heading structure and text alternatives for images and audio. <strong>It is not able to help you check the documents you link.</strong></p>
-              <p>Most mobile and assistive device users prefer to read text on Web pages, where content reflows to fit the screen. If the document linked here cannot be converted to a Web page, please manually check its structure (headings, lists, table headers) and image alt text.</p>
-              <ul>
-                  <li>Tips for <a href='https://webaim.org/techniques/word/'>MS Word</a> &amp; <a href="https://support.google.com/docs/answer/6199477?hl=en&ref_topic=6039805">Google Docs</a></li>
-                  <li><a href='https://webaim.org/techniques/powerpoint/'>Slideshows</a> &amp; <a href='https://support.microsoft.com/en-us/office/make-your-excel-documents-accessible-to-people-with-disabilities-6cc05fc5-1314-48b5-8eb3-683e49b3e593'>Spreadsheets</a>
-                  <li><a href='https://webaim.org/techniques/acrobat/'>Documents formatted for print instead of screens (PDF)</a></li>
-              </ul>`
+      `<p>Deze geautomatiseerde controle zorgt ervoor dat <strong><em>websites</em></strong> de functies bevatten die nodig zijn voor toegankelijke inhoud, zaken als kopstructuur en tekstalternatieven voor afbeeldingen en audio. <strong>Het is niet in staat om u te helpen bij het controleren van de documenten die u linkt.</strong></p>
+      <p>De meeste gebruikers van mobiele apparaten en ondersteunende apparaten lezen liever tekst op webpagina's, waar de inhoud opnieuw wordt weergegeven om op het scherm te passen. Als het hier gelinkte document niet kan worden geconverteerd naar een webpagina, controleer dan handmatig de structuur (koppen, lijsten, tabel headers) en afbeelding alt-tekst.</p>
+      <ul>
+       <li>Tips voor <a href='https://webaim.org/techniques/word/'>MS Word</a> en <a href='https://support.google.com/docs/answer/6199477?hl=nl&ref_topic=6039805'>Google Documenten</a></li>
+       <li><a href='https://webaim.org/techniques/powerpoint/'>Diavoorstellingen</a> & <a href='https://support.microsoft.com/nl-nl/office/uw-excel-documenten-toegankelijk-maken-voor-personen-met-een-handicap-6cc05fc5-1314-48b5-8eb3-683e49b3e593'>Spreadsheets</a>
+       <li><a href='https://webaim.org/techniques/acrobat/'>Documenten die zijn opgemaakt voor print in plaats van schermen (PDF)</a></li>
+      </ul>`
     ,
   },
 
   linkNewWindow : {
-    title: 'Manual check: is opening a new window expected?',
+    title: 'Handmatige controle: wordt een nieuw venster verwacht?',
     tip: () => 
-      `<p>Readers can always choose to open a link a new window. When a link forces open a new window, it can be confusing and annoying, especially for assistive device users who may wonder why their browser's "back" button is suddenly disabled.</p>
-              <p>There are two general exceptions:</p>
-              <ul>
-                  <li>When the user is filling out a form, and opening a link in the same window would cause them to lose their work.</li>
-                  <li>When the user is clearly warned a link will open a new window.</li>
-              </ul>
-              <p>To fix: set this link back its default target, or add a screen-reader accessible warning (text or an icon with alt text).</p>
+      `<p>Lezers kunnen er altijd voor kiezen om een link in een nieuw venster te openen. Wanneer een link een nieuw venster forceert, 
+      kan dit verwarrend en vervelend zijn, vooral voor gebruikers van hulpmiddelen die zich afvragen waarom de "terug" knop van hun browser is plotseling uitgeschakeld.</p>
+      <p>Er zijn twee algemene uitzonderingen:</p>
+      <ul>
+       <li>Als de gebruiker een formulier invult en een link in hetzelfde venster opent, zou hij zijn werk kwijtraken.</li>
+       <li>Als de gebruiker duidelijk wordt gewaarschuwd, wordt er een link geopend in een nieuw venster.</li>
+      </ul>
+      <p>Oplossen: zet deze link terug op zijn standaarddoel, of voeg een waarschuwing toe die toegankelijk is voor de schermlezer (tekst of een pictogram met alternatieve tekst).</p>      
               `
     ,
   },
@@ -312,98 +317,104 @@ ed11yLang['nl'] = {
   // Tooltips for Text QA ===============================
 
   tableNoHeaderCells : {
-    title: 'Table has no header cells',
+    title: 'Tabel heeft geen koptekstcellen',
     tip: () => `
-              <p>Tables are announced by screen readers as navigable data sets. Screen readers repeat row and column headers as needed to orient users while reading content cells.</p>
-              <p>To fix:</p>
-              <ul><li>If this table contains information that is meaningfully organized by row and column, edit the table's properties and specify whether the headers are in the first row, column or both.</li>
-              <li>If this table does not contain rows and columns of data, but is simply being used for visual layout, it would be best to remove it. Tables overflow the page rather than reflowing the text to fit on mobile devices, and should only be used when horizontal relationships are necessary to understand the content.</li></ul>
+    <p>Tabellen worden door schermlezers aangekondigd als navigeerbare gegevenssets. Schermlezers herhalen rij- en kolomkoppen indien nodig om gebruikers te oriënteren tijdens het lezen van inhoudscellen.</p>
+    <p>Oplossen:</p>
+    <ul>
+     <li>Als deze tabel informatie bevat die zinvol is geordend op rij en kolom, bewerk dan de eigenschappen van de tabel en geef aan of de koppen in de eerste rij, kolom of beide staan.</li>
+     <li>Als deze tabel geen rijen en kolommen met gegevens bevat, maar alleen wordt gebruikt voor visuele lay-out, kunt u deze het beste verwijderen. Tabellen overlopen de pagina in plaats van de tekst opnieuw te laten plaatsen op mobiele apparaten, en moeten alleen worden gebruikt wanneer horizontale relaties nodig zijn om de inhoud te begrijpen.</li>
+    </ul>
           `,
   },
 
   tableContainsContentHeading : {
-    title: 'Content heading inside a table',
+    title: 'Contentkop in een tabel',
     tip: () => 
-      `<p>Content headings ("Heading 1", "Heading 2") form a navigable table of contents for screen reader users,  
-      labelling all content <strong>until the next heading</strong>. Table headers label specific columns or rows within a table.</p> 
-          <p></p>
-          <table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">To illustrate: a <strong>table</strong> header in cell 2 would only label its column: cell B. <br><br>
-          A <strong>content</strong> heading in cell 2 would label all subsequent text, reading from left to right: cells 3, A, B and C, as well as this text!</td></tr>
-          <tr><td>A</td><td>B</td><td>C</td></table>
-          <p>To fix: remove heading formatting on text inside table cells.</p>
+      `<p>Inhoudskoppen ("Kop 1", "Kop 2") vormen een navigeerbare inhoudsopgave voor gebruikers van schermlezers, waarin alle inhoud <strong>tot de volgende kop</strong> wordt gelabeld. specifieke kolommen of rijen binnen een tabel.</p>
+      <p></p>
+      <table>
+       <tr><th>1</th><th>2</th><th>3</th><td rowspan="2">Ter illustratie: een <strong>tabel</strong> koptekst in cel 2 zou alleen de kolom labelen: cel B. <br> <br> Een <strong>inhoud</strong> kop in cel 2 zou alle volgende tekst labelen, lezend van links naar rechts: cellen 3, A, B en C, evenals deze tekst!</td></tr>
+       <tr><td>A</td><td>B</td><td>C</td></tr>
+      </table>
+      <p>Oplossing: verwijder kopopmaak in tekst in tabelcellen.</p>
           `
   },
 
   tableEmptyHeaderCell : {
-    title: 'Empty table header cell',
+    title: 'Lege tabelkopcel',
     tip: () => `
-              <p>When exploring tables, screen readers repeat table header cells as needed to orient users. 
-              Without headers, it is very easy to get lost; screen reader users have to count columns and rows and try to remember which columns went with which rows.</p>
-              <p>To fix: make sure each header cell in this table contains text.</p>
+      <p>Bij het verkennen van tabellen herhalen schermlezers de cellen van de tabelkopteksten om gebruikers te oriënteren. Zonder kopteksten is het heel gemakkelijk om te verdwalen; gebruikers van schermlezers moeten kolommen en rijen tellen en proberen te onthouden welke kolommen bij welke horen rijen.</p>
           `,
   },
 
   textPossibleList : {
-    title: 'Manual check: should this have list formatting?',
+    title: 'Handmatige controle: moet deze lijstindeling hebben?',
     tip : (text) => 
-      `<p>List formatting is structural:</p> 
-          <ol><li>List formatting indents and reflows on overflow. Text aligns vertically with text, rather than the "${text}"</li>
-          <li>Lists are machine-readable. Screen readers can orient their users, announcing this as "list item, 2 of 2."</li></ol>
-          <p>3. Whereas this unformatted item (just a number, typed as text) is not visually or audibly included in the list.</p>
-          <p>To fix: if this "${text}" starts a list, replace it with list formatting.</p>
+      `<p>Lijstopmaak is structureel:</p>
+      <ol>
+       <li>Lijst opmaak inspringingen en opnieuw plaatsen bij overloop. Tekst wordt verticaal uitgelijnd met tekst, in plaats van de "${text}"</li>
+       <li>Lijsten zijn machineleesbaar. Schermlezers kunnen hun gebruikers oriënteren en dit aankondigen als "lijstitem, 2 van 2."</li>
+      </ol>
+      <p>3. Terwijl dit niet-opgemaakte item (alleen een getal, getypt als tekst) niet visueel of hoorbaar in de lijst is opgenomen.</p>
+      <p>Oplossen: als deze "${text}" een lijst start, vervang deze dan door lijstopmaak.</p>
           `,
   },
 
   textPossibleHeading : {
-    title: 'Manual check: should this be a heading?',
+    title: 'Handmatige controle: moet dit een kop zijn?',
     tip : () => 
-      `<p>Headings and subheadings create a navigable table of contents for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
-          ${Ed11y.M.headingExample}
-          <p>If this all-bold text is functioning visually as a heading, please replace the bold formatting with the appropriately numbered heading.</p>
-          `,
+      `<p>Koppen en subkoppen creëren een navigeerbare inhoudsopgave voor hulpmiddelen. Het <strong><em>nummer</em></strong> van de kop geeft de <strong> ><em>diepte</em></strong> in het paginaoverzicht; bijv.:</p>
+      ${Ed11y.M.headingExample}
+      <p>Als deze vetgedrukte tekst visueel als kop fungeert, vervang dan de vetgedrukte opmaak door de correct genummerde kop.</p>
+      `,
   },
 
   textUppercase : {
-    title: 'Manual check: is this uppercase text needed?',
+    title: 'Handmatige controle: is deze tekst in hoofdletters nodig?',
     tip : () => 
-      `<p>UPPERCASE TEXT CAN BE MORE DIFFICULT TO READ FOR MANY PEOPLE, AND IS OFTEN INTERPRETED AS SHOUTING.</p>
-        <p>Consider using sentence case instead, and using bold text or font changes for visual emphasis, or structural formatting like headings for emphasis that will also be announced by screen readers.</p>`,
+      `<p>TEKST IN HOOFDLETTERS KAN VOOR VEEL MENSEN MOEILIJKER TE LEZEN ZIJN, EN WORDT VAAK INTERPRETEERD ALS SCHREEUWEN.</p>
+      <p>Overweeg om in plaats daarvan hoofdletters te gebruiken en vetgedrukte tekst of lettertypewijzigingen te gebruiken voor visuele nadruk, of structurele opmaak zoals koppen voor nadruk die ook worden aangekondigd door schermlezers.</p>
+      `,
   },
 
   embedVideo : {
-    title: 'Manual check: is this video accurately captioned?',
+    title: 'Handmatige controle: is deze tekst in hoofdletters nodig?',
     tip : () => 
-      `<p>If a recorded video contains speech or meaningful sounds, it must provide captioning.</p>
-          <p>Note that automatic, machine-generated captions must be proofread, and speaker identifications must be added, before being considered an equal alternative.</p>`,
+      `<p>Als een opgenomen video spraak of betekenisvolle geluiden bevat, moet deze voorzien zijn van ondertiteling.</p>
+      <p>Houd er rekening mee dat automatische, machinaal gegenereerde bijschriften moeten worden nagelezen en sprekeridentificaties moeten worden toegevoegd voordat ze als een gelijkwaardig alternatief worden beschouwd.</p>
+      `,
   },
 
   embedAudio : {
-    title: 'Manual check: is an accurate transcript provided?',
+    title: 'Handmatige controle: is er een nauwkeurige transcriptie voorzien?',
     tip : () => 
-      `<p>If this audio contains speech, a text alternative must be provided on this page or linked.</p>
-          <p>Note that automatic, machine-generated transcripts must be proofread, and speaker identifications must be added, before being considered an equal alternative</p>`,
+      `<p>Als deze audio spraak bevat, moet op deze pagina een tekstalternatief worden verstrekt of moet worden gelinkt.</p>
+      <p>Houd er rekening mee dat automatische, machinaal gegenereerde transcripties moeten worden nagelezen en sprekersidentificaties moeten worden toegevoegd voordat ze als een gelijkwaardig alternatief worden beschouwd</p>
+      `,
   },
 
   embedVisualization : {
-    title: 'Manual check: is this visualization accessible?',
+    title: 'Handmatige controle: is deze visualisatie toegankelijk?',
     tip : () => 
-      `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
-          <p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
+      `<p>Visualisatie-widgets zijn vaak moeilijk of onmogelijk te bedienen voor hulpmiddelen en kunnen moeilijk te begrijpen zijn voor lezers met slechtziendheid of kleurenblindheid.</p>
+        <p>Tenzij deze specifieke widget een hoog visueel contrast heeft, kan worden bediend met een toetsenbord en kan worden beschreven door een schermlezer, moet u ervan uitgaan dat er ook een alternatief formaat (tekstbeschrijving, gegevenstabel of downloadbare spreadsheet) moet worden verstrekt.</p> 
+      `,
   },
 
   embedTwitter : {
     title: 'Manual check: is this embed a keyboard trap?',
     tip : () => 
-      `<p>If embedded feeds are set to show a high number of items, keyboard users may have to click the tab key dozens or hundreds of times to exit the component.</p>
-          <p>Check to make sure only a small number of items auto-load immediately or while scrolling. Having additional items load on request ("show more") is fine.</p>`,
+      `<p>Als ingesloten feeds zijn ingesteld om een groot aantal items weer te geven, moeten toetsenbordgebruikers mogelijk tientallen of honderden keren op de tab-toets klikken om het onderdeel te verlaten.</p>
+        <p>Controleer of slechts een klein aantal items onmiddellijk of tijdens het scrollen automatisch wordt geladen. Extra items op verzoek laden ("meer weergeven") is prima.</p>
+      `,
   },
 
   embedCustom : {
-    title: 'Manual check: is this embedded content accessible?',
+    title: 'Handmatige controle: is deze ingesloten inhoud toegankelijk?',
     tip : () => 
-      '<p>Please make sure images inside this embed have alt text, videos have captions, and interactive components can be <a href=\'https://webaim.org/techniques/keyboard/\'>operated by a keyboard</a>.</p>',
+      '<p>Zorg ervoor dat afbeeldingen in deze insluiting alt-tekst hebben, video\'s bijschriften hebben en dat interactieve componenten <a href=\'https://webaim.org/techniques/keyboard/\'>worden bediend door een toetsenbord</a>.</p>',
   }
-
 
 };
 
