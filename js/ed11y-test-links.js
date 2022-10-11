@@ -47,9 +47,9 @@ class Ed11yTestLinks {
 
       // Create version of text without "open in new window" warnings.
       let linkStrippedText = Ed11y.options.linkIgnoreStrings ? linkText.replace(Ed11y.options.linkIgnoreStrings, '') : linkText;
-      if (el?.getAttribute('target') === '_blank' && linkText === linkStrippedText && linkStrippedText.indexOf('window') === -1 && linkStrippedText.indexOf('tab') === -1) {
-        // todo bring back defaults? new window? 
-        // If nothing was stripped and we opened a new window, we weren't warned.
+      let linkNewWindows = linkStrippedText.replace(Ed11y.M.linkStringNewWindows,'');
+      if (el?.getAttribute('target') === '_blank' && linkText === linkNewWindows) {
+        // If nothing was stripped AND we opened a new window, we weren't warned.
         let dismissKey = Ed11y.dismissalKey(linkText);        
         Ed11y.results.push([el, 'linkNewWindow', Ed11y.M.linkNewWindow.tip(), 'beforebegin', dismissKey]);
       }

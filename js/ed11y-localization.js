@@ -47,8 +47,8 @@ const ed11yLang = {
 
     suspiciousWords: ['image of','graphic of','picture of','placeholder','photo of'],
     linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
-    linksMeaningless: /learn|to|more|now|this|page|link|site|website|check|out|view|our|read|\.|,|:|download|form|here|click|>|<|\s/g,
-          
+    linksMeaningless: /learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|\.|,|:|>|<|\s/g,
+    linkStringsNewWindows: /window|tab|download|file/g,
     
     // Tooltips base ======================================
 
