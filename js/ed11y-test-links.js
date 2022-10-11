@@ -13,6 +13,7 @@ class Ed11yTestLinks {
       let linkText = Ed11y.computeAriaLabel(el); // returns text or 'noAria';
       let img = el.querySelectorAll('img');
       let hasImg = img.length > 0;
+      let innerLabel = el.querySelectorAll('[aria-label]:not(img)');
       let document = false;
 
       if (el.matches(Ed11y.options.documentLinks)) {
@@ -40,21 +41,29 @@ class Ed11yTestLinks {
           // This only checks the alt, not aria-label
           hasImg = true;
         }
+        if (innerLabel.length > 0) {
+          innerLabel.forEach(el => {
+            linkText += el.getAttribute('aria-label');
+          })
+        }
+        
       }
       
       // Todo replace with accessible name calculation?
       linkText += Ed11y.computeTitle(el) ? Ed11y.computeTitle(el) : '';
 
+
       // Create version of text without "open in new window" warnings.
       let linkStrippedText = Ed11y.options.linkIgnoreStrings ? linkText.replace(Ed11y.options.linkIgnoreStrings, '') : linkText;
-      let linkNewWindows = linkStrippedText.replace(Ed11y.M.linkStringNewWindows,'');
-      if (el?.getAttribute('target') === '_blank' && linkText === linkNewWindows) {
-        // If nothing was stripped AND we opened a new window, we weren't warned.
+      linkStrippedText = linkStrippedText.toLowerCase();
+      let linkNewWindows = linkStrippedText.replace(Ed11y.M.linkStringsNewWindows,'');
+      if (el?.getAttribute('target') === '_blank' && linkText.length === linkNewWindows.length) {
+        // Nothing was stripped AND we weren't warned.
         let dismissKey = Ed11y.dismissalKey(linkText);        
         Ed11y.results.push([el, 'linkNewWindow', Ed11y.M.linkNewWindow.tip(), 'beforebegin', dismissKey]);
       }
       
-      linkStrippedText = linkStrippedText.replace(/'|"|-|\.|\s+/g, '').toLowerCase();
+      linkStrippedText = linkStrippedText.replace(/'|"|-|\.|\s+/g, '');
 
       // Tests to see if this link is empty
       if (linkStrippedText.length === 0) {   
