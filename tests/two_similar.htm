@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" media="all" href="../docs.css">
+        <title>Editorially Utility Functions</title>
+    </head>
+<body>
+    <header>
+        <h1 id="editoria11y-demo">Editoria11y Utility Functions</h1>
+    </header>
+    <main>
+               
+        <section id="click-here">
+
+            <h2>Meaningless links</h2>
+            <div class="positive">
+                <img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+                <img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 233 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+
+            </div>
+            
+            
+        </section>
+        
+
+        <div hidden>
+            <link href="./tests.css" rel="stylesheet">
+            <script src="../js/ed11y-localization.js"></script>
+            <script src="../js/ed11y-element-panel.js"></script>
+            <script src="../js/ed11y-element-result.js"></script>
+            <script src="../js/ed11y-element-tip.js"></script>
+            <script src="../js/ed11y-element-alt.js"></script>
+            <script src="../js/ed11y-test-links.js"></script>
+            <script src="../js/ed11y-test-images.js"></script>
+            <script src="../js/ed11y-test-headings.js"></script>
+            <script src="../js/ed11y-test-text.js"></script>
+            <script src="../js/ed11y-test-embeds.js"></script>
+            <script src="../js/ed11y.js"></script>
+            <!-- Instantiate-->
+            <script>
+                document.addEventListener('ed11yShowHidden', function(e) {
+                    console.log('Event dispatched: ed11yShowHidden for #' + e.detail.result);
+                    let pop = Ed11y.findElements('hiddenPop',`#ed11y-result-${e.detail.result}`);
+                    Ed11y.elements['hiddenPop'][0].closest('[hidden]')?.removeAttribute('hidden');
+                }, false);
+                const ed11y = new Ed11y({
+                    alertMode : 'assertive',
+                    ignoreByKey : {
+                        'h' : '.utility *',
+                        'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
+                        'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
+                    },
+                    shadowComponents : 'shadow-test, shadow-test-no-hits', 
+                    hiddenHandlers : '[hidden]',
+                    checkRoots : 'body', 
+                });
+            </script>
+            
+        </div>
+    </main>
+
+
+
+
+</body>
+
+</html>

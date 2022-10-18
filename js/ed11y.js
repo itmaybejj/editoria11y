@@ -264,7 +264,7 @@ class Ed11y {
         for (let i = Ed11y.results.length - 1; i >= 0; i--) {
           let test = Ed11y.results[i][1];
           let dismissKey = Ed11y.results[i][4];
-          if (dismissKey !== false && typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage] !== 'undefined' && typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] !== 'undefined' && Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey] !== 'undefined') {
+          if (dismissKey !== false && Ed11y.options.currentPage in Ed11y.dismissedAlerts && test in Ed11y.dismissedAlerts[Ed11y.options.currentPage] && dismissKey in Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]) {
             // Remove result if it has been marked OK or ignored, increment dismissed match counter.
             Ed11y.dismissedCount++;
             Ed11y.results[i][5] = Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey];
@@ -749,9 +749,11 @@ class Ed11y {
     Ed11y.scrollTo = function (goto) {
       let gotoOffset = goto.getBoundingClientRect().top;
       if (gotoOffset < window.innerHeight * .25) {
+        // scroll down
         window.scrollBy(0, gotoOffset - window.innerHeight * .25);
       } else if (gotoOffset > window.innerHeight * .75) {
-        window.scrollBy(0, gotoOffset - window.innerHeight * .75);
+        // scroll up
+        window.scrollBy(0, gotoOffset - window.innerHeight + 160);
       }
     };
 
@@ -761,7 +763,7 @@ class Ed11y {
       let loopCount = recheck + 1;
 
       // hiddenHandlers may cause element to animate.
-      if (recheck < 3 && Ed11y.options.hiddenHandlers.length > 0 && !!button.getRootNode().host.closest(Ed11y.options.hiddenHandlers)) {
+      if (recheck < 3 && Ed11y.options.hiddenHandlers && Ed11y.options.hiddenHandlers.length > 0 && !!button.getRootNode().host.closest(Ed11y.options.hiddenHandlers)) {
         window.setTimeout(function() {
           Ed11y.alignTip(button, toolTip, loopCount);
         },150, loopCount);
@@ -793,11 +795,11 @@ class Ed11y {
       // Default to displaying under
       if (buttonOffset.top + tipHeight + scrollTop + 50 > windowBottom) {
         // If there's no room under in the viewport...
-        if (windowWidth - (buttonLeft + tipWidth + 90) > 0 && buttonOffset.top + 40 < window.innerHeight) {
+        if (windowWidth > tipWidth * 1.5 && windowWidth - (buttonLeft + tipWidth + 90) > 0 && buttonOffset.top + 130 < window.innerHeight) {
           direction = 'right';
         } else if (buttonOffset.top > tipHeight + 15) {
           direction = 'above';
-        } else if (buttonLeft - tipWidth - 50 > 0) {
+        } else if (windowWidth > tipWidth * 1.5 && buttonLeft - tipWidth - 50 > 0) {
           direction = 'left';
         } else if (buttonOffset.bottom + tipHeight > document.documentElement.clientHeight - 50) {
           // No room anywhere in viewport we're at the end of the page.
@@ -811,7 +813,6 @@ class Ed11y {
       
       if (direction === 'under') {
         // Pin to the left edge, unless the tip is not wide enough to reach:
-        // todo: this works great. copy to over, emulate on left/right.
         if (tipWidth * 4 / 5 + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
           if (tipWidth - 15 > buttonOffset.left) {
@@ -853,7 +854,7 @@ class Ed11y {
         let tipBottom = buttonOffset.top + scrollTop + tipHeight;
         if (tipBottom > windowBottom) {
           // Offset up
-          nudgeY = windowBottom - (tipBottom + 10);
+          nudgeY = windowBottom - (tipBottom + 90);
           let arrowY = nudgeY * -1 + 7;
           arrowY = Math.min(arrowY,tipHeight - 25);
           arrow.style.setProperty('top', `${arrowY}px`);

@@ -44,7 +44,7 @@ class Ed11yTestLinks {
         if (innerLabel.length > 0) {
           innerLabel.forEach(el => {
             linkText += el.getAttribute('aria-label');
-          })
+          });
         }
         
       }
