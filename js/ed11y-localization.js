@@ -230,8 +230,8 @@ const ed11yLang = {
     altLongLinked : {
       title: 'Manual check: very long alternative text in linked image',
       tip: (alt) =>
-        `${Ed11y.M.altAttributeProvided(alt)}
-        <p>The alt text on a linked image is used to describe the link destination. Links should be brief, clear and concise, as screen reader users often listen to the list of links on the page to find content of interest. Long alternative text inside a link often indicates that the image's text alternative is describing the image instead rather than the link.</p>`,
+        `<p>The alt text on a linked image is used to describe the link destination. Links should be brief, clear and concise, as screen reader users often listen to the list of links on the page to find content of interest. Long alternative text inside a link often indicates that the image's text alternative is describing the image instead rather than the link.</p>
+        ${Ed11y.M.altAttributeProvided(alt)}`,
     },
 
     altPartOfLinkWithText : {
@@ -275,8 +275,8 @@ const ed11yLang = {
         `<p>This link's text is: <strong>${text}</strong></p>
         <p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
                 <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully, such that they figure out each link's purpose from context for themselves. Few readers do this, so click-through rates on meaningless links are extremely poor.</p>
-                <ul><li>Not meaningful: "To learn more about meaningful links, <a href="https://www.google.com/search?q=writing+meaningful+links">click here</a>.</li>
-                <li>Not concise: "<a href="https://www.google.com/search?q=writing+meaningful+links">Click here to learn more about meaningful links</a>"</li>
+                <ul><li>Not meaningful: "<a href="https://www.google.com/search?q=writing+meaningful+links">Click here</a> to learn about meaningful links."</li>
+                <li>Not concise: "<a href="https://www.google.com/search?q=writing+meaningful+links">Click here to learn about meaningful links</a>"</li>
                 <li>Ideal: "Learn about <a href="https://www.google.com/search?q=writing+meaningful+links">meaningful links"</a></strong></li></ul>
                 `
       ,
@@ -286,7 +286,7 @@ const ed11yLang = {
       title : 'Manual check: is the linked document accessible?',
       tip: () => 
         `<p>This automated checker helps ensure <strong><em>websites</em></strong> contain the features needed for accessible content, things like heading structure and text alternatives for images and audio. <strong>It is not able to help you check the documents you link.</strong></p>
-        <p>Most mobile and assistive device users prefer to read text on Web pages, where content reflows to fit the screen. If the document linked here cannot be converted to a Web page, check that it is well structured (headings, lists, table headers) and any images provide alt text.</p>
+        <p>Most mobile and assistive device users prefer to read text on Web pages, where content reflows to fit the screen. If the document linked here cannot be converted to a Web page, make sure the document is well structured (headings, lists, table headers) and provides alt text for its images.</p>
         <ul>
             <li>Tips for <a href='https://webaim.org/techniques/word/'>MS Word</a> &amp; <a href="https://support.google.com/docs/answer/6199477?hl=en&ref_topic=6039805">Google Docs</a></li>
             <li><a href='https://webaim.org/techniques/powerpoint/'>Slideshows</a> &amp; <a href='https://support.microsoft.com/en-us/office/make-your-excel-documents-accessible-to-people-with-disabilities-6cc05fc5-1314-48b5-8eb3-683e49b3e593'>Spreadsheets</a>
