@@ -127,7 +127,7 @@ const ed11yLang = {
             </ul>`,
         
     altAttributeProvided: (alt) => 
-      `<p><strong>This image's alt text is: "${alt}"</strong></p>`,
+      `<p>This image's alt text is: <strong>"${alt}"</strong></p>`,
 
     altMissing : {
       title: 'Image has no alternative text attribute',
