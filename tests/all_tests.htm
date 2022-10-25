@@ -35,6 +35,8 @@
             <div class="positive"><h4 id="a-very-long-heading">Suspiciously long heading. Headings should not be used for emphasis, but rather for a document outline, so if you find yourself talking this much, this probably is being used for visual formatting, not a heading.</h4>
             </div>
 
+            <div class="positive"><h4>Skipped and empty heading (duplicate alert check)</h4><h6></h6></div>
+
             <h3>Possible fake headings</h3>
 
             <div class="positive"><blockquote>Short quote needs check</blockquote></div>
@@ -133,7 +135,9 @@
 
         <h3 id="links-with-no-text-at-all">Links with no text at all</h3>
 
-        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"></a></p>
+        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"></a> No characters</p>
+        <p class="positive"><a href="#"> </a> Space character</p>
+        <p class="positive">Image with deadspace: <a href="#"><img alt="'" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" class=""></a></p>
 
         <h3 id="links-titled-with-a-url">Links titled with a URL</h3>
 
@@ -333,11 +337,11 @@
           const ed11y = new Ed11y({
             alertMode : 'assertive',
             lang : 'en',
-            theme : 'darkTheme',
+            theme : 'lightTheme',
             outlineExclude : '.utility',
             linkIgnoreStrings: '\(opens in new window\)',
             embeddedContent: '#embed',
-            //ignoreElements : '.positive *, .positive',
+            //ignoreElements : 'footer *',
             shadowComponents : 'shadow-test, shadow-test-no-hits',
             hiddenHandlers : '#hidden-handler',
             checkRoots : 'main',

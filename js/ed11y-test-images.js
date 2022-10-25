@@ -62,7 +62,7 @@ class Ed11yTestImages {
         else if (check[1] !== null) {
           error = 'altImageOf';
         }
-        // Alert with deadspace alt.
+        // Alert with deadSpace alt.
         else if (alt !== '' && alt.replace(/"|'|\s+/g, '') === '') {
           error = 'altDeadspace';
           dismissable = false;
@@ -73,14 +73,14 @@ class Ed11yTestImages {
         }
 
         // If there is a parent link...
-        if (parentLink) {
+        if (parentLink !== null) {
           el = parentLink;
           // If we don't already have an error, check for mixed text
           if (!error && Ed11y.linkText(parentLink.textContent).length > 1) {
             // todo: need to remove ignored link text
             error = 'altPartOfLinkWithText';
           } else {
-            // Return the linked version of the message
+            // Return the linked version of the message.
             error = error ? error + 'Linked' : error;
           }
           

@@ -34,7 +34,7 @@ const ed11yLang = {
     errorAltMissing: '(missing!)',
     errorAltNull: '(none; image marked as decorative)',
     errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
-    errorOutlinePrefixHeadingEmpty: '(empty heading)',
+    errorOutlinePrefixHeadingEmpty: '(empty heading) ',
     errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
 
     // Errors and alerts ==================================
@@ -112,7 +112,7 @@ const ed11yLang = {
     blockquoteIsShort : {
       title: 'Manual check: is this a blockquote?',
       tip: () =>
-        '<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. This was flagged because short blockquotes are sometimes actually headings. If this is a heading and not a quotation, please use heading formatting instead, so this appears in the page outline.</p>',
+        '<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. This was flagged because short blockquotes are sometimes actually headings. If this is a heading and not a quotation, use heading formatting instead, so this appears in the page outline.</p>',
     },
 
     // Tooltips for image tests =========================
@@ -127,7 +127,7 @@ const ed11yLang = {
             </ul>`,
         
     altAttributeProvided: (alt) => 
-      `<p>This image's alt text is: "<strong>${alt}</strong>"</p>`,
+      `<p><strong>This image's alt text is: "${alt}"</strong></p>`,
 
     altMissing : {
       title: 'Image has no alternative text attribute',
@@ -147,71 +147,69 @@ const ed11yLang = {
     altURL : {
       title: 'Image\'s text alternative is a URL',
       tip: (alt) =>
-        `<p>Please set this image's alternative text to a concise description of what this image means in this context.</p>
-            ${Ed11y.M.altAttributeExample}
-            ${Ed11y.M.altAttributeProvided(alt)}`
+        `${Ed11y.M.altAttributeProvided(alt)}
+        <p>To fix: set this image's alternative text to a concise description of what this image means in this context.</p>
+        ${Ed11y.M.altAttributeExample}`
       ,
     },
 
     altURLLinked : {
       title: 'Linked image\'s text alternative is a URL',
       tip: (alt) =>
-        `<p>When a link includes an image, the image's alt text becomes part of the link text announced by screen readers.
+        `${Ed11y.M.altAttributeProvided(alt)}
+        <p>When a link includes an image, the image's alt text becomes part of the link text announced by screen readers.
             Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
             <ul>
                 <li>Good link text: "About us"</li>
                 <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess</li>
-            </ul>
-            ${Ed11y.M.altAttributeProvided(alt)}`,
+            </ul>`,
     },
 
     altImageOf : {
       title: 'Manual check: possibly redundant text in alt',
       tip: (alt) =>
-        `<p>Screen readers <strong>announce</strong> they are describing an image when reading alt text, so 
+        `${Ed11y.M.altAttributeProvided(alt)}
+        <p>Screen readers <strong>announce</strong> they are describing an image when reading alt text, so 
             phrases like "image of" and "photo of" are usually redundant, sounding like "this image's alt is the alt of an image."</p>
             <p>Note the sometimes the phrase is not redundant and should be kept, because the image is an image of an image:</p>
             <ul><li>Redundant: "image of a VHS tape"</li>
-            <li>Relevant: "image of a VHS tape being shown in history class"</li></ul>
-            ${Ed11y.M.altAttributeProvided(alt)}`
+            <li>Relevant: "image of a VHS tape being shown in history class"</li></ul>`
     },
     altImageOfLinked : {
       title: 'Manual check: possibly redundant text in linked image',
       tip: (alt) =>
-        `<p>Links should clearly and concisely describe their destination. Since words like "image," "graphic" or "photo" are redundant in text alternatives (screen readers already identify the image as an image), they often indicate that the image's text alternative is describing the image instead of the link.</p>
+        `${Ed11y.M.altAttributeProvided(alt)}
+        <hr><p>Links should clearly and concisely describe their destination. Since words like "image," "graphic" or "photo" are redundant in text alternatives (screen readers already identify the image as an image), they often indicate that the image's text alternative is describing the image instead of the link.</p>
             <ul>
                 <li>Good link text: "About us"</li>
                 <li>Bad link text: "Stock photo of five people jumping and high fiving around a conference table, image"</li>
-            </ul>
-            <hr>
-            ${Ed11y.M.altAttributeProvided(alt)}`
+            </ul>`
     },
 
     altDeadspace : {
-      title: 'Image\'s text alternative is unpronouncable',
+      title: 'Image\'s text alternative is unpronounceable',
       tip: (alt) =>
-        `<p>This image's alt only contains characters which are not spoken by screen readers. The presence of an image will be announced, but its description of will be unintelligible.</p>
+        `${Ed11y.M.altAttributeProvided(alt)}
         <p>To fix: add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") to tell screen readers to ignore this image.</p>
-            ${Ed11y.M.altAttributeExample}
-            ${Ed11y.M.altAttributeProvided(alt)}`,
+            ${Ed11y.M.altAttributeExample}`,
     },
 
     altDeadspaceLinked : {
-      title: 'Linked Image\'s text alternative is unpronouncable',
+      title: 'Linked Image\'s text alternative is unpronounceable',
       tip: (alt) =>
-        `<p>This image's alt consists of only silent characters (spaces and quotation marks). It will be announced by screen readers as as part of the link's text, but the description of what the image is will be unintelligible. Please set this image's alternative text to something that describes the link's destination, or provide a <em>completely</em> empty alt (alt="") if the image should not be mentioned at all.</p>
+        `${Ed11y.M.altAttributeProvided(alt)}
+        <p>This image's alt consists of only silent characters (spaces and quotation marks). It will be announced by screen readers as as part of the link's text, but the description of what the image is will be unintelligible. To fix, set this image's alternative text to something that describes the link's destination, or provide a <em>completely</em> empty alt (alt="") if the image should not be mentioned at all.</p>
             <ul>
                 <li>Good link text: "About us"</li>
                 <li>Bad link text: "About us, image: [short confusing silence]"</li>
-            </ul>
-            ${Ed11y.M.altAttributeProvided(alt)}`,
+            </ul>`,
     },
 
     altEmptyLinked : {
       title: 'Linked Image has no alt text',
       tip: () =>
         `<p>When a link is wrapped around an image, the image's alt text provides the link's title for screen readers</p>
-        <p>Please set this image's alternative text to something that describes the link's destination, or add text to the link.</p>
+        <p>To fix: set this image's alternative text to something that describes the link's destination, or add text to the link.</p>
             <ul>
                 <li>Good linked alt: "Meaningful link tips"</li>
                 <li>Bad linked alt: "Three happy dogs rolling in the grass"</li>
@@ -232,9 +230,8 @@ const ed11yLang = {
     altLongLinked : {
       title: 'Manual check: very long alternative text in linked image',
       tip: (alt) =>
-        `<p>The alt text on a linked image is used to describe the link destination. Links should be brief, clear and concise, as screen reader users often listen to the list of links on the page to find content of interest. Long alternative text inside a link often indicates that the image's text alternative is describing the image instead rather than the link.</p>
-            ${Ed11y.M.altAttributeProvided(alt)}
-            `,
+        `${Ed11y.M.altAttributeProvided(alt)}
+        <p>The alt text on a linked image is used to describe the link destination. Links should be brief, clear and concise, as screen reader users often listen to the list of links on the page to find content of interest. Long alternative text inside a link often indicates that the image's text alternative is describing the image instead rather than the link.</p>`,
     },
 
     altPartOfLinkWithText : {
@@ -263,25 +260,25 @@ const ed11yLang = {
     linkTextIsURL : {
       title: 'Manual check: is this link text a URL?',
       tip: (text) => 
-        `<p>Links should be meaningful and concise. Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
+        `<p>This link's text is:<br> <strong>${text}</strong></p>
+        <p>Links should be meaningful and concise. Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
          <p>A linked URL breaks this pattern; the reader has to read the preceding paragraph to figure out the link's purpose from context.</p>
             <ul>
                 <li>Meaningful and concise link: "Tips for writing meaningful links"</li>
                 <li>Linked URL, as pronounced by a screen reader: "H T T P S colon forward-slash forward-slash example dot com forward-slash tips forward-slash meaningful-links"</li>
-            </ul>
-                <p>This link's text is:<br> <strong>${text}</strong></p>
-                `,
+            </ul>`,
     },
 
     linkTextIsGeneric : {
       title: 'Manual check: is this link meaningful and concise?',
       tip: (text) => 
-        `<p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
+        `<p>This link's text is: <strong>${text}</strong></p>
+        <p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
                 <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully, such that they figure out each link's purpose from context for themselves. Few readers do this, so click-through rates on meaningless links are extremely poor.</p>
                 <ul><li>Not meaningful: "To learn more about meaningful links, <a href="https://www.google.com/search?q=writing+meaningful+links">click here</a>.</li>
                 <li>Not concise: "<a href="https://www.google.com/search?q=writing+meaningful+links">Click here to learn more about meaningful links</a>"</li>
                 <li>Ideal: "Learn about <a href="https://www.google.com/search?q=writing+meaningful+links">meaningful links"</a></strong></li></ul>
-                <p>This link's text is: <strong>${text}</strong></p>`
+                `
       ,
     },
 
@@ -289,12 +286,12 @@ const ed11yLang = {
       title : 'Manual check: is the linked document accessible?',
       tip: () => 
         `<p>This automated checker helps ensure <strong><em>websites</em></strong> contain the features needed for accessible content, things like heading structure and text alternatives for images and audio. <strong>It is not able to help you check the documents you link.</strong></p>
-                <p>Most mobile and assistive device users prefer to read text on Web pages, where content reflows to fit the screen. If the document linked here cannot be converted to a Web page, please manually check its structure (headings, lists, table headers) and image alt text.</p>
-                <ul>
-                    <li>Tips for <a href='https://webaim.org/techniques/word/'>MS Word</a> &amp; <a href="https://support.google.com/docs/answer/6199477?hl=en&ref_topic=6039805">Google Docs</a></li>
-                    <li><a href='https://webaim.org/techniques/powerpoint/'>Slideshows</a> &amp; <a href='https://support.microsoft.com/en-us/office/make-your-excel-documents-accessible-to-people-with-disabilities-6cc05fc5-1314-48b5-8eb3-683e49b3e593'>Spreadsheets</a>
-                    <li><a href='https://webaim.org/techniques/acrobat/'>Documents formatted for print instead of screens (PDF)</a></li>
-                </ul>`
+        <p>Most mobile and assistive device users prefer to read text on Web pages, where content reflows to fit the screen. If the document linked here cannot be converted to a Web page, check that it is well structured (headings, lists, table headers) and any images provide alt text.</p>
+        <ul>
+            <li>Tips for <a href='https://webaim.org/techniques/word/'>MS Word</a> &amp; <a href="https://support.google.com/docs/answer/6199477?hl=en&ref_topic=6039805">Google Docs</a></li>
+            <li><a href='https://webaim.org/techniques/powerpoint/'>Slideshows</a> &amp; <a href='https://support.microsoft.com/en-us/office/make-your-excel-documents-accessible-to-people-with-disabilities-6cc05fc5-1314-48b5-8eb3-683e49b3e593'>Spreadsheets</a>
+            <li><a href='https://webaim.org/techniques/acrobat/'>Documents formatted for print instead of screens (PDF)</a></li>
+        </ul>`
       ,
     },
 
@@ -362,7 +359,7 @@ const ed11yLang = {
       tip : () => 
         `<p>Headings and subheadings create a navigable table of contents for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
             ${Ed11y.M.headingExample}
-            <p>If this all-bold text is functioning visually as a heading, please replace the bold formatting with the appropriately numbered heading.</p>
+            <p>If this all-bold text is functioning visually as a heading, replace the bold formatting with the appropriately numbered heading.</p>
             `,
     },
 

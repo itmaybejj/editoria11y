@@ -678,22 +678,36 @@ class Ed11y {
         // Todo later: collision detection.
         let marksToNudge = [];
         // Reading and writing in a loop creates paint thrashing. Read first.
+        let previousLeft = 0;
+        let previousTop = 0;
+        let previousNudge = 0;
         Ed11y.elements.jumpList.forEach(mark => {
           if (mark.hasAttribute('style')) {
             mark.removeAttribute('style');
           }
           let offset = mark.getBoundingClientRect();
+          let nudgeTop = 0;
+          let overlap = 30;
+          // Detect tip that overlaps with previous result.
+          if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousTop + overlap) {
+            nudgeTop = 30 + previousNudge;
+          }
           if (offset.left < 8) {
             // Offscreen to left. push to the right.
-            marksToNudge.push([mark, 8 - offset.left]);
+            marksToNudge.push([mark, 8 - offset.left, nudgeTop]);
           }
           else if (offset.left + 80 > windowWidth) {
             // Offscreen to right. push to the left
-            marksToNudge.push([mark, windowWidth - offset.left - 80]);
+            marksToNudge.push([mark, windowWidth - offset.left - 80, nudgeTop]);
+          } else if (nudgeTop > 0) {
+            marksToNudge.push([mark, 0, nudgeTop]);
           }
+          previousLeft = offset.left;
+          previousTop = offset.top + nudgeTop;
+          previousNudge = nudgeTop;
         });
         marksToNudge.forEach(el => {
-          el[0].style.transform = 'translate(' + el[1] + 'px, 0)';
+          el[0].style.transform = `translate(${el[1]}px, ${el[2]}px)`;
         });
         if (!Ed11y.bodyStyle) {
           Ed11y.paintReady();
@@ -706,9 +720,6 @@ class Ed11y {
             `ed11y-element-result, ed11y-element-panel {
               opacity: 1; 
               outline: 0 !important;
-            }
-            ed11y-element-result + ed11y-element-result {
-              margin-top: 34px;
             }
             .ed11y-hidden-highlight {
               box-shadow: inset 0 0 0 1px ${Ed11y.color.warning}, inset 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 1px ${Ed11y.color.warning}, 0 0 0 3px ${Ed11y.color.primary}, 0 0 1px 3px !important;

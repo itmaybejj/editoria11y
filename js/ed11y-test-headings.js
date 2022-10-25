@@ -16,6 +16,7 @@ class Ed11yTestHeadings {
     // Test each header level for accessibility issues.
     Ed11y.elements.h?.forEach((el, i) => {
       let level;
+      let alert = [];
 
       // Match aria-headers to <h#> level.
       if (el.hasAttribute('aria-level')) {
@@ -28,39 +29,40 @@ class Ed11yTestHeadings {
       // Sanitized.
       level = parseInt(level);
       let error = '';
-      let outlinePrefix = false;
-      let message = '';
+      let outlinePrefix = '';
       let headingText = Ed11y.getText(el);
       let headingLength = headingText.length;
       let dismissKey = false;
-      if (level - prevLevel > 1 && i !== 0) {
-        error = 'headingLevelSkipped';
-        dismissKey = level + headingText;
-        outlinePrefix = Ed11y.M.errorOutlinePrefixSkippedLevel;
-        message = Ed11y.M.headingLevelSkipped.tip(prevLevel, level);
-      }
       if (headingLength < 1) {
         // todo: let image merge up into shared alert.
         let headingSubText = el.querySelector('img')?.getAttribute('alt');
         if (!headingSubText || headingSubText.length === 0) {
+          outlinePrefix += Ed11y.M.errorOutlinePrefixHeadingEmpty;
           error = 'headingEmpty';
-          outlinePrefix =  Ed11y.M.errorOutlinePrefixHeadingEmpty;
-          message = Ed11y.M.headingEmpty.tip();
+          dismissKey = false; // redeclare in case of two errors.
+          alert.push([el, error, Ed11y.M.headingEmpty.tip(), position, dismissKey]);
         }
       }
       else if (headingLength > 160) {
-        outlinePrefix = Ed11y.M.errorOutlinePrefixHeadingIsLong;
+        outlinePrefix += Ed11y.M.errorOutlinePrefixHeadingIsLong;
         dismissKey = level + headingText;
-        error = 'headingIsLong';
-        message = Ed11y.M.headingIsLong.tip();
+        error = 'headingIsLong',
+        alert.push([el, error, Ed11y.M.headingIsLong.tip(), position, dismissKey]);
+      }
+      if (level - prevLevel > 1 && i !== 0) {
+        dismissKey = level + headingText;
+        outlinePrefix += Ed11y.M.errorOutlinePrefixSkippedLevel;
+        error = 'headingLevelSkipped';
+        alert.push([el, error, Ed11y.M.headingLevelSkipped.tip(prevLevel, level), position, dismissKey]);
       }
       prevLevel = level;
-      // If the heading error is within a hyperlink, make sure to
-      // append button after anchor tag.
-      // Todo add this case to the test page
+
       if (error !== '') {
-        if (el.closest(Ed11y.options.checkRoots) || (Ed11y.options.shadowComponents && el.getRootNode()?.host?.matches(Ed11y.options.shadowComponents))) {
-          Ed11y.results.push([el, error, message, position, dismissKey]);
+        // Only mark errors if they are within the scanned area.
+        if (el.closest(Ed11y.options.checkRoots) !== null || (Ed11y.options.shadowComponents && el.getRootNode()?.host?.matches(Ed11y.options.shadowComponents) !== undefined)) {          
+          alert.forEach((result) => {
+            Ed11y.results.push(result);
+          });
           if (outlinePrefix) {
             outlinePrefix = '<span class=\'ed11y-small\'><em>' + outlinePrefix +
                 '</em></span>';

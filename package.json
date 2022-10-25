@@ -18,6 +18,7 @@
     "eslint": "^8.12.0",
     "geckodriver": "^3.0.1",
     "ms-chromium-edge-driver": "^0.5.1",
-    "nightwatch": "^2.0.10"
+    "nightwatch": "^2.0.10",
+    "uglify-js": "^3.17.4"
   }
 }
