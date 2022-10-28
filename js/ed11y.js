@@ -254,7 +254,7 @@ class Ed11y {
       }
     };
 
-    Ed11y.countAlerts = function (onLoad) {
+    Ed11y.countAlerts = function () {
       // Review results array to remove dismissed items
 
       if (Ed11y.ignoreAll) {
@@ -321,13 +321,12 @@ class Ed11y {
       }
       Ed11y.panel.classList.remove('ed11y-preload');
 
-      if (onLoad === true) {
-        // First export a copy of the results for synchronizers
-        window.setTimeout(function() {
-          let syncResults = new CustomEvent('ed11yResults');
-          document.dispatchEvent(syncResults);
-        },0);
-      }
+      // Dispatch event for synchronizers
+      window.setTimeout(function() {
+        let syncResults = new CustomEvent('ed11yResults');
+        document.dispatchEvent(syncResults);
+      },0);
+
     };
 
     Ed11y.updatePanel = function (onLoad, showPanel) {
@@ -338,7 +337,7 @@ class Ed11y {
         document.querySelector('body').appendChild(panel);
       }
 
-      Ed11y.countAlerts(onLoad);
+      Ed11y.countAlerts();
       
       if (onLoad === true && Ed11y.totalCount > 0 && !Ed11y.ignoreAll) {
         // Determine if panel should open automatically.
