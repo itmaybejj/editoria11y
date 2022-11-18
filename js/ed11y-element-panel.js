@@ -8,38 +8,38 @@ class Ed11yElementPanel extends HTMLElement {
   // todo mvp parameterize
   template() {
     return `
-    <div class='buttonbar' role='tablist' aria-label='Editorial Ally panel controls'>
+    <div class='buttonbar' role='tablist' aria-label='${Ed11y.M.panelControls}'>
       <button role="tab" id='issues' aria-selected='true'>
-          Issues
+          ${Ed11y.M.buttonIssuesContent}
       </button>
       <button role="tab" id='headings' aria-selected='false'>
-          Outline
+          ${Ed11y.M.buttonOutlineContent}
       </button>
       <button role="tab" id='alts' aria-selected='false'>
-          Alt Text
+          ${Ed11y.M.buttonAltsContent}
       </button>
-      <button role="tab" id='help' aria-selected='false' aria-controls='help-tab' title='About this tool'>?</button>
+      <button role="tab" id='help' aria-selected='false' aria-controls='help-tab' title='${Ed11y.M.buttonAboutTitle}'>?</button>
       <button role="tab"  id='minimize' aria-selected='false' title='Minimize panel' aria-label="minimize" aria-pressed="false"><span>&ndash;</span></button>
       <button type='button' id='toggle'><span class='close'>&times;</span><span class='open'><span class='icon'></span><span class='toggle-count'></span></span></button>
     </div>
     <div class="content">
       <div id='issues-tab' tabindex="0" role="tabpanel" class="show" aria-labelledby='issues'>
           <div>
-              <div class='content-text'><span class='count'>No</span> <span class='content-type'>accessibility errors detected</span>.</div>
+              <div class='content-text'>${Ed11y.M.panelCountBase}</div>
               <div aria-live='polite' class='announce hidden'></div>
           </div>
           <div class='jumplinks'>
-            <button class='jump prev' data-ed11y-goto='0'><span aria-hidden='true'>« </span><span class='jump-prev'>Previous</span></button>
-            <button class='jump next' data-ed11y-goto='0'><span class='jump-next'>First</span> <span aria-hidden='true'> »</span></button>
-            <button id='restore' hidden>Show hidden alerts</button>
+            <button class='jump prev' data-ed11y-goto='0'><span aria-hidden='true'>« </span><span class='jump-prev'>${Ed11y.M.buttonPrevContent}</span></button>
+            <button class='jump next' data-ed11y-goto='0'><span class='jump-next'>${Ed11y.M.buttonFirstContent}</span> <span aria-hidden='true'> »</span></button>
+            <button id='restore' hidden>${Ed11y.M.buttonShowHiddenAlertsContent}</button>
           </div>
         </div>
       <div id='headings-tab' role="tabpanel" class="hidden" aria-labelledby='headings' tabindex='0'>
-        <p>Check that this forms <a href='https://accessibility.princeton.edu/how/content/headings'>a complete outline</a>:</p>
+        ${Ed11y.M.panelCheckOutline}
         <ul id='outline'></ul>
       </div>
       <div id='alts-tab' role="tabpanel" class="hidden" aria-labelledby='alts' tabindex='0'>
-        <p>Check <a href='https://accessibility.princeton.edu/how/content/alternative-text'>alt text</a>, <a href='https://accessibility.princeton.edu/how/content/images-text'>images of text</a>, &amp; <a href='https://webaim.org/techniques/captions/'>captions</a>.</p>
+        ${Ed11y.M.panelCheckAltText}
         <ul id='alt-list'></ul>
       </div>
       <div id='help-tab' role="tabpanel" class="hidden" aria-labelledby='help' tabindex='0'>
@@ -76,6 +76,9 @@ class Ed11yElementPanel extends HTMLElement {
           border-radius: 3px;
           box-shadow: 1px 1px 4px 2px ${Ed11y.color.text}77;
           padding: 2px;
+        }
+        [tabindex]:focus-visible {
+          box-shadow: 0 0 0 3px ${Ed11y.color.bg}, 0 0 0 4px ${Ed11y.color.text};
         }
         a {
           color: inherit;
@@ -292,18 +295,20 @@ class Ed11yElementPanel extends HTMLElement {
   jumpTo(event) {
     // Handle jump
     event.preventDefault();
+    Ed11y.toggledFrom = this;
     Ed11y.resetClass(['ed11y-hidden-highlight']);
     if (!Ed11y.elements.jumpList) {
       Ed11y.buildJumpList();
     }
     // Find our button.
-    // todo do we need to jump over dismissed alerts?
     let goNum = parseInt(this.dataset.ed11yGoto);
-    // Send to ed11y to make timeouts easier
     let goto = Ed11y.elements.jumpList[goNum];
+    Ed11y.scrollTo(goto);
+
+    // Open the button
     goto.setAttribute('data-ed11y-action','open');
+
     let gotoResult = Ed11y.results[goto.getAttribute('data-ed11y-result')];
-    // Throw an alert if the button or target is hidden.
     let insert = gotoResult[3];
     let target;
     // todo postpone this all belongs in the result open logic not here
@@ -314,6 +319,7 @@ class Ed11yElementPanel extends HTMLElement {
       // todo mvp these are not being inserted right; revisit. maybe always before, just sometimes before link?
       target = goto.parentElement;
     }
+
     let delay = 100;
     if (Ed11y.options.hiddenHandlers.length > 0 && !!target.closest(Ed11y.options.hiddenHandlers)) {
       // Increase hesitation before scrolling, in case theme animates open an element.
@@ -322,26 +328,11 @@ class Ed11yElementPanel extends HTMLElement {
         detail: {result: goto.getAttribute('data-ed11y-result')}
       }));
     }
-    
-    // todo mvp do these match tests work? parameterize, test
-    window.setTimeout(function () {
-      let gotoResult = Ed11y.results[goto.getAttribute('data-ed11y-result')];
-      let bodyStyles = window.getComputedStyle(document.querySelector('body'));
-      // Throw an alert if the button or target is hidden.
-      let insert = gotoResult[3];
-      let target;
-      // todo postpone this all belongs in the result open logic not here
-      if (insert === 'beforebegin') {
-        target = Ed11y.nextUntil(goto, ':not(ed11y-element-result)');
-      }
-      else if (insert === 'afterbegin') {
-        // todo mvp these are not being inserted right; revisit. maybe always before, just sometimes before link?
-        target = goto.parentElement;
-      }
+
+    // Throw an alert if the button or target is hidden.
+    window.setTimeout(function (goto, target) {
       let firstVisible = false;
       let alertMessage;
-      let gotoOffset = goto.getBoundingClientRect().top - parseInt(bodyStyles.getPropertyValue('padding-top')) - 50;
-      // todo beta should we try to force visibility?
       if (!Ed11y.visible(target)) {
         firstVisible = Ed11y.firstVisibleParent(target);
         alertMessage = Ed11y.M.jumpedToInvisibleTip;
@@ -351,17 +342,14 @@ class Ed11yElementPanel extends HTMLElement {
         firstVisible = firstVisible.closest(':not([aria-hidden="true"])');
         alertMessage = Ed11y.M.jumpedToAriaHiddenTip;
       }
-
       if (firstVisible) {
         alert(alertMessage);
         firstVisible.classList.add('ed11y-hidden-highlight');
       }
-      // Go to the button.
-      document.querySelector('html, body').animate({
-        scrollTop: (gotoOffset)
-      }, 1);
-      goto.shadowRoot.querySelector('.toggle').focus();
-    }, delay, goto);
+      Ed11y.scrollTo(goto);
+      let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+      activeTip.shadowRoot.querySelector('.close').focus();
+    }, delay, goto, target);
 
   }
 

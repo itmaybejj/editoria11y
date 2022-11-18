@@ -58,7 +58,7 @@ class Ed11y {
       hiddenHandlers : '',
 
       // Interface
-      lang: 'en',
+      lang: 'en', 
       theme: 'lightTheme',
       darkTheme: {
         bg: '#0a2051',
@@ -101,6 +101,8 @@ class Ed11y {
       twitterContent: 'twitter-timeline',
       // Selector list to identify links to documents you would like flagged for manual review.
       documentLinks: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\'], a[href$=\'.doc\'], a[href$=\'.docx\'], a[href*=\'.doc?\'], a[href*=\'.docx?\'], a[href$=\'.ppt\'], a[href$=\'.pptx\'], a[href*=\'.ppt?\'], a[href*=\'.pptx?\'], a[href^=\'https://docs.google\']',
+      linksUrls: false, // get from language pack
+      linksMeaningless: false, // get from language pack
 
       // * Not implemented Yet:
       // custom Checks
@@ -114,7 +116,11 @@ class Ed11y {
       ...defaultOptions,
       ...options
     };
-    Ed11y.M = ed11yLang[Ed11y.options.lang];
+    Ed11y.M = {
+      // Fall back to En strings if language or string is unavailable
+      ...ed11yLang['en'],
+      ...ed11yLang[Ed11y.options.lang] 
+    };
     Ed11y.color = Ed11y.options[Ed11y.options.theme];
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
@@ -237,18 +243,18 @@ class Ed11y {
         window.setTimeout(function() {
           Ed11y.updatePanel(onLoad, showPanel); 
           // todo parameterize
-          Ed11y.panelToggle.setAttribute('title', 'Toggle accessibility tools');
+          Ed11y.panelToggle.setAttribute('title', Ed11y.M.toggleAccessibilityTools);
         },0);
       }
       else {
         Ed11y.reset();
         Ed11y.panelToggle.classList.add('disabled');
         Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
-        Ed11y.panelToggle.setAttribute('title', 'Editorially is disabled.');
+        Ed11y.panelToggle.setAttribute('title', Ed11y.M.toggleDisabled);
       }
     };
 
-    Ed11y.countAlerts = function (onLoad) {
+    Ed11y.countAlerts = function () {
       // Review results array to remove dismissed items
 
       if (Ed11y.ignoreAll) {
@@ -258,7 +264,7 @@ class Ed11y {
         for (let i = Ed11y.results.length - 1; i >= 0; i--) {
           let test = Ed11y.results[i][1];
           let dismissKey = Ed11y.results[i][4];
-          if (dismissKey !== false && typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage] !== 'undefined' && typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] !== 'undefined' && Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey] !== 'undefined') {
+          if (dismissKey !== false && Ed11y.options.currentPage in Ed11y.dismissedAlerts && test in Ed11y.dismissedAlerts[Ed11y.options.currentPage] && dismissKey in Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]) {
             // Remove result if it has been marked OK or ignored, increment dismissed match counter.
             Ed11y.dismissedCount++;
             Ed11y.results[i][5] = Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey];
@@ -315,13 +321,12 @@ class Ed11y {
       }
       Ed11y.panel.classList.remove('ed11y-preload');
 
-      if (onLoad === true) {
-        // First export a copy of the results for synchronizers
-        window.setTimeout(function() {
-          let syncResults = new CustomEvent('ed11yResults');
-          document.dispatchEvent(syncResults);
-        },0);
-      }
+      // Dispatch event for synchronizers
+      window.setTimeout(function() {
+        let syncResults = new CustomEvent('ed11yResults');
+        document.dispatchEvent(syncResults);
+      },0);
+
     };
 
     Ed11y.updatePanel = function (onLoad, showPanel) {
@@ -332,7 +337,7 @@ class Ed11y {
         document.querySelector('body').appendChild(panel);
       }
 
-      Ed11y.countAlerts(onLoad);
+      Ed11y.countAlerts();
       
       if (onLoad === true && Ed11y.totalCount > 0 && !Ed11y.ignoreAll) {
         // Determine if panel should open automatically.
@@ -672,22 +677,36 @@ class Ed11y {
         // Todo later: collision detection.
         let marksToNudge = [];
         // Reading and writing in a loop creates paint thrashing. Read first.
+        let previousLeft = 0;
+        let previousTop = 0;
+        let previousNudge = 0;
         Ed11y.elements.jumpList.forEach(mark => {
           if (mark.hasAttribute('style')) {
             mark.removeAttribute('style');
           }
           let offset = mark.getBoundingClientRect();
+          let nudgeTop = 0;
+          let overlap = 30;
+          // Detect tip that overlaps with previous result.
+          if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousTop + overlap) {
+            nudgeTop = 30 + previousNudge;
+          }
           if (offset.left < 8) {
             // Offscreen to left. push to the right.
-            marksToNudge.push([mark, 8 - offset.left]);
+            marksToNudge.push([mark, 8 - offset.left, nudgeTop]);
           }
           else if (offset.left + 80 > windowWidth) {
             // Offscreen to right. push to the left
-            marksToNudge.push([mark, windowWidth - offset.left - 80]);
+            marksToNudge.push([mark, windowWidth - offset.left - 80, nudgeTop]);
+          } else if (nudgeTop > 0) {
+            marksToNudge.push([mark, 0, nudgeTop]);
           }
+          previousLeft = offset.left;
+          previousTop = offset.top + nudgeTop;
+          previousNudge = nudgeTop;
         });
         marksToNudge.forEach(el => {
-          el[0].style.transform = 'translate(' + el[1] + 'px, 0)';
+          el[0].style.transform = `translate(${el[1]}px, ${el[2]}px)`;
         });
         if (!Ed11y.bodyStyle) {
           Ed11y.paintReady();
@@ -700,9 +719,6 @@ class Ed11y {
             `ed11y-element-result, ed11y-element-panel {
               opacity: 1; 
               outline: 0 !important;
-            }
-            ed11y-element-result + ed11y-element-result {
-              margin-top: 34px;
             }
             .ed11y-hidden-highlight {
               box-shadow: inset 0 0 0 1px ${Ed11y.color.warning}, inset 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 1px ${Ed11y.color.warning}, 0 0 0 3px ${Ed11y.color.primary}, 0 0 1px 3px !important;
@@ -740,13 +756,24 @@ class Ed11y {
       Ed11y.bodyStyle = true;
     };
 
+    Ed11y.scrollTo = function (goto) {
+      let gotoOffset = goto.getBoundingClientRect().top;
+      if (gotoOffset < window.innerHeight * .25) {
+        // scroll down
+        window.scrollBy(0, gotoOffset - window.innerHeight * .25);
+      } else if (gotoOffset > window.innerHeight * .75) {
+        // scroll up
+        window.scrollBy(0, gotoOffset - window.innerHeight + 160);
+      }
+    };
+
     Ed11y.alignTip = function (button, toolTip, recheck = 0) { 
       let arrow = toolTip.shadowRoot.querySelector('.arrow');
       let tip = arrow.nextElementSibling;
       let loopCount = recheck + 1;
 
       // hiddenHandlers may cause element to animate.
-      if (recheck < 3 && Ed11y.options.hiddenHandlers.length > 0 && !!button.getRootNode().host.closest(Ed11y.options.hiddenHandlers)) {
+      if (recheck < 3 && Ed11y.options.hiddenHandlers && Ed11y.options.hiddenHandlers.length > 0 && !!button.getRootNode().host.closest(Ed11y.options.hiddenHandlers)) {
         window.setTimeout(function() {
           Ed11y.alignTip(button, toolTip, loopCount);
         },150, loopCount);
@@ -777,14 +804,18 @@ class Ed11y {
       let direction = 'under';
       // Default to displaying under
       if (buttonOffset.top + tipHeight + scrollTop + 50 > windowBottom) {
-        // No room below
-        if (windowWidth - (buttonLeft + tipWidth + 90) > 0 && buttonOffset.top + 40 < window.innerHeight) {
+        // If there's no room under in the viewport...
+        if (windowWidth > tipWidth * 1.5 && windowWidth - (buttonLeft + tipWidth + 90) > 0 && buttonOffset.top + 130 < window.innerHeight) {
           direction = 'right';
         } else if (buttonOffset.top > tipHeight + 15) {
           direction = 'above';
-        } else if (buttonLeft - tipWidth - 50 > 0) {
+        } else if (windowWidth > tipWidth * 1.5 && buttonLeft - tipWidth - 50 > 0) {
           direction = 'left';
-        } 
+        } else if (buttonOffset.bottom + tipHeight > document.documentElement.clientHeight - 50) {
+          // No room anywhere in viewport we're at the end of the page.
+          direction = 'above';
+        }
+        // Back to default.
       }
 
       let nudgeX = 0;
@@ -792,7 +823,6 @@ class Ed11y {
       
       if (direction === 'under') {
         // Pin to the left edge, unless the tip is not wide enough to reach:
-        // todo: this works great. copy to over, emulate on left/right.
         if (tipWidth * 4 / 5 + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
           if (tipWidth - 15 > buttonOffset.left) {
@@ -834,7 +864,7 @@ class Ed11y {
         let tipBottom = buttonOffset.top + scrollTop + tipHeight;
         if (tipBottom > windowBottom) {
           // Offset up
-          nudgeY = windowBottom - (tipBottom + 10);
+          nudgeY = windowBottom - (tipBottom + 90);
           let arrowY = nudgeY * -1 + 7;
           arrowY = Math.min(arrowY,tipHeight - 25);
           arrow.style.setProperty('top', `${arrowY}px`);
@@ -1024,10 +1054,10 @@ class Ed11y {
         // Reached end of loop or dismissal pushed us out of loop
         goNext = 0;
         // todo parameterize
-        Ed11y.nextText = 'First';
+        Ed11y.nextText = Ed11y.M.buttonFirstContent;
       } else {
         goNext = parseInt(Ed11y.goto) + 1;
-        Ed11y.nextText = 'Next';
+        Ed11y.nextText = Ed11y.M.buttonNextContent;
       }
       let goPrev = goNext - 2;
       if (goPrev < 0) {
@@ -1066,15 +1096,14 @@ class Ed11y {
     // todo mvp rewrite
     Ed11y.escapeWatch = function(event) {
       if (event.keyCode === 27) {
-        if (event.target.closest('ed11y-element-panel')) {
-          // panel
+        if (event.target.closest('ed11y-element-panel') && Ed11y.panelToggle.getAttribute('aria-expanded') === 'true') {
           Ed11y.panelToggle.focus();
           Ed11y.panelToggle.click();
         } else if (event.target.hasAttribute('data-ed11y-open')) {
           // todo mvp findElements
           let openTip = Ed11y.getOpenTip();
           if (openTip) {
-            Ed11y.elements.openButton[0].shadowRoot.querySelector('button').focus();
+            Ed11y.toggledFrom.focus();
             Ed11y.elements.openButton[0].shadowRoot.querySelector('button').click();
           }
         } 
@@ -1169,17 +1198,22 @@ class Ed11y {
 
     Ed11y.visibleElement = function(el) {
       // Checks if this element is visible. Used in parent iterators.
+      // false is definitely invisible, true requires continued iteration to tell.
       // Todo postpone: Check for offscreen?
-      // Todo mvp: test this and parameters
       if (el) {
         let style = window.getComputedStyle(el);
-        /*console.log(style.getPropertyValue('display'));
-        console.log(style.getPropertyValue('visibility'));
-        console.log(style.getPropertyValue('opacity'));
-        console.log(el.offsetWidth);
-        console.log(el.offsetHeight);
-        console.log(el.hasAttribute('hidden'));*/
-        if (
+        if (el.classList.contains('ed11y-ring-red') || el.classList.contains('ed11y-ring-yellow')) {
+          if (
+            style.getPropertyValue('display') === 'none' || 
+              style.getPropertyValue('visibility') === 'hidden' ||
+              style.getPropertyValue('opacity') === '0' ||
+              el.hasAttribute('hidden')
+          ) {
+            return false;
+          } else {
+            return true;
+          }
+        } else if (
           // todo: if the element is display:none, can we push the tooltip to the nearest visible container and then open it?
           style.getPropertyValue('display') === 'none' || 
           style.getPropertyValue('visibility') === 'hidden' ||
@@ -1200,13 +1234,11 @@ class Ed11y {
         // Element is hidden
         return false;
       } else {
+        // Element is not known to be hidden.
         let parents = Ed11y.parents(el);
-        parents.forEach((parent) => {
-          if (!Ed11y.visibleElement(parent)) {
-            return false;
-          }
-        });
-        return true;
+        let visibleParent = (parent) => Ed11y.visibleElement(parent);
+        let visible = parents.every(visibleParent);
+        return visible;
       }
     };
 
@@ -1313,7 +1345,7 @@ class Ed11y {
     if (CSS.supports('selector(:is(body))')) {
       Ed11y.initialize();
     } else {
-      console.warn('This browser can not run Editoria11y.');
+      console.warn(Ed11y.M.consoleNotSupported);
     }
   }
 }

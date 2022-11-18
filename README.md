@@ -79,17 +79,18 @@ If possible, start with a turnkey implementation:
 
 To make your own implementation, simply call your copy (or a CDN version) of "editoria11y.min.js" as a script, and then define a create a new "Ed11y" instance:
 
-```
+```html
   <script src="/PATH/TO/YOUR/COPY/editoria11y.min.js"></script>
   <script>
     const ed11y = new Ed11y({
       // options,
     });           
   </script>
+ ```
 
 A complete implementation will only be called for logged-in editors (you don't want your site visitors seeing your checker!) and will have set various custom options. It might look more like this:
 
-```
+```html
   <script src="/PATH/TO/YOUR/COPY/editoria11y.min.js"></script>
   <script>
     const ed11y = new Ed11y({
@@ -129,6 +130,7 @@ A complete implementation will only be called for logged-in editors (you don't w
       hiddenHandlers : ".accordion-panel",
     });
   </script>
+ ```
 
 
 ### Dealing with alerts on hidden or size-constrained content

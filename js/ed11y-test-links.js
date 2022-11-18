@@ -13,6 +13,7 @@ class Ed11yTestLinks {
       let linkText = Ed11y.computeAriaLabel(el); // returns text or 'noAria';
       let img = el.querySelectorAll('img');
       let hasImg = img.length > 0;
+      let innerLabel = el.querySelectorAll('[aria-label]:not(img)');
       let document = false;
 
       if (el.matches(Ed11y.options.documentLinks)) {
@@ -40,21 +41,29 @@ class Ed11yTestLinks {
           // This only checks the alt, not aria-label
           hasImg = true;
         }
+        if (innerLabel.length > 0) {
+          innerLabel.forEach(el => {
+            linkText += el.getAttribute('aria-label');
+          });
+        }
+        
       }
       
       // Todo replace with accessible name calculation?
       linkText += Ed11y.computeTitle(el) ? Ed11y.computeTitle(el) : '';
 
+
       // Create version of text without "open in new window" warnings.
       let linkStrippedText = Ed11y.options.linkIgnoreStrings ? linkText.replace(Ed11y.options.linkIgnoreStrings, '') : linkText;
-      if (el?.getAttribute('target') === '_blank' && linkText === linkStrippedText && linkStrippedText.indexOf('window') === -1 && linkStrippedText.indexOf('tab') === -1) {
-        // todo bring back defaults? new window? 
-        // If nothing was stripped and we opened a new window, we weren't warned.
+      linkStrippedText = linkStrippedText.toLowerCase();
+      let linkNewWindows = linkStrippedText.replace(Ed11y.M.linkStringsNewWindows,'');
+      if (el?.getAttribute('target') === '_blank' && linkText.length === linkNewWindows.length) {
+        // Nothing was stripped AND we weren't warned.
         let dismissKey = Ed11y.dismissalKey(linkText);        
         Ed11y.results.push([el, 'linkNewWindow', Ed11y.M.linkNewWindow.tip(), 'beforebegin', dismissKey]);
       }
       
-      linkStrippedText = linkStrippedText.replace(/'|"|-|\.|\s+/g, '').toLowerCase();
+      linkStrippedText = linkStrippedText.replace(/'|"|-|\.|\s+/g, '');
 
       // Tests to see if this link is empty
       if (linkStrippedText.length === 0) {   
@@ -70,17 +79,17 @@ class Ed11yTestLinks {
         let linkTextCheck = function (textContent) {
           // todo later: use regex to find any three-letter TLD followed by a slash.
           // todo later: parameterize TLD list
-          let stopWords = ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'];
-          let partialStopRegex = /learn|to|more|now|this|page|link|site|website|check|out|view|our|read|\.|,|:|download|form|here|click|>|<|\s/g;
+          let linksUrls = Ed11y.options.linksUrls ? Ed11y.options.linksUrls : Ed11y.M.linksUrls;
+          let linksMeaningless = Ed11y.options.linksMeaningless ? Ed11y.options.linksMeaningless : Ed11y.M.linksMeaningless;
           let hit = 'none';
 
-          if (textContent.replace(partialStopRegex, '').length === 0) {
+          if (textContent.replace(linksMeaningless, '').length === 0) {
             // If no partial words were found, then check for total words.
             hit = 'generic';
           }
           else {
-            for (let i = 0; i < stopWords.length; i++) {
-              if (textContent.indexOf(stopWords[i]) > -1) {
+            for (let i = 0; i < linksUrls.length; i++) {
+              if (textContent.indexOf(linksUrls[i]) > -1) {
                 hit = 'url';
                 break;
               }
