@@ -171,7 +171,7 @@ const ed11yLang = {
         `${Ed11y.M.altAttributeProvided(alt)}
         <p>Screen readers <strong>announce</strong> they are describing an image when reading alt text, so 
             phrases like "image of" and "photo of" are usually redundant, sounding like "this image's alt is the alt of an image."</p>
-            <p>Note the sometimes the phrase is not redundant and should be kept, because the image is an image of an image:</p>
+            <p>Note that sometimes the phrase is not redundant and should be kept, because the image is an image of an image:</p>
             <ul><li>Redundant: "image of a VHS tape"</li>
             <li>Relevant: "image of a VHS tape being shown in history class"</li></ul>`
     },
