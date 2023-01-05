@@ -117,7 +117,7 @@ class Ed11yTestLinks {
       //Warning: Find all PDFs. Although only append warning icon to
       // first PDF on page.
       if (!hasImg && document) {
-        let dismissKey = Ed11y.dismissalKey(el?.getAttribute('src'));
+        let dismissKey = Ed11y.dismissalKey(el?.getAttribute('href'));
         Ed11y.results.push([el, 'linkDocument', Ed11y.M.linkDocument.tip(), 'beforebegin', dismissKey]);
       }
     });
