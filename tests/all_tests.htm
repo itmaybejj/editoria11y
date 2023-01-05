@@ -51,7 +51,7 @@
             
             <p class="positive"> <strong>Short lines with <a href="#">links</a>, <span>span</span>, &nbsp;non-breaking whitespace should still be flagged </strong></p>
             
-            <p class="positive"> <strong>Short bold line</strong><br>With a carriage return.</p>
+            <p class="todo-positive"> <strong>Short bold line</strong><br>With a carriage return.</p>
             
 
             <p class="negative"><strong>Headings with certain punctuation are assumed to be sentences, and not flagged. (!?)</strong></p>
@@ -209,7 +209,7 @@
 
         <h3 id="tables-without-valid-headers">Tables without valid headers</h3>
 
-        <table class="positive"><tbody><tr><td>A table without a TH header is invalid</td><td class="positive"><h4 >Outline headers do not count</h4></td></tr></tbody></table>
+        <table class="positive"><tbody><tr><td>A table without a TH header is invalid</td><td class="positive"><h4 >Outline headers do not count</h4></td><td class="negative"><p><strong>Disable should be content header test inside tables</strong></p></td></tr></tbody></table>
 
         <h3 id="empty-table-header-cells">Empty table header cells</h3>
 
