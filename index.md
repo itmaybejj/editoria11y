@@ -113,4 +113,10 @@ Editoria11y's JavaScript began as a fork of the [Sa11y](https://ryersondmp.githu
 
 Sa11y itself began as a fork of [Tota11y by Khan Academy](https://github.com/Khan/tota11y), and uses [FontAwesome icons](https://github.com/FortAwesome/Font-Awesome) and jQuery.
 
-<div hidden><style>#project_title {text-transform: capitalize;}.inner{max-width:50rem;}li{margin-top:.75rem;}section h2,section h3,section h4{padding-top:1em;}</style><script src="https://code.jquery.com/jquery-3.5.1.min.js"></script><link rel="stylesheet" media="screen" href="{{ site.baseurl}}/css/editoria11y.css"><script src="{{ site.baseurl}}/demo/editoria11y-prefs.js"></script><script src="{{ site.baseurl}}/js/editoria11y-localization.js"></script><script src="{{ site.baseurl}}/js/editoria11y.js"></script></div>
+<div hidden><style>#project_title {text-transform: capitalize;}.inner{max-width:50rem;}li{margin-top:.75rem;}section h2,section h3,section h4{padding-top:1em;}</style>
+ <script src="{{ site.baseurl}}/dist/editoria11y.min.js"></script>
+        <!-- Instantiate-->
+        <script>
+          const ed11y = new Ed11y();
+        </script>
+</div>
