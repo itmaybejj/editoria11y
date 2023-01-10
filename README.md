@@ -56,21 +56,15 @@ Try a [clickable demo of what a logged-in author would see](https://itmaybejj.gi
 * General content quality assurance
   * Lists made from asterisks, numbers and letters rather than list elements
   * AVOID LOTS OF CAPS LOCK TEXT
-  * Tables without headers and tables with document headers ("Header 3") instead of table headers (<th>)
+  * Tables without headers
+  * Tables with empty header cells
+  * Tables with document headers ("Header 3") instead of table headers 
   * Links to PDFs and other documents, reminding the user to test the download for accessibility or provide an alternate, accessible format
+  * Suspiciously short blockquotes that may not be block quotes.
+  * Embedded videos, reminding the user to add closed captions
+  * Embedded audio, reminding the user to provide a transcript
+  * Embedded social media, reminding the user to check their social media content as well
   
-### Items noted in the full check
-Clicking the full check button flips open an expanded panel where the user can see the document outline (headers) and all image alt text.
-
-It also flags some additional items:
-
-* The first link to a PDF on a page, reminding the user to provide an accessible PDF or an alternate format
-* Suspiciously short blockquotes that may not be block quotes.
-* Embedded videos, reminding the user to add closed captions
-* Embedded audio, reminding the user to provide a transcript
-* Embedded social media, reminding the user to check their social media content as well
-* A custom warning -- same as above, but checking against selectors you provide in the "ed11yCustomEmbeddedContent" variable.
-
 ## Installation and configuration
 
 If possible, start with a turnkey implementation:
