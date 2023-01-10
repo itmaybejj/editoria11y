@@ -17,7 +17,6 @@ If you are reading this ReadMe on the [GitHub site](https://itmaybejj.github.io/
 
 Try clicking the toggle in the lower righthand corner of the page. Tooltips will appear near these items with explanations of the issue and suggestions for improving the content.
 
-Then try a [full demo illustrating most of the tests and results](https://itmaybejj.github.io/editoria11y/demo/).
 
 ### Issues flagged in the quick check
 * Headings
@@ -113,7 +112,7 @@ Editoria11y's JavaScript began as a fork of the [Sa11y](https://ryersondmp.githu
 
 Sa11y itself began as a fork of [Tota11y by Khan Academy](https://github.com/Khan/tota11y), and uses [FontAwesome icons](https://github.com/FortAwesome/Font-Awesome) and jQuery.
 
-<div hidden><style>#project_title {text-transform: capitalize;}.inner{max-width:50rem;}li{margin-top:.75rem;}section h2,section h3,section h4{padding-top:1em;}</style>
+<div hidden><style>.wrapper{float:left;}a{font-weight: 500;}</style>
  <script src="{{ site.baseurl}}/dist/editoria11y.min.js"></script>
         <!-- Instantiate-->
         <script>
