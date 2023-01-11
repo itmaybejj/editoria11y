@@ -13,7 +13,7 @@ Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly 
 Try examine the panel in the lower righthand corner of the page. Tooltips will have appeared near items with explanations of the issue and suggestions for improving the content:
 
 * Example linked filename: [https://www.youtube.com/watch?v=DLzxrzFCyOs](https://www.youtube.com/watch?v=DLzxrzFCyOs)
-* Example link only titled with generic text: “[click here](https://www.youtube.com/watch?v=DLzxrzFCyOs),” “learn more,” “download,” etc.
+* Example link only titled with generic text: “learn more,” “download,” “[click here](https://www.youtube.com/watch?v=DLzxrzFCyOs),” etc.
 * Example (invisible) link with no accessible text at all: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"></a>
 
 
