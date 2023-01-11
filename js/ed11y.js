@@ -844,7 +844,7 @@ class Ed11y {
         // Slide left or right to center tip on page.
         nudgeY = -1 * (tipHeight + 18);
         arrow.style.setProperty('top', tipHeight);
-        if (tipWidth * 4 / 5 + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
+        if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
           if (tipWidth - 15 > buttonOffset.left) {
             nudgeX = 15 - buttonOffset.left;
