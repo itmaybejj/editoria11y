@@ -72,9 +72,6 @@ A complete implementation will only be called for logged-in editors (you don't w
     const ed11y = new Ed11y({
       // We have two content regions
       checkRoots : 'main, .footer-content-zone',
-
-      // Should we be polite?
-      alertMode : 'assertive',
             
       // Content editors cannot edit these elements
       ignoreElements : 'nav *, #social-block',
@@ -129,6 +126,9 @@ header {
  <script src="{{ site.baseurl}}/dist/editoria11y.min.js"></script>
         <!-- Instantiate-->
         <script>
-          const ed11y = new Ed11y();
+          const ed11y = new Ed11y({
+            // Should we be polite?
+            alertMode : 'assertive',
+          });
         </script>
 </div>
