@@ -823,7 +823,7 @@ class Ed11y {
       
       if (direction === 'under') {
         // Pin to the left edge, unless the tip is not wide enough to reach:
-        if (tipWidth * 4 / 5 + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
+        if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
           if (tipWidth - 15 > buttonOffset.left) {
             nudgeX = 15 - buttonOffset.left;

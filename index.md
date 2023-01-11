@@ -91,7 +91,10 @@ Editoria11y is maintained by [John Jameson](https://www.linkedin.com/in/johnwjam
 
 
 <div hidden><style>
-.wrapper {float:left;}
+.wrapper {
+  margin: auto;
+  min-height: 100vh;
+  }
 a {font-weight: 500;}
 a.github {
   display: inline-block;
