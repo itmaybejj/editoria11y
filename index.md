@@ -2,7 +2,7 @@
 Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly accessibility checker that addresses three critical needs for content authors:
 
 1. It runs automatically. Modern spellcheck works so well because it is always running; put spellcheck behind a button and few users remember to run it!
-1. It focuses exclusively on straightforward issues a content author can easily understand and easily fix. Yes; comprehensive testing should be a key part of site creation, but if a tool is going to run automatically, it will drive an author bonkers if it is constantly alerting on code they do not understand and cannot fix.
+1. It focuses exclusively on straightforward issues a content author can easily understand and easily fix. Yes; comprehensive testing should be a key part of site creation, but if a tool is going to run automatically, it will do more harm than good if it is constantly alerting on code they do not understand and cannot fix.
 1. It runs in context. Modern content management systems often assemble pages from many sources. Only the assembled page can be checked for things like the header outline order.
 
 ## The authoring experience
@@ -10,7 +10,7 @@ Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly 
 * If the page has a *new* issue, a panel automatically slides open with more details.
 * If the user minimizes the panel, it will not open automatically on future page visits until the content changes.
 
-Try clicking the toggle in the lower righthand corner of the page. Tooltips will appear near these items with explanations of the issue and suggestions for improving the content:
+Try examine the panel in the lower righthand corner of the page. Tooltips will have appeared near items with explanations of the issue and suggestions for improving the content:
 
 * Example linked filename: [https://www.youtube.com/watch?v=DLzxrzFCyOs](https://www.youtube.com/watch?v=DLzxrzFCyOs)
 * Example link only titled with generic text: “[click here](https://www.youtube.com/watch?v=DLzxrzFCyOs),” “learn more,” “download,” etc.
@@ -72,6 +72,9 @@ A complete implementation will only be called for logged-in editors (you don't w
     const ed11y = new Ed11y({
       // We have two content regions
       checkRoots : 'main, .footer-content-zone',
+
+      // Should we be polite?
+      alertMode : 'assertive',
             
       // Content editors cannot edit these elements
       ignoreElements : 'nav *, #social-block',
