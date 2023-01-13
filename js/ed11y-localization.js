@@ -22,11 +22,12 @@ const ed11yLang = {
     buttonPrevContent: 'Previous',
     buttonFirstContent: 'First',
     buttonNextContent: 'Next',
-    buttonShowHiddenAlertsContent: 'Restore hidden alerts',
+    buttonShowHiddenAlertsContent: 'Show dismissed alerts',
+    buttonHideHiddenAlertsContent: 'Hide dismissed alerts',
     panelCheckOutline: '<p>Check that this forms <a href=\'https://accessibility.princeton.edu/how/content/headings\'>a complete outline</a>:</p>',
     panelCheckAltText: '<p>Check <a href=\'https://accessibility.princeton.edu/how/content/alternative-text\'>alt text</a>, <a href=\'https://accessibility.princeton.edu/how/content/images-text\'>images of text</a>, &amp; <a href=\'https://webaim.org/techniques/captions/\'>captions</a>.</p>',
     panelHelp : `
-    <p>Assistive technologies and search engine crawlers work best with well-structured content. <a href="https://itmaybejj.github.io/editoria11y/demo/">Editoria11y</a> checks for common needs, such as descriptive image alternative text, meaningful heading outlines and well-named links.</p>
+    <p>Assistive technologies and search engine crawlers work best with well-structured content. <a href="https://itmaybejj.github.io/editoria11y/">Editoria11y</a> checks for common needs, such as descriptive image alternative text, meaningful heading outlines and well-named links.</p>
     <p>Note that it <strong>only</strong> checks content; different tools and techniques are needed to <a href='https://webaim.org/resources/evalquickref/'>test the design and code</a>.<p>
     <p>Have a bug or feature request? <a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Contact the Editoria11y maintainers</a>.</p>
     `,
@@ -59,13 +60,15 @@ const ed11yLang = {
     dismissOkButtonTitle: 'Dismisses alert for all editors',
     dismissHideButtonContent: 'Hide alert',
     dismissHideButtonTitle: 'Dismisses alert for you',
+    undismissButtonContent: 'Restore this dismissed alert',
+    undismissNotePermissions: 'This alert has been hidden by an administrator',
     elementDismissalHelpOK : `
-    "Mark as checked and OK" hides this alert on this page, for all site editors. The alert may reappear if the page's content changes, or if any editor presses "restore hidden alerts" for this page.
+    "OK" dismisses this for everyone, on this page.
     `,
     elementDismissalHelpHide : `
-    "Hide alert" hides this alert on this page, for you alone. The alert may reappear if the page content changes or if you switch devices.
+    "Hide" dismisses this for you, on this page.
     `,
-    elementDismissalHelpAll : 'To dismiss an alert site-wide, have an administrator adjust the configuration options to ignore this element.',
+    elementDismissalHelpAll : "Site-wide changes can be made in Editoria11y's settings.",
 
     // Tooltips for heading tests =========================
 

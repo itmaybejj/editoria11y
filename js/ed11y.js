@@ -280,9 +280,12 @@ class Ed11y {
       
       Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
 
-      if (Ed11y.totalCount > 0) {
+      // TotalCount is used for sync operations. Use local var for "show dismissed" state.
+      let displayCount = Ed11y.options.showDismissed ? Ed11y.totalCount + Ed11y.dismissedCount : Ed11y.totalCount;
+
+      if (displayCount > 0) {
         Ed11y.panelJumpNext.removeAttribute('hidden');
-        if (Ed11y.totalCount < 2) {
+        if (displayCount < 2) {
           Ed11y.panelJumpPrev.setAttribute('hidden','');
         } else {
           Ed11y.panelJumpPrev.removeAttribute('hidden');
@@ -295,10 +298,10 @@ class Ed11y {
           Ed11y.panel.classList.remove('errors', 'pass');
           Ed11y.panel.classList.add('warnings');
         }
-        Ed11y.panelCount.textCount = Ed11y.totalCount;    
+        Ed11y.panelCount.textCount = displayCount;    
         Ed11y.panelCount.style.display = 'inline-block';
-        Ed11y.panelMessage.innerHTML = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
-        Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
+        Ed11y.panelMessage.innerHTML = displayCount === 1 ? Ed11y.M.panelCount1 : displayCount + Ed11y.M.panelCountMultiple;
+        Ed11y.panel.querySelector('.toggle-count').textContent = displayCount;
       }
       else {
         Ed11y.panelJumpNext.setAttribute('hidden', '');
@@ -317,7 +320,7 @@ class Ed11y {
         }
       }
       if (Ed11y.dismissedCount > 0 || Ed11y.ignoreAll) {
-        Ed11y.restoreDismissed.removeAttribute('hidden');
+        Ed11y.showDismissed.removeAttribute('hidden');
       }
       Ed11y.panel.classList.remove('ed11y-preload');
 
@@ -557,23 +560,51 @@ class Ed11y {
       let test = Ed11y.results[id][1];
       let dismissalKey = Ed11y.dismissalKey(Ed11y.results[id][4]);
 
+      // old dismissAll
+      /*Ed11y.dismissedAlerts[Ed11y.options.currentPage] = {};
+      if (Ed11y.options.syncedDismissals === false) {
+        localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
+      } else {
+        let dismissalDetail = {
+          dismissPage: Ed11y.options.currentPage,
+          dismissAction: 'reset',
+        };
+        let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
+        document.dispatchEvent(ed11yDismissalUpdate);
+      }heeeee*/
+
       // Remove tip and reset borders around element
       Ed11y.resetClass(['ed11y-hidden-highlight','ed11y-ring-red','ed11y-ring-yellow']);
       removal.parentNode.removeChild(removal);
       let removeButton = Ed11y.elements.openButton[0];
       removeButton.parentNode.removeChild(removeButton);
 
-      // Build dismissal record.
-      let dismissal = {};
-      dismissal[dismissalKey] = dismissalType;
-      if (typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage] == 'undefined') {
-        let store = {};
-        store[test] = dismissal;
-        Ed11y.dismissedAlerts[Ed11y.options.currentPage] = store;
-      } else if (typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] === 'undefined') {
-        Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] = dismissal;
+      // Update dismissal record.
+      if (dismissalType === 'reset') {
+        delete Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissalKey];
+        if ( Object.keys(Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]).length === 0) {
+          delete Ed11y.dismissedAlerts[Ed11y.options.currentPage][test];
+        }
+        if ( Object.keys(Ed11y.dismissedAlerts[Ed11y.options.currentPage]).length === 0 ) {
+          delete Ed11y.dismissedAlerts[Ed11y.options.currentPage];
+        } 
       } else {
-        Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissalKey] = dismissalType;
+        let dismissal = {};
+        dismissal[dismissalKey] = dismissalType;
+        if (typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage] == 'undefined') {
+          let store = {};
+          store[test] = dismissal;
+          Ed11y.dismissedAlerts[Ed11y.options.currentPage] = store;
+        } else if (typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] === 'undefined') {
+          Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] = dismissal;
+        } else {
+          Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissalKey] = dismissalType;
+        }
+
+        // If we are showing hidden alerts, we need to stop so this goes away.
+        Ed11y.options.showDismissed = false;
+        Ed11y.showDismissed.setAttribute('data-ed11y-showing-hidden', !!Ed11y.options.showDismissed);
+        Ed11y.showDismissed.textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlertsContent : Ed11y.M.buttonShowHiddenAlertsContent;
       }
 
       // Send record to storage or dispatch an event to an API.
@@ -611,24 +642,15 @@ class Ed11y {
       }, 500, rememberGoto);
     };
 
-    Ed11y.clearDismissals = function() {
+    Ed11y.toggleShowDismissals = function() {
       // todo: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
       Ed11y.ignoreAll = false;
-      Ed11y.dismissedAlerts[Ed11y.options.currentPage] = {};
-      if (Ed11y.options.syncedDismissals === false) {
-        localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
-      } else {
-        let dismissalDetail = {
-          dismissPage: Ed11y.options.currentPage,
-          dismissAction: 'reset',
-        };
-        let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
-        document.dispatchEvent(ed11yDismissalUpdate);
-      }
-      
-      Ed11y.restoreDismissed.setAttribute('hidden', '');
+      Ed11y.options.showDismissed = !(Ed11y.options.showDismissed);
       Ed11y.reset();
       Ed11y.checkAll(false, 'show');
+
+      Ed11y.showDismissed.setAttribute('data-ed11y-showing-hidden', !!Ed11y.options.showDismissed);
+      Ed11y.showDismissed.textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlertsContent : Ed11y.M.buttonShowHiddenAlertsContent;
     };
 
     Ed11y.dismissHelp = function(el) {
@@ -657,7 +679,7 @@ class Ed11y {
     Ed11y.showResults = function () {
 
       Ed11y.results?.forEach(function (el, i) {
-        if (!Ed11y.results[i][5]) {
+        if (!Ed11y.results[i][5] || Ed11y.options.showDismissed) {
           Ed11y.result(el, i);
         }
       });

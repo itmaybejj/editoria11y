@@ -31,7 +31,7 @@ class Ed11yElementPanel extends HTMLElement {
           <div class='jumplinks'>
             <button class='jump prev' data-ed11y-goto='0'><span aria-hidden='true'>« </span><span class='jump-prev'>${Ed11y.M.buttonPrevContent}</span></button>
             <button class='jump next' data-ed11y-goto='0'><span class='jump-next'>${Ed11y.M.buttonFirstContent}</span> <span aria-hidden='true'> »</span></button>
-            <button id='restore' hidden>${Ed11y.M.buttonShowHiddenAlertsContent}</button>
+            <button id='show-hidden' data-ed11y-showing-hidden='${!!Ed11y.options.showDismissed}' hidden>${Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlertsContent : Ed11y.M.buttonShowHiddenAlertsContent}</button>
           </div>
         </div>
       <div id='headings-tab' role="tabpanel" class="hidden" aria-labelledby='headings' tabindex='0'>
@@ -217,8 +217,12 @@ class Ed11yElementPanel extends HTMLElement {
         .jump.next {
           min-width: 60px;
         }
-        #restore {
+        #show-hidden {
           min-width: min(146px, 100%);
+        }
+        #show-hidden[data-ed11y-showing-hidden="true"] {
+          background: ${Ed11y.color.primary};
+          color: ${Ed11y.color.primaryText};
         }
         .content button:hover {
           background: ${Ed11y.color.bg};
@@ -278,9 +282,9 @@ class Ed11yElementPanel extends HTMLElement {
       Ed11y.panelJumpPrev = wrapper.querySelector('.jump.prev');
       Ed11y.panelJumpNext.addEventListener('click', this.jumpTo);
       Ed11y.panelJumpPrev.addEventListener('click', this.jumpTo);
-      Ed11y.restoreDismissed = wrapper.querySelector('#restore');
-      Ed11y.restoreDismissed.addEventListener('click', function(){
-        Ed11y.clearDismissals();
+      Ed11y.showDismissed = wrapper.querySelector('#show-hidden');
+      Ed11y.showDismissed.addEventListener('click', function(){
+        Ed11y.toggleShowDismissals();
       });
       Ed11y.announce = wrapper.querySelector('.announce');
       Ed11y.panelTabs = wrapper.querySelectorAll('.buttonbar button');
