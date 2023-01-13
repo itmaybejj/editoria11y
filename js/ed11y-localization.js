@@ -68,7 +68,7 @@ const ed11yLang = {
     elementDismissalHelpHide : `
     "Hide" dismisses this for you, on this page.
     `,
-    elementDismissalHelpAll : "Site-wide changes can be made in Editoria11y's settings.",
+    elementDismissalHelpAll : 'Site-wide changes can be made in Editoria11y\'s settings.',
 
     // Tooltips for heading tests =========================
 
