@@ -54,7 +54,10 @@ class Ed11y {
       // "\(link is external\)|\(link sends email\)"
       linkIgnoreStrings: false,
 
-      // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip
+      // Disable the "is this element visible" check on themes that have 0-height elements.
+      checkVisible: true,
+
+      // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
       hiddenHandlers : '',
 
       // Interface
@@ -285,7 +288,7 @@ class Ed11y {
 
       if (displayCount > 0) {
         Ed11y.panelJumpNext.removeAttribute('hidden');
-        if (displayCount < 2) {
+        if (displayCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
           Ed11y.panelJumpPrev.setAttribute('hidden','');
         } else {
           Ed11y.panelJumpPrev.removeAttribute('hidden');

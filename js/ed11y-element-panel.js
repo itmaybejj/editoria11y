@@ -29,7 +29,7 @@ class Ed11yElementPanel extends HTMLElement {
               <div aria-live='polite' class='announce hidden'></div>
           </div>
           <div class='jumplinks'>
-            <button class='jump prev' data-ed11y-goto='0'><span aria-hidden='true'>« </span><span class='jump-prev'>${Ed11y.M.buttonPrevContent}</span></button>
+            <button class='jump prev' data-ed11y-goto='0' hidden><span aria-hidden='true'>« </span><span class='jump-prev'>${Ed11y.M.buttonPrevContent}</span></button>
             <button class='jump next' data-ed11y-goto='0'><span class='jump-next'>${Ed11y.M.buttonFirstContent}</span> <span aria-hidden='true'> »</span></button>
             <button id='show-hidden' data-ed11y-showing-hidden='${!!Ed11y.options.showDismissed}' hidden>${Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlertsContent : Ed11y.M.buttonShowHiddenAlertsContent}</button>
           </div>
@@ -337,7 +337,7 @@ class Ed11yElementPanel extends HTMLElement {
     window.setTimeout(function (goto, target) {
       let firstVisible = false;
       let alertMessage;
-      if (!Ed11y.visible(target)) {
+      if (Ed11y.options.checkVisible && !Ed11y.visible(target)) {
         firstVisible = Ed11y.firstVisibleParent(target);
         alertMessage = Ed11y.M.jumpedToInvisibleTip;
       }

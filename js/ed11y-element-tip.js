@@ -18,7 +18,8 @@ class Ed11yElementTip extends HTMLElement {
       this.wrapper = document.createElement('div');
       this.wrapper.setAttribute('role', 'dialog');
       
-      this.dismissable = this.result[4] !== false ? true : false;
+      this.dismissable = !!this.result[4];
+      this.dismissed = !!this.result[5];
       this.wrapper.classList.add('wrapper');
       this.wrapper.classList.add('ed11y-result');
 
@@ -26,7 +27,6 @@ class Ed11yElementTip extends HTMLElement {
 
       // Create CSS with embedded icon
       const style = document.createElement('style');
-      //let icon = this.toggleImage();
       style.textContent = Ed11y.baseCSS + `
         :host {
           position: absolute;
@@ -229,7 +229,7 @@ class Ed11yElementTip extends HTMLElement {
         let dismissHelp = false;
         
         // Dismissal Key is set in [5] if alert has been dismissed.
-        if (Ed11y.options.showDismissed && !!this.result[5]) {
+        if (Ed11y.options.showDismissed && this.dismissed) {
           // Check if user has permission to reset this alert.
           let okd = Ed11y.dismissedAlerts[Ed11y.options.currentPage][this.result[1]][this.result[5]] === 'ok';
           if ((okd && Ed11y.options.allowOK) || (!okd)) {
@@ -291,9 +291,18 @@ class Ed11yElementTip extends HTMLElement {
       closeButton.addEventListener('click', (event) => {
         event.preventDefault;
         if(this.open) {
+          // todo this needs to be part of the shadow DOM query I think
           let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
           Ed11y.toggledFrom.focus();
           // todo postpone: track if this tip was opened by the next button. If so, transfer focus back to it instead
+          toggle?.setAttribute('data-ed11y-action', 'shut');
+          this.setAttribute('data-ed11y-action', 'shut');
+        }
+      });
+      document.addEventListener('click', (event) => {
+        // Close tip when mouse is clicked outside it.
+        if(this.open && !event.target.closest('ed11y-element-tip, ed11y-element-result, ed11y-element-panel')) {
+          let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
           toggle?.setAttribute('data-ed11y-action', 'shut');
           this.setAttribute('data-ed11y-action', 'shut');
         }
@@ -327,34 +336,6 @@ class Ed11yElementTip extends HTMLElement {
       this.wrapper.classList.remove('open');
     }
     this.setAttribute('data-ed11y-open',changeTo);   
-  }
-
-  toggleImage() {
-    let manual = `
-      .toggle {
-        box-shadow: inset 0 0 0 2px ${Ed11y.color.warning}, inset 0 0 0 3px #444, inset 0 0 0 6px ${Ed11y.color.warning}, 1px 1px 5px 0 rgba(0,0,0,.5);
-        background: ${Ed11y.color.warning};
-        color: #333;
-      }
-      .toggle::before {
-        content: "?";
-      }
-      .toggle:hover, .toggle[aria-expanded='true'] {
-        border: 2px solid ${Ed11y.color.primary};
-      }`;
-    let alert = `
-      .toggle {
-        box-shadow: inset 0 0 0 1px ${Ed11y.color.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 1px 1px 5px 0 rgba(0,0,0,.5);
-        background: #fefefe;
-        color: ${Ed11y.color.alert};
-      }
-      .toggle:hover, .toggle[aria-expanded='true'] {
-        box-shadow: inset 0 0 0 1px ${Ed11y.color.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 3px transparent;
-      }
-      .toggle::before {
-        content: "!";
-      }`;
-    return this.dismissable ? manual : alert;
   }
 
   tipDOM (id, title, body) {

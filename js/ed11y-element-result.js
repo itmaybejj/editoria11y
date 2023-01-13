@@ -17,7 +17,8 @@ class Ed11yElementResult extends HTMLElement {
 
       this.wrapper = document.createElement('aside');
       
-      this.dismissable = this.result[4] !== false ? true : false;
+      this.dismissable = !!this.result[4];
+      this.dismissed = !!this.result[5];
       // todo MVP this would only work in darkmode -- need more theme variables
       // #ffd4d4 red. turn background to alert color in lightmode.
       this.wrapper.classList.add('wrapper');
@@ -100,8 +101,23 @@ class Ed11yElementResult extends HTMLElement {
   }
 
   toggleImage() {
-    let manual = `
-      .toggle {
+
+    let css = '';
+    if (this.dismissed) {
+      css = `
+        .toggle {
+          box-shadow: inset 0 0 0 2px ${Ed11y.color.primary}, inset 0 0 0 3px ${Ed11y.color.primaryText}, inset 0 0 0 6px ${Ed11y.color.primary}, 1px 1px 5px 0 rgba(0,0,0,.5);
+          background: ${Ed11y.color.ok};
+          color: ${Ed11y.color.primaryText};
+        }
+        .toggle::before {
+          content: "✓";
+        }
+        .toggle:hover, .toggle[aria-expanded='true'] {
+          border: 2px solid ${Ed11y.color.ok};
+        }`;
+    } else if (this.dismissable) {
+      css = `.toggle {
         box-shadow: inset 0 0 0 2px ${Ed11y.color.warning}, inset 0 0 0 3px #444, inset 0 0 0 6px ${Ed11y.color.warning}, 1px 1px 5px 0 rgba(0,0,0,.5);
         background: ${Ed11y.color.warning};
         color: #333;
@@ -112,19 +128,20 @@ class Ed11yElementResult extends HTMLElement {
       .toggle:hover, .toggle[aria-expanded='true'] {
         border: 2px solid ${Ed11y.color.primary};
       }`;
-    let alert = `
-      .toggle {
-        box-shadow: inset 0 0 0 1px ${Ed11y.color.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 1px 1px 5px 0 rgba(0,0,0,.5);
+    } else {
+      css = `.toggle {
+        box-shadow: inset 0 0 0 1px ${Ed11y.color.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.color.alert}, 1px 1px 5px 0 rgba(0,0,0,.5);
         background: #fefefe;
         color: ${Ed11y.color.alert};
       }
       .toggle:hover, .toggle[aria-expanded='true'] {
-        box-shadow: inset 0 0 0 1px ${Ed11y.color.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 3px transparent;
+        box-shadow: inset 0 0 0 1px ${Ed11y.color.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.color.alert}, 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 3px transparent;
       }
       .toggle::before {
         content: "!";
       }`;
-    return this.dismissable ? manual : alert;
+    }
+    return css;
   }
 
   handleHover(event) {
