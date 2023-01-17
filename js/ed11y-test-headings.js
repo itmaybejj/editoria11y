@@ -45,12 +45,12 @@ class Ed11yTestHeadings {
       }
       else if (headingLength > 160) {
         outlinePrefix += Ed11y.M.errorOutlinePrefixHeadingIsLong;
-        dismissKey = level + headingText;
+        dismissKey = Ed11y.dismissalKey(level + headingText);
         error = 'headingIsLong',
         alert.push([el, error, Ed11y.M.headingIsLong.tip(), position, dismissKey]);
       }
       if (level - prevLevel > 1 && i !== 0) {
-        dismissKey = level + headingText;
+        dismissKey = Ed11y.dismissalKey(level + headingText);
         outlinePrefix += Ed11y.M.errorOutlinePrefixSkippedLevel;
         error = 'headingLevelSkipped';
         alert.push([el, error, Ed11y.M.headingLevelSkipped.tip(prevLevel, level), position, dismissKey]);

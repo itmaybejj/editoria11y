@@ -6,7 +6,7 @@ describe('Check uglified version', function() {
   before(browser => browser.navigateTo(absolutePath));
 
   it('No false negatives', function(browser) {
-    browser.waitForElementVisible('ed11y-element-result');
+    browser.waitForElementPresent('ed11y-element-panel', 500);
      
     browser.elements('css selector','.positive', nodeContents => {
       nodeContents.value.forEach(node => {

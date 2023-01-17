@@ -33,7 +33,7 @@ class Ed11y {
       },
 
       // "Assertive" opens the panel automatically if new items are found.
-      alertMode: 'polite',
+      alertMode: 'assertive',
 
       // Dismissed alerts
       currentPage: false, // uses window.location.pathname unless a string is provided.
@@ -165,6 +165,23 @@ class Ed11y {
             Ed11y.dismissedAlerts[Ed11y.options.currentPage] = Ed11y.options.syncedDismissals;
           }
           
+          // Ed11y v2.0 stored special characters in dismissal keys. This strips them.
+          // This loop can be deleted in 2024.
+          if (Ed11y.options.currentPage in Ed11y.dismissedAlerts) {
+            for( const [key] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage])) {
+              if (key in Ed11y.dismissedAlerts[Ed11y.options.currentPage]) {
+                for( const [subkey, subvalue] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage][key])) {
+                  let newKey = Ed11y.dismissalKey(subkey);
+                  if (newKey !== subkey) {
+                    Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][newKey] = subvalue;
+                    delete Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][subkey];
+                  }
+                }
+              }
+            }
+          }
+          
+          
           // Create test class objects
           // todo postpone: dispatch event to load an array of custom test results
           Ed11y.testEmbeds = new Ed11yTestEmbeds;
@@ -266,7 +283,8 @@ class Ed11y {
         Ed11y.dismissedCount = 0;
         for (let i = Ed11y.results.length - 1; i >= 0; i--) {
           let test = Ed11y.results[i][1];
-          let dismissKey = Ed11y.results[i][4];
+          let dismissKey = Ed11y.dismissalKey(Ed11y.results[i][4]);
+          // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
           if (dismissKey !== false && Ed11y.options.currentPage in Ed11y.dismissedAlerts && test in Ed11y.dismissedAlerts[Ed11y.options.currentPage] && dismissKey in Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]) {
             // Remove result if it has been marked OK or ignored, increment dismissed match counter.
             Ed11y.dismissedCount++;
@@ -335,8 +353,7 @@ class Ed11y {
 
     };
 
-    Ed11y.updatePanel = function (onLoad, showPanel) {
-      
+    Ed11y.updatePanel = function (onLoad = false, showPanel = 'show') {
       if (onLoad === true) {
         // Create the panel if it doesn't exist yet
         let panel = document.createElement('ed11y-element-panel');
@@ -384,6 +401,11 @@ class Ed11y {
         }, 0);
         if (onLoad === false) {
           window.setTimeout(function() {
+            if (Ed11y.options.showDismissed == true && Ed11y.showDismissed && Ed11y.dismissedCount === 0) {
+              Ed11y.options.showDismissed = false;
+              Ed11y.showDismissed.textContent = Ed11y.M.buttonShowHiddenAlertsContent;
+              Ed11y.showDismissed.setAttribute('data-ed11y-showing-hidden', 'false');
+            }
             Ed11y.panelMessage.focus();
           }, 500);
         }
@@ -553,7 +575,8 @@ class Ed11y {
     };
 
     Ed11y.dismissalKey = function (text) {
-      return String(text).substring(0,512);
+      //?.replace(/([^0-9a-zA-Z])/g,'')
+      return String(text).replace(/([^0-9a-zA-Z])/g,'').substring(0,512);
     };
 
     Ed11y.dismissThis = function (dismissalType) {
@@ -562,19 +585,6 @@ class Ed11y {
       let id = removal.dataset.ed11yResult;
       let test = Ed11y.results[id][1];
       let dismissalKey = Ed11y.dismissalKey(Ed11y.results[id][4]);
-
-      // old dismissAll
-      /*Ed11y.dismissedAlerts[Ed11y.options.currentPage] = {};
-      if (Ed11y.options.syncedDismissals === false) {
-        localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
-      } else {
-        let dismissalDetail = {
-          dismissPage: Ed11y.options.currentPage,
-          dismissAction: 'reset',
-        };
-        let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
-        document.dispatchEvent(ed11yDismissalUpdate);
-      }heeeee*/
 
       // Remove tip and reset borders around element
       Ed11y.resetClass(['ed11y-hidden-highlight','ed11y-ring-red','ed11y-ring-yellow']);
@@ -591,6 +601,7 @@ class Ed11y {
         if ( Object.keys(Ed11y.dismissedAlerts[Ed11y.options.currentPage]).length === 0 ) {
           delete Ed11y.dismissedAlerts[Ed11y.options.currentPage];
         } 
+        Ed11y.updatePanel();
       } else {
         let dismissal = {};
         dismissal[dismissalKey] = dismissalType;

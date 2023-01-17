@@ -14,5 +14,5 @@
 
 ## Unit tests
 Testing is accomplished with the ["Nightwatch" framework](https://nightwatchjs.org/). The tests are declared as development depenencies.
-Run `npx nightwatch tests --env=firefox` (or chrome/edge/safari...) from the project root.
+Run `npx nightwatch tests --workers=4 --env=firefox` (or chrome/edge/safari...) from the project root.
 It is often not patient enough for the driver to load after a reboot; just run it a second time if it times out.

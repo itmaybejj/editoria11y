@@ -11,14 +11,14 @@
   },
   "license": "GPLv2",
   "devDependencies": {
-    "@cucumber/cucumber": "^7.3.2",
-    "@cucumber/pretty-formatter": "^1.0.0-alpha.2",
-    "axios": "^0.26.0",
-    "chromedriver": "^99.0.0",
-    "eslint": "^8.12.0",
-    "geckodriver": "^3.0.1",
+    "@cucumber/cucumber": "^7",
+    "@cucumber/pretty-formatter": "^1",
+    "axios": "^1",
+    "chromedriver": "^109",
+    "eslint": "^8.32.0",
+    "geckodriver": "^3.2",
     "ms-chromium-edge-driver": "^0.5.1",
-    "nightwatch": "^2.0.10",
+    "nightwatch": "^2",
     "uglify-js": "^3.17.4"
   }
 }
