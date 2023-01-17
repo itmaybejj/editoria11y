@@ -33,7 +33,7 @@ class Ed11y {
       },
 
       // "Assertive" opens the panel automatically if new items are found.
-      alertMode: 'assertive',
+      alertMode: 'polite',
 
       // Dismissed alerts
       currentPage: false, // uses window.location.pathname unless a string is provided.
