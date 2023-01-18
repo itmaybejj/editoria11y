@@ -301,12 +301,9 @@ class Ed11y {
       
       Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
 
-      // TotalCount is used for sync operations. Use local var for "show dismissed" state.
-      let displayCount = Ed11y.options.showDismissed ? Ed11y.totalCount + Ed11y.dismissedCount : Ed11y.totalCount;
-
-      if (displayCount > 0) {
+      if (Ed11y.totalCount > 0) {
         Ed11y.panelJumpNext.removeAttribute('hidden');
-        if (displayCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
+        if (Ed11y.totalCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
           Ed11y.panelJumpPrev.setAttribute('hidden','');
         } else {
           Ed11y.panelJumpPrev.removeAttribute('hidden');
@@ -319,10 +316,10 @@ class Ed11y {
           Ed11y.panel.classList.remove('errors', 'pass');
           Ed11y.panel.classList.add('warnings');
         }
-        Ed11y.panelCount.textCount = displayCount;    
+        Ed11y.panelCount.textCount = Ed11y.totalCount;    
         Ed11y.panelCount.style.display = 'inline-block';
-        Ed11y.panelMessage.innerHTML = displayCount === 1 ? Ed11y.M.panelCount1 : displayCount + Ed11y.M.panelCountMultiple;
-        Ed11y.panel.querySelector('.toggle-count').textContent = displayCount;
+        Ed11y.panelMessage.innerHTML = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
+        Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
       }
       else {
         Ed11y.panelJumpNext.setAttribute('hidden', '');
@@ -339,9 +336,6 @@ class Ed11y {
           Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
           Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
         }
-      }
-      if (Ed11y.dismissedCount > 0 || Ed11y.ignoreAll) {
-        Ed11y.showDismissed.removeAttribute('hidden');
       }
       Ed11y.panel.classList.remove('ed11y-preload');
 
@@ -393,6 +387,16 @@ class Ed11y {
         Ed11y.panel.classList.remove('shut');
         Ed11y.panel.classList.add('active');
         Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
+        if (Ed11y.dismissedCount > 0) {
+          let text = Ed11y.dismissedCount === 1 ? Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+          Ed11y.showDismissed.textContent = text;
+          Ed11y.showDismissed.removeAttribute('hidden');
+        } else if (Ed11y.options.showDismissed === true) {
+          // Reset show hidden default option when irrelevant.
+          Ed11y.showDismissed.setAttribute('hidden', '');
+          Ed11y.showDismissed.setAttribute('aria-pressed', 'false');
+          Ed11y.options.showDismissed = false;
+        }
         window.setTimeout(function () {
           document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
           if (!Ed11y.ignoreAll) {
@@ -401,11 +405,6 @@ class Ed11y {
         }, 0);
         if (onLoad === false) {
           window.setTimeout(function() {
-            if (Ed11y.options.showDismissed == true && Ed11y.showDismissed && Ed11y.dismissedCount === 0) {
-              Ed11y.options.showDismissed = false;
-              Ed11y.showDismissed.textContent = Ed11y.M.buttonShowHiddenAlertsContent;
-              Ed11y.showDismissed.setAttribute('data-ed11y-showing-hidden', 'false');
-            }
             Ed11y.panelMessage.focus();
           }, 500);
         }
@@ -614,11 +613,7 @@ class Ed11y {
         } else {
           Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissalKey] = dismissalType;
         }
-
-        // If we are showing hidden alerts, we need to stop so this goes away.
-        Ed11y.options.showDismissed = false;
-        Ed11y.showDismissed.setAttribute('data-ed11y-showing-hidden', !!Ed11y.options.showDismissed);
-        Ed11y.showDismissed.textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlertsContent : Ed11y.M.buttonShowHiddenAlertsContent;
+        Ed11y.showDismissed.removeAttribute('hidden');
       }
 
       // Send record to storage or dispatch an event to an API.
@@ -663,7 +658,7 @@ class Ed11y {
       Ed11y.reset();
       Ed11y.checkAll(false, 'show');
 
-      Ed11y.showDismissed.setAttribute('data-ed11y-showing-hidden', !!Ed11y.options.showDismissed);
+      Ed11y.showDismissed.setAttribute('aria-pressed', !!Ed11y.options.showDismissed);
       Ed11y.showDismissed.textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlertsContent : Ed11y.M.buttonShowHiddenAlertsContent;
     };
 

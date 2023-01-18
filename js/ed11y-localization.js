@@ -22,8 +22,8 @@ const ed11yLang = {
     buttonPrevContent: 'Previous',
     buttonFirstContent: 'First',
     buttonNextContent: 'Next',
-    buttonShowHiddenAlertsContent: 'Show dismissed alerts',
-    buttonHideHiddenAlertsContent: 'Hide dismissed alerts',
+    buttonShowHiddenAlert: 'Show 1 hidden alert',
+    buttonShowHiddenAlerts: (count) => `Show ${count} hidden alerts`,
     panelCheckOutline: '<p>Check that this forms <a href=\'https://accessibility.princeton.edu/how/content/headings\'>a complete outline</a>:</p>',
     panelCheckAltText: '<p>Check <a href=\'https://accessibility.princeton.edu/how/content/alternative-text\'>alt text</a>, <a href=\'https://accessibility.princeton.edu/how/content/images-text\'>images of text</a>, &amp; <a href=\'https://webaim.org/techniques/captions/\'>captions</a>.</p>',
     panelHelp : `
@@ -56,11 +56,12 @@ const ed11yLang = {
     toggleManualCheck: 'manual check needed',
     toggleAlert: 'alert',
     toggleAriaLabel: (resultID, label) => `Accessibility issue ${resultID}, ${label}`,
-    dismissOkButtonContent: 'Mark as Checked and OK',
-    dismissOkButtonTitle: 'Dismisses alert for all editors',
+    dismissOkButtonContent: 'Mark as checked and OK',
     dismissHideButtonContent: 'Hide alert',
-    dismissHideButtonTitle: 'Dismisses alert for you',
-    undismissButtonContent: 'Restore this dismissed alert',
+    dismissOkSyncedButtonContent: 'Mark OK for all users',
+    dismissHideSyncedButtonContent: 'Hide alert for me',
+    undismissOKButton: 'Restore this alert marked as OK',
+    undismissHideButton: 'Restore this hidden alert',
     undismissNotePermissions: 'This alert has been hidden by an administrator',
     elementDismissalHelpOK : `
     "OK" dismisses this for everyone, on this page.

@@ -9,14 +9,14 @@ class Ed11yElementResult extends HTMLElement {
       this.open = false;
       this.racing = false;
       this.setAttribute('style', 'outline: 0px solid transparent;');
-      const shadow = this.attachShadow({mode: 'open'});
+      const shadow = this.attachShadow({ mode: 'open' });
 
       // Create this.wrapper with type class
       this.resultID = this.dataset.ed11yResult;
       this.result = Ed11y.results[this.resultID];
 
       this.wrapper = document.createElement('aside');
-      
+
       this.dismissable = !!this.result[4];
       this.dismissed = !!this.result[5];
       // todo MVP this would only work in darkmode -- need more theme variables
@@ -29,11 +29,11 @@ class Ed11yElementResult extends HTMLElement {
 
       // Create tooltip toggle
       this.toggle = document.createElement('button');
-      this.toggle.setAttribute('class','toggle');
+      this.toggle.setAttribute('class', 'toggle');
       // todo parameterize
       let label = this.dismissable ? Ed11y.M.toggleManualCheck : Ed11y.M.toggleAlert;
       this.toggle.setAttribute('aria-label', Ed11y.M.toggleAriaLabel(this.resultID, label));
-      this.toggle.setAttribute('aria-expanded','false');
+      this.toggle.setAttribute('aria-expanded', 'false');
       this.toggle.setAttribute('aria-haspopup', 'dialog');
       this.toggle.setAttribute('data-ed11y-result', this.dataset.ed11yResult);
       this.toggle.setAttribute('data-ed11y-ready', 'false');
@@ -107,15 +107,27 @@ class Ed11yElementResult extends HTMLElement {
       css = `
         .toggle {
           box-shadow: inset 0 0 0 2px ${Ed11y.color.primary}, inset 0 0 0 3px ${Ed11y.color.primaryText}, inset 0 0 0 6px ${Ed11y.color.primary}, 1px 1px 5px 0 rgba(0,0,0,.5);
-          background: ${Ed11y.color.ok};
+          background: ${Ed11y.color.primary};
           color: ${Ed11y.color.primaryText};
-        }
-        .toggle::before {
-          content: "✓";
         }
         .toggle:hover, .toggle[aria-expanded='true'] {
           border: 2px solid ${Ed11y.color.ok};
         }`;
+      if (this.result[5] === 'ok') {
+        css += `
+          .toggle::before {
+            content: "✓";
+          }
+          `;
+      } else {
+        css += `
+            .toggle::before {
+              content: "i";
+              font-family: georgia, serif;
+              font-weight: 300;
+            }
+          `;
+      }
     } else if (this.dismissable) {
       css = `.toggle {
         box-shadow: inset 0 0 0 2px ${Ed11y.color.warning}, inset 0 0 0 3px #444, inset 0 0 0 6px ${Ed11y.color.warning}, 1px 1px 5px 0 rgba(0,0,0,.5);
@@ -151,7 +163,7 @@ class Ed11yElementResult extends HTMLElement {
       host.racing = true;
       host.toggleTip(true);
       Ed11y.toggledFrom = this;
-      window.setTimeout(function() {
+      window.setTimeout(function () {
         host.racing = false;
       }, 250, host);
     }
@@ -167,20 +179,20 @@ class Ed11yElementResult extends HTMLElement {
       let stateChange = host.getAttribute('data-ed11y-open') === 'false' ? 'open' : 'close';
       host.setAttribute('data-ed11y-action', stateChange);
       if (stateChange === 'open') {
-        window.setTimeout(function() {
+        window.setTimeout(function () {
           let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
           activeTip?.shadowRoot.querySelector('.close').focus();
-        },500);
+        }, 500);
       }
-      window.setTimeout(function() {
+      window.setTimeout(function () {
         host.racing = false;
       }, 250, host);
     }
-    
+
   }
 
   closeOtherTips() {
-    Ed11y.findElements('openTips','[data-ed11y-open="true"]');
+    Ed11y.findElements('openTips', '[data-ed11y-open="true"]');
     if (Ed11y.elements.openTips) {
       Array.from(Ed11y.elements.openTips).forEach(openTip => {
         openTip.setAttribute('data-ed11y-action', 'close');
@@ -188,7 +200,7 @@ class Ed11yElementResult extends HTMLElement {
     }
   }
 
-  tipDOM (id, title, body) {
+  tipDOM(id, title, body) {
     return `>
       <div class="title" id="tip-title-${id}">${title}</div>
       <div class="message">${body}</div>
@@ -222,11 +234,11 @@ class Ed11yElementResult extends HTMLElement {
     if (changeTo === true) {
       // Allow for themes to reveal hidden tips
       document.dispatchEvent(new CustomEvent('ed11yPop', {
-        detail: {id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result')}
+        detail: { id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result') }
       }));
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');
-      window.setTimeout(Ed11y.alignTip(this.toggle, this.tip)),250;
+      window.setTimeout(Ed11y.alignTip(this.toggle, this.tip)), 250;
       if (!Ed11y.elements.jumpList) {
         Ed11y.buildJumpList();
       }
@@ -235,12 +247,12 @@ class Ed11yElementResult extends HTMLElement {
     } else {
       // Allow for themes to restore original DOM/CSS
       document.dispatchEvent(new CustomEvent('ed11yShut', {
-        detail: {id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result')}
+        detail: { id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result') }
       }));
       this.tip.setAttribute('data-ed11y-action', 'shut');
     }
     this.setAttribute('data-ed11y-open', changeTo);
-    this.open = changeTo;   
+    this.open = changeTo;
   }
 
 
@@ -249,13 +261,13 @@ class Ed11yElementResult extends HTMLElement {
   attributeChangedCallback(attr, oldValue, newValue) {
     if (this.initialized) {
       switch (attr) {
-      case 'data-ed11y-action':
-        if (newValue !== 'false') {
-          let changeTo = newValue === 'open' ? true : false;
-          this.setAttribute('data-ed11y-action', 'false');
-          this.toggleTip(changeTo);
-        }
-        break;
+        case 'data-ed11y-action':
+          if (newValue !== 'false') {
+            let changeTo = newValue === 'open' ? true : false;
+            this.setAttribute('data-ed11y-action', 'false');
+            this.toggleTip(changeTo);
+          }
+          break;
       }
     }
   }

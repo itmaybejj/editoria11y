@@ -231,13 +231,12 @@ class Ed11yElementTip extends HTMLElement {
         // Dismissal Key is set in [5] if alert has been dismissed.
         if (Ed11y.options.showDismissed && this.dismissed) {
           // Check if user has permission to reset this alert.
-          let okd = Ed11y.dismissedAlerts[Ed11y.options.currentPage][this.result[1]][this.result[5]] === 'ok';
+          let okd = Ed11y.dismissedAlerts[Ed11y.options.currentPage][this.result[1]][this.result[4]] === 'ok';
           if ((okd && Ed11y.options.allowOK) || (!okd)) {
             // User can restore this alert.
             let undismissButton = document.createElement('button');
             undismissButton.classList.add('dismiss');
-            undismissButton.textContent = Ed11y.M.undismissButtonContent;
-            undismissButton.setAttribute('title', Ed11y.M.undismissButtonTitle);
+            undismissButton.textContent = okd ? Ed11y.M.undismissOKButton : Ed11y.M.undismissHideButton;
             dismissers.append(undismissButton);
             undismissButton.addEventListener('click', function(){Ed11y.dismissThis('reset');});
           } else {
@@ -247,24 +246,23 @@ class Ed11yElementTip extends HTMLElement {
             dismissers.append(undismissNote);
           }
         } else {
-          if (Ed11y.options.allowOK) {
-            let dismissOKButton = document.createElement('button');
-            dismissOKButton.classList.add('dismiss');
-            // todo mvp Parameterize
-            dismissOKButton.textContent = Ed11y.M.dismissOkButtonContent;
-            dismissOKButton.setAttribute('title', Ed11y.M.dismissOkButtonTitle);
-            dismissers.append(dismissOKButton);
-            dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
-            dismissHelp = true;
-          }
           if (Ed11y.options.allowHide) {
             let dismissHideButton = document.createElement('button');
             dismissHideButton.classList.add('dismiss');
             // todo parameterize
-            dismissHideButton.textContent = Ed11y.M.dismissHideButtonContent;
-            dismissHideButton.setAttribute('title', Ed11y.M.dismissHideButtonTitle);
+            dismissHideButton.textContent = Ed11y.options.syncedDismissals === false ? Ed11y.M.dismissHideButtonContent : Ed11y.M.dismissHideSyncedButtonContent;
+            //dismissHideButton.setAttribute('title', Ed11y.M.dismissHideButtonTitle);
             dismissers.append(dismissHideButton);
             dismissHideButton.addEventListener('click', function(){Ed11y.dismissThis('hide');});
+            dismissHelp = true;
+          }
+          if (Ed11y.options.allowOK) {
+            let dismissOKButton = document.createElement('button');
+            dismissOKButton.classList.add('dismiss');
+            dismissOKButton.textContent = Ed11y.options.syncedDismissals === false ? Ed11y.M.dismissOkButtonContent : Ed11y.M.dismissOkSyncedButtonContent;
+            //dismissOKButton.setAttribute('title', Ed11y.M.dismissOkButtonTitle);
+            dismissers.append(dismissOKButton);
+            dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
             dismissHelp = true;
           }
         }
