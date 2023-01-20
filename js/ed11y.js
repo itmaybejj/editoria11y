@@ -366,7 +366,7 @@ class Ed11y {
           window.setTimeout(function () {
             Ed11y.announce.innerHTML = Ed11y.getText(Ed11y.panelMessage);
           }, 1500);
-        } else if (Ed11y.options.showDismissed && Ed11y.dismissedCount > 0) {
+        } else if (Ed11y.options.showDismissed && (Ed11y.dismissedCount > 0 || Ed11y.totalCount > 0)) {
           showPanel = true;
         } else {
           showPanel = false;

@@ -204,7 +204,7 @@ class Ed11yElementPanel extends HTMLElement {
           min-width: max(7.25em, calc(49% - 3px));
         }
         .content button {
-          padding: 5px 11px;
+          padding: 5px 5px;
           border-radius: 2px;
           background: inherit;
           color: inherit;
