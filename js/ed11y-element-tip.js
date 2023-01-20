@@ -45,6 +45,7 @@ class Ed11yElementTip extends HTMLElement {
           height: 1px;
           overflow: visible;
           color: ${Ed11y.color.text};
+          font-size: 14px;
         }
         .arrow {
           display: none;
@@ -73,13 +74,12 @@ class Ed11yElementTip extends HTMLElement {
           background: linear-gradient(-135deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
         }
         .tip {
-          font-size: 14px;
           z-index: 1;
           border: 2px solid ${Ed11y.color.tipHeader};
           background: ${Ed11y.color.bg};
           border-radius: 0 0 3px 3px;
           position:relative;
-          width: clamp(12em, 30em, 89vw);
+          width: clamp(18em, 36em, 89vw);
           display: none;
           box-shadow: 0 0 0 2px ${Ed11y.color.bg}, 2px 2px 4px ${Ed11y.color.primary}77;
         }

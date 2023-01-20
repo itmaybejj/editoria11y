@@ -32,7 +32,7 @@ class Ed11y {
         // 'table': false,
       },
 
-      // "Assertive" opens the panel automatically if new items are found.
+      // "Assertive" opens the panel automatically if new items are found. "Headless never draws the panel."
       alertMode: 'polite',
 
       // Dismissed alerts
@@ -261,14 +261,14 @@ class Ed11y {
         window.setTimeout(function () {
           Ed11y.updatePanel(onLoad, showPanel);
           // todo parameterize
-          Ed11y.panelToggle.setAttribute('title', Ed11y.M.toggleAccessibilityTools);
+          Ed11y.panelToggle?.setAttribute('title', Ed11y.M.toggleAccessibilityTools);
         }, 0);
       }
       else {
         Ed11y.reset();
-        Ed11y.panelToggle.classList.add('disabled');
-        Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
-        Ed11y.panelToggle.setAttribute('title', Ed11y.M.toggleDisabled);
+        Ed11y.panelToggle?.classList.add('disabled');
+        Ed11y.panelToggle?.removeAttribute('aria-expanded');
+        Ed11y.panelToggle?.setAttribute('title', Ed11y.M.toggleDisabled);
       }
     };
 
@@ -303,44 +303,6 @@ class Ed11y {
 
       Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
 
-      if (Ed11y.totalCount > 0) {
-        Ed11y.panelJumpNext.removeAttribute('hidden');
-        if (Ed11y.totalCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
-          Ed11y.panelJumpPrev.setAttribute('hidden', '');
-        } else {
-          Ed11y.panelJumpPrev.removeAttribute('hidden');
-        }
-        if (Ed11y.errorCount > 0) {
-          Ed11y.panel.classList.remove('warnings', 'pass');
-          Ed11y.panel.classList.add('errors');
-        }
-        else if (Ed11y.warningCount > 0) {
-          Ed11y.panel.classList.remove('errors', 'pass');
-          Ed11y.panel.classList.add('warnings');
-        }
-        Ed11y.panelCount.textCount = Ed11y.totalCount;
-        Ed11y.panelCount.style.display = 'inline-block';
-        Ed11y.panelMessage.innerHTML = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
-        Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
-      }
-      else {
-        Ed11y.panelJumpNext.setAttribute('hidden', '');
-        Ed11y.panelJumpPrev.setAttribute('hidden', '');
-
-        Ed11y.panelCount.style.display = 'display: none;';
-        Ed11y.panel.classList.remove('warnings', 'errors');
-        Ed11y.panel.classList.add('pass');
-        if (Ed11y.dismissedCount > 0) {
-          // todo: title attribute to explain the difference?
-          Ed11y.panel.querySelector('.toggle-count').textContent = 'i';
-          Ed11y.panelMessage.innerText = Ed11y.M.panelCountAllDismissed;
-        } else {
-          Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
-          Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
-        }
-      }
-      Ed11y.panel.classList.remove('ed11y-preload');
-
       // Dispatch event for synchronizers
       window.setTimeout(function () {
         let syncResults = new CustomEvent('ed11yResults');
@@ -350,73 +312,109 @@ class Ed11y {
     };
 
     Ed11y.updatePanel = function (onLoad = false, showPanel = 'show') {
-      if (onLoad === true) {
-        // Create the panel if it doesn't exist yet
-        let panel = document.createElement('ed11y-element-panel');
-        document.querySelector('body').appendChild(panel);
-      }
-
       Ed11y.countAlerts();
 
-      if (onLoad === true) {
-        // todo: open on assertive with count mismatch or if showDismissed is set.
-        if (Ed11y.totalCount > 0 && !Ed11y.ignoreAll && Ed11y.options.alertMode === 'assertive' && Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount ) {
-          // User has already seen these errors, panel will not open.
-          showPanel = true;
-          window.setTimeout(function () {
-            Ed11y.announce.innerHTML = Ed11y.getText(Ed11y.panelMessage);
-          }, 1500);
-        } else if (Ed11y.options.showDismissed && (Ed11y.dismissedCount > 0 || Ed11y.totalCount > 0)) {
-          showPanel = true;
-        } else {
-          showPanel = false;
-        }
-      } else {
-        showPanel = true;
-      }
-
-      if (Ed11y.totalCount > 0) {
-        Ed11y.seen[encodeURI(Ed11y.options.currentPage)] = Ed11y.totalCount;
-        localStorage.setItem('editoria11yResultCount', JSON.stringify(Ed11y.seen));
-      } else {
-        delete Ed11y.seen[encodeURI(Ed11y.options.currentPage)];
-      }
-
-      // Now we can open or close the panel.
-      if (!showPanel) {
-        Ed11y.reset();
-        if (!Ed11y.bodyStyle) {
-          Ed11y.paintReady();
-        }
-      }
-      else {
-        Ed11y.panel.classList.remove('shut');
-        Ed11y.panel.classList.add('active');
-        Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
-        if (Ed11y.dismissedCount > 0) {
-          let text = Ed11y.dismissedCount === 1 ? Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
-          Ed11y.showDismissed.textContent = text;
-          Ed11y.showDismissed.removeAttribute('hidden');
-        } else if (Ed11y.options.showDismissed === true) {
-          // Reset show hidden default option when irrelevant.
-          Ed11y.showDismissed.setAttribute('hidden', '');
-          Ed11y.showDismissed.setAttribute('aria-pressed', 'false');
-          Ed11y.options.showDismissed = false;
-        }
-        window.setTimeout(function () {
-          document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
-          if (!Ed11y.ignoreAll) {
-            Ed11y.showResults();
+      if (Ed11y.options.alertMode !== 'headless') {
+        if (onLoad === true) {
+          // Create the panel if it doesn't exist yet
+          let panel = document.createElement('ed11y-element-panel');
+          document.querySelector('body').appendChild(panel);
+          // todo: open on assertive with count mismatch or if showDismissed is set.
+          if (Ed11y.totalCount > 0 && !Ed11y.ignoreAll && Ed11y.options.alertMode === 'assertive' && Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount ) {
+            // User has already seen these errors, panel will not open.
+            showPanel = true;
+            window.setTimeout(function () {
+              Ed11y.announce.innerHTML = Ed11y.getText(Ed11y.panelMessage);
+            }, 1500);
+          } else if (Ed11y.options.showDismissed && (Ed11y.dismissedCount > 0 || Ed11y.totalCount > 0)) {
+            showPanel = true;
+          } else {
+            showPanel = false;
           }
-        }, 0);
-        if (onLoad === false) {
-          window.setTimeout(function () {
-            Ed11y.panelMessage.focus();
-          }, 500);
+        } else {
+          showPanel = true;
         }
+  
+        if (Ed11y.totalCount > 0) {
+          Ed11y.seen[encodeURI(Ed11y.options.currentPage)] = Ed11y.totalCount;
+          localStorage.setItem('editoria11yResultCount', JSON.stringify(Ed11y.seen));
+        } else {
+          delete Ed11y.seen[encodeURI(Ed11y.options.currentPage)];
+        }
+  
+        // Now we can open or close the panel.
+        if (!showPanel) {
+          Ed11y.reset();
+          if (!Ed11y.bodyStyle) {
+            Ed11y.paintReady();
+          }
+        }
+        else {
+          if (Ed11y.totalCount > 0) {
+            Ed11y.panelJumpNext.removeAttribute('hidden');
+            if (Ed11y.totalCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
+              Ed11y.panelJumpPrev.setAttribute('hidden', '');
+            } else {
+              Ed11y.panelJumpPrev.removeAttribute('hidden');
+            }
+            if (Ed11y.errorCount > 0) {
+              Ed11y.panel.classList.remove('warnings', 'pass');
+              Ed11y.panel.classList.add('errors');
+            }
+            else if (Ed11y.warningCount > 0) {
+              Ed11y.panel.classList.remove('errors', 'pass');
+              Ed11y.panel.classList.add('warnings');
+            }
+            Ed11y.panelCount.textCount = Ed11y.totalCount;
+            Ed11y.panelCount.style.display = 'inline-block';
+            Ed11y.panelMessage.innerHTML = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
+            Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
+          }
+          else {
+            Ed11y.panelJumpNext.setAttribute('hidden', '');
+            Ed11y.panelJumpPrev.setAttribute('hidden', '');
+    
+            Ed11y.panelCount.style.display = 'display: none;';
+            Ed11y.panel.classList.remove('warnings', 'errors');
+            Ed11y.panel.classList.add('pass');
+            if (Ed11y.dismissedCount > 0) {
+              // todo: title attribute to explain the difference?
+              Ed11y.panel.querySelector('.toggle-count').textContent = 'i';
+              Ed11y.panelMessage.innerText = Ed11y.M.panelCountAllDismissed;
+            } else {
+              Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
+              Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
+            }
+          }
+          Ed11y.panel.classList.remove('ed11y-preload');
+          Ed11y.panel.classList.remove('shut');
+          Ed11y.panel.classList.add('active');
+          Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
+          if (Ed11y.dismissedCount > 0) {
+            let text = Ed11y.dismissedCount === 1 ? Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+            Ed11y.showDismissed.textContent = text;
+            Ed11y.showDismissed.removeAttribute('hidden');
+          } else if (Ed11y.options.showDismissed === true) {
+            // Reset show hidden default option when irrelevant.
+            Ed11y.showDismissed.setAttribute('hidden', '');
+            Ed11y.showDismissed.setAttribute('aria-pressed', 'false');
+            Ed11y.options.showDismissed = false;
+          }
+          window.setTimeout(function () {
+            document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
+            if (!Ed11y.ignoreAll) {
+              Ed11y.showResults();
+            }
+          }, 0);
+          if (onLoad === false) {
+            window.setTimeout(function () {
+              Ed11y.panelMessage.focus();
+            }, 500);
+          }
+        }
+        Ed11y.panelToggle.classList.remove('disabled');
+        Ed11y.panelToggle.removeAttribute('aria-disabled');
       }
-      Ed11y.panelToggle.classList.remove('disabled');
-      Ed11y.panelToggle.removeAttribute('aria-disabled');
       // todo parameterize
       Ed11y.running = false;
     };
