@@ -122,9 +122,8 @@ class Ed11yElementResult extends HTMLElement {
       } else {
         css += `
             .toggle::before {
-              content: "i";
+              content: "–";
               font-family: georgia, serif;
-              font-weight: 300;
             }
           `;
       }
