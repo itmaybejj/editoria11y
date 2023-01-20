@@ -79,7 +79,7 @@ class Ed11yElementTip extends HTMLElement {
           background: ${Ed11y.color.bg};
           border-radius: 0 0 3px 3px;
           position:relative;
-          width: clamp(12rem, 30rem, 89vw);
+          width: clamp(12em, 30em, 89vw);
           display: none;
           box-shadow: 0 0 0 2px ${Ed11y.color.bg}, 2px 2px 4px ${Ed11y.color.primary}77;
         }
