@@ -348,45 +348,7 @@ class Ed11y {
           if (!Ed11y.bodyStyle) {
             Ed11y.paintReady();
           }
-        }
-        else {
-          if (Ed11y.totalCount > 0) {
-            Ed11y.panelJumpNext.removeAttribute('hidden');
-            if (Ed11y.totalCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
-              Ed11y.panelJumpPrev.setAttribute('hidden', '');
-            } else {
-              Ed11y.panelJumpPrev.removeAttribute('hidden');
-            }
-            if (Ed11y.errorCount > 0) {
-              Ed11y.panel.classList.remove('warnings', 'pass');
-              Ed11y.panel.classList.add('errors');
-            }
-            else if (Ed11y.warningCount > 0) {
-              Ed11y.panel.classList.remove('errors', 'pass');
-              Ed11y.panel.classList.add('warnings');
-            }
-            Ed11y.panelCount.textCount = Ed11y.totalCount;
-            Ed11y.panelCount.style.display = 'inline-block';
-            Ed11y.panelMessage.innerHTML = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
-            Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
-          }
-          else {
-            Ed11y.panelJumpNext.setAttribute('hidden', '');
-            Ed11y.panelJumpPrev.setAttribute('hidden', '');
-    
-            Ed11y.panelCount.style.display = 'display: none;';
-            Ed11y.panel.classList.remove('warnings', 'errors');
-            Ed11y.panel.classList.add('pass');
-            if (Ed11y.dismissedCount > 0) {
-              // todo: title attribute to explain the difference?
-              Ed11y.panel.querySelector('.toggle-count').textContent = 'i';
-              Ed11y.panelMessage.innerText = Ed11y.M.panelCountAllDismissed;
-            } else {
-              Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
-              Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
-            }
-          }
-          Ed11y.panel.classList.remove('ed11y-preload');
+        } else {
           Ed11y.panel.classList.remove('shut');
           Ed11y.panel.classList.add('active');
           Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
@@ -412,6 +374,45 @@ class Ed11y {
             }, 500);
           }
         }
+        
+        if (Ed11y.totalCount > 0) {
+          Ed11y.panelJumpNext.removeAttribute('hidden');
+          if (Ed11y.totalCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
+            Ed11y.panelJumpPrev.setAttribute('hidden', '');
+          } else {
+            Ed11y.panelJumpPrev.removeAttribute('hidden');
+          }
+          if (Ed11y.errorCount > 0) {
+            Ed11y.panel.classList.remove('warnings', 'pass');
+            Ed11y.panel.classList.add('errors');
+          }
+          else if (Ed11y.warningCount > 0) {
+            Ed11y.panel.classList.remove('errors', 'pass');
+            Ed11y.panel.classList.add('warnings');
+          }
+          Ed11y.panelCount.textCount = Ed11y.totalCount;
+          Ed11y.panelCount.style.display = 'inline-block';
+          Ed11y.panelMessage.innerHTML = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
+          Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
+        }
+        else {
+          Ed11y.panelJumpNext.setAttribute('hidden', '');
+          Ed11y.panelJumpPrev.setAttribute('hidden', '');
+  
+          Ed11y.panelCount.style.display = 'display: none;';
+          Ed11y.panel.classList.remove('warnings', 'errors');
+          Ed11y.panel.classList.add('pass');
+          if (Ed11y.dismissedCount > 0) {
+            // todo: title attribute to explain the difference?
+            Ed11y.panel.querySelector('.toggle-count').textContent = 'i';
+            Ed11y.panelMessage.innerText = Ed11y.M.panelCountAllDismissed;
+          } else {
+            Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
+            Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
+          }
+        }
+
+        Ed11y.panel.classList.remove('ed11y-preload');
         Ed11y.panelToggle.classList.remove('disabled');
         Ed11y.panelToggle.removeAttribute('aria-disabled');
       }
