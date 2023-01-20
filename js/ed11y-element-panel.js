@@ -29,9 +29,9 @@ class Ed11yElementPanel extends HTMLElement {
               <div aria-live='polite' class='announce hidden'></div>
           </div>
           <div class='jumplinks'>
-            <button class='jump prev' data-ed11y-goto='0'><span aria-hidden='true'>« </span><span class='jump-prev'>${Ed11y.M.buttonPrevContent}</span></button>
+            <button class='jump prev' data-ed11y-goto='0' hidden><span aria-hidden='true'>« </span><span class='jump-prev'>${Ed11y.M.buttonPrevContent}</span></button>
             <button class='jump next' data-ed11y-goto='0'><span class='jump-next'>${Ed11y.M.buttonFirstContent}</span> <span aria-hidden='true'> »</span></button>
-            <button id='restore' hidden>${Ed11y.M.buttonShowHiddenAlertsContent}</button>
+            <button id='show-hidden' aria-pressed='${!!Ed11y.options.showDismissed}' hidden>${Ed11y.M.buttonShowHiddenAlertContent}</button>
           </div>
         </div>
       <div id='headings-tab' role="tabpanel" class="hidden" aria-labelledby='headings' tabindex='0'>
@@ -204,7 +204,7 @@ class Ed11yElementPanel extends HTMLElement {
           min-width: max(7.25em, calc(49% - 3px));
         }
         .content button {
-          padding: 5px 11px;
+          padding: 5px 5px;
           border-radius: 2px;
           background: inherit;
           color: inherit;
@@ -217,8 +217,12 @@ class Ed11yElementPanel extends HTMLElement {
         .jump.next {
           min-width: 60px;
         }
-        #restore {
+        #show-hidden {
           min-width: min(146px, 100%);
+        }
+        #show-hidden[aria-pressed="true"] {
+          background: ${Ed11y.color.primary};
+          color: ${Ed11y.color.primaryText};
         }
         .content button:hover {
           background: ${Ed11y.color.bg};
@@ -278,9 +282,9 @@ class Ed11yElementPanel extends HTMLElement {
       Ed11y.panelJumpPrev = wrapper.querySelector('.jump.prev');
       Ed11y.panelJumpNext.addEventListener('click', this.jumpTo);
       Ed11y.panelJumpPrev.addEventListener('click', this.jumpTo);
-      Ed11y.restoreDismissed = wrapper.querySelector('#restore');
-      Ed11y.restoreDismissed.addEventListener('click', function(){
-        Ed11y.clearDismissals();
+      Ed11y.showDismissed = wrapper.querySelector('#show-hidden');
+      Ed11y.showDismissed.addEventListener('click', function(){
+        Ed11y.toggleShowDismissals();
       });
       Ed11y.announce = wrapper.querySelector('.announce');
       Ed11y.panelTabs = wrapper.querySelectorAll('.buttonbar button');
@@ -333,7 +337,7 @@ class Ed11yElementPanel extends HTMLElement {
     window.setTimeout(function (goto, target) {
       let firstVisible = false;
       let alertMessage;
-      if (!Ed11y.visible(target)) {
+      if (Ed11y.options.checkVisible && !Ed11y.visible(target)) {
         firstVisible = Ed11y.firstVisibleParent(target);
         alertMessage = Ed11y.M.jumpedToInvisibleTip;
       }

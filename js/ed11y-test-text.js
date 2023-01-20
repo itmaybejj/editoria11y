@@ -65,7 +65,7 @@ class Ed11yTestText {
       }
       else {
         // Now check for possible heading.
-        let possibleHeading = p.querySelector('strong, b');
+        let possibleHeading = p.querySelector('strong:not(table strong), b:not(table b)');
         if (possibleHeading) {
           possibleHeading = Ed11y.getText(possibleHeading);
           let length = possibleHeading.length;

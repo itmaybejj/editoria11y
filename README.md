@@ -3,8 +3,10 @@
 Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly accessibility "auto-correct" checker that addresses three critical needs for content authors:
 
 1. It runs automatically. Modern spellcheck works so well because it is always running; put spellcheck behind a button and few users remember to run it!
-1. It focuses exclusively on straightforward issues a content author can easily understand and easily fix. Yes; comprehensive testing should be a key part of site creation, but if a tool is going to run automatically, it will drive an author bonkers if it is constantly alerting on code they do not understand and cannot fix.
+1. It focuses exclusively on straightforward issues a content author can easily understand and easily fix. Yes; comprehensive testing should be a key part of site creation, but if a tool is going to run automatically, it will do more harm than good if it is constantly alerting on code they do not understand and cannot fix.
 1. It runs in context. Modern content management systems often assemble pages from many sources. Only the assembled page can be checked for things like the header outline order.
+
+Try a **[clickable demo of what a logged-in author would see](https://itmaybejj.github.io/editoria11y/demo)**.
 
 ## Versions
 
@@ -27,8 +29,6 @@ Coming soon: WordPress integration.
 * When an author is logged in to their site, Editoria11y places a small toggle button at the bottom right of each page with an issue count. Users can press the button to view details of any alerts or access additional tools ("full check"), including visualizers for the document outline and image alt attributes, and the panel's state persists from page to page (open or shut).
 * If the page has a *new* issue, a panel automatically slides open with more details.
 * If the user minimizes the panel, it will not open automatically on future page visits until the content changes.
-
-Try a [clickable demo of what a logged-in author would see](https://itmaybejj.github.io/editoria11y/demo/).
 
 ### Issues flagged in the quick check
 * Headings
@@ -56,21 +56,15 @@ Try a [clickable demo of what a logged-in author would see](https://itmaybejj.gi
 * General content quality assurance
   * Lists made from asterisks, numbers and letters rather than list elements
   * AVOID LOTS OF CAPS LOCK TEXT
-  * Tables without headers and tables with document headers ("Header 3") instead of table headers (<th>)
+  * Tables without headers
+  * Tables with empty header cells
+  * Tables with document headers ("Header 3") instead of table headers 
   * Links to PDFs and other documents, reminding the user to test the download for accessibility or provide an alternate, accessible format
+  * Suspiciously short blockquotes that may not be block quotes.
+  * Embedded videos, reminding the user to add closed captions
+  * Embedded audio, reminding the user to provide a transcript
+  * Embedded social media, reminding the user to check their social media content as well
   
-### Items noted in the full check
-Clicking the full check button flips open an expanded panel where the user can see the document outline (headers) and all image alt text.
-
-It also flags some additional items:
-
-* The first link to a PDF on a page, reminding the user to provide an accessible PDF or an alternate format
-* Suspiciously short blockquotes that may not be block quotes.
-* Embedded videos, reminding the user to add closed captions
-* Embedded audio, reminding the user to provide a transcript
-* Embedded social media, reminding the user to check their social media content as well
-* A custom warning -- same as above, but checking against selectors you provide in the "ed11yCustomEmbeddedContent" variable.
-
 ## Installation and configuration
 
 If possible, start with a turnkey implementation:

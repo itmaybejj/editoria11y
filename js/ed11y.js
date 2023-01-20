@@ -3,16 +3,16 @@ class Ed11y {
   // ESLint config
   /* global ed11yLang, Ed11yTestHeadings, Ed11yTestImages, Ed11yTestLinks, Ed11yTestText, Ed11yTestEmbeds */
   /* exported Ed11y */
-  
+
   constructor(options) {
-    
+
     let defaultOptions = {
 
       // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
       checkRoots: false,
 
       // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
-      shadowComponents: false, 
+      shadowComponents: false,
 
       // Containers to globally ignore, e.g., "header *, .card *"
       ignoreElements: false,
@@ -40,6 +40,7 @@ class Ed11y {
       allowHide: true, // enables end-user ignore button
       allowOK: true,  // enables end-user mark OK button
       syncedDismissals: false, // provide empty or populated object {} to enable synch functions
+      showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
 
       // Hide all alerts if these elements are absent, e.g., ".edit-button"
       // Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
@@ -54,11 +55,14 @@ class Ed11y {
       // "\(link is external\)|\(link sends email\)"
       linkIgnoreStrings: false,
 
-      // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip
-      hiddenHandlers : '',
+      // Disable the "is this element visible" check on themes that have 0-height elements.
+      checkVisible: true,
+
+      // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
+      hiddenHandlers: '',
 
       // Interface
-      lang: 'en', 
+      lang: 'en',
       theme: 'lightTheme',
       darkTheme: {
         bg: '#0a2051',
@@ -89,7 +93,7 @@ class Ed11y {
         tipHeader: '#0a307a',
       },
       // Base z-index for buttons.
-      buttonZIndex : 9999,
+      buttonZIndex: 9999,
 
       // Test customizations
       embeddedContent: false, // todo remove in favor of custom checks
@@ -119,7 +123,7 @@ class Ed11y {
     Ed11y.M = {
       // Fall back to En strings if language or string is unavailable
       ...ed11yLang['en'],
-      ...ed11yLang[Ed11y.options.lang] 
+      ...ed11yLang[Ed11y.options.lang]
     };
     Ed11y.color = Ed11y.options[Ed11y.options.theme];
     if (Ed11y.options.currentPage === false) {
@@ -150,9 +154,9 @@ class Ed11y {
       documentLoadingCheck(() => {
         if (!Ed11y.checkRunPrevent()) {
           Ed11y.running = true;
-          Ed11y.localData = localStorage.getItem('Ed11y.localData');
-          Ed11y.localDataParsed = Ed11y.localData ? JSON.parse(Ed11y.localData) : {};
-          
+          let localData = localStorage.getItem('editoria11yResultCount');
+          Ed11y.seen = localData ? JSON.parse(localData) : {};
+
           // Build list of dismissed alerts
           if (Ed11y.options.syncedDismissals === false) {
             Ed11y.dismissedAlerts = localStorage.getItem('ed11ydismissed');
@@ -161,7 +165,24 @@ class Ed11y {
             Ed11y.dismissedAlerts = {};
             Ed11y.dismissedAlerts[Ed11y.options.currentPage] = Ed11y.options.syncedDismissals;
           }
-          
+
+          // Ed11y v2.0 stored special characters in dismissal keys. This strips them.
+          // This loop can be deleted in 2024.
+          if (Ed11y.options.currentPage in Ed11y.dismissedAlerts) {
+            for (const [key] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage])) {
+              if (key in Ed11y.dismissedAlerts[Ed11y.options.currentPage]) {
+                for (const [subkey, subvalue] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage][key])) {
+                  let newKey = Ed11y.dismissalKey(subkey);
+                  if (newKey !== subkey) {
+                    Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][newKey] = subvalue;
+                    delete Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][subkey];
+                  }
+                }
+              }
+            }
+          }
+
+
           // Create test class objects
           // todo postpone: dispatch event to load an array of custom test results
           Ed11y.testEmbeds = new Ed11yTestEmbeds;
@@ -182,24 +203,21 @@ class Ed11y {
           if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
             Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) === null ? false : true;
           }
-          
+
           // Run tests
           Ed11y.checkAll(true, 'hide');
-          window.addEventListener('resize', function() {Ed11y.windowResize();});
+          window.addEventListener('resize', function () { Ed11y.windowResize(); });
         }
       });
     };
 
     // Toggles the outline of all headers, link texts, and images.
     Ed11y.checkAll = (onLoad, showPanel) => {
-      
+
       if (!Ed11y.checkRunPrevent()) {
         // Reset counts
         Ed11y.results = [];
         Ed11y.elements = [];
-        Ed11y.errorCount = 0;
-        Ed11y.warningCount = 0;
-        Ed11y.dismissedCount = 0;
         Ed11y.mediaCount = 0;
 
         // Find and cache all root elements based on user-provided selectors.
@@ -224,7 +242,7 @@ class Ed11y {
             }
           });
           Ed11y.buildElementList();
-        
+
           let queue = [
             'testLinks',
             'testImages',
@@ -233,18 +251,18 @@ class Ed11y {
             'testEmbeds',
           ];
           queue.forEach((test) => {
-            window.setTimeout(function(){
+            window.setTimeout(function () {
               Ed11y[test].check();
-            },0,test);
+            }, 0, test);
           });
           // todo: handle custom rules and inbound synced results (e.g, broken links)
           // todo: test form labels
         }
-        window.setTimeout(function() {
-          Ed11y.updatePanel(onLoad, showPanel); 
+        window.setTimeout(function () {
+          Ed11y.updatePanel(onLoad, showPanel);
           // todo parameterize
           Ed11y.panelToggle.setAttribute('title', Ed11y.M.toggleAccessibilityTools);
-        },0);
+        }, 0);
       }
       else {
         Ed11y.reset();
@@ -255,15 +273,20 @@ class Ed11y {
     };
 
     Ed11y.countAlerts = function () {
-      // Review results array to remove dismissed items
 
+      Ed11y.errorCount = 0;
+      Ed11y.warningCount = 0;
+      Ed11y.dismissedCount = 0;
+
+      // Review results array to remove dismissed items
       if (Ed11y.ignoreAll) {
         Ed11y.dismissedCount = Ed11y.results.length > 0 ? 1 : 0;
       } else {
         Ed11y.dismissedCount = 0;
         for (let i = Ed11y.results.length - 1; i >= 0; i--) {
           let test = Ed11y.results[i][1];
-          let dismissKey = Ed11y.results[i][4];
+          let dismissKey = Ed11y.dismissalKey(Ed11y.results[i][4]);
+          // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
           if (dismissKey !== false && Ed11y.options.currentPage in Ed11y.dismissedAlerts && test in Ed11y.dismissedAlerts[Ed11y.options.currentPage] && dismissKey in Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]) {
             // Remove result if it has been marked OK or ignored, increment dismissed match counter.
             Ed11y.dismissedCount++;
@@ -277,13 +300,13 @@ class Ed11y {
           }
         }
       }
-      
+
       Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
 
       if (Ed11y.totalCount > 0) {
         Ed11y.panelJumpNext.removeAttribute('hidden');
-        if (Ed11y.totalCount < 2) {
-          Ed11y.panelJumpPrev.setAttribute('hidden','');
+        if (Ed11y.totalCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
+          Ed11y.panelJumpPrev.setAttribute('hidden', '');
         } else {
           Ed11y.panelJumpPrev.removeAttribute('hidden');
         }
@@ -295,7 +318,7 @@ class Ed11y {
           Ed11y.panel.classList.remove('errors', 'pass');
           Ed11y.panel.classList.add('warnings');
         }
-        Ed11y.panelCount.textCount = Ed11y.totalCount;    
+        Ed11y.panelCount.textCount = Ed11y.totalCount;
         Ed11y.panelCount.style.display = 'inline-block';
         Ed11y.panelMessage.innerHTML = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
         Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
@@ -303,7 +326,7 @@ class Ed11y {
       else {
         Ed11y.panelJumpNext.setAttribute('hidden', '');
         Ed11y.panelJumpPrev.setAttribute('hidden', '');
-        
+
         Ed11y.panelCount.style.display = 'display: none;';
         Ed11y.panel.classList.remove('warnings', 'errors');
         Ed11y.panel.classList.add('pass');
@@ -316,21 +339,17 @@ class Ed11y {
           Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
         }
       }
-      if (Ed11y.dismissedCount > 0 || Ed11y.ignoreAll) {
-        Ed11y.restoreDismissed.removeAttribute('hidden');
-      }
       Ed11y.panel.classList.remove('ed11y-preload');
 
       // Dispatch event for synchronizers
-      window.setTimeout(function() {
+      window.setTimeout(function () {
         let syncResults = new CustomEvent('ed11yResults');
         document.dispatchEvent(syncResults);
-      },0);
+      }, 0);
 
     };
 
-    Ed11y.updatePanel = function (onLoad, showPanel) {
-      
+    Ed11y.updatePanel = function (onLoad = false, showPanel = 'show') {
       if (onLoad === true) {
         // Create the panel if it doesn't exist yet
         let panel = document.createElement('ed11y-element-panel');
@@ -338,29 +357,33 @@ class Ed11y {
       }
 
       Ed11y.countAlerts();
-      
-      if (onLoad === true && Ed11y.totalCount > 0 && !Ed11y.ignoreAll) {
-        // Determine if panel should open automatically.
-        if (Ed11y.localDataParsed[Ed11y.options.currentPage] === Ed11y.totalCount) {
+
+      if (onLoad === true) {
+        // todo: open on assertive with count mismatch or if showDismissed is set.
+        if (Ed11y.totalCount > 0 && !Ed11y.ignoreAll && Ed11y.options.alertMode === 'assertive' && Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount ) {
           // User has already seen these errors, panel will not open.
-          showPanel = 'seen';
+          showPanel = true;
+          window.setTimeout(function () {
+            Ed11y.announce.innerHTML = Ed11y.getText(Ed11y.panelMessage);
+          }, 1500);
+        } else if (Ed11y.options.showDismissed && (Ed11y.dismissedCount > 0 || Ed11y.totalCount > 0)) {
+          showPanel = true;
+        } else {
+          showPanel = false;
         }
-        else if (Ed11y.options.alertMode === 'assertive') {
-          // User has not seen these errors; force open panel.
-          // CMS integrations can set this dynamically.
-          showPanel = 'show';
-        }
-        Ed11y.localDataParsed[Ed11y.options.currentPage] = Ed11y.totalCount;
-        window.setTimeout(function() {
-          Ed11y.announce.innerHTML = Ed11y.getText(Ed11y.panelMessage);
-        }, 1500);
+      } else {
+        showPanel = true;
       }
-      else if (onLoad === true && Ed11y.totalCount === 0) {
-        showPanel = 'pass';
+
+      if (Ed11y.totalCount > 0) {
+        Ed11y.seen[encodeURI(Ed11y.options.currentPage)] = Ed11y.totalCount;
+        localStorage.setItem('editoria11yResultCount', JSON.stringify(Ed11y.seen));
+      } else {
+        delete Ed11y.seen[encodeURI(Ed11y.options.currentPage)];
       }
 
       // Now we can open or close the panel.
-      if (showPanel !== 'show') {
+      if (!showPanel) {
         Ed11y.reset();
         if (!Ed11y.bodyStyle) {
           Ed11y.paintReady();
@@ -370,6 +393,16 @@ class Ed11y {
         Ed11y.panel.classList.remove('shut');
         Ed11y.panel.classList.add('active');
         Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
+        if (Ed11y.dismissedCount > 0) {
+          let text = Ed11y.dismissedCount === 1 ? Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+          Ed11y.showDismissed.textContent = text;
+          Ed11y.showDismissed.removeAttribute('hidden');
+        } else if (Ed11y.options.showDismissed === true) {
+          // Reset show hidden default option when irrelevant.
+          Ed11y.showDismissed.setAttribute('hidden', '');
+          Ed11y.showDismissed.setAttribute('aria-pressed', 'false');
+          Ed11y.options.showDismissed = false;
+        }
         window.setTimeout(function () {
           document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
           if (!Ed11y.ignoreAll) {
@@ -377,7 +410,7 @@ class Ed11y {
           }
         }, 0);
         if (onLoad === false) {
-          window.setTimeout(function() {
+          window.setTimeout(function () {
             Ed11y.panelMessage.focus();
           }, 500);
         }
@@ -389,7 +422,7 @@ class Ed11y {
     };
 
     // Place markers on elements with issues
-    Ed11y.result = function(el, index) {
+    Ed11y.result = function (el, index) {
       // [0] el element
       // [1] test ID
       // [2] tip contents
@@ -405,7 +438,7 @@ class Ed11y {
         location = el[0];
         position = el[3];
       }
-      mark.setAttribute('id','ed11y-result-' + index);
+      mark.setAttribute('id', 'ed11y-result-' + index);
       mark.setAttribute('data-ed11y-result', index);
       mark.setAttribute('data-ed11y-open', 'false');
       location.insertAdjacentElement(position, mark);
@@ -429,7 +462,7 @@ class Ed11y {
 
     Ed11y.linkText = (linkText) => {
       // todo: This is only used in Images??? Review all text value diving.
-      linkText = linkText.replace(Ed11y.options.linkIgnoreStrings,'');
+      linkText = linkText.replace(Ed11y.options.linkIgnoreStrings, '');
       linkText = linkText.replace(/'|"|-|\.|\s+/g, '');
       return linkText;
     };
@@ -484,17 +517,17 @@ class Ed11y {
     };
 
     // QuerySelectAll non-ignored elements within checkroots, with recursion into shadow components
-    Ed11y.findElements = function(key, selector, rootRestrict = true) {
-      
+    Ed11y.findElements = function (key, selector, rootRestrict = true) {
+
       // Todo beta: function and parameter to auto-detect shadow components.
       let shadowSelector = Ed11y.options.shadowComponents ? `, ${Ed11y.options.shadowComponents}` : '';
 
       // Concatenate global and specific ignores
       let ignore = '';
       if (Ed11y.options.ignoreElements) {
-        ignore = Ed11y.options.ignoreByKey[key] ? `:not(${Ed11y.options.ignoreElements}, ${Ed11y.options.ignoreByKey[key]})`: `:not(${Ed11y.options.ignoreElements})`; 
+        ignore = Ed11y.options.ignoreByKey[key] ? `:not(${Ed11y.options.ignoreElements}, ${Ed11y.options.ignoreByKey[key]})` : `:not(${Ed11y.options.ignoreElements})`;
       } else {
-        ignore = Ed11y.options.ignoreByKey[key] ? `:not(${Ed11y.options.ignoreByKey[key]})`: '';
+        ignore = Ed11y.options.ignoreByKey[key] ? `:not(${Ed11y.options.ignoreByKey[key]})` : '';
       }
 
       // Initialize or reset elements array.
@@ -508,7 +541,7 @@ class Ed11y {
       } else {
         Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(document.querySelectorAll(`:is(${selector}${shadowSelector})${ignore}`)));
       }
-      
+
       // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
       // Repeat the search inside each placeholder, and replace the placeholder with its search results.
       if (Ed11y.options.shadowComponents) {
@@ -526,7 +559,7 @@ class Ed11y {
               Ed11y.elements[key].splice(index, 1, ...shadowFind[index]);
             }
           }
-        }  
+        }
       }
     };
 
@@ -547,7 +580,8 @@ class Ed11y {
     };
 
     Ed11y.dismissalKey = function (text) {
-      return String(text).substring(0,512);
+      //?.replace(/([^0-9a-zA-Z])/g,'')
+      return String(text).replace(/([^0-9a-zA-Z])/g, '').substring(0, 512);
     };
 
     Ed11y.dismissThis = function (dismissalType) {
@@ -558,22 +592,34 @@ class Ed11y {
       let dismissalKey = Ed11y.dismissalKey(Ed11y.results[id][4]);
 
       // Remove tip and reset borders around element
-      Ed11y.resetClass(['ed11y-hidden-highlight','ed11y-ring-red','ed11y-ring-yellow']);
+      Ed11y.resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
       removal.parentNode.removeChild(removal);
       let removeButton = Ed11y.elements.openButton[0];
       removeButton.parentNode.removeChild(removeButton);
 
-      // Build dismissal record.
-      let dismissal = {};
-      dismissal[dismissalKey] = dismissalType;
-      if (typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage] == 'undefined') {
-        let store = {};
-        store[test] = dismissal;
-        Ed11y.dismissedAlerts[Ed11y.options.currentPage] = store;
-      } else if (typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] === 'undefined') {
-        Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] = dismissal;
+      // Update dismissal record.
+      if (dismissalType === 'reset') {
+        delete Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissalKey];
+        if (Object.keys(Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]).length === 0) {
+          delete Ed11y.dismissedAlerts[Ed11y.options.currentPage][test];
+        }
+        if (Object.keys(Ed11y.dismissedAlerts[Ed11y.options.currentPage]).length === 0) {
+          delete Ed11y.dismissedAlerts[Ed11y.options.currentPage];
+        }
+        Ed11y.updatePanel();
       } else {
-        Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissalKey] = dismissalType;
+        let dismissal = {};
+        dismissal[dismissalKey] = dismissalType;
+        if (typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage] == 'undefined') {
+          let store = {};
+          store[test] = dismissal;
+          Ed11y.dismissedAlerts[Ed11y.options.currentPage] = store;
+        } else if (typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] === 'undefined') {
+          Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] = dismissal;
+        } else {
+          Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissalKey] = dismissalType;
+        }
+        Ed11y.showDismissed.removeAttribute('hidden');
       }
 
       // Send record to storage or dispatch an event to an API.
@@ -595,15 +641,15 @@ class Ed11y {
       Ed11y.checkAll(false, 'show');
 
       let rememberGoto = Ed11y.goto;
-      
-      window.setTimeout( function() {
+
+      window.setTimeout(function () {
         Ed11y.buildJumpList();
         if (Ed11y.elements.jumpList.length > 0) {
           Ed11y.goto = (rememberGoto - 1);
           Ed11y.setCurrentJump();
           Ed11y.panelJumpNext.focus();
         } else {
-          window.setTimeout(function() {
+          window.setTimeout(function () {
             let focus = Ed11y.panel.querySelector('#issues-tab');
             focus.focus();
           }, 100);
@@ -611,27 +657,18 @@ class Ed11y {
       }, 500, rememberGoto);
     };
 
-    Ed11y.clearDismissals = function() {
+    Ed11y.toggleShowDismissals = function () {
       // todo: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
       Ed11y.ignoreAll = false;
-      Ed11y.dismissedAlerts[Ed11y.options.currentPage] = {};
-      if (Ed11y.options.syncedDismissals === false) {
-        localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
-      } else {
-        let dismissalDetail = {
-          dismissPage: Ed11y.options.currentPage,
-          dismissAction: 'reset',
-        };
-        let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
-        document.dispatchEvent(ed11yDismissalUpdate);
-      }
-      
-      Ed11y.restoreDismissed.setAttribute('hidden', '');
+      Ed11y.options.showDismissed = !(Ed11y.options.showDismissed);
       Ed11y.reset();
       Ed11y.checkAll(false, 'show');
+
+      Ed11y.showDismissed.setAttribute('aria-pressed', !!Ed11y.options.showDismissed);
+      Ed11y.showDismissed.textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlertsContent : Ed11y.M.buttonShowHiddenAlertsContent;
     };
 
-    Ed11y.dismissHelp = function(el) {
+    Ed11y.dismissHelp = function (el) {
       let help = document.createElement('ul');
       help.setAttribute('tabindex', '-1');
       help.classList.add('help');
@@ -657,7 +694,7 @@ class Ed11y {
     Ed11y.showResults = function () {
 
       Ed11y.results?.forEach(function (el, i) {
-        if (!Ed11y.results[i][5]) {
+        if (!Ed11y.results[i][5] || Ed11y.options.showDismissed) {
           Ed11y.result(el, i);
         }
       });
@@ -666,11 +703,11 @@ class Ed11y {
 
       // Announce that buttons have been placed.
       document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
-      
+
       Ed11y.alignButtons();
     };
 
-    Ed11y.alignButtons = function() {
+    Ed11y.alignButtons = function () {
       window.setTimeout(function () {
         // Nudge offscreen tips back on screen.
         let windowWidth = window.innerWidth;
@@ -714,9 +751,9 @@ class Ed11y {
       }, 0);
     };
 
-    Ed11y.paintReady = function() {
-      let readyStyle = 
-            `ed11y-element-result, ed11y-element-panel {
+    Ed11y.paintReady = function () {
+      let readyStyle =
+        `ed11y-element-result, ed11y-element-panel {
               opacity: 1; 
               outline: 0 !important;
             }
@@ -767,20 +804,20 @@ class Ed11y {
       }
     };
 
-    Ed11y.alignTip = function (button, toolTip, recheck = 0) { 
+    Ed11y.alignTip = function (button, toolTip, recheck = 0) {
       let arrow = toolTip.shadowRoot.querySelector('.arrow');
       let tip = arrow.nextElementSibling;
       let loopCount = recheck + 1;
 
       // hiddenHandlers may cause element to animate.
       if (recheck < 3 && Ed11y.options.hiddenHandlers && Ed11y.options.hiddenHandlers.length > 0 && !!button.getRootNode().host.closest(Ed11y.options.hiddenHandlers)) {
-        window.setTimeout(function() {
+        window.setTimeout(function () {
           Ed11y.alignTip(button, toolTip, loopCount);
-        },150, loopCount);
+        }, 150, loopCount);
       }
       // Reset any previous alignments
-      tip.setAttribute('style','');
-      arrow.setAttribute('style','');
+      tip.setAttribute('style', '');
+      arrow.setAttribute('style', '');
 
       // Find button on page
       let scrollTop = window.scrollY;
@@ -820,14 +857,14 @@ class Ed11y {
 
       let nudgeX = 0;
       let nudgeY = 0;
-      
+
       if (direction === 'under') {
         // Pin to the left edge, unless the tip is not wide enough to reach:
-        if (tipWidth * 4 / 5 + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
+        if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
           if (tipWidth - 15 > buttonOffset.left) {
             nudgeX = 15 - buttonOffset.left;
-            arrow.style.setProperty('left', Math.max(buttonOffset.left,15) - 9 + 'px');
+            arrow.style.setProperty('left', Math.max(buttonOffset.left, 15) - 9 + 'px');
           } else {
             arrow.style.setProperty('left', tipWidth - 26 + 'px');
             nudgeX = 31 - tipWidth;
@@ -836,7 +873,7 @@ class Ed11y {
           nudgeX = 40 - tipWidth / 5;
           arrow.style.setProperty('left', tipWidth / 5 - 34 + 'px');
         }
-        
+
         arrow.dataset.direction = 'under';
         nudgeY = 50;
       }
@@ -844,7 +881,7 @@ class Ed11y {
         // Slide left or right to center tip on page.
         nudgeY = -1 * (tipHeight + 18);
         arrow.style.setProperty('top', tipHeight);
-        if (tipWidth * 4 / 5 + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
+        if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
           if (tipWidth - 15 > buttonOffset.left) {
             nudgeX = 15 - buttonOffset.left;
@@ -866,7 +903,7 @@ class Ed11y {
           // Offset up
           nudgeY = windowBottom - (tipBottom + 90);
           let arrowY = nudgeY * -1 + 7;
-          arrowY = Math.min(arrowY,tipHeight - 25);
+          arrowY = Math.min(arrowY, tipHeight - 25);
           arrow.style.setProperty('top', `${arrowY}px`);
         }
         if (direction === 'left') {
@@ -880,7 +917,7 @@ class Ed11y {
         }
       }
       toolTip.style.setProperty('transform', `translate(${nudgeX}px, ${nudgeY}px)`);
-      
+
     };
 
     Ed11y.baseCSS = `
@@ -888,7 +925,7 @@ class Ed11y {
       .hidden{display:none;}
       .wrapper{font-size:14px;line-height: 1.5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
       `;
-    Ed11y.clickTab = function(event) {
+    Ed11y.clickTab = function (event) {
       Ed11y.activateTab(event.target, false);
     };
 
@@ -911,17 +948,17 @@ class Ed11y {
         }
       }
       Ed11y.doubleClickPrevent = true;
-      window.setTimeout(function() {
+      window.setTimeout(function () {
         Ed11y.doubleClickPrevent = false;
-      },200);
+      }, 200);
       return false;
     };
 
-    Ed11y.showHeadingsPanel = function() {
+    Ed11y.showHeadingsPanel = function () {
       // Visualize the document outline
- 
+
       let panelOutline = Ed11y.panel.querySelector('#outline');
-      
+
       if (Ed11y.headingOutline.length) {
         panelOutline.innerHTML = '';
         Ed11y.headingOutline.forEach((el, i) => {
@@ -939,7 +976,7 @@ class Ed11y {
             // todo: communicate alert level? Add alert title?
             li.classList.add('has-issues');
           }
-          li.style.setProperty('margin-left', leftPad + 'px');        
+          li.style.setProperty('margin-left', leftPad + 'px');
           li.innerHTML = `<strong>H${level}:</strong> ${message}`;
           let userText = document.createElement('span');
           userText.textContent = el[0].textContent;
@@ -950,7 +987,7 @@ class Ed11y {
         panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>';
       }
     };
-    Ed11y.switchPanel = function(id) {
+    Ed11y.switchPanel = function (id) {
       // Switch main panel tab
       Ed11y.panel.querySelector('.content > div:not(.hidden)')?.classList.add('hidden');
       Ed11y.panel.querySelector('[aria-selected=true]')?.setAttribute('aria-selected', 'false');
@@ -958,33 +995,33 @@ class Ed11y {
       Ed11y.panel.querySelector('#' + id + '-tab')?.classList.remove('hidden');
       // todo beta what to show when no outline or images
       // todo postpone: error when no headings found at all?
-      Ed11y.findElements('reset','ed11y-element-heading-label, ed11y-element-alt');
-      Ed11y.elements.reset?.forEach(el => {el.remove();});
-      
+      Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
+      Ed11y.elements.reset?.forEach(el => { el.remove(); });
+
       // Show extras
       switch (id) {
-      case 'alts':
-        Ed11y.showAltPanel();
-        break;
-      case 'headings':
-        Ed11y.showHeadingsPanel();
-        break;
-      case 'help':
-        Ed11y.showHelpPanel();
-        break;
-      default:
-        // hide extras
-        break;
+        case 'alts':
+          Ed11y.showAltPanel();
+          break;
+        case 'headings':
+          Ed11y.showHeadingsPanel();
+          break;
+        case 'help':
+          Ed11y.showHelpPanel();
+          break;
+        default:
+          // hide extras
+          break;
       }
     };
 
-    
-    Ed11y.alignAlts = function() {
+
+    Ed11y.alignAlts = function () {
       // Positions alt label to match absolute, inline or floated images.
       Ed11y.findElements('altMark', 'ed11y-element-alt');
       Ed11y.elements.altMark?.forEach((el) => {
         let id = el.dataset.ed11yImg;
-        el.setAttribute('style','');
+        el.setAttribute('style', '');
         let img = Ed11y.imageAlts[id][0];
         if (img.tagName !== 'IMG') {
           // Mark is placed outside the link in linked images.
@@ -999,20 +1036,20 @@ class Ed11y {
       });
     };
 
-    Ed11y.showAltPanel = function() {
+    Ed11y.showAltPanel = function () {
       // visualize image alts
       let altList = Ed11y.panel.querySelector('#alt-list');
-      
+
       if (Ed11y.imageAlts.length) {
         altList.innerHTML = '';
         Ed11y.imageAlts.forEach((el, i) => {
           // el[el, src, altLabel, altStyle]
-          
+
           // Label images
           let mark = document.createElement('ed11y-element-alt');
           mark.dataset.ed11yImg = i;
-          el[0].insertAdjacentElement('beforebegin', mark);         
-  
+          el[0].insertAdjacentElement('beforebegin', mark);
+
           // Build alt list in panel
           let userText = document.createElement('span');
           userText.textContent = el[2];
@@ -1031,19 +1068,19 @@ class Ed11y {
       }
     };
 
-    Ed11y.showHelpPanel = function() {
+    Ed11y.showHelpPanel = function () {
       let helpTab = Ed11y.panel.querySelector('#help-tab');
       helpTab.innerHTML = Ed11y.M.panelHelp;
     };
 
-    Ed11y.buildJumpList = function() {
-      Ed11y.findElements('jumpList','ed11y-element-result', false);
+    Ed11y.buildJumpList = function () {
+      Ed11y.findElements('jumpList', 'ed11y-element-result', false);
       Ed11y.elements.jumpList.forEach((result, i) => {
-        result.dataset.ed11yJumpPosition = i; 
+        result.dataset.ed11yJumpPosition = i;
       });
     };
 
-    Ed11y.setCurrentJump = function() {
+    Ed11y.setCurrentJump = function () {
       // Set next/previous buttons
       let goMax = Ed11y.elements.jumpList.length - 1;
       let goNext = 0;
@@ -1075,13 +1112,13 @@ class Ed11y {
       let minimized = Ed11y.panel.classList.contains('shut') === 'true' ? true : false;
       Ed11y.panel.classList.toggle('shut');
       if (minimized === false) {
-        window.setTimeout(function() {
+        window.setTimeout(function () {
           Ed11y.panelToggle.focus();
         }, 500);
       }
     };
 
-    Ed11y.windowResize = function() {
+    Ed11y.windowResize = function () {
       if (Ed11y.panel?.classList.contains('active') === true) {
         Ed11y.alignAlts();
         Ed11y.alignButtons();
@@ -1094,7 +1131,7 @@ class Ed11y {
 
     // Escape key closes panels.
     // todo mvp rewrite
-    Ed11y.escapeWatch = function(event) {
+    Ed11y.escapeWatch = function (event) {
       if (event.keyCode === 27) {
         if (event.target.closest('ed11y-element-panel') && Ed11y.panelToggle.getAttribute('aria-expanded') === 'true') {
           Ed11y.panelToggle.focus();
@@ -1106,16 +1143,16 @@ class Ed11y {
             Ed11y.toggledFrom.focus();
             Ed11y.elements.openButton[0].shadowRoot.querySelector('button').click();
           }
-        } 
+        }
       }
     };
-    document.addEventListener('keyup', function(event) {Ed11y.escapeWatch(event);});
+    document.addEventListener('keyup', function (event) { Ed11y.escapeWatch(event); });
 
     /*============== Panel interactions ========*/
-    Ed11y.activateTab = function(tab, setFocus) {
+    Ed11y.activateTab = function (tab, setFocus) {
       setFocus = setFocus || true;
       Ed11y.deactivateTabs();
-      tab.setAttribute('tabindex','0');
+      tab.setAttribute('tabindex', '0');
       tab.setAttribute('aria-selected', 'true');
       let controls = tab.getAttribute('aria-controls');
       Ed11y.panel.querySelector('#' + controls).classList.remove('hidden');
@@ -1123,7 +1160,7 @@ class Ed11y {
         tab.focus();
       }
     };
-    Ed11y.deactivateTabs = function() {
+    Ed11y.deactivateTabs = function () {
       Ed11y.panelTabs.forEach(tab => {
         tab.setAttribute('tabindex', '-1');
         tab.setAttribute('aria-selected', 'false');
@@ -1136,24 +1173,24 @@ class Ed11y {
 
     /*=============== Utilities ================*/
 
-    Ed11y.parents = function(el) {
+    Ed11y.parents = function (el) {
       let nodes = [];
       nodes.push(el);
-      while(el && !!el.parentElement && el.parentElement.tagName !== 'HTML') {
+      while (el && !!el.parentElement && el.parentElement.tagName !== 'HTML') {
         nodes.push(el.parentElement);
         el = el.parentElement;
       }
       return nodes;
     };
 
-    Ed11y.siblings = function(el) {
+    Ed11y.siblings = function (el) {
       if (el.parentNode === null) return [];
       return Array.prototype.filter.call(el.parentNode.children, function (child) {
         return child !== el;
       });
     };
 
-    Ed11y.nextUntil = function(el, selector) {
+    Ed11y.nextUntil = function (el, selector) {
       // Recursively iterate until match or null is returned.
       let next = el.nextElementSibling;
       if (next) {
@@ -1167,7 +1204,7 @@ class Ed11y {
       return next;
     };
 
-    Ed11y.getText = function(el) {
+    Ed11y.getText = function (el) {
       return el.textContent.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
     };
 
@@ -1181,22 +1218,22 @@ class Ed11y {
       });
     };
 
-    
-    
+
+
 
     // Is this still needed when we use real buttons? getting doubleclick on FF
-    Ed11y.keyboardClick = function(event) {
+    Ed11y.keyboardClick = function (event) {
       event.preventDefault();
       let key = event.keyCode;
       switch (key) {
-      case 13: // enter
-      case 32: // space
-        event.target.click();
-        break;
+        case 13: // enter
+        case 32: // space
+          event.target.click();
+          break;
       }
     };
 
-    Ed11y.visibleElement = function(el) {
+    Ed11y.visibleElement = function (el) {
       // Checks if this element is visible. Used in parent iterators.
       // false is definitely invisible, true requires continued iteration to tell.
       // Todo postpone: Check for offscreen?
@@ -1204,10 +1241,10 @@ class Ed11y {
         let style = window.getComputedStyle(el);
         if (el.classList.contains('ed11y-ring-red') || el.classList.contains('ed11y-ring-yellow')) {
           if (
-            style.getPropertyValue('display') === 'none' || 
-              style.getPropertyValue('visibility') === 'hidden' ||
-              style.getPropertyValue('opacity') === '0' ||
-              el.hasAttribute('hidden')
+            style.getPropertyValue('display') === 'none' ||
+            style.getPropertyValue('visibility') === 'hidden' ||
+            style.getPropertyValue('opacity') === '0' ||
+            el.hasAttribute('hidden')
           ) {
             return false;
           } else {
@@ -1215,7 +1252,7 @@ class Ed11y {
           }
         } else if (
           // todo: if the element is display:none, can we push the tooltip to the nearest visible container and then open it?
-          style.getPropertyValue('display') === 'none' || 
+          style.getPropertyValue('display') === 'none' ||
           style.getPropertyValue('visibility') === 'hidden' ||
           style.getPropertyValue('opacity') === '0' ||
           el.offsetWidth === 0 ||
@@ -1227,8 +1264,8 @@ class Ed11y {
         }
       }
     };
-    
-    Ed11y.visible = function(el) {
+
+    Ed11y.visible = function (el) {
       // Recurse element and ancestors to make sure it is visible
       if (!Ed11y.visibleElement(el)) {
         // Element is hidden
@@ -1242,7 +1279,7 @@ class Ed11y {
       }
     };
 
-    Ed11y.firstVisibleParent = function(el) {
+    Ed11y.firstVisibleParent = function (el) {
       let parent = el.parentElement;
       if (parent) {
         // Parent exists
@@ -1260,24 +1297,24 @@ class Ed11y {
       }
     };
 
-    Ed11y.parentLink = function(el) {
+    Ed11y.parentLink = function (el) {
       return el.closest('a[href]');
     };
 
-    Ed11y.getOpenTip = function() {
-      Ed11y.findElements('openButton','ed11y-element-result[data-ed11y-open="true"]');
+    Ed11y.getOpenTip = function () {
+      Ed11y.findElements('openButton', 'ed11y-element-result[data-ed11y-open="true"]');
       let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
       return activeTip;
     };
 
-    Ed11y.focusActiveResult = function() {
+    Ed11y.focusActiveResult = function () {
       Ed11y.getOpenTip();
-      window.setTimeout(function() {
+      window.setTimeout(function () {
         Ed11y.elements.openButton[0]?.shadowRoot.querySelector('button').focus();
-      },0);
+      }, 0);
     };
 
-    Ed11y.srcMatchesOptions = function(source, option) {
+    Ed11y.srcMatchesOptions = function (source, option) {
       if (option.length > 0 && source?.length > 0) {
         let selectorArray = option.split(/\s*[\s,]\s*/).map((el) => {
           return '[src*=\'' + el + '\']';
@@ -1312,7 +1349,7 @@ class Ed11y {
         el.setAttribute('id', id);
       }
       if (classes) {
-        if (typeof(classes) === 'string') {
+        if (typeof (classes) === 'string') {
           el.classList.add(classes);
         } else {
           classes.forEach(str => {
@@ -1320,7 +1357,7 @@ class Ed11y {
           });
         }
       }
-      if (typeof(attributes) === 'object') {
+      if (typeof (attributes) === 'object') {
         Object.entries(attributes).forEach(([key, value]) => {
           //let attribute = value.toString();
           el.setAttribute(key, value);
