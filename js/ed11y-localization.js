@@ -27,9 +27,8 @@ const ed11yLang = {
     panelCheckOutline: '<p>Check that this forms <a href=\'https://accessibility.princeton.edu/how/content/headings\'>a complete outline</a>:</p>',
     panelCheckAltText: '<p>Check <a href=\'https://accessibility.princeton.edu/how/content/alternative-text\'>alt text</a>, <a href=\'https://accessibility.princeton.edu/how/content/images-text\'>images of text</a>, &amp; <a href=\'https://webaim.org/techniques/captions/\'>captions</a>.</p>',
     panelHelp : `
-    <p>Assistive technologies and search engine crawlers work best with well-structured content. <a href="https://itmaybejj.github.io/editoria11y/">Editoria11y</a> checks for common needs, such as descriptive image alternative text, meaningful heading outlines and well-named links.</p>
-    <p>Note that it <strong>only</strong> checks content; different tools and techniques are needed to <a href='https://webaim.org/resources/evalquickref/'>test the design and code</a>.<p>
-    <p>Have a bug or feature request? <a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Contact the Editoria11y maintainers</a>.</p>
+    <p>Assistive technologies and search engines rely on well-structured content. <a href="https://itmaybejj.github.io/editoria11y/">Editoria11y</a> checks for common needs, such as image alternative text, meaningful heading outlines and well-named links. It is meant to supplement <a href='https://webaim.org/resources/evalquickref/'>testing the design and code</a>.</p>
+    <p><a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Report bugs & request changes <span aria-hidden="true">&raquo;</span></a></p>
     `,
     altLabelPrefix: 'Alt text: ',
     errorAltMissing: '(missing!)',
