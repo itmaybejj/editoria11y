@@ -160,3 +160,6 @@ Editoria11y is maintained by [John Jameson](https://www.linkedin.com/in/johnwjam
 Editoria11y's JavaScript began as a fork of the [Sa11y](https://ryersondmp.github.io/sa11y/) library, which was created by Digital Media Projects, Computing and Communication Services (CCS) at Toronto Metropolitan University. The libraries share most tests, and our teams work together on new features.
 
 Sa11y itself began as a fork of [Tota11y by Khan Academy](https://github.com/Khan/tota11y).
+
+ 
+<div hidden><style>.wrapper {margin: auto;min-height: 100vh;}a {font-weight: 500;}a.github {display: inline-block;height: auto;padding: 12px 2px 12px 32px;}header li {width: 11rem;height: auto;}body {font-size: 16px;}header {width: auto;max-width: 192px;}@media print, screen and (max-width: 960px) {header ul {  position: relative;}header {  width: 90vw;  padding-right: 0;}div.wrapper {  width: 100%;}}</div>
