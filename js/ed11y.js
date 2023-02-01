@@ -32,7 +32,9 @@ class Ed11y {
         // 'table': false,
       },
 
-      // "Assertive" opens the panel automatically if new items are found. "Headless never draws the panel."
+      // Set alertMode to "Assertive" to open the panel automatically if the issue count changes.
+      // For CMS integrations, it is nice  switch between polite & headless based on whether the page was just edited.
+      // alertMode "headless" never draws the panel.
       alertMode: 'polite',
 
       // Dismissed alerts
@@ -999,18 +1001,18 @@ class Ed11y {
 
       // Show extras
       switch (id) {
-        case 'alts':
-          Ed11y.showAltPanel();
-          break;
-        case 'headings':
-          Ed11y.showHeadingsPanel();
-          break;
-        case 'help':
-          Ed11y.showHelpPanel();
-          break;
-        default:
-          // hide extras
-          break;
+      case 'alts':
+        Ed11y.showAltPanel();
+        break;
+      case 'headings':
+        Ed11y.showHeadingsPanel();
+        break;
+      case 'help':
+        Ed11y.showHelpPanel();
+        break;
+      default:
+        // hide extras
+        break;
       }
     };
 
@@ -1225,10 +1227,10 @@ class Ed11y {
       event.preventDefault();
       let key = event.keyCode;
       switch (key) {
-        case 13: // enter
-        case 32: // space
-          event.target.click();
-          break;
+      case 13: // enter
+      case 32: // space
+        event.target.click();
+        break;
       }
     };
 

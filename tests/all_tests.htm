@@ -49,7 +49,7 @@
             
             <p class="positive"><b>All &lt;b&gt;old paragraph needs manual check</b></p>
             
-            <p class="positive"> <strong>Short lines with <a href="#">links</a>, <span>span</span>, &nbsp;non-breaking whitespace should still be flagged </strong></p>
+            <p class="positive"> <strong>Short lines with <span>spans</span>, &nbsp;non-breaking whitespace should still be flagged </strong></p>
             
             <p class="todo-positive"> <strong>Short bold line</strong><br>With a carriage return.</p>
             
@@ -192,6 +192,7 @@
         <p class="positive"><a href="#"><img alt="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
         </a> linked image with giant alt.</p>
         <p class="positive"><a href="#">Link text with image text<img  alt="a butterfly" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+        <p class="negative"><a href="#">Link text with text and empty image text<img  alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
         <h3>
             Links with accessible text added programmatically
         </h3>
