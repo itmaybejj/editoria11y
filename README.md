@@ -48,22 +48,11 @@ Try a [clickable demo of what a logged-in author would see](https://itmaybejj.gi
   * Embedded audio, reminding the user to provide a transcript
   * Embedded social media, reminding the user to check their social media content as well
 
-### Recent changes
-Major changes in version 2.x:
-* Content editors can now hide (and restore) "manual check" alerts.
-* When connected to a cloud API, "manual check" alerts can be marked as OK for all users, and results can be sent to a site-wide dashboard.
-* Additional theme variations and the ability to insert custom colors.
-* Tips extensively rewritten; external links to Princeton content removed.
-* The checker can now scan within shadow components.
-* Removing the jQuery dependency and rewriting tests doubled performance.
-
-[View full change log](https://github.com/itmaybejj/editoria11y/releases).
-
 ## Installation and configuration
 
 If possible, use a turnkey integration:
 * [Editoria11y Drupal Module](https://www.drupal.org/project/editoria11y)
-* [Editoria11y WordPress Plugin](https://github.com/itmaybejj/editoria11y-wp) (will be submitted to WordPress plugin library in early 2023)
+* [Editoria11y WordPress Plugin](https://wordpress.org/plugins/editoria11y-accessibility-checker/)
 * [Editoria11y SquareSpace Injector](https://github.com/itmaybejj/editoria11y-squarespace-inject) (Requires Commerce or Business tier)
 
 To build your own implementation, load a local copy (or a [CDN version](https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@2/dist/editoria11y.min.js)) of "editoria11y.min.js," and then create a new "Ed11y" instance:
@@ -136,6 +125,17 @@ A complete implementation will only be called for logged-in editors (you don't w
 
  Turnkey integrations often set these variables on the fly -- e.g., loading pages in "assertive" mode when they were recently edited, and switching back to "polite" after several minutes.
 
+
+### Recent changes
+Major changes in version 2.x:
+* Content editors can now hide (and restore) "manual check" alerts.
+* When connected to a cloud API, "manual check" alerts can be marked as OK for all users, and results can be sent to a site-wide dashboard.
+* Additional theme variations and the ability to insert custom colors.
+* Tips extensively rewritten; external links to Princeton content removed.
+* The checker can now scan within shadow components.
+* Removing the jQuery dependency and rewriting tests doubled performance.
+
+[View full change log](https://github.com/itmaybejj/editoria11y/releases).
 
 ### Dealing with alerts on hidden or size-constrained content
 
