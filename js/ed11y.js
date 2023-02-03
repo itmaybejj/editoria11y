@@ -325,9 +325,6 @@ class Ed11y {
           if (Ed11y.totalCount > 0 && !Ed11y.ignoreAll && Ed11y.options.alertMode === 'assertive' && Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount ) {
             // User has already seen these errors, panel will not open.
             showPanel = true;
-            window.setTimeout(function () {
-              Ed11y.announce.textContent = Ed11y.getText(Ed11y.panelMessage);
-            }, 1500);
           } else if (Ed11y.options.showDismissed && (Ed11y.dismissedCount > 0 || Ed11y.totalCount > 0)) {
             showPanel = true;
           } else {
@@ -374,7 +371,7 @@ class Ed11y {
             window.setTimeout(function () {
               Ed11y.panelMessage.focus();
             }, 500);
-          }
+          } 
         }
         
         if (Ed11y.totalCount > 0) {
@@ -394,7 +391,11 @@ class Ed11y {
           }
           Ed11y.panelCount.textCount = Ed11y.totalCount;
           Ed11y.panelCount.style.display = 'inline-block';
-          Ed11y.panelMessage.innerHTML = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
+          let text = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
+          Ed11y.panelMessage.textContent = text;
+          window.setTimeout(function() {
+            Ed11y.announce.textContent = text;
+          }, 1500);
           Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
         }
         else {
@@ -1295,6 +1296,33 @@ class Ed11y {
       } else {
         // No visible parents.
         return false;
+      }
+    };
+
+    Ed11y.hiddenElementCheck = function (el) {
+      // Checks if this element has been removed from the accessibility tree
+      let style = window.getComputedStyle(el);
+      if (style.getPropertyValue('display') === 'none' ||
+        style.getPropertyValue('visibility') === 'hidden' ||
+        el.hasAttribute('aria-hidden') || 
+        el.hasAttribute('hidden')) {
+        return false;
+      } else {
+        return true;
+      }
+    };
+
+    Ed11y.elementNotHidden = function (el) {
+      // Recurse element and ancestors to make sure it is visible
+      if (!Ed11y.hiddenElementCheck(el)) {
+        // Element is hidden
+        return false;
+      } else {
+        // Element is not known to be hidden.
+        let parents = Ed11y.parents(el);
+        let notHiddenParent = (parent) => Ed11y.hiddenElementCheck(parent);
+        let notHidden = parents.every(notHiddenParent);
+        return notHidden;
       }
     };
 

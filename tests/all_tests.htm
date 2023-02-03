@@ -29,13 +29,18 @@
             </div>
             <div class="positive">empty linked heading
                 <a href="#"><h4></h4></a>
-            </div>
-            
+            </div>          
 
             <div class="positive"><h4 id="a-very-long-heading">Suspiciously long heading. Headings should not be used for emphasis, but rather for a document outline, so if you find yourself talking this much, this probably is being used for visual formatting, not a heading.</h4>
             </div>
 
             <div class="positive"><h4>Skipped and empty heading (duplicate alert check)</h4><h6></h6></div>
+
+            <h3>Heading hidden from screen readers</h3>
+            <div class="negative">
+              <p>This should be excluded from the outline.</p>
+              <h6 style="display:none;">This should not be visible in the page outline</h6>
+            </div>
 
             <h3>Possible fake headings</h3>
 

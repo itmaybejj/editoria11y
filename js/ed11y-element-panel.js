@@ -26,7 +26,7 @@ class Ed11yElementPanel extends HTMLElement {
       <div id='issues-tab' tabindex="0" role="tabpanel" class="show" aria-labelledby='issues'>
           <div>
               <div class='content-text'>${Ed11y.M.panelCountBase}</div>
-              <div aria-live='polite' class='announce hidden'></div>
+              <div aria-live='polite' class='announce sr-only'></div>
           </div>
           <div class='jumplinks'>
             <button class='jump prev' data-ed11y-goto='0' hidden><span aria-hidden='true'>« </span><span class='jump-prev'>${Ed11y.M.buttonPrevContent}</span></button>
@@ -270,6 +270,14 @@ class Ed11yElementPanel extends HTMLElement {
           flex: 0 1 80px;
           width: 80px;
           align-self: flex-start;
+        }
+        .sr-only {
+          display: block;
+          width: 1px;
+          hight: 1px;
+          overflow: hidden;
+          opacity: 0;
+          position: absolute;
         }
       `;
       shadow.appendChild(style);
