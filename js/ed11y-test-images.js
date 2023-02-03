@@ -76,7 +76,7 @@ class Ed11yTestImages {
         if (parentLink !== null) {
           el = parentLink;
           // If we don't already have an error, check for mixed text
-          if (!error && Ed11y.linkText(parentLink.textContent).length > 1) {
+          if (!error && alt !== '' && Ed11y.linkText(parentLink.textContent).length > 1) {
             // todo: need to remove ignored link text
             error = 'altPartOfLinkWithText';
           } else {

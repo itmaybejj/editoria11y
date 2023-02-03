@@ -260,13 +260,13 @@ class Ed11yElementResult extends HTMLElement {
   attributeChangedCallback(attr, oldValue, newValue) {
     if (this.initialized) {
       switch (attr) {
-        case 'data-ed11y-action':
-          if (newValue !== 'false') {
-            let changeTo = newValue === 'open' ? true : false;
-            this.setAttribute('data-ed11y-action', 'false');
-            this.toggleTip(changeTo);
-          }
-          break;
+      case 'data-ed11y-action':
+        if (newValue !== 'false') {
+          let changeTo = newValue === 'open' ? true : false;
+          this.setAttribute('data-ed11y-action', 'false');
+          this.toggleTip(changeTo);
+        }
+        break;
       }
     }
   }

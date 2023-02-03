@@ -11,10 +11,10 @@ class Ed11yTestHeadings {
     
     let prevLevel = 0;
     Ed11y.headingOutline = [];
-    let position = 'beforebegin';
+    let position = 'afterbegin';
 
     // Test each header level for accessibility issues.
-    Ed11y.elements.h?.forEach((el, i) => {
+    Ed11y.elements.h?.filter( el => Ed11y.elementNotHidden(el) ).forEach((el, i) => {
       let level;
       let alert = [];
 
