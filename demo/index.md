@@ -20,47 +20,10 @@ Since this page is demonstrating what an author would see if new issues were det
 
 ## Learn more
 
-* [Installation and configuration](https://itmaybejj.github.io/editoria11y/demo).
+* [Test details and configuration notes](https://itmaybejj.github.io/editoria11y)
 * [Editoria11y Drupal Module](https://www.drupal.org/project/editoria11y)
 * [Editoria11y WordPress Plugin](https://github.com/itmaybejj/editoria11y-wp) (will be submitted to WordPress plugin library in early 2023)
 * [Editoria11y SquareSpace Injector](https://github.com/itmaybejj/editoria11y-squarespace-inject) (Requires Commerce or Business tier)
-
-## All included tests
-
-* Headings
-  * Skipped heading levels
-  * Empty headings
-  * Very long headings
-  * Suspiciously short blockquotes that may actually be headings
-  * All-bold paragraphs with no punctuation that may actually be headings
-* Text alternatives
-  * Images without an alt element
-  * Images with an empty alt element (flagged for manual review)
-  * Images with a filename as alt text
-  * Images with very long alt text
-  * Alt text that contains redundant text like "image of" or "photo of"
-  * Video embeds, reminding the user to add closed captions
-  * Audio embeds, reminding the user to provide a transcript
-  * Social media embeds, reminding the user to provide alt elements
-  * Embedded visualizations that usually require a text alternative
-* Meaningful links
-  * Links with no text
-  * Links titled with a filename 
-  * Links only titled with only generic text: “click here,” “learn more,” “download,” etc.
-  * Links that open in a new window without an external link icon
-  * Images in links with alt text that appears to be describing the image instead of the link destination
-* General content quality assurance
-  * Lists made from asterisks, numbers and letters rather than list elements
-  * AVOID LOTS OF CAPS LOCK TEXT
-  * Tables without headers
-  * Tables with empty header cells
-  * Tables with document headers ("Header 3") instead of table headers 
-  * Links to PDFs and other documents, reminding the user to test the download for accessibility or provide an alternate, accessible format
-  * Suspiciously short blockquotes that may not be block quotes.
-  * Embedded videos, reminding the user to add closed captions
-  * Embedded audio, reminding the user to provide a transcript
-  * Embedded social media, reminding the user to check their social media content as well
-
 
 <div hidden><style>
 .wrapper {

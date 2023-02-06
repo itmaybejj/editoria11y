@@ -7,7 +7,7 @@ Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly 
 1. It runs in context. Modern content management systems often assemble pages from many separately-edited blocks, widgets and elements. Only a fully-assembled "page" can be checked for things like the header outline order.
 
 * Try a [clickable demo of what a logged-in author would see](https://itmaybejj.github.io/editoria11y/demo).
-* Learn about [installation and configuration](https://itmaybejj.github.io/editoria11y/demo).
+* Learn about [test details, installation and configuration](https://itmaybejj.github.io/editoria11y/demo).
 * [View full change log](https://github.com/itmaybejj/editoria11y/releases).
 
 ## Contact
