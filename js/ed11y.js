@@ -109,7 +109,6 @@ class Ed11y {
       documentLinks: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\'], a[href$=\'.doc\'], a[href$=\'.docx\'], a[href*=\'.doc?\'], a[href*=\'.docx?\'], a[href$=\'.ppt\'], a[href$=\'.pptx\'], a[href*=\'.ppt?\'], a[href*=\'.pptx?\'], a[href^=\'https://docs.google\']',
       linksUrls: false, // get from language pack
       linksMeaningless: false, // get from language pack
-
       // * Not implemented Yet:
       // custom Checks
       // custom results
@@ -322,7 +321,7 @@ class Ed11y {
           let panel = document.createElement('ed11y-element-panel');
           document.querySelector('body').appendChild(panel);
           // todo: open on assertive with count mismatch or if showDismissed is set.
-          if (Ed11y.totalCount > 0 && !Ed11y.ignoreAll && Ed11y.options.alertMode === 'assertive' && Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount ) {
+          if (Ed11y.totalCount > 0 && !Ed11y.ignoreAll && Ed11y.options.alertMode === 'assertive' && Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount) {
             // User has already seen these errors, panel will not open.
             showPanel = true;
           } else if (Ed11y.options.showDismissed && (Ed11y.dismissedCount > 0 || Ed11y.totalCount > 0)) {
@@ -333,14 +332,14 @@ class Ed11y {
         } else {
           showPanel = true;
         }
-  
+
         if (Ed11y.totalCount > 0) {
           Ed11y.seen[encodeURI(Ed11y.options.currentPage)] = Ed11y.totalCount;
           localStorage.setItem('editoria11yResultCount', JSON.stringify(Ed11y.seen));
         } else {
           delete Ed11y.seen[encodeURI(Ed11y.options.currentPage)];
         }
-  
+
         // Now we can open or close the panel.
         if (!showPanel) {
           Ed11y.reset();
@@ -371,9 +370,9 @@ class Ed11y {
             window.setTimeout(function () {
               Ed11y.panelMessage.focus();
             }, 500);
-          } 
+          }
         }
-        
+
         if (Ed11y.totalCount > 0) {
           Ed11y.panelJumpNext.removeAttribute('hidden');
           if (Ed11y.totalCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
@@ -393,7 +392,7 @@ class Ed11y {
           Ed11y.panelCount.style.display = 'inline-block';
           let text = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
           Ed11y.panelMessage.textContent = text;
-          window.setTimeout(function() {
+          window.setTimeout(function () {
             Ed11y.announce.textContent = text;
           }, 1500);
           Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
@@ -401,7 +400,7 @@ class Ed11y {
         else {
           Ed11y.panelJumpNext.setAttribute('hidden', '');
           Ed11y.panelJumpPrev.setAttribute('hidden', '');
-  
+
           Ed11y.panelCount.style.display = 'display: none;';
           Ed11y.panel.classList.remove('warnings', 'errors');
           Ed11y.panel.classList.add('pass');
@@ -793,17 +792,6 @@ class Ed11y {
         root.appendChild(paintDelay);
       });
       Ed11y.bodyStyle = true;
-    };
-
-    Ed11y.scrollTo = function (goto) {
-      let gotoOffset = goto.getBoundingClientRect().top;
-      if (gotoOffset < window.innerHeight * .25) {
-        // scroll down
-        window.scrollBy(0, gotoOffset - window.innerHeight * .25);
-      } else if (gotoOffset > window.innerHeight * .75) {
-        // scroll up
-        window.scrollBy(0, gotoOffset - window.innerHeight + 160);
-      }
     };
 
     Ed11y.alignTip = function (button, toolTip, recheck = 0) {
@@ -1304,7 +1292,7 @@ class Ed11y {
       let style = window.getComputedStyle(el);
       if (style.getPropertyValue('display') === 'none' ||
         style.getPropertyValue('visibility') === 'hidden' ||
-        el.hasAttribute('aria-hidden') || 
+        el.hasAttribute('aria-hidden') ||
         el.hasAttribute('hidden')) {
         return false;
       } else {

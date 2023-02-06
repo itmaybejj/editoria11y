@@ -315,7 +315,7 @@ class Ed11yElementPanel extends HTMLElement {
     // Find our button.
     let goNum = parseInt(this.dataset.ed11yGoto);
     let goto = Ed11y.elements.jumpList[goNum];
-    Ed11y.scrollTo(goto);
+    goto.scrollIntoView({ block: 'center' });
 
     // Open the button
     goto.setAttribute('data-ed11y-action','open');
@@ -358,7 +358,7 @@ class Ed11yElementPanel extends HTMLElement {
         alert(alertMessage);
         firstVisible.classList.add('ed11y-hidden-highlight');
       }
-      Ed11y.scrollTo(goto);
+      goto.scrollIntoView({ block: 'center' });
       let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
       activeTip.shadowRoot.querySelector('.close').focus();
     }, delay, goto, target);
