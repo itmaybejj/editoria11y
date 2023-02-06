@@ -6,14 +6,9 @@ Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly 
 1. It focuses exclusively on straightforward issues a content author can easily understand and easily fix. Yes; comprehensive testing should be a key part of site creation, but if a tool is going to run automatically on every page, it will do more harm than good if it is alerting on issues editors cannot fix.
 1. It runs in context. Modern content management systems often assemble pages from many separately-edited blocks, widgets and elements. Only a fully-assembled "page" can be checked for things like the header outline order.
 
-Try a [clickable demo of what a logged-in author would see](https://itmaybejj.github.io/editoria11y/demo).
+Try a [clickable demo of what a logged-in author would experience](https://itmaybejj.github.io/editoria11y/demo).
 
-## The authoring experience
-* When an author is logged in to their site, Editoria11y places a small toggle button at the bottom right of each page with an issue count. Users can press the button to view details of any alerts or access additional tools ("full check"), including visualizers for the document outline and image alt attributes, and the panel's state persists from page to page (open or shut).
-* If the page has a *new* issue, a panel automatically slides open with more details.
-* If the user minimizes the panel, it will not open automatically on future page visits until the content changes.
-
-### Issues flagged in the quick check
+### All included tests
 * Headings
   * Skipped heading levels
   * Empty headings
