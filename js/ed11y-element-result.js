@@ -60,7 +60,7 @@ class Ed11yElementResult extends HTMLElement {
           width: 44px;
           height: 44px;
           overflow: visible;
-          color: ${Ed11y.color.text};
+          color: ${Ed11y.theme.text};
         }
         button {
           margin: 0;
@@ -71,8 +71,8 @@ class Ed11yElementResult extends HTMLElement {
           font-weight: 600;
           text-align: center;
           cursor: pointer;
-          color: ${Ed11y.color.primaryText};
-          background: ${Ed11y.color.tipHeader};
+          color: ${Ed11y.theme.primaryText};
+          background: ${Ed11y.theme.primary};
         }
         .toggle {
           display: block;
@@ -91,7 +91,7 @@ class Ed11yElementResult extends HTMLElement {
         }
         button:focus-visible {
           outline: 2px solid transparent;
-          box-shadow: inset 0 0 0 2px ${Ed11y.color.focusRing}, 0 0 0 3px ${Ed11y.color.primary};
+          box-shadow: inset 0 0 0 2px ${Ed11y.theme.focusRing}, 0 0 0 3px ${Ed11y.theme.primary};
         }
       `;
       shadow.appendChild(style);
@@ -106,12 +106,12 @@ class Ed11yElementResult extends HTMLElement {
     if (this.dismissed) {
       css = `
         .toggle {
-          box-shadow: inset 0 0 0 2px ${Ed11y.color.primary}, inset 0 0 0 3px ${Ed11y.color.primaryText}, inset 0 0 0 6px ${Ed11y.color.primary}, 1px 1px 5px 0 rgba(0,0,0,.5);
-          background: ${Ed11y.color.primary};
-          color: ${Ed11y.color.primaryText};
+          box-shadow: inset 0 0 0 2px ${Ed11y.theme.ok}, inset 0 0 0 3px ${Ed11y.theme.primaryText}, inset 0 0 0 6px ${Ed11y.theme.ok}, 1px 1px 5px 0 rgba(0,0,0,.5);
+          background: ${Ed11y.theme.ok};
+          color: ${Ed11y.theme.primaryText};
         }
         .toggle:hover, .toggle[aria-expanded='true'] {
-          border: 2px solid ${Ed11y.color.ok};
+          border: 2px solid ${Ed11y.theme.ok};
         }`;
       if (this.result[5] === 'ok') {
         css += `
@@ -129,24 +129,24 @@ class Ed11yElementResult extends HTMLElement {
       }
     } else if (this.dismissable) {
       css = `.toggle {
-        box-shadow: inset 0 0 0 2px ${Ed11y.color.warning}, inset 0 0 0 3px #444, inset 0 0 0 6px ${Ed11y.color.warning}, 1px 1px 5px 0 rgba(0,0,0,.5);
-        background: ${Ed11y.color.warning};
+        box-shadow: inset 0 0 0 2px ${Ed11y.theme.warning}, inset 0 0 0 3px #444, inset 0 0 0 6px ${Ed11y.theme.warning}, 1px 1px 5px 0 rgba(0,0,0,.5);
+        background: ${Ed11y.theme.warning};
         color: #333;
       }
       .toggle::before {
         content: "?";
       }
       .toggle:hover, .toggle[aria-expanded='true'] {
-        border: 2px solid ${Ed11y.color.primary};
+        border: 2px solid ${Ed11y.theme.primary};
       }`;
     } else {
       css = `.toggle {
-        box-shadow: inset 0 0 0 1px ${Ed11y.color.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.color.alert}, 1px 1px 5px 0 rgba(0,0,0,.5);
+        box-shadow: inset 0 0 0 1px ${Ed11y.theme.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.theme.alert}, 1px 1px 5px 0 rgba(0,0,0,.5);
         background: #fefefe;
-        color: ${Ed11y.color.alert};
+        color: ${Ed11y.theme.alert};
       }
       .toggle:hover, .toggle[aria-expanded='true'] {
-        box-shadow: inset 0 0 0 1px ${Ed11y.color.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.color.alert}, 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 3px transparent;
+        box-shadow: inset 0 0 0 1px ${Ed11y.theme.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.theme.alert}, 0 0 0 2px ${Ed11y.theme.primary}, 0 0 0 3px transparent;
       }
       .toggle::before {
         content: "!";

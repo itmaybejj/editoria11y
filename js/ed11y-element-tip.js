@@ -44,7 +44,7 @@ class Ed11yElementTip extends HTMLElement {
           width: 1px;
           height: 1px;
           overflow: visible;
-          color: ${Ed11y.color.text};
+          color: ${Ed11y.theme.text};
           font-size: 14px;
         }
         .arrow {
@@ -53,35 +53,36 @@ class Ed11yElementTip extends HTMLElement {
           position: absolute;
           transform: rotate(45deg);
           left: -10px;
-          box-shadow: 0 0 0 2px ${Ed11y.color.bg}, 2px 2px 4px ${Ed11y.color.tipHeader}77;
+          box-shadow: 0 0 0 ${Ed11y.theme.panelBorder}px ${Ed11y.theme.bg}, 2px 2px 4px ${Ed11y.theme.primary}77;
           width: 20px;
           height: 20px;
           top: 6px;
         }
         .arrow[data-direction="left"] {
           left: -18px;
-          background: linear-gradient(45deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
+          background: linear-gradient(45deg, transparent 0%, transparent 48%, ${Ed11y.theme.primary} 49%);
         }
         .arrow[data-direction="under"] {
           margin-top: -18px;
-          background: linear-gradient(-45deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
+          background: linear-gradient(-45deg, transparent 0%, transparent 48%, ${Ed11y.theme.primary} 49%);
         }
         .arrow[data-direction="above"] {
           margin-top: -27px;
-          background: linear-gradient(135deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
+          background: linear-gradient(135deg, transparent 0%, transparent 48%, ${Ed11y.theme.primary} 49%);
         }
         .arrow[data-direction="right"] {
-          background: linear-gradient(-135deg, transparent 0%, transparent 48%, ${Ed11y.color.tipHeader} 49%);
+          background: linear-gradient(-135deg, transparent 0%, transparent 48%, ${Ed11y.theme.primary} 49%);
         }
         .tip {
           z-index: 1;
-          border: 2px solid ${Ed11y.color.tipHeader};
-          background: ${Ed11y.color.bg};
-          border-radius: 0 0 3px 3px;
+          border: 2px solid ${Ed11y.theme.primary};
+          background: ${Ed11y.theme.bg};
+          border-radius: 0 0 ${Ed11y.theme.borderRadius} ${Ed11y.theme.borderRadius};
           position:relative;
           width: clamp(18em, 36em, 89vw);
           display: none;
-          box-shadow: 0 0 0 2px ${Ed11y.color.bg}, 2px 2px 4px ${Ed11y.color.primary}77;
+          margin-top: ${Ed11y.theme.panelBorder - 2}px;
+          box-shadow: 0 0 0 ${Ed11y.theme.panelBorder}px ${Ed11y.theme.bg}, 2px 2px 4px ${Ed11y.theme.primary}77;
         }
         @keyframes fade-in {
           0% { opacity: 0;}
@@ -98,8 +99,8 @@ class Ed11yElementTip extends HTMLElement {
           opacity: 1;
         }
         .title {
-          background: ${Ed11y.color.tipHeader};
-          color: ${Ed11y.color.primaryText};
+          background: ${Ed11y.theme.primary};
+          color: ${Ed11y.theme.primaryText};
           padding: 2px 35px 3px 14px;
           font-weight: bold;
           font-size: 14px;
@@ -128,8 +129,8 @@ class Ed11yElementTip extends HTMLElement {
           font-weight: 600;
           text-align: center;
           cursor: pointer;
-          color: ${Ed11y.color.primaryText};
-          background: ${Ed11y.color.tipHeader};
+          color: ${Ed11y.theme.primaryText};
+          background: ${Ed11y.theme.primary};
         }
         ul {
           margin-block-start: .643em;
@@ -169,27 +170,27 @@ class Ed11yElementTip extends HTMLElement {
           position: absolute;
           top: -3px;
           right: -2px;
-          box-shadow: -1px 0 ${Ed11y.color.bg};
+          box-shadow: -1px 0 ${Ed11y.theme.bg};
           background: transparent;
           width: 32px;
         }
         .close:hover {
-          background: ${Ed11y.color.bg};
-          color: ${Ed11y.color.text};
+          background: ${Ed11y.theme.bg};
+          color: ${Ed11y.theme.text};
         }
         .dismiss {
           margin: .5em 1em .25em 0;
           padding: 5px 9px;
-          border-radius: 3px;
+          border-radius: ${Ed11y.theme.borderRadius}px;
           font-weight: bold;
         }
         .dismiss:hover, .dismiss:focus-visible {
-          color: ${Ed11y.color.text};
-          background: ${Ed11y.color.bg};
-          box-shadow: inset 0 0 0 2px ${Ed11y.color.tipHeader};
+          color: ${Ed11y.theme.primary};
+          background: ${Ed11y.theme.primaryText};
+          box-shadow: inset 0 0 0 2px ${Ed11y.theme.primary};
         }
         .dismissed-note {
-          background: ${Ed11y.color.warning};
+          background: ${Ed11y.theme.warning};
           color: #333;
           font-style: italic;
           padding: .5em 1em;
@@ -198,7 +199,7 @@ class Ed11yElementTip extends HTMLElement {
         }
         .wrapper :focus-visible {
           outline: 2px solid transparent;
-          box-shadow: inset 0 0 0 2px ${Ed11y.color.focusRing}, 0 0 0 3px ${Ed11y.color.primary};
+          box-shadow: inset 0 0 0 2px ${Ed11y.theme.focusRing}, 0 0 0 3px ${Ed11y.theme.primary};
         }
       `;
       

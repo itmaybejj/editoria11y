@@ -65,7 +65,28 @@ class Ed11y {
 
       // Interface
       lang: 'en',
-      theme: 'lightTheme',
+      theme: 'sleekTheme',
+      sleekTheme: {
+        bg: '#fffffe',
+        bgHighlight: '#7b1919',
+        text: '#20160c',
+        primary: '#276499',
+        primaryText: '#fffdf7',
+        secondary: '#20160c',
+        button: 'transparent', // deprecate?
+        panelBar: '#fffffe',
+        panelBarText: '#20160c',
+        panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
+        panelBorder: 0,
+        activeTab: '#276499',
+        activeTabText: '#fffffe',
+        outlineWidth: 0,
+        borderRadius: 1,
+        ok: '#0a307a',
+        warning: '#fad859',
+        alert: '#b80519',
+        focusRing: '#007aff',
+      },
       darkTheme: {
         bg: '#0a2051',
         bgHighlight: '#7b1919',
@@ -73,12 +94,19 @@ class Ed11y {
         primary: '#3052a0',
         primaryText: '#f4f7ff',
         secondary: '#20160c',
+        button: 'transparent',
+        panelBar: '#3052a0',
+        panelBarText: '#f4f7ff',
+        panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
+        panelBorder: 2,
+        activeTab: '#0a2051',
+        activeTabText: '#fffffe',
+        focusRing: 'cyan',
+        outlineWidth: 2,
+        borderRadius: 3,
+        ok: '#0a307a',
         warning: '#fad859',
         alert: '#b80519',
-        button: '#dde8ff',
-        focusRing: 'cyan',
-        activeTab: '#0a2051',
-        tipHeader: '#3052a0',
       },
       lightTheme: {
         bg: '#fffffe',
@@ -87,12 +115,18 @@ class Ed11y {
         primary: '#0a307a',
         primaryText: '#fffdf7',
         secondary: '#20160c',
+        panelBar: '#0a307a',
+        panelBarText: '#f4f7ff',
+        panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
+        panelBorder: 2,
+        button: 'transparent',
+        activeTab: '#b9c0cf',
+        activeTabText: '#20160c',
+        focusRing: '#007aff',
+        outlineWidth: 2,
+        borderRadius: 3,
         warning: '#fad859',
         alert: '#b80519',
-        button: '#0a307a',
-        focusRing: '#007aff',
-        activeTab: '#b9c0cf',
-        tipHeader: '#0a307a',
       },
       // Base z-index for buttons.
       buttonZIndex: 9999,
@@ -126,7 +160,7 @@ class Ed11y {
       ...ed11yLang['en'],
       ...ed11yLang[Ed11y.options.lang]
     };
-    Ed11y.color = Ed11y.options[Ed11y.options.theme];
+    Ed11y.theme = Ed11y.options[Ed11y.options.theme];
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
     }
@@ -759,16 +793,16 @@ class Ed11y {
               outline: 0 !important;
             }
             .ed11y-hidden-highlight {
-              box-shadow: inset 0 0 0 1px ${Ed11y.color.warning}, inset 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 1px ${Ed11y.color.warning}, 0 0 0 3px ${Ed11y.color.primary}, 0 0 1px 3px !important;
+              box-shadow: inset 0 0 0 1px ${Ed11y.theme.warning}, inset 0 0 0 2px ${Ed11y.theme.primary}, 0 0 0 1px ${Ed11y.theme.warning}, 0 0 0 3px ${Ed11y.theme.primary}, 0 0 1px 3px !important;
             }
             .ed11y-ring-red {
-              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.color.alert}, 0 0 0 3px ${Ed11y.color.alert}, 0 0 1px 3px;
-              outline: 2px solid ${Ed11y.color.alert};
+              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.theme.alert}, 0 0 0 3px ${Ed11y.theme.alert}, 0 0 1px 3px;
+              outline: 2px solid ${Ed11y.theme.alert};
               outline-offset: 1px;
             }
             .ed11y-ring-yellow {
-              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.color.warning}, 0 0 0 3px ${Ed11y.color.warning}, 0 0 1px 3px;
-              outline: 2px solid ${Ed11y.color.warning};
+              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.theme.warning}, 0 0 0 3px ${Ed11y.theme.warning}, 0 0 1px 3px;
+              outline: 2px solid ${Ed11y.theme.warning};
               outline-offset: 1px;
             }
             `;

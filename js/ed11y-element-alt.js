@@ -29,8 +29,8 @@ class Ed11yElementAlt extends HTMLElement {
           right:0;
         }
         span {
-          background: ${Ed11y.color.primary}f3;
-          color: ${Ed11y.color.primaryText};
+          background: ${Ed11y.theme.primary}f3;
+          color: ${Ed11y.theme.primaryText};
           z-index: ${Ed11y.options.buttonZIndex - 1};
           font-weight: 500;
           padding: 6px;
@@ -40,8 +40,8 @@ class Ed11yElementAlt extends HTMLElement {
           right: 0;
           box-shadow: 0 1px, 0 -1px; 
         }
-        .warning { background: ${Ed11y.color.warning}; color: #111;}
-        .error { background: ${Ed11y.color.bgHighlight};}
+        .warning { background: ${Ed11y.theme.warning}; color: #111;}
+        .error { background: ${Ed11y.theme.bgHighlight};}
       `;
       shadow.appendChild(style);
       shadow.appendChild(altTextWrapper);

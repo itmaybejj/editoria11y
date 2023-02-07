@@ -71,26 +71,29 @@ class Ed11yElementPanel extends HTMLElement {
         }
         .wrapper {
           width: clamp(160px, 23em, 92vw);
-          background: ${Ed11y.color.bg};
-          color: ${Ed11y.color.text};
-          border-radius: 3px;
-          box-shadow: 1px 1px 4px 2px ${Ed11y.color.text}77;
-          padding: 2px;
+          background: ${Ed11y.theme.bg};
+          color: ${Ed11y.theme.text};
+          border-radius: ${Ed11y.theme.borderRadius};
+          box-shadow: 1px 1px 4px 2px ${Ed11y.theme.text}77;
+          padding: ${Ed11y.theme.panelBorder}px;
         }
         [tabindex]:focus-visible {
-          box-shadow: 0 0 0 3px ${Ed11y.color.bg}, 0 0 0 4px ${Ed11y.color.text};
+          box-shadow: 0 0 0 3px ${Ed11y.theme.bg}, 0 0 0 4px ${Ed11y.theme.text};
         }
         a {
           color: inherit;
         }
         .content {
           padding: 4px 4px 4px 12px;
-          border: 2px solid ${Ed11y.color.primary};
+          border: ${Ed11y.theme.panelBorder}px solid ${Ed11y.theme.primary};
           border-top: 0;
-          border-radius: 0 0 3px 3px;
-          color: ${Ed11y.color.text};
+          border-radius: 0 0 ${Ed11y.theme.borderRadius} ${Ed11y.theme.borderRadius};
+          color: ${Ed11y.theme.text};
           max-height: max(240px, 50vh);
-          overflow: auto;
+          overflow: hidden;
+        }
+        .content-text {
+          margin-top: -3px;
         }
         @media (min-width: 400px) {
           #toggle-tab {
@@ -107,41 +110,44 @@ class Ed11yElementPanel extends HTMLElement {
         }
         button {
           margin: 0;
-          background: ${Ed11y.color.primary};
-          color: ${Ed11y.color.primaryText};
-          padding: 6px 4px;
+          background: ${Ed11y.theme.button};
+          color: ${Ed11y.theme.primaryText};
+          padding: 7px 4px;
           font-family: inherit;
           font-size: 11px;
           font-weight: 500;
           border: 0;
-          border-right: 1px solid ${Ed11y.color.primaryText}55;
+          border-right: 1px solid ${Ed11y.theme.primaryText}55;
           text-align: center;
           flex: auto;
           cursor: pointer;
         }
         button:hover {
-          background: ${Ed11y.color.text};
+          background: ${Ed11y.theme.text};
         }
         #shut-panel {
           border-right: 0;
         }
         .buttonbar button {
-          color: ${Ed11y.color.primaryText}ee;
+          color: ${Ed11y.theme.panelBarText};
+          background: ${Ed11y.theme.panelBar};
+          box-shadow: ${Ed11y.theme.panelBarShadow};
         }
         .buttonbar button:hover {
-          background: ${Ed11y.color.secondary};
+          background: ${Ed11y.theme.activeTab};
+          color: ${Ed11y.theme.activeTabText};
         }
         .buttonbar button:first-child {
-          border-radius: 3px 0 0 0; 
+          border-radius: ${Ed11y.theme.borderRadius} 0 0 0; 
           border-left: 2px solid transparent;
         }          
         .buttonbar button:last-child {
-          border-radius: 0 3px 0 0;
+          border-radius: 0 ${Ed11y.theme.borderRadius} 0 0;
         }
         .buttonbar button[aria-selected="true"] {
-          background: ${Ed11y.color.activeTab};
-          box-shadow: inset 0 0 0 1px ${Ed11y.color.primary}, inset 0 -2px ${Ed11y.color.primary}22;
-          color: ${Ed11y.color.text};
+          background: ${Ed11y.theme.activeTab};
+          box-shadow: inset 0 0 0 1px ${Ed11y.theme.primary}, inset 0 -2px ${Ed11y.theme.primary}22;
+          color: ${Ed11y.theme.activeTabText};
           border: 0;
         }
         .buttonbar button + button[aria-selected="true"] {
@@ -169,29 +175,29 @@ class Ed11yElementPanel extends HTMLElement {
         }
         .pass.shut #toggle {
           font-size: 16px;
-          background: ${Ed11y.color.primary};
+          background: ${Ed11y.theme.primary};
           line-height: 1;
-          box-shadow: inset 0 0 0 2px ${Ed11y.color.primary}, inset 0 0 0 4px #fffe;
+          box-shadow: inset 0 0 0 2px ${Ed11y.theme.primary}, inset 0 0 0 4px #fffe;
           font-family: georgia, serif;
         }
         .pass.shut #toggle:hover {
-          box-shadow: inset 0 0 0 2px #fffe, 0 0 0 2px ${Ed11y.color.primary}; 
+          box-shadow: inset 0 0 0 2px #fffe, 0 0 0 2px ${Ed11y.theme.primary}; 
         }
         .shut.warnings #toggle {
-          background-color: ${Ed11y.color.warning};
+          background-color: ${Ed11y.theme.warning};
           color: #000b;
-          box-shadow: inset 0 0 0 2px ${Ed11y.color.warning}, inset 0 0 0 3px #000b, 0 0 2px #000;
+          box-shadow: inset 0 0 0 2px ${Ed11y.theme.warning}, inset 0 0 0 3px #000b, 0 0 2px #000;
         }
         .shut.warnings #toggle:hover {
-          box-shadow: inset 0 0 0 2px ${Ed11y.color.warning}, inset 0 0 0 3px #000b, 0 0 0 3px #000b;
+          box-shadow: inset 0 0 0 2px ${Ed11y.theme.warning}, inset 0 0 0 3px #000b, 0 0 0 3px #000b;
         }
         .shut.errors #toggle {
-          color: ${Ed11y.color.alert};
-          box-shadow: inset 0 0 0 1px ${Ed11y.color.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.color.alert}, 1px 1px 5px 0 rgba(0,0,0,.5);
+          color: ${Ed11y.theme.alert};
+          box-shadow: inset 0 0 0 1px ${Ed11y.theme.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.theme.alert}, 1px 1px 5px 0 rgba(0,0,0,.5);
           background: #fefefe;
         }
         .shut.errors #toggle:hover {
-          box-shadow: inset 0 0 0 1px #b80519, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 3px ${Ed11y.color.alert}, 0 0 0 4px transparent;
+          box-shadow: inset 0 0 0 1px #b80519, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 3px ${Ed11y.theme.alert}, 0 0 0 4px transparent;
         }
         .shut .toggle-count {
           display: block;
@@ -204,12 +210,12 @@ class Ed11yElementPanel extends HTMLElement {
           min-width: max(7.25em, calc(49% - 3px));
         }
         .content button {
-          padding: 5px 5px;
-          border-radius: 2px;
+          padding: 7px 5px;
+          border-radius: ${Ed11y.theme.borderRadius};
           background: inherit;
           color: inherit;
-          border: 1px ${Ed11y.color.button}55 solid;
-          margin: 2px 0 2px 1px;
+          border: 1px ${Ed11y.theme.button} solid;
+          margin: 5px 0 5px 1px;
         }
         .jump.prev {
           min-width: 81px;
@@ -219,23 +225,32 @@ class Ed11yElementPanel extends HTMLElement {
         }
         #show-hidden {
           min-width: min(146px, 100%);
+          margin: 0 -5px -5px;
+          background: ${Ed11y.theme.primary};
+          color: ${Ed11y.theme.primaryText};
+          border: 0;
         }
         #show-hidden[aria-pressed="true"] {
-          background: ${Ed11y.color.primary};
-          color: ${Ed11y.color.primaryText};
+          background: ${Ed11y.theme.bg};
+          color: ${Ed11y.theme.text};
+          box-shadow: inset 8px 1px ${Ed11y.theme.primary};
+        }
+        #show-hidden:hover, #show-hidden:focus-visible {
+          color: ${Ed11y.theme.primary};
+          background: ${Ed11y.theme.primaryText};
+          box-shadow: inset 8px 1px ${Ed11y.theme.primary};
         }
         .content button:hover {
-          background: ${Ed11y.color.bg};
-          color: ${Ed11y.color.text};
-          box-shadow: inset 0 0 0 1px ${Ed11y.color.text};
+          background: ${Ed11y.theme.bg};
+          color: ${Ed11y.theme.text};
+          box-shadow: inset 0 0 0 1px ${Ed11y.theme.text};
         }
-
         .warning {
-          background: ${Ed11y.color.warning};
+          background: ${Ed11y.theme.warning};
           color: #111;
         }
         .error {
-          background: ${Ed11y.color.bgHighlight};
+          background: ${Ed11y.theme.bgHighlight};
           color: #fff;
         }
         #issues-tab:not(.hidden) {
@@ -261,7 +276,7 @@ class Ed11yElementPanel extends HTMLElement {
           gap: 1em;
           padding: 8px;
           margin: 8px 0;
-          box-shadow: 0 4px ${Ed11y.color.bg}, 0 5px ${Ed11y.color.primary}22;
+          box-shadow: 0 4px ${Ed11y.theme.bg}, 0 5px ${Ed11y.theme.primary}22;
         }
         #alt-list li span {
           flex: 0 1 calc(100% - 100px);
@@ -415,12 +430,12 @@ class Ed11yElementHeadingLabel extends HTMLElement {
           margin-top:-.5em;
         }
         .wrapper {          
-          background: ${Ed11y.color.primary}ee;
-          color: ${Ed11y.color.primaryText};
-          box-shadow: 0 0 0 1px ${Ed11y.color.bg}ee, 0 0 0 4px ${Ed11y.color.primary}ee, 1px 1px 5px 2px #000;
+          background: ${Ed11y.theme.primary}ee;
+          color: ${Ed11y.theme.primaryText};
+          box-shadow: 0 0 0 1px ${Ed11y.theme.bg}ee, 0 0 0 4px ${Ed11y.theme.primary}ee, 1px 1px 5px 2px #000;
           padding: 0 .5em;
           line-height: 1.2;
-          border-radius: 2px;
+          border-radius: ${Ed11y.theme.borderRadius};
           margin-left: 35px;
           font-weight: 400;
           font-size: ${fontSize}px;
