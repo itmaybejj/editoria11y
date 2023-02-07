@@ -176,6 +176,7 @@ class Ed11yElementPanel extends HTMLElement {
         .pass.shut #toggle {
           font-size: 16px;
           background: ${Ed11y.theme.primary};
+          color: ${Ed11y.theme.primaryText};
           line-height: 1;
           box-shadow: inset 0 0 0 2px ${Ed11y.theme.primary}, inset 0 0 0 4px #fffe;
           font-family: georgia, serif;
@@ -255,7 +256,7 @@ class Ed11yElementPanel extends HTMLElement {
         }
         #issues-tab:not(.hidden) {
           display: flex;
-          
+          min-height: 3.25em;
           gap: 8px;
         }
         #issues-tab > div {
