@@ -93,7 +93,7 @@ class Ed11yElementPanel extends HTMLElement {
           overflow: hidden;
         }
         .content-text {
-          margin-top: -3px;
+          margin-top: -2px;
         }
         @media (min-width: 400px) {
           #toggle-tab {
