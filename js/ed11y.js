@@ -82,7 +82,7 @@ class Ed11y {
         activeTabText: '#fffffe',
         outlineWidth: 0,
         borderRadius: 1,
-        ok: '#0a307a',
+        ok: '#1f5381',
         warning: '#fad859',
         alert: '#b80519',
         focusRing: '#007aff',
@@ -125,6 +125,7 @@ class Ed11y {
         focusRing: '#007aff',
         outlineWidth: 2,
         borderRadius: 3,
+        ok: '#0a307a',
         warning: '#fad859',
         alert: '#b80519',
       },
@@ -903,7 +904,7 @@ class Ed11y {
       }
       else if (direction === 'above') {
         // Slide left or right to center tip on page.
-        nudgeY = -1 * (tipHeight + 18);
+        nudgeY = -1 * (tipHeight + 15 + Ed11y.theme.outlineWidth);
         arrow.style.setProperty('top', tipHeight);
         if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
@@ -919,7 +920,7 @@ class Ed11y {
           arrow.style.setProperty('left', tipWidth / 5 - 34 + 'px');
         }
         arrow.dataset.direction = 'above';
-        arrow.style.setProperty('top', `${tipHeight + 18}px`);
+        arrow.style.setProperty('top', `${tipHeight + 15 + Ed11y.theme.outlineWidth}px`);
       } else {
         // Left or right
         let tipBottom = buttonOffset.top + scrollTop + tipHeight;
