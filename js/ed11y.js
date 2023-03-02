@@ -996,16 +996,21 @@ class Ed11y {
           let leftPad = 10 * level - 10;
           let li = document.createElement('li');
           li.classList.add('level' + level);
-          let message = el[2] && !el[5] ? el[2] : ''; // Has an error message and is not ignored.
-          if (message) {
-            // todo: communicate alert level? Add alert title?
-            li.classList.add('has-issues');
-          }
           li.style.setProperty('margin-left', leftPad + 'px');
-          li.innerHTML = `<strong>H${level}:</strong> ${message}`;
+          let levelPrefix = document.createElement('strong');
+          levelPrefix.textContent = `H${level}: `;
+          li.append(levelPrefix);
           let userText = document.createElement('span');
           userText.textContent = el[0].textContent;
           li.append(userText);
+          if (el[2]) { // Has an error message
+            let type = !el[3] ? 'error' : 'warning';
+            li.classList.add(type);
+            let message = document.createElement('em');
+            message.classList.add('ed11y-small');
+            message.textContent = ' ' + el[2];
+            li.append(message);
+          }
           panelOutline.append(li);
         });
       } else {

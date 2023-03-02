@@ -80,6 +80,10 @@ class Ed11yElementPanel extends HTMLElement {
         [tabindex]:focus-visible {
           box-shadow: 0 0 0 3px ${Ed11y.theme.bg}, 0 0 0 4px ${Ed11y.theme.text};
         }
+        .ed11y-small {
+          font-size: 13px;
+          opacity: .9;
+        }
         a {
           color: inherit;
         }
@@ -262,6 +266,10 @@ class Ed11yElementPanel extends HTMLElement {
         #issues-tab > div {
           flex: 1 1 auto;
           align-self: center;
+        }
+        #headings-tab, #alts-tab {
+          max-height: max(240px, 50vh);
+          overflow: auto;
         }
         #outline, #alt-list {
           list-style: none;
