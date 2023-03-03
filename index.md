@@ -6,7 +6,7 @@ Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly 
 1. It focuses exclusively on straightforward issues a content author can easily understand and easily fix. Yes; comprehensive testing should be a key part of site creation, but if a tool is going to run automatically on every page, it will do more harm than good if it is alerting on issues editors cannot fix.
 1. It runs in context. Modern content management systems often assemble pages from many separately-edited blocks, widgets and elements. Only a fully-assembled "page" can be checked for things like the header outline order.
 
-Try a [clickable demo of what a logged-in author would experience](https://itmaybejj.github.io/editoria11y/demo).
+Try a [clickable demo of what a logged-in author would experience](https://editoria11y.princeton.edu/demo).
 
 ### All included tests
 * Headings
@@ -58,7 +58,7 @@ Major changes in version 2.x:
 
 If possible, use a turnkey integration:
 * [Editoria11y Drupal Module](https://www.drupal.org/project/editoria11y)
-* [Editoria11y WordPress Plugin](https://github.com/itmaybejj/editoria11y-wp) (will be submitted to WordPress plugin library in early 2023)
+* [Editoria11y WordPress Plugin](https://wordpress.org/plugins/editoria11y-accessibility-checker/)
 * [Editoria11y SquareSpace Injector](https://github.com/itmaybejj/editoria11y-squarespace-inject) (Requires Commerce or Business tier)
 
 To build your own implementation, load a local copy (or a [CDN version](https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@2/dist/editoria11y.min.js)) of "editoria11y.min.js," and then create a new "Ed11y" instance:
@@ -71,82 +71,7 @@ To build your own implementation, load a local copy (or a [CDN version](https://
     });           
   </script>
  ```
-
-A complete implementation will only be called for logged-in editors (you don't want your site visitors seeing your checker!) and will have set various custom options. It might look more like this:
-
-```html
-  <script src="/PATH/TO/YOUR/COPY/editoria11y.min.js"></script>
-  <script>
-    const ed11y = new Ed11y({
-      // We have two content regions
-      checkRoots: 'main, .footer-content-zone',
-      
-      // We have two custom shadow components
-      shadowComponents: 'accordion-widget, lightbox-widget',
-      
-      // We want the box to open automatically for errors:
-      alertMode: 'assertive',
-      
-      // We wanted to pick our own colors:
-      theme : 'darkTheme',
-      darkTheme: {
-          bg: '#0a2051',
-          bgHighlight: '#7b1919',
-          text: '#f4f7ff',
-          primary: '#4930a0',
-          primaryText: '#f4f7ff',
-          secondary: '#20160c',
-          warning: '#fad859',
-          alert: '#b80519',
-          button: '#dde8ff',
-          focusRing: 'cyan',
-          activeTab: '#0a2051',
-          tipHeader: '#4930a0',
-      },
-      
-      // We have an external link icon with visually hidden text
-      // to delete before checking if the link has text:
-      linkIgnoreStrings: ['(opens in new window)'],
-      
-      // Content editors cannot edit these elements:
-      ignoreElements: 'nav *, #social-block',
-      
-      // We don't want to ignore alerts, only fix or mark OK:
-      allowHide: false,
-      allowOK: true,
-      
-      // Don't scan while the editor toolbar is open:
-      doNotRun : ".editor-toolbar",
-
-      // If a tooltip is being drawn on an element 
-      // that might be invisible, warn the user first:
-      checkVisible: true,
-      
-      // Send a JS event when highlighting tips in this element,
-      // so our own JS can open the accordion and show it:
-      hiddenHandlers: ".accordion-panel",
-    });
-  </script>
- ```
-
- Turnkey integrations often set these variables on the fly -- e.g., loading pages in "assertive" mode when they were recently edited, and switching back to "polite" after several minutes.
-
-
-### Dealing with alerts on hidden or size-constrained content
-
-Note the `hiddenHandlers` and `checkVisible` options in the example above.
-
-Many interactive components (tabs, sliders, accordions) hide content. The Editoria11y info panel includes next/previous buttons to jump directly to issues. If Editoria11y thinks the issue's tooltip is currently invisible, it will alert the user something is wrong, and then highlight the first visible ancestor -- e.g., the div around an accordion.
-
-If this is incorrect (e.g., your #content container has a height of 0px), you can disable this check by setting `checkVisible` to false.
-
-If it is correct, you may wish to include custom JS in your theme to make those elements visible first.
-
-To do this when the panel first opens (e.g., unfolding accordions) add a JS event listener for `ed11yPanelOpened`, then do a querySelectorAll for relevant `ed11y-element-result` elements.
-
-To do this when jumping to a specific tip (e.g., in a closed tab or the "wrong" carousel slide), listen for the `ed11yShowHidden` event. This is thrown if Editoria11y recognizes a tip is inside a container with one of the listed `hiddenHandlers` selectors provided in the options list. This JS event will include the ID of the tip that it is about to open. Editoria11y will pause briefly after this event, to give your JS time to make the element visible before the tip tries to open.
-
-I can provide code samples on request.
+View [documentation and configuration tips](https://editoria11y.princeton.edu/configuration/).
 
 ## Contact
 Editoria11y is maintained by [John Jameson](https://www.linkedin.com/in/johnwjameson/), and is provided to the community thanks to the [Digital Accessibility](https://accessibility.princeton.edu/) initiatives at Princeton University's [Office of Web Development Services](https://wds.princeton.edu/)
