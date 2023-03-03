@@ -20,7 +20,7 @@ Since this page is demonstrating what an author would see if new issues were det
 
 ## Learn more
 
-* [Test details and configuration notes](https://editoria11y.princeton.edu/configuration/)
+* [About this library](https://editoria11y.princeton.edu/) and [configuration notes](https://editoria11y.princeton.edu/configuration/)
 * [Editoria11y Drupal Module](https://www.drupal.org/project/editoria11y)
 * [Editoria11y WordPress Plugin](https://wordpress.org/plugins/editoria11y-accessibility-checker/)
 * [Editoria11y SquareSpace Injector](https://github.com/itmaybejj/editoria11y-squarespace-inject) (Requires Commerce or Business tier)
