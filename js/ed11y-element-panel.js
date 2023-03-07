@@ -235,6 +235,9 @@ class Ed11yElementPanel extends HTMLElement {
           color: ${Ed11y.theme.primaryText};
           border: 0;
         }
+        .next[hidden] + #show-hidden {
+          margin-top: 22px;
+        }
         #show-hidden[aria-pressed="true"] {
           background: ${Ed11y.theme.bg};
           color: ${Ed11y.theme.text};

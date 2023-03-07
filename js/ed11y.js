@@ -407,8 +407,7 @@ class Ed11y {
             }, 500);
           }
         }
-
-        if (Ed11y.totalCount > 0) {
+        if (Ed11y.totalCount > 0 || (Ed11y.options.showDismissed && Ed11y.dismissedCount > 0)) {
           Ed11y.panelJumpNext.removeAttribute('hidden');
           if (Ed11y.totalCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
             Ed11y.panelJumpPrev.setAttribute('hidden', '');
