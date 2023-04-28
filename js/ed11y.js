@@ -144,6 +144,7 @@ class Ed11y {
       documentLinks: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\'], a[href$=\'.doc\'], a[href$=\'.docx\'], a[href*=\'.doc?\'], a[href*=\'.docx?\'], a[href$=\'.ppt\'], a[href$=\'.pptx\'], a[href*=\'.ppt?\'], a[href*=\'.pptx?\'], a[href^=\'https://docs.google\']',
       linksUrls: false, // get from language pack
       linksMeaningless: false, // get from language pack
+      altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
       // * Not implemented Yet:
       // custom Checks
       // custom results
@@ -787,7 +788,7 @@ class Ed11y {
     };
 
     Ed11y.paintReady = function () {
-      let readyStyle =
+      let ed11yStyle =
         `ed11y-element-result, ed11y-element-panel {
               opacity: 1; 
               outline: 0 !important;
@@ -806,24 +807,17 @@ class Ed11y {
               outline-offset: 1px;
             }
             `;
-
+      let inlineStyle = document.createElement('style');
+      inlineStyle.textContent = ed11yStyle;
+      document.querySelector('body')?.appendChild(inlineStyle);
       Ed11y.roots.forEach((root) => {
         // Shadow elements don't inherit styles, so they need their own copy.
-        let paintDelay = document.createElement('style');
-        paintDelay.textContent = readyStyle;
-        root.appendChild(paintDelay);
         if (Ed11y.options.shadowComponents) {
           root.querySelectorAll(Ed11y.options.shadowComponents).forEach((shadowHost) => {
-            let paintDelay = document.createElement('style');
-            paintDelay.textContent = readyStyle;
-            shadowHost.shadowRoot.appendChild(paintDelay);
+            let anotherInlineStyle = inlineStyle.cloneNode(true);
+            shadowHost.shadowRoot.appendChild(anotherInlineStyle);
           });
         }
-      });
-      Ed11y.roots.forEach(root => {
-        // Shadow elements don't inherit styles, so they need their own copy.
-        let paintDelay = document.createElement('style');
-        root.appendChild(paintDelay);
       });
       Ed11y.bodyStyle = true;
     };

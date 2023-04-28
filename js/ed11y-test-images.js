@@ -29,7 +29,7 @@ class Ed11yTestImages {
         // todo parameterize
         altLabel += Ed11y.M.errorAltMissing;
       }
-      else if (alt.length === 0 && !parentLink) {
+      else if ((!!Ed11y.options.altPlaceholder && alt.indexOf(Ed11y.options.altPlaceholder) !== -1) || (alt.length === 0 && !parentLink)) {
         // Empty alt not part of link. Link test will not flag this if the link has other text.
         error = 'altNull';
         altLabel += Ed11y.M.errorAltNull;
