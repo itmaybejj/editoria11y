@@ -14,7 +14,7 @@ class Ed11yTestHeadings {
     let position = 'afterbegin';
 
     // Test each header level for accessibility issues.
-    Ed11y.elements.h?.filter( el => Ed11y.elementNotHidden(el) ).forEach((el, i) => {
+    Ed11y.elements.h?.filter( el => Ed11y.elementNotHidden(el) )?.forEach((el, i) => {
       let level;
       let alert = [];
 
@@ -63,15 +63,11 @@ class Ed11yTestHeadings {
           alert.forEach((result) => {
             Ed11y.results.push(result);
           });
-          if (outlinePrefix) {
-            outlinePrefix = '<span class=\'ed11y-small\'><em>' + outlinePrefix +
-                '</em></span>';
-          }
         } else {
           outlinePrefix = '';
         }
       }
-      Ed11y.headingOutline.push([el, level, outlinePrefix]);
+      Ed11y.headingOutline.push([el, level, outlinePrefix, dismissKey]);
     });
 
     // Check for blockquotes used as headings. If it's less than 25

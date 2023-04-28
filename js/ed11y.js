@@ -65,7 +65,28 @@ class Ed11y {
 
       // Interface
       lang: 'en',
-      theme: 'lightTheme',
+      theme: 'sleekTheme',
+      sleekTheme: {
+        bg: '#fffffe',
+        bgHighlight: '#7b1919',
+        text: '#20160c',
+        primary: '#276499',
+        primaryText: '#fffdf7',
+        secondary: '#20160c',
+        button: 'transparent', // deprecate?
+        panelBar: '#fffffe',
+        panelBarText: '#20160c',
+        panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
+        panelBorder: 0,
+        activeTab: '#276499',
+        activeTabText: '#fffffe',
+        outlineWidth: 0,
+        borderRadius: 1,
+        ok: '#1f5381',
+        warning: '#fad859',
+        alert: '#b80519',
+        focusRing: '#007aff',
+      },
       darkTheme: {
         bg: '#0a2051',
         bgHighlight: '#7b1919',
@@ -73,12 +94,19 @@ class Ed11y {
         primary: '#3052a0',
         primaryText: '#f4f7ff',
         secondary: '#20160c',
+        button: 'transparent',
+        panelBar: '#3052a0',
+        panelBarText: '#f4f7ff',
+        panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
+        panelBorder: 2,
+        activeTab: '#0a2051',
+        activeTabText: '#fffffe',
+        focusRing: 'cyan',
+        outlineWidth: 2,
+        borderRadius: 3,
+        ok: '#0a307a',
         warning: '#fad859',
         alert: '#b80519',
-        button: '#dde8ff',
-        focusRing: 'cyan',
-        activeTab: '#0a2051',
-        tipHeader: '#3052a0',
       },
       lightTheme: {
         bg: '#fffffe',
@@ -87,12 +115,19 @@ class Ed11y {
         primary: '#0a307a',
         primaryText: '#fffdf7',
         secondary: '#20160c',
+        panelBar: '#0a307a',
+        panelBarText: '#f4f7ff',
+        panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
+        panelBorder: 2,
+        button: 'transparent',
+        activeTab: '#b9c0cf',
+        activeTabText: '#20160c',
+        focusRing: '#007aff',
+        outlineWidth: 2,
+        borderRadius: 3,
+        ok: '#0a307a',
         warning: '#fad859',
         alert: '#b80519',
-        button: '#0a307a',
-        focusRing: '#007aff',
-        activeTab: '#b9c0cf',
-        tipHeader: '#0a307a',
       },
       // Base z-index for buttons.
       buttonZIndex: 9999,
@@ -109,7 +144,7 @@ class Ed11y {
       documentLinks: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\'], a[href$=\'.doc\'], a[href$=\'.docx\'], a[href*=\'.doc?\'], a[href*=\'.docx?\'], a[href$=\'.ppt\'], a[href$=\'.pptx\'], a[href*=\'.ppt?\'], a[href*=\'.pptx?\'], a[href^=\'https://docs.google\']',
       linksUrls: false, // get from language pack
       linksMeaningless: false, // get from language pack
-
+      altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
       // * Not implemented Yet:
       // custom Checks
       // custom results
@@ -127,7 +162,7 @@ class Ed11y {
       ...ed11yLang['en'],
       ...ed11yLang[Ed11y.options.lang]
     };
-    Ed11y.color = Ed11y.options[Ed11y.options.theme];
+    Ed11y.theme = Ed11y.options[Ed11y.options.theme];
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
     }
@@ -322,7 +357,7 @@ class Ed11y {
           let panel = document.createElement('ed11y-element-panel');
           document.querySelector('body').appendChild(panel);
           // todo: open on assertive with count mismatch or if showDismissed is set.
-          if (Ed11y.totalCount > 0 && !Ed11y.ignoreAll && Ed11y.options.alertMode === 'assertive' && Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount ) {
+          if (Ed11y.totalCount > 0 && !Ed11y.ignoreAll && Ed11y.options.alertMode === 'assertive' && Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount) {
             // User has already seen these errors, panel will not open.
             showPanel = true;
           } else if (Ed11y.options.showDismissed && (Ed11y.dismissedCount > 0 || Ed11y.totalCount > 0)) {
@@ -333,14 +368,14 @@ class Ed11y {
         } else {
           showPanel = true;
         }
-  
+
         if (Ed11y.totalCount > 0) {
           Ed11y.seen[encodeURI(Ed11y.options.currentPage)] = Ed11y.totalCount;
           localStorage.setItem('editoria11yResultCount', JSON.stringify(Ed11y.seen));
         } else {
           delete Ed11y.seen[encodeURI(Ed11y.options.currentPage)];
         }
-  
+
         // Now we can open or close the panel.
         if (!showPanel) {
           Ed11y.reset();
@@ -371,10 +406,9 @@ class Ed11y {
             window.setTimeout(function () {
               Ed11y.panelMessage.focus();
             }, 500);
-          } 
+          }
         }
-        
-        if (Ed11y.totalCount > 0) {
+        if (Ed11y.totalCount > 0 || (Ed11y.options.showDismissed && Ed11y.dismissedCount > 0)) {
           Ed11y.panelJumpNext.removeAttribute('hidden');
           if (Ed11y.totalCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
             Ed11y.panelJumpPrev.setAttribute('hidden', '');
@@ -393,7 +427,7 @@ class Ed11y {
           Ed11y.panelCount.style.display = 'inline-block';
           let text = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
           Ed11y.panelMessage.textContent = text;
-          window.setTimeout(function() {
+          window.setTimeout(function () {
             Ed11y.announce.textContent = text;
           }, 1500);
           Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
@@ -401,7 +435,7 @@ class Ed11y {
         else {
           Ed11y.panelJumpNext.setAttribute('hidden', '');
           Ed11y.panelJumpPrev.setAttribute('hidden', '');
-  
+
           Ed11y.panelCount.style.display = 'display: none;';
           Ed11y.panel.classList.remove('warnings', 'errors');
           Ed11y.panel.classList.add('pass');
@@ -754,56 +788,38 @@ class Ed11y {
     };
 
     Ed11y.paintReady = function () {
-      let readyStyle =
+      let ed11yStyle =
         `ed11y-element-result, ed11y-element-panel {
               opacity: 1; 
               outline: 0 !important;
             }
             .ed11y-hidden-highlight {
-              box-shadow: inset 0 0 0 1px ${Ed11y.color.warning}, inset 0 0 0 2px ${Ed11y.color.primary}, 0 0 0 1px ${Ed11y.color.warning}, 0 0 0 3px ${Ed11y.color.primary}, 0 0 1px 3px !important;
+              box-shadow: inset 0 0 0 1px ${Ed11y.theme.warning}, inset 0 0 0 2px ${Ed11y.theme.primary}, 0 0 0 1px ${Ed11y.theme.warning}, 0 0 0 3px ${Ed11y.theme.primary}, 0 0 1px 3px !important;
             }
             .ed11y-ring-red {
-              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.color.alert}, 0 0 0 3px ${Ed11y.color.alert}, 0 0 1px 3px;
-              outline: 2px solid ${Ed11y.color.alert};
+              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.theme.alert}, 0 0 0 3px ${Ed11y.theme.alert}, 0 0 1px 3px;
+              outline: 2px solid ${Ed11y.theme.alert};
               outline-offset: 1px;
             }
             .ed11y-ring-yellow {
-              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.color.warning}, 0 0 0 3px ${Ed11y.color.warning}, 0 0 1px 3px;
-              outline: 2px solid ${Ed11y.color.warning};
+              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.theme.warning}, 0 0 0 3px ${Ed11y.theme.warning}, 0 0 1px 3px;
+              outline: 2px solid ${Ed11y.theme.warning};
               outline-offset: 1px;
             }
             `;
-
+      let inlineStyle = document.createElement('style');
+      inlineStyle.textContent = ed11yStyle;
+      document.querySelector('body')?.appendChild(inlineStyle);
       Ed11y.roots.forEach((root) => {
         // Shadow elements don't inherit styles, so they need their own copy.
-        let paintDelay = document.createElement('style');
-        paintDelay.textContent = readyStyle;
-        root.appendChild(paintDelay);
         if (Ed11y.options.shadowComponents) {
           root.querySelectorAll(Ed11y.options.shadowComponents).forEach((shadowHost) => {
-            let paintDelay = document.createElement('style');
-            paintDelay.textContent = readyStyle;
-            shadowHost.shadowRoot.appendChild(paintDelay);
+            let anotherInlineStyle = inlineStyle.cloneNode(true);
+            shadowHost.shadowRoot.appendChild(anotherInlineStyle);
           });
         }
       });
-      Ed11y.roots.forEach(root => {
-        // Shadow elements don't inherit styles, so they need their own copy.
-        let paintDelay = document.createElement('style');
-        root.appendChild(paintDelay);
-      });
       Ed11y.bodyStyle = true;
-    };
-
-    Ed11y.scrollTo = function (goto) {
-      let gotoOffset = goto.getBoundingClientRect().top;
-      if (gotoOffset < window.innerHeight * .25) {
-        // scroll down
-        window.scrollBy(0, gotoOffset - window.innerHeight * .25);
-      } else if (gotoOffset > window.innerHeight * .75) {
-        // scroll up
-        window.scrollBy(0, gotoOffset - window.innerHeight + 160);
-      }
     };
 
     Ed11y.alignTip = function (button, toolTip, recheck = 0) {
@@ -881,7 +897,7 @@ class Ed11y {
       }
       else if (direction === 'above') {
         // Slide left or right to center tip on page.
-        nudgeY = -1 * (tipHeight + 18);
+        nudgeY = -1 * (tipHeight + 15 + Ed11y.theme.outlineWidth);
         arrow.style.setProperty('top', tipHeight);
         if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
@@ -897,7 +913,7 @@ class Ed11y {
           arrow.style.setProperty('left', tipWidth / 5 - 34 + 'px');
         }
         arrow.dataset.direction = 'above';
-        arrow.style.setProperty('top', `${tipHeight + 18}px`);
+        arrow.style.setProperty('top', `${tipHeight + 15 + Ed11y.theme.outlineWidth}px`);
       } else {
         // Left or right
         let tipBottom = buttonOffset.top + scrollTop + tipHeight;
@@ -973,16 +989,21 @@ class Ed11y {
           let leftPad = 10 * level - 10;
           let li = document.createElement('li');
           li.classList.add('level' + level);
-          let message = el[2] && !el[5] ? el[2] : ''; // Has an error message and is not ignored.
-          if (message) {
-            // todo: communicate alert level? Add alert title?
-            li.classList.add('has-issues');
-          }
           li.style.setProperty('margin-left', leftPad + 'px');
-          li.innerHTML = `<strong>H${level}:</strong> ${message}`;
+          let levelPrefix = document.createElement('strong');
+          levelPrefix.textContent = `H${level}: `;
+          li.append(levelPrefix);
           let userText = document.createElement('span');
           userText.textContent = el[0].textContent;
           li.append(userText);
+          if (el[2]) { // Has an error message
+            let type = !el[3] ? 'error' : 'warning';
+            li.classList.add(type);
+            let message = document.createElement('em');
+            message.classList.add('ed11y-small');
+            message.textContent = ' ' + el[2];
+            li.append(message);
+          }
           panelOutline.append(li);
         });
       } else {
@@ -1304,7 +1325,7 @@ class Ed11y {
       let style = window.getComputedStyle(el);
       if (style.getPropertyValue('display') === 'none' ||
         style.getPropertyValue('visibility') === 'hidden' ||
-        el.hasAttribute('aria-hidden') || 
+        el.hasAttribute('aria-hidden') ||
         el.hasAttribute('hidden')) {
         return false;
       } else {
