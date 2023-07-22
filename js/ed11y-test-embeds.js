@@ -8,7 +8,7 @@ class Ed11yTestEmbeds {
 
     // Check frames, audio and video
     let video = Ed11y.srcMatchesOptions(Ed11y.elements.iframe, Ed11y.options.videoContent);
-    video = video.concat(Array.from(Ed11y.elements.video));
+    video = video ? video.concat(Array.from(Ed11y.elements.video)) : Ed11y.elements.video;
     if (video.length > 0) {
       video.forEach(el => {
         // Dismiss-able alert. False positive accepted on undefined sources.
@@ -18,7 +18,7 @@ class Ed11yTestEmbeds {
     }
   
     let audio = Ed11y.srcMatchesOptions(Ed11y.elements.iframe, Ed11y.options.audioContent);
-    audio = audio.concat(Array.from(Ed11y.elements.audio));
+    audio = audio ? audio.concat(Array.from(Ed11y.elements.audio)) : Ed11y.elements.audio;
     if (audio.length > 0) {
       audio.forEach(el => {
         // Dismiss-able alert. False positive accepted on undefined sources.
