@@ -1373,7 +1373,7 @@ class Ed11y {
         let finder = Array.from(source);
         return finder.filter((el) => el.matches(selectors));
       } else {
-        return '';
+        return [];
       }
     };
 
