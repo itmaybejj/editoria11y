@@ -266,7 +266,7 @@ class Ed11y {
           if (roots.length === 0) {
             console.warn('Check Editoria11y configuration; specified root element not found');
           } else {
-            console.warn('No user editable content on this page');
+            console.warn('Editoria11y found no user editable content on this page');
           }
           Ed11y.reset();
         } else {
@@ -581,18 +581,17 @@ class Ed11y {
       // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
       // Repeat the search inside each placeholder, and replace the placeholder with its search results.
       if (Ed11y.options.shadowComponents) {
-        let shadowFind = [];
-        Ed11y.elements[key].forEach((el, i) => {
-          if (el.matches(Ed11y.options.shadowComponents)) {
+        for (let index = Ed11y.elements[key].length - 1; index >= 0; index--) {
+          if (Ed11y.elements[key][index].matches(Ed11y.options.shadowComponents)) {
             // Dive into the shadow root and collect an array of its results.
-            shadowFind[i] = el.shadowRoot.querySelectorAll(`:is(${selector})${ignore}`);
-          }
-        });
-        if (shadowFind.length > 0) {
-          for (let index = shadowFind.length - 1; index >= 0; index--) {
-            if (shadowFind[index]) {
-              // Replace the placeholder with any sub-hits in the element-to-test array, or nothing.
-              Ed11y.elements[key].splice(index, 1, ...shadowFind[index]);
+            let inners = Ed11y.elements[key][index].shadowRoot?.querySelectorAll(`:is(${selector})${ignore}`);
+            if (typeof(inners) === 'object' && inners.length > 0) {
+              // Replace shadow host with inner elements.
+              Ed11y.elements[key].splice(index, 1, ...inners);
+            } else {
+              // Remove shadow host with no inner elements.
+              console.warn('Editoria11y: A specified shadow host has no shadowRoot.');
+              Ed11y.elements[key].splice(index, 1);
             }
           }
         }
@@ -813,9 +812,9 @@ class Ed11y {
       Ed11y.roots.forEach((root) => {
         // Shadow elements don't inherit styles, so they need their own copy.
         if (Ed11y.options.shadowComponents) {
-          root.querySelectorAll(Ed11y.options.shadowComponents).forEach((shadowHost) => {
+          root.querySelectorAll(Ed11y.options.shadowComponents)?.forEach((shadowHost) => {
             let anotherInlineStyle = inlineStyle.cloneNode(true);
-            shadowHost.shadowRoot.appendChild(anotherInlineStyle);
+            shadowHost.shadowRoot?.appendChild(anotherInlineStyle);
           });
         }
       });

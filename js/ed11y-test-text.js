@@ -14,12 +14,15 @@ class Ed11yTestText {
       B: 'A',
       2: '1'
     };
-    let prefixMatch = /a\.|a\)|A\.|A\)|1\.|1\)|\*\s|-\s|--|•\s|→\s|✓\s|✔\s|✗\s|✖\s|✘\s|❯\s|›\s|»\s/;
+    let prefixMatch = new RegExp(/([aA1]|[^\p{Alphabetic}\s])[-\s.)]/, 'u');
+    let emojiMatch = new RegExp(/\p{Emoji}/, 'u');
     let decrement = function (el) {
       return el.replace(/^b|^B|^2/, function (match) {
         return prefixDecrement[match];
       });
     };
+
+    let lastHitWasEmoji = false;
     Ed11y.elements.p?.forEach((p, i) => {
 
       // Detect possible lists.
@@ -31,25 +34,39 @@ class Ed11yTestText {
         firstPrefix = firstText.substring(0, 2);
       }
       // Grab first two characters.
-      if (firstPrefix.length > 0 && firstPrefix !== activeMatch && firstPrefix.match(prefixMatch)) {
+      let matchWasntEmoji = firstPrefix.match(prefixMatch);
+      if (firstPrefix.length > 0 && firstPrefix !== activeMatch && (matchWasntEmoji || firstPrefix.match(emojiMatch))) {
         // We have a prefix and a possible hit; check next detected paragraph.
-        // Note these paragraphs may not be siblings in the DOM...
-        let secondP = Ed11y.elements.p[i + 1];
-        if (secondP) {
-          secondText = Ed11y.getText(secondP).substring(0, 2);
-          let secondPrefix = decrement(secondText);
-          if (firstPrefix === secondPrefix) {
-            // Note: this will flag <p>1. + <p>1.
-            hit = true;
+        if (matchWasntEmoji) {
+          lastHitWasEmoji = false;
+          let secondP = Ed11y.elements.p[i + 1];
+          if (secondP) {
+            secondText = Ed11y.getText(secondP).substring(0, 2);
+            let secondPrefix = decrement(secondText);
+            if (firstPrefix === secondPrefix) {
+              // This will flag repeats (*,*) or increments(a,b)
+              hit = true;
+            }
           }
+        } else if (!lastHitWasEmoji) {
+          // Match was Emoji, match any paragraph with another emoji
+          let secondP = Ed11y.elements.p[i + 1];
+          if (secondP) {
+            let secondPrefix = Ed11y.getText(secondP).substring(0, 2);
+            if (secondPrefix.match(emojiMatch)) {
+              hit = true;
+            }
+          }
+          // It was an emoji match.
+          lastHitWasEmoji = hit;
         }
         if (!hit) {
-          // Split p by carriage return if present and compare.
+          // Split p by carriage return if there was a firstPrefix and compare.
           // todo: this is not detected if the element after the BR has rich formatting
-          let hasBreak = p?.querySelector('br')?.nextSibling?.nodeValue;
-          if (hasBreak) {
-            hasBreak = hasBreak.replace(/<\/?[^>]+(>|$)/g, '').trim().substring(0, 2);
-            if (firstPrefix === decrement(hasBreak)) {
+          let textAfterBreak = p?.querySelector('br')?.nextSibling?.nodeValue;
+          if (textAfterBreak) {
+            textAfterBreak = textAfterBreak.replace(/<\/?[^>]+(>|$)/g, '').trim().substring(0, 2);
+            if (firstPrefix === decrement(textAfterBreak) || (!matchWasntEmoji && !lastHitWasEmoji && textAfterBreak.match(emojiMatch))) {
               hit = true;
             }
           }
@@ -60,6 +77,7 @@ class Ed11yTestText {
           activeMatch = firstPrefix;
         }
         else {
+          // TODO: we could add a check for multiple emoji within the paragraph now.
           activeMatch = '';
         }
       }
