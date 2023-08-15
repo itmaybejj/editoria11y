@@ -236,10 +236,20 @@
             <hr><p>2. with HR</p>
             <hr><p>3. but non-contiguous p are detected.</p>
         </div>
-        <div class="todo-positive"><p>1. Failing test. This has rich text after the BR<br><a href="#"><strong>2.</strong> Fancy.</a></p></div>
+        <div class="negative"><p>Apple</p></div>
+        <div class="negative"><p>Appeal</p></div>
+        <div class="negative"><p>Apple</p></div>
+        <div class="negative"><p>Bear</p></div>
+        <div><p class="positive">🥑 Fake lists with emoji</p><p class="negative">🍅 Oh tomato...</p><p class="negative">🦄 Shiny Unicorn</p>
+          <p class="positive">⊙ Math symbol</p><p class="negative">⊙ Detect on repeat</p>
+          <p class="positive">🚜 Now emoji again, with a line break<br>🛵 Any other emoji</p>
+        </div>
+        
+        <div class="positive"><p>1. This has rich text after the BR<br><a href="#"><strong>2.</strong> Fancy.</a></p></div>
         <div class="negative"><p>1. This has nothing after the BR<br></p></div>
         <div class="negative"><p></p></div>
         <div class="negative"><p>1.</p></div>
+        <p class="negative">🍅 Oh tomato...</p>
 
         <h3 id="caps-lock">Caps lock</h3>
 
@@ -253,6 +263,11 @@
         </section>
         <section class="shadow-root-no-hits">
             <div>This shadow component has no elements to find.</div>
+        </section>
+        <section class="shadow-root-no-root">
+          <turtle>
+            This custom component has no shadow root.
+          </turtle>
         </section>
         
 
@@ -356,7 +371,7 @@
             linkIgnoreStrings: '\(opens in new window\)',
             embeddedContent: '#embed',
             //ignoreElements : 'footer *',
-            shadowComponents : 'shadow-test, shadow-test-no-hits',
+            shadowComponents : 'shadow-test, shadow-test-no-hits, turtle',
             hiddenHandlers : '#hidden-handler',
             checkRoots : 'main',
             showDismissed : true,
