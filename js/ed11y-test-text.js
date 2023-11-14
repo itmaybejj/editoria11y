@@ -149,7 +149,7 @@ class Ed11yTestText {
       else {
         // Make sure all table headers are not empty.
         findTHeaders.forEach((th) => {
-          if (Ed11y.getText(th).length < 1 && !Ed11y.computeTitle(th)) {
+          if (Ed11y.computeText(th).length < 1) {
             Ed11y.results.push([th, 'tableEmptyHeaderCell', Ed11y.M.tableEmptyHeaderCell.tip(), 'afterbegin', false]);
           }
         });

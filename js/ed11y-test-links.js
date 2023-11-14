@@ -10,48 +10,14 @@ class Ed11yTestLinks {
     // todo later: parameterize stopwords as in Sa11y
     Ed11y.elements.a?.forEach((el) => {
       // todo: replace with full accessible name calculation
-      let linkText = Ed11y.computeAriaLabel(el); // returns text or 'noAria';
+      let linkText = Ed11y.computeText(el); // returns text or 'noAria';
       let img = el.querySelectorAll('img');
       let hasImg = img.length > 0;
-      let innerLabel = el.querySelectorAll('[aria-label]:not(img)');
       let document = false;
 
       if (el.matches(Ed11y.options.documentLinks)) {
         document = true;
       }
-
-      // todo: replace with full accessible name calculation
-      if (linkText === 'noAria') {
-        linkText = Ed11y.getText(el);
-        if (hasImg) {
-          img.forEach((el) => {
-            let imgText = Ed11y.computeAriaLabel(el);
-            if (imgText !== 'noAria') {
-              linkText += imgText;
-            }
-            else {
-              if (el.hasAttribute('alt')) {
-                linkText += el.getAttribute('alt');
-              }
-              else if (el.hasAttribute('src')) {
-                linkText += el.getAttribute('src');
-              }
-            }
-          });
-          // This only checks the alt, not aria-label
-          hasImg = true;
-        }
-        if (innerLabel.length > 0) {
-          innerLabel.forEach(el => {
-            linkText += el.getAttribute('aria-label');
-          });
-        }
-        
-      }
-      
-      // Todo replace with accessible name calculation?
-      linkText += Ed11y.computeTitle(el) ? Ed11y.computeTitle(el) : '';
-
 
       // Create version of text without "open in new window" warnings.
       let linkStrippedText = Ed11y.options.linkIgnoreStrings ? linkText.replace(Ed11y.options.linkIgnoreStrings, '') : linkText;
