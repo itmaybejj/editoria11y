@@ -30,7 +30,7 @@ class Ed11yTestHeadings {
       level = parseInt(level);
       let error = '';
       let outlinePrefix = '';
-      let headingText = Ed11y.getText(el);
+      let headingText = Ed11y.computeText(el);
       let headingLength = headingText.length;
       let dismissKey = false;
       if (headingLength < 1) {
