@@ -28,6 +28,22 @@
                 <h4 style="background: silver; padding: 1em; font-size: 14px;">This editor-only utility heading will be skipped in the outline</h3>
             </div>
 
+            <h3>Accessible name calculation with SVG
+                <span class="prefix-icon">
+                  <svg role="presentation" aria-hidden="true" id="Layer_1" data-name="Layer 1"
+                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25.01 23.51">
+                    <defs>
+                      <style>.cls-1{fill:#a91e22;}.cls-2{fill:#c2c2c2;}</style>
+                    </defs>
+                    <title>double-arrow</title>
+                    <polygon class="cls-1"
+                      points="14.42 11.75 11.76 9.08 11.75 9.08 2.67 0 0 2.67 9.08 11.75 0 20.84 2.67 23.51 11.75 14.42 11.76 14.42 14.42 11.76 14.42 11.75 14.42 11.75"></polygon>
+                    <polygon class="cls-2"
+                      points="25.01 11.75 22.34 9.08 22.34 9.08 13.25 0 10.58 2.67 19.67 11.75 10.58 20.84 13.25 23.51 22.34 14.42 22.34 14.42 25.01 11.76 25.01 11.75 25.01 11.75"></polygon>
+                  </svg>
+                </span>
+              </h3>
+
             <h3>Aria:hidden image</h3>
             <div class="negative"><div aria-hidden="true">
                 <img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" >
@@ -54,6 +70,30 @@
 
             <h3>HTML hidden attribute</h3>
             <div class="positive"><div hidden><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
+
+        </section>
+
+        <section id="name-calculation">
+
+            <h2 id="name calc">Accessible name calculation</h2>
+
+            <h3>Pseudo selectors in a link</h3>
+            <div class="negative"><a id="text-in-css" href="#"></a></div>
+            <div class="positive"><a id="click-in-css" class="click-in-css" href="#"></a></div>
+            <div class="negative"><a id="titled-link" title="Titled link" href="#"></a></div>
+            <div class="positive"><a id="titled-link-click-here" title="Click here" href="#"><span></span></a></div>
+            <div class="positive"><a id="inner-css-link" href="#"><span class="click-in-css"></span></a></div>
+            <div class="negative"><a id="inner-svg-titles" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="5" cy="5" r="4"><title>I'm a circle</title></circle>
+                <rect x="11" y="1" width="8" height="8"><title>I'm a square</title></rect></svg></a></div>
+            <div class="positive"><a id="inner-svg-titles-click-here" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="5" cy="5" r="4"><title>Click</title></circle>
+                <rect x="11" y="1" width="8" height="8"><title>here</title></rect></svg></a></div>
+            <div class="negative"><a id="inner-svg-titles-ok-by-label" aria-labelledby="titled-link" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="5" cy="5" r="4"><title>Click</title></circle>
+                <rect x="11" y="1" width="8" height="8"><title>here</title></rect></svg></a></div>
+        
+            <style>#text-in-css::before {content: 'hello';} .click-in-css::before {content: 'click';} #click-in-css::after {content: ' here';}</style>
 
         </section>
 
