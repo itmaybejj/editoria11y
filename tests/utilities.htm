@@ -2,7 +2,6 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <link rel="stylesheet" media="all" href="../docs.css">
         <title>Editorially Utility Functions</title>
     </head>
 <body>
@@ -60,16 +59,21 @@
             <h2 id="hiding-tests">Hidden element handlers</h2>
 
             <h3>Display:none</h3>
-            <div class="positive"><div style="display: none;"><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
+            <div class="negative"><div style="display: none;"><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
 
             <h3>Visibility:hidden</h3>
-            <div class="positive"><div style="visibility: hidden;"><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
+            <div class="negative"><div style="visibility: hidden;"><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
 
             <h3>Aria:hidden text</h3>
-            <div class="positive"><div style="visibility: hidden;"><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
+            <div class="negative"><div style="visibility: hidden;"><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
 
             <h3>HTML hidden attribute</h3>
-            <div class="positive"><div hidden><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
+            <div class="negative"><div hidden><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
+
+            <h3>Hidden click here links</h3>
+            <div class="positive"><div style="display: none;"><a id="visually-hidden-click-here" href="#">Click here</a></div></div>
+            <div class="positive"><div style="visibility: hidden;"><a id="visually-hidden-click-here" href="#">Click here</a></div></div>
+            <div class="positive"><div hidden><a id="hidden-click-here" href="#">Click here</a></div></div>
 
         </section>
 
@@ -78,22 +82,34 @@
             <h2 id="name calc">Accessible name calculation</h2>
 
             <h3>Pseudo selectors in a link</h3>
-            <div class="negative"><a id="text-in-css" href="#"></a></div>
-            <div class="positive"><a id="click-in-css" class="click-in-css" href="#"></a></div>
-            <div class="negative"><a id="titled-link" title="Titled link" href="#"></a></div>
-            <div class="positive"><a id="titled-link-click-here" title="Click here" href="#"><span></span></a></div>
-            <div class="positive"><a id="inner-css-link" href="#"><span class="click-in-css"></span></a></div>
-            <div class="negative"><a id="inner-svg-titles" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="positive">Link with SVG image with multiple labels, one should be ignored: 
+                <a href="https://www.princeton.edu" >click <span class="extlink-nobreak">here<svg focusable="false" class="ext" role="img" aria-label="(link is external)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 40"><metadata><sfw xmlns="http://ns.adobe.com/SaveForWeb/1.0/"><slicesourcebounds y="-8160" x="-8165" width="16389" height="16384" bottomleftorigin="true"></slicesourcebounds><optimizationsettings><targetsettings targetsettingsid="0" fileformat="PNG24Format"><png24format transparency="true" filtered="false" interlaced="false" nomattecolor="false" mattecolor="#FFFFFF"></png24format></targetsettings></optimizationsettings></sfw></metadata><title>(link is external)</title><path d="M48 26c-1.1 0-2 0.9-2 2v26H10V18h26c1.1 0 2-0.9 2-2s-0.9-2-2-2H8c-1.1 0-2 0.9-2 2v40c0 1.1 0.9 2 2 2h40c1.1 0 2-0.9 2-2V28C50 26.9 49.1 26 48 26z"></path><path d="M56 6H44c-1.1 0-2 0.9-2 2s0.9 2 2 2h7.2L30.6 30.6c-0.8 0.8-0.8 2 0 2.8C31 33.8 31.5 34 32 34s1-0.2 1.4-0.6L54 12.8V20c0 1.1 0.9 2 2 2s2-0.9 2-2V8C58 6.9 57.1 6 56 6z"></path></svg></span></a></div>
+            <div class="negative">Good link text in ::before: <a id="text-in-css" href="#"></a></div>
+            <div class="positive">Bad link text in ::before:<a id="click-in-css" class="click-in-css" href="#"></a></div>
+            <div class="negative">Good link text in title attribute: <a id="titled-link" title="Titled link" href="#"></a></div>
+            <div class="positive">Bad link text in title attribute: <a id="titled-link-click-here" title="Click here" href="#"><span></span></a></div>
+            <div class="positive">Bad link text in ::before on inner span: <a id="inner-css-link" href="#"><span class="click-in-css"></span></a></div>
+            <div class="positive">Inner SVG has an alt but no role, alt is ignored: <a id="svg-incorrect-role" href="#"><svg alt="unread alt" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="5" cy="5" r="4"></circle></svg></a></div>
+            <div class="negative">Inner SVG has an alt and a valid role: <a id="svg-image-role" href="#"><svg role="image" alt="foo bar baz" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="5" cy="5" r="4"></circle></svg></a></div>
+            <div class="negative">Inner SVG has a good title element: <a id="inner-svg-titles" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>I'm a circle</title></circle>
                 <rect x="11" y="1" width="8" height="8"><title>I'm a square</title></rect></svg></a></div>
-            <div class="positive"><a id="inner-svg-titles-click-here" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="positive">Inner SVG has a bad title element: <a id="inner-svg-titles-click-here" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>Click</title></circle>
                 <rect x="11" y="1" width="8" height="8"><title>here</title></rect></svg></a></div>
-            <div class="negative"><a id="inner-svg-titles-ok-by-label" aria-labelledby="titled-link" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="negative">OK via aria-labelledby to another element: <a id="inner-svg-titles-ok-by-label" aria-labelledby="titled-link" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>Click</title></circle>
                 <rect x="11" y="1" width="8" height="8"><title>here</title></rect></svg></a></div>
+            <div class="positive">Bad via recursive aria-labelledby: <a id="recursive-svg-click-here" aria-labelledby="recursive-svg-click-here" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="5" cy="5" r="4"><title>Click</title></circle>
+                </svg> here</a></div>
+            <div class="negative">Good via inner aria-labelled element: <a id="recursive-svg-inner-label" aria-labelledby="recursive-svg-inner-label" href="#"><svg aria-label="meaningful link" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="5" cy="5" r="4"><title>Click</title></circle></svg> Here</a></div>
+            <div class="positive">Bad because IMG tag cannot have a ::before: <img class='click-in-css' src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></div>
         
-            <style>#text-in-css::before {content: 'hello';} .click-in-css::before {content: 'click';} #click-in-css::after {content: ' here';}</style>
+            <style>svg {max-width: 100px;} #text-in-css::before {content: 'hello';} .click-in-css::before {content: 'click';} #click-in-css::after {content: ' here';}</style>
 
         </section>
 
@@ -120,13 +136,13 @@
                 const ed11y = new Ed11y({
                     alertMode : 'assertive',
                     ignoreByKey : {
-                        'h' : '.utility *',
                         'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
                         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
                     },
                     shadowComponents : 'shadow-test, shadow-test-no-hits', 
                     hiddenHandlers : '[hidden]',
-                    checkRoots : 'body', 
+                    checkRoots : 'body',
+                    linkIgnoreStrings: '\(link is external\)',
                 });
             </script>
             
