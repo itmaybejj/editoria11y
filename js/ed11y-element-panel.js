@@ -282,6 +282,13 @@ class Ed11yElementPanel extends HTMLElement {
         #outline li {
           padding: 5px;
         }
+        #outline a {
+          text-decoration: none;
+          display: block;
+        }
+        #outline a:hover {
+          text-decoration: underline;
+        }
         #alt-list li {
           display: flex;
           flex-wrap: wrap;

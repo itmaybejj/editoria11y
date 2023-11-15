@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.0.7-dev';
+    Ed11y.version = '2.0.7';
 
     let defaultOptions = {
 
@@ -935,6 +935,8 @@ class Ed11y {
           // Todo implement outline ignore function.
           let mark = document.createElement('ed11y-element-heading-label');
           mark.dataset.ed11yHeadingOutline = i;
+          mark.setAttribute('id', 'ed11y-heading-' + i);
+          mark.setAttribute('tabindex', '-1');
           // Array: el, level, outlinePrefix
           el[0].insertAdjacentElement('afterbegin', mark);
           let level = el[1];
@@ -942,19 +944,22 @@ class Ed11y {
           let li = document.createElement('li');
           li.classList.add('level' + level);
           li.style.setProperty('margin-left', leftPad + 'px');
+          let link = document.createElement('a');
+          link.setAttribute('href', '#ed11y-heading-' + i);
+          li.append(link);
           let levelPrefix = document.createElement('strong');
           levelPrefix.textContent = `H${level}: `;
-          li.append(levelPrefix);
+          link.append(levelPrefix);
           let userText = document.createElement('span');
           userText.textContent = Ed11y.computeText(el[0]);
-          li.append(userText);
+          link.append(userText);
           if (el[2]) { // Has an error message
             let type = !el[3] ? 'error' : 'warning';
             li.classList.add(type);
             let message = document.createElement('em');
             message.classList.add('ed11y-small');
             message.textContent = ' ' + el[2];
-            li.append(message);
+            link.append(message);
           }
           panelOutline.append(li);
         });
