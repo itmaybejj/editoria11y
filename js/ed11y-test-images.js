@@ -63,7 +63,7 @@ class Ed11yTestImages {
           error = 'altImageOf';
         }
         // Alert with deadSpace alt.
-        else if (alt !== '' && alt.replace(/"|'|\s+/g, '') === '') {
+        else if (parentLink === null && alt !== '' && alt.replace(/"|'|\s+/g, '') === '') {
           error = 'altDeadspace';
           dismissable = false;
         }

@@ -197,17 +197,6 @@ const ed11yLang = {
             ${Ed11y.M.altAttributeExample}`,
     },
 
-    altDeadspaceLinked : {
-      title: 'Linked Image\'s text alternative is unpronounceable',
-      tip: (alt) =>
-        `${Ed11y.M.altAttributeProvided(alt)}
-        <p>This image's alt consists of only silent characters (spaces and quotation marks). It will be announced by screen readers as as part of the link's text, but the description of what the image is will be unintelligible. To fix, set this image's alternative text to something that describes the link's destination, or provide a <em>completely</em> empty alt (alt="") if the image should not be mentioned at all.</p>
-            <ul>
-                <li>Good link text: "About us"</li>
-                <li>Bad link text: "About us, image: [short confusing silence]"</li>
-            </ul>`,
-    },
-
     altEmptyLinked : {
       title: 'Linked Image has no alt text',
       tip: () =>

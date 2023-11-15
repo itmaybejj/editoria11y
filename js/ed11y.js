@@ -6,6 +6,8 @@ class Ed11y {
 
   constructor(options) {
 
+    Ed11y.version = '2.0.7-dev';
+
     let defaultOptions = {
 
       // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
@@ -166,7 +168,6 @@ class Ed11y {
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
     }
-    Ed11y.revision = '11/14/2023';
     Ed11y.elements = [];
 
     Ed11y.initialize = () => {
@@ -1248,7 +1249,7 @@ class Ed11y {
       walker: while (treeWalker.nextNode()) {
         count++;
         
-        // Links can use title attribute as text; we delay adding until next loop.
+        // Use link title as text if there was no text in the link.
         if (addTitleIfNoName && !treeWalker.currentNode.closest('a')) {
           if (aText === computedText) {
             computedText += addTitleIfNoName;
@@ -1288,11 +1289,7 @@ class Ed11y {
           }
           continue;
         case 'IMG':
-          if (treeWalker.currentNode.hasAttribute('alt')) {
-            computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, treeWalker.currentNode.getAttribute('alt'));
-          } else {
-            computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
-          }
+          computedText += treeWalker.currentNode.getAttribute('alt');
           continue;
         case 'SVG':
         case 'svg':
