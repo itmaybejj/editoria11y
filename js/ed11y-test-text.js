@@ -38,13 +38,17 @@ class Ed11yTestText {
       if (firstPrefix.length > 0 && firstPrefix !== activeMatch && (matchWasntEmoji || firstPrefix.match(emojiMatch))) {
         // We have a prefix and a possible hit; check next detected paragraph.
         let secondP = Ed11y.elements.p[i + 1];
-        if (secondP) {
+        compareP: if (secondP) {
           secondText = Ed11y.getText(secondP).substring(0, 2);
+          if (secondText === 'A') {
+            // A sentence. A nother sentence.
+            break compareP;
+          }
           let secondPrefix = decrement(secondText);
           if (matchWasntEmoji) {
             // Check for repeats (*,*) or increments(a,b)
             lastHitWasEmoji = false;
-            if (firstPrefix === secondPrefix) {
+            if (firstPrefix !== 'A ' && firstPrefix === secondPrefix) {
               hit = true;
             }
           } else if (!lastHitWasEmoji) {

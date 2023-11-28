@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.0.7';
+    Ed11y.version = '2.0.8';
 
     let defaultOptions = {
 
@@ -1254,18 +1254,19 @@ class Ed11y {
       walker: while (treeWalker.nextNode()) {
         count++;
         
+        if (treeWalker.currentNode.nodeType === Node.TEXT_NODE) {
+          computedText += ' ' + treeWalker.currentNode.nodeValue;
+          continue;
+        }
+        
         // Use link title as text if there was no text in the link.
+        // Todo: in theory this could attach the title to the wrong node.
         if (addTitleIfNoName && !treeWalker.currentNode.closest('a')) {
           if (aText === computedText) {
             computedText += addTitleIfNoName;
           }
           addTitleIfNoName = false;
           aText = false;
-        }
-        
-        if (treeWalker.currentNode.nodeType === Node.TEXT_NODE) {
-          computedText += ' ' + treeWalker.currentNode.nodeValue;
-          continue;
         }
         
         if (treeWalker.currentNode.hasAttribute('aria-hidden') && !(recursing && count < 3)) {
@@ -1309,6 +1310,10 @@ class Ed11y {
           if (treeWalker.currentNode.hasAttribute('title')) {
             addTitleIfNoName = treeWalker.currentNode.getAttribute('title');
             aText = computedText;
+          } else {
+            // Reset
+            addTitleIfNoName = false;
+            aText = false;
           }
           computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
           break;
