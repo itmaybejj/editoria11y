@@ -152,7 +152,7 @@ class Ed11y {
       // form label tests
       // detectSPArouting: false,
 
-      customTests: false,
+      customTests: 0,
 
     };
     Ed11y.options = {
@@ -260,7 +260,7 @@ class Ed11y {
         Ed11y.results = [];
         Ed11y.elements = [];
         Ed11y.mediaCount = 0;
-        Ed11y.waitingForCustomResults = false;
+        Ed11y.customTestsRunning = false;
 
         // Find and cache all root elements based on user-provided selectors.
         let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
@@ -298,24 +298,26 @@ class Ed11y {
             }, 0, test);
           });
 
-          if (Ed11y.options.customTests === true) {
+          if (Ed11y.options.customTests > 0) {
             // Pause 
-            Ed11y.waitingForCustomResults = true;
+            Ed11y.customTestsRunning = true;
+            Ed11y.customTestsFinished = 0;
             document.addEventListener('ed11yResume', function () {
-              if (Ed11y.waitingForCustomResults === true) {
-                Ed11y.waitingForCustomResults = false;
+              Ed11y.customTestsFinished++;
+              if (Ed11y.customTestsFinished === Ed11y.options.customTests) {
+                Ed11y.customTestsRunning = false;
                 Ed11y.panelToggle?.setAttribute('title', Ed11y.M.toggleAccessibilityTools);
                 Ed11y.updatePanel();
               }
             });
             window.setTimeout(function() {
-              if (Ed11y.waitingForCustomResults === true) {
-                Ed11y.waitingForCustomResults = false;
+              if (Ed11y.customTestsRunning === true) {
+                Ed11y.customTestsRunning = false;
                 Ed11y.panelToggle?.setAttribute('title', Ed11y.M.toggleAccessibilityTools);
                 Ed11y.updatePanel();
                 console.error('Editoria11y was told to wait for custom tests, but no tests were returned.');
               }
-            }, 500);
+            }, 1000);
             window.setTimeout(function() {
               let customTests = new CustomEvent('ed11yRunCustomTests');
               document.dispatchEvent(customTests);
@@ -325,7 +327,7 @@ class Ed11y {
           // todo: test form labels
         }
 
-        if (Ed11y.waitingForCustomResults === false) {
+        if (!Ed11y.customTestsRunning) {
           window.setTimeout(function () {
             Ed11y.panelToggle?.setAttribute('title', Ed11y.M.toggleAccessibilityTools);
             Ed11y.updatePanel();
@@ -382,7 +384,6 @@ class Ed11y {
 
     Ed11y.updatePanel = function () {
       Ed11y.countAlerts();
-
       if (Ed11y.options.alertMode !== 'headless') {
         if (Ed11y.onLoad === true) {
           Ed11y.onLoad = false;

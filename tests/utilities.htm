@@ -160,7 +160,9 @@
                             dismissalKey: el.getAttribute('href'),
                         })
                     })
+
                     let allDone = new CustomEvent('ed11yResume');
+                    document.dispatchEvent(allDone);
                     document.dispatchEvent(allDone);
                 })
 
@@ -177,7 +179,7 @@
                     hiddenHandlers : '[hidden]',
                     checkRoots : 'body',
                     linkIgnoreStrings: '\(link is external\)',
-                    customTests : true,
+                    customTests : 2,
                 });
             </script>
             
