@@ -26,7 +26,13 @@ class Ed11yTestLinks {
       if (el?.getAttribute('target') === '_blank' && linkText.length === linkNewWindows.length) {
         // Nothing was stripped AND we weren't warned.
         let dismissKey = Ed11y.dismissalKey(linkText);        
-        Ed11y.results.push([el, 'linkNewWindow', Ed11y.M.linkNewWindow.tip(), 'beforebegin', dismissKey]);
+        Ed11y.results.push({
+          element: el,
+          test: 'linkNewWindow',
+          content: Ed11y.M.linkNewWindow.tip(),
+          position: 'beforebegin',
+          dismissalKey: dismissKey,
+        });
       }
       
       linkStrippedText = linkStrippedText.replace(/'|"|-|\.|\s+/g, '');
@@ -35,9 +41,21 @@ class Ed11yTestLinks {
       if (linkStrippedText.length === 0) {   
         // already flagged by link test
         if (hasImg === false) {
-          Ed11y.results.push([el, 'linkNoText', Ed11y.M.linkNoText.tip(), 'beforebegin', false]);
+          Ed11y.results.push({
+            element: el,
+            test: 'linkNoText',
+            content: Ed11y.M.linkNoText.tip(),
+            position: 'beforebegin',
+            dismissalKey: false,
+          });
         } else {
-          Ed11y.results.push([el, 'altEmptyLinked', Ed11y.M.altEmptyLinked.tip(), 'beforebegin', false]);
+          Ed11y.results.push({
+            element: el,
+            test: 'altEmptyLinked',
+            content: Ed11y.M.altEmptyLinked.tip(),
+            position: 'beforebegin',
+            dismissalKey: false,
+          });
         }
       }
       else {
@@ -76,7 +94,13 @@ class Ed11yTestLinks {
             dismissKey = Ed11y.dismissalKey(linkText);
           }
           if (error) {
-            Ed11y.results.push([el, error, Ed11y.M[error].tip(Ed11y.sanitizeForHTML(linkText)), 'beforebegin', dismissKey]);
+            Ed11y.results.push({
+              element: el,
+              test: error,
+              content: Ed11y.M[error].tip(Ed11y.sanitizeForHTML(linkText)),
+              position: 'beforebegin',
+              dismissalKey: dismissKey,
+            });
           }
         }
       }
@@ -84,7 +108,14 @@ class Ed11yTestLinks {
       // first PDF on page.
       if (!hasImg && document) {
         let dismissKey = Ed11y.dismissalKey(el?.getAttribute('href'));
-        Ed11y.results.push([el, 'linkDocument', Ed11y.M.linkDocument.tip(), 'beforebegin', dismissKey]);
+        Ed11y.results.push(
+          {
+            element: el,
+            test: 'linkDocument',
+            content: Ed11y.M.linkDocument.tip(),
+            position: 'beforebegin',
+            dismissalKey: dismissKey,
+          });
       }
     });
   }

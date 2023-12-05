@@ -73,7 +73,14 @@ class Ed11yTestText {
         }
         if (hit) {
           let dismissKey = Ed11y.dismissalKey(firstText);
-          Ed11y.results.push([p, 'textPossibleList', Ed11y.M.textPossibleList.tip(firstPrefix), 'afterbegin', dismissKey]);
+          Ed11y.results.push(
+            {
+              element: p,
+              test: 'textPossibleList',
+              content: Ed11y.M.textPossibleList.tip(firstPrefix),
+              position: 'afterbegin',
+              dismissalKey: dismissKey,
+            });
           activeMatch = firstPrefix;
         }
         else {
@@ -91,7 +98,13 @@ class Ed11yTestText {
           let maybeSentence = possibleHeading.match(/[.:;?!"']/) !== null;
           if (121 > length && length > 5 && length === firstText.length && maybeSentence === false) {
             let dismissKey = Ed11y.dismissalKey(possibleHeading);
-            Ed11y.results.push([p, 'textPossibleHeading', Ed11y.M.textPossibleHeading.tip(), 'afterbegin', dismissKey]);
+            Ed11y.results.push({
+              element: p,
+              test: 'textPossibleHeading',
+              content: Ed11y.M.textPossibleHeading.tip(),
+              position: 'afterbegin',
+              dismissalKey: dismissKey,
+            });
           }
         }
       }
@@ -124,9 +137,22 @@ class Ed11yTestText {
         let dismissKey = Ed11y.dismissalKey(thisText);
         let parentClickable = el.closest('a, button');
         if (parentClickable) {
-          Ed11y.results.push([parentClickable, 'textUppercase', Ed11y.M.textUppercase.tip(), 'beforebegin', dismissKey]);
+          Ed11y.results.push(
+            {
+              element: parentClickable,
+              test: 'textUppercase',
+              content: Ed11y.M.textUppercase.tip(),
+              position: 'beforebegin',
+              dismissalKey: dismissKey,
+            });
         } else {
-          Ed11y.results.push([el, 'textUppercase', Ed11y.M.textUppercase.tip(), 'afterbegin', dismissKey]);
+          Ed11y.results.push({
+            element: el,
+            test: 'textUppercase',
+            content: Ed11y.M.textUppercase.tip(),
+            position: 'afterbegin',
+            dismissalKey: dismissKey,
+          });
         }
       }
     };
@@ -148,19 +174,37 @@ class Ed11yTestText {
       let findTHeaders = el.querySelectorAll('th');
       let findHeadingTags = el.querySelectorAll('h1, h2, h3, h4, h5, h6');
       if (findTHeaders.length === 0) {
-        Ed11y.results.push([el, 'tableNoHeaderCells', Ed11y.M.tableNoHeaderCells.tip(), 'beforebegin', false]);
+        Ed11y.results.push({
+          element: el,
+          test: 'tableNoHeaderCells',
+          content: Ed11y.M.tableNoHeaderCells.tip(),
+          position: 'beforebegin',
+          dismissalKey: false,
+        });
       }
       else {
         // Make sure all table headers are not empty.
         findTHeaders.forEach((th) => {
           if (Ed11y.computeText(th).length < 1) {
-            Ed11y.results.push([th, 'tableEmptyHeaderCell', Ed11y.M.tableEmptyHeaderCell.tip(), 'afterbegin', false]);
+            Ed11y.results.push({
+              element: th,
+              test: 'tableEmptyHeaderCell',
+              content: Ed11y.M.tableEmptyHeaderCell.tip(),
+              position: 'afterbegin',
+              dismissalKey: false,
+            });
           }
         });
       }
       if (findHeadingTags) {
         findHeadingTags.forEach((h) => {
-          Ed11y.results.push([h, 'tableContainsContentHeading', Ed11y.M.tableContainsContentHeading.tip(), 'beforebegin', false]);
+          Ed11y.results.push({
+            element: h,
+            test: 'tableContainsContentHeading',
+            content: Ed11y.M.tableContainsContentHeading.tip(),
+            position: 'beforebegin',
+            dismissalKey: false,
+          });
         });
       }
     });
