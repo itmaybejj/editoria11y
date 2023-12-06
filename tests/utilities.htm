@@ -34,7 +34,7 @@
                 <h4 style="background: silver; padding: 1em; font-size: 14px;">This editor-only utility heading will be skipped in the outline</h3>
             </div>
 
-            <h3>Accessible name calculation with SVG
+            <h3>Accessible name calculation in outline excluding hidden text <noscript>No script</noscript><style>.css-example {display: block;}</style>
                 <span class="prefix-icon">
                   <svg role="presentation" aria-hidden="true" id="Layer_1" data-name="Layer 1"
                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25.01 23.51">
@@ -109,7 +109,7 @@
             <div class="negative">OK via aria-labelledby to another element: <a id="inner-svg-titles-ok-by-label" aria-labelledby="titled-link" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>Click</title></circle>
                 <rect x="11" y="1" width="8" height="8"><title>here</title></rect></svg></a></div>
-            <div class="positive">Bad via recursive aria-labelledby: <a id="recursive-svg-click-here" aria-labelledby="recursive-svg-click-here" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="positive">Bad via recursive aria-labelledby: <a id="recursive-svg-click-here" aria-labelledby="recursive-svg-click-here click-in-css" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>Click</title></circle>
                 </svg> here</a></div>
             <div class="negative">Good via inner aria-labelled element: <a id="recursive-svg-inner-label" aria-labelledby="recursive-svg-inner-label" href="#"><svg aria-label="meaningful link" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">

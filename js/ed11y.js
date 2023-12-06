@@ -323,8 +323,6 @@ class Ed11y {
               document.dispatchEvent(customTests);
             },0);
           }
-          // todo: handle custom rules and inbound synced results (e.g, broken links)
-          // todo: test form labels
         }
 
         if (!Ed11y.customTestsRunning) {
@@ -1206,25 +1204,22 @@ class Ed11y {
     };
 
     // Handle aria-label or labelled-by. Latter "wins" and can self-label.
-    Ed11y.computeAriaLabel = function (el, recursing = false) {
-      let labelledBy = el.getAttribute('aria-labelledby');
+    Ed11y.computeAriaLabel = function (element, recursing = false) {
+      const labelledBy = element.getAttribute('aria-labelledby');
       if (!recursing && labelledBy) {
-        // On first pass only, we compute labelledby and recurse if applicable.
-        let returnText = '';
-        if (labelledBy.trim().length > 0) {
-          let idList = labelledBy.trim().replace(/ /g, ', #');
-          let targets = document.querySelectorAll(`#${CSS.escape(idList)}`);
-          if (targets.length > 0) {
-            targets?.forEach((target) => {
-              returnText += Ed11y.computeText(target, 1) + ' ';
-            });
-            return returnText;
-          }
+        const target = labelledBy.split(/\s+/);
+        if (target.length > 0) {
+          let returnText = '';
+          target.forEach((x) => {
+            const targetSelector = document.querySelector(`#${CSS.escape(x)}`);
+            returnText += (!targetSelector) ? '' : Ed11y.computeText(targetSelector, 1);
+          });
+          return returnText;
         }
-      } 
-      if (el.ariaLabel && el.ariaLabel.trim().length > 0) {
-        // todo add empty and whitespace string tests
-        return el.ariaLabel;
+      }
+      if (element.ariaLabel && element.ariaLabel.trim().length > 0) {
+        // To-do: add empty and whitespace string tests.
+        return element.ariaLabel;
       }
       return 'noAria';
     };
@@ -1325,6 +1320,7 @@ class Ed11y {
 
         switch (treeWalker.currentNode.tagName) {
         case 'STYLE':
+        case 'NOSCRIPT':
           // Skip style elements
           if (!Ed11y.nextTreeBranch(treeWalker)) {
             break walker;
