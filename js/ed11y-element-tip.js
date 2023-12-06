@@ -175,7 +175,7 @@ class Ed11yElementTip extends HTMLElement {
           width: 32px;
         }
         .close:hover {
-          background: ${Ed11y.theme.bg};
+          background: ${Ed11y.theme.bg}cc;
           color: ${Ed11y.theme.text};
         }
         .dismiss {

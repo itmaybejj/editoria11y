@@ -140,31 +140,38 @@
                     let pop = Ed11y.findElements('hiddenPop',`#ed11y-result-${e.detail.result}`);
                     Ed11y.elements['hiddenPop'][0].closest('[hidden]')?.removeAttribute('hidden');
                 }, false);
-
-                //document.addEventListener('ed11yResume', function () {
                 
+                const decodeSafelink = function(url) {
+                    const params = new URL(url).searchParams;
+                    let decoded = params.get('url');
+                    if (!!decoded) {
+                        return `<p>The actual URL may be:<br><em>"${decoded}"</em></p>`
+                    }
+                    return '';
+                }
                 document.addEventListener('ed11yRunCustomTests', function() {
-                    Ed11y.findElements('safeLinks','a[href*="safelinks.protection.outlook.com"]');
+                    Ed11y.findElements('safeLinks','a[href*="safelinks.protection.outlook.com/?"]');
                     Ed11y.M.outlookSafeLink = {
-                        title: 'Oh no a safelink',
-                        tip: () => 
-                            `<p>Yuck</p>
+                        title: 'URL is an Outlook Safelink',
+                        tip: (href) => 
+                            `<p>The URL for this link has been copied from an email, and will bounce all clicks through the Microsoft Safelinks server.</p>
+                            <p>The specified URL is:<br><em>"${href}"</em></p>
+                            ${decodeSafelink(href)}
                                 `,
                     };
                     Ed11y.elements.safeLinks?.forEach((el) => {
                         Ed11y.results.push({
                             element: el,
                             test: 'outlookSafeLink',
-                            content: Ed11y.M.outlookSafeLink.tip(),
+                            content: Ed11y.M.outlookSafeLink.tip(el.getAttribute('href')),
                             position: 'beforebegin',
-                            dismissalKey: el.getAttribute('href'),
+                            dismissalKey: false,
                         })
                     })
-
                     let allDone = new CustomEvent('ed11yResume');
                     document.dispatchEvent(allDone);
                     document.dispatchEvent(allDone);
-                })
+                    })
 
 
 
@@ -180,6 +187,7 @@
                     checkRoots : 'body',
                     linkIgnoreStrings: '\(link is external\)',
                     customTests : 2,
+                    theme: 'sleekTheme',
                 });
             </script>
             
