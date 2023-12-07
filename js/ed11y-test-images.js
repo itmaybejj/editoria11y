@@ -63,7 +63,7 @@ class Ed11yTestImages {
           error = 'altImageOf';
         }
         // Alert with deadSpace alt.
-        else if (alt !== '' && alt.replace(/"|'|\s+/g, '') === '') {
+        else if (parentLink === null && alt !== '' && alt.replace(/"|'|\s+/g, '') === '') {
           error = 'altDeadspace';
           dismissable = false;
         }
@@ -93,7 +93,13 @@ class Ed11yTestImages {
         let message = Ed11y.M[error].tip(Ed11y.sanitizeForHTML(alt));
         let baseSrc = src ? src.split('?')[0] : 'nosrc_';
         dismissable = dismissable ? Ed11y.dismissalKey(baseSrc + alt) : false;
-        Ed11y.results.push([el, error, message, 'beforebegin', dismissable]); 
+        Ed11y.results.push({
+          element: el,
+          test: error,
+          content: message,
+          position: 'beforebegin',
+          dismissalKey: dismissable,
+        });
         altStyle = dismissable === false ? 'error' : 'warning'; 
       }
       Ed11y.imageAlts.push([el, src, altLabel, altStyle]);

@@ -18,8 +18,8 @@ class Ed11yElementTip extends HTMLElement {
       this.wrapper = document.createElement('div');
       this.wrapper.setAttribute('role', 'dialog');
       
-      this.dismissable = !!this.result[4];
-      this.dismissed = !!this.result[5];
+      this.dismissable = !!this.result.dismissalKey;
+      this.dismissed = !!this.result.dismissalStatus;
       this.wrapper.classList.add('wrapper');
       this.wrapper.classList.add('ed11y-result');
 
@@ -175,7 +175,7 @@ class Ed11yElementTip extends HTMLElement {
           width: 32px;
         }
         .close:hover {
-          background: ${Ed11y.theme.bg};
+          background: ${Ed11y.theme.bg}cc;
           color: ${Ed11y.theme.text};
         }
         .dismiss {
@@ -203,15 +203,6 @@ class Ed11yElementTip extends HTMLElement {
         }
       `;
       
-      // Results array
-      // [0] el element
-      // [1] test ID
-      // [2] tip contents
-      // [3] position
-      // [4] dismiss key
-      // [5] dismissal status
-      // e.g.: Ed11y.results.push([el],'linkTextIsGeneric','click here', 'a_semi-unique_attribute_of_this_element'
-
       this.tip = document.createElement('div');
       this.tip.classList.add('tip');
       this.tip.setAttribute('aria-labelledby', 'tip-title-' + [this.resultID]);
@@ -219,10 +210,10 @@ class Ed11yElementTip extends HTMLElement {
       this.heading.setAttribute('id','tip-' + this.resultID);
       this.heading.classList.add('title');
       this.heading.setAttribute('tabindex', '-1');
-      this.heading.innerHTML = Ed11y.M[this.result[1]].title;
+      this.heading.innerHTML = Ed11y.M[this.result.test].title;
       let content = document.createElement('div');
       content.classList.add('content');
-      content.innerHTML = this.result[2];
+      content.innerHTML = this.result.content;
 
       // Draw dismiss or restore buttons
       if (this.dismissable) {
@@ -232,7 +223,7 @@ class Ed11yElementTip extends HTMLElement {
         // Dismissal Key is set in [5] if alert has been dismissed.
         if (Ed11y.options.showDismissed && this.dismissed) {
           // Check if user has permission to reset this alert.
-          let okd = Ed11y.dismissedAlerts[Ed11y.options.currentPage][this.result[1]][this.result[4]] === 'ok';
+          let okd = Ed11y.dismissedAlerts[Ed11y.options.currentPage][this.result.test][this.result.dismissalKey] === 'ok';
           if ((okd && Ed11y.options.allowOK) || (!okd)) {
             // User can restore this alert.
             let undismissButton = document.createElement('button');
@@ -336,14 +327,6 @@ class Ed11yElementTip extends HTMLElement {
     }
     this.setAttribute('data-ed11y-open',changeTo);   
   }
-
-  tipDOM (id, title, body) {
-    return `>
-      <div class="title" id="tip-title-${id}">${title}</div>
-      <div class="message">${body}</div>
-    `;
-  }
-
 
   static get observedAttributes() { return ['data-ed11y-action']; }
 

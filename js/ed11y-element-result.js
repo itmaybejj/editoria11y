@@ -17,15 +17,12 @@ class Ed11yElementResult extends HTMLElement {
 
       this.wrapper = document.createElement('aside');
 
-      this.dismissable = !!this.result[4];
-      this.dismissed = !!this.result[5];
+      this.dismissable = !!this.result.dismissalKey;
+      this.dismissed = !!this.result.dismissalStatus;
       // todo MVP this would only work in darkmode -- need more theme variables
       // #ffd4d4 red. turn background to alert color in lightmode.
       this.wrapper.classList.add('wrapper');
       this.wrapper.classList.add('ed11y-result');
-
-      // needed?
-      // this.wrapper.classList.add(this.type);
 
       // Create tooltip toggle
       this.toggle = document.createElement('button');
@@ -113,7 +110,7 @@ class Ed11yElementResult extends HTMLElement {
         .toggle:hover, .toggle[aria-expanded='true'] {
           border: 2px solid ${Ed11y.theme.ok};
         }`;
-      if (this.result[5] === 'ok') {
+      if (this.result.dismissalStatus === 'ok') {
         css += `
           .toggle::before {
             content: "✓";
@@ -199,22 +196,8 @@ class Ed11yElementResult extends HTMLElement {
     }
   }
 
-  tipDOM(id, title, body) {
-    return `>
-      <div class="title" id="tip-title-${id}">${title}</div>
-      <div class="message">${body}</div>
-    `;
-  }
-
   buildTip() {
     this.tipNeedsBuild = false;
-    // [0] el element
-    // [1] test ID
-    // [2] tip contents
-    // [3] position
-    // [4] dismiss key
-    // [5] dismissal status
-    // e.g.: Ed11y.results.push([el],'linkTextIsGeneric','click here', 'a_semi-unique_attribute_of_this_element'
 
     let tip = document.createElement('ed11y-element-tip');
     tip.setAttribute('data-ed11y-result', this.resultID);
@@ -229,7 +212,7 @@ class Ed11yElementResult extends HTMLElement {
     }
     this.toggle.setAttribute('aria-expanded', changeTo);
     let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
-    this.result[0].classList.toggle(highlightOutline);
+    this.result.element.classList.toggle(highlightOutline);
     if (changeTo === true) {
       // Allow for themes to reveal hidden tips
       document.dispatchEvent(new CustomEvent('ed11yPop', {

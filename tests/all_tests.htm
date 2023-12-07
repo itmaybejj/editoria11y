@@ -160,6 +160,7 @@
         <p>“Click here,” “learn more,” “download,” etc.</p>
 
         <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here</a></p>
+        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">More</a></p>
 
         <p class="positive">Link with ignored substring: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here (opens in new window)</a></p>
 
@@ -169,7 +170,7 @@
 
         <p class="positive"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">An informative video.</a></p>
 
-        <p class="negative">Link with inner download icon with aria-label: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">Click here <span aria-label="download">^</span></a></p>
+        <p class="negative">Link with inner download icon with aria-label: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">Aria label on inner span <span aria-label="download">^</span></a></p>
 
         <p class="negative"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">An informative video (opens in new window).</a></p>
 
@@ -184,7 +185,7 @@
 
         <p class="todo-positive"><a href="#" aria-hidden="true">Aria-hidden links without a negative tabindex.</a></p>
 
-        <p class="todo-positive"><a href="#"><span aria-hidden="true">Link with all text content aria-hidden.</span></a></p>
+        <p class="positive"><a href="#"><span aria-hidden="true">Link with all text content aria-hidden.</span></a></p>
 
         <p class="positive"><a href="#"><img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
         </a> linked image with empty alt.</p>
@@ -240,6 +241,7 @@
         <div class="negative"><p>Appeal</p></div>
         <div class="negative"><p>Apple</p></div>
         <div class="negative"><p>Bear</p></div>
+        <div class="negative"><p>A Bear</p><p>A turtle</p></div>
         <div><p class="positive">🥑 Fake lists with emoji</p><p class="negative">🍅 Oh tomato...</p><p class="negative">🦄 Shiny Unicorn</p>
           <p class="positive">⊙ Math symbol</p><p class="negative">⊙ Detect on repeat</p>
           <p class="positive">🚜 Now emoji again, with a line break<br>🛵 Any other emoji</p>

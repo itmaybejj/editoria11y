@@ -6,7 +6,7 @@
 
 * Update version numbers and copyright information
 * Run `npx eslint js` from the project root.
-* Generate the min.js [todo MVP: preserve license info] `uglifyjs js/{ed11y-localization,ed11y-element-alt,ed11y-element-panel,ed11y-element-result,ed11y-element-tip,ed11y-test-embeds,ed11y-test-headings,ed11y-test-images,ed11y-test-links,ed11y-test-text,ed11y}.js -c -m --output dist/editoria11y.min.js` 
+* Generate the min.js [todo MVP: preserve license info] `uglifyjs js/{ed11y-localization,ed11y-element-alt,ed11y-element-panel,ed11y-element-result,ed11y-element-tip,ed11y-test-embeds,ed11y-test-headings,ed11y-test-images,ed11y-test-links,ed11y-test-text,ed11y}.js -c -m --source-map  --output dist/editoria11y.min.js` 
 * remember there is a copy of the readme at index.md (with CSS)
 
 # Testing

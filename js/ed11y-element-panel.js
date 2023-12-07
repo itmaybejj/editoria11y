@@ -282,6 +282,13 @@ class Ed11yElementPanel extends HTMLElement {
         #outline li {
           padding: 5px;
         }
+        #outline a {
+          text-decoration: none;
+          display: block;
+        }
+        #outline a:hover {
+          text-decoration: underline;
+        }
         #alt-list li {
           display: flex;
           flex-wrap: wrap;
@@ -348,7 +355,7 @@ class Ed11yElementPanel extends HTMLElement {
     goto.setAttribute('data-ed11y-action','open');
 
     let gotoResult = Ed11y.results[goto.getAttribute('data-ed11y-result')];
-    let insert = gotoResult[3];
+    let insert = gotoResult.position;
     let target;
     // todo postpone this all belongs in the result open logic not here
     if (insert === 'beforebegin') {

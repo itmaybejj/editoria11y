@@ -40,20 +40,38 @@ class Ed11yTestHeadings {
           outlinePrefix += Ed11y.M.errorOutlinePrefixHeadingEmpty;
           error = 'headingEmpty';
           dismissKey = false; // redeclare in case of two errors.
-          alert.push([el, error, Ed11y.M.headingEmpty.tip(), position, dismissKey]);
+          alert.push({
+            element: el,
+            test: error,
+            content: Ed11y.M.headingEmpty.tip(),
+            position: position,
+            dismissalKey: dismissKey,
+          });
         }
       }
       else if (headingLength > 160) {
         outlinePrefix += Ed11y.M.errorOutlinePrefixHeadingIsLong;
         dismissKey = Ed11y.dismissalKey(level + headingText);
         error = 'headingIsLong',
-        alert.push([el, error, Ed11y.M.headingIsLong.tip(), position, dismissKey]);
+        alert.push({
+          element: el,
+          test: error,
+          content: Ed11y.M.headingIsLong.tip(),
+          position: position,
+          dismissalKey: dismissKey,
+        });
       }
       if (level - prevLevel > 1 && i !== 0) {
         dismissKey = Ed11y.dismissalKey(level + headingText);
         outlinePrefix += Ed11y.M.errorOutlinePrefixSkippedLevel;
         error = 'headingLevelSkipped';
-        alert.push([el, error, Ed11y.M.headingLevelSkipped.tip(prevLevel, level), position, dismissKey]);
+        alert.push({
+          element: el,
+          test: error,
+          content: Ed11y.M.headingLevelSkipped.tip(prevLevel, level),
+          position: position,
+          dismissalKey: dismissKey,
+        });
       }
       prevLevel = level;
 
@@ -78,7 +96,13 @@ class Ed11yTestHeadings {
         let dismissKey = Ed11y.dismissalKey(text);
         let error = 'blockquoteIsShort';
         let message = Ed11y.M.blockquoteIsShort.tip();
-        Ed11y.results.push([el, error, message, position, dismissKey]);
+        Ed11y.results.push({
+          element: el,
+          test: error,
+          content: message,
+          position: position,
+          dismissalKey: dismissKey,
+        });
       }
     });
   }

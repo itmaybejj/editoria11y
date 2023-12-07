@@ -13,7 +13,13 @@ class Ed11yTestEmbeds {
       video.forEach(el => {
         // Dismiss-able alert. False positive accepted on undefined sources.
         let dismissKey = Ed11y.dismissalKey(el?.getAttribute('src') !== 'undefined' ? el.getAttribute('src') : el.querySelector('[src]')?.getAttribute('src'));
-        Ed11y.results.push([el, 'embedVideo', Ed11y.M.embedVideo.tip(), 'beforebegin', dismissKey]);
+        Ed11y.results.push({
+          element: el,
+          test: 'embedVideo',
+          content: Ed11y.M.embedVideo.tip(),
+          position: 'beforebegin',
+          dismissalKey: dismissKey,
+        });
       });
     }
   
@@ -23,7 +29,13 @@ class Ed11yTestEmbeds {
       audio.forEach(el => {
         // Dismiss-able alert. False positive accepted on undefined sources.
         let dismissKey = Ed11y.dismissalKey(el?.getAttribute('src') !== 'undefined' ? el.getAttribute('src') : el.querySelector('[src]')?.getAttribute('src'));
-        Ed11y.results.push([el, 'embedAudio', Ed11y.M.embedAudio.tip(), 'beforebegin', dismissKey]);
+        Ed11y.results.push({
+          element: el,
+          test: 'embedAudio',
+          content: Ed11y.M.embedAudio.tip(),
+          position: 'beforebegin',
+          dismissalKey: dismissKey,
+        });
       });
     }
   
@@ -32,7 +44,13 @@ class Ed11yTestEmbeds {
       visualizations.forEach(el => {
         // Dismiss-able alert. False positive accepted on undefined sources.
         let dismissKey = Ed11y.dismissalKey(el.getAttribute('src'));
-        Ed11y.results.push([el, 'embedVisualization', Ed11y.M.embedVisualization.tip(), 'beforebegin', dismissKey]);
+        Ed11y.results.push({
+          element: el,
+          test: 'embedVisualization',
+          content: Ed11y.M.embedVisualization.tip(),
+          position: 'beforebegin',
+          dismissalKey: dismissKey,
+        });
       });
     }
   
@@ -43,7 +61,13 @@ class Ed11yTestEmbeds {
         let numberOfTweets = twit.querySelectorAll('.timeline-TweetList-tweet');
         if (!!numberOfTweets && numberOfTweets > 3) {
           let dismissKey = Ed11y.dismissalKey(twit.getAttribute('src'));
-          Ed11y.results.push([twit, 'embedTwitter', Ed11y.M.embedTwitter.tip(), 'beforebegin', dismissKey]);
+          Ed11y.results.push({
+            element: twit,
+            test: 'embedTwitter',
+            content: Ed11y.M.embedTwitter.tip(),
+            position: 'beforebegin',
+            dismissalKey: dismissKey,
+          });
         }
       });
     }
@@ -51,7 +75,13 @@ class Ed11yTestEmbeds {
     if (Ed11y.options.embeddedContent) {
       Ed11y.elements.embed?.forEach((el) => {
         let dismissKey = Ed11y.dismissalKey(el.getAttribute('src') + el.getAttribute('id') + el.getAttribute('class'));
-        Ed11y.results.push([el, 'embedCustom', Ed11y.M.embedCustom.tip(), 'beforebegin', dismissKey]);
+        Ed11y.results.push({
+          element: el,
+          test: 'embedCustom',
+          content: Ed11y.M.embedCustom.tip(),
+          position: 'beforebegin',
+          dismissalKey: dismissKey,
+        });
       });
     }
   

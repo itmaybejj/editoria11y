@@ -19,6 +19,13 @@
             
             
         </section>
+
+        <section id="Custom tests">
+            <h2 id="customtest">Custom tests</h2>
+            <div class="positive">
+                <a href="https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwds.princeton.edu%2F">Safelink</a>
+            </div>
+        </section>
         
         <section id="Exclusions">
 
@@ -27,7 +34,7 @@
                 <h4 style="background: silver; padding: 1em; font-size: 14px;">This editor-only utility heading will be skipped in the outline</h3>
             </div>
 
-            <h3>Accessible name calculation with SVG
+            <h3>Accessible name calculation in outline excluding hidden text <noscript>No script</noscript><style>.css-example {display: block;}</style>
                 <span class="prefix-icon">
                   <svg role="presentation" aria-hidden="true" id="Layer_1" data-name="Layer 1"
                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25.01 23.51">
@@ -79,7 +86,7 @@
 
         <section id="name-calculation">
 
-            <h2 id="name calc">Accessible name calculation</h2>
+            <h2 id="namecalc">Accessible name calculation</h2>
 
             <h3>Pseudo selectors in a link</h3>
             <div class="positive">Link with SVG image with multiple labels, one should be ignored: 
@@ -102,7 +109,7 @@
             <div class="negative">OK via aria-labelledby to another element: <a id="inner-svg-titles-ok-by-label" aria-labelledby="titled-link" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>Click</title></circle>
                 <rect x="11" y="1" width="8" height="8"><title>here</title></rect></svg></a></div>
-            <div class="positive">Bad via recursive aria-labelledby: <a id="recursive-svg-click-here" aria-labelledby="recursive-svg-click-here" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="positive">Bad via recursive aria-labelledby: <a id="recursive-svg-click-here" aria-labelledby="recursive-svg-click-here click-in-css" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>Click</title></circle>
                 </svg> here</a></div>
             <div class="negative">Good via inner aria-labelled element: <a id="recursive-svg-inner-label" aria-labelledby="recursive-svg-inner-label" href="#"><svg aria-label="meaningful link" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
@@ -133,6 +140,43 @@
                     let pop = Ed11y.findElements('hiddenPop',`#ed11y-result-${e.detail.result}`);
                     Ed11y.elements['hiddenPop'][0].closest('[hidden]')?.removeAttribute('hidden');
                 }, false);
+                
+                const decodeSafelink = function(url) {
+                    const params = new URL(url).searchParams;
+                    let decoded = params.get('url');
+                    if (!!decoded) {
+                        decoded = Ed11y.sanitizeForHTML(decoded);
+                        return `<p>The actual URL may be:<br><em style='word-wrap: break-word;'>${decoded}</em></p>`
+                    }
+                    return '';
+                }
+                document.addEventListener('ed11yRunCustomTests', function() {
+                    Ed11y.findElements('safeLinks','a[href*="safelinks.protection.outlook.com/?"]');
+                    Ed11y.M.outlookSafeLink = {
+                        title: 'URL is an Outlook Safelink',
+                        tip: (href) => 
+                            `<p>The URL for this link has been copied from an email, and will bounce all clicks through the Microsoft Safelinks server.</p>
+                            <p>The specified URL is:<br><em style='word-break: break-all;'>${Ed11y.sanitizeForHTML(href)}</em></p>
+                            ${decodeSafelink(href)}
+                                `,
+                    };
+                    Ed11y.elements.safeLinks?.forEach((el) => {
+                        Ed11y.results.push({
+                            element: el,
+                            test: 'outlookSafeLink',
+                            content: Ed11y.M.outlookSafeLink.tip(el.getAttribute('href')),
+                            position: 'beforebegin',
+                            dismissalKey: false,
+                        })
+                    })
+                    let allDone = new CustomEvent('ed11yResume');
+                    document.dispatchEvent(allDone);
+                    document.dispatchEvent(allDone);
+                    })
+
+
+
+
                 const ed11y = new Ed11y({
                     alertMode : 'assertive',
                     ignoreByKey : {
@@ -143,6 +187,8 @@
                     hiddenHandlers : '[hidden]',
                     checkRoots : 'body',
                     linkIgnoreStrings: '\(link is external\)',
+                    customTests : 2,
+                    theme: 'sleekTheme',
                 });
             </script>
             
