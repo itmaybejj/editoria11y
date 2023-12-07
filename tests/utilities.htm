@@ -145,7 +145,8 @@
                     const params = new URL(url).searchParams;
                     let decoded = params.get('url');
                     if (!!decoded) {
-                        return `<p>The actual URL may be:<br><em>"${decoded}"</em></p>`
+                        decoded = Ed11y.sanitizeForHTML(decoded);
+                        return `<p>The actual URL may be:<br><em style='word-wrap: break-word;'>${decoded}</em></p>`
                     }
                     return '';
                 }
@@ -155,7 +156,7 @@
                         title: 'URL is an Outlook Safelink',
                         tip: (href) => 
                             `<p>The URL for this link has been copied from an email, and will bounce all clicks through the Microsoft Safelinks server.</p>
-                            <p>The specified URL is:<br><em>"${href}"</em></p>
+                            <p>The specified URL is:<br><em style='word-break: break-all;'>${Ed11y.sanitizeForHTML(href)}</em></p>
                             ${decodeSafelink(href)}
                                 `,
                     };

@@ -1327,7 +1327,9 @@ class Ed11y {
           }
           continue;
         case 'IMG':
-          computedText += treeWalker.currentNode.getAttribute('alt');
+          if (treeWalker.currentNode.hasAttribute('alt')) {
+            computedText += treeWalker.currentNode.getAttribute('alt');
+          }
           continue;
         case 'SVG':
         case 'svg':

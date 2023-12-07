@@ -196,13 +196,6 @@ class Ed11yElementResult extends HTMLElement {
     }
   }
 
-  tipDOM(id, title, body) {
-    return `>
-      <div class="title" id="tip-title-${id}">${title}</div>
-      <div class="message">${body}</div>
-    `;
-  }
-
   buildTip() {
     this.tipNeedsBuild = false;
 

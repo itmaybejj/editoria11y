@@ -328,14 +328,6 @@ class Ed11yElementTip extends HTMLElement {
     this.setAttribute('data-ed11y-open',changeTo);   
   }
 
-  tipDOM (id, title, body) {
-    return `>
-      <div class="title" id="tip-title-${id}">${title}</div>
-      <div class="message">${body}</div>
-    `;
-  }
-
-
   static get observedAttributes() { return ['data-ed11y-action']; }
 
   attributeChangedCallback(attr, oldValue, newValue) {
