@@ -30,7 +30,7 @@ class Ed11yTestText {
       let secondText = false;
       let hit = false;
       if (!firstText) {
-        firstText = Ed11y.getText(p);
+        firstText = Ed11y.getText(p).replace('(','');
         firstPrefix = firstText.substring(0, 2);
       }
       // Grab first two characters.
@@ -39,7 +39,7 @@ class Ed11yTestText {
         // We have a prefix and a possible hit; check next detected paragraph.
         let secondP = Ed11y.elements.p[i + 1];
         compareP: if (secondP) {
-          secondText = Ed11y.getText(secondP).substring(0, 2);
+          secondText = Ed11y.getText(secondP).replace('(','').substring(0, 2);
           if (secondText === 'A') {
             // A sentence. A nother sentence.
             break compareP;
@@ -65,7 +65,7 @@ class Ed11yTestText {
           // todo: this is not detected if the element after the BR has rich formatting
           let textAfterBreak = p?.querySelector('br')?.nextSibling?.nodeValue;
           if (textAfterBreak) {
-            textAfterBreak = textAfterBreak.replace(/<\/?[^>]+(>|$)/g, '').trim().substring(0, 2);
+            textAfterBreak = textAfterBreak.replace(/<\/?[^>]+(>|$)/g, '').replace('(','').trim().substring(0, 2);
             if (firstPrefix === decrement(textAfterBreak) || (!matchWasntEmoji && !lastHitWasEmoji && textAfterBreak.match(emojiMatch))) {
               hit = true;
             }

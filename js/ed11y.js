@@ -225,7 +225,6 @@ class Ed11y {
 
 
           // Create test class objects
-          // todo postpone: dispatch event to load an array of custom test results
           Ed11y.testEmbeds = new Ed11yTestEmbeds;
           Ed11y.testHeadings = new Ed11yTestHeadings;
           Ed11y.testImages = new Ed11yTestImages;

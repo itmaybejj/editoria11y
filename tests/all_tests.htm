@@ -231,17 +231,27 @@
 
         <div><p>a. Fake lists</p><p>b. use letters or numbers.</p><p>c. rather than real formatting.</p></div>
         <div><p class="positive">1. Fake lists<br>2. Sometimes use<br>BR instead of P tags.</p></div>
+        
         <div><p class="positive">* Fake lists</p><p class="negative">* Should only</p><p class="negative">* be flagged</p><p class="negative">* one time.</p></div>
+        <div><p class="positive"><p><p>(a) apple<br>
+          (b) banana<br>
+          (c) pear</p></div>
         <div>
             <p class="positive">1. This is split</p>
             <hr><p>2. with HR</p>
             <hr><p>3. but non-contiguous p are detected.</p>
+        </div>
+        <div>
+          <p class="positive">(1) A parenthesis list</p>
+          <p class="negative">(2) Two</p>
+          <p>(3) Three</p>
         </div>
         <div class="negative"><p>Apple</p></div>
         <div class="negative"><p>Appeal</p></div>
         <div class="negative"><p>Apple</p></div>
         <div class="negative"><p>Bear</p></div>
         <div class="negative"><p>A Bear</p><p>A turtle</p></div>
+        <div class="negative"><p>Aardvark</p><p>Bad</p></div>
         <div><p class="positive">🥑 Fake lists with emoji</p><p class="negative">🍅 Oh tomato...</p><p class="negative">🦄 Shiny Unicorn</p>
           <p class="positive">⊙ Math symbol</p><p class="negative">⊙ Detect on repeat</p>
           <p class="positive">🚜 Now emoji again, with a line break<br>🛵 Any other emoji</p>
