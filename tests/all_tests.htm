@@ -296,6 +296,10 @@
         <section class="shadow-root">
             <h2 id="shadow-root-3">Shadow root handling 3</h2>
         </section>
+
+        <section id="all-tests">
+          <h2 id="all-tests-heading">All tips</h2>
+        </section>
     </main>
     <footer><div class="negative"><h6>Heading level skip in footer should not be flagged.</h6></div></footer>
 
@@ -395,6 +399,18 @@
             //ignoreAllIfPresent : 'main',
             //preventCheckingIfAbsent : 'maian',
           });
+
+          let inject = document.querySelector('#all-tests');
+          for (const [key, value] of Object.entries(Ed11y.M)) {
+            if (value.title && typeof value.tip()) {
+              let item = document.createElement('div');
+              item.innerHTML = value.tip('example');
+              let title = document.createElement('h3');
+              title.prepend(value.title);
+              item.prepend(title);
+              inject.append(item);
+            };
+          }
         </script>
 
     </div>

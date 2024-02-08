@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.1.0';
+    Ed11y.version = '2.1.1';
 
     let defaultOptions = {
 
@@ -51,13 +51,14 @@ class Ed11y {
       ignoreAllIfAbsent: false,
       ignoreAllIfPresent: false,
 
-      // Disable checker altogother if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
+      // Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
       preventCheckingIfPresent: false,
       preventCheckingIfAbsent: false,
 
       // Regex of strings to remove from links before checking to see if link titles are meaningful. E.g.:
       // "\(link is external\)|\(link sends email\)"
       linkIgnoreStrings: false,
+      linkIgnoreSelector: false,
 
       // Disable the "is this element visible" check on themes that have 0-height elements.
       checkVisible: true,
@@ -1252,10 +1253,10 @@ class Ed11y {
     };
 
     // Subset of the W3C accessible name algorithm.
-    Ed11y.computeText = function (el, recursing = 0) {
+    Ed11y.computeText = function (el, recursing = 0, excludeLinkClasses = false) {
       
       // Return immediately if there is an aria label.
-      let hasAria = Ed11y.computeAriaLabel(el, recursing);
+      let hasAria = Ed11y.computeAriaLabel(el, recursing, excludeLinkClasses);
       if (hasAria !== 'noAria') {
         return hasAria;
       }
@@ -1286,6 +1287,15 @@ class Ed11y {
         
         if (treeWalker.currentNode.nodeType === Node.TEXT_NODE) {
           computedText += ' ' + treeWalker.currentNode.nodeValue;
+          continue;
+        }
+
+        // Jump over ignored link text containers.
+        // e.g., "(link opens in new window)"
+        if (excludeLinkClasses && treeWalker.currentNode.matches(Ed11y.options.linkIgnoreSelector)) {
+          if (!Ed11y.nextTreeBranch(treeWalker)) {
+            break walker;
+          }
           continue;
         }
         

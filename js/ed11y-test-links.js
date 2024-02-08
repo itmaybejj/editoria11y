@@ -8,9 +8,10 @@ class Ed11yTestLinks {
     // todo: See if there is an alternative to :visible that shows only visually hidden content.
     // todo later: Add test for consecutive links to same href?
     // todo later: parameterize stopwords as in Sa11y
+
     Ed11y.elements.a?.forEach((el) => {
       // todo: replace with full accessible name calculation
-      let linkText = Ed11y.computeText(el); // returns text or 'noAria';
+      let linkText = Ed11y.computeText(el, 0, !!Ed11y.options.linkIgnoreSelector); // returns text or 'noAria';
       let img = el.querySelectorAll('img');
       let hasImg = img.length > 0;
       let document = false;
