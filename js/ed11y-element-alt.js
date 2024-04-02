@@ -43,7 +43,7 @@ class Ed11yElementAlt extends HTMLElement {
         .warning { background: ${Ed11y.theme.warning}; color: #111;}
         .error { background: ${Ed11y.theme.bgHighlight};}
       `;
-      style.textContent = Ed11y.options.baseCSS + altCSS + Ed11y.options.altCSS;
+      style.textContent = Ed11y.baseCSS + altCSS + Ed11y.options.altCSS;
       shadow.appendChild(style);
       shadow.appendChild(altTextWrapper);
       this.initialized = true;

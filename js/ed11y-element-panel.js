@@ -76,7 +76,7 @@ class Ed11yElementPanel extends HTMLElement {
           box-shadow: 0 0 0 3px ${Ed11y.theme.bg}, 0 0 0 4px ${Ed11y.theme.text};
         }
         .ed11y-small {
-          font-size: 13px;
+          font-size: .93em;
           opacity: .9;
         }
         a {
@@ -113,7 +113,7 @@ class Ed11yElementPanel extends HTMLElement {
           color: ${Ed11y.theme.primaryText};
           padding: 7px 4px;
           font-family: inherit;
-          font-size: 11px;
+          font-size: .7857em;
           font-weight: 500;
           border: 0;
           border-right: 1px solid ${Ed11y.theme.primaryText}55;
@@ -171,7 +171,7 @@ class Ed11yElementPanel extends HTMLElement {
           border: 0;
           min-width: 3.27em;
           height: 3.27em;
-          font-size: clamp(11px, 2vw, 16px);
+          font-size: clamp(.7857em, 2vw, 1.07em);
         }
         .pass.shut #toggle {
           background: ${Ed11y.theme.primary};
@@ -316,7 +316,7 @@ class Ed11yElementPanel extends HTMLElement {
       wrapper.setAttribute('class','wrapper');
       wrapper.innerHTML = this.template();
       let style = document.createElement('style');
-      style.textContent = Ed11y.options.baseCSS + this.panelCSS + Ed11y.options.panelCSS;
+      style.textContent = Ed11y.baseCSS + this.panelCSS + Ed11y.options.panelCSS;
       shadow.appendChild(style);
       shadow.appendChild(wrapper);
       Ed11y.panel = wrapper;
@@ -463,7 +463,7 @@ class Ed11yElementHeadingLabel extends HTMLElement {
           font-size: ${fontSize}px;
         }
       `;
-      style.textContent = Ed11y.options.baseCSS + headingCSS + Ed11y.options.headingCSS;
+      style.textContent = Ed11y.baseCSS + headingCSS + Ed11y.options.headingCSS;
       shadow.appendChild(style);
       shadow.appendChild(wrapper);
       this.initialized = true;

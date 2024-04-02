@@ -44,9 +44,7 @@ class Ed11yElementTip extends HTMLElement {
           width: 1px;
           height: 1px;
           overflow: visible;
-          color: ${Ed11y.theme.text};
-          font-size: 14px;
-        }
+          color: ${Ed11y.theme.text};        }
         .arrow {
           display: none;
           content: "";
@@ -101,10 +99,9 @@ class Ed11yElementTip extends HTMLElement {
         .title {
           background: ${Ed11y.theme.primary};
           color: ${Ed11y.theme.primaryText};
-          padding: 2px 35px 3px 14px;
+          padding: .143em 35px .214em 14px;
           font-weight: bold;
-          font-size: 14px;
-          min-height: 28px;
+          min-height: 2em;
           line-height: 1;
           display: grid;
           place-content: center left;
@@ -125,7 +122,7 @@ class Ed11yElementTip extends HTMLElement {
           border: 0;
           background: inherit;
           font-family: inherit;
-          font-size: 11px;
+          font-size: .7857em;
           font-weight: 600;
           text-align: center;
           cursor: pointer;
@@ -161,9 +158,9 @@ class Ed11yElementTip extends HTMLElement {
         }
         .close {
           padding: 0 0 0 2px;
-          font-size: 14px;
+          font-size: 1em;
           line-height: 1;
-          height: 36px;
+          height: 2.5174em;
           display: grid;
           place-content: center;
           font-weight: 400;
@@ -172,7 +169,7 @@ class Ed11yElementTip extends HTMLElement {
           right: -2px;
           box-shadow: -1px 0 ${Ed11y.theme.bg};
           background: transparent;
-          width: 32px;
+          width: 2.286em;
         }
         .close:hover {
           background: ${Ed11y.theme.bg}cc;
@@ -202,7 +199,7 @@ class Ed11yElementTip extends HTMLElement {
           box-shadow: inset 0 0 0 2px ${Ed11y.theme.focusRing}, 0 0 0 3px ${Ed11y.theme.primary};
         }
       `;
-      style.textContent = Ed11y.options.baseCSS + tipCSS + Ed11y.options.tipCSS;
+      style.textContent = Ed11y.baseCSS + tipCSS + Ed11y.options.tipCSS;
 
       this.tip = document.createElement('div');
       this.tip.classList.add('tip');

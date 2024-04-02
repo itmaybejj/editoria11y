@@ -135,12 +135,10 @@ class Ed11y {
       // Base z-index for buttons.
       buttonZIndex: 9999,
       // Custom CSS
+      baseFontSize: 14, // px
+      baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
+      baseCSS: '',
       altCSS: '',
-      baseCSS: `
-        :host{all: initial;} 
-        .hidden{display:none;}
-        .wrapper{font-size:14px;line-height: 1.5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
-      `,
       highlightCSS: '',
       panelCSS: '',
       resultCSS: '',
@@ -181,6 +179,15 @@ class Ed11y {
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
     }
+    Ed11y.baseCSS = `
+        :host{all: initial;}.hidden{display:none;}
+        .wrapper {
+         font-size:${Ed11y.options.baseFontSize}px;
+         line-height: 1.5;
+         font-family:${Ed11y.options.baseFontFamily};
+         }
+         ${Ed11y.options.baseCSS}
+      `;
     Ed11y.elements = [];
     Ed11y.onLoad = true;
     Ed11y.showPanel = 'show';
@@ -852,16 +859,17 @@ class Ed11y {
       let windowBottom = scrollTop + window.innerHeight;
 
       let direction = 'under';
+
       // Default to displaying under
-      if (buttonOffset.top + tipHeight + scrollTop + 50 > windowBottom) {
+      if (buttonOffset.top + tipHeight + scrollTop + buttonOffset.height + 22 > windowBottom) {
         // If there's no room under in the viewport...
-        if (windowWidth > tipWidth * 1.5 && windowWidth - (buttonLeft + tipWidth + 90) > 0 && buttonOffset.top + 130 < window.innerHeight) {
+        if (windowWidth > tipWidth * 1.5 && windowWidth - (buttonLeft + tipWidth + buttonOffset.width + 56) > 0 && buttonOffset.top + 130 < window.innerHeight) {
           direction = 'right';
         } else if (buttonOffset.top > tipHeight + 15) {
           direction = 'above';
         } else if (windowWidth > tipWidth * 1.5 && buttonLeft - tipWidth - 50 > 0) {
           direction = 'left';
-        } else if (buttonOffset.bottom + tipHeight > document.documentElement.clientHeight - 50) {
+        } else if (buttonOffset.bottom + tipHeight > document.documentElement.clientHeight - 50 && window.innerHeight > buttonOffset.height + tipHeight) {
           // No room anywhere in viewport we're at the end of the page.
           direction = 'above';
         }
@@ -875,37 +883,40 @@ class Ed11y {
         // Pin to the left edge, unless the tip is not wide enough to reach:
         if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
-          if (tipWidth - 15 > buttonOffset.left) {
-            nudgeX = 15 - buttonOffset.left;
+          if (tipWidth - ((buttonOffset.width / 2) - 1) > buttonOffset.left) {
+            // Under, overhang to left
+            nudgeX = (buttonOffset.width / 2) - 1 - buttonOffset.left;
             arrow.style.setProperty('left', Math.max(buttonOffset.left, 15) - 9 + 'px');
           } else {
             arrow.style.setProperty('left', tipWidth - 26 + 'px');
-            nudgeX = 31 - tipWidth;
+            nudgeX = buttonOffset.width / 2 + 15 - tipWidth;
           }
         } else {
-          nudgeX = 40 - tipWidth / 5;
-          arrow.style.setProperty('left', tipWidth / 5 - 34 + 'px');
+          // Under, overhang to right
+          nudgeX = buttonOffset.width + 8 - tipWidth / 5;
+          arrow.style.setProperty('left', tipWidth / 5 - (buttonOffset.width / 2) - 18 + 'px');
         }
 
         arrow.dataset.direction = 'under';
-        nudgeY = 50;
+        nudgeY = buttonOffset.height + 16;
       }
       else if (direction === 'above') {
         // Slide left or right to center tip on page.
-        nudgeY = -1 * (tipHeight + 15 + Ed11y.theme.outlineWidth);
+        nudgeY = -1 * (tipHeight + 13 + Ed11y.theme.outlineWidth);
         arrow.style.setProperty('top', tipHeight);
         if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
-          if (tipWidth - 15 > buttonOffset.left) {
-            nudgeX = 15 - buttonOffset.left;
+          if (tipWidth - ((buttonOffset.width / 2) - 1) > buttonOffset.left) {
+            // Under, overhand to left
+            nudgeX = ((buttonOffset.width / 2) - 1) - buttonOffset.left;
             arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
           } else {
             arrow.style.setProperty('left', tipWidth - 26 + 'px');
-            nudgeX = 31 - tipWidth;
+            nudgeX = buttonOffset.width / 2 + 15 - tipWidth;
           }
         } else {
-          nudgeX = 40 - tipWidth / 5;
-          arrow.style.setProperty('left', tipWidth / 5 - 34 + 'px');
+          nudgeX = buttonOffset.width + 8 - tipWidth / 5;
+          arrow.style.setProperty('left', tipWidth / 5 - (buttonOffset.width / 2) - 18 + 'px');
         }
         arrow.dataset.direction = 'above';
         arrow.style.setProperty('top', `${tipHeight + 15 + Ed11y.theme.outlineWidth}px`);
@@ -921,11 +932,11 @@ class Ed11y {
         }
         if (direction === 'left') {
           nudgeX = 0 - (tipWidth + 17);
-          arrow.style.setProperty('left', `${tipWidth - 9}px`);
+          arrow.style.setProperty('left', `${tipWidth - 10}px`);
           arrow.dataset.direction = 'left';
         } else {
           // direction is right
-          nudgeX = 50;
+          nudgeX = buttonOffset.width + 14;
           arrow.dataset.direction = 'right';
         }
       }

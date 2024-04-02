@@ -55,8 +55,8 @@ class Ed11yElementResult extends HTMLElement {
           z-index: ${Ed11y.options.buttonZIndex};
         }
         .wrapper {
-          width: 44px;
-          height: 44px;
+          width: 3.14em;
+          height: 3.14em;
           overflow: visible;
           color: ${Ed11y.theme.text};
         }
@@ -65,7 +65,7 @@ class Ed11yElementResult extends HTMLElement {
           border: 0;
           background: inherit;
           font-family: inherit;
-          font-size: 11px;
+          font-size: .786em;
           font-weight: 600;
           text-align: center;
           cursor: pointer;
@@ -82,17 +82,18 @@ class Ed11yElementResult extends HTMLElement {
           padding: 0;
           vertical-align: middle;
           cursor: pointer;
-          width: 32px;
-          height: 32px;
+          width: 2em;
+          height: 2em;
           line-height: 1;
-          font-size: 16px;
+          font-size: 1.14em;
+          font-size: clamp(1.14em, 2vw, 1.5em);
         }
         button:focus-visible {
           outline: 2px solid transparent;
           box-shadow: inset 0 0 0 2px ${Ed11y.theme.focusRing}, 0 0 0 3px ${Ed11y.theme.primary};
         }
       `;
-      style.textContent = Ed11y.options.baseCSS + icon + resultCSS + Ed11y.options.resultCSS;
+      style.textContent = Ed11y.baseCSS + icon + resultCSS + Ed11y.options.resultCSS;
       shadow.appendChild(style);
       shadow.appendChild(this.wrapper);
       this.initialized = true;
