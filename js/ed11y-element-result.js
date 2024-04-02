@@ -43,7 +43,8 @@ class Ed11yElementResult extends HTMLElement {
       // Create CSS with embedded icon
       const style = document.createElement('style');
       let icon = this.toggleImage();
-      style.textContent = Ed11y.baseCSS + icon + `
+
+      const resultCSS = `
         :host {
           position: absolute;
           opacity: 0;
@@ -91,6 +92,7 @@ class Ed11yElementResult extends HTMLElement {
           box-shadow: inset 0 0 0 2px ${Ed11y.theme.focusRing}, 0 0 0 3px ${Ed11y.theme.primary};
         }
       `;
+      style.textContent = Ed11y.options.baseCSS + icon + resultCSS + Ed11y.options.resultCSS;
       shadow.appendChild(style);
       shadow.appendChild(this.wrapper);
       this.initialized = true;

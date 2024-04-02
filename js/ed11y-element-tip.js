@@ -6,7 +6,7 @@ class Ed11yElementTip extends HTMLElement {
 
   connectedCallback() {
     if (!this.initialized) {
-      
+
       this.open = true;
       this.setAttribute('style', 'outline: 0px solid transparent;');
       const shadow = this.attachShadow({mode: 'open'});
@@ -17,7 +17,7 @@ class Ed11yElementTip extends HTMLElement {
 
       this.wrapper = document.createElement('div');
       this.wrapper.setAttribute('role', 'dialog');
-      
+
       this.dismissable = !!this.result.dismissalKey;
       this.dismissed = !!this.result.dismissalStatus;
       this.wrapper.classList.add('wrapper');
@@ -27,7 +27,7 @@ class Ed11yElementTip extends HTMLElement {
 
       // Create CSS with embedded icon
       const style = document.createElement('style');
-      style.textContent = Ed11y.baseCSS + `
+      const tipCSS = `
         :host {
           position: absolute;
           top: 10vh;
@@ -202,7 +202,8 @@ class Ed11yElementTip extends HTMLElement {
           box-shadow: inset 0 0 0 2px ${Ed11y.theme.focusRing}, 0 0 0 3px ${Ed11y.theme.primary};
         }
       `;
-      
+      style.textContent = Ed11y.options.baseCSS + tipCSS + Ed11y.options.tipCSS;
+
       this.tip = document.createElement('div');
       this.tip.classList.add('tip');
       this.tip.setAttribute('aria-labelledby', 'tip-title-' + [this.resultID]);
@@ -219,7 +220,7 @@ class Ed11yElementTip extends HTMLElement {
       if (this.dismissable) {
         let dismissers = document.createElement('div');
         let dismissHelp = false;
-        
+
         // Dismissal Key is set in [5] if alert has been dismissed.
         if (Ed11y.options.showDismissed && this.dismissed) {
           // Check if user has permission to reset this alert.
@@ -325,7 +326,7 @@ class Ed11yElementTip extends HTMLElement {
     } else {
       this.wrapper.classList.remove('open');
     }
-    this.setAttribute('data-ed11y-open',changeTo);   
+    this.setAttribute('data-ed11y-open',changeTo);
   }
 
   static get observedAttributes() { return ['data-ed11y-action']; }

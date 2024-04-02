@@ -12,13 +12,13 @@ class Ed11yElementAlt extends HTMLElement {
       altTextWrapper.setAttribute('class','wrapper');
       let img = Ed11y.imageAlts[this.dataset.ed11yImg];
       // img[el, src, altLabel, altStyle]
-     
+
       let altSpan = document.createElement('span');
       altSpan.textContent = img[2];
       altSpan.classList.add(img[3]);
       altTextWrapper.appendChild(altSpan);
       const style = document.createElement('style');
-      style.textContent = Ed11y.baseCSS + `
+      const altCSS = `
         :host {
           position: absolute;
         }
@@ -43,6 +43,7 @@ class Ed11yElementAlt extends HTMLElement {
         .warning { background: ${Ed11y.theme.warning}; color: #111;}
         .error { background: ${Ed11y.theme.bgHighlight};}
       `;
+      style.textContent = Ed11y.options.baseCSS + altCSS + Ed11y.options.altCSS;
       shadow.appendChild(style);
       shadow.appendChild(altTextWrapper);
       this.initialized = true;

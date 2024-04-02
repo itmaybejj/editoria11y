@@ -51,13 +51,8 @@ class Ed11yElementPanel extends HTMLElement {
 
   connectedCallback() {
     if (!this.initialized) {
-      this.setAttribute('style', 'outline: 0;');
-      const shadow = this.attachShadow({mode: 'open'});
-      let wrapper = document.createElement('div');
-      wrapper.setAttribute('class','wrapper');
-      wrapper.innerHTML = this.template();
-      let style = document.createElement('style');
-      style.textContent = Ed11y.baseCSS + `
+
+      this.panelCSS = `
         :host {
           position: fixed;
           right: 1%;
@@ -171,14 +166,14 @@ class Ed11yElementPanel extends HTMLElement {
         }
         .shut #toggle {
           display: block;
-          min-width: 36px;
-          height: 36px;
           border-radius: 100%;
           padding: 8px;
           border: 0;
+          min-width: 3.27em;
+          height: 3.27em;
+          font-size: clamp(11px, 2vw, 16px);
         }
         .pass.shut #toggle {
-          font-size: 16px;
           background: ${Ed11y.theme.primary};
           color: ${Ed11y.theme.primaryText};
           line-height: 1;
@@ -314,6 +309,14 @@ class Ed11yElementPanel extends HTMLElement {
           position: absolute;
         }
       `;
+
+      this.setAttribute('style', 'outline: 0;');
+      const shadow = this.attachShadow({mode: 'open'});
+      let wrapper = document.createElement('div');
+      wrapper.setAttribute('class','wrapper');
+      wrapper.innerHTML = this.template();
+      let style = document.createElement('style');
+      style.textContent = Ed11y.options.baseCSS + this.panelCSS + Ed11y.options.panelCSS;
       shadow.appendChild(style);
       shadow.appendChild(wrapper);
       Ed11y.panel = wrapper;
@@ -443,7 +446,7 @@ class Ed11yElementHeadingLabel extends HTMLElement {
       wrapper.classList.add('issue' + issues);
       let style = document.createElement('style');
       let fontSize = Math.max(52 - 8 * result[1], 12);
-      style.textContent = Ed11y.baseCSS + `
+      let headingCSS = `
         :host {
           position: absolute;
           margin-top:-.5em;
@@ -460,6 +463,7 @@ class Ed11yElementHeadingLabel extends HTMLElement {
           font-size: ${fontSize}px;
         }
       `;
+      style.textContent = Ed11y.options.baseCSS + headingCSS + Ed11y.options.headingCSS;
       shadow.appendChild(style);
       shadow.appendChild(wrapper);
       this.initialized = true;

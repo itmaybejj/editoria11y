@@ -134,6 +134,17 @@ class Ed11y {
       },
       // Base z-index for buttons.
       buttonZIndex: 9999,
+      // Custom CSS
+      altCSS: '',
+      baseCSS: `
+        :host{all: initial;} 
+        .hidden{display:none;}
+        .wrapper{font-size:14px;line-height: 1.5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
+      `,
+      highlightCSS: '',
+      panelCSS: '',
+      resultCSS: '',
+      tipCSS: '',
 
       // Test customizations
       embeddedContent: false, // todo remove in favor of custom checks
@@ -165,6 +176,7 @@ class Ed11y {
       ...ed11yLang['en'],
       ...ed11yLang[Ed11y.options.lang]
     };
+
     Ed11y.theme = Ed11y.options[Ed11y.options.theme];
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
@@ -299,7 +311,7 @@ class Ed11y {
           });
 
           if (Ed11y.options.customTests > 0) {
-            // Pause 
+            // Pause
             Ed11y.customTestsRunning = true;
             Ed11y.customTestsFinished = 0;
             document.addEventListener('ed11yResume', function () {
@@ -331,7 +343,7 @@ class Ed11y {
             Ed11y.updatePanel();
           }, 0);
         }
-        
+
       }
       else {
         Ed11y.reset();
@@ -491,7 +503,7 @@ class Ed11y {
 
     // Place markers on elements with issues
     Ed11y.result = function (result, index) {
-      /* old array to new object map: 
+      /* old array to new object map:
         // [0] element
         // [1] test
         // [2] content
@@ -772,8 +784,7 @@ class Ed11y {
     };
 
     Ed11y.paintReady = function () {
-      let ed11yStyle =
-        `ed11y-element-result, ed11y-element-panel {
+      const highlightCSS = `ed11y-element-result, ed11y-element-panel {
               opacity: 1; 
               outline: 0 !important;
             }
@@ -790,9 +801,9 @@ class Ed11y {
               outline: 2px solid ${Ed11y.theme.warning};
               outline-offset: 1px;
             }
-            `;
+          `;
       let inlineStyle = document.createElement('style');
-      inlineStyle.textContent = ed11yStyle;
+      inlineStyle.textContent = highlightCSS + Ed11y.options.highlightCSS;
       document.querySelector('body')?.appendChild(inlineStyle);
       Ed11y.roots.forEach((root) => {
         // Shadow elements don't inherit styles, so they need their own copy.
@@ -922,11 +933,6 @@ class Ed11y {
 
     };
 
-    Ed11y.baseCSS = `
-      :host{all: initial;} 
-      .hidden{display:none;}
-      .wrapper{font-size:14px;line-height: 1.5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
-      `;
     Ed11y.clickTab = function (event) {
       Ed11y.activateTab(event.target, false);
     };
@@ -1254,7 +1260,7 @@ class Ed11y {
 
     // Subset of the W3C accessible name algorithm.
     Ed11y.computeText = function (el, recursing = 0, excludeLinkClasses = false) {
-      
+
       // Return immediately if there is an aria label.
       let hasAria = Ed11y.computeAriaLabel(el, recursing, excludeLinkClasses);
       if (hasAria !== 'noAria') {
@@ -1277,14 +1283,14 @@ class Ed11y {
         el,
         NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT
       );
-      
+
       let addTitleIfNoName = false;
       let aText = false;
       let count = 0;
 
       walker: while (treeWalker.nextNode()) {
         count++;
-        
+
         if (treeWalker.currentNode.nodeType === Node.TEXT_NODE) {
           computedText += ' ' + treeWalker.currentNode.nodeValue;
           continue;
@@ -1298,7 +1304,7 @@ class Ed11y {
           }
           continue;
         }
-        
+
         // Use link title as text if there was no text in the link.
         // Todo: in theory this could attach the title to the wrong node.
         if (addTitleIfNoName && !treeWalker.currentNode.closest('a')) {
@@ -1308,7 +1314,7 @@ class Ed11y {
           addTitleIfNoName = false;
           aText = false;
         }
-        
+
         if (treeWalker.currentNode.hasAttribute('aria-hidden') && !(recursing && count < 3)) {
           // Ignore elements and children, except when directly aria-referenced.
           // W3C name calc 2 is more complicated than this, but this is good enough.
@@ -1370,7 +1376,7 @@ class Ed11y {
       if (addTitleIfNoName && !aText) {
         computedText += ' ' + addTitleIfNoName;
       }
-      
+
       if (!computedText.trim() && el.hasAttribute('title')) {
         return el.getAttribute('title');
       }
