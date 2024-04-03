@@ -134,15 +134,15 @@ class Ed11y {
       },
       // Base z-index for buttons.
       buttonZIndex: 9999,
-      // Custom CSS
+      // CSS overrides and additions.
       baseFontSize: 14, // px
       baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-      baseCSS: '',
-      altCSS: '',
-      highlightCSS: '',
-      panelCSS: '',
-      resultCSS: '',
-      tipCSS: '',
+      baseCSS: '',      // Applies to all elements.
+      altCSS: '',       // Applies to alt text visualizer.
+      highlightCSS: '', // Applied IN PAGE and affects your theme.
+      panelCSS: '',     // Applies in panel in lower right.
+      resultCSS: '',    // Applies in tooltip toggle buttons.
+      tipCSS: '',       // Applies in tooltips.
 
       // Test customizations
       embeddedContent: false, // todo remove in favor of custom checks
