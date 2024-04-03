@@ -9,6 +9,10 @@ class Ed11yTestLinks {
     // todo later: Add test for consecutive links to same href?
     // todo later: parameterize stopwords as in Sa11y
 
+    if (!Ed11y.options.linkIgnoreStrings) {
+      Ed11y.options.linkIgnoreStrings = Ed11y.M.linkStringsNewWindows;
+    }
+
     Ed11y.elements.a?.forEach((el) => {
       // todo: replace with full accessible name calculation
       let linkText = Ed11y.computeText(el, 0, !!Ed11y.options.linkIgnoreSelector); // returns text or 'noAria';
@@ -21,25 +25,27 @@ class Ed11yTestLinks {
       }
 
       // Create version of text without "open in new window" warnings.
-      let linkStrippedText = Ed11y.options.linkIgnoreStrings ? linkText.replace(Ed11y.options.linkIgnoreStrings, '') : linkText;
-      linkStrippedText = linkStrippedText.toLowerCase();
-      let linkNewWindows = linkStrippedText.replace(Ed11y.M.linkStringsNewWindows,'');
-      if (el?.getAttribute('target') === '_blank' && linkText.length === linkNewWindows.length) {
+      let linkStrippedText = Ed11y.options.linkIgnoreStrings ? linkText.toLowerCase().replace(Ed11y.options.linkIgnoreStrings, '') : linkText.toLowerCase();
+      if (el?.getAttribute('target') === '_blank') {
         // Nothing was stripped AND we weren't warned.
-        let dismissKey = Ed11y.dismissalKey(linkText);        
-        Ed11y.results.push({
-          element: el,
-          test: 'linkNewWindow',
-          content: Ed11y.M.linkNewWindow.tip(),
-          position: 'beforebegin',
-          dismissalKey: dismissKey,
-        });
+        if (linkStrippedText.length === linkText.length && !(Ed11y.options.linkIgnoreSelector && el?.querySelector(Ed11y.options.linkIgnoreSelector))) {
+          let dismissKey = Ed11y.dismissalKey(linkText);
+          Ed11y.results.push({
+            element: el,
+            test: 'linkNewWindow',
+            content: Ed11y.M.linkNewWindow.tip(),
+            position: 'beforebegin',
+            dismissalKey: dismissKey,
+          });
+        }
       }
-      
+
+
+
       linkStrippedText = linkStrippedText.replace(/'|"|-|\.|\s+/g, '');
 
       // Tests to see if this link is empty
-      if (linkStrippedText.length === 0) {   
+      if (linkStrippedText.length === 0) {
         // already flagged by link test
         if (hasImg === false) {
           Ed11y.results.push({

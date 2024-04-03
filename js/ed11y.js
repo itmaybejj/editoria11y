@@ -134,6 +134,15 @@ class Ed11y {
       },
       // Base z-index for buttons.
       buttonZIndex: 9999,
+      // CSS overrides and additions.
+      baseFontSize: 14, // px
+      baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
+      baseCSS: '',      // Applies to all elements.
+      altCSS: '',       // Applies to alt text visualizer.
+      highlightCSS: '', // Applied IN PAGE and affects your theme.
+      panelCSS: '',     // Applies in panel in lower right.
+      resultCSS: '',    // Applies in tooltip toggle buttons.
+      tipCSS: '',       // Applies in tooltips.
 
       // Test customizations
       embeddedContent: false, // todo remove in favor of custom checks
@@ -165,10 +174,20 @@ class Ed11y {
       ...ed11yLang['en'],
       ...ed11yLang[Ed11y.options.lang]
     };
+
     Ed11y.theme = Ed11y.options[Ed11y.options.theme];
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
     }
+    Ed11y.baseCSS = `
+        :host{all: initial;}.hidden{display:none;}
+        .wrapper {
+         font-size:${Ed11y.options.baseFontSize}px;
+         line-height: 1.5;
+         font-family:${Ed11y.options.baseFontFamily};
+         }
+         ${Ed11y.options.baseCSS}
+      `;
     Ed11y.elements = [];
     Ed11y.onLoad = true;
     Ed11y.showPanel = 'show';
@@ -299,7 +318,7 @@ class Ed11y {
           });
 
           if (Ed11y.options.customTests > 0) {
-            // Pause 
+            // Pause
             Ed11y.customTestsRunning = true;
             Ed11y.customTestsFinished = 0;
             document.addEventListener('ed11yResume', function () {
@@ -331,7 +350,7 @@ class Ed11y {
             Ed11y.updatePanel();
           }, 0);
         }
-        
+
       }
       else {
         Ed11y.reset();
@@ -491,7 +510,7 @@ class Ed11y {
 
     // Place markers on elements with issues
     Ed11y.result = function (result, index) {
-      /* old array to new object map: 
+      /* old array to new object map:
         // [0] element
         // [1] test
         // [2] content
@@ -772,8 +791,7 @@ class Ed11y {
     };
 
     Ed11y.paintReady = function () {
-      let ed11yStyle =
-        `ed11y-element-result, ed11y-element-panel {
+      const highlightCSS = `ed11y-element-result, ed11y-element-panel {
               opacity: 1; 
               outline: 0 !important;
             }
@@ -790,9 +808,9 @@ class Ed11y {
               outline: 2px solid ${Ed11y.theme.warning};
               outline-offset: 1px;
             }
-            `;
+          `;
       let inlineStyle = document.createElement('style');
-      inlineStyle.textContent = ed11yStyle;
+      inlineStyle.textContent = highlightCSS + Ed11y.options.highlightCSS;
       document.querySelector('body')?.appendChild(inlineStyle);
       Ed11y.roots.forEach((root) => {
         // Shadow elements don't inherit styles, so they need their own copy.
@@ -841,16 +859,17 @@ class Ed11y {
       let windowBottom = scrollTop + window.innerHeight;
 
       let direction = 'under';
+
       // Default to displaying under
-      if (buttonOffset.top + tipHeight + scrollTop + 50 > windowBottom) {
+      if (buttonOffset.top + tipHeight + scrollTop + buttonOffset.height + 22 > windowBottom) {
         // If there's no room under in the viewport...
-        if (windowWidth > tipWidth * 1.5 && windowWidth - (buttonLeft + tipWidth + 90) > 0 && buttonOffset.top + 130 < window.innerHeight) {
+        if (windowWidth > tipWidth * 1.5 && windowWidth - (buttonLeft + tipWidth + buttonOffset.width + 56) > 0 && buttonOffset.top + 130 < window.innerHeight) {
           direction = 'right';
         } else if (buttonOffset.top > tipHeight + 15) {
           direction = 'above';
         } else if (windowWidth > tipWidth * 1.5 && buttonLeft - tipWidth - 50 > 0) {
           direction = 'left';
-        } else if (buttonOffset.bottom + tipHeight > document.documentElement.clientHeight - 50) {
+        } else if (buttonOffset.bottom + tipHeight > document.documentElement.clientHeight - 50 && window.innerHeight > buttonOffset.height + tipHeight) {
           // No room anywhere in viewport we're at the end of the page.
           direction = 'above';
         }
@@ -864,37 +883,40 @@ class Ed11y {
         // Pin to the left edge, unless the tip is not wide enough to reach:
         if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
-          if (tipWidth - 15 > buttonOffset.left) {
-            nudgeX = 15 - buttonOffset.left;
+          if (tipWidth - ((buttonOffset.width / 2) - 1) > buttonOffset.left) {
+            // Under, overhang to left
+            nudgeX = (buttonOffset.width / 2) - 1 - buttonOffset.left;
             arrow.style.setProperty('left', Math.max(buttonOffset.left, 15) - 9 + 'px');
           } else {
             arrow.style.setProperty('left', tipWidth - 26 + 'px');
-            nudgeX = 31 - tipWidth;
+            nudgeX = buttonOffset.width / 2 + 15 - tipWidth;
           }
         } else {
-          nudgeX = 40 - tipWidth / 5;
-          arrow.style.setProperty('left', tipWidth / 5 - 34 + 'px');
+          // Under, overhang to right
+          nudgeX = buttonOffset.width + 8 - tipWidth / 5;
+          arrow.style.setProperty('left', tipWidth / 5 - (buttonOffset.width / 2) - 18 + 'px');
         }
 
         arrow.dataset.direction = 'under';
-        nudgeY = 50;
+        nudgeY = buttonOffset.height + 16;
       }
       else if (direction === 'above') {
         // Slide left or right to center tip on page.
-        nudgeY = -1 * (tipHeight + 15 + Ed11y.theme.outlineWidth);
+        nudgeY = -1 * (tipHeight + 13 + Ed11y.theme.outlineWidth);
         arrow.style.setProperty('top', tipHeight);
         if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
-          if (tipWidth - 15 > buttonOffset.left) {
-            nudgeX = 15 - buttonOffset.left;
+          if (tipWidth - ((buttonOffset.width / 2) - 1) > buttonOffset.left) {
+            // Under, overhand to left
+            nudgeX = ((buttonOffset.width / 2) - 1) - buttonOffset.left;
             arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
           } else {
             arrow.style.setProperty('left', tipWidth - 26 + 'px');
-            nudgeX = 31 - tipWidth;
+            nudgeX = buttonOffset.width / 2 + 15 - tipWidth;
           }
         } else {
-          nudgeX = 40 - tipWidth / 5;
-          arrow.style.setProperty('left', tipWidth / 5 - 34 + 'px');
+          nudgeX = buttonOffset.width + 8 - tipWidth / 5;
+          arrow.style.setProperty('left', tipWidth / 5 - (buttonOffset.width / 2) - 18 + 'px');
         }
         arrow.dataset.direction = 'above';
         arrow.style.setProperty('top', `${tipHeight + 15 + Ed11y.theme.outlineWidth}px`);
@@ -910,11 +932,11 @@ class Ed11y {
         }
         if (direction === 'left') {
           nudgeX = 0 - (tipWidth + 17);
-          arrow.style.setProperty('left', `${tipWidth - 9}px`);
+          arrow.style.setProperty('left', `${tipWidth - 10}px`);
           arrow.dataset.direction = 'left';
         } else {
           // direction is right
-          nudgeX = 50;
+          nudgeX = buttonOffset.width + 14;
           arrow.dataset.direction = 'right';
         }
       }
@@ -922,11 +944,6 @@ class Ed11y {
 
     };
 
-    Ed11y.baseCSS = `
-      :host{all: initial;} 
-      .hidden{display:none;}
-      .wrapper{font-size:14px;line-height: 1.5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
-      `;
     Ed11y.clickTab = function (event) {
       Ed11y.activateTab(event.target, false);
     };
@@ -1254,7 +1271,7 @@ class Ed11y {
 
     // Subset of the W3C accessible name algorithm.
     Ed11y.computeText = function (el, recursing = 0, excludeLinkClasses = false) {
-      
+
       // Return immediately if there is an aria label.
       let hasAria = Ed11y.computeAriaLabel(el, recursing, excludeLinkClasses);
       if (hasAria !== 'noAria') {
@@ -1277,14 +1294,14 @@ class Ed11y {
         el,
         NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT
       );
-      
+
       let addTitleIfNoName = false;
       let aText = false;
       let count = 0;
 
       walker: while (treeWalker.nextNode()) {
         count++;
-        
+
         if (treeWalker.currentNode.nodeType === Node.TEXT_NODE) {
           computedText += ' ' + treeWalker.currentNode.nodeValue;
           continue;
@@ -1298,7 +1315,7 @@ class Ed11y {
           }
           continue;
         }
-        
+
         // Use link title as text if there was no text in the link.
         // Todo: in theory this could attach the title to the wrong node.
         if (addTitleIfNoName && !treeWalker.currentNode.closest('a')) {
@@ -1308,7 +1325,7 @@ class Ed11y {
           addTitleIfNoName = false;
           aText = false;
         }
-        
+
         if (treeWalker.currentNode.hasAttribute('aria-hidden') && !(recursing && count < 3)) {
           // Ignore elements and children, except when directly aria-referenced.
           // W3C name calc 2 is more complicated than this, but this is good enough.
@@ -1370,7 +1387,7 @@ class Ed11y {
       if (addTitleIfNoName && !aText) {
         computedText += ' ' + addTitleIfNoName;
       }
-      
+
       if (!computedText.trim() && el.hasAttribute('title')) {
         return el.getAttribute('title');
       }

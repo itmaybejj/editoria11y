@@ -1,7 +1,7 @@
 {
   "name": "editoria11y",
   "homepage": "https://itmaybejj.github.io/editoria11y/",
-  "version": "2.0.1",
+  "version": "2.1.1",
   "repository": {
     "type": "git",
     "url": "git+https://itmaybejj@github.com/itmaybejj/editoria11y.git"
@@ -14,7 +14,7 @@
     "@cucumber/cucumber": "^7",
     "@cucumber/pretty-formatter": "^1",
     "axios": "^1",
-    "chromedriver": "^109",
+    "chromedriver": "^123",
     "eslint": "^8.32.0",
     "geckodriver": "^3.2",
     "ms-chromium-edge-driver": "^0.5.1",
