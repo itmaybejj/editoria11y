@@ -31,7 +31,7 @@ class Ed11y {
         // 'iframe': false,
         // 'audio': false,
         // 'video': false,
-        // 'table': false,
+        'table': '[role="presentation"]',
       },
 
       // Set alertMode to "Assertive" to open the panel automatically if the issue count changes.
