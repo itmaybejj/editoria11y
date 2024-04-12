@@ -762,10 +762,10 @@ class Ed11y {
           }
           let offset = mark.getBoundingClientRect();
           let nudgeTop = 0;
-          let overlap = 30;
+          let overlap = 36;
           // Detect tip that overlaps with previous result.
-          if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousTop + overlap) {
-            nudgeTop = 30 + previousNudge;
+          if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousLeft + overlap) {
+            nudgeTop = 36 + previousNudge;
           }
           if (offset.left < 8) {
             // Offscreen to left. push to the right.

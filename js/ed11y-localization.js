@@ -45,7 +45,9 @@ const ed11yLang = {
 
     // Strings used in tests ==============================
 
-    suspiciousWords: ['image of','graphic of','picture of','photo of','placeholder','tbd'],
+    suspiciousWords: ['image of','graphic of','picture of','photo of','placeholder','spacer','tbd','todo'],
+    meaninglessAlt: ['alt','chart','decorative','image','graphic','photo','placeholder','placeholder image','spacer','tbd','todo','to do'],
+    // 'alt', 'image', 'photo', 'decorative', 'placeholder', 'placeholder image', 'spacer'
     linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
     linksMeaningless: /learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|\.|,|:|>|<|\s/g,
     linkStringsNewWindows: /window|tab|download|file/g,
@@ -153,6 +155,26 @@ const ed11yLang = {
         `${Ed11y.M.altAttributeProvided(alt)}
         <p>To fix: set this image's alternative text to a concise description of what this image means in this context.</p>
         ${Ed11y.M.altAttributeExample}`
+      ,
+    },
+    altMeaningless : {
+      title: 'Alt text is meaningless',
+      tip: (alt) =>
+        `${Ed11y.M.altAttributeProvided(alt)}
+        <p>To fix: set this image's alternative text to a concise description of what this image means in this context.</p>
+        ${Ed11y.M.altAttributeExample}`
+      ,
+    },
+    altMeaninglessLinked : {
+      title: 'Linked alt text is meaningless',
+      tip: (alt) =>
+        `${Ed11y.M.altAttributeProvided(alt)}
+         <p>When a link includes an image, the image's alt text becomes part of the link text announced by screen readers.
+            Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
+            <ul>
+                <li>Good link text: "About us"</li>
+                <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess</li>
+            </ul>`
       ,
     },
 

@@ -42,7 +42,7 @@ class Ed11yTestLinks {
 
 
 
-      linkStrippedText = linkStrippedText.replace(/'|"|-|\.|\s+/g, '');
+      linkStrippedText = linkStrippedText.replace(/"|'|\?|\.|-|\s+/g, '');
 
       // Tests to see if this link is empty
       if (linkStrippedText.length === 0) {

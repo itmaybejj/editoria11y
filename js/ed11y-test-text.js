@@ -14,12 +14,12 @@ class Ed11yTestText {
     const numberMatch = new RegExp(/(([023456789][\d\s])|(1\d))/, ''); // All numbers but 1.
     const alphabeticMatch = new RegExp(/(^[aA1]|[^\p{Alphabetic}\s])[-\s.)]/, 'u');
     const emojiMatch = new RegExp(/\p{Extended_Pictographic}/, 'u');
+    const secondTextNoMatch = ['a','A','1'];
     const prefixDecrement = { // Converts to check a / b.
       b: 'a',
       B: 'A',
       2: '1'
     };
-    const secondTextNoMatch = ['a','A','1'];
     const decrement = function (el) {
       return el.replace(/^b|^B|^2/, function (match) {
         return prefixDecrement[match];
