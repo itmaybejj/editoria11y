@@ -22,7 +22,7 @@ class Ed11y {
       // Disable tests on specific elements
       // Include and modify this entire object in your call
       ignoreByKey: {
-        // 'p': false,
+        'p': 'table p',
         // 'h': false,
         'img': '[aria-hidden], [aria-label], [aria-labelledby], [aria-hidden] img, [aria-label] img, [aria-labelledby] img', // disable alt text tests on overriden images
         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
