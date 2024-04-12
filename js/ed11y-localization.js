@@ -45,11 +45,13 @@ const ed11yLang = {
 
     // Strings used in tests ==============================
 
-    suspiciousWords: ['image of','graphic of','picture of','placeholder','photo of'],
+    suspiciousWords: ['image of','graphic of','picture of','photo of','placeholder','spacer','tbd','todo'],
+    meaninglessAlt: ['alt','chart','decorative','image','graphic','photo','placeholder','placeholder image','spacer','tbd','todo','to do'],
+    // 'alt', 'image', 'photo', 'decorative', 'placeholder', 'placeholder image', 'spacer'
     linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
     linksMeaningless: /learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|\.|,|:|>|<|\s/g,
     linkStringsNewWindows: /window|tab|download|file/g,
-    
+
     // Tooltips base ======================================
 
     toggleManualCheck: 'manual check needed',
@@ -95,7 +97,7 @@ const ed11yLang = {
 
     headingEmpty : {
       title: 'Heading tag without any text',
-      tip: () => 
+      tip: () =>
         `<p>Headings and subheadings create a navigable table of contents for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
             ${Ed11y.M.headingExample}
             <p>"Blank" headings create confusing gaps in this outline: they could mean the following content is still part of the previous section, or that the text was unpronounceable for some reason.</p>
@@ -111,7 +113,7 @@ const ed11yLang = {
             <p><strong>To fix:</strong> shorten this heading if possible, or remove the heading style if it was only applied to this text to provide visual emphasis.</p>
             `,
     },
-            
+
     blockquoteIsShort : {
       title: 'Manual check: is this a blockquote?',
       tip: () =>
@@ -120,7 +122,7 @@ const ed11yLang = {
 
     // Tooltips for image tests =========================
 
-    altAttributeExample : 
+    altAttributeExample :
             `<p>Note that a good alt conveys what an image <strong>communicates</strong>, not what it <strong>contains</strong>. A picture of a child kicking a ball might have been selected because of the setting, the child, the kick or the ball:</p>
             <ul>
                 <li>Child happily kicking a ball on a summer day</li>
@@ -128,8 +130,8 @@ const ed11yLang = {
                 <li>A.J.'s game-winning kick curved in from the left sideline!</li>
                 <li>The "medium" ball is the right size for this 9-year-old child</li>
             </ul>`,
-        
-    altAttributeProvided: (alt) => 
+
+    altAttributeProvided: (alt) =>
       `<p>This image's alt text is: <strong>"${alt}"</strong></p>`,
 
     altMissing : {
@@ -153,6 +155,26 @@ const ed11yLang = {
         `${Ed11y.M.altAttributeProvided(alt)}
         <p>To fix: set this image's alternative text to a concise description of what this image means in this context.</p>
         ${Ed11y.M.altAttributeExample}`
+      ,
+    },
+    altMeaningless : {
+      title: 'Alt text is meaningless',
+      tip: (alt) =>
+        `${Ed11y.M.altAttributeProvided(alt)}
+        <p>To fix: set this image's alternative text to a concise description of what this image means in this context.</p>
+        ${Ed11y.M.altAttributeExample}`
+      ,
+    },
+    altMeaninglessLinked : {
+      title: 'Linked alt text is meaningless',
+      tip: (alt) =>
+        `${Ed11y.M.altAttributeProvided(alt)}
+         <p>When a link includes an image, the image's alt text becomes part of the link text announced by screen readers.
+            Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
+            <ul>
+                <li>Good link text: "About us"</li>
+                <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess</li>
+            </ul>`
       ,
     },
 
@@ -228,7 +250,7 @@ const ed11yLang = {
 
     altPartOfLinkWithText : {
       title: 'Manual check: link contains both text and an image',
-      tip: (alt) => 
+      tip: (alt) =>
         `<p>When a link includes an image, screen readers speak the image's alt text as part of the link.
             This can be confusing if the image's alt describes the image rather than the link.</p>
             <p>E.g., for a card-style link with both text and a stock photo, compare:</p>
@@ -251,7 +273,7 @@ const ed11yLang = {
 
     linkTextIsURL : {
       title: 'Manual check: is this link text a URL?',
-      tip: (text) => 
+      tip: (text) =>
         `<p>This link's text is:<br> <strong>${text}</strong></p>
         <p>Links should be meaningful and concise. Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
          <p>A linked URL breaks this pattern; the reader has to read the preceding paragraph to figure out the link's purpose from context.</p>
@@ -263,7 +285,7 @@ const ed11yLang = {
 
     linkTextIsGeneric : {
       title: 'Manual check: is this link meaningful and concise?',
-      tip: (text) => 
+      tip: (text) =>
         `<p>This link's text is: <strong>${text}</strong></p>
         <p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
                 <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully, such that they figure out each link's purpose from context for themselves. Few readers do this, so click-through rates on meaningless links are extremely poor.</p>
@@ -276,7 +298,7 @@ const ed11yLang = {
 
     linkDocument : {
       title : 'Manual check: is the linked document accessible?',
-      tip: () => 
+      tip: () =>
         `<p>This automated checker helps ensure <strong><em>websites</em></strong> contain the features needed for accessible content, things like heading structure and text alternatives for images and audio. <strong>It is not able to help you check the documents you link.</strong></p>
         <p>Most mobile and assistive device users prefer to read text on Web pages, where content reflows to fit the screen. If the document linked here cannot be converted to a Web page, make sure the document is well structured (headings, lists, table headers) and provides alt text for its images.</p>
         <ul>
@@ -289,7 +311,7 @@ const ed11yLang = {
 
     linkNewWindow : {
       title: 'Manual check: is opening a new window expected?',
-      tip: () => 
+      tip: () =>
         `<p>Readers can always choose to open a link a new window. When a link forces open a new window, it can be confusing and annoying, especially for assistive device users who may wonder why their browser's "back" button is suddenly disabled.</p>
                 <p>There are two general exceptions:</p>
                 <ul>
@@ -315,7 +337,7 @@ const ed11yLang = {
 
     tableContainsContentHeading : {
       title: 'Content heading inside a table',
-      tip: () => 
+      tip: () =>
         `<p>Content headings ("Heading 1", "Heading 2") form a navigable table of contents for screen reader users,  
         labelling all content <strong>until the next heading</strong>. Table headers label specific columns or rows within a table.</p> 
             <p></p>
@@ -337,7 +359,7 @@ const ed11yLang = {
 
     textPossibleList : {
       title: 'Manual check: should this have list formatting?',
-      tip : (text) => 
+      tip : (text) =>
         `<p>List formatting is structural:</p> 
             <ol><li>List formatting indents and reflows on overflow. Text aligns vertically with the line above it.</li>
             <li>Lists are machine-readable. Screen readers can orient their users, announcing this as "list item, 2 of 3."</li></ol>
@@ -348,7 +370,7 @@ const ed11yLang = {
 
     textPossibleHeading : {
       title: 'Manual check: should this be a heading?',
-      tip : () => 
+      tip : () =>
         `<p>Headings and subheadings create a navigable table of contents for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
             ${Ed11y.M.headingExample}
             <p>If this all-bold text is functioning visually as a heading, replace the bold formatting with the appropriately numbered heading.</p>
@@ -357,42 +379,42 @@ const ed11yLang = {
 
     textUppercase : {
       title: 'Manual check: is this uppercase text needed?',
-      tip : () => 
+      tip : () =>
         `<p>UPPERCASE TEXT CAN BE MORE DIFFICULT TO READ FOR MANY PEOPLE, AND IS OFTEN INTERPRETED AS SHOUTING.</p>
          <p>Consider using sentence case instead, and using bold text or font changes for visual emphasis, or structural formatting like headings for emphasis that will also be announced by screen readers.</p>`,
     },
 
     embedVideo : {
       title: 'Manual check: is this video accurately captioned?',
-      tip : () => 
+      tip : () =>
         `<p>If a recorded video contains speech or meaningful sounds, it must provide captioning.</p>
             <p>Note that automatic, machine-generated captions must be proofread, and speaker identifications must be added, before being considered an equal alternative.</p>`,
     },
 
     embedAudio : {
       title: 'Manual check: is an accurate transcript provided?',
-      tip : () => 
+      tip : () =>
         `<p>If this audio contains speech, a text alternative must be provided on this page or linked.</p>
             <p>Note that automatic, machine-generated transcripts must be proofread, and speaker identifications must be added, before being considered an equal alternative</p>`,
     },
 
     embedVisualization : {
       title: 'Manual check: is this visualization accessible?',
-      tip : () => 
+      tip : () =>
         `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
             <p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
     },
 
     embedTwitter : {
       title: 'Manual check: is this embed a keyboard trap?',
-      tip : () => 
+      tip : () =>
         `<p>If embedded feeds are set to show a high number of items, keyboard users may have to click the tab key dozens or hundreds of times to exit the component.</p>
             <p>Check to make sure only a small number of items auto-load immediately or while scrolling. Having additional items load on request ("show more") is fine.</p>`,
     },
 
     embedCustom : {
       title: 'Manual check: is this embedded content accessible?',
-      tip : () => 
+      tip : () =>
         '<p>Please make sure images inside this embed have alt text, videos have captions, and interactive components can be <a href=\'https://webaim.org/techniques/keyboard/\'>operated by a keyboard</a>.</p>',
     }
 

@@ -22,7 +22,7 @@ class Ed11y {
       // Disable tests on specific elements
       // Include and modify this entire object in your call
       ignoreByKey: {
-        // 'p': false,
+        'p': 'table p',
         // 'h': false,
         'img': '[aria-hidden], [aria-label], [aria-labelledby], [aria-hidden] img, [aria-label] img, [aria-labelledby] img', // disable alt text tests on overriden images
         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
@@ -31,7 +31,7 @@ class Ed11y {
         // 'iframe': false,
         // 'audio': false,
         // 'video': false,
-        // 'table': false,
+        'table': '[role="presentation"]',
       },
 
       // Set alertMode to "Assertive" to open the panel automatically if the issue count changes.
@@ -762,10 +762,10 @@ class Ed11y {
           }
           let offset = mark.getBoundingClientRect();
           let nudgeTop = 0;
-          let overlap = 30;
+          let overlap = 36;
           // Detect tip that overlaps with previous result.
-          if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousTop + overlap) {
-            nudgeTop = 30 + previousNudge;
+          if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousLeft + overlap) {
+            nudgeTop = 36 + previousNudge;
           }
           if (offset.left < 8) {
             // Offscreen to left. push to the right.
