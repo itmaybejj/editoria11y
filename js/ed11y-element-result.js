@@ -223,7 +223,7 @@ class Ed11yElementResult extends HTMLElement {
       }));
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');
-      window.setTimeout(Ed11y.alignTip(this.toggle, this.tip)), 250;
+      Ed11y.alignTip(this.toggle, this.tip);
       if (!Ed11y.elements.jumpList) {
         Ed11y.buildJumpList();
       }

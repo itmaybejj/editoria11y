@@ -24,7 +24,7 @@
             <div class="positive">empty alt
                 <h4><img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" ></h4>
             </div>
-            <div class="positive">placeholder alt
+            <div class="positive">CMS-provided-placeholder alternative for null alt
               <h4><img alt="This image has an empty alt attribute; it's filename is image.jpg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" ></h4>
           </div>
             <div class="positive">null alt
@@ -102,6 +102,10 @@
             <p>E.g., “image of.”</p>
 
             <p class="positive"><img alt="Image of a photo of a picture." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+
+            <h3 id="image-with-placeholder alt">Image with placeholder alt</h3>
+            <p class="positive"><img alt="TBD" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><a href="#"><img alt="TBD" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
 
             <h3 id="image-with-very-long-alt-text">Image with very long alt text</h3>
 
@@ -222,6 +226,31 @@
 
         <table class="positive"><tbody><tr><td>A table without a TH header is invalid</td><td class="positive"><h4 >Outline headers do not count</h4></td><td class="negative"><p><strong>Disable should be content header test inside tables</strong></p></td></tr></tbody></table>
 
+        <table class="negative" role="presentation"><tr><td>No table header, but table has role="presentation."</td></tr></table>
+
+        <table class="negative"><thead>
+        <tr>
+            <th><p>Numbers in tables</p></th>
+            <th><p>Should not be checked for lists</p>
+            </th>
+        </tr>
+        </thead>
+            <tbody>
+            <tr>
+                <th>   <p>1.</p>
+                </th>
+                <td>   <p>2. Turtles</p>
+                </td>
+            </tr>
+            <tr>
+                <th>   <p>2.</p>
+                </th>
+                <td>   <p>Bears</p>
+                </td>
+
+            </tr>
+            </tbody>
+        </table>
         <h3 id="empty-table-header-cells">Empty table header cells</h3>
 
         <table><tbody><tr><th>Empty table heading cells will also be flagged:</th><th class="positive"> &nbsp;</th></tr></tbody></table>
@@ -238,15 +267,16 @@
           (b) banana<br>
           (c) pear</p></div>
         <div>
-            <p class="positive">1. This is split</p>
-            <hr><p>2. with HR</p>
-            <hr><p>3. but non-contiguous p are detected.</p>
+            <p class="positive">1 This is split</p>
+            <hr><p>2 with HR</p>
+            <hr><p>3 but non-contiguous p are detected.</p>
         </div>
         <div>
           <p class="positive">(1) A parenthesis list</p>
           <p class="negative">(2) Two</p>
           <p>(3) Three</p>
         </div>
+        <div class="negative"><p>B bear.</p><p>A turtle.</p></div>
         <div class="negative"><p>Apple</p></div>
         <div class="negative"><p>Appeal</p></div>
         <div class="negative"><p>Apple</p></div>
@@ -256,6 +286,14 @@
         <div><p class="positive">🥑 Fake lists with emoji</p><p class="negative">🍅 Oh tomato...</p><p class="negative">🦄 Shiny Unicorn</p>
           <p class="positive">⊙ Math symbol</p><p class="negative">⊙ Detect on repeat</p>
           <p class="positive">🚜 Now emoji again, with a line break<br>🛵 Any other emoji</p>
+        </div>
+        <div class="negative"><p>11</p><p>12</p></div>
+        <div class="negative"><p>1 thing</p><p>20 things</p></div>
+        <div class="negative"><p>10 things</p><p>20 things</p></div>
+        <div class="negative"><p>1 thing</p><p>1 thing</p></div>
+        <div><p class="positive">🥑 Fake lists with emoji</p><p class="negative">🍅 Oh tomato...</p><p class="negative">🦄 Shiny Unicorn</p>
+            <p class="positive">⊙ Math symbol</p><p class="negative">⊙ Detect on repeat</p>
+            <p class="positive">🚜 Now emoji again, with a line break<br>🛵 Any other emoji</p>
         </div>
 
         <div class="positive"><p>1. This has rich text after the BR<br><a href="#"><strong>2.</strong> Fancy.</a></p></div>
