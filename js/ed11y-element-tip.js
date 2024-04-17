@@ -8,7 +8,7 @@ class Ed11yElementTip extends HTMLElement {
     if (!this.initialized) {
 
       this.open = true;
-      this.setAttribute('style', 'outline: 0px solid transparent;');
+      this.style.setProperty('outline', '0px solid transparent');
       const shadow = this.attachShadow({mode: 'open'});
 
       // Create this.wrapper with type class
@@ -20,186 +20,11 @@ class Ed11yElementTip extends HTMLElement {
 
       this.dismissable = !!this.result.dismissalKey;
       this.dismissed = !!this.result.dismissalStatus;
-      this.wrapper.classList.add('wrapper');
-      this.wrapper.classList.add('ed11y-result');
+      this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
 
       this.addEventListener('mouseover', this.handleHover);
 
-      // Create CSS with embedded icon
-      const style = document.createElement('style');
-      const tipCSS = `
-        :host {
-          position: absolute;
-          top: 10vh;
-          left: 2vw;
-          opacity: 0;
-          transition: opacity .25s ease-in;
-          z-index: ${Ed11y.options.buttonZIndex - 1};
-        }
-        :host([data-ed11y-open='true']) {
-          z-index: ${Ed11y.options.buttonZIndex};
-          opacity: 1;
-        }
-        .wrapper {
-          width: 1px;
-          height: 1px;
-          overflow: visible;
-          color: ${Ed11y.theme.text};        }
-        .arrow {
-          display: none;
-          content: "";
-          position: absolute;
-          transform: rotate(45deg);
-          left: -10px;
-          box-shadow: 0 0 0 ${Ed11y.theme.panelBorder}px ${Ed11y.theme.bg}, 2px 2px 4px ${Ed11y.theme.primary}77;
-          width: 20px;
-          height: 20px;
-          top: 6px;
-        }
-        .arrow[data-direction="left"] {
-          left: -18px;
-          background: linear-gradient(45deg, transparent 0%, transparent 48%, ${Ed11y.theme.primary} 49%);
-        }
-        .arrow[data-direction="under"] {
-          margin-top: -18px;
-          background: linear-gradient(-45deg, transparent 0%, transparent 48%, ${Ed11y.theme.primary} 49%);
-        }
-        .arrow[data-direction="above"] {
-          margin-top: -27px;
-          background: linear-gradient(135deg, transparent 0%, transparent 48%, ${Ed11y.theme.primary} 49%);
-        }
-        .arrow[data-direction="right"] {
-          background: linear-gradient(-135deg, transparent 0%, transparent 48%, ${Ed11y.theme.primary} 49%);
-        }
-        .tip {
-          z-index: 1;
-          border: 2px solid ${Ed11y.theme.primary};
-          background: ${Ed11y.theme.bg};
-          border-radius: 0 0 ${Ed11y.theme.borderRadius} ${Ed11y.theme.borderRadius};
-          position:relative;
-          width: clamp(18em, 36em, 89vw);
-          display: none;
-          margin-top: ${Ed11y.theme.panelBorder - 2}px;
-          box-shadow: 0 0 0 ${Ed11y.theme.panelBorder}px ${Ed11y.theme.bg}, 2px 2px 4px ${Ed11y.theme.primary}77;
-        }
-        @keyframes fade-in {
-          0% { opacity: 0;}
-          100% { opacity: 1;}
-        }
-        .open .tip {
-          display: block;
-        }
-        .open .tip .content {
-          animation: fade-in 0.25s ease-out;
-        }
-        .open .arrow {
-          display: block;
-          opacity: 1;
-        }
-        .title {
-          background: ${Ed11y.theme.primary};
-          color: ${Ed11y.theme.primaryText};
-          padding: .143em 35px .214em 14px;
-          font-weight: bold;
-          min-height: 2em;
-          line-height: 1;
-          display: grid;
-          place-content: center left;
-          outline: transparent;
-        }
-        .content {
-          padding: 0 12px 16px 16px;
-        }
-        p {
-          margin-block-start: 1em;
-          margin-block-end: 1em;
-        }
-        p:last-child {
-          margin-block-end: 0;
-        }
-        button {
-          margin: 0;
-          border: 0;
-          background: inherit;
-          font-family: inherit;
-          font-size: .7857em;
-          font-weight: 600;
-          text-align: center;
-          cursor: pointer;
-          color: ${Ed11y.theme.primaryText};
-          background: ${Ed11y.theme.primary};
-        }
-        ul {
-          margin-block-start: .643em;
-          margin-block-end: .643em;
-          padding-inline-start: 20px;
-        }
-        li {
-          line-height: 1.357;
-        }
-        li + li {
-          margin-top: .643em;
-        }
-        table {
-          border-spacing: 0;
-          margin: 20px;
-        }
-        th, td {
-          border: 0;
-          box-shadow: 0 0 0 1px;
-          padding: 5px 10px;
-        }
-        a {
-          color: inherit;
-        }
-        a:hover, a:focus-visible {
-          text-decoration-style: double;
-          text-decoration-skip-ink: none;
-        }
-        .close {
-          padding: 0 0 0 2px;
-          font-size: 1em;
-          line-height: 1;
-          height: 2.5174em;
-          display: grid;
-          place-content: center;
-          font-weight: 400;
-          position: absolute;
-          top: -3px;
-          right: -2px;
-          box-shadow: -1px 0 ${Ed11y.theme.bg};
-          background: transparent;
-          width: 2.286em;
-        }
-        .close:hover {
-          background: ${Ed11y.theme.bg}cc;
-          color: ${Ed11y.theme.text};
-        }
-        .dismiss {
-          margin: .5em 1em .25em 0;
-          padding: 5px 9px;
-          border-radius: ${Ed11y.theme.borderRadius}px;
-          font-weight: bold;
-        }
-        .dismiss:hover, .dismiss:focus-visible {
-          color: ${Ed11y.theme.primary};
-          background: ${Ed11y.theme.primaryText};
-          box-shadow: inset 0 0 0 2px ${Ed11y.theme.primary};
-        }
-        .dismissed-note {
-          background: ${Ed11y.theme.warning};
-          color: #333;
-          font-style: italic;
-          padding: .5em 1em;
-          display: inline-block;
-          border-radius: 2px;
-        }
-        .wrapper :focus-visible {
-          outline: 2px solid transparent;
-          box-shadow: inset 0 0 0 2px ${Ed11y.theme.focusRing}, 0 0 0 3px ${Ed11y.theme.primary};
-        }
-      `;
-      style.textContent = Ed11y.baseCSS + tipCSS + Ed11y.options.tipCSS;
+      Ed11y.attachCSS(this.wrapper);
 
       this.tip = document.createElement('div');
       this.tip.classList.add('tip');
@@ -295,7 +120,6 @@ class Ed11yElementTip extends HTMLElement {
           this.setAttribute('data-ed11y-action', 'shut');
         }
       });
-      shadow.appendChild(style);
       shadow.appendChild(this.wrapper);
       let focusLoopLeft = document.createElement('div');
       focusLoopLeft.setAttribute('tabIndex', '0');

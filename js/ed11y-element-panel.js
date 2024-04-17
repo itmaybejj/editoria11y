@@ -8,42 +8,41 @@ class Ed11yElementPanel extends HTMLElement {
   // todo mvp parameterize
   template() {
     return `
-    <div class='buttonbar' role='tablist' aria-label='${Ed11y.M.panelControls}'>
-      <button role="tab" id='issues' aria-selected='true'>
+    <div class='ed11y-buttonbar' role='tablist' aria-label='${Ed11y.M.panelControls}'>
+      <button role="tab" id='ed11y-issues' aria-controls='ed11y-issues-tab' aria-selected='true'>
           ${Ed11y.M.buttonIssuesContent}
       </button>
-      <button role="tab" id='headings' aria-selected='false'>
+      <button role="tab" id='ed11y-headings' aria-controls='ed11y-headings-tab' aria-selected='false'>
           ${Ed11y.M.buttonOutlineContent}
       </button>
-      <button role="tab" id='alts' aria-selected='false'>
+      <button role="tab" id='ed11y-alts' aria-controls='ed11y-alts-tab' aria-selected='false'>
           ${Ed11y.M.buttonAltsContent}
       </button>
-      <button role="tab" id='help' aria-selected='false' aria-controls='help-tab' title='${Ed11y.M.buttonAboutTitle}'>?</button>
-      <button role="tab"  id='minimize' aria-selected='false' title='Minimize panel' aria-label="minimize" aria-pressed="false"><span>&ndash;</span></button>
-      <button type='button' id='toggle'><span class='close'>&times;</span><span class='open'><span class='icon'></span><span class='toggle-count'></span></span></button>
+      <button role="tab" id='ed11y-help' aria-selected='false' aria-controls='ed11y-help-tab' title='${Ed11y.M.buttonAboutTitle}'>?</button>
+      <button role="tab"  id='ed11y-minimize' aria-selected='false' title='Minimize panel' aria-label="minimize" aria-pressed="false"><span>&ndash;</span></button>
+      <button type='button' id='ed11y-toggle'><span class='close'>&times;</span><span class='open'><span class='icon'></span><span class='toggle-count'></span></span></button>
     </div>
     <div class="content">
-      <div id='issues-tab' tabindex="0" role="tabpanel" class="show" aria-labelledby='issues'>
+      <div id='ed11y-issues-tab' tabindex="0" role="tabpanel" class="show" aria-labelledby='ed11y-issues'>
           <div>
               <div class='content-text'>${Ed11y.M.panelCountBase}</div>
-              <div aria-live='polite' class='announce sr-only'></div>
+              <div aria-live='polite' class='announce ed11y-sr-only'></div>
           </div>
-          <div class='jumplinks'>
-            <button class='jump prev' data-ed11y-goto='0' hidden><span aria-hidden='true'>« </span><span class='jump-prev'>${Ed11y.M.buttonPrevContent}</span></button>
-            <button class='jump next' data-ed11y-goto='0'><span class='jump-next'>${Ed11y.M.buttonFirstContent}</span> <span aria-hidden='true'> »</span></button>
-            <button id='show-hidden' aria-pressed='${!!Ed11y.options.showDismissed}' hidden>${Ed11y.M.buttonShowHiddenAlertContent}</button>
+          <div class='ed11y-jumplinks'>
+            <button class='ed11y-jump prev' data-ed11y-goto='0' hidden><span aria-hidden='true'>« </span><span class='jump-prev'>${Ed11y.M.buttonPrevContent}</span></button>
+            <button class='ed11y-jump next' data-ed11y-goto='0'><span class='jump-next'>${Ed11y.M.buttonFirstContent}</span> <span aria-hidden='true'> »</span></button>
+            <button id='ed11y-show-hidden' aria-pressed='${!!Ed11y.options.showDismissed}' hidden>${Ed11y.M.buttonShowHiddenAlertContent}</button>
           </div>
         </div>
-      <div id='headings-tab' role="tabpanel" class="hidden" aria-labelledby='headings' tabindex='0'>
+      <div id='ed11y-headings-tab' role="tabpanel" class="ed11y-hidden" aria-labelledby='ed11y-headings' tabindex='0'>
         ${Ed11y.M.panelCheckOutline}
-        <ul id='outline'></ul>
+        <ul id='ed11y-outline'></ul>
       </div>
-      <div id='alts-tab' role="tabpanel" class="hidden" aria-labelledby='alts' tabindex='0'>
+      <div id='ed11y-alts-tab' role="tabpanel" class="ed11y-hidden" aria-labelledby='ed11y-alts' tabindex='0'>
         ${Ed11y.M.panelCheckAltText}
-        <ul id='alt-list'></ul>
+        <ul id='ed11y-alt-list'></ul>
       </div>
-      <div id='help-tab' role="tabpanel" class="hidden" aria-labelledby='help' tabindex='0'>
-      // todo inject content
+      <div id='ed11y-help-tab' role="tabpanel" class="ed11y-hidden" aria-labelledby='ed11y-help' tabindex='0'>
       </div>
     </div>
     `;
@@ -52,287 +51,28 @@ class Ed11yElementPanel extends HTMLElement {
   connectedCallback() {
     if (!this.initialized) {
 
-      this.panelCSS = `
-        :host {
-          position: fixed;
-          right: 1%;
-          bottom: 1%;
-          opacity: 0;
-          transition: opacity .25s ease-in;
-          z-index: 9999;
-        }
-        :host:focus, div:focus {
-          outline: transparent;
-        }
-        .wrapper {
-          width: clamp(160px, 23em, 92vw);
-          background: ${Ed11y.theme.bg};
-          color: ${Ed11y.theme.text};
-          border-radius: ${Ed11y.theme.borderRadius};
-          box-shadow: 1px 1px 4px 2px ${Ed11y.theme.text}77;
-          padding: ${Ed11y.theme.panelBorder}px;
-        }
-        [tabindex]:focus-visible {
-          box-shadow: 0 0 0 3px ${Ed11y.theme.bg}, 0 0 0 4px ${Ed11y.theme.text};
-        }
-        .ed11y-small {
-          font-size: .93em;
-          opacity: .9;
-        }
-        a {
-          color: inherit;
-        }
-        .content {
-          padding: 4px 4px 4px 12px;
-          border: ${Ed11y.theme.panelBorder}px solid ${Ed11y.theme.primary};
-          border-top: 0;
-          border-radius: 0 0 ${Ed11y.theme.borderRadius} ${Ed11y.theme.borderRadius};
-          color: ${Ed11y.theme.text};
-          max-height: max(240px, 50vh);
-          overflow: hidden;
-        }
-        .content-text {
-          margin-top: -2px;
-        }
-        @media (min-width: 400px) {
-          #toggle-tab {
-            display: grid;
-            grid-gap: 1em;
-            grid-template-columns: 16em 1fr;
-          }
-        }
-        .hidden {
-          display:none;
-        }
-        .buttonbar {
-          display: flex;
-        }
-        button {
-          margin: 0;
-          background: ${Ed11y.theme.button};
-          color: ${Ed11y.theme.primaryText};
-          padding: 7px 4px;
-          font-family: inherit;
-          font-size: .7857em;
-          font-weight: 500;
-          border: 0;
-          border-right: 1px solid ${Ed11y.theme.primaryText}55;
-          text-align: center;
-          flex: auto;
-          cursor: pointer;
-        }
-        button:hover {
-          background: ${Ed11y.theme.text};
-        }
-        #shut-panel {
-          border-right: 0;
-        }
-        .buttonbar button {
-          color: ${Ed11y.theme.panelBarText};
-          background: ${Ed11y.theme.panelBar};
-          box-shadow: ${Ed11y.theme.panelBarShadow};
-        }
-        .buttonbar button:hover {
-          background: ${Ed11y.theme.activeTab};
-          color: ${Ed11y.theme.activeTabText};
-        }
-        .buttonbar button:first-child {
-          border-radius: ${Ed11y.theme.borderRadius} 0 0 0; 
-          border-left: 2px solid transparent;
-        }          
-        .buttonbar button:last-child {
-          border-radius: 0 ${Ed11y.theme.borderRadius} 0 0;
-        }
-        .buttonbar button[aria-selected="true"] {
-          background: ${Ed11y.theme.activeTab};
-          box-shadow: inset 0 0 0 1px ${Ed11y.theme.primary}, inset 0 -2px ${Ed11y.theme.primary}22;
-          color: ${Ed11y.theme.activeTabText};
-          border: 0;
-        }
-        .buttonbar button + button[aria-selected="true"] {
-          margin-left: -1px;
-        }
-        .shut {
-          border-radius: 100%;
-          background: transparent;
-          width: auto;
-          box-shadow: none;
-        }
-        .shut button, 
-        .shut .content, 
-        .active .toggle-count,
-        .shut .close {
-          display: none;
-        }
-        .shut #toggle {
-          display: block;
-          border-radius: 100%;
-          padding: 8px;
-          border: 0;
-          min-width: 3em;
-          height: 3em;
-          font-size: clamp(.7857em, 2vw, 1.07em);
-        }
-        .pass.shut #toggle {
-          background: ${Ed11y.theme.primary};
-          color: ${Ed11y.theme.primaryText};
-          line-height: 1;
-          box-shadow: inset 0 0 0 2px ${Ed11y.theme.primary}, inset 0 0 0 4px #fffe;
-          font-family: georgia, serif;
-        }
-        .pass.shut #toggle:hover {
-          box-shadow: inset 0 0 0 2px #fffe, 0 0 0 2px ${Ed11y.theme.primary}; 
-        }
-        .shut.warnings #toggle {
-          background-color: ${Ed11y.theme.warning};
-          color: #000b;
-          box-shadow: inset 0 0 0 2px ${Ed11y.theme.warning}, inset 0 0 0 3px #000b, 0 0 2px #000;
-        }
-        .shut.warnings #toggle:hover {
-          box-shadow: inset 0 0 0 2px ${Ed11y.theme.warning}, inset 0 0 0 3px #000b, 0 0 0 3px #000b;
-        }
-        .shut.errors #toggle {
-          color: ${Ed11y.theme.alert};
-          box-shadow: inset 0 0 0 1px ${Ed11y.theme.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.theme.alert}, 1px 1px 5px 0 rgba(0,0,0,.5);
-          background: #fefefe;
-        }
-        .shut.errors #toggle:hover {
-          box-shadow: inset 0 0 0 1px #b80519, inset 0 0 0 2px #fefefe, inset 0 0 0 6px #b80519, 0 0 0 3px ${Ed11y.theme.alert}, 0 0 0 4px transparent;
-        }
-        .shut .toggle-count {
-          display: block;
-        }
-        .jumplinks {
-          text-align: right;
-          width: min(12em, 50%);
-        }
-        .jumplinks button {
-          min-width: max(7.25em, calc(49% - 3px));
-        }
-        .content button {
-          padding: 7px 5px;
-          border-radius: ${Ed11y.theme.borderRadius};
-          background: inherit;
-          color: inherit;
-          border: 1px ${Ed11y.theme.button} solid;
-          margin: 5px 0 5px 1px;
-        }
-        .jump.prev {
-          min-width: 81px;
-        }
-        .jump.next {
-          min-width: 60px;
-        }
-        #show-hidden {
-          min-width: min(146px, 100%);
-          margin: 0 -5px -5px;
-          background: ${Ed11y.theme.primary};
-          color: ${Ed11y.theme.primaryText};
-          border: 0;
-        }
-        .next[hidden] + #show-hidden {
-          margin-top: 22px;
-        }
-        #show-hidden[aria-pressed="true"] {
-          background: ${Ed11y.theme.bg};
-          color: ${Ed11y.theme.text};
-          box-shadow: inset 8px 1px ${Ed11y.theme.primary};
-        }
-        #show-hidden:hover, #show-hidden:focus-visible {
-          color: ${Ed11y.theme.primary};
-          background: ${Ed11y.theme.primaryText};
-          box-shadow: inset 8px 1px ${Ed11y.theme.primary};
-        }
-        .content button:hover {
-          background: ${Ed11y.theme.bg};
-          color: ${Ed11y.theme.text};
-          box-shadow: inset 0 0 0 1px ${Ed11y.theme.text};
-        }
-        .warning {
-          background: ${Ed11y.theme.warning};
-          color: #111;
-        }
-        .error {
-          background: ${Ed11y.theme.bgHighlight};
-          color: #fff;
-        }
-        #issues-tab:not(.hidden) {
-          display: flex;
-          min-height: 3.25em;
-          gap: 8px;
-        }
-        #issues-tab > div {
-          flex: 1 1 auto;
-          align-self: center;
-        }
-        #headings-tab, #alts-tab {
-          max-height: max(240px, 50vh);
-          overflow: auto;
-        }
-        #outline, #alt-list {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-        }
-        #outline li {
-          padding: 5px;
-        }
-        #outline a {
-          text-decoration: none;
-          display: block;
-        }
-        #outline a:hover {
-          text-decoration: underline;
-        }
-        #alt-list li {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 1em;
-          padding: 8px;
-          margin: 8px 0;
-          box-shadow: 0 4px ${Ed11y.theme.bg}, 0 5px ${Ed11y.theme.primary}22;
-        }
-        #alt-list li span {
-          flex: 0 1 calc(100% - 100px);
-        }
-        #alt-list li img {
-          flex: 0 1 80px;
-          width: 80px;
-          align-self: flex-start;
-        }
-        .sr-only {
-          display: block;
-          width: 1px;
-          hight: 1px;
-          overflow: hidden;
-          opacity: 0;
-          position: absolute;
-        }
-      `;
-
-      this.setAttribute('style', 'outline: 0;');
+      this.style.setProperty('outline', '0');
+      this.classList.add('ed11y-element');
       const shadow = this.attachShadow({mode: 'open'});
       let wrapper = document.createElement('div');
-      wrapper.setAttribute('class','wrapper');
+      wrapper.classList.add('ed11y-wrapper', 'ed11y-panel-wrapper');
       wrapper.innerHTML = this.template();
-      let style = document.createElement('style');
-      style.textContent = Ed11y.baseCSS + this.panelCSS + Ed11y.options.panelCSS;
-      shadow.appendChild(style);
+      Ed11y.attachCSS(shadow);
       shadow.appendChild(wrapper);
       Ed11y.panel = wrapper;
-      Ed11y.panelToggle = wrapper.querySelector('#toggle');
+      Ed11y.panelToggle = wrapper.querySelector('#ed11y-toggle');
       Ed11y.panelMessage = wrapper.querySelector('.content-text');
       Ed11y.panelCount = wrapper.querySelector('.count');
-      Ed11y.panelJumpNext = wrapper.querySelector('.jump.next');
-      Ed11y.panelJumpPrev = wrapper.querySelector('.jump.prev');
+      Ed11y.panelJumpNext = wrapper.querySelector('.ed11y-jump.next');
+      Ed11y.panelJumpPrev = wrapper.querySelector('.ed11y-jump.prev');
       Ed11y.panelJumpNext.addEventListener('click', this.jumpTo);
       Ed11y.panelJumpPrev.addEventListener('click', this.jumpTo);
-      Ed11y.showDismissed = wrapper.querySelector('#show-hidden');
+      Ed11y.showDismissed = wrapper.querySelector('#ed11y-show-hidden');
       Ed11y.showDismissed.addEventListener('click', function(){
         Ed11y.toggleShowDismissals();
       });
       Ed11y.announce = wrapper.querySelector('.announce');
-      Ed11y.panelTabs = wrapper.querySelectorAll('.buttonbar button');
+      Ed11y.panelTabs = wrapper.querySelectorAll('.ed11y-buttonbar button');
       Ed11y.panelTabs.forEach(tab => {
         // todo postpone: needed?
         tab.addEventListener('click', this.handleBarClick);
@@ -407,10 +147,10 @@ class Ed11yElementPanel extends HTMLElement {
     event.preventDefault();
     let id = event.currentTarget.getAttribute('id');
     switch (id) {
-    case 'toggle':
+    case 'ed11y-toggle':
       Ed11y.togglePanel();
       break;
-    case 'minimize':
+    case 'ed11y-minimize':
       Ed11y.minimize();
       break;
     default:
@@ -421,6 +161,7 @@ class Ed11yElementPanel extends HTMLElement {
 
   static get observedAttributes() { return ['style']; }
 
+  // todo: WHAT WAS THIS? MOVE TO PROPS MAY BREAK...
   attributeChangedCallback(attrName, oldValue, newValue) {
     if (attrName === 'style' && this.initialized === true ) {
       let div = this.shadowRoot?.querySelector('div');
@@ -438,33 +179,15 @@ class Ed11yElementHeadingLabel extends HTMLElement {
     if (!this.initialized) {
       const shadow = this.attachShadow({mode: 'open'});
       let wrapper = document.createElement('div');
-      wrapper.setAttribute('class','wrapper');
+      wrapper.classList.add('ed11y-wrapper', 'ed11y-heading-wrapper');
       let i = this.dataset.ed11yHeadingOutline;
       let result = Ed11y.headingOutline[i];
       wrapper.innerHTML = 'H' + result[1];
       let issues = !!result[2];
       wrapper.classList.add('issue' + issues);
-      let style = document.createElement('style');
       let fontSize = Math.max(52 - 8 * result[1], 12);
-      let headingCSS = `
-        :host {
-          position: absolute;
-          margin-top:-.5em;
-        }
-        .wrapper {          
-          background: ${Ed11y.theme.primary}ee;
-          color: ${Ed11y.theme.primaryText};
-          box-shadow: 0 0 0 1px ${Ed11y.theme.bg}ee, 0 0 0 4px ${Ed11y.theme.primary}ee, 1px 1px 5px 2px #000;
-          padding: 0 .5em;
-          line-height: 1.2;
-          border-radius: ${Ed11y.theme.borderRadius};
-          margin-left: 35px;
-          font-weight: 400;
-          font-size: ${fontSize}px;
-        }
-      `;
-      style.textContent = Ed11y.baseCSS + headingCSS + Ed11y.options.headingCSS;
-      shadow.appendChild(style);
+      wrapper.style.setProperty('font-size', fontSize + 'px');
+      Ed11y.attachCSS(wrapper);
       shadow.appendChild(wrapper);
       this.initialized = true;
     }

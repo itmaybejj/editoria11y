@@ -9,7 +9,7 @@ class Ed11yElementAlt extends HTMLElement {
     if (!this.initialized) {
       const shadow = this.attachShadow({mode: 'open'});
       let altTextWrapper = document.createElement('div');
-      altTextWrapper.setAttribute('class','wrapper');
+      altTextWrapper.classList.add('ed11y-wrapper','ed11y-alt-wrapper');
       let img = Ed11y.imageAlts[this.dataset.ed11yImg];
       // img[el, src, altLabel, altStyle]
 
@@ -17,34 +17,7 @@ class Ed11yElementAlt extends HTMLElement {
       altSpan.textContent = img[2];
       altSpan.classList.add(img[3]);
       altTextWrapper.appendChild(altSpan);
-      const style = document.createElement('style');
-      const altCSS = `
-        :host {
-          position: absolute;
-        }
-        div {
-          position: absolute;
-          bottom: 0;
-          left:0;
-          right:0;
-        }
-        span {
-          background: ${Ed11y.theme.primary}f3;
-          color: ${Ed11y.theme.primaryText};
-          z-index: ${Ed11y.options.buttonZIndex - 1};
-          font-weight: 500;
-          padding: 6px;
-          position: absolute;
-          bottom: 12px;
-          left: 0;
-          right: 0;
-          box-shadow: 0 1px, 0 -1px; 
-        }
-        .warning { background: ${Ed11y.theme.warning}; color: #111;}
-        .error { background: ${Ed11y.theme.bgHighlight};}
-      `;
-      style.textContent = Ed11y.baseCSS + altCSS + Ed11y.options.altCSS;
-      shadow.appendChild(style);
+      Ed11y.attachCSS(altTextWrapper);
       shadow.appendChild(altTextWrapper);
       this.initialized = true;
     }

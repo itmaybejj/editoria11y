@@ -6,9 +6,13 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.1.3';
+    Ed11y.version = '2.1.4';
 
     let defaultOptions = {
+
+      // Relative or absolute
+      //cssUrls: false, // ['/folder/editoria11y.css','/folder/custom.css']
+      cssUrls: false,
 
       // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
       checkRoots: false,
@@ -75,7 +79,6 @@ class Ed11y {
         text: '#20160c',
         primary: '#276499',
         primaryText: '#fffdf7',
-        secondary: '#20160c',
         button: 'transparent', // deprecate?
         panelBar: '#fffffe',
         panelBarText: '#20160c',
@@ -96,7 +99,6 @@ class Ed11y {
         text: '#f4f7ff',
         primary: '#3052a0',
         primaryText: '#f4f7ff',
-        secondary: '#20160c',
         button: 'transparent',
         panelBar: '#3052a0',
         panelBarText: '#f4f7ff',
@@ -117,7 +119,6 @@ class Ed11y {
         text: '#20160c',
         primary: '#0a307a',
         primaryText: '#fffdf7',
-        secondary: '#20160c',
         panelBar: '#0a307a',
         panelBarText: '#f4f7ff',
         panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
@@ -135,14 +136,9 @@ class Ed11y {
       // Base z-index for buttons.
       buttonZIndex: 9999,
       // CSS overrides and additions.
-      baseFontSize: 14, // px
+
+      baseFontSize: '14px', // px
       baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-      baseCSS: '',      // Applies to all elements.
-      altCSS: '',       // Applies to alt text visualizer.
-      highlightCSS: '', // Applied IN PAGE and affects your theme.
-      panelCSS: '',     // Applies in panel in lower right.
-      resultCSS: '',    // Applies in tooltip toggle buttons.
-      tipCSS: '',       // Applies in tooltips.
 
       // Test customizations
       embeddedContent: false, // todo remove in favor of custom checks
@@ -176,18 +172,33 @@ class Ed11y {
     };
 
     Ed11y.theme = Ed11y.options[Ed11y.options.theme];
+    Ed11y.theme.baseFontSize = Ed11y.options.baseFontSize;
+    Ed11y.theme.buttonZIndex = Ed11y.options.buttonZIndex;
+    Ed11y.theme.baseFontFamily = Ed11y.options.baseFontFamily;
+
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
     }
-    Ed11y.baseCSS = `
-        :host{all: initial;}.hidden{display:none;}
-        .wrapper {
-         font-size:${Ed11y.options.baseFontSize}px;
-         line-height: 1.5;
-         font-family:${Ed11y.options.baseFontFamily};
-         }
-         ${Ed11y.options.baseCSS}
-      `;
+
+    if (!Ed11y.options.cssUrls) {
+      const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
+      Ed11y.options.cssUrls = [cssLink.getAttribute('href')];
+    }
+
+    const cssBundle = document.createElement('div');
+    cssBundle.setAttribute('hidden','');
+    Ed11y.options.cssUrls?.forEach( sheet => {
+      const cssLink = document.createElement('link');
+      cssLink.setAttribute('rel', 'stylesheet');
+      cssLink.setAttribute('media', 'all');
+      cssLink.setAttribute('href', sheet + '?v=' + Ed11y.version);
+      cssBundle.append(cssLink);
+    });
+
+    Ed11y.attachCSS = function(appendTo) {
+      appendTo.appendChild(cssBundle.cloneNode(true));
+    };
+
     Ed11y.elements = [];
     Ed11y.onLoad = true;
     Ed11y.showPanel = 'show';
@@ -434,16 +445,16 @@ class Ed11y {
             Ed11y.paintReady();
           }
         } else {
-          Ed11y.panel.classList.remove('shut');
-          Ed11y.panel.classList.add('active');
+          Ed11y.panel.classList.remove('ed11y-shut');
+          Ed11y.panel.classList.add('ed11y-active');
           Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
           if (Ed11y.dismissedCount > 0) {
             let text = Ed11y.dismissedCount === 1 ? Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
             Ed11y.showDismissed.textContent = text;
-            Ed11y.showDismissed.removeAttribute('hidden');
+            Ed11y.showDismissed.removeAttribute('ed11y-hidden');
           } else if (Ed11y.options.showDismissed === true) {
             // Reset show hidden default option when irrelevant.
-            Ed11y.showDismissed.setAttribute('hidden', '');
+            Ed11y.showDismissed.setAttribute('ed11y-hidden', '');
             Ed11y.showDismissed.setAttribute('aria-pressed', 'false');
             Ed11y.options.showDismissed = false;
           }
@@ -460,19 +471,19 @@ class Ed11y {
           }
         }
         if (Ed11y.totalCount > 0 || (Ed11y.options.showDismissed && Ed11y.dismissedCount > 0)) {
-          Ed11y.panelJumpNext.removeAttribute('hidden');
+          Ed11y.panelJumpNext.removeAttribute('ed11y-hidden');
           if (Ed11y.totalCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
-            Ed11y.panelJumpPrev.setAttribute('hidden', '');
+            Ed11y.panelJumpPrev.setAttribute('ed11y-hidden', '');
           } else {
-            Ed11y.panelJumpPrev.removeAttribute('hidden');
+            Ed11y.panelJumpPrev.removeAttribute('ed11y-hidden');
           }
           if (Ed11y.errorCount > 0) {
-            Ed11y.panel.classList.remove('warnings', 'pass');
-            Ed11y.panel.classList.add('errors');
+            Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-pass');
+            Ed11y.panel.classList.add('ed11y-errors');
           }
           else if (Ed11y.warningCount > 0) {
-            Ed11y.panel.classList.remove('errors', 'pass');
-            Ed11y.panel.classList.add('warnings');
+            Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-pass');
+            Ed11y.panel.classList.add('ed11y-warnings');
           }
           Ed11y.panelCount.textCount = Ed11y.totalCount;
           Ed11y.panelCount.style.display = 'inline-block';
@@ -484,12 +495,12 @@ class Ed11y {
           Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
         }
         else {
-          Ed11y.panelJumpNext.setAttribute('hidden', '');
-          Ed11y.panelJumpPrev.setAttribute('hidden', '');
+          Ed11y.panelJumpNext.setAttribute('ed11y-hidden', '');
+          Ed11y.panelJumpPrev.setAttribute('ed11y-hidden', '');
 
           Ed11y.panelCount.style.display = 'display: none;';
-          Ed11y.panel.classList.remove('warnings', 'errors');
-          Ed11y.panel.classList.add('pass');
+          Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-errors');
+          Ed11y.panel.classList.add('ed11y-pass');
           if (Ed11y.dismissedCount > 0) {
             // todo: title attribute to explain the difference?
             Ed11y.panel.querySelector('.toggle-count').textContent = 'i';
@@ -542,8 +553,8 @@ class Ed11y {
       // Reset main panel.
       Ed11y.panelJumpNext?.setAttribute('data-ed11y-goto', '0');
       Ed11y.panelJumpPrev?.setAttribute('data-ed11y-goto', '0');
-      Ed11y.panel?.classList.add('shut');
-      Ed11y.panel?.classList.remove('active');
+      Ed11y.panel?.classList.add('ed11y-shut');
+      Ed11y.panel?.classList.remove('ed11y-active');
       Ed11y.panelToggle?.setAttribute('aria-expanded', 'false');
       Ed11y.running = false;
     };
@@ -689,7 +700,7 @@ class Ed11y {
           Ed11y.panelJumpNext.focus();
         } else {
           window.setTimeout(function () {
-            let focus = Ed11y.panel.querySelector('#issues-tab');
+            let focus = Ed11y.panel.querySelector('#ed11y-issues-tab');
             focus.focus();
           }, 100);
         }
@@ -757,9 +768,7 @@ class Ed11y {
         let previousTop = 0;
         let previousNudge = 0;
         Ed11y.elements.jumpList.forEach(mark => {
-          if (mark.hasAttribute('style')) {
-            mark.removeAttribute('style');
-          }
+          mark.style.setProperty('transform', null);
           let offset = mark.getBoundingClientRect();
           let nudgeTop = 0;
           let overlap = 36;
@@ -791,33 +800,27 @@ class Ed11y {
     };
 
     Ed11y.paintReady = function () {
-      const highlightCSS = `ed11y-element-result, ed11y-element-panel {
-              opacity: 1; 
-              outline: 0 !important;
-            }
-            .ed11y-hidden-highlight {
-              box-shadow: inset 0 0 0 1px ${Ed11y.theme.warning}, inset 0 0 0 2px ${Ed11y.theme.primary}, 0 0 0 1px ${Ed11y.theme.warning}, 0 0 0 3px ${Ed11y.theme.primary}, 0 0 1px 3px !important;
-            }
-            .ed11y-ring-red {
-              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.theme.alert}, 0 0 0 3px ${Ed11y.theme.alert}, 0 0 1px 3px;
-              outline: 2px solid ${Ed11y.theme.alert};
-              outline-offset: 1px;
-            }
-            .ed11y-ring-yellow {
-              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.theme.warning}, 0 0 0 3px ${Ed11y.theme.warning}, 0 0 1px 3px;
-              outline: 2px solid ${Ed11y.theme.warning};
-              outline-offset: 1px;
-            }
-          `;
-      let inlineStyle = document.createElement('style');
-      inlineStyle.textContent = highlightCSS + Ed11y.options.highlightCSS;
-      document.querySelector('body')?.appendChild(inlineStyle);
+
+      //let inlineStyle = document.createElement('style');
+      // <link rel="stylesheet" media="all"
+      // href="/sites/default/files/css/css_ppdjrs-j8LWrbJLTZocZt07yzSg1TYZjYHWeLzxKn4w.css?delta=0&amp;language=en&amp;theme=olivero&amp;include=eJx9UFtuwzAMu5Ado0fYSQbZZlthjmVITrLcfmkxZ0M_-iNRpB6EktSO775QCVmXRmVKJ-ML1y9zyNxFmS6XPfzDznbrmEMkg0uiGAsodV7xHHZSDqgSmmxQZB93H4ukP-EKZLcyNgvPOM2Sl4JTr7TyjTpL9YbDWibdT9FAmu5-44xXrpKqbK6LlEgafrNbDDp8PvDEx05z6d0XxqzdRXta-mgZ9euRCZao4SPPXF3k22fjhjDADzVxj04">
+
+      for (const [key, value] of Object.entries(Ed11y.theme)) {
+        document.documentElement.style.setProperty('--ed11y-' + key, value);
+      }
+
+      if (document.querySelector('body')) {
+        // May be redundant, but preloads unbundled files.
+        Ed11y.attachCSS(document.querySelector('body'));
+      }
+
       Ed11y.roots.forEach((root) => {
         // Shadow elements don't inherit styles, so they need their own copy.
         if (Ed11y.options.shadowComponents) {
           root.querySelectorAll(Ed11y.options.shadowComponents)?.forEach((shadowHost) => {
-            let anotherInlineStyle = inlineStyle.cloneNode(true);
-            shadowHost.shadowRoot?.appendChild(anotherInlineStyle);
+            if (shadowHost.shadowRoot) {
+              Ed11y.attachCSS(shadowHost.shadowRoot);
+            }
           });
         }
       });
@@ -836,8 +839,9 @@ class Ed11y {
         }, 150, loopCount);
       }
       // Reset any previous alignments
-      tip.setAttribute('style', '');
-      arrow.setAttribute('style', '');
+      tip.style.setProperty('transform',null);
+      arrow.style.setProperty('left', null);
+      arrow.style.setProperty('top', null);
 
       // Find button on page
       let scrollTop = window.scrollY;
@@ -951,14 +955,14 @@ class Ed11y {
     Ed11y.togglePanel = function () {
       if (!Ed11y.doubleClickPrevent) {
         // todo beta: revisit aria states and announcements.
-        if (Ed11y.panel.classList.contains('active') && Ed11y.panel.classList.contains('shut')) {
+        if (Ed11y.panel.classList.contains('ed11y-active') && Ed11y.panel.classList.contains('ed11y-shut')) {
           Ed11y.minimize();
         }
         // Prevent clicks piling up while scan is running.
         else if (Ed11y.running !== true) {
           Ed11y.running = true;
           // Re-scan each time the panel reopens.
-          if (Ed11y.panel.classList.contains('active') === false) {
+          if (Ed11y.panel.classList.contains('ed11y-active') === false) {
             Ed11y.onLoad = false;
             Ed11y.showPanel = true;
             Ed11y.checkAll();
@@ -978,13 +982,14 @@ class Ed11y {
     Ed11y.showHeadingsPanel = function () {
       // Visualize the document outline
 
-      let panelOutline = Ed11y.panel.querySelector('#outline');
+      let panelOutline = Ed11y.panel.querySelector('#ed11y-outline');
 
       if (Ed11y.headingOutline.length) {
         panelOutline.innerHTML = '';
         Ed11y.headingOutline.forEach((el, i) => {
           // Todo implement outline ignore function.
           let mark = document.createElement('ed11y-element-heading-label');
+          mark.classList.add('ed11y-element', 'ed11y-element-heading');
           mark.dataset.ed11yHeadingOutline = i;
           mark.setAttribute('id', 'ed11y-heading-' + i);
           mark.setAttribute('tabindex', '-1');
@@ -1020,10 +1025,10 @@ class Ed11y {
     };
     Ed11y.switchPanel = function (id) {
       // Switch main panel tab
-      Ed11y.panel.querySelector('.content > div:not(.hidden)')?.classList.add('hidden');
+      Ed11y.panel.querySelector('.content > div:not(.ed11y-hidden)')?.classList.add('ed11y-hidden');
       Ed11y.panel.querySelector('[aria-selected=true]')?.setAttribute('aria-selected', 'false');
       Ed11y.panel.querySelector('#' + id).setAttribute('aria-selected', 'true');
-      Ed11y.panel.querySelector('#' + id + '-tab')?.classList.remove('hidden');
+      Ed11y.panel.querySelector('#' + id + '-tab')?.classList.remove('ed11y-hidden');
       // todo beta what to show when no outline or images
       // todo postpone: error when no headings found at all?
       Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
@@ -1031,13 +1036,13 @@ class Ed11y {
 
       // Show extras
       switch (id) {
-      case 'alts':
+      case 'ed11y-alts':
         Ed11y.showAltPanel();
         break;
-      case 'headings':
+      case 'ed11y-headings':
         Ed11y.showHeadingsPanel();
         break;
-      case 'help':
+      case 'ed11y-help':
         Ed11y.showHelpPanel();
         break;
       default:
@@ -1052,7 +1057,10 @@ class Ed11y {
       Ed11y.findElements('altMark', 'ed11y-element-alt');
       Ed11y.elements.altMark?.forEach((el) => {
         let id = el.dataset.ed11yImg;
-        el.setAttribute('style', '');
+        el.style.setProperty('transform', null);
+        el.style.setProperty('height', null);
+        el.style.setProperty('width', null);
+
         let img = Ed11y.imageAlts[id][0];
         if (img.tagName !== 'IMG') {
           // Mark is placed outside the link in linked images.
@@ -1063,13 +1071,15 @@ class Ed11y {
         let newOffset = imgOffset.left - markOffset.left;
         let height = getComputedStyle(img).height;
         height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
-        el.setAttribute('style', `transform: translate(${newOffset}px, 0px); height: ${height}px; width: ${img.offsetWidth}px;`);
+        el.style.setProperty('transform', `translate(${newOffset}px, 0px)`);
+        el.style.setProperty('height', `${height}px`);
+        el.style.setProperty('width', `${img.offsetWidth}px`);
       });
     };
 
     Ed11y.showAltPanel = function () {
       // visualize image alts
-      let altList = Ed11y.panel.querySelector('#alt-list');
+      let altList = Ed11y.panel.querySelector('#ed11y-alt-list');
 
       if (Ed11y.imageAlts.length) {
         altList.innerHTML = '';
@@ -1078,6 +1088,7 @@ class Ed11y {
 
           // Label images
           let mark = document.createElement('ed11y-element-alt');
+          mark.classList.add('ed11y-element');
           mark.dataset.ed11yImg = i;
           el[0].insertAdjacentElement('beforebegin', mark);
 
@@ -1100,7 +1111,7 @@ class Ed11y {
     };
 
     Ed11y.showHelpPanel = function () {
-      let helpTab = Ed11y.panel.querySelector('#help-tab');
+      let helpTab = Ed11y.panel.querySelector('#ed11y-help-tab');
       helpTab.innerHTML = Ed11y.M.panelHelp;
     };
 
@@ -1116,7 +1127,7 @@ class Ed11y {
       let goMax = Ed11y.elements.jumpList.length - 1;
       let goNext = 0;
       if (Ed11y.totalCount > 1) {
-        Ed11y.panelJumpPrev.removeAttribute('hidden');
+        Ed11y.panelJumpPrev.removeAttribute('ed11y-hidden');
       }
       if (Ed11y.goto == goMax || Ed11y.goto > goMax) {
         // Reached end of loop or dismissal pushed us out of loop
@@ -1141,7 +1152,7 @@ class Ed11y {
 
     Ed11y.minimize = function () {
       let minimized = Ed11y.panel.classList.contains('shut') === 'true' ? true : false;
-      Ed11y.panel.classList.toggle('shut');
+      Ed11y.panel.classList.toggle('ed11y-shut');
       if (minimized === false) {
         window.setTimeout(function () {
           Ed11y.panelToggle.focus();
@@ -1150,7 +1161,7 @@ class Ed11y {
     };
 
     Ed11y.windowResize = function () {
-      if (Ed11y.panel?.classList.contains('active') === true) {
+      if (Ed11y.panel?.classList.contains('ed11y-active') === true) {
         Ed11y.alignAlts();
         Ed11y.alignButtons();
       }
