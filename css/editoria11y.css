@@ -86,7 +86,7 @@ ed11y-element-result, ed11y-element-panel {
     color: var(--ed11y-text, #20160c);
     border-radius: var(--ed11y-borderRadius, 1);
     box-shadow: 1px 1px 4px var(--ed11y-text, #20160c);
-    padding: var(--ed11y-panelBorder, 0)px;
+    padding: var(--ed11y-panelBorder, 0);
 }
 
 .ed11y-panel-wrapper [tabindex]:focus-visible {
@@ -99,7 +99,7 @@ ed11y-element-result, ed11y-element-panel {
 
 .ed11y-panel-wrapper .content {
     padding: 4px 4px 4px 12px;
-    border: var(--ed11y-panelBorder, 0)px solid var(--ed11y-primary, #276499);
+    border: var(--ed11y-panelBorder, 0) solid var(--ed11y-primary, #276499);
     border-top: 0;
     border-radius: 0 0 var(--ed11y-borderRadius, 1) var(--ed11y-borderRadius, 1);
     color: var(--ed11y-text, #20160c);
@@ -126,7 +126,6 @@ ed11y-element-result, ed11y-element-panel {
 .ed11y-panel-wrapper button {
     background: var(--ed11y-button, transparent);
     padding: 7px 4px;
-    border-right: 1px solid var(--ed11y-primaryText, #fffdf7)55;
     flex: auto;
 }
 
@@ -135,13 +134,12 @@ ed11y-element-result, ed11y-element-panel {
 }
 
 .ed11y-panel-wrapper #shut-panel {
-    border-right: 0;
 }
 
 .ed11y-buttonbar button {
     color: var(--ed11y-panelBarText, #20160c);
     background: var(--ed11y-panelBar, #fffffe);
-    box-shadow: var(--ed11y-panelBarShadow, inset 0 -1px #0002, -1px 0 #0002);
+    box-shadow: var(--ed11y-panelBarShadow);
 }
 
 .ed11y-buttonbar button:hover {
@@ -160,7 +158,7 @@ ed11y-element-result, ed11y-element-panel {
 
 .ed11y-buttonbar button[aria-selected="true"] {
     background: var(--ed11y-activeTab, #276499);
-    box-shadow: inset 0 0 0 1px var(--ed11y-primary, #276499), inset 0 -2px var(--ed11y-primary, #276499)22;
+    box-shadow: inset 0 0 0 1px var(--ed11y-primary, #276499), inset 0 -2px var(--ed11y-primary, #276499);
     color: var(--ed11y-activeTabText, #fffffe);
     border: 0;
 }
@@ -475,7 +473,7 @@ ed11y-element-result, ed11y-element-panel {
     position: absolute;
     transform: rotate(45deg);
     left: -10px;
-    box-shadow: 0 0 0 var(--ed11y-panelBorder, 0)px var(--ed11y-bg, #fffffe), 2px 2px 4px var(--ed11y-primary, #276499)77;
+    box-shadow: 0 0 0 var(--ed11y-panelBorder, 0) var(--ed11y-bg, #fffffe), 2px 2px 4px var(--ed11y-primary, #276499);
     width: 20px;
     height: 20px;
     top: 6px;
@@ -508,8 +506,8 @@ ed11y-element-result, ed11y-element-panel {
     position:relative;
     width: clamp(18em, 36em, 89vw);
     display: none;
-    margin-top: calc(var(--ed11y-panelBorder) - 2)px;
-    box-shadow: 0 0 0 var(--ed11y-panelBorder, 0)px var(--ed11y-bg, #fffffe), 2px 2px 4px var(--ed11y-primary, #276499)77;
+    margin-top: calc(-2px - var(--ed11y-panelBorder, 0px));
+    box-shadow: 0 0 0 var(--ed11y-panelBorder, 0) var(--ed11y-bg, #fffffe), 2px 2px 4px var(--ed11y-primary, #276499);
 }
 
 @keyframes ed11y-fade-in {
@@ -603,7 +601,7 @@ ed11y-element-result, ed11y-element-panel {
     place-content: center;
     font-weight: 400;
     position: absolute;
-    top: -3px;
+    top: -2px;
     right: -2px;
     box-shadow: -1px 0 var(--ed11y-bg, #fffffe);
     background: transparent;

@@ -83,11 +83,11 @@ class Ed11y {
         panelBar: '#fffffe',
         panelBarText: '#20160c',
         panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
-        panelBorder: 0,
+        panelBorder: '0px', // '2px'
         activeTab: '#276499',
         activeTabText: '#fffffe',
         outlineWidth: 0,
-        borderRadius: 1,
+        borderRadius: '1px',
         ok: '#1f5381',
         warning: '#fad859',
         alert: '#b80519',
@@ -103,12 +103,12 @@ class Ed11y {
         panelBar: '#3052a0',
         panelBarText: '#f4f7ff',
         panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
-        panelBorder: 2,
+        panelBorder: '2px',
         activeTab: '#0a2051',
         activeTabText: '#fffffe',
         focusRing: 'cyan',
-        outlineWidth: 2,
-        borderRadius: 3,
+        outlineWidth: '2px',
+        borderRadius: '3px',
         ok: '#0a307a',
         warning: '#fad859',
         alert: '#b80519',
@@ -121,14 +121,14 @@ class Ed11y {
         primaryText: '#fffdf7',
         panelBar: '#0a307a',
         panelBarText: '#f4f7ff',
-        panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
-        panelBorder: 2,
+        panelBarShadow: 'inset 0 -1px #fff2, -1px 0 #fff2',
+        panelBorder: '2px',
         button: 'transparent',
         activeTab: '#b9c0cf',
         activeTabText: '#20160c',
         focusRing: '#007aff',
-        outlineWidth: 2,
-        borderRadius: 3,
+        outlineWidth: '2px',
+        borderRadius: '3px',
         ok: '#0a307a',
         warning: '#fad859',
         alert: '#b80519',
@@ -208,7 +208,7 @@ class Ed11y {
       Ed11y.checkRunPrevent = () => {
         let preventCheck = Ed11y.options.preventCheckingIfPresent ? document.querySelector(Ed11y.options.preventCheckingIfPresent) : false;
         if (!preventCheck && !!Ed11y.options.preventCheckingIfAbsent) {
-          preventCheck = document.querySelector(`:is(${Ed11y.options.preventCheckingIfAbsent})`) === null ? true : false;
+          preventCheck = document.querySelector(`:is(${Ed11y.options.preventCheckingIfAbsent})`) === null;
         }
         return preventCheck;
       };
@@ -270,9 +270,9 @@ class Ed11y {
           }
 
           // Check for ignoreAll element only once.
-          Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null ? true : false;
+          Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
           if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
-            Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) === null ? false : true;
+            Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
           }
 
           // Run tests
@@ -420,12 +420,10 @@ class Ed11y {
           document.querySelector('body').appendChild(panel);
           // todo: open on assertive with count mismatch or if showDismissed is set.
           if (Ed11y.totalCount > 0 && !Ed11y.ignoreAll && Ed11y.options.alertMode === 'assertive' && Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount) {
-            // User has already seen these errors, panel will not open.
-            Ed11y.showPanel = true;
-          } else if (Ed11y.options.showDismissed && (Ed11y.dismissedCount > 0 || Ed11y.totalCount > 0)) {
+            // User has not already seen these errors, panel will not open.
             Ed11y.showPanel = true;
           } else {
-            Ed11y.showPanel = false;
+            Ed11y.showPanel = Ed11y.options.showDismissed && (Ed11y.dismissedCount > 0 || Ed11y.totalCount > 0);
           }
         } else {
           Ed11y.showPanel = true;
@@ -449,12 +447,11 @@ class Ed11y {
           Ed11y.panel.classList.add('ed11y-active');
           Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
           if (Ed11y.dismissedCount > 0) {
-            let text = Ed11y.dismissedCount === 1 ? Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
-            Ed11y.showDismissed.textContent = text;
-            Ed11y.showDismissed.removeAttribute('ed11y-hidden');
+            Ed11y.showDismissed.textContent = Ed11y.dismissedCount === 1 ? Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+            Ed11y.showDismissed.removeAttribute('hidden');
           } else if (Ed11y.options.showDismissed === true) {
             // Reset show hidden default option when irrelevant.
-            Ed11y.showDismissed.setAttribute('ed11y-hidden', '');
+            Ed11y.showDismissed.setAttribute('hidden', '');
             Ed11y.showDismissed.setAttribute('aria-pressed', 'false');
             Ed11y.options.showDismissed = false;
           }
@@ -471,11 +468,11 @@ class Ed11y {
           }
         }
         if (Ed11y.totalCount > 0 || (Ed11y.options.showDismissed && Ed11y.dismissedCount > 0)) {
-          Ed11y.panelJumpNext.removeAttribute('ed11y-hidden');
+          Ed11y.panelJumpNext.removeAttribute('hidden');
           if (Ed11y.totalCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
-            Ed11y.panelJumpPrev.setAttribute('ed11y-hidden', '');
+            Ed11y.panelJumpPrev.setAttribute('hidden', '');
           } else {
-            Ed11y.panelJumpPrev.removeAttribute('ed11y-hidden');
+            Ed11y.panelJumpPrev.removeAttribute('hidden');
           }
           if (Ed11y.errorCount > 0) {
             Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-pass');
@@ -495,8 +492,8 @@ class Ed11y {
           Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
         }
         else {
-          Ed11y.panelJumpNext.setAttribute('ed11y-hidden', '');
-          Ed11y.panelJumpPrev.setAttribute('ed11y-hidden', '');
+          Ed11y.panelJumpNext.setAttribute('hidden', '');
+          Ed11y.panelJumpPrev.setAttribute('hidden', '');
 
           Ed11y.panelCount.style.display = 'display: none;';
           Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-errors');
@@ -715,7 +712,7 @@ class Ed11y {
       Ed11y.checkAll(false, 'show');
 
       Ed11y.showDismissed.setAttribute('aria-pressed', !!Ed11y.options.showDismissed);
-      Ed11y.showDismissed.textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlertsContent : Ed11y.M.buttonShowHiddenAlertsContent;
+      Ed11y.showDismissed.textContent = Ed11y.M.buttonShowHiddenAlertsContent;
     };
 
     Ed11y.dismissHelp = function (el) {
@@ -844,65 +841,68 @@ class Ed11y {
       arrow.style.setProperty('top', null);
 
       // Find button on page
-      let scrollTop = window.scrollY;
+      const scrollTop = window.scrollY;
       let buttonOffset = button.getBoundingClientRect();
+      let buttonSize = buttonOffset.width;
       if (buttonOffset.top === 0 && buttonOffset.left === 0) {
         // ruh roh invisible button
-        let firstVisibleParent = Ed11y.firstVisibleParent(button.getRootNode().host);
+        const firstVisibleParent = Ed11y.firstVisibleParent(button.getRootNode().host);
         if (firstVisibleParent) {
           buttonOffset = firstVisibleParent.getBoundingClientRect();
         }
+        // Estimate from font when it can't be measured.
+        buttonSize = parseInt(Ed11y.options.baseFontSize) * 3;
       }
-      let buttonLeft = buttonOffset.left + document.body.scrollLeft;
+      const buttonLeft = buttonOffset.left + document.body.scrollLeft;
       toolTip.style.setProperty('top', buttonOffset.top + scrollTop + 'px');
       // todo: need left scroll too for horizontally scrolled pages
       toolTip.style.setProperty('left', buttonOffset.left + 'px');
-      let tipWidth = tip.offsetWidth;
-      let tipHeight = tip.offsetHeight;
-      let windowWidth = window.innerWidth;
-      let windowBottom = scrollTop + window.innerHeight;
+      const tipWidth = tip.offsetWidth;
+      const tipHeight = tip.offsetHeight;
+      const windowWidth = window.innerWidth;
+      const windowBottom = scrollTop + window.innerHeight;
 
       let direction = 'under';
 
       // Default to displaying under
-      if (buttonOffset.top + tipHeight + scrollTop + buttonOffset.height + 22 > windowBottom) {
+      if (buttonOffset.top + tipHeight + scrollTop + buttonSize + 22 > windowBottom) {
         // If there's no room under in the viewport...
-        if (windowWidth > tipWidth * 1.5 && windowWidth - (buttonLeft + tipWidth + buttonOffset.width + 56) > 0 && buttonOffset.top + 130 < window.innerHeight) {
+        if (windowWidth > tipWidth * 1.5 && windowWidth - (buttonLeft + tipWidth + buttonSize + 56) > 0 && buttonOffset.top + 130 < window.innerHeight) {
           direction = 'right';
         } else if (buttonOffset.top > tipHeight + 15) {
           direction = 'above';
         } else if (windowWidth > tipWidth * 1.5 && buttonLeft - tipWidth - 50 > 0) {
           direction = 'left';
-        } else if (buttonOffset.bottom + tipHeight > document.documentElement.clientHeight - 50 && window.innerHeight > buttonOffset.height + tipHeight) {
+        } else if (buttonOffset.bottom + tipHeight > document.documentElement.clientHeight - 50 && window.innerHeight > buttonSize + tipHeight) {
           // No room anywhere in viewport we're at the end of the page.
           direction = 'above';
         }
         // Back to default.
       }
 
-      let nudgeX = 0;
+      let nudgeX;
       let nudgeY = 0;
 
       if (direction === 'under') {
         // Pin to the left edge, unless the tip is not wide enough to reach:
         if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
-          if (tipWidth - ((buttonOffset.width / 2) - 1) > buttonOffset.left) {
+          if (tipWidth - ((buttonSize / 2) - 1) > buttonOffset.left) {
             // Under, overhang to left
-            nudgeX = (buttonOffset.width / 2) - 1 - buttonOffset.left;
+            nudgeX = (buttonSize / 2) - 1 - buttonOffset.left;
             arrow.style.setProperty('left', Math.max(buttonOffset.left, 15) - 9 + 'px');
           } else {
             arrow.style.setProperty('left', tipWidth - 26 + 'px');
-            nudgeX = buttonOffset.width / 2 + 15 - tipWidth;
+            nudgeX = buttonSize / 2 + 15 - tipWidth;
           }
         } else {
           // Under, overhang to right
-          nudgeX = buttonOffset.width + 8 - tipWidth / 5;
-          arrow.style.setProperty('left', tipWidth / 5 - (buttonOffset.width / 2) - 18 + 'px');
+          nudgeX =  buttonSize + 8 - tipWidth / 5;
+          arrow.style.setProperty('left', tipWidth / 5 - (buttonSize / 2) - 18 + 'px');
         }
 
         arrow.dataset.direction = 'under';
-        nudgeY = buttonOffset.height + 16;
+        nudgeY = buttonSize + 16;
       }
       else if (direction === 'above') {
         // Slide left or right to center tip on page.
@@ -910,17 +910,18 @@ class Ed11y {
         arrow.style.setProperty('top', tipHeight);
         if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
-          if (tipWidth - ((buttonOffset.width / 2) - 1) > buttonOffset.left) {
-            // Under, overhand to left
-            nudgeX = ((buttonOffset.width / 2) - 1) - buttonOffset.left;
+          if (tipWidth - ((buttonSize / 2) - 1) > buttonOffset.left) {
+            // Overhang to left
+            nudgeX = ((buttonSize / 2) - 1) - buttonOffset.left;
             arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
           } else {
+            // Overhang to the right.
             arrow.style.setProperty('left', tipWidth - 26 + 'px');
-            nudgeX = buttonOffset.width / 2 + 15 - tipWidth;
+            nudgeX = buttonSize / 2 + 15 - tipWidth;
           }
         } else {
-          nudgeX = buttonOffset.width + 8 - tipWidth / 5;
-          arrow.style.setProperty('left', tipWidth / 5 - (buttonOffset.width / 2) - 18 + 'px');
+          nudgeX = buttonSize + 8 - tipWidth / 5;
+          arrow.style.setProperty('left', tipWidth / 5 - (buttonSize / 2) - 18 + 'px');
         }
         arrow.dataset.direction = 'above';
         arrow.style.setProperty('top', `${tipHeight + 15 + Ed11y.theme.outlineWidth}px`);
@@ -940,7 +941,7 @@ class Ed11y {
           arrow.dataset.direction = 'left';
         } else {
           // direction is right
-          nudgeX = buttonOffset.width + 14;
+          nudgeX = buttonSize + 14;
           arrow.dataset.direction = 'right';
         }
       }
@@ -1125,11 +1126,11 @@ class Ed11y {
     Ed11y.setCurrentJump = function () {
       // Set next/previous buttons
       let goMax = Ed11y.elements.jumpList.length - 1;
-      let goNext = 0;
+      let goNext;
       if (Ed11y.totalCount > 1) {
-        Ed11y.panelJumpPrev.removeAttribute('ed11y-hidden');
+        Ed11y.panelJumpPrev.removeAttribute('hidden');
       }
-      if (Ed11y.goto == goMax || Ed11y.goto > goMax) {
+      if (Ed11y.goto === goMax || Ed11y.goto > goMax) {
         // Reached end of loop or dismissal pushed us out of loop
         goNext = 0;
         // todo parameterize
@@ -1151,7 +1152,7 @@ class Ed11y {
     };
 
     Ed11y.minimize = function () {
-      let minimized = Ed11y.panel.classList.contains('shut') === 'true' ? true : false;
+      let minimized = Ed11y.panel.classList.contains('ed11y-shut') === true;
       Ed11y.panel.classList.toggle('ed11y-shut');
       if (minimized === false) {
         window.setTimeout(function () {
@@ -1457,28 +1458,16 @@ class Ed11y {
       if (el) {
         let style = window.getComputedStyle(el);
         if (el.classList.contains('ed11y-ring-red') || el.classList.contains('ed11y-ring-yellow')) {
-          if (
-            style.getPropertyValue('display') === 'none' ||
+          return !(style.getPropertyValue('display') === 'none' ||
             style.getPropertyValue('visibility') === 'hidden' ||
             style.getPropertyValue('opacity') === '0' ||
-            el.hasAttribute('hidden')
-          ) {
-            return false;
-          } else {
-            return true;
-          }
-        } else if (
-          // todo: if the element is display:none, can we push the tooltip to the nearest visible container and then open it?
-          style.getPropertyValue('display') === 'none' ||
+            el.hasAttribute('hidden'));
+        } else return !(style.getPropertyValue('display') === 'none' ||
           style.getPropertyValue('visibility') === 'hidden' ||
           style.getPropertyValue('opacity') === '0' ||
           el.offsetWidth === 0 ||
           el.offsetHeight === 0 ||
-          el.hasAttribute('hidden')) {
-          return false;
-        } else {
-          return true;
-        }
+          el.hasAttribute('hidden'));
       }
     };
 
@@ -1491,8 +1480,7 @@ class Ed11y {
         // Element is not known to be hidden.
         let parents = Ed11y.parents(el);
         let visibleParent = (parent) => Ed11y.visibleElement(parent);
-        let visible = parents.every(visibleParent);
-        return visible;
+        return parents.every(visibleParent);
       }
     };
 
@@ -1517,14 +1505,10 @@ class Ed11y {
     Ed11y.hiddenElementCheck = function (el) {
       // Checks if this element has been removed from the accessibility tree
       let style = window.getComputedStyle(el);
-      if (style.getPropertyValue('display') === 'none' ||
+      return !(style.getPropertyValue('display') === 'none' ||
         style.getPropertyValue('visibility') === 'hidden' ||
         el.hasAttribute('aria-hidden') ||
-        el.hasAttribute('hidden')) {
-        return false;
-      } else {
-        return true;
-      }
+        el.hasAttribute('hidden'));
     };
 
     Ed11y.elementNotHidden = function (el) {
@@ -1536,8 +1520,7 @@ class Ed11y {
         // Element is not known to be hidden.
         let parents = Ed11y.parents(el);
         let notHiddenParent = (parent) => Ed11y.hiddenElementCheck(parent);
-        let notHidden = parents.every(notHiddenParent);
-        return notHidden;
+        return parents.every(notHiddenParent);
       }
     };
 
@@ -1547,8 +1530,7 @@ class Ed11y {
 
     Ed11y.getOpenTip = function () {
       Ed11y.findElements('openButton', 'ed11y-element-result[data-ed11y-open="true"]');
-      let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-      return activeTip;
+      return document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
     };
 
     Ed11y.focusActiveResult = function () {

@@ -19,7 +19,7 @@ class Ed11yElementPanel extends HTMLElement {
           ${Ed11y.M.buttonAltsContent}
       </button>
       <button role="tab" id='ed11y-help' aria-selected='false' aria-controls='ed11y-help-tab' title='${Ed11y.M.buttonAboutTitle}'>?</button>
-      <button role="tab"  id='ed11y-minimize' aria-selected='false' title='Minimize panel' aria-label="minimize" aria-pressed="false"><span>&ndash;</span></button>
+      <button role="tab"  id='ed11y-minimize' aria-selected='false' title='Minimize panel' aria-label="minimize"><span>&ndash;</span></button>
       <button type='button' id='ed11y-toggle'><span class='close'>&times;</span><span class='open'><span class='icon'></span><span class='toggle-count'></span></span></button>
     </div>
     <div class="content">
@@ -31,7 +31,7 @@ class Ed11yElementPanel extends HTMLElement {
           <div class='ed11y-jumplinks'>
             <button class='ed11y-jump prev' data-ed11y-goto='0' hidden><span aria-hidden='true'>« </span><span class='jump-prev'>${Ed11y.M.buttonPrevContent}</span></button>
             <button class='ed11y-jump next' data-ed11y-goto='0'><span class='jump-next'>${Ed11y.M.buttonFirstContent}</span> <span aria-hidden='true'> »</span></button>
-            <button id='ed11y-show-hidden' aria-pressed='${!!Ed11y.options.showDismissed}' hidden>${Ed11y.M.buttonShowHiddenAlertContent}</button>
+            <button id='ed11y-show-hidden' aria-pressed='${!!Ed11y.options.showDismissed}' hidden></button>
           </div>
         </div>
       <div id='ed11y-headings-tab' role="tabpanel" class="ed11y-hidden" aria-labelledby='ed11y-headings' tabindex='0'>
@@ -89,8 +89,9 @@ class Ed11yElementPanel extends HTMLElement {
     if (!Ed11y.elements.jumpList) {
       Ed11y.buildJumpList();
     }
-    // Find our button.
+    // Find next or first result in the dom ordered list of results.
     let goNum = parseInt(this.dataset.ed11yGoto);
+    goNum = Ed11y.elements.jumpList.length > goNum ? goNum : 0;
     let goto = Ed11y.elements.jumpList[goNum];
     goto.scrollIntoView({ block: 'center' });
 
@@ -100,12 +101,12 @@ class Ed11yElementPanel extends HTMLElement {
     let gotoResult = Ed11y.results[goto.getAttribute('data-ed11y-result')];
     let insert = gotoResult.position;
     let target;
-    // todo postpone this all belongs in the result open logic not here
+    // todo this belongs in the result open logic not here
     if (insert === 'beforebegin') {
       target = Ed11y.nextUntil(goto, ':not(ed11y-element-result)');
     }
     else if (insert === 'afterbegin') {
-      // todo mvp these are not being inserted right; revisit. maybe always before, just sometimes before link?
+      // todo:check that these are identified correctly.
       target = goto.parentElement;
     }
 
