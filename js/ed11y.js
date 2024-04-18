@@ -481,6 +481,10 @@ class Ed11y {
           else if (Ed11y.warningCount > 0) {
             Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-pass');
             Ed11y.panel.classList.add('ed11y-warnings');
+          } else {
+            // Issues present but dismissed.
+            Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-warnings');
+            Ed11y.panel.classList.add('ed11y-pass');
           }
           Ed11y.panelCount.textCount = Ed11y.totalCount;
           Ed11y.panelCount.style.display = 'inline-block';
@@ -711,7 +715,7 @@ class Ed11y {
       Ed11y.reset();
       Ed11y.checkAll(false, 'show');
 
-      Ed11y.showDismissed.setAttribute('aria-pressed', !!Ed11y.options.showDismissed);
+      Ed11y.showDismissed.setAttribute('aria-pressed', (!!Ed11y.options.showDismissed).toString());
       Ed11y.showDismissed.textContent = Ed11y.M.buttonShowHiddenAlertsContent;
     };
 
@@ -797,10 +801,6 @@ class Ed11y {
     };
 
     Ed11y.paintReady = function () {
-
-      //let inlineStyle = document.createElement('style');
-      // <link rel="stylesheet" media="all"
-      // href="/sites/default/files/css/css_ppdjrs-j8LWrbJLTZocZt07yzSg1TYZjYHWeLzxKn4w.css?delta=0&amp;language=en&amp;theme=olivero&amp;include=eJx9UFtuwzAMu5Ado0fYSQbZZlthjmVITrLcfmkxZ0M_-iNRpB6EktSO775QCVmXRmVKJ-ML1y9zyNxFmS6XPfzDznbrmEMkg0uiGAsodV7xHHZSDqgSmmxQZB93H4ukP-EKZLcyNgvPOM2Sl4JTr7TyjTpL9YbDWibdT9FAmu5-44xXrpKqbK6LlEgafrNbDDp8PvDEx05z6d0XxqzdRXta-mgZ9euRCZao4SPPXF3k22fjhjDADzVxj04">
 
       for (const [key, value] of Object.entries(Ed11y.theme)) {
         document.documentElement.style.setProperty('--ed11y-' + key, value);
@@ -906,7 +906,7 @@ class Ed11y {
       }
       else if (direction === 'above') {
         // Slide left or right to center tip on page.
-        nudgeY = -1 * (tipHeight + 13 + Ed11y.theme.outlineWidth);
+        nudgeY = -1 * (tipHeight + 13 + parseInt(Ed11y.theme.outlineWidth));
         arrow.style.setProperty('top', tipHeight);
         if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
@@ -924,7 +924,7 @@ class Ed11y {
           arrow.style.setProperty('left', tipWidth / 5 - (buttonSize / 2) - 18 + 'px');
         }
         arrow.dataset.direction = 'above';
-        arrow.style.setProperty('top', `${tipHeight + 15 + Ed11y.theme.outlineWidth}px`);
+        arrow.style.setProperty('top', `${tipHeight + 15 - parseInt(Ed11y.theme.outlineWidth)}px`);
       } else {
         // Left or right
         let tipBottom = buttonOffset.top + scrollTop + tipHeight;
@@ -991,7 +991,7 @@ class Ed11y {
           // Todo implement outline ignore function.
           let mark = document.createElement('ed11y-element-heading-label');
           mark.classList.add('ed11y-element', 'ed11y-element-heading');
-          mark.dataset.ed11yHeadingOutline = i;
+          mark.dataset.ed11yHeadingOutline = i.toString();
           mark.setAttribute('id', 'ed11y-heading-' + i);
           mark.setAttribute('tabindex', '-1');
           // Array: el, level, outlinePrefix
@@ -1067,8 +1067,8 @@ class Ed11y {
           // Mark is placed outside the link in linked images.
           img = img.querySelector('img');
         }
-        let markOffset = el.getClientRects();
-        let imgOffset = img.getClientRects();
+        let markOffset = el.getBoundingClientRect();
+        let imgOffset = img.getBoundingClientRect();
         let newOffset = imgOffset.left - markOffset.left;
         let height = getComputedStyle(img).height;
         height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
@@ -1090,7 +1090,7 @@ class Ed11y {
           // Label images
           let mark = document.createElement('ed11y-element-alt');
           mark.classList.add('ed11y-element');
-          mark.dataset.ed11yImg = i;
+          mark.dataset.ed11yImg = i.toString();
           el[0].insertAdjacentElement('beforebegin', mark);
 
           // Build alt list in panel
@@ -1144,8 +1144,8 @@ class Ed11y {
         // loop around
         goPrev = goMax + 1 + goPrev;
       }
-      Ed11y.panelJumpNext.dataset.ed11yGoto = goNext;
-      Ed11y.panelJumpPrev.dataset.ed11yGoto = goPrev;
+      Ed11y.panelJumpNext.dataset.ed11yGoto = goNext.toString();
+      Ed11y.panelJumpPrev.dataset.ed11yGoto = goPrev.toString();
       window.setTimeout(function () {
         Ed11y.panelJumpNext.querySelector('.jump-next').textContent = Ed11y.nextText;
       }, 250);
@@ -1219,7 +1219,7 @@ class Ed11y {
     // Gets trimmed and normalized inner text nodes.
     // Use computeText() instead for the full accessible name calculation.
     Ed11y.getText = function (el) {
-      return el.textContent.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
+      return el.textContent.replace(/[\n\r]+|\s{2,}/g, ' ').trim();
     };
 
     Ed11y.parents = function (el) {
@@ -1233,7 +1233,7 @@ class Ed11y {
     };
 
     // Handle aria-label or labelled-by. Latter "wins" and can self-label.
-    Ed11y.computeAriaLabel = function (element, recursing = false) {
+    Ed11y.computeAriaLabel = function (element, recursing = 0) {
       const labelledBy = element.getAttribute('aria-labelledby');
       if (!recursing && labelledBy) {
         const target = labelledBy.split(/\s+/);
@@ -1285,7 +1285,7 @@ class Ed11y {
     Ed11y.computeText = function (el, recursing = 0, excludeLinkClasses = false) {
 
       // Return immediately if there is an aria label.
-      let hasAria = Ed11y.computeAriaLabel(el, recursing, excludeLinkClasses);
+      let hasAria = Ed11y.computeAriaLabel(el, recursing);
       if (hasAria !== 'noAria') {
         return hasAria;
       }
@@ -1567,32 +1567,6 @@ class Ed11y {
       return String(string).replace(/[&<>"'`=/]/g, function (s) {
         return entityMap[s];
       });
-    };
-
-    Ed11y.builder = function (type, id, classes, attributes, textContent) {
-      let el = document.createElement(type);
-      if (id) {
-        el.setAttribute('id', id);
-      }
-      if (classes) {
-        if (typeof (classes) === 'string') {
-          el.classList.add(classes);
-        } else {
-          classes.forEach(str => {
-            el.classList.add(str);
-          });
-        }
-      }
-      if (typeof (attributes) === 'object') {
-        Object.entries(attributes).forEach(([key, value]) => {
-          //let attribute = value.toString();
-          el.setAttribute(key, value);
-        });
-      }
-      if (textContent) {
-        el.textContent = textContent;
-      }
-      return (el);
     };
 
     if (CSS.supports('selector(:is(body))')) {

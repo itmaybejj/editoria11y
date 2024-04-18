@@ -261,20 +261,20 @@ ed11y-element-result, ed11y-element-panel {
     border: 0;
 }
 
-.ed11y-panel-wrapper .next[hidden] + #show-hidden {
+.ed11y-panel-wrapper [hidden] + #ed11y-show-hidden {
     margin-top: 22px;
 }
 
 #ed11y-show-hidden[aria-pressed="true"] {
     background: var(--ed11y-bg, #fffffe);
     color: var(--ed11y-text, #20160c);
-    box-shadow: inset 8px 1px var(--ed11y-primary, #276499);
+    box-shadow: inset 8px 0 0 1px var(--ed11y-primary, #276499);
 }
 
 #ed11y-show-hidden:hover, #ed11y-show-hidden:focus-visible {
     color: var(--ed11y-primary, #276499);
     background: var(--ed11y-primaryText, #fffdf7);
-    box-shadow: inset 8px 1px var(--ed11y-primary, #276499);
+    box-shadow: inset 8px 0 0 1px var(--ed11y-primary, #276499);
 }
 
 .ed11y-panel-wrapper .content button:hover {
