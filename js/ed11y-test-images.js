@@ -38,7 +38,6 @@ class Ed11yTestImages {
         altLabel += alt;
 
         if (Ed11y.M.meaninglessAlt.includes(alt.trim().toLowerCase())) {
-          altLabel += alt;
           error = 'altMeaningless';
           dismissable = false;
         } else {
@@ -107,7 +106,7 @@ class Ed11yTestImages {
           position: 'beforebegin',
           dismissalKey: dismissable,
         });
-        altStyle = dismissable === false ? 'error' : 'warning';
+        altStyle = dismissable === false ? 'ed11y-error' : 'ed11y-warning';
       }
       Ed11y.imageAlts.push([el, src, altLabel, altStyle]);
 

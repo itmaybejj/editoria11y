@@ -6,9 +6,13 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.1.3';
+    Ed11y.version = '2.2.0';
 
     let defaultOptions = {
+
+      // Relative or absolute
+      //cssUrls: false, // ['/folder/editoria11y.css','/folder/custom.css']
+      cssUrls: false,
 
       // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
       checkRoots: false,
@@ -75,16 +79,15 @@ class Ed11y {
         text: '#20160c',
         primary: '#276499',
         primaryText: '#fffdf7',
-        secondary: '#20160c',
         button: 'transparent', // deprecate?
         panelBar: '#fffffe',
         panelBarText: '#20160c',
         panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
-        panelBorder: 0,
+        panelBorder: '0px', // '2px'
         activeTab: '#276499',
         activeTabText: '#fffffe',
         outlineWidth: 0,
-        borderRadius: 1,
+        borderRadius: '1px',
         ok: '#1f5381',
         warning: '#fad859',
         alert: '#b80519',
@@ -96,17 +99,16 @@ class Ed11y {
         text: '#f4f7ff',
         primary: '#3052a0',
         primaryText: '#f4f7ff',
-        secondary: '#20160c',
         button: 'transparent',
         panelBar: '#3052a0',
         panelBarText: '#f4f7ff',
         panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
-        panelBorder: 2,
+        panelBorder: '2px',
         activeTab: '#0a2051',
         activeTabText: '#fffffe',
         focusRing: 'cyan',
-        outlineWidth: 2,
-        borderRadius: 3,
+        outlineWidth: '2px',
+        borderRadius: '3px',
         ok: '#0a307a',
         warning: '#fad859',
         alert: '#b80519',
@@ -117,17 +119,16 @@ class Ed11y {
         text: '#20160c',
         primary: '#0a307a',
         primaryText: '#fffdf7',
-        secondary: '#20160c',
         panelBar: '#0a307a',
         panelBarText: '#f4f7ff',
-        panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
-        panelBorder: 2,
+        panelBarShadow: 'inset 0 -1px #fff2, -1px 0 #fff2',
+        panelBorder: '2px',
         button: 'transparent',
         activeTab: '#b9c0cf',
         activeTabText: '#20160c',
         focusRing: '#007aff',
-        outlineWidth: 2,
-        borderRadius: 3,
+        outlineWidth: '2px',
+        borderRadius: '3px',
         ok: '#0a307a',
         warning: '#fad859',
         alert: '#b80519',
@@ -135,14 +136,9 @@ class Ed11y {
       // Base z-index for buttons.
       buttonZIndex: 9999,
       // CSS overrides and additions.
-      baseFontSize: 14, // px
+
+      baseFontSize: '14px', // px
       baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-      baseCSS: '',      // Applies to all elements.
-      altCSS: '',       // Applies to alt text visualizer.
-      highlightCSS: '', // Applied IN PAGE and affects your theme.
-      panelCSS: '',     // Applies in panel in lower right.
-      resultCSS: '',    // Applies in tooltip toggle buttons.
-      tipCSS: '',       // Applies in tooltips.
 
       // Test customizations
       embeddedContent: false, // todo remove in favor of custom checks
@@ -176,18 +172,33 @@ class Ed11y {
     };
 
     Ed11y.theme = Ed11y.options[Ed11y.options.theme];
+    Ed11y.theme.baseFontSize = Ed11y.options.baseFontSize;
+    Ed11y.theme.buttonZIndex = Ed11y.options.buttonZIndex;
+    Ed11y.theme.baseFontFamily = Ed11y.options.baseFontFamily;
+
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
     }
-    Ed11y.baseCSS = `
-        :host{all: initial;}.hidden{display:none;}
-        .wrapper {
-         font-size:${Ed11y.options.baseFontSize}px;
-         line-height: 1.5;
-         font-family:${Ed11y.options.baseFontFamily};
-         }
-         ${Ed11y.options.baseCSS}
-      `;
+
+    if (!Ed11y.options.cssUrls) {
+      const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
+      Ed11y.options.cssUrls = [cssLink.getAttribute('href')];
+    }
+
+    const cssBundle = document.createElement('div');
+    cssBundle.setAttribute('hidden','');
+    Ed11y.options.cssUrls?.forEach( sheet => {
+      const cssLink = document.createElement('link');
+      cssLink.setAttribute('rel', 'stylesheet');
+      cssLink.setAttribute('media', 'all');
+      cssLink.setAttribute('href', sheet + '?v=' + Ed11y.version);
+      cssBundle.append(cssLink);
+    });
+
+    Ed11y.attachCSS = function(appendTo) {
+      appendTo.appendChild(cssBundle.cloneNode(true));
+    };
+
     Ed11y.elements = [];
     Ed11y.onLoad = true;
     Ed11y.showPanel = 'show';
@@ -197,7 +208,7 @@ class Ed11y {
       Ed11y.checkRunPrevent = () => {
         let preventCheck = Ed11y.options.preventCheckingIfPresent ? document.querySelector(Ed11y.options.preventCheckingIfPresent) : false;
         if (!preventCheck && !!Ed11y.options.preventCheckingIfAbsent) {
-          preventCheck = document.querySelector(`:is(${Ed11y.options.preventCheckingIfAbsent})`) === null ? true : false;
+          preventCheck = document.querySelector(`:is(${Ed11y.options.preventCheckingIfAbsent})`) === null;
         }
         return preventCheck;
       };
@@ -259,9 +270,9 @@ class Ed11y {
           }
 
           // Check for ignoreAll element only once.
-          Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null ? true : false;
+          Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
           if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
-            Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) === null ? false : true;
+            Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
           }
 
           // Run tests
@@ -409,12 +420,10 @@ class Ed11y {
           document.querySelector('body').appendChild(panel);
           // todo: open on assertive with count mismatch or if showDismissed is set.
           if (Ed11y.totalCount > 0 && !Ed11y.ignoreAll && Ed11y.options.alertMode === 'assertive' && Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount) {
-            // User has already seen these errors, panel will not open.
-            Ed11y.showPanel = true;
-          } else if (Ed11y.options.showDismissed && (Ed11y.dismissedCount > 0 || Ed11y.totalCount > 0)) {
+            // User has not already seen these errors, panel will not open.
             Ed11y.showPanel = true;
           } else {
-            Ed11y.showPanel = false;
+            Ed11y.showPanel = Ed11y.options.showDismissed && (Ed11y.dismissedCount > 0 || Ed11y.totalCount > 0);
           }
         } else {
           Ed11y.showPanel = true;
@@ -434,12 +443,11 @@ class Ed11y {
             Ed11y.paintReady();
           }
         } else {
-          Ed11y.panel.classList.remove('shut');
-          Ed11y.panel.classList.add('active');
+          Ed11y.panel.classList.remove('ed11y-shut');
+          Ed11y.panel.classList.add('ed11y-active');
           Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
           if (Ed11y.dismissedCount > 0) {
-            let text = Ed11y.dismissedCount === 1 ? Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
-            Ed11y.showDismissed.textContent = text;
+            Ed11y.showDismissed.textContent = Ed11y.dismissedCount === 1 ? Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
             Ed11y.showDismissed.removeAttribute('hidden');
           } else if (Ed11y.options.showDismissed === true) {
             // Reset show hidden default option when irrelevant.
@@ -467,12 +475,16 @@ class Ed11y {
             Ed11y.panelJumpPrev.removeAttribute('hidden');
           }
           if (Ed11y.errorCount > 0) {
-            Ed11y.panel.classList.remove('warnings', 'pass');
-            Ed11y.panel.classList.add('errors');
+            Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-pass');
+            Ed11y.panel.classList.add('ed11y-errors');
           }
           else if (Ed11y.warningCount > 0) {
-            Ed11y.panel.classList.remove('errors', 'pass');
-            Ed11y.panel.classList.add('warnings');
+            Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-pass');
+            Ed11y.panel.classList.add('ed11y-warnings');
+          } else {
+            // Issues present but dismissed.
+            Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-warnings');
+            Ed11y.panel.classList.add('ed11y-pass');
           }
           Ed11y.panelCount.textCount = Ed11y.totalCount;
           Ed11y.panelCount.style.display = 'inline-block';
@@ -488,8 +500,8 @@ class Ed11y {
           Ed11y.panelJumpPrev.setAttribute('hidden', '');
 
           Ed11y.panelCount.style.display = 'display: none;';
-          Ed11y.panel.classList.remove('warnings', 'errors');
-          Ed11y.panel.classList.add('pass');
+          Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-errors');
+          Ed11y.panel.classList.add('ed11y-pass');
           if (Ed11y.dismissedCount > 0) {
             // todo: title attribute to explain the difference?
             Ed11y.panel.querySelector('.toggle-count').textContent = 'i';
@@ -542,8 +554,8 @@ class Ed11y {
       // Reset main panel.
       Ed11y.panelJumpNext?.setAttribute('data-ed11y-goto', '0');
       Ed11y.panelJumpPrev?.setAttribute('data-ed11y-goto', '0');
-      Ed11y.panel?.classList.add('shut');
-      Ed11y.panel?.classList.remove('active');
+      Ed11y.panel?.classList.add('ed11y-shut');
+      Ed11y.panel?.classList.remove('ed11y-active');
       Ed11y.panelToggle?.setAttribute('aria-expanded', 'false');
       Ed11y.running = false;
     };
@@ -689,7 +701,7 @@ class Ed11y {
           Ed11y.panelJumpNext.focus();
         } else {
           window.setTimeout(function () {
-            let focus = Ed11y.panel.querySelector('#issues-tab');
+            let focus = Ed11y.panel.querySelector('#ed11y-issues-tab');
             focus.focus();
           }, 100);
         }
@@ -703,8 +715,8 @@ class Ed11y {
       Ed11y.reset();
       Ed11y.checkAll(false, 'show');
 
-      Ed11y.showDismissed.setAttribute('aria-pressed', !!Ed11y.options.showDismissed);
-      Ed11y.showDismissed.textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlertsContent : Ed11y.M.buttonShowHiddenAlertsContent;
+      Ed11y.showDismissed.setAttribute('aria-pressed', (!!Ed11y.options.showDismissed).toString());
+      Ed11y.showDismissed.textContent = Ed11y.M.buttonShowHiddenAlertsContent;
     };
 
     Ed11y.dismissHelp = function (el) {
@@ -757,9 +769,7 @@ class Ed11y {
         let previousTop = 0;
         let previousNudge = 0;
         Ed11y.elements.jumpList.forEach(mark => {
-          if (mark.hasAttribute('style')) {
-            mark.removeAttribute('style');
-          }
+          mark.style.setProperty('transform', null);
           let offset = mark.getBoundingClientRect();
           let nudgeTop = 0;
           let overlap = 36;
@@ -791,33 +801,23 @@ class Ed11y {
     };
 
     Ed11y.paintReady = function () {
-      const highlightCSS = `ed11y-element-result, ed11y-element-panel {
-              opacity: 1; 
-              outline: 0 !important;
-            }
-            .ed11y-hidden-highlight {
-              box-shadow: inset 0 0 0 1px ${Ed11y.theme.warning}, inset 0 0 0 2px ${Ed11y.theme.primary}, 0 0 0 1px ${Ed11y.theme.warning}, 0 0 0 3px ${Ed11y.theme.primary}, 0 0 1px 3px !important;
-            }
-            .ed11y-ring-red {
-              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.theme.alert}, 0 0 0 3px ${Ed11y.theme.alert}, 0 0 1px 3px;
-              outline: 2px solid ${Ed11y.theme.alert};
-              outline-offset: 1px;
-            }
-            .ed11y-ring-yellow {
-              box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px ${Ed11y.theme.warning}, 0 0 0 3px ${Ed11y.theme.warning}, 0 0 1px 3px;
-              outline: 2px solid ${Ed11y.theme.warning};
-              outline-offset: 1px;
-            }
-          `;
-      let inlineStyle = document.createElement('style');
-      inlineStyle.textContent = highlightCSS + Ed11y.options.highlightCSS;
-      document.querySelector('body')?.appendChild(inlineStyle);
+
+      for (const [key, value] of Object.entries(Ed11y.theme)) {
+        document.documentElement.style.setProperty('--ed11y-' + key, value);
+      }
+
+      if (document.querySelector('body')) {
+        // May be redundant, but preloads unbundled files.
+        Ed11y.attachCSS(document.querySelector('body'));
+      }
+
       Ed11y.roots.forEach((root) => {
         // Shadow elements don't inherit styles, so they need their own copy.
         if (Ed11y.options.shadowComponents) {
           root.querySelectorAll(Ed11y.options.shadowComponents)?.forEach((shadowHost) => {
-            let anotherInlineStyle = inlineStyle.cloneNode(true);
-            shadowHost.shadowRoot?.appendChild(anotherInlineStyle);
+            if (shadowHost.shadowRoot) {
+              Ed11y.attachCSS(shadowHost.shadowRoot);
+            }
           });
         }
       });
@@ -836,90 +836,95 @@ class Ed11y {
         }, 150, loopCount);
       }
       // Reset any previous alignments
-      tip.setAttribute('style', '');
-      arrow.setAttribute('style', '');
+      tip.style.setProperty('transform',null);
+      arrow.style.setProperty('left', null);
+      arrow.style.setProperty('top', null);
 
       // Find button on page
-      let scrollTop = window.scrollY;
+      const scrollTop = window.scrollY;
       let buttonOffset = button.getBoundingClientRect();
+      let buttonSize = buttonOffset.width;
       if (buttonOffset.top === 0 && buttonOffset.left === 0) {
         // ruh roh invisible button
-        let firstVisibleParent = Ed11y.firstVisibleParent(button.getRootNode().host);
+        const firstVisibleParent = Ed11y.firstVisibleParent(button.getRootNode().host);
         if (firstVisibleParent) {
           buttonOffset = firstVisibleParent.getBoundingClientRect();
         }
+        // Estimate from font when it can't be measured.
+        buttonSize = parseInt(Ed11y.options.baseFontSize) * 3;
       }
-      let buttonLeft = buttonOffset.left + document.body.scrollLeft;
+      const buttonLeft = buttonOffset.left + document.body.scrollLeft;
       toolTip.style.setProperty('top', buttonOffset.top + scrollTop + 'px');
       // todo: need left scroll too for horizontally scrolled pages
       toolTip.style.setProperty('left', buttonOffset.left + 'px');
-      let tipWidth = tip.offsetWidth;
-      let tipHeight = tip.offsetHeight;
-      let windowWidth = window.innerWidth;
-      let windowBottom = scrollTop + window.innerHeight;
+      const tipWidth = tip.offsetWidth;
+      const tipHeight = tip.offsetHeight;
+      const windowWidth = window.innerWidth;
+      const windowBottom = scrollTop + window.innerHeight;
 
       let direction = 'under';
 
       // Default to displaying under
-      if (buttonOffset.top + tipHeight + scrollTop + buttonOffset.height + 22 > windowBottom) {
+      if (buttonOffset.top + tipHeight + scrollTop + buttonSize + 22 > windowBottom) {
         // If there's no room under in the viewport...
-        if (windowWidth > tipWidth * 1.5 && windowWidth - (buttonLeft + tipWidth + buttonOffset.width + 56) > 0 && buttonOffset.top + 130 < window.innerHeight) {
+        if (windowWidth > tipWidth * 1.5 && windowWidth - (buttonLeft + tipWidth + buttonSize + 56) > 0 && buttonOffset.top + 130 < window.innerHeight) {
           direction = 'right';
         } else if (buttonOffset.top > tipHeight + 15) {
           direction = 'above';
         } else if (windowWidth > tipWidth * 1.5 && buttonLeft - tipWidth - 50 > 0) {
           direction = 'left';
-        } else if (buttonOffset.bottom + tipHeight > document.documentElement.clientHeight - 50 && window.innerHeight > buttonOffset.height + tipHeight) {
+        } else if (buttonOffset.bottom + tipHeight > document.documentElement.clientHeight - 50 && window.innerHeight > buttonSize + tipHeight) {
           // No room anywhere in viewport we're at the end of the page.
           direction = 'above';
         }
         // Back to default.
       }
 
-      let nudgeX = 0;
+      let nudgeX;
       let nudgeY = 0;
 
       if (direction === 'under') {
         // Pin to the left edge, unless the tip is not wide enough to reach:
         if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
-          if (tipWidth - ((buttonOffset.width / 2) - 1) > buttonOffset.left) {
+          if (tipWidth - ((buttonSize / 2) - 1) > buttonOffset.left) {
             // Under, overhang to left
-            nudgeX = (buttonOffset.width / 2) - 1 - buttonOffset.left;
+            nudgeX = (buttonSize / 2) - 1 - buttonOffset.left;
             arrow.style.setProperty('left', Math.max(buttonOffset.left, 15) - 9 + 'px');
           } else {
             arrow.style.setProperty('left', tipWidth - 26 + 'px');
-            nudgeX = buttonOffset.width / 2 + 15 - tipWidth;
+            nudgeX = buttonSize / 2 + 15 - tipWidth;
           }
         } else {
           // Under, overhang to right
-          nudgeX = buttonOffset.width + 8 - tipWidth / 5;
-          arrow.style.setProperty('left', tipWidth / 5 - (buttonOffset.width / 2) - 18 + 'px');
+          nudgeX =  buttonSize + 8 - tipWidth / 5;
+          arrow.style.setProperty('left', tipWidth / 5 - (buttonSize / 2) - 18 + 'px');
         }
 
         arrow.dataset.direction = 'under';
-        nudgeY = buttonOffset.height + 16;
+        nudgeY = buttonSize + 16;
       }
       else if (direction === 'above') {
         // Slide left or right to center tip on page.
-        nudgeY = -1 * (tipHeight + 13 + Ed11y.theme.outlineWidth);
+        nudgeY = -1 * (tipHeight + 13 + parseInt(Ed11y.theme.outlineWidth));
         arrow.style.setProperty('top', tipHeight);
         if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
           // Can't center
-          if (tipWidth - ((buttonOffset.width / 2) - 1) > buttonOffset.left) {
-            // Under, overhand to left
-            nudgeX = ((buttonOffset.width / 2) - 1) - buttonOffset.left;
+          if (tipWidth - ((buttonSize / 2) - 1) > buttonOffset.left) {
+            // Overhang to left
+            nudgeX = ((buttonSize / 2) - 1) - buttonOffset.left;
             arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
           } else {
+            // Overhang to the right.
             arrow.style.setProperty('left', tipWidth - 26 + 'px');
-            nudgeX = buttonOffset.width / 2 + 15 - tipWidth;
+            nudgeX = buttonSize / 2 + 15 - tipWidth;
           }
         } else {
-          nudgeX = buttonOffset.width + 8 - tipWidth / 5;
-          arrow.style.setProperty('left', tipWidth / 5 - (buttonOffset.width / 2) - 18 + 'px');
+          nudgeX = buttonSize + 8 - tipWidth / 5;
+          arrow.style.setProperty('left', tipWidth / 5 - (buttonSize / 2) - 18 + 'px');
         }
         arrow.dataset.direction = 'above';
-        arrow.style.setProperty('top', `${tipHeight + 15 + Ed11y.theme.outlineWidth}px`);
+        arrow.style.setProperty('top', `${tipHeight + 15 - parseInt(Ed11y.theme.outlineWidth)}px`);
       } else {
         // Left or right
         let tipBottom = buttonOffset.top + scrollTop + tipHeight;
@@ -936,7 +941,7 @@ class Ed11y {
           arrow.dataset.direction = 'left';
         } else {
           // direction is right
-          nudgeX = buttonOffset.width + 14;
+          nudgeX = buttonSize + 14;
           arrow.dataset.direction = 'right';
         }
       }
@@ -951,14 +956,14 @@ class Ed11y {
     Ed11y.togglePanel = function () {
       if (!Ed11y.doubleClickPrevent) {
         // todo beta: revisit aria states and announcements.
-        if (Ed11y.panel.classList.contains('active') && Ed11y.panel.classList.contains('shut')) {
+        if (Ed11y.panel.classList.contains('ed11y-active') && Ed11y.panel.classList.contains('ed11y-shut')) {
           Ed11y.minimize();
         }
         // Prevent clicks piling up while scan is running.
         else if (Ed11y.running !== true) {
           Ed11y.running = true;
           // Re-scan each time the panel reopens.
-          if (Ed11y.panel.classList.contains('active') === false) {
+          if (Ed11y.panel.classList.contains('ed11y-active') === false) {
             Ed11y.onLoad = false;
             Ed11y.showPanel = true;
             Ed11y.checkAll();
@@ -978,14 +983,15 @@ class Ed11y {
     Ed11y.showHeadingsPanel = function () {
       // Visualize the document outline
 
-      let panelOutline = Ed11y.panel.querySelector('#outline');
+      let panelOutline = Ed11y.panel.querySelector('#ed11y-outline');
 
       if (Ed11y.headingOutline.length) {
         panelOutline.innerHTML = '';
         Ed11y.headingOutline.forEach((el, i) => {
           // Todo implement outline ignore function.
           let mark = document.createElement('ed11y-element-heading-label');
-          mark.dataset.ed11yHeadingOutline = i;
+          mark.classList.add('ed11y-element', 'ed11y-element-heading');
+          mark.dataset.ed11yHeadingOutline = i.toString();
           mark.setAttribute('id', 'ed11y-heading-' + i);
           mark.setAttribute('tabindex', '-1');
           // Array: el, level, outlinePrefix
@@ -1020,10 +1026,10 @@ class Ed11y {
     };
     Ed11y.switchPanel = function (id) {
       // Switch main panel tab
-      Ed11y.panel.querySelector('.content > div:not(.hidden)')?.classList.add('hidden');
+      Ed11y.panel.querySelector('.content > div:not(.ed11y-hidden)')?.classList.add('ed11y-hidden');
       Ed11y.panel.querySelector('[aria-selected=true]')?.setAttribute('aria-selected', 'false');
       Ed11y.panel.querySelector('#' + id).setAttribute('aria-selected', 'true');
-      Ed11y.panel.querySelector('#' + id + '-tab')?.classList.remove('hidden');
+      Ed11y.panel.querySelector('#' + id + '-tab')?.classList.remove('ed11y-hidden');
       // todo beta what to show when no outline or images
       // todo postpone: error when no headings found at all?
       Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
@@ -1031,13 +1037,13 @@ class Ed11y {
 
       // Show extras
       switch (id) {
-      case 'alts':
+      case 'ed11y-alts':
         Ed11y.showAltPanel();
         break;
-      case 'headings':
+      case 'ed11y-headings':
         Ed11y.showHeadingsPanel();
         break;
-      case 'help':
+      case 'ed11y-help':
         Ed11y.showHelpPanel();
         break;
       default:
@@ -1052,24 +1058,29 @@ class Ed11y {
       Ed11y.findElements('altMark', 'ed11y-element-alt');
       Ed11y.elements.altMark?.forEach((el) => {
         let id = el.dataset.ed11yImg;
-        el.setAttribute('style', '');
+        el.style.setProperty('transform', null);
+        el.style.setProperty('height', null);
+        el.style.setProperty('width', null);
+
         let img = Ed11y.imageAlts[id][0];
         if (img.tagName !== 'IMG') {
           // Mark is placed outside the link in linked images.
           img = img.querySelector('img');
         }
-        let markOffset = el.getClientRects();
-        let imgOffset = img.getClientRects();
+        let markOffset = el.getBoundingClientRect();
+        let imgOffset = img.getBoundingClientRect();
         let newOffset = imgOffset.left - markOffset.left;
         let height = getComputedStyle(img).height;
         height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
-        el.setAttribute('style', `transform: translate(${newOffset}px, 0px); height: ${height}px; width: ${img.offsetWidth}px;`);
+        el.style.setProperty('transform', `translate(${newOffset}px, 0px)`);
+        el.style.setProperty('height', `${height}px`);
+        el.style.setProperty('width', `${img.offsetWidth}px`);
       });
     };
 
     Ed11y.showAltPanel = function () {
       // visualize image alts
-      let altList = Ed11y.panel.querySelector('#alt-list');
+      let altList = Ed11y.panel.querySelector('#ed11y-alt-list');
 
       if (Ed11y.imageAlts.length) {
         altList.innerHTML = '';
@@ -1078,7 +1089,8 @@ class Ed11y {
 
           // Label images
           let mark = document.createElement('ed11y-element-alt');
-          mark.dataset.ed11yImg = i;
+          mark.classList.add('ed11y-element');
+          mark.dataset.ed11yImg = i.toString();
           el[0].insertAdjacentElement('beforebegin', mark);
 
           // Build alt list in panel
@@ -1100,7 +1112,7 @@ class Ed11y {
     };
 
     Ed11y.showHelpPanel = function () {
-      let helpTab = Ed11y.panel.querySelector('#help-tab');
+      let helpTab = Ed11y.panel.querySelector('#ed11y-help-tab');
       helpTab.innerHTML = Ed11y.M.panelHelp;
     };
 
@@ -1114,11 +1126,11 @@ class Ed11y {
     Ed11y.setCurrentJump = function () {
       // Set next/previous buttons
       let goMax = Ed11y.elements.jumpList.length - 1;
-      let goNext = 0;
+      let goNext;
       if (Ed11y.totalCount > 1) {
         Ed11y.panelJumpPrev.removeAttribute('hidden');
       }
-      if (Ed11y.goto == goMax || Ed11y.goto > goMax) {
+      if (Ed11y.goto === goMax || Ed11y.goto > goMax) {
         // Reached end of loop or dismissal pushed us out of loop
         goNext = 0;
         // todo parameterize
@@ -1132,16 +1144,16 @@ class Ed11y {
         // loop around
         goPrev = goMax + 1 + goPrev;
       }
-      Ed11y.panelJumpNext.dataset.ed11yGoto = goNext;
-      Ed11y.panelJumpPrev.dataset.ed11yGoto = goPrev;
+      Ed11y.panelJumpNext.dataset.ed11yGoto = goNext.toString();
+      Ed11y.panelJumpPrev.dataset.ed11yGoto = goPrev.toString();
       window.setTimeout(function () {
         Ed11y.panelJumpNext.querySelector('.jump-next').textContent = Ed11y.nextText;
       }, 250);
     };
 
     Ed11y.minimize = function () {
-      let minimized = Ed11y.panel.classList.contains('shut') === 'true' ? true : false;
-      Ed11y.panel.classList.toggle('shut');
+      let minimized = Ed11y.panel.classList.contains('ed11y-shut') === true;
+      Ed11y.panel.classList.toggle('ed11y-shut');
       if (minimized === false) {
         window.setTimeout(function () {
           Ed11y.panelToggle.focus();
@@ -1150,7 +1162,7 @@ class Ed11y {
     };
 
     Ed11y.windowResize = function () {
-      if (Ed11y.panel?.classList.contains('active') === true) {
+      if (Ed11y.panel?.classList.contains('ed11y-active') === true) {
         Ed11y.alignAlts();
         Ed11y.alignButtons();
       }
@@ -1207,7 +1219,7 @@ class Ed11y {
     // Gets trimmed and normalized inner text nodes.
     // Use computeText() instead for the full accessible name calculation.
     Ed11y.getText = function (el) {
-      return el.textContent.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
+      return el.textContent.replace(/[\n\r]+|\s{2,}/g, ' ').trim();
     };
 
     Ed11y.parents = function (el) {
@@ -1221,7 +1233,7 @@ class Ed11y {
     };
 
     // Handle aria-label or labelled-by. Latter "wins" and can self-label.
-    Ed11y.computeAriaLabel = function (element, recursing = false) {
+    Ed11y.computeAriaLabel = function (element, recursing = 0) {
       const labelledBy = element.getAttribute('aria-labelledby');
       if (!recursing && labelledBy) {
         const target = labelledBy.split(/\s+/);
@@ -1273,7 +1285,7 @@ class Ed11y {
     Ed11y.computeText = function (el, recursing = 0, excludeLinkClasses = false) {
 
       // Return immediately if there is an aria label.
-      let hasAria = Ed11y.computeAriaLabel(el, recursing, excludeLinkClasses);
+      let hasAria = Ed11y.computeAriaLabel(el, recursing);
       if (hasAria !== 'noAria') {
         return hasAria;
       }
@@ -1446,28 +1458,16 @@ class Ed11y {
       if (el) {
         let style = window.getComputedStyle(el);
         if (el.classList.contains('ed11y-ring-red') || el.classList.contains('ed11y-ring-yellow')) {
-          if (
-            style.getPropertyValue('display') === 'none' ||
+          return !(style.getPropertyValue('display') === 'none' ||
             style.getPropertyValue('visibility') === 'hidden' ||
             style.getPropertyValue('opacity') === '0' ||
-            el.hasAttribute('hidden')
-          ) {
-            return false;
-          } else {
-            return true;
-          }
-        } else if (
-          // todo: if the element is display:none, can we push the tooltip to the nearest visible container and then open it?
-          style.getPropertyValue('display') === 'none' ||
+            el.hasAttribute('hidden'));
+        } else return !(style.getPropertyValue('display') === 'none' ||
           style.getPropertyValue('visibility') === 'hidden' ||
           style.getPropertyValue('opacity') === '0' ||
           el.offsetWidth === 0 ||
           el.offsetHeight === 0 ||
-          el.hasAttribute('hidden')) {
-          return false;
-        } else {
-          return true;
-        }
+          el.hasAttribute('hidden'));
       }
     };
 
@@ -1480,8 +1480,7 @@ class Ed11y {
         // Element is not known to be hidden.
         let parents = Ed11y.parents(el);
         let visibleParent = (parent) => Ed11y.visibleElement(parent);
-        let visible = parents.every(visibleParent);
-        return visible;
+        return parents.every(visibleParent);
       }
     };
 
@@ -1506,14 +1505,10 @@ class Ed11y {
     Ed11y.hiddenElementCheck = function (el) {
       // Checks if this element has been removed from the accessibility tree
       let style = window.getComputedStyle(el);
-      if (style.getPropertyValue('display') === 'none' ||
+      return !(style.getPropertyValue('display') === 'none' ||
         style.getPropertyValue('visibility') === 'hidden' ||
         el.hasAttribute('aria-hidden') ||
-        el.hasAttribute('hidden')) {
-        return false;
-      } else {
-        return true;
-      }
+        el.hasAttribute('hidden'));
     };
 
     Ed11y.elementNotHidden = function (el) {
@@ -1525,8 +1520,7 @@ class Ed11y {
         // Element is not known to be hidden.
         let parents = Ed11y.parents(el);
         let notHiddenParent = (parent) => Ed11y.hiddenElementCheck(parent);
-        let notHidden = parents.every(notHiddenParent);
-        return notHidden;
+        return parents.every(notHiddenParent);
       }
     };
 
@@ -1536,8 +1530,7 @@ class Ed11y {
 
     Ed11y.getOpenTip = function () {
       Ed11y.findElements('openButton', 'ed11y-element-result[data-ed11y-open="true"]');
-      let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-      return activeTip;
+      return document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
     };
 
     Ed11y.focusActiveResult = function () {
@@ -1574,32 +1567,6 @@ class Ed11y {
       return String(string).replace(/[&<>"'`=/]/g, function (s) {
         return entityMap[s];
       });
-    };
-
-    Ed11y.builder = function (type, id, classes, attributes, textContent) {
-      let el = document.createElement(type);
-      if (id) {
-        el.setAttribute('id', id);
-      }
-      if (classes) {
-        if (typeof (classes) === 'string') {
-          el.classList.add(classes);
-        } else {
-          classes.forEach(str => {
-            el.classList.add(str);
-          });
-        }
-      }
-      if (typeof (attributes) === 'object') {
-        Object.entries(attributes).forEach(([key, value]) => {
-          //let attribute = value.toString();
-          el.setAttribute(key, value);
-        });
-      }
-      if (textContent) {
-        el.textContent = textContent;
-      }
-      return (el);
     };
 
     if (CSS.supports('selector(:is(body))')) {

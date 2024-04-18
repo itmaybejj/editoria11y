@@ -1,4 +1,4 @@
-# Editora11y
+# Editoria11y
 
 Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly accessibility "auto-correct" checker that addresses three critical needs for content authors:
 
@@ -61,15 +61,16 @@ If possible, use a turnkey integration:
 * [Editoria11y WordPress Plugin](https://wordpress.org/plugins/editoria11y-accessibility-checker/)
 * [Editoria11y SquareSpace Injector](https://github.com/itmaybejj/editoria11y-squarespace-inject) (Requires Commerce or Business tier)
 
-To build your own implementation, load a local copy (or a [CDN version](https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@2/dist/editoria11y.min.js)) of "editoria11y.min.js," and then create a new "Ed11y" instance:
+To build your own implementation, load a local copy (or a [CDN version](https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@2/dist/editoria11y.min.js)) of "editoria11y.min.js" and "editoria11y.min.css," and then create a new "Ed11y" instance:
 
 ```html
-  <script src="/PATH/TO/YOUR/COPY/editoria11y.min.js"></script>
+<link href="/PATH/TO/YOUR/COPY/editoria11y.min.css" rel="stylesheet">
+<script src="/PATH/TO/YOUR/COPY/editoria11y.min.js"></script>
   <script>
     const ed11y = new Ed11y({
       // options,
     });           
-  </script>
+</script>
  ```
 View [documentation and configuration tips](https://editoria11y.princeton.edu/configuration/).
 

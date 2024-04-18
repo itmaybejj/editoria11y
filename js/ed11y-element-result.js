@@ -8,7 +8,7 @@ class Ed11yElementResult extends HTMLElement {
     if (!this.initialized) {
       this.open = false;
       this.racing = false;
-      this.setAttribute('style', 'outline: 0px solid transparent;');
+      this.style.setProperty('outline', '0px solid transparent');
       const shadow = this.attachShadow({ mode: 'open' });
 
       // Create this.wrapper with type class
@@ -21,7 +21,7 @@ class Ed11yElementResult extends HTMLElement {
       this.dismissed = !!this.result.dismissalStatus;
       // todo MVP this would only work in darkmode -- need more theme variables
       // #ffd4d4 red. turn background to alert color in lightmode.
-      this.wrapper.classList.add('wrapper');
+      this.wrapper.classList.add('ed11y-wrapper', 'ed11y-result-wrapper');
       this.wrapper.classList.add('ed11y-result');
 
       // Create tooltip toggle
@@ -35,124 +35,26 @@ class Ed11yElementResult extends HTMLElement {
       this.toggle.setAttribute('data-ed11y-result', this.dataset.ed11yResult);
       this.toggle.setAttribute('data-ed11y-ready', 'false');
       this.toggle.setAttribute('data-ed11y-race', 'false');
+      if (this.dismissed) {
+        this.toggle.classList.add('dismissed');
+        if (this.result.dismissalStatus !== 'ok') {
+          this.toggle.classList.add('ok');
+        } else {
+          this.toggle.classList.add('notok');
+        }
+      } else if (this.dismissable) {
+        this.toggle.classList.add('dismissable');
+      }
       this.wrapper.appendChild(this.toggle);
       this.toggle.addEventListener('click', this.toggleClick);
       this.toggle.addEventListener('mouseover', this.handleHover);
       this.tipNeedsBuild = true;
 
-      // Create CSS with embedded icon
-      const style = document.createElement('style');
-      let icon = this.toggleImage();
+      Ed11y.attachCSS(this.wrapper);
 
-      const resultCSS = `
-        :host {
-          position: absolute;
-          opacity: 0;
-          transition: opacity .25s ease-in;
-          z-index: ${Ed11y.options.buttonZIndex - 1};
-        }
-        :host([data-ed11y-open='true']) {
-          z-index: ${Ed11y.options.buttonZIndex};
-        }
-        .wrapper {
-          width: 3.14em;
-          height: 3.14em;
-          overflow: visible;
-          color: ${Ed11y.theme.text};
-        }
-        button {
-          margin: 0;
-          border: 0;
-          background: inherit;
-          font-family: inherit;
-          font-size: .786em;
-          font-weight: 600;
-          text-align: center;
-          cursor: pointer;
-          color: ${Ed11y.theme.primaryText};
-          background: ${Ed11y.theme.primary};
-        }
-        .toggle {
-          display: block;
-          border: 0;
-          border-radius: 50%;
-          position: absolute;
-          margin: 0 0 0 10px;
-          z-index: 1;
-          padding: 0;
-          vertical-align: middle;
-          cursor: pointer;
-          width: 2em;
-          height: 2em;
-          line-height: 1;
-          font-size: 1.14em;
-          font-size: clamp(1.14em, 2vw, 1.5em);
-        }
-        button:focus-visible {
-          outline: 2px solid transparent;
-          box-shadow: inset 0 0 0 2px ${Ed11y.theme.focusRing}, 0 0 0 3px ${Ed11y.theme.primary};
-        }
-      `;
-      style.textContent = Ed11y.baseCSS + icon + resultCSS + Ed11y.options.resultCSS;
-      shadow.appendChild(style);
       shadow.appendChild(this.wrapper);
       this.initialized = true;
     }
-  }
-
-  toggleImage() {
-
-    let css = '';
-    if (this.dismissed) {
-      css = `
-        .toggle {
-          box-shadow: inset 0 0 0 2px ${Ed11y.theme.ok}, inset 0 0 0 3px ${Ed11y.theme.primaryText}, inset 0 0 0 6px ${Ed11y.theme.ok}, 1px 1px 5px 0 rgba(0,0,0,.5);
-          background: ${Ed11y.theme.ok};
-          color: ${Ed11y.theme.primaryText};
-        }
-        .toggle:hover, .toggle[aria-expanded='true'] {
-          border: 2px solid ${Ed11y.theme.ok};
-        }`;
-      if (this.result.dismissalStatus === 'ok') {
-        css += `
-          .toggle::before {
-            content: "✓";
-          }
-          `;
-      } else {
-        css += `
-            .toggle::before {
-              content: "–";
-              font-family: georgia, serif;
-            }
-          `;
-      }
-    } else if (this.dismissable) {
-      css = `.toggle {
-        box-shadow: inset 0 0 0 2px ${Ed11y.theme.warning}, inset 0 0 0 3px #444, inset 0 0 0 6px ${Ed11y.theme.warning}, 1px 1px 5px 0 rgba(0,0,0,.5);
-        background: ${Ed11y.theme.warning};
-        color: #333;
-      }
-      .toggle::before {
-        content: "?";
-      }
-      .toggle:hover, .toggle[aria-expanded='true'] {
-        border: 2px solid ${Ed11y.theme.primary};
-      }`;
-    } else {
-      css = `.toggle {
-        box-shadow: inset 0 0 0 1px ${Ed11y.theme.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.theme.alert}, 1px 1px 5px 0 rgba(0,0,0,.5);
-        background: #fefefe;
-        color: ${Ed11y.theme.alert};
-      }
-      .toggle:hover, .toggle[aria-expanded='true'] {
-        box-shadow: inset 0 0 0 1px ${Ed11y.theme.alert}, inset 0 0 0 2px #fefefe, inset 0 0 0 6px ${Ed11y.theme.alert}, 0 0 0 2px ${Ed11y.theme.primary}, 0 0 0 3px transparent;
-      }
-      .toggle::before {
-        content: "!";
-      }`;
-    }
-    return css;
   }
 
   handleHover(event) {
@@ -203,6 +105,7 @@ class Ed11yElementResult extends HTMLElement {
     this.tipNeedsBuild = false;
 
     let tip = document.createElement('ed11y-element-tip');
+    tip.classList.add('ed11y-element');
     tip.setAttribute('data-ed11y-result', this.resultID);
     let body = document.querySelector('body');
     body.insertAdjacentElement('beforeend', tip);
