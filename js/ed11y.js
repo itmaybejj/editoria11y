@@ -182,7 +182,12 @@ class Ed11y {
 
     if (!Ed11y.options.cssUrls) {
       const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
-      Ed11y.options.cssUrls = [cssLink.getAttribute('href')];
+      if (cssLink) {
+        Ed11y.options.cssUrls = [cssLink.getAttribute('href')];
+      } else {
+        console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
+        Ed11y.options.cssUrls = 'https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@2/dist/editoria11y.min.css';
+      }
     }
 
     const cssBundle = document.createElement('div');
