@@ -180,6 +180,10 @@ class Ed11y {
       Ed11y.options.currentPage = window.location.pathname;
     }
 
+    if (!Ed11y.options.linkStringsNewWindows) {
+      Ed11y.options.linkStringsNewWindows = Ed11y.M.linkStringsNewWindows;
+    }
+
     if (!Ed11y.options.cssUrls) {
       const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
       if (cssLink) {
@@ -780,7 +784,7 @@ class Ed11y {
           let overlap = 36;
           // Detect tip that overlaps with previous result.
           if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousLeft + overlap) {
-            nudgeTop = 36 + previousNudge;
+            nudgeTop = nudgeTop + 36 + previousNudge;
           }
           if (offset.left < 8) {
             // Offscreen to left. push to the right.
@@ -834,8 +838,8 @@ class Ed11y {
       let tip = arrow.nextElementSibling;
       let loopCount = recheck + 1;
 
-      // hiddenHandlers may cause element to animate.
-      if (recheck < 3 && Ed11y.options.hiddenHandlers && Ed11y.options.hiddenHandlers.length > 0 && !!button.getRootNode().host.closest(Ed11y.options.hiddenHandlers)) {
+      // Various hiddenHandlers may cause element to animate open.
+      if (recheck < 3) {
         window.setTimeout(function () {
           Ed11y.alignTip(button, toolTip, loopCount);
         }, 150, loopCount);
@@ -849,7 +853,7 @@ class Ed11y {
       const scrollTop = window.scrollY;
       let buttonOffset = button.getBoundingClientRect();
       let buttonSize = buttonOffset.width;
-      if (buttonOffset.top === 0 && buttonOffset.left === 0) {
+      if (!(Ed11y.visible(button.getRootNode().host)) || buttonOffset.top === 0 && buttonOffset.left === 0) {
         // ruh roh invisible button
         const firstVisibleParent = Ed11y.firstVisibleParent(button.getRootNode().host);
         if (firstVisibleParent) {

@@ -13,7 +13,7 @@
         <section id="headings">
 
             <h2 id="heading-tests">Headings</h2>
-            <h3>Outline structure &amp; empty headings.</h3>
+            <h3>Outline structure &amp;amp; empty headings.</h3>
 
             <div class="positive">skipped heading<h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div>
 
@@ -173,7 +173,9 @@
 
         <h3 id="links-that-open-in-a-new-window-without-an-external-link-icon-or-text-warning">Links that open in a new window without an external link icon or text warning</h3>
 
-        <p class="positive"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">An informative video.</a></p>
+        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">An informative video.</a></p>
+
+        <p class="negative"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">A link in a tab</a></p>
 
         <p class="negative">Link with inner download icon with aria-label: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">Aria label on inner span <span aria-label="download">^</span></a></p>
 

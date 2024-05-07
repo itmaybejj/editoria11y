@@ -18,17 +18,17 @@ class Ed11yTestLinks {
       let linkText = Ed11y.computeText(el, 0, !!Ed11y.options.linkIgnoreSelector); // returns text or 'noAria';
       let img = el.querySelectorAll('img');
       let hasImg = img.length > 0;
-      let document = false;
+      let document = el.matches(Ed11y.options.documentLinks);
 
-      if (el.matches(Ed11y.options.documentLinks)) {
-        document = true;
-      }
-
-      // Create version of text without "open in new window" warnings.
-      let linkStrippedText = Ed11y.options.linkIgnoreStrings ? linkText.toLowerCase().replace(Ed11y.options.linkIgnoreStrings, '') : linkText.toLowerCase();
       if (el?.getAttribute('target') === '_blank') {
         // Nothing was stripped AND we weren't warned.
-        if (linkStrippedText.length === linkText.length && !(Ed11y.options.linkIgnoreSelector && el?.querySelector(Ed11y.options.linkIgnoreSelector))) {
+        if (
+          !(
+            (Ed11y.options.linkIgnoreSelector &&
+              el?.querySelector(Ed11y.options.linkIgnoreSelector))
+              || linkText.toLowerCase().match(Ed11y.options.linkStringsNewWindows)
+          )
+        ) {
           let dismissKey = Ed11y.dismissalKey(linkText);
           Ed11y.results.push({
             element: el,
@@ -40,8 +40,10 @@ class Ed11yTestLinks {
         }
       }
 
-
-
+      // Create version of text without "open in new window" warnings.
+      let linkStrippedText = Ed11y.options.linkIgnoreStrings ?
+        linkText.toLowerCase().replace(Ed11y.options.linkIgnoreStrings, '')
+        : linkText.toLowerCase();
       linkStrippedText = linkStrippedText.replace(/"|'|\?|\.|-|\s+/g, '');
 
       // Tests to see if this link is empty
@@ -111,9 +113,8 @@ class Ed11yTestLinks {
           }
         }
       }
-      //Warning: Find all PDFs. Although only append warning icon to
-      // first PDF on page.
-      if (!hasImg && document) {
+      // Warning: Find all PDFs.
+      if ( document ) {
         let dismissKey = Ed11y.dismissalKey(el?.getAttribute('href'));
         Ed11y.results.push(
           {
