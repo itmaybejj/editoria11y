@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.2.1';
+    Ed11y.version = '2.2.2';
 
     let defaultOptions = {
 
@@ -1255,9 +1255,9 @@ class Ed11y {
           return returnText;
         }
       }
-      if (element.ariaLabel && element.ariaLabel.trim().length > 0) {
+      if (element.getAttribute('aria-label') && element.getAttribute('aria-label').trim().length > 0) {
         // To-do: add empty and whitespace string tests.
-        return element.ariaLabel;
+        return element.getAttribute('aria-label');
       }
       return 'noAria';
     };
