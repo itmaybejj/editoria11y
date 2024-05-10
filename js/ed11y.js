@@ -783,9 +783,9 @@ class Ed11y {
           let nudgeTop = 0;
           let overlap = 36;
           // Detect tip that overlaps with previous result.
-          if (offset.top < 44) {
+          if (offset.top < 0) {
             // Offscreen to top.
-            nudgeTop = offset.top < 0 ? (-1 * offset.top) + 44: 44;
+            nudgeTop = (-1 * offset.top) - 6;
           }
           if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousLeft + overlap) {
             // Overlapping previous

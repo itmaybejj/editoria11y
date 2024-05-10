@@ -6,7 +6,6 @@ ed11y-element-result, ed11y-element-panel {
 }
 
 ed11y-element-result {
-    margin-top: -44px !important;
     position: absolute !important;
     z-index: var(--ed11y-buttonZIndex, 9999) !important;
 }
