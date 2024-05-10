@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.2.2';
+    Ed11y.version = '2.2.3';
 
     let defaultOptions = {
 
@@ -783,7 +783,7 @@ class Ed11y {
           let nudgeTop = 0;
           let overlap = 36;
           // Detect tip that overlaps with previous result.
-          if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousLeft + overlap) {
+          if (offset.top < 44 || offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousLeft + overlap) {
             nudgeTop = nudgeTop + 36 + previousNudge;
           }
           if (offset.left < 8) {

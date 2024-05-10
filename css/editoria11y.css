@@ -1,8 +1,14 @@
 /* Applies to elements in light DOM ===== */
 
 ed11y-element-result, ed11y-element-panel {
-    opacity: 1;
+    opacity: 1 !important;
     outline: 0 !important;
+}
+
+ed11y-element-result {
+    margin-top: -44px !important;
+    position: absolute !important;
+    z-index: var(--ed11y-buttonZIndex, 9999) !important;
 }
 
 .ed11y-hidden-highlight {
@@ -10,15 +16,15 @@ ed11y-element-result, ed11y-element-panel {
 }
 
 .ed11y-ring-red {
-    box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px;
-    outline: 2px solid var(--ed11y-alert, #b80519);
-    outline-offset: 1px;
+    box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px !important;
+    outline: 2px solid var(--ed11y-alert, #b80519) !important;
+    outline-offset: 1px !important;
 }
 
 .ed11y-ring-yellow {
-    box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 1px 3px;
-    outline: 2px solid var(--ed11y-warning, #fad859);
-    outline-offset: 1px;
+    box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 1px 3px !important;
+    outline: 2px solid var(--ed11y-warning, #fad859) !important;
+    outline-offset: 1px !important;
 }
 
 
@@ -46,7 +52,7 @@ ed11y-element-result, ed11y-element-panel {
 .ed11y-sr-only {
     display: block;
     width: 1px;
-    hight: 1px;
+    height: 1px;
     overflow: hidden;
     opacity: 0;
     position: absolute;
