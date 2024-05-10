@@ -109,7 +109,7 @@ ed11y-element-result {
     border-radius: 0 0 var(--ed11y-borderRadius, 1) var(--ed11y-borderRadius, 1);
     color: var(--ed11y-text, #20160c);
     max-height: max(240px, 50vh);
-    overflow: auto;
+    overflow: hidden;
 }
 
 .ed11y-panel-wrapper .content-text {
@@ -309,7 +309,7 @@ ed11y-element-result {
     align-self: center;
 }
 
-#ed11y-headings-tab, #alts-tab {
+#ed11y-headings-tab, #ed11y-alts-tab {
     max-height: max(240px, 50vh);
     overflow: auto;
 }
