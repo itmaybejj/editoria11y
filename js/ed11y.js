@@ -783,7 +783,12 @@ class Ed11y {
           let nudgeTop = 0;
           let overlap = 36;
           // Detect tip that overlaps with previous result.
-          if (offset.top < 44 || offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousLeft + overlap) {
+          if (offset.top < 44) {
+            // Offscreen to top.
+            nudgeTop = offset.top < 0 ? (-1 * offset.top) + 44: 44;
+          }
+          if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousLeft + overlap) {
+            // Overlapping previous
             nudgeTop = nudgeTop + 36 + previousNudge;
           }
           if (offset.left < 8) {
@@ -793,7 +798,7 @@ class Ed11y {
           else if (offset.left + 80 > windowWidth) {
             // Offscreen to right. push to the left
             marksToNudge.push([mark, windowWidth - offset.left - 80, nudgeTop]);
-          } else if (nudgeTop > 0) {
+          } else if (nudgeTop !== 0) {
             marksToNudge.push([mark, 0, nudgeTop]);
           }
           previousLeft = offset.left;
