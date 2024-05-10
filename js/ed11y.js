@@ -776,11 +776,13 @@ class Ed11y {
         // Reading and writing in a loop creates paint thrashing. Read first.
         let previousLeft = 0;
         let previousTop = 0;
-        let previousNudge = 0;
+        let previousNudgeTop = 0;
+        let previousNudgeLeft = 0;
         Ed11y.elements.jumpList.forEach(mark => {
           mark.style.setProperty('transform', null);
           let offset = mark.getBoundingClientRect();
           let nudgeTop = 0;
+          let nudgeLeft = 0;
           let overlap = 36;
           // Detect tip that overlaps with previous result.
           if (offset.top < 0) {
@@ -789,21 +791,23 @@ class Ed11y {
           }
           if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousLeft + overlap) {
             // Overlapping previous
-            nudgeTop = nudgeTop + 36 + previousNudge;
+            nudgeTop = nudgeTop + 36 + previousNudgeTop;
+            nudgeLeft = 36;
           }
-          if (offset.left < 8) {
+          if (offset.left + nudgeLeft < 8) {
             // Offscreen to left. push to the right.
-            marksToNudge.push([mark, 8 - offset.left, nudgeTop]);
+            marksToNudge.push([mark, 8 - offset.left + nudgeLeft, nudgeTop]);
           }
-          else if (offset.left + 80 > windowWidth) {
+          else if (offset.left + nudgeLeft + 80 > windowWidth) {
             // Offscreen to right. push to the left
-            marksToNudge.push([mark, windowWidth - offset.left - 80, nudgeTop]);
+            marksToNudge.push([mark, windowWidth - nudgeLeft - offset.left - 80, nudgeTop]);
           } else if (nudgeTop !== 0) {
-            marksToNudge.push([mark, 0, nudgeTop]);
+            marksToNudge.push([mark, nudgeLeft, nudgeTop]);
           }
-          previousLeft = offset.left;
+          previousLeft = offset.left + nudgeLeft;
           previousTop = offset.top + nudgeTop;
-          previousNudge = nudgeTop;
+          previousNudgeTop = nudgeTop > 0 ? nudgeTop : previousNudgeTop;
+          previousNudgeLeft = nudgeLeft > 0 ? nudgeLeft : previousNudgeLeft;
         });
         marksToNudge.forEach(el => {
           el[0].style.transform = `translate(${el[1]}px, ${el[2]}px)`;
