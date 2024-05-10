@@ -109,7 +109,7 @@ ed11y-element-result {
     border-radius: 0 0 var(--ed11y-borderRadius, 1) var(--ed11y-borderRadius, 1);
     color: var(--ed11y-text, #20160c);
     max-height: max(240px, 50vh);
-    overflow: hidden;
+    overflow: auto;
 }
 
 .ed11y-panel-wrapper .content-text {
