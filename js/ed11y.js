@@ -28,7 +28,7 @@ class Ed11y {
       ignoreByKey: {
         'p': 'table p',
         // 'h': false,
-        'img': '[aria-hidden], [aria-label], [aria-labelledby], [aria-hidden] img, [aria-label] img, [aria-labelledby] img', // disable alt text tests on overriden images
+        'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on overriden images
         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
         // 'li': false,
         // 'blockquote': false,
@@ -785,9 +785,9 @@ class Ed11y {
           let nudgeLeft = 0;
           let overlap = 36;
           // Detect tip that overlaps with previous result.
-          if (offset.top < 0) {
+          if (offset.top + window.scrollY < 0) {
             // Offscreen to top.
-            nudgeTop = (-1 * offset.top) - 6;
+            nudgeTop = (-1 * (offset.top + window.scrollY)) - 6;
           }
           if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousLeft + overlap) {
             // Overlapping previous
@@ -806,8 +806,8 @@ class Ed11y {
           }
           previousLeft = offset.left + nudgeLeft;
           previousTop = offset.top + nudgeTop;
-          previousNudgeTop = nudgeTop > 0 ? nudgeTop : previousNudgeTop;
-          previousNudgeLeft = nudgeLeft > 0 ? nudgeLeft : previousNudgeLeft;
+          previousNudgeTop = nudgeTop > 0 ? nudgeTop + previousNudgeTop : 0;
+          previousNudgeLeft = nudgeLeft > 0 ? nudgeLeft + previousNudgeLeft: 0;
         });
         marksToNudge.forEach(el => {
           el[0].style.transform = `translate(${el[1]}px, ${el[2]}px)`;
