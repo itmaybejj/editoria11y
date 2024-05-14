@@ -50,7 +50,7 @@ const ed11yLang = {
     // 'alt', 'image', 'photo', 'decorative', 'placeholder', 'placeholder image', 'spacer'
     linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
     linksMeaningless: /learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|\.|,|:|>|<|\s/g,
-    linkStringsNewWindows: /window|tab|download|file/g,
+    linkStringsNewWindows: /window|\stab|download/g,
 
     // Tooltips base ======================================
 

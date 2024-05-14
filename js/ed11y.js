@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.2.1';
+    Ed11y.version = '2.2.2';
 
     let defaultOptions = {
 
@@ -28,7 +28,7 @@ class Ed11y {
       ignoreByKey: {
         'p': 'table p',
         // 'h': false,
-        'img': '[aria-hidden], [aria-label], [aria-labelledby], [aria-hidden] img, [aria-label] img, [aria-labelledby] img', // disable alt text tests on overriden images
+        'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on overriden images
         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
         // 'li': false,
         // 'blockquote': false,
@@ -180,6 +180,10 @@ class Ed11y {
       Ed11y.options.currentPage = window.location.pathname;
     }
 
+    if (!Ed11y.options.linkStringsNewWindows) {
+      Ed11y.options.linkStringsNewWindows = Ed11y.M.linkStringsNewWindows;
+    }
+
     if (!Ed11y.options.cssUrls) {
       const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
       if (cssLink) {
@@ -196,7 +200,7 @@ class Ed11y {
       const cssLink = document.createElement('link');
       cssLink.setAttribute('rel', 'stylesheet');
       cssLink.setAttribute('media', 'all');
-      cssLink.setAttribute('href', sheet + '?v=' + Ed11y.version);
+      cssLink.setAttribute('href', sheet + '?ver=' + Ed11y.version);
       cssBundle.append(cssLink);
     });
 
@@ -772,29 +776,38 @@ class Ed11y {
         // Reading and writing in a loop creates paint thrashing. Read first.
         let previousLeft = 0;
         let previousTop = 0;
-        let previousNudge = 0;
+        let previousNudgeTop = 0;
+        let previousNudgeLeft = 0;
         Ed11y.elements.jumpList.forEach(mark => {
           mark.style.setProperty('transform', null);
           let offset = mark.getBoundingClientRect();
           let nudgeTop = 0;
+          let nudgeLeft = 0;
           let overlap = 36;
           // Detect tip that overlaps with previous result.
+          if (offset.top + window.scrollY < 0) {
+            // Offscreen to top.
+            nudgeTop = (-1 * (offset.top + window.scrollY)) - 6;
+          }
           if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousLeft + overlap) {
-            nudgeTop = 36 + previousNudge;
+            // Overlapping previous
+            nudgeTop = nudgeTop + 36 + previousNudgeTop;
+            nudgeLeft = 36;
           }
-          if (offset.left < 8) {
+          if (offset.left + nudgeLeft < 8) {
             // Offscreen to left. push to the right.
-            marksToNudge.push([mark, 8 - offset.left, nudgeTop]);
+            marksToNudge.push([mark, 8 - offset.left + nudgeLeft, nudgeTop]);
           }
-          else if (offset.left + 80 > windowWidth) {
+          else if (offset.left + nudgeLeft + 80 > windowWidth) {
             // Offscreen to right. push to the left
-            marksToNudge.push([mark, windowWidth - offset.left - 80, nudgeTop]);
-          } else if (nudgeTop > 0) {
-            marksToNudge.push([mark, 0, nudgeTop]);
+            marksToNudge.push([mark, windowWidth - nudgeLeft - offset.left - 80, nudgeTop]);
+          } else if (nudgeTop !== 0) {
+            marksToNudge.push([mark, nudgeLeft, nudgeTop]);
           }
-          previousLeft = offset.left;
+          previousLeft = offset.left + nudgeLeft;
           previousTop = offset.top + nudgeTop;
-          previousNudge = nudgeTop;
+          previousNudgeTop = nudgeTop > 0 ? nudgeTop + previousNudgeTop : 0;
+          previousNudgeLeft = nudgeLeft > 0 ? nudgeLeft + previousNudgeLeft: 0;
         });
         marksToNudge.forEach(el => {
           el[0].style.transform = `translate(${el[1]}px, ${el[2]}px)`;
@@ -834,8 +847,8 @@ class Ed11y {
       let tip = arrow.nextElementSibling;
       let loopCount = recheck + 1;
 
-      // hiddenHandlers may cause element to animate.
-      if (recheck < 3 && Ed11y.options.hiddenHandlers && Ed11y.options.hiddenHandlers.length > 0 && !!button.getRootNode().host.closest(Ed11y.options.hiddenHandlers)) {
+      // Various hiddenHandlers may cause element to animate open.
+      if (recheck < 3) {
         window.setTimeout(function () {
           Ed11y.alignTip(button, toolTip, loopCount);
         }, 150, loopCount);
@@ -849,7 +862,7 @@ class Ed11y {
       const scrollTop = window.scrollY;
       let buttonOffset = button.getBoundingClientRect();
       let buttonSize = buttonOffset.width;
-      if (buttonOffset.top === 0 && buttonOffset.left === 0) {
+      if (!(Ed11y.visible(button.getRootNode().host)) || buttonOffset.top === 0 && buttonOffset.left === 0) {
         // ruh roh invisible button
         const firstVisibleParent = Ed11y.firstVisibleParent(button.getRootNode().host);
         if (firstVisibleParent) {
@@ -1251,9 +1264,9 @@ class Ed11y {
           return returnText;
         }
       }
-      if (element.ariaLabel && element.ariaLabel.trim().length > 0) {
+      if (element.getAttribute('aria-label') && element.getAttribute('aria-label').trim().length > 0) {
         // To-do: add empty and whitespace string tests.
-        return element.ariaLabel;
+        return element.getAttribute('aria-label');
       }
       return 'noAria';
     };

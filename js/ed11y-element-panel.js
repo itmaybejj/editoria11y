@@ -118,9 +118,14 @@ class Ed11yElementPanel extends HTMLElement {
         detail: {result: goto.getAttribute('data-ed11y-result')}
       }));
     }
+    const details = target.closest('details');
+    if (details && !details.open) {
+      details.open = true;
+      delay = 333;
+    }
 
     // Throw an alert if the button or target is hidden.
-    window.setTimeout(function (goto, target) {
+    window.setTimeout((goto, target) => {
       let firstVisible = false;
       let alertMessage;
       if (Ed11y.options.checkVisible && !Ed11y.visible(target)) {
@@ -138,7 +143,16 @@ class Ed11yElementPanel extends HTMLElement {
       }
       goto.scrollIntoView({ block: 'center' });
       let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-      activeTip.shadowRoot.querySelector('.close').focus();
+      if (!activeTip) {
+        goto.setAttribute('data-ed11y-action','open');
+        window.setTimeout(() => {
+          // Race conditions are fun.
+          let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+          activeTip?.shadowRoot.querySelector('.close').focus();
+        }, 100);
+      } else {
+        activeTip?.shadowRoot.querySelector('.close').focus();
+      }
     }, delay, goto, target);
 
   }
