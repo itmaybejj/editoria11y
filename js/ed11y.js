@@ -200,7 +200,7 @@ class Ed11y {
       const cssLink = document.createElement('link');
       cssLink.setAttribute('rel', 'stylesheet');
       cssLink.setAttribute('media', 'all');
-      cssLink.setAttribute('href', sheet + '?v=' + Ed11y.version);
+      cssLink.setAttribute('href', sheet + '?ver=' + Ed11y.version);
       cssBundle.append(cssLink);
     });
 
