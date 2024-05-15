@@ -49,7 +49,7 @@ const ed11yLang = {
     meaninglessAlt: ['alt','chart','decorative','image','graphic','photo','placeholder','placeholder image','spacer','tbd','todo','to do'],
     // 'alt', 'image', 'photo', 'decorative', 'placeholder', 'placeholder image', 'spacer'
     linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
-    linksMeaningless: /learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|\.|,|:|>|<|\s/g,
+    linksMeaningless: /(learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|"|'|\?|\.|-|,|:|>|<|\s)+/g,
     linkStringsNewWindows: /window|\stab|download/g,
 
     // Tooltips base ======================================
