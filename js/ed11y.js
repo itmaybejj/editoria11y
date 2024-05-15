@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.2.2';
+    Ed11y.version = '2.2.3';
 
     let defaultOptions = {
 
@@ -28,7 +28,7 @@ class Ed11y {
       ignoreByKey: {
         'p': 'table p',
         // 'h': false,
-        'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on overriden images
+        'img': '[aria-hidden], [aria-hidden] img', // May get false negatives in accordions, but needed for icons
         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
         // 'li': false,
         // 'blockquote': false,
