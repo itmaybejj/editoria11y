@@ -216,8 +216,13 @@ class Ed11y {
 
       Ed11y.checkRunPrevent = () => {
         let preventCheck = Ed11y.options.preventCheckingIfPresent ? document.querySelector(Ed11y.options.preventCheckingIfPresent) : false;
-        if (!preventCheck && !!Ed11y.options.preventCheckingIfAbsent) {
+        if (preventCheck) {
+          console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${Ed11y.options.preventCheckingIfPresent}"` );
+        } else if (!preventCheck && !!Ed11y.options.preventCheckingIfAbsent) {
           preventCheck = document.querySelector(`:is(${Ed11y.options.preventCheckingIfAbsent})`) === null;
+          if (preventCheck) {
+            console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${Ed11y.options.preventCheckingIfAbsent}"`);
+          }
         }
         return preventCheck;
       };
