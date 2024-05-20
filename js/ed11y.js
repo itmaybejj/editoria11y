@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.2.4-dev';
+    Ed11y.version = '2.2.4';
 
     let defaultOptions = {
 
