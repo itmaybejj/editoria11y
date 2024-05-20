@@ -36,8 +36,9 @@ class Ed11yTestImages {
       }
       else {
         altLabel += alt;
+        const altLower = alt.toLowerCase();
 
-        if (Ed11y.M.meaninglessAlt.includes(alt.trim().toLowerCase())) {
+        if (Ed11y.M.meaninglessAlt.includes(altLower.trim())) {
           error = 'altMeaningless';
           dismissable = false;
         } else {
@@ -49,13 +50,15 @@ class Ed11yTestImages {
           let check = [null, null];
 
           altUrl.forEach((string) => {
-            if (alt.toLowerCase().indexOf(string) >= 0) {
+            if (altLower.indexOf(string) >= 0) {
               check[0] = 'URL';
             }
           });
 
           suspiciousWords.forEach((string) => {
-            if (alt.toLowerCase().indexOf(string) !== -1) {
+            const suspiciousWord = altLower.indexOf(string);
+            if (suspiciousWord > -1 && suspiciousWord < 6) {
+              // photo of, a photo of, the photo is
               check[1] = string;
             }
           });
