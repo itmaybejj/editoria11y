@@ -39,9 +39,10 @@ class Ed11y {
       },
 
       // Set alertMode to "Assertive" to open the panel automatically if the issue count changes.
-      // For CMS integrations, it is nice  switch between polite & headless based on whether the page was just edited.
+      // CMS integrations can switch between polite & headless at runtime.
       // alertMode "headless" never draws the panel.
       alertMode: 'polite',
+      inlineAlerts: true,
 
       // Dismissed alerts
       currentPage: false, // uses window.location.pathname unless a string is provided.
@@ -545,11 +546,17 @@ class Ed11y {
         // [5] dismissalStatus
         */
       let mark = document.createElement('ed11y-element-result');
-      let location = result.element.closest('a');
+      let location;
       let position = 'beforebegin';
-      if (!location) {
-        location = result.element;
-        position = result.position;
+      if ( !Ed11y.options.inlineAlerts ) {
+        location = document.querySelector('body');
+        position = 'beforeend';
+      } else {
+        location = result.element.closest('a');
+        if (!location) {
+          location = result.element;
+          position = result.position;
+        }
       }
       mark.setAttribute('id', 'ed11y-result-' + index);
       mark.setAttribute('data-ed11y-result', index);
@@ -773,18 +780,41 @@ class Ed11y {
     };
 
     Ed11y.alignButtons = function () {
+      // Reading and writing in a loop creates paint thrashing.
+      // We iterate the array for reads, then iterate for writes.
+
       window.setTimeout(function () {
         // Nudge offscreen tips back on screen.
         let windowWidth = window.innerWidth;
         // Todo later: collision detection.
         let marksToNudge = [];
-        // Reading and writing in a loop creates paint thrashing. Read first.
         let previousLeft = 0;
         let previousTop = 0;
         let previousNudgeTop = 0;
         let previousNudgeLeft = 0;
         Ed11y.elements.jumpList.forEach(mark => {
           mark.style.setProperty('transform', null);
+          mark.style.setProperty('top', 'initial');
+          mark.style.setProperty('left', 'initial');
+        });
+        if (!Ed11y.options.inlineAlerts) {
+          // Alerts are at end of body and need to be positioned.
+          Ed11y.elements.jumpList.forEach(mark => {
+            const result = mark.getAttribute('data-ed11y-result');
+            const target = Ed11y.results[result]?.element;
+            let targetOffset = target.getBoundingClientRect();
+            if ((targetOffset.top === 0 && targetOffset.left === 0) || !Ed11y.visible(target)) {
+              // Invisible target.
+              const firstVisibleParent = Ed11y.firstVisibleParent(target);
+              targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
+            }
+            if (targetOffset.top + window.scrollY > 0 && targetOffset.left > 0) {
+              mark.style.setProperty('top', targetOffset.top + window.scrollY + 'px');
+              mark.style.setProperty('left', targetOffset.left + 'px');
+            }
+          });
+        }
+        Ed11y.elements.jumpList.forEach(mark => {
           let offset = mark.getBoundingClientRect();
           let nudgeTop = 0;
           let nudgeLeft = 0;
@@ -1140,7 +1170,7 @@ class Ed11y {
     };
 
     Ed11y.buildJumpList = function () {
-      Ed11y.findElements('jumpList', 'ed11y-element-result', false);
+      Ed11y.findElements('jumpList', 'ed11y-element-result', Ed11y.options.inlineAlerts);
       Ed11y.elements.jumpList.forEach((result, i) => {
         result.dataset.ed11yJumpPosition = i;
       });

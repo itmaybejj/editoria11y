@@ -400,20 +400,19 @@ ed11y-element-result {
     line-height: 1;
     font-size: 1.14em;
     font-size: clamp(1.14em, 2vw, 1.5em);
-}
-
-.ed11y-result-wrapper button:focus-visible {
-    outline: 2px solid transparent;
-    box-shadow: inset 0 0 0 2px var(--ed11y-focusRing, #007aff), 0 0 0 3px var(--ed11y-primary, #276499);
-}
-
-.ed11y-result-wrapper .toggle {
     box-shadow: inset 0 0 0 1px var(--ed11y-alert, #b80519), inset 0 0 0 2px #fefefe, inset 0 0 0 6px var(--ed11y-alert, #b80519), 1px 1px 5px 0 rgb(0 0 0 / 50%);
     background: #fefefe;
     color: var(--ed11y-alert, #b80519);
 }
 
-.ed11y-result-wrapper .toggle:hover, .ed11y-result-wrapper .toggle[aria-expanded='true'] {
+.ed11y-result-wrapper button.toggle:focus-visible {
+    outline: 2px solid transparent;
+}
+
+.ed11y-result-wrapper .toggle:hover,
+.ed11y-result-wrapper .toggle[aria-expanded='true'],
+.ed11y-result-wrapper .toggle:focus-visible {
+    border: 2px solid var(--ed11y-ok, #1f5381);
     box-shadow: inset 0 0 0 1px var(--ed11y-alert, #b80519), inset 0 0 0 2px #fefefe, inset 0 0 0 6px var(--ed11y-alert, #b80519), 0 0 0 2px var(--ed11y-primary, #276499), 0 0 0 3px transparent;
 }
 
@@ -425,10 +424,6 @@ ed11y-element-result {
     box-shadow: inset 0 0 0 2px var(--ed11y-ok, #1f5381), inset 0 0 0 3px var(--ed11y-primaryText, #fffdf7), inset 0 0 0 6px var(--ed11y-ok, #1f5381), 1px 1px 5px 0 rgb(0 0 0 / 50%);
     background: var(--ed11y-ok, #1f5381);
     color: var(--ed11y-primaryText, #fffdf7);
-}
-
-.ed11y-result-wrapper .toggle.dismissed:hover, .ed11y-result-wrapper .toggle[aria-expanded='true'] {
-    border: 2px solid var(--ed11y-ok, #1f5381);
 }
 
 .ed11y-result-wrapper .toggle.ok::before {
@@ -453,6 +448,9 @@ ed11y-element-result {
 .ed11y-result-wrapper .toggle.dismissable:hover,
 .ed11y-result-wrapper .toggle.dismissable[aria-expanded='true'] {
     border: 2px solid var(--ed11y-primary, #276499);
+}
+.ed11y-result-wrapper .toggle.dismissable:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--ed11y-focusRing, #007aff), 0 0 0 3px var(--ed11y-primary, #276499);
 }
 
 /* Tip/modal ============================ */
