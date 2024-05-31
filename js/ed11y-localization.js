@@ -57,6 +57,7 @@ const ed11yLang = {
     toggleManualCheck: 'manual check needed',
     toggleAlert: 'alert',
     toggleAriaLabel: (resultID, label) => `Accessibility issue ${resultID}, ${label}`,
+    transferFocus: 'Transfer focus to element',
     dismissOkButtonContent: 'Mark as checked and OK',
     dismissHideButtonContent: 'Hide alert',
     dismissOkSyncedButtonContent: 'Mark OK for all users',

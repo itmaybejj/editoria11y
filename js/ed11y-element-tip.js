@@ -38,9 +38,9 @@ class Ed11yElementTip extends HTMLElement {
       content.classList.add('content');
       content.innerHTML = this.result.content;
 
+      const buttonBar = document.createElement('div');
       // Draw dismiss or restore buttons
       if (this.dismissable) {
-        let dismissers = document.createElement('div');
         let dismissHelp = false;
 
         // Dismissal Key is set in [5] if alert has been dismissed.
@@ -52,13 +52,13 @@ class Ed11yElementTip extends HTMLElement {
             let undismissButton = document.createElement('button');
             undismissButton.classList.add('dismiss');
             undismissButton.textContent = okd ? Ed11y.M.undismissOKButton : Ed11y.M.undismissHideButton;
-            dismissers.append(undismissButton);
+            buttonBar.append(undismissButton);
             undismissButton.addEventListener('click', function(){Ed11y.dismissThis('reset');});
           } else {
             let undismissNote = document.createElement('div');
             undismissNote.classList.add('dismissed-note');
             undismissNote.textContent = Ed11y.M.undismissNotePermissions;
-            dismissers.append(undismissNote);
+            buttonBar.append(undismissNote);
           }
         } else {
           if (Ed11y.options.allowHide) {
@@ -67,7 +67,7 @@ class Ed11yElementTip extends HTMLElement {
             // todo parameterize
             dismissHideButton.textContent = Ed11y.options.syncedDismissals === false ? Ed11y.M.dismissHideButtonContent : Ed11y.M.dismissHideSyncedButtonContent;
             //dismissHideButton.setAttribute('title', Ed11y.M.dismissHideButtonTitle);
-            dismissers.append(dismissHideButton);
+            buttonBar.append(dismissHideButton);
             dismissHideButton.addEventListener('click', function(){Ed11y.dismissThis('hide');});
             dismissHelp = true;
           }
@@ -75,8 +75,7 @@ class Ed11yElementTip extends HTMLElement {
             let dismissOKButton = document.createElement('button');
             dismissOKButton.classList.add('dismiss');
             dismissOKButton.textContent = Ed11y.options.syncedDismissals === false ? Ed11y.M.dismissOkButtonContent : Ed11y.M.dismissOkSyncedButtonContent;
-            //dismissOKButton.setAttribute('title', Ed11y.M.dismissOkButtonTitle);
-            dismissers.append(dismissOKButton);
+            buttonBar.append(dismissOKButton);
             dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
             dismissHelp = true;
           }
@@ -86,11 +85,18 @@ class Ed11yElementTip extends HTMLElement {
           dismissHelp.classList.add('dismiss');
           // todo parameterize
           dismissHelp.textContent = '?';
-          dismissers.append(dismissHelp);
+          buttonBar.append(dismissHelp);
           dismissHelp.addEventListener('click', function(){Ed11y.dismissHelp(dismissHelp);});
         }
-        content.append(dismissers);
       }
+      const transferFocus = document.createElement('button');
+      transferFocus.textContent = '»';
+      transferFocus.setAttribute('aria-label', Ed11y.M.transferFocus);
+      transferFocus.setAttribute('title', Ed11y.M.transferFocus);
+      transferFocus.classList.add('dismiss');
+      buttonBar.append(transferFocus);
+      transferFocus.addEventListener('click', function(){Ed11y.transferFocus();});
+      content.append(buttonBar);
       let closeButton = document.createElement('button');
       closeButton.setAttribute('aria-label','close');
       closeButton.classList.add('close');
@@ -106,7 +112,9 @@ class Ed11yElementTip extends HTMLElement {
         if(this.open) {
           // todo this needs to be part of the shadow DOM query I think
           let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
-          Ed11y.toggledFrom.focus();
+          if (Ed11y.toggledFrom) {
+            Ed11y.toggledFrom.focus();
+          }
           // todo postpone: track if this tip was opened by the next button. If so, transfer focus back to it instead
           toggle?.setAttribute('data-ed11y-action', 'shut');
           this.setAttribute('data-ed11y-action', 'shut');

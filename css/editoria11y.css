@@ -696,3 +696,33 @@ ed11y-element-result {
     background: var(--ed11y-primary, #276499);
     color: var(--ed11y-primaryText, #fffdf7);
 }
+
+
+/******/
+
+@keyframes ed11yFadeOut {
+    from {
+        opacity: 1;
+        display: block;
+    }
+
+    to {
+        opacity: 0;
+        display: none;
+    }
+}
+@keyframes ed11yFadeIn {
+    from {
+        opacity: 0 !important;
+        display: none !important;
+    }
+
+    to {
+        opacity: 1 !important;
+        display: block !important;
+    }
+}
+
+.toggle.intersecting {
+    animation: ed11yFadeOut .1s ease-out forwards;
+}
