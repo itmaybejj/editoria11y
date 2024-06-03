@@ -99,8 +99,9 @@ class Ed11yElementPanel extends HTMLElement {
     goto.setAttribute('data-ed11y-action','open');
 
     let gotoResult = Ed11y.results[goto.getAttribute('data-ed11y-result')];
-    let insert = gotoResult.position;
-    let target;
+    //let insert = gotoResult.position;
+    const target = gotoResult.element;
+    /*let target;
     // todo this belongs in the result open logic not here
     if (insert === 'beforebegin') {
       target = Ed11y.nextUntil(goto, ':not(ed11y-element-result)');
@@ -108,7 +109,7 @@ class Ed11yElementPanel extends HTMLElement {
     else if (insert === 'afterbegin') {
       // todo:check that these are identified correctly.
       target = goto.parentElement;
-    }
+    }*/
 
     let delay = 100;
     if (Ed11y.options.hiddenHandlers.length > 0 && !!target.closest(Ed11y.options.hiddenHandlers)) {
@@ -129,10 +130,14 @@ class Ed11yElementPanel extends HTMLElement {
       let firstVisible = false;
       let alertMessage;
       if (Ed11y.options.checkVisible && !Ed11y.visible(target)) {
+        console.log('target failed visibility check');
+        console.log(target);
+        console.log(Ed11y.visible(target));
         firstVisible = Ed11y.firstVisibleParent(target);
         alertMessage = Ed11y.M.jumpedToInvisibleTip;
       }
       else if (target.closest('[aria-hidden="true"]')) {
+        console.log('aria-hidden target');
         firstVisible = target.closest('[aria-hidden="true"]');
         firstVisible = firstVisible.closest(':not([aria-hidden="true"])');
         alertMessage = Ed11y.M.jumpedToAriaHiddenTip;

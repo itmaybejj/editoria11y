@@ -118,7 +118,10 @@ class Ed11yElementResult extends HTMLElement {
     }
     this.toggle.setAttribute('aria-expanded', changeTo);
     let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
-    this.result.element.classList.toggle(highlightOutline);
+    if (!this.result.element.closest('[contenteditable="true"]')) {
+      // todo editable - abstract out
+      this.result.element.classList.toggle(highlightOutline);
+    }
     if (changeTo === true) {
       // Allow for themes to reveal hidden tips
       document.dispatchEvent(new CustomEvent('ed11yPop', {
@@ -131,6 +134,7 @@ class Ed11yElementResult extends HTMLElement {
         Ed11y.buildJumpList();
       }
       Ed11y.goto = this.getAttribute('data-ed11y-jump-position');
+      this.result.highlight?.style.setProperty('opacity', '1');
       Ed11y.setCurrentJump();
     } else {
       // Allow for themes to restore original DOM/CSS
@@ -138,6 +142,7 @@ class Ed11yElementResult extends HTMLElement {
         detail: { id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result') }
       }));
       this.tip.setAttribute('data-ed11y-action', 'shut');
+      this.result.highlight?.style.setProperty('opacity', '0');
     }
     this.setAttribute('data-ed11y-open', changeTo);
     this.open = changeTo;

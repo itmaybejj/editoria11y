@@ -703,28 +703,31 @@ ed11y-element-result {
 @keyframes ed11yFadeOut {
     from {
         opacity: 1;
-        display: block;
-        visibility: visible;
+        pointer-events: auto;
     }
 
     to {
         opacity: 0;
-        visibility: hidden;
+        pointer-events: none;
     }
 }
 @keyframes ed11yFadeIn {
     from {
         opacity: 0 !important;
-        display: none !important;
+        pointer-events: none;
     }
 
     to {
         opacity: 1 !important;
-        display: block !important;
+        pointer-events: auto;
     }
 }
 
 .intersecting {
     animation: ed11yFadeOut .1s ease-out forwards;
     /*visibility: hidden;*/
+}
+ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
+    filter: opacity(.94);
+    transition: filter .3s ease;
 }

@@ -9,11 +9,22 @@
     <header>
         <h1 id="editoria11y-demo">Editoria11y Utility Functions</h1>
     </header>
-    <main contenteditable="true">
+    <main>
 
-        <section id="editable-region">
+        <section id="editable-region" contenteditable="true">
 
-            <h2>Editable Region</h2>
+            <h2>Editable Regions</h2>
+            <p><a href="#">https://This link is going to wrap on to a lot of lines because it has a lot of text, and it is going to trip the https test.</a></p>
+            <div>
+                <ul><li><a href>stack positioning</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li></ul>
+            </div>
+
+
+        </section>
+        <section id="not-editable-region" contenteditable="false">
+
+            <h2>Editable Regions</h2>
+            <p><a href="#">https://This link is going to wrap on to a lot of lines because it has a lot of text, and it is going to trip the https test.</a></p>
             <div>
                 <ul><li><a href>stack positioning</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li></ul>
             </div>
@@ -21,7 +32,7 @@
 
         </section>
 
-        <section id="Custom tests">
+        <section id="Custom tests" contenteditable="true">
             <h2 id="customtest">Custom tests</h2>
             <div class="positive">
                 <a href="https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwds.princeton.edu%2F">Safelink</a>
@@ -103,7 +114,7 @@
 
         </section>
 
-        <section id="name-calculation">
+        <section id="name-calculation" >
 
             <h2 id="namecalc">Accessible name calculation</h2>
 
@@ -202,7 +213,7 @@
                     },
                     shadowComponents : 'shadow-test, shadow-test-no-hits',
                     hiddenHandlers : '[hidden]',
-                    inlineAlerts : false,
+                    //inlineAlerts : false,
                     checkRoots : 'body',
                     linkIgnoreStrings: '\(link is external\)',
                     customTests : 2,
