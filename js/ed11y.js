@@ -42,7 +42,7 @@ class Ed11y {
       // CMS integrations can switch between polite & headless at runtime.
       // alertMode "headless" never draws the panel.
       alertMode: 'polite',
-      startMinimized: true, // todo set to false by default
+      startMinimized: true, // todo set to false by default // todo create minimal interface
       inlineAlerts: true,
 
       // Dismissed alerts
@@ -977,14 +977,12 @@ class Ed11y {
       let previousTop = 0;
       let previousNudgeTop = 0;
       let previousNudgeLeft = 0;
-      let buttonWidth = 45;
 
       Ed11y.jumpList?.forEach(mark => {
         const id = mark.getAttribute('data-ed11y-result');
         const result = Ed11y.results[id];
         const target = result?.element;
         let noNudge = false;
-        buttonWidth = buttonWidth === 44 ? mark.offsetWidth : 44;
         mark.style.setProperty('transform', null);
         mark.style.setProperty('top', 'initial');
         mark.style.setProperty('left', 'initial');
@@ -1055,17 +1053,16 @@ class Ed11y {
           //const editable = target.closest('[contenteditable="true"]');
           if (target.isContentEditable) {
             mark.shadowRoot.querySelector('.toggle').style.setProperty('font-size', '16px');
-            buttonWidth = 36; // todo editable this shouldn't be overridden here
           }
 
           let markOffset = mark.getBoundingClientRect();
           const top = targetOffset.top - markOffset.top;
-          const left = targetOffset.left - markOffset.left;
+          const left = targetOffset.left - markOffset.left - 40;
           if (targetOffset.top + window.scrollY > 0 && targetOffset.left > 0 && (top !== 0 || left !== 0)) {
             mark.style.transform = `translate(${left}px, ${top}px)`;
             noNudge = true; // todo: not good; we still need the nudges
           }
-          if (!!bounds && (targetOffset.top - bounds.top < 0 || targetOffset.top + buttonWidth - bounds.bottom > 0)) {
+          if (!!bounds && (targetOffset.top - bounds.top < 0 || targetOffset.bottom - bounds.bottom > 0 )) {
             mark.classList.add('offscreen');
             mark.style.pointerEvents = 'none';
           }
@@ -1536,21 +1533,20 @@ class Ed11y {
 
     Ed11y.checkEditableIntersects = function () {
       if (!document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
+        //Reset classes to measure.
         Ed11y.jumpList?.forEach((el) => {
           el.classList.remove('intersecting');
         });
         return;
       }
       const range = document.createRange();
-      range.setStartBefore(getSelection().anchorNode);
-      range.setEndAfter(getSelection().anchorNode);
-      //const rangeNode = range.commonAncestorContainer;
-      //const firstLetter = document.createRange();
-      //firstLetter.setStartBefore(getSelection().anchorNode);
-      //firstLetter.setEnd(getSelection().anchorNode, 1); // todo not in use right?
-      const rangeNode = range; // todo no longer using rangeNode
-      if (typeof rangeNode !== 'object' || typeof rangeNode.getBoundingClientRect !== 'function') {
-        // Reset classes to measure.
+      let anchor = getSelection().anchorNode;
+      let expand = anchor?.parentNode?.closest('p, li, h2, h3, h4, h5');
+      anchor = expand ? expand : anchor;
+      range.setStartBefore(anchor);
+      range.setEndAfter(anchor);
+      if (typeof range !== 'object' || typeof range.getBoundingClientRect !== 'function') {
+        // Range isn't on a node we can measure.
         Ed11y.jumpList?.forEach((el) => {
           el.classList.remove('intersecting');
         });
@@ -1558,7 +1554,7 @@ class Ed11y {
       }
       Ed11y.jumpList?.forEach((el) => {
         const toggle = el.shadowRoot.querySelector('.toggle');
-        if ( intersect(rangeNode.getBoundingClientRect(), toggle.getBoundingClientRect(), 1) ) {
+        if ( intersect(range.getBoundingClientRect(), toggle.getBoundingClientRect(), 1) ) {
           if (!el.classList.contains('was-intersecting')) {
             el.classList.add('intersecting');
           }

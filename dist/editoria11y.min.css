@@ -734,3 +734,11 @@ ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
     filter: opacity(.94);
     transition: filter .3s ease;
 }
+#ed11y-toggle svg {
+    display: none;
+}
+#ed11y-toggle[aria-expanded="true"] svg {
+    display: inline-block;
+    width: 11px;
+    margin: 0 -3px -1px;
+}
