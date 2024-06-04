@@ -727,6 +727,9 @@ ed11y-element-result {
     animation: ed11yFadeOut .1s ease-out forwards;
     /*visibility: hidden;*/
 }
+ed11y-element-result[data-ed11y-open="false"].offscreen {
+    opacity: 0 !important;
+}
 ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
     filter: opacity(.94);
     transition: filter .3s ease;

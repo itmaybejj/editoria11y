@@ -86,19 +86,20 @@ class Ed11yElementPanel extends HTMLElement {
     event.preventDefault();
     Ed11y.toggledFrom = this;
     Ed11y.resetClass(['ed11y-hidden-highlight']);
-    if (!Ed11y.elements.jumpList) {
+    if (!Ed11y.jumpList) {
       Ed11y.buildJumpList();
     }
     // Find next or first result in the dom ordered list of results.
     let goNum = parseInt(this.dataset.ed11yGoto);
-    goNum = Ed11y.elements.jumpList.length > goNum ? goNum : 0;
-    let goto = Ed11y.elements.jumpList[goNum];
+    goNum = Ed11y.jumpList.length > goNum ? goNum : 0;
+    let goto = Ed11y.jumpList[goNum];
     goto.scrollIntoView({ block: 'center' });
 
     // Open the button
     goto.setAttribute('data-ed11y-action','open');
 
     let gotoResult = Ed11y.results[goto.getAttribute('data-ed11y-result')];
+    console.log(gotoResult);
     //let insert = gotoResult.position;
     const target = gotoResult.element;
     /*let target;
@@ -146,7 +147,12 @@ class Ed11yElementPanel extends HTMLElement {
         alert(alertMessage);
         firstVisible.classList.add('ed11y-hidden-highlight');
       }
-      goto.scrollIntoView({ block: 'center' });
+      if (target.isContentEditable) {
+        // todo this selector must match the selector that decides where to place the mark
+        target.scrollIntoView({ block: 'center' });
+      } else {
+        goto.scrollIntoView({ block: 'center' });
+      }
       let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
       if (!activeTip) {
         goto.setAttribute('data-ed11y-action','open');

@@ -118,9 +118,15 @@ class Ed11yElementResult extends HTMLElement {
     }
     this.toggle.setAttribute('aria-expanded', changeTo);
     let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
-    if (!this.result.element.closest('[contenteditable="true"]')) {
+    const editableParent = this.result.element.closest('[contenteditable="true"]');
+    if (!editableParent) {
       // todo editable - abstract out
       this.result.element.classList.toggle(highlightOutline);
+    } else {
+      console.log(this.offsetTop);
+      console.log(editableParent.offsetTop);
+      //editableParent.scrollTop = this.offsetTop;
+      //this.scrollIntoView();
     }
     if (changeTo === true) {
       // Allow for themes to reveal hidden tips
@@ -130,7 +136,7 @@ class Ed11yElementResult extends HTMLElement {
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');
       Ed11y.alignTip(this.toggle, this.tip);
-      if (!Ed11y.elements.jumpList) {
+      if (!Ed11y.jumpList) {
         Ed11y.buildJumpList();
       }
       Ed11y.goto = this.getAttribute('data-ed11y-jump-position');
