@@ -6,6 +6,7 @@ tests/performance.htm
 # Ignore testing artifacts.
 logs/*
 tests_output/*
+tests/tinymce/*
 logs/
 node_modules/
 tests_output/

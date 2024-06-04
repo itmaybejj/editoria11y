@@ -11,7 +11,7 @@
     </header>
     <main>
 
-        <section id="editable-region" contenteditable="true" style="max-height: 10em; overflow-y: auto; width: calc(100%-5rem); padding: 0 2.5rem; outline: 1px solid;">
+        <section id="editable-region" contenteditable="true" style="max-height: 20em; overflow-y: auto; width: calc(100%-5rem); padding: 0 2.5rem; outline: 1px solid;">
 
             <h2>Editable Regions</h2>
             <p><a href="#">https://This link is going to wrap on to a lot of lines because it has a lot of text, and it is going to trip the https test.</a></p>
@@ -24,6 +24,14 @@
 
 
         </section>
+        <script src="tinymce/js/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
+        <script>tinymce.init({
+          selector: '#editable-region',  // change this value according to your HTML
+          license_key: 'gpl',
+          inline: true,
+        });
+
+        </script>
         <section id="not-editable-region" contenteditable="false">
 
             <h2>Non-editable Regions</h2>
@@ -214,6 +222,7 @@
                         'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
                         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
                     },
+                    ignoreElements: '.tox-editor-header *',
                     shadowComponents : 'shadow-test, shadow-test-no-hits',
                     hiddenHandlers : '[hidden]',
                     //inlineAlerts : false,

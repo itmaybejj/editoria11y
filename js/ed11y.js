@@ -500,7 +500,6 @@ class Ed11y {
           }
           window.setTimeout(function () {
             document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
-            console.log('panel open event');
             if (!Ed11y.ignoreAll) {
               Ed11y.showResults();
             }
@@ -624,6 +623,7 @@ class Ed11y {
       location.insertAdjacentElement(position, mark);
       Ed11y.jumpList.unshift(mark);
       mark.dataset.ed11yJumpPosition = `${jumpIndex}`;
+      Ed11y.results[index].toggle = mark;
     };
 
     Ed11y.resetResults = function() {
@@ -921,7 +921,46 @@ class Ed11y {
       document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
 
       Ed11y.alignButtons();
+      Ed11y.checkEditableIntersects();
     };
+
+    Ed11y.editableHighlight = [];
+
+    Ed11y.editableHighlighter = function (resultID, show) {
+      if (!show) {
+        Ed11y.editableHighlight[resultID]?.style.setProperty('opacity', '0');
+        return;
+      }
+      const result = Ed11y.results[resultID];
+      const target = result.element;
+      let el = Ed11y.editableHighlight[resultID];
+      if (!el) {
+        el = document.createElement('div');
+        Ed11y.editableHighlight[resultID] = el;
+        el.classList.add('ed11y-editable-highlight');
+        el.style.setProperty('position', 'absolute');
+        el.style.setProperty('pointer-events', 'none');
+        // todo: sometimes while typing this fails to red?
+        document.body.appendChild(el);
+      }
+      const outline = result.dismissalKey ?
+        '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 1px 3px'
+        : '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
+      el.style.setProperty('box-shadow', outline);
+      el.style.setProperty('top', '0');
+      el.style.setProperty('left', '0');
+      let targetOffset = target.getBoundingClientRect();
+      if ((targetOffset.top === 0 && targetOffset.left === 0) || !Ed11y.visible(target)) {
+        // Invisible target. todo: wait why is 0 considered invisible?
+        const firstVisibleParent = Ed11y.firstVisibleParent(target);
+        targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
+      }
+      el.style.setProperty('width', targetOffset.width + 'px');
+      el.style.setProperty('top', targetOffset.top + window.scrollY + 'px');
+      el.style.setProperty('left', targetOffset.left + 'px');
+      el.style.setProperty('height', targetOffset.height + 'px');
+      //el.style.setProperty('opacity', '0');
+    }
 
     Ed11y.alignButtons = function () {
       /*if (!Ed11y.jumpList) {
@@ -958,7 +997,9 @@ class Ed11y {
           // We inline whether or not contenteditable is true or false.
           const bounds = editableParent?.getBoundingClientRect();
           // Alerts are at end of body and need to be positioned.
-          let editableHighlight = document.querySelector('#ed11y-editable-highlight-' + id);
+          /*Ed11y.findElements('editableHighlight', '#ed11y-editable-highlight-' + id);
+          let editableHighlight = Ed11y.elements.editableHighlight?.[0];
+          console.log(editableHighlight);
           const needsInit = !editableHighlight;
           if (needsInit) {
             editableHighlight = document.createElement('div');
@@ -989,7 +1030,6 @@ class Ed11y {
           // Position tips relative to contentEditable container.
           /*const highlightRects = editableHighlight.getBoundingClientRect();
           const topGoal  = targetOffset.top + window.scrollY - highlightRects.top;
-          console.log(topGoal);
           const leftGoal = targetOffset.left - highlightRects.left;
           if (topGoal) {
             let newTop = topGoal - parseInt(highlightStyles.getPropertyValue('top'));
@@ -998,15 +1038,25 @@ class Ed11y {
           if (leftGoal) {
             let newLeft = topGoal - parseInt(highlightStyles.getPropertyValue('left'));
             editableHighlight.style.setProperty('left', newLeft + 'px');
-          }*/
-          editableHighlight.setAttribute('id', 'ed11y-editable-highlight-' + id);
-          editableHighlight.classList.add('ed11y-editable-highlight');
+          }*//*
           editableHighlight.style.setProperty('width', targetOffset.width + 'px');
           editableHighlight.style.setProperty('top', targetOffset.top + 'px');
           editableHighlight.style.setProperty('left', targetOffset.left + 'px');
           editableHighlight.style.setProperty('height', targetOffset.height + 'px');
           editableHighlight.style.setProperty('opacity', '0');
-          Ed11y.results[id].highlight = editableHighlight;
+          Ed11y.results[id].highlight = editableHighlight;*/
+
+          let targetOffset = target.getBoundingClientRect();
+          if ((targetOffset.top === 0 && targetOffset.left === 0) || !Ed11y.visible(target)) {
+            // Invisible target. todo: wait why is 0 considered invisible?
+            const firstVisibleParent = Ed11y.firstVisibleParent(target);
+            targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
+          }
+          //const editable = target.closest('[contenteditable="true"]');
+          if (target.isContentEditable) {
+            mark.shadowRoot.querySelector('.toggle').style.setProperty('font-size', '16px');
+            buttonWidth = 36; // todo editable this shouldn't be overridden here
+          }
 
           let markOffset = mark.getBoundingClientRect();
           const top = targetOffset.top - markOffset.top;
@@ -1017,9 +1067,11 @@ class Ed11y {
           }
           if (!!bounds && (targetOffset.top - bounds.top < 0 || targetOffset.top + buttonWidth - bounds.bottom > 0)) {
             mark.classList.add('offscreen');
+            mark.style.pointerEvents = 'none';
           }
           else {
             mark.classList.remove('offscreen');
+            mark.style.pointerEvents = 'auto';
           }
 
           /* const display = window.getComputedStyle(result.element).getPropertyValue('display');
@@ -1045,7 +1097,6 @@ class Ed11y {
               //mark.style.setProperty('z-index', '-1 !important');
               //mark.shadowRoot.querySelector('.toggle').style.setProperty('pointer-events', 'none');
               result.element.addEventListener('mouseenter', function() {
-                console.log('mouseover');
                 //mark.setAttribute('data-ed11y-action', 'open');
               });
 
@@ -1064,7 +1115,7 @@ class Ed11y {
           // heeee
         }
 
-        if (!noNudge) {
+        if (!noNudge || noNudge) {
           let offset = mark.getBoundingClientRect();
           let nudgeTop = 0;
           let nudgeLeft = 0;
@@ -1102,7 +1153,15 @@ class Ed11y {
       });
       /* todo: nudge immediately, for next in loop. */
       marksToNudge.forEach(el => {
-        el[0].style.transform = `translate(${el[1]}px, ${el[2]}px)`;
+        if (el[0].style.transform) {
+          const computedStyle = window.getComputedStyle(el[0]);
+          let matrix = computedStyle.getPropertyValue('transform');
+          matrix = matrix.split(',');
+          el[0].style.transform = `translate(${parseInt(matrix[4]) + el[1]}px, ${parseInt(matrix[5]) + el[2]}px)`;
+        } else {
+          el[0].style.transform = `translate(${el[1]}px, ${el[2]}px)`;
+        }
+
       });
       if (!Ed11y.jumpList) {
         Ed11y.buildJumpList();
@@ -1138,6 +1197,9 @@ class Ed11y {
     };
 
     Ed11y.alignTip = function (button, toolTip, recheck = 0) {
+      if (!toolTip) {
+        return;
+      }
       let arrow = toolTip.shadowRoot.querySelector('.arrow');
       let tip = arrow.nextElementSibling;
       let loopCount = recheck + 1;
@@ -1451,7 +1513,6 @@ class Ed11y {
       });*/
       /*Ed11y.findElements('jumpList', 'ed11y-element-result', Ed11y.options.inlineAlerts);
       Ed11y.jumpList.forEach((result, i) => {
-        // heeee
       });
       Ed11y.jumpList.forEach((result, i) => {
         result.dataset.ed11yJumpPosition = i;
@@ -1473,50 +1534,62 @@ class Ed11y {
      * Hide tips that are in front of text currently being edited.
      * */
 
+    Ed11y.checkEditableIntersects = function () {
+      if (!document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
+        Ed11y.jumpList?.forEach((el) => {
+          el.classList.remove('intersecting');
+        });
+        return;
+      }
+      const range = document.createRange();
+      range.setStartBefore(getSelection().anchorNode);
+      range.setEndAfter(getSelection().anchorNode);
+      //const rangeNode = range.commonAncestorContainer;
+      //const firstLetter = document.createRange();
+      //firstLetter.setStartBefore(getSelection().anchorNode);
+      //firstLetter.setEnd(getSelection().anchorNode, 1); // todo not in use right?
+      const rangeNode = range; // todo no longer using rangeNode
+      if (typeof rangeNode !== 'object' || typeof rangeNode.getBoundingClientRect !== 'function') {
+        // Reset classes to measure.
+        Ed11y.jumpList?.forEach((el) => {
+          el.classList.remove('intersecting');
+        });
+        return;
+      }
+      Ed11y.jumpList?.forEach((el) => {
+        const toggle = el.shadowRoot.querySelector('.toggle');
+        if ( intersect(rangeNode.getBoundingClientRect(), toggle.getBoundingClientRect(), 1) ) {
+          if (!el.classList.contains('was-intersecting')) {
+            el.classList.add('intersecting');
+          }
+        } else {
+          el.classList.remove('intersecting');
+          el.classList.remove('was-intersecting');
+        }
+      });
+    };
+
     Ed11y.intersectionObservers = function () {
       Ed11y.elements.editable.forEach(editable => {
         editable.addEventListener('scrollend', function() {
-          Ed11y.alignButtons();
+          if (Ed11y.panel?.classList.contains('ed11y-active') === true) {
+            Ed11y.alignAlts();
+            Ed11y.alignButtons();
+          }
+          let openTip = Ed11y.getOpenTip();
+          if (openTip) {
+            Ed11y.alignTip(Ed11y.elements.openButton[0].shadowRoot.querySelector('button'), openTip);
+            Ed11y.editableHighlighter(Ed11y.results[openTip.dataset.ed11yResult]);
+          }
         });
       });
       document.addEventListener('scrollend', function() {
         Ed11y.alignButtons();
+        Ed11y.alignTip();
       });
 
       document.addEventListener('selectionchange', function() {
-        if (!document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
-          Ed11y.jumpList?.forEach((el) => {
-            el.classList.remove('intersecting');
-          });
-          return;
-        }
-        const range = document.createRange();
-        range.setStartBefore(getSelection().anchorNode);
-        range.setEndAfter(getSelection().anchorNode);
-        //const rangeNode = range.commonAncestorContainer;
-        //const firstLetter = document.createRange();
-        //firstLetter.setStartBefore(getSelection().anchorNode);
-        //firstLetter.setEnd(getSelection().anchorNode, 1); // todo not in use right?
-        const rangeNode = range; // todo no longer using rangeNode
-        if (typeof rangeNode !== 'object' || typeof rangeNode.getBoundingClientRect !== 'function') {
-          // Reset classes to measure.
-          Ed11y.jumpList?.forEach((el) => {
-            el.classList.remove('intersecting');
-          });
-          return;
-        }
-        Ed11y.jumpList?.forEach((el) => {
-          const toggle = el.shadowRoot.querySelector('.toggle');
-          if ( intersect(rangeNode.getBoundingClientRect(), toggle.getBoundingClientRect(), 1) ) {
-            if (!el.classList.contains('was-intersecting')) {
-              el.classList.add('intersecting');
-            }
-          } else {
-            el.classList.remove('intersecting');
-            el.classList.remove('was-intersecting');
-          }
-          //rangeNode.style.setProperty('text-decoration', 'underline');
-        });
+        Ed11y.checkEditableIntersects();
       });
       /** todo remove: hovering underlines */
       /*Ed11y.jumpList?.forEach((el) => {
@@ -1584,7 +1657,6 @@ class Ed11y {
       const callback = (mutationList) => {
         for (const mutation of mutationList) {
           if ((mutation.type === 'childList' && mutation.addedNodes.length) || mutation.type === 'characterData' ) {
-            console.log(mutation.type);
             mutated();
           }
         }

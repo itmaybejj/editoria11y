@@ -60,7 +60,7 @@ class Ed11yElementResult extends HTMLElement {
   handleHover(event) {
     event.preventDefault();
     let host = this.getRootNode().host;
-    if (host.getAttribute('data-ed11y-open') === 'false' && host.racing === false) {
+    if (host.getAttribute('data-ed11y-open') === 'false' && host.racing === false && !host.classList.contains('intersecting')) {
       host.racing = true;
       host.toggleTip(true);
       Ed11y.toggledFrom = this;
@@ -123,10 +123,7 @@ class Ed11yElementResult extends HTMLElement {
       // todo editable - abstract out
       this.result.element.classList.toggle(highlightOutline);
     } else {
-      console.log(this.offsetTop);
-      console.log(editableParent.offsetTop);
-      //editableParent.scrollTop = this.offsetTop;
-      //this.scrollIntoView();
+      Ed11y.editableHighlighter(this.resultID, changeTo);
     }
     if (changeTo === true) {
       // Allow for themes to reveal hidden tips
