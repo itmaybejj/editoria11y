@@ -301,7 +301,6 @@ class Ed11y {
     Ed11y.results = [];
     // Toggles the outline of all headers, link texts, and images.
     Ed11y.checkAll = () => {
-
       if (!Ed11y.checkRunPrevent()) {
         if (Ed11y.incremental) {
           Ed11y.oldResults = Ed11y.results;
@@ -481,9 +480,8 @@ class Ed11y {
             Ed11y.paintReady();
           }
         } else {
-          if (Ed11y.options.startMinimized) {
+          if (Ed11y.options.startMinimized && Ed11y.panel.getAttribute('aria-expanded') !== 'true') {
             Ed11y.panel.classList.add('ed11y-shut');
-            Ed11y.options.startMinimized = false;
           } else {
             Ed11y.panel.classList.remove('ed11y-shut');
           }
@@ -742,9 +740,9 @@ class Ed11y {
 
       // Remove tip and reset borders around element
       Ed11y.resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
-      removal.parentNode.removeChild(removal);
-      let removeButton = Ed11y.elements.openButton[0];
-      removeButton.parentNode.removeChild(removeButton);
+      removal.tip?.parentNode.removeChild(removal.tip);
+      // TODO EDITING: COMMENT OUT BELOW...SEEMS REDUNDANT?
+      removal.button?.parentNode.removeChild(removal.button);
 
       // Update dismissal record.
       if (dismissalType === 'reset') {
@@ -807,7 +805,8 @@ class Ed11y {
     };
 
     Ed11y.transferFocus = function () {
-      const tip = Ed11y.getOpenTip();
+      const openTip = Ed11y.getOpenTip();
+      const tip = openTip.tip;
       const id = tip.dataset.ed11yResult;
       const target = Ed11y.results[id].element;
       const editable = target.closest('[contenteditable]');
@@ -976,6 +975,33 @@ class Ed11y {
       }
     };
 
+    const scrollableElem = function(el) {
+      let overflowing = el.clientHeight && el.clientHeight < el.scrollHeight;
+      if (overflowing) {
+        const styles = window.getComputedStyle(el);
+        overflowing = styles.overflowY !== 'visible';
+      }
+      return overflowing;
+    };
+
+    const closestScrollable = function(el) {
+      let parent = el.parentElement;
+      if (parent && parent.tagName !== 'BODY') {
+        // Parent exists
+        if (scrollableElem(parent)) {
+          // Return if scrollable found.
+          return parent;
+        } else {
+          // Element is not scrollable, recurse
+          parent = closestScrollable(parent);
+          // Return if scrollable found.
+          return parent;
+        }
+      } else {
+        // No scrollable parents.
+        return false;
+      }
+    };
 
     Ed11y.alignButtons = function () {
       // Reading and writing in a loop creates paint thrashing.
@@ -983,7 +1009,6 @@ class Ed11y {
 
       // Nudge offscreen tips back on screen.
       let windowWidth = window.innerWidth;
-      let previousMarkOffset;
       let previousNudgeTop = 0;
       let previousNudgeLeft = 0;
 
@@ -1032,10 +1057,14 @@ class Ed11y {
           nudgeTop = (-1 * (markOffset.top + window.scrollY)) - 6;
         }
 
-        if (i > 0 && intersect(markOffset, Ed11y.jumpList[i - 1].getBoundingClientRect(), 5)) {
+        if (
+          (i > 0 && intersect(markOffset, Ed11y.jumpList[i - 1].getBoundingClientRect(), 15)) ||
+          (i > 1 && intersect(markOffset, Ed11y.jumpList[i - 2].getBoundingClientRect(), 15)) ||
+          (i > 2 && intersect(markOffset, Ed11y.jumpList[i - 3].getBoundingClientRect(), 15))
+        ) {
         // Overlapping previous
-          nudgeTop = nudgeTop + 36 + previousNudgeTop;
-          nudgeLeft = 36;
+          nudgeTop = nudgeTop + 24 + previousNudgeTop;
+          nudgeLeft = 24 + previousNudgeLeft;
         }
         if (markOffset.left + nudgeLeft < 8) {
         // Offscreen to left. push to the right.
@@ -1048,34 +1077,40 @@ class Ed11y {
         else if (nudgeTop !== 0) {
           nudgeMark(mark, nudgeLeft, nudgeTop);
         }
-        previousNudgeTop = nudgeTop > 0 ? nudgeTop + previousNudgeTop : 0;
-        previousNudgeLeft = nudgeLeft > 0 ? nudgeLeft + previousNudgeLeft : 0;
+        // todo: this is crude and only really works right once.
+        previousNudgeTop = nudgeTop;
+        previousNudgeLeft = nudgeLeft;
       });
 
-      // Last pass: check for elements outside contenteditable scrollable areas.
+      // Last pass: check for elements offscreen within scrollable areas.
+      // Todo: this should check for hidden and details as well? Check...
       if (!Ed11y.options.inlineAlerts || Ed11y.elements.editable.length > 0) {
         Ed11y.jumpList.forEach(mark => {
-          /**
-           * Last pass -- to check for out of bounds.
-           * */
           const id = mark.getAttribute('data-ed11y-result');
           const result = Ed11y.results[id];
           const target = result?.element;
-          const editableParent = target.closest('[contenteditable]');
-          const bounds = editableParent?.getBoundingClientRect();
-
           let markOffset = mark.getBoundingClientRect();
 
-          if (!!bounds && (markOffset.top - bounds.top < 0 || markOffset.top - bounds.bottom > 0 )) {
-            mark.classList.add('offscreen');
-            mark.style.pointerEvents = 'none';
+          const scrollableParent = closestScrollable(target);
+
+          if (scrollableParent) {
+            // Hide alerts outside a scroll zone.
+            const bounds = scrollableParent.getBoundingClientRect();
+            if (!!bounds && (markOffset.top - bounds.top < 0 || markOffset.top - bounds.bottom > 0 )) {
+              mark.classList.add('offscreen');
+              mark.style.pointerEvents = 'none';
+            }
+            else {
+              mark.classList.remove('offscreen');
+              mark.style.pointerEvents = 'auto';
+            }
           }
           else {
             mark.classList.remove('offscreen');
             mark.style.pointerEvents = 'auto';
           }
 
-
+          // Now make visible.
           mark.style.opacity = '';
           mark.classList.remove('ed11y-preload');
         });}
@@ -1439,6 +1474,17 @@ class Ed11y {
       Ed11y.intersectionObservers();
     };
 
+    // hat tip https://www.joshwcomeau.com/snippets/javascript/debounce/
+    const debounce = (callback, wait) => {
+      let timeoutId = null;
+      return (...args) => {
+        window.clearTimeout(timeoutId);
+        timeoutId = window.setTimeout(() => {
+          callback.apply(null, args);
+        }, wait);
+      };
+    };
+
     const intersect = function(a, b, x = 10) {
       return (a.left - x <= b.right &&
         b.left - x <= a.right &&
@@ -1449,7 +1495,6 @@ class Ed11y {
     /**
      * Hide tips that are in front of text currently being edited.
      * */
-
     Ed11y.checkEditableIntersects = function () {
       if (!document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
         //Reset classes to measure.
@@ -1484,50 +1529,41 @@ class Ed11y {
       });
     };
 
+    const updateTipLocations = debounce(() => {
+      if (!Ed11y.running && Ed11y.jumpList && Ed11y.panel?.classList.contains('ed11y-active') === true) {
+        window.setTimeout(function() {
+          Ed11y.alignButtons()
+          let openTip = Ed11y.getOpenTip();
+          if (openTip.tip) {
+            Ed11y.alignTip(openTip.button.shadowRoot.querySelector('button'), openTip.tip);
+            Ed11y.editableHighlighter(openTip.button.dataset.ed11yResult, true);
+          }
+        }, 0);
+      }
+    }, 10);
+
     Ed11y.intersectionObservers = function () {
       Ed11y.elements.editable.forEach(editable => {
-        editable.addEventListener('scrollend', function() {
-          if (Ed11y.jumpList && Ed11y.panel?.classList.contains('ed11y-active') === true) {
-            Ed11y.alignButtons();
-            let openTip = Ed11y.getOpenTip();
-            if (openTip) {
-              Ed11y.alignTip(Ed11y.elements.openButton[0].shadowRoot.querySelector('button'), openTip);
-              Ed11y.editableHighlighter(openTip.dataset.ed11yResult, true);
-            }
-          }
+        editable.addEventListener('scroll', function() {
+          updateTipLocations();
         });
       });
-      document.addEventListener('scrollend', function() {
-        if (Ed11y.jumpList && Ed11y.panel?.classList.contains('ed11y-active') === true) {
-          Ed11y.alignButtons();
-          let openTip = Ed11y.getOpenTip();
-          if (openTip) {
-            Ed11y.alignTip(Ed11y.elements.openButton[0].shadowRoot.querySelector('button'), openTip);
-            Ed11y.editableHighlighter(openTip.dataset.ed11yResult, true);
-          }
-        }
+      document.addEventListener('scroll', function() {
+        updateTipLocations();
       });
 
+      const selectionChanged = debounce(() => {
+        window.setTimeout(function() {
+          updateTipLocations();
+          Ed11y.checkEditableIntersects();
+        },0);
+      }, 100);
+
       document.addEventListener('selectionchange', function() {
-        Ed11y.checkEditableIntersects();
+        if (!Ed11y.running) {
+          selectionChanged();
+        }
       });
-      /** todo remove: hovering underlines */
-      /*Ed11y.jumpList?.forEach((el) => {
-        const ID = el.getAttribute('data-ed11y-result');
-        const result = Ed11y.results[ID];
-        result.element.addEventListener('mouseover', (event) => {
-          if (el.classList.contains('intersecting')) {
-            el.classList.remove('intersecting');
-            el.classList.add('was-intersecting');
-          }
-        });
-        result.element.addEventListener('mouseout', (event) => {
-          if (el.classList.contains('was-intersecting') && !el.matches(':hover')) {
-            el.classList.remove('was-intersecting');
-            el.classList.add('intersecting');
-          }
-        })
-      })*/
     };
 
     const startObserver = function (root) {
@@ -1550,16 +1586,6 @@ class Ed11y {
       /*
       Set up mutation observer for added nodes.
       */
-      // hat tip https://www.joshwcomeau.com/snippets/javascript/debounce/
-      const debounce = (callback, wait) => {
-        let timeoutId = null;
-        return (...args) => {
-          window.clearTimeout(timeoutId);
-          timeoutId = window.setTimeout(() => {
-            callback.apply(null, args);
-          }, wait);
-        };
-      };
 
       const mutated = debounce(() => {
         if (!Ed11y.running) {
@@ -1567,8 +1593,11 @@ class Ed11y {
           //Ed11y.reset(); // todo editor: we would need a way to run without reset, then compare the results array (json.stringify?), then only redraw tips as needed...
           Ed11y.incremental = true;
           Ed11y.checkAll();
+          window.setTimeout(function () {
+            updateTipLocations();
+          }, 1000);
         }
-      }, 100);
+      }, 1000);
 
       // Options for the observer (which mutations to observe)
       const config = { childList: true, subtree: true, characterData: true };
@@ -1633,8 +1662,8 @@ class Ed11y {
         Ed11y.alignButtons();
       }
       let openTip = Ed11y.getOpenTip();
-      if (openTip) {
-        Ed11y.alignTip(Ed11y.elements.openButton[0].shadowRoot.querySelector('button'), openTip);
+      if (openTip.button) {
+        Ed11y.alignTip(openTip.button.shadowRoot.querySelector('button'), openTip.tip);
       }
     };
 
@@ -1648,9 +1677,9 @@ class Ed11y {
         } else if (event.target.hasAttribute('data-ed11y-open')) {
           // todo mvp findElements
           let openTip = Ed11y.getOpenTip();
-          if (openTip) {
+          if (openTip.button) {
             Ed11y.toggledFrom.focus();
-            Ed11y.elements.openButton[0].shadowRoot.querySelector('button').click();
+            openTip.button.shadowRoot.querySelector('button').click();
           }
         }
       }
@@ -1998,14 +2027,27 @@ class Ed11y {
     };
 
     Ed11y.getOpenTip = function () {
-      Ed11y.findElements('openButton', 'ed11y-element-result[data-ed11y-open="true"]');
-      return document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+      // Quick check first, then the expensive one if needed.
+      let openTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+      let openButton = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
+      if (!openTip) {
+        Ed11y.findElements('openTip', 'ed11y-element-tip[data-ed11y-open="true"]');
+        Ed11y.findElements('openButton', 'ed11y-element-result[data-ed11y-open="true"]');
+        if (Ed11y.elements.openButton.length > 0) {
+          openButton = Ed11y.elements.openButton[0];
+          openTip = Ed11y.elements.openTip[0];
+        }
+      }
+      return {
+        tip: openTip,
+        button: openButton,
+      };
     };
 
     Ed11y.focusActiveResult = function () {
-      Ed11y.getOpenTip();
+      const openTip = Ed11y.getOpenTip();
       window.setTimeout(function () {
-        Ed11y.elements.openButton[0]?.shadowRoot.querySelector('button').focus();
+        openTip.button?.shadowRoot.querySelector('button').focus();
       }, 0);
     };
 

@@ -703,7 +703,7 @@ ed11y-element-result {
 /********/
 
 .intersecting {
-    transition: none;
+    opacity: 0;
     pointer-events: none;
 }
 [contenteditable] ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
@@ -711,6 +711,7 @@ ed11y-element-result {
 }
 ed11y-element-result[data-ed11y-open="false"].offscreen, ed11y-element-result.ed11y-preload {
     opacity: 0;
+    transition: none;
 }
 #ed11y-toggle svg {
     display: none;

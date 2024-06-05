@@ -698,31 +698,24 @@ ed11y-element-result {
 }
 
 
-/******/
+/*** new to distribute *****/
 
-@keyframes ed11yFadeOut {
-    from {
-        opacity: 1;
-        display: block;
-    }
-
-    to {
-        opacity: 0;
-        display: none;
-    }
+.intersecting {
+    opacity: 0;
+    pointer-events: none;
 }
-@keyframes ed11yFadeIn {
-    from {
-        opacity: 0 !important;
-        display: none !important;
-    }
-
-    to {
-        opacity: 1 !important;
-        display: block !important;
-    }
+[contenteditable] ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
+    opacity: .94;
 }
-
-.toggle.intersecting {
-    animation: ed11yFadeOut .1s ease-out forwards;
+ed11y-element-result[data-ed11y-open="false"].offscreen, ed11y-element-result.ed11y-preload {
+    opacity: 0;
+    transition: none;
+}
+#ed11y-toggle svg {
+    display: none;
+}
+#ed11y-toggle[aria-expanded="true"] svg {
+    display: inline-block;
+    width: 11px;
+    margin: 0 -3px -1px;
 }
