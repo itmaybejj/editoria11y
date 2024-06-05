@@ -1,11 +1,14 @@
 /* Applies to elements in light DOM ===== */
 
-ed11y-element-result:not(.intersecting), ed11y-element-panel {
-    opacity: 1 !important;
-    outline: 0 !important;
+ed11y-element-panel {
+    opacity: 1;
+    outline: 0;
 }
 
 ed11y-element-result {
+    opacity: 1;
+    outline: 0;
+    transition: opacity .2s ease-out;
     position: absolute !important;
     z-index: var(--ed11y-buttonZIndex, 9999) !important;
 }
@@ -697,42 +700,17 @@ ed11y-element-result {
     color: var(--ed11y-primaryText, #fffdf7);
 }
 
-
-/******/
-
-@keyframes ed11yFadeOut {
-    from {
-        opacity: 1;
-        pointer-events: auto;
-    }
-
-    to {
-        opacity: 0;
-        pointer-events: none;
-    }
-}
-@keyframes ed11yFadeIn {
-    from {
-        opacity: 0 !important;
-        pointer-events: none;
-    }
-
-    to {
-        opacity: 1 !important;
-        pointer-events: auto;
-    }
-}
+/********/
 
 .intersecting {
-    animation: ed11yFadeOut .1s ease-out forwards;
-    /*visibility: hidden;*/
+    transition: none;
+    pointer-events: none;
 }
-ed11y-element-result[data-ed11y-open="false"].offscreen {
-    opacity: 0 !important;
+[contenteditable] ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
+    opacity: .94;
 }
-ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
-    filter: opacity(.94);
-    transition: filter .3s ease;
+ed11y-element-result[data-ed11y-open="false"].offscreen, ed11y-element-result.ed11y-preload {
+    opacity: 0;
 }
 #ed11y-toggle svg {
     display: none;

@@ -42,7 +42,7 @@ class Ed11y {
       // CMS integrations can switch between polite & headless at runtime.
       // alertMode "headless" never draws the panel.
       alertMode: 'polite',
-      startMinimized: true, // todo set to false by default // todo create minimal interface
+      startMinimized: true, // todo don't open on subsequent detections! // todo set to false by default // todo create minimal interface?
       inlineAlerts: true,
 
       // Dismissed alerts
@@ -581,6 +581,8 @@ class Ed11y {
         // [5] dismissalStatus
         */
       let mark = document.createElement('ed11y-element-result');
+      mark.style.opacity = '0';
+      mark.classList.add('ed11y-preload');
       let location;
       let position = 'beforebegin';
       // todo: expose this as a string?
@@ -935,18 +937,19 @@ class Ed11y {
       const target = result.element;
       let el = Ed11y.editableHighlight[resultID];
       if (!el) {
-        el = document.createElement('div');
+        el = document.createElement('ed11y-element-highlight');
         Ed11y.editableHighlight[resultID] = el;
-        el.classList.add('ed11y-editable-highlight');
         el.style.setProperty('position', 'absolute');
         el.style.setProperty('pointer-events', 'none');
+        el.style.setProperty('z-index', 'calc(var(--ed11y-buttonZIndex, 9999) - 1)');
         // todo: sometimes while typing this fails to red?
         document.body.appendChild(el);
       }
       const outline = result.dismissalKey ?
-        '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 1px 3px'
+        '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)'
         : '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
       el.style.setProperty('box-shadow', outline);
+      el.style.setProperty('border-radius', '3px');
       el.style.setProperty('top', '0');
       el.style.setProperty('left', '0');
       let targetOffset = target.getBoundingClientRect();
@@ -955,114 +958,115 @@ class Ed11y {
         const firstVisibleParent = Ed11y.firstVisibleParent(target);
         targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
       }
-      el.style.setProperty('width', targetOffset.width + 'px');
-      el.style.setProperty('top', targetOffset.top + window.scrollY + 'px');
-      el.style.setProperty('left', targetOffset.left + 'px');
-      el.style.setProperty('height', targetOffset.height + 'px');
-      //el.style.setProperty('opacity', '0');
-    }
+      el.style.setProperty('width', targetOffset.width + 6 + 'px');
+      el.style.setProperty('top', targetOffset.top + window.scrollY - 3 + 'px');
+      el.style.setProperty('left', targetOffset.left - 3 + 'px');
+      el.style.setProperty('height', targetOffset.height + 6 + 'px');
+      el.style.setProperty('opacity', '1');
+    };
+
+    const nudgeMark = function (el, x, y) {
+      if (el.style.transform) {
+        const computedStyle = window.getComputedStyle(el);
+        let matrix = computedStyle.getPropertyValue('transform');
+        matrix = matrix.split(',');
+        el.style.transform = `translate(${parseInt(matrix[4]) + x}px, ${parseInt(matrix[5]) + y}px)`;
+      } else {
+        el.style.transform = `translate(${x}px, ${y}px)`;
+      }
+    };
+
 
     Ed11y.alignButtons = function () {
-      /*if (!Ed11y.jumpList) {
-        Ed11y.buildJumpList();
-      }*/
       // Reading and writing in a loop creates paint thrashing.
       // We iterate the array for reads, then iterate for writes.
 
       // Nudge offscreen tips back on screen.
       let windowWidth = window.innerWidth;
-      // Todo later: collision detection.
-      let marksToNudge = [];
-      let previousLeft = 0;
-      let previousTop = 0;
+      let previousMarkOffset;
       let previousNudgeTop = 0;
       let previousNudgeLeft = 0;
 
-      Ed11y.jumpList?.forEach(mark => {
+      Ed11y.jumpList?.forEach((mark, i) => {
         const id = mark.getAttribute('data-ed11y-result');
         const result = Ed11y.results[id];
         const target = result?.element;
-        let noNudge = false;
         mark.style.setProperty('transform', null);
         mark.style.setProperty('top', 'initial');
         mark.style.setProperty('left', 'initial');
+        let markOffset = mark.getBoundingClientRect();
 
         if (!Ed11y.options.inlineAlerts || Ed11y.elements.editable.length > 0) {
           /**
            * We could use contenteditable rather than a global variable?
            * */
-          const editableParent = target.closest('[contenteditable]');
-          // We inline whether or not contenteditable is true or false.
-          const bounds = editableParent?.getBoundingClientRect();
-          // Alerts are at end of body and need to be positioned.
-          /*Ed11y.findElements('editableHighlight', '#ed11y-editable-highlight-' + id);
-          let editableHighlight = Ed11y.elements.editableHighlight?.[0];
-          console.log(editableHighlight);
-          const needsInit = !editableHighlight;
-          if (needsInit) {
-            editableHighlight = document.createElement('div');
-            editableHighlight.setAttribute('id', 'ed11y-editable-highlight-' + id);
-            editableHighlight.classList.add('ed11y-editable-highlight');
-            editableHighlight.style.setProperty('position', 'absolute');
-            editableHighlight.style.setProperty('pointer-events', 'none');
-            // todo: sometimes while typing this fails to red?
-            document.body.appendChild(editableHighlight);
-          }
-          const outline = result.dismissalKey ?
-            '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 1px 3px'
-            : '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
-          editableHighlight.style.setProperty('box-shadow', outline);
-          editableHighlight.style.setProperty('top', 0);
-          editableHighlight.style.setProperty('left', 0);
           let targetOffset = target.getBoundingClientRect();
           if ((targetOffset.top === 0 && targetOffset.left === 0) || !Ed11y.visible(target)) {
             // Invisible target. todo: wait why is 0 considered invisible?
             const firstVisibleParent = Ed11y.firstVisibleParent(target);
             targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
           }
-          //const editable = target.closest('[contenteditable="true"]');
-          if (target.isContentEditable) {
-            mark.shadowRoot.querySelector('.toggle').style.setProperty('font-size', '16px');
-            buttonWidth = 36; // todo editable this shouldn't be overridden here
-          }
-          // Position tips relative to contentEditable container.
-          /*const highlightRects = editableHighlight.getBoundingClientRect();
-          const topGoal  = targetOffset.top + window.scrollY - highlightRects.top;
-          const leftGoal = targetOffset.left - highlightRects.left;
-          if (topGoal) {
-            let newTop = topGoal - parseInt(highlightStyles.getPropertyValue('top'));
-            editableHighlight.style.setProperty('top', newTop + 'px');
-          }
-          if (leftGoal) {
-            let newLeft = topGoal - parseInt(highlightStyles.getPropertyValue('left'));
-            editableHighlight.style.setProperty('left', newLeft + 'px');
-          }*//*
-          editableHighlight.style.setProperty('width', targetOffset.width + 'px');
-          editableHighlight.style.setProperty('top', targetOffset.top + 'px');
-          editableHighlight.style.setProperty('left', targetOffset.left + 'px');
-          editableHighlight.style.setProperty('height', targetOffset.height + 'px');
-          editableHighlight.style.setProperty('opacity', '0');
-          Ed11y.results[id].highlight = editableHighlight;*/
-
-          let targetOffset = target.getBoundingClientRect();
-          if ((targetOffset.top === 0 && targetOffset.left === 0) || !Ed11y.visible(target)) {
-            // Invisible target. todo: wait why is 0 considered invisible?
-            const firstVisibleParent = Ed11y.firstVisibleParent(target);
-            targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
-          }
-          //const editable = target.closest('[contenteditable="true"]');
           if (target.isContentEditable) {
             mark.shadowRoot.querySelector('.toggle').style.setProperty('font-size', '16px');
           }
 
-          let markOffset = mark.getBoundingClientRect();
-          const top = targetOffset.top - markOffset.top;
-          const left = targetOffset.left - markOffset.left - 40;
+          let top = targetOffset.top - markOffset.top;
+          let left = targetOffset.left - markOffset.left - 40;
+          if (target.tagName === 'IMG') {
+            top = top + 10;
+            left = left + 40;
+          }
           if (targetOffset.top + window.scrollY > 0 && targetOffset.left > 0 && (top !== 0 || left !== 0)) {
             mark.style.transform = `translate(${left}px, ${top}px)`;
-            noNudge = true; // todo: not good; we still need the nudges
           }
-          if (!!bounds && (targetOffset.top - bounds.top < 0 || targetOffset.bottom - bounds.bottom > 0 )) {
+          // Update
+          markOffset = mark.getBoundingClientRect();
+        }
+
+        // Now check for any needed nudges
+        let nudgeTop = 0;
+        let nudgeLeft = 0;
+        // Detect tip that overlaps with previous result.
+        if (markOffset.top + window.scrollY < 0) {
+        // Offscreen to top.
+          nudgeTop = (-1 * (markOffset.top + window.scrollY)) - 6;
+        }
+
+        if (i > 0 && intersect(markOffset, Ed11y.jumpList[i - 1].getBoundingClientRect(), 5)) {
+        // Overlapping previous
+          nudgeTop = nudgeTop + 36 + previousNudgeTop;
+          nudgeLeft = 36;
+        }
+        if (markOffset.left + nudgeLeft < 8) {
+        // Offscreen to left. push to the right.
+          nudgeMark(mark, 8 - markOffset.left + nudgeLeft, nudgeTop);
+        }
+        else if (markOffset.left + nudgeLeft + 80 > windowWidth) {
+        // Offscreen to right. push to the left
+          nudgeMark(mark, windowWidth - nudgeLeft - markOffset.left - 80, nudgeTop);
+        }
+        else if (nudgeTop !== 0) {
+          nudgeMark(mark, nudgeLeft, nudgeTop);
+        }
+        previousNudgeTop = nudgeTop > 0 ? nudgeTop + previousNudgeTop : 0;
+        previousNudgeLeft = nudgeLeft > 0 ? nudgeLeft + previousNudgeLeft : 0;
+      });
+
+      // Last pass: check for elements outside contenteditable scrollable areas.
+      if (!Ed11y.options.inlineAlerts || Ed11y.elements.editable.length > 0) {
+        Ed11y.jumpList.forEach(mark => {
+          /**
+           * Last pass -- to check for out of bounds.
+           * */
+          const id = mark.getAttribute('data-ed11y-result');
+          const result = Ed11y.results[id];
+          const target = result?.element;
+          const editableParent = target.closest('[contenteditable]');
+          const bounds = editableParent?.getBoundingClientRect();
+
+          let markOffset = mark.getBoundingClientRect();
+
+          if (!!bounds && (markOffset.top - bounds.top < 0 || markOffset.top - bounds.bottom > 0 )) {
             mark.classList.add('offscreen');
             mark.style.pointerEvents = 'none';
           }
@@ -1071,102 +1075,17 @@ class Ed11y {
             mark.style.pointerEvents = 'auto';
           }
 
-          /* const display = window.getComputedStyle(result.element).getPropertyValue('display');
-          /if (display.indexOf('inline') === -1 || result.element.tagName === 'IMG') {
-            // block -- outline
-            const outline = result.dismissalKey ?
-              '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 1px 3px'
-              : '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
-            editableHighlight.style.setProperty('box-shadow', outline);
-            // commented out: positioning to the left of the editable container:
-            //const editablePad = editable ? window.getComputedStyle(editable).getPropertyValue('padding-left') : 0;
-            //const left = editable ? editable.getBoundingClientRect().left + parseInt(editablePad) - buttonWidth - 10  : targetOffset.left - buttonWidth - 10  ;
-            //const top = targetOffset.top + window.scrollY;
-            const left = targetOffset.left;
-            if (targetOffset.top + window.scrollY > 0 && targetOffset.left > 0) {
-              mark.style.setProperty('top', targetOffset.top + window.scrollY + 'px');
-              mark.style.setProperty('left', left + 'px');
-            }
-          } else {
-            // underline with hover watch
-            if (needsInit) {
-              //mark.shadowRoot.querySelector('.toggle').style.setProperty('opacity', '0');
-              //mark.style.setProperty('z-index', '-1 !important');
-              //mark.shadowRoot.querySelector('.toggle').style.setProperty('pointer-events', 'none');
-              result.element.addEventListener('mouseenter', function() {
-                //mark.setAttribute('data-ed11y-action', 'open');
-              });
 
-            }
-            const underline = result.dismissalKey ?
-              'inset 0 -2px var(--ed11y-warning, #fad859), 0 2px var(--ed11y-warning, #fad859)'
-              : 'inset 0 -1px #fff, inset 0 -2px var(--ed11y-primary, #b80519), 0 2px var(--ed11y-primary, #b80519)';
-            editableHighlight.style.setProperty('box-shadow', underline);
-            if (targetOffset.top + window.scrollY > 0 && targetOffset.left > 0) {
-              mark.style.setProperty('top', targetOffset.top + window.scrollY - buttonWidth / 2 + 'px');
-              mark.style.setProperty('left', targetOffset.left + 'px');
-              noNudge = true;
-            }
-          }*/
-          //editableHighlight.style.setProperty('opacity', 0);
-          // heeee
-        }
-
-        if (!noNudge || noNudge) {
-          let offset = mark.getBoundingClientRect();
-          let nudgeTop = 0;
-          let nudgeLeft = 0;
-          let overlap = 36;
-          // Detect tip that overlaps with previous result.
-          if (offset.top + window.scrollY < 0) {
-            // Offscreen to top.
-            nudgeTop = (-1 * (offset.top + window.scrollY)) - 6;
-          }
-          /*
-          Todo: use intersect() instead, and check like +/- 5.
-          * */
-          if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousLeft + overlap) {
-            // Overlapping previous
-            nudgeTop = nudgeTop + 36 + previousNudgeTop;
-            nudgeLeft = 36;
-          }
-          if (offset.left + nudgeLeft < 8) {
-            // Offscreen to left. push to the right.
-            marksToNudge.push([mark, 8 - offset.left + nudgeLeft, nudgeTop]);
-          }
-          else if (offset.left + nudgeLeft + 80 > windowWidth) {
-            // Offscreen to right. push to the left
-            marksToNudge.push([mark, windowWidth - nudgeLeft - offset.left - 80, nudgeTop]);
-          }
-          else if (nudgeTop !== 0) {
-            marksToNudge.push([mark, nudgeLeft, nudgeTop]);
-          }
-          previousLeft = offset.left + nudgeLeft;
-          previousTop = offset.top + nudgeTop;
-          previousNudgeTop = nudgeTop > 0 ? nudgeTop + previousNudgeTop : 0;
-          previousNudgeLeft = nudgeLeft > 0 ? nudgeLeft + previousNudgeLeft : 0;
-        }
-
-      });
-      /* todo: nudge immediately, for next in loop. */
-      marksToNudge.forEach(el => {
-        if (el[0].style.transform) {
-          const computedStyle = window.getComputedStyle(el[0]);
-          let matrix = computedStyle.getPropertyValue('transform');
-          matrix = matrix.split(',');
-          el[0].style.transform = `translate(${parseInt(matrix[4]) + el[1]}px, ${parseInt(matrix[5]) + el[2]}px)`;
-        } else {
-          el[0].style.transform = `translate(${el[1]}px, ${el[2]}px)`;
-        }
-
-      });
+          mark.style.opacity = '';
+          mark.classList.remove('ed11y-preload');
+        });}
       if (!Ed11y.jumpList) {
         Ed11y.buildJumpList();
       }
       if (!Ed11y.bodyStyle) {
         Ed11y.paintReady();
       }
-    }
+    };
 
 
     Ed11y.paintReady = function () {
@@ -1541,7 +1460,7 @@ class Ed11y {
       }
       const range = document.createRange();
       let anchor = getSelection().anchorNode;
-      let expand = anchor?.parentNode?.closest('p, li, h2, h3, h4, h5');
+      let expand = anchor?.parentNode?.closest('p, td, th, li, h2, h3, h4, h5');
       anchor = expand ? expand : anchor;
       range.setStartBefore(anchor);
       range.setEndAfter(anchor);
@@ -1568,20 +1487,25 @@ class Ed11y {
     Ed11y.intersectionObservers = function () {
       Ed11y.elements.editable.forEach(editable => {
         editable.addEventListener('scrollend', function() {
-          if (Ed11y.panel?.classList.contains('ed11y-active') === true) {
-            Ed11y.alignAlts();
+          if (Ed11y.jumpList && Ed11y.panel?.classList.contains('ed11y-active') === true) {
             Ed11y.alignButtons();
-          }
-          let openTip = Ed11y.getOpenTip();
-          if (openTip) {
-            Ed11y.alignTip(Ed11y.elements.openButton[0].shadowRoot.querySelector('button'), openTip);
-            Ed11y.editableHighlighter(Ed11y.results[openTip.dataset.ed11yResult]);
+            let openTip = Ed11y.getOpenTip();
+            if (openTip) {
+              Ed11y.alignTip(Ed11y.elements.openButton[0].shadowRoot.querySelector('button'), openTip);
+              Ed11y.editableHighlighter(openTip.dataset.ed11yResult, true);
+            }
           }
         });
       });
       document.addEventListener('scrollend', function() {
-        Ed11y.alignButtons();
-        Ed11y.alignTip();
+        if (Ed11y.jumpList && Ed11y.panel?.classList.contains('ed11y-active') === true) {
+          Ed11y.alignButtons();
+          let openTip = Ed11y.getOpenTip();
+          if (openTip) {
+            Ed11y.alignTip(Ed11y.elements.openButton[0].shadowRoot.querySelector('button'), openTip);
+            Ed11y.editableHighlighter(openTip.dataset.ed11yResult, true);
+          }
+        }
       });
 
       document.addEventListener('selectionchange', function() {
@@ -2007,9 +1931,12 @@ class Ed11y {
         } else return !(style.getPropertyValue('display') === 'none' ||
           style.getPropertyValue('visibility') === 'hidden' ||
           style.getPropertyValue('opacity') === '0' ||
-          el.offsetWidth === 0 ||
-          el.offsetHeight === 0 ||
-          el.hasAttribute('hidden'));
+          el.hasAttribute('hidden') ||
+          (style.getPropertyValue('overflow') === 'hidden' &&
+            ( el.offsetWidth === 0 ||
+            el.offsetHeight === 0)
+          )
+        );
       }
     };
 
