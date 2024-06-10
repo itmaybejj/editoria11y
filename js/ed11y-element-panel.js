@@ -131,14 +131,10 @@ class Ed11yElementPanel extends HTMLElement {
       let firstVisible = false;
       let alertMessage;
       if (Ed11y.options.checkVisible && !Ed11y.visible(target)) {
-        console.log('target failed visibility check');
-        console.log(target);
-        console.log(Ed11y.visible(target));
         firstVisible = Ed11y.firstVisibleParent(target);
         alertMessage = Ed11y.M.jumpedToInvisibleTip;
       }
       else if (target.closest('[aria-hidden="true"]')) {
-        console.log('aria-hidden target');
         firstVisible = target.closest('[aria-hidden="true"]');
         firstVisible = firstVisible.closest(':not([aria-hidden="true"])');
         alertMessage = Ed11y.M.jumpedToAriaHiddenTip;

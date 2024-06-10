@@ -150,11 +150,12 @@
                     })
 
 
-                const ed11y = new Ed11y({
+                onload = (event) => {
+                  const ed11y = new Ed11y({
                     alertMode : 'assertive',
                     ignoreByKey : {
-                        'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
-                        'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
+                      'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
+                      'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
                     },
                     ignoreElements: '.tox-editor-header *',
                     shadowComponents : 'shadow-test, shadow-test-no-hits',
@@ -165,7 +166,9 @@
                     customTests : 2,
                     theme: 'sleekTheme',
                     linkIgnoreSelector : '.ignore-class',
-                });
+                  });
+                };
+
             </script>
 
         </div>

@@ -423,22 +423,28 @@ class Ed11y {
       Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
 
       // Dispatch event for synchronizers
-      window.setTimeout(function () {
-        let syncResults = new CustomEvent('ed11yResults');
-        document.dispatchEvent(syncResults);
-      }, 0);
+      if (!Ed11y.incremental) {
+        window.setTimeout(function () {
+          let syncResults = new CustomEvent('ed11yResults');
+          document.dispatchEvent(syncResults);
+        }, 0);
+      }
 
     };
 
     Ed11y.updatePanel = function () {
+      let oldWarnings = Ed11y.warningCount;
+      let oldErrors = Ed11y.errorCount;
+      Ed11y.countAlerts();
       if (Ed11y.incremental) {
-        if (Ed11y.oldResults.length === Ed11y.results.length &&
-          Object.keys(Ed11y.oldResults).toString() === Object.keys(Ed11y.results).toString()
-        ) {
+        // todo editable: should we be more precise than a simple error count?
+        if ( oldWarnings === Ed11y.warningCount && oldErrors === Ed11y.errorCount ) {
           // No changes needed, restore result set sorted to match jumpList.
           Ed11y.results = Ed11y.oldResults;
-          Ed11y.alignButtons();
           window.setTimeout(function() {
+            if ( !Ed11y.alignPending ) {
+              Ed11y.alignButtons();
+            }
             Ed11y.running = false;
           },0);
           return;
@@ -446,7 +452,6 @@ class Ed11y {
           Ed11y.resetResults();
         }
       }
-      Ed11y.countAlerts();
       if (Ed11y.options.alertMode !== 'headless') {
         if (Ed11y.onLoad === true) {
           Ed11y.onLoad = false;
@@ -558,9 +563,7 @@ class Ed11y {
         Ed11y.panelToggle.removeAttribute('aria-disabled');
       }
       // todo parameterize
-      window.setTimeout(function() {
-        Ed11y.running = false;
-      }, 1000);
+      Ed11y.running = false;
       if (Ed11y.elements['editable']) {
         Ed11y.elements['editable'].forEach(editable => {
           startObserver(editable);
@@ -584,7 +587,7 @@ class Ed11y {
       let location;
       let position = 'beforebegin';
       // todo: expose this as a string?
-      if ( !Ed11y.options.inlineAlerts) {
+      if (!Ed11y.options.inlineAlerts) {
         location = document.querySelector('body');
         position = 'beforeend';
       } else if ( editableParent ) {
@@ -711,6 +714,10 @@ class Ed11y {
 
     Ed11y.buildElementList = function () {
       Ed11y.findElements('editable', '[contenteditable="true"]', false);
+      if (Ed11y.elements.editable.length > 0) {
+        Ed11y.options.inlineAlerts = false;
+        console.log('Content editable detected; inline alerts disabled');
+      }
       Ed11y.findElements('p', 'p');
       Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', false);
       Ed11y.findElements('img', 'img');
@@ -927,23 +934,29 @@ class Ed11y {
 
     Ed11y.editableHighlight = [];
 
-    Ed11y.editableHighlighter = function (resultID, show) {
+    Ed11y.editableHighlighter = function (resultID, show, wrap) {
+
+      // todo editable: uggh this looks exactly like CKEditor's block selector
       if (!show) {
         Ed11y.editableHighlight[resultID]?.style.setProperty('opacity', '0');
         return;
       }
       const result = Ed11y.results[resultID];
-      const target = result.element;
+      let target = result.element;
+      if (wrap) {
+        target = result.element.closest('img,blockquote,p,table,h1,h2,h3,h4,h5,h6,li');
+      }
       let el = Ed11y.editableHighlight[resultID];
       if (!el) {
         el = document.createElement('ed11y-element-highlight');
         Ed11y.editableHighlight[resultID] = el;
         el.style.setProperty('position', 'absolute');
         el.style.setProperty('pointer-events', 'none');
-        el.style.setProperty('z-index', 'calc(var(--ed11y-buttonZIndex, 9999) - 1)');
         // todo: sometimes while typing this fails to red?
         document.body.appendChild(el);
       }
+      const zIndex = result.dismissalKey ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
+      el.style.setProperty('z-index', zIndex);
       const outline = result.dismissalKey ?
         '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)'
         : '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
@@ -1011,6 +1024,7 @@ class Ed11y {
       let windowWidth = window.innerWidth;
       let previousNudgeTop = 0;
       let previousNudgeLeft = 0;
+      Ed11y.alignPending = true;
 
       Ed11y.jumpList?.forEach((mark, i) => {
         const id = mark.getAttribute('data-ed11y-result');
@@ -1021,10 +1035,7 @@ class Ed11y {
         mark.style.setProperty('left', 'initial');
         let markOffset = mark.getBoundingClientRect();
 
-        if (!Ed11y.options.inlineAlerts || Ed11y.elements.editable.length > 0) {
-          /**
-           * We could use contenteditable rather than a global variable?
-           * */
+        if (!Ed11y.options.inlineAlerts) {
           let targetOffset = target.getBoundingClientRect();
           if ((targetOffset.top === 0 && targetOffset.left === 0) || !Ed11y.visible(target)) {
             // Invisible target. todo: wait why is 0 considered invisible?
@@ -1084,15 +1095,14 @@ class Ed11y {
 
       // Last pass: check for elements offscreen within scrollable areas.
       // Todo: this should check for hidden and details as well? Check...
-      if (!Ed11y.options.inlineAlerts || Ed11y.elements.editable.length > 0) {
-        Ed11y.jumpList.forEach(mark => {
+      if (!Ed11y.options.inlineAlerts) {
+        Ed11y.jumpList?.forEach(mark => {
           const id = mark.getAttribute('data-ed11y-result');
           const result = Ed11y.results[id];
           const target = result?.element;
           let markOffset = mark.getBoundingClientRect();
 
           const scrollableParent = closestScrollable(target);
-
           if (scrollableParent) {
             // Hide alerts outside a scroll zone.
             const bounds = scrollableParent.getBoundingClientRect();
@@ -1492,6 +1502,35 @@ class Ed11y {
         b.top - x <= a.bottom);
     };
 
+    let activeRange;
+    const rangeChange = function() {
+      const range = document.createRange();
+      let anchor = getSelection()?.anchorNode;
+      if (!anchor.parentNode || typeof anchor.parentNode.closest !== 'function') {
+        activeRange = false;
+        return false;
+      }
+      let expand = anchor?.parentNode && anchor.parentNode.closest('p, td, th, li, h2, h3, h4, h5, h6');
+      anchor = expand ? expand : anchor;
+      // todo editable: maybe not the whole selection but just a few lines?
+      range.setStartBefore(anchor);
+      range.setEndAfter(anchor);
+      if (typeof range !== 'object' || typeof range.getBoundingClientRect !== 'function') {
+        if (activeRange) {
+          activeRange = false;
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        let sameRange = activeRange &&
+          range.startContainer === activeRange.startContainer &&
+          range.startOffset === activeRange.startOffset;
+        activeRange = range;
+        return !sameRange;
+      }
+    };
+
     /**
      * Hide tips that are in front of text currently being edited.
      * */
@@ -1500,31 +1539,33 @@ class Ed11y {
         //Reset classes to measure.
         Ed11y.jumpList?.forEach((el) => {
           el.classList.remove('intersecting');
+          // todo editable
+          // todo editable: need to align these on scroll if we're going to do this
+          //Ed11y.editableHighlighter(el.dataset.ed11yResult, false);
         });
         return;
       }
-      const range = document.createRange();
-      let anchor = getSelection().anchorNode;
-      let expand = anchor?.parentNode?.closest('p, td, th, li, h2, h3, h4, h5');
-      anchor = expand ? expand : anchor;
-      range.setStartBefore(anchor);
-      range.setEndAfter(anchor);
-      if (typeof range !== 'object' || typeof range.getBoundingClientRect !== 'function') {
+      if (!activeRange) {
         // Range isn't on a node we can measure.
         Ed11y.jumpList?.forEach((el) => {
           el.classList.remove('intersecting');
+          //Ed11y.editableHighlighter(el.dataset.ed11yResult, false);
         });
         return;
       }
       Ed11y.jumpList?.forEach((el) => {
         const toggle = el.shadowRoot.querySelector('.toggle');
-        if ( intersect(range.getBoundingClientRect(), toggle.getBoundingClientRect(), 1) ) {
-          if (!el.classList.contains('was-intersecting')) {
-            el.classList.add('intersecting');
+        if ( intersect(activeRange.getBoundingClientRect(), toggle.getBoundingClientRect(), 0) ) {
+          if (!toggle.classList.contains('was-intersecting')) {
+            el.classList.add('intersecting')
+            toggle.classList.add('intersecting');
+            //Ed11y.editableHighlighter(toggle.dataset.ed11yResult, true, true);
           }
         } else {
-          el.classList.remove('intersecting');
-          el.classList.remove('was-intersecting');
+          el.classList.remove('intersecting', 'was-intersecting')
+          toggle.classList.remove('intersecting', 'was-intersecting');
+          //toggle.classList.remove('was-intersecting');
+          //Ed11y.editableHighlighter(toggle.dataset.ed11yResult, false);
         }
       });
     };
@@ -1552,16 +1593,16 @@ class Ed11y {
         updateTipLocations();
       });
 
-      const selectionChanged = debounce(() => {
-        window.setTimeout(function() {
+      Ed11y.selectionChanged = debounce(() => {
+        if (rangeChange()) {
           updateTipLocations();
           Ed11y.checkEditableIntersects();
-        },0);
-      }, 100);
+        }
+      }, 250);
 
       document.addEventListener('selectionchange', function() {
         if (!Ed11y.running) {
-          selectionChanged();
+          Ed11y.selectionChanged();
         }
       });
     };
@@ -1590,12 +1631,8 @@ class Ed11y {
       const mutated = debounce(() => {
         if (!Ed11y.running) {
           Ed11y.running = true;
-          //Ed11y.reset(); // todo editor: we would need a way to run without reset, then compare the results array (json.stringify?), then only redraw tips as needed...
           Ed11y.incremental = true;
           Ed11y.checkAll();
-          window.setTimeout(function () {
-            updateTipLocations();
-          }, 1000);
         }
       }, 1000);
 
@@ -1606,6 +1643,7 @@ class Ed11y {
       const callback = (mutationList) => {
         for (const mutation of mutationList) {
           if ((mutation.type === 'childList' && mutation.addedNodes.length) || mutation.type === 'characterData' ) {
+            Ed11y.alignPending = false;
             mutated();
           }
         }
@@ -1615,6 +1653,10 @@ class Ed11y {
       const observer = new MutationObserver(callback);
       // Start observing the target node for configured mutations
       observer.observe(root, config);
+      window.setTimeout(function () {
+        // heeee
+        Ed11y.alignButtons();
+      }, 1000);
     };
 
     Ed11y.setCurrentJump = function () {

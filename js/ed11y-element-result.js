@@ -60,7 +60,7 @@ class Ed11yElementResult extends HTMLElement {
   handleHover(event) {
     event.preventDefault();
     let host = this.getRootNode().host;
-    if (host.getAttribute('data-ed11y-open') === 'false' && host.racing === false && !host.classList.contains('intersecting')) {
+    if (!this.classList.contains('intersecting') && host.getAttribute('data-ed11y-open') === 'false' && host.racing === false) {
       host.racing = true;
       host.toggleTip(true);
       Ed11y.toggledFrom = this;
@@ -93,11 +93,9 @@ class Ed11yElementResult extends HTMLElement {
   }
 
   closeOtherTips() {
-    Ed11y.findElements('openTips', '[data-ed11y-open="true"]');
-    if (Ed11y.elements.openTips) {
-      Array.from(Ed11y.elements.openTips).forEach(openTip => {
-        openTip.setAttribute('data-ed11y-action', 'close');
-      });
+    const openTip = Ed11y.getOpenTip();
+    if (openTip.button) {
+      openTip.button.setAttribute('data-ed11y-action', 'close');
     }
   }
 
@@ -118,9 +116,7 @@ class Ed11yElementResult extends HTMLElement {
     }
     this.toggle.setAttribute('aria-expanded', changeTo);
     let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
-    const editableParent = this.result.element.closest('[contenteditable="true"]');
-    if (!editableParent) {
-      // todo editable - abstract out
+    if (Ed11y.options.inlineAlerts) {
       this.result.element.classList.toggle(highlightOutline);
     } else {
       Ed11y.editableHighlighter(this.resultID, changeTo);

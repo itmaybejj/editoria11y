@@ -1,11 +1,14 @@
 /* Applies to elements in light DOM ===== */
 
-ed11y-element-result, ed11y-element-panel {
-    opacity: 1 !important;
-    outline: 0 !important;
+ed11y-element-panel {
+    opacity: 1;
+    outline: 0;
 }
 
 ed11y-element-result {
+    opacity: 1;
+    outline: 0;
+    transition: opacity .2s ease-out;
     position: absolute !important;
     z-index: var(--ed11y-buttonZIndex, 9999) !important;
 }
@@ -697,12 +700,13 @@ ed11y-element-result {
     color: var(--ed11y-primaryText, #fffdf7);
 }
 
-
-/*** new to distribute *****/
+/********/
 
 .intersecting {
-    opacity: 0;
-    pointer-events: none;
+    transition: opacity .3s ease;
+    opacity: 0.5;
+    filter: saturate(.5);
+    pointer-events: none !important;
 }
 [contenteditable] ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
     opacity: .94;

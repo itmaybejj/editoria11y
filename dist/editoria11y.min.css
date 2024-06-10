@@ -703,8 +703,10 @@ ed11y-element-result {
 /********/
 
 .intersecting {
-    opacity: 0;
-    pointer-events: none;
+    transition: opacity .3s ease;
+    opacity: 0.5;
+    filter: saturate(.5);
+    pointer-events: none !important;
 }
 [contenteditable] ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
     opacity: .94;
