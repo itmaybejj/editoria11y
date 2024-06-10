@@ -1557,12 +1557,12 @@ class Ed11y {
         const toggle = el.shadowRoot.querySelector('.toggle');
         if ( intersect(activeRange.getBoundingClientRect(), toggle.getBoundingClientRect(), 0) ) {
           if (!toggle.classList.contains('was-intersecting')) {
-            el.classList.add('intersecting')
+            el.classList.add('intersecting');
             toggle.classList.add('intersecting');
             //Ed11y.editableHighlighter(toggle.dataset.ed11yResult, true, true);
           }
         } else {
-          el.classList.remove('intersecting', 'was-intersecting')
+          el.classList.remove('intersecting', 'was-intersecting');
           toggle.classList.remove('intersecting', 'was-intersecting');
           //toggle.classList.remove('was-intersecting');
           //Ed11y.editableHighlighter(toggle.dataset.ed11yResult, false);
@@ -1573,7 +1573,7 @@ class Ed11y {
     const updateTipLocations = debounce(() => {
       if (!Ed11y.running && Ed11y.jumpList && Ed11y.panel?.classList.contains('ed11y-active') === true) {
         window.setTimeout(function() {
-          Ed11y.alignButtons()
+          Ed11y.alignButtons();
           let openTip = Ed11y.getOpenTip();
           if (openTip.tip) {
             Ed11y.alignTip(openTip.button.shadowRoot.querySelector('button'), openTip.tip);
