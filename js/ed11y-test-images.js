@@ -44,7 +44,7 @@ class Ed11yTestImages {
         } else {
           // Check if alt text is descriptive.
           // todo parameterize
-          let altUrl = ['.png', '.jpg', '.jpeg', '.gif'];
+          let altUrl = ['https://', '.png', '.jpg', '.jpeg', '.gif'];
           // todo localize
           let suspiciousWords = Ed11y.M.suspiciousWords;
           let check = [null, null];

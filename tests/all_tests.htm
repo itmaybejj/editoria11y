@@ -80,6 +80,13 @@
             <p>Screen readers end up reading this as a filename.</p>
 
             <p class="positive"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive">
+                <picture>
+                    <source srcset="/sites/default/files/styles/related_teaser_small/public/foobar.png?itok=gZu_oP2K 1x" media="all and (min-width: 768px)" type="image/png" width="342" height="230">
+                    <img loading="eager" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" width="342" height="230">
+                </picture>
+
+            </p>
 
             <h3 id="image-marked-as-decorative-with-an-empty-alt">Image marked as decorative with an empty alt</h3>
 
@@ -233,29 +240,167 @@
 
         <table class="negative" role="presentation"><tr><td>No table header, but table has role="presentation."</td></tr></table>
 
-        <table class="negative"><thead>
-        <tr>
-            <th><p>Numbers in tables</p></th>
-            <th><p>Should not be checked for lists</p>
-            </th>
-        </tr>
-        </thead>
+        <table class="negative">
+            <thead>
+            <tr>
+                <th>
+                    <p>Price</p>
+                </th>
+                <th>
+                    <p>Quantity Demanded</p>
+                </th>
+                <th>
+                    <p>Total Revenue</p>
+                </th>
+                <th>
+                    <p>Marginal Revenue</p>
+                </th>
+            </tr>
+            </thead>
             <tbody>
             <tr>
-                <th>   <p>1.</p>
-                </th>
-                <td>   <p>2. Turtles</p>
+                <td>
+                    <p>7</p>
+                </td>
+                <td>
+                    <p>0</p>
+                </td>
+                <td>
+                    <p>0</p>
+                </td>
+                <td>
+                    <p>NA</p>
                 </td>
             </tr>
             <tr>
-                <th>   <p>2.</p>
-                </th>
-                <td>   <p>Bears</p>
+                <td>
+                    <p>6.50</p>
                 </td>
-
+                <td>
+                    <p>1</p>
+                </td>
+                <td>
+                    <p>6.50</p>
+                </td>
+                <td>
+                    <p>6.50</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>6</p>
+                </td>
+                <td>
+                    <p>2</p>
+                </td>
+                <td>
+                    <p>12</p>
+                </td>
+                <td>
+                    <p>5.50</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>5.50</p>
+                </td>
+                <td>
+                    <p>3</p>
+                </td>
+                <td>
+                    <p>16.50</p>
+                </td>
+                <td>
+                    <p>4.50</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>5</p>
+                </td>
+                <td>
+                    <p>4</p>
+                </td>
+                <td>
+                    <p>20</p>
+                </td>
+                <td>
+                    <p>3.50</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>4.50</p>
+                </td>
+                <td>
+                    <p>5</p>
+                </td>
+                <td>
+                    <p>22.50</p>
+                </td>
+                <td>
+                    <p>2.50</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>4</p>
+                </td>
+                <td>
+                    <p>6</p>
+                </td>
+                <td>
+                    <p>24</p>
+                </td>
+                <td>
+                    <p>1.50</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>3.50</p>
+                </td>
+                <td>
+                    <p>7</p>
+                </td>
+                <td>
+                    <p>24.50</p>
+                </td>
+                <td>
+                    <p>0.50</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>3</p>
+                </td>
+                <td>
+                    <p>8</p>
+                </td>
+                <td>
+                    <p>24</p>
+                </td>
+                <td>
+                    <p>–0.50</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>2.50</p>
+                </td>
+                <td>
+                    <p>9</p>
+                </td>
+                <td>
+                    <p>22.50</p>
+                </td>
+                <td>
+                    <p>–1.50</p>
+                </td>
             </tr>
             </tbody>
         </table>
+
         <h3 id="empty-table-header-cells">Empty table header cells</h3>
 
         <table><tbody><tr><th>Empty table heading cells will also be flagged:</th><th class="positive"> &nbsp;</th></tr></tbody></table>

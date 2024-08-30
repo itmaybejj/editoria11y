@@ -47,7 +47,7 @@ class Ed11y {
       currentPage: false, // uses window.location.pathname unless a string is provided.
       allowHide: true, // enables end-user ignore button
       allowOK: true,  // enables end-user mark OK button
-      syncedDismissals: false, // provide empty or populated object {} to enable synch functions
+      syncedDismissals: false, // provide empty or populated object {} to enable sync functions
       showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
 
       // Hide all alerts if these elements are absent, e.g., ".edit-button"
