@@ -545,7 +545,7 @@ class Ed11y {
         // [5] dismissalStatus
         */
       let mark = document.createElement('ed11y-element-result');
-      let location = result.element.closest('a');
+      let location = result.element.closest('a, button, [role="button"], [role="link"]');
       let position = 'beforebegin';
       if (!location) {
         location = result.element;
