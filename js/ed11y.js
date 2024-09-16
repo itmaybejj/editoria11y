@@ -1140,6 +1140,7 @@ class Ed11y {
     };
 
     Ed11y.buildJumpList = function () {
+      // TODO: add parameter to ignore-the-ignores
       Ed11y.findElements('jumpList', 'ed11y-element-result', false);
       Ed11y.elements.jumpList.forEach((result, i) => {
         result.dataset.ed11yJumpPosition = i;
