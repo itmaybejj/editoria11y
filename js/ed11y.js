@@ -136,7 +136,8 @@ class Ed11y {
         alert: 'rgb(184, 5, 25)',
       },
       // Base z-index for buttons.
-      buttonZIndex: 9999,
+      // 1299 maximizes TinyMCE compatibility.
+      buttonZIndex: 1299,
       // CSS overrides and additions.
 
       baseFontSize: '14px', // px
@@ -935,6 +936,7 @@ class Ed11y {
     Ed11y.editableHighlight = [];
 
     Ed11y.editableHighlighter = function (resultID, show, wrap) {
+      console.log('editable highlighter for ' + resultID);
 
       // todo editable: uggh this looks exactly like CKEditor's block selector
       if (!show) {
@@ -944,7 +946,8 @@ class Ed11y {
       const result = Ed11y.results[resultID];
       let target = result.element;
       if (wrap) {
-        target = result.element.closest('img,blockquote,p,table,h1,h2,h3,h4,h5,h6,li');
+        let wrapper = result.element.closest('img,blockquote,p,table,h1,h2,h3,h4,h5,h6,li');
+        target = wrapper ? wrapper : result.element.parentNode();
       }
       let el = Ed11y.editableHighlight[resultID];
       if (!el) {
@@ -1035,7 +1038,7 @@ class Ed11y {
         mark.style.setProperty('left', 'initial');
         let markOffset = mark.getBoundingClientRect();
 
-        if (!Ed11y.options.inlineAlerts) {
+        if (!Ed11y.options.inlineAlerts && target) {
           let targetOffset = target.getBoundingClientRect();
           if ((targetOffset.top === 0 && targetOffset.left === 0) || !Ed11y.visible(target)) {
             // Invisible target. todo: wait why is 0 considered invisible?
@@ -1107,23 +1110,29 @@ class Ed11y {
             // Hide alerts outside a scroll zone.
             const bounds = scrollableParent.getBoundingClientRect();
             if (!!bounds && (markOffset.top - bounds.top < 0 || markOffset.top - bounds.bottom > 0 )) {
-              mark.classList.add('offscreen');
+              // Tip has exited scrollable parent.
+              mark.classList.add('ed11y-offscreen');
               mark.style.pointerEvents = 'none';
+              if (mark.getAttribute('data-ed11y-open') === 'true') {
+                mark.setAttribute('data-ed11y-action', 'shut');
+              }
             }
             else {
-              mark.classList.remove('offscreen');
+              mark.classList.remove('ed11y-offscreen');
               mark.style.pointerEvents = 'auto';
             }
           }
           else {
-            mark.classList.remove('offscreen');
+            mark.classList.remove('ed11y-offscreen');
             mark.style.pointerEvents = 'auto';
           }
 
-          // Now make visible.
-          mark.style.opacity = '';
-          mark.classList.remove('ed11y-preload');
         });}
+      Ed11y.jumpList?.forEach(mark => {
+        // Now make visible.
+        mark.style.opacity = '';
+        mark.classList.remove('ed11y-preload');
+      })
       if (!Ed11y.jumpList) {
         Ed11y.buildJumpList();
       }
@@ -1598,7 +1607,7 @@ class Ed11y {
           updateTipLocations();
           Ed11y.checkEditableIntersects();
         }
-      }, 250);
+      }, 100);
 
       document.addEventListener('selectionchange', function() {
         if (!Ed11y.running) {
@@ -1630,11 +1639,15 @@ class Ed11y {
 
       const mutated = debounce(() => {
         if (!Ed11y.running) {
+          console.log('mutated' + new Date().getTime());
           Ed11y.running = true;
           Ed11y.incremental = true;
           Ed11y.checkAll();
+        } else {
+          console.log('run stop');
+          window.setTimeout(mutated, 1);
         }
-      }, 1000);
+      }, 500);
 
       // Options for the observer (which mutations to observe)
       const config = { childList: true, subtree: true, characterData: true };
