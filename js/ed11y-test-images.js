@@ -44,6 +44,7 @@ class Ed11yTestImages {
         } else {
           // Check if alt text is descriptive.
           // todo parameterize?
+          // this also catches avif and heic and jpeg etc
           let altUrl = [
             '.avi',
             '.png',
@@ -53,16 +54,6 @@ class Ed11yTestImages {
             '.tiff',
             '.svg',
             '.hei',
-            'dsc_',
-            'img_',
-            'photo_',
-            'pic_',
-            'pexels_',
-            'adobestock_',
-            'screenshot_',
-            'picture_',
-            'snap_',
-            'capture_',
             '://',
           ];
           let suspiciousWords = Ed11y.M.suspiciousWords;

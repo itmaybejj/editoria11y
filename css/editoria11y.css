@@ -120,32 +120,6 @@ ed11y-element-result {
     color: inherit;
 }
 
-.ed11y-panel-wrapper .content {
-    display: none;
-    padding: 4px 4px 4px 12px;
-    background: var(--ed11y-bg);
-    /*border: var(--ed11y-panelBorder, 0) solid var(--ed11y-primary, #276499);*/
-    box-shadow: var(--ed11y-panelBarShadow);
-    border-top: 0;
-    border-radius: 0 0 var(--ed11y-borderRadius, 1) var(--ed11y-borderRadius, 1);
-    color: var(--ed11y-text, #20160c);
-    max-height: max(240px, 50vh);
-    overflow: hidden;
-    margin-right: 12px;
-}
-
-.ed11y-panel-wrapper .content-text {
-    margin-top: -2px;
-}
-
-@media (width >= 400px) {
-    #ed11y-toggle-tab {
-        display: grid;
-        grid-gap: 1em;
-        grid-template-columns: 16em 1fr;
-    }
-}
-
 .ed11y-buttonbar {
     display: flex;
     align-items: center;
@@ -206,7 +180,8 @@ ed11y-element-result {
     padding: 0 .5em .25em;
     text-align: left;
     right: 12px;
-    width: calc(100% - 25px);
+    /* todo: map to actual width of buttons. consider ems. */
+    width: 135px;
     min-width: 133px;
     height: auto;
     line-height: 1.75;
@@ -235,7 +210,8 @@ ed11y-element-result {
 }
 
 .ed11y-active:hover button,
-.ed11y-active:has(:focus-visible) button {
+.ed11y-active:has(:focus-visible) button,
+.ed11y-active:has([aria-pressed="true"]) button {
     width: 40px;
     opacity: 1;
 }
@@ -317,15 +293,6 @@ ed11y-element-result {
     display: block;
 }
 
-.ed11y-jumplinks {
-    text-align: right;
-    width: min(12em, 50%);
-}
-
-.ed11yjumplinks button {
-    min-width: max(7.25em, calc(49% - 3px));
-}
-
 .ed11y-panel-wrapper .content button {
     padding: 7px 5px;
     border-radius: var(--ed11y-borderRadius, 1);
@@ -335,10 +302,6 @@ ed11y-element-result {
     margin: 5px 0 5px 1px;
 }
 
-.ed11y-jump.prev [aria-hidden] {
-    display: block;
-    margin-top:-2px;
-}
 .ed11y-jump.prev {
     display: none !important;
 }
@@ -359,6 +322,33 @@ ed11y-element-result {
     color: #fff;
 }
 
+.ed11y-panel-wrapper .content {
+    background: var(--ed11y-bg);
+    /*border: var(--ed11y-panelBorder, 0) solid var(--ed11y-primary, #276499);*/
+    box-shadow: var(--ed11y-panelBarShadow);
+    border-top: 0;
+    border-radius: 0 0 var(--ed11y-borderRadius, 1) var(--ed11y-borderRadius, 1);
+    color: var(--ed11y-text, #20160c);
+    max-height: max(240px, 50vh);
+    overflow: auto;
+    margin-right: 12px;
+    width: clamp(160px, 50vw, 280px);
+}
+.ed11y-panel-wrapper summary {
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 8px;
+    background-color: var(--ed11y-primary);
+    color: var(--ed11y-primaryText);
+    cursor: pointer;
+}
+.ed11y-panel-wrapper summary:hover {
+    box-shadow: inset 1px 1px 3px black;
+}
+.ed11y-panel-wrapper .details {
+    padding: 0 8px 8px 24px;
+}
+
 #ed11y-issues-tab:not(.ed11y-hidden) {
     padding: 4px 0;
 }
@@ -368,10 +358,6 @@ ed11y-element-result {
     align-self: center;
 }
 
-#ed11y-headings-tab, #ed11y-alts-tab {
-    max-height: max(240px, 50vh);
-    overflow: auto;
-}
 
 #ed11y-outline, #ed11y-alt-list {
     list-style: none;

@@ -654,6 +654,8 @@ class Ed11y {
     Ed11y.resetPanel = function() {
       // todo beta on re-open: recreate heading or alts if panel is showing
       // Reset main panel.
+      visualizing = true;
+      visualize();
       Ed11y.panelJumpNext?.setAttribute('data-ed11y-goto', '0');
       Ed11y.panelJumpPrev?.setAttribute('data-ed11y-goto', '0');
       Ed11y.panel?.classList.add('ed11y-shut');
@@ -1308,10 +1310,6 @@ class Ed11y {
 
     };
 
-    Ed11y.clickTab = function (event) {
-      Ed11y.activateTab(event.target, false);
-    };
-
     Ed11y.togglePanel = function () {
       console.log(Ed11y.panelMessage);
       if (!Ed11y.doubleClickPrevent) {
@@ -1340,7 +1338,7 @@ class Ed11y {
       return false;
     };
 
-    Ed11y.showHeadingsPanel = function () {
+    const showHeadingsPanel = function () {
       // Visualize the document outline
 
       let panelOutline = Ed11y.panel.querySelector('#ed11y-outline');
@@ -1394,19 +1392,14 @@ class Ed11y {
       Ed11y.panel.querySelector('#' + id + '-tab')?.classList.remove('ed11y-hidden');
       // todo beta what to show when no outline or images
       // todo postpone: error when no headings found at all?
-      Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
-      Ed11y.elements.reset?.forEach(el => { el.remove(); });
 
       // Show extras
       switch (id) {
-      case 'ed11y-alts':
-        Ed11y.showAltPanel();
-        break;
-      case 'ed11y-headings':
-        Ed11y.showHeadingsPanel();
-        break;
       case 'ed11y-help':
-        Ed11y.showHelpPanel();
+        showHelpPanel();
+        break;
+      case 'ed11y-visualize':
+        visualize();
         break;
       default:
         // hide extras
@@ -1440,7 +1433,7 @@ class Ed11y {
       });
     };
 
-    Ed11y.showAltPanel = function () {
+    const showAltPanel = function () {
       // visualize image alts
       let altList = Ed11y.panel.querySelector('#ed11y-alt-list');
 
@@ -1472,10 +1465,35 @@ class Ed11y {
         altList.innerHTML = '<p><em>No images found.</em></p>';
       }
     };
+    let visualizing = false;
+    const visualize = function () {
+      if (visualizing) {
+        visualizing = false;
+        Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('aria-pressed', 'false');
+        Ed11y.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
+        Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
+        Ed11y.elements.reset?.forEach(el => { el.remove(); });
+        return;
+      }
+      visualizing = true;
+      // todo transfer focus?
+      Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('aria-pressed', 'true');
+      Ed11y.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
+      showAltPanel();
+      showHeadingsPanel();
+    };
 
-    Ed11y.showHelpPanel = function () {
+    const showHelpPanel = function () {
+      console.log('showing help');
       let helpTab = Ed11y.panel.querySelector('#ed11y-help-tab');
-      helpTab.innerHTML = Ed11y.M.panelHelp;
+      if (helpTab.matches('[hidden]')) {
+        Ed11y.panel.querySelector('#ed11y-help').setAttribute('aria-pressed', 'true');
+        helpTab.removeAttribute('hidden');
+        helpTab.innerHTML = Ed11y.M.panelHelp;
+      } else {
+        helpTab.setAttribute('hidden', 'true');
+        Ed11y.panel.querySelector('#ed11y-help').setAttribute('aria-pressed', 'false');
+      }
     };
 
     Ed11y.buildJumpList = function () {
@@ -1751,28 +1769,6 @@ class Ed11y {
       }
     };
     document.addEventListener('keyup', function (event) { Ed11y.escapeWatch(event); });
-
-    /*============== Panel interactions ========*/
-    Ed11y.activateTab = function (tab, setFocus) {
-      setFocus = setFocus || true;
-      Ed11y.deactivateTabs();
-      tab.setAttribute('tabindex', '0');
-      tab.setAttribute('aria-selected', 'true');
-      let controls = tab.getAttribute('aria-controls');
-      Ed11y.panel.querySelector('#' + controls).classList.remove('hidden');
-      if (setFocus) {
-        tab.focus();
-      }
-    };
-    Ed11y.deactivateTabs = function () {
-      Ed11y.panelTabs.forEach(tab => {
-        tab.setAttribute('tabindex', '-1');
-        tab.setAttribute('aria-selected', 'false');
-      });
-      Ed11y.panel.querySelectorAll('[role="tabpanel"]').forEach(panel => {
-        panel.classList.add('hidden');
-      });
-    };
 
 
     /*=============== Utilities ================*/
