@@ -43,9 +43,28 @@ class Ed11yTestImages {
           dismissable = false;
         } else {
           // Check if alt text is descriptive.
-          // todo parameterize
-          let altUrl = ['.png', '.jpg', '.jpeg', '.gif'];
-          // todo localize
+          // todo parameterize?
+          let altUrl = [
+            '.avi',
+            '.png',
+            '.jp',
+            '.webp',
+            '.gif',
+            '.tiff',
+            '.svg',
+            '.hei',
+            'dsc_',
+            'img_',
+            'photo_',
+            'pic_',
+            'pexels_',
+            'adobestock_',
+            'screenshot_',
+            'picture_',
+            'snap_',
+            'capture_',
+            '://',
+          ];
           let suspiciousWords = Ed11y.M.suspiciousWords;
           let check = [null, null];
 

@@ -38,11 +38,13 @@ class Ed11y {
         'table': '[role="presentation"]',
       },
 
-      // Set alertMode to "Assertive" to open the panel automatically if the issue count changes.
+      // Set alertModes
+      // 'polite': don't open automatically.
+      // 'assertive': open if there are new issues.
+      // 'active': always open.
       // CMS integrations can switch between polite & headless at runtime.
       // alertMode "headless" never draws the panel.
       alertMode: 'polite',
-      startMinimized: true, // todo don't open on subsequent detections! // todo set to false by default // todo create minimal interface?
       inlineAlerts: true,
 
       // Dismissed alerts
@@ -189,6 +191,7 @@ class Ed11y {
 
     if (!Ed11y.options.cssUrls) {
       const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
+      console.log(cssLink);
       if (cssLink) {
         Ed11y.options.cssUrls = [cssLink.getAttribute('href')];
       } else {
@@ -213,7 +216,7 @@ class Ed11y {
 
     Ed11y.elements = [];
     Ed11y.onLoad = true;
-    Ed11y.showPanel = 'show';
+    Ed11y.showPanel = false;
 
     Ed11y.initialize = () => {
 
@@ -456,23 +459,24 @@ class Ed11y {
       if (Ed11y.options.alertMode !== 'headless') {
         if (Ed11y.onLoad === true) {
           Ed11y.onLoad = false;
-          // Create the panel if it doesn't exist yet
+          // Create the panel.
           let panel = document.createElement('ed11y-element-panel');
           document.querySelector('body').appendChild(panel);
+          // Decide whether the issue count suggests we should open the panel.
           // todo: open on assertive with count mismatch or if showDismissed is set.
-          if (Ed11y.totalCount > 0 && !Ed11y.ignoreAll && (Ed11y.options.alertMode === 'assertive') && Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount) {
-            // User has not already seen these errors, panel will not open.
+          if (Ed11y.options.alertMode === 'active') {
             Ed11y.showPanel = true;
-          } else if (Ed11y.options.startMinimized) {
+          } else if (Ed11y.totalCount > 0 && !Ed11y.ignoreAll && Ed11y.options.alertMode === 'assertive' && Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount) {
+            // This browser has not already seen these errors, panel will open.
             Ed11y.showPanel = true;
           } else {
+            // Forced open by showDismissed flag.
             Ed11y.showPanel = Ed11y.options.showDismissed && (Ed11y.dismissedCount > 0 || Ed11y.totalCount > 0);
           }
-        } else {
-          Ed11y.showPanel = true;
         }
 
         if (Ed11y.totalCount > 0) {
+          // Record what has been seen at this route.
           Ed11y.seen[encodeURI(Ed11y.options.currentPage)] = Ed11y.totalCount;
           localStorage.setItem('editoria11yResultCount', JSON.stringify(Ed11y.seen));
         } else {
@@ -481,20 +485,21 @@ class Ed11y {
 
         // Now we can open or close the panel.
         if (!Ed11y.showPanel) {
+          // Not opening on page load, or closing by user action.
+          Ed11y.open = false;
+          console.log('resetting');
           Ed11y.reset();
           if (!Ed11y.bodyStyle) {
             Ed11y.paintReady();
           }
         } else {
-          if (Ed11y.options.startMinimized && Ed11y.panel.getAttribute('aria-expanded') !== 'true') {
-            Ed11y.panel.classList.add('ed11y-shut');
-          } else {
-            Ed11y.panel.classList.remove('ed11y-shut');
-          }
+          // Ignore issue count if this resulted from a user action.
+          Ed11y.open = true;
+          Ed11y.panel.classList.remove('ed11y-shut');
           Ed11y.panel.classList.add('ed11y-active');
           Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
           if (Ed11y.dismissedCount > 0) {
-            Ed11y.showDismissed.textContent = Ed11y.dismissedCount === 1 ? Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+            Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.dismissedCount === 1 ? Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
             Ed11y.showDismissed.removeAttribute('hidden');
           } else if (Ed11y.options.showDismissed === true) {
             // Reset show hidden default option when irrelevant.
@@ -510,13 +515,16 @@ class Ed11y {
           }, 0);
           if (Ed11y.onLoad === false) {
             window.setTimeout(function () {
-              Ed11y.panelMessage.focus();
+              //Ed11y.panelMessage.focus();
             }, 500);
           }
         }
         if (Ed11y.totalCount > 0 || (Ed11y.options.showDismissed && Ed11y.dismissedCount > 0)) {
+          console.log(Ed11y.panelCount);
+          console.log(Ed11y.open);
+          Ed11y.panelMessage.textContent = Ed11y.open ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonShowAlerts;
           Ed11y.panelJumpNext.removeAttribute('hidden');
-          if (Ed11y.totalCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
+          if (Ed11y.totalCount < 2) {
             Ed11y.panelJumpPrev.setAttribute('hidden', '');
           } else {
             Ed11y.panelJumpPrev.removeAttribute('hidden');
@@ -534,15 +542,16 @@ class Ed11y {
             Ed11y.panel.classList.add('ed11y-pass');
           }
           Ed11y.panelCount.textCount = Ed11y.totalCount;
-          Ed11y.panelCount.style.display = 'inline-block';
-          let text = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
-          Ed11y.panelMessage.textContent = text;
+          //Ed11y.panelCount.style.display = 'inline-block';
+          //let text = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
+          //Ed11y.panelMessage.textContent = text;
           window.setTimeout(function () {
-            Ed11y.announce.textContent = text;
+            //Ed11y.announce.textContent = text;
           }, 1500);
           Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
-        }
-        else {
+        } else {
+          console.log(Ed11y.panelCount);
+          Ed11y.panelMessage.textContent = Ed11y.open ? Ed11y.M.buttonHideNoAlert : Ed11y.M.buttonShowNoAlert;
           Ed11y.panelJumpNext.setAttribute('hidden', '');
           Ed11y.panelJumpPrev.setAttribute('hidden', '');
 
@@ -552,10 +561,10 @@ class Ed11y {
           if (Ed11y.dismissedCount > 0) {
             // todo: title attribute to explain the difference?
             Ed11y.panel.querySelector('.toggle-count').textContent = 'i';
-            Ed11y.panelMessage.innerText = Ed11y.M.panelCountAllDismissed;
+            //Ed11y.panelMessage.innerText = Ed11y.M.panelCountAllDismissed;
           } else {
             Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
-            Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
+            //Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
           }
         }
 
@@ -657,6 +666,7 @@ class Ed11y {
       Ed11y.resetPanel();
       Ed11y.incremental = false;
       Ed11y.running = false;
+      Ed11y.showPanel = false;
     };
 
     Ed11y.linkText = (linkText) => {
@@ -740,9 +750,10 @@ class Ed11y {
     };
 
     Ed11y.dismissThis = function (dismissalType) {
+      console.log(Ed11y.getOpenTip());
       // Find the active tip and draw its identifying information from the result list
       let removal = Ed11y.getOpenTip();
-      let id = removal.dataset.ed11yResult;
+      let id = removal.tip.dataset.ed11yResult;
       let test = Ed11y.results[id].test;
       let dismissalKey = Ed11y.dismissalKey(Ed11y.results[id].dismissalKey);
 
@@ -792,7 +803,7 @@ class Ed11y {
       }
 
       Ed11y.reset();
-
+      Ed11y.showPanel = true;
       Ed11y.checkAll();
 
       let rememberGoto = Ed11y.goto;
@@ -858,10 +869,11 @@ class Ed11y {
       Ed11y.ignoreAll = false;
       Ed11y.options.showDismissed = !(Ed11y.options.showDismissed);
       Ed11y.reset();
+      Ed11y.showPanel = true;
       Ed11y.checkAll();
 
       Ed11y.showDismissed.setAttribute('aria-pressed', (!!Ed11y.options.showDismissed).toString());
-      Ed11y.showDismissed.textContent = Ed11y.M.buttonShowHiddenAlertsContent;
+      Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.M.buttonShowHiddenAlertsContent;
     };
 
     Ed11y.dismissHelp = function (el) {
@@ -917,9 +929,10 @@ class Ed11y {
 
       let jumpIndex = Ed11y.results.length;
       Ed11y.results?.forEach(function (result, i) {
+        jumpIndex--;
         let editableParent = result.element.closest('[contenteditable]');
         if (!Ed11y.results[i].dismissalStatus || Ed11y.options.showDismissed) {
-          jumpIndex--;
+          console.log(jumpIndex);
           Ed11y.result(result, i, jumpIndex, editableParent);
         }
       });
@@ -981,6 +994,7 @@ class Ed11y {
     };
 
     const nudgeMark = function (el, x, y) {
+      // TODO: THESE CAN NUDGE OUT OF THE OVERFLOW AREA OF THE CONTENTEDITABLE CONTAINER
       if (el.style.transform) {
         const computedStyle = window.getComputedStyle(el);
         let matrix = computedStyle.getPropertyValue('transform');
@@ -1299,21 +1313,22 @@ class Ed11y {
     };
 
     Ed11y.togglePanel = function () {
+      console.log(Ed11y.panelMessage);
       if (!Ed11y.doubleClickPrevent) {
         // todo beta: revisit aria states and announcements.
-        if (Ed11y.panel.classList.contains('ed11y-active') && Ed11y.panel.classList.contains('ed11y-shut')) {
-          Ed11y.minimize();
-        }
         // Prevent clicks piling up while scan is running.
-        else if (Ed11y.running !== true) {
+        if (Ed11y.running !== true) {
           Ed11y.running = true;
           // Re-scan each time the panel reopens.
           if (Ed11y.panel.classList.contains('ed11y-active') === false) {
             Ed11y.onLoad = false;
             Ed11y.showPanel = true;
             Ed11y.checkAll();
+            //Ed11y.panelMessage.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonHideNoAlert;
           }
           else {
+            Ed11y.open = false;
+            Ed11y.panelMessage.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonShowAlerts : Ed11y.M.buttonShowNoAlert;
             Ed11y.reset();
           }
         }
@@ -1371,9 +1386,11 @@ class Ed11y {
     };
     Ed11y.switchPanel = function (id) {
       // Switch main panel tab
+      //Ed11y.panel.classList.remove('ed11y-shut');
       Ed11y.panel.querySelector('.content > div:not(.ed11y-hidden)')?.classList.add('ed11y-hidden');
       Ed11y.panel.querySelector('[aria-selected=true]')?.setAttribute('aria-selected', 'false');
-      Ed11y.panel.querySelector('#' + id).setAttribute('aria-selected', 'true');
+      // TODO remove this functionality if we are ditching tabs
+      Ed11y.panel.querySelector('#' + id)?.setAttribute('aria-selected', 'true');
       Ed11y.panel.querySelector('#' + id + '-tab')?.classList.remove('ed11y-hidden');
       // todo beta what to show when no outline or images
       // todo postpone: error when no headings found at all?
@@ -1674,11 +1691,15 @@ class Ed11y {
 
     Ed11y.setCurrentJump = function () {
       // Set next/previous buttons
+      console.log(Ed11y.jumpList);
       let goMax = Ed11y.jumpList.length - 1;
       let goNext;
       if (Ed11y.totalCount > 1) {
-        Ed11y.panelJumpPrev.removeAttribute('hidden');
+        // todo remove if prev will be pinned
+        // Ed11y.panelJumpPrev.removeAttribute('hidden');
       }
+      console.log(Ed11y.goto);
+      console.log(goMax);
       if (Ed11y.goto === goMax || Ed11y.goto > goMax) {
         // Reached end of loop or dismissal pushed us out of loop
         goNext = 0;
@@ -1693,22 +1714,12 @@ class Ed11y {
         // loop around
         goPrev = goMax + 1 + goPrev;
       }
+      console.log(goNext);
       Ed11y.panelJumpNext.dataset.ed11yGoto = goNext.toString();
       Ed11y.panelJumpPrev.dataset.ed11yGoto = goPrev.toString();
       window.setTimeout(function () {
-        Ed11y.panelJumpNext.querySelector('.jump-next').textContent = Ed11y.nextText;
+        Ed11y.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Ed11y.nextText;
       }, 250);
-    };
-
-    Ed11y.minimize = function () {
-      // todo editable: start minimized.
-      let minimized = Ed11y.panel.classList.contains('ed11y-shut') === true;
-      Ed11y.panel.classList.toggle('ed11y-shut');
-      if (minimized === false) {
-        window.setTimeout(function () {
-          Ed11y.panelToggle.focus();
-        }, 500);
-      }
     };
 
     Ed11y.windowResize = function () {
