@@ -81,21 +81,23 @@ class Ed11y {
         bg: '#fffffe',
         bgHighlight: '#7b1919',
         text: '#20160c',
-        primary: '#276499',
+        primary: '#276499', // 276499
         primaryText: '#fffdf7',
         button: 'transparent', // deprecate?
-        panelBar: '#fffffe',
-        panelBarText: '#20160c',
+        panelBar: '#1e517c',
+        panelBarText: '#fffdf7',
         panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
         panelBorder: '0px', // '2px'
         activeTab: '#276499',
         activeTabText: '#fffffe',
+        focusRing: '#007aff',
         outlineWidth: 0,
         borderRadius: '1px',
         ok: '#1f5381',
         warning: 'rgb(250, 216, 89)',
+        warningText: '#20160c',
         alert: 'rgb(184, 5, 25)',
-        focusRing: '#007aff',
+        alertText: '#f4f7ff',
       },
       darkTheme: {
         bg: '#0a2051',
@@ -115,7 +117,9 @@ class Ed11y {
         borderRadius: '3px',
         ok: '#0a307a',
         warning: 'rgb(250, 216, 89)',
+        warningText: '#20160c',
         alert: 'rgb(184, 5, 25)',
+        alertText: '#f4f7ff',
       },
       lightTheme: {
         bg: '#fffffe',
@@ -135,7 +139,9 @@ class Ed11y {
         borderRadius: '3px',
         ok: '#0a307a',
         warning: 'rgb(250, 216, 89)',
+        warningText: '#20160c',
         alert: 'rgb(184, 5, 25)',
+        alertText: '#f4f7ff',
       },
       // Base z-index for buttons.
       // 1299 maximizes TinyMCE compatibility.
@@ -499,7 +505,13 @@ class Ed11y {
           Ed11y.panel.classList.add('ed11y-active');
           Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
           if (Ed11y.dismissedCount > 0) {
-            Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.dismissedCount === 1 ? Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+            console.log(Ed11y.options.showDismissed);
+            if (Ed11y.dismissedCount === 1) {
+              Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlert : Ed11y.M.buttonShowHiddenAlert;
+            } else {
+              Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlerts(Ed11y.dismissedCount) : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+            }
+
             Ed11y.showDismissed.removeAttribute('hidden');
           } else if (Ed11y.options.showDismissed === true) {
             // Reset show hidden default option when irrelevant.
@@ -875,7 +887,6 @@ class Ed11y {
       Ed11y.checkAll();
 
       Ed11y.showDismissed.setAttribute('aria-pressed', (!!Ed11y.options.showDismissed).toString());
-      Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.M.buttonShowHiddenAlertsContent;
     };
 
     Ed11y.dismissHelp = function (el) {
@@ -1550,7 +1561,7 @@ class Ed11y {
     const rangeChange = function() {
       const range = document.createRange();
       let anchor = getSelection()?.anchorNode;
-      if (!anchor.parentNode || typeof anchor.parentNode.closest !== 'function') {
+      if (!anchor || !anchor.parentNode || typeof anchor.parentNode.closest !== 'function') {
         activeRange = false;
         return false;
       }
