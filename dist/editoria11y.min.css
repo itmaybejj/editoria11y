@@ -122,7 +122,7 @@ ed11y-element-result {
     display: flex;
     flex-direction: row-reverse;
     align-items: center;
-    height: 38px;
+    height: 36px;
 }
 
 .ed11y-panel-wrapper button {
@@ -139,8 +139,8 @@ ed11y-element-result {
     color: var(--ed11y-panelBarText);
     /*box-shadow: var(--ed11y-panelBarShadow);*/
     box-shadow: 0 0 1px;
-    min-width: 44px;
-    min-height: 34px;
+    min-width: 38px;
+    min-height: 30px;
     font-size: 1em;
     line-height: 24px;
     overflow: hidden;
@@ -149,7 +149,7 @@ ed11y-element-result {
 }
 .ed11y-buttonbar button:hover,
 .ed11y-buttonbar button:focus-visible {
-    box-shadow: inset 0 0 0 2px;
+    box-shadow: inset 0 0 0 1px var(--ed11y-panelBar), inset 0 0 0 2px;
     background-color: var(--ed11y-panelBar);
 }/* todo focus */
 .ed11y-errors .ed11y-buttonbar button {
@@ -167,6 +167,7 @@ ed11y-element-result {
 .ed11y-buttonbar button svg {
     width: 16px;
     margin: 2px -1px -2px 1px;
+    opacity: .98;
 }
 #ed11y-onoff, #ed11y-help {
     display: none;
@@ -175,8 +176,8 @@ ed11y-element-result {
     display: none;
 }
 .ed11y-jump.next svg {
-    width: 10px;
-    margin: 2px -3px -3px 1px;
+    width: 12px;
+    margin: 2px -3px -2px -1px;
 }
 #ed11y-show-hidden svg {
     margin: 2px 0 -3px;
@@ -191,10 +192,6 @@ ed11y-element-result {
 .ed11y-errors .ed11y-buttonbar button:hover {
     box-shadow: 0 0 0 1px var(--ed11y-alert), inset 0 0 0 1px var(--ed11y-panelBarText), inset 0 0 0 2px var(--ed11y-alert);
 }
-
-
-
-
 
 .ed11y-buttonbar button .ed11y-sr-only {
     color: transparent;
@@ -246,12 +243,15 @@ ed11y-element-result {
     box-shadow: none;
 }
 
-.ed11y-active .next, .ed11y-pass.ed11y-active #ed11y-visualize {
+.ed11y-active .next,
+.ed11y-pass.ed11y-active [hidden] + #ed11y-show-hidden,
+.ed11y-pass.ed11y-active [hidden] + #ed11y-visualize {
     margin-right: -9px;
     padding-right: 9px;
     min-width: 42px;
     opacity: 1;
 }
+
 .ed11y-panel-wrapper button[hidden] {
     display: none !important;
 }
@@ -306,7 +306,7 @@ ed11y-element-result {
 
 .ed11y-errors #ed11y-toggle .ed11y-toggle-circle {
     color: var(--ed11y-alert, #b80519);
-    box-shadow: inset 0 0 0 1px var(--ed11y-alert, #b80519), inset 0 0 0 2px #fefefe, inset 0 0 0 6px var(--ed11y-alert, #b80519), 1px 1px 5px 0 rgb(0 0 0 / 50%);
+    box-shadow: inset 0 0 0 2px #fefefe, inset 0 0 0 6px var(--ed11y-alert, #b80519), 1px 1px 5px 0 rgba(0, 0, 0, 0.5);
     background: #fefefe;
 }
 /*.ed11y-errors.ed11y-active #ed11y-toggle .ed11y-toggle-circle {
@@ -372,7 +372,7 @@ ed11y-element-result {
 }
 .ed11y-panel-wrapper summary {
     font-weight: 400;
-    padding: 8px;
+    padding: 6px 10px;
     background-color: var(--ed11y-primary);
     color: var(--ed11y-primaryText);
     cursor: pointer;
@@ -388,7 +388,7 @@ ed11y-element-result {
 }
 .ed11y-errors summary {
     background-color: var(--ed11y-alert);
-    color: var(--ed11y-alertText);
+    color: #fffe;
 }
 .ed11y-panel-wrapper summary:hover {
     box-shadow: inset 1px 1px 3px black;
@@ -477,7 +477,7 @@ ed11y-element-result {
     border: 0;
     border-radius: 50%;
     position: absolute;
-    margin: 0 0 0 10px;
+    margin: 0 0 0 -34px;
     z-index: 1;
     padding: 0;
     vertical-align: middle;
@@ -487,7 +487,7 @@ ed11y-element-result {
     line-height: 1;
     font-size: 1.14em;
     font-size: clamp(1.14em, 2vw, 1.5em);
-    box-shadow: inset 0 0 0 1px var(--ed11y-alert, #b80519), inset 0 0 0 2px #fefefe, inset 0 0 0 6px var(--ed11y-alert, #b80519), 1px 1px 5px 0 rgb(0 0 0 / 50%);
+    box-shadow: inset 0 0 0 2px #fefefe, inset 0 0 0 6px var(--ed11y-alert, #b80519), 1px 1px 5px 0 rgb(0 0 0 / 50%);
     background: #fefefe;
     color: var(--ed11y-alert, #b80519);
 }
