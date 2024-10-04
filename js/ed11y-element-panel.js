@@ -26,7 +26,7 @@ class Ed11yElementPanel extends HTMLElement {
       
       <button class='ed11y-jump prev' data-ed11y-goto='0' hidden aria-disabled="true"><span aria-hidden='true'>« </span><span class='jump-prev ed11y-sr-only'>${Ed11y.M.buttonPrevContent}</span></button>
       <!-- TODO: IT NOW GETS STUCK AT THE END IF THERE ARE DISMISSED ITEMS -->
-      <button class='ed11y-jump next' data-ed11y-goto='0'><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 320 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M0 55.2L0 426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320l118.1 0c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"/></svg><span class='jump-next ed11y-sr-only'>${Ed11y.M.buttonFirstContent}</span></button>
+      <button class='ed11y-jump next' data-ed11y-goto='0'><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32L0 64 0 368 0 480c0 17.7 14.3 32 32 32s32-14.3 32-32l0-128 64.3-16.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30l0-247.7c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L64 48l0-16z"></path></svg><span class='jump-next ed11y-sr-only'>${Ed11y.M.buttonFirstContent}</span></button>
       <!-- todo: can't switch both label and aria-expanded -->
       <button id='ed11y-show-hidden' aria-pressed='${!!Ed11y.options.showDismissed}' hidden><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="Currentcolor" d="M152.1 38.2c9.9 8.9 10.7 24 1.8 33.9l-72 80c-4.4 4.9-10.6 7.8-17.2 7.9s-12.9-2.4-17.6-7L7 113C-2.3 103.6-2.3 88.4 7 79s24.6-9.4 33.9 0l22.1 22.1 55.1-61.2c8.9-9.9 24-10.7 33.9-1.8zm0 160c9.9 8.9 10.7 24 1.8 33.9l-72 80c-4.4 4.9-10.6 7.8-17.2 7.9s-12.9-2.4-17.6-7L7 273c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l22.1 22.1 55.1-61.2c8.9-9.9 24-10.7 33.9-1.8zM224 96c0-17.7 14.3-32 32-32l224 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-224 0c-17.7 0-32-14.3-32-32zm0 160c0-17.7 14.3-32 32-32l224 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-224 0c-17.7 0-32-14.3-32-32zM160 416c0-17.7 14.3-32 32-32l288 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-288 0c-17.7 0-32-14.3-32-32zM48 368a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/></svg><span class="ed11y-sr-only">Show dismissed alerts</span></button>
       <button id='ed11y-visualize' aria-pressed="false" class='ed11y-panel-fa'>
@@ -171,10 +171,10 @@ class Ed11yElementPanel extends HTMLElement {
       }
       if (target.isContentEditable) {
         // todo this selector must match the selector that decides where to place the mark
-        target.scrollIntoView({ block: 'center' });
+        target.scrollIntoView({ block: 'center', behavior: 'instant' });
         Ed11y.editableHighlighter(goto.dataset.ed11yResult, true);
       } else {
-        goto.scrollIntoView({ block: 'center' });
+        goto.scrollIntoView({ block: 'center', behavior: 'instant' });
       }
       let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
       if (!activeTip) {

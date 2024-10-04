@@ -515,9 +515,6 @@ class Ed11y {
         if (!Ed11y.showPanel) {
           // Close panel.
           Ed11y.reset();
-          if (!Ed11y.bodyStyle) {
-            Ed11y.paintReady();
-          }
         } else {
           // Ignore issue count if this resulted from a user action.
           Ed11y.open = true;
@@ -594,6 +591,9 @@ class Ed11y {
         Ed11y.panel.classList.remove('ed11y-preload');
         Ed11y.panelToggle.classList.remove('disabled');
         Ed11y.panelToggle.removeAttribute('aria-disabled');
+        if (!Ed11y.bodyStyle) {
+          Ed11y.paintReady();
+        }
       }
       // todo parameterize
       Ed11y.running = false;
@@ -1174,6 +1174,7 @@ class Ed11y {
 
     Ed11y.paintReady = function () {
 
+      console.log('painting');
       for (const [key, value] of Object.entries(Ed11y.theme)) {
         document.documentElement.style.setProperty('--ed11y-' + key, value);
       }
