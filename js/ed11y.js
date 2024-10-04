@@ -1050,6 +1050,7 @@ class Ed11y {
       Ed11y.jumpList.forEach((mark, i) => {
         let markOffset = mark.getBoundingClientRect();
         if (!Ed11y.options.inlineAlerts) {
+          // Append toggles to body tag.
           let targetOffset = mark.result.element.getBoundingClientRect();
           if ((targetOffset.top === 0 && targetOffset.left === 0) || !Ed11y.visible(mark.result.element)) {
             // Invisible target. todo: wait why is 0 considered invisible?
@@ -1057,7 +1058,7 @@ class Ed11y {
             targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
           }
           let top = targetOffset.top - markOffset.top;
-          let left = targetOffset.left - markOffset.left - 40;
+          let left = targetOffset.left - markOffset.left;
           if (mark.result.element.tagName === 'IMG') {
             top = top + 10;
             left = left + 40;
@@ -1116,9 +1117,9 @@ class Ed11y {
           nudgeTop = nudgeTop + 21 + previousNudgeTop;
           nudgeLeft = 21 + previousNudgeLeft;
         }
-        if (mark.markOffset.left + nudgeLeft < 8) {
+        if (mark.markOffset.left + nudgeLeft < 44) {
         // Offscreen to left. push to the right.
-          nudgeMark(mark, 8 - mark.markOffset.left + nudgeLeft, nudgeTop);
+          nudgeMark(mark, 44 - mark.markOffset.left + nudgeLeft, nudgeTop);
         }
         else if (mark.markOffset.left + nudgeLeft + 80 > windowWidth) {
         // Offscreen to right. push to the left
