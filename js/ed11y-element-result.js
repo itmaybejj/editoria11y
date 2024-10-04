@@ -47,6 +47,7 @@ class Ed11yElementResult extends HTMLElement {
       }
       this.wrapper.appendChild(this.toggle);
       this.toggle.addEventListener('click', this.toggleClick);
+      this.toggle.addEventListener('focus', this.handleFocus);
       this.toggle.addEventListener('mouseover', this.handleHover);
       this.tipNeedsBuild = true;
 
@@ -67,6 +68,14 @@ class Ed11yElementResult extends HTMLElement {
       window.setTimeout(function () {
         host.racing = false;
       }, 250, host);
+    }
+  }
+
+  handleFocus() {
+    let host = this.getRootNode().host;
+    if (this.getRootNode().host.classList.contains('ed11y-offscreen')) {
+      host.result.element.scrollIntoView();
+      Ed11y.alignButtons();
     }
   }
 

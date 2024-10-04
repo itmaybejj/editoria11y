@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.2.4';
+    Ed11y.version = '2.3.0-dev';
 
     let defaultOptions = {
 
@@ -39,12 +39,15 @@ class Ed11y {
       },
 
       // Set alertModes
-      // 'polite': don't open automatically.
-      // 'assertive': open if there are new issues.
+      // 'headless': do not draw interface
+      // 'userPreference: respect user preference.
+      // 'polite': open for new issues.
+      // 'assertive': open for any issues.
       // 'active': always open.
+      // 'showDismissed': active with dismissed revealed.
       // CMS integrations can switch between polite & headless at runtime.
       // alertMode "headless" never draws the panel.
-      alertMode: 'polite',
+      alertMode: 'active',
       inlineAlerts: true,
 
       // Dismissed alerts
@@ -252,8 +255,8 @@ class Ed11y {
       documentLoadingCheck(() => {
         if (!Ed11y.checkRunPrevent()) {
           Ed11y.running = true;
-          let localData = localStorage.getItem('editoria11yResultCount');
-          Ed11y.seen = localData ? JSON.parse(localData) : {};
+          let localResultCount = localStorage.getItem('editoria11yResultCount');
+          Ed11y.seen = localResultCount ? JSON.parse(localResultCount) : {};
 
           // Build list of dismissed alerts
           if (Ed11y.options.syncedDismissals === false) {
@@ -443,13 +446,17 @@ class Ed11y {
     };
 
     Ed11y.updatePanel = function () {
+
+      // Stash old values for incremental updates.
       let oldWarnings = Ed11y.warningCount;
       let oldErrors = Ed11y.errorCount;
       Ed11y.countAlerts();
       if (Ed11y.incremental) {
-        // todo editable: should we be more precise than a simple error count?
+        // Check for a change in the result counts.
+        // todo editable branch: should we be more precise than a simple error count?
         if ( oldWarnings === Ed11y.warningCount && oldErrors === Ed11y.errorCount ) {
-          // No changes needed, restore result set sorted to match jumpList.
+          console.log('incremental no change');
+          // No changes needed, restore existing result set and stop run.
           Ed11y.results = Ed11y.oldResults;
           window.setTimeout(function() {
             if ( !Ed11y.alignPending ) {
@@ -459,41 +466,54 @@ class Ed11y {
           },0);
           return;
         } else {
+          // Remove old tips from screen to be redrawn later in function.
           Ed11y.resetResults();
         }
-      }
-      if (Ed11y.options.alertMode !== 'headless') {
-        if (Ed11y.onLoad === true) {
-          Ed11y.onLoad = false;
-          // Create the panel.
-          let panel = document.createElement('ed11y-element-panel');
-          document.querySelector('body').appendChild(panel);
-          // Decide whether the issue count suggests we should open the panel.
-          // todo: open on assertive with count mismatch or if showDismissed is set.
-          if (Ed11y.options.alertMode === 'active') {
-            Ed11y.showPanel = true;
-          } else if (Ed11y.totalCount > 0 && !Ed11y.ignoreAll && Ed11y.options.alertMode === 'assertive' && Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount) {
-            // This browser has not already seen these errors, panel will open.
-            Ed11y.showPanel = true;
-          } else {
-            // Forced open by showDismissed flag.
-            Ed11y.showPanel = Ed11y.options.showDismissed && (Ed11y.dismissedCount > 0 || Ed11y.totalCount > 0);
-          }
-        }
-
+      } else {
         if (Ed11y.totalCount > 0) {
           // Record what has been seen at this route.
+          // We do not do this on incremental updates.
+          // Todo question: should we not do this at all for contentEditable?
           Ed11y.seen[encodeURI(Ed11y.options.currentPage)] = Ed11y.totalCount;
           localStorage.setItem('editoria11yResultCount', JSON.stringify(Ed11y.seen));
         } else {
           delete Ed11y.seen[encodeURI(Ed11y.options.currentPage)];
         }
+      }
+
+      if (Ed11y.options.alertMode !== 'headless') {
+        // Not headless; draw the interface.
+
+        if (Ed11y.onLoad === true) {
+          Ed11y.onLoad = false;
+
+          // Create the panel DOM on load.
+          let panel = document.createElement('ed11y-element-panel');
+          document.querySelector('body').appendChild(panel);
+
+          // Decide whether to open the panel on load.
+          if (Ed11y.options.alertMode === 'active' ||
+            localStorage.getItem('editoria11yShow') === '1' ||
+            Ed11y.options.showDismissed
+          ) {
+            // Show always on load for active mode or by user preference.
+            Ed11y.showPanel = true;
+          } else if (
+            Ed11y.totalCount > 0 &&
+            !Ed11y.ignoreAll &&
+            ( Ed11y.options.alertMode === 'assertive' ||
+              Ed11y.options.alertMode === 'polite' &&
+              Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount
+            )
+          ) {
+            // Show sometimes for assertive/polite if there are new items.
+            Ed11y.showPanel = true;
+          }
+        }
 
         // Now we can open or close the panel.
         if (!Ed11y.showPanel) {
-          // Not opening on page load, or closing by user action.
-          Ed11y.open = false;
-          console.log('resetting');
+          // Close panel.
           Ed11y.reset();
           if (!Ed11y.bodyStyle) {
             Ed11y.paintReady();
@@ -524,11 +544,6 @@ class Ed11y {
               Ed11y.showResults();
             }
           }, 0);
-          if (Ed11y.onLoad === false) {
-            window.setTimeout(function () {
-              //Ed11y.panelMessage.focus();
-            }, 500);
-          }
         }
         if (Ed11y.totalCount > 0 || (Ed11y.options.showDismissed && Ed11y.dismissedCount > 0)) {
           Ed11y.panelMessage.textContent = Ed11y.open ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonShowAlerts;
@@ -685,6 +700,7 @@ class Ed11y {
       Ed11y.incremental = false;
       Ed11y.running = false;
       Ed11y.showPanel = false;
+      Ed11y.open = false;
     };
 
     Ed11y.linkText = (linkText) => {
@@ -1049,6 +1065,11 @@ class Ed11y {
           if (mark.result.scrollableParent) {
             // Hide alerts outside a scroll zone.
             Ed11y.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
+            if (left < Ed11y.jumpList[i].bounds.left) {
+              left = Ed11y.jumpList[i].bounds.left;
+            } else if (left - 40 > Ed11y.jumpList[i].bounds.right) {
+              left = Ed11y.jumpList[i].bounds.right - 40;
+            }
           }
           Ed11y.jumpList[i].targetOffset = targetOffset;
           Ed11y.jumpList[i].markTop = top;
@@ -1119,10 +1140,11 @@ class Ed11y {
 
           if (mark.result.scrollableParent) {
             // Hide alerts outside a scroll zone.
-            // todo only offscreen if the result is offscreen, not the mark
-            if (!!mark.bounds && (mark.targetOffset.top - mark.bounds.top < 0 || mark.targetOffset.top - mark.bounds.bottom > 0 )) {
-              // Tip has exited scrollable parent.
+            // todo only offscreen if the result is offscreen, not the mark?
+            if (!!mark.bounds && (mark.targetOffset.top - mark.bounds.top < 0 || mark.targetOffset.top - mark.bounds.bottom > 0 ) && !mark.matches(':focus, :focus-within')) {
+              // Tip has exited scrollable parent. Visually hide.
               mark.classList.add('ed11y-offscreen');
+              mark.style.transform = 'translate(0px, -50px)';
               mark.style.pointerEvents = 'none';
               if (mark.getAttribute('data-ed11y-open') === 'true') {
                 mark.setAttribute('data-ed11y-action', 'shut');
@@ -1315,12 +1337,13 @@ class Ed11y {
             Ed11y.onLoad = false;
             Ed11y.showPanel = true;
             Ed11y.checkAll();
+            localStorage.setItem('editoria11yShow', '1');
             //Ed11y.panelMessage.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonHideNoAlert;
           }
           else {
-            Ed11y.open = false;
             Ed11y.panelMessage.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonShowAlerts : Ed11y.M.buttonShowNoAlert;
             Ed11y.reset();
+            localStorage.setItem('editoria11yShow', '0');
           }
         }
       }
