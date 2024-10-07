@@ -1666,8 +1666,11 @@ class Ed11y {
       });
     };
 
+    let scrollTicking = false;
+    let scrollPending = 0;
     const updateTipLocations = () => {
-      if (!Ed11y.running && Ed11y.jumpList && Ed11y.open) {
+      if (!scrollTicking && scrollPending > 0 && !Ed11y.running && Ed11y.jumpList && Ed11y.open) {
+        scrollTicking = true;
         Ed11y.alignButtons();
         let openTip = Ed11y.getOpenTip(); // todo: replace with saved param
         if (openTip.tip) {
@@ -1677,6 +1680,11 @@ class Ed11y {
             Ed11y.editableHighlighter(openTip.button.dataset.ed11yResult, true);
           }
         }
+        scrollPending --;
+      }
+      scrollTicking = false;
+      if (scrollPending > 0) {
+        requestAnimationFrame(() => updateTipLocations());
       }
     };
 
@@ -1684,11 +1692,9 @@ class Ed11y {
       Ed11y.elements.editable.forEach(editable => {
         editable.addEventListener('scroll', function() {
           // note: we could just adjust the transform rather than recalculating.
+          scrollPending = scrollPending < 2 ? scrollPending + 1 : scrollPending;
           requestAnimationFrame(() => updateTipLocations());
         });
-      });
-      document.addEventListener('scroll', function() {
-        requestAnimationFrame(() => updateTipLocations());
       });
 
       Ed11y.selectionChanged = debounce(() => {
