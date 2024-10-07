@@ -120,7 +120,8 @@ class Ed11yElementPanel extends HTMLElement {
     let goto = Ed11y.jumpList[goNum];
 
     // First of two scrollTo calls, to trigger any scroll based events.
-    goto.scrollIntoView({ block: 'center' });
+    let scrollPin = window.innerHeight > 800 && window.innerWidth > 800 ? 'center' : 'start';
+    goto.scrollIntoView({ block: scrollPin, behavior: 'instant' });
 
     // Open the button
     goto.setAttribute('data-ed11y-action','open');
@@ -172,10 +173,10 @@ class Ed11yElementPanel extends HTMLElement {
       }
       if (target.isContentEditable) {
         // todo this selector must match the selector that decides where to place the mark
-        target.scrollIntoView({ block: 'center', behavior: 'instant' });
+        target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
         Ed11y.editableHighlighter(goto.dataset.ed11yResult, true);
       } else {
-        goto.scrollIntoView({ block: 'center', behavior: 'instant' });
+        goto.scrollIntoView({ block: scrollPin, behavior: 'instant' });
       }
       let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
       if (!activeTip) {
