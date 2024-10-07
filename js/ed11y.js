@@ -452,6 +452,7 @@ class Ed11y {
       let oldErrors = Ed11y.errorCount;
       Ed11y.countAlerts();
       if (Ed11y.incremental) {
+        console.log('checking for incremental change');
         // Check for a change in the result counts.
         // todo editable branch: should we be more precise than a simple error count?
         if ( oldWarnings === Ed11y.warningCount && oldErrors === Ed11y.errorCount ) {

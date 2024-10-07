@@ -102,11 +102,8 @@ ed11y-element-result {
 }
 
 .ed11y-panel-wrapper {
-    /*width: clamp(160px, 23em, 92vw);*/
     color: var(--ed11y-text, #20160c);
     border-radius: var(--ed11y-borderRadius, 1);
-    /*background: var(--ed11y-bg, #fffffe);
-    box-shadow: 1px 1px 4px var(--ed11y-text, #20160c);*/
     padding: var(--ed11y-panelBorder, 0);
 }
 
@@ -378,6 +375,14 @@ ed11y-element-result {
     cursor: pointer;
     width: auto;
     box-shadow: 0 0 1px;
+}
+#ed11y-headings-tab summary svg {
+    width: 16px;
+    margin: 0 7px -3px -1px;
+}
+#ed11y-alts-tab summary svg {
+    width: 18px;
+    margin: 0 2px -3px 0;
 }
 .ed11y-panel-wrapper:has(details[open]) .content {
     width: clamp(160px, 50vw, 280px);
