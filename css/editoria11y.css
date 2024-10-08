@@ -482,7 +482,6 @@ ed11y-element-result {
     border: 0;
     border-radius: 50%;
     position: absolute;
-    margin: 0 0 0 -34px;
     z-index: 1;
     padding: 0;
     vertical-align: middle;
@@ -786,18 +785,18 @@ ed11y-element-result {
 
 /********/
 
+ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
+    opacity: .94;
+}
 .intersecting[data-ed11y-open="false"]:not(:hover, :focus-visible) {
     transition: opacity .3s ease, filter .3s ease;
     opacity: 0.25;
     filter: saturate(0);
     /*pointer-events: none !important;*/
 }
-[contenteditable] ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
-    opacity: .94;
-}
 .ed11y-offscreen, ed11y-element-result.ed11y-preload {
+    transition: none !important;
     opacity: 0 !important;
-    transition: none;
 }
 #ed11y-toggle svg {
     display: none;

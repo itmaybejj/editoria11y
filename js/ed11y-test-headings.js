@@ -19,9 +19,19 @@ class Ed11yTestHeadings {
       let level;
       let alert = [];
       if (el.isContentEditable !== prevEditable) {
-        console.log('need base level');
-        // TODO: SET BASE HEADING LEVEL FOR SPECIFIC FIELDS
-        prevLevel = 0;
+        let editableParent = el.closest('[contenteditable]');
+        if (editableParent) {
+          Ed11y.options.editorHeadingLevel.some(level => {
+            if (editableParent.matches(level.selector)) {
+              if (level.level === 'inherit') {
+                // Inherit levels
+                return true;
+              }
+              prevLevel = level.previousHeading;
+              return true;
+            }
+          });
+        }
         prevEditable = el.isContentEditable;
       }
 

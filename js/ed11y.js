@@ -172,6 +172,47 @@ class Ed11y {
       // form label tests
       // detectSPArouting: false,
 
+      editorHeadingLevel: [
+        // Sets previous heading level for contentEditable fields.
+        // With 'ignore' set, first heading level is ignored in editable zones.
+        // This is ideal for systems with separate backend editing pages.
+        // Set to 'inherit' for fields edited in a frontend context.
+        /*{
+          selector: '.example-inherit',
+          previousHeading: 'inherit',
+        },
+        {
+          selector: '.example-l3',
+          previousHeading: 3,
+        },*/
+        {
+          selector: '*',
+          previousHeading: 0, // Ignores first heading for level skip detection.
+        },
+      ],
+
+      contentEditableHeadingLevels: [
+        // Sets previous heading level for contentEditable fields.
+        // With nothing set, first heading level is ignored in editable zones.
+        // This is ideal for systems with separate backend editing pages.
+        // Set '*' to 'inherit' if fields are edited in a frontend context.
+        // Example:
+        /*
+        {
+          selector: '[class*=body]',
+          level: 1,
+        },
+        {
+          selector: '.l3block',
+          level: 3,
+        }
+        {
+          selector: '*',
+          level: 'inherit',
+        }
+        */
+      ],
+
       customTests: 0,
 
     };
@@ -471,10 +512,8 @@ class Ed11y {
       if (Ed11y.incremental) {
         // Check for a change in the result counts.
         if (newIncrementalResults()) {
-          console.log('incremental change detected');
           Ed11y.resetResults();
         } else {
-          console.log('no change detected');
           Ed11y.results = Ed11y.oldResults;
           window.setTimeout(function() {
             if ( !Ed11y.alignPending ) {
@@ -634,12 +673,11 @@ class Ed11y {
       let location;
       let position = 'beforebegin';
       // todo: expose this as a string?
-      if (!Ed11y.options.inlineAlerts) {
+      if (!Ed11y.options.inlineAlerts || editableParent) {
+        // todo: if editable parent is detected, set global inlineAlerts mode.
         location = document.querySelector('body');
         position = 'beforeend';
-      } else if ( editableParent ) {
-        location = editableParent;
-        position = 'afterend';
+        mark.classList.add('ed11y-editable-result');
       } else {
         location = result.element.closest('a');
         if (!location) {
@@ -774,9 +812,9 @@ class Ed11y {
 
     Ed11y.buildElementList = function () {
       Ed11y.findElements('editable', '[contenteditable="true"]', false);
-      if (Ed11y.elements.editable.length > 0) {
+      if (Ed11y.options.inlineAlerts && Ed11y.elements.editable.length > 0) {
         Ed11y.options.inlineAlerts = false;
-        console.log('Content editable detected; inline alerts disabled');
+        console.log('Editable content detected; Editoria11y inline alerts disabled');
       }
       Ed11y.findElements('p', 'p');
       Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', false);
@@ -1005,7 +1043,7 @@ class Ed11y {
         const computedStyle = window.getComputedStyle(el);
         let matrix = computedStyle.getPropertyValue('transform');
         matrix = matrix.split(',');
-        el.style.transform = `translate(${parseInt(matrix[4]) + x}px, ${parseInt(matrix[5]) + y}px)`;
+        el.style.transform = `translate(${parseFloat(matrix[4]) + x}px, ${parseFloat(matrix[5]) + y}px)`;
       } else {
         el.style.transform = `translate(${x}px, ${y}px)`;
       }
@@ -1056,7 +1094,17 @@ class Ed11y {
       // Batch write first to reduce paint thrash.
       Ed11y.jumpList.forEach((mark) => {
         // Reset positions.
-        mark.style.setProperty('transform', null);
+        //mark.style.setProperty('transform', null);
+        if (mark.style.transform) {
+          const computedStyle = window.getComputedStyle(mark);
+          let matrix = computedStyle.getPropertyValue('transform');
+          matrix = matrix.split(',');
+          mark.xOffset = parseFloat(matrix[4]);
+          mark.yOffset = parseFloat(matrix[5]);
+        } else {
+          mark.xOffset = 0;
+          mark.yOffset = 0;
+        }
         mark.style.setProperty('top', 'initial');
         mark.style.setProperty('left', 'initial');
       });
@@ -1072,11 +1120,19 @@ class Ed11y {
             const firstVisibleParent = Ed11y.firstVisibleParent(mark.result.element);
             targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
           }
-          let top = targetOffset.top - markOffset.top;
-          let left = targetOffset.left - markOffset.left;
-          if (mark.result.element.tagName === 'IMG') {
+          let top = targetOffset.top - markOffset.top + mark.yOffset;
+          let left = targetOffset.left - markOffset.left + mark.xOffset;
+          switch (mark.result.element.tagName) {
+          case 'TD':
+          case 'TH':
+            break;
+          case 'IMG':
             top = top + 10;
-            left = left + 40;
+            left = left + 10;
+            break;
+          default:
+            left = left - 34;
+            break;
           }
           if (mark.result.scrollableParent) {
             // Hide alerts outside a scroll zone.
@@ -1190,7 +1246,6 @@ class Ed11y {
 
     Ed11y.paintReady = function () {
 
-      console.log('painting');
       for (const [key, value] of Object.entries(Ed11y.theme)) {
         document.documentElement.style.setProperty('--ed11y-' + key, value);
       }
@@ -1714,7 +1769,6 @@ class Ed11y {
       */
       const incrementalAlign = debounce(() => {
         scrollPending++;
-        console.log('align');
         updateTipLocations();
       }, 10);
       const incrementalCheck = debounce(() => {
@@ -1723,7 +1777,7 @@ class Ed11y {
           Ed11y.incremental = true;
           Ed11y.checkAll();
         } else {
-          window.setTimeout(mutatedChanged, 1);
+          window.setTimeout(incrementalCheck, 1);
         }
       }, 250);
 
