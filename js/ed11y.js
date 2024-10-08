@@ -445,19 +445,36 @@ class Ed11y {
 
     };
 
+    let oldElements = [];
+    const newIncrementalResults = function() {
+      let newElements = [];
+      Ed11y.results.forEach(result => {
+        newElements.push(result.element);
+      });
+      if (oldElements.length !== newElements.length) {
+        oldElements = newElements;
+        return true;
+      } else {
+        let same = newElements.every((element) => {
+          return oldElements.includes(element);
+        });
+        oldElements = newElements;
+        return !same;
+      }
+    };
+
     Ed11y.updatePanel = function () {
 
       // Stash old values for incremental updates.
-      let oldWarnings = Ed11y.warningCount;
-      let oldErrors = Ed11y.errorCount;
+
       Ed11y.countAlerts();
       if (Ed11y.incremental) {
-        console.log('checking for incremental change');
         // Check for a change in the result counts.
-        // todo editable branch: should we be more precise than a simple error count?
-        if ( oldWarnings === Ed11y.warningCount && oldErrors === Ed11y.errorCount ) {
-          console.log('incremental no change');
-          // No changes needed, restore existing result set and stop run.
+        if (newIncrementalResults()) {
+          console.log('incremental change detected');
+          Ed11y.resetResults();
+        } else {
+          console.log('no change detected');
           Ed11y.results = Ed11y.oldResults;
           window.setTimeout(function() {
             if ( !Ed11y.alignPending ) {
@@ -466,9 +483,6 @@ class Ed11y {
             Ed11y.running = false;
           },0);
           return;
-        } else {
-          // Remove old tips from screen to be redrawn later in function.
-          Ed11y.resetResults();
         }
       } else {
         if (Ed11y.totalCount > 0) {
@@ -1503,6 +1517,8 @@ class Ed11y {
     };
 
     const showHelpPanel = function () {
+      // todo: this is commented out at the moment
+      // todo: report link if available?
       console.log('showing help');
       let helpTab = Ed11y.panel.querySelector('#ed11y-help-tab');
       if (helpTab.matches('[hidden]')) {
@@ -1550,34 +1566,6 @@ class Ed11y {
           Ed11y.result(result, i, jumpIndex, result.editableParent);
         }
       });
-
-      // todo temp remove element reference.
-      // todo editable: keep this even if we abandon this branch
-      /*
-      let sortedList = [];
-      Ed11y.jumpList = [];
-      Ed11y.results.forEach((result) => {
-        // todo: do we need a firstvisibleparent here?
-        result.rect = result.element.getBoundingClientRect();
-        sortedList.push({
-          toggle: result.toggle,
-          top: result.rect.top + window.scrollY,
-        });
-      });
-      sortedList.sort((a, b) => a.top - b.top);
-
-      sortedList.forEach((result, i) => {
-        Ed11y.jumpList.push(result.toggle);
-        result.toggle.dataset.ed11yJumpPosition = `${i}`;
-      });*/
-      /*Ed11y.findElements('jumpList', 'ed11y-element-result', Ed11y.options.inlineAlerts);
-      Ed11y.jumpList.forEach((result, i) => {
-      });
-      Ed11y.jumpList.forEach((result, i) => {
-        result.dataset.ed11yJumpPosition = i;
-        // todo this should go in the element
-      });
-      */
     };
 
     // hat tip https://www.joshwcomeau.com/snippets/javascript/debounce/
@@ -1635,9 +1623,6 @@ class Ed11y {
         //Reset classes to measure.
         Ed11y.jumpList?.forEach((el) => {
           el.classList.remove('intersecting');
-          // todo editable
-          // todo editable: need to align these on scroll if we're going to do this
-          //Ed11y.editableHighlighter(el.dataset.ed11yResult, false);
         });
         return;
       }
@@ -1645,7 +1630,6 @@ class Ed11y {
         // Range isn't on a node we can measure.
         Ed11y.jumpList?.forEach((el) => {
           el.classList.remove('intersecting');
-          //Ed11y.editableHighlighter(el.dataset.ed11yResult, false);
         });
         return;
       }
@@ -1655,13 +1639,10 @@ class Ed11y {
           if (!toggle.classList.contains('was-intersecting')) {
             el.classList.add('intersecting');
             toggle.classList.add('intersecting');
-            //Ed11y.editableHighlighter(toggle.dataset.ed11yResult, true, true);
           }
         } else {
           el.classList.remove('intersecting', 'was-intersecting');
           toggle.classList.remove('intersecting', 'was-intersecting');
-          //toggle.classList.remove('was-intersecting');
-          //Ed11y.editableHighlighter(toggle.dataset.ed11yResult, false);
         }
       });
     };
@@ -1731,17 +1712,20 @@ class Ed11y {
       /*
       Set up mutation observer for added nodes.
       */
-
-      const mutated = debounce(() => {
+      const incrementalAlign = debounce(() => {
+        scrollPending++;
+        console.log('align');
+        updateTipLocations();
+      }, 10);
+      const incrementalCheck = debounce(() => {
         if (!Ed11y.running) {
-          console.log('mutated' + new Date().getTime());
           Ed11y.running = true;
           Ed11y.incremental = true;
           Ed11y.checkAll();
         } else {
-          window.setTimeout(mutated, 1);
+          window.setTimeout(mutatedChanged, 1);
         }
-      }, 500);
+      }, 250);
 
       // Options for the observer (which mutations to observe)
       const config = { childList: true, subtree: true, characterData: true };
@@ -1750,8 +1734,9 @@ class Ed11y {
       const callback = (mutationList) => {
         for (const mutation of mutationList) {
           if ((mutation.type === 'childList' && mutation.addedNodes.length) || mutation.type === 'characterData' ) {
+            incrementalAlign();
             Ed11y.alignPending = false;
-            mutated();
+            incrementalCheck();
           }
         }
       };
@@ -1761,9 +1746,9 @@ class Ed11y {
       // Start observing the target node for configured mutations
       observer.observe(root, config);
       window.setTimeout(function () {
-        // heeee
-        Ed11y.alignButtons();
-      }, 1000);
+        scrollPending++;
+        updateTipLocations();
+      }, 100);
     };
 
     Ed11y.setCurrentJump = function () {
