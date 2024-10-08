@@ -47,14 +47,15 @@ class Ed11y {
       // 'showDismissed': active with dismissed revealed.
       // CMS integrations can switch between polite & headless at runtime.
       // alertMode "headless" never draws the panel.
-      alertMode: 'active',
+      alertMode: 'userPreference',
       inlineAlerts: true,
+      editableContent: '[contenteditable="true"]',
 
       // Dismissed alerts
       currentPage: false, // uses window.location.pathname unless a string is provided.
       allowHide: true, // enables end-user ignore button
       allowOK: true,  // enables end-user mark OK button
-      syncedDismissals: false, // provide empty or populated object {} to enable synch functions
+      syncedDismissals: false, // provide empty or populated object {} to enable sync functions
       showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
 
       // Hide all alerts if these elements are absent, e.g., ".edit-button"
@@ -445,6 +446,7 @@ class Ed11y {
       }
     };
 
+    Ed11y.totalCount = 0;
     Ed11y.countAlerts = function () {
 
       Ed11y.errorCount = 0;
@@ -486,32 +488,55 @@ class Ed11y {
 
     };
 
-    let oldElements = [];
+    let oldResultString = '';
     const newIncrementalResults = function() {
-      let newElements = [];
+      let newResultString = JSON.stringify(Ed11y.results);
+      let changed = newResultString !== oldResultString;
+      oldResultString = newResultString;
+      return changed;
+
+      // Sigh. Every other method I've tried misses some changes.
+      // This should work but somehow the arrays are in different orders?
+      /*let isSame = Ed11y.results.length === Ed11y.oldResults.length &&
+        Ed11y.results.every(function(element, index) {
+          return element === Ed11y.oldResults[index];
+        });*/
+      /*let newElements = [];
       Ed11y.results.forEach(result => {
         newElements.push(result.element);
+        newElements[result.element].push(result.test);
       });
       if (oldElements.length !== newElements.length) {
         oldElements = newElements;
         return true;
       } else {
         let same = newElements.every((element) => {
-          return oldElements.includes(element);
+          if (!oldElements.includes(element)) {
+            return false;
+          }
+          return element.every((test) => {
+            oldElements[element].includes(test);
+          });
         });
         oldElements = newElements;
         return !same;
-      }
+      }*/
     };
 
     Ed11y.updatePanel = function () {
 
       // Stash old values for incremental updates.
-
+      let oldWarnings = Ed11y.warningCount;
+      let oldErrors = Ed11y.errorCount;
       Ed11y.countAlerts();
       if (Ed11y.incremental) {
         // Check for a change in the result counts.
         if (newIncrementalResults()) {
+          console.log('incremental change detected');
+          if (Ed11y.options.alertMode === 'assertive' && Ed11y.totalCount > 0 && (Ed11y.warningCount > oldWarnings || Ed11y.errorCount > oldErrors)) {
+            console.log('forced open');
+            Ed11y.showPanel = true;
+          }
           Ed11y.resetResults();
         } else {
           Ed11y.results = Ed11y.oldResults;
@@ -540,6 +565,14 @@ class Ed11y {
 
         if (Ed11y.onLoad === true) {
           Ed11y.onLoad = false;
+
+          if (!Ed11y.options.inlineAlerts) {
+            // todo change to if there are editable elements
+            oldResultString = JSON.stringify(Ed11y.results);
+            /*if (Ed11y.options.alertMode === 'assertive') {
+              Ed11y.showPanel = true;
+            }*/
+          }
 
           // Create the panel DOM on load.
           let panel = document.createElement('ed11y-element-panel');
@@ -702,7 +735,7 @@ class Ed11y {
       mark.setAttribute('data-ed11y-open', 'false');
       //Ed11y.results[index].toggle = mark;
       location.insertAdjacentElement(position, mark);
-      if (!result.element.isContentEditable) {
+      if (Ed11y.options.inlineAlerts) {
         if (result.element.style.outline.indexOf('alert') === -1 ) {
           // Set property unless alert is already set.
           /* todo editable: this is setting a style attribute; must change to a positioned rule */
@@ -811,7 +844,7 @@ class Ed11y {
     };
 
     Ed11y.buildElementList = function () {
-      Ed11y.findElements('editable', '[contenteditable="true"]', false);
+      Ed11y.findElements('editable', Ed11y.options.editableContent, false);
       if (Ed11y.options.inlineAlerts && Ed11y.elements.editable.length > 0) {
         Ed11y.options.inlineAlerts = false;
         console.log('Editable content detected; Editoria11y inline alerts disabled');
@@ -989,7 +1022,7 @@ class Ed11y {
       document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
       Ed11y.alignButtons();
       Ed11y.checkEditableIntersects();
-      Ed11y.intersectionObservers(); // todo only when there is editable content*/
+      Ed11y.intersectionObservers(); // todo only when there is editable content ? */
     };
 
     Ed11y.editableHighlight = [];
@@ -1213,7 +1246,7 @@ class Ed11y {
           if (mark.result.scrollableParent) {
             // Hide alerts outside a scroll zone.
             // todo only offscreen if the result is offscreen, not the mark?
-            if (!!mark.bounds && (mark.targetOffset.top - mark.bounds.top < 0 || mark.targetOffset.top - mark.bounds.bottom > 0 ) && !mark.matches(':focus, :focus-within')) {
+            if (!!mark.bounds && (mark.targetOffset.top - mark.bounds.top < 0 || mark.targetOffset.top - mark.bounds.bottom > 0 ) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
               // Tip has exited scrollable parent. Visually hide.
               mark.classList.add('ed11y-offscreen');
               mark.style.transform = 'translate(0px, -50px)';
@@ -1703,9 +1736,9 @@ class Ed11y {
     };
 
     let scrollTicking = false;
-    let scrollPending = 0;
-    const updateTipLocations = () => {
-      if (!scrollTicking && scrollPending > 0 && !Ed11y.running && Ed11y.jumpList && Ed11y.open) {
+    Ed11y.scrollPending = 0;
+    Ed11y.updateTipLocations = () => {
+      if (!scrollTicking && Ed11y.scrollPending > 0 && !Ed11y.running && Ed11y.jumpList && Ed11y.open) {
         scrollTicking = true;
         Ed11y.alignButtons();
         let openTip = Ed11y.getOpenTip(); // todo: replace with saved param
@@ -1716,11 +1749,11 @@ class Ed11y {
             Ed11y.editableHighlighter(openTip.button.dataset.ed11yResult, true);
           }
         }
-        scrollPending --;
+        Ed11y.scrollPending --;
       }
       scrollTicking = false;
-      if (scrollPending > 0) {
-        requestAnimationFrame(() => updateTipLocations());
+      if (Ed11y.scrollPending > 0) {
+        requestAnimationFrame(() => Ed11y.updateTipLocations());
       }
     };
 
@@ -1728,14 +1761,14 @@ class Ed11y {
       Ed11y.elements.editable.forEach(editable => {
         editable.addEventListener('scroll', function() {
           // note: we could just adjust the transform rather than recalculating.
-          scrollPending = scrollPending < 2 ? scrollPending + 1 : scrollPending;
-          requestAnimationFrame(() => updateTipLocations());
+          Ed11y.scrollPending = Ed11y.scrollPending < 2 ? Ed11y.scrollPending + 1 : Ed11y.scrollPending;
+          requestAnimationFrame(() => Ed11y.updateTipLocations());
         });
       });
 
       Ed11y.selectionChanged = debounce(() => {
         if (rangeChange()) {
-          updateTipLocations();
+          Ed11y.updateTipLocations();
           Ed11y.checkEditableIntersects();
         }
       }, 100);
@@ -1768,16 +1801,16 @@ class Ed11y {
       Set up mutation observer for added nodes.
       */
       const incrementalAlign = debounce(() => {
-        scrollPending++;
-        updateTipLocations();
+        Ed11y.scrollPending++;
+        Ed11y.updateTipLocations();
       }, 10);
-      const incrementalCheck = debounce(() => {
+      Ed11y.incrementalCheck = debounce(() => {
         if (!Ed11y.running) {
           Ed11y.running = true;
           Ed11y.incremental = true;
           Ed11y.checkAll();
         } else {
-          window.setTimeout(incrementalCheck, 1);
+          window.setTimeout(Ed11y.incrementalCheck, 1);
         }
       }, 250);
 
@@ -1790,7 +1823,7 @@ class Ed11y {
           if ((mutation.type === 'childList' && mutation.addedNodes.length) || mutation.type === 'characterData' ) {
             incrementalAlign();
             Ed11y.alignPending = false;
-            incrementalCheck();
+            Ed11y.incrementalCheck();
           }
         }
       };
@@ -1799,10 +1832,16 @@ class Ed11y {
       const observer = new MutationObserver(callback);
       // Start observing the target node for configured mutations
       observer.observe(root, config);
+      document.addEventListener('readystatechange', () => {
+        window.setTimeout(function () {
+          Ed11y.scrollPending++;
+          Ed11y.updateTipLocations();
+        }, 100);
+      });
       window.setTimeout(function () {
-        scrollPending++;
-        updateTipLocations();
-      }, 100);
+        Ed11y.scrollPending++;
+        Ed11y.updateTipLocations();
+      }, 1000);
     };
 
     Ed11y.setCurrentJump = function () {

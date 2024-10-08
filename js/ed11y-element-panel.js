@@ -119,18 +119,24 @@ class Ed11yElementPanel extends HTMLElement {
     let goNum = parseInt(Ed11y.toggledFrom.getAttribute('data-ed11y-goto'));
     goNum = Ed11y.jumpList.length > goNum ? goNum : 0;
     let goto = Ed11y.jumpList[goNum];
-
-    // First of two scrollTo calls, to trigger any scroll based events.
-    let scrollPin = window.innerHeight > 800 && window.innerWidth > 800 ? 'center' : 'start';
-    goto.scrollIntoView({ block: scrollPin, behavior: 'instant' });
-
-    // Open the button
-    goto.setAttribute('data-ed11y-action','open');
     let result = goto.getAttribute('data-ed11y-result');
-
     let gotoResult = Ed11y.results[result];
     //let insert = gotoResult.position;
     const target = gotoResult.element;
+
+    // First of two scrollTo calls, to trigger any scroll based events.
+    let scrollPin = window.innerHeight > 800 && window.innerWidth > 800 ? 'center' : 'start';
+    if (Ed11y.options.inlineAlerts) {
+      goto.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+    } else {
+      target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+    }
+
+    // Open the button
+    goto.setAttribute('data-ed11y-action','open');
+    Ed11y.scrollPending++;
+    Ed11y.updateTipLocations();
+
     /*let target;
     // todo this belongs in the result open logic not here
     if (insert === 'beforebegin') {
@@ -172,7 +178,7 @@ class Ed11yElementPanel extends HTMLElement {
         alert(alertMessage);
         firstVisible.classList.add('ed11y-hidden-highlight');
       }
-      if (target.isContentEditable) {
+      if (!Ed11y.options.inlineAlerts) {
         // todo this selector must match the selector that decides where to place the mark
         target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
         Ed11y.editableHighlighter(goto.dataset.ed11yResult, true);
