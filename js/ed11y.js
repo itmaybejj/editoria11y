@@ -8,6 +8,35 @@ class Ed11y {
 
     Ed11y.version = '2.3.0-dev';
 
+    // todo MVP remove
+    let performanceCount = 0;
+    let start = 0;
+    let end = 1;
+    Ed11y.performanceTest = function() {
+
+      performanceCount = performanceCount + 1;
+      if (performanceCount === 1) {
+        start = performance.now();
+        console.log(start);
+        document.addEventListener('performanceTest', function() {
+          Ed11y.performanceTest();
+        });
+      }
+      if (performanceCount < 7) {
+        Ed11y.incrementalCheck();
+        console.log(performanceCount);
+        end = performance.now();
+        console.log(end - start);
+        console.log((end - start) / performanceCount);
+      } else {
+        console.log(performanceCount);
+        end = performance.now();
+        console.log(end - start);
+        console.log((end - start) / performanceCount);
+      }
+
+    };
+
     let defaultOptions = {
 
       // Relative or absolute
@@ -214,6 +243,8 @@ class Ed11y {
         */
       ],
 
+      userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
+
       customTests: 0,
 
     };
@@ -295,61 +326,62 @@ class Ed11y {
 
       // Once document has fully loaded.
       documentLoadingCheck(() => {
-        if (!Ed11y.checkRunPrevent()) {
-          Ed11y.running = true;
-          let localResultCount = localStorage.getItem('editoria11yResultCount');
-          Ed11y.seen = localResultCount ? JSON.parse(localResultCount) : {};
+        if (Ed11y.checkRunPrevent()) {
+          return false;
+        }
+        Ed11y.running = true;
+        let localResultCount = localStorage.getItem('editoria11yResultCount');
+        Ed11y.seen = localResultCount ? JSON.parse(localResultCount) : {};
 
-          // Build list of dismissed alerts
-          if (Ed11y.options.syncedDismissals === false) {
-            Ed11y.dismissedAlerts = localStorage.getItem('ed11ydismissed');
-            Ed11y.dismissedAlerts = Ed11y.dismissedAlerts ? JSON.parse(Ed11y.dismissedAlerts) : {};
-          } else {
-            Ed11y.dismissedAlerts = {};
-            Ed11y.dismissedAlerts[Ed11y.options.currentPage] = Ed11y.options.syncedDismissals;
-          }
+        // Build list of dismissed alerts
+        if (Ed11y.options.syncedDismissals === false) {
+          Ed11y.dismissedAlerts = localStorage.getItem('ed11ydismissed');
+          Ed11y.dismissedAlerts = Ed11y.dismissedAlerts ? JSON.parse(Ed11y.dismissedAlerts) : {};
+        } else {
+          Ed11y.dismissedAlerts = {};
+          Ed11y.dismissedAlerts[Ed11y.options.currentPage] = Ed11y.options.syncedDismissals;
+        }
 
-          // Ed11y v2.0 stored special characters in dismissal keys. This strips them.
-          // This loop can be deleted in 2024.
-          if (Ed11y.options.currentPage in Ed11y.dismissedAlerts) {
-            for (const [key] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage])) {
-              if (key in Ed11y.dismissedAlerts[Ed11y.options.currentPage]) {
-                for (const [subkey, subvalue] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage][key])) {
-                  let newKey = Ed11y.dismissalKey(subkey);
-                  if (newKey !== subkey) {
-                    Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][newKey] = subvalue;
-                    delete Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][subkey];
-                  }
+        // Ed11y v2.0 stored special characters in dismissal keys. This strips them.
+        // This loop can be deleted in 2024.
+        if (Ed11y.options.currentPage in Ed11y.dismissedAlerts) {
+          for (const [key] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage])) {
+            if (key in Ed11y.dismissedAlerts[Ed11y.options.currentPage]) {
+              for (const [subkey, subvalue] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage][key])) {
+                let newKey = Ed11y.dismissalKey(subkey);
+                if (newKey !== subkey) {
+                  Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][newKey] = subvalue;
+                  delete Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][subkey];
                 }
               }
             }
           }
-
-
-          // Create test class objects
-          Ed11y.testEmbeds = new Ed11yTestEmbeds;
-          Ed11y.testHeadings = new Ed11yTestHeadings;
-          Ed11y.testImages = new Ed11yTestImages;
-          Ed11y.testLinks = new Ed11yTestLinks;
-          Ed11y.testText = new Ed11yTestText;
-
-          // Convert the container ignore user option to a CSS :not selector.
-          Ed11y.ignore = Ed11y.options.ignoreElements ? `:not(${Ed11y.options.ignoreElements})` : '';
-
-          if (!Ed11y.options.checkRoots) {
-            Ed11y.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
-          }
-
-          // Check for ignoreAll element only once.
-          Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
-          if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
-            Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
-          }
-
-          // Run tests
-          Ed11y.checkAll();
-          window.addEventListener('resize', function () { Ed11y.windowResize(); });
         }
+
+        // Create test class objects
+        Ed11y.testEmbeds = new Ed11yTestEmbeds;
+        Ed11y.testHeadings = new Ed11yTestHeadings;
+        Ed11y.testImages = new Ed11yTestImages;
+        Ed11y.testLinks = new Ed11yTestLinks;
+        Ed11y.testText = new Ed11yTestText;
+
+        // Convert the container ignore user option to a CSS :not selector.
+        Ed11y.ignore = Ed11y.options.ignoreElements ? `:not(${Ed11y.options.ignoreElements})` : '';
+
+        if (!Ed11y.options.checkRoots) {
+          Ed11y.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
+        }
+
+        // Check for ignoreAll element only once.
+        Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
+        if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
+          Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
+        }
+
+        // Run tests
+        Ed11y.checkAll();
+        window.addEventListener('resize', function () { Ed11y.windowResize(); });
+
       });
     };
 
@@ -477,7 +509,6 @@ class Ed11y {
       }
 
       Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
-
       // Dispatch event for synchronizers
       if (!Ed11y.incremental) {
         window.setTimeout(function () {
@@ -489,7 +520,12 @@ class Ed11y {
     };
 
     let oldResultString = '';
+    let newNodes = false;
     const newIncrementalResults = function() {
+      if (newNodes) {
+        newNodes = false;
+        return true;
+      }
       let newResultString = JSON.stringify(Ed11y.results);
       let changed = newResultString !== oldResultString;
       oldResultString = newResultString;
@@ -545,6 +581,11 @@ class Ed11y {
               Ed11y.alignButtons();
             }
             Ed11y.running = false;
+            window.setTimeout(function () {
+              // todo MVP remove
+              let test = new CustomEvent('performanceTest');
+              document.dispatchEvent(test);
+            }, 0);
           },0);
           return;
         }
@@ -580,7 +621,7 @@ class Ed11y {
 
           // Decide whether to open the panel on load.
           if (Ed11y.options.alertMode === 'active' ||
-            localStorage.getItem('editoria11yShow') === '1' ||
+            !Ed11y.options.userPrefersShut ||
             Ed11y.options.showDismissed
           ) {
             // Show always on load for active mode or by user preference.
@@ -1156,9 +1197,10 @@ class Ed11y {
           let top = targetOffset.top - markOffset.top + mark.yOffset;
           let left = targetOffset.left - markOffset.left + mark.xOffset;
           switch (mark.result.element.tagName) {
-          case 'TD':
+          /*case 'TD':
           case 'TH':
-            break;
+            left = left - 20;
+            break;*/
           case 'IMG':
             top = top + 10;
             left = left + 10;
@@ -1442,12 +1484,14 @@ class Ed11y {
             Ed11y.onLoad = false;
             Ed11y.showPanel = true;
             Ed11y.checkAll();
+            Ed11y.options.userPrefersShut = false;
             localStorage.setItem('editoria11yShow', '1');
             //Ed11y.panelMessage.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonHideNoAlert;
           }
           else {
             Ed11y.panelMessage.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonShowAlerts : Ed11y.M.buttonShowNoAlert;
             Ed11y.reset();
+            Ed11y.options.userPrefersShut = true;
             localStorage.setItem('editoria11yShow', '0');
           }
         }
@@ -1674,12 +1718,12 @@ class Ed11y {
         b.top - x <= a.bottom);
     };
 
-    let activeRange;
+    Ed11y.activeRange = false;
     const rangeChange = function() {
       const range = document.createRange();
       let anchor = getSelection()?.anchorNode;
       if (!anchor || !anchor.parentNode || typeof anchor.parentNode.closest !== 'function') {
-        activeRange = false;
+        Ed11y.activeRange = false;
         return false;
       }
       let expand = anchor?.parentNode && anchor.parentNode.closest('p, td, th, li, h2, h3, h4, h5, h6');
@@ -1688,17 +1732,17 @@ class Ed11y {
       range.setStartBefore(anchor);
       range.setEndAfter(anchor);
       if (typeof range !== 'object' || typeof range.getBoundingClientRect !== 'function') {
-        if (activeRange) {
-          activeRange = false;
+        if (Ed11y.activeRange) {
+          Ed11y.activeRange = false;
           return true;
         } else {
           return false;
         }
       } else {
-        let sameRange = activeRange &&
-          range.startContainer === activeRange.startContainer &&
-          range.startOffset === activeRange.startOffset;
-        activeRange = range;
+        let sameRange = Ed11y.activeRange &&
+          range.startContainer === Ed11y.activeRange.startContainer &&
+          range.startOffset === Ed11y.activeRange.startOffset;
+        Ed11y.activeRange = range;
         return !sameRange;
       }
     };
@@ -1714,7 +1758,7 @@ class Ed11y {
         });
         return;
       }
-      if (!activeRange) {
+      if (!Ed11y.activeRange) {
         // Range isn't on a node we can measure.
         Ed11y.jumpList?.forEach((el) => {
           el.classList.remove('intersecting');
@@ -1723,7 +1767,7 @@ class Ed11y {
       }
       Ed11y.jumpList?.forEach((el) => {
         const toggle = el.shadowRoot.querySelector('.toggle');
-        if ( intersect(activeRange.getBoundingClientRect(), toggle.getBoundingClientRect(), 0) ) {
+        if ( intersect(Ed11y.activeRange.getBoundingClientRect(), toggle.getBoundingClientRect(), 0) ) {
           if (!toggle.classList.contains('was-intersecting')) {
             el.classList.add('intersecting');
             toggle.classList.add('intersecting');
@@ -1780,6 +1824,26 @@ class Ed11y {
       });
     };
 
+    Ed11y.recentlyAddedNodes = [];
+    Ed11y.addedNodeReadyToCheck = function(el) {
+      if (Ed11y.recentlyAddedNodes.length === 0) {
+        return true;
+      }
+      const thisWasAdded = Ed11y.recentlyAddedNodes.indexOf(el);
+      if (thisWasAdded > -1) {
+        if (el.textContent.trim().length === 0 || Ed11y.activeRange && el.contains(Ed11y.activeRange.startContainer)) {
+          // New node does not yet have text, or is selected.
+          return false;
+        } else {
+          // New node is ready for checking.
+          Ed11y.recentlyAddedNodes.splice(thisWasAdded, 1);
+          return true;
+        }
+      } else {
+        return true;
+      }
+    };
+
     const startObserver = function (root) {
       // todo editor: need to check on text change too.
       // We don't want to nest or duplicate observers.
@@ -1801,16 +1865,19 @@ class Ed11y {
       Set up mutation observer for added nodes.
       */
       const incrementalAlign = debounce(() => {
-        Ed11y.scrollPending++;
-        Ed11y.updateTipLocations();
+        if (!Ed11y.running) {
+          Ed11y.scrollPending++;
+          Ed11y.updateTipLocations();
+        }
       }, 10);
+      let checkCount = 0;
       Ed11y.incrementalCheck = debounce(() => {
         if (!Ed11y.running) {
           Ed11y.running = true;
           Ed11y.incremental = true;
           Ed11y.checkAll();
         } else {
-          window.setTimeout(Ed11y.incrementalCheck, 1);
+          window.setTimeout(Ed11y.incrementalCheck, 250);
         }
       }, 250);
 
@@ -1819,13 +1886,32 @@ class Ed11y {
 
       // Create an observer instance linked to the callback function
       const callback = (mutationList) => {
+        // todo mvp: race conditions sometimes create duplicate results.
         for (const mutation of mutationList) {
-          if ((mutation.type === 'childList' && mutation.addedNodes.length) || mutation.type === 'characterData' ) {
-            incrementalAlign();
-            Ed11y.alignPending = false;
-            Ed11y.incrementalCheck();
+          if (mutation.type === 'childList') {
+            newNodes = true; // Force redrawing buttons.
+            if (mutation.addedNodes.length > 0) {
+              mutation.addedNodes.forEach(node => {
+                if (node.nodeType === 1 && !node.matches('#mce_marker, [data-mce-bogus]')) {
+                  // TODO NEED PER CMS LIST OF IGNORES
+                  // TODO set a max length for this array.
+                  Ed11y.pendingIncrementals ++;
+                  Ed11y.recentlyAddedNodes.push(node);
+                  window.setTimeout(function(node) {
+                    let stillWaiting = Ed11y.recentlyAddedNodes.indexOf(node);
+                    if (stillWaiting > -1) {
+                      Ed11y.recentlyAddedNodes.splice(stillWaiting, 1);
+                      Ed11y.incrementalCheck();
+                    }
+                  }, 10000, node);
+                }
+              });
+            }
           }
         }
+        incrementalAlign(); // Immediately realign tips.
+        Ed11y.alignPending = false;
+        Ed11y.incrementalCheck(); // Recheck after delay.
       };
 
       // Create an observer instance linked to the callback function

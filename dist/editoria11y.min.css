@@ -158,7 +158,10 @@ ed11y-element-result {
     /* todo parameter */
     color: black;
 }
-.ed11y-buttonbar button:last-child {
+.ed11y-buttonbar button:last-child,
+.ed11y-pass #ed11y-show-hidden[aria-pressed="false"],
+.ed11y-pass:has(#ed11y-show-hidden[hidden]) #ed11y-visualize {
+    /* todo: simplify selectors */
     border-radius: 8px 0 0 8px;
 }
 .ed11y-buttonbar button svg {
@@ -240,7 +243,7 @@ ed11y-element-result {
     box-shadow: none;
 }
 
-.ed11y-active .next,
+.ed11y-active:not(.ed11y-pass) #ed11y-visualize,
 .ed11y-pass.ed11y-active [hidden] + #ed11y-show-hidden,
 .ed11y-pass.ed11y-active [hidden] + #ed11y-visualize {
     margin-right: -9px;
@@ -277,6 +280,10 @@ ed11y-element-result {
     height: 2em;
     font-size: clamp(1em, 2vw, 1.1em);
     position: relative;
+    transition: box-shadow .1s;
+}
+.ed11y-active .ed11y-toggle-circle {
+    padding: 1px;
 }
 
 .ed11y-pass .ed11y-toggle-circle {
@@ -286,9 +293,14 @@ ed11y-element-result {
     box-shadow: inset 0 0 0 2px var(--ed11y-primary, #276499), inset 0 0 0 4px #fffe;
     font-family: georgia, serif;
 }
+.ed11y-pass.ed11y-active .ed11y-toggle-circle {
+    box-shadow: inset 0 0 0 2px #fffe, 0 0 0 2px var(--ed11y-primary, #276499);
+    background-color: var(--ed11y-primaryText, #fffdf7);
+    color: var(--ed11y-primary, #276499);
+}
 
 .ed11y-pass #ed11y-toggle:hover .ed11y-toggle-circle {
-    box-shadow: inset 0 0 0 2px #fffe, 0 0 0 2px var(--ed11y-primary, #276499);
+    box-shadow: inset 0 0 0 2px #fffe, inset 0 0 0 6px var(--ed11y-primary, #276499), 0 0 1px var(--ed11y-primary, #276499);
 }
 
 .ed11y-warnings .ed11y-toggle-circle {
@@ -296,15 +308,26 @@ ed11y-element-result {
     color: #000b;
     box-shadow: inset 0 0 0 2px var(--ed11y-warning, #fad859), inset 0 0 0 3px #000b, 0 0 2px #000;
 }
-
-.ed11y-warnings #ed11y-toggle:hover .ed11y-toggle-circle {
-    box-shadow: inset 0 0 0 2px var(--ed11y-warning, #fad859), inset 0 0 0 3px #000b, 0 0 0 3px #000b;
+.ed11y-warnings.ed11y-active .ed11y-toggle-circle {
+    /*box-shadow: inset 0 0 1px #000b, inset 0 0 0 6px var(--ed11y-warning, #fad859), inset 0 0 1px 6px #000c;*/
+    box-shadow: inset 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 1px var(--ed11y-warning, #fad859), 0 0 1px 1px;
+    background-color: #fdfcfa;
 }
 
-.ed11y-errors #ed11y-toggle .ed11y-toggle-circle {
+.ed11y-warnings #ed11y-toggle:hover .ed11y-toggle-circle {
+    box-shadow: inset 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 1px 3px;
+}
+
+.ed11y-errors.ed11y-active #ed11y-toggle .ed11y-toggle-circle {
     color: var(--ed11y-alert, #b80519);
-    box-shadow: inset 0 0 0 2px #fefefe, inset 0 0 0 6px var(--ed11y-alert, #b80519), 1px 1px 5px 0 rgba(0, 0, 0, 0.5);
+    /*box-shadow: inset 0 0 0 2px #fefefe, inset 0 0 0 6px var(--ed11y-alert, #b80519), 1px 1px 5px 0 rgba(0, 0, 0, 0.5);*/
+    box-shadow: 0 0 0 2px;
     background: #fefefe;
+}
+.ed11y-errors #ed11y-toggle .ed11y-toggle-circle {
+    box-shadow: inset 0 0 0 3px var(--ed11y-alert), inset 0 0 0 5px #fffd, 1px 1px 5px 0 rgba(0, 0, 0, 0.5);
+    background: var(--ed11y-alert);
+    color: #fefefe;
 }
 /*.ed11y-errors.ed11y-active #ed11y-toggle .ed11y-toggle-circle {
     box-shadow: inset 0 0 0 1px var(--ed11y-primary), inset 0 0 0 2px var(--ed11y-primaryText), inset 0 0 0 6px var(--ed11y-primary), 1px 1px 5px 0 rgb(0 0 0 / 50%);
@@ -312,8 +335,8 @@ ed11y-element-result {
 }*/
 
 .ed11y-errors #ed11y-toggle:hover .ed11y-toggle-circle {
-    box-shadow: 0 0 0 3px var(--ed11y-alert), inset 0 0 0 1px var(--ed11y-alert, #b80519), inset 0 0 0 2px #fefefe, inset 0 0 0 6px var(--ed11y-alert, #b80519), 1px 1px 5px 0 rgb(0 0 0 / 50%);
-
+    /*box-shadow: 0 0 0 3px var(--ed11y-alert), inset 0 0 0 1px var(--ed11y-alert, #b80519), inset 0 0 0 2px #fefefe, inset 0 0 0 6px var(--ed11y-alert, #b80519), 1px 1px 5px 0 rgb(0 0 0 / 50%);*/
+    box-shadow: 0 0 0 4px;
 }
 
 #ed11y-toggle.disabled .ed11y-toggle-circle,

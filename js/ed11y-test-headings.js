@@ -16,6 +16,9 @@ class Ed11yTestHeadings {
 
     // Test each header level for accessibility issues.
     Ed11y.elements.h?.filter( el => Ed11y.elementNotHidden(el) )?.forEach((el) => {
+      if (!Ed11y.addedNodeReadyToCheck(el)) {
+        return;
+      }
       let level;
       let alert = [];
       if (el.isContentEditable !== prevEditable) {

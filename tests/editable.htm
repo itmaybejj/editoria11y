@@ -35,11 +35,14 @@
             <h2 id="tables">Tables</h2>
 
             <h3 id="tables-without-valid-headers">Tables without valid headers</h3>
+<!--
+            <table class="posi"><tbody><tr><td>A table without a TH header is invalid</td><td class="posi"><h4 >Outline headers do not count</h4></td><td class="negati"><p><strong>Disable should be content header test inside tables</strong></p></td></tr></tbody></table>-->
+            <!--<p>break</p>
+            <table class="negati" role="presentation"><tr><td>No table header, but table has role="presentation."</td></tr></table>-->
 
-            <table class="posi"><tbody><tr><td>A table without a TH header is invalid</td><td class="posi"><h4 >Outline headers do not count</h4></td><td class="negati"><p><strong>Disable should be content header test inside tables</strong></p></td></tr></tbody></table>
+            <table class="negati" ><tr><td></td></tr></table>
 
-            <table class="negati" role="presentation"><tr><td>No table header, but table has role="presentation."</td></tr></table>
-
+            to copy
             <h3 id="empty-table-header-cells">Empty table header cells</h3>
 
             <table><tbody><tr><th>Empty table heading cells will also be flagged:</th><th class="posi"> &nbsp;</th></tr></tbody></table>
