@@ -562,17 +562,16 @@ class Ed11y {
     Ed11y.updatePanel = function () {
 
       // Stash old values for incremental updates.
-      let oldWarnings = Ed11y.warningCount;
-      let oldErrors = Ed11y.errorCount;
+      //let oldWarnings = Ed11y.warningCount;
+      //let oldErrors = Ed11y.errorCount;
       Ed11y.countAlerts();
       if (Ed11y.incremental) {
         // Check for a change in the result counts.
         if (newIncrementalResults()) {
-          console.log('incremental change detected');
-          if (Ed11y.options.alertMode === 'assertive' && Ed11y.totalCount > 0 && (Ed11y.warningCount > oldWarnings || Ed11y.errorCount > oldErrors)) {
+          /*if (Ed11y.options.alertMode === 'assertive' && Ed11y.totalCount > 0 && (Ed11y.warningCount > oldWarnings || Ed11y.errorCount > oldErrors)) {
             console.log('forced open');
             Ed11y.showPanel = true;
-          }
+          }*/
           Ed11y.resetResults();
         } else {
           Ed11y.results = Ed11y.oldResults;
@@ -1870,7 +1869,6 @@ class Ed11y {
           Ed11y.updateTipLocations();
         }
       }, 10);
-      let checkCount = 0;
       Ed11y.incrementalCheck = debounce(() => {
         if (!Ed11y.running) {
           Ed11y.running = true;
@@ -1884,6 +1882,26 @@ class Ed11y {
       // Options for the observer (which mutations to observe)
       const config = { childList: true, subtree: true, characterData: true };
 
+      const logNode = function (node) {
+        //:is(table, h1, h2, h3, h4, h5, h6):
+        if (node.nodeType !== 1) {
+          return;
+        }
+        if (!node.matches('table, h1, h2, h3, h4, h5, h6')) {
+          node = node.querySelector('table, h1, h2, h3, h4, h5, h6');
+        }
+        if (node) {
+          Ed11y.recentlyAddedNodes.push(node);
+          window.setTimeout(function (node) {
+            let stillWaiting = Ed11y.recentlyAddedNodes.indexOf(node);
+            if (stillWaiting > -1) {
+              Ed11y.recentlyAddedNodes.splice(stillWaiting, 1);
+              Ed11y.incrementalCheck();
+            }
+          }, 10000, node);
+        }
+      };
+
       // Create an observer instance linked to the callback function
       const callback = (mutationList) => {
         // todo mvp: race conditions sometimes create duplicate results.
@@ -1892,19 +1910,7 @@ class Ed11y {
             newNodes = true; // Force redrawing buttons.
             if (mutation.addedNodes.length > 0) {
               mutation.addedNodes.forEach(node => {
-                if (node.nodeType === 1 && !node.matches('#mce_marker, [data-mce-bogus]')) {
-                  // TODO NEED PER CMS LIST OF IGNORES
-                  // TODO set a max length for this array.
-                  Ed11y.pendingIncrementals ++;
-                  Ed11y.recentlyAddedNodes.push(node);
-                  window.setTimeout(function(node) {
-                    let stillWaiting = Ed11y.recentlyAddedNodes.indexOf(node);
-                    if (stillWaiting > -1) {
-                      Ed11y.recentlyAddedNodes.splice(stillWaiting, 1);
-                      Ed11y.incrementalCheck();
-                    }
-                  }, 10000, node);
-                }
+                logNode(node);
               });
             }
           }

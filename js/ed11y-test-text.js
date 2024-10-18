@@ -195,7 +195,7 @@ class Ed11yTestText {
       }
       else {
         // Make sure table headers are not empty.
-        findTHeaders.forEach((th) => {
+        Array.from(findTHeaders).some((th) => {
           if (Ed11y.computeText(th).length < 1) {
             Ed11y.results.push({
               element: th,
@@ -204,6 +204,7 @@ class Ed11yTestText {
               position: 'afterbegin',
               dismissalKey: false,
             });
+            return true;
           }
         });
       }
