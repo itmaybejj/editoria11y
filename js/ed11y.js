@@ -1146,24 +1146,24 @@ class Ed11y {
       let previousNudgeTop = 0;
       let previousNudgeLeft = 0;
       const scrollTop = window.scrollY;
-
       if (!Ed11y.options.inlineAlerts) {
         // Compute based on target position.
 
         Ed11y.jumpList.forEach((mark, i) => {
           let targetOffset = mark.result.element.getBoundingClientRect();
-          if ((targetOffset.top === 0 && targetOffset.left === 0) || !Ed11y.visible(mark.result.element)) {
+          let top = targetOffset.top + scrollTop;
+          if ((top === 0 && targetOffset.left === 0) || !Ed11y.visible(mark.result.element)) {
             // Invisible target. todo: wait why is 0 considered invisible?
             const firstVisibleParent = Ed11y.firstVisibleParent(mark.result.element);
             targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
+            top = targetOffset.top + scrollTop;
           }
-          let top = targetOffset.top;
           let left = targetOffset.left;
           switch (mark.result.element.tagName) {
-          /*case 'TD':
-          case 'TH':
-            left = left - 20;
-            break;*/
+            /*case 'TD':
+            case 'TH':
+              left = left - 20;
+              break;*/
           case 'IMG':
             top = top + 10;
             left = left + 10;
@@ -1223,7 +1223,7 @@ class Ed11y {
         let nudgeLeft = 0;
         // Detect tip that overlaps with previous result.
         if (mark.markTop + scrollTop < 0) {
-        // Offscreen to top.
+          // Offscreen to top.
           // todo heeeere need different math for inline.
           nudgeTop = (-1 * (mark.markTop + scrollTop)) - 6;
         }
@@ -1236,7 +1236,7 @@ class Ed11y {
           (i > 2 && intersect(mark.markOffset, Ed11y.jumpList[i - 3].markOffset, 15))*/
         ) {
           //todo -- not actually computing -- need to update markOffset on nudge
-        // Overlapping previous
+          // Overlapping previous
           // todo compute actual overlap. We're bouncing by the full amount no matter what which gets gappy.
           // todo if we recorded positions and sorted the grid by y positions, we'd only need to CHECK x for y overlaps.
           nudgeTop = nudgeTop + 21 + previousNudgeTop;
@@ -1245,7 +1245,7 @@ class Ed11y {
 
         let needNudge = false;
         if (mark.markLeft + nudgeLeft < 44) {
-        // Offscreen to left. push to the right.
+          // Offscreen to left. push to the right.
           nudgeLeft = 44 - mark.markLeft + nudgeLeft;
           needNudge = true;
           //nudgeMark(mark, 44 - mark.markLeft + nudgeLeft, nudgeTop);
@@ -2264,7 +2264,7 @@ class Ed11y {
           el.hasAttribute('hidden') ||
           (style.getPropertyValue('overflow') === 'hidden' &&
             ( el.offsetWidth === 0 ||
-            el.offsetHeight === 0)
+              el.offsetHeight === 0)
           )
         );
       }
