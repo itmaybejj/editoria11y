@@ -359,8 +359,8 @@ class Ed11y {
     Ed11y.results = [];
     // Toggles the outline of all headers, link texts, and images.
     Ed11y.checkAll = () => {
-      if (!Ed11y.checkRunPrevent()) {
-        if (Ed11y.incremental) {
+      if ( !Ed11y.checkRunPrevent() ) {
+        if ( Ed11y.incremental ) {
           Ed11y.oldResults = Ed11y.results;
         }
         // Reset counts
@@ -543,7 +543,8 @@ class Ed11y {
       Ed11y.countAlerts();
       if (Ed11y.incremental) {
         // Check for a change in the result counts.
-        if (newIncrementalResults()) {
+        if (Ed11y.forceFullCheck || newIncrementalResults()) {
+          Ed11y.forceFullCheck = false;
           /*if (Ed11y.options.alertMode === 'assertive' && Ed11y.totalCount > 0 && (Ed11y.warningCount > oldWarnings || Ed11y.errorCount > oldErrors)) {
             console.log('forced open');
             Ed11y.showPanel = true;
@@ -879,7 +880,6 @@ class Ed11y {
     };
 
     Ed11y.dismissalKey = function (text) {
-      //?.replace(/([^0-9a-zA-Z])/g,'')
       return String(text).replace(/([^0-9a-zA-Z])/g, '').substring(0, 512);
     };
 
@@ -1844,6 +1844,28 @@ class Ed11y {
       }
     };
 
+    Ed11y.incrementalAlign = debounce(() => {
+      if (!Ed11y.running) {
+        Ed11y.scrollPending++;
+        Ed11y.updateTipLocations();
+      }
+    }, 10);
+    Ed11y.incrementalCheck = debounce(() => {
+      if (!Ed11y.running) {
+        Ed11y.running = true;
+        let runTime = performance.now();
+        Ed11y.incremental = true;
+        Ed11y.checkAll();
+        // Increase debounce if runs are slow.
+        runTime = performance.now() - runTime;
+        browserSpeed = runTime > 10 ? 10 : (browserSpeed + runTime) / 2;
+        // Todo: optimize tip placement so we do not need as much debounce.
+        Ed11y.browserLag = browserSpeed < 1 ? 0 : browserSpeed * 100 + Ed11y.totalCount;
+      } else {
+        window.setTimeout(Ed11y.incrementalCheck, 250);
+      }
+    }, 250);
+
     const startObserver = function (root) {
       // todo editor: need to check on text change too.
       // We don't want to nest or duplicate observers.
@@ -1864,28 +1886,6 @@ class Ed11y {
       /*
       Set up mutation observer for added nodes.
       */
-      // Scale timeouts by browser speed.
-      const incrementalAlign = debounce(() => {
-        if (!Ed11y.running) {
-          Ed11y.scrollPending++;
-          Ed11y.updateTipLocations();
-        }
-      }, 10);
-      Ed11y.incrementalCheck = debounce(() => {
-        if (!Ed11y.running) {
-          Ed11y.running = true;
-          let runTime = performance.now();
-          Ed11y.incremental = true;
-          Ed11y.checkAll();
-          // Increase debounce if runs are slow.
-          runTime = performance.now() - runTime;
-          browserSpeed = runTime > 10 ? 10 : (browserSpeed + runTime) / 2;
-          // Todo: optimize tip placement so we do not need as much debounce.
-          Ed11y.browserLag = browserSpeed < 1 ? 0 : browserSpeed * 100 + Ed11y.totalCount;
-        } else {
-          window.setTimeout(Ed11y.incrementalCheck, 250);
-        }
-      }, 250);
 
       // Options for the observer (which mutations to observe)
       const config = { childList: true, subtree: true, characterData: true };
@@ -1900,8 +1900,8 @@ class Ed11y {
         if (node.nodeType !== 1) {
           return;
         }
-        if (!node.matches('table, h1, h2, h3, h4, h5, h6')) {
-          node = node.querySelector('table, h1, h2, h3, h4, h5, h6');
+        if (!node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
+          node = node.querySelector('table, h1, h2, h3, h4, h5, h6, blockquote');
         }
         if (node) {
           Ed11y.recentlyAddedNodes.push(node);
@@ -1928,7 +1928,7 @@ class Ed11y {
             }
           }
         }
-        incrementalAlign(); // Immediately realign tips.
+        Ed11y.incrementalAlign(); // Immediately realign tips.
         Ed11y.alignPending = false;
         Ed11y.incrementalCheck(); // Recheck after delay.
       };
