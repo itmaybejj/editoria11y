@@ -8,35 +8,6 @@ class Ed11y {
 
     Ed11y.version = '2.3.0-dev';
 
-    // todo MVP remove
-    let performanceCount = 0;
-    let start = 0;
-    let end = 1;
-    Ed11y.performanceTest = function() {
-
-      performanceCount = performanceCount + 1;
-      if (performanceCount === 1) {
-        start = performance.now();
-        console.log(start);
-        document.addEventListener('performanceTest', function() {
-          Ed11y.performanceTest();
-        });
-      }
-      if (performanceCount < 7) {
-        Ed11y.incrementalCheck();
-        console.log(performanceCount);
-        end = performance.now();
-        console.log(end - start);
-        console.log((end - start) / performanceCount);
-      } else {
-        console.log(performanceCount);
-        end = performance.now();
-        console.log(end - start);
-        console.log((end - start) / performanceCount);
-      }
-
-    };
-
     let defaultOptions = {
 
       // Relative or absolute
@@ -585,11 +556,6 @@ class Ed11y {
               Ed11y.alignButtons();
             }
             Ed11y.running = false;
-            window.setTimeout(function () {
-              // todo MVP remove
-              let test = new CustomEvent('performanceTest');
-              document.dispatchEvent(test);
-            }, 0);
           },0);
           return;
         }
@@ -1159,7 +1125,7 @@ class Ed11y {
     };
 
     const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top) {
-      const width = 40;
+      const width = 40 + 15; // est width + padding.
       return !(rect1Left + width < rect2Left ||
         rect1Left > rect2Left + width ||
         rect1Top + width < rect2Top ||
@@ -1179,38 +1145,20 @@ class Ed11y {
       // Used for crude intersection detection.
       let previousNudgeTop = 0;
       let previousNudgeLeft = 0;
+      const scrollTop = window.scrollY;
 
-      // Batch write first to reduce paint thrash.
-      Ed11y.jumpList.forEach((mark) => {
-        // Reset positions.
-        //mark.style.setProperty('transform', null);
-        if (mark.style.transform) {
-          const computedStyle = window.getComputedStyle(mark);
-          let matrix = computedStyle.getPropertyValue('transform');
-          matrix = matrix.split(',');
-          mark.xOffset = parseFloat(matrix[4]);
-          mark.yOffset = parseFloat(matrix[5]);
-        } else {
-          mark.xOffset = 0;
-          mark.yOffset = 0;
-        }
-        mark.style.setProperty('top', 'initial');
-        mark.style.setProperty('left', 'initial');
-      });
+      if (!Ed11y.options.inlineAlerts) {
+        // Compute based on target position.
 
-      // Batch read to reduce paint thrash.
-      Ed11y.jumpList.forEach((mark, i) => {
-        let markOffset = mark.getBoundingClientRect();
-        if (!Ed11y.options.inlineAlerts) {
-          // Append toggles to body tag.
+        Ed11y.jumpList.forEach((mark, i) => {
           let targetOffset = mark.result.element.getBoundingClientRect();
           if ((targetOffset.top === 0 && targetOffset.left === 0) || !Ed11y.visible(mark.result.element)) {
             // Invisible target. todo: wait why is 0 considered invisible?
             const firstVisibleParent = Ed11y.firstVisibleParent(mark.result.element);
             targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
           }
-          let top = targetOffset.top - markOffset.top + mark.yOffset;
-          let left = targetOffset.left - markOffset.left + mark.xOffset;
+          let top = targetOffset.top;
+          let left = targetOffset.left;
           switch (mark.result.element.tagName) {
           /*case 'TD':
           case 'TH':
@@ -1236,23 +1184,29 @@ class Ed11y {
           Ed11y.jumpList[i].targetOffset = targetOffset;
           Ed11y.jumpList[i].markTop = top;
           Ed11y.jumpList[i].markLeft = left;
-        }
-        Ed11y.jumpList[i].markOffset = markOffset;
-      });
-
-      // Write changes.
-      if (!Ed11y.options.inlineAlerts) {
-        // Another batch write.
-        Ed11y.jumpList.forEach((mark) => {
-          if ((mark.markTop !== 0 || mark.markLeft !== 0) && mark.targetOffset.top + window.scrollY > 0 && mark.targetOffset.left > 0 ) {
-            mark.style.transform = `translate(${mark.markLeft}px, ${mark.markTop}px)`;
-            mark.markLeft = mark.markOffset.left + mark.markLeft;
-            mark.markTop = mark.markOffset.top + mark.markTop;
-            // Note: from now on the markOffset values are wrong!
-          }
         });
       } else {
-        // Another batch read;
+        // Compute based on self position.
+
+        // Clear old transforms first. Batch write first...
+        Ed11y.jumpList.forEach((mark) => {
+          // Reset positions.
+          mark.style.setProperty('transform', null);
+          mark.style.setProperty('top', 'initial');
+          mark.style.setProperty('left', 'initial');
+          if (mark.style.transform) {
+            const computedStyle = window.getComputedStyle(mark);
+            let matrix = computedStyle.getPropertyValue('transform');
+            matrix = matrix.split(',');
+            mark.xOffset = parseFloat(matrix[4]);
+            mark.yOffset = parseFloat(matrix[5]);
+          }
+          else {
+            mark.xOffset = 0;
+            mark.yOffset = 0;
+          }
+        });
+        // ...then batch read new positions.
         Ed11y.jumpList.forEach((mark) => {
           mark.markOffset = mark.getBoundingClientRect();
           mark.markLeft = mark.markOffset.left;
@@ -1260,21 +1214,26 @@ class Ed11y {
         });
       }
 
-      // Compute and move. We're just going to thrash now.
+
+      // Check for overlaps, then write out transforms.
       Ed11y.jumpList.forEach((mark, i) => {
 
         // Now check for any needed nudges
         let nudgeTop = 0;
         let nudgeLeft = 0;
         // Detect tip that overlaps with previous result.
-        if (mark.markTop + window.scrollY < 0) {
+        if (mark.markTop + scrollTop < 0) {
         // Offscreen to top.
-          nudgeTop = (-1 * (mark.markTop + window.scrollY)) - 6;
+          // todo heeeere need different math for inline.
+          nudgeTop = (-1 * (mark.markTop + scrollTop)) - 6;
         }
         if (
-          (i > 0 && intersect(mark.markOffset, Ed11y.jumpList[i - 1].markOffset, 15)) ||
+          (i > 0 && overlap(mark.markLeft, mark.markTop, Ed11y.jumpList[i - 1].markLeft, Ed11y.jumpList[i - 1].markTop)) ||
+          (i > 1 && overlap(mark.markLeft, mark.markTop, Ed11y.jumpList[i - 2].markLeft, Ed11y.jumpList[i - 2].markTop)) ||
+          (i > 2 && overlap(mark.markLeft, mark.markTop, Ed11y.jumpList[i - 3].markLeft, Ed11y.jumpList[i - 3].markTop))
+          /*(i > 0 && intersect(mark.markOffset, Ed11y.jumpList[i - 1].markOffset, 15)) ||
           (i > 1 && intersect(mark.markOffset, Ed11y.jumpList[i - 2].markOffset, 15)) ||
-          (i > 2 && intersect(mark.markOffset, Ed11y.jumpList[i - 3].markOffset, 15))
+          (i > 2 && intersect(mark.markOffset, Ed11y.jumpList[i - 3].markOffset, 15))*/
         ) {
           //todo -- not actually computing -- need to update markOffset on nudge
         // Overlapping previous
@@ -1283,15 +1242,34 @@ class Ed11y {
           nudgeTop = nudgeTop + 21 + previousNudgeTop;
           nudgeLeft = 21 + previousNudgeLeft;
         }
-        if (mark.markOffset.left + nudgeLeft < 44) {
+
+        let needNudge = false;
+        if (mark.markLeft + nudgeLeft < 44) {
         // Offscreen to left. push to the right.
-          nudgeMark(mark, 44 - mark.markOffset.left + nudgeLeft, nudgeTop);
+          nudgeLeft = 44 - mark.markLeft + nudgeLeft;
+          needNudge = true;
+          //nudgeMark(mark, 44 - mark.markLeft + nudgeLeft, nudgeTop);
         }
-        else if (mark.markOffset.left + nudgeLeft + 80 > windowWidth) {
-        // Offscreen to right. push to the left
-          nudgeMark(mark, windowWidth - nudgeLeft - mark.markOffset.left - 80, nudgeTop);
+        else if (mark.markLeft + nudgeLeft + 80 > windowWidth) {
+          needNudge = true;
+          // Offscreen to right. push to the left
+          nudgeLeft = windowWidth - nudgeLeft - mark.markLeft - 80;
+          //nudgeMark(mark, windowWidth - nudgeLeft - mark.markLeft - 80, nudgeTop);
         }
         else if (nudgeTop !== 0) {
+          needNudge = true;
+          //nudgeMark(mark, nudgeLeft, nudgeTop);
+        }
+        if (!Ed11y.options.inlineAlerts) {
+          //mark.markLeft = mark.markLeft + nudgeLeft;
+          //mark.markTop = mark.markTop + nudgeTop;
+          if (needNudge) {
+            mark.style.transform = `translate(${mark.markLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
+          } else {
+            mark.style.transform = `translate(${mark.markLeft}px, ${mark.markTop}px)`;
+          }
+
+        } else if (needNudge) {
           nudgeMark(mark, nudgeLeft, nudgeTop);
         }
         // todo: this is crude and only really works right once.
@@ -1732,6 +1710,7 @@ class Ed11y {
       };
     };
 
+    // todo here oh bother did this again with overlap const.
     const intersect = function(a, b, x = 10) {
       return (a.left - x <= b.right &&
         b.left - x <= a.right &&

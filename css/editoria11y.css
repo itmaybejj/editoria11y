@@ -491,6 +491,11 @@ ed11y-element-result {
     z-index: var(--ed11y-buttonZIndex, 9999);
 }
 
+.ed11y-editable-result {
+    top: 0 !important;
+    left: 0 !important;
+}
+
 .ed11y-result-wrapper {
     width: 3.14em;
     height: 3.14em;
