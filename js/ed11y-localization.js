@@ -8,7 +8,7 @@ const ed11yLang = {
 
     // Main Panel =========================================
     toggleAccessibilityTools: 'Toggle accessibility tools',
-    toggleDisabled: 'Editorially is disabled.',
+    toggleDisabled: 'Editoria11y cannot check this content.',
     panelCount0 : 'No issues detected.',
     panelCountAllDismissed : 'All issues hidden.',
     panelCount1 : 'One issue detected.',

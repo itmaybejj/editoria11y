@@ -81,7 +81,7 @@ class Ed11yTestHeadings {
           dismissalKey: dismissKey,
         });
       }
-      if (prevLevel > 0 && level - prevLevel > 1) {
+      if (error !== 'headingEmpty' && prevLevel > 0 && level - prevLevel > 1) {
         dismissKey = Ed11y.dismissalKey(level + headingText);
         outlinePrefix += Ed11y.M.errorOutlinePrefixSkippedLevel;
         error = 'headingLevelSkipped';

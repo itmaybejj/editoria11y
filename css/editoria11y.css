@@ -206,7 +206,7 @@ ed11y-element-result {
     box-shadow: 0 0 1px;
     padding: 0 .5em .25em;
     text-align: left;
-    right: 2.5em;
+    right: 2.25em;
     white-space: nowrap;
     width: auto;
     height: auto;
@@ -315,6 +315,10 @@ ed11y-element-result {
 }
 
 .ed11y-warnings #ed11y-toggle:hover .ed11y-toggle-circle {
+    box-shadow: inset 0 0 0 2px var(--ed11y-warning, #fad859), inset 0 0 0 4px #000b, 0 0 2px #000;
+}
+
+.ed11y-warnings.ed11y-active #ed11y-toggle:hover .ed11y-toggle-circle {
     box-shadow: inset 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 1px 3px;
 }
 

@@ -443,14 +443,15 @@ class Ed11y {
               Ed11y.customTestsFinished++;
               if (Ed11y.customTestsFinished === Ed11y.options.customTests) {
                 Ed11y.customTestsRunning = false;
-                Ed11y.panelToggle?.setAttribute('title', Ed11y.M.toggleAccessibilityTools);
                 Ed11y.updatePanel();
               }
             });
             window.setTimeout(function() {
               if (Ed11y.customTestsRunning === true) {
                 Ed11y.customTestsRunning = false;
-                Ed11y.panelToggle?.setAttribute('title', Ed11y.M.toggleAccessibilityTools);
+                if (Ed11y.panelToggle) {
+                  Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleAccessibilityTools;
+                }
                 Ed11y.updatePanel();
                 console.error('Editoria11y was told to wait for custom tests, but no tests were returned.');
               }
@@ -464,7 +465,9 @@ class Ed11y {
 
         if (!Ed11y.customTestsRunning) {
           window.setTimeout(function () {
-            Ed11y.panelToggle?.setAttribute('title', Ed11y.M.toggleAccessibilityTools);
+            if (Ed11y.panelToggle) {
+              Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleAccessibilityTools;
+            }
             Ed11y.updatePanel();
           }, 0);
         }
@@ -474,7 +477,9 @@ class Ed11y {
         Ed11y.reset();
         Ed11y.panelToggle?.classList.add('disabled');
         Ed11y.panelToggle?.removeAttribute('aria-expanded');
-        Ed11y.panelToggle?.setAttribute('title', Ed11y.M.toggleDisabled);
+        if (Ed11y.panelToggle) {
+          Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleDisabled;
+        }
       }
     };
 
@@ -758,17 +763,9 @@ class Ed11y {
           position = result.position;
         }
       }
-      const display = window.getComputedStyle(result.element).getPropertyValue('display');
-      let outlineClass;
-      if (display.indexOf('inline') === -1 || result.element.tagName === 'IMG') {
-        outlineClass = result.dismissalKey ?
-          'ed11y-warning-block'
-          : 'ed11y-error-block';
-      } else {
-        outlineClass = result.dismissalKey ?
-          'ed11y-warning-inline'
-          : 'ed11y-error-inline';
-      }
+      // heeeee compute this in test not here
+
+
 
       mark.setAttribute('id', 'ed11y-result-' + index);
       mark.setAttribute('data-ed11y-result', index);
@@ -778,6 +775,17 @@ class Ed11y {
       if (Ed11y.options.inlineAlerts) {
         if (result.element.style.outline.indexOf('alert') === -1 ) {
           // Set property unless alert is already set.
+          const display = window.getComputedStyle(result.element).getPropertyValue('display');
+          let outlineClass;
+          if (display.indexOf('inline') === -1 || result.element.tagName === 'IMG') {
+            outlineClass = result.dismissalKey ?
+              'ed11y-warning-block'
+              : 'ed11y-error-block';
+          } else {
+            outlineClass = result.dismissalKey ?
+              'ed11y-warning-inline'
+              : 'ed11y-error-inline';
+          }
           /* todo editable: this is setting a style attribute; must change to a positioned rule */
           //result.element.style.setProperty('box-shadow', color); // todo only within editable?
           result.element.classList.add(outlineClass);
@@ -1150,6 +1158,14 @@ class Ed11y {
       }
     };
 
+    const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top) {
+      const width = 40;
+      return !(rect1Left + width < rect2Left ||
+        rect1Left > rect2Left + width ||
+        rect1Top + width < rect2Top ||
+        rect1Top > rect2Top + width);
+    };
+
     Ed11y.alignButtons = function () {
 
       if (Ed11y.jumpList.length === 0) {
@@ -1209,7 +1225,7 @@ class Ed11y {
             break;
           }
           if (mark.result.scrollableParent) {
-            // Hide alerts outside a scroll zone.
+            // Bump alerts that would be X-position out of a scroll zone.
             Ed11y.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
             if (left < Ed11y.jumpList[i].bounds.left) {
               left = Ed11y.jumpList[i].bounds.left;
@@ -1230,12 +1246,17 @@ class Ed11y {
         Ed11y.jumpList.forEach((mark) => {
           if ((mark.markTop !== 0 || mark.markLeft !== 0) && mark.targetOffset.top + window.scrollY > 0 && mark.targetOffset.left > 0 ) {
             mark.style.transform = `translate(${mark.markLeft}px, ${mark.markTop}px)`;
+            mark.markLeft = mark.markOffset.left + mark.markLeft;
+            mark.markTop = mark.markOffset.top + mark.markTop;
+            // Note: from now on the markOffset values are wrong!
           }
         });
-
+      } else {
         // Another batch read;
         Ed11y.jumpList.forEach((mark) => {
           mark.markOffset = mark.getBoundingClientRect();
+          mark.markLeft = mark.markOffset.left;
+          mark.markTop = mark.markOffset.top;
         });
       }
 
@@ -1246,16 +1267,16 @@ class Ed11y {
         let nudgeTop = 0;
         let nudgeLeft = 0;
         // Detect tip that overlaps with previous result.
-        if (mark.markOffset.top + window.scrollY < 0) {
+        if (mark.markTop + window.scrollY < 0) {
         // Offscreen to top.
-          nudgeTop = (-1 * (mark.markOffset.top + window.scrollY)) - 6;
+          nudgeTop = (-1 * (mark.markTop + window.scrollY)) - 6;
         }
-
         if (
-          (i > 0 && intersect(mark.markOffset, Ed11y.jumpList[i - 1].getBoundingClientRect(), 15)) ||
-          (i > 1 && intersect(mark.markOffset, Ed11y.jumpList[i - 2].getBoundingClientRect(), 15)) ||
-          (i > 2 && intersect(mark.markOffset, Ed11y.jumpList[i - 3].getBoundingClientRect(), 15))
+          (i > 0 && intersect(mark.markOffset, Ed11y.jumpList[i - 1].markOffset, 15)) ||
+          (i > 1 && intersect(mark.markOffset, Ed11y.jumpList[i - 2].markOffset, 15)) ||
+          (i > 2 && intersect(mark.markOffset, Ed11y.jumpList[i - 3].markOffset, 15))
         ) {
+          //todo -- not actually computing -- need to update markOffset on nudge
         // Overlapping previous
           // todo compute actual overlap. We're bouncing by the full amount no matter what which gets gappy.
           // todo if we recorded positions and sorted the grid by y positions, we'd only need to CHECK x for y overlaps.
@@ -1472,7 +1493,6 @@ class Ed11y {
     };
 
     Ed11y.togglePanel = function () {
-      console.log(Ed11y.panelMessage);
       if (!Ed11y.doubleClickPrevent) {
         // todo beta: revisit aria states and announcements.
         // Prevent clicks piling up while scan is running.
@@ -1700,13 +1720,15 @@ class Ed11y {
     };
 
     // hat tip https://www.joshwcomeau.com/snippets/javascript/debounce/
+    let browserSpeed = 1;
+    Ed11y.browserLag = 0; // Scale debounce based on browser performance.
     const debounce = (callback, wait) => {
       let timeoutId = null;
       return (...args) => {
         window.clearTimeout(timeoutId);
         timeoutId = window.setTimeout(() => {
           callback.apply(null, args);
-        }, wait);
+        }, wait + Ed11y.browserLag);
       };
     };
 
@@ -1863,6 +1885,7 @@ class Ed11y {
       /*
       Set up mutation observer for added nodes.
       */
+      // Scale timeouts by browser speed.
       const incrementalAlign = debounce(() => {
         if (!Ed11y.running) {
           Ed11y.scrollPending++;
@@ -1872,8 +1895,14 @@ class Ed11y {
       Ed11y.incrementalCheck = debounce(() => {
         if (!Ed11y.running) {
           Ed11y.running = true;
+          let runTime = performance.now();
           Ed11y.incremental = true;
           Ed11y.checkAll();
+          // Increase debounce if runs are slow.
+          runTime = performance.now() - runTime;
+          browserSpeed = runTime > 10 ? 10 : (browserSpeed + runTime) / 2;
+          // Todo: optimize tip placement so we do not need as much debounce.
+          Ed11y.browserLag = browserSpeed < 1 ? 0 : browserSpeed * 100 + Ed11y.totalCount;
         } else {
           window.setTimeout(Ed11y.incrementalCheck, 250);
         }
@@ -1883,6 +1912,11 @@ class Ed11y {
       const config = { childList: true, subtree: true, characterData: true };
 
       const logNode = function (node) {
+        /*
+        * Newly inserted tables and headings should not be flagged as empty
+        * before the user has a chance to edit them. This is crude, but it
+        * delays flagging.
+        * */
         //:is(table, h1, h2, h3, h4, h5, h6):
         if (node.nodeType !== 1) {
           return;
@@ -1898,7 +1932,7 @@ class Ed11y {
               Ed11y.recentlyAddedNodes.splice(stillWaiting, 1);
               Ed11y.incrementalCheck();
             }
-          }, 10000, node);
+          }, 5000, node);
         }
       };
 
