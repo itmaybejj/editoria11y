@@ -8,7 +8,7 @@ ed11y-element-panel {
 ed11y-element-result {
     opacity: 1;
     outline: 0;
-    transition: opacity .2s ease-out;
+    /*transition: opacity .2s ease-out; todo -- this is causing flashing */
     position: absolute !important;
     z-index: var(--ed11y-buttonZIndex, 9999) !important;
 }

@@ -271,6 +271,15 @@ class Ed11y {
     Ed11y.showPanel = false;
     let windowWidth = window.innerWidth;
 
+    Ed11y.disable = () => {
+      Ed11y.reset();
+      Ed11y.panelToggle?.classList.add('disabled');
+      Ed11y.panelToggle?.removeAttribute('aria-expanded');
+      if (Ed11y.panelToggle) {
+        Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleDisabled;
+      }
+    };
+
     Ed11y.initialize = () => {
 
       Ed11y.checkRunPrevent = () => {
@@ -376,12 +385,9 @@ class Ed11y {
           // todo MVP: set panel message?
           Ed11y.roots = [document.querySelector('html, body')];
           // Todo parameterize.
-          if (roots.length === 0) {
-            console.warn('Check Editoria11y configuration; specified root element not found');
-          } else {
-            console.warn('Editoria11y found no user editable content on this page');
-          }
-          Ed11y.reset();
+          console.warn('Check Editoria11y configuration; specified root element not found');
+          Ed11y.disable();
+          return;
         } else {
           Ed11y.roots = [];
           roots.forEach((el, i) => {
@@ -445,12 +451,7 @@ class Ed11y {
 
       }
       else {
-        Ed11y.reset();
-        Ed11y.panelToggle?.classList.add('disabled');
-        Ed11y.panelToggle?.removeAttribute('aria-expanded');
-        if (Ed11y.panelToggle) {
-          Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleDisabled;
-        }
+        Ed11y.disable();
       }
     };
 
@@ -468,6 +469,10 @@ class Ed11y {
         Ed11y.dismissedCount = 0;
         for (let i = Ed11y.results.length - 1; i >= 0; i--) {
           let test = Ed11y.results[i].test;
+          // todo: we could remove active range from list if it is not in oldResults. But we'd have to walk the array. Expensive...
+          /*if (Ed11y.incremental && Ed11y.oldResults.length > 0) {
+            // Don't flag new issues in the active range while people are typing.
+          }*/
           let dismissKey = Ed11y.dismissalKey(Ed11y.results[i].dismissalKey);
           // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
           if (dismissKey !== false && Ed11y.options.currentPage in Ed11y.dismissedAlerts && test in Ed11y.dismissedAlerts[Ed11y.options.currentPage] && dismissKey in Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]) {
@@ -1160,10 +1165,10 @@ class Ed11y {
           }
           let left = targetOffset.left;
           switch (mark.result.element.tagName) {
-            /*case 'TD':
-            case 'TH':
-              left = left - 20;
-              break;*/
+          /*case 'TD':
+          case 'TH':
+            left = left - 20;
+            break;*/
           case 'IMG':
             top = top + 10;
             left = left + 10;
@@ -1722,7 +1727,7 @@ class Ed11y {
     const rangeChange = function() {
       const range = document.createRange();
       let anchor = getSelection()?.anchorNode;
-      if (!anchor || !anchor.parentNode || typeof anchor.parentNode.closest !== 'function') {
+      if (anchor && anchor.parentNode && typeof anchor.parentNode.closest === 'function' && anchor.parentNode.matches('[contenteditable=true]')) {
         Ed11y.activeRange = false;
         return false;
       }
