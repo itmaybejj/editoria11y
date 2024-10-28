@@ -18,7 +18,10 @@
             <ul><li>Tips will fade out when you click into paragraphs, to prevent tips covering where you are typing.</li>
             <li>There's a fairly long hesitation (~1s) between checks. This greatly helps with performance, but...is it a good balance of performance and frequency?</li>
             </ul>
-            <p>Some things that are unfinished but known...</p>
+            <details><summary>Weird why does this work sorta?</summary><a href="#">Click here</a></details>
+            <details><summary>But not if it is css hidden?</summary><div style="display: none;"><a href="#">Click here</a></div></details>
+            <div class="ed11y-ignore">
+                <p>Some things that are unfinished but known...</p>
             <ul><li>Tip drawing and fade-out when outside the editable container is half-finished -- you may notice it taking a moment for tips to align, or offscreen tips messing with the page's scrollbar.</li>
                 <li>The minimized main panel looks the same when it is minimized and when it is off. I need to add a third state to differentiate.
                 </li><li>The tips have a new button after the [?] that moves the cursor to where the issue is. That probably needs a better label or position. I have considered keeping it as an icon and putting it up at the top of the modal with the [x], or changing it to spell out a label like "Edit text" or "Select issue."</li></ul>
@@ -49,7 +52,7 @@
             <h2>Position collisions</h2>
             <ul><li>There are five alerts here and the buttons don't fit; the collision detection is moving them off each other too far, so several are only reachable via the main panel "next" button. Need to improve collision handling.</li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li></ul>
 
-
+            </div>
         </section>
         <script src=" https://cdn.jsdelivr.net/npm/tinymce@7.1.2/tinymce.min.js "></script>
         <script>tinymce.init({
@@ -149,7 +152,7 @@
                       'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
                       'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
                     },
-                    ignoreElements: '.tox-editor-header *',
+                    ignoreElements: '.tox-editor-header *, .ed11y-ignore *',
                     hiddenHandlers : '[hidden]',
                     //inlineAlerts : false,
                     checkRoots : 'body',

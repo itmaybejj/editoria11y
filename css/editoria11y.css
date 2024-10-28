@@ -389,8 +389,6 @@ ed11y-element-result {
     border-top: 0;
     border-radius: 0 0 var(--ed11y-borderRadius, 1) var(--ed11y-borderRadius, 1);
     color: var(--ed11y-text, #20160c);
-    max-height: max(240px, 50vh);
-    overflow: auto;
     margin-right: 12px;
 }
 .ed11y-panel-wrapper summary {
@@ -401,6 +399,13 @@ ed11y-element-result {
     cursor: pointer;
     width: auto;
     box-shadow: 0 0 1px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+.ed11y-panel-wrapper details {
+    max-height: max(240px, 45vh);
+    overflow: auto;
 }
 #ed11y-headings-tab summary svg {
     width: 16px;
@@ -476,6 +481,13 @@ ed11y-element-result {
     align-self: flex-start;
 }
 
+
+#ed11y-message:not(:empty) {
+    background: var(--ed11y-alert);
+    color: #fff;
+    padding: 1px 5px 2px;
+    font-weight: 600;
+}
 
 
 /* Result toggle button ================= */

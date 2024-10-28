@@ -35,38 +35,38 @@ class Ed11yElementPanel extends HTMLElement {
         <!-- TODO: IT NOW GETS STUCK AT THE END IF THERE ARE DISMISSED ITEMS -->
       <button class='ed11y-jump next' data-ed11y-goto='0'><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32L0 64 0 368 0 480c0 17.7 14.3 32 32 32s32-14.3 32-32l0-128 64.3-16.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30l0-247.7c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L64 48l0-16z"></path></svg><span class='jump-next ed11y-sr-only'>${Ed11y.M.buttonFirstContent}</span></button>
     </div>
-
-      <div id='ed11y-issues-tab' hidden tabindex="0" role="tabpanel" class="show" aria-labelledby='ed11y-issues'>
-          <div>
-              <div class='content-text'>${Ed11y.M.panelCountBase}</div>
-              <div aria-live='polite' class='announce ed11y-sr-only'></div>
-          </div>
-          <div hidden class='ed11y-jumplinks'>
-          </div>
+    <div id="ed11y-message" aria-live="polite"></div>
+    <div id='ed11y-issues-tab' hidden tabindex="0" role="tabpanel" class="show" aria-labelledby='ed11y-issues'>
+        <div>
+            <div class='content-text'>${Ed11y.M.panelCountBase}</div>
+            <div aria-live='polite' class='announce ed11y-sr-only'></div>
         </div>
-      <div id='ed11y-visualizers' class="content" hidden>
-        <details id="ed11y-headings-tab">
-            <summary>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM64 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L96 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"></path></svg>Headings
-            </summary>
-            <div class="details">
-                ${Ed11y.M.panelCheckOutline}
-                <ul id='ed11y-outline'></ul>
-            </div>
-        </details>
-        <details id="ed11y-alts-tab">
-            <summary>
-                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M160 80l352 0c8.8 0 16 7.2 16 16l0 224c0 8.8-7.2 16-16 16l-21.2 0L388.1 178.9c-4.4-6.8-12-10.9-20.1-10.9s-15.7 4.1-20.1 10.9l-52.2 79.8-12.4-16.9c-4.5-6.2-11.7-9.8-19.4-9.8s-14.8 3.6-19.4 9.8L175.6 336 160 336c-8.8 0-16-7.2-16-16l0-224c0-8.8 7.2-16 16-16zM96 96l0 224c0 35.3 28.7 64 64 64l352 0c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L160 32c-35.3 0-64 28.7-64 64zM48 120c0-13.3-10.7-24-24-24S0 106.7 0 120L0 344c0 75.1 60.9 136 136 136l320 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-320 0c-48.6 0-88-39.4-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg> Alt text
-            </summary>
-            <div class="details">
-                ${Ed11y.M.panelCheckAltText}
-                <ul id='ed11y-alt-list'></ul>
-            </div>
-        </details>
-      
+        <div hidden class='ed11y-jumplinks'>
+        </div>
       </div>
-      <div id='ed11y-help-tab' class="content" hidden>
-      </div>
+    <div id='ed11y-visualizers' class="content" hidden>
+      <details id="ed11y-headings-tab">
+          <summary>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM64 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L96 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"></path></svg>Headings
+          </summary>
+          <div class="details">
+              ${Ed11y.M.panelCheckOutline}
+              <ul id='ed11y-outline'></ul>
+          </div>
+      </details>
+      <details id="ed11y-alts-tab">
+          <summary>
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M160 80l352 0c8.8 0 16 7.2 16 16l0 224c0 8.8-7.2 16-16 16l-21.2 0L388.1 178.9c-4.4-6.8-12-10.9-20.1-10.9s-15.7 4.1-20.1 10.9l-52.2 79.8-12.4-16.9c-4.5-6.2-11.7-9.8-19.4-9.8s-14.8 3.6-19.4 9.8L175.6 336 160 336c-8.8 0-16-7.2-16-16l0-224c0-8.8 7.2-16 16-16zM96 96l0 224c0 35.3 28.7 64 64 64l352 0c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L160 32c-35.3 0-64 28.7-64 64zM48 120c0-13.3-10.7-24-24-24S0 106.7 0 120L0 344c0 75.1 60.9 136 136 136l320 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-320 0c-48.6 0-88-39.4-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg> Alt text
+          </summary>
+          <div class="details">
+              ${Ed11y.M.panelCheckAltText}
+              <ul id='ed11y-alt-list'></ul>
+          </div>
+      </details>
+    
+    </div>
+    <div id='ed11y-help-tab' class="content" hidden>
+     </div>
     
     
     
@@ -163,6 +163,7 @@ class Ed11yElementPanel extends HTMLElement {
 
     // Scroll into view and throw an alert if the button or target is hidden.
     window.setTimeout((goto, target) => {
+      Ed11y.panel.querySelector('#ed11y-message').textContent = '';
       let firstVisible = false;
       let alertMessage;
       if (Ed11y.options.checkVisible && !Ed11y.visible(target)) {
@@ -175,15 +176,17 @@ class Ed11yElementPanel extends HTMLElement {
         alertMessage = Ed11y.M.jumpedToAriaHiddenTip;
       }
       if (firstVisible) {
-        alert(alertMessage);
-        firstVisible.classList.add('ed11y-hidden-highlight');
+        Ed11y.panel.querySelector('#ed11y-message').textContent = alertMessage;
       }
       if (!Ed11y.options.inlineAlerts) {
         // todo this selector must match the selector that decides where to place the mark
         target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
-        Ed11y.editableHighlighter(goto.dataset.ed11yResult, true);
+        Ed11y.editableHighlighter(goto.dataset.ed11yResult, true, firstVisible);
       } else {
         goto.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+        if (firstVisible) {
+          firstVisible.classList.add('ed11y-hidden-highlight');
+        }
       }
       let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
       if (!activeTip) {

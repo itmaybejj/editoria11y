@@ -1046,18 +1046,18 @@ class Ed11y {
 
     Ed11y.editableHighlight = [];
 
-    Ed11y.editableHighlighter = function (resultID, show, wrap) {
+    Ed11y.editableHighlighter = function (resultID, show, firstVisible) {
 
       if (!show) {
         Ed11y.editableHighlight[resultID]?.style.setProperty('opacity', '0');
         return;
       }
       const result = Ed11y.results[resultID];
-      let target = result.element;
-      if (wrap) {
+      let target = firstVisible ? firstVisible : result.element;
+      /*if (wrap) {
         let wrapper = result.element.closest('img,blockquote,p,table,h1,h2,h3,h4,h5,h6,li');
         target = wrapper ? wrapper : result.element.parentNode();
-      }
+      }*/
       let el = Ed11y.editableHighlight[resultID];
       if (!el) {
         el = document.createElement('ed11y-element-highlight');
