@@ -176,7 +176,14 @@ class Ed11yElementPanel extends HTMLElement {
         alertMessage = Ed11y.M.jumpedToAriaHiddenTip;
       }
       if (firstVisible) {
+        // Throw warning that the element cannot be highlighted.
         Ed11y.panel.querySelector('#ed11y-message').textContent = alertMessage;
+        Ed11y.hidePanelAlert = Date.now() + 10000; // Set or extend.
+        window.setTimeout(function () {
+          if (Ed11y.hidePanelAlert < Date.now()) {
+            Ed11y.panel.querySelector('#ed11y-message').textContent = '';
+          }
+        }, 15000);
       }
       if (!Ed11y.options.inlineAlerts) {
         // todo this selector must match the selector that decides where to place the mark

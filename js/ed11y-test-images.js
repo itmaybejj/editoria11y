@@ -95,9 +95,23 @@ class Ed11yTestImages {
         if (parentLink !== null) {
           el = parentLink;
           // If we don't already have an error, check for mixed text
-          if (!error && alt !== '' && Ed11y.linkText(parentLink.textContent).length > 1) {
-            // todo: need to remove ignored link text
-            error = 'altPartOfLinkWithText';
+
+          if (!error && alt !== '') {
+            let linkStrippedText = Ed11y.computeText(el, 0, !!Ed11y.options.linkIgnoreSelector);
+            linkStrippedText = linkStrippedText.replace(alt, '');
+            if (Ed11y.options.linkStringsNewWindows && Ed11y.options.linkStringsNewWindows !== Ed11y.M.linkStringsNewWindows) {
+              // don't strip on the default, which is loose.
+              linkStrippedText = linkStrippedText.toLowerCase().replace(Ed11y.options.linkIgnoreStrings, '');
+            }
+            if (Ed11y.options.linkIgnoreStrings) {
+              linkStrippedText = Ed11y.options.linkIgnoreStrings ?
+                linkStrippedText.toLowerCase().replace(Ed11y.options.linkIgnoreStrings, '')
+                : linkStrippedText.toLowerCase();
+            }
+            linkStrippedText = linkStrippedText.replace(/"|'|\?|\.|-|\s+/g, '');
+            if (linkStrippedText.length > 0) {
+              error = 'altPartOfLinkWithText';
+            }
           } else {
             // Return the linked version of the message.
             error = error ? error + 'Linked' : error;
