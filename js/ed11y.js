@@ -761,7 +761,6 @@ class Ed11y {
               'ed11y-warning-inline'
               : 'ed11y-error-inline';
           }
-          result.element.style.setProperty('box-shadow', color);
           result.element.classList.add(outlineClass);
         }
       } else {
@@ -791,7 +790,6 @@ class Ed11y {
     };
 
     Ed11y.resetPanel = function() {
-      // todo beta on re-open: recreate heading or alts if panel is showing
       // Reset main panel.
       visualizing = true; // so visualize function removes visualizers.
       visualize();
@@ -1050,8 +1048,10 @@ class Ed11y {
       // Announce that buttons have been placed.
       document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
       Ed11y.alignButtons();
-      Ed11y.checkEditableIntersects();
-      Ed11y.intersectionObservers(); // todo only when there is editable content ? */
+      if (!Ed11y.options.inlineAlerts) {
+        Ed11y.checkEditableIntersects();
+        Ed11y.intersectionObservers();
+      }
     };
 
     Ed11y.editableHighlight = [];
