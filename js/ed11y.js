@@ -542,8 +542,6 @@ class Ed11y {
     Ed11y.updatePanel = function () {
 
       // Stash old values for incremental updates.
-      //let oldWarnings = Ed11y.warningCount;
-      //let oldErrors = Ed11y.errorCount;
       Ed11y.countAlerts();
       if (Ed11y.incremental) {
         // Check for a change in the result counts.
@@ -621,20 +619,20 @@ class Ed11y {
           Ed11y.panel.classList.add('ed11y-active');
           Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
           Ed11y.panelToggleTitle.textContent = Ed11y.M.buttonHideChecker;
-          if (Ed11y.dismissedCount > 0) {
-            // Prepare show hidden alerts button.
-            if (Ed11y.dismissedCount === 1) {
-              Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlert : Ed11y.M.buttonShowHiddenAlert;
-            } else {
-              Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlerts(Ed11y.dismissedCount) : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
-            }
-            Ed11y.showDismissed.removeAttribute('hidden');
-          } else if (Ed11y.options.showDismissed === true) {
+          // Prepare show hidden alerts button.
+          if (Ed11y.dismissedCount === 0) {
             // Reset show hidden default option when irrelevant.
             Ed11y.showDismissed.setAttribute('hidden', '');
             Ed11y.showDismissed.setAttribute('data-ed11y-pressed', 'false');
             Ed11y.options.showDismissed = false;
+          } else if (Ed11y.dismissedCount === 1) {
+            Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlert : Ed11y.M.buttonShowHiddenAlert;
+            Ed11y.showDismissed.removeAttribute('hidden');
+          } else {
+            Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlerts(Ed11y.dismissedCount) : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+            Ed11y.showDismissed.removeAttribute('hidden');
           }
+
           window.setTimeout(function () {
             document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
             if (!Ed11y.ignoreAll) {
@@ -660,12 +658,15 @@ class Ed11y {
             Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-warnings');
             Ed11y.panel.classList.add('ed11y-pass');
           }
-          Ed11y.panelCount.textCount = Ed11y.totalCount;
           // todo postpone: aria alert on load?
           /*window.setTimeout(function () {
             //Ed11y.announce.textContent = text;
           }, 1500);*/
-          Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.dismissedCount > 0 && Ed11y.totalCount === 0 && Ed11y.open ? Ed11y.dismissedCount : Ed11y.totalCount;
+          if (Ed11y.dismissedCount > 0 && Ed11y.totalCount === 0) {
+            Ed11y.panelCount.textContent = Ed11y.dismissedCount;
+          } else {
+            Ed11y.panelCount.textContent = Ed11y.totalCount > 99 ? '99+' : Ed11y.totalCount;
+          }
         } else {
           Ed11y.panelJumpNext.setAttribute('hidden', '');
 
@@ -674,7 +675,7 @@ class Ed11y {
           Ed11y.panel.classList.add('ed11y-pass');
 
           if (Ed11y.dismissedCount > 0) {
-            Ed11y.panel.querySelector('.toggle-count').textContent = 'i';
+            Ed11y.panelCount.textContent = 'i';
             if (Ed11y.open) {
               Ed11y.panelToggleTitle.textContent = Ed11y.M.buttonHideChecker;
             } else {
@@ -684,7 +685,7 @@ class Ed11y {
             }
           } else {
             // todo postpone checkmark looks bad on Android
-            Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
+            Ed11y.panelCount.textContent = '✓';
             Ed11y.panelToggleTitle.textContent = Ed11y.open ? Ed11y.M.buttonHideChecker : Ed11y.M.buttonShowNoAlert;
           }
         }
@@ -775,7 +776,7 @@ class Ed11y {
       visualizing = true; // so visualize function removes visualizers.
       visualize();
       if (Ed11y.totalCount === 0 && Ed11y.dismissedCount > 0) {
-        Ed11y.panel.querySelector('.toggle-count').textContent = 'i';
+        Ed11y.panelCount.textContent = 'i';
         Ed11y.panelToggleTitle.textContent = Ed11y.dismissedCount === 1 ?
           Ed11y.M.buttonShowHiddenAlert :
           Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);

@@ -119,7 +119,7 @@ ed11y-element-result {
     /*box-shadow: var(--ed11y-panelBarShadow);*/
     box-shadow: 0 0 1px;
     min-width: 2em;
-    min-height: 1.5em;
+    min-height: 1.6125em;
     font-size: 1em;
     line-height: 1.5;
     overflow: hidden;
@@ -149,15 +149,16 @@ ed11y-element-result {
 }
 .ed11y-buttonbar button svg {
     width: 15px;
-    margin: 0 -1px -2px 1px;
+    vertical-align: top;
+    margin: .3125em -1px 0 1px;
     opacity: .98;
 }
 .ed11y-jump.next svg {
     width: 10px;
-    margin: 0 -4px -1px 0;
+    margin: .375em -4px 0 0;
 }
 #ed11y-show-hidden svg {
-    margin: 2px 0 -2px;
+    margin: .25em 0 0;
 }
 .ed11y-buttonbar button[data-ed11y-pressed="true"] {
     box-shadow: inset 1px 1px 3px black, inset 1px 1px 3px black;

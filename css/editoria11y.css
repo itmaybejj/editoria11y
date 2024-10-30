@@ -119,7 +119,7 @@ ed11y-element-result {
     /*box-shadow: var(--ed11y-panelBarShadow);*/
     box-shadow: 0 0 1px;
     min-width: 2em;
-    min-height: 1.5em;
+    min-height: 1.6125em;
     font-size: 1em;
     line-height: 1.5;
     overflow: hidden;
