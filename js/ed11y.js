@@ -382,7 +382,6 @@ class Ed11y {
         // Find and cache all root elements based on user-provided selectors.
         let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
         if (roots.length === 0) {
-          // todo MVP: set panel message?
           Ed11y.roots = [document.querySelector('html, body')];
           // Todo parameterize.
           console.warn('Check Editoria11y configuration; specified root element not found');
@@ -625,18 +624,19 @@ class Ed11y {
           Ed11y.panel.classList.remove('ed11y-shut');
           Ed11y.panel.classList.add('ed11y-active');
           Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
+          Ed11y.panelToggleTitle.textContent = Ed11y.M.buttonHideChecker;
           if (Ed11y.dismissedCount > 0) {
+            // Prepare show hidden alerts button.
             if (Ed11y.dismissedCount === 1) {
               Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlert : Ed11y.M.buttonShowHiddenAlert;
             } else {
               Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlerts(Ed11y.dismissedCount) : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
             }
-
             Ed11y.showDismissed.removeAttribute('hidden');
           } else if (Ed11y.options.showDismissed === true) {
             // Reset show hidden default option when irrelevant.
             Ed11y.showDismissed.setAttribute('hidden', '');
-            Ed11y.showDismissed.setAttribute('aria-pressed', 'false');
+            Ed11y.showDismissed.setAttribute('data-ed11y-pressed', 'false');
             Ed11y.options.showDismissed = false;
           }
           window.setTimeout(function () {
@@ -647,18 +647,16 @@ class Ed11y {
           }, 0);
         }
         if (Ed11y.totalCount > 0 || (Ed11y.options.showDismissed && Ed11y.dismissedCount > 0)) {
-          Ed11y.panelMessage.textContent = Ed11y.open ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonShowAlerts;
+          // Showing via issue or forced-open
+          Ed11y.panelToggleTitle.textContent = Ed11y.M.buttonHideChecker;
           Ed11y.panelJumpNext.removeAttribute('hidden');
-          if (Ed11y.totalCount < 2) {
-            Ed11y.panelJumpPrev.setAttribute('hidden', '');
-          } else {
-            Ed11y.panelJumpPrev.removeAttribute('hidden');
-          }
           if (Ed11y.errorCount > 0) {
+            // Errors
             Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-pass');
             Ed11y.panel.classList.add('ed11y-errors');
           }
           else if (Ed11y.warningCount > 0) {
+            // Warnings
             Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-pass');
             Ed11y.panel.classList.add('ed11y-warnings');
           } else {
@@ -667,28 +665,34 @@ class Ed11y {
             Ed11y.panel.classList.add('ed11y-pass');
           }
           Ed11y.panelCount.textCount = Ed11y.totalCount;
-          //Ed11y.panelCount.style.display = 'inline-block';
-          //let text = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
-          //Ed11y.panelMessage.textContent = text;
           window.setTimeout(function () {
+            // todo restore aria alert?
             //Ed11y.announce.textContent = text;
           }, 1500);
-          Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
+          Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.dismissedCount > 0 && Ed11y.totalCount === 0 && Ed11y.open ? Ed11y.dismissedCount : Ed11y.totalCount;
         } else {
-          Ed11y.panelMessage.textContent = Ed11y.open ? Ed11y.M.buttonHideNoAlert : Ed11y.M.buttonShowNoAlert;
           Ed11y.panelJumpNext.setAttribute('hidden', '');
-          Ed11y.panelJumpPrev.setAttribute('hidden', '');
 
           Ed11y.panelCount.style.display = 'display: none;';
           Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-errors');
           Ed11y.panel.classList.add('ed11y-pass');
+
           if (Ed11y.dismissedCount > 0) {
             // todo: title attribute to explain the difference?
             Ed11y.panel.querySelector('.toggle-count').textContent = 'i';
-            //Ed11y.panelMessage.innerText = Ed11y.M.panelCountAllDismissed;
+            if (Ed11y.open) {
+              Ed11y.panelToggleTitle.textContent = Ed11y.M.buttonHideChecker;
+            } else {
+              Ed11y.panelToggleTitle.textContent = Ed11y.dismissedCount > 1 ?
+                Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount) :
+                Ed11y.M.buttonShowHiddenAlert;
+            }
+            // todo heeeeere restore old message keys with new labels
+            //Ed11y.panelToggleTitle.innerText = Ed11y.M.panelCountAllDismissed;
           } else {
+            // todo font looks bad on Android
             Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
-            //Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
+            Ed11y.panelToggleTitle.textContent = Ed11y.open ? Ed11y.M.buttonHideChecker : Ed11y.M.buttonShowNoAlert;
           }
         }
 
@@ -742,7 +746,6 @@ class Ed11y {
       mark.setAttribute('id', 'ed11y-result-' + index);
       mark.setAttribute('data-ed11y-result', index);
       mark.setAttribute('data-ed11y-open', 'false');
-      //Ed11y.results[index].toggle = mark;
       location.insertAdjacentElement(position, mark);
       if (Ed11y.options.inlineAlerts) {
         if (result.element.style.outline.indexOf('alert') === -1 ) {
@@ -758,8 +761,7 @@ class Ed11y {
               'ed11y-warning-inline'
               : 'ed11y-error-inline';
           }
-          /* todo editable: this is setting a style attribute; must change to a positioned rule */
-          //result.element.style.setProperty('box-shadow', color); // todo only within editable?
+          result.element.style.setProperty('box-shadow', color);
           result.element.classList.add(outlineClass);
         }
       } else {
@@ -793,8 +795,14 @@ class Ed11y {
       // Reset main panel.
       visualizing = true; // so visualize function removes visualizers.
       visualize();
+      if (Ed11y.totalCount === 0 && Ed11y.dismissedCount > 0) {
+        Ed11y.panel.querySelector('.toggle-count').textContent = 'i';
+        Ed11y.panelToggleTitle.textContent = Ed11y.dismissedCount === 1 ?
+          Ed11y.M.buttonShowHiddenAlert :
+          Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+      }
       Ed11y.panelJumpNext?.setAttribute('data-ed11y-goto', '0');
-      Ed11y.panelJumpPrev?.setAttribute('data-ed11y-goto', '0');
+      Ed11y.panel.querySelector('#ed11y-message').textContent = '';
       Ed11y.panel?.classList.add('ed11y-shut');
       Ed11y.panel?.classList.remove('ed11y-active');
       Ed11y.panelToggle?.setAttribute('aria-expanded', 'false');
@@ -810,7 +818,7 @@ class Ed11y {
     };
 
     Ed11y.linkText = (linkText) => {
-      // todo: This is only used in Images??? Review all text value diving.
+      // todo postpone: This is only used in Images??? Review all text value diving.
       linkText = linkText.replace(Ed11y.options.linkIgnoreStrings, '');
       linkText = linkText.replace(/'|"|-|\.|\s+/g, '');
       return linkText;
@@ -1002,21 +1010,23 @@ class Ed11y {
     };
 
     Ed11y.toggleShowDismissals = function () {
-      // todo: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
+      // todo postpone: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
       Ed11y.ignoreAll = false;
       Ed11y.options.showDismissed = !(Ed11y.options.showDismissed);
       Ed11y.reset();
       Ed11y.showPanel = true;
       Ed11y.checkAll();
 
-      Ed11y.showDismissed.setAttribute('aria-pressed', (!!Ed11y.options.showDismissed).toString());
+      Ed11y.showDismissed.setAttribute('data-ed11y-pressed', (!!Ed11y.options.showDismissed).toString());
+      window.setTimeout(function() {
+        Ed11y.showDismissed.focus();
+      }, 0);
     };
 
     Ed11y.dismissHelp = function (el) {
       let help = document.createElement('ul');
       help.setAttribute('tabindex', '-1');
       help.classList.add('help');
-      // todo MVP: parameterize and write more gooder
       if (Ed11y.options.allowHide) {
         let li = document.createElement('li');
         li.textContent = Ed11y.M.elementDismissalHelpHide;
@@ -1485,13 +1495,18 @@ class Ed11y {
           if (Ed11y.panel.classList.contains('ed11y-active') === false) {
             Ed11y.onLoad = false;
             Ed11y.showPanel = true;
-            Ed11y.checkAll();
+            if (Ed11y.dismissedCount > 0 && Ed11y.warningCount === 0 && Ed11y.errorCount === 0) {
+              Ed11y.options.showDismissed = false;
+              Ed11y.toggleShowDismissals();
+            } else {
+              Ed11y.checkAll();
+            }
             Ed11y.options.userPrefersShut = false;
             localStorage.setItem('editoria11yShow', '1');
-            //Ed11y.panelMessage.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonHideNoAlert;
+            //Ed11y.panelToggleTitle.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonHideNoAlert;
           }
           else {
-            Ed11y.panelMessage.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonShowAlerts : Ed11y.M.buttonShowNoAlert;
+            Ed11y.panelToggleTitle.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonShowAlerts : Ed11y.M.buttonShowNoAlert;
             Ed11y.reset();
             Ed11y.options.userPrefersShut = true;
             localStorage.setItem('editoria11yShow', '0');
@@ -1513,14 +1528,17 @@ class Ed11y {
       if (Ed11y.headingOutline.length) {
         panelOutline.innerHTML = '';
         Ed11y.headingOutline.forEach((el, i) => {
+          // Todo: we COULD do a draw-over of these in editable mode...
           // Todo implement outline ignore function.
-          let mark = document.createElement('ed11y-element-heading-label');
-          mark.classList.add('ed11y-element', 'ed11y-element-heading');
-          mark.dataset.ed11yHeadingOutline = i.toString();
-          mark.setAttribute('id', 'ed11y-heading-' + i);
-          mark.setAttribute('tabindex', '-1');
-          // Array: el, level, outlinePrefix
-          el[0].insertAdjacentElement('afterbegin', mark);
+          if (Ed11y.options.inlineAlerts) {
+            let mark = document.createElement('ed11y-element-heading-label');
+            mark.classList.add('ed11y-element', 'ed11y-element-heading');
+            mark.dataset.ed11yHeadingOutline = i.toString();
+            mark.setAttribute('id', 'ed11y-heading-' + i);
+            mark.setAttribute('tabindex', '-1');
+            // Array: el, level, outlinePrefix
+            el[0].insertAdjacentElement('afterbegin', mark);
+          };
           let level = el[1];
           let leftPad = 10 * level - 10;
           let li = document.createElement('li');
@@ -1557,7 +1575,6 @@ class Ed11y {
       // TODO remove this functionality if we are ditching tabs
       Ed11y.panel.querySelector('#' + id)?.setAttribute('aria-selected', 'true');
       Ed11y.panel.querySelector('#' + id + '-tab')?.classList.remove('ed11y-hidden');
-      // todo beta what to show when no outline or images
       // todo postpone: error when no headings found at all?
 
       // Show extras
@@ -1609,11 +1626,13 @@ class Ed11y {
         Ed11y.imageAlts.forEach((el, i) => {
           // el[el, src, altLabel, altStyle]
 
-          // Label images
-          let mark = document.createElement('ed11y-element-alt');
-          mark.classList.add('ed11y-element');
-          mark.dataset.ed11yImg = i.toString();
-          el[0].insertAdjacentElement('beforebegin', mark);
+          if (Ed11y.options.inlineAlerts) {
+            // Label images
+            let mark = document.createElement('ed11y-element-alt');
+            mark.classList.add('ed11y-element');
+            mark.dataset.ed11yImg = i.toString();
+            el[0].insertAdjacentElement('beforebegin', mark);
+          }
 
           // Build alt list in panel
           let userText = document.createElement('span');
@@ -1636,7 +1655,7 @@ class Ed11y {
     const visualize = function () {
       if (visualizing) {
         visualizing = false;
-        Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('aria-pressed', 'false');
+        Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
         Ed11y.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
         Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
         Ed11y.elements.reset?.forEach(el => { el.remove(); });
@@ -1644,25 +1663,10 @@ class Ed11y {
       }
       visualizing = true;
       // todo transfer focus?
-      Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('aria-pressed', 'true');
+      Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
       Ed11y.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
       showAltPanel();
       showHeadingsPanel();
-    };
-
-    const showHelpPanel = function () {
-      // todo: this is commented out at the moment
-      // todo: report link if available?
-      console.log('showing help');
-      let helpTab = Ed11y.panel.querySelector('#ed11y-help-tab');
-      if (helpTab.matches('[hidden]')) {
-        Ed11y.panel.querySelector('#ed11y-help').setAttribute('aria-pressed', 'true');
-        helpTab.removeAttribute('hidden');
-        helpTab.innerHTML = Ed11y.M.panelHelp;
-      } else {
-        helpTab.setAttribute('hidden', 'true');
-        Ed11y.panel.querySelector('#ed11y-help').setAttribute('aria-pressed', 'false');
-      }
     };
 
     Ed11y.buildJumpList = function () {
@@ -1807,7 +1811,7 @@ class Ed11y {
     };
 
     Ed11y.intersectionObservers = function () {
-      Ed11y.elements.editable.forEach(editable => {
+      Ed11y.elements.editable?.forEach(editable => {
         editable.addEventListener('scroll', function() {
           // note: we could just adjust the transform rather than recalculating.
           Ed11y.scrollPending = Ed11y.scrollPending < 2 ? Ed11y.scrollPending + 1 : Ed11y.scrollPending;
@@ -1958,10 +1962,6 @@ class Ed11y {
       // Set next/previous buttons
       let goMax = Ed11y.jumpList.length - 1;
       let goNext;
-      if (Ed11y.totalCount > 1) {
-        // todo remove if prev will be pinned
-        // Ed11y.panelJumpPrev.removeAttribute('hidden');
-      }
       if (Ed11y.goto === goMax || Ed11y.goto > goMax) {
         // Reached end of loop or dismissal pushed us out of loop
         goNext = 0;
@@ -1971,13 +1971,7 @@ class Ed11y {
         goNext = parseInt(Ed11y.goto) + 1;
         Ed11y.nextText = Ed11y.M.buttonNextContent;
       }
-      let goPrev = goNext - 2;
-      if (goPrev < 0) {
-        // loop around
-        goPrev = goMax + 1 + goPrev;
-      }
       Ed11y.panelJumpNext.dataset.ed11yGoto = goNext.toString();
-      Ed11y.panelJumpPrev.dataset.ed11yGoto = goPrev.toString();
       window.setTimeout(function () {
         Ed11y.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Ed11y.nextText;
       }, 250);

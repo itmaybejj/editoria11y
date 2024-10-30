@@ -20,7 +20,6 @@
             </ul>
             <details><summary>Weird why does this work sorta?</summary><a href="#">Click here</a></details>
             <details><summary>But not if it is css hidden?</summary><div style="display: none;"><a href="#">Click here</a></div></details>
-            <div class="ed11y-ignore">
                 <p>Some things that are unfinished but known...</p>
             <ul><li>Tip drawing and fade-out when outside the editable container is half-finished -- you may notice it taking a moment for tips to align, or offscreen tips messing with the page's scrollbar.</li>
                 <li>The minimized main panel looks the same when it is minimized and when it is off. I need to add a third state to differentiate.
@@ -52,7 +51,6 @@
             <h2>Position collisions</h2>
             <ul><li>There are five alerts here and the buttons don't fit; the collision detection is moving them off each other too far, so several are only reachable via the main panel "next" button. Need to improve collision handling.</li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li></ul>
 
-            </div>
         </section>
         <script src=" https://cdn.jsdelivr.net/npm/tinymce@7.1.2/tinymce.min.js "></script>
         <script>tinymce.init({
@@ -158,7 +156,7 @@
                     checkRoots : 'body',
                     linkIgnoreStrings: '\(link is external\)',
                     customTests : 2,
-                    theme: 'sleekTheme',
+                    theme: 'darkTheme',
                     linkIgnoreSelector : '.ignore-class',
                   });
                 };
