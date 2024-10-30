@@ -35,6 +35,9 @@ class Ed11yElementResult extends HTMLElement {
       this.toggle.setAttribute('data-ed11y-result', this.dataset.ed11yResult);
       this.toggle.setAttribute('data-ed11y-ready', 'false');
       this.toggle.setAttribute('data-ed11y-race', 'false');
+      if (!Ed11y.options.inlineAlerts) {
+        this.toggle.style.setProperty('font-size', '16px');
+      }
       if (this.dismissed) {
         this.toggle.classList.add('dismissed');
         if (this.result.dismissalStatus !== 'ok') {

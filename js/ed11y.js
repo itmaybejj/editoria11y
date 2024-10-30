@@ -468,7 +468,7 @@ class Ed11y {
         Ed11y.dismissedCount = 0;
         for (let i = Ed11y.results.length - 1; i >= 0; i--) {
           let test = Ed11y.results[i].test;
-          // todo: we could remove active range from list if it is not in oldResults. But we'd have to walk the array. Expensive...
+          // todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are testing. But we'd have to walk the array. Expensive!
           /*if (Ed11y.incremental && Ed11y.oldResults.length > 0) {
             // Don't flag new issues in the active range while people are typing.
           }*/
@@ -583,11 +583,7 @@ class Ed11y {
           Ed11y.onLoad = false;
 
           if (!Ed11y.options.inlineAlerts) {
-            // todo change to if there are editable elements
             oldResultString = JSON.stringify(Ed11y.results);
-            /*if (Ed11y.options.alertMode === 'assertive') {
-              Ed11y.showPanel = true;
-            }*/
           }
 
           // Create the panel DOM on load.
@@ -665,10 +661,10 @@ class Ed11y {
             Ed11y.panel.classList.add('ed11y-pass');
           }
           Ed11y.panelCount.textCount = Ed11y.totalCount;
-          window.setTimeout(function () {
-            // todo restore aria alert?
+          // todo postpone: aria alert on load?
+          /*window.setTimeout(function () {
             //Ed11y.announce.textContent = text;
-          }, 1500);
+          }, 1500);*/
           Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.dismissedCount > 0 && Ed11y.totalCount === 0 && Ed11y.open ? Ed11y.dismissedCount : Ed11y.totalCount;
         } else {
           Ed11y.panelJumpNext.setAttribute('hidden', '');
@@ -678,7 +674,6 @@ class Ed11y {
           Ed11y.panel.classList.add('ed11y-pass');
 
           if (Ed11y.dismissedCount > 0) {
-            // todo: title attribute to explain the difference?
             Ed11y.panel.querySelector('.toggle-count').textContent = 'i';
             if (Ed11y.open) {
               Ed11y.panelToggleTitle.textContent = Ed11y.M.buttonHideChecker;
@@ -687,10 +682,8 @@ class Ed11y {
                 Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount) :
                 Ed11y.M.buttonShowHiddenAlert;
             }
-            // todo heeeeere restore old message keys with new labels
-            //Ed11y.panelToggleTitle.innerText = Ed11y.M.panelCountAllDismissed;
           } else {
-            // todo font looks bad on Android
+            // todo postpone checkmark looks bad on Android
             Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
             Ed11y.panelToggleTitle.textContent = Ed11y.open ? Ed11y.M.buttonHideChecker : Ed11y.M.buttonShowNoAlert;
           }
@@ -703,7 +696,6 @@ class Ed11y {
           Ed11y.paintReady();
         }
       }
-      // todo parameterize
       Ed11y.running = false;
       if (Ed11y.elements['editable']) {
         Ed11y.elements['editable'].forEach(editable => {
@@ -713,7 +705,7 @@ class Ed11y {
     };
 
     // Place markers on elements with issues
-    Ed11y.result = function (result, index, jumpIndex, editableParent) {
+    Ed11y.result = function (result, index, jumpIndex) {
       /* old array to new object map:
         // [0] element
         // [1] test
@@ -726,9 +718,10 @@ class Ed11y {
       mark.classList.add('ed11y-preload');
       let location;
       let position = 'beforebegin';
-      // todo: expose this as a string?
-      if (!Ed11y.options.inlineAlerts || editableParent) {
-        // todo: if editable parent is detected, set global inlineAlerts mode.
+      mark.setAttribute('id', 'ed11y-result-' + index);
+      mark.setAttribute('data-ed11y-result', index);
+      mark.setAttribute('data-ed11y-open', 'false');
+      if (!Ed11y.options.inlineAlerts) {
         location = document.querySelector('body');
         position = 'beforeend';
         mark.classList.add('ed11y-editable-result');
@@ -738,16 +731,6 @@ class Ed11y {
           location = result.element;
           position = result.position;
         }
-      }
-      // heeeee compute this in test not here
-
-
-
-      mark.setAttribute('id', 'ed11y-result-' + index);
-      mark.setAttribute('data-ed11y-result', index);
-      mark.setAttribute('data-ed11y-open', 'false');
-      location.insertAdjacentElement(position, mark);
-      if (Ed11y.options.inlineAlerts) {
         if (result.element.style.outline.indexOf('alert') === -1 ) {
           // Set property unless alert is already set.
           const display = window.getComputedStyle(result.element).getPropertyValue('display');
@@ -763,10 +746,8 @@ class Ed11y {
           }
           result.element.classList.add(outlineClass);
         }
-      } else {
-        // Shrink toggle inside editable containers.
-        mark.shadowRoot.querySelector('.toggle').style.setProperty('font-size', '16px');
       }
+      location.insertAdjacentElement(position, mark);
       Ed11y.jumpList.unshift(mark);
       mark.dataset.ed11yJumpPosition = `${jumpIndex}`;
       Ed11y.results[index].toggle = mark;
@@ -1064,17 +1045,12 @@ class Ed11y {
       }
       const result = Ed11y.results[resultID];
       let target = firstVisible ? firstVisible : result.element;
-      /*if (wrap) {
-        let wrapper = result.element.closest('img,blockquote,p,table,h1,h2,h3,h4,h5,h6,li');
-        target = wrapper ? wrapper : result.element.parentNode();
-      }*/
       let el = Ed11y.editableHighlight[resultID];
       if (!el) {
         el = document.createElement('ed11y-element-highlight');
         Ed11y.editableHighlight[resultID] = el;
         el.style.setProperty('position', 'absolute');
         el.style.setProperty('pointer-events', 'none');
-        // todo: sometimes while typing this fails to red?
         document.body.appendChild(el);
       }
       const zIndex = result.dismissalKey ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
@@ -1087,8 +1063,8 @@ class Ed11y {
       el.style.setProperty('top', '0');
       el.style.setProperty('left', '0');
       let targetOffset = target.getBoundingClientRect();
-      if ((targetOffset.top === 0 && targetOffset.left === 0) || !Ed11y.visible(target)) {
-        // Invisible target. todo: wait why is 0 considered invisible?
+      if (!Ed11y.visible(target)) {
+        // Invisible target.
         const firstVisibleParent = Ed11y.firstVisibleParent(target);
         targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
       }
@@ -1139,12 +1115,12 @@ class Ed11y {
       }
     };
 
-    const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top) {
-      const width = 40 + 15; // est width + padding.
-      return !(rect1Left + width < rect2Left ||
-        rect1Left > rect2Left + width ||
-        rect1Top + width < rect2Top ||
-        rect1Top > rect2Top + width);
+    const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size = 55) {
+      // Yes this looks like intersect const, but it's math not browser offsets.
+      return !(rect1Left + size < rect2Left ||
+        rect1Left > rect2Left + size ||
+        rect1Top + size < rect2Top ||
+        rect1Top > rect2Top + size);
     };
 
     Ed11y.alignButtons = function () {
@@ -1167,8 +1143,8 @@ class Ed11y {
         Ed11y.jumpList.forEach((mark, i) => {
           let targetOffset = mark.result.element.getBoundingClientRect();
           let top = targetOffset.top + scrollTop;
-          if ((top === 0 && targetOffset.left === 0) || !Ed11y.visible(mark.result.element)) {
-            // Invisible target. todo: wait why is 0 considered invisible?
+          if (!Ed11y.visible(mark.result.element)) {
+            // Invisible target.
             const firstVisibleParent = Ed11y.firstVisibleParent(mark.result.element);
             targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
             top = targetOffset.top + scrollTop;
@@ -1239,21 +1215,14 @@ class Ed11y {
         // Detect tip that overlaps with previous result.
         if (mark.markTop + scrollTop < 0) {
           // Offscreen to top.
-          // todo heeeere need different math for inline.
           nudgeTop = (-1 * (mark.markTop + scrollTop)) - 6;
         }
         if (
           (i > 0 && overlap(mark.markLeft, mark.markTop, Ed11y.jumpList[i - 1].markLeft, Ed11y.jumpList[i - 1].markTop)) ||
           (i > 1 && overlap(mark.markLeft, mark.markTop, Ed11y.jumpList[i - 2].markLeft, Ed11y.jumpList[i - 2].markTop)) ||
           (i > 2 && overlap(mark.markLeft, mark.markTop, Ed11y.jumpList[i - 3].markLeft, Ed11y.jumpList[i - 3].markTop))
-          /*(i > 0 && intersect(mark.markOffset, Ed11y.jumpList[i - 1].markOffset, 15)) ||
-          (i > 1 && intersect(mark.markOffset, Ed11y.jumpList[i - 2].markOffset, 15)) ||
-          (i > 2 && intersect(mark.markOffset, Ed11y.jumpList[i - 3].markOffset, 15))*/
         ) {
-          //todo -- not actually computing -- need to update markOffset on nudge
-          // Overlapping previous
-          // todo compute actual overlap. We're bouncing by the full amount no matter what which gets gappy.
-          // todo if we recorded positions and sorted the grid by y positions, we'd only need to CHECK x for y overlaps.
+          // todo postpone: compute actual overlap? We're bouncing by the full amount no matter what which adds too much gapping.
           nudgeTop = nudgeTop + 21 + previousNudgeTop;
           nudgeLeft = 21 + previousNudgeLeft;
         }
@@ -1287,20 +1256,17 @@ class Ed11y {
         } else if (needNudge) {
           nudgeMark(mark, nudgeLeft, nudgeTop);
         }
-        // todo: this is crude and only really works right once.
         previousNudgeTop = nudgeTop;
         previousNudgeLeft = nudgeLeft;
       });
 
       // Last pass: check for elements offscreen within scrollable areas.
-      // Todo: this should check for hidden and details as well? Check...
       if (!Ed11y.options.inlineAlerts) {
         // Alerts have to be positioned relative to viewport.
         Ed11y.jumpList.forEach(mark => {
 
           if (mark.result.scrollableParent) {
             // Hide alerts outside a scroll zone.
-            // todo only offscreen if the result is offscreen, not the mark?
             if (!!mark.bounds && (mark.targetOffset.top - mark.bounds.top < 0 || mark.targetOffset.top - mark.bounds.bottom > 0 ) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
               // Tip has exited scrollable parent. Visually hide.
               mark.classList.add('ed11y-offscreen');
@@ -1372,7 +1338,7 @@ class Ed11y {
         }, 50, loopCount);
       }
       // Reset any previous alignments
-      // todo do this without resets to remove shudder
+      // todo postpone: calculate without resets to remove shudder.
       tip.style.setProperty('transform',null);
       arrow.style.setProperty('left', null);
       arrow.style.setProperty('top', null);
@@ -1392,7 +1358,7 @@ class Ed11y {
       }
       const buttonLeft = buttonOffset.left + document.body.scrollLeft;
       toolTip.style.setProperty('top', buttonOffset.top + scrollTop + 'px');
-      // todo: need left scroll too for horizontally scrolled pages
+      // todo postpone: need left scroll too for horizontally scrolled pages
       toolTip.style.setProperty('left', buttonOffset.left + 'px');
       const tipWidth = tip.offsetWidth;
       const tipHeight = tip.offsetHeight;
@@ -1487,7 +1453,6 @@ class Ed11y {
 
     Ed11y.togglePanel = function () {
       if (!Ed11y.doubleClickPrevent) {
-        // todo beta: revisit aria states and announcements.
         // Prevent clicks piling up while scan is running.
         if (Ed11y.running !== true) {
           Ed11y.running = true;
@@ -1662,7 +1627,6 @@ class Ed11y {
         return;
       }
       visualizing = true;
-      // todo transfer focus?
       Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
       Ed11y.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
       showAltPanel();
@@ -1675,7 +1639,6 @@ class Ed11y {
 
       // Initial alignment to get approximate Y position order for jump list.
       Ed11y.results.forEach((result, i) => {
-        // todo: do we need a firstvisibleparent here?
         let top = result.element.getBoundingClientRect().top;
         if (!top) {
           const visibleParent = Ed11y.firstVisibleParent(result.element);
@@ -1684,14 +1647,11 @@ class Ed11y {
           }
         }
         top = top + window.scrollY;
-        // todo: contentEditable parent selector? any scrollable Parent?
-        let editableParent = result.element.closest('[contenteditable]');
-        if (editableParent) {
+        Ed11y.results[i].scrollableParent = closestScrollable(result.element);
+        if (Ed11y.results[i].scrollableParent) {
           // Group these together.
           top = top * 0.000001;
         }
-        Ed11y.results[i].scrollableParent = closestScrollable(result.element);
-        Ed11y.results[i].editableParent = editableParent;
         Ed11y.results[i].sortPos = top;
       });
       // Sort from bottom to top so focus order after insert is top to bottom.
@@ -1701,7 +1661,7 @@ class Ed11y {
       Ed11y.results?.forEach(function (result, i) {
         jumpIndex--;
         if (!Ed11y.results[i].dismissalStatus || Ed11y.options.showDismissed) {
-          Ed11y.result(result, i, jumpIndex, result.editableParent);
+          Ed11y.result(result, i, jumpIndex);
         }
       });
     };
@@ -1719,8 +1679,8 @@ class Ed11y {
       };
     };
 
-    // todo here oh bother did this again with overlap const.
     const intersect = function(a, b, x = 10) {
+      // Compute intersect using browser offsets.
       return (a.left - x <= b.right &&
         b.left - x <= a.right &&
         a.top - x <= b.bottom &&
@@ -1737,7 +1697,6 @@ class Ed11y {
       }
       let expand = anchor?.parentNode && anchor.parentNode.closest('p, td, th, li, h2, h3, h4, h5, h6');
       anchor = expand ? expand : anchor;
-      // todo editable: maybe not the whole selection but just a few lines?
       range.setStartBefore(anchor);
       range.setEndAfter(anchor);
       if (typeof range !== 'object' || typeof range.getBoundingClientRect !== 'function') {
@@ -1794,10 +1753,10 @@ class Ed11y {
       if (!scrollTicking && Ed11y.scrollPending > 0 && !Ed11y.running && Ed11y.jumpList && Ed11y.open) {
         scrollTicking = true;
         Ed11y.alignButtons();
-        let openTip = Ed11y.getOpenTip(); // todo: replace with saved param
+        let openTip = Ed11y.getOpenTip(); // todo postpone: replace with saved param
         if (openTip.tip) {
           Ed11y.alignTip(openTip.button.shadowRoot.querySelector('button'), openTip.tip);
-          if (openTip.button.result.editableParent) {
+          if (!Ed11y.options.inlineAlerts) {
             // Align highlighter appended to body tag.
             Ed11y.editableHighlighter(openTip.button.dataset.ed11yResult, true);
           }
@@ -1876,7 +1835,6 @@ class Ed11y {
     }, 250);
 
     const startObserver = function (root) {
-      // todo editor: need to check on text change too.
       // We don't want to nest or duplicate observers.
       if (typeof root.closest !== 'function') {
         if (root.host.matches('.editoria11y-observer')) {
@@ -1926,7 +1884,6 @@ class Ed11y {
 
       // Create an observer instance linked to the callback function
       const callback = (mutationList) => {
-        // todo mvp: race conditions sometimes create duplicate results.
         for (const mutation of mutationList) {
           if (mutation.type === 'childList') {
             newNodes = true; // Force redrawing buttons.
@@ -1965,7 +1922,6 @@ class Ed11y {
       if (Ed11y.goto === goMax || Ed11y.goto > goMax) {
         // Reached end of loop or dismissal pushed us out of loop
         goNext = 0;
-        // todo parameterize
         Ed11y.nextText = Ed11y.M.buttonFirstContent;
       } else {
         goNext = parseInt(Ed11y.goto) + 1;
@@ -1990,14 +1946,12 @@ class Ed11y {
     };
 
     // Escape key closes panels.
-    // todo mvp rewrite
     Ed11y.escapeWatch = function (event) {
       if (event.keyCode === 27) {
         if (event.target.closest('ed11y-element-panel') && Ed11y.panelToggle.getAttribute('aria-expanded') === 'true') {
           Ed11y.panelToggle.focus();
           Ed11y.panelToggle.click();
         } else if (event.target.hasAttribute('data-ed11y-open')) {
-          // todo mvp findElements
           let openTip = Ed11y.getOpenTip();
           if (openTip.button) {
             Ed11y.toggledFrom.focus();
