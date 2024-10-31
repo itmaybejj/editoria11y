@@ -81,8 +81,6 @@ ed11y-element-result {
 /* Panel ================================ */
 :host(ed11y-element-panel.ed11y-element) {
     position: fixed;
-    right: 1%;
-    bottom: 1%;
     opacity: 0;
     transition: opacity .25s ease-in;
     z-index: 9999;

@@ -62,6 +62,7 @@ class Ed11yElementPanel extends HTMLElement {
       Ed11y.attachCSS(shadow);
       shadow.appendChild(wrapper);
       Ed11y.panel = wrapper;
+      Ed11y.panelElement = this;
       Ed11y.panelToggle = wrapper.querySelector('#ed11y-toggle');
       Ed11y.panelToggleTitle = wrapper.querySelector('#ed11y-toggle .ed11y-sr-only');
       Ed11y.panelCount = wrapper.querySelector('.toggle-count');

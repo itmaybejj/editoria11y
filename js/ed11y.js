@@ -78,6 +78,11 @@ class Ed11y {
       // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
       hiddenHandlers: '',
 
+      panelPinTo: 'right',
+      panelOffsetX: '1%',
+      panelOffsetY: '1%',
+      panelNoCover: '', // select other buttons to avoid.
+
       // Interface
       lang: 'en',
       theme: 'sleekTheme',
@@ -874,6 +879,10 @@ class Ed11y {
       if (Ed11y.options.embeddedContent) {
         Ed11y.findElements('embed', Ed11y.options.embeddedContent);
       }
+      if (Ed11y.options.panelNoCover) {
+        // used to align panel.
+        Ed11y.findElements('panelPin', Ed11y.options.panelNoCover, false);
+      }
     };
 
     Ed11y.dismissalKey = function (text) {
@@ -1128,6 +1137,36 @@ class Ed11y {
         rect1Top > rect2Top + size);
     };
 
+    // Applies parameters and avoids other widgets.
+    Ed11y.alignPanel = function() {
+      let xMost = '';
+      let yMost = '';
+      if (Ed11y.elements.panelPin) {
+        Ed11y.elements.panelPin.forEach(el => {
+          let bounds = el.getBoundingClientRect();
+          if (Ed11y.options.panelPinTo === 'right') {
+            xMost = windowWidth - bounds.left > xMost ? windowWidth - bounds.left : xMost;
+          } else {
+            xMost = bounds.right > xMost ? bounds.right : xMost;
+          }
+          yMost = bounds.height > yMost ? bounds.height : yMost;
+        });
+      }
+      if (xMost > 0 && xMost < windowWidth - 240) {
+        // push off horizontal
+        Ed11y.panelElement.style.setProperty(Ed11y.options.panelPinTo, xMost + 'px');
+        Ed11y.panelElement.style.setProperty('bottom', Ed11y.options.panelOffsetY);
+      } else if (xMost > 0 && xMost > windowWidth - 240 && yMost > 0) {
+        // push off vertical
+        Ed11y.panelElement.style.setProperty(Ed11y.options.panelPinTo, Ed11y.options.panelOffsetX);
+        Ed11y.panelElement.style.setProperty('bottom', `calc(${Ed11y.options.panelOffsetY} + ${yMost}px)`);
+      } else {
+        // no push
+        Ed11y.panelElement.style.setProperty(Ed11y.options.panelPinTo, Ed11y.options.panelOffsetX);
+        Ed11y.panelElement.style.setProperty('bottom', Ed11y.options.panelOffsetY);
+      }
+    };
+
     Ed11y.alignButtons = function () {
 
       if (Ed11y.jumpList.length === 0) {
@@ -1300,6 +1339,7 @@ class Ed11y {
       if (!Ed11y.bodyStyle) {
         Ed11y.paintReady();
       }
+      Ed11y.alignPanel();
     };
 
 
@@ -2050,7 +2090,7 @@ class Ed11y {
         Ed11y.alignButtons();
       }
       if (Ed11y.openTip.button) {
-        Ed11y.alignTip(openTip.button.shadowRoot.querySelector('button'), openTip.tip);
+        Ed11y.alignTip(Ed11y.openTip.button.shadowRoot.querySelector('button'), Ed11y.openTip.tip);
       }
     };
 
