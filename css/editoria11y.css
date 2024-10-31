@@ -654,7 +654,7 @@ ed11y-element-result {
 }
 
 .ed11y-tip-wrapper p {
-    margin-block: 1em 1em;
+    margin-block: .6125em .6125em;
 }
 
 .ed11y-tip-wrapper p:last-child {

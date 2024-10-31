@@ -562,6 +562,7 @@ class Ed11y {
           window.setTimeout(function() {
             if ( !Ed11y.alignPending ) {
               Ed11y.alignButtons();
+              Ed11y.alignPanel();
             }
             Ed11y.running = false;
           },0);
@@ -698,6 +699,7 @@ class Ed11y {
         Ed11y.panel.classList.remove('ed11y-preload');
         Ed11y.panelToggle.classList.remove('disabled');
         Ed11y.panelToggle.removeAttribute('aria-disabled');
+        Ed11y.alignPanel();
         if (!Ed11y.bodyStyle) {
           Ed11y.paintReady();
         }
@@ -1139,8 +1141,8 @@ class Ed11y {
 
     // Applies parameters and avoids other widgets.
     Ed11y.alignPanel = function() {
-      let xMost = '';
-      let yMost = '';
+      let xMost = 0;
+      let yMost = 0;
       if (Ed11y.elements.panelPin) {
         Ed11y.elements.panelPin.forEach(el => {
           let bounds = el.getBoundingClientRect();
@@ -1195,10 +1197,10 @@ class Ed11y {
           }
           let left = targetOffset.left;
           switch (mark.result.element.tagName) {
-          /*case 'TD':
-          case 'TH':
-            left = left - 20;
-            break;*/
+            /*case 'TD':
+            case 'TH':
+              left = left - 20;
+              break;*/
           case 'IMG':
             top = top + 10;
             left = left + 10;
@@ -1339,7 +1341,6 @@ class Ed11y {
       if (!Ed11y.bodyStyle) {
         Ed11y.paintReady();
       }
-      Ed11y.alignPanel();
     };
 
 
