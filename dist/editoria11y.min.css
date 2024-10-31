@@ -614,29 +614,41 @@ ed11y-element-result {
 .ed11y-tip-header {
     background: var(--ed11y-primary, #276499);
     display: flex;
-    align-items: stretch;
+    align-items: center;
+    justify-content: flex-end;
     color: var(--ed11y-primaryText, #fffdf7);
 }
 .ed11y-tip-header button {
     flex-basis: 31px;
     padding: 8px 6px 6px;
     box-shadow: -1px 0;
-    margin-top: -2px;
+    margin-bottom: -2px;
 }
 .ed11y-tip-header button:hover {
     background: var(--ed11y-primaryText, #fffffe);
     color: var(--ed11y-primary, #20160c);
     opacity: .9;
 }
+.ed11y-tip-count {
+    padding-right: 8px;
+    font-size: 12px;
+    height: 15px;
+}
 .ed11y-tip-header svg {
     width: 12px;
     height: 11px;
 }
+.ed11y-tip-prev span {
+    transform: scale(-1,-1);
+    display: inline-block;
+    vertical-align: middle;
+    margin: -1px 0;
+}
 .ed11y-tip-wrapper .title {
     font-weight: bold;
-    flex-grow: 1;
     outline: transparent;
-    padding: 4px 12px 6px;
+    padding: 14px 12px 0 0;
+    font-size: 1.1em;
 }
 
 .ed11y-tip-wrapper .content {

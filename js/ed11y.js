@@ -82,7 +82,7 @@ class Ed11y {
       lang: 'en',
       theme: 'sleekTheme',
       sleekTheme: {
-        bg: '#fffffe',
+        bg: '#eff2ff', // e8f4ff
         bgHighlight: '#7b1919',
         text: '#20160c',
         primary: '#276499', // 276499
@@ -750,12 +750,16 @@ class Ed11y {
       }
       location.insertAdjacentElement(position, mark);
       Ed11y.jumpList.unshift(mark);
-      mark.dataset.ed11yJumpPosition = `${jumpIndex}`;
       Ed11y.results[index].toggle = mark;
     };
 
     Ed11y.resetResults = function() {
       Ed11y.jumpList = [];
+      Ed11y.openTip = {
+        button: false,
+        tip: false,
+      };
+      Ed11y.lastOpenTip = -1;
       Ed11y.resetClass([
         'ed11y-ring-red',
         'ed11y-ring-yellow',
@@ -878,7 +882,7 @@ class Ed11y {
 
     Ed11y.dismissThis = function (dismissalType) {
       // Find the active tip and draw its identifying information from the result list
-      let removal = Ed11y.getOpenTip();
+      let removal = Ed11y.openTip;
       let id = removal.tip.dataset.ed11yResult;
       let test = Ed11y.results[id].test;
       let dismissalKey = Ed11y.dismissalKey(Ed11y.results[id].dismissalKey);
@@ -932,12 +936,11 @@ class Ed11y {
       Ed11y.showPanel = true;
       Ed11y.checkAll();
 
-      let rememberGoto = Ed11y.goto;
+      let rememberGoto = Ed11y.lastOpenTip;
 
       window.setTimeout(function () {
         if (Ed11y.jumpList.length > 0) {
-          Ed11y.goto = (rememberGoto - 1);
-          Ed11y.setCurrentJump();
+          Ed11y.lastOpenTip = (rememberGoto - 1);
           Ed11y.panelJumpNext.focus();
         } else {
           window.setTimeout(function () {
@@ -949,9 +952,10 @@ class Ed11y {
     };
 
     Ed11y.transferFocus = function () {
-      const openTip = Ed11y.getOpenTip();
-      const tip = openTip.tip;
-      const id = tip.dataset.ed11yResult;
+      if (!Ed11y.openTip.tip) {
+        return;
+      }
+      const id = Ed11y.openTip.tip.dataset.ed11yResult;
       const target = Ed11y.results[id].element;
       const editable = target.closest('[contenteditable]');
       if (!editable && !target.closest('textarea, input')) {
@@ -963,7 +967,7 @@ class Ed11y {
           target.setAttribute('tabindex', '0');
           Ed11y.toggledFrom = target;
         }
-        tip.shadowRoot.querySelector('.close').click();
+        Ed11y.openTip.tip.shadowRoot.querySelector('.close').click();
       } else {
         Ed11y.toggledFrom = false;
         if (target.getAttribute('contenteditable') === 'true') {
@@ -974,7 +978,7 @@ class Ed11y {
           // Just got complicated -- need to move a caret
           Ed11y.toggledFrom = false;
         }
-        tip.shadowRoot.querySelector('.close').click();
+        Ed11y.openTip.tip.shadowRoot.querySelector('.close').click();
         if (!Ed11y.toggledFrom && editable) {
           // Need to move focus manually
           // h/t https://stackoverflow.com/questions/6249095/how-to-set-the-caret-cursor-position-in-a-contenteditable-element-div
@@ -1662,8 +1666,11 @@ class Ed11y {
       Ed11y.results?.forEach(function (result, i) {
         jumpIndex--;
         if (!Ed11y.results[i].dismissalStatus || Ed11y.options.showDismissed) {
-          Ed11y.result(result, i, jumpIndex);
+          Ed11y.result(result, i);
         }
+      });
+      Ed11y.jumpList.forEach((el, i) => {
+        el.dataset.ed11yJumpPosition = `${i}`;
       });
     };
 
@@ -1754,12 +1761,11 @@ class Ed11y {
       if (!scrollTicking && Ed11y.scrollPending > 0 && !Ed11y.running && Ed11y.jumpList && Ed11y.open) {
         scrollTicking = true;
         Ed11y.alignButtons();
-        let openTip = Ed11y.getOpenTip(); // todo postpone: replace with saved param
-        if (openTip.tip) {
-          Ed11y.alignTip(openTip.button.shadowRoot.querySelector('button'), openTip.tip);
+        if (Ed11y.openTip.tip) {
+          Ed11y.alignTip(Ed11y.openTip.button.shadowRoot.querySelector('button'), Ed11y.openTip.tip);
           if (!Ed11y.options.inlineAlerts) {
             // Align highlighter appended to body tag.
-            Ed11y.editableHighlighter(openTip.button.dataset.ed11yResult, true);
+            Ed11y.editableHighlighter(Ed11y.openTip.button.dataset.ed11yResult, true);
           }
         }
         Ed11y.scrollPending --;
@@ -1916,22 +1922,125 @@ class Ed11y {
       }, 1000);
     };
 
-    Ed11y.setCurrentJump = function () {
-      // Set next/previous buttons
+    Ed11y.openTip = {
+      button: false,
+      tip: false,
+    };
+    Ed11y.lastOpenTip = -1;
+    Ed11y.jumpTo = function(dir = 1) {
+      // Determine target result.
       let goMax = Ed11y.jumpList.length - 1;
-      let goNext;
-      if (Ed11y.goto === goMax || Ed11y.goto > goMax) {
+      let goNum = Ed11y.lastOpenTip + dir;
+      if (goNum < 0) {
         // Reached end of loop or dismissal pushed us out of loop
-        goNext = 0;
         Ed11y.nextText = Ed11y.M.buttonFirstContent;
+        goNum = goMax;
+      } else if (goNum > goMax) {
+        goNum = 0;
+        Ed11y.nextText = Ed11y.M.buttonNextContent;
       } else {
-        goNext = parseInt(Ed11y.goto) + 1;
         Ed11y.nextText = Ed11y.M.buttonNextContent;
       }
-      Ed11y.panelJumpNext.dataset.ed11yGoto = goNext.toString();
+      Ed11y.lastOpenTip = goNum;
       window.setTimeout(function () {
         Ed11y.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Ed11y.nextText;
       }, 250);
+
+      Ed11y.resetClass(['ed11y-hidden-highlight']);
+      if (!Ed11y.jumpList) {
+        Ed11y.buildJumpList();
+      }
+      // Find next or first result in the dom ordered list of results.
+      let goto = Ed11y.jumpList[goNum];
+      let result = goto.getAttribute('data-ed11y-result');
+      let gotoResult = Ed11y.results[result];
+      //let insert = gotoResult.position;
+      const target = gotoResult.element;
+
+      // First of two scrollTo calls, to trigger any scroll based events.
+      let scrollPin = window.innerHeight > 800 && window.innerWidth > 800 ? 'center' : 'start';
+      if (Ed11y.options.inlineAlerts) {
+        goto.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+      } else {
+        target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+      }
+
+      // Open the button
+      goto.setAttribute('data-ed11y-action','open');
+      Ed11y.scrollPending++;
+      Ed11y.updateTipLocations();
+
+      /*let target;
+      // todo this belongs in the result open logic not here
+      if (insert === 'beforebegin') {
+        target = Ed11y.nextUntil(goto, ':not(ed11y-element-result)');
+      }
+      else if (insert === 'afterbegin') {
+        // todo:check that these are identified correctly.
+        target = goto.parentElement;
+      }*/
+
+      let delay = 100;
+      if (Ed11y.options.hiddenHandlers.length > 0 && !!target.closest(Ed11y.options.hiddenHandlers)) {
+        // Increase hesitation before scrolling, in case theme animates open an element.
+        delay = 333;
+        document.dispatchEvent(new CustomEvent('ed11yShowHidden', {
+          detail: {result: goto.getAttribute('data-ed11y-result')}
+        }));
+      }
+      const details = target.closest('details');
+      if (details && !details.open) {
+        details.open = true;
+        delay = 333;
+      }
+
+      // Scroll into view and throw an alert if the button or target is hidden.
+      window.setTimeout((goto, target) => {
+        Ed11y.panel.querySelector('#ed11y-message').textContent = '';
+        let firstVisible = false;
+        let alertMessage;
+        if (Ed11y.options.checkVisible && !Ed11y.visible(target)) {
+          firstVisible = Ed11y.firstVisibleParent(target);
+          alertMessage = Ed11y.M.jumpedToInvisibleTip;
+        }
+        else if (target.closest('[aria-hidden="true"]')) {
+          firstVisible = target.closest('[aria-hidden="true"]');
+          firstVisible = firstVisible.closest(':not([aria-hidden="true"])');
+          alertMessage = Ed11y.M.jumpedToAriaHiddenTip;
+        }
+        if (firstVisible) {
+          // Throw warning that the element cannot be highlighted.
+          Ed11y.panel.querySelector('#ed11y-message').textContent = alertMessage;
+          Ed11y.hidePanelAlert = Date.now() + 10000; // Set or extend.
+          window.setTimeout(function () {
+            if (Ed11y.hidePanelAlert < Date.now()) {
+              Ed11y.panel.querySelector('#ed11y-message').textContent = '';
+            }
+          }, 15000);
+        }
+        if (!Ed11y.options.inlineAlerts) {
+          // todo this selector must match the selector that decides where to place the mark
+          target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+          Ed11y.editableHighlighter(goto.dataset.ed11yResult, true, firstVisible);
+        } else {
+          goto.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+          if (firstVisible) {
+            firstVisible.classList.add('ed11y-hidden-highlight');
+          }
+        }
+        let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+        if (!activeTip) {
+          goto.setAttribute('data-ed11y-action','open');
+          window.setTimeout(() => {
+            // Race conditions are fun.
+            let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+            activeTip?.shadowRoot.querySelector('.close').focus();
+          }, 100);
+        } else {
+          activeTip?.shadowRoot.querySelector('.close').focus();
+        }
+      }, delay, goto, target);
+
     };
 
     Ed11y.windowResize = function () {
@@ -1940,8 +2049,7 @@ class Ed11y {
         Ed11y.alignAlts();
         Ed11y.alignButtons();
       }
-      let openTip = Ed11y.getOpenTip();
-      if (openTip.button) {
+      if (Ed11y.openTip.button) {
         Ed11y.alignTip(openTip.button.shadowRoot.querySelector('button'), openTip.tip);
       }
     };
@@ -1953,10 +2061,9 @@ class Ed11y {
           Ed11y.panelToggle.focus();
           Ed11y.panelToggle.click();
         } else if (event.target.hasAttribute('data-ed11y-open')) {
-          let openTip = Ed11y.getOpenTip();
-          if (openTip.button) {
+          if (Ed11y.openTip.button) {
             Ed11y.toggledFrom.focus();
-            openTip.button.shadowRoot.querySelector('button').click();
+            Ed11y.openTip.button.shadowRoot.querySelector('button').click();
           }
         }
       }
@@ -2281,28 +2388,37 @@ class Ed11y {
       return el.closest('a[href]');
     };
 
-    Ed11y.getOpenTip = function () {
+    /*Ed11y.getOpenTip = function () {
       // Quick check first, then the expensive one if needed.
+      let openButton = Ed11y.jumpList[Ed11y.lastOpenTip];
+      openButton = openButton.matches('[data-ed11y-open="true"]') ? openButton : false;
+      //let openButton = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
+      if (!openButton) {
+        return {
+          tip: false,
+          button: false,
+        };
+      }
       let openTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-      let openButton = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
       if (!openTip) {
         Ed11y.findElements('openTip', 'ed11y-element-tip[data-ed11y-open="true"]');
-        Ed11y.findElements('openButton', 'ed11y-element-result[data-ed11y-open="true"]');
-        if (Ed11y.elements.openButton.length > 0) {
-          openButton = Ed11y.elements.openButton[0];
+        if (Ed11y.elements.openTip.length > 0) {
           openTip = Ed11y.elements.openTip[0];
+        } else {
+          openButton = false;
         }
       }
+      console.log(openButton);
+      console.log(openTip);
       return {
         tip: openTip,
         button: openButton,
       };
-    };
+    };*/
 
     Ed11y.focusActiveResult = function () {
-      const openTip = Ed11y.getOpenTip();
       window.setTimeout(function () {
-        openTip.button?.shadowRoot.querySelector('button').focus();
+        Ed11y.openTip.button?.shadowRoot.querySelector('button').focus();
       }, 0);
     };
 

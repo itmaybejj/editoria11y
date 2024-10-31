@@ -41,9 +41,9 @@ class Ed11yElementResult extends HTMLElement {
       if (this.dismissed) {
         this.toggle.classList.add('dismissed');
         if (this.result.dismissalStatus !== 'ok') {
-          this.toggle.classList.add('ok');
-        } else {
           this.toggle.classList.add('notok');
+        } else {
+          this.toggle.classList.add('ok');
         }
       } else if (this.dismissable) {
         this.toggle.classList.add('dismissable');
@@ -105,9 +105,8 @@ class Ed11yElementResult extends HTMLElement {
   }
 
   closeOtherTips() {
-    const openTip = Ed11y.getOpenTip();
-    if (openTip.button) {
-      openTip.button.setAttribute('data-ed11y-action', 'close');
+    if (Ed11y.openTip.button) {
+      Ed11y.openTip.button.setAttribute('data-ed11y-action', 'close');
     }
   }
 
@@ -144,9 +143,12 @@ class Ed11yElementResult extends HTMLElement {
       if (!Ed11y.jumpList) {
         Ed11y.buildJumpList();
       }
-      Ed11y.goto = this.getAttribute('data-ed11y-jump-position');
+      Ed11y.lastOpenTip = Number(this.getAttribute('data-ed11y-jump-position'));
+      Ed11y.openTip = {
+        button: this,
+        tip: this.tip,
+      };
       this.result.highlight?.style.setProperty('opacity', '1');
-      Ed11y.setCurrentJump();
     } else {
       // Allow for themes to restore original DOM/CSS
       document.dispatchEvent(new CustomEvent('ed11yShut', {
@@ -154,6 +156,10 @@ class Ed11yElementResult extends HTMLElement {
       }));
       this.tip.setAttribute('data-ed11y-action', 'shut');
       this.result.highlight?.style.setProperty('opacity', '0');
+      Ed11y.openTip = {
+        button: false,
+        tip: false,
+      };
     }
     this.setAttribute('data-ed11y-open', changeTo);
     this.open = changeTo;
