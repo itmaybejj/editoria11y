@@ -55,7 +55,7 @@ class Ed11yElementPanel extends HTMLElement {
       this.style.setProperty('outline', '0');
       this.classList.add('ed11y-element');
       const shadow = this.attachShadow({mode: 'open'});
-      let wrapper = document.createElement('aside');
+      const wrapper = document.createElement('aside');
       wrapper.setAttribute('aria-label', Ed11y.M.panelControls);
       wrapper.classList.add('ed11y-wrapper', 'ed11y-panel-wrapper', 'ed11y-pass');
       wrapper.innerHTML = this.template();
@@ -69,12 +69,9 @@ class Ed11yElementPanel extends HTMLElement {
       Ed11y.panelJumpNext = wrapper.querySelector('.ed11y-jump.next');
       Ed11y.panelJumpNext.addEventListener('click', this.jumpTo);
       Ed11y.showDismissed = wrapper.querySelector('#ed11y-show-hidden');
-      Ed11y.showDismissed.addEventListener('click', function(){
-        Ed11y.toggleShowDismissals();
-      });
-      Ed11y.announce = wrapper.querySelector('.announce');
-      Ed11y.panelTabs = wrapper.querySelectorAll('.ed11y-buttonbar button');
-      Ed11y.panelTabs.forEach(tab => {
+      Ed11y.message = wrapper.querySelector('#ed11y-message');
+      const panelTabs = wrapper.querySelectorAll('.ed11y-buttonbar button');
+      panelTabs.forEach(tab => {
         // todo: syntax could be shrunk now that these aren't tabs.
         tab.addEventListener('click', this.handleBarClick);
       });
@@ -92,14 +89,19 @@ class Ed11yElementPanel extends HTMLElement {
 
   handleBarClick(event) {
     event.preventDefault();
-    Ed11y.panel.querySelector('#ed11y-message').textContent = '';
+    Ed11y.message.textContent = '';
     let id = event.currentTarget.getAttribute('id');
     switch (id) {
     case 'ed11y-toggle':
       Ed11y.togglePanel();
       break;
+    case 'ed11y-show-hidden':
+      Ed11y.toggleShowDismissals();
+      break;
+    case 'ed11y-visualize':
+      Ed11y.visualize();
+      break;
     default:
-      Ed11y.switchPanel(id);
       break;
     }
   }

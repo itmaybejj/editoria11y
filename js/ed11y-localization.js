@@ -30,10 +30,14 @@ const ed11yLang = {
     buttonHideChecker: 'Hide checker',
     panelCheckOutline: '<p>Check that this forms <a href=\'https://accessibility.princeton.edu/how/content/headings\'>a complete outline</a>:</p>',
     panelCheckAltText: '<p>Check <a href=\'https://accessibility.princeton.edu/how/content/alternative-text\'>alt text</a>, <a href=\'https://accessibility.princeton.edu/how/content/images-text\'>images of text</a>, &amp; <a href=\'https://webaim.org/techniques/captions/\'>captions</a>.</p>',
-    panelHelp : `
-    <p>Assistive technologies and search engines rely on well-structured content. <a href="https://itmaybejj.github.io/editoria11y/">Editoria11y</a> checks for common needs, such as image alternative text, meaningful heading outlines and well-named links. It is meant to supplement <a href='https://webaim.org/resources/evalquickref/'>testing the design and code</a>.</p>
-    <p><a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Report bugs & request changes <span aria-hidden="true">&raquo;</span></a></p>
-    `,
+    elementDismissalHelpOK : `
+    "OK" dismisses this for everyone, on this page.
+    `, // todo delete
+    elementDismissalHelpHide : `
+    "Hide" dismisses this for you, on this page.
+    `, // todo delete
+    elementDismissalHelpAll : 'Site-wide changes can be made in Editoria11y\'s settings.', //todo delete
+    panelHelpTitle: 'About this tool',
     altLabelPrefix: 'Alt text: ',
     errorAltMissing: '(missing!)',
     errorAltNull: '(none; image marked as decorative)',
@@ -44,7 +48,7 @@ const ed11yLang = {
     // Errors and alerts ==================================
 
     consoleNotSupported: 'This browser can not run Editoria11y.',
-    jumpedToInvisibleTip: 'The marked item may not be visible. Look for it inside the outlined container.',
+    jumpedToInvisibleTip: 'Note: this content may not be visible. Look for it inside the outlined container.', // todo update in Drupal
     jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.',
 
     // Strings used in tests ==============================
@@ -56,26 +60,33 @@ const ed11yLang = {
     linksMeaningless: /(learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|"|'|\?|\.|-|,|:|>|<|\s)+/g,
     linkStringsNewWindows: /window|\stab|download/g,
 
-    // Tooltips base ======================================
+    // Tooltips ======================================
 
     toggleManualCheck: 'manual check needed',
     toggleAlert: 'alert',
     toggleAriaLabel: (resultID, label) => `Accessibility issue ${resultID}, ${label}`,
     transferFocus: 'Edit this content',
     dismissOkButtonContent: 'Mark as checked and OK',
-    dismissHideButtonContent: 'Hide alert',
-    dismissOkSyncedButtonContent: 'Mark OK for all users',
-    dismissHideSyncedButtonContent: 'Hide alert for me',
+    dismissHideButtonContent: 'Ignore this manual check',
+    dismissOkTitle: 'Hides this alert for all editors', // todo add to Drupal
+    dismissHideTitle: 'Hides this alert for you',
     undismissOKButton: 'Restore this alert marked as OK',
     undismissHideButton: 'Restore this hidden alert',
     undismissNotePermissions: 'This alert has been hidden by an administrator',
-    elementDismissalHelpOK : `
-    "OK" dismisses this for everyone, on this page.
+    reportsLink: 'View site-wide reports',
+    closeTip: 'Close', // Drupal
+    panelHelp : `
+    <p><a href="https://itmaybejj.github.io/editoria11y/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
+    <p>Many alerts are "manual checks." Manual checks can be dismissed:</p>
+    <ul>
+        <li>"Mark as checked and OK" hides the alert for all editors.</li>
+        <li>"Ignore this manual check" leaves the tip visible to other editors.</li>
+    </ul>
+    <p>Dismissed alerts can be found via the "Show hidden alerts" toggle.</p>
+    <p>If an incorrect alert is appearing on many pages, site administrators can tell the checker to ignore particular elements and page regions.</p>
+    <p>And remember that automated checkers cannot replace <a href='https://webaim.org/resources/evalquickref/'> proofreading and testing for accessibility</a>.</p>
+    <p><br><a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Report bugs & request changes <span aria-hidden="true">&raquo;</span></a></p>
     `,
-    elementDismissalHelpHide : `
-    "Hide" dismisses this for you, on this page.
-    `,
-    elementDismissalHelpAll : 'Site-wide changes can be made in Editoria11y\'s settings.',
 
     // Tooltips for heading tests =========================
 

@@ -203,6 +203,7 @@
                         'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
                         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
                     },
+                    syncedDismissals: {},
                     shadowComponents : 'shadow-test, shadow-test-no-hits',
                     hiddenHandlers : '[hidden]',
                     checkRoots : 'body',
@@ -210,7 +211,8 @@
                     customTests : 2,
                     theme: 'sleekTheme',
                     linkIgnoreSelector : '.ignore-class',
-                    panelNoCover: '#klaro_toggle_dialog'
+                    panelNoCover: '#klaro_toggle_dialog',
+                    reportsURL: 'https://www.princeton.edu',
                 });
             </script>
 

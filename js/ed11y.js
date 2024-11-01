@@ -56,6 +56,7 @@ class Ed11y {
       allowHide: true, // enables end-user ignore button
       allowOK: true,  // enables end-user mark OK button
       syncedDismissals: false, // provide empty or populated object {} to enable sync functions
+      reportsURL: false, // Provides a link to site-wide reports
       showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
 
       // Hide all alerts if these elements are absent, e.g., ".edit-button"
@@ -785,7 +786,7 @@ class Ed11y {
     Ed11y.resetPanel = function() {
       // Reset main panel.
       visualizing = true; // so visualize function removes visualizers.
-      visualize();
+      Ed11y.visualize();
       if (Ed11y.totalCount === 0 && Ed11y.dismissedCount > 0) {
         Ed11y.panelCount.textContent = 'i';
         Ed11y.panelToggleTitle.textContent = Ed11y.dismissedCount === 1 ?
@@ -793,7 +794,7 @@ class Ed11y {
           Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
       }
       Ed11y.panelJumpNext?.setAttribute('data-ed11y-goto', '0');
-      Ed11y.panel.querySelector('#ed11y-message').textContent = '';
+      Ed11y.message.textContent = '';
       Ed11y.panel?.classList.add('ed11y-shut');
       Ed11y.panel?.classList.remove('ed11y-active');
       Ed11y.panelToggle?.setAttribute('aria-expanded', 'false');
@@ -955,7 +956,7 @@ class Ed11y {
           Ed11y.panelJumpNext.focus();
         } else {
           window.setTimeout(function () {
-            let focus = Ed11y.panel.querySelector('#ed11y-issues-tab');
+            let focus = Ed11y.panel.querySelector('#ed11y-issues-tab') // todo wha?
             focus.focus();
           }, 100);
         }
@@ -1016,28 +1017,6 @@ class Ed11y {
       window.setTimeout(function() {
         Ed11y.showDismissed.focus();
       }, 0);
-    };
-
-    Ed11y.dismissHelp = function (el) {
-      let help = document.createElement('ul');
-      help.setAttribute('tabindex', '-1');
-      help.classList.add('help');
-      if (Ed11y.options.allowHide) {
-        let li = document.createElement('li');
-        li.textContent = Ed11y.M.elementDismissalHelpHide;
-        help.append(li);
-      }
-      if (Ed11y.options.allowOK) {
-        let li = document.createElement('li');
-        li.textContent = Ed11y.M.elementDismissalHelpOK;
-        help.append(li);
-      }
-      let li = document.createElement('li');
-      li.textContent = Ed11y.M.elementDismissalHelpAll;
-      help.append(li);
-      el.parentElement.append(help);
-      help.focus();
-      el.remove();
     };
 
     Ed11y.showResults = function () {
@@ -1197,10 +1176,7 @@ class Ed11y {
           }
           let left = targetOffset.left;
           switch (mark.result.element.tagName) {
-            /*case 'TD':
-            case 'TH':
-              left = left - 20;
-              break;*/
+          // TD TD different?
           case 'IMG':
             top = top + 10;
             left = left + 10;
@@ -1578,30 +1554,6 @@ class Ed11y {
         panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>';
       }
     };
-    Ed11y.switchPanel = function (id) {
-      // Switch main panel tab
-      //Ed11y.panel.classList.remove('ed11y-shut');
-      Ed11y.panel.querySelector('.content > div:not(.ed11y-hidden)')?.classList.add('ed11y-hidden');
-      Ed11y.panel.querySelector('[aria-selected=true]')?.setAttribute('aria-selected', 'false');
-      // TODO remove this functionality if we are ditching tabs
-      Ed11y.panel.querySelector('#' + id)?.setAttribute('aria-selected', 'true');
-      Ed11y.panel.querySelector('#' + id + '-tab')?.classList.remove('ed11y-hidden');
-      // todo postpone: error when no headings found at all?
-
-      // Show extras
-      switch (id) {
-      case 'ed11y-help':
-        showHelpPanel();
-        break;
-      case 'ed11y-visualize':
-        visualize();
-        break;
-      default:
-        // hide extras
-        break;
-      }
-    };
-
 
     Ed11y.alignAlts = function () {
       // Positions alt label to match absolute, inline or floated images.
@@ -1663,17 +1615,17 @@ class Ed11y {
       }
     };
     let visualizing = false;
-    const visualize = function () {
+    Ed11y.visualize = function () {
       if (visualizing) {
         visualizing = false;
-        Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
+        Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('aria-pressed', 'false');
         Ed11y.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
         Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
         Ed11y.elements.reset?.forEach(el => { el.remove(); });
         return;
       }
       visualizing = true;
-      Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
+      Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('aria-pressed', 'true');
       Ed11y.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
       showAltPanel();
       showHeadingsPanel();
@@ -1968,7 +1920,83 @@ class Ed11y {
       tip: false,
     };
     Ed11y.lastOpenTip = -1;
+
+    Ed11y.viaJump = false;
+    Ed11y.alertOnInvisibleTip = function(button, target) {
+      let delay = 100;
+      if (Ed11y.options.hiddenHandlers.length > 0 && !!target.closest(Ed11y.options.hiddenHandlers)) {
+        // Increase hesitation before scrolling, in case theme animates open an element.
+        delay = 333;
+        document.dispatchEvent(new CustomEvent('ed11yShowHidden', {
+          detail: {result: button.getAttribute('data-ed11y-result')}
+        }));
+      }
+      const details = target.closest('details');
+      if (details && !details.open) {
+        details.open = true;
+        delay = 333;
+      }
+
+      // Scroll into view and throw an alert if the button or target is hidden.
+      window.setTimeout((button, target) => {
+        Ed11y.message.textContent = '';
+        let firstVisible = false;
+        let alertMessage;
+        if (Ed11y.options.checkVisible && !Ed11y.visible(target)) {
+          firstVisible = Ed11y.firstVisibleParent(target);
+          alertMessage = Ed11y.M.jumpedToInvisibleTip;
+        }
+        else if (target.closest('[aria-hidden="true"]')) {
+          firstVisible = target.closest('[aria-hidden="true"]');
+          firstVisible = firstVisible.closest(':not([aria-hidden="true"])');
+          alertMessage = Ed11y.M.jumpedToAriaHiddenTip;
+        }
+        if (firstVisible) {
+          // Throw warning that the element cannot be highlighted.
+          const tipAlert = Ed11y.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert');
+          tipAlert.textContent = alertMessage;
+          // Todo: confirm we no longer need the panelMessage container.
+          /*
+          Ed11y.message.textContent = alertMessage;
+          Ed11y.hidePanelAlert = Date.now() + 10000; // Set or extend.
+          window.setTimeout(function (tip) {
+            if (Ed11y.hidePanelAlert < Date.now()) {
+              Ed11y.message.textContent = '';
+            }
+          }, 15000, Ed11y.lastOpenTip);*/
+        }
+        let scrollPin = window.innerHeight > 800 && window.innerWidth > 800 ? 'center' : 'start';
+        if (!Ed11y.options.inlineAlerts) {
+          // todo this selector must match the selector that decides where to place the mark
+          if (Ed11y.viaJump) {
+            target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+          }
+          Ed11y.editableHighlighter(button.dataset.ed11yResult, true, firstVisible);
+        } else {
+          if (Ed11y.viaJump) {
+            target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+          }
+          if (firstVisible) {
+            firstVisible.classList.add('ed11y-hidden-highlight');
+          }
+        }
+        let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+        if (!activeTip) {
+          button.setAttribute('data-ed11y-action','open');
+          window.setTimeout(() => {
+            // Race conditions are fun.
+            let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+            activeTip?.shadowRoot.querySelector('.title').focus();
+          }, 100);
+        } else {
+          activeTip?.shadowRoot.querySelector('.title').focus();
+        }
+        Ed11y.viaJump = false;
+      }, delay, button, target);
+    };
+
     Ed11y.jumpTo = function(dir = 1) {
+      Ed11y.viaJump = true;
       // Determine target result.
       let goMax = Ed11y.jumpList.length - 1;
       let goNum = Ed11y.lastOpenTip + dir;
@@ -2010,6 +2038,7 @@ class Ed11y {
       goto.setAttribute('data-ed11y-action','open');
       Ed11y.scrollPending++;
       Ed11y.updateTipLocations();
+      //Ed11y.alertOnInvisibleTip(goto, target);
 
       /*let target;
       // todo this belongs in the result open logic not here
@@ -2020,67 +2049,6 @@ class Ed11y {
         // todo:check that these are identified correctly.
         target = goto.parentElement;
       }*/
-
-      let delay = 100;
-      if (Ed11y.options.hiddenHandlers.length > 0 && !!target.closest(Ed11y.options.hiddenHandlers)) {
-        // Increase hesitation before scrolling, in case theme animates open an element.
-        delay = 333;
-        document.dispatchEvent(new CustomEvent('ed11yShowHidden', {
-          detail: {result: goto.getAttribute('data-ed11y-result')}
-        }));
-      }
-      const details = target.closest('details');
-      if (details && !details.open) {
-        details.open = true;
-        delay = 333;
-      }
-
-      // Scroll into view and throw an alert if the button or target is hidden.
-      window.setTimeout((goto, target) => {
-        Ed11y.panel.querySelector('#ed11y-message').textContent = '';
-        let firstVisible = false;
-        let alertMessage;
-        if (Ed11y.options.checkVisible && !Ed11y.visible(target)) {
-          firstVisible = Ed11y.firstVisibleParent(target);
-          alertMessage = Ed11y.M.jumpedToInvisibleTip;
-        }
-        else if (target.closest('[aria-hidden="true"]')) {
-          firstVisible = target.closest('[aria-hidden="true"]');
-          firstVisible = firstVisible.closest(':not([aria-hidden="true"])');
-          alertMessage = Ed11y.M.jumpedToAriaHiddenTip;
-        }
-        if (firstVisible) {
-          // Throw warning that the element cannot be highlighted.
-          Ed11y.panel.querySelector('#ed11y-message').textContent = alertMessage;
-          Ed11y.hidePanelAlert = Date.now() + 10000; // Set or extend.
-          window.setTimeout(function () {
-            if (Ed11y.hidePanelAlert < Date.now()) {
-              Ed11y.panel.querySelector('#ed11y-message').textContent = '';
-            }
-          }, 15000);
-        }
-        if (!Ed11y.options.inlineAlerts) {
-          // todo this selector must match the selector that decides where to place the mark
-          target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
-          Ed11y.editableHighlighter(goto.dataset.ed11yResult, true, firstVisible);
-        } else {
-          goto.scrollIntoView({ block: scrollPin, behavior: 'instant' });
-          if (firstVisible) {
-            firstVisible.classList.add('ed11y-hidden-highlight');
-          }
-        }
-        let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-        if (!activeTip) {
-          goto.setAttribute('data-ed11y-action','open');
-          window.setTimeout(() => {
-            // Race conditions are fun.
-            let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-            activeTip?.shadowRoot.querySelector('.close').focus();
-          }, 100);
-        } else {
-          activeTip?.shadowRoot.querySelector('.close').focus();
-        }
-      }, delay, goto, target);
 
     };
 
@@ -2093,6 +2061,7 @@ class Ed11y {
       if (Ed11y.openTip.button) {
         Ed11y.alignTip(Ed11y.openTip.button.shadowRoot.querySelector('button'), Ed11y.openTip.tip);
       }
+      Ed11y.alignPanel();
     };
 
     // Escape key closes panels.
@@ -2457,11 +2426,11 @@ class Ed11y {
       };
     };*/
 
-    Ed11y.focusActiveResult = function () {
+    /*Ed11y.focusActiveResult = function () {
       window.setTimeout(function () {
-        Ed11y.openTip.button?.shadowRoot.querySelector('button').focus();
+        Ed11y.openTip.button?.shadowRoot.querySelector('.title').focus();
       }, 0);
-    };
+    };*/
 
     Ed11y.srcMatchesOptions = function (source, option) {
       if (option.length > 0 && source?.length > 0) {

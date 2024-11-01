@@ -38,16 +38,19 @@ class Ed11yElementTip extends HTMLElement {
       this.heading.setAttribute('tabindex', '-1');
       this.heading.innerHTML = Ed11y.M[this.result.test].title;
       content.append(this.heading);
+      const alertBox = document.createElement('div');
+      alertBox.classList.add('ed11y-tip-alert');
+      this.heading.insertAdjacentElement('afterbegin', alertBox);
 
       let innerContent = document.createElement('div');
       innerContent.innerHTML = this.result.content;
       content.append(innerContent);
 
-      const buttonBar = document.createElement('div');
       // Draw dismiss or restore buttons
       if (this.dismissable) {
-        let dismissHelp = false;
 
+        const buttonBar = document.createElement('div');
+        buttonBar.classList.add('ed11y-tip-dismissals');
         // Dismissal Key is set in [5] if alert has been dismissed.
         if (Ed11y.options.showDismissed && this.dismissed) {
           // Check if user has permission to reset this alert.
@@ -66,35 +69,30 @@ class Ed11yElementTip extends HTMLElement {
             buttonBar.append(undismissNote);
           }
         } else {
+          if (Ed11y.options.allowOK) {
+            let dismissOKButton = document.createElement('button');
+            dismissOKButton.classList.add('dismiss');
+            if (Ed11y.options.syncedDismissals) {
+              dismissOKButton.setAttribute('title', Ed11y.M.dismissOkTitle);
+            }
+            dismissOKButton.textContent = Ed11y.M.dismissOkButtonContent;
+            buttonBar.append(dismissOKButton);
+            dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
+          }
           if (Ed11y.options.allowHide) {
             let dismissHideButton = document.createElement('button');
             dismissHideButton.classList.add('dismiss');
             // todo parameterize
-            dismissHideButton.textContent = Ed11y.options.syncedDismissals === false ? Ed11y.M.dismissHideButtonContent : Ed11y.M.dismissHideSyncedButtonContent;
-            //dismissHideButton.setAttribute('title', Ed11y.M.dismissHideButtonTitle);
+            if (Ed11y.options.syncedDismissals) {
+              dismissHideButton.setAttribute('title', Ed11y.M.dismissHideTitle);
+            }
+            dismissHideButton.textContent = Ed11y.M.dismissHideButtonContent;
             buttonBar.append(dismissHideButton);
             dismissHideButton.addEventListener('click', function(){Ed11y.dismissThis('hide');});
-            dismissHelp = true;
-          }
-          if (Ed11y.options.allowOK) {
-            let dismissOKButton = document.createElement('button');
-            dismissOKButton.classList.add('dismiss');
-            dismissOKButton.textContent = Ed11y.options.syncedDismissals === false ? Ed11y.M.dismissOkButtonContent : Ed11y.M.dismissOkSyncedButtonContent;
-            buttonBar.append(dismissOKButton);
-            dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
-            dismissHelp = true;
           }
         }
-        if (dismissHelp) {
-          dismissHelp = document.createElement('button');
-          dismissHelp.classList.add('dismiss');
-          // todo parameterize
-          dismissHelp.textContent = '?';
-          buttonBar.append(dismissHelp);
-          dismissHelp.addEventListener('click', function(){Ed11y.dismissHelp(dismissHelp);});
-        }
+        content.append(buttonBar);
       }
-      content.append(buttonBar);
       this.tip.append(content);
 
       this.navBar = document.createElement('div');
@@ -106,6 +104,7 @@ class Ed11yElementTip extends HTMLElement {
       if (Ed11y.jumpList.length > 1) {
         this.prev = document.createElement('button');
         this.prev.classList.add('ed11y-tip-prev');
+        this.prev.setAttribute('aria-label', Ed11y.M.buttonPrevContent);
         this.prev.setAttribute('title', Ed11y.M.buttonPrevContent);
         this.prevIcon = document.createElement('span');
         this.prevIcon.textContent = '➤';
@@ -114,8 +113,11 @@ class Ed11yElementTip extends HTMLElement {
           event.preventDefault();
           Ed11y.jumpTo(-1);
         });
+        this.navBar.append(this.prev);
+
         this.next = document.createElement('button');
         this.next.classList.add('ed11y-tip-next');
+        this.next.setAttribute('aria-label', Ed11y.M.buttonNextContent);
         this.next.setAttribute('title', Ed11y.M.buttonNextContent);
         this.nextIcon = document.createElement('span');
         this.nextIcon.textContent = '➤';
@@ -124,8 +126,31 @@ class Ed11yElementTip extends HTMLElement {
           event.preventDefault();
           Ed11y.jumpTo(1);
         });
-        this.navBar.append(this.prev);
         this.navBar.append(this.next);
+
+        if (Ed11y.options.reportsURL) {
+          let reportLink = document.createElement('a');
+          reportLink.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M432 48L208 48c-17.7 0-32 14.3-32 32l0 16-48 0 0-16c0-44.2 35.8-80 80-80L432 0c44.2 0 80 35.8 80 80l0 224c0 44.2-35.8 80-80 80l-16 0 0-48 16 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32zM48 448c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-192L48 256l0 192zM64 128l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 192c0-35.3 28.7-64 64-64z"/></svg>';
+          reportLink.classList.add('ed11y-tip-reports', 'button');
+          reportLink.setAttribute('href', Ed11y.options.reportsURL);
+          reportLink.setAttribute('target', '_blank');
+          reportLink.setAttribute('aria-label', Ed11y.M.reportsLink);
+          reportLink.setAttribute('title', Ed11y.M.reportsLink);
+          this.navBar.append(reportLink);
+        }
+
+        this.help = document.createElement('details');
+        this.help.classList.add('button');
+        this.helpContent = document.createElement('div');
+        this.helpContent.classList.add('ed11y-tip-help-content');
+        this.helpContent.innerHTML = Ed11y.M.panelHelp;
+        this.help.append(this.helpContent);
+        this.helpToggle = document.createElement('summary');
+        this.helpToggle.textContent = '?';
+        this.helpToggle.setAttribute('aria-label', Ed11y.M.panelHelpTitle);
+        this.helpToggle.setAttribute('title', Ed11y.M.panelHelpTitle);
+        this.help.insertAdjacentElement('afterbegin', this.helpToggle);
+        this.navBar.append(this.help);
       }
       if (!Ed11y.options.inlineAlerts) {
         const transferFocus = document.createElement('button');
@@ -137,7 +162,8 @@ class Ed11yElementTip extends HTMLElement {
         transferFocus.addEventListener('click', function(){Ed11y.transferFocus();});
       }
       let closeButton = document.createElement('button');
-      closeButton.setAttribute('aria-label','close');
+      closeButton.setAttribute('arial-label',Ed11y.M.closeTip);
+      closeButton.setAttribute('title',Ed11y.M.closeTip);
       closeButton.classList.add('close');
       closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>';
       this.navBar.append(closeButton);
@@ -189,7 +215,17 @@ class Ed11yElementTip extends HTMLElement {
 
   toggleTip(changeTo) {
     if (changeTo) {
+      Ed11y.resetClass([
+        // 'ed11y-ring-red', // todo can we drop these?
+        // 'ed11y-ring-yellow',
+        //'ed11y-hidden-highlight',
+        // 'ed11y-warning-inline',
+        // 'ed11y-warning-block',
+        // 'ed11y-error-block',
+        // 'ed11y-error-inline',
+      ]);
       this.wrapper.classList.add('open');
+      Ed11y.alertOnInvisibleTip(this.result.toggle, this.result.element);
     } else {
       this.wrapper.classList.remove('open');
     }

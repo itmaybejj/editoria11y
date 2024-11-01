@@ -94,7 +94,7 @@ class Ed11yElementResult extends HTMLElement {
       if (stateChange === 'open') {
         window.setTimeout(function () {
           let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-          activeTip?.shadowRoot.querySelector('.close').focus();
+          activeTip?.shadowRoot.querySelector('.title').focus();
         }, 500);
       }
       window.setTimeout(function () {
