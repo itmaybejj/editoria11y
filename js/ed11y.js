@@ -647,9 +647,9 @@ class Ed11y {
             }
           }, 0);
         }
+        // Update buttons.
         if (Ed11y.totalCount > 0 || (Ed11y.options.showDismissed && Ed11y.dismissedCount > 0)) {
-          // Showing via issue or forced-open
-          Ed11y.panelToggleTitle.textContent = Ed11y.M.buttonHideChecker;
+          Ed11y.panelToggleTitle.textContent = Ed11y.open ? Ed11y.M.buttonHideChecker : Ed11y.M.buttonShowNoAlert;
           Ed11y.panelJumpNext.removeAttribute('hidden');
           if (Ed11y.errorCount > 0) {
             // Errors
@@ -1175,7 +1175,7 @@ class Ed11y {
           }
           let left = targetOffset.left;
           switch (mark.result.element.tagName) {
-          // TD TD different?
+            // TD TD different?
           case 'IMG':
             top = top + 10;
             left = left + 10;

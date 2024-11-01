@@ -20,7 +20,7 @@ const ed11yLang = {
     buttonAltsContent: 'Alt Text',
     buttonFirstContent: 'Go to first issue',
     buttonNextContent: 'Go to next issue',
-    buttonPrevContent: 'Go to previous issue', // add to Drupal
+    buttonPrevContent: 'Go to previous issue',
     buttonShowHiddenAlert: 'Show hidden alert',
     buttonHideHiddenAlert: 'Hide hidden alerts',
     buttonShowHiddenAlerts: (count) => `Show ${count} hidden alerts`,
@@ -30,13 +30,6 @@ const ed11yLang = {
     buttonHideChecker: 'Hide checker',
     panelCheckOutline: '<p>Check that this forms <a href=\'https://accessibility.princeton.edu/how/content/headings\'>a complete outline</a>:</p>',
     panelCheckAltText: '<p>Check <a href=\'https://accessibility.princeton.edu/how/content/alternative-text\'>alt text</a>, <a href=\'https://accessibility.princeton.edu/how/content/images-text\'>images of text</a>, &amp; <a href=\'https://webaim.org/techniques/captions/\'>captions</a>.</p>',
-    elementDismissalHelpOK : `
-    "OK" dismisses this for everyone, on this page.
-    `, // todo delete
-    elementDismissalHelpHide : `
-    "Hide" dismisses this for you, on this page.
-    `, // todo delete
-    elementDismissalHelpAll : 'Site-wide changes can be made in Editoria11y\'s settings.', //todo delete
     panelHelpTitle: 'About this tool',
     altLabelPrefix: 'Alt text: ',
     errorAltMissing: '(missing!)',
@@ -48,7 +41,7 @@ const ed11yLang = {
     // Errors and alerts ==================================
 
     consoleNotSupported: 'This browser can not run Editoria11y.',
-    jumpedToInvisibleTip: 'Note: this content may not be visible. Look for it inside the outlined container.', // todo update in Drupal
+    jumpedToInvisibleTip: 'Note: this content may not be visible. Look for it inside the outlined container.',
     jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.',
 
     // Strings used in tests ==============================
@@ -64,17 +57,17 @@ const ed11yLang = {
 
     toggleManualCheck: 'manual check needed',
     toggleAlert: 'alert',
-    toggleAriaLabel: (label) => `Accessibility ${label}`, // todo update drupal
+    toggleAriaLabel: (label) => `Accessibility ${label}`,
     transferFocus: 'Edit this content',
     dismissOkButtonContent: 'Mark as checked and OK',
     dismissHideButtonContent: 'Ignore this manual check',
-    dismissOkTitle: 'Hides this alert for all editors', // todo add to Drupal
+    dismissOkTitle: 'Hides this alert for all editors',
     dismissHideTitle: 'Hides this alert for you',
     undismissOKButton: 'Restore this alert marked as OK',
     undismissHideButton: 'Restore this hidden alert',
     undismissNotePermissions: 'This alert has been hidden by an administrator',
     reportsLink: 'View site-wide reports',
-    closeTip: 'Close', // Drupal
+    closeTip: 'Close',
     panelHelp : `
     <p><a href="https://itmaybejj.github.io/editoria11y/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
     <p>Many alerts are "manual checks." Manual checks can be dismissed:</p>
