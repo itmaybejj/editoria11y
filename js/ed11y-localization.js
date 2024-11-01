@@ -64,7 +64,7 @@ const ed11yLang = {
 
     toggleManualCheck: 'manual check needed',
     toggleAlert: 'alert',
-    toggleAriaLabel: (resultID, label) => `Accessibility issue ${resultID}, ${label}`,
+    toggleAriaLabel: (label) => `Accessibility ${label}`, // todo update drupal
     transferFocus: 'Edit this content',
     dismissOkButtonContent: 'Mark as checked and OK',
     dismissHideButtonContent: 'Ignore this manual check',

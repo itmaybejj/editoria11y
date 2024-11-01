@@ -714,7 +714,7 @@ class Ed11y {
     };
 
     // Place markers on elements with issues
-    Ed11y.result = function (result, index, jumpIndex) {
+    Ed11y.result = function (result, index) {
       /* old array to new object map:
         // [0] element
         // [1] test
@@ -953,11 +953,10 @@ class Ed11y {
       window.setTimeout(function () {
         if (Ed11y.jumpList.length > 0) {
           Ed11y.lastOpenTip = (rememberGoto - 1);
-          Ed11y.panelJumpNext.focus();
+          Ed11y.panelJumpNext?.focus();
         } else {
           window.setTimeout(function () {
-            let focus = Ed11y.panel.querySelector('#ed11y-issues-tab') // todo wha?
-            focus.focus();
+            Ed11y.panelToggle?.focus();
           }, 100);
         }
       }, 500, rememberGoto);
@@ -1525,7 +1524,7 @@ class Ed11y {
             mark.setAttribute('tabindex', '-1');
             // Array: el, level, outlinePrefix
             el[0].insertAdjacentElement('afterbegin', mark);
-          };
+          }
           let level = el[1];
           let leftPad = 10 * level - 10;
           let li = document.createElement('li');
@@ -1655,9 +1654,7 @@ class Ed11y {
       // Sort from bottom to top so focus order after insert is top to bottom.
       Ed11y.results.sort((a, b) => b.sortPos - a.sortPos);
 
-      let jumpIndex = Ed11y.results.length;
       Ed11y.results?.forEach(function (result, i) {
-        jumpIndex--;
         if (!Ed11y.results[i].dismissalStatus || Ed11y.options.showDismissed) {
           Ed11y.result(result, i);
         }

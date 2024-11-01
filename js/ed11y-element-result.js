@@ -15,7 +15,7 @@ class Ed11yElementResult extends HTMLElement {
       this.resultID = this.dataset.ed11yResult;
       this.result = Ed11y.results[this.resultID];
 
-      this.wrapper = document.createElement('aside');
+      this.wrapper = document.createElement('div');
 
       this.dismissable = !!this.result.dismissalKey;
       this.dismissed = !!this.result.dismissalStatus;
@@ -29,7 +29,7 @@ class Ed11yElementResult extends HTMLElement {
       this.toggle.setAttribute('class', 'toggle');
       // todo parameterize
       let label = this.dismissable ? Ed11y.M.toggleManualCheck : Ed11y.M.toggleAlert;
-      this.toggle.setAttribute('aria-label', Ed11y.M.toggleAriaLabel(this.resultID, label));
+      this.toggle.setAttribute('aria-label', Ed11y.M.toggleAriaLabel(label));
       this.toggle.setAttribute('aria-expanded', 'false');
       this.toggle.setAttribute('aria-haspopup', 'dialog');
       this.toggle.setAttribute('data-ed11y-result', this.dataset.ed11yResult);
