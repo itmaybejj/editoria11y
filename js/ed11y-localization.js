@@ -57,6 +57,7 @@ const ed11yLang = {
 
     toggleManualCheck: 'manual check needed',
     toggleAlert: 'alert',
+    issue: 'Issue',
     toggleAriaLabel: (label) => `Accessibility ${label}`,
     transferFocus: 'Edit this content',
     dismissOkButtonContent: 'Mark as checked and OK',
@@ -66,7 +67,7 @@ const ed11yLang = {
     undismissOKButton: 'Restore this alert marked as OK',
     undismissHideButton: 'Restore this hidden alert',
     undismissNotePermissions: 'This alert has been hidden by an administrator',
-    reportsLink: 'View site-wide reports',
+    reportsLink: 'Open site reports in new tab',
     closeTip: 'Close',
     panelHelp : `
     <p><a href="https://itmaybejj.github.io/editoria11y/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>

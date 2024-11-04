@@ -99,7 +99,7 @@ class Ed11yElementTip extends HTMLElement {
       this.navBar.classList.add('ed11y-tip-header');
       this.count = document.createElement('div');
       this.count.classList.add('ed11y-tip-count');
-      this.count.textContent = `${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1} / ${Ed11y.jumpList.length}`;
+      this.count.textContent = `${Ed11y.M.issue} ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1} / ${Ed11y.jumpList.length}`;
       this.navBar.append(this.count);
       if (Ed11y.jumpList.length > 1) {
         this.prev = document.createElement('button');
@@ -127,17 +127,6 @@ class Ed11yElementTip extends HTMLElement {
           Ed11y.jumpTo(1);
         });
         this.navBar.append(this.next);
-
-        if (Ed11y.options.reportsURL) {
-          let reportLink = document.createElement('a');
-          reportLink.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M432 48L208 48c-17.7 0-32 14.3-32 32l0 16-48 0 0-16c0-44.2 35.8-80 80-80L432 0c44.2 0 80 35.8 80 80l0 224c0 44.2-35.8 80-80 80l-16 0 0-48 16 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32zM48 448c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-192L48 256l0 192zM64 128l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 192c0-35.3 28.7-64 64-64z"/></svg>';
-          reportLink.classList.add('ed11y-tip-reports', 'button');
-          reportLink.setAttribute('href', Ed11y.options.reportsURL);
-          reportLink.setAttribute('target', '_blank');
-          reportLink.setAttribute('aria-label', Ed11y.M.reportsLink);
-          reportLink.setAttribute('title', Ed11y.M.reportsLink);
-          this.navBar.append(reportLink);
-        }
       }
       this.help = document.createElement('details');
       this.help.classList.add('button');

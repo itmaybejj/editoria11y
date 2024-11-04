@@ -655,15 +655,21 @@ class Ed11y {
             // Errors
             Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-pass');
             Ed11y.panel.classList.add('ed11y-errors');
+            document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.alert);
+            document.documentElement.style.setProperty('--ed11y-activeColor', '#fff');
           }
           else if (Ed11y.warningCount > 0) {
             // Warnings
             Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-pass');
             Ed11y.panel.classList.add('ed11y-warnings');
+            document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.warning);
+            document.documentElement.style.setProperty('--ed11y-activeColor', '#111');
           } else {
             // Issues present but dismissed.
             Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-warnings');
             Ed11y.panel.classList.add('ed11y-pass');
+            document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
+            document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
           }
           // todo postpone: aria alert on load?
           /*window.setTimeout(function () {
@@ -676,6 +682,8 @@ class Ed11y {
           }
         } else {
           Ed11y.panelJumpNext.setAttribute('hidden', '');
+          document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
+          document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
 
           Ed11y.panelCount.style.display = 'display: none;';
           Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-errors');
@@ -798,6 +806,8 @@ class Ed11y {
       Ed11y.panel?.classList.add('ed11y-shut');
       Ed11y.panel?.classList.remove('ed11y-active');
       Ed11y.panelToggle?.setAttribute('aria-expanded', 'false');
+      document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
+      document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
     };
 
     Ed11y.reset = function () {
@@ -1993,6 +2003,9 @@ class Ed11y {
     };
 
     Ed11y.jumpTo = function(dir = 1) {
+      if (!Ed11y.open) {
+        return false;
+      }
       Ed11y.viaJump = true;
       // Determine target result.
       let goMax = Ed11y.jumpList.length - 1;

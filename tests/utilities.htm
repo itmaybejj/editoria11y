@@ -195,15 +195,13 @@
                     })
 
 
-
-
                 const ed11y = new Ed11y({
                     alertMode : 'assertive',
                     ignoreByKey : {
                         'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
                         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
                     },
-                    syncedDismissals: {},
+                    //syncedDismissals: {},
                     shadowComponents : 'shadow-test, shadow-test-no-hits',
                     hiddenHandlers : '[hidden]',
                     checkRoots : 'body',
