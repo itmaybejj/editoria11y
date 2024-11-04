@@ -21,13 +21,14 @@ const ed11yLang = {
     buttonFirstContent: 'Go to first issue',
     buttonNextContent: 'Go to next issue',
     buttonPrevContent: 'Go to previous issue',
-    buttonShowHiddenAlert: 'Show hidden alert',
-    buttonHideHiddenAlert: 'Hide hidden alerts',
-    buttonShowHiddenAlerts: (count) => `Show ${count} hidden alerts`,
-    buttonHideHiddenAlerts: (count) => `Hide ${count} hidden alerts`,
-    buttonShowAlerts: 'Show alerts',
+    buttonShowHiddenAlert: 'Show hidden issue',
+    buttonHideHiddenAlert: 'Hide hidden issue',
+    buttonShowHiddenAlerts: (count) => `Show ${count} hidden issues`,
+    buttonHideHiddenAlerts: (count) => `Hide ${count} hidden issues`,
+    buttonShowAlerts: 'Show content issue alerts',
     buttonShowNoAlert: 'Show checker',
-    buttonHideChecker: 'Hide checker',
+    buttonHideChecker: 'Hide checker', // todo drupal
+    buttonHideAlerts: 'Hide content issue alerts',
     panelCheckOutline: '<p>Check that this forms <a href=\'https://accessibility.princeton.edu/how/content/headings\'>a complete outline</a>:</p>',
     panelCheckAltText: '<p>Check <a href=\'https://accessibility.princeton.edu/how/content/alternative-text\'>alt text</a>, <a href=\'https://accessibility.princeton.edu/how/content/images-text\'>images of text</a>, &amp; <a href=\'https://webaim.org/techniques/captions/\'>captions</a>.</p>',
     panelHelpTitle: 'About this tool',
@@ -70,7 +71,7 @@ const ed11yLang = {
     reportsLink: 'Open site reports in new tab',
     closeTip: 'Close',
     panelHelp : `
-    <p><a href="https://itmaybejj.github.io/editoria11y/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
+    <p><a href="https://editoria11y.princeton.edu/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
     <p>Many alerts are "manual checks." Manual checks can be dismissed:</p>
     <ul>
         <li>"Mark as checked and OK" hides the alert for all editors.</li>
@@ -80,7 +81,7 @@ const ed11yLang = {
     <p>If an incorrect alert is appearing on many pages, site administrators can tell the checker to ignore particular elements and page regions.</p>
     <p>And remember that automated checkers cannot replace <a href='https://webaim.org/resources/evalquickref/'> proofreading and testing for accessibility</a>.</p>
     <p><br><a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Report bugs & request changes <span aria-hidden="true">&raquo;</span></a></p>
-    `,
+    `, // todo drupal
 
     // Tooltips for heading tests =========================
 

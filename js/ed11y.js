@@ -625,7 +625,7 @@ class Ed11y {
           Ed11y.panel.classList.remove('ed11y-shut');
           Ed11y.panel.classList.add('ed11y-active');
           Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
-          Ed11y.panelToggleTitle.textContent = Ed11y.M.buttonHideChecker;
+          Ed11y.panelToggleTitle.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonHideChecker;
           // Prepare show hidden alerts button.
           if (Ed11y.dismissedCount === 0) {
             // Reset show hidden default option when irrelevant.
@@ -649,7 +649,7 @@ class Ed11y {
         }
         // Update buttons.
         if (Ed11y.totalCount > 0 || (Ed11y.options.showDismissed && Ed11y.dismissedCount > 0)) {
-          Ed11y.panelToggleTitle.textContent = Ed11y.open ? Ed11y.M.buttonHideChecker : Ed11y.M.buttonShowNoAlert;
+          Ed11y.panelToggleTitle.textContent = Ed11y.open ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonShowAlerts;
           Ed11y.panelJumpNext.removeAttribute('hidden');
           if (Ed11y.errorCount > 0) {
             // Errors
@@ -776,6 +776,7 @@ class Ed11y {
         tip: false,
       };
       Ed11y.lastOpenTip = -1;
+      Ed11y.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Ed11y.M.buttonFirstContent;
       Ed11y.resetClass([
         'ed11y-ring-red',
         'ed11y-ring-yellow',
@@ -793,7 +794,7 @@ class Ed11y {
 
     Ed11y.resetPanel = function() {
       // Reset main panel.
-      visualizing = true; // so visualize function removes visualizers.
+      Ed11y.visualizing = true; // so visualize function removes visualizers.
       Ed11y.visualize();
       if (Ed11y.totalCount === 0 && Ed11y.dismissedCount > 0) {
         Ed11y.panelCount.textContent = 'i';
@@ -801,13 +802,15 @@ class Ed11y {
           Ed11y.M.buttonShowHiddenAlert :
           Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
       }
-      Ed11y.panelJumpNext?.setAttribute('data-ed11y-goto', '0');
+      if (!Ed11y.options.showDismissed) {
+        Ed11y.showDismissed.setAttribute('data-ed11y-pressed', 'false');
+        Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.dismissedCount === 1 ?
+          Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+      }
       Ed11y.message.textContent = '';
       Ed11y.panel?.classList.add('ed11y-shut');
       Ed11y.panel?.classList.remove('ed11y-active');
       Ed11y.panelToggle?.setAttribute('aria-expanded', 'false');
-      document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
-      document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
     };
 
     Ed11y.reset = function () {
@@ -1185,7 +1188,7 @@ class Ed11y {
           }
           let left = targetOffset.left;
           switch (mark.result.element.tagName) {
-            // TD TD different?
+          // TD TD different?
           case 'IMG':
             top = top + 10;
             left = left + 10;
@@ -1499,10 +1502,10 @@ class Ed11y {
             }
             Ed11y.options.userPrefersShut = false;
             localStorage.setItem('editoria11yShow', '1');
-            //Ed11y.panelToggleTitle.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonHideNoAlert;
           }
           else {
             Ed11y.panelToggleTitle.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonShowAlerts : Ed11y.M.buttonShowNoAlert;
+            Ed11y.options.showDismissed = false;
             Ed11y.reset();
             Ed11y.options.userPrefersShut = true;
             localStorage.setItem('editoria11yShow', '0');
@@ -1623,17 +1626,17 @@ class Ed11y {
         altList.innerHTML = '<p><em>No images found.</em></p>';
       }
     };
-    let visualizing = false;
+    Ed11y.visualizing = false;
     Ed11y.visualize = function () {
-      if (visualizing) {
-        visualizing = false;
+      if (Ed11y.visualizing) {
+        Ed11y.visualizing = false;
         Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('aria-pressed', 'false');
         Ed11y.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
         Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
         Ed11y.elements.reset?.forEach(el => { el.remove(); });
         return;
       }
-      visualizing = true;
+      Ed11y.visualizing = true;
       Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('aria-pressed', 'true');
       Ed11y.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
       showAltPanel();
@@ -1831,6 +1834,13 @@ class Ed11y {
         let runTime = performance.now();
         Ed11y.incremental = true;
         Ed11y.checkAll();
+        window.setTimeout(function() {
+          if (Ed11y.visualizing) {
+            Ed11y.visualizing = false;
+            Ed11y.visualize();
+          }
+        }, 500);
+        // todo: if there are no issues and the heading panel is open...it closes!
         // Increase debounce if runs are slow.
         runTime = performance.now() - runTime;
         browserSpeed = runTime > 10 ? 10 : (browserSpeed + runTime) / 2;
