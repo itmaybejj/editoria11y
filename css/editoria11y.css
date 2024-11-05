@@ -126,7 +126,7 @@ ed11y-element-result {
 .ed11y-buttonbar > button, .ed11y-buttonbar > a {
     background: var(--ed11y-activeBackground);
     color: var(--ed11y-activeColor);
-    box-shadow: -1px 0 var(--ed11y-activeBorder), 2px 0 var(--ed11y-activeBackground), -2px 0 var(--ed11y-activeBackground);
+    box-shadow: 0 1px var(--ed11y-activePanelBorder), 0 -1px var(--ed11y-activePanelBorder), -1px 0 var(--ed11y-activeBorder), 2px 0 var(--ed11y-activeBackground), -2px 0 var(--ed11y-activeBackground);
     width: 2.0625em;
     height: 24px;
     font-size: 1em;
@@ -145,8 +145,8 @@ ed11y-element-result {
 #ed11y-reports-link,
 #ed11y-show-hidden:first-child,
 #ed11y-show-hidden[hidden]:first-child + #ed11y-visualize {
-    border-radius: 3px 0 0 3px;
-    box-shadow: 2px 0 var(--ed11y-activeBackground);
+    border-radius:  var(--ed11y-borderRadius, 3px) 0 0 var(--ed11y-borderRadius, 3px);
+    box-shadow: -1px 0 var(--ed11y-activePanelBorder), 0 -1px var(--ed11y-activePanelBorder), 0 1px var(--ed11y-activePanelBorder), 2px 0 var(--ed11y-activeBackground);
 }
 .ed11y-buttonbar:has(#ed11y-toggle.disabled) #ed11y-visualize,
 .ed11y-buttonbar:has(#ed11y-toggle.disabled) #ed11y-visualizers {
@@ -165,8 +165,8 @@ ed11y-element-result {
 .ed11y-buttonbar .ed11y-jump {
     grid-area: next;
     padding-left: 2px;
-    border-radius: 0 3px 3px 0;
-    box-shadow: -2px 0 var(--ed11y-activeBackground);
+    border-radius: 0  var(--ed11y-borderRadius, 3px) var(--ed11y-borderRadius, 3px) 0;
+    box-shadow: 0 0 0 1px var(--ed11y-activePanelBorder), -2px 0 var(--ed11y-activeBackground);
 }
 #ed11y-toggle {
     grid-area: toggle;
@@ -181,7 +181,7 @@ ed11y-element-result {
     padding: 0;
     width: auto;
     border-right: 0;
-    margin: 0 -3px 0 -2px;
+    margin: 0 -3px;
     z-index: 2;
 }
 .ed11y-shut #ed11y-toggle {
@@ -203,7 +203,7 @@ ed11y-element-result {
 #ed11y-panel .ed11y-buttonbar > a:hover,
 #ed11y-panel .ed11y-buttonbar > button:not(#ed11y-toggle):hover,
 .ed11y-panel-wrapper summary:hover {
-    box-shadow: inset 0 0 0 1px var(--ed11y-activeBackground), inset 0 0 0 2px var(--ed11y-activeColor);
+    box-shadow: 0 0 0 1px var(--ed11y-activePanelBorder), inset 0 0 0 1px var(--ed11y-activeBackground), inset 0 0 0 2px var(--ed11y-activeColor);
     z-index: 1;
 }
 #ed11y-panel summary:focus-visible {
@@ -362,9 +362,10 @@ ed11y-element-result {
     background: var(--ed11y-bg);
     box-shadow: var(--ed11y-panelBarShadow);
     border-top: 0;
-    border-radius: 0 0 var(--ed11y-borderRadius, 1px) var(--ed11y-borderRadius, 1px);
+    border-radius: var(--ed11y-borderRadius, 3px);
     color: var(--ed11y-text, #20160c);
-    margin: -2px 12px 0 0;
+    margin: -2px 0 0 0;
+    overflow: hidden;
 }
 .ed11y-panel-wrapper summary {
     font-weight: 400;

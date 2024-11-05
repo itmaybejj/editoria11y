@@ -281,8 +281,9 @@ class Ed11y {
       Ed11y.reset();
       Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-warnings');
       document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
-      document.documentElement.style.setProperty('--ed11y-activeBorder', Ed11y.theme.panelBarText + '44');
       document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
+      document.documentElement.style.setProperty('--ed11y-activeBorder', Ed11y.theme.panelBarText + '44');
+      document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
       Ed11y.panelCount.textContent = 'i';
       Ed11y.panelJumpNext.setAttribute('hidden', '');
       Ed11y.panelToggle?.classList.add('disabled');
@@ -663,23 +664,26 @@ class Ed11y {
             Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-pass');
             Ed11y.panel.classList.add('ed11y-errors');
             document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.alert);
-            document.documentElement.style.setProperty('--ed11y-activeBorder', '#fff7');
             document.documentElement.style.setProperty('--ed11y-activeColor', '#fff');
+            document.documentElement.style.setProperty('--ed11y-activeBorder', '#fff7');
+            document.documentElement.style.setProperty('--ed11y-activePanelBorder', '#def');
           }
           else if (Ed11y.warningCount > 0) {
             // Warnings
             Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-pass');
             Ed11y.panel.classList.add('ed11y-warnings');
             document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.warning);
-            document.documentElement.style.setProperty('--ed11y-activeBorder', '#947605');
             document.documentElement.style.setProperty('--ed11y-activeColor', '#111');
+            document.documentElement.style.setProperty('--ed11y-activeBorder', '#947605');
+            document.documentElement.style.setProperty('--ed11y-activePanelBorder', '#947605');
           } else {
             // Issues present but dismissed.
             Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-warnings');
             Ed11y.panel.classList.add('ed11y-pass');
             document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
-            document.documentElement.style.setProperty('--ed11y-activeBorder', Ed11y.theme.panelBarText + '44');
             document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
+            document.documentElement.style.setProperty('--ed11y-activeBorder', Ed11y.theme.panelBarText + '44');
+            document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
           }
           // todo postpone: aria alert on load?
           /*window.setTimeout(function () {
@@ -694,6 +698,8 @@ class Ed11y {
           Ed11y.panelJumpNext.setAttribute('hidden', '');
           document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
           document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
+          document.documentElement.style.setProperty('--ed11y-activeBorder', Ed11y.theme.panelBarText + '44');
+          document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
 
           Ed11y.panelCount.style.display = 'display: none;';
           Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-errors');
