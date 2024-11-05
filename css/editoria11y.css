@@ -126,7 +126,7 @@ ed11y-element-result {
 .ed11y-buttonbar > button, .ed11y-buttonbar > a {
     background: var(--ed11y-activeBackground);
     color: var(--ed11y-activeColor);
-    box-shadow: 0 0 1px var(--ed11y-activeColor), 2px 0 var(--ed11y-activeBackground), -2px 0 var(--ed11y-activeBackground);
+    box-shadow: -1px 0 var(--ed11y-activeBorder), 2px 0 var(--ed11y-activeBackground), -2px 0 var(--ed11y-activeBackground);
     width: 2.0625em;
     height: 24px;
     font-size: 1em;
