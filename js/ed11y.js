@@ -279,15 +279,15 @@ class Ed11y {
 
     Ed11y.disable = () => {
       Ed11y.reset();
-      Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-warnings');
       document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
       document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
       document.documentElement.style.setProperty('--ed11y-activeBorder', Ed11y.theme.panelBarText + '44');
       document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
-      Ed11y.panelCount.textContent = 'i';
-      Ed11y.panelJumpNext.setAttribute('hidden', '');
-      Ed11y.panelToggle?.classList.add('disabled');
       if (Ed11y.panelToggle) {
+        Ed11y.panel?.classList.remove('ed11y-errors', 'ed11y-warnings');
+        Ed11y.panelCount.textContent = 'i';
+        Ed11y.panelJumpNext.setAttribute('hidden', '');
+        Ed11y.panelToggle.classList.add('disabled');
         Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleDisabled;
       }
     };
@@ -364,12 +364,6 @@ class Ed11y {
           Ed11y.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
         }
 
-        // Check for ignoreAll element only once.
-        Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
-        if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
-          Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
-        }
-
         // Run tests
         Ed11y.checkAll();
         window.addEventListener('resize', function () { Ed11y.windowResize(); });
@@ -380,7 +374,14 @@ class Ed11y {
     Ed11y.results = [];
     // Toggles the outline of all headers, link texts, and images.
     Ed11y.checkAll = () => {
+
       if ( !Ed11y.checkRunPrevent() ) {
+        // Check for ignoreAll elements.
+        Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
+        if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
+          Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
+        }
+
         if ( Ed11y.incremental ) {
           Ed11y.oldResults = Ed11y.results;
         }
@@ -516,41 +517,17 @@ class Ed11y {
     let oldResultString = '';
     let newNodes = false;
     const newIncrementalResults = function() {
-      if (newNodes) {
+      if (newNodes || Ed11y.results.length !== Ed11y.oldResults.length) {
         newNodes = false;
         return true;
       }
-      let newResultString = JSON.stringify(Ed11y.results);
+      let newResultString = `${Ed11y.errorCount} ${Ed11y.warningCount}`;
+      Ed11y.results.forEach(result => {
+        newResultString += result.test + result.element.outerHTML;
+      });
       let changed = newResultString !== oldResultString;
       oldResultString = newResultString;
       return changed;
-
-      // Sigh. Every other method I've tried misses some changes.
-      // This should work but somehow the arrays are in different orders?
-      /*let isSame = Ed11y.results.length === Ed11y.oldResults.length &&
-        Ed11y.results.every(function(element, index) {
-          return element === Ed11y.oldResults[index];
-        });*/
-      /*let newElements = [];
-      Ed11y.results.forEach(result => {
-        newElements.push(result.element);
-        newElements[result.element].push(result.test);
-      });
-      if (oldElements.length !== newElements.length) {
-        oldElements = newElements;
-        return true;
-      } else {
-        let same = newElements.every((element) => {
-          if (!oldElements.includes(element)) {
-            return false;
-          }
-          return element.every((test) => {
-            oldElements[element].includes(test);
-          });
-        });
-        oldElements = newElements;
-        return !same;
-      }*/
     };
 
     Ed11y.updatePanel = function () {
@@ -596,7 +573,11 @@ class Ed11y {
           Ed11y.onLoad = false;
 
           if (!Ed11y.options.inlineAlerts) {
-            oldResultString = JSON.stringify(Ed11y.results);
+            // todo temp temp temp!
+            oldResultString = `${Ed11y.errorCount} ${Ed11y.warningCount}`;
+            Ed11y.results.forEach(result => {
+              oldResultString += result.test + result.element.outerHTML;
+            });
           }
 
           // Create the panel DOM on load.
@@ -819,12 +800,11 @@ class Ed11y {
           Ed11y.M.buttonShowHiddenAlert :
           Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
       }
-      if (!Ed11y.options.showDismissed) {
+      if (!Ed11y.options.showDismissed && Ed11y.showDismissed) {
         Ed11y.showDismissed.setAttribute('data-ed11y-pressed', 'false');
         Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.dismissedCount === 1 ?
           Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
       }
-      Ed11y.message.textContent = '';
       Ed11y.panel?.classList.add('ed11y-shut');
       Ed11y.panel?.classList.remove('ed11y-active');
       Ed11y.panelToggle?.setAttribute('aria-expanded', 'false');
@@ -864,7 +844,7 @@ class Ed11y {
       // Initialize or reset elements array.
       Ed11y.elements[key] = [];
 
-      if (rootRestrict) {
+      if (rootRestrict && Ed11y.roots) {
         // Add array of elements matching selector, excluding the provided ignore list.
         Ed11y.roots.forEach(root => {
           Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector}${shadowSelector})${ignore}`)));
@@ -1149,6 +1129,9 @@ class Ed11y {
 
     // Applies parameters and avoids other widgets.
     Ed11y.alignPanel = function() {
+      if (!Ed11y.panelElement) {
+        return false;
+      }
       let xMost = 0;
       let yMost = 0;
       if (Ed11y.elements.panelPin) {
@@ -1164,7 +1147,7 @@ class Ed11y {
       }
       if (xMost > 0 && xMost < windowWidth - 240) {
         // push off horizontal
-        Ed11y.panelElement.style.setProperty(Ed11y.options.panelPinTo, xMost + 'px');
+        Ed11y.panelElement.style.setProperty(Ed11y.options.panelPinTo, xMost + 10 + 'px');
         Ed11y.panelElement.style.setProperty('bottom', Ed11y.options.panelOffsetY);
       } else if (xMost > 0 && xMost > windowWidth - 240 && yMost > 0) {
         // push off vertical
@@ -1216,10 +1199,8 @@ class Ed11y {
             Ed11y.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
             if (left < Ed11y.jumpList[i].bounds.left) {
               left = Ed11y.jumpList[i].bounds.left;
-              console.log(mark.result);
             } else if (left - 20 > Ed11y.jumpList[i].bounds.right) {
               left = Ed11y.jumpList[i].bounds.right - 20;
-              console.log(mark.result);
             }
           }
           Ed11y.jumpList[i].targetOffset = targetOffset;
@@ -1651,15 +1632,15 @@ class Ed11y {
     Ed11y.visualize = function () {
       if (Ed11y.visualizing) {
         Ed11y.visualizing = false;
-        Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('aria-pressed', 'false');
-        Ed11y.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
+        Ed11y.panel?.querySelector('#ed11y-visualize').setAttribute('aria-pressed', 'false');
+        Ed11y.panel?.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
         Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
         Ed11y.elements.reset?.forEach(el => { el.remove(); });
         return;
       }
       Ed11y.visualizing = true;
-      Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('aria-pressed', 'true');
-      Ed11y.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
+      Ed11y.panel?.querySelector('#ed11y-visualize').setAttribute('aria-pressed', 'true');
+      Ed11y.panel?.querySelector('#ed11y-visualizers').removeAttribute('hidden');
       showAltPanel();
       showHeadingsPanel();
     };
