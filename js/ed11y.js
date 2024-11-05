@@ -80,8 +80,8 @@ class Ed11y {
       hiddenHandlers: '',
 
       panelPinTo: 'right',
-      panelOffsetX: '1%',
-      panelOffsetY: '1%',
+      panelOffsetX: '25px',
+      panelOffsetY: '25px',
       panelNoCover: '', // select other buttons to avoid.
 
       // Interface
@@ -279,8 +279,12 @@ class Ed11y {
 
     Ed11y.disable = () => {
       Ed11y.reset();
+      Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-warnings');
+      document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
+      document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
+      Ed11y.panelCount.textContent = 'i';
+      Ed11y.panelJumpNext.setAttribute('hidden', '');
       Ed11y.panelToggle?.classList.add('disabled');
-      Ed11y.panelToggle?.removeAttribute('aria-expanded');
       if (Ed11y.panelToggle) {
         Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleDisabled;
       }
@@ -388,9 +392,11 @@ class Ed11y {
         // Find and cache all root elements based on user-provided selectors.
         let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
         if (roots.length === 0) {
-          Ed11y.roots = [document.querySelector('html, body')];
+          //Ed11y.roots = [document.querySelector('html, body')];
           // Todo parameterize.
-          console.warn('Check Editoria11y configuration; specified root element not found');
+          if (Ed11y.onLoad) {
+            console.warn('Check Editoria11y configuration; specified root element not found');
+          }
           Ed11y.disable();
           return;
         } else {
@@ -412,7 +418,7 @@ class Ed11y {
             'testEmbeds',
           ];
           queue.forEach((test) => {
-            window.setTimeout(function () {
+            window.setTimeout(function (test) {
               Ed11y[test].check();
             }, 0, test);
           });
@@ -776,7 +782,6 @@ class Ed11y {
         tip: false,
       };
       Ed11y.lastOpenTip = -1;
-      Ed11y.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Ed11y.M.buttonFirstContent;
       Ed11y.resetClass([
         'ed11y-ring-red',
         'ed11y-ring-yellow',
@@ -786,10 +791,12 @@ class Ed11y {
         'ed11y-error-block',
         'ed11y-error-inline',
       ]);
-
-      // Reset insertions into body content.
       Ed11y.findElements('reset', 'ed11y-element-result, ed11y-element-tip, ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
       Ed11y.elements.reset.forEach((el) => el.remove());
+      if (Ed11y.panelJumpNext) {
+        Ed11y.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Ed11y.M.buttonFirstContent;
+      }
+      // Reset insertions into body content.
     };
 
     Ed11y.resetPanel = function() {
@@ -1187,23 +1194,22 @@ class Ed11y {
             top = targetOffset.top + scrollTop;
           }
           let left = targetOffset.left;
-          switch (mark.result.element.tagName) {
           // TD TD different?
-          case 'IMG':
+          if (mark.result.element.tagName === 'IMG') {
             top = top + 10;
             left = left + 10;
-            break;
-          default:
+          } else {
             left = left - 34;
-            break;
           }
           if (mark.result.scrollableParent) {
             // Bump alerts that would be X-position out of a scroll zone.
             Ed11y.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
             if (left < Ed11y.jumpList[i].bounds.left) {
               left = Ed11y.jumpList[i].bounds.left;
-            } else if (left - 40 > Ed11y.jumpList[i].bounds.right) {
-              left = Ed11y.jumpList[i].bounds.right - 40;
+              console.log(mark.result);
+            } else if (left - 20 > Ed11y.jumpList[i].bounds.right) {
+              left = Ed11y.jumpList[i].bounds.right - 20;
+              console.log(mark.result);
             }
           }
           Ed11y.jumpList[i].targetOffset = targetOffset;
@@ -1272,15 +1278,11 @@ class Ed11y {
           needNudge = true;
           // Offscreen to right. push to the left
           nudgeLeft = windowWidth - nudgeLeft - mark.markLeft - 80;
-          //nudgeMark(mark, windowWidth - nudgeLeft - mark.markLeft - 80, nudgeTop);
         }
         else if (nudgeTop !== 0) {
           needNudge = true;
-          //nudgeMark(mark, nudgeLeft, nudgeTop);
         }
         if (!Ed11y.options.inlineAlerts) {
-          //mark.markLeft = mark.markLeft + nudgeLeft;
-          //mark.markTop = mark.markTop + nudgeTop;
           if (needNudge) {
             mark.style.transform = `translate(${mark.markLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
           } else {
@@ -1527,7 +1529,7 @@ class Ed11y {
       if (Ed11y.headingOutline.length) {
         panelOutline.innerHTML = '';
         Ed11y.headingOutline.forEach((el, i) => {
-          // Todo: we COULD do a draw-over of these in editable mode...
+          // Todo: draw these in editable mode.
           // Todo implement outline ignore function.
           if (Ed11y.options.inlineAlerts) {
             let mark = document.createElement('ed11y-element-heading-label');
@@ -1543,22 +1545,31 @@ class Ed11y {
           let li = document.createElement('li');
           li.classList.add('level' + level);
           li.style.setProperty('margin-left', leftPad + 'px');
-          let link = document.createElement('a');
-          link.setAttribute('href', '#ed11y-heading-' + i);
-          li.append(link);
           let levelPrefix = document.createElement('strong');
           levelPrefix.textContent = `H${level}: `;
-          link.append(levelPrefix);
           let userText = document.createElement('span');
           userText.textContent = Ed11y.computeText(el[0]);
-          link.append(userText);
+          let link = document.createElement('a');
+          if (Ed11y.options.inlineAlerts) {
+            link.setAttribute('href', '#ed11y-heading-' + i);
+            li.append(link);
+            link.append(levelPrefix);
+            link.append(userText);
+          } else {
+            li.append(levelPrefix);
+            li.append(userText);
+          }
           if (el[2]) { // Has an error message
             let type = !el[3] ? 'error' : 'warning';
             li.classList.add(type);
             let message = document.createElement('em');
             message.classList.add('ed11y-small');
             message.textContent = ' ' + el[2];
-            link.append(message);
+            if (Ed11y.options.inlineAlerts) {
+              link.append(message);
+            } else {
+              li.append(message);
+            }
           }
           panelOutline.append(li);
         });

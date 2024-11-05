@@ -8,7 +8,7 @@ const ed11yLang = {
 
     // Main Panel =========================================
     toggleAccessibilityTools: 'Toggle accessibility tools',
-    toggleDisabled: 'Editoria11y cannot check this content.',
+    toggleDisabled: 'No content available for Editoria11y to check.',
     panelCount0 : 'No issues detected.',
     panelCountAllDismissed : 'All issues hidden.',
     panelCount1 : 'One issue detected.',
@@ -25,10 +25,10 @@ const ed11yLang = {
     buttonHideHiddenAlert: 'Hide hidden issue',
     buttonShowHiddenAlerts: (count) => `Show ${count} hidden issues`,
     buttonHideHiddenAlerts: (count) => `Hide ${count} hidden issues`,
-    buttonShowAlerts: 'Show content issue alerts',
-    buttonShowNoAlert: 'Show checker',
-    buttonHideChecker: 'Hide checker', // todo drupal
-    buttonHideAlerts: 'Hide content issue alerts',
+    buttonShowAlerts: 'Show content issues and tools',
+    buttonShowNoAlert: 'Show checker tools',
+    buttonHideChecker: 'Hide checker tools', // todo drupal
+    buttonHideAlerts: 'Hide content issues and tools',
     panelCheckOutline: '<p>Check that this forms <a href=\'https://accessibility.princeton.edu/how/content/headings\'>a complete outline</a>:</p>',
     panelCheckAltText: '<p>Check <a href=\'https://accessibility.princeton.edu/how/content/alternative-text\'>alt text</a>, <a href=\'https://accessibility.princeton.edu/how/content/images-text\'>images of text</a>, &amp; <a href=\'https://webaim.org/techniques/captions/\'>captions</a>.</p>',
     panelHelpTitle: 'About this tool',
