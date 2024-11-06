@@ -49,7 +49,9 @@ class Ed11y {
       // alertMode "headless" never draws the panel.
       alertMode: 'userPreference',
       inlineAlerts: true,
-      editableContent: '[contenteditable="true"]',
+
+      // This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
+      editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
 
       // Dismissed alerts
       currentPage: false, // uses window.location.pathname unless a string is provided.
@@ -170,7 +172,8 @@ class Ed11y {
       dataVizContent: 'datastudio.google.com, tableau',
       twitterContent: 'twitter-timeline',
       // Selector list to identify links to documents you would like flagged for manual review.
-      documentLinks: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\'], a[href$=\'.doc\'], a[href$=\'.docx\'], a[href*=\'.doc?\'], a[href*=\'.docx?\'], a[href$=\'.ppt\'], a[href$=\'.pptx\'], a[href*=\'.ppt?\'], a[href*=\'.pptx?\'], a[href^=\'https://docs.google\']',
+      documentLinks: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']',
+      // was 'a[href$=\'.pdf\'], a[href*=\'.pdf?\'], a[href$=\'.doc\'], a[href$=\'.docx\'], a[href*=\'.doc?\'], a[href*=\'.docx?\'], a[href$=\'.ppt\'], a[href$=\'.pptx\'], a[href*=\'.ppt?\'], a[href*=\'.pptx?\'], a[href^=\'https://docs.google\']'
       linksUrls: false, // get from language pack
       linksMeaningless: false, // get from language pack
       altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
@@ -196,28 +199,6 @@ class Ed11y {
           selector: '*',
           previousHeading: 0, // Ignores first heading for level skip detection.
         },
-      ],
-
-      contentEditableHeadingLevels: [
-        // Sets previous heading level for contentEditable fields.
-        // With nothing set, first heading level is ignored in editable zones.
-        // This is ideal for systems with separate backend editing pages.
-        // Set '*' to 'inherit' if fields are edited in a frontend context.
-        // Example:
-        /*
-        {
-          selector: '[class*=body]',
-          level: 1,
-        },
-        {
-          selector: '.l3block',
-          level: 3,
-        }
-        {
-          selector: '*',
-          level: 'inherit',
-        }
-        */
       ],
 
       userPrefersShut: localStorage.getItem('editoria11yShow') === '0',

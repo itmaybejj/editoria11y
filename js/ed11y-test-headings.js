@@ -23,10 +23,11 @@ class Ed11yTestHeadings {
       let alert = [];
       if (el.isContentEditable !== prevEditable) {
         let editableParent = el.closest('[contenteditable]');
+        // first in editable zone
         if (editableParent) {
           Ed11y.options.editorHeadingLevel.some(level => {
             if (editableParent.matches(level.selector)) {
-              if (level.level === 'inherit') {
+              if (level.previousHeading === 'inherit') {
                 // Inherit levels
                 return true;
               }
