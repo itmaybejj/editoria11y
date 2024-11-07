@@ -259,6 +259,10 @@ class Ed11y {
     let windowWidth = window.innerWidth;
 
     Ed11y.disable = () => {
+      if (Ed11y.open && !Ed11y.closedByDisable) {
+        Ed11y.closedByDisable = true;
+      }
+      Ed11y.disabled = true;
       Ed11y.reset();
       document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
       document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
@@ -355,6 +359,7 @@ class Ed11y {
     Ed11y.results = [];
     // Toggles the outline of all headers, link texts, and images.
     Ed11y.checkAll = () => {
+      Ed11y.disabled = false;
 
       if ( !Ed11y.checkRunPrevent() ) {
         // Check for ignoreAll elements.
@@ -1816,6 +1821,11 @@ class Ed11y {
         Ed11y.running = true;
         let runTime = performance.now();
         Ed11y.incremental = true;
+        if (Ed11y.disabled && Ed11y.closedByDisable) {
+          Ed11y.showPanel = true;
+          Ed11y.closedByDisable = false;
+          Ed11y.disabled = false;
+        }
         Ed11y.checkAll();
         window.setTimeout(function() {
           if (Ed11y.visualizing) {
