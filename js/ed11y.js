@@ -768,8 +768,17 @@ class Ed11y {
         'ed11y-error-block',
         'ed11y-error-inline',
       ]);
-      Ed11y.findElements('reset', 'ed11y-element-result, ed11y-element-tip, ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
-      Ed11y.elements.reset.forEach((el) => el.remove());
+      // Reset insertions into body content.
+      Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+      Ed11y.elements.reset?.forEach((el) => el.remove());
+
+      // Flicker prevention -- leave old tip in place for 100ms.
+      Ed11y.findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
+      const delayedReset = Ed11y.elements.delayedReset;
+      window.setTimeout(()=> {
+        delayedReset?.forEach((el) => el.remove());
+      }, 100, delayedReset);
+
       if (Ed11y.panelJumpNext) {
         Ed11y.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Ed11y.M.buttonFirstContent;
       }

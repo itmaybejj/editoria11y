@@ -519,7 +519,7 @@ ed11y-element-result {
     height: 2em;
     line-height: 1;
     font-size: clamp(1.14em, 2vw, 1.5em);
-    box-shadow: inset 0 0 0 2px #fefefe, inset 0 0 0 6px var(--ed11y-alert, #b80519), 1px 1px 5px 0 rgb(0 0 0 / 50%);
+    box-shadow: inset 0 0 0 1px var(--ed11y-alert, #b80519), inset 0 0 0 2px #fefefe, inset 0 0 0 6px var(--ed11y-alert, #b80519);
     background: #fefefe;
     color: var(--ed11y-alert, #b80519);
 }
@@ -535,7 +535,7 @@ ed11y-element-result {
 }
 
 .ed11y-result-wrapper .toggle.dismissed {
-    box-shadow: inset 0 0 0 2px var(--ed11y-ok, #1f5381), inset 0 0 0 3px var(--ed11y-primaryText, #fffdf7), inset 0 0 0 6px var(--ed11y-ok, #1f5381), 1px 1px 5px 0 rgb(0 0 0 / 50%);
+    box-shadow: inset 0 0 0 2px var(--ed11y-ok, #1f5381), inset 0 0 0 3px var(--ed11y-primaryText, #fffdf7), inset 0 0 0 6px var(--ed11y-ok, #1f5381);
     background: var(--ed11y-ok, #1f5381);
     color: var(--ed11y-primaryText, #fffdf7);
 }
@@ -550,7 +550,7 @@ ed11y-element-result {
 }
 
 .ed11y-result-wrapper .toggle.dismissable {
-    box-shadow: inset 0 0 0 2px var(--ed11y-warning, #fad859), inset 0 0 0 3px #444, inset 0 0 0 6px var(--ed11y-warning, #fad859), 1px 1px 5px 0 rgb(0 0 0 / 50%);
+    box-shadow: inset 0 0 0 2px var(--ed11y-warning, #fad859), inset 0 0 0 3px #444, inset 0 0 0 6px var(--ed11y-warning, #fad859);
     background: var(--ed11y-warning, #fad859);
     color: #333;
 }

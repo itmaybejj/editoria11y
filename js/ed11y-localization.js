@@ -96,6 +96,7 @@ const ed11yLang = {
             </li>
         </ul>`,
 
+    // todo: update Drupal localization file.
     headingLevelSkipped : {
       title: 'Manual check: was a heading level skipped?',
       tip: (prevLevel, level) =>
