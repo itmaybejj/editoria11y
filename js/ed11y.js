@@ -777,7 +777,7 @@ class Ed11y {
       const delayedReset = Ed11y.elements.delayedReset;
       window.setTimeout(()=> {
         delayedReset?.forEach((el) => el.remove());
-      }, 100, delayedReset);
+      }, 10, delayedReset);
 
       if (Ed11y.panelJumpNext) {
         Ed11y.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Ed11y.M.buttonFirstContent;
@@ -1697,16 +1697,28 @@ class Ed11y {
 
     Ed11y.activeRange = false;
     const rangeChange = function() {
-      const range = document.createRange();
       let anchor = getSelection()?.anchorNode;
-      if (anchor && anchor.parentNode && typeof anchor.parentNode.closest === 'function' && anchor.parentNode.matches('[contenteditable=true]')) {
+      if (anchor &&
+        anchor.parentNode &&
+        typeof anchor.parentNode.closest === 'function' &&
+        ( anchor.parentNode.matches(Ed11y.options.checkRoots) ||
+          ( !anchor.parentNode.matches(Ed11y.options.checkRoots) && anchor.parentNode.matches('[contenteditable="true"]')
+          )
+        )
+      ) {
         Ed11y.activeRange = false;
         return false;
       }
       let expand = anchor?.parentNode && anchor.parentNode.closest('p, td, th, li, h2, h3, h4, h5, h6');
-      anchor = expand ? expand : anchor;
-      range.setStartBefore(anchor);
-      range.setEndAfter(anchor);
+      // todo: this if is probably redundant?
+      if (typeof expand === 'function') {
+        anchor = expand ? expand : anchor;
+      }
+      const range = document.createRange();
+      if (typeof range === 'object') {
+        range.setStartBefore(anchor);
+        range.setEndAfter(anchor);
+      }
       if (typeof range !== 'object' || typeof range.getBoundingClientRect !== 'function') {
         if (Ed11y.activeRange) {
           Ed11y.activeRange = false;
@@ -1825,8 +1837,23 @@ class Ed11y {
         Ed11y.updateTipLocations();
       }
     }, 10);
+    let interaction = false;
+    window.addEventListener('keyup', () => {
+      interaction = true;
+    });
+    window.addEventListener('click', () => {
+      interaction = true;
+    });
+    window.addEventListener('dragend', () => {
+      interaction = true;
+      Ed11y.incrementalCheck();
+    });
     Ed11y.incrementalCheck = debounce(() => {
       if (!Ed11y.running) {
+        if (Ed11y.openTip.button || (!interaction && !Ed11y.forceFullCheck)) {
+          return;
+        }
+        interaction = false;
         Ed11y.running = true;
         let runTime = performance.now();
         Ed11y.incremental = true;
