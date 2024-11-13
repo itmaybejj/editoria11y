@@ -570,6 +570,26 @@ class Ed11y {
 
           let panel = document.createElement('ed11y-element-panel');
           document.querySelector('body').appendChild(panel);
+          Ed11y.attachCSS(Ed11y.panel);
+          Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsContent;
+          Ed11y.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = Ed11y.M.buttonOutlineContent;
+          Ed11y.panel.querySelector('#ed11y-headings-tab .details-title').textContent = Ed11y.M.buttonAltsContent;
+          Ed11y.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = Ed11y.M.buttonAltsContent;
+          Ed11y.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = Ed11y.M.panelCheckAltText;
+          Ed11y.panel.querySelector('.jump-next.ed11y-sr-only').textContent = Ed11y.M.buttonFirstContent;
+
+          Ed11y.panel.setAttribute('aria-label', Ed11y.M.panelControls);
+          if (Ed11y.options.reportsURL) {
+            let reportLink = document.createElement('a');
+            reportLink.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M0 96C0 60.7 28.7 32 64 32l384 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zm64 0l0 64 64 0 0-64L64 96zm384 0L192 96l0 64 256 0 0-64zM64 224l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64zM64 352l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64z"/></svg><span class="ed11y-sr-only"></span>';
+            reportLink.setAttribute('id' , 'ed11y-reports-link');
+            reportLink.setAttribute('href', Ed11y.options.reportsURL);
+            reportLink.setAttribute('target', '_blank');
+            reportLink.setAttribute('aria-label', Ed11y.M.reportsLink);
+            reportLink.querySelector('.ed11y-sr-only').textContent = Ed11y.M.reportsLink;
+            Ed11y.showDismissed.insertAdjacentElement('beforebegin', reportLink);
+          }
+
 
           // Decide whether to open the panel on load.
           if (Ed11y.options.alertMode === 'active' ||
@@ -1435,7 +1455,7 @@ class Ed11y {
           buttonOffset.left - tipWidth,
           -25); // can't be more to left than tip width
         if (buttonOffset.left + nudgeX - 25 < containLeft) { // offscreen to left
-          nudgeX = Math.max(containLeft - buttonOffset.left + (buttonOffset.left - mark.markLeft)); // shift right, up to 0
+          nudgeX = 10 + containLeft - buttonOffset.left + (buttonOffset.left - mark.markLeft); // shift right, up to 0
         } else if (buttonOffset.left - nudgeX + tipWidth > containLeft + containWidth &&
         buttonOffset.left + 24 - tipWidth > containLeft
         ) {
@@ -1443,7 +1463,7 @@ class Ed11y {
             Math.max(
               containLeft + containWidth - (buttonOffset.left + tipWidth + buttonSize + 20),
               24 - tipWidth),
-            0);
+            0); // Shift left, up to button.
         }
         const arrowLeft = Math.min(
           Math.max(
@@ -1550,6 +1570,7 @@ class Ed11y {
             mark.setAttribute('tabindex', '-1');
             // Array: el, level, outlinePrefix
             el[0].insertAdjacentElement('afterbegin', mark);
+            Ed11y.attachCSS(mark.shadowRoot);
           }
           let level = el[1];
           let leftPad = 10 * level - 10;
