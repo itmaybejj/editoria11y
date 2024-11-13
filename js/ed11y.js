@@ -1723,24 +1723,28 @@ class Ed11y {
     Ed11y.activeRange = false;
     const rangeChange = function() {
       let anchor = getSelection()?.anchorNode;
-      if (anchor &&
+      const expandable = anchor &&
         anchor.parentNode &&
-        typeof anchor.parentNode.closest === 'function' &&
+        typeof anchor.parentNode === 'object' &&
+        typeof anchor.parentNode.matches === 'function';
+      if (!anchor || expandable &&
         ( anchor.parentNode.matches(Ed11y.options.checkRoots) ||
-          ( !anchor.parentNode.matches(Ed11y.options.checkRoots) && anchor.parentNode.matches('[contenteditable="true"]')
+          ( !anchor.parentNode.matches(Ed11y.options.checkRoots) && anchor.parentNode.matches('div[contenteditable="true"]')
           )
         )
       ) {
         Ed11y.activeRange = false;
         return false;
       }
-      let expand = anchor?.parentNode && typeof anchor.parentNode === 'object' && Object.hasOwn(anchor.parentNode, 'closest', ) && anchor.parentNode.closest('p, td, th, li, h2, h3, h4, h5, h6');
       // todo: this if is probably redundant?
-      if (typeof expand === 'function') {
-        anchor = expand ? expand : anchor;
+      if (expandable) {
+        const closest = anchor.parentNode.closest('p, td, th, li, h2, h3, h4, h5, h6');
+        if (closest) {
+          anchor = closest;
+        }
       }
       const range = document.createRange();
-      if (typeof range === 'object') {
+      if (typeof anchor === 'object') {
         range.setStartBefore(anchor);
         range.setEndAfter(anchor);
       }
