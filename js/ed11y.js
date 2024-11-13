@@ -893,7 +893,7 @@ class Ed11y {
       Ed11y.findElements('editable', Ed11y.options.editableContent, false);
       if (Ed11y.options.inlineAlerts && Ed11y.elements.editable.length > 0) {
         Ed11y.options.inlineAlerts = false;
-        console.warn('Editable content detected; Editoria11y inline alerts disabled');
+        console.log('Editable content detected; Editoria11y inline alerts disabled');
       }
       Ed11y.findElements('p', 'p');
       Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', false);
