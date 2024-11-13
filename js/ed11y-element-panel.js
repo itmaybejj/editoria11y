@@ -46,18 +46,18 @@ class Ed11yElementPanel extends HTMLElement {
   }
 
   connectedCallback() {
-    if (!this.initialized) {
+    if (!this.initialized && typeof Ed11y !== 'undefined') {
 
       this.style.setProperty('outline', '0');
       this.classList.add('ed11y-element');
       const shadow = this.attachShadow({mode: 'open'});
       const wrapper = document.createElement('aside');
       wrapper.setAttribute('id', 'ed11y-panel');
+      wrapper.setAttribute('aria-label', Ed11y.M.panelControls);
       wrapper.classList.add('ed11y-wrapper', 'ed11y-panel-wrapper', 'ed11y-pass');
       wrapper.innerHTML = this.template();
       Ed11y.attachCSS(shadow);
       shadow.appendChild(wrapper);
-      wrapper.setAttribute('aria-label', Ed11y.M.panelControls);
       Ed11y.panel = wrapper;
       Ed11y.panelElement = this;
       Ed11y.panelToggle = wrapper.querySelector('#ed11y-toggle');
