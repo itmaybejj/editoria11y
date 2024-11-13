@@ -624,7 +624,7 @@ ed11y-element-result {
     background: var(--ed11y-bg, #fffffe);
     border-radius: var(--ed11y-borderRadius);
     position:relative;
-    width: clamp(18em, 36em, 89vw);
+    width: clamp(18em, 36em, 80vw);
     display: none;
     margin-top: calc(-2px - var(--ed11y-panelBorder, 0px));
     box-shadow: 0 0 0 var(--ed11y-panelBorder, 0) var(--ed11y-bg, #fffffe), 2px 2px 4px var(--ed11y-primary, #276499);

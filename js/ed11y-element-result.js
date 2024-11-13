@@ -77,6 +77,7 @@ class Ed11yElementResult extends HTMLElement {
   handleFocus() {
     let host = this.getRootNode().host;
     if (this.getRootNode().host.classList.contains('ed11y-offscreen')) {
+      console.log('handlefocus');
       host.result.element.scrollIntoView();
       Ed11y.alignButtons();
     }
@@ -93,6 +94,7 @@ class Ed11yElementResult extends HTMLElement {
       host.setAttribute('data-ed11y-action', stateChange);
       if (stateChange === 'open') {
         window.setTimeout(function () {
+          console.warn('it was me');
           let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
           activeTip?.shadowRoot.querySelector('.title').focus();
         }, 500);
@@ -139,7 +141,7 @@ class Ed11yElementResult extends HTMLElement {
       }));
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');
-      requestAnimationFrame(()=>Ed11y.alignTip(this.toggle, this.tip));
+      requestAnimationFrame(()=>Ed11y.alignTip(this.toggle, this.tip, 8));
       if (!Ed11y.jumpList) {
         Ed11y.buildJumpList();
       }

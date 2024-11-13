@@ -58,3 +58,7 @@ td, th {border: 1px solid silver;padding: .25rem .75rem;}
 th {background: #5294ca;}
 a:not(:hover) {color: inherit;}
 :focus {outline: 2px solid;}
+
+[contenteditable] > * {
+    min-width: 800px;
+}

@@ -567,6 +567,7 @@ class Ed11y {
           }
 
           // Create the panel DOM on load.
+
           let panel = document.createElement('ed11y-element-panel');
           document.querySelector('body').appendChild(panel);
 
@@ -1175,6 +1176,7 @@ class Ed11y {
         Ed11y.jumpList.forEach((mark, i) => {
           let targetOffset = mark.result.element.getBoundingClientRect();
           let top = targetOffset.top + scrollTop;
+          //let rightBound = windowWidth;
           if (!Ed11y.visible(mark.result.element)) {
             // Invisible target.
             const firstVisibleParent = Ed11y.firstVisibleParent(mark.result.element);
@@ -1194,8 +1196,8 @@ class Ed11y {
             Ed11y.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
             if (left < Ed11y.jumpList[i].bounds.left) {
               left = Ed11y.jumpList[i].bounds.left;
-            } else if (left - 20 > Ed11y.jumpList[i].bounds.right) {
-              left = Ed11y.jumpList[i].bounds.right - 20;
+            } else if (left + 40 > Ed11y.jumpList[i].bounds.right) {
+              left = Ed11y.jumpList[i].bounds.right - 40;
             }
           }
           Ed11y.jumpList[i].targetOffset = targetOffset;
@@ -1350,127 +1352,199 @@ class Ed11y {
       }
       let arrow = toolTip.shadowRoot.querySelector('.arrow');
       let tip = arrow.nextElementSibling;
-      let loopCount = recheck + 1;
+      let loopCount = recheck - 1;
       //toolTip.style.setProperty('opacity', recheck === 4 ? 1 : 0);
 
       // Various hiddenHandlers may cause element to animate open.
-      if (recheck < 8) {
+      if (recheck > 0) {
         window.setTimeout(function () {
           requestAnimationFrame(()=>Ed11y.alignTip(button, toolTip, loopCount));
         }, 50, loopCount);
       }
       // Reset any previous alignments
       // todo postpone: calculate without resets to remove shudder.
-      tip.style.setProperty('transform',null);
+      /*tip.style.setProperty('transform',null);
       arrow.style.setProperty('left', null);
-      arrow.style.setProperty('top', null);
+      arrow.style.setProperty('top', null);*/
+      const mark = button.getRootNode().host;
+      const resultNum = button.dataset.ed11yResult;
+      const result = Ed11y.results[resultNum];
 
       // Find button on page
       const scrollTop = window.scrollY;
       let buttonOffset = button.getBoundingClientRect();
       let buttonSize = buttonOffset.width;
-      if (!(Ed11y.visible(button.getRootNode().host)) || buttonOffset.top === 0 && buttonOffset.left === 0) {
+      let containLeft = 0;
+      let buttonLeft = buttonOffset.left + document.body.scrollLeft;
+      let containWidth = windowWidth;
+      let containBottom = window.innerHeight + scrollTop;
+      let containTop = scrollTop;
+      if ( !Ed11y.options.inlineAlerts && result.scrollableParent ) {
+        let bounds = result.scrollableParent.getBoundingClientRect();
+        if (bounds.width > 0) {
+          buttonLeft = buttonOffset.left + result.scrollableParent.scrollLeft;
+          containLeft = bounds.left;
+          containWidth = bounds.width - 30;
+          containBottom = bounds.bottom + scrollTop;
+          containTop = bounds.top + scrollTop;
+        }
+        tip.style.setProperty('max-width', containWidth + 'px');
+      } else if (!(Ed11y.visible(mark) || buttonOffset.top === 0 && buttonOffset.left === 0)) {
+        tip.style.setProperty('max-width', 'none');
         // ruh roh invisible button
-        const firstVisibleParent = Ed11y.firstVisibleParent(button.getRootNode().host);
+        const firstVisibleParent = Ed11y.firstVisibleParent(mark);
         if (firstVisibleParent) {
           buttonOffset = firstVisibleParent.getBoundingClientRect();
+        } else {
+          tip.style.setProperty('max-width', 'none');
         }
         // Estimate from font when it can't be measured.
         buttonSize = parseInt(Ed11y.options.baseFontSize) * 3;
       }
-      const buttonLeft = buttonOffset.left + document.body.scrollLeft;
       toolTip.style.setProperty('top', buttonOffset.top + scrollTop + 'px');
       // todo postpone: need left scroll too for horizontally scrolled pages
-      toolTip.style.setProperty('left', buttonOffset.left + 'px');
+      toolTip.style.setProperty('left', mark.markLeft + 'px');
       const tipWidth = tip.offsetWidth;
       const tipHeight = tip.offsetHeight;
-      const windowBottom = scrollTop + window.innerHeight;
 
       let direction = 'under';
 
       // Default to displaying under
-      if (buttonOffset.top + tipHeight + scrollTop + buttonSize + 22 > windowBottom) {
-        // If there's no room under in the viewport...
-        if (windowWidth > tipWidth * 1.5 && windowWidth - (buttonLeft + tipWidth + buttonSize + 56) > 0 && buttonOffset.top + 130 < window.innerHeight) {
+      if (buttonOffset.top + tipHeight + scrollTop + buttonSize + 22 > containBottom) {
+        // It won't fit under. Look elsewhere.
+        if ( containLeft + containWidth > buttonSize + tipWidth + buttonOffset.left + 70 && // fits to the right.
+          !(buttonOffset.top + scrollTop + 125 > containBottom) // but would fit better above.
+        ) {
           direction = 'right';
-        } else if (buttonOffset.top > tipHeight + 15) {
+        } else if (buttonOffset.top - tipHeight - 15 > containTop) {
           direction = 'above';
-        } else if (windowWidth > tipWidth * 1.5 && buttonLeft - tipWidth - 50 > 0) {
+        } else if (containWidth > tipWidth * 1.5 && buttonLeft - tipWidth - 50 > containLeft) {
           direction = 'left';
-        } else if (buttonOffset.bottom + tipHeight > document.documentElement.clientHeight - 50 && window.innerHeight > buttonSize + tipHeight) {
-          // No room anywhere in viewport we're at the end of the page.
+        } else if (buttonOffset.top + tipHeight + scrollTop + buttonSize > containBottom) {
+          // todo contain?
+          // It REALLY doesn't fit below.
           direction = 'above';
+          console.log('no room anywhere');
         }
+        console.log(direction);
         // Back to default.
-      }
+      } // else: under.
 
       let nudgeX;
       let nudgeY = 0;
+      console.log(`buttonSize: ${buttonSize}, scrollTop: ${scrollTop}, mark.markLeft: ${mark.markLeft}, containLeft: ${containLeft}, tipWidth: ${tipWidth}, tipHeight: ${tipHeight}, containTop: ${containTop}, containBottom: ${containBottom}`);
+      console.log(buttonOffset);
+
+
+      const horizontalAlign = function() {
+        nudgeX = Math.min(
+          buttonOffset.left - tipWidth,
+          -25); // can't be more to left than tip width
+        if (buttonOffset.left + nudgeX - 25 < containLeft) { // offscreen to left
+          nudgeX = Math.min(
+            buttonSize + containLeft - buttonOffset.left,
+            0); // shift right, up to 0
+        } else if (buttonOffset.left - nudgeX + tipWidth > containLeft + containWidth &&
+        buttonOffset.left + 24 - tipWidth > containLeft
+        ) {
+          nudgeX = Math.min(
+            Math.max(
+              containLeft + containWidth - (buttonOffset.left + tipWidth + buttonSize + 20),
+              24 - tipWidth),
+            0);
+        }
+        const arrowLeft = Math.min(
+          Math.max(
+            4,
+            7 - nudgeX + buttonOffset.left - mark.markLeft),
+          tipWidth - 24);
+        arrow.style.setProperty('left', `${arrowLeft}px`);
+      };
+      const oldhorizontalAlign = function() {
+        if (buttonOffset.left - tipWidth / 2 - 8 > containLeft && 8 + buttonSize + buttonOffset.left + tipWidth / 2 < containLeft + containWidth) {
+          // center
+          nudgeX = (buttonSize - tipWidth) / 2;
+          arrow.style.setProperty('left',  (tipWidth / 2) - 10 + 'px');
+          console.log('6 horizontal center');
+        }
+        //if (tipWidth + buttonOffset.left + 20 > containWidth || buttonOffset.left - 20 - tipWidth / 5 < containLeft) {
+        // Can't center -- overhang to right or left.
+        else if (buttonOffset.left - tipWidth - 30 > containLeft) {
+          // Extend tip to left of mark.
+          nudgeX = containLeft ?
+            Math.max(containLeft - buttonOffset.left, buttonSize / 2 + 15 - tipWidth) :
+            buttonSize / 2 + 15 - tipWidth;
+          let arrowLeft = containLeft ?
+            Math.min(buttonOffset.left - containLeft + 6, 7 - nudgeX) :
+            tipWidth / 5 - (buttonSize / 2) - 18;
+          arrow.style.setProperty('left', arrowLeft + 'px');
+          console.log('5 -- extend to left');
+        } else {
+          // Extend tip to right of mark
+          // let offLeft = containLeft && containLeft - buttonOffset.left > buttonSize / 2 + 15 - buttonOffset.left;
+          //console.log(offLeft);
+          /*nudgeX = offLeft ?
+            Math.max(0, containLeft - buttonOffset.left) :
+            Math.max(0, containLeft - buttonOffset.left, 20 - buttonOffset.left) + 2;*/
+          nudgeX = 0; // are you kidding me. 0 is the best answer? todo: beat face against keyboard.
+          nudgeX = 0 - Math.max(40 + buttonOffset.left - tipWidth, 40 - tipWidth);
+          // ((buttonSize / 2) - 1) - (buttonOffset.left + mark.markLeft - buttonOffset.left);
+          let arrowLeft = Math.max(7 + buttonOffset.left - mark.markLeft - nudgeX, 7 );
+          //Math.max(7 + buttonOffset.left - mark.markLeft - nudgeX, 7 ) : // todo: this exits the tip if the mark is offscreen to the left
+          //7 + buttonOffset.left - mark.markLeft - nudgeX; // buttonOffset.left + 4 + (buttonOffset.left - mark.markLeft)
+          arrow.style.setProperty('left', arrowLeft + 'px');
+
+          console.log('4 extends to right');
+        }
+      };
 
       if (direction === 'under') {
-        // Pin to the left edge, unless the tip is not wide enough to reach:
-        if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
-          // Can't center
-          if (tipWidth - ((buttonSize / 2) - 1) > buttonOffset.left) {
-            // Under, overhang to left
-            nudgeX = (buttonSize / 2) - 1 - buttonOffset.left;
-            arrow.style.setProperty('left', Math.max(buttonOffset.left, 15) - 9 + 'px');
-          } else {
-            arrow.style.setProperty('left', tipWidth - 26 + 'px');
-            nudgeX = buttonSize / 2 + 15 - tipWidth;
-          }
-        } else {
-          // Under, overhang to right
-          nudgeX =  buttonSize + 8 - tipWidth / 5;
-          arrow.style.setProperty('left', tipWidth / 5 - (buttonSize / 2) - 18 + 'px');
-        }
-
-        arrow.dataset.direction = 'under';
         nudgeY = buttonSize + 16;
+        arrow.dataset.direction = 'under';
+        arrow.style.setProperty('top', '6px');
+        horizontalAlign();
       }
       else if (direction === 'above') {
         // Slide left or right to center tip on page.
-        nudgeY = -1 * (tipHeight + 13 + parseInt(Ed11y.theme.outlineWidth));
-        arrow.style.setProperty('top', tipHeight);
-        if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
-          // Can't center
-          if (tipWidth - ((buttonSize / 2) - 1) > buttonOffset.left) {
-            // Overhang to left
-            nudgeX = ((buttonSize / 2) - 1) - buttonOffset.left;
-            arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
-          } else {
-            // Overhang to the right.
-            arrow.style.setProperty('left', tipWidth - 26 + 'px');
-            nudgeX = buttonSize / 2 + 15 - tipWidth;
-          }
-        } else {
-          nudgeX = buttonSize + 8 - tipWidth / 5;
-          arrow.style.setProperty('left', tipWidth / 5 - (buttonSize / 2) - 18 + 'px');
-        }
+        nudgeY = -1 * (7 + tipHeight + parseInt(Ed11y.theme.outlineWidth));
         arrow.dataset.direction = 'above';
         arrow.style.setProperty('top', `${tipHeight + 15 - parseInt(Ed11y.theme.outlineWidth)}px`);
+        horizontalAlign();
       } else {
-        // Left or right
+        // Left or right, starts top aligned with button.
         let tipBottom = buttonOffset.top + scrollTop + tipHeight;
-        if (tipBottom > windowBottom) {
-          // Offset up
-          nudgeY = windowBottom - (tipBottom + 90);
-          let arrowY = nudgeY * -1 + 7;
-          arrowY = Math.min(arrowY, tipHeight - 25);
-          arrow.style.setProperty('top', `${arrowY}px`);
+        let arrowY= 7;
+
+        if (Ed11y.options.inlineAlerts) {
+          if ( buttonOffset.top + tipHeight > window.innerHeight ) {
+            // Push farther up
+            nudgeY = containBottom - (tipBottom + 45); // todo: that number's kinda random and random is ominous.
+            arrowY = nudgeY * -1 + 7;
+            console.log('7: ' + nudgeY);
+          }
+        } else {
+          if (buttonOffset.top + tipHeight + scrollTop > containBottom) {
+            // Push farther up
+            nudgeY = containBottom - (tipBottom + 90); // todo: that number's kinda random and random is ominous.
+            arrowY = nudgeY * -1 + 7;
+            console.log('7: ' + nudgeY);
+          }
         }
+        arrow.style.setProperty('top', `${arrowY}px`);
         if (direction === 'left') {
           nudgeX = 0 - (tipWidth + 17);
           arrow.style.setProperty('left', `${tipWidth - 10}px`);
           arrow.dataset.direction = 'left';
+          console.log('8 -- done'); // todo haven't started this yet
         } else {
           // direction is right
-          nudgeX = buttonSize + 14;
+          nudgeX = 14 + buttonSize + buttonOffset.left - mark.markLeft;
+          arrow.style.setProperty('left', '-10px');
           arrow.dataset.direction = 'right';
+          console.log('9 -- done');
         }
       }
       toolTip.style.setProperty('transform', `translate(${nudgeX}px, ${nudgeY}px)`);
-
     };
 
     Ed11y.togglePanel = function () {
@@ -1709,7 +1783,7 @@ class Ed11y {
         Ed11y.activeRange = false;
         return false;
       }
-      let expand = anchor?.parentNode && anchor.parentNode.closest('p, td, th, li, h2, h3, h4, h5, h6');
+      let expand = anchor?.parentNode && typeof anchor.parentNode === 'object' && Object.hasOwn(anchor.parentNode, 'closest', ) && anchor.parentNode.closest('p, td, th, li, h2, h3, h4, h5, h6');
       // todo: this if is probably redundant?
       if (typeof expand === 'function') {
         anchor = expand ? expand : anchor;
@@ -2012,6 +2086,7 @@ class Ed11y {
           }, 15000, Ed11y.lastOpenTip);*/
         }
         let scrollPin = window.innerHeight > 800 && window.innerWidth > 800 ? 'center' : 'start';
+        // Todo: following statements work but could be simplified.
         if (!Ed11y.options.inlineAlerts) {
           // todo this selector must match the selector that decides where to place the mark
           if (Ed11y.viaJump) {
@@ -2029,13 +2104,22 @@ class Ed11y {
         let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
         if (!activeTip) {
           button.setAttribute('data-ed11y-action','open');
-          window.setTimeout(() => {
-            // Race conditions are fun.
-            let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-            activeTip?.shadowRoot.querySelector('.title').focus();
-          }, 100);
+          if (Ed11y.viaJump) {
+            window.setTimeout(() => {
+              // Race conditions are fun.
+              let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+              if (Ed11y.viaJump) {
+                activeTip?.shadowRoot.querySelector('.title').focus();
+              }
+            }, 100);
+          }
         } else {
-          activeTip?.shadowRoot.querySelector('.title').focus();
+          if (Ed11y.viaJump) {
+            window.setTimeout(() => {
+              // Race conditions are fun.
+              activeTip?.shadowRoot.querySelector('.title').focus();
+            }, 100, activeTip);
+          }
         }
         Ed11y.viaJump = false;
       }, delay, button, target);
@@ -2085,7 +2169,7 @@ class Ed11y {
 
       // Open the button
       goto.setAttribute('data-ed11y-action','open');
-      Ed11y.scrollPending++;
+      Ed11y.scrollPending = 2;
       Ed11y.updateTipLocations();
       //Ed11y.alertOnInvisibleTip(goto, target);
 
