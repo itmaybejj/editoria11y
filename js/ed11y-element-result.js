@@ -77,7 +77,6 @@ class Ed11yElementResult extends HTMLElement {
   handleFocus() {
     let host = this.getRootNode().host;
     if (this.getRootNode().host.classList.contains('ed11y-offscreen')) {
-      console.log('handlefocus');
       host.result.element.scrollIntoView();
       Ed11y.alignButtons();
     }

@@ -525,7 +525,7 @@ class Ed11y {
         if (Ed11y.forceFullCheck || newIncrementalResults()) {
           Ed11y.forceFullCheck = false;
           /*if (Ed11y.options.alertMode === 'assertive' && Ed11y.totalCount > 0 && (Ed11y.warningCount > oldWarnings || Ed11y.errorCount > oldErrors)) {
-            console.log('forced open');
+            console.warn('forced open');
             Ed11y.showPanel = true;
           }*/
           Ed11y.resetResults();
@@ -873,7 +873,7 @@ class Ed11y {
       Ed11y.findElements('editable', Ed11y.options.editableContent, false);
       if (Ed11y.options.inlineAlerts && Ed11y.elements.editable.length > 0) {
         Ed11y.options.inlineAlerts = false;
-        console.log('Editable content detected; Editoria11y inline alerts disabled');
+        console.warn('Editable content detected; Editoria11y inline alerts disabled');
       }
       Ed11y.findElements('p', 'p');
       Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', false);
@@ -1421,29 +1421,21 @@ class Ed11y {
         } else if (containWidth > tipWidth * 1.5 && buttonLeft - tipWidth - 50 > containLeft) {
           direction = 'left';
         } else if (buttonOffset.top + tipHeight + scrollTop + buttonSize > containBottom) {
-          // todo contain?
           // It REALLY doesn't fit below.
           direction = 'above';
-          console.log('no room anywhere');
         }
-        console.log(direction);
         // Back to default.
       } // else: under.
 
       let nudgeX;
       let nudgeY = 0;
-      console.log(`buttonSize: ${buttonSize}, scrollTop: ${scrollTop}, mark.markLeft: ${mark.markLeft}, containLeft: ${containLeft}, tipWidth: ${tipWidth}, tipHeight: ${tipHeight}, containTop: ${containTop}, containBottom: ${containBottom}`);
-      console.log(buttonOffset);
-
 
       const horizontalAlign = function() {
         nudgeX = Math.min(
           buttonOffset.left - tipWidth,
           -25); // can't be more to left than tip width
         if (buttonOffset.left + nudgeX - 25 < containLeft) { // offscreen to left
-          nudgeX = Math.min(
-            buttonSize + containLeft - buttonOffset.left,
-            0); // shift right, up to 0
+          nudgeX = Math.max(containLeft - buttonOffset.left + (buttonOffset.left - mark.markLeft)); // shift right, up to 0
         } else if (buttonOffset.left - nudgeX + tipWidth > containLeft + containWidth &&
         buttonOffset.left + 24 - tipWidth > containLeft
         ) {
@@ -1459,43 +1451,6 @@ class Ed11y {
             7 - nudgeX + buttonOffset.left - mark.markLeft),
           tipWidth - 24);
         arrow.style.setProperty('left', `${arrowLeft}px`);
-      };
-      const oldhorizontalAlign = function() {
-        if (buttonOffset.left - tipWidth / 2 - 8 > containLeft && 8 + buttonSize + buttonOffset.left + tipWidth / 2 < containLeft + containWidth) {
-          // center
-          nudgeX = (buttonSize - tipWidth) / 2;
-          arrow.style.setProperty('left',  (tipWidth / 2) - 10 + 'px');
-          console.log('6 horizontal center');
-        }
-        //if (tipWidth + buttonOffset.left + 20 > containWidth || buttonOffset.left - 20 - tipWidth / 5 < containLeft) {
-        // Can't center -- overhang to right or left.
-        else if (buttonOffset.left - tipWidth - 30 > containLeft) {
-          // Extend tip to left of mark.
-          nudgeX = containLeft ?
-            Math.max(containLeft - buttonOffset.left, buttonSize / 2 + 15 - tipWidth) :
-            buttonSize / 2 + 15 - tipWidth;
-          let arrowLeft = containLeft ?
-            Math.min(buttonOffset.left - containLeft + 6, 7 - nudgeX) :
-            tipWidth / 5 - (buttonSize / 2) - 18;
-          arrow.style.setProperty('left', arrowLeft + 'px');
-          console.log('5 -- extend to left');
-        } else {
-          // Extend tip to right of mark
-          // let offLeft = containLeft && containLeft - buttonOffset.left > buttonSize / 2 + 15 - buttonOffset.left;
-          //console.log(offLeft);
-          /*nudgeX = offLeft ?
-            Math.max(0, containLeft - buttonOffset.left) :
-            Math.max(0, containLeft - buttonOffset.left, 20 - buttonOffset.left) + 2;*/
-          nudgeX = 0; // are you kidding me. 0 is the best answer? todo: beat face against keyboard.
-          nudgeX = 0 - Math.max(40 + buttonOffset.left - tipWidth, 40 - tipWidth);
-          // ((buttonSize / 2) - 1) - (buttonOffset.left + mark.markLeft - buttonOffset.left);
-          let arrowLeft = Math.max(7 + buttonOffset.left - mark.markLeft - nudgeX, 7 );
-          //Math.max(7 + buttonOffset.left - mark.markLeft - nudgeX, 7 ) : // todo: this exits the tip if the mark is offscreen to the left
-          //7 + buttonOffset.left - mark.markLeft - nudgeX; // buttonOffset.left + 4 + (buttonOffset.left - mark.markLeft)
-          arrow.style.setProperty('left', arrowLeft + 'px');
-
-          console.log('4 extends to right');
-        }
       };
 
       if (direction === 'under') {
@@ -1520,14 +1475,12 @@ class Ed11y {
             // Push farther up
             nudgeY = containBottom - (tipBottom + 45); // todo: that number's kinda random and random is ominous.
             arrowY = nudgeY * -1 + 7;
-            console.log('7: ' + nudgeY);
           }
         } else {
           if (buttonOffset.top + tipHeight + scrollTop > containBottom) {
             // Push farther up
             nudgeY = containBottom - (tipBottom + 90); // todo: that number's kinda random and random is ominous.
             arrowY = nudgeY * -1 + 7;
-            console.log('7: ' + nudgeY);
           }
         }
         arrow.style.setProperty('top', `${arrowY}px`);
@@ -1535,13 +1488,11 @@ class Ed11y {
           nudgeX = 0 - (tipWidth + 17);
           arrow.style.setProperty('left', `${tipWidth - 10}px`);
           arrow.dataset.direction = 'left';
-          console.log('8 -- done'); // todo haven't started this yet
         } else {
           // direction is right
           nudgeX = 14 + buttonSize + buttonOffset.left - mark.markLeft;
           arrow.style.setProperty('left', '-10px');
           arrow.dataset.direction = 'right';
-          console.log('9 -- done');
         }
       }
       toolTip.style.setProperty('transform', `translate(${nudgeX}px, ${nudgeY}px)`);
@@ -2530,40 +2481,6 @@ class Ed11y {
     Ed11y.parentLink = function (el) {
       return el.closest('a[href]');
     };
-
-    /*Ed11y.getOpenTip = function () {
-      // Quick check first, then the expensive one if needed.
-      let openButton = Ed11y.jumpList[Ed11y.lastOpenTip];
-      openButton = openButton.matches('[data-ed11y-open="true"]') ? openButton : false;
-      //let openButton = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
-      if (!openButton) {
-        return {
-          tip: false,
-          button: false,
-        };
-      }
-      let openTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-      if (!openTip) {
-        Ed11y.findElements('openTip', 'ed11y-element-tip[data-ed11y-open="true"]');
-        if (Ed11y.elements.openTip.length > 0) {
-          openTip = Ed11y.elements.openTip[0];
-        } else {
-          openButton = false;
-        }
-      }
-      console.log(openButton);
-      console.log(openTip);
-      return {
-        tip: openTip,
-        button: openButton,
-      };
-    };*/
-
-    /*Ed11y.focusActiveResult = function () {
-      window.setTimeout(function () {
-        Ed11y.openTip.button?.shadowRoot.querySelector('.title').focus();
-      }, 0);
-    };*/
 
     Ed11y.srcMatchesOptions = function (source, option) {
       if (option.length > 0 && source?.length > 0) {
