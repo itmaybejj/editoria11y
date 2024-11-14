@@ -98,12 +98,11 @@ class Ed11y {
         button: 'transparent', // deprecate?
         panelBar: '#1e517c',
         panelBarText: '#fffdf7',
-        panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
-        panelBorder: '0px', // '2px'
+        panelBarShadow: '0 0 0 1px #276499',
         activeTab: '#276499',
         activeTabText: '#fffffe',
         focusRing: '#007aff',
-        outlineWidth: 0,
+        outlineWidth: '0',
         borderRadius: '3px',
         ok: '#1f5381',
         warning: 'rgb(250, 216, 89)',
@@ -120,8 +119,7 @@ class Ed11y {
         button: 'transparent',
         panelBar: '#3052a0',
         panelBarText: '#f4f7ff',
-        panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
-        panelBorder: '2px',
+        panelBarShadow: 'inset 0 0 1px, 0 0 0 1px #0a2051',
         activeTab: '#0a2051',
         activeTabText: '#fffffe',
         focusRing: 'cyan',
@@ -141,13 +139,12 @@ class Ed11y {
         primaryText: '#fffdf7',
         panelBar: '#0a307a',
         panelBarText: '#f4f7ff',
-        panelBarShadow: 'inset 0 -1px #fff2, -1px 0 #fff2',
-        panelBorder: '2px',
+        panelBarShadow: '0 0 0 1px #0a307a',
         button: 'transparent',
         activeTab: '#b9c0cf',
         activeTabText: '#20160c',
         focusRing: '#007aff',
-        outlineWidth: '2px',
+        outlineWidth: '0',
         borderRadius: '3px',
         ok: '#0a307a',
         warning: 'rgb(250, 216, 89)',
@@ -1480,9 +1477,9 @@ class Ed11y {
       }
       else if (direction === 'above') {
         // Slide left or right to center tip on page.
-        nudgeY = -1 * (7 + tipHeight + parseInt(Ed11y.theme.outlineWidth));
+        nudgeY = -1 * (9 + tipHeight + parseInt(Ed11y.theme.outlineWidth));
         arrow.dataset.direction = 'above';
-        arrow.style.setProperty('top', `${tipHeight + 15 - parseInt(Ed11y.theme.outlineWidth)}px`);
+        arrow.style.setProperty('top', `${tipHeight + 16 - parseInt(Ed11y.theme.outlineWidth)}px`);
         horizontalAlign();
       } else {
         // Left or right, starts top aligned with button.

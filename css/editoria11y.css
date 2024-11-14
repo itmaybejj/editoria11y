@@ -96,7 +96,6 @@ ed11y-element-result {
 .ed11y-panel-wrapper {
     color: var(--ed11y-text, #20160c);
     border-radius: var(--ed11y-borderRadius, 1px);
-    padding: var(--ed11y-panelBorder, 0);
 }
 
 .ed11y-panel-wrapper a {
@@ -626,8 +625,8 @@ ed11y-element-result {
     position:relative;
     width: clamp(18em, 36em, 80vw);
     display: none;
-    margin-top: calc(-2px - var(--ed11y-panelBorder, 0px));
-    box-shadow: 0 0 0 var(--ed11y-panelBorder, 0) var(--ed11y-bg, #fffffe), 2px 2px 4px var(--ed11y-primary, #276499);
+    margin-top: calc(-2px - var(--ed11y-outlineWidth, 0px));
+    box-shadow: 0 0 0 var(--ed11y-outlineWidth, 0) var(--ed11y-bg, #fffffe), 2px 2px 4px var(--ed11y-primary, #276499);
 }
 
 @keyframes ed11y-fade-in {
