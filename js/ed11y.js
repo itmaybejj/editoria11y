@@ -1470,9 +1470,9 @@ class Ed11y {
       };
 
       if (direction === 'under') {
-        nudgeY = buttonSize + 16;
+        nudgeY = buttonSize + 14 + parseInt(Ed11y.theme.outlineWidth);
         arrow.dataset.direction = 'under';
-        arrow.style.setProperty('top', '6px');
+        arrow.style.setProperty('top', `${8 - parseInt(Ed11y.theme.outlineWidth)}px`);
         horizontalAlign();
       }
       else if (direction === 'above') {
