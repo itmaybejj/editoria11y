@@ -1422,7 +1422,6 @@ class Ed11y {
         buttonSize = parseInt(Ed11y.options.baseFontSize) * 3;
       }
       toolTip.style.setProperty('top', buttonOffset.top + scrollTop + 'px');
-      // todo postpone: need left scroll too for horizontally scrolled pages
       toolTip.style.setProperty('left', mark.markLeft + 'px');
       const tipWidth = tip.offsetWidth;
       const tipHeight = tip.offsetHeight;
@@ -1467,9 +1466,9 @@ class Ed11y {
         }
         const arrowLeft = Math.min(
           Math.max(
-            4,
+            7,
             7 - nudgeX + buttonOffset.left - mark.markLeft),
-          tipWidth - 24);
+          tipWidth - 27);
         arrow.style.setProperty('left', `${arrowLeft}px`);
       };
 
