@@ -570,7 +570,7 @@ class Ed11y {
           Ed11y.attachCSS(Ed11y.panel);
           Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsContent;
           Ed11y.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = Ed11y.M.buttonOutlineContent;
-          Ed11y.panel.querySelector('#ed11y-headings-tab .details-title').textContent = Ed11y.M.panelCheckOutline;
+          Ed11y.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = Ed11y.M.panelCheckOutline;
           Ed11y.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = Ed11y.M.buttonAltsContent;
           Ed11y.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = Ed11y.M.panelCheckAltText;
           Ed11y.panel.querySelector('.jump-next.ed11y-sr-only').textContent = Ed11y.M.buttonFirstContent;
