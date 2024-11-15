@@ -623,6 +623,7 @@ ed11y-element-result {
     background: var(--ed11y-bg, #fffffe);
     border-radius: var(--ed11y-borderRadius);
     position:relative;
+    min-width: 200px;
     width: clamp(18em, 36em, 80vw);
     display: none;
     margin-top: calc(-2px - var(--ed11y-outlineWidth, 0px));

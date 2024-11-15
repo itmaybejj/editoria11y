@@ -1055,22 +1055,38 @@ class Ed11y {
 
     Ed11y.editableHighlight = [];
 
+    Ed11y.alignHighlights = function() {
+      Ed11y.editableHighlight.forEach((el) => {
+        let targetOffset = el.target.getBoundingClientRect();
+        if (!Ed11y.visible(el.target)) {
+          // Invisible target.
+          const firstVisibleParent = Ed11y.firstVisibleParent(el.target);
+          targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
+        }
+        el.highlight.style.setProperty('width', targetOffset.width + 6 + 'px');
+        el.highlight.style.setProperty('top', targetOffset.top + window.scrollY - 3 + 'px');
+        el.highlight.style.setProperty('left', targetOffset.left - 3 + 'px');
+        el.highlight.style.setProperty('height', targetOffset.height + 6 + 'px');
+      });
+    };
+
     Ed11y.editableHighlighter = function (resultID, show, firstVisible) {
 
       if (!show) {
-        Ed11y.editableHighlight[resultID]?.style.setProperty('opacity', '0');
+        Ed11y.editableHighlight[resultID]?.highlight.style.setProperty('opacity', '0');
         return;
       }
       const result = Ed11y.results[resultID];
-      let target = firstVisible ? firstVisible : result.element;
-      let el = Ed11y.editableHighlight[resultID];
+      let el = Ed11y.editableHighlight[resultID]?.highlight;
       if (!el) {
         el = document.createElement('ed11y-element-highlight');
-        Ed11y.editableHighlight[resultID] = el;
+        Ed11y.editableHighlight[resultID] = {highlight: el};
         el.style.setProperty('position', 'absolute');
         el.style.setProperty('pointer-events', 'none');
         document.body.appendChild(el);
       }
+      let target = firstVisible ? firstVisible : result.element;
+      Ed11y.editableHighlight[resultID].target = target;
       const zIndex = result.dismissalKey ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
       el.style.setProperty('z-index', zIndex);
       const outline = result.dismissalKey ?
@@ -1080,16 +1096,7 @@ class Ed11y {
       el.style.setProperty('border-radius', '3px');
       el.style.setProperty('top', '0');
       el.style.setProperty('left', '0');
-      let targetOffset = target.getBoundingClientRect();
-      if (!Ed11y.visible(target)) {
-        // Invisible target.
-        const firstVisibleParent = Ed11y.firstVisibleParent(target);
-        targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
-      }
-      el.style.setProperty('width', targetOffset.width + 6 + 'px');
-      el.style.setProperty('top', targetOffset.top + window.scrollY - 3 + 'px');
-      el.style.setProperty('left', targetOffset.left - 3 + 'px');
-      el.style.setProperty('height', targetOffset.height + 6 + 'px');
+      Ed11y.alignHighlights();
       el.style.setProperty('opacity', '1');
     };
 
@@ -1513,6 +1520,7 @@ class Ed11y {
         }
       }
       toolTip.style.setProperty('transform', `translate(${nudgeX}px, ${nudgeY}px)`);
+      Ed11y.alignHighlights();
     };
 
     Ed11y.togglePanel = function () {
@@ -1822,10 +1830,6 @@ class Ed11y {
         Ed11y.alignButtons();
         if (Ed11y.openTip.tip) {
           Ed11y.alignTip(Ed11y.openTip.button.shadowRoot.querySelector('button'), Ed11y.openTip.tip);
-          if (!Ed11y.options.inlineAlerts) {
-            // Align highlighter appended to body tag.
-            Ed11y.editableHighlighter(Ed11y.openTip.button.dataset.ed11yResult, true);
-          }
         }
         Ed11y.scrollPending --;
       }
