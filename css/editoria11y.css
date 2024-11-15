@@ -241,7 +241,9 @@ ed11y-element-result {
 #ed11y-show-hidden svg {
     margin: .25em 0 0;
 }
-.ed11y-buttonbar button[data-ed11y-pressed="true"], .ed11y-buttonbar button[aria-pressed="true"] {
+#ed11y-panel .ed11y-buttonbar button[data-ed11y-pressed="true"],
+#ed11y-panel .ed11y-buttonbar button[aria-pressed="true"],
+#ed11y-panel .ed11y-buttonbar #ed11y-visualize[aria-pressed="true"] {
     box-shadow: inset 1px 1px 3px 1px black, 0 0 0 1px var(--ed11y-activeBackground), 7px 0 var(--ed11y-activeBackground);
 }
 

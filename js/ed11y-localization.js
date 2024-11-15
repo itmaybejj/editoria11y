@@ -16,6 +16,7 @@ const ed11yLang = {
     panelCountBase: '<span class=\'count\'>No</span> <span class=\'content-type\'>issues detected</span>.',
     panelControls: 'Editorially',
     buttonToolsContent: 'Show headings & alt text', // todo Drupal
+    buttonToolsActive: 'Hide headings & alt text',
     buttonOutlineContent: 'Headings',
     buttonAltsContent: 'Alt Text',
     buttonFirstContent: 'Go to first issue',

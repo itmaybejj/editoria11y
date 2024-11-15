@@ -1678,14 +1678,16 @@ class Ed11y {
     Ed11y.visualize = function () {
       if (Ed11y.visualizing) {
         Ed11y.visualizing = false;
-        Ed11y.panel?.querySelector('#ed11y-visualize').setAttribute('aria-pressed', 'false');
-        Ed11y.panel?.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
+        Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsContent;
+        Ed11y.panel?.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
+        Ed11y.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
         Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
         Ed11y.elements.reset?.forEach(el => { el.remove(); });
         return;
       }
       Ed11y.visualizing = true;
-      Ed11y.panel?.querySelector('#ed11y-visualize').setAttribute('aria-pressed', 'true');
+      Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsActive;
+      Ed11y.panel?.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
       Ed11y.panel?.querySelector('#ed11y-visualizers').removeAttribute('hidden');
       showAltPanel();
       showHeadingsPanel();
@@ -1722,6 +1724,8 @@ class Ed11y {
       });
       Ed11y.jumpList.forEach((el, i) => {
         el.dataset.ed11yJumpPosition = `${i}`;
+        const newLabel = `${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}, ${i} / ${Ed11y.jumpList.length - 1}`;
+        el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
       });
     };
 
