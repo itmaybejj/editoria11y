@@ -88,6 +88,7 @@ class Ed11y {
 
       // Interface
       lang: 'en',
+      langSanitizes: false, // Some translation modules will double-escape
       theme: 'sleekTheme',
       sleekTheme: {
         bg: '#eff2ff', // e8f4ff
@@ -1453,7 +1454,7 @@ class Ed11y {
         if (buttonOffset.left + nudgeX - 25 < containLeft) { // offscreen to left
           nudgeX = 10 + containLeft - buttonOffset.left + (buttonOffset.left - mark.markLeft); // shift right, up to 0
         } else if (buttonOffset.left - nudgeX + tipWidth > containLeft + containWidth &&
-        buttonOffset.left + 24 - tipWidth > containLeft
+          buttonOffset.left + 24 - tipWidth > containLeft
         ) {
           nudgeX = Math.min(
             Math.max(

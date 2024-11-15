@@ -867,6 +867,7 @@ ed11y-element-result {
     left: 0;
     right: 0;
     box-shadow: 0 1px, 0 -1px;
+    min-width: 10em;
 }
 
 .ed11y-alt-wrapper .pass {

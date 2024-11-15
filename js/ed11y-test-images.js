@@ -123,7 +123,7 @@ class Ed11yTestImages {
       let altStyle = 'pass';
 
       if (error) {
-        let message = Ed11y.M[error].tip(Ed11y.sanitizeForHTML(alt));
+        let message = Ed11y.options.langSanitizes ? Ed11y.M[error].tip(alt) : Ed11y.M[error].tip(Ed11y.sanitizeForHTML(alt));
         let baseSrc = src ? src.split('?')[0] : 'nosrc_';
         dismissable = dismissable ? Ed11y.dismissalKey(baseSrc + alt) : false;
         Ed11y.results.push({

@@ -84,7 +84,9 @@ class Ed11yTestText {
             {
               element: p,
               test: 'textPossibleList',
-              content: Ed11y.M.textPossibleList.tip(firstPrefix),
+              content: Ed11y.options.langSanitizes ?
+                Ed11y.M.textPossibleList.tip(firstPrefix) :
+                Ed11y.M.textPossibleList.tip(Ed11y.sanitizeForHTML(firstPrefix)),
               position: 'afterbegin',
               dismissalKey: dismissKey,
             });
