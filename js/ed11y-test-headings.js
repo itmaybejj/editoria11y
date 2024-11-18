@@ -8,15 +8,36 @@ class Ed11yTestHeadings {
     // Reset panel; we rebuild on each run.
     // todo mvp rewrite to search the whole outline
     Ed11y.panel?.querySelectorAll('#ed11y-outline-list li, .ed11y-headings-label')?.forEach((el) => el.remove());
-    
+
     let prevLevel = 0;
+    let prevEditable = false;
     Ed11y.headingOutline = [];
     let position = 'afterbegin';
 
     // Test each header level for accessibility issues.
-    Ed11y.elements.h?.filter( el => Ed11y.elementNotHidden(el) )?.forEach((el, i) => {
+    Ed11y.elements.h?.filter( el => Ed11y.elementNotHidden(el) )?.forEach((el) => {
+      if (!Ed11y.addedNodeReadyToCheck(el)) {
+        return;
+      }
       let level;
       let alert = [];
+      if (el.isContentEditable !== prevEditable) {
+        let editableParent = el.closest('[contenteditable]');
+        // first in editable zone
+        if (editableParent) {
+          Ed11y.options.editorHeadingLevel.some(level => {
+            if (editableParent.matches(level.selector)) {
+              if (level.previousHeading === 'inherit') {
+                // Inherit levels
+                return true;
+              }
+              prevLevel = level.previousHeading;
+              return true;
+            }
+          });
+        }
+        prevEditable = el.isContentEditable;
+      }
 
       // Match aria-headers to <h#> level.
       if (el.hasAttribute('aria-level')) {
@@ -52,7 +73,7 @@ class Ed11yTestHeadings {
       else if (headingLength > 160) {
         outlinePrefix += Ed11y.M.errorOutlinePrefixHeadingIsLong;
         dismissKey = Ed11y.dismissalKey(level + headingText);
-        error = 'headingIsLong',
+        error = 'headingIsLong';
         alert.push({
           element: el,
           test: error,
@@ -61,7 +82,7 @@ class Ed11yTestHeadings {
           dismissalKey: dismissKey,
         });
       }
-      if (level - prevLevel > 1 && i !== 0) {
+      if (error !== 'headingEmpty' && prevLevel > 0 && level - prevLevel > 1) {
         dismissKey = Ed11y.dismissalKey(level + headingText);
         outlinePrefix += Ed11y.M.errorOutlinePrefixSkippedLevel;
         error = 'headingLevelSkipped';
@@ -77,7 +98,7 @@ class Ed11yTestHeadings {
 
       if (error !== '') {
         // Only mark errors if they are within the scanned area.
-        if (el.closest(Ed11y.options.checkRoots) !== null || (Ed11y.options.shadowComponents && el.getRootNode()?.host?.matches(Ed11y.options.shadowComponents) !== undefined)) {          
+        if (el.closest(Ed11y.options.checkRoots) !== null || (Ed11y.options.shadowComponents && el.getRootNode()?.host?.matches(Ed11y.options.shadowComponents) !== undefined)) {
           alert.forEach((result) => {
             Ed11y.results.push(result);
           });
@@ -91,8 +112,11 @@ class Ed11yTestHeadings {
     // Check for blockquotes used as headings. If it's less than 25
     // characters - it's probably not a blockquote.
     Ed11y.elements.blockquote?.forEach((el) => {
+      if (!Ed11y.addedNodeReadyToCheck(el)) {
+        return;
+      }
       let text = Ed11y.getText(el);
-      if (text.length < 25) {
+      if (text && text.length < 25) {
         let dismissKey = Ed11y.dismissalKey(text);
         let error = 'blockquoteIsShort';
         let message = Ed11y.M.blockquoteIsShort.tip();

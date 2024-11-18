@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" media="all" href="../css/editoria11y.css">
+        <title>Live Editing Tests</title>
+    </head>
+<body>
+    <header>
+        <h1 id="editoria11y-demo">Live editing prototype</h1>
+    </header>
+    <main style="max-width: none;">
+
+        <section id="editable-region" contenteditable="true" style="max-height: 36em; overflow-y: auto; min-width: calc(100% - 16rem); padding: 10px 1rem; margin: 1rem 7rem 5rem; box-shadow: 0px 0px 0 1px #777, inset 1px 1px 3px; border-radius: 3px;">
+            <p>This is an editable region -- click in to see the TinyMCE interface appear. Add and delete content, create and fix issues.
+            The easiest way to get a new tip to appear is to type a sentence in caps lock.</p>
+            <p>Some things you might notice that I'd especially like thoughts on:</p>
+            <ul><li>Tips will fade out when you click into paragraphs, to prevent tips covering where you are typing.</li>
+            <li>There's a fairly long hesitation (~1s) between checks. This greatly helps with performance, but...is it a good balance of performance and frequency?</li>
+            </ul>
+            <details><summary>Weird why does this work sorta?</summary><a href="#">Click here</a></details>
+            <details><summary>But not if it is css hidden?</summary><div style="display: none;"><a href="#">Click here</a></div></details>
+                <p>Some things that are unfinished but known...</p>
+            <ul><li>Tip drawing and fade-out when outside the editable container is half-finished -- you may notice it taking a moment for tips to align, or offscreen tips messing with the page's scrollbar.</li>
+                <li>The minimized main panel looks the same when it is minimized and when it is off. I need to add a third state to differentiate.
+                </li><li>The tips have a new button after the [?] that moves the cursor to where the issue is. That probably needs a better label or position. I have considered keeping it as an icon and putting it up at the top of the modal with the [x], or changing it to spell out a label like "Edit text" or "Select issue."</li></ul>
+            <h2>Sample issues</h2>
+            <p><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">https://This link is going to wrap on to a lot of lines because it has a lot of text, and it is going to trip the https test because it starts with https.</a></p>
+            <img style="float: right; width: 50%;" class='click-in-css' src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"><p style="margin-top: 2rem;">This floating image has no alt text:</p><hr>
+
+            <p>This is a big paragraph with several alerts that place their tips fairly close together:, <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">click here</a>, and <a href="#">https://princeton.edu,</a> and <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">""</a></p>
+
+
+            <div class="posi"><h4 id="a-very-long-heading">Suspiciously long heading with two alerts. Headings should not be used for emphasis, but rather for a document outline, so if you find yourself talking this much, this probably is being used for visual formatting, not a heading.</h4>
+            </div>
+
+            <h2 id="tables">Tables</h2>
+
+            <h3 id="tables-without-valid-headers">Tables without valid headers</h3>
+<!--
+            <table class="posi"><tbody><tr><td>A table without a TH header is invalid</td><td class="posi"><h4 >Outline headers do not count</h4></td><td class="negati"><p><strong>Disable should be content header test inside tables</strong></p></td></tr></tbody></table>-->
+            <!--<p>break</p>
+            <table class="negati" role="presentation"><tr><td>No table header, but table has role="presentation."</td></tr></table>-->
+
+            <table class="negati" ><tr><td></td></tr></table>
+
+            to copy
+            <h3 id="empty-table-header-cells">Empty table header cells</h3>
+
+            <table><tbody><tr><th>Empty table heading cells will also be flagged:</th><th class="posi"> &nbsp;</th></tr></tbody></table>
+            <h2>Position collisions</h2>
+            <ul><li>There are five alerts here and the buttons don't fit; the collision detection is moving them off each other too far, so several are only reachable via the main panel "next" button. Need to improve collision handling.</li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li></ul>
+
+        </section>
+        <script src=" https://cdn.jsdelivr.net/npm/tinymce@7.1.2/tinymce.min.js "></script>
+        <script>tinymce.init({
+          selector: '#editable-region',  // change this value according to your HTML
+          license_key: 'gpl',
+          inline: true,
+        });
+
+        </script>
+
+                <!--<section id="not-editable-region">
+
+                    <h2>Non-editable Regions</h2>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</p>
+                    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?</p>
+
+                    <p><a href="#">https://This link is going to wrap on to a lot of lines because it has a lot of text, and it is going to trip the https test.</a></p>
+                    <div>
+                        <ul><li><a href>stack positioning</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li></ul>
+                    </div>
+
+
+                </section>-->
+
+<!--                <section id="Custom tests" contenteditable="true">
+                    <h2 id="customtest">Custom tests</h2>
+                    <p class="posi">
+                        <a href="https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwds.princeton.edu%2F">Safelink</a>
+                    </p>
+                </section>-->
+
+
+
+
+        <div hidden>
+            <link href="./tests.css" rel="stylesheet">
+            <!--
+            <script src="../dist/editoria11y.min.js"></script>
+            -->
+            <script src="../js/ed11y-localization.js"></script>
+            <script src="../js/ed11y-element-panel.js"></script>
+            <script src="../js/ed11y-element-result.js"></script>
+            <script src="../js/ed11y-element-tip.js"></script>
+            <script src="../js/ed11y-element-alt.js"></script>
+            <script src="../js/ed11y-test-links.js"></script>
+            <script src="../js/ed11y-test-images.js"></script>
+            <script src="../js/ed11y-test-headings.js"></script>
+            <script src="../js/ed11y-test-text.js"></script>
+            <script src="../js/ed11y-test-embeds.js"></script>
+            <script src="../js/ed11y.js"></script>
+            <!-- Instantiate-->
+            <script>
+                document.addEventListener('ed11yShowHidden', function(e) {
+                    console.log('Event dispatched: ed11yShowHidden for #' + e.detail.result);
+                    let pop = Ed11y.findElements('hiddenPop',`#ed11y-result-${e.detail.result}`);
+                    Ed11y.elements['hiddenPop'][0].closest('[hidden]')?.removeAttribute('hidden');
+                }, false);
+
+                const decodeSafelink = function(url) {
+                    const params = new URL(url).searchParams;
+                    let decoded = params.get('url');
+                    if (!!decoded) {
+                        decoded = Ed11y.sanitizeForHTML(decoded);
+                        return `<p>The actual URL may be:<br><em style='word-wrap: break-word;'>${decoded}</em></p>`
+                    }
+                    return '';
+                }
+                document.addEventListener('ed11yRunCustomTests', function() {
+                    Ed11y.findElements('safeLinks','a[href*="safelinks.protection.outlook.com/?"]');
+                    Ed11y.M.outlookSafeLink = {
+                        title: 'URL is an Outlook Safelink',
+                        tip: (href) =>
+                            `<p>The URL for this link has been copied from an email, and will bounce all clicks through the Microsoft Safelinks server.</p>
+                            <p>The specified URL is:<br><em style='word-break: break-all;'>${Ed11y.sanitizeForHTML(href)}</em></p>
+                            ${decodeSafelink(href)}
+                                `,
+                    };
+                    Ed11y.elements.safeLinks?.forEach((el) => {
+                        Ed11y.results.push({
+                            element: el,
+                            test: 'outlookSafeLink',
+                            content: Ed11y.M.outlookSafeLink.tip(el.getAttribute('href')),
+                            position: 'beforebegin',
+                            dismissalKey: false,
+                        })
+                    })
+                    let allDone = new CustomEvent('ed11yResume');
+                    document.dispatchEvent(allDone);
+                    document.dispatchEvent(allDone);
+                    })
+
+
+                onload = (event) => {
+                  const ed11y = new Ed11y({
+                    alertMode : 'assertive',
+                    ignoreByKey : {
+                      'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
+                      'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
+                    },
+                    ignoreElements: '.tox-editor-header *, .ed11y-ignore *',
+                    hiddenHandlers : '[hidden]',
+                    //inlineAlerts : false,
+                    checkRoots : 'body',
+                    linkIgnoreStrings: '\(link is external\)',
+                    customTests : 2,
+                    theme: 'darkTheme',
+                    //theme: 'lightTheme',
+                    //theme: 'sleekTheme',
+                    linkIgnoreSelector : '.ignore-class',
+                  });
+                };
+
+            </script>
+
+        </div>
+    </main>
+
+
+
+
+</body>
+
+</html>

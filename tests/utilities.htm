@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <link rel="stylesheet" media="all" href="../dist/editoria11y.min.css">
+        <link rel="stylesheet" media="all" href="../css/editoria11y.css">
         <title>Editorially Utility Functions</title>
     </head>
 <body>
@@ -138,6 +138,7 @@
             <style>svg {max-width: 100px;} #text-in-css::before {content: 'hello';} .click-in-css::before {content: 'click';} #click-in-css::after {content: ' here';}</style>
 
         </section>
+        <div id="klaro_toggle_dialog" style="position: fixed; bottom: 10px; right: 10px; width: 25px; height: 25px; border-radius: 25px; background: silver;">@</div>
 
         <div hidden>
             <link href="./tests.css" rel="stylesheet">
@@ -194,14 +195,13 @@
                     })
 
 
-
-
                 const ed11y = new Ed11y({
                     alertMode : 'assertive',
                     ignoreByKey : {
                         'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
                         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
                     },
+                    //syncedDismissals: {},
                     shadowComponents : 'shadow-test, shadow-test-no-hits',
                     hiddenHandlers : '[hidden]',
                     checkRoots : 'body',
@@ -209,6 +209,8 @@
                     customTests : 2,
                     theme: 'sleekTheme',
                     linkIgnoreSelector : '.ignore-class',
+                    panelNoCover: '#klaro_toggle_dialog',
+                    reportsURL: 'https://www.princeton.edu',
                 });
             </script>
 

@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.2.4';
+    Ed11y.version = '2.3.0';
 
     let defaultOptions = {
 
@@ -38,16 +38,27 @@ class Ed11y {
         'table': '[role="presentation"]',
       },
 
-      // Set alertMode to "Assertive" to open the panel automatically if the issue count changes.
-      // For CMS integrations, it is nice  switch between polite & headless based on whether the page was just edited.
+      // Set alertModes
+      // 'headless': do not draw interface
+      // 'userPreference: respect user preference.
+      // 'polite': open for new issues.
+      // 'assertive': open for any issues.
+      // 'active': always open.
+      // 'showDismissed': active with dismissed revealed.
+      // CMS integrations can switch between polite & headless at runtime.
       // alertMode "headless" never draws the panel.
-      alertMode: 'polite',
+      alertMode: 'userPreference',
+      inlineAlerts: true,
+
+      // This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
+      editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
 
       // Dismissed alerts
       currentPage: false, // uses window.location.pathname unless a string is provided.
       allowHide: true, // enables end-user ignore button
       allowOK: true,  // enables end-user mark OK button
-      syncedDismissals: false, // provide empty or populated object {} to enable synch functions
+      syncedDismissals: false, // provide empty or populated object {} to enable sync functions
+      reportsURL: false, // Provides a link to site-wide reports
       showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
 
       // Hide all alerts if these elements are absent, e.g., ".edit-button"
@@ -70,28 +81,35 @@ class Ed11y {
       // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
       hiddenHandlers: '',
 
+      panelPinTo: 'right',
+      panelOffsetX: '25px',
+      panelOffsetY: '25px',
+      panelNoCover: '', // select other buttons to avoid.
+
       // Interface
       lang: 'en',
+      langSanitizes: false, // Some translation modules will double-escape
       theme: 'sleekTheme',
       sleekTheme: {
-        bg: '#fffffe',
+        bg: '#eff2ff', // e8f4ff
         bgHighlight: '#7b1919',
         text: '#20160c',
-        primary: '#276499',
+        primary: '#276499', // 276499
         primaryText: '#fffdf7',
         button: 'transparent', // deprecate?
-        panelBar: '#fffffe',
-        panelBarText: '#20160c',
-        panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
-        panelBorder: '0px', // '2px'
+        panelBar: '#1e517c',
+        panelBarText: '#fffdf7',
+        panelBarShadow: '0 0 0 1px #276499',
         activeTab: '#276499',
         activeTabText: '#fffffe',
-        outlineWidth: 0,
-        borderRadius: '1px',
-        ok: '#1f5381',
-        warning: '#fad859',
-        alert: '#b80519',
         focusRing: '#007aff',
+        outlineWidth: '0',
+        borderRadius: '3px',
+        ok: '#1f5381',
+        warning: 'rgb(250, 216, 89)',
+        warningText: '#20160c',
+        alert: 'rgb(184, 5, 25)',
+        alertText: '#f4f7ff',
       },
       darkTheme: {
         bg: '#0a2051',
@@ -102,16 +120,17 @@ class Ed11y {
         button: 'transparent',
         panelBar: '#3052a0',
         panelBarText: '#f4f7ff',
-        panelBarShadow: 'inset 0 -1px #0002, -1px 0 #0002',
-        panelBorder: '2px',
+        panelBarShadow: 'inset 0 0 1px, 0 0 0 1px #0a2051',
         activeTab: '#0a2051',
         activeTabText: '#fffffe',
         focusRing: 'cyan',
         outlineWidth: '2px',
         borderRadius: '3px',
         ok: '#0a307a',
-        warning: '#fad859',
-        alert: '#b80519',
+        warning: 'rgb(250, 216, 89)',
+        warningText: '#20160c',
+        alert: 'rgb(184, 5, 25)',
+        alertText: '#f4f7ff',
       },
       lightTheme: {
         bg: '#fffffe',
@@ -121,20 +140,22 @@ class Ed11y {
         primaryText: '#fffdf7',
         panelBar: '#0a307a',
         panelBarText: '#f4f7ff',
-        panelBarShadow: 'inset 0 -1px #fff2, -1px 0 #fff2',
-        panelBorder: '2px',
+        panelBarShadow: '0 0 0 1px #0a307a',
         button: 'transparent',
         activeTab: '#b9c0cf',
         activeTabText: '#20160c',
         focusRing: '#007aff',
-        outlineWidth: '2px',
+        outlineWidth: '0',
         borderRadius: '3px',
         ok: '#0a307a',
-        warning: '#fad859',
-        alert: '#b80519',
+        warning: 'rgb(250, 216, 89)',
+        warningText: '#20160c',
+        alert: 'rgb(184, 5, 25)',
+        alertText: '#f4f7ff',
       },
       // Base z-index for buttons.
-      buttonZIndex: 9999,
+      // 1299 maximizes TinyMCE compatibility.
+      buttonZIndex: 1299,
       // CSS overrides and additions.
 
       baseFontSize: '14px', // px
@@ -149,7 +170,8 @@ class Ed11y {
       dataVizContent: 'datastudio.google.com, tableau',
       twitterContent: 'twitter-timeline',
       // Selector list to identify links to documents you would like flagged for manual review.
-      documentLinks: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\'], a[href$=\'.doc\'], a[href$=\'.docx\'], a[href*=\'.doc?\'], a[href*=\'.docx?\'], a[href$=\'.ppt\'], a[href$=\'.pptx\'], a[href*=\'.ppt?\'], a[href*=\'.pptx?\'], a[href^=\'https://docs.google\']',
+      documentLinks: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']',
+      // was 'a[href$=\'.pdf\'], a[href*=\'.pdf?\'], a[href$=\'.doc\'], a[href$=\'.docx\'], a[href*=\'.doc?\'], a[href*=\'.docx?\'], a[href$=\'.ppt\'], a[href$=\'.pptx\'], a[href*=\'.ppt?\'], a[href*=\'.pptx?\'], a[href^=\'https://docs.google\']'
       linksUrls: false, // get from language pack
       linksMeaningless: false, // get from language pack
       altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
@@ -157,6 +179,27 @@ class Ed11y {
       // ruleset toggling
       // form label tests
       // detectSPArouting: false,
+
+      editorHeadingLevel: [
+        // Sets previous heading level for contentEditable fields.
+        // With 'ignore' set, first heading level is ignored in editable zones.
+        // This is ideal for systems with separate backend editing pages.
+        // Set to 'inherit' for fields edited in a frontend context.
+        /*{
+          selector: '.example-inherit',
+          previousHeading: 'inherit',
+        },
+        {
+          selector: '.example-l3',
+          previousHeading: 3,
+        },*/
+        {
+          selector: '*',
+          previousHeading: 0, // Ignores first heading for level skip detection.
+        },
+      ],
+
+      userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
 
       customTests: 0,
 
@@ -210,7 +253,27 @@ class Ed11y {
 
     Ed11y.elements = [];
     Ed11y.onLoad = true;
-    Ed11y.showPanel = 'show';
+    Ed11y.showPanel = false;
+    let windowWidth = window.innerWidth;
+
+    Ed11y.disable = () => {
+      if (Ed11y.open && !Ed11y.closedByDisable) {
+        Ed11y.closedByDisable = true;
+      }
+      Ed11y.disabled = true;
+      Ed11y.reset();
+      document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
+      document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
+      document.documentElement.style.setProperty('--ed11y-activeBorder', Ed11y.theme.panelBarText + '44');
+      document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
+      if (Ed11y.panelToggle) {
+        Ed11y.panel?.classList.remove('ed11y-errors', 'ed11y-warnings');
+        Ed11y.panelCount.textContent = 'i';
+        Ed11y.panelJumpNext.setAttribute('hidden', '');
+        Ed11y.panelToggle.classList.add('disabled');
+        Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleDisabled;
+      }
+    };
 
     Ed11y.initialize = () => {
 
@@ -238,86 +301,91 @@ class Ed11y {
 
       // Once document has fully loaded.
       documentLoadingCheck(() => {
-        if (!Ed11y.checkRunPrevent()) {
-          Ed11y.running = true;
-          let localData = localStorage.getItem('editoria11yResultCount');
-          Ed11y.seen = localData ? JSON.parse(localData) : {};
+        if (Ed11y.checkRunPrevent()) {
+          return false;
+        }
+        Ed11y.running = true;
+        let localResultCount = localStorage.getItem('editoria11yResultCount');
+        Ed11y.seen = localResultCount ? JSON.parse(localResultCount) : {};
 
-          // Build list of dismissed alerts
-          if (Ed11y.options.syncedDismissals === false) {
-            Ed11y.dismissedAlerts = localStorage.getItem('ed11ydismissed');
-            Ed11y.dismissedAlerts = Ed11y.dismissedAlerts ? JSON.parse(Ed11y.dismissedAlerts) : {};
-          } else {
-            Ed11y.dismissedAlerts = {};
-            Ed11y.dismissedAlerts[Ed11y.options.currentPage] = Ed11y.options.syncedDismissals;
-          }
+        // Build list of dismissed alerts
+        if (Ed11y.options.syncedDismissals === false) {
+          Ed11y.dismissedAlerts = localStorage.getItem('ed11ydismissed');
+          Ed11y.dismissedAlerts = Ed11y.dismissedAlerts ? JSON.parse(Ed11y.dismissedAlerts) : {};
+        } else {
+          Ed11y.dismissedAlerts = {};
+          Ed11y.dismissedAlerts[Ed11y.options.currentPage] = Ed11y.options.syncedDismissals;
+        }
 
-          // Ed11y v2.0 stored special characters in dismissal keys. This strips them.
-          // This loop can be deleted in 2024.
-          if (Ed11y.options.currentPage in Ed11y.dismissedAlerts) {
-            for (const [key] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage])) {
-              if (key in Ed11y.dismissedAlerts[Ed11y.options.currentPage]) {
-                for (const [subkey, subvalue] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage][key])) {
-                  let newKey = Ed11y.dismissalKey(subkey);
-                  if (newKey !== subkey) {
-                    Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][newKey] = subvalue;
-                    delete Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][subkey];
-                  }
+        // Ed11y v2.0 stored special characters in dismissal keys. This strips them.
+        // This loop can be deleted in 2024.
+        if (Ed11y.options.currentPage in Ed11y.dismissedAlerts) {
+          for (const [key] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage])) {
+            if (key in Ed11y.dismissedAlerts[Ed11y.options.currentPage]) {
+              for (const [subkey, subvalue] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage][key])) {
+                let newKey = Ed11y.dismissalKey(subkey);
+                if (newKey !== subkey) {
+                  Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][newKey] = subvalue;
+                  delete Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][subkey];
                 }
               }
             }
           }
-
-
-          // Create test class objects
-          Ed11y.testEmbeds = new Ed11yTestEmbeds;
-          Ed11y.testHeadings = new Ed11yTestHeadings;
-          Ed11y.testImages = new Ed11yTestImages;
-          Ed11y.testLinks = new Ed11yTestLinks;
-          Ed11y.testText = new Ed11yTestText;
-
-          // Convert the container ignore user option to a CSS :not selector.
-          Ed11y.ignore = Ed11y.options.ignoreElements ? `:not(${Ed11y.options.ignoreElements})` : '';
-
-          if (!Ed11y.options.checkRoots) {
-            Ed11y.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
-          }
-
-          // Check for ignoreAll element only once.
-          Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
-          if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
-            Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
-          }
-
-          // Run tests
-          Ed11y.checkAll(true, 'hide');
-          window.addEventListener('resize', function () { Ed11y.windowResize(); });
         }
+
+        // Create test class objects
+        Ed11y.testEmbeds = new Ed11yTestEmbeds;
+        Ed11y.testHeadings = new Ed11yTestHeadings;
+        Ed11y.testImages = new Ed11yTestImages;
+        Ed11y.testLinks = new Ed11yTestLinks;
+        Ed11y.testText = new Ed11yTestText;
+
+        // Convert the container ignore user option to a CSS :not selector.
+        Ed11y.ignore = Ed11y.options.ignoreElements ? `:not(${Ed11y.options.ignoreElements})` : '';
+
+        if (!Ed11y.options.checkRoots) {
+          Ed11y.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
+        }
+
+        // Run tests
+        Ed11y.checkAll();
+        window.addEventListener('resize', function () { Ed11y.windowResize(); });
+
       });
     };
 
+    Ed11y.results = [];
     // Toggles the outline of all headers, link texts, and images.
     Ed11y.checkAll = () => {
+      Ed11y.disabled = false;
 
-      if (!Ed11y.checkRunPrevent()) {
+      if ( !Ed11y.checkRunPrevent() ) {
+        // Check for ignoreAll elements.
+        Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
+        if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
+          Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
+        }
+
+        if ( Ed11y.incremental ) {
+          Ed11y.oldResults = Ed11y.results;
+        }
         // Reset counts
         Ed11y.results = [];
         Ed11y.elements = [];
         Ed11y.mediaCount = 0;
+
         Ed11y.customTestsRunning = false;
 
         // Find and cache all root elements based on user-provided selectors.
         let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
         if (roots.length === 0) {
-          // todo MVP: set panel message?
-          Ed11y.roots = [document.querySelector('html, body')];
+          //Ed11y.roots = [document.querySelector('html, body')];
           // Todo parameterize.
-          if (roots.length === 0) {
+          if (Ed11y.onLoad) {
             console.warn('Check Editoria11y configuration; specified root element not found');
-          } else {
-            console.warn('Editoria11y found no user editable content on this page');
           }
-          Ed11y.reset();
+          Ed11y.disable();
+          return;
         } else {
           Ed11y.roots = [];
           roots.forEach((el, i) => {
@@ -337,7 +405,7 @@ class Ed11y {
             'testEmbeds',
           ];
           queue.forEach((test) => {
-            window.setTimeout(function () {
+            window.setTimeout(function (test) {
               Ed11y[test].check();
             }, 0, test);
           });
@@ -350,14 +418,15 @@ class Ed11y {
               Ed11y.customTestsFinished++;
               if (Ed11y.customTestsFinished === Ed11y.options.customTests) {
                 Ed11y.customTestsRunning = false;
-                Ed11y.panelToggle?.setAttribute('title', Ed11y.M.toggleAccessibilityTools);
                 Ed11y.updatePanel();
               }
             });
             window.setTimeout(function() {
               if (Ed11y.customTestsRunning === true) {
                 Ed11y.customTestsRunning = false;
-                Ed11y.panelToggle?.setAttribute('title', Ed11y.M.toggleAccessibilityTools);
+                if (Ed11y.panelToggle) {
+                  Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleAccessibilityTools;
+                }
                 Ed11y.updatePanel();
                 console.error('Editoria11y was told to wait for custom tests, but no tests were returned.');
               }
@@ -371,20 +440,20 @@ class Ed11y {
 
         if (!Ed11y.customTestsRunning) {
           window.setTimeout(function () {
-            Ed11y.panelToggle?.setAttribute('title', Ed11y.M.toggleAccessibilityTools);
+            if (Ed11y.panelToggle) {
+              Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleAccessibilityTools;
+            }
             Ed11y.updatePanel();
           }, 0);
         }
 
       }
       else {
-        Ed11y.reset();
-        Ed11y.panelToggle?.classList.add('disabled');
-        Ed11y.panelToggle?.removeAttribute('aria-expanded');
-        Ed11y.panelToggle?.setAttribute('title', Ed11y.M.toggleDisabled);
+        Ed11y.disable();
       }
     };
 
+    Ed11y.totalCount = 0;
     Ed11y.countAlerts = function () {
 
       Ed11y.errorCount = 0;
@@ -398,6 +467,10 @@ class Ed11y {
         Ed11y.dismissedCount = 0;
         for (let i = Ed11y.results.length - 1; i >= 0; i--) {
           let test = Ed11y.results[i].test;
+          // todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are testing. But we'd have to walk the array. Expensive!
+          /*if (Ed11y.incremental && Ed11y.oldResults.length > 0) {
+            // Don't flag new issues in the active range while people are typing.
+          }*/
           let dismissKey = Ed11y.dismissalKey(Ed11y.results[i].dismissalKey);
           // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
           if (dismissKey !== false && Ed11y.options.currentPage in Ed11y.dismissedAlerts && test in Ed11y.dismissedAlerts[Ed11y.options.currentPage] && dismissKey in Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]) {
@@ -415,123 +488,239 @@ class Ed11y {
       }
 
       Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
-
       // Dispatch event for synchronizers
-      window.setTimeout(function () {
-        let syncResults = new CustomEvent('ed11yResults');
-        document.dispatchEvent(syncResults);
-      }, 0);
+      if (!Ed11y.incremental) {
+        window.setTimeout(function () {
+          let syncResults = new CustomEvent('ed11yResults');
+          document.dispatchEvent(syncResults);
+        }, 0);
+      }
 
     };
 
-    Ed11y.updatePanel = function () {
-      Ed11y.countAlerts();
-      if (Ed11y.options.alertMode !== 'headless') {
-        if (Ed11y.onLoad === true) {
-          Ed11y.onLoad = false;
-          // Create the panel if it doesn't exist yet
-          let panel = document.createElement('ed11y-element-panel');
-          document.querySelector('body').appendChild(panel);
-          // todo: open on assertive with count mismatch or if showDismissed is set.
-          if (Ed11y.totalCount > 0 && !Ed11y.ignoreAll && Ed11y.options.alertMode === 'assertive' && Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount) {
-            // User has not already seen these errors, panel will not open.
-            Ed11y.showPanel = true;
-          } else {
-            Ed11y.showPanel = Ed11y.options.showDismissed && (Ed11y.dismissedCount > 0 || Ed11y.totalCount > 0);
-          }
-        } else {
-          Ed11y.showPanel = true;
-        }
+    let oldResultString = '';
+    let newNodes = false;
+    const newIncrementalResults = function() {
+      if (newNodes || Ed11y.results.length !== Ed11y.oldResults.length) {
+        newNodes = false;
+        return true;
+      }
+      let newResultString = `${Ed11y.errorCount} ${Ed11y.warningCount}`;
+      Ed11y.results.forEach(result => {
+        newResultString += result.test + result.element.outerHTML;
+      });
+      let changed = newResultString !== oldResultString;
+      oldResultString = newResultString;
+      return changed;
+    };
 
+    Ed11y.updatePanel = function () {
+
+      // Stash old values for incremental updates.
+      Ed11y.countAlerts();
+      if (Ed11y.incremental) {
+        // Check for a change in the result counts.
+        if (Ed11y.forceFullCheck || newIncrementalResults()) {
+          Ed11y.forceFullCheck = false;
+          /*if (Ed11y.options.alertMode === 'assertive' && Ed11y.totalCount > 0 && (Ed11y.warningCount > oldWarnings || Ed11y.errorCount > oldErrors)) {
+            console.warn('forced open');
+            Ed11y.showPanel = true;
+          }*/
+          Ed11y.resetResults();
+        } else {
+          Ed11y.results = Ed11y.oldResults;
+          window.setTimeout(function() {
+            if ( !Ed11y.alignPending ) {
+              Ed11y.alignButtons();
+              Ed11y.alignPanel();
+            }
+            Ed11y.running = false;
+          },0);
+          return;
+        }
+      } else {
         if (Ed11y.totalCount > 0) {
+          // Record what has been seen at this route.
+          // We do not do this on incremental updates.
+          // Todo question: should we not do this at all for contentEditable?
           Ed11y.seen[encodeURI(Ed11y.options.currentPage)] = Ed11y.totalCount;
           localStorage.setItem('editoria11yResultCount', JSON.stringify(Ed11y.seen));
         } else {
           delete Ed11y.seen[encodeURI(Ed11y.options.currentPage)];
         }
+      }
+
+      if (Ed11y.options.alertMode !== 'headless') {
+        // Not headless; draw the interface.
+
+        if (Ed11y.onLoad === true) {
+          Ed11y.onLoad = false;
+
+          if (!Ed11y.options.inlineAlerts) {
+            // todo temp temp temp!
+            oldResultString = `${Ed11y.errorCount} ${Ed11y.warningCount}`;
+            Ed11y.results.forEach(result => {
+              oldResultString += result.test + result.element.outerHTML;
+            });
+          }
+
+          // Create the panel DOM on load.
+
+          let panel = document.createElement('ed11y-element-panel');
+          document.querySelector('body').appendChild(panel);
+          Ed11y.attachCSS(Ed11y.panel);
+          Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsContent;
+          Ed11y.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = Ed11y.M.buttonOutlineContent;
+          Ed11y.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = Ed11y.M.panelCheckOutline;
+          Ed11y.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = Ed11y.M.buttonAltsContent;
+          Ed11y.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = Ed11y.M.panelCheckAltText;
+          Ed11y.panel.querySelector('.jump-next.ed11y-sr-only').textContent = Ed11y.M.buttonFirstContent;
+
+          Ed11y.panel.setAttribute('aria-label', Ed11y.M.panelControls);
+          if (Ed11y.options.reportsURL) {
+            let reportLink = document.createElement('a');
+            reportLink.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M0 96C0 60.7 28.7 32 64 32l384 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zm64 0l0 64 64 0 0-64L64 96zm384 0L192 96l0 64 256 0 0-64zM64 224l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64zM64 352l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64z"/></svg><span class="ed11y-sr-only"></span>';
+            reportLink.setAttribute('id' , 'ed11y-reports-link');
+            reportLink.setAttribute('href', Ed11y.options.reportsURL);
+            reportLink.setAttribute('target', '_blank');
+            reportLink.setAttribute('aria-label', Ed11y.M.reportsLink);
+            reportLink.querySelector('.ed11y-sr-only').textContent = Ed11y.M.reportsLink;
+            Ed11y.showDismissed.insertAdjacentElement('beforebegin', reportLink);
+          }
+
+
+          // Decide whether to open the panel on load.
+          if (Ed11y.options.alertMode === 'active' ||
+            !Ed11y.options.userPrefersShut ||
+            Ed11y.options.showDismissed
+          ) {
+            // Show always on load for active mode or by user preference.
+            Ed11y.showPanel = true;
+          } else if (
+            Ed11y.totalCount > 0 &&
+            !Ed11y.ignoreAll &&
+            ( Ed11y.options.alertMode === 'assertive' ||
+              Ed11y.options.alertMode === 'polite' &&
+              Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount
+            )
+          ) {
+            // Show sometimes for assertive/polite if there are new items.
+            Ed11y.showPanel = true;
+          }
+        }
 
         // Now we can open or close the panel.
         if (!Ed11y.showPanel) {
+          // Close panel.
           Ed11y.reset();
-          if (!Ed11y.bodyStyle) {
-            Ed11y.paintReady();
-          }
         } else {
+          // Ignore issue count if this resulted from a user action.
+          Ed11y.open = true;
           Ed11y.panel.classList.remove('ed11y-shut');
           Ed11y.panel.classList.add('ed11y-active');
           Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
-          if (Ed11y.dismissedCount > 0) {
-            Ed11y.showDismissed.textContent = Ed11y.dismissedCount === 1 ? Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
-            Ed11y.showDismissed.removeAttribute('hidden');
-          } else if (Ed11y.options.showDismissed === true) {
+          Ed11y.panelToggleTitle.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonHideChecker;
+          // Prepare show hidden alerts button.
+          if (Ed11y.dismissedCount === 0) {
             // Reset show hidden default option when irrelevant.
             Ed11y.showDismissed.setAttribute('hidden', '');
-            Ed11y.showDismissed.setAttribute('aria-pressed', 'false');
+            Ed11y.showDismissed.setAttribute('data-ed11y-pressed', 'false');
             Ed11y.options.showDismissed = false;
+          } else if (Ed11y.dismissedCount === 1) {
+            Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlert : Ed11y.M.buttonShowHiddenAlert;
+            Ed11y.showDismissed.removeAttribute('hidden');
+          } else {
+            Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlerts(Ed11y.dismissedCount) : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+            Ed11y.showDismissed.removeAttribute('hidden');
           }
+
           window.setTimeout(function () {
             document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
             if (!Ed11y.ignoreAll) {
               Ed11y.showResults();
             }
           }, 0);
-          if (Ed11y.onLoad === false) {
-            window.setTimeout(function () {
-              Ed11y.panelMessage.focus();
-            }, 500);
-          }
         }
+        // Update buttons.
         if (Ed11y.totalCount > 0 || (Ed11y.options.showDismissed && Ed11y.dismissedCount > 0)) {
+          Ed11y.panelToggleTitle.textContent = Ed11y.open ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonShowAlerts;
           Ed11y.panelJumpNext.removeAttribute('hidden');
-          if (Ed11y.totalCount < 2 || Ed11y.panelJumpPrev.getAttribute('data-ed11y-goto') === '0') {
-            Ed11y.panelJumpPrev.setAttribute('hidden', '');
-          } else {
-            Ed11y.panelJumpPrev.removeAttribute('hidden');
-          }
           if (Ed11y.errorCount > 0) {
+            // Errors
             Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-pass');
             Ed11y.panel.classList.add('ed11y-errors');
+            document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.alert);
+            document.documentElement.style.setProperty('--ed11y-activeColor', '#fff');
+            document.documentElement.style.setProperty('--ed11y-activeBorder', '#fff7');
+            document.documentElement.style.setProperty('--ed11y-activePanelBorder', '#def');
           }
           else if (Ed11y.warningCount > 0) {
+            // Warnings
             Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-pass');
             Ed11y.panel.classList.add('ed11y-warnings');
+            document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.warning);
+            document.documentElement.style.setProperty('--ed11y-activeColor', '#111');
+            document.documentElement.style.setProperty('--ed11y-activeBorder', '#947605');
+            document.documentElement.style.setProperty('--ed11y-activePanelBorder', '#947605');
           } else {
             // Issues present but dismissed.
             Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-warnings');
             Ed11y.panel.classList.add('ed11y-pass');
+            document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
+            document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
+            document.documentElement.style.setProperty('--ed11y-activeBorder', Ed11y.theme.panelBarText + '44');
+            document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
           }
-          Ed11y.panelCount.textCount = Ed11y.totalCount;
-          Ed11y.panelCount.style.display = 'inline-block';
-          let text = Ed11y.totalCount === 1 ? Ed11y.M.panelCount1 : Ed11y.totalCount + Ed11y.M.panelCountMultiple;
-          Ed11y.panelMessage.textContent = text;
-          window.setTimeout(function () {
-            Ed11y.announce.textContent = text;
-          }, 1500);
-          Ed11y.panel.querySelector('.toggle-count').textContent = Ed11y.totalCount;
-        }
-        else {
+          // todo postpone: aria alert on load?
+          /*window.setTimeout(function () {
+            //Ed11y.announce.textContent = text;
+          }, 1500);*/
+          if (Ed11y.dismissedCount > 0 && Ed11y.totalCount === 0) {
+            Ed11y.panelCount.textContent = Ed11y.dismissedCount;
+          } else {
+            Ed11y.panelCount.textContent = Ed11y.totalCount > 99 ? '99+' : Ed11y.totalCount;
+          }
+        } else {
           Ed11y.panelJumpNext.setAttribute('hidden', '');
-          Ed11y.panelJumpPrev.setAttribute('hidden', '');
+          document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
+          document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
+          document.documentElement.style.setProperty('--ed11y-activeBorder', Ed11y.theme.panelBarText + '44');
+          document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
 
           Ed11y.panelCount.style.display = 'display: none;';
           Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-errors');
           Ed11y.panel.classList.add('ed11y-pass');
+
           if (Ed11y.dismissedCount > 0) {
-            // todo: title attribute to explain the difference?
-            Ed11y.panel.querySelector('.toggle-count').textContent = 'i';
-            Ed11y.panelMessage.innerText = Ed11y.M.panelCountAllDismissed;
+            Ed11y.panelCount.textContent = 'i';
+            if (Ed11y.open) {
+              Ed11y.panelToggleTitle.textContent = Ed11y.M.buttonHideChecker;
+            } else {
+              Ed11y.panelToggleTitle.textContent = Ed11y.dismissedCount > 1 ?
+                Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount) :
+                Ed11y.M.buttonShowHiddenAlert;
+            }
           } else {
-            Ed11y.panel.querySelector('.toggle-count').textContent = '✓';
-            Ed11y.panelMessage.innerText = Ed11y.M.panelCount0;
+            // todo postpone checkmark looks bad on Android
+            Ed11y.panelCount.textContent = '✓';
+            Ed11y.panelToggleTitle.textContent = Ed11y.open ? Ed11y.M.buttonHideChecker : Ed11y.M.buttonShowNoAlert;
           }
         }
 
         Ed11y.panel.classList.remove('ed11y-preload');
         Ed11y.panelToggle.classList.remove('disabled');
         Ed11y.panelToggle.removeAttribute('aria-disabled');
+        Ed11y.alignPanel();
+        if (!Ed11y.bodyStyle) {
+          Ed11y.paintReady();
+        }
       }
-      // todo parameterize
       Ed11y.running = false;
+      if (Ed11y.elements['editable']) {
+        Ed11y.elements['editable'].forEach(editable => {
+          startObserver(editable);
+        });
+      }
     };
 
     // Place markers on elements with issues
@@ -545,37 +734,107 @@ class Ed11y {
         // [5] dismissalStatus
         */
       let mark = document.createElement('ed11y-element-result');
-      let location = result.element.closest('a');
+      mark.classList.add('ed11y-preload');
+      let location;
       let position = 'beforebegin';
-      if (!location) {
-        location = result.element;
-        position = result.position;
-      }
       mark.setAttribute('id', 'ed11y-result-' + index);
       mark.setAttribute('data-ed11y-result', index);
       mark.setAttribute('data-ed11y-open', 'false');
+      if (!Ed11y.options.inlineAlerts) {
+        location = document.querySelector('body');
+        position = 'beforeend';
+        mark.classList.add('ed11y-editable-result');
+      } else {
+        location = result.element.closest('a');
+        if (!location) {
+          location = result.element;
+          position = result.position;
+        }
+        if (result.element.style.outline.indexOf('alert') === -1 ) {
+          // Set property unless alert is already set.
+          const display = window.getComputedStyle(result.element).getPropertyValue('display');
+          let outlineClass;
+          if (display.indexOf('inline') === -1 || result.element.tagName === 'IMG') {
+            outlineClass = result.dismissalKey ?
+              'ed11y-warning-block'
+              : 'ed11y-error-block';
+          } else {
+            outlineClass = result.dismissalKey ?
+              'ed11y-warning-inline'
+              : 'ed11y-error-inline';
+          }
+          result.element.classList.add(outlineClass);
+        }
+      }
       location.insertAdjacentElement(position, mark);
+      Ed11y.jumpList.unshift(mark);
+      Ed11y.results[index].toggle = mark;
     };
 
-    Ed11y.reset = function () {
-
+    Ed11y.resetResults = function() {
+      Ed11y.jumpList = [];
+      Ed11y.openTip = {
+        button: false,
+        tip: false,
+      };
+      Ed11y.lastOpenTip = -1;
+      Ed11y.resetClass([
+        'ed11y-ring-red',
+        'ed11y-ring-yellow',
+        'ed11y-hidden-highlight',
+        'ed11y-warning-inline',
+        'ed11y-warning-block',
+        'ed11y-error-block',
+        'ed11y-error-inline',
+      ]);
       // Reset insertions into body content.
-      Ed11y.resetClass(['ed11y-ring-red', 'ed11y-ring-yellow', 'ed11y-hidden-highlight']);
-      Ed11y.findElements('reset', 'ed11y-element-result, ed11y-element-tip, .ed11y-element-heading-label, .ed11y-element-alt, ed11y-element-heading-label, ed11y-element-alt', false);
-      // todo beta on re-open: recreate heading or alts if panel is showing
-      Ed11y.elements.reset.forEach((el) => el.remove());
+      Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+      Ed11y.elements.reset?.forEach((el) => el.remove());
 
+      // Flicker prevention -- leave old tip in place for 100ms.
+      Ed11y.findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
+      const delayedReset = Ed11y.elements.delayedReset;
+      window.setTimeout(()=> {
+        delayedReset?.forEach((el) => el.remove());
+      }, 10, delayedReset);
+
+      if (Ed11y.panelJumpNext) {
+        Ed11y.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Ed11y.M.buttonFirstContent;
+      }
+      // Reset insertions into body content.
+    };
+
+    Ed11y.resetPanel = function() {
       // Reset main panel.
-      Ed11y.panelJumpNext?.setAttribute('data-ed11y-goto', '0');
-      Ed11y.panelJumpPrev?.setAttribute('data-ed11y-goto', '0');
+      Ed11y.visualizing = true; // so visualize function removes visualizers.
+      Ed11y.visualize();
+      if (Ed11y.totalCount === 0 && Ed11y.dismissedCount > 0) {
+        Ed11y.panelCount.textContent = 'i';
+        Ed11y.panelToggleTitle.textContent = Ed11y.dismissedCount === 1 ?
+          Ed11y.M.buttonShowHiddenAlert :
+          Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+      }
+      if (!Ed11y.options.showDismissed && Ed11y.showDismissed) {
+        Ed11y.showDismissed.setAttribute('data-ed11y-pressed', 'false');
+        Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.dismissedCount === 1 ?
+          Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+      }
       Ed11y.panel?.classList.add('ed11y-shut');
       Ed11y.panel?.classList.remove('ed11y-active');
       Ed11y.panelToggle?.setAttribute('aria-expanded', 'false');
+    };
+
+    Ed11y.reset = function () {
+      Ed11y.resetResults();
+      Ed11y.resetPanel();
+      Ed11y.incremental = false;
       Ed11y.running = false;
+      Ed11y.showPanel = false;
+      Ed11y.open = false;
     };
 
     Ed11y.linkText = (linkText) => {
-      // todo: This is only used in Images??? Review all text value diving.
+      // todo postpone: This is only used in Images??? Review all text value diving.
       linkText = linkText.replace(Ed11y.options.linkIgnoreStrings, '');
       linkText = linkText.replace(/'|"|-|\.|\s+/g, '');
       return linkText;
@@ -599,7 +858,7 @@ class Ed11y {
       // Initialize or reset elements array.
       Ed11y.elements[key] = [];
 
-      if (rootRestrict) {
+      if (rootRestrict && Ed11y.roots) {
         // Add array of elements matching selector, excluding the provided ignore list.
         Ed11y.roots.forEach(root => {
           Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector}${shadowSelector})${ignore}`)));
@@ -629,6 +888,11 @@ class Ed11y {
     };
 
     Ed11y.buildElementList = function () {
+      Ed11y.findElements('editable', Ed11y.options.editableContent, false);
+      if (Ed11y.options.inlineAlerts && Ed11y.elements.editable.length > 0) {
+        Ed11y.options.inlineAlerts = false;
+        console.log('Editable content detected; Editoria11y inline alerts disabled');
+      }
       Ed11y.findElements('p', 'p');
       Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', false);
       Ed11y.findElements('img', 'img');
@@ -642,25 +906,28 @@ class Ed11y {
       if (Ed11y.options.embeddedContent) {
         Ed11y.findElements('embed', Ed11y.options.embeddedContent);
       }
+      if (Ed11y.options.panelNoCover) {
+        // used to align panel.
+        Ed11y.findElements('panelPin', Ed11y.options.panelNoCover, false);
+      }
     };
 
     Ed11y.dismissalKey = function (text) {
-      //?.replace(/([^0-9a-zA-Z])/g,'')
       return String(text).replace(/([^0-9a-zA-Z])/g, '').substring(0, 512);
     };
 
     Ed11y.dismissThis = function (dismissalType) {
       // Find the active tip and draw its identifying information from the result list
-      let removal = Ed11y.getOpenTip();
-      let id = removal.dataset.ed11yResult;
+      let removal = Ed11y.openTip;
+      let id = removal.tip.dataset.ed11yResult;
       let test = Ed11y.results[id].test;
       let dismissalKey = Ed11y.dismissalKey(Ed11y.results[id].dismissalKey);
 
       // Remove tip and reset borders around element
       Ed11y.resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
-      removal.parentNode.removeChild(removal);
-      let removeButton = Ed11y.elements.openButton[0];
-      removeButton.parentNode.removeChild(removeButton);
+      removal.tip?.parentNode.removeChild(removal.tip);
+      // TODO EDITING: COMMENT OUT BELOW...SEEMS REDUNDANT?
+      removal.button?.parentNode.removeChild(removal.button);
 
       // Update dismissal record.
       if (dismissalType === 'reset') {
@@ -702,126 +969,383 @@ class Ed11y {
       }
 
       Ed11y.reset();
+      Ed11y.showPanel = true;
+      Ed11y.checkAll();
 
-      Ed11y.checkAll(false, 'show');
-
-      let rememberGoto = Ed11y.goto;
+      let rememberGoto = Ed11y.lastOpenTip;
 
       window.setTimeout(function () {
-        Ed11y.buildJumpList();
-        if (Ed11y.elements.jumpList.length > 0) {
-          Ed11y.goto = (rememberGoto - 1);
-          Ed11y.setCurrentJump();
-          Ed11y.panelJumpNext.focus();
+        if (Ed11y.jumpList.length > 0) {
+          Ed11y.lastOpenTip = (rememberGoto - 1);
+          Ed11y.panelJumpNext?.focus();
         } else {
           window.setTimeout(function () {
-            let focus = Ed11y.panel.querySelector('#ed11y-issues-tab');
-            focus.focus();
+            Ed11y.panelToggle?.focus();
           }, 100);
         }
       }, 500, rememberGoto);
     };
 
+    Ed11y.transferFocus = function () {
+      if (!Ed11y.openTip.tip) {
+        return;
+      }
+      const id = Ed11y.openTip.tip.dataset.ed11yResult;
+      const target = Ed11y.results[id].element;
+      const editable = target.closest('[contenteditable]');
+      if (!editable && !target.closest('textarea, input')) {
+        if (target.closest('a')) {
+          Ed11y.toggledFrom = target.closest('a');
+        } else if (target.getAttribute('tabindex') !== null) {
+          Ed11y.toggledFrom = target;
+        } else {
+          target.setAttribute('tabindex', '0');
+          Ed11y.toggledFrom = target;
+        }
+        Ed11y.openTip.tip.shadowRoot.querySelector('.close').click();
+      } else {
+        Ed11y.toggledFrom = false;
+        if (target.getAttribute('contenteditable') === 'true') {
+          Ed11y.toggledFrom = target;
+        } else if (target.closest('p[contenteditable="true"]')) {
+          Ed11y.toggledFrom = target.closest('p[contenteditable="true"]');
+        } else {
+          // Just got complicated -- need to move a caret
+          Ed11y.toggledFrom = false;
+        }
+        Ed11y.openTip.tip.shadowRoot.querySelector('.close').click();
+        if (!Ed11y.toggledFrom && editable) {
+          // Need to move focus manually
+          // h/t https://stackoverflow.com/questions/6249095/how-to-set-the-caret-cursor-position-in-a-contenteditable-element-div
+          editable.focus();
+          const range = document.createRange();
+          const sel = window.getSelection();
+          range.setStart(target, 0);
+          range.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      }
+    };
+
     Ed11y.toggleShowDismissals = function () {
-      // todo: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
+      // todo postpone: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
       Ed11y.ignoreAll = false;
       Ed11y.options.showDismissed = !(Ed11y.options.showDismissed);
       Ed11y.reset();
-      Ed11y.checkAll(false, 'show');
+      Ed11y.showPanel = true;
+      Ed11y.checkAll();
 
-      Ed11y.showDismissed.setAttribute('aria-pressed', (!!Ed11y.options.showDismissed).toString());
-      Ed11y.showDismissed.textContent = Ed11y.M.buttonShowHiddenAlertsContent;
-    };
-
-    Ed11y.dismissHelp = function (el) {
-      let help = document.createElement('ul');
-      help.setAttribute('tabindex', '-1');
-      help.classList.add('help');
-      // todo MVP: parameterize and write more gooder
-      if (Ed11y.options.allowHide) {
-        let li = document.createElement('li');
-        li.textContent = Ed11y.M.elementDismissalHelpHide;
-        help.append(li);
-      }
-      if (Ed11y.options.allowOK) {
-        let li = document.createElement('li');
-        li.textContent = Ed11y.M.elementDismissalHelpOK;
-        help.append(li);
-      }
-      let li = document.createElement('li');
-      li.textContent = Ed11y.M.elementDismissalHelpAll;
-      help.append(li);
-      el.parentElement.append(help);
-      help.focus();
-      el.remove();
+      Ed11y.showDismissed.setAttribute('data-ed11y-pressed', (!!Ed11y.options.showDismissed).toString());
+      window.setTimeout(function() {
+        Ed11y.showDismissed.focus();
+      }, 0);
     };
 
     Ed11y.showResults = function () {
-
-      Ed11y.results?.forEach(function (result, i) {
-        if (!Ed11y.results[i].dismissalStatus || Ed11y.options.showDismissed) {
-          Ed11y.result(result, i);
-        }
-      });
-
       Ed11y.buildJumpList();
-
       // Announce that buttons have been placed.
       document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
-
       Ed11y.alignButtons();
+      if (!Ed11y.options.inlineAlerts) {
+        Ed11y.checkEditableIntersects();
+        Ed11y.intersectionObservers();
+      }
+    };
+
+    Ed11y.editableHighlight = [];
+
+    Ed11y.alignHighlights = function() {
+      Ed11y.editableHighlight.forEach((el) => {
+        let targetOffset = el.target.getBoundingClientRect();
+        if (!Ed11y.visible(el.target)) {
+          // Invisible target.
+          const firstVisibleParent = Ed11y.firstVisibleParent(el.target);
+          targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
+        }
+        el.highlight.style.setProperty('width', targetOffset.width + 6 + 'px');
+        el.highlight.style.setProperty('top', targetOffset.top + window.scrollY - 3 + 'px');
+        el.highlight.style.setProperty('left', targetOffset.left - 3 + 'px');
+        el.highlight.style.setProperty('height', targetOffset.height + 6 + 'px');
+      });
+    };
+
+    Ed11y.editableHighlighter = function (resultID, show, firstVisible) {
+
+      if (!show) {
+        Ed11y.editableHighlight[resultID]?.highlight.style.setProperty('opacity', '0');
+        return;
+      }
+      const result = Ed11y.results[resultID];
+      let el = Ed11y.editableHighlight[resultID]?.highlight;
+      if (!el) {
+        el = document.createElement('ed11y-element-highlight');
+        Ed11y.editableHighlight[resultID] = {highlight: el};
+        el.style.setProperty('position', 'absolute');
+        el.style.setProperty('pointer-events', 'none');
+        document.body.appendChild(el);
+      }
+      let target = firstVisible ? firstVisible : result.element;
+      Ed11y.editableHighlight[resultID].target = target;
+      const zIndex = result.dismissalKey ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
+      el.style.setProperty('z-index', zIndex);
+      const outline = result.dismissalKey ?
+        '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)'
+        : '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
+      el.style.setProperty('box-shadow', outline);
+      el.style.setProperty('border-radius', '3px');
+      el.style.setProperty('top', '0');
+      el.style.setProperty('left', '0');
+      Ed11y.alignHighlights();
+      el.style.setProperty('opacity', '1');
+    };
+
+    const nudgeMark = function (el, x, y) {
+      // TODO: THESE CAN NUDGE OUT OF THE OVERFLOW AREA OF THE CONTENTEDITABLE CONTAINER
+      if (el.style.transform) {
+        const computedStyle = window.getComputedStyle(el);
+        let matrix = computedStyle.getPropertyValue('transform');
+        matrix = matrix.split(',');
+        el.style.transform = `translate(${parseFloat(matrix[4]) + x}px, ${parseFloat(matrix[5]) + y}px)`;
+      } else {
+        el.style.transform = `translate(${x}px, ${y}px)`;
+      }
+    };
+
+    const scrollableElem = function(el) {
+      let overflowing = el.clientHeight && el.clientHeight < el.scrollHeight;
+      if (overflowing) {
+        const styles = window.getComputedStyle(el);
+        overflowing = styles.overflowY !== 'visible';
+      }
+      return overflowing;
+    };
+
+    const closestScrollable = function(el) {
+      let parent = el.parentElement;
+      if (parent && parent.tagName !== 'BODY') {
+        // Parent exists
+        if (scrollableElem(parent)) {
+          // Return if scrollable found.
+          return parent;
+        } else {
+          // Element is not scrollable, recurse
+          parent = closestScrollable(parent);
+          // Return if scrollable found.
+          return parent;
+        }
+      } else {
+        // No scrollable parents.
+        return false;
+      }
+    };
+
+    const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size = 55) {
+      // Yes this looks like intersect const, but it's math not browser offsets.
+      return !(rect1Left + size < rect2Left ||
+        rect1Left > rect2Left + size ||
+        rect1Top + size < rect2Top ||
+        rect1Top > rect2Top + size);
+    };
+
+    // Applies parameters and avoids other widgets.
+    Ed11y.alignPanel = function() {
+      if (!Ed11y.panelElement) {
+        return false;
+      }
+      let xMost = 0;
+      let yMost = 0;
+      if (Ed11y.elements.panelPin) {
+        Ed11y.elements.panelPin.forEach(el => {
+          let bounds = el.getBoundingClientRect();
+          if (Ed11y.options.panelPinTo === 'right') {
+            xMost = windowWidth - bounds.left > xMost ? windowWidth - bounds.left : xMost;
+          } else {
+            xMost = bounds.right > xMost ? bounds.right : xMost;
+          }
+          yMost = bounds.height > yMost ? bounds.height : yMost;
+        });
+      }
+      if (xMost > 0 && xMost < windowWidth - 240) {
+        // push off horizontal
+        Ed11y.panelElement.style.setProperty(Ed11y.options.panelPinTo, xMost + 10 + 'px');
+        Ed11y.panelElement.style.setProperty('bottom', Ed11y.options.panelOffsetY);
+      } else if (xMost > 0 && xMost > windowWidth - 240 && yMost > 0) {
+        // push off vertical
+        Ed11y.panelElement.style.setProperty(Ed11y.options.panelPinTo, Ed11y.options.panelOffsetX);
+        Ed11y.panelElement.style.setProperty('bottom', `calc(${Ed11y.options.panelOffsetY} + ${yMost}px)`);
+      } else {
+        // no push
+        Ed11y.panelElement.style.setProperty(Ed11y.options.panelPinTo, Ed11y.options.panelOffsetX);
+        Ed11y.panelElement.style.setProperty('bottom', Ed11y.options.panelOffsetY);
+      }
     };
 
     Ed11y.alignButtons = function () {
-      window.setTimeout(function () {
-        // Nudge offscreen tips back on screen.
-        let windowWidth = window.innerWidth;
-        // Todo later: collision detection.
-        let marksToNudge = [];
-        // Reading and writing in a loop creates paint thrashing. Read first.
-        let previousLeft = 0;
-        let previousTop = 0;
-        let previousNudgeTop = 0;
-        let previousNudgeLeft = 0;
-        Ed11y.elements.jumpList.forEach(mark => {
+
+      if (Ed11y.jumpList.length === 0) {
+        return;
+      }
+      Ed11y.alignPending = true;
+
+      // Reading and writing in a loop creates paint thrashing.
+      // We iterate the array for reads, then iterate for writes.
+
+      // Used for crude intersection detection.
+      let previousNudgeTop = 0;
+      let previousNudgeLeft = 0;
+      const scrollTop = window.scrollY;
+      if (!Ed11y.options.inlineAlerts) {
+        // Compute based on target position.
+
+        Ed11y.jumpList.forEach((mark, i) => {
+          let targetOffset = mark.result.element.getBoundingClientRect();
+          let top = targetOffset.top + scrollTop;
+          //let rightBound = windowWidth;
+          if (!Ed11y.visible(mark.result.element)) {
+            // Invisible target.
+            const firstVisibleParent = Ed11y.firstVisibleParent(mark.result.element);
+            targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
+            top = targetOffset.top + scrollTop;
+          }
+          let left = targetOffset.left;
+          // TD TD different?
+          if (mark.result.element.tagName === 'IMG') {
+            top = top + 10;
+            left = left + 10;
+          } else {
+            left = left - 34;
+          }
+          if (mark.result.scrollableParent) {
+            // Bump alerts that would be X-position out of a scroll zone.
+            Ed11y.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
+            if (left < Ed11y.jumpList[i].bounds.left) {
+              left = Ed11y.jumpList[i].bounds.left;
+            } else if (left + 40 > Ed11y.jumpList[i].bounds.right) {
+              left = Ed11y.jumpList[i].bounds.right - 40;
+            }
+          }
+          Ed11y.jumpList[i].targetOffset = targetOffset;
+          Ed11y.jumpList[i].markTop = top;
+          Ed11y.jumpList[i].markLeft = left;
+        });
+      } else {
+        // Compute based on self position.
+
+        // Clear old transforms first. Batch write first...
+        Ed11y.jumpList.forEach((mark) => {
+          // Reset positions.
           mark.style.setProperty('transform', null);
-          let offset = mark.getBoundingClientRect();
-          let nudgeTop = 0;
-          let nudgeLeft = 0;
-          let overlap = 36;
-          // Detect tip that overlaps with previous result.
-          if (offset.top + window.scrollY < 0) {
-            // Offscreen to top.
-            nudgeTop = (-1 * (offset.top + window.scrollY)) - 6;
+          mark.style.setProperty('top', 'initial');
+          mark.style.setProperty('left', 'initial');
+          if (mark.style.transform) {
+            const computedStyle = window.getComputedStyle(mark);
+            let matrix = computedStyle.getPropertyValue('transform');
+            matrix = matrix.split(',');
+            mark.xOffset = parseFloat(matrix[4]);
+            mark.yOffset = parseFloat(matrix[5]);
           }
-          if (offset.top > previousTop - overlap && offset.top < previousTop + overlap && offset.left > previousLeft - overlap && offset.left < previousLeft + overlap) {
-            // Overlapping previous
-            nudgeTop = nudgeTop + 36 + previousNudgeTop;
-            nudgeLeft = 36;
+          else {
+            mark.xOffset = 0;
+            mark.yOffset = 0;
           }
-          if (offset.left + nudgeLeft < 8) {
-            // Offscreen to left. push to the right.
-            marksToNudge.push([mark, 8 - offset.left + nudgeLeft, nudgeTop]);
-          }
-          else if (offset.left + nudgeLeft + 80 > windowWidth) {
-            // Offscreen to right. push to the left
-            marksToNudge.push([mark, windowWidth - nudgeLeft - offset.left - 80, nudgeTop]);
-          } else if (nudgeTop !== 0) {
-            marksToNudge.push([mark, nudgeLeft, nudgeTop]);
-          }
-          previousLeft = offset.left + nudgeLeft;
-          previousTop = offset.top + nudgeTop;
-          previousNudgeTop = nudgeTop > 0 ? nudgeTop + previousNudgeTop : 0;
-          previousNudgeLeft = nudgeLeft > 0 ? nudgeLeft + previousNudgeLeft: 0;
         });
-        marksToNudge.forEach(el => {
-          el[0].style.transform = `translate(${el[1]}px, ${el[2]}px)`;
+        // ...then batch read new positions.
+        Ed11y.jumpList.forEach((mark) => {
+          mark.markOffset = mark.getBoundingClientRect();
+          mark.markLeft = mark.markOffset.left;
+          mark.markTop = mark.markOffset.top;
         });
-        if (!Ed11y.bodyStyle) {
-          Ed11y.paintReady();
+      }
+
+
+      // Check for overlaps, then write out transforms.
+      Ed11y.jumpList.forEach((mark, i) => {
+
+        // Now check for any needed nudges
+        let nudgeTop = 0;
+        let nudgeLeft = 0;
+        // Detect tip that overlaps with previous result.
+        if (mark.markTop + scrollTop < 0) {
+          // Offscreen to top.
+          nudgeTop = (-1 * (mark.markTop + scrollTop)) - 6;
         }
-      }, 0);
+        if (
+          (i > 0 && overlap(mark.markLeft, mark.markTop, Ed11y.jumpList[i - 1].markLeft, Ed11y.jumpList[i - 1].markTop)) ||
+          (i > 1 && overlap(mark.markLeft, mark.markTop, Ed11y.jumpList[i - 2].markLeft, Ed11y.jumpList[i - 2].markTop)) ||
+          (i > 2 && overlap(mark.markLeft, mark.markTop, Ed11y.jumpList[i - 3].markLeft, Ed11y.jumpList[i - 3].markTop))
+        ) {
+          // todo postpone: compute actual overlap? We're bouncing by the full amount no matter what which adds too much gapping.
+          nudgeTop = nudgeTop + 21 + previousNudgeTop;
+          nudgeLeft = 21 + previousNudgeLeft;
+        }
+
+        let needNudge = false;
+        if (mark.markLeft + nudgeLeft < 44) {
+          // Offscreen to left. push to the right.
+          nudgeLeft = 44 - mark.markLeft + nudgeLeft;
+          needNudge = true;
+          //nudgeMark(mark, 44 - mark.markLeft + nudgeLeft, nudgeTop);
+        }
+        else if (mark.markLeft + nudgeLeft + 80 > windowWidth) {
+          needNudge = true;
+          // Offscreen to right. push to the left
+          nudgeLeft = windowWidth - nudgeLeft - mark.markLeft - 80;
+        }
+        else if (nudgeTop !== 0) {
+          needNudge = true;
+        }
+        if (!Ed11y.options.inlineAlerts) {
+          if (needNudge) {
+            mark.style.transform = `translate(${mark.markLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
+          } else {
+            mark.style.transform = `translate(${mark.markLeft}px, ${mark.markTop}px)`;
+          }
+
+        } else if (needNudge) {
+          nudgeMark(mark, nudgeLeft, nudgeTop);
+        }
+        previousNudgeTop = nudgeTop;
+        previousNudgeLeft = nudgeLeft;
+      });
+
+      // Last pass: check for elements offscreen within scrollable areas.
+      if (!Ed11y.options.inlineAlerts) {
+        // Alerts have to be positioned relative to viewport.
+        Ed11y.jumpList.forEach(mark => {
+
+          if (mark.result.scrollableParent) {
+            // Hide alerts outside a scroll zone.
+            if (!!mark.bounds && (mark.targetOffset.top - mark.bounds.top < 0 || mark.targetOffset.top - mark.bounds.bottom > 0 ) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
+              // Tip has exited scrollable parent. Visually hide.
+              mark.classList.add('ed11y-offscreen');
+              mark.style.transform = 'translate(0px, -50px)';
+              mark.style.pointerEvents = 'none';
+              if (mark.getAttribute('data-ed11y-open') === 'true') {
+                mark.setAttribute('data-ed11y-action', 'shut');
+              }
+            }
+            else {
+              mark.classList.remove('ed11y-offscreen');
+              mark.style.pointerEvents = 'auto';
+            }
+          }
+          else {
+            mark.classList.remove('ed11y-offscreen');
+            mark.style.pointerEvents = 'auto';
+          }
+
+        });
+      }
+      Ed11y.jumpList?.forEach(mark => {
+        // Now make visible.
+        mark.classList.remove('ed11y-preload');
+      });
+      if (!Ed11y.bodyStyle) {
+        Ed11y.paintReady();
+      }
     };
+
 
     Ed11y.paintReady = function () {
 
@@ -848,151 +1372,181 @@ class Ed11y {
     };
 
     Ed11y.alignTip = function (button, toolTip, recheck = 0) {
+      if (!toolTip) {
+        return;
+      }
       let arrow = toolTip.shadowRoot.querySelector('.arrow');
       let tip = arrow.nextElementSibling;
-      let loopCount = recheck + 1;
+      let loopCount = recheck - 1;
+      //toolTip.style.setProperty('opacity', recheck === 4 ? 1 : 0);
 
       // Various hiddenHandlers may cause element to animate open.
-      if (recheck < 3) {
+      if (recheck > 0) {
         window.setTimeout(function () {
-          Ed11y.alignTip(button, toolTip, loopCount);
-        }, 150, loopCount);
+          requestAnimationFrame(()=>Ed11y.alignTip(button, toolTip, loopCount));
+        }, 50, loopCount);
       }
       // Reset any previous alignments
-      tip.style.setProperty('transform',null);
+      // todo postpone: calculate without resets to remove shudder.
+      /*tip.style.setProperty('transform',null);
       arrow.style.setProperty('left', null);
-      arrow.style.setProperty('top', null);
+      arrow.style.setProperty('top', null);*/
+      const mark = button.getRootNode().host;
+      const resultNum = button.dataset.ed11yResult;
+      const result = Ed11y.results[resultNum];
 
       // Find button on page
       const scrollTop = window.scrollY;
       let buttonOffset = button.getBoundingClientRect();
       let buttonSize = buttonOffset.width;
-      if (!(Ed11y.visible(button.getRootNode().host)) || buttonOffset.top === 0 && buttonOffset.left === 0) {
+      let containLeft = 0;
+      let buttonLeft = buttonOffset.left + document.body.scrollLeft;
+      let containWidth = windowWidth;
+      let containBottom = window.innerHeight + scrollTop;
+      let containTop = scrollTop;
+      if ( !Ed11y.options.inlineAlerts && result.scrollableParent ) {
+        let bounds = result.scrollableParent.getBoundingClientRect();
+        if (bounds.width > 0) {
+          buttonLeft = buttonOffset.left + result.scrollableParent.scrollLeft;
+          containLeft = bounds.left;
+          containWidth = bounds.width - 30;
+          containBottom = bounds.bottom + scrollTop;
+          containTop = bounds.top + scrollTop;
+        }
+        tip.style.setProperty('max-width', containWidth + 'px');
+      } else if (!(Ed11y.visible(mark) || buttonOffset.top === 0 && buttonOffset.left === 0)) {
+        tip.style.setProperty('max-width', 'none');
         // ruh roh invisible button
-        const firstVisibleParent = Ed11y.firstVisibleParent(button.getRootNode().host);
+        const firstVisibleParent = Ed11y.firstVisibleParent(mark);
         if (firstVisibleParent) {
           buttonOffset = firstVisibleParent.getBoundingClientRect();
+        } else {
+          tip.style.setProperty('max-width', 'none');
         }
         // Estimate from font when it can't be measured.
         buttonSize = parseInt(Ed11y.options.baseFontSize) * 3;
       }
-      const buttonLeft = buttonOffset.left + document.body.scrollLeft;
       toolTip.style.setProperty('top', buttonOffset.top + scrollTop + 'px');
-      // todo: need left scroll too for horizontally scrolled pages
-      toolTip.style.setProperty('left', buttonOffset.left + 'px');
+      toolTip.style.setProperty('left', mark.markLeft + 'px');
       const tipWidth = tip.offsetWidth;
       const tipHeight = tip.offsetHeight;
-      const windowWidth = window.innerWidth;
-      const windowBottom = scrollTop + window.innerHeight;
 
       let direction = 'under';
 
       // Default to displaying under
-      if (buttonOffset.top + tipHeight + scrollTop + buttonSize + 22 > windowBottom) {
-        // If there's no room under in the viewport...
-        if (windowWidth > tipWidth * 1.5 && windowWidth - (buttonLeft + tipWidth + buttonSize + 56) > 0 && buttonOffset.top + 130 < window.innerHeight) {
+      if (buttonOffset.top + tipHeight + scrollTop + buttonSize + 22 > containBottom) {
+        // It won't fit under. Look elsewhere.
+        if ( containLeft + containWidth > buttonSize + tipWidth + buttonOffset.left + 70 && // fits to the right.
+          !(buttonOffset.top + scrollTop + 125 > containBottom) // but would fit better above.
+        ) {
           direction = 'right';
-        } else if (buttonOffset.top > tipHeight + 15) {
+        } else if (buttonOffset.top - tipHeight - 15 > containTop) {
           direction = 'above';
-        } else if (windowWidth > tipWidth * 1.5 && buttonLeft - tipWidth - 50 > 0) {
+        } else if (containWidth > tipWidth * 1.5 && buttonLeft - tipWidth - 50 > containLeft) {
           direction = 'left';
-        } else if (buttonOffset.bottom + tipHeight > document.documentElement.clientHeight - 50 && window.innerHeight > buttonSize + tipHeight) {
-          // No room anywhere in viewport we're at the end of the page.
+        } else if (buttonOffset.top + tipHeight + scrollTop + buttonSize > containBottom) {
+          // It REALLY doesn't fit below.
           direction = 'above';
         }
         // Back to default.
-      }
+      } // else: under.
 
       let nudgeX;
       let nudgeY = 0;
 
-      if (direction === 'under') {
-        // Pin to the left edge, unless the tip is not wide enough to reach:
-        if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
-          // Can't center
-          if (tipWidth - ((buttonSize / 2) - 1) > buttonOffset.left) {
-            // Under, overhang to left
-            nudgeX = (buttonSize / 2) - 1 - buttonOffset.left;
-            arrow.style.setProperty('left', Math.max(buttonOffset.left, 15) - 9 + 'px');
-          } else {
-            arrow.style.setProperty('left', tipWidth - 26 + 'px');
-            nudgeX = buttonSize / 2 + 15 - tipWidth;
-          }
-        } else {
-          // Under, overhang to right
-          nudgeX =  buttonSize + 8 - tipWidth / 5;
-          arrow.style.setProperty('left', tipWidth / 5 - (buttonSize / 2) - 18 + 'px');
+      const horizontalAlign = function() {
+        nudgeX = Math.min(
+          buttonOffset.left - tipWidth,
+          -25); // can't be more to left than tip width
+        if (buttonOffset.left + nudgeX - 25 < containLeft) { // offscreen to left
+          nudgeX = 10 + containLeft - buttonOffset.left + (buttonOffset.left - mark.markLeft); // shift right, up to 0
+        } else if (buttonOffset.left - nudgeX + tipWidth > containLeft + containWidth &&
+          buttonOffset.left + 24 - tipWidth > containLeft
+        ) {
+          nudgeX = Math.min(
+            Math.max(
+              containLeft + containWidth - (buttonOffset.left + tipWidth + buttonSize + 20),
+              24 - tipWidth),
+            0); // Shift left, up to button.
         }
+        const arrowLeft = Math.min(
+          Math.max(
+            7,
+            7 - nudgeX + buttonOffset.left - mark.markLeft),
+          tipWidth - 27);
+        arrow.style.setProperty('left', `${arrowLeft}px`);
+      };
 
+      if (direction === 'under') {
+        nudgeY = buttonSize + 14 + parseInt(Ed11y.theme.outlineWidth);
         arrow.dataset.direction = 'under';
-        nudgeY = buttonSize + 16;
+        arrow.style.setProperty('top', `${8 - parseInt(Ed11y.theme.outlineWidth)}px`);
+        horizontalAlign();
       }
       else if (direction === 'above') {
         // Slide left or right to center tip on page.
-        nudgeY = -1 * (tipHeight + 13 + parseInt(Ed11y.theme.outlineWidth));
-        arrow.style.setProperty('top', tipHeight);
-        if (tipWidth + buttonOffset.left + 20 > windowWidth || buttonOffset.left - 20 - tipWidth / 5 < 0) {
-          // Can't center
-          if (tipWidth - ((buttonSize / 2) - 1) > buttonOffset.left) {
-            // Overhang to left
-            nudgeX = ((buttonSize / 2) - 1) - buttonOffset.left;
-            arrow.style.setProperty('left', buttonOffset.left - 9 + 'px');
-          } else {
-            // Overhang to the right.
-            arrow.style.setProperty('left', tipWidth - 26 + 'px');
-            nudgeX = buttonSize / 2 + 15 - tipWidth;
+        nudgeY = -1 * (9 + tipHeight + parseInt(Ed11y.theme.outlineWidth));
+        arrow.dataset.direction = 'above';
+        arrow.style.setProperty('top', `${tipHeight + 16 - parseInt(Ed11y.theme.outlineWidth)}px`);
+        horizontalAlign();
+      } else {
+        // Left or right, starts top aligned with button.
+        let tipBottom = buttonOffset.top + scrollTop + tipHeight;
+        let arrowY= 7;
+
+        if (Ed11y.options.inlineAlerts) {
+          if ( buttonOffset.top + tipHeight > window.innerHeight ) {
+            // Push farther up
+            nudgeY = containBottom - (tipBottom + 45); // todo: that number's kinda random and random is ominous.
+            arrowY = nudgeY * -1 + 7;
           }
         } else {
-          nudgeX = buttonSize + 8 - tipWidth / 5;
-          arrow.style.setProperty('left', tipWidth / 5 - (buttonSize / 2) - 18 + 'px');
+          if (buttonOffset.top + tipHeight + scrollTop > containBottom) {
+            // Push farther up
+            nudgeY = containBottom - (tipBottom + 90); // todo: that number's kinda random and random is ominous.
+            arrowY = nudgeY * -1 + 7;
+          }
         }
-        arrow.dataset.direction = 'above';
-        arrow.style.setProperty('top', `${tipHeight + 15 - parseInt(Ed11y.theme.outlineWidth)}px`);
-      } else {
-        // Left or right
-        let tipBottom = buttonOffset.top + scrollTop + tipHeight;
-        if (tipBottom > windowBottom) {
-          // Offset up
-          nudgeY = windowBottom - (tipBottom + 90);
-          let arrowY = nudgeY * -1 + 7;
-          arrowY = Math.min(arrowY, tipHeight - 25);
-          arrow.style.setProperty('top', `${arrowY}px`);
-        }
+        arrow.style.setProperty('top', `${arrowY}px`);
         if (direction === 'left') {
           nudgeX = 0 - (tipWidth + 17);
           arrow.style.setProperty('left', `${tipWidth - 10}px`);
           arrow.dataset.direction = 'left';
         } else {
           // direction is right
-          nudgeX = buttonSize + 14;
+          nudgeX = 14 + buttonSize + buttonOffset.left - mark.markLeft;
+          arrow.style.setProperty('left', '-10px');
           arrow.dataset.direction = 'right';
         }
       }
       toolTip.style.setProperty('transform', `translate(${nudgeX}px, ${nudgeY}px)`);
-
-    };
-
-    Ed11y.clickTab = function (event) {
-      Ed11y.activateTab(event.target, false);
+      Ed11y.alignHighlights();
     };
 
     Ed11y.togglePanel = function () {
       if (!Ed11y.doubleClickPrevent) {
-        // todo beta: revisit aria states and announcements.
-        if (Ed11y.panel.classList.contains('ed11y-active') && Ed11y.panel.classList.contains('ed11y-shut')) {
-          Ed11y.minimize();
-        }
         // Prevent clicks piling up while scan is running.
-        else if (Ed11y.running !== true) {
+        if (Ed11y.running !== true) {
           Ed11y.running = true;
           // Re-scan each time the panel reopens.
           if (Ed11y.panel.classList.contains('ed11y-active') === false) {
             Ed11y.onLoad = false;
             Ed11y.showPanel = true;
-            Ed11y.checkAll();
+            if (Ed11y.dismissedCount > 0 && Ed11y.warningCount === 0 && Ed11y.errorCount === 0) {
+              Ed11y.options.showDismissed = false;
+              Ed11y.toggleShowDismissals();
+            } else {
+              Ed11y.checkAll();
+            }
+            Ed11y.options.userPrefersShut = false;
+            localStorage.setItem('editoria11yShow', '1');
           }
           else {
+            Ed11y.panelToggleTitle.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonShowAlerts : Ed11y.M.buttonShowNoAlert;
+            Ed11y.options.showDismissed = false;
             Ed11y.reset();
+            Ed11y.options.userPrefersShut = true;
+            localStorage.setItem('editoria11yShow', '0');
           }
         }
       }
@@ -1003,7 +1557,7 @@ class Ed11y {
       return false;
     };
 
-    Ed11y.showHeadingsPanel = function () {
+    const showHeadingsPanel = function () {
       // Visualize the document outline
 
       let panelOutline = Ed11y.panel.querySelector('#ed11y-outline');
@@ -1011,35 +1565,48 @@ class Ed11y {
       if (Ed11y.headingOutline.length) {
         panelOutline.innerHTML = '';
         Ed11y.headingOutline.forEach((el, i) => {
+          // Todo: draw these in editable mode.
           // Todo implement outline ignore function.
-          let mark = document.createElement('ed11y-element-heading-label');
-          mark.classList.add('ed11y-element', 'ed11y-element-heading');
-          mark.dataset.ed11yHeadingOutline = i.toString();
-          mark.setAttribute('id', 'ed11y-heading-' + i);
-          mark.setAttribute('tabindex', '-1');
-          // Array: el, level, outlinePrefix
-          el[0].insertAdjacentElement('afterbegin', mark);
+          if (Ed11y.options.inlineAlerts) {
+            let mark = document.createElement('ed11y-element-heading-label');
+            mark.classList.add('ed11y-element', 'ed11y-element-heading');
+            mark.dataset.ed11yHeadingOutline = i.toString();
+            mark.setAttribute('id', 'ed11y-heading-' + i);
+            mark.setAttribute('tabindex', '-1');
+            // Array: el, level, outlinePrefix
+            el[0].insertAdjacentElement('afterbegin', mark);
+            Ed11y.attachCSS(mark.shadowRoot);
+          }
           let level = el[1];
           let leftPad = 10 * level - 10;
           let li = document.createElement('li');
           li.classList.add('level' + level);
           li.style.setProperty('margin-left', leftPad + 'px');
-          let link = document.createElement('a');
-          link.setAttribute('href', '#ed11y-heading-' + i);
-          li.append(link);
           let levelPrefix = document.createElement('strong');
           levelPrefix.textContent = `H${level}: `;
-          link.append(levelPrefix);
           let userText = document.createElement('span');
           userText.textContent = Ed11y.computeText(el[0]);
-          link.append(userText);
+          let link = document.createElement('a');
+          if (Ed11y.options.inlineAlerts) {
+            link.setAttribute('href', '#ed11y-heading-' + i);
+            li.append(link);
+            link.append(levelPrefix);
+            link.append(userText);
+          } else {
+            li.append(levelPrefix);
+            li.append(userText);
+          }
           if (el[2]) { // Has an error message
             let type = !el[3] ? 'error' : 'warning';
             li.classList.add(type);
             let message = document.createElement('em');
             message.classList.add('ed11y-small');
             message.textContent = ' ' + el[2];
-            link.append(message);
+            if (Ed11y.options.inlineAlerts) {
+              link.append(message);
+            } else {
+              li.append(message);
+            }
           }
           panelOutline.append(li);
         });
@@ -1047,34 +1614,6 @@ class Ed11y {
         panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>';
       }
     };
-    Ed11y.switchPanel = function (id) {
-      // Switch main panel tab
-      Ed11y.panel.querySelector('.content > div:not(.ed11y-hidden)')?.classList.add('ed11y-hidden');
-      Ed11y.panel.querySelector('[aria-selected=true]')?.setAttribute('aria-selected', 'false');
-      Ed11y.panel.querySelector('#' + id).setAttribute('aria-selected', 'true');
-      Ed11y.panel.querySelector('#' + id + '-tab')?.classList.remove('ed11y-hidden');
-      // todo beta what to show when no outline or images
-      // todo postpone: error when no headings found at all?
-      Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
-      Ed11y.elements.reset?.forEach(el => { el.remove(); });
-
-      // Show extras
-      switch (id) {
-      case 'ed11y-alts':
-        Ed11y.showAltPanel();
-        break;
-      case 'ed11y-headings':
-        Ed11y.showHeadingsPanel();
-        break;
-      case 'ed11y-help':
-        Ed11y.showHelpPanel();
-        break;
-      default:
-        // hide extras
-        break;
-      }
-    };
-
 
     Ed11y.alignAlts = function () {
       // Positions alt label to match absolute, inline or floated images.
@@ -1101,7 +1640,7 @@ class Ed11y {
       });
     };
 
-    Ed11y.showAltPanel = function () {
+    const showAltPanel = function () {
       // visualize image alts
       let altList = Ed11y.panel.querySelector('#ed11y-alt-list');
 
@@ -1110,11 +1649,13 @@ class Ed11y {
         Ed11y.imageAlts.forEach((el, i) => {
           // el[el, src, altLabel, altStyle]
 
-          // Label images
-          let mark = document.createElement('ed11y-element-alt');
-          mark.classList.add('ed11y-element');
-          mark.dataset.ed11yImg = i.toString();
-          el[0].insertAdjacentElement('beforebegin', mark);
+          if (Ed11y.options.inlineAlerts) {
+            // Label images
+            let mark = document.createElement('ed11y-element-alt');
+            mark.classList.add('ed11y-element');
+            mark.dataset.ed11yImg = i.toString();
+            el[0].insertAdjacentElement('beforebegin', mark);
+          }
 
           // Build alt list in panel
           let userText = document.createElement('span');
@@ -1133,108 +1674,525 @@ class Ed11y {
         altList.innerHTML = '<p><em>No images found.</em></p>';
       }
     };
-
-    Ed11y.showHelpPanel = function () {
-      let helpTab = Ed11y.panel.querySelector('#ed11y-help-tab');
-      helpTab.innerHTML = Ed11y.M.panelHelp;
+    Ed11y.visualizing = false;
+    Ed11y.visualize = function () {
+      if (Ed11y.visualizing) {
+        Ed11y.visualizing = false;
+        Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsContent;
+        Ed11y.panel?.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
+        Ed11y.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
+        Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
+        Ed11y.elements.reset?.forEach(el => { el.remove(); });
+        return;
+      }
+      Ed11y.visualizing = true;
+      Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsActive;
+      Ed11y.panel?.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
+      Ed11y.panel?.querySelector('#ed11y-visualizers').removeAttribute('hidden');
+      showAltPanel();
+      showHeadingsPanel();
     };
 
     Ed11y.buildJumpList = function () {
-      Ed11y.findElements('jumpList', 'ed11y-element-result', false);
-      Ed11y.elements.jumpList.forEach((result, i) => {
-        result.dataset.ed11yJumpPosition = i;
+
+      Ed11y.jumpList = [];
+
+      // Initial alignment to get approximate Y position order for jump list.
+      Ed11y.results.forEach((result, i) => {
+        let top = result.element.getBoundingClientRect().top;
+        if (!top) {
+          const visibleParent = Ed11y.firstVisibleParent(result.element);
+          if (visibleParent) {
+            top = visibleParent.getBoundingClientRect().top;
+          }
+        }
+        top = top + window.scrollY;
+        Ed11y.results[i].scrollableParent = closestScrollable(result.element);
+        if (Ed11y.results[i].scrollableParent) {
+          // Group these together.
+          top = top * 0.000001;
+        }
+        Ed11y.results[i].sortPos = top;
+      });
+      // Sort from bottom to top so focus order after insert is top to bottom.
+      Ed11y.results.sort((a, b) => b.sortPos - a.sortPos);
+
+      Ed11y.results?.forEach(function (result, i) {
+        if (!Ed11y.results[i].dismissalStatus || Ed11y.options.showDismissed) {
+          Ed11y.result(result, i);
+        }
+      });
+      Ed11y.jumpList.forEach((el, i) => {
+        el.dataset.ed11yJumpPosition = `${i}`;
+        const newLabel = `${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}, ${i} / ${Ed11y.jumpList.length - 1}`;
+        el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
       });
     };
 
-    Ed11y.setCurrentJump = function () {
-      // Set next/previous buttons
-      let goMax = Ed11y.elements.jumpList.length - 1;
-      let goNext;
-      if (Ed11y.totalCount > 1) {
-        Ed11y.panelJumpPrev.removeAttribute('hidden');
-      }
-      if (Ed11y.goto === goMax || Ed11y.goto > goMax) {
-        // Reached end of loop or dismissal pushed us out of loop
-        goNext = 0;
-        // todo parameterize
-        Ed11y.nextText = Ed11y.M.buttonFirstContent;
-      } else {
-        goNext = parseInt(Ed11y.goto) + 1;
-        Ed11y.nextText = Ed11y.M.buttonNextContent;
-      }
-      let goPrev = goNext - 2;
-      if (goPrev < 0) {
-        // loop around
-        goPrev = goMax + 1 + goPrev;
-      }
-      Ed11y.panelJumpNext.dataset.ed11yGoto = goNext.toString();
-      Ed11y.panelJumpPrev.dataset.ed11yGoto = goPrev.toString();
-      window.setTimeout(function () {
-        Ed11y.panelJumpNext.querySelector('.jump-next').textContent = Ed11y.nextText;
-      }, 250);
+    // hat tip https://www.joshwcomeau.com/snippets/javascript/debounce/
+    let browserSpeed = 1;
+    Ed11y.browserLag = 0; // Scale debounce based on browser performance.
+    const debounce = (callback, wait) => {
+      let timeoutId = null;
+      return (...args) => {
+        window.clearTimeout(timeoutId);
+        timeoutId = window.setTimeout(() => {
+          callback.apply(null, args);
+        }, wait + Ed11y.browserLag);
+      };
     };
 
-    Ed11y.minimize = function () {
-      let minimized = Ed11y.panel.classList.contains('ed11y-shut') === true;
-      Ed11y.panel.classList.toggle('ed11y-shut');
-      if (minimized === false) {
-        window.setTimeout(function () {
-          Ed11y.panelToggle.focus();
-        }, 500);
+    const intersect = function(a, b, x = 10) {
+      // Compute intersect using browser offsets.
+      return (a.left - x <= b.right &&
+        b.left - x <= a.right &&
+        a.top - x <= b.bottom &&
+        b.top - x <= a.bottom);
+    };
+
+    Ed11y.activeRange = false;
+    const rangeChange = function() {
+      let anchor = getSelection()?.anchorNode;
+      const expandable = anchor &&
+        anchor.parentNode &&
+        typeof anchor.parentNode === 'object' &&
+        typeof anchor.parentNode.matches === 'function';
+      if (!anchor || expandable &&
+        ( anchor.parentNode.matches(Ed11y.options.checkRoots) ||
+          ( !anchor.parentNode.matches(Ed11y.options.checkRoots) && anchor.parentNode.matches('div[contenteditable="true"]')
+          )
+        )
+      ) {
+        Ed11y.activeRange = false;
+        return false;
       }
+      // todo: this if is probably redundant?
+      if (expandable) {
+        const closest = anchor.parentNode.closest('p, td, th, li, h2, h3, h4, h5, h6');
+        if (closest) {
+          anchor = closest;
+        }
+      }
+      const range = document.createRange();
+      if (typeof anchor === 'object') {
+        range.setStartBefore(anchor);
+        range.setEndAfter(anchor);
+      }
+      if (typeof range !== 'object' || typeof range.getBoundingClientRect !== 'function') {
+        if (Ed11y.activeRange) {
+          Ed11y.activeRange = false;
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        let sameRange = Ed11y.activeRange &&
+          range.startContainer === Ed11y.activeRange.startContainer &&
+          range.startOffset === Ed11y.activeRange.startOffset;
+        Ed11y.activeRange = range;
+        return !sameRange;
+      }
+    };
+
+    /**
+     * Hide tips that are in front of text currently being edited.
+     * */
+    Ed11y.checkEditableIntersects = function () {
+      if (!document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
+        //Reset classes to measure.
+        Ed11y.jumpList?.forEach((el) => {
+          el.classList.remove('intersecting');
+        });
+        return;
+      }
+      if (!Ed11y.activeRange) {
+        // Range isn't on a node we can measure.
+        Ed11y.jumpList?.forEach((el) => {
+          el.classList.remove('intersecting');
+        });
+        return;
+      }
+      Ed11y.jumpList?.forEach((el) => {
+        const toggle = el.shadowRoot.querySelector('.toggle');
+        if ( intersect(Ed11y.activeRange.getBoundingClientRect(), toggle.getBoundingClientRect(), 0) ) {
+          if (!toggle.classList.contains('was-intersecting')) {
+            el.classList.add('intersecting');
+            toggle.classList.add('intersecting');
+          }
+        } else {
+          el.classList.remove('intersecting', 'was-intersecting');
+          toggle.classList.remove('intersecting', 'was-intersecting');
+        }
+      });
+    };
+
+    let scrollTicking = false;
+    Ed11y.scrollPending = 0;
+    Ed11y.updateTipLocations = () => {
+      if (!scrollTicking && Ed11y.scrollPending > 0 && !Ed11y.running && Ed11y.jumpList && Ed11y.open) {
+        scrollTicking = true;
+        Ed11y.alignButtons();
+        if (Ed11y.openTip.tip) {
+          Ed11y.alignTip(Ed11y.openTip.button.shadowRoot.querySelector('button'), Ed11y.openTip.tip);
+        }
+        Ed11y.scrollPending --;
+      }
+      scrollTicking = false;
+      if (Ed11y.scrollPending > 0) {
+        requestAnimationFrame(() => Ed11y.updateTipLocations());
+      }
+    };
+
+    Ed11y.intersectionObservers = function () {
+      Ed11y.elements.editable?.forEach(editable => {
+        editable.addEventListener('scroll', function() {
+          // note: we could just adjust the transform rather than recalculating.
+          Ed11y.scrollPending = Ed11y.scrollPending < 2 ? Ed11y.scrollPending + 1 : Ed11y.scrollPending;
+          requestAnimationFrame(() => Ed11y.updateTipLocations());
+        });
+      });
+
+      Ed11y.selectionChanged = debounce(() => {
+        if (rangeChange()) {
+          Ed11y.updateTipLocations();
+          Ed11y.checkEditableIntersects();
+        }
+      }, 100);
+
+      document.addEventListener('selectionchange', function() {
+        if (!Ed11y.running) {
+          Ed11y.selectionChanged();
+        }
+      });
+    };
+
+    Ed11y.recentlyAddedNodes = [];
+    Ed11y.addedNodeReadyToCheck = function(el) {
+      if (Ed11y.recentlyAddedNodes.length === 0) {
+        return true;
+      }
+      const thisWasAdded = Ed11y.recentlyAddedNodes.indexOf(el);
+      if (thisWasAdded > -1) {
+        if (el.textContent.trim().length === 0 || Ed11y.activeRange && el.contains(Ed11y.activeRange.startContainer)) {
+          // New node does not yet have text, or is selected.
+          return false;
+        } else {
+          // New node is ready for checking.
+          Ed11y.recentlyAddedNodes.splice(thisWasAdded, 1);
+          return true;
+        }
+      } else {
+        return true;
+      }
+    };
+
+    Ed11y.incrementalAlign = debounce(() => {
+      if (!Ed11y.running) {
+        Ed11y.scrollPending++;
+        Ed11y.updateTipLocations();
+      }
+    }, 10);
+    let interaction = false;
+    window.addEventListener('keyup', () => {
+      interaction = true;
+    });
+    window.addEventListener('click', () => {
+      interaction = true;
+    });
+    window.addEventListener('dragend', () => {
+      interaction = true;
+      Ed11y.incrementalCheck();
+    });
+    Ed11y.incrementalCheck = debounce(() => {
+      if (!Ed11y.running) {
+        if (Ed11y.openTip.button || (!interaction && !Ed11y.forceFullCheck)) {
+          return;
+        }
+        interaction = false;
+        Ed11y.running = true;
+        let runTime = performance.now();
+        Ed11y.incremental = true;
+        if (Ed11y.disabled && Ed11y.closedByDisable) {
+          Ed11y.showPanel = true;
+          Ed11y.closedByDisable = false;
+          Ed11y.disabled = false;
+        }
+        Ed11y.checkAll();
+        window.setTimeout(function() {
+          if (Ed11y.visualizing) {
+            Ed11y.visualizing = false;
+            Ed11y.visualize();
+          }
+        }, 500);
+        // todo: if there are no issues and the heading panel is open...it closes!
+        // Increase debounce if runs are slow.
+        runTime = performance.now() - runTime;
+        browserSpeed = runTime > 10 ? 10 : (browserSpeed + runTime) / 2;
+        // Todo: optimize tip placement so we do not need as much debounce.
+        Ed11y.browserLag = browserSpeed < 1 ? 0 : browserSpeed * 100 + Ed11y.totalCount;
+      } else {
+        window.setTimeout(Ed11y.incrementalCheck, 250);
+      }
+    }, 250);
+
+    const startObserver = function (root) {
+      // We don't want to nest or duplicate observers.
+      if (typeof root.closest !== 'function') {
+        if (root.host.matches('.editoria11y-observer')) {
+          return;
+        } else {
+          root.host.classList.add('editoria11y-observer');
+        }
+      } else {
+        if (root.closest('.editoria11y-observer')) {
+          return;
+        } else {
+          root.classList.add('editoria11y-observer');
+        }
+      }
+
+      /*
+      Set up mutation observer for added nodes.
+      */
+
+      // Options for the observer (which mutations to observe)
+      const config = { childList: true, subtree: true, characterData: true };
+
+      const logNode = function (node) {
+        /*
+        * Newly inserted tables and headings should not be flagged as empty
+        * before the user has a chance to edit them. This is crude, but it
+        * delays flagging.
+        * */
+        //:is(table, h1, h2, h3, h4, h5, h6):
+        if (node.nodeType !== 1) {
+          return;
+        }
+        if (!node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
+          node = node.querySelector('table, h1, h2, h3, h4, h5, h6, blockquote');
+        }
+        if (node) {
+          Ed11y.recentlyAddedNodes.push(node);
+          window.setTimeout(function (node) {
+            let stillWaiting = Ed11y.recentlyAddedNodes.indexOf(node);
+            if (stillWaiting > -1) {
+              Ed11y.recentlyAddedNodes.splice(stillWaiting, 1);
+              Ed11y.incrementalCheck();
+            }
+          }, 5000, node);
+        }
+      };
+
+      // Create an observer instance linked to the callback function
+      const callback = (mutationList) => {
+        for (const mutation of mutationList) {
+          if (mutation.type === 'childList') {
+            newNodes = true; // Force redrawing buttons.
+            if (mutation.addedNodes.length > 0) {
+              mutation.addedNodes.forEach(node => {
+                logNode(node);
+              });
+            }
+          }
+        }
+        Ed11y.incrementalAlign(); // Immediately realign tips.
+        Ed11y.alignPending = false;
+        Ed11y.incrementalCheck(); // Recheck after delay.
+      };
+
+      // Create an observer instance linked to the callback function
+      const observer = new MutationObserver(callback);
+      // Start observing the target node for configured mutations
+      observer.observe(root, config);
+      document.addEventListener('readystatechange', () => {
+        window.setTimeout(function () {
+          Ed11y.scrollPending++;
+          Ed11y.updateTipLocations();
+        }, 100);
+      });
+      window.setTimeout(function () {
+        Ed11y.scrollPending++;
+        Ed11y.updateTipLocations();
+      }, 1000);
+    };
+
+    Ed11y.openTip = {
+      button: false,
+      tip: false,
+    };
+    Ed11y.lastOpenTip = -1;
+
+    Ed11y.viaJump = false;
+    Ed11y.alertOnInvisibleTip = function(button, target) {
+      let delay = 100;
+      if (Ed11y.options.hiddenHandlers.length > 0 && !!target.closest(Ed11y.options.hiddenHandlers)) {
+        // Increase hesitation before scrolling, in case theme animates open an element.
+        delay = 333;
+        document.dispatchEvent(new CustomEvent('ed11yShowHidden', {
+          detail: {result: button.getAttribute('data-ed11y-result')}
+        }));
+      }
+      const details = target.closest('details');
+      if (details && !details.open) {
+        details.open = true;
+        delay = 333;
+      }
+
+      // Scroll into view and throw an alert if the button or target is hidden.
+      window.setTimeout((button, target) => {
+        Ed11y.message.textContent = '';
+        let firstVisible = false;
+        let alertMessage;
+        if (Ed11y.options.checkVisible && !Ed11y.visible(target)) {
+          firstVisible = Ed11y.firstVisibleParent(target);
+          alertMessage = Ed11y.M.jumpedToInvisibleTip;
+        }
+        else if (target.closest('[aria-hidden="true"]')) {
+          firstVisible = target.closest('[aria-hidden="true"]');
+          firstVisible = firstVisible.closest(':not([aria-hidden="true"])');
+          alertMessage = Ed11y.M.jumpedToAriaHiddenTip;
+        }
+        if (firstVisible) {
+          // Throw warning that the element cannot be highlighted.
+          const tipAlert = Ed11y.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert');
+          tipAlert.textContent = alertMessage;
+          // Todo: confirm we no longer need the panelMessage container.
+          /*
+          Ed11y.message.textContent = alertMessage;
+          Ed11y.hidePanelAlert = Date.now() + 10000; // Set or extend.
+          window.setTimeout(function (tip) {
+            if (Ed11y.hidePanelAlert < Date.now()) {
+              Ed11y.message.textContent = '';
+            }
+          }, 15000, Ed11y.lastOpenTip);*/
+        }
+        let scrollPin = window.innerHeight > 800 && window.innerWidth > 800 ? 'center' : 'start';
+        // Todo: following statements work but could be simplified.
+        if (!Ed11y.options.inlineAlerts) {
+          // todo this selector must match the selector that decides where to place the mark
+          if (Ed11y.viaJump) {
+            target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+          }
+          Ed11y.editableHighlighter(button.dataset.ed11yResult, true, firstVisible);
+        } else {
+          if (Ed11y.viaJump) {
+            target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+          }
+          if (firstVisible) {
+            firstVisible.classList.add('ed11y-hidden-highlight');
+          }
+        }
+        let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+        if (!activeTip) {
+          button.setAttribute('data-ed11y-action','open');
+          if (Ed11y.viaJump) {
+            window.setTimeout(() => {
+              // Race conditions are fun.
+              let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+              if (Ed11y.viaJump) {
+                activeTip?.shadowRoot.querySelector('.title').focus();
+              }
+            }, 100);
+          }
+        } else {
+          if (Ed11y.viaJump) {
+            window.setTimeout(() => {
+              // Race conditions are fun.
+              activeTip?.shadowRoot.querySelector('.title').focus();
+            }, 100, activeTip);
+          }
+        }
+        Ed11y.viaJump = false;
+      }, delay, button, target);
+    };
+
+    Ed11y.jumpTo = function(dir = 1) {
+      if (!Ed11y.open) {
+        return false;
+      }
+      Ed11y.viaJump = true;
+      // Determine target result.
+      let goMax = Ed11y.jumpList.length - 1;
+      let goNum = Ed11y.lastOpenTip + dir;
+      if (goNum < 0) {
+        // Reached end of loop or dismissal pushed us out of loop
+        Ed11y.nextText = Ed11y.M.buttonFirstContent;
+        goNum = goMax;
+      } else if (goNum > goMax) {
+        goNum = 0;
+        Ed11y.nextText = Ed11y.M.buttonNextContent;
+      } else {
+        Ed11y.nextText = Ed11y.M.buttonNextContent;
+      }
+      Ed11y.lastOpenTip = goNum;
+      window.setTimeout(function () {
+        Ed11y.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Ed11y.nextText;
+      }, 250);
+
+      Ed11y.resetClass(['ed11y-hidden-highlight']);
+      if (!Ed11y.jumpList) {
+        Ed11y.buildJumpList();
+      }
+      // Find next or first result in the dom ordered list of results.
+      let goto = Ed11y.jumpList[goNum];
+      let result = goto.getAttribute('data-ed11y-result');
+      let gotoResult = Ed11y.results[result];
+      //let insert = gotoResult.position;
+      const target = gotoResult.element;
+
+      // First of two scrollTo calls, to trigger any scroll based events.
+      let scrollPin = window.innerHeight > 800 && window.innerWidth > 800 ? 'center' : 'start';
+      if (Ed11y.options.inlineAlerts) {
+        goto.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+      } else {
+        target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+      }
+
+      // Open the button
+      goto.setAttribute('data-ed11y-action','open');
+      Ed11y.scrollPending = 2;
+      Ed11y.updateTipLocations();
+      //Ed11y.alertOnInvisibleTip(goto, target);
+
+      /*let target;
+      // todo this belongs in the result open logic not here
+      if (insert === 'beforebegin') {
+        target = Ed11y.nextUntil(goto, ':not(ed11y-element-result)');
+      }
+      else if (insert === 'afterbegin') {
+        // todo:check that these are identified correctly.
+        target = goto.parentElement;
+      }*/
+
     };
 
     Ed11y.windowResize = function () {
+      windowWidth = window.innerWidth;
       if (Ed11y.panel?.classList.contains('ed11y-active') === true) {
         Ed11y.alignAlts();
         Ed11y.alignButtons();
       }
-      let openTip = Ed11y.getOpenTip();
-      if (openTip) {
-        Ed11y.alignTip(Ed11y.elements.openButton[0].shadowRoot.querySelector('button'), openTip);
+      if (Ed11y.openTip.button) {
+        Ed11y.alignTip(Ed11y.openTip.button.shadowRoot.querySelector('button'), Ed11y.openTip.tip);
       }
+      Ed11y.alignPanel();
     };
 
     // Escape key closes panels.
-    // todo mvp rewrite
     Ed11y.escapeWatch = function (event) {
       if (event.keyCode === 27) {
         if (event.target.closest('ed11y-element-panel') && Ed11y.panelToggle.getAttribute('aria-expanded') === 'true') {
           Ed11y.panelToggle.focus();
           Ed11y.panelToggle.click();
         } else if (event.target.hasAttribute('data-ed11y-open')) {
-          // todo mvp findElements
-          let openTip = Ed11y.getOpenTip();
-          if (openTip) {
+          if (Ed11y.openTip.button) {
             Ed11y.toggledFrom.focus();
-            Ed11y.elements.openButton[0].shadowRoot.querySelector('button').click();
+            Ed11y.openTip.button.shadowRoot.querySelector('button').click();
           }
         }
       }
     };
     document.addEventListener('keyup', function (event) { Ed11y.escapeWatch(event); });
-
-    /*============== Panel interactions ========*/
-    Ed11y.activateTab = function (tab, setFocus) {
-      setFocus = setFocus || true;
-      Ed11y.deactivateTabs();
-      tab.setAttribute('tabindex', '0');
-      tab.setAttribute('aria-selected', 'true');
-      let controls = tab.getAttribute('aria-controls');
-      Ed11y.panel.querySelector('#' + controls).classList.remove('hidden');
-      if (setFocus) {
-        tab.focus();
-      }
-    };
-    Ed11y.deactivateTabs = function () {
-      Ed11y.panelTabs.forEach(tab => {
-        tab.setAttribute('tabindex', '-1');
-        tab.setAttribute('aria-selected', 'false');
-      });
-      Ed11y.panel.querySelectorAll('[role="tabpanel"]').forEach(panel => {
-        panel.classList.add('hidden');
-      });
-    };
 
 
     /*=============== Utilities ================*/
@@ -1488,9 +2446,12 @@ class Ed11y {
         } else return !(style.getPropertyValue('display') === 'none' ||
           style.getPropertyValue('visibility') === 'hidden' ||
           style.getPropertyValue('opacity') === '0' ||
-          el.offsetWidth === 0 ||
-          el.offsetHeight === 0 ||
-          el.hasAttribute('hidden'));
+          el.hasAttribute('hidden') ||
+          (style.getPropertyValue('overflow') === 'hidden' &&
+            ( el.offsetWidth === 0 ||
+              el.offsetHeight === 0)
+          )
+        );
       }
     };
 
@@ -1549,18 +2510,6 @@ class Ed11y {
 
     Ed11y.parentLink = function (el) {
       return el.closest('a[href]');
-    };
-
-    Ed11y.getOpenTip = function () {
-      Ed11y.findElements('openButton', 'ed11y-element-result[data-ed11y-open="true"]');
-      return document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-    };
-
-    Ed11y.focusActiveResult = function () {
-      Ed11y.getOpenTip();
-      window.setTimeout(function () {
-        Ed11y.elements.openButton[0]?.shadowRoot.querySelector('button').focus();
-      }, 0);
     };
 
     Ed11y.srcMatchesOptions = function (source, option) {

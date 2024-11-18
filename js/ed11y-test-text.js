@@ -84,7 +84,9 @@ class Ed11yTestText {
             {
               element: p,
               test: 'textPossibleList',
-              content: Ed11y.M.textPossibleList.tip(firstPrefix),
+              content: Ed11y.options.langSanitizes ?
+                Ed11y.M.textPossibleList.tip(firstPrefix) :
+                Ed11y.M.textPossibleList.tip(Ed11y.sanitizeForHTML(firstPrefix)),
               position: 'afterbegin',
               dismissalKey: dismissKey,
             });
@@ -179,6 +181,9 @@ class Ed11yTestText {
 
     // Check if a table has a table header.
     Ed11y.elements.table.forEach((el) => {
+      if (!Ed11y.addedNodeReadyToCheck(el)) {
+        return;
+      }
       let findTHeaders = el.querySelectorAll('th');
       let findHeadingTags = el.querySelectorAll('h1, h2, h3, h4, h5, h6');
       if (findTHeaders.length === 0) {
@@ -191,8 +196,8 @@ class Ed11yTestText {
         });
       }
       else {
-        // Make sure all table headers are not empty.
-        findTHeaders.forEach((th) => {
+        // Make sure table headers are not empty.
+        Array.from(findTHeaders).some((th) => {
           if (Ed11y.computeText(th).length < 1) {
             Ed11y.results.push({
               element: th,
@@ -201,6 +206,7 @@ class Ed11yTestText {
               position: 'afterbegin',
               dismissalKey: false,
             });
+            return true;
           }
         });
       }

@@ -15,7 +15,7 @@ class Ed11yElementResult extends HTMLElement {
       this.resultID = this.dataset.ed11yResult;
       this.result = Ed11y.results[this.resultID];
 
-      this.wrapper = document.createElement('aside');
+      this.wrapper = document.createElement('div');
 
       this.dismissable = !!this.result.dismissalKey;
       this.dismissed = !!this.result.dismissalStatus;
@@ -29,24 +29,28 @@ class Ed11yElementResult extends HTMLElement {
       this.toggle.setAttribute('class', 'toggle');
       // todo parameterize
       let label = this.dismissable ? Ed11y.M.toggleManualCheck : Ed11y.M.toggleAlert;
-      this.toggle.setAttribute('aria-label', Ed11y.M.toggleAriaLabel(this.resultID, label));
+      this.toggle.setAttribute('aria-label', Ed11y.M.toggleAriaLabel(label));
       this.toggle.setAttribute('aria-expanded', 'false');
       this.toggle.setAttribute('aria-haspopup', 'dialog');
       this.toggle.setAttribute('data-ed11y-result', this.dataset.ed11yResult);
       this.toggle.setAttribute('data-ed11y-ready', 'false');
       this.toggle.setAttribute('data-ed11y-race', 'false');
+      if (!Ed11y.options.inlineAlerts) {
+        this.toggle.style.setProperty('font-size', '16px');
+      }
       if (this.dismissed) {
         this.toggle.classList.add('dismissed');
         if (this.result.dismissalStatus !== 'ok') {
-          this.toggle.classList.add('ok');
-        } else {
           this.toggle.classList.add('notok');
+        } else {
+          this.toggle.classList.add('ok');
         }
       } else if (this.dismissable) {
         this.toggle.classList.add('dismissable');
       }
       this.wrapper.appendChild(this.toggle);
       this.toggle.addEventListener('click', this.toggleClick);
+      this.toggle.addEventListener('focus', this.handleFocus);
       this.toggle.addEventListener('mouseover', this.handleHover);
       this.tipNeedsBuild = true;
 
@@ -60,13 +64,21 @@ class Ed11yElementResult extends HTMLElement {
   handleHover(event) {
     event.preventDefault();
     let host = this.getRootNode().host;
-    if (host.getAttribute('data-ed11y-open') === 'false' && host.racing === false) {
+    if (!this.classList.contains('intersecting') && host.getAttribute('data-ed11y-open') === 'false' && host.racing === false) {
       host.racing = true;
       host.toggleTip(true);
       Ed11y.toggledFrom = this;
       window.setTimeout(function () {
         host.racing = false;
       }, 250, host);
+    }
+  }
+
+  handleFocus() {
+    let host = this.getRootNode().host;
+    if (this.getRootNode().host.classList.contains('ed11y-offscreen')) {
+      host.result.element.scrollIntoView();
+      Ed11y.alignButtons();
     }
   }
 
@@ -81,8 +93,9 @@ class Ed11yElementResult extends HTMLElement {
       host.setAttribute('data-ed11y-action', stateChange);
       if (stateChange === 'open') {
         window.setTimeout(function () {
+          console.warn('it was me');
           let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-          activeTip?.shadowRoot.querySelector('.close').focus();
+          activeTip?.shadowRoot.querySelector('.title').focus();
         }, 500);
       }
       window.setTimeout(function () {
@@ -93,11 +106,8 @@ class Ed11yElementResult extends HTMLElement {
   }
 
   closeOtherTips() {
-    Ed11y.findElements('openTips', '[data-ed11y-open="true"]');
-    if (Ed11y.elements.openTips) {
-      Array.from(Ed11y.elements.openTips).forEach(openTip => {
-        openTip.setAttribute('data-ed11y-action', 'close');
-      });
+    if (Ed11y.openTip.button) {
+      Ed11y.openTip.button.setAttribute('data-ed11y-action', 'close');
     }
   }
 
@@ -118,7 +128,11 @@ class Ed11yElementResult extends HTMLElement {
     }
     this.toggle.setAttribute('aria-expanded', changeTo);
     let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
-    this.result.element.classList.toggle(highlightOutline);
+    if (Ed11y.options.inlineAlerts) {
+      this.result.element.classList.toggle(highlightOutline);
+    } else {
+      Ed11y.editableHighlighter(this.resultID, changeTo);
+    }
     if (changeTo === true) {
       // Allow for themes to reveal hidden tips
       document.dispatchEvent(new CustomEvent('ed11yPop', {
@@ -126,18 +140,27 @@ class Ed11yElementResult extends HTMLElement {
       }));
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');
-      Ed11y.alignTip(this.toggle, this.tip);
-      if (!Ed11y.elements.jumpList) {
+      requestAnimationFrame(()=>Ed11y.alignTip(this.toggle, this.tip, 8));
+      if (!Ed11y.jumpList) {
         Ed11y.buildJumpList();
       }
-      Ed11y.goto = this.getAttribute('data-ed11y-jump-position');
-      Ed11y.setCurrentJump();
+      Ed11y.lastOpenTip = Number(this.getAttribute('data-ed11y-jump-position'));
+      Ed11y.openTip = {
+        button: this,
+        tip: this.tip,
+      };
+      this.result.highlight?.style.setProperty('opacity', '1');
     } else {
       // Allow for themes to restore original DOM/CSS
       document.dispatchEvent(new CustomEvent('ed11yShut', {
         detail: { id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result') }
       }));
       this.tip.setAttribute('data-ed11y-action', 'shut');
+      this.result.highlight?.style.setProperty('opacity', '0');
+      Ed11y.openTip = {
+        button: false,
+        tip: false,
+      };
     }
     this.setAttribute('data-ed11y-open', changeTo);
     this.open = changeTo;
