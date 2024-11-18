@@ -745,7 +745,7 @@ class Ed11y {
         position = 'beforeend';
         mark.classList.add('ed11y-editable-result');
       } else {
-        location = result.element.closest('a');
+        location = result.element.closest('a, button, [role="button"], [role="link"]');
         if (!location) {
           location = result.element;
           position = result.position;

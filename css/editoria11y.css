@@ -86,7 +86,7 @@ ed11y-element-result {
     position: fixed;
     opacity: 0;
     transition: opacity .25s ease-in;
-    z-index: 9999;
+    z-index: var(--ed11y-buttonZIndex, 9999);
 }
 
 :host(ed11y-element-panel.ed11y-element):focus, .ed11y-wrapper div:focus { /* div?? */

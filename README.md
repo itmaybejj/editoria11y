@@ -1,4 +1,4 @@
-# Editora11y
+# Editoria11y
 
 Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly accessibility "auto-correct" checker that addresses three critical needs for content authors:
 
