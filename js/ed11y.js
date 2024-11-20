@@ -158,7 +158,7 @@ class Ed11y {
       buttonZIndex: 1299,
       // CSS overrides and additions.
 
-      baseFontSize: '14px', // px
+      baseFontSize: 'clamp(14px, 1.5vw, 16px)', // px
       baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
 
       // Test customizations
@@ -1373,7 +1373,7 @@ class Ed11y {
       Ed11y.bodyStyle = true;
     };
 
-    Ed11y.alignTip = function (button, toolTip, recheck = 0) {
+    Ed11y.alignTip = function (button, toolTip, recheck = 0, reveal = false) {
       if (!toolTip) {
         return;
       }
@@ -1385,12 +1385,14 @@ class Ed11y {
       // Various hiddenHandlers may cause element to animate open.
       if (recheck > 0) {
         window.setTimeout(function () {
-          requestAnimationFrame(()=>Ed11y.alignTip(button, toolTip, loopCount));
-        }, 333, loopCount);
+          requestAnimationFrame(()=>Ed11y.alignTip(button, toolTip, loopCount, reveal));
+        }, 200 / loopCount, button, toolTip, loopCount, reveal);
       }
-      window.setTimeout(() => {
-        toolTip.style.setProperty('opacity', '1');
-      }, 25, toolTip, tip);
+      if (loopCount < 4 && reveal) {
+        window.setTimeout(() => {
+          toolTip.style.setProperty('opacity', '1');
+        }, 25, toolTip, tip);
+      }
 
       const mark = button.getRootNode().host;
       const resultNum = button.dataset.ed11yResult;
@@ -2036,7 +2038,7 @@ class Ed11y {
           }, 15000, Ed11y.lastOpenTip);*/
         }
         if (Ed11y.viaJump) {
-          let scrollPin = window.innerHeight > 800 && window.innerWidth > 800 ? 'center' : 'start';
+          let scrollPin = window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600) ? 'center' : 'start';
           let scrollTarget = Ed11y.options.inlineAlerts ? button : target;
           if (button.dataset.ed11yHiddenResult || !(Ed11y.visible(scrollTarget))) {
             scrollTarget = Ed11y.firstVisibleParent(target);
@@ -2110,10 +2112,11 @@ class Ed11y {
       const target = gotoResult.element;
 
       // First of two scrollTo calls, to trigger any scroll based events.
-      let scrollPin = window.innerHeight > 800 && window.innerWidth > 800 ? 'center' : 'start';
+      let scrollPin = window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600) ? 'center' : 'start';
       let scrollTarget = Ed11y.options.inlineAlerts ? goto : target;
       if (goto.dataset.ed11yHiddenResult || !(Ed11y.visible(scrollTarget))) {
         scrollTarget = Ed11y.firstVisibleParent(target);
+        console.log('hidden');
       }
       scrollTarget?.scrollIntoView({ block: scrollPin, behavior: 'instant' });
 
