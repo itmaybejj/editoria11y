@@ -1464,7 +1464,6 @@ class Ed11y {
         } else if (buttonTop + tipHeight + buttonSize > absoluteBottom) {
           // It REALLY doesn't fit below.
           direction = 'above';
-          console.log('my fault');
         }
         // Back to default.
       } // else: under.
@@ -1481,9 +1480,7 @@ class Ed11y {
         }
       } else {
         let over = containBottom - (buttonTop + tipHeight + buttonSize);
-        console.log(over);
         if (over < 0) {
-          console.log(4- tipHeight + buttonSize);
           nudgeY = Math.max(over, buttonSize + 10 - tipHeight);
         }
       }
