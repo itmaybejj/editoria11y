@@ -204,15 +204,6 @@ class Ed11yElementTip extends HTMLElement {
 
   toggleTip(changeTo) {
     if (changeTo) {
-      Ed11y.resetClass([
-        // 'ed11y-ring-red', // todo can we drop these?
-        // 'ed11y-ring-yellow',
-        //'ed11y-hidden-highlight',
-        // 'ed11y-warning-inline',
-        // 'ed11y-warning-block',
-        // 'ed11y-error-block',
-        // 'ed11y-error-inline',
-      ]);
       this.wrapper.classList.add('open');
       Ed11y.alertOnInvisibleTip(this.result.toggle, this.result.element);
     } else {
