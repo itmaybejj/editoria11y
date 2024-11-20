@@ -1390,10 +1390,10 @@ class Ed11y {
           requestAnimationFrame(()=>Ed11y.alignTip(button, toolTip, loopCount, reveal));
         }, 200 / loopCount, button, toolTip, loopCount, reveal);
       }
-      if (loopCount < 4 && reveal) {
+      if (reveal) {
         window.setTimeout(() => {
           toolTip.style.setProperty('opacity', '1');
-        }, 25, toolTip, tip);
+        }, 75, toolTip, tip);
       }
 
       const mark = button.getRootNode().host;
