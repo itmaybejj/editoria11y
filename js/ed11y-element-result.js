@@ -142,7 +142,7 @@ class Ed11yElementResult extends HTMLElement {
       }));
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');
-      requestAnimationFrame(()=>Ed11y.alignTip(this.toggle, this.tip, 1));
+      requestAnimationFrame(()=>Ed11y.alignTip(this.toggle, this.tip, 4, true));
       if (!Ed11y.jumpList) {
         Ed11y.buildJumpList();
       }

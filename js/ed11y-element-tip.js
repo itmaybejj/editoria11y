@@ -8,6 +8,7 @@ class Ed11yElementTip extends HTMLElement {
     if (!this.initialized) {
 
       this.open = true;
+      this.style.setProperty('opacity', '0');
       this.style.setProperty('outline', '0px solid transparent');
       const shadow = this.attachShadow({mode: 'open'});
 
@@ -106,9 +107,7 @@ class Ed11yElementTip extends HTMLElement {
         this.prev.classList.add('ed11y-tip-prev');
         this.prev.setAttribute('aria-label', Ed11y.M.buttonPrevContent);
         this.prev.setAttribute('title', Ed11y.M.buttonPrevContent);
-        this.prevIcon = document.createElement('span');
-        this.prevIcon.textContent = '➤';
-        this.prev.append(this.prevIcon);
+        this.prev.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/></svg>';
         this.prev.addEventListener('click', (event) => {
           event.preventDefault();
           Ed11y.jumpTo(-1);
@@ -119,9 +118,7 @@ class Ed11yElementTip extends HTMLElement {
         this.next.classList.add('ed11y-tip-next');
         this.next.setAttribute('aria-label', Ed11y.M.buttonNextContent);
         this.next.setAttribute('title', Ed11y.M.buttonNextContent);
-        this.nextIcon = document.createElement('span');
-        this.nextIcon.textContent = '➤';
-        this.next.append(this.nextIcon);
+        this.next.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="currentColor" d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"></path></svg>';
         this.next.addEventListener('click', (event) => {
           event.preventDefault();
           Ed11y.jumpTo(1);
