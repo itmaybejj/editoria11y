@@ -116,6 +116,7 @@ class Ed11yElementResult extends HTMLElement {
 
     let tip = document.createElement('ed11y-element-tip');
     tip.classList.add('ed11y-element');
+    tip.style.setProperty('opacity', '0');
     tip.setAttribute('data-ed11y-result', this.resultID);
     let body = document.querySelector('body');
     body.insertAdjacentElement('beforeend', tip);
@@ -134,13 +135,14 @@ class Ed11yElementResult extends HTMLElement {
       Ed11y.editableHighlighter(this.resultID, changeTo);
     }
     if (changeTo === true) {
+      this.tip.style.setProperty('opacity', '0');
       // Allow for themes to reveal hidden tips
       document.dispatchEvent(new CustomEvent('ed11yPop', {
         detail: { id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result') }
       }));
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');
-      requestAnimationFrame(()=>Ed11y.alignTip(this.toggle, this.tip, 8));
+      requestAnimationFrame(()=>Ed11y.alignTip(this.toggle, this.tip, 1));
       if (!Ed11y.jumpList) {
         Ed11y.buildJumpList();
       }

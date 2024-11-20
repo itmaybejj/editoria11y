@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.0';
+    Ed11y.version = '2.3.1';
 
     let defaultOptions = {
 
@@ -1305,6 +1305,8 @@ class Ed11y {
         } else if (needNudge) {
           nudgeMark(mark, nudgeLeft, nudgeTop);
         }
+        mark.nudgeLeft = nudgeLeft;
+        mark.nudgeTop = nudgeTop;
         previousNudgeTop = nudgeTop;
         previousNudgeLeft = nudgeLeft;
       });
@@ -1375,151 +1377,117 @@ class Ed11y {
       if (!toolTip) {
         return;
       }
+
       let arrow = toolTip.shadowRoot.querySelector('.arrow');
       let tip = arrow.nextElementSibling;
       let loopCount = recheck - 1;
-      //toolTip.style.setProperty('opacity', recheck === 4 ? 1 : 0);
 
       // Various hiddenHandlers may cause element to animate open.
       if (recheck > 0) {
         window.setTimeout(function () {
           requestAnimationFrame(()=>Ed11y.alignTip(button, toolTip, loopCount));
-        }, 50, loopCount);
+        }, 333, loopCount);
       }
-      // Reset any previous alignments
-      // todo postpone: calculate without resets to remove shudder.
-      /*tip.style.setProperty('transform',null);
-      arrow.style.setProperty('left', null);
-      arrow.style.setProperty('top', null);*/
+      window.setTimeout(() => {
+        toolTip.style.setProperty('opacity', '1');
+      }, 25, toolTip, tip);
+
       const mark = button.getRootNode().host;
       const resultNum = button.dataset.ed11yResult;
       const result = Ed11y.results[resultNum];
 
       // Find button on page
       const scrollTop = window.scrollY;
+      let leftAdd = Ed11y.options.inlineAlerts ? window.scrollX : 0;
+
       let buttonOffset = button.getBoundingClientRect();
       let buttonSize = buttonOffset.width;
+      let buttonLeft = buttonOffset.left + leftAdd;
+      let buttonTop = buttonOffset.top + scrollTop;
+
+      let containTop = scrollTop;
       let containLeft = 0;
-      let buttonLeft = buttonOffset.left + document.body.scrollLeft;
       let containWidth = windowWidth;
       let containBottom = window.innerHeight + scrollTop;
-      let containTop = scrollTop;
-      if ( !Ed11y.options.inlineAlerts && result.scrollableParent ) {
+      let absoluteBottom = containBottom;
+
+      if (Ed11y.options.inlineAlerts) {
+        // buttonOffset.left + document.body.scrollLeft
+      }
+      if (!Ed11y.options.inlineAlerts && result.scrollableParent) {
         let bounds = result.scrollableParent.getBoundingClientRect();
         if (bounds.width > 0) {
-          buttonLeft = buttonOffset.left + result.scrollableParent.scrollLeft;
-          containLeft = bounds.left;
-          containWidth = bounds.width - 30;
+          //buttonTop = buttonTop + result.scrollableParent.scrollTop;
+          containLeft = Math.max(0, bounds.left);
+          containWidth = Math.min(containWidth, bounds.width - 30);
           containBottom = bounds.bottom + scrollTop;
           containTop = bounds.top + scrollTop;
+          absoluteBottom = bounds.top + result.scrollableParent.scrollHeight;
         }
-        tip.style.setProperty('max-width', containWidth + 'px');
-      } else if (!(Ed11y.visible(mark) || buttonOffset.top === 0 && buttonOffset.left === 0)) {
-        tip.style.setProperty('max-width', 'none');
+      } else if (mark.dataset.ed11yHiddenResult === 'true' || !(Ed11y.visible(mark) || buttonOffset.top === 0 && buttonOffset.left === 0)) {
         // ruh roh invisible button
-        const firstVisibleParent = Ed11y.firstVisibleParent(mark);
+        // todo: use the not-inline drawing pattern for invisible targets?
+        const firstVisibleParent = Ed11y.firstVisibleParent(mark.result.element);
         if (firstVisibleParent) {
           buttonOffset = firstVisibleParent.getBoundingClientRect();
+          buttonLeft = buttonOffset.left;
+          buttonTop = buttonOffset.top;
         } else {
           tip.style.setProperty('max-width', 'none');
         }
         // Estimate from font when it can't be measured.
         buttonSize = parseInt(Ed11y.options.baseFontSize) * 3;
       }
+      // Set wrapper for CSS.
+      tip.closest('.ed11y-wrapper').style.setProperty('width', buttonSize + 'px');
+      tip.closest('.ed11y-wrapper').style.setProperty('height', buttonSize + 'px');
+      tip.style.setProperty('max-width', `${containWidth > 280 ? containWidth : 280}px`);
+      const containRight = Math.min(windowWidth, containLeft + containWidth);
       toolTip.style.setProperty('top', buttonOffset.top + scrollTop + 'px');
-      toolTip.style.setProperty('left', mark.markLeft + 'px');
+      toolTip.style.setProperty('left', buttonOffset.left + leftAdd + 'px');
       const tipWidth = tip.offsetWidth;
       const tipHeight = tip.offsetHeight;
 
       let direction = 'under';
 
       // Default to displaying under
-      if (buttonOffset.top + tipHeight + scrollTop + buttonSize + 22 > containBottom) {
+      if (buttonTop + tipHeight + scrollTop + buttonSize + 22 > containBottom) {
         // It won't fit under. Look elsewhere.
-        if ( containLeft + containWidth > buttonSize + tipWidth + buttonOffset.left + 70 && // fits to the right.
-          !(buttonOffset.top + scrollTop + 125 > containBottom) // but would fit better above.
-        ) {
+        if ( containRight > buttonSize + tipWidth + buttonLeft + 30 &&
+          containTop + tipHeight + 30 < containBottom ) {
           direction = 'right';
-        } else if (buttonOffset.top - tipHeight - 15 > containTop) {
+        } else if (buttonTop - tipHeight - 15 > containTop) {
           direction = 'above';
-        } else if (containWidth > tipWidth * 1.5 && buttonLeft - tipWidth - 50 > containLeft) {
+        } else if ( containLeft < buttonLeft - (buttonSize + tipWidth + 30) &&
+          containTop + tipHeight + 30 < containBottom) {
           direction = 'left';
-        } else if (buttonOffset.top + tipHeight + scrollTop + buttonSize > containBottom) {
+        } else if (buttonTop + tipHeight + buttonSize > absoluteBottom) {
           // It REALLY doesn't fit below.
           direction = 'above';
+          console.log('my fault');
         }
         // Back to default.
       } // else: under.
+      arrow.dataset.direction = direction;
 
-      let nudgeX;
+      let nudgeX = 0;
       let nudgeY = 0;
 
-      const horizontalAlign = function() {
-        nudgeX = Math.min(
-          buttonOffset.left - tipWidth,
-          -25); // can't be more to left than tip width
-        if (buttonOffset.left + nudgeX - 25 < containLeft) { // offscreen to left
-          nudgeX = 10 + containLeft - buttonOffset.left + (buttonOffset.left - mark.markLeft); // shift right, up to 0
-        } else if (buttonOffset.left - nudgeX + tipWidth > containLeft + containWidth &&
-          buttonOffset.left + 24 - tipWidth > containLeft
-        ) {
-          nudgeX = Math.min(
-            Math.max(
-              containLeft + containWidth - (buttonOffset.left + tipWidth + buttonSize + 20),
-              24 - tipWidth),
-            0); // Shift left, up to button.
-        }
-        const arrowLeft = Math.min(
-          Math.max(
-            7,
-            7 - nudgeX + buttonOffset.left - mark.markLeft),
-          tipWidth - 27);
-        arrow.style.setProperty('left', `${arrowLeft}px`);
-      };
-
-      if (direction === 'under') {
-        nudgeY = buttonSize + 14 + parseInt(Ed11y.theme.outlineWidth);
-        arrow.dataset.direction = 'under';
-        arrow.style.setProperty('top', `${8 - parseInt(Ed11y.theme.outlineWidth)}px`);
-        horizontalAlign();
-      }
-      else if (direction === 'above') {
+      if (direction === 'under' || direction === 'above') {
         // Slide left or right to center tip on page.
-        nudgeY = -1 * (9 + tipHeight + parseInt(Ed11y.theme.outlineWidth));
-        arrow.dataset.direction = 'above';
-        arrow.style.setProperty('top', `${tipHeight + 16 - parseInt(Ed11y.theme.outlineWidth)}px`);
-        horizontalAlign();
-      } else {
-        // Left or right, starts top aligned with button.
-        let tipBottom = buttonOffset.top + scrollTop + tipHeight;
-        let arrowY= 7;
-
-        if (Ed11y.options.inlineAlerts) {
-          if ( buttonOffset.top + tipHeight > window.innerHeight ) {
-            // Push farther up
-            nudgeY = containBottom - (tipBottom + 45); // todo: that number's kinda random and random is ominous.
-            arrowY = nudgeY * -1 + 7;
-          }
-        } else {
-          if (buttonOffset.top + tipHeight + scrollTop > containBottom) {
-            // Push farther up
-            nudgeY = containBottom - (tipBottom + 90); // todo: that number's kinda random and random is ominous.
-            arrowY = nudgeY * -1 + 7;
-          }
+        let over = containRight - (buttonLeft + tipWidth + buttonSize);
+        if (over < 0) {
+          nudgeX = Math.max(over, buttonSize + 10 - tipWidth);
         }
-        arrow.style.setProperty('top', `${arrowY}px`);
-        if (direction === 'left') {
-          nudgeX = 0 - (tipWidth + 17);
-          arrow.style.setProperty('left', `${tipWidth - 10}px`);
-          arrow.dataset.direction = 'left';
-        } else {
-          // direction is right
-          nudgeX = 14 + buttonSize + buttonOffset.left - mark.markLeft;
-          arrow.style.setProperty('left', '-10px');
-          arrow.dataset.direction = 'right';
+      } else {
+        let over = containBottom - (buttonTop + tipHeight + buttonSize);
+        console.log(over);
+        if (over < 0) {
+          console.log(4- tipHeight + buttonSize);
+          nudgeY = Math.max(over, buttonSize + 10 - tipHeight);
         }
       }
-      toolTip.style.setProperty('transform', `translate(${nudgeX}px, ${nudgeY}px)`);
+      tip.style.setProperty('transform', `translate(${nudgeX}px, ${nudgeY}px)`);
       Ed11y.alignHighlights();
     };
 
@@ -1676,10 +1644,13 @@ class Ed11y {
     };
     Ed11y.visualizing = false;
     Ed11y.visualize = function () {
+      if (!Ed11y.panel) {
+        return;
+      }
       if (Ed11y.visualizing) {
         Ed11y.visualizing = false;
         Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsContent;
-        Ed11y.panel?.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
+        Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
         Ed11y.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
         Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
         Ed11y.elements.reset?.forEach(el => { el.remove(); });
@@ -1687,8 +1658,8 @@ class Ed11y {
       }
       Ed11y.visualizing = true;
       Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsActive;
-      Ed11y.panel?.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
-      Ed11y.panel?.querySelector('#ed11y-visualizers').removeAttribute('hidden');
+      Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
+      Ed11y.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
       showAltPanel();
       showHeadingsPanel();
     };
@@ -2044,6 +2015,7 @@ class Ed11y {
         let firstVisible = false;
         let alertMessage;
         if (Ed11y.options.checkVisible && !Ed11y.visible(target)) {
+          button.dataset.ed11yHiddenResult = 'true';
           firstVisible = Ed11y.firstVisibleParent(target);
           alertMessage = Ed11y.M.jumpedToInvisibleTip;
         }
@@ -2066,18 +2038,19 @@ class Ed11y {
             }
           }, 15000, Ed11y.lastOpenTip);*/
         }
-        let scrollPin = window.innerHeight > 800 && window.innerWidth > 800 ? 'center' : 'start';
+        if (Ed11y.viaJump) {
+          let scrollPin = window.innerHeight > 800 && window.innerWidth > 800 ? 'center' : 'start';
+          let scrollTarget = Ed11y.options.inlineAlerts ? button : target;
+          if (button.dataset.ed11yHiddenResult || !(Ed11y.visible(scrollTarget))) {
+            scrollTarget = Ed11y.firstVisibleParent(target);
+          }
+          scrollTarget.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+        }
         // Todo: following statements work but could be simplified.
         if (!Ed11y.options.inlineAlerts) {
           // todo this selector must match the selector that decides where to place the mark
-          if (Ed11y.viaJump) {
-            target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
-          }
           Ed11y.editableHighlighter(button.dataset.ed11yResult, true, firstVisible);
         } else {
-          if (Ed11y.viaJump) {
-            target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
-          }
           if (firstVisible) {
             firstVisible.classList.add('ed11y-hidden-highlight');
           }
@@ -2137,33 +2110,20 @@ class Ed11y {
       let goto = Ed11y.jumpList[goNum];
       let result = goto.getAttribute('data-ed11y-result');
       let gotoResult = Ed11y.results[result];
-      //let insert = gotoResult.position;
       const target = gotoResult.element;
 
       // First of two scrollTo calls, to trigger any scroll based events.
       let scrollPin = window.innerHeight > 800 && window.innerWidth > 800 ? 'center' : 'start';
-      if (Ed11y.options.inlineAlerts) {
-        goto.scrollIntoView({ block: scrollPin, behavior: 'instant' });
-      } else {
-        target.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+      let scrollTarget = Ed11y.options.inlineAlerts ? goto : target;
+      if (goto.dataset.ed11yHiddenResult || !(Ed11y.visible(scrollTarget))) {
+        scrollTarget = Ed11y.firstVisibleParent(target);
       }
+      scrollTarget?.scrollIntoView({ block: scrollPin, behavior: 'instant' });
 
       // Open the button
       goto.setAttribute('data-ed11y-action','open');
       Ed11y.scrollPending = 2;
       Ed11y.updateTipLocations();
-      //Ed11y.alertOnInvisibleTip(goto, target);
-
-      /*let target;
-      // todo this belongs in the result open logic not here
-      if (insert === 'beforebegin') {
-        target = Ed11y.nextUntil(goto, ':not(ed11y-element-result)');
-      }
-      else if (insert === 'afterbegin') {
-        // todo:check that these are identified correctly.
-        target = goto.parentElement;
-      }*/
-
     };
 
     Ed11y.windowResize = function () {
