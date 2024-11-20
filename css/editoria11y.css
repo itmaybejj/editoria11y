@@ -667,19 +667,17 @@ ed11y-element-result[data-ed11y-open='true'] {
 .ed11y-tip-header {
     background: var(--ed11y-primary, #276499);
     display: grid;
-    grid-template-columns: 1fr max-content repeat(4, 31px);
+    grid-template-columns: 1fr max-content repeat(5, min-content);
     grid-template-rows: 31px;
-    grid-template-areas:
-    "pad count previous next help close";
+    grid-template-areas: "pad count previous next help focus close";
     color: var(--ed11y-primaryText, #fffdf7);
     font-size: 14px;
-    margin-bottom: -3px; /* this is just to cover a Safari redraw bug */
+    margin-bottom: -2px; /* this is just to cover a Safari redraw bug */
+    border-radius: 0 0 3px 3px;
 }
-.ed11y-tip-header:has(.ed11y-transfer-focus) {
-    background: var(--ed11y-primary, #276499);
-    grid-template-columns: 1fr max-content repeat(5, 31px);
-    grid-template-areas:
-    "pad count previous next help focus close";
+
+.ed11y-tip-header > * {
+    min-width: 31px;
 }
 .ed11y-tip-count {
     grid-area: count;
