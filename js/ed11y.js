@@ -159,7 +159,6 @@ class Ed11y {
       // CSS overrides and additions.
 
       baseFontSize: 'clamp(14px, 1.5vw, 16px)',
-      baseTipSize: 'clamp(1.14em, 1.5vw, 1.3125em)',
       baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
 
       // Test customizations
@@ -217,7 +216,6 @@ class Ed11y {
 
     Ed11y.theme = Ed11y.options[Ed11y.options.theme];
     Ed11y.theme.baseFontSize = Ed11y.options.baseFontSize;
-    Ed11y.theme.baseTipSize = Ed11y.options.baseTipSize;
     Ed11y.theme.buttonZIndex = Ed11y.options.buttonZIndex;
     Ed11y.theme.baseFontFamily = Ed11y.options.baseFontFamily;
 
@@ -2161,7 +2159,6 @@ class Ed11y {
       let scrollTarget = Ed11y.options.inlineAlerts ? goto : target;
       if (goto.dataset.ed11yHiddenResult || !(Ed11y.visible(scrollTarget))) {
         scrollTarget = Ed11y.firstVisibleParent(target);
-        console.log('hidden');
       }
       scrollTarget?.scrollIntoView({ block: scrollPin, behavior: 'instant' });
 

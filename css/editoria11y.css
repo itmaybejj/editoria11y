@@ -671,7 +671,6 @@ ed11y-element-result[data-ed11y-open='true'] {
     grid-template-rows: 31px;
     grid-template-areas: "pad count previous next help focus close";
     color: var(--ed11y-primaryText, #fffdf7);
-    font-size: 14px;
     margin-bottom: -2px; /* this is just to cover a Safari redraw bug */
     border-radius: 0 0 3px 3px;
 }
@@ -754,8 +753,8 @@ ed11y-element-result[data-ed11y-open='true'] {
 
 }
 .ed11y-tip-count {
-    padding-right: 8px;
-    font-size: 12px;
+    padding-right: .571em;
+    font-size: .857em;
 }
 .ed11y-tip-header svg {
     width: 12px;
@@ -768,7 +767,7 @@ ed11y-element-result[data-ed11y-open='true'] {
     font-weight: bold;
     outline: transparent;
     padding: 14px 12px 0 0;
-    font-size: 1.1em;
+    font-size: 1.0625em;
 }
 .ed11y-tip-wrapper .title:focus {
     outline: none;
@@ -776,7 +775,7 @@ ed11y-element-result[data-ed11y-open='true'] {
 }
 
 .ed11y-tip-wrapper .content {
-    padding: 0 12px 16px 16px;
+    padding: 0 .857em 1.14em 1.14em;
 }
 
 .ed11y-tip-wrapper p {
@@ -833,7 +832,7 @@ ed11y-element-result[data-ed11y-open='true'] {
 
 .ed11y-tip-wrapper .dismiss {
     margin: .5em 1em .25em 0;
-    padding: 7px 11px;
+    padding: .5em 11px;
     border-radius: var(--ed11y-borderRadius, 1px);
     font-weight: bold;
     vertical-align: bottom;
