@@ -158,7 +158,8 @@ class Ed11y {
       buttonZIndex: 1299,
       // CSS overrides and additions.
 
-      baseFontSize: 'clamp(14px, 1.5vw, 16px)', // px
+      baseFontSize: 'clamp(14px, 1.5vw, 16px)',
+      baseTipSize: 'clamp(1.14em, 1.5vw, 1.3125em)',
       baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
 
       // Test customizations
@@ -216,6 +217,7 @@ class Ed11y {
 
     Ed11y.theme = Ed11y.options[Ed11y.options.theme];
     Ed11y.theme.baseFontSize = Ed11y.options.baseFontSize;
+    Ed11y.theme.baseTipSize = Ed11y.options.baseTipSize;
     Ed11y.theme.buttonZIndex = Ed11y.options.buttonZIndex;
     Ed11y.theme.baseFontFamily = Ed11y.options.baseFontFamily;
 
@@ -1413,9 +1415,6 @@ class Ed11y {
       let containBottom = window.innerHeight + scrollTop;
       let absoluteBottom = containBottom;
 
-      if (Ed11y.options.inlineAlerts) {
-        // buttonOffset.left + document.body.scrollLeft
-      }
       if (!Ed11y.options.inlineAlerts && result.scrollableParent) {
         let bounds = result.scrollableParent.getBoundingClientRect();
         if (bounds.width > 0) {
@@ -1438,11 +1437,12 @@ class Ed11y {
           tip.style.setProperty('max-width', 'none');
         }
         // Estimate from font when it can't be measured.
-        buttonSize = parseInt(Ed11y.options.baseFontSize) * 3;
+        buttonSize = windowWidth > 800 ? 38 : 33;
       }
       // Set wrapper for CSS.
-      tip.closest('.ed11y-wrapper').style.setProperty('width', buttonSize + 'px');
-      tip.closest('.ed11y-wrapper').style.setProperty('height', buttonSize + 'px');
+      //tip.closest('.ed11y-wrapper').style.setProperty('width', buttonSize + 'px');
+      //tip.closest('.ed11y-wrapper').style.setProperty('height', buttonSize + 'px');
+      document.documentElement.style.setProperty('--ed11y-buttonWidth', buttonSize + 'px');
       tip.style.setProperty('max-width', `${containWidth > 280 ? containWidth : 280}px`);
       const containRight = Math.min(windowWidth, containLeft + containWidth);
       toolTip.style.setProperty('top', buttonOffset.top + scrollTop + 'px');
@@ -1474,17 +1474,58 @@ class Ed11y {
       let nudgeX = 0;
       let nudgeY = 0;
 
-      if (direction === 'under' || direction === 'above') {
-        // Slide left or right to center tip on page.
-        let over = containRight - (buttonLeft + tipWidth + buttonSize);
+      const align = function(container, alignTo, size) {
+        let over = container - (alignTo + size + buttonSize);
         if (over < 0) {
-          nudgeX = Math.max(over, buttonSize + 10 - tipWidth);
+          return Math.max(over, buttonSize + 10 - size);
         }
-      } else {
-        let over = containBottom - (buttonTop + tipHeight + buttonSize);
-        if (over < 0) {
-          nudgeY = Math.max(over, buttonSize + 10 - tipHeight);
-        }
+      };
+
+      switch (direction) {
+      case 'under':
+        nudgeX = align(containRight, buttonLeft, tipWidth);
+        arrow.style.setProperty('top', buttonSize + 'px');
+        arrow.style.setProperty('right', 'auto');
+        arrow.style.setProperty('bottom', 'auto');
+        arrow.style.setProperty('left', buttonSize / 2 - 10 + 'px');
+        tip.style.setProperty('top', buttonSize + 10 + 'px');
+        tip.style.setProperty('right', 'auto');
+        tip.style.setProperty('bottom', 'auto');
+        tip.style.setProperty('left', '-4px');
+        break;
+      case 'above':
+        nudgeX = align(containRight, buttonLeft, tipWidth);
+        arrow.style.setProperty('top', 'auto');
+        arrow.style.setProperty('right', 'auto');
+        arrow.style.setProperty('bottom', '2px');
+        arrow.style.setProperty('left', buttonSize / 2 - 10 + 'px');
+        tip.style.setProperty('top', 'auto');
+        tip.style.setProperty('right', 'auto');
+        tip.style.setProperty('bottom', '12px');
+        tip.style.setProperty('left', '-4px');
+        break;
+      case 'right':
+        nudgeY = align(containBottom, buttonTop, tipHeight);
+        arrow.style.setProperty('top', buttonSize / 2 - 10 + 'px');
+        arrow.style.setProperty('right', 'auto');
+        arrow.style.setProperty('bottom', 'auto');
+        arrow.style.setProperty('left', buttonSize + 'px');
+        tip.style.setProperty('top', '-4px');
+        tip.style.setProperty('right', 'auto');
+        tip.style.setProperty('bottom', 'auto');
+        tip.style.setProperty('left', buttonSize + 10 + 'px');
+        break;
+      case 'left':
+        nudgeY = align(containBottom, buttonTop, tipHeight);
+        arrow.style.setProperty('top', buttonSize / 2 - 10 + 'px');
+        arrow.style.setProperty('right', '0');
+        arrow.style.setProperty('bottom', 'auto');
+        arrow.style.setProperty('left', 'auto');
+        tip.style.setProperty('top', '-4px');
+        tip.style.setProperty('right', '10px');
+        tip.style.setProperty('bottom', 'auto');
+        tip.style.setProperty('left', 'auto');
+        break;
       }
       tip.style.setProperty('transform', `translate(${nudgeX}px, ${nudgeY}px)`);
       Ed11y.alignHighlights();

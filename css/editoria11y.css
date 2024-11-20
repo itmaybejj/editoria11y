@@ -590,9 +590,6 @@ ed11y-element-result[data-ed11y-open='true'] {
     content: "";
     position: absolute;
     transform: rotate(45deg);
-    left: 100%;
-    top: calc(50% - 10px);
-    margin: var(--ed11y-outlineWidth, 0px);
     box-shadow: inset 0 0 0 2px var(--ed11y-primary, #276499), inset 0 0 0 3px var(--ed11y-bg, #fffffe), 0 0 0 1px var(--ed11y-primary, #276499);
     width: 20px;
     height: 20px;
@@ -606,44 +603,28 @@ ed11y-element-result[data-ed11y-open='true'] {
     position:absolute;
     min-width: 200px;
     width: clamp(18em, 36em, 80vw);
-    top: -4px;
-    left: calc(100% + 10px);
     display: none;
-    margin: calc(var(--ed11y-outlineWidth, 0px) + var(--ed11y-outlineWidth, 0px));
     box-shadow: 0 0 0 var(--ed11y-outlineWidth, 0) var(--ed11y-bg, #fffffe), 2px 2px 4px var(--ed11y-primary, #276499);
 }
 
 .ed11y-tip-wrapper .arrow[data-direction="left"] {
-    left: auto;
-    right: calc(100%);
+    margin-right: var(--ed11y-outlineWidth);
     background: linear-gradient(45deg, transparent 0%, transparent 48%, var(--ed11y-primary, #276499) 49%);
 }
 .ed11y-tip-wrapper .arrow[data-direction="left"] + .tip {
-    left: auto;
-    right: calc(100% + 10px);
+    margin-right: calc(var(--ed11y-outlineWidth) + var(--ed11y-outlineWidth));
 }
 
 .ed11y-tip-wrapper .arrow[data-direction="under"] {
-    top: 100%;
-    left: max(calc(50% - 10px), 4px);
     background: linear-gradient(-45deg, transparent 0%, transparent 48%, var(--ed11y-primary, #276499) 49%);
-}
-.ed11y-tip-wrapper .arrow[data-direction="under"] + .tip {
-    top: calc(100% + 10px);
-    left: -4px;
 }
 
 .ed11y-tip-wrapper .arrow[data-direction="above"] {
-    top: auto;
-    bottom: 100%;
-    margin-bottom: var(--ed11y-outlineWidth, 0);
-    left: max(calc(50% - 10px), 4px);
+    margin-bottom: var(--ed11y-outlineWidth);
     background: linear-gradient(135deg, transparent 0%, transparent 48%, var(--ed11y-primary, #276499) 49%);
 }
 .ed11y-tip-wrapper .arrow[data-direction="above"] + .tip {
-    top: auto;
-    bottom: calc(100% + 10px);
-    left: -4px;
+    margin-bottom: calc(var(--ed11y-outlineWidth) + var(--ed11y-outlineWidth));
 }
 
 .ed11y-tip-wrapper .arrow[data-direction="right"] {
