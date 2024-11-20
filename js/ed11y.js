@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.1';
+    Ed11y.version = '2.3.2';
 
     let defaultOptions = {
 
@@ -1527,7 +1527,11 @@ class Ed11y {
         tip.style.setProperty('left', 'auto');
         break;
       }
-      tip.style.setProperty('transform', `translate(${nudgeX}px, ${nudgeY}px)`);
+      if (nudgeX || nudgeY) {
+        tip.style.setProperty('transform', `translate(${nudgeX}px, ${nudgeY}px)`);
+      } else {
+        tip.style.setProperty('transform', 'none');
+      }
       Ed11y.alignHighlights();
     };
 
