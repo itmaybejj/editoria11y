@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.2';
+    Ed11y.version = '2.3.3';
 
     let defaultOptions = {
 
@@ -37,6 +37,8 @@ class Ed11y {
         // 'video': false,
         'table': '[role="presentation"]',
       },
+
+      headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
 
       // Set alertModes
       // 'headless': do not draw interface
@@ -159,7 +161,6 @@ class Ed11y {
       // CSS overrides and additions.
 
       baseFontSize: 'clamp(14px, 1.5vw, 16px)',
-      baseTipSize: 'clamp(1.14em, 1.5vw, 1.3125em)',
       baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
 
       // Test customizations
@@ -217,7 +218,6 @@ class Ed11y {
 
     Ed11y.theme = Ed11y.options[Ed11y.options.theme];
     Ed11y.theme.baseFontSize = Ed11y.options.baseFontSize;
-    Ed11y.theme.baseTipSize = Ed11y.options.baseTipSize;
     Ed11y.theme.buttonZIndex = Ed11y.options.buttonZIndex;
     Ed11y.theme.baseFontFamily = Ed11y.options.baseFontFamily;
 
@@ -235,7 +235,7 @@ class Ed11y {
         Ed11y.options.cssUrls = [cssLink.getAttribute('href')];
       } else {
         console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
-        Ed11y.options.cssUrls = ['https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@2/dist/editoria11y.min.css'];
+        Ed11y.options.cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${Ed11y.version}/dist/editoria11y.min.css`];
       }
     }
 
@@ -278,7 +278,11 @@ class Ed11y {
     };
 
     Ed11y.initialize = () => {
-
+      if (Ed11y.once) {
+        console.error('double init');
+        return;
+      }
+      Ed11y.once = true;
       Ed11y.checkRunPrevent = () => {
         let preventCheck = Ed11y.options.preventCheckingIfPresent ? document.querySelector(Ed11y.options.preventCheckingIfPresent) : false;
         if (preventCheck) {
@@ -896,7 +900,7 @@ class Ed11y {
         console.log('Editable content detected; Editoria11y inline alerts disabled');
       }
       Ed11y.findElements('p', 'p');
-      Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', false);
+      Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', Ed11y.options.headingsOnlyFromCheckRoots);
       Ed11y.findElements('img', 'img');
       Ed11y.findElements('a', 'a[href]');
       Ed11y.findElements('li', 'li');
@@ -1578,7 +1582,6 @@ class Ed11y {
         panelOutline.innerHTML = '';
         Ed11y.headingOutline.forEach((el, i) => {
           // Todo: draw these in editable mode.
-          // Todo implement outline ignore function.
           if (Ed11y.options.inlineAlerts) {
             let mark = document.createElement('ed11y-element-heading-label');
             mark.classList.add('ed11y-element', 'ed11y-element-heading');
@@ -1609,7 +1612,7 @@ class Ed11y {
             li.append(userText);
           }
           if (el[2]) { // Has an error message
-            let type = !el[3] ? 'error' : 'warning';
+            let type = !el[3] ? 'ed11y-error' : 'ed11y-warning';
             li.classList.add(type);
             let message = document.createElement('em');
             message.classList.add('ed11y-small');
@@ -1739,7 +1742,7 @@ class Ed11y {
       });
       Ed11y.jumpList.forEach((el, i) => {
         el.dataset.ed11yJumpPosition = `${i}`;
-        const newLabel = `${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}, ${i} / ${Ed11y.jumpList.length - 1}`;
+        const newLabel = `${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}, ${i + 1} / ${Ed11y.jumpList.length - 1}`;
         el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
       });
     };
@@ -2161,7 +2164,6 @@ class Ed11y {
       let scrollTarget = Ed11y.options.inlineAlerts ? goto : target;
       if (goto.dataset.ed11yHiddenResult || !(Ed11y.visible(scrollTarget))) {
         scrollTarget = Ed11y.firstVisibleParent(target);
-        console.log('hidden');
       }
       scrollTarget?.scrollIntoView({ block: scrollPin, behavior: 'instant' });
 
