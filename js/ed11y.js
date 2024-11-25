@@ -284,7 +284,9 @@ class Ed11y {
       }
       Ed11y.once = true;
       Ed11y.checkRunPrevent = () => {
-        let preventCheck = Ed11y.options.preventCheckingIfPresent ? document.querySelector(Ed11y.options.preventCheckingIfPresent) : false;
+        let preventCheck = Ed11y.options.preventCheckingIfPresent ?
+          document.querySelector(Ed11y.options.preventCheckingIfPresent) :
+          false;
         if (preventCheck) {
           console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${Ed11y.options.preventCheckingIfPresent}"` );
         } else if (!preventCheck && !!Ed11y.options.preventCheckingIfAbsent) {
@@ -621,6 +623,7 @@ class Ed11y {
           Ed11y.reset();
         } else {
           // Ignore issue count if this resulted from a user action.
+
           Ed11y.open = true;
           Ed11y.panel.classList.remove('ed11y-shut');
           Ed11y.panel.classList.add('ed11y-active');
@@ -1457,7 +1460,9 @@ class Ed11y {
       let direction = 'under';
 
       // Default to displaying under
-      if (buttonTop + tipHeight + scrollTop + buttonSize + 22 > containBottom) {
+      if (buttonTop === 0 && buttonLeft === 0) {
+        direction = 'whompwhomp';
+      } else if (buttonTop + tipHeight + scrollTop + buttonSize + 22 > containBottom) {
         // It won't fit under. Look elsewhere.
         if ( containRight > buttonSize + tipWidth + buttonLeft + 30 &&
           containTop + tipHeight + 30 < containBottom ) {
@@ -1530,6 +1535,17 @@ class Ed11y {
         tip.style.setProperty('bottom', 'auto');
         tip.style.setProperty('left', 'auto');
         break;
+      case 'whompwhomp':
+        nudgeY = align(containBottom, buttonTop, tipHeight);
+        arrow.style.setProperty('top', '0');
+        arrow.style.setProperty('right', '0');
+        arrow.style.setProperty('bottom', '0');
+        arrow.style.setProperty('left', '0');
+        tip.style.setProperty('top', `calc(50vh - ${tipWidth / 2}px)`);
+        tip.style.setProperty('right', 'auto');
+        tip.style.setProperty('bottom', 'auto');
+        tip.style.setProperty('left', `calc(50vh - ${tipHeight / 2}px)`);
+        break;
       }
       if (nudgeX || nudgeY) {
         tip.style.setProperty('transform', `translate(${nudgeX}px, ${nudgeY}px)`);
@@ -1540,13 +1556,15 @@ class Ed11y {
     };
 
     Ed11y.togglePanel = function () {
+
       if (!Ed11y.doubleClickPrevent) {
         // Prevent clicks piling up while scan is running.
         if (Ed11y.running !== true) {
           Ed11y.running = true;
           // Re-scan each time the panel reopens.
-          if (Ed11y.panel.classList.contains('ed11y-active') === false) {
+          if (Ed11y.panel.classList.contains('ed11y-shut') === true) {
             Ed11y.onLoad = false;
+            Ed11y.incremental = false;
             Ed11y.showPanel = true;
             if (Ed11y.dismissedCount > 0 && Ed11y.warningCount === 0 && Ed11y.errorCount === 0) {
               Ed11y.options.showDismissed = false;
@@ -2065,6 +2083,7 @@ class Ed11y {
           button.dataset.ed11yHiddenResult = 'true';
           firstVisible = Ed11y.firstVisibleParent(target);
           alertMessage = Ed11y.M.jumpedToInvisibleTip;
+          console.log(firstVisible);
         }
         else if (target.closest('[aria-hidden="true"]')) {
           firstVisible = target.closest('[aria-hidden="true"]');
@@ -2442,21 +2461,18 @@ class Ed11y {
     Ed11y.visibleElement = function (el) {
       // Checks if this element is visible. Used in parent iterators.
       // false is definitely invisible, true requires continued iteration to tell.
+      // todo: continued iteration may not be working correctly.
       // Todo postpone: Check for offscreen?
       if (el) {
         let style = window.getComputedStyle(el);
-        if (el.classList.contains('ed11y-ring-red') || el.classList.contains('ed11y-ring-yellow')) {
-          return !(style.getPropertyValue('display') === 'none' ||
-            style.getPropertyValue('visibility') === 'hidden' ||
-            style.getPropertyValue('opacity') === '0' ||
-            el.hasAttribute('hidden'));
-        } else return !(style.getPropertyValue('display') === 'none' ||
+        return !(el.closest('[hidden], .sr-only, .visually-hidden') ||
+          style.getPropertyValue('display') === 'none' ||
           style.getPropertyValue('visibility') === 'hidden' ||
           style.getPropertyValue('opacity') === '0' ||
-          el.hasAttribute('hidden') ||
+          style.getPropertyValue('z-index') < 0 ||
           (style.getPropertyValue('overflow') === 'hidden' &&
-            ( el.offsetWidth === 0 ||
-              el.offsetHeight === 0)
+            ( el.offsetWidth < 10 ||
+              el.offsetHeight < 10 )
           )
         );
       }

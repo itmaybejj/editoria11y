@@ -578,7 +578,7 @@ ed11y-element-result[data-ed11y-open='true'] {
 }
 
 :host(ed11y-element-tip.ed11y-element[data-ed11y-open='true']) {
-    z-index: var(--ed11y-buttonZIndex, 9999);
+    z-index: calc(var(--ed11y-buttonZIndex, 9999) + 11) !important;
     display: block;
 }
 
