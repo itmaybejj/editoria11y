@@ -637,9 +637,11 @@ class Ed11y {
             Ed11y.options.showDismissed = false;
           } else if (Ed11y.dismissedCount === 1) {
             Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlert : Ed11y.M.buttonShowHiddenAlert;
+            Ed11y.showDismissed.dataset.ed11yPressed = `${Ed11y.options.showDismissed}`;
             Ed11y.showDismissed.removeAttribute('hidden');
           } else {
             Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlerts(Ed11y.dismissedCount) : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+            Ed11y.showDismissed.dataset.ed11yPressed = `${Ed11y.options.showDismissed}`;
             Ed11y.showDismissed.removeAttribute('hidden');
           }
 
