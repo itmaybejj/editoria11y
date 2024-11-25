@@ -140,6 +140,16 @@ ed11y-element-result {
     color: #111;
     transition: background-color .2s ease-in, opacity .2s ease-in, width .2s ease-in, box-shadow .2s ease-in;
 }
+.ed11y-jump .hover-icon {display:none;}
+.ed11y-jump:hover .hover-icon {
+    display: initial;
+    margin: 4px 0 3px -3px;
+    width: .643em;
+}
+.ed11y-jump:hover .base-icon {
+    display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .ed11y-shut .ed11y-buttonbar a,
     .ed11y-shut .ed11y-buttonbar button:not(#ed11y-toggle, .next) {
@@ -238,7 +248,15 @@ ed11y-element-result {
     margin: 5px -4px 3px -3px;
 }
 #ed11y-show-hidden svg {
-    margin: 4px 0 2px;
+    margin: 5px 0 2px 1px;
+}
+#ed11y-show-hidden .shown,
+#ed11y-show-hidden[data-ed11y-pressed="true"] .hidden {
+    display: none;
+}
+#ed11y-show-hidden .hidden,
+#ed11y-show-hidden[data-ed11y-pressed="true"] .shown {
+    display: initial;
 }
 #ed11y-panel .ed11y-buttonbar button[data-ed11y-pressed="true"],
 #ed11y-panel .ed11y-buttonbar button[aria-pressed="true"],
@@ -253,7 +271,7 @@ ed11y-element-result {
 .ed11y-buttonbar >:hover .ed11y-sr-only,
 .ed11y-buttonbar >:focus-visible .ed11y-sr-only {
     opacity: 1;
-    top: -1px;
+    top: -0.1875em;
     background: var(--ed11y-activeBackground);
     color: var(--ed11y-activeColor);
     box-shadow: 0 0 1px;
@@ -433,7 +451,8 @@ ed11y-element-result {
 }
 
 #ed11y-outline li {
-    padding: 5px;
+    padding: 5px 8px;
+    margin: 0 -8px;
 }
 
 #ed11y-outline a {
@@ -542,13 +561,18 @@ ed11y-element-result[data-ed11y-open='true'] {
     color: var(--ed11y-primaryText, #fffdf7);
 }
 
-.ed11y-result-wrapper .toggle.ok::before {
+/*.ed11y-result-wrapper .toggle.ok::before {
     content: "✓";
+}*/
+.ed11y-result-wrapper .toggle.dismissed svg {
+    width: .8125em;
+    margin: .1875em;
+    vertical-align: top;
 }
-
-.ed11y-result-wrapper .toggle.dismissed.notok::before {
-    content: "–";
-    font-family: georgia, serif;
+.ed11y-result-wrapper .toggle.dismissed::before {
+    content: "";
+    /*content: "✓";
+    font-family: georgia, serif;*/
 }
 
 .ed11y-result-wrapper .toggle.dismissable {

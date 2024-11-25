@@ -1149,7 +1149,7 @@ class Ed11y {
       }
     };
 
-    const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size = 55) {
+    const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size = 17) {
       // Yes this looks like intersect const, but it's math not browser offsets.
       return !(rect1Left + size < rect2Left ||
         rect1Left > rect2Left + size ||
@@ -1285,8 +1285,8 @@ class Ed11y {
           (i > 2 && overlap(mark.markLeft, mark.markTop, Ed11y.jumpList[i - 3].markLeft, Ed11y.jumpList[i - 3].markTop))
         ) {
           // todo postpone: compute actual overlap? We're bouncing by the full amount no matter what which adds too much gapping.
-          nudgeTop = nudgeTop + 21 + previousNudgeTop;
-          nudgeLeft = 21 + previousNudgeLeft;
+          nudgeTop = nudgeTop + 14 + previousNudgeTop;
+          nudgeLeft = 14 + previousNudgeLeft;
         }
 
         let needNudge = false;
@@ -2083,7 +2083,6 @@ class Ed11y {
           button.dataset.ed11yHiddenResult = 'true';
           firstVisible = Ed11y.firstVisibleParent(target);
           alertMessage = Ed11y.M.jumpedToInvisibleTip;
-          console.log(firstVisible);
         }
         else if (target.closest('[aria-hidden="true"]')) {
           firstVisible = target.closest('[aria-hidden="true"]');
