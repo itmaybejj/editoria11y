@@ -626,6 +626,7 @@ ed11y-element-result[data-ed11y-open='true'] {
 .ed11y-tip-wrapper .tip {
     z-index: 1;
     border: 2px solid var(--ed11y-primary, #276499);
+    border-bottom: 0;
     background: var(--ed11y-bg, #fffffe);
     border-radius: var(--ed11y-borderRadius);
     position:absolute;
@@ -698,12 +699,6 @@ ed11y-element-result[data-ed11y-open='true'] {
     grid-template-rows: 2.124em;
     grid-template-areas: "pad count previous next help focus close";
     color: var(--ed11y-primaryText, #fffdf7);
-    margin-bottom: -2px; /* this is just to cover a Safari redraw bug */
-    border-radius: 0 0 3px 3px;
-}
-
-.ed11y-tip-header > * {
-    min-width: 2.124em;
 }
 .ed11y-tip-count {
     grid-area: count;
@@ -732,7 +727,6 @@ ed11y-element-result[data-ed11y-open='true'] {
     width: 2.75em;
     border-left: 1px solid;
     line-height: 1;
-    text-align: center;
 }
 .ed11y-tip-header summary {
     height: 100%;
@@ -742,16 +736,13 @@ ed11y-element-result[data-ed11y-open='true'] {
     width: 2.161em;
     align-items: center;
 }
-.ed11y-tip-header details.button {
-    padding: 0;
-    line-height: 1;
-}
 .ed11y-tip-help-content {
     position: absolute;
     bottom: 2.1em;
     left: 1px;
     right: 1px;
     top: 1px;
+    border-bottom: 1px solid var(--ed11y-bg);
     text-align: left;
     background: var(--ed11y-primary, #276499);
     color: var(--ed11y-primaryText, #fffdf7);
@@ -765,9 +756,6 @@ ed11y-element-result[data-ed11y-open='true'] {
 }
 .ed11y-tip-header summary::marker {
     content: none;
-}
-.ed11y-tip-header:has(details[open]) {
-    box-shadow: 0 -1px;
 }
 .ed11y-tip-header ::-webkit-details-marker {
     display: none;
@@ -783,16 +771,14 @@ ed11y-element-result[data-ed11y-open='true'] {
     color: var(--ed11y-primary, #20160c);
     opacity: .9;
 }
-.ed11y-tip-header details[open] summary {
-
-}
 .ed11y-tip-count {
     padding-right: .8em;
     font-size: .857em;
 }
 .ed11y-tip-header svg {
-    width: 12px;
-    height: 11px;
+    width: 1em;
+    height: 1em;
+    margin: 1px 0 -1px;
 }
 
 .ed11y-tip-wrapper .title {
