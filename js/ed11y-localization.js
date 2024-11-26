@@ -32,7 +32,6 @@ const ed11yLang = {
     buttonHideAlerts: 'Hide accessibility alerts',
     panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">heading outline</a>. Check that it matches how the content is organized visually.</p>',
     panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/" target="_blank" title="Opens in new tab">describes what it means in context</a>, and that there are no images of text.</p>',
-    panelHelpTitle: 'About this tool',
     altLabelPrefix: 'Alt text: ',
     errorAltMissing: '(missing!)',
     errorAltNull: '(none; image marked as decorative)',

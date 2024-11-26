@@ -680,7 +680,7 @@ class Ed11y {
             document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
             document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
             document.documentElement.style.setProperty('--ed11y-activeBorder', Ed11y.theme.panelBarText + '44');
-            document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
+            document.documentElement.style.setProperty('--ed11y-activePanelBorder', Ed11y.theme.panelBarText + '88');
           }
           // todo postpone: aria alert on load?
           /*window.setTimeout(function () {
@@ -696,7 +696,7 @@ class Ed11y {
           document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
           document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
           document.documentElement.style.setProperty('--ed11y-activeBorder', Ed11y.theme.panelBarText + '44');
-          document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
+          document.documentElement.style.setProperty('--ed11y-activePanelBorder', Ed11y.theme.panelBarText + '88');
 
           Ed11y.panelCount.style.display = 'display: none;';
           Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-errors');
