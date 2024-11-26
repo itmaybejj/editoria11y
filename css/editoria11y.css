@@ -695,7 +695,7 @@ ed11y-element-result[data-ed11y-open='true'] {
     background: var(--ed11y-primary, #276499);
     display: grid;
     grid-template-columns: 1fr max-content repeat(5, min-content);
-    grid-template-rows: 31px;
+    grid-template-rows: 2.124em;
     grid-template-areas: "pad count previous next help focus close";
     color: var(--ed11y-primaryText, #fffdf7);
     margin-bottom: -2px; /* this is just to cover a Safari redraw bug */
@@ -703,7 +703,7 @@ ed11y-element-result[data-ed11y-open='true'] {
 }
 
 .ed11y-tip-header > * {
-    min-width: 31px;
+    min-width: 2.124em;
 }
 .ed11y-tip-count {
     grid-area: count;
@@ -725,21 +725,30 @@ ed11y-element-result[data-ed11y-open='true'] {
     grid-area: close;
 }
 .ed11y-tip-header button,
-.ed11y-tip-header .button {
-    padding: 8px 6px 6px;
-    box-shadow: -1px 0;
+.ed11y-tip-header summary {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 2.75em;
+    border-left: 1px solid;
     line-height: 1;
-}
-.ed11y-tip-header .button {
     text-align: center;
-    padding: 8px 0 6px;
+}
+.ed11y-tip-header summary {
+    height: 100%;
+    padding: 0;
+    justify-content: center;
+    display: flex;
+    width: 2.161em;
+    align-items: center;
 }
 .ed11y-tip-header details.button {
     padding: 0;
+    line-height: 1;
 }
 .ed11y-tip-help-content {
     position: absolute;
-    bottom: 30px;
+    bottom: 2.1em;
     left: 1px;
     right: 1px;
     top: 1px;
@@ -752,8 +761,6 @@ ed11y-element-result[data-ed11y-open='true'] {
 }
 .ed11y-tip-header summary {
     cursor: pointer;
-    padding: 8px 0 6px;
-    height: 17px;
     background: var(--ed11y-primary, #276499);
 }
 .ed11y-tip-header summary::marker {
