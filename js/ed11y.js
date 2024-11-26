@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.3';
+    Ed11y.version = '2.3.4';
 
     let defaultOptions = {
 
@@ -284,7 +284,9 @@ class Ed11y {
       }
       Ed11y.once = true;
       Ed11y.checkRunPrevent = () => {
-        let preventCheck = Ed11y.options.preventCheckingIfPresent ? document.querySelector(Ed11y.options.preventCheckingIfPresent) : false;
+        let preventCheck = Ed11y.options.preventCheckingIfPresent ?
+          document.querySelector(Ed11y.options.preventCheckingIfPresent) :
+          false;
         if (preventCheck) {
           console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${Ed11y.options.preventCheckingIfPresent}"` );
         } else if (!preventCheck && !!Ed11y.options.preventCheckingIfAbsent) {
@@ -621,6 +623,7 @@ class Ed11y {
           Ed11y.reset();
         } else {
           // Ignore issue count if this resulted from a user action.
+
           Ed11y.open = true;
           Ed11y.panel.classList.remove('ed11y-shut');
           Ed11y.panel.classList.add('ed11y-active');
@@ -634,9 +637,11 @@ class Ed11y {
             Ed11y.options.showDismissed = false;
           } else if (Ed11y.dismissedCount === 1) {
             Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlert : Ed11y.M.buttonShowHiddenAlert;
+            Ed11y.showDismissed.dataset.ed11yPressed = `${Ed11y.options.showDismissed}`;
             Ed11y.showDismissed.removeAttribute('hidden');
           } else {
             Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlerts(Ed11y.dismissedCount) : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+            Ed11y.showDismissed.dataset.ed11yPressed = `${Ed11y.options.showDismissed}`;
             Ed11y.showDismissed.removeAttribute('hidden');
           }
 
@@ -675,7 +680,7 @@ class Ed11y {
             document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
             document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
             document.documentElement.style.setProperty('--ed11y-activeBorder', Ed11y.theme.panelBarText + '44');
-            document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
+            document.documentElement.style.setProperty('--ed11y-activePanelBorder', Ed11y.theme.panelBarText + '88');
           }
           // todo postpone: aria alert on load?
           /*window.setTimeout(function () {
@@ -691,7 +696,7 @@ class Ed11y {
           document.documentElement.style.setProperty('--ed11y-activeBackground', Ed11y.theme.panelBar);
           document.documentElement.style.setProperty('--ed11y-activeColor', Ed11y.theme.panelBarText);
           document.documentElement.style.setProperty('--ed11y-activeBorder', Ed11y.theme.panelBarText + '44');
-          document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
+          document.documentElement.style.setProperty('--ed11y-activePanelBorder', Ed11y.theme.panelBarText + '88');
 
           Ed11y.panelCount.style.display = 'display: none;';
           Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-errors');
@@ -707,8 +712,7 @@ class Ed11y {
                 Ed11y.M.buttonShowHiddenAlert;
             }
           } else {
-            // todo postpone checkmark looks bad on Android
-            Ed11y.panelCount.textContent = '✓';
+            Ed11y.panelCount.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10.1699 19.1777"><path fill="currentColor" d="M3.7031,10.5527c-.3633-.6562-.6426-1.1387-.8379-1.4473l-.3105-.4863-.2344-.3574c-.5117-.7969-1.0449-1.4551-1.5996-1.9746.3164-.2617.6113-.3926.8848-.3926.3359,0,.6348.123.8965.3691s.5918.7148.9902,1.4062c.4531-1.4727,1.0293-2.8691,1.7285-4.1895.3867-.7188.7314-1.2021,1.0342-1.4502s.7041-.3721,1.2041-.3721c.2656,0,.5938.041.9844.123-1.0039.8086-1.8066,1.7695-2.4082,2.8828s-1.3789,3.0762-2.332,5.8887Z"/></svg>';
             Ed11y.panelToggleTitle.textContent = Ed11y.open ? Ed11y.M.buttonHideChecker : Ed11y.M.buttonShowNoAlert;
           }
         }
@@ -1146,7 +1150,7 @@ class Ed11y {
       }
     };
 
-    const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size = 55) {
+    const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size = 17) {
       // Yes this looks like intersect const, but it's math not browser offsets.
       return !(rect1Left + size < rect2Left ||
         rect1Left > rect2Left + size ||
@@ -1282,8 +1286,8 @@ class Ed11y {
           (i > 2 && overlap(mark.markLeft, mark.markTop, Ed11y.jumpList[i - 3].markLeft, Ed11y.jumpList[i - 3].markTop))
         ) {
           // todo postpone: compute actual overlap? We're bouncing by the full amount no matter what which adds too much gapping.
-          nudgeTop = nudgeTop + 21 + previousNudgeTop;
-          nudgeLeft = 21 + previousNudgeLeft;
+          nudgeTop = nudgeTop + 14 + previousNudgeTop;
+          nudgeLeft = 14 + previousNudgeLeft;
         }
 
         let needNudge = false;
@@ -1397,7 +1401,8 @@ class Ed11y {
       if (reveal) {
         window.setTimeout(() => {
           toolTip.style.setProperty('opacity', '1');
-        }, 75, toolTip, tip);
+          // 140 seems to be the minimum to not flash.
+        }, 140, toolTip, tip);
       }
 
       const mark = button.getRootNode().host;
@@ -1457,7 +1462,9 @@ class Ed11y {
       let direction = 'under';
 
       // Default to displaying under
-      if (buttonTop + tipHeight + scrollTop + buttonSize + 22 > containBottom) {
+      if (buttonTop === 0 && buttonLeft === 0) {
+        direction = 'whompwhomp';
+      } else if (buttonTop + tipHeight + scrollTop + buttonSize + 22 > containBottom) {
         // It won't fit under. Look elsewhere.
         if ( containRight > buttonSize + tipWidth + buttonLeft + 30 &&
           containTop + tipHeight + 30 < containBottom ) {
@@ -1530,6 +1537,17 @@ class Ed11y {
         tip.style.setProperty('bottom', 'auto');
         tip.style.setProperty('left', 'auto');
         break;
+      case 'whompwhomp':
+        nudgeY = align(containBottom, buttonTop, tipHeight);
+        arrow.style.setProperty('top', '0');
+        arrow.style.setProperty('right', '0');
+        arrow.style.setProperty('bottom', '0');
+        arrow.style.setProperty('left', '0');
+        tip.style.setProperty('top', `calc(50vh - ${tipWidth / 2}px)`);
+        tip.style.setProperty('right', 'auto');
+        tip.style.setProperty('bottom', 'auto');
+        tip.style.setProperty('left', `calc(50vh - ${tipHeight / 2}px)`);
+        break;
       }
       if (nudgeX || nudgeY) {
         tip.style.setProperty('transform', `translate(${nudgeX}px, ${nudgeY}px)`);
@@ -1540,13 +1558,15 @@ class Ed11y {
     };
 
     Ed11y.togglePanel = function () {
+
       if (!Ed11y.doubleClickPrevent) {
         // Prevent clicks piling up while scan is running.
         if (Ed11y.running !== true) {
           Ed11y.running = true;
           // Re-scan each time the panel reopens.
-          if (Ed11y.panel.classList.contains('ed11y-active') === false) {
+          if (Ed11y.panel.classList.contains('ed11y-shut') === true) {
             Ed11y.onLoad = false;
+            Ed11y.incremental = false;
             Ed11y.showPanel = true;
             if (Ed11y.dismissedCount > 0 && Ed11y.warningCount === 0 && Ed11y.errorCount === 0) {
               Ed11y.options.showDismissed = false;
@@ -2442,21 +2462,18 @@ class Ed11y {
     Ed11y.visibleElement = function (el) {
       // Checks if this element is visible. Used in parent iterators.
       // false is definitely invisible, true requires continued iteration to tell.
+      // todo: continued iteration may not be working correctly.
       // Todo postpone: Check for offscreen?
       if (el) {
         let style = window.getComputedStyle(el);
-        if (el.classList.contains('ed11y-ring-red') || el.classList.contains('ed11y-ring-yellow')) {
-          return !(style.getPropertyValue('display') === 'none' ||
-            style.getPropertyValue('visibility') === 'hidden' ||
-            style.getPropertyValue('opacity') === '0' ||
-            el.hasAttribute('hidden'));
-        } else return !(style.getPropertyValue('display') === 'none' ||
+        return !(el.closest('[hidden], .sr-only, .visually-hidden') ||
+          style.getPropertyValue('display') === 'none' ||
           style.getPropertyValue('visibility') === 'hidden' ||
           style.getPropertyValue('opacity') === '0' ||
-          el.hasAttribute('hidden') ||
+          style.getPropertyValue('z-index') < 0 ||
           (style.getPropertyValue('overflow') === 'hidden' &&
-            ( el.offsetWidth === 0 ||
-              el.offsetHeight === 0)
+            ( el.offsetWidth < 10 ||
+              el.offsetHeight < 10 )
           )
         );
       }

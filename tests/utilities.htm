@@ -6,6 +6,7 @@
         <title>Editorially Utility Functions</title>
     </head>
 <body>
+<p style="display: none;">THIS IS A HIDDEN PARAGRAPH WITH CAPS LOCK TO SET OFF THE 0 TEST</p>
     <header>
         <h1 id="editoria11y-demo">Editoria11y Utility Functions</h1>
     </header>
@@ -25,12 +26,41 @@
         </section>
         <section id="hidden results">
             <details>
-                <summary>oh hi</summary>
+                <summary>Summary with tip in details, "click here"</summary>
                 <a href="#">Click here</a>
             </details>
-            <div style="visibility: hidden; position: absolute; top: -10000px">
-                Hidden issue.
-                <a href="#" hidden>Click here</a>
+            <div>
+                Visibility hidden. "click"
+                <div style="visibility: hidden;">
+                    <a href="#">Click</a>
+                </div>
+                <a href="#" style="visibility: hidden;">Click</a>
+            </div>
+            <div>
+                Display: none. "download"
+                <div style="display: none;">
+                    <a href="#">Download</a>
+                </div>
+                <a href="#" style="display: none;">Download</a>
+            </div>
+            <div>
+                Hidden. "click"
+                <div hidden>
+                    <a href="#">Click</a>
+                </div>
+                <div>
+                    <a href="#" hidden>Click</a>
+                </div>
+            </div>
+            <div>
+                Zindex. "file"
+                <div style="z-index: -1;">
+                    <a href="#">Click</a>
+                </div>
+            </div>
+            <div>
+                Visually hidden issue.
+                <div style="width: 1px; height: 1px; overflow: hidden;"> <a href="#">here</a></div>
             </div>
         </section>
 
@@ -197,6 +227,7 @@
 
                 const ed11y = new Ed11y({
                     alertMode : 'assertive',
+                  showDismissed: true,
                     ignoreByKey : {
                         'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
                         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
