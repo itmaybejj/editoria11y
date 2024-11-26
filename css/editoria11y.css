@@ -183,6 +183,7 @@ ed11y-element-result {
 }
 #ed11y-visualizers {
     grid-area: tools;
+    max-width: 280px;
 }
 #ed11y-reports-link {
     grid-area: reports;
@@ -597,7 +598,6 @@ ed11y-element-result[data-ed11y-open='true'] {
     top: 10vh;
     left: 2vw;
     display: none;
-    transition: opacity .25s ease-in;
     z-index: calc(var(--ed11y-buttonZIndex, 9999) - 1);
 }
 
@@ -667,9 +667,6 @@ ed11y-element-result[data-ed11y-open='true'] {
     0% { opacity: 0;}
     50% {opacity: 0;}
     100% { opacity: 1;}
-}
-.ed11y-tip-wrapper {
-    transition: opacity .2s ease-out;
 }
 
 .ed11y-tip-wrapper.open .tip {

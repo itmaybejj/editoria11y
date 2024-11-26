@@ -1401,7 +1401,8 @@ class Ed11y {
       if (reveal) {
         window.setTimeout(() => {
           toolTip.style.setProperty('opacity', '1');
-        }, 75, toolTip, tip);
+          // 140 seems to be the minimum to not flash.
+        }, 140, toolTip, tip);
       }
 
       const mark = button.getRootNode().host;
