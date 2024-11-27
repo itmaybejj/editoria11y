@@ -14,7 +14,9 @@ class Ed11yTestImages {
     // Test each image for alternative text.
     Ed11y.elements.img.forEach((el) => {
 
-      let alt = el.getAttribute('alt');
+      let alt = el.matches('[aria-label], [aria-labelledby]') ?
+        Ed11y.computeText(el) :
+        el.getAttribute('alt');
       let altLabel = Ed11y.M.altLabelPrefix;
       let src = el.getAttribute('src');
       let error = false;
