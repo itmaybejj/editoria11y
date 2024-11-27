@@ -38,6 +38,9 @@
             </div>
 
             <div class="positive"><h4>Skipped and empty heading (duplicate alert check)</h4><h6></h6></div>
+            <div class="negative">
+                <h4 class="gutenbergBadAria" aria-label="">This heading has a blank aria-label, but that should be ignored by config (needed for Gutenberg)</h4>
+            </div>
 
             <h3>Heading hidden from screen readers</h3>
             <div class="negative">
@@ -115,8 +118,9 @@
 
             <p class="positive"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs">This link has text and an image.<img alt="A lovely gray box" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
 
-            <h3 id="images-ignored">Ignored images</h3>
+            <h3 id="images-ignored">Ignore handling on images</h3>
             <p class="negative">Aria hidden image <img aria-hidden src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="negative"><a href="#" aria-label="ok">Image inside an aria-labelled link.<img alt="tbd" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
             <p class="positive">Aria labelled image <img aria-label="tbd" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
 
 
@@ -430,6 +434,7 @@
             //theme : 'sleekTheme',
             theme : 'darkTheme',
             outlineExclude : '.utility',
+            ignoreAriaOnElements: '.gutenbergBadAria',
             linkIgnoreStrings: /\(opens in new window\)|download/,
             linkIgnoreSelector: '.link-purpose',
             embeddedContent: '#embed',

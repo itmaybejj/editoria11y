@@ -26,7 +26,7 @@ class Ed11yTestHeadings {
         // first in editable zone
         if (editableParent) {
           Ed11y.options.editorHeadingLevel.some(level => {
-            if (editableParent.matches(level.selector)) {
+            if (editableParent.closest(level.selector)) {
               if (level.previousHeading === 'inherit') {
                 // Inherit levels
                 return true;

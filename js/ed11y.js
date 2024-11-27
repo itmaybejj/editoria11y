@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.4';
+    Ed11y.version = '2.3.5';
 
     let defaultOptions = {
 
@@ -23,12 +23,15 @@ class Ed11y {
       // Containers to globally ignore, e.g., "header *, .card *"
       ignoreElements: false,
 
+      // Ignore Aria on these elements (Gutenberg labels headings while editing.)
+      ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
+
       // Disable tests on specific elements
       // Include and modify this entire object in your call
       ignoreByKey: {
         'p': 'table p',
         // 'h': false,
-        'img': '[aria-hidden], [aria-hidden] img', // May get false negatives in accordions, but needed for icons
+        'img': '[aria-hidden], [aria-hidden] img, a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img', // May get false negatives in accordions, but needed for icons
         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
         // 'li': false,
         // 'blockquote': false,
@@ -2242,6 +2245,9 @@ class Ed11y {
 
     // Handle aria-label or labelled-by. Latter "wins" and can self-label.
     Ed11y.computeAriaLabel = function (element, recursing = 0) {
+      if (Ed11y.options.ignoreAriaOnElements && element.matches(Ed11y.options.ignoreAriaOnElements)) {
+        return 'noAria';
+      }
       const labelledBy = element.getAttribute('aria-labelledby');
       if (!recursing && labelledBy) {
         const target = labelledBy.split(/\s+/);
@@ -2254,8 +2260,7 @@ class Ed11y {
           return returnText;
         }
       }
-      if (element.getAttribute('aria-label') && element.getAttribute('aria-label').trim().length > 0) {
-        // To-do: add empty and whitespace string tests.
+      if (element.hasAttribute('aria-label')) {
         return element.getAttribute('aria-label');
       }
       return 'noAria';
@@ -2565,7 +2570,7 @@ class Ed11y {
       });
     };
 
-    if (CSS.supports('selector(:is(body))')) {
+    if (CSS.supports('selector(:has(body))')) {
       Ed11y.initialize();
     } else {
       console.warn(Ed11y.M.consoleNotSupported);
