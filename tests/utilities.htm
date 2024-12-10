@@ -16,7 +16,7 @@
 
             <h2>Overflow</h2>
             <div>
-                <ul><li><a href>stack positioning</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li></ul>
+                <ul><li><a href>stack positioning</a></li><li><a href>click here</a></li><li><a href="https://princeton.edu">click here</a></li><li><a href="https://princeton.edu/download.pdf">click here</a></li><li><a href="https://princeton.edu/download.pdf" target="_blank">click here</a></li><li><a href>click here</a></li></ul>
             </div>
             <div class="positive" style="width: 1em; height: 1em; overflow: hidden;">
                 <h4 style="background: silver; padding: 1em; font-size: 14px;">This editor-only utility heading will be skipped in the outline</h4>
@@ -97,6 +97,9 @@
             <h3>Link with ignored text</h3>
             <div class="positive">
                 <a href="#foo">Click here <span class="ignore-class">ignoreme</span></a>
+            </div>
+            <div class="positive">
+                <a href="https://princeton.edu"></a>
             </div>
 
             <h3>Aria:hidden image</h3>
@@ -236,13 +239,20 @@
                     shadowComponents : 'shadow-test, shadow-test-no-hits',
                     hiddenHandlers : '[hidden]',
                     checkRoots : 'body',
-                    linkIgnoreStrings: '\(link is external\)',
+                    //linkIgnoreStrings: '\(link is external\)',
                     customTests : 2,
                     theme: 'sleekTheme',
-                    linkIgnoreSelector : '.ignore-class',
+                    linkIgnoreSelector : '.ignore-class, .link-purpose-text',
                     panelNoCover: '#klaro_toggle_dialog',
                     reportsURL: 'https://www.princeton.edu',
                 });
+            </script>
+            <link rel="stylesheet" media="all" href="https://cdn.jsdelivr.net/gh/itmaybejj/linkpurpose@main/css/linkpurpose.css">
+            <script src="https://cdn.jsdelivr.net/gh/itmaybejj/linkpurpose@main/js/linkpurpose.min.js"></script>
+            <script>
+
+              const linkPurpose = new LinkPurpose({})
+
             </script>
 
         </div>

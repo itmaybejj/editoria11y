@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.5';
+    Ed11y.version = '2.3.6';
 
     let defaultOptions = {
 
@@ -763,21 +763,6 @@ class Ed11y {
           location = result.element;
           position = result.position;
         }
-        if (result.element.style.outline.indexOf('alert') === -1 ) {
-          // Set property unless alert is already set.
-          const display = window.getComputedStyle(result.element).getPropertyValue('display');
-          let outlineClass;
-          if (display.indexOf('inline') === -1 || result.element.tagName === 'IMG') {
-            outlineClass = result.dismissalKey ?
-              'ed11y-warning-block'
-              : 'ed11y-error-block';
-          } else {
-            outlineClass = result.dismissalKey ?
-              'ed11y-warning-inline'
-              : 'ed11y-error-inline';
-          }
-          result.element.classList.add(outlineClass);
-        }
       }
       location.insertAdjacentElement(position, mark);
       Ed11y.jumpList.unshift(mark);
@@ -873,6 +858,7 @@ class Ed11y {
 
       if (rootRestrict && Ed11y.roots) {
         // Add array of elements matching selector, excluding the provided ignore list.
+        // Todo this can dupe
         Ed11y.roots.forEach(root => {
           Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector}${shadowSelector})${ignore}`)));
         });
