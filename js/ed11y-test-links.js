@@ -43,7 +43,7 @@ class Ed11yTestLinks {
           el.querySelector(Ed11y.options.linkIgnoreSelector)
           )
       ) {
-        // already flagged by link test
+        // Link with no text at all.
         if (hasImg === false) {
           Ed11y.results.push({
             element: el,
@@ -67,7 +67,9 @@ class Ed11yTestLinks {
           // Checks if link text is not descriptive.
           let linkStrippedText = textContent.toLowerCase();
           // Create version of text without "open in new window" warnings.
-          if (Ed11y.options.linkStringsNewWindows && Ed11y.options.linkStringsNewWindows !== Ed11y.M.linkStringsNewWindows) {
+
+          if (Ed11y.options.linkStringsNewWindows &&
+            Ed11y.options.linkStringsNewWindows !== Ed11y.M.linkStringsNewWindows) {
             // don't strip on the default, which is loose.
             linkStrippedText = linkStrippedText.replace(Ed11y.options.linkIgnoreStrings, '');
           }
@@ -76,10 +78,11 @@ class Ed11yTestLinks {
               linkStrippedText.replace(Ed11y.options.linkIgnoreStrings, '')
               : linkStrippedText;
           }
-          if (linkStrippedText.trim().length === 0) {
+          if (linkStrippedText.replace(/"|'|\?|\.|-|\s+/g, '').length === 0) {
             // No Text because of stripping out ignoreStrings.
             return 'linkNoTextFromIgnore';
           }
+
           // todo later: use regex to find any three-letter TLD followed by a slash.
           // todo later: parameterize TLD list
           let linksUrls = Ed11y.options.linksUrls ? Ed11y.options.linksUrls : Ed11y.M.linksUrls;
