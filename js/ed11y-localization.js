@@ -279,7 +279,7 @@ const ed11yLang = {
         `<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
         ${ignoredText ? Ed11y.M.linkTextIgnored(ignoredText) : Ed11y.M.linkNoTextExample}
         <p><strong>To fix:</strong></p>
-        <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describes where it goes.</li>`,
+        <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describe where it goes.</li>`,
     },
 
     linkTextIsURL : {
