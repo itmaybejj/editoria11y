@@ -43,7 +43,7 @@ class Ed11yTestLinks {
           el.querySelector(Ed11y.options.linkIgnoreSelector)
           )
       ) {
-        // already flagged by link test
+        // Link with no text at all.
         if (hasImg === false) {
           Ed11y.results.push({
             element: el,
@@ -65,17 +65,24 @@ class Ed11yTestLinks {
       else {
         let linkTextCheck = function (textContent) {
           // Checks if link text is not descriptive.
-          let linkStrippedText = textContent;
+          let linkStrippedText = textContent.toLowerCase();
           // Create version of text without "open in new window" warnings.
-          if (Ed11y.options.linkStringsNewWindows && Ed11y.options.linkStringsNewWindows !== Ed11y.M.linkStringsNewWindows) {
+
+          if (Ed11y.options.linkStringsNewWindows &&
+            Ed11y.options.linkStringsNewWindows !== Ed11y.M.linkStringsNewWindows) {
             // don't strip on the default, which is loose.
-            linkStrippedText = linkStrippedText.toLowerCase().replace(Ed11y.options.linkIgnoreStrings, '');
+            linkStrippedText = linkStrippedText.replace(Ed11y.options.linkIgnoreStrings, '');
           }
           if (Ed11y.options.linkIgnoreStrings) {
             linkStrippedText = Ed11y.options.linkIgnoreStrings ?
-              linkStrippedText.toLowerCase().replace(Ed11y.options.linkIgnoreStrings, '')
-              : linkStrippedText.toLowerCase();
+              linkStrippedText.replace(Ed11y.options.linkIgnoreStrings, '')
+              : linkStrippedText;
           }
+          if (linkStrippedText.replace(/"|'|\?|\.|-|\s+/g, '').length === 0) {
+            // No Text because of stripping out ignoreStrings.
+            return 'linkNoTextFromIgnore';
+          }
+
           // todo later: use regex to find any three-letter TLD followed by a slash.
           // todo later: parameterize TLD list
           let linksUrls = Ed11y.options.linksUrls ? Ed11y.options.linksUrls : Ed11y.M.linksUrls;
@@ -100,19 +107,27 @@ class Ed11yTestLinks {
         if (textCheck !== 'none') {
           let dismissKey = false;
           let error = false;
-          if (!hasImg) {
-            error = 'linkTextIsURL';
-            dismissKey = Ed11y.dismissalKey(linkText);
-          }
-          if (textCheck === 'generic') {
-            error = 'linkTextIsGeneric';
-            dismissKey = Ed11y.dismissalKey(linkText);
+          let content;
+          if (textCheck === 'linkNoTextFromIgnore') {
+            content = Ed11y.M['linkNoText'].tip(Ed11y.sanitizeForHTML(Ed11y.computeText(el)));
+            error = 'linkNoText';
+          } else {
+            if (!hasImg) {
+              error = 'linkTextIsURL';
+              content = Ed11y.M[error].tip(Ed11y.sanitizeForHTML(linkText));
+              dismissKey = Ed11y.dismissalKey(linkText);
+            }
+            if (textCheck === 'generic') {
+              error = 'linkTextIsGeneric';
+              content = Ed11y.M[error].tip(Ed11y.sanitizeForHTML(linkText));
+              dismissKey = Ed11y.dismissalKey(linkText);
+            }
           }
           if (error) {
             Ed11y.results.push({
               element: el,
               test: error,
-              content: Ed11y.M[error].tip(Ed11y.sanitizeForHTML(linkText)),
+              content: content,
               position: 'beforebegin',
               dismissalKey: dismissKey,
             });

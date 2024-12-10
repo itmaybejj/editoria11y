@@ -18,26 +18,13 @@ ed11y-element-result {
 
 .ed11y-ring-red {
     box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px !important;
-    outline: 2px solid var(--ed11y-alert, #b80519) !important;
-    outline-offset: 1px !important;
+    outline: 2px solid transparent;
 }
 
 .ed11y-ring-yellow {
-    box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 1px 3px !important;
+    box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px !important;
     outline: 2px solid var(--ed11y-warning, #fad859) !important;
     outline-offset: 1px !important;
-}
-.ed11y-warning-block {
-    box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 1px 3px !important;
-}
-.ed11y-warning-inline {
-    box-shadow: inset 0 -2px var(--ed11y-warning, #fad859), 0 2px var(--ed11y-warning, #fad859) !important;
-}
-.ed11y-error-block {
-    box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px !important;
-}
-.ed11y-error-inline {
-    box-shadow: inset 0 -1px #fff, inset 0 -2px var(--ed11y-alert, #b80519), 0 2px var(--ed11y-alert, #b80519) !important;
 }
 .ed11y-wrapper :focus-visible:not([tabindex="-1"]) {
     outline: 2px solid var(--ed11y-focusRing);

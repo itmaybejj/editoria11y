@@ -131,7 +131,15 @@ class Ed11yElementResult extends HTMLElement {
     this.toggle.setAttribute('aria-expanded', changeTo);
     let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
     if (Ed11y.options.inlineAlerts) {
-      this.result.element.classList.toggle(highlightOutline);
+      Ed11y.resetClass([
+        'ed11y-hidden-highlight',
+        'ed11y-ring-red',
+        'ed11y-ring-yellow',
+        'ed11y-warning-block',
+        'ed11y-error-block',
+        'ed11y-warning-inline',
+        'ed11y-error-inline',
+      ]);
     } else {
       Ed11y.editableHighlighter(this.resultID, changeTo);
     }
@@ -143,6 +151,25 @@ class Ed11yElementResult extends HTMLElement {
       }));
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');
+      if (Ed11y.options.inlineAlerts) {
+        this.result.element.classList.add(highlightOutline);
+        // Removed in 2.3.6; Todo: confirm not needed and delete.
+        /*if (this.result.element.style.outline.indexOf('alert') === -1 ) {
+          // Set property unless alert is already set.
+          const display = window.getComputedStyle(this.result.element).getPropertyValue('display');
+          let outlineClass;
+          if (display.indexOf('inline') === -1 || this.result.element.tagName === 'IMG') {
+            outlineClass = this.result.dismissalKey ?
+              'ed11y-warning-block'
+              : 'ed11y-error-block';
+          } else {
+            outlineClass = this.result.dismissalKey ?
+              'ed11y-warning-inline'
+              : 'ed11y-error-inline';
+          }
+          this.result.element.classList.add(outlineClass);
+        }*/
+      }
       requestAnimationFrame(()=>Ed11y.alignTip(this.toggle, this.tip, 4, true));
       if (!Ed11y.jumpList) {
         Ed11y.buildJumpList();

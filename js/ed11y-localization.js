@@ -267,12 +267,19 @@ const ed11yLang = {
             `,
     },
 
+    linkNoTextExample: '<p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>',
+    linkTextIgnored: (ignoredText) => `
+    <p>Screen readers will only read the text of the link type indicator on this link:<br>
+    <em>"<strong>${ignoredText}</strong>"</em></p>
+    `,
+
     linkNoText : {
       title: 'Link with no accessible text',
-      tip: () =>
-        `<p>This link is either a typo (e.g., a linked space character), or wrapped around something with no text alternative (an image with no alt attribute).</p>
-            <p>Screen readers will either pause with an uninformative silence when they reach this link: <br>"Link, [...awkward pause where the link title should be...],"<br>or spell out the URL, character by character: <br>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</p>
-            <p><strong>To fix:</strong> add text if this should be a link, or delete it if it is a typo.</p>`,
+      tip: (ignoredText) =>
+        `<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
+        ${ignoredText ? Ed11y.M.linkTextIgnored(ignoredText) : Ed11y.M.linkNoTextExample}
+        <p><strong>To fix:</strong></p>
+        <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describe where it goes.</li>`,
     },
 
     linkTextIsURL : {
