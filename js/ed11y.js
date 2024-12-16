@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.6';
+    Ed11y.version = '2.3.7';
 
     let defaultOptions = {
 
@@ -1441,7 +1441,7 @@ class Ed11y {
       //tip.closest('.ed11y-wrapper').style.setProperty('width', buttonSize + 'px');
       //tip.closest('.ed11y-wrapper').style.setProperty('height', buttonSize + 'px');
       document.documentElement.style.setProperty('--ed11y-buttonWidth', buttonSize + 'px');
-      tip.style.setProperty('max-width', `${containWidth > 280 ? containWidth : 280}px`);
+      tip.style.setProperty('max-width', `min(${containWidth > 280 ? containWidth : 280}px, 90vw)`);
       const containRight = Math.min(windowWidth, containLeft + containWidth);
       toolTip.style.setProperty('top', buttonOffset.top + scrollTop + 'px');
       toolTip.style.setProperty('left', buttonOffset.left + leftAdd + 'px');
@@ -1474,16 +1474,22 @@ class Ed11y {
       let nudgeX = 0;
       let nudgeY = 0;
 
-      const align = function(container, alignTo, size) {
+      const align = function(container, alignTo, size, direction) {
         let over = container - (alignTo + size + buttonSize);
         if (over < 0) {
+          if (direction === 'horizontal' && alignTo + over < 0) {
+            // Prevent left edge overshoot.
+            return Math.max(0 - alignTo, 4 - size);
+          }
           return Math.max(over, buttonSize + 10 - size);
         }
+        return 0;
+
       };
 
       switch (direction) {
       case 'under':
-        nudgeX = align(containRight, buttonLeft, tipWidth);
+        nudgeX = align(containRight, buttonLeft, tipWidth, 'horizontal');
         arrow.style.setProperty('top', buttonSize + 'px');
         arrow.style.setProperty('right', 'auto');
         arrow.style.setProperty('bottom', 'auto');
@@ -1494,7 +1500,7 @@ class Ed11y {
         tip.style.setProperty('left', '-4px');
         break;
       case 'above':
-        nudgeX = align(containRight, buttonLeft, tipWidth);
+        nudgeX = align(containRight, buttonLeft, tipWidth, 'horizontal');
         arrow.style.setProperty('top', 'auto');
         arrow.style.setProperty('right', 'auto');
         arrow.style.setProperty('bottom', '2px');
@@ -1505,7 +1511,7 @@ class Ed11y {
         tip.style.setProperty('left', '-4px');
         break;
       case 'right':
-        nudgeY = align(containBottom, buttonTop, tipHeight);
+        nudgeY = align(containBottom, buttonTop, tipHeight, 'vertical');
         arrow.style.setProperty('top', buttonSize / 2 - 10 + 'px');
         arrow.style.setProperty('right', 'auto');
         arrow.style.setProperty('bottom', 'auto');
@@ -1516,7 +1522,7 @@ class Ed11y {
         tip.style.setProperty('left', buttonSize + 10 + 'px');
         break;
       case 'left':
-        nudgeY = align(containBottom, buttonTop, tipHeight);
+        nudgeY = align(containBottom, buttonTop, tipHeight, 'vertical');
         arrow.style.setProperty('top', buttonSize / 2 - 10 + 'px');
         arrow.style.setProperty('right', '0');
         arrow.style.setProperty('bottom', 'auto');
@@ -1527,7 +1533,7 @@ class Ed11y {
         tip.style.setProperty('left', 'auto');
         break;
       case 'whompwhomp':
-        nudgeY = align(containBottom, buttonTop, tipHeight);
+        nudgeY = align(containBottom, buttonTop, tipHeight, 'horizontal');
         arrow.style.setProperty('top', '0');
         arrow.style.setProperty('right', '0');
         arrow.style.setProperty('bottom', '0');
