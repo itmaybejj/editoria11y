@@ -2219,10 +2219,14 @@ class Ed11y {
 
     /*=============== Utilities ================*/
 
+    Ed11y.flattenText = function (text) {
+      return text.replace(/[\n\r]+|\s{2,}/g, ' ').trim();
+    };
+
     // Gets trimmed and normalized inner text nodes.
     // Use computeText() instead for the full accessible name calculation.
     Ed11y.getText = function (el) {
-      return el.textContent.replace(/[\n\r]+|\s{2,}/g, ' ').trim();
+      return Ed11y.flattenText(el.textContent);
     };
 
     Ed11y.parents = function (el) {
@@ -2319,6 +2323,7 @@ class Ed11y {
       walker: while (treeWalker.nextNode()) {
         count++;
 
+        // todo need to handle bugs found in Sa11y for CDATA type text
         if (treeWalker.currentNode.nodeType === Node.TEXT_NODE) {
           computedText += ' ' + treeWalker.currentNode.nodeValue;
           continue;
@@ -2391,6 +2396,20 @@ class Ed11y {
             // Reset
             addTitleIfNoName = false;
             aText = false;
+          }
+          computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
+          break;
+        case 'SLOT':
+          if (treeWalker.currentNode.assignedNodes()) {
+            // Slots have a special shadow DOM instance.
+            const children = treeWalker.currentNode.assignedNodes();
+            children?.forEach(child => {
+              if (child.nodeType === Node.ELEMENT_NODE) {
+                computedText += Ed11y.computeText(child);
+              } else if (child.nodeType === Node.TEXT_NODE) {
+                computedText += Ed11y.flattenText(child.nodeValue); // todo cleanup
+              }
+            });
           }
           computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
           break;
