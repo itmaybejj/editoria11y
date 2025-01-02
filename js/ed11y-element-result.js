@@ -147,7 +147,11 @@ class Ed11yElementResult extends HTMLElement {
       this.tip.style.setProperty('opacity', '0');
       // Allow for themes to reveal hidden tips
       document.dispatchEvent(new CustomEvent('ed11yPop', {
-        detail: { id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result') }
+        detail: {
+          id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result'),
+          result: this.result,
+          tip: this.tip
+        }
       }));
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');

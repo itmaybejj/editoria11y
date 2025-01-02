@@ -100,7 +100,7 @@ class Ed11y {
         bgHighlight: '#7b1919',
         text: '#20160c',
         primary: '#276499', // 276499
-        primaryText: '#fffdf7',
+        primaryText: '#eff2ff',
         button: 'transparent', // deprecate?
         panelBar: '#1e517c',
         panelBarText: '#fffdf7',
@@ -184,6 +184,8 @@ class Ed11y {
       // ruleset toggling
       // form label tests
       // detectSPArouting: false,
+
+      editLinks: false, // Add links to edit content in tooltips.
 
       editorHeadingLevel: [
         // Sets previous heading level for contentEditable fields.
