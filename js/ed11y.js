@@ -1877,13 +1877,12 @@ class Ed11y {
     };
 
     Ed11y.intersectionObservers = function () {
-      Ed11y.elements.editable?.forEach(editable => {
-        editable.addEventListener('scroll', function() {
-          // note: we could just adjust the transform rather than recalculating.
-          Ed11y.scrollPending = Ed11y.scrollPending < 2 ? Ed11y.scrollPending + 1 : Ed11y.scrollPending;
-          requestAnimationFrame(() => Ed11y.updateTipLocations());
-        });
-      });
+
+      document.addEventListener('scroll', function() {
+        // Trigger on any scroll event; could be this or a parent.
+        Ed11y.scrollPending = Ed11y.scrollPending < 2 ? Ed11y.scrollPending + 1 : Ed11y.scrollPending;
+        requestAnimationFrame(() => Ed11y.updateTipLocations());
+      }, true);
 
       Ed11y.selectionChanged = debounce(() => {
         if (rangeChange()) {
@@ -2401,13 +2400,13 @@ class Ed11y {
           break;
         case 'SLOT':
           if (treeWalker.currentNode.assignedNodes()) {
-            // Slots have a special shadow DOM instance.
+            // Slots have specific shadow DOM methods.
             const children = treeWalker.currentNode.assignedNodes();
             children?.forEach(child => {
               if (child.nodeType === Node.ELEMENT_NODE) {
                 computedText += Ed11y.computeText(child);
               } else if (child.nodeType === Node.TEXT_NODE) {
-                computedText += Ed11y.flattenText(child.nodeValue); // todo cleanup
+                computedText += Ed11y.flattenText(child.nodeValue);
               }
             });
           }
