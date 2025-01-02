@@ -1878,10 +1878,22 @@ class Ed11y {
 
     Ed11y.intersectionObservers = function () {
 
+      Ed11y.elements.editable?.forEach(editable => {
+        editable.addEventListener('scroll', function() {
+          // Align tips when scrolling editable container.
+          if (Ed11y.openTip.button) {
+            Ed11y.scrollPending = Ed11y.scrollPending < 2 ? Ed11y.scrollPending + 1 : Ed11y.scrollPending;
+            requestAnimationFrame(() => Ed11y.updateTipLocations());
+          }
+        });
+      });
+
       document.addEventListener('scroll', function() {
-        // Trigger on any scroll event; could be this or a parent.
-        Ed11y.scrollPending = Ed11y.scrollPending < 2 ? Ed11y.scrollPending + 1 : Ed11y.scrollPending;
-        requestAnimationFrame(() => Ed11y.updateTipLocations());
+        // Trigger on scrolling other containers, unless it will flicker a tip.
+        if (!Ed11y.openTip.button) {
+          Ed11y.scrollPending = Ed11y.scrollPending < 2 ? Ed11y.scrollPending + 1 : Ed11y.scrollPending;
+          requestAnimationFrame(() => Ed11y.updateTipLocations());
+        }
       }, true);
 
       Ed11y.selectionChanged = debounce(() => {
