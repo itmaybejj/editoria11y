@@ -753,7 +753,6 @@ class Ed11y {
         // [5] dismissalStatus
         */
       let mark = document.createElement('ed11y-element-result');
-      mark.classList.add('ed11y-preload');
       let location;
       let position = 'beforebegin';
       mark.setAttribute('id', 'ed11y-result-' + index);
@@ -1344,11 +1343,6 @@ class Ed11y {
 
         });
       }
-      Ed11y.jumpList?.forEach(mark => {
-        // Now make visible.
-        // todo: this still doesn't work in Drupal live edit mode.
-        mark.classList.remove('ed11y-preload');
-      });
     };
 
 
