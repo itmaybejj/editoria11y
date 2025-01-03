@@ -94,7 +94,6 @@ class Ed11yElementResult extends HTMLElement {
       host.setAttribute('data-ed11y-action', stateChange);
       if (stateChange === 'open') {
         window.setTimeout(function () {
-          console.warn('it was me');
           let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
           activeTip?.shadowRoot.querySelector('.title').focus();
         }, 500);
@@ -147,7 +146,11 @@ class Ed11yElementResult extends HTMLElement {
       this.tip.style.setProperty('opacity', '0');
       // Allow for themes to reveal hidden tips
       document.dispatchEvent(new CustomEvent('ed11yPop', {
-        detail: { id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result') }
+        detail: {
+          id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result'),
+          result: this.result,
+          tip: this.tip
+        }
       }));
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');

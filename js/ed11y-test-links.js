@@ -11,7 +11,7 @@ class Ed11yTestLinks {
 
     Ed11y.elements.a?.forEach((el) => {
       // todo: replace with full accessible name calculation
-      let linkText = Ed11y.computeText(el, 0, !!Ed11y.options.linkIgnoreSelector); // returns text or 'noAria';
+      let linkText = Ed11y.computeText(el, 0, !!Ed11y.options.linkIgnoreSelector);
       let img = el.querySelectorAll('img');
       let hasImg = img.length > 0;
       let document = el.matches(Ed11y.options.documentLinks);

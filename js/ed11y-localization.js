@@ -70,6 +70,7 @@ const ed11yLang = {
     undismissNotePermissions: 'This alert has been hidden by an administrator',
     reportsLink: 'Open site reports in new tab',
     closeTip: 'Close',
+    panelHelpTitle: 'About this tool',
     panelHelp : `
     <p><a href="https://editoria11y.princeton.edu/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
     <p>Many alerts are "manual checks." Manual checks can be dismissed:</p>

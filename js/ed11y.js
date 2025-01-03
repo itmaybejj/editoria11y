@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.6';
+    Ed11y.version = '2.3.7';
 
     let defaultOptions = {
 
@@ -100,7 +100,7 @@ class Ed11y {
         bgHighlight: '#7b1919',
         text: '#20160c',
         primary: '#276499', // 276499
-        primaryText: '#fffdf7',
+        primaryText: '#eff2ff',
         button: 'transparent', // deprecate?
         panelBar: '#1e517c',
         panelBarText: '#fffdf7',
@@ -184,6 +184,8 @@ class Ed11y {
       // ruleset toggling
       // form label tests
       // detectSPArouting: false,
+
+      editLinks: false, // Add links to edit content in tooltips.
 
       editorHeadingLevel: [
         // Sets previous heading level for contentEditable fields.
@@ -429,7 +431,7 @@ class Ed11y {
               Ed11y.customTestsFinished++;
               if (Ed11y.customTestsFinished === Ed11y.options.customTests) {
                 Ed11y.customTestsRunning = false;
-                Ed11y.updatePanel();
+                window.requestAnimationFrame(() => Ed11y.updatePanel());
               }
             });
             window.setTimeout(function() {
@@ -438,7 +440,7 @@ class Ed11y {
                 if (Ed11y.panelToggle) {
                   Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleAccessibilityTools;
                 }
-                Ed11y.updatePanel();
+                window.requestAnimationFrame(() => Ed11y.updatePanel());
                 console.error('Editoria11y was told to wait for custom tests, but no tests were returned.');
               }
             }, 1000);
@@ -454,7 +456,7 @@ class Ed11y {
             if (Ed11y.panelToggle) {
               Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleAccessibilityTools;
             }
-            Ed11y.updatePanel();
+            window.requestAnimationFrame(() => Ed11y.updatePanel());
           }, 0);
         }
 
@@ -564,6 +566,10 @@ class Ed11y {
       if (Ed11y.options.alertMode !== 'headless') {
         // Not headless; draw the interface.
 
+        if (!Ed11y.bodyStyle) {
+          Ed11y.paintReady();
+        }
+
         if (Ed11y.onLoad === true) {
           Ed11y.onLoad = false;
 
@@ -578,8 +584,12 @@ class Ed11y {
           // Create the panel DOM on load.
 
           let panel = document.createElement('ed11y-element-panel');
+          panel.classList.add('ed11y-preload');
           document.querySelector('body').appendChild(panel);
           Ed11y.attachCSS(Ed11y.panel);
+          window.setTimeout(()=> {
+            panel.classList.remove('ed11y-preload');
+          },0, panel);
           Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsContent;
           Ed11y.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = Ed11y.M.buttonOutlineContent;
           Ed11y.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = Ed11y.M.panelCheckOutline;
@@ -651,7 +661,7 @@ class Ed11y {
           window.setTimeout(function () {
             document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
             if (!Ed11y.ignoreAll) {
-              Ed11y.showResults();
+              requestAnimationFrame(() => Ed11y.showResults());
             }
           }, 0);
         }
@@ -719,14 +729,10 @@ class Ed11y {
             Ed11y.panelToggleTitle.textContent = Ed11y.open ? Ed11y.M.buttonHideChecker : Ed11y.M.buttonShowNoAlert;
           }
         }
-
-        Ed11y.panel.classList.remove('ed11y-preload');
         Ed11y.panelToggle.classList.remove('disabled');
         Ed11y.panelToggle.removeAttribute('aria-disabled');
         Ed11y.alignPanel();
-        if (!Ed11y.bodyStyle) {
-          Ed11y.paintReady();
-        }
+        Ed11y.panel.classList.remove('ed11y-preload');
       }
       Ed11y.running = false;
       if (Ed11y.elements['editable']) {
@@ -937,7 +943,7 @@ class Ed11y {
         if (Object.keys(Ed11y.dismissedAlerts[Ed11y.options.currentPage]).length === 0) {
           delete Ed11y.dismissedAlerts[Ed11y.options.currentPage];
         }
-        Ed11y.updatePanel();
+        window.requestAnimationFrame(() => Ed11y.updatePanel());
       } else {
         let dismissal = {};
         dismissal[dismissalKey] = dismissalType;
@@ -1340,11 +1346,9 @@ class Ed11y {
       }
       Ed11y.jumpList?.forEach(mark => {
         // Now make visible.
+        // todo: Edge still flickers on redraw.
         mark.classList.remove('ed11y-preload');
       });
-      if (!Ed11y.bodyStyle) {
-        Ed11y.paintReady();
-      }
     };
 
 
@@ -1441,7 +1445,7 @@ class Ed11y {
       //tip.closest('.ed11y-wrapper').style.setProperty('width', buttonSize + 'px');
       //tip.closest('.ed11y-wrapper').style.setProperty('height', buttonSize + 'px');
       document.documentElement.style.setProperty('--ed11y-buttonWidth', buttonSize + 'px');
-      tip.style.setProperty('max-width', `${containWidth > 280 ? containWidth : 280}px`);
+      tip.style.setProperty('max-width', `min(${containWidth > 280 ? containWidth : 280}px, 90vw)`);
       const containRight = Math.min(windowWidth, containLeft + containWidth);
       toolTip.style.setProperty('top', buttonOffset.top + scrollTop + 'px');
       toolTip.style.setProperty('left', buttonOffset.left + leftAdd + 'px');
@@ -1474,16 +1478,22 @@ class Ed11y {
       let nudgeX = 0;
       let nudgeY = 0;
 
-      const align = function(container, alignTo, size) {
+      const align = function(container, alignTo, size, direction) {
         let over = container - (alignTo + size + buttonSize);
         if (over < 0) {
+          if (direction === 'horizontal' && alignTo + over < 0) {
+            // Prevent left edge overshoot.
+            return Math.max(0 - alignTo, 4 - size);
+          }
           return Math.max(over, buttonSize + 10 - size);
         }
+        return 0;
+
       };
 
       switch (direction) {
       case 'under':
-        nudgeX = align(containRight, buttonLeft, tipWidth);
+        nudgeX = align(containRight, buttonLeft, tipWidth, 'horizontal');
         arrow.style.setProperty('top', buttonSize + 'px');
         arrow.style.setProperty('right', 'auto');
         arrow.style.setProperty('bottom', 'auto');
@@ -1494,7 +1504,7 @@ class Ed11y {
         tip.style.setProperty('left', '-4px');
         break;
       case 'above':
-        nudgeX = align(containRight, buttonLeft, tipWidth);
+        nudgeX = align(containRight, buttonLeft, tipWidth, 'horizontal');
         arrow.style.setProperty('top', 'auto');
         arrow.style.setProperty('right', 'auto');
         arrow.style.setProperty('bottom', '2px');
@@ -1505,7 +1515,7 @@ class Ed11y {
         tip.style.setProperty('left', '-4px');
         break;
       case 'right':
-        nudgeY = align(containBottom, buttonTop, tipHeight);
+        nudgeY = align(containBottom, buttonTop, tipHeight, 'vertical');
         arrow.style.setProperty('top', buttonSize / 2 - 10 + 'px');
         arrow.style.setProperty('right', 'auto');
         arrow.style.setProperty('bottom', 'auto');
@@ -1516,7 +1526,7 @@ class Ed11y {
         tip.style.setProperty('left', buttonSize + 10 + 'px');
         break;
       case 'left':
-        nudgeY = align(containBottom, buttonTop, tipHeight);
+        nudgeY = align(containBottom, buttonTop, tipHeight, 'vertical');
         arrow.style.setProperty('top', buttonSize / 2 - 10 + 'px');
         arrow.style.setProperty('right', '0');
         arrow.style.setProperty('bottom', 'auto');
@@ -1527,7 +1537,7 @@ class Ed11y {
         tip.style.setProperty('left', 'auto');
         break;
       case 'whompwhomp':
-        nudgeY = align(containBottom, buttonTop, tipHeight);
+        nudgeY = align(containBottom, buttonTop, tipHeight, 'horizontal');
         arrow.style.setProperty('top', '0');
         arrow.style.setProperty('right', '0');
         arrow.style.setProperty('bottom', '0');
@@ -1871,13 +1881,24 @@ class Ed11y {
     };
 
     Ed11y.intersectionObservers = function () {
+
       Ed11y.elements.editable?.forEach(editable => {
         editable.addEventListener('scroll', function() {
-          // note: we could just adjust the transform rather than recalculating.
-          Ed11y.scrollPending = Ed11y.scrollPending < 2 ? Ed11y.scrollPending + 1 : Ed11y.scrollPending;
-          requestAnimationFrame(() => Ed11y.updateTipLocations());
+          // Align tips when scrolling editable container.
+          if (Ed11y.openTip.button) {
+            Ed11y.scrollPending = Ed11y.scrollPending < 2 ? Ed11y.scrollPending + 1 : Ed11y.scrollPending;
+            requestAnimationFrame(() => Ed11y.updateTipLocations());
+          }
         });
       });
+
+      document.addEventListener('scroll', function() {
+        // Trigger on scrolling other containers, unless it will flicker a tip.
+        if (!Ed11y.openTip.button) {
+          Ed11y.scrollPending = Ed11y.scrollPending < 2 ? Ed11y.scrollPending + 1 : Ed11y.scrollPending;
+          requestAnimationFrame(() => Ed11y.updateTipLocations());
+        }
+      }, true);
 
       Ed11y.selectionChanged = debounce(() => {
         if (rangeChange()) {
@@ -2213,10 +2234,14 @@ class Ed11y {
 
     /*=============== Utilities ================*/
 
+    Ed11y.flattenText = function (text) {
+      return text.replace(/[\n\r]+|\s{2,}/g, ' ').trim();
+    };
+
     // Gets trimmed and normalized inner text nodes.
     // Use computeText() instead for the full accessible name calculation.
     Ed11y.getText = function (el) {
-      return el.textContent.replace(/[\n\r]+|\s{2,}/g, ' ').trim();
+      return Ed11y.flattenText(el.textContent);
     };
 
     Ed11y.parents = function (el) {
@@ -2313,6 +2338,7 @@ class Ed11y {
       walker: while (treeWalker.nextNode()) {
         count++;
 
+        // todo need to handle bugs found in Sa11y for CDATA type text
         if (treeWalker.currentNode.nodeType === Node.TEXT_NODE) {
           computedText += ' ' + treeWalker.currentNode.nodeValue;
           continue;
@@ -2385,6 +2411,20 @@ class Ed11y {
             // Reset
             addTitleIfNoName = false;
             aText = false;
+          }
+          computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
+          break;
+        case 'SLOT':
+          if (treeWalker.currentNode.assignedNodes()) {
+            // Slots have specific shadow DOM methods.
+            const children = treeWalker.currentNode.assignedNodes();
+            children?.forEach(child => {
+              if (child.nodeType === Node.ELEMENT_NODE) {
+                computedText += Ed11y.computeText(child);
+              } else if (child.nodeType === Node.TEXT_NODE) {
+                computedText += Ed11y.flattenText(child.nodeValue);
+              }
+            });
           }
           computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
           break;
