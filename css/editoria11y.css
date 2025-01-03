@@ -954,6 +954,6 @@ ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
     opacity: 0.25;
     filter: saturate(0);
 }
-.ed11y-offscreen, .ed11y-preload {
+.ed11y-offscreen, ed11y-element-result.ed11y-preload, .ed11y-preload {
     opacity: 0 !important;
 }
