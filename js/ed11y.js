@@ -1242,6 +1242,9 @@ class Ed11y {
 
     // Gets trimmed and normalized inner text nodes.
     // Use computeText() instead for the full accessible name calculation.
+    Ed11y.flattenText = function (text) {
+      return text.replace(/[\n\r]+|\s{2,}/g, ' ').trim();
+    };
     Ed11y.getText = function (el) {
       return el.textContent.replace(/[\n\r]+|\s{2,}/g, ' ').trim();
     };
@@ -1410,6 +1413,20 @@ class Ed11y {
             // Reset
             addTitleIfNoName = false;
             aText = false;
+          }
+          computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
+          break;
+        case 'SLOT':
+          if (treeWalker.currentNode.assignedNodes()) {
+            // Slots have specific shadow DOM methods.
+            const children = treeWalker.currentNode.assignedNodes();
+            children?.forEach(child => {
+              if (child.nodeType === Node.ELEMENT_NODE) {
+                computedText += Ed11y.computeText(child);
+              } else if (child.nodeType === Node.TEXT_NODE) {
+                computedText += Ed11y.flattenText(child.nodeValue);
+              }
+            });
           }
           computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
           break;
