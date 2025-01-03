@@ -431,7 +431,7 @@ class Ed11y {
               Ed11y.customTestsFinished++;
               if (Ed11y.customTestsFinished === Ed11y.options.customTests) {
                 Ed11y.customTestsRunning = false;
-                Ed11y.updatePanel();
+                window.requestAnimationFrame(() => Ed11y.updatePanel());
               }
             });
             window.setTimeout(function() {
@@ -440,7 +440,7 @@ class Ed11y {
                 if (Ed11y.panelToggle) {
                   Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleAccessibilityTools;
                 }
-                Ed11y.updatePanel();
+                window.requestAnimationFrame(() => Ed11y.updatePanel());
                 console.error('Editoria11y was told to wait for custom tests, but no tests were returned.');
               }
             }, 1000);
@@ -456,7 +456,7 @@ class Ed11y {
             if (Ed11y.panelToggle) {
               Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleAccessibilityTools;
             }
-            Ed11y.updatePanel();
+            window.requestAnimationFrame(() => Ed11y.updatePanel());
           }, 0);
         }
 
@@ -566,6 +566,10 @@ class Ed11y {
       if (Ed11y.options.alertMode !== 'headless') {
         // Not headless; draw the interface.
 
+        if (!Ed11y.bodyStyle) {
+          Ed11y.paintReady();
+        }
+
         if (Ed11y.onLoad === true) {
           Ed11y.onLoad = false;
 
@@ -580,8 +584,12 @@ class Ed11y {
           // Create the panel DOM on load.
 
           let panel = document.createElement('ed11y-element-panel');
+          panel.classList.add('ed11y-preload');
           document.querySelector('body').appendChild(panel);
           Ed11y.attachCSS(Ed11y.panel);
+          window.setTimeout(()=> {
+            panel.classList.remove('ed11y-preload');
+          },0, panel);
           Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsContent;
           Ed11y.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = Ed11y.M.buttonOutlineContent;
           Ed11y.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = Ed11y.M.panelCheckOutline;
@@ -653,7 +661,7 @@ class Ed11y {
           window.setTimeout(function () {
             document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
             if (!Ed11y.ignoreAll) {
-              Ed11y.showResults();
+              requestAnimationFrame(() => Ed11y.showResults());
             }
           }, 0);
         }
@@ -721,14 +729,10 @@ class Ed11y {
             Ed11y.panelToggleTitle.textContent = Ed11y.open ? Ed11y.M.buttonHideChecker : Ed11y.M.buttonShowNoAlert;
           }
         }
-
-        Ed11y.panel.classList.remove('ed11y-preload');
         Ed11y.panelToggle.classList.remove('disabled');
         Ed11y.panelToggle.removeAttribute('aria-disabled');
         Ed11y.alignPanel();
-        if (!Ed11y.bodyStyle) {
-          Ed11y.paintReady();
-        }
+        Ed11y.panel.classList.remove('ed11y-preload');
       }
       Ed11y.running = false;
       if (Ed11y.elements['editable']) {
@@ -939,7 +943,7 @@ class Ed11y {
         if (Object.keys(Ed11y.dismissedAlerts[Ed11y.options.currentPage]).length === 0) {
           delete Ed11y.dismissedAlerts[Ed11y.options.currentPage];
         }
-        Ed11y.updatePanel();
+        window.requestAnimationFrame(() => Ed11y.updatePanel());
       } else {
         let dismissal = {};
         dismissal[dismissalKey] = dismissalType;
@@ -1342,11 +1346,9 @@ class Ed11y {
       }
       Ed11y.jumpList?.forEach(mark => {
         // Now make visible.
+        // todo: this still doesn't work in Drupal live edit mode.
         mark.classList.remove('ed11y-preload');
       });
-      if (!Ed11y.bodyStyle) {
-        Ed11y.paintReady();
-      }
     };
 
 
