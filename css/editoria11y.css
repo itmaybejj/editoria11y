@@ -957,3 +957,41 @@ ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
 .ed11y-offscreen, ed11y-element-result.ed11y-preload, .ed11y-preload {
     opacity: 0 !important;
 }
+
+/* Windows high contrast mode makes tips invisible. */
+@media (forced-colors: active) {
+    .ed11y-wrapper .tip,
+    .ed11y-wrapper button,
+    .ed11y-wrapper summary,
+    .ed11y-wrapper details,
+    .ed11y-wrapper button.toggle,
+    .ed11y-wrapper .ed11y-toggle-circle,
+    .ed11y-tip-header,
+    .ed11y-buttonbar > a
+    {
+        border: 2px ButtonBorder solid;
+    }
+    .ed11y-wrapper.open div.arrow {
+        background: ButtonBorder;
+    }
+    .ed11y-tip-header,
+    .ed11y-tip-header button,
+    .ed11y-tip-header summary {
+        margin: -2px;
+    }
+    .ed11y-wrapper button:hover,
+    .ed11y-wrapper summary:hover,
+    .ed11y-buttonbar > a:hover {
+        outline: 3px solid;
+    }
+    .ed11y-buttonbar > a {
+        height: auto;
+    }
+    #ed11y-toggle {
+        border: 0;
+        margin: 0 -5px;
+    }
+    .ed11y-buttonbar >:hover .ed11y-sr-only, .ed11y-buttonbar >:focus-visible .ed11y-sr-only {
+        border: 2px ButtonBorder solid;
+    }
+}
