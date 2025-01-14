@@ -32,6 +32,7 @@ const ed11yLang = {
     buttonHideAlerts: 'Hide accessibility alerts',
     panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">heading outline</a>. Check that it matches how the content is organized visually.</p>',
     panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/" target="_blank" title="Opens in new tab">describes what it means in context</a>, and that there are no images of text.</p>',
+    noImagesFound: 'No images found.',
     altLabelPrefix: 'Alt text: ',
     errorAltMissing: '(missing!)',
     errorAltNull: '(none; image marked as decorative)',
@@ -71,7 +72,7 @@ const ed11yLang = {
     reportsLink: 'Open site reports in new tab',
     closeTip: 'Close',
     panelHelpTitle: 'About this tool',
-    panelHelp : `
+    panelHelp: `
     <p><a href="https://editoria11y.princeton.edu/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
     <p>Many alerts are "manual checks." Manual checks can be dismissed:</p>
     <ul>
@@ -143,10 +144,6 @@ const ed11yLang = {
                 <li>The game-winning kick curved in from the left sideline!</li>
                 <li>The size 4 ball is the right size for this 9-year-old child.</li>
             </ul>`,
-
-    // todo: Deprecate and remove:
-    altAttributeProvided: (alt) =>
-      `<p>This image's alt text is <strong>"${alt},"</strong>`,
 
     altMissing : {
       title: 'Image has no alternative text attribute',

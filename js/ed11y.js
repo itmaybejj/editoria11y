@@ -1705,7 +1705,12 @@ class Ed11y {
         });
         Ed11y.alignAlts();
       } else {
-        altList.innerHTML = '<p><em>No images found.</em></p>';
+        const noImages = document.createElement('p');
+        const noItalic = document.createElement('em');
+        noItalic.textContent = Ed11y.M.noImagesFound;
+        noImages.appendChild(noItalic);
+        altList.innerHTML = '';
+        altList.appendChild(noImages);
       }
     };
     Ed11y.visualizing = false;
