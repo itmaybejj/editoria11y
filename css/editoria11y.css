@@ -873,6 +873,7 @@ ed11y-element-result[data-ed11y-open='true'] {
 
 .ed11y-tip-wrapper svg {
     overflow: visible;
+    max-width: 100%;
 }
 .ed11y-transfer-icon {
     width: .45em;
