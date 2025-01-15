@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.8';
+    Ed11y.version = '2.3.9';
 
     let defaultOptions = {
 
@@ -1705,7 +1705,12 @@ class Ed11y {
         });
         Ed11y.alignAlts();
       } else {
-        altList.innerHTML = '<p><em>No images found.</em></p>';
+        const noImages = document.createElement('p');
+        const noItalic = document.createElement('em');
+        noItalic.textContent = Ed11y.M.noImagesFound;
+        noImages.appendChild(noItalic);
+        altList.innerHTML = '';
+        altList.appendChild(noImages);
       }
     };
     Ed11y.visualizing = false;
