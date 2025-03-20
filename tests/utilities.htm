@@ -178,17 +178,7 @@
             <h2>Slotted template</h2>
             <template id="element-details-template">
                 <style>
-                    details {font-family: "Open Sans Light",Helvetica,Arial}
-                    .name {font-weight: bold; color: #217ac0; font-size: 120%}
-                    h4 { margin: 10px 0 -8px 0; }
-                    h4 span { background: #217ac0; padding: 2px 6px 2px 6px }
-                    h4 span { border: 1px solid #cee9f9; border-radius: 4px }
-                    h4 span { color: white }
-                    .attributes { margin-left: 22px; font-size: 90% }
-                    .attributes p { margin-left: 16px; font-style: italic }
-                    h3 slot::before {
-                        content: "slotted pseudocontent";
-                    }
+
                     .positive {padding: .75rem 1rem .5rem; margin: 1rem 0; border-radius:3px;}
                     .todo-positive {background-color: orange;}
                     .todo-negative {background-color: yellow;}
@@ -216,12 +206,15 @@
                     .negative ed11y-element-result { outline: 8px dotted red !important; }
                 </style>
                 <div id="slot-template">
-                    <div class="positive">
-                        <h4 class="name"><slot name="element-name"></slot></h4>
-                    </div>
-                    <div class="negative">
-                        <h4 class="desc"><slot name="description"></slot></h4>
-                    </div>
+                    <pds-layout-container>
+                        <pds-sidebar>
+                            <pds-heading class="negative" style="display: block;">
+                                <h4></h4>
+                                Policy Riders and Endorsements
+                            </pds-heading>
+                            </aside>
+                        </pds-sidebar>
+                    </pds-layout-container>
 
                     <div class="positive">Empty slot:
                         <h4><slot></slot></h4></div>
@@ -261,6 +254,11 @@
                       .content;
                     const shadowRoot = this.attachShadow({mode: 'open'})
                       .appendChild(template.cloneNode(true));
+                    const h4 = this.shadowRoot.querySelector('h4');
+                    h4.attachShadow({mode: 'open'});
+                    const span = document.createElement('span');
+                    span.textContent = 'deeply embedded shadow';
+                    h4.shadowRoot.appendChild(span);
                   }
                 });
                 document.addEventListener('ed11yShowHidden', function(e) {
@@ -270,6 +268,9 @@
                 }, false);
 
                 const decodeSafelink = function(url) {
+                  if (!url) {
+                    return '[translation server error]';
+                  }
                     const params = new URL(url).searchParams;
                     let decoded = params.get('url');
                     if (!!decoded) {
@@ -325,7 +326,8 @@
                         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
                     },
                     //syncedDismissals: {},
-                    shadowComponents : 'shadow-test, shadow-test-no-hits, element-details',
+                    //shadowComponents : 'shadow-test, shadow-test-no-hits, element-details',
+                    autoDetectShadowComponents: true,
                     hiddenHandlers : '[hidden]',
                     checkRoots : 'body',
                     //linkIgnoreStrings: '\(link is external\)',

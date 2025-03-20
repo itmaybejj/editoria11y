@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.9';
+    Ed11y.version = '2.3.10';
 
     let defaultOptions = {
 
@@ -19,6 +19,7 @@ class Ed11y {
 
       // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
       shadowComponents: false,
+      autoDetectShadowComponents: true,
 
       // Containers to globally ignore, e.g., "header *, .card *"
       ignoreElements: false,
@@ -370,6 +371,7 @@ class Ed11y {
     Ed11y.results = [];
     // Toggles the outline of all headers, link texts, and images.
     Ed11y.checkAll = () => {
+      console.log('checking');
       Ed11y.disabled = false;
 
       if ( !Ed11y.checkRunPrevent() ) {
@@ -389,7 +391,6 @@ class Ed11y {
 
         Ed11y.customTestsRunning = false;
 
-        // Find and cache all root elements based on user-provided selectors.
         let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
         if (roots.length === 0) {
           //Ed11y.roots = [document.querySelector('html, body')];
@@ -404,10 +405,15 @@ class Ed11y {
           roots.forEach((el, i) => {
             if (el.shadowRoot) {
               Ed11y.roots[i] = el.shadowRoot;
+              el.setAttribute('data-ed11y-has-shadow-root', 'true');
+              Ed11y.detectShadow(el.shadowRoot);
             } else {
               Ed11y.roots[i] = el;
+              Ed11y.detectShadow(el);
             }
           });
+
+
           Ed11y.buildElementList();
 
           let queue = [
@@ -844,12 +850,74 @@ class Ed11y {
       return linkText;
     };
 
+    Ed11y.detectShadow = function (container) {
+      if (Ed11y.options.autoDetectShadowComponents) {
+        const select = !Ed11y.ignore ? '*:not(.ed11y-element)' : `*:not(${Ed11y.options.ignore}, .ed11y-element)`;
+        let search = [];
+        if (container.shadowRoot && container.shadowRoot.mode === 'open') {
+          if (!container.matches('[data-ed11y-has-shadow-root]')) {
+            container.setAttribute('data-ed11y-has-shadow-root', 'true');
+            Ed11y.attachCSS(container.shadowRoot);
+            Ed11y.attachCSS(container);
+          }
+          search = container.shadowRoot.querySelectorAll(select);
+        } else {
+          search = container.querySelectorAll(select);
+        }
+        search?.forEach((component) => {
+          if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+            Ed11y.detectShadow(component);
+          }
+        });
+      } else if (Ed11y.options.shadowComponents) {
+        const providedShadow = container.querySelectorAll(Ed11y.options.shadowComponents);
+        providedShadow.forEach((component) => {
+          if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+            if (!container.matches('[data-ed11y-has-shadow-root]')){
+              component.setAttribute('data-ed11y-has-shadow-root', 'true');
+              Ed11y.attachCSS(component.shadowRoot);
+              Ed11y.attachCSS(component);
+            }
+            Ed11y.detectShadow(component);
+          } else {
+            console.warn(`Editoria11y: A specified shadow host has no shadowRoot: ${component.tagName}`);
+          }
+        });
+      }
+    };
+
+    const diveShadow = function (container, select, selector) {
+      if (container.matches(selector)) {
+        return([container]);
+      } else {
+        let inners = container.shadowRoot.querySelectorAll(select);
+        if (typeof(inners) === 'object' && inners.length > 0) {
+          // Replace shadow host with inner elements.
+          inners.forEach(inner => {
+            for (let innerIndex = inners - 1; innerIndex >= 0; innerIndex--) {
+              let innerInner = diveShadow(inner, select, selector);
+              if (innerInner.length > 0) {
+                inners.splice(innerIndex, 1, ...innerInner);
+              } else {
+                inners.splice(innerIndex, 1);
+              }
+            }
+          });
+          return (Array.from(inners).filter((el) => el.matches(selector)));
+        }
+      }
+      return [];
+    };
+
     // QuerySelectAll non-ignored elements within checkroots, with recursion into shadow components
     Ed11y.findElements = function (key, selector, rootRestrict = true) {
       Ed11y.findElements.key = [];
 
       // Todo beta: function and parameter to auto-detect shadow components.
-      let shadowSelector = Ed11y.options.shadowComponents ? `, ${Ed11y.options.shadowComponents}` : '';
+      let shadowSelector = Ed11y.options.autoDetectShadowComponents ?
+        '[data-ed11y-has-shadow-root]' :
+        Ed11y.options.shadowComponents ?
+          Ed11y.options.shadowComponents : false;
 
       // Concatenate global and specific ignores
       let ignore = '';
@@ -862,29 +930,28 @@ class Ed11y {
       // Initialize or reset elements array.
       Ed11y.elements[key] = [];
 
+      const select = `:is(${selector}${shadowSelector ? ', ' + shadowSelector : ''})${ignore}`;
+
       if (rootRestrict && Ed11y.roots) {
         // Add array of elements matching selector, excluding the provided ignore list.
         // Todo this can dupe
         Ed11y.roots.forEach(root => {
-          Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector}${shadowSelector})${ignore}`)));
+          Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(select)));
         });
       } else {
-        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(document.querySelectorAll(`:is(${selector}${shadowSelector})${ignore}`)));
+        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(document.querySelectorAll(select)));
       }
 
       // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
       // Repeat the search inside each placeholder, and replace the placeholder with its search results.
-      if (Ed11y.options.shadowComponents) {
+      if (shadowSelector) {
         for (let index = Ed11y.elements[key].length - 1; index >= 0; index--) {
-          if (Ed11y.elements[key][index].matches(Ed11y.options.shadowComponents)) {
+          if (Ed11y.elements[key][index].matches(shadowSelector)) {
             // Dive into the shadow root and collect an array of its results.
-            let inners = Ed11y.elements[key][index].shadowRoot?.querySelectorAll(`:is(${selector})${ignore}`);
-            if (typeof(inners) === 'object' && inners.length > 0) {
-              // Replace shadow host with inner elements.
+            let inners = diveShadow(Ed11y.elements[key][index], select, selector);
+            if (inners.length > 0) {
               Ed11y.elements[key].splice(index, 1, ...inners);
             } else {
-              // Remove shadow host with no inner elements.
-              console.warn('Editoria11y: A specified shadow host has no shadowRoot.');
               Ed11y.elements[key].splice(index, 1);
             }
           }
@@ -893,6 +960,7 @@ class Ed11y {
     };
 
     Ed11y.buildElementList = function () {
+
       Ed11y.findElements('editable', Ed11y.options.editableContent, false);
       if (Ed11y.options.inlineAlerts && Ed11y.elements.editable.length > 0) {
         Ed11y.options.inlineAlerts = false;
@@ -1947,16 +2015,20 @@ class Ed11y {
     }, 10);
     let interaction = false;
     window.addEventListener('keyup', () => {
+      console.log('keyup');
       interaction = true;
     });
     window.addEventListener('click', () => {
+      console.log('click');
       interaction = true;
     });
     window.addEventListener('dragend', () => {
       interaction = true;
+      console.log('dragend');
       Ed11y.incrementalCheck();
     });
     Ed11y.incrementalCheck = debounce(() => {
+      console.log('incremental?');
       if (!Ed11y.running) {
         if (Ed11y.openTip.button || (!interaction && !Ed11y.forceFullCheck)) {
           return;
@@ -2025,6 +2097,7 @@ class Ed11y {
           node = node.querySelector('table, h1, h2, h3, h4, h5, h6, blockquote');
         }
         if (node) {
+          console.log(node);
           Ed11y.recentlyAddedNodes.push(node);
           window.setTimeout(function (node) {
             let stillWaiting = Ed11y.recentlyAddedNodes.indexOf(node);
@@ -2038,11 +2111,15 @@ class Ed11y {
 
       // Create an observer instance linked to the callback function
       const callback = (mutationList) => {
+        console.log('mutation:');
+        console.log(mutationList);
         for (const mutation of mutationList) {
           if (mutation.type === 'childList') {
             newNodes = true; // Force redrawing buttons.
+            console.log('newNodes');
             if (mutation.addedNodes.length > 0) {
               mutation.addedNodes.forEach(node => {
+                console.log('logged node');
                 logNode(node);
               });
             }
@@ -2050,6 +2127,7 @@ class Ed11y {
         }
         Ed11y.incrementalAlign(); // Immediately realign tips.
         Ed11y.alignPending = false;
+        console.log('observer incremental called');
         Ed11y.incrementalCheck(); // Recheck after delay.
       };
 
@@ -2060,11 +2138,13 @@ class Ed11y {
       document.addEventListener('readystatechange', () => {
         window.setTimeout(function () {
           Ed11y.scrollPending++;
+          console.log('update tip locations');
           Ed11y.updateTipLocations();
         }, 100);
       });
       window.setTimeout(function () {
         Ed11y.scrollPending++;
+        console.log('update tip locations');
         Ed11y.updateTipLocations();
       }, 1000);
     };
@@ -2321,9 +2401,15 @@ class Ed11y {
 
       // Return immediately if there is only a text node.
       let computedText = '';
+      if (el.shadowRoot) {
+        const shadowChildren = el.shadowRoot.querySelectorAll('*');
+        shadowChildren.forEach(child => {
+          computedText += Ed11y.computeText(child);
+        });
+      }
       if (!el.children.length) {
         // Just text! Output immediately.
-        computedText = Ed11y.wrapPseudoContent(el, el.textContent);
+        computedText += Ed11y.wrapPseudoContent(el, el.textContent);
         if (!computedText.trim() && el.hasAttribute('title')) {
           return el.getAttribute('title');
         }

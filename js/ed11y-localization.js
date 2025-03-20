@@ -48,7 +48,7 @@ const ed11yLang = {
 
     // Strings used in tests ==============================
 
-    suspiciousWords: ['image of','graphic of','picture of','photo of','placeholder','spacer','tbd','todo'],
+    suspiciousWords: ['image of','graphic of','picture of','photo of','photograph of','placeholder','spacer','tbd','todo'],
     meaninglessAlt: ['alt','chart','decorative','image','graphic','photo','placeholder','placeholder image','spacer','tbd','todo','to do'],
     // 'alt', 'image', 'photo', 'decorative', 'placeholder', 'placeholder image', 'spacer'
     linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],

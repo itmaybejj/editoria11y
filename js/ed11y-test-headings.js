@@ -52,6 +52,7 @@ class Ed11yTestHeadings {
       let error = '';
       let outlinePrefix = '';
       let headingText = Ed11y.computeText(el);
+      console.log (`${headingText}: ${prevLevel} / ${level}`);
       let headingLength = headingText.length;
       let dismissKey = false;
       if (headingLength < 1) {
@@ -97,8 +98,8 @@ class Ed11yTestHeadings {
       prevLevel = level;
 
       if (error !== '') {
-        // Only mark errors if they are within the scanned area.
-        if (el.closest(Ed11y.options.checkRoots) !== null || (Ed11y.options.shadowComponents && el.getRootNode()?.host?.matches(Ed11y.options.shadowComponents) !== undefined)) {
+        // Only mark errors if they are within the scanned area or a shadow root.
+        if (el.closest(Ed11y.options.checkRoots) !== null || el.getRootNode()?.host?.matches('[data-ed11y-has-shadow-root]') !== undefined) {
           alert.forEach((result) => {
             Ed11y.results.push(result);
           });
