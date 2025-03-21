@@ -55,6 +55,7 @@ class Ed11y {
       // alertMode "headless" never draws the panel.
       alertMode: 'userPreference',
       inlineAlerts: true,
+      watchForChanges: true,
 
       // This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
       editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
@@ -263,6 +264,7 @@ class Ed11y {
     Ed11y.onLoad = true;
     Ed11y.showPanel = false;
     let windowWidth = window.innerWidth;
+    Ed11y.watching = [];
 
     Ed11y.disable = () => {
       if (Ed11y.open && !Ed11y.closedByDisable) {
@@ -371,7 +373,6 @@ class Ed11y {
     Ed11y.results = [];
     // Toggles the outline of all headers, link texts, and images.
     Ed11y.checkAll = () => {
-      console.log('checking');
       Ed11y.disabled = false;
 
       if ( !Ed11y.checkRunPrevent() ) {
@@ -740,12 +741,21 @@ class Ed11y {
         Ed11y.alignPanel();
         Ed11y.panel.classList.remove('ed11y-preload');
       }
+
+      window.setTimeout(() => {
+        if (Ed11y.elements['editable'].length > 0 && Ed11y.options.watchForChanges) {
+          Ed11y.elements['editable'].forEach(editable => {
+            startObserver(editable);
+          });
+        } else if (Ed11y.options.watchForChanges) {
+          Ed11y.roots.forEach( root => {
+            startObserver( root );
+          });
+        }
+        Ed11y.resumeObservers(); // on recheck.
+      }, 0);
+
       Ed11y.running = false;
-      if (Ed11y.elements['editable']) {
-        Ed11y.elements['editable'].forEach(editable => {
-          startObserver(editable);
-        });
-      }
     };
 
     // Place markers on elements with issues
@@ -771,6 +781,14 @@ class Ed11y {
         mark.classList.add('ed11y-editable-result');
       } else {
         location = result.element.closest('a, button, [role="button"], [role="link"]');
+        if (!location && result.element.shadowRoot) {
+          // Must insert outside shadow DOM root.
+          location = result.element;
+          position = 'beforebegin';
+          while (location.parentElement && location.parentElement.shadowRoot) {
+            location = location.parentElement;
+          }
+        }
         if (!location) {
           location = result.element;
           position = result.position;
@@ -835,6 +853,7 @@ class Ed11y {
     };
 
     Ed11y.reset = function () {
+      Ed11y.pauseObservers();
       Ed11y.resetResults();
       Ed11y.resetPanel();
       Ed11y.incremental = false;
@@ -964,7 +983,7 @@ class Ed11y {
       Ed11y.findElements('editable', Ed11y.options.editableContent, false);
       if (Ed11y.options.inlineAlerts && Ed11y.elements.editable.length > 0) {
         Ed11y.options.inlineAlerts = false;
-        console.log('Editable content detected; Editoria11y inline alerts disabled');
+        console.warn('Editable content detected; Editoria11y inline alerts disabled');
       }
       Ed11y.findElements('p', 'p');
       Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', Ed11y.options.headingsOnlyFromCheckRoots);
@@ -1417,6 +1436,7 @@ class Ed11y {
         // todo: Edge still flickers on redraw.
         mark.classList.remove('ed11y-preload');
       });
+
     };
 
 
@@ -1795,17 +1815,20 @@ class Ed11y {
         Ed11y.elements.reset?.forEach(el => { el.remove(); });
         return;
       }
+      Ed11y.pauseObservers();
       Ed11y.visualizing = true;
       Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsActive;
       Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
       Ed11y.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
       showAltPanel();
       showHeadingsPanel();
+      Ed11y.resumeObservers();
     };
 
     Ed11y.buildJumpList = function () {
 
       Ed11y.jumpList = [];
+      Ed11y.pauseObservers();
 
       // Initial alignment to get approximate Y position order for jump list.
       Ed11y.results.forEach((result, i) => {
@@ -1837,6 +1860,7 @@ class Ed11y {
         const newLabel = `${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}, ${i + 1} / ${Ed11y.jumpList.length - 1}`;
         el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
       });
+      Ed11y.resumeObservers();
     };
 
     // hat tip https://www.joshwcomeau.com/snippets/javascript/debounce/
@@ -2015,20 +2039,16 @@ class Ed11y {
     }, 10);
     let interaction = false;
     window.addEventListener('keyup', () => {
-      console.log('keyup');
       interaction = true;
     });
     window.addEventListener('click', () => {
-      console.log('click');
       interaction = true;
     });
     window.addEventListener('dragend', () => {
       interaction = true;
-      console.log('dragend');
       Ed11y.incrementalCheck();
     });
     Ed11y.incrementalCheck = debounce(() => {
-      console.log('incremental?');
       if (!Ed11y.running) {
         if (Ed11y.openTip.button || (!interaction && !Ed11y.forceFullCheck)) {
           return;
@@ -2060,7 +2080,23 @@ class Ed11y {
       }
     }, 250);
 
+    Ed11y.pauseObservers = function() {
+      Ed11y.watching?.forEach(observer => {
+        observer.observer.disconnect();
+      });
+    };
+    Ed11y.resumeObservers = function() {
+      Ed11y.watching?.forEach(observer => {
+        observer.observer.observe(observer.root, observer.config);
+      });
+    };
+
     const startObserver = function (root) {
+
+      if (!Ed11y.options.watchForChanges) {
+        return false;
+      }
+
       // We don't want to nest or duplicate observers.
       if (typeof root.closest !== 'function') {
         if (root.host.matches('.editoria11y-observer')) {
@@ -2090,14 +2126,13 @@ class Ed11y {
         * delays flagging.
         * */
         //:is(table, h1, h2, h3, h4, h5, h6):
-        if (node.nodeType !== 1) {
+        if (node.nodeType !== 1 || node.closest('.ed11y-wrapper')) {
           return;
         }
         if (!node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
           node = node.querySelector('table, h1, h2, h3, h4, h5, h6, blockquote');
         }
         if (node) {
-          console.log(node);
           Ed11y.recentlyAddedNodes.push(node);
           window.setTimeout(function (node) {
             let stillWaiting = Ed11y.recentlyAddedNodes.indexOf(node);
@@ -2111,15 +2146,11 @@ class Ed11y {
 
       // Create an observer instance linked to the callback function
       const callback = (mutationList) => {
-        console.log('mutation:');
-        console.log(mutationList);
         for (const mutation of mutationList) {
           if (mutation.type === 'childList') {
             newNodes = true; // Force redrawing buttons.
-            console.log('newNodes');
             if (mutation.addedNodes.length > 0) {
               mutation.addedNodes.forEach(node => {
-                console.log('logged node');
                 logNode(node);
               });
             }
@@ -2127,7 +2158,6 @@ class Ed11y {
         }
         Ed11y.incrementalAlign(); // Immediately realign tips.
         Ed11y.alignPending = false;
-        console.log('observer incremental called');
         Ed11y.incrementalCheck(); // Recheck after delay.
       };
 
@@ -2135,16 +2165,19 @@ class Ed11y {
       const observer = new MutationObserver(callback);
       // Start observing the target node for configured mutations
       observer.observe(root, config);
+      Ed11y.watching.push({
+        observer: observer,
+        root: root,
+        config: config,
+      });
       document.addEventListener('readystatechange', () => {
         window.setTimeout(function () {
           Ed11y.scrollPending++;
-          console.log('update tip locations');
           Ed11y.updateTipLocations();
         }, 100);
       });
       window.setTimeout(function () {
         Ed11y.scrollPending++;
-        console.log('update tip locations');
         Ed11y.updateTipLocations();
       }, 1000);
     };
@@ -2431,7 +2464,9 @@ class Ed11y {
 
         // todo need to handle bugs found in Sa11y for CDATA type text
         if (treeWalker.currentNode.nodeType === Node.TEXT_NODE) {
-          computedText += ' ' + treeWalker.currentNode.nodeValue;
+          if (treeWalker.currentNode.parentNode.tagName !== 'SLOT') {
+            computedText += ` ${treeWalker.currentNode.nodeValue}`;
+          }
           continue;
         }
 

@@ -52,7 +52,6 @@ class Ed11yTestHeadings {
       let error = '';
       let outlinePrefix = '';
       let headingText = Ed11y.computeText(el);
-      console.log (`${headingText}: ${prevLevel} / ${level}`);
       let headingLength = headingText.length;
       let dismissKey = false;
       if (headingLength < 1) {
