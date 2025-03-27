@@ -992,18 +992,7 @@ class Ed11y {
       return String(text).replace(/([^0-9a-zA-Z])/g, '').substring(0, 512);
     };
 
-    Ed11y.dismissThis = function (dismissalType) {
-      // Find the active tip and draw its identifying information from the result list
-      let removal = Ed11y.openTip;
-      let id = removal.tip.dataset.ed11yResult;
-      let test = Ed11y.results[id].test;
-      let dismissalKey = Ed11y.dismissalKey(Ed11y.results[id].dismissalKey);
-
-      // Remove tip and reset borders around element
-      Ed11y.resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
-      removal.tip?.parentNode.removeChild(removal.tip);
-      // TODO EDITING: COMMENT OUT BELOW...SEEMS REDUNDANT?
-      removal.button?.parentNode.removeChild(removal.button);
+    const dismissOne = function(dismissalType, test, dismissalKey) {
 
       // Update dismissal record.
       if (dismissalType === 'reset') {
@@ -1014,7 +1003,7 @@ class Ed11y {
         if (Object.keys(Ed11y.dismissedAlerts[Ed11y.options.currentPage]).length === 0) {
           delete Ed11y.dismissedAlerts[Ed11y.options.currentPage];
         }
-        window.requestAnimationFrame(() => Ed11y.updatePanel());
+        //window.requestAnimationFrame(() => Ed11y.updatePanel());
       } else {
         let dismissal = {};
         dismissal[dismissalKey] = dismissalType;
@@ -1043,6 +1032,30 @@ class Ed11y {
         let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
         document.dispatchEvent(ed11yDismissalUpdate);
       }
+    };
+
+    Ed11y.dismissThis = function (dismissalType, all = false) {
+      // Find the active tip and draw its identifying information from the result list
+      let removal = Ed11y.openTip;
+      let id = removal.tip.dataset.ed11yResult;
+      let test = Ed11y.results[id].test;
+
+      if (all) {
+        Ed11y.results.forEach((result) => {
+          if (result.test === test && result.dismissalStatus !==dismissalType) {
+            dismissOne(dismissalType, test, result.dismissalKey);
+          }
+        });
+      } else {
+        let dismissalKey = Ed11y.dismissalKey(Ed11y.results[id].dismissalKey);
+        dismissOne(dismissalType, test, dismissalKey);
+      }
+
+      // Remove tip and reset borders around element
+      Ed11y.resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
+      removal.tip?.parentNode?.removeChild(removal.tip);
+      // TODO EDITING: COMMENT OUT BELOW...SEEMS REDUNDANT?
+      //removal.button?.parentNode?.removeChild(removal.button);
 
       Ed11y.reset();
       Ed11y.showPanel = true;
@@ -1060,6 +1073,7 @@ class Ed11y {
           }, 100);
         }
       }, 500, rememberGoto);
+
     };
 
     Ed11y.transferFocus = function () {

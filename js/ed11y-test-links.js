@@ -45,7 +45,6 @@ class Ed11yTestLinks {
       ) {
         // Link with no text at all.
         if (hasImg === false) {
-          console.log(el);
           Ed11y.results.push({
             element: el,
             test: 'linkNoText',

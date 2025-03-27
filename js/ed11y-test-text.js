@@ -13,7 +13,7 @@ class Ed11yTestText {
     // Set up checks for types of strings.
     const numberMatch = new RegExp(/(([023456789][\d\s])|(1\d))/, ''); // All numbers but 1.
     const alphabeticMatch = new RegExp(/(^[aA1]|[^\p{Alphabetic}\s])[-\s.)]/, 'u');
-    const emojiMatch = new RegExp(/\p{Extended_Pictographic}/, 'u');
+    const emojiMatch = new RegExp(/\p{Extended_Pictographic}|[•*]/, 'u');
     const secondTextNoMatch = ['a','A','1'];
     const prefixDecrement = { // Converts to check a / b.
       b: 'a',
@@ -39,11 +39,11 @@ class Ed11yTestText {
       let firstPrefix = firstText.substring(0, 2);
 
       // Grab first two characters.
-      const isAlphabetic = firstPrefix.match(alphabeticMatch);
-      const isNumber = firstPrefix.match(numberMatch);
-      const isEmoji = firstPrefix.match(emojiMatch);
+      const isAlphabetic = firstPrefix.match(alphabeticMatch) !== null;
+      const isNumber = firstPrefix.match(numberMatch) !== null;
+      const isEmoji = firstPrefix.match(emojiMatch) !== null;
 
-      if (firstPrefix.length > 0 && firstPrefix !== activeMatch && !isNumber && (isAlphabetic || isEmoji)) {
+      if (firstPrefix.length > 0 && (firstPrefix !== activeMatch || (lastHitWasEmoji && isEmoji)) && !isNumber && (isAlphabetic || isEmoji)) {
         // We have a prefix and a possible hit; check next detected paragraph.
         let secondP = Ed11y.elements.p[i + 1];
         compareP: if (secondP) {
@@ -80,13 +80,14 @@ class Ed11yTestText {
         }
         if (hit) {
           let dismissKey = Ed11y.dismissalKey(firstText);
+          const nicePrefix = /[•*-1aA]/.test(firstPrefix) ? firstPrefix.substring(0, 1) : firstPrefix;
           Ed11y.results.push(
             {
               element: p,
               test: 'textPossibleList',
               content: Ed11y.options.langSanitizes ?
                 Ed11y.M.textPossibleList.tip(firstPrefix) :
-                Ed11y.M.textPossibleList.tip(Ed11y.sanitizeForHTML(firstPrefix)),
+                Ed11y.M.textPossibleList.tip(Ed11y.sanitizeForHTML(nicePrefix)),
               position: 'afterbegin',
               dismissalKey: dismissKey,
             });
@@ -95,7 +96,6 @@ class Ed11yTestText {
         else {
           // TODO: we could add a check for multiple emoji within the paragraph now.
           activeMatch = '';
-          lastHitWasEmoji = false;
         }
       }
       else {
@@ -117,6 +117,9 @@ class Ed11yTestText {
             });
           }
         }
+      }
+      if (!(isEmoji && lastHitWasEmoji)) {
+        lastHitWasEmoji = false;
       }
 
       // Reset for next loop, carry over text query if available.
@@ -198,15 +201,25 @@ class Ed11yTestText {
       else {
         // Make sure table headers are not empty.
         Array.from(findTHeaders).some((th) => {
-          if (Ed11y.computeText(th).length < 1 && th.matches('th + th, tr + tr th')) {
-            Ed11y.results.push({
-              element: th,
-              test: 'tableEmptyHeaderCell',
-              content: Ed11y.M.tableEmptyHeaderCell.tip(),
-              position: 'afterbegin',
-              dismissalKey: false,
-            });
-            return true;
+          if (Ed11y.computeText(th).length < 1) {
+            if (th.matches('th + th, tr + tr th')) {
+              Ed11y.results.push({
+                element: th,
+                test: 'tableEmptyHeaderCell',
+                content: Ed11y.M.tableEmptyHeaderCell.tip(),
+                position: 'afterbegin',
+                dismissalKey: false,
+              });
+              return true;
+            } else {
+              Ed11y.results.push({
+                element: th,
+                test: 'tableEmptyHeaderCell',
+                content: Ed11y.M.tableEmptyHeaderCell.tip(),
+                position: 'afterbegin',
+                dismissalKey: Ed11y.dismissalKey(th.closest('tr')?.innerHTML),
+              });
+            }
           }
         });
       }
