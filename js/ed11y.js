@@ -333,22 +333,6 @@ class Ed11y {
           Ed11y.dismissedAlerts[Ed11y.options.currentPage] = Ed11y.options.syncedDismissals;
         }
 
-        // Ed11y v2.0 stored special characters in dismissal keys. This strips them.
-        // This loop can be deleted in 2024.
-        if (Ed11y.options.currentPage in Ed11y.dismissedAlerts) {
-          for (const [key] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage])) {
-            if (key in Ed11y.dismissedAlerts[Ed11y.options.currentPage]) {
-              for (const [subkey, subvalue] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage][key])) {
-                let newKey = Ed11y.dismissalKey(subkey);
-                if (newKey !== subkey) {
-                  Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][newKey] = subvalue;
-                  delete Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][subkey];
-                }
-              }
-            }
-          }
-        }
-
         // Create test class objects
         Ed11y.testEmbeds = new Ed11yTestEmbeds;
         Ed11y.testHeadings = new Ed11yTestHeadings;
@@ -1355,8 +1339,8 @@ class Ed11y {
       Ed11y.jumpList.forEach((mark, i) => {
 
         // Now check for any needed nudges
-        let nudgeTop = 0;
-        let nudgeLeft = 0;
+        let nudgeTop = 10;
+        let nudgeLeft = mark.result.element.tagName === 'IMG' ? 10 : -34;
         // Detect tip that overlaps with previous result.
         if (mark.markTop + scrollTop < 0) {
           // Offscreen to top.
@@ -1394,7 +1378,7 @@ class Ed11y {
             mark.style.transform = `translate(${mark.markLeft}px, ${mark.markTop}px)`;
           }
 
-        } else if (needNudge) {
+        } else {
           nudgeMark(mark, nudgeLeft, nudgeTop);
         }
         mark.nudgeLeft = nudgeLeft;

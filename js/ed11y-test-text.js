@@ -198,7 +198,7 @@ class Ed11yTestText {
       else {
         // Make sure table headers are not empty.
         Array.from(findTHeaders).some((th) => {
-          if (Ed11y.computeText(th).length < 1) {
+          if (Ed11y.computeText(th).length < 1 && th.matches('th + th, tr + tr th')) {
             Ed11y.results.push({
               element: th,
               test: 'tableEmptyHeaderCell',

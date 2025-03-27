@@ -45,6 +45,7 @@ class Ed11yTestLinks {
       ) {
         // Link with no text at all.
         if (hasImg === false) {
+          console.log(el);
           Ed11y.results.push({
             element: el,
             test: 'linkNoText',
@@ -80,7 +81,7 @@ class Ed11yTestLinks {
           }
           if (linkStrippedText.replace(/"|'|\?|\.|-|\s+/g, '').length === 0) {
             // No Text because of stripping out ignoreStrings.
-            return 'linkNoTextFromIgnore';
+            return 'generic';
           }
 
           // todo later: use regex to find any three-letter TLD followed by a slash.
@@ -105,31 +106,21 @@ class Ed11yTestLinks {
         };
         let textCheck = linkTextCheck(linkText);
         if (textCheck !== 'none') {
-          let dismissKey = false;
           let error = false;
-          let content;
-          if (textCheck === 'linkNoTextFromIgnore') {
-            content = Ed11y.M['linkNoText'].tip(Ed11y.sanitizeForHTML(Ed11y.computeText(el)));
-            error = 'linkNoText';
-          } else {
-            if (!hasImg) {
-              error = 'linkTextIsURL';
-              content = Ed11y.M[error].tip(Ed11y.sanitizeForHTML(linkText));
-              dismissKey = Ed11y.dismissalKey(linkText);
-            }
-            if (textCheck === 'generic') {
-              error = 'linkTextIsGeneric';
-              content = Ed11y.M[error].tip(Ed11y.sanitizeForHTML(linkText));
-              dismissKey = Ed11y.dismissalKey(linkText);
-            }
+          if (!hasImg && textCheck === 'url') {
+            // Images test will pick this up.
+            error = 'linkTextIsURL';
+          }
+          if (textCheck === 'generic') {
+            error = 'linkTextIsGeneric';
           }
           if (error) {
             Ed11y.results.push({
               element: el,
               test: error,
-              content: content,
+              content: Ed11y.M[error].tip(Ed11y.sanitizeForHTML(linkText)),
               position: 'beforebegin',
-              dismissalKey: dismissKey,
+              dismissalKey: Ed11y.dismissalKey(linkText),
             });
           }
         }
