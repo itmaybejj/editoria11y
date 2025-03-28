@@ -76,12 +76,12 @@ class Ed11yElementPanel extends HTMLElement {
       });
       const altDetails = Ed11y.panel.querySelector('#ed11y-alts-tab');
       const headingDetails = Ed11y.panel.querySelector('#ed11y-headings-tab');
-      altDetails.addEventListener('toggle', (event) => {
+      altDetails.addEventListener('toggle', () => {
         if (altDetails.open && headingDetails.open) {
           headingDetails.removeAttribute('open');
         }
       });
-      headingDetails.addEventListener('toggle', (event) => {
+      headingDetails.addEventListener('toggle', () => {
         if (altDetails.open && headingDetails.open) {
           altDetails.removeAttribute('open');
         }

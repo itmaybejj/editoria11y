@@ -24,6 +24,9 @@ class Ed11y {
       // Containers to globally ignore, e.g., "header *, .card *"
       ignoreElements: false,
 
+      // Provide list of test keys; get from localization file or Ed11y.results.
+      ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
+
       // Ignore Aria on these elements (Gutenberg labels headings while editing.)
       ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
 
@@ -464,17 +467,27 @@ class Ed11y {
       Ed11y.warningCount = 0;
       Ed11y.dismissedCount = 0;
 
-      // Review results array to remove dismissed items
+      // Review results array to remove dismissed or ignored items
       if (Ed11y.ignoreAll) {
         Ed11y.dismissedCount = Ed11y.results.length > 0 ? 1 : 0;
       } else {
         Ed11y.dismissedCount = 0;
         for (let i = Ed11y.results.length - 1; i >= 0; i--) {
+
           let test = Ed11y.results[i].test;
-          // todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are testing. But we'd have to walk the array. Expensive!
+
+          if (Ed11y.options.ignoreTests &&
+            Ed11y.options.ignoreTests.includes(test)) {
+            // Would be faster to skip test, but this is easy and reliable.
+            Ed11y.results.splice(i, 1);
+            continue;
+          }
+
+          // todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
           /*if (Ed11y.incremental && Ed11y.oldResults.length > 0) {
             // Don't flag new issues in the active range while people are typing.
           }*/
+
           let dismissKey = Ed11y.dismissalKey(Ed11y.results[i].dismissalKey);
           // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
           if (dismissKey !== false && Ed11y.options.currentPage in Ed11y.dismissedAlerts && test in Ed11y.dismissedAlerts[Ed11y.options.currentPage] && dismissKey in Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]) {
