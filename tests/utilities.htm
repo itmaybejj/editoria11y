@@ -26,6 +26,15 @@
         </section>
         <section id="hidden-results">
             <h2>Hidden results</h2>
+            <div>Visible wrapper
+                <div style="display: none;">
+                    <div class="item-list"><ul><li>
+                        <div>
+                            <div><a href="#">Page</a></div>
+                        </div>
+                    </li></ul></div>
+                </div>
+            </div>
             <p style="display: none;">THIS IS A HIDDEN PARAGRAPH WITH CAPS LOCK TO SET OFF THE 0 TEST</p>
             <details>
                 <summary>Summary with tip in details, "click here"</summary>
@@ -150,7 +159,12 @@
                 <a href="https://demo">click here</a></div>
             <div class="negative">Good link text in ::before: <a id="text-in-css" href="#"></a></div>
             <div class="positive">Bad link text in ::before:<a id="click-in-css" class="click-in-css" href="#"></a></div>
+            <div class="positive"><div role="region" aria-label="Featured image">
+                Aria labelled region should not negate inner name calculation.
+                <svg id="nested-aria-label" role="img"  viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg"/>
+            </div></div>
             <div class="negative">Good link text in title attribute: <a id="titled-link" title="Titled link" href="#"></a></div>
+            <div class="negative">Null aria label: <a id="null-aria" aria-label="" href="#">Null aria</a></div>
             <div class="positive">Bad link text in title attribute: <a id="titled-link-click-here" title="Click here" href="#"><span></span></a></div>
             <div class="positive">Bad link text in ::before on inner span: <a id="inner-css-link" href="#"><span class="click-in-css"></span></a></div>
             <div class="positive">Inner SVG has an alt but no role, alt is ignored: <a id="svg-incorrect-role" href="#"><svg alt="unread alt" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">

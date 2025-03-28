@@ -2412,7 +2412,7 @@ class Ed11y {
           return returnText;
         }
       }
-      if (element.hasAttribute('aria-label')) {
+      if (element.hasAttribute('aria-label') && element.getAttribute('aria-label').trim().length > 0) {
         return element.getAttribute('aria-label');
       }
       return 'noAria';
@@ -2642,14 +2642,16 @@ class Ed11y {
     Ed11y.visibleElement = function (el) {
       // Checks if this element is visible. Used in parent iterators.
       // false is definitely invisible, true requires continued iteration to tell.
-      // todo: continued iteration may not be working correctly.
       // Todo postpone: Check for offscreen?
       if (el) {
+        if (!el.checkVisibility({
+          opacityProperty: true,
+          visibilityProperty: true,
+        })) {
+          return false;
+        }
         let style = window.getComputedStyle(el);
-        return !(el.closest('[hidden], .sr-only, .visually-hidden') ||
-          style.getPropertyValue('display') === 'none' ||
-          style.getPropertyValue('visibility') === 'hidden' ||
-          style.getPropertyValue('opacity') === '0' ||
+        return !(el.closest('.sr-only, .visually-hidden') ||
           style.getPropertyValue('z-index') < 0 ||
           (style.getPropertyValue('overflow') === 'hidden' &&
             ( el.offsetWidth < 10 ||
