@@ -22,6 +22,9 @@ class Ed11yElementTip extends HTMLElement {
       this.dismissable = this.result.dismissalKey !== false;
       this.dismissed = !!this.result.dismissalStatus;
       this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
+      this.wrapper.setAttribute('aria-label',
+        `${Ed11y.M.issue}
+        ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1}`);
 
       this.addEventListener('mouseover', this.handleHover);
 
@@ -29,12 +32,11 @@ class Ed11yElementTip extends HTMLElement {
 
       this.tip = document.createElement('div');
       this.tip.classList.add('tip');
-      this.tip.setAttribute('aria-labelledby', 'tip-title-' + [this.resultID]);
 
       let content = document.createElement('div');
       content.classList.add('content');
       this.heading = document.createElement('div');
-      this.heading.setAttribute('id','tip-' + this.resultID);
+      this.heading.setAttribute('id','tip-title-' + this.resultID);
       this.heading.classList.add('title');
       this.heading.setAttribute('tabindex', '-1');
       this.heading.innerHTML = Ed11y.M[this.result.test].title;

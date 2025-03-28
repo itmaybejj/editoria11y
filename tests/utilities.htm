@@ -24,7 +24,9 @@
 
 
         </section>
-        <section id="hidden results">
+        <section id="hidden-results">
+            <h2>Hidden results</h2>
+            <p style="display: none;">THIS IS A HIDDEN PARAGRAPH WITH CAPS LOCK TO SET OFF THE 0 TEST</p>
             <details>
                 <summary>Summary with tip in details, "click here"</summary>
                 <a href="#">Click here</a>
@@ -153,7 +155,7 @@
             <div class="positive">Bad link text in ::before on inner span: <a id="inner-css-link" href="#"><span class="click-in-css"></span></a></div>
             <div class="positive">Inner SVG has an alt but no role, alt is ignored: <a id="svg-incorrect-role" href="#"><svg alt="unread alt" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"></circle></svg></a></div>
-            <div class="negative">Inner SVG has an alt and a valid role: <a id="svg-image-role" href="#"><svg role="image" alt="foo bar baz" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="negative">Inner SVG has an alt and a valid role: <a id="svg-image-role" href="#"><svg role="img" alt="foo bar baz" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"></circle></svg></a></div>
             <div class="negative">Inner SVG has a good title element: <a id="inner-svg-titles" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>I'm a circle</title></circle>

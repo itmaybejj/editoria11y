@@ -609,6 +609,9 @@ ed11y-element-result[data-ed11y-open='true'] {
     width: 20px;
     height: 20px;
 }
+.ed11y-tip-wrapper .arrow[data-direction="whompwhomp"] {
+    visibility: hidden;
+}
 
 .ed11y-tip-wrapper .tip {
     z-index: 1;

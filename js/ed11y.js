@@ -914,7 +914,6 @@ class Ed11y {
 
     // QuerySelectAll non-ignored elements within checkroots, with recursion into shadow components
     Ed11y.findElements = function (key, selector, rootRestrict = true) {
-      Ed11y.findElements.key = [];
 
       // Todo beta: function and parameter to auto-detect shadow components.
       let shadowSelector = Ed11y.options.autoDetectShadowComponents ?
@@ -964,6 +963,7 @@ class Ed11y {
 
     Ed11y.buildElementList = function () {
 
+      // Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
       Ed11y.findElements('editable', Ed11y.options.editableContent, false);
       if (Ed11y.options.inlineAlerts && Ed11y.elements.editable.length > 0) {
         Ed11y.options.inlineAlerts = false;
@@ -979,20 +979,17 @@ class Ed11y {
       Ed11y.findElements('audio', 'audio');
       Ed11y.findElements('video', 'video');
       Ed11y.findElements('table', 'table');
+
       if (Ed11y.options.embeddedContent) {
         Ed11y.findElements('embed', Ed11y.options.embeddedContent);
       }
       if (Ed11y.options.panelNoCover) {
-        // used to align panel.
+        // Moves panel off conflicting widgets.
         Ed11y.findElements('panelPin', Ed11y.options.panelNoCover, false);
       }
     };
 
     Ed11y.dismissalKey = function (text) {
-      /*let newString = String(text).replace(/([^0-9a-zA-Z])/g, '').substring(0, 512);
-      if (!newString) {
-        newString = 'ed11yBlankDismissalKey';
-      }*/
       return String(text).replace(/([^0-9a-zA-Z])/g, '').substring(0, 512);
     };
 
