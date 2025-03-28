@@ -17,17 +17,14 @@ class Ed11yElementResult extends HTMLElement {
 
       this.wrapper = document.createElement('div');
 
-      this.dismissable = !!this.result.dismissalKey;
+      this.dismissable = this.result.dismissalKey !== false;
       this.dismissed = !!this.result.dismissalStatus;
-      // todo MVP this would only work in darkmode -- need more theme variables
-      // #ffd4d4 red. turn background to alert color in lightmode.
       this.wrapper.classList.add('ed11y-wrapper', 'ed11y-result-wrapper');
       this.wrapper.classList.add('ed11y-result');
 
       // Create tooltip toggle
       this.toggle = document.createElement('button');
       this.toggle.setAttribute('class', 'toggle');
-      // todo parameterize
       let label = this.dismissable ? Ed11y.M.toggleManualCheck : Ed11y.M.toggleAlert;
       this.toggle.setAttribute('aria-label', Ed11y.M.toggleAriaLabel(label));
       this.toggle.setAttribute('aria-expanded', 'false');

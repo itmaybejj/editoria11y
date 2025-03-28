@@ -989,6 +989,10 @@ class Ed11y {
     };
 
     Ed11y.dismissalKey = function (text) {
+      /*let newString = String(text).replace(/([^0-9a-zA-Z])/g, '').substring(0, 512);
+      if (!newString) {
+        newString = 'ed11yBlankDismissalKey';
+      }*/
       return String(text).replace(/([^0-9a-zA-Z])/g, '').substring(0, 512);
     };
 
@@ -1030,7 +1034,9 @@ class Ed11y {
           dismissAction: dismissalType,
         };
         let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
-        document.dispatchEvent(ed11yDismissalUpdate);
+        window.setTimeout(() => {
+          document.dispatchEvent(ed11yDismissalUpdate);
+        },100);
       }
     };
 

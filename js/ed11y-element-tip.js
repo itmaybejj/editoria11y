@@ -19,7 +19,7 @@ class Ed11yElementTip extends HTMLElement {
       this.wrapper = document.createElement('div');
       this.wrapper.setAttribute('role', 'dialog');
 
-      this.dismissable = !!this.result.dismissalKey;
+      this.dismissable = this.result.dismissalKey !== false;
       this.dismissed = !!this.result.dismissalStatus;
       this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
 
@@ -101,58 +101,69 @@ class Ed11yElementTip extends HTMLElement {
             buttonBar.append(undismissNote);
           }
         } else {
-          if (Ed11y.options.allowHide) {
-            const dismissHideButton = document.createElement('button');
-            dismissHideButton.classList.add('dismiss');
-            // todo parameterize
-            if (Ed11y.options.syncedDismissals) {
-              dismissHideButton.setAttribute('title', Ed11y.M.dismissHideTitle);
-            }
-            dismissHideButton.textContent = Ed11y.M.dismissHideButtonContent;
-            dismissHideButton.prepend(dismissIcon.cloneNode(true));
-            buttonBar.append(dismissHideButton);
-            dismissHideButton.addEventListener('click', function(){Ed11y.dismissThis('hide');});
+
+          const pageActions = document.createElement('details');
+          const pageActionsSummary = document.createElement('summary');
+          const othersLikeThis = Ed11y.results.filter(el => el.test === this.result.test);
+          const showPageActions = othersLikeThis.length > 1 && Ed11y.options.allowHide && Ed11y.options.allowOK;
+
+          if (showPageActions) {
+            pageActions.classList.add('ed11y-bulk-actions', 'dismiss');
+            pageActionsSummary.textContent = Ed11y.M.dismissActions;
+            pageActions.appendChild(pageActionsSummary);
+            buttonBar.appendChild(pageActions);
           }
+
           if (Ed11y.options.allowOK) {
             const check = document.createElement('span');
             check.setAttribute('aria-hidden', 'true');
             check.textContent = '✓';
 
-            const dismissOKButton = document.createElement('button');
-            dismissOKButton.classList.add('dismiss');
+            const OkButton = document.createElement('button');
+            OkButton.classList.add('dismiss');
             if (Ed11y.options.syncedDismissals) {
-              dismissOKButton.setAttribute('title', Ed11y.M.dismissOkTitle);
+              OkButton.setAttribute('title', Ed11y.M.dismissOkTitle);
             }
-            dismissOKButton.textContent = Ed11y.M.dismissOkButtonContent;
-            buttonBar.append(dismissOKButton);
+            OkButton.textContent = Ed11y.M.dismissOkButtonContent;
+            buttonBar.prepend(OkButton);
 
-            const bulkActions = document.createElement('details');
-            const bulkSummary = document.createElement('summary');
-            bulkActions.classList.add('ed11y-bulk-actions', 'dismiss');
-            bulkSummary.textContent = Ed11y.M.dismissActions;
-            bulkActions.appendChild(bulkSummary);
-            buttonBar.appendChild(bulkActions);
+            const OkAllButton = OkButton.cloneNode(true);
+            OkAllButton.textContent = Ed11y.M.dismissOkAllButton;
+            if (showPageActions) {
+              pageActions.append(OkAllButton);
+            } else {
+              buttonBar.append(OkAllButton);
+            }
 
-            const dismissAllButton = document.createElement('button');
-            dismissAllButton.classList.add('dismiss');
+            OkButton.prepend(check);
+            OkAllButton.prepend(check.cloneNode(true));
+
+            OkButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
+            OkAllButton.addEventListener('click', function(){Ed11y.dismissThis('ok', true);});
+          }
+
+          if (Ed11y.options.allowHide) {
+            const ignoreButton = document.createElement('button');
+            ignoreButton.classList.add('dismiss');
+            // todo parameterize
             if (Ed11y.options.syncedDismissals) {
-              dismissAllButton.setAttribute('title', Ed11y.M.dismissOkTitle); // need new
+              ignoreButton.setAttribute('title', Ed11y.M.dismissHideTitle);
             }
-            dismissAllButton.textContent = Ed11y.M.dismissHideAllButton;
-            dismissAllButton.prepend(dismissIcon.cloneNode(true));
-            bulkActions.append(dismissAllButton);
-            dismissAllButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
+            ignoreButton.textContent = Ed11y.M.dismissHideButtonContent;
+            ignoreButton.prepend(dismissIcon.cloneNode(true));
+            buttonBar.prepend(ignoreButton);
+            ignoreButton.addEventListener('click', function(){Ed11y.dismissThis('hide');});
 
-            const dismissOKAllButton = dismissOKButton.cloneNode(true);
-            dismissOKAllButton.textContent = Ed11y.M.dismissOKAllButton;
-            bulkActions.append(dismissOKAllButton);
-
-            dismissOKButton.prepend(check);
-            dismissOKAllButton.prepend(check.cloneNode(true));
-
-            dismissOKButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
-            dismissAllButton.addEventListener('click', function(){Ed11y.dismissThis('hide', true);});
-            dismissOKAllButton.addEventListener('click', function(){Ed11y.dismissThis('ok', true);});
+            const ignoreAllButton = document.createElement('button');
+            ignoreAllButton.classList.add('dismiss');
+            ignoreAllButton.textContent = Ed11y.M.dismissHideAllButton;
+            ignoreAllButton.prepend(dismissIcon.cloneNode(true));
+            if (showPageActions) {
+              pageActionsSummary.insertAdjacentElement('afterend', ignoreAllButton);
+            } else {
+              buttonBar.append(ignoreAllButton);
+            }
+            ignoreAllButton.addEventListener('click', function(){Ed11y.dismissThis('hide');});
           }
         }
 

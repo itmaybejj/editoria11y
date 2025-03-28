@@ -63,10 +63,10 @@ const ed11yLang = {
     toggleAriaLabel: (label) => `Accessibility ${label}`,
     transferFocus: 'Edit this content',
     dismissOkButtonContent: 'Mark as OK',
-    dismissHideButtonContent: 'Ignore',
+    dismissHideButtonContent: 'Mark as ignored',
     dismissActions: 'Page actions', // 2.3.10
     dismissHideAllButton: 'Ignore all like this', // 2.3.10
-    dismissOKAllButton: 'Mark all like this as OK', // 2.3.10
+    dismissOkAllButton: 'Mark all like this as OK', // 2.3.10
     dismissOkTitle: 'Hides this alert for all editors',
     dismissHideTitle: 'Hides this alert for you',
     undismissOKButton: 'Restore this alert marked as OK',
