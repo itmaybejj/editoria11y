@@ -350,6 +350,12 @@ class Ed11y {
           Ed11y.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
         }
 
+        // Check for ignoreAll elements.
+        Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
+        if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
+          Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
+        }
+
         // Run tests
         Ed11y.checkAll();
         window.addEventListener('resize', function () { Ed11y.windowResize(); });
@@ -363,11 +369,6 @@ class Ed11y {
       Ed11y.disabled = false;
 
       if ( !Ed11y.checkRunPrevent() ) {
-        // Check for ignoreAll elements.
-        Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
-        if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
-          Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
-        }
 
         if ( Ed11y.incremental ) {
           Ed11y.oldResults = Ed11y.results;
@@ -468,49 +469,54 @@ class Ed11y {
       Ed11y.dismissedCount = 0;
 
       // Review results array to remove dismissed or ignored items
-      if (Ed11y.ignoreAll) {
-        Ed11y.dismissedCount = Ed11y.results.length > 0 ? 1 : 0;
-      } else {
-        Ed11y.dismissedCount = 0;
-        for (let i = Ed11y.results.length - 1; i >= 0; i--) {
 
-          let test = Ed11y.results[i].test;
+      Ed11y.dismissedCount = 0;
+      for (let i = Ed11y.results.length - 1; i >= 0; i--) {
 
-          if (Ed11y.options.ignoreTests &&
-            Ed11y.options.ignoreTests.includes(test)) {
-            // Would be faster to skip test, but this is easy and reliable.
-            Ed11y.results.splice(i, 1);
-            continue;
-          }
+        let test = Ed11y.results[i].test;
 
-          // todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
-          /*if (Ed11y.incremental && Ed11y.oldResults.length > 0) {
-            // Don't flag new issues in the active range while people are typing.
-          }*/
+        if (Ed11y.options.ignoreTests &&
+          Ed11y.options.ignoreTests.includes(test)) {
+          // Would be faster to skip test, but this is easy and reliable.
+          Ed11y.results.splice(i, 1);
+          continue;
+        }
 
-          let dismissKey = Ed11y.dismissalKey(Ed11y.results[i].dismissalKey);
-          // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-          if (dismissKey !== false && Ed11y.options.currentPage in Ed11y.dismissedAlerts && test in Ed11y.dismissedAlerts[Ed11y.options.currentPage] && dismissKey in Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]) {
-            // Remove result if it has been marked OK or ignored, increment dismissed match counter.
-            Ed11y.dismissedCount++;
-            Ed11y.results[i].dismissalStatus = Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey];
-          } else if (Ed11y.results[i].dismissalKey) {
-            Ed11y.warningCount++;
-            Ed11y.results[i].dismissalStatus = false;
-          } else {
-            Ed11y.errorCount++;
-            Ed11y.results[i].dismissalStatus = false;
-          }
+        // todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
+        /*if (Ed11y.incremental && Ed11y.oldResults.length > 0) {
+          // Don't flag new issues in the active range while people are typing.
+        }*/
+
+        let dismissKey = Ed11y.dismissalKey(Ed11y.results[i].dismissalKey);
+        // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
+        if (dismissKey !== false && Ed11y.options.currentPage in Ed11y.dismissedAlerts && test in Ed11y.dismissedAlerts[Ed11y.options.currentPage] && dismissKey in Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]) {
+          // Remove result if it has been marked OK or ignored, increment dismissed match counter.
+          Ed11y.dismissedCount++;
+          Ed11y.results[i].dismissalStatus = Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey];
+        } else if (Ed11y.results[i].dismissalKey) {
+          Ed11y.warningCount++;
+          Ed11y.results[i].dismissalStatus = false;
+        } else {
+          Ed11y.errorCount++;
+          Ed11y.results[i].dismissalStatus = false;
         }
       }
 
       Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
-      // Dispatch event for synchronizers
+
+      // Dispatch event for synchronizers.
       if (!Ed11y.incremental) {
         window.setTimeout(function () {
           let syncResults = new CustomEvent('ed11yResults');
           document.dispatchEvent(syncResults);
         }, 0);
+      }
+
+      if (Ed11y.ignoreAll) {
+        Ed11y.dismissedCount = Ed11y.totalCount + Ed11y.dismissedCount;
+        Ed11y.errorCount = 0;
+        Ed11y.warningCount = 0;
+        Ed11y.totalCount = 0;
       }
 
     };
@@ -615,7 +621,9 @@ class Ed11y {
 
 
           // Decide whether to open the panel on load.
-          if (Ed11y.options.alertMode === 'active' ||
+          if (Ed11y.ignoreAll) {
+            Ed11y.showPanel = false;
+          } else if (Ed11y.options.alertMode === 'active' ||
             !Ed11y.options.userPrefersShut ||
             Ed11y.options.showDismissed
           ) {
@@ -1659,6 +1667,7 @@ class Ed11y {
     };
 
     Ed11y.togglePanel = function () {
+      Ed11y.ignoreAll = false;
 
       if (!Ed11y.doubleClickPrevent) {
         // Prevent clicks piling up while scan is running.
@@ -2536,7 +2545,7 @@ class Ed11y {
           continue;
         case 'SVG':
         case 'svg':
-          if (treeWalker.currentNode.getAttribute('role') === 'image' && treeWalker.currentNode.hasAttribute('alt')) {
+          if (treeWalker.currentNode.getAttribute('role') === 'img' && treeWalker.currentNode.hasAttribute('alt')) {
             computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, treeWalker.currentNode.getAttribute('alt'));
             if (!Ed11y.nextTreeBranch(treeWalker)) {
               break walker;

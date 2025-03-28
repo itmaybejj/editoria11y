@@ -182,9 +182,9 @@ const ed11yLang = {
     altMeaninglessLinked : {
       title: 'Linked alt text is meaningless',
       tip: (alt) =>
-        `<p>This image's alt text is "${alt}," which probably does describe this link.</p>
-         <p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" target="_blank" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
-            Links should clearly and concisely describe their destination, even out of context.</p>`
+        `<p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" target="_blank" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
+            Links should clearly and concisely describe their destination, even out of context.</p>
+           <p>This image's alt text is "${alt}," which probably does not describe this link.</p>`
       ,
     },
 
