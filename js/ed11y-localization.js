@@ -64,7 +64,7 @@ const ed11yLang = {
     transferFocus: 'Edit this content',
     dismissOkButtonContent: 'Mark as OK',
     dismissHideButtonContent: 'Mark as ignored',
-    dismissActions: 'Page actions', // 2.3.10
+    dismissActions: (count) => `${count} similar checks`, // 2.3.10
     dismissHideAllButton: 'Ignore all like this', // 2.3.10
     dismissOkAllButton: 'Mark all like this as OK', // 2.3.10
     dismissOkTitle: 'Hides this alert for all editors',
@@ -256,16 +256,15 @@ const ed11yLang = {
     altPartOfLinkWithText : {
       title: 'Manual check: link contains both text and an image',
       tip: (alt) =>
-        `<p>When a link includes an image, screen readers <a href="https://www.w3.org/WAI/tutorials/images/functional/" title="Opens in new tab" target="_blank">speak the image's alt text as part of the link</a>.
-            This can be confusing if the image's alt is irrelevant to the link.</p>
-            <p>E.g., for a card-style link with both text and a stock photo, compare:</p>
+        `<p>Screen readers will <a href="https://www.w3.org/WAI/tutorials/images/functional/" title="Opens in new tab" target="_blank">include the image's alt text when describing this link</a>.</p>
+            <p>Check that the combined text is concise and meaningful:<br>"<em><strong>${alt}</strong></em>"</p>
+            <p></p>
             <ul>
-                <li>"Link, image, five people jumping and high-fiving around a conference table, About us"</li>
-                <li>"Link, About us"</li>
+                <li>Keep alts that add relevant meaning:<br>"Buy (A Tigers v. Falcons ticket)."</li>
+                <li>Edit unhelpful or irrelevant alts:<br>"Buy (A piece of paper with team logos on it)."</li>
+                <li>Remove unnecessary alts:<br>"Buy Tigers v. Falcons tickets (A Tigers v. Falcons ticket)."</li>
             </ul>
-            <p>If the content of this image is not relevant, it may be better to leave this alt text blank.</p>
-            <p>This image's alt text is: <em>${alt}</em></p>
-            `,
+        `, // 2.3.10.
     },
 
     linkNoTextExample: '<p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>',

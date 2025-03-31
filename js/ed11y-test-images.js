@@ -19,7 +19,7 @@ class Ed11yTestImages {
         el.getAttribute('alt');
       let altLabel = Ed11y.M.altLabelPrefix;
       let src = el.getAttribute('src');
-      let error = false;
+      let error = '';
       let dismissable = true;
       let parentLink = Ed11y.parentLink(el);
 
@@ -125,9 +125,15 @@ class Ed11yTestImages {
       let altStyle = 'pass';
 
       if (error) {
-        let message = Ed11y.options.langSanitizes ? Ed11y.M[error].tip(alt) : Ed11y.M[error].tip(Ed11y.sanitizeForHTML(alt));
         let baseSrc = src ? src.split('?')[0] : 'nosrc_';
         dismissable = dismissable ? Ed11y.dismissalKey(baseSrc + alt) : false;
+        if (error === 'altPartOfLinkWithText') {
+          let linkText = Ed11y.computeText(parentLink);
+          if (linkText && alt) {
+            alt = linkText.replace(alt.trim(), ` (Image: ${alt}) `).trim();
+          }
+        }
+        let message = Ed11y.options.langSanitizes ? Ed11y.M[error].tip(alt) : Ed11y.M[error].tip(Ed11y.sanitizeForHTML(alt));
         Ed11y.results.push({
           element: el,
           test: error,
