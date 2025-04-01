@@ -112,9 +112,10 @@ class Ed11yElementResult extends HTMLElement {
     this.tipNeedsBuild = false;
 
     let tip = document.createElement('ed11y-element-tip');
+    tip.result = this.result;
+    tip.setAttribute('data-ed11y-result', this.resultID);
     tip.classList.add('ed11y-element');
     tip.style.setProperty('opacity', '0');
-    tip.setAttribute('data-ed11y-result', this.resultID);
     let body = document.querySelector('body');
     body.insertAdjacentElement('beforeend', tip);
     this.tip = tip;
