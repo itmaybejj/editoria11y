@@ -1328,7 +1328,7 @@ class Ed11y {
             top = top + 10;
             left = left + 10;
           } else {
-            left = left - 34;
+            left = Ed11y.options.inlineAlerts ? left - 34 : left;
           }
           if (mark.result.scrollableParent) {
             // Bump alerts that would be X-position out of a scroll zone.

@@ -856,6 +856,10 @@ ed11y-element-result[data-ed11y-open='true'] {
 
 .ed11y-tip-wrapper details.dismiss {
     padding: 0;
+    max-width: 20em;
+    display: flex;
+    align-items: start;
+    flex-direction: column;
 }
 
 .ed11y-tip-wrapper .dismiss summary {

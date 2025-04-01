@@ -64,7 +64,7 @@ const ed11yLang = {
     transferFocus: 'Edit this content',
     dismissOkButtonContent: 'Mark as OK',
     dismissHideButtonContent: 'Mark as ignored',
-    dismissActions: (count) => `${count} similar checks`, // 2.3.10
+    dismissActions: (count) => `${count} similar issues`, // 2.3.10
     dismissHideAllButton: 'Ignore all like this', // 2.3.10
     dismissOkAllButton: 'Mark all like this as OK', // 2.3.10
     dismissOkTitle: 'Hides this alert for all editors',
