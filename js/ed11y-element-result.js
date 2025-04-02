@@ -62,7 +62,7 @@ class Ed11yElementResult extends HTMLElement {
   handleHover(event) {
     event.preventDefault();
     let host = this.getRootNode().host;
-    if (!this.classList.contains('intersecting') && this.open !== true && host.racing === false) {
+    if (!this.classList.contains('intersecting') && host.open !== true && host.racing === false) {
       this.open = true;
       host.racing = true;
       host.toggleTip(true);
@@ -206,7 +206,7 @@ class Ed11yElementResult extends HTMLElement {
       switch (attr) {
       case 'data-ed11y-action':
         if (newValue !== 'false') {
-          let changeTo = newValue === 'open' ? true : false;
+          let changeTo = newValue === 'open';
           this.setAttribute('data-ed11y-action', 'false');
           this.toggleTip(changeTo);
         }
