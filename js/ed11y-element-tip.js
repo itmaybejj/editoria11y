@@ -284,7 +284,7 @@ class Ed11yElementTip extends HTMLElement {
       switch (attr) {
       case 'data-ed11y-action':
         if (newValue !== 'false') {
-          let changeTo = newValue === 'open' ? true : false;
+          let changeTo = newValue === 'open';
           this.open = changeTo;
           this.setAttribute('data-ed11y-action', 'false');
           this.toggleTip(changeTo);
