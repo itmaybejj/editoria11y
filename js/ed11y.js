@@ -1251,6 +1251,10 @@ class Ed11y {
     };
 
     const closestScrollable = function(el) {
+      if (Ed11y.options.constrainButtons && el.closest(Ed11y.options.constrainButtons)) {
+        return el.closest(Ed11y.options.constrainButtons);
+      }
+
       let parent = el.parentElement;
       if (parent && parent.tagName !== 'BODY') {
         // Parent exists
@@ -1409,17 +1413,13 @@ class Ed11y {
           nudgeLeft = 14 + previousNudgeLeft;
         }
 
-        let constrained = false;
-        if (Ed11y.options.constrainButtons) {
-          constrained = mark.result.element.closest(Ed11y.options.constrainButtons);
-        }
         let constrainLeft = 0;
         let constrainRight = windowWidth;
 
-        if (constrained) {
-          constrained.getBoundingClientRect();
-          constrainLeft = constrained.offsetLeft;
-          constrainRight = constrainLeft + constrained.offsetWidth;
+        if (mark.result.scrollableParent) {
+          const constrained = mark.result.scrollableParent.getBoundingClientRect();
+          constrainLeft = constrained.left;
+          constrainRight = constrainLeft + constrained.width;
         }
 
         let needNudge = false;
@@ -1432,7 +1432,7 @@ class Ed11y {
         else if (mark.markLeft + nudgeLeft + 80 > constrainRight ) {
           needNudge = true;
           // Offscreen to right. push to the left
-          nudgeLeft = constrainRight - nudgeLeft - mark.markLeft - 80;
+          nudgeLeft = constrainRight - nudgeLeft - mark.markLeft - 100;
         }
         else if (nudgeTop !== 0) {
           needNudge = true;
