@@ -74,6 +74,18 @@ class Ed11yElementPanel extends HTMLElement {
         // todo: syntax could be shrunk now that these aren't tabs.
         tab.addEventListener('click', this.handleBarClick);
       });
+      const altDetails = Ed11y.panel.querySelector('#ed11y-alts-tab');
+      const headingDetails = Ed11y.panel.querySelector('#ed11y-headings-tab');
+      altDetails.addEventListener('toggle', () => {
+        if (altDetails.open && headingDetails.open) {
+          headingDetails.removeAttribute('open');
+        }
+      });
+      headingDetails.addEventListener('toggle', () => {
+        if (altDetails.open && headingDetails.open) {
+          altDetails.removeAttribute('open');
+        }
+      });
       this.initialized = true;
     }
   }

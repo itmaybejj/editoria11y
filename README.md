@@ -1,8 +1,8 @@
 # Editoria11y
 
-Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly accessibility "auto-correct" checker that addresses three critical needs for content authors:
+Editoria11y (editorial [ally](https://www.a11yproject.com/)) is a user-friendly accessibility "spellcheck" that addresses three critical needs for content authors:
 
-1. It runs automatically. Modern spellcheck works so well because it is always running; put spellcheck behind a button and few users remember to run it!
+1. It runs automatically. Spellcheck works best when it is always running; put it behind a button and few users remember to run it!
 1. It focuses exclusively on straightforward issues a content author can easily understand and easily fix. Yes; comprehensive testing should be a key part of site creation, but if a tool is going to run automatically on every page, it will do more harm than good if it is alerting on issues editors cannot fix.
 1. It runs in context. Modern content management systems often assemble pages from many separately-edited blocks, widgets and elements. Only a fully-assembled "page" can be checked for things like the header outline order.
 

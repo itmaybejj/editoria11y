@@ -6,8 +6,8 @@ describe('Check uglified version', function() {
   before(browser => browser.navigateTo(absolutePath));
 
   it('No false negatives', function(browser) {
-    browser.waitForElementPresent('ed11y-element-panel', 500);
-     
+    browser.waitForElementPresent('ed11y-element-result', 1000);
+
     browser.elements('css selector','.positive', nodeContents => {
       nodeContents.value.forEach(node => {
         for (const [key, value] of Object.entries(node)) {
@@ -22,7 +22,7 @@ describe('Check uglified version', function() {
 
       })
     });
-    
+
     //browser.assert.not.elementPresent('.negative > ed11y-element-result');
     //const resultElements = browser.findElements('.positive');
 
@@ -33,10 +33,10 @@ describe('Check uglified version', function() {
     item.assert.not.elementPresent('ed11y-element-result', item.getId());
   };*/
 
-  
+
 });
 it('No false positives', function(browser) {
- 
+
   //const resultElements = browser.findElements('.negative');
 
   //Array.from(resultElements).forEach(item => noFalsePositive(item));
@@ -56,5 +56,5 @@ it('No false positives', function(browser) {
   });
 
   after(browser => browser.end());
-  
+
 });

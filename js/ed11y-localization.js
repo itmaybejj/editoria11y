@@ -48,8 +48,8 @@ const ed11yLang = {
 
     // Strings used in tests ==============================
 
-    suspiciousWords: ['image of','graphic of','picture of','photo of','placeholder','spacer','tbd','todo'],
-    meaninglessAlt: ['alt','chart','decorative','image','graphic','photo','placeholder','placeholder image','spacer','tbd','todo','to do'],
+    suspiciousWords: ['image of','graphic of','picture of','photo of','photograph of','placeholder','spacer','tbd','todo', 'copyright', 'courtesy of', 'photo by'],
+    meaninglessAlt: ['alt','chart','decorative','image','graphic','photo','placeholder','placeholder image','spacer','tbd','todo','to do','copyright', 'courtesy of', 'photo by'],
     // 'alt', 'image', 'photo', 'decorative', 'placeholder', 'placeholder image', 'spacer'
     linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
     linksMeaningless: /(learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|"|'|\?|\.|-|,|:|>|<|\s)+/g,
@@ -62,8 +62,11 @@ const ed11yLang = {
     issue: 'Issue',
     toggleAriaLabel: (label) => `Accessibility ${label}`,
     transferFocus: 'Edit this content',
-    dismissOkButtonContent: 'Mark as checked and OK',
-    dismissHideButtonContent: 'Ignore this manual check',
+    dismissOkButtonContent: 'Mark as OK',
+    dismissHideButtonContent: 'Mark as ignored',
+    dismissActions: (count) => `${count} similar issues`, // 2.3.10
+    dismissHideAllButton: 'Ignore all like this', // 2.3.10
+    dismissOkAllButton: 'Mark all like this as OK', // 2.3.10
     dismissOkTitle: 'Hides this alert for all editors',
     dismissHideTitle: 'Hides this alert for you',
     undismissOKButton: 'Restore this alert marked as OK',
@@ -179,9 +182,9 @@ const ed11yLang = {
     altMeaninglessLinked : {
       title: 'Linked alt text is meaningless',
       tip: (alt) =>
-        `<p>This image's alt text is "${alt}," which probably does describe this link.</p>
-         <p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" target="_blank" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
-            Links should clearly and concisely describe their destination, even out of context.</p>`
+        `<p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" target="_blank" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
+            Links should clearly and concisely describe their destination, even out of context.</p>
+           <p>This image's alt text is "${alt}," which probably does not describe this link.</p>`
       ,
     },
 
@@ -253,16 +256,15 @@ const ed11yLang = {
     altPartOfLinkWithText : {
       title: 'Manual check: link contains both text and an image',
       tip: (alt) =>
-        `<p>When a link includes an image, screen readers <a href="https://www.w3.org/WAI/tutorials/images/functional/" title="Opens in new tab" target="_blank">speak the image's alt text as part of the link</a>.
-            This can be confusing if the image's alt is irrelevant to the link.</p>
-            <p>E.g., for a card-style link with both text and a stock photo, compare:</p>
+        `<p>Screen readers will <a href="https://www.w3.org/WAI/tutorials/images/functional/" title="Opens in new tab" target="_blank">include the image's alt text when describing this link</a>.</p>
+            <p>Check that the combined text is concise and meaningful:<br>"<em><strong>${alt}</strong></em>"</p>
+            <p></p>
             <ul>
-                <li>"Link, image, five people jumping and high-fiving around a conference table, About us"</li>
-                <li>"Link, About us"</li>
+                <li>Keep alts that add relevant meaning:<br>"Buy (A Tigers v. Falcons ticket)."</li>
+                <li>Edit unhelpful or irrelevant alts:<br>"Buy (A piece of paper with team logos on it)."</li>
+                <li>Remove unnecessary alts:<br>"Buy Tigers v. Falcons tickets (A Tigers v. Falcons ticket)."</li>
             </ul>
-            <p>If the content of this image is not relevant, it may be better to leave this alt text blank.</p>
-            <p>This image's alt text is: <em>${alt}</em></p>
-            `,
+        `, // 2.3.10.
     },
 
     linkNoTextExample: '<p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>',

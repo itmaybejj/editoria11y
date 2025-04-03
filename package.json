@@ -11,14 +11,9 @@
   },
   "license": "GPLv2",
   "devDependencies": {
-    "@cucumber/cucumber": "^7",
-    "@cucumber/pretty-formatter": "^1",
-    "axios": "^1",
-    "chromedriver":  "*",
+    "chromedriver": "^134.0.5",
     "eslint": "^8.32.0",
-    "geckodriver": "^3.2",
-    "ms-chromium-edge-driver": "^0.5.1",
-    "nightwatch": "^2",
+    "nightwatch": "^3",
     "stylelint": "^16.3.1",
     "stylelint-config-standard": "^36.0.0",
     "uglify-js": "^3.17.4"
