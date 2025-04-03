@@ -96,6 +96,9 @@ class Ed11y {
       panelOffsetY: '25px',
       panelNoCover: '', // select other buttons to avoid.
 
+      // Selector list for elements that hide overflow, truncating buttons.
+      constrainButtons: false,
+
       // Interface
       lang: 'en',
       langSanitizes: false, // Some translation modules will double-escape
@@ -1406,17 +1409,30 @@ class Ed11y {
           nudgeLeft = 14 + previousNudgeLeft;
         }
 
+        let constrained = false;
+        if (Ed11y.options.constrainButtons) {
+          constrained = mark.result.element.closest(Ed11y.options.constrainButtons);
+        }
+        let constrainLeft = 0;
+        let constrainRight = windowWidth;
+
+        if (constrained) {
+          constrained.getBoundingClientRect();
+          constrainLeft = constrained.offsetLeft;
+          constrainRight = constrainLeft + constrained.offsetWidth;
+        }
+
         let needNudge = false;
-        if (mark.markLeft + nudgeLeft < 44) {
+        if (mark.markLeft + nudgeLeft - constrainLeft < 44) {
           // Offscreen to left. push to the right.
-          nudgeLeft = 44 - mark.markLeft + nudgeLeft;
+          nudgeLeft = 44 - mark.markLeft + nudgeLeft + constrainLeft;
           needNudge = true;
           //nudgeMark(mark, 44 - mark.markLeft + nudgeLeft, nudgeTop);
         }
-        else if (mark.markLeft + nudgeLeft + 80 > windowWidth) {
+        else if (mark.markLeft + nudgeLeft + 80 > constrainRight ) {
           needNudge = true;
           // Offscreen to right. push to the left
-          nudgeLeft = windowWidth - nudgeLeft - mark.markLeft - 80;
+          nudgeLeft = constrainRight - nudgeLeft - mark.markLeft - 80;
         }
         else if (nudgeTop !== 0) {
           needNudge = true;
