@@ -36,6 +36,8 @@ class Ed11yTestLinks {
         }
       }
 
+      // Todo: add test for title === textContent. Don't use computedText().
+
       // Tests to see if this link is empty
       if (
         linkText.replace(/"|'|\?|\.|-|\s+/g, '').length === 0 &&

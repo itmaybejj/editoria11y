@@ -158,17 +158,21 @@
         <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"></a> No characters</p>
         <p class="positive"><a href="#"> </a> Space character</p>
         <p class="positive">Image with deadspace: <a href="#"><img alt="'" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" class=""></a></p>
+        <p class="positive">Content is image in CSS ::before: <a href="#" class="insert-image-before"></a></p>
+        <p class="positive only">Content is in CSS ::before: <a href="#" class="insert-text-before insert-text-after"><span class="insert-image-before"></span></a></p>
 
         <h3 id="links-titled-with-a-url">Links titled with a URL</h3>
 
         <p class="positive"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs">https://www.youtube.com/watch?v=DLzxrzFCyOs</a></p>
+        <p class="positive"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs" title="https://www.youtube.com/watch?v=DLzxrzFCyOs"></a></p>
+        <p class="positive"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs" title="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here</a></p>
 
         <h3 id="links-only-titled-with-generic-text">Links only titled with generic text</h3>
 
         <p>“Click here,” “learn more,” “download,” etc.</p>
 
         <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Download</a> But should only be yellow</p>
-        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here</a></p>
+        <p class="positive"><a class="insert-text-before insert-text-after" href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here</a></p>
         <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">More</a></p>
 
         <p class="positive">Link with ignored substring: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here (opens in new window)</a></p>
@@ -201,7 +205,7 @@
 
         <p class="positive"><a href="#"><span aria-hidden="true">Link with all text content aria-hidden.</span></a></p>
 
-        <p class="positive"><a href="#"><img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+        <p class="positive"><a href="#"><img class="insert-text-before" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
         </a> linked image with empty alt.</p>
         <p class="positive"><a href="#"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
         </a> linked image with no alt.</p>
@@ -453,6 +457,18 @@
         </script>
         <style>
             main {position: relative; z-index: 0;}
+            .insert-image-before::before {
+                content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E");
+                display: inline-block;
+                width: 24px;
+                height: 24px;
+            }
+            .insert-text-before::before {
+                content: "Click ";
+            }
+            .insert-text-after::after {
+                content: " Here";
+            }
             /*footer { position: fixed; z-index: 1; bottom: 0; left: 0; right: 0; background: silver;}*/
         </style>
         <link href="./tests.css" rel="stylesheet">

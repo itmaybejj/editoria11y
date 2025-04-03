@@ -2445,16 +2445,20 @@ class Ed11y {
     };
 
     Ed11y.wrapPseudoContent = function(el, string) {
-      let pseudo = [];
-      pseudo[0] = window.getComputedStyle(
-        el, ':before'
-      ).getPropertyValue('content');
-      pseudo[1] = window.getComputedStyle(
-        el, ':after'
-      ).getPropertyValue('content');
-      pseudo[0] = pseudo[0] === 'none' ? '' : pseudo[0].replace(/^"(.*)"$/, '$1');
-      pseudo[1] = pseudo[1] === 'none' ? '' : pseudo[1].replace(/^"(.*)"$/, '$1');
-      return ' ' + pseudo[0] + string + pseudo[1];
+      // Get quoted content, avoid inserting URL references.
+      // Hat tip Adam Chaboryk
+
+      const getAltText = (content) => {
+        if (content === 'none') return '';
+        const match = content.includes('url(') || content.includes('image-set(')
+          ? content.match(/\/\s*"([^"]+)"/) // Content after slash, e.g. url('image.jpg') / "alt text";
+          : content.match(/"([^"]+)"/); // Content between quotes, e.g. "alt text";
+        return match ? match[1] : '';
+      };
+      const before = getAltText(window.getComputedStyle(el, ':before').getPropertyValue('content'));
+      const after = getAltText(window.getComputedStyle(el, ':after').getPropertyValue('content'));
+      return `${before}${string}${after}`;
+
     };
 
     // Sets treeWalker loop to last node before next branch.
@@ -2490,12 +2494,12 @@ class Ed11y {
         });
       }
       if (!el.children.length) {
-        // Just text! Output immediately.
+        // Skip treeWalker, only contents are text.
         computedText += Ed11y.wrapPseudoContent(el, el.textContent);
         if (!computedText.trim() && el.hasAttribute('title')) {
-          return el.getAttribute('title');
+          computedText = el.getAttribute('title');
         }
-        return recursing ? computedText : computedText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
+        return recursing ? computedText : computedText.replace(/[\n\r]+|\s{2,}/g, ' ').trim();
       }
 
       // Otherwise, recurse into children.
@@ -2511,7 +2515,7 @@ class Ed11y {
       walker: while (treeWalker.nextNode()) {
         count++;
 
-        // todo need to handle bugs found in Sa11y for CDATA type text
+        // todo: Sa11y excludes
         if (treeWalker.currentNode.nodeType === Node.TEXT_NODE) {
           if (treeWalker.currentNode.parentNode.tagName !== 'SLOT') {
             computedText += ` ${treeWalker.currentNode.nodeValue}`;
@@ -2613,6 +2617,8 @@ class Ed11y {
       if (addTitleIfNoName && !aText) {
         computedText += ' ' + addTitleIfNoName;
       }
+
+      computedText = Ed11y.wrapPseudoContent(el, computedText);
 
       if (!computedText.trim() && el.hasAttribute('title')) {
         return el.getAttribute('title');
