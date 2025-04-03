@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.9';
+    Ed11y.version = '2.3.10';
 
     let defaultOptions = {
 
@@ -19,9 +19,13 @@ class Ed11y {
 
       // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
       shadowComponents: false,
+      autoDetectShadowComponents: true,
 
       // Containers to globally ignore, e.g., "header *, .card *"
       ignoreElements: false,
+
+      // Provide list of test keys; get from localization file or Ed11y.results.
+      ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
 
       // Ignore Aria on these elements (Gutenberg labels headings while editing.)
       ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
@@ -54,6 +58,7 @@ class Ed11y {
       // alertMode "headless" never draws the panel.
       alertMode: 'userPreference',
       inlineAlerts: true,
+      watchForChanges: true, // true, false, 'checkRoots';
 
       // This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
       editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
@@ -90,6 +95,9 @@ class Ed11y {
       panelOffsetX: '25px',
       panelOffsetY: '25px',
       panelNoCover: '', // select other buttons to avoid.
+
+      // Selector list for elements that hide overflow, truncating buttons.
+      constrainButtons: false,
 
       // Interface
       lang: 'en',
@@ -245,6 +253,7 @@ class Ed11y {
     }
 
     const cssBundle = document.createElement('div');
+    cssBundle.classList.add('ed11y-style');
     cssBundle.setAttribute('hidden','');
     Ed11y.options.cssUrls?.forEach( sheet => {
       const cssLink = document.createElement('link');
@@ -262,6 +271,7 @@ class Ed11y {
     Ed11y.onLoad = true;
     Ed11y.showPanel = false;
     let windowWidth = window.innerWidth;
+    Ed11y.watching = [];
 
     Ed11y.disable = () => {
       if (Ed11y.open && !Ed11y.closedByDisable) {
@@ -330,22 +340,6 @@ class Ed11y {
           Ed11y.dismissedAlerts[Ed11y.options.currentPage] = Ed11y.options.syncedDismissals;
         }
 
-        // Ed11y v2.0 stored special characters in dismissal keys. This strips them.
-        // This loop can be deleted in 2024.
-        if (Ed11y.options.currentPage in Ed11y.dismissedAlerts) {
-          for (const [key] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage])) {
-            if (key in Ed11y.dismissedAlerts[Ed11y.options.currentPage]) {
-              for (const [subkey, subvalue] of Object.entries(Ed11y.dismissedAlerts[Ed11y.options.currentPage][key])) {
-                let newKey = Ed11y.dismissalKey(subkey);
-                if (newKey !== subkey) {
-                  Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][newKey] = subvalue;
-                  delete Ed11y.dismissedAlerts[Ed11y.options.currentPage][key][subkey];
-                }
-              }
-            }
-          }
-        }
-
         // Create test class objects
         Ed11y.testEmbeds = new Ed11yTestEmbeds;
         Ed11y.testHeadings = new Ed11yTestHeadings;
@@ -360,6 +354,12 @@ class Ed11y {
           Ed11y.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
         }
 
+        // Check for ignoreAll elements.
+        Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
+        if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
+          Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
+        }
+
         // Run tests
         Ed11y.checkAll();
         window.addEventListener('resize', function () { Ed11y.windowResize(); });
@@ -370,14 +370,12 @@ class Ed11y {
     Ed11y.results = [];
     // Toggles the outline of all headers, link texts, and images.
     Ed11y.checkAll = () => {
+      if (Ed11y.openTip.button) {
+        return false;
+      }
       Ed11y.disabled = false;
 
       if ( !Ed11y.checkRunPrevent() ) {
-        // Check for ignoreAll elements.
-        Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
-        if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
-          Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
-        }
 
         if ( Ed11y.incremental ) {
           Ed11y.oldResults = Ed11y.results;
@@ -389,11 +387,9 @@ class Ed11y {
 
         Ed11y.customTestsRunning = false;
 
-        // Find and cache all root elements based on user-provided selectors.
         let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
         if (roots.length === 0) {
-          //Ed11y.roots = [document.querySelector('html, body')];
-          // Todo parameterize.
+          // Todo parameterize for translation.
           if (Ed11y.onLoad) {
             console.warn('Check Editoria11y configuration; specified root element not found');
           }
@@ -404,10 +400,15 @@ class Ed11y {
           roots.forEach((el, i) => {
             if (el.shadowRoot) {
               Ed11y.roots[i] = el.shadowRoot;
+              el.setAttribute('data-ed11y-has-shadow-root', 'true');
+              Ed11y.detectShadow(el.shadowRoot);
             } else {
               Ed11y.roots[i] = el;
+              Ed11y.detectShadow(el);
             }
           });
+
+
           Ed11y.buildElementList();
 
           let queue = [
@@ -473,35 +474,43 @@ class Ed11y {
       Ed11y.warningCount = 0;
       Ed11y.dismissedCount = 0;
 
-      // Review results array to remove dismissed items
-      if (Ed11y.ignoreAll) {
-        Ed11y.dismissedCount = Ed11y.results.length > 0 ? 1 : 0;
-      } else {
-        Ed11y.dismissedCount = 0;
-        for (let i = Ed11y.results.length - 1; i >= 0; i--) {
-          let test = Ed11y.results[i].test;
-          // todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are testing. But we'd have to walk the array. Expensive!
-          /*if (Ed11y.incremental && Ed11y.oldResults.length > 0) {
-            // Don't flag new issues in the active range while people are typing.
-          }*/
-          let dismissKey = Ed11y.dismissalKey(Ed11y.results[i].dismissalKey);
-          // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-          if (dismissKey !== false && Ed11y.options.currentPage in Ed11y.dismissedAlerts && test in Ed11y.dismissedAlerts[Ed11y.options.currentPage] && dismissKey in Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]) {
-            // Remove result if it has been marked OK or ignored, increment dismissed match counter.
-            Ed11y.dismissedCount++;
-            Ed11y.results[i].dismissalStatus = Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey];
-          } else if (Ed11y.results[i].dismissalKey) {
-            Ed11y.warningCount++;
-            Ed11y.results[i].dismissalStatus = false;
-          } else {
-            Ed11y.errorCount++;
-            Ed11y.results[i].dismissalStatus = false;
-          }
+      // Review results array to remove dismissed or ignored items
+
+      Ed11y.dismissedCount = 0;
+      for (let i = Ed11y.results.length - 1; i >= 0; i--) {
+
+        let test = Ed11y.results[i].test;
+
+        if (Ed11y.options.ignoreTests &&
+          Ed11y.options.ignoreTests.includes(test)) {
+          // Would be faster to skip test, but this is easy and reliable.
+          Ed11y.results.splice(i, 1);
+          continue;
+        }
+
+        // todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
+        /*if (Ed11y.incremental && Ed11y.oldResults.length > 0) {
+          // Don't flag new issues in the active range while people are typing.
+        }*/
+
+        let dismissKey = Ed11y.dismissalKey(Ed11y.results[i].dismissalKey);
+        // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
+        if (dismissKey !== false && Ed11y.options.currentPage in Ed11y.dismissedAlerts && test in Ed11y.dismissedAlerts[Ed11y.options.currentPage] && dismissKey in Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]) {
+          // Remove result if it has been marked OK or ignored, increment dismissed match counter.
+          Ed11y.dismissedCount++;
+          Ed11y.results[i].dismissalStatus = Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey];
+        } else if (Ed11y.results[i].dismissalKey) {
+          Ed11y.warningCount++;
+          Ed11y.results[i].dismissalStatus = false;
+        } else {
+          Ed11y.errorCount++;
+          Ed11y.results[i].dismissalStatus = false;
         }
       }
 
       Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
-      // Dispatch event for synchronizers
+
+      // Dispatch event for synchronizers.
       if (!Ed11y.incremental) {
         window.setTimeout(function () {
           let syncResults = new CustomEvent('ed11yResults');
@@ -509,13 +518,18 @@ class Ed11y {
         }, 0);
       }
 
+      if (Ed11y.ignoreAll) {
+        Ed11y.dismissedCount = Ed11y.totalCount + Ed11y.dismissedCount;
+        Ed11y.errorCount = 0;
+        Ed11y.warningCount = 0;
+        Ed11y.totalCount = 0;
+      }
+
     };
 
     let oldResultString = '';
-    let newNodes = false;
     const newIncrementalResults = function() {
-      if (newNodes || Ed11y.results.length !== Ed11y.oldResults.length) {
-        newNodes = false;
+      if (Ed11y.results.length !== Ed11y.oldResults.length) {
         return true;
       }
       let newResultString = `${Ed11y.errorCount} ${Ed11y.warningCount}`;
@@ -611,7 +625,9 @@ class Ed11y {
 
 
           // Decide whether to open the panel on load.
-          if (Ed11y.options.alertMode === 'active' ||
+          if (Ed11y.ignoreAll) {
+            Ed11y.showPanel = false;
+          } else if (Ed11y.options.alertMode === 'active' ||
             !Ed11y.options.userPrefersShut ||
             Ed11y.options.showDismissed
           ) {
@@ -734,12 +750,31 @@ class Ed11y {
         Ed11y.alignPanel();
         Ed11y.panel.classList.remove('ed11y-preload');
       }
+
+      window.setTimeout(() => {
+        if (Ed11y.options.watchForChanges) {
+          Ed11y.elements.editable?.forEach(editable => {
+            if (!editable.matches('.drag-observe')) {
+              editable.classList.add('drag-observe');
+              editable.addEventListener('drop', () => {
+                // This event does not bubble.
+                Ed11y.forceFullCheck = true;
+                Ed11y.incrementalCheck();
+              });
+            }
+          });
+          if (Ed11y.options.watchForChanges === 'checkRoots') {
+            Ed11y.roots?.forEach((root) => {
+              startObserver( root );
+            });
+          } else {
+            startObserver( document.body );
+          }
+          Ed11y.resumeObservers(); // on recheck.
+        }
+      }, 0);
+
       Ed11y.running = false;
-      if (Ed11y.elements['editable']) {
-        Ed11y.elements['editable'].forEach(editable => {
-          startObserver(editable);
-        });
-      }
     };
 
     // Place markers on elements with issues
@@ -753,7 +788,7 @@ class Ed11y {
         // [5] dismissalStatus
         */
       let mark = document.createElement('ed11y-element-result');
-      mark.classList.add('ed11y-preload');
+      mark.classList.add('ed11y-element');
       let location;
       let position = 'beforebegin';
       mark.setAttribute('id', 'ed11y-result-' + index);
@@ -765,6 +800,14 @@ class Ed11y {
         mark.classList.add('ed11y-editable-result');
       } else {
         location = result.element.closest('a, button, [role="button"], [role="link"]');
+        if (!location && result.element.shadowRoot) {
+          // Must insert outside shadow DOM root.
+          location = result.element;
+          position = 'beforebegin';
+          while (location.parentElement && location.parentElement.shadowRoot) {
+            location = location.parentElement;
+          }
+        }
         if (!location) {
           location = result.element;
           position = result.position;
@@ -798,9 +841,10 @@ class Ed11y {
       // Flicker prevention -- leave old tip in place for 100ms.
       Ed11y.findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
       const delayedReset = Ed11y.elements.delayedReset;
+
       window.setTimeout(()=> {
         delayedReset?.forEach((el) => el.remove());
-      }, 10, delayedReset);
+      }, 100, delayedReset);
 
       if (Ed11y.panelJumpNext) {
         Ed11y.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Ed11y.M.buttonFirstContent;
@@ -829,6 +873,7 @@ class Ed11y {
     };
 
     Ed11y.reset = function () {
+      Ed11y.pauseObservers();
       Ed11y.resetResults();
       Ed11y.resetPanel();
       Ed11y.incremental = false;
@@ -844,12 +889,73 @@ class Ed11y {
       return linkText;
     };
 
+    Ed11y.detectShadow = function (container) {
+      if (Ed11y.options.autoDetectShadowComponents) {
+        const select = !Ed11y.ignore ? '*:not(.ed11y-element)' : `*:not(${Ed11y.options.ignore}, .ed11y-element)`;
+        let search = [];
+        if (container.shadowRoot && container.shadowRoot.mode === 'open') {
+          if (!container.matches('[data-ed11y-has-shadow-root]')) {
+            container.setAttribute('data-ed11y-has-shadow-root', 'true');
+            Ed11y.attachCSS(container.shadowRoot);
+            Ed11y.attachCSS(container);
+          }
+          search = container.shadowRoot.querySelectorAll(select);
+        } else {
+          search = container.querySelectorAll(select);
+        }
+        search?.forEach((component) => {
+          if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+            Ed11y.detectShadow(component);
+          }
+        });
+      } else if (Ed11y.options.shadowComponents) {
+        const providedShadow = container.querySelectorAll(Ed11y.options.shadowComponents);
+        providedShadow.forEach((component) => {
+          if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+            if (!container.matches('[data-ed11y-has-shadow-root]')){
+              component.setAttribute('data-ed11y-has-shadow-root', 'true');
+              Ed11y.attachCSS(component.shadowRoot);
+              Ed11y.attachCSS(component);
+            }
+            Ed11y.detectShadow(component);
+          } else {
+            console.warn(`Editoria11y: A specified shadow host has no shadowRoot: ${component.tagName}`);
+          }
+        });
+      }
+    };
+
+    const diveShadow = function (container, select, selector) {
+      if (container.matches(selector)) {
+        return([container]);
+      } else {
+        let inners = container.shadowRoot.querySelectorAll(select);
+        if (typeof(inners) === 'object' && inners.length > 0) {
+          // Replace shadow host with inner elements.
+          inners.forEach(inner => {
+            for (let innerIndex = inners - 1; innerIndex >= 0; innerIndex--) {
+              let innerInner = diveShadow(inner, select, selector);
+              if (innerInner.length > 0) {
+                inners.splice(innerIndex, 1, ...innerInner);
+              } else {
+                inners.splice(innerIndex, 1);
+              }
+            }
+          });
+          return (Array.from(inners).filter((el) => el.matches(selector)));
+        }
+      }
+      return [];
+    };
+
     // QuerySelectAll non-ignored elements within checkroots, with recursion into shadow components
     Ed11y.findElements = function (key, selector, rootRestrict = true) {
-      Ed11y.findElements.key = [];
 
       // Todo beta: function and parameter to auto-detect shadow components.
-      let shadowSelector = Ed11y.options.shadowComponents ? `, ${Ed11y.options.shadowComponents}` : '';
+      let shadowSelector = Ed11y.options.autoDetectShadowComponents ?
+        '[data-ed11y-has-shadow-root]' :
+        Ed11y.options.shadowComponents ?
+          Ed11y.options.shadowComponents : false;
 
       // Concatenate global and specific ignores
       let ignore = '';
@@ -862,29 +968,28 @@ class Ed11y {
       // Initialize or reset elements array.
       Ed11y.elements[key] = [];
 
+      const select = `:is(${selector}${shadowSelector ? ', ' + shadowSelector : ''})${ignore}`;
+
       if (rootRestrict && Ed11y.roots) {
         // Add array of elements matching selector, excluding the provided ignore list.
         // Todo this can dupe
         Ed11y.roots.forEach(root => {
-          Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(`:is(${selector}${shadowSelector})${ignore}`)));
+          Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(root.querySelectorAll(select)));
         });
       } else {
-        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(document.querySelectorAll(`:is(${selector}${shadowSelector})${ignore}`)));
+        Ed11y.elements[key] = Ed11y.elements[key].concat(Array.from(document.querySelectorAll(select)));
       }
 
       // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
       // Repeat the search inside each placeholder, and replace the placeholder with its search results.
-      if (Ed11y.options.shadowComponents) {
+      if (shadowSelector) {
         for (let index = Ed11y.elements[key].length - 1; index >= 0; index--) {
-          if (Ed11y.elements[key][index].matches(Ed11y.options.shadowComponents)) {
+          if (Ed11y.elements[key][index].matches(shadowSelector)) {
             // Dive into the shadow root and collect an array of its results.
-            let inners = Ed11y.elements[key][index].shadowRoot?.querySelectorAll(`:is(${selector})${ignore}`);
-            if (typeof(inners) === 'object' && inners.length > 0) {
-              // Replace shadow host with inner elements.
+            let inners = diveShadow(Ed11y.elements[key][index], select, selector);
+            if (inners.length > 0) {
               Ed11y.elements[key].splice(index, 1, ...inners);
             } else {
-              // Remove shadow host with no inner elements.
-              console.warn('Editoria11y: A specified shadow host has no shadowRoot.');
               Ed11y.elements[key].splice(index, 1);
             }
           }
@@ -893,10 +998,12 @@ class Ed11y {
     };
 
     Ed11y.buildElementList = function () {
+
+      // Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
       Ed11y.findElements('editable', Ed11y.options.editableContent, false);
       if (Ed11y.options.inlineAlerts && Ed11y.elements.editable.length > 0) {
         Ed11y.options.inlineAlerts = false;
-        console.log('Editable content detected; Editoria11y inline alerts disabled');
+        console.warn('Editable content detected; Editoria11y inline alerts disabled');
       }
       Ed11y.findElements('p', 'p');
       Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', Ed11y.options.headingsOnlyFromCheckRoots);
@@ -908,11 +1015,12 @@ class Ed11y {
       Ed11y.findElements('audio', 'audio');
       Ed11y.findElements('video', 'video');
       Ed11y.findElements('table', 'table');
+
       if (Ed11y.options.embeddedContent) {
         Ed11y.findElements('embed', Ed11y.options.embeddedContent);
       }
       if (Ed11y.options.panelNoCover) {
-        // used to align panel.
+        // Moves panel off conflicting widgets.
         Ed11y.findElements('panelPin', Ed11y.options.panelNoCover, false);
       }
     };
@@ -921,18 +1029,7 @@ class Ed11y {
       return String(text).replace(/([^0-9a-zA-Z])/g, '').substring(0, 512);
     };
 
-    Ed11y.dismissThis = function (dismissalType) {
-      // Find the active tip and draw its identifying information from the result list
-      let removal = Ed11y.openTip;
-      let id = removal.tip.dataset.ed11yResult;
-      let test = Ed11y.results[id].test;
-      let dismissalKey = Ed11y.dismissalKey(Ed11y.results[id].dismissalKey);
-
-      // Remove tip and reset borders around element
-      Ed11y.resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
-      removal.tip?.parentNode.removeChild(removal.tip);
-      // TODO EDITING: COMMENT OUT BELOW...SEEMS REDUNDANT?
-      removal.button?.parentNode.removeChild(removal.button);
+    const dismissOne = function(dismissalType, test, dismissalKey) {
 
       // Update dismissal record.
       if (dismissalType === 'reset') {
@@ -943,7 +1040,7 @@ class Ed11y {
         if (Object.keys(Ed11y.dismissedAlerts[Ed11y.options.currentPage]).length === 0) {
           delete Ed11y.dismissedAlerts[Ed11y.options.currentPage];
         }
-        window.requestAnimationFrame(() => Ed11y.updatePanel());
+        //window.requestAnimationFrame(() => Ed11y.updatePanel());
       } else {
         let dismissal = {};
         dismissal[dismissalKey] = dismissalType;
@@ -970,8 +1067,34 @@ class Ed11y {
           dismissAction: dismissalType,
         };
         let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
-        document.dispatchEvent(ed11yDismissalUpdate);
+        window.setTimeout(() => {
+          document.dispatchEvent(ed11yDismissalUpdate);
+        },100);
       }
+    };
+
+    Ed11y.dismissThis = function (dismissalType, all = false) {
+      // Find the active tip and draw its identifying information from the result list
+      let removal = Ed11y.openTip;
+      let id = removal.tip.dataset.ed11yResult;
+      let test = Ed11y.results[id].test;
+
+      if (all) {
+        Ed11y.results.forEach((result) => {
+          if (result.test === test && result.dismissalStatus !==dismissalType) {
+            dismissOne(dismissalType, test, result.dismissalKey);
+          }
+        });
+      } else {
+        let dismissalKey = Ed11y.dismissalKey(Ed11y.results[id].dismissalKey);
+        dismissOne(dismissalType, test, dismissalKey);
+      }
+
+      // Remove tip and reset borders around element
+      Ed11y.resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
+      removal.tip?.parentNode?.removeChild(removal.tip);
+      // TODO EDITING: COMMENT OUT BELOW...SEEMS REDUNDANT?
+      //removal.button?.parentNode?.removeChild(removal.button);
 
       Ed11y.reset();
       Ed11y.showPanel = true;
@@ -989,6 +1112,7 @@ class Ed11y {
           }, 100);
         }
       }, 500, rememberGoto);
+
     };
 
     Ed11y.transferFocus = function () {
@@ -1085,13 +1209,13 @@ class Ed11y {
       let el = Ed11y.editableHighlight[resultID]?.highlight;
       if (!el) {
         el = document.createElement('ed11y-element-highlight');
+        el.classList.add('ed11y-element');
         Ed11y.editableHighlight[resultID] = {highlight: el};
         el.style.setProperty('position', 'absolute');
         el.style.setProperty('pointer-events', 'none');
         document.body.appendChild(el);
       }
-      let target = firstVisible ? firstVisible : result.element;
-      Ed11y.editableHighlight[resultID].target = target;
+      Ed11y.editableHighlight[resultID].target = firstVisible ? firstVisible : result.element;
       const zIndex = result.dismissalKey ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
       el.style.setProperty('z-index', zIndex);
       const outline = result.dismissalKey ?
@@ -1127,6 +1251,10 @@ class Ed11y {
     };
 
     const closestScrollable = function(el) {
+      if (Ed11y.options.constrainButtons && el.closest(Ed11y.options.constrainButtons)) {
+        return el.closest(Ed11y.options.constrainButtons);
+      }
+
       let parent = el.parentElement;
       if (parent && parent.tagName !== 'BODY') {
         // Parent exists
@@ -1188,7 +1316,7 @@ class Ed11y {
 
     Ed11y.alignButtons = function () {
 
-      if (Ed11y.jumpList.length === 0) {
+      if (Ed11y.jumpList.length === 0 || (Ed11y.openTip.button && Ed11y.scrollPending === 0)) {
         return;
       }
       Ed11y.alignPending = true;
@@ -1219,7 +1347,7 @@ class Ed11y {
             top = top + 10;
             left = left + 10;
           } else {
-            left = left - 34;
+            left = Ed11y.options.inlineAlerts ? left - 34 : left;
           }
           if (mark.result.scrollableParent) {
             // Bump alerts that would be X-position out of a scroll zone.
@@ -1268,8 +1396,8 @@ class Ed11y {
       Ed11y.jumpList.forEach((mark, i) => {
 
         // Now check for any needed nudges
-        let nudgeTop = 0;
-        let nudgeLeft = 0;
+        let nudgeTop = 10;
+        let nudgeLeft = mark.result.element.tagName === 'IMG' ? 10 : -34;
         // Detect tip that overlaps with previous result.
         if (mark.markTop + scrollTop < 0) {
           // Offscreen to top.
@@ -1285,17 +1413,26 @@ class Ed11y {
           nudgeLeft = 14 + previousNudgeLeft;
         }
 
+        let constrainLeft = 0;
+        let constrainRight = windowWidth;
+
+        if (mark.result.scrollableParent) {
+          const constrained = mark.result.scrollableParent.getBoundingClientRect();
+          constrainLeft = constrained.left;
+          constrainRight = constrainLeft + constrained.width;
+        }
+
         let needNudge = false;
-        if (mark.markLeft + nudgeLeft < 44) {
+        if (mark.markLeft + nudgeLeft - constrainLeft < 44) {
           // Offscreen to left. push to the right.
-          nudgeLeft = 44 - mark.markLeft + nudgeLeft;
+          nudgeLeft = 44 - mark.markLeft + nudgeLeft + constrainLeft;
           needNudge = true;
           //nudgeMark(mark, 44 - mark.markLeft + nudgeLeft, nudgeTop);
         }
-        else if (mark.markLeft + nudgeLeft + 80 > windowWidth) {
+        else if (mark.markLeft + nudgeLeft + 80 > constrainRight ) {
           needNudge = true;
           // Offscreen to right. push to the left
-          nudgeLeft = windowWidth - nudgeLeft - mark.markLeft - 80;
+          nudgeLeft = constrainRight - nudgeLeft - mark.markLeft - 100;
         }
         else if (nudgeTop !== 0) {
           needNudge = true;
@@ -1307,7 +1444,7 @@ class Ed11y {
             mark.style.transform = `translate(${mark.markLeft}px, ${mark.markTop}px)`;
           }
 
-        } else if (needNudge) {
+        } else {
           nudgeMark(mark, nudgeLeft, nudgeTop);
         }
         mark.nudgeLeft = nudgeLeft;
@@ -1349,6 +1486,7 @@ class Ed11y {
         // todo: Edge still flickers on redraw.
         mark.classList.remove('ed11y-preload');
       });
+
     };
 
 
@@ -1557,6 +1695,7 @@ class Ed11y {
     };
 
     Ed11y.togglePanel = function () {
+      Ed11y.ignoreAll = false;
 
       if (!Ed11y.doubleClickPrevent) {
         // Prevent clicks piling up while scan is running.
@@ -1727,17 +1866,20 @@ class Ed11y {
         Ed11y.elements.reset?.forEach(el => { el.remove(); });
         return;
       }
+      Ed11y.pauseObservers();
       Ed11y.visualizing = true;
       Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsActive;
       Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
       Ed11y.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
       showAltPanel();
       showHeadingsPanel();
+      Ed11y.resumeObservers();
     };
 
     Ed11y.buildJumpList = function () {
 
       Ed11y.jumpList = [];
+      Ed11y.pauseObservers();
 
       // Initial alignment to get approximate Y position order for jump list.
       Ed11y.results.forEach((result, i) => {
@@ -1769,6 +1911,7 @@ class Ed11y {
         const newLabel = `${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}, ${i + 1} / ${Ed11y.jumpList.length - 1}`;
         el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
       });
+      Ed11y.resumeObservers();
     };
 
     // hat tip https://www.joshwcomeau.com/snippets/javascript/debounce/
@@ -1899,9 +2042,11 @@ class Ed11y {
 
       document.addEventListener('scroll', function() {
         // Trigger on scrolling other containers, unless it will flicker a tip.
-        if (!Ed11y.openTip.button) {
+        if (!Ed11y.options.inlineAlerts && !Ed11y.openTip.button) {
           Ed11y.scrollPending = Ed11y.scrollPending < 2 ? Ed11y.scrollPending + 1 : Ed11y.scrollPending;
           requestAnimationFrame(() => Ed11y.updateTipLocations());
+        } else if (Ed11y.openTip.button) {
+          Ed11y.alignTip(Ed11y.openTip.button.shadowRoot.querySelector('button'), Ed11y.openTip.tip);
         }
       }, true);
 
@@ -1945,23 +2090,19 @@ class Ed11y {
         Ed11y.updateTipLocations();
       }
     }, 10);
-    let interaction = false;
+    Ed11y.interaction = false;
     window.addEventListener('keyup', () => {
-      interaction = true;
+      Ed11y.interaction = true;
     });
     window.addEventListener('click', () => {
-      interaction = true;
-    });
-    window.addEventListener('dragend', () => {
-      interaction = true;
-      Ed11y.incrementalCheck();
+      Ed11y.interaction = true;
     });
     Ed11y.incrementalCheck = debounce(() => {
       if (!Ed11y.running) {
-        if (Ed11y.openTip.button || (!interaction && !Ed11y.forceFullCheck)) {
+        if (Ed11y.openTip.button || (!Ed11y.interaction && !Ed11y.forceFullCheck)) {
           return;
         }
-        interaction = false;
+        Ed11y.interaction = false;
         Ed11y.running = true;
         let runTime = performance.now();
         Ed11y.incremental = true;
@@ -1988,25 +2129,42 @@ class Ed11y {
       }
     }, 250);
 
+    Ed11y.pauseObservers = function() {
+      Ed11y.watching?.forEach(observer => {
+        observer.observer.disconnect();
+      });
+    };
+    Ed11y.resumeObservers = function() {
+      Ed11y.watching?.forEach(observer => {
+        observer.observer.observe(observer.root, observer.config);
+      });
+    };
+
+    /*
+    Set up mutation observer for added nodes.
+    */
     const startObserver = function (root) {
+
       // We don't want to nest or duplicate observers.
-      if (typeof root.closest !== 'function') {
-        if (root.host.matches('.editoria11y-observer')) {
+      if (typeof root.closest === 'function') {
+        // It's a normal tag.
+        if (root.closest('[data-editoria11y-observer]')) {
+          // We're already being watched.
           return;
         } else {
-          root.host.classList.add('editoria11y-observer');
+          root.dataset.editoria11yObserver = 'true';
         }
       } else {
-        if (root.closest('.editoria11y-observer')) {
+        // Match has DOM traversal issues.
+        if (typeof root.host !== 'function' ||
+          root.host.dataset.editoria11yObserver !== undefined) {
+          // Already watching or something is weird.
           return;
         } else {
-          root.classList.add('editoria11y-observer');
+          // Observe host instead.
+          root.host.dataset.editoria11yObserver = 'true';
         }
       }
-
-      /*
-      Set up mutation observer for added nodes.
-      */
 
       // Options for the observer (which mutations to observe)
       const config = { childList: true, subtree: true, characterData: true };
@@ -2018,35 +2176,50 @@ class Ed11y {
         * delays flagging.
         * */
         //:is(table, h1, h2, h3, h4, h5, h6):
-        if (node.nodeType !== 1) {
-          return;
+        if (!node || node.nodeType !== 1 || !node.isConnected || node.closest('script, link, head, .ed11y-wrapper, .ed11y-style, .ed11y-element')) {
+          return false;
         }
-        if (!node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
+        if (Ed11y.options.inlineAlerts) {
+          return true;
+        }
+        if (Ed11y.editableContent && node.matches('[contenteditable] *)') && !node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
           node = node.querySelector('table, h1, h2, h3, h4, h5, h6, blockquote');
         }
         if (node) {
           Ed11y.recentlyAddedNodes.push(node);
+          Ed11y.incrementalAlign(); // Immediately realign tips.
+          Ed11y.alignPending = false;
           window.setTimeout(function (node) {
+            // Don't repeatedly recheck on repeated changes to same node.
             let stillWaiting = Ed11y.recentlyAddedNodes.indexOf(node);
             if (stillWaiting > -1) {
               Ed11y.recentlyAddedNodes.splice(stillWaiting, 1);
+              Ed11y.incrementalAlign(); // Immediately realign tips.
+              Ed11y.alignPending = false;
               Ed11y.incrementalCheck();
             }
           }, 5000, node);
+          return false;
         }
+        return true;
       };
 
       // Create an observer instance linked to the callback function
       const callback = (mutationList) => {
+        let align = true;
         for (const mutation of mutationList) {
           if (mutation.type === 'childList') {
-            newNodes = true; // Force redrawing buttons.
+            //newNodes = true; // Force redrawing buttons.
             if (mutation.addedNodes.length > 0) {
               mutation.addedNodes.forEach(node => {
-                logNode(node);
+                align = logNode(node);
               });
             }
           }
+        }
+        // These are debounced
+        if (!align) {
+          return;
         }
         Ed11y.incrementalAlign(); // Immediately realign tips.
         Ed11y.alignPending = false;
@@ -2057,6 +2230,11 @@ class Ed11y {
       const observer = new MutationObserver(callback);
       // Start observing the target node for configured mutations
       observer.observe(root, config);
+      Ed11y.watching.push({
+        observer: observer,
+        root: root,
+        config: config,
+      });
       document.addEventListener('readystatechange', () => {
         window.setTimeout(function () {
           Ed11y.scrollPending++;
@@ -2276,23 +2454,27 @@ class Ed11y {
           return returnText;
         }
       }
-      if (element.hasAttribute('aria-label')) {
+      if (element.hasAttribute('aria-label') && element.getAttribute('aria-label').trim().length > 0) {
         return element.getAttribute('aria-label');
       }
       return 'noAria';
     };
 
     Ed11y.wrapPseudoContent = function(el, string) {
-      let pseudo = [];
-      pseudo[0] = window.getComputedStyle(
-        el, ':before'
-      ).getPropertyValue('content');
-      pseudo[1] = window.getComputedStyle(
-        el, ':after'
-      ).getPropertyValue('content');
-      pseudo[0] = pseudo[0] === 'none' ? '' : pseudo[0].replace(/^"(.*)"$/, '$1');
-      pseudo[1] = pseudo[1] === 'none' ? '' : pseudo[1].replace(/^"(.*)"$/, '$1');
-      return ' ' + pseudo[0] + string + pseudo[1];
+      // Get quoted content, avoid inserting URL references.
+      // Hat tip Adam Chaboryk
+
+      const getAltText = (content) => {
+        if (content === 'none') return '';
+        const match = content.includes('url(') || content.includes('image-set(')
+          ? content.match(/\/\s*"([^"]+)"/) // Content after slash, e.g. url('image.jpg') / "alt text";
+          : content.match(/"([^"]+)"/); // Content between quotes, e.g. "alt text";
+        return match ? match[1] : '';
+      };
+      const before = getAltText(window.getComputedStyle(el, ':before').getPropertyValue('content'));
+      const after = getAltText(window.getComputedStyle(el, ':after').getPropertyValue('content'));
+      return `${before}${string}${after}`;
+
     };
 
     // Sets treeWalker loop to last node before next branch.
@@ -2321,13 +2503,19 @@ class Ed11y {
 
       // Return immediately if there is only a text node.
       let computedText = '';
+      if (el.shadowRoot) {
+        const shadowChildren = el.shadowRoot.querySelectorAll('*');
+        shadowChildren.forEach(child => {
+          computedText += Ed11y.computeText(child);
+        });
+      }
       if (!el.children.length) {
-        // Just text! Output immediately.
-        computedText = Ed11y.wrapPseudoContent(el, el.textContent);
+        // Skip treeWalker, only contents are text.
+        computedText += Ed11y.wrapPseudoContent(el, el.textContent);
         if (!computedText.trim() && el.hasAttribute('title')) {
-          return el.getAttribute('title');
+          computedText = el.getAttribute('title');
         }
-        return recursing ? computedText : computedText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
+        return recursing ? computedText : computedText.replace(/[\n\r]+|\s{2,}/g, ' ').trim();
       }
 
       // Otherwise, recurse into children.
@@ -2343,9 +2531,11 @@ class Ed11y {
       walker: while (treeWalker.nextNode()) {
         count++;
 
-        // todo need to handle bugs found in Sa11y for CDATA type text
+        // todo: Sa11y excludes
         if (treeWalker.currentNode.nodeType === Node.TEXT_NODE) {
-          computedText += ' ' + treeWalker.currentNode.nodeValue;
+          if (treeWalker.currentNode.parentNode.tagName !== 'SLOT') {
+            computedText += ` ${treeWalker.currentNode.nodeValue}`;
+          }
           continue;
         }
 
@@ -2401,7 +2591,7 @@ class Ed11y {
           continue;
         case 'SVG':
         case 'svg':
-          if (treeWalker.currentNode.getAttribute('role') === 'image' && treeWalker.currentNode.hasAttribute('alt')) {
+          if (treeWalker.currentNode.getAttribute('role') === 'img' && treeWalker.currentNode.hasAttribute('alt')) {
             computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, treeWalker.currentNode.getAttribute('alt'));
             if (!Ed11y.nextTreeBranch(treeWalker)) {
               break walker;
@@ -2443,6 +2633,8 @@ class Ed11y {
       if (addTitleIfNoName && !aText) {
         computedText += ' ' + addTitleIfNoName;
       }
+
+      computedText = Ed11y.wrapPseudoContent(el, computedText);
 
       if (!computedText.trim() && el.hasAttribute('title')) {
         return el.getAttribute('title');
@@ -2498,14 +2690,16 @@ class Ed11y {
     Ed11y.visibleElement = function (el) {
       // Checks if this element is visible. Used in parent iterators.
       // false is definitely invisible, true requires continued iteration to tell.
-      // todo: continued iteration may not be working correctly.
       // Todo postpone: Check for offscreen?
       if (el) {
+        if (!el.checkVisibility({
+          opacityProperty: true,
+          visibilityProperty: true,
+        })) {
+          return false;
+        }
         let style = window.getComputedStyle(el);
-        return !(el.closest('[hidden], .sr-only, .visually-hidden') ||
-          style.getPropertyValue('display') === 'none' ||
-          style.getPropertyValue('visibility') === 'hidden' ||
-          style.getPropertyValue('opacity') === '0' ||
+        return !(el.closest('.sr-only, .visually-hidden') ||
           style.getPropertyValue('z-index') < 0 ||
           (style.getPropertyValue('overflow') === 'hidden' &&
             ( el.offsetWidth < 10 ||

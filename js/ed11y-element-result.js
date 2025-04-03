@@ -17,17 +17,14 @@ class Ed11yElementResult extends HTMLElement {
 
       this.wrapper = document.createElement('div');
 
-      this.dismissable = !!this.result.dismissalKey;
+      this.dismissable = this.result.dismissalKey !== false;
       this.dismissed = !!this.result.dismissalStatus;
-      // todo MVP this would only work in darkmode -- need more theme variables
-      // #ffd4d4 red. turn background to alert color in lightmode.
       this.wrapper.classList.add('ed11y-wrapper', 'ed11y-result-wrapper');
       this.wrapper.classList.add('ed11y-result');
 
       // Create tooltip toggle
       this.toggle = document.createElement('button');
       this.toggle.setAttribute('class', 'toggle');
-      // todo parameterize
       let label = this.dismissable ? Ed11y.M.toggleManualCheck : Ed11y.M.toggleAlert;
       this.toggle.setAttribute('aria-label', Ed11y.M.toggleAriaLabel(label));
       this.toggle.setAttribute('aria-expanded', 'false');
@@ -65,7 +62,8 @@ class Ed11yElementResult extends HTMLElement {
   handleHover(event) {
     event.preventDefault();
     let host = this.getRootNode().host;
-    if (!this.classList.contains('intersecting') && host.getAttribute('data-ed11y-open') === 'false' && host.racing === false) {
+    if (!this.classList.contains('intersecting') && host.open !== true && host.racing === false) {
+      this.open = true;
       host.racing = true;
       host.toggleTip(true);
       Ed11y.toggledFrom = this;
@@ -115,9 +113,10 @@ class Ed11yElementResult extends HTMLElement {
     this.tipNeedsBuild = false;
 
     let tip = document.createElement('ed11y-element-tip');
+    tip.result = this.result;
+    tip.setAttribute('data-ed11y-result', this.resultID);
     tip.classList.add('ed11y-element');
     tip.style.setProperty('opacity', '0');
-    tip.setAttribute('data-ed11y-result', this.resultID);
     let body = document.querySelector('body');
     body.insertAdjacentElement('beforeend', tip);
     this.tip = tip;
@@ -207,7 +206,7 @@ class Ed11yElementResult extends HTMLElement {
       switch (attr) {
       case 'data-ed11y-action':
         if (newValue !== 'false') {
-          let changeTo = newValue === 'open' ? true : false;
+          let changeTo = newValue === 'open';
           this.setAttribute('data-ed11y-action', 'false');
           this.toggleTip(changeTo);
         }

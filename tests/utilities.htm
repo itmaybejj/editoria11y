@@ -24,7 +24,18 @@
 
 
         </section>
-        <section id="hidden results">
+        <section id="hidden-results">
+            <h2>Hidden results</h2>
+            <div>Visible wrapper
+                <div style="display: none;">
+                    <div class="item-list"><ul><li>
+                        <div>
+                            <div><a href="#">Page</a></div>
+                        </div>
+                    </li></ul></div>
+                </div>
+            </div>
+            <p style="display: none;">THIS IS A HIDDEN PARAGRAPH WITH CAPS LOCK TO SET OFF THE 0 TEST</p>
             <details>
                 <summary>Summary with tip in details, "click here"</summary>
                 <a href="#">Click here</a>
@@ -61,6 +72,14 @@
             <div>
                 Visually hidden issue.
                 <div style="width: 1px; height: 1px; overflow: hidden;"> <a href="#">here</a></div>
+            </div>
+        </section>
+
+        <section id="button-position">
+            <h2>Button positioning param</h2>
+            <div style="outline: 1px solid; overflow: scroll; position: relative; min-height: 12em;" class="constrain-position"><a href="https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwds.princeton.edu%2F">Safelink</a>
+                <p style="float:right; width:10px;"><a href="#">.</a></p>
+
             </div>
         </section>
 
@@ -107,8 +126,14 @@
 
             <h3>Aria:hidden image</h3>
             <div class="negative"><div aria-hidden="true">
-                <img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" >
             </div></div>
+            <div>
+
+                <figure class="figure media--type-image ratio--freeform size--extra-small alignment--left">
+                    <a href="https://ihum.princeton.edu/" class="link-purpose link-purpose-external no-border"><img alt="oh hi" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" > .</a>
+                </figure>
+            </div>
+
 
             <div class="positive"><h4 id="a-very-long-heading">Suspiciously long heading. Headings should not be used for emphasis, but rather for a document outline, so if you find yourself talking this much, this probably is being used for visual formatting, not a heading.</h4>
             </div>
@@ -145,15 +170,20 @@
 
             <h3>Pseudo selectors in a link</h3>
             <div class="positive">Link with SVG image with multiple labels, one should be ignored:
-                <a href="https://www.princeton.edu" >click <span class="extlink-nobreak">here<svg focusable="false" class="ext" role="img" aria-label="(link is external)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 40"><metadata><sfw xmlns="http://ns.adobe.com/SaveForWeb/1.0/"><slicesourcebounds y="-8160" x="-8165" width="16389" height="16384" bottomleftorigin="true"></slicesourcebounds><optimizationsettings><targetsettings targetsettingsid="0" fileformat="PNG24Format"><png24format transparency="true" filtered="false" interlaced="false" nomattecolor="false" mattecolor="#FFFFFF"></png24format></targetsettings></optimizationsettings></sfw></metadata><title>(link is external)</title><path d="M48 26c-1.1 0-2 0.9-2 2v26H10V18h26c1.1 0 2-0.9 2-2s-0.9-2-2-2H8c-1.1 0-2 0.9-2 2v40c0 1.1 0.9 2 2 2h40c1.1 0 2-0.9 2-2V28C50 26.9 49.1 26 48 26z"></path><path d="M56 6H44c-1.1 0-2 0.9-2 2s0.9 2 2 2h7.2L30.6 30.6c-0.8 0.8-0.8 2 0 2.8C31 33.8 31.5 34 32 34s1-0.2 1.4-0.6L54 12.8V20c0 1.1 0.9 2 2 2s2-0.9 2-2V8C58 6.9 57.1 6 56 6z"></path></svg></span></a></div>
+                <a href="https://demo">click here</a></div>
             <div class="negative">Good link text in ::before: <a id="text-in-css" href="#"></a></div>
             <div class="positive">Bad link text in ::before:<a id="click-in-css" class="click-in-css" href="#"></a></div>
+            <div class="positive"><div role="region" aria-label="Featured image">
+                Aria labelled region should not negate inner name calculation.
+                <svg id="nested-aria-label" role="img"  viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg"/>
+            </div></div>
             <div class="negative">Good link text in title attribute: <a id="titled-link" title="Titled link" href="#"></a></div>
+            <div class="negative">Null aria label: <a id="null-aria" aria-label="" href="#">Null aria</a></div>
             <div class="positive">Bad link text in title attribute: <a id="titled-link-click-here" title="Click here" href="#"><span></span></a></div>
             <div class="positive">Bad link text in ::before on inner span: <a id="inner-css-link" href="#"><span class="click-in-css"></span></a></div>
             <div class="positive">Inner SVG has an alt but no role, alt is ignored: <a id="svg-incorrect-role" href="#"><svg alt="unread alt" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"></circle></svg></a></div>
-            <div class="negative">Inner SVG has an alt and a valid role: <a id="svg-image-role" href="#"><svg role="image" alt="foo bar baz" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="negative">Inner SVG has an alt and a valid role: <a id="svg-image-role" href="#"><svg role="img" alt="foo bar baz" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"></circle></svg></a></div>
             <div class="negative">Inner SVG has a good title element: <a id="inner-svg-titles" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>I'm a circle</title></circle>
@@ -178,17 +208,7 @@
             <h2>Slotted template</h2>
             <template id="element-details-template">
                 <style>
-                    details {font-family: "Open Sans Light",Helvetica,Arial}
-                    .name {font-weight: bold; color: #217ac0; font-size: 120%}
-                    h4 { margin: 10px 0 -8px 0; }
-                    h4 span { background: #217ac0; padding: 2px 6px 2px 6px }
-                    h4 span { border: 1px solid #cee9f9; border-radius: 4px }
-                    h4 span { color: white }
-                    .attributes { margin-left: 22px; font-size: 90% }
-                    .attributes p { margin-left: 16px; font-style: italic }
-                    h3 slot::before {
-                        content: "slotted pseudocontent";
-                    }
+
                     .positive {padding: .75rem 1rem .5rem; margin: 1rem 0; border-radius:3px;}
                     .todo-positive {background-color: orange;}
                     .todo-negative {background-color: yellow;}
@@ -216,12 +236,15 @@
                     .negative ed11y-element-result { outline: 8px dotted red !important; }
                 </style>
                 <div id="slot-template">
-                    <div class="positive">
-                        <h4 class="name"><slot name="element-name"></slot></h4>
-                    </div>
-                    <div class="negative">
-                        <h4 class="desc"><slot name="description"></slot></h4>
-                    </div>
+                    <pds-layout-container>
+                        <pds-sidebar>
+                            <pds-heading class="positive" style="display: block;">
+                                <h4></h4>
+                                Policy Riders and Endorsements
+                            </pds-heading>
+                            </aside>
+                        </pds-sidebar>
+                    </pds-layout-container>
 
                     <div class="positive">Empty slot:
                         <h4><slot></slot></h4></div>
@@ -261,6 +284,11 @@
                       .content;
                     const shadowRoot = this.attachShadow({mode: 'open'})
                       .appendChild(template.cloneNode(true));
+                    const h4 = this.shadowRoot.querySelector('h4');
+                    h4.attachShadow({mode: 'open'});
+                    const span = document.createElement('span');
+                    span.textContent = 'deeply embedded shadow';
+                    h4.shadowRoot.appendChild(span);
                   }
                 });
                 document.addEventListener('ed11yShowHidden', function(e) {
@@ -270,6 +298,9 @@
                 }, false);
 
                 const decodeSafelink = function(url) {
+                  if (!url) {
+                    return '[translation server error]';
+                  }
                     const params = new URL(url).searchParams;
                     let decoded = params.get('url');
                     if (!!decoded) {
@@ -319,22 +350,30 @@
 
                 const ed11y = new Ed11y({
                     alertMode : 'assertive',
-                  showDismissed: true,
+                  //showDismissed: true,
                     ignoreByKey : {
                         'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
                         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
                     },
                     //syncedDismissals: {},
-                    shadowComponents : 'shadow-test, shadow-test-no-hits, element-details',
+                    //shadowComponents : 'shadow-test, shadow-test-no-hits, element-details',
+                    autoDetectShadowComponents: true,
                     hiddenHandlers : '[hidden]',
                     checkRoots : 'body',
-                    //linkIgnoreStrings: '\(link is external\)',
+                    //linkIgnoreStrings: /\(link is external\)/i,
                     customTests : 2,
                     theme: 'sleekTheme',
                     linkIgnoreSelector : '.ignore-class, .link-purpose-text',
                     panelNoCover: '#klaro_toggle_dialog',
                     reportsURL: 'https://www.princeton.edu',
                   editLinks: editLinks,
+                  watchForChanges: false,
+                  allowOK: true,
+                  constrainButtons: '.constrain-position',
+
+                  //ignoreAllIfPresent: 'body',
+                  //allowHide: false,
+                  //allowOK: false,
                 });
             </script>
             <link rel="stylesheet" media="all" href="https://cdn.jsdelivr.net/gh/itmaybejj/linkpurpose@main/css/linkpurpose.css">
