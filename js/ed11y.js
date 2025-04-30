@@ -2189,7 +2189,10 @@ class Ed11y {
         if (!node.matches('[contenteditable] *')) {
           return 0;
         }
-        if (!node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
+        if (Ed11y.options.inlineAlerts) {
+          return true;
+        }
+        if (Ed11y.editableContent && node.matches('[contenteditable] *)') && !node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
           node = node.querySelector('table, h1, h2, h3, h4, h5, h6, blockquote');
         }
         if (node && node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
@@ -2229,6 +2232,10 @@ class Ed11y {
               });
             }
           }
+        }
+        // These are debounced
+        if (!align) {
+          return;
         }
         if (!align) {
           return;
