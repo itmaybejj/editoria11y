@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.10';
+    Ed11y.version = '2.3.11';
 
     let defaultOptions = {
 
@@ -2125,9 +2125,14 @@ class Ed11y {
         // Todo: optimize tip placement so we do not need as much debounce.
         Ed11y.browserLag = browserSpeed < 1 ? 0 : browserSpeed * 100 + Ed11y.totalCount;
       } else {
-        window.setTimeout(Ed11y.incrementalCheck, 250);
+        window.setTimeout(() => {Ed11y.incrementalCheck();}, 250);
       }
     }, 250);
+    Ed11y.slowIncremental = debounce(() => {
+      Ed11y.incrementalAlign(); // Immediately realign tips.
+      Ed11y.alignPending = false;
+      Ed11y.incrementalCheck();
+    }, 1000);
 
     Ed11y.pauseObservers = function() {
       Ed11y.watching?.forEach(observer => {
@@ -2175,9 +2180,14 @@ class Ed11y {
         * before the user has a chance to edit them. This is crude, but it
         * delays flagging.
         * */
-        //:is(table, h1, h2, h3, h4, h5, h6):
         if (!node || node.nodeType !== 1 || !node.isConnected || node.closest('script, link, head, .ed11y-wrapper, .ed11y-style, .ed11y-element')) {
-          return false;
+          return 0;
+        }
+        if (Ed11y.options.inlineAlerts) {
+          return 1;
+        }
+        if (!node.matches('[contenteditable] *')) {
+          return 0;
         }
         if (Ed11y.options.inlineAlerts) {
           return true;
@@ -2185,7 +2195,7 @@ class Ed11y {
         if (Ed11y.editableContent && node.matches('[contenteditable] *)') && !node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
           node = node.querySelector('table, h1, h2, h3, h4, h5, h6, blockquote');
         }
-        if (node) {
+        if (node && node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
           Ed11y.recentlyAddedNodes.push(node);
           Ed11y.incrementalAlign(); // Immediately realign tips.
           Ed11y.alignPending = false;
@@ -2199,20 +2209,26 @@ class Ed11y {
               Ed11y.incrementalCheck();
             }
           }, 5000, node);
-          return false;
+          return 0;
         }
-        return true;
+        return 1;
       };
 
       // Create an observer instance linked to the callback function
       const callback = (mutationList) => {
-        let align = true;
+        let align = 0;
         for (const mutation of mutationList) {
-          if (mutation.type === 'childList') {
-            //newNodes = true; // Force redrawing buttons.
+          if (mutation.type === 'characterData' &&
+            mutation.target.parentElement &&
+            mutation.target.parentElement.matches('[contenteditable] *')) {
+            // Recheck when typing in content editable area hesitates > 1s;
+            Ed11y.slowIncremental();
+            return;
+          } else if (mutation.type === 'childList') {
+            // Recheck if there are relevant node changes.
             if (mutation.addedNodes.length > 0) {
               mutation.addedNodes.forEach(node => {
-                align = logNode(node);
+                align += logNode(node);
               });
             }
           }
@@ -2221,9 +2237,14 @@ class Ed11y {
         if (!align) {
           return;
         }
-        Ed11y.incrementalAlign(); // Immediately realign tips.
-        Ed11y.alignPending = false;
-        Ed11y.incrementalCheck(); // Recheck after delay.
+        if (!align) {
+          return;
+        }
+        window.setTimeout(function () {
+          Ed11y.incrementalAlign(); // Immediately realign tips.
+          Ed11y.alignPending = false;
+          Ed11y.incrementalCheck(); // Recheck after delay.
+        },0);
       };
 
       // Create an observer instance linked to the callback function

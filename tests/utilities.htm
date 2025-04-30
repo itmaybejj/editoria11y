@@ -348,6 +348,27 @@
                 editLinks.appendChild(editLink);
                 editLinks.appendChild(layoutLink);
 
+              /*
+              * Performance tests
+              * */
+              let beforeCall = performance.now();
+              iterations = 0;
+              // Listen for event
+              document.addEventListener('ed11yPanelOpened', e => {
+                if (iterations < 2) {
+                  console.log('panel ready at: ' + parseInt(performance.now() - beforeCall));
+                }
+              });
+              document.addEventListener('ed11yResults', e => {
+                //console.log('results ready at: ' + parseInt(performance.now() - beforeCall));
+                //console.log(iterations);
+                iterations ++;
+                if (iterations === 10) {
+                  console.log('Average run: ' + parseInt((performance.now() - beforeCall)) / 10);
+                } else if (iterations < 10) {
+                  Ed11y.checkAll();
+                }
+              });
                 const ed11y = new Ed11y({
                     alertMode : 'assertive',
                   //showDismissed: true,
