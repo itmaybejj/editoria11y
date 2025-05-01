@@ -1059,18 +1059,17 @@ class Ed11y {
       // Send record to storage or dispatch an event to an API.
       if (Ed11y.options.syncedDismissals === false) {
         localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
-      } else {
-        let dismissalDetail = {
-          dismissPage: Ed11y.options.currentPage,
-          dismissTest: test,
-          dismissKey: dismissalKey,
-          dismissAction: dismissalType,
-        };
-        let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
-        window.setTimeout(() => {
-          document.dispatchEvent(ed11yDismissalUpdate);
-        },100);
       }
+      let dismissalDetail = {
+        dismissPage: Ed11y.options.currentPage,
+        dismissTest: test,
+        dismissKey: dismissalKey,
+        dismissAction: dismissalType,
+      };
+      let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
+      window.setTimeout(() => {
+        document.dispatchEvent(ed11yDismissalUpdate);
+      },100);
     };
 
     Ed11y.dismissThis = function (dismissalType, all = false) {
@@ -1292,11 +1291,11 @@ class Ed11y {
         Ed11y.elements.panelPin.forEach(el => {
           let bounds = el.getBoundingClientRect();
           if (Ed11y.options.panelPinTo === 'right') {
-            xMost = windowWidth - bounds.left > xMost ? windowWidth - bounds.left : xMost;
+            xMost = windowWidth - bounds.left > xMost && bounds.left > windowWidth / 3 ? windowWidth - bounds.left : xMost;
           } else {
-            xMost = bounds.right > xMost ? bounds.right : xMost;
+            xMost = bounds.right > xMost && xMost + bounds.right < windowWidth / 3 ? xMost + bounds.right : xMost;
           }
-          yMost = bounds.height > yMost ? bounds.height : yMost;
+          yMost = bounds.height > yMost && bounds.height + yMost < window.innerHeight / 2 ? yMost + bounds.height : yMost;
         });
       }
       if (xMost > 0 && xMost < windowWidth - 240) {
@@ -2221,6 +2220,8 @@ class Ed11y {
           if (mutation.type === 'characterData' &&
             mutation.target.parentElement &&
             mutation.target.parentElement.matches('[contenteditable] *')) {
+            Ed11y.incrementalAlign(); // Immediately realign tips.
+            Ed11y.alignPending = false;
             // Recheck when typing in content editable area hesitates > 1s;
             Ed11y.slowIncremental();
             return;
@@ -2234,9 +2235,6 @@ class Ed11y {
           }
         }
         // These are debounced
-        if (!align) {
-          return;
-        }
         if (!align) {
           return;
         }
