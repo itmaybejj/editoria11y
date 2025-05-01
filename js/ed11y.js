@@ -2417,6 +2417,16 @@ class Ed11y {
       Ed11y.alignPanel();
     };
 
+    // Move toggles when something expands or collapses.
+    const mightExpand = document.querySelectorAll('[aria-expanded], [aria-controls]');
+    mightExpand?.forEach(expandable => {
+      expandable.addEventListener('click', () => {
+        window.setTimeout(() => {
+          Ed11y.windowResize();
+        }, 333);
+      });
+    });
+
     // Escape key closes panels.
     Ed11y.escapeWatch = function (event) {
       if (event.keyCode === 27) {
