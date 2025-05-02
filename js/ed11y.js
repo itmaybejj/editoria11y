@@ -457,7 +457,7 @@ class Ed11y {
             if (Ed11y.panelToggle) {
               Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleAccessibilityTools;
             }
-            window.requestAnimationFrame(() => Ed11y.updatePanel());
+            Ed11y.updatePanel();
           }, 0);
         }
 
@@ -529,7 +529,7 @@ class Ed11y {
 
     let oldResultString = '';
     const newIncrementalResults = function() {
-      if (Ed11y.results.length !== Ed11y.oldResults.length) {
+      if (Ed11y.forceFullCheck || Ed11y.results.length !== Ed11y.oldResults.length) {
         return true;
       }
       let newResultString = `${Ed11y.errorCount} ${Ed11y.warningCount}`;
@@ -555,6 +555,8 @@ class Ed11y {
           }*/
           Ed11y.resetResults();
         } else {
+          // Todo: commented out in 2.3.11:
+          // Reconnect map
           Ed11y.results = Ed11y.oldResults;
           window.setTimeout(function() {
             if ( !Ed11y.alignPending ) {
@@ -1331,7 +1333,16 @@ class Ed11y {
         // Compute based on target position.
 
         Ed11y.jumpList.forEach((mark, i) => {
+          if (!mark.result.element.isConnected) {
+            // Something broke; rebuild jumplist on next loop.
+            Ed11y.forceFullCheck = true;
+            Ed11y.interaction = true;
+            mark.style.display = 'none';
+          } else {
+            //mark.visibility = 'visible';
+          }
           let targetOffset = mark.result.element.getBoundingClientRect();
+
           let top = targetOffset.top + scrollTop;
           //let rightBound = windowWidth;
           if (!Ed11y.visible(mark.result.element)) {
@@ -2090,7 +2101,7 @@ class Ed11y {
       }
     }, 10);
     Ed11y.interaction = false;
-    window.addEventListener('keyup', () => {
+    window.addEventListener('keydown', () => {
       Ed11y.interaction = true;
     });
     window.addEventListener('click', () => {
@@ -2110,6 +2121,7 @@ class Ed11y {
           Ed11y.closedByDisable = false;
           Ed11y.disabled = false;
         }
+        //Ed11y.forceFullCheck = true; // todo no
         Ed11y.checkAll();
         window.setTimeout(function() {
           if (Ed11y.visualizing) {
@@ -2124,12 +2136,14 @@ class Ed11y {
         // Todo: optimize tip placement so we do not need as much debounce.
         Ed11y.browserLag = browserSpeed < 1 ? 0 : browserSpeed * 100 + Ed11y.totalCount;
       } else {
+        // Ed11y was running, try again later.
         window.setTimeout(() => {Ed11y.incrementalCheck();}, 250);
       }
     }, 250);
     Ed11y.slowIncremental = debounce(() => {
-      Ed11y.incrementalAlign(); // Immediately realign tips.
-      Ed11y.alignPending = false;
+      //Ed11y.incrementalAlign(); // Immediately realign tips.
+      //Ed11y.alignPending = false;
+      Ed11y.interaction = true;
       Ed11y.incrementalCheck();
     }, 1000);
 
@@ -2220,14 +2234,15 @@ class Ed11y {
           if (mutation.type === 'characterData' &&
             mutation.target.parentElement &&
             mutation.target.parentElement.matches('[contenteditable] *')) {
-            Ed11y.incrementalAlign(); // Immediately realign tips.
+            Ed11y.incrementalAlign();
             Ed11y.alignPending = false;
-            // Recheck when typing in content editable area hesitates > 1s;
             Ed11y.slowIncremental();
             return;
           } else if (mutation.type === 'childList') {
             // Recheck if there are relevant node changes.
-            if (mutation.addedNodes.length > 0) {
+            if (mutation.removedNodes.length > 0) {
+              align += 1;
+            } else if (mutation.addedNodes.length > 0) {
               mutation.addedNodes.forEach(node => {
                 align += logNode(node);
               });
