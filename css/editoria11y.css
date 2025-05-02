@@ -35,11 +35,11 @@ ed11y-element-result {
 /* All elements =========================== */
 
 :host(.ed11y-element) { /* this will not work. */
-  all:initial;
+  all: initial;
 }
 
 .ed11y-hidden {
-  display:none;
+  display: none;
 }
 
 .ed11y-wrapper {
@@ -82,7 +82,8 @@ ed11y-element-result {
   z-index: var(--ed11y-buttonZIndex, 9999);
 }
 
-:host(ed11y-element-panel.ed11y-element):focus, .ed11y-wrapper div:focus { /* div?? */
+:host(ed11y-element-panel.ed11y-element):focus,
+.ed11y-wrapper div:focus {
   outline: transparent;
 }
 
@@ -100,10 +101,10 @@ ed11y-element-result {
   grid-template-columns: 1fr repeat(5, min-content);
   grid-template-rows: .429em 1.714em .5em 1fr;
   grid-template-areas:
-  "upad   upad    upad    upad    upad  upad"
-  "pad  reports   showHidden  visualize   toggle  next"
-  "dpad   dpad    dpad    dpad    dpad  dpad"
-  "tools  tools     tools     tools     tools   tools ";
+  "upad   upad        upad        upad        upad    upad"
+  "pad    reports     showHidden  visualize   toggle  next"
+  "dpad   dpad        dpad        dpad        dpad    dpad"
+  "tools  tools       tools       tools       tools   tools ";
   grid-auto-flow: column;
   justify-items: end;
   min-height: 35px;
@@ -114,11 +115,13 @@ ed11y-element-result {
   width: min-content;
 }
 
-.ed11y-buttonbar:hover, .ed11y-buttonbar:focus-within {
+.ed11y-buttonbar:hover,
+.ed11y-buttonbar:focus-within {
   grid-template-rows: 2em 1.714em .5em 1fr;
 }
 
-.ed11y-buttonbar > button, .ed11y-buttonbar > a {
+.ed11y-buttonbar > button,
+.ed11y-buttonbar > a {
   background: var(--ed11y-activeBackground);
   color: var(--ed11y-activeColor);
   box-shadow: 0 1px var(--ed11y-activePanelBorder), 0 -1px var(--ed11y-activePanelBorder), -1px 0 var(--ed11y-activeBorder), 2px 0 var(--ed11y-activeBackground), -2px 0 var(--ed11y-activeBackground);
@@ -171,7 +174,7 @@ ed11y-element-result {
 #ed11y-reports-link,
 #ed11y-show-hidden:first-child,
 .ed11y-buttonbar [hidden]:first-child + #ed11y-visualize {
-  border-radius:  var(--ed11y-borderRadius, 3px) 0 0 var(--ed11y-borderRadius, 3px);
+  border-radius: var(--ed11y-borderRadius, 3px) 0 0 var(--ed11y-borderRadius, 3px);
   box-shadow: -1px 0 var(--ed11y-activePanelBorder), 0 -1px var(--ed11y-activePanelBorder), 0 1px var(--ed11y-activePanelBorder), 2px 0 var(--ed11y-activeBackground);
 }
 
@@ -389,7 +392,7 @@ ed11y-element-result {
 }
 
 .ed11y-errors #ed11y-toggle:hover .ed11y-toggle-circle {
-  box-shadow:inset 0 0 0 1px var(--ed11y-alert), inset 0 0 0 5px #fffd, 1px 1px 5px 0 rgb(0 0 0 / 50%);
+  box-shadow: inset 0 0 0 1px var(--ed11y-alert), inset 0 0 0 5px #fffd, 1px 1px 5px 0 rgb(0 0 0 / 50%);
 }
 
 .ed11y-errors.ed11y-active #ed11y-toggle:hover .ed11y-toggle-circle {
@@ -1077,7 +1080,9 @@ ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
   filter: saturate(0);
 }
 
-.ed11y-offscreen, ed11y-element-result.ed11y-preload, .ed11y-preload {
+.ed11y-offscreen,
+ed11y-element-result.ed11y-preload,
+.ed11y-preload {
   opacity: 0 !important;
 }
 

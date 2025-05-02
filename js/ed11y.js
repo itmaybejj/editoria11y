@@ -1319,7 +1319,6 @@ class Ed11y {
     };
 
     Ed11y.alignButtons = function () {
-      console.log('align called');
 
       if (Ed11y.jumpList.length === 0 || (Ed11y.openTip.button && Ed11y.scrollPending === 0)) {
         return;
