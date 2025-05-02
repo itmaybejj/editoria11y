@@ -562,6 +562,7 @@ class Ed11y {
             if ( !Ed11y.alignPending ) {
               Ed11y.alignButtons();
               Ed11y.alignPanel();
+              Ed11y.alignPending = false;
             }
             Ed11y.running = false;
           },0);
@@ -590,7 +591,7 @@ class Ed11y {
           Ed11y.onLoad = false;
 
           if (!Ed11y.options.inlineAlerts) {
-            // todo temp temp temp!
+            // todo move to incremental check or timeout; no need to do on load.
             oldResultString = `${Ed11y.errorCount} ${Ed11y.warningCount}`;
             Ed11y.results.forEach(result => {
               oldResultString += result.test + result.element.outerHTML;
@@ -627,7 +628,9 @@ class Ed11y {
 
 
           // Decide whether to open the panel on load.
-          if (Ed11y.ignoreAll) {
+          if (Ed11y.ignoreAll ||
+            (!Ed11y.options.inlineAlerts && Ed11y.totalCount > 75)
+          ) {
             Ed11y.showPanel = false;
           } else if (Ed11y.options.alertMode === 'active' ||
             !Ed11y.options.userPrefersShut ||
@@ -1316,6 +1319,7 @@ class Ed11y {
     };
 
     Ed11y.alignButtons = function () {
+      console.log('align called');
 
       if (Ed11y.jumpList.length === 0 || (Ed11y.openTip.button && Ed11y.scrollPending === 0)) {
         return;
@@ -2095,9 +2099,12 @@ class Ed11y {
     };
 
     Ed11y.incrementalAlign = debounce(() => {
-      if (!Ed11y.running) {
+      if (!Ed11y.running && !Ed11y.alignPending) {
         Ed11y.scrollPending++;
         Ed11y.updateTipLocations();
+        Ed11y.alignPending = false;
+      } else {
+        Ed11y.incrementalAlign();
       }
     }, 10);
     Ed11y.interaction = false;
@@ -2211,14 +2218,12 @@ class Ed11y {
         if (node && node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
           Ed11y.recentlyAddedNodes.push(node);
           Ed11y.incrementalAlign(); // Immediately realign tips.
-          Ed11y.alignPending = false;
           window.setTimeout(function (node) {
             // Don't repeatedly recheck on repeated changes to same node.
             let stillWaiting = Ed11y.recentlyAddedNodes.indexOf(node);
             if (stillWaiting > -1) {
               Ed11y.recentlyAddedNodes.splice(stillWaiting, 1);
               Ed11y.incrementalAlign(); // Immediately realign tips.
-              Ed11y.alignPending = false;
               Ed11y.incrementalCheck();
             }
           }, 5000, node);
@@ -2235,7 +2240,6 @@ class Ed11y {
             mutation.target.parentElement &&
             mutation.target.parentElement.matches('[contenteditable] *')) {
             Ed11y.incrementalAlign();
-            Ed11y.alignPending = false;
             Ed11y.slowIncremental();
             return;
           } else if (mutation.type === 'childList') {
