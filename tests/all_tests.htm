@@ -454,6 +454,11 @@
             document.querySelector('#hidden-handler h4').style.padding="1em";
           }, false);
 
+          document.addEventListener('ed11yDismissalUpdate', function(e) {
+            console.log('Event dispatched: ed11yDismissalUpdate');
+            console.log(e.detail);
+          }, false);
+
         </script>
         <style>
             main {position: relative; z-index: 0;}

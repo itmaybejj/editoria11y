@@ -457,7 +457,7 @@ class Ed11y {
             if (Ed11y.panelToggle) {
               Ed11y.panelToggle.querySelector('.ed11y-sr-only').textContent = Ed11y.M.toggleAccessibilityTools;
             }
-            window.requestAnimationFrame(() => Ed11y.updatePanel());
+            Ed11y.updatePanel();
           }, 0);
         }
 
@@ -529,7 +529,7 @@ class Ed11y {
 
     let oldResultString = '';
     const newIncrementalResults = function() {
-      if (Ed11y.results.length !== Ed11y.oldResults.length) {
+      if (Ed11y.forceFullCheck || Ed11y.results.length !== Ed11y.oldResults.length) {
         return true;
       }
       let newResultString = `${Ed11y.errorCount} ${Ed11y.warningCount}`;
@@ -555,11 +555,14 @@ class Ed11y {
           }*/
           Ed11y.resetResults();
         } else {
+          // Todo: commented out in 2.3.11:
+          // Reconnect map
           Ed11y.results = Ed11y.oldResults;
           window.setTimeout(function() {
             if ( !Ed11y.alignPending ) {
               Ed11y.alignButtons();
               Ed11y.alignPanel();
+              Ed11y.alignPending = false;
             }
             Ed11y.running = false;
           },0);
@@ -588,7 +591,7 @@ class Ed11y {
           Ed11y.onLoad = false;
 
           if (!Ed11y.options.inlineAlerts) {
-            // todo temp temp temp!
+            // todo move to incremental check or timeout; no need to do on load.
             oldResultString = `${Ed11y.errorCount} ${Ed11y.warningCount}`;
             Ed11y.results.forEach(result => {
               oldResultString += result.test + result.element.outerHTML;
@@ -625,7 +628,9 @@ class Ed11y {
 
 
           // Decide whether to open the panel on load.
-          if (Ed11y.ignoreAll) {
+          if (Ed11y.ignoreAll ||
+            (!Ed11y.options.inlineAlerts && Ed11y.totalCount > 75)
+          ) {
             Ed11y.showPanel = false;
           } else if (Ed11y.options.alertMode === 'active' ||
             !Ed11y.options.userPrefersShut ||
@@ -1059,18 +1064,17 @@ class Ed11y {
       // Send record to storage or dispatch an event to an API.
       if (Ed11y.options.syncedDismissals === false) {
         localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
-      } else {
-        let dismissalDetail = {
-          dismissPage: Ed11y.options.currentPage,
-          dismissTest: test,
-          dismissKey: dismissalKey,
-          dismissAction: dismissalType,
-        };
-        let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
-        window.setTimeout(() => {
-          document.dispatchEvent(ed11yDismissalUpdate);
-        },100);
       }
+      let dismissalDetail = {
+        dismissPage: Ed11y.options.currentPage,
+        dismissTest: test,
+        dismissKey: dismissalKey,
+        dismissAction: dismissalType,
+      };
+      let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
+      window.setTimeout(() => {
+        document.dispatchEvent(ed11yDismissalUpdate);
+      },100);
     };
 
     Ed11y.dismissThis = function (dismissalType, all = false) {
@@ -1292,11 +1296,11 @@ class Ed11y {
         Ed11y.elements.panelPin.forEach(el => {
           let bounds = el.getBoundingClientRect();
           if (Ed11y.options.panelPinTo === 'right') {
-            xMost = windowWidth - bounds.left > xMost ? windowWidth - bounds.left : xMost;
+            xMost = windowWidth - bounds.left > xMost && bounds.left > windowWidth / 3 ? windowWidth - bounds.left : xMost;
           } else {
-            xMost = bounds.right > xMost ? bounds.right : xMost;
+            xMost = bounds.right > xMost && xMost + bounds.right < windowWidth / 3 ? xMost + bounds.right : xMost;
           }
-          yMost = bounds.height > yMost ? bounds.height : yMost;
+          yMost = bounds.height > yMost && bounds.height + yMost < window.innerHeight / 2 ? yMost + bounds.height : yMost;
         });
       }
       if (xMost > 0 && xMost < windowWidth - 240) {
@@ -1332,7 +1336,16 @@ class Ed11y {
         // Compute based on target position.
 
         Ed11y.jumpList.forEach((mark, i) => {
+          if (!mark.result.element.isConnected) {
+            // Something broke; rebuild jumplist on next loop.
+            Ed11y.forceFullCheck = true;
+            Ed11y.interaction = true;
+            mark.style.display = 'none';
+          } else {
+            //mark.visibility = 'visible';
+          }
           let targetOffset = mark.result.element.getBoundingClientRect();
+
           let top = targetOffset.top + scrollTop;
           //let rightBound = windowWidth;
           if (!Ed11y.visible(mark.result.element)) {
@@ -2085,13 +2098,16 @@ class Ed11y {
     };
 
     Ed11y.incrementalAlign = debounce(() => {
-      if (!Ed11y.running) {
+      if (!Ed11y.running && !Ed11y.alignPending) {
         Ed11y.scrollPending++;
         Ed11y.updateTipLocations();
+        Ed11y.alignPending = false;
+      } else {
+        Ed11y.incrementalAlign();
       }
     }, 10);
     Ed11y.interaction = false;
-    window.addEventListener('keyup', () => {
+    window.addEventListener('keydown', () => {
       Ed11y.interaction = true;
     });
     window.addEventListener('click', () => {
@@ -2111,6 +2127,7 @@ class Ed11y {
           Ed11y.closedByDisable = false;
           Ed11y.disabled = false;
         }
+        //Ed11y.forceFullCheck = true; // todo no
         Ed11y.checkAll();
         window.setTimeout(function() {
           if (Ed11y.visualizing) {
@@ -2125,12 +2142,14 @@ class Ed11y {
         // Todo: optimize tip placement so we do not need as much debounce.
         Ed11y.browserLag = browserSpeed < 1 ? 0 : browserSpeed * 100 + Ed11y.totalCount;
       } else {
+        // Ed11y was running, try again later.
         window.setTimeout(() => {Ed11y.incrementalCheck();}, 250);
       }
     }, 250);
     Ed11y.slowIncremental = debounce(() => {
-      Ed11y.incrementalAlign(); // Immediately realign tips.
-      Ed11y.alignPending = false;
+      //Ed11y.incrementalAlign(); // Immediately realign tips.
+      //Ed11y.alignPending = false;
+      Ed11y.interaction = true;
       Ed11y.incrementalCheck();
     }, 1000);
 
@@ -2198,14 +2217,12 @@ class Ed11y {
         if (node && node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
           Ed11y.recentlyAddedNodes.push(node);
           Ed11y.incrementalAlign(); // Immediately realign tips.
-          Ed11y.alignPending = false;
           window.setTimeout(function (node) {
             // Don't repeatedly recheck on repeated changes to same node.
             let stillWaiting = Ed11y.recentlyAddedNodes.indexOf(node);
             if (stillWaiting > -1) {
               Ed11y.recentlyAddedNodes.splice(stillWaiting, 1);
               Ed11y.incrementalAlign(); // Immediately realign tips.
-              Ed11y.alignPending = false;
               Ed11y.incrementalCheck();
             }
           }, 5000, node);
@@ -2221,12 +2238,14 @@ class Ed11y {
           if (mutation.type === 'characterData' &&
             mutation.target.parentElement &&
             mutation.target.parentElement.matches('[contenteditable] *')) {
-            // Recheck when typing in content editable area hesitates > 1s;
+            Ed11y.incrementalAlign();
             Ed11y.slowIncremental();
             return;
           } else if (mutation.type === 'childList') {
             // Recheck if there are relevant node changes.
-            if (mutation.addedNodes.length > 0) {
+            if (mutation.removedNodes.length > 0) {
+              align += 1;
+            } else if (mutation.addedNodes.length > 0) {
               mutation.addedNodes.forEach(node => {
                 align += logNode(node);
               });
@@ -2234,9 +2253,6 @@ class Ed11y {
           }
         }
         // These are debounced
-        if (!align) {
-          return;
-        }
         if (!align) {
           return;
         }
@@ -2418,6 +2434,16 @@ class Ed11y {
       }
       Ed11y.alignPanel();
     };
+
+    // Move toggles when something expands or collapses.
+    const mightExpand = document.querySelectorAll('[aria-expanded], [aria-controls]');
+    mightExpand?.forEach(expandable => {
+      expandable.addEventListener('click', () => {
+        window.setTimeout(() => {
+          Ed11y.windowResize();
+        }, 333);
+      });
+    });
 
     // Escape key closes panels.
     Ed11y.escapeWatch = function (event) {
