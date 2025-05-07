@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.11';
+    Ed11y.version = '2.3.12-dev';
 
     let defaultOptions = {
 
@@ -1924,6 +1924,8 @@ class Ed11y {
         const newLabel = `${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}, ${i + 1} / ${Ed11y.jumpList.length - 1}`;
         el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
       });
+      let tipsPainted = new CustomEvent('ed11yResultsPainted');
+      document.dispatchEvent(tipsPainted);
       Ed11y.resumeObservers();
     };
 
