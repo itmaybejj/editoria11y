@@ -29,6 +29,7 @@ class Ed11y {
 
       // Ignore Aria on these elements (Gutenberg labels headings while editing.)
       ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
+      ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
 
       // Disable tests on specific elements
       // Include and modify this entire object in your call
@@ -2491,6 +2492,10 @@ class Ed11y {
       if (Ed11y.options.ignoreAriaOnElements && element.matches(Ed11y.options.ignoreAriaOnElements)) {
         return 'noAria';
       }
+      if (Ed11y.options.ignoreTextInElements && element.matches(Ed11y.options.ignoreTextInElements)) {
+        return '';
+      }
+
       const labelledBy = element.getAttribute('aria-labelledby');
       if (!recursing && labelledBy) {
         const target = labelledBy.split(/\s+/);
