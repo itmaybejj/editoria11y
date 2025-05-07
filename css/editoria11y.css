@@ -79,7 +79,7 @@ ed11y-element-result {
   position: fixed;
   opacity: 0;
   transition: opacity .25s ease-in;
-  z-index: var(--ed11y-buttonZIndex, 9999);
+  z-index: calc(var(--ed11y-buttonZIndex, 9999) + 1000);
 }
 
 :host(ed11y-element-panel.ed11y-element):focus,
@@ -558,7 +558,7 @@ ed11y-element-result {
 
 :host(ed11y-element-result.ed11y-element[data-ed11y-open='true']),
 ed11y-element-result[data-ed11y-open='true'] {
-  z-index: calc(var(--ed11y-buttonZIndex, 9999) + 10) !important;
+  z-index: calc(var(--ed11y-buttonZIndex, 9999) + 1000) !important;
 }
 
 .ed11y-editable-result {
@@ -654,7 +654,7 @@ ed11y-element-result[data-ed11y-open='true'] {
 }
 
 :host(ed11y-element-tip.ed11y-element[data-ed11y-open='true']) {
-  z-index: calc(var(--ed11y-buttonZIndex, 9999) + 11) !important;
+  z-index: calc(var(--ed11y-buttonZIndex, 9999) + 1001) !important;
   display: block;
 }
 
