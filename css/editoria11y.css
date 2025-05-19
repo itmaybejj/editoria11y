@@ -309,6 +309,12 @@ ed11y-element-result {
   line-height: 1.75;
 }
 
+.ed11y-pin-left .ed11y-buttonbar >:hover .ed11y-sr-only,
+.ed11y-pin-left .ed11y-buttonbar >:focus-visible .ed11y-sr-only {
+  right: auto;
+  left: 0;
+}
+
 .ed11y-shut {
   border-radius: 100%;
   background: transparent;

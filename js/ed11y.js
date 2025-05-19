@@ -1291,6 +1291,9 @@ class Ed11y {
       if (!Ed11y.panelElement) {
         return false;
       }
+      if (Ed11y.options.panelPinTo === 'left') {
+        Ed11y.panel.classList.add('ed11y-pin-left');
+      }
       let xMost = 0;
       let yMost = 0;
       if (Ed11y.elements.panelPin) {
