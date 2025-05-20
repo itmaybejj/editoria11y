@@ -1012,7 +1012,8 @@ class Ed11y {
         console.warn('Editable content detected; Editoria11y inline alerts disabled');
       }
       Ed11y.findElements('p', 'p');
-      Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', Ed11y.options.headingsOnlyFromCheckRoots);
+      Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]');
+      Ed11y.findElements('allH', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', false);
       Ed11y.findElements('img', 'img');
       Ed11y.findElements('a', 'a[href]');
       Ed11y.findElements('li', 'li');

@@ -15,7 +15,7 @@ class Ed11yTestHeadings {
     let position = 'afterbegin';
 
     // Test each header level for accessibility issues.
-    Ed11y.elements.h?.filter( el => Ed11y.elementNotHidden(el) )?.forEach((el) => {
+    Ed11y.elements.allH?.filter( el => Ed11y.elementNotHidden(el) )?.forEach((el) => {
       if (!Ed11y.addedNodeReadyToCheck(el)) {
         return;
       }
@@ -96,17 +96,17 @@ class Ed11yTestHeadings {
       }
       prevLevel = level;
 
-      if (error !== '') {
-        // Only mark errors if they are within the scanned area or a shadow root.
-        if (el.closest(Ed11y.options.checkRoots) !== null || el.getRootNode()?.host?.matches('[data-ed11y-has-shadow-root]') !== undefined) {
-          alert.forEach((result) => {
-            Ed11y.results.push(result);
-          });
-        } else {
-          outlinePrefix = '';
-        }
+      if (Ed11y.elements.h?.includes(el)) {
+        // Populate heading outline with included heading.
+        Ed11y.headingOutline.push([el, level, outlinePrefix, dismissKey]);
+
+        alert?.forEach((result) => {
+          Ed11y.results.push(result);
+        });
+      } else if (!Ed11y.options.headingsOnlyFromCheckRoots) {
+        Ed11y.headingOutline.push([el, level, '', dismissKey]);
       }
-      Ed11y.headingOutline.push([el, level, outlinePrefix, dismissKey]);
+
     });
 
     // Check for blockquotes used as headings. If it's less than 25
