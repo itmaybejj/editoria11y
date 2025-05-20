@@ -2667,6 +2667,12 @@ class Ed11y {
           }
           computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
           break;
+        case 'INPUT':
+          computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
+          if (treeWalker.currentNode.hasAttribute('title')) {
+            addTitleIfNoName = treeWalker.currentNode.getAttribute('title');
+          }
+          break;
         case 'SLOT':
           if (treeWalker.currentNode.assignedNodes()) {
             // Slots have specific shadow DOM methods.
