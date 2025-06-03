@@ -2084,22 +2084,35 @@ class Ed11y {
       });
     };
 
-    Ed11y.recentlyAddedNodes = [];
+    Ed11y.recentlyAddedNodes = new WeakMap();
     Ed11y.addedNodeReadyToCheck = function(el) {
-      if (Ed11y.recentlyAddedNodes.length === 0) {
+      if (!Ed11y.recentlyAddedNodes.has(el)) {
         return true;
       }
-      const thisWasAdded = Ed11y.recentlyAddedNodes.indexOf(el);
-      if (thisWasAdded > -1) {
-        if (el.textContent.trim().length === 0 || Ed11y.activeRange && el.contains(Ed11y.activeRange.startContainer)) {
-          // New node does not yet have text, or is selected.
+      const hasText = el.textContent.trim().length;
+      if ((!hasText && Ed11y.recentlyAddedNodes.get(el) > Date.now() - 5000) ||
+        Ed11y.activeRange && el.contains(Ed11y.activeRange.startContainer)) {
+        // Do not check recent nodes if they are empty or selected.
+        return false;
+      } else if (el.matches('table') && el.querySelectorAll('td:not(:empty)')) {
+        // Only check tables once there is content in a non-heading cell.
+        let cumulativeText = '';
+        if (hasText) {
+          const cells = el.querySelectorAll('td:not(:empty)');
+          cells.forEach((cell) => {
+            cumulativeText += cell.textContent;
+          });
+        }
+        if (!cumulativeText) {
           return false;
         } else {
-          // New node is ready for checking.
-          Ed11y.recentlyAddedNodes.splice(thisWasAdded, 1);
+          // Text in body cells.
+          Ed11y.recentlyAddedNodes.delete(el);
           return true;
         }
       } else {
+        // New node is ready for checking.
+        Ed11y.recentlyAddedNodes.delete(el);
         return true;
       }
     };
@@ -2218,21 +2231,19 @@ class Ed11y {
         if (Ed11y.options.inlineAlerts) {
           return true;
         }
-        if (Ed11y.editableContent && node.matches('[contenteditable] *)') && !node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
-          node = node.querySelector('table, h1, h2, h3, h4, h5, h6, blockquote');
+        const searchList = 'table, h1, h2, h3, h4, h5, h6, blockquote';
+        if (!Ed11y.options.inlineAlerts &&
+          !node.matches(node.matches(searchList)) &&
+          node.matches('[contenteditable] *')) {
+          if (node.matches('table *')) {
+            node = node.closest('table');
+          } else if (!node.matches(searchList)) {
+            node = node.querySelector(searchList);
+          }
         }
-        if (node && node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
-          Ed11y.recentlyAddedNodes.push(node);
+        if (node && node.matches(searchList)) {
+          Ed11y.recentlyAddedNodes.set(node, Date.now());
           Ed11y.incrementalAlign(); // Immediately realign tips.
-          window.setTimeout(function (node) {
-            // Don't repeatedly recheck on repeated changes to same node.
-            let stillWaiting = Ed11y.recentlyAddedNodes.indexOf(node);
-            if (stillWaiting > -1) {
-              Ed11y.recentlyAddedNodes.splice(stillWaiting, 1);
-              Ed11y.incrementalAlign(); // Immediately realign tips.
-              Ed11y.incrementalCheck();
-            }
-          }, 5000, node);
           return 0;
         }
         return 1;
