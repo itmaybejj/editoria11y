@@ -9,6 +9,7 @@
 <p style="display: none;">THIS IS A HIDDEN PARAGRAPH WITH CAPS LOCK TO SET OFF THE 0 TEST</p>
     <header>
         <h1 id="editoria11y-demo">Editoria11y Utility Functions</h1>
+        <h3 class="negative" id="ignored-skipped-heading">Ignored skipped heading outside main</h3>
     </header>
     <main>
 
@@ -168,6 +169,11 @@
 
             <h2 id="namecalc">Accessible name calculation</h2>
 
+            <h3>Inputs with titles</h3>
+            <table><th class="negative">
+                <input type="checkbox" class="form-checkbox" title="Select all rows in this table">
+            </th></table>
+
             <h3>Pseudo selectors in a link</h3>
             <div class="positive">Link with SVG image with multiple labels, one should be ignored:
                 <a href="https://demo">click here</a></div>
@@ -261,6 +267,13 @@
         <div id="klaro_toggle_dialog" style="position: fixed; bottom: 10px; right: 10px; width: 25px; height: 25px; border-radius: 25px; background: silver;">@</div>
 
         <div hidden>
+            <link rel="stylesheet" media="all" href="https://cdn.jsdelivr.net/gh/itmaybejj/linkpurpose@main/css/linkpurpose.css">
+            <script src="https://cdn.jsdelivr.net/gh/itmaybejj/linkpurpose@main/js/linkpurpose.min.js"></script>
+            <script>
+              console.log('Link purpose loaded from CDN');
+              const linkPurpose = new LinkPurpose({})
+
+            </script>
             <link href="./tests.css" rel="stylesheet">
             <script src="../js/ed11y-localization.js"></script>
             <script src="../js/ed11y-element-panel.js"></script>
@@ -380,7 +393,7 @@
                     //shadowComponents : 'shadow-test, shadow-test-no-hits, element-details',
                     autoDetectShadowComponents: true,
                     hiddenHandlers : '[hidden]',
-                    checkRoots : 'body',
+                    checkRoots : 'main',
                     //linkIgnoreStrings: /\(link is external\)/i,
                     customTests : 2,
                     theme: 'sleekTheme',
@@ -391,18 +404,12 @@
                   watchForChanges: false,
                   allowOK: true,
                   constrainButtons: '.constrain-position',
+                  panelPinTo: 'left',
 
                   //ignoreAllIfPresent: 'body',
                   //allowHide: false,
                   //allowOK: false,
                 });
-            </script>
-            <link rel="stylesheet" media="all" href="https://cdn.jsdelivr.net/gh/itmaybejj/linkpurpose@main/css/linkpurpose.css">
-            <script src="https://cdn.jsdelivr.net/gh/itmaybejj/linkpurpose@main/js/linkpurpose.min.js"></script>
-            <script>
-
-              const linkPurpose = new LinkPurpose({})
-
             </script>
 
         </div>
