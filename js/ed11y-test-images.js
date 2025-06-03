@@ -38,9 +38,9 @@ class Ed11yTestImages {
       }
       else {
         altLabel += alt;
-        const altLower = alt.toLowerCase();
+        const altLower = alt.toLowerCase().trim();
 
-        if (Ed11y.M.meaninglessAlt.includes(altLower.trim())) {
+        if (Ed11y.M.meaninglessAlt.includes(altLower)) {
           error = 'altMeaningless';
           dismissable = false;
         } else {
@@ -58,7 +58,6 @@ class Ed11yTestImages {
             '.hei',
             '://',
           ];
-          let suspiciousWords = Ed11y.M.suspiciousWords;
           let check = [null, null];
 
           altUrl.forEach((string) => {
@@ -67,13 +66,31 @@ class Ed11yTestImages {
             }
           });
 
-          suspiciousWords.forEach((string) => {
-            const suspiciousWord = altLower.indexOf(string);
-            if (suspiciousWord > -1 && suspiciousWord < 6) {
-              // photo of, a photo of, the photo is
-              check[1] = string;
+          if (!check[0]) {
+
+            let suspiciousWords = Ed11y.M.suspiciousWords;
+
+            const altStripped = altLower.replace('.','');
+
+            suspiciousWords.some((string) => {
+              const suspiciousWord = altStripped.indexOf(string);
+              if (suspiciousWord > -1 && suspiciousWord < 6) {
+                // photo of, a photo of, the photo is
+                check[1] = string;
+                return true;
+              }
+            });
+
+            if (!check[1]) {
+              Ed11y.M.badEndingForAlt.some((string) => {
+                if (altStripped.endsWith(string)) {
+                  // photo of, a photo of, the photo is
+                  check[1] = string;
+                  return true;
+                }
+              });
             }
-          });
+          }
 
           if (check[0] === 'URL') {
             error = 'altURL';
