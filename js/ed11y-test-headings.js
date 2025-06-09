@@ -56,19 +56,16 @@ class Ed11yTestHeadings {
       let dismissKey = false;
       if (headingLength < 1) {
         // todo: let image merge up into shared alert.
-        let headingSubText = el.querySelector('img')?.getAttribute('alt');
-        if (!headingSubText || headingSubText.length === 0) {
-          outlinePrefix += Ed11y.M.errorOutlinePrefixHeadingEmpty;
-          error = 'headingEmpty';
-          dismissKey = false; // redeclare in case of two errors.
-          alert.push({
-            element: el,
-            test: error,
-            content: Ed11y.M.headingEmpty.tip(),
-            position: position,
-            dismissalKey: dismissKey,
-          });
-        }
+        outlinePrefix += Ed11y.M.errorOutlinePrefixHeadingEmpty;
+        error = 'headingEmpty';
+        dismissKey = false; // redeclare in case of two errors.
+        alert.push({
+          element: el,
+          test: error,
+          content: Ed11y.M.headingEmpty.tip(),
+          position: position,
+          dismissalKey: dismissKey,
+        });
       }
       else if (headingLength > 160) {
         outlinePrefix += Ed11y.M.errorOutlinePrefixHeadingIsLong;

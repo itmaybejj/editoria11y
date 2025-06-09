@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.11';
+    Ed11y.version = '2.3.13-dev';
 
     let defaultOptions = {
 
@@ -35,7 +35,10 @@ class Ed11y {
       ignoreByKey: {
         'p': 'table p',
         // 'h': false,
-        'img': '[aria-hidden], [aria-hidden] img, a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img', // May get false negatives in accordions, but needed for icons
+        'img': '[aria-hidden], [aria-hidden] img, ' +
+          '[role="presentation"], ' +
+          'a[href][aria-label] img, button[aria-label] img, ' +
+          'a[href][aria-labelledby] img, button[aria-labelledby] img',
         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
         // 'li': false,
         // 'blockquote': false,
@@ -2632,7 +2635,8 @@ class Ed11y {
           }
           continue;
         case 'IMG':
-          if (treeWalker.currentNode.hasAttribute('alt')) {
+          if (treeWalker.currentNode.hasAttribute('alt') &&
+            !treeWalker.currentNode.matches('[role="presentation"]')) {
             computedText += treeWalker.currentNode.getAttribute('alt');
           }
           continue;
