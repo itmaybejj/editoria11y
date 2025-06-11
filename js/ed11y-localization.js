@@ -49,8 +49,8 @@ const ed11yLang = {
     // Strings used in tests ==============================
 
     suspiciousWords: ['image of','graphic of','picture of','photo of','photograph of','placeholder','spacer','tbd','todo', 'copyright', 'courtesy of', 'photo by'],
-    meaninglessAlt: ['alt','chart','decorative','image','graphic','photo','placeholder','placeholder image','spacer','tbd','todo','to do','copyright', 'courtesy of', 'photo by'],
-    // 'alt', 'image', 'photo', 'decorative', 'placeholder', 'placeholder image', 'spacer'
+    meaninglessAlt: ['alt','chart','decorative','image','graphic','photo','placeholder','placeholder image','spacer','tbd','todo','to do'],
+    badEndingForAlt: ['photo', 'image', 'photograph', 'picture'],
     linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
     linksMeaningless: /(learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|"|'|\?|\.|-|,|:|>|<|\s)+/g,
     linkStringsNewWindows: /window|\stab|download/g,

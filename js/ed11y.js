@@ -29,6 +29,7 @@ class Ed11y {
 
       // Ignore Aria on these elements (Gutenberg labels headings while editing.)
       ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
+      ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
 
       // Disable tests on specific elements
       // Include and modify this entire object in your call
@@ -1014,7 +1015,8 @@ class Ed11y {
         console.warn('Editable content detected; Editoria11y inline alerts disabled');
       }
       Ed11y.findElements('p', 'p');
-      Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', Ed11y.options.headingsOnlyFromCheckRoots);
+      Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]');
+      Ed11y.findElements('allH', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', false);
       Ed11y.findElements('img', 'img');
       Ed11y.findElements('a', 'a[href]');
       Ed11y.findElements('li', 'li');
@@ -1292,6 +1294,9 @@ class Ed11y {
     Ed11y.alignPanel = function() {
       if (!Ed11y.panelElement) {
         return false;
+      }
+      if (Ed11y.options.panelPinTo === 'left') {
+        Ed11y.panel.classList.add('ed11y-pin-left');
       }
       let xMost = 0;
       let yMost = 0;
@@ -1927,6 +1932,8 @@ class Ed11y {
         const newLabel = `${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}, ${i + 1} / ${Ed11y.jumpList.length - 1}`;
         el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
       });
+      let tipsPainted = new CustomEvent('ed11yResultsPainted');
+      document.dispatchEvent(tipsPainted);
       Ed11y.resumeObservers();
     };
 
@@ -2080,22 +2087,35 @@ class Ed11y {
       });
     };
 
-    Ed11y.recentlyAddedNodes = [];
+    Ed11y.recentlyAddedNodes = new WeakMap();
     Ed11y.addedNodeReadyToCheck = function(el) {
-      if (Ed11y.recentlyAddedNodes.length === 0) {
+      if (!Ed11y.recentlyAddedNodes.has(el)) {
         return true;
       }
-      const thisWasAdded = Ed11y.recentlyAddedNodes.indexOf(el);
-      if (thisWasAdded > -1) {
-        if (el.textContent.trim().length === 0 || Ed11y.activeRange && el.contains(Ed11y.activeRange.startContainer)) {
-          // New node does not yet have text, or is selected.
+      const hasText = el.textContent.trim().length;
+      if ((!hasText && Ed11y.recentlyAddedNodes.get(el) > Date.now() - 5000) ||
+        Ed11y.activeRange && el.contains(Ed11y.activeRange.startContainer)) {
+        // Do not check recent nodes if they are empty or selected.
+        return false;
+      } else if (el.matches('table') && el.querySelectorAll('td:not(:empty)')) {
+        // Only check tables once there is content in a non-heading cell.
+        let cumulativeText = '';
+        if (hasText) {
+          const cells = el.querySelectorAll('td:not(:empty)');
+          cells.forEach((cell) => {
+            cumulativeText += cell.textContent;
+          });
+        }
+        if (!cumulativeText) {
           return false;
         } else {
-          // New node is ready for checking.
-          Ed11y.recentlyAddedNodes.splice(thisWasAdded, 1);
+          // Text in body cells.
+          Ed11y.recentlyAddedNodes.delete(el);
           return true;
         }
       } else {
+        // New node is ready for checking.
+        Ed11y.recentlyAddedNodes.delete(el);
         return true;
       }
     };
@@ -2214,21 +2234,19 @@ class Ed11y {
         if (Ed11y.options.inlineAlerts) {
           return true;
         }
-        if (Ed11y.editableContent && node.matches('[contenteditable] *)') && !node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
-          node = node.querySelector('table, h1, h2, h3, h4, h5, h6, blockquote');
+        const searchList = 'table, h1, h2, h3, h4, h5, h6, blockquote';
+        if (!Ed11y.options.inlineAlerts &&
+          !node.matches(node.matches(searchList)) &&
+          node.matches('[contenteditable] *')) {
+          if (node.matches('table *')) {
+            node = node.closest('table');
+          } else if (!node.matches(searchList)) {
+            node = node.querySelector(searchList);
+          }
         }
-        if (node && node.matches('table, h1, h2, h3, h4, h5, h6, blockquote')) {
-          Ed11y.recentlyAddedNodes.push(node);
+        if (node && node.matches(searchList)) {
+          Ed11y.recentlyAddedNodes.set(node, Date.now());
           Ed11y.incrementalAlign(); // Immediately realign tips.
-          window.setTimeout(function (node) {
-            // Don't repeatedly recheck on repeated changes to same node.
-            let stillWaiting = Ed11y.recentlyAddedNodes.indexOf(node);
-            if (stillWaiting > -1) {
-              Ed11y.recentlyAddedNodes.splice(stillWaiting, 1);
-              Ed11y.incrementalAlign(); // Immediately realign tips.
-              Ed11y.incrementalCheck();
-            }
-          }, 5000, node);
           return 0;
         }
         return 1;
@@ -2492,6 +2510,10 @@ class Ed11y {
       if (Ed11y.options.ignoreAriaOnElements && element.matches(Ed11y.options.ignoreAriaOnElements)) {
         return 'noAria';
       }
+      if (Ed11y.options.ignoreTextInElements && element.matches(Ed11y.options.ignoreTextInElements)) {
+        return '';
+      }
+
       const labelledBy = element.getAttribute('aria-labelledby');
       if (!recursing && labelledBy) {
         const target = labelledBy.split(/\s+/);
@@ -2659,6 +2681,12 @@ class Ed11y {
             aText = false;
           }
           computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
+          break;
+        case 'INPUT':
+          computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
+          if (treeWalker.currentNode.hasAttribute('title')) {
+            addTitleIfNoName = treeWalker.currentNode.getAttribute('title');
+          }
           break;
         case 'SLOT':
           if (treeWalker.currentNode.assignedNodes()) {

@@ -79,7 +79,7 @@ ed11y-element-result {
   position: fixed;
   opacity: 0;
   transition: opacity .25s ease-in;
-  z-index: var(--ed11y-buttonZIndex, 9999);
+  z-index: calc(var(--ed11y-buttonZIndex, 9999) + 9000);
 }
 
 :host(ed11y-element-panel.ed11y-element):focus,
@@ -307,6 +307,12 @@ ed11y-element-result {
   width: auto;
   height: auto;
   line-height: 1.75;
+}
+
+.ed11y-pin-left .ed11y-buttonbar >:hover .ed11y-sr-only,
+.ed11y-pin-left .ed11y-buttonbar >:focus-visible .ed11y-sr-only {
+  right: auto;
+  left: 0;
 }
 
 .ed11y-shut {
@@ -558,7 +564,7 @@ ed11y-element-result {
 
 :host(ed11y-element-result.ed11y-element[data-ed11y-open='true']),
 ed11y-element-result[data-ed11y-open='true'] {
-  z-index: calc(var(--ed11y-buttonZIndex, 9999) + 10) !important;
+  z-index: calc(var(--ed11y-buttonZIndex, 9999) + 9000) !important;
 }
 
 .ed11y-editable-result {
@@ -654,7 +660,7 @@ ed11y-element-result[data-ed11y-open='true'] {
 }
 
 :host(ed11y-element-tip.ed11y-element[data-ed11y-open='true']) {
-  z-index: calc(var(--ed11y-buttonZIndex, 9999) + 11) !important;
+  z-index: calc(var(--ed11y-buttonZIndex, 9999) + 9001) !important;
   display: block;
 }
 
