@@ -114,6 +114,10 @@ class Ed11yTestLinks {
           }
           if (textCheck === 'generic') {
             error = 'linkTextIsGeneric';
+            if (linkText.length < 4) {
+              // Reinsert ignored link strings.
+              linkText = Ed11y.computeText(el, 0);
+            }
           }
           if (error) {
             Ed11y.results.push({

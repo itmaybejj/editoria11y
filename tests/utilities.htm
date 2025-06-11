@@ -306,8 +306,9 @@
                 });
                 document.addEventListener('ed11yShowHidden', function(e) {
                     console.log('Event dispatched: ed11yShowHidden for #' + e.detail.result);
-                    let pop = Ed11y.findElements('hiddenPop',`#ed11y-result-${e.detail.result}`);
+                    Ed11y.findElements('hiddenPop',`#ed11y-result-${e.detail.result}`);
                     Ed11y.elements['hiddenPop'][0].closest('[hidden]')?.removeAttribute('hidden');
+
                 }, false);
 
                 const decodeSafelink = function(url) {
