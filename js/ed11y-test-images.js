@@ -117,7 +117,7 @@ class Ed11yTestImages {
 
           if (!error && alt !== '') {
             let linkStrippedText = Ed11y.computeText(el, 0, !!Ed11y.options.linkIgnoreSelector);
-            linkStrippedText = linkStrippedText.replace(alt, '');
+            linkStrippedText = linkStrippedText.replace(alt.trim(), '');
             if (Ed11y.options.linkStringsNewWindows && Ed11y.options.linkStringsNewWindows !== Ed11y.M.linkStringsNewWindows) {
               // don't strip on the default, which is loose.
               linkStrippedText = linkStrippedText.toLowerCase().replace(Ed11y.options.linkIgnoreStrings, '');

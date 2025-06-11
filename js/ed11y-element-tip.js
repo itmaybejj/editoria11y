@@ -36,7 +36,6 @@ class Ed11yElementTip extends HTMLElement {
     let content = document.createElement('div');
     content.classList.add('content');
     this.heading = document.createElement('div');
-    this.heading.setAttribute('id','tip-title-' + this.resultID);
     this.heading.classList.add('title');
     this.heading.setAttribute('tabindex', '-1');
     this.heading.innerHTML = Ed11y.M[this.result.test].title;

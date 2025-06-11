@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" media="all" href="../css/editoria11y.css">
+    <title>Editorially Utility Functions</title>
+</head>
+<body>
+<p style="display: none;">THIS IS A HIDDEN PARAGRAPH WITH CAPS LOCK TO SET OFF THE 0 TEST</p>
+<header>
+    <h1 id="editoria11y-demo">Editoria11y Utility Functions</h1>
+</header>
+<main>
+
+    <section id="dev">
+        <h2>Dev</h2>
+        <figure class="figure media--type-image ratio--freeform size--medium alignment--left">
+            <a href="https://humanities.princeton.edu/" class=no-border">  <img src="https://ihum.princeton.edu/sites/g/files/toruqf7181/files/styles/freeform_750w/public/2024-09/Humanities%20Council%20Logo.jpg?itok=BTMFEPBQ" width="750" height="440" alt="Link, Humanities Council. " loading="lazy" class="image-style-freeform-750w">
+
+            </a>
+        </figure>
+        <figure class="figure media--type-image ratio--freeform size--extra-small alignment--left">
+            <a href="https://ihum.princeton.edu/" class=" no-border">  <img src="https://ihum.princeton.edu//sites/g/files/toruqf7181/files/styles/freeform_320w/public/2024-09/IHUM%20Logo.jpg?itok=NaT8Xzgt" width="300" height="329" alt="" loading="lazy" typeof="foaf:Image" class="image-style-freeform-320w">
+
+                </a>
+        </figure>
+    </section>
+
+
+    <div hidden>
+        <link href="./tests.css" rel="stylesheet">
+        <script src="../js/ed11y-localization.js"></script>
+        <script src="../js/ed11y-element-panel.js"></script>
+        <script src="../js/ed11y-element-result.js"></script>
+        <script src="../js/ed11y-element-tip.js"></script>
+        <script src="../js/ed11y-element-alt.js"></script>
+        <script src="../js/ed11y-test-links.js"></script>
+        <script src="../js/ed11y-test-images.js"></script>
+        <script src="../js/ed11y-test-headings.js"></script>
+        <script src="../js/ed11y-test-text.js"></script>
+        <script src="../js/ed11y-test-embeds.js"></script>
+        <script src="../js/ed11y.js"></script>
+        <!-- Instantiate-->
+        <script>
+          document.addEventListener('ed11yShowHidden', function(e) {
+            console.log('Event dispatched: ed11yShowHidden for #' + e.detail.result);
+            let pop = Ed11y.findElements('hiddenPop',`#ed11y-result-${e.detail.result}`);
+            Ed11y.elements['hiddenPop'][0].closest('[hidden]')?.removeAttribute('hidden');
+          }, false);
+
+          const decodeSafelink = function(url) {
+            if (!url) {
+              return '[translation server error]';
+            }
+            const params = new URL(url).searchParams;
+            let decoded = params.get('url');
+            if (!!decoded) {
+              decoded = Ed11y.sanitizeForHTML(decoded);
+              return `<p>The actual URL may be:<br><em style='word-wrap: break-word;'>${decoded}</em></p>`
+            }
+            return '';
+          }
+          document.addEventListener('ed11yRunCustomTests', function() {
+            Ed11y.findElements('safeLinks','a[href*="safelinks.protection.outlook.com/?"]');
+            Ed11y.M.outlookSafeLink = {
+              title: 'URL is an Outlook Safelink',
+              tip: (href) =>
+                `<p>The URL for this link has been copied from an email, and will bounce all clicks through the Microsoft Safelinks server.</p>
+                            <p>The specified URL is:<br><em style='word-break: break-all;'>${Ed11y.sanitizeForHTML(href)}</em></p>
+                            ${decodeSafelink(href)}
+                                `,
+            };
+            Ed11y.elements.safeLinks?.forEach((el) => {
+              Ed11y.results.push({
+                element: el,
+                test: 'outlookSafeLink',
+                content: Ed11y.M.outlookSafeLink.tip(el.getAttribute('href')),
+                position: 'beforebegin',
+                dismissalKey: false,
+              })
+            })
+            let allDone = new CustomEvent('ed11yResume');
+            document.dispatchEvent(allDone);
+            document.dispatchEvent(allDone);
+          })
+
+          const editLinks = document.createElement('div');
+          const editIcon = document.createElement('span');
+          editIcon.classList.add('ed11y-custom-edit-icon');
+          editIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152L0 424c0 48.6 39.4 88 88 88l272 0c48.6 0 88-39.4 88-88l0-112c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 112c0 22.1-17.9 40-40 40L88 464c-22.1 0-40-17.9-40-40l0-272c0-22.1 17.9-40 40-40l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L88 64z"/></svg>';
+          const editLink = document.createElement('a');
+          editLink.href="#";
+          editLink.textContent = "Edit page";
+          editLink.prepend(editIcon.cloneNode(true));
+          const layoutLink = document.createElement('a');
+          layoutLink.href="#";
+          layoutLink.textContent = "Edit layout";
+          layoutLink.prepend(editIcon.cloneNode(true));
+          editLinks.appendChild(editLink);
+          editLinks.appendChild(layoutLink);
+
+          /*
+          * Performance tests
+          * */
+          let beforeCall = performance.now();
+          iterations = 0;
+          // Listen for event
+          document.addEventListener('ed11yPanelOpened', e => {
+            if (iterations < 2) {
+              console.log('panel ready at: ' + parseInt(performance.now() - beforeCall));
+            }
+          });
+          document.addEventListener('ed11yResults', e => {
+            //console.log('results ready at: ' + parseInt(performance.now() - beforeCall));
+            //console.log(iterations);
+            iterations ++;
+            if (iterations === 10) {
+              console.log('Average run: ' + parseInt((performance.now() - beforeCall)) / 10);
+            } else if (iterations < 10) {
+              Ed11y.checkAll();
+            }
+          });
+          const ed11y = new Ed11y({
+            alertMode : 'assertive',
+            //showDismissed: true,
+            ignoreByKey : {
+              'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
+              'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
+            },
+            //syncedDismissals: {},
+            //shadowComponents : 'shadow-test, shadow-test-no-hits, element-details',
+            autoDetectShadowComponents: true,
+            hiddenHandlers : '[hidden]',
+            checkRoots : 'body',
+            //linkIgnoreStrings: /\(link is external\)/i,
+            customTests : 2,
+            theme: 'sleekTheme',
+            linkIgnoreSelector : '.ignore-class, .link-purpose-text',
+            panelNoCover: '#klaro_toggle_dialog',
+            reportsURL: 'https://www.princeton.edu',
+            editLinks: editLinks,
+            watchForChanges: false,
+            allowOK: true,
+            constrainButtons: '.constrain-position',
+
+            //ignoreAllIfPresent: 'body',
+            //allowHide: false,
+            //allowOK: false,
+          });
+        </script>
+        <link rel="stylesheet" media="all" href="https://cdn.jsdelivr.net/gh/itmaybejj/linkpurpose@main/css/linkpurpose.css">
+        <script src="https://cdn.jsdelivr.net/gh/itmaybejj/linkpurpose@main/js/linkpurpose.min.js"></script>
+        <script>
+
+          const linkPurpose = new LinkPurpose({})
+
+        </script>
+
+    </div>
+</main>
+
+
+
+
+</body>
+
+</html>
