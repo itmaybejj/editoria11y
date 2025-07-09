@@ -1,6 +1,11 @@
-# Editoria11y - License
+# Editoria11y - Use statements
 
 Editoria11y was adapted from the Sa11y library. Credits and attachments follow.
+
+Most icons are from Font Awesome by Dave Gandy - http://fontawesome.io
+Font Awesome license: CC BY 3.0, URL: http://creativecommons.org/licenses/by/3.0/
+
+# Editoria11y - License
 
 Editoria11y was created by John Jameson at the Web Development Services team, at Princeton University, 
 and is released under the GNU GPLv2 License:
