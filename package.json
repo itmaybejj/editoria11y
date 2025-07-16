@@ -13,9 +13,12 @@
   "devDependencies": {
     "chromedriver": "^138",
     "eslint": "^8.32.0",
-    "nightwatch": "^3",
+    "nightwatch": "^3.12.2",
     "stylelint": "^16.3.1",
     "stylelint-config-standard": "^36.0.0",
     "uglify-js": "^3.17.4"
+  },
+  "dependencies": {
+    "css-minify": "^2.1.0"
   }
 }
