@@ -210,12 +210,13 @@ ed11y-element-result {
 button.ed11y-jump {
   grid-area: next;
   margin-left: -3px;
-  border-radius: 0  var(--ed11y-borderRadius, 3px) var(--ed11y-borderRadius, 3px) 0;
+  border-radius: 0 1em 1em 0;
   box-shadow: 0 0 0 1px var(--ed11y-activePanelBorder), -2px 0 var(--ed11y-activeBackground);
 
   .toggle-count {
-    padding: 0 5px 0 9px;
+    padding: 0 6px 0 8px;
     display: block;
+    font-size: .9em;
     min-width: 1.375em;
   }
 
@@ -226,7 +227,7 @@ button.ed11y-jump {
   &:hover {
     .hover-icon {
       display: initial;
-      margin: .4em 0 0 10%;
+      margin: .4em 0 0 5%;
       width: .643em;
     }
 
@@ -273,16 +274,21 @@ button.ed11y-jump {
 #ed11y-reports-link,
 #ed11y-show-hidden:first-child,
 .ed11y-buttonbar [hidden]:first-child + #ed11y-visualize {
-  border-radius: var(--ed11y-borderRadius, 3px) 0 0 var(--ed11y-borderRadius, 3px);
+  border-radius: 1em 0 0 1em;
   box-shadow: -1px 0 var(--ed11y-activePanelBorder), 0 -1px var(--ed11y-activePanelBorder), 0 1px var(--ed11y-activePanelBorder), 2px 0 var(--ed11y-activeBackground);
+  padding: 0 6px 0 10px;
+}
+.ed11y-buttonbar [hidden]:first-child + #ed11y-visualize {
+  padding: 0 11px 0 10px;
 }
 
 #ed11y-reports-link {
+  padding: 0 0 0 4px;
   grid-area: reports;
 
   svg {
     width: 1em;
-    margin: .4em 0 0 -1px;
+    margin: .375em 0 0 -1px;
   }
 }
 
