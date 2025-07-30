@@ -1004,6 +1004,7 @@ ed11y-element-result[data-ed11y-open='true'] {
 
 .ed11y-transfer-icon {
   width: .45em;
+  padding: 0 .25em 0 .2em;
 }
 
 .ed11y-dismiss-icon {
