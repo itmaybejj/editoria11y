@@ -2620,6 +2620,15 @@ class Ed11y {
           continue;
         }
 
+        // Inner nodes with shadowRoots.
+        if (treeWalker.currentNode.shadowRoot) {
+          const shadowChildren = treeWalker.currentNode.shadowRoot.querySelectorAll('*');
+          shadowChildren.forEach(child => {
+            computedText += Ed11y.computeText(child);
+          });
+          continue;
+        }
+
         // Use link title as text if there was no text in the link.
         // Todo: in theory this could attach the title to the wrong node.
         if (addTitleIfNoName && !treeWalker.currentNode.closest('a')) {

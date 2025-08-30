@@ -210,7 +210,7 @@ ed11y-element-result {
 button.ed11y-jump {
   grid-area: next;
   margin-left: -3px;
-  border-radius: 0 1em 1em 0;
+  border-radius: 0 .5em .5em 0;
   box-shadow: 0 0 0 1px var(--ed11y-activePanelBorder), -2px 0 var(--ed11y-activeBackground);
 
   .toggle-count {
@@ -274,7 +274,7 @@ button.ed11y-jump {
 #ed11y-reports-link,
 #ed11y-show-hidden:first-child,
 .ed11y-buttonbar [hidden]:first-child + #ed11y-visualize {
-  border-radius: 1em 0 0 1em;
+  border-radius: .5em 0 0 .5em;
   box-shadow: -1px 0 var(--ed11y-activePanelBorder), 0 -1px var(--ed11y-activePanelBorder), 0 1px var(--ed11y-activePanelBorder), 2px 0 var(--ed11y-activeBackground);
   padding: 0 6px 0 10px;
 }
