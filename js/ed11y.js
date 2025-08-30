@@ -16,6 +16,7 @@ class Ed11y {
 
       // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
       checkRoots: false,
+      fixedRoots: false, // Array of specific nodes, overrides previous.
 
       // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
       shadowComponents: false,
@@ -53,13 +54,13 @@ class Ed11y {
 
       // Set alertModes
       // 'headless': do not draw interface
+      // 'customUI': measure for external interface and export values
       // 'userPreference: respect user preference.
       // 'polite': open for new issues.
       // 'assertive': open for any issues.
       // 'active': always open.
       // 'showDismissed': active with dismissed revealed.
       // CMS integrations can switch between polite & headless at runtime.
-      // alertMode "headless" never draws the panel.
       alertMode: 'userPreference',
       inlineAlerts: true,
       watchForChanges: true, // true, false, 'checkRoots';
@@ -99,9 +100,12 @@ class Ed11y {
       panelOffsetX: '25px',
       panelOffsetY: '25px',
       panelNoCover: '', // select other buttons to avoid.
+      panelAttachTo: document.body,
 
       // Selector list for elements that hide overflow, truncating buttons.
       constrainButtons: false,
+      // Offset buttons by the position of this element.
+      iframePositioning: false,
 
       // Interface
       lang: 'en',
@@ -391,7 +395,10 @@ class Ed11y {
 
         Ed11y.customTestsRunning = false;
 
-        let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
+        let roots = Ed11y.options.fixedRoots ?
+          Ed11y.options.fixedRoots :
+          document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
+
         if (roots.length === 0) {
           // Todo parameterize for translation.
           if (Ed11y.onLoad) {
@@ -515,7 +522,7 @@ class Ed11y {
       Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
 
       // Dispatch event for synchronizers.
-      if (!Ed11y.incremental) {
+      if (!Ed11y.incremental || Ed11y.options.alertMode === 'customUI') {
         window.setTimeout(function () {
           let syncResults = new CustomEvent('ed11yResults');
           document.dispatchEvent(syncResults);
@@ -584,7 +591,7 @@ class Ed11y {
         }
       }
 
-      if (Ed11y.options.alertMode !== 'headless') {
+      if (Ed11y.options.alertMode !== 'headless' && Ed11y.options.alertMode !== 'customUI') {
         // Not headless; draw the interface.
 
         if (!Ed11y.bodyStyle) {
@@ -606,7 +613,7 @@ class Ed11y {
 
           let panel = document.createElement('ed11y-element-panel');
           panel.classList.add('ed11y-preload');
-          document.querySelector('body').appendChild(panel);
+          Ed11y.options.panelAttachTo.appendChild(panel);
           Ed11y.attachCSS(Ed11y.panel);
           window.setTimeout(()=> {
             panel.classList.remove('ed11y-preload');
@@ -635,11 +642,14 @@ class Ed11y {
           if (Ed11y.ignoreAll ||
             (!Ed11y.options.inlineAlerts && Ed11y.totalCount > 75)
           ) {
+            console.log('not gonna open');
+            console.log;
             Ed11y.showPanel = false;
           } else if (Ed11y.options.alertMode === 'active' ||
             !Ed11y.options.userPrefersShut ||
             Ed11y.options.showDismissed
           ) {
+            console.log('show panel');
             // Show always on load for active mode or by user preference.
             Ed11y.showPanel = true;
           } else if (
@@ -652,6 +662,7 @@ class Ed11y {
           ) {
             // Show sometimes for assertive/polite if there are new items.
             Ed11y.showPanel = true;
+            console.log('show panel2');
           }
         }
 
@@ -804,7 +815,7 @@ class Ed11y {
       mark.setAttribute('data-ed11y-result', index);
       mark.setAttribute('data-ed11y-open', 'false');
       if (!Ed11y.options.inlineAlerts) {
-        location = document.querySelector('body');
+        location = Ed11y.options.panelAttachTo;
         position = 'beforeend';
         mark.classList.add('ed11y-editable-result');
       } else {
@@ -1009,7 +1020,11 @@ class Ed11y {
     Ed11y.buildElementList = function () {
 
       // Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
-      Ed11y.findElements('editable', Ed11y.options.editableContent, false);
+      if (typeof Ed11y.options.editableContent === 'string') {
+        Ed11y.findElements('editable', Ed11y.options.editableContent, false);
+      } else {
+        Ed11y.elements.editable = Ed11y.options.editableContent;
+      }
       if (Ed11y.options.inlineAlerts && Ed11y.elements.editable.length > 0) {
         Ed11y.options.inlineAlerts = false;
         console.warn('Editable content detected; Editoria11y inline alerts disabled');
@@ -1222,7 +1237,7 @@ class Ed11y {
         Ed11y.editableHighlight[resultID] = {highlight: el};
         el.style.setProperty('position', 'absolute');
         el.style.setProperty('pointer-events', 'none');
-        document.body.appendChild(el);
+        Ed11y.options.panelAttachTo.appendChild(el);
       }
       Ed11y.editableHighlight[resultID].target = firstVisible ? firstVisible : result.element;
       const zIndex = result.dismissalKey ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
@@ -1336,6 +1351,9 @@ class Ed11y {
       // Reading and writing in a loop creates paint thrashing.
       // We iterate the array for reads, then iterate for writes.
 
+      const framePositioner = Ed11y.options.framePositioner ?
+        Ed11y.options.framePositioner.getBoundingClientRect() : { top: 0, left: 0 };
+
       // Used for crude intersection detection.
       let previousNudgeTop = 0;
       let previousNudgeLeft = 0;
@@ -1354,15 +1372,15 @@ class Ed11y {
           }
           let targetOffset = mark.result.element.getBoundingClientRect();
 
-          let top = targetOffset.top + scrollTop;
+          let top = targetOffset.top + scrollTop + framePositioner.top;
           //let rightBound = windowWidth;
           if (!Ed11y.visible(mark.result.element)) {
             // Invisible target.
             const firstVisibleParent = Ed11y.firstVisibleParent(mark.result.element);
             targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
-            top = targetOffset.top + scrollTop;
+            top = targetOffset.top + scrollTop + framePositioner.top;
           }
-          let left = targetOffset.left;
+          let left = targetOffset.left + framePositioner.left;
           // TD TD different?
           if (mark.result.element.tagName === 'IMG') {
             top = top + 10;
@@ -1517,10 +1535,9 @@ class Ed11y {
         document.documentElement.style.setProperty('--ed11y-' + key, value);
       }
 
-      if (document.querySelector('body')) {
-        // May be redundant, but preloads unbundled files.
-        Ed11y.attachCSS(document.querySelector('body'));
-      }
+      // May be redundant, but preloads unbundled files.
+      Ed11y.attachCSS(Ed11y.options.panelAttachTo);
+
 
       Ed11y.roots.forEach((root) => {
         // Shadow elements don't inherit styles, so they need their own copy.
@@ -1902,9 +1919,12 @@ class Ed11y {
       Ed11y.jumpList = [];
       Ed11y.pauseObservers();
 
+      const framePositioner = Ed11y.options.framePositioner ?
+        Ed11y.options.framePositioner.getBoundingClientRect() : { top: 0 };
+
       // Initial alignment to get approximate Y position order for jump list.
       Ed11y.results.forEach((result, i) => {
-        let top = result.element.getBoundingClientRect().top;
+        let top = result.element.getBoundingClientRect().top + framePositioner.top;
         if (!top) {
           const visibleParent = Ed11y.firstVisibleParent(result.element);
           if (visibleParent) {
