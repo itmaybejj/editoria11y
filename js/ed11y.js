@@ -54,7 +54,6 @@ class Ed11y {
 
       // Set alertModes
       // 'headless': do not draw interface
-      // 'customUI': measure for external interface and export values
       // 'userPreference: respect user preference.
       // 'polite': open for new issues.
       // 'assertive': open for any issues.
@@ -362,12 +361,6 @@ class Ed11y {
           Ed11y.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
         }
 
-        // Check for ignoreAll elements.
-        Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
-        if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
-          Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
-        }
-
         // Run tests
         Ed11y.checkAll();
         window.addEventListener('resize', function () { Ed11y.windowResize(); });
@@ -384,6 +377,11 @@ class Ed11y {
       Ed11y.disabled = false;
 
       if ( !Ed11y.checkRunPrevent() ) {
+        // Check for ignoreAll elements.
+        Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
+        if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
+          Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
+        }
 
         if ( Ed11y.incremental ) {
           Ed11y.oldResults = Ed11y.results;
@@ -522,7 +520,7 @@ class Ed11y {
       Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
 
       // Dispatch event for synchronizers.
-      if (!Ed11y.incremental || Ed11y.options.alertMode === 'customUI') {
+      if (!Ed11y.incremental) {
         window.setTimeout(function () {
           let syncResults = new CustomEvent('ed11yResults');
           document.dispatchEvent(syncResults);
@@ -591,7 +589,7 @@ class Ed11y {
         }
       }
 
-      if (Ed11y.options.alertMode !== 'headless' && Ed11y.options.alertMode !== 'customUI') {
+      if (Ed11y.options.alertMode !== 'headless') {
         // Not headless; draw the interface.
 
         if (!Ed11y.bodyStyle) {
@@ -1031,7 +1029,7 @@ class Ed11y {
       }
       Ed11y.findElements('p', 'p');
       Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]');
-      Ed11y.findElements('allH', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', false);
+      Ed11y.findElements('allH', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', Ed11y.options.fixedRoots ? Ed11y.options.headingsOnlyFromCheckRoots : false);
       Ed11y.findElements('img', 'img');
       Ed11y.findElements('a', 'a[href]');
       Ed11y.findElements('li', 'li');
@@ -1209,6 +1207,9 @@ class Ed11y {
     Ed11y.editableHighlight = [];
 
     Ed11y.alignHighlights = function() {
+      const framePositioner = Ed11y.options.framePositioner ?
+        Ed11y.options.framePositioner.getBoundingClientRect() : { top: 0, left: 0 };
+
       Ed11y.editableHighlight.forEach((el) => {
         let targetOffset = el.target.getBoundingClientRect();
         if (!Ed11y.visible(el.target)) {
@@ -1217,8 +1218,8 @@ class Ed11y {
           targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
         }
         el.highlight.style.setProperty('width', targetOffset.width + 6 + 'px');
-        el.highlight.style.setProperty('top', targetOffset.top + window.scrollY - 3 + 'px');
-        el.highlight.style.setProperty('left', targetOffset.left - 3 + 'px');
+        el.highlight.style.setProperty('top', targetOffset.top + framePositioner.top + window.scrollY - 3 + 'px');
+        el.highlight.style.setProperty('left', targetOffset.left + framePositioner.left - 3 + 'px');
         el.highlight.style.setProperty('height', targetOffset.height + 6 + 'px');
       });
     };
@@ -2276,6 +2277,7 @@ class Ed11y {
       const callback = (mutationList) => {
         let align = 0;
         for (const mutation of mutationList) {
+          console.log(mutation);
           if (mutation.type === 'characterData' &&
             mutation.target.parentElement &&
             mutation.target.parentElement.matches('[contenteditable] *')) {
