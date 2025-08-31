@@ -17,6 +17,14 @@ class Ed11y {
       // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
       checkRoots: false,
       fixedRoots: false, // Array of specific nodes, overrides previous.
+      /* e.g:
+      fixedRoots: [
+        {
+           root: direct domReference
+           framePositioner: direct domReference or false
+        }
+      ]
+      */
 
       // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
       shadowComponents: false,
@@ -103,8 +111,6 @@ class Ed11y {
 
       // Selector list for elements that hide overflow, truncating buttons.
       constrainButtons: false,
-      // Offset buttons by the position of this element.
-      framePositioner: false,
 
       // Interface
       lang: 'en',
@@ -266,7 +272,10 @@ class Ed11y {
       const cssLink = document.createElement('link');
       cssLink.setAttribute('rel', 'stylesheet');
       cssLink.setAttribute('media', 'all');
-      cssLink.setAttribute('href', sheet + '?ver=' + Ed11y.version);
+      if (sheet.indexOf('?') < 0) {
+        sheet = sheet + '?ver=' + Ed11y.version;
+      }
+      cssLink.setAttribute('href', sheet);
       cssBundle.append(cssLink);
     });
 
@@ -393,9 +402,12 @@ class Ed11y {
 
         Ed11y.customTestsRunning = false;
 
-        let roots = Ed11y.options.fixedRoots ?
-          Ed11y.options.fixedRoots :
-          document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
+        let roots = [];
+        if (Ed11y.options.fixedRoots) {
+          Ed11y.options.fixedRoots.forEach(root => {roots.push(root.fixedRoot);});
+        } else {
+          roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
+        }
 
         if (roots.length === 0) {
           // Todo parameterize for translation.
@@ -413,7 +425,10 @@ class Ed11y {
               Ed11y.detectShadow(el.shadowRoot);
             } else {
               Ed11y.roots[i] = el;
-              Ed11y.detectShadow(el);
+              Ed11y.detectShadow(el);//heeee
+            }
+            if (Ed11y.options.fixedRoots) {
+              el.dataset.ed11yRoot = `${i}`;
             }
           });
 
@@ -611,7 +626,7 @@ class Ed11y {
 
           let panel = document.createElement('ed11y-element-panel');
           panel.classList.add('ed11y-preload');
-          Ed11y.options.panelAttachTo.appendChild(panel);
+          document.body.appendChild(panel);
           Ed11y.attachCSS(Ed11y.panel);
           window.setTimeout(()=> {
             panel.classList.remove('ed11y-preload');
@@ -1203,16 +1218,19 @@ class Ed11y {
     Ed11y.editableHighlight = [];
 
     Ed11y.alignHighlights = function() {
-      const framePositioner = Ed11y.options.framePositioner ?
-        Ed11y.options.framePositioner.getBoundingClientRect() : { top: 0, left: 0 };
 
       Ed11y.editableHighlight.forEach((el) => {
+
+        const framePositioner = Ed11y.results[el.resultID].fixedRoot && Ed11y.positionedFrames[Ed11y.results[el.resultID].fixedRoot] ?
+          Ed11y.positionedFrames[Ed11y.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
+
         let targetOffset = el.target.getBoundingClientRect();
         if (!Ed11y.visible(el.target)) {
           // Invisible target.
           const firstVisibleParent = Ed11y.firstVisibleParent(el.target);
           targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
         }
+
         el.highlight.style.setProperty('width', targetOffset.width + 6 + 'px');
         el.highlight.style.setProperty('top', targetOffset.top + framePositioner.top + window.scrollY - 3 + 'px');
         el.highlight.style.setProperty('left', targetOffset.left + framePositioner.left - 3 + 'px');
@@ -1231,7 +1249,7 @@ class Ed11y {
       if (!el) {
         el = document.createElement('ed11y-element-highlight');
         el.classList.add('ed11y-element');
-        Ed11y.editableHighlight[resultID] = {highlight: el};
+        Ed11y.editableHighlight[resultID] = {highlight: el, resultID: resultID};
         el.style.setProperty('position', 'absolute');
         el.style.setProperty('pointer-events', 'none');
         Ed11y.options.panelAttachTo.appendChild(el);
@@ -1338,6 +1356,8 @@ class Ed11y {
       }
     };
 
+    Ed11y.positionedFrames = [];
+
     Ed11y.alignButtons = function () {
 
       if (Ed11y.jumpList.length === 0 || (Ed11y.openTip.button && Ed11y.scrollPending === 0)) {
@@ -1348,8 +1368,15 @@ class Ed11y {
       // Reading and writing in a loop creates paint thrashing.
       // We iterate the array for reads, then iterate for writes.
 
-      const framePositioner = Ed11y.options.framePositioner ?
-        Ed11y.options.framePositioner.getBoundingClientRect() : { top: 0, left: 0 };
+      if (Ed11y.options.fixedRoots) {
+        Ed11y.positionedFrames = [];
+
+        Ed11y.options.fixedRoots.forEach((root) => {
+          if (root['framePositioner']) {
+            Ed11y.positionedFrames.push(root['framePositioner'].getBoundingClientRect());
+          }
+        });
+      }
 
       // Used for crude intersection detection.
       let previousNudgeTop = 0;
@@ -1369,15 +1396,21 @@ class Ed11y {
           }
           let targetOffset = mark.result.element.getBoundingClientRect();
 
-          let top = targetOffset.top + scrollTop + framePositioner.top;
+          let top = targetOffset.top + scrollTop;
           //let rightBound = windowWidth;
           if (!Ed11y.visible(mark.result.element)) {
             // Invisible target.
             const firstVisibleParent = Ed11y.firstVisibleParent(mark.result.element);
             targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
-            top = targetOffset.top + scrollTop + framePositioner.top;
+            top = targetOffset.top + scrollTop;
           }
-          let left = targetOffset.left + framePositioner.left;
+          let left = targetOffset.left;
+
+          if (mark.result.fixedRoot && Ed11y.positionedFrames[mark.result.fixedRoot]) {
+            top = top + Ed11y.positionedFrames[mark.result.fixedRoot].top;
+            left = left + Ed11y.positionedFrames[mark.result.fixedRoot].left;
+          }
+
           // TD TD different?
           if (mark.result.element.tagName === 'IMG') {
             top = top + 10;
@@ -1533,7 +1566,10 @@ class Ed11y {
       }
 
       // May be redundant, but preloads unbundled files.
-      Ed11y.attachCSS(Ed11y.options.panelAttachTo);
+      if (document.querySelector('body')) {
+        // May be redundant, but preloads unbundled files.
+        Ed11y.attachCSS(document.querySelector('body'));
+      }
 
 
       Ed11y.roots.forEach((root) => {
@@ -1916,17 +1952,20 @@ class Ed11y {
       Ed11y.jumpList = [];
       Ed11y.pauseObservers();
 
-      const framePositioner = Ed11y.options.framePositioner ?
-        Ed11y.options.framePositioner.getBoundingClientRect() : { top: 0 };
-
       // Initial alignment to get approximate Y position order for jump list.
       Ed11y.results.forEach((result, i) => {
-        let top = result.element.getBoundingClientRect().top + framePositioner.top;
+
+        let top = result.element.getBoundingClientRect().top;
         if (!top) {
           const visibleParent = Ed11y.firstVisibleParent(result.element);
           if (visibleParent) {
             top = visibleParent.getBoundingClientRect().top;
           }
+        }
+        if (Ed11y.options.fixedRoots) {
+          const root = result.element.closest('[data-ed11y-root]');
+          // Todo: it might be faster to associate this with the element finder.
+          Ed11y.results[i].fixedRoot = root.dataset.ed11yRoot;
         }
         top = top + window.scrollY;
         Ed11y.results[i].scrollableParent = closestScrollable(result.element);
@@ -1968,8 +2007,6 @@ class Ed11y {
     };
 
     const intersect = function(a, b, x = 10) {
-      console.log(a);
-      console.log(b);
       // Compute intersect using browser offsets.
       return (a.left - x <= b.right &&
         b.left - x <= a.right &&
@@ -1978,8 +2015,8 @@ class Ed11y {
     };
 
     Ed11y.activeRange = false;
-    const rangeChange = function() {
-      let anchor = getSelection()?.anchorNode;
+    Ed11y.rangeChange = function(anchorNode) {
+      let anchor = anchorNode ? anchorNode : window.getSelection()?.anchorNode;
       const expandable = anchor &&
         anchor.parentNode &&
         typeof anchor.parentNode === 'object' &&
@@ -2024,8 +2061,8 @@ class Ed11y {
     /**
      * Hide tips that are in front of text currently being edited.
      * */
-    Ed11y.checkEditableIntersects = function () {
-      if (!document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
+    Ed11y.checkEditableIntersects = function (focusKnown = false) {
+      if (!focusKnown && !document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
         //Reset classes to measure.
         Ed11y.jumpList?.forEach((el) => {
           el.classList.remove('intersecting');
@@ -2039,14 +2076,16 @@ class Ed11y {
         });
         return;
       }
-      const framePositioner = Ed11y.options.framePositioner ?
-        Ed11y.options.framePositioner.getBoundingClientRect() : { top: 0, left: 0 };
       Ed11y.jumpList?.forEach((el) => {
-        const rects = Ed11y.activeRange.getBoundingClientRect();
-        rects.top = rects.top + framePositioner.top;
-        rects.left = rects.left + framePositioner.left;
-        rects.bottom = rects.bottom + framePositioner.top;
-        rects.right = rects.right + framePositioner.left;
+        const framePositioner = el.result.fixedRoot && Ed11y.positionedFrames[el.result.fixedRoot] ?
+          Ed11y.positionedFrames[el.result.fixedRoot] : { top: 0, left: 0 };
+        const activeRects = Ed11y.activeRange.getBoundingClientRect();
+        const rects = {};
+        rects.top = activeRects.top + framePositioner.top;
+        rects.left = activeRects.left + framePositioner.left;
+        rects.bottom = activeRects.bottom + framePositioner.top;
+        rects.right = activeRects.right + framePositioner.left;
+
         const toggle = el.shadowRoot.querySelector('.toggle');
         if ( intersect(rects, toggle.getBoundingClientRect(), 0) ) {
           if (!toggle.classList.contains('was-intersecting')) {
@@ -2100,7 +2139,7 @@ class Ed11y {
       }, true);
 
       Ed11y.selectionChanged = debounce(() => {
-        if (rangeChange()) {
+        if (Ed11y.rangeChange()) {
           Ed11y.updateTipLocations();
           Ed11y.checkEditableIntersects();
         }
