@@ -104,7 +104,7 @@ class Ed11y {
       // Selector list for elements that hide overflow, truncating buttons.
       constrainButtons: false,
       // Offset buttons by the position of this element.
-      iframePositioning: false,
+      framePositioner: false,
 
       // Interface
       lang: 'en',
@@ -640,14 +640,11 @@ class Ed11y {
           if (Ed11y.ignoreAll ||
             (!Ed11y.options.inlineAlerts && Ed11y.totalCount > 75)
           ) {
-            console.log('not gonna open');
-            console.log;
             Ed11y.showPanel = false;
           } else if (Ed11y.options.alertMode === 'active' ||
             !Ed11y.options.userPrefersShut ||
             Ed11y.options.showDismissed
           ) {
-            console.log('show panel');
             // Show always on load for active mode or by user preference.
             Ed11y.showPanel = true;
           } else if (
@@ -660,7 +657,6 @@ class Ed11y {
           ) {
             // Show sometimes for assertive/polite if there are new items.
             Ed11y.showPanel = true;
-            console.log('show panel2');
           }
         }
 
@@ -1972,6 +1968,8 @@ class Ed11y {
     };
 
     const intersect = function(a, b, x = 10) {
+      console.log(a);
+      console.log(b);
       // Compute intersect using browser offsets.
       return (a.left - x <= b.right &&
         b.left - x <= a.right &&
@@ -2041,9 +2039,16 @@ class Ed11y {
         });
         return;
       }
+      const framePositioner = Ed11y.options.framePositioner ?
+        Ed11y.options.framePositioner.getBoundingClientRect() : { top: 0, left: 0 };
       Ed11y.jumpList?.forEach((el) => {
+        const rects = Ed11y.activeRange.getBoundingClientRect();
+        rects.top = rects.top + framePositioner.top;
+        rects.left = rects.left + framePositioner.left;
+        rects.bottom = rects.bottom + framePositioner.top;
+        rects.right = rects.right + framePositioner.left;
         const toggle = el.shadowRoot.querySelector('.toggle');
-        if ( intersect(Ed11y.activeRange.getBoundingClientRect(), toggle.getBoundingClientRect(), 0) ) {
+        if ( intersect(rects, toggle.getBoundingClientRect(), 0) ) {
           if (!toggle.classList.contains('was-intersecting')) {
             el.classList.add('intersecting');
             toggle.classList.add('intersecting');
@@ -2277,7 +2282,6 @@ class Ed11y {
       const callback = (mutationList) => {
         let align = 0;
         for (const mutation of mutationList) {
-          console.log(mutation);
           if (mutation.type === 'characterData' &&
             mutation.target.parentElement &&
             mutation.target.parentElement.matches('[contenteditable] *')) {
