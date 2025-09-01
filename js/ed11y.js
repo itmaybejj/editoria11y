@@ -1219,6 +1219,16 @@ class Ed11y {
 
     Ed11y.alignHighlights = function() {
 
+      if (Ed11y.options.fixedRoots && Ed11y.editableHighlight.length > 0) {
+        Ed11y.positionedFrames = [];
+
+        Ed11y.options.fixedRoots.forEach((root) => {
+          if (root['framePositioner']) {
+            Ed11y.positionedFrames.push(root['framePositioner'].getBoundingClientRect());
+          }
+        });
+      }
+
       Ed11y.editableHighlight.forEach((el) => {
 
         const framePositioner = Ed11y.results[el.resultID].fixedRoot && Ed11y.positionedFrames[Ed11y.results[el.resultID].fixedRoot] ?
