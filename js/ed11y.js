@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.3.13';
+    Ed11y.version = '3.0.0-dev';
 
     let defaultOptions = {
 
@@ -16,6 +16,15 @@ class Ed11y {
 
       // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
       checkRoots: false,
+      fixedRoots: false, // Array of specific nodes, overrides previous.
+      /* e.g:
+      fixedRoots: [
+        {
+           root: direct domReference
+           framePositioner: direct domReference or false
+        }
+      ]
+      */
 
       // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
       shadowComponents: false,
@@ -59,7 +68,6 @@ class Ed11y {
       // 'active': always open.
       // 'showDismissed': active with dismissed revealed.
       // CMS integrations can switch between polite & headless at runtime.
-      // alertMode "headless" never draws the panel.
       alertMode: 'userPreference',
       inlineAlerts: true,
       watchForChanges: true, // true, false, 'checkRoots';
@@ -99,6 +107,7 @@ class Ed11y {
       panelOffsetX: '25px',
       panelOffsetY: '25px',
       panelNoCover: '', // select other buttons to avoid.
+      panelAttachTo: document.body,
 
       // Selector list for elements that hide overflow, truncating buttons.
       constrainButtons: false,
@@ -263,7 +272,10 @@ class Ed11y {
       const cssLink = document.createElement('link');
       cssLink.setAttribute('rel', 'stylesheet');
       cssLink.setAttribute('media', 'all');
-      cssLink.setAttribute('href', sheet + '?ver=' + Ed11y.version);
+      if (sheet.indexOf('?') < 0) {
+        sheet = sheet + '?ver=' + Ed11y.version;
+      }
+      cssLink.setAttribute('href', sheet);
       cssBundle.append(cssLink);
     });
 
@@ -358,12 +370,6 @@ class Ed11y {
           Ed11y.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
         }
 
-        // Check for ignoreAll elements.
-        Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
-        if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
-          Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
-        }
-
         // Run tests
         Ed11y.checkAll();
         window.addEventListener('resize', function () { Ed11y.windowResize(); });
@@ -380,6 +386,11 @@ class Ed11y {
       Ed11y.disabled = false;
 
       if ( !Ed11y.checkRunPrevent() ) {
+        // Check for ignoreAll elements.
+        Ed11y.ignoreAll = Ed11y.options.ignoreAllIfAbsent && document.querySelector(`:is(${Ed11y.options.ignoreAllIfAbsent})`) === null;
+        if (!Ed11y.ignoreAll && !!Ed11y.options.ignoreAllIfPresent) {
+          Ed11y.ignoreAll = document.querySelector(`:is(${Ed11y.options.ignoreAllIfPresent})`) !== null;
+        }
 
         if ( Ed11y.incremental ) {
           Ed11y.oldResults = Ed11y.results;
@@ -391,7 +402,13 @@ class Ed11y {
 
         Ed11y.customTestsRunning = false;
 
-        let roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
+        let roots = [];
+        if (Ed11y.options.fixedRoots) {
+          Ed11y.options.fixedRoots.forEach(root => {roots.push(root.fixedRoot);});
+        } else {
+          roots = document.querySelectorAll(`:is(${Ed11y.options.checkRoots})`);
+        }
+
         if (roots.length === 0) {
           // Todo parameterize for translation.
           if (Ed11y.onLoad) {
@@ -408,7 +425,10 @@ class Ed11y {
               Ed11y.detectShadow(el.shadowRoot);
             } else {
               Ed11y.roots[i] = el;
-              Ed11y.detectShadow(el);
+              Ed11y.detectShadow(el);//heeee
+            }
+            if (Ed11y.options.fixedRoots) {
+              el.dataset.ed11yRoot = `${i}`;
             }
           });
 
@@ -606,7 +626,7 @@ class Ed11y {
 
           let panel = document.createElement('ed11y-element-panel');
           panel.classList.add('ed11y-preload');
-          document.querySelector('body').appendChild(panel);
+          document.body.appendChild(panel);
           Ed11y.attachCSS(Ed11y.panel);
           window.setTimeout(()=> {
             panel.classList.remove('ed11y-preload');
@@ -750,7 +770,7 @@ class Ed11y {
                 Ed11y.M.buttonShowHiddenAlert;
             }
           } else {
-            Ed11y.panelCount.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10.1699 19.1777"><path fill="currentColor" d="M3.7031,10.5527c-.3633-.6562-.6426-1.1387-.8379-1.4473l-.3105-.4863-.2344-.3574c-.5117-.7969-1.0449-1.4551-1.5996-1.9746.3164-.2617.6113-.3926.8848-.3926.3359,0,.6348.123.8965.3691s.5918.7148.9902,1.4062c.4531-1.4727,1.0293-2.8691,1.7285-4.1895.3867-.7188.7314-1.2021,1.0342-1.4502s.7041-.3721,1.2041-.3721c.2656,0,.5938.041.9844.123-1.0039.8086-1.8066,1.7695-2.4082,2.8828s-1.3789,3.0762-2.332,5.8887Z"/></svg>';
+            // todo 3.x: move these inline and just change the class.
             Ed11y.panelToggleTitle.textContent = Ed11y.open ? Ed11y.M.buttonHideChecker : Ed11y.M.buttonShowNoAlert;
           }
         }
@@ -804,7 +824,7 @@ class Ed11y {
       mark.setAttribute('data-ed11y-result', index);
       mark.setAttribute('data-ed11y-open', 'false');
       if (!Ed11y.options.inlineAlerts) {
-        location = document.querySelector('body');
+        location = Ed11y.options.panelAttachTo;
         position = 'beforeend';
         mark.classList.add('ed11y-editable-result');
       } else {
@@ -1009,14 +1029,18 @@ class Ed11y {
     Ed11y.buildElementList = function () {
 
       // Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
-      Ed11y.findElements('editable', Ed11y.options.editableContent, false);
+      if (typeof Ed11y.options.editableContent === 'string') {
+        Ed11y.findElements('editable', Ed11y.options.editableContent, false);
+      } else {
+        Ed11y.elements.editable = Ed11y.options.editableContent;
+      }
       if (Ed11y.options.inlineAlerts && Ed11y.elements.editable.length > 0) {
         Ed11y.options.inlineAlerts = false;
         console.warn('Editable content detected; Editoria11y inline alerts disabled');
       }
       Ed11y.findElements('p', 'p');
       Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]');
-      Ed11y.findElements('allH', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', false);
+      Ed11y.findElements('allH', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', Ed11y.options.fixedRoots ? Ed11y.options.headingsOnlyFromCheckRoots : false);
       Ed11y.findElements('img', 'img');
       Ed11y.findElements('a', 'a[href]');
       Ed11y.findElements('li', 'li');
@@ -1194,16 +1218,32 @@ class Ed11y {
     Ed11y.editableHighlight = [];
 
     Ed11y.alignHighlights = function() {
+
+      if (Ed11y.options.fixedRoots && Ed11y.editableHighlight.length > 0) {
+        Ed11y.positionedFrames = [];
+
+        Ed11y.options.fixedRoots.forEach((root) => {
+          if (root['framePositioner']) {
+            Ed11y.positionedFrames.push(root['framePositioner'].getBoundingClientRect());
+          }
+        });
+      }
+
       Ed11y.editableHighlight.forEach((el) => {
+
+        const framePositioner = Ed11y.results[el.resultID].fixedRoot && Ed11y.positionedFrames[Ed11y.results[el.resultID].fixedRoot] ?
+          Ed11y.positionedFrames[Ed11y.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
+
         let targetOffset = el.target.getBoundingClientRect();
         if (!Ed11y.visible(el.target)) {
           // Invisible target.
           const firstVisibleParent = Ed11y.firstVisibleParent(el.target);
           targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
         }
+
         el.highlight.style.setProperty('width', targetOffset.width + 6 + 'px');
-        el.highlight.style.setProperty('top', targetOffset.top + window.scrollY - 3 + 'px');
-        el.highlight.style.setProperty('left', targetOffset.left - 3 + 'px');
+        el.highlight.style.setProperty('top', targetOffset.top + framePositioner.top + window.scrollY - 3 + 'px');
+        el.highlight.style.setProperty('left', targetOffset.left + framePositioner.left - 3 + 'px');
         el.highlight.style.setProperty('height', targetOffset.height + 6 + 'px');
       });
     };
@@ -1219,10 +1259,10 @@ class Ed11y {
       if (!el) {
         el = document.createElement('ed11y-element-highlight');
         el.classList.add('ed11y-element');
-        Ed11y.editableHighlight[resultID] = {highlight: el};
+        Ed11y.editableHighlight[resultID] = {highlight: el, resultID: resultID};
         el.style.setProperty('position', 'absolute');
         el.style.setProperty('pointer-events', 'none');
-        document.body.appendChild(el);
+        Ed11y.options.panelAttachTo.appendChild(el);
       }
       Ed11y.editableHighlight[resultID].target = firstVisible ? firstVisible : result.element;
       const zIndex = result.dismissalKey ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
@@ -1326,6 +1366,8 @@ class Ed11y {
       }
     };
 
+    Ed11y.positionedFrames = [];
+
     Ed11y.alignButtons = function () {
 
       if (Ed11y.jumpList.length === 0 || (Ed11y.openTip.button && Ed11y.scrollPending === 0)) {
@@ -1335,6 +1377,16 @@ class Ed11y {
 
       // Reading and writing in a loop creates paint thrashing.
       // We iterate the array for reads, then iterate for writes.
+
+      if (Ed11y.options.fixedRoots) {
+        Ed11y.positionedFrames = [];
+
+        Ed11y.options.fixedRoots.forEach((root) => {
+          if (root['framePositioner']) {
+            Ed11y.positionedFrames.push(root['framePositioner'].getBoundingClientRect());
+          }
+        });
+      }
 
       // Used for crude intersection detection.
       let previousNudgeTop = 0;
@@ -1363,6 +1415,12 @@ class Ed11y {
             top = targetOffset.top + scrollTop;
           }
           let left = targetOffset.left;
+
+          if (mark.result.fixedRoot && Ed11y.positionedFrames[mark.result.fixedRoot]) {
+            top = top + Ed11y.positionedFrames[mark.result.fixedRoot].top;
+            left = left + Ed11y.positionedFrames[mark.result.fixedRoot].left;
+          }
+
           // TD TD different?
           if (mark.result.element.tagName === 'IMG') {
             top = top + 10;
@@ -1517,10 +1575,12 @@ class Ed11y {
         document.documentElement.style.setProperty('--ed11y-' + key, value);
       }
 
+      // May be redundant, but preloads unbundled files.
       if (document.querySelector('body')) {
         // May be redundant, but preloads unbundled files.
         Ed11y.attachCSS(document.querySelector('body'));
       }
+
 
       Ed11y.roots.forEach((root) => {
         // Shadow elements don't inherit styles, so they need their own copy.
@@ -1904,12 +1964,18 @@ class Ed11y {
 
       // Initial alignment to get approximate Y position order for jump list.
       Ed11y.results.forEach((result, i) => {
+
         let top = result.element.getBoundingClientRect().top;
         if (!top) {
           const visibleParent = Ed11y.firstVisibleParent(result.element);
           if (visibleParent) {
             top = visibleParent.getBoundingClientRect().top;
           }
+        }
+        if (Ed11y.options.fixedRoots) {
+          const root = result.element.closest('[data-ed11y-root]');
+          // Todo: it might be faster to associate this with the element finder.
+          Ed11y.results[i].fixedRoot = root.dataset.ed11yRoot;
         }
         top = top + window.scrollY;
         Ed11y.results[i].scrollableParent = closestScrollable(result.element);
@@ -1959,8 +2025,8 @@ class Ed11y {
     };
 
     Ed11y.activeRange = false;
-    const rangeChange = function() {
-      let anchor = getSelection()?.anchorNode;
+    Ed11y.rangeChange = function(anchorNode) {
+      let anchor = anchorNode ? anchorNode : window.getSelection()?.anchorNode;
       const expandable = anchor &&
         anchor.parentNode &&
         typeof anchor.parentNode === 'object' &&
@@ -2005,8 +2071,8 @@ class Ed11y {
     /**
      * Hide tips that are in front of text currently being edited.
      * */
-    Ed11y.checkEditableIntersects = function () {
-      if (!document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
+    Ed11y.checkEditableIntersects = function (focusKnown = false) {
+      if (!focusKnown && !document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
         //Reset classes to measure.
         Ed11y.jumpList?.forEach((el) => {
           el.classList.remove('intersecting');
@@ -2021,8 +2087,17 @@ class Ed11y {
         return;
       }
       Ed11y.jumpList?.forEach((el) => {
+        const framePositioner = el.result.fixedRoot && Ed11y.positionedFrames[el.result.fixedRoot] ?
+          Ed11y.positionedFrames[el.result.fixedRoot] : { top: 0, left: 0 };
+        const activeRects = Ed11y.activeRange.getBoundingClientRect();
+        const rects = {};
+        rects.top = activeRects.top + framePositioner.top;
+        rects.left = activeRects.left + framePositioner.left;
+        rects.bottom = activeRects.bottom + framePositioner.top;
+        rects.right = activeRects.right + framePositioner.left;
+
         const toggle = el.shadowRoot.querySelector('.toggle');
-        if ( intersect(Ed11y.activeRange.getBoundingClientRect(), toggle.getBoundingClientRect(), 0) ) {
+        if ( intersect(rects, toggle.getBoundingClientRect(), 0) ) {
           if (!toggle.classList.contains('was-intersecting')) {
             el.classList.add('intersecting');
             toggle.classList.add('intersecting');
@@ -2074,7 +2149,7 @@ class Ed11y {
       }, true);
 
       Ed11y.selectionChanged = debounce(() => {
-        if (rangeChange()) {
+        if (Ed11y.rangeChange()) {
           Ed11y.updateTipLocations();
           Ed11y.checkEditableIntersects();
         }
@@ -2617,6 +2692,15 @@ class Ed11y {
           if (!Ed11y.nextTreeBranch(treeWalker)) {
             break walker;
           }
+          continue;
+        }
+
+        // Inner nodes with shadowRoots.
+        if (treeWalker.currentNode.shadowRoot) {
+          const shadowChildren = treeWalker.currentNode.shadowRoot.querySelectorAll('*');
+          shadowChildren.forEach(child => {
+            computedText += Ed11y.computeText(child);
+          });
           continue;
         }
 
