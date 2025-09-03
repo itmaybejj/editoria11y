@@ -1369,8 +1369,7 @@ class Ed11y {
     Ed11y.positionedFrames = [];
 
     Ed11y.alignButtons = function () {
-
-      if (Ed11y.jumpList.length === 0 || (Ed11y.openTip.button && Ed11y.scrollPending === 0)) {
+      if (!Ed11y.jumpList || Ed11y.jumpList.length === 0 || (Ed11y.openTip.button && Ed11y.scrollPending === 0)) {
         return;
       }
       Ed11y.alignPending = true;
