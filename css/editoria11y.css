@@ -425,7 +425,7 @@ button.ed11y-jump {
     background: silver;
     box-shadow: 0 1px, 0 -1px, -1px 0;
     color: #111;
-    transition: .2s ease-in;
+    transition: all .2s;
   }
 
   #ed11y-reports-link,
@@ -445,9 +445,9 @@ button.ed11y-jump {
     overflow: hidden;
   }
 
-  .ed11y-jump,
-  .ed11y-buttonbar:hover > *,
-  &:has(button:not(#ed11y-toggle):focus-visible) .ed11y-buttonbar > *:not(#ed11y-toggle) {
+  &#ed11y-panel:not(.ed11y-pin-left) .ed11y-jump,
+  &#ed11y-panel:not(.ed11y-pin-left) .ed11y-buttonbar:hover > *,
+  &:has(:focus-visible) .ed11y-buttonbar > *:not(#ed11y-toggle) {
     opacity: 1;
     min-width: 2.0625em;
     overflow: visible;
