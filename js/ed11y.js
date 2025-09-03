@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '3.0.0-dev';
+    Ed11y.version = '2.4.0';
 
     let defaultOptions = {
 
@@ -1369,8 +1369,7 @@ class Ed11y {
     Ed11y.positionedFrames = [];
 
     Ed11y.alignButtons = function () {
-
-      if (Ed11y.jumpList.length === 0 || (Ed11y.openTip.button && Ed11y.scrollPending === 0)) {
+      if (!Ed11y.jumpList || Ed11y.jumpList.length === 0 || (Ed11y.openTip.button && Ed11y.scrollPending === 0)) {
         return;
       }
       Ed11y.alignPending = true;
