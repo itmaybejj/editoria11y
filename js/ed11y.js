@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.4.0';
+    Ed11y.version = '2.4.1-dev';
 
     let defaultOptions = {
 
@@ -425,7 +425,7 @@ class Ed11y {
               Ed11y.detectShadow(el.shadowRoot);
             } else {
               Ed11y.roots[i] = el;
-              Ed11y.detectShadow(el);//heeee
+              Ed11y.detectShadow(el);
             }
             if (Ed11y.options.fixedRoots) {
               el.dataset.ed11yRoot = `${i}`;
@@ -1415,6 +1415,15 @@ class Ed11y {
           }
           let left = targetOffset.left;
 
+          // TD TD different?
+          if (mark.result.element.tagName === 'IMG') {
+            top = top + 10;
+            left = left + 10;
+          } else {
+            left = Ed11y.options.inlineAlerts ? left - 34 : left;
+          }
+
+          // Add iframe positon to calculated position
           if (mark.result.fixedRoot && Ed11y.positionedFrames[mark.result.fixedRoot]) {
             top = top + Ed11y.positionedFrames[mark.result.fixedRoot].top;
             left = left + Ed11y.positionedFrames[mark.result.fixedRoot].left;
@@ -1430,6 +1439,14 @@ class Ed11y {
           if (mark.result.scrollableParent) {
             // Bump alerts that would be X-position out of a scroll zone.
             Ed11y.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
+            if (left < Ed11y.jumpList[i].bounds.left) {
+              left = Ed11y.jumpList[i].bounds.left;
+            } else if (left + 40 > Ed11y.jumpList[i].bounds.right) {
+              left = Ed11y.jumpList[i].bounds.right - 40;
+            }
+          } else if (mark.result.fixedRoot && Ed11y.positionedFrames[mark.result.fixedRoot]) {
+            // Bump alerts that would x-position out of an iframe.
+            Ed11y.jumpList[i].bounds = Ed11y.positionedFrames[mark.result.fixedRoot];
             if (left < Ed11y.jumpList[i].bounds.left) {
               left = Ed11y.jumpList[i].bounds.left;
             } else if (left + 40 > Ed11y.jumpList[i].bounds.right) {
@@ -1498,6 +1515,9 @@ class Ed11y {
           const constrained = mark.result.scrollableParent.getBoundingClientRect();
           constrainLeft = constrained.left;
           constrainRight = constrainLeft + constrained.width;
+        } else if (mark.result.fixedRoot && Ed11y.positionedFrames[mark.result.fixedRoot]) {
+          constrainLeft = Ed11y.positionedFrames[mark.result.fixedRoot].left;
+          constrainRight = Ed11y.positionedFrames[mark.result.fixedRoot].right;
         }
 
         let needNudge = false;
@@ -1505,7 +1525,6 @@ class Ed11y {
           // Offscreen to left. push to the right.
           nudgeLeft = 44 - mark.markLeft + nudgeLeft + constrainLeft;
           needNudge = true;
-          //nudgeMark(mark, 44 - mark.markLeft + nudgeLeft, nudgeTop);
         }
         else if (mark.markLeft + nudgeLeft + 80 > constrainRight ) {
           needNudge = true;
@@ -1539,6 +1558,20 @@ class Ed11y {
           if (mark.result.scrollableParent) {
             // Hide alerts outside a scroll zone.
             if (!!mark.bounds && (mark.targetOffset.top - mark.bounds.top < 0 || mark.targetOffset.top - mark.bounds.bottom > 0 ) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
+              // Tip has exited scrollable parent. Visually hide.
+              mark.classList.add('ed11y-offscreen');
+              mark.style.transform = 'translate(0px, -50px)';
+              mark.style.pointerEvents = 'none';
+              if (mark.getAttribute('data-ed11y-open') === 'true') {
+                mark.setAttribute('data-ed11y-action', 'shut');
+              }
+            }
+            else {
+              mark.classList.remove('ed11y-offscreen');
+              mark.style.pointerEvents = 'auto';
+            }
+          } else if (mark.result.fixedRoot && Ed11y.positionedFrames[mark.result.fixedRoot]) {
+            if (!!mark.bounds && (mark.targetOffset.top < -40 || mark.targetOffset.top + mark.bounds.top - mark.bounds.bottom > -10 ) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
               // Tip has exited scrollable parent. Visually hide.
               mark.classList.add('ed11y-offscreen');
               mark.style.transform = 'translate(0px, -50px)';
@@ -1971,12 +2004,12 @@ class Ed11y {
             top = visibleParent.getBoundingClientRect().top;
           }
         }
+        top = top + window.scrollY;
         if (Ed11y.options.fixedRoots) {
           const root = result.element.closest('[data-ed11y-root]');
           // Todo: it might be faster to associate this with the element finder.
           Ed11y.results[i].fixedRoot = root.dataset.ed11yRoot;
         }
-        top = top + window.scrollY;
         Ed11y.results[i].scrollableParent = closestScrollable(result.element);
         if (Ed11y.results[i].scrollableParent) {
           // Group these together.
