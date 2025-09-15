@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.4.1-dev';
+    Ed11y.version = '2.4.2';
 
     let defaultOptions = {
 
@@ -1230,6 +1230,14 @@ class Ed11y {
       }
 
       Ed11y.editableHighlight.forEach((el) => {
+
+        if (!Ed11y.results[el.resultID]) {
+          Ed11y.interaction = true;
+          Ed11y.forceFullCheck = true;
+          Ed11y.editableHighlight = [];
+          Ed11y.incrementalCheck(true);
+          return false;
+        }
 
         const framePositioner = Ed11y.results[el.resultID].fixedRoot && Ed11y.positionedFrames[Ed11y.results[el.resultID].fixedRoot] ?
           Ed11y.positionedFrames[Ed11y.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
@@ -2469,7 +2477,12 @@ class Ed11y {
           if (button.dataset.ed11yHiddenResult || !(Ed11y.visible(scrollTarget))) {
             scrollTarget = Ed11y.firstVisibleParent(target);
           }
-          scrollTarget.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+          if (scrollTarget && typeof scrollTarget.scrollIntoView === 'function') {
+            scrollTarget.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+          } else {
+            Ed11y.raceCrash();
+            return false;
+          }
         }
         // Todo: following statements work but could be simplified.
         if (!Ed11y.options.inlineAlerts) {
@@ -2502,6 +2515,24 @@ class Ed11y {
         }
         Ed11y.viaJump = false;
       }, delay, button, target);
+    };
+
+    let loopStop = false;
+    Ed11y.raceCrash = function() {
+      // A marked element disappeared while we were jumping to it.
+      if (loopStop) {
+        return;
+      }
+      loopStop = true;
+      Ed11y.reset();
+      Ed11y.showPanel = true;
+      Ed11y.checkAll();
+      window.setTimeout(function() {
+        if (Ed11y.results.length > 0 && loopStop) {
+          Ed11y.jumpTo(1);
+          loopStop = false;
+        }
+      },100, loopStop);
     };
 
     Ed11y.jumpTo = function(dir = 1) {
@@ -2543,7 +2574,12 @@ class Ed11y {
       if (goto.dataset.ed11yHiddenResult || !(Ed11y.visible(scrollTarget))) {
         scrollTarget = Ed11y.firstVisibleParent(target);
       }
-      scrollTarget?.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+      if (scrollTarget && typeof scrollTarget.scrollIntoView === 'function') {
+        scrollTarget.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+      } else {
+        Ed11y.raceCrash();
+        return false;
+      }
 
       // Open the button
       goto.setAttribute('data-ed11y-action','open');
