@@ -369,11 +369,11 @@
               iterations = 0;
               // Listen for event
               document.addEventListener('ed11yPanelOpened', e => {
-                if (iterations < 2) {
-                  console.log('panel ready at: ' + parseInt(performance.now() - beforeCall));
+                if (iterations < 1) {
+                  console.log('Ed11y first run took ' + parseInt(performance.now() - beforeCall) + 'ms');
                 }
               });
-              document.addEventListener('ed11yResults', e => {
+              document.addEventListener('ed11yPanelOpened', e => {
                 //console.log('results ready at: ' + parseInt(performance.now() - beforeCall));
                 //console.log(iterations);
                 iterations ++;
@@ -385,7 +385,7 @@
               });
                 const ed11y = new Ed11y({
                     alertMode : 'assertive',
-                  //showDismissed: true,
+                    showDismissed: true,
                     ignoreByKey : {
                         'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
                         'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links

@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.4.2';
+    Ed11y.version = '2.4.3';
 
     let defaultOptions = {
 
@@ -66,7 +66,6 @@ class Ed11y {
       // 'polite': open for new issues.
       // 'assertive': open for any issues.
       // 'active': always open.
-      // 'showDismissed': active with dismissed revealed.
       // CMS integrations can switch between polite & headless at runtime.
       alertMode: 'userPreference',
       inlineAlerts: true,
@@ -704,7 +703,6 @@ class Ed11y {
           }
 
           window.setTimeout(function () {
-            document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
             if (!Ed11y.ignoreAll) {
               requestAnimationFrame(() => Ed11y.showResults());
             }
@@ -1948,6 +1946,8 @@ class Ed11y {
             let mark = document.createElement('ed11y-element-alt');
             mark.classList.add('ed11y-element');
             mark.dataset.ed11yImg = i.toString();
+            mark.setAttribute('id', 'ed11y-alt-' + i);
+            mark.setAttribute('tabindex', '-1');
             el[0].insertAdjacentElement('beforebegin', mark);
           }
 
@@ -1956,11 +1956,14 @@ class Ed11y {
           userText.textContent = el[2];
           let li = document.createElement('li');
           li.classList.add(el[3]);
+          let a = document.createElement('a');
+          a.href = '#ed11y-alt-' + i;
           let img = document.createElement('img');
           img.setAttribute('src', el[1]);
           img.setAttribute('alt', '');
-          li.append(img);
-          li.append(userText);
+          li.append(a);
+          a.append(img);
+          a.append(userText);
           altList.append(li);
         });
         Ed11y.alignAlts();
@@ -2756,7 +2759,7 @@ class Ed11y {
 
         // Jump over ignored link text containers.
         // e.g., "(link opens in new window)"
-        if (excludeLinkClasses && treeWalker.currentNode.matches(Ed11y.options.linkIgnoreSelector)) {
+        if (treeWalker.currentNode.matches('.ed11y-element') || (excludeLinkClasses && treeWalker.currentNode.matches(Ed11y.options.linkIgnoreSelector))) {
           if (!Ed11y.nextTreeBranch(treeWalker)) {
             break walker;
           }
