@@ -579,7 +579,7 @@ button.ed11y-jump {
     margin-left: -8px;
   }
 
-  a {
+  .alt-parent {
     display: flex;
     flex-wrap: wrap;
     gap: 1em;
@@ -587,6 +587,9 @@ button.ed11y-jump {
     margin: 8px 0;
     box-shadow: 0 4px var(--ed11y-bg, #fffffe), 0 5px var(--ed11y-primary, #276499)22;
     text-decoration: none;
+  }
+
+  a.alt-parent {
     &:hover, &:focus-visible {
       text-decoration: underline;
     }
@@ -599,7 +602,6 @@ button.ed11y-jump {
   img {
     flex: 0 1 80px;
     width: 80px;
-    align-self: flex-start;
   }
 }
 

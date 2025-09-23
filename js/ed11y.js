@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.4.3';
+    Ed11y.version = '2.4.4';
 
     let defaultOptions = {
 
@@ -1956,14 +1956,22 @@ class Ed11y {
           userText.textContent = el[2];
           let li = document.createElement('li');
           li.classList.add(el[3]);
-          let a = document.createElement('a');
-          a.href = '#ed11y-alt-' + i;
           let img = document.createElement('img');
           img.setAttribute('src', el[1]);
           img.setAttribute('alt', '');
-          li.append(a);
-          a.append(img);
-          a.append(userText);
+
+          if (Ed11y.options.inlineAlerts) {
+            let a = document.createElement('a');
+            a.href = '#ed11y-alt-' + i;
+            a.classList.add('alt-parent');
+            li.append(a);
+            a.append(img);
+            a.append(userText);
+          } else {
+            li.classList.add('alt-parent');
+            li.append(img);
+            li.append(userText);
+          }
           altList.append(li);
         });
         Ed11y.alignAlts();
