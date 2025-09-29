@@ -582,6 +582,7 @@ button.ed11y-jump {
   .alt-parent {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 1em;
     padding: 8px;
     margin: 8px 0;
