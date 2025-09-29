@@ -566,6 +566,7 @@ class Ed11y {
 
     Ed11y.updatePanel = function () {
 
+      Ed11y.pauseObservers();
       // Stash old values for incremental updates.
       Ed11y.countAlerts();
       if (Ed11y.incremental) {
@@ -576,7 +577,7 @@ class Ed11y {
             console.warn('forced open');
             Ed11y.showPanel = true;
           }*/
-          Ed11y.resetResults();
+          Ed11y.resetResults(true);
         } else {
           // Todo: commented out in 2.3.11:
           // Reconnect map
@@ -589,6 +590,7 @@ class Ed11y {
             }
             Ed11y.running = false;
           },0);
+          Ed11y.resumeObservers();
           return;
         }
       } else {
@@ -801,6 +803,7 @@ class Ed11y {
         }
       }, 0);
 
+      Ed11y.resumeObservers();
       Ed11y.running = false;
     };
 
@@ -845,7 +848,7 @@ class Ed11y {
       Ed11y.results[index].toggle = mark;
     };
 
-    Ed11y.resetResults = function() {
+    Ed11y.resetResults = function(incremental) {
       Ed11y.jumpList = [];
       Ed11y.openTip = {
         button: false,
@@ -862,7 +865,11 @@ class Ed11y {
         'ed11y-error-inline',
       ]);
       // Reset insertions into body content.
-      Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+      if (incremental) {
+        Ed11y.findElements('reset', 'ed11y-element-highlight', false);
+      } else {
+        Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+      }
       Ed11y.elements.reset?.forEach((el) => el.remove());
 
       // Flicker prevention -- leave old tip in place for 100ms.
@@ -1860,7 +1867,7 @@ class Ed11y {
         Ed11y.headingOutline.forEach((el, i) => {
           // Todo: draw these in editable mode.
           if (Ed11y.options.inlineAlerts) {
-            let mark = document.createElement('ed11y-element-heading-label');
+            const mark = document.createElement('ed11y-element-heading-label');
             mark.classList.add('ed11y-element', 'ed11y-element-heading');
             mark.dataset.ed11yHeadingOutline = i.toString();
             mark.setAttribute('id', 'ed11y-heading-' + i);
@@ -1943,7 +1950,7 @@ class Ed11y {
 
           if (Ed11y.options.inlineAlerts) {
             // Label images
-            let mark = document.createElement('ed11y-element-alt');
+            const mark = document.createElement('ed11y-element-alt');
             mark.classList.add('ed11y-element');
             mark.dataset.ed11yImg = i.toString();
             mark.setAttribute('id', 'ed11y-alt-' + i);
@@ -1989,23 +1996,23 @@ class Ed11y {
       if (!Ed11y.panel) {
         return;
       }
+      if (Ed11y.options.inlineAlerts) {
+        Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+        Ed11y.elements.reset?.forEach((el) => el.remove());
+      }
       if (Ed11y.visualizing) {
         Ed11y.visualizing = false;
         Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsContent;
         Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
         Ed11y.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
-        Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
-        Ed11y.elements.reset?.forEach(el => { el.remove(); });
         return;
       }
-      Ed11y.pauseObservers();
       Ed11y.visualizing = true;
       Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsActive;
       Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
       Ed11y.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
       showAltPanel();
       showHeadingsPanel();
-      Ed11y.resumeObservers();
     };
 
     Ed11y.buildJumpList = function () {
@@ -2281,7 +2288,9 @@ class Ed11y {
         window.setTimeout(function() {
           if (Ed11y.visualizing) {
             Ed11y.visualizing = false;
+            Ed11y.pauseObservers();
             Ed11y.visualize();
+            Ed11y.resumeObservers();
           }
         }, 500);
         // todo: if there are no issues and the heading panel is open...it closes!
@@ -2821,7 +2830,7 @@ class Ed11y {
           continue;
         case 'IMG':
           if (treeWalker.currentNode.hasAttribute('alt') &&
-            !treeWalker.currentNode.matches('[role="presentation"]')) {
+              !treeWalker.currentNode.matches('[role="presentation"]')) {
             computedText += treeWalker.currentNode.getAttribute('alt');
           }
           continue;
