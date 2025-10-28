@@ -1,4 +1,4 @@
-class Ed11yElementTip extends HTMLElement {
+class Tooltips extends HTMLElement {
   /* global Ed11y */
   constructor() {
     super();
@@ -293,4 +293,4 @@ class Ed11yElementTip extends HTMLElement {
     }
   }
 }
-customElements.define('ed11y-element-tip', Ed11yElementTip);
+customElements.define('ed11y-element-tip', Tooltips);

@@ -1,4 +1,4 @@
-class Ed11yElementResult extends HTMLElement {
+class Annotations extends HTMLElement {
   /* global Ed11y */
   constructor() {
     super();
@@ -214,4 +214,4 @@ class Ed11yElementResult extends HTMLElement {
     }
   }
 }
-customElements.define('ed11y-element-result', Ed11yElementResult);
+customElements.define('ed11y-element-result', Annotations);

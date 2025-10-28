@@ -1,14 +1,35 @@
-.DS_Store
-.idea
-node_modules/
-tests/performance.htm
-
 # Ignore testing artifacts.
 logs/*
 tests_output/*
-tests/tinymce/*
+tests/tinymce/
+tests/performance.htm
 logs/
 node_modules/
 tests_output/
 screens/
 .vscode/
+
+# IDE & System Related Files
+.buildpath
+.project
+.settings
+.idea
+.vscode
+npm-debug.log
+
+# OSX
+._*
+.Spotlight-V100
+.Trashes
+.DS_Store
+**/.DS_Store
+**/**/.DS_Store
+**/**/**/.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

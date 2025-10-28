@@ -1,4 +1,4 @@
-class Ed11yElementPanel extends HTMLElement {
+class ControlPanel extends HTMLElement {
   /* global Ed11y */
 
   constructor() {
@@ -128,7 +128,7 @@ class Ed11yElementPanel extends HTMLElement {
     }
   }
 }
-customElements.define('ed11y-element-panel', Ed11yElementPanel);
+customElements.define('ed11y-element-panel', ControlPanel);
 
 class Ed11yElementHeadingLabel extends HTMLElement {
   constructor() {

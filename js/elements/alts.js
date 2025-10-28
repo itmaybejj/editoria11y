@@ -1,4 +1,4 @@
-class Ed11yElementAlt extends HTMLElement {
+class Alts extends HTMLElement {
   /* global Ed11y */
 
   constructor() {
@@ -24,4 +24,4 @@ class Ed11yElementAlt extends HTMLElement {
   }
 
 }
-customElements.define('ed11y-element-alt', Ed11yElementAlt);
+customElements.define('ed11y-element-alt', Alts);
