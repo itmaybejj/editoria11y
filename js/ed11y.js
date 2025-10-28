@@ -356,11 +356,9 @@ class Ed11y {
         }
 
         // Create test class objects
-        Ed11y.testEmbeds = new Ed11yTestEmbeds;
+        //@todo merge adopt Sa11y code
         Ed11y.testHeadings = new Ed11yTestHeadings;
         Ed11y.testImages = new Ed11yTestImages;
-        Ed11y.testLinks = new Ed11yTestLinks;
-        Ed11y.testText = new Ed11yTestText;
 
         // Convert the container ignore user option to a CSS :not selector.
         Ed11y.ignore = Ed11y.options.ignoreElements ? `:not(${Ed11y.options.ignoreElements})` : '';
@@ -435,11 +433,11 @@ class Ed11y {
           Ed11y.buildElementList();
 
           let queue = [
-            'testLinks',
+            //'testLinks',
             'testImages',
             'testHeadings',
-            'testText',
-            'testEmbeds',
+            //'testText',
+            //'testEmbeds',
           ];
           queue.forEach((test) => {
             window.setTimeout(function (test) {
@@ -447,7 +445,10 @@ class Ed11y {
             }, 0, test);
           });
 
+
+
           if (Ed11y.options.customTests > 0) {
+
             // Pause
             Ed11y.customTestsRunning = true;
             Ed11y.customTestsFinished = 0;
@@ -458,6 +459,8 @@ class Ed11y {
                 window.requestAnimationFrame(() => Ed11y.updatePanel());
               }
             });
+            // @todo merge integrate this properly.
+            //sa11y.checkAll();
             window.setTimeout(function() {
               if (Ed11y.customTestsRunning === true) {
                 Ed11y.customTestsRunning = false;
@@ -983,6 +986,7 @@ class Ed11y {
     };
 
     // QuerySelectAll non-ignored elements within checkroots, with recursion into shadow components
+    // @todo Merge replace with Sa11y.
     Ed11y.findElements = function (key, selector, rootRestrict = true) {
 
       // Todo beta: function and parameter to auto-detect shadow components.
@@ -1032,6 +1036,7 @@ class Ed11y {
     };
 
     Ed11y.buildElementList = function () {
+      // @todo merge figure out what to do with editable selectors.
 
       // Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
       if (typeof Ed11y.options.editableContent === 'string') {
@@ -1043,27 +1048,21 @@ class Ed11y {
         Ed11y.options.inlineAlerts = false;
         console.warn('Editable content detected; Editoria11y inline alerts disabled');
       }
-      Ed11y.findElements('p', 'p');
-      Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]');
       Ed11y.findElements('allH', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', Ed11y.options.fixedRoots ? Ed11y.options.headingsOnlyFromCheckRoots : false);
-      Ed11y.findElements('img', 'img');
-      Ed11y.findElements('a', 'a[href]');
-      Ed11y.findElements('li', 'li');
-      Ed11y.findElements('blockquote', 'blockquote');
-      Ed11y.findElements('iframe', 'iframe');
-      Ed11y.findElements('audio', 'audio');
-      Ed11y.findElements('video', 'video');
-      Ed11y.findElements('table', 'table');
 
-      if (Ed11y.options.embeddedContent) {
+      Ed11y.findElements('img', 'img');
+
+      /*if (Ed11y.options.embeddedContent) {
         Ed11y.findElements('embed', Ed11y.options.embeddedContent);
-      }
+      }*/
+
       if (Ed11y.options.panelNoCover) {
         // Moves panel off conflicting widgets.
         Ed11y.findElements('panelPin', Ed11y.options.panelNoCover, false);
       }
     };
 
+    // @todo compare.
     Ed11y.dismissalKey = function (text) {
       return String(text).replace(/([^0-9a-zA-Z])/g, '').substring(0, 512);
     };
