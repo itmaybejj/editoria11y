@@ -1,46 +1,51 @@
 // Options, language object, constants, and utilities.
-import defaultOptions from './sa11y/js/utils/default-options';
-import Lang from './sa11y/js/utils/lang';
-import * as Utils from './sa11y/js/utils/utils';
-import Constants from './sa11y/js/utils/constants';
-import Elements from './sa11y/js/utils/elements';
-import find from './sa11y/js/utils/find';
-import findShadowComponents from './sa11y/js/logic/find-shadow-components';
+import defaultOptions from './sa11y/src/js/utils/default-options';
+import Lang from './sa11y/src/js/utils/lang';
+import * as Utils from './sa11y/src//js/utils/utils';
+import Constants from './sa11y/src/js/utils/constants';
+import Elements from './sa11y/src/js/utils/elements';
+import find from './sa11y/src/js/utils/find';
+import findShadowComponents from './sa11y/src/js/logic/find-shadow-components';
 
 // Extras
-import detectPageChanges from './sa11y/js/features/detect-page-changes';
-import { dismissLogic, dismissButtons, removeDismissListeners } from './features/dismiss-annotations';
-import { addColourFilters, resetColourFilters } from './sa11y/js/features/colour-filters';
-import { exportResults, removeExportListeners } from './sa11y/js/features/export-results';
-import ConsoleErrors from './sa11y/js/interface/console-error';
+// import detectPageChanges from './sa11y/dist/js/features/detect-page-changes';
+// import { dismissLogic, dismissButtons, removeDismissListeners } from './features/dismiss-annotations';
+// import { addColourFilters, resetColourFilters } from './sa11y/dist/js/features/colour-filters';
+// import { exportResults, removeExportListeners } from './sa11y/dist/js/features/export-results';
+import ConsoleErrors from './sa11y/src/js/interface/console-error';
 
 // Create UI/interface elements
-import mainToggle from './sa11y/js/logic/main-toggle-logic';
-import ControlPanel from './sa11y/js/interface/control-panel';
-import settingsPanelToggles from './sa11y/js/logic/settings-panel-logic';
-import initializePanelToggles from './sa11y/js/logic/control-panel-logic';
-import generatePageOutline from './sa11y/js/interface/page-outline';
-import generateImageOutline from './sa11y/js/interface/image-outline';
-import { updatePanel, updateBadge, updateCount } from './sa11y/js/logic/update-panel';
-import { AnnotationTooltips, PanelTooltips } from './sa11y/js/interface/tooltips';
-import { Annotations, annotate } from './sa11y/js/interface/annotations';
-import { HeadingAnchor, HeadingLabel } from './sa11y/js/interface/heading-labels';
-import { skipToIssue, removeSkipBtnListeners } from './sa11y/js/logic/skip-to-issue';
+//import mainToggle from './sa11y/dist/js/logic/main-toggle-logic';
+// import ControlPanel from './sa11y/dist/js/interface/control-panel';
+// import settingsPanelToggles from './sa11y/dist/js/logic/settings-panel-logic';
+// import initializePanelToggles from './sa11y/dist/js/logic/control-panel-logic';
+// import generatePageOutline from './sa11y/dist/js/interface/page-outline';
+// import generateImageOutline from './sa11y/dist/js/interface/image-outline';
+// import { updatePanel, updateBadge, updateCount } from './sa11y/dist/js/logic/update-panel';
+// import { AnnotationTooltips, PanelTooltips } from './sa11y/dist/js/interface/tooltips';
+// import { Annotations, annotate } from './sa11y/dist/js/interface/annotations';
+// import { HeadingAnchor, HeadingLabel } from './sa11y/dist/js/interface/heading-labels';
+// import { skipToIssue, removeSkipBtnListeners } from './sa11y/dist/js/logic/skip-to-issue';
 
 // Checks/rulesets
-import checkImages from './sa11y/js/rulesets/images';
-import checkHeaders from './sa11y/js/rulesets/headers';
-import checkLinkText from './sa11y/js/rulesets/link-text';
-import checkContrast from './sa11y/js/rulesets/contrast';
-import checkLabels from './sa11y/js/rulesets/labels';
-import checkReadability from './sa11y/js/rulesets/readability';
-import checkEmbeddedContent from './sa11y/js/rulesets/embedded-content';
-import checkQA from './sa11y/js/rulesets/quality-assurance';
-import checkDeveloper from './sa11y/js/rulesets/developer';
-import checkCustom from './sa11y/js/sa11y-custom-checks';
+import checkImages from './sa11y/src/js/rulesets/images';
+import checkHeaders from './sa11y/src/js/rulesets/headers';
+import checkLinkText from './sa11y/src/js/rulesets/link-text';
+import checkContrast from './sa11y/src/js/rulesets/contrast';
+import checkLabels from './sa11y/src/js/rulesets/labels';
+import checkReadability from './sa11y/src/js/rulesets/readability';
+import checkEmbeddedContent from './sa11y/src/js/rulesets/embedded-content';
+import checkQA from './sa11y/src/js/rulesets/quality-assurance';
+import checkDeveloper from './sa11y/src/js/rulesets/developer';
+import Options from "./utils/options.js";
+// import checkCustom from './sa11y/src/js/sa11y-custom-checks';
 
 class Ed11y {
   constructor(options) {
+
+    console.log(options);
+    options = Options.preProcessOptions(options);
+    console.log(options);
     const option = {
       ...defaultOptions,
       ...options,
@@ -49,6 +54,7 @@ class Ed11y {
         ...options.checks,
       },
     };
+    console.log(option);
 
     /* *********************************************************** */
     /*  Initialize: Start your engines.                            */
@@ -62,13 +68,13 @@ class Ed11y {
 
       if (!checkRunPrevent()) {
         // Register web components
-        customElements.define('sa11y-heading-label', HeadingLabel);
-        customElements.define('sa11y-heading-anchor', HeadingAnchor);
-        customElements.define('sa11y-annotation', Annotations);
-        customElements.define('sa11y-tooltips', AnnotationTooltips);
-        customElements.define('sa11y-panel-tooltips', PanelTooltips);
-        customElements.define('sa11y-control-panel', ControlPanel);
-        customElements.define('sa11y-console-error', ConsoleErrors);
+        // customElements.define('sa11y-heading-label', HeadingLabel);
+        // customElements.define('sa11y-heading-anchor', HeadingAnchor);
+        // customElements.define('sa11y-annotation', Annotations);
+        // customElements.define('sa11y-tooltips', AnnotationTooltips);
+        // customElements.define('sa11y-panel-tooltips', PanelTooltips);
+        // customElements.define('sa11y-control-panel', ControlPanel);
+        // customElements.define('sa11y-console-error', ConsoleErrors);
 
         // Initialize global constants and exclusions.
         Constants.initializeGlobal(option);
@@ -82,59 +88,6 @@ class Ed11y {
           }
         }
 
-        // Once document has fully loaded.
-        Utils.documentLoadingCheck(() => {
-          if (option.headless) {
-            // Headless: Perform all checks without loading UI.
-            this.checkAll();
-            Utils.store.removeItem('sa11y-dismissed');
-          } else {
-            // Save panel position preference if not already set or if position changes via props.
-            const rememberPosition = Utils.store.getItem('sa11y-position');
-            const { panelPosition } = option;
-            if (option.showMovePanelToggle
-              && (!rememberPosition || !rememberPosition.includes('top') !== !panelPosition.includes('top'))) {
-              Utils.store.setItem('sa11y-position', panelPosition);
-            }
-
-            // Build control panel.
-            const controlPanel = new ControlPanel();
-            document.body.appendChild(controlPanel);
-
-            // Initialize control panel.
-            settingsPanelToggles(this.checkAll, this.resetAll);
-            initializePanelToggles();
-            addColourFilters();
-
-            // Detect page changes (for SPAs).
-            detectPageChanges(
-              option.detectSPArouting,
-              this.checkAll,
-              this.resetAll,
-            );
-
-            // Initialize panel tooltips.
-            this.panelTooltips = new PanelTooltips();
-            document.body.appendChild(this.panelTooltips);
-
-            // Disable toggle initially.
-            Constants.Panel.toggle.disabled = false;
-
-            // Initial check once page is done loading.
-            setTimeout(() => {
-              this.resetAll(); // Make sure there's a clean slate.
-              this.checkAll();
-            }, option.delayCheck);
-
-            // Disable button if user needs to wait longer than 700ms.
-            if (option.delayCheck >= 700) {
-              Constants.Panel.toggle.disabled = true;
-            }
-
-            // Initialize main toggle
-            mainToggle(this.checkAll, this.resetAll);
-          }
-        });
       }
     };
 
@@ -246,106 +199,9 @@ class Ed11y {
       this.results.forEach(($el, id) => {
         const cssPath = option.selectorPath ? Utils.generateSelectorPath($el.element) : '';
         const htmlPath = $el.element?.outerHTML.replace(/\s{2,}/g, ' ').trim() || '';
-        Object.assign($el, { htmlPath, cssPath, id });
+        Object.assign($el, {htmlPath, cssPath, id});
       });
-
-      if (option.headless === false) {
-        // Check for dismissed items and update results array.
-        const dismiss = dismissLogic(
-          this.results,
-          this.panelTooltips,
-          this.checkAll,
-          this.resetAll,
-        );
-        this.results = dismiss.updatedResults;
-        this.dismissed = dismiss.dismissedIssues;
-        this.dismissedPageResults = dismiss.dismissedResults;
-
-        // Update count & badge.
-        const count = updateCount(
-          this.results,
-          this.errorCount,
-          this.warningCount,
-        );
-        updateBadge(count.error, count.warning);
-
-        /* If panel is OPENED. */
-        if (Utils.store.getItem('sa11y-panel') === 'Opened') {
-          // Paint the page with annotations.
-          const counts = new Map();
-          this.results.forEach((issue) => {
-            let updatedIssue = issue;
-            // Dynamically alter margins if an element has multiple issues.
-            if (issue.element && !issue.margin) {
-              const index = counts.get(issue.element) || 0;
-              counts.set(issue.element, index + 1);
-              const offset = issue.inline ? 0 : 15;
-              updatedIssue = { ...issue, margin: `${index * 20 + offset}px` };
-            }
-            annotate(updatedIssue, option);
-          });
-
-          // After annotations are painted, find & cache.
-          Elements.initializeAnnotations();
-
-          // Initialize tooltips
-          const tooltipComponent = new AnnotationTooltips();
-          document.body.appendChild(tooltipComponent);
-
-          dismissButtons(
-            this.results,
-            this.dismissed,
-            this.checkAll,
-            this.resetAll,
-          );
-
-          generatePageOutline(
-            this.dismissedPageResults,
-            this.headingOutline,
-            option,
-          );
-
-          if (option.showImageOutline) {
-            generateImageOutline(
-              this.dismissedPageResults,
-              this.imageResults,
-              option,
-            );
-          }
-
-          updatePanel(
-            dismiss.dismissCount,
-            count.error,
-            count.warning,
-          );
-
-          // Initialize Skip to Issue button.
-          skipToIssue(this.results);
-
-          // Initialize Export Results plugin.
-          if (option.exportResultsPlugin) {
-            exportResults(this.results, dismiss.dismissedResults);
-          }
-
-          // Page issues: add gradient if scrollable list.
-          Utils.isScrollable(Constants.Panel.pageIssuesList, Constants.Panel.pageIssuesContent);
-        }
-
-        // Make sure toggle isn't disabled after checking.
-        Constants.Panel.toggle.disabled = false;
-      }
-
-      // Dispatch custom event that stores the results array.
-      window.sa11yCheckComplete = null;
-      const event = new CustomEvent('sa11y-check-complete', {
-        detail: {
-          results: this.results,
-          page: window.location.pathname,
-        },
-      });
-      window.sa11yCheckComplete = event.detail;
-      document.dispatchEvent(event);
-    };
+    }
 
     /* *********************************************************** */
     /*  Reset all: Clears everything and resets the panel.         */
@@ -353,100 +209,17 @@ class Ed11y {
     this.resetAll = (restartPanel = true) => {
       Constants.Global.html.removeAttribute('data-sa11y-active');
 
-      // Remove from page.
-      Utils.remove([
-        'sa11y-annotation',
-        'sa11y-heading-label',
-        'sa11y-heading-anchor',
-        'sa11y-image-anchor',
-        'sa11y-tooltips',
-      ], 'document');
-
-      // Remove Sa11y anchor positioning markup (while preserving any existing anchors).
-      if (Utils.supportsAnchorPositioning()) {
-        find('[data-sa11y-error], [data-sa11y-warning], [data-sa11y-good]', 'document').forEach(($el) => {
-          const anchor = $el;
-          const anchors = (anchor.style.anchorName || '')
-            .split(',').map((s) => s.trim()).filter((s) => s && !s.startsWith('--sa11y-anchor'));
-          if (anchors.length) {
-            anchor.style.anchorName = anchors.join(', ');
-          } else {
-            anchor.style.removeProperty('anchor-name');
-            if (!anchor.style.length) anchor.removeAttribute('style');
-          }
-        });
-      }
-
-      // @todo Merge work needed. Maybe an external positioner param?
-      // Reset all data attributes.
-      Utils.resetAttributes([
-        'data-sa11y-parent',
-        'data-sa11y-error',
-        'data-sa11y-warning',
-        'data-sa11y-good',
-        'data-sa11y-overflow',
-        'data-sa11y-image',
-        'data-sa11y-pulse-border',
-        'data-sa11y-filter',
-        'data-sa11y-has-shadow-root',
-      ], 'document');
-
-      // Remove from panel.
-      Constants.Panel.outlineList.innerHTML = '';
-      if (option.showImageOutline) Constants.Panel.imagesList.innerHTML = '';
-      Constants.Panel.pageIssuesList.innerHTML = '';
-      Constants.Panel.readabilityInfo.innerHTML = '';
-      Constants.Panel.readabilityDetails.innerHTML = '';
-      Constants.Panel.panel.classList.remove('has-page-issues');
-      Constants.Panel.pageIssues.classList.remove('active');
-      Constants.Panel.settingsContent.classList.remove('hide-settings-border');
-      Constants.Panel.panel.querySelector('#readability-alert')?.remove();
-
-      // Remove any active alerts from panel.
-      Utils.removeAlert();
-
-      // Remove EventListeners.
-      removeSkipBtnListeners();
-      removeExportListeners();
-      removeDismissListeners();
-
-      // Reset colour filters.
-      resetColourFilters();
-
-      // Main panel warning and error count.
-      while (Constants.Panel.status.firstChild) Constants.Panel.status.removeChild(Constants.Panel.status.firstChild);
-
       // Remove data attribute from shadow root elements.
       document.querySelectorAll('[data-sa11y-has-shadow-root]').forEach((el) => {
         el.shadowRoot.querySelectorAll('style.sa11y-css-utilities').forEach((style) => style.remove());
         el.removeAttribute('data-sa11y-has-shadow-root');
       });
 
-      if (restartPanel) {
-        Constants.Panel.panel.classList.remove('active');
-      }
     };
 
     /* *********************************************************** */
     /*  Methods: Useful utilities for integrations.                */
     /* *********************************************************** */
-
-    // Method: temporarily disable toggle.
-    this.disabled = () => {
-      setTimeout(() => {
-        if (Utils.store.getItem('sa11y-panel') === 'Opened') {
-          Constants.Panel.toggle.click();
-        }
-        Constants.Panel.toggle.disabled = true;
-      }, option.delayCheck + 10);
-    };
-
-    // Method: re-enable toggle.
-    this.enabled = () => {
-      if (Constants.Panel.toggle) {
-        Constants.Panel.toggle.disabled = false;
-      }
-    };
 
     // Method: find utility.
     this.find = (selector, desiredRoot, exclude) => find(selector, desiredRoot, exclude);
@@ -469,5 +242,5 @@ class Ed11y {
 
 export {
   Lang,
-  Sa11y,
+  Ed11y,
 };

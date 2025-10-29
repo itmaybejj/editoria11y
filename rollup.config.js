@@ -92,7 +92,7 @@ const languages = (developmentMode) ? ['en'] : [
 ];
 const languageConfigs = languages.flatMap((lang) => [
   {
-    input: `js/sa11y/js/lang/${lang}.js`,
+    input: `js/sa11y/src/js/lang/${lang}.js`,
     plugins: [nodeResolve()],
     output: [
       {
@@ -103,7 +103,7 @@ const languageConfigs = languages.flatMap((lang) => [
     ],
   },
   {
-    input: `src/js/lang/${lang}.js`,
+    input: `js/sa11y/src/js/lang/${lang}.js`,
     plugins: [nodeResolve()],
     output: [
       {
@@ -130,7 +130,7 @@ const scssFiles = [
   'export-results',
 ];
 const scssConfigs = scssFiles.map((file) => ({
-  input: `js/sa11y/scss/${file}.scss`,
+  input: `js/sa11y/src/scss/${file}.scss`,
   plugins: [
     sass({
       output: false,

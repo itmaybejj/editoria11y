@@ -276,14 +276,7 @@
 
             </script>-->
             <link href="./tests.css" rel="stylesheet">
-            <script src="../js/ed11y-localization.js"></script>
-            <script src="../js/elements/control-panel.js"></script>
-            <script src="../js/elements/annotations.js"></script>
-            <script src="../js/elements/tooltips.js"></script>
-            <script src="../js/elements/alts.js"></script>
-            <script src="../js/ed11y-test-images.js"></script>
-            <script src="../js/ed11y-test-headings.js"></script>
-            <script src="../js/ed11y.js"></script>
+
             <!-- Instantiate-->
             <script>
               customElements.define('element-details',
@@ -384,10 +377,16 @@
             </script>
             <!-- Instantiate-->
             <!-- Sa11y (fork the latest code from GitHub) -->
-            <script src="../../../sa11y/dist/js/sa11y.umd.min.js"></script>
-            <script src="../../../sa11y/dist/js/lang/en.umd.js"></script>
+            <!--<script src="../../../sa11y/dist/js/sa11y.umd.min.js"></script>
+            <script src="../../../sa11y/dist/js/lang/en.umd.js"></script>-->
 
-            <script>
+            <script type="module">
+              import { Ed11y, Lang } from "../dist/js/ed11y.esm.js";
+              import Sa11yLangEn from "../dist/js/lang/en.js";
+
+              // Set translations
+              Lang.addI18n(Sa11yLangEn.strings);
+              /*
               Sa11y.Lang.addI18n(Sa11yLangEn.strings);
               document.addEventListener('ed11yRunCustomTests', e => {
                 // Use event details to get the marked element
@@ -577,8 +576,8 @@
                 linkIgnore: '[aria-hidden][tabindex]',
                 imageIgnore: '[aria-hidden], [aria-hidden] img',
 
-              });
-*/
+              });*/
+
 
               const ed11y = new Ed11y({
                 alertMode : 'assertive',
@@ -603,6 +602,7 @@
                 allowOK: true,
                 constrainButtons: '.constrain-position',
               });
+              window.setTimeout(() =>{ed11y.checkAll()}, 500);
             </script>
 
         </div>
