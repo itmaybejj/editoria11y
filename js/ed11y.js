@@ -133,20 +133,16 @@ class Ed11y {
 
     this.checkAll = Check.checkAll;
 
-    this.resetAll = function () {
-      /*Ed11y.pauseObservers();
-      Ed11y.resetResults();
-      Ed11y.resetPanel();*/
-      State.incremental = false;
-      State.running = false;
-      State.showPanel = false;
-      State.open = false;
-    };
+    this.resetAll = Check.resetAll();
 
     Check.checkAll();
+
     this.results = function() {
       return State.results;
     };
+
+    console.log(State);
+
 
     // todo incrementalCheck
     //checkAll();

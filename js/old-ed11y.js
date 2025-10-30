@@ -33,7 +33,7 @@ class Ed11y {
       // Containers to globally ignore, e.g., "header *, .card *"
       ignoreElements: false,
 
-      // Provide list of test keys; get from localization file or Ed11y.results.
+      // Provide list of test keys; get from localization file or State.results.
       ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
 
       // Ignore Aria on these elements (Gutenberg labels headings while editing.)
@@ -287,10 +287,10 @@ class Ed11y {
 
     // @todo merge current location. How to handle state variables? A single state file that tracks and returns?
     Ed11y.elements = [];
-    Ed11y.onLoad = true;
-    Ed11y.showPanel = false;
+    State.onLoad = true;
+    State.showPanel = false;
     let windowWidth = window.innerWidth;
-    Ed11y.watching = [];
+    State.watching = [];
 
     Ed11y.disable = () => {
       if (Ed11y.open && !Ed11y.closedByDisable) {
@@ -349,17 +349,17 @@ class Ed11y {
         if (Ed11y.checkRunPrevent()) {
           return false;
         }
-        Ed11y.running = true;
+        State.running = true;
         let localResultCount = localStorage.getItem('editoria11yResultCount');
-        Ed11y.seen = localResultCount ? JSON.parse(localResultCount) : {};
+        State.seen = localResultCount ? JSON.parse(localResultCount) : {};
 
         // Build list of dismissed alerts
         if (Ed11y.options.syncedDismissals === false) {
-          Ed11y.dismissedAlerts = localStorage.getItem('ed11ydismissed');
-          Ed11y.dismissedAlerts = Ed11y.dismissedAlerts ? JSON.parse(Ed11y.dismissedAlerts) : {};
+          State.dismissedAlerts = localStorage.getItem('ed11ydismissed');
+          State.dismissedAlerts = State.dismissedAlerts ? JSON.parse(State.dismissedAlerts) : {};
         } else {
-          Ed11y.dismissedAlerts = {};
-          Ed11y.dismissedAlerts[Ed11y.options.currentPage] = Ed11y.options.syncedDismissals;
+          State.dismissedAlerts = {};
+          State.dismissedAlerts[Ed11y.options.currentPage] = Ed11y.options.syncedDismissals;
         }
 
         // Create test class objects
@@ -381,10 +381,10 @@ class Ed11y {
       });
     };
 
-    Ed11y.results = [];
+    State.results = [];
     // Toggles the outline of all headers, link texts, and images.
     Ed11y.checkAll = () => {
-      if (Ed11y.openTip.button) {
+      if (State.openTip.button) {
         return false;
       }
       Ed11y.disabled = false;
@@ -397,10 +397,10 @@ class Ed11y {
         }
 
         if ( Ed11y.incremental ) {
-          Ed11y.oldResults = Ed11y.results;
+          Ed11y.oldResults = State.results;
         }
         // Reset counts
-        Ed11y.results = [];
+        State.results = [];
         Ed11y.elements = [];
         Ed11y.mediaCount = 0;
 
@@ -415,7 +415,7 @@ class Ed11y {
 
         if (roots.length === 0) {
           // Todo parameterize for translation.
-          if (Ed11y.onLoad) {
+          if (State.onLoad) {
             console.warn('Check Editoria11y configuration; specified root element not found');
           }
           Ed11y.disable();
@@ -500,24 +500,24 @@ class Ed11y {
       }
     };
 
-    Ed11y.totalCount = 0;
+    State.totalCount = 0;
     Ed11y.countAlerts = function () {
 
-      Ed11y.errorCount = 0;
-      Ed11y.warningCount = 0;
-      Ed11y.dismissedCount = 0;
+      State.errorCount = 0;
+      State.warningCount = 0;
+      State.dismissedCount = 0;
 
       // Review results array to remove dismissed or ignored items
 
-      Ed11y.dismissedCount = 0;
-      for (let i = Ed11y.results.length - 1; i >= 0; i--) {
+      State.dismissedCount = 0;
+      for (let i = State.results.length - 1; i >= 0; i--) {
 
-        let test = Ed11y.results[i].test;
+        let test = State.results[i].test;
 
         if (Ed11y.options.ignoreTests &&
           Ed11y.options.ignoreTests.includes(test)) {
           // Would be faster to skip test, but this is easy and reliable.
-          Ed11y.results.splice(i, 1);
+          State.results.splice(i, 1);
           continue;
         }
 
@@ -526,22 +526,22 @@ class Ed11y {
           // Don't flag new issues in the active range while people are typing.
         }*/
 
-        let dismissKey = Ed11y.dismissalKey(Ed11y.results[i].dismissalKey);
+        let dismissKey = Ed11y.dismiss(State.results[i].dismiss);
         // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-        if (dismissKey !== false && Ed11y.options.currentPage in Ed11y.dismissedAlerts && test in Ed11y.dismissedAlerts[Ed11y.options.currentPage] && dismissKey in Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]) {
+        if (dismissKey !== false && Ed11y.options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[Ed11y.options.currentPage] && dismissKey in State.dismissedAlerts[Ed11y.options.currentPage][test]) {
           // Remove result if it has been marked OK or ignored, increment dismissed match counter.
-          Ed11y.dismissedCount++;
-          Ed11y.results[i].dismissalStatus = Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey];
-        } else if (Ed11y.results[i].dismissalKey) {
-          Ed11y.warningCount++;
-          Ed11y.results[i].dismissalStatus = false;
+          State.dismissedCount++;
+          State.results[i].dismissalStatus = State.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey];
+        } else if (State.results[i].dismiss) {
+          State.warningCount++;
+          State.results[i].dismissalStatus = false;
         } else {
-          Ed11y.errorCount++;
-          Ed11y.results[i].dismissalStatus = false;
+          State.errorCount++;
+          State.results[i].dismissalStatus = false;
         }
       }
 
-      Ed11y.totalCount = Ed11y.errorCount + Ed11y.warningCount;
+      State.totalCount = State.errorCount + State.warningCount;
 
       // Dispatch event for synchronizers.
       if (!Ed11y.incremental) {
@@ -552,21 +552,21 @@ class Ed11y {
       }
 
       if (Ed11y.ignoreAll) {
-        Ed11y.dismissedCount = Ed11y.totalCount + Ed11y.dismissedCount;
-        Ed11y.errorCount = 0;
-        Ed11y.warningCount = 0;
-        Ed11y.totalCount = 0;
+        State.dismissedCount = State.totalCount + State.dismissedCount;
+        State.errorCount = 0;
+        State.warningCount = 0;
+        State.totalCount = 0;
       }
 
     };
 
     let oldResultString = '';
     const newIncrementalResults = function() {
-      if (Ed11y.forceFullCheck || Ed11y.results.length !== Ed11y.oldResults.length) {
+      if (Ed11y.forceFullCheck || State.results.length !== Ed11y.oldResults.length) {
         return true;
       }
-      let newResultString = `${Ed11y.errorCount} ${Ed11y.warningCount}`;
-      Ed11y.results.forEach(result => {
+      let newResultString = `${State.errorCount} ${State.warningCount}`;
+      State.results.forEach(result => {
         newResultString += result.test + result.element.outerHTML;
       });
       let changed = newResultString !== oldResultString;
@@ -583,35 +583,35 @@ class Ed11y {
         // Check for a change in the result counts.
         if (Ed11y.forceFullCheck || newIncrementalResults()) {
           Ed11y.forceFullCheck = false;
-          /*if (Ed11y.options.alertMode === 'assertive' && Ed11y.totalCount > 0 && (Ed11y.warningCount > oldWarnings || Ed11y.errorCount > oldErrors)) {
+          /*if (Ed11y.options.alertMode === 'assertive' && State.totalCount > 0 && (State.warningCount > oldWarnings || State.errorCount > oldErrors)) {
             console.warn('forced open');
-            Ed11y.showPanel = true;
+            State.showPanel = true;
           }*/
           Ed11y.resetResults(true);
         } else {
           // Todo: commented out in 2.3.11:
           // Reconnect map
-          Ed11y.results = Ed11y.oldResults;
+          State.results = Ed11y.oldResults;
           window.setTimeout(function() {
             if ( !Ed11y.alignPending ) {
               Ed11y.alignButtons();
               Ed11y.alignPanel();
               Ed11y.alignPending = false;
             }
-            Ed11y.running = false;
+            State.running = false;
           },0);
           Ed11y.resumeObservers();
           return;
         }
       } else {
-        if (Ed11y.totalCount > 0) {
+        if (State.totalCount > 0) {
           // Record what has been seen at this route.
           // We do not do this on incremental updates.
           // Todo question: should we not do this at all for contentEditable?
-          Ed11y.seen[encodeURI(Ed11y.options.currentPage)] = Ed11y.totalCount;
-          localStorage.setItem('editoria11yResultCount', JSON.stringify(Ed11y.seen));
+          State.seen[encodeURI(Ed11y.options.currentPage)] = State.totalCount;
+          localStorage.setItem('editoria11yResultCount', JSON.stringify(State.seen));
         } else {
-          delete Ed11y.seen[encodeURI(Ed11y.options.currentPage)];
+          delete State.seen[encodeURI(Ed11y.options.currentPage)];
         }
       }
 
@@ -622,13 +622,13 @@ class Ed11y {
           Ed11y.paintReady();
         }
 
-        if (Ed11y.onLoad === true) {
-          Ed11y.onLoad = false;
+        if (State.onLoad === true) {
+          State.onLoad = false;
 
           if (!Ed11y.options.inlineAlerts) {
             // todo move to incremental check or timeout; no need to do on load.
-            oldResultString = `${Ed11y.errorCount} ${Ed11y.warningCount}`;
-            Ed11y.results.forEach(result => {
+            oldResultString = `${State.errorCount} ${State.warningCount}`;
+            State.results.forEach(result => {
               oldResultString += result.test + result.element.outerHTML;
             });
           }
@@ -664,30 +664,30 @@ class Ed11y {
 
           // Decide whether to open the panel on load.
           if (Ed11y.ignoreAll ||
-            (!Ed11y.options.inlineAlerts && Ed11y.totalCount > 75)
+            (!Ed11y.options.inlineAlerts && State.totalCount > 75)
           ) {
-            Ed11y.showPanel = false;
+            State.showPanel = false;
           } else if (Ed11y.options.alertMode === 'active' ||
             !Ed11y.options.userPrefersShut ||
             Ed11y.options.showDismissed
           ) {
             // Show always on load for active mode or by user preference.
-            Ed11y.showPanel = true;
+            State.showPanel = true;
           } else if (
-            Ed11y.totalCount > 0 &&
+            State.totalCount > 0 &&
             !Ed11y.ignoreAll &&
             ( Ed11y.options.alertMode === 'assertive' ||
               Ed11y.options.alertMode === 'polite' &&
-              Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount
+              State.seen[encodeURI(Ed11y.options.currentPage)] !== State.totalCount
             )
           ) {
             // Show sometimes for assertive/polite if there are new items.
-            Ed11y.showPanel = true;
+            State.showPanel = true;
           }
         }
 
         // Now we can open or close the panel.
-        if (!Ed11y.showPanel) {
+        if (!State.showPanel) {
           // Close panel.
           Ed11y.reset();
         } else {
@@ -697,19 +697,19 @@ class Ed11y {
           Ed11y.panel.classList.remove('ed11y-shut');
           Ed11y.panel.classList.add('ed11y-active');
           Ed11y.panelToggle.setAttribute('aria-expanded', 'true');
-          Ed11y.panelToggleTitle.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonHideChecker;
+          Ed11y.panelToggleTitle.textContent = State.totalCount > 0 ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonHideChecker;
           // Prepare show hidden alerts button.
-          if (Ed11y.dismissedCount === 0) {
+          if (State.dismissedCount === 0) {
             // Reset show hidden default option when irrelevant.
             Ed11y.showDismissed.setAttribute('hidden', '');
             Ed11y.showDismissed.setAttribute('data-ed11y-pressed', 'false');
             Ed11y.options.showDismissed = false;
-          } else if (Ed11y.dismissedCount === 1) {
+          } else if (State.dismissedCount === 1) {
             Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlert : Ed11y.M.buttonShowHiddenAlert;
             Ed11y.showDismissed.dataset.ed11yPressed = `${Ed11y.options.showDismissed}`;
             Ed11y.showDismissed.removeAttribute('hidden');
           } else {
-            Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlerts(Ed11y.dismissedCount) : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+            Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.options.showDismissed ? Ed11y.M.buttonHideHiddenAlerts(State.dismissedCount) : Ed11y.M.buttonShowHiddenAlerts(State.dismissedCount);
             Ed11y.showDismissed.dataset.ed11yPressed = `${Ed11y.options.showDismissed}`;
             Ed11y.showDismissed.removeAttribute('hidden');
           }
@@ -721,10 +721,10 @@ class Ed11y {
           }, 0);
         }
         // Update buttons.
-        if (Ed11y.totalCount > 0 || (Ed11y.options.showDismissed && Ed11y.dismissedCount > 0)) {
+        if (State.totalCount > 0 || (Ed11y.options.showDismissed && State.dismissedCount > 0)) {
           Ed11y.panelToggleTitle.textContent = Ed11y.open ? Ed11y.M.buttonHideAlerts : Ed11y.M.buttonShowAlerts;
           Ed11y.panelJumpNext.removeAttribute('hidden');
-          if (Ed11y.errorCount > 0) {
+          if (State.errorCount > 0) {
             // Errors
             Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-pass');
             Ed11y.panel.classList.add('ed11y-errors');
@@ -733,7 +733,7 @@ class Ed11y {
             document.documentElement.style.setProperty('--ed11y-activeBorder', '#fff7');
             document.documentElement.style.setProperty('--ed11y-activePanelBorder', '#def');
           }
-          else if (Ed11y.warningCount > 0) {
+          else if (State.warningCount > 0) {
             // Warnings
             Ed11y.panel.classList.remove('ed11y-errors', 'ed11y-pass');
             Ed11y.panel.classList.add('ed11y-warnings');
@@ -754,10 +754,10 @@ class Ed11y {
           /*window.setTimeout(function () {
             //Ed11y.announce.textContent = text;
           }, 1500);*/
-          if (Ed11y.dismissedCount > 0 && Ed11y.totalCount === 0) {
-            Ed11y.panelCount.textContent = Ed11y.dismissedCount;
+          if (State.dismissedCount > 0 && State.totalCount === 0) {
+            Ed11y.panelCount.textContent = State.dismissedCount;
           } else {
-            Ed11y.panelCount.textContent = Ed11y.totalCount > 99 ? '99+' : Ed11y.totalCount;
+            Ed11y.panelCount.textContent = State.totalCount > 99 ? '99+' : State.totalCount;
           }
         } else {
           Ed11y.panelJumpNext.setAttribute('hidden', '');
@@ -770,13 +770,13 @@ class Ed11y {
           Ed11y.panel.classList.remove('ed11y-warnings', 'ed11y-errors');
           Ed11y.panel.classList.add('ed11y-pass');
 
-          if (Ed11y.dismissedCount > 0) {
+          if (State.dismissedCount > 0) {
             Ed11y.panelCount.textContent = 'i';
             if (Ed11y.open) {
               Ed11y.panelToggleTitle.textContent = Ed11y.M.buttonHideChecker;
             } else {
-              Ed11y.panelToggleTitle.textContent = Ed11y.dismissedCount > 1 ?
-                Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount) :
+              Ed11y.panelToggleTitle.textContent = State.dismissedCount > 1 ?
+                Ed11y.M.buttonShowHiddenAlerts(State.dismissedCount) :
                 Ed11y.M.buttonShowHiddenAlert;
             }
           } else {
@@ -814,7 +814,7 @@ class Ed11y {
       }, 0);
 
       Ed11y.resumeObservers();
-      Ed11y.running = false;
+      State.running = false;
     };
 
     // Place markers on elements with issues
@@ -824,7 +824,7 @@ class Ed11y {
         // [1] test
         // [2] content
         // [3] position
-        // [4] dismissalKey
+        // [4] dismiss
         // [5] dismissalStatus
         */
       let mark = document.createElement('ed11y-element-result');
@@ -855,12 +855,12 @@ class Ed11y {
       }
       location.insertAdjacentElement(position, mark);
       Ed11y.jumpList.unshift(mark);
-      Ed11y.results[index].toggle = mark;
+      State.results[index].toggle = mark;
     };
 
     Ed11y.resetResults = function(incremental) {
       Ed11y.jumpList = [];
-      Ed11y.openTip = {
+      State.openTip = {
         button: false,
         tip: false,
       };
@@ -900,16 +900,16 @@ class Ed11y {
       // Reset main panel.
       Ed11y.visualizing = true; // so visualize function removes visualizers.
       Ed11y.visualize();
-      if (Ed11y.totalCount === 0 && Ed11y.dismissedCount > 0) {
+      if (State.totalCount === 0 && State.dismissedCount > 0) {
         Ed11y.panelCount.textContent = 'i';
-        Ed11y.panelToggleTitle.textContent = Ed11y.dismissedCount === 1 ?
+        Ed11y.panelToggleTitle.textContent = State.dismissedCount === 1 ?
           Ed11y.M.buttonShowHiddenAlert :
-          Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+          Ed11y.M.buttonShowHiddenAlerts(State.dismissedCount);
       }
       if (!Ed11y.options.showDismissed && Ed11y.showDismissed) {
         Ed11y.showDismissed.setAttribute('data-ed11y-pressed', 'false');
-        Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = Ed11y.dismissedCount === 1 ?
-          Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(Ed11y.dismissedCount);
+        Ed11y.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
+          Ed11y.M.buttonShowHiddenAlert : Ed11y.M.buttonShowHiddenAlerts(State.dismissedCount);
       }
       Ed11y.panel?.classList.add('ed11y-shut');
       Ed11y.panel?.classList.remove('ed11y-active');
@@ -921,8 +921,8 @@ class Ed11y {
       Ed11y.resetResults();
       Ed11y.resetPanel();
       Ed11y.incremental = false;
-      Ed11y.running = false;
-      Ed11y.showPanel = false;
+      State.running = false;
+      State.showPanel = false;
       Ed11y.open = false;
     };
 
@@ -1070,45 +1070,45 @@ class Ed11y {
     };
 
     // @todo compare.
-    Ed11y.dismissalKey = function (text) {
+    Ed11y.dismiss = function (text) {
       return String(text).replace(/([^0-9a-zA-Z])/g, '').substring(0, 512);
     };
 
-    const dismissOne = function(dismissalType, test, dismissalKey) {
+    const dismissOne = function(dismissalType, test, dismiss) {
 
       // Update dismissal record.
       if (dismissalType === 'reset') {
-        delete Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissalKey];
-        if (Object.keys(Ed11y.dismissedAlerts[Ed11y.options.currentPage][test]).length === 0) {
-          delete Ed11y.dismissedAlerts[Ed11y.options.currentPage][test];
+        delete State.dismissedAlerts[Ed11y.options.currentPage][test][dismiss];
+        if (Object.keys(State.dismissedAlerts[Ed11y.options.currentPage][test]).length === 0) {
+          delete State.dismissedAlerts[Ed11y.options.currentPage][test];
         }
-        if (Object.keys(Ed11y.dismissedAlerts[Ed11y.options.currentPage]).length === 0) {
-          delete Ed11y.dismissedAlerts[Ed11y.options.currentPage];
+        if (Object.keys(State.dismissedAlerts[Ed11y.options.currentPage]).length === 0) {
+          delete State.dismissedAlerts[Ed11y.options.currentPage];
         }
         //window.requestAnimationFrame(() => Ed11y.updatePanel());
       } else {
         let dismissal = {};
-        dismissal[dismissalKey] = dismissalType;
-        if (typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage] == 'undefined') {
+        dismissal[dismiss] = dismissalType;
+        if (typeof State.dismissedAlerts[Ed11y.options.currentPage] == 'undefined') {
           let store = {};
           store[test] = dismissal;
-          Ed11y.dismissedAlerts[Ed11y.options.currentPage] = store;
-        } else if (typeof Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] === 'undefined') {
-          Ed11y.dismissedAlerts[Ed11y.options.currentPage][test] = dismissal;
+          State.dismissedAlerts[Ed11y.options.currentPage] = store;
+        } else if (typeof State.dismissedAlerts[Ed11y.options.currentPage][test] === 'undefined') {
+          State.dismissedAlerts[Ed11y.options.currentPage][test] = dismissal;
         } else {
-          Ed11y.dismissedAlerts[Ed11y.options.currentPage][test][dismissalKey] = dismissalType;
+          State.dismissedAlerts[Ed11y.options.currentPage][test][dismiss] = dismissalType;
         }
         Ed11y.showDismissed.removeAttribute('hidden');
       }
 
       // Send record to storage or dispatch an event to an API.
       if (Ed11y.options.syncedDismissals === false) {
-        localStorage.setItem('ed11ydismissed', JSON.stringify(Ed11y.dismissedAlerts));
+        localStorage.setItem('ed11ydismissed', JSON.stringify(State.dismissedAlerts));
       }
       let dismissalDetail = {
         dismissPage: Ed11y.options.currentPage,
         dismissTest: test,
-        dismissKey: dismissalKey,
+        dismissKey: dismiss,
         dismissAction: dismissalType,
       };
       let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
@@ -1119,19 +1119,19 @@ class Ed11y {
 
     Ed11y.dismissThis = function (dismissalType, all = false) {
       // Find the active tip and draw its identifying information from the result list
-      let removal = Ed11y.openTip;
+      let removal = State.openTip;
       let id = removal.tip.dataset.ed11yResult;
-      let test = Ed11y.results[id].test;
+      let test = State.results[id].test;
 
       if (all) {
-        Ed11y.results.forEach((result) => {
+        State.results.forEach((result) => {
           if (result.test === test && result.dismissalStatus !==dismissalType) {
-            dismissOne(dismissalType, test, result.dismissalKey);
+            dismissOne(dismissalType, test, result.dismiss);
           }
         });
       } else {
-        let dismissalKey = Ed11y.dismissalKey(Ed11y.results[id].dismissalKey);
-        dismissOne(dismissalType, test, dismissalKey);
+        let dismiss = Ed11y.dismiss(State.results[id].dismiss);
+        dismissOne(dismissalType, test, dismiss);
       }
 
       // Remove tip and reset borders around element
@@ -1141,7 +1141,7 @@ class Ed11y {
       //removal.button?.parentNode?.removeChild(removal.button);
 
       Ed11y.reset();
-      Ed11y.showPanel = true;
+      State.showPanel = true;
       Ed11y.checkAll();
 
       let rememberGoto = Ed11y.lastOpenTip;
@@ -1160,11 +1160,11 @@ class Ed11y {
     };
 
     Ed11y.transferFocus = function () {
-      if (!Ed11y.openTip.tip) {
+      if (!State.openTip.tip) {
         return;
       }
-      const id = Ed11y.openTip.tip.dataset.ed11yResult;
-      const target = Ed11y.results[id].element;
+      const id = State.openTip.tip.dataset.ed11yResult;
+      const target = State.results[id].element;
       const editable = target.closest('[contenteditable]');
       if (!editable && !target.closest('textarea, input')) {
         if (target.closest('a')) {
@@ -1175,7 +1175,7 @@ class Ed11y {
           target.setAttribute('tabindex', '0');
           Ed11y.toggledFrom = target;
         }
-        Ed11y.openTip.tip.shadowRoot.querySelector('.close').click();
+        State.openTip.tip.shadowRoot.querySelector('.close').click();
       } else {
         Ed11y.toggledFrom = false;
         if (target.getAttribute('contenteditable') === 'true') {
@@ -1186,7 +1186,7 @@ class Ed11y {
           // Just got complicated -- need to move a caret
           Ed11y.toggledFrom = false;
         }
-        Ed11y.openTip.tip.shadowRoot.querySelector('.close').click();
+        State.openTip.tip.shadowRoot.querySelector('.close').click();
         if (!Ed11y.toggledFrom && editable) {
           // Need to move focus manually
           // h/t https://stackoverflow.com/questions/6249095/how-to-set-the-caret-cursor-position-in-a-contenteditable-element-div
@@ -1206,7 +1206,7 @@ class Ed11y {
       Ed11y.ignoreAll = false;
       Ed11y.options.showDismissed = !(Ed11y.options.showDismissed);
       Ed11y.reset();
-      Ed11y.showPanel = true;
+      State.showPanel = true;
       Ed11y.checkAll();
 
       Ed11y.showDismissed.setAttribute('data-ed11y-pressed', (!!Ed11y.options.showDismissed).toString());
@@ -1222,7 +1222,7 @@ class Ed11y {
       Ed11y.alignButtons();
       if (!Ed11y.options.inlineAlerts) {
         Ed11y.checkEditableIntersects();
-        Ed11y.intersectionObservers();
+        State.intersectionObservers();
       }
     };
 
@@ -1242,16 +1242,16 @@ class Ed11y {
 
       Ed11y.editableHighlight.forEach((el) => {
 
-        if (!Ed11y.results[el.resultID]) {
-          Ed11y.interaction = true;
+        if (!State.results[el.resultID]) {
+          State.interaction = true;
           Ed11y.forceFullCheck = true;
           Ed11y.editableHighlight = [];
           Ed11y.incrementalCheck(true);
           return false;
         }
 
-        const framePositioner = Ed11y.results[el.resultID].fixedRoot && Ed11y.positionedFrames[Ed11y.results[el.resultID].fixedRoot] ?
-          Ed11y.positionedFrames[Ed11y.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
+        const framePositioner = State.results[el.resultID].fixedRoot && Ed11y.positionedFrames[State.results[el.resultID].fixedRoot] ?
+          Ed11y.positionedFrames[State.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
 
         let targetOffset = el.target.getBoundingClientRect();
         if (!Ed11y.visible(el.target)) {
@@ -1273,7 +1273,7 @@ class Ed11y {
         Ed11y.editableHighlight[resultID]?.highlight.style.setProperty('opacity', '0');
         return;
       }
-      const result = Ed11y.results[resultID];
+      const result = State.results[resultID];
       let el = Ed11y.editableHighlight[resultID]?.highlight;
       if (!el) {
         el = document.createElement('ed11y-element-highlight');
@@ -1284,9 +1284,9 @@ class Ed11y {
         Ed11y.options.panelAttachTo.appendChild(el);
       }
       Ed11y.editableHighlight[resultID].target = firstVisible ? firstVisible : result.element;
-      const zIndex = result.dismissalKey ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
+      const zIndex = result.dismiss ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
       el.style.setProperty('z-index', zIndex);
-      const outline = result.dismissalKey ?
+      const outline = result.dismiss ?
         '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)'
         : '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
       el.style.setProperty('box-shadow', outline);
@@ -1388,7 +1388,7 @@ class Ed11y {
     Ed11y.positionedFrames = [];
 
     Ed11y.alignButtons = function () {
-      if (!Ed11y.jumpList || Ed11y.jumpList.length === 0 || (Ed11y.openTip.button && Ed11y.scrollPending === 0)) {
+      if (!Ed11y.jumpList || Ed11y.jumpList.length === 0 || (State.openTip.button && State.scrollPending === 0)) {
         return;
       }
       Ed11y.alignPending = true;
@@ -1417,7 +1417,7 @@ class Ed11y {
           if (!mark.result.element.isConnected) {
             // Something broke; rebuild jumplist on next loop.
             Ed11y.forceFullCheck = true;
-            Ed11y.interaction = true;
+            State.interaction = true;
             mark.style.display = 'none';
           } else {
             //mark.visibility = 'visible';
@@ -1670,7 +1670,7 @@ class Ed11y {
 
       const mark = button.getRootNode().host;
       const resultNum = button.dataset.ed11yResult;
-      const result = Ed11y.results[resultNum];
+      const result = State.results[resultNum];
 
       // Find button on page
       const scrollTop = window.scrollY;
@@ -1831,14 +1831,14 @@ class Ed11y {
 
       if (!Ed11y.doubleClickPrevent) {
         // Prevent clicks piling up while scan is running.
-        if (Ed11y.running !== true) {
-          Ed11y.running = true;
+        if (State.running !== true) {
+          State.running = true;
           // Re-scan each time the panel reopens.
           if (Ed11y.panel.classList.contains('ed11y-shut') === true) {
-            Ed11y.onLoad = false;
+            State.onLoad = false;
             Ed11y.incremental = false;
-            Ed11y.showPanel = true;
-            if (Ed11y.dismissedCount > 0 && Ed11y.warningCount === 0 && Ed11y.errorCount === 0) {
+            State.showPanel = true;
+            if (State.dismissedCount > 0 && State.warningCount === 0 && State.errorCount === 0) {
               Ed11y.options.showDismissed = false;
               Ed11y.toggleShowDismissals();
             } else {
@@ -1848,7 +1848,7 @@ class Ed11y {
             localStorage.setItem('editoria11yShow', '1');
           }
           else {
-            Ed11y.panelToggleTitle.textContent = Ed11y.totalCount > 0 ? Ed11y.M.buttonShowAlerts : Ed11y.M.buttonShowNoAlert;
+            Ed11y.panelToggleTitle.textContent = State.totalCount > 0 ? Ed11y.M.buttonShowAlerts : Ed11y.M.buttonShowNoAlert;
             Ed11y.options.showDismissed = false;
             Ed11y.reset();
             Ed11y.options.userPrefersShut = true;
@@ -2027,7 +2027,7 @@ class Ed11y {
       Ed11y.pauseObservers();
 
       // Initial alignment to get approximate Y position order for jump list.
-      Ed11y.results.forEach((result, i) => {
+      State.results.forEach((result, i) => {
 
         let top = result.element.getBoundingClientRect().top;
         if (!top) {
@@ -2040,20 +2040,20 @@ class Ed11y {
         if (Ed11y.options.fixedRoots) {
           const root = result.element.closest('[data-ed11y-root]');
           // Todo: it might be faster to associate this with the element finder.
-          Ed11y.results[i].fixedRoot = root.dataset.ed11yRoot;
+          State.results[i].fixedRoot = root.dataset.ed11yRoot;
         }
-        Ed11y.results[i].scrollableParent = closestScrollable(result.element);
-        if (Ed11y.results[i].scrollableParent) {
+        State.results[i].scrollableParent = closestScrollable(result.element);
+        if (State.results[i].scrollableParent) {
           // Group these together.
           top = top * 0.000001;
         }
-        Ed11y.results[i].sortPos = top;
+        State.results[i].sortPos = top;
       });
       // Sort from bottom to top so focus order after insert is top to bottom.
-      Ed11y.results.sort((a, b) => b.sortPos - a.sortPos);
+      State.results.sort((a, b) => b.sortPos - a.sortPos);
 
-      Ed11y.results?.forEach(function (result, i) {
-        if (!Ed11y.results[i].dismissalStatus || Ed11y.options.showDismissed) {
+      State.results?.forEach(function (result, i) {
+        if (!State.results[i].dismissalStatus || Ed11y.options.showDismissed) {
           Ed11y.result(result, i);
         }
       });
@@ -2174,29 +2174,29 @@ class Ed11y {
     };
 
     let scrollTicking = false;
-    Ed11y.scrollPending = 0;
+    State.scrollPending = 0;
     Ed11y.updateTipLocations = () => {
-      if (!scrollTicking && Ed11y.scrollPending > 0 && !Ed11y.running && Ed11y.jumpList && Ed11y.open) {
+      if (!scrollTicking && State.scrollPending > 0 && !State.running && Ed11y.jumpList && Ed11y.open) {
         scrollTicking = true;
         Ed11y.alignButtons();
-        if (Ed11y.openTip.tip) {
-          Ed11y.alignTip(Ed11y.openTip.button.shadowRoot.querySelector('button'), Ed11y.openTip.tip);
+        if (State.openTip.tip) {
+          Ed11y.alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
         }
-        Ed11y.scrollPending --;
+        State.scrollPending --;
       }
       scrollTicking = false;
-      if (Ed11y.scrollPending > 0) {
+      if (State.scrollPending > 0) {
         requestAnimationFrame(() => Ed11y.updateTipLocations());
       }
     };
 
-    Ed11y.intersectionObservers = function () {
+    State.intersectionObservers = function () {
 
       Ed11y.elements.editable?.forEach(editable => {
         editable.addEventListener('scroll', function() {
           // Align tips when scrolling editable container.
-          if (Ed11y.openTip.button) {
-            Ed11y.scrollPending = Ed11y.scrollPending < 2 ? Ed11y.scrollPending + 1 : Ed11y.scrollPending;
+          if (State.openTip.button) {
+            State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
             requestAnimationFrame(() => Ed11y.updateTipLocations());
           }
         });
@@ -2204,11 +2204,11 @@ class Ed11y {
 
       document.addEventListener('scroll', function() {
         // Trigger on scrolling other containers, unless it will flicker a tip.
-        if (!Ed11y.options.inlineAlerts && !Ed11y.openTip.button) {
-          Ed11y.scrollPending = Ed11y.scrollPending < 2 ? Ed11y.scrollPending + 1 : Ed11y.scrollPending;
+        if (!Ed11y.options.inlineAlerts && !State.openTip.button) {
+          State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
           requestAnimationFrame(() => Ed11y.updateTipLocations());
-        } else if (Ed11y.openTip.button) {
-          Ed11y.alignTip(Ed11y.openTip.button.shadowRoot.querySelector('button'), Ed11y.openTip.tip);
+        } else if (State.openTip.button) {
+          Ed11y.alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
         }
       }, true);
 
@@ -2220,7 +2220,7 @@ class Ed11y {
       }, 100);
 
       document.addEventListener('selectionchange', function() {
-        if (!Ed11y.running) {
+        if (!State.running) {
           Ed11y.selectionChanged();
         }
       });
@@ -2260,32 +2260,32 @@ class Ed11y {
     };
 
     Ed11y.incrementalAlign = debounce(() => {
-      if (!Ed11y.running && !Ed11y.alignPending) {
-        Ed11y.scrollPending++;
+      if (!State.running && !Ed11y.alignPending) {
+        State.scrollPending++;
         Ed11y.updateTipLocations();
         Ed11y.alignPending = false;
       } else {
         Ed11y.incrementalAlign();
       }
     }, 10);
-    Ed11y.interaction = false;
+    State.interaction = false;
     window.addEventListener('keydown', () => {
-      Ed11y.interaction = true;
+      State.interaction = true;
     });
     window.addEventListener('click', () => {
-      Ed11y.interaction = true;
+      State.interaction = true;
     });
     Ed11y.incrementalCheck = debounce(() => {
-      if (!Ed11y.running) {
-        if (Ed11y.openTip.button || (!Ed11y.interaction && !Ed11y.forceFullCheck)) {
+      if (!State.running) {
+        if (State.openTip.button || (!State.interaction && !Ed11y.forceFullCheck)) {
           return;
         }
-        Ed11y.interaction = false;
-        Ed11y.running = true;
+        State.interaction = false;
+        State.running = true;
         let runTime = performance.now();
         Ed11y.incremental = true;
         if (Ed11y.disabled && Ed11y.closedByDisable) {
-          Ed11y.showPanel = true;
+          State.showPanel = true;
           Ed11y.closedByDisable = false;
           Ed11y.disabled = false;
         }
@@ -2304,7 +2304,7 @@ class Ed11y {
         runTime = performance.now() - runTime;
         browserSpeed = runTime > 10 ? 10 : (browserSpeed + runTime) / 2;
         // Todo: optimize tip placement so we do not need as much debounce.
-        Ed11y.browserLag = browserSpeed < 1 ? 0 : browserSpeed * 100 + Ed11y.totalCount;
+        Ed11y.browserLag = browserSpeed < 1 ? 0 : browserSpeed * 100 + State.totalCount;
       } else {
         // Ed11y was running, try again later.
         window.setTimeout(() => {Ed11y.incrementalCheck();}, 250);
@@ -2313,17 +2313,17 @@ class Ed11y {
     Ed11y.slowIncremental = debounce(() => {
       //Ed11y.incrementalAlign(); // Immediately realign tips.
       //Ed11y.alignPending = false;
-      Ed11y.interaction = true;
+      State.interaction = true;
       Ed11y.incrementalCheck();
     }, 1000);
 
     Ed11y.pauseObservers = function() {
-      Ed11y.watching?.forEach(observer => {
+      State.watching?.forEach(observer => {
         observer.observer.disconnect();
       });
     };
     Ed11y.resumeObservers = function() {
-      Ed11y.watching?.forEach(observer => {
+      State.watching?.forEach(observer => {
         observer.observer.observe(observer.root, observer.config);
       });
     };
@@ -2429,24 +2429,24 @@ class Ed11y {
       const observer = new MutationObserver(callback);
       // Start observing the target node for configured mutations
       observer.observe(root, config);
-      Ed11y.watching.push({
+      State.watching.push({
         observer: observer,
         root: root,
         config: config,
       });
       document.addEventListener('readystatechange', () => {
         window.setTimeout(function () {
-          Ed11y.scrollPending++;
+          State.scrollPending++;
           Ed11y.updateTipLocations();
         }, 100);
       });
       window.setTimeout(function () {
-        Ed11y.scrollPending++;
+        State.scrollPending++;
         Ed11y.updateTipLocations();
       }, 1000);
     };
 
-    Ed11y.openTip = {
+    State.openTip = {
       button: false,
       tip: false,
     };
@@ -2485,7 +2485,7 @@ class Ed11y {
         }
         if (firstVisible) {
           // Throw warning that the element cannot be highlighted.
-          const tipAlert = Ed11y.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert');
+          const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert');
           tipAlert.textContent = alertMessage;
           // Todo: confirm we no longer need the panelMessage container.
           /*
@@ -2551,10 +2551,10 @@ class Ed11y {
       }
       loopStop = true;
       Ed11y.reset();
-      Ed11y.showPanel = true;
+      State.showPanel = true;
       Ed11y.checkAll();
       window.setTimeout(function() {
-        if (Ed11y.results.length > 0 && loopStop) {
+        if (State.results.length > 0 && loopStop) {
           Ed11y.jumpTo(1);
           loopStop = false;
         }
@@ -2591,7 +2591,7 @@ class Ed11y {
       // Find next or first result in the dom ordered list of results.
       let goto = Ed11y.jumpList[goNum];
       let result = goto.getAttribute('data-ed11y-result');
-      let gotoResult = Ed11y.results[result];
+      let gotoResult = State.results[result];
       const target = gotoResult.element;
 
       // First of two scrollTo calls, to trigger any scroll based events.
@@ -2609,7 +2609,7 @@ class Ed11y {
 
       // Open the button
       goto.setAttribute('data-ed11y-action','open');
-      Ed11y.scrollPending = 2;
+      State.scrollPending = 2;
       Ed11y.updateTipLocations();
     };
 
@@ -2619,8 +2619,8 @@ class Ed11y {
         Ed11y.alignAlts();
         Ed11y.alignButtons();
       }
-      if (Ed11y.openTip.button) {
-        Ed11y.alignTip(Ed11y.openTip.button.shadowRoot.querySelector('button'), Ed11y.openTip.tip);
+      if (State.openTip.button) {
+        Ed11y.alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
       }
       Ed11y.alignPanel();
     };
@@ -2642,9 +2642,9 @@ class Ed11y {
           Ed11y.panelToggle.focus();
           Ed11y.panelToggle.click();
         } else if (event.target.hasAttribute('data-ed11y-open')) {
-          if (Ed11y.openTip.button) {
+          if (State.openTip.button) {
             Ed11y.toggledFrom.focus();
-            Ed11y.openTip.button.shadowRoot.querySelector('button').click();
+            State.openTip.button.shadowRoot.querySelector('button').click();
           }
         }
       }

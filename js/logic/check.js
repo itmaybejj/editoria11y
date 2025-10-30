@@ -16,6 +16,91 @@ import checkQA from '../sa11y/src/js/rulesets/quality-assurance';
 // import checkDeveloper from '../sa11y/src/js/rulesets/developer';
 import ConsoleErrors from "../sa11y/src/js/interface/console-error.js";
 import {updatePanel} from "./control-panel-logic.js";
+import {prepareDismissal} from "../sa11y/src/js/utils/utils.js";
+
+
+// @todo merge this should be wrapped into my dismissal logic I think.
+export function countAlerts() {
+
+  State.errorCount = 0;
+  State.warningCount = 0;
+  State.dismissedCount = 0;
+
+  // Review results array to remove dismissed or ignored items
+  for (let i = State.results.length - 1; i >= 0; i--) {
+
+    // @todo merge we need the test name here
+    let test = State.results[i].content;
+
+    if (State.options.ignoreTests &&
+      State.options.ignoreTests.includes(test)) {
+      // Would be faster to skip test, but this is easy and reliable.
+      State.results.splice(i, 1);
+      continue;
+    }
+    console.log('count');
+
+    // todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
+    /*if (Ed11y.incremental && Ed11y.oldResults.length > 0) {
+      // Don't flag new issues in the active range while people are typing.
+    }*/
+
+    let dismissKey = prepareDismissal(State.results[i].dismiss);
+    console.log(dismissKey);
+    console.log(State.dismissedAlerts);
+    console.log(test);
+    console.log(State.currentPage);
+
+    // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
+    if (dismissKey !== false && State.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[State.currentPage] && dismissKey in State.dismissedAlerts[State.currentPage][test]) {
+      // Remove result if it has been marked OK or ignored, increment dismissed match counter.
+      console.log('co0unt');
+
+      State.dismissedCount++;
+      State.results[i].dismissalStatus = State.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey];
+    } else if (State.results[i].dismissalKey) {
+      console.log('cou1nt');
+
+      State.warningCount++;
+      State.results[i].dismissalStatus = false;
+    } else {
+      console.log('co2unt');
+
+      State.errorCount++;
+      State.results[i].dismissalStatus = false;
+    }
+  }
+
+  State.totalCount = State.errorCount + State.warningCount;
+
+  // Dispatch event for synchronizers.
+  if (!State.incremental) {
+    window.setTimeout(function () {
+      let syncResults = new CustomEvent('ed11yResults');
+      document.dispatchEvent(syncResults);
+    }, 0);
+  }
+
+  if (State.ignoreAll) {
+    State.dismissedCount = State.totalCount + State.dismissedCount;
+    State.errorCount = 0;
+    State.warningCount = 0;
+    State.totalCount = 0;
+  }
+  console.log('counted');
+
+}
+
+
+export function resetAll() {
+  /*Ed11y.pauseObservers();
+  Ed11y.resetResults();
+  Ed11y.resetPanel();*/
+  State.incremental = false;
+  State.running = false;
+  State.showPanel = false;
+  State.open = false;
+}
 
 export const checkAll = function (
   desiredRoot = State.options.checkRoot,
@@ -149,26 +234,5 @@ export const updateResults = () => {
     window.sa11yCheckComplete = event.detail;
     document.dispatchEvent(event);
 
-    console.log(State.results);
-
-}
-
-// @todo merge this should be wrapped into my dismissal logic I think.
-export function updateCount(results, error, warning) {
-  let updatedErrorCount = error;
-  let updatedWarningCount = warning;
-
-  // @todo merge what of dismissal logic?
-  results.forEach(($el, i) => {
-    const issue = results[i].type;
-    if (issue === 'error') {
-      updatedErrorCount += 1;
-    } else if (issue === 'warning') {
-      updatedWarningCount += 1;
-    }
-  });
-
-  State.totalCount = updatedWarningCount + updatedErrorCount;
-
-  return { error: updatedErrorCount, warning: updatedWarningCount };
+    countAlerts();
 }

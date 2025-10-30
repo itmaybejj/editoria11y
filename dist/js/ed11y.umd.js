@@ -1720,11 +1720,14 @@
     watching: [],
     results: [],
     seen: [],
+    ignoreAll: false,
     totalCount: 0,
     warningCount: 0,
     errorCount: 0,
     dismissedCount: 1,
+    dismissedAlerts: {},
     options: {},
+    currentPage: window.location.pathname,
 
     /* Panel initial state */
     disabled: false,
@@ -1748,6 +1751,19 @@
       vars: {}
     },
   };
+
+  let localResultCount = store.getItem('editoria11yResultCount');
+  console.log(localResultCount);
+  State.seen = localResultCount !== 'undefined' ? JSON.parse(localResultCount) : {};
+
+  // Build list of dismissed alerts
+  if (State.options.syncedDismissals === false) {
+    State.dismissedAlerts = store.getItem('ed11ydismissed');
+    State.dismissedAlerts = State.dismissedAlerts ? JSON.parse(State.dismissedAlerts) : {};
+  } else {
+    State.dismissedAlerts = {};
+    State.dismissedAlerts[State.currentPage] = State.options.syncedDismissals;
+  }
 
   const Options = (function options() {
     let ed11yLang = {};
@@ -3842,6 +3858,29 @@ ${this.error.stack}
     return false;
   };
 
+  const paintReady = function () {
+      for (const [key, value] of Object.entries(State.theme.vars)) {
+        document.documentElement.style.setProperty(`--ed11y-${key}`, `${value}`);
+      }
+
+      // May be redundant, but preloads unbundled files.
+      if (document.querySelector('body')) {
+        // May be redundant, but preloads unbundled files.
+        State.theme.attachCSS(document.querySelector('body'));
+      }
+      Constants.Root.forEach((root) => {
+        // Shadow elements don't inherit styles, so they need their own copy.
+        if (State.options.shadowComponents) {
+          root.querySelectorAll(State.options.shadowComponents)?.forEach((shadowHost) => {
+            if (shadowHost.shadowRoot) {
+              State.theme.attachCSS(shadowHost.shadowRoot);
+            }
+          });
+        }
+      });
+      State.bodyStyle = true;
+    };
+
   const alignPanel = function() {
     if (!State.theme.panelElement) {
       return false;
@@ -3872,7 +3911,6 @@ ${this.error.stack}
     // @todo merge
     //Ed11y.pauseObservers();
     // Stash old values for incremental updates.
-  console.log(1);
     if (State.incremental) {
       // Check for a change in the result counts.
       if (State.forceFullCheck || newIncrementalResults()) {
@@ -3899,14 +3937,11 @@ ${this.error.stack}
         return;
       }
     } else {
-      const uri = encodeURI(State.options.currentPage);
+      const uri = encodeURI(State.currentPage);
       if (State.totalCount > 0) {
-        console.log(2);
-
         // Record what has been seen at this route.
         // We do not do this on incremental updates.
         // Todo question: should we not do this at all for contentEditable?
-        console.log(State);
         State.seen[uri] = State.totalCount;
         store.setItem('editoria11yResultCount', JSON.stringify(Ed11y.seen));
       } else if (State.seen[uri]) {
@@ -3915,14 +3950,11 @@ ${this.error.stack}
     }
 
     if (State.options.alertMode !== 'headless') {
-      console.log(3);
-
       // Not headless; draw the interface.
 
       if (!State.theme.bodyStyle) {
-        State.theme.paintReady();
+        paintReady();
       }
-      console.log(4);
 
       if (State.onLoad === true) {
         State.onLoad = false;
@@ -3934,8 +3966,6 @@ ${this.error.stack}
             State.oldResultString += result.test + result.element.outerHTML;
           });
         }
-
-        console.log(5);
 
         // Create the panel DOM on load.
 
@@ -3962,8 +3992,6 @@ ${this.error.stack}
           State.theme.showDismissed.insertAdjacentElement('beforebegin', reportLink);
         }
 
-        console.log(6);
-
         // Decide whether to open the panel on load.
         if (State.ignoreAll ||
           (!State.options.inlineAlerts && State.totalCount > 75)
@@ -3980,7 +4008,7 @@ ${this.error.stack}
           !State.ignoreAll &&
           ( State.options.alertMode === 'assertive' ||
             State.options.alertMode === 'polite' &&
-            State.seen[encodeURI(State.options.currentPage)] !== State.totalCount
+            State.seen[encodeURI(State.currentPage)] !== State.totalCount
           )
         ) {
           // Show sometimes for assertive/polite if there are new items.
@@ -3993,9 +4021,10 @@ ${this.error.stack}
         console.log(7);
         // Close panel.
         resetAll();
+        console.log('8');
       } else {
         // Ignore issue count if this resulted from a user action.
-
+        console.log(9);
         State.open = true;
         State.theme.panel.classList.remove('ed11y-shut');
         State.theme.panel.classList.add('ed11y-active');
@@ -4016,7 +4045,7 @@ ${this.error.stack}
           State.theme.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
           State.theme.showDismissed.removeAttribute('hidden');
         }
-
+  console.log(10);
         window.setTimeout(function () {
           if (!State.ignoreAll) {
             requestAnimationFrame(() => State.theme.showResults());
@@ -4169,6 +4198,89 @@ ${this.error.stack}
     return false;
   };
 
+  // @todo merge this should be wrapped into my dismissal logic I think.
+  function countAlerts() {
+
+    State.errorCount = 0;
+    State.warningCount = 0;
+    State.dismissedCount = 0;
+
+    // Review results array to remove dismissed or ignored items
+    for (let i = State.results.length - 1; i >= 0; i--) {
+
+      // @todo merge we need the test name here
+      let test = State.results[i].content;
+
+      if (State.options.ignoreTests &&
+        State.options.ignoreTests.includes(test)) {
+        // Would be faster to skip test, but this is easy and reliable.
+        State.results.splice(i, 1);
+        continue;
+      }
+      console.log('count');
+
+      // todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
+      /*if (Ed11y.incremental && Ed11y.oldResults.length > 0) {
+        // Don't flag new issues in the active range while people are typing.
+      }*/
+
+      let dismissKey = prepareDismissal(State.results[i].dismiss);
+      console.log(dismissKey);
+      console.log(State.dismissedAlerts);
+      console.log(test);
+      console.log(State.currentPage);
+
+      // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
+      if (dismissKey !== false && State.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[State.currentPage] && dismissKey in State.dismissedAlerts[State.currentPage][test]) {
+        // Remove result if it has been marked OK or ignored, increment dismissed match counter.
+        console.log('co0unt');
+
+        State.dismissedCount++;
+        State.results[i].dismissalStatus = State.dismissedAlerts[Ed11y.options.currentPage][test][dismissKey];
+      } else if (State.results[i].dismissalKey) {
+        console.log('cou1nt');
+
+        State.warningCount++;
+        State.results[i].dismissalStatus = false;
+      } else {
+        console.log('co2unt');
+
+        State.errorCount++;
+        State.results[i].dismissalStatus = false;
+      }
+    }
+
+    State.totalCount = State.errorCount + State.warningCount;
+
+    // Dispatch event for synchronizers.
+    if (!State.incremental) {
+      window.setTimeout(function () {
+        let syncResults = new CustomEvent('ed11yResults');
+        document.dispatchEvent(syncResults);
+      }, 0);
+    }
+
+    if (State.ignoreAll) {
+      State.dismissedCount = State.totalCount + State.dismissedCount;
+      State.errorCount = 0;
+      State.warningCount = 0;
+      State.totalCount = 0;
+    }
+    console.log('counted');
+
+  }
+
+
+  function resetAll() {
+    /*Ed11y.pauseObservers();
+    Ed11y.resetResults();
+    Ed11y.resetPanel();*/
+    State.incremental = false;
+    State.running = false;
+    State.showPanel = false;
+    State.open = false;
+  }
+
   const checkAll = function (
     desiredRoot = State.options.checkRoot,
     desiredReadabilityRoot = State.options.readabilityRoot,
@@ -4301,8 +4413,7 @@ ${this.error.stack}
       window.sa11yCheckComplete = event.detail;
       document.dispatchEvent(event);
 
-      console.log(State.results);
-
+      countAlerts();
   };
 
   class ControlPanel extends HTMLElement {
@@ -4543,20 +4654,16 @@ ${this.error.stack}
 
       this.checkAll = checkAll;
 
-      this.resetAll = function () {
-        /*Ed11y.pauseObservers();
-        Ed11y.resetResults();
-        Ed11y.resetPanel();*/
-        State.incremental = false;
-        State.running = false;
-        State.showPanel = false;
-        State.open = false;
-      };
+      this.resetAll = resetAll();
 
       checkAll();
+
       this.results = function() {
         return State.results;
       };
+
+      console.log(State);
+
 
       // todo incrementalCheck
       //checkAll();

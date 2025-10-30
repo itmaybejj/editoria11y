@@ -1,6 +1,6 @@
 import State from "../utils/state.js";
 import {store} from "../sa11y/src/js/utils/utils.js"
-import {checkAll} from "./check.js";
+import {checkAll, resetAll} from "./check.js";
 import Constants from "../sa11y/src/js/utils/constants.js";
 import ed11yLang from "../lang/localization.js";
 
@@ -32,7 +32,6 @@ const newIncrementalResults = function() {
 }
 
 const paintReady = function () {
-
     for (const [key, value] of Object.entries(State.theme.vars)) {
       document.documentElement.style.setProperty(`--ed11y-${key}`, `${value}`);
     }
@@ -42,9 +41,7 @@ const paintReady = function () {
       // May be redundant, but preloads unbundled files.
       State.theme.attachCSS(document.querySelector('body'));
     }
-
-
-    Constants.roots.forEach((root) => {
+    Constants.Root.forEach((root) => {
       // Shadow elements don't inherit styles, so they need their own copy.
       if (State.options.shadowComponents) {
         root.querySelectorAll(State.options.shadowComponents)?.forEach((shadowHost) => {
@@ -97,7 +94,6 @@ export const updatePanel = function () {
   // @todo merge
   //Ed11y.pauseObservers();
   // Stash old values for incremental updates.
-console.log(1);
   if (State.incremental) {
     // Check for a change in the result counts.
     if (State.forceFullCheck || newIncrementalResults()) {
@@ -124,14 +120,11 @@ console.log(1);
       return;
     }
   } else {
-    const uri = encodeURI(State.options.currentPage);
+    const uri = encodeURI(State.currentPage);
     if (State.totalCount > 0) {
-      console.log(2);
-
       // Record what has been seen at this route.
       // We do not do this on incremental updates.
       // Todo question: should we not do this at all for contentEditable?
-      console.log(State);
       State.seen[uri] = State.totalCount;
       store.setItem('editoria11yResultCount', JSON.stringify(Ed11y.seen));
     } else if (State.seen[uri]) {
@@ -140,14 +133,11 @@ console.log(1);
   }
 
   if (State.options.alertMode !== 'headless') {
-    console.log(3);
-
     // Not headless; draw the interface.
 
     if (!State.theme.bodyStyle) {
-      State.theme.paintReady();
+      paintReady();
     }
-    console.log(4);
 
     if (State.onLoad === true) {
       State.onLoad = false;
@@ -159,8 +149,6 @@ console.log(1);
           State.oldResultString += result.test + result.element.outerHTML;
         });
       }
-
-      console.log(5);
 
       // Create the panel DOM on load.
 
@@ -187,8 +175,6 @@ console.log(1);
         State.theme.showDismissed.insertAdjacentElement('beforebegin', reportLink);
       }
 
-      console.log(6);
-
       // Decide whether to open the panel on load.
       if (State.ignoreAll ||
         (!State.options.inlineAlerts && State.totalCount > 75)
@@ -205,7 +191,7 @@ console.log(1);
         !State.ignoreAll &&
         ( State.options.alertMode === 'assertive' ||
           State.options.alertMode === 'polite' &&
-          State.seen[encodeURI(State.options.currentPage)] !== State.totalCount
+          State.seen[encodeURI(State.currentPage)] !== State.totalCount
         )
       ) {
         // Show sometimes for assertive/polite if there are new items.
@@ -218,9 +204,10 @@ console.log(1);
       console.log(7);
       // Close panel.
       resetAll();
+      console.log('8');
     } else {
       // Ignore issue count if this resulted from a user action.
-
+      console.log(9);
       State.open = true;
       State.theme.panel.classList.remove('ed11y-shut');
       State.theme.panel.classList.add('ed11y-active');
@@ -241,7 +228,7 @@ console.log(1);
         State.theme.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
         State.theme.showDismissed.removeAttribute('hidden');
       }
-
+console.log(10);
       window.setTimeout(function () {
         if (!State.ignoreAll) {
           requestAnimationFrame(() => State.theme.showResults());
