@@ -1,7 +1,5 @@
-import {store as Store} from "../sa11y/src/js/utils/utils.js";
-
-const State = {
-  /* Application initial state */
+export const State = {
+  version: '3.0.0',
   running: false,
   watching: [],
   results: [],
@@ -13,42 +11,49 @@ const State = {
   dismissedCount: 1,
   dismissedAlerts: {},
   options: {},
+  activeRange: false,
+  incremental: false,
+  interaction: false,
+  forceFullCheck: false,
+  browserSpeed: 1,
+  browserLag: 0,
+  loopStop: false,
   currentPage: window.location.pathname,
+  elements: [], // to be replaced by Sa11y.
+  roots: [],
+  oldResults: [],
+  headingOutline: [],
 
   /* Panel initial state */
+  once: false,
   disabled: false,
   onLoad: true,
   open: false,
   showPanel: false,
+  nextText: '',
+  panelAttachTo: document.body,
 
-  /* Annotations initial state */
+  /* Annotations initial states */
   jumpList: [],
   lastOpenTip: -1,
+  viaJump: false,
+  toggledFrom: false,
+  scrollPending: false,
+  scrollTicking: false,
   openTip: {
     button: false,
     tip: false,
   },
-
-
-  /* *********** */
-  /* Theme setup */
-  /* *********** */
-  theme: {
-    vars: {}
-  },
+  positionedFrames: [],
+  editableHighlight: [],
+  recentlyAddedNodes: [],
 }
 
-let localResultCount = Store.getItem('editoria11yResultCount');
-console.log(localResultCount);
-State.seen = localResultCount !== 'undefined' ? JSON.parse(localResultCount) : {};
+export const Theme = {}
 
-// Build list of dismissed alerts
-if (State.options.syncedDismissals === false) {
-  State.dismissedAlerts = Store.getItem('ed11ydismissed');
-  State.dismissedAlerts = State.dismissedAlerts ? JSON.parse(State.dismissedAlerts) : {};
-} else {
-  State.dismissedAlerts = {};
-  State.dismissedAlerts[State.currentPage] = State.options.syncedDismissals;
+export const UI = {
+  imageAlts: [],
+  attachCSS: ()=>{},
 }
 
-export default State;
+export const M = {}

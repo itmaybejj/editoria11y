@@ -1,0 +1,176 @@
+import {State} from "../utils/state.js";
+import {alignButtons, alignTip} from "../render/align.js";
+import {buildJumpList, editableHighlighter} from "../render/interface.js";
+import {resetClass} from "../utils/utils.js";
+
+export class Ed11yElementResult extends HTMLElement {
+  /* global Ed11y */
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    if (!this.initialized) {
+      this.open = false;
+      this.racing = false;
+      this.style.setProperty('outline', '0px solid transparent');
+
+      this.initialized = true;
+    }
+  }
+
+  handleHover(event) {
+    event.preventDefault();
+    let host = this.getRootNode().host;
+    if (!this.classList.contains('intersecting') && host.open !== true && host.racing === false) {
+      this.open = true;
+      host.racing = true;
+      host.toggleTip(true);
+      State.toggledFrom = this;
+      window.setTimeout(function () {
+        host.racing = false;
+      }, 250, host);
+    }
+  }
+
+  handleFocus() {
+    let host = this.getRootNode().host;
+    if (this.getRootNode().host.classList.contains('ed11y-offscreen')) {
+      host.result.element.scrollIntoView();
+      alignButtons();
+    }
+  }
+
+  toggleClick(event) {
+    event.preventDefault();
+    let host = this.getRootNode().host;
+    // Todo: extremely fast clicks throw TypeError: e is null
+    if (host.racing === false) {
+      host.racing = true;
+      State.toggledFrom = this;
+      let stateChange = host.getAttribute('data-ed11y-open') === 'false' ? 'open' : 'close';
+      host.setAttribute('data-ed11y-action', stateChange);
+      if (stateChange === 'open') {
+        window.setTimeout(function () {
+          let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+          activeTip?.shadowRoot.querySelector('.title').focus();
+        }, 500);
+      }
+      window.setTimeout(function () {
+        host.racing = false;
+      }, 250, host);
+    }
+
+  }
+
+  closeOtherTips() {
+    if (State.openTip.button) {
+      State.openTip.button.setAttribute('data-ed11y-action', 'close');
+    }
+  }
+
+  buildTip() {
+    this.tipNeedsBuild = false;
+
+    let tip = document.createElement('ed11y-element-tip');
+    tip.result = this.result;
+    tip.setAttribute('data-ed11y-result', this.resultID);
+    tip.classList.add('ed11y-element');
+    tip.style.setProperty('opacity', '0');
+    State.panelAttachTo.insertAdjacentElement('beforeend', tip);
+    this.tip = tip;
+  }
+
+  toggleTip(changeTo) {
+    if (this.tipNeedsBuild) {
+      this.buildTip();
+    }
+    this.toggle.setAttribute('aria-expanded', changeTo);
+    let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
+    if (State.options.inlineAlerts) {
+      resetClass([
+        'ed11y-hidden-highlight',
+        'ed11y-ring-red',
+        'ed11y-ring-yellow',
+        'ed11y-warning-block',
+        'ed11y-error-block',
+        'ed11y-warning-inline',
+        'ed11y-error-inline',
+      ]);
+    } else {
+      editableHighlighter(this.resultID, changeTo);
+    }
+    if (changeTo === true) {
+      this.tip.style.setProperty('opacity', '0');
+      // Allow for themes to reveal hidden tips
+      document.dispatchEvent(new CustomEvent('ed11yPop', {
+        detail: {
+          id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result'),
+          result: this.result,
+          tip: this.tip
+        }
+      }));
+      this.closeOtherTips();
+      this.tip.setAttribute('data-ed11y-action', 'open');
+      if (State.options.inlineAlerts) {
+        this.result.element.classList.add(highlightOutline);
+        // Removed in 2.3.6; Todo: confirm not needed and delete.
+        /*if (this.result.element.style.outline.indexOf('alert') === -1 ) {
+          // Set property unless alert is already set.
+          const display = window.getComputedStyle(this.result.element).getPropertyValue('display');
+          let outlineClass;
+          if (display.indexOf('inline') === -1 || this.result.element.tagName === 'IMG') {
+            outlineClass = this.result.dismissalKey ?
+              'ed11y-warning-block'
+              : 'ed11y-error-block';
+          } else {
+            outlineClass = this.result.dismissalKey ?
+              'ed11y-warning-inline'
+              : 'ed11y-error-inline';
+          }
+          this.result.element.classList.add(outlineClass);
+        }*/
+      }
+      requestAnimationFrame(()=>alignTip(this.toggle, this.tip, 4, true));
+      if (!State.jumpList) {
+        buildJumpList();
+      }
+      State.lastOpenTip = Number(this.getAttribute('data-ed11y-jump-position'));
+      State.openTip = {
+        button: this,
+        tip: this.tip,
+      };
+      this.result.highlight?.style.setProperty('opacity', '1');
+    } else {
+      // Allow for themes to restore original DOM/CSS
+      document.dispatchEvent(new CustomEvent('ed11yShut', {
+        detail: { id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result') }
+      }));
+      this.tip.setAttribute('data-ed11y-action', 'shut');
+      this.result.highlight?.style.setProperty('opacity', '0');
+      State.openTip = {
+        button: false,
+        tip: false,
+      };
+    }
+    this.setAttribute('data-ed11y-open', changeTo);
+    this.open = changeTo;
+  }
+
+
+  static get observedAttributes() { return ['data-ed11y-action']; }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (this.initialized) {
+      switch (attr) {
+      case 'data-ed11y-action':
+        if (newValue !== 'false') {
+          let changeTo = newValue === 'open';
+          this.setAttribute('data-ed11y-action', 'false');
+          this.toggleTip(changeTo);
+        }
+        break;
+      }
+    }
+  }
+}

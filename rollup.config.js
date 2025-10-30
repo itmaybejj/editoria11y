@@ -37,7 +37,7 @@ const banner = `
  * @param {string} outputMin - Output minified CSS file path.
  * @returns {Promise<string>} - Empty string.
  */
-const processSCSS = async (input, output, outputMin) => {
+/*const processSCSS = async (input, output, outputMin) => {
   const result = await postcss([autoprefixer]).process(input, { from: undefined });
   const path = `dist/css/${output}`;
   const pathMin = `dist/css/${outputMin}`;
@@ -53,7 +53,7 @@ const processSCSS = async (input, output, outputMin) => {
   }
   await writeFile(pathMin, minifiedResult.css, { encoding: 'utf8' });
   return '';
-};
+};*/
 
 /* ********************* */
 /*    Language files     */
@@ -92,7 +92,7 @@ const languages = (developmentMode) ? ['en'] : [
 ];
 const languageConfigs = languages.flatMap((lang) => [
   {
-    input: `js/sa11y/src/js/lang/${lang}.js`,
+    input: `node_modules/sa11y/src/js/lang/${lang}.js`,
     plugins: [nodeResolve()],
     output: [
       {
@@ -103,7 +103,7 @@ const languageConfigs = languages.flatMap((lang) => [
     ],
   },
   {
-    input: `js/sa11y/src/js/lang/${lang}.js`,
+    input: `node_modules/sa11y/src/js/lang/${lang}.js`,
     plugins: [nodeResolve()],
     output: [
       {
@@ -119,7 +119,7 @@ const languageConfigs = languages.flatMap((lang) => [
 /* ********************* */
 /*      SCSS files       */
 /* ********************* */
-const scssFiles = [
+/*const scssFiles = [
   'sa11y',
   'control-panel',
   'shared',
@@ -130,18 +130,18 @@ const scssFiles = [
   'export-results',
 ];
 const scssConfigs = scssFiles.map((file) => ({
-  input: `js/sa11y/src/scss/${file}.scss`,
+  input: `node_modules/sa11y/src/scss/${file}.scss`,
   plugins: [
     sass({
       output: false,
       processor: (css) => processSCSS(css, `${file}.css`, `${file}.min.css`),
     }),
   ],
-}));
+}));*/
 
 export default [
   ...languageConfigs,
-  ...scssConfigs,
+  //...scssConfigs,
 
   /* ********************* */
   /*      Javascript       */

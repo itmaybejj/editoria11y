@@ -1,155 +1,85 @@
-// Options, language object, constants, and utilities.
-import defaultOptions from './sa11y/src/js/utils/default-options';
-import Lang from './sa11y/src/js/utils/lang';
-import * as Utils from './sa11y/src/js/utils/utils';
-import Constants from './sa11y/src/js/utils/constants';
-import Elements from './sa11y/src/js/utils/elements';
-import find from './sa11y/src/js/utils/find';
-import * as Check from './logic/check.js'
-import State from './utils/state.js'
-import findShadowComponents from './sa11y/src/js/logic/find-shadow-components';
-
-// Extras
-// import detectPageChanges from './sa11y/dist/js/features/detect-page-changes';
-// import { dismissLogic, dismissButtons, removeDismissListeners } from './features/dismiss-annotations';
-// import { addColourFilters, resetColourFilters } from './sa11y/dist/js/features/colour-filters';
-// import { exportResults, removeExportListeners } from './sa11y/dist/js/features/export-results';
-import ConsoleErrors from './sa11y/src/js/interface/console-error';
-
-// Create UI/interface elements
-//import mainToggle from './sa11y/dist/js/logic/main-toggle-logic';
-// import ControlPanel from './sa11y/dist/js/interface/control-panel';
-// import settingsPanelToggles from './sa11y/dist/js/logic/settings-panel-logic';
-// import initializePanelToggles from './sa11y/dist/js/logic/control-panel-logic';
-// import generatePageOutline from './sa11y/dist/js/interface/page-outline';
-// import generateImageOutline from './sa11y/dist/js/interface/image-outline';
-// import { updatePanel, updateBadge, updateCount } from './sa11y/dist/js/logic/update-panel';
-// import { AnnotationTooltips, PanelTooltips } from './sa11y/dist/js/interface/tooltips';
-// import { Annotations, annotate } from './sa11y/dist/js/interface/annotations';
-// import { HeadingAnchor, HeadingLabel } from './sa11y/dist/js/interface/heading-labels';
-// import { skipToIssue, removeSkipBtnListeners } from './sa11y/dist/js/logic/skip-to-issue';
-
 import Options from "./utils/options.js";
-import {checkAll} from "./logic/check.js";
-import ControlPanel from "./interface/control-panel.js";
-// import checkCustom from './sa11y/src/js/sa11y-custom-checks';
+import Lang from '../node_modules/sa11y/src/js/utils/lang';
+import Constants from "sa11y/src/js/utils/constants.js";
+import ed11yLang from "./lang/localization.js";
+import {State, Theme, M, UI} from "./utils/state.js";
+import {windowResize} from "./utils/observers.js";
+import {checkAll, makeItSo} from "./utils/check.js";
 
 class Ed11y {
+
   constructor(options) {
 
-    // @todo Sa11y style versioning magic.
-    options.version = '3.0.0';
+    State.version = '3.0.0';
     State.options = Options.preProcessOptions(options);
-    State.options = {
-      ...defaultOptions,
-      ...options,
-      checks: {
-        ...defaultOptions.checks,
-        ...options.checks,
-      },
-    };
+    // Initialize global constants and exclusions.
+    Constants.initializeGlobal(State.options);
+    Constants.initializeReadability(State.options);
+    Constants.initializeExclusions(State.options);
+    Options.postProcessOptions(State.options);
 
-    /* *********************************************************** */
-    /*  Initialize: Start your engines.                            */
-    /* *********************************************************** */
-    this.initialize = () => {
-      // Do not run Sa11y if any supplied elements detected on page.
-      const checkRunPrevent = () => {
-        const { doNotRun } = State.options;
-        return doNotRun.trim().length > 0 ? document.querySelector(doNotRun) : false;
-      };
+    Object.assign(M, ed11yLang['en'], ed11yLang[State.options.lang]);
 
-      if (!checkRunPrevent()) {
-        // Register web components
-        // customElements.define('sa11y-heading-label', HeadingLabel);
-        // customElements.define('sa11y-heading-anchor', HeadingAnchor);
-        // customElements.define('sa11y-annotation', Annotations);
-        // customElements.define('sa11y-tooltips', AnnotationTooltips);
-        // customElements.define('sa11y-panel-tooltips', PanelTooltips);
-        // customElements.define('sa11y-control-panel', ControlPanel);
-        // customElements.define('sa11y-console-error', ConsoleErrors);
-        customElements.define('ed11y-element-panel', ControlPanel);
+    Object.assign(Theme, State.options[State.options.theme]);
+    Theme.baseFontSize = State.options.baseFontSize;
+    Theme.buttonZIndex = State.options.buttonZIndex;
+    Theme.baseFontFamily = State.options.baseFontFamily;
 
-        // Initialize global constants and exclusions.
-        Constants.initializeGlobal(State.options);
-        Constants.initializeReadability(State.options);
-        Constants.initializeExclusions(State.options);
+    if (State.options.currentPage === false) {
+      State.options.currentPage = window.location.pathname;
+    }
 
-        Options.postProcessOptions(State.options);
+    if (!State.options.linkStringsNewWindows) {
+      State.options.linkStringsNewWindows = M.linkStringsNewWindows;
+    }
 
+    window.addEventListener('keydown', () => {
+      State.interaction = true;
+    });
+    window.addEventListener('click', () => {
+      State.interaction = true;
+    });
 
-        // Build control panel.
-        const controlPanel = new ControlPanel();
-        document.body.appendChild(controlPanel);
-        State.theme.attachCSS(document.body);
+    // Move toggles when something expands or collapses.
+    const mightExpand = document.querySelectorAll('[aria-expanded], [aria-controls]');
+    mightExpand?.forEach(expandable => {
+      expandable.addEventListener('click', () => {
+        window.setTimeout(() => {
+          windowResize();
+        }, 333);
+      });
+    });
 
-        // Make "Developer checks" on by default or if toggle switch is visually hidden.
-        /*if (option.developerChecksOnByDefault) {
-          if (Utils.store.getItem('sa11y-developer') === null || option.checkAllHideToggles) {
-            Utils.store.setItem('sa11y-developer', 'On');
+    // Escape key closes panels.
+    const escapeWatch = function (event) {
+      if (event.keyCode === 27) {
+        if (event.target.closest('ed11y-element-panel') && UI.panelToggle.getAttribute('aria-expanded') === 'true') {
+          UI.panelToggle.focus();
+          UI.panelToggle.click();
+        } else if (event.target.hasAttribute('data-ed11y-open')) {
+          if (State.openTip.button) {
+            State.toggledFrom.focus();
+            State.openTip.button.shadowRoot.querySelector('button').click();
           }
-        }*/
-
+        }
       }
     };
+    document.addEventListener('keyup', function (event) {escapeWatch(event); });
 
 
+    if (CSS.supports('selector(:has(body))')) {
+      makeItSo();
+    } else {
+      console.warn(M.consoleNotSupported);
+    }
 
-    /* *********************************************************** */
-    /*  Reset all: Clears everything and resets the panel.         */
-    /* *********************************************************** */
-    this.resetAll = (restartPanel = true) => {
-      /*
-      Constants.Global.html.removeAttribute('data-sa11y-active');
-
-      // Remove data attribute from shadow root elements.
-      document.querySelectorAll('[data-sa11y-has-shadow-root]').forEach((el) => {
-        el.shadowRoot.querySelectorAll('style.sa11y-css-utilities').forEach((style) => style.remove());
-        el.removeAttribute('data-sa11y-has-shadow-root');
-      });
-      */
-    };
-
-    /* *********************************************************** */
-    /*  Methods: Useful utilities for integrations.                */
-    /* *********************************************************** */
-
-    // Method: find utility.
-    this.find = (selector, desiredRoot, exclude) => find(selector, desiredRoot, exclude);
-
-    // Method: prepare dismissal keys.
-    this.prepareDismissal = (string) => Utils.prepareDismissal(string);
-
-    // Method: sanitize HTML.
-    this.sanitizeHTML = (string) => Utils.sanitizeHTML(string);
-
-    // Method: truncate string.
-    this.truncateString = (string, maxLength) => Utils.truncateString(string, maxLength);
-
-    /* *********************************************************** */
-    /*  Initialize Sa11y.                                          */
-    /* *********************************************************** */
-    this.initialize();
-
-    this.checkAll = Check.checkAll;
-
-    this.resetAll = Check.resetAll();
-
-    Check.checkAll();
-
-    this.results = function() {
-      return State.results;
-    };
-
-    console.log(State);
-
-
-    // todo incrementalCheck
-    //checkAll();
+    /* Export exposed interfaces */
+    this.checkAll = checkAll();
   }
 }
 
 export {
   Lang,
-  Ed11y
-};
+  Ed11y,
+  checkAll
+}
