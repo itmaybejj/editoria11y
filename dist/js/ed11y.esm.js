@@ -899,37 +899,6 @@ const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
 };
 
 /**
- * Determine whether an element is visually hidden (e.g. .sr-only) based on computed properties.
- * @param {HTMLElement} element The element to check for.
- * @returns {boolean} Returns true if visually hidden based on properties.
- */
-function isScreenReaderOnly(element) {
-  const style = getComputedStyle(element);
-
-  // Modern technique: clip-path inset(50%).
-  if (style.getPropertyValue('clip-path').startsWith('inset(50%)')) return true;
-
-  // Legacy clipping.
-  if (style.clip === 'rect(1px, 1px, 1px, 1px)'
-    || style.clip === 'rect(0px, 0px, 0px, 0px)') return true;
-
-  // Large text-indent offscreen.
-  const indent = parseInt(style.textIndent, 10);
-  if (!Number.isNaN(indent) && Math.abs(indent) > 5000) return true;
-
-  // Tiny box offscreen.
-  if (style.overflow === 'hidden'
-    && parseFloat(style.width) < 2 && parseFloat(style.height) < 2) return true;
-
-  // Absolute positioned far offscreen.
-  if (style.position === 'absolute'
-    && ['left', 'right', 'top', 'bottom'].some((p) => Math.abs(parseInt(style[p], 10)) > 5000)) return true;
-
-  // Font size 1px or 0px.
-  return parseFloat(style.fontSize) < 2;
-}
-
-/**
  * Checks if an element is hidden (display: none) based on its attributes and styles.
  * @param {HTMLElement} element The element to check for visibility.
  * @returns {boolean} 'true' if the element is hidden (display: none).
@@ -968,37 +937,6 @@ function escapeHTML(string) {
  */
 function sanitizeHTML(string) {
   return string.replace(/[^\w. ]/gi, (c) => `&#${c.charCodeAt(0)};`);
-}
-
-/**
- * Sanitizes HTML by removing script tags, inline event handlers and any dangerous attributes. It returns a clean version of the HTML string.
- * @param {string} html The HTML string to sanitize.
- * @param {Boolean} allowStyles Preserve inline style attributes.
- * @returns {string} The sanitized HTML string.
- */
-function sanitizeHTMLBlock(html, allowStyles = false) {
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = html;
-
-  // Remove blocks.
-  ['script', 'style', 'noscript', 'iframe', 'form'].forEach((tag) => {
-    const elements = tempDiv.getElementsByTagName(tag);
-    while (elements.length > 0) {
-      elements[0].parentNode.removeChild(elements[0]);
-    }
-  });
-
-  // Remove inline event handlers and dangerous attributes.
-  const allElements = Array.from(tempDiv.getElementsByTagName('*'));
-  allElements.forEach((element) => {
-    Array.from(element.attributes).forEach((attr) => {
-      if (attr.name.startsWith('on')) element.removeAttribute(attr.name);
-    });
-    if (!allowStyles) {
-      element.removeAttribute('style');
-    }
-  });
-  return tempDiv.innerHTML;
 }
 
 /**
@@ -1092,41 +1030,6 @@ const store = {
  */
 function prepareDismissal(string) {
   return String(string).replace(/([^0-9a-zA-Z])/g, '').substring(0, 256);
-}
-
-/**
- * Generates a selector path for the given DOM element.
- * @param {Element} element The DOM element for which to generate the selector path.
- * @returns {string} The selector path as a string.
- * @link https://www.geeksforgeeks.org/how-to-create-a-function-generateselector-to-generate-css-selector-path-of-a-dom-element/
- * @link https://dev.to/aniket_chauhan/generate-a-css-selector-path-of-a-dom-element-4aim
-*/
-function generateSelectorPath(element) {
-  const path = [];
-  let currentElement = element;
-  while (currentElement) {
-    let selector = currentElement.localName;
-    if (currentElement.id) {
-      selector += `#${currentElement.id}`;
-      path.unshift(selector);
-      break;
-    } else if (currentElement.className) {
-      selector += `.${currentElement.className.replace(/\s+/g, '.')}`;
-    }
-    const parentElement = currentElement.parentNode;
-    if (parentElement) {
-      const siblings = parentElement.children;
-      if (siblings.length > 1) {
-        const index = Array.prototype.indexOf.call(siblings, currentElement) + 1;
-        selector += `:nth-child(${index})`;
-      }
-      path.unshift(selector);
-    } else {
-      break;
-    }
-    currentElement = currentElement.parentNode.host || currentElement.parentNode;
-  }
-  return path.join(' > ');
 }
 
 /**
@@ -1375,6 +1278,829 @@ const Elements = (function myElements() {
   };
 }());
 
+const ed11yLang = {
+
+  // ESLint config:
+  /* global Ed11y */
+  /* exported ed11yLang */
+
+  en : {
+
+    // Main Panel =========================================
+    toggleAccessibilityTools: 'Toggle accessibility tools',
+    toggleDisabled: 'No content available for Editoria11y to check.',
+    panelCount0 : 'No issues detected.',
+    panelCountAllDismissed : 'All issues hidden.',
+    panelCount1 : 'One issue detected.',
+    panelCountMultiple: ' issues detected.',
+    panelCountBase: '<span class=\'count\'>No</span> <span class=\'content-type\'>issues detected</span>.',
+    panelControls: 'Editorially',
+    buttonToolsContent: 'Check headings & alt text', // todo Drupal
+    buttonToolsActive: 'Hide headings & alt text',
+    buttonOutlineContent: 'Headings',
+    buttonAltsContent: 'Alt Text',
+    buttonFirstContent: 'Go to first alert',
+    buttonNextContent: 'Go to next alert',
+    buttonPrevContent: 'Go to previous alert',
+    buttonShowHiddenAlert: 'Show hidden alert',
+    buttonHideHiddenAlert: 'Hide hidden alert',
+    buttonShowHiddenAlerts: (count) => `Show ${count} hidden alerts`,
+    buttonHideHiddenAlerts: (count) => `Hide ${count} hidden alerts`,
+    buttonShowAlerts: 'Show accessibility alerts',
+    buttonShowNoAlert: 'Show accessibility checker',
+    buttonHideChecker: 'Hide accessibility checker',
+    buttonHideAlerts: 'Hide accessibility alerts',
+    panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">heading outline</a>. Check that it matches how the content is organized visually.</p>',
+    panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/" target="_blank" title="Opens in new tab">describes what it means in context</a>, and that there are no images of text.</p>',
+    noImagesFound: 'No images found.',
+    altLabelPrefix: 'Alt text: ',
+    errorAltMissing: '(missing!)',
+    errorAltNull: '(none; image marked as decorative)',
+    errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
+    errorOutlinePrefixHeadingEmpty: '(empty heading) ',
+    errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
+
+    // Errors and alerts ==================================
+
+    consoleNotSupported: 'This browser can not run Editoria11y.',
+    jumpedToInvisibleTip: 'Note: this content may not be visible. Look for it inside the outlined container.',
+    jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.',
+
+    // Strings used in tests ==============================
+
+    suspiciousWords: ['image of','graphic of','picture of','photo of','photograph of','placeholder','spacer','tbd','todo', 'copyright', 'courtesy of', 'photo by'],
+    meaninglessAlt: ['alt','chart','decorative','image','graphic','photo','placeholder','placeholder image','spacer','tbd','todo','to do'],
+    badEndingForAlt: ['photo', 'image', 'photograph', 'picture'],
+    linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
+    linksMeaningless: /(learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|"|'|\?|\.|-|,|:|>|<|\s)+/g,
+    linkStringsNewWindows: /window|\stab|download/g,
+
+    // Tooltips ======================================
+
+    toggleManualCheck: 'manual check needed',
+    toggleAlert: 'alert',
+    issue: 'Issue',
+    toggleAriaLabel: (label) => `Accessibility ${label}`,
+    transferFocus: 'Edit this content',
+    dismissOkButtonContent: 'Mark as OK',
+    dismissHideButtonContent: 'Mark as ignored',
+    dismissActions: (count) => `${count} similar issues`, // 2.3.10
+    dismissHideAllButton: 'Ignore all like this', // 2.3.10
+    dismissOkAllButton: 'Mark all like this as OK', // 2.3.10
+    dismissOkTitle: 'Hides this alert for all editors',
+    dismissHideTitle: 'Hides this alert for you',
+    undismissOKButton: 'Restore this alert marked as OK',
+    undismissHideButton: 'Restore this hidden alert',
+    undismissNotePermissions: 'This alert has been hidden by an administrator',
+    reportsLink: 'Open site reports in new tab',
+    closeTip: 'Close',
+    panelHelpTitle: 'About this tool',
+    panelHelp: `
+    <p><a href="https://editoria11y.princeton.edu/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
+    <p>Many alerts are "manual checks." Manual checks can be dismissed:</p>
+    <ul>
+        <li>"Mark as checked and OK" hides the alert for all editors.</li>
+        <li>"Ignore this manual check" leaves the tip visible to other editors.</li>
+    </ul>
+    <p>Dismissed alerts can be found via the "Show hidden alerts" toggle.</p>
+    <p>If an incorrect alert is appearing on many pages, site administrators can tell the checker to ignore particular elements and page regions.</p>
+    <p>And remember that automated checkers cannot replace <a href='https://webaim.org/resources/evalquickref/'> proofreading and testing for accessibility</a>.</p>
+    <p><br><a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Report bugs & request changes <span aria-hidden="true">&raquo;</span></a></p>
+    `,
+
+    // Tooltips for heading tests =========================
+
+    headingExample : `
+        <ul>
+            <li>Heading level 1
+                <ul>
+                    <li>Heading level 2: a topic
+                        <ul><li>Heading level 3: a subtopic</li></ul></li>
+                    <li>Heading level 2: a new topic</li>
+                </ul>
+            </li>
+        </ul>`,
+
+    // todo: update Drupal localization file.
+    headingLevelSkipped : {
+      title: 'Manual check: was a heading level skipped?',
+      tip: (prevLevel, level) =>
+        `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
+            ${ed11yLang.en.headingExample}
+            <p>This heading skipped from level ${prevLevel} to level ${level}. From a screen reader, this sounds like content is missing.</p>
+            <p><strong>To fix:</strong> adjust levels to form an accurate outline, without gaps.</p>
+            `,
+    },
+
+    headingEmpty : {
+      title: 'Heading tag without any text',
+      tip: () =>
+        `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
+            ${ed11yLang.en.headingExample}
+            <p>Empty headings create confusing gaps in this outline: they could mean the following content is still part of the previous section, or that the text was unpronounceable for some reason.</p>
+            <p><strong>To fix:</strong> add text to this heading, or delete this empty line.</p>
+            `,
+    },
+
+    headingIsLong : {
+      title: 'Manual check: long heading',
+      tip: () =>
+        `<p>Headings should be brief and clear. Assistive devices use them as a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">navigable table of contents</a> for the page. The numbers indicate indents in a nesting relationship:</p>  
+            ${ed11yLang.en.headingExample}
+            <p><strong>To fix:</strong> shorten this heading if possible, or remove the heading style if it was only applied to this text to provide visual emphasis.</p>
+            `,
+    },
+
+    blockquoteIsShort : {
+      title: 'Manual check: is this a blockquote?',
+      tip: () =>
+        '<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. This was flagged because short blockquotes are <em>sometimes</em> actually <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">headings</a>. If this is a heading and not a quotation, use heading formatting instead, so this appears in the page outline.</p>',
+    },
+
+    // Tooltips for image tests =========================
+
+    altAttributeExample :
+            `<p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative" target="_blank" title="Opens in new tab">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
+            <ul>
+                <li>The sunny spring day brought kids to the park for some soccer.</li>
+                <li>A.J. wearing the new team uniform.</li>
+                <li>The game-winning kick curved in from the left sideline!</li>
+                <li>The size 4 ball is the right size for this 9-year-old child.</li>
+            </ul>`,
+
+    altMissing : {
+      title: 'Image has no alternative text attribute',
+      tip: () =>
+        `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.</p>
+            <p><strong>To fix:</strong> either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>
+            ${ed11yLang.en.altAttributeExample}`,
+    },
+
+    altNull : {
+      title: 'Manual check: image has no alt text',
+      tip: () =>
+        `<p>Unless this image is purely decorative (a spacer icon or background texture), an alt should probably be provided. Photos in page content <strong>almost always need alt text.</strong> Since many screen reader users can see there is an image present, it can be very confusing to move the cursor across the place on the page where an image is visible, but hear nothing.</p>
+        ${ed11yLang.en.altAttributeExample}`,
+    },
+
+    altURL : {
+      title: 'Image\'s text alternative is a URL',
+      tip: (alt) =>
+        `This image's alt text is "${alt}," which probably describes the file name, not the contents of the image.
+        <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
+        ${ed11yLang.en.altAttributeExample}`
+      ,
+    },
+    altMeaningless : {
+      title: 'Alt text is meaningless',
+      tip: (alt) =>
+        `<p>This image's alt text is "${alt}," which was flagged for being common placeholder text.</p>
+        <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
+        ${ed11yLang.en.altAttributeExample}`
+      ,
+    },
+    altMeaninglessLinked : {
+      title: 'Linked alt text is meaningless',
+      tip: (alt) =>
+        `<p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" target="_blank" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
+            Links should clearly and concisely describe their destination, even out of context.</p>
+           <p>This image's alt text is "${alt}," which probably does not describe this link.</p>`
+      ,
+    },
+
+    altURLLinked : {
+      title: 'Linked image\'s text alternative is a URL',
+      tip: (alt) =>
+        `<p>This image's alt text is "${alt}," which is probably a filename.</p>
+        <p>When a link is wrapped around an image and there is no other text, the <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" target="_blank" title="Opens in new tab">image's alt text becomes the link text</a> announced by screen readers.
+            Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
+            <ul>
+                <li>Good link text: "About us"</li>
+                <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess</li>
+            </ul>`,
+    },
+
+    altImageOf : {
+      title: 'Manual check: possibly redundant text in alt',
+      tip: (alt) =>
+        `<p>This image's alt text is "${alt}," which mentions that this image is an image.</p>
+        <p>Screen readers announce they are describing an image when reading alt text, so 
+            phrases like "image of" and "photo of" are usually redundant in alt text; the screen reader user hears "image: image of something."</p>
+            <p>Note that this is OK if the format is referring to the <strong>content</strong> of the image:</p>
+            <ul><li>Format is redundant: "<em>photo of</em> a VHS tape"</li>
+            <li>Format is relevant: "<em>photo of</em> a VHS tape in a photo album being discussed in a history class"</li></ul>`
+    },
+    altImageOfLinked : {
+      title: 'Manual check: possibly redundant text in linked image',
+      tip: (alt) =>
+        `<p>This image's alt text is "${alt}," which mentions that this image is an image.</p>
+        <hr><p>Links should clearly and concisely describe their destination. Since words like "image," "graphic" or "photo" are already redundant in text alternatives (screen readers already identify the image as an image), their presence in a linked image usually means the image's text alternative is <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="Opens in new tab" target="_blank">describing the image instead of the link</a>.</p>
+            <ul>
+                <li>Good link text: "About us"</li>
+                <li>Bad link text: "Image of five people jumping"</li>
+            </ul>`
+    },
+
+    altDeadspace : {
+      title: 'Image\'s text alternative is unpronounceable',
+      tip: (alt) =>
+        `<p>This image's alt text is "${alt}," which only contains unpronounceable symbols and/or spaces. Screen readers will announce that an image is present, and then pause awkwardly: "image: ____."</p>
+        <p><strong>To fix:</strong> add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") if this is just an icon or spacer, and screen readers should ignore it.</p>
+            ${ed11yLang.en.altAttributeExample}`,
+    },
+
+    altEmptyLinked : {
+      title: 'Linked Image has no alt text',
+      tip: () =>
+        `<p>When a link is wrapped around an image, the image's alt text <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="Opens in new tab" target="_blank">provides the link's title for screen readers</a>.</p>
+        <p><strong>To fix:</strong> set this image's alternative text to something that describes the link's destination, or add text next to the image, within the link.</p>`,
+    },
+
+    altLong : {
+      title: 'Manual check: very long alternative text',
+      tip: (alt) =>
+        `<p>Image text alternatives are announced by screen readers as a single run-on sentence; listeners must listen to the entire alt a second time if they miss something. If this cannot be reworded to something succinct, it is better to use the alt to reference a <em>visible</em> <a href="https://www.w3.org/WAI/tutorials/images/complex/" title="Opens in new tab" target="_blank">text alternative for complex images</a>. For example:</p>
+            <ul><li>"Event poster; details follow in caption"</li>
+            <li>"Chart showing our issues going to zero; details follow in table"</li></ul>
+            This image's alt text is: <em>${alt}</em>
+            `,
+    },
+
+    altLongLinked : {
+      title: 'Manual check: very long alternative text in linked image',
+      tip: (alt) =>
+        `<p><a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="Opens in new tab" target="_blank">The alt text on a linked image is used to describe the link destination</a>. Links should be brief, clear and concise, as screen reader users often listen to the list of links on the page to find content of interest. Long alternative text inside a link often indicates that the image's text alternative is describing the image instead rather than the link.</p>
+        This image's alt text is: <em>${alt}</em>`,
+    },
+
+    altPartOfLinkWithText : {
+      title: 'Manual check: link contains both text and an image',
+      tip: (alt) =>
+        `<p>Screen readers will <a href="https://www.w3.org/WAI/tutorials/images/functional/" title="Opens in new tab" target="_blank">include the image's alt text when describing this link</a>.</p>
+            <p>Check that the combined text is concise and meaningful:<br>"<em><strong>${alt}</strong></em>"</p>
+            <p></p>
+            <ul>
+                <li>Keep alts that add relevant meaning:<br>"Buy (A Tigers v. Falcons ticket)."</li>
+                <li>Edit unhelpful or irrelevant alts:<br>"Buy (A piece of paper with team logos on it)."</li>
+                <li>Remove unnecessary alts:<br>"Buy Tigers v. Falcons tickets (A Tigers v. Falcons ticket)."</li>
+            </ul>
+        `, // 2.3.10.
+    },
+
+    linkNoTextExample: '<p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>',
+    linkTextIgnored: (ignoredText) => `
+    <p>Screen readers will only read the text of the link type indicator on this link:<br>
+    <em>"<strong>${ignoredText}</strong>"</em></p>
+    `,
+
+    linkNoText : {
+      title: 'Link with no accessible text',
+      tip: (ignoredText) =>
+        `<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
+        ${ignoredText ? ed11yLang.en.linkTextIgnored(ignoredText) : ed11yLang.en.linkNoTextExample}
+        <p><strong>To fix:</strong></p>
+        <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describe where it goes.</li>`,
+    },
+
+    linkTextIsURL : {
+      title: 'Manual check: is this link text a URL?',
+      tip: (text) =>
+        `<p>This link's text is:<br> <strong>${text}</strong></p>
+        <p><a href="https://webaim.org/techniques/hypertext/link_text" title="Opens in new tab" target="_blank">Links should be meaningful and concise</a>. Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
+         <p>A linked URL breaks this pattern; the reader has to read the preceding paragraph to figure out the link's purpose from context.</p>
+            <ul>
+                <li>Meaningful and concise link: "Tips for writing meaningful links"</li>
+                <li>Linked URL, as pronounced by a screen reader: "H T T P S colon forward-slash forward-slash example dot com forward-slash tips forward-slash meaningful-links"</li>
+            </ul>`,
+    },
+
+    linkTextIsGeneric : {
+      title: 'Manual check: is this link meaningful and concise?',
+      tip: (text) =>
+        `<p>This link's text is: <strong>${text}</strong></p>
+        <p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
+                <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully enough to figure out each link's purpose from context. Few readers do this, so click-through rates on meaningless links are extremely poor.</p>
+                <ul>
+                <li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text" title="Opens in new tab" target="_blank">meaningful links"</a></strong></li>
+                <li>Not meaningful: "Click <a href="https://webaim.org/techniques/hypertext/link_text" title="Opens in new tab" target="_blank">here</a> to learn about meaningful links."</li>
+                <li>Not concise: "<a href="https://webaim.org/techniques/hypertext/link_text" title="Opens in new tab" target="_blank">Click here to learn more about meaningful links</a>"</li>
+                </ul>
+                `
+      ,
+    },
+
+    linkDocument : {
+      title : 'Manual check: is the linked document accessible?',
+      tip: () =>
+        `<p>Many mobile and assistive device users struggle to read content in PDFs. PDFs generally do not allow for changing font sizes, and often contain features that are incompatible with screen readers.</p>
+        <p>Ideally make the content of this linked PDF available on a Web page or in an editable document, and only link to this PDF as a "printable" alternative. If this PDF is the only way you are providing to access this content, you will need to <a href='https://webaim.org/techniques/acrobat/' target='_blank' title="Opens in new tab">manually check that the PDF is well-structured</a>, with headings, lists and table headers, and provides alt text for its images.</p>`,
+    },
+
+    linkNewWindow : {
+      title: 'Manual check: is opening a new window expected?',
+      tip: () =>
+        `<p>Readers can always choose to open a link a new window. When a link forces open a new window, it can be confusing and annoying, especially for assistive device users who may wonder why their browser's "back" button is suddenly disabled.</p>
+                <p>There are two general exceptions:</p>
+                <ul>
+                    <li>When the user is filling out a form, and opening a link in the same window would cause them to lose their work.</li>
+                    <li>When the user is clearly warned a link will open a new window.</li>
+                </ul>
+                <p><strong>To fix:</strong> set this link back its default target, or add a screen-reader accessible warning (text or an icon with alt text).</p>
+                `
+      ,
+    },
+
+    // Tooltips for Text QA ===============================
+
+    tableNoHeaderCells : {
+      title: 'Table has no header cells',
+      tip: () => `
+                <p>To fix:</p>
+                <ul><li>If this table contains data that is meaningfully organized by row and column, edit the table's properties and specify whether headers have been placed in the first row, column or both. This lets screen reader users hear the headers repeated while navigating the content.</li>
+                <li>If this table does not contain rows and columns of data, but is instead being used for visual layout, remove it. Tables overflow the page rather than reflowing on mobile devices, and should only be used when the horizontal relationships are necessary to understand the content.</li></ul>
+            `,
+    },
+
+    tableContainsContentHeading : {
+      title: 'Content heading inside a table',
+      tip: () =>
+        `<p>To fix: remove heading formatting. Use row and column headers instead.</p>
+        <p>Content headings ("Heading 1", "Heading 2") form a navigable table of contents for screen reader users,  
+        labelling all content <strong>until the next heading</strong>. Table headers label specific columns or rows within a table.</p> 
+            <p></p>
+            <table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">To illustrate: a <strong>table</strong> header in cell 2 would only label its column: cell B. <br><br>
+            A <strong>content</strong> heading in cell 2 would label all subsequent text, reading from left to right: cells 3, A, B and C, as well as this text!</td></tr>
+            <tr><td>A</td><td>B</td><td>C</td></table>
+            `
+    },
+
+    tableEmptyHeaderCell : {
+      title: 'Empty table header cell',
+      tip: () => `
+                <p>When exploring tables, screen readers repeat table header cells as needed to orient users. 
+                Without headers, it is very easy to get lost; screen reader users have to count columns and rows and try to remember which columns went with which rows.</p>
+                <p><strong>To fix:</strong> make sure each header cell in this table contains text.</p>
+            `,
+    },
+
+    textPossibleList : {
+      title: 'Manual check: should this have list formatting?',
+      tip : (text) =>
+        `<p>List formatting is structural:</p> 
+            <ol><li>List formatting indents and reflows on overflow. Text aligns vertically with the line above it.</li>
+            <li>Lists are machine-readable. Screen readers can orient their users, announcing this as "list item, 2 of 3."</li></ol>
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;3. But this third item is just a sentence with a number in front of it. It wraps incorrectly, and screen readers do not know it is related to the other items in the list.</p>
+            <p><strong>To fix:</strong> if this "${text}" is part of a list, replace it with list formatting.</p>
+            `,
+    },
+
+    textPossibleHeading : {
+      title: 'Manual check: should this be a heading?',
+      tip : () =>
+        `<p>If this all-bold line of text is functioning as a heading for the following text rather than a visual emphasis, replace the bold formatting with the appropriately numbered heading. Otherwise, dismiss this alert.</p>
+        <p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" title="Opens in new tab" target="_blank">navigable table of contents</a> for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
+            ${ed11yLang.en.headingExample}
+            
+            `,
+    },
+
+    textUppercase : {
+      title: 'Manual check: is this uppercase text needed?',
+      tip : () =>
+        `<p>UPPERCASE TEXT CAN BE MORE DIFFICULT TO READ FOR MANY PEOPLE, AND IS OFTEN INTERPRETED AS SHOUTING.</p>
+         <p>Consider using sentence case instead, and using bold text or font changes for visual emphasis, or structural formatting like headings for emphasis that will also be announced by screen readers.</p>`,
+    },
+
+    embedVideo : {
+      title: 'Manual check: is this video accurately captioned?',
+      tip : () =>
+        `<p>If a recorded video contains speech or meaningful sounds, it must <a href="https://www.w3.org/WAI/media/av/captions/" title="Opens in new window" target="_blank">provide captions</a>.</p>
+            <p>Note that automatic, machine-generated captions must be proofread, and speaker identifications must be added, before being considered an equal alternative.</p>`,
+    },
+
+    embedAudio : {
+      title: 'Manual check: is an accurate transcript provided?',
+      tip : () =>
+        `<p>If this audio contains speech, a <a href="https://www.w3.org/WAI/media/av/transcribing/" target="_blank" title="Opens in new window">text alternative</a> must be provided on this page or linked.</p>
+            <p>Note that automatic, machine-generated transcripts must be proofread, and speaker identifications must be added, before being considered an equal alternative</p>`,
+    },
+
+    embedVisualization : {
+      title: 'Manual check: is this visualization accessible?',
+      tip : () =>
+        `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
+            <p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
+    },
+
+    embedTwitter : {
+      title: 'Manual check: is this embed a keyboard trap?',
+      tip : () =>
+        `<p>If embedded feeds are set to show a high number of items, keyboard users may have to click the tab key dozens or hundreds of times to exit the component.</p>
+            <p>Check to make sure only a small number of items auto-load immediately or while scrolling. Having additional items load on request ("show more") is fine.</p>`,
+    },
+
+    embedCustom : {
+      title: 'Manual check: is this embedded content accessible?',
+      tip : () =>
+        '<p>Please make sure images inside this embed have alt text, videos have captions, and interactive components can be <a href=\'https://webaim.org/techniques/keyboard/\'>operated by a keyboard</a>.</p>',
+    }
+
+  },
+};
+
+const State = {
+  /* Application initial state */
+  running: false,
+  watching: [],
+  results: [],
+  seen: [],
+  totalCount: 0,
+  warningCount: 0,
+  errorCount: 0,
+  dismissedCount: 1,
+  options: {},
+
+  /* Panel initial state */
+  disabled: false,
+  onLoad: true,
+  open: false,
+  showPanel: false,
+
+  /* Annotations initial state */
+  jumpList: [],
+  lastOpenTip: -1,
+  openTip: {
+    button: false,
+    tip: false,
+  },
+
+
+  /* *********** */
+  /* Theme setup */
+  /* *********** */
+  theme: {
+    vars: {}
+  },
+};
+
+const Options = (function options() {
+  let ed11yLang = {};
+  function preProcessOptions(options) {
+    let defaultOptions = {
+
+      // Relative or absolute
+      //cssUrls: false, // ['/folder/editoria11y.css','/folder/custom.css']
+      cssUrls: false,
+
+      // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
+      checkRoots: false,
+      fixedRoots: false, // Array of specific nodes, overrides previous.
+      /* e.g:
+      fixedRoots: [
+        {
+           root: direct domReference
+           framePositioner: direct domReference or false
+        }
+      ]
+      */
+
+      // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
+      shadowComponents: false,
+      autoDetectShadowComponents: true,
+
+      // Containers to globally ignore, e.g., "header *, .card *"
+      ignoreElements: false,
+
+      // Provide list of test keys; get from localization file or results object.
+      // @todo merge provide translation layer or document change.
+      ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
+
+      // Ignore Aria on these elements (Gutenberg labels headings while editing.)
+      ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
+      ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
+
+      // Disable tests on specific elements
+      // Include and modify this entire object in your call
+      ignoreByKey: {
+        'p': 'table p',
+        // 'h': false,
+        'img': '[aria-hidden], [aria-hidden] img, ' +
+          '[role="presentation"], ' +
+          'a[href][aria-label] img, button[aria-label] img, ' +
+          'a[href][aria-labelledby] img, button[aria-labelledby] img',
+        'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
+        // 'li': false,
+        // 'blockquote': false,
+        // 'iframe': false,
+        // 'audio': false,
+        // 'video': false,
+        'table': '[role="presentation"]',
+      },
+
+      headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
+
+      // Set alertModes
+      // 'headless': do not draw interface
+      // 'userPreference: respect user preference.
+      // 'polite': open for new issues.
+      // 'assertive': open for any issues.
+      // 'active': always open.
+      // CMS integrations can switch between polite & headless at runtime.
+      alertMode: 'userPreference',
+      inlineAlerts: true,
+      watchForChanges: true, // true, false, 'checkRoots';
+
+      // This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
+      editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
+
+      // Dismissed alerts
+      currentPage: false, // uses window.location.pathname unless a string is provided.
+      allowHide: true, // enables end-user ignore button
+      allowOK: true,  // enables end-user mark OK button
+      syncedDismissals: false, // provide empty or populated object {} to enable sync functions
+      reportsURL: false, // Provides a link to site-wide reports
+      showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
+
+      // Hide all alerts if these elements are absent, e.g., ".edit-button"
+      // Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
+      ignoreAllIfAbsent: false,
+      ignoreAllIfPresent: false,
+
+      // Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
+      preventCheckingIfPresent: false,
+      preventCheckingIfAbsent: false,
+
+      // Regex of strings to remove from links before checking to see if link titles are meaningful. E.g.:
+      // "\(link is external\)|\(link sends email\)"
+      linkIgnoreStrings: false,
+      linkIgnoreSelector: false,
+
+      // Disable the "is this element visible" check on themes that have 0-height elements.
+      checkVisible: true,
+
+      // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
+      hiddenHandlers: '',
+
+      panelPinTo: 'right',
+      panelOffsetX: '25px',
+      panelOffsetY: '25px',
+      panelNoCover: '', // select other buttons to avoid.
+      panelAttachTo: document.body,
+
+      // Selector list for elements that hide overflow, truncating buttons.
+      constrainButtons: false,
+
+      // Interface
+      lang: 'en',
+      langSanitizes: false, // Some translation modules will double-escape
+      theme: 'sleekTheme',
+      sleekTheme: {
+        bg: '#eff2ff', // e8f4ff
+        bgHighlight: '#7b1919',
+        text: '#20160c',
+        primary: '#276499', // 276499
+        primaryText: '#eff2ff',
+        button: 'transparent', // deprecate?
+        panelBar: '#1e517c',
+        panelBarText: '#fffdf7',
+        panelBarShadow: '0 0 0 1px #276499',
+        activeTab: '#276499',
+        activeTabText: '#fffffe',
+        focusRing: '#007aff',
+        outlineWidth: '0',
+        borderRadius: '3px',
+        ok: '#1f5381',
+        warning: 'rgb(250, 216, 89)',
+        warningText: '#20160c',
+        alert: 'rgb(184, 5, 25)',
+        alertText: '#f4f7ff',
+      },
+      darkTheme: {
+        bg: '#0a2051',
+        bgHighlight: '#7b1919',
+        text: '#f4f7ff',
+        primary: '#3052a0',
+        primaryText: '#f4f7ff',
+        button: 'transparent',
+        panelBar: '#3052a0',
+        panelBarText: '#f4f7ff',
+        panelBarShadow: 'inset 0 0 1px, 0 0 0 1px #0a2051',
+        activeTab: '#0a2051',
+        activeTabText: '#fffffe',
+        focusRing: 'cyan',
+        outlineWidth: '2px',
+        borderRadius: '3px',
+        ok: '#0a307a',
+        warning: 'rgb(250, 216, 89)',
+        warningText: '#20160c',
+        alert: 'rgb(184, 5, 25)',
+        alertText: '#f4f7ff',
+      },
+      lightTheme: {
+        bg: '#fffffe',
+        bgHighlight: '#7b1919',
+        text: '#20160c',
+        primary: '#0a307a',
+        primaryText: '#fffdf7',
+        panelBar: '#0a307a',
+        panelBarText: '#f4f7ff',
+        panelBarShadow: '0 0 0 1px #0a307a',
+        button: 'transparent',
+        activeTab: '#b9c0cf',
+        activeTabText: '#20160c',
+        focusRing: '#007aff',
+        outlineWidth: '0',
+        borderRadius: '3px',
+        ok: '#0a307a',
+        warning: 'rgb(250, 216, 89)',
+        warningText: '#20160c',
+        alert: 'rgb(184, 5, 25)',
+        alertText: '#f4f7ff',
+      },
+      // Base z-index for buttons.
+      // 1299 maximizes TinyMCE compatibility.
+      buttonZIndex: 1299,
+      // CSS overrides and additions.
+
+      baseFontSize: 'clamp(14px, 1.5vw, 16px)',
+      baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
+
+      // Test customizations
+      embeddedContent: false, // @todo remove in favor of custom checks?
+      embeddedContentTitle: '', // @todo test or remove?
+      embeddedContentMessage: '', // @todo test or remove?
+
+      linksUrls: false, // get from language pack
+      linksMeaningless: false, // get from language pack
+      altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
+      // * Not implemented Yet:
+      // ruleset toggling
+      // form label tests
+      // detectSPArouting: false,
+
+      editLinks: false, // Add links to edit content in tooltips.
+
+      // @todo merge: port this functionality.
+      editorHeadingLevel: [
+        // Sets previous heading level for contentEditable fields.
+        // With 'ignore' set, first heading level is ignored in editable zones.
+        // This is ideal for systems with separate backend editing pages.
+        // Set to 'inherit' for fields edited in a frontend context.
+        /*{
+          selector: '.example-inherit',
+          previousHeading: 'inherit',
+        },
+        {
+          selector: '.example-l3',
+          previousHeading: 3,
+        },*/
+        {
+          selector: '*',
+          previousHeading: 0, // Ignores first heading for level skip detection.
+        },
+      ],
+
+      userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
+
+      customTests: 0,
+
+      // @todo merge do we need the image and button descenders and the tabindex selector? If so should it be in the MR?
+      imageIgnore: '[aria-hidden], [aria-hidden] img, [role="presentation"], a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img',
+      linkIgnore: '[aria-hidden][tabindex="-1"]',
+
+
+      checks: {
+        QA_DOCUMENT: {
+          sources: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']',
+        },
+        EMBED_VIDEO: {
+          sources: 'video, [src*="youtube.com"], [src*="brightcove.com"], [src*="dailymotion.com"], [src*="panopto.com"], [src*="Video"], [src*="video"], [src*="vimeo.com"], [src*="watch"], [src*="wistia.com"], [src*="vidyard.com"], [src*=yuja.com]'
+        },
+      },
+
+    };
+    options = {
+      ...defaultOptions,
+      ...options
+    };
+
+    /*
+    * Options translation
+    * */
+    options.headless = options.alertMode === 'headless';
+    options.customChecks = options.customTests > 0 && !options.customChecks ? 'listen' : false;
+
+    // Toggleable plugins
+    options.developerPlugin = false;
+    options.colourFilterPlugin = false;
+    options.exportResultsPlugin = false;
+    options.showImageOutline = false;
+    // @todo merge what are these?
+    // Global.ignoreContentOutsideRoots = option.ignoreContentOutsideRoots;
+
+  //  options.panelPosition = panelPinTo; // Syntax?
+
+    // Check for document types.
+
+    if (options.documentLinks) {
+      options.checks.QA_DOCUMENT.sources = options.documentLinks;
+    }
+    // @todo merge this changed name from linkIgnoreSelector.
+
+    if (options.linkIgnoreSelector) {
+      options.linkIgnoreSpan = options.linkIgnoreSelector;
+    }
+
+
+
+    // @todo Merge ignoreByKey deprecation documentation and conversion. These tests still need overrides:
+    // 'p': 'table p',
+    //  'table': '[role="presentation"]'
+
+    /* ********************** */
+    /* Embedded Content Setup */
+    /* ********************** */
+    //Global.AllEmbeddedContent = `${Global.VideoSources}, ${Global.AudioSources}, ${Global.VisualizationSources}`;
+    // @todo merge: this means custom embeds needs to be a custom test.
+
+    /* ************** */
+    /* Language setup */
+    /* ************** */
+    // @todo merge how to emulate Sa11y translations?
+    ed11yLang = {
+      // Fall back to En strings if language or string is unavailable
+      ...ed11yLang['en'],
+      ...ed11yLang[options.lang]
+    };
+
+    /* *********** */
+    /* Theme setup */
+    /* *********** */
+    State.theme.vars.push = options[options.theme];
+    State.theme.baseFontSize = options.baseFontSize;
+    State.theme.buttonZIndex = options.buttonZIndex;
+    State.theme.baseFontFamily = options.baseFontFamily;
+    State.theme.version = options.version;
+
+    if (!options.cssUrls) {
+      const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
+      if (cssLink) {
+        State.theme.cssUrls = [cssLink.getAttribute('href')];
+      } else {
+        console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
+        State.theme.cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.theme.version}/dist/editoria11y.min.css`];
+      }
+    }
+    const cssBundle = document.createElement('div');
+    cssBundle.classList.add('ed11y-style');
+    cssBundle.setAttribute('hidden','');
+    State.theme.cssUrls?.forEach( sheet => {
+      const cssLink = document.createElement('link');
+      cssLink.setAttribute('rel', 'stylesheet');
+      // @todo preload.
+      cssLink.setAttribute('media', 'all');
+      if (sheet.indexOf('?') < 0) {
+        sheet = sheet + '?ver=' + State.theme.version;
+      }
+      cssLink.setAttribute('href', sheet);
+      cssBundle.append(cssLink);
+    });
+    State.theme.attachCSS = function(appendTo) {
+      const link = cssBundle.cloneNode(true);
+      appendTo.appendChild(link);
+    };
+
+    return options;
+  }
+  function postProcessOptions(options) {
+    // @todo merge: test: does this need descendant selector?
+    Constants.Sa11yElements = '.ed11y-element';
+    // Main container exclusions.
+    console.log('Constants: ');
+    console.log(Constants);
+
+
+
+    State.currentPage = options.currentPage ? options.currentPage : window.location.currentPage;
+
+    // @todo merge remove wpadminbar from defaults and update wp module.
+    /*Exclusions.Container = ['#wpadminbar', '#wpadminbar *', ...exclusions];
+    if (option.containerIgnore) {
+      const containerSelectors = option.containerIgnore.split(',').map((item) => item.trim());
+      Exclusions.Container = Exclusions.Container.concat(
+        containerSelectors.flatMap((item) => [`${item} *`, item]),
+      );
+    }*/
+
+  }
+
+  return {
+    preProcessOptions,
+    ed11yLang,
+    postProcessOptions,
+  };
+}());
+
 var styles$1 = "[data-sa11y-overflow]{overflow:auto!important}[data-sa11y-error]{outline:5px solid var(--sa11y-error)!important;outline-offset:2px}[data-sa11y-warning]:not([data-sa11y-error]){outline:5px solid var(--sa11y-warning)!important;outline-offset:2px}[data-sa11y-pulse-border]{animation:pulse 1s 2;box-shadow:0;outline:5px solid var(--sa11y-focus-color)!important}[data-sa11y-pulse-border]:focus,[data-sa11y-pulse-border]:hover{animation:none}@keyframes pulse{0%{box-shadow:0 0 0 5px var(--sa11y-focus-color)}50%{box-shadow:0 0 0 12px var(--sa11y-pulse-color)}to{box-shadow:0 0 0 5px var(--sa11y-pulse-color)}}h1[data-sa11y-pulse-border],h2[data-sa11y-pulse-border],h3[data-sa11y-pulse-border],h4[data-sa11y-pulse-border],h5[data-sa11y-pulse-border],h6[data-sa11y-pulse-border],img[data-sa11y-pulse-border]{animation:pulse-scale 1s 2}@keyframes pulse-scale{0%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.02)}to{opacity:1;transform:scale(1)}}@media (prefers-reduced-motion:reduce){[data-sa11y-pulse-border]{animation:none!important}}@media (forced-colors:active){[data-sa11y-error-inline],[data-sa11y-error],[data-sa11y-good],[data-sa11y-pulse-border],[data-sa11y-warning-inline],[data-sa11y-warning]{forced-color-adjust:none}}";
 
 /* ************************************************************ */
@@ -1414,74 +2140,6 @@ function findShadowComponents(option) {
       component.setAttribute('data-sa11y-has-shadow-root', '');
       addStyleUtilities(component);
     });
-  }
-}
-
-const version = '3.0.0';
-
-var styles = ":host{background:var(--sa11y-panel-bg);border-top:5px solid var(--sa11y-panel-bg-splitter);bottom:0;display:block;height:-moz-fit-content;height:fit-content;left:0;position:fixed;right:0;width:100%;z-index:999999}*{-webkit-font-smoothing:auto!important;color:var(--sa11y-panel-primary);font-family:var(--sa11y-font-face)!important;font-size:var(--sa11y-normal-text);line-height:22px!important}#dialog{margin:20px auto;max-width:900px;padding:20px}h2{font-size:var(--sa11y-large-text);margin-top:0}a{color:var(--sa11y-hyperlink);cursor:pointer;text-decoration:underline}a:focus,a:hover{text-decoration:none}p{margin-top:0}.error{background:var(--sa11y-error);border:2px dashed #f08080;color:var(--sa11y-error-text);margin-bottom:0;padding:5px}";
-
-var sharedStyles = ".visually-hidden{clip:rect(1px,1px,1px,1px);border:0;clip-path:inset(50%);display:block;height:1px;overflow:hidden;padding:0;position:absolute;white-space:nowrap;width:1px}[hidden]{display:none!important}.header-text,.header-text-inline,h2{color:var(--sa11y-panel-primary);display:block;font-size:var(--sa11y-large-text);font-weight:600;margin-bottom:3px}.header-text-inline{display:inline-block!important}code{font-family:monospace!important;font-size:calc(var(--sa11y-normal-text) - 1px);font-weight:600}pre:has(code){display:block;overflow:auto;white-space:pre-wrap}.kbd,code,kbd,pre{background-color:var(--sa11y-panel-badge);border-radius:3.2px;color:var(--sa11y-panel-primary);padding:1.6px 4.8px}.bold{font-weight:600}.error .colour,.red-text{color:var(--sa11y-red-text);font-family:var(--sa11y-font-face)}.warning .colour,.yellow-text{color:var(--sa11y-yellow-text);font-family:var(--sa11y-font-face)}.badge,.normal-badge{background-color:var(--sa11y-panel-badge);border-radius:10px;color:var(--sa11y-panel-primary);display:inline;font-size:14px;font-weight:700!important;line-height:1;min-width:10px;outline:1px solid transparent;padding:1px 5px 1.75px;text-align:center;vertical-align:baseline;white-space:nowrap}.error .badge{background:var(--sa11y-error);color:var(--sa11y-error-text)}.error-badge{background:var(--sa11y-error)!important;color:var(--sa11y-error-text)!important}.warning .badge{background:var(--sa11y-yellow-text);color:var(--sa11y-panel-bg)}.warning-badge{background:var(--sa11y-yellow-text)!important;color:var(--sa11y-panel-bg)!important}.good-contrast{background:var(--sa11y-good)!important;color:var(--sa11y-good-text)!important}#contrast-preview{background-color:#e8e8e8;background-image:linear-gradient(45deg,#ccc 25%,transparent 0,transparent 75%,#ccc 0,#ccc),linear-gradient(45deg,#ccc 25%,transparent 0,transparent 75%,#ccc 0,#ccc);background-position:0 0,5px 5px;background-size:10px 10px;border:2px dashed var(--sa11y-panel-bg-splitter);border-radius:3.2px;line-height:1;margin-top:10px;max-height:100px;overflow:clip;overflow-wrap:break-word;padding:5px}#contrast-preview:empty{display:none}#color-pickers{display:flex;justify-content:space-between;margin-bottom:10px;margin-top:10px}#color-pickers label{align-items:center;display:flex}#color-pickers input{cursor:pointer;margin-inline-start:7px}input[type=color i]{background:var(--sa11y-panel-bg-secondary);block-size:44px;border-color:var(--sa11y-button-outline);border-radius:50%;border-style:solid;border-width:1px;inline-size:44px;padding:2px}input[type=color i]::-webkit-color-swatch-wrapper{padding:1px}input[type=color i]::-webkit-color-swatch{border-color:var(--sa11y-button-outline);border-radius:50%}input[type=color i]::-moz-color-swatch{border-color:var(--sa11y-button-outline);border-radius:50%}input[type=color i].unknown{box-shadow:0 0 0 2px var(--sa11y-yellow-text)}input[type=color i].unknown:after{align-items:center;color:#fff;content:\"?\";display:flex;font-size:22px;height:44px;justify-content:center;margin:-40px -3px;pointer-events:none;position:absolute;width:44px;z-index:2}.close-btn{background:var(--sa11y-panel-bg-secondary);border:2px solid var(--sa11y-button-outline);border-radius:50%;color:var(--sa11y-panel-primary);cursor:pointer;float:var(--sa11y-float-rtl);font-size:var(--sa11y-normal-text);font-weight:400;height:32px;margin:0;position:relative;transition:all .2s ease-in-out;width:32px}.close-btn:focus,.close-btn:hover{background-color:var(--sa11y-shortcut-hover)}.close-btn:after{background:var(--sa11y-setting-switch-bg-off);content:\"\";inset:-7px;-webkit-mask:var(--sa11y-close-btn-svg) center no-repeat;mask:var(--sa11y-close-btn-svg) center no-repeat;position:absolute}@media screen and (forced-colors:active){.close-btn:after{filter:invert(1)}}#container [tabindex=\"-1\"]:focus,#container [tabindex=\"0\"]:focus,#container a:focus,#container button:focus,#container input:focus,#container select:focus{box-shadow:0 0 0 5px var(--sa11y-focus-color);outline:0}#container #panel-controls button:focus,#container .switch:focus{box-shadow:inset 0 0 0 4px var(--sa11y-focus-color);outline:0}#container #panel-controls button:focus:not(:focus-visible),#container [tabindex=\"-1\"]:focus:not(:focus-visible),#container [tabindex=\"0\"]:focus:not(:focus-visible),#container button:focus:not(:focus-visible),#container input:focus:not(:focus-visible),#container select:focus:not(:focus-visible){box-shadow:none;outline:0}#container [tabindex=\"-1\"]:focus-visible,#container [tabindex=\"0\"]:focus-visible,#container a:focus-visible,#container button:not(#panel-controls button):not(.switch):focus-visible,#container input:focus-visible,#container select:focus-visible{box-shadow:0 0 0 5px var(--sa11y-focus-color);outline:0}#container #panel-controls button:focus-visible,#container .switch:focus-visible{box-shadow:inset 0 0 0 4px var(--sa11y-focus-color);outline:0}@media screen and (forced-colors:active){#panel-controls button:focus{border:3px solid transparent}#container [tabindex=\"-1\"]:focus,#container [tabindex=\"0\"]:focus,#container a:focus,#container button:focus,#container select:focus,.close-btn:focus{outline:3px solid transparent!important}}";
-
-class ConsoleErrors extends HTMLElement {
-  constructor(error) {
-    super();
-    this.error = error;
-  }
-
-  connectedCallback() {
-    const shadow = this.attachShadow({ mode: 'open' });
-
-    // Styles
-    const style = document.createElement('style');
-    style.innerHTML = styles + sharedStyles;
-    shadow.appendChild(style);
-
-    // Container
-    const content = document.createElement('div');
-    content.setAttribute('id', 'dialog');
-    content.setAttribute('tabindex', '-1');
-
-    // Google Form & GitHub error link.
-    const url = window.location;
-    const google = 'https://forms.gle/sjzK9XykETaoqZv99';
-
-    // GitHub template
-    const template = `## Error Description
-\`\`\`javascript
-${this.error.stack}
-\`\`\`
-
-## Details
-- **URL:** ${url}
-- **Version:** ${version}
-
-## Comments
-`;
-    const encodedTemplate = encodeURIComponent(template);
-    const github = `https://github.com/ryersondmp/sa11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
-
-    // Message
-    content.innerHTML = `
-      <button class="close-btn" aria-label="${Lang._('ALERT_CLOSE')}"></button>
-      <h2>${Lang._('ERROR')}</h2>
-      <p>${Lang.sprintf('CONSOLE_ERROR', google, github)}</p>
-      <p class="error">${escapeHTML(this.error.stack)}<br><br>Version: ${version} <br> URL: ${url}</p>
-    `;
-    shadow.appendChild(content);
-
-    // Set focus and hide Sa11y's toggle.
-    setTimeout(() => {
-      Constants.Panel.toggle.style.display = 'none';
-      const container = document.querySelector('sa11y-console-error');
-      const dialog = container.shadowRoot.getElementById('dialog');
-      dialog.focus();
-
-      const close = container.shadowRoot.querySelector('.close-btn');
-      close.addEventListener('click', () => {
-        container.remove();
-      });
-    }, 0);
   }
 }
 
@@ -2449,1134 +3107,6 @@ function checkLinkText(results, option) {
   return results;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// */ //// END LOCAL TESTING SWITCH
-
-
-/////  Module Scope Object Containing Constants  /////
-/////   APCA   0.0.98G - 4g - W3 Compatible Constants
-
-/////  𝒦 SA98G  ///////////////////////////////////
-    const SA98G = {
-
-        mainTRC: 2.4, // 2.4 exponent for emulating actual monitor perception
-
-            // For reverseAPCA
-        get mainTRCencode() { return 1 / this.mainTRC },
-
-              // sRGB coefficients
-        sRco: 0.2126729, 
-        sGco: 0.7151522, 
-        sBco: 0.0721750, 
-
-              // G-4g constants for use with 2.4 exponent
-        normBG: 0.56, 
-        normTXT: 0.57,
-        revTXT: 0.62,
-        revBG: 0.65,
-
-              // G-4g Clamps and Scalers
-        blkThrs: 0.022,
-        blkClmp: 1.414, 
-        scaleBoW: 1.14,
-        scaleWoB: 1.14,
-        loBoWoffset: 0.027,
-        loWoBoffset: 0.027,
-        deltaYmin: 0.0005,
-        loClip: 0.1,
-
-          ///// MAGIC NUMBERS for UNCLAMP, for use with 0.022 & 1.414 /////
-         // Magic Numbers for reverseAPCA
-        mFactor: 1.94685544331710,
-        get mFactInv() { return 1 / this.mFactor},
-        mOffsetIn: 0.03873938165714010,
-        mExpAdj: 0.2833433964208690,
-        get mExp() { return this.mExpAdj / this.blkClmp},
-        mOffsetOut: 0.3128657958707580,
-      };
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-//////////  APCA CALCULATION FUNCTIONS \/////////////////////////////////////
-
-//////////  ƒ  APCAcontrast()  ////////////////////////////////////////////
-function APCAcontrast (txtY,bgY,places = -1) {
-                 // send linear Y (luminance) for text and background.
-                // txtY and bgY must be between 0.0-1.0
-               // IMPORTANT: Do not swap, polarity is important.
-
-  const icp = [0.0,1.1];     // input range clamp / input error check
-
-  if(isNaN(txtY)||isNaN(bgY)||Math.min(txtY,bgY)<icp[0]||
-                              Math.max(txtY,bgY)>icp[1]){
-    return 0.0;  // return zero on error
-    // return 'error'; // optional string return for error
-  }
-//////////   SAPC LOCAL VARS   /////////////////////////////////////////
-
-  let SAPC = 0.0;            // For raw SAPC values
-  let outputContrast = 0.0; // For weighted final values
-  let polCat = 'BoW';      // Alternate Polarity Indicator. N normal R reverse
-
-  // TUTORIAL
-
-  // Use Y for text and BG, and soft clamp black,
-  // return 0 for very close luminances, determine
-  // polarity, and calculate SAPC raw contrast
-  // Then scale for easy to remember levels.
-
-  // Note that reverse contrast (white text on black)
-  // intentionally returns a negative number
-  // Proper polarity is important!
-
-//////////   BLACK SOFT CLAMP   ////////////////////////////////////////
-
-          // Soft clamps Y for either color if it is near black.
-  txtY = (txtY > SA98G.blkThrs) ? txtY :
-                         txtY + Math.pow(SA98G.blkThrs - txtY, SA98G.blkClmp);
-  bgY = (bgY > SA98G.blkThrs) ? bgY :
-                          bgY + Math.pow(SA98G.blkThrs - bgY, SA98G.blkClmp);
-
-       ///// Return 0 Early for extremely low ∆Y
-  if ( Math.abs(bgY - txtY) < SA98G.deltaYmin ) { return 0.0; }
-
-
-//////////   APCA/SAPC CONTRAST - LOW CLIP (W3 LICENSE)  ///////////////
-
-  if ( bgY > txtY ) {  // For normal polarity, black text on white (BoW)
-
-              // Calculate the SAPC contrast value and scale
-    SAPC = ( Math.pow(bgY, SA98G.normBG) - 
-             Math.pow(txtY, SA98G.normTXT) ) * SA98G.scaleBoW;
-
-            // Low Contrast smooth rollout to prevent polarity reversal
-           // and also a low-clip for very low contrasts
-    outputContrast = (SAPC < SA98G.loClip) ? 0.0 : SAPC - SA98G.loBoWoffset;
-
-  } else {  // For reverse polarity, light text on dark (WoB)
-           // WoB should always return negative value.
-    polCat = 'WoB';
-
-    SAPC = ( Math.pow(bgY, SA98G.revBG) - 
-             Math.pow(txtY, SA98G.revTXT) ) * SA98G.scaleWoB;
-
-    outputContrast = (SAPC > -SA98G.loClip) ? 0.0 : SAPC + SA98G.loWoBoffset;
-  }
-
-         // return Lc (lightness contrast) as a signed numeric value 
-        // Round to the nearest whole number as string is optional.
-       // Rounded can be a signed INT as output will be within ± 127 
-      // places = -1 returns signed float, 1 or more set that many places
-     // 0 returns rounded string, uses BoW or WoB instead of minus sign
-
-  if(places < 0 ){  // Default (-1) number out, all others are strings
-    return  outputContrast * 100.0;
-  } else if(places == 0 ){
-    return  Math.round(Math.abs(outputContrast)*100.0)+'<sub>'+polCat+'</sub>';
-  } else if(Number.isInteger(places)){
-    return  (outputContrast * 100.0).toFixed(places);
-  } else { return 0.0 }
-
-} // End APCAcontrast()
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-//////////  ƒ  fontLookupAPCA()  0.1.7 (G)  \////////////////////////////////
-/////////                                    \//////////////////////////////
-
-function fontLookupAPCA (contrast,places=2) {
-
-////////////////////////////////////////////////////////////////////////////
-/////  CONTRAST * FONT WEIGHT & SIZE  /////////////////////////////////////
-
-// Font size interpolations. Here the chart was re-ordered to put
-// the main contrast levels each on one line, instead of font size per line.
-// First column is LC value, then each following column is font size by weight
-
-// G G G G G G  Public Beta 0.1.7 (G) • MAY 28 2022
-
-// Lc values under 70 should have Lc 15 ADDED if used for body text
-// All font sizes are in px and reference font is Barlow
-
-// 999: prohibited - too low contrast
-// 777: NON TEXT at this minimum weight stroke
-// 666 - this is for spot text, not fluent-Things like copyright or placeholder.
-// 5xx - minimum font at this weight for content, 5xx % 500 for font-size
-// 4xx - minimum font at this weight for any purpose], 4xx % 400 for font-size
-
-// MAIN FONT SIZE LOOKUP
-
-//// ASCENDING SORTED  Public Beta 0.1.7 (G) • MAY 28 2022  ////
-
-//// Lc 45 * 0.2 = 9 which is the index for the row for Lc 45
-
-// MAIN FONT LOOKUP May 28 2022 EXPANDED
-// Sorted by Lc Value
-// First row is standard weights 100-900
-// First column is font size in px
-// All other values are the Lc contrast 
-// 999 = too low. 777 = non-text and spot text only
-
-
-const fontMatrixAscend = [
-    ['Lc',100,200,300,400,500,600,700,800,900],
-    [0,999,999,999,999,999,999,999,999,999],
-    [10,999,999,999,999,999,999,999,999,999],
-    [15,777,777,777,777,777,777,777,777,777],
-    [20,777,777,777,777,777,777,777,777,777],
-    [25,777,777,777,120,120,108,96,96,96],
-    [30,777,777,120,108,108,96,72,72,72],
-    [35,777,120,108,96,72,60,48,48,48],
-    [40,120,108,96,60,48,42,32,32,32],
-    [45,108,96,72,42,32,28,24,24,24],
-    [50,96,72,60,32,28,24,21,21,21],
-    [55,80,60,48,28,24,21,18,18,18],
-    [60,72,48,42,24,21,18,16,16,18],
-    [65,68,46,32,21.75,19,17,15,16,18],
-    [70,64,44,28,19.5,18,16,14.5,16,18],
-    [75,60,42,24,18,16,15,14,16,18],
-    [80,56,38.25,23,17.25,15.81,14.81,14,16,18],
-    [85,52,34.5,22,16.5,15.625,14.625,14,16,18],
-    [90,48,32,21,16,15.5,14.5,14,16,18],
-    [95,45,28,19.5,15.5,15,14,13.5,16,18],
-    [100,42,26.5,18.5,15,14.5,13.5,13,16,18],
-    [105,39,25,18,14.5,14,13,12,16,18],
-    [110,36,24,18,14,13,12,11,16,18],
-    [115,34.5,22.5,17.25,12.5,11.875,11.25,10.625,14.5,16.5],
-    [120,33,21,16.5,11,10.75,10.5,10.25,13,15],
-    [125,32,20,16,10,10,10,10,12,14],
-    ];
-
-
-// ASCENDING SORTED  Public Beta 0.1.7 (G) • MAY 28 2022 ////
-
-// DELTA - MAIN FONT LOOKUP May 28 2022 EXPANDED
-// EXPANDED  Sorted by Lc Value ••  DELTA
-// The pre-calculated deltas of the above array
-
-const fontDeltaAscend = [
-    ['∆Lc',100,200,300,400,500,600,700,800,900],
-    [0,0,0,0,0,0,0,0,0,0],
-    [10,0,0,0,0,0,0,0,0,0],
-    [15,0,0,0,0,0,0,0,0,0],
-    [20,0,0,0,0,0,0,0,0,0],
-    [25,0,0,0,12,12,12,24,24,24],
-    [30,0,0,12,12,36,36,24,24,24],
-    [35,0,12,12,36,24,18,16,16,16],
-    [40,12,12,24,18,16,14,8,8,8],
-    [45,12,24,12,10,4,4,3,3,3],
-    [50,16,12,12,4,4,3,3,3,3],
-    [55,8,12,6,4,3,3,2,2,0],
-    [60,4,2,10,2.25,2,1,1,0,0],
-    [65,4,2,4,2.25,1,1,0.5,0,0],
-    [70,4,2,4,1.5,2,1,0.5,0,0],
-    [75,4,3.75,1,0.75,0.188,0.188,0,0,0],
-    [80,4,3.75,1,0.75,0.188,0.188,0,0,0],
-    [85,4,2.5,1,0.5,0.125,0.125,0,0,0],
-    [90,3,4,1.5,0.5,0.5,0.5,0.5,0,0],
-    [95,3,1.5,1,0.5,0.5,0.5,0.5,0,0],
-    [100,3,1.5,0.5,0.5,0.5,0.5,1,0,0],
-    [105,3,1,0,0.5,1,1,1,0,0],
-    [110,1.5,1.5,0.75,1.5,1.125,0.75,0.375,1.5,1.5],
-    [115,1.5,1.5,0.75,1.5,1.125,0.75,0.375,1.5,1.5],
-    [120,1,1,0.5,1,0.75,0.5,0.25,1,1],
-    [125,0,0,0,0,0,0,0,0,0],
-    ];
-
-  // APCA CONTRAST FONT LOOKUP TABLES
-  // Copyright © 2022 by Myndex Research and Andrew Somers. All Rights Reserved
-  // Public Beta 0.1.7 (G) • MAY 28 2022
-  // For the following arrays, the Y axis is contrastArrayLen
-  // The two x axis are weightArrayLen and scoreArrayLen
-
-  // MAY 28 2022
-
-  const weightArray = [0,100,200,300,400,500,600,700,800,900];
-  const weightArrayLen = weightArray.length; // X axis
-
-  let returnArray = [contrast.toFixed(places),0,0,0,0,0,0,0,0,0,];
-  returnArray.length; // X axis
-
-//// Lc 45 * 0.2 = 9, and 9 is the index for the row for Lc 45
-
-  let tempFont = 777;
-  contrast = Math.abs(contrast); // Polarity unneeded for LUT
-  const factor = 0.2; // 1/5 as LUT is in increments of 5
-  const index = (contrast == 0) ?
-                 1 : (contrast * factor) | 0 ; // LUT row... n|0 is bw floor
-  let w = 0; 
-    // scoreAdj interpolates the needed font side per the Lc
-  let scoreAdj = (contrast - fontMatrixAscend[index][w]) * factor;
-
-  w++; // determines column in font matrix LUT
-
-
-/////////  Font and Score Interpolation  \/////////////////////////////////
-
-// populate returnArray with interpolated values
-
-  for (; w < weightArrayLen; w++) {
-
-    tempFont = fontMatrixAscend[index][w]; 
-
-    if (tempFont > 400) { // declares a specific minimum for the weight.
-        returnArray[w] = tempFont;
-    } else if (contrast < 14.5 ) {
-        returnArray[w] = 999; //  999 = do not use for anything
-    } else if (contrast < 29.5 ) {
-        returnArray[w] = 777; // 777 =  non-text only
-    } else {
-                // INTERPOLATION OF FONT SIZE
-               // sets level for 0.5px size increments of smaller fonts
-              // Note bitwise (n|0) instead of floor
-      (tempFont > 24) ?
-        returnArray[w] =
-            Math.round(tempFont - (fontDeltaAscend[index][w] * scoreAdj)) :
-        returnArray[w] =
-            tempFont - ((2.0 * fontDeltaAscend[index][w] * scoreAdj) | 0) * 0.5;
-                                                      // (n|0) is bitwise floor
-    }
-  }
-/////////  End Interpolation  ////////////////////////////////////////////
-
-  return returnArray
-} // end fontLookupAPCA
-
-/////////\                                      ///////////////////////////\
-//////////\  END  fontLookupAPCA()  0.1.7 (G)  /////////////////////////////\
-/////////////////////////////////////////////////////////////////////////////\
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-//////////  LUMINANCE CONVERTERS  |//////////////////////////////////////////
-
-
-//////////  ƒ  sRGBtoY()  //////////////////////////////////////////////////
-function sRGBtoY (rgb = [0,0,0]) { // send sRGB 8bpc (0xFFFFFF) or string
-
-// NOTE: Currently expects 0-255
-
-/////   APCA   0.0.98G - 4g - W3 Compatible Constants   ////////////////////
-/*
-const mainTRC = 2.4; // 2.4 exponent emulates actual monitor perception
-    
-const sRco = 0.2126729, 
-      sGco = 0.7151522, 
-      sBco = 0.0721750; // sRGB coefficients
-      */
-// Future:
-// 0.2126478133913640	0.7151791475336150	0.0721730390750208
-// Derived from:
-// xW	yW	K	xR	yR	xG	yG	xB	yB
-// 0.312720	0.329030	6504	0.640	0.330	0.300	0.600	0.150	0.060
-
-         // linearize r, g, or b then apply coefficients
-        // and sum then return the resulting luminance
-
-  function simpleExp (chan) { return Math.pow(chan/255.0, SA98G.mainTRC); }
-  return SA98G.sRco * simpleExp(rgb[0]) +
-         SA98G.sGco * simpleExp(rgb[1]) +
-         SA98G.sBco * simpleExp(rgb[2]);
-         
-} // End sRGBtoY()
-
-
-
-
-////////////////////////////////////////////////////////////////////////////
-//////////  UTILITIES  \///////////////////////////////////////////////////
-
-
-//////////  ƒ  alphaBlend()  /////////////////////////////////////////////
-
-                      // send rgba array for text/icon, rgb for background.
-                     // Only foreground allows alpha of 0.0 to 1.0 
-                    // This blends using gamma encoded space (standard)
-                   // rounded 0-255 or set round=false for number 0.0-255.0
-function alphaBlend (rgbaFG=[0,0,0,1.0], rgbBG=[0,0,0], round = true ) {
-	
-	rgbaFG[3] = Math.max(Math.min(rgbaFG[3], 1.0), 0.0); // clamp alpha 0-1
-	let compBlend = 1.0 - rgbaFG[3];
-	let rgbOut = [0,0,0,1,true]; // or just use rgbBG to retain other elements?
-	
-	for (let i=0;i<3;i++) {
-		rgbOut[i] = rgbBG[i] * compBlend + rgbaFG[i] * rgbaFG[3];
-		if (round) rgbOut[i] = Math.min(Math.round(rgbOut[i]),255);
-	}  return rgbOut;
-} // End alphaBlend()
-
-
-
-
-//\                                     ////////////////////////////////////////
-///\                                   ////////////////////////////////////////
-////\                                 ////////////////////////////////////////
-/////\  END APCA 0.1.9  G-4g  BLOCK  ////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////
-
-/**
- * Normalizes a given font weight to a numeric value. Maps keywords to their numeric equivalents.
- * @param {string|number} weight - The font weight, either as a number or a keyword.
- * @returns {number} - The numeric font weight.
-*/
-function normalizeFontWeight(weight) {
-  const numericWeight = parseInt(weight, 10);
-  if (!Number.isNaN(numericWeight)) return numericWeight;
-  const weightMap = {
-    lighter: 100,
-    normal: 400,
-    bold: 700,
-    bolder: 900,
-  };
-  return weightMap[weight] || 400;
-}
-
-/**
- * Convert colour string to RGBA format.
- * @param {string} color The colour string to convert.
- * @param {number} opacity The computed opacity of the element (0 to 1).
- * @returns Returns colour in rgba format with alpha value.
- */
-function convertToRGBA(color, opacity) {
-  const colorString = color;
-  let r;
-  let g;
-  let b;
-  let a = 1; // Initialize alpha to 1 by default.
-
-  if (!colorString.startsWith('rgb')) {
-    // Unsupported color spaces.
-    if (
-      colorString.startsWith('color(rec2020')
-      || colorString.startsWith('color(display-p3')
-      || colorString.startsWith('url(')
-    ) {
-      return 'unsupported';
-    }
-
-    // Let the browser do conversion in rgb for non-supported colour spaces.
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    context.fillStyle = colorString;
-    context.fillRect(0, 0, 1, 1);
-    const imageData = context.getImageData(0, 0, 1, 1);
-    [r, g, b, a] = imageData.data;
-    a = (a / 255).toFixed(2); // Convert alpha to range [0, 1]
-  } else {
-    // Parse RGB or RGBA values from the color string
-    const rgbaArray = colorString.match(/[\d.]+/g).map(Number);
-    [r, g, b, a] = rgbaArray.length === 4 ? rgbaArray : [...rgbaArray, 1];
-  }
-
-  // If element has opacity attribute, amend the foreground text color string.
-  if (opacity && opacity < 1) {
-    a = (a * opacity).toFixed(2); // Adjust alpha based on the opacity
-  }
-  return [r, g, b, Number(a)];
-}
-
-/**
- * Retrieves the background colour of an element by traversing up the DOM tree.
- * @param {HTMLElement} $el - The DOM element from which to start searching for the background.
- * @returns {string} - The background color in RGBA format, or "image" if background image.
-*/
-function getBackground($el) {
-  let targetEl = $el;
-  while (targetEl && targetEl.nodeType === 1) {
-    // Element is within a shadow component.
-    if (Constants.Global.shadowDetection) {
-      const root = targetEl.getRootNode();
-      if (root instanceof ShadowRoot) {
-        // Traverse upward until the shadow root's host.
-        let node = targetEl;
-        while (node && node !== root.host) {
-          const styles = getComputedStyle(node);
-
-          // Background image check.
-          if (styles.backgroundImage && styles.backgroundImage !== 'none') {
-            return { type: 'image', value: styles.backgroundImage };
-          }
-
-          // Background colour check.
-          const bgColor = convertToRGBA(styles.backgroundColor);
-          if (bgColor[3] !== 0 && bgColor !== 'transparent') {
-            return bgColor;
-          }
-          node = node.parentElement;
-        }
-
-        // If nothing found within the shadow tree, continue with the host.
-        return getBackground(root.host);
-      }
-    }
-
-    // Element has background image.
-    const styles = getComputedStyle(targetEl);
-    const bgImage = styles.backgroundImage;
-    if (bgImage !== 'none') {
-      return { type: 'image', value: bgImage };
-    }
-
-    // Element has background colour.
-    const bgColor = convertToRGBA(styles.backgroundColor);
-    if (bgColor[3] !== 0 && bgColor !== 'transparent') {
-      // If the background colour has an alpha channel.
-      if (bgColor[3] < 1) {
-        // We need to find the first non-transparent parent background and blend them together.
-        let parentEl = targetEl.parentElement;
-        let parentBgColor = 'rgba(255, 255, 255, 1)';
-        while (parentEl && parentEl.nodeType === 1) {
-          const parentStyles = getComputedStyle(parentEl);
-          parentBgColor = parentStyles.backgroundColor;
-
-          // Stop, valid colour found.
-          if (parentBgColor !== 'rgba(0, 0, 0, 0)') break;
-
-          // If we reach the HTML tag, default to white.
-          if (parentBgColor === 'rgba(0, 0, 0, 0)' && parentEl.tagName === 'HTML') {
-            parentBgColor = 'rgba(255, 255, 255, 1)';
-          }
-
-          // Move up the DOM tree.
-          parentEl = parentEl.parentElement;
-        }
-        const parentColor = convertToRGBA(parentBgColor || 'rgba(255, 255, 255, 1)');
-        const blendedBG = alphaBlend(bgColor, parentColor);
-        return blendedBG;
-      }
-      // Return solid color immediately if no alpha channel.
-      return bgColor;
-    }
-    if (targetEl.tagName === 'HTML') {
-      return [255, 255, 255]; // Default to white if we reach the HTML tag.
-    }
-    targetEl = targetEl.parentNode;
-  }
-  return [255, 255, 255]; // Default to white if no background color is found.
-}
-
-/** Get the relative luminance of a colour based on WCAG 2.0
- * @link http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
- * @param {number[]} color Colour code in [R,G,B] format.
- * @returns Luminance value.
- */
-function getLuminance(color) {
-  const rgb = color.slice(0, 3).map((x) => {
-    const normalized = x / 255;
-    return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
-}
-
-/**
- * Get WCAG 2.0 contrast ratio from luminance value.
- * @link http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
- * @param {number} l1 Luminance value of foreground colour.
- * @param {number} l2 Luminance value of background colour.
- * @returns WCAG 2.0 contrast ratio.
- */
-function getWCAG2Ratio(l1, l2) {
-  const lighter = Math.max(l1, l2);
-  const darker = Math.min(l1, l2);
-  return (lighter + 0.05) / (darker + 0.05);
-}
-
-/**
- * Get the hex code equivalent of an RGB colour.
- * @param {number[]} color Colour in [R,G,B,A] format.
- * @returns Hexcode equivalent.
- */
-function getHex(color) {
-  const [r, g, b] = color.map((value) => Math.min(255, Math.max(0, value)));
-  const hexR = r.toString(16).padStart(2, '0');
-  const hexG = g.toString(16).padStart(2, '0');
-  const hexB = b.toString(16).padStart(2, '0');
-  return `#${hexR}${hexG}${hexB}`;
-}
-
-/**
- * Get the display-friendly contrast value for output.
- * @param {Object} value - The value object containing the contrast ratio.
- * @returns {string|number} The formatted contrast ratio.
- */
-function ratioToDisplay(value) {
-  if (Constants.Global.contrastAPCA) {
-    return Math.abs(Number(value.toFixed(1)));
-  }
-  // Round to decimal places, and display without decimals if integer.
-  const truncatedRatio = Math.trunc(value * 10) / 10;
-  const formattedRatio = Number.isInteger(truncatedRatio)
-    ? truncatedRatio.toFixed(0)
-    : truncatedRatio;
-  return `${formattedRatio}:1`;
-}
-
-/**
- * Calculate the contrast ratio or value between two colours.
- * @param {number[]} color Text colour in [R,G,B,A] format.
- * @param {Array} bg Background colour in [R,G,B,A] format.
- * @returns Either WCAG 2.0 contrast ratio or APCA contrast value.
- */
-function calculateContrast(color, bg) {
-  let ratio;
-  const blendedColor = alphaBlend(color, bg).slice(0, 4);
-  if (Constants.Global.contrastAPCA) {
-    const foreground = sRGBtoY(blendedColor);
-    const background = sRGBtoY(bg);
-    ratio = APCAcontrast(foreground, background);
-  } else {
-    // Uses WCAG 2.0 contrast algorithm based on luminance.
-    const foreground = getLuminance(blendedColor);
-    const background = getLuminance(bg);
-    ratio = getWCAG2Ratio(foreground, background);
-  }
-  return { ratio, blendedColor };
-}
-
-/**
-  * Calculate an elements contrast based on WCAG 2.0 contrast algorithm.
-  * @param {HTMLElement} $el The element in the DOM.
-  * @param {number[]} color Text colour in [R,G,B,A] format.
-  * @param {Array} background Background colour in [R,G,B,A] format.
-  * @param {number} fontSize Element's font size.
-  * @param {number} fontWeight Element's font weight.
-  * @param {number} opacity Element's opacity value.
-  * @param {boolean} contrastAAA Check if AAA threshold is required.
-  * @returns {Object} Object containing the element, ratio, and extra details.
-  */
-function wcagAlgorithm($el, color, background, fontSize, fontWeight, opacity, contrastAAA = false) {
-  const { ratio, blendedColor } = calculateContrast(color, background);
-  const isLargeText = fontSize >= 24 || (fontSize >= 18.67 && fontWeight >= 700);
-
-  let hasLowContrast;
-  if (contrastAAA) {
-    hasLowContrast = isLargeText ? ratio < 4.5 : ratio < 7;
-  } else {
-    const hasLowContrastNormalText = ratio > 1 && ratio < 4.5;
-    hasLowContrast = isLargeText ? ratio < 3 : hasLowContrastNormalText;
-  }
-
-  if (hasLowContrast) {
-    return {
-      $el,
-      ratio: ratioToDisplay(ratio),
-      color: blendedColor,
-      background,
-      fontSize,
-      fontWeight,
-      isLargeText,
-      opacity,
-      textUnderline: getComputedStyle($el).textDecorationLine,
-    };
-  }
-  return null;
-}
-
-/**
- * Calculate an elements contrast based on APCA algorithm.
- * @param {HTMLElement} $el The element in the DOM.
- * @param {number[]} color Text colour in [R,G,B,A] format.
- * @param {Array} background Background colour in [R,G,B,A] format.
- * @param {number} fontSize Element's font size.
- * @param {number} fontWeight Element's font weight.
- * @param {number} opacity Element's opacity value.
- * @returns {Object} Object containing the element, ratio, and extra details.
-*/
-function apcaAlgorithm($el, color, background, fontSize, fontWeight, opacity) {
-  const { ratio, blendedColor } = calculateContrast(color, background);
-
-  // Returns 9 font sizes in px corresponding to weights 100 thru 900.
-  // Returns ['LcValue',100,200,300,400,500,600,700,800,900]
-  const fontLookup = fontLookupAPCA(ratio).slice(1);
-
-  // Get minimum font size based on weight.
-  const fontWeightIndex = Math.floor(fontWeight / 100) - 1;
-  const minFontSize = fontLookup[fontWeightIndex];
-
-  if (fontSize < minFontSize) {
-    return {
-      $el,
-      ratio: ratioToDisplay(ratio),
-      color: blendedColor,
-      background,
-      fontWeight,
-      fontSize,
-      opacity,
-      textUnderline: getComputedStyle($el).textDecorationLine,
-    };
-  }
-  return null;
-}
-
-/**
- * Check an element's contrast based on APCA or WCAG 2.0 algorithm.
- * @param {HTMLElement} $el The element in the DOM.
- * @param {number[]} color Text colour in [R,G,B,A] format.
- * @param {Array} background Background colour in [R,G,B,A] format.
- * @param {number} fontSize Element's font size.
- * @param {number} fontWeight Element's font weight.
- * @param {number} opacity Element's opacity value.
- * @param {boolean} contrastAAA Use WCAG 2.0 AAA thresholds.
- * @returns {Object} Object containing the element, ratio, and extra details.
- */
-function checkElementContrast(
-  $el, color, background, fontSize, fontWeight, opacity, contrastAAA = false,
-) {
-  const algorithm = Constants.Global.contrastAPCA ? apcaAlgorithm : wcagAlgorithm;
-  return algorithm($el, color, background, fontSize, fontWeight, opacity, contrastAAA);
-}
-
-/**
- * Rulesets: Contrast
- * @param {Array} results Sa11y's results array.
- * @param {Object} option Sa11y's options object.
- * @returns Contrast results.
- * APCA contrast checking is experimental. References:
- * @link https://github.com/jasonday/color-contrast
- * @link https://github.com/gka/chroma.js
- * @link https://github.com/Myndex/SAPC-APCA
- */
-function checkContrast(results, option) {
-  // Initialize contrast results array.
-  const contrastResults = [];
-
-  // Iterate through all elements on the page and get computed styles.
-  for (let i = 0; i < Elements.Found.Contrast.length; i++) {
-    const $el = Elements.Found.Contrast[i];
-    const style = getComputedStyle($el);
-
-    // Get computed styles.
-    const opacity = parseFloat(style.opacity);
-    const color = convertToRGBA(style.color, opacity);
-    const fontSize = parseFloat(style.fontSize);
-    const getFontWeight = style.fontWeight;
-    const fontWeight = normalizeFontWeight(getFontWeight);
-    const background = getBackground($el);
-
-    // Check if element is visually hidden to screen readers or explicitly hidden.
-    const isVisuallyHidden = isScreenReaderOnly($el);
-    const isExplicitlyHidden = isElementHidden($el);
-    const isHidden = isExplicitlyHidden || isVisuallyHidden || opacity === 0 || fontSize === 0;
-
-    // Filter only text nodes.
-    const textString = Array.from($el.childNodes)
-      .filter((node) => node.nodeType === 3)
-      .map((node) => node.textContent)
-      .join('');
-    const text = textString.trim();
-
-    // Inputs to check
-    const checkInputs = ['SELECT', 'INPUT', 'TEXTAREA'].includes($el.tagName);
-
-    // Only check elements with text and inputs.
-    if (text.length !== 0 || checkInputs) {
-      const isLargeText = fontSize >= 24 || (fontSize >= 18.67 && fontWeight >= 700);
-      if (color === 'unsupported' || background === 'unsupported') {
-        contrastResults.push({
-          $el,
-          type: 'unsupported',
-          fontSize,
-          fontWeight,
-          isLargeText,
-          opacity,
-          ...(background !== 'unsupported' && { background }),
-          ...(color !== 'unsupported' && { color }),
-        });
-      } else if (background.type === 'image') {
-        if (!isHidden) {
-          contrastResults.push({
-            $el,
-            type: 'background-image',
-            color,
-            isLargeText,
-            background,
-            fontSize,
-            fontWeight,
-            opacity,
-          });
-        }
-      } else if (!isHidden && getHex(color) !== getHex(background)) {
-        const result = checkElementContrast(
-          $el, color, background, fontSize, fontWeight, opacity, option.contrastAAA,
-        );
-        if (result) {
-          result.type = checkInputs ? 'input' : 'text';
-          contrastResults.push(result);
-        }
-      }
-    }
-  }
-
-  // Iterate through all SVGs on the page, separately.
-  Elements.Found.Svg.forEach(($el) => {
-    const generalWarning = { $el, type: 'svg-warning' };
-
-    // Get background.
-    const background = getBackground($el);
-    const hasBackground = background !== 'unsupported' && background.type !== 'image';
-
-    // Process simple SVGs with a single shape.
-    const shapes = $el.querySelectorAll('path, rect, circle, ellipse, polygon, text, use');
-
-    // Push a general warning for any complex SVGs.
-    const complex = $el.querySelectorAll('*:not(path):not(rect):not(circle):not(ellipse):not(polygon):not(text):not(use):not(title)');
-
-    // Check if all nodes within the SVG have the same fill/stroke/opacity.
-    let allSameColour = false;
-    if (shapes.length) {
-      const ref = getComputedStyle(shapes[0]);
-      allSameColour = Array.from(shapes).every((node) => {
-        const style = getComputedStyle(node);
-        return (
-          style.fill === ref.fill
-          && style.fillOpacity === ref.fillOpacity
-          && style.stroke === ref.stroke
-          && style.strokeOpacity === ref.strokeOpacity
-          && style.opacity === ref.opacity
-        );
-      });
-    }
-
-    // If simple SVG (single path) or complex SVG with same colour.
-    if ((shapes.length === 1 || allSameColour) && complex.length === 0) {
-      const style = getComputedStyle(shapes[0]);
-      const { fill, stroke, strokeWidth, opacity } = style;
-
-      // Get computed stroke width/convert % to number.
-      let strokePx = 0;
-      const { width, height } = $el.getBBox();
-      if (stroke && stroke !== 'none') {
-        if (strokeWidth.endsWith('%')) {
-          strokePx = (parseFloat(strokeWidth) / 100) * Math.min(width, height);
-        } else {
-          strokePx = ['inherit', 'initial', 'unset'].includes(strokeWidth)
-            ? 1 : parseFloat(strokeWidth);
-        }
-      }
-
-      // Threshold is arbitrary/not WCAG. Smaller threshold for smaller SVGs.
-      const threshold = Math.min(width, height) < 50 ? 1 : 3;
-      const hasStroke = stroke && strokePx >= threshold && stroke !== 'none';
-
-      // Get resolved fill colour.
-      const hasFill = fill && fill !== 'none' && !fill.startsWith('url(');
-      const resolvedFill = fill === 'currentColor'
-        ? convertToRGBA(getComputedStyle(shapes[0]).color, opacity)
-        : convertToRGBA(fill, opacity);
-
-      // Get resolved stroke colour.
-      const resolvedStroke = stroke === 'currentColor'
-        ? convertToRGBA(getComputedStyle(shapes[0]).color, opacity)
-        : convertToRGBA(stroke, opacity);
-
-      // If supported colours and has background, we can calculate contrast.
-      const supported = ![resolvedFill, resolvedStroke].includes('unsupported');
-      if (supported && hasBackground) {
-        let contrastValue;
-        let fillPasses = false;
-        let strokePasses = false;
-
-        if (hasFill) {
-          contrastValue = calculateContrast(resolvedFill, background);
-          fillPasses = option.contrastAPCA
-            ? contrastValue.ratio >= 45
-            : contrastValue.ratio >= 3;
-        }
-
-        if (hasStroke) {
-          contrastValue = calculateContrast(resolvedStroke, background);
-          strokePasses = option.contrastAPCA
-            ? contrastValue.ratio >= 45
-            : contrastValue.ratio >= 3;
-        }
-
-        // Calculate contrast of both stroke and fill.
-        const failsBoth = hasFill && hasStroke && !fillPasses && !strokePasses;
-        const failsFill = hasFill && !hasStroke && !fillPasses;
-        const failsStroke = !hasFill && hasStroke && !strokePasses;
-
-        // Fails
-        if (failsBoth || failsFill || failsStroke) {
-          // Get hex values.
-          const bgHex = getHex(background);
-          const fillHex = getHex(resolvedFill);
-          const strokeHex = getHex(resolvedStroke);
-
-          // Ignore if foreground equals background.
-          if ((fillHex === bgHex && !hasStroke) || (strokeHex === bgHex && !hasFill)) {
-            return;
-          }
-
-          // Push an error for simple SVGs.
-          contrastResults.push({
-            $el,
-            ratio: ratioToDisplay(contrastValue.ratio),
-            color: contrastValue.blendedColor,
-            type: 'svg-error',
-            isLargeText: true, // To push a suggested colour (3:1).
-            background,
-          });
-        }
-      } else {
-        // General warning for complex SVGs with multiple shapes.
-        // Push whatever colour is valid.
-        if (hasFill && resolvedFill !== 'unsupported') {
-          generalWarning.color = resolvedFill;
-        } else if (hasStroke && resolvedStroke !== 'unsupported') {
-          generalWarning.color = resolvedStroke;
-        }
-        if (hasBackground) generalWarning.background = background;
-        contrastResults.push(generalWarning);
-      }
-    } else {
-      // General warning for complex SVGs.
-      if (hasBackground) generalWarning.background = background;
-      contrastResults.push(generalWarning);
-    }
-  });
-
-  // Check contrast of all placeholder elements.
-  Elements.Found.Inputs.forEach(($el) => {
-    if ($el.placeholder && $el.placeholder.length !== 0) {
-      const placeholder = getComputedStyle($el, '::placeholder');
-      const pColor = convertToRGBA(placeholder.getPropertyValue('color'));
-      const pSize = parseFloat(placeholder.fontSize);
-      const pWeight = normalizeFontWeight(placeholder.fontWeight);
-      const pBackground = getBackground($el);
-      const pOpacity = parseFloat(placeholder.opacity);
-
-      // Placeholder has background image.
-      if (pColor === 'unsupported') {
-        // Unsupported colour
-        contrastResults.push({ $el, type: 'placeholder-unsupported' });
-      } else if (pBackground.type === 'image') ; else {
-        const result = checkElementContrast($el, pColor, pBackground, pSize, pWeight, pOpacity, option.contrastAAA);
-        if (result) {
-          result.type = 'placeholder';
-          contrastResults.push(result);
-        }
-      }
-    }
-  });
-
-  // Do some extra processing on warnings.
-  const processWarnings = (warnings) => {
-    // Separate warnings based on type.
-    const backgroundImages = warnings.filter((warning) => warning.type === 'background-image');
-    const otherWarnings = warnings.filter((warning) => warning.type !== 'background-image');
-
-    let processedBackgroundWarnings;
-
-    // Process background-image warnings based on option.contrastAPCA.
-    if (option.contrastAPCA) {
-      // Do not group warnings, return each warning as-is.
-      processedBackgroundWarnings = backgroundImages.map((warning) => ({ ...warning }));
-    } else {
-      // Group background-image warnings if they share same BG and FG colours.
-      const groupedWarnings = backgroundImages.reduce((groups, warning) => {
-        const grouped = groups;
-        const groupKey = JSON.stringify({
-          background: warning.background.value,
-          color: warning.color,
-          isLargeText: warning.isLargeText,
-        });
-        if (!grouped[groupKey]) grouped[groupKey] = [];
-        grouped[groupKey].push(warning);
-        return grouped;
-      }, {});
-
-      // Process each group.
-      processedBackgroundWarnings = Object.values(groupedWarnings).map((group) => ({ ...group[0] }));
-    }
-
-    // Combine processed background-image warnings with other warnings.
-    return [...processedBackgroundWarnings, ...otherWarnings];
-  };
-
-  const processedResults = processWarnings(contrastResults);
-
-  // Iterate through all contrast results.
-  processedResults.forEach((item) => {
-    const { $el, ratio } = item;
-    const updatedItem = item;
-
-    // Annotation placement.
-    const element = $el.tagName === 'OPTION' ? $el.closest('datalist, select, optgroup') : $el;
-
-    // Process text within element.
-    const nodeText = fnIgnore(element, ['option:not(option:first-child)']);
-    const text = getText(nodeText);
-
-    // Content for tooltip.
-    const truncatedText = truncateString(text, 80);
-    const sanitizedText = sanitizeHTML(truncatedText);
-
-    // Preview text
-    let previewText;
-    if (item.type === 'placeholder' || item.type === 'placeholder-unsupported') {
-      previewText = sanitizeHTML($el.placeholder);
-    } else if (item.type === 'svg-error' || item.type === 'svg-warning') {
-      previewText = '';
-    } else {
-      previewText = sanitizedText;
-    }
-    updatedItem.sanitizedText = previewText;
-
-    // Reference necessary ratios for compliance.
-    let ratioTip = '';
-    if (!option.contrastAPCA) {
-      const normal = option.contrastAAA ? '7:1' : '4.5:1';
-      const large = option.contrastAAA ? '4.5:1' : '3:1';
-      const ratioToDisplay = item.isLargeText ? large : normal;
-      const ratioRequirement = item.isLargeText ? 'CONTRAST_LARGE' : 'CONTRAST_NORMAL';
-      ratioTip = ` ${Lang.sprintf(ratioRequirement, ratioToDisplay)}`;
-    }
-    const graphicsTip = option.contrastAPCA ? '' : ` ${Lang.sprintf('CONTRAST_TIP_GRAPHIC')}`;
-
-    // Iterate through contrast results based on type.
-    switch (item.type) {
-      case 'text':
-        if (option.checks.CONTRAST_ERROR) {
-          results.push({
-            element: $el,
-            type: option.checks.CONTRAST_ERROR.type || 'error',
-            content: option.checks.CONTRAST_ERROR.content
-              ? Lang.sprintf(option.checks.CONTRAST_ERROR.content)
-              : Lang.sprintf('CONTRAST_ERROR') + ratioTip,
-            dismiss: prepareDismissal(`CONTRAST${sanitizedText}`),
-            dismissAll: option.checks.CONTRAST_ERROR.dismissAll ? 'CONTRAST_ERROR' : false,
-            developer: option.checks.CONTRAST_ERROR.developer || false,
-            contrastDetails: updatedItem,
-          });
-        }
-        break;
-      case 'input':
-        if (option.checks.CONTRAST_INPUT) {
-          const sanitizedInput = sanitizeHTMLBlock($el.outerHTML);
-          results.push({
-            element,
-            type: option.checks.CONTRAST_INPUT.type || 'error',
-            content: option.checks.CONTRAST_INPUT.content
-              ? Lang.sprintf(option.checks.CONTRAST_INPUT.content)
-              : Lang.sprintf('CONTRAST_INPUT', ratio) + ratioTip,
-            dismiss: prepareDismissal(`CONTRAST${sanitizedInput}`),
-            dismissAll: option.checks.CONTRAST_INPUT.dismissAll ? 'CONTRAST_INPUT' : false,
-            developer: option.checks.CONTRAST_INPUT.developer || true,
-            contrastDetails: updatedItem,
-          });
-        }
-        break;
-      case 'placeholder':
-        if (option.checks.CONTRAST_PLACEHOLDER) {
-          const sanitizedPlaceholder = sanitizeHTMLBlock($el.outerHTML);
-          results.push({
-            element: $el,
-            type: option.checks.CONTRAST_PLACEHOLDER.type || 'error',
-            content: option.checks.CONTRAST_PLACEHOLDER.content
-              ? Lang.sprintf(option.checks.CONTRAST_PLACEHOLDER.content)
-              : Lang.sprintf('CONTRAST_PLACEHOLDER') + ratioTip,
-            position: 'afterend',
-            dismiss: prepareDismissal(`CPLACEHOLDER${sanitizedPlaceholder}`),
-            dismissAll: option.checks.CONTRAST_PLACEHOLDER.dismissAll ? 'CONTRAST_PLACEHOLDER' : false,
-            developer: option.checks.CONTRAST_PLACEHOLDER.developer || true,
-            contrastDetails: updatedItem,
-          });
-        }
-        break;
-      case 'placeholder-unsupported':
-        if (option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED) {
-          const sanitizedPlaceholder = sanitizeHTMLBlock($el.outerHTML);
-          results.push({
-            element: $el,
-            type: option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.type || 'warning',
-            content: option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.content
-              ? Lang.sprintf(option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.content)
-              : Lang.sprintf('CONTRAST_PLACEHOLDER_UNSUPPORTED') + ratioTip,
-            position: 'afterend',
-            dismiss: prepareDismissal(`CPLACEHOLDERUN${sanitizedPlaceholder}`),
-            dismissAll: option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.dismissAll
-              ? 'CONTRAST_PLACEHOLDER_UNSUPPORTED' : false,
-            developer: option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.developer || true,
-            contrastDetails: updatedItem,
-          });
-        }
-        break;
-      case 'svg-error':
-        if (option.checks.CONTRAST_ERROR_GRAPHIC) {
-          const sanitizedSVG = sanitizeHTMLBlock($el.outerHTML);
-          results.push({
-            element: $el,
-            type: option.checks.CONTRAST_ERROR_GRAPHIC.type || 'error',
-            content: option.checks.CONTRAST_ERROR_GRAPHIC.content
-              ? Lang.sprintf(option.checks.CONTRAST_ERROR_GRAPHIC.content)
-              : Lang.sprintf('CONTRAST_ERROR_GRAPHIC') + graphicsTip,
-            dismiss: prepareDismissal(`CONTRASTERROR${sanitizedSVG}`),
-            dismissAll: option.checks.CONTRAST_ERROR_GRAPHIC.dismissAll ? 'CONTRAST_ERROR_GRAPHIC' : false,
-            developer: option.checks.CONTRAST_ERROR_GRAPHIC.developer || true,
-            contrastDetails: updatedItem,
-            margin: '-25px',
-          });
-        }
-        break;
-      case 'svg-warning':
-        if (option.checks.CONTRAST_WARNING_GRAPHIC) {
-          const sanitizedSVG = sanitizeHTMLBlock($el.outerHTML);
-          results.push({
-            element: $el,
-            type: option.checks.CONTRAST_WARNING_GRAPHIC.type || 'warning',
-            content: option.checks.CONTRAST_WARNING_GRAPHIC.content
-              ? Lang.sprintf(option.checks.CONTRAST_WARNING_GRAPHIC.content)
-              : Lang.sprintf('CONTRAST_WARNING_GRAPHIC') + graphicsTip,
-            dismiss: prepareDismissal(`CONTRASTWARNING${sanitizedSVG}`),
-            dismissAll: option.checks.CONTRAST_WARNING_GRAPHIC.dismissAll ? 'CONTRAST_WARNING_GRAPHIC' : false,
-            developer: option.checks.CONTRAST_WARNING_GRAPHIC.developer || true,
-            contrastDetails: updatedItem,
-            margin: '-25px',
-          });
-        }
-        break;
-      case 'background-image':
-        if (option.checks.CONTRAST_WARNING) {
-          results.push({
-            element,
-            type: option.checks.CONTRAST_WARNING.type || 'warning',
-            content: option.checks.CONTRAST_WARNING.content
-              ? Lang.sprintf(option.checks.CONTRAST_WARNING.content)
-              : Lang.sprintf('CONTRAST_WARNING') + ratioTip,
-            dismiss: prepareDismissal(`CONTRAST${sanitizedText}`),
-            dismissAll: option.checks.CONTRAST_WARNING.dismissAll ? 'CONTRAST_WARNING' : false,
-            developer: option.checks.CONTRAST_WARNING.developer || false,
-            contrastDetails: updatedItem,
-          });
-        }
-        break;
-      case 'unsupported':
-        if (option.checks.CONTRAST_UNSUPPORTED) {
-          results.push({
-            element,
-            type: option.checks.CONTRAST_UNSUPPORTED.type || 'warning',
-            content: option.checks.CONTRAST_UNSUPPORTED.content
-              ? Lang.sprintf(option.checks.CONTRAST_UNSUPPORTED.content)
-              : Lang.sprintf('CONTRAST_WARNING') + ratioTip,
-            dismiss: prepareDismissal(`CONTRAST${sanitizedText}`),
-            dismissAll: option.checks.CONTRAST_UNSUPPORTED.dismissAll ? 'CONTRAST_UNSUPPORTED' : false,
-            developer: option.checks.CONTRAST_UNSUPPORTED.developer || false,
-            contrastDetails: updatedItem,
-          });
-        }
-        break;
-    }
-  });
-  return results;
-}
-
 function checkLabels(results, option) {
   if (option.formLabelsPlugin) {
     Elements.Found.Inputs.forEach(($el) => {
@@ -3708,330 +3238,6 @@ function checkLabels(results, option) {
           developer: option.checks.LABELS_PLACEHOLDER.developer || true,
         });
       }
-    });
-  }
-  return results;
-}
-
-/**
- * Rulesets: Readability
- * Adapted from Greg Kraus. References for other non-english languages included below.
- * @link https://accessibility.oit.ncsu.edu/it-accessibility-at-nc-state/developers/tools/readability-bookmarklet/
- * @link https://core.ac.uk/download/pdf/6552422.pdf
- * @link https://github.com/Yoast/YoastSEO.js/issues/267
- * @link http://stackoverflow.com/questions/5686483/how-to-compute-number-of-syllables-in-a-word-in-javascript
- * @link https://www.simoahava.com/analytics/calculate-readability-scores-for-content/#commento-58ac602191e5c6dc391015c5a6933cf3e4fc99d1dc92644024c331f1ee9b6093
- * @link https://oaji.net/articles/2017/601-1498133639.pdf (Portuguese adaptation).
-*/
-
-function checkReadability() {
-  let results;
-  const rememberReadability = store.getItem('sa11y-readability') === 'On';
-  if (rememberReadability) {
-    const readabilityArray = [];
-    // Improve the accuracy of a readability analysis by ensuring that long list items are treated as complete sentences.
-    const punctuation = ['.', '?', '!'];
-    Elements.Found.Readability.forEach(($el) => {
-      const ignore = fnIgnore($el);
-      const text = getText(ignore);
-      if (!text) return;
-      const lastCharacter = text[text.length - 1];
-      const sentence = punctuation.includes(lastCharacter) ? text : `${text}.`;
-      readabilityArray.push(sentence);
-    });
-    const pageText = readabilityArray.join(' ');
-
-    /* Flesch Reading Ease for English, French, German, Dutch, and Italian. */
-    if (['en', 'es', 'fr', 'de', 'nl', 'it', 'pt'].includes(Constants.Readability.Lang)) {
-      // Compute syllables
-      const numberOfSyllables = (el) => {
-        let wordCheck = el;
-        wordCheck = wordCheck.toLowerCase().replace('.', '').replace('\n', '');
-        if (wordCheck.length <= 3) {
-          return 1;
-        }
-        wordCheck = wordCheck.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
-        wordCheck = wordCheck.replace(/^y/, '');
-        const syllableString = wordCheck.match(/[aeiouy]{1,2}/g);
-        let syllables = 0;
-
-        const syllString = !!syllableString;
-        if (syllString) {
-          syllables = syllableString.length;
-        }
-        return syllables;
-      };
-
-      // Words
-      const wordsRaw = pageText.replace(/[.!?-]+/g, ' ').split(' ');
-      let words = 0;
-      for (let i = 0; i < wordsRaw.length; i++) {
-        // eslint-disable-next-line eqeqeq
-        if (wordsRaw[i] != 0) {
-          words += 1;
-        }
-      }
-
-      // Sentences
-      const sentenceRaw = pageText.split(/[.!?]+/);
-      let sentences = 0;
-      for (let i = 0; i < sentenceRaw.length; i++) {
-        if (sentenceRaw[i] !== '') {
-          sentences += 1;
-        }
-      }
-
-      // Syllables
-      let totalSyllables = 0;
-      let syllables1 = 0;
-      let syllables2 = 0;
-      for (let i = 0; i < wordsRaw.length; i++) {
-        // eslint-disable-next-line eqeqeq
-        if (wordsRaw[i] != 0) {
-          const syllableCount = numberOfSyllables(wordsRaw[i]);
-          if (syllableCount === 1) {
-            syllables1 += 1;
-          }
-          if (syllableCount === 2) {
-            syllables2 += 1;
-          }
-          totalSyllables += syllableCount;
-        }
-      }
-
-      let flesch = false;
-      if (Constants.Readability.Lang === 'en') {
-        flesch = 206.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
-      } else if (Constants.Readability.Lang === 'fr') {
-        flesch = 207 - (1.015 * (words / sentences)) - (73.6 * (totalSyllables / words));
-      } else if (Constants.Readability.Lang === 'es') {
-        flesch = 206.84 - (1.02 * (words / sentences)) - (0.60 * (100 * (totalSyllables / words)));
-      } else if (Constants.Readability.Lang === 'de') {
-        flesch = 180 - (words / sentences) - (58.5 * (totalSyllables / words));
-      } else if (Constants.Readability.Lang === 'nl') {
-        flesch = 206.84 - (0.77 * (100 * (totalSyllables / words))) - (0.93 * (words / sentences));
-      } else if (Constants.Readability.Lang === 'it') {
-        flesch = 217 - (1.3 * (words / sentences)) - (0.6 * (100 * (totalSyllables / words)));
-      } else if (Constants.Readability.Lang === 'pt') {
-        flesch = 248.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
-      }
-
-      // Score must be between 0 and 100%.
-      if (flesch > 100) {
-        flesch = 100;
-      } else if (flesch < 0) {
-        flesch = 0;
-      }
-
-      // Compute scores.
-      const fleschScore = flesch.toFixed(1);
-      const avgWordsPerSentence = (words / sentences).toFixed(1);
-      const complexWords = Math.round(100 * ((words - (syllables1 + syllables2)) / words));
-
-      let difficulty;
-      if (fleschScore >= 0 && fleschScore < 30) {
-        difficulty = Lang._('VERY_DIFFICULT');
-      } else if (fleschScore > 31 && fleschScore < 49) {
-        difficulty = Lang._('DIFFICULT');
-      } else if (fleschScore > 50 && fleschScore < 60) {
-        difficulty = Lang._('FAIRLY_DIFFICULT');
-      } else {
-        difficulty = Lang._('GOOD');
-      }
-
-      // Create object for headless mode.
-      results = {
-        score: fleschScore,
-        averageWordsPerSentence: avgWordsPerSentence,
-        complexWords,
-        difficultyLevel: difficulty,
-        wordCount: words,
-      };
-    } else if (['sv', 'fi', 'da', 'no', 'nb', 'nn'].includes(Constants.Readability.Lang)) {
-      /* Lix: Danish, Finnish, Norwegian (Bokmål & Nynorsk), Swedish. */
-      const calculateLix = (text) => {
-        const lixWords = () => text.replace(/[-'.]/ig, '').split(/[^a-zA-ZöäåÖÄÅÆæØø0-9]/g).filter(Boolean);
-        const splitSentences = () => {
-          const splitter = /\?|!|\.|\n/g;
-          const arrayOfSentences = text.split(splitter).filter(Boolean);
-          return arrayOfSentences;
-        };
-        const wordCount = lixWords().length;
-        const longWordsCount = lixWords().filter((wordsArray) => wordsArray.length > 6).length;
-        const sentenceCount = splitSentences().length;
-        const score = Math.round((wordCount / sentenceCount) + ((longWordsCount * 100) / wordCount));
-        const avgWordsPerSentence = (wordCount / sentenceCount).toFixed(1);
-        const complexWords = Math.round(100 * (longWordsCount / wordCount));
-
-        let difficulty;
-        if (score >= 0 && score < 39) {
-          difficulty = Lang._('GOOD');
-        } else if (score > 40 && score < 50) {
-          difficulty = Lang._('FAIRLY_DIFFICULT');
-        } else if (score > 51 && score < 61) {
-          difficulty = Lang._('DIFFICULT');
-        } else {
-          difficulty = Lang._('VERY_DIFFICULT');
-        }
-        return {
-          score, difficulty, avgWordsPerSentence, complexWords, wordCount,
-        };
-      };
-
-      // Compute LIX
-      const lix = calculateLix(pageText);
-
-      // Create object for headless mode.
-      results = {
-        score: lix.score,
-        averageWordsPerSentence: lix.avgWordsPerSentence,
-        complexWords: lix.complexWords,
-        difficultyLevel: lix.difficulty,
-        wordCount: lix.wordCount,
-      };
-    }
-
-    // Update main panel if not in headless mode.
-    if (Constants.Global.headless === false) {
-      if (pageText.length === 0) {
-        Constants.Panel.readabilityInfo.innerHTML = Lang._('READABILITY_NO_CONTENT');
-      } else if (results.wordCount > 30) {
-        Constants.Panel.readabilityInfo.innerHTML = `${Math.ceil(results.score)} <span class="readability-score">${results.difficultyLevel}</span>`;
-        Constants.Panel.readabilityDetails.innerHTML = `<li><strong>${Lang._('AVG_SENTENCE')}</strong> ${Math.ceil(results.averageWordsPerSentence)}</li><li><strong>${Lang._('COMPLEX_WORDS')}</strong> ${results.complexWords}%</li><li><strong>${Lang._('TOTAL_WORDS')}</strong> ${results.wordCount}</li>`;
-      } else {
-        Constants.Panel.readabilityInfo.textContent = Lang._('READABILITY_NOT_ENOUGH');
-      }
-    }
-  }
-  return results;
-}
-
-function checkEmbeddedContent(results, option) {
-  // iFrame's SRC attribute.
-  const src = ($el) => $el.getAttribute('src')
-    || $el.querySelector('source[src]')?.getAttribute('src')
-    || $el.querySelector('[src]')?.getAttribute('src')
-    || null;
-
-  // Warning: Audio content.
-  if (option.checks.EMBED_AUDIO) {
-    Elements.Found.Audio.forEach(($el) => {
-      // General warning for audio content.
-      results.push({
-        element: $el,
-        type: option.checks.EMBED_AUDIO.type || 'warning',
-        content: Lang.sprintf(option.checks.EMBED_AUDIO.content || 'EMBED_AUDIO'),
-        dismiss: prepareDismissal(`AUDIO${src($el)}`),
-        dismissAll: option.checks.EMBED_AUDIO.dismissAll ? 'EMBED_AUDIO' : false,
-        developer: option.checks.EMBED_AUDIO.developer || false,
-      });
-    });
-  }
-
-  // Warning: Video content.
-  if (option.checks.EMBED_VIDEO) {
-    Elements.Found.Videos.forEach(($el) => {
-      // Warning if <track> doesn't exist, or the <track>'s src is empty.
-      const track = $el.querySelector('track');
-      const trackSrc = track?.getAttribute('src');
-      if (track === null || trackSrc === null || trackSrc.trim().length === 0) {
-        results.push({
-          element: $el,
-          type: option.checks.EMBED_VIDEO.type || 'warning',
-          content: Lang.sprintf(option.checks.EMBED_VIDEO.content || 'EMBED_VIDEO'),
-          dismiss: prepareDismissal(`VIDEO${src($el)}`),
-          dismissAll: option.checks.EMBED_VIDEO.dismissAll ? 'EMBED_VIDEO' : false,
-          developer: option.checks.EMBED_VIDEO.developer || false,
-        });
-      }
-    });
-  }
-
-  // Warning: Data visualizations.
-  if (option.checks.EMBED_DATA_VIZ) {
-    Elements.Found.Visualizations.forEach(($el) => {
-      // General warning for data visualization widgets.
-      results.push({
-        element: $el,
-        type: option.checks.EMBED_DATA_VIZ.type || 'warning',
-        content: Lang.sprintf(option.checks.EMBED_DATA_VIZ.content || 'EMBED_DATA_VIZ'),
-        dismiss: prepareDismissal(`DATAVIZ${src($el)}`),
-        dismissAll: option.checks.EMBED_DATA_VIZ.dismissAll ? 'EMBED_DATA_VIZ' : false,
-        developer: option.checks.EMBED_DATA_VIZ.developer || false,
-      });
-    });
-  }
-
-  /* Error: Check all iFrames for a missing accessible name. */
-  Elements.Found.iframes.forEach(($el) => {
-    // Ignore hidden elements and video/audio.
-    const presentation = ['presentation', 'none'].includes($el.getAttribute('role'));
-    const hidden = isElementHidden($el);
-    const videoAudio = $el.tagName === 'VIDEO' || $el.tagName === 'AUDIO';
-    const ariaHidden = $el.getAttribute('aria-hidden') === 'true';
-    const negativeTabindex = $el.getAttribute('tabindex') === '-1';
-    if (hidden || videoAudio || (ariaHidden && negativeTabindex) || presentation) {
-      return;
-    }
-
-    // Warning if element only has negative tabindex (without aria-hidden). Axe rulecheck.
-    if (negativeTabindex) {
-      if (option.checks.EMBED_UNFOCUSABLE) {
-        results.push({
-          element: $el,
-          type: option.checks.EMBED_UNFOCUSABLE.type || 'error',
-          content: Lang.sprintf(option.checks.EMBED_UNFOCUSABLE.content || 'EMBED_UNFOCUSABLE'),
-          dismiss: prepareDismissal(`EMBEDUNFOCUSABLE${src($el)}`),
-          dismissAll: option.checks.EMBED_UNFOCUSABLE.dismissAll ? 'EMBED_UNFOCUSABLE' : false,
-          developer: option.checks.EMBED_UNFOCUSABLE.developer || true,
-        });
-      }
-      return;
-    }
-
-    if (option.checks.EMBED_MISSING_TITLE) {
-      // Accessible name is missing for iFrame.
-      const aria = computeAriaLabel($el);
-      const checkTitle = (aria === 'noAria') ? ($el.getAttribute('title') || '') : aria;
-      const accessibleName = removeWhitespace(checkTitle);
-      if (accessibleName.length === 0) {
-        results.push({
-          element: $el,
-          type: option.checks.EMBED_MISSING_TITLE.type || 'error',
-          content: Lang.sprintf(option.checks.EMBED_MISSING_TITLE.content || 'EMBED_MISSING_TITLE'),
-          dismiss: prepareDismissal(`EMBEDMISSTITLE${src($el)}`),
-          dismissAll: option.checks.EMBED_MISSING_TITLE.dismissAll ? 'EMBED_MISSING_TITLE' : false,
-          developer: option.checks.EMBED_MISSING_TITLE.developer || true,
-        });
-      }
-    }
-  });
-
-  /* Warning: for all iFrames (except video, audio, or data visualizations). */
-  if (option.checks.EMBED_GENERAL) {
-    Elements.Found.EmbeddedContent.forEach(($el) => {
-      // Ignore hidden elements.
-      const presentation = ['presentation', 'none'].includes($el.getAttribute('role'));
-      const ariaHidden = $el.getAttribute('aria-hidden') === 'true';
-      const negativeTabindex = $el.getAttribute('tabindex') === '-1';
-      const hidden = isElementHidden($el);
-      if (hidden || (ariaHidden && negativeTabindex) || presentation) {
-        return;
-      }
-
-      // Ignore video & audio elements.
-      if ($el.tagName === 'VIDEO' || $el.tagName === 'AUDIO') {
-        return;
-      }
-
-      results.push({
-        element: $el,
-        type: option.checks.EMBED_GENERAL.type || 'warning',
-        content: Lang.sprintf(option.checks.EMBED_GENERAL.content || 'EMBED_GENERAL'),
-        dismiss: prepareDismissal(`IFRAMEGENERAL${src($el)}`),
-        dismissAll: option.checks.EMBED_GENERAL.dismissAll ? 'EMBED_GENERAL' : false,
-        developer: option.checks.EMBED_GENERAL.developer || false,
-      });
     });
   }
   return results;
@@ -4557,605 +3763,688 @@ function checkQA(results, option) {
   return results;
 }
 
-function checkDeveloper(results, option) {
-  /* *************************************************************** */
-  /*  Error: Missing language tag. Lang should be at least 2 chars.  */
-  /* *************************************************************** */
-  if (option.checks.META_LANG) {
-    if (!Elements.Found.Language || Elements.Found.Language.length < 2) {
-      results.push({
-        type: option.checks.META_LANG.type || 'error',
-        content: Lang.sprintf(option.checks.META_LANG.content || 'META_LANG'),
-        dismiss: prepareDismissal('LANG'),
-        developer: option.checks.META_LANG.developer || true,
+const version = '3.0.0';
+
+var styles = ":host{background:var(--sa11y-panel-bg);border-top:5px solid var(--sa11y-panel-bg-splitter);bottom:0;display:block;height:-moz-fit-content;height:fit-content;left:0;position:fixed;right:0;width:100%;z-index:999999}*{-webkit-font-smoothing:auto!important;color:var(--sa11y-panel-primary);font-family:var(--sa11y-font-face)!important;font-size:var(--sa11y-normal-text);line-height:22px!important}#dialog{margin:20px auto;max-width:900px;padding:20px}h2{font-size:var(--sa11y-large-text);margin-top:0}a{color:var(--sa11y-hyperlink);cursor:pointer;text-decoration:underline}a:focus,a:hover{text-decoration:none}p{margin-top:0}.error{background:var(--sa11y-error);border:2px dashed #f08080;color:var(--sa11y-error-text);margin-bottom:0;padding:5px}";
+
+var sharedStyles = ".visually-hidden{clip:rect(1px,1px,1px,1px);border:0;clip-path:inset(50%);display:block;height:1px;overflow:hidden;padding:0;position:absolute;white-space:nowrap;width:1px}[hidden]{display:none!important}.header-text,.header-text-inline,h2{color:var(--sa11y-panel-primary);display:block;font-size:var(--sa11y-large-text);font-weight:600;margin-bottom:3px}.header-text-inline{display:inline-block!important}code{font-family:monospace!important;font-size:calc(var(--sa11y-normal-text) - 1px);font-weight:600}pre:has(code){display:block;overflow:auto;white-space:pre-wrap}.kbd,code,kbd,pre{background-color:var(--sa11y-panel-badge);border-radius:3.2px;color:var(--sa11y-panel-primary);padding:1.6px 4.8px}.bold{font-weight:600}.error .colour,.red-text{color:var(--sa11y-red-text);font-family:var(--sa11y-font-face)}.warning .colour,.yellow-text{color:var(--sa11y-yellow-text);font-family:var(--sa11y-font-face)}.badge,.normal-badge{background-color:var(--sa11y-panel-badge);border-radius:10px;color:var(--sa11y-panel-primary);display:inline;font-size:14px;font-weight:700!important;line-height:1;min-width:10px;outline:1px solid transparent;padding:1px 5px 1.75px;text-align:center;vertical-align:baseline;white-space:nowrap}.error .badge{background:var(--sa11y-error);color:var(--sa11y-error-text)}.error-badge{background:var(--sa11y-error)!important;color:var(--sa11y-error-text)!important}.warning .badge{background:var(--sa11y-yellow-text);color:var(--sa11y-panel-bg)}.warning-badge{background:var(--sa11y-yellow-text)!important;color:var(--sa11y-panel-bg)!important}.good-contrast{background:var(--sa11y-good)!important;color:var(--sa11y-good-text)!important}#contrast-preview{background-color:#e8e8e8;background-image:linear-gradient(45deg,#ccc 25%,transparent 0,transparent 75%,#ccc 0,#ccc),linear-gradient(45deg,#ccc 25%,transparent 0,transparent 75%,#ccc 0,#ccc);background-position:0 0,5px 5px;background-size:10px 10px;border:2px dashed var(--sa11y-panel-bg-splitter);border-radius:3.2px;line-height:1;margin-top:10px;max-height:100px;overflow:clip;overflow-wrap:break-word;padding:5px}#contrast-preview:empty{display:none}#color-pickers{display:flex;justify-content:space-between;margin-bottom:10px;margin-top:10px}#color-pickers label{align-items:center;display:flex}#color-pickers input{cursor:pointer;margin-inline-start:7px}input[type=color i]{background:var(--sa11y-panel-bg-secondary);block-size:44px;border-color:var(--sa11y-button-outline);border-radius:50%;border-style:solid;border-width:1px;inline-size:44px;padding:2px}input[type=color i]::-webkit-color-swatch-wrapper{padding:1px}input[type=color i]::-webkit-color-swatch{border-color:var(--sa11y-button-outline);border-radius:50%}input[type=color i]::-moz-color-swatch{border-color:var(--sa11y-button-outline);border-radius:50%}input[type=color i].unknown{box-shadow:0 0 0 2px var(--sa11y-yellow-text)}input[type=color i].unknown:after{align-items:center;color:#fff;content:\"?\";display:flex;font-size:22px;height:44px;justify-content:center;margin:-40px -3px;pointer-events:none;position:absolute;width:44px;z-index:2}.close-btn{background:var(--sa11y-panel-bg-secondary);border:2px solid var(--sa11y-button-outline);border-radius:50%;color:var(--sa11y-panel-primary);cursor:pointer;float:var(--sa11y-float-rtl);font-size:var(--sa11y-normal-text);font-weight:400;height:32px;margin:0;position:relative;transition:all .2s ease-in-out;width:32px}.close-btn:focus,.close-btn:hover{background-color:var(--sa11y-shortcut-hover)}.close-btn:after{background:var(--sa11y-setting-switch-bg-off);content:\"\";inset:-7px;-webkit-mask:var(--sa11y-close-btn-svg) center no-repeat;mask:var(--sa11y-close-btn-svg) center no-repeat;position:absolute}@media screen and (forced-colors:active){.close-btn:after{filter:invert(1)}}#container [tabindex=\"-1\"]:focus,#container [tabindex=\"0\"]:focus,#container a:focus,#container button:focus,#container input:focus,#container select:focus{box-shadow:0 0 0 5px var(--sa11y-focus-color);outline:0}#container #panel-controls button:focus,#container .switch:focus{box-shadow:inset 0 0 0 4px var(--sa11y-focus-color);outline:0}#container #panel-controls button:focus:not(:focus-visible),#container [tabindex=\"-1\"]:focus:not(:focus-visible),#container [tabindex=\"0\"]:focus:not(:focus-visible),#container button:focus:not(:focus-visible),#container input:focus:not(:focus-visible),#container select:focus:not(:focus-visible){box-shadow:none;outline:0}#container [tabindex=\"-1\"]:focus-visible,#container [tabindex=\"0\"]:focus-visible,#container a:focus-visible,#container button:not(#panel-controls button):not(.switch):focus-visible,#container input:focus-visible,#container select:focus-visible{box-shadow:0 0 0 5px var(--sa11y-focus-color);outline:0}#container #panel-controls button:focus-visible,#container .switch:focus-visible{box-shadow:inset 0 0 0 4px var(--sa11y-focus-color);outline:0}@media screen and (forced-colors:active){#panel-controls button:focus{border:3px solid transparent}#container [tabindex=\"-1\"]:focus,#container [tabindex=\"0\"]:focus,#container a:focus,#container button:focus,#container select:focus,.close-btn:focus{outline:3px solid transparent!important}}";
+
+class ConsoleErrors extends HTMLElement {
+  constructor(error) {
+    super();
+    this.error = error;
+  }
+
+  connectedCallback() {
+    const shadow = this.attachShadow({ mode: 'open' });
+
+    // Styles
+    const style = document.createElement('style');
+    style.innerHTML = styles + sharedStyles;
+    shadow.appendChild(style);
+
+    // Container
+    const content = document.createElement('div');
+    content.setAttribute('id', 'dialog');
+    content.setAttribute('tabindex', '-1');
+
+    // Google Form & GitHub error link.
+    const url = window.location;
+    const google = 'https://forms.gle/sjzK9XykETaoqZv99';
+
+    // GitHub template
+    const template = `## Error Description
+\`\`\`javascript
+${this.error.stack}
+\`\`\`
+
+## Details
+- **URL:** ${url}
+- **Version:** ${version}
+
+## Comments
+`;
+    const encodedTemplate = encodeURIComponent(template);
+    const github = `https://github.com/ryersondmp/sa11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
+
+    // Message
+    content.innerHTML = `
+      <button class="close-btn" aria-label="${Lang._('ALERT_CLOSE')}"></button>
+      <h2>${Lang._('ERROR')}</h2>
+      <p>${Lang.sprintf('CONSOLE_ERROR', google, github)}</p>
+      <p class="error">${escapeHTML(this.error.stack)}<br><br>Version: ${version} <br> URL: ${url}</p>
+    `;
+    shadow.appendChild(content);
+
+    // Set focus and hide Sa11y's toggle.
+    setTimeout(() => {
+      Constants.Panel.toggle.style.display = 'none';
+      const container = document.querySelector('sa11y-console-error');
+      const dialog = container.shadowRoot.getElementById('dialog');
+      dialog.focus();
+
+      const close = container.shadowRoot.querySelector('.close-btn');
+      close.addEventListener('click', () => {
+        container.remove();
       });
-    }
+    }, 0);
   }
-
-  /* *************************************************************** */
-  /*  Check for missing meta page title <title>                      */
-  /* *************************************************************** */
-  if (option.checks.META_TITLE) {
-    const metaTitle = document.querySelector('title:not(svg title)');
-    if (!metaTitle || metaTitle.textContent.trim().length === 0) {
-      results.push({
-        type: option.checks.META_TITLE.type || 'error',
-        content: Lang.sprintf(option.checks.META_TITLE.content || 'META_TITLE'),
-        dismiss: prepareDismissal('TITLE'),
-        developer: option.checks.META_TITLE.developer || true,
-      });
-    }
-  }
-
-  /* ********************************************* */
-  /*  Zooming and scaling must not be disabled.    */
-  /* ********************************************* */
-  if (option.checks.META_SCALABLE || option.checks.META_MAX) {
-    const metaViewport = document.querySelector('meta[name="viewport"]');
-    if (metaViewport) {
-      const content = metaViewport.getAttribute('content');
-      if (content) {
-        // Parse the content attribute to extract parameters.
-        const params = content.split(',').reduce((acc, param) => {
-          const [key, value] = param.split('=').map((s) => s.trim());
-          acc[key] = value;
-          return acc;
-        }, {});
-
-        // Check for user-scalable parameter.
-        if (option.checks.META_SCALABLE && (params['user-scalable'] === 'no' || params['user-scalable'] === '0')) {
-          results.push({
-            type: option.checks.META_SCALABLE.type || 'error',
-            content: Lang.sprintf(option.checks.META_SCALABLE.content || 'META_SCALABLE'),
-            dismiss: prepareDismissal('SCALABLE'),
-            developer: option.checks.META_SCALABLE.developer || true,
-          });
-        }
-
-        // Check maximum-scale parameter.
-        const maxScale = parseFloat(params['maximum-scale']);
-        if (option.checks.META_MAX && !Number.isNaN(maxScale) && maxScale < 2) {
-          results.push({
-            type: option.checks.META_MAX.type || 'error',
-            content: Lang.sprintf(option.checks.META_MAX.content || 'META_MAX'),
-            dismiss: prepareDismissal('MAXSCALE'),
-            developer: option.checks.META_MAX.developer || true,
-          });
-        }
-      }
-    }
-  }
-
-  /* ****************************************** */
-  /*  Page shouldn't automatically refresh.     */
-  /* ****************************************** */
-  if (option.checks.META_REFRESH) {
-    const metaRefresh = document.querySelector('meta[http-equiv="refresh"]');
-    if (metaRefresh) {
-      results.push({
-        type: option.checks.META_REFRESH.type || 'error',
-        content: Lang.sprintf(option.checks.META_REFRESH.content || 'META_REFRESH'),
-        dismiss: prepareDismissal('REFRESH'),
-        developer: option.checks.META_REFRESH.developer || true,
-      });
-    }
-  }
-
-  /* *************************************************************** */
-  /*  Check for duplicate IDs that are referenced by other elements. */
-  /* *************************************************************** */
-  if (option.checks.DUPLICATE_ID) {
-    // Look for duplicate IDs within each DOM.
-    const doms = document.querySelectorAll('body, [data-sa11y-has-shadow-root]');
-    doms.forEach((dom) => {
-      const allIds = new Set();
-      const findDuplicateIds = (ids, withinDOM) => {
-        ids.forEach(($el) => {
-          const { id } = $el;
-
-          // Ignore empty IDs.
-          if (typeof id !== 'string' || id.trim().length === 0) {
-            return;
-          }
-
-          // Only flag duplicate IDs being referenced by same-page links, aria or a label.
-          // Reference: https://accessibilityinsights.io/info-examples/web/duplicate-id-aria/
-          if (id && !allIds.has(id)) {
-            allIds.add(id);
-          } else {
-            const ariaReference = Array.from(
-              withinDOM.querySelectorAll(`
-                a[href*="${id}"],
-                label[for*="${id}"],
-                [aria-labelledby*="${id}"],
-                [aria-controls*="${id}"],
-                [aria-owns*="${id}"]`),
-            );
-            if (ariaReference.length > 0) {
-              results.push({
-                element: $el,
-                type: option.checks.DUPLICATE_ID.type || 'error',
-                content: Lang.sprintf(option.checks.DUPLICATE_ID.content || 'DUPLICATE_ID', id),
-                dismiss: prepareDismissal(`DUPLICATEID${id}${$el.textContent}`),
-                dismissAll: option.checks.DUPLICATE_ID.dismissAll ? 'DUPLICATE_ID' : false,
-                developer: option.checks.DUPLICATE_ID.developer || true,
-              });
-            }
-          }
-        });
-      };
-
-      // Look for duplicate IDs within shadow DOMs.
-      if (dom.shadowRoot) {
-        const shadowRootIds = Array.from(
-          dom.shadowRoot.querySelectorAll(`[id]:not(${Constants.Exclusions.Container})`),
-        );
-        findDuplicateIds(shadowRootIds, dom.shadowRoot);
-      }
-
-      // Look for duplicates IDs in document body.
-      const regularIds = Array.from(
-        dom.querySelectorAll(`[id]:not(${Constants.Exclusions.Container})`),
-      );
-      findDuplicateIds(regularIds, dom);
-    });
-  }
-
-  /* ********************************************* */
-  /*  Buttons must have an accessible name.        */
-  /* ********************************************* */
-  if (option.checks.BTN_EMPTY || option.checks.BTN_EMPTY_LABELLEDBY || option.checks.BTN_LABEL || option.checks.HIDDEN_FOCUSABLE || option.checks.LABEL_IN_NAME) {
-    Elements.Found.Buttons.forEach(($el) => {
-      const accName = computeAccessibleName($el);
-      const buttonText = accName.replace(/'|"|-|\.|\s+/g, '').toLowerCase();
-
-      // Dismissal key.
-      const key = prepareDismissal(`BTN${$el.tagName + $el.id + $el.className + accName}`);
-
-      // Has ARIA
-      const hasAria = $el.querySelector(':scope [aria-labelledby], :scope [aria-label]') || $el.getAttribute('aria-labelledby') || $el.getAttribute('aria-label');
-      const hasAriaLabelledby = $el.querySelector(':scope [aria-labelledby]') || $el.getAttribute('aria-labelledby');
-      const ariaHidden = $el.getAttribute('aria-hidden') === 'true';
-      const negativeTabindex = $el.getAttribute('tabindex') === '-1';
-
-      // Button has aria-hidden but is still focusable.
-      if (ariaHidden) {
-        if (!negativeTabindex) {
-          if (option.checks.HIDDEN_FOCUSABLE) {
-            results.push({
-              element: $el,
-              type: option.checks.HIDDEN_FOCUSABLE.type || 'error',
-              content: Lang.sprintf(option.checks.HIDDEN_FOCUSABLE.content || 'HIDDEN_FOCUSABLE'),
-              dismiss: key,
-              dismissAll: option.checks.HIDDEN_FOCUSABLE.dismissAll ? 'BTN_HIDDEN_FOCUSABLE' : false,
-              developer: option.checks.HIDDEN_FOCUSABLE.developer || true,
-            });
-          }
-        }
-        return;
-      }
-
-      // Button doesn't have an accessible name.
-      if (buttonText.length === 0) {
-        if (option.checks.BTN_EMPTY_LABELLEDBY && hasAriaLabelledby) {
-          results.push({
-            element: $el,
-            type: option.checks.BTN_EMPTY_LABELLEDBY.type || 'error',
-            content: option.checks.BTN_EMPTY_LABELLEDBY.content
-              ? Lang.sprintf(option.checks.BTN_EMPTY_LABELLEDBY.content)
-              : `${Lang.sprintf('BTN_EMPTY_LABELLEDBY')} ${Lang.sprintf('BTN_TIP')}`,
-            dismiss: prepareDismissal(key),
-            dismissAll: option.checks.BTN_EMPTY_LABELLEDBY.dismissAll ? 'BTN_EMPTY_LABELLEDBY' : false,
-            developer: option.checks.BTN_EMPTY_LABELLEDBY.developer || true,
-          });
-        } else if (option.checks.BTN_EMPTY) {
-          results.push({
-            element: $el,
-            type: option.checks.BTN_EMPTY.type || 'error',
-            content: option.checks.BTN_EMPTY.content
-              ? Lang.sprintf(option.checks.BTN_EMPTY.content)
-              : `${Lang.sprintf('BTN_EMPTY')} ${Lang.sprintf('BTN_TIP')}`,
-            dismiss: key,
-            dismissAll: option.checks.BTN_EMPTY.dismissAll ? 'BTN_EMPTY' : false,
-            developer: option.checks.BTN_EMPTY.developer || true,
-          });
-        }
-        return;
-      }
-
-      // Button must have visible label as part of their accessible name.
-      const isVisibleTextInAccessibleName$1 = isVisibleTextInAccessibleName($el);
-      if (option.checks.LABEL_IN_NAME && hasAria && isVisibleTextInAccessibleName$1) {
-        const sanitizedText = sanitizeHTML(accName);
-        results.push({
-          element: $el,
-          type: option.checks.LABEL_IN_NAME.type || 'warning',
-          content: option.checks.LABEL_IN_NAME.content
-            ? Lang.sprintf(option.checks.LABEL_IN_NAME.content, sanitizedText)
-            : `${Lang.sprintf('LABEL_IN_NAME', sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`,
-          dismiss: key,
-          dismissAll: option.checks.LABEL_IN_NAME.dismissAll ? 'BTN_LABEL_IN_NAME' : false,
-          developer: option.checks.LABEL_IN_NAME.developer || true,
-        });
-        return;
-      }
-
-      // Has "button" in the accessible name.
-      if (option.checks.BTN_ROLE_IN_NAME && accName.includes(Lang._('BTN'))) {
-        results.push({
-          element: $el,
-          type: option.checks.BTN_ROLE_IN_NAME.type || 'warning',
-          content: option.checks.BTN_ROLE_IN_NAME.content
-            ? Lang.sprintf(option.checks.BTN_ROLE_IN_NAME.content)
-            : `${Lang.sprintf('BTN_ROLE_IN_NAME')} ${Lang.sprintf('BTN_TIP')}`,
-          dismiss: key,
-          dismissAll: option.checks.BTN_ROLE_IN_NAME.dismissAll ? 'BTN_ROLE_IN_NAME' : false,
-          developer: option.checks.BTN_ROLE_IN_NAME.developer || true,
-        });
-      }
-    });
-  }
-
-  /* ********************************************************** */
-  /* <li> elements must be contained in a <ul>/<ol>/<menu>.     */
-  /* ********************************************************** */
-  if (option.checks.UNCONTAINED_LI) {
-    Elements.Found.Lists.forEach(($el) => {
-      if (!$el.closest('ul, ol, menu')) {
-        results.push({
-          element: $el,
-          type: option.checks.UNCONTAINED_LI.type || 'error',
-          content: Lang.sprintf(option.checks.UNCONTAINED_LI.content || 'UNCONTAINED_LI'),
-          dismiss: prepareDismissal(`UNCONTAINEDLI${$el.textContent}`),
-          dismissAll: option.checks.UNCONTAINED_LI.dismissAll ? 'UNCONTAINED_LI' : false,
-          developer: option.checks.UNCONTAINED_LI.developer || true,
-        });
-      }
-    });
-  }
-
-  /* ****************************************** */
-  /*  No tabindex values greater than 0.        */
-  /* ****************************************** */
-  if (option.checks.TABINDEX_ATTR) {
-    Elements.Found.TabIndex.forEach(($el) => {
-      results.push({
-        element: $el,
-        type: option.checks.TABINDEX_ATTR.type || 'error',
-        content: Lang.sprintf(option.checks.TABINDEX_ATTR.content || 'TABINDEX_ATTR'),
-        dismiss: prepareDismissal(`TABINDEX${$el.tagName + $el.id + $el.className}`),
-        dismissAll: option.checks.TABINDEX_ATTR.dismissAll ? 'TABINDEX_ATTR' : false,
-        developer: option.checks.TABINDEX_ATTR.developer || true,
-      });
-    });
-  }
-
-  return results;
 }
 
-//import Lang from './lang.js';
+//@todo merge
+const newIncrementalResults = function() {
+  return false;
+};
 
-const Options = (function options() {
-  function preProcessOptions(options) {
-    let defaultOptions = {
+const alignPanel = function() {
+  if (!State.theme.panelElement) {
+    return false;
+  }
+  if (State.options.panelPinTo === 'left') {
+    State.theme.panel.classList.add('ed11y-pin-left');
+  }
+  // @todo merge elements.
+  /*    if (Ed11y.elements.panelPin) {
+        Ed11y.elements.panelPin.forEach(el => {
+          let bounds = el.getBoundingClientRect();
+          if (State.options.panelPinTo === 'right') {
+            xMost = windowWidth - bounds.left > xMost && bounds.left > windowWidth / 3 ? windowWidth - bounds.left : xMost;
+          } else {
+            xMost = bounds.right > xMost && xMost + bounds.right < windowWidth / 3 ? xMost + bounds.right : xMost;
+          }
+          yMost = bounds.height > yMost && bounds.height + yMost < window.innerHeight / 2 ? yMost + bounds.height : yMost;
+        });
+      }*/
+  {
+    // no push
+    State.theme.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
+    State.theme.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
+  }
+};
 
-      // Relative or absolute
-      //cssUrls: false, // ['/folder/editoria11y.css','/folder/custom.css']
-      cssUrls: false,
-
-      // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
-      checkRoots: false,
-      fixedRoots: false, // Array of specific nodes, overrides previous.
-      /* e.g:
-      fixedRoots: [
-        {
-           root: direct domReference
-           framePositioner: direct domReference or false
+const updatePanel = function () {
+  // @todo merge
+  //Ed11y.pauseObservers();
+  // Stash old values for incremental updates.
+console.log(1);
+  if (State.incremental) {
+    // Check for a change in the result counts.
+    if (State.forceFullCheck || newIncrementalResults()) {
+      State.forceFullCheck = false;
+      /*if (State.options.alertMode === 'assertive' && Ed11y.totalCount > 0 && (Ed11y.warningCount > oldWarnings || State.errorCount > oldErrors)) {
+        console.warn('forced open');
+        State.theme.showPanel = true;
+      }*/
+      //Ed11y.resetResults(true);
+    } else {
+      // Todo: commented out in 2.3.11:
+      // Reconnect map
+      // @todo merge
+      /*Ed11y.results = Ed11y.oldResults;
+      window.setTimeout(function() {
+        if ( !Ed11y.alignPending ) {
+          Ed11y.alignButtons();
+          Ed11y.alignPanel();
+          Ed11y.alignPending = false;
         }
-      ]
-      */
-
-      // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
-      shadowComponents: false,
-      autoDetectShadowComponents: true,
-
-      // Containers to globally ignore, e.g., "header *, .card *"
-      ignoreElements: false,
-
-      // Provide list of test keys; get from localization file or Ed11y.results.
-      ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
-
-      // Ignore Aria on these elements (Gutenberg labels headings while editing.)
-      ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
-      ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
-
-      // Disable tests on specific elements
-      // Include and modify this entire object in your call
-      ignoreByKey: {
-        'p': 'table p',
-        // 'h': false,
-        'img': '[aria-hidden], [aria-hidden] img, ' +
-          '[role="presentation"], ' +
-          'a[href][aria-label] img, button[aria-label] img, ' +
-          'a[href][aria-labelledby] img, button[aria-labelledby] img',
-        'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
-        // 'li': false,
-        // 'blockquote': false,
-        // 'iframe': false,
-        // 'audio': false,
-        // 'video': false,
-        'table': '[role="presentation"]',
-      },
-
-      headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
-
-      // Set alertModes
-      // 'headless': do not draw interface
-      // 'userPreference: respect user preference.
-      // 'polite': open for new issues.
-      // 'assertive': open for any issues.
-      // 'active': always open.
-      // CMS integrations can switch between polite & headless at runtime.
-      alertMode: 'userPreference',
-      inlineAlerts: true,
-      watchForChanges: true, // true, false, 'checkRoots';
-
-      // This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
-      editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
-
-      // Dismissed alerts
-      currentPage: false, // uses window.location.pathname unless a string is provided.
-      allowHide: true, // enables end-user ignore button
-      allowOK: true,  // enables end-user mark OK button
-      syncedDismissals: false, // provide empty or populated object {} to enable sync functions
-      reportsURL: false, // Provides a link to site-wide reports
-      showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
-
-      // Hide all alerts if these elements are absent, e.g., ".edit-button"
-      // Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
-      ignoreAllIfAbsent: false,
-      ignoreAllIfPresent: false,
-
-      // Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
-      preventCheckingIfPresent: false,
-      preventCheckingIfAbsent: false,
-
-      // Regex of strings to remove from links before checking to see if link titles are meaningful. E.g.:
-      // "\(link is external\)|\(link sends email\)"
-      linkIgnoreStrings: false,
-      linkIgnoreSelector: false,
-
-      // Disable the "is this element visible" check on themes that have 0-height elements.
-      checkVisible: true,
-
-      // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
-      hiddenHandlers: '',
-
-      panelPinTo: 'right',
-      panelOffsetX: '25px',
-      panelOffsetY: '25px',
-      panelNoCover: '', // select other buttons to avoid.
-      panelAttachTo: document.body,
-
-      // Selector list for elements that hide overflow, truncating buttons.
-      constrainButtons: false,
-
-      // Interface
-      lang: 'en',
-      langSanitizes: false, // Some translation modules will double-escape
-      theme: 'sleekTheme',
-      sleekTheme: {
-        bg: '#eff2ff', // e8f4ff
-        bgHighlight: '#7b1919',
-        text: '#20160c',
-        primary: '#276499', // 276499
-        primaryText: '#eff2ff',
-        button: 'transparent', // deprecate?
-        panelBar: '#1e517c',
-        panelBarText: '#fffdf7',
-        panelBarShadow: '0 0 0 1px #276499',
-        activeTab: '#276499',
-        activeTabText: '#fffffe',
-        focusRing: '#007aff',
-        outlineWidth: '0',
-        borderRadius: '3px',
-        ok: '#1f5381',
-        warning: 'rgb(250, 216, 89)',
-        warningText: '#20160c',
-        alert: 'rgb(184, 5, 25)',
-        alertText: '#f4f7ff',
-      },
-      darkTheme: {
-        bg: '#0a2051',
-        bgHighlight: '#7b1919',
-        text: '#f4f7ff',
-        primary: '#3052a0',
-        primaryText: '#f4f7ff',
-        button: 'transparent',
-        panelBar: '#3052a0',
-        panelBarText: '#f4f7ff',
-        panelBarShadow: 'inset 0 0 1px, 0 0 0 1px #0a2051',
-        activeTab: '#0a2051',
-        activeTabText: '#fffffe',
-        focusRing: 'cyan',
-        outlineWidth: '2px',
-        borderRadius: '3px',
-        ok: '#0a307a',
-        warning: 'rgb(250, 216, 89)',
-        warningText: '#20160c',
-        alert: 'rgb(184, 5, 25)',
-        alertText: '#f4f7ff',
-      },
-      lightTheme: {
-        bg: '#fffffe',
-        bgHighlight: '#7b1919',
-        text: '#20160c',
-        primary: '#0a307a',
-        primaryText: '#fffdf7',
-        panelBar: '#0a307a',
-        panelBarText: '#f4f7ff',
-        panelBarShadow: '0 0 0 1px #0a307a',
-        button: 'transparent',
-        activeTab: '#b9c0cf',
-        activeTabText: '#20160c',
-        focusRing: '#007aff',
-        outlineWidth: '0',
-        borderRadius: '3px',
-        ok: '#0a307a',
-        warning: 'rgb(250, 216, 89)',
-        warningText: '#20160c',
-        alert: 'rgb(184, 5, 25)',
-        alertText: '#f4f7ff',
-      },
-      // Base z-index for buttons.
-      // 1299 maximizes TinyMCE compatibility.
-      buttonZIndex: 1299,
-      // CSS overrides and additions.
-
-      baseFontSize: 'clamp(14px, 1.5vw, 16px)',
-      baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-
-      // Test customizations
-      embeddedContent: false, // @todo remove in favor of custom checks?
-      embeddedContentTitle: '', // @todo test or remove?
-      embeddedContentMessage: '', // @todo test or remove?
-
-      linksUrls: false, // get from language pack
-      linksMeaningless: false, // get from language pack
-      altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
-      // * Not implemented Yet:
-      // ruleset toggling
-      // form label tests
-      // detectSPArouting: false,
-
-      editLinks: false, // Add links to edit content in tooltips.
-
-      // @todo merge: port this functionality.
-      editorHeadingLevel: [
-        // Sets previous heading level for contentEditable fields.
-        // With 'ignore' set, first heading level is ignored in editable zones.
-        // This is ideal for systems with separate backend editing pages.
-        // Set to 'inherit' for fields edited in a frontend context.
-        /*{
-          selector: '.example-inherit',
-          previousHeading: 'inherit',
-        },
-        {
-          selector: '.example-l3',
-          previousHeading: 3,
-        },*/
-        {
-          selector: '*',
-          previousHeading: 0, // Ignores first heading for level skip detection.
-        },
-      ],
-
-      userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
-
-      customTests: 0,
-
-      // @todo merge do we need the image and button descenders and the tabindex selector? If so should it be in the MR?
-      imageIgnore: '[aria-hidden], [aria-hidden] img, [role="presentation"], a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img',
-      linkIgnore: '[aria-hidden][tabindex="-1"]',
-
-
-      checks: {
-        QA_DOCUMENT: {
-          sources: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']',
-        },
-        EMBED_VIDEO: {
-          sources: 'video, [src*="youtube.com"], [src*="brightcove.com"], [src*="dailymotion.com"], [src*="panopto.com"], [src*="Video"], [src*="video"], [src*="vimeo.com"], [src*="watch"], [src*="wistia.com"], [src*="vidyard.com"], [src*=yuja.com]'
-        },
-      },
-
-    };
-    options = {
-      ...defaultOptions,
-      ...options
-    };
-    /*M = {
-      // Fall back to En strings if language or string is unavailable
-      ...ed11yLang['en'],
-      ...ed11yLang[Ed11y.options.lang]
-    };*/
-
-    /*
-    * Options translation
-    * */
-    options.headless = options.alertMode === 'headless';
-
-    // Toggleable plugins
-    options.developerPlugin = false;
-    options.colourFilterPlugin = false;
-    options.exportResultsPlugin = false;
-    options.showImageOutline = false;
-    // @todo merge what are these?
-    // Global.ignoreContentOutsideRoots = option.ignoreContentOutsideRoots;
-
-  //  options.panelPosition = panelPinTo; // Syntax?
-
-    // Check for document types.
-
-    if (options.documentLinks) {
-      options.checks.QA_DOCUMENT.sources = options.documentLinks;
+        Ed11y.running = false;
+      },0);
+      Ed11y.resumeObservers();*/
+      return;
     }
-    // @todo merge this changed name from linkIgnoreSelector.
+  } else {
+    const uri = encodeURI(State.options.currentPage);
+    if (State.totalCount > 0) {
+      console.log(2);
 
-    if (options.linkIgnoreSelector) {
-      options.linkIgnoreSpan = options.linkIgnoreSelector;
+      // Record what has been seen at this route.
+      // We do not do this on incremental updates.
+      // Todo question: should we not do this at all for contentEditable?
+      console.log(State);
+      State.seen[uri] = State.totalCount;
+      store.setItem('editoria11yResultCount', JSON.stringify(Ed11y.seen));
+    } else if (State.seen[uri]) {
+      delete State.seen[uri];
     }
-
-
-
-    // @todo Merge ignoreByKey deprecation documentation and conversion. These tests still need overrides:
-    // 'p': 'table p',
-    //  'table': '[role="presentation"]'
-
-    /* ********************** */
-    /* Embedded Content Setup */
-    /* ********************** */
-    //Global.AllEmbeddedContent = `${Global.VideoSources}, ${Global.AudioSources}, ${Global.VisualizationSources}`;
-    // @todo merge: this means custom embeds needs to be a custom test.
-
-    return options;
   }
 
-  function postProcessOptions(options) {
-    // Exclusions.Sa11yElements: convert to Ed11y elements.
-    // @todo merge: test: need descendant selector?
-    Constants.Sa11yElements = '.ed11y-element';
-    // Main container exclusions.
+  if (State.options.alertMode !== 'headless') {
+    console.log(3);
 
-    // @todo merge remove wpadminbar from defaults and update wp module.
-    /*Exclusions.Container = ['#wpadminbar', '#wpadminbar *', ...exclusions];
-    if (option.containerIgnore) {
-      const containerSelectors = option.containerIgnore.split(',').map((item) => item.trim());
-      Exclusions.Container = Exclusions.Container.concat(
-        containerSelectors.flatMap((item) => [`${item} *`, item]),
-      );
-    }*/
+    // Not headless; draw the interface.
 
+    if (!State.theme.bodyStyle) {
+      State.theme.paintReady();
+    }
+    console.log(4);
+
+    if (State.onLoad === true) {
+      State.onLoad = false;
+
+      if (!State.options.inlineAlerts) {
+        // todo move to incremental check or timeout; no need to do on load.
+        State.oldResultString = `${State.errorCount} ${State.warningCount}`;
+        State.results.forEach(result => {
+          State.oldResultString += result.test + result.element.outerHTML;
+        });
+      }
+
+      console.log(5);
+
+      // Create the panel DOM on load.
+
+      State.theme.panel = document.createElement('ed11y-element-panel');
+      State.theme.attachCSS(State.theme.panel);
+      document.body.appendChild(State.theme.panel);
+      // @todo merge language handling?
+      State.theme.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = ed11yLang.en.buttonToolsContent;
+      State.theme.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = ed11yLang.en.buttonOutlineContent;
+      State.theme.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = ed11yLang.en.panelCheckOutline;
+      State.theme.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = ed11yLang.en.buttonAltsContent;
+      State.theme.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = ed11yLang.en.panelCheckAltText;
+      State.theme.panel.querySelector('.jump-next.ed11y-sr-only').textContent = ed11yLang.en.buttonFirstContent;
+
+      State.theme.panel.setAttribute('aria-label', ed11yLang.en.panelControls);
+      if (State.options.reportsURL) {
+        let reportLink = document.createElement('a');
+        reportLink.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M0 96C0 61 29 32 64 32l384 0c35 0 64 29 64 64l0 320c0 35-29 64-64 64L64 480c-35 0-64-29-64-64L0 96zm64 0l0 64 64 0 0-64L64 96zm384 0L192 96l0 64 256 0 0-64zM64 224l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64zM64 352l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64z"/></svg><span class="ed11y-sr-only"></span>';
+        reportLink.setAttribute('id' , 'ed11y-reports-link');
+        reportLink.setAttribute('href', State.options.reportsURL);
+        reportLink.setAttribute('target', '_blank');
+        reportLink.setAttribute('aria-label', ed11yLang.en.reportsLink);
+        reportLink.querySelector('.ed11y-sr-only').textContent = ed11yLang.en.reportsLink;
+        State.theme.showDismissed.insertAdjacentElement('beforebegin', reportLink);
+      }
+
+      console.log(6);
+
+      // Decide whether to open the panel on load.
+      if (State.ignoreAll ||
+        (!State.options.inlineAlerts && State.totalCount > 75)
+      ) {
+        State.showPanel = false;
+      } else if (State.options.alertMode === 'active' ||
+        !State.options.userPrefersShut ||
+        State.options.showDismissed
+      ) {
+        // Show always on load for active mode or by user preference.
+        State.showPanel = true;
+      } else if (
+        State.totalCount > 0 &&
+        !State.ignoreAll &&
+        ( State.options.alertMode === 'assertive' ||
+          State.options.alertMode === 'polite' &&
+          State.seen[encodeURI(State.options.currentPage)] !== State.totalCount
+        )
+      ) {
+        // Show sometimes for assertive/polite if there are new items.
+        State.showPanel = true;
+      }
+    }
+
+    // Now we can open or close the panel.
+    if (!State.showPanel) {
+      console.log(7);
+      // Close panel.
+      resetAll();
+    } else {
+      // Ignore issue count if this resulted from a user action.
+
+      State.open = true;
+      State.theme.panel.classList.remove('ed11y-shut');
+      State.theme.panel.classList.add('ed11y-active');
+      State.theme.panelToggle.setAttribute('aria-expanded', 'true');
+      State.theme.panelToggleTitle.textContent = State.totalCount > 0 ? ed11yLang.en.buttonHideAlerts : ed11yLang.en.buttonHideChecker;
+      // Prepare show hidden alerts button.
+      if (State.dismissedCount === 0) {
+        // Reset show hidden default option when irrelevant.
+        State.theme.showDismissed.setAttribute('hidden', '');
+        State.theme.showDismissed.setAttribute('data-ed11y-pressed', 'false');
+        State.options.showDismissed = false;
+      } else if (State.dismissedCount === 1) {
+        State.theme.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ? ed11yLang.en.buttonHideHiddenAlert : ed11yLang.en.buttonShowHiddenAlert;
+        State.theme.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
+        State.theme.showDismissed.removeAttribute('hidden');
+      } else {
+        State.theme.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ? ed11yLang.en.buttonHideHiddenAlerts(State.dismissedCount) : ed11yLang.en.buttonShowHiddenAlerts(State.dismissedCount);
+        State.theme.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
+        State.theme.showDismissed.removeAttribute('hidden');
+      }
+
+      window.setTimeout(function () {
+        if (!State.ignoreAll) {
+          requestAnimationFrame(() => State.theme.showResults());
+        }
+      }, 0);
+    }
+    // Update buttons.
+    if (State.totalCount > 0 || (State.options.showDismissed && State.dismissedCount > 0)) {
+      State.theme.panelToggleTitle.textContent = State.open ? ed11yLang.en.buttonHideAlerts : ed11yLang.en.buttonShowAlerts;
+      State.theme.panelJumpNext.removeAttribute('hidden');
+      if (State.errorCount > 0) {
+        // Errors
+        State.theme.panel.classList.remove('ed11y-warnings', 'ed11y-pass');
+        State.theme.panel.classList.add('ed11y-errors');
+        document.documentElement.style.setProperty('--ed11y-activeBackground', State.theme.alert);
+        document.documentElement.style.setProperty('--ed11y-activeColor', '#fff');
+        document.documentElement.style.setProperty('--ed11y-activeBorder', '#fff7');
+        document.documentElement.style.setProperty('--ed11y-activePanelBorder', '#def');
+      }
+      else if (State.warningCount > 0) {
+        // Warnings
+        State.theme.panel.classList.remove('ed11y-errors', 'ed11y-pass');
+        State.theme.panel.classList.add('ed11y-warnings');
+        document.documentElement.style.setProperty('--ed11y-activeBackground', State.theme.warning);
+        document.documentElement.style.setProperty('--ed11y-activeColor', '#111');
+        document.documentElement.style.setProperty('--ed11y-activeBorder', '#947605');
+        document.documentElement.style.setProperty('--ed11y-activePanelBorder', '#947605');
+      } else {
+        // Issues present but dismissed.
+        State.theme.panel.classList.remove('ed11y-errors', 'ed11y-warnings');
+        State.theme.panel.classList.add('ed11y-pass');
+        document.documentElement.style.setProperty('--ed11y-activeBackground', State.theme.panelBar);
+        document.documentElement.style.setProperty('--ed11y-activeColor', State.theme.panelBarText);
+        document.documentElement.style.setProperty('--ed11y-activeBorder', State.theme.panelBarText + '44');
+        document.documentElement.style.setProperty('--ed11y-activePanelBorder', State.theme.panelBarText + '88');
+      }
+      // todo postpone: aria alert on load?
+      /*window.setTimeout(function () {
+        //Ed11y.announce.textContent = text;
+      }, 1500);*/
+      if (State.dismissedCount > 0 && State.totalCount === 0) {
+        State.theme.panelCount.textContent = State.dismissedCount;
+      } else {
+        State.theme.panelCount.textContent = State.totalCount > 99 ? '99+' : State.totalCount;
+      }
+    } else {
+      State.theme.panelJumpNext.setAttribute('hidden', '');
+      document.documentElement.style.setProperty('--ed11y-activeBackground', State.theme.panelBar);
+      document.documentElement.style.setProperty('--ed11y-activeColor', State.theme.panelBarText);
+      document.documentElement.style.setProperty('--ed11y-activeBorder', State.theme.panelBarText + '44');
+      document.documentElement.style.setProperty('--ed11y-activePanelBorder', State.theme.panelBarText + '88');
+
+      State.theme.panelCount.style.display = 'display: none;';
+      State.theme.panel.classList.remove('ed11y-warnings', 'ed11y-errors');
+      State.theme.panel.classList.add('ed11y-pass');
+
+      if (State.dismissedCount > 0) {
+        State.theme.panelCount.textContent = 'i';
+        if (State.open) {
+          State.theme.panelToggleTitle.textContent = ed11yLang.en.buttonHideChecker;
+        } else {
+          State.theme.panelToggleTitle.textContent = State.dismissedCount > 1 ?
+            ed11yLang.en.buttonShowHiddenAlerts(State.dismissedCount) :
+            ed11yLang.en.buttonShowHiddenAlert;
+        }
+      } else {
+        // todo 3.x: move these inline and just change the class.
+        State.theme.panelToggleTitle.textContent = State.open ? ed11yLang.en.buttonHideChecker : ed11yLang.en.buttonShowNoAlert;
+      }
+    }
+    State.theme.panelToggle.classList.remove('disabled');
+    State.theme.panelToggle.removeAttribute('aria-disabled');
+    alignPanel();
+    console.log('i tried');
   }
 
 
 
 
-  return {
-    preProcessOptions,
-    postProcessOptions,
-  };
-}());
+  // todo merge convert to find
+/*
+  window.setTimeout(() => {
+    if (State.options.watchForChanges) {
+      Ed11y.elements.editable?.forEach(editable => {
+        if (!editable.matches('.drag-observe')) {
+          editable.classList.add('drag-observe');
+          editable.addEventListener('drop', () => {
+            // This event does not bubble.
+            Ed11y.forceFullCheck = true;
+            Ed11y.incrementalCheck();
+          });
+        }
+      });
+      if (State.options.watchForChanges === 'checkRoots') {
+        Ed11y.roots?.forEach((root) => {
+          startObserver( root );
+        });
+      } else {
+        startObserver( document.body );
+      }
+      Ed11y.resumeObservers(); // on recheck.
+    }
+  }, 0);
+
+  Ed11y.resumeObservers();*/
+  State.running = false;
+};
+
+
+
+const togglePanel = function() {
+  State.ignoreAll = false;
+
+  if (!State.doubleClickPrevent) {
+    // Prevent clicks piling up while scan is running.
+    if (State.running !== true) {
+      State.running = true;
+      // Re-scan each time the panel reopens.
+      if (State.theme.panel.classList.contains('ed11y-shut') === true) {
+        State.onLoad = false;
+        State.incremental = false;
+        State.showPanel = true;
+        if (State.dismissedCount > 0 && State.warningCount === 0 && State.errorCount === 0) {
+          State.showDismissed = false;
+          this.toggleShowDismissals();
+        } else {
+          // todo!
+          checkAll();
+        }
+        State.userPrefersShut = false;
+        localStorage.setItem('editoria11yShow', '1');
+      }
+      else {
+        State.theme.panelToggleTitle.textContent = State.totalCount > 0 ? ed11yLang.en.buttonShowAlerts : ed11yLang.en.buttonShowNoAlert;
+        State.showDismissed = false;
+
+        // todo!
+        resetAll();
+        State.userPrefersShut = true;
+
+        // todo OOS Sa11y storage system.
+        localStorage.setItem('editoria11yShow', '0');
+      }
+    }
+  }
+  State.doubleClickPrevent = true;
+  window.setTimeout(function () {
+    State.doubleClickPrevent = false;
+  }, 200);
+  return false;
+};
+
+const checkAll = function (
+  desiredRoot = State.options.checkRoot,
+  desiredReadabilityRoot = State.options.readabilityRoot,
+  fixedRoots = State.options.fixedRoots,
+) {
+  try {
+    // @todo merge does Editoria11y need to separate out these clears?
+    State.results = []; // erm...
+    State.headingOutline = [];
+    State.errorCount = 0;
+    State.warningCount = 0;
+    State.customChecksRunning = false;
+    // Initialize root areas to check.
+    Constants.initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots);
+    // Find all web components on the page.
+    // @todo Merge work needed.
+    findShadowComponents(Constants.Global);
+    // Find and cache elements.
+    // @todo Merge work needed.
+    Elements.initializeElements(State.options);
+    // Ruleset checks
+    checkHeaders(State.results, State.options, State.headingOutline);
+    checkLinkText(State.results, State.options);
+    checkImages(State.results, State.options);
+    checkLabels(State.results, State.options);
+    checkQA(State.results, State.options);
+    // checkDeveloper(this.results, Options);
+    // @todo merge work needed
+    // if (State.options.embeddedContentPlugin) checkEmbeddedContent(State.results, Options);
+    // if (Options.contrastPlugin) checkContrast(this.results, Options);
+    // if (Options.readabilityPlugin) checkReadability();
+    // Build array of images to be used for image panel.
+    State.imageResults = Elements.Found.Images.map((image) => {
+      const match = State.results.find((i) => i.element === image);
+      return match && {
+        element: image,
+        type: match.type,
+        dismiss: match.dismiss,
+        developer: match.developer,
+      };
+    }).filter(Boolean);
+    /* Custom checks */
+    if (Constants.customChecks === 'listen') {
+      console.log('listening');
+      // Option 3: Provide via event listener. Yoinked from Editoria11y!
+      State.customChecksRunning = true;
+      State.customChecksFinished = 0;
+      document.addEventListener('sa11y-resume', () => {
+        State.customChecksFinished += 1;
+        if (State.customChecksFinished === 1) {
+          State.customChecksRunning = false;
+          this.updateResults();
+        }
+      });
+      window.setTimeout(() => {
+        if (State.customChecksRunning === true) {
+          State.customChecksRunning = false;
+          this.updateResults();
+          throw Error('Sa11y: No custom checks were returned.');
+        }
+      }, Options.delayCustomCheck);
+      window.setTimeout(() => {
+        const customChecks = new CustomEvent('sa11y-custom-checks');
+        document.dispatchEvent(customChecks);
+      }, 0);
+    } else if (typeof Constants.customChecks === 'object') {
+      // Option 2: Provide as an object when instantiated.
+      State.results.push(...Options.customChecks);
+    }
+
+    // No custom checks running.
+    if (!State.customChecksRunning) updateResults();
+  } catch (error) {
+    const consoleErrors = new ConsoleErrors(error);
+    document.body.appendChild(consoleErrors);
+    throw Error(error);
+  }
+  return true;
+};
+
+const updateResults = () => {
+  // Filter out heading issues that are outside of the target root.
+  State.results = State.results.filter((heading) => heading.isWithinRoot !== false);
+  // Filter out "Developer checks" if toggled off or if using externally supplied developer checks.
+  /*const devChecks = Utils.store.getItem('sa11y-developer') === 'Off' || Utils.store.getItem('sa11y-developer') === null;
+  if (devChecks || option.externalDeveloperChecks === true) {
+    this.results = this.results.filter((issue) => issue.developer !== true);
+  }
+
+  // Filter out external vendor results based on "Developer checks" state.
+  if (devChecks) {
+    this.results = this.results.filter((issue) => issue.external !== true);
+  }
+
+  // Generate HTML path, and optionally CSS selector path of element.
+  this.results.forEach(($el, id) => {
+    const cssPath = option.selectorPath ? Utils.generateSelectorPath($el.element) : '';
+    const htmlPath = $el.element?.outerHTML.replace(/\s{2,}/g, ' ').trim() || '';
+    Object.assign($el, {htmlPath, cssPath, id});
+  });*/
+
+  if (State.options.headless === false) {
+    // Check for dismissed items and update results array.
+
+    // @todo Merge and replace.
+    // until then....
+    State.totalCount = State.results.length;
+    updatePanel();
+    /*        const dismiss = dismissLogic(
+              this.results,
+              this.panelTooltips,
+              this.checkAll,
+              this.resetAll,
+            );
+            this.results = dismiss.updatedResults;
+            this.dismissed = dismiss.dismissedIssues;
+            this.dismissedPageResults = dismiss.dismissedResults;*/
+    }
+
+    // Dispatch custom event that stores the results array.
+    // @todo merge Ed11y events
+    window.sa11yCheckComplete = null;
+    const event = new CustomEvent('sa11y-check-complete', {
+      detail: {
+        results: State.results,
+        // @todo merge need the param.
+        page: window.location.pathname,
+      },
+    });
+    window.sa11yCheckComplete = event.detail;
+    document.dispatchEvent(event);
+
+    console.log(State.results);
+
+};
+
+class ControlPanel extends HTMLElement {
+  /* global Ed11y */
+
+  constructor() {
+    super();
+  }
+
+  // todo mvp parameterize
+  template() {
+    // @todo MVP change to sa11y-control-panel.
+    // TODO: CHANGE FROM VISIBILITY TO WIDTH TOGGLES SO FOCUS WORKS
+    // Todo: details summary language params
+    // todo: don't switch both label and aria-expanded on show hidden
+    return `
+    <div class='ed11y-buttonbar'>
+      <button id='ed11y-show-hidden' data-ed11y-pressed='false' hidden>
+        <svg aria-hidden="true" class="shown" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="9 0 640 512"><path fill="Currentcolor" d="M288 32c-81 0-146 37-193 81C49 156 17 208 3 244c-3 8-3 17 0 25C17 304 49 356 95 399C142.5 443 207 480 288 480s146-37 193-81c47-44 78-95 93-131c3-8 3-17 0-25c-15-36-46-88-93-131C434 69 369 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35-29 64-64 64c-7 0-14-1-20-3c-6-2-12 2-12 7c.3 7 1 14 3 21c14 51 66 82 118 68s82-66 68-118c-11-42-48-69-89-71c-6-.2-9 6-7 12c2 6 3 13 3 20z"/></svg>
+        <svg aria-hidden="true" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="39 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>
+        <span class="ed11y-sr-only"></span>
+      </button>
+      <button id='ed11y-visualize' data-ed11y-pressed="false" class='ed11y-panel-fa'>
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 10 512 512"><path fill="Currentcolor" d="M152 38c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 113C-2 104-2 88 7 79s25-9 34 0l22 22 55-61c9-10 24-11 34-2zm0 160c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 273c-9-9-9-25 0-34s25-9 35 0l22 22 55-61c9-10 24-11 34-2zM224 96c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zm0 160c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zM160 416c0-18 14-32 32-32l288 0c18 0 32 14 32 32s-14 32-32 32l-288 0c-18 0-32-14-32-32zM48 368a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/></svg>
+        <span class="ed11y-sr-only"></span>
+      </button>
+      <div id='ed11y-visualizers' class="content" hidden>
+          <details id="ed11y-headings-tab">
+              <summary>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M0 96C0 78 14 64 32 64l384 0c18 0 32 14 32 32s-14 32-32 32L32 128C14 128 0 114 0 96zM64 256c0-18 14-32 32-32l384 0c18 0 32 14 32 32s-14 32-32 32L96 288c-18 0-32-14-32-32zM448 416c0 18-14 32-32 32L32 448c-18 0-32-14-32-32s14-32 32-32l384 0c18 0 32 14 32 32z"></path></svg> <span class="summary-title"></span>
+              </summary>
+              <div class="details">
+                  <span class="details-title"></span>
+                  <ul id='ed11y-outline'></ul>
+              </div>
+          </details>
+          <details id="ed11y-alts-tab">
+            <summary>
+                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg> <span class="summary-title"></span>
+            </summary>
+            <div class="details">
+                <span class="details-title"></span>
+                <ul id='ed11y-alt-list'></ul>
+            </div>
+        </details>
+        </div>
+      <button type='button' id='ed11y-toggle'><span class="ed11y-sr-only">Show alerts</span><span class="ed11y-toggle-circle"><span class='icon'><svg class="errors-icon" xmlns="http://www.w3.org/2000/svg" width="10" aria-hidden="true" viewBox="0 0 448 512"><path fill="currentColor" d="M64 32C64 14 50 0 32 0S0 14 0 32L0 64 0 368 0 480c0 18 14 32 32 32s32-14 32-32l0-128 64-16c41-10 85-5 123 13c44.2 22 96 25 142 7l35-13c13-5 21-17 21-30l0-248c0-23-24-38-45-28l-10 5c-46 23-101 23-147 0c-35-18-75-22-114-13L64 48l0-16z"></path></svg><svg class="pass-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10.1699 19.1777"><path fill="currentColor" d="M3.7031,10.5527c-.3633-.6562-.6426-1.1387-.8379-1.4473l-.3105-.4863-.2344-.3574c-.5117-.7969-1.0449-1.4551-1.5996-1.9746.3164-.2617.6113-.3926.8848-.3926.3359,0,.6348.123.8965.3691s.5918.7148.9902,1.4062c.4531-1.4727,1.0293-2.8691,1.7285-4.1895.3867-.7188.7314-1.2021,1.0342-1.4502s.7041-.3721,1.2041-.3721c.2656,0,.5938.041.9844.123-1.0039.8086-1.8066,1.7695-2.4082,2.8828s-1.3789,3.0762-2.332,5.8887Z"/></svg><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="close-icon" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg></span></span></button>
+      <button class='ed11y-jump next' data-ed11y-goto='0' aria-haspopup="dialog"><svg class="hover-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="11" viewBox="0 -15 90 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m30 00 50 50-50 50" stroke-width="18"></path></svg><span class='toggle-count'></span><span class='jump-next ed11y-sr-only'></span></button>
+     </div>
+    </div>
+    <div id="ed11y-message" aria-live="polite"></div>
+    `;
+  }
+
+  connectedCallback() {
+    if (!this.initialized && typeof Ed11y !== 'undefined') {
+
+      this.style.setProperty('outline', '0');
+      this.classList.add('ed11y-element');
+      const shadow = this.attachShadow({mode: 'open'});
+      const wrapper = document.createElement('aside');
+      wrapper.setAttribute('id', 'panel');
+      //!!wrapper.setAttribute('aria-label', Ed11y.M.panelControls);
+      wrapper.classList.add('ed11y-wrapper', 'ed11y-panel-wrapper', 'ed11y-pass');
+      wrapper.innerHTML = this.template();
+      shadow.appendChild(wrapper);
+      State.theme.attachCSS(shadow);
+      State.theme.panel = wrapper;
+      State.theme.panelElement = this;
+      State.theme.panelToggle = wrapper.querySelector('#ed11y-toggle');
+      State.theme.panelToggleTitle = wrapper.querySelector('#ed11y-toggle .ed11y-sr-only');
+      State.theme.panelCount = wrapper.querySelector('.toggle-count');
+      State.theme.panelJumpNext = wrapper.querySelector('.ed11y-jump.next');
+      State.theme.panelJumpNext.addEventListener('click', this.jumpTo);
+      State.theme.showDismissed = wrapper.querySelector('#ed11y-show-hidden');
+      State.theme.message = wrapper.querySelector('#ed11y-message');
+      const panelTabs = wrapper.querySelectorAll('.ed11y-buttonbar button');
+      panelTabs.forEach(tab => {
+        // todo: syntax could be shrunk now that these aren't tabs.
+        tab.addEventListener('click', this.handleBarClick);
+      });
+      const altDetails = State.theme.panel.querySelector('#ed11y-alts-tab');
+      const headingDetails = State.theme.panel.querySelector('#ed11y-headings-tab');
+      altDetails.addEventListener('toggle', () => {
+        if (altDetails.open && headingDetails.open) {
+          headingDetails.removeAttribute('open');
+        }
+      });
+      headingDetails.addEventListener('toggle', () => {
+        if (altDetails.open && headingDetails.open) {
+          altDetails.removeAttribute('open');
+        }
+      });
+      this.initialized = true;
+    }
+  }
+
+  jumpTo(event) {
+    // Handle jump
+    event.preventDefault();
+    State.toggledFrom = event.target.closest('button');
+    if (!State.open) {
+      togglePanel();
+      window.setTimeout(function() {
+        Ed11y.jumpTo(1);
+      },500);
+    } else {
+      Ed11y.jumpTo(1);
+    }
+  }
+
+
+
+}
+
+class Ed11yElementHeadingLabel extends HTMLElement {
+  constructor() {
+    super();
+  }
+  connectedCallback() {
+    if (!this.initialized) {
+      const shadow = this.attachShadow({mode: 'open'});
+      let wrapper = document.createElement('div');
+      wrapper.classList.add('ed11y-wrapper', 'ed11y-heading-wrapper');
+      let i = this.dataset.ed11yHeadingOutline;
+      let result = Ed11y.headingOutline[i];
+      wrapper.innerHTML = 'H' + result[1];
+      let issues = !!result[2];
+      wrapper.classList.add('issue' + issues);
+      let fontSize = Math.max(52 - 8 * result[1], 12);
+      wrapper.style.setProperty('font-size', fontSize + 'px');
+      shadow.appendChild(wrapper);
+      this.initialized = true;
+    }
+  }
+}
+customElements.define('ed11y-element-heading-label', Ed11yElementHeadingLabel);
 
 // Options, language object, constants, and utilities.
 // import checkCustom from './sa11y/src/js/sa11y-custom-checks';
 
-class Ed11y {
+class Ed11y$1 {
   constructor(options) {
 
-    console.log(options);
-    options = Options.preProcessOptions(options);
-    console.log(options);
-    const option = {
+    // @todo Sa11y style versioning magic.
+    options.version = '3.0.0';
+    State.options = Options.preProcessOptions(options);
+    State.options = {
       ...defaultOptions,
       ...options,
       checks: {
@@ -5163,7 +4452,6 @@ class Ed11y {
         ...options.checks,
       },
     };
-    console.log(option);
 
     /* *********************************************************** */
     /*  Initialize: Start your engines.                            */
@@ -5171,7 +4459,7 @@ class Ed11y {
     this.initialize = () => {
       // Do not run Sa11y if any supplied elements detected on page.
       const checkRunPrevent = () => {
-        const { doNotRun } = option;
+        const { doNotRun } = State.options;
         return doNotRun.trim().length > 0 ? document.querySelector(doNotRun) : false;
       };
 
@@ -5184,138 +4472,38 @@ class Ed11y {
         // customElements.define('sa11y-panel-tooltips', PanelTooltips);
         // customElements.define('sa11y-control-panel', ControlPanel);
         // customElements.define('sa11y-console-error', ConsoleErrors);
+        customElements.define('ed11y-element-panel', ControlPanel);
 
         // Initialize global constants and exclusions.
-        Constants.initializeGlobal(option);
-        Constants.initializeReadability(option);
-        Constants.initializeExclusions(option);
+        Constants.initializeGlobal(State.options);
+        Constants.initializeReadability(State.options);
+        Constants.initializeExclusions(State.options);
+
+        Options.postProcessOptions(State.options);
+
+
+        // Build control panel.
+        const controlPanel = new ControlPanel();
+        document.body.appendChild(controlPanel);
+        State.theme.attachCSS(document.body);
 
         // Make "Developer checks" on by default or if toggle switch is visually hidden.
-        if (option.developerChecksOnByDefault) {
-          if (store.getItem('sa11y-developer') === null || option.checkAllHideToggles) {
-            store.setItem('sa11y-developer', 'On');
+        /*if (option.developerChecksOnByDefault) {
+          if (Utils.store.getItem('sa11y-developer') === null || option.checkAllHideToggles) {
+            Utils.store.setItem('sa11y-developer', 'On');
           }
-        }
+        }*/
 
       }
     };
 
-    /* *********************************************************** */
-    /*  Check All: Where all the magic happens.                    */
-    /* *********************************************************** */
-    this.checkAll = async (
-      desiredRoot = option.checkRoot,
-      desiredReadabilityRoot = option.readabilityRoot,
-      fixedRoots = option.fixedRoots,
-    ) => {
-      try {
-        // @todo merge does Editoria11y need to separate out these clears?
-        this.results = [];
-        this.headingOutline = [];
-        this.errorCount = 0;
-        this.warningCount = 0;
-        this.customChecksRunning = false;
 
-        // Initialize root areas to check.
-        Constants.initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots);
-
-        // Find all web components on the page.
-        // @todo Merge work needed.
-        findShadowComponents(option);
-
-        // Find and cache elements.
-        // @todo Merge work needed.
-        Elements.initializeElements(option);
-
-        // Ruleset checks
-        checkHeaders(this.results, option, this.headingOutline);
-        checkLinkText(this.results, option);
-        checkImages(this.results, option);
-        checkLabels(this.results, option);
-        checkQA(this.results, option);
-        checkDeveloper(this.results, option);
-        if (option.embeddedContentPlugin) checkEmbeddedContent(this.results, option);
-        if (option.contrastPlugin) checkContrast(this.results, option);
-        if (option.readabilityPlugin) checkReadability();
-
-        // Build array of images to be used for image panel.
-        this.imageResults = Elements.Found.Images.map((image) => {
-          const match = this.results.find((i) => i.element === image);
-          return match && {
-            element: image,
-            type: match.type,
-            dismiss: match.dismiss,
-            developer: match.developer,
-          };
-        }).filter(Boolean);
-
-        /* Custom checks */
-        if (option.customChecks === true) {
-          // Option 1: Provide via sa11y-custom-checks.js
-          checkCustom(this.results);
-        } else if (typeof option.customChecks === 'object') {
-          // Option 2: Provide as an object when instantiated.
-          this.results.push(...option.customChecks);
-        } else if (option.customChecks === 'listen') {
-          // Option 3: Provide via event listener. Yoinked from Editoria11y!
-          this.customChecksRunning = true;
-          this.customChecksFinished = 0;
-          document.addEventListener('sa11y-resume', () => {
-            this.customChecksFinished += 1;
-            if (this.customChecksFinished === 1) {
-              this.customChecksRunning = false;
-              this.updateResults();
-            }
-          });
-          window.setTimeout(() => {
-            if (this.customChecksRunning === true) {
-              this.customChecksRunning = false;
-              this.updateResults();
-              throw Error('Sa11y: No custom checks were returned.');
-            }
-          }, option.delayCustomCheck);
-          window.setTimeout(() => {
-            const customChecks = new CustomEvent('sa11y-custom-checks');
-            document.dispatchEvent(customChecks);
-          }, 0);
-        }
-
-        // No custom checks running.
-        if (!this.customChecksRunning) this.updateResults();
-      } catch (error) {
-        const consoleErrors = new ConsoleErrors(error);
-        document.body.appendChild(consoleErrors);
-        throw Error(error);
-      }
-    };
-
-    this.updateResults = () => {
-      // Filter out heading issues that are outside of the target root.
-      this.results = this.results.filter((heading) => heading.isWithinRoot !== false);
-
-      // Filter out "Developer checks" if toggled off or if using externally supplied developer checks.
-      const devChecks = store.getItem('sa11y-developer') === 'Off' || store.getItem('sa11y-developer') === null;
-      if (devChecks || option.externalDeveloperChecks === true) {
-        this.results = this.results.filter((issue) => issue.developer !== true);
-      }
-
-      // Filter out external vendor results based on "Developer checks" state.
-      if (devChecks) {
-        this.results = this.results.filter((issue) => issue.external !== true);
-      }
-
-      // Generate HTML path, and optionally CSS selector path of element.
-      this.results.forEach(($el, id) => {
-        const cssPath = option.selectorPath ? generateSelectorPath($el.element) : '';
-        const htmlPath = $el.element?.outerHTML.replace(/\s{2,}/g, ' ').trim() || '';
-        Object.assign($el, {htmlPath, cssPath, id});
-      });
-    };
 
     /* *********************************************************** */
     /*  Reset all: Clears everything and resets the panel.         */
     /* *********************************************************** */
     this.resetAll = (restartPanel = true) => {
+      /*
       Constants.Global.html.removeAttribute('data-sa11y-active');
 
       // Remove data attribute from shadow root elements.
@@ -5323,7 +4511,7 @@ class Ed11y {
         el.shadowRoot.querySelectorAll('style.sa11y-css-utilities').forEach((style) => style.remove());
         el.removeAttribute('data-sa11y-has-shadow-root');
       });
-
+      */
     };
 
     /* *********************************************************** */
@@ -5346,7 +4534,27 @@ class Ed11y {
     /*  Initialize Sa11y.                                          */
     /* *********************************************************** */
     this.initialize();
+
+    this.checkAll = checkAll;
+
+    this.resetAll = function () {
+      /*Ed11y.pauseObservers();
+      Ed11y.resetResults();
+      Ed11y.resetPanel();*/
+      State.incremental = false;
+      State.running = false;
+      State.showPanel = false;
+      State.open = false;
+    };
+
+    checkAll();
+    this.results = function() {
+      return State.results;
+    };
+
+    // todo incrementalCheck
+    //checkAll();
   }
 }
 
-export { Ed11y, Lang };
+export { Ed11y$1 as Ed11y, Lang };

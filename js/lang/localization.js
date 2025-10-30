@@ -106,7 +106,7 @@ const ed11yLang = {
       title: 'Manual check: was a heading level skipped?',
       tip: (prevLevel, level) =>
         `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
-            ${Ed11y.M.headingExample}
+            ${ed11yLang.en.headingExample}
             <p>This heading skipped from level ${prevLevel} to level ${level}. From a screen reader, this sounds like content is missing.</p>
             <p><strong>To fix:</strong> adjust levels to form an accurate outline, without gaps.</p>
             `,
@@ -116,7 +116,7 @@ const ed11yLang = {
       title: 'Heading tag without any text',
       tip: () =>
         `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
-            ${Ed11y.M.headingExample}
+            ${ed11yLang.en.headingExample}
             <p>Empty headings create confusing gaps in this outline: they could mean the following content is still part of the previous section, or that the text was unpronounceable for some reason.</p>
             <p><strong>To fix:</strong> add text to this heading, or delete this empty line.</p>
             `,
@@ -126,7 +126,7 @@ const ed11yLang = {
       title: 'Manual check: long heading',
       tip: () =>
         `<p>Headings should be brief and clear. Assistive devices use them as a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">navigable table of contents</a> for the page. The numbers indicate indents in a nesting relationship:</p>  
-            ${Ed11y.M.headingExample}
+            ${ed11yLang.en.headingExample}
             <p><strong>To fix:</strong> shorten this heading if possible, or remove the heading style if it was only applied to this text to provide visual emphasis.</p>
             `,
     },
@@ -153,14 +153,14 @@ const ed11yLang = {
       tip: () =>
         `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.</p>
             <p><strong>To fix:</strong> either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>
-            ${Ed11y.M.altAttributeExample}`,
+            ${ed11yLang.en.altAttributeExample}`,
     },
 
     altNull : {
       title: 'Manual check: image has no alt text',
       tip: () =>
         `<p>Unless this image is purely decorative (a spacer icon or background texture), an alt should probably be provided. Photos in page content <strong>almost always need alt text.</strong> Since many screen reader users can see there is an image present, it can be very confusing to move the cursor across the place on the page where an image is visible, but hear nothing.</p>
-        ${Ed11y.M.altAttributeExample}`,
+        ${ed11yLang.en.altAttributeExample}`,
     },
 
     altURL : {
@@ -168,7 +168,7 @@ const ed11yLang = {
       tip: (alt) =>
         `This image's alt text is "${alt}," which probably describes the file name, not the contents of the image.
         <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
-        ${Ed11y.M.altAttributeExample}`
+        ${ed11yLang.en.altAttributeExample}`
       ,
     },
     altMeaningless : {
@@ -176,7 +176,7 @@ const ed11yLang = {
       tip: (alt) =>
         `<p>This image's alt text is "${alt}," which was flagged for being common placeholder text.</p>
         <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
-        ${Ed11y.M.altAttributeExample}`
+        ${ed11yLang.en.altAttributeExample}`
       ,
     },
     altMeaninglessLinked : {
@@ -226,7 +226,7 @@ const ed11yLang = {
       tip: (alt) =>
         `<p>This image's alt text is "${alt}," which only contains unpronounceable symbols and/or spaces. Screen readers will announce that an image is present, and then pause awkwardly: "image: ____."</p>
         <p><strong>To fix:</strong> add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") if this is just an icon or spacer, and screen readers should ignore it.</p>
-            ${Ed11y.M.altAttributeExample}`,
+            ${ed11yLang.en.altAttributeExample}`,
     },
 
     altEmptyLinked : {
@@ -277,7 +277,7 @@ const ed11yLang = {
       title: 'Link with no accessible text',
       tip: (ignoredText) =>
         `<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
-        ${ignoredText ? Ed11y.M.linkTextIgnored(ignoredText) : Ed11y.M.linkNoTextExample}
+        ${ignoredText ? ed11yLang.en.linkTextIgnored(ignoredText) : ed11yLang.en.linkNoTextExample}
         <p><strong>To fix:</strong></p>
         <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describe where it goes.</li>`,
     },
@@ -379,7 +379,7 @@ const ed11yLang = {
       tip : () =>
         `<p>If this all-bold line of text is functioning as a heading for the following text rather than a visual emphasis, replace the bold formatting with the appropriately numbered heading. Otherwise, dismiss this alert.</p>
         <p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" title="Opens in new tab" target="_blank">navigable table of contents</a> for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
-            ${Ed11y.M.headingExample}
+            ${ed11yLang.en.headingExample}
             
             `,
     },
@@ -428,3 +428,4 @@ const ed11yLang = {
   },
 };
 
+export default ed11yLang;

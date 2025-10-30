@@ -1,4 +1,11 @@
-class ControlPanel extends HTMLElement {
+import Lang from '../sa11y/src/js/utils/lang.js';
+import ed11yLang from '../utils/options.js';
+import { store } from '../sa11y/src/js/utils/utils.js';
+import Constants from '../sa11y/src/js/utils/constants.js';
+import State from "../utils/state.js";
+import * as Panel from '../logic/control-panel-logic.js'
+
+export default class ControlPanel extends HTMLElement {
   /* global Ed11y */
 
   constructor() {
@@ -7,9 +14,10 @@ class ControlPanel extends HTMLElement {
 
   // todo mvp parameterize
   template() {
+    // @todo MVP change to sa11y-control-panel.
     // TODO: CHANGE FROM VISIBILITY TO WIDTH TOGGLES SO FOCUS WORKS
     // Todo: details summary language params
-    <!-- todo: don't switch both label and aria-expanded on show hidden -->
+    // todo: don't switch both label and aria-expanded on show hidden
     return `
     <div class='ed11y-buttonbar'>
       <button id='ed11y-show-hidden' data-ed11y-pressed='false' hidden>
@@ -56,27 +64,28 @@ class ControlPanel extends HTMLElement {
       this.classList.add('ed11y-element');
       const shadow = this.attachShadow({mode: 'open'});
       const wrapper = document.createElement('aside');
-      wrapper.setAttribute('id', 'ed11y-panel');
+      wrapper.setAttribute('id', 'panel');
       //!!wrapper.setAttribute('aria-label', Ed11y.M.panelControls);
-      wrapper.classList.add('ed11y-wrapper', 'ed11y-panel-wrapper', 'ed11y-pass', 'ed11y-preload');
+      wrapper.classList.add('ed11y-wrapper', 'ed11y-panel-wrapper', 'ed11y-pass');
       wrapper.innerHTML = this.template();
       shadow.appendChild(wrapper);
-      Ed11y.panel = wrapper;
-      Ed11y.panelElement = this;
-      Ed11y.panelToggle = wrapper.querySelector('#ed11y-toggle');
-      Ed11y.panelToggleTitle = wrapper.querySelector('#ed11y-toggle .ed11y-sr-only');
-      Ed11y.panelCount = wrapper.querySelector('.toggle-count');
-      Ed11y.panelJumpNext = wrapper.querySelector('.ed11y-jump.next');
-      Ed11y.panelJumpNext.addEventListener('click', this.jumpTo);
-      Ed11y.showDismissed = wrapper.querySelector('#ed11y-show-hidden');
-      Ed11y.message = wrapper.querySelector('#ed11y-message');
+      State.theme.attachCSS(shadow);
+      State.theme.panel = wrapper;
+      State.theme.panelElement = this;
+      State.theme.panelToggle = wrapper.querySelector('#ed11y-toggle');
+      State.theme.panelToggleTitle = wrapper.querySelector('#ed11y-toggle .ed11y-sr-only');
+      State.theme.panelCount = wrapper.querySelector('.toggle-count');
+      State.theme.panelJumpNext = wrapper.querySelector('.ed11y-jump.next');
+      State.theme.panelJumpNext.addEventListener('click', this.jumpTo);
+      State.theme.showDismissed = wrapper.querySelector('#ed11y-show-hidden');
+      State.theme.message = wrapper.querySelector('#ed11y-message');
       const panelTabs = wrapper.querySelectorAll('.ed11y-buttonbar button');
       panelTabs.forEach(tab => {
         // todo: syntax could be shrunk now that these aren't tabs.
         tab.addEventListener('click', this.handleBarClick);
       });
-      const altDetails = Ed11y.panel.querySelector('#ed11y-alts-tab');
-      const headingDetails = Ed11y.panel.querySelector('#ed11y-headings-tab');
+      const altDetails = State.theme.panel.querySelector('#ed11y-alts-tab');
+      const headingDetails = State.theme.panel.querySelector('#ed11y-headings-tab');
       altDetails.addEventListener('toggle', () => {
         if (altDetails.open && headingDetails.open) {
           headingDetails.removeAttribute('open');
@@ -94,9 +103,9 @@ class ControlPanel extends HTMLElement {
   jumpTo(event) {
     // Handle jump
     event.preventDefault();
-    Ed11y.toggledFrom = event.target.closest('button');
-    if (!Ed11y.open) {
-      Ed11y.togglePanel();
+    State.toggledFrom = event.target.closest('button');
+    if (!State.open) {
+      Panel.togglePanel();
       window.setTimeout(function() {
         Ed11y.jumpTo(1);
       },500);
@@ -106,29 +115,8 @@ class ControlPanel extends HTMLElement {
   }
 
 
-  handleBarClick(event) {
-    event.preventDefault();
-    Ed11y.message.textContent = '';
-    let id = event.currentTarget.getAttribute('id');
-    switch (id) {
-    case 'ed11y-toggle':
-      Ed11y.togglePanel();
-      break;
-    case 'ed11y-show-hidden':
-      Ed11y.toggleShowDismissals();
-      break;
-    case 'ed11y-visualize':
-      if (!Ed11y.open) {
-        Ed11y.togglePanel();
-      }
-      Ed11y.visualize();
-      break;
-    default:
-      break;
-    }
-  }
+
 }
-customElements.define('ed11y-element-panel', ControlPanel);
 
 class Ed11yElementHeadingLabel extends HTMLElement {
   constructor() {

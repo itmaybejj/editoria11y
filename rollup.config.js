@@ -148,7 +148,7 @@ export default [
   /* ********************* */
   // ES6 standalone files
   {
-    input: 'js/edsel.js',
+    input: 'js/ed11y.js',
     plugins: [
       nodeResolve(),
       css(),
@@ -164,7 +164,7 @@ export default [
   },
   // UMD standalone files
   {
-    input: 'js/edsel.js',
+    input: 'js/ed11y.js',
     plugins: [
       nodeResolve(),
       css(),

@@ -1,13 +1,15 @@
-//import Lang from './lang.js';
+import ed11yLang from '../lang/localization.js';
 //import * as Utils from './utils.js';
 import Exclusions from '../sa11y/src/js/utils/constants.js';
+import Constants from '../sa11y/src/js/utils/constants.js';
+import State from "./state.js";
 
 const Options = (function options() {
   /* **************** */
   /* Global constants */
   /* **************** */
   const Global = {};
-  let M = {};
+  let ed11yLang = {};
   function preProcessOptions(options) {
     let defaultOptions = {
 
@@ -34,7 +36,8 @@ const Options = (function options() {
       // Containers to globally ignore, e.g., "header *, .card *"
       ignoreElements: false,
 
-      // Provide list of test keys; get from localization file or Ed11y.results.
+      // Provide list of test keys; get from localization file or results object.
+      // @todo merge provide translation layer or document change.
       ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
 
       // Ignore Aria on these elements (Gutenberg labels headings while editing.)
@@ -245,16 +248,12 @@ const Options = (function options() {
       ...defaultOptions,
       ...options
     };
-    /*M = {
-      // Fall back to En strings if language or string is unavailable
-      ...ed11yLang['en'],
-      ...ed11yLang[Ed11y.options.lang]
-    };*/
 
     /*
     * Options translation
     * */
     options.headless = options.alertMode === 'headless';
+    options.customChecks = options.customTests > 0 && !options.customChecks ? 'listen' : false;
 
     // Toggleable plugins
     options.developerPlugin = false;
@@ -289,14 +288,67 @@ const Options = (function options() {
     //Global.AllEmbeddedContent = `${Global.VideoSources}, ${Global.AudioSources}, ${Global.VisualizationSources}`;
     // @todo merge: this means custom embeds needs to be a custom test.
 
+    /* ************** */
+    /* Language setup */
+    /* ************** */
+    // @todo merge how to emulate Sa11y translations?
+    ed11yLang = {
+      // Fall back to En strings if language or string is unavailable
+      ...ed11yLang['en'],
+      ...ed11yLang[options.lang]
+    };
+
+    /* *********** */
+    /* Theme setup */
+    /* *********** */
+    State.theme.vars.push = options[options.theme];
+    State.theme.baseFontSize = options.baseFontSize;
+    State.theme.buttonZIndex = options.buttonZIndex;
+    State.theme.baseFontFamily = options.baseFontFamily;
+    State.theme.version = options.version;
+
+    if (!options.cssUrls) {
+      const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
+      if (cssLink) {
+        State.theme.cssUrls = [cssLink.getAttribute('href')];
+      } else {
+        console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
+        State.theme.cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.theme.version}/dist/editoria11y.min.css`];
+      }
+    }
+    const cssBundle = document.createElement('div');
+    cssBundle.classList.add('ed11y-style');
+    cssBundle.setAttribute('hidden','');
+    State.theme.cssUrls?.forEach( sheet => {
+      const cssLink = document.createElement('link');
+      cssLink.setAttribute('rel', 'stylesheet');
+      // @todo preload.
+      cssLink.setAttribute('media', 'all');
+      if (sheet.indexOf('?') < 0) {
+        sheet = sheet + '?ver=' + State.theme.version;
+      }
+      cssLink.setAttribute('href', sheet);
+      cssBundle.append(cssLink);
+    });
+    State.theme.attachCSS = function(appendTo) {
+      const link = cssBundle.cloneNode(true)
+      appendTo.appendChild(link);
+    };
+
     return options;
   }
 
+  const Sync = {};
   function postProcessOptions(options) {
-    // Exclusions.Sa11yElements: convert to Ed11y elements.
-    // @todo merge: test: need descendant selector?
+    // @todo merge: test: does this need descendant selector?
     Exclusions.Sa11yElements = '.ed11y-element';
     // Main container exclusions.
+    console.log('Constants: ')
+    console.log(Constants);
+
+
+
+    State.currentPage = options.currentPage ? options.currentPage : window.location.currentPage;
 
     // @todo merge remove wpadminbar from defaults and update wp module.
     /*Exclusions.Container = ['#wpadminbar', '#wpadminbar *', ...exclusions];
@@ -309,11 +361,9 @@ const Options = (function options() {
 
   }
 
-
-
-
   return {
     preProcessOptions,
+    ed11yLang,
     postProcessOptions,
   };
 }());

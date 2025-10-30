@@ -3,6 +3,8 @@ import { store, createAlert } from '../utils/utils.js';
 import find from '../utils/find.js';
 import Lang from '../utils/lang.js';
 
+// @todo merge this all needs to be overridden.
+
 /* ************************************************************ */
 /*  Update results array before painting annotations to page.   */
 /* ************************************************************ */
