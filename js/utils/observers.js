@@ -1,28 +1,12 @@
 import {State, UI} from "./state.js";
-import {debounce} from "sa11y/src/js/utils/utils.js";
-import {alignButtons, alignTip, updateTipLocations} from "../render/align.js";
+import {
+  alignAlts,
+  alignButtons, alignPanel, alignTip,
+  checkEditableIntersects, updateTipLocations
+} from "../render/align.js";
+import {lagBounce} from "./utils.js";
+import {visualize} from "../render/visualizers.js";
 
-export const lagBounce = (callback, wait) => {
-  let timeoutId = null;
-  return (...args) => {
-    window.clearTimeout(timeoutId);
-    timeoutId = window.setTimeout(() => {
-      callback.apply(null, args);
-    }, wait + State.browserLag);
-  };
-};
-
-
-export function windowResize() {
-  if (UI.panel?.classList.contains('ed11y-active') === true) {
-    alignAlts();
-    alignButtons();
-  }
-  if (State.openTip.button) {
-    alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
-  }
-  alignPanel();
-};
 
 export function incrementalCheck() {
   lagBounce(() => {
@@ -40,7 +24,7 @@ export function incrementalCheck() {
         State.disabled = false;
       }
       //State.forceFullCheck = true; // todo no
-      checkAll();
+      this.checkAll();
       window.setTimeout(function() {
         if (State.visualizing) {
           State.visualizing = false;
@@ -61,6 +45,7 @@ export function incrementalCheck() {
     }
   }, 250)
 }
+
 export function slowIncremental() {
   lagBounce(() => {
     //incrementalAlign(); // Immediately realign tips.
@@ -70,16 +55,28 @@ export function slowIncremental() {
   }, 1000);
 }
 
+export function windowResize() {
+  if (UI.panel?.classList.contains('ed11y-active') === true) {
+    alignAlts();
+    alignButtons();
+  }
+  if (State.openTip.button) {
+    alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
+  }
+  alignPanel();
+}
+
 export function pauseObservers() {
   State.watching?.forEach(observer => {
     observer.observer.disconnect();
   });
-};
+}
+
 export function resumeObservers() {
   State.watching?.forEach(observer => {
     observer.observer.observe(observer.root, observer.config);
   });
-};
+}
 
 export function intersectionObservers() {
 
@@ -152,26 +149,6 @@ export function addedNodeReadyToCheck(el) {
   }
 }
 
-export function incrementalAlign() {
-  debounce(() => {
-    if (!State.running && !State.alignPending) {
-      State.scrollPending++;
-      updateTipLocations();
-      State.alignPending = false;
-    } else {
-      incrementalAlign();
-    }
-  }, 10);
-}
-
-export const intersect = function(a, b, x = 10) {
-  // Compute intersect using browser offsets.
-  return (a.left - x <= b.right &&
-    b.left - x <= a.right &&
-    a.top - x <= b.bottom &&
-    b.top - x <= a.bottom);
-};
-
 export function rangeChange(anchorNode) {
   let anchor = anchorNode ? anchorNode : window.getSelection()?.anchorNode;
   const expandable = anchor &&
@@ -213,49 +190,7 @@ export function rangeChange(anchorNode) {
     State.activeRange = range;
     return !sameRange;
   }
-};
-
-/**
- * Hide tips that are in front of text currently being edited.
- * */
-export function checkEditableIntersects (focusKnown = false) {
-  if (!focusKnown && !document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
-    //Reset classes to measure.
-    State.jumpList?.forEach((el) => {
-      el.classList.remove('intersecting');
-    });
-    return;
-  }
-  if (!State.activeRange) {
-    // Range isn't on a node we can measure.
-    State.jumpList?.forEach((el) => {
-      el.classList.remove('intersecting');
-    });
-    return;
-  }
-  State.jumpList?.forEach((el) => {
-    const framePositioner = el.result.fixedRoot && State.positionedFrames[el.result.fixedRoot] ?
-      State.positionedFrames[el.result.fixedRoot] : { top: 0, left: 0 };
-    const activeRects = State.activeRange.getBoundingClientRect();
-    const rects = {};
-    rects.top = activeRects.top + framePositioner.top;
-    rects.left = activeRects.left + framePositioner.left;
-    rects.bottom = activeRects.bottom + framePositioner.top;
-    rects.right = activeRects.right + framePositioner.left;
-
-    const toggle = el.shadowRoot.querySelector('.toggle');
-    if ( intersect(rects, toggle.getBoundingClientRect(), 0) ) {
-      if (!toggle.classList.contains('was-intersecting')) {
-        el.classList.add('intersecting');
-        toggle.classList.add('intersecting');
-      }
-    } else {
-      el.classList.remove('intersecting', 'was-intersecting');
-      toggle.classList.remove('intersecting', 'was-intersecting');
-    }
-  });
-};
-
+}
 
 /*
 Set up mutation observer for added nodes.
@@ -373,4 +308,4 @@ export function startObserver (root) {
     State.scrollPending++;
     updateTipLocations();
   }, 1000);
-};
+}

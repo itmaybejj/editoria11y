@@ -1,9 +1,11 @@
+/* Track values and DOM references */
 export const State = {
   version: '3.0.0',
   running: false,
   watching: [],
   results: [],
   seen: [],
+  ignore: '',
   ignoreAll: false,
   totalCount: 0,
   warningCount: 0,
@@ -19,10 +21,13 @@ export const State = {
   browserLag: 0,
   loopStop: false,
   currentPage: window.location.pathname,
-  elements: [], // to be replaced by Sa11y.
   roots: [],
   oldResults: [],
   headingOutline: [],
+  elements: { // to be replaced by Sa11y find.
+    altMark: [],
+    delayedReset: []
+  },
 
   /* Panel initial state */
   once: false,
@@ -52,8 +57,18 @@ export const State = {
 export const Theme = {}
 
 export const UI = {
+  editableHighlight: [],
   imageAlts: [],
   attachCSS: ()=>{},
+  panel: false,
+  message: {},
+  panelElement: {},
+  panelPin: [],
+  panelToggle: {},
+  panelToggleTitle: {},
+  panelCount: {},
+  panelJumpNext: {},
+  showDismissed: {},
 }
 
 export const M = {}

@@ -10,436 +10,6 @@
   * For all acknowledgements, please visit: https://sa11y.netlify.app/acknowledgements/
   * The above copyright notice shall be included in all copies or substantial portions of the Software.
 **/
-const ed11yLang = {
-
-  // ESLint config:
-  /* global Ed11y */
-  /* exported ed11yLang */
-
-  en : {
-
-    // Main Panel =========================================
-    toggleAccessibilityTools: 'Toggle accessibility tools',
-    toggleDisabled: 'No content available for Editoria11y to check.',
-    panelCount0 : 'No issues detected.',
-    panelCountAllDismissed : 'All issues hidden.',
-    panelCount1 : 'One issue detected.',
-    panelCountMultiple: ' issues detected.',
-    panelCountBase: '<span class=\'count\'>No</span> <span class=\'content-type\'>issues detected</span>.',
-    panelControls: 'Editorially',
-    buttonToolsContent: 'Check headings & alt text', // todo Drupal
-    buttonToolsActive: 'Hide headings & alt text',
-    buttonOutlineContent: 'Headings',
-    buttonAltsContent: 'Alt Text',
-    buttonFirstContent: 'Go to first alert',
-    buttonNextContent: 'Go to next alert',
-    buttonPrevContent: 'Go to previous alert',
-    buttonShowHiddenAlert: 'Show hidden alert',
-    buttonHideHiddenAlert: 'Hide hidden alert',
-    buttonShowHiddenAlerts: (count) => `Show ${count} hidden alerts`,
-    buttonHideHiddenAlerts: (count) => `Hide ${count} hidden alerts`,
-    buttonShowAlerts: 'Show accessibility alerts',
-    buttonShowNoAlert: 'Show accessibility checker',
-    buttonHideChecker: 'Hide accessibility checker',
-    buttonHideAlerts: 'Hide accessibility alerts',
-    panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">heading outline</a>. Check that it matches how the content is organized visually.</p>',
-    panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/" target="_blank" title="Opens in new tab">describes what it means in context</a>, and that there are no images of text.</p>',
-    noImagesFound: 'No images found.',
-    altLabelPrefix: 'Alt text: ',
-    errorAltMissing: '(missing!)',
-    errorAltNull: '(none; image marked as decorative)',
-    errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
-    errorOutlinePrefixHeadingEmpty: '(empty heading) ',
-    errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
-
-    // Errors and alerts ==================================
-
-    consoleNotSupported: 'This browser can not run Editoria11y.',
-    jumpedToInvisibleTip: 'Note: this content may not be visible. Look for it inside the outlined container.',
-    jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.',
-
-    // Strings used in tests ==============================
-
-    suspiciousWords: ['image of','graphic of','picture of','photo of','photograph of','placeholder','spacer','tbd','todo', 'copyright', 'courtesy of', 'photo by'],
-    meaninglessAlt: ['alt','chart','decorative','image','graphic','photo','placeholder','placeholder image','spacer','tbd','todo','to do'],
-    badEndingForAlt: ['photo', 'image', 'photograph', 'picture'],
-    linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
-    linksMeaningless: /(learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|"|'|\?|\.|-|,|:|>|<|\s)+/g,
-    linkStringsNewWindows: /window|\stab|download/g,
-
-    // Tooltips ======================================
-
-    toggleManualCheck: 'manual check needed',
-    toggleAlert: 'alert',
-    issue: 'Issue',
-    toggleAriaLabel: (label) => `Accessibility ${label}`,
-    transferFocus: 'Edit this content',
-    dismissOkButtonContent: 'Mark as OK',
-    dismissHideButtonContent: 'Mark as ignored',
-    dismissActions: (count) => `${count} similar issues`, // 2.3.10
-    dismissHideAllButton: 'Ignore all like this', // 2.3.10
-    dismissOkAllButton: 'Mark all like this as OK', // 2.3.10
-    dismissOkTitle: 'Hides this alert for all editors',
-    dismissHideTitle: 'Hides this alert for you',
-    undismissOKButton: 'Restore this alert marked as OK',
-    undismissHideButton: 'Restore this hidden alert',
-    undismissNotePermissions: 'This alert has been hidden by an administrator',
-    reportsLink: 'Open site reports in new tab',
-    closeTip: 'Close',
-    panelHelpTitle: 'About this tool',
-    panelHelp: `
-    <p><a href="https://editoria11y.princeton.edu/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
-    <p>Many alerts are "manual checks." Manual checks can be dismissed:</p>
-    <ul>
-        <li>"Mark as checked and OK" hides the alert for all editors.</li>
-        <li>"Ignore this manual check" leaves the tip visible to other editors.</li>
-    </ul>
-    <p>Dismissed alerts can be found via the "Show hidden alerts" toggle.</p>
-    <p>If an incorrect alert is appearing on many pages, site administrators can tell the checker to ignore particular elements and page regions.</p>
-    <p>And remember that automated checkers cannot replace <a href='https://webaim.org/resources/evalquickref/'> proofreading and testing for accessibility</a>.</p>
-    <p><br><a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Report bugs & request changes <span aria-hidden="true">&raquo;</span></a></p>
-    `,
-
-    // Tooltips for heading tests =========================
-
-    headingExample : `
-        <ul>
-            <li>Heading level 1
-                <ul>
-                    <li>Heading level 2: a topic
-                        <ul><li>Heading level 3: a subtopic</li></ul></li>
-                    <li>Heading level 2: a new topic</li>
-                </ul>
-            </li>
-        </ul>`,
-
-    // todo: update Drupal localization file.
-    headingLevelSkipped : {
-      title: 'Manual check: was a heading level skipped?',
-      tip: (prevLevel, level) =>
-        `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
-            ${ed11yLang.en.headingExample}
-            <p>This heading skipped from level ${prevLevel} to level ${level}. From a screen reader, this sounds like content is missing.</p>
-            <p><strong>To fix:</strong> adjust levels to form an accurate outline, without gaps.</p>
-            `,
-    },
-
-    headingEmpty : {
-      title: 'Heading tag without any text',
-      tip: () =>
-        `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
-            ${ed11yLang.en.headingExample}
-            <p>Empty headings create confusing gaps in this outline: they could mean the following content is still part of the previous section, or that the text was unpronounceable for some reason.</p>
-            <p><strong>To fix:</strong> add text to this heading, or delete this empty line.</p>
-            `,
-    },
-
-    headingIsLong : {
-      title: 'Manual check: long heading',
-      tip: () =>
-        `<p>Headings should be brief and clear. Assistive devices use them as a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">navigable table of contents</a> for the page. The numbers indicate indents in a nesting relationship:</p>  
-            ${ed11yLang.en.headingExample}
-            <p><strong>To fix:</strong> shorten this heading if possible, or remove the heading style if it was only applied to this text to provide visual emphasis.</p>
-            `,
-    },
-
-    blockquoteIsShort : {
-      title: 'Manual check: is this a blockquote?',
-      tip: () =>
-        '<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. This was flagged because short blockquotes are <em>sometimes</em> actually <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">headings</a>. If this is a heading and not a quotation, use heading formatting instead, so this appears in the page outline.</p>',
-    },
-
-    // Tooltips for image tests =========================
-
-    altAttributeExample :
-            `<p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative" target="_blank" title="Opens in new tab">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
-            <ul>
-                <li>The sunny spring day brought kids to the park for some soccer.</li>
-                <li>A.J. wearing the new team uniform.</li>
-                <li>The game-winning kick curved in from the left sideline!</li>
-                <li>The size 4 ball is the right size for this 9-year-old child.</li>
-            </ul>`,
-
-    altMissing : {
-      title: 'Image has no alternative text attribute',
-      tip: () =>
-        `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.</p>
-            <p><strong>To fix:</strong> either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>
-            ${ed11yLang.en.altAttributeExample}`,
-    },
-
-    altNull : {
-      title: 'Manual check: image has no alt text',
-      tip: () =>
-        `<p>Unless this image is purely decorative (a spacer icon or background texture), an alt should probably be provided. Photos in page content <strong>almost always need alt text.</strong> Since many screen reader users can see there is an image present, it can be very confusing to move the cursor across the place on the page where an image is visible, but hear nothing.</p>
-        ${ed11yLang.en.altAttributeExample}`,
-    },
-
-    altURL : {
-      title: 'Image\'s text alternative is a URL',
-      tip: (alt) =>
-        `This image's alt text is "${alt}," which probably describes the file name, not the contents of the image.
-        <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
-        ${ed11yLang.en.altAttributeExample}`
-      ,
-    },
-    altMeaningless : {
-      title: 'Alt text is meaningless',
-      tip: (alt) =>
-        `<p>This image's alt text is "${alt}," which was flagged for being common placeholder text.</p>
-        <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
-        ${ed11yLang.en.altAttributeExample}`
-      ,
-    },
-    altMeaninglessLinked : {
-      title: 'Linked alt text is meaningless',
-      tip: (alt) =>
-        `<p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" target="_blank" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
-            Links should clearly and concisely describe their destination, even out of context.</p>
-           <p>This image's alt text is "${alt}," which probably does not describe this link.</p>`
-      ,
-    },
-
-    altURLLinked : {
-      title: 'Linked image\'s text alternative is a URL',
-      tip: (alt) =>
-        `<p>This image's alt text is "${alt}," which is probably a filename.</p>
-        <p>When a link is wrapped around an image and there is no other text, the <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" target="_blank" title="Opens in new tab">image's alt text becomes the link text</a> announced by screen readers.
-            Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
-            <ul>
-                <li>Good link text: "About us"</li>
-                <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess</li>
-            </ul>`,
-    },
-
-    altImageOf : {
-      title: 'Manual check: possibly redundant text in alt',
-      tip: (alt) =>
-        `<p>This image's alt text is "${alt}," which mentions that this image is an image.</p>
-        <p>Screen readers announce they are describing an image when reading alt text, so 
-            phrases like "image of" and "photo of" are usually redundant in alt text; the screen reader user hears "image: image of something."</p>
-            <p>Note that this is OK if the format is referring to the <strong>content</strong> of the image:</p>
-            <ul><li>Format is redundant: "<em>photo of</em> a VHS tape"</li>
-            <li>Format is relevant: "<em>photo of</em> a VHS tape in a photo album being discussed in a history class"</li></ul>`
-    },
-    altImageOfLinked : {
-      title: 'Manual check: possibly redundant text in linked image',
-      tip: (alt) =>
-        `<p>This image's alt text is "${alt}," which mentions that this image is an image.</p>
-        <hr><p>Links should clearly and concisely describe their destination. Since words like "image," "graphic" or "photo" are already redundant in text alternatives (screen readers already identify the image as an image), their presence in a linked image usually means the image's text alternative is <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="Opens in new tab" target="_blank">describing the image instead of the link</a>.</p>
-            <ul>
-                <li>Good link text: "About us"</li>
-                <li>Bad link text: "Image of five people jumping"</li>
-            </ul>`
-    },
-
-    altDeadspace : {
-      title: 'Image\'s text alternative is unpronounceable',
-      tip: (alt) =>
-        `<p>This image's alt text is "${alt}," which only contains unpronounceable symbols and/or spaces. Screen readers will announce that an image is present, and then pause awkwardly: "image: ____."</p>
-        <p><strong>To fix:</strong> add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") if this is just an icon or spacer, and screen readers should ignore it.</p>
-            ${ed11yLang.en.altAttributeExample}`,
-    },
-
-    altEmptyLinked : {
-      title: 'Linked Image has no alt text',
-      tip: () =>
-        `<p>When a link is wrapped around an image, the image's alt text <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="Opens in new tab" target="_blank">provides the link's title for screen readers</a>.</p>
-        <p><strong>To fix:</strong> set this image's alternative text to something that describes the link's destination, or add text next to the image, within the link.</p>`,
-    },
-
-    altLong : {
-      title: 'Manual check: very long alternative text',
-      tip: (alt) =>
-        `<p>Image text alternatives are announced by screen readers as a single run-on sentence; listeners must listen to the entire alt a second time if they miss something. If this cannot be reworded to something succinct, it is better to use the alt to reference a <em>visible</em> <a href="https://www.w3.org/WAI/tutorials/images/complex/" title="Opens in new tab" target="_blank">text alternative for complex images</a>. For example:</p>
-            <ul><li>"Event poster; details follow in caption"</li>
-            <li>"Chart showing our issues going to zero; details follow in table"</li></ul>
-            This image's alt text is: <em>${alt}</em>
-            `,
-    },
-
-    altLongLinked : {
-      title: 'Manual check: very long alternative text in linked image',
-      tip: (alt) =>
-        `<p><a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="Opens in new tab" target="_blank">The alt text on a linked image is used to describe the link destination</a>. Links should be brief, clear and concise, as screen reader users often listen to the list of links on the page to find content of interest. Long alternative text inside a link often indicates that the image's text alternative is describing the image instead rather than the link.</p>
-        This image's alt text is: <em>${alt}</em>`,
-    },
-
-    altPartOfLinkWithText : {
-      title: 'Manual check: link contains both text and an image',
-      tip: (alt) =>
-        `<p>Screen readers will <a href="https://www.w3.org/WAI/tutorials/images/functional/" title="Opens in new tab" target="_blank">include the image's alt text when describing this link</a>.</p>
-            <p>Check that the combined text is concise and meaningful:<br>"<em><strong>${alt}</strong></em>"</p>
-            <p></p>
-            <ul>
-                <li>Keep alts that add relevant meaning:<br>"Buy (A Tigers v. Falcons ticket)."</li>
-                <li>Edit unhelpful or irrelevant alts:<br>"Buy (A piece of paper with team logos on it)."</li>
-                <li>Remove unnecessary alts:<br>"Buy Tigers v. Falcons tickets (A Tigers v. Falcons ticket)."</li>
-            </ul>
-        `, // 2.3.10.
-    },
-
-    linkNoTextExample: '<p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>',
-    linkTextIgnored: (ignoredText) => `
-    <p>Screen readers will only read the text of the link type indicator on this link:<br>
-    <em>"<strong>${ignoredText}</strong>"</em></p>
-    `,
-
-    linkNoText : {
-      title: 'Link with no accessible text',
-      tip: (ignoredText) =>
-        `<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
-        ${ignoredText ? ed11yLang.en.linkTextIgnored(ignoredText) : ed11yLang.en.linkNoTextExample}
-        <p><strong>To fix:</strong></p>
-        <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describe where it goes.</li>`,
-    },
-
-    linkTextIsURL : {
-      title: 'Manual check: is this link text a URL?',
-      tip: (text) =>
-        `<p>This link's text is:<br> <strong>${text}</strong></p>
-        <p><a href="https://webaim.org/techniques/hypertext/link_text" title="Opens in new tab" target="_blank">Links should be meaningful and concise</a>. Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
-         <p>A linked URL breaks this pattern; the reader has to read the preceding paragraph to figure out the link's purpose from context.</p>
-            <ul>
-                <li>Meaningful and concise link: "Tips for writing meaningful links"</li>
-                <li>Linked URL, as pronounced by a screen reader: "H T T P S colon forward-slash forward-slash example dot com forward-slash tips forward-slash meaningful-links"</li>
-            </ul>`,
-    },
-
-    linkTextIsGeneric : {
-      title: 'Manual check: is this link meaningful and concise?',
-      tip: (text) =>
-        `<p>This link's text is: <strong>${text}</strong></p>
-        <p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
-                <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully enough to figure out each link's purpose from context. Few readers do this, so click-through rates on meaningless links are extremely poor.</p>
-                <ul>
-                <li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text" title="Opens in new tab" target="_blank">meaningful links"</a></strong></li>
-                <li>Not meaningful: "Click <a href="https://webaim.org/techniques/hypertext/link_text" title="Opens in new tab" target="_blank">here</a> to learn about meaningful links."</li>
-                <li>Not concise: "<a href="https://webaim.org/techniques/hypertext/link_text" title="Opens in new tab" target="_blank">Click here to learn more about meaningful links</a>"</li>
-                </ul>
-                `
-      ,
-    },
-
-    linkDocument : {
-      title : 'Manual check: is the linked document accessible?',
-      tip: () =>
-        `<p>Many mobile and assistive device users struggle to read content in PDFs. PDFs generally do not allow for changing font sizes, and often contain features that are incompatible with screen readers.</p>
-        <p>Ideally make the content of this linked PDF available on a Web page or in an editable document, and only link to this PDF as a "printable" alternative. If this PDF is the only way you are providing to access this content, you will need to <a href='https://webaim.org/techniques/acrobat/' target='_blank' title="Opens in new tab">manually check that the PDF is well-structured</a>, with headings, lists and table headers, and provides alt text for its images.</p>`,
-    },
-
-    linkNewWindow : {
-      title: 'Manual check: is opening a new window expected?',
-      tip: () =>
-        `<p>Readers can always choose to open a link a new window. When a link forces open a new window, it can be confusing and annoying, especially for assistive device users who may wonder why their browser's "back" button is suddenly disabled.</p>
-                <p>There are two general exceptions:</p>
-                <ul>
-                    <li>When the user is filling out a form, and opening a link in the same window would cause them to lose their work.</li>
-                    <li>When the user is clearly warned a link will open a new window.</li>
-                </ul>
-                <p><strong>To fix:</strong> set this link back its default target, or add a screen-reader accessible warning (text or an icon with alt text).</p>
-                `
-      ,
-    },
-
-    // Tooltips for Text QA ===============================
-
-    tableNoHeaderCells : {
-      title: 'Table has no header cells',
-      tip: () => `
-                <p>To fix:</p>
-                <ul><li>If this table contains data that is meaningfully organized by row and column, edit the table's properties and specify whether headers have been placed in the first row, column or both. This lets screen reader users hear the headers repeated while navigating the content.</li>
-                <li>If this table does not contain rows and columns of data, but is instead being used for visual layout, remove it. Tables overflow the page rather than reflowing on mobile devices, and should only be used when the horizontal relationships are necessary to understand the content.</li></ul>
-            `,
-    },
-
-    tableContainsContentHeading : {
-      title: 'Content heading inside a table',
-      tip: () =>
-        `<p>To fix: remove heading formatting. Use row and column headers instead.</p>
-        <p>Content headings ("Heading 1", "Heading 2") form a navigable table of contents for screen reader users,  
-        labelling all content <strong>until the next heading</strong>. Table headers label specific columns or rows within a table.</p> 
-            <p></p>
-            <table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">To illustrate: a <strong>table</strong> header in cell 2 would only label its column: cell B. <br><br>
-            A <strong>content</strong> heading in cell 2 would label all subsequent text, reading from left to right: cells 3, A, B and C, as well as this text!</td></tr>
-            <tr><td>A</td><td>B</td><td>C</td></table>
-            `
-    },
-
-    tableEmptyHeaderCell : {
-      title: 'Empty table header cell',
-      tip: () => `
-                <p>When exploring tables, screen readers repeat table header cells as needed to orient users. 
-                Without headers, it is very easy to get lost; screen reader users have to count columns and rows and try to remember which columns went with which rows.</p>
-                <p><strong>To fix:</strong> make sure each header cell in this table contains text.</p>
-            `,
-    },
-
-    textPossibleList : {
-      title: 'Manual check: should this have list formatting?',
-      tip : (text) =>
-        `<p>List formatting is structural:</p> 
-            <ol><li>List formatting indents and reflows on overflow. Text aligns vertically with the line above it.</li>
-            <li>Lists are machine-readable. Screen readers can orient their users, announcing this as "list item, 2 of 3."</li></ol>
-            <p>&nbsp;&nbsp;&nbsp;&nbsp;3. But this third item is just a sentence with a number in front of it. It wraps incorrectly, and screen readers do not know it is related to the other items in the list.</p>
-            <p><strong>To fix:</strong> if this "${text}" is part of a list, replace it with list formatting.</p>
-            `,
-    },
-
-    textPossibleHeading : {
-      title: 'Manual check: should this be a heading?',
-      tip : () =>
-        `<p>If this all-bold line of text is functioning as a heading for the following text rather than a visual emphasis, replace the bold formatting with the appropriately numbered heading. Otherwise, dismiss this alert.</p>
-        <p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" title="Opens in new tab" target="_blank">navigable table of contents</a> for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
-            ${ed11yLang.en.headingExample}
-            
-            `,
-    },
-
-    textUppercase : {
-      title: 'Manual check: is this uppercase text needed?',
-      tip : () =>
-        `<p>UPPERCASE TEXT CAN BE MORE DIFFICULT TO READ FOR MANY PEOPLE, AND IS OFTEN INTERPRETED AS SHOUTING.</p>
-         <p>Consider using sentence case instead, and using bold text or font changes for visual emphasis, or structural formatting like headings for emphasis that will also be announced by screen readers.</p>`,
-    },
-
-    embedVideo : {
-      title: 'Manual check: is this video accurately captioned?',
-      tip : () =>
-        `<p>If a recorded video contains speech or meaningful sounds, it must <a href="https://www.w3.org/WAI/media/av/captions/" title="Opens in new window" target="_blank">provide captions</a>.</p>
-            <p>Note that automatic, machine-generated captions must be proofread, and speaker identifications must be added, before being considered an equal alternative.</p>`,
-    },
-
-    embedAudio : {
-      title: 'Manual check: is an accurate transcript provided?',
-      tip : () =>
-        `<p>If this audio contains speech, a <a href="https://www.w3.org/WAI/media/av/transcribing/" target="_blank" title="Opens in new window">text alternative</a> must be provided on this page or linked.</p>
-            <p>Note that automatic, machine-generated transcripts must be proofread, and speaker identifications must be added, before being considered an equal alternative</p>`,
-    },
-
-    embedVisualization : {
-      title: 'Manual check: is this visualization accessible?',
-      tip : () =>
-        `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
-            <p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
-    },
-
-    embedTwitter : {
-      title: 'Manual check: is this embed a keyboard trap?',
-      tip : () =>
-        `<p>If embedded feeds are set to show a high number of items, keyboard users may have to click the tab key dozens or hundreds of times to exit the component.</p>
-            <p>Check to make sure only a small number of items auto-load immediately or while scrolling. Having additional items load on request ("show more") is fine.</p>`,
-    },
-
-    embedCustom : {
-      title: 'Manual check: is this embedded content accessible?',
-      tip : () =>
-        '<p>Please make sure images inside this embed have alt text, videos have captions, and interactive components can be <a href=\'https://webaim.org/techniques/keyboard/\'>operated by a keyboard</a>.</p>',
-    }
-
-  },
-};
-
 const defaultOptions = {
   // Target area to check
   checkRoot: 'body',
@@ -1041,12 +611,14 @@ const Constants = (function myConstants() {
   };
 }());
 
+/* Track values and DOM references */
 const State = {
   version: '3.0.0',
   running: false,
   watching: [],
   results: [],
   seen: [],
+  ignore: '',
   ignoreAll: false,
   totalCount: 0,
   warningCount: 0,
@@ -1062,10 +634,13 @@ const State = {
   browserLag: 0,
   loopStop: false,
   currentPage: window.location.pathname,
-  elements: [], // to be replaced by Sa11y.
   roots: [],
   oldResults: [],
   headingOutline: [],
+  elements: { // to be replaced by Sa11y find.
+    altMark: [],
+    delayedReset: []
+  },
 
   /* Panel initial state */
   once: false,
@@ -1094,14 +669,27 @@ const State = {
 
 const Theme = {};
 
-const UI$1 = {
+const UI = {
+  editableHighlight: [],
   imageAlts: [],
   attachCSS: ()=>{},
+  panel: false,
+  message: {},
+  panelElement: {},
+  panelPin: [],
+  panelToggle: {},
+  panelToggleTitle: {},
+  panelCount: {},
+  panelJumpNext: {},
+  showDismissed: {},
 };
 
 const M = {};
 
 const Options = (function options() {
+  /* **************** */
+  /* Global constants */
+  /* **************** */
   let ed11yLang = {};
   let ed11yDefaults = {
 
@@ -1427,13 +1015,14 @@ const Options = (function options() {
       cssLink.setAttribute('href', sheet);
       cssBundle.append(cssLink);
     });
-    UI$1.attachCSS = function(appendTo) {
+    UI.attachCSS = function(appendTo) {
       const link = cssBundle.cloneNode(true);
       appendTo.appendChild(link);
     };
 
     return options;
   }
+
   function postProcessOptions(option) {
     // @todo merge: test: does this need descendant selector?
     Constants.Exclusions.Sa11yElements = ['.ed11y-element'];
@@ -1450,6 +1039,20 @@ const Options = (function options() {
     Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
 
     State.currentPage = options.currentPage ? options.currentPage : window.location.currentPage;
+
+    Object.assign(Theme, State.options[State.options.theme]);
+    Theme.baseFontSize = State.options.baseFontSize;
+    Theme.buttonZIndex = State.options.buttonZIndex;
+    Theme.baseFontFamily = State.options.baseFontFamily;
+
+    // @todo this is probably getting provided by Sa11y
+    if (State.options.currentPage === false) {
+      State.options.currentPage = window.location.pathname;
+    }
+
+    if (!State.options.linkStringsNewWindows) {
+      State.options.linkStringsNewWindows = M.linkStringsNewWindows;
+    }
     // @todo merge remove wpadminbar from defaults and update wp module.
     /*Exclusions.Container = ['#wpadminbar', '#wpadminbar *', ...exclusions];
     if (option.containerIgnore) {
@@ -1467,6 +1070,436 @@ const Options = (function options() {
     postProcessOptions,
   };
 }());
+
+const ed11yLang = {
+
+  // ESLint config:
+  /* global Ed11y */
+  /* exported ed11yLang */
+
+  en : {
+
+    // Main Panel =========================================
+    toggleAccessibilityTools: 'Toggle accessibility tools',
+    toggleDisabled: 'No content available for Editoria11y to check.',
+    panelCount0 : 'No issues detected.',
+    panelCountAllDismissed : 'All issues hidden.',
+    panelCount1 : 'One issue detected.',
+    panelCountMultiple: ' issues detected.',
+    panelCountBase: '<span class=\'count\'>No</span> <span class=\'content-type\'>issues detected</span>.',
+    panelControls: 'Editorially',
+    buttonToolsContent: 'Check headings & alt text', // todo Drupal
+    buttonToolsActive: 'Hide headings & alt text',
+    buttonOutlineContent: 'Headings',
+    buttonAltsContent: 'Alt Text',
+    buttonFirstContent: 'Go to first alert',
+    buttonNextContent: 'Go to next alert',
+    buttonPrevContent: 'Go to previous alert',
+    buttonShowHiddenAlert: 'Show hidden alert',
+    buttonHideHiddenAlert: 'Hide hidden alert',
+    buttonShowHiddenAlerts: (count) => `Show ${count} hidden alerts`,
+    buttonHideHiddenAlerts: (count) => `Hide ${count} hidden alerts`,
+    buttonShowAlerts: 'Show accessibility alerts',
+    buttonShowNoAlert: 'Show accessibility checker',
+    buttonHideChecker: 'Hide accessibility checker',
+    buttonHideAlerts: 'Hide accessibility alerts',
+    panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">heading outline</a>. Check that it matches how the content is organized visually.</p>',
+    panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/" target="_blank" title="Opens in new tab">describes what it means in context</a>, and that there are no images of text.</p>',
+    noImagesFound: 'No images found.',
+    altLabelPrefix: 'Alt text: ',
+    errorAltMissing: '(missing!)',
+    errorAltNull: '(none; image marked as decorative)',
+    errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
+    errorOutlinePrefixHeadingEmpty: '(empty heading) ',
+    errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
+
+    // Errors and alerts ==================================
+
+    consoleNotSupported: 'This browser can not run Editoria11y.',
+    jumpedToInvisibleTip: 'Note: this content may not be visible. Look for it inside the outlined container.',
+    jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.',
+
+    // Strings used in tests ==============================
+
+    suspiciousWords: ['image of','graphic of','picture of','photo of','photograph of','placeholder','spacer','tbd','todo', 'copyright', 'courtesy of', 'photo by'],
+    meaninglessAlt: ['alt','chart','decorative','image','graphic','photo','placeholder','placeholder image','spacer','tbd','todo','to do'],
+    badEndingForAlt: ['photo', 'image', 'photograph', 'picture'],
+    linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
+    linksMeaningless: /(learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|"|'|\?|\.|-|,|:|>|<|\s)+/g,
+    linkStringsNewWindows: /window|\stab|download/g,
+
+    // Tooltips ======================================
+
+    toggleManualCheck: 'manual check needed',
+    toggleAlert: 'alert',
+    issue: 'Issue',
+    toggleAriaLabel: (label) => `Accessibility ${label}`,
+    transferFocus: 'Edit this content',
+    dismissOkButtonContent: 'Mark as OK',
+    dismissHideButtonContent: 'Mark as ignored',
+    dismissActions: (count) => `${count} similar issues`, // 2.3.10
+    dismissHideAllButton: 'Ignore all like this', // 2.3.10
+    dismissOkAllButton: 'Mark all like this as OK', // 2.3.10
+    dismissOkTitle: 'Hides this alert for all editors',
+    dismissHideTitle: 'Hides this alert for you',
+    undismissOKButton: 'Restore this alert marked as OK',
+    undismissHideButton: 'Restore this hidden alert',
+    undismissNotePermissions: 'This alert has been hidden by an administrator',
+    reportsLink: 'Open site reports in new tab',
+    closeTip: 'Close',
+    panelHelpTitle: 'About this tool',
+    panelHelp: `
+    <p><a href="https://editoria11y.princeton.edu/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
+    <p>Many alerts are "manual checks." Manual checks can be dismissed:</p>
+    <ul>
+        <li>"Mark as checked and OK" hides the alert for all editors.</li>
+        <li>"Ignore this manual check" leaves the tip visible to other editors.</li>
+    </ul>
+    <p>Dismissed alerts can be found via the "Show hidden alerts" toggle.</p>
+    <p>If an incorrect alert is appearing on many pages, site administrators can tell the checker to ignore particular elements and page regions.</p>
+    <p>And remember that automated checkers cannot replace <a href='https://webaim.org/resources/evalquickref/'> proofreading and testing for accessibility</a>.</p>
+    <p><br><a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Report bugs & request changes <span aria-hidden="true">&raquo;</span></a></p>
+    `,
+
+    // Tooltips for heading tests =========================
+
+    headingExample : `
+        <ul>
+            <li>Heading level 1
+                <ul>
+                    <li>Heading level 2: a topic
+                        <ul><li>Heading level 3: a subtopic</li></ul></li>
+                    <li>Heading level 2: a new topic</li>
+                </ul>
+            </li>
+        </ul>`,
+
+    // todo: update Drupal localization file.
+    headingLevelSkipped : {
+      title: 'Manual check: was a heading level skipped?',
+      tip: (prevLevel, level) =>
+        `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
+            ${ed11yLang.en.headingExample}
+            <p>This heading skipped from level ${prevLevel} to level ${level}. From a screen reader, this sounds like content is missing.</p>
+            <p><strong>To fix:</strong> adjust levels to form an accurate outline, without gaps.</p>
+            `,
+    },
+
+    headingEmpty : {
+      title: 'Heading tag without any text',
+      tip: () =>
+        `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
+            ${ed11yLang.en.headingExample}
+            <p>Empty headings create confusing gaps in this outline: they could mean the following content is still part of the previous section, or that the text was unpronounceable for some reason.</p>
+            <p><strong>To fix:</strong> add text to this heading, or delete this empty line.</p>
+            `,
+    },
+
+    headingIsLong : {
+      title: 'Manual check: long heading',
+      tip: () =>
+        `<p>Headings should be brief and clear. Assistive devices use them as a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">navigable table of contents</a> for the page. The numbers indicate indents in a nesting relationship:</p>  
+            ${ed11yLang.en.headingExample}
+            <p><strong>To fix:</strong> shorten this heading if possible, or remove the heading style if it was only applied to this text to provide visual emphasis.</p>
+            `,
+    },
+
+    blockquoteIsShort : {
+      title: 'Manual check: is this a blockquote?',
+      tip: () =>
+        '<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. This was flagged because short blockquotes are <em>sometimes</em> actually <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" target="_blank" title="Opens in new tab">headings</a>. If this is a heading and not a quotation, use heading formatting instead, so this appears in the page outline.</p>',
+    },
+
+    // Tooltips for image tests =========================
+
+    altAttributeExample :
+            `<p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative" target="_blank" title="Opens in new tab">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
+            <ul>
+                <li>The sunny spring day brought kids to the park for some soccer.</li>
+                <li>A.J. wearing the new team uniform.</li>
+                <li>The game-winning kick curved in from the left sideline!</li>
+                <li>The size 4 ball is the right size for this 9-year-old child.</li>
+            </ul>`,
+
+    altMissing : {
+      title: 'Image has no alternative text attribute',
+      tip: () =>
+        `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.</p>
+            <p><strong>To fix:</strong> either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>
+            ${ed11yLang.en.altAttributeExample}`,
+    },
+
+    altNull : {
+      title: 'Manual check: image has no alt text',
+      tip: () =>
+        `<p>Unless this image is purely decorative (a spacer icon or background texture), an alt should probably be provided. Photos in page content <strong>almost always need alt text.</strong> Since many screen reader users can see there is an image present, it can be very confusing to move the cursor across the place on the page where an image is visible, but hear nothing.</p>
+        ${ed11yLang.en.altAttributeExample}`,
+    },
+
+    altURL : {
+      title: 'Image\'s text alternative is a URL',
+      tip: (alt) =>
+        `This image's alt text is "${alt}," which probably describes the file name, not the contents of the image.
+        <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
+        ${ed11yLang.en.altAttributeExample}`
+      ,
+    },
+    altMeaningless : {
+      title: 'Alt text is meaningless',
+      tip: (alt) =>
+        `<p>This image's alt text is "${alt}," which was flagged for being common placeholder text.</p>
+        <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
+        ${ed11yLang.en.altAttributeExample}`
+      ,
+    },
+    altMeaninglessLinked : {
+      title: 'Linked alt text is meaningless',
+      tip: (alt) =>
+        `<p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" target="_blank" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
+            Links should clearly and concisely describe their destination, even out of context.</p>
+           <p>This image's alt text is "${alt}," which probably does not describe this link.</p>`
+      ,
+    },
+
+    altURLLinked : {
+      title: 'Linked image\'s text alternative is a URL',
+      tip: (alt) =>
+        `<p>This image's alt text is "${alt}," which is probably a filename.</p>
+        <p>When a link is wrapped around an image and there is no other text, the <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" target="_blank" title="Opens in new tab">image's alt text becomes the link text</a> announced by screen readers.
+            Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
+            <ul>
+                <li>Good link text: "About us"</li>
+                <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess</li>
+            </ul>`,
+    },
+
+    altImageOf : {
+      title: 'Manual check: possibly redundant text in alt',
+      tip: (alt) =>
+        `<p>This image's alt text is "${alt}," which mentions that this image is an image.</p>
+        <p>Screen readers announce they are describing an image when reading alt text, so 
+            phrases like "image of" and "photo of" are usually redundant in alt text; the screen reader user hears "image: image of something."</p>
+            <p>Note that this is OK if the format is referring to the <strong>content</strong> of the image:</p>
+            <ul><li>Format is redundant: "<em>photo of</em> a VHS tape"</li>
+            <li>Format is relevant: "<em>photo of</em> a VHS tape in a photo album being discussed in a history class"</li></ul>`
+    },
+    altImageOfLinked : {
+      title: 'Manual check: possibly redundant text in linked image',
+      tip: (alt) =>
+        `<p>This image's alt text is "${alt}," which mentions that this image is an image.</p>
+        <hr><p>Links should clearly and concisely describe their destination. Since words like "image," "graphic" or "photo" are already redundant in text alternatives (screen readers already identify the image as an image), their presence in a linked image usually means the image's text alternative is <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="Opens in new tab" target="_blank">describing the image instead of the link</a>.</p>
+            <ul>
+                <li>Good link text: "About us"</li>
+                <li>Bad link text: "Image of five people jumping"</li>
+            </ul>`
+    },
+
+    altDeadspace : {
+      title: 'Image\'s text alternative is unpronounceable',
+      tip: (alt) =>
+        `<p>This image's alt text is "${alt}," which only contains unpronounceable symbols and/or spaces. Screen readers will announce that an image is present, and then pause awkwardly: "image: ____."</p>
+        <p><strong>To fix:</strong> add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") if this is just an icon or spacer, and screen readers should ignore it.</p>
+            ${ed11yLang.en.altAttributeExample}`,
+    },
+
+    altEmptyLinked : {
+      title: 'Linked Image has no alt text',
+      tip: () =>
+        `<p>When a link is wrapped around an image, the image's alt text <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="Opens in new tab" target="_blank">provides the link's title for screen readers</a>.</p>
+        <p><strong>To fix:</strong> set this image's alternative text to something that describes the link's destination, or add text next to the image, within the link.</p>`,
+    },
+
+    altLong : {
+      title: 'Manual check: very long alternative text',
+      tip: (alt) =>
+        `<p>Image text alternatives are announced by screen readers as a single run-on sentence; listeners must listen to the entire alt a second time if they miss something. If this cannot be reworded to something succinct, it is better to use the alt to reference a <em>visible</em> <a href="https://www.w3.org/WAI/tutorials/images/complex/" title="Opens in new tab" target="_blank">text alternative for complex images</a>. For example:</p>
+            <ul><li>"Event poster; details follow in caption"</li>
+            <li>"Chart showing our issues going to zero; details follow in table"</li></ul>
+            This image's alt text is: <em>${alt}</em>
+            `,
+    },
+
+    altLongLinked : {
+      title: 'Manual check: very long alternative text in linked image',
+      tip: (alt) =>
+        `<p><a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="Opens in new tab" target="_blank">The alt text on a linked image is used to describe the link destination</a>. Links should be brief, clear and concise, as screen reader users often listen to the list of links on the page to find content of interest. Long alternative text inside a link often indicates that the image's text alternative is describing the image instead rather than the link.</p>
+        This image's alt text is: <em>${alt}</em>`,
+    },
+
+    altPartOfLinkWithText : {
+      title: 'Manual check: link contains both text and an image',
+      tip: (alt) =>
+        `<p>Screen readers will <a href="https://www.w3.org/WAI/tutorials/images/functional/" title="Opens in new tab" target="_blank">include the image's alt text when describing this link</a>.</p>
+            <p>Check that the combined text is concise and meaningful:<br>"<em><strong>${alt}</strong></em>"</p>
+            <p></p>
+            <ul>
+                <li>Keep alts that add relevant meaning:<br>"Buy (A Tigers v. Falcons ticket)."</li>
+                <li>Edit unhelpful or irrelevant alts:<br>"Buy (A piece of paper with team logos on it)."</li>
+                <li>Remove unnecessary alts:<br>"Buy Tigers v. Falcons tickets (A Tigers v. Falcons ticket)."</li>
+            </ul>
+        `, // 2.3.10.
+    },
+
+    linkNoTextExample: '<p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>',
+    linkTextIgnored: (ignoredText) => `
+    <p>Screen readers will only read the text of the link type indicator on this link:<br>
+    <em>"<strong>${ignoredText}</strong>"</em></p>
+    `,
+
+    linkNoText : {
+      title: 'Link with no accessible text',
+      tip: (ignoredText) =>
+        `<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
+        ${ignoredText ? ed11yLang.en.linkTextIgnored(ignoredText) : ed11yLang.en.linkNoTextExample}
+        <p><strong>To fix:</strong></p>
+        <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describe where it goes.</li>`,
+    },
+
+    linkTextIsURL : {
+      title: 'Manual check: is this link text a URL?',
+      tip: (text) =>
+        `<p>This link's text is:<br> <strong>${text}</strong></p>
+        <p><a href="https://webaim.org/techniques/hypertext/link_text" title="Opens in new tab" target="_blank">Links should be meaningful and concise</a>. Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
+         <p>A linked URL breaks this pattern; the reader has to read the preceding paragraph to figure out the link's purpose from context.</p>
+            <ul>
+                <li>Meaningful and concise link: "Tips for writing meaningful links"</li>
+                <li>Linked URL, as pronounced by a screen reader: "H T T P S colon forward-slash forward-slash example dot com forward-slash tips forward-slash meaningful-links"</li>
+            </ul>`,
+    },
+
+    linkTextIsGeneric : {
+      title: 'Manual check: is this link meaningful and concise?',
+      tip: (text) =>
+        `<p>This link's text is: <strong>${text}</strong></p>
+        <p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
+                <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully enough to figure out each link's purpose from context. Few readers do this, so click-through rates on meaningless links are extremely poor.</p>
+                <ul>
+                <li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text" title="Opens in new tab" target="_blank">meaningful links"</a></strong></li>
+                <li>Not meaningful: "Click <a href="https://webaim.org/techniques/hypertext/link_text" title="Opens in new tab" target="_blank">here</a> to learn about meaningful links."</li>
+                <li>Not concise: "<a href="https://webaim.org/techniques/hypertext/link_text" title="Opens in new tab" target="_blank">Click here to learn more about meaningful links</a>"</li>
+                </ul>
+                `
+      ,
+    },
+
+    linkDocument : {
+      title : 'Manual check: is the linked document accessible?',
+      tip: () =>
+        `<p>Many mobile and assistive device users struggle to read content in PDFs. PDFs generally do not allow for changing font sizes, and often contain features that are incompatible with screen readers.</p>
+        <p>Ideally make the content of this linked PDF available on a Web page or in an editable document, and only link to this PDF as a "printable" alternative. If this PDF is the only way you are providing to access this content, you will need to <a href='https://webaim.org/techniques/acrobat/' target='_blank' title="Opens in new tab">manually check that the PDF is well-structured</a>, with headings, lists and table headers, and provides alt text for its images.</p>`,
+    },
+
+    linkNewWindow : {
+      title: 'Manual check: is opening a new window expected?',
+      tip: () =>
+        `<p>Readers can always choose to open a link a new window. When a link forces open a new window, it can be confusing and annoying, especially for assistive device users who may wonder why their browser's "back" button is suddenly disabled.</p>
+                <p>There are two general exceptions:</p>
+                <ul>
+                    <li>When the user is filling out a form, and opening a link in the same window would cause them to lose their work.</li>
+                    <li>When the user is clearly warned a link will open a new window.</li>
+                </ul>
+                <p><strong>To fix:</strong> set this link back its default target, or add a screen-reader accessible warning (text or an icon with alt text).</p>
+                `
+      ,
+    },
+
+    // Tooltips for Text QA ===============================
+
+    tableNoHeaderCells : {
+      title: 'Table has no header cells',
+      tip: () => `
+                <p>To fix:</p>
+                <ul><li>If this table contains data that is meaningfully organized by row and column, edit the table's properties and specify whether headers have been placed in the first row, column or both. This lets screen reader users hear the headers repeated while navigating the content.</li>
+                <li>If this table does not contain rows and columns of data, but is instead being used for visual layout, remove it. Tables overflow the page rather than reflowing on mobile devices, and should only be used when the horizontal relationships are necessary to understand the content.</li></ul>
+            `,
+    },
+
+    tableContainsContentHeading : {
+      title: 'Content heading inside a table',
+      tip: () =>
+        `<p>To fix: remove heading formatting. Use row and column headers instead.</p>
+        <p>Content headings ("Heading 1", "Heading 2") form a navigable table of contents for screen reader users,  
+        labelling all content <strong>until the next heading</strong>. Table headers label specific columns or rows within a table.</p> 
+            <p></p>
+            <table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">To illustrate: a <strong>table</strong> header in cell 2 would only label its column: cell B. <br><br>
+            A <strong>content</strong> heading in cell 2 would label all subsequent text, reading from left to right: cells 3, A, B and C, as well as this text!</td></tr>
+            <tr><td>A</td><td>B</td><td>C</td></table>
+            `
+    },
+
+    tableEmptyHeaderCell : {
+      title: 'Empty table header cell',
+      tip: () => `
+                <p>When exploring tables, screen readers repeat table header cells as needed to orient users. 
+                Without headers, it is very easy to get lost; screen reader users have to count columns and rows and try to remember which columns went with which rows.</p>
+                <p><strong>To fix:</strong> make sure each header cell in this table contains text.</p>
+            `,
+    },
+
+    textPossibleList : {
+      title: 'Manual check: should this have list formatting?',
+      tip : (text) =>
+        `<p>List formatting is structural:</p> 
+            <ol><li>List formatting indents and reflows on overflow. Text aligns vertically with the line above it.</li>
+            <li>Lists are machine-readable. Screen readers can orient their users, announcing this as "list item, 2 of 3."</li></ol>
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;3. But this third item is just a sentence with a number in front of it. It wraps incorrectly, and screen readers do not know it is related to the other items in the list.</p>
+            <p><strong>To fix:</strong> if this "${text}" is part of a list, replace it with list formatting.</p>
+            `,
+    },
+
+    textPossibleHeading : {
+      title: 'Manual check: should this be a heading?',
+      tip : () =>
+        `<p>If this all-bold line of text is functioning as a heading for the following text rather than a visual emphasis, replace the bold formatting with the appropriately numbered heading. Otherwise, dismiss this alert.</p>
+        <p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/" title="Opens in new tab" target="_blank">navigable table of contents</a> for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
+            ${ed11yLang.en.headingExample}
+            
+            `,
+    },
+
+    textUppercase : {
+      title: 'Manual check: is this uppercase text needed?',
+      tip : () =>
+        `<p>UPPERCASE TEXT CAN BE MORE DIFFICULT TO READ FOR MANY PEOPLE, AND IS OFTEN INTERPRETED AS SHOUTING.</p>
+         <p>Consider using sentence case instead, and using bold text or font changes for visual emphasis, or structural formatting like headings for emphasis that will also be announced by screen readers.</p>`,
+    },
+
+    embedVideo : {
+      title: 'Manual check: is this video accurately captioned?',
+      tip : () =>
+        `<p>If a recorded video contains speech or meaningful sounds, it must <a href="https://www.w3.org/WAI/media/av/captions/" title="Opens in new window" target="_blank">provide captions</a>.</p>
+            <p>Note that automatic, machine-generated captions must be proofread, and speaker identifications must be added, before being considered an equal alternative.</p>`,
+    },
+
+    embedAudio : {
+      title: 'Manual check: is an accurate transcript provided?',
+      tip : () =>
+        `<p>If this audio contains speech, a <a href="https://www.w3.org/WAI/media/av/transcribing/" target="_blank" title="Opens in new window">text alternative</a> must be provided on this page or linked.</p>
+            <p>Note that automatic, machine-generated transcripts must be proofread, and speaker identifications must be added, before being considered an equal alternative</p>`,
+    },
+
+    embedVisualization : {
+      title: 'Manual check: is this visualization accessible?',
+      tip : () =>
+        `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
+            <p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
+    },
+
+    embedTwitter : {
+      title: 'Manual check: is this embed a keyboard trap?',
+      tip : () =>
+        `<p>If embedded feeds are set to show a high number of items, keyboard users may have to click the tab key dozens or hundreds of times to exit the component.</p>
+            <p>Check to make sure only a small number of items auto-load immediately or while scrolling. Having additional items load on request ("show more") is fine.</p>`,
+    },
+
+    embedCustom : {
+      title: 'Manual check: is this embedded content accessible?',
+      tip : () =>
+        '<p>Please make sure images inside this embed have alt text, videos have captions, and interactive components can be <a href=\'https://webaim.org/techniques/keyboard/\'>operated by a keyboard</a>.</p>',
+    }
+
+  },
+};
 
 /**
  * Finds elements in the DOM that match the given selector, within the specified root element, and excluding any specified elements.
@@ -1526,6 +1559,120 @@ function find(selector, desiredRoot, exclude) {
   // 4. Return the cleaned up array, filtering out <slot> placeholders.
   return elements.filter((node) => node.parentNode.tagName !== 'SLOT');
 }
+
+const Elements = (function myElements() {
+  const Found = {};
+  function initializeElements(option) {
+    // Since 4.0.0: For performance, we filter elements instead of dozens of querySelectors on the DOM.
+    Found.Everything = find('*', 'root', Constants.Exclusions.Sa11yElements);
+
+    Found.Contrast = Found.Everything.filter(($el) => {
+      const matchesSelector = Constants.Exclusions.Contrast.some((exclusion) => $el.matches(exclusion));
+      return !matchesSelector && !Constants.Exclusions.Contrast.includes($el);
+    });
+
+    Found.Images = Found.Everything.filter(($el) => $el.tagName === 'IMG'
+      && !Constants.Exclusions.Images.some((selector) => $el.matches(selector)));
+
+    Found.Links = Found.Everything.filter(($el) => ($el.tagName === 'A' || $el.tagName === 'a')
+      && $el.hasAttribute('href')
+      && !$el.matches('[role="button"]') // Exclude links with [role="button"]
+      && !Constants.Exclusions.Links.some((selector) => $el.matches(selector)));
+
+    // We want headings from the entire document for the Page Outline.
+    Found.Headings = find(
+      'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
+      'document',
+      Constants.Exclusions.Headings,
+    );
+    Found.HeadingOne = find(
+      'h1, [role="heading"][aria-level="1"]',
+      'document',
+      Constants.Exclusions.Headings,
+    );
+
+    // Excluded via headerIgnore.
+    Found.ExcludedHeadings = Found.Headings.filter((heading) => Constants.Exclusions.Headings.some((exclusion) => heading.matches(exclusion)));
+
+    // Excluded via outlineIgnore.
+    Found.ExcludedOutlineHeadings = Found.Headings.filter((heading) => Constants.Exclusions.Outline.some((exclusion) => heading.matches(exclusion)));
+
+    // Merge both headerIgnore and outlineIgnore.
+    Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(Elements.Found.ExcludedHeadings);
+
+    // Quality assurance module.
+    Found.Paragraphs = Found.Everything.filter(($el) => $el.tagName === 'P'
+      && !$el.closest('table'));
+
+    Found.Lists = Found.Everything.filter(($el) => $el.tagName === 'LI');
+
+    Found.Blockquotes = Found.Everything.filter(($el) => $el.tagName === 'BLOCKQUOTE');
+
+    Found.Tables = Found.Everything.filter(($el) => $el.tagName === 'TABLE' && !$el.matches('[role="presentation"]') && !$el.matches('[role="none"]'));
+
+    Found.StrongItalics = Found.Everything.filter(($el) => ['STRONG', 'EM'].includes($el.tagName));
+
+    Found.Subscripts = Found.Everything.filter(($el) => ['SUP', 'SUB'].includes($el.tagName));
+
+    const badLinkSources = option.checks.QA_BAD_LINK.sources;
+    Found.CustomErrorLinks = badLinkSources.length
+      ? Found.Links.filter(($el) => badLinkSources.split(',').some((selector) => $el.matches(selector.trim()))) : [];
+
+    // Readability.
+    const readabilityExclusions = ($el) => Constants.Root.Readability.contains($el)
+      && !Constants.Exclusions.Readability.some((selector) => $el.matches(selector));
+    Found.Readability = [
+      ...Found.Paragraphs.filter(readabilityExclusions),
+      ...Found.Lists.filter(readabilityExclusions),
+    ];
+
+    // Developer checks.
+    const nestedSources = option.checks.QA_NESTED_COMPONENTS.sources || '[role="tablist"], details';
+    Found.NestedComponents = nestedSources
+      ? Found.Everything.filter(($el) => $el.matches(nestedSources)) : [];
+
+    Found.TabIndex = Found.Everything.filter(($el) => $el.hasAttribute('tabindex')
+      && $el.getAttribute('tabindex') !== '0'
+      && !$el.getAttribute('tabindex').startsWith('-'));
+
+    Found.Svg = Found.Everything.filter(($el) => $el.tagName === 'svg');
+
+    Found.Buttons = Found.Everything.filter(($el) => $el.tagName === 'BUTTON' || $el.matches('[role="button"]'));
+
+    Found.Inputs = Found.Everything.filter(($el) => ['INPUT', 'SELECT', 'TEXTAREA', 'METER', 'PROGRESS'].includes($el.tagName));
+
+    Found.Labels = Found.Everything.filter(($el) => $el.tagName === 'LABEL');
+
+    // iFrames.
+    Found.iframes = Found.Everything.filter(($el) => ['IFRAME', 'AUDIO', 'VIDEO'].includes($el.tagName));
+    Found.Videos = Found.iframes.filter(($el) => $el.matches(Constants.Global.VideoSources));
+    Found.Audio = Found.iframes.filter(($el) => $el.matches(Constants.Global.AudioSources));
+    Found.Visualizations = Found.iframes.filter(($el) => $el.matches(Constants.Global.VisualizationSources));
+    Found.EmbeddedContent = Found.iframes.filter(($el) => !$el.matches(Constants.Global.AllEmbeddedContent));
+
+    // Query select <HTML> given that the lang may change on an SPA.
+    const html = document.querySelector('html');
+    Found.Language = html.getAttribute('lang');
+  }
+
+  /* ************* */
+  /*  Annotations  */
+  /* ************* */
+  const Annotations = {};
+  function initializeAnnotations() {
+    Annotations.Array = find('sa11y-annotation', 'document');
+    Annotations.Array.forEach((annotation, i) => {
+      annotation.setAttribute('data-sa11y-position', i);
+    });
+  }
+
+  return {
+    initializeElements,
+    Found,
+    initializeAnnotations,
+    Annotations,
+  };
+}());
 
 /* eslint-disable no-continue */
 /* eslint-disable no-use-before-define */
@@ -1917,1531 +2064,6 @@ function standardizeHref($el) {
   href = href.replace(/\.(html|php|htm|asp|aspx)$/i, '');
 
   return href;
-}
-
-class Ed11yElementAlt extends HTMLElement {
-  /* global Ed11y */
-
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    if (!this.initialized) {
-      const shadow = this.attachShadow({mode: 'open'});
-      let altTextWrapper = document.createElement('div');
-      altTextWrapper.classList.add('ed11y-wrapper','ed11y-alt-wrapper');
-      let img = UI$1.imageAlts[this.dataset.ed11yImg];
-      // img[el, src, altLabel, altStyle]
-
-      let altSpan = document.createElement('span');
-      altSpan.textContent = img[2];
-      altSpan.classList.add(img[3]);
-      altTextWrapper.appendChild(altSpan);
-      UI$1.attachCSS(altTextWrapper);
-      shadow.appendChild(altTextWrapper);
-      this.initialized = true;
-    }
-  }
-
-}
-
-function alignAlts$1 () {
-  // Positions alt label to match absolute, inline or floated images.
-  findElements('altMark', 'ed11y-element-alt');
-  State.elements.altMark?.forEach((el) => { // @todo merge
-    let id = el.dataset.ed11yImg;
-    el.style.setProperty('transform', null);
-    el.style.setProperty('height', null);
-    el.style.setProperty('width', null);
-
-    let img = UI$1.imageAlts[id][0];
-    if (img.tagName !== 'IMG') {
-      // Mark is placed outside the link in linked images.
-      img = img.querySelector('img');
-    }
-    let markOffset = el.getBoundingClientRect();
-    let imgOffset = img.getBoundingClientRect();
-    let newOffset = imgOffset.left - markOffset.left;
-    let height = getComputedStyle(img).height;
-    height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
-    el.style.setProperty('transform', `translate(${newOffset}px, 0px)`);
-    el.style.setProperty('height', `${height}px`);
-    el.style.setProperty('width', `${img.offsetWidth}px`);
-  });
-}
-const showAltPanel = function () {
-  // visualize image alts
-  let altList = UI$1.panel.querySelector('#ed11y-alt-list');
-
-  if (UI$1.imageAlts.length) {
-    altList.innerHTML = '';
-    UI$1.imageAlts.forEach((el, i) => {
-      // el[el, src, altLabel, altStyle]
-
-      if (State.options.inlineAlerts) {
-        // Label images
-        const mark = document.createElement('ed11y-element-alt');
-        mark.classList.add('ed11y-element');
-        mark.dataset.ed11yImg = i.toString();
-        mark.setAttribute('id', 'ed11y-alt-' + i);
-        mark.setAttribute('tabindex', '-1');
-        el[0].insertAdjacentElement('beforebegin', mark);
-      }
-
-      // Build alt list in panel
-      let userText = document.createElement('span');
-      userText.textContent = el[2];
-      let li = document.createElement('li');
-      li.classList.add(el[3]);
-      let img = document.createElement('img');
-      img.setAttribute('src', el[1]);
-      img.setAttribute('alt', '');
-
-      if (State.options.inlineAlerts) {
-        let a = document.createElement('a');
-        a.href = '#ed11y-alt-' + i;
-        a.classList.add('alt-parent');
-        li.append(a);
-        a.append(img);
-        a.append(userText);
-      } else {
-        li.classList.add('alt-parent');
-        li.append(img);
-        li.append(userText);
-      }
-      altList.append(li);
-    });
-    alignAlts$1();
-  } else {
-    const noImages = document.createElement('p');
-    const noItalic = document.createElement('em');
-    noItalic.textContent = M.noImagesFound;
-    noImages.appendChild(noItalic);
-    altList.innerHTML = '';
-    altList.appendChild(noImages);
-  }
-};
-function visualize () {
-  if (!UI$1.panel) {
-    return;
-  }
-  if (State.options.inlineAlerts) {
-    findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
-    State.elements.reset?.forEach((el) => el.remove());
-  }
-  if (State.visualizing) {
-    State.visualizing = false;
-    UI$1.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsContent;
-    UI$1.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
-    UI$1.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
-    return;
-  }
-  State.visualizing = true;
-  UI$1.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsActive;
-  UI$1.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
-  UI$1.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
-  showAltPanel();
-  showHeadingsPanel();
-}
-
-function updatePanel () {
-
-  pauseObservers();
-  // Stash old values for incremental updates.
-  countAlerts();
-  if (State.incremental) {
-    // Check for a change in the result counts.
-    if (State.forceFullCheck || newIncrementalResults()) {
-      State.forceFullCheck = false;
-      /*if (State.options.alertMode === 'assertive' && State.totalCount > 0 && (State.warningCount > oldWarnings || State.errorCount > oldErrors)) {
-        console.warn('forced open');
-        State.showPanel = true;
-      }*/
-      resetResults(true);
-    } else {
-      // Todo: commented out in 2.3.11:
-      // Reconnect map
-      State.results = State.oldResults;
-      window.setTimeout(function() {
-        if ( !State.alignPending ) {
-          alignButtons();
-          alignPanel$1();
-          State.alignPending = false;
-        }
-        State.running = false;
-      },0);
-      resumeObservers();
-      return;
-    }
-  } else {
-    if (State.totalCount > 0) {
-      // Record what has been seen at this route.
-      // We do not do this on incremental updates.
-      // Todo question: should we not do this at all for contentEditable?
-      State.seen[encodeURI(State.options.currentPage)] = State.totalCount;
-      localStorage.setItem('editoria11yResultCount', JSON.stringify(State.seen));
-    } else {
-      delete State.seen[encodeURI(State.options.currentPage)];
-    }
-  }
-
-  if (State.options.alertMode !== 'headless') {
-    // Not headless; draw the interface.
-
-    if (!State.bodyStyle) {
-      paintReady();
-    }
-
-    if (State.onLoad === true) {
-      State.onLoad = false;
-
-      if (!State.options.inlineAlerts) {
-        // todo move to incremental check or timeout; no need to do on load.
-        State.oldResultString = `${State.errorCount} ${State.warningCount}`;
-        State.results.forEach(result => {
-          State.oldResultString += result.test + result.element.outerHTML;
-        });
-      }
-
-      // Create the panel DOM on load.
-
-      UI$1.panelElement = document.createElement('ed11y-element-panel');
-      UI$1.panelElement.classList.add('ed11y-preload');
-      document.body.appendChild(UI$1.panelElement);
-      UI$1.panel = UI$1.panelElement.shadowRoot.getElementById('ed11y-panel');
-      UI$1.attachCSS(UI$1.panel);
-      UI$1.panelToggle = UI$1.panel.querySelector('#ed11y-toggle');
-      UI$1.panelToggleTitle = UI$1.panel.querySelector('#ed11y-toggle .ed11y-sr-only');
-      UI$1.panelCount = UI$1.panel.querySelector('.toggle-count');
-      UI$1.panelJumpNext = UI$1.panel.querySelector('.ed11y-jump.next');
-      UI$1.panelJumpNext.addEventListener('click', jumpTo);
-      UI$1.showDismissed = UI$1.panel.querySelector('#ed11y-show-hidden');
-      UI$1.message = UI$1.panel.querySelector('#ed11y-message');
-      window.setTimeout(()=> {
-        UI$1.panelElement.classList.remove('ed11y-preload');
-      },0, UI$1.panel);
-      UI$1.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsContent;
-      UI$1.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = M.buttonOutlineContent;
-      UI$1.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = M.panelCheckOutline;
-      UI$1.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = M.buttonAltsContent;
-      UI$1.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = M.panelCheckAltText;
-      UI$1.panel.querySelector('.jump-next.ed11y-sr-only').textContent = M.buttonFirstContent;
-
-      UI$1.panel.setAttribute('aria-label', M.panelControls);
-      if (State.options.reportsURL) {
-        let reportLink = document.createElement('a');
-        reportLink.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M0 96C0 61 29 32 64 32l384 0c35 0 64 29 64 64l0 320c0 35-29 64-64 64L64 480c-35 0-64-29-64-64L0 96zm64 0l0 64 64 0 0-64L64 96zm384 0L192 96l0 64 256 0 0-64zM64 224l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64zM64 352l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64z"/></svg><span class="ed11y-sr-only"></span>';
-        reportLink.setAttribute('id' , 'ed11y-reports-link');
-        reportLink.setAttribute('href', State.options.reportsURL);
-        reportLink.setAttribute('target', '_blank');
-        reportLink.setAttribute('aria-label', M.reportsLink);
-        reportLink.querySelector('.ed11y-sr-only').textContent = M.reportsLink;
-        UI$1.showDismissed.insertAdjacentElement('beforebegin', reportLink);
-      }
-
-
-      // Decide whether to open the panel on load.
-      if (State.ignoreAll ||
-        (!State.options.inlineAlerts && State.totalCount > 75)
-      ) {
-        State.showPanel = false;
-      } else if (State.options.alertMode === 'active' ||
-        !State.options.userPrefersShut ||
-        State.options.showDismissed
-      ) {
-        // Show always on load for active mode or by user preference.
-        State.showPanel = true;
-      } else if (
-        State.totalCount > 0 &&
-        !State.ignoreAll &&
-        ( State.options.alertMode === 'assertive' ||
-          State.options.alertMode === 'polite' &&
-          State.seen[encodeURI(State.options.currentPage)] !== State.totalCount
-        )
-      ) {
-        // Show sometimes for assertive/polite if there are new items.
-        State.showPanel = true;
-      }
-    }
-
-    // Now we can open or close the panel.
-    if (!State.showPanel) {
-      // Close panel.
-      reset();
-    } else {
-      // Ignore issue count if this resulted from a user action.
-
-      State.open = true;
-      UI$1.panel.classList.remove('ed11y-shut');
-      UI$1.panel.classList.add('ed11y-active');
-      UI$1.panelToggle.setAttribute('aria-expanded', 'true');
-      UI$1.panelToggleTitle.textContent = State.totalCount > 0 ? M.buttonHideAlerts : M.buttonHideChecker;
-      // Prepare show hidden alerts button.
-      if (State.dismissedCount === 0) {
-        // Reset show hidden default option when irrelevant.
-        UI$1.showDismissed.setAttribute('hidden', '');
-        UI$1.showDismissed.setAttribute('data-ed11y-pressed', 'false');
-        State.options.showDismissed = false;
-      } else if (State.dismissedCount === 1) {
-        UI$1.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ? M.buttonHideHiddenAlert : M.buttonShowHiddenAlert;
-        UI$1.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
-        UI$1.showDismissed.removeAttribute('hidden');
-      } else {
-        UI$1.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ? M.buttonHideHiddenAlerts(State.dismissedCount) : M.buttonShowHiddenAlerts(State.dismissedCount);
-        UI$1.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
-        UI$1.showDismissed.removeAttribute('hidden');
-      }
-
-      window.setTimeout(function () {
-        if (!State.ignoreAll) {
-          requestAnimationFrame(() => showResults());
-        }
-      }, 0);
-    }
-    // Update buttons.
-    if (State.totalCount > 0 || (State.options.showDismissed && State.dismissedCount > 0)) {
-      UI$1.panelToggleTitle.textContent = State.open ? M.buttonHideAlerts : M.buttonShowAlerts;
-      UI$1.panelJumpNext.removeAttribute('hidden');
-      if (State.errorCount > 0) {
-        // Errors
-        UI$1.panel.classList.remove('ed11y-warnings', 'ed11y-pass');
-        UI$1.panel.classList.add('ed11y-errors');
-        document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.alert);
-        document.documentElement.style.setProperty('--ed11y-activeColor', '#fff');
-        document.documentElement.style.setProperty('--ed11y-activeBorder', '#fff7');
-        document.documentElement.style.setProperty('--ed11y-activePanelBorder', '#def');
-      }
-      else if (State.warningCount > 0) {
-        // Warnings
-        UI$1.panel.classList.remove('ed11y-errors', 'ed11y-pass');
-        UI$1.panel.classList.add('ed11y-warnings');
-        document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.warning);
-        document.documentElement.style.setProperty('--ed11y-activeColor', '#111');
-        document.documentElement.style.setProperty('--ed11y-activeBorder', '#947605');
-        document.documentElement.style.setProperty('--ed11y-activePanelBorder', '#947605');
-      } else {
-        // Issues present but dismissed.
-        UI$1.panel.classList.remove('ed11y-errors', 'ed11y-warnings');
-        UI$1.panel.classList.add('ed11y-pass');
-        document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.panelBar);
-        document.documentElement.style.setProperty('--ed11y-activeColor', Theme.panelBarText);
-        document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
-        document.documentElement.style.setProperty('--ed11y-activePanelBorder', Theme.panelBarText + '88');
-      }
-      // todo postpone: aria alert on load?
-      /*window.setTimeout(function () {
-        //announce.textContent = text;
-      }, 1500);*/
-      if (State.dismissedCount > 0 && State.totalCount === 0) {
-        UI$1.panelCount.textContent = State.dismissedCount;
-      } else {
-        UI$1.panelCount.textContent = State.totalCount > 99 ? '99+' : State.totalCount;
-      }
-    } else {
-      UI$1.panelJumpNext.setAttribute('hidden', '');
-      document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.panelBar);
-      document.documentElement.style.setProperty('--ed11y-activeColor', Theme.panelBarText);
-      document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
-      document.documentElement.style.setProperty('--ed11y-activePanelBorder', Theme.panelBarText + '88');
-
-      UI$1.panelCount.style.display = 'display: none;';
-      UI$1.panel.classList.remove('ed11y-warnings', 'ed11y-errors');
-      UI$1.panel.classList.add('ed11y-pass');
-
-      if (State.dismissedCount > 0) {
-        UI$1.panelCount.textContent = 'i';
-        if (State.open) {
-          UI$1.panelToggleTitle.textContent = M.buttonHideChecker;
-        } else {
-          UI$1.panelToggleTitle.textContent = State.dismissedCount > 1 ?
-            M.buttonShowHiddenAlerts(State.dismissedCount) :
-            M.buttonShowHiddenAlert;
-        }
-      } else {
-        // todo 3.x: move these inline and just change the class.
-        UI$1.panelToggleTitle.textContent = State.open ? M.buttonHideChecker : M.buttonShowNoAlert;
-      }
-    }
-    UI$1.panelToggle.classList.remove('disabled');
-    UI$1.panelToggle.removeAttribute('aria-disabled');
-    alignPanel$1();
-    UI$1.panel.classList.remove('ed11y-preload');
-  }
-
-  window.setTimeout(() => {
-    if (State.options.watchForChanges) {
-      State.elements.editable?.forEach(editable => {
-        if (!editable.matches('.drag-observe')) {
-          editable.classList.add('drag-observe');
-          editable.addEventListener('drop', () => {
-            // This event does not bubble.
-            State.forceFullCheck = true;
-          });
-        }
-      });
-      if (State.options.watchForChanges === 'checkRoots') {
-        State.roots?.forEach((root) => {
-          startObserver( root );
-        });
-      } else {
-        startObserver( document.body );
-      }
-      resumeObservers(); // on recheck.
-    }
-  }, 0);
-
-  resumeObservers();
-  State.running = false;
-}
-function showResults () {
-  buildJumpList();
-  // Announce that buttons have been placed.
-  document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
-  alignButtons();
-  if (!State.options.inlineAlerts) {
-    checkEditableIntersects();
-    intersectionObservers();
-  }
-}
-// Place markers on elements with issues
-function drawResult(result, index) {
-  /* old array to new object map:
-    // [0] element
-    // [1] test
-    // [2] content
-    // [3] position
-    // [4] dismissalKey
-    // [5] dismissalStatus
-    */
-  let mark = document.createElement('ed11y-element-result');
-  mark.classList.add('ed11y-element');
-  let location;
-  let position = 'beforebegin';
-  mark.setAttribute('id', 'ed11y-result-' + index);
-  mark.setAttribute('data-ed11y-result', index);
-  mark.setAttribute('data-ed11y-open', 'false');
-  if (!State.options.inlineAlerts) {
-    location = State.panelAttachTo;
-    position = 'beforeend';
-    mark.classList.add('ed11y-editable-result');
-  } else {
-    location = result.element.closest('a, button, [role="button"], [role="link"]');
-    if (!location && result.element.shadowRoot) {
-      // Must insert outside shadow DOM root.
-      location = result.element;
-      position = 'beforebegin';
-      while (location.parentElement && location.parentElement.shadowRoot) {
-        location = location.parentElement;
-      }
-    }
-    if (!location) {
-      location = result.element;
-      position = result.position;
-    }
-  }
-  location.insertAdjacentElement(position, mark);
-
-  const shadow = mark.attachShadow({ mode: 'open' });
-
-  // Create mark.wrapper with type class
-  mark.resultID = mark.dataset.ed11yResult;
-  mark.result = State.results[mark.resultID];
-
-  mark.wrapper = document.createElement('div');
-
-  mark.dismissable = mark.result.dismissalKey !== false;
-  mark.dismissed = !!mark.result.dismissalStatus;
-  mark.wrapper.classList.add('ed11y-wrapper', 'ed11y-result-wrapper');
-  mark.wrapper.classList.add('ed11y-result');
-
-  // Create tooltip toggle
-  // @todo abstract out.
-  mark.toggle = document.createElement('button');
-  mark.toggle.setAttribute('class', 'toggle');
-  let label = mark.dismissable ? M.toggleManualCheck : M.toggleAlert;
-  mark.toggle.setAttribute('aria-label', M.toggleAriaLabel(label));
-  mark.toggle.setAttribute('aria-expanded', 'false');
-  mark.toggle.setAttribute('aria-haspopup', 'dialog');
-  mark.toggle.setAttribute('data-ed11y-result', mark.dataset.ed11yResult);
-  mark.toggle.setAttribute('data-ed11y-ready', 'false');
-  mark.toggle.setAttribute('data-ed11y-race', 'false');
-  if (!State.options.inlineAlerts) {
-    mark.toggle.style.setProperty('font-size', '16px');
-  }
-  if (mark.dismissed) {
-    mark.toggle.innerHTML = '<svg aria-hidden="true" width="10" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>';
-    mark.toggle.classList.add('dismissed');
-    if (mark.result.dismissalStatus !== 'ok') {
-      mark.toggle.classList.add('notok');
-    } else {
-      mark.toggle.classList.add('ok');
-    }
-  } else if (mark.dismissable) {
-    mark.toggle.classList.add('dismissable');
-  }
-  mark.wrapper.appendChild(mark.toggle);
-  mark.toggle.addEventListener('click', mark.toggleClick);
-  mark.toggle.addEventListener('focus', mark.handleFocus);
-  mark.toggle.addEventListener('mouseover', mark.handleHover);
-  mark.tipNeedsBuild = true;
-
-  UI$1.attachCSS(mark.wrapper);
-
-  shadow.appendChild(mark.wrapper);
-
-  State.jumpList.unshift(mark);
-  State.results[index].toggle = mark;
-}
-
-function buildJumpList () {
-
-  State.jumpList = [];
-  pauseObservers();
-
-  // Initial alignment to get approximate Y position order for jump list.
-  State.results.forEach((result, i) => {
-
-    let top = result.element.getBoundingClientRect().top;
-    if (!top) {
-      const visibleParent = firstVisibleParent(result.element);
-      if (visibleParent) {
-        top = visibleParent.getBoundingClientRect().top;
-      }
-    }
-    top = top + window.scrollY;
-    if (State.options.fixedRoots) {
-      const root = result.element.closest('[data-ed11y-root]');
-      // Todo: it might be faster to associate this with the element finder.
-      State.results[i].fixedRoot = root.dataset.ed11yRoot;
-    }
-    State.results[i].scrollableParent = closestScrollable(result.element);
-    if (State.results[i].scrollableParent) {
-      // Group these together.
-      top = top * 0.000001;
-    }
-    State.results[i].sortPos = top;
-  });
-  // Sort from bottom to top so focus order after insert is top to bottom.
-  State.results.sort((a, b) => b.sortPos - a.sortPos);
-
-  State.results?.forEach(function (result, i) {
-    if (!State.results[i].dismissalStatus || State.options.showDismissed) {
-      drawResult(result, i);
-    }
-  });
-  State.jumpList.forEach((el, i) => {
-    el.dataset.ed11yJumpPosition = `${i}`;
-    const newLabel = `${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}, ${i + 1} / ${State.jumpList.length - 1}`;
-    el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
-  });
-  let tipsPainted = new CustomEvent('ed11yResultsPainted');
-  document.dispatchEvent(tipsPainted);
-  resumeObservers();
-}
-
-function dismissalKey (text) {
-  return String(text).replace(/([^0-9a-zA-Z])/g, '').substring(0, 512);
-}
-function toggleShowDismissals () {
-  // todo postpone: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
-  State.ignoreAll = false;
-  State.options.showDismissed = !(State.options.showDismissed);
-  reset();
-  State.showPanel = true;
-  checkAll();
-
-  UI$1.showDismissed.setAttribute('data-ed11y-pressed', (!!State.options.showDismissed).toString());
-  window.setTimeout(function() {
-    UI$1.showDismissed.focus();
-  }, 0);
-}
-function alignHighlights() {
-
-  if (State.options.fixedRoots && UI$1.editableHighlight.length > 0) {
-    State.positionedFrames = [];
-
-    State.options.fixedRoots.forEach((root) => {
-      if (root['framePositioner']) {
-        State.positionedFrames.push(root['framePositioner'].getBoundingClientRect());
-      }
-    });
-  }
-
-  UI$1.editableHighlight.forEach((el) => {
-
-    if (!State.results[el.resultID]) {
-      State.interaction = true;
-      State.forceFullCheck = true;
-      UI$1.editableHighlight = [];
-      return false;
-    }
-
-    const framePositioner = State.results[el.resultID].fixedRoot && State.positionedFrames[State.results[el.resultID].fixedRoot] ?
-      State.positionedFrames[State.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
-
-    let targetOffset = el.target.getBoundingClientRect();
-    if (!visible(el.target)) {
-      // Invisible target.
-      const firstVisibleParent$1 = firstVisibleParent(el.target);
-      targetOffset = firstVisibleParent$1 ? firstVisibleParent$1.getBoundingClientRect() : targetOffset;
-    }
-
-    // @todo why is setProperty failing?
-    console.log('has set property?');
-    console.log(el.highlight);
-
-    el.highlight.style.setProperty('width', targetOffset.width + 6 + 'px');
-    el.highlight.style.setProperty('top', targetOffset.top + framePositioner.top + window.scrollY - 3 + 'px');
-    el.highlight.style.setProperty('left', targetOffset.left + framePositioner.left - 3 + 'px');
-    el.highlight.style.setProperty('height', targetOffset.height + 6 + 'px');
-  });
-}
-function editableHighlighter (resultID, show, firstVisible) {
-
-  if (!show) {
-    UI$1.editableHighlight[resultID]?.highlight.style.setProperty('opacity', '0');
-    return;
-  }
-  const result = State.results[resultID];
-  let el = UI$1.editableHighlight[resultID]?.highlight;
-  if (!el) {
-    el = document.createElement('ed11y-element-highlight');
-    el.classList.add('ed11y-element');
-    UI$1.editableHighlight[resultID] = {highlight: el, resultID: resultID};
-    el.style.setProperty('position', 'absolute');
-    el.style.setProperty('pointer-events', 'none');
-    State.panelAttachTo.appendChild(el);
-  }
-  UI$1.editableHighlight[resultID].target = firstVisible ? firstVisible : result.element;
-  const zIndex = result.dismissalKey ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
-  el.style.setProperty('z-index', zIndex);
-  const outline = result.dismissalKey ?
-    '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)'
-    : '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
-  el.style.setProperty('box-shadow', outline);
-  el.style.setProperty('border-radius', '3px');
-  el.style.setProperty('top', '0');
-  el.style.setProperty('left', '0');
-  alignHighlights();
-  el.style.setProperty('opacity', '1');
-}
-function resetResults(incremental) {
-  State.jumpList = [];
-  State.openTip = {
-    button: false,
-    tip: false,
-  };
-  State.lastOpenTip = -1;
-  resetClass([
-    'ed11y-ring-red',
-    'ed11y-ring-yellow',
-    'ed11y-hidden-highlight',
-    'ed11y-warning-inline',
-    'ed11y-warning-block',
-    'ed11y-error-block',
-    'ed11y-error-inline',
-  ]);
-  // Reset insertions into body content.
-  if (incremental) {
-    findElements$1('reset', 'ed11y-element-highlight', false);
-  } else {
-    findElements$1('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
-  }
-  State.elements.reset?.forEach((el) => el.remove());
-
-  // Flicker prevention -- leave old tip in place for 100ms.
-  findElements$1('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
-  const delayedReset = State.elements.delayedReset;
-
-  window.setTimeout(()=> {
-    delayedReset?.forEach((el) => el.remove());
-  }, 100, delayedReset);
-
-  if (UI$1.panelJumpNext) {
-    UI$1.panelJumpNext.querySelector('.ed11y-sr-only').textContent = M.buttonFirstContent;
-  }
-  // Reset insertions into body content.
-}
-function resetPanel() {
-  // Reset main panel.
-  State.visualizing = true; // so visualize function removes visualizers.
-  visualize();
-  if (State.totalCount === 0 && State.dismissedCount > 0) {
-    UI$1.panelCount.textContent = 'i';
-    UI$1.panelToggleTitle.textContent = State.dismissedCount === 1 ?
-      M.buttonShowHiddenAlert :
-      M.buttonShowHiddenAlerts(State.dismissedCount);
-  }
-  if (!State.options.showDismissed && UI$1.showDismissed) {
-    UI$1.showDismissed.setAttribute('data-ed11y-pressed', 'false');
-    UI$1.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
-      M.buttonShowHiddenAlert : M.buttonShowHiddenAlerts(State.dismissedCount);
-  }
-  UI$1.panel?.classList.add('ed11y-shut');
-  UI$1.panel?.classList.remove('ed11y-active');
-  UI$1.panelToggle?.setAttribute('aria-expanded', 'false');
-}
-function reset () {
-  pauseObservers();
-  resetResults();
-  resetPanel();
-  State.incremental = false;
-  State.running = false;
-  State.showPanel = false;
-  State.open = false;
-}
-
-function paintReady () {
-
-  if (!State.options.cssUrls) {
-    const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
-    if (cssLink) {
-      State.options.cssUrls = [cssLink.getAttribute('href')];
-    } else {
-      console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
-      State.options.cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
-    }
-  }
-
-  for (const [key, value] of Object.entries(Theme)) {
-    document.documentElement.style.setProperty('--ed11y-' + key, value);
-  }
-
-  // May be redundant, but preloads unbundled files.
-  if (document.querySelector('body')) {
-    // May be redundant, but preloads unbundled files.
-    UI$1.attachCSS(document.querySelector('body'));
-  }
-
-
-  State.roots.forEach((root) => {
-    // Shadow elements don't inherit styles, so they need their own copy.
-    if (State.options.shadowComponents) {
-      root.querySelectorAll(State.options.shadowComponents)?.forEach((shadowHost) => {
-        if (shadowHost.shadowRoot) {
-          UI$1.attachCSS(shadowHost.shadowRoot);
-        }
-      });
-    }
-  });
-  State.bodyStyle = true;
-}
-function togglePanel () {
-  State.ignoreAll = false;
-
-  if (!State.doubleClickPrevent) {
-    // Prevent clicks piling up while scan is running.
-    if (State.running !== true) {
-      State.running = true;
-      // Re-scan each time the panel reopens.
-      if (UI$1.panel.classList.contains('ed11y-shut') === true) {
-        State.onLoad = false;
-        State.incremental = false;
-        State.showPanel = true;
-        if (State.dismissedCount > 0 && State.warningCount === 0 && State.errorCount === 0) {
-          State.options.showDismissed = false;
-          toggleShowDismissals();
-        } else {
-          checkAll();
-        }
-        State.options.userPrefersShut = false;
-        localStorage.setItem('editoria11yShow', '1');
-      }
-      else {
-        UI$1.panelToggleTitle.textContent = State.totalCount > 0 ? M.buttonShowAlerts : M.buttonShowNoAlert;
-        State.options.showDismissed = false;
-        reset();
-        State.options.userPrefersShut = true;
-        localStorage.setItem('editoria11yShow', '0');
-      }
-    }
-  }
-  State.doubleClickPrevent = true;
-  window.setTimeout(function () {
-    State.doubleClickPrevent = false;
-  }, 200);
-  return false;
-}
-function showHeadingsPanel () {
-  // Visualize the document outline
-
-  let panelOutline = UI$1.panel.querySelector('#ed11y-outline');
-
-  if (State.headingOutline.length) {
-    panelOutline.innerHTML = '';
-    State.headingOutline.forEach((el, i) => {
-      // Todo: draw these in editable mode.
-      if (State.options.inlineAlerts) {
-        const mark = document.createElement('ed11y-element-heading-label');
-        mark.classList.add('ed11y-element', 'ed11y-element-heading');
-        mark.dataset.ed11yHeadingOutline = i.toString();
-        mark.setAttribute('id', 'ed11y-heading-' + i);
-        mark.setAttribute('tabindex', '-1');
-        // Array: el, level, outlinePrefix
-        el[0].insertAdjacentElement('afterbegin', mark);
-        UI$1.attachCSS(mark.shadowRoot);
-      }
-      let level = el[1];
-      let leftPad = 10 * level - 10;
-      let li = document.createElement('li');
-      li.classList.add('level' + level);
-      li.style.setProperty('margin-left', leftPad + 'px');
-      let levelPrefix = document.createElement('strong');
-      levelPrefix.textContent = `H${level}: `;
-      let userText = document.createElement('span');
-      userText.textContent = computeText(el[0]);
-      let link = document.createElement('a');
-      if (State.options.inlineAlerts) {
-        link.setAttribute('href', '#ed11y-heading-' + i);
-        li.append(link);
-        link.append(levelPrefix);
-        link.append(userText);
-      } else {
-        li.append(levelPrefix);
-        li.append(userText);
-      }
-      if (el[2]) { // Has an error message
-        let type = !el[3] ? 'ed11y-error' : 'ed11y-warning';
-        li.classList.add(type);
-        let message = document.createElement('em');
-        message.classList.add('ed11y-small');
-        message.textContent = ' ' + el[2];
-        if (State.options.inlineAlerts) {
-          link.append(message);
-        } else {
-          li.append(message);
-        }
-      }
-      panelOutline.append(li);
-    });
-  } else {
-    panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>';
-  }
-}
-
-class Ed11yElementResult extends HTMLElement {
-  /* global Ed11y */
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    if (!this.initialized) {
-      this.open = false;
-      this.racing = false;
-      this.style.setProperty('outline', '0px solid transparent');
-
-      this.initialized = true;
-    }
-  }
-
-  handleHover(event) {
-    event.preventDefault();
-    let host = this.getRootNode().host;
-    if (!this.classList.contains('intersecting') && host.open !== true && host.racing === false) {
-      this.open = true;
-      host.racing = true;
-      host.toggleTip(true);
-      State.toggledFrom = this;
-      window.setTimeout(function () {
-        host.racing = false;
-      }, 250, host);
-    }
-  }
-
-  handleFocus() {
-    let host = this.getRootNode().host;
-    if (this.getRootNode().host.classList.contains('ed11y-offscreen')) {
-      host.result.element.scrollIntoView();
-      alignButtons();
-    }
-  }
-
-  toggleClick(event) {
-    event.preventDefault();
-    let host = this.getRootNode().host;
-    // Todo: extremely fast clicks throw TypeError: e is null
-    if (host.racing === false) {
-      host.racing = true;
-      State.toggledFrom = this;
-      let stateChange = host.getAttribute('data-ed11y-open') === 'false' ? 'open' : 'close';
-      host.setAttribute('data-ed11y-action', stateChange);
-      if (stateChange === 'open') {
-        window.setTimeout(function () {
-          let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-          activeTip?.shadowRoot.querySelector('.title').focus();
-        }, 500);
-      }
-      window.setTimeout(function () {
-        host.racing = false;
-      }, 250, host);
-    }
-
-  }
-
-  closeOtherTips() {
-    if (State.openTip.button) {
-      State.openTip.button.setAttribute('data-ed11y-action', 'close');
-    }
-  }
-
-  buildTip() {
-    this.tipNeedsBuild = false;
-
-    let tip = document.createElement('ed11y-element-tip');
-    tip.result = this.result;
-    tip.setAttribute('data-ed11y-result', this.resultID);
-    tip.classList.add('ed11y-element');
-    tip.style.setProperty('opacity', '0');
-    State.panelAttachTo.insertAdjacentElement('beforeend', tip);
-    this.tip = tip;
-  }
-
-  toggleTip(changeTo) {
-    if (this.tipNeedsBuild) {
-      this.buildTip();
-    }
-    this.toggle.setAttribute('aria-expanded', changeTo);
-    let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
-    if (State.options.inlineAlerts) {
-      resetClass([
-        'ed11y-hidden-highlight',
-        'ed11y-ring-red',
-        'ed11y-ring-yellow',
-        'ed11y-warning-block',
-        'ed11y-error-block',
-        'ed11y-warning-inline',
-        'ed11y-error-inline',
-      ]);
-    } else {
-      editableHighlighter(this.resultID, changeTo);
-    }
-    if (changeTo === true) {
-      this.tip.style.setProperty('opacity', '0');
-      // Allow for themes to reveal hidden tips
-      document.dispatchEvent(new CustomEvent('ed11yPop', {
-        detail: {
-          id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result'),
-          result: this.result,
-          tip: this.tip
-        }
-      }));
-      this.closeOtherTips();
-      this.tip.setAttribute('data-ed11y-action', 'open');
-      if (State.options.inlineAlerts) {
-        this.result.element.classList.add(highlightOutline);
-        // Removed in 2.3.6; Todo: confirm not needed and delete.
-        /*if (this.result.element.style.outline.indexOf('alert') === -1 ) {
-          // Set property unless alert is already set.
-          const display = window.getComputedStyle(this.result.element).getPropertyValue('display');
-          let outlineClass;
-          if (display.indexOf('inline') === -1 || this.result.element.tagName === 'IMG') {
-            outlineClass = this.result.dismissalKey ?
-              'ed11y-warning-block'
-              : 'ed11y-error-block';
-          } else {
-            outlineClass = this.result.dismissalKey ?
-              'ed11y-warning-inline'
-              : 'ed11y-error-inline';
-          }
-          this.result.element.classList.add(outlineClass);
-        }*/
-      }
-      requestAnimationFrame(()=>alignTip(this.toggle, this.tip, 4, true));
-      if (!State.jumpList) {
-        buildJumpList();
-      }
-      State.lastOpenTip = Number(this.getAttribute('data-ed11y-jump-position'));
-      State.openTip = {
-        button: this,
-        tip: this.tip,
-      };
-      this.result.highlight?.style.setProperty('opacity', '1');
-    } else {
-      // Allow for themes to restore original DOM/CSS
-      document.dispatchEvent(new CustomEvent('ed11yShut', {
-        detail: { id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result') }
-      }));
-      this.tip.setAttribute('data-ed11y-action', 'shut');
-      this.result.highlight?.style.setProperty('opacity', '0');
-      State.openTip = {
-        button: false,
-        tip: false,
-      };
-    }
-    this.setAttribute('data-ed11y-open', changeTo);
-    this.open = changeTo;
-  }
-
-
-  static get observedAttributes() { return ['data-ed11y-action']; }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (this.initialized) {
-      switch (attr) {
-      case 'data-ed11y-action':
-        if (newValue !== 'false') {
-          let changeTo = newValue === 'open';
-          this.setAttribute('data-ed11y-action', 'false');
-          this.toggleTip(changeTo);
-        }
-        break;
-      }
-    }
-  }
-}
-
-class Ed11yElementPanel extends HTMLElement {
-
-  constructor() {
-    super();
-  }
-
-  // todo mvp parameterize
-  template() {
-    // TODO: CHANGE FROM VISIBILITY TO WIDTH TOGGLES SO FOCUS WORKS
-    // Todo: details summary language params
-    // todo: don't switch both label and aria-expanded on show hidden
-    return `
-    <div class='ed11y-buttonbar'>
-      <button id='ed11y-show-hidden' data-ed11y-pressed='false' hidden>
-        <svg aria-hidden="true" class="shown" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="9 0 640 512"><path fill="Currentcolor" d="M288 32c-81 0-146 37-193 81C49 156 17 208 3 244c-3 8-3 17 0 25C17 304 49 356 95 399C142.5 443 207 480 288 480s146-37 193-81c47-44 78-95 93-131c3-8 3-17 0-25c-15-36-46-88-93-131C434 69 369 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35-29 64-64 64c-7 0-14-1-20-3c-6-2-12 2-12 7c.3 7 1 14 3 21c14 51 66 82 118 68s82-66 68-118c-11-42-48-69-89-71c-6-.2-9 6-7 12c2 6 3 13 3 20z"/></svg>
-        <svg aria-hidden="true" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="39 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>
-        <span class="ed11y-sr-only"></span>
-      </button>
-      <button id='ed11y-visualize' data-ed11y-pressed="false" class='ed11y-panel-fa'>
-        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 10 512 512"><path fill="Currentcolor" d="M152 38c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 113C-2 104-2 88 7 79s25-9 34 0l22 22 55-61c9-10 24-11 34-2zm0 160c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 273c-9-9-9-25 0-34s25-9 35 0l22 22 55-61c9-10 24-11 34-2zM224 96c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zm0 160c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zM160 416c0-18 14-32 32-32l288 0c18 0 32 14 32 32s-14 32-32 32l-288 0c-18 0-32-14-32-32zM48 368a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/></svg>
-        <span class="ed11y-sr-only"></span>
-      </button>
-      <div id='ed11y-visualizers' class="content" hidden>
-          <details id="ed11y-headings-tab">
-              <summary>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M0 96C0 78 14 64 32 64l384 0c18 0 32 14 32 32s-14 32-32 32L32 128C14 128 0 114 0 96zM64 256c0-18 14-32 32-32l384 0c18 0 32 14 32 32s-14 32-32 32L96 288c-18 0-32-14-32-32zM448 416c0 18-14 32-32 32L32 448c-18 0-32-14-32-32s14-32 32-32l384 0c18 0 32 14 32 32z"></path></svg> <span class="summary-title"></span>
-              </summary>
-              <div class="details">
-                  <span class="details-title"></span>
-                  <ul id='ed11y-outline'></ul>
-              </div>
-          </details>
-          <details id="ed11y-alts-tab">
-            <summary>
-                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg> <span class="summary-title"></span>
-            </summary>
-            <div class="details">
-                <span class="details-title"></span>
-                <ul id='ed11y-alt-list'></ul>
-            </div>
-        </details>
-        </div>
-      <button type='button' id='ed11y-toggle'><span class="ed11y-sr-only">Show alerts</span><span class="ed11y-toggle-circle"><span class='icon'><svg class="errors-icon" xmlns="http://www.w3.org/2000/svg" width="10" aria-hidden="true" viewBox="0 0 448 512"><path fill="currentColor" d="M64 32C64 14 50 0 32 0S0 14 0 32L0 64 0 368 0 480c0 18 14 32 32 32s32-14 32-32l0-128 64-16c41-10 85-5 123 13c44.2 22 96 25 142 7l35-13c13-5 21-17 21-30l0-248c0-23-24-38-45-28l-10 5c-46 23-101 23-147 0c-35-18-75-22-114-13L64 48l0-16z"></path></svg><svg class="pass-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10.1699 19.1777"><path fill="currentColor" d="M3.7031,10.5527c-.3633-.6562-.6426-1.1387-.8379-1.4473l-.3105-.4863-.2344-.3574c-.5117-.7969-1.0449-1.4551-1.5996-1.9746.3164-.2617.6113-.3926.8848-.3926.3359,0,.6348.123.8965.3691s.5918.7148.9902,1.4062c.4531-1.4727,1.0293-2.8691,1.7285-4.1895.3867-.7188.7314-1.2021,1.0342-1.4502s.7041-.3721,1.2041-.3721c.2656,0,.5938.041.9844.123-1.0039.8086-1.8066,1.7695-2.4082,2.8828s-1.3789,3.0762-2.332,5.8887Z"/></svg><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="close-icon" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg></span></span></button>
-      <button class='ed11y-jump next' data-ed11y-goto='0' aria-haspopup="dialog"><svg class="hover-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="11" viewBox="0 -15 90 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m30 00 50 50-50 50" stroke-width="18"></path></svg><span class='toggle-count'></span><span class='jump-next ed11y-sr-only'></span></button>
-     </div>
-    </div>
-    <div id="ed11y-message" aria-live="polite"></div>
-    `;
-  }
-
-  connectedCallback() {
-    if (!this.initialized) {
-
-      this.style.setProperty('outline', '0');
-      this.classList.add('ed11y-element');
-      const shadow = this.attachShadow({mode: 'open'});
-      const wrapper = document.createElement('aside');
-      wrapper.setAttribute('id', 'ed11y-panel');
-      //!!wrapper.setAttribute('aria-label', M.panelControls);
-      wrapper.classList.add('ed11y-wrapper', 'ed11y-panel-wrapper', 'ed11y-pass', 'ed11y-preload');
-      wrapper.innerHTML = this.template();
-      shadow.appendChild(wrapper);
-      const panelTabs = wrapper.querySelectorAll('.ed11y-buttonbar button');
-      panelTabs.forEach(tab => {
-        // todo: syntax could be shrunk now that these aren't tabs.
-        tab.addEventListener('click', this.handleBarClick);
-      });
-      const altDetails = wrapper.querySelector('#ed11y-alts-tab');
-      const headingDetails = wrapper.querySelector('#ed11y-headings-tab');
-      altDetails.addEventListener('toggle', () => {
-        if (altDetails.open && headingDetails.open) {
-          headingDetails.removeAttribute('open');
-        }
-      });
-      headingDetails.addEventListener('toggle', () => {
-        if (altDetails.open && headingDetails.open) {
-          altDetails.removeAttribute('open');
-        }
-      });
-      this.initialized = true;
-    }
-  }
-/*
-  // @todo move out.
-  jumpTo(event) {
-    // Handle jump
-    event.preventDefault();
-    State.toggledFrom = event.target.closest('button');
-    if (!State.open) {
-      togglePanel();
-      window.setTimeout(function() {
-        jumpTo(1);
-      },500);
-    } else {
-      jumpTo(1);
-    }
-  }
-*/
-
-  handleBarClick(event) {
-    event.preventDefault();
-    UI$1.message.textContent = '';
-    let id = event.currentTarget.getAttribute('id');
-    switch (id) {
-    case 'ed11y-toggle':
-      togglePanel();
-      break;
-    case 'ed11y-show-hidden':
-      toggleShowDismissals();
-      break;
-    case 'ed11y-visualize':
-      if (!State.open) {
-        togglePanel();
-      }
-      visualize();
-      break;
-    }
-  }
-}
-
-class Ed11yElementHeadingLabel extends HTMLElement {
-  constructor() {
-    super();
-  }
-  connectedCallback() {
-    if (!this.initialized) {
-      const shadow = this.attachShadow({mode: 'open'});
-      let wrapper = document.createElement('div');
-      wrapper.classList.add('ed11y-wrapper', 'ed11y-heading-wrapper');
-      let i = this.dataset.ed11yHeadingOutline;
-      let result = State.headingOutline[i];
-      wrapper.innerHTML = 'H' + result[1];
-      let issues = !!result[2];
-      wrapper.classList.add('issue' + issues);
-      let fontSize = Math.max(52 - 8 * result[1], 12);
-      wrapper.style.setProperty('font-size', fontSize + 'px');
-      shadow.appendChild(wrapper);
-      this.initialized = true;
-    }
-  }
-}
-
-const Elements = (function myElements() {
-  const Found = {};
-  function initializeElements(option) {
-    // Since 4.0.0: For performance, we filter elements instead of dozens of querySelectors on the DOM.
-    Found.Everything = find('*', 'root', Constants.Exclusions.Sa11yElements);
-
-    Found.Contrast = Found.Everything.filter(($el) => {
-      const matchesSelector = Constants.Exclusions.Contrast.some((exclusion) => $el.matches(exclusion));
-      return !matchesSelector && !Constants.Exclusions.Contrast.includes($el);
-    });
-
-    Found.Images = Found.Everything.filter(($el) => $el.tagName === 'IMG'
-      && !Constants.Exclusions.Images.some((selector) => $el.matches(selector)));
-
-    Found.Links = Found.Everything.filter(($el) => ($el.tagName === 'A' || $el.tagName === 'a')
-      && $el.hasAttribute('href')
-      && !$el.matches('[role="button"]') // Exclude links with [role="button"]
-      && !Constants.Exclusions.Links.some((selector) => $el.matches(selector)));
-
-    // We want headings from the entire document for the Page Outline.
-    Found.Headings = find(
-      'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
-      'document',
-      Constants.Exclusions.Headings,
-    );
-    Found.HeadingOne = find(
-      'h1, [role="heading"][aria-level="1"]',
-      'document',
-      Constants.Exclusions.Headings,
-    );
-
-    // Excluded via headerIgnore.
-    Found.ExcludedHeadings = Found.Headings.filter((heading) => Constants.Exclusions.Headings.some((exclusion) => heading.matches(exclusion)));
-
-    // Excluded via outlineIgnore.
-    Found.ExcludedOutlineHeadings = Found.Headings.filter((heading) => Constants.Exclusions.Outline.some((exclusion) => heading.matches(exclusion)));
-
-    // Merge both headerIgnore and outlineIgnore.
-    Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(Elements.Found.ExcludedHeadings);
-
-    // Quality assurance module.
-    Found.Paragraphs = Found.Everything.filter(($el) => $el.tagName === 'P'
-      && !$el.closest('table'));
-
-    Found.Lists = Found.Everything.filter(($el) => $el.tagName === 'LI');
-
-    Found.Blockquotes = Found.Everything.filter(($el) => $el.tagName === 'BLOCKQUOTE');
-
-    Found.Tables = Found.Everything.filter(($el) => $el.tagName === 'TABLE' && !$el.matches('[role="presentation"]') && !$el.matches('[role="none"]'));
-
-    Found.StrongItalics = Found.Everything.filter(($el) => ['STRONG', 'EM'].includes($el.tagName));
-
-    Found.Subscripts = Found.Everything.filter(($el) => ['SUP', 'SUB'].includes($el.tagName));
-
-    const badLinkSources = option.checks.QA_BAD_LINK.sources;
-    Found.CustomErrorLinks = badLinkSources.length
-      ? Found.Links.filter(($el) => badLinkSources.split(',').some((selector) => $el.matches(selector.trim()))) : [];
-
-    // Readability.
-    const readabilityExclusions = ($el) => Constants.Root.Readability.contains($el)
-      && !Constants.Exclusions.Readability.some((selector) => $el.matches(selector));
-    Found.Readability = [
-      ...Found.Paragraphs.filter(readabilityExclusions),
-      ...Found.Lists.filter(readabilityExclusions),
-    ];
-
-    // Developer checks.
-    const nestedSources = option.checks.QA_NESTED_COMPONENTS.sources || '[role="tablist"], details';
-    Found.NestedComponents = nestedSources
-      ? Found.Everything.filter(($el) => $el.matches(nestedSources)) : [];
-
-    Found.TabIndex = Found.Everything.filter(($el) => $el.hasAttribute('tabindex')
-      && $el.getAttribute('tabindex') !== '0'
-      && !$el.getAttribute('tabindex').startsWith('-'));
-
-    Found.Svg = Found.Everything.filter(($el) => $el.tagName === 'svg');
-
-    Found.Buttons = Found.Everything.filter(($el) => $el.tagName === 'BUTTON' || $el.matches('[role="button"]'));
-
-    Found.Inputs = Found.Everything.filter(($el) => ['INPUT', 'SELECT', 'TEXTAREA', 'METER', 'PROGRESS'].includes($el.tagName));
-
-    Found.Labels = Found.Everything.filter(($el) => $el.tagName === 'LABEL');
-
-    // iFrames.
-    Found.iframes = Found.Everything.filter(($el) => ['IFRAME', 'AUDIO', 'VIDEO'].includes($el.tagName));
-    Found.Videos = Found.iframes.filter(($el) => $el.matches(Constants.Global.VideoSources));
-    Found.Audio = Found.iframes.filter(($el) => $el.matches(Constants.Global.AudioSources));
-    Found.Visualizations = Found.iframes.filter(($el) => $el.matches(Constants.Global.VisualizationSources));
-    Found.EmbeddedContent = Found.iframes.filter(($el) => !$el.matches(Constants.Global.AllEmbeddedContent));
-
-    // Query select <HTML> given that the lang may change on an SPA.
-    const html = document.querySelector('html');
-    Found.Language = html.getAttribute('lang');
-  }
-
-  /* ************* */
-  /*  Annotations  */
-  /* ************* */
-  const Annotations = {};
-  function initializeAnnotations() {
-    Annotations.Array = find('sa11y-annotation', 'document');
-    Annotations.Array.forEach((annotation, i) => {
-      annotation.setAttribute('data-sa11y-position', i);
-    });
-  }
-
-  return {
-    initializeElements,
-    Found,
-    initializeAnnotations,
-    Annotations,
-  };
-}());
-
-class Ed11yElementTip extends HTMLElement {
-  /* global Ed11y */
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    if (!this.initialized && this.result) {
-      this.renderOnce();
-    }
-  }
-  renderOnce() {
-    this.initialized = true;
-    this.open = true;
-    this.style.setProperty('opacity', '0');
-    this.style.setProperty('outline', '0px solid transparent');
-    const shadow = this.attachShadow({mode: 'open'});
-
-    this.wrapper = document.createElement('div');
-    this.wrapper.setAttribute('role', 'dialog');
-
-    this.dismissable = this.result.dismissalKey !== false;
-    this.dismissed = !!this.result.dismissalStatus;
-    this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
-    this.wrapper.setAttribute('aria-label',
-      `${M.issue}
-        ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1}`);
-
-    this.addEventListener('mouseover', this.handleHover);
-
-    UI.attachCSS(this.wrapper);
-
-    this.tip = document.createElement('div');
-    this.tip.classList.add('tip');
-
-    let content = document.createElement('div');
-    content.classList.add('content');
-    this.heading = document.createElement('div');
-    this.heading.classList.add('title');
-    this.heading.setAttribute('tabindex', '-1');
-    this.heading.innerHTML = Ed11y.M[this.result.test].title;
-    content.append(this.heading);
-    const alertBox = document.createElement('div');
-    alertBox.classList.add('ed11y-tip-alert');
-    this.heading.insertAdjacentElement('afterbegin', alertBox);
-
-    let innerContent = document.createElement('div');
-    innerContent.innerHTML = this.result.content;
-    content.append(innerContent);
-
-    if (!Ed11y.options.inlineAlerts || Ed11y.options.editLinks) {
-      const editBar = document.createElement('div');
-
-      if (!Ed11y.options.inlineAlerts) {
-        editBar.classList.add('ed11y-tip-dismissals');
-        const transferFocus = document.createElement('button');
-        const transferIcon = document.createElement('span');
-        transferIcon.classList.add('ed11y-transfer-icon');
-        transferIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 256 512"><path fill="currentColor" d="M0 29C-1 47 12 62 29 64l8 1C71 67 96 95 96 128L96 224l-32 0c-18 0-32 14-32 32s14 32 32 32l32 0 0 96c0 33-26 61-59 64l-8 1C12 450-1 465 0 483s17 31 35 29l8-1c34-3 64-19 85-43c21 24 51 40 85 43l8 1c18 2 33-12 35-29s-12-33-29-35l-8-1C186 445 160 417 160 384l0-96 32 0c18 0 32-14 32-32s-14-32-32-32l-32 0 0-96c0-33 26-61 59-64l8-1c18-2 31-17 29-35S239-1 221 0l-8 1C179 4 149 20 128 44c-21-24-51-40-85-43l-8-1C17-1 2 12 0 29z"/></svg>';
-        transferFocus.textContent = M.transferFocus;
-        transferFocus.prepend(transferIcon);
-        transferFocus.classList.add('dismiss', 'ed11y-transfer-focus');
-        editBar.append(transferFocus);
-        transferFocus.addEventListener('click', function(){Ed11y.transferFocus();});
-      } else {
-        editBar.classList.add('ed11y-custom-edit-links');
-        editBar.append(Ed11y.options.editLinks.cloneNode(true));
-      }
-      content.append(editBar);
-    }
-
-    // Draw dismiss or restore buttons
-    if (this.dismissable) {
-
-      const buttonBar = document.createElement('div');
-      buttonBar.classList.add('ed11y-tip-dismissals');
-
-      const dismissIcon = document.createElement('span');
-      dismissIcon.classList.add('ed11y-dismiss-icon');
-      dismissIcon.innerHTML = '<svg aria-hidden="true" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>';
-
-      // Dismissal Key is set in [5] if alert has been dismissed.
-      if (Ed11y.options.showDismissed && this.dismissed) {
-
-        // Check if user has permission to reset this alert.
-        let okd = Ed11y.dismissedAlerts[Ed11y.options.currentPage][this.result.test][this.result.dismissalKey] === 'ok';
-        if ((okd && Ed11y.options.allowOK) || (!okd)) {
-          // User can restore this alert.
-          const undismissButton = document.createElement('button');
-          const unDismissIcon = document.createElement('span');
-          unDismissIcon.classList.add('ed11y-dismiss-icon');
-          unDismissIcon.innerHTML = '<svg aria-hidden="true" class="shown" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="-30 0 640 512"><path fill="Currentcolor" d="M288 32c-81 0-146 37-193 81C49 156 17 208 3 244c-3 8-3 17 0 25C17 304 49 356 95 399C142.5 443 207 480 288 480s146-37 193-81c47-44 78-95 93-131c3-8 3-17 0-25c-15-36-46-88-93-131C434 69 369 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35-29 64-64 64c-7 0-14-1-20-3c-6-2-12 2-12 7c.3 7 1 14 3 21c14 51 66 82 118 68s82-66 68-118c-11-42-48-69-89-71c-6-.2-9 6-7 12c2 6 3 13 3 20z"/></svg>';
-          undismissButton.classList.add('dismiss');
-          undismissButton.textContent = okd ? M.undismissOKButton : M.undismissHideButton;
-          undismissButton.prepend(unDismissIcon);
-          buttonBar.append(undismissButton);
-          undismissButton.addEventListener('click', function(){Ed11y.dismissThis('reset');});
-        } else {
-          const undismissNote = document.createElement('div');
-          undismissNote.classList.add('dismissed-note');
-          undismissNote.textContent = M.undismissNotePermissions;
-          buttonBar.append(undismissNote);
-        }
-      } else {
-
-        const pageActions = document.createElement('details');
-        const pageActionsSummary = document.createElement('summary');
-        const othersLikeThis = Ed11y.results.filter(el => el.test === this.result.test).length;
-        const showPageActions = othersLikeThis > 3 && Ed11y.options.allowHide && Ed11y.options.allowOK;
-
-        if (showPageActions) {
-          pageActions.classList.add('ed11y-bulk-actions', 'dismiss');
-          pageActionsSummary.textContent = M.dismissActions(othersLikeThis);
-          pageActions.appendChild(pageActionsSummary);
-          buttonBar.appendChild(pageActions);
-        }
-
-        if (Ed11y.options.allowOK) {
-          const check = document.createElement('span');
-          check.setAttribute('aria-hidden', 'true');
-          check.textContent = '✓';
-
-          const OkButton = document.createElement('button');
-          OkButton.classList.add('dismiss');
-          if (Ed11y.options.syncedDismissals) {
-            OkButton.setAttribute('title', M.dismissOkTitle);
-          }
-          OkButton.textContent = M.dismissOkButtonContent;
-          buttonBar.prepend(OkButton);
-
-          if (showPageActions) {
-            const OkAllButton = OkButton.cloneNode(true);
-            OkAllButton.textContent = M.dismissOkAllButton;
-            OkAllButton.prepend(check.cloneNode(true));
-            pageActions.append(OkAllButton);
-            OkAllButton.addEventListener('click', function(){Ed11y.dismissThis('ok', true);});
-          }
-
-          OkButton.prepend(check);
-
-          OkButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
-        }
-
-        if (Ed11y.options.allowHide) {
-          const ignoreButton = document.createElement('button');
-          ignoreButton.classList.add('dismiss');
-          // todo parameterize
-          if (Ed11y.options.syncedDismissals) {
-            ignoreButton.setAttribute('title', M.dismissHideTitle);
-          }
-          ignoreButton.textContent = M.dismissHideButtonContent;
-          ignoreButton.prepend(dismissIcon.cloneNode(true));
-          buttonBar.prepend(ignoreButton);
-          ignoreButton.addEventListener('click', function(){Ed11y.dismissThis('hide');});
-
-          if (showPageActions) {
-            const ignoreAllButton = document.createElement('button');
-            ignoreAllButton.classList.add('dismiss');
-            ignoreAllButton.textContent = M.dismissHideAllButton;
-            ignoreAllButton.prepend(dismissIcon.cloneNode(true));
-            pageActionsSummary.insertAdjacentElement('afterend', ignoreAllButton);
-            ignoreAllButton.addEventListener('click', function(){Ed11y.dismissThis('hide', true);});
-          }
-        }
-      }
-
-
-      content.append(buttonBar);
-    }
-    this.tip.append(content);
-
-    this.navBar = document.createElement('div');
-    this.navBar.classList.add('ed11y-tip-header');
-    this.count = document.createElement('div');
-    this.count.classList.add('ed11y-tip-count');
-    this.count.textContent = `${M.issue} ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1} / ${Ed11y.jumpList.length}`;
-    this.navBar.append(this.count);
-    if (Ed11y.jumpList.length > 1) {
-      this.prev = document.createElement('button');
-      this.prev.classList.add('ed11y-tip-prev');
-      this.prev.setAttribute('aria-label', M.buttonPrevContent);
-      this.prev.setAttribute('title', M.buttonPrevContent);
-      this.prev.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 -10 30 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m40 100,-50 -50 50-50 50"></path></svg>';
-      this.prev.addEventListener('click', (event) => {
-        event.preventDefault();
-        Ed11y.jumpTo(-1);
-      });
-      this.navBar.append(this.prev);
-
-      this.next = document.createElement('button');
-      this.next.classList.add('ed11y-tip-next');
-      this.next.setAttribute('aria-label', M.buttonNextContent);
-      this.next.setAttribute('title', M.buttonNextContent);
-      this.next.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 120 120" width="10"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m30 00 50 50-50 50"></path></svg>';
-      this.next.addEventListener('click', (event) => {
-        event.preventDefault();
-        Ed11y.jumpTo(1);
-      });
-      this.navBar.append(this.next);
-    }
-    this.help = document.createElement('details');
-    this.help.classList.add('button');
-    this.helpContent = document.createElement('div');
-    this.helpContent.classList.add('ed11y-tip-help-content');
-    this.helpContent.innerHTML = M.panelHelp;
-    this.help.append(this.helpContent);
-    this.helpToggle = document.createElement('summary');
-    this.helpToggle.textContent = '?';
-    this.helpToggle.setAttribute('aria-label', M.panelHelpTitle);
-    this.helpToggle.setAttribute('title', M.panelHelpTitle);
-    this.help.insertAdjacentElement('afterbegin', this.helpToggle);
-    this.navBar.append(this.help);
-
-    let closeButton = document.createElement('button');
-    closeButton.setAttribute('aria-label',M.closeTip);
-    closeButton.setAttribute('title',M.closeTip);
-    closeButton.classList.add('close');
-    closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"/></svg>';
-    this.navBar.append(closeButton);
-    this.tip.append(this.navBar);
-
-    let arrow = document.createElement('div');
-    arrow.classList.add('arrow');
-    closeButton.addEventListener('click', (event) => {
-      event.preventDefault();
-      if(this.open) {
-        // todo this needs to be part of the shadow DOM query I think
-        let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
-        if (Ed11y.toggledFrom) {
-          Ed11y.toggledFrom.focus();
-        }
-        // todo postpone: track if this tip was opened by the next button. If so, transfer focus back to it instead
-        toggle?.setAttribute('data-ed11y-action', 'shut');
-        this.setAttribute('data-ed11y-action', 'shut');
-      }
-    });
-    document.addEventListener('click', (event) => {
-      // Close tip when mouse is clicked outside it.
-      if(this.open && !event.target.closest('ed11y-element-tip, ed11y-element-result, ed11y-element-panel')) {
-        let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
-        toggle?.setAttribute('data-ed11y-action', 'shut');
-        this.setAttribute('data-ed11y-action', 'shut');
-      }
-    });
-    shadow.appendChild(this.wrapper);
-    let focusLoopLeft = document.createElement('div');
-    focusLoopLeft.setAttribute('tabIndex', '0');
-    let focusLoopRight = document.createElement('div');
-    focusLoopRight.setAttribute('tabindex', '0');
-    this.wrapper.appendChild(focusLoopLeft);
-    this.wrapper.appendChild(arrow);
-    this.wrapper.appendChild(this.tip);
-    this.wrapper.appendChild(focusLoopRight);
-    let focusables = this.wrapper.querySelectorAll('a, button, [tabindex="0"]');
-    let count = focusables.length;
-    focusables[0].addEventListener('focus', () => {
-      focusables[count - 2].focus();
-    });
-    focusables[count - 1].addEventListener('focus', () => {
-      focusables[1].focus();
-    });
-    this.initialized = true;
-    this.rendering = false;
-  }
-
-  toggleTip(changeTo) {
-    if (changeTo) {
-      this.wrapper.classList.add('open');
-      Ed11y.alertOnInvisibleTip(this.result.toggle, this.result.element);
-    } else {
-      this.wrapper.classList.remove('open');
-    }
-    this.setAttribute('data-ed11y-open',changeTo);
-  }
-
-  static get observedAttributes() { return ['data-ed11y-action']; }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (!this.initialized && this.result) {
-      this.renderOnce();
-    }
-    if (this.initialized) {
-      switch (attr) {
-      case 'data-ed11y-action':
-        if (newValue !== 'false') {
-          let changeTo = newValue === 'open';
-          this.open = changeTo;
-          this.setAttribute('data-ed11y-action', 'false');
-          this.toggleTip(changeTo);
-        }
-        break;
-      }
-    }
-  }
 }
 
 function checkHeaders(results, option, headingOutline) {
@@ -5064,397 +3686,18 @@ function checkQA(results, option) {
   return results;
 }
 
-var styles = "[data-sa11y-overflow]{overflow:auto!important}[data-sa11y-error]{outline:5px solid var(--sa11y-error)!important;outline-offset:2px}[data-sa11y-warning]:not([data-sa11y-error]){outline:5px solid var(--sa11y-warning)!important;outline-offset:2px}[data-sa11y-pulse-border]{animation:pulse 1s 2;box-shadow:0;outline:5px solid var(--sa11y-focus-color)!important}[data-sa11y-pulse-border]:focus,[data-sa11y-pulse-border]:hover{animation:none}@keyframes pulse{0%{box-shadow:0 0 0 5px var(--sa11y-focus-color)}50%{box-shadow:0 0 0 12px var(--sa11y-pulse-color)}to{box-shadow:0 0 0 5px var(--sa11y-pulse-color)}}h1[data-sa11y-pulse-border],h2[data-sa11y-pulse-border],h3[data-sa11y-pulse-border],h4[data-sa11y-pulse-border],h5[data-sa11y-pulse-border],h6[data-sa11y-pulse-border],img[data-sa11y-pulse-border]{animation:pulse-scale 1s 2}@keyframes pulse-scale{0%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.02)}to{opacity:1;transform:scale(1)}}@media (prefers-reduced-motion:reduce){[data-sa11y-pulse-border]{animation:none!important}}@media (forced-colors:active){[data-sa11y-error-inline],[data-sa11y-error],[data-sa11y-good],[data-sa11y-pulse-border],[data-sa11y-warning-inline],[data-sa11y-warning]{forced-color-adjust:none}}";
-
-/* ************************************************************ */
-/*  Auto-detect shadow DOM or process provided web components.  */
-/* ************************************************************ */
-const addStyleUtilities = (component) => {
-  const CSSUtils = component.shadowRoot.querySelectorAll('.sa11y-css-utilities');
-  if (CSSUtils.length === 0) {
-    const style = document.createElement('style');
-    style.setAttribute('class', 'sa11y-css-utilities');
-    style.textContent = styles;
-    component.shadowRoot.appendChild(style);
-  }
-};
-
-function findShadowComponents(option) {
-  if (option.autoDetectShadowComponents) {
-    // Elements to ignore.
-    const ignore = Constants.Exclusions.Sa11yElements;
-
-    // Search all elements.
-    const root = document.querySelector(option.checkRoot);
-    const search = (root)
-      ? Array.from(root.querySelectorAll(`*:not(${ignore})`))
-      : Array.from(document.body.querySelectorAll(`*:not(${ignore})`));
-
-    // Query for open shadow roots & inject CSS utilities into every shadow DOM.
-    search.forEach((component) => {
-      if (component.shadowRoot && component.shadowRoot.mode === 'open') {
-        component.setAttribute('data-sa11y-has-shadow-root', '');
-        addStyleUtilities(component);
-      }
-    });
-  } else if (option.shadowComponents) {
-    const providedShadow = document.querySelectorAll(option.shadowComponents);
-    providedShadow.forEach((component) => {
-      component.setAttribute('data-sa11y-has-shadow-root', '');
-      addStyleUtilities(component);
-    });
-  }
-}
-
-function disable() {
-  if (State.open && !State.closedByDisable) {
-    State.closedByDisable = true;
-  }
-  State.disabled = true;
-  reset();
-  document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.panelBar);
-  document.documentElement.style.setProperty('--ed11y-activeColor', Theme.panelBarText);
-  document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
-  document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
-  if (UI$1.panelToggle) {
-    UI$1.panel?.classList.remove('ed11y-errors', 'ed11y-warnings');
-    UI$1.panelCount.textContent = 'i';
-    UI$1.panelJumpNext.setAttribute('hidden', '');
-    UI$1.panelToggle.classList.add('disabled');
-    UI$1.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleDisabled;
-  }
-}
-const checkRunPrevent = function() {
-  let preventCheck = State.options.preventCheckingIfPresent ?
-    document.querySelector(State.options.preventCheckingIfPresent) :
-    false;
-  if (preventCheck) {
-    console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${State.options.preventCheckingIfPresent}"` );
-  } else if (!preventCheck && !!State.options.preventCheckingIfAbsent) {
-    preventCheck = document.querySelector(`:is(${State.options.preventCheckingIfAbsent})`) === null;
-    if (preventCheck) {
-      console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${State.options.preventCheckingIfAbsent}"`);
-    }
-  }
-  return preventCheck;
-};
-
-function makeItSo () {
-  if (State.once) {
-    console.error('double init');
-    return;
-  }
-  State.once = true;
-
-  //Need to evaluate if "load" event took place for bookmarklet version. Otherwise, only call Sa11y once page has loaded.
-  const documentLoadingCheck = (callback) => {
-    if (document.readyState === 'complete') {
-      callback();
-    } else {
-      window.addEventListener('load', callback);
-    }
-  };
-
-  // Once document has fully loaded.
-  documentLoadingCheck(() => {
-    if (checkRunPrevent()) {
-      return false;
-    }
-    customElements.define('ed11y-element-alt', Ed11yElementAlt);
-    customElements.define('ed11y-element-result', Ed11yElementResult);
-    customElements.define('ed11y-element-heading-label',
-      Ed11yElementHeadingLabel);
-    customElements.define('ed11y-element-panel', Ed11yElementPanel);
-    customElements.define('ed11y-element-tip', Ed11yElementTip);
-
-    State.running = true;
-    let localResultCount = store.getItem('editoria11yResultCount');
-    State.seen = localResultCount && localResultCount !== 'undefined' ?
-      JSON.parse(localResultCount) : {};
-
-    // Build list of dismissed alerts
-    if (State.options.syncedDismissals === false) {
-      State.dismissedAlerts = localStorage.getItem('ed11ydismissed');
-      State.dismissedAlerts = State.dismissedAlerts ? JSON.parse(State.dismissedAlerts) : {};
-    } else {
-      State.dismissedAlerts = {};
-      State.dismissedAlerts[State.options.currentPage] = State.options.syncedDismissals;
-    }
-
-    // Create test class objects
-    /*Ed11y.testEmbeds = new Ed11yTestEmbeds;
-    Ed11y.testHeadings = new Ed11yTestHeadings;
-    Ed11y.testImages = new Ed11yTestImages;
-    Ed11y.testLinks = new Ed11yTestLinks;
-    Ed11y.testText = new Ed11yTestText;
-*/
-    // Convert the container ignore user option to a CSS :not selector.
-    State.ignore = State.options.ignoreElements ? `:not(${State.options.ignoreElements})` : '';
-
-    if (!State.options.checkRoots) {
-      State.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
-    }
-
-    // Run tests
-    checkAll();
-    window.addEventListener('resize', function () { windowResize(); });
-
-  });
-}
-// Toggles the outline of all headers, link texts, and images.
-function checkAll() {
-  if (State.openTip.button) {
-    return false;
-  }
-  State.disabled = false;
-
-  if ( !checkRunPrevent() ) {
-
-    // Check for ignoreAll elements.
-    State.ignoreAll = State.options.ignoreAllIfAbsent && document.querySelector(`:is(${State.options.ignoreAllIfAbsent})`) === null;
-    if (!State.ignoreAll && !!State.options.ignoreAllIfPresent) {
-      State.ignoreAll = document.querySelector(`:is(${State.options.ignoreAllIfPresent})`) !== null;
-    }
-
-    if ( State.incremental ) {
-      State.oldResults = State.results;
-    }
-    // Reset counts
-    State.results = [];
-    State.elements = [];
-    State.mediaCount = 0;
-
-    State.customTestsRunning = false;
-
-    let roots = [];
-    if (State.options.fixedRoots) {
-      State.options.fixedRoots.forEach(root => {roots.push(root.fixedRoot);});
-    } else {
-      roots = document.querySelectorAll(`:is(${State.options.checkRoots})`);
-    }
-
-    if (roots.length === 0) {
-      // Todo parameterize for translation.
-      if (State.onLoad) {
-        console.warn('Check Editoria11y configuration; specified root element not found');
-      }
-      disable();
-      return;
-    } else {
-      State.roots = [];
-      roots.forEach((el, i) => {
-        if (el.shadowRoot) {
-          State.roots[i] = el.shadowRoot;
-          el.setAttribute('data-ed11y-has-shadow-root', 'true');
-          detectShadow(el.shadowRoot);
-        } else {
-          State.roots[i] = el;
-          detectShadow(el);
-        }
-        if (State.options.fixedRoots) {
-          el.dataset.ed11yRoot = `${i}`;
-        }
-      });
-
-
-      buildElementList();
-
-      Constants.initializeRoot(false, false, roots);
-
-      // Find all web components on the page.
-      findShadowComponents(State.options);
-
-      // Find and cache elements.
-      Elements.initializeElements(State.options);
-
-      State.headingOutline = [];
-      // Ruleset checks
-      checkHeaders(State.results, State.options, State.headingOutline);
-      checkLinkText(State.results, State.options);
-      checkImages(State.results, State.options);
-      checkLabels(State.results, State.options);
-      checkQA(State.results, State.options);
-      console.log(State.results);
-      /*{
-"element": {},
-"type": "error",
-"content": "Empty heading found! To fix, delete this line or change its format from <strong class=\"colour\">Heading 4</strong> to <strong>Normal</strong> or <strong>Paragraph</strong>.",
-"dismiss": "H4",
-"dismissAll": false,
-"isWithinRoot": true,
-"developer": false,
-"margin": "0",
-"dismissalStatus": false,
-"scrollableParent": false,
-"sortPos": 5495.38330078125
-}
-content
-dismissalKey
-dismissalStatus
-element
-position
-scrollableParent
-sortPos
-test
-toggle
-
-      * */
-      // @todo merge temporary values.
-      State.results.forEach((result) => {
-        result.position = 'beforebegin';
-        result.dismissalKey = result.dismiss;
-        result.test = 'altNull';
-      });
-
-      /*let queue = [
-        'testLinks',
-        'testImages',
-        'testHeadings',
-        'testText',
-        'testEmbeds',
-      ];
-      queue.forEach((test) => {
-        window.setTimeout(function (test) {
-          Ed11y[test].check();
-        }, 0, test);
-      });*/
-
-      if (State.options.customTests > 0) {
-        // Pause
-        State.customTestsRunning = true;
-        State.customTestsFinished = 0;
-        document.addEventListener('ed11yResume', function () {
-          State.customTestsFinished++;
-          if (State.customTestsFinished === State.options.customTests) {
-            State.customTestsRunning = false;
-            window.requestAnimationFrame(() => updatePanel());
-          }
-        });
-        window.setTimeout(function() {
-          if (State.customTestsRunning === true) {
-            State.customTestsRunning = false;
-            if (UI$1.panelToggle) {
-              UI$1.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleAccessibilityTools;
-            }
-            window.requestAnimationFrame(() => updatePanel());
-            console.error('Editoria11y was told to wait for custom tests, but no tests were returned.');
-          }
-        }, 1000);
-        window.setTimeout(function() {
-          let customTests = new CustomEvent('ed11yRunCustomTests');
-          document.dispatchEvent(customTests);
-        },0);
-      }
-    }
-
-    if (!State.customTestsRunning) {
-      window.setTimeout(function () {
-        if (UI$1.panelToggle) {
-          UI$1.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleAccessibilityTools;
-        }
-        updatePanel();
-      }, 0);
-    }
-
-  }
-  else {
-    disable();
-  }
-}
-function countAlerts () {
-
-  State.errorCount = 0;
-  State.warningCount = 0;
-  State.dismissedCount = 0;
-
-  // Review results array to remove dismissed or ignored items
-
-  State.dismissedCount = 0;
-  for (let i = State.results.length - 1; i >= 0; i--) {
-
-    let test = State.results[i].test;
-
-    if (State.options.ignoreTests &&
-      State.options.ignoreTests.includes(test)) {
-      // Would be faster to skip test, but this is easy and reliable.
-      State.results.splice(i, 1);
-      continue;
-    }
-
-    // todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
-    /*if (State.incremental && Ed11y.oldResults.length > 0) {
-      // Don't flag new issues in the active range while people are typing.
-    }*/
-
-    let dismissKey = dismissalKey(State.results[i].dismissalKey);
-    // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-    if (dismissKey !== false && State.options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[State.options.currentPage] && dismissKey in State.dismissedAlerts[State.options.currentPage][test]) {
-      // Remove result if it has been marked OK or ignored, increment dismissed match counter.
-      State.dismissedCount++;
-      State.results[i].dismissalStatus = State.dismissedAlerts[State.options.currentPage][test][dismissKey];
-    } else if (State.results[i].dismissalKey) {
-      State.warningCount++;
-      State.results[i].dismissalStatus = false;
-    } else {
-      State.errorCount++;
-      State.results[i].dismissalStatus = false;
-    }
-  }
-
-  State.totalCount = State.errorCount + State.warningCount;
-
-  // Dispatch event for synchronizers.
-  if (!State.incremental) {
-    window.setTimeout(function () {
-      let syncResults = new CustomEvent('ed11yResults');
-      document.dispatchEvent(syncResults);
-    }, 0);
-  }
-
-  if (State.ignoreAll) {
-    State.dismissedCount = State.totalCount + State.dismissedCount;
-    State.errorCount = 0;
-    State.warningCount = 0;
-    State.totalCount = 0;
-  }
-
-}
-
-function buildElementList () {
-
-  // Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
-  if (typeof State.options.editableContent === 'string') {
-    findElements$1('editable', State.options.editableContent, false);
-  } else {
-    State.elements.editable = State.options.editableContent;
-  }
-  if (State.options.inlineAlerts && State.elements.editable.length > 0) {
-    State.options.inlineAlerts = false;
-    console.warn('Editable content detected; Editoria11y inline alerts disabled');
-  }
-  //Ed11y.findElements('p', 'p');
-  //Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]');
-  findElements$1('allH', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', State.options.fixedRoots ? State.options.headingsOnlyFromCheckRoots : false);
-  findElements$1('img', 'img');
-  //findElements('a', 'a[href]');
-  //findElements('li', 'li');
-  //findElements('blockquote', 'blockquote');
-  //findElements('iframe', 'iframe');
-  //findElements('audio', 'audio');
-  //findElements('video', 'video');
-  //findElements('table', 'table');
-
-  if (State.options.embeddedContent) ;
-  if (State.options.panelNoCover) {
-    // Moves panel off conflicting widgets.
-    findElements$1('panelPin', State.options.panelNoCover, false);
-  }
-}
-
-/*=============== Utilities ================*/
-
 function flattenText(text) {
   return text.replace(/[\n\r]+|\s{2,}/g, ' ').trim();
+}
+
+function parents(el) {
+  let nodes = [];
+  nodes.push(el);
+  while (el && !!el.parentElement && el.parentElement.tagName !== 'HTML') {
+    nodes.push(el.parentElement);
+    el = el.parentElement;
+  }
+  return nodes;
 }
 
 // Handle aria-label or labelled-by. Latter "wins" and can self-label.
@@ -5688,7 +3931,7 @@ function computeText(el, recursing = 0, excludeLinkClasses = false) {
 function resetClass(classes) {
   classes?.forEach((el) => {
     let thisClass = el;
-    findElements$1('reset', `.${thisClass}`);
+    findElements('reset', `.${thisClass}`);
     State.elements.reset?.forEach(el => {
       el.classList.remove(thisClass);
     });
@@ -5723,9 +3966,9 @@ function visible(el) {
     return false;
   } else {
     // Element is not known to be hidden.
-    let parents = parents(el);
+    let theParents = parents(el);
     let visibleParent = (parent) => visibleElement(parent);
-    return parents.every(visibleParent);
+    return theParents.every(visibleParent);
   }
 }
 function firstVisibleParent(el) {
@@ -5745,84 +3988,17 @@ function firstVisibleParent(el) {
     return false;
   }
 }
-function raceCrash() {
-  // A marked element disappeared while we were jumping to it.
-  if (State.loopStop) {
-    return;
-  }
-  State.loopStop = true;
-  reset();
-  State.showPanel = true;
-  checkAll();
-  window.setTimeout(function() {
-    if (State.results.length > 0 && State.loopStop) {
-      jumpTo(1); // todo
-      State.loopStop = false;
-    }
-  },100, State.loopStop);
-}
 
-function jumpTo(dir = 1) {
-  if (!State.open) {
-    return false;
-  }
-  State.viaJump = true;
-  // Determine target result.
-  let goMax = State.jumpList.length - 1;
-  let goNum = State.lastOpenTip + dir;
-  if (goNum < 0) {
-    // Reached end of loop or dismissal pushed us out of loop
-    State.nextText = M.buttonFirstContent; // todo
-    goNum = goMax;
-  } else if (goNum > goMax) {
-    goNum = 0;
-    State.nextText = M.buttonNextContent;
-  } else {
-    State.nextText = M.buttonNextContent;
-  }
-  State.lastOpenTip = goNum;
-  window.setTimeout(function () {
-    UI$1.panelJumpNext.querySelector('.ed11y-sr-only').textContent = State.nextText;
-  }, 250);
-
-  resetClass(['ed11y-hidden-highlight']);
-  if (!State.jumpList) {
-    buildJumpList(); // todo
-  }
-  // Find next or first result in the dom ordered list of results.
-  let goto = State.jumpList[goNum];
-  let result = goto.getAttribute('data-ed11y-result');
-  let gotoResult = State.results[result];
-  const target = gotoResult.element;
-
-  // First of two scrollTo calls, to trigger any scroll based events.
-  let scrollPin = window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600) ? 'center' : 'start';
-  let scrollTarget = State.options.inlineAlerts ? goto : target;
-  if (goto.dataset.ed11yHiddenResult || !(visible(scrollTarget))) {
-    scrollTarget = firstVisibleParent(target);
-  }
-  if (scrollTarget && typeof scrollTarget.scrollIntoView === 'function') {
-    scrollTarget.scrollIntoView({ block: scrollPin, behavior: 'instant' });
-  } else {
-    raceCrash();
-    return false;
-  }
-
-  // Open the button
-  goto.setAttribute('data-ed11y-action','open');
-  State.scrollPending = 2;
-  updateTipLocations();
-}
 
 function detectShadow (container) {
   if (State.options.autoDetectShadowComponents) {
     const select = !State.ignore ? '*:not(.ed11y-element)' : `*:not(${State.options.ignore}, .ed11y-element)`;
-    let search = [];
+    let search;
     if (container.shadowRoot && container.shadowRoot.mode === 'open') {
       if (!container.matches('[data-ed11y-has-shadow-root]')) {
         container.setAttribute('data-ed11y-has-shadow-root', 'true');
-        UI$1.attachCSS(container.shadowRoot);
-        UI$1.attachCSS(container);
+        UI.attachCSS(container.shadowRoot);
+        UI.attachCSS(container);
       }
       search = container.shadowRoot.querySelectorAll(select);
     } else {
@@ -5839,8 +4015,8 @@ function detectShadow (container) {
       if (component.shadowRoot && component.shadowRoot.mode === 'open') {
         if (!container.matches('[data-ed11y-has-shadow-root]')){
           component.setAttribute('data-ed11y-has-shadow-root', 'true');
-          UI$1.attachCSS(component.shadowRoot);
-          UI$1.attachCSS(component);
+          UI.attachCSS(component.shadowRoot);
+          UI.attachCSS(component);
         }
         detectShadow(component);
       } else {
@@ -5872,8 +4048,8 @@ const diveShadow = function (container, select, selector) {
   return [];
 };
 
-// QuerySelectAll non-ignored elements within checkroots, with recursion into shadow components
-function findElements$1 (key, selector, rootRestrict = true) { // @todo merge replace.
+// QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
+function findElements (key, selector, rootRestrict = true) { // @todo merge replace.
 
   // Todo beta: function and parameter to auto-detect shadow components.
   let shadowSelector = State.options.autoDetectShadowComponents ?
@@ -5882,7 +4058,7 @@ function findElements$1 (key, selector, rootRestrict = true) { // @todo merge re
       State.options.shadowComponents : false;
 
   // Concatenate global and specific ignores
-  let ignore = '';
+  let ignore;
   if (State.options.ignoreElements) {
     ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreElements}, ${State.options.ignoreByKey[key]})` : `:not(${State.options.ignoreElements})`;
   } else {
@@ -5920,6 +4096,110 @@ function findElements$1 (key, selector, rootRestrict = true) { // @todo merge re
     }
   }
 }
+function raceCrash() {
+  // A marked element disappeared while we were jumping to it.
+  if (State.loopStop) {
+    return;
+  }
+  State.loopStop = true;
+  this.reset();
+  State.showPanel = true;
+  this.checkAll();
+  window.setTimeout(function() {
+    if (State.results.length > 0 && State.loopStop) {
+      this.jumpTo(1); // todo
+      State.loopStop = false;
+    }
+  },100, State.loopStop);
+}
+
+var styles = "[data-sa11y-overflow]{overflow:auto!important}[data-sa11y-error]{outline:5px solid var(--sa11y-error)!important;outline-offset:2px}[data-sa11y-warning]:not([data-sa11y-error]){outline:5px solid var(--sa11y-warning)!important;outline-offset:2px}[data-sa11y-pulse-border]{animation:pulse 1s 2;box-shadow:0;outline:5px solid var(--sa11y-focus-color)!important}[data-sa11y-pulse-border]:focus,[data-sa11y-pulse-border]:hover{animation:none}@keyframes pulse{0%{box-shadow:0 0 0 5px var(--sa11y-focus-color)}50%{box-shadow:0 0 0 12px var(--sa11y-pulse-color)}to{box-shadow:0 0 0 5px var(--sa11y-pulse-color)}}h1[data-sa11y-pulse-border],h2[data-sa11y-pulse-border],h3[data-sa11y-pulse-border],h4[data-sa11y-pulse-border],h5[data-sa11y-pulse-border],h6[data-sa11y-pulse-border],img[data-sa11y-pulse-border]{animation:pulse-scale 1s 2}@keyframes pulse-scale{0%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.02)}to{opacity:1;transform:scale(1)}}@media (prefers-reduced-motion:reduce){[data-sa11y-pulse-border]{animation:none!important}}@media (forced-colors:active){[data-sa11y-error-inline],[data-sa11y-error],[data-sa11y-good],[data-sa11y-pulse-border],[data-sa11y-warning-inline],[data-sa11y-warning]{forced-color-adjust:none}}";
+
+/* ************************************************************ */
+/*  Auto-detect shadow DOM or process provided web components.  */
+/* ************************************************************ */
+const addStyleUtilities = (component) => {
+  const CSSUtils = component.shadowRoot.querySelectorAll('.sa11y-css-utilities');
+  if (CSSUtils.length === 0) {
+    const style = document.createElement('style');
+    style.setAttribute('class', 'sa11y-css-utilities');
+    style.textContent = styles;
+    component.shadowRoot.appendChild(style);
+  }
+};
+
+function findShadowComponents(option) {
+  if (option.autoDetectShadowComponents) {
+    // Elements to ignore.
+    const ignore = Constants.Exclusions.Sa11yElements;
+
+    // Search all elements.
+    const root = document.querySelector(option.checkRoot);
+    const search = (root)
+      ? Array.from(root.querySelectorAll(`*:not(${ignore})`))
+      : Array.from(document.body.querySelectorAll(`*:not(${ignore})`));
+
+    // Query for open shadow roots & inject CSS utilities into every shadow DOM.
+    search.forEach((component) => {
+      if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+        component.setAttribute('data-sa11y-has-shadow-root', '');
+        addStyleUtilities(component);
+      }
+    });
+  } else if (option.shadowComponents) {
+    const providedShadow = document.querySelectorAll(option.shadowComponents);
+    providedShadow.forEach((component) => {
+      component.setAttribute('data-sa11y-has-shadow-root', '');
+      addStyleUtilities(component);
+    });
+  }
+}
+
+/**
+ * Hide tips that are in front of text currently being edited.
+ * */
+function checkEditableIntersects (focusKnown = false) {
+  if (!focusKnown && !document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
+    //Reset classes to measure.
+    State.jumpList?.forEach((el) => {
+      el.classList.remove('intersecting');
+    });
+    return;
+  }
+  {
+    // Range isn't on a node we can measure.
+    State.jumpList?.forEach((el) => {
+      el.classList.remove('intersecting');
+    });
+    return;
+  }
+}
+
+function alignAlts$1 () {
+  // Positions alt label to match absolute, inline or floated images.
+  findElements('altMark', 'ed11y-element-alt');
+  State.elements.altMark?.forEach((el) => { // @todo merge
+    let id = el.dataset.ed11yImg;
+    el.style.setProperty('transform', null);
+    el.style.setProperty('height', null);
+    el.style.setProperty('width', null);
+
+    let img = UI.imageAlts[id][0];
+    if (img.tagName !== 'IMG') {
+      // Mark is placed outside the link in linked images.
+      img = img.querySelector('img');
+    }
+    let markOffset = el.getBoundingClientRect();
+    let imgOffset = img.getBoundingClientRect();
+    let newOffset = imgOffset.left - markOffset.left;
+    let height = getComputedStyle(img).height;
+    height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
+    el.style.setProperty('transform', `translate(${newOffset}px, 0px)`);
+    el.style.setProperty('height', `${height}px`);
+    el.style.setProperty('width', `${img.offsetWidth}px`);
+  });
+}
+
 
 const nudgeMark = function (el, x, y) {
   // TODO: THESE CAN NUDGE OUT OF THE OVERFLOW AREA OF THE CONTENTEDITABLE CONTAINER
@@ -6163,7 +4443,6 @@ function alignButtons() {
 
 }
 
-
 function alignTip (button, toolTip, recheck = 0, reveal = false) {
   if (!toolTip) {
     return;
@@ -6390,6 +4669,50 @@ function closestScrollable(el) {
     return false;
   }
 }
+
+function alignHighlights() {
+
+  if (State.options.fixedRoots && UI.editableHighlight.length > 0) {
+    State.positionedFrames = [];
+
+    State.options.fixedRoots.forEach((root) => {
+      if (root['framePositioner']) {
+        State.positionedFrames.push(root['framePositioner'].getBoundingClientRect());
+      }
+    });
+  }
+
+  UI.editableHighlight.forEach((el) => {
+
+    if (!State.results[el.resultID]) {
+      State.interaction = true;
+      State.forceFullCheck = true;
+      UI.editableHighlight = [];
+      incrementalCheck(true);
+      return false;
+    }
+
+    const framePositioner = State.results[el.resultID].fixedRoot && State.positionedFrames[State.results[el.resultID].fixedRoot] ?
+      State.positionedFrames[State.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
+
+    let targetOffset = el.target.getBoundingClientRect();
+    if (!visible(el.target)) {
+      // Invisible target.
+      const theVisibleParent = firstVisibleParent(el.target);
+      targetOffset = theVisibleParent ? theVisibleParent.getBoundingClientRect() : targetOffset;
+    }
+
+    // @todo why is setProperty failing?
+    console.log('has set property?');
+    console.log(el.highlight);
+
+    el.highlight.style.setProperty('width', targetOffset.width + 6 + 'px');
+    el.highlight.style.setProperty('top', targetOffset.top + framePositioner.top + window.scrollY - 3 + 'px');
+    el.highlight.style.setProperty('left', targetOffset.left + framePositioner.left - 3 + 'px');
+    el.highlight.style.setProperty('height', targetOffset.height + 6 + 'px');
+  });
+}
+
 const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size = 17) {
   // Yes this looks like intersect const, but it's math not browser offsets.
   return !(rect1Left + size < rect2Left ||
@@ -6399,12 +4722,12 @@ const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size = 17) {
 };
 
 // Applies parameters and avoids other widgets.
-function alignPanel$1() {
-  if (!UI$1.panelElement) {
+function alignPanel() {
+  if (!UI.panelElement) {
     return false;
   }
   if (State.options.panelPinTo === 'left') {
-    UI$1.panel.classList.add('ed11y-pin-left');
+    UI.panel.classList.add('ed11y-pin-left');
   }
   let xMost = 0;
   let yMost = 0;
@@ -6421,22 +4744,156 @@ function alignPanel$1() {
   }
   if (xMost > 0 && xMost < window.innerWidth - 240) {
     // push off horizontal
-    UI$1.panelElement.style.setProperty(State.options.panelPinTo, xMost + 10 + 'px');
-    UI$1.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
+    UI.panelElement.style.setProperty(State.options.panelPinTo, xMost + 10 + 'px');
+    UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
   } else if (xMost > 0 && xMost > window.innerWidth - 240 && yMost > 0) {
     // push off vertical
-    UI$1.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
-    UI$1.panelElement.style.setProperty('bottom', `calc(${State.options.panelOffsetY} + ${yMost}px)`);
+    UI.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
+    UI.panelElement.style.setProperty('bottom', `calc(${State.options.panelOffsetY} + ${yMost}px)`);
   } else {
     // no push
-    UI$1.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
-    UI$1.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
+    UI.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
+    UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
   }
 }
 
-function windowResize() {
-  if (UI$1.panel?.classList.contains('ed11y-active') === true) {
+function visualize () {
+  if (!UI.panel) {
+    return;
+  }
+  if (State.options.inlineAlerts) {
+    findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+    State.elements.reset?.forEach((el) => el.remove());
+  }
+  if (State.visualizing) {
+    State.visualizing = false;
+    UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsContent;
+    UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
+    UI.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
+    return;
+  }
+  State.visualizing = true;
+  UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsActive;
+  UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
+  UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
+  showAltPanel();
+  showHeadingsPanel();
+}
+
+function showHeadingsPanel () {
+  // Visualize the document outline
+
+  let panelOutline = UI.panel.querySelector('#ed11y-outline');
+  console.log(State.headingOutline);
+  if (State.headingOutline.length) {
+    panelOutline.innerHTML = '';
+    State.headingOutline.forEach((result, i) => {
+      console.log(result);
+      console.log(result.headingLevel);
+      // Todo: draw these in editable mode.
+      if (State.options.inlineAlerts) {
+        const mark = document.createElement('ed11y-element-heading-label');
+        mark.classList.add('ed11y-element', 'ed11y-element-heading');
+        mark.dataset.ed11yHeadingOutline = i.toString();
+        mark.setAttribute('id', 'ed11y-heading-' + i);
+        mark.setAttribute('tabindex', '-1');
+        // Array: el, level, outlinePrefix
+        result.element.insertAdjacentElement('afterbegin', mark);
+        UI.attachCSS(mark.shadowRoot);
+      }
+      let leftPad = 10 * result.headingLevel - 10;
+      let li = document.createElement('li');
+      li.classList.add('level' + result.headingLevel);
+      li.style.setProperty('margin-left', leftPad + 'px');
+      let levelPrefix = document.createElement('strong');
+      levelPrefix.textContent = `H${result.headingLevel}: `;
+      let userText = document.createElement('span');
+      userText.textContent = computeText(result.element);
+      let link = document.createElement('a');
+      if (State.options.inlineAlerts) {
+        link.setAttribute('href', '#ed11y-heading-' + i);
+        li.append(link);
+        link.append(levelPrefix);
+        link.append(userText);
+      } else {
+        li.append(levelPrefix);
+        li.append(userText);
+      }
+      if (result.type) { // Has an error message
+        li.classList.add(`ed11y-${result.type}`);
+        /*let message = document.createElement('em');
+        message.classList.add('ed11y-small');
+        message.textContent = ' ' + el[2];
+        if (State.options.inlineAlerts) {
+          link.append(message);
+        } else {
+          li.append(message);
+        }*/
+      }
+      panelOutline.append(li);
+    });
+  } else {
+    panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>';
+  }
+}
+
+
+const showAltPanel = function () {
+  // visualize image alts
+  let altList = UI.panel.querySelector('#ed11y-alt-list');
+
+  if (UI.imageAlts.length) {
+    altList.innerHTML = '';
+    UI.imageAlts.forEach((el, i) => {
+      // el[el, src, altLabel, altStyle]
+
+      if (State.options.inlineAlerts) {
+        // Label images
+        const mark = document.createElement('ed11y-element-alt');
+        mark.classList.add('ed11y-element');
+        mark.dataset.ed11yImg = i.toString();
+        mark.setAttribute('id', 'ed11y-alt-' + i);
+        mark.setAttribute('tabindex', '-1');
+        el[0].insertAdjacentElement('beforebegin', mark);
+      }
+
+      // Build alt list in panel
+      let userText = document.createElement('span');
+      userText.textContent = el[2];
+      let li = document.createElement('li');
+      li.classList.add(el[3]);
+      let img = document.createElement('img');
+      img.setAttribute('src', el[1]);
+      img.setAttribute('alt', '');
+
+      if (State.options.inlineAlerts) {
+        let a = document.createElement('a');
+        a.href = '#ed11y-alt-' + i;
+        a.classList.add('alt-parent');
+        li.append(a);
+        a.append(img);
+        a.append(userText);
+      } else {
+        li.classList.add('alt-parent');
+        li.append(img);
+        li.append(userText);
+      }
+      altList.append(li);
+    });
     alignAlts();
+  } else {
+    const noImages = document.createElement('p');
+    const noItalic = document.createElement('em');
+    noItalic.textContent = M.noImagesFound;
+    noImages.appendChild(noItalic);
+    altList.innerHTML = '';
+    altList.appendChild(noImages);
+  }
+};
+
+function windowResize() {
+  if (UI.panel?.classList.contains('ed11y-active') === true) {
+    alignAlts$1();
     alignButtons();
   }
   if (State.openTip.button) {
@@ -6444,15 +4901,19 @@ function windowResize() {
   }
   alignPanel();
 }
+
 function pauseObservers() {
   State.watching?.forEach(observer => {
     observer.observer.disconnect();
   });
-}function resumeObservers() {
+}
+
+function resumeObservers() {
   State.watching?.forEach(observer => {
     observer.observer.observe(observer.root, observer.config);
   });
 }
+
 function intersectionObservers() {
 
   State.elements.editable?.forEach(editable => {
@@ -6477,26 +4938,6 @@ function intersectionObservers() {
 
   document.addEventListener('selectionchange', function() {
   });
-}
-
-/**
- * Hide tips that are in front of text currently being edited.
- * */
-function checkEditableIntersects (focusKnown = false) {
-  if (!focusKnown && !document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
-    //Reset classes to measure.
-    State.jumpList?.forEach((el) => {
-      el.classList.remove('intersecting');
-    });
-    return;
-  }
-  {
-    // Range isn't on a node we can measure.
-    State.jumpList?.forEach((el) => {
-      el.classList.remove('intersecting');
-    });
-    return;
-  }
 }
 
 /*
@@ -6558,6 +4999,7 @@ function startObserver (root) {
     }
     if (node && node.matches(searchList)) {
       State.recentlyAddedNodes.set(node, Date.now());
+      incrementalAlign(); // Immediately realign tips.
       return 0;
     }
     return 1;
@@ -6570,6 +5012,7 @@ function startObserver (root) {
       if (mutation.type === 'characterData' &&
         mutation.target.parentElement &&
         mutation.target.parentElement.matches('[contenteditable] *')) {
+        incrementalAlign();
         return;
       } else if (mutation.type === 'childList') {
         // Recheck if there are relevant node changes.
@@ -6587,6 +5030,7 @@ function startObserver (root) {
       return;
     }
     window.setTimeout(function () {
+      incrementalAlign(); // Immediately realign tips.
       State.alignPending = false;
     },0);
   };
@@ -6612,7 +5056,1872 @@ function startObserver (root) {
   }, 1000);
 }
 
-class Ed11y$1 {
+function showResults () {
+  buildJumpList();
+  // Announce that buttons have been placed.
+  document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
+  alignButtons();
+  if (!State.options.inlineAlerts) {
+    checkEditableIntersects();
+    intersectionObservers();
+  }
+}
+
+function updatePanel () {
+
+  pauseObservers();
+  // Stash old values for incremental updates.
+
+  if (State.incremental) {
+    // Check for a change in the result counts.
+    if (State.forceFullCheck) {
+      State.forceFullCheck = false;
+      /*if (State.options.alertMode === 'assertive' && State.totalCount > 0 && (State.warningCount > oldWarnings || State.errorCount > oldErrors)) {
+        console.warn('forced open');
+        State.showPanel = true;
+      }*/
+      resetResults(true);
+    } else {
+      // Todo: commented out in 2.3.11:
+      // Reconnect map
+      State.results = State.oldResults;
+      window.setTimeout(function() {
+        if ( !State.alignPending ) {
+          alignButtons();
+          alignPanel();
+          State.alignPending = false;
+        }
+        State.running = false;
+      },0);
+      resumeObservers();
+      return;
+    }
+  } else {
+    if (State.totalCount > 0) {
+      // Record what has been seen at this route.
+      // We do not do this on incremental updates.
+      // Todo question: should we not do this at all for contentEditable?
+      State.seen[encodeURI(State.options.currentPage)] = State.totalCount;
+      localStorage.setItem('editoria11yResultCount', JSON.stringify(State.seen));
+    } else {
+      delete State.seen[encodeURI(State.options.currentPage)];
+    }
+  }
+
+  if (State.options.alertMode !== 'headless') {
+    // Not headless; draw the interface.
+
+    if (!State.bodyStyle) {
+      paintReady();
+    }
+
+    if (State.onLoad === true) {
+      State.onLoad = false;
+
+      if (!State.options.inlineAlerts) {
+        // todo move to incremental check or timeout; no need to do on load.
+        State.oldResultString = `${State.errorCount} ${State.warningCount}`;
+        State.results.forEach(result => {
+          State.oldResultString += result.test + result.element.outerHTML;
+        });
+      }
+
+      // Create the panel DOM on load.
+
+      UI.panelElement = document.createElement('ed11y-element-panel');
+      UI.panelElement.classList.add('ed11y-preload');
+      document.body.appendChild(UI.panelElement);
+      UI.panel = UI.panelElement.shadowRoot.getElementById('ed11y-panel');
+      UI.attachCSS(UI.panel);
+      UI.panelToggle = UI.panel.querySelector('#ed11y-toggle');
+      UI.panelToggleTitle = UI.panel.querySelector('#ed11y-toggle .ed11y-sr-only');
+      UI.panelCount = UI.panel.querySelector('.toggle-count');
+      UI.panelJumpNext = UI.panel.querySelector('.ed11y-jump.next');
+      UI.panelJumpNext.addEventListener('click', jumpTo);
+      UI.showDismissed = UI.panel.querySelector('#ed11y-show-hidden');
+      UI.message = UI.panel.querySelector('#ed11y-message');
+      window.setTimeout(()=> {
+        UI.panelElement.classList.remove('ed11y-preload');
+      },0, UI.panel);
+      UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsContent;
+      UI.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = M.buttonOutlineContent;
+      UI.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = M.panelCheckOutline;
+      UI.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = M.buttonAltsContent;
+      UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = M.panelCheckAltText;
+      UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = M.buttonFirstContent;
+      UI.panel.setAttribute('aria-label', M.panelControls);
+
+      if (State.options.reportsURL) {
+        let reportLink = document.createElement('a');
+        reportLink.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M0 96C0 61 29 32 64 32l384 0c35 0 64 29 64 64l0 320c0 35-29 64-64 64L64 480c-35 0-64-29-64-64L0 96zm64 0l0 64 64 0 0-64L64 96zm384 0L192 96l0 64 256 0 0-64zM64 224l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64zM64 352l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64z"/></svg><span class="ed11y-sr-only"></span>';
+        reportLink.setAttribute('id' , 'ed11y-reports-link');
+        reportLink.setAttribute('href', State.options.reportsURL);
+        reportLink.setAttribute('target', '_blank');
+        reportLink.setAttribute('aria-label', M.reportsLink);
+        reportLink.querySelector('.ed11y-sr-only').textContent = M.reportsLink;
+        UI.showDismissed.insertAdjacentElement('beforebegin', reportLink);
+      }
+
+      // Escape key closes panels.
+      const escapeWatch = function (event) {
+        if (event.keyCode === 27) {
+          if (event.target.closest('ed11y-element-panel') && UI.panelToggle.getAttribute('aria-expanded') === 'true') {
+            UI.panelToggle.focus();
+            UI.panelToggle.click();
+          } else if (event.target.hasAttribute('data-ed11y-open')) {
+            if (State.openTip.button) {
+              State.toggledFrom.focus();
+              State.openTip.button.shadowRoot.querySelector('button').click();
+            }
+          }
+        }
+      };
+      document.addEventListener('keyup', function (event) {escapeWatch(event); });
+
+      // Decide whether to open the panel on load.
+      if (State.ignoreAll ||
+        (!State.options.inlineAlerts && State.totalCount > 75)
+      ) {
+        State.showPanel = false;
+      } else if (State.options.alertMode === 'active' ||
+        !State.options.userPrefersShut ||
+        State.options.showDismissed
+      ) {
+        // Show always on load for active mode or by user preference.
+        State.showPanel = true;
+      } else if (
+        State.totalCount > 0 &&
+        !State.ignoreAll &&
+        ( State.options.alertMode === 'assertive' ||
+          State.options.alertMode === 'polite' &&
+          State.seen[encodeURI(State.options.currentPage)] !== State.totalCount
+        )
+      ) {
+        // Show sometimes for assertive/polite if there are new items.
+        State.showPanel = true;
+      }
+    }
+
+    // Now we can open or close the panel.
+    if (!State.showPanel) {
+      // Close panel.
+      reset();
+    } else {
+      // Ignore issue count if this resulted from a user action.
+
+      State.open = true;
+      UI.panel.classList.remove('ed11y-shut');
+      UI.panel.classList.add('ed11y-active');
+      UI.panelToggle.setAttribute('aria-expanded', 'true');
+      UI.panelToggleTitle.textContent = State.totalCount > 0 ? M.buttonHideAlerts : M.buttonHideChecker;
+      // Prepare show hidden alerts button.
+      if (State.dismissedCount === 0) {
+        // Reset show hidden default option when irrelevant.
+        UI.showDismissed.setAttribute('hidden', '');
+        UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
+        State.options.showDismissed = false;
+      } else if (State.dismissedCount === 1) {
+        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ? M.buttonHideHiddenAlert : M.buttonShowHiddenAlert;
+        UI.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
+        UI.showDismissed.removeAttribute('hidden');
+      } else {
+        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ? M.buttonHideHiddenAlerts(State.dismissedCount) : M.buttonShowHiddenAlerts(State.dismissedCount);
+        UI.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
+        UI.showDismissed.removeAttribute('hidden');
+      }
+
+      window.setTimeout(function () {
+        if (!State.ignoreAll) {
+          requestAnimationFrame(() => showResults());
+        }
+      }, 0);
+    }
+    // Update buttons.
+    if (State.totalCount > 0 || (State.options.showDismissed && State.dismissedCount > 0)) {
+      UI.panelToggleTitle.textContent = State.open ? M.buttonHideAlerts : M.buttonShowAlerts;
+      UI.panelJumpNext.removeAttribute('hidden');
+      if (State.errorCount > 0) {
+        // Errors
+        UI.panel.classList.remove('ed11y-warnings', 'ed11y-pass');
+        UI.panel.classList.add('ed11y-errors');
+        document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.alert);
+        document.documentElement.style.setProperty('--ed11y-activeColor', '#fff');
+        document.documentElement.style.setProperty('--ed11y-activeBorder', '#fff7');
+        document.documentElement.style.setProperty('--ed11y-activePanelBorder', '#def');
+      }
+      else if (State.warningCount > 0) {
+        // Warnings
+        UI.panel.classList.remove('ed11y-errors', 'ed11y-pass');
+        UI.panel.classList.add('ed11y-warnings');
+        document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.warning);
+        document.documentElement.style.setProperty('--ed11y-activeColor', '#111');
+        document.documentElement.style.setProperty('--ed11y-activeBorder', '#947605');
+        document.documentElement.style.setProperty('--ed11y-activePanelBorder', '#947605');
+      } else {
+        // Issues present but dismissed.
+        UI.panel.classList.remove('ed11y-errors', 'ed11y-warnings');
+        UI.panel.classList.add('ed11y-pass');
+        document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.panelBar);
+        document.documentElement.style.setProperty('--ed11y-activeColor', Theme.panelBarText);
+        document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
+        document.documentElement.style.setProperty('--ed11y-activePanelBorder', Theme.panelBarText + '88');
+      }
+      // todo postpone: aria alert on load?
+      /*window.setTimeout(function () {
+        //announce.textContent = text;
+      }, 1500);*/
+      if (State.dismissedCount > 0 && State.totalCount === 0) {
+        UI.panelCount.textContent = State.dismissedCount;
+      } else {
+        UI.panelCount.textContent = State.totalCount > 99 ? '99+' : State.totalCount;
+      }
+    } else {
+      UI.panelJumpNext.setAttribute('hidden', '');
+      document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.panelBar);
+      document.documentElement.style.setProperty('--ed11y-activeColor', Theme.panelBarText);
+      document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
+      document.documentElement.style.setProperty('--ed11y-activePanelBorder', Theme.panelBarText + '88');
+
+      UI.panelCount.style.display = 'display: none;';
+      UI.panel.classList.remove('ed11y-warnings', 'ed11y-errors');
+      UI.panel.classList.add('ed11y-pass');
+
+      if (State.dismissedCount > 0) {
+        UI.panelCount.textContent = 'i';
+        if (State.open) {
+          UI.panelToggleTitle.textContent = M.buttonHideChecker;
+        } else {
+          UI.panelToggleTitle.textContent = State.dismissedCount > 1 ?
+            M.buttonShowHiddenAlerts(State.dismissedCount) :
+            M.buttonShowHiddenAlert;
+        }
+      } else {
+        // todo 3.x: move these inline and just change the class.
+        UI.panelToggleTitle.textContent = State.open ? M.buttonHideChecker : M.buttonShowNoAlert;
+      }
+    }
+    UI.panelToggle.classList.remove('disabled');
+    UI.panelToggle.removeAttribute('aria-disabled');
+    alignPanel();
+    UI.panel.classList.remove('ed11y-preload');
+  }
+
+  window.setTimeout(() => {
+    if (State.options.watchForChanges) {
+      State.elements.editable?.forEach(editable => {
+        if (!editable.matches('.drag-observe')) {
+          editable.classList.add('drag-observe');
+          editable.addEventListener('drop', () => {
+            // This event does not bubble.
+            State.forceFullCheck = true;
+          });
+        }
+      });
+      if (State.options.watchForChanges === 'checkRoots') {
+        State.roots?.forEach((root) => {
+          startObserver( root );
+        });
+      } else {
+        startObserver( document.body );
+      }
+      resumeObservers(); // on recheck.
+    }
+  }, 0);
+
+  resumeObservers();
+  State.running = false;
+}
+
+function buildJumpList () {
+
+  State.jumpList = [];
+  pauseObservers();
+
+  // Initial alignment to get approximate Y position order for jump list.
+  State.results.forEach((result, i) => {
+
+    let top = result.element.getBoundingClientRect().top;
+    if (!top) {
+      const visibleParent = firstVisibleParent(result.element);
+      if (visibleParent) {
+        top = visibleParent.getBoundingClientRect().top;
+      }
+    }
+    top = top + window.scrollY;
+    if (State.options.fixedRoots) {
+      const root = result.element.closest('[data-ed11y-root]');
+      // Todo: it might be faster to associate this with the element finder.
+      State.results[i].fixedRoot = root.dataset.ed11yRoot;
+    }
+    State.results[i].scrollableParent = closestScrollable(result.element);
+    if (State.results[i].scrollableParent) {
+      // Group these together.
+      top = top * 0.000001;
+    }
+    State.results[i].sortPos = top;
+  });
+  // Sort from bottom to top so focus order after insert is top to bottom.
+  State.results.sort((a, b) => b.sortPos - a.sortPos);
+
+  State.results?.forEach(function (result, i) {
+    if (!State.results[i].dismissalStatus || State.options.showDismissed) {
+      drawResult(result, i);
+    }
+  });
+  State.jumpList.forEach((el, i) => {
+    el.dataset.ed11yJumpPosition = `${i}`;
+    const newLabel = `${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}, ${i + 1} / ${State.jumpList.length - 1}`;
+    el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
+  });
+  let tipsPainted = new CustomEvent('ed11yResultsPainted');
+  document.dispatchEvent(tipsPainted);
+  resumeObservers();
+}
+
+// Place markers on elements with issues
+function drawResult(result, index) {
+  /* old array to new object map:
+    // [0] element
+    // [1] test
+    // [2] content
+    // [3] position
+    // [4] dismissalKey
+    // [5] dismissalStatus
+    */
+  let mark = document.createElement('ed11y-element-result');
+  mark.classList.add('ed11y-element');
+  let location;
+  let position = 'beforebegin';
+  mark.setAttribute('id', 'ed11y-result-' + index);
+  mark.setAttribute('data-ed11y-result', index);
+  mark.setAttribute('data-ed11y-open', 'false');
+  if (!State.options.inlineAlerts) {
+    location = State.panelAttachTo;
+    position = 'beforeend';
+    mark.classList.add('ed11y-editable-result');
+  } else {
+    location = result.element.closest('a, button, [role="button"], [role="link"]');
+    if (!location && result.element.shadowRoot) {
+      // Must insert outside shadow DOM root.
+      location = result.element;
+      position = 'beforebegin';
+      while (location.parentElement && location.parentElement.shadowRoot) {
+        location = location.parentElement;
+      }
+    }
+    if (!location) {
+      location = result.element;
+      position = result.position;
+    }
+  }
+  location.insertAdjacentElement(position, mark);
+
+  const shadow = mark.attachShadow({ mode: 'open' });
+
+  // Create mark.wrapper with type class
+  mark.resultID = mark.dataset.ed11yResult;
+  mark.result = State.results[mark.resultID];
+
+  mark.wrapper = document.createElement('div');
+
+  mark.dismissable = mark.result.dismissalKey !== false;
+  mark.dismissed = !!mark.result.dismissalStatus;
+  mark.wrapper.classList.add('ed11y-wrapper', 'ed11y-result-wrapper');
+  mark.wrapper.classList.add('ed11y-result');
+
+  // Create tooltip toggle
+  // @todo abstract out.
+  mark.toggle = document.createElement('button');
+  mark.toggle.setAttribute('class', 'toggle');
+  let label = mark.dismissable ? M.toggleManualCheck : M.toggleAlert;
+  mark.toggle.setAttribute('aria-label', M.toggleAriaLabel(label));
+  mark.toggle.setAttribute('aria-expanded', 'false');
+  mark.toggle.setAttribute('aria-haspopup', 'dialog');
+  mark.toggle.setAttribute('data-ed11y-result', mark.dataset.ed11yResult);
+  mark.toggle.setAttribute('data-ed11y-ready', 'false');
+  mark.toggle.setAttribute('data-ed11y-race', 'false');
+  if (!State.options.inlineAlerts) {
+    mark.toggle.style.setProperty('font-size', '16px');
+  }
+  if (mark.dismissed) {
+    mark.toggle.innerHTML = '<svg aria-hidden="true" width="10" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>';
+    mark.toggle.classList.add('dismissed');
+    if (mark.result.dismissalStatus !== 'ok') {
+      mark.toggle.classList.add('notok');
+    } else {
+      mark.toggle.classList.add('ok');
+    }
+  } else if (mark.dismissable) {
+    mark.toggle.classList.add('dismissable');
+  }
+  mark.wrapper.appendChild(mark.toggle);
+  mark.toggle.addEventListener('click', mark.toggleClick);
+  mark.toggle.addEventListener('focus', mark.handleFocus);
+  mark.toggle.addEventListener('mouseover', mark.handleHover);
+  mark.tipNeedsBuild = true;
+
+  UI.attachCSS(mark.wrapper);
+
+  shadow.appendChild(mark.wrapper);
+
+  State.jumpList.unshift(mark);
+  State.results[index].toggle = mark;
+}
+
+function dismissOne(dismissalType, test, dismissalKey) {
+
+  // Update dismissal record.
+  if (dismissalType === 'reset') {
+    delete State.dismissedAlerts[State.options.currentPage][test][dismissalKey];
+    if (Object.keys(State.dismissedAlerts[State.options.currentPage][test]).length === 0) {
+      delete State.dismissedAlerts[State.options.currentPage][test];
+    }
+    if (Object.keys(State.dismissedAlerts[State.options.currentPage]).length === 0) {
+      delete State.dismissedAlerts[State.options.currentPage];
+    }
+    //window.requestAnimationFrame(() => updatePanel());
+  } else {
+    let dismissal = {};
+    dismissal[dismissalKey] = dismissalType;
+    if (typeof State.dismissedAlerts[State.options.currentPage] == 'undefined') {
+      let store = {};
+      store[test] = dismissal;
+      State.dismissedAlerts[State.options.currentPage] = store;
+    } else if (typeof State.dismissedAlerts[State.options.currentPage][test] === 'undefined') {
+      State.dismissedAlerts[State.options.currentPage][test] = dismissal;
+    } else {
+      State.dismissedAlerts[State.options.currentPage][test][dismissalKey] = dismissalType;
+    }
+    UI.showDismissed.removeAttribute('hidden');
+  }
+
+  // Send record to storage or dispatch an event to an API.
+  if (State.options.syncedDismissals === false) {
+    localStorage.setItem('ed11ydismissed', JSON.stringify(State.dismissedAlerts));
+  }
+  let dismissalDetail = {
+    dismissPage: State.options.currentPage,
+    dismissTest: test,
+    dismissKey: dismissalKey,
+    dismissAction: dismissalType,
+  };
+  let ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
+  window.setTimeout(() => {
+    document.dispatchEvent(ed11yDismissalUpdate);
+  },100);
+}
+
+function editableHighlighter (resultID, show, firstVisible) {
+
+  if (!show) {
+    UI.editableHighlight[resultID]?.highlight.style.setProperty('opacity', '0');
+    return;
+  }
+  const result = State.results[resultID];
+  let el = UI.editableHighlight[resultID]?.highlight;
+  if (!el) {
+    el = document.createElement('ed11y-element-highlight');
+    el.classList.add('ed11y-element');
+    UI.editableHighlight[resultID] = {highlight: el, resultID: resultID};
+    el.style.setProperty('position', 'absolute');
+    el.style.setProperty('pointer-events', 'none');
+    State.panelAttachTo.appendChild(el);
+  }
+  UI.editableHighlight[resultID].target = firstVisible ? firstVisible : result.element;
+  const zIndex = result.dismissalKey ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
+  el.style.setProperty('z-index', zIndex);
+  const outline = result.dismissalKey ?
+    '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)'
+    : '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
+  el.style.setProperty('box-shadow', outline);
+  el.style.setProperty('border-radius', '3px');
+  el.style.setProperty('top', '0');
+  el.style.setProperty('left', '0');
+  alignHighlights();
+  el.style.setProperty('opacity', '1');
+}
+
+function transferFocus () {
+  if (!State.openTip.tip) {
+    return;
+  }
+  const id = State.openTip.tip.dataset.ed11yResult;
+  const target = State.results[id].element;
+  const editable = target.closest('[contenteditable]');
+  if (!editable && !target.closest('textarea, input')) {
+    if (target.closest('a')) {
+      State.toggledFrom = target.closest('a');
+    } else if (target.getAttribute('tabindex') !== null) {
+      State.toggledFrom = target;
+    } else {
+      target.setAttribute('tabindex', '0');
+      State.toggledFrom = target;
+    }
+    State.openTip.tip.shadowRoot.querySelector('.close').click();
+  } else {
+    State.toggledFrom = false;
+    if (target.getAttribute('contenteditable') === 'true') {
+      State.toggledFrom = target;
+    } else if (target.closest('p[contenteditable="true"]')) {
+      State.toggledFrom = target.closest('p[contenteditable="true"]');
+    } else {
+      // Just got complicated -- need to move a caret
+      State.toggledFrom = false;
+    }
+    State.openTip.tip.shadowRoot.querySelector('.close').click();
+    if (!State.toggledFrom && editable) {
+      // Need to move focus manually
+      // h/t https://stackoverflow.com/questions/6249095/how-to-set-the-caret-cursor-position-in-a-contenteditable-element-div
+      editable.focus();
+      const range = document.createRange();
+      const sel = window.getSelection();
+      range.setStart(target, 0);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
+}
+
+function paintReady () {
+
+  if (!State.options.cssUrls) {
+    const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
+    if (cssLink) {
+      State.options.cssUrls = [cssLink.getAttribute('href')];
+    } else {
+      console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
+      State.options.cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
+    }
+  }
+
+  for (const [key, value] of Object.entries(Theme)) {
+    document.documentElement.style.setProperty('--ed11y-' + key, `${value}`);
+  }
+
+  // May be redundant, but preloads unbundled files.
+  if (document.querySelector('body')) {
+    // May be redundant, but preloads unbundled files.
+    UI.attachCSS(document.querySelector('body'));
+  }
+
+
+  State.roots.forEach((root) => {
+    // Shadow elements don't inherit styles, so they need their own copy.
+    if (State.options.shadowComponents) {
+      root.querySelectorAll(State.options.shadowComponents)?.forEach((shadowHost) => {
+        if (shadowHost.shadowRoot) {
+          UI.attachCSS(shadowHost.shadowRoot);
+        }
+      });
+    }
+  });
+  State.bodyStyle = true;
+}
+
+function alertOnInvisibleTip (button, target) {
+  let delay = 100;
+  if (State.options.hiddenHandlers.length > 0 && !!target.closest(State.options.hiddenHandlers)) {
+    // Increase hesitation before scrolling, in case theme animates open an element.
+    delay = 333;
+    document.dispatchEvent(new CustomEvent('ed11yShowHidden', {
+      detail: {result: button.getAttribute('data-ed11y-result')}
+    }));
+  }
+  const details = target.closest('details');
+  if (details && !details.open) {
+    details.open = true;
+    delay = 333;
+  }
+
+  // Scroll into view and throw an alert if the button or target is hidden.
+  window.setTimeout((button, target) => {
+    UI.message.textContent = '';
+    let firstVisible = false;
+    let alertMessage;
+    if (State.options.checkVisible && !visible(target)) {
+      button.dataset.ed11yHiddenResult = 'true';
+      firstVisible = firstVisibleParent(target);
+      alertMessage = ed11yLang.en.jumpedToInvisibleTip;
+    }
+    else if (target.closest('[aria-hidden="true"]')) {
+      firstVisible = target.closest('[aria-hidden="true"]');
+      firstVisible = firstVisible.closest(':not([aria-hidden="true"])');
+      alertMessage = M.jumpedToAriaHiddenTip;
+    }
+    if (firstVisible) {
+      // Throw warning that the element cannot be highlighted.
+      const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert');
+      tipAlert.textContent = alertMessage;
+    }
+    if (State.viaJump) {
+      let scrollPin = window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600) ? 'center' : 'start';
+      let scrollTarget = State.options.inlineAlerts ? button : target;
+      if (button.dataset.ed11yHiddenResult || !(visible(scrollTarget))) {
+        scrollTarget = firstVisibleParent(target);
+      }
+      if (scrollTarget && typeof scrollTarget.scrollIntoView === 'function') {
+        scrollTarget.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+      } else {
+        raceCrash();
+        return false;
+      }
+    }
+    // Todo: following statements work but could be simplified.
+    if (!State.options.inlineAlerts) {
+      // todo this selector must match the selector that decides where to place the mark
+      editableHighlighter(button.dataset.ed11yResult, true, firstVisible); // todo
+    } else {
+      if (firstVisible) {
+        firstVisible.classList.add('ed11y-hidden-highlight');
+      }
+    }
+    let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+    if (!activeTip) {
+      button.setAttribute('data-ed11y-action','open');
+      if (State.viaJump) {
+        window.setTimeout(() => {
+          // Race conditions are fun.
+          let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+          if (State.viaJump) {
+            activeTip?.shadowRoot.querySelector('.title').focus();
+          }
+        }, 100);
+      }
+    } else {
+      if (State.viaJump) {
+        window.setTimeout(() => {
+          // Race conditions are fun.
+          activeTip?.shadowRoot.querySelector('.title').focus();
+        }, 100, activeTip);
+      }
+    }
+    State.viaJump = false;
+  }, delay, button, target);
+}
+
+function jumpTo(dir = 1) {
+  if (!State.open) {
+    return false;
+  }
+  State.viaJump = true;
+  // Determine target result.
+  let goMax = State.jumpList.length - 1;
+  let goNum = State.lastOpenTip + dir;
+  if (goNum < 0) {
+    // Reached end of loop or dismissal pushed us out of loop
+    State.nextText = M.buttonFirstContent; // todo
+    goNum = goMax;
+  } else if (goNum > goMax) {
+    goNum = 0;
+    State.nextText = M.buttonNextContent;
+  } else {
+    State.nextText = M.buttonNextContent;
+  }
+  State.lastOpenTip = goNum;
+  window.setTimeout(function () {
+    UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = State.nextText;
+  }, 250);
+
+  resetClass(['ed11y-hidden-highlight']);
+  if (!State.jumpList) {
+    buildJumpList(); // todo
+  }
+  // Find next or first result in the dom ordered list of results.
+  let goto = State.jumpList[goNum];
+  let result = goto.getAttribute('data-ed11y-result');
+  let gotoResult = State.results[result];
+  const target = gotoResult.element;
+
+  // First of two scrollTo calls, to trigger any scroll based events.
+  let scrollPin = window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600) ? 'center' : 'start';
+  let scrollTarget = State.options.inlineAlerts ? goto : target;
+  if (goto.dataset.ed11yHiddenResult || !(visible(scrollTarget))) {
+    scrollTarget = firstVisibleParent(target);
+  }
+  if (scrollTarget && typeof scrollTarget.scrollIntoView === 'function') {
+    scrollTarget.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+  } else {
+    raceCrash();
+    return false;
+  }
+
+  // Open the button
+  goto.setAttribute('data-ed11y-action','open');
+  State.scrollPending = 2;
+  updateTipLocations();
+}
+
+function resetResults(incremental) {
+  State.jumpList = [];
+  State.openTip = {
+    button: false,
+    tip: false,
+  };
+  State.lastOpenTip = -1;
+  resetClass([
+    'ed11y-ring-red',
+    'ed11y-ring-yellow',
+    'ed11y-hidden-highlight',
+    'ed11y-warning-inline',
+    'ed11y-warning-block',
+    'ed11y-error-block',
+    'ed11y-error-inline',
+  ]);
+  // Reset insertions into body content.
+  if (incremental) {
+    findElements('reset', 'ed11y-element-highlight', false);
+  } else {
+    findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+  }
+  State.elements.reset?.forEach((el) => el.remove());
+
+  // Flicker prevention -- leave old tip in place for 100ms.
+  findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
+  const delayedReset = State.elements.delayedReset;
+
+  window.setTimeout(()=> {
+    delayedReset?.forEach((el) => el.remove());
+  }, 100, delayedReset);
+
+  if (UI.panelJumpNext) {
+    UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = M.buttonFirstContent;
+  }
+  // Reset insertions into body content.
+}
+
+function resetPanel() {
+  // Reset main panel.
+  State.visualizing = true; // so visualize function removes visualizers.
+  visualize();
+  if (State.totalCount === 0 && State.dismissedCount > 0) {
+    UI.panelCount.textContent = 'i';
+    UI.panelToggleTitle.textContent = State.dismissedCount === 1 ?
+      M.buttonShowHiddenAlert :
+      M.buttonShowHiddenAlerts(State.dismissedCount);
+  }
+  if (!State.options.showDismissed && UI.showDismissed) {
+    UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
+    UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
+      M.buttonShowHiddenAlert : M.buttonShowHiddenAlerts(State.dismissedCount);
+  }
+  UI.panel?.classList.add('ed11y-shut');
+  UI.panel?.classList.remove('ed11y-active');
+  UI.panelToggle?.setAttribute('aria-expanded', 'false');
+}
+
+function reset () {
+  pauseObservers();
+  resetResults();
+  resetPanel();
+  State.incremental = false;
+  State.running = false;
+  State.showPanel = false;
+  State.open = false;
+}
+
+function makeItSo () {
+  if (State.once) {
+    console.error('double init');
+    return;
+  }
+  State.once = true;
+
+  //Need to evaluate if "load" event took place for bookmarklet version. Otherwise, only call Sa11y once page has loaded.
+  const documentLoadingCheck = (callback) => {
+    if (document.readyState === 'complete') {
+      callback();
+    } else {
+      window.addEventListener('load', callback);
+    }
+  };
+
+  // Once document has fully loaded.
+  documentLoadingCheck(() => {
+    if (checkRunPrevent()) {
+      return false;
+    }
+
+    State.running = true;
+    let localResultCount = store.getItem('editoria11yResultCount');
+    State.seen = localResultCount && localResultCount !== 'undefined' ?
+      JSON.parse(localResultCount) : {};
+
+    // Build list of dismissed alerts
+    if (State.options.syncedDismissals === false) {
+      State.dismissedAlerts = localStorage.getItem('ed11ydismissed');
+      State.dismissedAlerts = State.dismissedAlerts ? JSON.parse(State.dismissedAlerts) : {};
+    } else {
+      State.dismissedAlerts = {};
+      State.dismissedAlerts[State.options.currentPage] = State.options.syncedDismissals;
+    }
+
+    // Create test class objects
+    /*Ed11y.testEmbeds = new Ed11yTestEmbeds;
+    Ed11y.testHeadings = new Ed11yTestHeadings;
+    Ed11y.testImages = new Ed11yTestImages;
+    Ed11y.testLinks = new Ed11yTestLinks;
+    Ed11y.testText = new Ed11yTestText;
+*/
+    // Convert the container ignore user option to a CSS :not selector.
+    State.ignore = State.options.ignoreElements ? `:not(${State.options.ignoreElements})` : '';
+
+    if (!State.options.checkRoots) {
+      State.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
+    }
+
+    // Run tests
+    checkAll();
+
+
+    // Move toggles when something expands or collapses.
+    const mightExpand = document.querySelectorAll('[aria-expanded], [aria-controls]');
+    mightExpand?.forEach(expandable => {
+      expandable.addEventListener('click', () => {
+        window.setTimeout(() => {
+          windowResize();
+        }, 333);
+      });
+    });
+
+    window.addEventListener('resize', function () { windowResize(); });
+  });
+}
+// Toggles the outline of all headers, link texts, and images.
+function checkAll() {
+  if (State.openTip.button) {
+    return false;
+  }
+  State.disabled = false;
+
+  if ( !checkRunPrevent() ) {
+
+    // Check for ignoreAll elements.
+    State.ignoreAll = State.options.ignoreAllIfAbsent && document.querySelector(`:is(${State.options.ignoreAllIfAbsent})`) === null;
+    if (!State.ignoreAll && !!State.options.ignoreAllIfPresent) {
+      State.ignoreAll = document.querySelector(`:is(${State.options.ignoreAllIfPresent})`) !== null;
+    }
+
+    if ( State.incremental ) {
+      State.oldResults = State.results;
+    }
+    // Reset counts
+    State.results = [];
+    State.elements = [];
+    State.mediaCount = 0;
+
+    State.customTestsRunning = false;
+
+    let roots = [];
+    if (State.options.fixedRoots) {
+      State.options.fixedRoots.forEach(root => {roots.push(root.fixedRoot);});
+    } else {
+      roots = document.querySelectorAll(`:is(${State.options.checkRoots})`);
+    }
+
+    if (roots.length === 0) {
+      // Todo parameterize for translation.
+      if (State.onLoad) {
+        console.warn('Check Editoria11y configuration; specified root element not found');
+      }
+      disable();
+      return;
+    } else {
+      State.roots = [];
+      roots.forEach((el, i) => {
+        if (el.shadowRoot) {
+          State.roots[i] = el.shadowRoot;
+          el.setAttribute('data-ed11y-has-shadow-root', 'true');
+          detectShadow(el.shadowRoot);
+        } else {
+          State.roots[i] = el;
+          detectShadow(el);
+        }
+        if (State.options.fixedRoots) {
+          el.dataset.ed11yRoot = `${i}`;
+        }
+      });
+
+
+      buildElementList();
+
+      Constants.initializeRoot(false, false, roots);
+
+      // Find all web components on the page.
+      findShadowComponents(State.options);
+
+      // Find and cache elements.
+      Elements.initializeElements(State.options);
+
+      State.headingOutline = [];
+      // Ruleset checks
+      checkHeaders(State.results, State.options, State.headingOutline);
+      checkLinkText(State.results, State.options);
+      checkImages(State.results, State.options);
+      checkLabels(State.results, State.options);
+      checkQA(State.results, State.options);
+      console.log(State.results);
+      /*{
+"element": {},
+"type": "error",
+"content": "Empty heading found! To fix, delete this line or change its format from <strong class=\"colour\">Heading 4</strong> to <strong>Normal</strong> or <strong>Paragraph</strong>.",
+"dismiss": "H4",
+"dismissAll": false,
+"isWithinRoot": true,
+"developer": false,
+"margin": "0",
+"dismissalStatus": false,
+"scrollableParent": false,
+"sortPos": 5495.38330078125
+}
+content
+dismissalKey
+dismissalStatus
+element
+position
+scrollableParent
+sortPos
+test
+toggle
+
+      * */
+      // @todo merge temporary values.
+      State.results.forEach((result) => {
+        result.position = 'beforebegin';
+        result.dismissalKey = result.dismiss;
+        result.test = 'altNull';
+      });
+
+      /*let queue = [
+        'testLinks',
+        'testImages',
+        'testHeadings',
+        'testText',
+        'testEmbeds',
+      ];
+      queue.forEach((test) => {
+        window.setTimeout(function (test) {
+          Ed11y[test].check();
+        }, 0, test);
+      });*/
+
+      if (State.options.customTests > 0) {
+        // Pause
+        State.customTestsRunning = true;
+        State.customTestsFinished = 0;
+        document.addEventListener('ed11yResume', function () {
+          State.customTestsFinished++;
+          if (State.customTestsFinished === State.options.customTests) {
+            State.customTestsRunning = false;
+            countAlerts();
+            window.requestAnimationFrame(() => updatePanel());
+          }
+        });
+        window.setTimeout(function() {
+          if (State.customTestsRunning === true) {
+            State.customTestsRunning = false;
+            if (typeof UI.panelToggle.querySelector === 'function') {
+              UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleAccessibilityTools;
+            }
+            countAlerts();
+            window.requestAnimationFrame(() => updatePanel());
+            console.error('Editoria11y was told to wait for custom tests, but no tests were returned.');
+          }
+        }, 1000);
+        window.setTimeout(function() {
+          let customTests = new CustomEvent('ed11yRunCustomTests');
+          document.dispatchEvent(customTests);
+        },0);
+      }
+    }
+
+    if (!State.customTestsRunning) {
+      window.setTimeout(function () {
+        if (typeof UI.panelToggle.querySelector === 'function') {
+          UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleAccessibilityTools;
+        }
+        countAlerts();
+        updatePanel();
+      }, 0);
+    }
+
+  }
+  else {
+    disable();
+  }
+}
+function countAlerts () {
+
+  State.errorCount = 0;
+  State.warningCount = 0;
+  State.dismissedCount = 0;
+
+  // Review results array to remove dismissed or ignored items
+
+  State.dismissedCount = 0;
+  for (let i = State.results.length - 1; i >= 0; i--) {
+
+    let test = State.results[i].test;
+
+    if (State.options.ignoreTests &&
+      State.options.ignoreTests.includes(test)) {
+      // Would be faster to skip test, but this is easy and reliable.
+      State.results.splice(i, 1);
+      continue;
+    }
+
+    // todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
+    /*if (State.incremental && Ed11y.oldResults.length > 0) {
+      // Don't flag new issues in the active range while people are typing.
+    }*/
+
+    let dismissKey = prepareDismissal(State.results[i].dismissalKey);
+    // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
+    if (dismissKey !== false && State.options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[State.options.currentPage] && dismissKey in State.dismissedAlerts[State.options.currentPage][test]) {
+      // Remove result if it has been marked OK or ignored, increment dismissed match counter.
+      State.dismissedCount++;
+      State.results[i].dismissalStatus = State.dismissedAlerts[State.options.currentPage][test][dismissKey];
+    } else if (State.results[i].dismissalKey) {
+      State.warningCount++;
+      State.results[i].dismissalStatus = false;
+    } else {
+      State.errorCount++;
+      State.results[i].dismissalStatus = false;
+    }
+  }
+
+  State.totalCount = State.errorCount + State.warningCount;
+
+  // Dispatch event for synchronizers.
+  if (!State.incremental) {
+    window.setTimeout(function () {
+      let syncResults = new CustomEvent('ed11yResults');
+      document.dispatchEvent(syncResults);
+    }, 0);
+  }
+
+  if (State.ignoreAll) {
+    State.dismissedCount = State.totalCount + State.dismissedCount;
+    State.errorCount = 0;
+    State.warningCount = 0;
+    State.totalCount = 0;
+  }
+
+  isFullNeeded();
+}
+
+function buildElementList () {
+
+  // Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
+  if (typeof State.options.editableContent === 'string') {
+    findElements('editable', State.options.editableContent, false);
+  } else {
+    State.elements.editable = State.options.editableContent;
+  }
+  if (State.options.inlineAlerts && State.elements.editable.length > 0) {
+    State.options.inlineAlerts = false;
+    console.warn('Editable content detected; Editoria11y inline alerts disabled');
+  }
+  //Ed11y.findElements('p', 'p');
+  //Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]');
+  findElements('allH', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', State.options.fixedRoots ? State.options.headingsOnlyFromCheckRoots : false);
+  findElements('img', 'img');
+  //findElements('a', 'a[href]');
+  //findElements('li', 'li');
+  //findElements('blockquote', 'blockquote');
+  //findElements('iframe', 'iframe');
+  //findElements('audio', 'audio');
+  //findElements('video', 'video');
+  //findElements('table', 'table');
+
+  if (State.options.embeddedContent) ;
+  if (State.options.panelNoCover) {
+    // Moves panel off conflicting widgets.
+    findElements('panelPin', State.options.panelNoCover, false);
+  }
+}
+
+function disable() {
+  if (State.open && !State.closedByDisable) {
+    State.closedByDisable = true;
+  }
+  State.disabled = true;
+  reset();
+  document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.panelBar);
+  document.documentElement.style.setProperty('--ed11y-activeColor', Theme.panelBarText);
+  document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
+  document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
+  if (typeof UI.panelToggle.querySelector === 'function') {
+    UI.panel?.classList.remove('ed11y-errors', 'ed11y-warnings');
+    UI.panelCount.textContent = 'i';
+    UI.panelJumpNext.setAttribute('hidden', '');
+    UI.panelToggle.classList.add('disabled');
+    UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleDisabled;
+  }
+}
+const checkRunPrevent = function() {
+  let preventCheck = State.options.preventCheckingIfPresent ?
+    document.querySelector(State.options.preventCheckingIfPresent) :
+    false;
+  if (preventCheck) {
+    console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${State.options.preventCheckingIfPresent}"` );
+  } else if (!preventCheck && !!State.options.preventCheckingIfAbsent) {
+    preventCheck = document.querySelector(`:is(${State.options.preventCheckingIfAbsent})`) === null;
+    if (preventCheck) {
+      console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${State.options.preventCheckingIfAbsent}"`);
+    }
+  }
+  return preventCheck;
+};
+
+const isFullNeeded = function() {
+  if (State.incremental && !State.forceFullCheck && !newIncrementalResults()) {
+    State.forceFullCheck = true;
+  }
+};
+
+function newIncrementalResults() {
+  if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
+    return true;
+  }
+  let newResultString = `${State.errorCount} ${State.warningCount}`;
+  State.results.forEach(result => {
+    newResultString += result.test + result.element.outerHTML;
+  });
+  let changed = newResultString !== State.oldResultString;
+  State.oldResultString = newResultString;
+  return changed;
+}
+
+function dismissThis (dismissalType, all = false) {
+  // Find the active tip and draw its identifying information from the result list
+  let removal = State.openTip;
+  let id = removal.tip.dataset.ed11yResult;
+  let test = State.results[id].test;
+
+  if (all) {
+    State.results.forEach((result) => {
+      if (result.test === test && result.dismissalStatus !==dismissalType) {
+        dismissOne(dismissalType, test, result.dismissalKey);
+      }
+    });
+  } else {
+    let dismissalKey = prepareDismissal(State.results[id].dismissalKey);
+    dismissOne(dismissalType, test, dismissalKey);
+  }
+
+  // Remove tip and reset borders around element
+  resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
+  removal.tip?.parentNode?.removeChild(removal.tip);
+  // TODO EDITING: COMMENT OUT BELOW...SEEMS REDUNDANT?
+  //removal.button?.parentNode?.removeChild(removal.button);
+
+  reset();
+  State.showPanel = true;
+  checkAll();
+
+  let rememberGoto = State.lastOpenTip;
+
+  window.setTimeout(function () {
+    if (State.jumpList.length > 0) {
+      State.lastOpenTip = (rememberGoto - 1);
+      UI.panelJumpNext?.focus();
+    } else {
+      window.setTimeout(function () {
+        UI.panelToggle?.focus();
+      }, 100);
+    }
+  }, 500, rememberGoto);
+
+}
+function toggleShowDismissals () {
+  // todo postpone: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
+  State.ignoreAll = false;
+  State.options.showDismissed = !(State.options.showDismissed);
+  reset();
+  State.showPanel = true;
+  checkAll();
+
+  UI.showDismissed.setAttribute('data-ed11y-pressed', (!!State.options.showDismissed).toString());
+  window.setTimeout(function() {
+    UI.showDismissed.focus();
+  }, 0);
+}
+function togglePanel () {
+  State.ignoreAll = false;
+
+  if (!State.doubleClickPrevent) {
+    // Prevent clicks piling up while scan is running.
+    if (State.running !== true) {
+      State.running = true;
+      // Re-scan each time the panel reopens.
+      if (UI.panel.classList.contains('ed11y-shut') === true) {
+        State.onLoad = false;
+        State.incremental = false;
+        State.showPanel = true;
+        if (State.dismissedCount > 0 && State.warningCount === 0 && State.errorCount === 0) {
+          State.options.showDismissed = false;
+          toggleShowDismissals();
+        } else {
+          checkAll();
+        }
+        State.options.userPrefersShut = false;
+        localStorage.setItem('editoria11yShow', '1');
+      }
+      else {
+        UI.panelToggleTitle.textContent = State.totalCount > 0 ? M.buttonShowAlerts : M.buttonShowNoAlert;
+        State.options.showDismissed = false;
+        reset();
+        State.options.userPrefersShut = true;
+        localStorage.setItem('editoria11yShow', '0');
+      }
+    }
+  }
+  State.doubleClickPrevent = true;
+  window.setTimeout(function () {
+    State.doubleClickPrevent = false;
+  }, 200);
+  return false;
+}
+
+class Ed11yElementPanel extends HTMLElement {
+
+  constructor() {
+    super();
+  }
+
+  // todo mvp parameterize
+  template() {
+    // TODO: CHANGE FROM VISIBILITY TO WIDTH TOGGLES SO FOCUS WORKS
+    // Todo: details summary language params
+    // todo: don't switch both label and aria-expanded on show hidden
+    return `
+    <div class='ed11y-buttonbar'>
+      <button id='ed11y-show-hidden' data-ed11y-pressed='false' hidden>
+        <svg aria-hidden="true" class="shown" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="9 0 640 512"><path fill="Currentcolor" d="M288 32c-81 0-146 37-193 81C49 156 17 208 3 244c-3 8-3 17 0 25C17 304 49 356 95 399C142.5 443 207 480 288 480s146-37 193-81c47-44 78-95 93-131c3-8 3-17 0-25c-15-36-46-88-93-131C434 69 369 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35-29 64-64 64c-7 0-14-1-20-3c-6-2-12 2-12 7c.3 7 1 14 3 21c14 51 66 82 118 68s82-66 68-118c-11-42-48-69-89-71c-6-.2-9 6-7 12c2 6 3 13 3 20z"/></svg>
+        <svg aria-hidden="true" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="39 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>
+        <span class="ed11y-sr-only"></span>
+      </button>
+      <button id='ed11y-visualize' data-ed11y-pressed="false" class='ed11y-panel-fa'>
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 10 512 512"><path fill="Currentcolor" d="M152 38c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 113C-2 104-2 88 7 79s25-9 34 0l22 22 55-61c9-10 24-11 34-2zm0 160c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 273c-9-9-9-25 0-34s25-9 35 0l22 22 55-61c9-10 24-11 34-2zM224 96c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zm0 160c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zM160 416c0-18 14-32 32-32l288 0c18 0 32 14 32 32s-14 32-32 32l-288 0c-18 0-32-14-32-32zM48 368a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/></svg>
+        <span class="ed11y-sr-only"></span>
+      </button>
+      <div id='ed11y-visualizers' class="content" hidden>
+          <details id="ed11y-headings-tab">
+              <summary>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M0 96C0 78 14 64 32 64l384 0c18 0 32 14 32 32s-14 32-32 32L32 128C14 128 0 114 0 96zM64 256c0-18 14-32 32-32l384 0c18 0 32 14 32 32s-14 32-32 32L96 288c-18 0-32-14-32-32zM448 416c0 18-14 32-32 32L32 448c-18 0-32-14-32-32s14-32 32-32l384 0c18 0 32 14 32 32z"></path></svg> <span class="summary-title"></span>
+              </summary>
+              <div class="details">
+                  <span class="details-title"></span>
+                  <ul id='ed11y-outline'></ul>
+              </div>
+          </details>
+          <details id="ed11y-alts-tab">
+            <summary>
+                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg> <span class="summary-title"></span>
+            </summary>
+            <div class="details">
+                <span class="details-title"></span>
+                <ul id='ed11y-alt-list'></ul>
+            </div>
+        </details>
+        </div>
+      <button type='button' id='ed11y-toggle'><span class="ed11y-sr-only">Show alerts</span><span class="ed11y-toggle-circle"><span class='icon'><svg class="errors-icon" xmlns="http://www.w3.org/2000/svg" width="10" aria-hidden="true" viewBox="0 0 448 512"><path fill="currentColor" d="M64 32C64 14 50 0 32 0S0 14 0 32L0 64 0 368 0 480c0 18 14 32 32 32s32-14 32-32l0-128 64-16c41-10 85-5 123 13c44.2 22 96 25 142 7l35-13c13-5 21-17 21-30l0-248c0-23-24-38-45-28l-10 5c-46 23-101 23-147 0c-35-18-75-22-114-13L64 48l0-16z"></path></svg><svg class="pass-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10.1699 19.1777"><path fill="currentColor" d="M3.7031,10.5527c-.3633-.6562-.6426-1.1387-.8379-1.4473l-.3105-.4863-.2344-.3574c-.5117-.7969-1.0449-1.4551-1.5996-1.9746.3164-.2617.6113-.3926.8848-.3926.3359,0,.6348.123.8965.3691s.5918.7148.9902,1.4062c.4531-1.4727,1.0293-2.8691,1.7285-4.1895.3867-.7188.7314-1.2021,1.0342-1.4502s.7041-.3721,1.2041-.3721c.2656,0,.5938.041.9844.123-1.0039.8086-1.8066,1.7695-2.4082,2.8828s-1.3789,3.0762-2.332,5.8887Z"/></svg><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="close-icon" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg></span></span></button>
+      <button class='ed11y-jump next' data-ed11y-goto='0' aria-haspopup="dialog"><svg class="hover-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="11" viewBox="0 -15 90 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m30 00 50 50-50 50" stroke-width="18"></path></svg><span class='toggle-count'></span><span class='jump-next ed11y-sr-only'></span></button>
+     </div>
+    </div>
+    <div id="ed11y-message" aria-live="polite"></div>
+    `;
+  }
+
+  connectedCallback() {
+    if (!this.initialized) {
+
+      this.style.setProperty('outline', '0');
+      this.classList.add('ed11y-element');
+      const shadow = this.attachShadow({mode: 'open'});
+      const wrapper = document.createElement('aside');
+      wrapper.setAttribute('id', 'ed11y-panel');
+      //!!wrapper.setAttribute('aria-label', M.panelControls);
+      wrapper.classList.add('ed11y-wrapper', 'ed11y-panel-wrapper', 'ed11y-pass', 'ed11y-preload');
+      wrapper.innerHTML = this.template();
+      shadow.appendChild(wrapper);
+      const panelTabs = wrapper.querySelectorAll('.ed11y-buttonbar button');
+      panelTabs.forEach(tab => {
+        // todo: syntax could be shrunk now that these aren't tabs.
+        tab.addEventListener('click', this.handleBarClick);
+      });
+      const altDetails = wrapper.querySelector('#ed11y-alts-tab');
+      const headingDetails = wrapper.querySelector('#ed11y-headings-tab');
+      altDetails.addEventListener('toggle', () => {
+        if (altDetails.open && headingDetails.open) {
+          headingDetails.removeAttribute('open');
+        }
+      });
+      headingDetails.addEventListener('toggle', () => {
+        if (altDetails.open && headingDetails.open) {
+          altDetails.removeAttribute('open');
+        }
+      });
+      this.initialized = true;
+    }
+  }
+/*
+  // @todo fix.
+  oldJumpTo(event) {
+    // Handle jump
+    event.preventDefault();
+    State.toggledFrom = event.target.closest('button');
+    if (!State.open) {
+      togglePanel();
+      window.setTimeout(function() {
+        jumpTo(1);
+      },500);
+    } else {
+      jumpTo(1);
+    }
+  }
+*/
+
+  handleBarClick(event) {
+    event.preventDefault();
+    UI.message.textContent = '';
+    let id = event.currentTarget.getAttribute('id');
+    switch (id) {
+    case 'ed11y-toggle':
+      togglePanel();
+      break;
+    case 'ed11y-show-hidden':
+      toggleShowDismissals();
+      break;
+    case 'ed11y-visualize':
+      if (!State.open) {
+        togglePanel();
+      }
+      visualize();
+      break;
+    }
+  }
+}
+
+class Ed11yElementHeadingLabel extends HTMLElement {
+  constructor() {
+    super();
+  }
+  connectedCallback() {
+    if (!this.initialized) {
+      const shadow = this.attachShadow({mode: 'open'});
+      let wrapper = document.createElement('div');
+      wrapper.classList.add('ed11y-wrapper', 'ed11y-heading-wrapper');
+      let i = this.dataset.ed11yHeadingOutline;
+      let result = State.headingOutline[i];
+      wrapper.innerHTML = 'H' + result.headingLevel;
+      let issues = !!result.type;
+      wrapper.classList.add('issue' + issues);
+      let fontSize = Math.max(52 - 8 * result.headingLevel, 12);
+      wrapper.style.setProperty('font-size', fontSize + 'px');
+      shadow.appendChild(wrapper);
+      this.initialized = true;
+    }
+  }
+}
+
+class Ed11yElementTip extends HTMLElement {
+  /* global Ed11y */
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    if (!this.initialized && this.result) {
+      this.renderOnce();
+    }
+  }
+  renderOnce() {
+    this.initialized = true;
+    this.open = true;
+    this.style.setProperty('opacity', '0');
+    this.style.setProperty('outline', '0px solid transparent');
+    const shadow = this.attachShadow({mode: 'open'});
+
+    this.wrapper = document.createElement('div');
+    this.wrapper.setAttribute('role', 'dialog');
+
+    this.dismissable = this.result.dismissalKey !== false;
+    this.dismissed = !!this.result.dismissalStatus;
+    this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
+    this.wrapper.setAttribute('aria-label',
+      `${M.issue}
+        ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1}`);
+
+    this.addEventListener('mouseover', this.handleHover);
+
+    UI.attachCSS(this.wrapper);
+
+    this.tip = document.createElement('div');
+    this.tip.classList.add('tip');
+
+    let content = document.createElement('div');
+    content.classList.add('content');
+    this.heading = document.createElement('div');
+    this.heading.classList.add('title');
+    this.heading.setAttribute('tabindex', '-1');
+    this.heading.innerHTML = M[this.result.test].title;
+    content.append(this.heading);
+    const alertBox = document.createElement('div');
+    alertBox.classList.add('ed11y-tip-alert');
+    this.heading.insertAdjacentElement('afterbegin', alertBox);
+
+    let innerContent = document.createElement('div');
+    innerContent.innerHTML = this.result.content;
+    content.append(innerContent);
+
+    if (!State.options.inlineAlerts || State.options.editLinks) {
+      const editBar = document.createElement('div');
+
+      if (!State.options.inlineAlerts) {
+        editBar.classList.add('ed11y-tip-dismissals');
+        const focusTransfer = document.createElement('button');
+        const transferIcon = document.createElement('span');
+        transferIcon.classList.add('ed11y-transfer-icon');
+        transferIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 256 512"><path fill="currentColor" d="M0 29C-1 47 12 62 29 64l8 1C71 67 96 95 96 128L96 224l-32 0c-18 0-32 14-32 32s14 32 32 32l32 0 0 96c0 33-26 61-59 64l-8 1C12 450-1 465 0 483s17 31 35 29l8-1c34-3 64-19 85-43c21 24 51 40 85 43l8 1c18 2 33-12 35-29s-12-33-29-35l-8-1C186 445 160 417 160 384l0-96 32 0c18 0 32-14 32-32s-14-32-32-32l-32 0 0-96c0-33 26-61 59-64l8-1c18-2 31-17 29-35S239-1 221 0l-8 1C179 4 149 20 128 44c-21-24-51-40-85-43l-8-1C17-1 2 12 0 29z"/></svg>';
+        focusTransfer.textContent = M.transferFocus;
+        focusTransfer.prepend(transferIcon);
+        focusTransfer.classList.add('dismiss', 'ed11y-transfer-focus');
+        editBar.append(focusTransfer);
+        focusTransfer.addEventListener('click', function(){transferFocus();});
+      } else {
+        editBar.classList.add('ed11y-custom-edit-links');
+        editBar.append(State.options.editLinks.cloneNode(true));
+      }
+      content.append(editBar);
+    }
+
+    // Draw dismiss or restore buttons
+    if (this.dismissable) {
+
+      const buttonBar = document.createElement('div');
+      buttonBar.classList.add('ed11y-tip-dismissals');
+
+      const dismissIcon = document.createElement('span');
+      dismissIcon.classList.add('ed11y-dismiss-icon');
+      dismissIcon.innerHTML = '<svg aria-hidden="true" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>';
+
+      // Dismissal Key is set in [5] if alert has been dismissed.
+      if (State.options.showDismissed && this.dismissed) {
+
+        // Check if user has permission to reset this alert.
+        let okd = State.dismissedAlerts[State.options.currentPage][this.result.test][this.result.dismissalKey] === 'ok';
+        if ((okd && State.options.allowOK) || (!okd)) {
+          // User can restore this alert.
+          const undismissButton = document.createElement('button');
+          const unDismissIcon = document.createElement('span');
+          unDismissIcon.classList.add('ed11y-dismiss-icon');
+          unDismissIcon.innerHTML = '<svg aria-hidden="true" class="shown" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="-30 0 640 512"><path fill="Currentcolor" d="M288 32c-81 0-146 37-193 81C49 156 17 208 3 244c-3 8-3 17 0 25C17 304 49 356 95 399C142.5 443 207 480 288 480s146-37 193-81c47-44 78-95 93-131c3-8 3-17 0-25c-15-36-46-88-93-131C434 69 369 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35-29 64-64 64c-7 0-14-1-20-3c-6-2-12 2-12 7c.3 7 1 14 3 21c14 51 66 82 118 68s82-66 68-118c-11-42-48-69-89-71c-6-.2-9 6-7 12c2 6 3 13 3 20z"/></svg>';
+          undismissButton.classList.add('dismiss');
+          undismissButton.textContent = okd ? M.undismissOKButton : M.undismissHideButton;
+          undismissButton.prepend(unDismissIcon);
+          buttonBar.append(undismissButton);
+          undismissButton.addEventListener('click', function(){dismissThis('reset');});
+        } else {
+          const restoreNote = document.createElement('div');
+          restoreNote.classList.add('dismissed-note');
+          restoreNote.textContent = M.undismissNotePermissions;
+          buttonBar.append(restoreNote);
+        }
+      } else {
+
+        const pageActions = document.createElement('details');
+        const pageActionsSummary = document.createElement('summary');
+        const othersLikeThis = State.results.filter(el => el.test === this.result.test).length;
+        const showPageActions = othersLikeThis > 3 && State.options.allowHide && State.options.allowOK;
+
+        if (showPageActions) {
+          pageActions.classList.add('ed11y-bulk-actions', 'dismiss');
+          pageActionsSummary.textContent = M.dismissActions(othersLikeThis);
+          pageActions.appendChild(pageActionsSummary);
+          buttonBar.appendChild(pageActions);
+        }
+
+        if (State.options.allowOK) {
+          const check = document.createElement('span');
+          check.setAttribute('aria-hidden', 'true');
+          check.textContent = '✓';
+
+          const OkButton = document.createElement('button');
+          OkButton.classList.add('dismiss');
+          if (State.options.syncedDismissals) {
+            OkButton.setAttribute('title', M.dismissOkTitle);
+          }
+          OkButton.textContent = M.dismissOkButtonContent;
+          buttonBar.prepend(OkButton);
+
+          if (showPageActions) {
+            const OkAllButton = OkButton.cloneNode(true);
+            OkAllButton.textContent = M.dismissOkAllButton;
+            OkAllButton.prepend(check.cloneNode(true));
+            pageActions.append(OkAllButton);
+            OkAllButton.addEventListener('click', function(){dismissThis('ok', true);});
+          }
+
+          OkButton.prepend(check);
+
+          OkButton.addEventListener('click', function(){dismissThis('ok');});
+        }
+
+        if (State.options.allowHide) {
+          const ignoreButton = document.createElement('button');
+          ignoreButton.classList.add('dismiss');
+          // todo parameterize
+          if (State.options.syncedDismissals) {
+            ignoreButton.setAttribute('title', M.dismissHideTitle);
+          }
+          ignoreButton.textContent = M.dismissHideButtonContent;
+          ignoreButton.prepend(dismissIcon.cloneNode(true));
+          buttonBar.prepend(ignoreButton);
+          ignoreButton.addEventListener('click', function(){dismissThis('hide');});
+
+          if (showPageActions) {
+            const ignoreAllButton = document.createElement('button');
+            ignoreAllButton.classList.add('dismiss');
+            ignoreAllButton.textContent = M.dismissHideAllButton;
+            ignoreAllButton.prepend(dismissIcon.cloneNode(true));
+            pageActionsSummary.insertAdjacentElement('afterend', ignoreAllButton);
+            ignoreAllButton.addEventListener('click', function(){dismissThis('hide', true);});
+          }
+        }
+      }
+
+
+      content.append(buttonBar);
+    }
+    this.tip.append(content);
+
+    this.navBar = document.createElement('div');
+    this.navBar.classList.add('ed11y-tip-header');
+    this.count = document.createElement('div');
+    this.count.classList.add('ed11y-tip-count');
+    this.count.textContent = `${M.issue} ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1} / ${State.jumpList.length}`;
+    this.navBar.append(this.count);
+    if (State.jumpList.length > 1) {
+      this.prev = document.createElement('button');
+      this.prev.classList.add('ed11y-tip-prev');
+      this.prev.setAttribute('aria-label', M.buttonPrevContent);
+      this.prev.setAttribute('title', M.buttonPrevContent);
+      this.prev.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 -10 30 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m40 100,-50 -50 50-50 50"></path></svg>';
+      this.prev.addEventListener('click', (event) => {
+        event.preventDefault();
+        jumpTo(-1);
+      });
+      this.navBar.append(this.prev);
+
+      this.next = document.createElement('button');
+      this.next.classList.add('ed11y-tip-next');
+      this.next.setAttribute('aria-label', M.buttonNextContent);
+      this.next.setAttribute('title', M.buttonNextContent);
+      this.next.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 120 120" width="10"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m30 00 50 50-50 50"></path></svg>';
+      this.next.addEventListener('click', (event) => {
+        event.preventDefault();
+        jumpTo(1);
+      });
+      this.navBar.append(this.next);
+    }
+    this.help = document.createElement('details');
+    this.help.classList.add('button');
+    this.helpContent = document.createElement('div');
+    this.helpContent.classList.add('ed11y-tip-help-content');
+    this.helpContent.innerHTML = M.panelHelp;
+    this.help.append(this.helpContent);
+    this.helpToggle = document.createElement('summary');
+    this.helpToggle.textContent = '?';
+    this.helpToggle.setAttribute('aria-label', M.panelHelpTitle);
+    this.helpToggle.setAttribute('title', M.panelHelpTitle);
+    this.help.insertAdjacentElement('afterbegin', this.helpToggle);
+    this.navBar.append(this.help);
+
+    let closeButton = document.createElement('button');
+    closeButton.setAttribute('aria-label',M.closeTip);
+    closeButton.setAttribute('title',M.closeTip);
+    closeButton.classList.add('close');
+    closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"/></svg>';
+    this.navBar.append(closeButton);
+    this.tip.append(this.navBar);
+
+    let arrow = document.createElement('div');
+    arrow.classList.add('arrow');
+    closeButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      if(this.open) {
+        // todo this needs to be part of the shadow DOM query I think
+        let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
+        if (State.toggledFrom) {
+          State.toggledFrom.focus();
+        }
+        // todo postpone: track if this tip was opened by the next button. If so, transfer focus back to it instead
+        toggle?.setAttribute('data-ed11y-action', 'shut');
+        this.setAttribute('data-ed11y-action', 'shut');
+      }
+    });
+    document.addEventListener('click', (event) => {
+      // Close tip when mouse is clicked outside it.
+      if(this.open && !event.target.closest('ed11y-element-tip, ed11y-element-result, ed11y-element-panel')) {
+        let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
+        toggle?.setAttribute('data-ed11y-action', 'shut');
+        this.setAttribute('data-ed11y-action', 'shut');
+      }
+    });
+    shadow.appendChild(this.wrapper);
+    let focusLoopLeft = document.createElement('div');
+    focusLoopLeft.setAttribute('tabIndex', '0');
+    let focusLoopRight = document.createElement('div');
+    focusLoopRight.setAttribute('tabindex', '0');
+    this.wrapper.appendChild(focusLoopLeft);
+    this.wrapper.appendChild(arrow);
+    this.wrapper.appendChild(this.tip);
+    this.wrapper.appendChild(focusLoopRight);
+    let focusables = this.wrapper.querySelectorAll('a, button, [tabindex="0"]');
+    let count = focusables.length;
+    focusables[0].addEventListener('focus', () => {
+      focusables[count - 2].focus();
+    });
+    focusables[count - 1].addEventListener('focus', () => {
+      focusables[1].focus();
+    });
+    this.initialized = true;
+    this.rendering = false;
+  }
+
+  toggleTip(changeTo) {
+    if (changeTo) {
+      this.wrapper.classList.add('open');
+      alertOnInvisibleTip(this.result.toggle, this.result.element);
+    } else {
+      this.wrapper.classList.remove('open');
+    }
+    this.setAttribute('data-ed11y-open',changeTo);
+  }
+
+  static get observedAttributes() { return ['data-ed11y-action']; }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (!this.initialized && this.result) {
+      this.renderOnce();
+    }
+    if (this.initialized) {
+      switch (attr) {
+      case 'data-ed11y-action':
+        if (newValue !== 'false') {
+          let changeTo = newValue === 'open';
+          this.open = changeTo;
+          this.setAttribute('data-ed11y-action', 'false');
+          this.toggleTip(changeTo);
+        }
+        break;
+      }
+    }
+  }
+}
+
+class Ed11yElementAlt extends HTMLElement {
+  /* global Ed11y */
+
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    if (!this.initialized) {
+      const shadow = this.attachShadow({mode: 'open'});
+      let altTextWrapper = document.createElement('div');
+      altTextWrapper.classList.add('ed11y-wrapper','ed11y-alt-wrapper');
+      let img = UI.imageAlts[this.dataset.ed11yImg];
+      // img[el, src, altLabel, altStyle]
+
+      let altSpan = document.createElement('span');
+      altSpan.textContent = img[2];
+      altSpan.classList.add(img[3]);
+      altTextWrapper.appendChild(altSpan);
+      UI.attachCSS(altTextWrapper);
+      shadow.appendChild(altTextWrapper);
+      this.initialized = true;
+    }
+  }
+
+}
+
+class Ed11yElementResult extends HTMLElement {
+  /* global Ed11y */
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    if (!this.initialized) {
+      this.open = false;
+      this.racing = false;
+      this.style.setProperty('outline', '0px solid transparent');
+
+      this.initialized = true;
+    }
+  }
+
+  handleHover(event) {
+    event.preventDefault();
+    let host = this.getRootNode().host;
+    if (!this.classList.contains('intersecting') && host.open !== true && host.racing === false) {
+      this.open = true;
+      host.racing = true;
+      host.toggleTip(true);
+      State.toggledFrom = this;
+      window.setTimeout(function () {
+        host.racing = false;
+      }, 250, host);
+    }
+  }
+
+  handleFocus() {
+    let host = this.getRootNode().host;
+    if (this.getRootNode().host.classList.contains('ed11y-offscreen')) {
+      host.result.element.scrollIntoView();
+      alignButtons();
+    }
+  }
+
+  toggleClick(event) {
+    event.preventDefault();
+    let host = this.getRootNode().host;
+    // Todo: extremely fast clicks throw TypeError: e is null
+    if (host.racing === false) {
+      host.racing = true;
+      State.toggledFrom = this;
+      let stateChange = host.getAttribute('data-ed11y-open') === 'false' ? 'open' : 'close';
+      host.setAttribute('data-ed11y-action', stateChange);
+      if (stateChange === 'open') {
+        window.setTimeout(function () {
+          let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+          activeTip?.shadowRoot.querySelector('.title').focus();
+        }, 500);
+      }
+      window.setTimeout(function () {
+        host.racing = false;
+      }, 250, host);
+    }
+
+  }
+
+  closeOtherTips() {
+    if (State.openTip.button) {
+      State.openTip.button.setAttribute('data-ed11y-action', 'close');
+    }
+  }
+
+  buildTip() {
+    this.tipNeedsBuild = false;
+
+    let tip = document.createElement('ed11y-element-tip');
+    tip.result = this.result;
+    tip.setAttribute('data-ed11y-result', this.resultID);
+    tip.classList.add('ed11y-element');
+    tip.style.setProperty('opacity', '0');
+    State.panelAttachTo.insertAdjacentElement('beforeend', tip);
+    this.tip = tip;
+  }
+
+  toggleTip(changeTo) {
+    if (this.tipNeedsBuild) {
+      this.buildTip();
+    }
+    this.toggle.setAttribute('aria-expanded', changeTo);
+    let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
+    if (State.options.inlineAlerts) {
+      resetClass([
+        'ed11y-hidden-highlight',
+        'ed11y-ring-red',
+        'ed11y-ring-yellow',
+        'ed11y-warning-block',
+        'ed11y-error-block',
+        'ed11y-warning-inline',
+        'ed11y-error-inline',
+      ]);
+    } else {
+      editableHighlighter(this.resultID, changeTo);
+    }
+    if (changeTo === true) {
+      this.tip.style.setProperty('opacity', '0');
+      // Allow for themes to reveal hidden tips
+      document.dispatchEvent(new CustomEvent('ed11yPop', {
+        detail: {
+          id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result'),
+          result: this.result,
+          tip: this.tip
+        }
+      }));
+      this.closeOtherTips();
+      this.tip.setAttribute('data-ed11y-action', 'open');
+      if (State.options.inlineAlerts) {
+        this.result.element.classList.add(highlightOutline);
+        // Removed in 2.3.6; Todo: confirm not needed and delete.
+        /*if (this.result.element.style.outline.indexOf('alert') === -1 ) {
+          // Set property unless alert is already set.
+          const display = window.getComputedStyle(this.result.element).getPropertyValue('display');
+          let outlineClass;
+          if (display.indexOf('inline') === -1 || this.result.element.tagName === 'IMG') {
+            outlineClass = this.result.dismissalKey ?
+              'ed11y-warning-block'
+              : 'ed11y-error-block';
+          } else {
+            outlineClass = this.result.dismissalKey ?
+              'ed11y-warning-inline'
+              : 'ed11y-error-inline';
+          }
+          this.result.element.classList.add(outlineClass);
+        }*/
+      }
+      requestAnimationFrame(()=>alignTip(this.toggle, this.tip, 4, true));
+      if (!State.jumpList) {
+        buildJumpList();
+      }
+      State.lastOpenTip = Number(this.getAttribute('data-ed11y-jump-position'));
+      State.openTip = {
+        button: this,
+        tip: this.tip,
+      };
+      this.result.highlight?.style.setProperty('opacity', '1');
+    } else {
+      // Allow for themes to restore original DOM/CSS
+      document.dispatchEvent(new CustomEvent('ed11yShut', {
+        detail: { id: 'ed11y-result-' + this.toggle.getAttribute('data-ed11y-result') }
+      }));
+      this.tip.setAttribute('data-ed11y-action', 'shut');
+      this.result.highlight?.style.setProperty('opacity', '0');
+      State.openTip = {
+        button: false,
+        tip: false,
+      };
+    }
+    this.setAttribute('data-ed11y-open', changeTo);
+    this.open = changeTo;
+  }
+
+
+  static get observedAttributes() { return ['data-ed11y-action']; }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (this.initialized) {
+      switch (attr) {
+      case 'data-ed11y-action':
+        if (newValue !== 'false') {
+          let changeTo = newValue === 'open';
+          this.setAttribute('data-ed11y-action', 'false');
+          this.toggleTip(changeTo);
+        }
+        break;
+      }
+    }
+  }
+}
+
+class Ed11y {
 
   constructor(options) {
 
@@ -6626,18 +6935,12 @@ class Ed11y$1 {
 
     Object.assign(M, ed11yLang['en'], ed11yLang[State.options.lang]);
 
-    Object.assign(Theme, State.options[State.options.theme]);
-    Theme.baseFontSize = State.options.baseFontSize;
-    Theme.buttonZIndex = State.options.buttonZIndex;
-    Theme.baseFontFamily = State.options.baseFontFamily;
-
-    if (State.options.currentPage === false) {
-      State.options.currentPage = window.location.pathname;
-    }
-
-    if (!State.options.linkStringsNewWindows) {
-      State.options.linkStringsNewWindows = M.linkStringsNewWindows;
-    }
+    customElements.define('ed11y-element-alt', Ed11yElementAlt);
+    customElements.define('ed11y-element-result', Ed11yElementResult);
+    customElements.define('ed11y-element-heading-label',
+      Ed11yElementHeadingLabel);
+    customElements.define('ed11y-element-panel', Ed11yElementPanel);
+    customElements.define('ed11y-element-tip', Ed11yElementTip);
 
     window.addEventListener('keydown', () => {
       State.interaction = true;
@@ -6646,41 +6949,15 @@ class Ed11y$1 {
       State.interaction = true;
     });
 
-    // Move toggles when something expands or collapses.
-    const mightExpand = document.querySelectorAll('[aria-expanded], [aria-controls]');
-    mightExpand?.forEach(expandable => {
-      expandable.addEventListener('click', () => {
-        window.setTimeout(() => {
-          windowResize();
-        }, 333);
-      });
-    });
-
-    // Escape key closes panels.
-    const escapeWatch = function (event) {
-      if (event.keyCode === 27) {
-        if (event.target.closest('ed11y-element-panel') && UI$1.panelToggle.getAttribute('aria-expanded') === 'true') {
-          UI$1.panelToggle.focus();
-          UI$1.panelToggle.click();
-        } else if (event.target.hasAttribute('data-ed11y-open')) {
-          if (State.openTip.button) {
-            State.toggledFrom.focus();
-            State.openTip.button.shadowRoot.querySelector('button').click();
-          }
-        }
-      }
-    };
-    document.addEventListener('keyup', function (event) {escapeWatch(event); });
-
-
     if (CSS.supports('selector(:has(body))')) {
       makeItSo();
     } else {
       console.warn(M.consoleNotSupported);
     }
 
+    /* Export exposed interfaces */
     this.checkAll = checkAll();
   }
 }
 
-export { Ed11y$1 as Ed11y, Lang, checkAll };
+export { Ed11y, Lang, checkAll };

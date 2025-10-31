@@ -1,14 +1,11 @@
-import ed11yLang from '../lang/localization.js';
-//import * as Utils from './utils.js';
 import defaultOptions from '../../node_modules/sa11y/src/js/utils/default-options';
 import Constants from '../../node_modules/sa11y/src/js/utils/constants.js';
-import {State, Theme, UI} from "./state.js";
+import {M, State, Theme, UI} from "./state.js";
 
 const Options = (function options() {
   /* **************** */
   /* Global constants */
   /* **************** */
-  const Global = {};
   let ed11yLang = {};
   let ed11yDefaults = {
 
@@ -342,7 +339,6 @@ const Options = (function options() {
     return options;
   }
 
-  const Sync = {};
   function postProcessOptions(option) {
     // @todo merge: test: does this need descendant selector?
     Constants.Exclusions.Sa11yElements = ['.ed11y-element'];
@@ -359,6 +355,20 @@ const Options = (function options() {
     Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
 
     State.currentPage = options.currentPage ? options.currentPage : window.location.currentPage;
+
+    Object.assign(Theme, State.options[State.options.theme]);
+    Theme.baseFontSize = State.options.baseFontSize;
+    Theme.buttonZIndex = State.options.buttonZIndex;
+    Theme.baseFontFamily = State.options.baseFontFamily;
+
+    // @todo this is probably getting provided by Sa11y
+    if (State.options.currentPage === false) {
+      State.options.currentPage = window.location.pathname;
+    }
+
+    if (!State.options.linkStringsNewWindows) {
+      State.options.linkStringsNewWindows = M.linkStringsNewWindows;
+    }
     // @todo merge remove wpadminbar from defaults and update wp module.
     /*Exclusions.Container = ['#wpadminbar', '#wpadminbar *', ...exclusions];
     if (option.containerIgnore) {

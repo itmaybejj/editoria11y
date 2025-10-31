@@ -1,6 +1,92 @@
+import {debounce} from "sa11y/src/js/utils/utils.js";
 import {State, UI} from "../utils/state.js";
-import {visible} from "../utils/utils.js";
-import {alignHighlights} from "./interface.js";
+import {findElements, firstVisibleParent, visible} from "../utils/utils.js";
+
+export function incrementalAlign() {
+  debounce(() => {
+    if (!State.running && !State.alignPending) {
+      State.scrollPending++;
+      updateTipLocations();
+      State.alignPending = false;
+    } else {
+      incrementalAlign();
+    }
+  }, 10);
+}
+
+export const intersect = function(a, b, x = 10) {
+  // Compute intersect using browser offsets.
+  return (a.left - x <= b.right &&
+    b.left - x <= a.right &&
+    a.top - x <= b.bottom &&
+    b.top - x <= a.bottom);
+};
+
+/**
+ * Hide tips that are in front of text currently being edited.
+ * */
+export function checkEditableIntersects (focusKnown = false) {
+  if (!focusKnown && !document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
+    //Reset classes to measure.
+    State.jumpList?.forEach((el) => {
+      el.classList.remove('intersecting');
+    });
+    return;
+  }
+  if (!State.activeRange) {
+    // Range isn't on a node we can measure.
+    State.jumpList?.forEach((el) => {
+      el.classList.remove('intersecting');
+    });
+    return;
+  }
+  State.jumpList?.forEach((el) => {
+    const framePositioner = el.result.fixedRoot && State.positionedFrames[el.result.fixedRoot] ?
+      State.positionedFrames[el.result.fixedRoot] : { top: 0, left: 0 };
+    const activeRects = State.activeRange.getBoundingClientRect();
+    const rects = {};
+    rects.top = activeRects.top + framePositioner.top;
+    rects.left = activeRects.left + framePositioner.left;
+    rects.bottom = activeRects.bottom + framePositioner.top;
+    rects.right = activeRects.right + framePositioner.left;
+
+    const toggle = el.shadowRoot.querySelector('.toggle');
+    if ( intersect(rects, toggle.getBoundingClientRect(), 0) ) {
+      if (!toggle.classList.contains('was-intersecting')) {
+        el.classList.add('intersecting');
+        toggle.classList.add('intersecting');
+      }
+    } else {
+      el.classList.remove('intersecting', 'was-intersecting');
+      toggle.classList.remove('intersecting', 'was-intersecting');
+    }
+  });
+}
+
+export function alignAlts () {
+  // Positions alt label to match absolute, inline or floated images.
+  findElements('altMark', 'ed11y-element-alt');
+  State.elements.altMark?.forEach((el) => { // @todo merge
+    let id = el.dataset.ed11yImg;
+    el.style.setProperty('transform', null);
+    el.style.setProperty('height', null);
+    el.style.setProperty('width', null);
+
+    let img = UI.imageAlts[id][0];
+    if (img.tagName !== 'IMG') {
+      // Mark is placed outside the link in linked images.
+      img = img.querySelector('img');
+    }
+    let markOffset = el.getBoundingClientRect();
+    let imgOffset = img.getBoundingClientRect();
+    let newOffset = imgOffset.left - markOffset.left;
+    let height = getComputedStyle(img).height;
+    height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
+    el.style.setProperty('transform', `translate(${newOffset}px, 0px)`);
+    el.style.setProperty('height', `${height}px`);
+    el.style.setProperty('width', `${img.offsetWidth}px`);
+  });
+}
 
 
 const nudgeMark = function (el, x, y) {
@@ -247,7 +333,6 @@ export function alignButtons() {
 
 }
 
-
 export function alignTip (button, toolTip, recheck = 0, reveal = false) {
   if (!toolTip) {
     return;
@@ -473,7 +558,50 @@ export function closestScrollable(el) {
     // No scrollable parents.
     return false;
   }
-};
+}
+
+export function alignHighlights() {
+
+  if (State.options.fixedRoots && UI.editableHighlight.length > 0) {
+    State.positionedFrames = [];
+
+    State.options.fixedRoots.forEach((root) => {
+      if (root['framePositioner']) {
+        State.positionedFrames.push(root['framePositioner'].getBoundingClientRect());
+      }
+    });
+  }
+
+  UI.editableHighlight.forEach((el) => {
+
+    if (!State.results[el.resultID]) {
+      State.interaction = true;
+      State.forceFullCheck = true;
+      UI.editableHighlight = [];
+      incrementalCheck(true);
+      return false;
+    }
+
+    const framePositioner = State.results[el.resultID].fixedRoot && State.positionedFrames[State.results[el.resultID].fixedRoot] ?
+      State.positionedFrames[State.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
+
+    let targetOffset = el.target.getBoundingClientRect();
+    if (!visible(el.target)) {
+      // Invisible target.
+      const theVisibleParent = firstVisibleParent(el.target);
+      targetOffset = theVisibleParent ? theVisibleParent.getBoundingClientRect() : targetOffset;
+    }
+
+    // @todo why is setProperty failing?
+    console.log('has set property?')
+    console.log(el.highlight);
+
+    el.highlight.style.setProperty('width', targetOffset.width + 6 + 'px');
+    el.highlight.style.setProperty('top', targetOffset.top + framePositioner.top + window.scrollY - 3 + 'px');
+    el.highlight.style.setProperty('left', targetOffset.left + framePositioner.left - 3 + 'px');
+    el.highlight.style.setProperty('height', targetOffset.height + 6 + 'px');
+  });
+}
 
 const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size = 17) {
   // Yes this looks like intersect const, but it's math not browser offsets.

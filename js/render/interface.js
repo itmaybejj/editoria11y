@@ -1,23 +1,44 @@
 import {M, State, Theme, UI} from "../utils/state.js";
-import {alignButtons, alignPanel, closestScrollable} from "./align.js";
-import * as Util from "../utils/utils.js";
 import {
-  checkEditableIntersects, incrementalCheck,
-  intersectionObservers,
-  pauseObservers, resumeObservers, startObserver
-} from "../utils/observers.js";
-import {computeText, findElements, jumpTo, resetClass} from "../utils/utils.js";
-import {checkAll, countAlerts} from "../utils/check.js";
+  computeText,
+  findElements, firstVisibleParent, raceCrash,
+  resetClass,
+  visible
+} from "../utils/utils.js";
+import ed11yLang from "../lang/localization.js";
+import {debounce} from "sa11y/src/js/utils/utils.js";
+import {
+  alignButtons,
+  alignHighlights,
+  alignPanel,
+  checkEditableIntersects, closestScrollable, updateTipLocations
+} from "./align.js";
 import {visualize} from "./visualizers.js";
+import {
+  incrementalCheck, intersectionObservers,
+  pauseObservers,
+  resumeObservers, startObserver
+} from "../utils/observers.js";
+
+export function showResults () {
+  buildJumpList();
+  // Announce that buttons have been placed.
+  document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
+  alignButtons();
+  if (!State.options.inlineAlerts) {
+    checkEditableIntersects();
+    intersectionObservers();
+  }
+}
 
 export function updatePanel () {
 
   pauseObservers();
   // Stash old values for incremental updates.
-  countAlerts();
+
   if (State.incremental) {
     // Check for a change in the result counts.
-    if (State.forceFullCheck || newIncrementalResults()) {
+    if (State.forceFullCheck) {
       State.forceFullCheck = false;
       /*if (State.options.alertMode === 'assertive' && State.totalCount > 0 && (State.warningCount > oldWarnings || State.errorCount > oldErrors)) {
         console.warn('forced open');
@@ -92,8 +113,8 @@ export function updatePanel () {
       UI.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = M.buttonAltsContent;
       UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = M.panelCheckAltText;
       UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = M.buttonFirstContent;
-
       UI.panel.setAttribute('aria-label', M.panelControls);
+
       if (State.options.reportsURL) {
         let reportLink = document.createElement('a');
         reportLink.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M0 96C0 61 29 32 64 32l384 0c35 0 64 29 64 64l0 320c0 35-29 64-64 64L64 480c-35 0-64-29-64-64L0 96zm64 0l0 64 64 0 0-64L64 96zm384 0L192 96l0 64 256 0 0-64zM64 224l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64zM64 352l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64z"/></svg><span class="ed11y-sr-only"></span>';
@@ -105,6 +126,21 @@ export function updatePanel () {
         UI.showDismissed.insertAdjacentElement('beforebegin', reportLink);
       }
 
+      // Escape key closes panels.
+      const escapeWatch = function (event) {
+        if (event.keyCode === 27) {
+          if (event.target.closest('ed11y-element-panel') && UI.panelToggle.getAttribute('aria-expanded') === 'true') {
+            UI.panelToggle.focus();
+            UI.panelToggle.click();
+          } else if (event.target.hasAttribute('data-ed11y-open')) {
+            if (State.openTip.button) {
+              State.toggledFrom.focus();
+              State.openTip.button.shadowRoot.querySelector('button').click();
+            }
+          }
+        }
+      };
+      document.addEventListener('keyup', function (event) {escapeWatch(event); });
 
       // Decide whether to open the panel on load.
       if (State.ignoreAll ||
@@ -259,18 +295,53 @@ export function updatePanel () {
 
   resumeObservers();
   State.running = false;
-};
+}
 
-export function showResults () {
-  buildJumpList();
-  // Announce that buttons have been placed.
-  document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
-  alignButtons();
-  if (!State.options.inlineAlerts) {
-    checkEditableIntersects();
-    intersectionObservers();
-  }
-};
+export function buildJumpList () {
+
+  State.jumpList = [];
+  pauseObservers();
+
+  // Initial alignment to get approximate Y position order for jump list.
+  State.results.forEach((result, i) => {
+
+    let top = result.element.getBoundingClientRect().top;
+    if (!top) {
+      const visibleParent = firstVisibleParent(result.element);
+      if (visibleParent) {
+        top = visibleParent.getBoundingClientRect().top;
+      }
+    }
+    top = top + window.scrollY;
+    if (State.options.fixedRoots) {
+      const root = result.element.closest('[data-ed11y-root]');
+      // Todo: it might be faster to associate this with the element finder.
+      State.results[i].fixedRoot = root.dataset.ed11yRoot;
+    }
+    State.results[i].scrollableParent = closestScrollable(result.element);
+    if (State.results[i].scrollableParent) {
+      // Group these together.
+      top = top * 0.000001;
+    }
+    State.results[i].sortPos = top;
+  });
+  // Sort from bottom to top so focus order after insert is top to bottom.
+  State.results.sort((a, b) => b.sortPos - a.sortPos);
+
+  State.results?.forEach(function (result, i) {
+    if (!State.results[i].dismissalStatus || State.options.showDismissed) {
+      drawResult(result, i);
+    }
+  });
+  State.jumpList.forEach((el, i) => {
+    el.dataset.ed11yJumpPosition = `${i}`;
+    const newLabel = `${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}, ${i + 1} / ${State.jumpList.length - 1}`;
+    el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
+  });
+  let tipsPainted = new CustomEvent('ed11yResultsPainted');
+  document.dispatchEvent(tipsPainted);
+  resumeObservers();
+}
 
 // Place markers on elements with issues
 export function drawResult(result, index) {
@@ -360,60 +431,9 @@ export function drawResult(result, index) {
 
   State.jumpList.unshift(mark);
   State.results[index].toggle = mark;
-};
-
-
-export function buildJumpList () {
-
-  State.jumpList = [];
-  pauseObservers();
-
-  // Initial alignment to get approximate Y position order for jump list.
-  State.results.forEach((result, i) => {
-
-    let top = result.element.getBoundingClientRect().top;
-    if (!top) {
-      const visibleParent = Util.firstVisibleParent(result.element);
-      if (visibleParent) {
-        top = visibleParent.getBoundingClientRect().top;
-      }
-    }
-    top = top + window.scrollY;
-    if (State.options.fixedRoots) {
-      const root = result.element.closest('[data-ed11y-root]');
-      // Todo: it might be faster to associate this with the element finder.
-      State.results[i].fixedRoot = root.dataset.ed11yRoot;
-    }
-    State.results[i].scrollableParent = closestScrollable(result.element);
-    if (State.results[i].scrollableParent) {
-      // Group these together.
-      top = top * 0.000001;
-    }
-    State.results[i].sortPos = top;
-  });
-  // Sort from bottom to top so focus order after insert is top to bottom.
-  State.results.sort((a, b) => b.sortPos - a.sortPos);
-
-  State.results?.forEach(function (result, i) {
-    if (!State.results[i].dismissalStatus || State.options.showDismissed) {
-      drawResult(result, i);
-    }
-  });
-  State.jumpList.forEach((el, i) => {
-    el.dataset.ed11yJumpPosition = `${i}`;
-    const newLabel = `${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}, ${i + 1} / ${State.jumpList.length - 1}`;
-    el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
-  });
-  let tipsPainted = new CustomEvent('ed11yResultsPainted');
-  document.dispatchEvent(tipsPainted);
-  resumeObservers();
 }
 
-export function dismissalKey (text) {
-  return String(text).replace(/([^0-9a-zA-Z])/g, '').substring(0, 512);
-};
-
-const dismissOne = function(dismissalType, test, dismissalKey) {
+export function dismissOne(dismissalType, test, dismissalKey) {
 
   // Update dismissal record.
   if (dismissalType === 'reset') {
@@ -454,106 +474,7 @@ const dismissOne = function(dismissalType, test, dismissalKey) {
   window.setTimeout(() => {
     document.dispatchEvent(ed11yDismissalUpdate);
   },100);
-};
-
-export function dismissThis (dismissalType, all = false) {
-  // Find the active tip and draw its identifying information from the result list
-  let removal = State.openTip;
-  let id = removal.tip.dataset.ed11yResult;
-  let test = State.results[id].test;
-
-  if (all) {
-    State.results.forEach((result) => {
-      if (result.test === test && result.dismissalStatus !==dismissalType) {
-        dismissOne(dismissalType, test, result.dismissalKey);
-      }
-    });
-  } else {
-    let dismissalKey = dismissalKey(State.results[id].dismissalKey);
-    dismissOne(dismissalType, test, dismissalKey);
-  }
-
-  // Remove tip and reset borders around element
-  resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
-  removal.tip?.parentNode?.removeChild(removal.tip);
-  // TODO EDITING: COMMENT OUT BELOW...SEEMS REDUNDANT?
-  //removal.button?.parentNode?.removeChild(removal.button);
-
-  reset();
-  State.showPanel = true;
-  checkAll();
-
-  let rememberGoto = State.lastOpenTip;
-
-  window.setTimeout(function () {
-    if (State.jumpList.length > 0) {
-      State.lastOpenTip = (rememberGoto - 1);
-      UI.panelJumpNext?.focus();
-    } else {
-      window.setTimeout(function () {
-        UI.panelToggle?.focus();
-      }, 100);
-    }
-  }, 500, rememberGoto);
-
-};
-
-export function toggleShowDismissals () {
-  // todo postpone: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
-  State.ignoreAll = false;
-  State.options.showDismissed = !(State.options.showDismissed);
-  reset();
-  State.showPanel = true;
-  checkAll();
-
-  UI.showDismissed.setAttribute('data-ed11y-pressed', (!!State.options.showDismissed).toString());
-  window.setTimeout(function() {
-    UI.showDismissed.focus();
-  }, 0);
-};
-
-export function alignHighlights() {
-
-  if (State.options.fixedRoots && UI.editableHighlight.length > 0) {
-    State.positionedFrames = [];
-
-    State.options.fixedRoots.forEach((root) => {
-      if (root['framePositioner']) {
-        State.positionedFrames.push(root['framePositioner'].getBoundingClientRect());
-      }
-    });
-  }
-
-  UI.editableHighlight.forEach((el) => {
-
-    if (!State.results[el.resultID]) {
-      State.interaction = true;
-      State.forceFullCheck = true;
-      UI.editableHighlight = [];
-      incrementalCheck(true);
-      return false;
-    }
-
-    const framePositioner = State.results[el.resultID].fixedRoot && State.positionedFrames[State.results[el.resultID].fixedRoot] ?
-      State.positionedFrames[State.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
-
-    let targetOffset = el.target.getBoundingClientRect();
-    if (!Util.visible(el.target)) {
-      // Invisible target.
-      const firstVisibleParent = Util.firstVisibleParent(el.target);
-      targetOffset = firstVisibleParent ? firstVisibleParent.getBoundingClientRect() : targetOffset;
-    }
-
-    // @todo why is setProperty failing?
-    console.log('has set property?')
-    console.log(el.highlight);
-
-    el.highlight.style.setProperty('width', targetOffset.width + 6 + 'px');
-    el.highlight.style.setProperty('top', targetOffset.top + framePositioner.top + window.scrollY - 3 + 'px');
-    el.highlight.style.setProperty('left', targetOffset.left + framePositioner.left - 3 + 'px');
-    el.highlight.style.setProperty('height', targetOffset.height + 6 + 'px');
-  });
-};
+}
 
 export function editableHighlighter (resultID, show, firstVisible) {
 
@@ -583,82 +504,14 @@ export function editableHighlighter (resultID, show, firstVisible) {
   el.style.setProperty('left', '0');
   alignHighlights();
   el.style.setProperty('opacity', '1');
-};
-
-export function resetResults(incremental) {
-  State.jumpList = [];
-  State.openTip = {
-    button: false,
-    tip: false,
-  };
-  State.lastOpenTip = -1;
-  resetClass([
-    'ed11y-ring-red',
-    'ed11y-ring-yellow',
-    'ed11y-hidden-highlight',
-    'ed11y-warning-inline',
-    'ed11y-warning-block',
-    'ed11y-error-block',
-    'ed11y-error-inline',
-  ]);
-  // Reset insertions into body content.
-  if (incremental) {
-    findElements('reset', 'ed11y-element-highlight', false);
-  } else {
-    findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
-  }
-  State.elements.reset?.forEach((el) => el.remove());
-
-  // Flicker prevention -- leave old tip in place for 100ms.
-  findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
-  const delayedReset = State.elements.delayedReset;
-
-  window.setTimeout(()=> {
-    delayedReset?.forEach((el) => el.remove());
-  }, 100, delayedReset);
-
-  if (UI.panelJumpNext) {
-    UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = M.buttonFirstContent;
-  }
-  // Reset insertions into body content.
-};
-
-export function resetPanel() {
-  // Reset main panel.
-  State.visualizing = true; // so visualize function removes visualizers.
-  visualize();
-  if (State.totalCount === 0 && State.dismissedCount > 0) {
-    UI.panelCount.textContent = 'i';
-    UI.panelToggleTitle.textContent = State.dismissedCount === 1 ?
-      M.buttonShowHiddenAlert :
-      M.buttonShowHiddenAlerts(State.dismissedCount);
-  }
-  if (!State.options.showDismissed && UI.showDismissed) {
-    UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
-    UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
-      M.buttonShowHiddenAlert : M.buttonShowHiddenAlerts(State.dismissedCount);
-  }
-  UI.panel?.classList.add('ed11y-shut');
-  UI.panel?.classList.remove('ed11y-active');
-  UI.panelToggle?.setAttribute('aria-expanded', 'false');
-};
-
-export function reset () {
-  pauseObservers();
-  resetResults();
-  resetPanel();
-  State.incremental = false;
-  State.running = false;
-  State.showPanel = false;
-  State.open = false;
-};
+}
 
 export function linkText (linkText) {
   // todo postpone: This is only used in Images??? Review all text value diving.
   linkText = linkText.replace(State.options.linkIgnoreStrings, '');
   linkText = linkText.replace(/'|"|-|\.|\s+/g, '');
   return linkText;
-};
+}
 
 export function transferFocus () {
   if (!State.openTip.tip) {
@@ -700,8 +553,7 @@ export function transferFocus () {
       sel.addRange(range);
     }
   }
-};
-
+}
 
 export function paintReady () {
 
@@ -716,7 +568,7 @@ export function paintReady () {
   }
 
   for (const [key, value] of Object.entries(Theme)) {
-    document.documentElement.style.setProperty('--ed11y-' + key, value);
+    document.documentElement.style.setProperty('--ed11y-' + key, `${value}`);
   }
 
   // May be redundant, but preloads unbundled files.
@@ -737,98 +589,205 @@ export function paintReady () {
     }
   });
   State.bodyStyle = true;
-};
+}
 
-export function togglePanel () {
-  State.ignoreAll = false;
+export function alertOnInvisibleTip (button, target) {
+  let delay = 100;
+  if (State.options.hiddenHandlers.length > 0 && !!target.closest(State.options.hiddenHandlers)) {
+    // Increase hesitation before scrolling, in case theme animates open an element.
+    delay = 333;
+    document.dispatchEvent(new CustomEvent('ed11yShowHidden', {
+      detail: {result: button.getAttribute('data-ed11y-result')}
+    }));
+  }
+  const details = target.closest('details');
+  if (details && !details.open) {
+    details.open = true;
+    delay = 333;
+  }
 
-  if (!State.doubleClickPrevent) {
-    // Prevent clicks piling up while scan is running.
-    if (State.running !== true) {
-      State.running = true;
-      // Re-scan each time the panel reopens.
-      if (UI.panel.classList.contains('ed11y-shut') === true) {
-        State.onLoad = false;
-        State.incremental = false;
-        State.showPanel = true;
-        if (State.dismissedCount > 0 && State.warningCount === 0 && State.errorCount === 0) {
-          State.options.showDismissed = false;
-          toggleShowDismissals();
-        } else {
-          checkAll();
-        }
-        State.options.userPrefersShut = false;
-        localStorage.setItem('editoria11yShow', '1');
+  // Scroll into view and throw an alert if the button or target is hidden.
+  window.setTimeout((button, target) => {
+    UI.message.textContent = '';
+    let firstVisible = false;
+    let alertMessage;
+    if (State.options.checkVisible && !visible(target)) {
+      button.dataset.ed11yHiddenResult = 'true';
+      firstVisible = firstVisibleParent(target);
+      alertMessage = ed11yLang.en.jumpedToInvisibleTip;
+    }
+    else if (target.closest('[aria-hidden="true"]')) {
+      firstVisible = target.closest('[aria-hidden="true"]');
+      firstVisible = firstVisible.closest(':not([aria-hidden="true"])');
+      alertMessage = M.jumpedToAriaHiddenTip;
+    }
+    if (firstVisible) {
+      // Throw warning that the element cannot be highlighted.
+      const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert');
+      tipAlert.textContent = alertMessage;
+    }
+    if (State.viaJump) {
+      let scrollPin = window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600) ? 'center' : 'start';
+      let scrollTarget = State.options.inlineAlerts ? button : target;
+      if (button.dataset.ed11yHiddenResult || !(visible(scrollTarget))) {
+        scrollTarget = firstVisibleParent(target);
       }
-      else {
-        UI.panelToggleTitle.textContent = State.totalCount > 0 ? M.buttonShowAlerts : M.buttonShowNoAlert;
-        State.options.showDismissed = false;
-        reset();
-        State.options.userPrefersShut = true;
-        localStorage.setItem('editoria11yShow', '0');
+      if (scrollTarget && typeof scrollTarget.scrollIntoView === 'function') {
+        scrollTarget.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+      } else {
+        raceCrash();
+        return false;
       }
     }
+    // Todo: following statements work but could be simplified.
+    if (!State.options.inlineAlerts) {
+      // todo this selector must match the selector that decides where to place the mark
+      editableHighlighter(button.dataset.ed11yResult, true, firstVisible); // todo
+    } else {
+      if (firstVisible) {
+        firstVisible.classList.add('ed11y-hidden-highlight');
+      }
+    }
+    let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+    if (!activeTip) {
+      button.setAttribute('data-ed11y-action','open');
+      if (State.viaJump) {
+        window.setTimeout(() => {
+          // Race conditions are fun.
+          let activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
+          if (State.viaJump) {
+            activeTip?.shadowRoot.querySelector('.title').focus();
+          }
+        }, 100);
+      }
+    } else {
+      if (State.viaJump) {
+        window.setTimeout(() => {
+          // Race conditions are fun.
+          activeTip?.shadowRoot.querySelector('.title').focus();
+        }, 100, activeTip);
+      }
+    }
+    State.viaJump = false;
+  }, delay, button, target);
+}
+
+export function jumpTo(dir = 1) {
+  if (!State.open) {
+    return false;
   }
-  State.doubleClickPrevent = true;
-  window.setTimeout(function () {
-    State.doubleClickPrevent = false;
-  }, 200);
-  return false;
-};
-
-export function showHeadingsPanel () {
-  // Visualize the document outline
-
-  let panelOutline = UI.panel.querySelector('#ed11y-outline');
-
-  if (State.headingOutline.length) {
-    panelOutline.innerHTML = '';
-    State.headingOutline.forEach((el, i) => {
-      // Todo: draw these in editable mode.
-      if (State.options.inlineAlerts) {
-        const mark = document.createElement('ed11y-element-heading-label');
-        mark.classList.add('ed11y-element', 'ed11y-element-heading');
-        mark.dataset.ed11yHeadingOutline = i.toString();
-        mark.setAttribute('id', 'ed11y-heading-' + i);
-        mark.setAttribute('tabindex', '-1');
-        // Array: el, level, outlinePrefix
-        el[0].insertAdjacentElement('afterbegin', mark);
-        UI.attachCSS(mark.shadowRoot);
-      }
-      let level = el[1];
-      let leftPad = 10 * level - 10;
-      let li = document.createElement('li');
-      li.classList.add('level' + level);
-      li.style.setProperty('margin-left', leftPad + 'px');
-      let levelPrefix = document.createElement('strong');
-      levelPrefix.textContent = `H${level}: `;
-      let userText = document.createElement('span');
-      userText.textContent = computeText(el[0]);
-      let link = document.createElement('a');
-      if (State.options.inlineAlerts) {
-        link.setAttribute('href', '#ed11y-heading-' + i);
-        li.append(link);
-        link.append(levelPrefix);
-        link.append(userText);
-      } else {
-        li.append(levelPrefix);
-        li.append(userText);
-      }
-      if (el[2]) { // Has an error message
-        let type = !el[3] ? 'ed11y-error' : 'ed11y-warning';
-        li.classList.add(type);
-        let message = document.createElement('em');
-        message.classList.add('ed11y-small');
-        message.textContent = ' ' + el[2];
-        if (State.options.inlineAlerts) {
-          link.append(message);
-        } else {
-          li.append(message);
-        }
-      }
-      panelOutline.append(li);
-    });
+  State.viaJump = true;
+  // Determine target result.
+  let goMax = State.jumpList.length - 1;
+  let goNum = State.lastOpenTip + dir;
+  if (goNum < 0) {
+    // Reached end of loop or dismissal pushed us out of loop
+    State.nextText = M.buttonFirstContent; // todo
+    goNum = goMax;
+  } else if (goNum > goMax) {
+    goNum = 0;
+    State.nextText = M.buttonNextContent;
   } else {
-    panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>';
+    State.nextText = M.buttonNextContent;
   }
-};
+  State.lastOpenTip = goNum;
+  window.setTimeout(function () {
+    UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = State.nextText;
+  }, 250);
+
+  resetClass(['ed11y-hidden-highlight']);
+  if (!State.jumpList) {
+    buildJumpList(); // todo
+  }
+  // Find next or first result in the dom ordered list of results.
+  let goto = State.jumpList[goNum];
+  let result = goto.getAttribute('data-ed11y-result');
+  let gotoResult = State.results[result];
+  const target = gotoResult.element;
+
+  // First of two scrollTo calls, to trigger any scroll based events.
+  let scrollPin = window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600) ? 'center' : 'start';
+  let scrollTarget = State.options.inlineAlerts ? goto : target;
+  if (goto.dataset.ed11yHiddenResult || !(visible(scrollTarget))) {
+    scrollTarget = firstVisibleParent(target);
+  }
+  if (scrollTarget && typeof scrollTarget.scrollIntoView === 'function') {
+    scrollTarget.scrollIntoView({ block: scrollPin, behavior: 'instant' });
+  } else {
+    raceCrash();
+    return false;
+  }
+
+  // Open the button
+  goto.setAttribute('data-ed11y-action','open');
+  State.scrollPending = 2;
+  updateTipLocations();
+}
+
+export function resetResults(incremental) {
+  State.jumpList = [];
+  State.openTip = {
+    button: false,
+    tip: false,
+  };
+  State.lastOpenTip = -1;
+  resetClass([
+    'ed11y-ring-red',
+    'ed11y-ring-yellow',
+    'ed11y-hidden-highlight',
+    'ed11y-warning-inline',
+    'ed11y-warning-block',
+    'ed11y-error-block',
+    'ed11y-error-inline',
+  ]);
+  // Reset insertions into body content.
+  if (incremental) {
+    findElements('reset', 'ed11y-element-highlight', false);
+  } else {
+    findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+  }
+  State.elements.reset?.forEach((el) => el.remove());
+
+  // Flicker prevention -- leave old tip in place for 100ms.
+  findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
+  const delayedReset = State.elements.delayedReset;
+
+  window.setTimeout(()=> {
+    delayedReset?.forEach((el) => el.remove());
+  }, 100, delayedReset);
+
+  if (UI.panelJumpNext) {
+    UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = M.buttonFirstContent;
+  }
+  // Reset insertions into body content.
+}
+
+export function resetPanel() {
+  // Reset main panel.
+  State.visualizing = true; // so visualize function removes visualizers.
+  visualize();
+  if (State.totalCount === 0 && State.dismissedCount > 0) {
+    UI.panelCount.textContent = 'i';
+    UI.panelToggleTitle.textContent = State.dismissedCount === 1 ?
+      M.buttonShowHiddenAlert :
+      M.buttonShowHiddenAlerts(State.dismissedCount);
+  }
+  if (!State.options.showDismissed && UI.showDismissed) {
+    UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
+    UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
+      M.buttonShowHiddenAlert : M.buttonShowHiddenAlerts(State.dismissedCount);
+  }
+  UI.panel?.classList.add('ed11y-shut');
+  UI.panel?.classList.remove('ed11y-active');
+  UI.panelToggle?.setAttribute('aria-expanded', 'false');
+}
+
+export function reset () {
+  pauseObservers();
+  resetResults();
+  resetPanel();
+  State.incremental = false;
+  State.running = false;
+  State.showPanel = false;
+  State.open = false;
+}

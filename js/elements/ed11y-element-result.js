@@ -1,7 +1,7 @@
 import {State} from "../utils/state.js";
-import {alignButtons, alignTip} from "../render/align.js";
 import {buildJumpList, editableHighlighter} from "../render/interface.js";
 import {resetClass} from "../utils/utils.js";
+import {alignButtons, alignTip} from "../render/align.js";
 
 export class Ed11yElementResult extends HTMLElement {
   /* global Ed11y */

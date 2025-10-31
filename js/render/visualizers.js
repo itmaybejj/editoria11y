@@ -1,30 +1,90 @@
 import {M, State, UI} from "../utils/state.js";
-import {showHeadingsPanel} from "./interface.js";
+import {
+  computeText,
+  findElements
+} from "../utils/utils.js";
+import ed11yLang from "../lang/localization.js";
 
-export function alignAlts () {
-  // Positions alt label to match absolute, inline or floated images.
-  findElements('altMark', 'ed11y-element-alt');
-  State.elements.altMark?.forEach((el) => { // @todo merge
-    let id = el.dataset.ed11yImg;
-    el.style.setProperty('transform', null);
-    el.style.setProperty('height', null);
-    el.style.setProperty('width', null);
+export function visualize () {
+  if (!UI.panel) {
+    return;
+  }
+  if (State.options.inlineAlerts) {
+    findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+    State.elements.reset?.forEach((el) => el.remove());
+  }
+  if (State.visualizing) {
+    State.visualizing = false;
+    UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsContent;
+    UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
+    UI.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
+    return;
+  }
+  State.visualizing = true;
+  UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsActive;
+  UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
+  UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
+  showAltPanel();
+  showHeadingsPanel();
+}
 
-    let img = UI.imageAlts[id][0];
-    if (img.tagName !== 'IMG') {
-      // Mark is placed outside the link in linked images.
-      img = img.querySelector('img');
-    }
-    let markOffset = el.getBoundingClientRect();
-    let imgOffset = img.getBoundingClientRect();
-    let newOffset = imgOffset.left - markOffset.left;
-    let height = getComputedStyle(img).height;
-    height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
-    el.style.setProperty('transform', `translate(${newOffset}px, 0px)`);
-    el.style.setProperty('height', `${height}px`);
-    el.style.setProperty('width', `${img.offsetWidth}px`);
-  });
-};
+export function showHeadingsPanel () {
+  // Visualize the document outline
+
+  let panelOutline = UI.panel.querySelector('#ed11y-outline');
+  console.log(State.headingOutline);
+  if (State.headingOutline.length) {
+    panelOutline.innerHTML = '';
+    State.headingOutline.forEach((result, i) => {
+      console.log(result);
+      console.log(result.headingLevel);
+      // Todo: draw these in editable mode.
+      if (State.options.inlineAlerts) {
+        const mark = document.createElement('ed11y-element-heading-label');
+        mark.classList.add('ed11y-element', 'ed11y-element-heading');
+        mark.dataset.ed11yHeadingOutline = i.toString();
+        mark.setAttribute('id', 'ed11y-heading-' + i);
+        mark.setAttribute('tabindex', '-1');
+        // Array: el, level, outlinePrefix
+        result.element.insertAdjacentElement('afterbegin', mark);
+        UI.attachCSS(mark.shadowRoot);
+      }
+      let leftPad = 10 * result.headingLevel - 10;
+      let li = document.createElement('li');
+      li.classList.add('level' + result.headingLevel);
+      li.style.setProperty('margin-left', leftPad + 'px');
+      let levelPrefix = document.createElement('strong');
+      levelPrefix.textContent = `H${result.headingLevel}: `;
+      let userText = document.createElement('span');
+      userText.textContent = computeText(result.element);
+      let link = document.createElement('a');
+      if (State.options.inlineAlerts) {
+        link.setAttribute('href', '#ed11y-heading-' + i);
+        li.append(link);
+        link.append(levelPrefix);
+        link.append(userText);
+      } else {
+        li.append(levelPrefix);
+        li.append(userText);
+      }
+      if (result.type) { // Has an error message
+        li.classList.add(`ed11y-${result.type}`);
+        /*let message = document.createElement('em');
+        message.classList.add('ed11y-small');
+        message.textContent = ' ' + el[2];
+        if (State.options.inlineAlerts) {
+          link.append(message);
+        } else {
+          li.append(message);
+        }*/
+      }
+      panelOutline.append(li);
+    });
+  } else {
+    panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>';
+  }
+}
+
 
 const showAltPanel = function () {
   // visualize image alts
@@ -77,26 +137,4 @@ const showAltPanel = function () {
     altList.innerHTML = '';
     altList.appendChild(noImages);
   }
-};
-export function visualize () {
-  if (!UI.panel) {
-    return;
-  }
-  if (State.options.inlineAlerts) {
-    findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
-    State.elements.reset?.forEach((el) => el.remove());
-  }
-  if (State.visualizing) {
-    State.visualizing = false;
-    UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsContent;
-    UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
-    UI.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
-    return;
-  }
-  State.visualizing = true;
-  UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsActive;
-  UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
-  UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
-  showAltPanel();
-  showHeadingsPanel();
 };

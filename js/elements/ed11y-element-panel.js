@@ -1,5 +1,5 @@
 import {State, UI} from "../utils/state.js";
-import {togglePanel, toggleShowDismissals} from "../render/interface.js";
+import {togglePanel, toggleShowDismissals} from "../utils/toggle.js";
 import {visualize} from "../render/visualizers.js";
 
 export class Ed11yElementPanel extends HTMLElement {
@@ -85,8 +85,8 @@ export class Ed11yElementPanel extends HTMLElement {
     }
   }
 /*
-  // @todo move out.
-  jumpTo(event) {
+  // @todo fix.
+  oldJumpTo(event) {
     // Handle jump
     event.preventDefault();
     State.toggledFrom = event.target.closest('button');
@@ -135,10 +135,10 @@ export class Ed11yElementHeadingLabel extends HTMLElement {
       wrapper.classList.add('ed11y-wrapper', 'ed11y-heading-wrapper');
       let i = this.dataset.ed11yHeadingOutline;
       let result = State.headingOutline[i];
-      wrapper.innerHTML = 'H' + result[1];
-      let issues = !!result[2];
+      wrapper.innerHTML = 'H' + result.headingLevel;
+      let issues = !!result.type;
       wrapper.classList.add('issue' + issues);
-      let fontSize = Math.max(52 - 8 * result[1], 12);
+      let fontSize = Math.max(52 - 8 * result.headingLevel, 12);
       wrapper.style.setProperty('font-size', fontSize + 'px');
       shadow.appendChild(wrapper);
       this.initialized = true;

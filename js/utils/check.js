@@ -1,57 +1,19 @@
 import {M, State, Theme, UI} from "./state.js";
-import {Ed11yElementAlt} from "../elements/ed11y-element-alt.js";
-import {Ed11yElementResult} from "../elements/ed11y-element-result.js";
-import {
-  Ed11yElementHeadingLabel,
-  Ed11yElementPanel
-} from "../elements/ed11y-element-panel.js";
 import Elements from "sa11y/src/js/utils/elements.js"
-import {Ed11yElementTip} from "../elements/ed11y-element-tip.js";
-import {store} from "sa11y/src/js/utils/utils.js";
+import {prepareDismissal, store} from "sa11y/src/js/utils/utils.js";
 import Constants from "sa11y/src/js/utils/constants.js";
 import checkHeaders from "sa11y/src/js/rulesets/headers.js";
 import checkLinkText from "sa11y/src/js/rulesets/link-text.js";
 import checkImages from "sa11y/src/js/rulesets/images.js";
 import checkLabels from "sa11y/src/js/rulesets/labels.js";
 import checkQA from "sa11y/src/js/rulesets/quality-assurance.js";
-import {dismissalKey, reset, updatePanel} from "../render/interface.js";
 import {detectShadow, findElements} from "./utils.js";
 import findShadowComponents from "sa11y/src/js/logic/find-shadow-components.js";
+import {
+  reset,
+  updatePanel,
+} from "../render/interface.js";
 import {windowResize} from "./observers.js";
-
-export function disable() {
-  if (State.open && !State.closedByDisable) {
-    State.closedByDisable = true;
-  }
-  State.disabled = true;
-  reset();
-  document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.panelBar);
-  document.documentElement.style.setProperty('--ed11y-activeColor', Theme.panelBarText);
-  document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
-  document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
-  if (UI.panelToggle) {
-    UI.panel?.classList.remove('ed11y-errors', 'ed11y-warnings');
-    UI.panelCount.textContent = 'i';
-    UI.panelJumpNext.setAttribute('hidden', '');
-    UI.panelToggle.classList.add('disabled');
-    UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleDisabled;
-  }
-};
-
-const checkRunPrevent = function() {
-  let preventCheck = State.options.preventCheckingIfPresent ?
-    document.querySelector(State.options.preventCheckingIfPresent) :
-    false;
-  if (preventCheck) {
-    console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${State.options.preventCheckingIfPresent}"` );
-  } else if (!preventCheck && !!State.options.preventCheckingIfAbsent) {
-    preventCheck = document.querySelector(`:is(${State.options.preventCheckingIfAbsent})`) === null;
-    if (preventCheck) {
-      console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${State.options.preventCheckingIfAbsent}"`);
-    }
-  }
-  return preventCheck;
-}
 
 export function makeItSo () {
   if (State.once) {
@@ -74,12 +36,6 @@ export function makeItSo () {
     if (checkRunPrevent()) {
       return false;
     }
-    customElements.define('ed11y-element-alt', Ed11yElementAlt);
-    customElements.define('ed11y-element-result', Ed11yElementResult);
-    customElements.define('ed11y-element-heading-label',
-      Ed11yElementHeadingLabel);
-    customElements.define('ed11y-element-panel', Ed11yElementPanel);
-    customElements.define('ed11y-element-tip', Ed11yElementTip);
 
     State.running = true;
     let localResultCount = store.getItem('editoria11yResultCount');
@@ -111,8 +67,19 @@ export function makeItSo () {
 
     // Run tests
     checkAll();
-    window.addEventListener('resize', function () { windowResize(); });
 
+
+    // Move toggles when something expands or collapses.
+    const mightExpand = document.querySelectorAll('[aria-expanded], [aria-controls]');
+    mightExpand?.forEach(expandable => {
+      expandable.addEventListener('click', () => {
+        window.setTimeout(() => {
+          windowResize();
+        }, 333);
+      });
+    });
+
+    window.addEventListener('resize', function () { windowResize(); });
   });
 };
 
@@ -242,15 +209,17 @@ toggle
           State.customTestsFinished++;
           if (State.customTestsFinished === State.options.customTests) {
             State.customTestsRunning = false;
+            countAlerts();
             window.requestAnimationFrame(() => updatePanel());
           }
         });
         window.setTimeout(function() {
           if (State.customTestsRunning === true) {
             State.customTestsRunning = false;
-            if (UI.panelToggle) {
+            if (typeof UI.panelToggle.querySelector === 'function') {
               UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleAccessibilityTools;
             }
+            countAlerts();
             window.requestAnimationFrame(() => updatePanel());
             console.error('Editoria11y was told to wait for custom tests, but no tests were returned.');
           }
@@ -264,9 +233,10 @@ toggle
 
     if (!State.customTestsRunning) {
       window.setTimeout(function () {
-        if (UI.panelToggle) {
+        if (typeof UI.panelToggle.querySelector === 'function') {
           UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleAccessibilityTools;
         }
+        countAlerts();
         updatePanel();
       }, 0);
     }
@@ -302,7 +272,7 @@ export function countAlerts () {
       // Don't flag new issues in the active range while people are typing.
     }*/
 
-    let dismissKey = dismissalKey(State.results[i].dismissalKey);
+    let dismissKey = prepareDismissal(State.results[i].dismissalKey);
     // We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
     if (dismissKey !== false && State.options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[State.options.currentPage] && dismissKey in State.dismissedAlerts[State.options.currentPage][test]) {
       // Remove result if it has been marked OK or ignored, increment dismissed match counter.
@@ -334,20 +304,8 @@ export function countAlerts () {
     State.totalCount = 0;
   }
 
+  isFullNeeded();
 }
-
-const newIncrementalResults = function() {
-  if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
-    return true;
-  }
-  let newResultString = `${State.errorCount} ${State.warningCount}`;
-  State.results.forEach(result => {
-    newResultString += result.test + result.element.outerHTML;
-  });
-  let changed = newResultString !== oldResultString;
-  State.oldResultString = newResultString;
-  return changed;
-};
 
 export function buildElementList () {
 
@@ -380,4 +338,58 @@ export function buildElementList () {
     // Moves panel off conflicting widgets.
     findElements('panelPin', State.options.panelNoCover, false);
   }
+}
+
+export function disable() {
+  if (State.open && !State.closedByDisable) {
+    State.closedByDisable = true;
+  }
+  State.disabled = true;
+  reset();
+  document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.panelBar);
+  document.documentElement.style.setProperty('--ed11y-activeColor', Theme.panelBarText);
+  document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
+  document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
+  if (typeof UI.panelToggle.querySelector === 'function') {
+    UI.panel?.classList.remove('ed11y-errors', 'ed11y-warnings');
+    UI.panelCount.textContent = 'i';
+    UI.panelJumpNext.setAttribute('hidden', '');
+    UI.panelToggle.classList.add('disabled');
+    UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleDisabled;
+  }
 };
+
+const checkRunPrevent = function() {
+  let preventCheck = State.options.preventCheckingIfPresent ?
+    document.querySelector(State.options.preventCheckingIfPresent) :
+    false;
+  if (preventCheck) {
+    console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${State.options.preventCheckingIfPresent}"` );
+  } else if (!preventCheck && !!State.options.preventCheckingIfAbsent) {
+    preventCheck = document.querySelector(`:is(${State.options.preventCheckingIfAbsent})`) === null;
+    if (preventCheck) {
+      console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${State.options.preventCheckingIfAbsent}"`);
+    }
+  }
+  return preventCheck;
+}
+
+const isFullNeeded = function() {
+  if (State.incremental && !State.forceFullCheck && !newIncrementalResults()) {
+    State.forceFullCheck = true;
+  }
+}
+
+export function newIncrementalResults() {
+  if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
+    return true;
+  }
+  let newResultString = `${State.errorCount} ${State.warningCount}`;
+  State.results.forEach(result => {
+    newResultString += result.test + result.element.outerHTML;
+  });
+  let changed = newResultString !== State.oldResultString;
+  State.oldResultString = newResultString;
+  return changed;
+};
+
