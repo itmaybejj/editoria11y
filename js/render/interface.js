@@ -756,7 +756,7 @@ export function resetResults(incremental) {
     delayedReset?.forEach((el) => el.remove());
   }, 100, delayedReset);
 
-  if (UI.panelJumpNext) {
+  if (typeof UI.panelJumpNext === 'function') {
     UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = M.buttonFirstContent;
   }
   // Reset insertions into body content.
@@ -772,14 +772,16 @@ export function resetPanel() {
       M.buttonShowHiddenAlert :
       M.buttonShowHiddenAlerts(State.dismissedCount);
   }
-  if (!State.options.showDismissed && UI.showDismissed) {
-    UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
-    UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
-      M.buttonShowHiddenAlert : M.buttonShowHiddenAlerts(State.dismissedCount);
-  }
-  UI.panel?.classList.add('ed11y-shut');
-  UI.panel?.classList.remove('ed11y-active');
-  UI.panelToggle?.setAttribute('aria-expanded', 'false');
+	if (typeof (UI.panel) === 'function') {
+		UI.panel?.classList.add('ed11y-shut');
+		UI.panel?.classList.remove('ed11y-active');
+		UI.panelToggle?.setAttribute('aria-expanded', 'false');
+		if (!State.options.showDismissed && typeof UI.showDismissed === 'function') {
+			UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
+			UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
+				M.buttonShowHiddenAlert : M.buttonShowHiddenAlerts(State.dismissedCount);
+		}
+	}
 }
 
 export function reset () {

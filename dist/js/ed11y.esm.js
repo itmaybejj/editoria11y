@@ -922,9 +922,12 @@ const Options = (function options() {
     };
 
     // @todo MERGE these get destroyed in constants.js
-    ed11yDefaults.checks.QA_DOCUMENT.sources = 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']';
-    ed11yDefaults.checks.EMBED_VIDEO.sources = 'video, [src*="youtube.com"], [src*="brightcove.com"], [src*="dailymotion.com"], [src*="panopto.com"], [src*="Video"], [src*="video"], [src*="vimeo.com"], [src*="watch"], [src*="wistia.com"], [src*="vidyard.com"], [src*=yuja.com]';
+    //ed11yDefaults.checks.QA_DOCUMENT.sources = 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']'
+    //ed11yDefaults.checks.EMBED_VIDEO.sources = 'video, [src*="youtube.com"], [src*="brightcove.com"], [src*="dailymotion.com"], [src*="panopto.com"], [src*="Video"], [src*="video"], [src*="vimeo.com"], [src*="watch"], [src*="wistia.com"], [src*="vidyard.com"], [src*=yuja.com]';
 
+		/*
+		* video, [src*="Video"], [src*="video"], [src*="watch"], [src*="youtube.com"], [src*="vimeo.com"], [src*="panopto.com"], [src*="wistia.com"], [src*="dailymotion.com"], [src*="brightcove.com"], [src*="vidyard.com"], [src*="video"], [src*="[src*="youtube.com"]"], [src*="[src*="brightcove.com"]"], [src*="[src*="dailymotion.com"]"], [src*="[src*="panopto.com"]"], [src*="[src*="Video"]"], [src*="[src*="video"]"], [src*="[src*="vimeo.com"]"], [src*="[src*="watch"]"], [src*="[src*="wistia.com"]"], [src*="[src*="vidyard.com"]"], [src*="[src*=yuja.com]"]
+		* */
 
     options = {
       ...ed11yDefaults,
@@ -1032,11 +1035,11 @@ const Options = (function options() {
     console.log(Constants);
 
     // Undo Sa11y overrides in constants.js.
-    Constants.Global.documentSources = option.checks.QA_DOCUMENT.sources;
-    Constants.Global.videoSources = option.checks.EMBED_VIDEO.sources;
-    Constants.Global.AudioSources = option.checks.EMBED_AUDIO.sources;
-    Constants.Global.dataVizSources = option.checks.EMBED_DATA_VIZ.sources;
-    Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
+    //Constants.Global.documentSources = option.checks.QA_DOCUMENT.sources;
+    //Constants.Global.videoSources = option.checks.EMBED_VIDEO.sources;
+    //Constants.Global.AudioSources = option.checks.EMBED_AUDIO.sources;
+    //Constants.Global.dataVizSources = option.checks.EMBED_DATA_VIZ.sources;
+    //Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
 
     State.currentPage = options.currentPage ? options.currentPage : window.location.currentPage;
 
@@ -2006,6 +2009,77 @@ const store = {
  */
 function prepareDismissal(string) {
   return String(string).replace(/([^0-9a-zA-Z])/g, '').substring(0, 256);
+}
+
+/**
+ * Removes the alert from the Sa11y control panel by clearing its content and removing CSS classes.
+ * This function clears the content of the alert element and removes CSS classes 'active' from the main alert element, and 'panel-alert-preview' from the alert preview element.
+ * @returns {void}
+ */
+function removeAlert() {
+  const Sa11yPanel = document.querySelector('sa11y-control-panel').shadowRoot;
+  const alert = Sa11yPanel.getElementById('panel-alert');
+  const alertText = Sa11yPanel.getElementById('panel-alert-text');
+  const alertPreview = Sa11yPanel.getElementById('panel-alert-preview');
+
+  alert.classList.remove('active');
+  alertPreview.classList.remove('panel-alert-preview');
+  while (alertText.firstChild) alertText.removeChild(alertText.firstChild);
+  while (alertPreview.firstChild) alertPreview.removeChild(alertPreview.firstChild);
+}
+
+/**
+ * Creates an alert in the Sa11y control panel with the given alert message and error preview.
+ * @param {string} alertMessage The alert message.
+ * @param {string} errorPreview The issue's tooltip message (optional).
+ * @param {string} extendedPreview The issue's HTML or escaped HTML to be previewed (optional).
+ * @returns {void}
+ */
+function createAlert(alertMessage, errorPreview, extendedPreview) {
+  // Clear alert first before creating new one.
+  removeAlert();
+
+  // Constants
+  const Sa11yPanel = document.querySelector('sa11y-control-panel').shadowRoot;
+  const alert = Sa11yPanel.getElementById('panel-alert');
+  const alertText = Sa11yPanel.getElementById('panel-alert-text');
+  const alertPreview = Sa11yPanel.getElementById('panel-alert-preview');
+  const alertClose = Sa11yPanel.getElementById('close-alert');
+  const skipButton = Sa11yPanel.getElementById('skip-button');
+
+  alert.classList.add('active');
+  alertText.innerHTML = alertMessage;
+
+  // If the issue's element is being previewed.
+  const elementPreview = (extendedPreview)
+    ? `<div class="element-preview">${extendedPreview}</div>` : '';
+
+  // Alert message or tooltip's message.
+  if (errorPreview) {
+    alertPreview.classList.add('panel-alert-preview');
+    alertPreview.innerHTML = `${elementPreview}<div class="preview-message">${errorPreview}</div>`;
+  }
+
+  // A little time before setting focus on the close button.
+  setTimeout(() => alertClose.focus(), 300);
+
+  // Closing alert sets focus back to Skip to Issue toggle.
+  function closeAlert() {
+    removeAlert();
+    const focusTarget = skipButton.hasAttribute('disabled')
+      ? Sa11yPanel.getElementById('toggle')
+      : skipButton;
+    focusTarget.focus();
+  }
+  alertClose.addEventListener('click', closeAlert);
+
+  // Escape key to close alert.
+  alert.onkeydown = (e) => {
+    const evt = e || window.event;
+    if (evt.key === 'Escape' && alert.classList.contains('active')) {
+      closeAlert();
+    }
+  };
 }
 
 /**
@@ -4497,8 +4571,8 @@ function alignTip (button, toolTip, recheck = 0, reveal = false) {
   } else if (mark.dataset.ed11yHiddenResult === 'true' || !(visible(mark) || buttonOffset.top === 0 && buttonOffset.left === 0)) {
     // ruh roh invisible button
     // todo: use the not-inline drawing pattern for invisible targets?
-    const firstVisibleParent = firstVisibleParent(mark.result.element);
-    if (firstVisibleParent) {
+    const theFirstVisibleParent = firstVisibleParent(mark.result.element);
+    if (theFirstVisibleParent) {
       buttonOffset = firstVisibleParent.getBoundingClientRect();
       buttonLeft = buttonOffset.left;
       buttonTop = buttonOffset.top;
@@ -5784,7 +5858,7 @@ function resetResults(incremental) {
     delayedReset?.forEach((el) => el.remove());
   }, 100, delayedReset);
 
-  if (UI.panelJumpNext) {
+  if (typeof UI.panelJumpNext === 'function') {
     UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = M.buttonFirstContent;
   }
   // Reset insertions into body content.
@@ -5800,14 +5874,16 @@ function resetPanel() {
       M.buttonShowHiddenAlert :
       M.buttonShowHiddenAlerts(State.dismissedCount);
   }
-  if (!State.options.showDismissed && UI.showDismissed) {
-    UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
-    UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
-      M.buttonShowHiddenAlert : M.buttonShowHiddenAlerts(State.dismissedCount);
-  }
-  UI.panel?.classList.add('ed11y-shut');
-  UI.panel?.classList.remove('ed11y-active');
-  UI.panelToggle?.setAttribute('aria-expanded', 'false');
+	if (typeof (UI.panel) === 'function') {
+		UI.panel?.classList.add('ed11y-shut');
+		UI.panel?.classList.remove('ed11y-active');
+		UI.panelToggle?.setAttribute('aria-expanded', 'false');
+		if (!State.options.showDismissed && typeof UI.showDismissed === 'function') {
+			UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
+			UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
+				M.buttonShowHiddenAlert : M.buttonShowHiddenAlerts(State.dismissedCount);
+		}
+	}
 }
 
 function reset () {
@@ -5912,42 +5988,46 @@ function checkAll() {
 
     State.customTestsRunning = false;
 
-    let roots = [];
+    State.roots = [];
     if (State.options.fixedRoots) {
-      State.options.fixedRoots.forEach(root => {roots.push(root.fixedRoot);});
+			// @todo merge this needs to be implemented
+			State.options.fixedRoots.forEach(root => {roots.push(root.fixedRoot);});
     } else {
-      roots = document.querySelectorAll(`:is(${State.options.checkRoots})`);
+			// @todo merge this needs to return to querySelectorAll.
+      State.roots = document.querySelectorAll(`:is(${State.options.checkRoots})`);
     }
+		// Initialize root areas to check.
+		if (!State.roots && State.options.headless === false) {
+			createAlert(`${Lang.sprintf('MISSING_ROOT', State.options.checkRoots)}`);
+		} // todo fixedRoots.
 
-    if (roots.length === 0) {
+    if (State.roots.length === 0) {
       // Todo parameterize for translation.
       if (State.onLoad) {
         console.warn('Check Editoria11y configuration; specified root element not found');
       }
       disable();
       return;
-    } else {
-      State.roots = [];
-      roots.forEach((el, i) => {
-        if (el.shadowRoot) {
-          State.roots[i] = el.shadowRoot;
-          el.setAttribute('data-ed11y-has-shadow-root', 'true');
-          detectShadow(el.shadowRoot);
-        } else {
-          State.roots[i] = el;
-          detectShadow(el);
-        }
-        if (State.options.fixedRoots) {
-          el.dataset.ed11yRoot = `${i}`;
-        }
-      });
+    } else
+			for (let i = 0; i < State.roots.length; i++) {
+				if (State.options.fixedRoots) {
+					State.roots[i].dataset.ed11yRoot = `${i}`;
+				}
+				if (State.roots[i].shadowRoot) {
+					State.roots.setAttribute('data-ed11y-has-shadow-root', 'true');
+					detectShadow(State.roots[i]);
+					State.roots[i] = State.roots[i].shadowRoot;
+				} else {
+					detectShadow(State.roots[i]);
+				}
+			}
 
 
       buildElementList();
 
-      Constants.initializeRoot(false, false, roots);
+			Constants.initializeRoot(State.options.checkRoots, State.options.checkRoots); // @todo merge readability, add multiroot.
 
-      // Find all web components on the page.
+			// Find all web components on the page.
       findShadowComponents(State.options);
 
       // Find and cache elements.
@@ -6044,12 +6124,11 @@ toggle
         updatePanel();
       }, 0);
     }
-
-  }
   else {
     disable();
   }
 }
+
 function countAlerts () {
 
   State.errorCount = 0;
@@ -6928,6 +7007,7 @@ class Ed11y {
     State.version = '3.0.0';
     State.options = Options.preProcessOptions(options);
     // Initialize global constants and exclusions.
+		Constants.initializeRoot(State.options.checkRoots, State.options.checkRoots);
     Constants.initializeGlobal(State.options);
     Constants.initializeReadability(State.options);
     Constants.initializeExclusions(State.options);

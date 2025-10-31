@@ -16,7 +16,7 @@
     "lint": "npm run lint:css && npm run lint:js",
     "lint:js": "node ./node_modules/eslint/bin/eslint.js src",
     "lint:css": "stylelint --config .stylelintrc.json -s scss \"src/scss/**/*.scss\"",
-    "serve": "npm run build && node ./docs.js && light-server -p 8080 -b localhost -s ./ -w \"src/**/* # npm run build && node ./docs.js # reload\"",
+    "serve": "npm run build && scripts/pack.sh && light-server -p 8080 -b localhost -s ./",
     "test": "npx playwright test"
   },
   "devDependencies": {

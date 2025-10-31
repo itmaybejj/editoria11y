@@ -238,9 +238,12 @@ const Options = (function options() {
     };
 
     // @todo MERGE these get destroyed in constants.js
-    ed11yDefaults.checks.QA_DOCUMENT.sources = 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']';
-    ed11yDefaults.checks.EMBED_VIDEO.sources = 'video, [src*="youtube.com"], [src*="brightcove.com"], [src*="dailymotion.com"], [src*="panopto.com"], [src*="Video"], [src*="video"], [src*="vimeo.com"], [src*="watch"], [src*="wistia.com"], [src*="vidyard.com"], [src*=yuja.com]';
+    //ed11yDefaults.checks.QA_DOCUMENT.sources = 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']'
+    //ed11yDefaults.checks.EMBED_VIDEO.sources = 'video, [src*="youtube.com"], [src*="brightcove.com"], [src*="dailymotion.com"], [src*="panopto.com"], [src*="Video"], [src*="video"], [src*="vimeo.com"], [src*="watch"], [src*="wistia.com"], [src*="vidyard.com"], [src*=yuja.com]';
 
+		/*
+		* video, [src*="Video"], [src*="video"], [src*="watch"], [src*="youtube.com"], [src*="vimeo.com"], [src*="panopto.com"], [src*="wistia.com"], [src*="dailymotion.com"], [src*="brightcove.com"], [src*="vidyard.com"], [src*="video"], [src*="[src*="youtube.com"]"], [src*="[src*="brightcove.com"]"], [src*="[src*="dailymotion.com"]"], [src*="[src*="panopto.com"]"], [src*="[src*="Video"]"], [src*="[src*="video"]"], [src*="[src*="vimeo.com"]"], [src*="[src*="watch"]"], [src*="[src*="wistia.com"]"], [src*="[src*="vidyard.com"]"], [src*="[src*=yuja.com]"]
+		* */
 
     options = {
       ...ed11yDefaults,
@@ -348,11 +351,11 @@ const Options = (function options() {
     console.log(Constants);
 
     // Undo Sa11y overrides in constants.js.
-    Constants.Global.documentSources = option.checks.QA_DOCUMENT.sources;
-    Constants.Global.videoSources = option.checks.EMBED_VIDEO.sources;
-    Constants.Global.AudioSources = option.checks.EMBED_AUDIO.sources;
-    Constants.Global.dataVizSources = option.checks.EMBED_DATA_VIZ.sources;
-    Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
+    //Constants.Global.documentSources = option.checks.QA_DOCUMENT.sources;
+    //Constants.Global.videoSources = option.checks.EMBED_VIDEO.sources;
+    //Constants.Global.AudioSources = option.checks.EMBED_AUDIO.sources;
+    //Constants.Global.dataVizSources = option.checks.EMBED_DATA_VIZ.sources;
+    //Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
 
     State.currentPage = options.currentPage ? options.currentPage : window.location.currentPage;
 

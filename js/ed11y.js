@@ -19,6 +19,7 @@ class Ed11y {
     State.version = '3.0.0';
     State.options = Options.preProcessOptions(options);
     // Initialize global constants and exclusions.
+		Constants.initializeRoot(State.options.checkRoots, State.options.checkRoots)
     Constants.initializeGlobal(State.options);
     Constants.initializeReadability(State.options);
     Constants.initializeExclusions(State.options);

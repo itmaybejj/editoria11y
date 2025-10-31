@@ -21,13 +21,13 @@ const copyDirectory = async (src, dest) => {
   );
 };
 
-(async () => {
-  //copyDirectory('./dist/js', './docs/assets/js');
-  //copyDirectory('./dist/css', './docs/assets/css');
+/*(async () => {
+  copyDirectory('./dist/js', './docs/assets/js');
+  copyDirectory('./css', './docs/assets/css');
 
-  //const scriptSource = await readFile('./docs/demo/script.js', 'utf8');
-  //await writeFile('./docs/demo/script.js', scriptSource.replace(/\.\.\/dist\//g, 'assets/'), 'utf8');
-})();
+  const scriptSource = await readFile('./docs/demo/script.js', 'utf8');
+  await writeFile('./docs/demo/script.js', scriptSource.replace(/\.\.\/dist\//g, 'assets/'), 'utf8');
+})();*/
 
 // Automatically update Sa11y version number within docs.
 /*(async () => {

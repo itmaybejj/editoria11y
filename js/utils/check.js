@@ -14,6 +14,8 @@ import {
   updatePanel,
 } from "../render/interface.js";
 import {windowResize} from "./observers.js";
+import Lang from "sa11y/src/js/utils/lang.js";
+import * as Utils from "sa11y/src/js/utils/utils.js";
 
 export function makeItSo () {
   if (State.once) {
@@ -108,42 +110,46 @@ export function checkAll() {
 
     State.customTestsRunning = false;
 
-    let roots = [];
+    State.roots = [];
     if (State.options.fixedRoots) {
-      State.options.fixedRoots.forEach(root => {roots.push(root.fixedRoot);});
+			// @todo merge this needs to be implemented
+			State.options.fixedRoots.forEach(root => {roots.push(root.fixedRoot);});
     } else {
-      roots = document.querySelectorAll(`:is(${State.options.checkRoots})`);
+			// @todo merge this needs to return to querySelectorAll.
+      State.roots = document.querySelectorAll(`:is(${State.options.checkRoots})`);
     }
+		// Initialize root areas to check.
+		if (!State.roots && State.options.headless === false) {
+			Utils.createAlert(`${Lang.sprintf('MISSING_ROOT', State.options.checkRoots)}`);
+		} // todo fixedRoots.
 
-    if (roots.length === 0) {
+    if (State.roots.length === 0) {
       // Todo parameterize for translation.
       if (State.onLoad) {
         console.warn('Check Editoria11y configuration; specified root element not found');
       }
       disable();
       return;
-    } else {
-      State.roots = [];
-      roots.forEach((el, i) => {
-        if (el.shadowRoot) {
-          State.roots[i] = el.shadowRoot;
-          el.setAttribute('data-ed11y-has-shadow-root', 'true');
-          detectShadow(el.shadowRoot);
-        } else {
-          State.roots[i] = el;
-          detectShadow(el);
-        }
-        if (State.options.fixedRoots) {
-          el.dataset.ed11yRoot = `${i}`;
-        }
-      });
+    } else
+			for (let i = 0; i < State.roots.length; i++) {
+				if (State.options.fixedRoots) {
+					State.roots[i].dataset.ed11yRoot = `${i}`;
+				}
+				if (State.roots[i].shadowRoot) {
+					State.roots.setAttribute('data-ed11y-has-shadow-root', 'true');
+					detectShadow(State.roots[i]);
+					State.roots[i] = State.roots[i].shadowRoot;
+				} else {
+					detectShadow(State.roots[i]);
+				}
+			}
 
 
       buildElementList();
 
-      Constants.initializeRoot(false, false, roots);
+			Constants.initializeRoot(State.options.checkRoots, State.options.checkRoots); // @todo merge readability, add multiroot.
 
-      // Find all web components on the page.
+			// Find all web components on the page.
       findShadowComponents(State.options);
 
       // Find and cache elements.
@@ -240,12 +246,10 @@ toggle
         updatePanel();
       }, 0);
     }
-
-  }
   else {
     disable();
   }
-};
+}
 
 export function countAlerts () {
 

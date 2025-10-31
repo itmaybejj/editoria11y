@@ -387,8 +387,8 @@ export function alignTip (button, toolTip, recheck = 0, reveal = false) {
   } else if (mark.dataset.ed11yHiddenResult === 'true' || !(visible(mark) || buttonOffset.top === 0 && buttonOffset.left === 0)) {
     // ruh roh invisible button
     // todo: use the not-inline drawing pattern for invisible targets?
-    const firstVisibleParent = firstVisibleParent(mark.result.element);
-    if (firstVisibleParent) {
+    const theFirstVisibleParent = firstVisibleParent(mark.result.element);
+    if (theFirstVisibleParent) {
       buttonOffset = firstVisibleParent.getBoundingClientRect();
       buttonLeft = buttonOffset.left;
       buttonTop = buttonOffset.top;
