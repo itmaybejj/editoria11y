@@ -6,7 +6,7 @@ class Ed11y {
 
   constructor(options) {
 
-    Ed11y.version = '2.4.4';
+    Ed11y.version = '2.4.5';
 
     let defaultOptions = {
 
@@ -62,12 +62,13 @@ class Ed11y {
 
       // Set alertModes
       // 'headless': do not draw interface
+      // 'minimized': always shut.
       // 'userPreference: respect user preference.
-      // 'polite': open for new issues.
+      // 'polite': open for changed issue count.
       // 'assertive': open for any issues.
       // 'active': always open.
-      // CMS integrations can switch between polite & headless at runtime.
-      alertMode: 'userPreference',
+      // CMS integrations usually choose at runtime.
+      alertMode: 'polite',
       inlineAlerts: true,
       watchForChanges: true, // true, false, 'checkRoots';
 
@@ -226,7 +227,9 @@ class Ed11y {
         },
       ],
 
-      userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
+      userPrefersShut: localStorage.getItem('editoria11yShow') === null ?
+        'undefined'
+        : localStorage.getItem('editoria11yShow') === '0',
 
       customTests: 0,
 
@@ -566,6 +569,7 @@ class Ed11y {
 
     Ed11y.updatePanel = function () {
 
+      Ed11y.pauseObservers();
       // Stash old values for incremental updates.
       Ed11y.countAlerts();
       if (Ed11y.incremental) {
@@ -576,7 +580,7 @@ class Ed11y {
             console.warn('forced open');
             Ed11y.showPanel = true;
           }*/
-          Ed11y.resetResults();
+          Ed11y.resetResults(true);
         } else {
           // Todo: commented out in 2.3.11:
           // Reconnect map
@@ -589,6 +593,7 @@ class Ed11y {
             }
             Ed11y.running = false;
           },0);
+          Ed11y.resumeObservers();
           return;
         }
       } else {
@@ -649,28 +654,30 @@ class Ed11y {
             Ed11y.showDismissed.insertAdjacentElement('beforebegin', reportLink);
           }
 
-
           // Decide whether to open the panel on load.
-          if (Ed11y.ignoreAll ||
-            (!Ed11y.options.inlineAlerts && Ed11y.totalCount > 75)
+          if (Ed11y.ignoreAll
+            || (!Ed11y.options.inlineAlerts
+              && Ed11y.totalCount > 75)
           ) {
+            // Always minimize on command or for too many results.
             Ed11y.showPanel = false;
-          } else if (Ed11y.options.alertMode === 'active' ||
-            !Ed11y.options.userPrefersShut ||
-            Ed11y.options.showDismissed
+          } else if (Ed11y.options.alertMode === 'active'
+            || Ed11y.options.showDismissed
           ) {
-            // Show always on load for active mode or by user preference.
+            // Always show in active mode or when dismissals displayed.
             Ed11y.showPanel = true;
           } else if (
-            Ed11y.totalCount > 0 &&
-            !Ed11y.ignoreAll &&
-            ( Ed11y.options.alertMode === 'assertive' ||
-              Ed11y.options.alertMode === 'polite' &&
-              Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount
-            )
+            Ed11y.totalCount > 0
+            && !Ed11y.ignoreAll
+            && Ed11y.options.alertMode !== 'minimized'
           ) {
-            // Show sometimes for assertive/polite if there are new items.
-            Ed11y.showPanel = true;
+            // Show sometimes if there are new items.
+            if (Ed11y.options.userPrefersShut === false
+              || Ed11y.options.alertMode === 'assertive'
+              || ( Ed11y.options.alertMode === 'polite' &&
+                Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount )
+            )
+              Ed11y.showPanel = true;
           }
         }
 
@@ -801,6 +808,7 @@ class Ed11y {
         }
       }, 0);
 
+      Ed11y.resumeObservers();
       Ed11y.running = false;
     };
 
@@ -845,7 +853,7 @@ class Ed11y {
       Ed11y.results[index].toggle = mark;
     };
 
-    Ed11y.resetResults = function() {
+    Ed11y.resetResults = function(incremental) {
       Ed11y.jumpList = [];
       Ed11y.openTip = {
         button: false,
@@ -862,7 +870,11 @@ class Ed11y {
         'ed11y-error-inline',
       ]);
       // Reset insertions into body content.
-      Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+      if (incremental) {
+        Ed11y.findElements('reset', 'ed11y-element-highlight', false);
+      } else {
+        Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+      }
       Ed11y.elements.reset?.forEach((el) => el.remove());
 
       // Flicker prevention -- leave old tip in place for 100ms.
@@ -1860,7 +1872,7 @@ class Ed11y {
         Ed11y.headingOutline.forEach((el, i) => {
           // Todo: draw these in editable mode.
           if (Ed11y.options.inlineAlerts) {
-            let mark = document.createElement('ed11y-element-heading-label');
+            const mark = document.createElement('ed11y-element-heading-label');
             mark.classList.add('ed11y-element', 'ed11y-element-heading');
             mark.dataset.ed11yHeadingOutline = i.toString();
             mark.setAttribute('id', 'ed11y-heading-' + i);
@@ -1943,7 +1955,7 @@ class Ed11y {
 
           if (Ed11y.options.inlineAlerts) {
             // Label images
-            let mark = document.createElement('ed11y-element-alt');
+            const mark = document.createElement('ed11y-element-alt');
             mark.classList.add('ed11y-element');
             mark.dataset.ed11yImg = i.toString();
             mark.setAttribute('id', 'ed11y-alt-' + i);
@@ -1989,23 +2001,23 @@ class Ed11y {
       if (!Ed11y.panel) {
         return;
       }
+      if (Ed11y.options.inlineAlerts) {
+        Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+        Ed11y.elements.reset?.forEach((el) => el.remove());
+      }
       if (Ed11y.visualizing) {
         Ed11y.visualizing = false;
         Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsContent;
         Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
         Ed11y.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
-        Ed11y.findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt');
-        Ed11y.elements.reset?.forEach(el => { el.remove(); });
         return;
       }
-      Ed11y.pauseObservers();
       Ed11y.visualizing = true;
       Ed11y.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Ed11y.M.buttonToolsActive;
       Ed11y.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
       Ed11y.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
       showAltPanel();
       showHeadingsPanel();
-      Ed11y.resumeObservers();
     };
 
     Ed11y.buildJumpList = function () {
@@ -2281,7 +2293,9 @@ class Ed11y {
         window.setTimeout(function() {
           if (Ed11y.visualizing) {
             Ed11y.visualizing = false;
+            Ed11y.pauseObservers();
             Ed11y.visualize();
+            Ed11y.resumeObservers();
           }
         }, 500);
         // todo: if there are no issues and the heading panel is open...it closes!
@@ -2821,7 +2835,7 @@ class Ed11y {
           continue;
         case 'IMG':
           if (treeWalker.currentNode.hasAttribute('alt') &&
-            !treeWalker.currentNode.matches('[role="presentation"]')) {
+              !treeWalker.currentNode.matches('[role="presentation"]')) {
             computedText += treeWalker.currentNode.getAttribute('alt');
           }
           continue;

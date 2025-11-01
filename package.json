@@ -1,7 +1,7 @@
 {
   "name": "editoria11y",
   "homepage": "https://itmaybejj.github.io/editoria11y/",
-  "version": "2.1.1",
+  "version": "2.4.5",
   "repository": {
     "type": "git",
     "url": "git+https://itmaybejj@github.com/itmaybejj/editoria11y.git"
@@ -11,7 +11,7 @@
   },
   "license": "GPLv2",
   "devDependencies": {
-    "chromedriver": "^140",
+    "chromedriver": "^142",
     "eslint": "^8.32.0",
     "nightwatch": "^3.12.2",
     "stylelint": "^16.3.1",
