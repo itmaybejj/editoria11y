@@ -7,13 +7,13 @@ import checkLinkText from "sa11y/src/js/rulesets/link-text.js";
 import checkImages from "sa11y/src/js/rulesets/images.js";
 import checkLabels from "sa11y/src/js/rulesets/labels.js";
 import checkQA from "sa11y/src/js/rulesets/quality-assurance.js";
-import {detectShadow, findElements} from "./utils.js";
+import {detectShadow, findElements, lagBounce} from "./utils.js";
 import findShadowComponents from "sa11y/src/js/logic/find-shadow-components.js";
 import {
   reset,
   updatePanel,
 } from "../render/interface.js";
-import {windowResize} from "./observers.js";
+import {resumeObservers, startObserver, windowResize} from "./observers.js";
 import Lang from "sa11y/src/js/utils/lang.js";
 import * as Utils from "sa11y/src/js/utils/utils.js";
 
@@ -113,13 +113,14 @@ export function checkAll() {
     State.roots = [];
     if (State.options.fixedRoots) {
 			// @todo merge this needs to be implemented
-			State.options.fixedRoots.forEach(root => {roots.push(root.fixedRoot);});
+			State.options.fixedRoots.forEach(root => {State.roots.push(root.fixedRoot);});
     } else {
 			// @todo merge this needs to return to querySelectorAll.
       State.roots = document.querySelectorAll(`:is(${State.options.checkRoots})`);
     }
 		// Initialize root areas to check.
 		if (!State.roots && State.options.headless === false) {
+			// @todo merge invalid number of arguments.
 			Utils.createAlert(`${Lang.sprintf('MISSING_ROOT', State.options.checkRoots)}`);
 		} // todo fixedRoots.
 
@@ -244,11 +245,69 @@ toggle
         }
         countAlerts();
         updatePanel();
+				window.setTimeout(() => {
+					if (State.options.watchForChanges) {
+						State.elements.editable?.forEach(editable => {
+							if (!editable.matches('.drag-observe')) {
+								editable.classList.add('drag-observe');
+								editable.addEventListener('drop', () => {
+									// This event does not bubble.
+									State.forceFullCheck = true;
+									incrementalCheck();
+								});
+							}
+						});
+						if (State.options.watchForChanges === 'checkRoots') {
+							State.roots?.forEach((root) => {
+								startObserver( root );
+							});
+						} else {
+							startObserver( document.body );
+						}
+						resumeObservers(); // on recheck.
+					}
+				}, 0);
       }, 0);
     }
   else {
     disable();
   }
+}
+
+
+export function incrementalCheck() {
+	lagBounce(() => {
+		if (!State.running) {
+			if (State.openTip.button || (!State.interaction && !State.forceFullCheck)) {
+				return;
+			}
+			State.interaction = false;
+			State.running = true;
+			let runTime = performance.now();
+			State.incremental = true;
+			if (State.disabled && State.closedByDisable) {
+				State.showPanel = true;
+				State.closedByDisable = false;
+				State.disabled = false;
+			}
+			//State.forceFullCheck = true; // todo no
+			checkAll();
+			window.setTimeout(function() {
+				if (State.visualizing) {
+					document.dispatchEvent(new CustomEvent('ed11yEndVisualization'))
+					}
+				}, 500);
+			// todo: if there are no issues and the heading panel is open...it closes!
+			// Increase debounce if runs are slow.
+			runTime = performance.now() - runTime;
+			State.browserSpeed = runTime > 10 ? 10 : (State.browserSpeed + runTime) / 2;
+			// Todo: optimize tip placement so we do not need as much debounce.
+			State.browserLag = State.browserSpeed < 1 ? 0 : State.browserSpeed * 100 + State.totalCount;
+		} else {
+			// Ed11y was running, try again later.
+			window.setTimeout(() => {incrementalCheck();}, 250);
+		}
+	}, 250)
 }
 
 export function countAlerts () {

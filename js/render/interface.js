@@ -1,12 +1,10 @@
 import {M, State, Theme, UI} from "../utils/state.js";
 import {
-  computeText,
   findElements, firstVisibleParent, raceCrash,
   resetClass,
   visible
 } from "../utils/utils.js";
 import ed11yLang from "../lang/localization.js";
-import {debounce} from "sa11y/src/js/utils/utils.js";
 import {
   alignButtons,
   alignHighlights,
@@ -15,7 +13,7 @@ import {
 } from "./align.js";
 import {visualize} from "./visualizers.js";
 import {
-  incrementalCheck, intersectionObservers,
+  intersectionObservers,
   pauseObservers,
   resumeObservers, startObserver
 } from "../utils/observers.js";
@@ -269,29 +267,6 @@ export function updatePanel () {
     alignPanel();
     UI.panel.classList.remove('ed11y-preload');
   }
-
-  window.setTimeout(() => {
-    if (State.options.watchForChanges) {
-      State.elements.editable?.forEach(editable => {
-        if (!editable.matches('.drag-observe')) {
-          editable.classList.add('drag-observe');
-          editable.addEventListener('drop', () => {
-            // This event does not bubble.
-            State.forceFullCheck = true;
-            incrementalCheck();
-          });
-        }
-      });
-      if (State.options.watchForChanges === 'checkRoots') {
-        State.roots?.forEach((root) => {
-          startObserver( root );
-        });
-      } else {
-        startObserver( document.body );
-      }
-      resumeObservers(); // on recheck.
-    }
-  }, 0);
 
   resumeObservers();
   State.running = false;
@@ -696,11 +671,14 @@ export function jumpTo(dir = 1) {
   }, 250);
 
   resetClass(['ed11y-hidden-highlight']);
-  if (!State.jumpList) {
+  if (State.jumpList.length === 0) {
     buildJumpList(); // todo
   }
   // Find next or first result in the dom ordered list of results.
   let goto = State.jumpList[goNum];
+	if (!goto) {
+		goto = State.jumpList[0];
+	}
   let result = goto.getAttribute('data-ed11y-result');
   let gotoResult = State.results[result];
   const target = gotoResult.element;

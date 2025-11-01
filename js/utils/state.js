@@ -37,6 +37,7 @@ export const State = {
   showPanel: false,
   nextText: '',
   panelAttachTo: document.body,
+	visualizing: false,
 
   /* Annotations initial states */
   jumpList: [],

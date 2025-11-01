@@ -5,46 +5,6 @@ import {
   checkEditableIntersects, updateTipLocations
 } from "../render/align.js";
 import {lagBounce} from "./utils.js";
-import {visualize} from "../render/visualizers.js";
-
-
-export function incrementalCheck() {
-  lagBounce(() => {
-    if (!State.running) {
-      if (State.openTip.button || (!State.interaction && !State.forceFullCheck)) {
-        return;
-      }
-      State.interaction = false;
-      State.running = true;
-      let runTime = performance.now();
-      State.incremental = true;
-      if (State.disabled && State.closedByDisable) {
-        State.showPanel = true;
-        State.closedByDisable = false;
-        State.disabled = false;
-      }
-      //State.forceFullCheck = true; // todo no
-      this.checkAll();
-      window.setTimeout(function() {
-        if (State.visualizing) {
-          State.visualizing = false;
-          pauseObservers();
-          visualize();
-          resumeObservers();
-        }
-      }, 500);
-      // todo: if there are no issues and the heading panel is open...it closes!
-      // Increase debounce if runs are slow.
-      runTime = performance.now() - runTime;
-      State.browserSpeed = runTime > 10 ? 10 : (State.browserSpeed + runTime) / 2;
-      // Todo: optimize tip placement so we do not need as much debounce.
-      State.browserLag = State.browserSpeed < 1 ? 0 : State.browserSpeed * 100 + State.totalCount;
-    } else {
-      // Ed11y was running, try again later.
-      window.setTimeout(() => {incrementalCheck();}, 250);
-    }
-  }, 250)
-}
 
 export function slowIncremental() {
   lagBounce(() => {

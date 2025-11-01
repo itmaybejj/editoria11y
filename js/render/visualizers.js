@@ -4,6 +4,7 @@ import {
   findElements
 } from "../utils/utils.js";
 import ed11yLang from "../lang/localization.js";
+import {pauseObservers, resumeObservers} from "../utils/observers.js";
 
 export function visualize () {
   if (!UI.panel) {
@@ -85,6 +86,12 @@ export function showHeadingsPanel () {
   }
 }
 
+window.addEventListener('ed11yEndVisualization', ()=>{
+	State.visualizing = false;
+	pauseObservers();
+	visualize();
+	resumeObservers();
+})
 
 const showAltPanel = function () {
   // visualize image alts

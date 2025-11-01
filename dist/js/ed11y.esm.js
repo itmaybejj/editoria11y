@@ -650,6 +650,7 @@ const State = {
   showPanel: false,
   nextText: '',
   panelAttachTo: document.body,
+	visualizing: false,
 
   /* Annotations initial states */
   jumpList: [],
@@ -4831,140 +4832,6 @@ function alignPanel() {
   }
 }
 
-function visualize () {
-  if (!UI.panel) {
-    return;
-  }
-  if (State.options.inlineAlerts) {
-    findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
-    State.elements.reset?.forEach((el) => el.remove());
-  }
-  if (State.visualizing) {
-    State.visualizing = false;
-    UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsContent;
-    UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
-    UI.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
-    return;
-  }
-  State.visualizing = true;
-  UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsActive;
-  UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
-  UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
-  showAltPanel();
-  showHeadingsPanel();
-}
-
-function showHeadingsPanel () {
-  // Visualize the document outline
-
-  let panelOutline = UI.panel.querySelector('#ed11y-outline');
-  console.log(State.headingOutline);
-  if (State.headingOutline.length) {
-    panelOutline.innerHTML = '';
-    State.headingOutline.forEach((result, i) => {
-      console.log(result);
-      console.log(result.headingLevel);
-      // Todo: draw these in editable mode.
-      if (State.options.inlineAlerts) {
-        const mark = document.createElement('ed11y-element-heading-label');
-        mark.classList.add('ed11y-element', 'ed11y-element-heading');
-        mark.dataset.ed11yHeadingOutline = i.toString();
-        mark.setAttribute('id', 'ed11y-heading-' + i);
-        mark.setAttribute('tabindex', '-1');
-        // Array: el, level, outlinePrefix
-        result.element.insertAdjacentElement('afterbegin', mark);
-        UI.attachCSS(mark.shadowRoot);
-      }
-      let leftPad = 10 * result.headingLevel - 10;
-      let li = document.createElement('li');
-      li.classList.add('level' + result.headingLevel);
-      li.style.setProperty('margin-left', leftPad + 'px');
-      let levelPrefix = document.createElement('strong');
-      levelPrefix.textContent = `H${result.headingLevel}: `;
-      let userText = document.createElement('span');
-      userText.textContent = computeText(result.element);
-      let link = document.createElement('a');
-      if (State.options.inlineAlerts) {
-        link.setAttribute('href', '#ed11y-heading-' + i);
-        li.append(link);
-        link.append(levelPrefix);
-        link.append(userText);
-      } else {
-        li.append(levelPrefix);
-        li.append(userText);
-      }
-      if (result.type) { // Has an error message
-        li.classList.add(`ed11y-${result.type}`);
-        /*let message = document.createElement('em');
-        message.classList.add('ed11y-small');
-        message.textContent = ' ' + el[2];
-        if (State.options.inlineAlerts) {
-          link.append(message);
-        } else {
-          li.append(message);
-        }*/
-      }
-      panelOutline.append(li);
-    });
-  } else {
-    panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>';
-  }
-}
-
-
-const showAltPanel = function () {
-  // visualize image alts
-  let altList = UI.panel.querySelector('#ed11y-alt-list');
-
-  if (UI.imageAlts.length) {
-    altList.innerHTML = '';
-    UI.imageAlts.forEach((el, i) => {
-      // el[el, src, altLabel, altStyle]
-
-      if (State.options.inlineAlerts) {
-        // Label images
-        const mark = document.createElement('ed11y-element-alt');
-        mark.classList.add('ed11y-element');
-        mark.dataset.ed11yImg = i.toString();
-        mark.setAttribute('id', 'ed11y-alt-' + i);
-        mark.setAttribute('tabindex', '-1');
-        el[0].insertAdjacentElement('beforebegin', mark);
-      }
-
-      // Build alt list in panel
-      let userText = document.createElement('span');
-      userText.textContent = el[2];
-      let li = document.createElement('li');
-      li.classList.add(el[3]);
-      let img = document.createElement('img');
-      img.setAttribute('src', el[1]);
-      img.setAttribute('alt', '');
-
-      if (State.options.inlineAlerts) {
-        let a = document.createElement('a');
-        a.href = '#ed11y-alt-' + i;
-        a.classList.add('alt-parent');
-        li.append(a);
-        a.append(img);
-        a.append(userText);
-      } else {
-        li.classList.add('alt-parent');
-        li.append(img);
-        li.append(userText);
-      }
-      altList.append(li);
-    });
-    alignAlts();
-  } else {
-    const noImages = document.createElement('p');
-    const noItalic = document.createElement('em');
-    noItalic.textContent = M.noImagesFound;
-    noImages.appendChild(noItalic);
-    altList.innerHTML = '';
-    altList.appendChild(noImages);
-  }
-};
-
 function windowResize() {
   if (UI.panel?.classList.contains('ed11y-active') === true) {
     alignAlts$1();
@@ -5106,6 +4973,7 @@ function startObserver (root) {
     window.setTimeout(function () {
       incrementalAlign(); // Immediately realign tips.
       State.alignPending = false;
+      incrementalCheck(); // Recheck after delay.
     },0);
   };
 
@@ -5129,6 +4997,146 @@ function startObserver (root) {
     updateTipLocations();
   }, 1000);
 }
+
+function visualize () {
+  if (!UI.panel) {
+    return;
+  }
+  if (State.options.inlineAlerts) {
+    findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+    State.elements.reset?.forEach((el) => el.remove());
+  }
+  if (State.visualizing) {
+    State.visualizing = false;
+    UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsContent;
+    UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
+    UI.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
+    return;
+  }
+  State.visualizing = true;
+  UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsActive;
+  UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
+  UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
+  showAltPanel();
+  showHeadingsPanel();
+}
+
+function showHeadingsPanel () {
+  // Visualize the document outline
+
+  let panelOutline = UI.panel.querySelector('#ed11y-outline');
+  console.log(State.headingOutline);
+  if (State.headingOutline.length) {
+    panelOutline.innerHTML = '';
+    State.headingOutline.forEach((result, i) => {
+      console.log(result);
+      console.log(result.headingLevel);
+      // Todo: draw these in editable mode.
+      if (State.options.inlineAlerts) {
+        const mark = document.createElement('ed11y-element-heading-label');
+        mark.classList.add('ed11y-element', 'ed11y-element-heading');
+        mark.dataset.ed11yHeadingOutline = i.toString();
+        mark.setAttribute('id', 'ed11y-heading-' + i);
+        mark.setAttribute('tabindex', '-1');
+        // Array: el, level, outlinePrefix
+        result.element.insertAdjacentElement('afterbegin', mark);
+        UI.attachCSS(mark.shadowRoot);
+      }
+      let leftPad = 10 * result.headingLevel - 10;
+      let li = document.createElement('li');
+      li.classList.add('level' + result.headingLevel);
+      li.style.setProperty('margin-left', leftPad + 'px');
+      let levelPrefix = document.createElement('strong');
+      levelPrefix.textContent = `H${result.headingLevel}: `;
+      let userText = document.createElement('span');
+      userText.textContent = computeText(result.element);
+      let link = document.createElement('a');
+      if (State.options.inlineAlerts) {
+        link.setAttribute('href', '#ed11y-heading-' + i);
+        li.append(link);
+        link.append(levelPrefix);
+        link.append(userText);
+      } else {
+        li.append(levelPrefix);
+        li.append(userText);
+      }
+      if (result.type) { // Has an error message
+        li.classList.add(`ed11y-${result.type}`);
+        /*let message = document.createElement('em');
+        message.classList.add('ed11y-small');
+        message.textContent = ' ' + el[2];
+        if (State.options.inlineAlerts) {
+          link.append(message);
+        } else {
+          li.append(message);
+        }*/
+      }
+      panelOutline.append(li);
+    });
+  } else {
+    panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>';
+  }
+}
+
+window.addEventListener('ed11yEndVisualization', ()=>{
+	State.visualizing = false;
+	pauseObservers();
+	visualize();
+	resumeObservers();
+});
+
+const showAltPanel = function () {
+  // visualize image alts
+  let altList = UI.panel.querySelector('#ed11y-alt-list');
+
+  if (UI.imageAlts.length) {
+    altList.innerHTML = '';
+    UI.imageAlts.forEach((el, i) => {
+      // el[el, src, altLabel, altStyle]
+
+      if (State.options.inlineAlerts) {
+        // Label images
+        const mark = document.createElement('ed11y-element-alt');
+        mark.classList.add('ed11y-element');
+        mark.dataset.ed11yImg = i.toString();
+        mark.setAttribute('id', 'ed11y-alt-' + i);
+        mark.setAttribute('tabindex', '-1');
+        el[0].insertAdjacentElement('beforebegin', mark);
+      }
+
+      // Build alt list in panel
+      let userText = document.createElement('span');
+      userText.textContent = el[2];
+      let li = document.createElement('li');
+      li.classList.add(el[3]);
+      let img = document.createElement('img');
+      img.setAttribute('src', el[1]);
+      img.setAttribute('alt', '');
+
+      if (State.options.inlineAlerts) {
+        let a = document.createElement('a');
+        a.href = '#ed11y-alt-' + i;
+        a.classList.add('alt-parent');
+        li.append(a);
+        a.append(img);
+        a.append(userText);
+      } else {
+        li.classList.add('alt-parent');
+        li.append(img);
+        li.append(userText);
+      }
+      altList.append(li);
+    });
+    alignAlts();
+  } else {
+    const noImages = document.createElement('p');
+    const noItalic = document.createElement('em');
+    noItalic.textContent = M.noImagesFound;
+    noImages.appendChild(noItalic);
+    altList.innerHTML = '';
+    altList.appendChild(noImages);
+  }
+};
 
 function showResults () {
   buildJumpList();
@@ -5379,28 +5387,6 @@ function updatePanel () {
     alignPanel();
     UI.panel.classList.remove('ed11y-preload');
   }
-
-  window.setTimeout(() => {
-    if (State.options.watchForChanges) {
-      State.elements.editable?.forEach(editable => {
-        if (!editable.matches('.drag-observe')) {
-          editable.classList.add('drag-observe');
-          editable.addEventListener('drop', () => {
-            // This event does not bubble.
-            State.forceFullCheck = true;
-          });
-        }
-      });
-      if (State.options.watchForChanges === 'checkRoots') {
-        State.roots?.forEach((root) => {
-          startObserver( root );
-        });
-      } else {
-        startObserver( document.body );
-      }
-      resumeObservers(); // on recheck.
-    }
-  }, 0);
 
   resumeObservers();
   State.running = false;
@@ -5798,11 +5784,14 @@ function jumpTo(dir = 1) {
   }, 250);
 
   resetClass(['ed11y-hidden-highlight']);
-  if (!State.jumpList) {
+  if (State.jumpList.length === 0) {
     buildJumpList(); // todo
   }
   // Find next or first result in the dom ordered list of results.
   let goto = State.jumpList[goNum];
+	if (!goto) {
+		goto = State.jumpList[0];
+	}
   let result = goto.getAttribute('data-ed11y-result');
   let gotoResult = State.results[result];
   const target = gotoResult.element;
@@ -5991,7 +5980,7 @@ function checkAll() {
     State.roots = [];
     if (State.options.fixedRoots) {
 			// @todo merge this needs to be implemented
-			State.options.fixedRoots.forEach(root => {roots.push(root.fixedRoot);});
+			State.options.fixedRoots.forEach(root => {State.roots.push(root.fixedRoot);});
     } else {
 			// @todo merge this needs to return to querySelectorAll.
       State.roots = document.querySelectorAll(`:is(${State.options.checkRoots})`);
@@ -6122,6 +6111,27 @@ toggle
         }
         countAlerts();
         updatePanel();
+				window.setTimeout(() => {
+					if (State.options.watchForChanges) {
+						State.elements.editable?.forEach(editable => {
+							if (!editable.matches('.drag-observe')) {
+								editable.classList.add('drag-observe');
+								editable.addEventListener('drop', () => {
+									// This event does not bubble.
+									State.forceFullCheck = true;
+								});
+							}
+						});
+						if (State.options.watchForChanges === 'checkRoots') {
+							State.roots?.forEach((root) => {
+								startObserver( root );
+							});
+						} else {
+							startObserver( document.body );
+						}
+						resumeObservers(); // on recheck.
+					}
+				}, 0);
       }, 0);
     }
   else {
@@ -6542,17 +6552,25 @@ class Ed11yElementTip extends HTMLElement {
 
     let content = document.createElement('div');
     content.classList.add('content');
-    this.heading = document.createElement('div');
+    /*this.heading = document.createElement('div');
     this.heading.classList.add('title');
     this.heading.setAttribute('tabindex', '-1');
     this.heading.innerHTML = M[this.result.test].title;
     content.append(this.heading);
     const alertBox = document.createElement('div');
     alertBox.classList.add('ed11y-tip-alert');
-    this.heading.insertAdjacentElement('afterbegin', alertBox);
+    this.heading.insertAdjacentElement('afterbegin', alertBox);*/
 
     let innerContent = document.createElement('div');
-    innerContent.innerHTML = this.result.content;
+		const sentences = this.result.content.split('.');
+		const firstSentence = document.createElement('div');
+		firstSentence.innerHTML = sentences.shift() + '.';
+		firstSentence.classList.add('title');
+		firstSentence.setAttribute('tabindex', '-1');
+		innerContent.append(firstSentence);
+		const theRest = document.createElement('span');
+		theRest.innerHTML = sentences.join('.');
+		innerContent.appendChild(theRest);
     content.append(innerContent);
 
     if (!State.options.inlineAlerts || State.options.editLinks) {

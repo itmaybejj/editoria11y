@@ -43,17 +43,25 @@ export class Ed11yElementTip extends HTMLElement {
 
     let content = document.createElement('div');
     content.classList.add('content');
-    this.heading = document.createElement('div');
+    /*this.heading = document.createElement('div');
     this.heading.classList.add('title');
     this.heading.setAttribute('tabindex', '-1');
     this.heading.innerHTML = M[this.result.test].title;
     content.append(this.heading);
     const alertBox = document.createElement('div');
     alertBox.classList.add('ed11y-tip-alert');
-    this.heading.insertAdjacentElement('afterbegin', alertBox);
+    this.heading.insertAdjacentElement('afterbegin', alertBox);*/
 
     let innerContent = document.createElement('div');
-    innerContent.innerHTML = this.result.content;
+		const sentences = this.result.content.split('.');
+		const firstSentence = document.createElement('div');
+		firstSentence.innerHTML = sentences.shift() + '.';
+		firstSentence.classList.add('title');
+		firstSentence.setAttribute('tabindex', '-1');
+		innerContent.append(firstSentence);
+		const theRest = document.createElement('span');
+		theRest.innerHTML = sentences.join('.');
+		innerContent.appendChild(theRest);
     content.append(innerContent);
 
     if (!State.options.inlineAlerts || State.options.editLinks) {
