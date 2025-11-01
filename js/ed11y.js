@@ -62,12 +62,13 @@ class Ed11y {
 
       // Set alertModes
       // 'headless': do not draw interface
+      // 'minimized': always shut.
       // 'userPreference: respect user preference.
-      // 'polite': open for new issues.
+      // 'polite': open for changed issue count.
       // 'assertive': open for any issues.
       // 'active': always open.
-      // CMS integrations can switch between polite & headless at runtime.
-      alertMode: 'userPreference',
+      // CMS integrations usually choose at runtime.
+      alertMode: 'polite',
       inlineAlerts: true,
       watchForChanges: true, // true, false, 'checkRoots';
 
@@ -226,7 +227,9 @@ class Ed11y {
         },
       ],
 
-      userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
+      userPrefersShut: localStorage.getItem('editoria11yShow') === null ?
+        'undefined'
+        : localStorage.getItem('editoria11yShow') === '0',
 
       customTests: 0,
 
@@ -651,28 +654,30 @@ class Ed11y {
             Ed11y.showDismissed.insertAdjacentElement('beforebegin', reportLink);
           }
 
-
           // Decide whether to open the panel on load.
-          if (Ed11y.ignoreAll ||
-            (!Ed11y.options.inlineAlerts && Ed11y.totalCount > 75)
+          if (Ed11y.ignoreAll
+            || (!Ed11y.options.inlineAlerts
+              && Ed11y.totalCount > 75)
           ) {
+            // Always minimize on command or for too many results.
             Ed11y.showPanel = false;
-          } else if (Ed11y.options.alertMode === 'active' ||
-            !Ed11y.options.userPrefersShut ||
-            Ed11y.options.showDismissed
+          } else if (Ed11y.options.alertMode === 'active'
+            || Ed11y.options.showDismissed
           ) {
-            // Show always on load for active mode or by user preference.
+            // Always show in active mode or when dismissals displayed.
             Ed11y.showPanel = true;
           } else if (
-            Ed11y.totalCount > 0 &&
-            !Ed11y.ignoreAll &&
-            ( Ed11y.options.alertMode === 'assertive' ||
-              Ed11y.options.alertMode === 'polite' &&
-              Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount
-            )
+            Ed11y.totalCount > 0
+            && !Ed11y.ignoreAll
+            && Ed11y.options.alertMode !== 'minimized'
           ) {
-            // Show sometimes for assertive/polite if there are new items.
-            Ed11y.showPanel = true;
+            // Show sometimes if there are new items.
+            if (Ed11y.options.userPrefersShut === false
+              || Ed11y.options.alertMode === 'assertive'
+              || ( Ed11y.options.alertMode === 'polite' &&
+                Ed11y.seen[encodeURI(Ed11y.options.currentPage)] !== Ed11y.totalCount )
+            )
+              Ed11y.showPanel = true;
           }
         }
 
