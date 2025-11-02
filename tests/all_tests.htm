@@ -482,20 +482,12 @@
             /*footer { position: fixed; z-index: 1; bottom: 0; left: 0; right: 0; background: silver;}*/
         </style>
         <link href="./tests.css" rel="stylesheet">
-        <script src="../js/ed11y-localization.js"></script>
-        <script src="../js/ed11y-element-panel.js"></script>
-        <script src="../js/ed11y-element-result.js"></script>
-        <script src="../js/ed11y-element-tip.js"></script>
-        <script src="../js/ed11y-element-alt.js"></script>
-        <script src="../js/ed11y-test-links.js"></script>
-        <script src="../js/ed11y-test-images.js"></script>
-        <script src="../js/ed11y-test-headings.js"></script>
-        <script src="../js/ed11y-test-text.js"></script>
-        <script src="../js/ed11y-test-embeds.js"></script>
-        <script src="../js/ed11y.js"></script>
+		<script src="../dist/js/ed11y.umd.js"></script>
+		<script src="../dist/js/lang/en.umd.js"></script>
         <!-- Instantiate-->
         <script>
-          const ed11y = new Ed11y({
+		  Ed11y.Lang.addI18n(Sa11yLangEn.strings);
+          const ed11y = new Ed11y.Ed11y({
             alertMode : 'assertive',
             lang : 'en',
             //baseFontSize: 18,
@@ -510,7 +502,7 @@
             shadowComponents : 'shadow-test, shadow-test-no-hits, turtle',
             //autoDetectShadowComponents: false,
             hiddenHandlers : '#hidden-handler',
-            checkRoots : 'main',
+		  	checkRoot: 'main',
             //showDismissed : true,
             altPlaceholder: 'This image has an empty alt attribute;',
             //ignoreTests: ['headingLevelSkipped'],
@@ -522,7 +514,7 @@
             //preventCheckingIfAbsent : 'maian',
           });
 
-          let inject = document.querySelector('#all-tests');
+          /*let inject = document.querySelector('#all-tests');
           for (const [key, value] of Object.entries(Ed11y.M)) {
             if (value.title && typeof value.tip()) {
               let item = document.createElement('div');
@@ -532,7 +524,8 @@
               item.prepend(title);
               inject.append(item);
             };
-          }
+          }*/
+		  console.log(Ed11y);
         </script>
 
     </div>
