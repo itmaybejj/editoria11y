@@ -217,7 +217,7 @@ export function updatePanel () {
         UI.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
         UI.showDismissed.removeAttribute('hidden');
       } else {
-        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ? M.buttonHideHiddenAlerts(State.dismissedCount) : M.buttonShowHiddenAlerts(State.dismissedCount);
+        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ? Lang.sprintf('buttonHideHiddenAlerts', State.dismissedCount) : Lang.sprintf('buttonShowHiddenAlerts', State.dismissedCount);
         UI.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
         UI.showDismissed.removeAttribute('hidden');
       }
@@ -284,8 +284,8 @@ export function updatePanel () {
           UI.panelToggleTitle.textContent = M.buttonHideChecker;
         } else {
           UI.panelToggleTitle.textContent = State.dismissedCount > 1 ?
-            M.buttonShowHiddenAlerts(State.dismissedCount) :
-            M.buttonShowHiddenAlert;
+						Lang.sprintf('buttonShowHiddenAlerts', State.dismissedCount) :
+            Lang._('buttonShowHiddenAlert');
         }
       } else {
         // todo 3.x: move these inline and just change the class.
@@ -404,7 +404,7 @@ export function drawResult(result, index) {
   mark.toggle = document.createElement('button');
   mark.toggle.setAttribute('class', 'toggle');
   let label = mark.dismissable ? M.toggleManualCheck : M.toggleAlert;
-  mark.toggle.setAttribute('aria-label', M.toggleAriaLabel(label));
+  mark.toggle.setAttribute('aria-label', Lang.sprintf('toggleAriaLabel', label));
   mark.toggle.setAttribute('aria-expanded', 'false');
   mark.toggle.setAttribute('aria-haspopup', 'dialog');
   mark.toggle.setAttribute('data-ed11y-result', mark.dataset.ed11yResult);
@@ -1625,7 +1625,7 @@ export function resetPanel() {
 		UI.panelCount.textContent = 'i';
 		UI.panelToggleTitle.textContent = State.dismissedCount === 1 ?
 			M.buttonShowHiddenAlert :
-			M.buttonShowHiddenAlerts(State.dismissedCount);
+			Lang.sprintf('buttonShowHiddenAlerts', State.dismissedCount);
 	}
 
 	// @todo is this going to fail again? Should it a different if?
@@ -1636,7 +1636,7 @@ export function resetPanel() {
 		if (!State.options.showDismissed && typeof UI.showDismissed === 'function') {
 			UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
 			UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
-				M.buttonShowHiddenAlert : M.buttonShowHiddenAlerts(State.dismissedCount);
+				M.buttonShowHiddenAlert : Lang.sprintf('buttonShowHiddenAlerts', State.dismissedCount);
 		}
 	}
 }

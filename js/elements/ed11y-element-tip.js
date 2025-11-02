@@ -5,6 +5,7 @@ import {
   jumpTo,
   transferFocus
 } from "../logic/interface.js";
+import {Lang} from "sa11y/src/js/sa11y.js";
 
 export class Ed11yElementTip extends HTMLElement {
   /* global Ed11y */
@@ -43,26 +44,33 @@ export class Ed11yElementTip extends HTMLElement {
 
     let content = document.createElement('div');
     content.classList.add('content');
-    /*this.heading = document.createElement('div');
-    this.heading.classList.add('title');
-    this.heading.setAttribute('tabindex', '-1');
-    this.heading.innerHTML = M[this.result.test].title;
-    content.append(this.heading);
-    const alertBox = document.createElement('div');
-    alertBox.classList.add('ed11y-tip-alert');
-    this.heading.insertAdjacentElement('afterbegin', alertBox);*/
+		if (this.result.content.includes('class="title"')) {
+			// Sent by Ed11y
+			//this.heading = document.createElement('div');
+			//this.heading.classList.add('title');
+			//this.heading.setAttribute('tabindex', '-1');
+			//this.heading.innerHTML = M[this.result.test].title;
+			//content.append(this.heading);
+			//const alertBox = document.createElement('div');
+			//alertBox.classList.add('ed11y-tip-alert');
+			//this.heading.insertAdjacentElement('afterbegin', alertBox);
+			content.innerHTML = this.result.content;
+		} else {
+			// Sent by Sa11y
+			let innerContent = document.createElement('div');
+			const sentences = this.result.content.split('.');
+			const firstSentence = document.createElement('div');
+			firstSentence.innerHTML = sentences.shift() + '.';
+			firstSentence.classList.add('title');
+			firstSentence.setAttribute('tabindex', '-1');
+			innerContent.append(firstSentence);
+			const theRest = document.createElement('span');
+			theRest.innerHTML = sentences.join('.');
+			innerContent.appendChild(theRest);
+			content.append(innerContent);
+		}
+    /**/
 
-    let innerContent = document.createElement('div');
-		const sentences = this.result.content.split('.');
-		const firstSentence = document.createElement('div');
-		firstSentence.innerHTML = sentences.shift() + '.';
-		firstSentence.classList.add('title');
-		firstSentence.setAttribute('tabindex', '-1');
-		innerContent.append(firstSentence);
-		const theRest = document.createElement('span');
-		theRest.innerHTML = sentences.join('.');
-		innerContent.appendChild(theRest);
-    content.append(innerContent);
 
     if (!State.options.inlineAlerts || State.options.editLinks) {
       const editBar = document.createElement('div');
@@ -126,7 +134,7 @@ export class Ed11yElementTip extends HTMLElement {
 
         if (showPageActions) {
           pageActions.classList.add('ed11y-bulk-actions', 'dismiss');
-          pageActionsSummary.textContent = M.dismissActions(othersLikeThis);
+          pageActionsSummary.textContent = Lang.sprintf('dismissActions', othersLikeThis);
           pageActions.appendChild(pageActionsSummary);
           buttonBar.appendChild(pageActions);
         }

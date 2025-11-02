@@ -249,8 +249,6 @@ const Options = (function options() {
       ...ed11yDefaults,
       ...options,
     };
-    console.log('merged');
-    console.log(options);
     /*
     * Options translation
     * */
@@ -297,11 +295,11 @@ const Options = (function options() {
     /* Language setup */
     /* ************** */
     // @todo merge how to emulate Sa11y translations?
-    ed11yLang = {
+    /*ed11yLang = {
       // Fall back to En strings if language or string is unavailable
       ...ed11yLang['en'],
       ...ed11yLang[options.lang]
-    };
+    };*/
 
     /* *********** */
     /* Theme setup */
