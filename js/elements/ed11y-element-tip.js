@@ -3,7 +3,7 @@ import {
   alertOnInvisibleTip,
   jumpTo,
   transferFocus
-} from "../render/interface.js";
+} from "../logic/interface.js";
 import {dismissThis} from "../utils/toggle.js";
 
 export class Ed11yElementTip extends HTMLElement {
@@ -199,7 +199,7 @@ export class Ed11yElementTip extends HTMLElement {
       this.prev.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 -10 30 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m40 100,-50 -50 50-50 50"></path></svg>';
       this.prev.addEventListener('click', (event) => {
         event.preventDefault();
-        jumpTo(-1);
+        jumpTo(false);
       });
       this.navBar.append(this.prev);
 
@@ -210,7 +210,7 @@ export class Ed11yElementTip extends HTMLElement {
       this.next.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 120 120" width="10"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m30 00 50 50-50 50"></path></svg>';
       this.next.addEventListener('click', (event) => {
         event.preventDefault();
-        jumpTo(1);
+        jumpTo();
       });
       this.navBar.append(this.next);
     }

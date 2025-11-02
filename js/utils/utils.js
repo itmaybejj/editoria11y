@@ -12,16 +12,6 @@ export const lagBounce = (callback, wait) => {
   };
 };
 
-export function flattenText(text) {
-  return text.replace(/[\n\r]+|\s{2,}/g, ' ').trim();
-}
-
-// Gets trimmed and normalized inner text nodes.
-// Use computeText() instead for the full accessible name calculation.
-export function getText(el) {
-  return flattenText(el.textContent);
-}
-
 export function parents(el) {
   let nodes = [];
   nodes.push(el);
@@ -32,234 +22,6 @@ export function parents(el) {
   return nodes;
 }
 
-// Handle aria-label or labelled-by. Latter "wins" and can self-label.
-export function computeAriaLabel(element, recursing = 0) {
-  if (State.options.ignoreAriaOnElements && element.matches(State.options.ignoreAriaOnElements)) {
-    return 'noAria';
-  }
-  if (State.options.ignoreTextInElements && element.matches(State.options.ignoreTextInElements)) {
-    return '';
-  }
-
-  const labelledBy = element.getAttribute('aria-labelledby');
-  if (!recursing && labelledBy) {
-    const target = labelledBy.split(/\s+/);
-    if (target.length > 0) {
-      let returnText = '';
-      target.forEach((x) => {
-        const targetSelector = document.querySelector(`#${CSS.escape(x)}`);
-        returnText += (!targetSelector) ? '' : computeText(targetSelector, 1);
-      });
-      return returnText;
-    }
-  }
-  if (element.hasAttribute('aria-label') && element.getAttribute('aria-label').trim().length > 0) {
-    return element.getAttribute('aria-label');
-  }
-  return 'noAria';
-}
-
-export function wrapPseudoContent(el, string) {
-  // Get quoted content, avoid inserting URL references.
-  // Hat tip Adam Chaboryk
-
-  const getAltText = (content) => {
-    if (content === 'none') return '';
-    const match = content.includes('url(') || content.includes('image-set(')
-      ? content.match(/\/\s*"([^"]+)"/) // Content after slash, e.g. url('image.jpg') / "alt text";
-      : content.match(/"([^"]+)"/); // Content between quotes, e.g. "alt text";
-    return match ? match[1] : '';
-  };
-  const before = getAltText(window.getComputedStyle(el, ':before').getPropertyValue('content'));
-  const after = getAltText(window.getComputedStyle(el, ':after').getPropertyValue('content'));
-  return `${before}${string}${after}`;
-
-}
-
-// Sets treeWalker loop to last node before next branch.
-export function nextTreeBranch(tree) {
-  for (let i = 0; i < 1000; i++) {
-    if (tree.nextSibling()) {
-      // Prepare for continue to advance.
-      return tree.previousNode();
-    }
-    // Next node will be in next branch.
-    if (!tree.parentNode()) {
-      return false;
-    }
-  }
-  return false;
-}
-
-// Subset of the W3C accessible name algorithm.
-export function computeText(el, recursing = 0, excludeLinkClasses = false) {
-
-  // Return immediately if there is an aria label.
-  let hasAria = computeAriaLabel(el, recursing);
-  if (hasAria !== 'noAria') {
-    return hasAria;
-  }
-
-  // Return immediately if there is only a text node.
-  let computedText = '';
-  if (el.shadowRoot) {
-    const shadowChildren = el.shadowRoot.querySelectorAll('*');
-    shadowChildren.forEach(child => {
-      computedText += computeText(child);
-    });
-  }
-  if (!el.children.length) {
-    // Skip treeWalker, only contents are text.
-    computedText += wrapPseudoContent(el, el.textContent);
-    if (!computedText.trim() && el.hasAttribute('title')) {
-      computedText = el.getAttribute('title');
-    }
-    return recursing ? computedText : computedText.replace(/[\n\r]+|\s{2,}/g, ' ').trim();
-  }
-
-  // Otherwise, recurse into children.
-  let treeWalker = document.createTreeWalker(
-    el,
-    NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT
-  );
-
-  let addTitleIfNoName = false;
-  let aText = false;
-  let count = 0;
-
-  walker: while (treeWalker.nextNode()) {
-    count++;
-
-    // todo: Sa11y excludes
-    if (treeWalker.currentNode.nodeType === Node.TEXT_NODE) {
-      if (treeWalker.currentNode.parentNode.tagName !== 'SLOT') {
-        computedText += ` ${treeWalker.currentNode.nodeValue}`;
-      }
-      continue;
-    }
-
-    // Jump over ignored link text containers.
-    // e.g., "(link opens in new window)"
-    if (treeWalker.currentNode.matches('.ed11y-element') || (excludeLinkClasses && treeWalker.currentNode.matches(State.options.linkIgnoreSelector))) {
-      if (!nextTreeBranch(treeWalker)) {
-        break walker;
-      }
-      continue;
-    }
-
-    // Inner nodes with shadowRoots.
-    if (treeWalker.currentNode.shadowRoot) {
-      const shadowChildren = treeWalker.currentNode.shadowRoot.querySelectorAll('*');
-      shadowChildren.forEach(child => {
-        computedText += computeText(child);
-      });
-      continue;
-    }
-
-    // Use link title as text if there was no text in the link.
-    // Todo: in theory this could attach the title to the wrong node.
-    if (addTitleIfNoName && !treeWalker.currentNode.closest('a')) {
-      if (aText === computedText) {
-        computedText += addTitleIfNoName;
-      }
-      addTitleIfNoName = false;
-      aText = false;
-    }
-
-    if (treeWalker.currentNode.hasAttribute('aria-hidden') && !(recursing && count < 3)) {
-      // Ignore elements and children, except when directly aria-referenced.
-      // W3C name calc 2 is more complicated than this, but this is good enough.
-      if (!nextTreeBranch(treeWalker)) {
-        break walker;
-      }
-      continue;
-    }
-
-    let aria = computeAriaLabel(treeWalker.currentNode, recursing);
-    if (aria !== 'noAria') {
-      computedText += ' ' + aria;
-      if (!nextTreeBranch(treeWalker)) {
-        break walker;
-      }
-      continue;
-    }
-
-    switch (treeWalker.currentNode.tagName) {
-      case 'STYLE':
-      case 'NOSCRIPT':
-        // Skip style elements
-        if (!nextTreeBranch(treeWalker)) {
-          break walker;
-        }
-        continue;
-      case 'IMG':
-        if (treeWalker.currentNode.hasAttribute('alt') &&
-          !treeWalker.currentNode.matches('[role="presentation"]')) {
-          computedText += treeWalker.currentNode.getAttribute('alt');
-        }
-        continue;
-      case 'SVG':
-      case 'svg':
-        if (treeWalker.currentNode.getAttribute('role') === 'img' && treeWalker.currentNode.hasAttribute('alt')) {
-          computedText += wrapPseudoContent(treeWalker.currentNode, treeWalker.currentNode.getAttribute('alt'));
-          if (!nextTreeBranch(treeWalker)) {
-            break walker;
-          }
-        }
-        continue;
-      case 'A':
-        if (treeWalker.currentNode.hasAttribute('title')) {
-          addTitleIfNoName = treeWalker.currentNode.getAttribute('title');
-          aText = computedText;
-        } else {
-          // Reset
-          addTitleIfNoName = false;
-          aText = false;
-        }
-        computedText += wrapPseudoContent(treeWalker.currentNode, '');
-        break;
-      case 'INPUT':
-        computedText += wrapPseudoContent(treeWalker.currentNode, '');
-        if (treeWalker.currentNode.hasAttribute('title')) {
-          addTitleIfNoName = treeWalker.currentNode.getAttribute('title');
-        }
-        break;
-      case 'SLOT':
-        if (treeWalker.currentNode.assignedNodes()) {
-          // Slots have specific shadow DOM methods.
-          const children = treeWalker.currentNode.assignedNodes();
-          children?.forEach(child => {
-            if (child.nodeType === Node.ELEMENT_NODE) {
-              computedText += computeText(child);
-            } else if (child.nodeType === Node.TEXT_NODE) {
-              computedText += flattenText(child.nodeValue);
-            }
-          });
-        }
-        computedText += wrapPseudoContent(treeWalker.currentNode, '');
-        break;
-      default:
-        // Other tags continue as-is.
-        computedText += wrapPseudoContent(treeWalker.currentNode, '');
-        break;
-    }
-  }
-  // At end of loop, add last title element if need be.
-  if (addTitleIfNoName && !aText) {
-    computedText += ' ' + addTitleIfNoName;
-  }
-
-  computedText = wrapPseudoContent(el, computedText);
-
-  if (!computedText.trim() && el.hasAttribute('title')) {
-    return el.getAttribute('title');
-  }
-
-  return recursing ? computedText : computedText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim();
-
-}
-
-
 export function resetClass(classes) {
   classes?.forEach((el) => {
     let thisClass = el;
@@ -269,39 +31,6 @@ export function resetClass(classes) {
     });
   });
 }
-
-// Is this still needed when we use real buttons? getting doubleClick on FF
-export function keyboardClick(event) {
-  event.preventDefault();
-  let key = event.keyCode;
-  switch (key) {
-    case 13: // enter
-    case 32: // space
-      event.target.click();
-      break;
-  }
-}
-
-export function siblings(el) {
-  if (el.parentNode === null) return [];
-  return Array.prototype.filter.call(el.parentNode.children, function (child) {
-    return child !== el;
-  });
-}
-
-export function nextUntil(el, selector) {
-  // Recursively iterate until match or null is returned.
-  let next = el.nextElementSibling;
-  if (next) {
-    let nextMatch = next.matches(selector);
-    if (nextMatch) {
-      return next;
-    } else {
-      next = nextUntil(next, selector);
-    }
-  }
-  return next;
-};
 
 export function visibleElement(el) {
   // Checks if this element is visible. Used in parent iterators.
@@ -376,42 +105,7 @@ export function elementNotHidden(el) {
     let notHiddenParent = (parent) => hiddenElementCheck(parent);
     return theParents.every(notHiddenParent);
   }
-};
-
-export function parentLink(el) {
-  return el.closest('a[href]');
-};
-
-export function srcMatchesOptions(source, option) {
-  if (option.length > 0 && source?.length > 0) {
-    let selectorArray = option.split(/\s*[\s,]\s*/).map((el) => {
-      return '[src*=\'' + el + '\']';
-    });
-    let selectors = selectorArray.join(', ');
-    let finder = Array.from(source);
-    return finder.filter((el) => el.matches(selectors));
-  } else {
-    return [];
-  }
-};
-
-export function sanitizeForHTML(string) {
-  let entityMap = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    '\'': '&#39;',
-    '/': '&#x2F;',
-    '`': '&#x60;',
-    '=': '&#x3D;'
-  };
-  return String(string).replace(/[&<>"'`=/]/g, function (s) {
-    return entityMap[s];
-  });
-};
-
-
+}
 
 export function detectShadow (container) {
   if (State.options.autoDetectShadowComponents) {
@@ -532,7 +226,7 @@ export function raceCrash() {
   this.checkAll();
   window.setTimeout(function() {
     if (State.results.length > 0 && State.loopStop) {
-      this.jumpTo(1); // todo
+      this.jumpTo(); // todo
       State.loopStop = false;
     }
   },100, State.loopStop);

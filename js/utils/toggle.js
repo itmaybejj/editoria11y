@@ -1,8 +1,7 @@
 import {M, State, UI} from "./state.js";
-import {dismissOne, reset} from "../render/interface.js";
+import {dismissOne, reset, checkAll} from "../logic/interface.js";
 import {prepareDismissal} from "sa11y/src/js/utils/utils.js";
 import {resetClass} from "./utils.js";
-import {checkAll} from "./check.js";
 
 export function dismissThis (dismissalType, all = false) {
   // Find the active tip and draw its identifying information from the result list

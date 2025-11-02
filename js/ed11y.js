@@ -3,14 +3,14 @@ import Lang from '../node_modules/sa11y/src/js/utils/lang';
 import Constants from "sa11y/src/js/utils/constants.js";
 import ed11yLang from "./lang/localization.js";
 import {State, M} from "./utils/state.js";
-import {checkAll, makeItSo} from "./utils/check.js";
+import {Ed11yElementTip} from "./elements/ed11y-element-tip.js";
+import {Ed11yElementAlt} from "./elements/ed11y-element-alt.js";
+import {Ed11yElementResult} from "./elements/ed11y-element-result.js";
 import {
   Ed11yElementHeadingLabel,
   Ed11yElementPanel
 } from "./elements/ed11y-element-panel.js";
-import {Ed11yElementTip} from "./elements/ed11y-element-tip.js";
-import {Ed11yElementAlt} from "./elements/ed11y-element-alt.js";
-import {Ed11yElementResult} from "./elements/ed11y-element-result.js";
+import {makeItSo, checkAll} from "./logic/interface.js";
 
 class Ed11y {
 
