@@ -1,13 +1,19 @@
 import {M, State, Theme, UI} from "../utils/state.js";
 import {
+	checkRunPrevent,
+	countAlerts,
 	detectShadow,
-	findElements, firstVisibleParent, lagBounce, raceCrash,
-	resetClass,
+	findElements, firstVisibleParent, lagBounce, pauseObservers,
+	resetClass, resetResults, resumeObservers,
 	visible
 } from "../utils/utils.js";
 import ed11yLang from "../lang/localization.js";
 
-import {prepareDismissal, store} from "sa11y/src/js/utils/utils.js";
+import {
+	documentLoadingCheck,
+	prepareDismissal,
+	store
+} from "sa11y/src/js/utils/utils.js";
 import * as Utils from "sa11y/src/js/utils/utils.js";
 import findShadowComponents from "sa11y/src/js/logic/find-shadow-components.js";
 import checkHeaders from "sa11y/src/js/rulesets/headers.js";
@@ -21,6 +27,12 @@ import Elements from "sa11y/src/js/utils/elements.js";
 import {
 	computeAccessibleName
 } from "sa11y/src/js/utils/computeAccessibleName.js";
+import {
+	alignAlts,
+	alignButtons, alignPanel,
+	checkEditableIntersects,
+	closestScrollable
+} from "../utils/align.js";
 
 export function showResults () {
   buildJumpList();
@@ -31,6 +43,20 @@ export function showResults () {
     checkEditableIntersects();
     intersectionObservers();
   }
+}
+
+const panelJumpTo = function(event) {
+	// Handle jump
+	event.preventDefault();
+	State.toggledFrom = event.target.closest('button');
+	if (!State.open) {
+		togglePanel();
+		window.setTimeout(function() {
+			jumpTo(1);
+		},500);
+	} else {
+		jumpTo(1);
+	}
 }
 
 export function updatePanel () {
@@ -103,7 +129,7 @@ export function updatePanel () {
       UI.panelToggleTitle = UI.panel.querySelector('#ed11y-toggle .ed11y-sr-only');
       UI.panelCount = UI.panel.querySelector('.toggle-count');
       UI.panelJumpNext = UI.panel.querySelector('.ed11y-jump.next');
-      UI.panelJumpNext.addEventListener('click', jumpTo);
+      UI.panelJumpNext.addEventListener('click', panelJumpTo);
       UI.showDismissed = UI.panel.querySelector('#ed11y-show-hidden');
       UI.message = UI.panel.querySelector('#ed11y-message');
       window.setTimeout(()=> {
@@ -485,13 +511,6 @@ export function editableHighlighter (resultID, show, firstVisible) {
   el.style.setProperty('opacity', '1');
 }
 
-export function linkText (linkText) {
-  // todo postpone: This is only used in Images??? Review all text value diving.
-  linkText = linkText.replace(State.options.linkIgnoreStrings, '');
-  linkText = linkText.replace(/'|"|-|\.|\s+/g, '');
-  return linkText;
-}
-
 export function transferFocus () {
   if (!State.openTip.tip) {
     return;
@@ -707,78 +726,6 @@ export function jumpTo(next = true) {
   updateTipLocations();
 }
 
-export function resetResults(incremental) {
-  State.jumpList = [];
-  State.openTip = {
-    button: false,
-    tip: false,
-  };
-  State.lastOpenTip = -1;
-  resetClass([
-    'ed11y-ring-red',
-    'ed11y-ring-yellow',
-    'ed11y-hidden-highlight',
-    'ed11y-warning-inline',
-    'ed11y-warning-block',
-    'ed11y-error-block',
-    'ed11y-error-inline',
-  ]);
-  // Reset insertions into body content.
-  if (incremental) {
-    findElements('reset', 'ed11y-element-highlight', false);
-  } else {
-    findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
-  }
-  State.elements.reset?.forEach((el) => el.remove());
-
-  // Flicker prevention -- leave old tip in place for 100ms.
-  findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
-  const delayedReset = State.elements.delayedReset;
-
-  window.setTimeout(()=> {
-    delayedReset?.forEach((el) => el.remove());
-  }, 100, delayedReset);
-
-  if (typeof UI.panelJumpNext === 'function') {
-    UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = M.buttonFirstContent;
-  }
-  // Reset insertions into body content.
-}
-
-export function resetPanel() {
-  // Reset main panel.
-  State.visualizing = true; // so visualize function removes visualizers.
-  visualize();
-  if (State.totalCount === 0 && State.dismissedCount > 0) {
-    UI.panelCount.textContent = 'i';
-    UI.panelToggleTitle.textContent = State.dismissedCount === 1 ?
-      M.buttonShowHiddenAlert :
-      M.buttonShowHiddenAlerts(State.dismissedCount);
-  }
-	if (typeof (UI.panel) === 'function') {
-		UI.panel?.classList.add('ed11y-shut');
-		UI.panel?.classList.remove('ed11y-active');
-		UI.panelToggle?.setAttribute('aria-expanded', 'false');
-		if (!State.options.showDismissed && typeof UI.showDismissed === 'function') {
-			UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
-			UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
-				M.buttonShowHiddenAlert : M.buttonShowHiddenAlerts(State.dismissedCount);
-		}
-	}
-}
-
-export function reset () {
-  pauseObservers();
-  resetResults();
-  resetPanel();
-  State.incremental = false;
-  State.running = false;
-  State.showPanel = false;
-  State.open = false;
-}
-
-
-
 export function incrementalAlign() {
 	lagBounce(() => {
 		if (!State.running && !State.alignPending) {
@@ -789,325 +736,6 @@ export function incrementalAlign() {
 			incrementalAlign();
 		}
 	}, 10);
-}
-
-export const intersect = function(a, b, x = 10) {
-	// Compute intersect using browser offsets.
-	return (a.left - x <= b.right &&
-		b.left - x <= a.right &&
-		a.top - x <= b.bottom &&
-		b.top - x <= a.bottom);
-};
-
-/**
- * Hide tips that are in front of text currently being edited.
- * */
-export function checkEditableIntersects (focusKnown = false) {
-	if (!focusKnown && !document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
-		//Reset classes to measure.
-		State.jumpList?.forEach((el) => {
-			el.classList.remove('intersecting');
-		});
-		return;
-	}
-	if (!State.activeRange) {
-		// Range isn't on a node we can measure.
-		State.jumpList?.forEach((el) => {
-			el.classList.remove('intersecting');
-		});
-		return;
-	}
-	State.jumpList?.forEach((el) => {
-		const framePositioner = el.result.fixedRoot && State.positionedFrames[el.result.fixedRoot] ?
-			State.positionedFrames[el.result.fixedRoot] : { top: 0, left: 0 };
-		const activeRects = State.activeRange.getBoundingClientRect();
-		const rects = {};
-		rects.top = activeRects.top + framePositioner.top;
-		rects.left = activeRects.left + framePositioner.left;
-		rects.bottom = activeRects.bottom + framePositioner.top;
-		rects.right = activeRects.right + framePositioner.left;
-
-		const toggle = el.shadowRoot.querySelector('.toggle');
-		if ( intersect(rects, toggle.getBoundingClientRect(), 0) ) {
-			if (!toggle.classList.contains('was-intersecting')) {
-				el.classList.add('intersecting');
-				toggle.classList.add('intersecting');
-			}
-		} else {
-			el.classList.remove('intersecting', 'was-intersecting');
-			toggle.classList.remove('intersecting', 'was-intersecting');
-		}
-	});
-}
-
-export function alignAlts () {
-	// Positions alt label to match absolute, inline or floated images.
-	findElements('altMark', 'ed11y-element-alt');
-	State.elements.altMark?.forEach((el) => { // @todo merge
-		let id = el.dataset.ed11yImg;
-		el.style.setProperty('transform', null);
-		el.style.setProperty('height', null);
-		el.style.setProperty('width', null);
-
-		let img = UI.imageAlts[id][0];
-		if (img.tagName !== 'IMG') {
-			// Mark is placed outside the link in linked images.
-			img = img.querySelector('img');
-		}
-		let markOffset = el.getBoundingClientRect();
-		let imgOffset = img.getBoundingClientRect();
-		let newOffset = imgOffset.left - markOffset.left;
-		let height = getComputedStyle(img).height;
-		height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
-		el.style.setProperty('transform', `translate(${newOffset}px, 0px)`);
-		el.style.setProperty('height', `${height}px`);
-		el.style.setProperty('width', `${img.offsetWidth}px`);
-	});
-}
-
-
-const nudgeMark = function (el, x, y) {
-	// TODO: THESE CAN NUDGE OUT OF THE OVERFLOW AREA OF THE CONTENTEDITABLE CONTAINER
-	if (el.style.transform) {
-		const computedStyle = window.getComputedStyle(el);
-		let matrix = computedStyle.getPropertyValue('transform');
-		matrix = matrix.split(',');
-		el.style.transform = `translate(${parseFloat(matrix[4]) + x}px, ${parseFloat(matrix[5]) + y}px)`;
-	} else {
-		el.style.transform = `translate(${x}px, ${y}px)`;
-	}
-};
-
-export function alignButtons() {
-	if (!State.jumpList || State.jumpList.length === 0 || (State.openTip.button && State.scrollPending === 0)) { // todo always false?
-		return;
-	}
-	State.alignPending = true;
-
-	// Reading and writing in a loop creates paint thrashing.
-	// We iterate the array for reads, then iterate for writes.
-
-	if (State.options.fixedRoots) {
-		State.positionedFrames.length = 0;
-
-		State.options.fixedRoots.forEach((root) => {
-			if (root['framePositioner']) {
-				State.positionedFrames.push(root['framePositioner'].getBoundingClientRect());
-			}
-		});
-	}
-
-	// Used for crude intersection detection.
-	let previousNudgeTop = 0;
-	let previousNudgeLeft = 0;
-	const scrollTop = window.scrollY;
-	if (!State.options.inlineAlerts) {
-		// Compute based on target position.
-
-		State.jumpList.forEach((mark, i) => {
-			if (!mark.result.element.isConnected) {
-				// Something broke; rebuild jumpList on next loop.
-				State.forceFullCheck = true;
-				State.interaction = true;
-				mark.style.display = 'none';
-			} else {
-				//mark.visibility = 'visible';
-			}
-			let targetOffset = mark.result.element.getBoundingClientRect();
-
-			let top = targetOffset.top + scrollTop;
-			//let rightBound = window.innerWidth;
-			if (!visible(mark.result.element)) {
-				// Invisible target.
-				const theFirstVisibleParent = firstVisibleParent(mark.result.element);
-				targetOffset = theFirstVisibleParent ? theFirstVisibleParent.getBoundingClientRect() : targetOffset;
-				top = targetOffset.top + scrollTop;
-			}
-			let left = targetOffset.left;
-
-			// TD TD different?
-			if (mark.result.element.tagName === 'IMG') {
-				top = top + 10;
-				left = left + 10;
-			} else {
-				left = State.options.inlineAlerts ? left - 34 : left;
-			}
-
-			// Add iframe positon to calculated position
-			if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
-				top = top + State.positionedFrames[mark.result.fixedRoot].top;
-				left = left + State.positionedFrames[mark.result.fixedRoot].left;
-			}
-
-			// TD TD different?
-			if (mark.result.element.tagName === 'IMG') {
-				top = top + 10;
-				left = left + 10;
-			} else {
-				left = State.options.inlineAlerts ? left - 34 : left;
-			}
-			if (mark.result.scrollableParent) {
-				// Bump alerts that would be X-position out of a scroll zone.
-				State.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
-				if (left < State.jumpList[i].bounds.left) {
-					left = State.jumpList[i].bounds.left;
-				} else if (left + 40 > State.jumpList[i].bounds.right) {
-					left = State.jumpList[i].bounds.right - 40;
-				}
-			} else if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
-				// Bump alerts that would x-position out of an iframe.
-				State.jumpList[i].bounds = State.positionedFrames[mark.result.fixedRoot];
-				if (left < State.jumpList[i].bounds.left) {
-					left = State.jumpList[i].bounds.left;
-				} else if (left + 40 > State.jumpList[i].bounds.right) {
-					left = State.jumpList[i].bounds.right - 40;
-				}
-			}
-			State.jumpList[i].targetOffset = targetOffset;
-			State.jumpList[i].markTop = top;
-			State.jumpList[i].markLeft = left;
-		});
-	} else {
-		// Compute based on self position.
-
-		// Clear old transforms first. Batch write first...
-		State.jumpList.forEach((mark) => {
-			// Reset positions.
-			mark.style.setProperty('transform', null);
-			mark.style.setProperty('top', 'initial');
-			mark.style.setProperty('left', 'initial');
-			if (mark.style.transform) {
-				const computedStyle = window.getComputedStyle(mark);
-				let matrix = computedStyle.getPropertyValue('transform');
-				matrix = matrix.split(',');
-				mark.xOffset = parseFloat(matrix[4]);
-				mark.yOffset = parseFloat(matrix[5]);
-			}
-			else {
-				mark.xOffset = 0;
-				mark.yOffset = 0;
-			}
-		});
-		// ...then batch read new positions.
-		State.jumpList.forEach((mark) => {
-			mark.markOffset = mark.getBoundingClientRect();
-			mark.markLeft = mark.markOffset.left;
-			mark.markTop = mark.markOffset.top;
-		});
-	}
-
-
-	// Check for overlaps, then write out transforms.
-	State.jumpList.forEach((mark, i) => {
-
-		// Now check for any needed nudges
-		let nudgeTop = 10;
-		let nudgeLeft = mark.result.element.tagName === 'IMG' ? 10 : -34;
-		// Detect tip that overlaps with previous result.
-		if (mark.markTop + scrollTop < 0) {
-			// Offscreen to top.
-			nudgeTop = (-1 * (mark.markTop + scrollTop)) - 6;
-		}
-		if (
-			(i > 0 && overlap(mark.markLeft, mark.markTop, State.jumpList[i - 1].markLeft, State.jumpList[i - 1].markTop)) ||
-			(i > 1 && overlap(mark.markLeft, mark.markTop, State.jumpList[i - 2].markLeft, State.jumpList[i - 2].markTop)) ||
-			(i > 2 && overlap(mark.markLeft, mark.markTop, State.jumpList[i - 3].markLeft, State.jumpList[i - 3].markTop))
-		) {
-			// todo postpone: compute actual overlap? We're bouncing by the full amount no matter what which adds too much gapping.
-			nudgeTop = nudgeTop + 14 + previousNudgeTop;
-			nudgeLeft = 14 + previousNudgeLeft;
-		}
-
-		let constrainLeft = 0;
-		let constrainRight = window.innerWidth;
-
-		if (mark.result.scrollableParent) {
-			const constrained = mark.result.scrollableParent.getBoundingClientRect();
-			constrainLeft = constrained.left;
-			constrainRight = constrainLeft + constrained.width;
-		} else if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
-			constrainLeft = State.positionedFrames[mark.result.fixedRoot].left;
-			constrainRight = State.positionedFrames[mark.result.fixedRoot].right;
-		}
-
-		let needNudge = false;
-		if (mark.markLeft + nudgeLeft - constrainLeft < 44) {
-			// Offscreen to left. push to the right.
-			nudgeLeft = 44 - mark.markLeft + nudgeLeft + constrainLeft;
-			needNudge = true;
-		}
-		else if (mark.markLeft + nudgeLeft + 80 > constrainRight ) {
-			needNudge = true;
-			// Offscreen to right. push to the left
-			nudgeLeft = constrainRight - nudgeLeft - mark.markLeft - 100;
-		}
-		else if (nudgeTop !== 0) {
-			needNudge = true;
-		}
-		if (!State.options.inlineAlerts) {
-			if (needNudge) {
-				mark.style.transform = `translate(${mark.markLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
-			} else {
-				mark.style.transform = `translate(${mark.markLeft}px, ${mark.markTop}px)`;
-			}
-
-		} else {
-			nudgeMark(mark, nudgeLeft, nudgeTop);
-		}
-		mark.nudgeLeft = nudgeLeft;
-		mark.nudgeTop = nudgeTop;
-		previousNudgeTop = nudgeTop;
-		previousNudgeLeft = nudgeLeft;
-	});
-
-	// Last pass: check for elements offscreen within scrollable areas.
-	if (!State.options.inlineAlerts) {
-		// Alerts have to be positioned relative to viewport.
-		State.jumpList.forEach(mark => {
-
-			if (mark.result.scrollableParent) {
-				// Hide alerts outside a scroll zone.
-				if (!!mark.bounds && (mark.targetOffset.top - mark.bounds.top < 0 || mark.targetOffset.top - mark.bounds.bottom > 0 ) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
-					// Tip has exited scrollable parent. Visually hide.
-					mark.classList.add('ed11y-offscreen');
-					mark.style.transform = 'translate(0px, -50px)';
-					mark.style.pointerEvents = 'none';
-					if (mark.getAttribute('data-ed11y-open') === 'true') {
-						mark.setAttribute('data-ed11y-action', 'shut');
-					}
-				}
-				else {
-					mark.classList.remove('ed11y-offscreen');
-					mark.style.pointerEvents = 'auto';
-				}
-			} else if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
-				if (!!mark.bounds && (mark.targetOffset.top < -40 || mark.targetOffset.top + mark.bounds.top - mark.bounds.bottom > -10 ) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
-					// Tip has exited scrollable parent. Visually hide.
-					mark.classList.add('ed11y-offscreen');
-					mark.style.transform = 'translate(0px, -50px)';
-					mark.style.pointerEvents = 'none';
-					if (mark.getAttribute('data-ed11y-open') === 'true') {
-						mark.setAttribute('data-ed11y-action', 'shut');
-					}
-				}
-				else {
-					mark.classList.remove('ed11y-offscreen');
-					mark.style.pointerEvents = 'auto';
-				}
-			}
-			else {
-				mark.classList.remove('ed11y-offscreen');
-				mark.style.pointerEvents = 'auto';
-			}
-
-		});
-	}
-	State.jumpList?.forEach(mark => {
-		// Now make visible.
-		// todo: Edge still flickers on redraw.
-		mark.classList.remove('ed11y-preload');
-	});
-
 }
 
 export function alignTip (button, toolTip, recheck = 0, reveal = false) {
@@ -1305,38 +933,6 @@ export function updateTipLocations () {
 	}
 }
 
-const scrollableElem = function(el) {
-	let overflowing = el.clientHeight && el.clientHeight < el.scrollHeight;
-	if (overflowing) {
-		const styles = window.getComputedStyle(el);
-		overflowing = styles.overflowY !== 'visible';
-	}
-	return overflowing;
-};
-
-export function closestScrollable(el) {
-	if (State.options.constrainButtons && el.closest(State.options.constrainButtons)) {
-		return el.closest(State.options.constrainButtons);
-	}
-
-	let parent = el.parentElement;
-	if (parent && parent.tagName !== 'BODY') {
-		// Parent exists
-		if (scrollableElem(parent)) {
-			// Return if scrollable found.
-			return parent;
-		} else {
-			// Element is not scrollable, recurse
-			parent = closestScrollable(parent);
-			// Return if scrollable found.
-			return parent;
-		}
-	} else {
-		// No scrollable parents.
-		return false;
-	}
-}
-
 export function alignHighlights() {
 
 	if (State.options.fixedRoots && UI.editableHighlight.length > 0) {
@@ -1376,51 +972,6 @@ export function alignHighlights() {
 	});
 }
 
-const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size = 17) {
-	// Yes this looks like intersect const, but it's math not browser offsets.
-	return !(rect1Left + size < rect2Left ||
-		rect1Left > rect2Left + size ||
-		rect1Top + size < rect2Top ||
-		rect1Top > rect2Top + size);
-};
-
-// Applies parameters and avoids other widgets.
-export function alignPanel() {
-	if (!UI.panelElement) {
-		return false;
-	}
-	if (State.options.panelPinTo === 'left') {
-		UI.panel.classList.add('ed11y-pin-left');
-	}
-	let xMost = 0;
-	let yMost = 0;
-	if (State.elements.panelPin) { // todo
-		State.elements.panelPin.forEach(el => {
-			let bounds = el.getBoundingClientRect();
-			if (State.options.panelPinTo === 'right') {
-				xMost = window.innerWidth - bounds.left > xMost && bounds.left > window.innerWidth / 3 ? window.innerWidth - bounds.left : xMost;
-			} else {
-				xMost = bounds.right > xMost && xMost + bounds.right < window.innerWidth / 3 ? xMost + bounds.right : xMost;
-			}
-			yMost = bounds.height > yMost && bounds.height + yMost < window.innerHeight / 2 ? yMost + bounds.height : yMost;
-		});
-	}
-	if (xMost > 0 && xMost < window.innerWidth - 240) {
-		// push off horizontal
-		UI.panelElement.style.setProperty(State.options.panelPinTo, xMost + 10 + 'px');
-		UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
-	} else if (xMost > 0 && xMost > window.innerWidth - 240 && yMost > 0) {
-		// push off vertical
-		UI.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
-		UI.panelElement.style.setProperty('bottom', `calc(${State.options.panelOffsetY} + ${yMost}px)`);
-	} else {
-		// no push
-		UI.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
-		UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
-	}
-}
-
-
 export function slowIncremental() {
 	lagBounce(() => {
 		//incrementalAlign(); // Immediately realign tips.
@@ -1439,18 +990,6 @@ export function windowResize() {
 		alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
 	}
 	alignPanel();
-}
-
-export function pauseObservers() {
-	State.watching?.forEach(observer => {
-		observer.observer.disconnect();
-	});
-}
-
-export function resumeObservers() {
-	State.watching?.forEach(observer => {
-		observer.observer.observe(observer.root, observer.config);
-	});
 }
 
 export function intersectionObservers() {
@@ -1685,21 +1224,12 @@ export function startObserver (root) {
 	}, 1000);
 }
 
-export function makeItSo () {
+export function ed11ySetup () {
 	if (State.once) {
 		console.error('double init');
 		return;
 	}
 	State.once = true;
-
-	//Need to evaluate if "load" event took place for bookmarklet version. Otherwise, only call Sa11y once page has loaded.
-	const documentLoadingCheck = (callback) => {
-		if (document.readyState === 'complete') {
-			callback();
-		} else {
-			window.addEventListener('load', callback);
-		}
-	};
 
 	// Once document has fully loaded.
 	documentLoadingCheck(() => {
@@ -1751,7 +1281,7 @@ export function makeItSo () {
 
 		window.addEventListener('resize', function () { windowResize(); });
 	});
-};
+}
 
 // Toggles the outline of all headers, link texts, and images.
 export function checkAll() {
@@ -1942,7 +1472,6 @@ toggle
 	}
 }
 
-
 export function incrementalCheck() {
 	lagBounce(() => {
 		if (!State.running) {
@@ -1978,66 +1507,6 @@ export function incrementalCheck() {
 	}, 250)
 }
 
-export function countAlerts () {
-
-	State.errorCount = 0;
-	State.warningCount = 0;
-	State.dismissedCount = 0;
-
-	// Review results array to remove dismissed or ignored items
-
-	State.dismissedCount = 0;
-	for (let i = State.results.length - 1; i >= 0; i--) {
-
-		let test = State.results[i].test;
-
-		if (State.options.ignoreTests &&
-			State.options.ignoreTests.includes(test)) {
-			// Would be faster to skip test, but this is easy and reliable.
-			State.results.splice(i, 1);
-			continue;
-		}
-
-		// todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
-		/*if (State.incremental && Ed11y.oldResults.length > 0) {
-			// Don't flag new issues in the active range while people are typing.
-		}*/
-
-		let dismissKey = prepareDismissal(State.results[i].dismissalKey);
-		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-		if (dismissKey !== false && State.options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[State.options.currentPage] && dismissKey in State.dismissedAlerts[State.options.currentPage][test]) {
-			// Remove result if it has been marked OK or ignored, increment dismissed match counter.
-			State.dismissedCount++;
-			State.results[i].dismissalStatus = State.dismissedAlerts[State.options.currentPage][test][dismissKey];
-		} else if (State.results[i].dismissalKey) {
-			State.warningCount++;
-			State.results[i].dismissalStatus = false;
-		} else {
-			State.errorCount++;
-			State.results[i].dismissalStatus = false;
-		}
-	}
-
-	State.totalCount = State.errorCount + State.warningCount;
-
-	// Dispatch event for synchronizers.
-	if (!State.incremental) {
-		window.setTimeout(function () {
-			let syncResults = new CustomEvent('ed11yResults');
-			document.dispatchEvent(syncResults);
-		}, 0);
-	}
-
-	if (State.ignoreAll) {
-		State.dismissedCount = State.totalCount + State.dismissedCount;
-		State.errorCount = 0;
-		State.warningCount = 0;
-		State.totalCount = 0;
-	}
-
-	isFullNeeded();
-}
-
 export function buildElementList () {
 
 	// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
@@ -2070,59 +1539,6 @@ export function buildElementList () {
 		findElements('panelPin', State.options.panelNoCover, false);
 	}
 }
-
-export function disable() {
-	if (State.open && !State.closedByDisable) {
-		State.closedByDisable = true;
-	}
-	State.disabled = true;
-	reset();
-	document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.panelBar);
-	document.documentElement.style.setProperty('--ed11y-activeColor', Theme.panelBarText);
-	document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
-	document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
-	if (typeof UI.panelToggle.querySelector === 'function') {
-		UI.panel?.classList.remove('ed11y-errors', 'ed11y-warnings');
-		UI.panelCount.textContent = 'i';
-		UI.panelJumpNext.setAttribute('hidden', '');
-		UI.panelToggle.classList.add('disabled');
-		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleDisabled;
-	}
-};
-
-const checkRunPrevent = function() {
-	let preventCheck = State.options.preventCheckingIfPresent ?
-		document.querySelector(State.options.preventCheckingIfPresent) :
-		false;
-	if (preventCheck) {
-		console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${State.options.preventCheckingIfPresent}"` );
-	} else if (!preventCheck && !!State.options.preventCheckingIfAbsent) {
-		preventCheck = document.querySelector(`:is(${State.options.preventCheckingIfAbsent})`) === null;
-		if (preventCheck) {
-			console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${State.options.preventCheckingIfAbsent}"`);
-		}
-	}
-	return preventCheck;
-}
-
-const isFullNeeded = function() {
-	if (State.incremental && !State.forceFullCheck && !newIncrementalResults()) {
-		State.forceFullCheck = true;
-	}
-}
-
-export function newIncrementalResults() {
-	if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
-		return true;
-	}
-	let newResultString = `${State.errorCount} ${State.warningCount}`;
-	State.results.forEach(result => {
-		newResultString += result.test + result.element.outerHTML;
-	});
-	let changed = newResultString !== State.oldResultString;
-	State.oldResultString = newResultString;
-	return changed;
-};
 
 export function visualize () {
 	if (!UI.panel) {
@@ -2201,6 +1617,31 @@ export function showHeadingsPanel () {
 	}
 }
 
+export function resetPanel() {
+	// Reset main panel.
+	State.visualizing = true; // so visualize function removes visualizers.
+	visualize();
+	if (State.totalCount === 0 && State.dismissedCount > 0) {
+		UI.panelCount.textContent = 'i';
+		UI.panelToggleTitle.textContent = State.dismissedCount === 1 ?
+			M.buttonShowHiddenAlert :
+			M.buttonShowHiddenAlerts(State.dismissedCount);
+	}
+
+	// @todo is this going to fail again? Should it a different if?
+	if (typeof (UI.panel) === 'object') {
+		UI.panel?.classList.add('ed11y-shut');
+		UI.panel?.classList.remove('ed11y-active');
+		UI.panelToggle?.setAttribute('aria-expanded', 'false');
+		if (!State.options.showDismissed && typeof UI.showDismissed === 'function') {
+			UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
+			UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
+				M.buttonShowHiddenAlert : M.buttonShowHiddenAlerts(State.dismissedCount);
+		}
+	}
+}
+
+// @todo is this getting called?
 window.addEventListener('ed11yEndVisualization', ()=>{
 	State.visualizing = false;
 	pauseObservers();
@@ -2260,3 +1701,143 @@ const showAltPanel = function () {
 		altList.appendChild(noImages);
 	}
 };
+
+
+export function dismissThis (dismissalType, all = false) {
+	// Find the active tip and draw its identifying information from the result list
+	let removal = State.openTip;
+	let id = removal.tip.dataset.ed11yResult;
+	let test = State.results[id].test;
+
+	if (all) {
+		State.results.forEach((result) => {
+			if (result.test === test && result.dismissalStatus !==dismissalType) {
+				dismissOne(dismissalType, test, result.dismissalKey);
+			}
+		});
+	} else {
+		let dismissalKey = prepareDismissal(State.results[id].dismissalKey);
+		dismissOne(dismissalType, test, dismissalKey);
+	}
+
+	// Remove tip and reset borders around element
+	resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
+	removal.tip?.parentNode?.removeChild(removal.tip);
+	// TODO EDITING: COMMENT OUT BELOW...SEEMS REDUNDANT?
+	//removal.button?.parentNode?.removeChild(removal.button);
+
+	reset();
+	State.showPanel = true;
+	checkAll();
+
+	let rememberGoto = State.lastOpenTip;
+
+	window.setTimeout(function () {
+		if (State.jumpList.length > 0) {
+			State.lastOpenTip = (rememberGoto - 1);
+			UI.panelJumpNext?.focus();
+		} else {
+			window.setTimeout(function () {
+				UI.panelToggle?.focus();
+			}, 100);
+		}
+	}, 500, rememberGoto);
+
+};
+
+export function toggleShowDismissals () {
+	// todo postpone: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
+	State.ignoreAll = false;
+	State.options.showDismissed = !(State.options.showDismissed);
+	reset();
+	State.showPanel = true;
+	checkAll();
+
+	UI.showDismissed.setAttribute('data-ed11y-pressed', (!!State.options.showDismissed).toString());
+	window.setTimeout(function() {
+		UI.showDismissed.focus();
+	}, 0);
+};
+
+export function togglePanel () {
+	State.ignoreAll = false;
+
+	if (!State.doubleClickPrevent) {
+		// Prevent clicks piling up while scan is running.
+		if (State.running !== true) {
+			State.running = true;
+			// Re-scan each time the panel reopens.
+			if (UI.panel.classList.contains('ed11y-shut') === true) {
+				State.onLoad = false;
+				State.incremental = false;
+				State.showPanel = true;
+				if (State.dismissedCount > 0 && State.warningCount === 0 && State.errorCount === 0) {
+					State.options.showDismissed = false;
+					toggleShowDismissals();
+				} else {
+					checkAll();
+				}
+				State.options.userPrefersShut = false;
+				localStorage.setItem('editoria11yShow', '1');
+			}
+			else {
+				UI.panelToggleTitle.textContent = State.totalCount > 0 ? M.buttonShowAlerts : M.buttonShowNoAlert;
+				State.options.showDismissed = false;
+				reset();
+				State.options.userPrefersShut = true;
+				localStorage.setItem('editoria11yShow', '0');
+			}
+		}
+	}
+	State.doubleClickPrevent = true;
+	window.setTimeout(function () {
+		State.doubleClickPrevent = false;
+	}, 200);
+	return false;
+}
+
+export function raceCrash() {
+	// A marked element disappeared while we were jumping to it.
+	if (State.loopStop) {
+		return;
+	}
+	State.loopStop = true;
+	reset();
+	State.showPanel = true;
+	checkAll();
+	window.setTimeout(function() {
+		if (State.results.length > 0 && State.loopStop) {
+			this.jumpTo(); // todo
+			State.loopStop = false;
+		}
+	},100, State.loopStop);
+}
+
+export function disable() {
+	if (State.open && !State.closedByDisable) {
+		State.closedByDisable = true;
+	}
+	State.disabled = true;
+	reset();
+	document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.panelBar);
+	document.documentElement.style.setProperty('--ed11y-activeColor', Theme.panelBarText);
+	document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
+	document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
+	if (typeof UI.panelToggle.querySelector === 'function') {
+		UI.panel?.classList.remove('ed11y-errors', 'ed11y-warnings');
+		UI.panelCount.textContent = 'i';
+		UI.panelJumpNext.setAttribute('hidden', '');
+		UI.panelToggle.classList.add('disabled');
+		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleDisabled;
+	}
+};
+
+export function reset () {
+	pauseObservers();
+	resetResults();
+	resetPanel();
+	State.incremental = false;
+	State.running = false;
+	State.showPanel = false;
+	State.open = false;
+}

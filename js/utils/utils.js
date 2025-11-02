@@ -1,6 +1,14 @@
-import {State, UI} from "./state.js"
+import {M, State, Theme, UI} from "./state.js"
+import {prepareDismissal} from "sa11y/src/js/utils/utils.js";
 
 /*=============== Utilities ================*/
+
+export function linkText (linkText) {
+	// @todo merge do we need this for linkpurpose?
+	linkText = linkText.replace(State.options.linkIgnoreStrings, '');
+	linkText = linkText.replace(/'|"|-|\.|\s+/g, '');
+	return linkText;
+}
 
 export const lagBounce = (callback, wait) => {
   let timeoutId = null;
@@ -85,6 +93,7 @@ export function firstVisibleParent(el) {
   }
 };
 
+// @todo merge discuss differences
 export function hiddenElementCheck(el) {
   // Checks if this element has been removed from the accessibility tree
   let style = window.getComputedStyle(el);
@@ -215,19 +224,141 @@ export function findElements (key, selector, rootRestrict = true) { // @todo mer
   }
 };
 
-export function raceCrash() {
-  // A marked element disappeared while we were jumping to it.
-  if (State.loopStop) {
-    return;
-  }
-  State.loopStop = true;
-  this.reset();
-  State.showPanel = true;
-  this.checkAll();
-  window.setTimeout(function() {
-    if (State.results.length > 0 && State.loopStop) {
-      this.jumpTo(); // todo
-      State.loopStop = false;
-    }
-  },100, State.loopStop);
+export function pauseObservers() {
+	State.watching?.forEach(observer => {
+		observer.observer.disconnect();
+	});
+}
+
+export function resumeObservers() {
+	State.watching?.forEach(observer => {
+		observer.observer.observe(observer.root, observer.config);
+	});
+}
+
+export function checkRunPrevent() {
+	let preventCheck = State.options.preventCheckingIfPresent ?
+		document.querySelector(State.options.preventCheckingIfPresent) :
+		false;
+	if (preventCheck) {
+		console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${State.options.preventCheckingIfPresent}"` );
+	} else if (!preventCheck && !!State.options.preventCheckingIfAbsent) {
+		preventCheck = document.querySelector(`:is(${State.options.preventCheckingIfAbsent})`) === null;
+		if (preventCheck) {
+			console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${State.options.preventCheckingIfAbsent}"`);
+		}
+	}
+	return preventCheck;
+}
+
+export function resetResults(incremental) {
+	State.jumpList = [];
+	State.openTip = {
+		button: false,
+		tip: false,
+	};
+	State.lastOpenTip = -1;
+	resetClass([
+		'ed11y-ring-red',
+		'ed11y-ring-yellow',
+		'ed11y-hidden-highlight',
+		'ed11y-warning-inline',
+		'ed11y-warning-block',
+		'ed11y-error-block',
+		'ed11y-error-inline',
+	]);
+	// Reset insertions into body content.
+	if (incremental) {
+		findElements('reset', 'ed11y-element-highlight', false);
+	} else {
+		findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+	}
+	State.elements.reset?.forEach((el) => el.remove());
+
+	// Flicker prevention -- leave old tip in place for 100ms.
+	findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
+	const delayedReset = State.elements.delayedReset;
+
+	window.setTimeout(()=> {
+		delayedReset?.forEach((el) => el.remove());
+	}, 100, delayedReset);
+
+	if (typeof UI.panelJumpNext === 'function') {
+		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = M.buttonFirstContent;
+	}
+	// Reset insertions into body content.
+}
+
+export function newIncrementalResults() {
+	if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
+		return true;
+	}
+	let newResultString = `${State.errorCount} ${State.warningCount}`;
+	State.results.forEach(result => {
+		newResultString += result.test + result.element.outerHTML;
+	});
+	let changed = newResultString !== State.oldResultString;
+	State.oldResultString = newResultString;
+	return changed;
+}
+export function countAlerts () {
+
+	State.errorCount = 0;
+	State.warningCount = 0;
+	State.dismissedCount = 0;
+
+	// Review results array to remove dismissed or ignored items
+
+	State.dismissedCount = 0;
+	for (let i = State.results.length - 1; i >= 0; i--) {
+
+		let test = State.results[i].test;
+
+		if (State.options.ignoreTests &&
+			State.options.ignoreTests.includes(test)) {
+			// Would be faster to skip test, but this is easy and reliable.
+			State.results.splice(i, 1);
+			continue;
+		}
+
+		// todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
+		/*if (State.incremental && Ed11y.oldResults.length > 0) {
+			// Don't flag new issues in the active range while people are typing.
+		}*/
+
+		let dismissKey = prepareDismissal(State.results[i].dismissalKey);
+		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
+		if (dismissKey !== false && State.options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[State.options.currentPage] && dismissKey in State.dismissedAlerts[State.options.currentPage][test]) {
+			// Remove result if it has been marked OK or ignored, increment dismissed match counter.
+			State.dismissedCount++;
+			State.results[i].dismissalStatus = State.dismissedAlerts[State.options.currentPage][test][dismissKey];
+		} else if (State.results[i].dismissalKey) {
+			State.warningCount++;
+			State.results[i].dismissalStatus = false;
+		} else {
+			State.errorCount++;
+			State.results[i].dismissalStatus = false;
+		}
+	}
+
+	State.totalCount = State.errorCount + State.warningCount;
+
+	// Dispatch event for synchronizers.
+	if (!State.incremental) {
+		window.setTimeout(function () {
+			let syncResults = new CustomEvent('ed11yResults');
+			document.dispatchEvent(syncResults);
+		}, 0);
+	}
+
+	if (State.ignoreAll) {
+		State.dismissedCount = State.totalCount + State.dismissedCount;
+		State.errorCount = 0;
+		State.warningCount = 0;
+		State.totalCount = 0;
+	}
+
+	if (State.incremental && !State.forceFullCheck && !newIncrementalResults()) {
+		State.forceFullCheck = true;
+	}
 }

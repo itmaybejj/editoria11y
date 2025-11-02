@@ -1,6 +1,5 @@
 import {State, UI} from "../utils/state.js";
-import {togglePanel, toggleShowDismissals} from "../utils/toggle.js";
-import {visualize} from "../logic/interface.js";
+import {togglePanel, toggleShowDismissals, visualize} from "../logic/interface.js";
 
 export class Ed11yElementPanel extends HTMLElement {
 
@@ -84,22 +83,6 @@ export class Ed11yElementPanel extends HTMLElement {
       this.initialized = true;
     }
   }
-/*
-  // @todo fix.
-  oldJumpTo(event) {
-    // Handle jump
-    event.preventDefault();
-    State.toggledFrom = event.target.closest('button');
-    if (!State.open) {
-      togglePanel();
-      window.setTimeout(function() {
-        jumpTo(1);
-      },500);
-    } else {
-      jumpTo(1);
-    }
-  }
-*/
 
   handleBarClick(event) {
     event.preventDefault();

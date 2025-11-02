@@ -1511,199 +1511,6 @@
     },
   };
 
-  function parents(el) {
-    let nodes = [];
-    nodes.push(el);
-    while (el && !!el.parentElement && el.parentElement.tagName !== 'HTML') {
-      nodes.push(el.parentElement);
-      el = el.parentElement;
-    }
-    return nodes;
-  }
-
-  function resetClass(classes) {
-    classes?.forEach((el) => {
-      let thisClass = el;
-      findElements('reset', `.${thisClass}`);
-      State.elements.reset?.forEach(el => {
-        el.classList.remove(thisClass);
-      });
-    });
-  }
-
-  function visibleElement(el) {
-    // Checks if this element is visible. Used in parent iterators.
-    // false is definitely invisible, true requires continued iteration to tell.
-    // Todo postpone: Check for offscreen?
-    if (el) {
-      if (!el.checkVisibility({
-        opacityProperty: true,
-        visibilityProperty: true,
-      })) {
-        return false;
-      }
-      let style = window.getComputedStyle(el);
-      return !(el.closest('.sr-only, .visually-hidden') ||
-        style.getPropertyValue('z-index') < 0 ||
-        (style.getPropertyValue('overflow') === 'hidden' &&
-          ( el.offsetWidth < 10 ||
-            el.offsetHeight < 10 )
-        )
-      );
-    }
-  }
-  function visible(el) {
-    // Recurse element and ancestors to make sure it is visible
-    if (!visibleElement(el)) {
-      // Element is hidden
-      return false;
-    } else {
-      // Element is not known to be hidden.
-      let theParents = parents(el);
-      let visibleParent = (parent) => visibleElement(parent);
-      return theParents.every(visibleParent);
-    }
-  }
-  function firstVisibleParent(el) {
-    let parent = el.parentElement;
-    if (parent) {
-      // Parent exists
-      if (!visibleElement(parent)) {
-        // Recurse
-        parent = firstVisibleParent(parent);
-        return parent;
-      } else {
-        // Element is visible
-        return parent;
-      }
-    } else {
-      // No visible parents.
-      return false;
-    }
-  }
-  function detectShadow (container) {
-    if (State.options.autoDetectShadowComponents) {
-      const select = !State.ignore ? '*:not(.ed11y-element)' : `*:not(${State.options.ignore}, .ed11y-element)`;
-      let search;
-      if (container.shadowRoot && container.shadowRoot.mode === 'open') {
-        if (!container.matches('[data-ed11y-has-shadow-root]')) {
-          container.setAttribute('data-ed11y-has-shadow-root', 'true');
-          UI.attachCSS(container.shadowRoot);
-          UI.attachCSS(container);
-        }
-        search = container.shadowRoot.querySelectorAll(select);
-      } else {
-        search = container.querySelectorAll(select);
-      }
-      search?.forEach((component) => {
-        if (component.shadowRoot && component.shadowRoot.mode === 'open') {
-          detectShadow(component);
-        }
-      });
-    } else if (State.options.shadowComponents) {
-      const providedShadow = container.querySelectorAll(State.options.shadowComponents);
-      providedShadow.forEach((component) => {
-        if (component.shadowRoot && component.shadowRoot.mode === 'open') {
-          if (!container.matches('[data-ed11y-has-shadow-root]')){
-            component.setAttribute('data-ed11y-has-shadow-root', 'true');
-            UI.attachCSS(component.shadowRoot);
-            UI.attachCSS(component);
-          }
-          detectShadow(component);
-        } else {
-          console.warn(`Editoria11y: A specified shadow host has no shadowRoot: ${component.tagName}`);
-        }
-      });
-    }
-  }
-  const diveShadow = function (container, select, selector) {
-    if (container.matches(selector)) {
-      return([container]);
-    } else {
-      let inners = container.shadowRoot.querySelectorAll(select);
-      if (typeof(inners) === 'object' && inners.length > 0) {
-        // Replace shadow host with inner elements.
-        inners.forEach(inner => {
-          for (let innerIndex = inners - 1; innerIndex >= 0; innerIndex--) {
-            let innerInner = diveShadow(inner, select, selector);
-            if (innerInner.length > 0) {
-              inners.splice(innerIndex, 1, ...innerInner);
-            } else {
-              inners.splice(innerIndex, 1);
-            }
-          }
-        });
-        return (Array.from(inners).filter((el) => el.matches(selector)));
-      }
-    }
-    return [];
-  };
-
-  // QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
-  function findElements (key, selector, rootRestrict = true) { // @todo merge replace.
-
-    // Todo beta: function and parameter to auto-detect shadow components.
-    let shadowSelector = State.options.autoDetectShadowComponents ?
-      '[data-ed11y-has-shadow-root]' :
-      State.options.shadowComponents ?
-        State.options.shadowComponents : false;
-
-    // Concatenate global and specific ignores
-    let ignore;
-    if (State.options.ignoreElements) {
-      ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreElements}, ${State.options.ignoreByKey[key]})` : `:not(${State.options.ignoreElements})`;
-    } else {
-      ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreByKey[key]})` : '';
-    }
-
-    // Initialize or reset elements array.
-    State.elements[key] = [];
-
-    const select = `:is(${selector}${shadowSelector ? ', ' + shadowSelector : ''})${ignore}`;
-
-    if (rootRestrict && State.roots) {
-      // Add array of elements matching selector, excluding the provided ignore list.
-      // Todo this can dupe
-      State.roots.forEach(root => {
-        State.elements[key] = State.elements[key].concat(Array.from(root.querySelectorAll(select)));
-      });
-    } else {
-      State.elements[key] = State.elements[key].concat(Array.from(document.querySelectorAll(select)));
-    }
-
-    // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
-    // Repeat the search inside each placeholder, and replace the placeholder with its search results.
-    if (shadowSelector) {
-      for (let index = State.elements[key].length - 1; index >= 0; index--) {
-        if (State.elements[key][index].matches(shadowSelector)) {
-          // Dive into the shadow root and collect an array of its results.
-          let inners = diveShadow(State.elements[key][index], select, selector);
-          if (inners.length > 0) {
-            State.elements[key].splice(index, 1, ...inners);
-          } else {
-            State.elements[key].splice(index, 1);
-          }
-        }
-      }
-    }
-  }
-  function raceCrash() {
-    // A marked element disappeared while we were jumping to it.
-    if (State.loopStop) {
-      return;
-    }
-    State.loopStop = true;
-    this.reset();
-    State.showPanel = true;
-    this.checkAll();
-    window.setTimeout(function() {
-      if (State.results.length > 0 && State.loopStop) {
-        this.jumpTo(); // todo
-        State.loopStop = false;
-      }
-    },100, State.loopStop);
-  }
-
   /**
    * Finds elements in the DOM that match the given selector, within the specified root element, and excluding any specified elements.
    * @param {string} selector - The CSS selector to match elements against.
@@ -1975,6 +1782,18 @@
   };
 
   /**
+   * Checks if the document has finished loading, and if so, immediately calls the provided callback function. Otherwise, waits for the 'load' event to fire and then calls the callback function.
+   * @param {function} callback The callback function to be called when the document finishes loading.
+   */
+  function documentLoadingCheck(callback) {
+    if (document.readyState === 'complete') {
+      callback();
+    } else {
+      window.addEventListener('load', callback);
+    }
+  }
+
+  /**
    * Checks if an element is hidden (display: none) based on its attributes and styles.
    * @param {HTMLElement} element The element to check for visibility.
    * @returns {boolean} 'true' if the element is hidden (display: none).
@@ -2224,6 +2043,321 @@
     href = href.replace(/\.(html|php|htm|asp|aspx)$/i, '');
 
     return href;
+  }
+
+  function parents(el) {
+    let nodes = [];
+    nodes.push(el);
+    while (el && !!el.parentElement && el.parentElement.tagName !== 'HTML') {
+      nodes.push(el.parentElement);
+      el = el.parentElement;
+    }
+    return nodes;
+  }
+
+  function resetClass(classes) {
+    classes?.forEach((el) => {
+      let thisClass = el;
+      findElements('reset', `.${thisClass}`);
+      State.elements.reset?.forEach(el => {
+        el.classList.remove(thisClass);
+      });
+    });
+  }
+
+  function visibleElement(el) {
+    // Checks if this element is visible. Used in parent iterators.
+    // false is definitely invisible, true requires continued iteration to tell.
+    // Todo postpone: Check for offscreen?
+    if (el) {
+      if (!el.checkVisibility({
+        opacityProperty: true,
+        visibilityProperty: true,
+      })) {
+        return false;
+      }
+      let style = window.getComputedStyle(el);
+      return !(el.closest('.sr-only, .visually-hidden') ||
+        style.getPropertyValue('z-index') < 0 ||
+        (style.getPropertyValue('overflow') === 'hidden' &&
+          ( el.offsetWidth < 10 ||
+            el.offsetHeight < 10 )
+        )
+      );
+    }
+  }
+  function visible(el) {
+    // Recurse element and ancestors to make sure it is visible
+    if (!visibleElement(el)) {
+      // Element is hidden
+      return false;
+    } else {
+      // Element is not known to be hidden.
+      let theParents = parents(el);
+      let visibleParent = (parent) => visibleElement(parent);
+      return theParents.every(visibleParent);
+    }
+  }
+  function firstVisibleParent(el) {
+    let parent = el.parentElement;
+    if (parent) {
+      // Parent exists
+      if (!visibleElement(parent)) {
+        // Recurse
+        parent = firstVisibleParent(parent);
+        return parent;
+      } else {
+        // Element is visible
+        return parent;
+      }
+    } else {
+      // No visible parents.
+      return false;
+    }
+  }
+  function detectShadow (container) {
+    if (State.options.autoDetectShadowComponents) {
+      const select = !State.ignore ? '*:not(.ed11y-element)' : `*:not(${State.options.ignore}, .ed11y-element)`;
+      let search;
+      if (container.shadowRoot && container.shadowRoot.mode === 'open') {
+        if (!container.matches('[data-ed11y-has-shadow-root]')) {
+          container.setAttribute('data-ed11y-has-shadow-root', 'true');
+          UI.attachCSS(container.shadowRoot);
+          UI.attachCSS(container);
+        }
+        search = container.shadowRoot.querySelectorAll(select);
+      } else {
+        search = container.querySelectorAll(select);
+      }
+      search?.forEach((component) => {
+        if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+          detectShadow(component);
+        }
+      });
+    } else if (State.options.shadowComponents) {
+      const providedShadow = container.querySelectorAll(State.options.shadowComponents);
+      providedShadow.forEach((component) => {
+        if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+          if (!container.matches('[data-ed11y-has-shadow-root]')){
+            component.setAttribute('data-ed11y-has-shadow-root', 'true');
+            UI.attachCSS(component.shadowRoot);
+            UI.attachCSS(component);
+          }
+          detectShadow(component);
+        } else {
+          console.warn(`Editoria11y: A specified shadow host has no shadowRoot: ${component.tagName}`);
+        }
+      });
+    }
+  }
+  const diveShadow = function (container, select, selector) {
+    if (container.matches(selector)) {
+      return([container]);
+    } else {
+      let inners = container.shadowRoot.querySelectorAll(select);
+      if (typeof(inners) === 'object' && inners.length > 0) {
+        // Replace shadow host with inner elements.
+        inners.forEach(inner => {
+          for (let innerIndex = inners - 1; innerIndex >= 0; innerIndex--) {
+            let innerInner = diveShadow(inner, select, selector);
+            if (innerInner.length > 0) {
+              inners.splice(innerIndex, 1, ...innerInner);
+            } else {
+              inners.splice(innerIndex, 1);
+            }
+          }
+        });
+        return (Array.from(inners).filter((el) => el.matches(selector)));
+      }
+    }
+    return [];
+  };
+
+  // QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
+  function findElements (key, selector, rootRestrict = true) { // @todo merge replace.
+
+    // Todo beta: function and parameter to auto-detect shadow components.
+    let shadowSelector = State.options.autoDetectShadowComponents ?
+      '[data-ed11y-has-shadow-root]' :
+      State.options.shadowComponents ?
+        State.options.shadowComponents : false;
+
+    // Concatenate global and specific ignores
+    let ignore;
+    if (State.options.ignoreElements) {
+      ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreElements}, ${State.options.ignoreByKey[key]})` : `:not(${State.options.ignoreElements})`;
+    } else {
+      ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreByKey[key]})` : '';
+    }
+
+    // Initialize or reset elements array.
+    State.elements[key] = [];
+
+    const select = `:is(${selector}${shadowSelector ? ', ' + shadowSelector : ''})${ignore}`;
+
+    if (rootRestrict && State.roots) {
+      // Add array of elements matching selector, excluding the provided ignore list.
+      // Todo this can dupe
+      State.roots.forEach(root => {
+        State.elements[key] = State.elements[key].concat(Array.from(root.querySelectorAll(select)));
+      });
+    } else {
+      State.elements[key] = State.elements[key].concat(Array.from(document.querySelectorAll(select)));
+    }
+
+    // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
+    // Repeat the search inside each placeholder, and replace the placeholder with its search results.
+    if (shadowSelector) {
+      for (let index = State.elements[key].length - 1; index >= 0; index--) {
+        if (State.elements[key][index].matches(shadowSelector)) {
+          // Dive into the shadow root and collect an array of its results.
+          let inners = diveShadow(State.elements[key][index], select, selector);
+          if (inners.length > 0) {
+            State.elements[key].splice(index, 1, ...inners);
+          } else {
+            State.elements[key].splice(index, 1);
+          }
+        }
+      }
+    }
+  }
+  function pauseObservers() {
+  	State.watching?.forEach(observer => {
+  		observer.observer.disconnect();
+  	});
+  }
+
+  function resumeObservers() {
+  	State.watching?.forEach(observer => {
+  		observer.observer.observe(observer.root, observer.config);
+  	});
+  }
+
+  function checkRunPrevent() {
+  	let preventCheck = State.options.preventCheckingIfPresent ?
+  		document.querySelector(State.options.preventCheckingIfPresent) :
+  		false;
+  	if (preventCheck) {
+  		console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${State.options.preventCheckingIfPresent}"` );
+  	} else if (!preventCheck && !!State.options.preventCheckingIfAbsent) {
+  		preventCheck = document.querySelector(`:is(${State.options.preventCheckingIfAbsent})`) === null;
+  		if (preventCheck) {
+  			console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${State.options.preventCheckingIfAbsent}"`);
+  		}
+  	}
+  	return preventCheck;
+  }
+
+  function resetResults(incremental) {
+  	State.jumpList = [];
+  	State.openTip = {
+  		button: false,
+  		tip: false,
+  	};
+  	State.lastOpenTip = -1;
+  	resetClass([
+  		'ed11y-ring-red',
+  		'ed11y-ring-yellow',
+  		'ed11y-hidden-highlight',
+  		'ed11y-warning-inline',
+  		'ed11y-warning-block',
+  		'ed11y-error-block',
+  		'ed11y-error-inline',
+  	]);
+  	// Reset insertions into body content.
+  	if (incremental) {
+  		findElements('reset', 'ed11y-element-highlight', false);
+  	} else {
+  		findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+  	}
+  	State.elements.reset?.forEach((el) => el.remove());
+
+  	// Flicker prevention -- leave old tip in place for 100ms.
+  	findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
+  	const delayedReset = State.elements.delayedReset;
+
+  	window.setTimeout(()=> {
+  		delayedReset?.forEach((el) => el.remove());
+  	}, 100, delayedReset);
+
+  	if (typeof UI.panelJumpNext === 'function') {
+  		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = M.buttonFirstContent;
+  	}
+  	// Reset insertions into body content.
+  }
+
+  function newIncrementalResults() {
+  	if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
+  		return true;
+  	}
+  	let newResultString = `${State.errorCount} ${State.warningCount}`;
+  	State.results.forEach(result => {
+  		newResultString += result.test + result.element.outerHTML;
+  	});
+  	let changed = newResultString !== State.oldResultString;
+  	State.oldResultString = newResultString;
+  	return changed;
+  }
+  function countAlerts () {
+
+  	State.errorCount = 0;
+  	State.warningCount = 0;
+  	State.dismissedCount = 0;
+
+  	// Review results array to remove dismissed or ignored items
+
+  	State.dismissedCount = 0;
+  	for (let i = State.results.length - 1; i >= 0; i--) {
+
+  		let test = State.results[i].test;
+
+  		if (State.options.ignoreTests &&
+  			State.options.ignoreTests.includes(test)) {
+  			// Would be faster to skip test, but this is easy and reliable.
+  			State.results.splice(i, 1);
+  			continue;
+  		}
+
+  		// todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
+  		/*if (State.incremental && Ed11y.oldResults.length > 0) {
+  			// Don't flag new issues in the active range while people are typing.
+  		}*/
+
+  		let dismissKey = prepareDismissal(State.results[i].dismissalKey);
+  		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
+  		if (dismissKey !== false && State.options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[State.options.currentPage] && dismissKey in State.dismissedAlerts[State.options.currentPage][test]) {
+  			// Remove result if it has been marked OK or ignored, increment dismissed match counter.
+  			State.dismissedCount++;
+  			State.results[i].dismissalStatus = State.dismissedAlerts[State.options.currentPage][test][dismissKey];
+  		} else if (State.results[i].dismissalKey) {
+  			State.warningCount++;
+  			State.results[i].dismissalStatus = false;
+  		} else {
+  			State.errorCount++;
+  			State.results[i].dismissalStatus = false;
+  		}
+  	}
+
+  	State.totalCount = State.errorCount + State.warningCount;
+
+  	// Dispatch event for synchronizers.
+  	if (!State.incremental) {
+  		window.setTimeout(function () {
+  			let syncResults = new CustomEvent('ed11yResults');
+  			document.dispatchEvent(syncResults);
+  		}, 0);
+  	}
+
+  	if (State.ignoreAll) {
+  		State.dismissedCount = State.totalCount + State.dismissedCount;
+  		State.errorCount = 0;
+  		State.warningCount = 0;
+  		State.totalCount = 0;
+  	}
+
+  	if (State.incremental && !State.forceFullCheck && !newIncrementalResults()) {
+  		State.forceFullCheck = true;
+  	}
   }
 
   var styles = "[data-sa11y-overflow]{overflow:auto!important}[data-sa11y-error]{outline:5px solid var(--sa11y-error)!important;outline-offset:2px}[data-sa11y-warning]:not([data-sa11y-error]){outline:5px solid var(--sa11y-warning)!important;outline-offset:2px}[data-sa11y-pulse-border]{animation:pulse 1s 2;box-shadow:0;outline:5px solid var(--sa11y-focus-color)!important}[data-sa11y-pulse-border]:focus,[data-sa11y-pulse-border]:hover{animation:none}@keyframes pulse{0%{box-shadow:0 0 0 5px var(--sa11y-focus-color)}50%{box-shadow:0 0 0 12px var(--sa11y-pulse-color)}to{box-shadow:0 0 0 5px var(--sa11y-pulse-color)}}h1[data-sa11y-pulse-border],h2[data-sa11y-pulse-border],h3[data-sa11y-pulse-border],h4[data-sa11y-pulse-border],h5[data-sa11y-pulse-border],h6[data-sa11y-pulse-border],img[data-sa11y-pulse-border]{animation:pulse-scale 1s 2}@keyframes pulse-scale{0%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.02)}to{opacity:1;transform:scale(1)}}@media (prefers-reduced-motion:reduce){[data-sa11y-pulse-border]{animation:none!important}}@media (forced-colors:active){[data-sa11y-error-inline],[data-sa11y-error],[data-sa11y-good],[data-sa11y-pulse-border],[data-sa11y-warning-inline],[data-sa11y-warning]{forced-color-adjust:none}}";
@@ -4002,6 +4136,372 @@
     return results;
   }
 
+  const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size = 17) {
+  	// Yes this looks like intersect const, but it's math not browser offsets.
+  	return !(rect1Left + size < rect2Left ||
+  		rect1Left > rect2Left + size ||
+  		rect1Top + size < rect2Top ||
+  		rect1Top > rect2Top + size);
+  };
+
+  const nudgeMark = function (el, x, y) {
+  	// TODO: THESE CAN NUDGE OUT OF THE OVERFLOW AREA OF THE CONTENTEDITABLE CONTAINER
+  	if (el.style.transform) {
+  		const computedStyle = window.getComputedStyle(el);
+  		let matrix = computedStyle.getPropertyValue('transform');
+  		matrix = matrix.split(',');
+  		el.style.transform = `translate(${parseFloat(matrix[4]) + x}px, ${parseFloat(matrix[5]) + y}px)`;
+  	} else {
+  		el.style.transform = `translate(${x}px, ${y}px)`;
+  	}
+  };
+
+  const scrollableElem = function(el) {
+  	let overflowing = el.clientHeight && el.clientHeight < el.scrollHeight;
+  	if (overflowing) {
+  		const styles = window.getComputedStyle(el);
+  		overflowing = styles.overflowY !== 'visible';
+  	}
+  	return overflowing;
+  };
+
+  function closestScrollable(el) {
+  	if (State.options.constrainButtons && el.closest(State.options.constrainButtons)) {
+  		return el.closest(State.options.constrainButtons);
+  	}
+
+  	let parent = el.parentElement;
+  	if (parent && parent.tagName !== 'BODY') {
+  		// Parent exists
+  		if (scrollableElem(parent)) {
+  			// Return if scrollable found.
+  			return parent;
+  		} else {
+  			// Element is not scrollable, recurse
+  			parent = closestScrollable(parent);
+  			// Return if scrollable found.
+  			return parent;
+  		}
+  	} else {
+  		// No scrollable parents.
+  		return false;
+  	}
+  }
+
+
+  // Applies parameters and avoids other widgets.
+  function alignPanel() {
+  	if (!UI.panelElement) {
+  		return false;
+  	}
+  	if (State.options.panelPinTo === 'left') {
+  		UI.panel.classList.add('ed11y-pin-left');
+  	}
+  	let xMost = 0;
+  	let yMost = 0;
+  	if (State.elements.panelPin) { // todo
+  		State.elements.panelPin.forEach(el => {
+  			let bounds = el.getBoundingClientRect();
+  			if (State.options.panelPinTo === 'right') {
+  				xMost = window.innerWidth - bounds.left > xMost && bounds.left > window.innerWidth / 3 ? window.innerWidth - bounds.left : xMost;
+  			} else {
+  				xMost = bounds.right > xMost && xMost + bounds.right < window.innerWidth / 3 ? xMost + bounds.right : xMost;
+  			}
+  			yMost = bounds.height > yMost && bounds.height + yMost < window.innerHeight / 2 ? yMost + bounds.height : yMost;
+  		});
+  	}
+  	if (xMost > 0 && xMost < window.innerWidth - 240) {
+  		// push off horizontal
+  		UI.panelElement.style.setProperty(State.options.panelPinTo, xMost + 10 + 'px');
+  		UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
+  	} else if (xMost > 0 && xMost > window.innerWidth - 240 && yMost > 0) {
+  		// push off vertical
+  		UI.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
+  		UI.panelElement.style.setProperty('bottom', `calc(${State.options.panelOffsetY} + ${yMost}px)`);
+  	} else {
+  		// no push
+  		UI.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
+  		UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
+  	}
+  }
+
+  function alignAlts () {
+  	// Positions alt label to match absolute, inline or floated images.
+  	findElements('altMark', 'ed11y-element-alt');
+  	State.elements.altMark?.forEach((el) => { // @todo merge
+  		let id = el.dataset.ed11yImg;
+  		el.style.setProperty('transform', null);
+  		el.style.setProperty('height', null);
+  		el.style.setProperty('width', null);
+
+  		let img = UI.imageAlts[id][0];
+  		if (img.tagName !== 'IMG') {
+  			// Mark is placed outside the link in linked images.
+  			img = img.querySelector('img');
+  		}
+  		let markOffset = el.getBoundingClientRect();
+  		let imgOffset = img.getBoundingClientRect();
+  		let newOffset = imgOffset.left - markOffset.left;
+  		let height = getComputedStyle(img).height;
+  		height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
+  		el.style.setProperty('transform', `translate(${newOffset}px, 0px)`);
+  		el.style.setProperty('height', `${height}px`);
+  		el.style.setProperty('width', `${img.offsetWidth}px`);
+  	});
+  }
+
+
+  /**
+   * Hide tips that are in front of text currently being edited.
+   * */
+  function checkEditableIntersects (focusKnown = false) {
+  	if (!focusKnown && !document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
+  		//Reset classes to measure.
+  		State.jumpList?.forEach((el) => {
+  			el.classList.remove('intersecting');
+  		});
+  		return;
+  	}
+  	{
+  		// Range isn't on a node we can measure.
+  		State.jumpList?.forEach((el) => {
+  			el.classList.remove('intersecting');
+  		});
+  		return;
+  	}
+  }
+
+
+  function alignButtons() {
+  	if (!State.jumpList || State.jumpList.length === 0 || (State.openTip.button && State.scrollPending === 0)) { // todo always false?
+  		return;
+  	}
+  	State.alignPending = true;
+
+  	// Reading and writing in a loop creates paint thrashing.
+  	// We iterate the array for reads, then iterate for writes.
+
+  	if (State.options.fixedRoots) {
+  		State.positionedFrames.length = 0;
+
+  		State.options.fixedRoots.forEach((root) => {
+  			if (root['framePositioner']) {
+  				State.positionedFrames.push(root['framePositioner'].getBoundingClientRect());
+  			}
+  		});
+  	}
+
+  	// Used for crude intersection detection.
+  	let previousNudgeTop = 0;
+  	let previousNudgeLeft = 0;
+  	const scrollTop = window.scrollY;
+  	if (!State.options.inlineAlerts) {
+  		// Compute based on target position.
+
+  		State.jumpList.forEach((mark, i) => {
+  			if (!mark.result.element.isConnected) {
+  				// Something broke; rebuild jumpList on next loop.
+  				State.forceFullCheck = true;
+  				State.interaction = true;
+  				mark.style.display = 'none';
+  			}
+  			let targetOffset = mark.result.element.getBoundingClientRect();
+
+  			let top = targetOffset.top + scrollTop;
+  			//let rightBound = window.innerWidth;
+  			if (!visible(mark.result.element)) {
+  				// Invisible target.
+  				const theFirstVisibleParent = firstVisibleParent(mark.result.element);
+  				targetOffset = theFirstVisibleParent ? theFirstVisibleParent.getBoundingClientRect() : targetOffset;
+  				top = targetOffset.top + scrollTop;
+  			}
+  			let left = targetOffset.left;
+
+  			// TD TD different?
+  			if (mark.result.element.tagName === 'IMG') {
+  				top = top + 10;
+  				left = left + 10;
+  			} else {
+  				left = State.options.inlineAlerts ? left - 34 : left;
+  			}
+
+  			// Add iframe positon to calculated position
+  			if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
+  				top = top + State.positionedFrames[mark.result.fixedRoot].top;
+  				left = left + State.positionedFrames[mark.result.fixedRoot].left;
+  			}
+
+  			// TD TD different?
+  			if (mark.result.element.tagName === 'IMG') {
+  				top = top + 10;
+  				left = left + 10;
+  			} else {
+  				left = State.options.inlineAlerts ? left - 34 : left;
+  			}
+  			if (mark.result.scrollableParent) {
+  				// Bump alerts that would be X-position out of a scroll zone.
+  				State.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
+  				if (left < State.jumpList[i].bounds.left) {
+  					left = State.jumpList[i].bounds.left;
+  				} else if (left + 40 > State.jumpList[i].bounds.right) {
+  					left = State.jumpList[i].bounds.right - 40;
+  				}
+  			} else if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
+  				// Bump alerts that would x-position out of an iframe.
+  				State.jumpList[i].bounds = State.positionedFrames[mark.result.fixedRoot];
+  				if (left < State.jumpList[i].bounds.left) {
+  					left = State.jumpList[i].bounds.left;
+  				} else if (left + 40 > State.jumpList[i].bounds.right) {
+  					left = State.jumpList[i].bounds.right - 40;
+  				}
+  			}
+  			State.jumpList[i].targetOffset = targetOffset;
+  			State.jumpList[i].markTop = top;
+  			State.jumpList[i].markLeft = left;
+  		});
+  	} else {
+  		// Compute based on self position.
+
+  		// Clear old transforms first. Batch write first...
+  		State.jumpList.forEach((mark) => {
+  			// Reset positions.
+  			mark.style.setProperty('transform', null);
+  			mark.style.setProperty('top', 'initial');
+  			mark.style.setProperty('left', 'initial');
+  			if (mark.style.transform) {
+  				const computedStyle = window.getComputedStyle(mark);
+  				let matrix = computedStyle.getPropertyValue('transform');
+  				matrix = matrix.split(',');
+  				mark.xOffset = parseFloat(matrix[4]);
+  				mark.yOffset = parseFloat(matrix[5]);
+  			}
+  			else {
+  				mark.xOffset = 0;
+  				mark.yOffset = 0;
+  			}
+  		});
+  		// ...then batch read new positions.
+  		State.jumpList.forEach((mark) => {
+  			mark.markOffset = mark.getBoundingClientRect();
+  			mark.markLeft = mark.markOffset.left;
+  			mark.markTop = mark.markOffset.top;
+  		});
+  	}
+
+
+  	// Check for overlaps, then write out transforms.
+  	State.jumpList.forEach((mark, i) => {
+
+  		// Now check for any needed nudges
+  		let nudgeTop = 10;
+  		let nudgeLeft = mark.result.element.tagName === 'IMG' ? 10 : -34;
+  		// Detect tip that overlaps with previous result.
+  		if (mark.markTop + scrollTop < 0) {
+  			// Offscreen to top.
+  			nudgeTop = (-1 * (mark.markTop + scrollTop)) - 6;
+  		}
+  		if (
+  			(i > 0 && overlap(mark.markLeft, mark.markTop, State.jumpList[i - 1].markLeft, State.jumpList[i - 1].markTop)) ||
+  			(i > 1 && overlap(mark.markLeft, mark.markTop, State.jumpList[i - 2].markLeft, State.jumpList[i - 2].markTop)) ||
+  			(i > 2 && overlap(mark.markLeft, mark.markTop, State.jumpList[i - 3].markLeft, State.jumpList[i - 3].markTop))
+  		) {
+  			// todo postpone: compute actual overlap? We're bouncing by the full amount no matter what which adds too much gapping.
+  			nudgeTop = nudgeTop + 14 + previousNudgeTop;
+  			nudgeLeft = 14 + previousNudgeLeft;
+  		}
+
+  		let constrainLeft = 0;
+  		let constrainRight = window.innerWidth;
+
+  		if (mark.result.scrollableParent) {
+  			const constrained = mark.result.scrollableParent.getBoundingClientRect();
+  			constrainLeft = constrained.left;
+  			constrainRight = constrainLeft + constrained.width;
+  		} else if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
+  			constrainLeft = State.positionedFrames[mark.result.fixedRoot].left;
+  			constrainRight = State.positionedFrames[mark.result.fixedRoot].right;
+  		}
+
+  		let needNudge = false;
+  		if (mark.markLeft + nudgeLeft - constrainLeft < 44) {
+  			// Offscreen to left. push to the right.
+  			nudgeLeft = 44 - mark.markLeft + nudgeLeft + constrainLeft;
+  			needNudge = true;
+  		}
+  		else if (mark.markLeft + nudgeLeft + 80 > constrainRight ) {
+  			needNudge = true;
+  			// Offscreen to right. push to the left
+  			nudgeLeft = constrainRight - nudgeLeft - mark.markLeft - 100;
+  		}
+  		else if (nudgeTop !== 0) {
+  			needNudge = true;
+  		}
+  		if (!State.options.inlineAlerts) {
+  			if (needNudge) {
+  				mark.style.transform = `translate(${mark.markLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
+  			} else {
+  				mark.style.transform = `translate(${mark.markLeft}px, ${mark.markTop}px)`;
+  			}
+
+  		} else {
+  			nudgeMark(mark, nudgeLeft, nudgeTop);
+  		}
+  		mark.nudgeLeft = nudgeLeft;
+  		mark.nudgeTop = nudgeTop;
+  		previousNudgeTop = nudgeTop;
+  		previousNudgeLeft = nudgeLeft;
+  	});
+
+  	// Last pass: check for elements offscreen within scrollable areas.
+  	if (!State.options.inlineAlerts) {
+  		// Alerts have to be positioned relative to viewport.
+  		State.jumpList.forEach(mark => {
+
+  			if (mark.result.scrollableParent) {
+  				// Hide alerts outside a scroll zone.
+  				if (!!mark.bounds && (mark.targetOffset.top - mark.bounds.top < 0 || mark.targetOffset.top - mark.bounds.bottom > 0 ) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
+  					// Tip has exited scrollable parent. Visually hide.
+  					mark.classList.add('ed11y-offscreen');
+  					mark.style.transform = 'translate(0px, -50px)';
+  					mark.style.pointerEvents = 'none';
+  					if (mark.getAttribute('data-ed11y-open') === 'true') {
+  						mark.setAttribute('data-ed11y-action', 'shut');
+  					}
+  				}
+  				else {
+  					mark.classList.remove('ed11y-offscreen');
+  					mark.style.pointerEvents = 'auto';
+  				}
+  			} else if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
+  				if (!!mark.bounds && (mark.targetOffset.top < -40 || mark.targetOffset.top + mark.bounds.top - mark.bounds.bottom > -10 ) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
+  					// Tip has exited scrollable parent. Visually hide.
+  					mark.classList.add('ed11y-offscreen');
+  					mark.style.transform = 'translate(0px, -50px)';
+  					mark.style.pointerEvents = 'none';
+  					if (mark.getAttribute('data-ed11y-open') === 'true') {
+  						mark.setAttribute('data-ed11y-action', 'shut');
+  					}
+  				}
+  				else {
+  					mark.classList.remove('ed11y-offscreen');
+  					mark.style.pointerEvents = 'auto';
+  				}
+  			}
+  			else {
+  				mark.classList.remove('ed11y-offscreen');
+  				mark.style.pointerEvents = 'auto';
+  			}
+
+  		});
+  	}
+  	State.jumpList?.forEach(mark => {
+  		// Now make visible.
+  		// todo: Edge still flickers on redraw.
+  		mark.classList.remove('ed11y-preload');
+  	});
+
+  }
+
   function showResults () {
     buildJumpList();
     // Announce that buttons have been placed.
@@ -4012,6 +4512,20 @@
       intersectionObservers();
     }
   }
+
+  const panelJumpTo = function(event) {
+  	// Handle jump
+  	event.preventDefault();
+  	State.toggledFrom = event.target.closest('button');
+  	if (!State.open) {
+  		togglePanel();
+  		window.setTimeout(function() {
+  			jumpTo(1);
+  		},500);
+  	} else {
+  		jumpTo(1);
+  	}
+  };
 
   function updatePanel () {
 
@@ -4083,7 +4597,7 @@
         UI.panelToggleTitle = UI.panel.querySelector('#ed11y-toggle .ed11y-sr-only');
         UI.panelCount = UI.panel.querySelector('.toggle-count');
         UI.panelJumpNext = UI.panel.querySelector('.ed11y-jump.next');
-        UI.panelJumpNext.addEventListener('click', jumpTo);
+        UI.panelJumpNext.addEventListener('click', panelJumpTo);
         UI.showDismissed = UI.panel.querySelector('#ed11y-show-hidden');
         UI.message = UI.panel.querySelector('#ed11y-message');
         window.setTimeout(()=> {
@@ -4680,364 +5194,6 @@
     updateTipLocations();
   }
 
-  function resetResults(incremental) {
-    State.jumpList = [];
-    State.openTip = {
-      button: false,
-      tip: false,
-    };
-    State.lastOpenTip = -1;
-    resetClass([
-      'ed11y-ring-red',
-      'ed11y-ring-yellow',
-      'ed11y-hidden-highlight',
-      'ed11y-warning-inline',
-      'ed11y-warning-block',
-      'ed11y-error-block',
-      'ed11y-error-inline',
-    ]);
-    // Reset insertions into body content.
-    if (incremental) {
-      findElements('reset', 'ed11y-element-highlight', false);
-    } else {
-      findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
-    }
-    State.elements.reset?.forEach((el) => el.remove());
-
-    // Flicker prevention -- leave old tip in place for 100ms.
-    findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
-    const delayedReset = State.elements.delayedReset;
-
-    window.setTimeout(()=> {
-      delayedReset?.forEach((el) => el.remove());
-    }, 100, delayedReset);
-
-    if (typeof UI.panelJumpNext === 'function') {
-      UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = M.buttonFirstContent;
-    }
-    // Reset insertions into body content.
-  }
-
-  function resetPanel() {
-    // Reset main panel.
-    State.visualizing = true; // so visualize function removes visualizers.
-    visualize();
-    if (State.totalCount === 0 && State.dismissedCount > 0) {
-      UI.panelCount.textContent = 'i';
-      UI.panelToggleTitle.textContent = State.dismissedCount === 1 ?
-        M.buttonShowHiddenAlert :
-        M.buttonShowHiddenAlerts(State.dismissedCount);
-    }
-  	if (typeof (UI.panel) === 'function') {
-  		UI.panel?.classList.add('ed11y-shut');
-  		UI.panel?.classList.remove('ed11y-active');
-  		UI.panelToggle?.setAttribute('aria-expanded', 'false');
-  		if (!State.options.showDismissed && typeof UI.showDismissed === 'function') {
-  			UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
-  			UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
-  				M.buttonShowHiddenAlert : M.buttonShowHiddenAlerts(State.dismissedCount);
-  		}
-  	}
-  }
-
-  function reset () {
-    pauseObservers();
-    resetResults();
-    resetPanel();
-    State.incremental = false;
-    State.running = false;
-    State.showPanel = false;
-    State.open = false;
-  }
-
-  /**
-   * Hide tips that are in front of text currently being edited.
-   * */
-  function checkEditableIntersects (focusKnown = false) {
-  	if (!focusKnown && !document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
-  		//Reset classes to measure.
-  		State.jumpList?.forEach((el) => {
-  			el.classList.remove('intersecting');
-  		});
-  		return;
-  	}
-  	{
-  		// Range isn't on a node we can measure.
-  		State.jumpList?.forEach((el) => {
-  			el.classList.remove('intersecting');
-  		});
-  		return;
-  	}
-  }
-
-  function alignAlts () {
-  	// Positions alt label to match absolute, inline or floated images.
-  	findElements('altMark', 'ed11y-element-alt');
-  	State.elements.altMark?.forEach((el) => { // @todo merge
-  		let id = el.dataset.ed11yImg;
-  		el.style.setProperty('transform', null);
-  		el.style.setProperty('height', null);
-  		el.style.setProperty('width', null);
-
-  		let img = UI.imageAlts[id][0];
-  		if (img.tagName !== 'IMG') {
-  			// Mark is placed outside the link in linked images.
-  			img = img.querySelector('img');
-  		}
-  		let markOffset = el.getBoundingClientRect();
-  		let imgOffset = img.getBoundingClientRect();
-  		let newOffset = imgOffset.left - markOffset.left;
-  		let height = getComputedStyle(img).height;
-  		height = height === 'auto' ? img.offsetHeight : Math.max(img.offsetHeight, parseInt(height));
-  		el.style.setProperty('transform', `translate(${newOffset}px, 0px)`);
-  		el.style.setProperty('height', `${height}px`);
-  		el.style.setProperty('width', `${img.offsetWidth}px`);
-  	});
-  }
-
-
-  const nudgeMark = function (el, x, y) {
-  	// TODO: THESE CAN NUDGE OUT OF THE OVERFLOW AREA OF THE CONTENTEDITABLE CONTAINER
-  	if (el.style.transform) {
-  		const computedStyle = window.getComputedStyle(el);
-  		let matrix = computedStyle.getPropertyValue('transform');
-  		matrix = matrix.split(',');
-  		el.style.transform = `translate(${parseFloat(matrix[4]) + x}px, ${parseFloat(matrix[5]) + y}px)`;
-  	} else {
-  		el.style.transform = `translate(${x}px, ${y}px)`;
-  	}
-  };
-
-  function alignButtons() {
-  	if (!State.jumpList || State.jumpList.length === 0 || (State.openTip.button && State.scrollPending === 0)) { // todo always false?
-  		return;
-  	}
-  	State.alignPending = true;
-
-  	// Reading and writing in a loop creates paint thrashing.
-  	// We iterate the array for reads, then iterate for writes.
-
-  	if (State.options.fixedRoots) {
-  		State.positionedFrames.length = 0;
-
-  		State.options.fixedRoots.forEach((root) => {
-  			if (root['framePositioner']) {
-  				State.positionedFrames.push(root['framePositioner'].getBoundingClientRect());
-  			}
-  		});
-  	}
-
-  	// Used for crude intersection detection.
-  	let previousNudgeTop = 0;
-  	let previousNudgeLeft = 0;
-  	const scrollTop = window.scrollY;
-  	if (!State.options.inlineAlerts) {
-  		// Compute based on target position.
-
-  		State.jumpList.forEach((mark, i) => {
-  			if (!mark.result.element.isConnected) {
-  				// Something broke; rebuild jumpList on next loop.
-  				State.forceFullCheck = true;
-  				State.interaction = true;
-  				mark.style.display = 'none';
-  			}
-  			let targetOffset = mark.result.element.getBoundingClientRect();
-
-  			let top = targetOffset.top + scrollTop;
-  			//let rightBound = window.innerWidth;
-  			if (!visible(mark.result.element)) {
-  				// Invisible target.
-  				const theFirstVisibleParent = firstVisibleParent(mark.result.element);
-  				targetOffset = theFirstVisibleParent ? theFirstVisibleParent.getBoundingClientRect() : targetOffset;
-  				top = targetOffset.top + scrollTop;
-  			}
-  			let left = targetOffset.left;
-
-  			// TD TD different?
-  			if (mark.result.element.tagName === 'IMG') {
-  				top = top + 10;
-  				left = left + 10;
-  			} else {
-  				left = State.options.inlineAlerts ? left - 34 : left;
-  			}
-
-  			// Add iframe positon to calculated position
-  			if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
-  				top = top + State.positionedFrames[mark.result.fixedRoot].top;
-  				left = left + State.positionedFrames[mark.result.fixedRoot].left;
-  			}
-
-  			// TD TD different?
-  			if (mark.result.element.tagName === 'IMG') {
-  				top = top + 10;
-  				left = left + 10;
-  			} else {
-  				left = State.options.inlineAlerts ? left - 34 : left;
-  			}
-  			if (mark.result.scrollableParent) {
-  				// Bump alerts that would be X-position out of a scroll zone.
-  				State.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
-  				if (left < State.jumpList[i].bounds.left) {
-  					left = State.jumpList[i].bounds.left;
-  				} else if (left + 40 > State.jumpList[i].bounds.right) {
-  					left = State.jumpList[i].bounds.right - 40;
-  				}
-  			} else if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
-  				// Bump alerts that would x-position out of an iframe.
-  				State.jumpList[i].bounds = State.positionedFrames[mark.result.fixedRoot];
-  				if (left < State.jumpList[i].bounds.left) {
-  					left = State.jumpList[i].bounds.left;
-  				} else if (left + 40 > State.jumpList[i].bounds.right) {
-  					left = State.jumpList[i].bounds.right - 40;
-  				}
-  			}
-  			State.jumpList[i].targetOffset = targetOffset;
-  			State.jumpList[i].markTop = top;
-  			State.jumpList[i].markLeft = left;
-  		});
-  	} else {
-  		// Compute based on self position.
-
-  		// Clear old transforms first. Batch write first...
-  		State.jumpList.forEach((mark) => {
-  			// Reset positions.
-  			mark.style.setProperty('transform', null);
-  			mark.style.setProperty('top', 'initial');
-  			mark.style.setProperty('left', 'initial');
-  			if (mark.style.transform) {
-  				const computedStyle = window.getComputedStyle(mark);
-  				let matrix = computedStyle.getPropertyValue('transform');
-  				matrix = matrix.split(',');
-  				mark.xOffset = parseFloat(matrix[4]);
-  				mark.yOffset = parseFloat(matrix[5]);
-  			}
-  			else {
-  				mark.xOffset = 0;
-  				mark.yOffset = 0;
-  			}
-  		});
-  		// ...then batch read new positions.
-  		State.jumpList.forEach((mark) => {
-  			mark.markOffset = mark.getBoundingClientRect();
-  			mark.markLeft = mark.markOffset.left;
-  			mark.markTop = mark.markOffset.top;
-  		});
-  	}
-
-
-  	// Check for overlaps, then write out transforms.
-  	State.jumpList.forEach((mark, i) => {
-
-  		// Now check for any needed nudges
-  		let nudgeTop = 10;
-  		let nudgeLeft = mark.result.element.tagName === 'IMG' ? 10 : -34;
-  		// Detect tip that overlaps with previous result.
-  		if (mark.markTop + scrollTop < 0) {
-  			// Offscreen to top.
-  			nudgeTop = (-1 * (mark.markTop + scrollTop)) - 6;
-  		}
-  		if (
-  			(i > 0 && overlap(mark.markLeft, mark.markTop, State.jumpList[i - 1].markLeft, State.jumpList[i - 1].markTop)) ||
-  			(i > 1 && overlap(mark.markLeft, mark.markTop, State.jumpList[i - 2].markLeft, State.jumpList[i - 2].markTop)) ||
-  			(i > 2 && overlap(mark.markLeft, mark.markTop, State.jumpList[i - 3].markLeft, State.jumpList[i - 3].markTop))
-  		) {
-  			// todo postpone: compute actual overlap? We're bouncing by the full amount no matter what which adds too much gapping.
-  			nudgeTop = nudgeTop + 14 + previousNudgeTop;
-  			nudgeLeft = 14 + previousNudgeLeft;
-  		}
-
-  		let constrainLeft = 0;
-  		let constrainRight = window.innerWidth;
-
-  		if (mark.result.scrollableParent) {
-  			const constrained = mark.result.scrollableParent.getBoundingClientRect();
-  			constrainLeft = constrained.left;
-  			constrainRight = constrainLeft + constrained.width;
-  		} else if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
-  			constrainLeft = State.positionedFrames[mark.result.fixedRoot].left;
-  			constrainRight = State.positionedFrames[mark.result.fixedRoot].right;
-  		}
-
-  		let needNudge = false;
-  		if (mark.markLeft + nudgeLeft - constrainLeft < 44) {
-  			// Offscreen to left. push to the right.
-  			nudgeLeft = 44 - mark.markLeft + nudgeLeft + constrainLeft;
-  			needNudge = true;
-  		}
-  		else if (mark.markLeft + nudgeLeft + 80 > constrainRight ) {
-  			needNudge = true;
-  			// Offscreen to right. push to the left
-  			nudgeLeft = constrainRight - nudgeLeft - mark.markLeft - 100;
-  		}
-  		else if (nudgeTop !== 0) {
-  			needNudge = true;
-  		}
-  		if (!State.options.inlineAlerts) {
-  			if (needNudge) {
-  				mark.style.transform = `translate(${mark.markLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
-  			} else {
-  				mark.style.transform = `translate(${mark.markLeft}px, ${mark.markTop}px)`;
-  			}
-
-  		} else {
-  			nudgeMark(mark, nudgeLeft, nudgeTop);
-  		}
-  		mark.nudgeLeft = nudgeLeft;
-  		mark.nudgeTop = nudgeTop;
-  		previousNudgeTop = nudgeTop;
-  		previousNudgeLeft = nudgeLeft;
-  	});
-
-  	// Last pass: check for elements offscreen within scrollable areas.
-  	if (!State.options.inlineAlerts) {
-  		// Alerts have to be positioned relative to viewport.
-  		State.jumpList.forEach(mark => {
-
-  			if (mark.result.scrollableParent) {
-  				// Hide alerts outside a scroll zone.
-  				if (!!mark.bounds && (mark.targetOffset.top - mark.bounds.top < 0 || mark.targetOffset.top - mark.bounds.bottom > 0 ) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
-  					// Tip has exited scrollable parent. Visually hide.
-  					mark.classList.add('ed11y-offscreen');
-  					mark.style.transform = 'translate(0px, -50px)';
-  					mark.style.pointerEvents = 'none';
-  					if (mark.getAttribute('data-ed11y-open') === 'true') {
-  						mark.setAttribute('data-ed11y-action', 'shut');
-  					}
-  				}
-  				else {
-  					mark.classList.remove('ed11y-offscreen');
-  					mark.style.pointerEvents = 'auto';
-  				}
-  			} else if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
-  				if (!!mark.bounds && (mark.targetOffset.top < -40 || mark.targetOffset.top + mark.bounds.top - mark.bounds.bottom > -10 ) && !mark.matches(':focus, :focus-within, [data-ed11y-open="true"]')) {
-  					// Tip has exited scrollable parent. Visually hide.
-  					mark.classList.add('ed11y-offscreen');
-  					mark.style.transform = 'translate(0px, -50px)';
-  					mark.style.pointerEvents = 'none';
-  					if (mark.getAttribute('data-ed11y-open') === 'true') {
-  						mark.setAttribute('data-ed11y-action', 'shut');
-  					}
-  				}
-  				else {
-  					mark.classList.remove('ed11y-offscreen');
-  					mark.style.pointerEvents = 'auto';
-  				}
-  			}
-  			else {
-  				mark.classList.remove('ed11y-offscreen');
-  				mark.style.pointerEvents = 'auto';
-  			}
-
-  		});
-  	}
-  	State.jumpList?.forEach(mark => {
-  		// Now make visible.
-  		// todo: Edge still flickers on redraw.
-  		mark.classList.remove('ed11y-preload');
-  	});
-
-  }
-
   function alignTip (button, toolTip, recheck = 0, reveal = false) {
   	if (!toolTip) {
   		return;
@@ -5233,38 +5389,6 @@
   	}
   }
 
-  const scrollableElem = function(el) {
-  	let overflowing = el.clientHeight && el.clientHeight < el.scrollHeight;
-  	if (overflowing) {
-  		const styles = window.getComputedStyle(el);
-  		overflowing = styles.overflowY !== 'visible';
-  	}
-  	return overflowing;
-  };
-
-  function closestScrollable(el) {
-  	if (State.options.constrainButtons && el.closest(State.options.constrainButtons)) {
-  		return el.closest(State.options.constrainButtons);
-  	}
-
-  	let parent = el.parentElement;
-  	if (parent && parent.tagName !== 'BODY') {
-  		// Parent exists
-  		if (scrollableElem(parent)) {
-  			// Return if scrollable found.
-  			return parent;
-  		} else {
-  			// Element is not scrollable, recurse
-  			parent = closestScrollable(parent);
-  			// Return if scrollable found.
-  			return parent;
-  		}
-  	} else {
-  		// No scrollable parents.
-  		return false;
-  	}
-  }
-
   function alignHighlights() {
 
   	if (State.options.fixedRoots && UI.editableHighlight.length > 0) {
@@ -5303,50 +5427,6 @@
   	});
   }
 
-  const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size = 17) {
-  	// Yes this looks like intersect const, but it's math not browser offsets.
-  	return !(rect1Left + size < rect2Left ||
-  		rect1Left > rect2Left + size ||
-  		rect1Top + size < rect2Top ||
-  		rect1Top > rect2Top + size);
-  };
-
-  // Applies parameters and avoids other widgets.
-  function alignPanel() {
-  	if (!UI.panelElement) {
-  		return false;
-  	}
-  	if (State.options.panelPinTo === 'left') {
-  		UI.panel.classList.add('ed11y-pin-left');
-  	}
-  	let xMost = 0;
-  	let yMost = 0;
-  	if (State.elements.panelPin) { // todo
-  		State.elements.panelPin.forEach(el => {
-  			let bounds = el.getBoundingClientRect();
-  			if (State.options.panelPinTo === 'right') {
-  				xMost = window.innerWidth - bounds.left > xMost && bounds.left > window.innerWidth / 3 ? window.innerWidth - bounds.left : xMost;
-  			} else {
-  				xMost = bounds.right > xMost && xMost + bounds.right < window.innerWidth / 3 ? xMost + bounds.right : xMost;
-  			}
-  			yMost = bounds.height > yMost && bounds.height + yMost < window.innerHeight / 2 ? yMost + bounds.height : yMost;
-  		});
-  	}
-  	if (xMost > 0 && xMost < window.innerWidth - 240) {
-  		// push off horizontal
-  		UI.panelElement.style.setProperty(State.options.panelPinTo, xMost + 10 + 'px');
-  		UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
-  	} else if (xMost > 0 && xMost > window.innerWidth - 240 && yMost > 0) {
-  		// push off vertical
-  		UI.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
-  		UI.panelElement.style.setProperty('bottom', `calc(${State.options.panelOffsetY} + ${yMost}px)`);
-  	} else {
-  		// no push
-  		UI.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
-  		UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
-  	}
-  }
-
   function windowResize() {
   	if (UI.panel?.classList.contains('ed11y-active') === true) {
   		alignAlts();
@@ -5356,18 +5436,6 @@
   		alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
   	}
   	alignPanel();
-  }
-
-  function pauseObservers() {
-  	State.watching?.forEach(observer => {
-  		observer.observer.disconnect();
-  	});
-  }
-
-  function resumeObservers() {
-  	State.watching?.forEach(observer => {
-  		observer.observer.observe(observer.root, observer.config);
-  	});
   }
 
   function intersectionObservers() {
@@ -5509,21 +5577,12 @@
   	}, 1000);
   }
 
-  function makeItSo () {
+  function ed11ySetup () {
   	if (State.once) {
   		console.error('double init');
   		return;
   	}
   	State.once = true;
-
-  	//Need to evaluate if "load" event took place for bookmarklet version. Otherwise, only call Sa11y once page has loaded.
-  	const documentLoadingCheck = (callback) => {
-  		if (document.readyState === 'complete') {
-  			callback();
-  		} else {
-  			window.addEventListener('load', callback);
-  		}
-  	};
 
   	// Once document has fully loaded.
   	documentLoadingCheck(() => {
@@ -5576,6 +5635,7 @@
   		window.addEventListener('resize', function () { windowResize(); });
   	});
   }
+
   // Toggles the outline of all headers, link texts, and images.
   function checkAll() {
   	if (State.openTip.button) {
@@ -5764,66 +5824,6 @@
   	}
   }
 
-  function countAlerts () {
-
-  	State.errorCount = 0;
-  	State.warningCount = 0;
-  	State.dismissedCount = 0;
-
-  	// Review results array to remove dismissed or ignored items
-
-  	State.dismissedCount = 0;
-  	for (let i = State.results.length - 1; i >= 0; i--) {
-
-  		let test = State.results[i].test;
-
-  		if (State.options.ignoreTests &&
-  			State.options.ignoreTests.includes(test)) {
-  			// Would be faster to skip test, but this is easy and reliable.
-  			State.results.splice(i, 1);
-  			continue;
-  		}
-
-  		// todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
-  		/*if (State.incremental && Ed11y.oldResults.length > 0) {
-  			// Don't flag new issues in the active range while people are typing.
-  		}*/
-
-  		let dismissKey = prepareDismissal(State.results[i].dismissalKey);
-  		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-  		if (dismissKey !== false && State.options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[State.options.currentPage] && dismissKey in State.dismissedAlerts[State.options.currentPage][test]) {
-  			// Remove result if it has been marked OK or ignored, increment dismissed match counter.
-  			State.dismissedCount++;
-  			State.results[i].dismissalStatus = State.dismissedAlerts[State.options.currentPage][test][dismissKey];
-  		} else if (State.results[i].dismissalKey) {
-  			State.warningCount++;
-  			State.results[i].dismissalStatus = false;
-  		} else {
-  			State.errorCount++;
-  			State.results[i].dismissalStatus = false;
-  		}
-  	}
-
-  	State.totalCount = State.errorCount + State.warningCount;
-
-  	// Dispatch event for synchronizers.
-  	if (!State.incremental) {
-  		window.setTimeout(function () {
-  			let syncResults = new CustomEvent('ed11yResults');
-  			document.dispatchEvent(syncResults);
-  		}, 0);
-  	}
-
-  	if (State.ignoreAll) {
-  		State.dismissedCount = State.totalCount + State.dismissedCount;
-  		State.errorCount = 0;
-  		State.warningCount = 0;
-  		State.totalCount = 0;
-  	}
-
-  	isFullNeeded();
-  }
-
   function buildElementList () {
 
   	// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
@@ -5855,57 +5855,6 @@
   	}
   }
 
-  function disable() {
-  	if (State.open && !State.closedByDisable) {
-  		State.closedByDisable = true;
-  	}
-  	State.disabled = true;
-  	reset();
-  	document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.panelBar);
-  	document.documentElement.style.setProperty('--ed11y-activeColor', Theme.panelBarText);
-  	document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
-  	document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
-  	if (typeof UI.panelToggle.querySelector === 'function') {
-  		UI.panel?.classList.remove('ed11y-errors', 'ed11y-warnings');
-  		UI.panelCount.textContent = 'i';
-  		UI.panelJumpNext.setAttribute('hidden', '');
-  		UI.panelToggle.classList.add('disabled');
-  		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleDisabled;
-  	}
-  }
-  const checkRunPrevent = function() {
-  	let preventCheck = State.options.preventCheckingIfPresent ?
-  		document.querySelector(State.options.preventCheckingIfPresent) :
-  		false;
-  	if (preventCheck) {
-  		console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${State.options.preventCheckingIfPresent}"` );
-  	} else if (!preventCheck && !!State.options.preventCheckingIfAbsent) {
-  		preventCheck = document.querySelector(`:is(${State.options.preventCheckingIfAbsent})`) === null;
-  		if (preventCheck) {
-  			console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${State.options.preventCheckingIfAbsent}"`);
-  		}
-  	}
-  	return preventCheck;
-  };
-
-  const isFullNeeded = function() {
-  	if (State.incremental && !State.forceFullCheck && !newIncrementalResults()) {
-  		State.forceFullCheck = true;
-  	}
-  };
-
-  function newIncrementalResults() {
-  	if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
-  		return true;
-  	}
-  	let newResultString = `${State.errorCount} ${State.warningCount}`;
-  	State.results.forEach(result => {
-  		newResultString += result.test + result.element.outerHTML;
-  	});
-  	let changed = newResultString !== State.oldResultString;
-  	State.oldResultString = newResultString;
-  	return changed;
-  }
   function visualize () {
   	if (!UI.panel) {
   		return;
@@ -5933,12 +5882,9 @@
   	// Visualize the document outline
 
   	let panelOutline = UI.panel.querySelector('#ed11y-outline');
-  	console.log(State.headingOutline);
   	if (State.headingOutline.length) {
   		panelOutline.innerHTML = '';
   		State.headingOutline.forEach((result, i) => {
-  			console.log(result);
-  			console.log(result.headingLevel);
   			// Todo: draw these in editable mode.
   			if (State.options.inlineAlerts) {
   				const mark = document.createElement('ed11y-element-heading-label');
@@ -5986,6 +5932,31 @@
   	}
   }
 
+  function resetPanel() {
+  	// Reset main panel.
+  	State.visualizing = true; // so visualize function removes visualizers.
+  	visualize();
+  	if (State.totalCount === 0 && State.dismissedCount > 0) {
+  		UI.panelCount.textContent = 'i';
+  		UI.panelToggleTitle.textContent = State.dismissedCount === 1 ?
+  			M.buttonShowHiddenAlert :
+  			M.buttonShowHiddenAlerts(State.dismissedCount);
+  	}
+
+  	// @todo is this going to fail again? Should it a different if?
+  	if (typeof (UI.panel) === 'object') {
+  		UI.panel?.classList.add('ed11y-shut');
+  		UI.panel?.classList.remove('ed11y-active');
+  		UI.panelToggle?.setAttribute('aria-expanded', 'false');
+  		if (!State.options.showDismissed && typeof UI.showDismissed === 'function') {
+  			UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
+  			UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
+  				M.buttonShowHiddenAlert : M.buttonShowHiddenAlerts(State.dismissedCount);
+  		}
+  	}
+  }
+
+  // @todo is this getting called?
   window.addEventListener('ed11yEndVisualization', ()=>{
   	State.visualizing = false;
   	pauseObservers();
@@ -6046,95 +6017,141 @@
   	}
   };
 
+
   function dismissThis (dismissalType, all = false) {
-    // Find the active tip and draw its identifying information from the result list
-    let removal = State.openTip;
-    let id = removal.tip.dataset.ed11yResult;
-    let test = State.results[id].test;
+  	// Find the active tip and draw its identifying information from the result list
+  	let removal = State.openTip;
+  	let id = removal.tip.dataset.ed11yResult;
+  	let test = State.results[id].test;
 
-    if (all) {
-      State.results.forEach((result) => {
-        if (result.test === test && result.dismissalStatus !==dismissalType) {
-          dismissOne(dismissalType, test, result.dismissalKey);
-        }
-      });
-    } else {
-      let dismissalKey = prepareDismissal(State.results[id].dismissalKey);
-      dismissOne(dismissalType, test, dismissalKey);
-    }
+  	if (all) {
+  		State.results.forEach((result) => {
+  			if (result.test === test && result.dismissalStatus !==dismissalType) {
+  				dismissOne(dismissalType, test, result.dismissalKey);
+  			}
+  		});
+  	} else {
+  		let dismissalKey = prepareDismissal(State.results[id].dismissalKey);
+  		dismissOne(dismissalType, test, dismissalKey);
+  	}
 
-    // Remove tip and reset borders around element
-    resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
-    removal.tip?.parentNode?.removeChild(removal.tip);
-    // TODO EDITING: COMMENT OUT BELOW...SEEMS REDUNDANT?
-    //removal.button?.parentNode?.removeChild(removal.button);
+  	// Remove tip and reset borders around element
+  	resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
+  	removal.tip?.parentNode?.removeChild(removal.tip);
+  	// TODO EDITING: COMMENT OUT BELOW...SEEMS REDUNDANT?
+  	//removal.button?.parentNode?.removeChild(removal.button);
 
-    reset();
-    State.showPanel = true;
-    checkAll();
+  	reset();
+  	State.showPanel = true;
+  	checkAll();
 
-    let rememberGoto = State.lastOpenTip;
+  	let rememberGoto = State.lastOpenTip;
 
-    window.setTimeout(function () {
-      if (State.jumpList.length > 0) {
-        State.lastOpenTip = (rememberGoto - 1);
-        UI.panelJumpNext?.focus();
-      } else {
-        window.setTimeout(function () {
-          UI.panelToggle?.focus();
-        }, 100);
-      }
-    }, 500, rememberGoto);
+  	window.setTimeout(function () {
+  		if (State.jumpList.length > 0) {
+  			State.lastOpenTip = (rememberGoto - 1);
+  			UI.panelJumpNext?.focus();
+  		} else {
+  			window.setTimeout(function () {
+  				UI.panelToggle?.focus();
+  			}, 100);
+  		}
+  	}, 500, rememberGoto);
 
   }
   function toggleShowDismissals () {
-    // todo postpone: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
-    State.ignoreAll = false;
-    State.options.showDismissed = !(State.options.showDismissed);
-    reset();
-    State.showPanel = true;
-    checkAll();
+  	// todo postpone: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
+  	State.ignoreAll = false;
+  	State.options.showDismissed = !(State.options.showDismissed);
+  	reset();
+  	State.showPanel = true;
+  	checkAll();
 
-    UI.showDismissed.setAttribute('data-ed11y-pressed', (!!State.options.showDismissed).toString());
-    window.setTimeout(function() {
-      UI.showDismissed.focus();
-    }, 0);
+  	UI.showDismissed.setAttribute('data-ed11y-pressed', (!!State.options.showDismissed).toString());
+  	window.setTimeout(function() {
+  		UI.showDismissed.focus();
+  	}, 0);
   }
   function togglePanel () {
-    State.ignoreAll = false;
+  	State.ignoreAll = false;
 
-    if (!State.doubleClickPrevent) {
-      // Prevent clicks piling up while scan is running.
-      if (State.running !== true) {
-        State.running = true;
-        // Re-scan each time the panel reopens.
-        if (UI.panel.classList.contains('ed11y-shut') === true) {
-          State.onLoad = false;
-          State.incremental = false;
-          State.showPanel = true;
-          if (State.dismissedCount > 0 && State.warningCount === 0 && State.errorCount === 0) {
-            State.options.showDismissed = false;
-            toggleShowDismissals();
-          } else {
-            checkAll();
-          }
-          State.options.userPrefersShut = false;
-          localStorage.setItem('editoria11yShow', '1');
-        }
-        else {
-          UI.panelToggleTitle.textContent = State.totalCount > 0 ? M.buttonShowAlerts : M.buttonShowNoAlert;
-          State.options.showDismissed = false;
-          reset();
-          State.options.userPrefersShut = true;
-          localStorage.setItem('editoria11yShow', '0');
-        }
-      }
-    }
-    State.doubleClickPrevent = true;
-    window.setTimeout(function () {
-      State.doubleClickPrevent = false;
-    }, 200);
-    return false;
+  	if (!State.doubleClickPrevent) {
+  		// Prevent clicks piling up while scan is running.
+  		if (State.running !== true) {
+  			State.running = true;
+  			// Re-scan each time the panel reopens.
+  			if (UI.panel.classList.contains('ed11y-shut') === true) {
+  				State.onLoad = false;
+  				State.incremental = false;
+  				State.showPanel = true;
+  				if (State.dismissedCount > 0 && State.warningCount === 0 && State.errorCount === 0) {
+  					State.options.showDismissed = false;
+  					toggleShowDismissals();
+  				} else {
+  					checkAll();
+  				}
+  				State.options.userPrefersShut = false;
+  				localStorage.setItem('editoria11yShow', '1');
+  			}
+  			else {
+  				UI.panelToggleTitle.textContent = State.totalCount > 0 ? M.buttonShowAlerts : M.buttonShowNoAlert;
+  				State.options.showDismissed = false;
+  				reset();
+  				State.options.userPrefersShut = true;
+  				localStorage.setItem('editoria11yShow', '0');
+  			}
+  		}
+  	}
+  	State.doubleClickPrevent = true;
+  	window.setTimeout(function () {
+  		State.doubleClickPrevent = false;
+  	}, 200);
+  	return false;
+  }
+
+  function raceCrash() {
+  	// A marked element disappeared while we were jumping to it.
+  	if (State.loopStop) {
+  		return;
+  	}
+  	State.loopStop = true;
+  	reset();
+  	State.showPanel = true;
+  	checkAll();
+  	window.setTimeout(function() {
+  		if (State.results.length > 0 && State.loopStop) {
+  			this.jumpTo(); // todo
+  			State.loopStop = false;
+  		}
+  	},100, State.loopStop);
+  }
+
+  function disable() {
+  	if (State.open && !State.closedByDisable) {
+  		State.closedByDisable = true;
+  	}
+  	State.disabled = true;
+  	reset();
+  	document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.panelBar);
+  	document.documentElement.style.setProperty('--ed11y-activeColor', Theme.panelBarText);
+  	document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
+  	document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
+  	if (typeof UI.panelToggle.querySelector === 'function') {
+  		UI.panel?.classList.remove('ed11y-errors', 'ed11y-warnings');
+  		UI.panelCount.textContent = 'i';
+  		UI.panelJumpNext.setAttribute('hidden', '');
+  		UI.panelToggle.classList.add('disabled');
+  		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleDisabled;
+  	}
+  }
+  function reset () {
+  	pauseObservers();
+  	resetResults();
+  	resetPanel();
+  	State.incremental = false;
+  	State.running = false;
+  	State.showPanel = false;
+  	State.open = false;
   }
 
   class Ed11yElementTip extends HTMLElement {
@@ -6722,22 +6739,6 @@
         this.initialized = true;
       }
     }
-  /*
-    // @todo fix.
-    oldJumpTo(event) {
-      // Handle jump
-      event.preventDefault();
-      State.toggledFrom = event.target.closest('button');
-      if (!State.open) {
-        togglePanel();
-        window.setTimeout(function() {
-          jumpTo(1);
-        },500);
-      } else {
-        jumpTo(1);
-      }
-    }
-  */
 
     handleBarClick(event) {
       event.preventDefault();
@@ -6812,7 +6813,7 @@
       });
 
       if (CSS.supports('selector(:has(body))')) {
-        makeItSo();
+        ed11ySetup();
       } else {
         console.warn(M.consoleNotSupported);
       }

@@ -10,7 +10,7 @@ import {
   Ed11yElementHeadingLabel,
   Ed11yElementPanel
 } from "./elements/ed11y-element-panel.js";
-import {makeItSo, checkAll} from "./logic/interface.js";
+import {ed11ySetup, checkAll} from "./logic/interface.js";
 
 class Ed11y {
 
@@ -42,7 +42,7 @@ class Ed11y {
     });
 
     if (CSS.supports('selector(:has(body))')) {
-      makeItSo();
+      ed11ySetup();
     } else {
       console.warn(M.consoleNotSupported);
     }

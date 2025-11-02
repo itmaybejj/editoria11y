@@ -1,10 +1,10 @@
 import {M, State, UI} from "../utils/state.js";
 import {
   alertOnInvisibleTip,
+	dismissThis,
   jumpTo,
   transferFocus
 } from "../logic/interface.js";
-import {dismissThis} from "../utils/toggle.js";
 
 export class Ed11yElementTip extends HTMLElement {
   /* global Ed11y */
