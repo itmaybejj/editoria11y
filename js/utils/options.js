@@ -10,57 +10,122 @@ const Options = (function options() {
   let ed11yLang = {};
   let ed11yDefaults = {
 
-    // Relative or absolute
+		/**
+		 * Sa11y overrides =============== */
+
+		// Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
+		checkRoots: false, // @todo merge implement whatever syntax Sa11y releases.
+		fixedRoots: false, // Array of specific nodes, overrides previous.
+		/* e.g:
+		fixedRoots: [
+			{
+				 root: direct domReference
+				 framePositioner: direct domReference or false
+			}
+		]
+		*/
+		// Containers to globally ignore, e.g., "header *, .card *"
+		ignoreByKey: { // not implemented in Sa11y
+			// @todo merge discuss how to implement this in Sa11y core. Sa11y appends a descending selector; for these we only want to ignore QA and table checks, not inner link checks.
+			'p': 'table p',
+			'table': '[role="presentation"]',
+		},
+		containerIgnore: false, // @todo merge CMS was ignoreElements.
+
+		// contrastIgnore: '.sr-only',
+		outlineIgnore: '', // @todo merge CMS was in ignoreByKey
+		// headerIgnore: '',
+		// headerIgnoreSpan: '',
+		// headerIgnoreStrings: '',
+		imageIgnore: 'img[aria-hidden], [aria-hidden] img, ' +
+			'img[role="presentation"], ' +
+			'a[href][aria-label] img, button[aria-label] img, ' +
+			'a[href][aria-labelledby] img, button[aria-labelledby] img', 		// @todo merge discuss moving to Sa11y.
+		linkIgnore: '[aria-hidden][tabindex="-1"]', // @todo merge discuss moving to Sa11y.
+		// linkIgnoreStrings: false,
+		// linkIgnoreSpan: false, // @todo merge CMS was linkIgnoreSelector
+
+		// Relative or absolute
     //cssUrls: false, // ['/folder/editoria11y.css','/folder/custom.css']
-    cssUrls: false,
 
-    // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
-    checkRoots: false,
-    fixedRoots: false, // Array of specific nodes, overrides previous.
-    /* e.g:
-    fixedRoots: [
-      {
-         root: direct domReference
-         framePositioner: direct domReference or false
-      }
-    ]
-    */
+		// Control panel settings
+		// aboutContent: '',
+		panelPosition: 'right', // @todo merge CMS was panelPinTo
+		// showMovePanelToggle: true,
+		// checkAllHideToggles: false,
+		// developerChecksOnByDefault: false,
 
-    // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
-    shadowComponents: false,
-    autoDetectShadowComponents: true,
+		// Page outline
+		showHinPageOutline: false, // @todo merge test.
+		showTitleInPageOutline: true,
 
-    // Containers to globally ignore, e.g., "header *, .card *"
-    ignoreElements: false,
-		showGoodLinkButton: false,
-		showGoodImageButton: false,
+		// Image outline
+		// showImageOutline: true,
+		editImageURLofCMS: '', // @todo merge CMS test.
+		// relativePathImageSRC: '',
+		// relativePathImageID: '',
+		// ignoreEditImageURL: [],
+		// ignoreEditImageClass: [],
 
-    // Provide list of test keys; get from localization file or results object.
-    // @todo merge provide translation layer or document change.
-    ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
+		// Other features
+		// delayCheck: 0,
+		// delayCustomCheck: 500,
+		// detectSPArouting: false,
+		doNotRun: '', // @todo merge test.
+		// headless: false,
+		selectorPath: false, // @todo merge what was this?
+		// shadowComponents: '',
+		// autoDetectShadowComponents: false,
 
-    // Ignore Aria on these elements (Gutenberg labels headings while editing.)
-    ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
-    ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
+		// Annotations.
+		// showGoodImageButton: false,
+		// showGoodLinkButton: false,
+		// dismissAnnotations: true,
+		// dismissAll: true,
+		ignoreHiddenOverflow: '', // @todo merge do we need to add this Sa11y feature? "Modifies the annotation's parent container with overflow: hidden, making it visible and scrollable so content authors can access it."
+		// insertAnnotationBefore: '',
+
+		// Readability
+		readabilityPlugin: false,
+		// readabilityRoot: 'body',
+		// readabilityIgnore: '',
+
+		// Contrast
+		contrastPlugin: false,
+		// contrastAAA: false,
+		// contrastAPCA: false,
+
+		// Other plugins
+		customChecks: false, // @todo merge migrate in embed check?
+		// linksAdvancedPlugin: true,
+		formLabelsPlugin: true, // @todo merge CMS turn off when editing.
+		// embeddedContentPlugin: true,
+		developerPlugin: false,
+		// externalDeveloperChecks: false,
+		colourFilterPlugin: false,
+		// exportResultsPlugin: false,
+
+		// Shared properties for some checks
+		// susAltStopWords: '', // @todo merge I have some extras.
+		// linkStopWords: '',
+		extraPlaceholderStopWords: '',
+		// imageWithinLightbox: '',
+
+		/**
+		* Editoria11y only =============== */
+
+		// Provide list of test keys; get from localization file or results object.
+		// @todo merge CMS provide translation layer or document change.
+		// ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
+
+		// Ignore Aria on these elements (Gutenberg labels headings while editing.)
+		// @todo merge discuss these additions to the accessible name computation.
+		ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
+		ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
 
     // Disable tests on specific elements
     // Include and modify this entire object in your call
-    ignoreByKey: {
-      'p': 'table p',
-      // 'h': false,
-      'img': '[aria-hidden], [aria-hidden] img, ' +
-        '[role="presentation"], ' +
-        'a[href][aria-label] img, button[aria-label] img, ' +
-        'a[href][aria-labelledby] img, button[aria-labelledby] img',
-      'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
-      // 'li': false,
-      // 'blockquote': false,
-      // 'iframe': false,
-      // 'audio': false,
-      // 'video': false,
-      'table': '[role="presentation"]',
-    },
-
+		// @todo merge test and/or reimplement.
     headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
 
     // Set alertModes
@@ -94,18 +159,12 @@ const Options = (function options() {
     preventCheckingIfPresent: false,
     preventCheckingIfAbsent: false,
 
-    // Regex of strings to remove from links before checking to see if link titles are meaningful. E.g.:
-    // "\(link is external\)|\(link sends email\)"
-    linkIgnoreStrings: false,
-    linkIgnoreSelector: false,
-
     // Disable the "is this element visible" check on themes that have 0-height elements.
     checkVisible: true,
 
     // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
     hiddenHandlers: '',
 
-    panelPinTo: 'right',
     panelOffsetX: '25px',
     panelOffsetY: '25px',
     panelNoCover: '', // select other buttons to avoid.
@@ -115,8 +174,8 @@ const Options = (function options() {
     constrainButtons: false,
 
     // Interface
-    lang: 'en',
-    langSanitizes: false, // Some translation modules will double-escape
+    lang: 'en', // @todo merge drop after migrating to Lang_..
+    langSanitizes: false, // @todo merge drop after migrating to Lang_.
     theme: 'sleekTheme',
     sleekTheme: {
       bg: '#eff2ff', // e8f4ff
@@ -190,21 +249,17 @@ const Options = (function options() {
     baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
 
     // Test customizations
-    embeddedContent: false, // @todo remove in favor of custom checks?
-    embeddedContentTitle: '', // @todo test or remove?
-    embeddedContentMessage: '', // @todo test or remove?
+    embeddedContent: false, // @todo merge remove.
+    embeddedContentTitle: '', // @todo merge remove.
+    embeddedContentMessage: '', // @todo merge remove.
 
     linksUrls: false, // get from language pack
     linksMeaningless: false, // get from language pack
     altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
-    // * Not implemented Yet:
-    // ruleset toggling
-    // form label tests
-    // detectSPArouting: false,
 
     editLinks: false, // Add links to edit content in tooltips.
 
-    // @todo merge: port this functionality.
+    // @todo merge discuss: how to handle this functionality.
     editorHeadingLevel: [
       // Sets previous heading level for contentEditable fields.
       // With 'ignore' set, first heading level is ignored in editable zones.
@@ -227,10 +282,6 @@ const Options = (function options() {
     userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
 
     customTests: 0,
-
-    // @todo merge do we need the image and button descenders and the tabindex selector? If so should it be in the MR?
-    imageIgnore: '[aria-hidden], [aria-hidden] img, [role="presentation"], a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img',
-    linkIgnore: '[aria-hidden][tabindex="-1"]',
   };
 
   function preProcessOptions(options) {
@@ -240,7 +291,7 @@ const Options = (function options() {
       ...ed11yDefaults,
     };
 
-    // @todo MERGE these get destroyed in constants.js
+    // @todo merge re-implement: these get destroyed in constants.js
     //ed11yDefaults.checks.QA_DOCUMENT.sources = 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']'
     //ed11yDefaults.checks.EMBED_VIDEO.sources = 'video, [src*="youtube.com"], [src*="brightcove.com"], [src*="dailymotion.com"], [src*="panopto.com"], [src*="Video"], [src*="video"], [src*="vimeo.com"], [src*="watch"], [src*="wistia.com"], [src*="vidyard.com"], [src*=yuja.com]';
 
@@ -255,54 +306,31 @@ const Options = (function options() {
     /*
     * Options translation
     * */
-    options.headless = options.alertMode === 'headless';
-    options.customChecks = options.customTests > 0 && !options.customChecks ? 'listen' : false;
+    options.headless = options.alertMode === 'headless'; // @todo merge test if needed.
+    options.customChecks = options.customTests > 0 && !options.customChecks ? 'listen' : false; // @todo merge test.
 
     // Toggleable plugins
-    options.developerPlugin = false;
+		// @todo merge test if these are lost on [...merge].
+/*    options.developerPlugin = false;
     options.colourFilterPlugin = false;
     options.exportResultsPlugin = false;
-    options.showImageOutline = false;
-    // @todo merge what are these?
-    // Constants.Global.ignoreContentOutsideRoots = option.ignoreContentOutsideRoots;
-
-  //  options.panelPosition = panelPinTo; // Syntax?
+    options.showImageOutline = false;*/
 
     // Check for document types.
 
-    if (options.documentLinks) {
+    if (options.documentLinks) { // @todo merge needed?
       options.checks.QA_DOCUMENT.sources = options.documentLinks;
-    }
-    // @todo merge this changed name from linkIgnoreSelector.
-
-    if (options.linkIgnoreSelector) {
-      options.linkIgnoreSpan = options.linkIgnoreSelector;
     }
 
     if (options.panelAttachTo) {
-      State.panelAttachTo = options.panelAttachTo; // todo Is this implemented anywhere?
+      State.panelAttachTo = options.panelAttachTo; // todo merge Is this implemented anywhere?
     }
-
-
-    // @todo Merge ignoreByKey deprecation documentation and conversion. These tests still need overrides:
-    // 'p': 'table p',
-    //  'table': '[role="presentation"]'
 
     /* ********************** */
     /* Embedded Content Setup */
     /* ********************** */
     //Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
-    // @todo merge: this means custom embeds needs to be a custom test.
-
-    /* ************** */
-    /* Language setup */
-    /* ************** */
-    // @todo merge how to emulate Sa11y translations?
-    /*ed11yLang = {
-      // Fall back to En strings if language or string is unavailable
-      ...ed11yLang['en'],
-      ...ed11yLang[options.lang]
-    };*/
+    // @todo merge: this means custom embeds needs to be converted to a custom test in the build.
 
     /* *********** */
     /* Theme setup */
@@ -327,7 +355,7 @@ const Options = (function options() {
     cssUrls?.forEach( sheet => {
       const cssLink = document.createElement('link');
       cssLink.setAttribute('rel', 'stylesheet');
-      // @todo preload.
+      // @todo merge possibly lost some preload functionality.
       cssLink.setAttribute('media', 'all');
       if (sheet.indexOf('?') < 0) {
         sheet = sheet + '?ver=' + State.version;
@@ -367,7 +395,7 @@ const Options = (function options() {
     Theme.buttonZIndex = State.options.buttonZIndex;
     Theme.baseFontFamily = State.options.baseFontFamily;
 
-    // @todo this is probably getting provided by Sa11y
+    // @todo merge this might be getting provided by Sa11y
     if (State.options.currentPage === false) {
       State.options.currentPage = window.location.pathname;
     }
@@ -375,7 +403,7 @@ const Options = (function options() {
     if (!State.options.linkStringsNewWindows) {
       State.options.linkStringsNewWindows = M.linkStringsNewWindows;
     }
-    // @todo merge remove wpadminbar from defaults and update wp module.
+    // @todo merge CMS remove wpadminbar from defaults and update wp module.
     /*Exclusions.Container = ['#wpadminbar', '#wpadminbar *', ...exclusions];
     if (option.containerIgnore) {
       const containerSelectors = option.containerIgnore.split(',').map((item) => item.trim());

@@ -44,7 +44,7 @@ export class Ed11yElementResult extends HTMLElement {
   toggleClick(event) {
     event.preventDefault();
     let host = this.getRootNode().host;
-    // Todo: extremely fast clicks throw TypeError: e is null
+    // Todo: fast rechecks and double clicks not being correctly intercepted.
     if (host.racing === false) {
       host.racing = true;
       State.toggledFrom = this;
@@ -114,22 +114,6 @@ export class Ed11yElementResult extends HTMLElement {
       this.tip.setAttribute('data-ed11y-action', 'open');
       if (State.options.inlineAlerts) {
         this.result.element.classList.add(highlightOutline);
-        // Removed in 2.3.6; Todo: confirm not needed and delete.
-        /*if (this.result.element.style.outline.indexOf('alert') === -1 ) {
-          // Set property unless alert is already set.
-          const display = window.getComputedStyle(this.result.element).getPropertyValue('display');
-          let outlineClass;
-          if (display.indexOf('inline') === -1 || this.result.element.tagName === 'IMG') {
-            outlineClass = this.result.dismissalKey ?
-              'ed11y-warning-block'
-              : 'ed11y-error-block';
-          } else {
-            outlineClass = this.result.dismissalKey ?
-              'ed11y-warning-inline'
-              : 'ed11y-error-inline';
-          }
-          this.result.element.classList.add(outlineClass);
-        }*/
       }
       requestAnimationFrame(()=>alignTip(this.toggle, this.tip, 4, true));
       if (!State.jumpList) {

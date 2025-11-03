@@ -6,53 +6,56 @@ const ed11yLang = {
 
   strings : {
 
-		// todo implement CONSOLE_ERROR
+		// @todo merge implement CONSOLE_ERROR?
+		// @todo merge discuss 8 strings, short test names.
 
     // Main Panel =========================================
-    MAIN_TOGGLE_LABEL: 'Toggle accessibility tools',
-    toggleDisabled: 'No content available for Editoria11y to check.',
     panelControls: 'Editorially',
-    PANEL_HEADING: 'Check headings & alt text',
-    buttonToolsActive: 'Hide headings & alt text', // todo
-    OUTLINE: 'Headings', // todo
+    OUTLINE: 'Headings',
 		IMAGES: 'Alt text',
-    buttonFirstContent: 'Go to first alert', // todo change to "SKIP_TO_ISSUE#".
-    buttonNextContent: 'Go to next alert',
-    buttonPrevContent: 'Go to previous alert',
-    buttonShowHiddenAlert: 'Show hidden alert', // Has fallback.
-    buttonHideHiddenAlert: 'Hide hidden alert', // Has fallback.
+
+		// Extended English strings with translated fallback.
+		buttonFirstContent: 'Go to first alert', // @todo merge change to "SKIP_TO_ISSUE#".
+		buttonNextContent: 'Go to next alert',
+		buttonPrevContent: 'Go to previous alert',
+		MAIN_TOGGLE_LABEL: 'Toggle accessibility tools',
+		toggleDisabled: 'No content available for Editoria11y to check.', // @todo merge
+		PANEL_HEADING: 'Check headings & alt text',
+		buttonToolsActive: 'Hide headings & alt text', // @todo merge
     PANEL_DISMISS_BUTTON: `Show %(dismissCount) hidden alerts`,
-    buttonHideHiddenAlerts: `Hide %(count) hidden alerts`, // Has fallback.
+		buttonShowHiddenAlert: 'Show hidden alert',
+		buttonHideHiddenAlert: 'Hide hidden alert',
+    buttonHideHiddenAlerts: `Hide %(count) hidden alerts`,
     buttonShowAlerts: 'Show accessibility alerts',
     buttonShowNoAlert: 'Show accessibility checker',
     buttonHideChecker: 'Hide accessibility checker',
     buttonHideAlerts: 'Hide accessibility alerts',
-    panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>', // Todo ENG only.
-    panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>', // Todo ENG only.
+
+		// Visualization
     NO_IMAGES: 'No images found.',
-		ALT: 'Alt Text: ', // @todo Merge mvp image alts are not rendering!
+		ALT: 'Alt Text: ',
     MISSING: '(missing!)',
-    errorAltNull: '(none; image marked as decorative)', // todo ENG only?
+		panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>', // Todo merge ENG only.
+		panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>', // Todo merge ENG only.
+    errorAltNull: '(none; image marked as decorative)', // todo merge ENG only?
     errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
     errorOutlinePrefixHeadingEmpty: '(empty heading) ',
     errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
 
     // Errors and alerts ==================================
-
-    consoleNotSupported: 'This browser can not run Editoria11y.',
     NOT_VISIBLE: 'Note: this content may not be visible. Look for it inside the outlined container.',
-    jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.', // todo fall back to NOT_VISIBLE?
-		ACC_NAME_TIP: ' ', // todo pass label instead, swap if not EN
-		LINK_TIP: ' ',
+    jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.', // @todo merge fall back to NOT_VISIBLE?
+		ACC_NAME_TIP: '', // @todo merge pass label instead, swap if not EN
+		LINK_TIP: '',
 
     // Strings used in tests ==============================
 
-		// @todo Add courtesy of, copyright, and photo by to Sa11y.
+		// @todo merge Add courtesy of, copyright, and photo by to Sa11y.
     // suspiciousWords: ['image of','graphic of','picture of','photo of','photograph of','placeholder','spacer','tbd','todo', 'copyright', 'courtesy of', 'photo by'],
     // badEndingForAlt: ['photo', 'image', 'photograph', 'picture'],
-		// @todo Compare Sa11y test.
+		// @todo after merge Compare Sa11y test.
     //linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
-		// @todo Compare Sa11y test performance
+		// @todo after merge Compare Sa11y test performance
     //linksMeaningless: /(learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|"|'|\?|\.|-|,|:|>|<|\s)+/g,
     //linkStringsNewWindows: /window|\stab|download/g,
 
@@ -67,15 +70,15 @@ const ed11yLang = {
 		DISMISS: 'Mark as ignored',
     dismissActions: `%(count) similar issues`, // 2.3.10
 		DISMISS_ALL: 'Ignore all like this', // 2.3.10
-    dismissOkAllButton: 'Mark all like this as OK', // 2.3.10
-    dismissOkTitle: 'Hides this alert for all editors',
-    dismissHideTitle: 'Hides this alert for you',
-    undismissOKButton: 'Restore this alert marked as OK',
-    undismissHideButton: 'Restore this hidden alert',
-    undismissNotePermissions: 'This alert has been hidden by an administrator',
-    reportsLink: 'Open site reports in new tab',
+    dismissOkAllButton: 'Mark all like this as OK', // @todo merge translate
+    dismissOkTitle: 'Hides this alert for all editors',  // @todo translate
+    dismissHideTitle: 'Hides this alert for you',  // @todo translate
+    undismissOKButton: 'Restore this alert marked as OK',  // @todo translate
+    undismissHideButton: 'Restore this hidden alert', // @todo translate
+    undismissNotePermissions: 'This alert has been hidden by an administrator', // @todo translate
+    reportsLink: 'Open site reports in new tab', // @todo translate
     ALERT_CLOSE: 'Close',
-    panelHelpTitle: 'About this tool',
+    panelHelpTitle: 'About this tool', // @todo hide if not ENG.
     panelHelp: `
     <p><a href="https://editoria11y.princeton.edu/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
     <p>Many alerts are "manual checks." Manual checks can be dismissed:</p>
@@ -269,7 +272,7 @@ const ed11yLang = {
             </ul>
         `,
 
-		// @todo discuss: separate tests for no text and all text ignored:
+		// @todo merge discuss: separate tests for no text and all text ignored:
 		linkNoTextExample: '<p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>',
 
 		linkTextIgnored: (ignoredText) => `

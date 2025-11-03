@@ -168,7 +168,6 @@ export class Ed11yElementTip extends HTMLElement {
         if (State.options.allowHide) {
           const ignoreButton = document.createElement('button');
           ignoreButton.classList.add('dismiss');
-          // todo parameterize
           if (State.options.syncedDismissals) {
             ignoreButton.setAttribute('title', M.dismissHideTitle);
           }
@@ -236,7 +235,6 @@ export class Ed11yElementTip extends HTMLElement {
     this.navBar.append(this.help);
 
     let closeButton = document.createElement('button');
-    closeButton.setAttribute('aria-label', Lang._('ALERT_CLOSE')); // Todo redundant.
     closeButton.setAttribute('title', Lang._('ALERT_CLOSE'));
     closeButton.classList.add('close');
     closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"/></svg>';
@@ -248,7 +246,7 @@ export class Ed11yElementTip extends HTMLElement {
     closeButton.addEventListener('click', (event) => {
       event.preventDefault();
       if(this.open) {
-        // todo this needs to be part of the shadow DOM query I think
+        // @todo merge this should use the shadow dom finder.
         let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
         if (State.toggledFrom) {
           State.toggledFrom.focus();

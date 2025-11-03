@@ -56,8 +56,6 @@ class Ed11y {
 
     if (CSS.supports('selector(:has(body))')) {
       ed11ySetup();
-    } else {
-      console.warn(M.consoleNotSupported);
     }
 
     /* Export exposed interfaces */

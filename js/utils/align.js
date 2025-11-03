@@ -22,7 +22,7 @@ export const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size =
 };
 
 export const nudgeMark = function (el, x, y) {
-	// TODO: THESE CAN NUDGE OUT OF THE OVERFLOW AREA OF THE CONTENTEDITABLE CONTAINER
+	// todo: these can get nudged out of an editable area.
 	if (el.style.transform) {
 		const computedStyle = window.getComputedStyle(el);
 		let matrix = computedStyle.getPropertyValue('transform');
@@ -71,15 +71,15 @@ export function alignPanel() {
 	if (!UI.panelElement) {
 		return false;
 	}
-	if (State.options.panelPinTo === 'left') {
+	if (State.options.panelPosition === 'left') {
 		UI.panel.classList.add('ed11y-pin-left');
 	}
 	let xMost = 0;
 	let yMost = 0;
-	if (State.elements.panelPin) { // todo
+	if (State.elements.panelPin) { // @todo merge panel pinning.
 		State.elements.panelPin.forEach(el => {
 			let bounds = el.getBoundingClientRect();
-			if (State.options.panelPinTo === 'right') {
+			if (State.options.panelPosition === 'right') {
 				xMost = window.innerWidth - bounds.left > xMost && bounds.left > window.innerWidth / 3 ? window.innerWidth - bounds.left : xMost;
 			} else {
 				xMost = bounds.right > xMost && xMost + bounds.right < window.innerWidth / 3 ? xMost + bounds.right : xMost;
@@ -89,15 +89,15 @@ export function alignPanel() {
 	}
 	if (xMost > 0 && xMost < window.innerWidth - 240) {
 		// push off horizontal
-		UI.panelElement.style.setProperty(State.options.panelPinTo, xMost + 10 + 'px');
+		UI.panelElement.style.setProperty(State.options.panelPosition, xMost + 10 + 'px');
 		UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
 	} else if (xMost > 0 && xMost > window.innerWidth - 240 && yMost > 0) {
 		// push off vertical
-		UI.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
+		UI.panelElement.style.setProperty(State.options.panelPosition, State.options.panelOffsetX);
 		UI.panelElement.style.setProperty('bottom', `calc(${State.options.panelOffsetY} + ${yMost}px)`);
 	} else {
 		// no push
-		UI.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
+		UI.panelElement.style.setProperty(State.options.panelPosition, State.options.panelOffsetX);
 		UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
 	}
 }
@@ -105,7 +105,7 @@ export function alignPanel() {
 export function alignAlts () {
 	// Positions alt label to match absolute, inline or floated images.
 	findElements('altMark', 'ed11y-element-alt');
-	State.elements.altMark?.forEach((el) => { // @todo merge
+	State.elements.altMark?.forEach((el) => { // @todo merge test
 		let id = el.dataset.ed11yImg;
 		el.style.setProperty('transform', null);
 		el.style.setProperty('height', null);

@@ -179,7 +179,7 @@ const diveShadow = function (container, select, selector) {
 // QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
 export function findElements (key, selector, rootRestrict = true) { // @todo merge replace.
 
-  // Todo beta: function and parameter to auto-detect shadow components.
+  // Todo merge: function and parameter to auto-detect shadow components.
   let shadowSelector = State.options.autoDetectShadowComponents ?
     '[data-ed11y-has-shadow-root]' :
     State.options.shadowComponents ?
@@ -200,7 +200,7 @@ export function findElements (key, selector, rootRestrict = true) { // @todo mer
 
   if (rootRestrict && State.roots) {
     // Add array of elements matching selector, excluding the provided ignore list.
-    // Todo this can dupe
+    // Todo this can result in nested roots.
     State.roots.forEach(root => {
       State.elements[key] = State.elements[key].concat(Array.from(root.querySelectorAll(select)));
     });

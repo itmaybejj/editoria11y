@@ -67,13 +67,8 @@ export function updatePanel () {
     // Check for a change in the result counts.
     if (State.forceFullCheck) {
       State.forceFullCheck = false;
-      /*if (State.options.alertMode === 'assertive' && State.totalCount > 0 && (State.warningCount > oldWarnings || State.errorCount > oldErrors)) {
-        console.warn('forced open');
-        State.showPanel = true;
-      }*/
       resetResults(true);
     } else {
-      // Todo: commented out in 2.3.11:
       // Reconnect map
       State.results = State.oldResults;
       window.setTimeout(function() {
@@ -108,14 +103,6 @@ export function updatePanel () {
 
     if (State.onLoad === true) {
       State.onLoad = false;
-
-      if (!State.options.inlineAlerts) {
-        // todo move to incremental check or timeout; no need to do on load.
-        State.oldResultString = `${State.errorCount} ${State.warningCount}`;
-        State.results.forEach(result => {
-          State.oldResultString += result.test + result.element.outerHTML;
-        });
-      }
 
       // Create the panel DOM on load.
 
@@ -191,7 +178,12 @@ export function updatePanel () {
         // Show sometimes for assertive/polite if there are new items.
         State.showPanel = true;
       }
-    }
+    } else if (!State.options.inlineAlerts) { // todo is that the best param?
+				State.oldResultString = `${State.errorCount} ${State.warningCount}`;
+				State.results.forEach(result => {
+					State.oldResultString += result.test + result.element.outerHTML;
+				});
+		}
 
     // Now we can open or close the panel.
     if (!State.showPanel) {
@@ -273,10 +265,6 @@ export function updatePanel () {
         document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
         document.documentElement.style.setProperty('--ed11y-activePanelBorder', Theme.panelBarText + '88');
       }
-      // todo postpone: aria alert on load?
-      /*window.setTimeout(function () {
-        //announce.textContent = text;
-      }, 1500);*/
       if (State.dismissedCount > 0 && State.totalCount === 0) {
         UI.panelCount.textContent = State.dismissedCount;
       } else {
@@ -303,7 +291,7 @@ export function updatePanel () {
             Lang._('buttonShowHiddenAlert');
         }
       } else {
-        // todo 3.x: move these inline and just change the class.
+        // todo merge: move these inline and just change the class.
         UI.panelToggleTitle.textContent = State.open ? M.buttonHideChecker : M.buttonShowNoAlert;
       }
     }
@@ -335,7 +323,6 @@ export function buildJumpList () {
     top = top + window.scrollY;
     if (State.options.fixedRoots) {
       const root = result.element.closest('[data-ed11y-root]');
-      // Todo: it might be faster to associate this with the element finder.
       State.results[i].fixedRoot = root.dataset.ed11yRoot;
     }
     State.results[i].scrollableParent = closestScrollable(result.element);
@@ -415,7 +402,6 @@ export function drawResult(result, index) {
   mark.wrapper.classList.add('ed11y-result');
 
   // Create tooltip toggle
-  // @todo abstract out.
   mark.toggle = document.createElement('button');
   mark.toggle.setAttribute('class', 'toggle');
   let label = mark.dismissable ? Lang._('WARNING') : Lang._('ERROR');
@@ -652,10 +638,9 @@ export function alertOnInvisibleTip (button, target) {
         return false;
       }
     }
-    // Todo: following statements work but could be simplified.
     if (!State.options.inlineAlerts) {
-      // todo this selector must match the selector that decides where to place the mark
-      editableHighlighter(button.dataset.ed11yResult, true, firstVisible); // todo
+      // todo this selector should match the selector that decided where to place the mark
+      editableHighlighter(button.dataset.ed11yResult, true, firstVisible); // @todo merge test
     } else {
       if (firstVisible) {
         firstVisible.classList.add('ed11y-hidden-highlight');
@@ -695,7 +680,7 @@ export function jumpTo(next = true) {
   let goNum = next ? State.lastOpenTip + 1 : State.lastOpenTip - 1;
   if (goNum < 0) {
     // Reached end of loop or dismissal pushed us out of loop
-    State.nextText = M.buttonFirstContent; // todo
+    State.nextText = M.buttonFirstContent;
     goNum = goMax;
   } else if (goNum > goMax) {
     goNum = 0;
@@ -710,7 +695,7 @@ export function jumpTo(next = true) {
 
   resetClass(['ed11y-hidden-highlight']);
   if (State.jumpList.length === 0) {
-    buildJumpList(); // todo
+    buildJumpList();
   }
   // Find next or first result in the dom ordered list of results.
   let goto = State.jumpList[goNum];
@@ -805,8 +790,8 @@ export function alignTip (button, toolTip, recheck = 0, reveal = false) {
 			absoluteBottom = bounds.top + result.scrollableParent.scrollHeight;
 		}
 	} else if (mark.dataset.ed11yHiddenResult === 'true' || !(visible(mark) || buttonOffset.top === 0 && buttonOffset.left === 0)) {
-		// ruh roh invisible button
-		// todo: use the not-inline drawing pattern for invisible targets?
+		// Invisible button
+		// todo postpone: could we use the not-inline drawing pattern for invisible targets?
 		const theFirstVisibleParent = firstVisibleParent(mark.result.element);
 		if (theFirstVisibleParent) {
 			buttonOffset = firstVisibleParent.getBoundingClientRect();
@@ -1093,7 +1078,7 @@ export function rangeChange(anchorNode) {
 		State.activeRange = false;
 		return false;
 	}
-	// todo: this if is probably redundant?
+	// todo: is this redundant?
 	if (expandable) {
 		const closest = anchor.parentNode.closest('p, td, th, li, h2, h3, h4, h5, h6');
 		if (closest) {
@@ -1324,21 +1309,20 @@ export function checkAll() {
 		State.customTestsRunning = false;
 
 		State.roots = [];
+		// @todo merge rewrite when Sa11y releases fixed root support.
 		if (State.options.fixedRoots) {
-			// @todo merge this needs to be implemented
 			State.options.fixedRoots.forEach(root => {State.roots.push(root.fixedRoot);});
 		} else {
-			// @todo merge this needs to return to querySelectorAll.
 			State.roots = document.querySelectorAll(`:is(${State.options.checkRoots})`);
 		}
 		// Initialize root areas to check.
 		if (!State.roots && State.options.headless === false) {
 			// @todo merge invalid number of arguments.
 			Utils.createAlert(`${Lang.sprintf('MISSING_ROOT', State.options.checkRoots)}`);
-		} // todo fixedRoots.
+		}
 
 		if (State.roots.length === 0) {
-			// Todo parameterize for translation.
+			// @todo merge parameterize for translation.
 			if (State.onLoad) {
 				console.warn('Check Editoria11y configuration; specified root element not found');
 			}
@@ -1404,6 +1388,7 @@ toggle
 
 		* */
 		// @todo merge temporary values.
+		// @todo merge handle readability and developer checks.
 		for (let i = State.results.length - 1; i >= 0;) {
 			if (State.results[i].type === 'good') {
 				State.results.splice(i, 1);
@@ -1510,14 +1495,14 @@ export function incrementalCheck() {
 				State.closedByDisable = false;
 				State.disabled = false;
 			}
-			//State.forceFullCheck = true; // todo no
-			checkAll();
+			//State.forceFullCheck = true; // @todo merge check history; why was this here?
+ 			checkAll();
 			window.setTimeout(function() {
 				if (State.visualizing) {
 					document.dispatchEvent(new CustomEvent('ed11yEndVisualization'))
 				}
 			}, 500);
-			// todo: if there are no issues and the heading panel is open...it closes!
+			// @todo merge test: if there are no issues and the heading panel is open...it closes!
 			// Increase debounce if runs are slow.
 			runTime = performance.now() - runTime;
 			State.browserSpeed = runTime > 10 ? 10 : (State.browserSpeed + runTime) / 2;
@@ -1636,7 +1621,7 @@ export function showHeadingsPanel () {
 			panelOutline.append(li);
 		});
 	} else {
-		panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>'; // @todo translate!
+		panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>'; // @todo merge translate
 	}
 }
 
@@ -1651,7 +1636,7 @@ export function resetPanel() {
 			Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount);
 	}
 
-	// @todo is this going to fail again? Should it a different if?
+	// @todo merge is this going to fail again? Should it use a different if?
 	if (typeof (UI.panel) === 'object') {
 		UI.panel?.classList.add('ed11y-shut');
 		UI.panel?.classList.remove('ed11y-active');
@@ -1664,8 +1649,9 @@ export function resetPanel() {
 	}
 }
 
-// @todo is this getting called?
+// @todo merge is this getting called?
 window.addEventListener('ed11yEndVisualization', ()=>{
+	console.log('end visualization');
 	State.visualizing = false;
 	pauseObservers();
 	visualize();
@@ -1709,7 +1695,7 @@ const showAltPanel = function () {
 			let alert = {};
 			/*
 			// Match dismissed images.
-			// @todo this is Sa11y logic:
+			// @todo merge remove; this is the Sa11y logic:
 			// const isDismissed = dismissed.some((key) => key.dismiss === image.dismiss);
 			// if (isDismissed) Object.assign(image, { dismissedImage: true });
 			// Make developer checks don't show images as error if Developer checks are off!
@@ -1807,7 +1793,7 @@ export function dismissThis (dismissalType, all = false) {
 	// Remove tip and reset borders around element
 	resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
 	removal.tip?.parentNode?.removeChild(removal.tip);
-	// TODO EDITING: COMMENT OUT BELOW...SEEMS REDUNDANT?
+	// @todo merge found this commented out -- is it needed or can it be removed?
 	//removal.button?.parentNode?.removeChild(removal.button);
 
 	reset();
@@ -1891,7 +1877,7 @@ export function raceCrash() {
 	checkAll();
 	window.setTimeout(function() {
 		if (State.results.length > 0 && State.loopStop) {
-			this.jumpTo(); // todo
+			jumpTo();
 			State.loopStop = false;
 		}
 	},100, State.loopStop);
