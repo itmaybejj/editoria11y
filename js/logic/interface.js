@@ -7,7 +7,6 @@ import {
 	resetClass, resetResults, resumeObservers,
 	visible
 } from "../utils/utils.js";
-import ed11yLang from "../lang/localization.js";
 
 import {
 	documentLoadingCheck,
@@ -25,7 +24,7 @@ import {Lang} from "sa11y/src/js/sa11y.js";
 import Constants from "sa11y/src/js/utils/constants.js";
 import Elements from "sa11y/src/js/utils/elements.js";
 import {
-	computeAccessibleName
+	computeAccessibleName, computeAriaLabel
 } from "sa11y/src/js/utils/computeAccessibleName.js";
 import {
 	alignAlts,
@@ -135,10 +134,10 @@ export function updatePanel () {
       window.setTimeout(()=> {
         UI.panelElement.classList.remove('ed11y-preload');
       },0, UI.panel);
-      UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsContent;
-      UI.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = M.buttonOutlineContent;
+      UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('PANEL_HEADING');
+      UI.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = Lang._('OUTLINE');
       UI.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = M.panelCheckOutline;
-      UI.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = M.buttonAltsContent;
+      UI.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = Lang._('IMAGES');
       UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = M.panelCheckAltText;
       UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = M.buttonFirstContent;
       UI.panel.setAttribute('aria-label', M.panelControls);
@@ -205,20 +204,36 @@ export function updatePanel () {
       UI.panel.classList.remove('ed11y-shut');
       UI.panel.classList.add('ed11y-active');
       UI.panelToggle.setAttribute('aria-expanded', 'true');
-      UI.panelToggleTitle.textContent = State.totalCount > 0 ? M.buttonHideAlerts : M.buttonHideChecker;
+			const preferredHide = State.totalCount > 0 ? M.buttonHideAlerts : M.buttonHideChecker;
+      UI.panelToggleTitle.textContent = State.english ? preferredHide : Lang._('ALERT_CLOSE');
       // Prepare show hidden alerts button.
+			const preferredDismissHide = State.dismissedCount > 1 ?
+				Lang.sprintf('buttonHideHiddenAlerts', State.dismissedCount)
+				: Lang._('buttonHideHiddenAlert');
       if (State.dismissedCount === 0) {
         // Reset show hidden default option when irrelevant.
         UI.showDismissed.setAttribute('hidden', '');
         UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
         State.options.showDismissed = false;
       } else if (State.dismissedCount === 1) {
-        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ? M.buttonHideHiddenAlert : M.buttonShowHiddenAlert;
+				const show = State.english ?
+					Lang._('buttonShowHiddenAlert')
+					: Lang.sprintf('PANEL_DISMISS_BUTTON', '1');
+        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ?
+					preferredDismissHide : show;
         UI.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
+				if (!State.english) {
+					UI.showDismissed.ariaPressed = State.options.showDismissed;
+				}
         UI.showDismissed.removeAttribute('hidden');
       } else {
-        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ? Lang.sprintf('buttonHideHiddenAlerts', State.dismissedCount) : Lang.sprintf('buttonShowHiddenAlerts', State.dismissedCount);
+        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ?
+					preferredDismissHide
+					: Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount);
         UI.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
+				if (!State.english) {
+					UI.showDismissed.ariaPressed = State.options.showDismissed;
+				}
         UI.showDismissed.removeAttribute('hidden');
       }
 
@@ -284,7 +299,7 @@ export function updatePanel () {
           UI.panelToggleTitle.textContent = M.buttonHideChecker;
         } else {
           UI.panelToggleTitle.textContent = State.dismissedCount > 1 ?
-						Lang.sprintf('buttonShowHiddenAlerts', State.dismissedCount) :
+						Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount) :
             Lang._('buttonShowHiddenAlert');
         }
       } else {
@@ -340,7 +355,7 @@ export function buildJumpList () {
   });
   State.jumpList.forEach((el, i) => {
     el.dataset.ed11yJumpPosition = `${i}`;
-    const newLabel = `${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}, ${i + 1} / ${State.jumpList.length - 1}`;
+    const newLabel = `${Lang._('ALERT_TEXT')} ${i + 1} / ${State.jumpList.length - 1}, ${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}`;
     el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
   });
   let tipsPainted = new CustomEvent('ed11yResultsPainted');
@@ -403,8 +418,8 @@ export function drawResult(result, index) {
   // @todo abstract out.
   mark.toggle = document.createElement('button');
   mark.toggle.setAttribute('class', 'toggle');
-  let label = mark.dismissable ? M.toggleManualCheck : M.toggleAlert;
-  mark.toggle.setAttribute('aria-label', Lang.sprintf('toggleAriaLabel', label));
+  let label = mark.dismissable ? Lang._('WARNING') : Lang._('ERROR');
+  mark.toggle.setAttribute('aria-label', label);
   mark.toggle.setAttribute('aria-expanded', 'false');
   mark.toggle.setAttribute('aria-haspopup', 'dialog');
   mark.toggle.setAttribute('data-ed11y-result', mark.dataset.ed11yResult);
@@ -612,7 +627,7 @@ export function alertOnInvisibleTip (button, target) {
     if (State.options.checkVisible && !visible(target)) {
       button.dataset.ed11yHiddenResult = 'true';
       firstVisible = firstVisibleParent(target);
-      alertMessage = ed11yLang.en.jumpedToInvisibleTip;
+      alertMessage = Lang._('NOT_VISIBLE');
     }
     else if (target.closest('[aria-hidden="true"]')) {
       firstVisible = target.closest('[aria-hidden="true"]');
@@ -1355,6 +1370,7 @@ export function checkAll() {
 		Elements.initializeElements(State.options);
 
 		State.headingOutline = [];
+		//let results = [];
 		// Ruleset checks
 		checkHeaders(State.results, State.options, State.headingOutline);
 		checkLinkText(State.results, State.options);
@@ -1385,13 +1401,20 @@ sortPos
 test
 toggle
 
+
 		* */
 		// @todo merge temporary values.
-		State.results.forEach((result) => {
-			result.position = 'beforebegin';
-			result.dismissalKey = result.dismiss;
-			result.test = 'altNull';
-		})
+		for (let i = State.results.length - 1; i >= 0;) {
+			if (State.results[i].type === 'good') {
+				State.results.splice(i, 1);
+			} else {
+				State.results[i].position = 'beforebegin'; // @todo merge compute.
+				State.results[i].dismissalKey = State.results[i].dismiss;
+				State.results[i].test = 'altNull';
+			}
+			i = i - 1;
+		}
+		console.log(State.results);
 
 		/*let queue = [
 			'testLinks',
@@ -1422,7 +1445,7 @@ toggle
 				if (State.customTestsRunning === true) {
 					State.customTestsRunning = false;
 					if (typeof UI.panelToggle.querySelector === 'function') {
-						UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleAccessibilityTools;
+						UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
 					}
 					countAlerts();
 					window.requestAnimationFrame(() => updatePanel());
@@ -1439,7 +1462,7 @@ toggle
 	if (!State.customTestsRunning) {
 		window.setTimeout(function () {
 			if (typeof UI.panelToggle.querySelector === 'function') {
-				UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleAccessibilityTools;
+				UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
 			}
 			countAlerts();
 			updatePanel();
@@ -1550,7 +1573,7 @@ export function visualize () {
 	}
 	if (State.visualizing) {
 		State.visualizing = false;
-		UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsContent;
+		UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('PANEL_HEADING');
 		UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
 		UI.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
 		return;
@@ -1613,7 +1636,7 @@ export function showHeadingsPanel () {
 			panelOutline.append(li);
 		});
 	} else {
-		panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>';
+		panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>'; // @todo translate!
 	}
 }
 
@@ -1624,8 +1647,8 @@ export function resetPanel() {
 	if (State.totalCount === 0 && State.dismissedCount > 0) {
 		UI.panelCount.textContent = 'i';
 		UI.panelToggleTitle.textContent = State.dismissedCount === 1 ?
-			M.buttonShowHiddenAlert :
-			Lang.sprintf('buttonShowHiddenAlerts', State.dismissedCount);
+			Lang._('buttonShowHiddenAlert') :
+			Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount);
 	}
 
 	// @todo is this going to fail again? Should it a different if?
@@ -1636,7 +1659,7 @@ export function resetPanel() {
 		if (!State.options.showDismissed && typeof UI.showDismissed === 'function') {
 			UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
 			UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
-				M.buttonShowHiddenAlert : Lang.sprintf('buttonShowHiddenAlerts', State.dismissedCount);
+				Lang._('buttonShowHiddenAlert') : Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount);
 		}
 	}
 }
@@ -1652,11 +1675,72 @@ window.addEventListener('ed11yEndVisualization', ()=>{
 const showAltPanel = function () {
 	// visualize image alts
 	let altList = UI.panel.querySelector('#ed11y-alt-list');
+	/*UI.imageAlts = [];
+	const imageResults = State.results.filter((result) => result.element.tagName === 'IMG');
+	console.log(imageResults);
+	// Build array of images to be used for image panel.
+	Elements.Found.Images.forEach((image) => {
+		UI.imageAlts.push({element: image});
+	})
+	console.log(UI.imageAlts);
+	imageResults.forEach((result)=>{
+		const index = UI.imageAlts.findIndex(image => image.element === result.element);
+		UI.imageAlts[index] = {
+			element: result.image,
+			type: result.type,
+			dismiss: result.dismiss,
+			developer: result.developer,
+		};
+	})*/
+	UI.imageAlts = Elements.Found.Images.map((image) => {
+			const match = State.results.find((i) => i.element === image);
+			return match && {
+				element: image,
+				type: match.type,
+				dismiss: match.dismiss,
+				developer: match.developer,
+			};
+		}).filter(Boolean);
 
-	if (UI.imageAlts.length) {
+	if (UI.imageAlts.length > 0) {
 		altList.innerHTML = '';
-		UI.imageAlts.forEach((el, i) => {
-			// el[el, src, altLabel, altStyle]
+		UI.imageAlts.forEach((image, i) => {
+			console.log(image);
+			let alert = {};
+			/*
+			// Match dismissed images.
+			// @todo this is Sa11y logic:
+			// const isDismissed = dismissed.some((key) => key.dismiss === image.dismiss);
+			// if (isDismissed) Object.assign(image, { dismissedImage: true });
+			// Make developer checks don't show images as error if Developer checks are off!
+			// const dev = Utils.store.getItem('sa11y-developer');
+			// const devChecksOff = dev === 'Off' || dev === null;
+			// const showDeveloperChecks = devChecksOff && (type === 'error' || type === 'warning') && developer === true;
+
+			// Generate edit link if locally hosted image and prop is enabled.
+			const edit = Constants.Global.editImageURLofCMS ? generateEditLink(image) : '';
+
+			// Image is decorative (has null alt)
+			const decorative = (element.hasAttribute('alt') && altText === '')
+				? `<div class="badge">${Lang._('DECORATIVE')}</div>` : '';
+
+			// If image is linked.
+			const anchor = option.imageWithinLightbox ? `a[href]:not(${option.imageWithinLightbox})` : 'a[href]';
+			const linked = (element.closest(anchor))
+				? `<div class="badge"><span class="link-icon"></span><span class="visually-hidden">${Lang._('LINKED')}</span></div>` : '';
+			const visibleIcon = (hidden === true)
+				? `<div class="badge"><span class="hidden-icon"></span><span class="visually-hidden">${Lang._('HIDDEN')}</span></div>` : '';
+			let append;
+      if (type === 'error' && !showDeveloperChecks) {
+      // etc
+			*/
+
+
+			// Account for lazy loading libraries.
+			const source = Utils.getBestImageSource(image.element);
+			const altText = computeAriaLabel(image.element) === 'noAria'
+				? Utils.escapeHTML(image.element.getAttribute('alt'))
+				: computeAriaLabel(image.element);
 
 			if (State.options.inlineAlerts) {
 				// Label images
@@ -1665,16 +1749,16 @@ const showAltPanel = function () {
 				mark.dataset.ed11yImg = i.toString();
 				mark.setAttribute('id', 'ed11y-alt-' + i);
 				mark.setAttribute('tabindex', '-1');
-				el[0].insertAdjacentElement('beforebegin', mark);
+				image.element.insertAdjacentElement('beforebegin', mark);
 			}
 
 			// Build alt list in panel
 			let userText = document.createElement('span');
-			userText.textContent = el[2];
+			userText.textContent = altText;
 			let li = document.createElement('li');
-			li.classList.add(el[3]);
+			li.classList.add(image.type);
 			let img = document.createElement('img');
-			img.setAttribute('src', el[1]);
+			img.setAttribute('src', source);
 			img.setAttribute('alt', '');
 
 			if (State.options.inlineAlerts) {
@@ -1695,7 +1779,7 @@ const showAltPanel = function () {
 	} else {
 		const noImages = document.createElement('p');
 		const noItalic = document.createElement('em');
-		noItalic.textContent = M.noImagesFound;
+		noItalic.textContent = Lang._('NO_IMAGES');
 		noImages.appendChild(noItalic);
 		altList.innerHTML = '';
 		altList.appendChild(noImages);

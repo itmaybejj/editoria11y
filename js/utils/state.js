@@ -1,6 +1,7 @@
 /* Track values and DOM references */
 export const State = {
   version: '3.0.0',
+	english: true,
   running: false,
   watching: [],
   results: [],

@@ -614,6 +614,7 @@ const Constants = (function myConstants() {
 /* Track values and DOM references */
 const State = {
   version: '3.0.0',
+	english: true,
   running: false,
   watching: [],
   results: [],
@@ -686,812 +687,6 @@ const UI = {
 };
 
 const M = {};
-
-const Options = (function options() {
-  /* **************** */
-  /* Global constants */
-  /* **************** */
-  let ed11yLang = {};
-  let ed11yDefaults = {
-
-    // Relative or absolute
-    //cssUrls: false, // ['/folder/editoria11y.css','/folder/custom.css']
-    cssUrls: false,
-
-    // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
-    checkRoots: false,
-    fixedRoots: false, // Array of specific nodes, overrides previous.
-    /* e.g:
-    fixedRoots: [
-      {
-         root: direct domReference
-         framePositioner: direct domReference or false
-      }
-    ]
-    */
-
-    // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
-    shadowComponents: false,
-    autoDetectShadowComponents: true,
-
-    // Containers to globally ignore, e.g., "header *, .card *"
-    ignoreElements: false,
-
-    // Provide list of test keys; get from localization file or results object.
-    // @todo merge provide translation layer or document change.
-    ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
-
-    // Ignore Aria on these elements (Gutenberg labels headings while editing.)
-    ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
-    ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
-
-    // Disable tests on specific elements
-    // Include and modify this entire object in your call
-    ignoreByKey: {
-      'p': 'table p',
-      // 'h': false,
-      'img': '[aria-hidden], [aria-hidden] img, ' +
-        '[role="presentation"], ' +
-        'a[href][aria-label] img, button[aria-label] img, ' +
-        'a[href][aria-labelledby] img, button[aria-labelledby] img',
-      'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
-      // 'li': false,
-      // 'blockquote': false,
-      // 'iframe': false,
-      // 'audio': false,
-      // 'video': false,
-      'table': '[role="presentation"]',
-    },
-
-    headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
-
-    // Set alertModes
-    // 'headless': do not draw interface
-    // 'userPreference: respect user preference.
-    // 'polite': open for new issues.
-    // 'assertive': open for any issues.
-    // 'active': always open.
-    // CMS integrations can switch between polite & headless at runtime.
-    alertMode: 'userPreference',
-    inlineAlerts: true,
-    watchForChanges: true, // true, false, 'checkRoots';
-
-    // This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
-    editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
-
-    // Dismissed alerts
-    currentPage: false, // uses window.location.pathname unless a string is provided.
-    allowHide: true, // enables end-user ignore button
-    allowOK: true,  // enables end-user mark OK button
-    syncedDismissals: false, // provide empty or populated object {} to enable sync functions
-    reportsURL: false, // Provides a link to site-wide reports
-    showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
-
-    // Hide all alerts if these elements are absent, e.g., ".edit-button"
-    // Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
-    ignoreAllIfAbsent: false,
-    ignoreAllIfPresent: false,
-
-    // Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
-    preventCheckingIfPresent: false,
-    preventCheckingIfAbsent: false,
-
-    // Regex of strings to remove from links before checking to see if link titles are meaningful. E.g.:
-    // "\(link is external\)|\(link sends email\)"
-    linkIgnoreStrings: false,
-    linkIgnoreSelector: false,
-
-    // Disable the "is this element visible" check on themes that have 0-height elements.
-    checkVisible: true,
-
-    // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
-    hiddenHandlers: '',
-
-    panelPinTo: 'right',
-    panelOffsetX: '25px',
-    panelOffsetY: '25px',
-    panelNoCover: '', // select other buttons to avoid.
-    panelAttachTo: document.body,
-
-    // Selector list for elements that hide overflow, truncating buttons.
-    constrainButtons: false,
-
-    // Interface
-    lang: 'en',
-    langSanitizes: false, // Some translation modules will double-escape
-    theme: 'sleekTheme',
-    sleekTheme: {
-      bg: '#eff2ff', // e8f4ff
-      bgHighlight: '#7b1919',
-      text: '#20160c',
-      primary: '#276499', // 276499
-      primaryText: '#eff2ff',
-      button: 'transparent', // deprecate?
-      panelBar: '#1e517c',
-      panelBarText: '#fffdf7',
-      panelBarShadow: '0 0 0 1px #276499',
-      activeTab: '#276499',
-      activeTabText: '#fffffe',
-      focusRing: '#007aff',
-      outlineWidth: '0',
-      borderRadius: '3px',
-      ok: '#1f5381',
-      warning: 'rgb(250, 216, 89)',
-      warningText: '#20160c',
-      alert: 'rgb(184, 5, 25)',
-      alertText: '#f4f7ff',
-    },
-    darkTheme: {
-      bg: '#0a2051',
-      bgHighlight: '#7b1919',
-      text: '#f4f7ff',
-      primary: '#3052a0',
-      primaryText: '#f4f7ff',
-      button: 'transparent',
-      panelBar: '#3052a0',
-      panelBarText: '#f4f7ff',
-      panelBarShadow: 'inset 0 0 1px, 0 0 0 1px #0a2051',
-      activeTab: '#0a2051',
-      activeTabText: '#fffffe',
-      focusRing: 'cyan',
-      outlineWidth: '2px',
-      borderRadius: '3px',
-      ok: '#0a307a',
-      warning: 'rgb(250, 216, 89)',
-      warningText: '#20160c',
-      alert: 'rgb(184, 5, 25)',
-      alertText: '#f4f7ff',
-    },
-    lightTheme: {
-      bg: '#fffffe',
-      bgHighlight: '#7b1919',
-      text: '#20160c',
-      primary: '#0a307a',
-      primaryText: '#fffdf7',
-      panelBar: '#0a307a',
-      panelBarText: '#f4f7ff',
-      panelBarShadow: '0 0 0 1px #0a307a',
-      button: 'transparent',
-      activeTab: '#b9c0cf',
-      activeTabText: '#20160c',
-      focusRing: '#007aff',
-      outlineWidth: '0',
-      borderRadius: '3px',
-      ok: '#0a307a',
-      warning: 'rgb(250, 216, 89)',
-      warningText: '#20160c',
-      alert: 'rgb(184, 5, 25)',
-      alertText: '#f4f7ff',
-    },
-    // Base z-index for buttons.
-    // 1299 maximizes TinyMCE compatibility.
-    buttonZIndex: 1299,
-    // CSS overrides and additions.
-
-    baseFontSize: 'clamp(14px, 1.5vw, 16px)',
-    baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-
-    // Test customizations
-    embeddedContent: false, // @todo remove in favor of custom checks?
-    embeddedContentTitle: '', // @todo test or remove?
-    embeddedContentMessage: '', // @todo test or remove?
-
-    linksUrls: false, // get from language pack
-    linksMeaningless: false, // get from language pack
-    altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
-    // * Not implemented Yet:
-    // ruleset toggling
-    // form label tests
-    // detectSPArouting: false,
-
-    editLinks: false, // Add links to edit content in tooltips.
-
-    // @todo merge: port this functionality.
-    editorHeadingLevel: [
-      // Sets previous heading level for contentEditable fields.
-      // With 'ignore' set, first heading level is ignored in editable zones.
-      // This is ideal for systems with separate backend editing pages.
-      // Set to 'inherit' for fields edited in a frontend context.
-      /*{
-        selector: '.example-inherit',
-        previousHeading: 'inherit',
-      },
-      {
-        selector: '.example-l3',
-        previousHeading: 3,
-      },*/
-      {
-        selector: '*',
-        previousHeading: 0, // Ignores first heading for level skip detection.
-      },
-    ],
-
-    userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
-
-    customTests: 0,
-
-    // @todo merge do we need the image and button descenders and the tabindex selector? If so should it be in the MR?
-    imageIgnore: '[aria-hidden], [aria-hidden] img, [role="presentation"], a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img',
-    linkIgnore: '[aria-hidden][tabindex="-1"]',
-  };
-
-  function preProcessOptions(options) {
-    const sa11yDefaults = defaultOptions;
-    ed11yDefaults = {
-      ...sa11yDefaults,
-      ...ed11yDefaults,
-    };
-
-    // @todo MERGE these get destroyed in constants.js
-    //ed11yDefaults.checks.QA_DOCUMENT.sources = 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']'
-    //ed11yDefaults.checks.EMBED_VIDEO.sources = 'video, [src*="youtube.com"], [src*="brightcove.com"], [src*="dailymotion.com"], [src*="panopto.com"], [src*="Video"], [src*="video"], [src*="vimeo.com"], [src*="watch"], [src*="wistia.com"], [src*="vidyard.com"], [src*=yuja.com]';
-
-		/*
-		* video, [src*="Video"], [src*="video"], [src*="watch"], [src*="youtube.com"], [src*="vimeo.com"], [src*="panopto.com"], [src*="wistia.com"], [src*="dailymotion.com"], [src*="brightcove.com"], [src*="vidyard.com"], [src*="video"], [src*="[src*="youtube.com"]"], [src*="[src*="brightcove.com"]"], [src*="[src*="dailymotion.com"]"], [src*="[src*="panopto.com"]"], [src*="[src*="Video"]"], [src*="[src*="video"]"], [src*="[src*="vimeo.com"]"], [src*="[src*="watch"]"], [src*="[src*="wistia.com"]"], [src*="[src*="vidyard.com"]"], [src*="[src*=yuja.com]"]
-		* */
-
-    options = {
-      ...ed11yDefaults,
-      ...options,
-    };
-    /*
-    * Options translation
-    * */
-    options.headless = options.alertMode === 'headless';
-    options.customChecks = options.customTests > 0 && !options.customChecks ? 'listen' : false;
-
-    // Toggleable plugins
-    options.developerPlugin = false;
-    options.colourFilterPlugin = false;
-    options.exportResultsPlugin = false;
-    options.showImageOutline = false;
-    // @todo merge what are these?
-    // Constants.Global.ignoreContentOutsideRoots = option.ignoreContentOutsideRoots;
-
-  //  options.panelPosition = panelPinTo; // Syntax?
-
-    // Check for document types.
-
-    if (options.documentLinks) {
-      options.checks.QA_DOCUMENT.sources = options.documentLinks;
-    }
-    // @todo merge this changed name from linkIgnoreSelector.
-
-    if (options.linkIgnoreSelector) {
-      options.linkIgnoreSpan = options.linkIgnoreSelector;
-    }
-
-    if (options.panelAttachTo) {
-      State.panelAttachTo = options.panelAttachTo; // todo Is this implemented anywhere?
-    }
-
-
-    // @todo Merge ignoreByKey deprecation documentation and conversion. These tests still need overrides:
-    // 'p': 'table p',
-    //  'table': '[role="presentation"]'
-
-    /* ********************** */
-    /* Embedded Content Setup */
-    /* ********************** */
-    //Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
-    // @todo merge: this means custom embeds needs to be a custom test.
-
-    /* ************** */
-    /* Language setup */
-    /* ************** */
-    // @todo merge how to emulate Sa11y translations?
-    /*ed11yLang = {
-      // Fall back to En strings if language or string is unavailable
-      ...ed11yLang['en'],
-      ...ed11yLang[options.lang]
-    };*/
-
-    /* *********** */
-    /* Theme setup */
-    /* *********** */
-    Theme.push = options[options.theme];
-    Theme.baseFontSize = options.baseFontSize;
-    Theme.buttonZIndex = options.buttonZIndex;
-    Theme.baseFontFamily = options.baseFontFamily;
-
-    let cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
-    if (!options.cssUrls) {
-      const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
-      if (cssLink) {
-        cssUrls = [cssLink.getAttribute('href')];
-      } else {
-        console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
-      }
-    }
-    const cssBundle = document.createElement('div');
-    cssBundle.classList.add('ed11y-style');
-    cssBundle.setAttribute('hidden','');
-    cssUrls?.forEach( sheet => {
-      const cssLink = document.createElement('link');
-      cssLink.setAttribute('rel', 'stylesheet');
-      // @todo preload.
-      cssLink.setAttribute('media', 'all');
-      if (sheet.indexOf('?') < 0) {
-        sheet = sheet + '?ver=' + State.version;
-      }
-      cssLink.setAttribute('href', sheet);
-      cssBundle.append(cssLink);
-    });
-    UI.attachCSS = function(appendTo) {
-      const link = cssBundle.cloneNode(true);
-      appendTo.appendChild(link);
-    };
-
-    return options;
-  }
-
-  function postProcessOptions(option) {
-    // @todo merge: test: does this need descendant selector?
-    Constants.Exclusions.Sa11yElements = ['.ed11y-element'];
-
-    // Main container exclusions.
-    console.log('Constants: ');
-    console.log(Constants);
-
-    // Undo Sa11y overrides in constants.js.
-    //Constants.Global.documentSources = option.checks.QA_DOCUMENT.sources;
-    //Constants.Global.videoSources = option.checks.EMBED_VIDEO.sources;
-    //Constants.Global.AudioSources = option.checks.EMBED_AUDIO.sources;
-    //Constants.Global.dataVizSources = option.checks.EMBED_DATA_VIZ.sources;
-    //Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
-
-    State.currentPage = options.currentPage ? options.currentPage : window.location.currentPage;
-
-    Object.assign(Theme, State.options[State.options.theme]);
-    Theme.baseFontSize = State.options.baseFontSize;
-    Theme.buttonZIndex = State.options.buttonZIndex;
-    Theme.baseFontFamily = State.options.baseFontFamily;
-
-    // @todo this is probably getting provided by Sa11y
-    if (State.options.currentPage === false) {
-      State.options.currentPage = window.location.pathname;
-    }
-
-    if (!State.options.linkStringsNewWindows) {
-      State.options.linkStringsNewWindows = M.linkStringsNewWindows;
-    }
-    // @todo merge remove wpadminbar from defaults and update wp module.
-    /*Exclusions.Container = ['#wpadminbar', '#wpadminbar *', ...exclusions];
-    if (option.containerIgnore) {
-      const containerSelectors = option.containerIgnore.split(',').map((item) => item.trim());
-      Exclusions.Container = Exclusions.Container.concat(
-        containerSelectors.flatMap((item) => [`${item} *`, item]),
-      );
-    }*/
-
-  }
-
-  return {
-    preProcessOptions,
-    ed11yLang,
-    postProcessOptions,
-  };
-}());
-
-const ed11yLang = {
-
-  // ESLint config:
-  /* global Ed11y */
-  /* exported ed11yLang */
-
-  strings : {
-
-    // Main Panel =========================================
-    toggleAccessibilityTools: 'Toggle accessibility tools',
-    toggleDisabled: 'No content available for Editoria11y to check.',
-    panelCount0 : 'No issues detected.',
-    panelCountAllDismissed : 'All issues hidden.',
-    panelCount1 : 'One issue detected.',
-    panelCountMultiple: ' issues detected.',
-    panelCountBase: '<span class=\'count\'>No</span> <span class=\'content-type\'>issues detected</span>.',
-    panelControls: 'Editorially',
-    buttonToolsContent: 'Check headings & alt text', // todo Drupal
-    buttonToolsActive: 'Hide headings & alt text',
-    buttonOutlineContent: 'Headings',
-    buttonAltsContent: 'Alt Text',
-    buttonFirstContent: 'Go to first alert',
-    buttonNextContent: 'Go to next alert',
-    buttonPrevContent: 'Go to previous alert',
-    buttonShowHiddenAlert: 'Show hidden alert',
-    buttonHideHiddenAlert: 'Hide hidden alert',
-    buttonShowHiddenAlerts: `Show %(count) hidden alerts`,
-    buttonHideHiddenAlerts: `Hide %(count) hidden alerts`,
-    buttonShowAlerts: 'Show accessibility alerts',
-    buttonShowNoAlert: 'Show accessibility checker',
-    buttonHideChecker: 'Hide accessibility checker',
-    buttonHideAlerts: 'Hide accessibility alerts',
-    panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>',
-    panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>',
-    noImagesFound: 'No images found.',
-    altLabelPrefix: 'Alt text: ',
-    errorAltMissing: '(missing!)',
-    errorAltNull: '(none; image marked as decorative)',
-    errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
-    errorOutlinePrefixHeadingEmpty: '(empty heading) ',
-    errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
-
-    // Errors and alerts ==================================
-
-    consoleNotSupported: 'This browser can not run Editoria11y.',
-    jumpedToInvisibleTip: 'Note: this content may not be visible. Look for it inside the outlined container.',
-    jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.',
-
-    // Strings used in tests ==============================
-
-		// @todo Add courtesy of, copyright, and photo by to Sa11y.
-    // suspiciousWords: ['image of','graphic of','picture of','photo of','photograph of','placeholder','spacer','tbd','todo', 'copyright', 'courtesy of', 'photo by'],
-    // badEndingForAlt: ['photo', 'image', 'photograph', 'picture'],
-		// @todo Compare Sa11y test.
-    //linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
-		// @todo Compare Sa11y test performance
-    //linksMeaningless: /(learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|"|'|\?|\.|-|,|:|>|<|\s)+/g,
-    //linkStringsNewWindows: /window|\stab|download/g,
-
-    // Tooltips ======================================
-
-    toggleManualCheck: 'manual check needed',
-    toggleAlert: 'alert',
-    issue: 'Issue',
-    toggleAriaLabel: `Accessibility %(label)`,
-    transferFocus: 'Edit this content',
-    dismissOkButtonContent: 'Mark as OK',
-    dismissHideButtonContent: 'Mark as ignored',
-    dismissActions: `%(count) similar issues`, // 2.3.10
-    dismissHideAllButton: 'Ignore all like this', // 2.3.10
-    dismissOkAllButton: 'Mark all like this as OK', // 2.3.10
-    dismissOkTitle: 'Hides this alert for all editors',
-    dismissHideTitle: 'Hides this alert for you',
-    undismissOKButton: 'Restore this alert marked as OK',
-    undismissHideButton: 'Restore this hidden alert',
-    undismissNotePermissions: 'This alert has been hidden by an administrator',
-    reportsLink: 'Open site reports in new tab',
-    closeTip: 'Close',
-    panelHelpTitle: 'About this tool',
-    panelHelp: `
-    <p><a href="https://editoria11y.princeton.edu/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
-    <p>Many alerts are "manual checks." Manual checks can be dismissed:</p>
-    <ul>
-        <li>"Mark as checked and OK" hides the alert for all editors.</li>
-        <li>"Ignore this manual check" leaves the tip visible to other editors.</li>
-    </ul>
-    <p>Dismissed alerts can be found via the "Show hidden alerts" toggle.</p>
-    <p>If an incorrect alert is appearing on many pages, site administrators can tell the checker to ignore particular elements and page regions.</p>
-    <p>And remember that automated checkers cannot replace <a href='https://webaim.org/resources/evalquickref/'> proofreading and testing for accessibility</a>.</p>
-    <p><br><a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Report bugs & request changes <span aria-hidden="true">&raquo;</span></a></p>
-    `,
-
-    // Tooltips for heading tests =========================
-
-//    headingExample : `<ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>`,
-
-  },
-	tests: {
-		// todo: update Drupal localization file.
-		headingLevelSkipped : {
-			title: 'Manual check: was a heading level skipped?',
-		},
-		HEADING_SKIPPED_LEVEL: `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
-            <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>
-            <p>This heading skipped from level %(prevLevel) to level %(level). From a screen reader, this sounds like content is missing.</p>
-            <p><strong>To fix:</strong> adjust levels to form an accurate outline, without gaps.</p>
-            `,
-
-		headingEmpty : {
-			title: 'Heading tag without any text',
-		},
-		HEADING_EMPTY: `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
-            <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>
-            <p>Empty headings create confusing gaps in this outline: they could mean the following content is still part of the previous section, or that the text was unpronounceable for some reason.</p>
-            <p><strong>To fix:</strong> add text to this heading, or delete this empty line.</p>
-            `,
-
-		headingIsLong : {
-			title: 'Manual check: long heading',
-		},
-		HEADING_LONG: `<p>Headings should be brief and clear. Assistive devices use them as a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for the page. The numbers indicate indents in a nesting relationship:</p>  
-            <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>
-            <p><strong>To fix:</strong> shorten this heading if possible, or remove the heading style if it was only applied to this text to provide visual emphasis.</p>
-            `,
-
-		blockquoteIsShort : {
-			title: 'Manual check: is this a blockquote?',
-		},
-		QA_BLOCKQUOTE: '<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. This was flagged because short blockquotes are <em>sometimes</em> actually <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">headings</a>. If this is a heading and not a quotation, use heading formatting instead, so this appears in the page outline.</p>',
-
-		// Tooltips for image tests =========================
-
-		altMissing : {
-			title: 'Image has no alternative text attribute',
-		},
-		MISSING_ALT: `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.</p>
-            <p><strong>To fix:</strong> either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>
-            <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
-            <ul>
-                <li>The sunny spring day brought kids to the park for some soccer.</li>
-                <li>A.J. wearing the new team uniform.</li>
-                <li>The game-winning kick curved in from the left sideline!</li>
-                <li>The size 4 ball is the right size for this 9-year-old child.</li>
-            </ul>`,
-
-		altNull : {
-			title: 'Manual check: image has no alt text',
-		},
-		IMAGE_DECORATIVE: `<p>Unless this image is purely decorative (a spacer icon or background texture), an alt should probably be provided. Photos in page content <strong>almost always need alt text.</strong> Since many screen reader users can see there is an image present, it can be very confusing to move the cursor across the place on the page where an image is visible, but hear nothing.</p>
-        <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
-            <ul>
-                <li>The sunny spring day brought kids to the park for some soccer.</li>
-                <li>A.J. wearing the new team uniform.</li>
-                <li>The game-winning kick curved in from the left sideline!</li>
-                <li>The size 4 ball is the right size for this 9-year-old child.</li>
-            </ul>`,
-
-		altURL : {
-			title: 'Image\'s text alternative is a URL',
-		},
-		ALT_FILE_EXT: `This image's alt text is "%(alt)," which probably describes the file name, not the contents of the image.
-        <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
-        <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
-            <ul>
-                <li>The sunny spring day brought kids to the park for some soccer.</li>
-                <li>A.J. wearing the new team uniform.</li>
-                <li>The game-winning kick curved in from the left sideline!</li>
-                <li>The size 4 ball is the right size for this 9-year-old child.</li>
-            </ul>`
-		,
-
-		altMeaningless : {
-			title: 'Alt text is meaningless',
-		},
-		ALT_PLACEHOLDER: `<p>This image's alt text is "%(alt}," which was flagged for being common placeholder text.</p>
-        <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
-        <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
-            <ul>
-                <li>The sunny spring day brought kids to the park for some soccer.</li>
-                <li>A.J. wearing the new team uniform.</li>
-                <li>The game-winning kick curved in from the left sideline!</li>
-                <li>The size 4 ball is the right size for this 9-year-old child.</li>
-            </ul>`
-		,
-
-		altMeaninglessLinked : {
-			title: 'Linked alt text is meaningless',
-		},
-		LINK_PLACEHOLDER_ALT: `<p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
-            Links should clearly and concisely describe their destination, even out of context.</p>
-           <p>This image's alt text is "%(alt)," which probably does not describe this link.</p>`
-		,
-
-		altURLLinked : {
-			title: 'Linked image\'s text alternative is a URL',
-		},
-		LINK_ALT_FILE_EXT: `<p>This image's alt text is "%(alt)," which is probably a filename.</p>
-        <p>When a link is wrapped around an image and there is no other text, the <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">image's alt text becomes the link text</a> announced by screen readers.
-            Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
-            <ul>
-                <li>Good link text: "About us"</li>
-                <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess</li>
-            </ul>`, // @todo merge with Adam's wording.
-
-		altImageOf : {
-			title: 'Manual check: possibly redundant text in alt',
-		},
-		SUS_ALT: `<p>This image's alt text is "%(alt)," which mentions that this image is an image.</p>
-        <p>Screen readers announce they are describing an image when reading alt text, so 
-            phrases like "image of" and "photo of" are usually redundant in alt text; the screen reader user hears "image: image of something."</p>
-            <p>Note that this is OK if the format is referring to the <strong>content</strong> of the image:</p>
-            <ul><li>Format is redundant: "<em>photo of</em> a VHS tape"</li>
-            <li>Format is relevant: "<em>photo of</em> a VHS tape in a photo album being discussed in a history class"</li></ul>`,
-
-		altImageOfLinked : {
-			title: 'Manual check: possibly redundant text in linked image',
-		},
-		LINK_SUS_ALT: `<p>This image's alt text is "%(alt)," which mentions that this image is an image.</p>
-        <hr><p>Links should clearly and concisely describe their destination. Since words like "image," "graphic" or "photo" are already redundant in text alternatives (screen readers already identify the image as an image), their presence in a linked image usually means the image's text alternative is <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">describing the image instead of the link</a>.</p>
-            <ul>
-                <li>Good link text: "About us"</li>
-                <li>Bad link text: "Image of five people jumping"</li>
-            </ul>`,
-
-		altDeadspace : {
-			title: 'Image\'s text alternative is unpronounceable',
-		},
-		ALT_UNPRONOUNCEABLE: `<p>This image's alt text is "%(alt)," which only contains unpronounceable symbols and/or spaces. Screen readers will announce that an image is present, and then pause awkwardly: "image: ____."</p>
-        <p><strong>To fix:</strong> add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") if this is just an icon or spacer, and screen readers should ignore it.</p>
-            <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
-            <ul>
-                <li>The sunny spring day brought kids to the park for some soccer.</li>
-                <li>A.J. wearing the new team uniform.</li>
-                <li>The game-winning kick curved in from the left sideline!</li>
-                <li>The size 4 ball is the right size for this 9-year-old child.</li>
-            </ul>`,
-
-		altEmptyLinked : {
-			title: 'Linked Image has no alt text',
-		},
-		LINK_IMAGE_NO_ALT_TEXT: `<p>When a link is wrapped around an image, the image's alt text <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">provides the link's title for screen readers</a>.</p>
-        <p><strong>To fix:</strong> set this image's alternative text to something that describes the link's destination, or add text next to the image, within the link.</p>`,
-		// @todo MISSING_ALT_LINKED too?
-
-		altLong : {
-			title: 'Manual check: very long alternative text',
-		},
-		IMAGE_ALT_TOO_LONG: `<p>Image text alternatives are announced by screen readers as a single run-on sentence; listeners must listen to the entire alt a second time if they miss something. If this cannot be reworded to something succinct, it is better to use the alt to reference a <em>visible</em> <a href="https://www.w3.org/WAI/tutorials/images/complex/">text alternative for complex images</a>. For example:</p>
-            <ul><li>"Event poster; details follow in caption"</li>
-            <li>"Chart showing our issues going to zero; details follow in table"</li></ul>
-            This image's alt text is: <em>%(alt)</em>
-            `,
-
-		altLongLinked : {
-			title: 'Manual check: very long alternative text in linked image',
-		},
-		LINK_IMAGE_LONG_ALT: `<p><a href="https://webaim.org/techniques/hypertext/link_text#alt_link">The alt text on a linked image is used to describe the link destination</a>. Links should be brief, clear and concise, as screen reader users often listen to the list of links on the page to find content of interest. Long alternative text inside a link often indicates that the image's text alternative is describing the image instead rather than the link.</p>
-        This image's alt text is: <em>%(alt)</em>`,
-
-		altPartOfLinkWithText : {
-			title: 'Manual check: link contains both text and an image', // 2.3.10.
-		},
-		LINK_IMAGE_ALT_AND_TEXT: `<p>Screen readers will <a href="https://www.w3.org/WAI/tutorials/images/functional/">include the image's alt text when describing this link</a>.</p>
-            <p>Check that the combined text is concise and meaningful:<br>"<em><strong>%(alt)</strong></em>"</p>
-            <p></p>
-            <ul>
-                <li>Keep alts that add relevant meaning:<br>"Buy (A Tigers v. Falcons ticket)."</li>
-                <li>Edit unhelpful or irrelevant alts:<br>"Buy (A piece of paper with team logos on it)."</li>
-                <li>Remove unnecessary alts:<br>"Buy Tigers v. Falcons tickets (A Tigers v. Falcons ticket)."</li>
-            </ul>
-        `,
-
-		// @todo discuss: separate tests for no text and all text ignored:
-		linkNoTextExample: '<p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>',
-
-		linkTextIgnored: (ignoredText) => `
-    <p>Screen readers will only read the text of the link type indicator on this link:<br>
-    <em>"<strong>%(ignoredText)</strong>"</em></p>
-    `,
-
-		linkNoText : {
-			title: 'Link with no accessible text',
-		},
-		LINK_EMPTY:
-			`<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
-        <p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>
-        <p><strong>To fix:</strong></p>
-        <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describe where it goes.</li>`,
-
-		linkTextIsURL : {
-			title: 'Manual check: is this link text a URL?',
-		},
-		LINK_URL: `<p>This link's text is:<br> <strong>%(text)</strong></p>
-        <p><a href="https://webaim.org/techniques/hypertext/link_text">Links should be meaningful and concise</a>. Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
-         <p>A linked URL breaks this pattern; the reader has to read the preceding paragraph to figure out the link's purpose from context.</p>
-            <ul>
-                <li>Meaningful and concise link: "Tips for writing meaningful links"</li>
-                <li>Linked URL, as pronounced by a screen reader: "H T T P S colon forward-slash forward-slash example dot com forward-slash tips forward-slash meaningful-links"</li>
-            </ul>`,
-
-		linkTextIsGeneric : {
-			title: 'Manual check: is this link meaningful and concise?',
-		},
-		LINK_STOPWORD: `<p>This link's text is: <strong>%(text)</strong></p>
-        <p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
-                <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully enough to figure out each link's purpose from context. Few readers do this, so click-through rates on meaningless links are extremely poor.</p>
-                <ul>
-                <li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text">meaningful links"</a></strong></li>
-                <li>Not meaningful: "Click <a href="https://webaim.org/techniques/hypertext/link_text">here</a> to learn about meaningful links."</li>
-                <li>Not concise: "<a href="https://webaim.org/techniques/hypertext/link_text">Click here to learn more about meaningful links</a>"</li>
-                </ul>
-                `,
-
-		linkDocument : {
-			title : 'Manual check: is the linked document accessible?',
-		},
-		QA_PDF: `<p>Many mobile and assistive device users struggle to read content in PDFs. PDFs generally do not allow for changing font sizes, and often contain features that are incompatible with screen readers.</p>
-        <p>Ideally make the content of this linked PDF available on a Web page or in an editable document, and only link to this PDF as a "printable" alternative. If this PDF is the only way you are providing to access this content, you will need to <a href='https://webaim.org/techniques/acrobat/' target='_blank'>manually check that the PDF is well-structured</a>, with headings, lists and table headers, and provides alt text for its images.</p>`,
-
-		linkNewWindow : {
-			title: 'Manual check: is opening a new window expected?',
-		},
-		LINK_NEW_TAB: `<p>Readers can always choose to open a link a new window. When a link forces open a new window, it can be confusing and annoying, especially for assistive device users who may wonder why their browser's "back" button is suddenly disabled.</p>
-                <p>There are two general exceptions:</p>
-                <ul>
-                    <li>When the user is filling out a form, and opening a link in the same window would cause them to lose their work.</li>
-                    <li>When the user is clearly warned a link will open a new window.</li>
-                </ul>
-                <p><strong>To fix:</strong> set this link back its default target, or add a screen-reader accessible warning (text or an icon with alt text).</p>
-                `,
-
-		// Tooltips for Text QA ===============================
-
-		tableNoHeaderCells : {
-			title: 'Table has no header cells',
-		},
-		TABLES_MISSING_HEADINGS: `
-                <p>To fix:</p>
-                <ul><li>If this table contains data that is meaningfully organized by row and column, edit the table's properties and specify whether headers have been placed in the first row, column or both. This lets screen reader users hear the headers repeated while navigating the content.</li>
-                <li>If this table does not contain rows and columns of data, but is instead being used for visual layout, remove it. Tables overflow the page rather than reflowing on mobile devices, and should only be used when the horizontal relationships are necessary to understand the content.</li></ul>
-            `,
-
-		tableContainsContentHeading : {
-			title: 'Content heading inside a table',
-		},
-		TABLES_SEMANTIC_HEADING: `<p>To fix: remove heading formatting. Use row and column headers instead.</p>
-        <p>Content headings ("Heading 1", "Heading 2") form a navigable table of contents for screen reader users,  
-        labelling all content <strong>until the next heading</strong>. Table headers label specific columns or rows within a table.</p> 
-            <p></p>
-            <table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">To illustrate: a <strong>table</strong> header in cell 2 would only label its column: cell B. <br><br>
-            A <strong>content</strong> heading in cell 2 would label all subsequent text, reading from left to right: cells 3, A, B and C, as well as this text!</td></tr>
-            <tr><td>A</td><td>B</td><td>C</td></table>
-            `,
-
-		tableEmptyHeaderCell : {
-			title: 'Empty table header cell',
-		},
-		TABLES_EMPTY_HEADING: `
-                <p>When exploring tables, screen readers repeat table header cells as needed to orient users. 
-                Without headers, it is very easy to get lost; screen reader users have to count columns and rows and try to remember which columns went with which rows.</p>
-                <p><strong>To fix:</strong> make sure each header cell in this table contains text.</p>
-            `,
-
-		textPossibleList : {
-			title: 'Manual check: should this have list formatting?',
-		},
-		QA_FAKE_LIST: `<p>List formatting is structural:</p> 
-            <ol><li>List formatting indents and reflows on overflow. Text aligns vertically with the line above it.</li>
-            <li>Lists are machine-readable. Screen readers can orient their users, announcing this as "list item, 2 of 3."</li></ol>
-            <p>&nbsp;&nbsp;&nbsp;&nbsp;3. But this third item is just a sentence with a number in front of it. It wraps incorrectly, and screen readers do not know it is related to the other items in the list.</p>
-            <p><strong>To fix:</strong> if this "%(text)" is part of a list, replace it with list formatting.</p>
-            `,
-
-		textPossibleHeading : {
-			title: 'Manual check: should this be a heading?',
-		},
-		QA_FAKE_HEADING: `<p>If this all-bold line of text is functioning as a heading for the following text rather than a visual emphasis, replace the bold formatting with the appropriately numbered heading. Otherwise, dismiss this alert.</p>
-        <p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
-            <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>
-            `,
-
-		textUppercase : {
-			title: 'Manual check: is this uppercase text needed?',
-		},
-		QA_UPPERCASE: `<p>UPPERCASE TEXT CAN BE MORE DIFFICULT TO READ FOR MANY PEOPLE, AND IS OFTEN INTERPRETED AS SHOUTING.</p>
-         <p>Consider using sentence case instead, and using bold text or font changes for visual emphasis, or structural formatting like headings for emphasis that will also be announced by screen readers.</p>`,
-
-		embedVideo : {
-			title: 'Manual check: is this video accurately captioned?',
-		},
-		EMBED_VIDEO: `<p>If a recorded video contains speech or meaningful sounds, it must <a href="https://www.w3.org/WAI/media/av/captions/" title="Opens in new window">provide captions</a>.</p>
-            <p>Note that automatic, machine-generated captions must be proofread, and speaker identifications must be added, before being considered an equal alternative.</p>`,
-
-		embedAudio : {
-			title: 'Manual check: is an accurate transcript provided?',
-		},
-		EMBED_AUDIO: `<p>If this audio contains speech, a <a href="https://www.w3.org/WAI/media/av/transcribing/" title="Opens in new window">text alternative</a> must be provided on this page or linked.</p>
-            <p>Note that automatic, machine-generated transcripts must be proofread, and speaker identifications must be added, before being considered an equal alternative</p>`,
-
-		embedVisualization : {
-			title: 'Manual check: is this visualization accessible?',
-		},
-		EMBED_DATA_VIZ: `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
-            <p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
-
-		// @todo merge lost test
-		/*embedTwitter : {
-			title: 'Manual check: is this embed a keyboard trap?',
-			tip : () =>
-				`<p>If embedded feeds are set to show a high number of items, keyboard users may have to click the tab key dozens or hundreds of times to exit the component.</p>
-						<p>Check to make sure only a small number of items auto-load immediately or while scrolling. Having additional items load on request ("show more") is fine.</p>`,
-		},*/
-
-		embedCustom : {
-			title: 'Manual check: is this embedded content accessible?',
-		},
-		EMBED_GENERAL: '<p>Please make sure images inside this embed have alt text, videos have captions, and interactive components can be <a href=\'https://webaim.org/techniques/keyboard/\'>operated by a keyboard</a>.</p>',
-	}
-};
 
 /**
  * Finds elements in the DOM that match the given selector, within the specified root element, and excluding any specified elements.
@@ -1796,6 +991,17 @@ function isElementVisuallyHiddenOrHidden(element) {
 }
 
 /**
+ * Escapes HTML special characters in a string.
+ * @param {string} string The string to escape.
+ * @returns {string} The escaped string with HTML special characters replaced by their corresponding entities.
+ */
+function escapeHTML(string) {
+  const div = document.createElement('div');
+  div.textContent = string;
+  return div.innerHTML.replaceAll('"', '&quot;').replaceAll("'", '&#039;').replaceAll('`', '&#x60;');
+}
+
+/**
  * Sanitizes an HTML string by replacing special characters with their corresponding HTML entities.
  * @param {string} string The HTML string to sanitize.
  * @returns {string} The sanitized HTML string with special characters replaced by their corresponding entities.
@@ -1970,6 +1176,27 @@ function createAlert(alertMessage, errorPreview, extendedPreview) {
 }
 
 /**
+ * Get the best image source from an element, considering data-src, srcset, and src attributes.
+ * @param {HTMLElement} element - The image element to extract the source from.
+ * @returns {string} - The best available source URL.
+ */
+function getBestImageSource(element) {
+  const getLastSrc = (src) => src?.split(/,\s+/).pop()?.trim()?.split(/\s+/)[0];
+
+  // Return absolute URLs. Necessary for HTML export.
+  const resolveUrl = (src) => (src ? new URL(src, window.location.href).href : null);
+
+  const dataSrc = getLastSrc(element.getAttribute('data-src') || element.getAttribute('srcset'));
+  if (dataSrc) return resolveUrl(dataSrc);
+
+  const picture = element.closest('picture')?.querySelector('source[srcset]')?.getAttribute('srcset');
+  const pictureSrc = getLastSrc(picture);
+
+  if (pictureSrc) return resolveUrl(pictureSrc);
+  return resolveUrl(element.getAttribute('src'));
+}
+
+/**
  * Check if an element's visible text is included in the accessible name.
  * To minimize false positives: iterate through all child nodes of the element, checking for visibility.
  * @param {element} $el The element to test.
@@ -2025,363 +1252,6 @@ function standardizeHref($el) {
   href = href.replace(/\.(html|php|htm|asp|aspx)$/i, '');
 
   return href;
-}
-
-function parents(el) {
-  let nodes = [];
-  nodes.push(el);
-  while (el && !!el.parentElement && el.parentElement.tagName !== 'HTML') {
-    nodes.push(el.parentElement);
-    el = el.parentElement;
-  }
-  return nodes;
-}
-
-function resetClass(classes) {
-  classes?.forEach((el) => {
-    let thisClass = el;
-    findElements('reset', `.${thisClass}`);
-    State.elements.reset?.forEach(el => {
-      el.classList.remove(thisClass);
-    });
-  });
-}
-
-function visibleElement(el) {
-  // Checks if this element is visible. Used in parent iterators.
-  // false is definitely invisible, true requires continued iteration to tell.
-  // Todo postpone: Check for offscreen?
-  if (el) {
-    if (!el.checkVisibility({
-      opacityProperty: true,
-      visibilityProperty: true,
-    })) {
-      return false;
-    }
-    let style = window.getComputedStyle(el);
-    return !(el.closest('.sr-only, .visually-hidden') ||
-      style.getPropertyValue('z-index') < 0 ||
-      (style.getPropertyValue('overflow') === 'hidden' &&
-        ( el.offsetWidth < 10 ||
-          el.offsetHeight < 10 )
-      )
-    );
-  }
-}
-function visible(el) {
-  // Recurse element and ancestors to make sure it is visible
-  if (!visibleElement(el)) {
-    // Element is hidden
-    return false;
-  } else {
-    // Element is not known to be hidden.
-    let theParents = parents(el);
-    let visibleParent = (parent) => visibleElement(parent);
-    return theParents.every(visibleParent);
-  }
-}
-function firstVisibleParent(el) {
-  let parent = el.parentElement;
-  if (parent) {
-    // Parent exists
-    if (!visibleElement(parent)) {
-      // Recurse
-      parent = firstVisibleParent(parent);
-      return parent;
-    } else {
-      // Element is visible
-      return parent;
-    }
-  } else {
-    // No visible parents.
-    return false;
-  }
-}
-function detectShadow (container) {
-  if (State.options.autoDetectShadowComponents) {
-    const select = !State.ignore ? '*:not(.ed11y-element)' : `*:not(${State.options.ignore}, .ed11y-element)`;
-    let search;
-    if (container.shadowRoot && container.shadowRoot.mode === 'open') {
-      if (!container.matches('[data-ed11y-has-shadow-root]')) {
-        container.setAttribute('data-ed11y-has-shadow-root', 'true');
-        UI.attachCSS(container.shadowRoot);
-        UI.attachCSS(container);
-      }
-      search = container.shadowRoot.querySelectorAll(select);
-    } else {
-      search = container.querySelectorAll(select);
-    }
-    search?.forEach((component) => {
-      if (component.shadowRoot && component.shadowRoot.mode === 'open') {
-        detectShadow(component);
-      }
-    });
-  } else if (State.options.shadowComponents) {
-    const providedShadow = container.querySelectorAll(State.options.shadowComponents);
-    providedShadow.forEach((component) => {
-      if (component.shadowRoot && component.shadowRoot.mode === 'open') {
-        if (!container.matches('[data-ed11y-has-shadow-root]')){
-          component.setAttribute('data-ed11y-has-shadow-root', 'true');
-          UI.attachCSS(component.shadowRoot);
-          UI.attachCSS(component);
-        }
-        detectShadow(component);
-      } else {
-        console.warn(`Editoria11y: A specified shadow host has no shadowRoot: ${component.tagName}`);
-      }
-    });
-  }
-}
-const diveShadow = function (container, select, selector) {
-  if (container.matches(selector)) {
-    return([container]);
-  } else {
-    let inners = container.shadowRoot.querySelectorAll(select);
-    if (typeof(inners) === 'object' && inners.length > 0) {
-      // Replace shadow host with inner elements.
-      inners.forEach(inner => {
-        for (let innerIndex = inners - 1; innerIndex >= 0; innerIndex--) {
-          let innerInner = diveShadow(inner, select, selector);
-          if (innerInner.length > 0) {
-            inners.splice(innerIndex, 1, ...innerInner);
-          } else {
-            inners.splice(innerIndex, 1);
-          }
-        }
-      });
-      return (Array.from(inners).filter((el) => el.matches(selector)));
-    }
-  }
-  return [];
-};
-
-// QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
-function findElements (key, selector, rootRestrict = true) { // @todo merge replace.
-
-  // Todo beta: function and parameter to auto-detect shadow components.
-  let shadowSelector = State.options.autoDetectShadowComponents ?
-    '[data-ed11y-has-shadow-root]' :
-    State.options.shadowComponents ?
-      State.options.shadowComponents : false;
-
-  // Concatenate global and specific ignores
-  let ignore;
-  if (State.options.ignoreElements) {
-    ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreElements}, ${State.options.ignoreByKey[key]})` : `:not(${State.options.ignoreElements})`;
-  } else {
-    ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreByKey[key]})` : '';
-  }
-
-  // Initialize or reset elements array.
-  State.elements[key] = [];
-
-  const select = `:is(${selector}${shadowSelector ? ', ' + shadowSelector : ''})${ignore}`;
-
-  if (rootRestrict && State.roots) {
-    // Add array of elements matching selector, excluding the provided ignore list.
-    // Todo this can dupe
-    State.roots.forEach(root => {
-      State.elements[key] = State.elements[key].concat(Array.from(root.querySelectorAll(select)));
-    });
-  } else {
-    State.elements[key] = State.elements[key].concat(Array.from(document.querySelectorAll(select)));
-  }
-
-  // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
-  // Repeat the search inside each placeholder, and replace the placeholder with its search results.
-  if (shadowSelector) {
-    for (let index = State.elements[key].length - 1; index >= 0; index--) {
-      if (State.elements[key][index].matches(shadowSelector)) {
-        // Dive into the shadow root and collect an array of its results.
-        let inners = diveShadow(State.elements[key][index], select, selector);
-        if (inners.length > 0) {
-          State.elements[key].splice(index, 1, ...inners);
-        } else {
-          State.elements[key].splice(index, 1);
-        }
-      }
-    }
-  }
-}
-function pauseObservers() {
-	State.watching?.forEach(observer => {
-		observer.observer.disconnect();
-	});
-}
-
-function resumeObservers() {
-	State.watching?.forEach(observer => {
-		observer.observer.observe(observer.root, observer.config);
-	});
-}
-
-function checkRunPrevent() {
-	let preventCheck = State.options.preventCheckingIfPresent ?
-		document.querySelector(State.options.preventCheckingIfPresent) :
-		false;
-	if (preventCheck) {
-		console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${State.options.preventCheckingIfPresent}"` );
-	} else if (!preventCheck && !!State.options.preventCheckingIfAbsent) {
-		preventCheck = document.querySelector(`:is(${State.options.preventCheckingIfAbsent})`) === null;
-		if (preventCheck) {
-			console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${State.options.preventCheckingIfAbsent}"`);
-		}
-	}
-	return preventCheck;
-}
-
-function resetResults(incremental) {
-	State.jumpList = [];
-	State.openTip = {
-		button: false,
-		tip: false,
-	};
-	State.lastOpenTip = -1;
-	resetClass([
-		'ed11y-ring-red',
-		'ed11y-ring-yellow',
-		'ed11y-hidden-highlight',
-		'ed11y-warning-inline',
-		'ed11y-warning-block',
-		'ed11y-error-block',
-		'ed11y-error-inline',
-	]);
-	// Reset insertions into body content.
-	if (incremental) {
-		findElements('reset', 'ed11y-element-highlight', false);
-	} else {
-		findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
-	}
-	State.elements.reset?.forEach((el) => el.remove());
-
-	// Flicker prevention -- leave old tip in place for 100ms.
-	findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
-	const delayedReset = State.elements.delayedReset;
-
-	window.setTimeout(()=> {
-		delayedReset?.forEach((el) => el.remove());
-	}, 100, delayedReset);
-
-	if (typeof UI.panelJumpNext === 'function') {
-		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = M.buttonFirstContent;
-	}
-	// Reset insertions into body content.
-}
-
-function newIncrementalResults() {
-	if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
-		return true;
-	}
-	let newResultString = `${State.errorCount} ${State.warningCount}`;
-	State.results.forEach(result => {
-		newResultString += result.test + result.element.outerHTML;
-	});
-	let changed = newResultString !== State.oldResultString;
-	State.oldResultString = newResultString;
-	return changed;
-}
-function countAlerts () {
-
-	State.errorCount = 0;
-	State.warningCount = 0;
-	State.dismissedCount = 0;
-
-	// Review results array to remove dismissed or ignored items
-
-	State.dismissedCount = 0;
-	for (let i = State.results.length - 1; i >= 0; i--) {
-
-		let test = State.results[i].test;
-
-		if (State.options.ignoreTests &&
-			State.options.ignoreTests.includes(test)) {
-			// Would be faster to skip test, but this is easy and reliable.
-			State.results.splice(i, 1);
-			continue;
-		}
-
-		// todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
-		/*if (State.incremental && Ed11y.oldResults.length > 0) {
-			// Don't flag new issues in the active range while people are typing.
-		}*/
-
-		let dismissKey = prepareDismissal(State.results[i].dismissalKey);
-		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-		if (dismissKey !== false && State.options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[State.options.currentPage] && dismissKey in State.dismissedAlerts[State.options.currentPage][test]) {
-			// Remove result if it has been marked OK or ignored, increment dismissed match counter.
-			State.dismissedCount++;
-			State.results[i].dismissalStatus = State.dismissedAlerts[State.options.currentPage][test][dismissKey];
-		} else if (State.results[i].dismissalKey) {
-			State.warningCount++;
-			State.results[i].dismissalStatus = false;
-		} else {
-			State.errorCount++;
-			State.results[i].dismissalStatus = false;
-		}
-	}
-
-	State.totalCount = State.errorCount + State.warningCount;
-
-	// Dispatch event for synchronizers.
-	if (!State.incremental) {
-		window.setTimeout(function () {
-			let syncResults = new CustomEvent('ed11yResults');
-			document.dispatchEvent(syncResults);
-		}, 0);
-	}
-
-	if (State.ignoreAll) {
-		State.dismissedCount = State.totalCount + State.dismissedCount;
-		State.errorCount = 0;
-		State.warningCount = 0;
-		State.totalCount = 0;
-	}
-
-	if (State.incremental && !State.forceFullCheck && !newIncrementalResults()) {
-		State.forceFullCheck = true;
-	}
-}
-
-var styles = "[data-sa11y-overflow]{overflow:auto!important}[data-sa11y-error]{outline:5px solid var(--sa11y-error)!important;outline-offset:2px}[data-sa11y-warning]:not([data-sa11y-error]){outline:5px solid var(--sa11y-warning)!important;outline-offset:2px}[data-sa11y-pulse-border]{animation:pulse 1s 2;box-shadow:0;outline:5px solid var(--sa11y-focus-color)!important}[data-sa11y-pulse-border]:focus,[data-sa11y-pulse-border]:hover{animation:none}@keyframes pulse{0%{box-shadow:0 0 0 5px var(--sa11y-focus-color)}50%{box-shadow:0 0 0 12px var(--sa11y-pulse-color)}to{box-shadow:0 0 0 5px var(--sa11y-pulse-color)}}h1[data-sa11y-pulse-border],h2[data-sa11y-pulse-border],h3[data-sa11y-pulse-border],h4[data-sa11y-pulse-border],h5[data-sa11y-pulse-border],h6[data-sa11y-pulse-border],img[data-sa11y-pulse-border]{animation:pulse-scale 1s 2}@keyframes pulse-scale{0%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.02)}to{opacity:1;transform:scale(1)}}@media (prefers-reduced-motion:reduce){[data-sa11y-pulse-border]{animation:none!important}}@media (forced-colors:active){[data-sa11y-error-inline],[data-sa11y-error],[data-sa11y-good],[data-sa11y-pulse-border],[data-sa11y-warning-inline],[data-sa11y-warning]{forced-color-adjust:none}}";
-
-/* ************************************************************ */
-/*  Auto-detect shadow DOM or process provided web components.  */
-/* ************************************************************ */
-const addStyleUtilities = (component) => {
-  const CSSUtils = component.shadowRoot.querySelectorAll('.sa11y-css-utilities');
-  if (CSSUtils.length === 0) {
-    const style = document.createElement('style');
-    style.setAttribute('class', 'sa11y-css-utilities');
-    style.textContent = styles;
-    component.shadowRoot.appendChild(style);
-  }
-};
-
-function findShadowComponents(option) {
-  if (option.autoDetectShadowComponents) {
-    // Elements to ignore.
-    const ignore = Constants.Exclusions.Sa11yElements;
-
-    // Search all elements.
-    const root = document.querySelector(option.checkRoot);
-    const search = (root)
-      ? Array.from(root.querySelectorAll(`*:not(${ignore})`))
-      : Array.from(document.body.querySelectorAll(`*:not(${ignore})`));
-
-    // Query for open shadow roots & inject CSS utilities into every shadow DOM.
-    search.forEach((component) => {
-      if (component.shadowRoot && component.shadowRoot.mode === 'open') {
-        component.setAttribute('data-sa11y-has-shadow-root', '');
-        addStyleUtilities(component);
-      }
-    });
-  } else if (option.shadowComponents) {
-    const providedShadow = document.querySelectorAll(option.shadowComponents);
-    providedShadow.forEach((component) => {
-      component.setAttribute('data-sa11y-has-shadow-root', '');
-      addStyleUtilities(component);
-    });
-  }
 }
 
 const Elements = (function myElements() {
@@ -2497,6 +1367,471 @@ const Elements = (function myElements() {
     Annotations,
   };
 }());
+
+var styles = "[data-sa11y-overflow]{overflow:auto!important}[data-sa11y-error]{outline:5px solid var(--sa11y-error)!important;outline-offset:2px}[data-sa11y-warning]:not([data-sa11y-error]){outline:5px solid var(--sa11y-warning)!important;outline-offset:2px}[data-sa11y-pulse-border]{animation:pulse 1s 2;box-shadow:0;outline:5px solid var(--sa11y-focus-color)!important}[data-sa11y-pulse-border]:focus,[data-sa11y-pulse-border]:hover{animation:none}@keyframes pulse{0%{box-shadow:0 0 0 5px var(--sa11y-focus-color)}50%{box-shadow:0 0 0 12px var(--sa11y-pulse-color)}to{box-shadow:0 0 0 5px var(--sa11y-pulse-color)}}h1[data-sa11y-pulse-border],h2[data-sa11y-pulse-border],h3[data-sa11y-pulse-border],h4[data-sa11y-pulse-border],h5[data-sa11y-pulse-border],h6[data-sa11y-pulse-border],img[data-sa11y-pulse-border]{animation:pulse-scale 1s 2}@keyframes pulse-scale{0%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.02)}to{opacity:1;transform:scale(1)}}@media (prefers-reduced-motion:reduce){[data-sa11y-pulse-border]{animation:none!important}}@media (forced-colors:active){[data-sa11y-error-inline],[data-sa11y-error],[data-sa11y-good],[data-sa11y-pulse-border],[data-sa11y-warning-inline],[data-sa11y-warning]{forced-color-adjust:none}}";
+
+/* ************************************************************ */
+/*  Auto-detect shadow DOM or process provided web components.  */
+/* ************************************************************ */
+const addStyleUtilities = (component) => {
+  const CSSUtils = component.shadowRoot.querySelectorAll('.sa11y-css-utilities');
+  if (CSSUtils.length === 0) {
+    const style = document.createElement('style');
+    style.setAttribute('class', 'sa11y-css-utilities');
+    style.textContent = styles;
+    component.shadowRoot.appendChild(style);
+  }
+};
+
+function findShadowComponents(option) {
+  if (option.autoDetectShadowComponents) {
+    // Elements to ignore.
+    const ignore = Constants.Exclusions.Sa11yElements;
+
+    // Search all elements.
+    const root = document.querySelector(option.checkRoot);
+    const search = (root)
+      ? Array.from(root.querySelectorAll(`*:not(${ignore})`))
+      : Array.from(document.body.querySelectorAll(`*:not(${ignore})`));
+
+    // Query for open shadow roots & inject CSS utilities into every shadow DOM.
+    search.forEach((component) => {
+      if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+        component.setAttribute('data-sa11y-has-shadow-root', '');
+        addStyleUtilities(component);
+      }
+    });
+  } else if (option.shadowComponents) {
+    const providedShadow = document.querySelectorAll(option.shadowComponents);
+    providedShadow.forEach((component) => {
+      component.setAttribute('data-sa11y-has-shadow-root', '');
+      addStyleUtilities(component);
+    });
+  }
+}
+
+function checkImages(results, option) {
+  const containsAltTextStopWords = (alt) => {
+    const altUrl = [
+      '.avif',
+      '.png',
+      '.jpg',
+      '.jpeg',
+      '.webp',
+      '.gif',
+      '.tiff',
+      '.svg',
+      '.heif',
+      '.heic',
+      'http',
+    ];
+
+    const hit = [null, null, null];
+    altUrl.forEach((word) => {
+      if (alt.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
+        hit[0] = word;
+      } else {
+        // Checking for image dimensions in alt text.
+        const imageDimensions = /\b\d{2,6}\s*x\s*\d{2,6}\b/;
+        const match = alt.toLowerCase().match(imageDimensions);
+        if (match) {
+          [hit[0]] = match;
+        }
+      }
+    });
+
+    const susAltWordsOverride = (option.susAltStopWords) ? option.susAltStopWords.split(',').map((word) => word.trim()) : Lang._('SUS_ALT_STOPWORDS');
+    susAltWordsOverride.forEach((word) => {
+      const susWord = alt.toLowerCase().indexOf(word);
+      if (susWord > -1 && susWord < 6) {
+        hit[1] = word;
+      }
+    });
+
+    Lang._('PLACEHOLDER_ALT_STOPWORDS').forEach((word) => {
+      if (alt.length === word.length && alt.toLowerCase().indexOf(word) >= 0) {
+        hit[2] = word;
+      }
+    });
+
+    // Additional placeholder stopwords to flag as an error.
+    const { extraPlaceholderStopWords } = option;
+    if (extraPlaceholderStopWords.length) {
+      const array = extraPlaceholderStopWords.split(',').map((word) => word.trim());
+      array.forEach((word) => {
+        const susWord = alt.toLowerCase().indexOf(word);
+        if (susWord > -1 && susWord < 6) {
+          hit[2] = word;
+        }
+      });
+    }
+
+    return hit;
+  };
+
+  Elements.Found.Images.forEach(($el) => {
+    const alt = (computeAriaLabel($el) === 'noAria') ? $el.getAttribute('alt') : computeAriaLabel($el);
+
+    // If selectors passed via prop, it will treat that image as an unlinked image.
+    const link = $el.closest(option.imageWithinLightbox
+      ? `a[href]:not(${option.imageWithinLightbox})`
+      : 'a[href]');
+
+    // Image's source for key.
+    const src = ($el.getAttribute('src')) ? $el.getAttribute('src') : $el.getAttribute('srcset');
+
+    // Process link text exclusions.
+    const linkSpanExclusions = link
+      ? fnIgnore(link, Constants.Exclusions.LinkSpan).textContent : '';
+    const stringMatchExclusions = option.linkIgnoreStrings
+      ? linkSpanExclusions.replace(option.linkIgnoreStrings, '') : linkSpanExclusions;
+    const linkTextLength = link
+      ? removeWhitespace(stringMatchExclusions).length : 0;
+
+    // Has aria-hidden.
+    if ($el.getAttribute('aria-hidden') === 'true') {
+      return;
+    }
+
+    // Ignore tracking pixels without explicit aria-hidden or nullified alt.
+    if ($el.height < 2 && $el.width < 2 && (isElementHidden($el) || alt === '')) {
+      return;
+    }
+
+    if (link && link.getAttribute('aria-hidden') === 'true') {
+      // If linked image has aria-hidden, but is still focusable.
+      const unfocusable = link.getAttribute('tabindex') === '-1';
+      if (option.checks.HIDDEN_FOCUSABLE && !unfocusable) {
+        results.push({
+          element: $el,
+          type: option.checks.HIDDEN_FOCUSABLE.type || 'error',
+          content: Lang.sprintf(option.checks.HIDDEN_FOCUSABLE.content || 'HIDDEN_FOCUSABLE'),
+          dismiss: prepareDismissal(`IMGHIDDENFOCUSABLE${src}`),
+          dismissAll: option.checks.HIDDEN_FOCUSABLE.dismissAll
+            ? 'LINK_HIDDEN_FOCUSABLE' : false,
+          developer: option.checks.HIDDEN_FOCUSABLE.developer || true,
+        });
+      }
+      return;
+    }
+
+    // If alt is missing.
+    if (alt === null) {
+      if (link) {
+        const rule = (linkTextLength === 0)
+          ? option.checks.MISSING_ALT_LINK
+          : option.checks.MISSING_ALT_LINK_HAS_TEXT;
+        const conditional = linkTextLength === 0
+          ? 'MISSING_ALT_LINK' : 'MISSING_ALT_LINK_HAS_TEXT';
+        if (rule) {
+          results.push({
+            element: $el,
+            type: rule.type || 'error',
+            content: Lang.sprintf(rule.content || conditional),
+            dismiss: prepareDismissal(`${conditional + src + linkTextLength}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (option.checks.MISSING_ALT) {
+        // General failure message if image is missing alt.
+        results.push({
+          element: $el,
+          type: option.checks.MISSING_ALT.type || 'error',
+          content: Lang.sprintf(option.checks.MISSING_ALT.content || 'MISSING_ALT'),
+          dismiss: prepareDismissal(`IMGNOALT${src}`),
+          dismissAll: option.checks.MISSING_ALT.dismissAll ? 'MISSING_ALT' : false,
+          developer: option.checks.MISSING_ALT.developer || false,
+        });
+      }
+    } else {
+      // If image has alt.
+      const sanitizedAlt = sanitizeHTML(alt);
+      const altText = removeWhitespace(sanitizedAlt);
+      const error = containsAltTextStopWords(altText);
+      const hasAria = $el.getAttribute('aria-label') || $el.getAttribute('aria-labelledby');
+      const titleAttr = $el.getAttribute('title');
+      const decorative = (alt === '');
+
+      // Figure elements.
+      const figure = $el.closest('figure');
+      const figcaption = figure?.querySelector('figcaption');
+      const figcaptionText = (figcaption) ? figcaption.textContent.trim() : '';
+
+      // Maximum alt text length
+      const maxAltCharactersLinks = option.checks.LINK_IMAGE_LONG_ALT.maxLength || 250;
+      const maxAltCharacters = option.checks.IMAGE_ALT_TOO_LONG.maxLength || 250;
+
+      // If aria-label or aria-labelledby returns empty or invalid.
+      if (option.checks.MISSING_ALT) {
+        if (hasAria && altText === '') {
+          results.push({
+            element: $el,
+            type: option.checks.MISSING_ALT.type || 'error',
+            content: Lang.sprintf(option.checks.MISSING_ALT.content || 'MISSING_ALT'),
+            dismiss: prepareDismissal(`IMGNOALTARIA${src}`),
+            dismissAll: option.checks.MISSING_ALT.dismissAll ? 'MISSING_ALT' : false,
+            developer: option.checks.MISSING_ALT.developer || false,
+          });
+          return;
+        }
+      }
+
+      // Decorative images.
+      if (decorative) {
+        const carouselSources = option.checks.IMAGE_DECORATIVE_CAROUSEL.sources;
+        const carousel = carouselSources ? $el.closest(carouselSources) : '';
+        if (carousel) {
+          const numberOfSlides = carousel.querySelectorAll('img');
+          const rule = (numberOfSlides.length === 1)
+            ? option.checks.IMAGE_DECORATIVE
+            : option.checks.IMAGE_DECORATIVE_CAROUSEL;
+          const conditional = (numberOfSlides.length === 1)
+            ? 'IMAGE_DECORATIVE'
+            : 'IMAGE_DECORATIVE_CAROUSEL';
+          if (rule) {
+            results.push({
+              element: $el,
+              type: rule.type || 'warning',
+              content: Lang.sprintf(rule.content || conditional),
+              dismiss: prepareDismissal(conditional + src),
+              dismissAll: rule.dismissAll ? conditional : false,
+              developer: rule.developer || false,
+            });
+          }
+        } else if (link) {
+          const rule = (linkTextLength === 0)
+            ? option.checks.LINK_IMAGE_NO_ALT_TEXT
+            : option.checks.LINK_IMAGE_TEXT;
+          const conditional = linkTextLength === 0
+            ? 'LINK_IMAGE_NO_ALT_TEXT' : 'LINK_IMAGE_TEXT';
+          if (rule) {
+            results.push({
+              element: $el,
+              type: rule.type || (linkTextLength === 0 ? 'error' : 'good'),
+              content: Lang.sprintf(rule.content || conditional),
+              dismiss: prepareDismissal(`${conditional + src + linkTextLength}`),
+              dismissAll: rule.dismissAll ? conditional : false,
+              developer: rule.developer || false,
+            });
+          }
+        } else if (figure) {
+          const rule = (figcaption && figcaptionText.length)
+            ? option.checks.IMAGE_FIGURE_DECORATIVE
+            : option.checks.IMAGE_DECORATIVE;
+          const conditional = figcaption && figcaptionText.length
+            ? 'IMAGE_FIGURE_DECORATIVE' : 'IMAGE_DECORATIVE';
+          if (rule) {
+            results.push({
+              element: $el,
+              type: rule.type || 'warning',
+              content: Lang.sprintf(rule.content || conditional),
+              dismiss: prepareDismissal(`${conditional + src + figcaptionText}`),
+              dismissAll: rule.dismissAll ? conditional : false,
+              developer: rule.developer || false,
+            });
+          }
+        } else if (option.checks.IMAGE_DECORATIVE) {
+          results.push({
+            element: $el,
+            type: option.checks.IMAGE_DECORATIVE.type || 'warning',
+            content: Lang.sprintf(option.checks.IMAGE_DECORATIVE.content || 'IMAGE_DECORATIVE'),
+            dismiss: prepareDismissal(`DECIMAGE${src}`),
+            dismissAll: option.checks.IMAGE_DECORATIVE.dismissAll ? 'IMAGE_DECORATIVE' : false,
+            developer: option.checks.IMAGE_DECORATIVE.developer || false,
+          });
+        }
+        return;
+      }
+
+      // Alt is unpronounceable.
+      const unpronounceable = (link)
+        ? option.checks.LINK_ALT_UNPRONOUNCEABLE : option.checks.ALT_UNPRONOUNCEABLE;
+      if (unpronounceable) {
+        if (alt.replace(/"|'|\?|\.|-|\s+/g, '') === '' && linkTextLength === 0) {
+          const condition = (link) ? 'LINK_ALT_UNPRONOUNCEABLE' : 'ALT_UNPRONOUNCEABLE';
+          results.push({
+            element: $el,
+            type: unpronounceable.type || 'error',
+            content: Lang.sprintf(unpronounceable.content || condition, altText),
+            dismiss: prepareDismissal(`UNPRONOUNCEABLE${src}`),
+            dismissAll: unpronounceable.dismissAll ? 'ALT_UNPRONOUNCEABLE' : false,
+            developer: unpronounceable.developer || false,
+          });
+          return;
+        }
+      }
+
+      // Potentially contains auto-generated placeholder text.
+      const maybeBadAlt = (link)
+        ? option.checks.LINK_ALT_MAYBE_BAD : option.checks.ALT_MAYBE_BAD;
+      const isTooLongSingleWord = new RegExp(`^\\S{${maybeBadAlt.minLength || 15},}$`);
+      const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(alt);
+
+      // Alt text quality.
+      if (error[0] !== null) {
+        // Has stop words.
+        const rule = (link)
+          ? option.checks.LINK_ALT_FILE_EXT
+          : option.checks.ALT_FILE_EXT;
+        const conditional = (link) ? 'LINK_ALT_FILE_EXT' : 'ALT_FILE_EXT';
+        if (rule) {
+          results.push({
+            element: $el,
+            type: rule.type || 'error',
+            content: Lang.sprintf(rule.content || conditional, error[0], altText),
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (error[2] !== null) {
+        // Placeholder words.
+        const rule = (link)
+          ? option.checks.LINK_PLACEHOLDER_ALT
+          : option.checks.ALT_PLACEHOLDER;
+        const conditional = (link) ? 'LINK_PLACEHOLDER_ALT' : 'ALT_PLACEHOLDER';
+        if (rule) {
+          results.push({
+            element: $el,
+            type: rule.type || 'error',
+            content: Lang.sprintf(rule.content || conditional, altText),
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (error[1] !== null) {
+        // Suspicious words.
+        const rule = (link)
+          ? option.checks.LINK_SUS_ALT
+          : option.checks.SUS_ALT;
+        const conditional = (link) ? 'LINK_SUS_ALT' : 'SUS_ALT';
+        if (rule) {
+          results.push({
+            element: $el,
+            type: rule.type || 'warning',
+            content: Lang.sprintf(rule.content || conditional, error[1], altText),
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (maybeBadAlt && (isTooLongSingleWord.test(alt) && containsNonAlphaChar)) {
+        // Alt text is a single word greater than 15 characters that is potentially auto-generated.
+        const conditional = (link) ? 'LINK_ALT_MAYBE_BAD' : 'ALT_MAYBE_BAD';
+        results.push({
+          element: $el,
+          type: maybeBadAlt.type || 'warning',
+          content: Lang.sprintf(maybeBadAlt.content || conditional, altText),
+          dismiss: prepareDismissal(`${conditional + src + altText}`),
+          dismissAll: maybeBadAlt.dismissAll ? conditional : false,
+          developer: maybeBadAlt.developer || false,
+        });
+      } else if (link
+        ? alt.length > maxAltCharactersLinks
+        : alt.length > maxAltCharacters) {
+        // Alt is too long.
+        const rule = (link)
+          ? option.checks.LINK_IMAGE_LONG_ALT
+          : option.checks.IMAGE_ALT_TOO_LONG;
+        const conditional = (link) ? 'LINK_IMAGE_LONG_ALT' : 'IMAGE_ALT_TOO_LONG';
+        const truncated = truncateString(altText, 600);
+        if (rule) {
+          results.push({
+            element: $el,
+            type: rule.type || 'warning',
+            content: Lang.sprintf(rule.content || conditional, alt.length, truncated),
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (link) {
+        const rule = (linkTextLength === 0)
+          ? option.checks.LINK_IMAGE_ALT
+          : option.checks.LINK_IMAGE_ALT_AND_TEXT;
+        const conditional = (linkTextLength === 0) ? 'LINK_IMAGE_ALT' : 'LINK_IMAGE_ALT_AND_TEXT';
+
+        if (rule) {
+          // Has both link text and alt text.
+          const linkAccName = computeAccessibleName(link);
+          const removeWhitespace$1 = removeWhitespace(linkAccName);
+          const sanitizedText = sanitizeHTML(removeWhitespace$1);
+
+          const tooltip = (linkTextLength === 0)
+            ? Lang.sprintf('LINK_IMAGE_ALT', altText)
+            : `${Lang.sprintf('LINK_IMAGE_ALT_AND_TEXT', altText, sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`;
+
+          results.push({
+            element: $el,
+            type: rule.type || 'warning',
+            content: rule.content
+              ? Lang.sprintf(rule.content, altText, sanitizedText)
+              : tooltip,
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (figure) {
+        // Figure element has same alt and caption text.
+        const duplicate = !!figcaption && (figcaptionText.toLowerCase() === altText.trim().toLowerCase());
+        if (duplicate) {
+          if (option.checks.IMAGE_FIGURE_DUPLICATE_ALT) {
+            results.push({
+              element: $el,
+              type: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.type || 'warning',
+              content: Lang.sprintf(option.checks.IMAGE_FIGURE_DUPLICATE_ALT.content || 'IMAGE_FIGURE_DUPLICATE_ALT', altText),
+              dismiss: prepareDismissal(`FIGDUPLICATE${src}`),
+              dismissAll: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.dismissAll ? 'IMAGE_FIGURE_DUPLICATE_ALT' : false,
+              developer: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.developer || false,
+            });
+          }
+        } else if (option.checks.IMAGE_PASS) {
+          // Figure has alt text!
+          results.push({
+            element: $el,
+            type: option.checks.IMAGE_PASS.type || 'good',
+            content: Lang.sprintf(option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
+            dismiss: prepareDismissal(`FIGIMGPASS${src + altText}`),
+            dismissAll: option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
+            developer: option.checks.IMAGE_PASS.developer || false,
+          });
+        }
+      } else if (option.checks.IMAGE_PASS) {
+        if (!$el.closest('button, [role="button"]')) {
+          // Image has alt text!
+          results.push({
+            element: $el,
+            type: option.checks.IMAGE_PASS.type || 'good',
+            content: Lang.sprintf(option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
+            dismiss: prepareDismissal(`IMAGEPASS${src + altText}`),
+            dismissAll: option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
+            developer: option.checks.IMAGE_PASS.developer || false,
+          });
+        }
+      }
+
+      // Image's title attribute is the same as the alt.
+      // Since this is extra, it's okay if it overlaps "good" annotation.
+      if (titleAttr?.toLowerCase() === alt.toLowerCase()) {
+        if (option.checks.DUPLICATE_TITLE) {
+          results.push({
+            element: $el,
+            type: option.checks.DUPLICATE_TITLE.type || 'warning',
+            content: Lang.sprintf(option.checks.DUPLICATE_TITLE.content || 'DUPLICATE_TITLE'),
+            inline: true,
+            dismiss: prepareDismissal(`ALTDUPLICATETITLE${altText}`),
+            dismissAll: option.checks.DUPLICATE_TITLE.dismissAll ? 'DUPLICATE_TITLE' : false,
+            developer: option.checks.DUPLICATE_TITLE.developer || false,
+          });
+        }
+      }
+    }
+  });
+  return results;
+}
 
 function checkHeaders(results, option, headingOutline) {
   let prevLevel;
@@ -3032,429 +2367,6 @@ function checkLinkText(results, option) {
               developer: option.checks.LINK_FILE_EXT.developer || false,
             });
           }
-        }
-      }
-    }
-  });
-  return results;
-}
-
-function checkImages(results, option) {
-  const containsAltTextStopWords = (alt) => {
-    const altUrl = [
-      '.avif',
-      '.png',
-      '.jpg',
-      '.jpeg',
-      '.webp',
-      '.gif',
-      '.tiff',
-      '.svg',
-      '.heif',
-      '.heic',
-      'http',
-    ];
-
-    const hit = [null, null, null];
-    altUrl.forEach((word) => {
-      if (alt.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
-        hit[0] = word;
-      } else {
-        // Checking for image dimensions in alt text.
-        const imageDimensions = /\b\d{2,6}\s*x\s*\d{2,6}\b/;
-        const match = alt.toLowerCase().match(imageDimensions);
-        if (match) {
-          [hit[0]] = match;
-        }
-      }
-    });
-
-    const susAltWordsOverride = (option.susAltStopWords) ? option.susAltStopWords.split(',').map((word) => word.trim()) : Lang._('SUS_ALT_STOPWORDS');
-    susAltWordsOverride.forEach((word) => {
-      const susWord = alt.toLowerCase().indexOf(word);
-      if (susWord > -1 && susWord < 6) {
-        hit[1] = word;
-      }
-    });
-
-    Lang._('PLACEHOLDER_ALT_STOPWORDS').forEach((word) => {
-      if (alt.length === word.length && alt.toLowerCase().indexOf(word) >= 0) {
-        hit[2] = word;
-      }
-    });
-
-    // Additional placeholder stopwords to flag as an error.
-    const { extraPlaceholderStopWords } = option;
-    if (extraPlaceholderStopWords.length) {
-      const array = extraPlaceholderStopWords.split(',').map((word) => word.trim());
-      array.forEach((word) => {
-        const susWord = alt.toLowerCase().indexOf(word);
-        if (susWord > -1 && susWord < 6) {
-          hit[2] = word;
-        }
-      });
-    }
-
-    return hit;
-  };
-
-  Elements.Found.Images.forEach(($el) => {
-    const alt = (computeAriaLabel($el) === 'noAria') ? $el.getAttribute('alt') : computeAriaLabel($el);
-
-    // If selectors passed via prop, it will treat that image as an unlinked image.
-    const link = $el.closest(option.imageWithinLightbox
-      ? `a[href]:not(${option.imageWithinLightbox})`
-      : 'a[href]');
-
-    // Image's source for key.
-    const src = ($el.getAttribute('src')) ? $el.getAttribute('src') : $el.getAttribute('srcset');
-
-    // Process link text exclusions.
-    const linkSpanExclusions = link
-      ? fnIgnore(link, Constants.Exclusions.LinkSpan).textContent : '';
-    const stringMatchExclusions = option.linkIgnoreStrings
-      ? linkSpanExclusions.replace(option.linkIgnoreStrings, '') : linkSpanExclusions;
-    const linkTextLength = link
-      ? removeWhitespace(stringMatchExclusions).length : 0;
-
-    // Has aria-hidden.
-    if ($el.getAttribute('aria-hidden') === 'true') {
-      return;
-    }
-
-    // Ignore tracking pixels without explicit aria-hidden or nullified alt.
-    if ($el.height < 2 && $el.width < 2 && (isElementHidden($el) || alt === '')) {
-      return;
-    }
-
-    if (link && link.getAttribute('aria-hidden') === 'true') {
-      // If linked image has aria-hidden, but is still focusable.
-      const unfocusable = link.getAttribute('tabindex') === '-1';
-      if (option.checks.HIDDEN_FOCUSABLE && !unfocusable) {
-        results.push({
-          element: $el,
-          type: option.checks.HIDDEN_FOCUSABLE.type || 'error',
-          content: Lang.sprintf(option.checks.HIDDEN_FOCUSABLE.content || 'HIDDEN_FOCUSABLE'),
-          dismiss: prepareDismissal(`IMGHIDDENFOCUSABLE${src}`),
-          dismissAll: option.checks.HIDDEN_FOCUSABLE.dismissAll
-            ? 'LINK_HIDDEN_FOCUSABLE' : false,
-          developer: option.checks.HIDDEN_FOCUSABLE.developer || true,
-        });
-      }
-      return;
-    }
-
-    // If alt is missing.
-    if (alt === null) {
-      if (link) {
-        const rule = (linkTextLength === 0)
-          ? option.checks.MISSING_ALT_LINK
-          : option.checks.MISSING_ALT_LINK_HAS_TEXT;
-        const conditional = linkTextLength === 0
-          ? 'MISSING_ALT_LINK' : 'MISSING_ALT_LINK_HAS_TEXT';
-        if (rule) {
-          results.push({
-            element: $el,
-            type: rule.type || 'error',
-            content: Lang.sprintf(rule.content || conditional),
-            dismiss: prepareDismissal(`${conditional + src + linkTextLength}`),
-            dismissAll: rule.dismissAll ? conditional : false,
-            developer: rule.developer || false,
-          });
-        }
-      } else if (option.checks.MISSING_ALT) {
-        // General failure message if image is missing alt.
-        results.push({
-          element: $el,
-          type: option.checks.MISSING_ALT.type || 'error',
-          content: Lang.sprintf(option.checks.MISSING_ALT.content || 'MISSING_ALT'),
-          dismiss: prepareDismissal(`IMGNOALT${src}`),
-          dismissAll: option.checks.MISSING_ALT.dismissAll ? 'MISSING_ALT' : false,
-          developer: option.checks.MISSING_ALT.developer || false,
-        });
-      }
-    } else {
-      // If image has alt.
-      const sanitizedAlt = sanitizeHTML(alt);
-      const altText = removeWhitespace(sanitizedAlt);
-      const error = containsAltTextStopWords(altText);
-      const hasAria = $el.getAttribute('aria-label') || $el.getAttribute('aria-labelledby');
-      const titleAttr = $el.getAttribute('title');
-      const decorative = (alt === '');
-
-      // Figure elements.
-      const figure = $el.closest('figure');
-      const figcaption = figure?.querySelector('figcaption');
-      const figcaptionText = (figcaption) ? figcaption.textContent.trim() : '';
-
-      // Maximum alt text length
-      const maxAltCharactersLinks = option.checks.LINK_IMAGE_LONG_ALT.maxLength || 250;
-      const maxAltCharacters = option.checks.IMAGE_ALT_TOO_LONG.maxLength || 250;
-
-      // If aria-label or aria-labelledby returns empty or invalid.
-      if (option.checks.MISSING_ALT) {
-        if (hasAria && altText === '') {
-          results.push({
-            element: $el,
-            type: option.checks.MISSING_ALT.type || 'error',
-            content: Lang.sprintf(option.checks.MISSING_ALT.content || 'MISSING_ALT'),
-            dismiss: prepareDismissal(`IMGNOALTARIA${src}`),
-            dismissAll: option.checks.MISSING_ALT.dismissAll ? 'MISSING_ALT' : false,
-            developer: option.checks.MISSING_ALT.developer || false,
-          });
-          return;
-        }
-      }
-
-      // Decorative images.
-      if (decorative) {
-        const carouselSources = option.checks.IMAGE_DECORATIVE_CAROUSEL.sources;
-        const carousel = carouselSources ? $el.closest(carouselSources) : '';
-        if (carousel) {
-          const numberOfSlides = carousel.querySelectorAll('img');
-          const rule = (numberOfSlides.length === 1)
-            ? option.checks.IMAGE_DECORATIVE
-            : option.checks.IMAGE_DECORATIVE_CAROUSEL;
-          const conditional = (numberOfSlides.length === 1)
-            ? 'IMAGE_DECORATIVE'
-            : 'IMAGE_DECORATIVE_CAROUSEL';
-          if (rule) {
-            results.push({
-              element: $el,
-              type: rule.type || 'warning',
-              content: Lang.sprintf(rule.content || conditional),
-              dismiss: prepareDismissal(conditional + src),
-              dismissAll: rule.dismissAll ? conditional : false,
-              developer: rule.developer || false,
-            });
-          }
-        } else if (link) {
-          const rule = (linkTextLength === 0)
-            ? option.checks.LINK_IMAGE_NO_ALT_TEXT
-            : option.checks.LINK_IMAGE_TEXT;
-          const conditional = linkTextLength === 0
-            ? 'LINK_IMAGE_NO_ALT_TEXT' : 'LINK_IMAGE_TEXT';
-          if (rule) {
-            results.push({
-              element: $el,
-              type: rule.type || (linkTextLength === 0 ? 'error' : 'good'),
-              content: Lang.sprintf(rule.content || conditional),
-              dismiss: prepareDismissal(`${conditional + src + linkTextLength}`),
-              dismissAll: rule.dismissAll ? conditional : false,
-              developer: rule.developer || false,
-            });
-          }
-        } else if (figure) {
-          const rule = (figcaption && figcaptionText.length)
-            ? option.checks.IMAGE_FIGURE_DECORATIVE
-            : option.checks.IMAGE_DECORATIVE;
-          const conditional = figcaption && figcaptionText.length
-            ? 'IMAGE_FIGURE_DECORATIVE' : 'IMAGE_DECORATIVE';
-          if (rule) {
-            results.push({
-              element: $el,
-              type: rule.type || 'warning',
-              content: Lang.sprintf(rule.content || conditional),
-              dismiss: prepareDismissal(`${conditional + src + figcaptionText}`),
-              dismissAll: rule.dismissAll ? conditional : false,
-              developer: rule.developer || false,
-            });
-          }
-        } else if (option.checks.IMAGE_DECORATIVE) {
-          results.push({
-            element: $el,
-            type: option.checks.IMAGE_DECORATIVE.type || 'warning',
-            content: Lang.sprintf(option.checks.IMAGE_DECORATIVE.content || 'IMAGE_DECORATIVE'),
-            dismiss: prepareDismissal(`DECIMAGE${src}`),
-            dismissAll: option.checks.IMAGE_DECORATIVE.dismissAll ? 'IMAGE_DECORATIVE' : false,
-            developer: option.checks.IMAGE_DECORATIVE.developer || false,
-          });
-        }
-        return;
-      }
-
-      // Alt is unpronounceable.
-      const unpronounceable = (link)
-        ? option.checks.LINK_ALT_UNPRONOUNCEABLE : option.checks.ALT_UNPRONOUNCEABLE;
-      if (unpronounceable) {
-        if (alt.replace(/"|'|\?|\.|-|\s+/g, '') === '' && linkTextLength === 0) {
-          const condition = (link) ? 'LINK_ALT_UNPRONOUNCEABLE' : 'ALT_UNPRONOUNCEABLE';
-          results.push({
-            element: $el,
-            type: unpronounceable.type || 'error',
-            content: Lang.sprintf(unpronounceable.content || condition, altText),
-            dismiss: prepareDismissal(`UNPRONOUNCEABLE${src}`),
-            dismissAll: unpronounceable.dismissAll ? 'ALT_UNPRONOUNCEABLE' : false,
-            developer: unpronounceable.developer || false,
-          });
-          return;
-        }
-      }
-
-      // Potentially contains auto-generated placeholder text.
-      const maybeBadAlt = (link)
-        ? option.checks.LINK_ALT_MAYBE_BAD : option.checks.ALT_MAYBE_BAD;
-      const isTooLongSingleWord = new RegExp(`^\\S{${maybeBadAlt.minLength || 15},}$`);
-      const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(alt);
-
-      // Alt text quality.
-      if (error[0] !== null) {
-        // Has stop words.
-        const rule = (link)
-          ? option.checks.LINK_ALT_FILE_EXT
-          : option.checks.ALT_FILE_EXT;
-        const conditional = (link) ? 'LINK_ALT_FILE_EXT' : 'ALT_FILE_EXT';
-        if (rule) {
-          results.push({
-            element: $el,
-            type: rule.type || 'error',
-            content: Lang.sprintf(rule.content || conditional, error[0], altText),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
-            dismissAll: rule.dismissAll ? conditional : false,
-            developer: rule.developer || false,
-          });
-        }
-      } else if (error[2] !== null) {
-        // Placeholder words.
-        const rule = (link)
-          ? option.checks.LINK_PLACEHOLDER_ALT
-          : option.checks.ALT_PLACEHOLDER;
-        const conditional = (link) ? 'LINK_PLACEHOLDER_ALT' : 'ALT_PLACEHOLDER';
-        if (rule) {
-          results.push({
-            element: $el,
-            type: rule.type || 'error',
-            content: Lang.sprintf(rule.content || conditional, altText),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
-            dismissAll: rule.dismissAll ? conditional : false,
-            developer: rule.developer || false,
-          });
-        }
-      } else if (error[1] !== null) {
-        // Suspicious words.
-        const rule = (link)
-          ? option.checks.LINK_SUS_ALT
-          : option.checks.SUS_ALT;
-        const conditional = (link) ? 'LINK_SUS_ALT' : 'SUS_ALT';
-        if (rule) {
-          results.push({
-            element: $el,
-            type: rule.type || 'warning',
-            content: Lang.sprintf(rule.content || conditional, error[1], altText),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
-            dismissAll: rule.dismissAll ? conditional : false,
-            developer: rule.developer || false,
-          });
-        }
-      } else if (maybeBadAlt && (isTooLongSingleWord.test(alt) && containsNonAlphaChar)) {
-        // Alt text is a single word greater than 15 characters that is potentially auto-generated.
-        const conditional = (link) ? 'LINK_ALT_MAYBE_BAD' : 'ALT_MAYBE_BAD';
-        results.push({
-          element: $el,
-          type: maybeBadAlt.type || 'warning',
-          content: Lang.sprintf(maybeBadAlt.content || conditional, altText),
-          dismiss: prepareDismissal(`${conditional + src + altText}`),
-          dismissAll: maybeBadAlt.dismissAll ? conditional : false,
-          developer: maybeBadAlt.developer || false,
-        });
-      } else if (link
-        ? alt.length > maxAltCharactersLinks
-        : alt.length > maxAltCharacters) {
-        // Alt is too long.
-        const rule = (link)
-          ? option.checks.LINK_IMAGE_LONG_ALT
-          : option.checks.IMAGE_ALT_TOO_LONG;
-        const conditional = (link) ? 'LINK_IMAGE_LONG_ALT' : 'IMAGE_ALT_TOO_LONG';
-        const truncated = truncateString(altText, 600);
-        if (rule) {
-          results.push({
-            element: $el,
-            type: rule.type || 'warning',
-            content: Lang.sprintf(rule.content || conditional, alt.length, truncated),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
-            dismissAll: rule.dismissAll ? conditional : false,
-            developer: rule.developer || false,
-          });
-        }
-      } else if (link) {
-        const rule = (linkTextLength === 0)
-          ? option.checks.LINK_IMAGE_ALT
-          : option.checks.LINK_IMAGE_ALT_AND_TEXT;
-        const conditional = (linkTextLength === 0) ? 'LINK_IMAGE_ALT' : 'LINK_IMAGE_ALT_AND_TEXT';
-
-        if (rule) {
-          // Has both link text and alt text.
-          const linkAccName = computeAccessibleName(link);
-          const removeWhitespace$1 = removeWhitespace(linkAccName);
-          const sanitizedText = sanitizeHTML(removeWhitespace$1);
-
-          const tooltip = (linkTextLength === 0)
-            ? Lang.sprintf('LINK_IMAGE_ALT', altText)
-            : `${Lang.sprintf('LINK_IMAGE_ALT_AND_TEXT', altText, sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`;
-
-          results.push({
-            element: $el,
-            type: rule.type || 'warning',
-            content: rule.content
-              ? Lang.sprintf(rule.content, altText, sanitizedText)
-              : tooltip,
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
-            dismissAll: rule.dismissAll ? conditional : false,
-            developer: rule.developer || false,
-          });
-        }
-      } else if (figure) {
-        // Figure element has same alt and caption text.
-        const duplicate = !!figcaption && (figcaptionText.toLowerCase() === altText.trim().toLowerCase());
-        if (duplicate) {
-          if (option.checks.IMAGE_FIGURE_DUPLICATE_ALT) {
-            results.push({
-              element: $el,
-              type: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.type || 'warning',
-              content: Lang.sprintf(option.checks.IMAGE_FIGURE_DUPLICATE_ALT.content || 'IMAGE_FIGURE_DUPLICATE_ALT', altText),
-              dismiss: prepareDismissal(`FIGDUPLICATE${src}`),
-              dismissAll: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.dismissAll ? 'IMAGE_FIGURE_DUPLICATE_ALT' : false,
-              developer: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.developer || false,
-            });
-          }
-        } else if (option.checks.IMAGE_PASS) {
-          // Figure has alt text!
-          results.push({
-            element: $el,
-            type: option.checks.IMAGE_PASS.type || 'good',
-            content: Lang.sprintf(option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
-            dismiss: prepareDismissal(`FIGIMGPASS${src + altText}`),
-            dismissAll: option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
-            developer: option.checks.IMAGE_PASS.developer || false,
-          });
-        }
-      } else if (option.checks.IMAGE_PASS) {
-        if (!$el.closest('button, [role="button"]')) {
-          // Image has alt text!
-          results.push({
-            element: $el,
-            type: option.checks.IMAGE_PASS.type || 'good',
-            content: Lang.sprintf(option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
-            dismiss: prepareDismissal(`IMAGEPASS${src + altText}`),
-            dismissAll: option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
-            developer: option.checks.IMAGE_PASS.developer || false,
-          });
-        }
-      }
-
-      // Image's title attribute is the same as the alt.
-      // Since this is extra, it's okay if it overlaps "good" annotation.
-      if (titleAttr?.toLowerCase() === alt.toLowerCase()) {
-        if (option.checks.DUPLICATE_TITLE) {
-          results.push({
-            element: $el,
-            type: option.checks.DUPLICATE_TITLE.type || 'warning',
-            content: Lang.sprintf(option.checks.DUPLICATE_TITLE.content || 'DUPLICATE_TITLE'),
-            inline: true,
-            dismiss: prepareDismissal(`ALTDUPLICATETITLE${altText}`),
-            dismissAll: option.checks.DUPLICATE_TITLE.dismissAll ? 'DUPLICATE_TITLE' : false,
-            developer: option.checks.DUPLICATE_TITLE.developer || false,
-          });
         }
       }
     }
@@ -4118,6 +3030,1129 @@ function checkQA(results, option) {
   return results;
 }
 
+const Options = (function options() {
+  /* **************** */
+  /* Global constants */
+  /* **************** */
+  let ed11yLang = {};
+  let ed11yDefaults = {
+
+    // Relative or absolute
+    //cssUrls: false, // ['/folder/editoria11y.css','/folder/custom.css']
+    cssUrls: false,
+
+    // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
+    checkRoots: false,
+    fixedRoots: false, // Array of specific nodes, overrides previous.
+    /* e.g:
+    fixedRoots: [
+      {
+         root: direct domReference
+         framePositioner: direct domReference or false
+      }
+    ]
+    */
+
+    // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
+    shadowComponents: false,
+    autoDetectShadowComponents: true,
+
+    // Containers to globally ignore, e.g., "header *, .card *"
+    ignoreElements: false,
+		showGoodLinkButton: false,
+		showGoodImageButton: false,
+
+    // Provide list of test keys; get from localization file or results object.
+    // @todo merge provide translation layer or document change.
+    ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
+
+    // Ignore Aria on these elements (Gutenberg labels headings while editing.)
+    ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
+    ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
+
+    // Disable tests on specific elements
+    // Include and modify this entire object in your call
+    ignoreByKey: {
+      'p': 'table p',
+      // 'h': false,
+      'img': '[aria-hidden], [aria-hidden] img, ' +
+        '[role="presentation"], ' +
+        'a[href][aria-label] img, button[aria-label] img, ' +
+        'a[href][aria-labelledby] img, button[aria-labelledby] img',
+      'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
+      // 'li': false,
+      // 'blockquote': false,
+      // 'iframe': false,
+      // 'audio': false,
+      // 'video': false,
+      'table': '[role="presentation"]',
+    },
+
+    headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
+
+    // Set alertModes
+    // 'headless': do not draw interface
+    // 'userPreference: respect user preference.
+    // 'polite': open for new issues.
+    // 'assertive': open for any issues.
+    // 'active': always open.
+    // CMS integrations can switch between polite & headless at runtime.
+    alertMode: 'userPreference',
+    inlineAlerts: true,
+    watchForChanges: true, // true, false, 'checkRoots';
+
+    // This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
+    editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
+
+    // Dismissed alerts
+    currentPage: false, // uses window.location.pathname unless a string is provided.
+    allowHide: true, // enables end-user ignore button
+    allowOK: true,  // enables end-user mark OK button
+    syncedDismissals: false, // provide empty or populated object {} to enable sync functions
+    reportsURL: false, // Provides a link to site-wide reports
+    showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
+
+    // Hide all alerts if these elements are absent, e.g., ".edit-button"
+    // Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
+    ignoreAllIfAbsent: false,
+    ignoreAllIfPresent: false,
+
+    // Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
+    preventCheckingIfPresent: false,
+    preventCheckingIfAbsent: false,
+
+    // Regex of strings to remove from links before checking to see if link titles are meaningful. E.g.:
+    // "\(link is external\)|\(link sends email\)"
+    linkIgnoreStrings: false,
+    linkIgnoreSelector: false,
+
+    // Disable the "is this element visible" check on themes that have 0-height elements.
+    checkVisible: true,
+
+    // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
+    hiddenHandlers: '',
+
+    panelPinTo: 'right',
+    panelOffsetX: '25px',
+    panelOffsetY: '25px',
+    panelNoCover: '', // select other buttons to avoid.
+    panelAttachTo: document.body,
+
+    // Selector list for elements that hide overflow, truncating buttons.
+    constrainButtons: false,
+
+    // Interface
+    lang: 'en',
+    langSanitizes: false, // Some translation modules will double-escape
+    theme: 'sleekTheme',
+    sleekTheme: {
+      bg: '#eff2ff', // e8f4ff
+      bgHighlight: '#7b1919',
+      text: '#20160c',
+      primary: '#276499', // 276499
+      primaryText: '#eff2ff',
+      button: 'transparent', // deprecate?
+      panelBar: '#1e517c',
+      panelBarText: '#fffdf7',
+      panelBarShadow: '0 0 0 1px #276499',
+      activeTab: '#276499',
+      activeTabText: '#fffffe',
+      focusRing: '#007aff',
+      outlineWidth: '0',
+      borderRadius: '3px',
+      ok: '#1f5381',
+      warning: 'rgb(250, 216, 89)',
+      warningText: '#20160c',
+      alert: 'rgb(184, 5, 25)',
+      alertText: '#f4f7ff',
+    },
+    darkTheme: {
+      bg: '#0a2051',
+      bgHighlight: '#7b1919',
+      text: '#f4f7ff',
+      primary: '#3052a0',
+      primaryText: '#f4f7ff',
+      button: 'transparent',
+      panelBar: '#3052a0',
+      panelBarText: '#f4f7ff',
+      panelBarShadow: 'inset 0 0 1px, 0 0 0 1px #0a2051',
+      activeTab: '#0a2051',
+      activeTabText: '#fffffe',
+      focusRing: 'cyan',
+      outlineWidth: '2px',
+      borderRadius: '3px',
+      ok: '#0a307a',
+      warning: 'rgb(250, 216, 89)',
+      warningText: '#20160c',
+      alert: 'rgb(184, 5, 25)',
+      alertText: '#f4f7ff',
+    },
+    lightTheme: {
+      bg: '#fffffe',
+      bgHighlight: '#7b1919',
+      text: '#20160c',
+      primary: '#0a307a',
+      primaryText: '#fffdf7',
+      panelBar: '#0a307a',
+      panelBarText: '#f4f7ff',
+      panelBarShadow: '0 0 0 1px #0a307a',
+      button: 'transparent',
+      activeTab: '#b9c0cf',
+      activeTabText: '#20160c',
+      focusRing: '#007aff',
+      outlineWidth: '0',
+      borderRadius: '3px',
+      ok: '#0a307a',
+      warning: 'rgb(250, 216, 89)',
+      warningText: '#20160c',
+      alert: 'rgb(184, 5, 25)',
+      alertText: '#f4f7ff',
+    },
+    // Base z-index for buttons.
+    // 1299 maximizes TinyMCE compatibility.
+    buttonZIndex: 1299,
+    // CSS overrides and additions.
+
+    baseFontSize: 'clamp(14px, 1.5vw, 16px)',
+    baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
+
+    // Test customizations
+    embeddedContent: false, // @todo remove in favor of custom checks?
+    embeddedContentTitle: '', // @todo test or remove?
+    embeddedContentMessage: '', // @todo test or remove?
+
+    linksUrls: false, // get from language pack
+    linksMeaningless: false, // get from language pack
+    altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
+    // * Not implemented Yet:
+    // ruleset toggling
+    // form label tests
+    // detectSPArouting: false,
+
+    editLinks: false, // Add links to edit content in tooltips.
+
+    // @todo merge: port this functionality.
+    editorHeadingLevel: [
+      // Sets previous heading level for contentEditable fields.
+      // With 'ignore' set, first heading level is ignored in editable zones.
+      // This is ideal for systems with separate backend editing pages.
+      // Set to 'inherit' for fields edited in a frontend context.
+      /*{
+        selector: '.example-inherit',
+        previousHeading: 'inherit',
+      },
+      {
+        selector: '.example-l3',
+        previousHeading: 3,
+      },*/
+      {
+        selector: '*',
+        previousHeading: 0, // Ignores first heading for level skip detection.
+      },
+    ],
+
+    userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
+
+    customTests: 0,
+
+    // @todo merge do we need the image and button descenders and the tabindex selector? If so should it be in the MR?
+    imageIgnore: '[aria-hidden], [aria-hidden] img, [role="presentation"], a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img',
+    linkIgnore: '[aria-hidden][tabindex="-1"]',
+  };
+
+  function preProcessOptions(options) {
+    const sa11yDefaults = defaultOptions;
+    ed11yDefaults = {
+      ...sa11yDefaults,
+      ...ed11yDefaults,
+    };
+
+    // @todo MERGE these get destroyed in constants.js
+    //ed11yDefaults.checks.QA_DOCUMENT.sources = 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']'
+    //ed11yDefaults.checks.EMBED_VIDEO.sources = 'video, [src*="youtube.com"], [src*="brightcove.com"], [src*="dailymotion.com"], [src*="panopto.com"], [src*="Video"], [src*="video"], [src*="vimeo.com"], [src*="watch"], [src*="wistia.com"], [src*="vidyard.com"], [src*=yuja.com]';
+
+		/*
+		* video, [src*="Video"], [src*="video"], [src*="watch"], [src*="youtube.com"], [src*="vimeo.com"], [src*="panopto.com"], [src*="wistia.com"], [src*="dailymotion.com"], [src*="brightcove.com"], [src*="vidyard.com"], [src*="video"], [src*="[src*="youtube.com"]"], [src*="[src*="brightcove.com"]"], [src*="[src*="dailymotion.com"]"], [src*="[src*="panopto.com"]"], [src*="[src*="Video"]"], [src*="[src*="video"]"], [src*="[src*="vimeo.com"]"], [src*="[src*="watch"]"], [src*="[src*="wistia.com"]"], [src*="[src*="vidyard.com"]"], [src*="[src*=yuja.com]"]
+		* */
+
+    options = {
+      ...ed11yDefaults,
+      ...options,
+    };
+    /*
+    * Options translation
+    * */
+    options.headless = options.alertMode === 'headless';
+    options.customChecks = options.customTests > 0 && !options.customChecks ? 'listen' : false;
+
+    // Toggleable plugins
+    options.developerPlugin = false;
+    options.colourFilterPlugin = false;
+    options.exportResultsPlugin = false;
+    options.showImageOutline = false;
+    // @todo merge what are these?
+    // Constants.Global.ignoreContentOutsideRoots = option.ignoreContentOutsideRoots;
+
+  //  options.panelPosition = panelPinTo; // Syntax?
+
+    // Check for document types.
+
+    if (options.documentLinks) {
+      options.checks.QA_DOCUMENT.sources = options.documentLinks;
+    }
+    // @todo merge this changed name from linkIgnoreSelector.
+
+    if (options.linkIgnoreSelector) {
+      options.linkIgnoreSpan = options.linkIgnoreSelector;
+    }
+
+    if (options.panelAttachTo) {
+      State.panelAttachTo = options.panelAttachTo; // todo Is this implemented anywhere?
+    }
+
+
+    // @todo Merge ignoreByKey deprecation documentation and conversion. These tests still need overrides:
+    // 'p': 'table p',
+    //  'table': '[role="presentation"]'
+
+    /* ********************** */
+    /* Embedded Content Setup */
+    /* ********************** */
+    //Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
+    // @todo merge: this means custom embeds needs to be a custom test.
+
+    /* ************** */
+    /* Language setup */
+    /* ************** */
+    // @todo merge how to emulate Sa11y translations?
+    /*ed11yLang = {
+      // Fall back to En strings if language or string is unavailable
+      ...ed11yLang['en'],
+      ...ed11yLang[options.lang]
+    };*/
+
+    /* *********** */
+    /* Theme setup */
+    /* *********** */
+    Theme.push = options[options.theme];
+    Theme.baseFontSize = options.baseFontSize;
+    Theme.buttonZIndex = options.buttonZIndex;
+    Theme.baseFontFamily = options.baseFontFamily;
+
+    let cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
+    if (!options.cssUrls) {
+      const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
+      if (cssLink) {
+        cssUrls = [cssLink.getAttribute('href')];
+      } else {
+        console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
+      }
+    }
+    const cssBundle = document.createElement('div');
+    cssBundle.classList.add('ed11y-style');
+    cssBundle.setAttribute('hidden','');
+    cssUrls?.forEach( sheet => {
+      const cssLink = document.createElement('link');
+      cssLink.setAttribute('rel', 'stylesheet');
+      // @todo preload.
+      cssLink.setAttribute('media', 'all');
+      if (sheet.indexOf('?') < 0) {
+        sheet = sheet + '?ver=' + State.version;
+      }
+      cssLink.setAttribute('href', sheet);
+      cssBundle.append(cssLink);
+    });
+    UI.attachCSS = function(appendTo) {
+      const link = cssBundle.cloneNode(true);
+      appendTo.appendChild(link);
+    };
+
+    return options;
+  }
+
+  function postProcessOptions(option) {
+    // @todo merge: test: does this need descendant selector?
+    Constants.Exclusions.Sa11yElements = ['.ed11y-element'];
+
+		State.english = Lang.langStrings.LANG_CODE.startsWith('en');
+
+    // Main container exclusions.
+    console.log('Constants: ');
+    console.log(Constants);
+
+    // Undo Sa11y overrides in constants.js.
+    //Constants.Global.documentSources = option.checks.QA_DOCUMENT.sources;
+    //Constants.Global.videoSources = option.checks.EMBED_VIDEO.sources;
+    //Constants.Global.AudioSources = option.checks.EMBED_AUDIO.sources;
+    //Constants.Global.dataVizSources = option.checks.EMBED_DATA_VIZ.sources;
+    //Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
+
+    State.currentPage = options.currentPage ? options.currentPage : window.location.currentPage;
+
+    Object.assign(Theme, State.options[State.options.theme]);
+    Theme.baseFontSize = State.options.baseFontSize;
+    Theme.buttonZIndex = State.options.buttonZIndex;
+    Theme.baseFontFamily = State.options.baseFontFamily;
+
+    // @todo this is probably getting provided by Sa11y
+    if (State.options.currentPage === false) {
+      State.options.currentPage = window.location.pathname;
+    }
+
+    if (!State.options.linkStringsNewWindows) {
+      State.options.linkStringsNewWindows = M.linkStringsNewWindows;
+    }
+    // @todo merge remove wpadminbar from defaults and update wp module.
+    /*Exclusions.Container = ['#wpadminbar', '#wpadminbar *', ...exclusions];
+    if (option.containerIgnore) {
+      const containerSelectors = option.containerIgnore.split(',').map((item) => item.trim());
+      Exclusions.Container = Exclusions.Container.concat(
+        containerSelectors.flatMap((item) => [`${item} *`, item]),
+      );
+    }*/
+
+  }
+
+  return {
+    preProcessOptions,
+    ed11yLang,
+    postProcessOptions,
+  };
+}());
+
+const ed11yLang = {
+
+  // ESLint config:
+  /* global Ed11y */
+  /* exported ed11yLang */
+
+  strings : {
+
+		// todo implement CONSOLE_ERROR
+
+    // Main Panel =========================================
+    MAIN_TOGGLE_LABEL: 'Toggle accessibility tools',
+    toggleDisabled: 'No content available for Editoria11y to check.',
+    panelControls: 'Editorially',
+    PANEL_HEADING: 'Check headings & alt text',
+    buttonToolsActive: 'Hide headings & alt text', // todo
+    OUTLINE: 'Headings', // todo
+		IMAGES: 'Alt text',
+    buttonFirstContent: 'Go to first alert', // todo change to "SKIP_TO_ISSUE#".
+    buttonNextContent: 'Go to next alert',
+    buttonPrevContent: 'Go to previous alert',
+    buttonShowHiddenAlert: 'Show hidden alert', // Has fallback.
+    buttonHideHiddenAlert: 'Hide hidden alert', // Has fallback.
+    PANEL_DISMISS_BUTTON: `Show %(dismissCount) hidden alerts`,
+    buttonHideHiddenAlerts: `Hide %(count) hidden alerts`, // Has fallback.
+    buttonShowAlerts: 'Show accessibility alerts',
+    buttonShowNoAlert: 'Show accessibility checker',
+    buttonHideChecker: 'Hide accessibility checker',
+    buttonHideAlerts: 'Hide accessibility alerts',
+    panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>', // Todo ENG only.
+    panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>', // Todo ENG only.
+    NO_IMAGES: 'No images found.',
+		ALT: 'Alt Text: ', // @todo Merge mvp image alts are not rendering!
+    MISSING: '(missing!)',
+    errorAltNull: '(none; image marked as decorative)', // todo ENG only?
+    errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
+    errorOutlinePrefixHeadingEmpty: '(empty heading) ',
+    errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
+
+    // Errors and alerts ==================================
+
+    consoleNotSupported: 'This browser can not run Editoria11y.',
+    NOT_VISIBLE: 'Note: this content may not be visible. Look for it inside the outlined container.',
+    jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.', // todo fall back to NOT_VISIBLE?
+		ACC_NAME_TIP: ' ',
+
+    // Strings used in tests ==============================
+
+		// @todo Add courtesy of, copyright, and photo by to Sa11y.
+    // suspiciousWords: ['image of','graphic of','picture of','photo of','photograph of','placeholder','spacer','tbd','todo', 'copyright', 'courtesy of', 'photo by'],
+    // badEndingForAlt: ['photo', 'image', 'photograph', 'picture'],
+		// @todo Compare Sa11y test.
+    //linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
+		// @todo Compare Sa11y test performance
+    //linksMeaningless: /(learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|"|'|\?|\.|-|,|:|>|<|\s)+/g,
+    //linkStringsNewWindows: /window|\stab|download/g,
+
+    // Tooltips ======================================
+
+    WARNING: 'manual check needed',
+    //ERROR: 'alert',
+    ALERT_TEXT: 'Issue',
+    //toggleAriaLabel: `Accessibility %(label)`,
+    transferFocus: 'Edit this content',
+    dismissOkButtonContent: 'Mark as OK',
+		DISMISS: 'Mark as ignored',
+    dismissActions: `%(count) similar issues`, // 2.3.10
+		DISMISS_ALL: 'Ignore all like this', // 2.3.10
+    dismissOkAllButton: 'Mark all like this as OK', // 2.3.10
+    dismissOkTitle: 'Hides this alert for all editors',
+    dismissHideTitle: 'Hides this alert for you',
+    undismissOKButton: 'Restore this alert marked as OK',
+    undismissHideButton: 'Restore this hidden alert',
+    undismissNotePermissions: 'This alert has been hidden by an administrator',
+    reportsLink: 'Open site reports in new tab',
+    ALERT_CLOSE: 'Close',
+    panelHelpTitle: 'About this tool',
+    panelHelp: `
+    <p><a href="https://editoria11y.princeton.edu/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
+    <p>Many alerts are "manual checks." Manual checks can be dismissed:</p>
+    <ul>
+        <li>"Mark as checked and OK" hides the alert for all editors.</li>
+        <li>"Ignore this manual check" leaves the tip visible to other editors.</li>
+    </ul>
+    <p>Dismissed alerts can be found via the "Show hidden alerts" toggle.</p>
+    <p>If an incorrect alert is appearing on many pages, site administrators can tell the checker to ignore particular elements and page regions.</p>
+    <p>And remember that automated checkers cannot replace <a href='https://webaim.org/resources/evalquickref/'> proofreading and testing for accessibility</a>.</p>
+    <p><br><a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Report bugs & request changes <span aria-hidden="true">&raquo;</span></a></p>
+    `,
+
+    // Tooltips for heading tests =========================
+
+//    headingExample : `<ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>`,
+
+  },
+	tests: {
+		// todo: update Drupal localization file.
+		headingLevelSkipped : {
+			title: 'Manual check: was a heading level skipped?',
+		},
+		HEADING_SKIPPED_LEVEL: `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
+            <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>
+            <p>This heading skipped from level %(prevLevel) to level %(level). From a screen reader, this sounds like content is missing.</p>
+            <p><strong>To fix:</strong> adjust levels to form an accurate outline, without gaps.</p>
+            `,
+
+		headingEmpty : {
+			title: 'Heading tag without any text',
+		},
+		HEADING_EMPTY: `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
+            <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>
+            <p>Empty headings create confusing gaps in this outline: they could mean the following content is still part of the previous section, or that the text was unpronounceable for some reason.</p>
+            <p><strong>To fix:</strong> add text to this heading, or delete this empty line.</p>
+            `,
+
+		headingIsLong : {
+			title: 'Manual check: long heading',
+		},
+		HEADING_LONG: `<p>Headings should be brief and clear. Assistive devices use them as a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for the page. The numbers indicate indents in a nesting relationship:</p>  
+            <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>
+            <p><strong>To fix:</strong> shorten this heading if possible, or remove the heading style if it was only applied to this text to provide visual emphasis.</p>
+            `,
+
+		blockquoteIsShort : {
+			title: 'Manual check: is this a blockquote?',
+		},
+		QA_BLOCKQUOTE: '<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. This was flagged because short blockquotes are <em>sometimes</em> actually <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">headings</a>. If this is a heading and not a quotation, use heading formatting instead, so this appears in the page outline.</p>',
+
+		// Tooltips for image tests =========================
+
+		altMissing : {
+			title: 'Image has no alternative text attribute',
+		},
+		MISSING_ALT: `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.</p>
+            <p><strong>To fix:</strong> either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>
+            <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
+            <ul>
+                <li>The sunny spring day brought kids to the park for some soccer.</li>
+                <li>A.J. wearing the new team uniform.</li>
+                <li>The game-winning kick curved in from the left sideline!</li>
+                <li>The size 4 ball is the right size for this 9-year-old child.</li>
+            </ul>`,
+
+		altNull : {
+			title: 'Manual check: image has no alt text',
+		},
+		IMAGE_DECORATIVE: `<p>Unless this image is purely decorative (a spacer icon or background texture), an alt should probably be provided. Photos in page content <strong>almost always need alt text.</strong> Since many screen reader users can see there is an image present, it can be very confusing to move the cursor across the place on the page where an image is visible, but hear nothing.</p>
+        <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
+            <ul>
+                <li>The sunny spring day brought kids to the park for some soccer.</li>
+                <li>A.J. wearing the new team uniform.</li>
+                <li>The game-winning kick curved in from the left sideline!</li>
+                <li>The size 4 ball is the right size for this 9-year-old child.</li>
+            </ul>`,
+
+		altURL : {
+			title: 'Image\'s text alternative is a URL',
+		},
+		ALT_FILE_EXT: `This image's alt text is "%(alt)," which probably describes the file name, not the contents of the image.
+        <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
+        <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
+            <ul>
+                <li>The sunny spring day brought kids to the park for some soccer.</li>
+                <li>A.J. wearing the new team uniform.</li>
+                <li>The game-winning kick curved in from the left sideline!</li>
+                <li>The size 4 ball is the right size for this 9-year-old child.</li>
+            </ul>`
+		,
+
+		altMeaningless : {
+			title: 'Alt text is meaningless',
+		},
+		ALT_PLACEHOLDER: `<p>This image's alt text is "%(alt)," which was flagged for being common placeholder text.</p>
+        <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
+        <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
+            <ul>
+                <li>The sunny spring day brought kids to the park for some soccer.</li>
+                <li>A.J. wearing the new team uniform.</li>
+                <li>The game-winning kick curved in from the left sideline!</li>
+                <li>The size 4 ball is the right size for this 9-year-old child.</li>
+            </ul>`
+		,
+
+		altMeaninglessLinked : {
+			title: 'Linked alt text is meaningless',
+		},
+		LINK_PLACEHOLDER_ALT: `<p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
+            Links should clearly and concisely describe their destination, even out of context.</p>
+           <p>This image's alt text is "%(alt)," which probably does not describe this link.</p>`
+		,
+
+		altURLLinked : {
+			title: 'Linked image\'s text alternative is a URL',
+		},
+		LINK_ALT_FILE_EXT: `<p>This image's alt text is "%(alt)," which is probably a filename.</p>
+        <p>When a link is wrapped around an image and there is no other text, the <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">image's alt text becomes the link text</a> announced by screen readers.
+            Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
+            <ul>
+                <li>Good link text: "About us"</li>
+                <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess</li>
+            </ul>`, // @todo merge with Adam's wording.
+
+		altImageOf : {
+			title: 'Manual check: possibly redundant text in alt',
+		},
+		SUS_ALT: `<p>This image's alt text is "%(alt)," which mentions that this image is an image.</p>
+        <p>Screen readers announce they are describing an image when reading alt text, so 
+            phrases like "image of" and "photo of" are usually redundant in alt text; the screen reader user hears "image: image of something."</p>
+            <p>Note that this is OK if the format is referring to the <strong>content</strong> of the image:</p>
+            <ul><li>Format is redundant: "<em>photo of</em> a VHS tape"</li>
+            <li>Format is relevant: "<em>photo of</em> a VHS tape in a photo album being discussed in a history class"</li></ul>`,
+
+		altImageOfLinked : {
+			title: 'Manual check: possibly redundant text in linked image',
+		},
+		LINK_SUS_ALT: `<p>This image's alt text is "%(alt)," which mentions that this image is an image.</p>
+        <hr><p>Links should clearly and concisely describe their destination. Since words like "image," "graphic" or "photo" are already redundant in text alternatives (screen readers already identify the image as an image), their presence in a linked image usually means the image's text alternative is <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">describing the image instead of the link</a>.</p>
+            <ul>
+                <li>Good link text: "About us"</li>
+                <li>Bad link text: "Image of five people jumping"</li>
+            </ul>`,
+
+		altDeadspace : {
+			title: 'Image\'s text alternative is unpronounceable',
+		},
+		ALT_UNPRONOUNCEABLE: `<p>This image's alt text is "%(alt)," which only contains unpronounceable symbols and/or spaces. Screen readers will announce that an image is present, and then pause awkwardly: "image: ____."</p>
+        <p><strong>To fix:</strong> add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") if this is just an icon or spacer, and screen readers should ignore it.</p>
+            <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
+            <ul>
+                <li>The sunny spring day brought kids to the park for some soccer.</li>
+                <li>A.J. wearing the new team uniform.</li>
+                <li>The game-winning kick curved in from the left sideline!</li>
+                <li>The size 4 ball is the right size for this 9-year-old child.</li>
+            </ul>`,
+
+		altEmptyLinked : {
+			title: 'Linked Image has no alt text',
+		},
+		LINK_IMAGE_NO_ALT_TEXT: `<p>When a link is wrapped around an image, the image's alt text <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">provides the link's title for screen readers</a>.</p>
+        <p><strong>To fix:</strong> set this image's alternative text to something that describes the link's destination, or add text next to the image, within the link.</p>`,
+		// @todo MISSING_ALT_LINKED too?
+
+		altLong : {
+			title: 'Manual check: very long alternative text',
+		},
+		IMAGE_ALT_TOO_LONG: `<p>Image text alternatives are announced by screen readers as a single run-on sentence; listeners must listen to the entire alt a second time if they miss something. If this cannot be reworded to something succinct, it is better to use the alt to reference a <em>visible</em> <a href="https://www.w3.org/WAI/tutorials/images/complex/">text alternative for complex images</a>. For example:</p>
+            <ul><li>"Event poster; details follow in caption"</li>
+            <li>"Chart showing our issues going to zero; details follow in table"</li></ul>
+            This image's alt text is: <em>%(alt)</em>
+            `,
+
+		altLongLinked : {
+			title: 'Manual check: very long alternative text in linked image',
+		},
+		LINK_IMAGE_LONG_ALT: `<p><a href="https://webaim.org/techniques/hypertext/link_text#alt_link">The alt text on a linked image is used to describe the link destination</a>. Links should be brief, clear and concise, as screen reader users often listen to the list of links on the page to find content of interest. Long alternative text inside a link often indicates that the image's text alternative is describing the image instead rather than the link.</p>
+        This image's alt text is: <em>%(alt)</em>`,
+
+		altPartOfLinkWithText : {
+			title: 'Manual check: link contains both text and an image', // 2.3.10.
+		},
+		LINK_IMAGE_ALT_AND_TEXT: `<p>Screen readers will <a href="https://www.w3.org/WAI/tutorials/images/functional/">include the image's alt text when describing this link</a>.</p>
+            <p>Check that the combined text is concise and meaningful:<br>"<em><strong>%(alt)</strong></em>"</p>
+            <p></p>
+            <ul>
+                <li>Keep alts that add relevant meaning:<br>"Buy (A Tigers v. Falcons ticket)."</li>
+                <li>Edit unhelpful or irrelevant alts:<br>"Buy (A piece of paper with team logos on it)."</li>
+                <li>Remove unnecessary alts:<br>"Buy Tigers v. Falcons tickets (A Tigers v. Falcons ticket)."</li>
+            </ul>
+        `,
+
+		// @todo discuss: separate tests for no text and all text ignored:
+		linkNoTextExample: '<p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>',
+
+		linkTextIgnored: (ignoredText) => `
+    <p>Screen readers will only read the text of the link type indicator on this link:<br>
+    <em>"<strong>%(ignoredText)</strong>"</em></p>
+    `,
+
+		linkNoText : {
+			title: 'Link with no accessible text',
+		},
+		LINK_EMPTY:
+			`<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
+        <p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>
+        <p><strong>To fix:</strong></p>
+        <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describe where it goes.</li>`,
+
+		linkTextIsURL : {
+			title: 'Manual check: is this link text a URL?',
+		},
+		LINK_URL: `<p>This link's text is:<br> <strong>%(text)</strong></p>
+        <p><a href="https://webaim.org/techniques/hypertext/link_text">Links should be meaningful and concise</a>. Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
+         <p>A linked URL breaks this pattern; the reader has to read the preceding paragraph to figure out the link's purpose from context.</p>
+            <ul>
+                <li>Meaningful and concise link: "Tips for writing meaningful links"</li>
+                <li>Linked URL, as pronounced by a screen reader: "H T T P S colon forward-slash forward-slash example dot com forward-slash tips forward-slash meaningful-links"</li>
+            </ul>`,
+
+		linkTextIsGeneric : {
+			title: 'Manual check: is this link meaningful and concise?',
+		},
+		LINK_STOPWORD: `<p>This link's text is: <strong>%(text)</strong></p>
+        <p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
+                <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully enough to figure out each link's purpose from context. Few readers do this, so click-through rates on meaningless links are extremely poor.</p>
+                <ul>
+                <li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text">meaningful links"</a></strong></li>
+                <li>Not meaningful: "Click <a href="https://webaim.org/techniques/hypertext/link_text">here</a> to learn about meaningful links."</li>
+                <li>Not concise: "<a href="https://webaim.org/techniques/hypertext/link_text">Click here to learn more about meaningful links</a>"</li>
+                </ul>
+                `,
+
+		linkDocument : {
+			title : 'Manual check: is the linked document accessible?',
+		},
+		QA_PDF: `<p>Many mobile and assistive device users struggle to read content in PDFs. PDFs generally do not allow for changing font sizes, and often contain features that are incompatible with screen readers.</p>
+        <p>Ideally make the content of this linked PDF available on a Web page or in an editable document, and only link to this PDF as a "printable" alternative. If this PDF is the only way you are providing to access this content, you will need to <a href='https://webaim.org/techniques/acrobat/' target='_blank'>manually check that the PDF is well-structured</a>, with headings, lists and table headers, and provides alt text for its images.</p>`,
+
+		linkNewWindow : {
+			title: 'Manual check: is opening a new window expected?',
+		},
+		LINK_NEW_TAB: `<p>Readers can always choose to open a link a new window. When a link forces open a new window, it can be confusing and annoying, especially for assistive device users who may wonder why their browser's "back" button is suddenly disabled.</p>
+                <p>There are two general exceptions:</p>
+                <ul>
+                    <li>When the user is filling out a form, and opening a link in the same window would cause them to lose their work.</li>
+                    <li>When the user is clearly warned a link will open a new window.</li>
+                </ul>
+                <p><strong>To fix:</strong> set this link back its default target, or add a screen-reader accessible warning (text or an icon with alt text).</p>
+                `,
+
+		// Tooltips for Text QA ===============================
+
+		tableNoHeaderCells : {
+			title: 'Table has no header cells',
+		},
+		TABLES_MISSING_HEADINGS: `
+                <p>To fix:</p>
+                <ul><li>If this table contains data that is meaningfully organized by row and column, edit the table's properties and specify whether headers have been placed in the first row, column or both. This lets screen reader users hear the headers repeated while navigating the content.</li>
+                <li>If this table does not contain rows and columns of data, but is instead being used for visual layout, remove it. Tables overflow the page rather than reflowing on mobile devices, and should only be used when the horizontal relationships are necessary to understand the content.</li></ul>
+            `,
+
+		tableContainsContentHeading : {
+			title: 'Content heading inside a table',
+		},
+		TABLES_SEMANTIC_HEADING: `<p>To fix: remove heading formatting. Use row and column headers instead.</p>
+        <p>Content headings ("Heading 1", "Heading 2") form a navigable table of contents for screen reader users,  
+        labelling all content <strong>until the next heading</strong>. Table headers label specific columns or rows within a table.</p> 
+            <p></p>
+            <table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">To illustrate: a <strong>table</strong> header in cell 2 would only label its column: cell B. <br><br>
+            A <strong>content</strong> heading in cell 2 would label all subsequent text, reading from left to right: cells 3, A, B and C, as well as this text!</td></tr>
+            <tr><td>A</td><td>B</td><td>C</td></table>
+            `,
+
+		tableEmptyHeaderCell : {
+			title: 'Empty table header cell',
+		},
+		TABLES_EMPTY_HEADING: `
+                <p>When exploring tables, screen readers repeat table header cells as needed to orient users. 
+                Without headers, it is very easy to get lost; screen reader users have to count columns and rows and try to remember which columns went with which rows.</p>
+                <p><strong>To fix:</strong> make sure each header cell in this table contains text.</p>
+            `,
+
+		textPossibleList : {
+			title: 'Manual check: should this have list formatting?',
+		},
+		QA_FAKE_LIST: `<p>List formatting is structural:</p> 
+            <ol><li>List formatting indents and reflows on overflow. Text aligns vertically with the line above it.</li>
+            <li>Lists are machine-readable. Screen readers can orient their users, announcing this as "list item, 2 of 3."</li></ol>
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;3. But this third item is just a sentence with a number in front of it. It wraps incorrectly, and screen readers do not know it is related to the other items in the list.</p>
+            <p><strong>To fix:</strong> if this "%(text)" is part of a list, replace it with list formatting.</p>
+            `,
+
+		textPossibleHeading : {
+			title: 'Manual check: should this be a heading?',
+		},
+		QA_FAKE_HEADING: `<p>If this all-bold line of text is functioning as a heading for the following text rather than a visual emphasis, replace the bold formatting with the appropriately numbered heading. Otherwise, dismiss this alert.</p>
+        <p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
+            <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>
+            `,
+
+		textUppercase : {
+			title: 'Manual check: is this uppercase text needed?',
+		},
+		QA_UPPERCASE: `<p>UPPERCASE TEXT CAN BE MORE DIFFICULT TO READ FOR MANY PEOPLE, AND IS OFTEN INTERPRETED AS SHOUTING.</p>
+         <p>Consider using sentence case instead, and using bold text or font changes for visual emphasis, or structural formatting like headings for emphasis that will also be announced by screen readers.</p>`,
+
+		embedVideo : {
+			title: 'Manual check: is this video accurately captioned?',
+		},
+		EMBED_VIDEO: `<p>If a recorded video contains speech or meaningful sounds, it must <a href="https://www.w3.org/WAI/media/av/captions/" title="Opens in new window">provide captions</a>.</p>
+            <p>Note that automatic, machine-generated captions must be proofread, and speaker identifications must be added, before being considered an equal alternative.</p>`,
+
+		embedAudio : {
+			title: 'Manual check: is an accurate transcript provided?',
+		},
+		EMBED_AUDIO: `<p>If this audio contains speech, a <a href="https://www.w3.org/WAI/media/av/transcribing/" title="Opens in new window">text alternative</a> must be provided on this page or linked.</p>
+            <p>Note that automatic, machine-generated transcripts must be proofread, and speaker identifications must be added, before being considered an equal alternative</p>`,
+
+		embedVisualization : {
+			title: 'Manual check: is this visualization accessible?',
+		},
+		EMBED_DATA_VIZ: `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
+            <p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
+
+		// @todo merge lost test
+		/*embedTwitter : {
+			title: 'Manual check: is this embed a keyboard trap?',
+			tip : () =>
+				`<p>If embedded feeds are set to show a high number of items, keyboard users may have to click the tab key dozens or hundreds of times to exit the component.</p>
+						<p>Check to make sure only a small number of items auto-load immediately or while scrolling. Having additional items load on request ("show more") is fine.</p>`,
+		},*/
+
+		embedCustom : {
+			title: 'Manual check: is this embedded content accessible?',
+		},
+		EMBED_GENERAL: '<p>Please make sure images inside this embed have alt text, videos have captions, and interactive components can be <a href=\'https://webaim.org/techniques/keyboard/\'>operated by a keyboard</a>.</p>',
+	}
+};
+
+function parents(el) {
+  let nodes = [];
+  nodes.push(el);
+  while (el && !!el.parentElement && el.parentElement.tagName !== 'HTML') {
+    nodes.push(el.parentElement);
+    el = el.parentElement;
+  }
+  return nodes;
+}
+
+function resetClass(classes) {
+  classes?.forEach((el) => {
+    let thisClass = el;
+    findElements('reset', `.${thisClass}`);
+    State.elements.reset?.forEach(el => {
+      el.classList.remove(thisClass);
+    });
+  });
+}
+
+function visibleElement(el) {
+  // Checks if this element is visible. Used in parent iterators.
+  // false is definitely invisible, true requires continued iteration to tell.
+  // Todo postpone: Check for offscreen?
+  if (el) {
+    if (!el.checkVisibility({
+      opacityProperty: true,
+      visibilityProperty: true,
+    })) {
+      return false;
+    }
+    let style = window.getComputedStyle(el);
+    return !(el.closest('.sr-only, .visually-hidden') ||
+      style.getPropertyValue('z-index') < 0 ||
+      (style.getPropertyValue('overflow') === 'hidden' &&
+        ( el.offsetWidth < 10 ||
+          el.offsetHeight < 10 )
+      )
+    );
+  }
+}
+function visible(el) {
+  // Recurse element and ancestors to make sure it is visible
+  if (!visibleElement(el)) {
+    // Element is hidden
+    return false;
+  } else {
+    // Element is not known to be hidden.
+    let theParents = parents(el);
+    let visibleParent = (parent) => visibleElement(parent);
+    return theParents.every(visibleParent);
+  }
+}
+function firstVisibleParent(el) {
+  let parent = el.parentElement;
+  if (parent) {
+    // Parent exists
+    if (!visibleElement(parent)) {
+      // Recurse
+      parent = firstVisibleParent(parent);
+      return parent;
+    } else {
+      // Element is visible
+      return parent;
+    }
+  } else {
+    // No visible parents.
+    return false;
+  }
+}
+function detectShadow (container) {
+  if (State.options.autoDetectShadowComponents) {
+    const select = !State.ignore ? '*:not(.ed11y-element)' : `*:not(${State.options.ignore}, .ed11y-element)`;
+    let search;
+    if (container.shadowRoot && container.shadowRoot.mode === 'open') {
+      if (!container.matches('[data-ed11y-has-shadow-root]')) {
+        container.setAttribute('data-ed11y-has-shadow-root', 'true');
+        UI.attachCSS(container.shadowRoot);
+        UI.attachCSS(container);
+      }
+      search = container.shadowRoot.querySelectorAll(select);
+    } else {
+      search = container.querySelectorAll(select);
+    }
+    search?.forEach((component) => {
+      if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+        detectShadow(component);
+      }
+    });
+  } else if (State.options.shadowComponents) {
+    const providedShadow = container.querySelectorAll(State.options.shadowComponents);
+    providedShadow.forEach((component) => {
+      if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+        if (!container.matches('[data-ed11y-has-shadow-root]')){
+          component.setAttribute('data-ed11y-has-shadow-root', 'true');
+          UI.attachCSS(component.shadowRoot);
+          UI.attachCSS(component);
+        }
+        detectShadow(component);
+      } else {
+        console.warn(`Editoria11y: A specified shadow host has no shadowRoot: ${component.tagName}`);
+      }
+    });
+  }
+}
+const diveShadow = function (container, select, selector) {
+  if (container.matches(selector)) {
+    return([container]);
+  } else {
+    let inners = container.shadowRoot.querySelectorAll(select);
+    if (typeof(inners) === 'object' && inners.length > 0) {
+      // Replace shadow host with inner elements.
+      inners.forEach(inner => {
+        for (let innerIndex = inners - 1; innerIndex >= 0; innerIndex--) {
+          let innerInner = diveShadow(inner, select, selector);
+          if (innerInner.length > 0) {
+            inners.splice(innerIndex, 1, ...innerInner);
+          } else {
+            inners.splice(innerIndex, 1);
+          }
+        }
+      });
+      return (Array.from(inners).filter((el) => el.matches(selector)));
+    }
+  }
+  return [];
+};
+
+// QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
+function findElements (key, selector, rootRestrict = true) { // @todo merge replace.
+
+  // Todo beta: function and parameter to auto-detect shadow components.
+  let shadowSelector = State.options.autoDetectShadowComponents ?
+    '[data-ed11y-has-shadow-root]' :
+    State.options.shadowComponents ?
+      State.options.shadowComponents : false;
+
+  // Concatenate global and specific ignores
+  let ignore;
+  if (State.options.ignoreElements) {
+    ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreElements}, ${State.options.ignoreByKey[key]})` : `:not(${State.options.ignoreElements})`;
+  } else {
+    ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreByKey[key]})` : '';
+  }
+
+  // Initialize or reset elements array.
+  State.elements[key] = [];
+
+  const select = `:is(${selector}${shadowSelector ? ', ' + shadowSelector : ''})${ignore}`;
+
+  if (rootRestrict && State.roots) {
+    // Add array of elements matching selector, excluding the provided ignore list.
+    // Todo this can dupe
+    State.roots.forEach(root => {
+      State.elements[key] = State.elements[key].concat(Array.from(root.querySelectorAll(select)));
+    });
+  } else {
+    State.elements[key] = State.elements[key].concat(Array.from(document.querySelectorAll(select)));
+  }
+
+  // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
+  // Repeat the search inside each placeholder, and replace the placeholder with its search results.
+  if (shadowSelector) {
+    for (let index = State.elements[key].length - 1; index >= 0; index--) {
+      if (State.elements[key][index].matches(shadowSelector)) {
+        // Dive into the shadow root and collect an array of its results.
+        let inners = diveShadow(State.elements[key][index], select, selector);
+        if (inners.length > 0) {
+          State.elements[key].splice(index, 1, ...inners);
+        } else {
+          State.elements[key].splice(index, 1);
+        }
+      }
+    }
+  }
+}
+function pauseObservers() {
+	State.watching?.forEach(observer => {
+		observer.observer.disconnect();
+	});
+}
+
+function resumeObservers() {
+	State.watching?.forEach(observer => {
+		observer.observer.observe(observer.root, observer.config);
+	});
+}
+
+function checkRunPrevent() {
+	let preventCheck = State.options.preventCheckingIfPresent ?
+		document.querySelector(State.options.preventCheckingIfPresent) :
+		false;
+	if (preventCheck) {
+		console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${State.options.preventCheckingIfPresent}"` );
+	} else if (!preventCheck && !!State.options.preventCheckingIfAbsent) {
+		preventCheck = document.querySelector(`:is(${State.options.preventCheckingIfAbsent})`) === null;
+		if (preventCheck) {
+			console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${State.options.preventCheckingIfAbsent}"`);
+		}
+	}
+	return preventCheck;
+}
+
+function resetResults(incremental) {
+	State.jumpList = [];
+	State.openTip = {
+		button: false,
+		tip: false,
+	};
+	State.lastOpenTip = -1;
+	resetClass([
+		'ed11y-ring-red',
+		'ed11y-ring-yellow',
+		'ed11y-hidden-highlight',
+		'ed11y-warning-inline',
+		'ed11y-warning-block',
+		'ed11y-error-block',
+		'ed11y-error-inline',
+	]);
+	// Reset insertions into body content.
+	if (incremental) {
+		findElements('reset', 'ed11y-element-highlight', false);
+	} else {
+		findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+	}
+	State.elements.reset?.forEach((el) => el.remove());
+
+	// Flicker prevention -- leave old tip in place for 100ms.
+	findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
+	const delayedReset = State.elements.delayedReset;
+
+	window.setTimeout(()=> {
+		delayedReset?.forEach((el) => el.remove());
+	}, 100, delayedReset);
+
+	if (typeof UI.panelJumpNext === 'function') {
+		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = M.buttonFirstContent;
+	}
+	// Reset insertions into body content.
+}
+
+function newIncrementalResults() {
+	if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
+		return true;
+	}
+	let newResultString = `${State.errorCount} ${State.warningCount}`;
+	State.results.forEach(result => {
+		newResultString += result.test + result.element.outerHTML;
+	});
+	let changed = newResultString !== State.oldResultString;
+	State.oldResultString = newResultString;
+	return changed;
+}
+function countAlerts () {
+
+	State.errorCount = 0;
+	State.warningCount = 0;
+	State.dismissedCount = 0;
+
+	// Review results array to remove dismissed or ignored items
+
+	State.dismissedCount = 0;
+	for (let i = State.results.length - 1; i >= 0; i--) {
+
+		let test = State.results[i].test;
+
+		if (State.options.ignoreTests &&
+			State.options.ignoreTests.includes(test)) {
+			// Would be faster to skip test, but this is easy and reliable.
+			State.results.splice(i, 1);
+			continue;
+		}
+
+		// todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
+		/*if (State.incremental && Ed11y.oldResults.length > 0) {
+			// Don't flag new issues in the active range while people are typing.
+		}*/
+
+		let dismissKey = prepareDismissal(State.results[i].dismissalKey);
+		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
+		if (dismissKey !== false && State.options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[State.options.currentPage] && dismissKey in State.dismissedAlerts[State.options.currentPage][test]) {
+			// Remove result if it has been marked OK or ignored, increment dismissed match counter.
+			State.dismissedCount++;
+			State.results[i].dismissalStatus = State.dismissedAlerts[State.options.currentPage][test][dismissKey];
+		} else if (State.results[i].dismissalKey) {
+			State.warningCount++;
+			State.results[i].dismissalStatus = false;
+		} else {
+			State.errorCount++;
+			State.results[i].dismissalStatus = false;
+		}
+	}
+
+	State.totalCount = State.errorCount + State.warningCount;
+
+	// Dispatch event for synchronizers.
+	if (!State.incremental) {
+		window.setTimeout(function () {
+			let syncResults = new CustomEvent('ed11yResults');
+			document.dispatchEvent(syncResults);
+		}, 0);
+	}
+
+	if (State.ignoreAll) {
+		State.dismissedCount = State.totalCount + State.dismissedCount;
+		State.errorCount = 0;
+		State.warningCount = 0;
+		State.totalCount = 0;
+	}
+
+	if (State.incremental && !State.forceFullCheck && !newIncrementalResults()) {
+		State.forceFullCheck = true;
+	}
+}
+
 const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size = 17) {
 	// Yes this looks like intersect const, but it's math not browser offsets.
 	return !(rect1Left + size < rect2Left ||
@@ -4585,10 +4620,10 @@ function updatePanel () {
       window.setTimeout(()=> {
         UI.panelElement.classList.remove('ed11y-preload');
       },0, UI.panel);
-      UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsContent;
-      UI.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = M.buttonOutlineContent;
+      UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('PANEL_HEADING');
+      UI.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = Lang._('OUTLINE');
       UI.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = M.panelCheckOutline;
-      UI.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = M.buttonAltsContent;
+      UI.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = Lang._('IMAGES');
       UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = M.panelCheckAltText;
       UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = M.buttonFirstContent;
       UI.panel.setAttribute('aria-label', M.panelControls);
@@ -4655,20 +4690,36 @@ function updatePanel () {
       UI.panel.classList.remove('ed11y-shut');
       UI.panel.classList.add('ed11y-active');
       UI.panelToggle.setAttribute('aria-expanded', 'true');
-      UI.panelToggleTitle.textContent = State.totalCount > 0 ? M.buttonHideAlerts : M.buttonHideChecker;
+			const preferredHide = State.totalCount > 0 ? M.buttonHideAlerts : M.buttonHideChecker;
+      UI.panelToggleTitle.textContent = State.english ? preferredHide : Lang._('ALERT_CLOSE');
       // Prepare show hidden alerts button.
+			const preferredDismissHide = State.dismissedCount > 1 ?
+				Lang.sprintf('buttonHideHiddenAlerts', State.dismissedCount)
+				: Lang._('buttonHideHiddenAlert');
       if (State.dismissedCount === 0) {
         // Reset show hidden default option when irrelevant.
         UI.showDismissed.setAttribute('hidden', '');
         UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
         State.options.showDismissed = false;
       } else if (State.dismissedCount === 1) {
-        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ? M.buttonHideHiddenAlert : M.buttonShowHiddenAlert;
+				const show = State.english ?
+					Lang._('buttonShowHiddenAlert')
+					: Lang.sprintf('PANEL_DISMISS_BUTTON', '1');
+        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ?
+					preferredDismissHide : show;
         UI.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
+				if (!State.english) {
+					UI.showDismissed.ariaPressed = State.options.showDismissed;
+				}
         UI.showDismissed.removeAttribute('hidden');
       } else {
-        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ? Lang.sprintf('buttonHideHiddenAlerts', State.dismissedCount) : Lang.sprintf('buttonShowHiddenAlerts', State.dismissedCount);
+        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ?
+					preferredDismissHide
+					: Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount);
         UI.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
+				if (!State.english) {
+					UI.showDismissed.ariaPressed = State.options.showDismissed;
+				}
         UI.showDismissed.removeAttribute('hidden');
       }
 
@@ -4734,7 +4785,7 @@ function updatePanel () {
           UI.panelToggleTitle.textContent = M.buttonHideChecker;
         } else {
           UI.panelToggleTitle.textContent = State.dismissedCount > 1 ?
-						Lang.sprintf('buttonShowHiddenAlerts', State.dismissedCount) :
+						Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount) :
             Lang._('buttonShowHiddenAlert');
         }
       } else {
@@ -4790,7 +4841,7 @@ function buildJumpList () {
   });
   State.jumpList.forEach((el, i) => {
     el.dataset.ed11yJumpPosition = `${i}`;
-    const newLabel = `${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}, ${i + 1} / ${State.jumpList.length - 1}`;
+    const newLabel = `${Lang._('ALERT_TEXT')} ${i + 1} / ${State.jumpList.length - 1}, ${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}`;
     el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
   });
   let tipsPainted = new CustomEvent('ed11yResultsPainted');
@@ -4853,8 +4904,8 @@ function drawResult(result, index) {
   // @todo abstract out.
   mark.toggle = document.createElement('button');
   mark.toggle.setAttribute('class', 'toggle');
-  let label = mark.dismissable ? M.toggleManualCheck : M.toggleAlert;
-  mark.toggle.setAttribute('aria-label', Lang.sprintf('toggleAriaLabel', label));
+  let label = mark.dismissable ? Lang._('WARNING') : Lang._('ERROR');
+  mark.toggle.setAttribute('aria-label', label);
   mark.toggle.setAttribute('aria-expanded', 'false');
   mark.toggle.setAttribute('aria-haspopup', 'dialog');
   mark.toggle.setAttribute('data-ed11y-result', mark.dataset.ed11yResult);
@@ -5062,7 +5113,7 @@ function alertOnInvisibleTip (button, target) {
     if (State.options.checkVisible && !visible(target)) {
       button.dataset.ed11yHiddenResult = 'true';
       firstVisible = firstVisibleParent(target);
-      alertMessage = ed11yLang.en.jumpedToInvisibleTip;
+      alertMessage = Lang._('NOT_VISIBLE');
     }
     else if (target.closest('[aria-hidden="true"]')) {
       firstVisible = target.closest('[aria-hidden="true"]');
@@ -5690,6 +5741,7 @@ function checkAll() {
 		Elements.initializeElements(State.options);
 
 		State.headingOutline = [];
+		//let results = [];
 		// Ruleset checks
 		checkHeaders(State.results, State.options, State.headingOutline);
 		checkLinkText(State.results, State.options);
@@ -5720,13 +5772,20 @@ sortPos
 test
 toggle
 
+
 		* */
 		// @todo merge temporary values.
-		State.results.forEach((result) => {
-			result.position = 'beforebegin';
-			result.dismissalKey = result.dismiss;
-			result.test = 'altNull';
-		});
+		for (let i = State.results.length - 1; i >= 0;) {
+			if (State.results[i].type === 'good') {
+				State.results.splice(i, 1);
+			} else {
+				State.results[i].position = 'beforebegin'; // @todo merge compute.
+				State.results[i].dismissalKey = State.results[i].dismiss;
+				State.results[i].test = 'altNull';
+			}
+			i = i - 1;
+		}
+		console.log(State.results);
 
 		/*let queue = [
 			'testLinks',
@@ -5757,7 +5816,7 @@ toggle
 				if (State.customTestsRunning === true) {
 					State.customTestsRunning = false;
 					if (typeof UI.panelToggle.querySelector === 'function') {
-						UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleAccessibilityTools;
+						UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
 					}
 					countAlerts();
 					window.requestAnimationFrame(() => updatePanel());
@@ -5774,7 +5833,7 @@ toggle
 	if (!State.customTestsRunning) {
 		window.setTimeout(function () {
 			if (typeof UI.panelToggle.querySelector === 'function') {
-				UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleAccessibilityTools;
+				UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
 			}
 			countAlerts();
 			updatePanel();
@@ -5847,7 +5906,7 @@ function visualize () {
 	}
 	if (State.visualizing) {
 		State.visualizing = false;
-		UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsContent;
+		UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('PANEL_HEADING');
 		UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
 		UI.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
 		return;
@@ -5910,7 +5969,7 @@ function showHeadingsPanel () {
 			panelOutline.append(li);
 		});
 	} else {
-		panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>';
+		panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>'; // @todo translate!
 	}
 }
 
@@ -5921,8 +5980,8 @@ function resetPanel() {
 	if (State.totalCount === 0 && State.dismissedCount > 0) {
 		UI.panelCount.textContent = 'i';
 		UI.panelToggleTitle.textContent = State.dismissedCount === 1 ?
-			M.buttonShowHiddenAlert :
-			Lang.sprintf('buttonShowHiddenAlerts', State.dismissedCount);
+			Lang._('buttonShowHiddenAlert') :
+			Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount);
 	}
 
 	// @todo is this going to fail again? Should it a different if?
@@ -5933,7 +5992,7 @@ function resetPanel() {
 		if (!State.options.showDismissed && typeof UI.showDismissed === 'function') {
 			UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
 			UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
-				M.buttonShowHiddenAlert : Lang.sprintf('buttonShowHiddenAlerts', State.dismissedCount);
+				Lang._('buttonShowHiddenAlert') : Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount);
 		}
 	}
 }
@@ -5949,11 +6008,71 @@ window.addEventListener('ed11yEndVisualization', ()=>{
 const showAltPanel = function () {
 	// visualize image alts
 	let altList = UI.panel.querySelector('#ed11y-alt-list');
+	/*UI.imageAlts = [];
+	const imageResults = State.results.filter((result) => result.element.tagName === 'IMG');
+	console.log(imageResults);
+	// Build array of images to be used for image panel.
+	Elements.Found.Images.forEach((image) => {
+		UI.imageAlts.push({element: image});
+	})
+	console.log(UI.imageAlts);
+	imageResults.forEach((result)=>{
+		const index = UI.imageAlts.findIndex(image => image.element === result.element);
+		UI.imageAlts[index] = {
+			element: result.image,
+			type: result.type,
+			dismiss: result.dismiss,
+			developer: result.developer,
+		};
+	})*/
+	UI.imageAlts = Elements.Found.Images.map((image) => {
+			const match = State.results.find((i) => i.element === image);
+			return match && {
+				element: image,
+				type: match.type,
+				dismiss: match.dismiss,
+				developer: match.developer,
+			};
+		}).filter(Boolean);
 
-	if (UI.imageAlts.length) {
+	if (UI.imageAlts.length > 0) {
 		altList.innerHTML = '';
-		UI.imageAlts.forEach((el, i) => {
-			// el[el, src, altLabel, altStyle]
+		UI.imageAlts.forEach((image, i) => {
+			console.log(image);
+			/*
+			// Match dismissed images.
+			// @todo this is Sa11y logic:
+			// const isDismissed = dismissed.some((key) => key.dismiss === image.dismiss);
+			// if (isDismissed) Object.assign(image, { dismissedImage: true });
+			// Make developer checks don't show images as error if Developer checks are off!
+			// const dev = Utils.store.getItem('sa11y-developer');
+			// const devChecksOff = dev === 'Off' || dev === null;
+			// const showDeveloperChecks = devChecksOff && (type === 'error' || type === 'warning') && developer === true;
+
+			// Generate edit link if locally hosted image and prop is enabled.
+			const edit = Constants.Global.editImageURLofCMS ? generateEditLink(image) : '';
+
+			// Image is decorative (has null alt)
+			const decorative = (element.hasAttribute('alt') && altText === '')
+				? `<div class="badge">${Lang._('DECORATIVE')}</div>` : '';
+
+			// If image is linked.
+			const anchor = option.imageWithinLightbox ? `a[href]:not(${option.imageWithinLightbox})` : 'a[href]';
+			const linked = (element.closest(anchor))
+				? `<div class="badge"><span class="link-icon"></span><span class="visually-hidden">${Lang._('LINKED')}</span></div>` : '';
+			const visibleIcon = (hidden === true)
+				? `<div class="badge"><span class="hidden-icon"></span><span class="visually-hidden">${Lang._('HIDDEN')}</span></div>` : '';
+			let append;
+      if (type === 'error' && !showDeveloperChecks) {
+      // etc
+			*/
+
+
+			// Account for lazy loading libraries.
+			const source = getBestImageSource(image.element);
+			const altText = computeAriaLabel(image.element) === 'noAria'
+				? escapeHTML(image.element.getAttribute('alt'))
+				: computeAriaLabel(image.element);
 
 			if (State.options.inlineAlerts) {
 				// Label images
@@ -5962,16 +6081,16 @@ const showAltPanel = function () {
 				mark.dataset.ed11yImg = i.toString();
 				mark.setAttribute('id', 'ed11y-alt-' + i);
 				mark.setAttribute('tabindex', '-1');
-				el[0].insertAdjacentElement('beforebegin', mark);
+				image.element.insertAdjacentElement('beforebegin', mark);
 			}
 
 			// Build alt list in panel
 			let userText = document.createElement('span');
-			userText.textContent = el[2];
+			userText.textContent = altText;
 			let li = document.createElement('li');
-			li.classList.add(el[3]);
+			li.classList.add(image.type);
 			let img = document.createElement('img');
-			img.setAttribute('src', el[1]);
+			img.setAttribute('src', source);
 			img.setAttribute('alt', '');
 
 			if (State.options.inlineAlerts) {
@@ -5992,7 +6111,7 @@ const showAltPanel = function () {
 	} else {
 		const noImages = document.createElement('p');
 		const noItalic = document.createElement('em');
-		noItalic.textContent = M.noImagesFound;
+		noItalic.textContent = Lang._('NO_IMAGES');
 		noImages.appendChild(noItalic);
 		altList.innerHTML = '';
 		altList.appendChild(noImages);
@@ -6161,7 +6280,7 @@ class Ed11yElementTip extends HTMLElement {
     this.dismissed = !!this.result.dismissalStatus;
     this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
     this.wrapper.setAttribute('aria-label',
-      `${M.issue}
+      `${Lang._('ALERT_TEXT')}
         ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1}`);
 
     this.addEventListener('mouseover', this.handleHover);
@@ -6193,7 +6312,7 @@ class Ed11yElementTip extends HTMLElement {
 			firstSentence.classList.add('title');
 			firstSentence.setAttribute('tabindex', '-1');
 			innerContent.append(firstSentence);
-			const theRest = document.createElement('span');
+			const theRest = document.createElement('div');
 			theRest.innerHTML = sentences.join('.');
 			innerContent.appendChild(theRest);
 			content.append(innerContent);
@@ -6301,7 +6420,7 @@ class Ed11yElementTip extends HTMLElement {
           if (State.options.syncedDismissals) {
             ignoreButton.setAttribute('title', M.dismissHideTitle);
           }
-          ignoreButton.textContent = M.dismissHideButtonContent;
+          ignoreButton.textContent = Lang._('DISMISS');
           ignoreButton.prepend(dismissIcon.cloneNode(true));
           buttonBar.prepend(ignoreButton);
           ignoreButton.addEventListener('click', function(){dismissThis('hide');});
@@ -6309,7 +6428,7 @@ class Ed11yElementTip extends HTMLElement {
           if (showPageActions) {
             const ignoreAllButton = document.createElement('button');
             ignoreAllButton.classList.add('dismiss');
-            ignoreAllButton.textContent = M.dismissHideAllButton;
+            ignoreAllButton.textContent = Lang._('DISMISS_ALL');
             ignoreAllButton.prepend(dismissIcon.cloneNode(true));
             pageActionsSummary.insertAdjacentElement('afterend', ignoreAllButton);
             ignoreAllButton.addEventListener('click', function(){dismissThis('hide', true);});
@@ -6326,7 +6445,7 @@ class Ed11yElementTip extends HTMLElement {
     this.navBar.classList.add('ed11y-tip-header');
     this.count = document.createElement('div');
     this.count.classList.add('ed11y-tip-count');
-    this.count.textContent = `${M.issue} ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1} / ${State.jumpList.length}`;
+    this.count.textContent = `${Lang._('ALERT_TEXT')} ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1} / ${State.jumpList.length}`;
     this.navBar.append(this.count);
     if (State.jumpList.length > 1) {
       this.prev = document.createElement('button');
@@ -6365,8 +6484,8 @@ class Ed11yElementTip extends HTMLElement {
     this.navBar.append(this.help);
 
     let closeButton = document.createElement('button');
-    closeButton.setAttribute('aria-label',M.closeTip);
-    closeButton.setAttribute('title',M.closeTip);
+    closeButton.setAttribute('aria-label', Lang._('ALERT_CLOSE')); // Todo redundant.
+    closeButton.setAttribute('title', Lang._('ALERT_CLOSE'));
     closeButton.classList.add('close');
     closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"/></svg>';
     this.navBar.append(closeButton);

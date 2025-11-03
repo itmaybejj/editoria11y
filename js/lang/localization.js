@@ -6,36 +6,33 @@ const ed11yLang = {
 
   strings : {
 
+		// todo implement CONSOLE_ERROR
+
     // Main Panel =========================================
-    toggleAccessibilityTools: 'Toggle accessibility tools',
+    MAIN_TOGGLE_LABEL: 'Toggle accessibility tools',
     toggleDisabled: 'No content available for Editoria11y to check.',
-    panelCount0 : 'No issues detected.',
-    panelCountAllDismissed : 'All issues hidden.',
-    panelCount1 : 'One issue detected.',
-    panelCountMultiple: ' issues detected.',
-    panelCountBase: '<span class=\'count\'>No</span> <span class=\'content-type\'>issues detected</span>.',
     panelControls: 'Editorially',
-    buttonToolsContent: 'Check headings & alt text', // todo Drupal
-    buttonToolsActive: 'Hide headings & alt text',
-    buttonOutlineContent: 'Headings',
-    buttonAltsContent: 'Alt Text',
-    buttonFirstContent: 'Go to first alert',
+    PANEL_HEADING: 'Check headings & alt text',
+    buttonToolsActive: 'Hide headings & alt text', // todo
+    OUTLINE: 'Headings', // todo
+		IMAGES: 'Alt text',
+    buttonFirstContent: 'Go to first alert', // todo change to "SKIP_TO_ISSUE#".
     buttonNextContent: 'Go to next alert',
     buttonPrevContent: 'Go to previous alert',
-    buttonShowHiddenAlert: 'Show hidden alert',
-    buttonHideHiddenAlert: 'Hide hidden alert',
-    buttonShowHiddenAlerts: `Show %(count) hidden alerts`,
-    buttonHideHiddenAlerts: `Hide %(count) hidden alerts`,
+    buttonShowHiddenAlert: 'Show hidden alert', // Has fallback.
+    buttonHideHiddenAlert: 'Hide hidden alert', // Has fallback.
+    PANEL_DISMISS_BUTTON: `Show %(dismissCount) hidden alerts`,
+    buttonHideHiddenAlerts: `Hide %(count) hidden alerts`, // Has fallback.
     buttonShowAlerts: 'Show accessibility alerts',
     buttonShowNoAlert: 'Show accessibility checker',
     buttonHideChecker: 'Hide accessibility checker',
     buttonHideAlerts: 'Hide accessibility alerts',
-    panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>',
-    panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>',
-    noImagesFound: 'No images found.',
-    altLabelPrefix: 'Alt text: ',
-    errorAltMissing: '(missing!)',
-    errorAltNull: '(none; image marked as decorative)',
+    panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>', // Todo ENG only.
+    panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>', // Todo ENG only.
+    NO_IMAGES: 'No images found.',
+		ALT: 'Alt Text: ', // @todo Merge mvp image alts are not rendering!
+    MISSING: '(missing!)',
+    errorAltNull: '(none; image marked as decorative)', // todo ENG only?
     errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
     errorOutlinePrefixHeadingEmpty: '(empty heading) ',
     errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
@@ -43,8 +40,10 @@ const ed11yLang = {
     // Errors and alerts ==================================
 
     consoleNotSupported: 'This browser can not run Editoria11y.',
-    jumpedToInvisibleTip: 'Note: this content may not be visible. Look for it inside the outlined container.',
-    jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.',
+    NOT_VISIBLE: 'Note: this content may not be visible. Look for it inside the outlined container.',
+    jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.', // todo fall back to NOT_VISIBLE?
+		ACC_NAME_TIP: ' ', // todo pass label instead, swap if not EN
+		LINK_TIP: ' ',
 
     // Strings used in tests ==============================
 
@@ -59,15 +58,15 @@ const ed11yLang = {
 
     // Tooltips ======================================
 
-    toggleManualCheck: 'manual check needed',
-    toggleAlert: 'alert',
-    issue: 'Issue',
-    toggleAriaLabel: `Accessibility %(label)`,
+    WARNING: 'manual check needed',
+    //ERROR: 'alert',
+    ALERT_TEXT: 'Issue',
+    //toggleAriaLabel: `Accessibility %(label)`,
     transferFocus: 'Edit this content',
     dismissOkButtonContent: 'Mark as OK',
-    dismissHideButtonContent: 'Mark as ignored',
+		DISMISS: 'Mark as ignored',
     dismissActions: `%(count) similar issues`, // 2.3.10
-    dismissHideAllButton: 'Ignore all like this', // 2.3.10
+		DISMISS_ALL: 'Ignore all like this', // 2.3.10
     dismissOkAllButton: 'Mark all like this as OK', // 2.3.10
     dismissOkTitle: 'Hides this alert for all editors',
     dismissHideTitle: 'Hides this alert for you',
@@ -75,7 +74,7 @@ const ed11yLang = {
     undismissHideButton: 'Restore this hidden alert',
     undismissNotePermissions: 'This alert has been hidden by an administrator',
     reportsLink: 'Open site reports in new tab',
-    closeTip: 'Close',
+    ALERT_CLOSE: 'Close',
     panelHelpTitle: 'About this tool',
     panelHelp: `
     <p><a href="https://editoria11y.princeton.edu/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
@@ -172,7 +171,7 @@ const ed11yLang = {
 		altMeaningless : {
 			title: 'Alt text is meaningless',
 		},
-		ALT_PLACEHOLDER: `<p>This image's alt text is "%(alt}," which was flagged for being common placeholder text.</p>
+		ALT_PLACEHOLDER: `<p>This image's alt text is "%(alt)," which was flagged for being common placeholder text.</p>
         <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
         <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
             <ul>

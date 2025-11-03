@@ -1,6 +1,7 @@
 import defaultOptions from '../../node_modules/sa11y/src/js/utils/default-options';
 import Constants from '../../node_modules/sa11y/src/js/utils/constants.js';
 import {M, State, Theme, UI} from "./state.js";
+import {Lang} from "sa11y/src/js/sa11y.js";
 
 const Options = (function options() {
   /* **************** */
@@ -31,6 +32,8 @@ const Options = (function options() {
 
     // Containers to globally ignore, e.g., "header *, .card *"
     ignoreElements: false,
+		showGoodLinkButton: false,
+		showGoodImageButton: false,
 
     // Provide list of test keys; get from localization file or results object.
     // @todo merge provide translation layer or document change.
@@ -343,6 +346,8 @@ const Options = (function options() {
   function postProcessOptions(option) {
     // @todo merge: test: does this need descendant selector?
     Constants.Exclusions.Sa11yElements = ['.ed11y-element'];
+
+		State.english = Lang.langStrings.LANG_CODE.startsWith('en');
 
     // Main container exclusions.
     console.log('Constants: ')

@@ -32,7 +32,7 @@ export class Ed11yElementTip extends HTMLElement {
     this.dismissed = !!this.result.dismissalStatus;
     this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
     this.wrapper.setAttribute('aria-label',
-      `${M.issue}
+      `${Lang._('ALERT_TEXT')}
         ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1}`);
 
     this.addEventListener('mouseover', this.handleHover);
@@ -64,7 +64,7 @@ export class Ed11yElementTip extends HTMLElement {
 			firstSentence.classList.add('title');
 			firstSentence.setAttribute('tabindex', '-1');
 			innerContent.append(firstSentence);
-			const theRest = document.createElement('span');
+			const theRest = document.createElement('div');
 			theRest.innerHTML = sentences.join('.');
 			innerContent.appendChild(theRest);
 			content.append(innerContent);
@@ -172,7 +172,7 @@ export class Ed11yElementTip extends HTMLElement {
           if (State.options.syncedDismissals) {
             ignoreButton.setAttribute('title', M.dismissHideTitle);
           }
-          ignoreButton.textContent = M.dismissHideButtonContent;
+          ignoreButton.textContent = Lang._('DISMISS');
           ignoreButton.prepend(dismissIcon.cloneNode(true));
           buttonBar.prepend(ignoreButton);
           ignoreButton.addEventListener('click', function(){dismissThis('hide');});
@@ -180,7 +180,7 @@ export class Ed11yElementTip extends HTMLElement {
           if (showPageActions) {
             const ignoreAllButton = document.createElement('button');
             ignoreAllButton.classList.add('dismiss');
-            ignoreAllButton.textContent = M.dismissHideAllButton;
+            ignoreAllButton.textContent = Lang._('DISMISS_ALL');
             ignoreAllButton.prepend(dismissIcon.cloneNode(true));
             pageActionsSummary.insertAdjacentElement('afterend', ignoreAllButton);
             ignoreAllButton.addEventListener('click', function(){dismissThis('hide', true);});
@@ -197,7 +197,7 @@ export class Ed11yElementTip extends HTMLElement {
     this.navBar.classList.add('ed11y-tip-header');
     this.count = document.createElement('div');
     this.count.classList.add('ed11y-tip-count');
-    this.count.textContent = `${M.issue} ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1} / ${State.jumpList.length}`;
+    this.count.textContent = `${Lang._('ALERT_TEXT')} ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1} / ${State.jumpList.length}`;
     this.navBar.append(this.count);
     if (State.jumpList.length > 1) {
       this.prev = document.createElement('button');
@@ -236,8 +236,8 @@ export class Ed11yElementTip extends HTMLElement {
     this.navBar.append(this.help);
 
     let closeButton = document.createElement('button');
-    closeButton.setAttribute('aria-label',M.closeTip);
-    closeButton.setAttribute('title',M.closeTip);
+    closeButton.setAttribute('aria-label', Lang._('ALERT_CLOSE')); // Todo redundant.
+    closeButton.setAttribute('title', Lang._('ALERT_CLOSE'));
     closeButton.classList.add('close');
     closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"/></svg>';
     this.navBar.append(closeButton);

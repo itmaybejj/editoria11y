@@ -1,5 +1,6 @@
 import {M, State, Theme, UI} from "./state.js"
 import {prepareDismissal} from "sa11y/src/js/utils/utils.js";
+import {Lang} from "sa11y/src/js/sa11y.js";
 
 /*=============== Utilities ================*/
 
