@@ -1,14 +1,18 @@
-import {M, State, Theme, UI} from "./state.js"
+import {State, UI} from "./state.js"
 import {prepareDismissal} from "sa11y/src/js/utils/utils.js";
-import {Lang} from "sa11y/src/js/sa11y.js";
+import find from "sa11y/src/js/utils/find.js"
+import Constants from "sa11y/src/js/utils/constants.js";
 
 /*=============== Utilities ================*/
 
-export function linkText (linkText) {
-	// @todo merge do we need this for linkpurpose?
-	linkText = linkText.replace(State.options.linkIgnoreStrings, '');
-	linkText = linkText.replace(/'|"|-|\.|\s+/g, '');
-	return linkText;
+export function getElements(selector, desiredRoot, exclude) {
+	return find(selector, desiredRoot, exclude);
+}
+// QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
+export function findElements (key, selector, rootRestrict = true) { // @todo merge replace.
+	const desiredRoot = rootRestrict ? 'root' : 'document';
+	const exclude = rootRestrict ? [] : Constants.Exclusions.Sa11yElements;
+	State.elements.key = find(selector, desiredRoot, exclude );
 }
 
 export const lagBounce = (callback, wait) => {
@@ -176,55 +180,6 @@ const diveShadow = function (container, select, selector) {
   return [];
 };
 
-// QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
-export function findElements (key, selector, rootRestrict = true) { // @todo merge replace.
-
-  // Todo merge: function and parameter to auto-detect shadow components.
-  let shadowSelector = State.options.autoDetectShadowComponents ?
-    '[data-ed11y-has-shadow-root]' :
-    State.options.shadowComponents ?
-      State.options.shadowComponents : false;
-
-  // Concatenate global and specific ignores
-  let ignore;
-  if (State.options.ignoreElements) {
-    ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreElements}, ${State.options.ignoreByKey[key]})` : `:not(${State.options.ignoreElements})`;
-  } else {
-    ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreByKey[key]})` : '';
-  }
-
-  // Initialize or reset elements array.
-  State.elements[key] = [];
-
-  const select = `:is(${selector}${shadowSelector ? ', ' + shadowSelector : ''})${ignore}`;
-
-  if (rootRestrict && State.roots) {
-    // Add array of elements matching selector, excluding the provided ignore list.
-    // Todo this can result in nested roots.
-    State.roots.forEach(root => {
-      State.elements[key] = State.elements[key].concat(Array.from(root.querySelectorAll(select)));
-    });
-  } else {
-    State.elements[key] = State.elements[key].concat(Array.from(document.querySelectorAll(select)));
-  }
-
-  // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
-  // Repeat the search inside each placeholder, and replace the placeholder with its search results.
-  if (shadowSelector) {
-    for (let index = State.elements[key].length - 1; index >= 0; index--) {
-      if (State.elements[key][index].matches(shadowSelector)) {
-        // Dive into the shadow root and collect an array of its results.
-        let inners = diveShadow(State.elements[key][index], select, selector);
-        if (inners.length > 0) {
-          State.elements[key].splice(index, 1, ...inners);
-        } else {
-          State.elements[key].splice(index, 1);
-        }
-      }
-    }
-  }
-};
-
 export function pauseObservers() {
 	State.watching?.forEach(observer => {
 		observer.observer.disconnect();
@@ -285,7 +240,7 @@ export function resetResults(incremental) {
 	}, 100, delayedReset);
 
 	if (typeof UI.panelJumpNext === 'function') {
-		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = M.buttonFirstContent;
+		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Lang._('buttonFirstContent');
 	}
 	// Reset insertions into body content.
 }

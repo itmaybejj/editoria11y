@@ -1,4 +1,4 @@
-import {M, State, UI} from "../utils/state.js";
+import {State, UI} from "../utils/state.js";
 import {
   alertOnInvisibleTip,
 	dismissThis,
@@ -81,7 +81,7 @@ export class Ed11yElementTip extends HTMLElement {
         const transferIcon = document.createElement('span');
         transferIcon.classList.add('ed11y-transfer-icon');
         transferIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 256 512"><path fill="currentColor" d="M0 29C-1 47 12 62 29 64l8 1C71 67 96 95 96 128L96 224l-32 0c-18 0-32 14-32 32s14 32 32 32l32 0 0 96c0 33-26 61-59 64l-8 1C12 450-1 465 0 483s17 31 35 29l8-1c34-3 64-19 85-43c21 24 51 40 85 43l8 1c18 2 33-12 35-29s-12-33-29-35l-8-1C186 445 160 417 160 384l0-96 32 0c18 0 32-14 32-32s-14-32-32-32l-32 0 0-96c0-33 26-61 59-64l8-1c18-2 31-17 29-35S239-1 221 0l-8 1C179 4 149 20 128 44c-21-24-51-40-85-43l-8-1C17-1 2 12 0 29z"/></svg>';
-        focusTransfer.textContent = M.transferFocus;
+        focusTransfer.textContent = Lang._('transferFocus');
         focusTransfer.prepend(transferIcon);
         focusTransfer.classList.add('dismiss', 'ed11y-transfer-focus');
         editBar.append(focusTransfer);
@@ -115,14 +115,14 @@ export class Ed11yElementTip extends HTMLElement {
           unDismissIcon.classList.add('ed11y-dismiss-icon');
           unDismissIcon.innerHTML = '<svg aria-hidden="true" class="shown" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="-30 0 640 512"><path fill="Currentcolor" d="M288 32c-81 0-146 37-193 81C49 156 17 208 3 244c-3 8-3 17 0 25C17 304 49 356 95 399C142.5 443 207 480 288 480s146-37 193-81c47-44 78-95 93-131c3-8 3-17 0-25c-15-36-46-88-93-131C434 69 369 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35-29 64-64 64c-7 0-14-1-20-3c-6-2-12 2-12 7c.3 7 1 14 3 21c14 51 66 82 118 68s82-66 68-118c-11-42-48-69-89-71c-6-.2-9 6-7 12c2 6 3 13 3 20z"/></svg>';
           undismissButton.classList.add('dismiss');
-          undismissButton.textContent = okd ? M.undismissOKButton : M.undismissHideButton;
+          undismissButton.textContent = okd ? Lang._('undismissOKButton') : Lang._('undismissHideButton');
           undismissButton.prepend(unDismissIcon);
           buttonBar.append(undismissButton);
           undismissButton.addEventListener('click', function(){dismissThis('reset');});
         } else {
           const restoreNote = document.createElement('div');
           restoreNote.classList.add('dismissed-note');
-          restoreNote.textContent = M.undismissNotePermissions;
+          restoreNote.textContent = Lang._('undismissNotePermissions');
           buttonBar.append(restoreNote);
         }
       } else {
@@ -147,14 +147,14 @@ export class Ed11yElementTip extends HTMLElement {
           const OkButton = document.createElement('button');
           OkButton.classList.add('dismiss');
           if (State.options.syncedDismissals) {
-            OkButton.setAttribute('title', M.dismissOkTitle);
+            OkButton.setAttribute('title', Lang._('dismissOkTitle'));
           }
-          OkButton.textContent = M.dismissOkButtonContent;
+          OkButton.textContent = Lang._('dismissOkButtonContent');
           buttonBar.prepend(OkButton);
 
           if (showPageActions) {
             const OkAllButton = OkButton.cloneNode(true);
-            OkAllButton.textContent = M.dismissOkAllButton;
+            OkAllButton.textContent = Lang._('dismissOkAllButton');
             OkAllButton.prepend(check.cloneNode(true));
             pageActions.append(OkAllButton);
             OkAllButton.addEventListener('click', function(){dismissThis('ok', true);});
@@ -169,7 +169,7 @@ export class Ed11yElementTip extends HTMLElement {
           const ignoreButton = document.createElement('button');
           ignoreButton.classList.add('dismiss');
           if (State.options.syncedDismissals) {
-            ignoreButton.setAttribute('title', M.dismissHideTitle);
+            ignoreButton.setAttribute('title', `${Lang._('dismissHideTitle')}`);
           }
           ignoreButton.textContent = Lang._('DISMISS');
           ignoreButton.prepend(dismissIcon.cloneNode(true));
@@ -201,8 +201,8 @@ export class Ed11yElementTip extends HTMLElement {
     if (State.jumpList.length > 1) {
       this.prev = document.createElement('button');
       this.prev.classList.add('ed11y-tip-prev');
-      this.prev.setAttribute('aria-label', M.buttonPrevContent);
-      this.prev.setAttribute('title', M.buttonPrevContent);
+      this.prev.setAttribute('aria-label', Lang._('buttonPrevContent'));
+      this.prev.setAttribute('title', Lang._('buttonPrevContent'));
       this.prev.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 -10 30 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m40 100,-50 -50 50-50 50"></path></svg>';
       this.prev.addEventListener('click', (event) => {
         event.preventDefault();
@@ -212,8 +212,8 @@ export class Ed11yElementTip extends HTMLElement {
 
       this.next = document.createElement('button');
       this.next.classList.add('ed11y-tip-next');
-      this.next.setAttribute('aria-label', M.buttonNextContent);
-      this.next.setAttribute('title', M.buttonNextContent);
+      this.next.setAttribute('aria-label', Lang._('buttonNextContent'));
+      this.next.setAttribute('title', Lang._('buttonNextContent'));
       this.next.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 120 120" width="10"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m30 00 50 50-50 50"></path></svg>';
       this.next.addEventListener('click', (event) => {
         event.preventDefault();
@@ -225,12 +225,12 @@ export class Ed11yElementTip extends HTMLElement {
     this.help.classList.add('button');
     this.helpContent = document.createElement('div');
     this.helpContent.classList.add('ed11y-tip-help-content');
-    this.helpContent.innerHTML = M.panelHelp;
+    this.helpContent.innerHTML = Lang._('panelHelp');
     this.help.append(this.helpContent);
     this.helpToggle = document.createElement('summary');
     this.helpToggle.textContent = '?';
-    this.helpToggle.setAttribute('aria-label', M.panelHelpTitle);
-    this.helpToggle.setAttribute('title', M.panelHelpTitle);
+    this.helpToggle.setAttribute('aria-label', Lang._('panelHelpTitle'));
+    this.helpToggle.setAttribute('title', Lang._('panelHelpTitle'));
     this.help.insertAdjacentElement('afterbegin', this.helpToggle);
     this.navBar.append(this.help);
 

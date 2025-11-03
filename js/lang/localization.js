@@ -37,8 +37,8 @@ const ed11yLang = {
     MISSING: '(missing!)',
 		panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>', // Todo merge ENG only.
 		panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>', // Todo merge ENG only.
-    errorAltNull: '(none; image marked as decorative)', // todo merge ENG only?
-    errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
+    DECORATIVE: 'Marked decorative',
+    errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ', // todo merge ENG only?
     errorOutlinePrefixHeadingEmpty: '(empty heading) ',
     errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
 

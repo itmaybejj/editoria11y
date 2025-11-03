@@ -1,4 +1,4 @@
-import {M, State, Theme, UI} from "../utils/state.js";
+import {State, Theme, UI} from "../utils/state.js";
 import {
 	checkRunPrevent,
 	countAlerts,
@@ -51,10 +51,10 @@ const panelJumpTo = function(event) {
 	if (!State.open) {
 		togglePanel();
 		window.setTimeout(function() {
-			jumpTo(1);
+			jumpTo();
 		},500);
 	} else {
-		jumpTo(1);
+		jumpTo();
 	}
 }
 
@@ -123,11 +123,11 @@ export function updatePanel () {
       },0, UI.panel);
       UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('PANEL_HEADING');
       UI.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = Lang._('OUTLINE');
-      UI.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = M.panelCheckOutline;
+      UI.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = Lang._('panelCheckOutline');
       UI.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = Lang._('IMAGES');
-      UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = M.panelCheckAltText;
-      UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = M.buttonFirstContent;
-      UI.panel.setAttribute('aria-label', M.panelControls);
+      UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = Lang._('panelCheckAltText');
+      UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = Lang._('buttonFirstContent');
+      UI.panel.setAttribute('aria-label', Lang._('panelControls'));
 
       if (State.options.reportsURL) {
         let reportLink = document.createElement('a');
@@ -135,8 +135,8 @@ export function updatePanel () {
         reportLink.setAttribute('id' , 'ed11y-reports-link');
         reportLink.setAttribute('href', State.options.reportsURL);
         reportLink.setAttribute('target', '_blank');
-        reportLink.setAttribute('aria-label', M.reportsLink);
-        reportLink.querySelector('.ed11y-sr-only').textContent = M.reportsLink;
+        reportLink.setAttribute('aria-label', Lang._('reportsLink'));
+        reportLink.querySelector('.ed11y-sr-only').textContent = Lang._('reportsLink');
         UI.showDismissed.insertAdjacentElement('beforebegin', reportLink);
       }
 
@@ -196,7 +196,7 @@ export function updatePanel () {
       UI.panel.classList.remove('ed11y-shut');
       UI.panel.classList.add('ed11y-active');
       UI.panelToggle.setAttribute('aria-expanded', 'true');
-			const preferredHide = State.totalCount > 0 ? M.buttonHideAlerts : M.buttonHideChecker;
+			const preferredHide = State.totalCount > 0 ? Lang._('buttonHideAlerts') : Lang._('buttonHideChecker');
       UI.panelToggleTitle.textContent = State.english ? preferredHide : Lang._('ALERT_CLOSE');
       // Prepare show hidden alerts button.
 			const preferredDismissHide = State.dismissedCount > 1 ?
@@ -237,7 +237,7 @@ export function updatePanel () {
     }
     // Update buttons.
     if (State.totalCount > 0 || (State.options.showDismissed && State.dismissedCount > 0)) {
-      UI.panelToggleTitle.textContent = State.open ? M.buttonHideAlerts : M.buttonShowAlerts;
+      UI.panelToggleTitle.textContent = State.open ? Lang._('buttonHideAlerts') : Lang._('buttonShowAlerts');
       UI.panelJumpNext.removeAttribute('hidden');
       if (State.errorCount > 0) {
         // Errors
@@ -284,7 +284,7 @@ export function updatePanel () {
       if (State.dismissedCount > 0) {
         UI.panelCount.textContent = 'i';
         if (State.open) {
-          UI.panelToggleTitle.textContent = M.buttonHideChecker;
+          UI.panelToggleTitle.textContent = Lang._('buttonHideChecker');
         } else {
           UI.panelToggleTitle.textContent = State.dismissedCount > 1 ?
 						Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount) :
@@ -292,7 +292,7 @@ export function updatePanel () {
         }
       } else {
         // todo merge: move these inline and just change the class.
-        UI.panelToggleTitle.textContent = State.open ? M.buttonHideChecker : M.buttonShowNoAlert;
+        UI.panelToggleTitle.textContent = State.open ? Lang._('buttonHideChecker') : Lang._('buttonShowNoAlert');
       }
     }
     UI.panelToggle.classList.remove('disabled');
@@ -618,7 +618,7 @@ export function alertOnInvisibleTip (button, target) {
     else if (target.closest('[aria-hidden="true"]')) {
       firstVisible = target.closest('[aria-hidden="true"]');
       firstVisible = firstVisible.closest(':not([aria-hidden="true"])');
-      alertMessage = M.jumpedToAriaHiddenTip;
+      alertMessage = Lang._('jumpedToAriaHiddenTip');
     }
     if (firstVisible) {
       // Throw warning that the element cannot be highlighted.
@@ -680,13 +680,13 @@ export function jumpTo(next = true) {
   let goNum = next ? State.lastOpenTip + 1 : State.lastOpenTip - 1;
   if (goNum < 0) {
     // Reached end of loop or dismissal pushed us out of loop
-    State.nextText = M.buttonFirstContent;
+    State.nextText = Lang._('buttonFirstContent');
     goNum = goMax;
   } else if (goNum > goMax) {
     goNum = 0;
-    State.nextText = M.buttonNextContent;
+    State.nextText = Lang._('buttonNextContent');
   } else {
-    State.nextText = M.buttonNextContent;
+    State.nextText = Lang._('buttonNextContent');
   }
   State.lastOpenTip = goNum;
   window.setTimeout(function () {
@@ -1361,7 +1361,6 @@ export function checkAll() {
 		checkImages(State.results, State.options);
 		checkLabels(State.results, State.options);
 		checkQA(State.results, State.options);
-		console.log(State.results);
 		/*{
 "element": {},
 "type": "error",
@@ -1442,38 +1441,37 @@ toggle
 				document.dispatchEvent(customTests);
 			},0);
 		}
-	}
-
-	if (!State.customTestsRunning) {
-		window.setTimeout(function () {
-			if (typeof UI.panelToggle.querySelector === 'function') {
-				UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
-			}
-			countAlerts();
-			updatePanel();
-			window.setTimeout(() => {
-				if (State.options.watchForChanges) {
-					State.elements.editable?.forEach(editable => {
-						if (!editable.matches('.drag-observe')) {
-							editable.classList.add('drag-observe');
-							editable.addEventListener('drop', () => {
-								// This event does not bubble.
-								State.forceFullCheck = true;
-								incrementalCheck();
-							});
-						}
-					});
-					if (State.options.watchForChanges === 'checkRoots') {
-						State.roots?.forEach((root) => {
-							startObserver( root );
-						});
-					} else {
-						startObserver( document.body );
-					}
-					resumeObservers(); // on recheck.
+		if (!State.customTestsRunning) {
+			window.setTimeout(function () {
+				if (typeof UI.panelToggle.querySelector === 'function') {
+					UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
 				}
+				countAlerts();
+				updatePanel();
+				window.setTimeout(() => {
+					if (State.options.watchForChanges) {
+						State.elements.editable?.forEach(editable => {
+							if (!editable.matches('.drag-observe')) {
+								editable.classList.add('drag-observe');
+								editable.addEventListener('drop', () => {
+									// This event does not bubble.
+									State.forceFullCheck = true;
+									incrementalCheck();
+								});
+							}
+						});
+						if (State.options.watchForChanges === 'checkRoots') {
+							State.roots?.forEach((root) => {
+								startObserver( root );
+							});
+						} else {
+							startObserver( document.body );
+						}
+						resumeObservers(); // on recheck.
+					}
+				}, 0);
 			}, 0);
-		}, 0);
+		}
 	}
 	else {
 		disable();
@@ -1523,7 +1521,7 @@ export function buildElementList () {
 	} else {
 		State.elements.editable = State.options.editableContent;
 	}
-	if (State.options.inlineAlerts && State.elements.editable.length > 0) {
+	if (State.options.inlineAlerts && State.elements.editable) {
 		State.options.inlineAlerts = false;
 		console.warn('Editable content detected; Editoria11y inline alerts disabled');
 	}
@@ -1564,7 +1562,7 @@ export function visualize () {
 		return;
 	}
 	State.visualizing = true;
-	UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = M.buttonToolsActive;
+	UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('buttonToolsActive');
 	UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
 	UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
 	showAltPanel();
@@ -1690,9 +1688,15 @@ const showAltPanel = function () {
 
 	if (UI.imageAlts.length > 0) {
 		altList.innerHTML = '';
-		UI.imageAlts.forEach((image, i) => {
+		for (let i = 0; i < UI.imageAlts.length; i++) {
+			const image = UI.imageAlts[i];
+			let altText = computeAriaLabel(image.element) === 'noAria'
+				? Utils.escapeHTML(image.element.getAttribute('alt'))
+				: computeAriaLabel(image.element);
+			UI.imageAlts[i].altText = altText;
 			console.log(image);
-			let alert = {};
+			console.log(UI.imageAlts[i].altText);
+			//let alert = {};
 			/*
 			// Match dismissed images.
 			// @todo merge remove; this is the Sa11y logic:
@@ -1723,10 +1727,6 @@ const showAltPanel = function () {
 
 
 			// Account for lazy loading libraries.
-			const source = Utils.getBestImageSource(image.element);
-			const altText = computeAriaLabel(image.element) === 'noAria'
-				? Utils.escapeHTML(image.element.getAttribute('alt'))
-				: computeAriaLabel(image.element);
 
 			if (State.options.inlineAlerts) {
 				// Label images
@@ -1735,16 +1735,24 @@ const showAltPanel = function () {
 				mark.dataset.ed11yImg = i.toString();
 				mark.setAttribute('id', 'ed11y-alt-' + i);
 				mark.setAttribute('tabindex', '-1');
+				UI.imageAlts[i].mark = mark;
 				image.element.insertAdjacentElement('beforebegin', mark);
 			}
 
 			// Build alt list in panel
 			let userText = document.createElement('span');
-			userText.textContent = altText;
+			if (altText !== '') {
+				userText.textContent = altText;
+			} else {
+				const decorative = document.createElement('span');
+				decorative.classList.add('ed11y-decorative');
+				decorative.textContent = Lang._('DECORATIVE');
+				userText.append(decorative);
+			}
 			let li = document.createElement('li');
 			li.classList.add(image.type);
 			let img = document.createElement('img');
-			img.setAttribute('src', source);
+			img.setAttribute('src', Utils.getBestImageSource(image.element));
 			img.setAttribute('alt', '');
 
 			if (State.options.inlineAlerts) {
@@ -1760,8 +1768,13 @@ const showAltPanel = function () {
 				li.append(userText);
 			}
 			altList.append(li);
-		});
-		alignAlts();
+		}
+		if (State.options.inlineAlerts) {
+			alignAlts();
+		} else {
+			UI.imageAlts.length = 0;
+		}
+		//findElements('altMark', 'ed11y-element-alt', false );
 	} else {
 		const noImages = document.createElement('p');
 		const noItalic = document.createElement('em');
@@ -1813,7 +1826,7 @@ export function dismissThis (dismissalType, all = false) {
 		}
 	}, 500, rememberGoto);
 
-};
+}
 
 export function toggleShowDismissals () {
 	// todo postpone: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
@@ -1827,7 +1840,7 @@ export function toggleShowDismissals () {
 	window.setTimeout(function() {
 		UI.showDismissed.focus();
 	}, 0);
-};
+}
 
 export function togglePanel () {
 	State.ignoreAll = false;
@@ -1851,7 +1864,7 @@ export function togglePanel () {
 				localStorage.setItem('editoria11yShow', '1');
 			}
 			else {
-				UI.panelToggleTitle.textContent = State.totalCount > 0 ? M.buttonShowAlerts : M.buttonShowNoAlert;
+				UI.panelToggleTitle.textContent = State.totalCount > 0 ? Lang._('buttonShowAlerts') : Lang._('buttonShowNoAlert');
 				State.options.showDismissed = false;
 				reset();
 				State.options.userPrefersShut = true;
@@ -1898,11 +1911,12 @@ export function disable() {
 		UI.panelCount.textContent = 'i';
 		UI.panelJumpNext.setAttribute('hidden', '');
 		UI.panelToggle.classList.add('disabled');
-		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = M.toggleDisabled;
+		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('toggleDisabled');
 	}
-};
+}
 
 export function reset () {
+	// @todo should we also flush things like State.elements.altMark?
 	pauseObservers();
 	resetResults();
 	resetPanel();

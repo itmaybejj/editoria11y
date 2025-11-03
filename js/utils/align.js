@@ -1,5 +1,4 @@
 import {
-	findElements,
 	firstVisibleParent,
 	visible
 } from "./utils.js";
@@ -104,14 +103,19 @@ export function alignPanel() {
 
 export function alignAlts () {
 	// Positions alt label to match absolute, inline or floated images.
-	findElements('altMark', 'ed11y-element-alt');
-	State.elements.altMark?.forEach((el) => { // @todo merge test
-		let id = el.dataset.ed11yImg;
+	console.log(UI.imageAlts);
+	UI.imageAlts?.forEach((mark) => { // @todo merge test
+		console.log(mark);
+		if (!mark.mark) {
+			console.log('nope');
+			return;
+		}
+		const el = mark.mark;
 		el.style.setProperty('transform', null);
 		el.style.setProperty('height', null);
 		el.style.setProperty('width', null);
 
-		let img = UI.imageAlts[id][0];
+		let img = mark.element;
 		if (img.tagName !== 'IMG') {
 			// Mark is placed outside the link in linked images.
 			img = img.querySelector('img');

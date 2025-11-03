@@ -3037,227 +3037,273 @@ const Options = (function options() {
   let ed11yLang = {};
   let ed11yDefaults = {
 
-    // Relative or absolute
+		/**
+		 * Editoria11y only =============== */
+
+		// Provide list of test keys; get from localization file or results object.
+		// @todo merge CMS provide translation layer or document change.
+		// ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
+
+		// Ignore Aria on these elements (Gutenberg labels headings while editing.)
+		// @todo merge discuss these additions to the accessible name computation.
+		ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
+		ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
+
+		// Disable tests on specific elements
+		// Include and modify this entire object in your call
+		// @todo merge test and/or reimplement.
+		headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
+
+		// Set alertModes
+		// 'headless': do not draw interface
+		// 'userPreference: respect user preference.
+		// 'polite': open for new issues.
+		// 'assertive': open for any issues.
+		// 'active': always open.
+		// CMS integrations can switch between polite & headless at runtime.
+		alertMode: 'userPreference',
+		inlineAlerts: true,
+		watchForChanges: true, // true, false, 'checkRoots';
+
+		// This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
+		editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
+
+		// Dismissed alerts
+		currentPage: false, // uses window.location.pathname unless a string is provided.
+		allowHide: true, // enables end-user ignore button
+		allowOK: true,  // enables end-user mark OK button
+		syncedDismissals: false, // provide empty or populated object {} to enable sync functions
+		reportsURL: false, // Provides a link to site-wide reports
+		showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
+
+		// Hide all alerts if these elements are absent, e.g., ".edit-button"
+		// Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
+		ignoreAllIfAbsent: false,
+		ignoreAllIfPresent: false,
+
+		// Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
+		preventCheckingIfPresent: false,
+		preventCheckingIfAbsent: false,
+
+		// Disable the "is this element visible" check on themes that have 0-height elements.
+		checkVisible: true,
+
+		// Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
+		hiddenHandlers: '',
+
+		panelOffsetX: '25px',
+		panelOffsetY: '25px',
+		panelNoCover: '', // select other buttons to avoid.
+		panelAttachTo: document.body,
+
+		// Selector list for elements that hide overflow, truncating buttons.
+		constrainButtons: false,
+
+		// Interface
+		lang: 'en', // @todo merge drop after migrating to Lang_..
+		langSanitizes: false, // @todo merge drop after migrating to Lang_.
+		theme: 'sleekTheme',
+		sleekTheme: {
+			bg: '#eff2ff', // e8f4ff
+			bgHighlight: '#7b1919',
+			text: '#20160c',
+			primary: '#276499', // 276499
+			primaryText: '#eff2ff',
+			button: 'transparent', // deprecate?
+			panelBar: '#1e517c',
+			panelBarText: '#fffdf7',
+			panelBarShadow: '0 0 0 1px #276499',
+			activeTab: '#276499',
+			activeTabText: '#fffffe',
+			focusRing: '#007aff',
+			outlineWidth: '0',
+			borderRadius: '3px',
+			ok: '#1f5381',
+			warning: 'rgb(250, 216, 89)',
+			warningText: '#20160c',
+			alert: 'rgb(184, 5, 25)',
+			alertText: '#f4f7ff',
+		},
+		darkTheme: {
+			bg: '#0a2051',
+			bgHighlight: '#7b1919',
+			text: '#f4f7ff',
+			primary: '#3052a0',
+			primaryText: '#f4f7ff',
+			button: 'transparent',
+			panelBar: '#3052a0',
+			panelBarText: '#f4f7ff',
+			panelBarShadow: 'inset 0 0 1px, 0 0 0 1px #0a2051',
+			activeTab: '#0a2051',
+			activeTabText: '#fffffe',
+			focusRing: 'cyan',
+			outlineWidth: '2px',
+			borderRadius: '3px',
+			ok: '#0a307a',
+			warning: 'rgb(250, 216, 89)',
+			warningText: '#20160c',
+			alert: 'rgb(184, 5, 25)',
+			alertText: '#f4f7ff',
+		},
+		lightTheme: {
+			bg: '#fffffe',
+			bgHighlight: '#7b1919',
+			text: '#20160c',
+			primary: '#0a307a',
+			primaryText: '#fffdf7',
+			panelBar: '#0a307a',
+			panelBarText: '#f4f7ff',
+			panelBarShadow: '0 0 0 1px #0a307a',
+			button: 'transparent',
+			activeTab: '#b9c0cf',
+			activeTabText: '#20160c',
+			focusRing: '#007aff',
+			outlineWidth: '0',
+			borderRadius: '3px',
+			ok: '#0a307a',
+			warning: 'rgb(250, 216, 89)',
+			warningText: '#20160c',
+			alert: 'rgb(184, 5, 25)',
+			alertText: '#f4f7ff',
+		},
+		// Base z-index for buttons.
+		// 1299 maximizes TinyMCE compatibility.
+		buttonZIndex: 1299,
+		// CSS overrides and additions.
+
+		baseFontSize: 'clamp(14px, 1.5vw, 16px)',
+		baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
+
+		// Test customizations
+		embeddedContent: false, // @todo merge remove.
+		embeddedContentTitle: '', // @todo merge remove.
+		embeddedContentMessage: '', // @todo merge remove.
+
+		linksUrls: false, // get from language pack
+		linksMeaningless: false, // get from language pack
+		altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
+
+		editLinks: false, // Add links to edit content in tooltips.
+
+		// @todo merge discuss: how to handle this functionality.
+		editorHeadingLevel: [
+			// Sets previous heading level for contentEditable fields.
+			// With 'ignore' set, first heading level is ignored in editable zones.
+			// This is ideal for systems with separate backend editing pages.
+			// Set to 'inherit' for fields edited in a frontend context.
+			/*{
+				selector: '.example-inherit',
+				previousHeading: 'inherit',
+			},
+			{
+				selector: '.example-l3',
+				previousHeading: 3,
+			},*/
+			{
+				selector: '*',
+				previousHeading: 0, // Ignores first heading for level skip detection.
+			},
+		],
+
+		userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
+
+		customTests: 0,
+
+		/**
+		 * Sa11y overrides =============== */
+
+		// Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
+		checkRoots: false, // @todo merge implement whatever syntax Sa11y releases.
+		fixedRoots: false, // Array of specific nodes, overrides previous.
+		/* e.g:
+		fixedRoots: [
+			{
+				 root: direct domReference
+				 framePositioner: direct domReference or false
+			}
+		]
+		*/
+
+		containerIgnore: false, // @todo merge CMS was ignoreElements.
+
+		// contrastIgnore: '.sr-only',
+		outlineIgnore: '', // @todo merge CMS was in ignoreByKey
+		// headerIgnore: '',
+		// headerIgnoreSpan: '',
+		// headerIgnoreStrings: '',
+		imageIgnore: 'img[aria-hidden], [aria-hidden] img, ' +
+			'img[role="presentation"], ' +
+			'a[href][aria-label] img, button[aria-label] img, ' +
+			'a[href][aria-labelledby] img, button[aria-labelledby] img', 		// @todo merge discuss moving to Sa11y.
+		linkIgnore: '[aria-hidden][tabindex="-1"]', // @todo merge discuss moving to Sa11y.
+		// linkIgnoreStrings: false,
+		// linkIgnoreSpan: false, // @todo merge CMS was linkIgnoreSelector
+
+		// Relative or absolute
     //cssUrls: false, // ['/folder/editoria11y.css','/folder/custom.css']
-    cssUrls: false,
 
-    // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
-    checkRoots: false,
-    fixedRoots: false, // Array of specific nodes, overrides previous.
-    /* e.g:
-    fixedRoots: [
-      {
-         root: direct domReference
-         framePositioner: direct domReference or false
-      }
-    ]
-    */
+		// Control panel settings
+		// aboutContent: '',
+		panelPosition: 'right', // @todo merge CMS was panelPinTo
+		// showMovePanelToggle: true,
+		// checkAllHideToggles: false,
+		// developerChecksOnByDefault: false,
 
-    // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
-    shadowComponents: false,
-    autoDetectShadowComponents: true,
+		// Page outline
+		showHinPageOutline: false,
+		showTitleInPageOutline: false,
 
-    // Containers to globally ignore, e.g., "header *, .card *"
-    ignoreElements: false,
-		showGoodLinkButton: false,
-		showGoodImageButton: false,
+		// Image outline
+		// showImageOutline: true,
+		editImageURLofCMS: '', // @todo merge CMS test.
+		// relativePathImageSRC: '',
+		// relativePathImageID: '',
+		// ignoreEditImageURL: [],
+		// ignoreEditImageClass: [],
 
-    // Provide list of test keys; get from localization file or results object.
-    // @todo merge provide translation layer or document change.
-    ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
+		// Other features
+		// delayCheck: 0,
+		// delayCustomCheck: 500,
+		// detectSPArouting: false,
+		//doNotRun: false, // @todo merge test.
+		// headless: false,
+		selectorPath: false, // @todo merge what was this?
+		// shadowComponents: '',
+		// autoDetectShadowComponents: false,
 
-    // Ignore Aria on these elements (Gutenberg labels headings while editing.)
-    ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
-    ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
+		// Annotations.
+		// showGoodImageButton: false,
+		// showGoodLinkButton: false,
+		// dismissAnnotations: true,
+		// dismissAll: true,
+		ignoreHiddenOverflow: '', // @todo merge do we need to add this Sa11y feature? "Modifies the annotation's parent container with overflow: hidden, making it visible and scrollable so content authors can access it."
+		// insertAnnotationBefore: '',
 
-    // Disable tests on specific elements
-    // Include and modify this entire object in your call
-    ignoreByKey: {
-      'p': 'table p',
-      // 'h': false,
-      'img': '[aria-hidden], [aria-hidden] img, ' +
-        '[role="presentation"], ' +
-        'a[href][aria-label] img, button[aria-label] img, ' +
-        'a[href][aria-labelledby] img, button[aria-labelledby] img',
-      'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
-      // 'li': false,
-      // 'blockquote': false,
-      // 'iframe': false,
-      // 'audio': false,
-      // 'video': false,
-      'table': '[role="presentation"]',
-    },
+		// Readability
+		readabilityPlugin: false,
+		// readabilityRoot: 'body',
+		// readabilityIgnore: '',
 
-    headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
+		// Contrast
+		contrastPlugin: false,
+		// contrastAAA: false,
+		// contrastAPCA: false,
 
-    // Set alertModes
-    // 'headless': do not draw interface
-    // 'userPreference: respect user preference.
-    // 'polite': open for new issues.
-    // 'assertive': open for any issues.
-    // 'active': always open.
-    // CMS integrations can switch between polite & headless at runtime.
-    alertMode: 'userPreference',
-    inlineAlerts: true,
-    watchForChanges: true, // true, false, 'checkRoots';
+		// Other plugins
+		customChecks: false, // @todo merge migrate in embed check?
+		// linksAdvancedPlugin: true,
+		formLabelsPlugin: true, // @todo merge CMS turn off when editing.
+		// embeddedContentPlugin: true,
+		developerPlugin: false,
+		// externalDeveloperChecks: false,
+		colourFilterPlugin: false,
+		// exportResultsPlugin: false,
 
-    // This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
-    editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
-
-    // Dismissed alerts
-    currentPage: false, // uses window.location.pathname unless a string is provided.
-    allowHide: true, // enables end-user ignore button
-    allowOK: true,  // enables end-user mark OK button
-    syncedDismissals: false, // provide empty or populated object {} to enable sync functions
-    reportsURL: false, // Provides a link to site-wide reports
-    showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
-
-    // Hide all alerts if these elements are absent, e.g., ".edit-button"
-    // Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
-    ignoreAllIfAbsent: false,
-    ignoreAllIfPresent: false,
-
-    // Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
-    preventCheckingIfPresent: false,
-    preventCheckingIfAbsent: false,
-
-    // Regex of strings to remove from links before checking to see if link titles are meaningful. E.g.:
-    // "\(link is external\)|\(link sends email\)"
-    linkIgnoreStrings: false,
-    linkIgnoreSelector: false,
-
-    // Disable the "is this element visible" check on themes that have 0-height elements.
-    checkVisible: true,
-
-    // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
-    hiddenHandlers: '',
-
-    panelPinTo: 'right',
-    panelOffsetX: '25px',
-    panelOffsetY: '25px',
-    panelNoCover: '', // select other buttons to avoid.
-    panelAttachTo: document.body,
-
-    // Selector list for elements that hide overflow, truncating buttons.
-    constrainButtons: false,
-
-    // Interface
-    lang: 'en',
-    langSanitizes: false, // Some translation modules will double-escape
-    theme: 'sleekTheme',
-    sleekTheme: {
-      bg: '#eff2ff', // e8f4ff
-      bgHighlight: '#7b1919',
-      text: '#20160c',
-      primary: '#276499', // 276499
-      primaryText: '#eff2ff',
-      button: 'transparent', // deprecate?
-      panelBar: '#1e517c',
-      panelBarText: '#fffdf7',
-      panelBarShadow: '0 0 0 1px #276499',
-      activeTab: '#276499',
-      activeTabText: '#fffffe',
-      focusRing: '#007aff',
-      outlineWidth: '0',
-      borderRadius: '3px',
-      ok: '#1f5381',
-      warning: 'rgb(250, 216, 89)',
-      warningText: '#20160c',
-      alert: 'rgb(184, 5, 25)',
-      alertText: '#f4f7ff',
-    },
-    darkTheme: {
-      bg: '#0a2051',
-      bgHighlight: '#7b1919',
-      text: '#f4f7ff',
-      primary: '#3052a0',
-      primaryText: '#f4f7ff',
-      button: 'transparent',
-      panelBar: '#3052a0',
-      panelBarText: '#f4f7ff',
-      panelBarShadow: 'inset 0 0 1px, 0 0 0 1px #0a2051',
-      activeTab: '#0a2051',
-      activeTabText: '#fffffe',
-      focusRing: 'cyan',
-      outlineWidth: '2px',
-      borderRadius: '3px',
-      ok: '#0a307a',
-      warning: 'rgb(250, 216, 89)',
-      warningText: '#20160c',
-      alert: 'rgb(184, 5, 25)',
-      alertText: '#f4f7ff',
-    },
-    lightTheme: {
-      bg: '#fffffe',
-      bgHighlight: '#7b1919',
-      text: '#20160c',
-      primary: '#0a307a',
-      primaryText: '#fffdf7',
-      panelBar: '#0a307a',
-      panelBarText: '#f4f7ff',
-      panelBarShadow: '0 0 0 1px #0a307a',
-      button: 'transparent',
-      activeTab: '#b9c0cf',
-      activeTabText: '#20160c',
-      focusRing: '#007aff',
-      outlineWidth: '0',
-      borderRadius: '3px',
-      ok: '#0a307a',
-      warning: 'rgb(250, 216, 89)',
-      warningText: '#20160c',
-      alert: 'rgb(184, 5, 25)',
-      alertText: '#f4f7ff',
-    },
-    // Base z-index for buttons.
-    // 1299 maximizes TinyMCE compatibility.
-    buttonZIndex: 1299,
-    // CSS overrides and additions.
-
-    baseFontSize: 'clamp(14px, 1.5vw, 16px)',
-    baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-
-    // Test customizations
-    embeddedContent: false, // @todo remove in favor of custom checks?
-    embeddedContentTitle: '', // @todo test or remove?
-    embeddedContentMessage: '', // @todo test or remove?
-
-    linksUrls: false, // get from language pack
-    linksMeaningless: false, // get from language pack
-    altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
-    // * Not implemented Yet:
-    // ruleset toggling
-    // form label tests
-    // detectSPArouting: false,
-
-    editLinks: false, // Add links to edit content in tooltips.
-
-    // @todo merge: port this functionality.
-    editorHeadingLevel: [
-      // Sets previous heading level for contentEditable fields.
-      // With 'ignore' set, first heading level is ignored in editable zones.
-      // This is ideal for systems with separate backend editing pages.
-      // Set to 'inherit' for fields edited in a frontend context.
-      /*{
-        selector: '.example-inherit',
-        previousHeading: 'inherit',
-      },
-      {
-        selector: '.example-l3',
-        previousHeading: 3,
-      },*/
-      {
-        selector: '*',
-        previousHeading: 0, // Ignores first heading for level skip detection.
-      },
-    ],
-
-    userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
-
-    customTests: 0,
-
-    // @todo merge do we need the image and button descenders and the tabindex selector? If so should it be in the MR?
-    imageIgnore: '[aria-hidden], [aria-hidden] img, [role="presentation"], a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img',
-    linkIgnore: '[aria-hidden][tabindex="-1"]',
+		// Shared properties for some checks
+		// susAltStopWords: '', // @todo merge I have some extras.
+		// linkStopWords: '',
+		extraPlaceholderStopWords: '',
+		// imageWithinLightbox: '',
   };
 
   function preProcessOptions(options) {
@@ -3267,7 +3313,7 @@ const Options = (function options() {
       ...ed11yDefaults,
     };
 
-    // @todo MERGE these get destroyed in constants.js
+    // @todo merge re-implement: these get destroyed in constants.js
     //ed11yDefaults.checks.QA_DOCUMENT.sources = 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']'
     //ed11yDefaults.checks.EMBED_VIDEO.sources = 'video, [src*="youtube.com"], [src*="brightcove.com"], [src*="dailymotion.com"], [src*="panopto.com"], [src*="Video"], [src*="video"], [src*="vimeo.com"], [src*="watch"], [src*="wistia.com"], [src*="vidyard.com"], [src*=yuja.com]';
 
@@ -3282,54 +3328,33 @@ const Options = (function options() {
     /*
     * Options translation
     * */
-    options.headless = options.alertMode === 'headless';
-    options.customChecks = options.customTests > 0 && !options.customChecks ? 'listen' : false;
+    options.headless = options.alertMode === 'headless'; // @todo merge test if needed.
+    options.customChecks = options.customTests > 0 && !options.customChecks ? 'listen' : false; // @todo merge test.
 
     // Toggleable plugins
-    options.developerPlugin = false;
+		// @todo merge test if these are lost on [...merge].
+		/*options.developerPlugin = false;
     options.colourFilterPlugin = false;
     options.exportResultsPlugin = false;
-    options.showImageOutline = false;
-    // @todo merge what are these?
-    // Constants.Global.ignoreContentOutsideRoots = option.ignoreContentOutsideRoots;
-
-  //  options.panelPosition = panelPinTo; // Syntax?
+    options.showImageOutline = false;*/
 
     // Check for document types.
 
-    if (options.documentLinks) {
+		console.log(options.documentLinks);
+    if (options.documentLinks) { // @todo merge needed?
       options.checks.QA_DOCUMENT.sources = options.documentLinks;
     }
-    // @todo merge this changed name from linkIgnoreSelector.
-
-    if (options.linkIgnoreSelector) {
-      options.linkIgnoreSpan = options.linkIgnoreSelector;
-    }
+		console.log(options.documentLinks);
 
     if (options.panelAttachTo) {
-      State.panelAttachTo = options.panelAttachTo; // todo Is this implemented anywhere?
+			State.panelAttachTo = options.panelAttachTo;
     }
-
-
-    // @todo Merge ignoreByKey deprecation documentation and conversion. These tests still need overrides:
-    // 'p': 'table p',
-    //  'table': '[role="presentation"]'
 
     /* ********************** */
     /* Embedded Content Setup */
     /* ********************** */
     //Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
-    // @todo merge: this means custom embeds needs to be a custom test.
-
-    /* ************** */
-    /* Language setup */
-    /* ************** */
-    // @todo merge how to emulate Sa11y translations?
-    /*ed11yLang = {
-      // Fall back to En strings if language or string is unavailable
-      ...ed11yLang['en'],
-      ...ed11yLang[options.lang]
-    };*/
+    // @todo merge: this means custom embeds needs to be converted to a custom test in the build.
 
     /* *********** */
     /* Theme setup */
@@ -3354,7 +3379,7 @@ const Options = (function options() {
     cssUrls?.forEach( sheet => {
       const cssLink = document.createElement('link');
       cssLink.setAttribute('rel', 'stylesheet');
-      // @todo preload.
+      // @todo merge possibly lost some preload functionality.
       cssLink.setAttribute('media', 'all');
       if (sheet.indexOf('?') < 0) {
         sheet = sheet + '?ver=' + State.version;
@@ -3394,7 +3419,7 @@ const Options = (function options() {
     Theme.buttonZIndex = State.options.buttonZIndex;
     Theme.baseFontFamily = State.options.baseFontFamily;
 
-    // @todo this is probably getting provided by Sa11y
+    // @todo merge this might be getting provided by Sa11y
     if (State.options.currentPage === false) {
       State.options.currentPage = window.location.pathname;
     }
@@ -3402,7 +3427,7 @@ const Options = (function options() {
     if (!State.options.linkStringsNewWindows) {
       State.options.linkStringsNewWindows = M.linkStringsNewWindows;
     }
-    // @todo merge remove wpadminbar from defaults and update wp module.
+    // @todo merge CMS remove wpadminbar from defaults and update wp module.
     /*Exclusions.Container = ['#wpadminbar', '#wpadminbar *', ...exclusions];
     if (option.containerIgnore) {
       const containerSelectors = option.containerIgnore.split(',').map((item) => item.trim());
@@ -3428,52 +3453,56 @@ const ed11yLang = {
 
   strings : {
 
-		// todo implement CONSOLE_ERROR
+		// @todo merge implement CONSOLE_ERROR?
+		// @todo merge discuss 8 strings, short test names.
 
     // Main Panel =========================================
-    MAIN_TOGGLE_LABEL: 'Toggle accessibility tools',
-    toggleDisabled: 'No content available for Editoria11y to check.',
     panelControls: 'Editorially',
-    PANEL_HEADING: 'Check headings & alt text',
-    buttonToolsActive: 'Hide headings & alt text', // todo
-    OUTLINE: 'Headings', // todo
+    OUTLINE: 'Headings',
 		IMAGES: 'Alt text',
-    buttonFirstContent: 'Go to first alert', // todo change to "SKIP_TO_ISSUE#".
-    buttonNextContent: 'Go to next alert',
-    buttonPrevContent: 'Go to previous alert',
-    buttonShowHiddenAlert: 'Show hidden alert', // Has fallback.
-    buttonHideHiddenAlert: 'Hide hidden alert', // Has fallback.
+
+		// Extended English strings with translated fallback.
+		buttonFirstContent: 'Go to first alert', // @todo merge change to "SKIP_TO_ISSUE#".
+		buttonNextContent: 'Go to next alert',
+		buttonPrevContent: 'Go to previous alert',
+		MAIN_TOGGLE_LABEL: 'Toggle accessibility tools',
+		toggleDisabled: 'No content available for Editoria11y to check.', // @todo merge
+		PANEL_HEADING: 'Check headings & alt text',
+		buttonToolsActive: 'Hide headings & alt text', // @todo merge
     PANEL_DISMISS_BUTTON: `Show %(dismissCount) hidden alerts`,
-    buttonHideHiddenAlerts: `Hide %(count) hidden alerts`, // Has fallback.
+		buttonShowHiddenAlert: 'Show hidden alert',
+		buttonHideHiddenAlert: 'Hide hidden alert',
+    buttonHideHiddenAlerts: `Hide %(count) hidden alerts`,
     buttonShowAlerts: 'Show accessibility alerts',
     buttonShowNoAlert: 'Show accessibility checker',
     buttonHideChecker: 'Hide accessibility checker',
     buttonHideAlerts: 'Hide accessibility alerts',
-    panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>', // Todo ENG only.
-    panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>', // Todo ENG only.
+
+		// Visualization
     NO_IMAGES: 'No images found.',
-		ALT: 'Alt Text: ', // @todo Merge mvp image alts are not rendering!
+		ALT: 'Alt Text: ',
     MISSING: '(missing!)',
-    errorAltNull: '(none; image marked as decorative)', // todo ENG only?
-    errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
+		panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>', // Todo merge ENG only.
+		panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>', // Todo merge ENG only.
+    DECORATIVE: 'Marked decorative',
+    errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ', // todo merge ENG only?
     errorOutlinePrefixHeadingEmpty: '(empty heading) ',
     errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
 
     // Errors and alerts ==================================
-
-    consoleNotSupported: 'This browser can not run Editoria11y.',
     NOT_VISIBLE: 'Note: this content may not be visible. Look for it inside the outlined container.',
-    jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.', // todo fall back to NOT_VISIBLE?
-		ACC_NAME_TIP: ' ',
+    jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.', // @todo merge fall back to NOT_VISIBLE?
+		ACC_NAME_TIP: '', // @todo merge pass label instead, swap if not EN
+		LINK_TIP: '',
 
     // Strings used in tests ==============================
 
-		// @todo Add courtesy of, copyright, and photo by to Sa11y.
+		// @todo merge Add courtesy of, copyright, and photo by to Sa11y.
     // suspiciousWords: ['image of','graphic of','picture of','photo of','photograph of','placeholder','spacer','tbd','todo', 'copyright', 'courtesy of', 'photo by'],
     // badEndingForAlt: ['photo', 'image', 'photograph', 'picture'],
-		// @todo Compare Sa11y test.
+		// @todo after merge Compare Sa11y test.
     //linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],
-		// @todo Compare Sa11y test performance
+		// @todo after merge Compare Sa11y test performance
     //linksMeaningless: /(learn|to|more|now|this|page|link|site|website|check|out|view|our|read|download|form|here|click|"|'|\?|\.|-|,|:|>|<|\s)+/g,
     //linkStringsNewWindows: /window|\stab|download/g,
 
@@ -3488,15 +3517,15 @@ const ed11yLang = {
 		DISMISS: 'Mark as ignored',
     dismissActions: `%(count) similar issues`, // 2.3.10
 		DISMISS_ALL: 'Ignore all like this', // 2.3.10
-    dismissOkAllButton: 'Mark all like this as OK', // 2.3.10
-    dismissOkTitle: 'Hides this alert for all editors',
-    dismissHideTitle: 'Hides this alert for you',
-    undismissOKButton: 'Restore this alert marked as OK',
-    undismissHideButton: 'Restore this hidden alert',
-    undismissNotePermissions: 'This alert has been hidden by an administrator',
-    reportsLink: 'Open site reports in new tab',
+    dismissOkAllButton: 'Mark all like this as OK', // @todo merge translate
+    dismissOkTitle: 'Hides this alert for all editors',  // @todo translate
+    dismissHideTitle: 'Hides this alert for you',  // @todo translate
+    undismissOKButton: 'Restore this alert marked as OK',  // @todo translate
+    undismissHideButton: 'Restore this hidden alert', // @todo translate
+    undismissNotePermissions: 'This alert has been hidden by an administrator', // @todo translate
+    reportsLink: 'Open site reports in new tab', // @todo translate
     ALERT_CLOSE: 'Close',
-    panelHelpTitle: 'About this tool',
+    panelHelpTitle: 'About this tool', // @todo hide if not ENG.
     panelHelp: `
     <p><a href="https://editoria11y.princeton.edu/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
     <p>Many alerts are "manual checks." Manual checks can be dismissed:</p>
@@ -3690,7 +3719,7 @@ const ed11yLang = {
             </ul>
         `,
 
-		// @todo discuss: separate tests for no text and all text ignored:
+		// @todo merge discuss: separate tests for no text and all text ignored:
 		linkNoTextExample: '<p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>',
 
 		linkTextIgnored: (ignoredText) => `
@@ -3838,6 +3867,13 @@ const ed11yLang = {
 	}
 };
 
+// QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
+function findElements (key, selector, rootRestrict = true) { // @todo merge replace.
+	const desiredRoot = rootRestrict ? 'root' : 'document';
+	const exclude = rootRestrict ? [] : Constants.Exclusions.Sa11yElements;
+	State.elements.key = find(selector, desiredRoot, exclude );
+}
+
 function parents(el) {
   let nodes = [];
   nodes.push(el);
@@ -3941,77 +3977,6 @@ function detectShadow (container) {
         console.warn(`Editoria11y: A specified shadow host has no shadowRoot: ${component.tagName}`);
       }
     });
-  }
-}
-const diveShadow = function (container, select, selector) {
-  if (container.matches(selector)) {
-    return([container]);
-  } else {
-    let inners = container.shadowRoot.querySelectorAll(select);
-    if (typeof(inners) === 'object' && inners.length > 0) {
-      // Replace shadow host with inner elements.
-      inners.forEach(inner => {
-        for (let innerIndex = inners - 1; innerIndex >= 0; innerIndex--) {
-          let innerInner = diveShadow(inner, select, selector);
-          if (innerInner.length > 0) {
-            inners.splice(innerIndex, 1, ...innerInner);
-          } else {
-            inners.splice(innerIndex, 1);
-          }
-        }
-      });
-      return (Array.from(inners).filter((el) => el.matches(selector)));
-    }
-  }
-  return [];
-};
-
-// QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
-function findElements (key, selector, rootRestrict = true) { // @todo merge replace.
-
-  // Todo beta: function and parameter to auto-detect shadow components.
-  let shadowSelector = State.options.autoDetectShadowComponents ?
-    '[data-ed11y-has-shadow-root]' :
-    State.options.shadowComponents ?
-      State.options.shadowComponents : false;
-
-  // Concatenate global and specific ignores
-  let ignore;
-  if (State.options.ignoreElements) {
-    ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreElements}, ${State.options.ignoreByKey[key]})` : `:not(${State.options.ignoreElements})`;
-  } else {
-    ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreByKey[key]})` : '';
-  }
-
-  // Initialize or reset elements array.
-  State.elements[key] = [];
-
-  const select = `:is(${selector}${shadowSelector ? ', ' + shadowSelector : ''})${ignore}`;
-
-  if (rootRestrict && State.roots) {
-    // Add array of elements matching selector, excluding the provided ignore list.
-    // Todo this can dupe
-    State.roots.forEach(root => {
-      State.elements[key] = State.elements[key].concat(Array.from(root.querySelectorAll(select)));
-    });
-  } else {
-    State.elements[key] = State.elements[key].concat(Array.from(document.querySelectorAll(select)));
-  }
-
-  // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
-  // Repeat the search inside each placeholder, and replace the placeholder with its search results.
-  if (shadowSelector) {
-    for (let index = State.elements[key].length - 1; index >= 0; index--) {
-      if (State.elements[key][index].matches(shadowSelector)) {
-        // Dive into the shadow root and collect an array of its results.
-        let inners = diveShadow(State.elements[key][index], select, selector);
-        if (inners.length > 0) {
-          State.elements[key].splice(index, 1, ...inners);
-        } else {
-          State.elements[key].splice(index, 1);
-        }
-      }
-    }
   }
 }
 function pauseObservers() {
@@ -4162,7 +4127,7 @@ const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size = 17) {
 };
 
 const nudgeMark = function (el, x, y) {
-	// TODO: THESE CAN NUDGE OUT OF THE OVERFLOW AREA OF THE CONTENTEDITABLE CONTAINER
+	// todo: these can get nudged out of an editable area.
 	if (el.style.transform) {
 		const computedStyle = window.getComputedStyle(el);
 		let matrix = computedStyle.getPropertyValue('transform');
@@ -4211,15 +4176,15 @@ function alignPanel() {
 	if (!UI.panelElement) {
 		return false;
 	}
-	if (State.options.panelPinTo === 'left') {
+	if (State.options.panelPosition === 'left') {
 		UI.panel.classList.add('ed11y-pin-left');
 	}
 	let xMost = 0;
 	let yMost = 0;
-	if (State.elements.panelPin) { // todo
+	if (State.elements.panelPin) { // @todo merge panel pinning.
 		State.elements.panelPin.forEach(el => {
 			let bounds = el.getBoundingClientRect();
-			if (State.options.panelPinTo === 'right') {
+			if (State.options.panelPosition === 'right') {
 				xMost = window.innerWidth - bounds.left > xMost && bounds.left > window.innerWidth / 3 ? window.innerWidth - bounds.left : xMost;
 			} else {
 				xMost = bounds.right > xMost && xMost + bounds.right < window.innerWidth / 3 ? xMost + bounds.right : xMost;
@@ -4229,29 +4194,35 @@ function alignPanel() {
 	}
 	if (xMost > 0 && xMost < window.innerWidth - 240) {
 		// push off horizontal
-		UI.panelElement.style.setProperty(State.options.panelPinTo, xMost + 10 + 'px');
+		UI.panelElement.style.setProperty(State.options.panelPosition, xMost + 10 + 'px');
 		UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
 	} else if (xMost > 0 && xMost > window.innerWidth - 240 && yMost > 0) {
 		// push off vertical
-		UI.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
+		UI.panelElement.style.setProperty(State.options.panelPosition, State.options.panelOffsetX);
 		UI.panelElement.style.setProperty('bottom', `calc(${State.options.panelOffsetY} + ${yMost}px)`);
 	} else {
 		// no push
-		UI.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
+		UI.panelElement.style.setProperty(State.options.panelPosition, State.options.panelOffsetX);
 		UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
 	}
 }
 
 function alignAlts () {
 	// Positions alt label to match absolute, inline or floated images.
-	findElements('altMark', 'ed11y-element-alt');
-	State.elements.altMark?.forEach((el) => { // @todo merge
-		let id = el.dataset.ed11yImg;
+	console.log(UI.imageAlts);
+	UI.imageAlts?.forEach((mark) => { // @todo merge test
+		console.log(mark);
+		if (!mark.mark) {
+			console.log('nope');
+			return;
+		}
+		const el = mark.mark;
+		el.dataset.ed11yImg;
 		el.style.setProperty('transform', null);
 		el.style.setProperty('height', null);
 		el.style.setProperty('width', null);
 
-		let img = UI.imageAlts[id][0];
+		let img = mark.element;
 		if (img.tagName !== 'IMG') {
 			// Mark is placed outside the link in linked images.
 			img = img.querySelector('img');
@@ -4553,13 +4524,8 @@ function updatePanel () {
     // Check for a change in the result counts.
     if (State.forceFullCheck) {
       State.forceFullCheck = false;
-      /*if (State.options.alertMode === 'assertive' && State.totalCount > 0 && (State.warningCount > oldWarnings || State.errorCount > oldErrors)) {
-        console.warn('forced open');
-        State.showPanel = true;
-      }*/
       resetResults(true);
     } else {
-      // Todo: commented out in 2.3.11:
       // Reconnect map
       State.results = State.oldResults;
       window.setTimeout(function() {
@@ -4594,14 +4560,6 @@ function updatePanel () {
 
     if (State.onLoad === true) {
       State.onLoad = false;
-
-      if (!State.options.inlineAlerts) {
-        // todo move to incremental check or timeout; no need to do on load.
-        State.oldResultString = `${State.errorCount} ${State.warningCount}`;
-        State.results.forEach(result => {
-          State.oldResultString += result.test + result.element.outerHTML;
-        });
-      }
 
       // Create the panel DOM on load.
 
@@ -4677,7 +4635,12 @@ function updatePanel () {
         // Show sometimes for assertive/polite if there are new items.
         State.showPanel = true;
       }
-    }
+    } else if (!State.options.inlineAlerts) { // todo is that the best param?
+				State.oldResultString = `${State.errorCount} ${State.warningCount}`;
+				State.results.forEach(result => {
+					State.oldResultString += result.test + result.element.outerHTML;
+				});
+		}
 
     // Now we can open or close the panel.
     if (!State.showPanel) {
@@ -4759,10 +4722,6 @@ function updatePanel () {
         document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
         document.documentElement.style.setProperty('--ed11y-activePanelBorder', Theme.panelBarText + '88');
       }
-      // todo postpone: aria alert on load?
-      /*window.setTimeout(function () {
-        //announce.textContent = text;
-      }, 1500);*/
       if (State.dismissedCount > 0 && State.totalCount === 0) {
         UI.panelCount.textContent = State.dismissedCount;
       } else {
@@ -4789,7 +4748,7 @@ function updatePanel () {
             Lang._('buttonShowHiddenAlert');
         }
       } else {
-        // todo 3.x: move these inline and just change the class.
+        // todo merge: move these inline and just change the class.
         UI.panelToggleTitle.textContent = State.open ? M.buttonHideChecker : M.buttonShowNoAlert;
       }
     }
@@ -4821,7 +4780,6 @@ function buildJumpList () {
     top = top + window.scrollY;
     if (State.options.fixedRoots) {
       const root = result.element.closest('[data-ed11y-root]');
-      // Todo: it might be faster to associate this with the element finder.
       State.results[i].fixedRoot = root.dataset.ed11yRoot;
     }
     State.results[i].scrollableParent = closestScrollable(result.element);
@@ -4901,7 +4859,6 @@ function drawResult(result, index) {
   mark.wrapper.classList.add('ed11y-result');
 
   // Create tooltip toggle
-  // @todo abstract out.
   mark.toggle = document.createElement('button');
   mark.toggle.setAttribute('class', 'toggle');
   let label = mark.dismissable ? Lang._('WARNING') : Lang._('ERROR');
@@ -5138,10 +5095,9 @@ function alertOnInvisibleTip (button, target) {
         return false;
       }
     }
-    // Todo: following statements work but could be simplified.
     if (!State.options.inlineAlerts) {
-      // todo this selector must match the selector that decides where to place the mark
-      editableHighlighter(button.dataset.ed11yResult, true, firstVisible); // todo
+      // todo this selector should match the selector that decided where to place the mark
+      editableHighlighter(button.dataset.ed11yResult, true, firstVisible); // @todo merge test
     } else {
       if (firstVisible) {
         firstVisible.classList.add('ed11y-hidden-highlight');
@@ -5181,7 +5137,7 @@ function jumpTo(next = true) {
   let goNum = next ? State.lastOpenTip + 1 : State.lastOpenTip - 1;
   if (goNum < 0) {
     // Reached end of loop or dismissal pushed us out of loop
-    State.nextText = M.buttonFirstContent; // todo
+    State.nextText = M.buttonFirstContent;
     goNum = goMax;
   } else if (goNum > goMax) {
     goNum = 0;
@@ -5196,7 +5152,7 @@ function jumpTo(next = true) {
 
   resetClass(['ed11y-hidden-highlight']);
   if (State.jumpList.length === 0) {
-    buildJumpList(); // todo
+    buildJumpList();
   }
   // Find next or first result in the dom ordered list of results.
   let goto = State.jumpList[goNum];
@@ -5279,8 +5235,8 @@ function alignTip (button, toolTip, recheck = 0, reveal = false) {
 			absoluteBottom = bounds.top + result.scrollableParent.scrollHeight;
 		}
 	} else if (mark.dataset.ed11yHiddenResult === 'true' || !(visible(mark) || buttonOffset.top === 0 && buttonOffset.left === 0)) {
-		// ruh roh invisible button
-		// todo: use the not-inline drawing pattern for invisible targets?
+		// Invisible button
+		// todo postpone: could we use the not-inline drawing pattern for invisible targets?
 		const theFirstVisibleParent = firstVisibleParent(mark.result.element);
 		if (theFirstVisibleParent) {
 			buttonOffset = firstVisibleParent.getBoundingClientRect();
@@ -5695,21 +5651,20 @@ function checkAll() {
 		State.customTestsRunning = false;
 
 		State.roots = [];
+		// @todo merge rewrite when Sa11y releases fixed root support.
 		if (State.options.fixedRoots) {
-			// @todo merge this needs to be implemented
 			State.options.fixedRoots.forEach(root => {State.roots.push(root.fixedRoot);});
 		} else {
-			// @todo merge this needs to return to querySelectorAll.
 			State.roots = document.querySelectorAll(`:is(${State.options.checkRoots})`);
 		}
 		// Initialize root areas to check.
 		if (!State.roots && State.options.headless === false) {
 			// @todo merge invalid number of arguments.
 			createAlert(`${Lang.sprintf('MISSING_ROOT', State.options.checkRoots)}`);
-		} // todo fixedRoots.
+		}
 
 		if (State.roots.length === 0) {
-			// Todo parameterize for translation.
+			// @todo merge parameterize for translation.
 			if (State.onLoad) {
 				console.warn('Check Editoria11y configuration; specified root element not found');
 			}
@@ -5748,7 +5703,6 @@ function checkAll() {
 		checkImages(State.results, State.options);
 		checkLabels(State.results, State.options);
 		checkQA(State.results, State.options);
-		console.log(State.results);
 		/*{
 "element": {},
 "type": "error",
@@ -5775,6 +5729,7 @@ toggle
 
 		* */
 		// @todo merge temporary values.
+		// @todo merge handle readability and developer checks.
 		for (let i = State.results.length - 1; i >= 0;) {
 			if (State.results[i].type === 'good') {
 				State.results.splice(i, 1);
@@ -5828,37 +5783,36 @@ toggle
 				document.dispatchEvent(customTests);
 			},0);
 		}
-	}
-
-	if (!State.customTestsRunning) {
-		window.setTimeout(function () {
-			if (typeof UI.panelToggle.querySelector === 'function') {
-				UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
-			}
-			countAlerts();
-			updatePanel();
-			window.setTimeout(() => {
-				if (State.options.watchForChanges) {
-					State.elements.editable?.forEach(editable => {
-						if (!editable.matches('.drag-observe')) {
-							editable.classList.add('drag-observe');
-							editable.addEventListener('drop', () => {
-								// This event does not bubble.
-								State.forceFullCheck = true;
-							});
-						}
-					});
-					if (State.options.watchForChanges === 'checkRoots') {
-						State.roots?.forEach((root) => {
-							startObserver( root );
-						});
-					} else {
-						startObserver( document.body );
-					}
-					resumeObservers(); // on recheck.
+		if (!State.customTestsRunning) {
+			window.setTimeout(function () {
+				if (typeof UI.panelToggle.querySelector === 'function') {
+					UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
 				}
+				countAlerts();
+				updatePanel();
+				window.setTimeout(() => {
+					if (State.options.watchForChanges) {
+						State.elements.editable?.forEach(editable => {
+							if (!editable.matches('.drag-observe')) {
+								editable.classList.add('drag-observe');
+								editable.addEventListener('drop', () => {
+									// This event does not bubble.
+									State.forceFullCheck = true;
+								});
+							}
+						});
+						if (State.options.watchForChanges === 'checkRoots') {
+							State.roots?.forEach((root) => {
+								startObserver( root );
+							});
+						} else {
+							startObserver( document.body );
+						}
+						resumeObservers(); // on recheck.
+					}
+				}, 0);
 			}, 0);
-		}, 0);
+		}
 	}
 	else {
 		disable();
@@ -5873,7 +5827,7 @@ function buildElementList () {
 	} else {
 		State.elements.editable = State.options.editableContent;
 	}
-	if (State.options.inlineAlerts && State.elements.editable.length > 0) {
+	if (State.options.inlineAlerts && State.elements.editable) {
 		State.options.inlineAlerts = false;
 		console.warn('Editable content detected; Editoria11y inline alerts disabled');
 	}
@@ -5969,7 +5923,7 @@ function showHeadingsPanel () {
 			panelOutline.append(li);
 		});
 	} else {
-		panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>'; // @todo translate!
+		panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>'; // @todo merge translate
 	}
 }
 
@@ -5984,7 +5938,7 @@ function resetPanel() {
 			Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount);
 	}
 
-	// @todo is this going to fail again? Should it a different if?
+	// @todo merge is this going to fail again? Should it use a different if?
 	if (typeof (UI.panel) === 'object') {
 		UI.panel?.classList.add('ed11y-shut');
 		UI.panel?.classList.remove('ed11y-active');
@@ -5997,8 +5951,9 @@ function resetPanel() {
 	}
 }
 
-// @todo is this getting called?
+// @todo merge is this getting called?
 window.addEventListener('ed11yEndVisualization', ()=>{
+	console.log('end visualization');
 	State.visualizing = false;
 	pauseObservers();
 	visualize();
@@ -6037,11 +5992,18 @@ const showAltPanel = function () {
 
 	if (UI.imageAlts.length > 0) {
 		altList.innerHTML = '';
-		UI.imageAlts.forEach((image, i) => {
+		for (let i = 0; i < UI.imageAlts.length; i++) {
+			const image = UI.imageAlts[i];
+			let altText = computeAriaLabel(image.element) === 'noAria'
+				? escapeHTML(image.element.getAttribute('alt'))
+				: computeAriaLabel(image.element);
+			UI.imageAlts[i].altText = altText;
 			console.log(image);
+			console.log(UI.imageAlts[i].altText);
+			//let alert = {};
 			/*
 			// Match dismissed images.
-			// @todo this is Sa11y logic:
+			// @todo merge remove; this is the Sa11y logic:
 			// const isDismissed = dismissed.some((key) => key.dismiss === image.dismiss);
 			// if (isDismissed) Object.assign(image, { dismissedImage: true });
 			// Make developer checks don't show images as error if Developer checks are off!
@@ -6069,10 +6031,6 @@ const showAltPanel = function () {
 
 
 			// Account for lazy loading libraries.
-			const source = getBestImageSource(image.element);
-			const altText = computeAriaLabel(image.element) === 'noAria'
-				? escapeHTML(image.element.getAttribute('alt'))
-				: computeAriaLabel(image.element);
 
 			if (State.options.inlineAlerts) {
 				// Label images
@@ -6081,16 +6039,24 @@ const showAltPanel = function () {
 				mark.dataset.ed11yImg = i.toString();
 				mark.setAttribute('id', 'ed11y-alt-' + i);
 				mark.setAttribute('tabindex', '-1');
+				UI.imageAlts[i].mark = mark;
 				image.element.insertAdjacentElement('beforebegin', mark);
 			}
 
 			// Build alt list in panel
 			let userText = document.createElement('span');
-			userText.textContent = altText;
+			if (altText !== '') {
+				userText.textContent = altText;
+			} else {
+				const decorative = document.createElement('span');
+				decorative.classList.add('ed11y-decorative');
+				decorative.textContent = Lang._('DECORATIVE');
+				userText.append(decorative);
+			}
 			let li = document.createElement('li');
 			li.classList.add(image.type);
 			let img = document.createElement('img');
-			img.setAttribute('src', source);
+			img.setAttribute('src', getBestImageSource(image.element));
 			img.setAttribute('alt', '');
 
 			if (State.options.inlineAlerts) {
@@ -6106,8 +6072,13 @@ const showAltPanel = function () {
 				li.append(userText);
 			}
 			altList.append(li);
-		});
-		alignAlts();
+		}
+		if (State.options.inlineAlerts) {
+			alignAlts();
+		} else {
+			UI.imageAlts.length = 0;
+		}
+		//findElements('altMark', 'ed11y-element-alt', false );
 	} else {
 		const noImages = document.createElement('p');
 		const noItalic = document.createElement('em');
@@ -6139,7 +6110,7 @@ function dismissThis (dismissalType, all = false) {
 	// Remove tip and reset borders around element
 	resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
 	removal.tip?.parentNode?.removeChild(removal.tip);
-	// TODO EDITING: COMMENT OUT BELOW...SEEMS REDUNDANT?
+	// @todo merge found this commented out -- is it needed or can it be removed?
 	//removal.button?.parentNode?.removeChild(removal.button);
 
 	reset();
@@ -6221,7 +6192,7 @@ function raceCrash() {
 	checkAll();
 	window.setTimeout(function() {
 		if (State.results.length > 0 && State.loopStop) {
-			this.jumpTo(); // todo
+			jumpTo();
 			State.loopStop = false;
 		}
 	},100, State.loopStop);
@@ -6246,6 +6217,7 @@ function disable() {
 	}
 }
 function reset () {
+	// @todo should we also flush things like State.elements.altMark?
 	pauseObservers();
 	resetResults();
 	resetPanel();
@@ -6416,7 +6388,6 @@ class Ed11yElementTip extends HTMLElement {
         if (State.options.allowHide) {
           const ignoreButton = document.createElement('button');
           ignoreButton.classList.add('dismiss');
-          // todo parameterize
           if (State.options.syncedDismissals) {
             ignoreButton.setAttribute('title', M.dismissHideTitle);
           }
@@ -6484,7 +6455,6 @@ class Ed11yElementTip extends HTMLElement {
     this.navBar.append(this.help);
 
     let closeButton = document.createElement('button');
-    closeButton.setAttribute('aria-label', Lang._('ALERT_CLOSE')); // Todo redundant.
     closeButton.setAttribute('title', Lang._('ALERT_CLOSE'));
     closeButton.classList.add('close');
     closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"/></svg>';
@@ -6496,7 +6466,7 @@ class Ed11yElementTip extends HTMLElement {
     closeButton.addEventListener('click', (event) => {
       event.preventDefault();
       if(this.open) {
-        // todo this needs to be part of the shadow DOM query I think
+        // @todo merge this should use the shadow dom finder.
         let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
         if (State.toggledFrom) {
           State.toggledFrom.focus();
@@ -6579,11 +6549,16 @@ class Ed11yElementAlt extends HTMLElement {
       let altTextWrapper = document.createElement('div');
       altTextWrapper.classList.add('ed11y-wrapper','ed11y-alt-wrapper');
       let img = UI.imageAlts[this.dataset.ed11yImg];
-      // img[el, src, altLabel, altStyle]
-
       let altSpan = document.createElement('span');
-      altSpan.textContent = img[2];
-      altSpan.classList.add(img[3]);
+			if (img.altText !== '') {
+				altSpan.textContent = img.altText;
+			} else {
+				const decorative = document.createElement('span');
+				decorative.classList.add('ed11y-decorative');
+				decorative.textContent = Lang._('DECORATIVE');
+				altSpan.append(decorative);
+			}
+      altSpan.classList.add(`ed11y-${img.type}`);
       altTextWrapper.appendChild(altSpan);
       UI.attachCSS(altTextWrapper);
       shadow.appendChild(altTextWrapper);
@@ -6634,7 +6609,7 @@ class Ed11yElementResult extends HTMLElement {
   toggleClick(event) {
     event.preventDefault();
     let host = this.getRootNode().host;
-    // Todo: extremely fast clicks throw TypeError: e is null
+    // Todo: fast rechecks and double clicks not being correctly intercepted.
     if (host.racing === false) {
       host.racing = true;
       State.toggledFrom = this;
@@ -6704,22 +6679,6 @@ class Ed11yElementResult extends HTMLElement {
       this.tip.setAttribute('data-ed11y-action', 'open');
       if (State.options.inlineAlerts) {
         this.result.element.classList.add(highlightOutline);
-        // Removed in 2.3.6; Todo: confirm not needed and delete.
-        /*if (this.result.element.style.outline.indexOf('alert') === -1 ) {
-          // Set property unless alert is already set.
-          const display = window.getComputedStyle(this.result.element).getPropertyValue('display');
-          let outlineClass;
-          if (display.indexOf('inline') === -1 || this.result.element.tagName === 'IMG') {
-            outlineClass = this.result.dismissalKey ?
-              'ed11y-warning-block'
-              : 'ed11y-error-block';
-          } else {
-            outlineClass = this.result.dismissalKey ?
-              'ed11y-warning-inline'
-              : 'ed11y-error-inline';
-          }
-          this.result.element.classList.add(outlineClass);
-        }*/
       }
       requestAnimationFrame(()=>alignTip(this.toggle, this.tip, 4, true));
       if (!State.jumpList) {
@@ -6771,11 +6730,9 @@ class Ed11yElementPanel extends HTMLElement {
     super();
   }
 
-  // todo mvp parameterize
   template() {
-    // TODO: CHANGE FROM VISIBILITY TO WIDTH TOGGLES SO FOCUS WORKS
-    // Todo: details summary language params
-    // todo: don't switch both label and aria-expanded on show hidden
+    // @todo merge: test that focus works; may need to toggle width instead of visibility.
+    // @todo merge: don't switch both label and aria-expanded on show hidden
     return `
     <div class='ed11y-buttonbar'>
       <button id='ed11y-show-hidden' data-ed11y-pressed='false' hidden>
@@ -6807,7 +6764,7 @@ class Ed11yElementPanel extends HTMLElement {
             </div>
         </details>
         </div>
-      <button type='button' id='ed11y-toggle'><span class="ed11y-sr-only">Show alerts</span><span class="ed11y-toggle-circle"><span class='icon'><svg class="errors-icon" xmlns="http://www.w3.org/2000/svg" width="10" aria-hidden="true" viewBox="0 0 448 512"><path fill="currentColor" d="M64 32C64 14 50 0 32 0S0 14 0 32L0 64 0 368 0 480c0 18 14 32 32 32s32-14 32-32l0-128 64-16c41-10 85-5 123 13c44.2 22 96 25 142 7l35-13c13-5 21-17 21-30l0-248c0-23-24-38-45-28l-10 5c-46 23-101 23-147 0c-35-18-75-22-114-13L64 48l0-16z"></path></svg><svg class="pass-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10.1699 19.1777"><path fill="currentColor" d="M3.7031,10.5527c-.3633-.6562-.6426-1.1387-.8379-1.4473l-.3105-.4863-.2344-.3574c-.5117-.7969-1.0449-1.4551-1.5996-1.9746.3164-.2617.6113-.3926.8848-.3926.3359,0,.6348.123.8965.3691s.5918.7148.9902,1.4062c.4531-1.4727,1.0293-2.8691,1.7285-4.1895.3867-.7188.7314-1.2021,1.0342-1.4502s.7041-.3721,1.2041-.3721c.2656,0,.5938.041.9844.123-1.0039.8086-1.8066,1.7695-2.4082,2.8828s-1.3789,3.0762-2.332,5.8887Z"/></svg><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="close-icon" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg></span></span></button>
+      <button type='button' id='ed11y-toggle'><span class="ed11y-sr-only"></span><span class="ed11y-toggle-circle"><span class='icon'><svg class="errors-icon" xmlns="http://www.w3.org/2000/svg" width="10" aria-hidden="true" viewBox="0 0 448 512"><path fill="currentColor" d="M64 32C64 14 50 0 32 0S0 14 0 32L0 64 0 368 0 480c0 18 14 32 32 32s32-14 32-32l0-128 64-16c41-10 85-5 123 13c44.2 22 96 25 142 7l35-13c13-5 21-17 21-30l0-248c0-23-24-38-45-28l-10 5c-46 23-101 23-147 0c-35-18-75-22-114-13L64 48l0-16z"></path></svg><svg class="pass-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10.1699 19.1777"><path fill="currentColor" d="M3.7031,10.5527c-.3633-.6562-.6426-1.1387-.8379-1.4473l-.3105-.4863-.2344-.3574c-.5117-.7969-1.0449-1.4551-1.5996-1.9746.3164-.2617.6113-.3926.8848-.3926.3359,0,.6348.123.8965.3691s.5918.7148.9902,1.4062c.4531-1.4727,1.0293-2.8691,1.7285-4.1895.3867-.7188.7314-1.2021,1.0342-1.4502s.7041-.3721,1.2041-.3721c.2656,0,.5938.041.9844.123-1.0039.8086-1.8066,1.7695-2.4082,2.8828s-1.3789,3.0762-2.332,5.8887Z"/></svg><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="close-icon" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg></span></span></button>
       <button class='ed11y-jump next' data-ed11y-goto='0' aria-haspopup="dialog"><svg class="hover-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="11" viewBox="0 -15 90 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m30 00 50 50-50 50" stroke-width="18"></path></svg><span class='toggle-count'></span><span class='jump-next ed11y-sr-only'></span></button>
      </div>
     </div>
@@ -6829,7 +6786,7 @@ class Ed11yElementPanel extends HTMLElement {
       shadow.appendChild(wrapper);
       const panelTabs = wrapper.querySelectorAll('.ed11y-buttonbar button');
       panelTabs.forEach(tab => {
-        // todo: syntax could be shrunk now that these aren't tabs.
+        // todo: may not be needed for details elements.
         tab.addEventListener('click', this.handleBarClick);
       });
       const altDetails = wrapper.querySelector('#ed11y-alts-tab');
@@ -6935,8 +6892,6 @@ class Ed11y {
 
     if (CSS.supports('selector(:has(body))')) {
       ed11ySetup();
-    } else {
-      console.warn(M.consoleNotSupported);
     }
 
     /* Export exposed interfaces */

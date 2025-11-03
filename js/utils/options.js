@@ -1,6 +1,6 @@
 import defaultOptions from '../../node_modules/sa11y/src/js/utils/default-options';
 import Constants from '../../node_modules/sa11y/src/js/utils/constants.js';
-import {M, State, Theme, UI} from "./state.js";
+import {State, Theme, UI} from "./state.js";
 import {Lang} from "sa11y/src/js/sa11y.js";
 
 const Options = (function options() {
@@ -9,6 +9,176 @@ const Options = (function options() {
   /* **************** */
   let ed11yLang = {};
   let ed11yDefaults = {
+
+		/**
+		 * Editoria11y only =============== */
+
+		// Provide list of test keys; get from localization file or results object.
+		// @todo merge CMS provide translation layer or document change.
+		// ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
+
+		// Ignore Aria on these elements (Gutenberg labels headings while editing.)
+		// @todo merge discuss these additions to the accessible name computation.
+		ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
+		ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
+
+		// Disable tests on specific elements
+		// Include and modify this entire object in your call
+		// @todo merge test and/or reimplement.
+		headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
+
+		// Set alertModes
+		// 'headless': do not draw interface
+		// 'userPreference: respect user preference.
+		// 'polite': open for new issues.
+		// 'assertive': open for any issues.
+		// 'active': always open.
+		// CMS integrations can switch between polite & headless at runtime.
+		alertMode: 'userPreference',
+		inlineAlerts: true,
+		watchForChanges: true, // true, false, 'checkRoots';
+
+		// This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
+		editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
+
+		// Dismissed alerts
+		currentPage: false, // uses window.location.pathname unless a string is provided.
+		allowHide: true, // enables end-user ignore button
+		allowOK: true,  // enables end-user mark OK button
+		syncedDismissals: false, // provide empty or populated object {} to enable sync functions
+		reportsURL: false, // Provides a link to site-wide reports
+		showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
+
+		// Hide all alerts if these elements are absent, e.g., ".edit-button"
+		// Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
+		ignoreAllIfAbsent: false,
+		ignoreAllIfPresent: false, // @todo merge dismissal system appears to be broken.
+
+		// Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
+		preventCheckingIfPresent: false,
+		preventCheckingIfAbsent: false,
+
+		// Disable the "is this element visible" check on themes that have 0-height elements.
+		checkVisible: true,
+
+		// Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
+		hiddenHandlers: '',
+
+		panelOffsetX: '25px',
+		panelOffsetY: '25px',
+		panelNoCover: '', // select other buttons to avoid.
+		panelAttachTo: document.body,
+
+		// Selector list for elements that hide overflow, truncating buttons.
+		constrainButtons: false,
+
+		// Interface
+		theme: 'sleekTheme',
+		sleekTheme: {
+			bg: '#eff2ff', // e8f4ff
+			bgHighlight: '#7b1919',
+			text: '#20160c',
+			primary: '#276499', // 276499
+			primaryText: '#eff2ff',
+			button: 'transparent', // deprecate?
+			panelBar: '#1e517c',
+			panelBarText: '#fffdf7',
+			panelBarShadow: '0 0 0 1px #276499',
+			activeTab: '#276499',
+			activeTabText: '#fffffe',
+			focusRing: '#007aff',
+			outlineWidth: '0',
+			borderRadius: '3px',
+			ok: '#1f5381',
+			warning: 'rgb(250, 216, 89)',
+			warningText: '#20160c',
+			alert: 'rgb(184, 5, 25)',
+			alertText: '#f4f7ff',
+		},
+		darkTheme: {
+			bg: '#0a2051',
+			bgHighlight: '#7b1919',
+			text: '#f4f7ff',
+			primary: '#3052a0',
+			primaryText: '#f4f7ff',
+			button: 'transparent',
+			panelBar: '#3052a0',
+			panelBarText: '#f4f7ff',
+			panelBarShadow: 'inset 0 0 1px, 0 0 0 1px #0a2051',
+			activeTab: '#0a2051',
+			activeTabText: '#fffffe',
+			focusRing: 'cyan',
+			outlineWidth: '2px',
+			borderRadius: '3px',
+			ok: '#0a307a',
+			warning: 'rgb(250, 216, 89)',
+			warningText: '#20160c',
+			alert: 'rgb(184, 5, 25)',
+			alertText: '#f4f7ff',
+		},
+		lightTheme: {
+			bg: '#fffffe',
+			bgHighlight: '#7b1919',
+			text: '#20160c',
+			primary: '#0a307a',
+			primaryText: '#fffdf7',
+			panelBar: '#0a307a',
+			panelBarText: '#f4f7ff',
+			panelBarShadow: '0 0 0 1px #0a307a',
+			button: 'transparent',
+			activeTab: '#b9c0cf',
+			activeTabText: '#20160c',
+			focusRing: '#007aff',
+			outlineWidth: '0',
+			borderRadius: '3px',
+			ok: '#0a307a',
+			warning: 'rgb(250, 216, 89)',
+			warningText: '#20160c',
+			alert: 'rgb(184, 5, 25)',
+			alertText: '#f4f7ff',
+		},
+		// Base z-index for buttons.
+		// 1299 maximizes TinyMCE compatibility.
+		buttonZIndex: 1299,
+		// CSS overrides and additions.
+
+		baseFontSize: 'clamp(14px, 1.5vw, 16px)',
+		baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
+
+		// Test customizations
+		embeddedContent: false, // @todo merge remove.
+		embeddedContentTitle: '', // @todo merge remove.
+		embeddedContentMessage: '', // @todo merge remove.
+
+		linksUrls: false, // get from language pack
+		linksMeaningless: false, // get from language pack
+		altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
+
+		editLinks: false, // Add links to edit content in tooltips.
+
+		// @todo merge discuss: how to handle this functionality.
+		editorHeadingLevel: [
+			// Sets previous heading level for contentEditable fields.
+			// With 'ignore' set, first heading level is ignored in editable zones.
+			// This is ideal for systems with separate backend editing pages.
+			// Set to 'inherit' for fields edited in a frontend context.
+			/*{
+				selector: '.example-inherit',
+				previousHeading: 'inherit',
+			},
+			{
+				selector: '.example-l3',
+				previousHeading: 3,
+			},*/
+			{
+				selector: '*',
+				previousHeading: 0, // Ignores first heading for level skip detection.
+			},
+		],
+
+		userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
+
+		customTests: 0,
 
 		/**
 		 * Sa11y overrides =============== */
@@ -24,12 +194,7 @@ const Options = (function options() {
 			}
 		]
 		*/
-		// Containers to globally ignore, e.g., "header *, .card *"
-		ignoreByKey: { // not implemented in Sa11y
-			// @todo merge discuss how to implement this in Sa11y core. Sa11y appends a descending selector; for these we only want to ignore QA and table checks, not inner link checks.
-			'p': 'table p',
-			'table': '[role="presentation"]',
-		},
+
 		containerIgnore: false, // @todo merge CMS was ignoreElements.
 
 		// contrastIgnore: '.sr-only',
@@ -56,8 +221,8 @@ const Options = (function options() {
 		// developerChecksOnByDefault: false,
 
 		// Page outline
-		showHinPageOutline: false, // @todo merge test.
-		showTitleInPageOutline: true,
+		showHinPageOutline: false,
+		showTitleInPageOutline: false,
 
 		// Image outline
 		// showImageOutline: true,
@@ -71,7 +236,7 @@ const Options = (function options() {
 		// delayCheck: 0,
 		// delayCustomCheck: 500,
 		// detectSPArouting: false,
-		doNotRun: '', // @todo merge test.
+		//doNotRun: false, // @todo merge test.
 		// headless: false,
 		selectorPath: false, // @todo merge what was this?
 		// shadowComponents: '',
@@ -110,178 +275,6 @@ const Options = (function options() {
 		// linkStopWords: '',
 		extraPlaceholderStopWords: '',
 		// imageWithinLightbox: '',
-
-		/**
-		* Editoria11y only =============== */
-
-		// Provide list of test keys; get from localization file or results object.
-		// @todo merge CMS provide translation layer or document change.
-		// ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
-
-		// Ignore Aria on these elements (Gutenberg labels headings while editing.)
-		// @todo merge discuss these additions to the accessible name computation.
-		ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
-		ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
-
-    // Disable tests on specific elements
-    // Include and modify this entire object in your call
-		// @todo merge test and/or reimplement.
-    headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
-
-    // Set alertModes
-    // 'headless': do not draw interface
-    // 'userPreference: respect user preference.
-    // 'polite': open for new issues.
-    // 'assertive': open for any issues.
-    // 'active': always open.
-    // CMS integrations can switch between polite & headless at runtime.
-    alertMode: 'userPreference',
-    inlineAlerts: true,
-    watchForChanges: true, // true, false, 'checkRoots';
-
-    // This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
-    editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
-
-    // Dismissed alerts
-    currentPage: false, // uses window.location.pathname unless a string is provided.
-    allowHide: true, // enables end-user ignore button
-    allowOK: true,  // enables end-user mark OK button
-    syncedDismissals: false, // provide empty or populated object {} to enable sync functions
-    reportsURL: false, // Provides a link to site-wide reports
-    showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
-
-    // Hide all alerts if these elements are absent, e.g., ".edit-button"
-    // Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
-    ignoreAllIfAbsent: false,
-    ignoreAllIfPresent: false,
-
-    // Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
-    preventCheckingIfPresent: false,
-    preventCheckingIfAbsent: false,
-
-    // Disable the "is this element visible" check on themes that have 0-height elements.
-    checkVisible: true,
-
-    // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
-    hiddenHandlers: '',
-
-    panelOffsetX: '25px',
-    panelOffsetY: '25px',
-    panelNoCover: '', // select other buttons to avoid.
-    panelAttachTo: document.body,
-
-    // Selector list for elements that hide overflow, truncating buttons.
-    constrainButtons: false,
-
-    // Interface
-    lang: 'en', // @todo merge drop after migrating to Lang_..
-    langSanitizes: false, // @todo merge drop after migrating to Lang_.
-    theme: 'sleekTheme',
-    sleekTheme: {
-      bg: '#eff2ff', // e8f4ff
-      bgHighlight: '#7b1919',
-      text: '#20160c',
-      primary: '#276499', // 276499
-      primaryText: '#eff2ff',
-      button: 'transparent', // deprecate?
-      panelBar: '#1e517c',
-      panelBarText: '#fffdf7',
-      panelBarShadow: '0 0 0 1px #276499',
-      activeTab: '#276499',
-      activeTabText: '#fffffe',
-      focusRing: '#007aff',
-      outlineWidth: '0',
-      borderRadius: '3px',
-      ok: '#1f5381',
-      warning: 'rgb(250, 216, 89)',
-      warningText: '#20160c',
-      alert: 'rgb(184, 5, 25)',
-      alertText: '#f4f7ff',
-    },
-    darkTheme: {
-      bg: '#0a2051',
-      bgHighlight: '#7b1919',
-      text: '#f4f7ff',
-      primary: '#3052a0',
-      primaryText: '#f4f7ff',
-      button: 'transparent',
-      panelBar: '#3052a0',
-      panelBarText: '#f4f7ff',
-      panelBarShadow: 'inset 0 0 1px, 0 0 0 1px #0a2051',
-      activeTab: '#0a2051',
-      activeTabText: '#fffffe',
-      focusRing: 'cyan',
-      outlineWidth: '2px',
-      borderRadius: '3px',
-      ok: '#0a307a',
-      warning: 'rgb(250, 216, 89)',
-      warningText: '#20160c',
-      alert: 'rgb(184, 5, 25)',
-      alertText: '#f4f7ff',
-    },
-    lightTheme: {
-      bg: '#fffffe',
-      bgHighlight: '#7b1919',
-      text: '#20160c',
-      primary: '#0a307a',
-      primaryText: '#fffdf7',
-      panelBar: '#0a307a',
-      panelBarText: '#f4f7ff',
-      panelBarShadow: '0 0 0 1px #0a307a',
-      button: 'transparent',
-      activeTab: '#b9c0cf',
-      activeTabText: '#20160c',
-      focusRing: '#007aff',
-      outlineWidth: '0',
-      borderRadius: '3px',
-      ok: '#0a307a',
-      warning: 'rgb(250, 216, 89)',
-      warningText: '#20160c',
-      alert: 'rgb(184, 5, 25)',
-      alertText: '#f4f7ff',
-    },
-    // Base z-index for buttons.
-    // 1299 maximizes TinyMCE compatibility.
-    buttonZIndex: 1299,
-    // CSS overrides and additions.
-
-    baseFontSize: 'clamp(14px, 1.5vw, 16px)',
-    baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-
-    // Test customizations
-    embeddedContent: false, // @todo merge remove.
-    embeddedContentTitle: '', // @todo merge remove.
-    embeddedContentMessage: '', // @todo merge remove.
-
-    linksUrls: false, // get from language pack
-    linksMeaningless: false, // get from language pack
-    altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
-
-    editLinks: false, // Add links to edit content in tooltips.
-
-    // @todo merge discuss: how to handle this functionality.
-    editorHeadingLevel: [
-      // Sets previous heading level for contentEditable fields.
-      // With 'ignore' set, first heading level is ignored in editable zones.
-      // This is ideal for systems with separate backend editing pages.
-      // Set to 'inherit' for fields edited in a frontend context.
-      /*{
-        selector: '.example-inherit',
-        previousHeading: 'inherit',
-      },
-      {
-        selector: '.example-l3',
-        previousHeading: 3,
-      },*/
-      {
-        selector: '*',
-        previousHeading: 0, // Ignores first heading for level skip detection.
-      },
-    ],
-
-    userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
-
-    customTests: 0,
   };
 
   function preProcessOptions(options) {
@@ -311,19 +304,21 @@ const Options = (function options() {
 
     // Toggleable plugins
 		// @todo merge test if these are lost on [...merge].
-/*    options.developerPlugin = false;
+		/*options.developerPlugin = false;
     options.colourFilterPlugin = false;
     options.exportResultsPlugin = false;
     options.showImageOutline = false;*/
 
     // Check for document types.
 
+		console.log(options.documentLinks);
     if (options.documentLinks) { // @todo merge needed?
       options.checks.QA_DOCUMENT.sources = options.documentLinks;
     }
+		console.log(options.documentLinks);
 
     if (options.panelAttachTo) {
-      State.panelAttachTo = options.panelAttachTo; // todo merge Is this implemented anywhere?
+			State.panelAttachTo = options.panelAttachTo;
     }
 
     /* ********************** */
@@ -371,7 +366,7 @@ const Options = (function options() {
     return options;
   }
 
-  function postProcessOptions(option) {
+  function postProcessOptions(options) {
     // @todo merge: test: does this need descendant selector?
     Constants.Exclusions.Sa11yElements = ['.ed11y-element'];
 
@@ -401,7 +396,7 @@ const Options = (function options() {
     }
 
     if (!State.options.linkStringsNewWindows) {
-      State.options.linkStringsNewWindows = M.linkStringsNewWindows;
+      State.options.linkStringsNewWindows = Lang._('linkStringsNewWindows');
     }
     // @todo merge CMS remove wpadminbar from defaults and update wp module.
     /*Exclusions.Container = ['#wpadminbar', '#wpadminbar *', ...exclusions];

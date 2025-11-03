@@ -538,6 +538,13 @@ button.ed11y-jump {
   margin: 0 2px -3px 0;
 }
 
+.ed11y-decorative {
+	font-style: italic;
+	font-weight: 200;
+	opacity: .8;
+}
+
+
 #ed11y-visualizers {
   grid-area: tools;
   max-width: 280px;
