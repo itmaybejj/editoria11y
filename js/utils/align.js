@@ -3,6 +3,7 @@ import {
 	visible
 } from "./utils.js";
 import {State, UI} from "./state.js";
+import {Options} from "./options.js";
 
 export const intersect = function(a, b, x = 10) {
 	// Compute intersect using browser offsets.
@@ -42,8 +43,8 @@ export const scrollableElem = function(el) {
 };
 
 export function closestScrollable(el) {
-	if (State.options.constrainButtons && el.closest(State.options.constrainButtons)) {
-		return el.closest(State.options.constrainButtons);
+	if (Options.constrainButtons && el.closest(Options.constrainButtons)) {
+		return el.closest(Options.constrainButtons);
 	}
 
 	let parent = el.parentElement;
@@ -70,15 +71,15 @@ export function alignPanel() {
 	if (!UI.panelElement) {
 		return false;
 	}
-	if (State.options.panelPosition === 'left') {
+	if (Options.panelPosition === 'left') {
 		UI.panel.classList.add('ed11y-pin-left');
 	}
 	let xMost = 0;
 	let yMost = 0;
-	if (State.elements.panelPin) { // @todo merge panel pinning.
-		State.elements.panelPin.forEach(el => {
+	if (State.elements.panelNoCover) {
+		State.elements.panelNoCover.forEach(el => {
 			let bounds = el.getBoundingClientRect();
-			if (State.options.panelPosition === 'right') {
+			if (Options.panelPosition === 'right') {
 				xMost = window.innerWidth - bounds.left > xMost && bounds.left > window.innerWidth / 3 ? window.innerWidth - bounds.left : xMost;
 			} else {
 				xMost = bounds.right > xMost && xMost + bounds.right < window.innerWidth / 3 ? xMost + bounds.right : xMost;
@@ -88,16 +89,16 @@ export function alignPanel() {
 	}
 	if (xMost > 0 && xMost < window.innerWidth - 240) {
 		// push off horizontal
-		UI.panelElement.style.setProperty(State.options.panelPosition, xMost + 10 + 'px');
-		UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
+		UI.panelElement.style.setProperty(Options.panelPosition, xMost + 10 + 'px');
+		UI.panelElement.style.setProperty('bottom', Options.panelOffsetY);
 	} else if (xMost > 0 && xMost > window.innerWidth - 240 && yMost > 0) {
 		// push off vertical
-		UI.panelElement.style.setProperty(State.options.panelPosition, State.options.panelOffsetX);
-		UI.panelElement.style.setProperty('bottom', `calc(${State.options.panelOffsetY} + ${yMost}px)`);
+		UI.panelElement.style.setProperty(Options.panelPosition, Options.panelOffsetX);
+		UI.panelElement.style.setProperty('bottom', `calc(${Options.panelOffsetY} + ${yMost}px)`);
 	} else {
 		// no push
-		UI.panelElement.style.setProperty(State.options.panelPosition, State.options.panelOffsetX);
-		UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
+		UI.panelElement.style.setProperty(Options.panelPosition, Options.panelOffsetX);
+		UI.panelElement.style.setProperty('bottom', Options.panelOffsetY);
 	}
 }
 
@@ -183,10 +184,10 @@ export function alignButtons() {
 	// Reading and writing in a loop creates paint thrashing.
 	// We iterate the array for reads, then iterate for writes.
 
-	if (State.options.fixedRoots) {
+	if (Options.fixedRoots) {
 		State.positionedFrames.length = 0;
 
-		State.options.fixedRoots.forEach((root) => {
+		Options.fixedRoots.forEach((root) => {
 			if (root['framePositioner']) {
 				State.positionedFrames.push(root['framePositioner'].getBoundingClientRect());
 			}
@@ -197,7 +198,7 @@ export function alignButtons() {
 	let previousNudgeTop = 0;
 	let previousNudgeLeft = 0;
 	const scrollTop = window.scrollY;
-	if (!State.options.inlineAlerts) {
+	if (!Options.inlineAlerts) {
 		// Compute based on target position.
 
 		State.jumpList.forEach((mark, i) => {
@@ -226,7 +227,7 @@ export function alignButtons() {
 				top = top + 10;
 				left = left + 10;
 			} else {
-				left = State.options.inlineAlerts ? left - 34 : left;
+				left = Options.inlineAlerts ? left - 34 : left;
 			}
 
 			// Add iframe positon to calculated position
@@ -240,7 +241,7 @@ export function alignButtons() {
 				top = top + 10;
 				left = left + 10;
 			} else {
-				left = State.options.inlineAlerts ? left - 34 : left;
+				left = Options.inlineAlerts ? left - 34 : left;
 			}
 			if (mark.result.scrollableParent) {
 				// Bump alerts that would be X-position out of a scroll zone.
@@ -340,7 +341,7 @@ export function alignButtons() {
 		else if (nudgeTop !== 0) {
 			needNudge = true;
 		}
-		if (!State.options.inlineAlerts) {
+		if (!Options.inlineAlerts) {
 			if (needNudge) {
 				mark.style.transform = `translate(${mark.markLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
 			} else {
@@ -357,7 +358,7 @@ export function alignButtons() {
 	});
 
 	// Last pass: check for elements offscreen within scrollable areas.
-	if (!State.options.inlineAlerts) {
+	if (!Options.inlineAlerts) {
 		// Alerts have to be positioned relative to viewport.
 		State.jumpList.forEach(mark => {
 

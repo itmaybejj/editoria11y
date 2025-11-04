@@ -18,10 +18,8 @@ export class Ed11yElementAlt extends HTMLElement {
 			if (img.altText !== '') {
 				altSpan.textContent = img.altText;
 			} else {
-				const decorative = document.createElement('span');
-				decorative.classList.add('ed11y-decorative');
-				decorative.textContent = Lang._('DECORATIVE');
-				altSpan.append(decorative);
+				altSpan.classList.add('ed11y-decorative');
+				altSpan.textContent = Lang._('DECORATIVE');
 			}
       altSpan.classList.add(`ed11y-${img.type}`);
       altTextWrapper.appendChild(altSpan);

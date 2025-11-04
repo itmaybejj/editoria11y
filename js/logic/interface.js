@@ -1,27 +1,23 @@
 import {State, Theme, UI} from "../utils/state.js";
 import {
+	buildElementList,
 	checkRunPrevent,
 	countAlerts,
-	detectShadow,
 	findElements, firstVisibleParent, lagBounce, pauseObservers,
 	resetClass, resetResults, resumeObservers,
 	visible
 } from "../utils/utils.js";
 
 import {
-	documentLoadingCheck,
 	prepareDismissal,
-	store
 } from "sa11y/src/js/utils/utils.js";
 import * as Utils from "sa11y/src/js/utils/utils.js";
-import findShadowComponents from "sa11y/src/js/logic/find-shadow-components.js";
 import checkHeaders from "sa11y/src/js/rulesets/headers.js";
 import checkLinkText from "sa11y/src/js/rulesets/link-text.js";
 import checkImages from "sa11y/src/js/rulesets/images.js";
 import checkLabels from "sa11y/src/js/rulesets/labels.js";
 import checkQA from "sa11y/src/js/rulesets/quality-assurance.js";
 import {Lang} from "sa11y/src/js/sa11y.js";
-import Constants from "sa11y/src/js/utils/constants.js";
 import Elements from "sa11y/src/js/utils/elements.js";
 import {
 	computeAccessibleName, computeAriaLabel
@@ -32,13 +28,14 @@ import {
 	checkEditableIntersects,
 	closestScrollable
 } from "../utils/align.js";
+import {Options} from "../utils/options.js";
 
 export function showResults () {
   buildJumpList();
   // Announce that buttons have been placed.
   document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
   alignButtons();
-  if (!State.options.inlineAlerts) {
+  if (!Options.inlineAlerts) {
     checkEditableIntersects();
     intersectionObservers();
   }
@@ -87,14 +84,14 @@ export function updatePanel () {
       // Record what has been seen at this route.
       // We do not do this on incremental updates.
       // Todo question: should we not do this at all for contentEditable?
-      State.seen[encodeURI(State.options.currentPage)] = State.totalCount;
+      State.seen[encodeURI(Options.currentPage)] = State.totalCount;
       localStorage.setItem('editoria11yResultCount', JSON.stringify(State.seen));
     } else {
-      delete State.seen[encodeURI(State.options.currentPage)];
+      delete State.seen[encodeURI(Options.currentPage)];
     }
   }
 
-  if (State.options.alertMode !== 'headless') {
+  if (!Options.headless) {
     // Not headless; draw the interface.
 
     if (!State.bodyStyle) {
@@ -129,11 +126,11 @@ export function updatePanel () {
       UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = Lang._('buttonFirstContent');
       UI.panel.setAttribute('aria-label', Lang._('panelControls'));
 
-      if (State.options.reportsURL) {
+      if (Options.reportsURL) {
         let reportLink = document.createElement('a');
         reportLink.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M0 96C0 61 29 32 64 32l384 0c35 0 64 29 64 64l0 320c0 35-29 64-64 64L64 480c-35 0-64-29-64-64L0 96zm64 0l0 64 64 0 0-64L64 96zm384 0L192 96l0 64 256 0 0-64zM64 224l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64zM64 352l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64z"/></svg><span class="ed11y-sr-only"></span>';
         reportLink.setAttribute('id' , 'ed11y-reports-link');
-        reportLink.setAttribute('href', State.options.reportsURL);
+        reportLink.setAttribute('href', Options.reportsURL);
         reportLink.setAttribute('target', '_blank');
         reportLink.setAttribute('aria-label', Lang._('reportsLink'));
         reportLink.querySelector('.ed11y-sr-only').textContent = Lang._('reportsLink');
@@ -158,27 +155,27 @@ export function updatePanel () {
 
       // Decide whether to open the panel on load.
       if (State.ignoreAll ||
-        (!State.options.inlineAlerts && State.totalCount > 75)
+        (!Options.inlineAlerts && State.totalCount > 75)
       ) {
         State.showPanel = false;
-      } else if (State.options.alertMode === 'active' ||
-        !State.options.userPrefersShut ||
-        State.options.showDismissed
+      } else if (Options.alertMode === 'active' ||
+        !Options.userPrefersShut ||
+        Options.showDismissed
       ) {
         // Show always on load for active mode or by user preference.
         State.showPanel = true;
       } else if (
         State.totalCount > 0 &&
         !State.ignoreAll &&
-        ( State.options.alertMode === 'assertive' ||
-          State.options.alertMode === 'polite' &&
-          State.seen[encodeURI(State.options.currentPage)] !== State.totalCount
+        ( Options.alertMode === 'assertive' ||
+          Options.alertMode === 'polite' &&
+          State.seen[encodeURI(Options.currentPage)] !== State.totalCount
         )
       ) {
         // Show sometimes for assertive/polite if there are new items.
         State.showPanel = true;
       }
-    } else if (!State.options.inlineAlerts) { // todo is that the best param?
+    } else if (!Options.inlineAlerts) { // todo is that the best param?
 				State.oldResultString = `${State.errorCount} ${State.warningCount}`;
 				State.results.forEach(result => {
 					State.oldResultString += result.test + result.element.outerHTML;
@@ -206,25 +203,25 @@ export function updatePanel () {
         // Reset show hidden default option when irrelevant.
         UI.showDismissed.setAttribute('hidden', '');
         UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
-        State.options.showDismissed = false;
+        Options.showDismissed = false;
       } else if (State.dismissedCount === 1) {
 				const show = State.english ?
 					Lang._('buttonShowHiddenAlert')
 					: Lang.sprintf('PANEL_DISMISS_BUTTON', '1');
-        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ?
+        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = Options.showDismissed ?
 					preferredDismissHide : show;
-        UI.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
+        UI.showDismissed.dataset.ed11yPressed = `${Options.showDismissed}`;
 				if (!State.english) {
-					UI.showDismissed.ariaPressed = State.options.showDismissed;
+					UI.showDismissed.ariaPressed = Options.showDismissed;
 				}
         UI.showDismissed.removeAttribute('hidden');
       } else {
-        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.options.showDismissed ?
+        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = Options.showDismissed ?
 					preferredDismissHide
 					: Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount);
-        UI.showDismissed.dataset.ed11yPressed = `${State.options.showDismissed}`;
+        UI.showDismissed.dataset.ed11yPressed = `${Options.showDismissed}`;
 				if (!State.english) {
-					UI.showDismissed.ariaPressed = State.options.showDismissed;
+					UI.showDismissed.ariaPressed = Options.showDismissed;
 				}
         UI.showDismissed.removeAttribute('hidden');
       }
@@ -236,7 +233,7 @@ export function updatePanel () {
       }, 0);
     }
     // Update buttons.
-    if (State.totalCount > 0 || (State.options.showDismissed && State.dismissedCount > 0)) {
+    if (State.totalCount > 0 || (Options.showDismissed && State.dismissedCount > 0)) {
       UI.panelToggleTitle.textContent = State.open ? Lang._('buttonHideAlerts') : Lang._('buttonShowAlerts');
       UI.panelJumpNext.removeAttribute('hidden');
       if (State.errorCount > 0) {
@@ -321,7 +318,7 @@ export function buildJumpList () {
       }
     }
     top = top + window.scrollY;
-    if (State.options.fixedRoots) {
+    if (Options.fixedRoots) {
       const root = result.element.closest('[data-ed11y-root]');
       State.results[i].fixedRoot = root.dataset.ed11yRoot;
     }
@@ -336,7 +333,7 @@ export function buildJumpList () {
   State.results.sort((a, b) => b.sortPos - a.sortPos);
 
   State.results?.forEach(function (result, i) {
-    if (!State.results[i].dismissalStatus || State.options.showDismissed) {
+    if (!State.results[i].dismissalStatus || Options.showDismissed) {
       drawResult(result, i);
     }
   });
@@ -367,7 +364,7 @@ export function drawResult(result, index) {
   mark.setAttribute('id', 'ed11y-result-' + index);
   mark.setAttribute('data-ed11y-result', index);
   mark.setAttribute('data-ed11y-open', 'false');
-  if (!State.options.inlineAlerts) {
+  if (!Options.inlineAlerts) {
     location = State.panelAttachTo;
     position = 'beforeend';
     mark.classList.add('ed11y-editable-result');
@@ -411,7 +408,7 @@ export function drawResult(result, index) {
   mark.toggle.setAttribute('data-ed11y-result', mark.dataset.ed11yResult);
   mark.toggle.setAttribute('data-ed11y-ready', 'false');
   mark.toggle.setAttribute('data-ed11y-race', 'false');
-  if (!State.options.inlineAlerts) {
+  if (!Options.inlineAlerts) {
     mark.toggle.style.setProperty('font-size', '16px');
   }
   if (mark.dismissed) {
@@ -443,35 +440,35 @@ export function dismissOne(dismissalType, test, dismissalKey) {
 
   // Update dismissal record.
   if (dismissalType === 'reset') {
-    delete State.dismissedAlerts[State.options.currentPage][test][dismissalKey];
-    if (Object.keys(State.dismissedAlerts[State.options.currentPage][test]).length === 0) {
-      delete State.dismissedAlerts[State.options.currentPage][test];
+    delete State.dismissedAlerts[Options.currentPage][test][dismissalKey];
+    if (Object.keys(State.dismissedAlerts[Options.currentPage][test]).length === 0) {
+      delete State.dismissedAlerts[Options.currentPage][test];
     }
-    if (Object.keys(State.dismissedAlerts[State.options.currentPage]).length === 0) {
-      delete State.dismissedAlerts[State.options.currentPage];
+    if (Object.keys(State.dismissedAlerts[Options.currentPage]).length === 0) {
+      delete State.dismissedAlerts[Options.currentPage];
     }
     //window.requestAnimationFrame(() => updatePanel());
   } else {
     let dismissal = {};
     dismissal[dismissalKey] = dismissalType;
-    if (typeof State.dismissedAlerts[State.options.currentPage] == 'undefined') {
+    if (typeof State.dismissedAlerts[Options.currentPage] == 'undefined') {
       let store = {};
       store[test] = dismissal;
-      State.dismissedAlerts[State.options.currentPage] = store;
-    } else if (typeof State.dismissedAlerts[State.options.currentPage][test] === 'undefined') {
-      State.dismissedAlerts[State.options.currentPage][test] = dismissal;
+      State.dismissedAlerts[Options.currentPage] = store;
+    } else if (typeof State.dismissedAlerts[Options.currentPage][test] === 'undefined') {
+      State.dismissedAlerts[Options.currentPage][test] = dismissal;
     } else {
-      State.dismissedAlerts[State.options.currentPage][test][dismissalKey] = dismissalType;
+      State.dismissedAlerts[Options.currentPage][test][dismissalKey] = dismissalType;
     }
     UI.showDismissed.removeAttribute('hidden');
   }
 
   // Send record to storage or dispatch an event to an API.
-  if (State.options.syncedDismissals === false) {
+  if (Options.syncedDismissals === false) {
     localStorage.setItem('ed11ydismissed', JSON.stringify(State.dismissedAlerts));
   }
   let dismissalDetail = {
-    dismissPage: State.options.currentPage,
+    dismissPage: Options.currentPage,
     dismissTest: test,
     dismissKey: dismissalKey,
     dismissAction: dismissalType,
@@ -556,13 +553,13 @@ export function transferFocus () {
 
 export function paintReady () {
 
-  if (!State.options.cssUrls) {
+  if (!Options.cssUrls) {
     const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
     if (cssLink) {
-      State.options.cssUrls = [cssLink.getAttribute('href')];
+      Options.cssUrls = [cssLink.getAttribute('href')];
     } else {
       console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
-      State.options.cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
+      Options.cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
     }
   }
 
@@ -579,8 +576,8 @@ export function paintReady () {
 
   State.roots.forEach((root) => {
     // Shadow elements don't inherit styles, so they need their own copy.
-    if (State.options.shadowComponents) {
-      root.querySelectorAll(State.options.shadowComponents)?.forEach((shadowHost) => {
+    if (Options.shadowComponents) {
+      root.querySelectorAll(Options.shadowComponents)?.forEach((shadowHost) => {
         if (shadowHost.shadowRoot) {
           UI.attachCSS(shadowHost.shadowRoot);
         }
@@ -592,7 +589,7 @@ export function paintReady () {
 
 export function alertOnInvisibleTip (button, target) {
   let delay = 100;
-  if (State.options.hiddenHandlers.length > 0 && !!target.closest(State.options.hiddenHandlers)) {
+  if (Options.hiddenHandlers.length > 0 && !!target.closest(Options.hiddenHandlers)) {
     // Increase hesitation before scrolling, in case theme animates open an element.
     delay = 333;
     document.dispatchEvent(new CustomEvent('ed11yShowHidden', {
@@ -610,7 +607,7 @@ export function alertOnInvisibleTip (button, target) {
     UI.message.textContent = '';
     let firstVisible = false;
     let alertMessage;
-    if (State.options.checkVisible && !visible(target)) {
+    if (Options.checkVisible && !visible(target)) {
       button.dataset.ed11yHiddenResult = 'true';
       firstVisible = firstVisibleParent(target);
       alertMessage = Lang._('NOT_VISIBLE');
@@ -627,7 +624,7 @@ export function alertOnInvisibleTip (button, target) {
     }
     if (State.viaJump) {
       let scrollPin = window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600) ? 'center' : 'start';
-      let scrollTarget = State.options.inlineAlerts ? button : target;
+      let scrollTarget = Options.inlineAlerts ? button : target;
       if (button.dataset.ed11yHiddenResult || !(visible(scrollTarget))) {
         scrollTarget = firstVisibleParent(target);
       }
@@ -638,7 +635,7 @@ export function alertOnInvisibleTip (button, target) {
         return false;
       }
     }
-    if (!State.options.inlineAlerts) {
+    if (!Options.inlineAlerts) {
       // todo this selector should match the selector that decided where to place the mark
       editableHighlighter(button.dataset.ed11yResult, true, firstVisible); // @todo merge test
     } else {
@@ -709,7 +706,7 @@ export function jumpTo(next = true) {
 
   // First of two scrollTo calls, to trigger any scroll based events.
   let scrollPin = window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600) ? 'center' : 'start';
-  let scrollTarget = State.options.inlineAlerts ? goto : target;
+  let scrollTarget = Options.inlineAlerts ? goto : target;
   if (goto.dataset.ed11yHiddenResult || !(visible(scrollTarget))) {
     scrollTarget = firstVisibleParent(target);
   }
@@ -766,7 +763,7 @@ export function alignTip (button, toolTip, recheck = 0, reveal = false) {
 
 	// Find button on page
 	const scrollTop = window.scrollY;
-	let leftAdd = State.options.inlineAlerts ? window.scrollX : 0;
+	let leftAdd = Options.inlineAlerts ? window.scrollX : 0;
 
 	let buttonOffset = button.getBoundingClientRect();
 	let buttonSize = buttonOffset.width;
@@ -779,7 +776,7 @@ export function alignTip (button, toolTip, recheck = 0, reveal = false) {
 	let containBottom = window.innerHeight + scrollTop;
 	let absoluteBottom = containBottom;
 
-	if (!State.options.inlineAlerts && result.scrollableParent) {
+	if (!Options.inlineAlerts && result.scrollableParent) {
 		let bounds = result.scrollableParent.getBoundingClientRect();
 		if (bounds.width > 0) {
 			//buttonTop = buttonTop + result.scrollableParent.scrollTop;
@@ -935,10 +932,10 @@ export function updateTipLocations () {
 
 export function alignHighlights() {
 
-	if (State.options.fixedRoots && UI.editableHighlight.length > 0) {
+	if (Options.fixedRoots && UI.editableHighlight.length > 0) {
 		State.positionedFrames = [];
 
-		State.options.fixedRoots.forEach((root) => {
+		Options.fixedRoots.forEach((root) => {
 			if (root['framePositioner']) {
 				State.positionedFrames.push(root['framePositioner'].getBoundingClientRect());
 			}
@@ -1006,7 +1003,7 @@ export function intersectionObservers() {
 
 	document.addEventListener('scroll', function() {
 		// Trigger on scrolling other containers, unless it will flicker a tip.
-		if (!State.options.inlineAlerts && !State.openTip.button) {
+		if (!Options.inlineAlerts && !State.openTip.button) {
 			State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
 			requestAnimationFrame(() => updateTipLocations());
 		} else if (State.openTip.button) {
@@ -1070,8 +1067,8 @@ export function rangeChange(anchorNode) {
 		typeof anchor.parentNode === 'object' &&
 		typeof anchor.parentNode.matches === 'function';
 	if (!anchor || expandable &&
-		( anchor.parentNode.matches(State.options.checkRoots) ||
-			( !anchor.parentNode.matches(State.options.checkRoots) && anchor.parentNode.matches('div[contenteditable="true"]')
+		( anchor.parentNode.matches(Options.checkRoots) ||
+			( !anchor.parentNode.matches(Options.checkRoots) && anchor.parentNode.matches('div[contenteditable="true"]')
 			)
 		)
 	) {
@@ -1144,17 +1141,17 @@ export function startObserver (root) {
 		if (!node || node.nodeType !== 1 || !node.isConnected || node.closest('script, link, head, .ed11y-wrapper, .ed11y-style, .ed11y-element')) {
 			return 0;
 		}
-		if (State.options.inlineAlerts) {
+		if (Options.inlineAlerts) {
 			return 1;
 		}
 		if (!node.matches('[contenteditable] *')) {
 			return 0;
 		}
-		if (State.options.inlineAlerts) {
+		if (Options.inlineAlerts) {
 			return true;
 		}
 		const searchList = 'table, h1, h2, h3, h4, h5, h6, blockquote';
-		if (!State.options.inlineAlerts &&
+		if (!Options.inlineAlerts &&
 			!node.matches(node.matches(searchList)) &&
 			node.matches('[contenteditable] *')) {
 			if (node.matches('table *')) {
@@ -1224,258 +1221,177 @@ export function startObserver (root) {
 	}, 1000);
 }
 
-export function ed11ySetup () {
-	if (State.once) {
-		console.error('double init');
-		return;
+
+const getRuleset = {
+	checkHeaders: checkHeaders(State.results, Options, State.headingOutline),
+	checkLinkText: checkLinkText(State.results, Options),
+	checkImages: checkImages(State.results, Options),
+	checkLabels: checkLabels(State.results, Options),
+	checkQA: checkQA(State.results, Options),
+}
+const getCheck = async function(check) {
+	return getRuleset['check'];
+}
+
+const removeCustomTest = function() {
+	console.error('Editoria11y has disabled a custom test that is not returning results within 1000ms.');
+	Options.customTestsRemaining = 1;
+	Options.customTests--;
+	if (Options.customTests === 0) {
+		document.removeEventListener('ed11yResume', function () {
+			continueCheck(State.customTestsRemaining);
+		})
 	}
-	State.once = true;
-
-	// Once document has fully loaded.
-	documentLoadingCheck(() => {
-		if (checkRunPrevent()) {
-			return false;
-		}
-
-		State.running = true;
-		let localResultCount = store.getItem('editoria11yResultCount');
-		State.seen = localResultCount && localResultCount !== 'undefined' ?
-			JSON.parse(localResultCount) : {};
-
-		// Build list of dismissed alerts
-		if (State.options.syncedDismissals === false) {
-			State.dismissedAlerts = localStorage.getItem('ed11ydismissed');
-			State.dismissedAlerts = State.dismissedAlerts ? JSON.parse(State.dismissedAlerts) : {};
-		} else {
-			State.dismissedAlerts = {};
-			State.dismissedAlerts[State.options.currentPage] = State.options.syncedDismissals;
-		}
-
-		// Create test class objects
-		/*Ed11y.testEmbeds = new Ed11yTestEmbeds;
-		Ed11y.testHeadings = new Ed11yTestHeadings;
-		Ed11y.testImages = new Ed11yTestImages;
-		Ed11y.testLinks = new Ed11yTestLinks;
-		Ed11y.testText = new Ed11yTestText;
-*/
-		// Convert the container ignore user option to a CSS :not selector.
-		State.ignore = State.options.ignoreElements ? `:not(${State.options.ignoreElements})` : '';
-
-		if (!State.options.checkRoots) {
-			State.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
-		}
-
-		// Run tests
-		checkAll();
-
-
-		// Move toggles when something expands or collapses.
-		const mightExpand = document.querySelectorAll('[aria-expanded], [aria-controls]');
-		mightExpand?.forEach(expandable => {
-			expandable.addEventListener('click', () => {
-				window.setTimeout(() => {
-					windowResize();
-				}, 333);
-			});
-		});
-
-		window.addEventListener('resize', function () { windowResize(); });
-	});
 }
 
 // Toggles the outline of all headers, link texts, and images.
 export function checkAll() {
+
+	console.log('check');
+	return;
 	if (State.openTip.button) {
 		return false;
 	}
 	State.disabled = false;
 
-	if ( !checkRunPrevent() ) {
-
-		// Check for ignoreAll elements.
-		State.ignoreAll = State.options.ignoreAllIfAbsent && document.querySelector(`:is(${State.options.ignoreAllIfAbsent})`) === null;
-		if (!State.ignoreAll && !!State.options.ignoreAllIfPresent) {
-			State.ignoreAll = document.querySelector(`:is(${State.options.ignoreAllIfPresent})`) !== null;
-		}
-
-		if ( State.incremental ) {
-			State.oldResults = State.results;
-		}
-		// Reset counts
-		State.results = [];
-		State.elements = [];
-		State.mediaCount = 0;
-
-		State.customTestsRunning = false;
-
-		State.roots = [];
-		// @todo merge rewrite when Sa11y releases fixed root support.
-		if (State.options.fixedRoots) {
-			State.options.fixedRoots.forEach(root => {State.roots.push(root.fixedRoot);});
-		} else {
-			State.roots = document.querySelectorAll(`:is(${State.options.checkRoots})`);
-		}
-		// Initialize root areas to check.
-		if (!State.roots && State.options.headless === false) {
-			// @todo merge invalid number of arguments.
-			Utils.createAlert(`${Lang.sprintf('MISSING_ROOT', State.options.checkRoots)}`);
-		}
-
-		if (State.roots.length === 0) {
-			// @todo merge parameterize for translation.
-			if (State.onLoad) {
-				console.warn('Check Editoria11y configuration; specified root element not found');
-			}
-			disable();
-			return;
-		} else
-			for (let i = 0; i < State.roots.length; i++) {
-				if (State.options.fixedRoots) {
-					State.roots[i].dataset.ed11yRoot = `${i}`;
-				}
-				if (State.roots[i].shadowRoot) {
-					State.roots.setAttribute('data-ed11y-has-shadow-root', 'true');
-					detectShadow(State.roots[i]);
-					State.roots[i] = State.roots[i].shadowRoot;
-				} else {
-					detectShadow(State.roots[i]);
-				}
-			}
-
-
-		buildElementList();
-
-		Constants.initializeRoot(State.options.checkRoots, State.options.checkRoots); // @todo merge readability, add multiroot.
-
-		// Find all web components on the page.
-		findShadowComponents(State.options);
-
-		// Find and cache elements.
-		Elements.initializeElements(State.options);
-
-		State.headingOutline = [];
-		//let results = [];
-		// Ruleset checks
-		checkHeaders(State.results, State.options, State.headingOutline);
-		checkLinkText(State.results, State.options);
-		checkImages(State.results, State.options);
-		checkLabels(State.results, State.options);
-		checkQA(State.results, State.options);
-		/*{
-"element": {},
-"type": "error",
-"content": "Empty heading found! To fix, delete this line or change its format from <strong class=\"colour\">Heading 4</strong> to <strong>Normal</strong> or <strong>Paragraph</strong>.",
-"dismiss": "H4",
-"dismissAll": false,
-"isWithinRoot": true,
-"developer": false,
-"margin": "0",
-"dismissalStatus": false,
-"scrollableParent": false,
-"sortPos": 5495.38330078125
-}
-content
-dismissalKey
-dismissalStatus
-element
-position
-scrollableParent
-sortPos
-test
-toggle
-
-
-		* */
-		// @todo merge temporary values.
-		// @todo merge handle readability and developer checks.
-		for (let i = State.results.length - 1; i >= 0;) {
-			if (State.results[i].type === 'good') {
-				State.results.splice(i, 1);
-			} else {
-				State.results[i].position = 'beforebegin'; // @todo merge compute.
-				State.results[i].dismissalKey = State.results[i].dismiss;
-				State.results[i].test = 'altNull';
-			}
-			i = i - 1;
-		}
-		console.log(State.results);
-
-		/*let queue = [
-			'testLinks',
-			'testImages',
-			'testHeadings',
-			'testText',
-			'testEmbeds',
-		];
-		queue.forEach((test) => {
-			window.setTimeout(function (test) {
-				Ed11y[test].check();
-			}, 0, test);
-		});*/
-
-		if (State.options.customTests > 0) {
-			// Pause
-			State.customTestsRunning = true;
-			State.customTestsFinished = 0;
-			document.addEventListener('ed11yResume', function () {
-				State.customTestsFinished++;
-				if (State.customTestsFinished === State.options.customTests) {
-					State.customTestsRunning = false;
-					countAlerts();
-					window.requestAnimationFrame(() => updatePanel());
-				}
-			});
-			window.setTimeout(function() {
-				if (State.customTestsRunning === true) {
-					State.customTestsRunning = false;
-					if (typeof UI.panelToggle.querySelector === 'function') {
-						UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
-					}
-					countAlerts();
-					window.requestAnimationFrame(() => updatePanel());
-					console.error('Editoria11y was told to wait for custom tests, but no tests were returned.');
-				}
-			}, 1000);
-			window.setTimeout(function() {
-				let customTests = new CustomEvent('ed11yRunCustomTests');
-				document.dispatchEvent(customTests);
-			},0);
-		}
-		if (!State.customTestsRunning) {
-			window.setTimeout(function () {
-				if (typeof UI.panelToggle.querySelector === 'function') {
-					UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
-				}
-				countAlerts();
-				updatePanel();
-				window.setTimeout(() => {
-					if (State.options.watchForChanges) {
-						State.elements.editable?.forEach(editable => {
-							if (!editable.matches('.drag-observe')) {
-								editable.classList.add('drag-observe');
-								editable.addEventListener('drop', () => {
-									// This event does not bubble.
-									State.forceFullCheck = true;
-									incrementalCheck();
-								});
-							}
-						});
-						if (State.options.watchForChanges === 'checkRoots') {
-							State.roots?.forEach((root) => {
-								startObserver( root );
-							});
-						} else {
-							startObserver( document.body );
-						}
-						resumeObservers(); // on recheck.
-					}
-				}, 0);
-			}, 0);
-		}
-	}
-	else {
+	if (checkRunPrevent()) {
 		disable();
 	}
+
+
+	State.customTestsRunning = false;
+
+	State.roots = [];
+	// @todo merge rewrite when Sa11y releases fixed root support.
+	if (Options.fixedRoots) {
+		Options.fixedRoots.forEach(root => {State.roots.push(root.fixedRoot);});
+	} else {
+		State.roots = document.querySelectorAll(`:is(${Options.checkRoots})`);
+	}
+	// Initialize root areas to check.
+	if (!State.roots && Options.headless === false) {
+		// @todo merge invalid number of arguments.
+		Utils.createAlert(`${Lang.sprintf('MISSING_ROOT', Options.checkRoots)}`);
+	}
+
+	if (State.roots.length === 0) {
+		if (State.onLoad) {
+			console.warn(Lang._('MISSING_ROOT'));
+		}
+		disable();
+		return;
+	}
+
+	buildElementList();
+	console.log(Elements);
+
+	// Call rulesets.
+	let queue = [
+		'checkHeaders',
+		'checkLinkText',
+		'checkImages',
+		'checkLabels',
+		'checkQA',
+	];
+	// Todo after merge: developer and readability tests added via options here.
+	State.testsRemaining = queue.length;
+	queue.forEach((test) => {
+		window.setTimeout(function (test) {
+			getCheck('test').then(
+				function () {
+					continueCheck(State.testsRemaining);
+				}
+			)
+		}, 0, test);
+	});
+
+	if (State.customTestsRemaining > 0) {
+		removeCustomTest();
+	}
+
+	if (Options.customTests > 0) {
+		// Pause
+		State.customTestsRunning += Options.customTests;
+		window.setTimeout(function() {
+			if (State.customTestsRemaining > 0) {
+				removeCustomTest();
+			}
+		}, 1500);
+		window.setTimeout(function() {
+			let customTests = new CustomEvent('ed11yRunCustomTests');
+			document.dispatchEvent(customTests);
+		},0);
+	}
+	/*{
+		"element": {},
+		"type": "error",
+		"content": "Empty heading found! To fix, delete this line or change its format from <strong class=\"colour\">Heading 4</strong> to <strong>Normal</strong> or <strong>Paragraph</strong>.",
+		"dismiss": "H4",
+		"dismissAll": false,
+		"isWithinRoot": true,
+		"developer": false,
+		"margin": "0",
+		"dismissalStatus": false,
+		"scrollableParent": false,
+		"sortPos": 5495.38330078125
+		}
+		content
+		dismissalKey
+		dismissalStatus
+		element
+		position
+		scrollableParent
+		sortPos
+		test
+		toggle
+	* */
+	// @todo merge temporary values.
+	// @todo merge handle readability and developer checks.
+}
+
+export function continueCheck(counter) {
+	counter--;
+	if (State.testsRemaining + State.customTestsRemaining > 0) {
+		return;
+	}
+	for (let i = State.results.length - 1; i >= 0;) {
+		if (State.results[i].type === 'good') {
+			State.results.splice(i, 1);
+		} else {
+			State.results[i].position = 'beforebegin'; // @todo merge compute.
+			State.results[i].dismissalKey = State.results[i].dismiss;
+			State.results[i].test = 'altNull';
+		}
+		i = i - 1;
+	}
+	console.log(State.results);
+	if (typeof UI.panelToggle.querySelector === 'function') {
+		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
+	}
+	countAlerts();
+	updatePanel();
+	window.setTimeout(() => {
+		if (Options.watchForChanges) {
+			State.elements.editable?.forEach(editable => {
+				if (!editable.matches('.drag-observe')) {
+					editable.classList.add('drag-observe');
+					editable.addEventListener('drop', () => {
+						// This event does not bubble.
+						State.forceFullCheck = true;
+						incrementalCheck();
+					});
+				}
+			});
+			if (Options.watchForChanges === 'checkRoots') {
+				State.roots?.forEach((root) => {
+					startObserver( root );
+				});
+			} else {
+				startObserver( document.body );
+			}
+			resumeObservers(); // on recheck.
+		}
+	}, 0);
 }
 
 export function incrementalCheck() {
@@ -1513,44 +1429,11 @@ export function incrementalCheck() {
 	}, 250)
 }
 
-export function buildElementList () {
-
-	// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
-	if (typeof State.options.editableContent === 'string') {
-		findElements('editable', State.options.editableContent, false);
-	} else {
-		State.elements.editable = State.options.editableContent;
-	}
-	if (State.options.inlineAlerts && State.elements.editable) {
-		State.options.inlineAlerts = false;
-		console.warn('Editable content detected; Editoria11y inline alerts disabled');
-	}
-	//Ed11y.findElements('p', 'p');
-	//Ed11y.findElements('h', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]');
-	findElements('allH', 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]', State.options.fixedRoots ? State.options.headingsOnlyFromCheckRoots : false);
-	findElements('img', 'img');
-	//findElements('a', 'a[href]');
-	//findElements('li', 'li');
-	//findElements('blockquote', 'blockquote');
-	//findElements('iframe', 'iframe');
-	//findElements('audio', 'audio');
-	//findElements('video', 'video');
-	//findElements('table', 'table');
-
-	if (State.options.embeddedContent) {
-		//Ed11y.findElements('embed', State.options.embeddedContent);
-	}
-	if (State.options.panelNoCover) {
-		// Moves panel off conflicting widgets.
-		findElements('panelPin', State.options.panelNoCover, false);
-	}
-}
-
 export function visualize () {
 	if (!UI.panel) {
 		return;
 	}
-	if (State.options.inlineAlerts) {
+	if (Options.inlineAlerts) {
 		findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
 		State.elements.reset?.forEach((el) => el.remove());
 	}
@@ -1577,7 +1460,7 @@ export function showHeadingsPanel () {
 		panelOutline.innerHTML = '';
 		State.headingOutline.forEach((result, i) => {
 			// Todo: draw these in editable mode.
-			if (State.options.inlineAlerts) {
+			if (Options.inlineAlerts) {
 				const mark = document.createElement('ed11y-element-heading-label');
 				mark.classList.add('ed11y-element', 'ed11y-element-heading');
 				mark.dataset.ed11yHeadingOutline = i.toString();
@@ -1596,7 +1479,7 @@ export function showHeadingsPanel () {
 			let userText = document.createElement('span');
 			userText.textContent = computeAccessibleName(result.element);
 			let link = document.createElement('a');
-			if (State.options.inlineAlerts) {
+			if (Options.inlineAlerts) {
 				link.setAttribute('href', '#ed11y-heading-' + i);
 				li.append(link);
 				link.append(levelPrefix);
@@ -1610,7 +1493,7 @@ export function showHeadingsPanel () {
 				/*let message = document.createElement('em');
 				message.classList.add('ed11y-small');
 				message.textContent = ' ' + el[2];
-				if (State.options.inlineAlerts) {
+				if (Options.inlineAlerts) {
 					link.append(message);
 				} else {
 					li.append(message);
@@ -1619,7 +1502,7 @@ export function showHeadingsPanel () {
 			panelOutline.append(li);
 		});
 	} else {
-		panelOutline.innerHTML = '<p><em>No heading structure found.</em></p>'; // @todo merge translate
+		panelOutline.innerHTML = `<p><em>${Lang._('PANEL_NO_HEADINGS')}</em></p>`;
 	}
 }
 
@@ -1639,7 +1522,7 @@ export function resetPanel() {
 		UI.panel?.classList.add('ed11y-shut');
 		UI.panel?.classList.remove('ed11y-active');
 		UI.panelToggle?.setAttribute('aria-expanded', 'false');
-		if (!State.options.showDismissed && typeof UI.showDismissed === 'function') {
+		if (!Options.showDismissed && typeof UI.showDismissed === 'function') {
 			UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
 			UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
 				Lang._('buttonShowHiddenAlert') : Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount);
@@ -1694,8 +1577,6 @@ const showAltPanel = function () {
 				? Utils.escapeHTML(image.element.getAttribute('alt'))
 				: computeAriaLabel(image.element);
 			UI.imageAlts[i].altText = altText;
-			console.log(image);
-			console.log(UI.imageAlts[i].altText);
 			//let alert = {};
 			/*
 			// Match dismissed images.
@@ -1728,7 +1609,8 @@ const showAltPanel = function () {
 
 			// Account for lazy loading libraries.
 
-			if (State.options.inlineAlerts) {
+			console.log()
+			if (Options.inlineAlerts) {
 				// Label images
 				const mark = document.createElement('ed11y-element-alt');
 				mark.classList.add('ed11y-element');
@@ -1736,6 +1618,7 @@ const showAltPanel = function () {
 				mark.setAttribute('id', 'ed11y-alt-' + i);
 				mark.setAttribute('tabindex', '-1');
 				UI.imageAlts[i].mark = mark;
+				console.log(image.element);
 				image.element.insertAdjacentElement('beforebegin', mark);
 			}
 
@@ -1755,7 +1638,7 @@ const showAltPanel = function () {
 			img.setAttribute('src', Utils.getBestImageSource(image.element));
 			img.setAttribute('alt', '');
 
-			if (State.options.inlineAlerts) {
+			if (Options.inlineAlerts) {
 				let a = document.createElement('a');
 				a.href = '#ed11y-alt-' + i;
 				a.classList.add('alt-parent');
@@ -1769,7 +1652,7 @@ const showAltPanel = function () {
 			}
 			altList.append(li);
 		}
-		if (State.options.inlineAlerts) {
+		if (Options.inlineAlerts) {
 			alignAlts();
 		} else {
 			UI.imageAlts.length = 0;
@@ -1831,12 +1714,12 @@ export function dismissThis (dismissalType, all = false) {
 export function toggleShowDismissals () {
 	// todo postpone: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
 	State.ignoreAll = false;
-	State.options.showDismissed = !(State.options.showDismissed);
+	Options.showDismissed = !(Options.showDismissed);
 	reset();
 	State.showPanel = true;
 	checkAll();
 
-	UI.showDismissed.setAttribute('data-ed11y-pressed', (!!State.options.showDismissed).toString());
+	UI.showDismissed.setAttribute('data-ed11y-pressed', (!!Options.showDismissed).toString());
 	window.setTimeout(function() {
 		UI.showDismissed.focus();
 	}, 0);
@@ -1855,19 +1738,19 @@ export function togglePanel () {
 				State.incremental = false;
 				State.showPanel = true;
 				if (State.dismissedCount > 0 && State.warningCount === 0 && State.errorCount === 0) {
-					State.options.showDismissed = false;
+					Options.showDismissed = false;
 					toggleShowDismissals();
 				} else {
 					checkAll();
 				}
-				State.options.userPrefersShut = false;
+				Options.userPrefersShut = false;
 				localStorage.setItem('editoria11yShow', '1');
 			}
 			else {
 				UI.panelToggleTitle.textContent = State.totalCount > 0 ? Lang._('buttonShowAlerts') : Lang._('buttonShowNoAlert');
-				State.options.showDismissed = false;
+				Options.showDismissed = false;
 				reset();
-				State.options.userPrefersShut = true;
+				Options.userPrefersShut = true;
 				localStorage.setItem('editoria11yShow', '0');
 			}
 		}

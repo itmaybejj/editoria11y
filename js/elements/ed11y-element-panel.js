@@ -8,7 +8,6 @@ export class Ed11yElementPanel extends HTMLElement {
   }
 
   template() {
-    // @todo merge: test that focus works; may need to toggle width instead of visibility.
     // @todo merge: don't switch both label and aria-expanded on show hidden
     return `
     <div class='ed11y-buttonbar'>

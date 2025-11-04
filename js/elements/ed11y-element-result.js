@@ -2,6 +2,7 @@ import {State} from "../utils/state.js";
 import {alignTip, buildJumpList, editableHighlighter} from "../logic/interface.js";
 import {resetClass} from "../utils/utils.js";
 import {alignButtons} from "../utils/align.js";
+import {Options} from "../utils/options.js";
 
 export class Ed11yElementResult extends HTMLElement {
   /* global Ed11y */
@@ -87,7 +88,7 @@ export class Ed11yElementResult extends HTMLElement {
     }
     this.toggle.setAttribute('aria-expanded', changeTo);
     let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
-    if (State.options.inlineAlerts) {
+    if (Options.inlineAlerts) {
       resetClass([
         'ed11y-hidden-highlight',
         'ed11y-ring-red',
@@ -112,7 +113,7 @@ export class Ed11yElementResult extends HTMLElement {
       }));
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');
-      if (State.options.inlineAlerts) {
+      if (Options.inlineAlerts) {
         this.result.element.classList.add(highlightOutline);
       }
       requestAnimationFrame(()=>alignTip(this.toggle, this.tip, 4, true));

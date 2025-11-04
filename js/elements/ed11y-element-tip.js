@@ -6,6 +6,7 @@ import {
   transferFocus
 } from "../logic/interface.js";
 import {Lang} from "sa11y/src/js/sa11y.js";
+import {Options} from "../utils/options.js";
 
 export class Ed11yElementTip extends HTMLElement {
   /* global Ed11y */
@@ -72,10 +73,10 @@ export class Ed11yElementTip extends HTMLElement {
     /**/
 
 
-    if (!State.options.inlineAlerts || State.options.editLinks) {
+    if (!Options.inlineAlerts || Options.editLinks) {
       const editBar = document.createElement('div');
 
-      if (!State.options.inlineAlerts) {
+      if (!Options.inlineAlerts) {
         editBar.classList.add('ed11y-tip-dismissals');
         const focusTransfer = document.createElement('button');
         const transferIcon = document.createElement('span');
@@ -88,7 +89,7 @@ export class Ed11yElementTip extends HTMLElement {
         focusTransfer.addEventListener('click', function(){transferFocus();});
       } else {
         editBar.classList.add('ed11y-custom-edit-links');
-        editBar.append(State.options.editLinks.cloneNode(true));
+        editBar.append(Options.editLinks.cloneNode(true));
       }
       content.append(editBar);
     }
@@ -104,11 +105,11 @@ export class Ed11yElementTip extends HTMLElement {
       dismissIcon.innerHTML = '<svg aria-hidden="true" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>';
 
       // Dismissal Key is set in [5] if alert has been dismissed.
-      if (State.options.showDismissed && this.dismissed) {
+      if (Options.showDismissed && this.dismissed) {
 
         // Check if user has permission to reset this alert.
-        let okd = State.dismissedAlerts[State.options.currentPage][this.result.test][this.result.dismissalKey] === 'ok';
-        if ((okd && State.options.allowOK) || (!okd)) {
+        let okd = State.dismissedAlerts[Options.currentPage][this.result.test][this.result.dismissalKey] === 'ok';
+        if ((okd && Options.allowOK) || (!okd)) {
           // User can restore this alert.
           const undismissButton = document.createElement('button');
           const unDismissIcon = document.createElement('span');
@@ -130,7 +131,7 @@ export class Ed11yElementTip extends HTMLElement {
         const pageActions = document.createElement('details');
         const pageActionsSummary = document.createElement('summary');
         const othersLikeThis = State.results.filter(el => el.test === this.result.test).length;
-        const showPageActions = othersLikeThis > 3 && State.options.allowHide && State.options.allowOK;
+        const showPageActions = othersLikeThis > 3 && Options.allowHide && Options.allowOK;
 
         if (showPageActions) {
           pageActions.classList.add('ed11y-bulk-actions', 'dismiss');
@@ -139,14 +140,14 @@ export class Ed11yElementTip extends HTMLElement {
           buttonBar.appendChild(pageActions);
         }
 
-        if (State.options.allowOK) {
+        if (Options.allowOK) {
           const check = document.createElement('span');
           check.setAttribute('aria-hidden', 'true');
           check.textContent = '✓';
 
           const OkButton = document.createElement('button');
           OkButton.classList.add('dismiss');
-          if (State.options.syncedDismissals) {
+          if (Options.syncedDismissals) {
             OkButton.setAttribute('title', Lang._('dismissOkTitle'));
           }
           OkButton.textContent = Lang._('dismissOkButtonContent');
@@ -165,10 +166,10 @@ export class Ed11yElementTip extends HTMLElement {
           OkButton.addEventListener('click', function(){dismissThis('ok');});
         }
 
-        if (State.options.allowHide) {
+        if (Options.allowHide) {
           const ignoreButton = document.createElement('button');
           ignoreButton.classList.add('dismiss');
-          if (State.options.syncedDismissals) {
+          if (Options.syncedDismissals) {
             ignoreButton.setAttribute('title', `${Lang._('dismissHideTitle')}`);
           }
           ignoreButton.textContent = Lang._('DISMISS');

@@ -2,17 +2,86 @@ import {State, UI} from "./state.js"
 import {prepareDismissal} from "sa11y/src/js/utils/utils.js";
 import find from "sa11y/src/js/utils/find.js"
 import Constants from "sa11y/src/js/utils/constants.js";
+import {Options} from "./options.js";
+import findShadowComponents from "sa11y/src/js/logic/find-shadow-components.js";
+import Elements from "sa11y/src/js/utils/elements.js";
+import {Lang} from "sa11y/src/js/sa11y.js";
 
 /*=============== Utilities ================*/
 
 export function getElements(selector, desiredRoot, exclude) {
+	exclude = exclude === false ? [] : exclude;
 	return find(selector, desiredRoot, exclude);
 }
 // QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
 export function findElements (key, selector, rootRestrict = true) { // @todo merge replace.
 	const desiredRoot = rootRestrict ? 'root' : 'document';
 	const exclude = rootRestrict ? [] : Constants.Exclusions.Sa11yElements;
-	State.elements.key = find(selector, desiredRoot, exclude );
+	State.elements[key] = find( selector, desiredRoot, exclude );
+}
+
+// First step in checkAll is getting a fresh set of elements to check.
+export function buildElementList () {
+
+	console.log('todo wtf no');
+
+	// Check for ignoreAll elements.
+	State.ignoreAll = Options.ignoreAllIfAbsent && document.querySelector(`:is(${Options.ignoreAllIfAbsent})`) === null;
+	if (!State.ignoreAll && !!Options.ignoreAllIfPresent) {
+		State.ignoreAll = document.querySelector(`:is(${Options.ignoreAllIfPresent})`) !== null;
+	}
+
+	if ( State.incremental ) {
+		State.oldResults = State.results;
+	}
+	// Reset counts
+	State.results = [];
+	State.elements = [];
+	State.mediaCount = 0;
+	State.headingOutline = [];
+
+	for (let i = 0; i < State.roots.length; i++) {
+		if (Options.fixedRoots) {
+			State.roots[i].dataset.ed11yRoot = `${i}`;
+		}
+		if (State.roots[i].shadowRoot) {
+			State.roots.setAttribute('data-ed11y-has-shadow-root', 'true');
+			detectShadow(State.roots[i]);
+			State.roots[i] = State.roots[i].shadowRoot;
+		}
+		else {
+			detectShadow(State.roots[i]);
+		}
+
+		Constants.initializeRoot(Options.checkRoots, Options.checkRoots); // @todo merge readability, add multiroot.
+
+		// Find all web components on the page.
+		findShadowComponents(Options);
+
+		// Find and cache elements.
+		Elements.initializeElements(Options);
+		console.log('elements initialized');
+
+		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
+		if (typeof Options.editableContent === 'string') {
+			findElements('editable', Options.editableContent, false);
+		}
+		else {
+			State.elements.editable = Options.editableContent;
+		}
+		if (Options.inlineAlerts && State.elements.editable.length > 0) {
+			Options.inlineAlerts = false;
+			console.warn('Editable content detected; Editoria11y inline alerts disabled');
+		}
+
+		if (Options.embeddedContent) { // @todo merge restore embedded check?
+			//Ed11y.findElements('embed', Options.embeddedContent);
+		}
+		if (Options.panelNoCover) {
+			// Moves panel off conflicting widgets.
+			findElements('panelNoCover', Options.panelNoCover, false);
+		}
+	}
 }
 
 export const lagBounce = (callback, wait) => {
@@ -98,7 +167,7 @@ export function firstVisibleParent(el) {
   }
 };
 
-// @todo merge discuss differences
+// @todo discuss differences
 export function hiddenElementCheck(el) {
   // Checks if this element has been removed from the accessibility tree
   let style = window.getComputedStyle(el);
@@ -122,8 +191,8 @@ export function elementNotHidden(el) {
 }
 
 export function detectShadow (container) {
-  if (State.options.autoDetectShadowComponents) {
-    const select = !State.ignore ? '*:not(.ed11y-element)' : `*:not(${State.options.ignore}, .ed11y-element)`;
+  if (Options.autoDetectShadowComponents) {
+    const select = !State.ignore ? '*:not(.ed11y-element)' : `*:not(${Options.ignore}, .ed11y-element)`;
     let search;
     if (container.shadowRoot && container.shadowRoot.mode === 'open') {
       if (!container.matches('[data-ed11y-has-shadow-root]')) {
@@ -140,8 +209,8 @@ export function detectShadow (container) {
         detectShadow(component);
       }
     });
-  } else if (State.options.shadowComponents) {
-    const providedShadow = container.querySelectorAll(State.options.shadowComponents);
+  } else if (Options.shadowComponents) {
+    const providedShadow = container.querySelectorAll(Options.shadowComponents);
     providedShadow.forEach((component) => {
       if (component.shadowRoot && component.shadowRoot.mode === 'open') {
         if (!container.matches('[data-ed11y-has-shadow-root]')){
@@ -193,15 +262,15 @@ export function resumeObservers() {
 }
 
 export function checkRunPrevent() {
-	let preventCheck = State.options.preventCheckingIfPresent ?
-		document.querySelector(State.options.preventCheckingIfPresent) :
+	let preventCheck = Options.preventCheckingIfPresent ?
+		document.querySelector(Options.preventCheckingIfPresent) :
 		false;
 	if (preventCheck) {
-		console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${State.options.preventCheckingIfPresent}"` );
-	} else if (!preventCheck && !!State.options.preventCheckingIfAbsent) {
-		preventCheck = document.querySelector(`:is(${State.options.preventCheckingIfAbsent})`) === null;
+		console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${Options.preventCheckingIfPresent}"` );
+	} else if (!preventCheck && !!Options.preventCheckingIfAbsent) {
+		preventCheck = document.querySelector(`:is(${Options.preventCheckingIfAbsent})`) === null;
 		if (preventCheck) {
-			console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${State.options.preventCheckingIfAbsent}"`);
+			console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${Options.preventCheckingIfAbsent}"`);
 		}
 	}
 	return preventCheck;
@@ -225,19 +294,19 @@ export function resetResults(incremental) {
 	]);
 	// Reset insertions into body content.
 	if (incremental) {
-		findElements('reset', 'ed11y-element-highlight', false);
+		State.elements.reset = getElements('ed11y-element-highlight', 'document', []);
 	} else {
-		findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+		State.elements.reset = getElements('ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', 'document', []);
 	}
 	State.elements.reset?.forEach((el) => el.remove());
 
 	// Flicker prevention -- leave old tip in place for 100ms.
-	findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
-	const delayedReset = State.elements.delayedReset;
+	//findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
+	State.elements.delayedReset = getElements('ed11y-element-result, ed11y-element-tip', 'document', []);
 
 	window.setTimeout(()=> {
-		delayedReset?.forEach((el) => el.remove());
-	}, 100, delayedReset);
+		State.elements.delayedReset?.forEach((el) => el.remove());
+	}, 100, State.elements.delayedReset);
 
 	if (typeof UI.panelJumpNext === 'function') {
 		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Lang._('buttonFirstContent');
@@ -270,8 +339,8 @@ export function countAlerts () {
 
 		let test = State.results[i].test;
 
-		if (State.options.ignoreTests &&
-			State.options.ignoreTests.includes(test)) {
+		if (Options.ignoreTests &&
+			Options.ignoreTests.includes(test)) {
 			// Would be faster to skip test, but this is easy and reliable.
 			State.results.splice(i, 1);
 			continue;
@@ -284,10 +353,10 @@ export function countAlerts () {
 
 		let dismissKey = prepareDismissal(State.results[i].dismissalKey);
 		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-		if (dismissKey !== false && State.options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[State.options.currentPage] && dismissKey in State.dismissedAlerts[State.options.currentPage][test]) {
+		if (dismissKey !== false && Options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[Options.currentPage] && dismissKey in State.dismissedAlerts[Options.currentPage][test]) {
 			// Remove result if it has been marked OK or ignored, increment dismissed match counter.
 			State.dismissedCount++;
-			State.results[i].dismissalStatus = State.dismissedAlerts[State.options.currentPage][test][dismissKey];
+			State.results[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][test][dismissKey];
 		} else if (State.results[i].dismissalKey) {
 			State.warningCount++;
 			State.results[i].dismissalStatus = false;

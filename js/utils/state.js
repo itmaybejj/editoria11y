@@ -1,4 +1,5 @@
 /* Track values and DOM references */
+
 export const State = {
   version: '3.0.0',
 	english: true,
@@ -13,13 +14,14 @@ export const State = {
   errorCount: Number,
   dismissedCount: Number,
   dismissedAlerts: {},
-  options: {},
   activeRange: false,
   incremental: false,
   interaction: false,
   forceFullCheck: false,
   browserSpeed: Number,
   browserLag: Number,
+	customTestsRemaining: Number,
+	testsRemaining: Number,
   loopStop: false,
   currentPage: window.location.pathname,
   roots: [],
@@ -65,7 +67,7 @@ export const UI = {
   panel: false,
   message: {},
   panelElement: {},
-  panelPin: [],
+  panelNoCover: [],
   panelToggle: {},
   panelToggleTitle: {},
   panelCount: {},

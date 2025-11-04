@@ -7,7 +7,6 @@ const ed11yLang = {
   strings : {
 
 		// @todo merge implement CONSOLE_ERROR?
-		// @todo merge discuss 8 strings, short test names.
 
     // Main Panel =========================================
     panelControls: 'Editorially',
@@ -47,8 +46,9 @@ const ed11yLang = {
     jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.', // @todo merge fall back to NOT_VISIBLE?
 		ACC_NAME_TIP: '', // @todo merge pass label instead, swap if not EN
 		LINK_TIP: '',
+		SUS_ALT_STOPWORDS: ['image', 'graphic', 'picture', 'photo', 'thumbnail', 'icon', 'placeholder','spacer','tbd','todo', 'copyright', 'courtesy of'], // todo Ed11y test use to catch these at the end as well as the beginning.
 
-    // Strings used in tests ==============================
+		// Strings used in tests ==============================
 
 		// @todo merge Add courtesy of, copyright, and photo by to Sa11y.
     // suspiciousWords: ['image of','graphic of','picture of','photo of','photograph of','placeholder','spacer','tbd','todo', 'copyright', 'courtesy of', 'photo by'],
@@ -272,7 +272,7 @@ const ed11yLang = {
             </ul>
         `,
 
-		// @todo merge discuss: separate tests for no text and all text ignored:
+		// @todo merge test: separate tests for no text and all text ignored:
 		linkNoTextExample: '<p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>',
 
 		linkTextIgnored: (ignoredText) => `
