@@ -73,7 +73,6 @@ export function buildElementList () {
 			Options.inlineAlerts = false;
 			console.warn('Editable content detected; Editoria11y inline alerts disabled');
 		}
-
 		if (Options.embeddedContent) { // @todo merge restore embedded check?
 			//Ed11y.findElements('embed', Options.embeddedContent);
 		}

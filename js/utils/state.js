@@ -21,7 +21,6 @@ export const State = {
   browserSpeed: Number,
   browserLag: Number,
 	customTestsRemaining: Number,
-	testsRemaining: Number,
   loopStop: false,
   currentPage: window.location.pathname,
   roots: [],

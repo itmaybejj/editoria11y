@@ -1222,18 +1222,46 @@ export function startObserver (root) {
 }
 
 
-const getRuleset = {
+/*const getRuleset = {
 	checkHeaders: checkHeaders(State.results, Options, State.headingOutline),
-	checkLinkText: checkLinkText(State.results, Options),
-	checkImages: checkImages(State.results, Options),
-	checkLabels: checkLabels(State.results, Options),
-	checkQA: checkQA(State.results, Options),
-}
-const getCheck = async function(check) {
-	return getRuleset['check'];
+	checkLinkText:
+	checkImages: ,
+	checkLabels: ,
+	checkQA: ,
+}*/
+
+const enqueueTests = function(queue) {
+
+	const test = queue.pop();
+
+	console.log(test);
+	switch (test) {
+		case 'checkHeaders':
+			checkHeaders(State.results, Options, State.headingOutline)
+			break
+		case 'checkLinkText':
+			checkLinkText(State.results, Options)
+			break
+		case 'checkImages':
+			checkImages(State.results, Options)
+			break
+		case 'checkLabels':
+			checkLabels(State.results, Options)
+			break
+		case 'checkQA':
+			checkQA(State.results, Options)
+			break
+	}
+	if (queue.length > 0) {
+		window.setTimeout(function (queue) {
+			enqueueTests(queue);
+		}, 0, queue);
+	} else {
+		continueCheck();
+	}
 }
 
-const removeCustomTest = function() {
+function removeCustomTest() {
 	console.error('Editoria11y has disabled a custom test that is not returning results within 1000ms.');
 	Options.customTestsRemaining = 1;
 	Options.customTests--;
@@ -1244,11 +1272,11 @@ const removeCustomTest = function() {
 	}
 }
 
+State.testsRunning = true;
+State.testsRemainng = 0;
 // Toggles the outline of all headers, link texts, and images.
 export function checkAll() {
-
-	console.log('check');
-	return;
+	console.log('check')
 	if (State.openTip.button) {
 		return false;
 	}
@@ -1283,7 +1311,6 @@ export function checkAll() {
 	}
 
 	buildElementList();
-	console.log(Elements);
 
 	// Call rulesets.
 	let queue = [
@@ -1295,15 +1322,7 @@ export function checkAll() {
 	];
 	// Todo after merge: developer and readability tests added via options here.
 	State.testsRemaining = queue.length;
-	queue.forEach((test) => {
-		window.setTimeout(function (test) {
-			getCheck('test').then(
-				function () {
-					continueCheck(State.testsRemaining);
-				}
-			)
-		}, 0, test);
-	});
+	enqueueTests(queue);
 
 	if (State.customTestsRemaining > 0) {
 		removeCustomTest();
@@ -1349,9 +1368,12 @@ export function checkAll() {
 	// @todo merge handle readability and developer checks.
 }
 
-export function continueCheck(counter) {
-	counter--;
-	if (State.testsRemaining + State.customTestsRemaining > 0) {
+export function continueCheck(customCheck = false) {
+	if (customCheck) {
+		State.customTestsRunning--;
+	}
+	// change to only countering fro custom tests
+	if (State.customTestsRemaining > 0) {
 		return;
 	}
 	for (let i = State.results.length - 1; i >= 0;) {

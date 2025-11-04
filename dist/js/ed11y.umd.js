@@ -790,6 +790,77 @@
   }
 
   /**
+   * Removes the alert from the Sa11y control panel by clearing its content and removing CSS classes.
+   * This function clears the content of the alert element and removes CSS classes 'active' from the main alert element, and 'panel-alert-preview' from the alert preview element.
+   * @returns {void}
+   */
+  function removeAlert() {
+    const Sa11yPanel = document.querySelector('sa11y-control-panel').shadowRoot;
+    const alert = Sa11yPanel.getElementById('panel-alert');
+    const alertText = Sa11yPanel.getElementById('panel-alert-text');
+    const alertPreview = Sa11yPanel.getElementById('panel-alert-preview');
+
+    alert.classList.remove('active');
+    alertPreview.classList.remove('panel-alert-preview');
+    while (alertText.firstChild) alertText.removeChild(alertText.firstChild);
+    while (alertPreview.firstChild) alertPreview.removeChild(alertPreview.firstChild);
+  }
+
+  /**
+   * Creates an alert in the Sa11y control panel with the given alert message and error preview.
+   * @param {string} alertMessage The alert message.
+   * @param {string} errorPreview The issue's tooltip message (optional).
+   * @param {string} extendedPreview The issue's HTML or escaped HTML to be previewed (optional).
+   * @returns {void}
+   */
+  function createAlert(alertMessage, errorPreview, extendedPreview) {
+    // Clear alert first before creating new one.
+    removeAlert();
+
+    // Constants
+    const Sa11yPanel = document.querySelector('sa11y-control-panel').shadowRoot;
+    const alert = Sa11yPanel.getElementById('panel-alert');
+    const alertText = Sa11yPanel.getElementById('panel-alert-text');
+    const alertPreview = Sa11yPanel.getElementById('panel-alert-preview');
+    const alertClose = Sa11yPanel.getElementById('close-alert');
+    const skipButton = Sa11yPanel.getElementById('skip-button');
+
+    alert.classList.add('active');
+    alertText.innerHTML = alertMessage;
+
+    // If the issue's element is being previewed.
+    const elementPreview = (extendedPreview)
+      ? `<div class="element-preview">${extendedPreview}</div>` : '';
+
+    // Alert message or tooltip's message.
+    if (errorPreview) {
+      alertPreview.classList.add('panel-alert-preview');
+      alertPreview.innerHTML = `${elementPreview}<div class="preview-message">${errorPreview}</div>`;
+    }
+
+    // A little time before setting focus on the close button.
+    setTimeout(() => alertClose.focus(), 300);
+
+    // Closing alert sets focus back to Skip to Issue toggle.
+    function closeAlert() {
+      removeAlert();
+      const focusTarget = skipButton.hasAttribute('disabled')
+        ? Sa11yPanel.getElementById('toggle')
+        : skipButton;
+      focusTarget.focus();
+    }
+    alertClose.addEventListener('click', closeAlert);
+
+    // Escape key to close alert.
+    alert.onkeydown = (e) => {
+      const evt = e || window.event;
+      if (evt.key === 'Escape' && alert.classList.contains('active')) {
+        closeAlert();
+      }
+    };
+  }
+
+  /**
    * Get the best image source from an element, considering data-src, srcset, and src attributes.
    * @param {HTMLElement} element - The image element to extract the source from.
    * @returns {string} - The best available source URL.
@@ -891,7 +962,6 @@
     browserSpeed: Number,
     browserLag: Number,
   	customTestsRemaining: Number,
-  	testsRemaining: Number,
     loopStop: false,
     currentPage: window.location.pathname,
     roots: [],
@@ -1348,6 +1418,48 @@
   		},
   	},
   };
+
+  var styles = "[data-sa11y-overflow]{overflow:auto!important}[data-sa11y-error]{outline:5px solid var(--sa11y-error)!important;outline-offset:2px}[data-sa11y-warning]:not([data-sa11y-error]){outline:5px solid var(--sa11y-warning)!important;outline-offset:2px}[data-sa11y-pulse-border]{animation:pulse 1s 2;box-shadow:0;outline:5px solid var(--sa11y-focus-color)!important}[data-sa11y-pulse-border]:focus,[data-sa11y-pulse-border]:hover{animation:none}@keyframes pulse{0%{box-shadow:0 0 0 5px var(--sa11y-focus-color)}50%{box-shadow:0 0 0 12px var(--sa11y-pulse-color)}to{box-shadow:0 0 0 5px var(--sa11y-pulse-color)}}h1[data-sa11y-pulse-border],h2[data-sa11y-pulse-border],h3[data-sa11y-pulse-border],h4[data-sa11y-pulse-border],h5[data-sa11y-pulse-border],h6[data-sa11y-pulse-border],img[data-sa11y-pulse-border]{animation:pulse-scale 1s 2}@keyframes pulse-scale{0%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.02)}to{opacity:1;transform:scale(1)}}@media (prefers-reduced-motion:reduce){[data-sa11y-pulse-border]{animation:none!important}}@media (forced-colors:active){[data-sa11y-error-inline],[data-sa11y-error],[data-sa11y-good],[data-sa11y-pulse-border],[data-sa11y-warning-inline],[data-sa11y-warning]{forced-color-adjust:none}}";
+
+  /* ************************************************************ */
+  /*  Auto-detect shadow DOM or process provided web components.  */
+  /* ************************************************************ */
+  const addStyleUtilities = (component) => {
+    const CSSUtils = component.shadowRoot.querySelectorAll('.sa11y-css-utilities');
+    if (CSSUtils.length === 0) {
+      const style = document.createElement('style');
+      style.setAttribute('class', 'sa11y-css-utilities');
+      style.textContent = styles;
+      component.shadowRoot.appendChild(style);
+    }
+  };
+
+  function findShadowComponents(option) {
+    if (option.autoDetectShadowComponents) {
+      // Elements to ignore.
+      const ignore = Constants.Exclusions.Sa11yElements;
+
+      // Search all elements.
+      const root = document.querySelector(option.checkRoot);
+      const search = (root)
+        ? Array.from(root.querySelectorAll(`*:not(${ignore})`))
+        : Array.from(document.body.querySelectorAll(`*:not(${ignore})`));
+
+      // Query for open shadow roots & inject CSS utilities into every shadow DOM.
+      search.forEach((component) => {
+        if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+          component.setAttribute('data-sa11y-has-shadow-root', '');
+          addStyleUtilities(component);
+        }
+      });
+    } else if (option.shadowComponents) {
+      const providedShadow = document.querySelectorAll(option.shadowComponents);
+      providedShadow.forEach((component) => {
+        component.setAttribute('data-sa11y-has-shadow-root', '');
+        addStyleUtilities(component);
+      });
+    }
+  }
 
   const Elements = (function myElements() {
     const Found = {};
@@ -3096,6 +3208,67 @@
   	State.elements[key] = find( selector, desiredRoot, exclude );
   }
 
+  // First step in checkAll is getting a fresh set of elements to check.
+  function buildElementList () {
+
+  	console.log('todo wtf no');
+
+  	// Check for ignoreAll elements.
+  	State.ignoreAll = Options.ignoreAllIfAbsent && document.querySelector(`:is(${Options.ignoreAllIfAbsent})`) === null;
+  	if (!State.ignoreAll && !!Options.ignoreAllIfPresent) {
+  		State.ignoreAll = document.querySelector(`:is(${Options.ignoreAllIfPresent})`) !== null;
+  	}
+
+  	if ( State.incremental ) {
+  		State.oldResults = State.results;
+  	}
+  	// Reset counts
+  	State.results = [];
+  	State.elements = [];
+  	State.mediaCount = 0;
+  	State.headingOutline = [];
+
+  	for (let i = 0; i < State.roots.length; i++) {
+  		if (Options.fixedRoots) {
+  			State.roots[i].dataset.ed11yRoot = `${i}`;
+  		}
+  		if (State.roots[i].shadowRoot) {
+  			State.roots.setAttribute('data-ed11y-has-shadow-root', 'true');
+  			detectShadow(State.roots[i]);
+  			State.roots[i] = State.roots[i].shadowRoot;
+  		}
+  		else {
+  			detectShadow(State.roots[i]);
+  		}
+
+  		Constants.initializeRoot(Options.checkRoots, Options.checkRoots); // @todo merge readability, add multiroot.
+
+  		// Find all web components on the page.
+  		findShadowComponents(Options);
+
+  		// Find and cache elements.
+  		Elements.initializeElements(Options);
+  		console.log('elements initialized');
+
+  		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
+  		if (typeof Options.editableContent === 'string') {
+  			findElements('editable', Options.editableContent, false);
+  		}
+  		else {
+  			State.elements.editable = Options.editableContent;
+  		}
+  		if (Options.inlineAlerts && State.elements.editable.length > 0) {
+  			Options.inlineAlerts = false;
+  			console.warn('Editable content detected; Editoria11y inline alerts disabled');
+  		}
+  		if (Options.embeddedContent) ;
+  		if (Options.panelNoCover) {
+  			// Moves panel off conflicting widgets.
+  			findElements('panelNoCover', Options.panelNoCover, false);
+  		}
+  	}
+  }
+
   function parents(el) {
     let nodes = [];
     nodes.push(el);
@@ -3164,6 +3337,41 @@
     } else {
       // No visible parents.
       return false;
+    }
+  }
+  function detectShadow (container) {
+    if (Options.autoDetectShadowComponents) {
+      const select = !State.ignore ? '*:not(.ed11y-element)' : `*:not(${Options.ignore}, .ed11y-element)`;
+      let search;
+      if (container.shadowRoot && container.shadowRoot.mode === 'open') {
+        if (!container.matches('[data-ed11y-has-shadow-root]')) {
+          container.setAttribute('data-ed11y-has-shadow-root', 'true');
+          UI.attachCSS(container.shadowRoot);
+          UI.attachCSS(container);
+        }
+        search = container.shadowRoot.querySelectorAll(select);
+      } else {
+        search = container.querySelectorAll(select);
+      }
+      search?.forEach((component) => {
+        if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+          detectShadow(component);
+        }
+      });
+    } else if (Options.shadowComponents) {
+      const providedShadow = container.querySelectorAll(Options.shadowComponents);
+      providedShadow.forEach((component) => {
+        if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+          if (!container.matches('[data-ed11y-has-shadow-root]')){
+            component.setAttribute('data-ed11y-has-shadow-root', 'true');
+            UI.attachCSS(component.shadowRoot);
+            UI.attachCSS(component);
+          }
+          detectShadow(component);
+        } else {
+          console.warn(`Editoria11y: A specified shadow host has no shadowRoot: ${component.tagName}`);
+        }
+      });
     }
   }
   function pauseObservers() {
@@ -4783,19 +4991,125 @@
   }
 
 
-  ({
+  /*const getRuleset = {
   	checkHeaders: checkHeaders(State.results, Options, State.headingOutline),
-  	checkLinkText: checkLinkText(State.results, Options),
-  	checkImages: checkImages(State.results, Options),
-  	checkLabels: checkLabels(State.results, Options),
-  	checkQA: checkQA(State.results, Options),
-  });
+  	checkLinkText:
+  	checkImages: ,
+  	checkLabels: ,
+  	checkQA: ,
+  }*/
 
+  const enqueueTests = function(queue) {
+
+  	const test = queue.pop();
+
+  	console.log(test);
+  	switch (test) {
+  		case 'checkHeaders':
+  			checkHeaders(State.results, Options, State.headingOutline);
+  			break
+  		case 'checkLinkText':
+  			checkLinkText(State.results, Options);
+  			break
+  		case 'checkImages':
+  			checkImages(State.results, Options);
+  			break
+  		case 'checkLabels':
+  			checkLabels(State.results, Options);
+  			break
+  		case 'checkQA':
+  			checkQA(State.results, Options);
+  			break
+  	}
+  	if (queue.length > 0) {
+  		window.setTimeout(function (queue) {
+  			enqueueTests(queue);
+  		}, 0, queue);
+  	} else {
+  		continueCheck();
+  	}
+  };
+
+  function removeCustomTest() {
+  	console.error('Editoria11y has disabled a custom test that is not returning results within 1000ms.');
+  	Options.customTestsRemaining = 1;
+  	Options.customTests--;
+  	if (Options.customTests === 0) {
+  		document.removeEventListener('ed11yResume', function () {
+  			continueCheck(State.customTestsRemaining);
+  		});
+  	}
+  }
+
+  State.testsRunning = true;
+  State.testsRemainng = 0;
   // Toggles the outline of all headers, link texts, and images.
   function checkAll() {
-
   	console.log('check');
-  	return;
+  	if (State.openTip.button) {
+  		return false;
+  	}
+  	State.disabled = false;
+
+  	if (checkRunPrevent()) {
+  		disable();
+  	}
+
+
+  	State.customTestsRunning = false;
+
+  	State.roots = [];
+  	// @todo merge rewrite when Sa11y releases fixed root support.
+  	if (Options.fixedRoots) {
+  		Options.fixedRoots.forEach(root => {State.roots.push(root.fixedRoot);});
+  	} else {
+  		State.roots = document.querySelectorAll(`:is(${Options.checkRoots})`);
+  	}
+  	// Initialize root areas to check.
+  	if (!State.roots && Options.headless === false) {
+  		// @todo merge invalid number of arguments.
+  		createAlert(`${Lang.sprintf('MISSING_ROOT', Options.checkRoots)}`);
+  	}
+
+  	if (State.roots.length === 0) {
+  		if (State.onLoad) {
+  			console.warn(Lang._('MISSING_ROOT'));
+  		}
+  		disable();
+  		return;
+  	}
+
+  	buildElementList();
+
+  	// Call rulesets.
+  	let queue = [
+  		'checkHeaders',
+  		'checkLinkText',
+  		'checkImages',
+  		'checkLabels',
+  		'checkQA',
+  	];
+  	// Todo after merge: developer and readability tests added via options here.
+  	State.testsRemaining = queue.length;
+  	enqueueTests(queue);
+
+  	if (State.customTestsRemaining > 0) {
+  		removeCustomTest();
+  	}
+
+  	if (Options.customTests > 0) {
+  		// Pause
+  		State.customTestsRunning += Options.customTests;
+  		window.setTimeout(function() {
+  			if (State.customTestsRemaining > 0) {
+  				removeCustomTest();
+  			}
+  		}, 1500);
+  		window.setTimeout(function() {
+  			let customTests = new CustomEvent('ed11yRunCustomTests');
+  			document.dispatchEvent(customTests);
+  		},0);
+  	}
   	/*{
   		"element": {},
   		"type": "error",
@@ -4823,8 +5137,12 @@
   	// @todo merge handle readability and developer checks.
   }
 
-  function continueCheck(counter) {
-  	if (State.testsRemaining + State.customTestsRemaining > 0) {
+  function continueCheck(customCheck = false) {
+  	if (customCheck) {
+  		State.customTestsRunning--;
+  	}
+  	// change to only countering fro custom tests
+  	if (State.customTestsRemaining > 0) {
   		return;
   	}
   	for (let i = State.results.length - 1; i >= 0;) {
@@ -5217,6 +5535,25 @@
   			State.loopStop = false;
   		}
   	},100, State.loopStop);
+  }
+
+  function disable() {
+  	if (State.open && !State.closedByDisable) {
+  		State.closedByDisable = true;
+  	}
+  	State.disabled = true;
+  	reset();
+  	document.documentElement.style.setProperty('--ed11y-activeBackground', Theme.panelBar);
+  	document.documentElement.style.setProperty('--ed11y-activeColor', Theme.panelBarText);
+  	document.documentElement.style.setProperty('--ed11y-activeBorder', Theme.panelBarText + '44');
+  	document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
+  	if (typeof UI.panelToggle.querySelector === 'function') {
+  		UI.panel?.classList.remove('ed11y-errors', 'ed11y-warnings');
+  		UI.panelCount.textContent = 'i';
+  		UI.panelJumpNext.setAttribute('hidden', '');
+  		UI.panelToggle.classList.add('disabled');
+  		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('toggleDisabled');
+  	}
   }
 
   function reset () {
@@ -6389,6 +6726,21 @@
   	* video, [src*="Video"], [src*="video"], [src*="watch"], [src*="youtube.com"], [src*="vimeo.com"], [src*="panopto.com"], [src*="wistia.com"], [src*="dailymotion.com"], [src*="brightcove.com"], [src*="vidyard.com"], [src*="video"], [src*="[src*="youtube.com"]"], [src*="[src*="brightcove.com"]"], [src*="[src*="dailymotion.com"]"], [src*="[src*="panopto.com"]"], [src*="[src*="Video"]"], [src*="[src*="video"]"], [src*="[src*="vimeo.com"]"], [src*="[src*="watch"]"], [src*="[src*="wistia.com"]"], [src*="[src*="vidyard.com"]"], [src*="[src*=yuja.com]"]
   	* */
 
+  	Object.assign(Lang.langStrings, ed11yLang.strings); // todo after merge convert to new syntax.
+  	if (Lang.langStrings.LANG_CODE.startsWith('en')) {
+  		// temporary conversion until Sa11y has test keys.
+  		let oldTitle = '';
+  		const overrides = Object.entries(ed11yLang.tests);
+  		for(let i = 0; i < overrides.length; i++) {
+  			if (typeof overrides[i][1] === 'object') {
+  				oldTitle = overrides[i][1]['title'];
+  			} else {
+  				Lang.langStrings[overrides[i][0]] = `<div class="title" tabindex="-1"><div class="ed11y-tip-alert"></div>${oldTitle}</div>${overrides[i][1]}`;
+  			}
+  		}
+  	}
+
+
   	let localResultCount = store.getItem('editoria11yResultCount');
   	State.seen = localResultCount && localResultCount !== 'undefined' ?
   		JSON.parse(localResultCount) : {};
@@ -6474,32 +6826,14 @@
 
   		State.version = '3.0.0';
 
-  		Object.assign(Lang.langStrings, ed11yLang.strings); // todo after merge convert to new syntax.
-  		if (Lang.langStrings.LANG_CODE.startsWith('en')) {
-  			// temporary conversion until Sa11y has test keys.
-  			let oldTitle = '';
-  			const overrides = Object.entries(ed11yLang.tests);
-  			for(let i = 0; i < overrides.length; i++) {
-  				if (typeof overrides[i][1] === 'object') {
-  					oldTitle = overrides[i][1]['title'];
-  				} else {
-  					Lang.langStrings[overrides[i][0]] = `<div class="title" tabindex="-1"><div class="ed11y-tip-alert"></div>${oldTitle}</div>${overrides[i][1]}`;
-  				}
-  			}
-  		}
-
       if (CSS.supports('selector(:has(body))')) {
         firstCheck(userOptions);
       }
 
       /* Export exposed interfaces */
-      this.checkAll = checkAll();
+      //this.checkAll = checkAll();
   		this.version = State.version;
-  		this.incrementalCheck = () => incrementalCheck();
-  		this.Options = Options;
-  		this.getElements = getElements();
-  		this.computeAccessibleName = computeAccessibleName();
-  		this.prepareDismissal = prepareDismissal();
+
     }
   }
 

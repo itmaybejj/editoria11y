@@ -134,6 +134,21 @@ export function postProcessOptions(userOptions) {
 	* video, [src*="Video"], [src*="video"], [src*="watch"], [src*="youtube.com"], [src*="vimeo.com"], [src*="panopto.com"], [src*="wistia.com"], [src*="dailymotion.com"], [src*="brightcove.com"], [src*="vidyard.com"], [src*="video"], [src*="[src*="youtube.com"]"], [src*="[src*="brightcove.com"]"], [src*="[src*="dailymotion.com"]"], [src*="[src*="panopto.com"]"], [src*="[src*="Video"]"], [src*="[src*="video"]"], [src*="[src*="vimeo.com"]"], [src*="[src*="watch"]"], [src*="[src*="wistia.com"]"], [src*="[src*="vidyard.com"]"], [src*="[src*=yuja.com]"]
 	* */
 
+	Object.assign(Lang.langStrings, ed11yLang.strings); // todo after merge convert to new syntax.
+	if (Lang.langStrings.LANG_CODE.startsWith('en')) {
+		// temporary conversion until Sa11y has test keys.
+		let oldTitle = '';
+		const overrides = Object.entries(ed11yLang.tests);
+		for(let i = 0; i < overrides.length; i++) {
+			if (typeof overrides[i][1] === 'object') {
+				oldTitle = overrides[i][1]['title'];
+			} else {
+				Lang.langStrings[overrides[i][0]] = `<div class="title" tabindex="-1"><div class="ed11y-tip-alert"></div>${oldTitle}</div>${overrides[i][1]}`
+			}
+		}
+	}
+
+
 	let localResultCount = store.getItem('editoria11yResultCount');
 	State.seen = localResultCount && localResultCount !== 'undefined' ?
 		JSON.parse(localResultCount) : {};
