@@ -946,7 +946,6 @@
   	english: true,
     running: false,
     watching: [],
-    results: [],
     seen: [],
     ignore: '',
     ignoreAll: false,
@@ -1015,10 +1014,13 @@
     showDismissed: {},
   };
 
+  const Results = [];
+
   const Options = {
 
   	checkRoots: false, // @todo merge implement whatever syntax Sa11y releases.
   	fixedRoots: false, // Array of specific nodes, overrides previous.
+  	ignoreElements: '',
 
   	ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
   	ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
@@ -1184,18 +1186,18 @@
   	checkRoot: 'body',
 
   	// Exclusions
-  	containerIgnore: '.sa11y-ignore', // todo docs was ignoreElements
+  	containerIgnore: '',
   	contrastIgnore: '.sr-only',
   	outlineIgnore: '',
   	headerIgnore: '',
-  	headerIgnoreSpan: '',
+  	headerIgnoreSpan: 'ed11y-element-heading-label',
   	headerIgnoreStrings: '',
   	imageIgnore: 'img[aria-hidden], [aria-hidden] img, ' +
   		'img[role="presentation"], ' +
   		'a[href][aria-label] img, button[aria-label] img, ' +
   		'a[href][aria-labelledby] img, button[aria-labelledby] img',
   	linkIgnore: '[aria-hidden][tabindex="-1"]',
-  	linkIgnoreSpan: '',
+  	linkIgnoreSpan: '.ed11y-element',
   	linkIgnoreStrings: '',
 
   	// Control panel settings
@@ -3202,7 +3204,7 @@
   	return find(selector, desiredRoot, exclude);
   }
   // QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
-  function findElements (key, selector, rootRestrict = true) { // @todo merge replace.
+  function findElements (key, selector, rootRestrict = true) { // @todo after merge replace.
   	const desiredRoot = rootRestrict ? 'root' : 'document';
   	const exclude = rootRestrict ? [] : Constants.Exclusions.Sa11yElements;
   	State.elements[key] = find( selector, desiredRoot, exclude );
@@ -3211,8 +3213,6 @@
   // First step in checkAll is getting a fresh set of elements to check.
   function buildElementList () {
 
-  	console.log('todo wtf no');
-
   	// Check for ignoreAll elements.
   	State.ignoreAll = Options.ignoreAllIfAbsent && document.querySelector(`:is(${Options.ignoreAllIfAbsent})`) === null;
   	if (!State.ignoreAll && !!Options.ignoreAllIfPresent) {
@@ -3220,10 +3220,10 @@
   	}
 
   	if ( State.incremental ) {
-  		State.oldResults = State.results;
+  		State.oldResults = Results;
   	}
   	// Reset counts
-  	State.results = [];
+  	Results.length = 0;
   	State.elements = [];
   	State.mediaCount = 0;
   	State.headingOutline = [];
@@ -3241,15 +3241,15 @@
   			detectShadow(State.roots[i]);
   		}
 
-  		Constants.initializeRoot(Options.checkRoots, Options.checkRoots); // @todo merge readability, add multiroot.
+  		Constants.initializeRoot(Options.checkRoots, Options.checkRoots); // @todo release merge readability, add multiroot.
 
   		// Find all web components on the page.
   		findShadowComponents(Options);
 
   		// Find and cache elements.
+  		console.log(Constants);
   		Elements.initializeElements(Options);
-  		console.log('elements initialized');
-
+  		console.log(Elements);
   		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
   		if (typeof Options.editableContent === 'string') {
   			findElements('editable', Options.editableContent, false);
@@ -3434,17 +3434,18 @@
   	}, 100, State.elements.delayedReset);
 
   	if (typeof UI.panelJumpNext === 'function') {
-  		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Lang._('buttonFirstContent');
+  		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = State.english ? Lang._('buttonFirstContent')
+  			: Lang._('SKIP_TO_ISSUE') + ' 1';
   	}
   	// Reset insertions into body content.
   }
 
   function newIncrementalResults() {
-  	if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
+  	if (State.forceFullCheck || Results.length !== State.oldResults.length) {
   		return true;
   	}
   	let newResultString = `${State.errorCount} ${State.warningCount}`;
-  	State.results.forEach(result => {
+  	Results.forEach(result => {
   		newResultString += result.test + result.element.outerHTML;
   	});
   	let changed = newResultString !== State.oldResultString;
@@ -3460,14 +3461,14 @@
   	// Review results array to remove dismissed or ignored items
 
   	State.dismissedCount = 0;
-  	for (let i = State.results.length - 1; i >= 0; i--) {
+  	for (let i = Results.length - 1; i >= 0; i--) {
 
-  		let test = State.results[i].test;
+  		let test = Results[i].test;
 
   		if (Options.ignoreTests &&
   			Options.ignoreTests.includes(test)) {
   			// Would be faster to skip test, but this is easy and reliable.
-  			State.results.splice(i, 1);
+  			Results.splice(i, 1);
   			continue;
   		}
 
@@ -3476,18 +3477,18 @@
   			// Don't flag new issues in the active range while people are typing.
   		}*/
 
-  		let dismissKey = prepareDismissal(State.results[i].dismissalKey);
+  		let dismissKey = prepareDismissal(Results[i].dismissalKey);
   		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
   		if (dismissKey !== false && Options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[Options.currentPage] && dismissKey in State.dismissedAlerts[Options.currentPage][test]) {
   			// Remove result if it has been marked OK or ignored, increment dismissed match counter.
   			State.dismissedCount++;
-  			State.results[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][test][dismissKey];
-  		} else if (State.results[i].dismissalKey) {
+  			Results[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][test][dismissKey];
+  		} else if (Results[i].dismissalKey) {
   			State.warningCount++;
-  			State.results[i].dismissalStatus = false;
+  			Results[i].dismissalStatus = false;
   		} else {
   			State.errorCount++;
-  			State.results[i].dismissalStatus = false;
+  			Results[i].dismissalStatus = false;
   		}
   	}
 
@@ -3612,11 +3613,8 @@
 
   function alignAlts () {
   	// Positions alt label to match absolute, inline or floated images.
-  	console.log(UI.imageAlts);
-  	UI.imageAlts?.forEach((mark) => { // @todo merge test
-  		console.log(mark);
+  	UI.imageAlts?.forEach((mark) => {
   		if (!mark.mark) {
-  			console.log('nope');
   			return;
   		}
   		const el = mark.mark;
@@ -3722,7 +3720,9 @@
   			//let rightBound = window.innerWidth;
   			if (!visible(mark.result.element)) {
   				// Invisible target.
+  				// @todo merge issue #2 blows up in all tests.
   				const theFirstVisibleParent = firstVisibleParent(mark.result.element);
+  				console.log(theFirstVisibleParent);
   				targetOffset = theFirstVisibleParent ? theFirstVisibleParent.getBoundingClientRect() : targetOffset;
   				top = targetOffset.top + scrollTop;
   			}
@@ -3950,7 +3950,8 @@
         resetResults(true);
       } else {
         // Reconnect map
-        State.results = State.oldResults;
+  			Results.length = 0;
+        Results.assign(State.oldResults);
         window.setTimeout(function() {
           if ( !State.alignPending ) {
             alignButtons();
@@ -4003,11 +4004,14 @@
         },0, UI.panel);
         UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('PANEL_HEADING');
         UI.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = Lang._('OUTLINE');
-        UI.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = Lang._('panelCheckOutline');
         UI.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = Lang._('IMAGES');
-        UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = Lang._('panelCheckAltText');
-        UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = Lang._('buttonFirstContent');
-        UI.panel.setAttribute('aria-label', Lang._('panelControls'));
+  			if (!State.english) {
+  				UI.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = Lang._('panelCheckOutline');
+  				UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = Lang._('panelCheckAltText');
+  			}
+        UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = State.english ? Lang._('buttonFirstContent')
+  				: Lang._('SKIP_TO_ISSUE') + ' 1';
+        UI.panel.setAttribute('aria-label', Lang._('CONTAINER_LABEL'));
 
         if (Options.reportsURL) {
           let reportLink = document.createElement('a');
@@ -4060,7 +4064,7 @@
         }
       } else if (!Options.inlineAlerts) { // todo is that the best param?
   				State.oldResultString = `${State.errorCount} ${State.warningCount}`;
-  				State.results.forEach(result => {
+  				Results.forEach(result => {
   					State.oldResultString += result.test + result.element.outerHTML;
   				});
   		}
@@ -4191,7 +4195,7 @@
     pauseObservers();
 
     // Initial alignment to get approximate Y position order for jump list.
-    State.results.forEach((result, i) => {
+    Results.forEach((result, i) => {
 
       let top = result.element.getBoundingClientRect().top;
       if (!top) {
@@ -4203,20 +4207,20 @@
       top = top + window.scrollY;
       if (Options.fixedRoots) {
         const root = result.element.closest('[data-ed11y-root]');
-        State.results[i].fixedRoot = root.dataset.ed11yRoot;
+        Results[i].fixedRoot = root.dataset.ed11yRoot;
       }
-      State.results[i].scrollableParent = closestScrollable(result.element);
-      if (State.results[i].scrollableParent) {
+      Results[i].scrollableParent = closestScrollable(result.element);
+      if (Results[i].scrollableParent) {
         // Group these together.
         top = top * 0.000001;
       }
-      State.results[i].sortPos = top;
+      Results[i].sortPos = top;
     });
     // Sort from bottom to top so focus order after insert is top to bottom.
-    State.results.sort((a, b) => b.sortPos - a.sortPos);
+    Results.sort((a, b) => b.sortPos - a.sortPos);
 
-    State.results?.forEach(function (result, i) {
-      if (!State.results[i].dismissalStatus || Options.showDismissed) {
+    Results?.forEach(function (result, i) {
+      if (!Results[i].dismissalStatus || Options.showDismissed) {
         drawResult(result, i);
       }
     });
@@ -4272,7 +4276,7 @@
 
     // Create mark.wrapper with type class
     mark.resultID = mark.dataset.ed11yResult;
-    mark.result = State.results[mark.resultID];
+    mark.result = Results[mark.resultID];
 
     mark.wrapper = document.createElement('div');
 
@@ -4316,7 +4320,7 @@
     shadow.appendChild(mark.wrapper);
 
     State.jumpList.unshift(mark);
-    State.results[index].toggle = mark;
+    Results[index].toggle = mark;
   }
 
   function dismissOne(dismissalType, test, dismissalKey) {
@@ -4368,7 +4372,7 @@
       UI.editableHighlight[resultID]?.highlight.style.setProperty('opacity', '0');
       return;
     }
-    const result = State.results[resultID];
+    const result = Results[resultID];
     let el = UI.editableHighlight[resultID]?.highlight;
     if (!el) {
       el = document.createElement('ed11y-element-highlight');
@@ -4397,7 +4401,7 @@
       return;
     }
     const id = State.openTip.tip.dataset.ed11yResult;
-    const target = State.results[id].element;
+    const target = Results[id].element;
     const editable = target.closest('[contenteditable]');
     if (!editable && !target.closest('textarea, input')) {
       if (target.closest('a')) {
@@ -4557,16 +4561,17 @@
     State.viaJump = true;
     // Determine target result.
     let goMax = State.jumpList.length - 1;
-    let goNum = next ? State.lastOpenTip + 1 : State.lastOpenTip - 1;
+    let goNum = next ? +State.lastOpenTip + 1 : +State.lastOpenTip - 1;
     if (goNum < 0) {
       // Reached end of loop or dismissal pushed us out of loop
-      State.nextText = Lang._('buttonFirstContent');
+      State.nextText = Lang._('SKIP_TO_ISSUE');
       goNum = goMax;
     } else if (goNum > goMax) {
       goNum = 0;
-      State.nextText = Lang._('buttonNextContent');
+      State.nextText = Lang._('SKIP_TO_ISSUE');
     } else {
-      State.nextText = Lang._('buttonNextContent');
+  		const showNum = isNaN(goNum) ? 2 : goNum + 2;
+      State.nextText = Lang._('SKIP_TO_ISSUE') + ' ' + showNum;
     }
     State.lastOpenTip = goNum;
     window.setTimeout(function () {
@@ -4584,7 +4589,7 @@
   		State.lastOpenTip = 0;
   	}
     let result = goto.getAttribute('data-ed11y-result');
-    let gotoResult = State.results[result];
+    let gotoResult = Results[result];
     const target = gotoResult.element;
 
     // First of two scrollTo calls, to trigger any scroll based events.
@@ -4630,7 +4635,7 @@
 
   	const mark = button.getRootNode().host;
   	const resultNum = button.dataset.ed11yResult;
-  	const result = State.results[resultNum];
+  	const result = Results[resultNum];
 
   	// Find button on page
   	const scrollTop = window.scrollY;
@@ -4815,15 +4820,15 @@
 
   	UI.editableHighlight.forEach((el) => {
 
-  		if (!State.results[el.resultID]) {
+  		if (!Results[el.resultID]) {
   			State.interaction = true;
   			State.forceFullCheck = true;
   			UI.editableHighlight = [];
   			return false;
   		}
 
-  		const framePositioner = State.results[el.resultID].fixedRoot && State.positionedFrames[State.results[el.resultID].fixedRoot] ?
-  			State.positionedFrames[State.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
+  		const framePositioner = Results[el.resultID].fixedRoot && State.positionedFrames[Results[el.resultID].fixedRoot] ?
+  			State.positionedFrames[Results[el.resultID].fixedRoot] : { top: 0, left: 0 };
 
   		let targetOffset = el.target.getBoundingClientRect();
   		if (!visible(el.target)) {
@@ -4992,7 +4997,7 @@
 
 
   /*const getRuleset = {
-  	checkHeaders: checkHeaders(State.results, Options, State.headingOutline),
+  	checkHeaders: checkHeaders(Results, Options, State.headingOutline),
   	checkLinkText:
   	checkImages: ,
   	checkLabels: ,
@@ -5000,25 +5005,22 @@
   }*/
 
   const enqueueTests = function(queue) {
-
   	const test = queue.pop();
-
-  	console.log(test);
   	switch (test) {
   		case 'checkHeaders':
-  			checkHeaders(State.results, Options, State.headingOutline);
+  			checkHeaders(Results, Options, State.headingOutline);
   			break
   		case 'checkLinkText':
-  			checkLinkText(State.results, Options);
+  			checkLinkText(Results, Options);
   			break
   		case 'checkImages':
-  			checkImages(State.results, Options);
+  			checkImages(Results, Options);
   			break
   		case 'checkLabels':
-  			checkLabels(State.results, Options);
+  			checkLabels(Results, Options);
   			break
   		case 'checkQA':
-  			checkQA(State.results, Options);
+  			checkQA(Results, Options);
   			break
   	}
   	if (queue.length > 0) {
@@ -5036,7 +5038,7 @@
   	Options.customTests--;
   	if (Options.customTests === 0) {
   		document.removeEventListener('ed11yResume', function () {
-  			continueCheck(State.customTestsRemaining);
+  			continueCheck(true);
   		});
   	}
   }
@@ -5045,7 +5047,6 @@
   State.testsRemainng = 0;
   // Toggles the outline of all headers, link texts, and images.
   function checkAll() {
-  	console.log('check');
   	if (State.openTip.button) {
   		return false;
   	}
@@ -5143,19 +5144,21 @@
   	}
   	// change to only countering fro custom tests
   	if (State.customTestsRemaining > 0) {
+  		// Tests still in progress.
   		return;
   	}
-  	for (let i = State.results.length - 1; i >= 0;) {
-  		if (State.results[i].type === 'good') {
-  			State.results.splice(i, 1);
+  	for (let i = Results.length - 1; i >= 0;) {
+  		if (Results[i].type === 'good') {
+  			Results.splice(i, 1);
   		} else {
-  			State.results[i].position = 'beforebegin'; // @todo merge compute.
-  			State.results[i].dismissalKey = State.results[i].dismiss;
-  			State.results[i].test = 'altNull';
+  			Results[i].position = 'beforebegin'; // @todo merge compute.
+  			if (Results[i].dismiss) {
+  				Results[i].dismissalKey = Results[i].dismiss;
+  			}
+  			Results[i].test = 'altNull'; // @todo wait merge remove when Sa11y is ready
   		}
   		i = i - 1;
   	}
-  	console.log(State.results);
   	if (typeof UI.panelToggle.querySelector === 'function') {
   		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
   	}
@@ -5235,7 +5238,7 @@
   			let levelPrefix = document.createElement('strong');
   			levelPrefix.textContent = `H${result.headingLevel}: `;
   			let userText = document.createElement('span');
-  			userText.textContent = computeAccessibleName(result.element);
+  			userText.textContent = result.text;
   			let link = document.createElement('a');
   			if (Options.inlineAlerts) {
   				link.setAttribute('href', '#ed11y-heading-' + i);
@@ -5288,9 +5291,8 @@
   	}
   }
 
-  // @todo merge is this getting called?
+  // @todo is this abstraction still needed?
   window.addEventListener('ed11yEndVisualization', ()=>{
-  	console.log('end visualization');
   	State.visualizing = false;
   	pauseObservers();
   	visualize();
@@ -5300,25 +5302,8 @@
   const showAltPanel = function () {
   	// visualize image alts
   	let altList = UI.panel.querySelector('#ed11y-alt-list');
-  	/*UI.imageAlts = [];
-  	const imageResults = State.results.filter((result) => result.element.tagName === 'IMG');
-  	console.log(imageResults);
-  	// Build array of images to be used for image panel.
-  	Elements.Found.Images.forEach((image) => {
-  		UI.imageAlts.push({element: image});
-  	})
-  	console.log(UI.imageAlts);
-  	imageResults.forEach((result)=>{
-  		const index = UI.imageAlts.findIndex(image => image.element === result.element);
-  		UI.imageAlts[index] = {
-  			element: result.image,
-  			type: result.type,
-  			dismiss: result.dismiss,
-  			developer: result.developer,
-  		};
-  	})*/
   	UI.imageAlts = Elements.Found.Images.map((image) => {
-  			const match = State.results.find((i) => i.element === image);
+  			const match = Results.find((i) => i.element === image);
   			return match && {
   				element: image,
   				type: match.type,
@@ -5367,7 +5352,6 @@
 
   			// Account for lazy loading libraries.
 
-  			console.log();
   			if (Options.inlineAlerts) {
   				// Label images
   				const mark = document.createElement('ed11y-element-alt');
@@ -5376,7 +5360,6 @@
   				mark.setAttribute('id', 'ed11y-alt-' + i);
   				mark.setAttribute('tabindex', '-1');
   				UI.imageAlts[i].mark = mark;
-  				console.log(image.element);
   				image.element.insertAdjacentElement('beforebegin', mark);
   			}
 
@@ -5431,16 +5414,16 @@
   	// Find the active tip and draw its identifying information from the result list
   	let removal = State.openTip;
   	let id = removal.tip.dataset.ed11yResult;
-  	let test = State.results[id].test;
+  	let test = Results[id].test;
 
   	if (all) {
-  		State.results.forEach((result) => {
+  		Results.forEach((result) => {
   			if (result.test === test && result.dismissalStatus !==dismissalType) {
   				dismissOne(dismissalType, test, result.dismissalKey);
   			}
   		});
   	} else {
-  		let dismissalKey = prepareDismissal(State.results[id].dismissalKey);
+  		let dismissalKey = prepareDismissal(Results[id].dismissalKey);
   		dismissOne(dismissalType, test, dismissalKey);
   	}
 
@@ -5530,7 +5513,7 @@
   	State.showPanel = true;
   	checkAll();
   	window.setTimeout(function() {
-  		if (State.results.length > 0 && State.loopStop) {
+  		if (Results.length > 0 && State.loopStop) {
   			jumpTo();
   			State.loopStop = false;
   		}
@@ -5552,7 +5535,8 @@
   		UI.panelCount.textContent = 'i';
   		UI.panelJumpNext.setAttribute('hidden', '');
   		UI.panelToggle.classList.add('disabled');
-  		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('toggleDisabled');
+  		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = State.english ?
+  			Lang._('toggleDisabled') : Lang._('CONTAINER_LABEL');
   	}
   }
 
@@ -5575,21 +5559,17 @@
 
     strings : {
 
-  		// @todo merge implement CONSOLE_ERROR?
-
       // Main Panel =========================================
-      panelControls: 'Editorially',
       OUTLINE: 'Headings',
   		IMAGES: 'Alt text',
 
   		// Extended English strings with translated fallback.
-  		buttonFirstContent: 'Go to first alert', // @todo merge change to "SKIP_TO_ISSUE#".
-  		buttonNextContent: 'Go to next alert',
-  		buttonPrevContent: 'Go to previous alert',
+  		SKIP_TO_ISSUE: 'Go to issue',
+  		buttonFirstContent: 'Go to first alert',
   		MAIN_TOGGLE_LABEL: 'Toggle accessibility tools',
-  		toggleDisabled: 'No content available for Editoria11y to check.', // @todo merge
+  		toggleDisabled: 'No content available for Editoria11y to check.',
   		PANEL_HEADING: 'Check headings & alt text',
-  		buttonToolsActive: 'Hide headings & alt text', // @todo merge
+  		buttonToolsActive: 'Hide headings & alt text',
       PANEL_DISMISS_BUTTON: `Show %(dismissCount) hidden alerts`,
   		buttonShowHiddenAlert: 'Show hidden alert',
   		buttonHideHiddenAlert: 'Hide hidden alert',
@@ -5603,12 +5583,14 @@
       NO_IMAGES: 'No images found.',
   		ALT: 'Alt Text: ',
       MISSING: '(missing!)',
-  		panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>', // Todo merge ENG only.
-  		panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>', // Todo merge ENG only.
+  		panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>', // Shown for EN only.
+  		panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>', // Shown for EN only.
       DECORATIVE: 'Marked decorative',
-      errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ', // todo merge ENG only?
+      /* Outline error explanations currently hidden.
+  		errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
       errorOutlinePrefixHeadingEmpty: '(empty heading) ',
       errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
+      */
 
       // Errors and alerts ==================================
       NOT_VISIBLE: 'Note: this content may not be visible. Look for it inside the outlined container.',
@@ -5619,7 +5601,7 @@
 
   		// Strings used in tests ==============================
 
-  		// @todo merge Add courtesy of, copyright, and photo by to Sa11y.
+  		// @todo after merge Add courtesy of, copyright, and photo by to Sa11y.
       // suspiciousWords: ['image of','graphic of','picture of','photo of','photograph of','placeholder','spacer','tbd','todo', 'copyright', 'courtesy of', 'photo by'],
       // badEndingForAlt: ['photo', 'image', 'photograph', 'picture'],
   		// @todo after merge Compare Sa11y test.
@@ -5634,12 +5616,12 @@
       //ERROR: 'alert',
       ALERT_TEXT: 'Issue',
       //toggleAriaLabel: `Accessibility %(label)`,
-      transferFocus: 'Edit this content',
-      dismissOkButtonContent: 'Mark as OK',
+      transferFocus: 'Edit this content', // @todo translate
+      dismissOkButtonContent: 'Mark as OK', //@todo translate
   		DISMISS: 'Mark as ignored',
-      dismissActions: `%(count) similar issues`, // 2.3.10
+      dismissActions: `%(count) similar issues`, // 2.3.10 // @todo translate
   		DISMISS_ALL: 'Ignore all like this', // 2.3.10
-      dismissOkAllButton: 'Mark all like this as OK', // @todo merge translate
+      dismissOkAllButton: 'Mark all like this as OK', // @todo translate
       dismissOkTitle: 'Hides this alert for all editors',  // @todo translate
       dismissHideTitle: 'Hides this alert for you',  // @todo translate
       undismissOKButton: 'Restore this alert marked as OK',  // @todo translate
@@ -5647,7 +5629,7 @@
       undismissNotePermissions: 'This alert has been hidden by an administrator', // @todo translate
       reportsLink: 'Open site reports in new tab', // @todo translate
       ALERT_CLOSE: 'Close',
-      panelHelpTitle: 'About this tool', // @todo hide if not ENG.
+      panelHelpTitle: 'About this tool', // @todo translate
       panelHelp: `
     <p><a href="https://editoria11y.princeton.edu/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
     <p>Many alerts are "manual checks." Manual checks can be dismissed:</p>
@@ -5974,14 +5956,6 @@
   		EMBED_DATA_VIZ: `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
             <p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
 
-  		// @todo merge lost test
-  		/*embedTwitter : {
-  			title: 'Manual check: is this embed a keyboard trap?',
-  			tip : () =>
-  				`<p>If embedded feeds are set to show a high number of items, keyboard users may have to click the tab key dozens or hundreds of times to exit the component.</p>
-  						<p>Check to make sure only a small number of items auto-load immediately or while scrolling. Having additional items load on request ("show more") is fine.</p>`,
-  		},*/
-
   		embedCustom : {
   			title: 'Manual check: is this embedded content accessible?',
   		},
@@ -6182,7 +6156,6 @@
     }
 
     template() {
-      // @todo merge: don't switch both label and aria-expanded on show hidden
       return `
     <div class='ed11y-buttonbar'>
       <button id='ed11y-show-hidden' data-ed11y-pressed='false' hidden>
@@ -6314,6 +6287,10 @@
       this.style.setProperty('opacity', '0');
       this.style.setProperty('outline', '0px solid transparent');
       const shadow = this.attachShadow({mode: 'open'});
+  		this.issueIndex = Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition);
+  		this.issueNext = this.issueIndex < State.jumpList.length ?
+  			this.issueIndex + 2 : 0;
+  		this.issuePrev = this.issueIndex > 0 ? this.issueIndex : State.jumpList.length;
 
       this.wrapper = document.createElement('div');
       this.wrapper.setAttribute('role', 'dialog');
@@ -6323,7 +6300,7 @@
       this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
       this.wrapper.setAttribute('aria-label',
         `${Lang._('ALERT_TEXT')}
-        ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1}`);
+        ${this.issueIndex + 1}`);
 
       this.addEventListener('mouseover', this.handleHover);
 
@@ -6419,7 +6396,7 @@
 
           const pageActions = document.createElement('details');
           const pageActionsSummary = document.createElement('summary');
-          const othersLikeThis = State.results.filter(el => el.test === this.result.test).length;
+          const othersLikeThis = Results.filter(el => el.test === this.result.test).length;
           const showPageActions = othersLikeThis > 3 && Options.allowHide && Options.allowOK;
 
           if (showPageActions) {
@@ -6476,8 +6453,6 @@
             }
           }
         }
-
-
         content.append(buttonBar);
       }
       this.tip.append(content);
@@ -6486,13 +6461,12 @@
       this.navBar.classList.add('ed11y-tip-header');
       this.count = document.createElement('div');
       this.count.classList.add('ed11y-tip-count');
-      this.count.textContent = `${Lang._('ALERT_TEXT')} ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1} / ${State.jumpList.length}`;
+      this.count.textContent = `${Lang._('ALERT_TEXT')} ${this.issueIndex + 1} / ${State.jumpList.length}`;
       this.navBar.append(this.count);
       if (State.jumpList.length > 1) {
         this.prev = document.createElement('button');
         this.prev.classList.add('ed11y-tip-prev');
-        this.prev.setAttribute('aria-label', Lang._('buttonPrevContent'));
-        this.prev.setAttribute('title', Lang._('buttonPrevContent'));
+        this.prev.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issuePrev}`);
         this.prev.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 -10 30 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m40 100,-50 -50 50-50 50"></path></svg>';
         this.prev.addEventListener('click', (event) => {
           event.preventDefault();
@@ -6502,8 +6476,7 @@
 
         this.next = document.createElement('button');
         this.next.classList.add('ed11y-tip-next');
-        this.next.setAttribute('aria-label', Lang._('buttonNextContent'));
-        this.next.setAttribute('title', Lang._('buttonNextContent'));
+        this.next.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issueNext}`);
         this.next.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 120 120" width="10"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m30 00 50 50-50 50"></path></svg>';
         this.next.addEventListener('click', (event) => {
           event.preventDefault();
@@ -6536,21 +6509,20 @@
       closeButton.addEventListener('click', (event) => {
         event.preventDefault();
         if(this.open) {
-          // @todo merge this should use the shadow dom finder.
-          let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
+          let toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', 'document');
           if (State.toggledFrom) {
             State.toggledFrom.focus();
           }
           // todo postpone: track if this tip was opened by the next button. If so, transfer focus back to it instead
-          toggle?.setAttribute('data-ed11y-action', 'shut');
+          toggle[0]?.setAttribute('data-ed11y-action', 'shut');
           this.setAttribute('data-ed11y-action', 'shut');
         }
       });
       document.addEventListener('click', (event) => {
         // Close tip when mouse is clicked outside it.
         if(this.open && !event.target.closest('ed11y-element-tip, ed11y-element-result, ed11y-element-panel')) {
-          let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
-          toggle?.setAttribute('data-ed11y-action', 'shut');
+          let toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', 'document');
+          toggle[0]?.setAttribute('data-ed11y-action', 'shut');
           this.setAttribute('data-ed11y-action', 'shut');
         }
       });
@@ -6624,11 +6596,7 @@
   		State.panelAttachTo = userOptions.panelAttachTo;
   	}
 
-  	/* ********************** */
-  	/* Embedded Content Setup */
-  	/* ********************** */
-  	//Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
-  	// @todo merge: this means custom embeds needs to be converted to a custom test in the build.
+  	// @todo merge: Custom embed test might need to be converted to a custom test in the build.
 
   	/* *********** */
   	/* Theme setup */
@@ -6668,13 +6636,26 @@
   }
 
   function postProcessOptions(userOptions) {
-  	Constants.Exclusions.Sa11yElements = ['.ed11y-element'];
+
+  	// Override Sa11y's exclusion settings.
+
+  	// This is separate because sometimes that's what we are looking for.
+  	Constants.Exclusions.Sa11yElements = ['.ed11y-element', 'ed11y-element-heading-label'];
+
+  	Constants.Exclusions.Container = ['style', 'script', 'noscript'];
+  	if (Options.containerIgnore) {
+  		const containerSelectors = Options.containerIgnore.split(',').map((item) => item.trim());
+  		Constants.Exclusions.Container = Constants.Exclusions.Container.concat(
+  			containerSelectors.flatMap((item) => [`${item} *`, item]),
+  		);
+  	}
+  	if (Options.ignoreElements) {
+  		const elementSelectors = Options.containerIgnore.split(',').map((item) => item.trim());
+  		Constants.Exclusions.Container = Constants.Exclusions.Container.concat(elementSelectors);
+  	}
 
   	State.english = Lang.langStrings.LANG_CODE.startsWith('en');
 
-  	// Main container exclusions.
-  	console.log('Constants: ');
-  	console.log(Constants);
 
   	// Undo Sa11y overrides in constants.js.
   	//Constants.Global.documentSources = option.checks.QA_DOCUMENT.sources;
@@ -6716,7 +6697,6 @@
   			userOptions['documentLinks']
   			: Options.checks.QA_DOCUMENT.sources;
   	}
-  	console.log(Constants.Global.documentSources);
   	//Constants.Global.documentSources = userOptions.
 
   	//ed11yDefaults.checks.QA_DOCUMENT.sources = 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']'
@@ -6758,7 +6738,6 @@
   	// @todo merge get this from the global.
   	State.ignore = Options.containerIgnore ? `:not(${Options.containerIgnore})` : '';
 
-  	console.log(Constants.Global.documentSources);
   }
 
   function firstCheck (userOptions) {
@@ -6781,6 +6760,7 @@
   		Ed11yElementHeadingLabel);
   	customElements.define('ed11y-element-panel', Ed11yElementPanel);
   	customElements.define('ed11y-element-tip', Ed11yElementTip);
+  	console.log(Constants);
 
   	// Once document has fully loaded.
   	documentLoadingCheck(() => {
@@ -6790,13 +6770,11 @@
 
   		State.running = true;
 
-  		console.log('running');
-
   		// Run tests
   		checkAll();
 
   		document.addEventListener('ed11yResume', function () {
-  			continueCheck(State.customTestsRemaining);
+  			continueCheck(true);
   		});
   		// Set up observers.
   		// Todo only needed if we are watching for changes.
@@ -6840,7 +6818,10 @@
   exports.Ed11y = Ed11y;
   exports.Lang = Lang;
   exports.Options = Options;
+  exports.Results = Results;
   exports.State = State;
+  exports.Theme = Theme;
+  exports.UI = UI;
   exports.checkAll = checkAll;
   exports.computeAccessibleName = computeAccessibleName;
   exports.getElements = getElements;

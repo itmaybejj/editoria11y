@@ -5,7 +5,6 @@ export const State = {
 	english: true,
   running: false,
   watching: [],
-  results: [],
   seen: [],
   ignore: '',
   ignoreAll: false,
@@ -74,4 +73,4 @@ export const UI = {
   showDismissed: {},
 }
 
-export const M = {}
+export const Results = []

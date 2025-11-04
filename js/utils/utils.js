@@ -1,4 +1,4 @@
-import {State, UI} from "./state.js"
+import {Results, State, UI} from "./state.js"
 import {prepareDismissal} from "sa11y/src/js/utils/utils.js";
 import find from "sa11y/src/js/utils/find.js"
 import Constants from "sa11y/src/js/utils/constants.js";
@@ -14,7 +14,7 @@ export function getElements(selector, desiredRoot, exclude) {
 	return find(selector, desiredRoot, exclude);
 }
 // QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
-export function findElements (key, selector, rootRestrict = true) { // @todo merge replace.
+export function findElements (key, selector, rootRestrict = true) { // @todo after merge replace.
 	const desiredRoot = rootRestrict ? 'root' : 'document';
 	const exclude = rootRestrict ? [] : Constants.Exclusions.Sa11yElements;
 	State.elements[key] = find( selector, desiredRoot, exclude );
@@ -23,8 +23,6 @@ export function findElements (key, selector, rootRestrict = true) { // @todo mer
 // First step in checkAll is getting a fresh set of elements to check.
 export function buildElementList () {
 
-	console.log('todo wtf no');
-
 	// Check for ignoreAll elements.
 	State.ignoreAll = Options.ignoreAllIfAbsent && document.querySelector(`:is(${Options.ignoreAllIfAbsent})`) === null;
 	if (!State.ignoreAll && !!Options.ignoreAllIfPresent) {
@@ -32,10 +30,10 @@ export function buildElementList () {
 	}
 
 	if ( State.incremental ) {
-		State.oldResults = State.results;
+		State.oldResults = Results;
 	}
 	// Reset counts
-	State.results = [];
+	Results.length = 0;
 	State.elements = [];
 	State.mediaCount = 0;
 	State.headingOutline = [];
@@ -53,15 +51,15 @@ export function buildElementList () {
 			detectShadow(State.roots[i]);
 		}
 
-		Constants.initializeRoot(Options.checkRoots, Options.checkRoots); // @todo merge readability, add multiroot.
+		Constants.initializeRoot(Options.checkRoots, Options.checkRoots); // @todo release merge readability, add multiroot.
 
 		// Find all web components on the page.
 		findShadowComponents(Options);
 
 		// Find and cache elements.
+		console.log(Constants);
 		Elements.initializeElements(Options);
-		console.log('elements initialized');
-
+		console.log(Elements);
 		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
 		if (typeof Options.editableContent === 'string') {
 			findElements('editable', Options.editableContent, false);
@@ -308,17 +306,18 @@ export function resetResults(incremental) {
 	}, 100, State.elements.delayedReset);
 
 	if (typeof UI.panelJumpNext === 'function') {
-		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = Lang._('buttonFirstContent');
+		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = State.english ? Lang._('buttonFirstContent')
+			: Lang._('SKIP_TO_ISSUE') + ' 1';
 	}
 	// Reset insertions into body content.
 }
 
 export function newIncrementalResults() {
-	if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
+	if (State.forceFullCheck || Results.length !== State.oldResults.length) {
 		return true;
 	}
 	let newResultString = `${State.errorCount} ${State.warningCount}`;
-	State.results.forEach(result => {
+	Results.forEach(result => {
 		newResultString += result.test + result.element.outerHTML;
 	});
 	let changed = newResultString !== State.oldResultString;
@@ -334,14 +333,14 @@ export function countAlerts () {
 	// Review results array to remove dismissed or ignored items
 
 	State.dismissedCount = 0;
-	for (let i = State.results.length - 1; i >= 0; i--) {
+	for (let i = Results.length - 1; i >= 0; i--) {
 
-		let test = State.results[i].test;
+		let test = Results[i].test;
 
 		if (Options.ignoreTests &&
 			Options.ignoreTests.includes(test)) {
 			// Would be faster to skip test, but this is easy and reliable.
-			State.results.splice(i, 1);
+			Results.splice(i, 1);
 			continue;
 		}
 
@@ -350,18 +349,18 @@ export function countAlerts () {
 			// Don't flag new issues in the active range while people are typing.
 		}*/
 
-		let dismissKey = prepareDismissal(State.results[i].dismissalKey);
+		let dismissKey = prepareDismissal(Results[i].dismissalKey);
 		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
 		if (dismissKey !== false && Options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[Options.currentPage] && dismissKey in State.dismissedAlerts[Options.currentPage][test]) {
 			// Remove result if it has been marked OK or ignored, increment dismissed match counter.
 			State.dismissedCount++;
-			State.results[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][test][dismissKey];
-		} else if (State.results[i].dismissalKey) {
+			Results[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][test][dismissKey];
+		} else if (Results[i].dismissalKey) {
 			State.warningCount++;
-			State.results[i].dismissalStatus = false;
+			Results[i].dismissalStatus = false;
 		} else {
 			State.errorCount++;
-			State.results[i].dismissalStatus = false;
+			Results[i].dismissalStatus = false;
 		}
 	}
 

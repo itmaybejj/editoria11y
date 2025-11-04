@@ -2,6 +2,7 @@ export const Options = {
 
 	checkRoots: false, // @todo merge implement whatever syntax Sa11y releases.
 	fixedRoots: false, // Array of specific nodes, overrides previous.
+	ignoreElements: '',
 
 	ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
 	ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
@@ -167,18 +168,18 @@ export const Options = {
 	checkRoot: 'body',
 
 	// Exclusions
-	containerIgnore: '.sa11y-ignore', // todo docs was ignoreElements
+	containerIgnore: '',
 	contrastIgnore: '.sr-only',
 	outlineIgnore: '',
 	headerIgnore: '',
-	headerIgnoreSpan: '',
+	headerIgnoreSpan: 'ed11y-element-heading-label',
 	headerIgnoreStrings: '',
 	imageIgnore: 'img[aria-hidden], [aria-hidden] img, ' +
 		'img[role="presentation"], ' +
 		'a[href][aria-label] img, button[aria-label] img, ' +
 		'a[href][aria-labelledby] img, button[aria-labelledby] img',
 	linkIgnore: '[aria-hidden][tabindex="-1"]',
-	linkIgnoreSpan: '',
+	linkIgnoreSpan: '.ed11y-element',
 	linkIgnoreStrings: '',
 
 	// Control panel settings

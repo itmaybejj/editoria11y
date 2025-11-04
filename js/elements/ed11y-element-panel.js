@@ -8,7 +8,6 @@ export class Ed11yElementPanel extends HTMLElement {
   }
 
   template() {
-    // @todo merge: don't switch both label and aria-expanded on show hidden
     return `
     <div class='ed11y-buttonbar'>
       <button id='ed11y-show-hidden' data-ed11y-pressed='false' hidden>

@@ -1,7 +1,7 @@
 import Lang from '../node_modules/sa11y/src/js/utils/lang';
 import {computeAccessibleName} from "sa11y/src/js/utils/computeAccessibleName.js";
 import {prepareDismissal} from "sa11y/src/js/utils/utils.js";
-import {State} from "./utils/state.js";
+import {State, Results, Theme, UI} from "./utils/state.js";
 import {Options} from './utils/options.js';
 import {checkAll, incrementalCheck} from "./logic/interface.js";
 import {
@@ -28,6 +28,9 @@ class Ed11y {
 
 export {
   Lang,
+	Results,
+	Theme,
+	UI,
 	State,
 	Options,
 	checkAll,

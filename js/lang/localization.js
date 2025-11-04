@@ -6,21 +6,17 @@ const ed11yLang = {
 
   strings : {
 
-		// @todo merge implement CONSOLE_ERROR?
-
     // Main Panel =========================================
-    panelControls: 'Editorially',
     OUTLINE: 'Headings',
 		IMAGES: 'Alt text',
 
 		// Extended English strings with translated fallback.
-		buttonFirstContent: 'Go to first alert', // @todo merge change to "SKIP_TO_ISSUE#".
-		buttonNextContent: 'Go to next alert',
-		buttonPrevContent: 'Go to previous alert',
+		SKIP_TO_ISSUE: 'Go to issue',
+		buttonFirstContent: 'Go to first alert',
 		MAIN_TOGGLE_LABEL: 'Toggle accessibility tools',
-		toggleDisabled: 'No content available for Editoria11y to check.', // @todo merge
+		toggleDisabled: 'No content available for Editoria11y to check.',
 		PANEL_HEADING: 'Check headings & alt text',
-		buttonToolsActive: 'Hide headings & alt text', // @todo merge
+		buttonToolsActive: 'Hide headings & alt text',
     PANEL_DISMISS_BUTTON: `Show %(dismissCount) hidden alerts`,
 		buttonShowHiddenAlert: 'Show hidden alert',
 		buttonHideHiddenAlert: 'Hide hidden alert',
@@ -34,12 +30,14 @@ const ed11yLang = {
     NO_IMAGES: 'No images found.',
 		ALT: 'Alt Text: ',
     MISSING: '(missing!)',
-		panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>', // Todo merge ENG only.
-		panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>', // Todo merge ENG only.
+		panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>', // Shown for EN only.
+		panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>', // Shown for EN only.
     DECORATIVE: 'Marked decorative',
-    errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ', // todo merge ENG only?
+    /* Outline error explanations currently hidden.
+		errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
     errorOutlinePrefixHeadingEmpty: '(empty heading) ',
     errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
+    */
 
     // Errors and alerts ==================================
     NOT_VISIBLE: 'Note: this content may not be visible. Look for it inside the outlined container.',
@@ -50,7 +48,7 @@ const ed11yLang = {
 
 		// Strings used in tests ==============================
 
-		// @todo merge Add courtesy of, copyright, and photo by to Sa11y.
+		// @todo after merge Add courtesy of, copyright, and photo by to Sa11y.
     // suspiciousWords: ['image of','graphic of','picture of','photo of','photograph of','placeholder','spacer','tbd','todo', 'copyright', 'courtesy of', 'photo by'],
     // badEndingForAlt: ['photo', 'image', 'photograph', 'picture'],
 		// @todo after merge Compare Sa11y test.
@@ -65,12 +63,12 @@ const ed11yLang = {
     //ERROR: 'alert',
     ALERT_TEXT: 'Issue',
     //toggleAriaLabel: `Accessibility %(label)`,
-    transferFocus: 'Edit this content',
-    dismissOkButtonContent: 'Mark as OK',
+    transferFocus: 'Edit this content', // @todo translate
+    dismissOkButtonContent: 'Mark as OK', //@todo translate
 		DISMISS: 'Mark as ignored',
-    dismissActions: `%(count) similar issues`, // 2.3.10
+    dismissActions: `%(count) similar issues`, // 2.3.10 // @todo translate
 		DISMISS_ALL: 'Ignore all like this', // 2.3.10
-    dismissOkAllButton: 'Mark all like this as OK', // @todo merge translate
+    dismissOkAllButton: 'Mark all like this as OK', // @todo translate
     dismissOkTitle: 'Hides this alert for all editors',  // @todo translate
     dismissHideTitle: 'Hides this alert for you',  // @todo translate
     undismissOKButton: 'Restore this alert marked as OK',  // @todo translate
@@ -78,7 +76,7 @@ const ed11yLang = {
     undismissNotePermissions: 'This alert has been hidden by an administrator', // @todo translate
     reportsLink: 'Open site reports in new tab', // @todo translate
     ALERT_CLOSE: 'Close',
-    panelHelpTitle: 'About this tool', // @todo hide if not ENG.
+    panelHelpTitle: 'About this tool', // @todo translate
     panelHelp: `
     <p><a href="https://editoria11y.princeton.edu/">Editoria11y</a> checks for common accessibility needs, such as image alternative text, meaningful heading outlines and well-named links.</p>
     <p>Many alerts are "manual checks." Manual checks can be dismissed:</p>
@@ -404,14 +402,6 @@ const ed11yLang = {
 		},
 		EMBED_DATA_VIZ: `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
             <p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
-
-		// @todo merge lost test
-		/*embedTwitter : {
-			title: 'Manual check: is this embed a keyboard trap?',
-			tip : () =>
-				`<p>If embedded feeds are set to show a high number of items, keyboard users may have to click the tab key dozens or hundreds of times to exit the component.</p>
-						<p>Check to make sure only a small number of items auto-load immediately or while scrolling. Having additional items load on request ("show more") is fine.</p>`,
-		},*/
 
 		embedCustom : {
 			title: 'Manual check: is this embedded content accessible?',

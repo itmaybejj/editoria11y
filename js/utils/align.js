@@ -104,11 +104,8 @@ export function alignPanel() {
 
 export function alignAlts () {
 	// Positions alt label to match absolute, inline or floated images.
-	console.log(UI.imageAlts);
-	UI.imageAlts?.forEach((mark) => { // @todo merge test
-		console.log(mark);
+	UI.imageAlts?.forEach((mark) => {
 		if (!mark.mark) {
-			console.log('nope');
 			return;
 		}
 		const el = mark.mark;
@@ -216,7 +213,9 @@ export function alignButtons() {
 			//let rightBound = window.innerWidth;
 			if (!visible(mark.result.element)) {
 				// Invisible target.
+				// @todo merge issue #2 blows up in all tests.
 				const theFirstVisibleParent = firstVisibleParent(mark.result.element);
+				console.log(theFirstVisibleParent);
 				targetOffset = theFirstVisibleParent ? theFirstVisibleParent.getBoundingClientRect() : targetOffset;
 				top = targetOffset.top + scrollTop;
 			}

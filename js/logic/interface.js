@@ -1,4 +1,4 @@
-import {State, Theme, UI} from "../utils/state.js";
+import {Results, State, Theme, UI} from "../utils/state.js";
 import {
 	buildElementList,
 	checkRunPrevent,
@@ -7,7 +7,6 @@ import {
 	resetClass, resetResults, resumeObservers,
 	visible
 } from "../utils/utils.js";
-
 import {
 	prepareDismissal,
 } from "sa11y/src/js/utils/utils.js";
@@ -20,7 +19,7 @@ import checkQA from "sa11y/src/js/rulesets/quality-assurance.js";
 import {Lang} from "sa11y/src/js/sa11y.js";
 import Elements from "sa11y/src/js/utils/elements.js";
 import {
-	computeAccessibleName, computeAriaLabel
+	computeAriaLabel
 } from "sa11y/src/js/utils/computeAccessibleName.js";
 import {
 	alignAlts,
@@ -67,7 +66,8 @@ export function updatePanel () {
       resetResults(true);
     } else {
       // Reconnect map
-      State.results = State.oldResults;
+			Results.length = 0;
+      Results.assign(State.oldResults);
       window.setTimeout(function() {
         if ( !State.alignPending ) {
           alignButtons();
@@ -120,11 +120,14 @@ export function updatePanel () {
       },0, UI.panel);
       UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('PANEL_HEADING');
       UI.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = Lang._('OUTLINE');
-      UI.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = Lang._('panelCheckOutline');
       UI.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = Lang._('IMAGES');
-      UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = Lang._('panelCheckAltText');
-      UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = Lang._('buttonFirstContent');
-      UI.panel.setAttribute('aria-label', Lang._('panelControls'));
+			if (State.english) {
+				UI.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = Lang._('panelCheckOutline');
+				UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = Lang._('panelCheckAltText');
+			}
+      UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = State.english ? Lang._('buttonFirstContent')
+				: Lang._('SKIP_TO_ISSUE') + ' 1';
+      UI.panel.setAttribute('aria-label', Lang._('CONTAINER_LABEL'));
 
       if (Options.reportsURL) {
         let reportLink = document.createElement('a');
@@ -177,7 +180,7 @@ export function updatePanel () {
       }
     } else if (!Options.inlineAlerts) { // todo is that the best param?
 				State.oldResultString = `${State.errorCount} ${State.warningCount}`;
-				State.results.forEach(result => {
+				Results.forEach(result => {
 					State.oldResultString += result.test + result.element.outerHTML;
 				});
 		}
@@ -308,7 +311,7 @@ export function buildJumpList () {
   pauseObservers();
 
   // Initial alignment to get approximate Y position order for jump list.
-  State.results.forEach((result, i) => {
+  Results.forEach((result, i) => {
 
     let top = result.element.getBoundingClientRect().top;
     if (!top) {
@@ -320,20 +323,20 @@ export function buildJumpList () {
     top = top + window.scrollY;
     if (Options.fixedRoots) {
       const root = result.element.closest('[data-ed11y-root]');
-      State.results[i].fixedRoot = root.dataset.ed11yRoot;
+      Results[i].fixedRoot = root.dataset.ed11yRoot;
     }
-    State.results[i].scrollableParent = closestScrollable(result.element);
-    if (State.results[i].scrollableParent) {
+    Results[i].scrollableParent = closestScrollable(result.element);
+    if (Results[i].scrollableParent) {
       // Group these together.
       top = top * 0.000001;
     }
-    State.results[i].sortPos = top;
+    Results[i].sortPos = top;
   });
   // Sort from bottom to top so focus order after insert is top to bottom.
-  State.results.sort((a, b) => b.sortPos - a.sortPos);
+  Results.sort((a, b) => b.sortPos - a.sortPos);
 
-  State.results?.forEach(function (result, i) {
-    if (!State.results[i].dismissalStatus || Options.showDismissed) {
+  Results?.forEach(function (result, i) {
+    if (!Results[i].dismissalStatus || Options.showDismissed) {
       drawResult(result, i);
     }
   });
@@ -389,7 +392,7 @@ export function drawResult(result, index) {
 
   // Create mark.wrapper with type class
   mark.resultID = mark.dataset.ed11yResult;
-  mark.result = State.results[mark.resultID];
+  mark.result = Results[mark.resultID];
 
   mark.wrapper = document.createElement('div');
 
@@ -433,7 +436,7 @@ export function drawResult(result, index) {
   shadow.appendChild(mark.wrapper);
 
   State.jumpList.unshift(mark);
-  State.results[index].toggle = mark;
+  Results[index].toggle = mark;
 }
 
 export function dismissOne(dismissalType, test, dismissalKey) {
@@ -485,7 +488,7 @@ export function editableHighlighter (resultID, show, firstVisible) {
     UI.editableHighlight[resultID]?.highlight.style.setProperty('opacity', '0');
     return;
   }
-  const result = State.results[resultID];
+  const result = Results[resultID];
   let el = UI.editableHighlight[resultID]?.highlight;
   if (!el) {
     el = document.createElement('ed11y-element-highlight');
@@ -514,7 +517,7 @@ export function transferFocus () {
     return;
   }
   const id = State.openTip.tip.dataset.ed11yResult;
-  const target = State.results[id].element;
+  const target = Results[id].element;
   const editable = target.closest('[contenteditable]');
   if (!editable && !target.closest('textarea, input')) {
     if (target.closest('a')) {
@@ -674,16 +677,17 @@ export function jumpTo(next = true) {
   State.viaJump = true;
   // Determine target result.
   let goMax = State.jumpList.length - 1;
-  let goNum = next ? State.lastOpenTip + 1 : State.lastOpenTip - 1;
+  let goNum = next ? +State.lastOpenTip + 1 : +State.lastOpenTip - 1;
   if (goNum < 0) {
     // Reached end of loop or dismissal pushed us out of loop
-    State.nextText = Lang._('buttonFirstContent');
+    State.nextText = Lang._('SKIP_TO_ISSUE');
     goNum = goMax;
   } else if (goNum > goMax) {
     goNum = 0;
-    State.nextText = Lang._('buttonNextContent');
+    State.nextText = Lang._('SKIP_TO_ISSUE');
   } else {
-    State.nextText = Lang._('buttonNextContent');
+		const showNum = isNaN(goNum) ? 2 : goNum + 2
+    State.nextText = Lang._('SKIP_TO_ISSUE') + ' ' + showNum;
   }
   State.lastOpenTip = goNum;
   window.setTimeout(function () {
@@ -701,7 +705,7 @@ export function jumpTo(next = true) {
 		State.lastOpenTip = 0;
 	}
   let result = goto.getAttribute('data-ed11y-result');
-  let gotoResult = State.results[result];
+  let gotoResult = Results[result];
   const target = gotoResult.element;
 
   // First of two scrollTo calls, to trigger any scroll based events.
@@ -759,7 +763,7 @@ export function alignTip (button, toolTip, recheck = 0, reveal = false) {
 
 	const mark = button.getRootNode().host;
 	const resultNum = button.dataset.ed11yResult;
-	const result = State.results[resultNum];
+	const result = Results[resultNum];
 
 	// Find button on page
 	const scrollTop = window.scrollY;
@@ -944,7 +948,7 @@ export function alignHighlights() {
 
 	UI.editableHighlight.forEach((el) => {
 
-		if (!State.results[el.resultID]) {
+		if (!Results[el.resultID]) {
 			State.interaction = true;
 			State.forceFullCheck = true;
 			UI.editableHighlight = [];
@@ -952,8 +956,8 @@ export function alignHighlights() {
 			return false;
 		}
 
-		const framePositioner = State.results[el.resultID].fixedRoot && State.positionedFrames[State.results[el.resultID].fixedRoot] ?
-			State.positionedFrames[State.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
+		const framePositioner = Results[el.resultID].fixedRoot && State.positionedFrames[Results[el.resultID].fixedRoot] ?
+			State.positionedFrames[Results[el.resultID].fixedRoot] : { top: 0, left: 0 };
 
 		let targetOffset = el.target.getBoundingClientRect();
 		if (!visible(el.target)) {
@@ -1223,7 +1227,7 @@ export function startObserver (root) {
 
 
 /*const getRuleset = {
-	checkHeaders: checkHeaders(State.results, Options, State.headingOutline),
+	checkHeaders: checkHeaders(Results, Options, State.headingOutline),
 	checkLinkText:
 	checkImages: ,
 	checkLabels: ,
@@ -1231,25 +1235,22 @@ export function startObserver (root) {
 }*/
 
 const enqueueTests = function(queue) {
-
 	const test = queue.pop();
-
-	console.log(test);
 	switch (test) {
 		case 'checkHeaders':
-			checkHeaders(State.results, Options, State.headingOutline)
+			checkHeaders(Results, Options, State.headingOutline)
 			break
 		case 'checkLinkText':
-			checkLinkText(State.results, Options)
+			checkLinkText(Results, Options)
 			break
 		case 'checkImages':
-			checkImages(State.results, Options)
+			checkImages(Results, Options)
 			break
 		case 'checkLabels':
-			checkLabels(State.results, Options)
+			checkLabels(Results, Options)
 			break
 		case 'checkQA':
-			checkQA(State.results, Options)
+			checkQA(Results, Options)
 			break
 	}
 	if (queue.length > 0) {
@@ -1267,7 +1268,7 @@ function removeCustomTest() {
 	Options.customTests--;
 	if (Options.customTests === 0) {
 		document.removeEventListener('ed11yResume', function () {
-			continueCheck(State.customTestsRemaining);
+			continueCheck(true);
 		})
 	}
 }
@@ -1276,7 +1277,6 @@ State.testsRunning = true;
 State.testsRemainng = 0;
 // Toggles the outline of all headers, link texts, and images.
 export function checkAll() {
-	console.log('check')
 	if (State.openTip.button) {
 		return false;
 	}
@@ -1374,19 +1374,21 @@ export function continueCheck(customCheck = false) {
 	}
 	// change to only countering fro custom tests
 	if (State.customTestsRemaining > 0) {
+		// Tests still in progress.
 		return;
 	}
-	for (let i = State.results.length - 1; i >= 0;) {
-		if (State.results[i].type === 'good') {
-			State.results.splice(i, 1);
+	for (let i = Results.length - 1; i >= 0;) {
+		if (Results[i].type === 'good') {
+			Results.splice(i, 1);
 		} else {
-			State.results[i].position = 'beforebegin'; // @todo merge compute.
-			State.results[i].dismissalKey = State.results[i].dismiss;
-			State.results[i].test = 'altNull';
+			Results[i].position = 'beforebegin'; // @todo merge compute.
+			if (Results[i].dismiss) {
+				Results[i].dismissalKey = Results[i].dismiss;
+			}
+			Results[i].test = 'altNull'; // @todo wait merge remove when Sa11y is ready
 		}
 		i = i - 1;
 	}
-	console.log(State.results);
 	if (typeof UI.panelToggle.querySelector === 'function') {
 		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
 	}
@@ -1499,7 +1501,7 @@ export function showHeadingsPanel () {
 			let levelPrefix = document.createElement('strong');
 			levelPrefix.textContent = `H${result.headingLevel}: `;
 			let userText = document.createElement('span');
-			userText.textContent = computeAccessibleName(result.element);
+			userText.textContent = result.text;
 			let link = document.createElement('a');
 			if (Options.inlineAlerts) {
 				link.setAttribute('href', '#ed11y-heading-' + i);
@@ -1552,9 +1554,8 @@ export function resetPanel() {
 	}
 }
 
-// @todo merge is this getting called?
+// @todo is this abstraction still needed?
 window.addEventListener('ed11yEndVisualization', ()=>{
-	console.log('end visualization');
 	State.visualizing = false;
 	pauseObservers();
 	visualize();
@@ -1564,25 +1565,8 @@ window.addEventListener('ed11yEndVisualization', ()=>{
 const showAltPanel = function () {
 	// visualize image alts
 	let altList = UI.panel.querySelector('#ed11y-alt-list');
-	/*UI.imageAlts = [];
-	const imageResults = State.results.filter((result) => result.element.tagName === 'IMG');
-	console.log(imageResults);
-	// Build array of images to be used for image panel.
-	Elements.Found.Images.forEach((image) => {
-		UI.imageAlts.push({element: image});
-	})
-	console.log(UI.imageAlts);
-	imageResults.forEach((result)=>{
-		const index = UI.imageAlts.findIndex(image => image.element === result.element);
-		UI.imageAlts[index] = {
-			element: result.image,
-			type: result.type,
-			dismiss: result.dismiss,
-			developer: result.developer,
-		};
-	})*/
 	UI.imageAlts = Elements.Found.Images.map((image) => {
-			const match = State.results.find((i) => i.element === image);
+			const match = Results.find((i) => i.element === image);
 			return match && {
 				element: image,
 				type: match.type,
@@ -1631,7 +1615,6 @@ const showAltPanel = function () {
 
 			// Account for lazy loading libraries.
 
-			console.log()
 			if (Options.inlineAlerts) {
 				// Label images
 				const mark = document.createElement('ed11y-element-alt');
@@ -1640,7 +1623,6 @@ const showAltPanel = function () {
 				mark.setAttribute('id', 'ed11y-alt-' + i);
 				mark.setAttribute('tabindex', '-1');
 				UI.imageAlts[i].mark = mark;
-				console.log(image.element);
 				image.element.insertAdjacentElement('beforebegin', mark);
 			}
 
@@ -1695,16 +1677,16 @@ export function dismissThis (dismissalType, all = false) {
 	// Find the active tip and draw its identifying information from the result list
 	let removal = State.openTip;
 	let id = removal.tip.dataset.ed11yResult;
-	let test = State.results[id].test;
+	let test = Results[id].test;
 
 	if (all) {
-		State.results.forEach((result) => {
+		Results.forEach((result) => {
 			if (result.test === test && result.dismissalStatus !==dismissalType) {
 				dismissOne(dismissalType, test, result.dismissalKey);
 			}
 		});
 	} else {
-		let dismissalKey = prepareDismissal(State.results[id].dismissalKey);
+		let dismissalKey = prepareDismissal(Results[id].dismissalKey);
 		dismissOne(dismissalType, test, dismissalKey);
 	}
 
@@ -1794,7 +1776,7 @@ export function raceCrash() {
 	State.showPanel = true;
 	checkAll();
 	window.setTimeout(function() {
-		if (State.results.length > 0 && State.loopStop) {
+		if (Results.length > 0 && State.loopStop) {
 			jumpTo();
 			State.loopStop = false;
 		}
@@ -1816,7 +1798,8 @@ export function disable() {
 		UI.panelCount.textContent = 'i';
 		UI.panelJumpNext.setAttribute('hidden', '');
 		UI.panelToggle.classList.add('disabled');
-		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('toggleDisabled');
+		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = State.english ?
+			Lang._('toggleDisabled') : Lang._('CONTAINER_LABEL');
 	}
 }
 

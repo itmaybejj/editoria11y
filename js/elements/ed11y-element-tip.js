@@ -1,4 +1,4 @@
-import {State, UI} from "../utils/state.js";
+import {Results, State, UI} from "../utils/state.js";
 import {
   alertOnInvisibleTip,
 	dismissThis,
@@ -7,6 +7,7 @@ import {
 } from "../logic/interface.js";
 import {Lang} from "sa11y/src/js/sa11y.js";
 import {Options} from "../utils/options.js";
+import {getElements} from "../utils/utils.js";
 
 export class Ed11yElementTip extends HTMLElement {
   /* global Ed11y */
@@ -25,6 +26,10 @@ export class Ed11yElementTip extends HTMLElement {
     this.style.setProperty('opacity', '0');
     this.style.setProperty('outline', '0px solid transparent');
     const shadow = this.attachShadow({mode: 'open'});
+		this.issueIndex = Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition);
+		this.issueNext = this.issueIndex < State.jumpList.length ?
+			this.issueIndex + 2 : 0;
+		this.issuePrev = this.issueIndex > 0 ? this.issueIndex : State.jumpList.length;
 
     this.wrapper = document.createElement('div');
     this.wrapper.setAttribute('role', 'dialog');
@@ -34,7 +39,7 @@ export class Ed11yElementTip extends HTMLElement {
     this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
     this.wrapper.setAttribute('aria-label',
       `${Lang._('ALERT_TEXT')}
-        ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1}`);
+        ${this.issueIndex + 1}`);
 
     this.addEventListener('mouseover', this.handleHover);
 
@@ -130,7 +135,7 @@ export class Ed11yElementTip extends HTMLElement {
 
         const pageActions = document.createElement('details');
         const pageActionsSummary = document.createElement('summary');
-        const othersLikeThis = State.results.filter(el => el.test === this.result.test).length;
+        const othersLikeThis = Results.filter(el => el.test === this.result.test).length;
         const showPageActions = othersLikeThis > 3 && Options.allowHide && Options.allowOK;
 
         if (showPageActions) {
@@ -187,8 +192,6 @@ export class Ed11yElementTip extends HTMLElement {
           }
         }
       }
-
-
       content.append(buttonBar);
     }
     this.tip.append(content);
@@ -197,13 +200,12 @@ export class Ed11yElementTip extends HTMLElement {
     this.navBar.classList.add('ed11y-tip-header');
     this.count = document.createElement('div');
     this.count.classList.add('ed11y-tip-count');
-    this.count.textContent = `${Lang._('ALERT_TEXT')} ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1} / ${State.jumpList.length}`;
+    this.count.textContent = `${Lang._('ALERT_TEXT')} ${this.issueIndex + 1} / ${State.jumpList.length}`;
     this.navBar.append(this.count);
     if (State.jumpList.length > 1) {
       this.prev = document.createElement('button');
       this.prev.classList.add('ed11y-tip-prev');
-      this.prev.setAttribute('aria-label', Lang._('buttonPrevContent'));
-      this.prev.setAttribute('title', Lang._('buttonPrevContent'));
+      this.prev.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issuePrev}`);
       this.prev.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 -10 30 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m40 100,-50 -50 50-50 50"></path></svg>';
       this.prev.addEventListener('click', (event) => {
         event.preventDefault();
@@ -213,8 +215,7 @@ export class Ed11yElementTip extends HTMLElement {
 
       this.next = document.createElement('button');
       this.next.classList.add('ed11y-tip-next');
-      this.next.setAttribute('aria-label', Lang._('buttonNextContent'));
-      this.next.setAttribute('title', Lang._('buttonNextContent'));
+      this.next.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issueNext}`);
       this.next.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 120 120" width="10"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m30 00 50 50-50 50"></path></svg>';
       this.next.addEventListener('click', (event) => {
         event.preventDefault();
@@ -247,21 +248,20 @@ export class Ed11yElementTip extends HTMLElement {
     closeButton.addEventListener('click', (event) => {
       event.preventDefault();
       if(this.open) {
-        // @todo merge this should use the shadow dom finder.
-        let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
+        let toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', 'document');
         if (State.toggledFrom) {
           State.toggledFrom.focus();
         }
         // todo postpone: track if this tip was opened by the next button. If so, transfer focus back to it instead
-        toggle?.setAttribute('data-ed11y-action', 'shut');
+        toggle[0]?.setAttribute('data-ed11y-action', 'shut');
         this.setAttribute('data-ed11y-action', 'shut');
       }
     });
     document.addEventListener('click', (event) => {
       // Close tip when mouse is clicked outside it.
       if(this.open && !event.target.closest('ed11y-element-tip, ed11y-element-result, ed11y-element-panel')) {
-        let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
-        toggle?.setAttribute('data-ed11y-action', 'shut');
+        let toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', 'document');
+        toggle[0]?.setAttribute('data-ed11y-action', 'shut');
         this.setAttribute('data-ed11y-action', 'shut');
       }
     });

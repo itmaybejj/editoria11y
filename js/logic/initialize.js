@@ -32,11 +32,7 @@ function preProcessOptions(userOptions) {
 		State.panelAttachTo = userOptions.panelAttachTo;
 	}
 
-	/* ********************** */
-	/* Embedded Content Setup */
-	/* ********************** */
-	//Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
-	// @todo merge: this means custom embeds needs to be converted to a custom test in the build.
+	// @todo merge: Custom embed test might need to be converted to a custom test in the build.
 
 	/* *********** */
 	/* Theme setup */
@@ -76,13 +72,26 @@ function preProcessOptions(userOptions) {
 }
 
 export function postProcessOptions(userOptions) {
-	Constants.Exclusions.Sa11yElements = ['.ed11y-element'];
+
+	// Override Sa11y's exclusion settings.
+
+	// This is separate because sometimes that's what we are looking for.
+	Constants.Exclusions.Sa11yElements = ['.ed11y-element', 'ed11y-element-heading-label'];
+
+	Constants.Exclusions.Container = ['style', 'script', 'noscript'];
+	if (Options.containerIgnore) {
+		const containerSelectors = Options.containerIgnore.split(',').map((item) => item.trim());
+		Constants.Exclusions.Container = Constants.Exclusions.Container.concat(
+			containerSelectors.flatMap((item) => [`${item} *`, item]),
+		);
+	}
+	if (Options.ignoreElements) {
+		const elementSelectors = Options.containerIgnore.split(',').map((item) => item.trim());
+		Constants.Exclusions.Container = Constants.Exclusions.Container.concat(elementSelectors);
+	}
 
 	State.english = Lang.langStrings.LANG_CODE.startsWith('en');
 
-	// Main container exclusions.
-	console.log('Constants: ')
-	console.log(Constants);
 
 	// Undo Sa11y overrides in constants.js.
 	//Constants.Global.documentSources = option.checks.QA_DOCUMENT.sources;
@@ -124,7 +133,6 @@ export function postProcessOptions(userOptions) {
 			userOptions['documentLinks']
 			: Options.checks.QA_DOCUMENT.sources;
 	}
-	console.log(Constants.Global.documentSources);
 	//Constants.Global.documentSources = userOptions.
 
 	//ed11yDefaults.checks.QA_DOCUMENT.sources = 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']'
@@ -166,7 +174,6 @@ export function postProcessOptions(userOptions) {
 	// @todo merge get this from the global.
 	State.ignore = Options.containerIgnore ? `:not(${Options.containerIgnore})` : '';
 
-	console.log(Constants.Global.documentSources);
 }
 
 export function firstCheck (userOptions) {
@@ -189,6 +196,7 @@ export function firstCheck (userOptions) {
 		Ed11yElementHeadingLabel);
 	customElements.define('ed11y-element-panel', Ed11yElementPanel);
 	customElements.define('ed11y-element-tip', Ed11yElementTip);
+	console.log(Constants);
 
 	// Once document has fully loaded.
 	documentLoadingCheck(() => {
@@ -198,13 +206,11 @@ export function firstCheck (userOptions) {
 
 		State.running = true;
 
-		console.log('running')
-
 		// Run tests
 		checkAll();
 
 		document.addEventListener('ed11yResume', function () {
-			continueCheck(State.customTestsRemaining);
+			continueCheck(true);
 		});
 		// Set up observers.
 		// Todo only needed if we are watching for changes.
