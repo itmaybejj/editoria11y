@@ -88,7 +88,7 @@ export class Ed11yElementResult extends HTMLElement {
     }
     this.toggle.setAttribute('aria-expanded', changeTo);
     let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
-    if (Options.inlineAlerts) {
+    if (State.inlineAlerts) {
       resetClass([
         'ed11y-hidden-highlight',
         'ed11y-ring-red',
@@ -113,11 +113,11 @@ export class Ed11yElementResult extends HTMLElement {
       }));
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');
-      if (Options.inlineAlerts) {
+      if (State.inlineAlerts) {
         this.result.element.classList.add(highlightOutline);
       }
       requestAnimationFrame(()=>alignTip(this.toggle, this.tip, 4, true));
-      if (!State.jumpList) {
+      if (State.jumpList.length === 0) { // todo is it still possible to have a tip and no jumpList?
         buildJumpList();
       }
       State.lastOpenTip = Number(this.getAttribute('data-ed11y-jump-position'));

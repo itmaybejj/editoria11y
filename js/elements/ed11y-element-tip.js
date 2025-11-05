@@ -76,10 +76,10 @@ export class Ed11yElementTip extends HTMLElement {
     /**/
 
 
-    if (!Options.inlineAlerts || Options.editLinks) {
+    if (!State.inlineAlerts || Options.editLinks) {
       const editBar = document.createElement('div');
 
-      if (!Options.inlineAlerts) {
+      if (!State.inlineAlerts) {
         editBar.classList.add('ed11y-tip-dismissals');
         const focusTransfer = document.createElement('button');
         const transferIcon = document.createElement('span');

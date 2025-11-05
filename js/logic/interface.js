@@ -34,7 +34,7 @@ export function showResults () {
   // Announce that buttons have been placed.
   document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
   alignButtons();
-  if (!Options.inlineAlerts) {
+  if (!State.inlineAlerts) {
     checkEditableIntersects();
     intersectionObservers();
   }
@@ -148,7 +148,7 @@ export function updatePanel () {
             UI.panelToggle.click();
           } else if (event.target.hasAttribute('data-ed11y-open')) {
             if (State.tipOpen) {
-              State.toggledFrom.focus();
+              State.toggledFrom?.focus(); // todo is this still needed or handled by the next?
               State.openTip.button.shadowRoot.querySelector('button').click();
             }
           }
@@ -158,7 +158,7 @@ export function updatePanel () {
 
       // Decide whether to open the panel on load.
       if (State.ignoreAll ||
-        (!Options.inlineAlerts && State.totalCount > 75)
+        (!State.inlineAlerts && State.totalCount > 75)
       ) {
         State.showPanel = false;
       } else if (Options.alertMode === 'active' ||
@@ -178,7 +178,7 @@ export function updatePanel () {
         // Show sometimes for assertive/polite if there are new items.
         State.showPanel = true;
       }
-    } else if (!Options.inlineAlerts) { // todo is that the best param?
+    } else if (!State.inlineAlerts) {
 				State.oldResultString = `${State.errorCount} ${State.warningCount}`;
 				Results.forEach(result => {
 					State.oldResultString += result.test + result.element.outerHTML;
@@ -366,7 +366,7 @@ export function drawResult(result, index) {
   mark.setAttribute('id', 'ed11y-result-' + index);
   mark.setAttribute('data-ed11y-result', index);
   mark.setAttribute('data-ed11y-open', 'false');
-  if (!Options.inlineAlerts) {
+  if (!State.inlineAlerts) {
     location = State.panelAttachTo;
     position = 'beforeend';
     mark.classList.add('ed11y-editable-result');
@@ -410,7 +410,7 @@ export function drawResult(result, index) {
   mark.toggle.setAttribute('data-ed11y-result', mark.dataset.ed11yResult);
   mark.toggle.setAttribute('data-ed11y-ready', 'false');
   mark.toggle.setAttribute('data-ed11y-race', 'false');
-  if (!Options.inlineAlerts) {
+  if (!State.inlineAlerts) {
     mark.toggle.style.setProperty('font-size', '16px');
   }
   if (mark.dismissed) {
@@ -519,7 +519,7 @@ export function transferFocus () {
   const target = Results[id].element;
   const editable = target.closest('[contenteditable]');
   if (!editable && !target.closest('textarea, input')) {
-    if (target.closest('a')) {
+    if (target.closest('a')) { // @todo after merge add button?
       State.toggledFrom = target.closest('a');
     } else if (target.getAttribute('tabindex') !== null) {
       State.toggledFrom = target;
@@ -621,12 +621,12 @@ export function alertOnInvisibleTip (button, target) {
     }
     if (firstVisible) {
       // Throw warning that the element cannot be highlighted.
-      const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert'); // @todo merge
+      const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert');
       tipAlert.textContent = alertMessage;
     }
     if (State.viaJump) {
       let scrollPin = window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600) ? 'center' : 'start';
-      let scrollTarget = Options.inlineAlerts ? button : target;
+      let scrollTarget = State.inlineAlerts ? button : target;
       if (button.dataset.ed11yHiddenResult || !(visible(scrollTarget))) {
         scrollTarget = firstVisibleParent(target);
       }
@@ -637,7 +637,7 @@ export function alertOnInvisibleTip (button, target) {
         return false;
       }
     }
-    if (!Options.inlineAlerts) {
+    if (!State.inlineAlerts) {
       // todo this selector should match the selector that decided where to place the mark
       editableHighlighter(button.dataset.ed11yResult, true, firstVisible); // @todo merge test
     } else {
@@ -709,7 +709,7 @@ export function jumpTo(next = true) {
 
   // First of two scrollTo calls, to trigger any scroll based events.
   let scrollPin = window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600) ? 'center' : 'start';
-  let scrollTarget = Options.inlineAlerts ? goto : target;
+  let scrollTarget = State.inlineAlerts ? goto : target;
   if (goto.dataset.ed11yHiddenResult || !(visible(scrollTarget))) {
     scrollTarget = firstVisibleParent(target);
   }
@@ -766,7 +766,7 @@ export function alignTip (button, toolTip, recheck = 0, reveal = false) {
 
 	// Find button on page
 	const scrollTop = window.scrollY;
-	let leftAdd = Options.inlineAlerts ? window.scrollX : 0;
+	let leftAdd = State.inlineAlerts ? window.scrollX : 0;
 
 	let buttonOffset = button.getBoundingClientRect();
 	let buttonSize = buttonOffset.width;
@@ -779,7 +779,7 @@ export function alignTip (button, toolTip, recheck = 0, reveal = false) {
 	let containBottom = window.innerHeight + scrollTop;
 	let absoluteBottom = containBottom;
 
-	if (!Options.inlineAlerts && result.scrollableParent) {
+	if (!State.inlineAlerts && result.scrollableParent) {
 		let bounds = result.scrollableParent.getBoundingClientRect();
 		if (bounds.width > 0) {
 			//buttonTop = buttonTop + result.scrollableParent.scrollTop;
@@ -1006,7 +1006,7 @@ export function intersectionObservers() {
 
 	document.addEventListener('scroll', function() {
 		// Trigger on scrolling other containers, unless it will flicker a tip.
-		if (!Options.inlineAlerts && !State.tipOpen) {
+		if (!State.inlineAlerts && !State.tipOpen) {
 			State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
 			requestAnimationFrame(() => updateTipLocations());
 		} else if (State.tipOpen) {
@@ -1144,17 +1144,17 @@ export function startObserver (root) {
 		if (!node || node.nodeType !== 1 || !node.isConnected || node.closest('script, link, head, .ed11y-wrapper, .ed11y-style, .ed11y-element')) {
 			return 0;
 		}
-		if (Options.inlineAlerts) {
+		if (State.inlineAlerts) {
 			return 1;
 		}
 		if (!node.matches('[contenteditable] *')) {
 			return 0;
 		}
-		if (Options.inlineAlerts) {
+		if (State.inlineAlerts) {
 			return true;
 		}
 		const searchList = 'table, h1, h2, h3, h4, h5, h6, blockquote';
-		if (!Options.inlineAlerts &&
+		if (!State.inlineAlerts &&
 			!node.matches(node.matches(searchList)) &&
 			node.matches('[contenteditable] *')) {
 			if (node.matches('table *')) {
@@ -1289,7 +1289,7 @@ export function checkAll() {
 	State.customTestsRunning = false;
 
 	State.roots = [];
-	// @todo merge rewrite when Sa11y releases fixed root support.
+	// @todo CMS merge rewrite when Sa11y releases fixed root support.
 	if (Options.fixedRoots) {
 		Options.fixedRoots.forEach(root => {State.roots.push(root.fixedRoot);});
 	} else {
@@ -1362,8 +1362,8 @@ export function checkAll() {
 		test
 		toggle
 	* */
-	// @todo merge temporary values.
-	// @todo merge handle readability and developer checks.
+	// @todo CMS merge when Sa11y support is ready.
+	// @todo after merge handle readability and developer checks.
 }
 
 export function continueCheck(customCheck = false) {
@@ -1379,7 +1379,7 @@ export function continueCheck(customCheck = false) {
 		if (Results[i].type === 'good') {
 			Results.splice(i, 1);
 		} else {
-			Results[i].position = 'beforebegin'; // @todo merge compute.
+			Results[i].position = 'beforebegin'; // @todo CMS merge use Sa11y keys when ready or closest().
 			if (Results[i].dismiss) {
 				Results[i].dismissalKey = Results[i].dismiss;
 			}
@@ -1438,7 +1438,7 @@ export function incrementalCheck() {
 					document.dispatchEvent(new CustomEvent('ed11yEndVisualization'))
 				}
 			}, 500);
-			// @todo merge test: if there are no issues and the heading panel is open...it closes!
+			// @todo after merge test: if there are no issues and the heading panel is open...it closes!
 			// Increase debounce if runs are slow.
 			runTime = performance.now() - runTime;
 			State.browserSpeed = runTime > 10 ? 10 : (State.browserSpeed + runTime) / 2;
@@ -1455,7 +1455,7 @@ export function visualize () {
 	if (!UI.panel) {
 		return;
 	}
-	if (Options.inlineAlerts) {
+	if (State.inlineAlerts) {
 		findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
 		Elements.Found.reset?.forEach((el) => el.remove());
 	}
@@ -1482,7 +1482,7 @@ export function showHeadingsPanel () {
 		panelOutline.innerHTML = '';
 		State.headingOutline.forEach((result, i) => {
 			// Todo: draw these in editable mode.
-			if (Options.inlineAlerts) {
+			if (State.inlineAlerts) {
 				const mark = document.createElement('ed11y-element-heading-label');
 				mark.classList.add('ed11y-element', 'ed11y-element-heading');
 				mark.dataset.ed11yHeadingOutline = i.toString();
@@ -1501,7 +1501,7 @@ export function showHeadingsPanel () {
 			let userText = document.createElement('span');
 			userText.textContent = result.text;
 			let link = document.createElement('a');
-			if (Options.inlineAlerts) {
+			if (State.inlineAlerts) {
 				link.setAttribute('href', '#ed11y-heading-' + i);
 				li.append(link);
 				link.append(levelPrefix);
@@ -1515,7 +1515,7 @@ export function showHeadingsPanel () {
 				/*let message = document.createElement('em');
 				message.classList.add('ed11y-small');
 				message.textContent = ' ' + el[2];
-				if (Options.inlineAlerts) {
+				if (State.inlineAlerts) {
 					link.append(message);
 				} else {
 					li.append(message);
@@ -1584,7 +1584,7 @@ const showAltPanel = function () {
 			//let alert = {};
 			/*
 			// Match dismissed images.
-			// @todo merge remove; this is the Sa11y logic:
+			// @todo CMS merge remove once new syntax is ready; this is the Sa11y logic for dev reference:
 			// const isDismissed = dismissed.some((key) => key.dismiss === image.dismiss);
 			// if (isDismissed) Object.assign(image, { dismissedImage: true });
 			// Make developer checks don't show images as error if Developer checks are off!
@@ -1613,7 +1613,7 @@ const showAltPanel = function () {
 
 			// Account for lazy loading libraries.
 
-			if (Options.inlineAlerts) {
+			if (State.inlineAlerts) {
 				// Label images
 				const mark = document.createElement('ed11y-element-alt');
 				mark.classList.add('ed11y-element');
@@ -1640,7 +1640,7 @@ const showAltPanel = function () {
 			img.setAttribute('src', Utils.getBestImageSource(image.element));
 			img.setAttribute('alt', '');
 
-			if (Options.inlineAlerts) {
+			if (State.inlineAlerts) {
 				let a = document.createElement('a');
 				a.href = '#ed11y-alt-' + i;
 				a.classList.add('alt-parent');
@@ -1654,7 +1654,7 @@ const showAltPanel = function () {
 			}
 			altList.append(li);
 		}
-		if (Options.inlineAlerts) {
+		if (State.inlineAlerts) {
 			alignAlts();
 		} else {
 			UI.imageAlts.length = 0;

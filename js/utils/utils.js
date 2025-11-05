@@ -29,7 +29,7 @@ export function buildElementList () {
 		State.ignoreAll = document.querySelector(`:is(${Options.ignoreAllIfPresent})`) !== null;
 	}
 
-	if ( State.incremental ) {
+	if ( State.incremental) {
 		State.oldResults = Results;
 	}
 	// Reset counts
@@ -65,11 +65,11 @@ export function buildElementList () {
 		else {
 			Elements.Found.editable = Options.editableContent;
 		}
-		if (Options.inlineAlerts && Elements.Found.editable.length > 0) {
-			Options.inlineAlerts = false;
+		if (State.inlineAlerts && Elements.Found.editable.length > 0) {
+			State.inlineAlerts = false;
 			console.warn('Editable content detected; Editoria11y inline alerts disabled');
 		}
-		if (Options.embeddedContent) { // @todo merge restore embedded check?
+		if (Options.embeddedContent) { // @todo merge convert to custom check
 			// Ed11y.findElements('embed', Options.embeddedContent);
 		}
 		if (Options.panelNoCover) {
@@ -290,9 +290,11 @@ export function resetResults(incremental) {
 }
 
 export function newIncrementalResults() {
+	// Obviously new if there are more results:
 	if (State.forceFullCheck || Results.length !== State.oldResults.length) {
 		return true;
 	}
+	// Subtly new if a result has changed:
 	let newResultString = `${State.errorCount} ${State.warningCount}`;
 	Results.forEach(result => {
 		newResultString += result.test + result.element.outerHTML;
@@ -301,6 +303,7 @@ export function newIncrementalResults() {
 	State.oldResultString = newResultString;
 	return changed;
 }
+
 export function countAlerts () {
 
 	State.errorCount = 0;
@@ -312,9 +315,7 @@ export function countAlerts () {
 	State.dismissedCount = 0;
 	for (let i = Results.length - 1; i >= 0; i--) {
 
-		let test = Results[i].test;
-
-		// @todo CMS merge convert to new syntax.
+		let test = Results[i].test; // @todo CMS merge convert to new syntax when available.
 		/*
 		if (Options.ignoreTests &&
 			Options.ignoreTests.includes(test)) {
@@ -327,8 +328,6 @@ export function countAlerts () {
 		/*if (State.incremental && Ed11y.oldResults.length > 0) {
 			// Don't flag new issues in the active range while people are typing.
 		}*/
-
-		// @todo merge does this mess up the incremental oldResults array?
 
 		let dismissKey = prepareDismissal(Results[i].dismissalKey);
 		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.

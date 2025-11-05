@@ -14,6 +14,7 @@ export const State = {
   dismissedCount: Number,
   dismissedAlerts: {},
   activeRange: false,
+	inlineAlerts: false,
   incremental: false,
   interaction: false,
   forceFullCheck: false,

@@ -175,7 +175,7 @@ export function checkEditableIntersects (focusKnown = false) {
 
 export function alignButtons() {
 	// @ todo merge check out the tip order on utilities.
-	if (!State.jumpList || State.jumpList.length === 0 || (State.tipOpen && State.scrollPending === 0)) { // todo always false?
+	if (State.jumpList.length === 0 || (State.tipOpen && State.scrollPending === 0)) { // todo always false?
 		return;
 	}
 	State.alignPending = true;
@@ -197,7 +197,7 @@ export function alignButtons() {
 	let previousNudgeTop = 0;
 	let previousNudgeLeft = 0;
 	const scrollTop = window.scrollY;
-	if (!Options.inlineAlerts) {
+	if (!State.inlineAlerts) {
 		// Compute based on target position.
 
 		State.jumpList.forEach((mark, i) => {
@@ -226,7 +226,7 @@ export function alignButtons() {
 				top = top + 10;
 				left = left + 10;
 			} else {
-				left = Options.inlineAlerts ? left - 34 : left;
+				left = State.inlineAlerts ? left - 34 : left;
 			}
 
 			// Add iframe positon to calculated position
@@ -240,7 +240,7 @@ export function alignButtons() {
 				top = top + 10;
 				left = left + 10;
 			} else {
-				left = Options.inlineAlerts ? left - 34 : left;
+				left = State.inlineAlerts ? left - 34 : left;
 			}
 			if (mark.result.scrollableParent) {
 				// Bump alerts that would be X-position out of a scroll zone.
@@ -340,7 +340,7 @@ export function alignButtons() {
 		else if (nudgeTop !== 0) {
 			needNudge = true;
 		}
-		if (!Options.inlineAlerts) {
+		if (!State.inlineAlerts) {
 			if (needNudge) {
 				mark.style.transform = `translate(${mark.markLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
 			} else {
@@ -357,7 +357,7 @@ export function alignButtons() {
 	});
 
 	// Last pass: check for elements offscreen within scrollable areas.
-	if (!Options.inlineAlerts) {
+	if (!State.inlineAlerts) {
 		// Alerts have to be positioned relative to viewport.
 		State.jumpList.forEach(mark => {
 

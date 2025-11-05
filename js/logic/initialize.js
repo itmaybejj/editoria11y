@@ -14,7 +14,7 @@ import {
 } from "../elements/ed11y-element-panel.js";
 import {Ed11yElementTip} from "../elements/ed11y-element-tip.js";
 
-function preProcessOptions(userOptions) {
+const preProcessOptions = function(userOptions) {
 	Object.assign(Options, userOptions);
 
 	if (!userOptions.checkRoots) {
@@ -41,6 +41,7 @@ function preProcessOptions(userOptions) {
 	Theme.baseFontSize = Options.baseFontSize;
 	Theme.buttonZIndex = Options.buttonZIndex;
 	Theme.baseFontFamily = Options.baseFontFamily;
+	State.inlineAlerts = Options.inlineAlerts;
 
 	let cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
 	if (!userOptions.cssUrls) {
@@ -71,7 +72,7 @@ function preProcessOptions(userOptions) {
 	};
 }
 
-export function postProcessOptions(userOptions) {
+const postProcessOptions = function(userOptions) {
 
 	// Override Sa11y's exclusion settings.
 
@@ -174,7 +175,7 @@ export function postProcessOptions(userOptions) {
 
 }
 
-export function firstCheck (userOptions) {
+export function initialize (userOptions) {
 	if (State.once) {
 		console.error('double init');
 		return;

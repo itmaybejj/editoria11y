@@ -6,7 +6,7 @@ import {Options} from './utils/options.js';
 import Elements from "sa11y/src/js/utils/elements.js";
 import {checkAll, incrementalCheck} from "./logic/interface.js";
 import {
-	firstCheck,
+	initialize,
 } from "./logic/initialize.js";
 import {getElements, findElements} from "./utils/utils.js";
 
@@ -17,7 +17,7 @@ class Ed11y {
 		State.version = '3.0.0';
 
     if (CSS.supports('selector(:has(body))')) {
-      firstCheck(userOptions);
+      initialize(userOptions);
     }
 
     /* Export exposed interfaces */

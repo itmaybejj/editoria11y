@@ -1,6 +1,6 @@
 export const Options = {
 
-	checkRoots: false, // @todo merge implement whatever syntax Sa11y releases.
+	checkRoots: false, // @todo CMS merge implement whatever syntax Sa11y releases.
 	fixedRoots: false, // Array of specific nodes, overrides previous.
 	ignoreElements: '',
 
@@ -36,7 +36,7 @@ export const Options = {
 	// Hide all alerts if these elements are absent, e.g., ".edit-button"
 	// Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
 	ignoreAllIfAbsent: false,
-	ignoreAllIfPresent: false, // @todo merge dismissal system appears to be broken.
+	ignoreAllIfPresent: false, // @todo CMS merge dismissal system.
 
 	// Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
 	preventCheckingIfPresent: false,
@@ -130,9 +130,9 @@ export const Options = {
 	baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
 
 	// Test customizations
-	embeddedContent: false, // @todo merge remove.
-	embeddedContentTitle: '', // @todo merge remove.
-	embeddedContentMessage: '', // @todo merge remove.
+	embeddedContent: false, // @todo merge replace with custom test.
+	embeddedContentTitle: '',
+	embeddedContentMessage: '',
 
 	linksUrls: false, // get from language pack
 	linksMeaningless: false, // get from language pack
@@ -230,7 +230,7 @@ export const Options = {
 	contrastAPCA: false,
 
 	// Other plugins
-	customChecks: false, // @todo merge migrate in embed check?
+	customChecks: false, // @todo CMS merge test this functionality.
 	linksAdvancedPlugin: true,
 	formLabelsPlugin: true, // @todo CMS merge turn off when editing.
 	embeddedContentPlugin: true,
