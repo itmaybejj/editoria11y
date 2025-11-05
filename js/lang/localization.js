@@ -21,10 +21,6 @@ const ed11yLang = {
 		buttonShowHiddenAlert: 'Show hidden alert',
 		buttonHideHiddenAlert: 'Hide hidden alert',
     buttonHideHiddenAlerts: `Hide %(count) hidden alerts`,
-    buttonShowAlerts: 'Show accessibility alerts',
-    buttonShowNoAlert: 'Show accessibility checker',
-    buttonHideChecker: 'Hide accessibility checker',
-    buttonHideAlerts: 'Hide accessibility alerts',
 
 		// Visualization
     NO_IMAGES: 'No images found.',
@@ -41,9 +37,6 @@ const ed11yLang = {
 
     // Errors and alerts ==================================
     NOT_VISIBLE: 'Note: this content may not be visible. Look for it inside the outlined container.',
-    jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.', // @todo merge fall back to NOT_VISIBLE?
-		ACC_NAME_TIP: '', // @todo merge pass label instead, swap if not EN
-		LINK_TIP: '',
 		SUS_ALT_STOPWORDS: ['image', 'graphic', 'picture', 'photo', 'thumbnail', 'icon', 'placeholder','spacer','tbd','todo', 'copyright', 'courtesy of'], // todo Ed11y test use to catch these at the end as well as the beginning.
 
 		// Strings used in tests ==============================
@@ -199,8 +192,8 @@ const ed11yLang = {
             Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
             <ul>
                 <li>Good link text: "About us"</li>
-                <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess</li>
-            </ul>`, // @todo merge with Adam's wording.
+                <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess"</li>
+            </ul>`, // @todo after merge: compare with Sa11y's wording.
 
 		altImageOf : {
 			title: 'Manual check: possibly redundant text in alt',
@@ -270,7 +263,6 @@ const ed11yLang = {
             </ul>
         `,
 
-		// @todo merge test: separate tests for no text and all text ignored:
 		linkNoTextExample: '<p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>',
 
 		linkTextIgnored: (ignoredText) => `

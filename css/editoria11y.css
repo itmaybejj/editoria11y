@@ -1,5 +1,3 @@
-/* Applies to elements in light DOM ===== */
-
 ed11y-element-panel {
   outline: 0;
   opacity: 1;
@@ -987,6 +985,23 @@ ed11y-element-result[data-ed11y-open='true'] {
   svg {
     max-width: 100%;
     overflow: visible;
+  }
+
+  .sa11y-tip {
+    margin: .75em 0;
+	  hr {
+		  opacity: 0;
+	  }
+	  .badge {
+		  padding: 0 .5em;
+		  margin-right: .25em;
+		  font-size: 12px;
+		  font-weight: 400;
+		  color: var(--ed11y-warningText);
+		  background: var(--ed11y-warning);
+		  border: 1px solid;
+		  border-radius: 1em;
+	  }
   }
 
   .dismiss {

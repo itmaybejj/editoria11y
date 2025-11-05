@@ -4,6 +4,7 @@ import {
 } from "./utils.js";
 import {State, UI} from "./state.js";
 import {Options} from "./options.js";
+import Elements from "sa11y/src/js/utils/elements.js";
 
 export const intersect = function(a, b, x = 10) {
 	// Compute intersect using browser offsets.
@@ -76,8 +77,8 @@ export function alignPanel() {
 	}
 	let xMost = 0;
 	let yMost = 0;
-	if (State.elements.panelNoCover) {
-		State.elements.panelNoCover.forEach(el => {
+	if (Elements.Found.panelNoCover) {
+		Elements.Found.panelNoCover.forEach(el => {
 			let bounds = el.getBoundingClientRect();
 			if (Options.panelPosition === 'right') {
 				xMost = window.innerWidth - bounds.left > xMost && bounds.left > window.innerWidth / 3 ? window.innerWidth - bounds.left : xMost;
@@ -173,7 +174,8 @@ export function checkEditableIntersects (focusKnown = false) {
 
 
 export function alignButtons() {
-	if (!State.jumpList || State.jumpList.length === 0 || (State.openTip.button && State.scrollPending === 0)) { // todo always false?
+	// @ todo merge check out the tip order on utilities.
+	if (!State.jumpList || State.jumpList.length === 0 || (State.tipOpen && State.scrollPending === 0)) { // todo always false?
 		return;
 	}
 	State.alignPending = true;
@@ -213,9 +215,7 @@ export function alignButtons() {
 			//let rightBound = window.innerWidth;
 			if (!visible(mark.result.element)) {
 				// Invisible target.
-				// @todo merge issue #2 blows up in all tests.
 				const theFirstVisibleParent = firstVisibleParent(mark.result.element);
-				console.log(theFirstVisibleParent);
 				targetOffset = theFirstVisibleParent ? theFirstVisibleParent.getBoundingClientRect() : targetOffset;
 				top = targetOffset.top + scrollTop;
 			}

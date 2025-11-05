@@ -50,17 +50,13 @@ export class Ed11yElementTip extends HTMLElement {
 
     let content = document.createElement('div');
     content.classList.add('content');
+		const tipAlert = document.createElement('div');
+		tipAlert.classList.add('ed11y-tip-alert');
 		if (this.result.content.includes('class="title"')) {
 			// Sent by Ed11y
-			//this.heading = document.createElement('div');
-			//this.heading.classList.add('title');
-			//this.heading.setAttribute('tabindex', '-1');
-			//this.heading.innerHTML = M[this.result.test].title;
-			//content.append(this.heading);
-			//const alertBox = document.createElement('div');
-			//alertBox.classList.add('ed11y-tip-alert');
-			//this.heading.insertAdjacentElement('afterbegin', alertBox);
-			content.innerHTML = this.result.content;
+			// This removes Sa11y's injected "Tip!" additions:
+			content.innerHTML = this.result.content.split('<hr')[0];
+			content.querySelector('.title').prepend(tipAlert);
 		} else {
 			// Sent by Sa11y
 			let innerContent = document.createElement('div');
@@ -68,9 +64,11 @@ export class Ed11yElementTip extends HTMLElement {
 			const firstSentence = document.createElement('div');
 			firstSentence.innerHTML = sentences.shift() + '.';
 			firstSentence.classList.add('title');
+			firstSentence.prepend(tipAlert);
 			firstSentence.setAttribute('tabindex', '-1');
 			innerContent.append(firstSentence);
 			const theRest = document.createElement('div');
+			theRest.classList.add('sa11y-tip');
 			theRest.innerHTML = sentences.join('.');
 			innerContent.appendChild(theRest);
 			content.append(innerContent);

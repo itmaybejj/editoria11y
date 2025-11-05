@@ -147,7 +147,7 @@ export function updatePanel () {
             UI.panelToggle.focus();
             UI.panelToggle.click();
           } else if (event.target.hasAttribute('data-ed11y-open')) {
-            if (State.openTip.button) {
+            if (State.tipOpen) {
               State.toggledFrom.focus();
               State.openTip.button.shadowRoot.querySelector('button').click();
             }
@@ -195,9 +195,6 @@ export function updatePanel () {
       State.open = true;
       UI.panel.classList.remove('ed11y-shut');
       UI.panel.classList.add('ed11y-active');
-      UI.panelToggle.setAttribute('aria-expanded', 'true');
-			const preferredHide = State.totalCount > 0 ? Lang._('buttonHideAlerts') : Lang._('buttonHideChecker');
-      UI.panelToggleTitle.textContent = State.english ? preferredHide : Lang._('ALERT_CLOSE');
       // Prepare show hidden alerts button.
 			const preferredDismissHide = State.dismissedCount > 1 ?
 				Lang.sprintf('buttonHideHiddenAlerts', State.dismissedCount)
@@ -237,7 +234,9 @@ export function updatePanel () {
     }
     // Update buttons.
     if (State.totalCount > 0 || (Options.showDismissed && State.dismissedCount > 0)) {
-      UI.panelToggleTitle.textContent = State.open ? Lang._('buttonHideAlerts') : Lang._('buttonShowAlerts');
+			UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
+
+			UI.panelToggle.ariaExpanded = `${State.open}`;
       UI.panelJumpNext.removeAttribute('hidden');
       if (State.errorCount > 0) {
         // Errors
@@ -284,15 +283,15 @@ export function updatePanel () {
       if (State.dismissedCount > 0) {
         UI.panelCount.textContent = 'i';
         if (State.open) {
-          UI.panelToggleTitle.textContent = Lang._('buttonHideChecker');
+          UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
         } else {
+					// @ todo merge isn't this backwards?
           UI.panelToggleTitle.textContent = State.dismissedCount > 1 ?
 						Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount) :
             Lang._('buttonShowHiddenAlert');
         }
       } else {
-        // todo merge: move these inline and just change the class.
-        UI.panelToggleTitle.textContent = State.open ? Lang._('buttonHideChecker') : Lang._('buttonShowNoAlert');
+        UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
       }
     }
     UI.panelToggle.classList.remove('disabled');
@@ -513,7 +512,7 @@ export function editableHighlighter (resultID, show, firstVisible) {
 }
 
 export function transferFocus () {
-  if (!State.openTip.tip) {
+  if (!State.tipOpen) {
     return;
   }
   const id = State.openTip.tip.dataset.ed11yResult;
@@ -618,11 +617,11 @@ export function alertOnInvisibleTip (button, target) {
     else if (target.closest('[aria-hidden="true"]')) {
       firstVisible = target.closest('[aria-hidden="true"]');
       firstVisible = firstVisible.closest(':not([aria-hidden="true"])');
-      alertMessage = Lang._('jumpedToAriaHiddenTip');
+      alertMessage = Lang._('NOT_VISIBLE');
     }
     if (firstVisible) {
       // Throw warning that the element cannot be highlighted.
-      const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert');
+      const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert'); // @todo merge
       tipAlert.textContent = alertMessage;
     }
     if (State.viaJump) {
@@ -795,7 +794,7 @@ export function alignTip (button, toolTip, recheck = 0, reveal = false) {
 		// todo postpone: could we use the not-inline drawing pattern for invisible targets?
 		const theFirstVisibleParent = firstVisibleParent(mark.result.element);
 		if (theFirstVisibleParent) {
-			buttonOffset = firstVisibleParent.getBoundingClientRect();
+			buttonOffset = theFirstVisibleParent.getBoundingClientRect();
 			buttonLeft = buttonOffset.left;
 			buttonTop = buttonOffset.top;
 		} else {
@@ -923,7 +922,7 @@ export function updateTipLocations () {
 	if (!State.scrollTicking && State.scrollPending > 0 && !State.running && State.jumpList && State.open) {
 		State.scrollTicking = true;
 		alignButtons();
-		if (State.openTip.tip) {
+		if (State.tipOpen) {
 			alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
 		}
 		State.scrollPending --;
@@ -987,7 +986,7 @@ export function windowResize() {
 		alignAlts();
 		alignButtons();
 	}
-	if (State.openTip.button) {
+	if (State.tipOpen) {
 		alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
 	}
 	alignPanel();
@@ -995,10 +994,10 @@ export function windowResize() {
 
 export function intersectionObservers() {
 
-	State.elements.editable?.forEach(editable => {
+	Elements.Found.editable?.forEach(editable => {
 		editable.addEventListener('scroll', function() {
 			// Align tips when scrolling editable container.
-			if (State.openTip.button) {
+			if (State.tipOpen) {
 				State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
 				requestAnimationFrame(() => updateTipLocations());
 			}
@@ -1007,10 +1006,10 @@ export function intersectionObservers() {
 
 	document.addEventListener('scroll', function() {
 		// Trigger on scrolling other containers, unless it will flicker a tip.
-		if (!Options.inlineAlerts && !State.openTip.button) {
+		if (!Options.inlineAlerts && !State.tipOpen) {
 			State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
 			requestAnimationFrame(() => updateTipLocations());
-		} else if (State.openTip.button) {
+		} else if (State.tipOpen) {
 			alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
 		}
 	}, true);
@@ -1277,7 +1276,7 @@ State.testsRunning = true;
 State.testsRemainng = 0;
 // Toggles the outline of all headers, link texts, and images.
 export function checkAll() {
-	if (State.openTip.button) {
+	if (State.tipOpen) {
 		return false;
 	}
 	State.disabled = false;
@@ -1298,8 +1297,7 @@ export function checkAll() {
 	}
 	// Initialize root areas to check.
 	if (!State.roots && Options.headless === false) {
-		// @todo merge invalid number of arguments.
-		Utils.createAlert(`${Lang.sprintf('MISSING_ROOT', Options.checkRoots)}`);
+		console.warn(Lang.sprintf('MISSING_ROOT', Options.checkRoots));
 	}
 
 	if (State.roots.length === 0) {
@@ -1396,7 +1394,7 @@ export function continueCheck(customCheck = false) {
 	updatePanel();
 	window.setTimeout(() => {
 		if (Options.watchForChanges) {
-			State.elements.editable?.forEach(editable => {
+			Elements.Found.editable?.forEach(editable => {
 				if (!editable.matches('.drag-observe')) {
 					editable.classList.add('drag-observe');
 					editable.addEventListener('drop', () => {
@@ -1459,7 +1457,7 @@ export function visualize () {
 	}
 	if (Options.inlineAlerts) {
 		findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
-		State.elements.reset?.forEach((el) => el.remove());
+		Elements.Found.reset?.forEach((el) => el.remove());
 	}
 	if (State.visualizing) {
 		State.visualizing = false;
@@ -1545,7 +1543,7 @@ export function resetPanel() {
 	if (typeof (UI.panel) === 'object') {
 		UI.panel?.classList.add('ed11y-shut');
 		UI.panel?.classList.remove('ed11y-active');
-		UI.panelToggle?.setAttribute('aria-expanded', 'false');
+		UI.panelToggle.ariaExpanded = false;
 		if (!Options.showDismissed && typeof UI.showDismissed === 'function') {
 			UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
 			UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
@@ -1693,8 +1691,7 @@ export function dismissThis (dismissalType, all = false) {
 	// Remove tip and reset borders around element
 	resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
 	removal.tip?.parentNode?.removeChild(removal.tip);
-	// @todo merge found this commented out -- is it needed or can it be removed?
-	//removal.button?.parentNode?.removeChild(removal.button);
+	removal.button?.parentNode?.removeChild(removal.button);
 
 	reset();
 	State.showPanel = true;
@@ -1751,7 +1748,7 @@ export function togglePanel () {
 				localStorage.setItem('editoria11yShow', '1');
 			}
 			else {
-				UI.panelToggleTitle.textContent = State.totalCount > 0 ? Lang._('buttonShowAlerts') : Lang._('buttonShowNoAlert');
+				UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
 				Options.showDismissed = false;
 				reset();
 				Options.userPrefersShut = true;
@@ -1804,7 +1801,7 @@ export function disable() {
 }
 
 export function reset () {
-	// @todo should we also flush things like State.elements.altMark?
+	// @todo should we also flush things like Elements.Found.altMark?
 	pauseObservers();
 	resetResults();
 	resetPanel();

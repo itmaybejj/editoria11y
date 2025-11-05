@@ -790,77 +790,6 @@
   }
 
   /**
-   * Removes the alert from the Sa11y control panel by clearing its content and removing CSS classes.
-   * This function clears the content of the alert element and removes CSS classes 'active' from the main alert element, and 'panel-alert-preview' from the alert preview element.
-   * @returns {void}
-   */
-  function removeAlert() {
-    const Sa11yPanel = document.querySelector('sa11y-control-panel').shadowRoot;
-    const alert = Sa11yPanel.getElementById('panel-alert');
-    const alertText = Sa11yPanel.getElementById('panel-alert-text');
-    const alertPreview = Sa11yPanel.getElementById('panel-alert-preview');
-
-    alert.classList.remove('active');
-    alertPreview.classList.remove('panel-alert-preview');
-    while (alertText.firstChild) alertText.removeChild(alertText.firstChild);
-    while (alertPreview.firstChild) alertPreview.removeChild(alertPreview.firstChild);
-  }
-
-  /**
-   * Creates an alert in the Sa11y control panel with the given alert message and error preview.
-   * @param {string} alertMessage The alert message.
-   * @param {string} errorPreview The issue's tooltip message (optional).
-   * @param {string} extendedPreview The issue's HTML or escaped HTML to be previewed (optional).
-   * @returns {void}
-   */
-  function createAlert(alertMessage, errorPreview, extendedPreview) {
-    // Clear alert first before creating new one.
-    removeAlert();
-
-    // Constants
-    const Sa11yPanel = document.querySelector('sa11y-control-panel').shadowRoot;
-    const alert = Sa11yPanel.getElementById('panel-alert');
-    const alertText = Sa11yPanel.getElementById('panel-alert-text');
-    const alertPreview = Sa11yPanel.getElementById('panel-alert-preview');
-    const alertClose = Sa11yPanel.getElementById('close-alert');
-    const skipButton = Sa11yPanel.getElementById('skip-button');
-
-    alert.classList.add('active');
-    alertText.innerHTML = alertMessage;
-
-    // If the issue's element is being previewed.
-    const elementPreview = (extendedPreview)
-      ? `<div class="element-preview">${extendedPreview}</div>` : '';
-
-    // Alert message or tooltip's message.
-    if (errorPreview) {
-      alertPreview.classList.add('panel-alert-preview');
-      alertPreview.innerHTML = `${elementPreview}<div class="preview-message">${errorPreview}</div>`;
-    }
-
-    // A little time before setting focus on the close button.
-    setTimeout(() => alertClose.focus(), 300);
-
-    // Closing alert sets focus back to Skip to Issue toggle.
-    function closeAlert() {
-      removeAlert();
-      const focusTarget = skipButton.hasAttribute('disabled')
-        ? Sa11yPanel.getElementById('toggle')
-        : skipButton;
-      focusTarget.focus();
-    }
-    alertClose.addEventListener('click', closeAlert);
-
-    // Escape key to close alert.
-    alert.onkeydown = (e) => {
-      const evt = e || window.event;
-      if (evt.key === 'Escape' && alert.classList.contains('active')) {
-        closeAlert();
-      }
-    };
-  }
-
-  /**
    * Get the best image source from an element, considering data-src, srcset, and src attributes.
    * @param {HTMLElement} element - The image element to extract the source from.
    * @returns {string} - The best available source URL.
@@ -988,9 +917,10 @@
     toggledFrom: false,
     scrollPending: Number,
     scrollTicking: false,
+  	tipOpen: false,
     openTip: {
-      button: false,
-      tip: false,
+      button: {},
+      tip: {},
     },
     positionedFrames: [],
     editableHighlight: [],
@@ -1421,48 +1351,6 @@
   	},
   };
 
-  var styles = "[data-sa11y-overflow]{overflow:auto!important}[data-sa11y-error]{outline:5px solid var(--sa11y-error)!important;outline-offset:2px}[data-sa11y-warning]:not([data-sa11y-error]){outline:5px solid var(--sa11y-warning)!important;outline-offset:2px}[data-sa11y-pulse-border]{animation:pulse 1s 2;box-shadow:0;outline:5px solid var(--sa11y-focus-color)!important}[data-sa11y-pulse-border]:focus,[data-sa11y-pulse-border]:hover{animation:none}@keyframes pulse{0%{box-shadow:0 0 0 5px var(--sa11y-focus-color)}50%{box-shadow:0 0 0 12px var(--sa11y-pulse-color)}to{box-shadow:0 0 0 5px var(--sa11y-pulse-color)}}h1[data-sa11y-pulse-border],h2[data-sa11y-pulse-border],h3[data-sa11y-pulse-border],h4[data-sa11y-pulse-border],h5[data-sa11y-pulse-border],h6[data-sa11y-pulse-border],img[data-sa11y-pulse-border]{animation:pulse-scale 1s 2}@keyframes pulse-scale{0%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.02)}to{opacity:1;transform:scale(1)}}@media (prefers-reduced-motion:reduce){[data-sa11y-pulse-border]{animation:none!important}}@media (forced-colors:active){[data-sa11y-error-inline],[data-sa11y-error],[data-sa11y-good],[data-sa11y-pulse-border],[data-sa11y-warning-inline],[data-sa11y-warning]{forced-color-adjust:none}}";
-
-  /* ************************************************************ */
-  /*  Auto-detect shadow DOM or process provided web components.  */
-  /* ************************************************************ */
-  const addStyleUtilities = (component) => {
-    const CSSUtils = component.shadowRoot.querySelectorAll('.sa11y-css-utilities');
-    if (CSSUtils.length === 0) {
-      const style = document.createElement('style');
-      style.setAttribute('class', 'sa11y-css-utilities');
-      style.textContent = styles;
-      component.shadowRoot.appendChild(style);
-    }
-  };
-
-  function findShadowComponents(option) {
-    if (option.autoDetectShadowComponents) {
-      // Elements to ignore.
-      const ignore = Constants.Exclusions.Sa11yElements;
-
-      // Search all elements.
-      const root = document.querySelector(option.checkRoot);
-      const search = (root)
-        ? Array.from(root.querySelectorAll(`*:not(${ignore})`))
-        : Array.from(document.body.querySelectorAll(`*:not(${ignore})`));
-
-      // Query for open shadow roots & inject CSS utilities into every shadow DOM.
-      search.forEach((component) => {
-        if (component.shadowRoot && component.shadowRoot.mode === 'open') {
-          component.setAttribute('data-sa11y-has-shadow-root', '');
-          addStyleUtilities(component);
-        }
-      });
-    } else if (option.shadowComponents) {
-      const providedShadow = document.querySelectorAll(option.shadowComponents);
-      providedShadow.forEach((component) => {
-        component.setAttribute('data-sa11y-has-shadow-root', '');
-        addStyleUtilities(component);
-      });
-    }
-  }
-
   const Elements = (function myElements() {
     const Found = {};
     function initializeElements(option) {
@@ -1576,6 +1464,48 @@
       Annotations,
     };
   }());
+
+  var styles = "[data-sa11y-overflow]{overflow:auto!important}[data-sa11y-error]{outline:5px solid var(--sa11y-error)!important;outline-offset:2px}[data-sa11y-warning]:not([data-sa11y-error]){outline:5px solid var(--sa11y-warning)!important;outline-offset:2px}[data-sa11y-pulse-border]{animation:pulse 1s 2;box-shadow:0;outline:5px solid var(--sa11y-focus-color)!important}[data-sa11y-pulse-border]:focus,[data-sa11y-pulse-border]:hover{animation:none}@keyframes pulse{0%{box-shadow:0 0 0 5px var(--sa11y-focus-color)}50%{box-shadow:0 0 0 12px var(--sa11y-pulse-color)}to{box-shadow:0 0 0 5px var(--sa11y-pulse-color)}}h1[data-sa11y-pulse-border],h2[data-sa11y-pulse-border],h3[data-sa11y-pulse-border],h4[data-sa11y-pulse-border],h5[data-sa11y-pulse-border],h6[data-sa11y-pulse-border],img[data-sa11y-pulse-border]{animation:pulse-scale 1s 2}@keyframes pulse-scale{0%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.02)}to{opacity:1;transform:scale(1)}}@media (prefers-reduced-motion:reduce){[data-sa11y-pulse-border]{animation:none!important}}@media (forced-colors:active){[data-sa11y-error-inline],[data-sa11y-error],[data-sa11y-good],[data-sa11y-pulse-border],[data-sa11y-warning-inline],[data-sa11y-warning]{forced-color-adjust:none}}";
+
+  /* ************************************************************ */
+  /*  Auto-detect shadow DOM or process provided web components.  */
+  /* ************************************************************ */
+  const addStyleUtilities = (component) => {
+    const CSSUtils = component.shadowRoot.querySelectorAll('.sa11y-css-utilities');
+    if (CSSUtils.length === 0) {
+      const style = document.createElement('style');
+      style.setAttribute('class', 'sa11y-css-utilities');
+      style.textContent = styles;
+      component.shadowRoot.appendChild(style);
+    }
+  };
+
+  function findShadowComponents(option) {
+    if (option.autoDetectShadowComponents) {
+      // Elements to ignore.
+      const ignore = Constants.Exclusions.Sa11yElements;
+
+      // Search all elements.
+      const root = document.querySelector(option.checkRoot);
+      const search = (root)
+        ? Array.from(root.querySelectorAll(`*:not(${ignore})`))
+        : Array.from(document.body.querySelectorAll(`*:not(${ignore})`));
+
+      // Query for open shadow roots & inject CSS utilities into every shadow DOM.
+      search.forEach((component) => {
+        if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+          component.setAttribute('data-sa11y-has-shadow-root', '');
+          addStyleUtilities(component);
+        }
+      });
+    } else if (option.shadowComponents) {
+      const providedShadow = document.querySelectorAll(option.shadowComponents);
+      providedShadow.forEach((component) => {
+        component.setAttribute('data-sa11y-has-shadow-root', '');
+        addStyleUtilities(component);
+      });
+    }
+  }
 
   function checkImages(results, option) {
     const containsAltTextStopWords = (alt) => {
@@ -3203,11 +3133,11 @@
   	exclude = exclude === false ? [] : exclude;
   	return find(selector, desiredRoot, exclude);
   }
-  // QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
-  function findElements (key, selector, rootRestrict = true) { // @todo after merge replace.
+  function findElements (key, selector, rootRestrict = true) {
+  	// Legacy support for deprecated code.
   	const desiredRoot = rootRestrict ? 'root' : 'document';
   	const exclude = rootRestrict ? [] : Constants.Exclusions.Sa11yElements;
-  	State.elements[key] = find( selector, desiredRoot, exclude );
+  	Elements.Found[key] = find( selector, desiredRoot, exclude );
   }
 
   // First step in checkAll is getting a fresh set of elements to check.
@@ -3247,17 +3177,15 @@
   		findShadowComponents(Options);
 
   		// Find and cache elements.
-  		console.log(Constants);
   		Elements.initializeElements(Options);
-  		console.log(Elements);
   		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
   		if (typeof Options.editableContent === 'string') {
   			findElements('editable', Options.editableContent, false);
   		}
   		else {
-  			State.elements.editable = Options.editableContent;
+  			Elements.Found.editable = Options.editableContent;
   		}
-  		if (Options.inlineAlerts && State.elements.editable.length > 0) {
+  		if (Options.inlineAlerts && Elements.Found.editable.length > 0) {
   			Options.inlineAlerts = false;
   			console.warn('Editable content detected; Editoria11y inline alerts disabled');
   		}
@@ -3283,7 +3211,7 @@
     classes?.forEach((el) => {
       let thisClass = el;
       findElements('reset', `.${thisClass}`);
-      State.elements.reset?.forEach(el => {
+      Elements.Found.reset?.forEach(el => {
         el.classList.remove(thisClass);
       });
     });
@@ -3341,7 +3269,9 @@
   }
   function detectShadow (container) {
     if (Options.autoDetectShadowComponents) {
-      const select = !State.ignore ? '*:not(.ed11y-element)' : `*:not(${Options.ignore}, .ed11y-element)`;
+
+  		const select = `*:not(${Constants.Exclusions.Container.join(', ')}, .ed11y-element)`;
+
       let search;
       if (container.shadowRoot && container.shadowRoot.mode === 'open') {
         if (!container.matches('[data-ed11y-has-shadow-root]')) {
@@ -3374,6 +3304,7 @@
       });
     }
   }
+
   function pauseObservers() {
   	State.watching?.forEach(observer => {
   		observer.observer.disconnect();
@@ -3419,19 +3350,19 @@
   	]);
   	// Reset insertions into body content.
   	if (incremental) {
-  		State.elements.reset = getElements('ed11y-element-highlight', 'document', []);
+  		Elements.Found.reset = getElements('ed11y-element-highlight', 'document', []);
   	} else {
-  		State.elements.reset = getElements('ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', 'document', []);
+  		Elements.Found.reset = getElements('ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', 'document', []);
   	}
-  	State.elements.reset?.forEach((el) => el.remove());
+  	Elements.Found.reset?.forEach((el) => el.remove());
 
   	// Flicker prevention -- leave old tip in place for 100ms.
   	//findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
-  	State.elements.delayedReset = getElements('ed11y-element-result, ed11y-element-tip', 'document', []);
+  	Elements.Found.delayedReset = getElements('ed11y-element-result, ed11y-element-tip', 'document', []);
 
   	window.setTimeout(()=> {
-  		State.elements.delayedReset?.forEach((el) => el.remove());
-  	}, 100, State.elements.delayedReset);
+  		Elements.Found.delayedReset?.forEach((el) => el.remove());
+  	}, 100, Elements.Found.delayedReset);
 
   	if (typeof UI.panelJumpNext === 'function') {
   		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = State.english ? Lang._('buttonFirstContent')
@@ -3465,17 +3396,21 @@
 
   		let test = Results[i].test;
 
+  		// @todo CMS merge convert to new syntax.
+  		/*
   		if (Options.ignoreTests &&
   			Options.ignoreTests.includes(test)) {
   			// Would be faster to skip test, but this is easy and reliable.
   			Results.splice(i, 1);
   			continue;
-  		}
+  		}*/
 
   		// todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
   		/*if (State.incremental && Ed11y.oldResults.length > 0) {
   			// Don't flag new issues in the active range while people are typing.
   		}*/
+
+  		// @todo merge does this mess up the incremental oldResults array?
 
   		let dismissKey = prepareDismissal(Results[i].dismissalKey);
   		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
@@ -3585,8 +3520,8 @@
   	}
   	let xMost = 0;
   	let yMost = 0;
-  	if (State.elements.panelNoCover) {
-  		State.elements.panelNoCover.forEach(el => {
+  	if (Elements.Found.panelNoCover) {
+  		Elements.Found.panelNoCover.forEach(el => {
   			let bounds = el.getBoundingClientRect();
   			if (Options.panelPosition === 'right') {
   				xMost = window.innerWidth - bounds.left > xMost && bounds.left > window.innerWidth / 3 ? window.innerWidth - bounds.left : xMost;
@@ -3682,7 +3617,8 @@
 
 
   function alignButtons() {
-  	if (!State.jumpList || State.jumpList.length === 0 || (State.openTip.button && State.scrollPending === 0)) { // todo always false?
+  	// @ todo merge check out the tip order on utilities.
+  	if (!State.jumpList || State.jumpList.length === 0 || (State.tipOpen && State.scrollPending === 0)) { // todo always false?
   		return;
   	}
   	State.alignPending = true;
@@ -3720,9 +3656,7 @@
   			//let rightBound = window.innerWidth;
   			if (!visible(mark.result.element)) {
   				// Invisible target.
-  				// @todo merge issue #2 blows up in all tests.
   				const theFirstVisibleParent = firstVisibleParent(mark.result.element);
-  				console.log(theFirstVisibleParent);
   				targetOffset = theFirstVisibleParent ? theFirstVisibleParent.getBoundingClientRect() : targetOffset;
   				top = targetOffset.top + scrollTop;
   			}
@@ -4005,7 +3939,7 @@
         UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('PANEL_HEADING');
         UI.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = Lang._('OUTLINE');
         UI.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = Lang._('IMAGES');
-  			if (!State.english) {
+  			if (State.english) {
   				UI.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML = Lang._('panelCheckOutline');
   				UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML = Lang._('panelCheckAltText');
   			}
@@ -4031,7 +3965,7 @@
               UI.panelToggle.focus();
               UI.panelToggle.click();
             } else if (event.target.hasAttribute('data-ed11y-open')) {
-              if (State.openTip.button) {
+              if (State.tipOpen) {
                 State.toggledFrom.focus();
                 State.openTip.button.shadowRoot.querySelector('button').click();
               }
@@ -4079,9 +4013,6 @@
         State.open = true;
         UI.panel.classList.remove('ed11y-shut');
         UI.panel.classList.add('ed11y-active');
-        UI.panelToggle.setAttribute('aria-expanded', 'true');
-  			const preferredHide = State.totalCount > 0 ? Lang._('buttonHideAlerts') : Lang._('buttonHideChecker');
-        UI.panelToggleTitle.textContent = State.english ? preferredHide : Lang._('ALERT_CLOSE');
         // Prepare show hidden alerts button.
   			const preferredDismissHide = State.dismissedCount > 1 ?
   				Lang.sprintf('buttonHideHiddenAlerts', State.dismissedCount)
@@ -4121,7 +4052,9 @@
       }
       // Update buttons.
       if (State.totalCount > 0 || (Options.showDismissed && State.dismissedCount > 0)) {
-        UI.panelToggleTitle.textContent = State.open ? Lang._('buttonHideAlerts') : Lang._('buttonShowAlerts');
+  			UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
+
+  			UI.panelToggle.ariaExpanded = `${State.open}`;
         UI.panelJumpNext.removeAttribute('hidden');
         if (State.errorCount > 0) {
           // Errors
@@ -4168,15 +4101,15 @@
         if (State.dismissedCount > 0) {
           UI.panelCount.textContent = 'i';
           if (State.open) {
-            UI.panelToggleTitle.textContent = Lang._('buttonHideChecker');
+            UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
           } else {
+  					// @ todo merge isn't this backwards?
             UI.panelToggleTitle.textContent = State.dismissedCount > 1 ?
   						Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount) :
               Lang._('buttonShowHiddenAlert');
           }
         } else {
-          // todo merge: move these inline and just change the class.
-          UI.panelToggleTitle.textContent = State.open ? Lang._('buttonHideChecker') : Lang._('buttonShowNoAlert');
+          UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
         }
       }
       UI.panelToggle.classList.remove('disabled');
@@ -4397,7 +4330,7 @@
   }
 
   function transferFocus () {
-    if (!State.openTip.tip) {
+    if (!State.tipOpen) {
       return;
     }
     const id = State.openTip.tip.dataset.ed11yResult;
@@ -4502,11 +4435,11 @@
       else if (target.closest('[aria-hidden="true"]')) {
         firstVisible = target.closest('[aria-hidden="true"]');
         firstVisible = firstVisible.closest(':not([aria-hidden="true"])');
-        alertMessage = Lang._('jumpedToAriaHiddenTip');
+        alertMessage = Lang._('NOT_VISIBLE');
       }
       if (firstVisible) {
         // Throw warning that the element cannot be highlighted.
-        const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert');
+        const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert'); // @todo merge
         tipAlert.textContent = alertMessage;
       }
       if (State.viaJump) {
@@ -4667,7 +4600,7 @@
   		// todo postpone: could we use the not-inline drawing pattern for invisible targets?
   		const theFirstVisibleParent = firstVisibleParent(mark.result.element);
   		if (theFirstVisibleParent) {
-  			buttonOffset = firstVisibleParent.getBoundingClientRect();
+  			buttonOffset = theFirstVisibleParent.getBoundingClientRect();
   			buttonLeft = buttonOffset.left;
   			buttonTop = buttonOffset.top;
   		} else {
@@ -4795,7 +4728,7 @@
   	if (!State.scrollTicking && State.scrollPending > 0 && !State.running && State.jumpList && State.open) {
   		State.scrollTicking = true;
   		alignButtons();
-  		if (State.openTip.tip) {
+  		if (State.tipOpen) {
   			alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
   		}
   		State.scrollPending --;
@@ -4849,7 +4782,7 @@
   		alignAlts();
   		alignButtons();
   	}
-  	if (State.openTip.button) {
+  	if (State.tipOpen) {
   		alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
   	}
   	alignPanel();
@@ -4857,10 +4790,10 @@
 
   function intersectionObservers() {
 
-  	State.elements.editable?.forEach(editable => {
+  	Elements.Found.editable?.forEach(editable => {
   		editable.addEventListener('scroll', function() {
   			// Align tips when scrolling editable container.
-  			if (State.openTip.button) {
+  			if (State.tipOpen) {
   				State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
   				requestAnimationFrame(() => updateTipLocations());
   			}
@@ -4869,10 +4802,10 @@
 
   	document.addEventListener('scroll', function() {
   		// Trigger on scrolling other containers, unless it will flicker a tip.
-  		if (!Options.inlineAlerts && !State.openTip.button) {
+  		if (!Options.inlineAlerts && !State.tipOpen) {
   			State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
   			requestAnimationFrame(() => updateTipLocations());
-  		} else if (State.openTip.button) {
+  		} else if (State.tipOpen) {
   			alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
   		}
   	}, true);
@@ -5047,7 +4980,7 @@
   State.testsRemainng = 0;
   // Toggles the outline of all headers, link texts, and images.
   function checkAll() {
-  	if (State.openTip.button) {
+  	if (State.tipOpen) {
   		return false;
   	}
   	State.disabled = false;
@@ -5068,8 +5001,7 @@
   	}
   	// Initialize root areas to check.
   	if (!State.roots && Options.headless === false) {
-  		// @todo merge invalid number of arguments.
-  		createAlert(`${Lang.sprintf('MISSING_ROOT', Options.checkRoots)}`);
+  		console.warn(Lang.sprintf('MISSING_ROOT', Options.checkRoots));
   	}
 
   	if (State.roots.length === 0) {
@@ -5166,7 +5098,7 @@
   	updatePanel();
   	window.setTimeout(() => {
   		if (Options.watchForChanges) {
-  			State.elements.editable?.forEach(editable => {
+  			Elements.Found.editable?.forEach(editable => {
   				if (!editable.matches('.drag-observe')) {
   					editable.classList.add('drag-observe');
   					editable.addEventListener('drop', () => {
@@ -5196,7 +5128,7 @@
   	}
   	if (Options.inlineAlerts) {
   		findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
-  		State.elements.reset?.forEach((el) => el.remove());
+  		Elements.Found.reset?.forEach((el) => el.remove());
   	}
   	if (State.visualizing) {
   		State.visualizing = false;
@@ -5282,7 +5214,7 @@
   	if (typeof (UI.panel) === 'object') {
   		UI.panel?.classList.add('ed11y-shut');
   		UI.panel?.classList.remove('ed11y-active');
-  		UI.panelToggle?.setAttribute('aria-expanded', 'false');
+  		UI.panelToggle.ariaExpanded = false;
   		if (!Options.showDismissed && typeof UI.showDismissed === 'function') {
   			UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
   			UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
@@ -5430,8 +5362,7 @@
   	// Remove tip and reset borders around element
   	resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
   	removal.tip?.parentNode?.removeChild(removal.tip);
-  	// @todo merge found this commented out -- is it needed or can it be removed?
-  	//removal.button?.parentNode?.removeChild(removal.button);
+  	removal.button?.parentNode?.removeChild(removal.button);
 
   	reset();
   	State.showPanel = true;
@@ -5488,7 +5419,7 @@
   				localStorage.setItem('editoria11yShow', '1');
   			}
   			else {
-  				UI.panelToggleTitle.textContent = State.totalCount > 0 ? Lang._('buttonShowAlerts') : Lang._('buttonShowNoAlert');
+  				UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
   				Options.showDismissed = false;
   				reset();
   				Options.userPrefersShut = true;
@@ -5541,7 +5472,7 @@
   }
 
   function reset () {
-  	// @todo should we also flush things like State.elements.altMark?
+  	// @todo should we also flush things like Elements.Found.altMark?
   	pauseObservers();
   	resetResults();
   	resetPanel();
@@ -5574,10 +5505,6 @@
   		buttonShowHiddenAlert: 'Show hidden alert',
   		buttonHideHiddenAlert: 'Hide hidden alert',
       buttonHideHiddenAlerts: `Hide %(count) hidden alerts`,
-      buttonShowAlerts: 'Show accessibility alerts',
-      buttonShowNoAlert: 'Show accessibility checker',
-      buttonHideChecker: 'Hide accessibility checker',
-      buttonHideAlerts: 'Hide accessibility alerts',
 
   		// Visualization
       NO_IMAGES: 'No images found.',
@@ -5594,9 +5521,6 @@
 
       // Errors and alerts ==================================
       NOT_VISIBLE: 'Note: this content may not be visible. Look for it inside the outlined container.',
-      jumpedToAriaHiddenTip: 'The item with this issue may be invisible or off screen.', // @todo merge fall back to NOT_VISIBLE?
-  		ACC_NAME_TIP: '', // @todo merge pass label instead, swap if not EN
-  		LINK_TIP: '',
   		SUS_ALT_STOPWORDS: ['image', 'graphic', 'picture', 'photo', 'thumbnail', 'icon', 'placeholder','spacer','tbd','todo', 'copyright', 'courtesy of'], // todo Ed11y test use to catch these at the end as well as the beginning.
 
   		// Strings used in tests ==============================
@@ -5752,8 +5676,8 @@
             Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
             <ul>
                 <li>Good link text: "About us"</li>
-                <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess</li>
-            </ul>`, // @todo merge with Adam's wording.
+                <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess"</li>
+            </ul>`, // @todo after merge: compare with Sa11y's wording.
 
   		altImageOf : {
   			title: 'Manual check: possibly redundant text in alt',
@@ -5823,7 +5747,6 @@
             </ul>
         `,
 
-  		// @todo merge test: separate tests for no text and all text ignored:
   		linkNoTextExample: '<p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>',
 
   		linkTextIgnored: (ignoredText) => `
@@ -6054,7 +5977,7 @@
     }
 
     closeOtherTips() {
-      if (State.openTip.button) {
+      if (State.tipOpen) {
         State.openTip.button.setAttribute('data-ed11y-action', 'close');
       }
     }
@@ -6110,6 +6033,7 @@
           buildJumpList();
         }
         State.lastOpenTip = Number(this.getAttribute('data-ed11y-jump-position'));
+  			State.tipOpen = true;
         State.openTip = {
           button: this,
           tip: this.tip,
@@ -6122,6 +6046,7 @@
         }));
         this.tip.setAttribute('data-ed11y-action', 'shut');
         this.result.highlight?.style.setProperty('opacity', '0');
+  			State.tipOpen = false;
         State.openTip = {
           button: false,
           tip: false,
@@ -6311,17 +6236,13 @@
 
       let content = document.createElement('div');
       content.classList.add('content');
+  		const tipAlert = document.createElement('div');
+  		tipAlert.classList.add('ed11y-tip-alert');
   		if (this.result.content.includes('class="title"')) {
   			// Sent by Ed11y
-  			//this.heading = document.createElement('div');
-  			//this.heading.classList.add('title');
-  			//this.heading.setAttribute('tabindex', '-1');
-  			//this.heading.innerHTML = M[this.result.test].title;
-  			//content.append(this.heading);
-  			//const alertBox = document.createElement('div');
-  			//alertBox.classList.add('ed11y-tip-alert');
-  			//this.heading.insertAdjacentElement('afterbegin', alertBox);
-  			content.innerHTML = this.result.content;
+  			// This removes Sa11y's injected "Tip!" additions:
+  			content.innerHTML = this.result.content.split('<hr')[0];
+  			content.querySelector('.title').prepend(tipAlert);
   		} else {
   			// Sent by Sa11y
   			let innerContent = document.createElement('div');
@@ -6329,9 +6250,11 @@
   			const firstSentence = document.createElement('div');
   			firstSentence.innerHTML = sentences.shift() + '.';
   			firstSentence.classList.add('title');
+  			firstSentence.prepend(tipAlert);
   			firstSentence.setAttribute('tabindex', '-1');
   			innerContent.append(firstSentence);
   			const theRest = document.createElement('div');
+  			theRest.classList.add('sa11y-tip');
   			theRest.innerHTML = sentences.join('.');
   			innerContent.appendChild(theRest);
   			content.append(innerContent);
@@ -6689,8 +6612,7 @@
   	}*/
 
   	// @todo merge re-implement: these get destroyed in constants.js
-  	//console.log( Options.documentLinks);
-  	//console.log(Constants.Global.checks.QA_DOCUMENT.sources);
+
   	// Todo need to look at checks.QA_DOCUMENT.sources.
   	if ( userOptions['documentLinks']) { // @todo merge needed?
   		Constants.Global.documentSources = userOptions['documentLinks'] ?
@@ -6735,7 +6657,6 @@
   	}
 
   	// Convert the container ignore user option to a CSS :not selector.
-  	// @todo merge get this from the global.
   	State.ignore = Options.containerIgnore ? `:not(${Options.containerIgnore})` : '';
 
   }
@@ -6760,7 +6681,6 @@
   		Ed11yElementHeadingLabel);
   	customElements.define('ed11y-element-panel', Ed11yElementPanel);
   	customElements.define('ed11y-element-tip', Ed11yElementTip);
-  	console.log(Constants);
 
   	// Once document has fully loaded.
   	documentLoadingCheck(() => {
@@ -6811,9 +6731,9 @@
       /* Export exposed interfaces */
       //this.checkAll = checkAll();
   		this.version = State.version;
-
     }
   }
+  let elements = Elements.Found;
 
   exports.Ed11y = Ed11y;
   exports.Lang = Lang;
@@ -6824,6 +6744,8 @@
   exports.UI = UI;
   exports.checkAll = checkAll;
   exports.computeAccessibleName = computeAccessibleName;
+  exports.elements = elements;
+  exports.findElements = findElements;
   exports.getElements = getElements;
   exports.incrementalCheck = incrementalCheck;
   exports.prepareDismissal = prepareDismissal;

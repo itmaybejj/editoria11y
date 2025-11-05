@@ -13,11 +13,11 @@ export function getElements(selector, desiredRoot, exclude) {
 	exclude = exclude === false ? [] : exclude;
 	return find(selector, desiredRoot, exclude);
 }
-// QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
-export function findElements (key, selector, rootRestrict = true) { // @todo after merge replace.
+export function findElements (key, selector, rootRestrict = true) {
+	// Legacy support for deprecated code.
 	const desiredRoot = rootRestrict ? 'root' : 'document';
 	const exclude = rootRestrict ? [] : Constants.Exclusions.Sa11yElements;
-	State.elements[key] = find( selector, desiredRoot, exclude );
+	Elements.Found[key] = find( selector, desiredRoot, exclude );
 }
 
 // First step in checkAll is getting a fresh set of elements to check.
@@ -57,22 +57,20 @@ export function buildElementList () {
 		findShadowComponents(Options);
 
 		// Find and cache elements.
-		console.log(Constants);
 		Elements.initializeElements(Options);
-		console.log(Elements);
 		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
 		if (typeof Options.editableContent === 'string') {
 			findElements('editable', Options.editableContent, false);
 		}
 		else {
-			State.elements.editable = Options.editableContent;
+			Elements.Found.editable = Options.editableContent;
 		}
-		if (Options.inlineAlerts && State.elements.editable.length > 0) {
+		if (Options.inlineAlerts && Elements.Found.editable.length > 0) {
 			Options.inlineAlerts = false;
 			console.warn('Editable content detected; Editoria11y inline alerts disabled');
 		}
 		if (Options.embeddedContent) { // @todo merge restore embedded check?
-			//Ed11y.findElements('embed', Options.embeddedContent);
+			// Ed11y.findElements('embed', Options.embeddedContent);
 		}
 		if (Options.panelNoCover) {
 			// Moves panel off conflicting widgets.
@@ -105,7 +103,7 @@ export function resetClass(classes) {
   classes?.forEach((el) => {
     let thisClass = el;
     findElements('reset', `.${thisClass}`);
-    State.elements.reset?.forEach(el => {
+    Elements.Found.reset?.forEach(el => {
       el.classList.remove(thisClass);
     });
   });
@@ -189,7 +187,9 @@ export function elementNotHidden(el) {
 
 export function detectShadow (container) {
   if (Options.autoDetectShadowComponents) {
-    const select = !State.ignore ? '*:not(.ed11y-element)' : `*:not(${Options.ignore}, .ed11y-element)`;
+
+		const select = `*:not(${Constants.Exclusions.Container.join(', ')}, .ed11y-element)`;
+
     let search;
     if (container.shadowRoot && container.shadowRoot.mode === 'open') {
       if (!container.matches('[data-ed11y-has-shadow-root]')) {
@@ -221,30 +221,7 @@ export function detectShadow (container) {
       }
     });
   }
-};
-
-const diveShadow = function (container, select, selector) {
-  if (container.matches(selector)) {
-    return([container]);
-  } else {
-    let inners = container.shadowRoot.querySelectorAll(select);
-    if (typeof(inners) === 'object' && inners.length > 0) {
-      // Replace shadow host with inner elements.
-      inners.forEach(inner => {
-        for (let innerIndex = inners - 1; innerIndex >= 0; innerIndex--) {
-          let innerInner = diveShadow(inner, select, selector);
-          if (innerInner.length > 0) {
-            inners.splice(innerIndex, 1, ...innerInner);
-          } else {
-            inners.splice(innerIndex, 1);
-          }
-        }
-      });
-      return (Array.from(inners).filter((el) => el.matches(selector)));
-    }
-  }
-  return [];
-};
+}
 
 export function pauseObservers() {
 	State.watching?.forEach(observer => {
@@ -291,19 +268,19 @@ export function resetResults(incremental) {
 	]);
 	// Reset insertions into body content.
 	if (incremental) {
-		State.elements.reset = getElements('ed11y-element-highlight', 'document', []);
+		Elements.Found.reset = getElements('ed11y-element-highlight', 'document', []);
 	} else {
-		State.elements.reset = getElements('ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', 'document', []);
+		Elements.Found.reset = getElements('ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', 'document', []);
 	}
-	State.elements.reset?.forEach((el) => el.remove());
+	Elements.Found.reset?.forEach((el) => el.remove());
 
 	// Flicker prevention -- leave old tip in place for 100ms.
 	//findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
-	State.elements.delayedReset = getElements('ed11y-element-result, ed11y-element-tip', 'document', []);
+	Elements.Found.delayedReset = getElements('ed11y-element-result, ed11y-element-tip', 'document', []);
 
 	window.setTimeout(()=> {
-		State.elements.delayedReset?.forEach((el) => el.remove());
-	}, 100, State.elements.delayedReset);
+		Elements.Found.delayedReset?.forEach((el) => el.remove());
+	}, 100, Elements.Found.delayedReset);
 
 	if (typeof UI.panelJumpNext === 'function') {
 		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = State.english ? Lang._('buttonFirstContent')
@@ -337,17 +314,21 @@ export function countAlerts () {
 
 		let test = Results[i].test;
 
+		// @todo CMS merge convert to new syntax.
+		/*
 		if (Options.ignoreTests &&
 			Options.ignoreTests.includes(test)) {
 			// Would be faster to skip test, but this is easy and reliable.
 			Results.splice(i, 1);
 			continue;
-		}
+		}*/
 
 		// todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
 		/*if (State.incremental && Ed11y.oldResults.length > 0) {
 			// Don't flag new issues in the active range while people are typing.
 		}*/
+
+		// @todo merge does this mess up the incremental oldResults array?
 
 		let dismissKey = prepareDismissal(Results[i].dismissalKey);
 		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.

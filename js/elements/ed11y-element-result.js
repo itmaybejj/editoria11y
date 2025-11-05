@@ -65,7 +65,7 @@ export class Ed11yElementResult extends HTMLElement {
   }
 
   closeOtherTips() {
-    if (State.openTip.button) {
+    if (State.tipOpen) {
       State.openTip.button.setAttribute('data-ed11y-action', 'close');
     }
   }
@@ -121,6 +121,7 @@ export class Ed11yElementResult extends HTMLElement {
         buildJumpList();
       }
       State.lastOpenTip = Number(this.getAttribute('data-ed11y-jump-position'));
+			State.tipOpen = true;
       State.openTip = {
         button: this,
         tip: this.tip,
@@ -133,6 +134,7 @@ export class Ed11yElementResult extends HTMLElement {
       }));
       this.tip.setAttribute('data-ed11y-action', 'shut');
       this.result.highlight?.style.setProperty('opacity', '0');
+			State.tipOpen = false;
       State.openTip = {
         button: false,
         tip: false,

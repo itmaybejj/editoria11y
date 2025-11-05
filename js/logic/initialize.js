@@ -125,8 +125,7 @@ export function postProcessOptions(userOptions) {
 	}*/
 
 	// @todo merge re-implement: these get destroyed in constants.js
-	//console.log( Options.documentLinks);
-	//console.log(Constants.Global.checks.QA_DOCUMENT.sources);
+
 	// Todo need to look at checks.QA_DOCUMENT.sources.
 	if ( userOptions['documentLinks']) { // @todo merge needed?
 		Constants.Global.documentSources = userOptions['documentLinks'] ?
@@ -171,7 +170,6 @@ export function postProcessOptions(userOptions) {
 	}
 
 	// Convert the container ignore user option to a CSS :not selector.
-	// @todo merge get this from the global.
 	State.ignore = Options.containerIgnore ? `:not(${Options.containerIgnore})` : '';
 
 }
@@ -196,7 +194,6 @@ export function firstCheck (userOptions) {
 		Ed11yElementHeadingLabel);
 	customElements.define('ed11y-element-panel', Ed11yElementPanel);
 	customElements.define('ed11y-element-tip', Ed11yElementTip);
-	console.log(Constants);
 
 	// Once document has fully loaded.
 	documentLoadingCheck(() => {

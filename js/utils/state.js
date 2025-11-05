@@ -47,9 +47,10 @@ export const State = {
   toggledFrom: false,
   scrollPending: Number,
   scrollTicking: false,
+	tipOpen: false,
   openTip: {
-    button: false,
-    tip: false,
+    button: {},
+    tip: {},
   },
   positionedFrames: [],
   editableHighlight: [],
