@@ -1295,7 +1295,7 @@ export function checkAll() {
 		'checkHeaders',
 		'checkLinkText',
 		'checkImages',
-		'checkLabels',
+		// 'checkLabels',
 		'checkQA',
 	];
 	// Todo after merge: developer and readability tests added via options here.

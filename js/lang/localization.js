@@ -136,6 +136,19 @@ const ed11yLang = {
                 <li>The size 4 ball is the right size for this 9-year-old child.</li>
             </ul>`,
 
+		altMissingLinkWithText : {
+			title: 'Image has no alternative text attribute',
+		},
+		MISSING_ALT_LINK_HAS_TEXT: `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.</p>
+		<p>This image is part of a link with text. If the visible text is sufficient to describe the link, add an empty alt (alt="") to tell screen readers to ignore this image. Otherwise, provide the title of the linked page as the alt text.</p>`,
+
+		altMissingLink : {
+			title: 'Image has no alternative text attribute',
+		},
+		MISSING_ALT_LINK: `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time. This is especially a problem for linked images.</p>
+            <p><strong>To fix:</strong> either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>
+            `,
+
 		altNull : {
 			title: 'Manual check: image has no alt text',
 		},
@@ -174,6 +187,28 @@ const ed11yLang = {
                 <li>The game-winning kick curved in from the left sideline!</li>
                 <li>The size 4 ball is the right size for this 9-year-old child.</li>
             </ul>`
+		,
+
+		altMaybeRobot : {
+			title: 'Manual check: alt text may be meaningless',
+		},
+		ALT_MAYBE_BAD: `<p>This image's alt text is "%(alt)," which was flagged as containing a suspicious number of characters that may not form words.</p>
+        <p><strong>To fix:</strong> if this is placeholder text, set this image's alternative text to a concise description of what this image means in this context.</p>
+        <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
+            <ul>
+                <li>The sunny spring day brought kids to the park for some soccer.</li>
+                <li>A.J. wearing the new team uniform.</li>
+                <li>The game-winning kick curved in from the left sideline!</li>
+                <li>The size 4 ball is the right size for this 9-year-old child.</li>
+            </ul>`
+		,
+
+		altMaybeRobotLinked : {
+			title: 'Manual check: alt text may be meaningless',
+		},
+		LINK_ALT_MAYBE_BAD: `<p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
+            Links should clearly and concisely describe their destination, even out of context.</p>
+           <p>This image's alt text is "%(alt)," which may not describe this link.</p>`
 		,
 
 		altMeaninglessLinked : {
@@ -233,7 +268,6 @@ const ed11yLang = {
 		},
 		LINK_IMAGE_NO_ALT_TEXT: `<p>When a link is wrapped around an image, the image's alt text <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">provides the link's title for screen readers</a>.</p>
         <p><strong>To fix:</strong> set this image's alternative text to something that describes the link's destination, or add text next to the image, within the link.</p>`,
-		// @todo MISSING_ALT_LINKED too?
 
 		altLong : {
 			title: 'Manual check: very long alternative text',
@@ -274,6 +308,15 @@ const ed11yLang = {
 			title: 'Link with no accessible text',
 		},
 		LINK_EMPTY:
+			`<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
+        <p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>
+        <p><strong>To fix:</strong></p>
+        <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describe where it goes.</li>`,
+
+		linkNoLabel : {
+			title: 'Link with no accessible text',
+		},
+		LINK_EMPTY_NO_LABEL:
 			`<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
         <p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>
         <p><strong>To fix:</strong></p>

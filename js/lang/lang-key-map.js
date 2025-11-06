@@ -18,9 +18,10 @@ export const langKeyMap = {
 	altLongLinked: 'LINK_IMAGE_LONG_ALT',
 	altPartOfLinkWithText: 'LINK_IMAGE_ALT_AND_TEXT',
 	linkNoText: 'LINK_EMPTY',
+	linkNoLabel: 'LINK_EMPTY_NO_LABEL', // New.
 	linkTextIsURL: 'LINK_URL',
 	linkTextIsGeneric: 'LINK_STOPWORD',
-	linkDocument: 'QA_PDF', // and maybe QA_DOCUMENT
+	linkDocument: 'QA_PDF', // QA_DOCUMENT is new and closer.
 	linkNewWindow: 'LINK_NEW_TAB',
 	tableNoHeaderCells: 'TABLES_MISSING_HEADINGS',
 	tableContainsContentHeading: 'TABLES_SEMANTIC_HEADING',

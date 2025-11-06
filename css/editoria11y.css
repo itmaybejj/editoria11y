@@ -998,6 +998,9 @@ ed11y-element-result[data-ed11y-open='true'] {
 		  background: var(--ed11y-warning);
 		  border: 1px solid;
 		  border-radius: 1em;
+		  &:has(.link-icon) {
+			  display: none;
+		  }
 	  }
   }
 

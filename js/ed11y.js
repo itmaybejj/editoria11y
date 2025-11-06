@@ -4,7 +4,7 @@ import {prepareDismissal} from "../sa11y/utils/utils.js";
 import {State, Results, Theme, UI} from "./utils/state.js";
 import {Options} from './utils/options.js';
 import Elements from "../sa11y/utils/elements.js";
-import {checkAll, incrementalCheck, reset} from "./logic/interface.js";
+import {checkAll, reset} from "./logic/interface.js";
 import {
 	initialize,
 } from "./logic/initialize.js";
@@ -40,7 +40,6 @@ export {
 	computeAccessibleName,
 	findElements,
 	getElements,
-	incrementalCheck,
 	prepareDismissal,
 	reset,
 	Ed11y,

@@ -1322,7 +1322,9 @@
 
   	checks: {
   		// Sa11y: Heading checks
-  		HEADING_SKIPPED_LEVEL: true,
+  		HEADING_SKIPPED_LEVEL: {
+  			type: 'warning',
+  		},
   		HEADING_EMPTY_WITH_IMAGE: true,
   		HEADING_EMPTY: true,
   		HEADING_FIRST: true, // @todo CMS migrate to this from the complicated setters.
@@ -1335,13 +1337,17 @@
   		MISSING_ALT_LINK: true,
   		MISSING_ALT_LINK_HAS_TEXT: true,
   		MISSING_ALT: true,
-  		IMAGE_DECORATIVE_CAROUSEL: {
-  			sources: '.carousel',
+  		IMAGE_DECORATIVE_CAROUSEL: false, // New.
+  		LINK_IMAGE_NO_ALT_TEXT: {
+  			type: 'error',
   		},
-  		LINK_IMAGE_NO_ALT_TEXT: true,
-  		LINK_IMAGE_TEXT: true,
-  		IMAGE_FIGURE_DECORATIVE: true,
-  		IMAGE_DECORATIVE: true,
+  		LINK_IMAGE_TEXT: false,
+  		IMAGE_FIGURE_DECORATIVE: {
+  			type: 'warning',
+  		}, // New
+  		IMAGE_DECORATIVE: {
+  			type: 'warning',
+  		},
   		LINK_ALT_FILE_EXT: true,
   		ALT_FILE_EXT: true,
   		LINK_PLACEHOLDER_ALT: true,
@@ -1354,11 +1360,9 @@
   		IMAGE_ALT_TOO_LONG: {
   			maxLength: 250,
   		},
-  		LINK_IMAGE_ALT: {
-  			dismissAll: true,
-  		},
+  		LINK_IMAGE_ALT: false, // New.
   		LINK_IMAGE_ALT_AND_TEXT: true,
-  		IMAGE_FIGURE_DUPLICATE_ALT: true,
+  		IMAGE_FIGURE_DUPLICATE_ALT: false, // New.
   		IMAGE_PASS: {
   			dismissAll: true,
   		},
@@ -1373,11 +1377,13 @@
 
   		// Sa11y: Link checks
   		DUPLICATE_TITLE: false,
-  		LINK_EMPTY_LABELLEDBY: true,
+  		LINK_EMPTY_LABELLEDBY: false, // New.
   		LINK_EMPTY_NO_LABEL: true,
-  		LINK_STOPWORD: true,
-  		LINK_STOPWORD_ARIA: true,
-  		LINK_SYMBOLS: true,
+  		LINK_STOPWORD: {
+  			type: 'warning',
+  		},
+  		LINK_STOPWORD_ARIA: false, // New.
+  		LINK_SYMBOLS: false, // New.
   		LINK_CLICK_HERE: false,
   		LINK_DOI: false,
   		LINK_URL: {
@@ -1391,15 +1397,17 @@
   		LINK_NEW_TAB: {
   			dismissAll: true,
   		},
-  		LINK_FILE_EXT: true,
+  		LINK_FILE_EXT: false, // New.
 
-  		// Sa11y: Form labels checks
+  		// Form label checks module not yet enabled.
+  		/*
   		LABELS_MISSING_IMAGE_INPUT: true,
   		LABELS_INPUT_RESET: true,
   		LABELS_MISSING_LABEL: true,
   		LABELS_ARIA_LABEL_INPUT: true,
   		LABELS_NO_FOR_ATTRIBUTE: true,
   		LABELS_PLACEHOLDER: true,
+  		*/
 
   		// Embedded content checks
   		EMBED_AUDIO: {
@@ -1421,11 +1429,9 @@
   		},
   		QA_STRONG_ITALICS: false,
   		QA_IN_PAGE_LINK: false,
-  		QA_DOCUMENT: {
-  			sources: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']',
-  			dismissAll: true,
-  		},
+  		QA_DOCUMENT: false,
   		QA_PDF: {
+  			sources: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']',
   			dismissAll: true,
   		},
   		QA_BLOCKQUOTE: true,
@@ -1435,21 +1441,20 @@
   		QA_FAKE_HEADING: true,
   		QA_FAKE_LIST: true,
   		QA_UPPERCASE: true,
-  		QA_UNDERLINE: false,
-  		QA_SUBSCRIPT: false,
-  		QA_NESTED_COMPONENTS: {
-  			sources: '',
-  		},
-  		QA_JUSTIFY: false,
-  		QA_SMALL_TEXT: false,
+  		QA_UNDERLINE: false, // New.
+  		QA_SUBSCRIPT: false, // New.
+  		QA_NESTED_COMPONENTS: false, // New.
+  		QA_JUSTIFY: false, // New.
+  		QA_SMALL_TEXT: false, // New.
 
   		// Sa11y: Meta checks
-  		META_LANG: false,
-  		META_SCALABLE: false,
-  		META_MAX: false,
-  		META_REFRESH: false,
+  		META_LANG: false, // New.
+  		META_SCALABLE: false, // New.
+  		META_MAX: false, // New.
+  		META_REFRESH: false, // New.
 
   		// Sa11y: Developer checks
+  		/*
   		DUPLICATE_ID: false,
   		META_TITLE: false,
   		UNCONTAINED_LI: false,
@@ -1459,8 +1464,10 @@
   		BTN_EMPTY: true,
   		BTN_EMPTY_LABELLEDBY: true,
   		BTN_ROLE_IN_NAME: true,
+  		*/
 
   		// Sa11y: Contrast checks
+  		/*
   		CONTRAST_WARNING: {
   			dismissAll: true,
   		},
@@ -1475,6 +1482,7 @@
   		CONTRAST_UNSUPPORTED: {
   			dismissAll: true,
   		},
+  	 	*/
   	},
   };
 
@@ -5519,7 +5527,7 @@ URL: ${url}</pre>
   		'checkHeaders',
   		'checkLinkText',
   		'checkImages',
-  		'checkLabels',
+  		// 'checkLabels',
   		'checkQA',
   	];
   	// Todo after merge: developer and readability tests added via options here.
@@ -6150,6 +6158,19 @@ URL: ${url}</pre>
                 <li>The size 4 ball is the right size for this 9-year-old child.</li>
             </ul>`,
 
+  		altMissingLinkWithText : {
+  			title: 'Image has no alternative text attribute',
+  		},
+  		MISSING_ALT_LINK_HAS_TEXT: `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.</p>
+		<p>This image is part of a link with text. If the visible text is sufficient to describe the link, add an empty alt (alt="") to tell screen readers to ignore this image. Otherwise, provide the title of the linked page as the alt text.</p>`,
+
+  		altMissingLink : {
+  			title: 'Image has no alternative text attribute',
+  		},
+  		MISSING_ALT_LINK: `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time. This is especially a problem for linked images.</p>
+            <p><strong>To fix:</strong> either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>
+            `,
+
   		altNull : {
   			title: 'Manual check: image has no alt text',
   		},
@@ -6188,6 +6209,28 @@ URL: ${url}</pre>
                 <li>The game-winning kick curved in from the left sideline!</li>
                 <li>The size 4 ball is the right size for this 9-year-old child.</li>
             </ul>`
+  		,
+
+  		altMaybeRobot : {
+  			title: 'Manual check: alt text may be meaningless',
+  		},
+  		ALT_MAYBE_BAD: `<p>This image's alt text is "%(alt)," which was flagged as containing a suspicious number of characters that may not form words.</p>
+        <p><strong>To fix:</strong> if this is placeholder text, set this image's alternative text to a concise description of what this image means in this context.</p>
+        <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
+            <ul>
+                <li>The sunny spring day brought kids to the park for some soccer.</li>
+                <li>A.J. wearing the new team uniform.</li>
+                <li>The game-winning kick curved in from the left sideline!</li>
+                <li>The size 4 ball is the right size for this 9-year-old child.</li>
+            </ul>`
+  		,
+
+  		altMaybeRobotLinked : {
+  			title: 'Manual check: alt text may be meaningless',
+  		},
+  		LINK_ALT_MAYBE_BAD: `<p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
+            Links should clearly and concisely describe their destination, even out of context.</p>
+           <p>This image's alt text is "%(alt)," which may not describe this link.</p>`
   		,
 
   		altMeaninglessLinked : {
@@ -6247,7 +6290,6 @@ URL: ${url}</pre>
   		},
   		LINK_IMAGE_NO_ALT_TEXT: `<p>When a link is wrapped around an image, the image's alt text <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">provides the link's title for screen readers</a>.</p>
         <p><strong>To fix:</strong> set this image's alternative text to something that describes the link's destination, or add text next to the image, within the link.</p>`,
-  		// @todo MISSING_ALT_LINKED too?
 
   		altLong : {
   			title: 'Manual check: very long alternative text',
@@ -6288,6 +6330,15 @@ URL: ${url}</pre>
   			title: 'Link with no accessible text',
   		},
   		LINK_EMPTY:
+  			`<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
+        <p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>
+        <p><strong>To fix:</strong></p>
+        <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describe where it goes.</li>`,
+
+  		linkNoLabel : {
+  			title: 'Link with no accessible text',
+  		},
+  		LINK_EMPTY_NO_LABEL:
   			`<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
         <p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>
         <p><strong>To fix:</strong></p>
@@ -6715,7 +6766,7 @@ URL: ${url}</pre>
         let i = this.dataset.ed11yHeadingOutline;
         let result = State.headingOutline[i];
         wrapper.innerHTML = 'H' + result.headingLevel;
-        let issues = !!result.type;
+        let issues = !!result.type; // @ todo merge type can be pass now.
         wrapper.classList.add('issue' + issues);
         let fontSize = Math.max(52 - 8 * result.headingLevel, 12);
         wrapper.style.setProperty('font-size', fontSize + 'px');
@@ -6750,6 +6801,7 @@ URL: ${url}</pre>
       this.wrapper = document.createElement('div');
       this.wrapper.setAttribute('role', 'dialog');
 
+  		console.log(this.result.type);
       this.dismissable = this.result.type !== 'error';
       this.dismissed = !!this.result.dismissalStatus;
       this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
@@ -7290,7 +7342,6 @@ URL: ${url}</pre>
   exports.elements = elements;
   exports.findElements = findElements;
   exports.getElements = getElements;
-  exports.incrementalCheck = incrementalCheck;
   exports.prepareDismissal = prepareDismissal;
   exports.reset = reset;
 

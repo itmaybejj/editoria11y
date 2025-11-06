@@ -247,7 +247,9 @@ export const Options = {
 
 	checks: {
 		// Sa11y: Heading checks
-		HEADING_SKIPPED_LEVEL: true,
+		HEADING_SKIPPED_LEVEL: {
+			type: 'warning',
+		},
 		HEADING_EMPTY_WITH_IMAGE: true,
 		HEADING_EMPTY: true,
 		HEADING_FIRST: true, // @todo CMS migrate to this from the complicated setters.
@@ -260,13 +262,17 @@ export const Options = {
 		MISSING_ALT_LINK: true,
 		MISSING_ALT_LINK_HAS_TEXT: true,
 		MISSING_ALT: true,
-		IMAGE_DECORATIVE_CAROUSEL: {
-			sources: '.carousel',
+		IMAGE_DECORATIVE_CAROUSEL: false, // New.
+		LINK_IMAGE_NO_ALT_TEXT: {
+			type: 'error',
 		},
-		LINK_IMAGE_NO_ALT_TEXT: true,
-		LINK_IMAGE_TEXT: true,
-		IMAGE_FIGURE_DECORATIVE: true,
-		IMAGE_DECORATIVE: true,
+		LINK_IMAGE_TEXT: false,
+		IMAGE_FIGURE_DECORATIVE: {
+			type: 'warning',
+		}, // New
+		IMAGE_DECORATIVE: {
+			type: 'warning',
+		},
 		LINK_ALT_FILE_EXT: true,
 		ALT_FILE_EXT: true,
 		LINK_PLACEHOLDER_ALT: true,
@@ -279,11 +285,9 @@ export const Options = {
 		IMAGE_ALT_TOO_LONG: {
 			maxLength: 250,
 		},
-		LINK_IMAGE_ALT: {
-			dismissAll: true,
-		},
+		LINK_IMAGE_ALT: false, // New.
 		LINK_IMAGE_ALT_AND_TEXT: true,
-		IMAGE_FIGURE_DUPLICATE_ALT: true,
+		IMAGE_FIGURE_DUPLICATE_ALT: false, // New.
 		IMAGE_PASS: {
 			dismissAll: true,
 		},
@@ -298,11 +302,13 @@ export const Options = {
 
 		// Sa11y: Link checks
 		DUPLICATE_TITLE: false,
-		LINK_EMPTY_LABELLEDBY: true,
+		LINK_EMPTY_LABELLEDBY: false, // New.
 		LINK_EMPTY_NO_LABEL: true,
-		LINK_STOPWORD: true,
-		LINK_STOPWORD_ARIA: true,
-		LINK_SYMBOLS: true,
+		LINK_STOPWORD: {
+			type: 'warning',
+		},
+		LINK_STOPWORD_ARIA: false, // New.
+		LINK_SYMBOLS: false, // New.
 		LINK_CLICK_HERE: false,
 		LINK_DOI: false,
 		LINK_URL: {
@@ -316,15 +322,17 @@ export const Options = {
 		LINK_NEW_TAB: {
 			dismissAll: true,
 		},
-		LINK_FILE_EXT: true,
+		LINK_FILE_EXT: false, // New.
 
-		// Sa11y: Form labels checks
+		// Form label checks module not yet enabled.
+		/*
 		LABELS_MISSING_IMAGE_INPUT: true,
 		LABELS_INPUT_RESET: true,
 		LABELS_MISSING_LABEL: true,
 		LABELS_ARIA_LABEL_INPUT: true,
 		LABELS_NO_FOR_ATTRIBUTE: true,
 		LABELS_PLACEHOLDER: true,
+		*/
 
 		// Embedded content checks
 		EMBED_AUDIO: {
@@ -346,11 +354,9 @@ export const Options = {
 		},
 		QA_STRONG_ITALICS: false,
 		QA_IN_PAGE_LINK: false,
-		QA_DOCUMENT: {
-			sources: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']',
-			dismissAll: true,
-		},
+		QA_DOCUMENT: false,
 		QA_PDF: {
+			sources: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']',
 			dismissAll: true,
 		},
 		QA_BLOCKQUOTE: true,
@@ -360,21 +366,20 @@ export const Options = {
 		QA_FAKE_HEADING: true,
 		QA_FAKE_LIST: true,
 		QA_UPPERCASE: true,
-		QA_UNDERLINE: false,
-		QA_SUBSCRIPT: false,
-		QA_NESTED_COMPONENTS: {
-			sources: '',
-		},
-		QA_JUSTIFY: false,
-		QA_SMALL_TEXT: false,
+		QA_UNDERLINE: false, // New.
+		QA_SUBSCRIPT: false, // New.
+		QA_NESTED_COMPONENTS: false, // New.
+		QA_JUSTIFY: false, // New.
+		QA_SMALL_TEXT: false, // New.
 
 		// Sa11y: Meta checks
-		META_LANG: false,
-		META_SCALABLE: false,
-		META_MAX: false,
-		META_REFRESH: false,
+		META_LANG: false, // New.
+		META_SCALABLE: false, // New.
+		META_MAX: false, // New.
+		META_REFRESH: false, // New.
 
 		// Sa11y: Developer checks
+		/*
 		DUPLICATE_ID: false,
 		META_TITLE: false,
 		UNCONTAINED_LI: false,
@@ -384,8 +389,10 @@ export const Options = {
 		BTN_EMPTY: true,
 		BTN_EMPTY_LABELLEDBY: true,
 		BTN_ROLE_IN_NAME: true,
+		*/
 
 		// Sa11y: Contrast checks
+		/*
 		CONTRAST_WARNING: {
 			dismissAll: true,
 		},
@@ -400,5 +407,6 @@ export const Options = {
 		CONTRAST_UNSUPPORTED: {
 			dismissAll: true,
 		},
+	 	*/
 	},
 };
