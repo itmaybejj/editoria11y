@@ -1,5 +1,5 @@
 import {UI} from "../utils/state.js";
-import {Lang} from "sa11y/src/js/sa11y.js";
+import Lang from "../../sa11y/utils/lang.js";
 
 export class Ed11yElementAlt extends HTMLElement {
   /* global Ed11y */

@@ -1,11 +1,8 @@
 {
   "plugins": [
-    "stylelint-scss",
     "stylelint-order"
   ],
   "rules": {
-    "declaration-bang-space-before": "always",
-    "declaration-bang-space-after": "never",
     "declaration-property-value-allowed-list": {
       "clear": [
         "both",
@@ -26,12 +23,8 @@
     "color-named": "never",
     "declaration-block-no-duplicate-properties": true,
     "block-no-empty": true,
-    "no-missing-end-of-source-newline": null,
     "color-hex-length": "short",
-    "color-hex-case": "lower",
     "color-no-invalid-hex": true,
-    "indentation": 2,
-    "number-leading-zero": "never",
     "max-nesting-depth": 4,
     "selector-max-compound-selectors": 5,
     "order/properties-order": [
@@ -213,23 +206,12 @@
       "animation-iteration-count",
       "animation-direction"
     ],
-    "block-opening-brace-space-before": "always",
-    "declaration-block-trailing-semicolon": "always",
-    "declaration-colon-space-after": "always",
-    "declaration-colon-space-before": "never",
-    "function-parentheses-space-inside": "never",
     "function-url-no-scheme-relative": true,
     "function-url-quotes": "always",
     "length-zero-no-unit": true,
-    "no-eol-whitespace": true,
-    "number-no-trailing-zeros": true,
     "property-no-unknown": true,
     "property-no-vendor-prefix": true,
-    "scss/dollar-variable-colon-space-before": "never",
-    "scss/selector-no-redundant-nesting-selector": true,
-    "selector-pseudo-class-parentheses-space-inside": "never",
     "shorthand-property-no-redundant-values": true,
-    "string-quotes": "double",
     "unit-allowed-list": [
       "ch",
       "em",

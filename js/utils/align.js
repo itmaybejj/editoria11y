@@ -4,7 +4,7 @@ import {
 } from "./utils.js";
 import {State, UI} from "./state.js";
 import {Options} from "./options.js";
-import Elements from "sa11y/src/js/utils/elements.js";
+import Elements from "../../sa11y/utils/elements.js";
 
 export const intersect = function(a, b, x = 10) {
 	// Compute intersect using browser offsets.
@@ -174,7 +174,6 @@ export function checkEditableIntersects (focusKnown = false) {
 
 
 export function alignButtons() {
-	// @ todo merge check out the tip order on utilities.
 	if (State.jumpList.length === 0 || (State.tipOpen && State.scrollPending === 0)) { // todo always false?
 		return;
 	}

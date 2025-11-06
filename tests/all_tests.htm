@@ -232,7 +232,7 @@
         <ul>
             <li class="negative">Title <a href="#"  title="text is in the title"></a></li>
             <li class="negative">Aria-label [todo] <a href="#"  id="aria-test" aria-label="Aria label"></a></li>
-            <li class="negative">Aria-label overriding [todo]<a href="#"  aria-label="Aria label">Click here</a></li>
+            <li class="negative">Aria-label overriding [todo]<a href="#"  aria-label="Aria label"></a></li>
             <li class="negative">Aria-labelledby [todo]<a href="#"  aria-labelledby="aria-test"></a></li>
         </ul>
 
@@ -486,7 +486,6 @@
 		<script src="../dist/js/lang/en.umd.js"></script>
         <!-- Instantiate-->
         <script>
-			console.log(Ed11y);
 		  Ed11y.Lang.addI18n(Sa11yLangEn.strings);
           const ed11y = new Ed11y.Ed11y({
             alertMode : 'assertive',
@@ -494,18 +493,19 @@
             //baseFontSize: 18,
             //theme : 'sleekTheme',
             theme : 'darkTheme',
-            outlineExclude : '.utility',
+            //outlineExclude : '.utility', // @todo CMS this syntax changed for Sa11y to the below.
+			  outlineIgnore: '.utility, h3',
             ignoreAriaOnElements: '.gutenbergBadAria',
-            linkIgnoreStrings: /\(opens in new window\)|download/,
+            linkIgnoreStrings: ['opens in new window','download'], // @todo CMS was regex.
             linkIgnoreSelector: '.link-purpose',
             embeddedContent: '#embed',
-            //ignoreElements : 'footer *',
+            ignoreElements : 'footer *, [style*="none"] *, [style*="none"]',
             // shadowComponents : 'shadow-test, shadow-test-no-hits, turtle',
             //autoDetectShadowComponents: false,
             hiddenHandlers : '#hidden-handler',
 		  	checkRoot: 'main',
             //showDismissed : true,
-            altPlaceholder: 'This image has an empty alt attribute;',
+            altPlaceholder: ['This image has an empty alt attribute;'], // @todo CMS was string.
 			  //panelAttachTo: 'header',
             //ignoreTests: ['headingLevelSkipped'],
             // syncedDismissals : {},

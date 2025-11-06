@@ -370,6 +370,7 @@
                 iterations ++;
                 if (iterations === 10) {
                   console.log('Average run: ' + parseInt((performance.now() - beforeCall)) / 10);
+				  console.log("Don't worry about duplicate tips; skipping reset for performance testing.")
                 } else if (iterations < 10) {
                   Ed11y.checkAll();
                 }

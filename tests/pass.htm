@@ -133,20 +133,14 @@
 
             </script>
             <link href="./tests.css" rel="stylesheet">
-            <script src="../js/lang/ed11y-localization.js"></script>
-            <script src="../js/elements/control-panel.js"></script>
-            <script src="../js/elements/annotations.js"></script>
-            <script src="../js/elements/tooltips.js"></script>
-            <script src="../js/elements/alts.js"></script>
-            <script src="../js/ed11y-test-links.js"></script>
-            <script src="../js/ed11y-test-images.js"></script>
-            <script src="../js/ed11y-test-headings.js"></script>
-            <script src="../js/ed11y-test-text.js"></script>
-            <script src="../js/ed11y-test-embeds.js"></script>
-            <script src="../js/old-ed11y.js"></script>
+
             <!-- Instantiate-->
-            <script>
-                const ed11y = new Ed11y({
+			<script src="../dist/js/ed11y.umd.js"></script>
+			<script src="../dist/js/lang/en.umd.js"></script>
+			<!-- Instantiate-->
+			<script>
+				Ed11y.Lang.addI18n(Sa11yLangEn.strings);
+				const ed11y = new Ed11y.Ed11y({
                     alertMode : 'polite',
                     shadowComponents : 'shadow-test, shadow-test-no-hits',
                     checkRoots : 'body',

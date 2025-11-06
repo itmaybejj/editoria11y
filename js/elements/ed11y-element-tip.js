@@ -5,7 +5,7 @@ import {
   jumpTo,
   transferFocus
 } from "../logic/interface.js";
-import {Lang} from "sa11y/src/js/sa11y.js";
+import Lang from "../../sa11y/utils/lang.js";
 import {Options} from "../utils/options.js";
 import {getElements} from "../utils/utils.js";
 
@@ -34,14 +34,16 @@ export class Ed11yElementTip extends HTMLElement {
     this.wrapper = document.createElement('div');
     this.wrapper.setAttribute('role', 'dialog');
 
-    this.dismissable = this.result.dismissalKey !== false;
+    this.dismissable = this.result.type !== 'error';
     this.dismissed = !!this.result.dismissalStatus;
     this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
     this.wrapper.setAttribute('aria-label',
       `${Lang._('ALERT_TEXT')}
         ${this.issueIndex + 1}`);
 
-    this.addEventListener('mouseover', this.handleHover);
+    this.addEventListener('mouseover', this.handleHover, {
+			passive: true,
+		});
 
     UI.attachCSS(this.wrapper);
 

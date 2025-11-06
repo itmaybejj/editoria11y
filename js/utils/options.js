@@ -20,7 +20,7 @@ export const Options = {
 	// CMS integrations can switch between polite & headless at runtime.
 	alertMode: 'userPreference',
 	inlineAlerts: true,
-	watchForChanges: true, // true, false, 'checkRoots';
+	watchForChanges: 'checkRoots', // 'document', false, 'checkRoots';
 
 	// This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
 	editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
@@ -136,7 +136,7 @@ export const Options = {
 
 	linksUrls: false, // get from language pack
 	linksMeaningless: false, // get from language pack
-	altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
+	altPlaceholder: '', // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
 
 	editLinks: false, // Add links to edit content in tooltips.
 

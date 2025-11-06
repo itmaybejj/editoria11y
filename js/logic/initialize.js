@@ -1,8 +1,8 @@
-import Constants from 'sa11y/src/js/utils/constants.js';
+import Constants from '../../sa11y/utils/constants.js';
 import {State, Theme, UI} from "../utils/state.js";
-import {Lang} from "sa11y/src/js/sa11y.js";
+import Lang from "../../sa11y/utils/lang.js";
 import {Options} from "../utils/options.js";
-import {documentLoadingCheck, store} from "sa11y/src/js/utils/utils.js";
+import {documentLoadingCheck, store} from "../../sa11y/utils/utils.js";
 import {checkRunPrevent} from "../utils/utils.js";
 import {checkAll, continueCheck, windowResize} from "./interface.js";
 import ed11yLang from "../lang/localization.js";
@@ -87,7 +87,7 @@ const postProcessOptions = function(userOptions) {
 		);
 	}
 	if (Options.ignoreElements) {
-		const elementSelectors = Options.containerIgnore.split(',').map((item) => item.trim());
+		const elementSelectors = Options.ignoreElements.split(',').map((item) => item.trim());
 		Constants.Exclusions.Container = Constants.Exclusions.Container.concat(elementSelectors);
 	}
 
@@ -214,11 +214,17 @@ export function initialize (userOptions) {
 		// Todo only needed if we are watching for changes.
 		window.addEventListener('keydown', () => {
 			State.interaction = true;
+		}, {
+			passive: true,
 		});
 		window.addEventListener('click', () => {
 			State.interaction = true;
+		}, {
+			passive: true,
 		});
-		window.addEventListener('resize', function () { windowResize(); });
+		window.addEventListener('resize', function () { windowResize(); }, {
+			passive: true,
+		});
 		// Move toggles when something expands or collapses.
 		const mightExpand = document.querySelectorAll('[aria-expanded], [aria-controls]');
 		mightExpand?.forEach(expandable => {
@@ -226,6 +232,8 @@ export function initialize (userOptions) {
 				window.setTimeout(() => {
 					windowResize();
 				}, 333);
+			}, {
+				passive: true,
 			});
 		});
 

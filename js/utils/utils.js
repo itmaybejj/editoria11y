@@ -1,11 +1,12 @@
 import {Results, State, UI} from "./state.js"
-import {prepareDismissal} from "sa11y/src/js/utils/utils.js";
-import find from "sa11y/src/js/utils/find.js"
-import Constants from "sa11y/src/js/utils/constants.js";
+import {prepareDismissal} from "../../sa11y/utils/utils.js";
+import Lang from "../../sa11y/utils/lang.js"
+import find from "../../sa11y/utils/find.js"
+import Constants from "../../sa11y/utils/constants.js";
 import {Options} from "./options.js";
-import findShadowComponents from "sa11y/src/js/logic/find-shadow-components.js";
-import Elements from "sa11y/src/js/utils/elements.js";
-import {Lang} from "sa11y/src/js/sa11y.js";
+import findShadowComponents from "../../sa11y/logic/find-shadow-components.js";
+import Elements from "../../sa11y/utils/elements.js";
+import ConsoleErrors from "../elements/ed11y-console-error.js";
 
 /*=============== Utilities ================*/
 
@@ -18,6 +19,50 @@ export function findElements (key, selector, rootRestrict = true) {
 	const desiredRoot = rootRestrict ? 'root' : 'document';
 	const exclude = rootRestrict ? [] : Constants.Exclusions.Sa11yElements;
 	Elements.Found[key] = find( selector, desiredRoot, exclude );
+}
+
+export function addedNodeReadyToCheck(el) {
+	if (!State.recentlyAddedNodes.has(el)) {
+		return true;
+	}
+	const hasText = el.textContent.trim().length;
+	if ((!hasText && State.recentlyAddedNodes.get(el) > Date.now() - 5000) ||
+		State.activeRange && el.contains(State.activeRange.startContainer)) {
+		// Do not check recent nodes if they are empty or selected.
+		return false;
+	} else if (el.matches('table') && el.querySelectorAll('td:not(:empty)')) {
+		// Only check tables once there is content in a non-heading cell.
+		let cumulativeText = '';
+		if (hasText) {
+			const cells = el.querySelectorAll('td:not(:empty)');
+			cells.forEach((cell) => {
+				cumulativeText += cell.textContent;
+			});
+		}
+		if (!cumulativeText) {
+			return false;
+		} else {
+			// Text in body cells.
+			State.recentlyAddedNodes.delete(el);
+			return true;
+		}
+	} else {
+		// New node is ready for checking.
+		State.recentlyAddedNodes.delete(el);
+		return true;
+	}
+}
+
+const dropSomeElements = function(arrayRef, sendTo = false, readyCheck = true, hiddenCheck = false) {
+	for (let i = arrayRef.length - 1; i >= 0; i--) {
+		if (hiddenCheck && !elementNotHidden(arrayRef[i]) ||
+			readyCheck && !addedNodeReadyToCheck(arrayRef[i])) {
+			if (sendTo) {
+				sendTo.push(arrayRef[i]);
+			}
+			arrayRef.splice(i, 1);
+		}
+	}
 }
 
 // First step in checkAll is getting a fresh set of elements to check.
@@ -58,6 +103,11 @@ export function buildElementList () {
 
 		// Find and cache elements.
 		Elements.initializeElements(Options);
+
+		dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore);
+		dropSomeElements(Elements.Found.Blockquotes);
+		dropSomeElements(Elements.Found.Tables);
+
 		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
 		if (typeof Options.editableContent === 'string') {
 			findElements('editable', Options.editableContent, false);
@@ -79,8 +129,8 @@ export function buildElementList () {
 	}
 }
 
-export const lagBounce = (callback, wait) => {
-  let timeoutId = null;
+export function lagBounce (callback, wait) {
+  let timeoutId;
   return (...args) => {
     window.clearTimeout(timeoutId);
     timeoutId = window.setTimeout(() => {
@@ -364,4 +414,11 @@ export function countAlerts () {
 	if (State.incremental && !State.forceFullCheck && !newIncrementalResults()) {
 		State.forceFullCheck = true;
 	}
+}
+
+export function showError(error) {
+	customElements.define('sa11y-console-error', ConsoleErrors);
+	const consoleErrors = new ConsoleErrors(error);
+	document.body.appendChild(consoleErrors);
+	throw Error(error);
 }

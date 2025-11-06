@@ -44,251 +44,80 @@ const Lang = {
   },
 };
 
-/* eslint-disable no-continue */
-/* eslint-disable no-use-before-define */
+/**
+ * Removes the alert from the Sa11y control panel by clearing its content and removing CSS classes.
+ * This function clears the content of the alert element and removes CSS classes 'active' from the main alert element, and 'panel-alert-preview' from the alert preview element.
+ * @returns {void}
+ */
+function removeAlert() {
+  const Sa11yPanel = document.querySelector('sa11y-control-panel').shadowRoot;
+  const alert = Sa11yPanel.getElementById('panel-alert');
+  const alertText = Sa11yPanel.getElementById('panel-alert-text');
+  const alertPreview = Sa11yPanel.getElementById('panel-alert-preview');
 
-/* Get text content of pseudo elements. */
-const wrapPseudoContent = (element, string) => {
-  const getAltText = (content) => {
-    if (content === 'none') return '';
-    const match = content.includes('url(') || content.includes('image-set(')
-      ? content.match(/\/\s*"([^"]+)"/) // Content after slash, e.g. url('image.jpg') / "alt text";
-      : content.match(/"([^"]+)"/); // Content between quotes, e.g. "alt text";
-    return match ? match[1] : '';
-  };
-  const before = getAltText(window.getComputedStyle(element, ':before').getPropertyValue('content'));
-  const after = getAltText(window.getComputedStyle(element, ':after').getPropertyValue('content'));
-  return `${before}${string}${after}`;
-};
-
-/* Sets treeWalker loop to last node before next branch. */
-const nextTreeBranch = (tree) => {
-  for (let i = 0; i < 1000; i++) {
-    if (tree.nextSibling()) {
-      // Prepare for continue to advance.
-      return tree.previousNode();
-    }
-    // Next node will be in next branch.
-    if (!tree.parentNode()) {
-      return false;
-    }
-  }
-  return false;
-};
-
-/* Compute ARIA attributes. */
-const computeAriaLabel = (element, recursing = false) => {
-  const labelledBy = element.getAttribute('aria-labelledby');
-  if (!recursing && labelledBy) {
-    return labelledBy
-      .split(/\s+/)
-      .filter((id) => id.trim()) // Exclude empty IDs.
-      .map((id) => {
-        const targetElement = document.querySelector(`#${CSS.escape(id)}`);
-        return targetElement ? computeAccessibleName(targetElement, '', 1) : '';
-      }).join(' ');
-  }
-
-  const { ariaLabel } = element;
-  if (ariaLabel && ariaLabel.trim().length > 0) {
-    return ariaLabel;
-  }
-  return 'noAria';
-};
+  alert.classList.remove('active');
+  alertPreview.classList.remove('panel-alert-preview');
+  while (alertText.firstChild) alertText.removeChild(alertText.firstChild);
+  while (alertPreview.firstChild) alertPreview.removeChild(alertPreview.firstChild);
+}
 
 /**
- * Compute the accessible name of an element.
- * Implements a subset of the W3C Accessible Name algorithm.
- * Based on John Jameson’s Editoria11y library.
- *
- * @param {Element} element Target element.
- * @param {string[]} exclusions CSS selectors to ignore.
- * @param {number} recursing Recursion depth.
- * @returns {string} Accessible name.
+ * Creates an alert in the Sa11y control panel with the given alert message and error preview.
+ * @param {string} alertMessage The alert message.
+ * @param {string} errorPreview The issue's tooltip message (optional).
+ * @param {string} extendedPreview The issue's HTML or escaped HTML to be previewed (optional).
+ * @returns {void}
  */
-const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
-  // Return immediately if there is an aria label.
-  const ariaLabel = computeAriaLabel(element, recursing);
-  if (ariaLabel !== 'noAria') return ariaLabel;
+function createAlert(alertMessage, errorPreview, extendedPreview) {
+  // Clear alert first before creating new one.
+  removeAlert();
 
-  // Textarea with a title.
-  if (element.tagName === 'TEXTAREA' && element.hasAttribute('title')) {
-    return element.getAttribute('title');
+  // Constants
+  const Sa11yPanel = document.querySelector('sa11y-control-panel').shadowRoot;
+  const alert = Sa11yPanel.getElementById('panel-alert');
+  const alertText = Sa11yPanel.getElementById('panel-alert-text');
+  const alertPreview = Sa11yPanel.getElementById('panel-alert-preview');
+  const alertClose = Sa11yPanel.getElementById('close-alert');
+  const skipButton = Sa11yPanel.getElementById('skip-button');
+
+  alert.classList.add('active');
+  alertText.innerHTML = alertMessage;
+
+  // If the issue's element is being previewed.
+  const elementPreview = (extendedPreview)
+    ? `<div class="element-preview">${extendedPreview}</div>` : '';
+
+  // Alert message or tooltip's message.
+  if (errorPreview) {
+    alertPreview.classList.add('panel-alert-preview');
+    alertPreview.innerHTML = `${elementPreview}<div class="preview-message">${errorPreview}</div>`;
   }
 
-  // Return immediately if there is only a text node.
-  let computedText = '';
-  if (!element.children.length) {
-    computedText = wrapPseudoContent(element, element.textContent);
-    if (!computedText.trim() && element.hasAttribute('title')) {
-      return element.getAttribute('title');
-    }
-    return computedText;
+  // A little time before setting focus on the close button.
+  setTimeout(() => alertClose.focus(), 300);
+
+  // Closing alert sets focus back to Skip to Issue toggle.
+  function closeAlert() {
+    removeAlert();
+    const focusTarget = skipButton.hasAttribute('disabled')
+      ? Sa11yPanel.getElementById('toggle')
+      : skipButton;
+    focusTarget.focus();
   }
+  alertClose.addEventListener('click', closeAlert);
 
-  // Create tree walker object.
-  function createTreeWalker(root, showElement, showText) {
-    const acceptNode = (node) => {
-      if (showElement && node.nodeType === Node.ELEMENT_NODE) return NodeFilter.FILTER_ACCEPT;
-      if (showText && node.nodeType === Node.TEXT_NODE) return NodeFilter.FILTER_ACCEPT;
-      return NodeFilter.FILTER_REJECT;
-    };
-    return document.createTreeWalker(root, NodeFilter.SHOW_ALL, { acceptNode });
-  }
-  const treeWalker = createTreeWalker(element, true, true);
-
-  // Exclusions
-  const alwaysExclude = ['noscript', 'style', 'script', 'video', 'audio'];
-  const excludeSelector = [...exclusions, ...alwaysExclude].join(', ');
-  const exclude = excludeSelector ? element.querySelectorAll(excludeSelector) : [];
-
-  // Recurse into children.
-  let addTitleIfNoName = false;
-  let aText = false;
-  let count = 0;
-  let continueWalker = true;
-
-  while (treeWalker.nextNode() && continueWalker) {
-    count += 1;
-    const node = treeWalker.currentNode;
-    const excluded = Array.from(exclude).some((ex) => ex.contains(node));
-
-    // Matches exclusion.
-    if (excluded) {
-      continue;
+  // Escape key to close alert.
+  alert.onkeydown = (e) => {
+    const evt = e || window.event;
+    if (evt.key === 'Escape' && alert.classList.contains('active')) {
+      closeAlert();
     }
+  };
+}
 
-    // Inner nodes with shadowRoots.
-    if (node.shadowRoot) {
-      const shadowChildren = node.shadowRoot.querySelectorAll('*');
-      for (let i = 0; i < shadowChildren.length; i++) {
-        const child = shadowChildren[i];
-        if (!excludeSelector || !child.closest(excludeSelector)) {
-          computedText += computeAccessibleName(child, exclusions, recursing + 1);
-        }
-      }
-    }
-
-    // Return text from text nodes.
-    if (node.nodeType === Node.TEXT_NODE) {
-      if (node.parentNode.tagName !== 'SLOT') {
-        computedText += ` ${node.nodeValue}`;
-      }
-      continue;
-    }
-
-    if (addTitleIfNoName && !node.closest('a')) {
-      if (aText === computedText) computedText += addTitleIfNoName;
-      addTitleIfNoName = false;
-      aText = false;
-    }
-
-    if (node.ariaHidden === 'true' && !(recursing && count < 3)) {
-      if (!nextTreeBranch(treeWalker)) continueWalker = false;
-      continue;
-    }
-
-    const aria = computeAriaLabel(node, recursing);
-    if (aria !== 'noAria') {
-      computedText += ` ${aria}`;
-      if (!nextTreeBranch(treeWalker)) continueWalker = false;
-      continue;
-    }
-
-    switch (node.tagName) {
-      case 'IMG':
-        if (node.hasAttribute('alt') && node.role !== 'presentation') {
-          computedText += node.getAttribute('alt');
-        }
-        break;
-      case 'SVG':
-        if (node.role === 'img' || node.role === 'graphics-document') {
-          computedText += computeAriaLabel(node);
-        } else {
-          const title = node.querySelector('title');
-          if (title) computedText += title.textContent;
-        }
-        break;
-      case 'A':
-        if (node.hasAttribute('title')) {
-          addTitleIfNoName = node.getAttribute('title');
-          aText = computedText;
-        } else {
-          addTitleIfNoName = false;
-          aText = false;
-        }
-        computedText += wrapPseudoContent(node, '');
-        break;
-      case 'SLOT': {
-        const children = node.assignedNodes?.() || [];
-        let slotText = '';
-        children.forEach((child) => {
-          if (child.nodeType === Node.ELEMENT_NODE) {
-            slotText += computeAccessibleName(child);
-          } else if (child.nodeType === Node.TEXT_NODE) {
-            slotText += child.nodeValue;
-          }
-        });
-        computedText += slotText;
-        computedText += wrapPseudoContent(node, '');
-        break;
-      }
-      default:
-        computedText += wrapPseudoContent(node, '');
-        break;
-    }
-  }
-
-  if (addTitleIfNoName && !aText) {
-    computedText += ` ${addTitleIfNoName}`;
-  }
-
-  // Replace Private Use Area (PUA) unicode characters.
-  // https://www.unicode.org/faq/private_use.html
-  computedText = computedText.replace(/[\uE000-\uF8FF]/gu, '');
-
-  // If computedText returns blank, fallback on title attribute.
-  if (!computedText.trim() && element.hasAttribute('title')) {
-    return element.getAttribute('title');
-  }
-
-  return computedText;
-};
+/* eslint-disable no-console */
 
 const Constants = (function myConstants() {
-  /* **************** */
-  /* Initialize Roots */
-  /* **************** */
-  const Root = {};
-  function initializeRoot(desiredRoot, desiredReadabilityRoot) {
-    Root.areaToCheck = document.querySelector(desiredRoot);
-    if (!Root.areaToCheck) {
-      Root.areaToCheck = document.querySelector('body');
-    }
-
-    // Readability target area to check.
-    Root.Readability = document.querySelector(desiredReadabilityRoot);
-    if (!Root.Readability) {
-      if (!Root.areaToCheck) {
-        Root.Readability = document.querySelector('body');
-      } else {
-        // If desired root area is not found, use the root target area.
-        Root.Readability = Root.areaToCheck;
-
-        // Create a warning if the desired readability root is not found.
-        const { readabilityDetails, readabilityToggle } = Constants.Panel;
-        const readabilityOn = readabilityToggle?.getAttribute('aria-pressed') === 'true';
-        if (readabilityDetails && readabilityOn) {
-          const note = document.createElement('div');
-          note.id = 'readability-alert';
-          note.innerHTML = `<hr aria-hidden="true"><p>${Lang.sprintf('MISSING_READABILITY_ROOT',
-            Root.areaToCheck.tagName.toLowerCase(), desiredReadabilityRoot)}</p>`;
-          readabilityDetails.insertAdjacentElement('afterend', note);
-        }
-      }
-    }
-  }
-
   /* **************** */
   /* Global constants */
   /* **************** */
@@ -303,6 +132,9 @@ const Constants = (function myConstants() {
     Global.contrastSuggestions = option.contrastSuggestions;
     Global.contrastAAA = option.contrastAAA;
     Global.shadowDetection = option.shadowComponents.length > 0 || option.autoDetectShadowComponents === true;
+    Global.fixedRoots = option.fixedRoots;
+    Global.ignoreAriaOnElements = option.ignoreAriaOnElements;
+    Global.ignoreTextInElements = option.ignoreTextInElements;
 
     // Toggleable plugins
     Global.developerPlugin = option.developerPlugin;
@@ -373,6 +205,83 @@ const Constants = (function myConstants() {
 
     // Embedded content all
     Global.AllEmbeddedContent = `${Global.VideoSources}, ${Global.AudioSources}, ${Global.VisualizationSources}`;
+  }
+
+  /* **************** */
+  /* Initialize Roots */
+  /* **************** */
+  const Root = {};
+  function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
+    Root.areaToCheck = [];
+    Root.Readability = [];
+
+    // If fixed roots provided.
+    if (fixedRoots) {
+      Root.areaToCheck = fixedRoots;
+      Root.Readability = fixedRoots;
+      return;
+    }
+
+    /* Main target area */
+    try {
+      // Iterate through each selector passed, and push valid ones to final root array.
+      const selectorList = desiredRoot.split(',').map((selector) => selector.trim());
+      selectorList.forEach((selector) => {
+        const root = document.querySelector(selector);
+        if (root) Root.areaToCheck.push(root);
+        else console.error(`Sa11y: The target root (${selector}) does not exist.`);
+      });
+    } catch {
+      Root.areaToCheck.length = 0;
+    }
+
+    // Push a visible UI alert if not headless and no roots at all are found.
+    if (Root.areaToCheck.length === 0 && Global.headless === false) {
+      createAlert(Lang.sprintf('MISSING_ROOT', desiredRoot));
+      Root.areaToCheck.push(document.body);
+    }
+
+    /* Readability target area */
+    try {
+      const selectorList = desiredReadabilityRoot.split(',').map((selector) => selector.trim());
+      selectorList.forEach((selector) => {
+        const root = document.querySelector(selector);
+        if (root) Root.Readability.push(root);
+        else console.error(`Sa11y: The target readability root (${selector}) does not exist.`);
+      });
+    } catch {
+      Root.Readability.length = 0;
+    }
+
+    if (Root.Readability.length === 0 && Global.headless === false) {
+      if (Root.areaToCheck.length === 0) {
+        Root.Readability.push(document.body);
+      } else {
+        // If desired root area is not found, use the root target area.
+        Root.Readability = Root.areaToCheck;
+
+        // Create a warning if the desired readability root is not found.
+        setTimeout(() => {
+          const { readabilityDetails, readabilityToggle } = Constants.Panel;
+          const readabilityOn = readabilityToggle?.getAttribute('aria-pressed') === 'true';
+          const alert = Constants.Panel.readability.querySelector('#readability-alert');
+          if (readabilityDetails && readabilityOn && !alert) {
+            // Roots that readability will be based on.
+            const roots = Root.areaToCheck.map((el) => {
+              if (el.id) return `#${el.id}`;
+              if (el.className) return `.${el.className.split(/\s+/).filter(Boolean).join('.')}`;
+              return el.tagName.toLowerCase();
+            }).join(', ');
+
+            // Append note to Readability panel.
+            const note = document.createElement('div');
+            note.id = 'readability-alert';
+            note.innerHTML = `<hr><p>${Lang.sprintf('MISSING_READABILITY_ROOT', roots, desiredReadabilityRoot)}</p>`;
+            readabilityDetails.insertAdjacentElement('afterend', note);
+          }
+        }, 100);
+      }
+    }
   }
 
   /* *************** */
@@ -578,33 +487,243 @@ const Constants = (function myConstants() {
   };
 }());
 
+/* eslint-disable no-continue */
+
+/* Get text content of pseudo elements. */
+const wrapPseudoContent = (element, string) => {
+  const getAltText = (content) => {
+    if (content === 'none') return '';
+    const match = content.includes('url(') || content.includes('image-set(')
+      ? content.match(/\/\s*"([^"]+)"/) // Content after slash, e.g. url('image.jpg') / "alt text";
+      : content.match(/"([^"]+)"/); // Content between quotes, e.g. "alt text";
+    return match ? match[1] : '';
+  };
+  const before = getAltText(window.getComputedStyle(element, ':before').getPropertyValue('content'));
+  const after = getAltText(window.getComputedStyle(element, ':after').getPropertyValue('content'));
+  return `${before}${string}${after}`;
+};
+
+/* Sets treeWalker loop to last node before next branch. */
+const nextTreeBranch = (tree) => {
+  for (let i = 0; i < 1000; i++) {
+    if (tree.nextSibling()) {
+      // Prepare for continue to advance.
+      return tree.previousNode();
+    }
+    // Next node will be in next branch.
+    if (!tree.parentNode()) {
+      return false;
+    }
+  }
+  return false;
+};
+
+/* Compute ARIA attributes. */
+const computeAriaLabel = (element, recursing = false) => {
+  // Ignore ARIA on these elements.
+  if (Constants.Global.ignoreAriaOnElements && element.matches(Constants.Global.ignoreAriaOnElements)) {
+    return 'noAria';
+  }
+
+  if (Constants.Global.ignoreTextInElements && element.matches(Constants.Global.ignoreTextInElements)) {
+    return '';
+  }
+
+  const labelledBy = element.getAttribute('aria-labelledby');
+  if (!recursing && labelledBy) {
+    return labelledBy
+      .split(/\s+/)
+      .filter((id) => id.trim()) // Exclude empty IDs.
+      .map((id) => {
+        const targetElement = document.querySelector(`#${CSS.escape(id)}`);
+        return targetElement ? computeAccessibleName(targetElement, '', 1) : '';
+      }).join(' ');
+  }
+
+  const { ariaLabel } = element;
+  if (ariaLabel && ariaLabel.trim().length > 0) {
+    return ariaLabel;
+  }
+  return 'noAria';
+};
+
+/**
+ * Compute the accessible name of an element.
+ * Implements a subset of the W3C Accessible Name algorithm.
+ * Based on John Jameson’s Editoria11y library.
+ *
+ * @param {Element} element Target element.
+ * @param {string[]} exclusions CSS selectors to ignore.
+ * @param {number} recursing Recursion depth.
+ * @returns {string} Accessible name.
+ */
+const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
+  // Return immediately if there is an aria label.
+  const ariaLabel = computeAriaLabel(element, recursing);
+  if (ariaLabel !== 'noAria') return ariaLabel;
+
+  // Textarea with a title.
+  if (element.tagName === 'TEXTAREA' && element.hasAttribute('title')) {
+    return element.getAttribute('title');
+  }
+
+  // Return immediately if there is only a text node.
+  let computedText = '';
+  if (!element.children.length) {
+    computedText = wrapPseudoContent(element, element.textContent);
+    if (!computedText.trim() && element.hasAttribute('title')) {
+      return element.getAttribute('title');
+    }
+    return computedText;
+  }
+
+  // Create tree walker object.
+  function createTreeWalker(root, showElement, showText) {
+    const acceptNode = (node) => {
+      if (showElement && node.nodeType === Node.ELEMENT_NODE) return NodeFilter.FILTER_ACCEPT;
+      if (showText && node.nodeType === Node.TEXT_NODE) return NodeFilter.FILTER_ACCEPT;
+      return NodeFilter.FILTER_REJECT;
+    };
+    return document.createTreeWalker(root, NodeFilter.SHOW_ALL, { acceptNode });
+  }
+  const treeWalker = createTreeWalker(element, true, true);
+
+  // Exclusions
+  const alwaysExclude = ['noscript', 'style', 'script', 'video', 'audio'];
+  const excludeSelector = [...exclusions, ...alwaysExclude].join(', ');
+  const exclude = excludeSelector ? element.querySelectorAll(excludeSelector) : [];
+
+  // Recurse into children.
+  let addTitleIfNoName = false;
+  let aText = false;
+  let count = 0;
+  let continueWalker = true;
+
+  while (treeWalker.nextNode() && continueWalker) {
+    count += 1;
+    const node = treeWalker.currentNode;
+    const excluded = Array.from(exclude).some((ex) => ex.contains(node));
+
+    // Matches exclusion.
+    if (excluded) {
+      continue;
+    }
+
+    // Inner nodes with shadowRoots.
+    if (node.shadowRoot) {
+      const shadowChildren = node.shadowRoot.querySelectorAll('*');
+      for (let i = 0; i < shadowChildren.length; i++) {
+        const child = shadowChildren[i];
+        if (!excludeSelector || !child.closest(excludeSelector)) {
+          computedText += computeAccessibleName(child, exclusions, recursing + 1);
+        }
+      }
+    }
+
+    // Return text from text nodes.
+    if (node.nodeType === Node.TEXT_NODE) {
+      if (node.parentNode.tagName !== 'SLOT') {
+        computedText += ` ${node.nodeValue}`;
+      }
+      continue;
+    }
+
+    if (addTitleIfNoName && !node.closest('a')) {
+      if (aText === computedText) computedText += addTitleIfNoName;
+      addTitleIfNoName = false;
+      aText = false;
+    }
+
+    if (node.ariaHidden === 'true' && !(recursing && count < 3)) {
+      if (!nextTreeBranch(treeWalker)) continueWalker = false;
+      continue;
+    }
+
+    const aria = computeAriaLabel(node, recursing);
+    if (aria !== 'noAria') {
+      computedText += ` ${aria}`;
+      if (!nextTreeBranch(treeWalker)) continueWalker = false;
+      continue;
+    }
+
+    switch (node.tagName) {
+      case 'IMG':
+        if (node.hasAttribute('alt') && node.role !== 'presentation') {
+          computedText += node.getAttribute('alt');
+        }
+        break;
+      case 'SVG':
+        if (node.role === 'img' || node.role === 'graphics-document') {
+          computedText += computeAriaLabel(node);
+        } else {
+          const title = node.querySelector('title');
+          if (title) computedText += title.textContent;
+        }
+        break;
+      case 'A':
+        if (node.hasAttribute('title')) {
+          addTitleIfNoName = node.getAttribute('title');
+          aText = computedText;
+        } else {
+          addTitleIfNoName = false;
+          aText = false;
+        }
+        computedText += wrapPseudoContent(node, '');
+        break;
+      case 'SLOT': {
+        const children = node.assignedNodes?.() || [];
+        let slotText = '';
+        children.forEach((child) => {
+          if (child.nodeType === Node.ELEMENT_NODE) {
+            slotText += computeAccessibleName(child);
+          } else if (child.nodeType === Node.TEXT_NODE) {
+            slotText += child.nodeValue;
+          }
+        });
+        computedText += slotText;
+        computedText += wrapPseudoContent(node, '');
+        break;
+      }
+      default:
+        computedText += wrapPseudoContent(node, '');
+        break;
+    }
+  }
+
+  if (addTitleIfNoName && !aText) {
+    computedText += ` ${addTitleIfNoName}`;
+  }
+
+  // Replace Private Use Area (PUA) unicode characters.
+  // https://www.unicode.org/faq/private_use.html
+  computedText = computedText.replace(/[\uE000-\uF8FF]/gu, '');
+
+  // If computedText returns blank, fallback on title attribute.
+  if (!computedText.trim() && element.hasAttribute('title')) {
+    return element.getAttribute('title');
+  }
+
+  return computedText;
+};
+
 /**
  * Finds elements in the DOM that match the given selector, within the specified root element, and excluding any specified elements.
  * @param {string} selector - The CSS selector to match elements against.
- * @param {string} desiredRoot - The root element to start the search from. Can be one of 'document', 'readability', 'root', or a custom selector for the desired root element.
+ * @param {string} desiredRoot - The root element to start the search from. Can be one of 'document', 'root', or a custom selector for the desired root element.
  * @param {string} exclude - Elements to exclude from the search, specified as a CSS selector (optional).
  * @returns {Array} - An array of elements that match the given selector.
+ * @credits Logic yoinked from Editoria11y.
  */
 function find(selector, desiredRoot, exclude) {
-  let root;
+  const root = [];
   if (desiredRoot === 'document') {
-    root = document;
-  } else if (desiredRoot === 'readability') {
-    root = Constants.Readability.Root;
-    if (!root) root = Constants.Root.areaToCheck;
+    root.push(document.body);
+    if (Constants.Global.fixedRoots) root.push(Constants.Global.fixedRoots);
   } else if (desiredRoot === 'root') {
-    root = Constants.Root.areaToCheck;
-    if (!root) root = document.body;
-  } else if (desiredRoot === 'panel') {
-    root = Constants.Panel.panel;
-    if (!root) root = document.body;
+    root.push(Constants.Root.areaToCheck);
   } else {
-    root = document.querySelector(desiredRoot);
-    if (!root) root = document.body;
+    root.push(document.querySelectorAll(desiredRoot));
   }
-
-  const shadowComponents = document.querySelectorAll('[data-sa11y-has-shadow-root]');
-  const shadow = shadowComponents ? ', [data-sa11y-has-shadow-root]' : '';
 
   // Exclusions are returned as an array & need to become a string for selector.
   const exclusions = Constants.Exclusions.Container.join(', ');
@@ -613,28 +732,35 @@ function find(selector, desiredRoot, exclude) {
   // Ensure no trailing commas.
   const additional = additionalExclusions ? `, ${additionalExclusions}` : '';
 
-  /* Logic yoinked from Editoria11y */
-  // 1. Elements array includes web components in the selector to be used as a placeholder.
-  const elements = Array.from(root.querySelectorAll(`:is(${selector}${shadow}):not(${exclusions}${additional})`));
-  if (shadowComponents.length) {
-    // 2. Dive into the each shadow root and collect an array of its results.
-    const shadowFind = [];
-    elements.forEach((el, i) => {
-      if (el && el.matches && el.matches('[data-sa11y-has-shadow-root]') && el.shadowRoot) {
-        shadowFind[i] = el.shadowRoot.querySelectorAll(`:is(${selector}):not(${exclusions}${additional})`);
-      }
-    });
-    // 3. Replace the placeholder with any hits found in the shadow root.
-    if (shadowFind.length > 0) {
-      for (let index = shadowFind.length - 1; index >= 0; index--) {
-        if (shadowFind[index]) {
-          elements.splice(index, 1, ...shadowFind[index]);
+  let list = [];
+  root.flat().filter(Boolean)?.forEach((r) => {
+    const shadowComponents = r?.querySelectorAll('[data-sa11y-has-shadow-root]');
+    const shadow = shadowComponents ? ', [data-sa11y-has-shadow-root]' : '';
+
+    // 1. Elements array includes web components in the selector to be used as a placeholder.
+    const elements = Array.from(r.querySelectorAll(`:is(${selector}${shadow}):not(${exclusions}${additional})`));
+    if (shadowComponents.length) {
+      // 2. Dive into each shadow root and collect an array of its results.
+      const shadowFind = [];
+      elements.forEach((el, i) => {
+        if (el && el.matches && el.matches('[data-sa11y-has-shadow-root]') && el.shadowRoot) {
+          shadowFind[i] = el.shadowRoot.querySelectorAll(`:is(${selector}):not(${exclusions}${additional})`);
+        }
+      });
+      // 3. Replace the placeholder with any hits found in the shadow root.
+      if (shadowFind.length > 0) {
+        for (let index = shadowFind.length - 1; index >= 0; index--) {
+          if (shadowFind[index]) {
+            elements.splice(index, 1, ...shadowFind[index]);
+          }
         }
       }
     }
-  }
+    list = list.concat(elements.filter((node) => node.parentNode.tagName !== 'SLOT'));
+  });
+
   // 4. Return the cleaned up array, filtering out <slot> placeholders.
-  return elements.filter((node) => node.parentNode.tagName !== 'SLOT');
+  return list;
 }
 
 /**
@@ -872,18 +998,19 @@ const State = {
   seen: [],
   ignore: '',
   ignoreAll: false,
-  totalCount: Number,
-  warningCount: Number,
-  errorCount: Number,
-  dismissedCount: Number,
+  totalCount: 1,
+  warningCount: 1,
+  errorCount: 1,
+  dismissedCount: 1,
   dismissedAlerts: {},
   activeRange: false,
+	inlineAlerts: false,
   incremental: false,
   interaction: false,
   forceFullCheck: false,
-  browserSpeed: Number,
-  browserLag: Number,
-	customTestsRemaining: Number,
+  browserSpeed: 1,
+  browserLag: 1,
+	customTestsRemaining: 0,
   loopStop: false,
   currentPage: window.location.pathname,
   roots: [],
@@ -909,7 +1036,7 @@ const State = {
   lastOpenTip: Number -1,
   viaJump: false,
   toggledFrom: false,
-  scrollPending: Number,
+  scrollPending: 0,
   scrollTicking: false,
 	tipOpen: false,
   openTip: {
@@ -918,7 +1045,7 @@ const State = {
   },
   positionedFrames: [],
   editableHighlight: [],
-  recentlyAddedNodes: [],
+  recentlyAddedNodes: new WeakMap,
 };
 
 const Theme = {};
@@ -942,7 +1069,7 @@ const Results = [];
 
 const Options = {
 
-	checkRoots: false, // @todo merge implement whatever syntax Sa11y releases.
+	checkRoots: false, // @todo CMS merge implement whatever syntax Sa11y releases.
 	fixedRoots: false, // Array of specific nodes, overrides previous.
 	ignoreElements: '',
 
@@ -962,7 +1089,7 @@ const Options = {
 	// CMS integrations can switch between polite & headless at runtime.
 	alertMode: 'userPreference',
 	inlineAlerts: true,
-	watchForChanges: true, // true, false, 'checkRoots';
+	watchForChanges: 'checkRoots', // 'document', false, 'checkRoots';
 
 	// This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
 	editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
@@ -978,7 +1105,7 @@ const Options = {
 	// Hide all alerts if these elements are absent, e.g., ".edit-button"
 	// Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
 	ignoreAllIfAbsent: false,
-	ignoreAllIfPresent: false, // @todo merge dismissal system appears to be broken.
+	ignoreAllIfPresent: false, // @todo CMS merge dismissal system.
 
 	// Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
 	preventCheckingIfPresent: false,
@@ -1072,13 +1199,13 @@ const Options = {
 	baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
 
 	// Test customizations
-	embeddedContent: false, // @todo merge remove.
-	embeddedContentTitle: '', // @todo merge remove.
-	embeddedContentMessage: '', // @todo merge remove.
+	embeddedContent: false, // @todo merge replace with custom test.
+	embeddedContentTitle: '',
+	embeddedContentMessage: '',
 
 	linksUrls: false, // get from language pack
 	linksMeaningless: false, // get from language pack
-	altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
+	altPlaceholder: '', // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
 
 	editLinks: false, // Add links to edit content in tooltips.
 
@@ -1172,7 +1299,7 @@ const Options = {
 	contrastAPCA: false,
 
 	// Other plugins
-	customChecks: false, // @todo merge migrate in embed check?
+	customChecks: false, // @todo CMS merge test this functionality.
 	linksAdvancedPlugin: true,
 	formLabelsPlugin: true, // @todo CMS merge turn off when editing.
 	embeddedContentPlugin: true,
@@ -1367,12 +1494,14 @@ const Elements = (function myElements() {
     // We want headings from the entire document for the Page Outline.
     Found.Headings = find(
       'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
-      'document',
+      option.ignoreContentOutsideRoots || option.fixedRoots
+        ? 'root' : 'document',
       Constants.Exclusions.Headings,
     );
     Found.HeadingOne = find(
       'h1, [role="heading"][aria-level="1"]',
-      'document',
+      option.ignoreContentOutsideRoots || option.fixedRoots
+        ? 'root' : 'document',
       Constants.Exclusions.Headings,
     );
 
@@ -1404,8 +1533,9 @@ const Elements = (function myElements() {
       ? Found.Links.filter(($el) => badLinkSources.split(',').some((selector) => $el.matches(selector.trim()))) : [];
 
     // Readability.
-    const readabilityExclusions = ($el) => Constants.Root.Readability.contains($el)
+    const readabilityExclusions = ($el) => Constants.Root.Readability.some((rootEl) => rootEl.contains($el))
       && !Constants.Exclusions.Readability.some((selector) => $el.matches(selector));
+
     Found.Readability = [
       ...Found.Paragraphs.filter(readabilityExclusions),
       ...Found.Lists.filter(readabilityExclusions),
@@ -1459,469 +1589,527 @@ const Elements = (function myElements() {
   };
 }());
 
-var styles = "[data-sa11y-overflow]{overflow:auto!important}[data-sa11y-error]{outline:5px solid var(--sa11y-error)!important;outline-offset:2px}[data-sa11y-warning]:not([data-sa11y-error]){outline:5px solid var(--sa11y-warning)!important;outline-offset:2px}[data-sa11y-pulse-border]{animation:pulse 1s 2;box-shadow:0;outline:5px solid var(--sa11y-focus-color)!important}[data-sa11y-pulse-border]:focus,[data-sa11y-pulse-border]:hover{animation:none}@keyframes pulse{0%{box-shadow:0 0 0 5px var(--sa11y-focus-color)}50%{box-shadow:0 0 0 12px var(--sa11y-pulse-color)}to{box-shadow:0 0 0 5px var(--sa11y-pulse-color)}}h1[data-sa11y-pulse-border],h2[data-sa11y-pulse-border],h3[data-sa11y-pulse-border],h4[data-sa11y-pulse-border],h5[data-sa11y-pulse-border],h6[data-sa11y-pulse-border],img[data-sa11y-pulse-border]{animation:pulse-scale 1s 2}@keyframes pulse-scale{0%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.02)}to{opacity:1;transform:scale(1)}}@media (prefers-reduced-motion:reduce){[data-sa11y-pulse-border]{animation:none!important}}@media (forced-colors:active){[data-sa11y-error-inline],[data-sa11y-error],[data-sa11y-good],[data-sa11y-pulse-border],[data-sa11y-warning-inline],[data-sa11y-warning]{forced-color-adjust:none}}";
-
-/* ************************************************************ */
-/*  Auto-detect shadow DOM or process provided web components.  */
-/* ************************************************************ */
-const addStyleUtilities = (component) => {
-  const CSSUtils = component.shadowRoot.querySelectorAll('.sa11y-css-utilities');
-  if (CSSUtils.length === 0) {
-    const style = document.createElement('style');
-    style.setAttribute('class', 'sa11y-css-utilities');
-    style.textContent = styles;
-    component.shadowRoot.appendChild(style);
-  }
-};
+/*
+* Replaces Sa11y finder with one that does not insert CSS.
+* */
 
 function findShadowComponents(option) {
-  if (option.autoDetectShadowComponents) {
-    // Elements to ignore.
-    const ignore = Constants.Exclusions.Sa11yElements;
+	if (option.autoDetectShadowComponents) {
+		// Elements to ignore.
+		const ignore = Constants.Exclusions.Sa11yElements;
 
-    // Search all elements.
-    const root = document.querySelector(option.checkRoot);
-    const search = (root)
-      ? Array.from(root.querySelectorAll(`*:not(${ignore})`))
-      : Array.from(document.body.querySelectorAll(`*:not(${ignore})`));
+		// Search all elements.
+		const root = document.querySelector(option.checkRoot);
+		const search = (root)
+			? Array.from(root.querySelectorAll(`*:not(${ignore})`))
+			: Array.from(document.body.querySelectorAll(`*:not(${ignore})`));
 
-    // Query for open shadow roots & inject CSS utilities into every shadow DOM.
-    search.forEach((component) => {
+		// Query for open shadow roots & inject CSS utilities into every shadow DOM.
+		search.forEach((component) => {
+			if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+				component.setAttribute('data-sa11y-has-shadow-root', '');
+				// addStyleUtilities(component);
+				// @todo should we add CSS here?
+			}
+		});
+	} else if (option.shadowComponents) {
+		const providedShadow = document.querySelectorAll(option.shadowComponents);
+		providedShadow.forEach((component) => {
+			component.setAttribute('data-sa11y-has-shadow-root', '');
+			// addStyleUtilities(component);
+			// @todo should we add CSS here?
+		});
+	}
+}
+
+// Replaces Sa11y error with one that does not attach CSS.
+
+class ConsoleErrors extends HTMLElement {
+	constructor(error) {
+		super();
+		this.error = error;
+	}
+
+	connectedCallback() {
+		const shadow = this.attachShadow({ mode: 'open' });
+
+		// Styles
+//		const style = document.createElement('style');
+//		style.innerHTML = styles + sharedStyles;
+//		shadow.appendChild(style);
+
+		// Container
+		const content = document.createElement('dialog');
+		content.ariaLabel = Lang._('ERROR');
+
+		// Google Form & GitHub error link.
+		const url = window.location;
+		const google = 'https://forms.gle/sjzK9XykETaoqZv99';
+
+		// GitHub template
+		const template = `## Error Description
+\`\`\`javascript
+${this.error.stack}
+\`\`\`
+
+## Details
+- **URL:** ${url}
+- **Version:** ${State.version}
+
+## Comments
+`;
+		const encodedTemplate = encodeURIComponent(template);
+		const github = `https://github.com/ryersondmp/sa11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
+
+		// Message
+		content.innerHTML = `
+      <button class="close-btn" aria-describedby="ed11y-console-error"><span aria-hidden="true">&times</span> ${Lang._('ALERT_CLOSE')}</button>
+      <h2 id="ed11y-console-error">${Lang._('ERROR')}</h2>
+      <p>${Lang.sprintf('CONSOLE_ERROR', google, github)}</p>
+      <p><strong>${Lang._('DEVELOPER_CHECKS')}:</strong></p>
+      <pre>
+Version: ${State.version}
+URL: ${url}</pre>
+  		<p><strong>${Lang._('ERRORS')}:</strong></p>
+<pre>${escapeHTML(this.error.stack)}</pre>
+    `;
+		shadow.appendChild(content);
+
+		// Set focus and hide Sa11y's toggle.
+		setTimeout(() => {
+			content.show();
+			// Constants.Panel.toggle.style.display = 'none';
+			const button = content.querySelector('button');
+			button.style.setProperty('padding', '1em;');
+			button.style.setProperty('filter', 'invert(1)');
+			const hiddenItems = content.querySelectorAll('.visually-hidden');
+			hiddenItems?.forEach((hidden) => {
+				hidden.style.setProperty('position', 'absolute');
+				hidden.style.setProperty('width', '1px');
+				hidden.style.setProperty('height', '1px');
+				hidden.style.setProperty('overflow', 'hidden');
+			});
+			const preS = content.querySelectorAll('pre');
+			preS.forEach((pre) => {
+				pre.style.setProperty('margin-left','18px');
+			});
+			//const dialog = container.shadowRoot.getElementById('dialog');
+			//dialog.focus();
+
+			const close = content.querySelector('.close-btn');
+			close.addEventListener('click', () => {
+				content.close();
+			});
+		}, 0);
+	}
+}
+
+/*=============== Utilities ================*/
+
+function getElements(selector, desiredRoot, exclude) {
+	exclude = exclude === false ? [] : exclude;
+	return find(selector, desiredRoot, exclude);
+}
+function findElements (key, selector, rootRestrict = true) {
+	// Legacy support for deprecated code.
+	const desiredRoot = rootRestrict ? 'root' : 'document';
+	const exclude = rootRestrict ? [] : Constants.Exclusions.Sa11yElements;
+	Elements.Found[key] = find( selector, desiredRoot, exclude );
+}
+
+function addedNodeReadyToCheck(el) {
+	if (!State.recentlyAddedNodes.has(el)) {
+		return true;
+	}
+	const hasText = el.textContent.trim().length;
+	if ((!hasText && State.recentlyAddedNodes.get(el) > Date.now() - 5000) ||
+		State.activeRange && el.contains(State.activeRange.startContainer)) {
+		// Do not check recent nodes if they are empty or selected.
+		return false;
+	} else if (el.matches('table') && el.querySelectorAll('td:not(:empty)')) {
+		// Only check tables once there is content in a non-heading cell.
+		let cumulativeText = '';
+		if (hasText) {
+			const cells = el.querySelectorAll('td:not(:empty)');
+			cells.forEach((cell) => {
+				cumulativeText += cell.textContent;
+			});
+		}
+		if (!cumulativeText) {
+			return false;
+		} else {
+			// Text in body cells.
+			State.recentlyAddedNodes.delete(el);
+			return true;
+		}
+	} else {
+		// New node is ready for checking.
+		State.recentlyAddedNodes.delete(el);
+		return true;
+	}
+}
+
+const dropSomeElements = function(arrayRef, sendTo = false, readyCheck = true, hiddenCheck = false) {
+	for (let i = arrayRef.length - 1; i >= 0; i--) {
+		if (hiddenCheck && !elementNotHidden(arrayRef[i]) ||
+			readyCheck && !addedNodeReadyToCheck(arrayRef[i])) {
+			if (sendTo) {
+				sendTo.push(arrayRef[i]);
+			}
+			arrayRef.splice(i, 1);
+		}
+	}
+};
+
+// First step in checkAll is getting a fresh set of elements to check.
+function buildElementList () {
+
+	// Check for ignoreAll elements.
+	State.ignoreAll = Options.ignoreAllIfAbsent && document.querySelector(`:is(${Options.ignoreAllIfAbsent})`) === null;
+	if (!State.ignoreAll && !!Options.ignoreAllIfPresent) {
+		State.ignoreAll = document.querySelector(`:is(${Options.ignoreAllIfPresent})`) !== null;
+	}
+
+	if ( State.incremental) {
+		State.oldResults = Results;
+	}
+	// Reset counts
+	Results.length = 0;
+	State.elements = [];
+	State.mediaCount = 0;
+	State.headingOutline = [];
+
+	for (let i = 0; i < State.roots.length; i++) {
+		if (Options.fixedRoots) {
+			State.roots[i].dataset.ed11yRoot = `${i}`;
+		}
+		if (State.roots[i].shadowRoot) {
+			State.roots.setAttribute('data-ed11y-has-shadow-root', 'true');
+			detectShadow(State.roots[i]);
+			State.roots[i] = State.roots[i].shadowRoot;
+		}
+		else {
+			detectShadow(State.roots[i]);
+		}
+
+		Constants.initializeRoot(Options.checkRoots, Options.checkRoots); // @todo release merge readability, add multiroot.
+
+		// Find all web components on the page.
+		findShadowComponents(Options);
+
+		// Find and cache elements.
+		Elements.initializeElements(Options);
+
+		dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore);
+		dropSomeElements(Elements.Found.Blockquotes);
+		dropSomeElements(Elements.Found.Tables);
+
+		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
+		if (typeof Options.editableContent === 'string') {
+			findElements('editable', Options.editableContent, false);
+		}
+		else {
+			Elements.Found.editable = Options.editableContent;
+		}
+		if (State.inlineAlerts && Elements.Found.editable.length > 0) {
+			State.inlineAlerts = false;
+			console.warn('Editable content detected; Editoria11y inline alerts disabled');
+		}
+		if (Options.embeddedContent) ;
+		if (Options.panelNoCover) {
+			// Moves panel off conflicting widgets.
+			findElements('panelNoCover', Options.panelNoCover, false);
+		}
+	}
+}
+
+function lagBounce (callback, wait) {
+  let timeoutId;
+  return (...args) => {
+    window.clearTimeout(timeoutId);
+    timeoutId = window.setTimeout(() => {
+      callback.apply(null, args);
+    }, wait + State.browserLag);
+  };
+}
+function parents(el) {
+  let nodes = [];
+  nodes.push(el);
+  while (el && !!el.parentElement && el.parentElement.tagName !== 'HTML') {
+    nodes.push(el.parentElement);
+    el = el.parentElement;
+  }
+  return nodes;
+}
+
+function resetClass(classes) {
+  classes?.forEach((el) => {
+    let thisClass = el;
+    findElements('reset', `.${thisClass}`);
+    Elements.Found.reset?.forEach(el => {
+      el.classList.remove(thisClass);
+    });
+  });
+}
+
+function visibleElement(el) {
+  // Checks if this element is visible. Used in parent iterators.
+  // false is definitely invisible, true requires continued iteration to tell.
+  // Todo postpone: Check for offscreen?
+  if (el) {
+    if (!el.checkVisibility({
+      opacityProperty: true,
+      visibilityProperty: true,
+    })) {
+      return false;
+    }
+    let style = window.getComputedStyle(el);
+    return !(el.closest('.sr-only, .visually-hidden') ||
+      style.getPropertyValue('z-index') < 0 ||
+      (style.getPropertyValue('overflow') === 'hidden' &&
+        ( el.offsetWidth < 10 ||
+          el.offsetHeight < 10 )
+      )
+    );
+  }
+}
+function visible(el) {
+  // Recurse element and ancestors to make sure it is visible
+  if (!visibleElement(el)) {
+    // Element is hidden
+    return false;
+  } else {
+    // Element is not known to be hidden.
+    let theParents = parents(el);
+    let visibleParent = (parent) => visibleElement(parent);
+    return theParents.every(visibleParent);
+  }
+}
+function firstVisibleParent(el) {
+  let parent = el.parentElement;
+  if (parent) {
+    // Parent exists
+    if (!visibleElement(parent)) {
+      // Recurse
+      parent = firstVisibleParent(parent);
+      return parent;
+    } else {
+      // Element is visible
+      return parent;
+    }
+  } else {
+    // No visible parents.
+    return false;
+  }
+}
+// @todo discuss differences
+function hiddenElementCheck(el) {
+  // Checks if this element has been removed from the accessibility tree
+  let style = window.getComputedStyle(el);
+  return !(style.getPropertyValue('display') === 'none' ||
+    style.getPropertyValue('visibility') === 'hidden' ||
+    el.hasAttribute('aria-hidden') ||
+    el.hasAttribute('hidden'));
+}
+function elementNotHidden(el) {
+  // Recurse element and ancestors to make sure it is visible
+  if (!hiddenElementCheck(el)) {
+    // Element is hidden
+    return false;
+  } else {
+    // Element is not known to be hidden.
+    let theParents = parents(el);
+    let notHiddenParent = (parent) => hiddenElementCheck(parent);
+    return theParents.every(notHiddenParent);
+  }
+}
+
+function detectShadow (container) {
+  if (Options.autoDetectShadowComponents) {
+
+		const select = `*:not(${Constants.Exclusions.Container.join(', ')}, .ed11y-element)`;
+
+    let search;
+    if (container.shadowRoot && container.shadowRoot.mode === 'open') {
+      if (!container.matches('[data-ed11y-has-shadow-root]')) {
+        container.setAttribute('data-ed11y-has-shadow-root', 'true');
+        UI.attachCSS(container.shadowRoot);
+        UI.attachCSS(container);
+      }
+      search = container.shadowRoot.querySelectorAll(select);
+    } else {
+      search = container.querySelectorAll(select);
+    }
+    search?.forEach((component) => {
       if (component.shadowRoot && component.shadowRoot.mode === 'open') {
-        component.setAttribute('data-sa11y-has-shadow-root', '');
-        addStyleUtilities(component);
+        detectShadow(component);
       }
     });
-  } else if (option.shadowComponents) {
-    const providedShadow = document.querySelectorAll(option.shadowComponents);
+  } else if (Options.shadowComponents) {
+    const providedShadow = container.querySelectorAll(Options.shadowComponents);
     providedShadow.forEach((component) => {
-      component.setAttribute('data-sa11y-has-shadow-root', '');
-      addStyleUtilities(component);
+      if (component.shadowRoot && component.shadowRoot.mode === 'open') {
+        if (!container.matches('[data-ed11y-has-shadow-root]')){
+          component.setAttribute('data-ed11y-has-shadow-root', 'true');
+          UI.attachCSS(component.shadowRoot);
+          UI.attachCSS(component);
+        }
+        detectShadow(component);
+      } else {
+        console.warn(`Editoria11y: A specified shadow host has no shadowRoot: ${component.tagName}`);
+      }
     });
   }
 }
 
-function checkImages(results, option) {
-  const containsAltTextStopWords = (alt) => {
-    const altUrl = [
-      '.avif',
-      '.png',
-      '.jpg',
-      '.jpeg',
-      '.webp',
-      '.gif',
-      '.tiff',
-      '.svg',
-      '.heif',
-      '.heic',
-      'http',
-    ];
+function pauseObservers() {
+	State.watching?.forEach(observer => {
+		observer.observer.disconnect();
+	});
+}
 
-    const hit = [null, null, null];
-    altUrl.forEach((word) => {
-      if (alt.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
-        hit[0] = word;
-      } else {
-        // Checking for image dimensions in alt text.
-        const imageDimensions = /\b\d{2,6}\s*x\s*\d{2,6}\b/;
-        const match = alt.toLowerCase().match(imageDimensions);
-        if (match) {
-          [hit[0]] = match;
-        }
-      }
-    });
+function resumeObservers() {
+	State.watching?.forEach(observer => {
+		observer.observer.observe(observer.root, observer.config);
+	});
+}
 
-    const susAltWordsOverride = (option.susAltStopWords) ? option.susAltStopWords.split(',').map((word) => word.trim()) : Lang._('SUS_ALT_STOPWORDS');
-    susAltWordsOverride.forEach((word) => {
-      const susWord = alt.toLowerCase().indexOf(word);
-      if (susWord > -1 && susWord < 6) {
-        hit[1] = word;
-      }
-    });
+function checkRunPrevent() {
+	let preventCheck = Options.preventCheckingIfPresent ?
+		document.querySelector(Options.preventCheckingIfPresent) :
+		false;
+	if (preventCheck) {
+		console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${Options.preventCheckingIfPresent}"` );
+	} else if (!preventCheck && !!Options.preventCheckingIfAbsent) {
+		preventCheck = document.querySelector(`:is(${Options.preventCheckingIfAbsent})`) === null;
+		if (preventCheck) {
+			console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${Options.preventCheckingIfAbsent}"`);
+		}
+	}
+	return preventCheck;
+}
 
-    Lang._('PLACEHOLDER_ALT_STOPWORDS').forEach((word) => {
-      if (alt.length === word.length && alt.toLowerCase().indexOf(word) >= 0) {
-        hit[2] = word;
-      }
-    });
+function resetResults(incremental) {
+	State.jumpList = [];
+	State.openTip = {
+		button: false,
+		tip: false,
+	};
+	State.lastOpenTip = -1;
+	resetClass([
+		'ed11y-ring-red',
+		'ed11y-ring-yellow',
+		'ed11y-hidden-highlight',
+		'ed11y-warning-inline',
+		'ed11y-warning-block',
+		'ed11y-error-block',
+		'ed11y-error-inline',
+	]);
+	// Reset insertions into body content.
+	if (incremental) {
+		Elements.Found.reset = getElements('ed11y-element-highlight', 'document', []);
+	} else {
+		Elements.Found.reset = getElements('ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', 'document', []);
+	}
+	Elements.Found.reset?.forEach((el) => el.remove());
 
-    // Additional placeholder stopwords to flag as an error.
-    const { extraPlaceholderStopWords } = option;
-    if (extraPlaceholderStopWords.length) {
-      const array = extraPlaceholderStopWords.split(',').map((word) => word.trim());
-      array.forEach((word) => {
-        const susWord = alt.toLowerCase().indexOf(word);
-        if (susWord > -1 && susWord < 6) {
-          hit[2] = word;
-        }
-      });
-    }
+	// Flicker prevention -- leave old tip in place for 100ms.
+	//findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
+	Elements.Found.delayedReset = getElements('ed11y-element-result, ed11y-element-tip', 'document', []);
 
-    return hit;
-  };
+	window.setTimeout(()=> {
+		Elements.Found.delayedReset?.forEach((el) => el.remove());
+	}, 100, Elements.Found.delayedReset);
 
-  Elements.Found.Images.forEach(($el) => {
-    const alt = (computeAriaLabel($el) === 'noAria') ? $el.getAttribute('alt') : computeAriaLabel($el);
+	if (typeof UI.panelJumpNext === 'function') {
+		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = State.english ? Lang._('buttonFirstContent')
+			: Lang._('SKIP_TO_ISSUE') + ' 1';
+	}
+	// Reset insertions into body content.
+}
 
-    // If selectors passed via prop, it will treat that image as an unlinked image.
-    const link = $el.closest(option.imageWithinLightbox
-      ? `a[href]:not(${option.imageWithinLightbox})`
-      : 'a[href]');
+function newIncrementalResults() {
+	// Obviously new if there are more results:
+	if (State.forceFullCheck || Results.length !== State.oldResults.length) {
+		return true;
+	}
+	// Subtly new if a result has changed:
+	let newResultString = `${State.errorCount} ${State.warningCount}`;
+	Results.forEach(result => {
+		newResultString += result.test + result.element.outerHTML;
+	});
+	let changed = newResultString !== State.oldResultString;
+	State.oldResultString = newResultString;
+	return changed;
+}
 
-    // Image's source for key.
-    const src = ($el.getAttribute('src')) ? $el.getAttribute('src') : $el.getAttribute('srcset');
+function countAlerts () {
 
-    // Process link text exclusions.
-    const linkSpanExclusions = link
-      ? fnIgnore(link, Constants.Exclusions.LinkSpan).textContent : '';
-    const stringMatchExclusions = option.linkIgnoreStrings
-      ? linkSpanExclusions.replace(option.linkIgnoreStrings, '') : linkSpanExclusions;
-    const linkTextLength = link
-      ? removeWhitespace(stringMatchExclusions).length : 0;
+	State.errorCount = 0;
+	State.warningCount = 0;
+	State.dismissedCount = 0;
 
-    // Has aria-hidden.
-    if ($el.getAttribute('aria-hidden') === 'true') {
-      return;
-    }
+	// Review results array to remove dismissed or ignored items
 
-    // Ignore tracking pixels without explicit aria-hidden or nullified alt.
-    if ($el.height < 2 && $el.width < 2 && (isElementHidden($el) || alt === '')) {
-      return;
-    }
+	State.dismissedCount = 0;
+	for (let i = Results.length - 1; i >= 0; i--) {
 
-    if (link && link.getAttribute('aria-hidden') === 'true') {
-      // If linked image has aria-hidden, but is still focusable.
-      const unfocusable = link.getAttribute('tabindex') === '-1';
-      if (option.checks.HIDDEN_FOCUSABLE && !unfocusable) {
-        results.push({
-          element: $el,
-          type: option.checks.HIDDEN_FOCUSABLE.type || 'error',
-          content: Lang.sprintf(option.checks.HIDDEN_FOCUSABLE.content || 'HIDDEN_FOCUSABLE'),
-          dismiss: prepareDismissal(`IMGHIDDENFOCUSABLE${src}`),
-          dismissAll: option.checks.HIDDEN_FOCUSABLE.dismissAll
-            ? 'LINK_HIDDEN_FOCUSABLE' : false,
-          developer: option.checks.HIDDEN_FOCUSABLE.developer || true,
-        });
-      }
-      return;
-    }
+		let test = Results[i].test; // @todo CMS merge convert to new syntax when available.
+		/*
+		if (Options.ignoreTests &&
+			Options.ignoreTests.includes(test)) {
+			// Would be faster to skip test, but this is easy and reliable.
+			Results.splice(i, 1);
+			continue;
+		}*/
 
-    // If alt is missing.
-    if (alt === null) {
-      if (link) {
-        const rule = (linkTextLength === 0)
-          ? option.checks.MISSING_ALT_LINK
-          : option.checks.MISSING_ALT_LINK_HAS_TEXT;
-        const conditional = linkTextLength === 0
-          ? 'MISSING_ALT_LINK' : 'MISSING_ALT_LINK_HAS_TEXT';
-        if (rule) {
-          results.push({
-            element: $el,
-            type: rule.type || 'error',
-            content: Lang.sprintf(rule.content || conditional),
-            dismiss: prepareDismissal(`${conditional + src + linkTextLength}`),
-            dismissAll: rule.dismissAll ? conditional : false,
-            developer: rule.developer || false,
-          });
-        }
-      } else if (option.checks.MISSING_ALT) {
-        // General failure message if image is missing alt.
-        results.push({
-          element: $el,
-          type: option.checks.MISSING_ALT.type || 'error',
-          content: Lang.sprintf(option.checks.MISSING_ALT.content || 'MISSING_ALT'),
-          dismiss: prepareDismissal(`IMGNOALT${src}`),
-          dismissAll: option.checks.MISSING_ALT.dismissAll ? 'MISSING_ALT' : false,
-          developer: option.checks.MISSING_ALT.developer || false,
-        });
-      }
-    } else {
-      // If image has alt.
-      const sanitizedAlt = sanitizeHTML(alt);
-      const altText = removeWhitespace(sanitizedAlt);
-      const error = containsAltTextStopWords(altText);
-      const hasAria = $el.getAttribute('aria-label') || $el.getAttribute('aria-labelledby');
-      const titleAttr = $el.getAttribute('title');
-      const decorative = (alt === '');
+		// todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
+		/*if (State.incremental && Ed11y.oldResults.length > 0) {
+			// Don't flag new issues in the active range while people are typing.
+		}*/
 
-      // Figure elements.
-      const figure = $el.closest('figure');
-      const figcaption = figure?.querySelector('figcaption');
-      const figcaptionText = (figcaption) ? figcaption.textContent.trim() : '';
+		let dismissKey = prepareDismissal(Results[i].dismissalKey);
+		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
+		if (dismissKey !== false && Options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[Options.currentPage] && dismissKey in State.dismissedAlerts[Options.currentPage][test]) {
+			// Remove result if it has been marked OK or ignored, increment dismissed match counter.
+			State.dismissedCount++;
+			Results[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][test][dismissKey];
+		} else if (Results[i].dismissalKey) {
+			State.warningCount++;
+			Results[i].dismissalStatus = false;
+		} else {
+			State.errorCount++;
+			Results[i].dismissalStatus = false;
+		}
+	}
 
-      // Maximum alt text length
-      const maxAltCharactersLinks = option.checks.LINK_IMAGE_LONG_ALT.maxLength || 250;
-      const maxAltCharacters = option.checks.IMAGE_ALT_TOO_LONG.maxLength || 250;
+	State.totalCount = State.errorCount + State.warningCount;
 
-      // If aria-label or aria-labelledby returns empty or invalid.
-      if (option.checks.MISSING_ALT) {
-        if (hasAria && altText === '') {
-          results.push({
-            element: $el,
-            type: option.checks.MISSING_ALT.type || 'error',
-            content: Lang.sprintf(option.checks.MISSING_ALT.content || 'MISSING_ALT'),
-            dismiss: prepareDismissal(`IMGNOALTARIA${src}`),
-            dismissAll: option.checks.MISSING_ALT.dismissAll ? 'MISSING_ALT' : false,
-            developer: option.checks.MISSING_ALT.developer || false,
-          });
-          return;
-        }
-      }
+	// Dispatch event for synchronizers.
+	if (!State.incremental) {
+		window.setTimeout(function () {
+			let syncResults = new CustomEvent('ed11yResults');
+			document.dispatchEvent(syncResults);
+		}, 0);
+	}
 
-      // Decorative images.
-      if (decorative) {
-        const carouselSources = option.checks.IMAGE_DECORATIVE_CAROUSEL.sources;
-        const carousel = carouselSources ? $el.closest(carouselSources) : '';
-        if (carousel) {
-          const numberOfSlides = carousel.querySelectorAll('img');
-          const rule = (numberOfSlides.length === 1)
-            ? option.checks.IMAGE_DECORATIVE
-            : option.checks.IMAGE_DECORATIVE_CAROUSEL;
-          const conditional = (numberOfSlides.length === 1)
-            ? 'IMAGE_DECORATIVE'
-            : 'IMAGE_DECORATIVE_CAROUSEL';
-          if (rule) {
-            results.push({
-              element: $el,
-              type: rule.type || 'warning',
-              content: Lang.sprintf(rule.content || conditional),
-              dismiss: prepareDismissal(conditional + src),
-              dismissAll: rule.dismissAll ? conditional : false,
-              developer: rule.developer || false,
-            });
-          }
-        } else if (link) {
-          const rule = (linkTextLength === 0)
-            ? option.checks.LINK_IMAGE_NO_ALT_TEXT
-            : option.checks.LINK_IMAGE_TEXT;
-          const conditional = linkTextLength === 0
-            ? 'LINK_IMAGE_NO_ALT_TEXT' : 'LINK_IMAGE_TEXT';
-          if (rule) {
-            results.push({
-              element: $el,
-              type: rule.type || (linkTextLength === 0 ? 'error' : 'good'),
-              content: Lang.sprintf(rule.content || conditional),
-              dismiss: prepareDismissal(`${conditional + src + linkTextLength}`),
-              dismissAll: rule.dismissAll ? conditional : false,
-              developer: rule.developer || false,
-            });
-          }
-        } else if (figure) {
-          const rule = (figcaption && figcaptionText.length)
-            ? option.checks.IMAGE_FIGURE_DECORATIVE
-            : option.checks.IMAGE_DECORATIVE;
-          const conditional = figcaption && figcaptionText.length
-            ? 'IMAGE_FIGURE_DECORATIVE' : 'IMAGE_DECORATIVE';
-          if (rule) {
-            results.push({
-              element: $el,
-              type: rule.type || 'warning',
-              content: Lang.sprintf(rule.content || conditional),
-              dismiss: prepareDismissal(`${conditional + src + figcaptionText}`),
-              dismissAll: rule.dismissAll ? conditional : false,
-              developer: rule.developer || false,
-            });
-          }
-        } else if (option.checks.IMAGE_DECORATIVE) {
-          results.push({
-            element: $el,
-            type: option.checks.IMAGE_DECORATIVE.type || 'warning',
-            content: Lang.sprintf(option.checks.IMAGE_DECORATIVE.content || 'IMAGE_DECORATIVE'),
-            dismiss: prepareDismissal(`DECIMAGE${src}`),
-            dismissAll: option.checks.IMAGE_DECORATIVE.dismissAll ? 'IMAGE_DECORATIVE' : false,
-            developer: option.checks.IMAGE_DECORATIVE.developer || false,
-          });
-        }
-        return;
-      }
+	if (State.ignoreAll) {
+		State.dismissedCount = State.totalCount + State.dismissedCount;
+		State.errorCount = 0;
+		State.warningCount = 0;
+		State.totalCount = 0;
+	}
 
-      // Alt is unpronounceable.
-      const unpronounceable = (link)
-        ? option.checks.LINK_ALT_UNPRONOUNCEABLE : option.checks.ALT_UNPRONOUNCEABLE;
-      if (unpronounceable) {
-        if (alt.replace(/"|'|\?|\.|-|\s+/g, '') === '' && linkTextLength === 0) {
-          const condition = (link) ? 'LINK_ALT_UNPRONOUNCEABLE' : 'ALT_UNPRONOUNCEABLE';
-          results.push({
-            element: $el,
-            type: unpronounceable.type || 'error',
-            content: Lang.sprintf(unpronounceable.content || condition, altText),
-            dismiss: prepareDismissal(`UNPRONOUNCEABLE${src}`),
-            dismissAll: unpronounceable.dismissAll ? 'ALT_UNPRONOUNCEABLE' : false,
-            developer: unpronounceable.developer || false,
-          });
-          return;
-        }
-      }
+	if (State.incremental && !State.forceFullCheck && !newIncrementalResults()) {
+		State.forceFullCheck = true;
+	}
+}
 
-      // Potentially contains auto-generated placeholder text.
-      const maybeBadAlt = (link)
-        ? option.checks.LINK_ALT_MAYBE_BAD : option.checks.ALT_MAYBE_BAD;
-      const isTooLongSingleWord = new RegExp(`^\\S{${maybeBadAlt.minLength || 15},}$`);
-      const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(alt);
-
-      // Alt text quality.
-      if (error[0] !== null) {
-        // Has stop words.
-        const rule = (link)
-          ? option.checks.LINK_ALT_FILE_EXT
-          : option.checks.ALT_FILE_EXT;
-        const conditional = (link) ? 'LINK_ALT_FILE_EXT' : 'ALT_FILE_EXT';
-        if (rule) {
-          results.push({
-            element: $el,
-            type: rule.type || 'error',
-            content: Lang.sprintf(rule.content || conditional, error[0], altText),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
-            dismissAll: rule.dismissAll ? conditional : false,
-            developer: rule.developer || false,
-          });
-        }
-      } else if (error[2] !== null) {
-        // Placeholder words.
-        const rule = (link)
-          ? option.checks.LINK_PLACEHOLDER_ALT
-          : option.checks.ALT_PLACEHOLDER;
-        const conditional = (link) ? 'LINK_PLACEHOLDER_ALT' : 'ALT_PLACEHOLDER';
-        if (rule) {
-          results.push({
-            element: $el,
-            type: rule.type || 'error',
-            content: Lang.sprintf(rule.content || conditional, altText),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
-            dismissAll: rule.dismissAll ? conditional : false,
-            developer: rule.developer || false,
-          });
-        }
-      } else if (error[1] !== null) {
-        // Suspicious words.
-        const rule = (link)
-          ? option.checks.LINK_SUS_ALT
-          : option.checks.SUS_ALT;
-        const conditional = (link) ? 'LINK_SUS_ALT' : 'SUS_ALT';
-        if (rule) {
-          results.push({
-            element: $el,
-            type: rule.type || 'warning',
-            content: Lang.sprintf(rule.content || conditional, error[1], altText),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
-            dismissAll: rule.dismissAll ? conditional : false,
-            developer: rule.developer || false,
-          });
-        }
-      } else if (maybeBadAlt && (isTooLongSingleWord.test(alt) && containsNonAlphaChar)) {
-        // Alt text is a single word greater than 15 characters that is potentially auto-generated.
-        const conditional = (link) ? 'LINK_ALT_MAYBE_BAD' : 'ALT_MAYBE_BAD';
-        results.push({
-          element: $el,
-          type: maybeBadAlt.type || 'warning',
-          content: Lang.sprintf(maybeBadAlt.content || conditional, altText),
-          dismiss: prepareDismissal(`${conditional + src + altText}`),
-          dismissAll: maybeBadAlt.dismissAll ? conditional : false,
-          developer: maybeBadAlt.developer || false,
-        });
-      } else if (link
-        ? alt.length > maxAltCharactersLinks
-        : alt.length > maxAltCharacters) {
-        // Alt is too long.
-        const rule = (link)
-          ? option.checks.LINK_IMAGE_LONG_ALT
-          : option.checks.IMAGE_ALT_TOO_LONG;
-        const conditional = (link) ? 'LINK_IMAGE_LONG_ALT' : 'IMAGE_ALT_TOO_LONG';
-        const truncated = truncateString(altText, 600);
-        if (rule) {
-          results.push({
-            element: $el,
-            type: rule.type || 'warning',
-            content: Lang.sprintf(rule.content || conditional, alt.length, truncated),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
-            dismissAll: rule.dismissAll ? conditional : false,
-            developer: rule.developer || false,
-          });
-        }
-      } else if (link) {
-        const rule = (linkTextLength === 0)
-          ? option.checks.LINK_IMAGE_ALT
-          : option.checks.LINK_IMAGE_ALT_AND_TEXT;
-        const conditional = (linkTextLength === 0) ? 'LINK_IMAGE_ALT' : 'LINK_IMAGE_ALT_AND_TEXT';
-
-        if (rule) {
-          // Has both link text and alt text.
-          const linkAccName = computeAccessibleName(link);
-          const removeWhitespace$1 = removeWhitespace(linkAccName);
-          const sanitizedText = sanitizeHTML(removeWhitespace$1);
-
-          const tooltip = (linkTextLength === 0)
-            ? Lang.sprintf('LINK_IMAGE_ALT', altText)
-            : `${Lang.sprintf('LINK_IMAGE_ALT_AND_TEXT', altText, sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`;
-
-          results.push({
-            element: $el,
-            type: rule.type || 'warning',
-            content: rule.content
-              ? Lang.sprintf(rule.content, altText, sanitizedText)
-              : tooltip,
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
-            dismissAll: rule.dismissAll ? conditional : false,
-            developer: rule.developer || false,
-          });
-        }
-      } else if (figure) {
-        // Figure element has same alt and caption text.
-        const duplicate = !!figcaption && (figcaptionText.toLowerCase() === altText.trim().toLowerCase());
-        if (duplicate) {
-          if (option.checks.IMAGE_FIGURE_DUPLICATE_ALT) {
-            results.push({
-              element: $el,
-              type: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.type || 'warning',
-              content: Lang.sprintf(option.checks.IMAGE_FIGURE_DUPLICATE_ALT.content || 'IMAGE_FIGURE_DUPLICATE_ALT', altText),
-              dismiss: prepareDismissal(`FIGDUPLICATE${src}`),
-              dismissAll: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.dismissAll ? 'IMAGE_FIGURE_DUPLICATE_ALT' : false,
-              developer: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.developer || false,
-            });
-          }
-        } else if (option.checks.IMAGE_PASS) {
-          // Figure has alt text!
-          results.push({
-            element: $el,
-            type: option.checks.IMAGE_PASS.type || 'good',
-            content: Lang.sprintf(option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
-            dismiss: prepareDismissal(`FIGIMGPASS${src + altText}`),
-            dismissAll: option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
-            developer: option.checks.IMAGE_PASS.developer || false,
-          });
-        }
-      } else if (option.checks.IMAGE_PASS) {
-        if (!$el.closest('button, [role="button"]')) {
-          // Image has alt text!
-          results.push({
-            element: $el,
-            type: option.checks.IMAGE_PASS.type || 'good',
-            content: Lang.sprintf(option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
-            dismiss: prepareDismissal(`IMAGEPASS${src + altText}`),
-            dismissAll: option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
-            developer: option.checks.IMAGE_PASS.developer || false,
-          });
-        }
-      }
-
-      // Image's title attribute is the same as the alt.
-      // Since this is extra, it's okay if it overlaps "good" annotation.
-      if (titleAttr?.toLowerCase() === alt.toLowerCase()) {
-        if (option.checks.DUPLICATE_TITLE) {
-          results.push({
-            element: $el,
-            type: option.checks.DUPLICATE_TITLE.type || 'warning',
-            content: Lang.sprintf(option.checks.DUPLICATE_TITLE.content || 'DUPLICATE_TITLE'),
-            inline: true,
-            dismiss: prepareDismissal(`ALTDUPLICATETITLE${altText}`),
-            dismissAll: option.checks.DUPLICATE_TITLE.dismissAll ? 'DUPLICATE_TITLE' : false,
-            developer: option.checks.DUPLICATE_TITLE.developer || false,
-          });
-        }
-      }
-    }
-  });
-  return results;
+function showError(error) {
+	customElements.define('sa11y-console-error', ConsoleErrors);
+	const consoleErrors = new ConsoleErrors(error);
+	document.body.appendChild(consoleErrors);
+	throw Error(error);
 }
 
 function checkHeaders(results, option, headingOutline) {
@@ -1936,8 +2124,8 @@ function checkHeaders(results, option, headingOutline) {
     const headingText = sanitizeHTML(removeWhitespace$1);
 
     // Check if heading is within root target area.
-    const rootContainsHeading = Constants.Root.areaToCheck.contains($el);
-    const rootContainsShadowHeading = Constants.Root.areaToCheck.contains($el.getRootNode().host);
+    const rootContainsHeading = Constants.Root.areaToCheck.some((root) => root.contains($el));
+    const rootContainsShadowHeading = Constants.Root.areaToCheck.some((root) => root.contains($el.getRootNode().host));
     const isWithinRoot = rootContainsHeading || rootContainsShadowHeading;
 
     // Determine heading level.
@@ -1946,6 +2134,7 @@ function checkHeaders(results, option, headingOutline) {
     const maxHeadingLength = option.checks.HEADING_LONG.maxLength || 160;
 
     // Default.
+    let test = null;
     let type = null;
     let content = null;
     let developer = null;
@@ -1958,6 +2147,7 @@ function checkHeaders(results, option, headingOutline) {
         const alt = $el.querySelector('img')?.getAttribute('alt');
         if ($el.querySelector('img') && (!alt || alt.trim() === '')) {
           if (option.checks.HEADING_EMPTY_WITH_IMAGE) {
+            test = 'HEADING_EMPTY_WITH_IMAGE';
             type = option.checks.HEADING_EMPTY_WITH_IMAGE.type || 'error';
             content = Lang.sprintf(option.checks.HEADING_EMPTY_WITH_IMAGE.content || 'HEADING_EMPTY_WITH_IMAGE', level);
             developer = option.checks.HEADING_EMPTY_WITH_IMAGE.developer || false;
@@ -1966,6 +2156,7 @@ function checkHeaders(results, option, headingOutline) {
           }
         }
       } else if (option.checks.HEADING_EMPTY) {
+        test = 'HEADING_EMPTY';
         type = option.checks.HEADING_EMPTY.type || 'error';
         content = Lang.sprintf(option.checks.HEADING_EMPTY.content || 'HEADING_EMPTY', level);
         developer = option.checks.HEADING_EMPTY.developer || false;
@@ -1974,6 +2165,7 @@ function checkHeaders(results, option, headingOutline) {
       }
     } else if (level - prevLevel > 1 && i !== 0) {
       if (option.checks.HEADING_SKIPPED_LEVEL) {
+        test = 'HEADING_SKIPPED_LEVEL';
         type = option.checks.HEADING_SKIPPED_LEVEL.type || 'error';
         content = Lang.sprintf(option.checks.HEADING_SKIPPED_LEVEL.content || 'HEADING_SKIPPED_LEVEL', prevLevel, level, truncateString(headingText, 60), truncateString(prevHeadingText, 60), prevLevel + 1);
         developer = option.checks.HEADING_SKIPPED_LEVEL.developer || false;
@@ -1981,6 +2173,7 @@ function checkHeaders(results, option, headingOutline) {
       }
     } else if (i === 0 && level !== 1 && level !== 2) {
       if (option.checks.HEADING_FIRST) {
+        test = 'HEADING_FIRST';
         type = option.checks.HEADING_FIRST.type || 'error';
         content = Lang.sprintf(option.checks.HEADING_FIRST.content || 'HEADING_FIRST');
         developer = option.checks.HEADING_FIRST.developer || false;
@@ -1988,6 +2181,7 @@ function checkHeaders(results, option, headingOutline) {
       }
     } else if (headingLength > maxHeadingLength) {
       if (option.checks.HEADING_LONG) {
+        test = 'HEADING_LONG';
         type = option.checks.HEADING_LONG.type || 'warning';
         content = Lang.sprintf(option.checks.HEADING_LONG.content || 'HEADING_LONG', maxHeadingLength, headingLength);
         developer = option.checks.HEADING_LONG.developer || false;
@@ -1998,6 +2192,7 @@ function checkHeaders(results, option, headingOutline) {
     // Create results object.
     if (content && type) {
       results.push({
+        test,
         element: $el,
         type,
         content,
@@ -2014,20 +2209,23 @@ function checkHeaders(results, option, headingOutline) {
     prevHeadingText = headingText;
 
     // Create an object for heading outline panel.
-    headingOutline.push({
-      element: $el,
-      headingLevel: level,
-      text: headingText,
-      index: i,
-      type,
-      dismiss: prepareDismissal(`H${level + headingText}`),
-      isWithinRoot,
-    });
+    // Filter out specified headings in outlineIgnore and headerIgnore props.
+    if (!Elements.Found.OutlineIgnore.includes($el)) {
+      headingOutline.push({
+        element: $el,
+        headingLevel: level,
+        text: headingText,
+        type,
+        dismiss: prepareDismissal(`H${level + headingText}`),
+        isWithinRoot,
+      });
+    }
   });
 
   // Missing Heading 1
   if (option.checks.HEADING_MISSING_ONE && Elements.Found.HeadingOne.length === 0) {
     results.push({
+      test: 'HEADING_MISSING_ONE',
       type: option.checks.HEADING_MISSING_ONE.type || 'warning',
       content: Lang.sprintf(option.checks.HEADING_MISSING_ONE.content || 'HEADING_MISSING_ONE'),
       dismiss: 'MISSINGH1',
@@ -2117,8 +2315,9 @@ function checkLinkText(results, option) {
 
     // Link text based on COMPUTED ACCESSIBLE NAME.
     const accName = computeAccessibleName($el, Constants.Exclusions.LinkSpan);
-    const stringMatchExclusions = option.linkIgnoreStrings
-      ? accName.replace(option.linkIgnoreStrings, '') : accName;
+    const stringMatchExclusions = Array.isArray(option.linkIgnoreStrings)
+      ? option.linkIgnoreStrings.reduce((result, str) => result.replace(str, ''), accName)
+      : accName;
     const linkText = removeWhitespace(stringMatchExclusions);
 
     // Ignore special characters (except forward slash).
@@ -2181,6 +2380,27 @@ function checkLinkText(results, option) {
     // Remove whitespace and special characters to improve accuracy and minimize false positives.
     const linkTextTrimmed = linkText.replace(/'|"|-|\.|\s+/g, '').toLowerCase();
 
+    // Original preserved text to lowercase.
+    const originalLinkText = $el.textContent.trim().toLowerCase();
+
+    const addStopWordResult = (element, stopword) => {
+      if (option.checks.LINK_STOPWORD) {
+        results.push({
+          test: 'LINK_STOPWORD',
+          element,
+          type: option.checks.LINK_STOPWORD.type || 'error',
+          content: option.checks.LINK_STOPWORD.content
+            ? Lang.sprintf(option.checks.LINK_STOPWORD.content, stopword)
+            : Lang.sprintf('LINK_STOPWORD', stopword) + Lang.sprintf('LINK_TIP'),
+          inline: true,
+          position: 'afterend',
+          dismiss: prepareDismissal(`LINKSTOPWORD${href + linkTextTrimmed}`),
+          dismissAll: option.checks.LINK_STOPWORD.dismissAll ? 'LINK_STOPWORD' : false,
+          developer: option.checks.LINK_STOPWORD.developer || false,
+        });
+      }
+    };
+
     // Don't overlap with Alt Text module.
     if (!$el.querySelectorAll('img').length) {
       // Has aria-hidden.
@@ -2189,6 +2409,7 @@ function checkLinkText(results, option) {
           // If negative tabindex.
           if (option.checks.HIDDEN_FOCUSABLE) {
             results.push({
+              test: 'HIDDEN_FOCUSABLE',
               element: $el,
               type: option.checks.HIDDEN_FOCUSABLE.type || 'error',
               content: Lang.sprintf(option.checks.HIDDEN_FOCUSABLE.content || 'HIDDEN_FOCUSABLE'),
@@ -2200,12 +2421,35 @@ function checkLinkText(results, option) {
             });
           }
         }
-      } else if ((href || href === '') && linkText.length === 0) {
-        // Empty hyperlinks.
+        return;
+      }
+
+      // If link text is ONLY "new window" or similar phrases.
+      if (containsNewWindowPhrases) {
+        const matchedPhrase = Lang._('NEW_WINDOW_PHRASES').find((phrase) => phrase.toLowerCase() === originalLinkText);
+        if (originalLinkText === matchedPhrase) {
+          addStopWordResult($el, matchedPhrase);
+        }
+      }
+
+      // If link text is ONLY strings that were passed in via prop.
+      let isLinkIgnoreStrings = false;
+      if (option.linkIgnoreStrings) {
+        option.linkIgnoreStrings.forEach((string) => {
+          if (originalLinkText === string.toLowerCase()) {
+            addStopWordResult($el, string);
+            isLinkIgnoreStrings = true;
+          }
+        });
+      }
+
+      // Empty hyperlinks.
+      if ((href || href === '') && linkText.length === 0) {
         if (hasAriaLabelledby) {
           // Has ariaLabelledby attribute but empty accessible name.
           if (option.checks.LINK_EMPTY_LABELLEDBY) {
             results.push({
+              test: 'LINK_EMPTY_LABELLEDBY',
               element: $el,
               type: option.checks.LINK_EMPTY_LABELLEDBY.type || 'error',
               content: Lang.sprintf(option.checks.LINK_EMPTY_LABELLEDBY.content || 'LINK_EMPTY_LABELLEDBY'),
@@ -2217,9 +2461,23 @@ function checkLinkText(results, option) {
             });
           }
         } else if ($el.children.length) {
+          // Add correct warning when link text is only linkIgnoreSpan text.
+          let hasStopWordWarning = false;
+          if (option.linkIgnoreSpan) {
+            const spanEl = $el.querySelector(option.linkIgnoreSpan);
+            if (spanEl) {
+              const spanText = stripSpecialCharacters(spanEl.textContent).trim().toLowerCase();
+              if (spanText === originalLinkText) {
+                addStopWordResult($el, spanText);
+                hasStopWordWarning = true;
+              }
+            }
+          }
+
           // Has child elements (e.g. SVG or SPAN) <a><i></i></a>
-          if (option.checks.LINK_EMPTY_NO_LABEL) {
+          if (!hasStopWordWarning && option.checks.LINK_EMPTY_NO_LABEL) {
             results.push({
+              test: 'LINK_EMPTY_NO_LABEL',
               element: $el,
               type: option.checks.LINK_EMPTY_NO_LABEL.type || 'error',
               content: Lang.sprintf(option.checks.LINK_EMPTY_NO_LABEL.content || 'LINK_EMPTY_NO_LABEL'),
@@ -2230,9 +2488,10 @@ function checkLinkText(results, option) {
               developer: option.checks.LINK_EMPTY_NO_LABEL.developer || false,
             });
           }
-        } else if (option.checks.LINK_EMPTY) {
+        } else if (!isLinkIgnoreStrings && option.checks.LINK_EMPTY) {
           // Completely empty <a></a>
           results.push({
+            test: 'LINK_EMPTY',
             element: $el,
             type: option.checks.LINK_EMPTY.type || 'error',
             content: Lang.sprintf(option.checks.LINK_EMPTY.content || 'LINK_EMPTY'),
@@ -2244,26 +2503,13 @@ function checkLinkText(results, option) {
           });
         }
       } else if (error[0] !== null) {
-        // Contains stop words.
-        if (option.checks.LINK_STOPWORD) {
-          results.push({
-            element: $el,
-            type: option.checks.LINK_STOPWORD.type || 'error',
-            content: option.checks.LINK_STOPWORD.content
-              ? Lang.sprintf(option.checks.LINK_STOPWORD.content, error[0])
-              : Lang.sprintf('LINK_STOPWORD', error[0]) + Lang.sprintf('LINK_TIP'),
-            inline: true,
-            position: 'afterend',
-            dismiss: prepareDismissal(`LINKSTOPWORD${href + linkTextTrimmed}`),
-            dismissAll: option.checks.LINK_STOPWORD.dismissAll ? 'LINK_STOPWORD' : false,
-            developer: option.checks.LINK_STOPWORD.developer || false,
-          });
-        }
+        addStopWordResult($el, error[0]);
       } else if (error[2] !== null) {
         // Contains DOI URL in link text.
         if (linkText.length > 8) {
           if (option.checks.LINK_DOI) {
             results.push({
+              test: 'LINK_DOI',
               element: $el,
               type: option.checks.LINK_DOI.type || 'warning',
               content: Lang.sprintf(option.checks.LINK_DOI.content || 'LINK_DOI'),
@@ -2279,6 +2525,7 @@ function checkLinkText(results, option) {
         if (linkText.length > (option.checks.LINK_URL.maxLength || 40)) {
           if (option.checks.LINK_URL) {
             results.push({
+              test: 'LINK_URL',
               element: $el,
               type: option.checks.LINK_URL.type || 'warning',
               content: option.checks.LINK_URL.content
@@ -2303,6 +2550,7 @@ function checkLinkText(results, option) {
         const stopword = checkStopWords(cleanedString, linkStopWords);
         if (option.checks.LINK_STOPWORD_ARIA && stopword !== null) {
           results.push({
+            test: 'LINK_STOPWORD_ARIA',
             element: $el,
             type: option.checks.LINK_STOPWORD_ARIA.type || 'warning',
             content: option.checks.LINK_STOPWORD_ARIA.content
@@ -2316,6 +2564,7 @@ function checkLinkText(results, option) {
         } else if (option.checks.LINK_LABEL) {
           // If the link has any ARIA, append a "Good" link button.
           results.push({
+            test: 'LINK_LABEL',
             element: $el,
             type: option.checks.LINK_LABEL.type || 'good',
             content: option.checks.LINK_LABEL.content
@@ -2333,6 +2582,7 @@ function checkLinkText(results, option) {
         const isVisibleTextInAccessibleName$1 = isVisibleTextInAccessibleName($el);
         if (option.checks.LABEL_IN_NAME && isVisibleTextInAccessibleName$1 && $el.textContent.length !== 0) {
           results.push({
+            test: 'LABEL_IN_NAME',
             element: $el,
             type: option.checks.LABEL_IN_NAME.type || 'warning',
             content: Lang.sprintf(option.checks.LABEL_IN_NAME.content || 'LABEL_IN_NAME', sanitizedText),
@@ -2347,6 +2597,7 @@ function checkLinkText(results, option) {
         // If link contains a special character used as a CTA.
         if (option.checks.LINK_SYMBOLS) {
           results.push({
+            test: 'LINK_SYMBOLS',
             element: $el,
             type: option.checks.LINK_SYMBOLS.type || 'warning',
             content: Lang.sprintf(option.checks.LINK_SYMBOLS.content || 'LINK_SYMBOLS', matchedSymbol),
@@ -2360,6 +2611,7 @@ function checkLinkText(results, option) {
         // Link is ONLY a period, comma, or special character.
         if (option.checks.LINK_EMPTY) {
           results.push({
+            test: 'LINK_EMPTY',
             element: $el,
             type: option.checks.LINK_EMPTY.type || 'error',
             content: Lang.sprintf(option.checks.LINK_EMPTY.content || 'LINK_EMPTY'),
@@ -2376,6 +2628,7 @@ function checkLinkText(results, option) {
       if (error[1] !== null || containsClickPhrase) {
         if (option.checks.LINK_CLICK_HERE) {
           results.push({
+            test: 'LINK_CLICK_HERE',
             element: $el,
             type: option.checks.LINK_CLICK_HERE.type || 'warning',
             content: option.checks.LINK_CLICK_HERE.content
@@ -2393,6 +2646,7 @@ function checkLinkText(results, option) {
       if (getText($el).length !== 0 && titleAttr?.toLowerCase() === linkText.toLowerCase()) {
         if (option.checks.DUPLICATE_TITLE) {
           results.push({
+            test: 'DUPLICATE_TITLE',
             element: $el,
             type: option.checks.DUPLICATE_TITLE.type || 'warning',
             content: Lang.sprintf(option.checks.DUPLICATE_TITLE.content || 'DUPLICATE_TITLE'),
@@ -2414,6 +2668,7 @@ function checkLinkText(results, option) {
           if (option.checks.LINK_IDENTICAL_NAME && !hasAttributes && !ignored) {
             const sanitizedText = sanitizeHTML(linkText);
             results.push({
+              test: 'LINK_IDENTICAL_NAME',
               element: $el,
               type: option.checks.LINK_IDENTICAL_NAME.type || 'warning',
               content: option.checks.LINK_IDENTICAL_NAME.content
@@ -2434,6 +2689,7 @@ function checkLinkText(results, option) {
         if ($el.getAttribute('target')?.toLowerCase() === '_blank' && !fileTypeMatch && !containsNewWindowPhrases) {
           if (option.checks.LINK_NEW_TAB) {
             results.push({
+              test: 'LINK_NEW_TAB',
               element: $el,
               type: option.checks.LINK_NEW_TAB.type || 'warning',
               content: Lang.sprintf(option.checks.LINK_NEW_TAB.content || 'LINK_NEW_TAB'),
@@ -2449,6 +2705,7 @@ function checkLinkText(results, option) {
         if (fileTypeMatch && !containsFileTypePhrases) {
           if (option.checks.LINK_FILE_EXT) {
             results.push({
+              test: 'LINK_FILE_EXT',
               element: $el,
               type: option.checks.LINK_FILE_EXT.type || 'warning',
               content: Lang.sprintf(option.checks.LINK_FILE_EXT.content || 'LINK_FILE_EXT'),
@@ -2458,6 +2715,454 @@ function checkLinkText(results, option) {
               developer: option.checks.LINK_FILE_EXT.developer || false,
             });
           }
+        }
+      }
+    }
+  });
+  return results;
+}
+
+function checkImages(results, option) {
+  const containsAltTextStopWords = (alt) => {
+    const altUrl = [
+      '.avif',
+      '.png',
+      '.jpg',
+      '.jpeg',
+      '.webp',
+      '.gif',
+      '.tiff',
+      '.svg',
+      '.heif',
+      '.heic',
+      'http',
+    ];
+
+    const hit = [null, null, null];
+    altUrl.forEach((word) => {
+      if (alt.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
+        hit[0] = word;
+      } else {
+        // Checking for image dimensions in alt text.
+        const imageDimensions = /\b\d{2,6}\s*x\s*\d{2,6}\b/;
+        const match = alt.toLowerCase().match(imageDimensions);
+        if (match) {
+          [hit[0]] = match;
+        }
+      }
+    });
+
+    const susAltWordsOverride = (option.susAltStopWords) ? option.susAltStopWords.split(',').map((word) => word.trim()) : Lang._('SUS_ALT_STOPWORDS');
+    susAltWordsOverride.forEach((word) => {
+      const susWord = alt.toLowerCase().indexOf(word);
+      if (susWord > -1 && susWord < 6) {
+        hit[1] = word;
+      }
+    });
+
+    Lang._('PLACEHOLDER_ALT_STOPWORDS').forEach((word) => {
+      if (alt.length === word.length && alt.toLowerCase().indexOf(word) >= 0) {
+        hit[2] = word;
+      }
+    });
+
+    // Additional placeholder stopwords to flag as an error.
+    const { extraPlaceholderStopWords } = option;
+    if (extraPlaceholderStopWords.length) {
+      const array = extraPlaceholderStopWords.split(',').map((word) => word.trim());
+      array.forEach((word) => {
+        const susWord = alt.toLowerCase().indexOf(word);
+        if (susWord > -1 && susWord < 6) {
+          hit[2] = word;
+        }
+      });
+    }
+
+    return hit;
+  };
+
+  Elements.Found.Images.forEach(($el) => {
+    const alt = (computeAriaLabel($el) === 'noAria') ? $el.getAttribute('alt') : computeAriaLabel($el);
+
+    // If selectors passed via prop, it will treat that image as an unlinked image.
+    const link = $el.closest(option.imageWithinLightbox
+      ? `a[href]:not(${option.imageWithinLightbox})`
+      : 'a[href]');
+
+    // Image's source for key.
+    const src = ($el.getAttribute('src')) ? $el.getAttribute('src') : $el.getAttribute('srcset');
+
+    // Process link text exclusions.
+    const linkSpanExclusions = link
+      ? fnIgnore(link, Constants.Exclusions.LinkSpan).textContent : '';
+
+    const stringMatchExclusions = Array.isArray(option.linkIgnoreStrings)
+      ? option.linkIgnoreStrings.reduce((result, str) => result.replace(str, ''), linkSpanExclusions)
+      : linkSpanExclusions;
+
+    const linkTextLength = link
+      ? removeWhitespace(stringMatchExclusions).length : 0;
+
+    // Has aria-hidden.
+    if ($el.getAttribute('aria-hidden') === 'true') {
+      return;
+    }
+
+    // Ignore tracking pixels without explicit aria-hidden or nullified alt.
+    if ($el.height < 2 && $el.width < 2 && (isElementHidden($el) || alt === '')) {
+      return;
+    }
+
+    if (link && link.getAttribute('aria-hidden') === 'true') {
+      // If linked image has aria-hidden, but is still focusable.
+      const unfocusable = link.getAttribute('tabindex') === '-1';
+      if (option.checks.HIDDEN_FOCUSABLE && !unfocusable) {
+        results.push({
+          test: 'HIDDEN_FOCUSABLE',
+          element: $el,
+          type: option.checks.HIDDEN_FOCUSABLE.type || 'error',
+          content: Lang.sprintf(option.checks.HIDDEN_FOCUSABLE.content || 'HIDDEN_FOCUSABLE'),
+          dismiss: prepareDismissal(`IMGHIDDENFOCUSABLE${src}`),
+          dismissAll: option.checks.HIDDEN_FOCUSABLE.dismissAll
+            ? 'LINK_HIDDEN_FOCUSABLE' : false,
+          developer: option.checks.HIDDEN_FOCUSABLE.developer || true,
+        });
+      }
+      return;
+    }
+
+    // If alt is missing.
+    if (alt === null) {
+      if (link) {
+        const rule = (linkTextLength === 0)
+          ? option.checks.MISSING_ALT_LINK
+          : option.checks.MISSING_ALT_LINK_HAS_TEXT;
+        const conditional = linkTextLength === 0
+          ? 'MISSING_ALT_LINK' : 'MISSING_ALT_LINK_HAS_TEXT';
+        if (rule) {
+          results.push({
+            test: conditional,
+            element: $el,
+            type: rule.type || 'error',
+            content: Lang.sprintf(rule.content || conditional),
+            dismiss: prepareDismissal(`${conditional + src + linkTextLength}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (option.checks.MISSING_ALT) {
+        // General failure message if image is missing alt.
+        results.push({
+          test: 'MISSING_ALT',
+          element: $el,
+          type: option.checks.MISSING_ALT.type || 'error',
+          content: Lang.sprintf(option.checks.MISSING_ALT.content || 'MISSING_ALT'),
+          dismiss: prepareDismissal(`IMGNOALT${src}`),
+          dismissAll: option.checks.MISSING_ALT.dismissAll ? 'MISSING_ALT' : false,
+          developer: option.checks.MISSING_ALT.developer || false,
+        });
+      }
+    } else {
+      // If image has alt.
+      const sanitizedAlt = sanitizeHTML(alt);
+      const altText = removeWhitespace(sanitizedAlt);
+      const error = containsAltTextStopWords(altText);
+      const hasAria = $el.getAttribute('aria-label') || $el.getAttribute('aria-labelledby');
+      const titleAttr = $el.getAttribute('title');
+      const decorative = (alt === '');
+
+      // Figure elements.
+      const figure = $el.closest('figure');
+      const figcaption = figure?.querySelector('figcaption');
+      const figcaptionText = (figcaption) ? figcaption.textContent.trim() : '';
+
+      // Maximum alt text length
+      const maxAltCharactersLinks = option.checks.LINK_IMAGE_LONG_ALT.maxLength || 250;
+      const maxAltCharacters = option.checks.IMAGE_ALT_TOO_LONG.maxLength || 250;
+
+      // If aria-label or aria-labelledby returns empty or invalid.
+      if (option.checks.MISSING_ALT) {
+        if (hasAria && altText === '') {
+          results.push({
+            test: 'MISSING_ALT',
+            element: $el,
+            type: option.checks.MISSING_ALT.type || 'error',
+            content: Lang.sprintf(option.checks.MISSING_ALT.content || 'MISSING_ALT'),
+            dismiss: prepareDismissal(`IMGNOALTARIA${src}`),
+            dismissAll: option.checks.MISSING_ALT.dismissAll ? 'MISSING_ALT' : false,
+            developer: option.checks.MISSING_ALT.developer || false,
+          });
+          return;
+        }
+      }
+
+      // If alt text starts with a very specific string provided via props.
+      const startsWithSpecificAlt = option.altPlaceholder && option.altPlaceholder.some((text) => alt.toLowerCase().startsWith(text.toLowerCase()));
+
+      // Decorative images.
+      if (decorative || startsWithSpecificAlt) {
+        const carouselSources = option.checks.IMAGE_DECORATIVE_CAROUSEL.sources;
+        const carousel = carouselSources ? $el.closest(carouselSources) : '';
+        if (carousel) {
+          const numberOfSlides = carousel.querySelectorAll('img');
+          const rule = (numberOfSlides.length === 1)
+            ? option.checks.IMAGE_DECORATIVE
+            : option.checks.IMAGE_DECORATIVE_CAROUSEL;
+          const conditional = (numberOfSlides.length === 1)
+            ? 'IMAGE_DECORATIVE'
+            : 'IMAGE_DECORATIVE_CAROUSEL';
+          if (rule) {
+            results.push({
+              test: conditional,
+              element: $el,
+              type: rule.type || 'warning',
+              content: Lang.sprintf(rule.content || conditional),
+              dismiss: prepareDismissal(conditional + src),
+              dismissAll: rule.dismissAll ? conditional : false,
+              developer: rule.developer || false,
+            });
+          }
+        } else if (link) {
+          const rule = (linkTextLength === 0)
+            ? option.checks.LINK_IMAGE_NO_ALT_TEXT
+            : option.checks.LINK_IMAGE_TEXT;
+          const conditional = linkTextLength === 0
+            ? 'LINK_IMAGE_NO_ALT_TEXT' : 'LINK_IMAGE_TEXT';
+          if (rule) {
+            results.push({
+              test: conditional,
+              element: $el,
+              type: rule.type || (linkTextLength === 0 ? 'error' : 'good'),
+              content: Lang.sprintf(rule.content || conditional),
+              dismiss: prepareDismissal(`${conditional + src + linkTextLength}`),
+              dismissAll: rule.dismissAll ? conditional : false,
+              developer: rule.developer || false,
+            });
+          }
+        } else if (figure) {
+          const rule = (figcaption && figcaptionText.length)
+            ? option.checks.IMAGE_FIGURE_DECORATIVE
+            : option.checks.IMAGE_DECORATIVE;
+          const conditional = figcaption && figcaptionText.length
+            ? 'IMAGE_FIGURE_DECORATIVE' : 'IMAGE_DECORATIVE';
+          if (rule) {
+            results.push({
+              test: conditional,
+              element: $el,
+              type: rule.type || 'warning',
+              content: Lang.sprintf(rule.content || conditional),
+              dismiss: prepareDismissal(`${conditional + src + figcaptionText}`),
+              dismissAll: rule.dismissAll ? conditional : false,
+              developer: rule.developer || false,
+            });
+          }
+        } else if (option.checks.IMAGE_DECORATIVE) {
+          results.push({
+            test: 'IMAGE_DECORATIVE',
+            element: $el,
+            type: option.checks.IMAGE_DECORATIVE.type || 'warning',
+            content: Lang.sprintf(option.checks.IMAGE_DECORATIVE.content || 'IMAGE_DECORATIVE'),
+            dismiss: prepareDismissal(`DECIMAGE${src}`),
+            dismissAll: option.checks.IMAGE_DECORATIVE.dismissAll ? 'IMAGE_DECORATIVE' : false,
+            developer: option.checks.IMAGE_DECORATIVE.developer || false,
+          });
+        }
+        return;
+      }
+
+      // Alt is unpronounceable.
+      const unpronounceable = (link)
+        ? option.checks.LINK_ALT_UNPRONOUNCEABLE : option.checks.ALT_UNPRONOUNCEABLE;
+      if (unpronounceable) {
+        if (alt.replace(/"|'|\?|\.|-|\s+/g, '') === '' && linkTextLength === 0) {
+          const conditional = (link) ? 'LINK_ALT_UNPRONOUNCEABLE' : 'ALT_UNPRONOUNCEABLE';
+          results.push({
+            test: conditional,
+            element: $el,
+            type: unpronounceable.type || 'error',
+            content: Lang.sprintf(unpronounceable.content || conditional, altText),
+            dismiss: prepareDismissal(`UNPRONOUNCEABLE${src}`),
+            dismissAll: unpronounceable.dismissAll ? 'ALT_UNPRONOUNCEABLE' : false,
+            developer: unpronounceable.developer || false,
+          });
+          return;
+        }
+      }
+
+      // Potentially contains auto-generated placeholder text.
+      const maybeBadAlt = (link)
+        ? option.checks.LINK_ALT_MAYBE_BAD : option.checks.ALT_MAYBE_BAD;
+      const isTooLongSingleWord = new RegExp(`^\\S{${maybeBadAlt.minLength || 15},}$`);
+      const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(alt);
+
+      // Alt text quality.
+      if (error[0] !== null) {
+        // Has stop words.
+        const rule = (link)
+          ? option.checks.LINK_ALT_FILE_EXT
+          : option.checks.ALT_FILE_EXT;
+        const conditional = (link) ? 'LINK_ALT_FILE_EXT' : 'ALT_FILE_EXT';
+        if (rule) {
+          results.push({
+            test: conditional,
+            element: $el,
+            type: rule.type || 'error',
+            content: Lang.sprintf(rule.content || conditional, error[0], altText),
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (error[2] !== null) {
+        // Placeholder words.
+        const rule = (link)
+          ? option.checks.LINK_PLACEHOLDER_ALT
+          : option.checks.ALT_PLACEHOLDER;
+        const conditional = (link) ? 'LINK_PLACEHOLDER_ALT' : 'ALT_PLACEHOLDER';
+        if (rule) {
+          results.push({
+            test: conditional,
+            element: $el,
+            type: rule.type || 'error',
+            content: Lang.sprintf(rule.content || conditional, altText),
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (error[1] !== null) {
+        // Suspicious words.
+        const rule = (link)
+          ? option.checks.LINK_SUS_ALT
+          : option.checks.SUS_ALT;
+        const conditional = (link) ? 'LINK_SUS_ALT' : 'SUS_ALT';
+        if (rule) {
+          results.push({
+            test: conditional,
+            element: $el,
+            type: rule.type || 'warning',
+            content: Lang.sprintf(rule.content || conditional, error[1], altText),
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (maybeBadAlt && (isTooLongSingleWord.test(alt) && containsNonAlphaChar)) {
+        // Alt text is a single word greater than 15 characters that is potentially auto-generated.
+        const conditional = (link) ? 'LINK_ALT_MAYBE_BAD' : 'ALT_MAYBE_BAD';
+        results.push({
+          test: conditional,
+          element: $el,
+          type: maybeBadAlt.type || 'warning',
+          content: Lang.sprintf(maybeBadAlt.content || conditional, altText),
+          dismiss: prepareDismissal(`${conditional + src + altText}`),
+          dismissAll: maybeBadAlt.dismissAll ? conditional : false,
+          developer: maybeBadAlt.developer || false,
+        });
+      } else if (link
+        ? alt.length > maxAltCharactersLinks
+        : alt.length > maxAltCharacters) {
+        // Alt is too long.
+        const rule = (link)
+          ? option.checks.LINK_IMAGE_LONG_ALT
+          : option.checks.IMAGE_ALT_TOO_LONG;
+        const conditional = (link) ? 'LINK_IMAGE_LONG_ALT' : 'IMAGE_ALT_TOO_LONG';
+        const truncated = truncateString(altText, 600);
+        if (rule) {
+          results.push({
+            test: conditional,
+            element: $el,
+            type: rule.type || 'warning',
+            content: Lang.sprintf(rule.content || conditional, alt.length, truncated),
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (link) {
+        const rule = (linkTextLength === 0)
+          ? option.checks.LINK_IMAGE_ALT
+          : option.checks.LINK_IMAGE_ALT_AND_TEXT;
+        const conditional = (linkTextLength === 0) ? 'LINK_IMAGE_ALT' : 'LINK_IMAGE_ALT_AND_TEXT';
+
+        if (rule) {
+          // Has both link text and alt text.
+          const linkAccName = computeAccessibleName(link);
+          const removeWhitespace$1 = removeWhitespace(linkAccName);
+          const sanitizedText = sanitizeHTML(removeWhitespace$1);
+
+          const tooltip = (linkTextLength === 0)
+            ? Lang.sprintf('LINK_IMAGE_ALT', altText)
+            : `${Lang.sprintf('LINK_IMAGE_ALT_AND_TEXT', altText, sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`;
+
+          results.push({
+            test: conditional,
+            element: $el,
+            type: rule.type || 'warning',
+            content: rule.content
+              ? Lang.sprintf(rule.content, altText, sanitizedText)
+              : tooltip,
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (figure) {
+        // Figure element has same alt and caption text.
+        const duplicate = !!figcaption && (figcaptionText.toLowerCase() === altText.trim().toLowerCase());
+        if (duplicate) {
+          if (option.checks.IMAGE_FIGURE_DUPLICATE_ALT) {
+            results.push({
+              test: 'IMAGE_FIGURE_DUPLICATE_ALT',
+              element: $el,
+              type: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.type || 'warning',
+              content: Lang.sprintf(option.checks.IMAGE_FIGURE_DUPLICATE_ALT.content || 'IMAGE_FIGURE_DUPLICATE_ALT', altText),
+              dismiss: prepareDismissal(`FIGDUPLICATE${src}`),
+              dismissAll: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.dismissAll ? 'IMAGE_FIGURE_DUPLICATE_ALT' : false,
+              developer: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.developer || false,
+            });
+          }
+        } else if (option.checks.IMAGE_PASS) {
+          // Figure has alt text!
+          results.push({
+            test: 'IMAGE_PASS',
+            element: $el,
+            type: option.checks.IMAGE_PASS.type || 'good',
+            content: Lang.sprintf(option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
+            dismiss: prepareDismissal(`FIGIMGPASS${src + altText}`),
+            dismissAll: option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
+            developer: option.checks.IMAGE_PASS.developer || false,
+          });
+        }
+      } else if (option.checks.IMAGE_PASS) {
+        if (!$el.closest('button, [role="button"]')) {
+          // Image has alt text!
+          results.push({
+            test: 'IMAGE_PASS',
+            element: $el,
+            type: option.checks.IMAGE_PASS.type || 'good',
+            content: Lang.sprintf(option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
+            dismiss: prepareDismissal(`IMAGEPASS${src + altText}`),
+            dismissAll: option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
+            developer: option.checks.IMAGE_PASS.developer || false,
+          });
+        }
+      }
+
+      // Image's title attribute is the same as the alt.
+      // Since this is extra, it's okay if it overlaps "good" annotation.
+      if (titleAttr?.toLowerCase() === alt.toLowerCase()) {
+        if (option.checks.DUPLICATE_TITLE) {
+          results.push({
+            test: 'DUPLICATE_TITLE',
+            element: $el,
+            type: option.checks.DUPLICATE_TITLE.type || 'warning',
+            content: Lang.sprintf(option.checks.DUPLICATE_TITLE.content || 'DUPLICATE_TITLE'),
+            inline: true,
+            dismiss: prepareDismissal(`ALTDUPLICATETITLE${altText}`),
+            dismissAll: option.checks.DUPLICATE_TITLE.dismissAll ? 'DUPLICATE_TITLE' : false,
+            developer: option.checks.DUPLICATE_TITLE.developer || false,
+          });
         }
       }
     }
@@ -2495,6 +3200,7 @@ function checkLabels(results, option) {
       if (type === 'image') {
         if (option.checks.LABELS_MISSING_IMAGE_INPUT && (!alt || alt.trim() === '') && !hasAria && !hasTitle) {
           results.push({
+            test: 'LABELS_MISSING_IMAGE_INPUT',
             element: $el,
             type: option.checks.LABELS_MISSING_IMAGE_INPUT.type || 'error',
             content: Lang.sprintf(option.checks.LABELS_MISSING_IMAGE_INPUT.content || 'LABELS_MISSING_IMAGE_INPUT'),
@@ -2510,6 +3216,7 @@ function checkLabels(results, option) {
       if (type === 'reset') {
         if (option.checks.LABELS_INPUT_RESET) {
           results.push({
+            test: 'LABELS_INPUT_RESET',
             element: $el,
             type: option.checks.LABELS_INPUT_RESET.type || 'warning',
             content: Lang.sprintf(option.checks.LABELS_INPUT_RESET.content || 'LABELS_INPUT_RESET'),
@@ -2526,6 +3233,7 @@ function checkLabels(results, option) {
         if (inputName.length === 0) {
           if (option.checks.LABELS_MISSING_LABEL) {
             results.push({
+              test: 'LABELS_MISSING_LABEL',
               element: $el,
               type: option.checks.LABELS_MISSING_LABEL.type || 'error',
               content: Lang.sprintf(option.checks.LABELS_MISSING_LABEL.content || 'LABELS_MISSING_LABEL'),
@@ -2537,6 +3245,7 @@ function checkLabels(results, option) {
         } else if (option.checks.LABELS_ARIA_LABEL_INPUT) {
           const sanitizedText = sanitizeHTML(inputName);
           results.push({
+            test: 'LABELS_ARIA_LABEL_INPUT',
             element: $el,
             type: option.checks.LABELS_ARIA_LABEL_INPUT.type || 'warning',
             content: option.checks.LABELS_ARIA_LABEL_INPUT.content
@@ -2564,6 +3273,7 @@ function checkLabels(results, option) {
         if (!Elements.Found.Labels.some((label) => label.getAttribute('for') === id)) {
           if (option.checks.LABELS_NO_FOR_ATTRIBUTE) {
             results.push({
+              test: 'LABELS_NO_FOR_ATTRIBUTE',
               element: $el,
               type: option.checks.LABELS_NO_FOR_ATTRIBUTE.type || 'error',
               content: Lang.sprintf(option.checks.LABELS_NO_FOR_ATTRIBUTE.content || 'LABELS_NO_FOR_ATTRIBUTE', id),
@@ -2576,6 +3286,7 @@ function checkLabels(results, option) {
       } else if (option.checks.LABELS_MISSING_LABEL) {
         // No id!
         results.push({
+          test: 'LABELS_MISSING_LABEL',
           element: $el,
           type: option.checks.LABELS_MISSING_LABEL.type || 'error',
           content: Lang.sprintf(option.checks.LABELS_MISSING_LABEL.content || 'LABELS_MISSING_LABEL'),
@@ -2588,6 +3299,7 @@ function checkLabels(results, option) {
       // Avoid using placeholder attributes.
       if (option.checks.LABELS_PLACEHOLDER && $el.placeholder && $el.placeholder !== 0) {
         results.push({
+          test: 'LABELS_PLACEHOLDER',
           element: $el,
           type: option.checks.LABELS_PLACEHOLDER.type || 'warning',
           content: Lang.sprintf(option.checks.LABELS_PLACEHOLDER.content || 'LABELS_PLACEHOLDER'),
@@ -2608,6 +3320,7 @@ function checkQA(results, option) {
   if (option.checks.QA_BAD_LINK) {
     Elements.Found.CustomErrorLinks.forEach(($el) => {
       results.push({
+        test: 'QA_BAD_LINK',
         element: $el,
         type: option.checks.QA_BAD_LINK.type || 'error',
         content: Lang.sprintf(option.checks.QA_BAD_LINK.content || 'QA_BAD_LINK', $el),
@@ -2627,6 +3340,7 @@ function checkQA(results, option) {
       const text = getText($el);
       if (text.length !== 0 && text.length > 400) {
         results.push({
+          test: 'QA_STRONG_ITALICS',
           element: $el.parentNode,
           type: option.checks.QA_STRONG_ITALICS.type || 'warning',
           content: Lang.sprintf(option.checks.QA_STRONG_ITALICS.content || 'QA_STRONG_ITALICS'),
@@ -2672,6 +3386,7 @@ function checkQA(results, option) {
           // If reference ID doesn't exist.
           if (!targetElement) {
             results.push({
+              test: 'QA_IN_PAGE_LINK',
               element: $el,
               type: option.checks.QA_IN_PAGE_LINK.type || 'error',
               content: Lang.sprintf(option.checks.QA_IN_PAGE_LINK.content || 'QA_IN_PAGE_LINK'),
@@ -2687,6 +3402,7 @@ function checkQA(results, option) {
       // Manually inspect documents & PDF for accessibility.
       if (option.checks.QA_DOCUMENT && hasExtension) {
         results.push({
+          test: 'QA_DOCUMENT',
           element: $el,
           type: option.checks.QA_DOCUMENT.type || 'warning',
           content: Lang.sprintf(option.checks.QA_DOCUMENT.content || 'QA_DOCUMENT'),
@@ -2697,6 +3413,7 @@ function checkQA(results, option) {
         });
       } else if (option.checks.QA_PDF && hasPDF) {
         results.push({
+          test: 'QA_PDF',
           element: $el,
           type: option.checks.QA_PDF.type || 'warning',
           content: Lang.sprintf(option.checks.QA_PDF.content || 'QA_PDF'),
@@ -2718,6 +3435,7 @@ function checkQA(results, option) {
       if (text.length !== 0 && text.length < 25) {
         const sanitizedText = sanitizeHTML(text);
         results.push({
+          test: 'QA_BLOCKQUOTE',
           element: $el,
           type: option.checks.QA_BLOCKQUOTE.type || 'warning',
           content: Lang.sprintf(option.checks.QA_BLOCKQUOTE.content || 'QA_BLOCKQUOTE', sanitizedText),
@@ -2739,6 +3457,7 @@ function checkQA(results, option) {
       const key = prepareDismissal(`TABLE${$el.textContent}`);
       if (option.checks.TABLES_MISSING_HEADINGS && tableHeaders.length === 0) {
         results.push({
+          test: 'TABLES_MISSING_HEADINGS',
           element: $el,
           type: option.checks.TABLES_MISSING_HEADINGS.type || 'error',
           content: Lang.sprintf(option.checks.TABLES_MISSING_HEADINGS.content || 'TABLES_MISSING_HEADINGS'),
@@ -2750,6 +3469,7 @@ function checkQA(results, option) {
       if (option.checks.TABLES_SEMANTIC_HEADING && semanticHeadings.length > 0) {
         semanticHeadings.forEach((heading) => {
           results.push({
+            test: 'TABLES_SEMANTIC_HEADING',
             element: heading,
             type: option.checks.TABLES_SEMANTIC_HEADING.type || 'error',
             content: Lang.sprintf(option.checks.TABLES_SEMANTIC_HEADING.content || 'TABLES_SEMANTIC_HEADING'),
@@ -2762,6 +3482,7 @@ function checkQA(results, option) {
       tableHeaders.forEach((th) => {
         if (option.checks.TABLES_EMPTY_HEADING && th.textContent.trim().length === 0) {
           results.push({
+            test: 'TABLES_EMPTY_HEADING',
             element: th,
             type: option.checks.TABLES_EMPTY_HEADING.type || 'error',
             content: Lang.sprintf(option.checks.TABLES_EMPTY_HEADING.content || 'TABLES_EMPTY_HEADING'),
@@ -2781,6 +3502,7 @@ function checkQA(results, option) {
   if (option.checks.QA_FAKE_HEADING) {
     const addResult = (element, sanitizedText) => {
       results.push({
+        test: 'QA_FAKE_HEADING',
         element,
         type: option.checks.QA_FAKE_HEADING.type || 'warning',
         content: Lang.sprintf(option.checks.QA_FAKE_HEADING.content || 'QA_FAKE_HEADING', sanitizedText),
@@ -2925,6 +3647,7 @@ function checkQA(results, option) {
           }
         } if (hit) {
           results.push({
+            test: 'QA_FAKE_LIST',
             element: p,
             type: option.checks.QA_FAKE_LIST.type || 'warning',
             content: Lang.sprintf(option.checks.QA_FAKE_LIST.content || 'QA_FAKE_LIST', firstPrefix),
@@ -2965,6 +3688,7 @@ function checkQA(results, option) {
 
       if (detectUpperCase && detectUpperCase[0].length > 10) {
         results.push({
+          test: 'QA_UPPERCASE',
           element: $el,
           type: option.checks.QA_UPPERCASE.type || 'warning',
           content: Lang.sprintf(option.checks.QA_UPPERCASE.content || 'QA_UPPERCASE'),
@@ -2986,6 +3710,7 @@ function checkQA(results, option) {
   // Check underlined text. Created by Brian Teeman!
   const addUnderlineResult = ($el) => {
     results.push({
+      test: 'QA_UNDERLINE',
       element: $el,
       type: option.checks.QA_UNDERLINE.type || 'warning',
       content: Lang.sprintf(option.checks.QA_UNDERLINE.content || 'QA_UNDERLINE'),
@@ -2998,6 +3723,7 @@ function checkQA(results, option) {
 
   const addJustifyResult = ($el) => {
     results.push({
+      test: 'QA_JUSTIFY',
       element: $el,
       type: option.checks.QA_JUSTIFY.type || 'warning',
       content: Lang.sprintf(option.checks.QA_JUSTIFY.content || 'QA_JUSTIFY'),
@@ -3009,6 +3735,7 @@ function checkQA(results, option) {
 
   const addSmallTextResult = ($el) => {
     results.push({
+      test: 'QA_SMALL_TEXT',
       element: $el,
       type: option.checks.QA_SMALL_TEXT.type || 'warning',
       content: Lang.sprintf(option.checks.QA_SMALL_TEXT.content || 'QA_SMALL_TEXT'),
@@ -3086,6 +3813,7 @@ function checkQA(results, option) {
       const text = getText($el);
       if (text.length >= 80) {
         results.push({
+          test: 'QA_SUBSCRIPT',
           element: $el,
           type: option.checks.QA_SUBSCRIPT.type || 'warning',
           content: Lang.sprintf(option.checks.QA_SUBSCRIPT.content || 'QA_SUBSCRIPT'),
@@ -3107,6 +3835,7 @@ function checkQA(results, option) {
       const component = $el.querySelector(sources);
       if (component) {
         results.push({
+          test: 'QA_NESTED_COMPONENTS',
           element: $el,
           type: option.checks.QA_NESTED_COMPONENTS.type || 'warning',
           content: Lang.sprintf(option.checks.QA_NESTED_COMPONENTS.content || 'QA_NESTED_COMPONENTS'),
@@ -3119,328 +3848,6 @@ function checkQA(results, option) {
   }
 
   return results;
-}
-
-/*=============== Utilities ================*/
-
-function getElements(selector, desiredRoot, exclude) {
-	exclude = exclude === false ? [] : exclude;
-	return find(selector, desiredRoot, exclude);
-}
-function findElements (key, selector, rootRestrict = true) {
-	// Legacy support for deprecated code.
-	const desiredRoot = rootRestrict ? 'root' : 'document';
-	const exclude = rootRestrict ? [] : Constants.Exclusions.Sa11yElements;
-	Elements.Found[key] = find( selector, desiredRoot, exclude );
-}
-
-// First step in checkAll is getting a fresh set of elements to check.
-function buildElementList () {
-
-	// Check for ignoreAll elements.
-	State.ignoreAll = Options.ignoreAllIfAbsent && document.querySelector(`:is(${Options.ignoreAllIfAbsent})`) === null;
-	if (!State.ignoreAll && !!Options.ignoreAllIfPresent) {
-		State.ignoreAll = document.querySelector(`:is(${Options.ignoreAllIfPresent})`) !== null;
-	}
-
-	if ( State.incremental ) {
-		State.oldResults = Results;
-	}
-	// Reset counts
-	Results.length = 0;
-	State.elements = [];
-	State.mediaCount = 0;
-	State.headingOutline = [];
-
-	for (let i = 0; i < State.roots.length; i++) {
-		if (Options.fixedRoots) {
-			State.roots[i].dataset.ed11yRoot = `${i}`;
-		}
-		if (State.roots[i].shadowRoot) {
-			State.roots.setAttribute('data-ed11y-has-shadow-root', 'true');
-			detectShadow(State.roots[i]);
-			State.roots[i] = State.roots[i].shadowRoot;
-		}
-		else {
-			detectShadow(State.roots[i]);
-		}
-
-		Constants.initializeRoot(Options.checkRoots, Options.checkRoots); // @todo release merge readability, add multiroot.
-
-		// Find all web components on the page.
-		findShadowComponents(Options);
-
-		// Find and cache elements.
-		Elements.initializeElements(Options);
-		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
-		if (typeof Options.editableContent === 'string') {
-			findElements('editable', Options.editableContent, false);
-		}
-		else {
-			Elements.Found.editable = Options.editableContent;
-		}
-		if (Options.inlineAlerts && Elements.Found.editable.length > 0) {
-			Options.inlineAlerts = false;
-			console.warn('Editable content detected; Editoria11y inline alerts disabled');
-		}
-		if (Options.embeddedContent) ;
-		if (Options.panelNoCover) {
-			// Moves panel off conflicting widgets.
-			findElements('panelNoCover', Options.panelNoCover, false);
-		}
-	}
-}
-
-function parents(el) {
-  let nodes = [];
-  nodes.push(el);
-  while (el && !!el.parentElement && el.parentElement.tagName !== 'HTML') {
-    nodes.push(el.parentElement);
-    el = el.parentElement;
-  }
-  return nodes;
-}
-
-function resetClass(classes) {
-  classes?.forEach((el) => {
-    let thisClass = el;
-    findElements('reset', `.${thisClass}`);
-    Elements.Found.reset?.forEach(el => {
-      el.classList.remove(thisClass);
-    });
-  });
-}
-
-function visibleElement(el) {
-  // Checks if this element is visible. Used in parent iterators.
-  // false is definitely invisible, true requires continued iteration to tell.
-  // Todo postpone: Check for offscreen?
-  if (el) {
-    if (!el.checkVisibility({
-      opacityProperty: true,
-      visibilityProperty: true,
-    })) {
-      return false;
-    }
-    let style = window.getComputedStyle(el);
-    return !(el.closest('.sr-only, .visually-hidden') ||
-      style.getPropertyValue('z-index') < 0 ||
-      (style.getPropertyValue('overflow') === 'hidden' &&
-        ( el.offsetWidth < 10 ||
-          el.offsetHeight < 10 )
-      )
-    );
-  }
-}
-function visible(el) {
-  // Recurse element and ancestors to make sure it is visible
-  if (!visibleElement(el)) {
-    // Element is hidden
-    return false;
-  } else {
-    // Element is not known to be hidden.
-    let theParents = parents(el);
-    let visibleParent = (parent) => visibleElement(parent);
-    return theParents.every(visibleParent);
-  }
-}
-function firstVisibleParent(el) {
-  let parent = el.parentElement;
-  if (parent) {
-    // Parent exists
-    if (!visibleElement(parent)) {
-      // Recurse
-      parent = firstVisibleParent(parent);
-      return parent;
-    } else {
-      // Element is visible
-      return parent;
-    }
-  } else {
-    // No visible parents.
-    return false;
-  }
-}
-function detectShadow (container) {
-  if (Options.autoDetectShadowComponents) {
-
-		const select = `*:not(${Constants.Exclusions.Container.join(', ')}, .ed11y-element)`;
-
-    let search;
-    if (container.shadowRoot && container.shadowRoot.mode === 'open') {
-      if (!container.matches('[data-ed11y-has-shadow-root]')) {
-        container.setAttribute('data-ed11y-has-shadow-root', 'true');
-        UI.attachCSS(container.shadowRoot);
-        UI.attachCSS(container);
-      }
-      search = container.shadowRoot.querySelectorAll(select);
-    } else {
-      search = container.querySelectorAll(select);
-    }
-    search?.forEach((component) => {
-      if (component.shadowRoot && component.shadowRoot.mode === 'open') {
-        detectShadow(component);
-      }
-    });
-  } else if (Options.shadowComponents) {
-    const providedShadow = container.querySelectorAll(Options.shadowComponents);
-    providedShadow.forEach((component) => {
-      if (component.shadowRoot && component.shadowRoot.mode === 'open') {
-        if (!container.matches('[data-ed11y-has-shadow-root]')){
-          component.setAttribute('data-ed11y-has-shadow-root', 'true');
-          UI.attachCSS(component.shadowRoot);
-          UI.attachCSS(component);
-        }
-        detectShadow(component);
-      } else {
-        console.warn(`Editoria11y: A specified shadow host has no shadowRoot: ${component.tagName}`);
-      }
-    });
-  }
-}
-
-function pauseObservers() {
-	State.watching?.forEach(observer => {
-		observer.observer.disconnect();
-	});
-}
-
-function resumeObservers() {
-	State.watching?.forEach(observer => {
-		observer.observer.observe(observer.root, observer.config);
-	});
-}
-
-function checkRunPrevent() {
-	let preventCheck = Options.preventCheckingIfPresent ?
-		document.querySelector(Options.preventCheckingIfPresent) :
-		false;
-	if (preventCheck) {
-		console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${Options.preventCheckingIfPresent}"` );
-	} else if (!preventCheck && !!Options.preventCheckingIfAbsent) {
-		preventCheck = document.querySelector(`:is(${Options.preventCheckingIfAbsent})`) === null;
-		if (preventCheck) {
-			console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${Options.preventCheckingIfAbsent}"`);
-		}
-	}
-	return preventCheck;
-}
-
-function resetResults(incremental) {
-	State.jumpList = [];
-	State.openTip = {
-		button: false,
-		tip: false,
-	};
-	State.lastOpenTip = -1;
-	resetClass([
-		'ed11y-ring-red',
-		'ed11y-ring-yellow',
-		'ed11y-hidden-highlight',
-		'ed11y-warning-inline',
-		'ed11y-warning-block',
-		'ed11y-error-block',
-		'ed11y-error-inline',
-	]);
-	// Reset insertions into body content.
-	if (incremental) {
-		Elements.Found.reset = getElements('ed11y-element-highlight', 'document', []);
-	} else {
-		Elements.Found.reset = getElements('ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', 'document', []);
-	}
-	Elements.Found.reset?.forEach((el) => el.remove());
-
-	// Flicker prevention -- leave old tip in place for 100ms.
-	//findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
-	Elements.Found.delayedReset = getElements('ed11y-element-result, ed11y-element-tip', 'document', []);
-
-	window.setTimeout(()=> {
-		Elements.Found.delayedReset?.forEach((el) => el.remove());
-	}, 100, Elements.Found.delayedReset);
-
-	if (typeof UI.panelJumpNext === 'function') {
-		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = State.english ? Lang._('buttonFirstContent')
-			: Lang._('SKIP_TO_ISSUE') + ' 1';
-	}
-	// Reset insertions into body content.
-}
-
-function newIncrementalResults() {
-	if (State.forceFullCheck || Results.length !== State.oldResults.length) {
-		return true;
-	}
-	let newResultString = `${State.errorCount} ${State.warningCount}`;
-	Results.forEach(result => {
-		newResultString += result.test + result.element.outerHTML;
-	});
-	let changed = newResultString !== State.oldResultString;
-	State.oldResultString = newResultString;
-	return changed;
-}
-function countAlerts () {
-
-	State.errorCount = 0;
-	State.warningCount = 0;
-	State.dismissedCount = 0;
-
-	// Review results array to remove dismissed or ignored items
-
-	State.dismissedCount = 0;
-	for (let i = Results.length - 1; i >= 0; i--) {
-
-		let test = Results[i].test;
-
-		// @todo CMS merge convert to new syntax.
-		/*
-		if (Options.ignoreTests &&
-			Options.ignoreTests.includes(test)) {
-			// Would be faster to skip test, but this is easy and reliable.
-			Results.splice(i, 1);
-			continue;
-		}*/
-
-		// todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
-		/*if (State.incremental && Ed11y.oldResults.length > 0) {
-			// Don't flag new issues in the active range while people are typing.
-		}*/
-
-		// @todo merge does this mess up the incremental oldResults array?
-
-		let dismissKey = prepareDismissal(Results[i].dismissalKey);
-		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-		if (dismissKey !== false && Options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[Options.currentPage] && dismissKey in State.dismissedAlerts[Options.currentPage][test]) {
-			// Remove result if it has been marked OK or ignored, increment dismissed match counter.
-			State.dismissedCount++;
-			Results[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][test][dismissKey];
-		} else if (Results[i].dismissalKey) {
-			State.warningCount++;
-			Results[i].dismissalStatus = false;
-		} else {
-			State.errorCount++;
-			Results[i].dismissalStatus = false;
-		}
-	}
-
-	State.totalCount = State.errorCount + State.warningCount;
-
-	// Dispatch event for synchronizers.
-	if (!State.incremental) {
-		window.setTimeout(function () {
-			let syncResults = new CustomEvent('ed11yResults');
-			document.dispatchEvent(syncResults);
-		}, 0);
-	}
-
-	if (State.ignoreAll) {
-		State.dismissedCount = State.totalCount + State.dismissedCount;
-		State.errorCount = 0;
-		State.warningCount = 0;
-		State.totalCount = 0;
-	}
-
-	if (State.incremental && !State.forceFullCheck && !newIncrementalResults()) {
-		State.forceFullCheck = true;
-	}
 }
 
 const intersect = function(a, b, x = 10) {
@@ -3611,8 +4018,7 @@ function checkEditableIntersects (focusKnown = false) {
 
 
 function alignButtons() {
-	// @ todo merge check out the tip order on utilities.
-	if (!State.jumpList || State.jumpList.length === 0 || (State.tipOpen && State.scrollPending === 0)) { // todo always false?
+	if (State.jumpList.length === 0 || (State.tipOpen && State.scrollPending === 0)) { // todo always false?
 		return;
 	}
 	State.alignPending = true;
@@ -3634,7 +4040,7 @@ function alignButtons() {
 	let previousNudgeTop = 0;
 	let previousNudgeLeft = 0;
 	const scrollTop = window.scrollY;
-	if (!Options.inlineAlerts) {
+	if (!State.inlineAlerts) {
 		// Compute based on target position.
 
 		State.jumpList.forEach((mark, i) => {
@@ -3661,7 +4067,7 @@ function alignButtons() {
 				top = top + 10;
 				left = left + 10;
 			} else {
-				left = Options.inlineAlerts ? left - 34 : left;
+				left = State.inlineAlerts ? left - 34 : left;
 			}
 
 			// Add iframe positon to calculated position
@@ -3675,7 +4081,7 @@ function alignButtons() {
 				top = top + 10;
 				left = left + 10;
 			} else {
-				left = Options.inlineAlerts ? left - 34 : left;
+				left = State.inlineAlerts ? left - 34 : left;
 			}
 			if (mark.result.scrollableParent) {
 				// Bump alerts that would be X-position out of a scroll zone.
@@ -3775,7 +4181,7 @@ function alignButtons() {
 		else if (nudgeTop !== 0) {
 			needNudge = true;
 		}
-		if (!Options.inlineAlerts) {
+		if (!State.inlineAlerts) {
 			if (needNudge) {
 				mark.style.transform = `translate(${mark.markLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
 			} else {
@@ -3792,7 +4198,7 @@ function alignButtons() {
 	});
 
 	// Last pass: check for elements offscreen within scrollable areas.
-	if (!Options.inlineAlerts) {
+	if (!State.inlineAlerts) {
 		// Alerts have to be positioned relative to viewport.
 		State.jumpList.forEach(mark => {
 
@@ -3846,7 +4252,7 @@ function showResults () {
   // Announce that buttons have been placed.
   document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
   alignButtons();
-  if (!Options.inlineAlerts) {
+  if (!State.inlineAlerts) {
     checkEditableIntersects();
     intersectionObservers();
   }
@@ -3879,7 +4285,7 @@ function updatePanel () {
     } else {
       // Reconnect map
 			Results.length = 0;
-      Results.assign(State.oldResults);
+      Results.concat(State.oldResults);
       window.setTimeout(function() {
         if ( !State.alignPending ) {
           alignButtons();
@@ -3960,7 +4366,7 @@ function updatePanel () {
             UI.panelToggle.click();
           } else if (event.target.hasAttribute('data-ed11y-open')) {
             if (State.tipOpen) {
-              State.toggledFrom.focus();
+              State.toggledFrom?.focus(); // todo is this still needed or handled by the next?
               State.openTip.button.shadowRoot.querySelector('button').click();
             }
           }
@@ -3970,15 +4376,15 @@ function updatePanel () {
 
       // Decide whether to open the panel on load.
       if (State.ignoreAll ||
-        (!Options.inlineAlerts && State.totalCount > 75)
+        (!State.inlineAlerts && State.totalCount > 75)
       ) {
-        State.showPanel = false;
+        State.open = false;
       } else if (Options.alertMode === 'active' ||
         !Options.userPrefersShut ||
         Options.showDismissed
       ) {
         // Show always on load for active mode or by user preference.
-        State.showPanel = true;
+        State.open = true;
       } else if (
         State.totalCount > 0 &&
         !State.ignoreAll &&
@@ -3988,9 +4394,9 @@ function updatePanel () {
         )
       ) {
         // Show sometimes for assertive/polite if there are new items.
-        State.showPanel = true;
+        State.open = true;
       }
-    } else if (!Options.inlineAlerts) { // todo is that the best param?
+    } else if (!State.inlineAlerts) {
 				State.oldResultString = `${State.errorCount} ${State.warningCount}`;
 				Results.forEach(result => {
 					State.oldResultString += result.test + result.element.outerHTML;
@@ -3998,7 +4404,7 @@ function updatePanel () {
 		}
 
     // Now we can open or close the panel.
-    if (!State.showPanel) {
+    if (!State.open) {
       // Close panel.
       reset();
     } else {
@@ -4178,7 +4584,7 @@ function drawResult(result, index) {
   mark.setAttribute('id', 'ed11y-result-' + index);
   mark.setAttribute('data-ed11y-result', index);
   mark.setAttribute('data-ed11y-open', 'false');
-  if (!Options.inlineAlerts) {
+  if (!State.inlineAlerts) {
     location = State.panelAttachTo;
     position = 'beforeend';
     mark.classList.add('ed11y-editable-result');
@@ -4207,7 +4613,7 @@ function drawResult(result, index) {
 
   mark.wrapper = document.createElement('div');
 
-  mark.dismissable = mark.result.dismissalKey !== false;
+  mark.dismissable = mark.result.type !== 'error';
   mark.dismissed = !!mark.result.dismissalStatus;
   mark.wrapper.classList.add('ed11y-wrapper', 'ed11y-result-wrapper');
   mark.wrapper.classList.add('ed11y-result');
@@ -4222,7 +4628,7 @@ function drawResult(result, index) {
   mark.toggle.setAttribute('data-ed11y-result', mark.dataset.ed11yResult);
   mark.toggle.setAttribute('data-ed11y-ready', 'false');
   mark.toggle.setAttribute('data-ed11y-race', 'false');
-  if (!Options.inlineAlerts) {
+  if (!State.inlineAlerts) {
     mark.toggle.style.setProperty('font-size', '16px');
   }
   if (mark.dismissed) {
@@ -4331,7 +4737,7 @@ function transferFocus () {
   const target = Results[id].element;
   const editable = target.closest('[contenteditable]');
   if (!editable && !target.closest('textarea, input')) {
-    if (target.closest('a')) {
+    if (target.closest('a')) { // @todo after merge add button?
       State.toggledFrom = target.closest('a');
     } else if (target.getAttribute('tabindex') !== null) {
       State.toggledFrom = target;
@@ -4433,12 +4839,12 @@ function alertOnInvisibleTip (button, target) {
     }
     if (firstVisible) {
       // Throw warning that the element cannot be highlighted.
-      const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert'); // @todo merge
+      const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert');
       tipAlert.textContent = alertMessage;
     }
     if (State.viaJump) {
       let scrollPin = window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600) ? 'center' : 'start';
-      let scrollTarget = Options.inlineAlerts ? button : target;
+      let scrollTarget = State.inlineAlerts ? button : target;
       if (button.dataset.ed11yHiddenResult || !(visible(scrollTarget))) {
         scrollTarget = firstVisibleParent(target);
       }
@@ -4449,7 +4855,7 @@ function alertOnInvisibleTip (button, target) {
         return false;
       }
     }
-    if (!Options.inlineAlerts) {
+    if (!State.inlineAlerts) {
       // todo this selector should match the selector that decided where to place the mark
       editableHighlighter(button.dataset.ed11yResult, true, firstVisible); // @todo merge test
     } else {
@@ -4521,7 +4927,7 @@ function jumpTo(next = true) {
 
   // First of two scrollTo calls, to trigger any scroll based events.
   let scrollPin = window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600) ? 'center' : 'start';
-  let scrollTarget = Options.inlineAlerts ? goto : target;
+  let scrollTarget = State.inlineAlerts ? goto : target;
   if (goto.dataset.ed11yHiddenResult || !(visible(scrollTarget))) {
     scrollTarget = firstVisibleParent(target);
   }
@@ -4537,6 +4943,16 @@ function jumpTo(next = true) {
   State.scrollPending = 2;
   updateTipLocations();
 }
+
+const incrementalAlign = lagBounce( () => {
+		if (!State.running && !State.alignPending) {
+			State.scrollPending++;
+			updateTipLocations();
+			State.alignPending = false;
+		} else {
+			incrementalAlign();
+		}
+	}, 10);
 
 function alignTip (button, toolTip, recheck = 0, reveal = false) {
 	if (!toolTip) {
@@ -4566,7 +4982,7 @@ function alignTip (button, toolTip, recheck = 0, reveal = false) {
 
 	// Find button on page
 	const scrollTop = window.scrollY;
-	let leftAdd = Options.inlineAlerts ? window.scrollX : 0;
+	let leftAdd = State.inlineAlerts ? window.scrollX : 0;
 
 	let buttonOffset = button.getBoundingClientRect();
 	let buttonSize = buttonOffset.width;
@@ -4579,7 +4995,7 @@ function alignTip (button, toolTip, recheck = 0, reveal = false) {
 	let containBottom = window.innerHeight + scrollTop;
 	let absoluteBottom = containBottom;
 
-	if (!Options.inlineAlerts && result.scrollableParent) {
+	if (!State.inlineAlerts && result.scrollableParent) {
 		let bounds = result.scrollableParent.getBoundingClientRect();
 		if (bounds.width > 0) {
 			//buttonTop = buttonTop + result.scrollableParent.scrollTop;
@@ -4751,6 +5167,7 @@ function alignHighlights() {
 			State.interaction = true;
 			State.forceFullCheck = true;
 			UI.editableHighlight = [];
+			incrementalCheck(true);
 			return false;
 		}
 
@@ -4771,6 +5188,13 @@ function alignHighlights() {
 	});
 }
 
+const slowIncremental = lagBounce( () => {
+		//incrementalAlign(); // Immediately realign tips.
+		//State.alignPending = false;
+		State.interaction = true;
+		incrementalCheck();
+}, 1000);
+
 function windowResize() {
 	if (UI.panel?.classList.contains('ed11y-active') === true) {
 		alignAlts();
@@ -4782,31 +5206,85 @@ function windowResize() {
 	alignPanel();
 }
 
-function intersectionObservers() {
-
-	Elements.Found.editable?.forEach(editable => {
-		editable.addEventListener('scroll', function() {
-			// Align tips when scrolling editable container.
-			if (State.tipOpen) {
-				State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
-				requestAnimationFrame(() => updateTipLocations());
-			}
-		});
-	});
-
-	document.addEventListener('scroll', function() {
+const scrollWatch = function(container) {
+	container.addEventListener('scroll', function() {
 		// Trigger on scrolling other containers, unless it will flicker a tip.
-		if (!Options.inlineAlerts && !State.tipOpen) {
+		if (!State.inlineAlerts && !State.tipOpen) {
 			State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
 			requestAnimationFrame(() => updateTipLocations());
 		} else if (State.tipOpen) {
 			alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
 		}
-	}, true);
+	}, {
+		passive: true,
+	});
+};
+
+function intersectionObservers() {
+
+	Elements.Found.editable?.forEach((editable) => {
+		scrollWatch(editable);
+	});
+
+	scrollWatch(document);
 
 	document.addEventListener('selectionchange', function() {
-		if (!State.running) ;
+		if (!State.running) {
+			selectionChanged();
+		}
+	}, {
+		passive: true,
 	});
+}
+
+const selectionChanged = lagBounce( () => {
+		if (rangeChange()) {
+			updateTipLocations();
+			checkEditableIntersects();
+		}
+	}, 100);
+
+function rangeChange(anchorNode) {
+	let anchor = anchorNode ? anchorNode : window.getSelection()?.anchorNode;
+	const expandable = anchor &&
+		anchor.parentNode &&
+		typeof anchor.parentNode === 'object' &&
+		typeof anchor.parentNode.matches === 'function';
+	if (!anchor || expandable &&
+		( anchor.parentNode.matches(Options.checkRoots) ||
+			( !anchor.parentNode.matches(Options.checkRoots) && anchor.parentNode.matches('div[contenteditable="true"]')
+			)
+		)
+	) {
+		State.activeRange = false;
+		return false;
+	}
+	// todo: is this redundant?
+	if (expandable) {
+		const closest = anchor.parentNode.closest('p, td, th, li, h2, h3, h4, h5, h6');
+		if (closest) {
+			anchor = closest;
+		}
+	}
+	const range = document.createRange();
+	if (typeof anchor === 'object') {
+		range.setStartBefore(anchor);
+		range.setEndAfter(anchor);
+	}
+	if (typeof range !== 'object' || typeof range.getBoundingClientRect !== 'function') {
+		if (State.activeRange) {
+			State.activeRange = false;
+			return true;
+		} else {
+			return false;
+		}
+	} else {
+		let sameRange = State.activeRange &&
+			range.startContainer === State.activeRange.startContainer &&
+			range.startOffset === State.activeRange.startOffset;
+		State.activeRange = range;
+		return !sameRange;
+	}
 }
 
 /*
@@ -4847,17 +5325,17 @@ function startObserver (root) {
 		if (!node || node.nodeType !== 1 || !node.isConnected || node.closest('script, link, head, .ed11y-wrapper, .ed11y-style, .ed11y-element')) {
 			return 0;
 		}
-		if (Options.inlineAlerts) {
+		if (State.inlineAlerts) {
 			return 1;
 		}
 		if (!node.matches('[contenteditable] *')) {
 			return 0;
 		}
-		if (Options.inlineAlerts) {
+		if (State.inlineAlerts) {
 			return true;
 		}
 		const searchList = 'table, h1, h2, h3, h4, h5, h6, blockquote';
-		if (!Options.inlineAlerts &&
+		if (!State.inlineAlerts &&
 			!node.matches(node.matches(searchList)) &&
 			node.matches('[contenteditable] *')) {
 			if (node.matches('table *')) {
@@ -4868,6 +5346,7 @@ function startObserver (root) {
 		}
 		if (node && node.matches(searchList)) {
 			State.recentlyAddedNodes.set(node, Date.now());
+			incrementalAlign(); // Immediately realign tips.
 			return 0;
 		}
 		return 1;
@@ -4879,7 +5358,9 @@ function startObserver (root) {
 		for (const mutation of mutationList) {
 			if (mutation.type === 'characterData' &&
 				mutation.target.parentElement &&
-				mutation.target.parentElement.matches('[contenteditable] *')) {
+				mutation.target.parentElement.matches('[contenteditable] *, [contenteditable]')) {
+				incrementalAlign();
+				slowIncremental();
 				return;
 			} else if (mutation.type === 'childList') {
 				// Recheck if there are relevant node changes.
@@ -4897,7 +5378,11 @@ function startObserver (root) {
 			return;
 		}
 		window.setTimeout(function () {
+			incrementalAlign(); // Immediately realign tips.
 			State.alignPending = false;
+		},0);
+		window.setTimeout(function () {
+			incrementalCheck(); // Recheck after delay.
 		},0);
 	};
 
@@ -4915,6 +5400,18 @@ function startObserver (root) {
 			State.scrollPending++;
 			updateTipLocations();
 		}, 100);
+	}, {
+		passive: true,
+	});
+	document.addEventListener("paste", () => {
+		State.scrollPending++;
+		updateTipLocations();
+		window.setTimeout(function () {
+			State.forceFullCheck = true;
+			incrementalCheck();
+		}, 100);
+	}, {
+		passive: true,
 	});
 	window.setTimeout(function () {
 		State.scrollPending++;
@@ -4933,22 +5430,26 @@ function startObserver (root) {
 
 const enqueueTests = function(queue) {
 	const test = queue.pop();
-	switch (test) {
-		case 'checkHeaders':
-			checkHeaders(Results, Options, State.headingOutline);
-			break
-		case 'checkLinkText':
-			checkLinkText(Results, Options);
-			break
-		case 'checkImages':
-			checkImages(Results, Options);
-			break
-		case 'checkLabels':
-			checkLabels(Results, Options);
-			break
-		case 'checkQA':
-			checkQA(Results, Options);
-			break
+	try {
+		switch (test) {
+			case 'checkHeaders':
+				checkHeaders(Results, Options, State.headingOutline);
+				break
+			case 'checkLinkText':
+				checkLinkText(Results, Options);
+				break
+			case 'checkImages':
+				checkImages(Results, Options);
+				break
+			case 'checkLabels':
+				checkLabels(Results, Options);
+				break
+			case 'checkQA':
+				checkQA(Results, Options);
+				break
+		}
+	} catch (error) {
+		showError(error);
 	}
 	if (queue.length > 0) {
 		window.setTimeout(function (queue) {
@@ -4983,11 +5484,10 @@ function checkAll() {
 		disable();
 	}
 
-
 	State.customTestsRunning = false;
 
 	State.roots = [];
-	// @todo merge rewrite when Sa11y releases fixed root support.
+	// @todo CMS merge rewrite when Sa11y releases fixed root support.
 	if (Options.fixedRoots) {
 		Options.fixedRoots.forEach(root => {State.roots.push(root.fixedRoot);});
 	} else {
@@ -5060,8 +5560,8 @@ function checkAll() {
 		test
 		toggle
 	* */
-	// @todo merge temporary values.
-	// @todo merge handle readability and developer checks.
+	// @todo CMS merge when Sa11y support is ready.
+	// @todo after merge handle readability and developer checks.
 }
 
 function continueCheck(customCheck = false) {
@@ -5077,11 +5577,10 @@ function continueCheck(customCheck = false) {
 		if (Results[i].type === 'good') {
 			Results.splice(i, 1);
 		} else {
-			Results[i].position = 'beforebegin'; // @todo merge compute.
+			Results[i].position = 'beforebegin'; // @todo CMS merge use Sa11y keys when ready or closest().
 			if (Results[i].dismiss) {
 				Results[i].dismissalKey = Results[i].dismiss;
 			}
-			Results[i].test = 'altNull'; // @todo wait merge remove when Sa11y is ready
 		}
 		i = i - 1;
 	}
@@ -5098,6 +5597,7 @@ function continueCheck(customCheck = false) {
 					editable.addEventListener('drop', () => {
 						// This event does not bubble.
 						State.forceFullCheck = true;
+						incrementalCheck();
 					});
 				}
 			});
@@ -5113,14 +5613,44 @@ function continueCheck(customCheck = false) {
 	}, 0);
 }
 
-function incrementalCheck() {
-}
+const incrementalCheck = lagBounce( () => {
+	if (!State.running) {
+		if (State.tipOpen || (!State.interaction && !State.forceFullCheck)) {
+			return;
+		}
+		State.interaction = false;
+		State.running = true;
+		let runTime = performance.now();
+		State.incremental = true;
+		if (State.disabled && State.closedByDisable) {
+			State.open = true;
+			State.closedByDisable = false;
+			State.disabled = false;
+		}
+		//State.forceFullCheck = true; // @todo merge check history; why was this here?
+		checkAll();
+		window.setTimeout(function() {
+			if (State.visualizing) {
+				document.dispatchEvent(new CustomEvent('ed11yEndVisualization'));
+			}
+		}, 500);
+		// @todo after merge test: if there are no issues and the heading panel is open...it closes!
+		// Increase debounce if runs are slow.
+		runTime = performance.now() - runTime;
+		State.browserSpeed = runTime > 10 ? 10 : (State.browserSpeed + runTime) / 2;
+		// Todo: optimize tip placement so we do not need as much debounce.
+		State.browserLag = State.browserSpeed < 1 ? 0 : State.browserSpeed * 100 + State.totalCount;
+	} else {
+		// Ed11y was running, try again later.
+		window.setTimeout(() => {incrementalCheck();}, 250);
+	}
+}, 250);
 
 function visualize () {
 	if (!UI.panel) {
 		return;
 	}
-	if (Options.inlineAlerts) {
+	if (State.inlineAlerts) {
 		findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
 		Elements.Found.reset?.forEach((el) => el.remove());
 	}
@@ -5147,7 +5677,7 @@ function showHeadingsPanel () {
 		panelOutline.innerHTML = '';
 		State.headingOutline.forEach((result, i) => {
 			// Todo: draw these in editable mode.
-			if (Options.inlineAlerts) {
+			if (State.inlineAlerts) {
 				const mark = document.createElement('ed11y-element-heading-label');
 				mark.classList.add('ed11y-element', 'ed11y-element-heading');
 				mark.dataset.ed11yHeadingOutline = i.toString();
@@ -5166,7 +5696,7 @@ function showHeadingsPanel () {
 			let userText = document.createElement('span');
 			userText.textContent = result.text;
 			let link = document.createElement('a');
-			if (Options.inlineAlerts) {
+			if (State.inlineAlerts) {
 				link.setAttribute('href', '#ed11y-heading-' + i);
 				li.append(link);
 				link.append(levelPrefix);
@@ -5180,7 +5710,7 @@ function showHeadingsPanel () {
 				/*let message = document.createElement('em');
 				message.classList.add('ed11y-small');
 				message.textContent = ' ' + el[2];
-				if (Options.inlineAlerts) {
+				if (State.inlineAlerts) {
 					link.append(message);
 				} else {
 					li.append(message);
@@ -5249,7 +5779,7 @@ const showAltPanel = function () {
 			//let alert = {};
 			/*
 			// Match dismissed images.
-			// @todo merge remove; this is the Sa11y logic:
+			// @todo CMS merge remove once new syntax is ready; this is the Sa11y logic for dev reference:
 			// const isDismissed = dismissed.some((key) => key.dismiss === image.dismiss);
 			// if (isDismissed) Object.assign(image, { dismissedImage: true });
 			// Make developer checks don't show images as error if Developer checks are off!
@@ -5278,7 +5808,7 @@ const showAltPanel = function () {
 
 			// Account for lazy loading libraries.
 
-			if (Options.inlineAlerts) {
+			if (State.inlineAlerts) {
 				// Label images
 				const mark = document.createElement('ed11y-element-alt');
 				mark.classList.add('ed11y-element');
@@ -5305,7 +5835,7 @@ const showAltPanel = function () {
 			img.setAttribute('src', getBestImageSource(image.element));
 			img.setAttribute('alt', '');
 
-			if (Options.inlineAlerts) {
+			if (State.inlineAlerts) {
 				let a = document.createElement('a');
 				a.href = '#ed11y-alt-' + i;
 				a.classList.add('alt-parent');
@@ -5319,7 +5849,7 @@ const showAltPanel = function () {
 			}
 			altList.append(li);
 		}
-		if (Options.inlineAlerts) {
+		if (State.inlineAlerts) {
 			alignAlts();
 		} else {
 			UI.imageAlts.length = 0;
@@ -5359,7 +5889,7 @@ function dismissThis (dismissalType, all = false) {
 	removal.button?.parentNode?.removeChild(removal.button);
 
 	reset();
-	State.showPanel = true;
+	State.open = true;
 	checkAll();
 
 	let rememberGoto = State.lastOpenTip;
@@ -5382,7 +5912,7 @@ function toggleShowDismissals () {
 	State.ignoreAll = false;
 	Options.showDismissed = !(Options.showDismissed);
 	reset();
-	State.showPanel = true;
+	State.open = true;
 	checkAll();
 
 	UI.showDismissed.setAttribute('data-ed11y-pressed', (!!Options.showDismissed).toString());
@@ -5399,10 +5929,10 @@ function togglePanel () {
 		if (State.running !== true) {
 			State.running = true;
 			// Re-scan each time the panel reopens.
-			if (UI.panel.classList.contains('ed11y-shut') === true) {
+			if (!State.open) {
 				State.onLoad = false;
 				State.incremental = false;
-				State.showPanel = true;
+				State.open = true;
 				if (State.dismissedCount > 0 && State.warningCount === 0 && State.errorCount === 0) {
 					Options.showDismissed = false;
 					toggleShowDismissals();
@@ -5435,7 +5965,7 @@ function raceCrash() {
 	}
 	State.loopStop = true;
 	reset();
-	State.showPanel = true;
+	State.open = true;
 	checkAll();
 	window.setTimeout(function() {
 		if (Results.length > 0 && State.loopStop) {
@@ -5472,7 +6002,7 @@ function reset () {
 	resetPanel();
 	State.incremental = false;
 	State.running = false;
-	State.showPanel = false;
+	State.open = false;
 	State.open = false;
 }
 
@@ -5994,7 +6524,7 @@ class Ed11yElementResult extends HTMLElement {
     }
     this.toggle.setAttribute('aria-expanded', changeTo);
     let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
-    if (Options.inlineAlerts) {
+    if (State.inlineAlerts) {
       resetClass([
         'ed11y-hidden-highlight',
         'ed11y-ring-red',
@@ -6019,11 +6549,11 @@ class Ed11yElementResult extends HTMLElement {
       }));
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');
-      if (Options.inlineAlerts) {
+      if (State.inlineAlerts) {
         this.result.element.classList.add(highlightOutline);
       }
       requestAnimationFrame(()=>alignTip(this.toggle, this.tip, 4, true));
-      if (!State.jumpList) {
+      if (State.jumpList.length === 0) { // todo is it still possible to have a tip and no jumpList?
         buildJumpList();
       }
       State.lastOpenTip = Number(this.getAttribute('data-ed11y-jump-position'));
@@ -6214,14 +6744,16 @@ class Ed11yElementTip extends HTMLElement {
     this.wrapper = document.createElement('div');
     this.wrapper.setAttribute('role', 'dialog');
 
-    this.dismissable = this.result.dismissalKey !== false;
+    this.dismissable = this.result.type !== 'error';
     this.dismissed = !!this.result.dismissalStatus;
     this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
     this.wrapper.setAttribute('aria-label',
       `${Lang._('ALERT_TEXT')}
         ${this.issueIndex + 1}`);
 
-    this.addEventListener('mouseover', this.handleHover);
+    this.addEventListener('mouseover', this.handleHover, {
+			passive: true,
+		});
 
     UI.attachCSS(this.wrapper);
 
@@ -6256,10 +6788,10 @@ class Ed11yElementTip extends HTMLElement {
     /**/
 
 
-    if (!Options.inlineAlerts || Options.editLinks) {
+    if (!State.inlineAlerts || Options.editLinks) {
       const editBar = document.createElement('div');
 
-      if (!Options.inlineAlerts) {
+      if (!State.inlineAlerts) {
         editBar.classList.add('ed11y-tip-dismissals');
         const focusTransfer = document.createElement('button');
         const transferIcon = document.createElement('span');
@@ -6495,7 +7027,7 @@ class Ed11yElementTip extends HTMLElement {
   }
 }
 
-function preProcessOptions(userOptions) {
+const preProcessOptions = function(userOptions) {
 	Object.assign(Options, userOptions);
 
 	if (!userOptions.checkRoots) {
@@ -6522,6 +7054,7 @@ function preProcessOptions(userOptions) {
 	Theme.baseFontSize = Options.baseFontSize;
 	Theme.buttonZIndex = Options.buttonZIndex;
 	Theme.baseFontFamily = Options.baseFontFamily;
+	State.inlineAlerts = Options.inlineAlerts;
 
 	let cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
 	if (!userOptions.cssUrls) {
@@ -6550,9 +7083,9 @@ function preProcessOptions(userOptions) {
 		const link = cssBundle.cloneNode(true);
 		appendTo.appendChild(link);
 	};
-}
+};
 
-function postProcessOptions(userOptions) {
+const postProcessOptions = function(userOptions) {
 
 	// Override Sa11y's exclusion settings.
 
@@ -6567,7 +7100,7 @@ function postProcessOptions(userOptions) {
 		);
 	}
 	if (Options.ignoreElements) {
-		const elementSelectors = Options.containerIgnore.split(',').map((item) => item.trim());
+		const elementSelectors = Options.ignoreElements.split(',').map((item) => item.trim());
 		Constants.Exclusions.Container = Constants.Exclusions.Container.concat(elementSelectors);
 	}
 
@@ -6653,9 +7186,9 @@ function postProcessOptions(userOptions) {
 	// Convert the container ignore user option to a CSS :not selector.
 	State.ignore = Options.containerIgnore ? `:not(${Options.containerIgnore})` : '';
 
-}
+};
 
-function firstCheck (userOptions) {
+function initialize (userOptions) {
 	if (State.once) {
 		console.error('double init');
 		return;
@@ -6694,11 +7227,17 @@ function firstCheck (userOptions) {
 		// Todo only needed if we are watching for changes.
 		window.addEventListener('keydown', () => {
 			State.interaction = true;
+		}, {
+			passive: true,
 		});
 		window.addEventListener('click', () => {
 			State.interaction = true;
+		}, {
+			passive: true,
 		});
-		window.addEventListener('resize', function () { windowResize(); });
+		window.addEventListener('resize', function () { windowResize(); }, {
+			passive: true,
+		});
 		// Move toggles when something expands or collapses.
 		const mightExpand = document.querySelectorAll('[aria-expanded], [aria-controls]');
 		mightExpand?.forEach(expandable => {
@@ -6706,6 +7245,8 @@ function firstCheck (userOptions) {
 				window.setTimeout(() => {
 					windowResize();
 				}, 333);
+			}, {
+				passive: true,
 			});
 		});
 
@@ -6719,14 +7260,16 @@ class Ed11y {
 		State.version = '3.0.0';
 
     if (CSS.supports('selector(:has(body))')) {
-      firstCheck(userOptions);
+			try {
+				initialize(userOptions);
+			} catch (error) {
+				showError(error);}
     }
 
     /* Export exposed interfaces */
-    //this.checkAll = checkAll();
 		this.version = State.version;
   }
 }
 let elements = Elements.Found;
 
-export { Ed11y, Lang, Options, Results, State, Theme, UI, checkAll, computeAccessibleName, elements, findElements, getElements, incrementalCheck, prepareDismissal };
+export { Ed11y, Lang, Options, Results, State, Theme, UI, checkAll, computeAccessibleName, elements, findElements, getElements, incrementalCheck, prepareDismissal, reset };

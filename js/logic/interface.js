@@ -4,23 +4,23 @@ import {
 	checkRunPrevent,
 	countAlerts,
 	findElements, firstVisibleParent, lagBounce, pauseObservers,
-	resetClass, resetResults, resumeObservers,
+	resetClass, resetResults, resumeObservers, showError,
 	visible
 } from "../utils/utils.js";
 import {
 	prepareDismissal,
-} from "sa11y/src/js/utils/utils.js";
-import * as Utils from "sa11y/src/js/utils/utils.js";
-import checkHeaders from "sa11y/src/js/rulesets/headers.js";
-import checkLinkText from "sa11y/src/js/rulesets/link-text.js";
-import checkImages from "sa11y/src/js/rulesets/images.js";
-import checkLabels from "sa11y/src/js/rulesets/labels.js";
-import checkQA from "sa11y/src/js/rulesets/quality-assurance.js";
-import {Lang} from "sa11y/src/js/sa11y.js";
-import Elements from "sa11y/src/js/utils/elements.js";
+} from '../../sa11y/utils/utils.js';
+import * as Utils from "../../sa11y/utils/utils.js";
+import checkHeaders from "../../sa11y/rulesets/headers.js";
+import checkLinkText from "../../sa11y/rulesets/link-text.js";
+import checkImages from "../../sa11y/rulesets/images.js";
+import checkLabels from "../../sa11y/rulesets/labels.js";
+import checkQA from "../../sa11y/rulesets/quality-assurance.js";
+import Lang from "../../sa11y/utils/lang.js"
+import Elements from "../../sa11y/utils/elements.js";
 import {
 	computeAriaLabel
-} from "sa11y/src/js/utils/computeAccessibleName.js";
+} from "../../sa11y/utils/computeAccessibleName.js";
 import {
 	alignAlts,
 	alignButtons, alignPanel,
@@ -67,7 +67,7 @@ export function updatePanel () {
     } else {
       // Reconnect map
 			Results.length = 0;
-      Results.assign(State.oldResults);
+      Results.concat(State.oldResults);
       window.setTimeout(function() {
         if ( !State.alignPending ) {
           alignButtons();
@@ -160,13 +160,13 @@ export function updatePanel () {
       if (State.ignoreAll ||
         (!State.inlineAlerts && State.totalCount > 75)
       ) {
-        State.showPanel = false;
+        State.open = false;
       } else if (Options.alertMode === 'active' ||
         !Options.userPrefersShut ||
         Options.showDismissed
       ) {
         // Show always on load for active mode or by user preference.
-        State.showPanel = true;
+        State.open = true;
       } else if (
         State.totalCount > 0 &&
         !State.ignoreAll &&
@@ -176,7 +176,7 @@ export function updatePanel () {
         )
       ) {
         // Show sometimes for assertive/polite if there are new items.
-        State.showPanel = true;
+        State.open = true;
       }
     } else if (!State.inlineAlerts) {
 				State.oldResultString = `${State.errorCount} ${State.warningCount}`;
@@ -186,7 +186,7 @@ export function updatePanel () {
 		}
 
     // Now we can open or close the panel.
-    if (!State.showPanel) {
+    if (!State.open) {
       // Close panel.
       reset();
     } else {
@@ -395,7 +395,7 @@ export function drawResult(result, index) {
 
   mark.wrapper = document.createElement('div');
 
-  mark.dismissable = mark.result.dismissalKey !== false;
+  mark.dismissable = mark.result.type !== 'error';
   mark.dismissed = !!mark.result.dismissalStatus;
   mark.wrapper.classList.add('ed11y-wrapper', 'ed11y-result-wrapper');
   mark.wrapper.classList.add('ed11y-result');
@@ -726,8 +726,7 @@ export function jumpTo(next = true) {
   updateTipLocations();
 }
 
-export function incrementalAlign() {
-	lagBounce(() => {
+export const incrementalAlign = lagBounce( () => {
 		if (!State.running && !State.alignPending) {
 			State.scrollPending++;
 			updateTipLocations();
@@ -736,7 +735,6 @@ export function incrementalAlign() {
 			incrementalAlign();
 		}
 	}, 10);
-}
 
 export function alignTip (button, toolTip, recheck = 0, reveal = false) {
 	if (!toolTip) {
@@ -972,14 +970,12 @@ export function alignHighlights() {
 	});
 }
 
-export function slowIncremental() {
-	lagBounce(() => {
+export const slowIncremental = lagBounce( () => {
 		//incrementalAlign(); // Immediately realign tips.
 		//State.alignPending = false;
 		State.interaction = true;
 		incrementalCheck();
-	}, 1000);
-}
+}, 1000);
 
 export function windowResize() {
 	if (UI.panel?.classList.contains('ed11y-active') === true) {
@@ -992,19 +988,8 @@ export function windowResize() {
 	alignPanel();
 }
 
-export function intersectionObservers() {
-
-	Elements.Found.editable?.forEach(editable => {
-		editable.addEventListener('scroll', function() {
-			// Align tips when scrolling editable container.
-			if (State.tipOpen) {
-				State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
-				requestAnimationFrame(() => updateTipLocations());
-			}
-		});
-	});
-
-	document.addEventListener('scroll', function() {
+const scrollWatch = function(container) {
+	container.addEventListener('scroll', function() {
 		// Trigger on scrolling other containers, unless it will flicker a tip.
 		if (!State.inlineAlerts && !State.tipOpen) {
 			State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
@@ -1012,56 +997,34 @@ export function intersectionObservers() {
 		} else if (State.tipOpen) {
 			alignTip(State.openTip.button.shadowRoot.querySelector('button'), State.openTip.tip);
 		}
-	}, true);
+	}, {
+		passive: true,
+	});
+}
+
+export function intersectionObservers() {
+
+	Elements.Found.editable?.forEach((editable) => {
+		scrollWatch(editable);
+	});
+
+	scrollWatch(document);
 
 	document.addEventListener('selectionchange', function() {
 		if (!State.running) {
 			selectionChanged();
 		}
+	}, {
+		passive: true,
 	});
 }
 
-export function selectionChanged() {
-	lagBounce(() => {
+export const selectionChanged = lagBounce( () => {
 		if (rangeChange()) {
 			updateTipLocations();
 			checkEditableIntersects();
 		}
 	}, 100);
-}
-
-let recentlyAddedNodes = new WeakMap();
-export function addedNodeReadyToCheck(el) {
-	if (!recentlyAddedNodes.has(el)) {
-		return true;
-	}
-	const hasText = el.textContent.trim().length;
-	if ((!hasText && State.recentlyAddedNodes.get(el) > Date.now() - 5000) ||
-		State.activeRange && el.contains(State.activeRange.startContainer)) {
-		// Do not check recent nodes if they are empty or selected.
-		return false;
-	} else if (el.matches('table') && el.querySelectorAll('td:not(:empty)')) {
-		// Only check tables once there is content in a non-heading cell.
-		let cumulativeText = '';
-		if (hasText) {
-			const cells = el.querySelectorAll('td:not(:empty)');
-			cells.forEach((cell) => {
-				cumulativeText += cell.textContent;
-			});
-		}
-		if (!cumulativeText) {
-			return false;
-		} else {
-			// Text in body cells.
-			recentlyAddedNodes.delete(el);
-			return true;
-		}
-	} else {
-		// New node is ready for checking.
-		recentlyAddedNodes.delete(el);
-		return true;
-	}
-}
 
 export function rangeChange(anchorNode) {
 	let anchor = anchorNode ? anchorNode : window.getSelection()?.anchorNode;
@@ -1177,7 +1140,7 @@ export function startObserver (root) {
 		for (const mutation of mutationList) {
 			if (mutation.type === 'characterData' &&
 				mutation.target.parentElement &&
-				mutation.target.parentElement.matches('[contenteditable] *')) {
+				mutation.target.parentElement.matches('[contenteditable] *, [contenteditable]')) {
 				incrementalAlign();
 				slowIncremental();
 				return;
@@ -1199,6 +1162,8 @@ export function startObserver (root) {
 		window.setTimeout(function () {
 			incrementalAlign(); // Immediately realign tips.
 			State.alignPending = false;
+		},0);
+		window.setTimeout(function () {
 			incrementalCheck(); // Recheck after delay.
 		},0);
 	};
@@ -1217,7 +1182,19 @@ export function startObserver (root) {
 			State.scrollPending++;
 			updateTipLocations();
 		}, 100);
+	}, {
+		passive: true,
 	});
+	document.addEventListener("paste", () => {
+		State.scrollPending++;
+		updateTipLocations();
+		window.setTimeout(function () {
+			State.forceFullCheck = true;
+			incrementalCheck();
+		}, 100);
+	}, {
+		passive: true,
+	})
 	window.setTimeout(function () {
 		State.scrollPending++;
 		updateTipLocations();
@@ -1235,22 +1212,26 @@ export function startObserver (root) {
 
 const enqueueTests = function(queue) {
 	const test = queue.pop();
-	switch (test) {
-		case 'checkHeaders':
-			checkHeaders(Results, Options, State.headingOutline)
-			break
-		case 'checkLinkText':
-			checkLinkText(Results, Options)
-			break
-		case 'checkImages':
-			checkImages(Results, Options)
-			break
-		case 'checkLabels':
-			checkLabels(Results, Options)
-			break
-		case 'checkQA':
-			checkQA(Results, Options)
-			break
+	try {
+		switch (test) {
+			case 'checkHeaders':
+				checkHeaders(Results, Options, State.headingOutline)
+				break
+			case 'checkLinkText':
+				checkLinkText(Results, Options)
+				break
+			case 'checkImages':
+				checkImages(Results, Options)
+				break
+			case 'checkLabels':
+				checkLabels(Results, Options)
+				break
+			case 'checkQA':
+				checkQA(Results, Options)
+				break
+		}
+	} catch (error) {
+		showError(error);
 	}
 	if (queue.length > 0) {
 		window.setTimeout(function (queue) {
@@ -1284,7 +1265,6 @@ export function checkAll() {
 	if (checkRunPrevent()) {
 		disable();
 	}
-
 
 	State.customTestsRunning = false;
 
@@ -1383,7 +1363,6 @@ export function continueCheck(customCheck = false) {
 			if (Results[i].dismiss) {
 				Results[i].dismissalKey = Results[i].dismiss;
 			}
-			Results[i].test = 'altNull'; // @todo wait merge remove when Sa11y is ready
 		}
 		i = i - 1;
 	}
@@ -1416,40 +1395,38 @@ export function continueCheck(customCheck = false) {
 	}, 0);
 }
 
-export function incrementalCheck() {
-	lagBounce(() => {
-		if (!State.running) {
-			if (State.openTip.button || (!State.interaction && !State.forceFullCheck)) {
-				return;
-			}
-			State.interaction = false;
-			State.running = true;
-			let runTime = performance.now();
-			State.incremental = true;
-			if (State.disabled && State.closedByDisable) {
-				State.showPanel = true;
-				State.closedByDisable = false;
-				State.disabled = false;
-			}
-			//State.forceFullCheck = true; // @todo merge check history; why was this here?
- 			checkAll();
-			window.setTimeout(function() {
-				if (State.visualizing) {
-					document.dispatchEvent(new CustomEvent('ed11yEndVisualization'))
-				}
-			}, 500);
-			// @todo after merge test: if there are no issues and the heading panel is open...it closes!
-			// Increase debounce if runs are slow.
-			runTime = performance.now() - runTime;
-			State.browserSpeed = runTime > 10 ? 10 : (State.browserSpeed + runTime) / 2;
-			// Todo: optimize tip placement so we do not need as much debounce.
-			State.browserLag = State.browserSpeed < 1 ? 0 : State.browserSpeed * 100 + State.totalCount;
-		} else {
-			// Ed11y was running, try again later.
-			window.setTimeout(() => {incrementalCheck();}, 250);
+export const incrementalCheck = lagBounce( () => {
+	if (!State.running) {
+		if (State.tipOpen || (!State.interaction && !State.forceFullCheck)) {
+			return;
 		}
-	}, 250)
-}
+		State.interaction = false;
+		State.running = true;
+		let runTime = performance.now();
+		State.incremental = true;
+		if (State.disabled && State.closedByDisable) {
+			State.open = true;
+			State.closedByDisable = false;
+			State.disabled = false;
+		}
+		//State.forceFullCheck = true; // @todo merge check history; why was this here?
+		checkAll();
+		window.setTimeout(function() {
+			if (State.visualizing) {
+				document.dispatchEvent(new CustomEvent('ed11yEndVisualization'))
+			}
+		}, 500);
+		// @todo after merge test: if there are no issues and the heading panel is open...it closes!
+		// Increase debounce if runs are slow.
+		runTime = performance.now() - runTime;
+		State.browserSpeed = runTime > 10 ? 10 : (State.browserSpeed + runTime) / 2;
+		// Todo: optimize tip placement so we do not need as much debounce.
+		State.browserLag = State.browserSpeed < 1 ? 0 : State.browserSpeed * 100 + State.totalCount;
+	} else {
+		// Ed11y was running, try again later.
+		window.setTimeout(() => {incrementalCheck();}, 250);
+	}
+}, 250);
 
 export function visualize () {
 	if (!UI.panel) {
@@ -1694,7 +1671,7 @@ export function dismissThis (dismissalType, all = false) {
 	removal.button?.parentNode?.removeChild(removal.button);
 
 	reset();
-	State.showPanel = true;
+	State.open = true;
 	checkAll();
 
 	let rememberGoto = State.lastOpenTip;
@@ -1717,7 +1694,7 @@ export function toggleShowDismissals () {
 	State.ignoreAll = false;
 	Options.showDismissed = !(Options.showDismissed);
 	reset();
-	State.showPanel = true;
+	State.open = true;
 	checkAll();
 
 	UI.showDismissed.setAttribute('data-ed11y-pressed', (!!Options.showDismissed).toString());
@@ -1734,10 +1711,10 @@ export function togglePanel () {
 		if (State.running !== true) {
 			State.running = true;
 			// Re-scan each time the panel reopens.
-			if (UI.panel.classList.contains('ed11y-shut') === true) {
+			if (!State.open) {
 				State.onLoad = false;
 				State.incremental = false;
-				State.showPanel = true;
+				State.open = true;
 				if (State.dismissedCount > 0 && State.warningCount === 0 && State.errorCount === 0) {
 					Options.showDismissed = false;
 					toggleShowDismissals();
@@ -1770,7 +1747,7 @@ export function raceCrash() {
 	}
 	State.loopStop = true;
 	reset();
-	State.showPanel = true;
+	State.open = true;
 	checkAll();
 	window.setTimeout(function() {
 		if (Results.length > 0 && State.loopStop) {
@@ -1807,6 +1784,6 @@ export function reset () {
 	resetPanel();
 	State.incremental = false;
 	State.running = false;
-	State.showPanel = false;
+	State.open = false;
 	State.open = false;
 }

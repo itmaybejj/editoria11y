@@ -1,14 +1,14 @@
-import Lang from '../node_modules/sa11y/src/js/utils/lang';
-import {computeAccessibleName} from "sa11y/src/js/utils/computeAccessibleName.js";
-import {prepareDismissal} from "sa11y/src/js/utils/utils.js";
+import Lang from '../sa11y/utils/lang';
+import {computeAccessibleName} from "../sa11y/utils/computeAccessibleName.js";
+import {prepareDismissal} from "../sa11y/utils/utils.js";
 import {State, Results, Theme, UI} from "./utils/state.js";
 import {Options} from './utils/options.js';
-import Elements from "sa11y/src/js/utils/elements.js";
-import {checkAll, incrementalCheck} from "./logic/interface.js";
+import Elements from "../sa11y/utils/elements.js";
+import {checkAll, incrementalCheck, reset} from "./logic/interface.js";
 import {
 	initialize,
 } from "./logic/initialize.js";
-import {getElements, findElements} from "./utils/utils.js";
+import {getElements, findElements, showError} from "./utils/utils.js";
 
 class Ed11y {
 
@@ -17,11 +17,13 @@ class Ed11y {
 		State.version = '3.0.0';
 
     if (CSS.supports('selector(:has(body))')) {
-      initialize(userOptions);
+			try {
+				initialize(userOptions);
+			} catch (error) {
+				showError(error);}
     }
 
     /* Export exposed interfaces */
-    //this.checkAll = checkAll();
 		this.version = State.version;
   }
 }
@@ -40,5 +42,6 @@ export {
 	getElements,
 	incrementalCheck,
 	prepareDismissal,
+	reset,
 	Ed11y,
 }
