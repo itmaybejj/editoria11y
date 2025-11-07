@@ -1363,6 +1363,21 @@ export function continueCheck(customCheck = false) {
 			if (Results[i].dismiss) {
 				Results[i].dismissalKey = Results[i].dismiss;
 			}
+			if (State.headingOutlineOverrides.length > 0 &&
+				Results[i].test === 'HEADING_SKIPPED_LEVEL') {
+				const el = Results[i].element;
+				const remove = State.headingOutlineOverrides.some((override) => {
+					if (el === override.element) {
+						const elementLevel = el.tagName.split('H')[1];
+						if (elementLevel <= override.level + 1) {
+							return true;
+						}
+					}
+				})
+				if (remove) {
+					Results.splice(i, 1);
+				}
+			}
 		}
 		i = i - 1;
 	}

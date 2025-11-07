@@ -141,24 +141,22 @@ export const Options = {
 	editLinks: false, // Add links to edit content in tooltips.
 
 	// @todo merge discuss: how to handle this functionality.
-	editorHeadingLevel: [
+	initialHeadingLevel: false,
 		// Sets previous heading level for contentEditable fields.
 		// With 'ignore' set, first heading level is ignored in editable zones.
 		// This is ideal for systems with separate backend editing pages.
 		// Set to 'inherit' for fields edited in a frontend context.
-		/*{
-			selector: '.example-inherit',
-			previousHeading: 'inherit',
-		},
-		{
-			selector: '.example-l3',
-			previousHeading: 3,
-		},*/
-		{
-			selector: '*',
-			previousHeading: 0, // Ignores first heading for level skip detection.
-		},
-	],
+		/*
+		[
+			{
+				selector: '.example-inherit',
+				previousHeading: 'inherit',
+			},
+			{
+				selector: '.example-l3',
+				previousHeading: 3,
+			},
+		],*/
 
 	userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
 

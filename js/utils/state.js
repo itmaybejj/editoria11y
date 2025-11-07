@@ -26,6 +26,7 @@ export const State = {
   roots: [],
   oldResults: [],
   headingOutline: [],
+	headingOutlineOverrides: [],
   elements: { // to be replaced by Sa11y find.
     altMark: [],
     delayedReset: []

@@ -1016,6 +1016,7 @@ const State = {
   roots: [],
   oldResults: [],
   headingOutline: [],
+	headingOutlineOverrides: [],
   elements: { // to be replaced by Sa11y find.
     altMark: [],
     delayedReset: []
@@ -1210,24 +1211,22 @@ const Options = {
 	editLinks: false, // Add links to edit content in tooltips.
 
 	// @todo merge discuss: how to handle this functionality.
-	editorHeadingLevel: [
+	initialHeadingLevel: false,
 		// Sets previous heading level for contentEditable fields.
 		// With 'ignore' set, first heading level is ignored in editable zones.
 		// This is ideal for systems with separate backend editing pages.
 		// Set to 'inherit' for fields edited in a frontend context.
-		/*{
-			selector: '.example-inherit',
-			previousHeading: 'inherit',
-		},
-		{
-			selector: '.example-l3',
-			previousHeading: 3,
-		},*/
-		{
-			selector: '*',
-			previousHeading: 0, // Ignores first heading for level skip detection.
-		},
-	],
+		/*
+		[
+			{
+				selector: '.example-inherit',
+				previousHeading: 'inherit',
+			},
+			{
+				selector: '.example-l3',
+				previousHeading: 3,
+			},
+		],*/
 
 	userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
 
@@ -1811,6 +1810,23 @@ function buildElementList () {
 		dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore);
 		dropSomeElements(Elements.Found.Blockquotes);
 		dropSomeElements(Elements.Found.Tables);
+
+		if (typeof Options.initialHeadingLevel === 'object') {
+			Options.initialHeadingLevel.forEach((level) => {
+				const headingRoots = getElements([level.selector], 'root');
+				if (headingRoots.length > 0) {
+					headingRoots.forEach((headingRoot) => {
+						const firstInSection = headingRoot.querySelector(`h${level.previousHeading}, h${parseInt(level.previousHeading) + 1}`);
+						if (firstInSection) {
+							State.headingOutlineOverrides.push({
+								element: firstInSection,
+								level: level.previousHeading
+							});
+						}
+					});
+				}
+			});
+		}
 
 		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
 		if (typeof Options.editableContent === 'string') {
@@ -5588,6 +5604,21 @@ function continueCheck(customCheck = false) {
 			Results[i].position = 'beforebegin'; // @todo CMS merge use Sa11y keys when ready or closest().
 			if (Results[i].dismiss) {
 				Results[i].dismissalKey = Results[i].dismiss;
+			}
+			if (State.headingOutlineOverrides.length > 0 &&
+				Results[i].test === 'HEADING_SKIPPED_LEVEL') {
+				const el = Results[i].element;
+				const remove = State.headingOutlineOverrides.some((override) => {
+					if (el === override.element) {
+						const elementLevel = el.tagName.split('H')[1];
+						if (elementLevel <= override.level + 1) {
+							return true;
+						}
+					}
+				});
+				if (remove) {
+					Results.splice(i, 1);
+				}
 			}
 		}
 		i = i - 1;

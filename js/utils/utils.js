@@ -108,6 +108,23 @@ export function buildElementList () {
 		dropSomeElements(Elements.Found.Blockquotes);
 		dropSomeElements(Elements.Found.Tables);
 
+		if (typeof Options.initialHeadingLevel === 'object') {
+			Options.initialHeadingLevel.forEach((level) => {
+				const headingRoots = getElements([level.selector], 'root');
+				if (headingRoots.length > 0) {
+					headingRoots.forEach((headingRoot) => {
+						const firstInSection = headingRoot.querySelector(`h${level.previousHeading}, h${parseInt(level.previousHeading) + 1}`);
+						if (firstInSection) {
+							State.headingOutlineOverrides.push({
+								element: firstInSection,
+								level: level.previousHeading
+							});
+						}
+					})
+				}
+			})
+		}
+
 		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
 		if (typeof Options.editableContent === 'string') {
 			findElements('editable', Options.editableContent, false);
