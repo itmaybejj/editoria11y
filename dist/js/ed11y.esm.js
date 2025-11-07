@@ -1813,15 +1813,12 @@ function buildElementList () {
 
 		if (typeof Options.initialHeadingLevel === 'object') {
 			Options.initialHeadingLevel.forEach((level) => {
-				const headingRoots = getElements([level.selector], 'root');
+				const headingRoots = getElements([level.selector], 'document');
 				if (headingRoots.length > 0) {
 					headingRoots.forEach((headingRoot) => {
-						const firstInSection = headingRoot.querySelector(`h${level.previousHeading}, h${parseInt(level.previousHeading) + 1}`);
+						const firstInSection = headingRoot.querySelector(`h${level.previousHeading}, h${level.previousHeading + 1}`);
 						if (firstInSection) {
-							State.headingOutlineOverrides.push({
-								element: firstInSection,
-								level: level.previousHeading
-							});
+							State.headingOutlineOverrides.push(firstInSection);
 						}
 					});
 				}
@@ -5609,16 +5606,16 @@ function continueCheck(customCheck = false) {
 				Results[i].test === 'HEADING_SKIPPED_LEVEL') {
 				const el = Results[i].element;
 				const remove = State.headingOutlineOverrides.some((override) => {
-					if (el === override.element) {
-						const elementLevel = el.tagName.split('H')[1];
-						if (elementLevel <= override.level + 1) {
-							return true;
-						}
+					if (el === override) {
+						return true;
 					}
 				});
 				if (remove) {
 					Results.splice(i, 1);
 				}
+				//if (elementLevel < override.level) {
+				// this would become a new error, for like...an H2 in a section that should only have h4 or higher...
+				//}
 			}
 		}
 		i = i - 1;
@@ -6826,7 +6823,6 @@ class Ed11yElementTip extends HTMLElement {
     this.wrapper = document.createElement('div');
     this.wrapper.setAttribute('role', 'dialog');
 
-		console.log(this.result.type);
     this.dismissable = this.result.type !== 'error';
     this.dismissed = !!this.result.dismissalStatus;
     this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');

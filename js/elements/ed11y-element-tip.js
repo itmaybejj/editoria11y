@@ -34,7 +34,6 @@ export class Ed11yElementTip extends HTMLElement {
     this.wrapper = document.createElement('div');
     this.wrapper.setAttribute('role', 'dialog');
 
-		console.log(this.result.type);
     this.dismissable = this.result.type !== 'error';
     this.dismissed = !!this.result.dismissalStatus;
     this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');

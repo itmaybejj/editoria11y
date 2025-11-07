@@ -1367,16 +1367,16 @@ export function continueCheck(customCheck = false) {
 				Results[i].test === 'HEADING_SKIPPED_LEVEL') {
 				const el = Results[i].element;
 				const remove = State.headingOutlineOverrides.some((override) => {
-					if (el === override.element) {
-						const elementLevel = el.tagName.split('H')[1];
-						if (elementLevel <= override.level + 1) {
-							return true;
-						}
+					if (el === override) {
+						return true;
 					}
 				})
 				if (remove) {
 					Results.splice(i, 1);
 				}
+				//if (elementLevel < override.level) {
+				// this would become a new error, for like...an H2 in a section that should only have h4 or higher...
+				//}
 			}
 		}
 		i = i - 1;

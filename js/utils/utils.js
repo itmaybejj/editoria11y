@@ -110,15 +110,12 @@ export function buildElementList () {
 
 		if (typeof Options.initialHeadingLevel === 'object') {
 			Options.initialHeadingLevel.forEach((level) => {
-				const headingRoots = getElements([level.selector], 'root');
+				const headingRoots = getElements([level.selector], 'document');
 				if (headingRoots.length > 0) {
 					headingRoots.forEach((headingRoot) => {
-						const firstInSection = headingRoot.querySelector(`h${level.previousHeading}, h${parseInt(level.previousHeading) + 1}`);
+						const firstInSection = headingRoot.querySelector(`h${level.previousHeading}, h${level.previousHeading + 1}`);
 						if (firstInSection) {
-							State.headingOutlineOverrides.push({
-								element: firstInSection,
-								level: level.previousHeading
-							});
+							State.headingOutlineOverrides.push(firstInSection);
 						}
 					})
 				}
