@@ -1476,124 +1476,142 @@ const Options = {
 			dismissAll: true,
 		},
 	 	*/
+		// dev
+		HEADING_EXCEEDS_LEVEL: true,
 	},
 };
 
 const Elements = (function myElements() {
-  const Found = {};
-  function initializeElements(option) {
-    // Since 4.0.0: For performance, we filter elements instead of dozens of querySelectors on the DOM.
-    Found.Everything = find('*', 'root', Constants.Exclusions.Sa11yElements);
+	const Found = {};
+	function initializeElements(option) {
+		// Since 4.0.0: For performance, we filter elements instead of dozens of querySelectors on the DOM.
+		Found.Everything = find('*', 'root', Constants.Exclusions.Sa11yElements);
 
-    Found.Contrast = Found.Everything.filter(($el) => {
-      const matchesSelector = Constants.Exclusions.Contrast.some((exclusion) => $el.matches(exclusion));
-      return !matchesSelector && !Constants.Exclusions.Contrast.includes($el);
-    });
+		Found.Contrast = Found.Everything.filter(($el) => {
+			const matchesSelector = Constants.Exclusions.Contrast.some((exclusion) => $el.matches(exclusion));
+			return !matchesSelector && !Constants.Exclusions.Contrast.includes($el);
+		});
 
-    Found.Images = Found.Everything.filter(($el) => $el.tagName === 'IMG'
-      && !Constants.Exclusions.Images.some((selector) => $el.matches(selector)));
+		Found.Images = Found.Everything.filter(($el) => $el.tagName === 'IMG'
+			&& !Constants.Exclusions.Images.some((selector) => $el.matches(selector)));
 
-    Found.Links = Found.Everything.filter(($el) => ($el.tagName === 'A' || $el.tagName === 'a')
-      && $el.hasAttribute('href')
-      && !$el.matches('[role="button"]') // Exclude links with [role="button"]
-      && !Constants.Exclusions.Links.some((selector) => $el.matches(selector)));
+		Found.Links = Found.Everything.filter(($el) => ($el.tagName === 'A' || $el.tagName === 'a')
+			&& $el.hasAttribute('href')
+			&& !$el.matches('[role="button"]') // Exclude links with [role="button"]
+			&& !Constants.Exclusions.Links.some((selector) => $el.matches(selector)));
 
-    // We want headings from the entire document for the Page Outline.
-    Found.Headings = find(
-      'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
-      option.ignoreContentOutsideRoots || option.fixedRoots
-        ? 'root' : 'document',
-      Constants.Exclusions.Headings,
-    );
-    Found.HeadingOne = find(
-      'h1, [role="heading"][aria-level="1"]',
-      option.ignoreContentOutsideRoots || option.fixedRoots
-        ? 'root' : 'document',
-      Constants.Exclusions.Headings,
-    );
+		// We want headings from the entire document for the Page Outline.
+		Found.Headings = find(
+			'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
+			option.ignoreContentOutsideRoots || option.fixedRoots
+				? 'root' : 'document',
+			Constants.Exclusions.Headings,
+		);
+		Found.HeadingOne = find(
+			'h1, [role="heading"][aria-level="1"]',
+			option.ignoreContentOutsideRoots || option.fixedRoots
+				? 'root' : 'document',
+			Constants.Exclusions.Headings,
+		);
 
-    // Excluded via headerIgnore.
-    Found.ExcludedHeadings = Found.Headings.filter((heading) => Constants.Exclusions.Headings.some((exclusion) => heading.matches(exclusion)));
+		Found.HeadingOverrideStart = new WeakMap;
+		Found.HeadingOverrideEnd = new WeakMap;
+		if (option.initialHeadingLevel) {
+			option.initialHeadingLevel.forEach((section) => {
+				console.log(section);
+				const headingsInSection = find(`${section.selector} :is(h1,h2,h3,h4,h5,h6,[aria-role=heading][aria-level])`, option.ignoreContentOutsideRoots || option.fixedRoots
+					? 'root' : 'document', Constants.Exclusions.Headings);
+				if (headingsInSection) {
+					Found.HeadingOverrideStart.set(headingsInSection[0], section.previousHeading);
+					Found.HeadingOverrideEnd.set(headingsInSection.pop(), section.previousHeading);
+				}
+			});
+		}
+		console.log('hi?');
+		console.log(Found.HeadingOverrideEnd);
 
-    // Excluded via outlineIgnore.
-    Found.ExcludedOutlineHeadings = Found.Headings.filter((heading) => Constants.Exclusions.Outline.some((exclusion) => heading.matches(exclusion)));
+		// Excluded via headerIgnore.
+		Found.ExcludedHeadings = Found.Headings.filter((heading) => Constants.Exclusions.Headings.some((exclusion) => heading.matches(exclusion)));
 
-    // Merge both headerIgnore and outlineIgnore.
-    Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(Elements.Found.ExcludedHeadings);
+		// Excluded via outlineIgnore.
+		Found.ExcludedOutlineHeadings = Found.Headings.filter((heading) => Constants.Exclusions.Outline.some((exclusion) => heading.matches(exclusion)));
 
-    // Quality assurance module.
-    Found.Paragraphs = Found.Everything.filter(($el) => $el.tagName === 'P'
-      && !$el.closest('table'));
+		// Merge both headerIgnore and outlineIgnore.
+		Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(Elements.Found.ExcludedHeadings);
 
-    Found.Lists = Found.Everything.filter(($el) => $el.tagName === 'LI');
+		// Quality assurance module.
+		Found.Paragraphs = Found.Everything.filter(($el) => $el.tagName === 'P'
+			&& !$el.closest('table'));
 
-    Found.Blockquotes = Found.Everything.filter(($el) => $el.tagName === 'BLOCKQUOTE');
+		Found.Lists = Found.Everything.filter(($el) => $el.tagName === 'LI');
 
-    Found.Tables = Found.Everything.filter(($el) => $el.tagName === 'TABLE' && !$el.matches('[role="presentation"]') && !$el.matches('[role="none"]'));
+		Found.Blockquotes = Found.Everything.filter(($el) => $el.tagName === 'BLOCKQUOTE');
 
-    Found.StrongItalics = Found.Everything.filter(($el) => ['STRONG', 'EM'].includes($el.tagName));
+		Found.Tables = Found.Everything.filter(($el) => $el.tagName === 'TABLE' && !$el.matches('[role="presentation"]') && !$el.matches('[role="none"]'));
 
-    Found.Subscripts = Found.Everything.filter(($el) => ['SUP', 'SUB'].includes($el.tagName));
+		Found.StrongItalics = Found.Everything.filter(($el) => ['STRONG', 'EM'].includes($el.tagName));
 
-    const badLinkSources = option.checks.QA_BAD_LINK.sources;
-    Found.CustomErrorLinks = badLinkSources.length
-      ? Found.Links.filter(($el) => badLinkSources.split(',').some((selector) => $el.matches(selector.trim()))) : [];
+		Found.Subscripts = Found.Everything.filter(($el) => ['SUP', 'SUB'].includes($el.tagName));
 
-    // Readability.
-    const readabilityExclusions = ($el) => Constants.Root.Readability.some((rootEl) => rootEl.contains($el))
-      && !Constants.Exclusions.Readability.some((selector) => $el.matches(selector));
+		const badLinkSources = option.checks.QA_BAD_LINK.sources;
+		Found.CustomErrorLinks = badLinkSources.length
+			? Found.Links.filter(($el) => badLinkSources.split(',').some((selector) => $el.matches(selector.trim()))) : [];
 
-    Found.Readability = [
-      ...Found.Paragraphs.filter(readabilityExclusions),
-      ...Found.Lists.filter(readabilityExclusions),
-    ];
+		// Readability.
+		const readabilityExclusions = ($el) => Constants.Root.Readability.some((rootEl) => rootEl.contains($el))
+			&& !Constants.Exclusions.Readability.some((selector) => $el.matches(selector));
 
-    // Developer checks.
-    const nestedSources = option.checks.QA_NESTED_COMPONENTS.sources || '[role="tablist"], details';
-    Found.NestedComponents = nestedSources
-      ? Found.Everything.filter(($el) => $el.matches(nestedSources)) : [];
+		Found.Readability = [
+			...Found.Paragraphs.filter(readabilityExclusions),
+			...Found.Lists.filter(readabilityExclusions),
+		];
 
-    Found.TabIndex = Found.Everything.filter(($el) => $el.hasAttribute('tabindex')
-      && $el.getAttribute('tabindex') !== '0'
-      && !$el.getAttribute('tabindex').startsWith('-'));
+		// Developer checks.
+		const nestedSources = option.checks.QA_NESTED_COMPONENTS.sources || '[role="tablist"], details';
+		Found.NestedComponents = nestedSources
+			? Found.Everything.filter(($el) => $el.matches(nestedSources)) : [];
 
-    Found.Svg = Found.Everything.filter(($el) => $el.tagName === 'svg');
+		Found.TabIndex = Found.Everything.filter(($el) => $el.hasAttribute('tabindex')
+			&& $el.getAttribute('tabindex') !== '0'
+			&& !$el.getAttribute('tabindex').startsWith('-'));
 
-    Found.Buttons = Found.Everything.filter(($el) => $el.tagName === 'BUTTON' || $el.matches('[role="button"]'));
+		Found.Svg = Found.Everything.filter(($el) => $el.tagName === 'svg');
 
-    Found.Inputs = Found.Everything.filter(($el) => ['INPUT', 'SELECT', 'TEXTAREA', 'METER', 'PROGRESS'].includes($el.tagName));
+		Found.Buttons = Found.Everything.filter(($el) => $el.tagName === 'BUTTON' || $el.matches('[role="button"]'));
 
-    Found.Labels = Found.Everything.filter(($el) => $el.tagName === 'LABEL');
+		Found.Inputs = Found.Everything.filter(($el) => ['INPUT', 'SELECT', 'TEXTAREA', 'METER', 'PROGRESS'].includes($el.tagName));
 
-    // iFrames.
-    Found.iframes = Found.Everything.filter(($el) => ['IFRAME', 'AUDIO', 'VIDEO'].includes($el.tagName));
-    Found.Videos = Found.iframes.filter(($el) => $el.matches(Constants.Global.VideoSources));
-    Found.Audio = Found.iframes.filter(($el) => $el.matches(Constants.Global.AudioSources));
-    Found.Visualizations = Found.iframes.filter(($el) => $el.matches(Constants.Global.VisualizationSources));
-    Found.EmbeddedContent = Found.iframes.filter(($el) => !$el.matches(Constants.Global.AllEmbeddedContent));
+		Found.Labels = Found.Everything.filter(($el) => $el.tagName === 'LABEL');
 
-    // Query select <HTML> given that the lang may change on an SPA.
-    const html = document.querySelector('html');
-    Found.Language = html.getAttribute('lang');
-  }
+		// iFrames.
+		Found.iframes = Found.Everything.filter(($el) => ['IFRAME', 'AUDIO', 'VIDEO'].includes($el.tagName));
+		Found.Videos = Found.iframes.filter(($el) => $el.matches(Constants.Global.VideoSources));
+		Found.Audio = Found.iframes.filter(($el) => $el.matches(Constants.Global.AudioSources));
+		Found.Visualizations = Found.iframes.filter(($el) => $el.matches(Constants.Global.VisualizationSources));
+		Found.EmbeddedContent = Found.iframes.filter(($el) => !$el.matches(Constants.Global.AllEmbeddedContent));
 
-  /* ************* */
-  /*  Annotations  */
-  /* ************* */
-  const Annotations = {};
-  function initializeAnnotations() {
-    Annotations.Array = find('sa11y-annotation', 'document');
-    Annotations.Array.forEach((annotation, i) => {
-      annotation.setAttribute('data-sa11y-position', i);
-    });
-  }
+		// Query select <HTML> given that the lang may change on an SPA.
+		const html = document.querySelector('html');
+		Found.Language = html.getAttribute('lang');
+	}
 
-  return {
-    initializeElements,
-    Found,
-    initializeAnnotations,
-    Annotations,
-  };
+	/* ************* */
+	/*  Annotations  */
+	/* ************* */
+	const Annotations = {};
+	function initializeAnnotations() {
+		Annotations.Array = find('sa11y-annotation', 'document');
+		Annotations.Array.forEach((annotation, i) => {
+			annotation.setAttribute('data-sa11y-position', i);
+		});
+	}
+
+	return {
+		initializeElements,
+		Found,
+		initializeAnnotations,
+		Annotations,
+	};
 }());
 
 /*
@@ -2134,126 +2152,154 @@ function showError(error) {
 }
 
 function checkHeaders(results, option, headingOutline) {
-  let prevLevel;
-  let prevHeadingText = '';
-  Elements.Found.Headings.forEach(($el, i) => {
-    // Get accessible name of heading.
-    const accName = computeAccessibleName($el, Constants.Exclusions.HeaderSpan);
-    const stringMatchExclusions = option.headerIgnoreStrings
-      ? accName.replace(option.headerIgnoreStrings, '') : accName;
-    const removeWhitespace$1 = removeWhitespace(stringMatchExclusions);
-    const headingText = sanitizeHTML(removeWhitespace$1);
+	let prevLevel;
+	let maxLevel = 1;
+	let prevHeadingText = '';
+	Elements.Found.Headings.forEach(($el, i) => {
+		// Get accessible name of heading.
+		const accName = computeAccessibleName($el, Constants.Exclusions.HeaderSpan);
+		const stringMatchExclusions = option.headerIgnoreStrings
+			? accName.replace(option.headerIgnoreStrings, '') : accName;
+		const removeWhitespace$1 = removeWhitespace(stringMatchExclusions);
+		const headingText = sanitizeHTML(removeWhitespace$1);
 
-    // Check if heading is within root target area.
-    const rootContainsHeading = Constants.Root.areaToCheck.some((root) => root.contains($el));
-    const rootContainsShadowHeading = Constants.Root.areaToCheck.some((root) => root.contains($el.getRootNode().host));
-    const isWithinRoot = rootContainsHeading || rootContainsShadowHeading;
+		// OVERRIDE
+		// Check if heading is within root target area.
+		const rootContainsHeading = Constants.Root.areaToCheck.some((root) => root.contains($el));
+		const rootContainsShadowHeading = Constants.Root.areaToCheck.some((root) => root.contains($el.getRootNode().host));
+		const isWithinRoot = rootContainsHeading || rootContainsShadowHeading;
 
-    // Determine heading level.
-    const level = parseInt($el.getAttribute('aria-level') || $el.tagName.slice(1), 10);
-    const headingLength = removeWhitespace$1.length;
-    const maxHeadingLength = option.checks.HEADING_LONG.maxLength || 160;
+		// Check if heading starts an override zone.
+		console.log(Elements.Found.HeadingOverrideStart);
+		const headingStartsOverride = Elements.Found.HeadingOverrideStart.get($el);
+		console.log(headingStartsOverride);
+		if (headingStartsOverride) {
+			console.log($el);
+			prevLevel = headingStartsOverride;
+			maxLevel = headingStartsOverride;
+			console.log(headingStartsOverride);
+		}
 
-    // Default.
-    let test = null;
-    let type = null;
-    let content = null;
-    let developer = null;
-    let dismissAll = null;
-    let margin = null;
+		// Determine heading level.
+		const level = parseInt($el.getAttribute('aria-level') || $el.tagName.slice(1), 10);
+		const headingLength = removeWhitespace$1.length;
+		const maxHeadingLength = option.checks.HEADING_LONG.maxLength || 160;
 
-    // Rulesets.
-    if (headingLength === 0) {
-      if ($el.querySelectorAll('img').length) {
-        const alt = $el.querySelector('img')?.getAttribute('alt');
-        if ($el.querySelector('img') && (!alt || alt.trim() === '')) {
-          if (option.checks.HEADING_EMPTY_WITH_IMAGE) {
-            test = 'HEADING_EMPTY_WITH_IMAGE';
-            type = option.checks.HEADING_EMPTY_WITH_IMAGE.type || 'error';
-            content = Lang.sprintf(option.checks.HEADING_EMPTY_WITH_IMAGE.content || 'HEADING_EMPTY_WITH_IMAGE', level);
-            developer = option.checks.HEADING_EMPTY_WITH_IMAGE.developer || false;
-            dismissAll = option.checks.HEADING_EMPTY_WITH_IMAGE.dismissAll ? 'HEADING_EMPTY_WITH_IMAGE' : false;
-            margin = '-15px 30px';
-          }
-        }
-      } else if (option.checks.HEADING_EMPTY) {
-        test = 'HEADING_EMPTY';
-        type = option.checks.HEADING_EMPTY.type || 'error';
-        content = Lang.sprintf(option.checks.HEADING_EMPTY.content || 'HEADING_EMPTY', level);
-        developer = option.checks.HEADING_EMPTY.developer || false;
-        dismissAll = option.checks.HEADING_EMPTY.dismissAll ? 'HEADING_EMPTY' : false;
-        margin = '0';
-      }
-    } else if (level - prevLevel > 1 && i !== 0) {
-      if (option.checks.HEADING_SKIPPED_LEVEL) {
-        test = 'HEADING_SKIPPED_LEVEL';
-        type = option.checks.HEADING_SKIPPED_LEVEL.type || 'error';
-        content = Lang.sprintf(option.checks.HEADING_SKIPPED_LEVEL.content || 'HEADING_SKIPPED_LEVEL', prevLevel, level, truncateString(headingText, 60), truncateString(prevHeadingText, 60), prevLevel + 1);
-        developer = option.checks.HEADING_SKIPPED_LEVEL.developer || false;
-        dismissAll = option.checks.HEADING_SKIPPED_LEVEL.dismissAll ? 'HEADING_SKIPPED_LEVEL' : false;
-      }
-    } else if (i === 0 && level !== 1 && level !== 2) {
-      if (option.checks.HEADING_FIRST) {
-        test = 'HEADING_FIRST';
-        type = option.checks.HEADING_FIRST.type || 'error';
-        content = Lang.sprintf(option.checks.HEADING_FIRST.content || 'HEADING_FIRST');
-        developer = option.checks.HEADING_FIRST.developer || false;
-        dismissAll = option.checks.HEADING_FIRST.dismissAll ? 'HEADING_FIRST' : false;
-      }
-    } else if (headingLength > maxHeadingLength) {
-      if (option.checks.HEADING_LONG) {
-        test = 'HEADING_LONG';
-        type = option.checks.HEADING_LONG.type || 'warning';
-        content = Lang.sprintf(option.checks.HEADING_LONG.content || 'HEADING_LONG', maxHeadingLength, headingLength);
-        developer = option.checks.HEADING_LONG.developer || false;
-        dismissAll = option.checks.HEADING_LONG.dismissAll ? 'HEADING_LONG' : false;
-      }
-    }
+		// Default.
+		let test = null;
+		let type = null;
+		let content = null;
+		let developer = null;
+		let dismissAll = null;
+		let margin = null;
 
-    // Create results object.
-    if (content && type) {
-      results.push({
-        test,
-        element: $el,
-        type,
-        content,
-        dismiss: prepareDismissal(`H${level + headingText}`),
-        dismissAll,
-        isWithinRoot,
-        developer,
-        margin,
-      });
-    }
+		// Rulesets.
+		if (headingLength === 0) {
+			if ($el.querySelectorAll('img').length) {
+				const alt = $el.querySelector('img')?.getAttribute('alt');
+				if ($el.querySelector('img') && (!alt || alt.trim() === '')) {
+					if (option.checks.HEADING_EMPTY_WITH_IMAGE) {
+						test = 'HEADING_EMPTY_WITH_IMAGE';
+						type = option.checks.HEADING_EMPTY_WITH_IMAGE.type || 'error';
+						content = Lang.sprintf(option.checks.HEADING_EMPTY_WITH_IMAGE.content || 'HEADING_EMPTY_WITH_IMAGE', level);
+						developer = option.checks.HEADING_EMPTY_WITH_IMAGE.developer || false;
+						dismissAll = option.checks.HEADING_EMPTY_WITH_IMAGE.dismissAll ? 'HEADING_EMPTY_WITH_IMAGE' : false;
+						margin = '-15px 30px';
+					}
+				}
+			} else if (option.checks.HEADING_EMPTY) {
+				test = 'HEADING_EMPTY';
+				type = option.checks.HEADING_EMPTY.type || 'error';
+				content = Lang.sprintf(option.checks.HEADING_EMPTY.content || 'HEADING_EMPTY', level);
+				developer = option.checks.HEADING_EMPTY.developer || false;
+				dismissAll = option.checks.HEADING_EMPTY.dismissAll ? 'HEADING_EMPTY' : false;
+				margin = '0';
+			}
+		} else if (level < maxLevel) {
+			// We are in a constrained heading level zone.
+			test = 'HEADING_EXCEEDS_LEVEL';
+			type = option.checks.HEADING_EXCEEDS_LEVEL.type || 'error';
+			content = Lang.sprintf(option.checks.HEADING_EXCEEDS_LEVEL.content || 'HEADING_EXCEEDS_LEVEL', prevLevel, level, truncateString(headingText, 60), maxLevel);
+			developer = option.checks.HEADING_EXCEEDS_LEVEL.developer || false;
+			dismissAll = option.checks.HEADING_EXCEEDS_LEVEL.dismissAll ? 'HEADING_EXCEEDS_LEVEL' : false;
+		} else if (level - prevLevel > 1 && i !== 0) {
+			if (option.checks.HEADING_SKIPPED_LEVEL) {
+				test = 'HEADING_SKIPPED_LEVEL';
+				type = option.checks.HEADING_SKIPPED_LEVEL.type || 'error';
+				content = Lang.sprintf(option.checks.HEADING_SKIPPED_LEVEL.content || 'HEADING_SKIPPED_LEVEL', prevLevel, level, truncateString(headingText, 60), truncateString(prevHeadingText, 60), prevLevel + 1);
+				developer = option.checks.HEADING_SKIPPED_LEVEL.developer || false;
+				dismissAll = option.checks.HEADING_SKIPPED_LEVEL.dismissAll ? 'HEADING_SKIPPED_LEVEL' : false;
+			}
+		} else if (i === 0 && level !== 1 && level !== 2) {
+			if (option.checks.HEADING_FIRST) {
+				test = 'HEADING_FIRST';
+				type = option.checks.HEADING_FIRST.type || 'error';
+				content = Lang.sprintf(option.checks.HEADING_FIRST.content || 'HEADING_FIRST');
+				developer = option.checks.HEADING_FIRST.developer || false;
+				dismissAll = option.checks.HEADING_FIRST.dismissAll ? 'HEADING_FIRST' : false;
+			}
+		} else if (headingLength > maxHeadingLength) {
+			if (option.checks.HEADING_LONG) {
+				test = 'HEADING_LONG';
+				type = option.checks.HEADING_LONG.type || 'warning';
+				content = Lang.sprintf(option.checks.HEADING_LONG.content || 'HEADING_LONG', maxHeadingLength, headingLength);
+				developer = option.checks.HEADING_LONG.developer || false;
+				dismissAll = option.checks.HEADING_LONG.dismissAll ? 'HEADING_LONG' : false;
+			}
+		}
 
-    // Reset level and text.
-    prevLevel = level;
-    prevHeadingText = headingText;
+		// Create results object.
+		if (content && type) {
+			results.push({
+				test,
+				element: $el,
+				type,
+				content,
+				dismiss: prepareDismissal(`H${level + headingText}`),
+				dismissAll,
+				isWithinRoot,
+				developer,
+				margin,
+			});
+		}
 
-    // Create an object for heading outline panel.
-    // Filter out specified headings in outlineIgnore and headerIgnore props.
-    if (!Elements.Found.OutlineIgnore.includes($el)) {
-      headingOutline.push({
-        element: $el,
-        headingLevel: level,
-        text: headingText,
-        type,
-        dismiss: prepareDismissal(`H${level + headingText}`),
-        isWithinRoot,
-      });
-    }
-  });
+		// Reset level and text.
+		prevLevel = level;
 
-  // Missing Heading 1
-  if (option.checks.HEADING_MISSING_ONE && Elements.Found.HeadingOne.length === 0) {
-    results.push({
-      test: 'HEADING_MISSING_ONE',
-      type: option.checks.HEADING_MISSING_ONE.type || 'warning',
-      content: Lang.sprintf(option.checks.HEADING_MISSING_ONE.content || 'HEADING_MISSING_ONE'),
-      dismiss: 'MISSINGH1',
-      developer: option.checks.HEADING_MISSING_ONE.developer || false,
-    });
-  }
-  return { results, headingOutline };
+		// OVERRIDE
+		// Check if heading starts an override zone.
+		const headingEndsOverride = Elements.Found.HeadingOverrideStart.get($el);
+		if (headingEndsOverride) {
+			prevLevel = headingEndsOverride;
+			maxLevel = 1;
+		}
+		prevHeadingText = headingText;
+
+		// Create an object for heading outline panel.
+		// Filter out specified headings in outlineIgnore and headerIgnore props.
+		if (!Elements.Found.OutlineIgnore.includes($el)) {
+			headingOutline.push({
+				element: $el,
+				headingLevel: level,
+				text: headingText,
+				type,
+				dismiss: prepareDismissal(`H${level + headingText}`),
+				isWithinRoot,
+			});
+		}
+	});
+
+	// Missing Heading 1
+	if (option.checks.HEADING_MISSING_ONE && Elements.Found.HeadingOne.length === 0) {
+		results.push({
+			test: 'HEADING_MISSING_ONE',
+			type: option.checks.HEADING_MISSING_ONE.type || 'warning',
+			content: Lang.sprintf(option.checks.HEADING_MISSING_ONE.content || 'HEADING_MISSING_ONE'),
+			dismiss: 'MISSINGH1',
+			developer: option.checks.HEADING_MISSING_ONE.developer || false,
+		});
+	}
+	return { results, headingOutline };
 }
 
 function checkLinkText(results, option) {

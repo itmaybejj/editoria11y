@@ -18,7 +18,7 @@
             <ul><li>Tips will fade out when you click into paragraphs, to prevent tips covering where you are typing.</li>
             <li>There's a fairly long hesitation (~1s) between checks. This greatly helps with performance, but...is it a good balance of performance and frequency?</li>
             </ul>
-            <h2>Sample issues</h2>
+            <h4>Sample issues</h4>
             <p>This is a big paragraph with one small link asking you to <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">click here,</a> which is flagged because it is not an informative link name.</p>
 
             <p>This is a big paragraph with several alerts that place their tips fairly close together:, <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">click here</a>, and <a href="#">https://princeton.edu,</a> and <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">""</a></p>
@@ -116,6 +116,13 @@
                     //theme: 'lightTheme',
                     //theme: 'sleekTheme',
                     headingsOnlyFromCheckRoots: true,
+					  initialHeadingLevel:
+					  [
+						  {
+							  selector: '#editable-region',
+							  previousHeading: 2,
+						  },
+					  ],
                     linkIgnoreSelector : '.ignore-class',
                   });
                 };

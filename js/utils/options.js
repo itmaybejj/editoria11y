@@ -406,5 +406,7 @@ export const Options = {
 			dismissAll: true,
 		},
 	 	*/
+		// dev
+		HEADING_EXCEEDS_LEVEL: true,
 	},
 };
