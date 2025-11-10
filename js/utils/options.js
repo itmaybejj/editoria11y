@@ -1,4 +1,5 @@
 export const Options = {
+	// Default options.
 
 	checkRoots: false, // @todo CMS merge implement whatever syntax Sa11y releases.
 	fixedRoots: false, // Array of specific nodes, overrides previous.
@@ -228,13 +229,13 @@ export const Options = {
 	contrastAPCA: false,
 
 	// Other plugins
-	customChecks: false, // @todo CMS merge test this functionality.
+	customChecks: false,
 	linksAdvancedPlugin: true,
-	formLabelsPlugin: true, // @todo CMS merge turn off when editing.
+	formLabelsPlugin: true, // @todo pro
 	embeddedContentPlugin: true,
-	developerPlugin: false,
-	externalDeveloperChecks: false,
-	colourFilterPlugin: false,
+	developerPlugin: false, // @todo pro
+	externalDeveloperChecks: false, // @todo pro
+	colourFilterPlugin: false, // @todo pro
 	exportResultsPlugin: false,
 
 	// Shared properties for some checks
@@ -260,11 +261,11 @@ export const Options = {
 		MISSING_ALT_LINK: true,
 		MISSING_ALT_LINK_HAS_TEXT: true,
 		MISSING_ALT: true,
-		IMAGE_DECORATIVE_CAROUSEL: false, // New.
+		IMAGE_DECORATIVE_CAROUSEL: false, // Todo consider.
 		LINK_IMAGE_NO_ALT_TEXT: {
 			type: 'error',
 		},
-		LINK_IMAGE_TEXT: false,
+		LINK_IMAGE_TEXT: false, // Not interested.
 		IMAGE_FIGURE_DECORATIVE: {
 			type: 'warning',
 		}, // New
@@ -283,9 +284,9 @@ export const Options = {
 		IMAGE_ALT_TOO_LONG: {
 			maxLength: 250,
 		},
-		LINK_IMAGE_ALT: false, // New.
+		LINK_IMAGE_ALT: false, // Not interested.
 		LINK_IMAGE_ALT_AND_TEXT: true,
-		IMAGE_FIGURE_DUPLICATE_ALT: false, // New.
+		IMAGE_FIGURE_DUPLICATE_ALT: false, // Todo pro.
 		IMAGE_PASS: {
 			dismissAll: true,
 		},
@@ -299,16 +300,16 @@ export const Options = {
 		},
 
 		// Sa11y: Link checks
-		DUPLICATE_TITLE: false,
-		LINK_EMPTY_LABELLEDBY: false, // New.
+		DUPLICATE_TITLE: false, // Todo pro.
+		LINK_EMPTY_LABELLEDBY: false, // Todo pro.
 		LINK_EMPTY_NO_LABEL: true,
 		LINK_STOPWORD: {
 			type: 'warning',
 		},
-		LINK_STOPWORD_ARIA: false, // New.
-		LINK_SYMBOLS: false, // New.
+		LINK_STOPWORD_ARIA: false, // Todo pro.
+		LINK_SYMBOLS: false, // Todo pro.
 		LINK_CLICK_HERE: false,
-		LINK_DOI: false,
+		LINK_DOI: false, // Todo consider.
 		LINK_URL: {
 			maxLength: 40,
 		},
@@ -316,13 +317,14 @@ export const Options = {
 			dismissAll: true,
 		},
 		LINK_EMPTY: true,
-		LINK_IDENTICAL_NAME: false,
+		LINK_IDENTICAL_NAME: false, // Todo pro.
 		LINK_NEW_TAB: {
 			dismissAll: true,
 		},
-		LINK_FILE_EXT: false, // New.
+		LINK_FILE_EXT: false, // Todo test vs LinkPurpose.
 
 		// Form label checks module not yet enabled.
+		// Todo pro.
 		/*
 		LABELS_MISSING_IMAGE_INPUT: true,
 		LABELS_INPUT_RESET: true,
@@ -343,16 +345,18 @@ export const Options = {
 			sources: '',
 		},
 		EMBED_UNFOCUSABLE: true,
-		EMBED_MISSING_TITLE: true,
+		EMBED_MISSING_TITLE: {
+			type: 'warning',
+		},
 		EMBED_GENERAL: true,
 
 		// Quality assurance checks
 		QA_BAD_LINK: {
 			sources: '',
 		},
-		QA_STRONG_ITALICS: false,
-		QA_IN_PAGE_LINK: false,
-		QA_DOCUMENT: false,
+		QA_STRONG_ITALICS: false, // Todo pro.
+		QA_IN_PAGE_LINK: false, // Todo pro.
+		QA_DOCUMENT: false, // Todo CMS consider.
 		QA_PDF: {
 			sources: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']',
 			dismissAll: true,
@@ -364,19 +368,20 @@ export const Options = {
 		QA_FAKE_HEADING: true,
 		QA_FAKE_LIST: true,
 		QA_UPPERCASE: true,
-		QA_UNDERLINE: false, // New.
-		QA_SUBSCRIPT: false, // New.
-		QA_NESTED_COMPONENTS: false, // New.
-		QA_JUSTIFY: false, // New.
-		QA_SMALL_TEXT: false, // New.
+		QA_UNDERLINE: false, // Todo pro.
+		QA_SUBSCRIPT: false, // Todo pro.
+		QA_NESTED_COMPONENTS: false, // Todo pro.
+		QA_JUSTIFY: false, // Todo pro.
+		QA_SMALL_TEXT: false, // Todo pro.
 
 		// Sa11y: Meta checks
-		META_LANG: false, // New.
-		META_SCALABLE: false, // New.
-		META_MAX: false, // New.
-		META_REFRESH: false, // New.
+		META_LANG: false, // Todo pro.
+		META_SCALABLE: false, // Not interested.
+		META_MAX: false, // Not interested.
+		META_REFRESH: false, // Todo pro.
 
 		// Sa11y: Developer checks
+		// Todo pro.
 		/*
 		DUPLICATE_ID: false,
 		META_TITLE: false,
@@ -390,6 +395,7 @@ export const Options = {
 		*/
 
 		// Sa11y: Contrast checks
+		// Todo pro.
 		/*
 		CONTRAST_WARNING: {
 			dismissAll: true,
@@ -407,6 +413,9 @@ export const Options = {
 		},
 	 	*/
 		// dev
-		HEADING_EXCEEDS_LEVEL: true,
+		HEADING_EXCEEDS_LEVEL: true, // todo merge would need text.
+		EMBED_CUSTOM: {
+			sources: '#embed'
+		},
 	},
 };

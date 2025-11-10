@@ -27,6 +27,8 @@ import {
 	closestScrollable
 } from "../utils/align.js";
 import {Options} from "../utils/options.js";
+import checkEmbeddedContent from '../../sa11y/rulesets/embedded-content';
+import customRuleset from '../rulesets/custom-ruleset';
 
 export function showResults () {
   buildJumpList();
@@ -1201,6 +1203,7 @@ export function startObserver (root) {
 
 const enqueueTests = function(queue) {
 	const test = queue.pop();
+	State.testsRemaining--;
 	try {
 		switch (test) {
 			case 'checkHeaders':
@@ -1215,8 +1218,14 @@ const enqueueTests = function(queue) {
 			case 'checkLabels':
 				checkLabels(Results, Options)
 				break
+			case 'checkEmbeddedContent':
+				checkEmbeddedContent(Results, Options)
+				break
 			case 'checkQA':
 				checkQA(Results, Options)
+				break
+			case 'customRuleset':
+				customRuleset(Results)
 				break
 		}
 	} catch (error) {
@@ -1285,28 +1294,30 @@ export function checkAll() {
 		'checkHeaders',
 		'checkLinkText',
 		'checkImages',
+		'checkEmbeddedContent',
 		// 'checkLabels',
 		'checkQA',
+		'customRuleset',
 	];
 	// Todo after merge: developer and readability tests added via options here.
 	State.testsRemaining = queue.length;
 	enqueueTests(queue);
 
-	if (State.customTestsRemaining > 0) {
-		removeCustomTest();
-	}
-
 	if (Options.customTests > 0) {
 		// Pause
-		State.customTestsRunning += Options.customTests;
-		window.setTimeout(function() {
+		console.log('add custom test');
+		console.log(Options.customTests);
+		State.customTestsRemaining += Options.customTests;
+		console.log(State.customTestsRemaining);
+		window.clearTimeout(State.customTestTimeout);
+		State.customTestTimeout = window.setTimeout(function() {
 			if (State.customTestsRemaining > 0) {
 				removeCustomTest();
 			}
 		}, 1500);
 		window.setTimeout(function() {
 			let customTests = new CustomEvent('ed11yRunCustomTests');
-			document.dispatchEvent(customTests);
+			document.dispatchEvent(customTests); // todo there is a race condition here for slow custom tests. May need to pass State.customTestTimeout and only accept back results that match the ID.
 		},0);
 	}
 	/*{
@@ -1338,10 +1349,10 @@ export function checkAll() {
 
 export function continueCheck(customCheck = false) {
 	if (customCheck) {
-		State.customTestsRunning--;
+		State.customTestsRemaining--;
 	}
 	// change to only countering fro custom tests
-	if (State.customTestsRemaining > 0) {
+	if (State.customTestsRemaining + State.testsRemaining > 0) {
 		// Tests still in progress.
 		return;
 	}
@@ -1455,7 +1466,7 @@ export function showHeadingsPanel () {
 			let levelPrefix = document.createElement('strong');
 			levelPrefix.textContent = `H${result.headingLevel}: `;
 			let userText = document.createElement('span');
-			userText.textContent = result.text;
+			userText.innerHTML = result.text;
 			let link = document.createElement('a');
 			if (State.inlineAlerts) {
 				link.setAttribute('href', '#ed11y-heading-' + i);
@@ -1700,7 +1711,7 @@ export function togglePanel () {
 				State.showPanel = true;
 				if (State.dismissedCount > 0 && State.warningCount === 0 && State.errorCount === 0) {
 					State.showDismissed = false;
-					toggleShowDismissals(); // todo merge fails if there is a tip open
+					toggleShowDismissals();
 				} else {
 					checkAll();
 				}

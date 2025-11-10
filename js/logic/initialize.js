@@ -25,7 +25,6 @@ const preProcessOptions = function(userOptions) {
 	* Options translation
 	* */
 	Options.headless = userOptions.alertMode === 'headless';
-	Options.customChecks = userOptions.customTests > 0 && !userOptions.customChecks ? 'listen' : false; // @todo merge test.
 
 	// Check for document types.
 	if (userOptions.panelAttachTo) {
@@ -43,6 +42,10 @@ const preProcessOptions = function(userOptions) {
 	Theme.baseFontFamily = Options.baseFontFamily;
 	State.inlineAlerts = Options.inlineAlerts;
 	State.showDismissed = Options.showDismissed;
+
+	if (userOptions.linkIgnoreSelector && !userOptions.linkIgnoreSpan) {
+		Options.linkIgnoreSpan = userOptions.linkIgnoreSelector;
+	}
 
 	let cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
 	if (!userOptions.cssUrls) {

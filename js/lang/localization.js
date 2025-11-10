@@ -441,7 +441,7 @@ const ed11yLang = {
 		embedCustom : {
 			title: 'Manual check: is this embedded content accessible?',
 		},
-		EMBED_GENERAL: '<p>Please make sure images inside this embed have alt text, videos have captions, and interactive components can be <a href=\'https://webaim.org/techniques/keyboard/\'>operated by a keyboard</a>.</p>',
+		EMBED_CUSTOM: '<p>This checker cannot test inside embedded content. Check to sure images inside this embed have alt text, videos have captions, and interactive components can be <a href=\'https://webaim.org/techniques/keyboard/\'>operated by a keyboard</a>.</p>',
 	}
 };
 

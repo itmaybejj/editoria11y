@@ -103,7 +103,7 @@ export function buildElementList () {
 		// Find and cache elements.
 		Elements.initializeElements(Options);
 
-		dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore);
+		dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore, true, true);
 		dropSomeElements(Elements.Found.Blockquotes);
 		dropSomeElements(Elements.Found.Tables);
 
@@ -397,7 +397,7 @@ export function countAlerts () {
 			if (Results[i].type === 'good') {
 				Results.splice(i, 1);
 			} else {
-				Results[i].position = 'beforebegin'; // @todo CMS merge use Sa11y keys when ready or closest().
+				Results[i].position = 'beforebegin'; // @todo merge use Sa11y keys when ready or closest().
 				if (Results[i].dismiss) {
 					// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
 					if (Options.currentPage in State.dismissedAlerts

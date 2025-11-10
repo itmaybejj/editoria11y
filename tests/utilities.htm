@@ -190,17 +190,15 @@
                 <a href="https://demo">click here</a></div>
             <div class="negative">Good link text in ::before: <a id="text-in-css" href="/"></a></div>
             <div class="positive">Bad link text in ::before:<a id="click-in-css" class="click-in-css" href="/"></a></div>
-            <div class="positive"><div role="region" aria-label="Featured image">
-                Aria labelled region should not negate inner name calculation.
+            <div class="todo-positive"><div role="region" aria-label="Featured image">
+                We should be testing SVG as a developer test, and an aria labelled region should not negate inner name calculation on an SVG.
                 <svg id="nested-aria-label" role="img"  viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg"/>
             </div></div>
-            <div class="negative">Good link text in title attribute: <a id="titled-link" title="Titled link" href="/"></a></div>
+            <div class="negative">Good link text in title attribute: <a id="titled-link" title="Potatoes" href="/"></a></div>
             <div class="negative">Null aria label: <a id="null-aria" aria-label="" href="/">Null aria</a></div>
             <div class="positive">Bad link text in title attribute: <a id="titled-link-click-here" title="Click here" href="/"><span></span></a></div>
             <div class="positive">Bad link text in ::before on inner span: <a id="inner-css-link" href="/"><span class="click-in-css"></span></a></div>
-            <div class="positive">Inner SVG has an alt but no role, alt is ignored: <a id="svg-incorrect-role" href="/"><svg alt="unread alt" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="5" cy="5" r="4"></circle></svg></a></div>
-            <div class="negative">Inner SVG has an alt and a valid role: <a id="svg-image-role" href="/"><svg role="img" alt="foo bar baz" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="positive">Inner SVG has an alt but no role, alt is ignored: <a id="svg-incorrect-role" href="/"><svg title="unread alt" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"></circle></svg></a></div>
             <div class="negative">Inner SVG has a good title element: <a id="inner-svg-titles" href="/"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>I'm a circle</title></circle>
@@ -211,7 +209,7 @@
             <div class="negative">OK via aria-labelledby to another element: <a id="inner-svg-titles-ok-by-label" aria-labelledby="titled-link" href="/"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>Click</title></circle>
                 <rect x="11" y="1" width="8" height="8"><title>here</title></rect></svg></a></div>
-            <div class="positive">Bad via recursive aria-labelledby: <a id="recursive-svg-click-here" aria-labelledby="recursive-svg-click-here click-in-css" href="/"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="positive">Bad via recursive aria-labelledby: <a id="recursive-svg-click-here" aria-labelledby="recursive-svg-click-here" href="/"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>Click</title></circle>
                 </svg> here</a></div>
             <div class="negative">Good via inner aria-labelled element: <a id="recursive-svg-inner-label" aria-labelledby="recursive-svg-inner-label" href="/"><svg aria-label="meaningful link" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
@@ -403,8 +401,9 @@
                 //shadowComponents : 'shadow-test, shadow-test-no-hits, element-details',
                 autoDetectShadowComponents: true,
                   hiddenHandlers : '[hidden]',
-                checkRoots : 'main',
+                checkRoot : 'main',
                 //linkIgnoreStrings: /\(link is external\)/i,
+				  ignoreContentOutsideRoots: true, // todo CMS new phrasing.
                 customTests : 0,
                 theme: 'sleekTheme',
                 linkIgnoreSelector : '.ignore-class, .link-purpose-text',

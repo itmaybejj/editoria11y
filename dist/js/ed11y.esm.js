@@ -456,7 +456,7 @@ const Constants = (function myConstants() {
       : [];
 
     // Ignore specific images.
-    Exclusions.Images = ['[role="presentation"]'];
+    Exclusions.Images = ['img[role="presentation"]:not(a img[role="presentation"]), img[aria-hidden="true"]:not(a img[aria-hidden="true"])'];
     if (option.imageIgnore) {
       Exclusions.Images = option.imageIgnore.split(',').map(($el) => $el.trim()).concat(Exclusions.Images);
     }
@@ -1026,6 +1026,7 @@ const State = {
   browserSpeed: 1,
   browserLag: 1,
 	customTestsRemaining: 0,
+	customTestTimeout: 0,
   loopStop: false,
   roots: [],
   oldResults: [],
@@ -1083,6 +1084,7 @@ const UI = {
 const Results = [];
 
 const Options = {
+	// Default options.
 
 	checkRoots: false, // @todo CMS merge implement whatever syntax Sa11y releases.
 	fixedRoots: false, // Array of specific nodes, overrides previous.
@@ -1312,13 +1314,13 @@ const Options = {
 	contrastAPCA: false,
 
 	// Other plugins
-	customChecks: false, // @todo CMS merge test this functionality.
+	customChecks: false,
 	linksAdvancedPlugin: true,
-	formLabelsPlugin: true, // @todo CMS merge turn off when editing.
+	formLabelsPlugin: true, // @todo pro
 	embeddedContentPlugin: true,
-	developerPlugin: false,
-	externalDeveloperChecks: false,
-	colourFilterPlugin: false,
+	developerPlugin: false, // @todo pro
+	externalDeveloperChecks: false, // @todo pro
+	colourFilterPlugin: false, // @todo pro
 	exportResultsPlugin: false,
 
 	// Shared properties for some checks
@@ -1344,11 +1346,11 @@ const Options = {
 		MISSING_ALT_LINK: true,
 		MISSING_ALT_LINK_HAS_TEXT: true,
 		MISSING_ALT: true,
-		IMAGE_DECORATIVE_CAROUSEL: false, // New.
+		IMAGE_DECORATIVE_CAROUSEL: false, // Todo consider.
 		LINK_IMAGE_NO_ALT_TEXT: {
 			type: 'error',
 		},
-		LINK_IMAGE_TEXT: false,
+		LINK_IMAGE_TEXT: false, // Not interested.
 		IMAGE_FIGURE_DECORATIVE: {
 			type: 'warning',
 		}, // New
@@ -1367,9 +1369,9 @@ const Options = {
 		IMAGE_ALT_TOO_LONG: {
 			maxLength: 250,
 		},
-		LINK_IMAGE_ALT: false, // New.
+		LINK_IMAGE_ALT: false, // Not interested.
 		LINK_IMAGE_ALT_AND_TEXT: true,
-		IMAGE_FIGURE_DUPLICATE_ALT: false, // New.
+		IMAGE_FIGURE_DUPLICATE_ALT: false, // Todo pro.
 		IMAGE_PASS: {
 			dismissAll: true,
 		},
@@ -1383,16 +1385,16 @@ const Options = {
 		},
 
 		// Sa11y: Link checks
-		DUPLICATE_TITLE: false,
-		LINK_EMPTY_LABELLEDBY: false, // New.
+		DUPLICATE_TITLE: false, // Todo pro.
+		LINK_EMPTY_LABELLEDBY: false, // Todo pro.
 		LINK_EMPTY_NO_LABEL: true,
 		LINK_STOPWORD: {
 			type: 'warning',
 		},
-		LINK_STOPWORD_ARIA: false, // New.
-		LINK_SYMBOLS: false, // New.
+		LINK_STOPWORD_ARIA: false, // Todo pro.
+		LINK_SYMBOLS: false, // Todo pro.
 		LINK_CLICK_HERE: false,
-		LINK_DOI: false,
+		LINK_DOI: false, // Todo consider.
 		LINK_URL: {
 			maxLength: 40,
 		},
@@ -1400,13 +1402,14 @@ const Options = {
 			dismissAll: true,
 		},
 		LINK_EMPTY: true,
-		LINK_IDENTICAL_NAME: false,
+		LINK_IDENTICAL_NAME: false, // Todo pro.
 		LINK_NEW_TAB: {
 			dismissAll: true,
 		},
-		LINK_FILE_EXT: false, // New.
+		LINK_FILE_EXT: false, // Todo test vs LinkPurpose.
 
 		// Form label checks module not yet enabled.
+		// Todo pro.
 		/*
 		LABELS_MISSING_IMAGE_INPUT: true,
 		LABELS_INPUT_RESET: true,
@@ -1427,16 +1430,18 @@ const Options = {
 			sources: '',
 		},
 		EMBED_UNFOCUSABLE: true,
-		EMBED_MISSING_TITLE: true,
+		EMBED_MISSING_TITLE: {
+			type: 'warning',
+		},
 		EMBED_GENERAL: true,
 
 		// Quality assurance checks
 		QA_BAD_LINK: {
 			sources: '',
 		},
-		QA_STRONG_ITALICS: false,
-		QA_IN_PAGE_LINK: false,
-		QA_DOCUMENT: false,
+		QA_STRONG_ITALICS: false, // Todo pro.
+		QA_IN_PAGE_LINK: false, // Todo pro.
+		QA_DOCUMENT: false, // Todo CMS consider.
 		QA_PDF: {
 			sources: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']',
 			dismissAll: true,
@@ -1448,19 +1453,20 @@ const Options = {
 		QA_FAKE_HEADING: true,
 		QA_FAKE_LIST: true,
 		QA_UPPERCASE: true,
-		QA_UNDERLINE: false, // New.
-		QA_SUBSCRIPT: false, // New.
-		QA_NESTED_COMPONENTS: false, // New.
-		QA_JUSTIFY: false, // New.
-		QA_SMALL_TEXT: false, // New.
+		QA_UNDERLINE: false, // Todo pro.
+		QA_SUBSCRIPT: false, // Todo pro.
+		QA_NESTED_COMPONENTS: false, // Todo pro.
+		QA_JUSTIFY: false, // Todo pro.
+		QA_SMALL_TEXT: false, // Todo pro.
 
 		// Sa11y: Meta checks
-		META_LANG: false, // New.
-		META_SCALABLE: false, // New.
-		META_MAX: false, // New.
-		META_REFRESH: false, // New.
+		META_LANG: false, // Todo pro.
+		META_SCALABLE: false, // Not interested.
+		META_MAX: false, // Not interested.
+		META_REFRESH: false, // Todo pro.
 
 		// Sa11y: Developer checks
+		// Todo pro.
 		/*
 		DUPLICATE_ID: false,
 		META_TITLE: false,
@@ -1474,6 +1480,7 @@ const Options = {
 		*/
 
 		// Sa11y: Contrast checks
+		// Todo pro.
 		/*
 		CONTRAST_WARNING: {
 			dismissAll: true,
@@ -1491,7 +1498,10 @@ const Options = {
 		},
 	 	*/
 		// dev
-		HEADING_EXCEEDS_LEVEL: true,
+		HEADING_EXCEEDS_LEVEL: true, // todo merge would need text.
+		EMBED_CUSTOM: {
+			sources: '#embed'
+		},
 	},
 };
 
@@ -1839,7 +1849,7 @@ function buildElementList () {
 		// Find and cache elements.
 		Elements.initializeElements(Options);
 
-		dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore);
+		dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore, true, true);
 		dropSomeElements(Elements.Found.Blockquotes);
 		dropSomeElements(Elements.Found.Tables);
 
@@ -2111,7 +2121,7 @@ function countAlerts () {
 			if (Results[i].type === 'good') {
 				Results.splice(i, 1);
 			} else {
-				Results[i].position = 'beforebegin'; // @todo CMS merge use Sa11y keys when ready or closest().
+				Results[i].position = 'beforebegin'; // @todo merge use Sa11y keys when ready or closest().
 				if (Results[i].dismiss) {
 					// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
 					if (Options.currentPage in State.dismissedAlerts
@@ -2191,9 +2201,12 @@ function checkHeaders(results, option, headingOutline) {
 		// Check if heading starts an override zone.
 		console.log(Elements.Found.HeadingOverrideStart);
 		const headingStartsOverride = Elements.Found.HeadingOverrideStart.get($el);
+		console.log(headingStartsOverride);
 		if (headingStartsOverride) {
+			console.log($el);
 			prevLevel = headingStartsOverride;
 			maxLevel = headingStartsOverride;
+			console.log(headingStartsOverride);
 		}
 
 		// Determine heading level.
@@ -2397,11 +2410,10 @@ function checkLinkText(results, option) {
     const href = standardizeHref($el);
 
     // Link text based on COMPUTED ACCESSIBLE NAME.
-    const accName = computeAccessibleName($el, Constants.Exclusions.LinkSpan);
-    const stringMatchExclusions = Array.isArray(option.linkIgnoreStrings)
+    const accName = removeWhitespace(computeAccessibleName($el, Constants.Exclusions.LinkSpan));
+    const linkText = Array.isArray(option.linkIgnoreStrings)
       ? option.linkIgnoreStrings.reduce((result, str) => result.replace(str, ''), accName)
       : accName;
-    const linkText = removeWhitespace(stringMatchExclusions);
 
     // Ignore special characters (except forward slash).
     const stripSpecialChars = stripSpecialCharacters(linkText);
@@ -2426,8 +2438,7 @@ function checkLinkText(results, option) {
     const hasAriaLabelledby = $el.querySelector(':scope [aria-labelledby]') || $el.getAttribute('aria-labelledby');
 
     // New tab or new window.
-    // Evaluate $el.textContent in addition to accessible name to bypass `linkIgnoreSpan` prop.
-    const containsNewWindowPhrases = Lang._('NEW_WINDOW_PHRASES').some((pass) => linkText.toLowerCase().includes(pass) || getText($el).toLowerCase().includes(pass));
+    const containsNewWindowPhrases = Lang._('NEW_WINDOW_PHRASES').some((pass) => accName.toLowerCase().includes(pass));
 
     // If visible label contains word "click" (regardless of accessible name).
     const containsClickPhrase = Lang._('CLICK').some((pass) => {
@@ -2885,11 +2896,6 @@ function checkImages(results, option) {
 
     const linkTextLength = link
       ? removeWhitespace(stringMatchExclusions).length : 0;
-
-    // Has aria-hidden.
-    if ($el.getAttribute('aria-hidden') === 'true') {
-      return;
-    }
 
     // Ignore tracking pixels without explicit aria-hidden or nullified alt.
     if ($el.height < 2 && $el.width < 2 && (isElementHidden($el) || alt === '')) {
@@ -4330,6 +4336,170 @@ function alignButtons() {
 
 }
 
+function checkEmbeddedContent(results, option) {
+  // iFrame's SRC attribute.
+  const src = ($el) => $el.getAttribute('src')
+    || $el.querySelector('source[src]')?.getAttribute('src')
+    || $el.querySelector('[src]')?.getAttribute('src')
+    || null;
+
+  // Warning: Audio content.
+  if (option.checks.EMBED_AUDIO) {
+    Elements.Found.Audio.forEach(($el) => {
+      // General warning for audio content.
+      results.push({
+        test: 'EMBED_AUDIO',
+        element: $el,
+        type: option.checks.EMBED_AUDIO.type || 'warning',
+        content: Lang.sprintf(option.checks.EMBED_AUDIO.content || 'EMBED_AUDIO'),
+        dismiss: prepareDismissal(`AUDIO${src($el)}`),
+        dismissAll: option.checks.EMBED_AUDIO.dismissAll ? 'EMBED_AUDIO' : false,
+        developer: option.checks.EMBED_AUDIO.developer || false,
+      });
+    });
+  }
+
+  // Warning: Video content.
+  if (option.checks.EMBED_VIDEO) {
+    Elements.Found.Videos.forEach(($el) => {
+      // Warning if <track> doesn't exist, or the <track>'s src is empty.
+      const track = $el.querySelector('track');
+      const trackSrc = track?.getAttribute('src');
+      if (track === null || trackSrc === null || trackSrc.trim().length === 0) {
+        results.push({
+          test: 'EMBED_VIDEO',
+          element: $el,
+          type: option.checks.EMBED_VIDEO.type || 'warning',
+          content: Lang.sprintf(option.checks.EMBED_VIDEO.content || 'EMBED_VIDEO'),
+          dismiss: prepareDismissal(`VIDEO${src($el)}`),
+          dismissAll: option.checks.EMBED_VIDEO.dismissAll ? 'EMBED_VIDEO' : false,
+          developer: option.checks.EMBED_VIDEO.developer || false,
+        });
+      }
+    });
+  }
+
+  // Warning: Data visualizations.
+  if (option.checks.EMBED_DATA_VIZ) {
+    Elements.Found.Visualizations.forEach(($el) => {
+      // General warning for data visualization widgets.
+      results.push({
+        test: 'EMBED_DATA_VIZ',
+        element: $el,
+        type: option.checks.EMBED_DATA_VIZ.type || 'warning',
+        content: Lang.sprintf(option.checks.EMBED_DATA_VIZ.content || 'EMBED_DATA_VIZ'),
+        dismiss: prepareDismissal(`DATAVIZ${src($el)}`),
+        dismissAll: option.checks.EMBED_DATA_VIZ.dismissAll ? 'EMBED_DATA_VIZ' : false,
+        developer: option.checks.EMBED_DATA_VIZ.developer || false,
+      });
+    });
+  }
+
+  /* Error: Check all iFrames for a missing accessible name. */
+  Elements.Found.iframes.forEach(($el) => {
+    // Ignore hidden elements and video/audio.
+    const presentation = ['presentation', 'none'].includes($el.getAttribute('role'));
+    const hidden = isElementHidden($el);
+    const videoAudio = $el.tagName === 'VIDEO' || $el.tagName === 'AUDIO';
+    const ariaHidden = $el.getAttribute('aria-hidden') === 'true';
+    const negativeTabindex = $el.getAttribute('tabindex') === '-1';
+    if (hidden || videoAudio || (ariaHidden && negativeTabindex) || presentation) {
+      return;
+    }
+
+    // Warning if element only has negative tabindex (without aria-hidden). Axe rulecheck.
+    if (negativeTabindex) {
+      if (option.checks.EMBED_UNFOCUSABLE) {
+        results.push({
+          test: 'EMBED_UNFOCUSABLE',
+          element: $el,
+          type: option.checks.EMBED_UNFOCUSABLE.type || 'error',
+          content: Lang.sprintf(option.checks.EMBED_UNFOCUSABLE.content || 'EMBED_UNFOCUSABLE'),
+          dismiss: prepareDismissal(`EMBEDUNFOCUSABLE${src($el)}`),
+          dismissAll: option.checks.EMBED_UNFOCUSABLE.dismissAll ? 'EMBED_UNFOCUSABLE' : false,
+          developer: option.checks.EMBED_UNFOCUSABLE.developer || true,
+        });
+      }
+      return;
+    }
+
+    if (option.checks.EMBED_MISSING_TITLE) {
+      // Accessible name is missing for iFrame.
+      const aria = computeAriaLabel($el);
+      const checkTitle = (aria === 'noAria') ? ($el.getAttribute('title') || '') : aria;
+      const accessibleName = removeWhitespace(checkTitle);
+      if (accessibleName.length === 0) {
+        results.push({
+          test: 'EMBED_MISSING_TITLE',
+          element: $el,
+          type: option.checks.EMBED_MISSING_TITLE.type || 'error',
+          content: Lang.sprintf(option.checks.EMBED_MISSING_TITLE.content || 'EMBED_MISSING_TITLE'),
+          dismiss: prepareDismissal(`EMBEDMISSTITLE${src($el)}`),
+          dismissAll: option.checks.EMBED_MISSING_TITLE.dismissAll ? 'EMBED_MISSING_TITLE' : false,
+          developer: option.checks.EMBED_MISSING_TITLE.developer || true,
+        });
+      }
+    }
+  });
+
+  /* Warning: for all iFrames (except video, audio, or data visualizations). */
+  if (option.checks.EMBED_GENERAL) {
+    Elements.Found.EmbeddedContent.forEach(($el) => {
+      // Ignore hidden elements.
+      const presentation = ['presentation', 'none'].includes($el.getAttribute('role'));
+      const ariaHidden = $el.getAttribute('aria-hidden') === 'true';
+      const negativeTabindex = $el.getAttribute('tabindex') === '-1';
+      const hidden = isElementHidden($el);
+      if (hidden || (ariaHidden && negativeTabindex) || presentation) {
+        return;
+      }
+
+      // Ignore video & audio elements.
+      if ($el.tagName === 'VIDEO' || $el.tagName === 'AUDIO') {
+        return;
+      }
+
+      results.push({
+        test: 'EMBED_GENERAL',
+        element: $el,
+        type: option.checks.EMBED_GENERAL.type || 'warning',
+        content: Lang.sprintf(option.checks.EMBED_GENERAL.content || 'EMBED_GENERAL'),
+        dismiss: prepareDismissal(`IFRAMEGENERAL${src($el)}`),
+        dismissAll: option.checks.EMBED_GENERAL.dismissAll ? 'EMBED_GENERAL' : false,
+        developer: option.checks.EMBED_GENERAL.developer || false,
+      });
+    });
+  }
+  return results;
+}
+
+function customRuleset(results) {
+	/* *********************************************************** */
+	/*  Error: Find all links pointing to development environment. */
+	/* *********************************************************** */
+
+	console.log('hi?');
+	console.log(Options.checks.EMBED_CUSTOM);
+	if (Options.checks.EMBED_CUSTOM) {
+		const matchedEmbeds = getElements(Options.checks.EMBED_CUSTOM.sources, 'root');
+		Lang.langStrings.embeddedContent = `<div class="title" tabindex="-1"><div class="ed11y-tip-alert"></div>${Options.embeddedContentTitle}</div>${Options.embeddedContentMessage}`;
+		matchedEmbeds.forEach(($el) => {
+			results.push({
+				test: 'EMBED_CUSTOM',
+				element: $el,
+				type: 'warning',
+				content: Lang.sprintf('EMBED_CUSTOM'),
+				inline: false,
+				dismiss: prepareDismissal($el.tagName + $el.getAttribute('src')),
+				dismissAll: 'embeddedContent',
+				developer: false,
+			});
+		});
+	}
+
+	return results;
+}
+
 function showResults () {
   buildJumpList();
   // Announce that buttons have been placed.
@@ -5503,6 +5673,7 @@ function startObserver (root) {
 
 const enqueueTests = function(queue) {
 	const test = queue.pop();
+	State.testsRemaining--;
 	try {
 		switch (test) {
 			case 'checkHeaders':
@@ -5517,8 +5688,14 @@ const enqueueTests = function(queue) {
 			case 'checkLabels':
 				checkLabels(Results, Options);
 				break
+			case 'checkEmbeddedContent':
+				checkEmbeddedContent(Results, Options);
+				break
 			case 'checkQA':
 				checkQA(Results, Options);
+				break
+			case 'customRuleset':
+				customRuleset(Results);
 				break
 		}
 	} catch (error) {
@@ -5587,28 +5764,30 @@ function checkAll() {
 		'checkHeaders',
 		'checkLinkText',
 		'checkImages',
+		'checkEmbeddedContent',
 		// 'checkLabels',
 		'checkQA',
+		'customRuleset',
 	];
 	// Todo after merge: developer and readability tests added via options here.
 	State.testsRemaining = queue.length;
 	enqueueTests(queue);
 
-	if (State.customTestsRemaining > 0) {
-		removeCustomTest();
-	}
-
 	if (Options.customTests > 0) {
 		// Pause
-		State.customTestsRunning += Options.customTests;
-		window.setTimeout(function() {
+		console.log('add custom test');
+		console.log(Options.customTests);
+		State.customTestsRemaining += Options.customTests;
+		console.log(State.customTestsRemaining);
+		window.clearTimeout(State.customTestTimeout);
+		State.customTestTimeout = window.setTimeout(function() {
 			if (State.customTestsRemaining > 0) {
 				removeCustomTest();
 			}
 		}, 1500);
 		window.setTimeout(function() {
 			let customTests = new CustomEvent('ed11yRunCustomTests');
-			document.dispatchEvent(customTests);
+			document.dispatchEvent(customTests); // todo there is a race condition here for slow custom tests. May need to pass State.customTestTimeout and only accept back results that match the ID.
 		},0);
 	}
 	/*{
@@ -5640,10 +5819,10 @@ function checkAll() {
 
 function continueCheck(customCheck = false) {
 	if (customCheck) {
-		State.customTestsRunning--;
+		State.customTestsRemaining--;
 	}
 	// change to only countering fro custom tests
-	if (State.customTestsRemaining > 0) {
+	if (State.customTestsRemaining + State.testsRemaining > 0) {
 		// Tests still in progress.
 		return;
 	}
@@ -5757,7 +5936,7 @@ function showHeadingsPanel () {
 			let levelPrefix = document.createElement('strong');
 			levelPrefix.textContent = `H${result.headingLevel}: `;
 			let userText = document.createElement('span');
-			userText.textContent = result.text;
+			userText.innerHTML = result.text;
 			let link = document.createElement('a');
 			if (State.inlineAlerts) {
 				link.setAttribute('href', '#ed11y-heading-' + i);
@@ -6002,7 +6181,7 @@ function togglePanel () {
 				State.showPanel = true;
 				if (State.dismissedCount > 0 && State.warningCount === 0 && State.errorCount === 0) {
 					State.showDismissed = false;
-					toggleShowDismissals(); // todo merge fails if there is a tip open
+					toggleShowDismissals();
 				} else {
 					checkAll();
 				}
@@ -6516,7 +6695,7 @@ const ed11yLang = {
 		embedCustom : {
 			title: 'Manual check: is this embedded content accessible?',
 		},
-		EMBED_GENERAL: '<p>Please make sure images inside this embed have alt text, videos have captions, and interactive components can be <a href=\'https://webaim.org/techniques/keyboard/\'>operated by a keyboard</a>.</p>',
+		EMBED_CUSTOM: '<p>This checker cannot test inside embedded content. Check to sure images inside this embed have alt text, videos have captions, and interactive components can be <a href=\'https://webaim.org/techniques/keyboard/\'>operated by a keyboard</a>.</p>',
 	}
 };
 
@@ -7148,7 +7327,6 @@ const preProcessOptions = function(userOptions) {
 	* Options translation
 	* */
 	Options.headless = userOptions.alertMode === 'headless';
-	Options.customChecks = userOptions.customTests > 0 && !userOptions.customChecks ? 'listen' : false; // @todo merge test.
 
 	// Check for document types.
 	if (userOptions.panelAttachTo) {
@@ -7166,6 +7344,10 @@ const preProcessOptions = function(userOptions) {
 	Theme.baseFontFamily = Options.baseFontFamily;
 	State.inlineAlerts = Options.inlineAlerts;
 	State.showDismissed = Options.showDismissed;
+
+	if (userOptions.linkIgnoreSelector && !userOptions.linkIgnoreSpan) {
+		Options.linkIgnoreSpan = userOptions.linkIgnoreSelector;
+	}
 
 	let cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
 	if (!userOptions.cssUrls) {

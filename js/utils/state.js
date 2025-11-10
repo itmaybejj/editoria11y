@@ -21,6 +21,7 @@ export const State = {
   browserSpeed: 1,
   browserLag: 1,
 	customTestsRemaining: 0,
+	customTestTimeout: 0,
   loopStop: false,
   roots: [],
   oldResults: [],
