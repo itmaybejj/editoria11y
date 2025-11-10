@@ -42,6 +42,7 @@ const preProcessOptions = function(userOptions) {
 	Theme.buttonZIndex = Options.buttonZIndex;
 	Theme.baseFontFamily = Options.baseFontFamily;
 	State.inlineAlerts = Options.inlineAlerts;
+	State.showDismissed = Options.showDismissed;
 
 	let cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
 	if (!userOptions.cssUrls) {
@@ -101,17 +102,10 @@ const postProcessOptions = function(userOptions) {
 	//Constants.Global.dataVizSources = option.checks.EMBED_DATA_VIZ.sources;
 	//Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
 
-	State.currentPage = userOptions.currentPage ? userOptions.currentPage : window.location.currentPage;
-
 	Object.assign(Theme, Options[Options.theme]);
 	Theme.baseFontSize = Options.baseFontSize;
 	Theme.buttonZIndex = Options.buttonZIndex;
 	Theme.baseFontFamily = Options.baseFontFamily;
-
-	if (Options.currentPage === false) {
-		Options.currentPage = window.location.pathname;
-	}
-
 
 	if (!Options.linkStringsNewWindows) {
 		Options.linkStringsNewWindows = Lang._('linkStringsNewWindows');
@@ -155,7 +149,6 @@ const postProcessOptions = function(userOptions) {
 			}
 		}
 	}
-
 
 	let localResultCount = store.getItem('editoria11yResultCount');
 	State.seen = localResultCount && localResultCount !== 'undefined' ?

@@ -91,7 +91,7 @@ export class Ed11yElementPanel extends HTMLElement {
       toggleShowDismissals();
       break;
     case 'ed11y-visualize':
-      if (!State.open) {
+      if (!State.showPanel) {
         togglePanel();
       }
       visualize();

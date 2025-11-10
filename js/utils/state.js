@@ -22,7 +22,6 @@ export const State = {
   browserLag: 1,
 	customTestsRemaining: 0,
   loopStop: false,
-  currentPage: window.location.pathname,
   roots: [],
   oldResults: [],
   headingOutline: [],
@@ -38,6 +37,7 @@ export const State = {
   onLoad: true,
   open: false,
   showPanel: false,
+	showDismissed: false,
   nextText: '',
   panelAttachTo: document.body,
 	visualizing: false,
@@ -55,7 +55,6 @@ export const State = {
     tip: {},
   },
   positionedFrames: [],
-  editableHighlight: [],
   recentlyAddedNodes: new WeakMap,
 }
 
@@ -73,7 +72,7 @@ export const UI = {
   panelToggleTitle: {},
   panelCount: {},
   panelJumpNext: {},
-  showDismissed: {},
+  panelShowDismissed: {},
 }
 
 export const Results = []

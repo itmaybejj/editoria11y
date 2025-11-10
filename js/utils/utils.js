@@ -1,5 +1,4 @@
 import {Results, State, UI} from "./state.js"
-import {prepareDismissal} from "../../sa11y/utils/utils.js";
 import Lang from "../../sa11y/utils/lang.js"
 import find from "../../sa11y/utils/find.js"
 import Constants from "../../sa11y/utils/constants.js";
@@ -316,6 +315,7 @@ export function checkRunPrevent() {
 
 export function resetResults(incremental) {
 	State.jumpList = [];
+	State.tipOpen = false;
 	State.openTip = {
 		button: false,
 		tip: false,
@@ -379,7 +379,6 @@ export function countAlerts () {
 	State.dismissedCount = 0;
 	for (let i = Results.length - 1; i >= 0; i--) {
 
-		let test = Results[i].test; // @todo CMS merge convert to new syntax when available.
 		/*
 		if (Options.ignoreTests &&
 			Options.ignoreTests.includes(test)) {
@@ -393,20 +392,43 @@ export function countAlerts () {
 			// Don't flag new issues in the active range while people are typing.
 		}*/
 
-		let dismissKey = prepareDismissal(Results[i].dismissalKey);
-		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-		if (dismissKey !== false && Options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[Options.currentPage] && dismissKey in State.dismissedAlerts[Options.currentPage][test]) {
-			// Remove result if it has been marked OK or ignored, increment dismissed match counter.
-			State.dismissedCount++;
-			Results[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][test][dismissKey];
-		} else if (Results[i].dismissalKey) {
-			State.warningCount++;
-			Results[i].dismissalStatus = false;
-		} else {
-			State.errorCount++;
-			Results[i].dismissalStatus = false;
+
+
+			if (Results[i].type === 'good') {
+				Results.splice(i, 1);
+			} else {
+				Results[i].position = 'beforebegin'; // @todo CMS merge use Sa11y keys when ready or closest().
+				if (Results[i].dismiss) {
+					// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
+					if (Options.currentPage in State.dismissedAlerts
+						&& Results[i].test in State.dismissedAlerts[Options.currentPage]
+						&& Results[i].dismiss in State.dismissedAlerts[Options.currentPage][Results[i].test]) {
+						// Remove result if it has been marked OK or ignored, increment dismissed match counter.
+						State.dismissedCount++;
+						Results[i].dismissalStatus = true;
+					} else if (Results[i].type === 'warning') {
+						State.warningCount++;
+					} else {
+						State.errorCount++;
+					}
+				}
+			}
+			if (State.headingOutlineOverrides.length > 0 &&
+				Results[i].test === 'HEADING_SKIPPED_LEVEL') {
+				const el = Results[i].element;
+				const remove = State.headingOutlineOverrides.some((override) => {
+					if (el === override) {
+						return true;
+					}
+				})
+				if (remove) {
+					Results.splice(i, 1);
+				}
+				//if (elementLevel < override.level) {
+				// this would become a new error, for like...an H2 in a section that should only have h4 or higher...
+				//}
+			}
 		}
-	}
 
 	State.totalCount = State.errorCount + State.warningCount;
 
@@ -425,9 +447,6 @@ export function countAlerts () {
 		State.totalCount = 0;
 	}
 
-	if (State.incremental && !State.forceFullCheck && !newIncrementalResults()) {
-		State.forceFullCheck = true;
-	}
 }
 
 export function showError(error) {

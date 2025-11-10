@@ -17,7 +17,7 @@
     "lint:css": "stylelint --config .stylelintrc.json \"./css/editoria11y.css\"",
     "playright": "npx playwright test",
     "test": "npx nightwatch tests --workers=4 --env=chrome",
-    "watch": "chokidar \"./js\" \"./css\" -c \"npm run build\""
+    "watch": "npm run build && chokidar \"./js\" \"./css\" -c \"npm run build\""
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",

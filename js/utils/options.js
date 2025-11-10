@@ -26,7 +26,7 @@ export const Options = {
 	editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
 
 	// Dismissed alerts
-	currentPage: false, // uses window.location.pathname unless a string is provided.
+	currentPage: window.location.pathname, // uses window.location.pathname unless a string is provided.
 	allowHide: true, // enables end-user ignore button
 	allowOK: true,  // enables end-user mark OK button
 	syncedDismissals: false, // provide empty or populated object {} to enable sync functions

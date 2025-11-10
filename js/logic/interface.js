@@ -7,8 +7,7 @@ import {
 	resetClass, resetResults, resumeObservers, showError,
 	visible
 } from "../utils/utils.js";
-import {
-	prepareDismissal,
+import {remove,
 } from '../../sa11y/utils/utils.js';
 import * as Utils from "../../sa11y/utils/utils.js";
 import checkHeaders from "../../sa11y/rulesets/headers.js";
@@ -44,7 +43,7 @@ const panelJumpTo = function(event) {
 	// Handle jump
 	event.preventDefault();
 	State.toggledFrom = event.target.closest('button');
-	if (!State.open) {
+	if (!State.showPanel) {
 		togglePanel();
 		window.setTimeout(function() {
 			jumpTo();
@@ -113,7 +112,7 @@ export function updatePanel () {
       UI.panelCount = UI.panel.querySelector('.toggle-count');
       UI.panelJumpNext = UI.panel.querySelector('.ed11y-jump.next');
       UI.panelJumpNext.addEventListener('click', panelJumpTo);
-      UI.showDismissed = UI.panel.querySelector('#ed11y-show-hidden');
+      UI.panelShowDismissed = UI.panel.querySelector('#ed11y-show-hidden');
       UI.message = UI.panel.querySelector('#ed11y-message');
       window.setTimeout(()=> {
         UI.panelElement.classList.remove('ed11y-preload');
@@ -137,7 +136,7 @@ export function updatePanel () {
         reportLink.setAttribute('target', '_blank');
         reportLink.setAttribute('aria-label', Lang._('reportsLink'));
         reportLink.querySelector('.ed11y-sr-only').textContent = Lang._('reportsLink');
-        UI.showDismissed.insertAdjacentElement('beforebegin', reportLink);
+        UI.panelShowDismissed.insertAdjacentElement('beforebegin', reportLink);
       }
 
       // Escape key closes panels.
@@ -160,13 +159,13 @@ export function updatePanel () {
       if (State.ignoreAll ||
         (!State.inlineAlerts && State.totalCount > 75)
       ) {
-        State.open = false;
+        State.showPanel = false;
       } else if (Options.alertMode === 'active' ||
         !Options.userPrefersShut ||
-        Options.showDismissed
+        State.showDismissed
       ) {
         // Show always on load for active mode or by user preference.
-        State.open = true;
+        State.showPanel = true;
       } else if (
         State.totalCount > 0 &&
         !State.ignoreAll &&
@@ -176,7 +175,7 @@ export function updatePanel () {
         )
       ) {
         // Show sometimes for assertive/polite if there are new items.
-        State.open = true;
+        State.showPanel = true;
       }
     } else if (!State.inlineAlerts) {
 				State.oldResultString = `${State.errorCount} ${State.warningCount}`;
@@ -184,15 +183,13 @@ export function updatePanel () {
 					State.oldResultString += result.test + result.element.outerHTML;
 				});
 		}
-
     // Now we can open or close the panel.
-    if (!State.open) {
+    if (!State.showPanel) {
       // Close panel.
       reset();
     } else {
       // Ignore issue count if this resulted from a user action.
-
-      State.open = true;
+      State.showPanel = true;
       UI.panel.classList.remove('ed11y-shut');
       UI.panel.classList.add('ed11y-active');
       // Prepare show hidden alerts button.
@@ -201,29 +198,29 @@ export function updatePanel () {
 				: Lang._('buttonHideHiddenAlert');
       if (State.dismissedCount === 0) {
         // Reset show hidden default option when irrelevant.
-        UI.showDismissed.setAttribute('hidden', '');
-        UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
-        Options.showDismissed = false;
+        UI.panelShowDismissed.setAttribute('hidden', '');
+				UI.panelShowDismissed.setAttribute('data-ed11y-pressed', 'false');
+        State.showDismissed = false;
       } else if (State.dismissedCount === 1) {
 				const show = State.english ?
 					Lang._('buttonShowHiddenAlert')
 					: Lang.sprintf('PANEL_DISMISS_BUTTON', '1');
-        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = Options.showDismissed ?
+				UI.panelShowDismissed.querySelector('.ed11y-sr-only').textContent = State.showDismissed ?
 					preferredDismissHide : show;
-        UI.showDismissed.dataset.ed11yPressed = `${Options.showDismissed}`;
+				UI.panelShowDismissed.dataset.ed11yPressed = `${State.showDismissed}`;
 				if (!State.english) {
-					UI.showDismissed.ariaPressed = Options.showDismissed;
+					UI.panelShowDismissed.ariaPressed = State.showDismissed;
 				}
-        UI.showDismissed.removeAttribute('hidden');
+				UI.panelShowDismissed.removeAttribute('hidden');
       } else {
-        UI.showDismissed.querySelector('.ed11y-sr-only').textContent = Options.showDismissed ?
+				UI.panelShowDismissed.querySelector('.ed11y-sr-only').textContent = State.showDismissed ?
 					preferredDismissHide
 					: Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount);
-        UI.showDismissed.dataset.ed11yPressed = `${Options.showDismissed}`;
+				UI.panelShowDismissed.dataset.ed11yPressed = `${State.showDismissed}`;
 				if (!State.english) {
-					UI.showDismissed.ariaPressed = Options.showDismissed;
+					UI.panelShowDismissed.ariaPressed = State.showDismissed;
 				}
-        UI.showDismissed.removeAttribute('hidden');
+				UI.panelShowDismissed.removeAttribute('hidden');
       }
 
       window.setTimeout(function () {
@@ -233,10 +230,10 @@ export function updatePanel () {
       }, 0);
     }
     // Update buttons.
-    if (State.totalCount > 0 || (Options.showDismissed && State.dismissedCount > 0)) {
+    if (State.totalCount > 0 || (State.showDismissed && State.dismissedCount > 0)) {
 			UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
 
-			UI.panelToggle.ariaExpanded = `${State.open}`;
+			UI.panelToggle.ariaExpanded = `${State.showPanel}`;
       UI.panelJumpNext.removeAttribute('hidden');
       if (State.errorCount > 0) {
         // Errors
@@ -282,7 +279,7 @@ export function updatePanel () {
 
       if (State.dismissedCount > 0) {
         UI.panelCount.textContent = 'i';
-        if (State.open) {
+        if (State.showPanel) {
           UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
         } else {
 					// @ todo merge isn't this backwards?
@@ -335,7 +332,7 @@ export function buildJumpList () {
   Results.sort((a, b) => b.sortPos - a.sortPos);
 
   Results?.forEach(function (result, i) {
-    if (!Results[i].dismissalStatus || Options.showDismissed) {
+    if (!Results[i].dismissalStatus || State.showDismissed) {
       drawResult(result, i);
     }
   });
@@ -351,14 +348,6 @@ export function buildJumpList () {
 
 // Place markers on elements with issues
 export function drawResult(result, index) {
-  /* old array to new object map:
-    // [0] element
-    // [1] test
-    // [2] content
-    // [3] position
-    // [4] dismissalKey
-    // [5] dismissalStatus
-    */
   let mark = document.createElement('ed11y-element-result');
   mark.classList.add('ed11y-element');
   let location;
@@ -462,7 +451,7 @@ export function dismissOne(dismissalType, test, dismissalKey) {
     } else {
       State.dismissedAlerts[Options.currentPage][test][dismissalKey] = dismissalType;
     }
-    UI.showDismissed.removeAttribute('hidden');
+		UI.panelShowDismissed.removeAttribute('hidden');
   }
 
   // Send record to storage or dispatch an event to an API.
@@ -498,9 +487,9 @@ export function editableHighlighter (resultID, show, firstVisible) {
     State.panelAttachTo.appendChild(el);
   }
   UI.editableHighlight[resultID].target = firstVisible ? firstVisible : result.element;
-  const zIndex = result.dismissalKey ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
+  const zIndex = result.dismissalStatus ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
   el.style.setProperty('z-index', zIndex);
-  const outline = result.dismissalKey ?
+  const outline = result.type === 'warning' ?
     '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)'
     : '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
   el.style.setProperty('box-shadow', outline);
@@ -670,7 +659,7 @@ export function alertOnInvisibleTip (button, target) {
 }
 
 export function jumpTo(next = true) {
-  if (!State.open) {
+  if (!State.showPanel) {
     return false;
   }
   State.viaJump = true;
@@ -917,7 +906,7 @@ export function alignTip (button, toolTip, recheck = 0, reveal = false) {
 }
 
 export function updateTipLocations () {
-	if (!State.scrollTicking && State.scrollPending > 0 && !State.running && State.jumpList && State.open) {
+	if (!State.scrollTicking && State.scrollPending > 0 && !State.running && State.jumpList && State.showPanel) {
 		State.scrollTicking = true;
 		alignButtons();
 		if (State.tipOpen) {
@@ -1254,9 +1243,10 @@ function removeCustomTest() {
 }
 
 State.testsRunning = true;
-State.testsRemainng = 0;
+State.testsRemaining = 0;
 // Toggles the outline of all headers, link texts, and images.
 export function checkAll() {
+	console.log('check');
 	if (State.tipOpen) {
 		return false;
 	}
@@ -1355,32 +1345,6 @@ export function continueCheck(customCheck = false) {
 		// Tests still in progress.
 		return;
 	}
-	for (let i = Results.length - 1; i >= 0;) {
-		if (Results[i].type === 'good') {
-			Results.splice(i, 1);
-		} else {
-			Results[i].position = 'beforebegin'; // @todo CMS merge use Sa11y keys when ready or closest().
-			if (Results[i].dismiss) {
-				Results[i].dismissalKey = Results[i].dismiss;
-			}
-			if (State.headingOutlineOverrides.length > 0 &&
-				Results[i].test === 'HEADING_SKIPPED_LEVEL') {
-				const el = Results[i].element;
-				const remove = State.headingOutlineOverrides.some((override) => {
-					if (el === override) {
-						return true;
-					}
-				})
-				if (remove) {
-					Results.splice(i, 1);
-				}
-				//if (elementLevel < override.level) {
-				// this would become a new error, for like...an H2 in a section that should only have h4 or higher...
-				//}
-			}
-		}
-		i = i - 1;
-	}
 	if (typeof UI.panelToggle.querySelector === 'function') {
 		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
 	}
@@ -1420,7 +1384,7 @@ export const incrementalCheck = lagBounce( () => {
 		let runTime = performance.now();
 		State.incremental = true;
 		if (State.disabled && State.closedByDisable) {
-			State.open = true;
+			State.showPanel = true;
 			State.closedByDisable = false;
 			State.disabled = false;
 		}
@@ -1536,9 +1500,9 @@ export function resetPanel() {
 		UI.panel?.classList.add('ed11y-shut');
 		UI.panel?.classList.remove('ed11y-active');
 		UI.panelToggle.ariaExpanded = false;
-		if (!Options.showDismissed && typeof UI.showDismissed === 'function') {
-			UI.showDismissed.setAttribute('data-ed11y-pressed', 'false');
-			UI.showDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
+		if (!State.showDismissed && typeof UI.panelShowDismissed === 'function') {
+			UI.panelShowDismissed.setAttribute('data-ed11y-pressed', 'false');
+			UI.panelShowDismissed.querySelector('.ed11y-sr-only').textContent = State.dismissedCount === 1 ?
 				Lang._('buttonShowHiddenAlert') : Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount);
 		}
 	}
@@ -1672,11 +1636,11 @@ export function dismissThis (dismissalType, all = false) {
 	if (all) {
 		Results.forEach((result) => {
 			if (result.test === test && result.dismissalStatus !==dismissalType) {
-				dismissOne(dismissalType, test, result.dismissalKey);
+				dismissOne(dismissalType, test, result.dismiss);
 			}
 		});
 	} else {
-		let dismissalKey = prepareDismissal(Results[id].dismissalKey);
+		let dismissalKey = Results[id].dismiss;
 		dismissOne(dismissalType, test, dismissalKey);
 	}
 
@@ -1684,9 +1648,11 @@ export function dismissThis (dismissalType, all = false) {
 	resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
 	removal.tip?.parentNode?.removeChild(removal.tip);
 	removal.button?.parentNode?.removeChild(removal.button);
+	remove('ed11y-element-highlight', 'document');
+	UI.editableHighlight = [];
 
 	reset();
-	State.open = true;
+	State.showPanel = true;
 	checkAll();
 
 	let rememberGoto = State.lastOpenTip;
@@ -1707,32 +1673,34 @@ export function dismissThis (dismissalType, all = false) {
 export function toggleShowDismissals () {
 	// todo postpone: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
 	State.ignoreAll = false;
-	Options.showDismissed = !(Options.showDismissed);
-	reset();
-	State.open = true;
-	checkAll();
+	State.showDismissed = !(State.showDismissed);
+	//reset();
+	State.forceFullCheck = true;
+	State.showPanel = true;
+	resetResults();
+	incrementalCheck();
 
-	UI.showDismissed.setAttribute('data-ed11y-pressed', (!!Options.showDismissed).toString());
+	UI.panelShowDismissed.setAttribute('data-ed11y-pressed', `${State.showDismissed}`);
 	window.setTimeout(function() {
-		UI.showDismissed.focus();
+		UI.panelShowDismissed.focus();
 	}, 0);
 }
 
 export function togglePanel () {
-	State.ignoreAll = false;
+	State.ignoreAll = false; // todo: should reset to option on close.
 
 	if (!State.doubleClickPrevent) {
 		// Prevent clicks piling up while scan is running.
 		if (State.running !== true) {
 			State.running = true;
 			// Re-scan each time the panel reopens.
-			if (!State.open) {
+			if (!State.showPanel) {
 				State.onLoad = false;
 				State.incremental = false;
-				State.open = true;
+				State.showPanel = true;
 				if (State.dismissedCount > 0 && State.warningCount === 0 && State.errorCount === 0) {
-					Options.showDismissed = false;
-					toggleShowDismissals();
+					State.showDismissed = false;
+					toggleShowDismissals(); // todo merge fails if there is a tip open
 				} else {
 					checkAll();
 				}
@@ -1741,7 +1709,8 @@ export function togglePanel () {
 			}
 			else {
 				UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
-				Options.showDismissed = false;
+				State.showDismissed = false;
+				State.showPanel = false;
 				reset();
 				Options.userPrefersShut = true;
 				localStorage.setItem('editoria11yShow', '0');
@@ -1762,7 +1731,7 @@ export function raceCrash() {
 	}
 	State.loopStop = true;
 	reset();
-	State.open = true;
+	State.showPanel = true;
 	checkAll();
 	window.setTimeout(function() {
 		if (Results.length > 0 && State.loopStop) {
@@ -1773,7 +1742,7 @@ export function raceCrash() {
 }
 
 export function disable() {
-	if (State.open && !State.closedByDisable) {
+	if (State.showPanel && !State.closedByDisable) {
 		State.closedByDisable = true;
 	}
 	State.disabled = true;
@@ -1799,6 +1768,5 @@ export function reset () {
 	resetPanel();
 	State.incremental = false;
 	State.running = false;
-	State.open = false;
-	State.open = false;
+	State.showPanel = false;
 }
