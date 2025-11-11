@@ -30,6 +30,11 @@ h3 {
 }
 h2 + h3 {margin-top: 2.5rem;}
 .positive {padding: .75rem 1rem .5rem; margin: 1rem 0; border-radius:3px;}
+.positive:not(:has(.ed11y-element), .negative:has(.ed11y-element)), .ed11y-element + .negative {
+	border: 4px dashed firebrick;
+	box-shadow: -35px 0 firebrick;
+}
+.ed11y-element + .positive {border: none !important; box-shadow: none !important;}
 .todo-positive {background-color: orange;}
 .todo-negative {background-color: yellow;}
 .todo-positive::before, .todo-negative::before {

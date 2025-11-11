@@ -23,6 +23,12 @@
 
         <div hidden>
             <link href="./tests.css" rel="stylesheet">
+
+            <!-- Sa11y (fork the latest code from GitHub) -->
+            <script src="../../../sa11y/dist/js/sa11y.umd.min.js"></script>
+            <script src="../../../sa11y/dist/js/lang/en.umd.js"></script>
+
+            <!-- Instantiate -->
             <script src="../js/lang/ed11y-localization.js"></script>
             <script src="../js/elements/control-panel.js"></script>
             <script src="../js/elements/annotations.js"></script>
@@ -36,10 +42,39 @@
             <script src="../js/old-ed11y.js"></script>
             <!-- Instantiate-->
             <script>
+              Sa11y.Lang.addI18n(Sa11yLangEn.strings);
+              document.addEventListener('ed11yRunCustomTests', e => {
+                console.log('heard from Ed11y');
+                // Use event details to get the marked element
+                sa11y.checkAll();
+              });
+              document.addEventListener('sa11y-check-complete', e => {
+                console.log('heard from Sa11y');
+                console.log(e.detail.results);
+                e.detail.results?.forEach((result) => {
+                  Ed11y.results.push({
+                    content: result.content,
+                    dismissalKey: result.dismiss,
+                    element: result.element,
+                    position: 'afterbegin',
+                    test: 'headingLevelSkipped',
+                  })
+                })
+                let resume = new CustomEvent('ed11yResume');
+                document.dispatchEvent(resume);
+
+              });
+              const sa11y = new Sa11y.Sa11y({
+                checkRoot: "body",
+                headless: true,
+                // Add props here!
+              });
+
                 const ed11y = new Ed11y({
                     alertMode : 'assertive',
                     shadowComponents : 'shadow-test, shadow-test-no-hits',
                     checkRoots : 'body',
+                  customTests: 1,
                     //showDismissed : true,
                   theme: 'sleekTheme',
                 });
