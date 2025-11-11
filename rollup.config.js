@@ -6,7 +6,7 @@ import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
 
 /* Speed up compile time when developing by excluding language builds. */
-export const developmentMode = true;
+export const developmentMode = false;
 
 /* Copyright notice */
 /* @todo Merge update */

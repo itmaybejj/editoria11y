@@ -815,7 +815,7 @@ ed11y-element-result[data-ed11y-open='true'] {
   font-style: italic;
   font-weight: bold;
   line-height: 1.2;
-  color: black;
+  color: #010101;
   background: var(--ed11y-warning);
   border-top: 2px solid var(--ed11y-primary);
 }
