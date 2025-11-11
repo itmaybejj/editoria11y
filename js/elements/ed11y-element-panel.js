@@ -114,8 +114,6 @@ export class Ed11yElementHeadingLabel extends HTMLElement {
       let i = this.dataset.ed11yHeadingOutline;
       let result = State.headingOutline[i];
       wrapper.innerHTML = 'H' + result.headingLevel;
-      let issues = !!result.type; // @ todo merge type can be pass now.
-      wrapper.classList.add('issue' + issues);
       let fontSize = Math.max(52 - 8 * result.headingLevel, 12);
       wrapper.style.setProperty('font-size', fontSize + 'px');
       shadow.appendChild(wrapper);

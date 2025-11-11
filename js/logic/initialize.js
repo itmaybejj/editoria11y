@@ -31,8 +31,6 @@ const preProcessOptions = function(userOptions) {
 		State.panelAttachTo = userOptions.panelAttachTo;
 	}
 
-	// @todo merge: Custom embed test might need to be converted to a custom test in the build.
-
 	/* *********** */
 	/* Theme setup */
 	/* *********** */
@@ -62,7 +60,7 @@ const preProcessOptions = function(userOptions) {
 	cssUrls?.forEach( sheet => {
 		const cssLink = document.createElement('link');
 		cssLink.setAttribute('rel', 'stylesheet');
-		// @todo merge possibly lost some preload functionality.
+		// @todo after merge possibly lost some preload functionality.
 		cssLink.setAttribute('media', 'all');
 		if (sheet.indexOf('?') < 0) {
 			sheet = sheet + '?ver=' + State.version;
@@ -97,14 +95,6 @@ const postProcessOptions = function(userOptions) {
 
 	State.english = Lang.langStrings.LANG_CODE.startsWith('en');
 
-
-	// Undo Sa11y overrides in constants.js.
-	//Constants.Global.documentSources = option.checks.QA_DOCUMENT.sources;
-	//Constants.Global.videoSources = option.checks.EMBED_VIDEO.sources;
-	//Constants.Global.AudioSources = option.checks.EMBED_AUDIO.sources;
-	//Constants.Global.dataVizSources = option.checks.EMBED_DATA_VIZ.sources;
-	//Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
-
 	Object.assign(Theme, Options[Options.theme]);
 	Theme.baseFontSize = Options.baseFontSize;
 	Theme.buttonZIndex = Options.buttonZIndex;
@@ -113,35 +103,14 @@ const postProcessOptions = function(userOptions) {
 	if (!Options.linkStringsNewWindows) {
 		Options.linkStringsNewWindows = Lang._('linkStringsNewWindows');
 	}
-	// @todo CMS merge remove wpadminbar from defaults and update wp module.
-	/*Exclusions.Container = ['#wpadminbar', '#wpadminbar *', ...exclusions];
-	if (option.containerIgnore) {
-		const containerSelectors = option.containerIgnore.split(',').map((item) => item.trim());
-		Exclusions.Container = Exclusions.Container.concat(
-			containerSelectors.flatMap((item) => [`${item} *`, item]),
-		);
-	}*/
 
-	// @todo merge re-implement: these get destroyed in constants.js
-
-	// Todo need to look at checks.QA_DOCUMENT.sources.
-	if ( userOptions['documentLinks']) { // @todo merge needed?
-		Constants.Global.documentSources = userOptions['documentLinks'] ?
-			userOptions['documentLinks']
-			: Options.checks.QA_DOCUMENT.sources;
+	if ( userOptions['documentLinks']) {
+		Constants.Global.documentSources = userOptions['documentLinks'];
 	}
-	//Constants.Global.documentSources = userOptions.
 
-	//ed11yDefaults.checks.QA_DOCUMENT.sources = 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']'
-	//ed11yDefaults.checks.EMBED_VIDEO.sources = 'video, [src*="youtube.com"], [src*="brightcove.com"], [src*="dailymotion.com"], [src*="panopto.com"], [src*="Video"], [src*="video"], [src*="vimeo.com"], [src*="watch"], [src*="wistia.com"], [src*="vidyard.com"], [src*=yuja.com]';
-
-	/*
-	* video, [src*="Video"], [src*="video"], [src*="watch"], [src*="youtube.com"], [src*="vimeo.com"], [src*="panopto.com"], [src*="wistia.com"], [src*="dailymotion.com"], [src*="brightcove.com"], [src*="vidyard.com"], [src*="video"], [src*="[src*="youtube.com"]"], [src*="[src*="brightcove.com"]"], [src*="[src*="dailymotion.com"]"], [src*="[src*="panopto.com"]"], [src*="[src*="Video"]"], [src*="[src*="video"]"], [src*="[src*="vimeo.com"]"], [src*="[src*="watch"]"], [src*="[src*="wistia.com"]"], [src*="[src*="vidyard.com"]"], [src*="[src*=yuja.com]"]
-	* */
-
-	Object.assign(Lang.langStrings, ed11yLang.strings); // todo after merge convert to new syntax.
+	Object.assign(Lang.langStrings, ed11yLang.strings);
 	if (Lang.langStrings.LANG_CODE.startsWith('en')) {
-		// temporary conversion until Sa11y has test keys.
+		// todo CMS merge also include as fallbacks untranslated strings.
 		let oldTitle = '';
 		const overrides = Object.entries(ed11yLang.tests);
 		for(let i = 0; i < overrides.length; i++) {
@@ -165,9 +134,6 @@ const postProcessOptions = function(userOptions) {
 		State.dismissedAlerts = {};
 		State.dismissedAlerts[Options.currentPage] = Options.syncedDismissals;
 	}
-
-	// Convert the container ignore user option to a CSS :not selector.
-	State.ignore = Options.containerIgnore ? `:not(${Options.containerIgnore})` : '';
 
 }
 

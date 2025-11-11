@@ -284,7 +284,6 @@ export function updatePanel () {
         if (State.showPanel) {
           UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
         } else {
-					// @ todo merge isn't this backwards?
           UI.panelToggleTitle.textContent = State.dismissedCount > 1 ?
 						Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount) :
             Lang._('buttonShowHiddenAlert');
@@ -629,8 +628,7 @@ export function alertOnInvisibleTip (button, target) {
       }
     }
     if (!State.inlineAlerts) {
-      // todo this selector should match the selector that decided where to place the mark
-      editableHighlighter(button.dataset.ed11yResult, true, firstVisible); // @todo merge test
+      editableHighlighter(button.dataset.ed11yResult, true, firstVisible);
     } else {
       if (firstVisible) {
         firstVisible.classList.add('ed11y-hidden-highlight');
@@ -1255,7 +1253,6 @@ State.testsRunning = true;
 State.testsRemaining = 0;
 // Toggles the outline of all headers, link texts, and images.
 export function checkAll() {
-	console.log('check');
 	if (State.tipOpen) {
 		return false;
 	}
@@ -1305,10 +1302,7 @@ export function checkAll() {
 
 	if (Options.customTests > 0) {
 		// Pause
-		console.log('add custom test');
-		console.log(Options.customTests);
 		State.customTestsRemaining += Options.customTests;
-		console.log(State.customTestsRemaining);
 		window.clearTimeout(State.customTestTimeout);
 		State.customTestTimeout = window.setTimeout(function() {
 			if (State.customTestsRemaining > 0) {
@@ -1399,7 +1393,6 @@ export const incrementalCheck = lagBounce( () => {
 			State.closedByDisable = false;
 			State.disabled = false;
 		}
-		//State.forceFullCheck = true; // @todo merge check history; why was this here?
 		checkAll();
 		window.setTimeout(function() {
 			if (State.visualizing) {
@@ -1506,7 +1499,6 @@ export function resetPanel() {
 			Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount);
 	}
 
-	// @todo merge is this going to fail again? Should it use a different if?
 	if (typeof (UI.panel) === 'object') {
 		UI.panel?.classList.add('ed11y-shut');
 		UI.panel?.classList.remove('ed11y-active');

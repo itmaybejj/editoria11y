@@ -8,8 +8,6 @@ export default function customRuleset(results) {
 	/*  Error: Find all links pointing to development environment. */
 	/* *********************************************************** */
 
-	console.log('hi?');
-	console.log(Options.checks.EMBED_CUSTOM);
 	if (Options.checks.EMBED_CUSTOM) {
 		const matchedEmbeds = getElements(Options.checks.EMBED_CUSTOM.sources, 'root');
 		Lang.langStrings.embeddedContent = `<div class="title" tabindex="-1"><div class="ed11y-tip-alert"></div>${Options.embeddedContentTitle}</div>${Options.embeddedContentMessage}`;
