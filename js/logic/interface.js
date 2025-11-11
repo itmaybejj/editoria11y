@@ -922,7 +922,7 @@ export function alignHighlights() {
 			State.interaction = true;
 			State.forceFullCheck = true;
 			UI.editableHighlight = [];
-			incrementalCheck(true);
+			incrementalCheckDebounce(true);
 			return false;
 		}
 
@@ -947,7 +947,7 @@ export const slowIncremental = lagBounce( () => {
 		//incrementalAlign(); // Immediately realign tips.
 		//State.alignPending = false;
 		State.interaction = true;
-		incrementalCheck();
+		incrementalCheckDebounce();
 }, 1000);
 
 export function windowResize() {
@@ -1137,7 +1137,7 @@ export function startObserver (root) {
 			State.alignPending = false;
 		},0);
 		window.setTimeout(function () {
-			incrementalCheck(); // Recheck after delay.
+			incrementalCheckDebounce(); // Recheck after delay.
 		},0);
 	};
 
@@ -1163,7 +1163,7 @@ export function startObserver (root) {
 		updateTipLocations();
 		window.setTimeout(function () {
 			State.forceFullCheck = true;
-			incrementalCheck();
+			incrementalCheckDebounce();
 		}, 100);
 	}, {
 		passive: true,
@@ -1224,8 +1224,9 @@ const enqueueTests = function(queue) {
 
 function removeCustomTest() {
 	console.error('Editoria11y has disabled a custom test that is not returning results within 1000ms.');
-	Options.customTestsRemaining = 1;
 	Options.customTests--;
+	State.customTestsRemaining = 0;
+	continueCheck();
 	if (Options.customTests === 0) {
 		document.removeEventListener('ed11yResume', function () {
 			continueCheck(true);
@@ -1347,7 +1348,7 @@ export function continueCheck(customCheck = false) {
 					editable.addEventListener('drop', () => {
 						// This event does not bubble.
 						State.forceFullCheck = true;
-						incrementalCheck();
+						incrementalCheckDebounce();
 					});
 				}
 			});
@@ -1363,7 +1364,7 @@ export function continueCheck(customCheck = false) {
 	}, 0);
 }
 
-export const incrementalCheck = lagBounce( () => {
+export function incrementalCheck() {
 	if (!State.running) {
 		if (State.tipOpen || (!State.interaction && !State.forceFullCheck)) {
 			return;
@@ -1391,8 +1392,12 @@ export const incrementalCheck = lagBounce( () => {
 		State.browserLag = State.browserSpeed < 1 ? 0 : State.browserSpeed * 100 + State.totalCount;
 	} else {
 		// Ed11y was running, try again later.
-		window.setTimeout(() => {incrementalCheck();}, 250);
+		window.setTimeout(() => {incrementalCheckDebounce();}, 250);
 	}
+}
+
+export const incrementalCheckDebounce = lagBounce( () => {
+	incrementalCheck();
 }, 250);
 
 export function visualize () {
@@ -1665,7 +1670,7 @@ export function toggleShowDismissals () {
 	State.forceFullCheck = true;
 	State.showPanel = true;
 	resetResults();
-	incrementalCheck();
+	incrementalCheckDebounce();
 
 	UI.panelShowDismissed.setAttribute('data-ed11y-pressed', `${State.showDismissed}`);
 	window.setTimeout(function() {

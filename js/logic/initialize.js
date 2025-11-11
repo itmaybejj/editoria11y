@@ -45,12 +45,13 @@ const preProcessOptions = function(userOptions) {
 		Options.linkIgnoreSpan = userOptions.linkIgnoreSelector;
 	}
 
-	let cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
-	if (!userOptions.cssUrls) {
+	let cssUrls = userOptions.cssUrls;
+	if (!cssUrls) {
 		const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
 		if (cssLink) {
 			cssUrls = [cssLink.getAttribute('href')];
 		} else {
+			cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
 			console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
 		}
 	}
@@ -108,16 +109,15 @@ const postProcessOptions = function(userOptions) {
 		Constants.Global.documentSources = userOptions['documentLinks'];
 	}
 
-	Object.assign(Lang.langStrings, ed11yLang.strings);
-	if (Lang.langStrings.LANG_CODE.startsWith('en')) {
-		// todo CMS merge also include as fallbacks untranslated strings.
-		let oldTitle = '';
-		const overrides = Object.entries(ed11yLang.tests);
+	Object.assign(Lang.langStrings, ed11yLang.strings, ed11yLang.testNames);
+	// todo CMS merge also include as fallbacks untranslated strings.
+	const overrides = Object.entries(ed11yLang.tests);
+	if (State.english) {
 		for(let i = 0; i < overrides.length; i++) {
-			if (typeof overrides[i][1] === 'object') {
-				oldTitle = overrides[i][1]['title'];
-			} else {
-				Lang.langStrings[overrides[i][0]] = `<div class="title" tabindex="-1"><div class="ed11y-tip-alert"></div>${oldTitle}</div>${overrides[i][1]}`
+			if (State.english) {
+				Lang.langStrings[overrides[i][0]] = `<div class="title" tabindex="-1"><div class="ed11y-tip-alert"></div>${ed11yLang.testNames[overrides[i][0] + '_TEST_NAME']}</div>${overrides[i][1]}`
+				// todo CMS merge custom test.
+				// todo after merge names for other tests.
 			}
 		}
 	}

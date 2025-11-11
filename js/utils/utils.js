@@ -397,20 +397,19 @@ export function countAlerts () {
 			if (Results[i].type === 'good') {
 				Results.splice(i, 1);
 			} else {
-				if (Results[i].dismiss) {
-					// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-					if (Options.currentPage in State.dismissedAlerts
-						&& Results[i].test in State.dismissedAlerts[Options.currentPage]
-						&& Results[i].dismiss in State.dismissedAlerts[Options.currentPage][Results[i].test]) {
-						// Remove Results[i] if it has been marked OK or ignored, increment dismissed match counter.
-						State.dismissedCount++;
-						Results[i].dismissalStatus = true;
-					} else if (Results[i].type === 'warning') {
-						State.warningCount++;
-					} else {
-						State.errorCount++;
-					}
+				// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
+				if (Options.currentPage in State.dismissedAlerts
+					&& Results[i].test in State.dismissedAlerts[Options.currentPage]
+					&& Results[i].dismiss in State.dismissedAlerts[Options.currentPage][Results[i].test]) {
+					// Remove Results[i] if it has been marked OK or ignored, increment dismissed match counter.
+					State.dismissedCount++;
+					Results[i].dismissalStatus = true;
+				} else if (Results[i].type === 'warning') {
+					State.warningCount++;
+				} else {
+					State.errorCount++;
 				}
+
 
 				let location = Results[i].element;
 				let position = 'afterbegin';

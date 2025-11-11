@@ -91,44 +91,68 @@ const ed11yLang = {
 //    headingExample : `<ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>`,
 
   },
+	testNames: {
+		HEADING_SKIPPED_LEVEL_TEST_NAME: 'Manual check: was a heading level skipped?',
+		HEADING_EMPTY_TEST_NAME: 'Heading tag without any text',
+		HEADING_LONG_TEST_NAME: 'Manual check: long heading',
+		QA_BLOCKQUOTE_TEST_NAME : 'Manual check: is this a blockquote?',
+		MISSING_ALT_TEST_NAME: 'Image has no alternative text attribute',
+		MISSING_ALT_LINK_HAS_TEXT_TEST_NAME: 'Image has no alternative text attribute',
+		MISSING_ALT_LINK_TEST_NAME: 'Image has no alternative text attribute',
+		IMAGE_DECORATIVE_TEST_NAME: 'Manual check: image has no alt text',
+		ALT_FILE_EXT_TEST_NAME: 'Image\'s text alternative is a URL',
+		ALT_PLACEHOLDER_TEST_NAME: 	'Alt text is meaningless',
+		ALT_MAYBE_BAD_TEST_NAME: 'Manual check: alt text may be meaningless',
+		LINK_ALT_MAYBE_BAD_TEST_NAME: 'Manual check: alt text may be meaningless',
+		LINK_PLACEHOLDER_ALT_TEST_NAME: 'Linked alt text is meaningless',
+		LINK_ALT_FILE_EXT_TEST_NAME:	'Linked image\'s text alternative is a URL',
+		SUS_ALT_TEST_NAME: 'Manual check: possibly redundant text in alt',
+		LINK_SUS_ALT_TEST_NAME: 'Manual check: possibly redundant text in linked image',
+		ALT_UNPRONOUNCEABLE_TEST_NAME: 'Image\'s text alternative is unpronounceable',
+		LINK_IMAGE_NO_ALT_TEXT_TEST_NAME: 'Linked Image has no alt text',
+		IMAGE_ALT_TOO_LONG_TEST_NAME: 'Manual check: very long alternative text',
+		LINK_IMAGE_LONG_ALT_TEST_NAME: 'Manual check: very long alternative text in linked image',
+		LINK_IMAGE_ALT_AND_TEXT_TEST_NAME: 'Manual check: link contains both text and an image', // 2.3.10.
+		LINK_EMPTY_TEST_NAME: 'Link with no accessible text',
+		LINK_EMPTY_NO_LABEL_TEST_NAME: 'Link with no accessible text',
+		LINK_URL_TEST_NAME: 'Manual check: is this link text a URL?',
+		LINK_STOPWORD_TEST_NAME: 'Manual check: is this link meaningful and concise?',
+		QA_PDF_TEST_NAME: 'Manual check: is the linked document accessible?',
+		LINK_NEW_TAB_TEST_NAME: 'Manual check: is opening a new window expected?',
+		TABLES_MISSING_HEADINGS_TEST_NAME: 'Table has no header cells',
+		TABLES_SEMANTIC_HEADING_TEST_NAME: 'Content heading inside a table',
+		TABLES_EMPTY_HEADING_TEST_NAME: 'Empty table header cell',
+		QA_FAKE_LIST_TEST_NAME: 'Manual check: should this have list formatting?',
+		QA_FAKE_HEADING_TEST_NAME: 'Manual check: should this be a heading?',
+		QA_UPPERCASE_TEST_NAME: 'Manual check: is this uppercase text needed?',
+		EMBED_VIDEO_TEST_NAME: 'Manual check: is this video accurately captioned?',
+		EMBED_AUDIO_TEST_NAME:	'Manual check: is an accurate transcript provided?',
+		EMBED_DATA_VIZ_TEST_NAME: 'Manual check: is this visualization accessible?',
+		EMBED_CUSTOM_TEST_NAME: 'Manual check: is this embedded content accessible?',
+	},
 	tests: {
 		// todo: update Drupal localization file.
-		headingLevelSkipped : {
-			title: 'Manual check: was a heading level skipped?',
-		},
 		HEADING_SKIPPED_LEVEL: `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
             <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>
             <p>This heading skipped from level %(prevLevel) to level %(level). From a screen reader, this sounds like content is missing.</p>
             <p><strong>To fix:</strong> adjust levels to form an accurate outline, without gaps.</p>
             `,
 
-		headingEmpty : {
-			title: 'Heading tag without any text',
-		},
 		HEADING_EMPTY: `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
             <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>
             <p>Empty headings create confusing gaps in this outline: they could mean the following content is still part of the previous section, or that the text was unpronounceable for some reason.</p>
             <p><strong>To fix:</strong> add text to this heading, or delete this empty line.</p>
             `,
 
-		headingIsLong : {
-			title: 'Manual check: long heading',
-		},
 		HEADING_LONG: `<p>Headings should be brief and clear. Assistive devices use them as a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for the page. The numbers indicate indents in a nesting relationship:</p>  
             <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>
             <p><strong>To fix:</strong> shorten this heading if possible, or remove the heading style if it was only applied to this text to provide visual emphasis.</p>
             `,
 
-		blockquoteIsShort : {
-			title: 'Manual check: is this a blockquote?',
-		},
 		QA_BLOCKQUOTE: '<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. This was flagged because short blockquotes are <em>sometimes</em> actually <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">headings</a>. If this is a heading and not a quotation, use heading formatting instead, so this appears in the page outline.</p>',
 
 		// Tooltips for image tests =========================
 
-		altMissing : {
-			title: 'Image has no alternative text attribute',
-		},
 		MISSING_ALT: `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.</p>
             <p><strong>To fix:</strong> either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>
             <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
@@ -139,22 +163,13 @@ const ed11yLang = {
                 <li>The size 4 ball is the right size for this 9-year-old child.</li>
             </ul>`,
 
-		altMissingLinkWithText : {
-			title: 'Image has no alternative text attribute',
-		},
 		MISSING_ALT_LINK_HAS_TEXT: `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.</p>
 		<p>This image is part of a link with text. If the visible text is sufficient to describe the link, add an empty alt (alt="") to tell screen readers to ignore this image. Otherwise, provide the title of the linked page as the alt text.</p>`,
 
-		altMissingLink : {
-			title: 'Image has no alternative text attribute',
-		},
 		MISSING_ALT_LINK: `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time. This is especially a problem for linked images.</p>
             <p><strong>To fix:</strong> either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>
             `,
 
-		altNull : {
-			title: 'Manual check: image has no alt text',
-		},
 		IMAGE_DECORATIVE: `<p>Unless this image is purely decorative (a spacer icon or background texture), an alt should probably be provided. Photos in page content <strong>almost always need alt text.</strong> Since many screen reader users can see there is an image present, it can be very confusing to move the cursor across the place on the page where an image is visible, but hear nothing.</p>
         <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
             <ul>
@@ -164,9 +179,6 @@ const ed11yLang = {
                 <li>The size 4 ball is the right size for this 9-year-old child.</li>
             </ul>`,
 
-		altURL : {
-			title: 'Image\'s text alternative is a URL',
-		},
 		ALT_FILE_EXT: `This image's alt text is "%(alt)," which probably describes the file name, not the contents of the image.
         <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
         <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
@@ -178,9 +190,6 @@ const ed11yLang = {
             </ul>`
 		,
 
-		altMeaningless : {
-			title: 'Alt text is meaningless',
-		},
 		ALT_PLACEHOLDER: `<p>This image's alt text is "%(alt)," which was flagged for being common placeholder text.</p>
         <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
         <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
@@ -192,9 +201,7 @@ const ed11yLang = {
             </ul>`
 		,
 
-		altMaybeRobot : {
-			title: 'Manual check: alt text may be meaningless',
-		},
+		// Machine generated string.
 		ALT_MAYBE_BAD: `<p>This image's alt text is "%(alt)," which was flagged as containing a suspicious number of characters that may not form words.</p>
         <p><strong>To fix:</strong> if this is placeholder text, set this image's alternative text to a concise description of what this image means in this context.</p>
         <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
@@ -206,25 +213,16 @@ const ed11yLang = {
             </ul>`
 		,
 
-		altMaybeRobotLinked : {
-			title: 'Manual check: alt text may be meaningless',
-		},
 		LINK_ALT_MAYBE_BAD: `<p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
             Links should clearly and concisely describe their destination, even out of context.</p>
            <p>This image's alt text is "%(alt)," which may not describe this link.</p>`
 		,
 
-		altMeaninglessLinked : {
-			title: 'Linked alt text is meaningless',
-		},
 		LINK_PLACEHOLDER_ALT: `<p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
             Links should clearly and concisely describe their destination, even out of context.</p>
            <p>This image's alt text is "%(alt)," which probably does not describe this link.</p>`
 		,
 
-		altURLLinked : {
-			title: 'Linked image\'s text alternative is a URL',
-		},
 		LINK_ALT_FILE_EXT: `<p>This image's alt text is "%(alt)," which is probably a filename.</p>
         <p>When a link is wrapped around an image and there is no other text, the <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">image's alt text becomes the link text</a> announced by screen readers.
             Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
@@ -233,9 +231,6 @@ const ed11yLang = {
                 <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess"</li>
             </ul>`, // @todo after merge: compare with Sa11y's wording.
 
-		altImageOf : {
-			title: 'Manual check: possibly redundant text in alt',
-		},
 		SUS_ALT: `<p>This image's alt text is "%(alt)," which mentions that this image is an image.</p>
         <p>Screen readers announce they are describing an image when reading alt text, so 
             phrases like "image of" and "photo of" are usually redundant in alt text; the screen reader user hears "image: image of something."</p>
@@ -243,9 +238,6 @@ const ed11yLang = {
             <ul><li>Format is redundant: "<em>photo of</em> a VHS tape"</li>
             <li>Format is relevant: "<em>photo of</em> a VHS tape in a photo album being discussed in a history class"</li></ul>`,
 
-		altImageOfLinked : {
-			title: 'Manual check: possibly redundant text in linked image',
-		},
 		LINK_SUS_ALT: `<p>This image's alt text is "%(alt)," which mentions that this image is an image.</p>
         <hr><p>Links should clearly and concisely describe their destination. Since words like "image," "graphic" or "photo" are already redundant in text alternatives (screen readers already identify the image as an image), their presence in a linked image usually means the image's text alternative is <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">describing the image instead of the link</a>.</p>
             <ul>
@@ -253,9 +245,6 @@ const ed11yLang = {
                 <li>Bad link text: "Image of five people jumping"</li>
             </ul>`,
 
-		altDeadspace : {
-			title: 'Image\'s text alternative is unpronounceable',
-		},
 		ALT_UNPRONOUNCEABLE: `<p>This image's alt text is "%(alt)," which only contains unpronounceable symbols and/or spaces. Screen readers will announce that an image is present, and then pause awkwardly: "image: ____."</p>
         <p><strong>To fix:</strong> add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") if this is just an icon or spacer, and screen readers should ignore it.</p>
             <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
@@ -266,30 +255,18 @@ const ed11yLang = {
                 <li>The size 4 ball is the right size for this 9-year-old child.</li>
             </ul>`,
 
-		altEmptyLinked : {
-			title: 'Linked Image has no alt text',
-		},
 		LINK_IMAGE_NO_ALT_TEXT: `<p>When a link is wrapped around an image, the image's alt text <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">provides the link's title for screen readers</a>.</p>
         <p><strong>To fix:</strong> set this image's alternative text to something that describes the link's destination, or add text next to the image, within the link.</p>`,
 
-		altLong : {
-			title: 'Manual check: very long alternative text',
-		},
 		IMAGE_ALT_TOO_LONG: `<p>Image text alternatives are announced by screen readers as a single run-on sentence; listeners must listen to the entire alt a second time if they miss something. If this cannot be reworded to something succinct, it is better to use the alt to reference a <em>visible</em> <a href="https://www.w3.org/WAI/tutorials/images/complex/">text alternative for complex images</a>. For example:</p>
             <ul><li>"Event poster; details follow in caption"</li>
             <li>"Chart showing our issues going to zero; details follow in table"</li></ul>
             This image's alt text is: <em>%(alt)</em>
             `,
 
-		altLongLinked : {
-			title: 'Manual check: very long alternative text in linked image',
-		},
 		LINK_IMAGE_LONG_ALT: `<p><a href="https://webaim.org/techniques/hypertext/link_text#alt_link">The alt text on a linked image is used to describe the link destination</a>. Links should be brief, clear and concise, as screen reader users often listen to the list of links on the page to find content of interest. Long alternative text inside a link often indicates that the image's text alternative is describing the image instead rather than the link.</p>
         This image's alt text is: <em>%(alt)</em>`,
 
-		altPartOfLinkWithText : {
-			title: 'Manual check: link contains both text and an image', // 2.3.10.
-		},
 		LINK_IMAGE_ALT_AND_TEXT: `<p>Screen readers will <a href="https://www.w3.org/WAI/tutorials/images/functional/">include the image's alt text when describing this link</a>.</p>
             <p>Check that the combined text is concise and meaningful:<br>"<em><strong>%(alt)</strong></em>"</p>
             <p></p>
@@ -300,34 +277,18 @@ const ed11yLang = {
             </ul>
         `,
 
-		linkNoTextExample: '<p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>',
-
-		linkTextIgnored: (ignoredText) => `
-    <p>Screen readers will only read the text of the link type indicator on this link:<br>
-    <em>"<strong>%(ignoredText)</strong>"</em></p>
-    `,
-
-		linkNoText : {
-			title: 'Link with no accessible text',
-		},
 		LINK_EMPTY:
 			`<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
         <p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>
         <p><strong>To fix:</strong></p>
         <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describe where it goes.</li>`,
 
-		linkNoLabel : {
-			title: 'Link with no accessible text',
-		},
 		LINK_EMPTY_NO_LABEL:
 			`<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
         <p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>
         <p><strong>To fix:</strong></p>
         <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describe where it goes.</li>`,
 
-		linkTextIsURL : {
-			title: 'Manual check: is this link text a URL?',
-		},
 		LINK_URL: `<p>This link's text is:<br> <strong>%(text)</strong></p>
         <p><a href="https://webaim.org/techniques/hypertext/link_text">Links should be meaningful and concise</a>. Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
          <p>A linked URL breaks this pattern; the reader has to read the preceding paragraph to figure out the link's purpose from context.</p>
@@ -336,9 +297,6 @@ const ed11yLang = {
                 <li>Linked URL, as pronounced by a screen reader: "H T T P S colon forward-slash forward-slash example dot com forward-slash tips forward-slash meaningful-links"</li>
             </ul>`,
 
-		linkTextIsGeneric : {
-			title: 'Manual check: is this link meaningful and concise?',
-		},
 		LINK_STOPWORD: `<p>This link's text is: <strong>%(text)</strong></p>
         <p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
                 <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully enough to figure out each link's purpose from context. Few readers do this, so click-through rates on meaningless links are extremely poor.</p>
@@ -349,15 +307,9 @@ const ed11yLang = {
                 </ul>
                 `,
 
-		linkDocument : {
-			title : 'Manual check: is the linked document accessible?',
-		},
 		QA_PDF: `<p>Many mobile and assistive device users struggle to read content in PDFs. PDFs generally do not allow for changing font sizes, and often contain features that are incompatible with screen readers.</p>
         <p>Ideally make the content of this linked PDF available on a Web page or in an editable document, and only link to this PDF as a "printable" alternative. If this PDF is the only way you are providing to access this content, you will need to <a href='https://webaim.org/techniques/acrobat/' target='_blank'>manually check that the PDF is well-structured</a>, with headings, lists and table headers, and provides alt text for its images.</p>`,
 
-		linkNewWindow : {
-			title: 'Manual check: is opening a new window expected?',
-		},
 		LINK_NEW_TAB: `<p>Readers can always choose to open a link a new window. When a link forces open a new window, it can be confusing and annoying, especially for assistive device users who may wonder why their browser's "back" button is suddenly disabled.</p>
                 <p>There are two general exceptions:</p>
                 <ul>
@@ -369,18 +321,12 @@ const ed11yLang = {
 
 		// Tooltips for Text QA ===============================
 
-		tableNoHeaderCells : {
-			title: 'Table has no header cells',
-		},
 		TABLES_MISSING_HEADINGS: `
                 <p>To fix:</p>
                 <ul><li>If this table contains data that is meaningfully organized by row and column, edit the table's properties and specify whether headers have been placed in the first row, column or both. This lets screen reader users hear the headers repeated while navigating the content.</li>
                 <li>If this table does not contain rows and columns of data, but is instead being used for visual layout, remove it. Tables overflow the page rather than reflowing on mobile devices, and should only be used when the horizontal relationships are necessary to understand the content.</li></ul>
             `,
 
-		tableContainsContentHeading : {
-			title: 'Content heading inside a table',
-		},
 		TABLES_SEMANTIC_HEADING: `<p>To fix: remove heading formatting. Use row and column headers instead.</p>
         <p>Content headings ("Heading 1", "Heading 2") form a navigable table of contents for screen reader users,  
         labelling all content <strong>until the next heading</strong>. Table headers label specific columns or rows within a table.</p> 
@@ -390,18 +336,12 @@ const ed11yLang = {
             <tr><td>A</td><td>B</td><td>C</td></table>
             `,
 
-		tableEmptyHeaderCell : {
-			title: 'Empty table header cell',
-		},
 		TABLES_EMPTY_HEADING: `
                 <p>When exploring tables, screen readers repeat table header cells as needed to orient users. 
                 Without headers, it is very easy to get lost; screen reader users have to count columns and rows and try to remember which columns went with which rows.</p>
                 <p><strong>To fix:</strong> make sure each header cell in this table contains text.</p>
             `,
 
-		textPossibleList : {
-			title: 'Manual check: should this have list formatting?',
-		},
 		QA_FAKE_LIST: `<p>List formatting is structural:</p> 
             <ol><li>List formatting indents and reflows on overflow. Text aligns vertically with the line above it.</li>
             <li>Lists are machine-readable. Screen readers can orient their users, announcing this as "list item, 2 of 3."</li></ol>
@@ -409,43 +349,25 @@ const ed11yLang = {
             <p><strong>To fix:</strong> if this "%(text)" is part of a list, replace it with list formatting.</p>
             `,
 
-		textPossibleHeading : {
-			title: 'Manual check: should this be a heading?',
-		},
 		QA_FAKE_HEADING: `<p>If this all-bold line of text is functioning as a heading for the following text rather than a visual emphasis, replace the bold formatting with the appropriately numbered heading. Otherwise, dismiss this alert.</p>
         <p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
             <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>
             `,
 
-		textUppercase : {
-			title: 'Manual check: is this uppercase text needed?',
-		},
 		QA_UPPERCASE: `<p>UPPERCASE TEXT CAN BE MORE DIFFICULT TO READ FOR MANY PEOPLE, AND IS OFTEN INTERPRETED AS SHOUTING.</p>
          <p>Consider using sentence case instead, and using bold text or font changes for visual emphasis, or structural formatting like headings for emphasis that will also be announced by screen readers.</p>`,
 
-		embedVideo : {
-			title: 'Manual check: is this video accurately captioned?',
-		},
 		EMBED_VIDEO: `<p>If a recorded video contains speech or meaningful sounds, it must <a href="https://www.w3.org/WAI/media/av/captions/" title="Opens in new window">provide captions</a>.</p>
             <p>Note that automatic, machine-generated captions must be proofread, and speaker identifications must be added, before being considered an equal alternative.</p>`,
 
-		embedAudio : {
-			title: 'Manual check: is an accurate transcript provided?',
-		},
 		EMBED_AUDIO: `<p>If this audio contains speech, a <a href="https://www.w3.org/WAI/media/av/transcribing/" title="Opens in new window">text alternative</a> must be provided on this page or linked.</p>
             <p>Note that automatic, machine-generated transcripts must be proofread, and speaker identifications must be added, before being considered an equal alternative</p>`,
 
-		embedVisualization : {
-			title: 'Manual check: is this visualization accessible?',
-		},
 		EMBED_DATA_VIZ: `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
-            <p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
+							<p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
 
-		embedCustom : {
-			title: 'Manual check: is this embedded content accessible?',
-		},
-		EMBED_CUSTOM: '<p>This checker cannot test inside embedded content. Check to sure images inside this embed have alt text, videos have captions, and interactive components can be <a href=\'https://webaim.org/techniques/keyboard/\'>operated by a keyboard</a>.</p>',
-	}
+			EMBED_CUSTOM: '<p>This checker cannot test inside embedded content. Check to sure images inside this embed have alt text, videos have captions, and interactive components can be <a href=\'https://webaim.org/techniques/keyboard/\'>operated by a keyboard</a>.</p>',
+		}
 };
 
 export default ed11yLang;
