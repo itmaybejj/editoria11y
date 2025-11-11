@@ -2,6 +2,7 @@ import {State} from "../utils/state.js";
 import {alignTip, buildJumpList, editableHighlighter} from "../logic/interface.js";
 import {resetClass} from "../utils/utils.js";
 import {alignButtons} from "../utils/align.js";
+import {Options} from "../utils/options.js";
 
 export class Ed11yElementResult extends HTMLElement {
   /* global Ed11y */
@@ -44,7 +45,7 @@ export class Ed11yElementResult extends HTMLElement {
   toggleClick(event) {
     event.preventDefault();
     let host = this.getRootNode().host;
-    // Todo: extremely fast clicks throw TypeError: e is null
+    // Todo: fast rechecks and double clicks not being correctly intercepted.
     if (host.racing === false) {
       host.racing = true;
       State.toggledFrom = this;
@@ -64,7 +65,7 @@ export class Ed11yElementResult extends HTMLElement {
   }
 
   closeOtherTips() {
-    if (State.openTip.button) {
+    if (State.tipOpen) {
       State.openTip.button.setAttribute('data-ed11y-action', 'close');
     }
   }
@@ -87,7 +88,7 @@ export class Ed11yElementResult extends HTMLElement {
     }
     this.toggle.setAttribute('aria-expanded', changeTo);
     let highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
-    if (State.options.inlineAlerts) {
+    if (State.inlineAlerts) {
       resetClass([
         'ed11y-hidden-highlight',
         'ed11y-ring-red',
@@ -112,30 +113,15 @@ export class Ed11yElementResult extends HTMLElement {
       }));
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');
-      if (State.options.inlineAlerts) {
+      if (State.inlineAlerts) {
         this.result.element.classList.add(highlightOutline);
-        // Removed in 2.3.6; Todo: confirm not needed and delete.
-        /*if (this.result.element.style.outline.indexOf('alert') === -1 ) {
-          // Set property unless alert is already set.
-          const display = window.getComputedStyle(this.result.element).getPropertyValue('display');
-          let outlineClass;
-          if (display.indexOf('inline') === -1 || this.result.element.tagName === 'IMG') {
-            outlineClass = this.result.dismissalKey ?
-              'ed11y-warning-block'
-              : 'ed11y-error-block';
-          } else {
-            outlineClass = this.result.dismissalKey ?
-              'ed11y-warning-inline'
-              : 'ed11y-error-inline';
-          }
-          this.result.element.classList.add(outlineClass);
-        }*/
       }
       requestAnimationFrame(()=>alignTip(this.toggle, this.tip, 4, true));
-      if (!State.jumpList) {
+      if (State.jumpList.length === 0) { // todo is it still possible to have a tip and no jumpList?
         buildJumpList();
       }
       State.lastOpenTip = Number(this.getAttribute('data-ed11y-jump-position'));
+			State.tipOpen = true;
       State.openTip = {
         button: this,
         tip: this.tip,
@@ -148,6 +134,7 @@ export class Ed11yElementResult extends HTMLElement {
       }));
       this.tip.setAttribute('data-ed11y-action', 'shut');
       this.result.highlight?.style.setProperty('opacity', '0');
+			State.tipOpen = false;
       State.openTip = {
         button: false,
         tip: false,

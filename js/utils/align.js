@@ -1,9 +1,10 @@
 import {
-	findElements,
 	firstVisibleParent,
 	visible
 } from "./utils.js";
 import {State, UI} from "./state.js";
+import {Options} from "./options.js";
+import Elements from "../../sa11y/utils/elements.js";
 
 export const intersect = function(a, b, x = 10) {
 	// Compute intersect using browser offsets.
@@ -22,7 +23,7 @@ export const overlap = function(rect1Left, rect1Top, rect2Left, rect2Top, size =
 };
 
 export const nudgeMark = function (el, x, y) {
-	// TODO: THESE CAN NUDGE OUT OF THE OVERFLOW AREA OF THE CONTENTEDITABLE CONTAINER
+	// todo: these can get nudged out of an editable area.
 	if (el.style.transform) {
 		const computedStyle = window.getComputedStyle(el);
 		let matrix = computedStyle.getPropertyValue('transform');
@@ -43,8 +44,8 @@ export const scrollableElem = function(el) {
 };
 
 export function closestScrollable(el) {
-	if (State.options.constrainButtons && el.closest(State.options.constrainButtons)) {
-		return el.closest(State.options.constrainButtons);
+	if (Options.constrainButtons && el.closest(Options.constrainButtons)) {
+		return el.closest(Options.constrainButtons);
 	}
 
 	let parent = el.parentElement;
@@ -71,15 +72,15 @@ export function alignPanel() {
 	if (!UI.panelElement) {
 		return false;
 	}
-	if (State.options.panelPinTo === 'left') {
+	if (Options.panelPosition === 'left') {
 		UI.panel.classList.add('ed11y-pin-left');
 	}
 	let xMost = 0;
 	let yMost = 0;
-	if (State.elements.panelPin) { // todo
-		State.elements.panelPin.forEach(el => {
+	if (Elements.Found.panelNoCover) {
+		Elements.Found.panelNoCover.forEach(el => {
 			let bounds = el.getBoundingClientRect();
-			if (State.options.panelPinTo === 'right') {
+			if (Options.panelPosition === 'right') {
 				xMost = window.innerWidth - bounds.left > xMost && bounds.left > window.innerWidth / 3 ? window.innerWidth - bounds.left : xMost;
 			} else {
 				xMost = bounds.right > xMost && xMost + bounds.right < window.innerWidth / 3 ? xMost + bounds.right : xMost;
@@ -89,29 +90,31 @@ export function alignPanel() {
 	}
 	if (xMost > 0 && xMost < window.innerWidth - 240) {
 		// push off horizontal
-		UI.panelElement.style.setProperty(State.options.panelPinTo, xMost + 10 + 'px');
-		UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
+		UI.panelElement.style.setProperty(Options.panelPosition, xMost + 10 + 'px');
+		UI.panelElement.style.setProperty('bottom', Options.panelOffsetY);
 	} else if (xMost > 0 && xMost > window.innerWidth - 240 && yMost > 0) {
 		// push off vertical
-		UI.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
-		UI.panelElement.style.setProperty('bottom', `calc(${State.options.panelOffsetY} + ${yMost}px)`);
+		UI.panelElement.style.setProperty(Options.panelPosition, Options.panelOffsetX);
+		UI.panelElement.style.setProperty('bottom', `calc(${Options.panelOffsetY} + ${yMost}px)`);
 	} else {
 		// no push
-		UI.panelElement.style.setProperty(State.options.panelPinTo, State.options.panelOffsetX);
-		UI.panelElement.style.setProperty('bottom', State.options.panelOffsetY);
+		UI.panelElement.style.setProperty(Options.panelPosition, Options.panelOffsetX);
+		UI.panelElement.style.setProperty('bottom', Options.panelOffsetY);
 	}
 }
 
 export function alignAlts () {
 	// Positions alt label to match absolute, inline or floated images.
-	findElements('altMark', 'ed11y-element-alt');
-	State.elements.altMark?.forEach((el) => { // @todo merge
-		let id = el.dataset.ed11yImg;
+	UI.imageAlts?.forEach((mark) => {
+		if (!mark.mark) {
+			return;
+		}
+		const el = mark.mark;
 		el.style.setProperty('transform', null);
 		el.style.setProperty('height', null);
 		el.style.setProperty('width', null);
 
-		let img = UI.imageAlts[id][0];
+		let img = mark.element;
 		if (img.tagName !== 'IMG') {
 			// Mark is placed outside the link in linked images.
 			img = img.querySelector('img');
@@ -171,7 +174,7 @@ export function checkEditableIntersects (focusKnown = false) {
 
 
 export function alignButtons() {
-	if (!State.jumpList || State.jumpList.length === 0 || (State.openTip.button && State.scrollPending === 0)) { // todo always false?
+	if (State.jumpList.length === 0 || (State.tipOpen && State.scrollPending === 0)) { // todo always false?
 		return;
 	}
 	State.alignPending = true;
@@ -179,10 +182,10 @@ export function alignButtons() {
 	// Reading and writing in a loop creates paint thrashing.
 	// We iterate the array for reads, then iterate for writes.
 
-	if (State.options.fixedRoots) {
+	if (Options.fixedRoots) {
 		State.positionedFrames.length = 0;
 
-		State.options.fixedRoots.forEach((root) => {
+		Options.fixedRoots.forEach((root) => {
 			if (root['framePositioner']) {
 				State.positionedFrames.push(root['framePositioner'].getBoundingClientRect());
 			}
@@ -193,7 +196,7 @@ export function alignButtons() {
 	let previousNudgeTop = 0;
 	let previousNudgeLeft = 0;
 	const scrollTop = window.scrollY;
-	if (!State.options.inlineAlerts) {
+	if (!State.inlineAlerts) {
 		// Compute based on target position.
 
 		State.jumpList.forEach((mark, i) => {
@@ -222,7 +225,7 @@ export function alignButtons() {
 				top = top + 10;
 				left = left + 10;
 			} else {
-				left = State.options.inlineAlerts ? left - 34 : left;
+				left = State.inlineAlerts ? left - 34 : left;
 			}
 
 			// Add iframe positon to calculated position
@@ -236,7 +239,7 @@ export function alignButtons() {
 				top = top + 10;
 				left = left + 10;
 			} else {
-				left = State.options.inlineAlerts ? left - 34 : left;
+				left = State.inlineAlerts ? left - 34 : left;
 			}
 			if (mark.result.scrollableParent) {
 				// Bump alerts that would be X-position out of a scroll zone.
@@ -336,7 +339,7 @@ export function alignButtons() {
 		else if (nudgeTop !== 0) {
 			needNudge = true;
 		}
-		if (!State.options.inlineAlerts) {
+		if (!State.inlineAlerts) {
 			if (needNudge) {
 				mark.style.transform = `translate(${mark.markLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
 			} else {
@@ -353,7 +356,7 @@ export function alignButtons() {
 	});
 
 	// Last pass: check for elements offscreen within scrollable areas.
-	if (!State.options.inlineAlerts) {
+	if (!State.inlineAlerts) {
 		// Alerts have to be positioned relative to viewport.
 		State.jumpList.forEach(mark => {
 

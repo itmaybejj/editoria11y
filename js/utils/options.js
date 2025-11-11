@@ -1,393 +1,421 @@
-import defaultOptions from '../../node_modules/sa11y/src/js/utils/default-options';
-import Constants from '../../node_modules/sa11y/src/js/utils/constants.js';
-import {M, State, Theme, UI} from "./state.js";
+export const Options = {
+	// Default options.
 
-const Options = (function options() {
-  /* **************** */
-  /* Global constants */
-  /* **************** */
-  let ed11yLang = {};
-  let ed11yDefaults = {
+	checkRoots: false, // @todo CMS merge implement whatever syntax Sa11y releases.
+	fixedRoots: false, // Array of specific nodes, overrides previous.
+	ignoreElements: '',
 
-    // Relative or absolute
-    //cssUrls: false, // ['/folder/editoria11y.css','/folder/custom.css']
-    cssUrls: false,
+	ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
+	ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
 
-    // Only check within these containers, e.g. "#main, footer." Default is to look for <main> and fall back to <body>.
-    checkRoots: false,
-    fixedRoots: false, // Array of specific nodes, overrides previous.
-    /* e.g:
-    fixedRoots: [
-      {
-         root: direct domReference
-         framePositioner: direct domReference or false
-      }
-    ]
-    */
+	// Include and modify this entire object in your call
+	// @todo merge test and/or reimplement.
+	headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
 
-    // Shadow components inside the checkroot to check within, e.g., 'accordion, spa-content'
-    shadowComponents: false,
-    autoDetectShadowComponents: true,
+	// Set alertModes:
+	// 'headless': do not draw interface
+	// 'userPreference: respect user preference.
+	// 'polite': open for new issues.
+	// 'assertive': open for any issues.
+	// 'active': always open.
+	// CMS integrations can switch between polite & headless at runtime.
+	alertMode: 'userPreference',
+	inlineAlerts: true,
+	watchForChanges: 'checkRoots', // 'document', false, 'checkRoots';
 
-    // Containers to globally ignore, e.g., "header *, .card *"
-    ignoreElements: false,
+	// This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
+	editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
 
-    // Provide list of test keys; get from localization file or results object.
-    // @todo merge provide translation layer or document change.
-    ignoreTests: false, //e.g. ['linkNewWindow', 'textUppercase']
+	// Dismissed alerts
+	currentPage: window.location.pathname, // uses window.location.pathname unless a string is provided.
+	allowHide: true, // enables end-user ignore button
+	allowOK: true,  // enables end-user mark OK button
+	syncedDismissals: false, // provide empty or populated object {} to enable sync functions
+	reportsURL: false, // Provides a link to site-wide reports
+	showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
 
-    // Ignore Aria on these elements (Gutenberg labels headings while editing.)
-    ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
-    ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
+	// Hide all alerts if these elements are absent, e.g., ".edit-button"
+	// Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
+	ignoreAllIfAbsent: false,
+	ignoreAllIfPresent: false, // @todo CMS merge dismissal system.
 
-    // Disable tests on specific elements
-    // Include and modify this entire object in your call
-    ignoreByKey: {
-      'p': 'table p',
-      // 'h': false,
-      'img': '[aria-hidden], [aria-hidden] img, ' +
-        '[role="presentation"], ' +
-        'a[href][aria-label] img, button[aria-label] img, ' +
-        'a[href][aria-labelledby] img, button[aria-labelledby] img',
-      'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
-      // 'li': false,
-      // 'blockquote': false,
-      // 'iframe': false,
-      // 'audio': false,
-      // 'video': false,
-      'table': '[role="presentation"]',
-    },
+	// Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
+	preventCheckingIfPresent: false,
+	preventCheckingIfAbsent: false,
 
-    headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
+	// Disable the "is this element visible" check on themes that have 0-height elements.
+	checkVisible: true,
 
-    // Set alertModes
-    // 'headless': do not draw interface
-    // 'userPreference: respect user preference.
-    // 'polite': open for new issues.
-    // 'assertive': open for any issues.
-    // 'active': always open.
-    // CMS integrations can switch between polite & headless at runtime.
-    alertMode: 'userPreference',
-    inlineAlerts: true,
-    watchForChanges: true, // true, false, 'checkRoots';
+	// Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
+	hiddenHandlers: '',
 
-    // This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
-    editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
+	panelOffsetX: '25px',
+	panelOffsetY: '25px',
+	panelNoCover: '', // select other buttons to avoid.
+	panelAttachTo: document.body,
 
-    // Dismissed alerts
-    currentPage: false, // uses window.location.pathname unless a string is provided.
-    allowHide: true, // enables end-user ignore button
-    allowOK: true,  // enables end-user mark OK button
-    syncedDismissals: false, // provide empty or populated object {} to enable sync functions
-    reportsURL: false, // Provides a link to site-wide reports
-    showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
+	// Selector list for elements that hide overflow, truncating buttons.
+	constrainButtons: false,
 
-    // Hide all alerts if these elements are absent, e.g., ".edit-button"
-    // Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
-    ignoreAllIfAbsent: false,
-    ignoreAllIfPresent: false,
+	// Interface
+	theme: 'sleekTheme',
+	sleekTheme: {
+		bg: '#eff2ff', // e8f4ff
+		bgHighlight: '#7b1919',
+		text: '#20160c',
+		primary: '#276499', // 276499
+		primaryText: '#eff2ff',
+		button: 'transparent', // deprecate?
+		panelBar: '#1e517c',
+		panelBarText: '#fffdf7',
+		panelBarShadow: '0 0 0 1px #276499',
+		activeTab: '#276499',
+		activeTabText: '#fffffe',
+		focusRing: '#007aff',
+		outlineWidth: '0',
+		borderRadius: '3px',
+		ok: '#1f5381',
+		warning: 'rgb(250, 216, 89)',
+		warningText: '#20160c',
+		alert: 'rgb(184, 5, 25)',
+		alertText: '#f4f7ff',
+	},
+	darkTheme: {
+		bg: '#0a2051',
+		bgHighlight: '#7b1919',
+		text: '#f4f7ff',
+		primary: '#3052a0',
+		primaryText: '#f4f7ff',
+		button: 'transparent',
+		panelBar: '#3052a0',
+		panelBarText: '#f4f7ff',
+		panelBarShadow: 'inset 0 0 1px, 0 0 0 1px #0a2051',
+		activeTab: '#0a2051',
+		activeTabText: '#fffffe',
+		focusRing: 'cyan',
+		outlineWidth: '2px',
+		borderRadius: '3px',
+		ok: '#0a307a',
+		warning: 'rgb(250, 216, 89)',
+		warningText: '#20160c',
+		alert: 'rgb(184, 5, 25)',
+		alertText: '#f4f7ff',
+	},
+	lightTheme: {
+		bg: '#fffffe',
+		bgHighlight: '#7b1919',
+		text: '#20160c',
+		primary: '#0a307a',
+		primaryText: '#fffdf7',
+		panelBar: '#0a307a',
+		panelBarText: '#f4f7ff',
+		panelBarShadow: '0 0 0 1px #0a307a',
+		button: 'transparent',
+		activeTab: '#b9c0cf',
+		activeTabText: '#20160c',
+		focusRing: '#007aff',
+		outlineWidth: '0',
+		borderRadius: '3px',
+		ok: '#0a307a',
+		warning: 'rgb(250, 216, 89)',
+		warningText: '#20160c',
+		alert: 'rgb(184, 5, 25)',
+		alertText: '#f4f7ff',
+	},
+	// Base z-index for buttons.
+	// 1299 maximizes TinyMCE compatibility.
+	buttonZIndex: 1299,
+	// CSS overrides and additions.
 
-    // Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
-    preventCheckingIfPresent: false,
-    preventCheckingIfAbsent: false,
+	baseFontSize: 'clamp(14px, 1.5vw, 16px)',
+	baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
 
-    // Regex of strings to remove from links before checking to see if link titles are meaningful. E.g.:
-    // "\(link is external\)|\(link sends email\)"
-    linkIgnoreStrings: false,
-    linkIgnoreSelector: false,
+	// Test customizations
+	embeddedContent: false, // @todo merge replace with custom test.
+	embeddedContentTitle: '',
+	embeddedContentMessage: '',
 
-    // Disable the "is this element visible" check on themes that have 0-height elements.
-    checkVisible: true,
+	linksUrls: false, // get from language pack
+	linksMeaningless: false, // get from language pack
+	altPlaceholder: '', // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
 
-    // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
-    hiddenHandlers: '',
+	editLinks: false, // Add links to edit content in tooltips.
 
-    panelPinTo: 'right',
-    panelOffsetX: '25px',
-    panelOffsetY: '25px',
-    panelNoCover: '', // select other buttons to avoid.
-    panelAttachTo: document.body,
-
-    // Selector list for elements that hide overflow, truncating buttons.
-    constrainButtons: false,
-
-    // Interface
-    lang: 'en',
-    langSanitizes: false, // Some translation modules will double-escape
-    theme: 'sleekTheme',
-    sleekTheme: {
-      bg: '#eff2ff', // e8f4ff
-      bgHighlight: '#7b1919',
-      text: '#20160c',
-      primary: '#276499', // 276499
-      primaryText: '#eff2ff',
-      button: 'transparent', // deprecate?
-      panelBar: '#1e517c',
-      panelBarText: '#fffdf7',
-      panelBarShadow: '0 0 0 1px #276499',
-      activeTab: '#276499',
-      activeTabText: '#fffffe',
-      focusRing: '#007aff',
-      outlineWidth: '0',
-      borderRadius: '3px',
-      ok: '#1f5381',
-      warning: 'rgb(250, 216, 89)',
-      warningText: '#20160c',
-      alert: 'rgb(184, 5, 25)',
-      alertText: '#f4f7ff',
-    },
-    darkTheme: {
-      bg: '#0a2051',
-      bgHighlight: '#7b1919',
-      text: '#f4f7ff',
-      primary: '#3052a0',
-      primaryText: '#f4f7ff',
-      button: 'transparent',
-      panelBar: '#3052a0',
-      panelBarText: '#f4f7ff',
-      panelBarShadow: 'inset 0 0 1px, 0 0 0 1px #0a2051',
-      activeTab: '#0a2051',
-      activeTabText: '#fffffe',
-      focusRing: 'cyan',
-      outlineWidth: '2px',
-      borderRadius: '3px',
-      ok: '#0a307a',
-      warning: 'rgb(250, 216, 89)',
-      warningText: '#20160c',
-      alert: 'rgb(184, 5, 25)',
-      alertText: '#f4f7ff',
-    },
-    lightTheme: {
-      bg: '#fffffe',
-      bgHighlight: '#7b1919',
-      text: '#20160c',
-      primary: '#0a307a',
-      primaryText: '#fffdf7',
-      panelBar: '#0a307a',
-      panelBarText: '#f4f7ff',
-      panelBarShadow: '0 0 0 1px #0a307a',
-      button: 'transparent',
-      activeTab: '#b9c0cf',
-      activeTabText: '#20160c',
-      focusRing: '#007aff',
-      outlineWidth: '0',
-      borderRadius: '3px',
-      ok: '#0a307a',
-      warning: 'rgb(250, 216, 89)',
-      warningText: '#20160c',
-      alert: 'rgb(184, 5, 25)',
-      alertText: '#f4f7ff',
-    },
-    // Base z-index for buttons.
-    // 1299 maximizes TinyMCE compatibility.
-    buttonZIndex: 1299,
-    // CSS overrides and additions.
-
-    baseFontSize: 'clamp(14px, 1.5vw, 16px)',
-    baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-
-    // Test customizations
-    embeddedContent: false, // @todo remove in favor of custom checks?
-    embeddedContentTitle: '', // @todo test or remove?
-    embeddedContentMessage: '', // @todo test or remove?
-
-    linksUrls: false, // get from language pack
-    linksMeaningless: false, // get from language pack
-    altPlaceholder: false, // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
-    // * Not implemented Yet:
-    // ruleset toggling
-    // form label tests
-    // detectSPArouting: false,
-
-    editLinks: false, // Add links to edit content in tooltips.
-
-    // @todo merge: port this functionality.
-    editorHeadingLevel: [
-      // Sets previous heading level for contentEditable fields.
-      // With 'ignore' set, first heading level is ignored in editable zones.
-      // This is ideal for systems with separate backend editing pages.
-      // Set to 'inherit' for fields edited in a frontend context.
-      /*{
-        selector: '.example-inherit',
-        previousHeading: 'inherit',
-      },
-      {
-        selector: '.example-l3',
-        previousHeading: 3,
-      },*/
-      {
-        selector: '*',
-        previousHeading: 0, // Ignores first heading for level skip detection.
-      },
-    ],
-
-    userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
-
-    customTests: 0,
-
-    // @todo merge do we need the image and button descenders and the tabindex selector? If so should it be in the MR?
-    imageIgnore: '[aria-hidden], [aria-hidden] img, [role="presentation"], a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img',
-    linkIgnore: '[aria-hidden][tabindex="-1"]',
-  };
-
-  function preProcessOptions(options) {
-    const sa11yDefaults = defaultOptions;
-    ed11yDefaults = {
-      ...sa11yDefaults,
-      ...ed11yDefaults,
-    };
-
-    // @todo MERGE these get destroyed in constants.js
-    //ed11yDefaults.checks.QA_DOCUMENT.sources = 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']'
-    //ed11yDefaults.checks.EMBED_VIDEO.sources = 'video, [src*="youtube.com"], [src*="brightcove.com"], [src*="dailymotion.com"], [src*="panopto.com"], [src*="Video"], [src*="video"], [src*="vimeo.com"], [src*="watch"], [src*="wistia.com"], [src*="vidyard.com"], [src*=yuja.com]';
-
+	// @todo merge discuss: how to handle this functionality.
+	initialHeadingLevel: false,
+		// Sets previous heading level for contentEditable fields.
+		// With 'ignore' set, first heading level is ignored in editable zones.
+		// This is ideal for systems with separate backend editing pages.
+		// Set to 'inherit' for fields edited in a frontend context.
 		/*
-		* video, [src*="Video"], [src*="video"], [src*="watch"], [src*="youtube.com"], [src*="vimeo.com"], [src*="panopto.com"], [src*="wistia.com"], [src*="dailymotion.com"], [src*="brightcove.com"], [src*="vidyard.com"], [src*="video"], [src*="[src*="youtube.com"]"], [src*="[src*="brightcove.com"]"], [src*="[src*="dailymotion.com"]"], [src*="[src*="panopto.com"]"], [src*="[src*="Video"]"], [src*="[src*="video"]"], [src*="[src*="vimeo.com"]"], [src*="[src*="watch"]"], [src*="[src*="wistia.com"]"], [src*="[src*="vidyard.com"]"], [src*="[src*=yuja.com]"]
-		* */
+		[
+			{
+				selector: '.example-inherit',
+				previousHeading: 'inherit',
+			},
+			{
+				selector: '.example-l3',
+				previousHeading: 3,
+			},
+		],*/
 
-    options = {
-      ...ed11yDefaults,
-      ...options,
-    };
-    console.log('merged');
-    console.log(options);
-    /*
-    * Options translation
-    * */
-    options.headless = options.alertMode === 'headless';
-    options.customChecks = options.customTests > 0 && !options.customChecks ? 'listen' : false;
+	userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
 
-    // Toggleable plugins
-    options.developerPlugin = false;
-    options.colourFilterPlugin = false;
-    options.exportResultsPlugin = false;
-    options.showImageOutline = false;
-    // @todo merge what are these?
-    // Constants.Global.ignoreContentOutsideRoots = option.ignoreContentOutsideRoots;
+	customTests: 0,
 
-  //  options.panelPosition = panelPinTo; // Syntax?
+	// Target area to check
+	checkRoot: 'body',
 
-    // Check for document types.
+	// Exclusions
+	containerIgnore: '',
+	contrastIgnore: '.sr-only',
+	outlineIgnore: '',
+	headerIgnore: '',
+	headerIgnoreSpan: 'ed11y-element-heading-label',
+	headerIgnoreStrings: '',
+	imageIgnore: 'img[aria-hidden], [aria-hidden] img, ' +
+		'img[role="presentation"], ' +
+		'a[href][aria-label] img, button[aria-label] img, ' +
+		'a[href][aria-labelledby] img, button[aria-labelledby] img',
+	linkIgnore: '[aria-hidden][tabindex="-1"]',
+	linkIgnoreSpan: '.ed11y-element',
+	linkIgnoreStrings: '',
 
-    if (options.documentLinks) {
-      options.checks.QA_DOCUMENT.sources = options.documentLinks;
-    }
-    // @todo merge this changed name from linkIgnoreSelector.
+	// Control panel settings
+	aboutContent: '',
+	panelPosition: 'right',
+	showMovePanelToggle: true,
+	checkAllHideToggles: false,
+	developerChecksOnByDefault: false,
 
-    if (options.linkIgnoreSelector) {
-      options.linkIgnoreSpan = options.linkIgnoreSelector;
-    }
+	// Page outline
+	showHinPageOutline: false,
+	showTitleInPageOutline: false,
 
-    if (options.panelAttachTo) {
-      State.panelAttachTo = options.panelAttachTo; // todo Is this implemented anywhere?
-    }
+	// Image outline
+	showImageOutline: true,
+	editImageURLofCMS: '',
+	relativePathImageSRC: '',
+	relativePathImageID: '',
+	ignoreEditImageURL: [],
+	ignoreEditImageClass: [],
 
+	// Other features
+	delayCheck: 0,
+	delayCustomCheck: 500,
+	detectSPArouting: false,
+	doNotRun: '',
+	headless: false,
+	selectorPath: false,
+	shadowComponents: '',
+	autoDetectShadowComponents: false,
 
-    // @todo Merge ignoreByKey deprecation documentation and conversion. These tests still need overrides:
-    // 'p': 'table p',
-    //  'table': '[role="presentation"]'
+	// Annotations
+	showGoodImageButton: true,
+	showGoodLinkButton: true,
+	dismissAnnotations: true,
+	dismissAll: true,
+	ignoreHiddenOverflow: '',
+	insertAnnotationBefore: '',
 
-    /* ********************** */
-    /* Embedded Content Setup */
-    /* ********************** */
-    //Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
-    // @todo merge: this means custom embeds needs to be a custom test.
+	// Readability
+	readabilityPlugin: false,
+	readabilityRoot: 'body',
+	readabilityIgnore: '',
 
-    /* ************** */
-    /* Language setup */
-    /* ************** */
-    // @todo merge how to emulate Sa11y translations?
-    ed11yLang = {
-      // Fall back to En strings if language or string is unavailable
-      ...ed11yLang['en'],
-      ...ed11yLang[options.lang]
-    };
+	// Contrast
+	contrastPlugin: false,
+	contrastAAA: false,
+	contrastAPCA: false,
 
-    /* *********** */
-    /* Theme setup */
-    /* *********** */
-    Theme.push = options[options.theme];
-    Theme.baseFontSize = options.baseFontSize;
-    Theme.buttonZIndex = options.buttonZIndex;
-    Theme.baseFontFamily = options.baseFontFamily;
+	// Other plugins
+	customChecks: false,
+	linksAdvancedPlugin: true,
+	formLabelsPlugin: true, // @todo pro
+	embeddedContentPlugin: true,
+	developerPlugin: false, // @todo pro
+	externalDeveloperChecks: false, // @todo pro
+	colourFilterPlugin: false, // @todo pro
+	exportResultsPlugin: false,
 
-    let cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
-    if (!options.cssUrls) {
-      const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
-      if (cssLink) {
-        cssUrls = [cssLink.getAttribute('href')];
-      } else {
-        console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
-      }
-    }
-    const cssBundle = document.createElement('div');
-    cssBundle.classList.add('ed11y-style');
-    cssBundle.setAttribute('hidden','');
-    cssUrls?.forEach( sheet => {
-      const cssLink = document.createElement('link');
-      cssLink.setAttribute('rel', 'stylesheet');
-      // @todo preload.
-      cssLink.setAttribute('media', 'all');
-      if (sheet.indexOf('?') < 0) {
-        sheet = sheet + '?ver=' + State.version;
-      }
-      cssLink.setAttribute('href', sheet);
-      cssBundle.append(cssLink);
-    });
-    UI.attachCSS = function(appendTo) {
-      const link = cssBundle.cloneNode(true)
-      appendTo.appendChild(link);
-    };
+	// Shared properties for some checks
+	susAltStopWords: '',
+	linkStopWords: '',
+	extraPlaceholderStopWords: '',
+	imageWithinLightbox: '',
 
-    return options;
-  }
+	checks: {
+		// Sa11y: Heading checks
+		HEADING_SKIPPED_LEVEL: {
+			type: 'warning',
+		},
+		HEADING_EMPTY_WITH_IMAGE: true,
+		HEADING_EMPTY: true,
+		HEADING_FIRST: true, // @todo CMS migrate to this from the complicated setters.
+		HEADING_LONG: {
+			maxLength: 170,
+		},
+		HEADING_MISSING_ONE: false,
 
-  function postProcessOptions(option) {
-    // @todo merge: test: does this need descendant selector?
-    Constants.Exclusions.Sa11yElements = ['.ed11y-element'];
+		// Sa11y: Image checks
+		MISSING_ALT_LINK: true,
+		MISSING_ALT_LINK_HAS_TEXT: true,
+		MISSING_ALT: true,
+		IMAGE_DECORATIVE_CAROUSEL: false, // Todo consider.
+		LINK_IMAGE_NO_ALT_TEXT: {
+			type: 'error',
+		},
+		LINK_IMAGE_TEXT: false, // Not interested.
+		IMAGE_FIGURE_DECORATIVE: {
+			type: 'warning',
+		}, // New
+		IMAGE_DECORATIVE: {
+			type: 'warning',
+		},
+		LINK_ALT_FILE_EXT: true,
+		ALT_FILE_EXT: true,
+		LINK_PLACEHOLDER_ALT: true,
+		ALT_PLACEHOLDER: true,
+		LINK_SUS_ALT: true,
+		SUS_ALT: true,
+		LINK_IMAGE_LONG_ALT: {
+			maxLength: 250,
+		},
+		IMAGE_ALT_TOO_LONG: {
+			maxLength: 250,
+		},
+		LINK_IMAGE_ALT: false, // Not interested.
+		LINK_IMAGE_ALT_AND_TEXT: true,
+		IMAGE_FIGURE_DUPLICATE_ALT: false, // Todo pro.
+		IMAGE_PASS: {
+			dismissAll: true,
+		},
+		ALT_UNPRONOUNCEABLE: true,
+		LINK_ALT_UNPRONOUNCEABLE: true,
+		ALT_MAYBE_BAD: {
+			minLength: 15,
+		},
+		LINK_ALT_MAYBE_BAD: {
+			minLength: 15,
+		},
 
-    // Main container exclusions.
-    console.log('Constants: ')
-    console.log(Constants);
+		// Sa11y: Link checks
+		DUPLICATE_TITLE: false, // Todo pro.
+		LINK_EMPTY_LABELLEDBY: false, // Todo pro.
+		LINK_EMPTY_NO_LABEL: true,
+		LINK_STOPWORD: {
+			type: 'warning',
+		},
+		LINK_STOPWORD_ARIA: false, // Todo pro.
+		LINK_SYMBOLS: false, // Todo pro.
+		LINK_CLICK_HERE: false,
+		LINK_DOI: false, // Todo consider.
+		LINK_URL: {
+			maxLength: 40,
+		},
+		LINK_LABEL: {
+			dismissAll: true,
+		},
+		LINK_EMPTY: true,
+		LINK_IDENTICAL_NAME: false, // Todo pro.
+		LINK_NEW_TAB: {
+			dismissAll: true,
+		},
+		LINK_FILE_EXT: false, // Todo test vs LinkPurpose.
 
-    // Undo Sa11y overrides in constants.js.
-    //Constants.Global.documentSources = option.checks.QA_DOCUMENT.sources;
-    //Constants.Global.videoSources = option.checks.EMBED_VIDEO.sources;
-    //Constants.Global.AudioSources = option.checks.EMBED_AUDIO.sources;
-    //Constants.Global.dataVizSources = option.checks.EMBED_DATA_VIZ.sources;
-    //Constants.Global.AllEmbeddedContent = `${Constants.Global.VideoSources}, ${Constants.Global.AudioSources}, ${Constants.Global.VisualizationSources}`;
+		// Form label checks module not yet enabled.
+		// Todo pro.
+		/*
+		LABELS_MISSING_IMAGE_INPUT: true,
+		LABELS_INPUT_RESET: true,
+		LABELS_MISSING_LABEL: true,
+		LABELS_ARIA_LABEL_INPUT: true,
+		LABELS_NO_FOR_ATTRIBUTE: true,
+		LABELS_PLACEHOLDER: true,
+		*/
 
-    State.currentPage = options.currentPage ? options.currentPage : window.location.currentPage;
+		// Embedded content checks
+		EMBED_AUDIO: {
+			sources: '',
+		},
+		EMBED_VIDEO: {
+			sources: '',
+		},
+		EMBED_DATA_VIZ: {
+			sources: '',
+		},
+		EMBED_UNFOCUSABLE: true,
+		EMBED_MISSING_TITLE: {
+			type: 'warning',
+		},
+		EMBED_GENERAL: true,
 
-    Object.assign(Theme, State.options[State.options.theme]);
-    Theme.baseFontSize = State.options.baseFontSize;
-    Theme.buttonZIndex = State.options.buttonZIndex;
-    Theme.baseFontFamily = State.options.baseFontFamily;
+		// Quality assurance checks
+		QA_BAD_LINK: {
+			sources: '',
+		},
+		QA_STRONG_ITALICS: false, // Todo pro.
+		QA_IN_PAGE_LINK: false, // Todo pro.
+		QA_DOCUMENT: false, // Todo CMS consider.
+		QA_PDF: {
+			sources: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']',
+			dismissAll: true,
+		},
+		QA_BLOCKQUOTE: true,
+		TABLES_MISSING_HEADINGS: true,
+		TABLES_SEMANTIC_HEADING: true,
+		TABLES_EMPTY_HEADING: true,
+		QA_FAKE_HEADING: true,
+		QA_FAKE_LIST: true,
+		QA_UPPERCASE: true,
+		QA_UNDERLINE: false, // Todo pro.
+		QA_SUBSCRIPT: false, // Todo pro.
+		QA_NESTED_COMPONENTS: false, // Todo pro.
+		QA_JUSTIFY: false, // Todo pro.
+		QA_SMALL_TEXT: false, // Todo pro.
 
-    // @todo this is probably getting provided by Sa11y
-    if (State.options.currentPage === false) {
-      State.options.currentPage = window.location.pathname;
-    }
+		// Sa11y: Meta checks
+		META_LANG: false, // Todo pro.
+		META_SCALABLE: false, // Not interested.
+		META_MAX: false, // Not interested.
+		META_REFRESH: false, // Todo pro.
 
-    if (!State.options.linkStringsNewWindows) {
-      State.options.linkStringsNewWindows = M.linkStringsNewWindows;
-    }
-    // @todo merge remove wpadminbar from defaults and update wp module.
-    /*Exclusions.Container = ['#wpadminbar', '#wpadminbar *', ...exclusions];
-    if (option.containerIgnore) {
-      const containerSelectors = option.containerIgnore.split(',').map((item) => item.trim());
-      Exclusions.Container = Exclusions.Container.concat(
-        containerSelectors.flatMap((item) => [`${item} *`, item]),
-      );
-    }*/
+		// Sa11y: Developer checks
+		// Todo pro.
+		/*
+		DUPLICATE_ID: false,
+		META_TITLE: false,
+		UNCONTAINED_LI: false,
+		TABINDEX_ATTR: true,
+		HIDDEN_FOCUSABLE: true,
+		LABEL_IN_NAME: true,
+		BTN_EMPTY: true,
+		BTN_EMPTY_LABELLEDBY: true,
+		BTN_ROLE_IN_NAME: true,
+		*/
 
-  }
-
-  return {
-    preProcessOptions,
-    ed11yLang,
-    postProcessOptions,
-  };
-}());
-
-export default Options;
+		// Sa11y: Contrast checks
+		// Todo pro.
+		/*
+		CONTRAST_WARNING: {
+			dismissAll: true,
+		},
+		CONTRAST_INPUT: true,
+		CONTRAST_ERROR: true,
+		CONTRAST_PLACEHOLDER: true,
+		CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
+		CONTRAST_ERROR_GRAPHIC: true,
+		CONTRAST_WARNING_GRAPHIC: {
+			dismissAll: true,
+		},
+		CONTRAST_UNSUPPORTED: {
+			dismissAll: true,
+		},
+	 	*/
+		// dev
+		HEADING_EXCEEDS_LEVEL: true, // todo merge would need text.
+		EMBED_CUSTOM: {
+			sources: '#embed'
+		},
+	},
+};

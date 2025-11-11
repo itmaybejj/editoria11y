@@ -1,59 +1,46 @@
-import Options from "./utils/options.js";
-import Lang from '../node_modules/sa11y/src/js/utils/lang';
-import Constants from "sa11y/src/js/utils/constants.js";
-import ed11yLang from "./lang/localization.js";
-import {State, M} from "./utils/state.js";
-import {Ed11yElementTip} from "./elements/ed11y-element-tip.js";
-import {Ed11yElementAlt} from "./elements/ed11y-element-alt.js";
-import {Ed11yElementResult} from "./elements/ed11y-element-result.js";
+import Lang from '../sa11y/utils/lang';
+import {computeAccessibleName} from "../sa11y/utils/computeAccessibleName.js";
+import {prepareDismissal} from "../sa11y/utils/utils.js";
+import {State, Results, Theme, UI} from "./utils/state.js";
+import {Options} from './utils/options.js';
+import Elements from "../sa11y/utils/elements.js";
+import {checkAll, reset} from "./logic/interface.js";
 import {
-  Ed11yElementHeadingLabel,
-  Ed11yElementPanel
-} from "./elements/ed11y-element-panel.js";
-import {ed11ySetup, checkAll} from "./logic/interface.js";
+	initialize,
+} from "./logic/initialize.js";
+import {getElements, findElements, showError} from "./utils/utils.js";
 
 class Ed11y {
 
-  constructor(options) {
+  constructor(userOptions) {
 
-    State.version = '3.0.0';
-    State.options = Options.preProcessOptions(options);
-    // Initialize global constants and exclusions.
-		Constants.initializeRoot(State.options.checkRoots, State.options.checkRoots)
-    Constants.initializeGlobal(State.options);
-    Constants.initializeReadability(State.options);
-    Constants.initializeExclusions(State.options);
-    Options.postProcessOptions(State.options);
-
-    Object.assign(M, ed11yLang['en'], ed11yLang[State.options.lang]);
-
-    customElements.define('ed11y-element-alt', Ed11yElementAlt);
-    customElements.define('ed11y-element-result', Ed11yElementResult);
-    customElements.define('ed11y-element-heading-label',
-      Ed11yElementHeadingLabel);
-    customElements.define('ed11y-element-panel', Ed11yElementPanel);
-    customElements.define('ed11y-element-tip', Ed11yElementTip);
-
-    window.addEventListener('keydown', () => {
-      State.interaction = true;
-    });
-    window.addEventListener('click', () => {
-      State.interaction = true;
-    });
+		State.version = '3.0.0';
 
     if (CSS.supports('selector(:has(body))')) {
-      ed11ySetup();
-    } else {
-      console.warn(M.consoleNotSupported);
+			try {
+				initialize(userOptions);
+			} catch (error) {
+				showError(error);}
     }
 
     /* Export exposed interfaces */
-    this.checkAll = checkAll();
+		this.version = State.version;
   }
 }
+export let elements = Elements.Found;
 
 export {
   Lang,
-  Ed11y,
-  checkAll
+	Results,
+	Theme,
+	UI,
+	State,
+	Options,
+	checkAll,
+	computeAccessibleName,
+	findElements,
+	getElements,
+	prepareDismissal,
+	reset,
+	Ed11y,
 }

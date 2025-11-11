@@ -1,5 +1,3 @@
-/* Applies to elements in light DOM ===== */
-
 ed11y-element-panel {
   outline: 0;
   opacity: 1;
@@ -249,7 +247,7 @@ button.ed11y-jump {
   .ed11y-shut .ed11y-buttonbar a,
   .ed11y-shut .ed11y-buttonbar button:not(#ed11y-toggle, .next) {
     color: #111;
-    background: silver;
+    background: #c0c0c0;
     box-shadow: 0 1px, 0 -1px, -1px 0;
     transition: background-color .2s ease-in, opacity .2s ease-in, box-shadow .2s ease-in;
   }
@@ -311,7 +309,7 @@ button.ed11y-jump {
     button[data-ed11y-pressed="true"],
     button[aria-pressed="true"],
     #ed11y-visualize[data-ed11y-pressed="true"] {
-      box-shadow: inset 1px 1px 3px 1px black, 0 0 0 1px var(--ed11y-activeBackground), 7px 0 var(--ed11y-activeBackground);
+      box-shadow: inset 1px 1px 3px 1px #000, 0 0 0 1px var(--ed11y-activeBackground), 7px 0 var(--ed11y-activeBackground);
     }
 
     button .ed11y-sr-only {
@@ -329,7 +327,7 @@ button.ed11y-jump {
       padding: 0 .5em;
       line-height: 1.75;
       color: var(--ed11y-activeColor);
-      text-align: left;
+      text-align: start;
       white-space: nowrap;
       background: var(--ed11y-activeBackground);
       box-shadow: 0 0 1px;
@@ -370,9 +368,6 @@ button.ed11y-jump {
   .close-icon {
     display: none;
   }
-}
-
-.ed11y-active .ed11y-toggle-circle {
 }
 
 #ed11y-toggle {
@@ -431,7 +426,7 @@ button.ed11y-jump {
   button:not(#ed11y-toggle,
   .next) {
     color: #111;
-    background: silver;
+    background: #c0c0c0;
     box-shadow: 0 1px, 0 -1px, -1px 0;
     transition: all .2s;
   }
@@ -537,6 +532,13 @@ button.ed11y-jump {
   width: 18px;
   margin: 0 2px -3px 0;
 }
+
+.ed11y-decorative {
+	font-style: italic;
+	font-weight: 200;
+	opacity: .8;
+}
+
 
 #ed11y-visualizers {
   grid-area: tools;
@@ -898,7 +900,7 @@ ed11y-element-result[data-ed11y-open='true'] {
   overflow: auto;
   line-height: 1.3;
   color: var(--ed11y-primaryText, #fffdf7);
-  text-align: left;
+  text-align: start;
   background: var(--ed11y-primary, #276499);
   border-bottom: 1px solid var(--ed11y-bg);
   inset: 1px 1px 2.1em;
@@ -980,6 +982,26 @@ ed11y-element-result[data-ed11y-open='true'] {
   svg {
     max-width: 100%;
     overflow: visible;
+  }
+
+  .sa11y-tip {
+    margin: .75em 0;
+	  hr {
+		  opacity: 0;
+	  }
+	  .badge {
+		  padding: 0 .5em;
+		  margin-right: .25em;
+		  font-size: 12px;
+		  font-weight: 400;
+		  color: var(--ed11y-warningText);
+		  background: var(--ed11y-warning);
+		  border: 1px solid;
+		  border-radius: 1em;
+		  &:has(.link-icon) {
+			  display: none;
+		  }
+	  }
   }
 
   .dismiss {

@@ -1,5 +1,5 @@
 # Setup
-* Run `npm install` to gather dependencies.
+* Run `scripts/get.sh` to pull Sa11y and node dependencies.
 * Use `uglifyjs js/{ed11y-localization,ed11y-element-alt,ed11y-element-panel,ed11y-element-result,ed11y-element-tip,ed11y-test-embeds,ed11y-test-headings,ed11y-test-images,ed11y-test-links,ed11y-test-text,ed11y}.js -c --verbose --output dist/editoria11y.min.js` to help locate unused and duplicated variables.
 
 # Distribution

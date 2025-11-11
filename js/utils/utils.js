@@ -1,17 +1,149 @@
-import {M, State, Theme, UI} from "./state.js"
-import {prepareDismissal} from "sa11y/src/js/utils/utils.js";
+import {Results, State, UI} from "./state.js"
+import Lang from "../../sa11y/utils/lang.js"
+import find from "../../sa11y/utils/find.js"
+import Constants from "../../sa11y/utils/constants.js";
+import {Options} from "./options.js";
+import findShadowComponents from "../../sa11y/logic/find-shadow-components.js";
+import Elements from "../../sa11y/utils/elements.js";
+import ConsoleErrors from "../elements/ed11y-console-error.js";
 
 /*=============== Utilities ================*/
 
-export function linkText (linkText) {
-	// @todo merge do we need this for linkpurpose?
-	linkText = linkText.replace(State.options.linkIgnoreStrings, '');
-	linkText = linkText.replace(/'|"|-|\.|\s+/g, '');
-	return linkText;
+export function getElements(selector, desiredRoot, exclude) {
+	exclude = exclude === false ? [] : exclude;
+	return find(selector, desiredRoot, exclude);
+}
+export function findElements (key, selector, rootRestrict = true) {
+	// Legacy support for deprecated code.
+	const desiredRoot = rootRestrict ? 'root' : 'document';
+	const exclude = rootRestrict ? [] : Constants.Exclusions.Sa11yElements;
+	Elements.Found[key] = find( selector, desiredRoot, exclude );
 }
 
-export const lagBounce = (callback, wait) => {
-  let timeoutId = null;
+export function addedNodeReadyToCheck(el) {
+	if (!State.recentlyAddedNodes.has(el)) {
+		return true;
+	}
+	const hasText = el.textContent.trim().length;
+	if ((!hasText && State.recentlyAddedNodes.get(el) > Date.now() - 5000) ||
+		State.activeRange && el.contains(State.activeRange.startContainer)) {
+		// Do not check recent nodes if they are empty or selected.
+		return false;
+	} else if (el.matches('table') && el.querySelectorAll('td:not(:empty)')) {
+		// Only check tables once there is content in a non-heading cell.
+		let cumulativeText = '';
+		if (hasText) {
+			const cells = el.querySelectorAll('td:not(:empty)');
+			cells.forEach((cell) => {
+				cumulativeText += cell.textContent;
+			});
+		}
+		if (!cumulativeText) {
+			return false;
+		} else {
+			// Text in body cells.
+			State.recentlyAddedNodes.delete(el);
+			return true;
+		}
+	} else {
+		// New node is ready for checking.
+		State.recentlyAddedNodes.delete(el);
+		return true;
+	}
+}
+
+const dropSomeElements = function(arrayRef, sendTo = false, readyCheck = true, hiddenCheck = false) {
+	for (let i = arrayRef.length - 1; i >= 0; i--) {
+		if (hiddenCheck && !elementNotHidden(arrayRef[i]) ||
+			readyCheck && !addedNodeReadyToCheck(arrayRef[i])) {
+			if (sendTo) {
+				sendTo.push(arrayRef[i]);
+			}
+			arrayRef.splice(i, 1);
+		}
+	}
+}
+
+// First step in checkAll is getting a fresh set of elements to check.
+export function buildElementList () {
+
+	// Check for ignoreAll elements.
+	State.ignoreAll = Options.ignoreAllIfAbsent && document.querySelector(`:is(${Options.ignoreAllIfAbsent})`) === null;
+	if (!State.ignoreAll && !!Options.ignoreAllIfPresent) {
+		State.ignoreAll = document.querySelector(`:is(${Options.ignoreAllIfPresent})`) !== null;
+	}
+
+	if ( State.incremental) {
+		State.oldResults = Results;
+	}
+	// Reset counts
+	Results.length = 0;
+	State.elements = [];
+	State.mediaCount = 0;
+	State.headingOutline = [];
+
+	for (let i = 0; i < State.roots.length; i++) {
+		if (Options.fixedRoots) {
+			State.roots[i].dataset.ed11yRoot = `${i}`;
+		}
+		if (State.roots[i].shadowRoot) {
+			State.roots.setAttribute('data-ed11y-has-shadow-root', 'true');
+			detectShadow(State.roots[i]);
+			State.roots[i] = State.roots[i].shadowRoot;
+		}
+		else {
+			detectShadow(State.roots[i]);
+		}
+
+		Constants.initializeRoot(Options.checkRoots, Options.checkRoots); // @todo release merge readability, add multiroot.
+
+		// Find all web components on the page.
+		findShadowComponents(Options);
+
+		// Find and cache elements.
+		Elements.initializeElements(Options);
+
+		dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore, true, true);
+		dropSomeElements(Elements.Found.Blockquotes);
+		dropSomeElements(Elements.Found.Tables);
+
+		if (typeof Options.initialHeadingLevel === 'object') {
+			Options.initialHeadingLevel.forEach((level) => {
+				const headingRoots = getElements([level.selector], 'document');
+				if (headingRoots.length > 0) {
+					headingRoots.forEach((headingRoot) => {
+						const firstInSection = headingRoot.querySelector(`h${level.previousHeading}, h${level.previousHeading + 1}`);
+						if (firstInSection) {
+							State.headingOutlineOverrides.push(firstInSection);
+						}
+					})
+				}
+			})
+		}
+
+		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
+		if (typeof Options.editableContent === 'string') {
+			findElements('editable', Options.editableContent, false);
+		}
+		else {
+			Elements.Found.editable = Options.editableContent;
+		}
+		if (State.inlineAlerts && Elements.Found.editable.length > 0) {
+			State.inlineAlerts = false;
+			console.warn('Editable content detected; Editoria11y inline alerts disabled');
+		}
+		if (Options.embeddedContent) { // @todo merge convert to custom check
+			// Ed11y.findElements('embed', Options.embeddedContent);
+		}
+		if (Options.panelNoCover) {
+			// Moves panel off conflicting widgets.
+			findElements('panelNoCover', Options.panelNoCover, false);
+		}
+	}
+}
+
+export function lagBounce (callback, wait) {
+  let timeoutId;
   return (...args) => {
     window.clearTimeout(timeoutId);
     timeoutId = window.setTimeout(() => {
@@ -34,7 +166,7 @@ export function resetClass(classes) {
   classes?.forEach((el) => {
     let thisClass = el;
     findElements('reset', `.${thisClass}`);
-    State.elements.reset?.forEach(el => {
+    Elements.Found.reset?.forEach(el => {
       el.classList.remove(thisClass);
     });
   });
@@ -93,7 +225,7 @@ export function firstVisibleParent(el) {
   }
 };
 
-// @todo merge discuss differences
+// @todo discuss differences
 export function hiddenElementCheck(el) {
   // Checks if this element has been removed from the accessibility tree
   let style = window.getComputedStyle(el);
@@ -117,8 +249,10 @@ export function elementNotHidden(el) {
 }
 
 export function detectShadow (container) {
-  if (State.options.autoDetectShadowComponents) {
-    const select = !State.ignore ? '*:not(.ed11y-element)' : `*:not(${State.options.ignore}, .ed11y-element)`;
+  if (Options.autoDetectShadowComponents) {
+
+		const select = `*:not(${Constants.Exclusions.Container.join(', ')}, .ed11y-element)`;
+
     let search;
     if (container.shadowRoot && container.shadowRoot.mode === 'open') {
       if (!container.matches('[data-ed11y-has-shadow-root]')) {
@@ -135,8 +269,8 @@ export function detectShadow (container) {
         detectShadow(component);
       }
     });
-  } else if (State.options.shadowComponents) {
-    const providedShadow = container.querySelectorAll(State.options.shadowComponents);
+  } else if (Options.shadowComponents) {
+    const providedShadow = container.querySelectorAll(Options.shadowComponents);
     providedShadow.forEach((component) => {
       if (component.shadowRoot && component.shadowRoot.mode === 'open') {
         if (!container.matches('[data-ed11y-has-shadow-root]')){
@@ -150,79 +284,7 @@ export function detectShadow (container) {
       }
     });
   }
-};
-
-const diveShadow = function (container, select, selector) {
-  if (container.matches(selector)) {
-    return([container]);
-  } else {
-    let inners = container.shadowRoot.querySelectorAll(select);
-    if (typeof(inners) === 'object' && inners.length > 0) {
-      // Replace shadow host with inner elements.
-      inners.forEach(inner => {
-        for (let innerIndex = inners - 1; innerIndex >= 0; innerIndex--) {
-          let innerInner = diveShadow(inner, select, selector);
-          if (innerInner.length > 0) {
-            inners.splice(innerIndex, 1, ...innerInner);
-          } else {
-            inners.splice(innerIndex, 1);
-          }
-        }
-      });
-      return (Array.from(inners).filter((el) => el.matches(selector)));
-    }
-  }
-  return [];
-};
-
-// QuerySelectAll non-ignored elements within checkRoots, with recursion into shadow components
-export function findElements (key, selector, rootRestrict = true) { // @todo merge replace.
-
-  // Todo beta: function and parameter to auto-detect shadow components.
-  let shadowSelector = State.options.autoDetectShadowComponents ?
-    '[data-ed11y-has-shadow-root]' :
-    State.options.shadowComponents ?
-      State.options.shadowComponents : false;
-
-  // Concatenate global and specific ignores
-  let ignore;
-  if (State.options.ignoreElements) {
-    ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreElements}, ${State.options.ignoreByKey[key]})` : `:not(${State.options.ignoreElements})`;
-  } else {
-    ignore = State.options.ignoreByKey[key] ? `:not(${State.options.ignoreByKey[key]})` : '';
-  }
-
-  // Initialize or reset elements array.
-  State.elements[key] = [];
-
-  const select = `:is(${selector}${shadowSelector ? ', ' + shadowSelector : ''})${ignore}`;
-
-  if (rootRestrict && State.roots) {
-    // Add array of elements matching selector, excluding the provided ignore list.
-    // Todo this can dupe
-    State.roots.forEach(root => {
-      State.elements[key] = State.elements[key].concat(Array.from(root.querySelectorAll(select)));
-    });
-  } else {
-    State.elements[key] = State.elements[key].concat(Array.from(document.querySelectorAll(select)));
-  }
-
-  // The initial search may be a mix of elements ('p') and placeholders for shadow hosts ('custom-p-element').
-  // Repeat the search inside each placeholder, and replace the placeholder with its search results.
-  if (shadowSelector) {
-    for (let index = State.elements[key].length - 1; index >= 0; index--) {
-      if (State.elements[key][index].matches(shadowSelector)) {
-        // Dive into the shadow root and collect an array of its results.
-        let inners = diveShadow(State.elements[key][index], select, selector);
-        if (inners.length > 0) {
-          State.elements[key].splice(index, 1, ...inners);
-        } else {
-          State.elements[key].splice(index, 1);
-        }
-      }
-    }
-  }
-};
+}
 
 export function pauseObservers() {
 	State.watching?.forEach(observer => {
@@ -237,15 +299,15 @@ export function resumeObservers() {
 }
 
 export function checkRunPrevent() {
-	let preventCheck = State.options.preventCheckingIfPresent ?
-		document.querySelector(State.options.preventCheckingIfPresent) :
+	let preventCheck = Options.preventCheckingIfPresent ?
+		document.querySelector(Options.preventCheckingIfPresent) :
 		false;
 	if (preventCheck) {
-		console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${State.options.preventCheckingIfPresent}"` );
-	} else if (!preventCheck && !!State.options.preventCheckingIfAbsent) {
-		preventCheck = document.querySelector(`:is(${State.options.preventCheckingIfAbsent})`) === null;
+		console.warn(`Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${Options.preventCheckingIfPresent}"` );
+	} else if (!preventCheck && !!Options.preventCheckingIfAbsent) {
+		preventCheck = document.querySelector(`:is(${Options.preventCheckingIfAbsent})`) === null;
 		if (preventCheck) {
-			console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${State.options.preventCheckingIfAbsent}"`);
+			console.warn(`Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${Options.preventCheckingIfAbsent}"`);
 		}
 	}
 	return preventCheck;
@@ -253,6 +315,7 @@ export function checkRunPrevent() {
 
 export function resetResults(incremental) {
 	State.jumpList = [];
+	State.tipOpen = false;
 	State.openTip = {
 		button: false,
 		tip: false,
@@ -269,38 +332,42 @@ export function resetResults(incremental) {
 	]);
 	// Reset insertions into body content.
 	if (incremental) {
-		findElements('reset', 'ed11y-element-highlight', false);
+		Elements.Found.reset = getElements('ed11y-element-highlight', 'document', []);
 	} else {
-		findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
+		Elements.Found.reset = getElements('ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', 'document', []);
 	}
-	State.elements.reset?.forEach((el) => el.remove());
+	Elements.Found.reset?.forEach((el) => el.remove());
 
 	// Flicker prevention -- leave old tip in place for 100ms.
-	findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
-	const delayedReset = State.elements.delayedReset;
+	//findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
+	Elements.Found.delayedReset = getElements('ed11y-element-result, ed11y-element-tip', 'document', []);
 
 	window.setTimeout(()=> {
-		delayedReset?.forEach((el) => el.remove());
-	}, 100, delayedReset);
+		Elements.Found.delayedReset?.forEach((el) => el.remove());
+	}, 100, Elements.Found.delayedReset);
 
 	if (typeof UI.panelJumpNext === 'function') {
-		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = M.buttonFirstContent;
+		UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = State.english ? Lang._('buttonFirstContent')
+			: Lang._('SKIP_TO_ISSUE') + ' 1';
 	}
 	// Reset insertions into body content.
 }
 
 export function newIncrementalResults() {
-	if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
+	// Obviously new if there are more results:
+	if (State.forceFullCheck || Results.length !== State.oldResults.length) {
 		return true;
 	}
+	// Subtly new if a result has changed:
 	let newResultString = `${State.errorCount} ${State.warningCount}`;
-	State.results.forEach(result => {
+	Results.forEach(result => {
 		newResultString += result.test + result.element.outerHTML;
 	});
 	let changed = newResultString !== State.oldResultString;
 	State.oldResultString = newResultString;
 	return changed;
 }
+
 export function countAlerts () {
 
 	State.errorCount = 0;
@@ -310,36 +377,58 @@ export function countAlerts () {
 	// Review results array to remove dismissed or ignored items
 
 	State.dismissedCount = 0;
-	for (let i = State.results.length - 1; i >= 0; i--) {
+	for (let i = Results.length - 1; i >= 0; i--) {
 
-		let test = State.results[i].test;
-
-		if (State.options.ignoreTests &&
-			State.options.ignoreTests.includes(test)) {
+		/*
+		if (Options.ignoreTests &&
+			Options.ignoreTests.includes(test)) {
 			// Would be faster to skip test, but this is easy and reliable.
-			State.results.splice(i, 1);
+			Results.splice(i, 1);
 			continue;
-		}
+		}*/
 
 		// todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
 		/*if (State.incremental && Ed11y.oldResults.length > 0) {
 			// Don't flag new issues in the active range while people are typing.
 		}*/
 
-		let dismissKey = prepareDismissal(State.results[i].dismissalKey);
-		// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-		if (dismissKey !== false && State.options.currentPage in State.dismissedAlerts && test in State.dismissedAlerts[State.options.currentPage] && dismissKey in State.dismissedAlerts[State.options.currentPage][test]) {
-			// Remove result if it has been marked OK or ignored, increment dismissed match counter.
-			State.dismissedCount++;
-			State.results[i].dismissalStatus = State.dismissedAlerts[State.options.currentPage][test][dismissKey];
-		} else if (State.results[i].dismissalKey) {
-			State.warningCount++;
-			State.results[i].dismissalStatus = false;
-		} else {
-			State.errorCount++;
-			State.results[i].dismissalStatus = false;
+
+
+			if (Results[i].type === 'good') {
+				Results.splice(i, 1);
+			} else {
+				Results[i].position = 'beforebegin'; // @todo merge use Sa11y keys when ready or closest().
+				if (Results[i].dismiss) {
+					// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
+					if (Options.currentPage in State.dismissedAlerts
+						&& Results[i].test in State.dismissedAlerts[Options.currentPage]
+						&& Results[i].dismiss in State.dismissedAlerts[Options.currentPage][Results[i].test]) {
+						// Remove result if it has been marked OK or ignored, increment dismissed match counter.
+						State.dismissedCount++;
+						Results[i].dismissalStatus = true;
+					} else if (Results[i].type === 'warning') {
+						State.warningCount++;
+					} else {
+						State.errorCount++;
+					}
+				}
+			}
+			if (State.headingOutlineOverrides.length > 0 &&
+				Results[i].test === 'HEADING_SKIPPED_LEVEL') {
+				const el = Results[i].element;
+				const remove = State.headingOutlineOverrides.some((override) => {
+					if (el === override) {
+						return true;
+					}
+				})
+				if (remove) {
+					Results.splice(i, 1);
+				}
+				//if (elementLevel < override.level) {
+				// this would become a new error, for like...an H2 in a section that should only have h4 or higher...
+				//}
+			}
 		}
-	}
 
 	State.totalCount = State.errorCount + State.warningCount;
 
@@ -358,7 +447,11 @@ export function countAlerts () {
 		State.totalCount = 0;
 	}
 
-	if (State.incremental && !State.forceFullCheck && !newIncrementalResults()) {
-		State.forceFullCheck = true;
-	}
+}
+
+export function showError(error) {
+	customElements.define('sa11y-console-error', ConsoleErrors);
+	const consoleErrors = new ConsoleErrors(error);
+	document.body.appendChild(consoleErrors);
+	throw Error(error);
 }

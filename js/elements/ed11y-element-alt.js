@@ -1,4 +1,5 @@
-import {UI} from "../utils/state.js";
+import {UI} from '../utils/state.js';
+import Lang from "../../sa11y/utils/lang.js";
 
 export class Ed11yElementAlt extends HTMLElement {
   /* global Ed11y */
@@ -13,11 +14,14 @@ export class Ed11yElementAlt extends HTMLElement {
       let altTextWrapper = document.createElement('div');
       altTextWrapper.classList.add('ed11y-wrapper','ed11y-alt-wrapper');
       let img = UI.imageAlts[this.dataset.ed11yImg];
-      // img[el, src, altLabel, altStyle]
-
       let altSpan = document.createElement('span');
-      altSpan.textContent = img[2];
-      altSpan.classList.add(img[3]);
+			if (img.altText !== '') {
+				altSpan.textContent = img.altText;
+			} else {
+				altSpan.classList.add('ed11y-decorative');
+				altSpan.textContent = Lang._('DECORATIVE');
+			}
+      altSpan.classList.add(`ed11y-${img.type}`);
       altTextWrapper.appendChild(altSpan);
       UI.attachCSS(altTextWrapper);
       shadow.appendChild(altTextWrapper);

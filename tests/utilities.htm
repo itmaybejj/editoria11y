@@ -14,6 +14,7 @@
     <main>
         <section>Initial times: Editoria11y 30ms, ed11y 50-55ms.</section>
 
+
         <section id="overflow">
 
             <h2>Overflow</h2>
@@ -26,6 +27,15 @@
 
 
         </section>
+
+		<section id="h4root">
+			<h4>This h4 should not be flagged due to #h4root.</h4>
+		</section>
+
+
+		<section id="h6root">
+			<h6>This h6 should not be flagged due to #h6root.</h6>
+		</section>
         <section id="hidden-results">
             <h2>Hidden results</h2>
             <div>Visible wrapper
@@ -180,17 +190,15 @@
                 <a href="https://demo">click here</a></div>
             <div class="negative">Good link text in ::before: <a id="text-in-css" href="/"></a></div>
             <div class="positive">Bad link text in ::before:<a id="click-in-css" class="click-in-css" href="/"></a></div>
-            <div class="positive"><div role="region" aria-label="Featured image">
-                Aria labelled region should not negate inner name calculation.
+            <div class="todo-positive"><div role="region" aria-label="Featured image">
+                We should be testing SVG as a developer test, and an aria labelled region should not negate inner name calculation on an SVG.
                 <svg id="nested-aria-label" role="img"  viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg"/>
             </div></div>
-            <div class="negative">Good link text in title attribute: <a id="titled-link" title="Titled link" href="/"></a></div>
+            <div class="negative">Good link text in title attribute: <a id="titled-link" title="Potatoes" href="/"></a></div>
             <div class="negative">Null aria label: <a id="null-aria" aria-label="" href="/">Null aria</a></div>
             <div class="positive">Bad link text in title attribute: <a id="titled-link-click-here" title="Click here" href="/"><span></span></a></div>
             <div class="positive">Bad link text in ::before on inner span: <a id="inner-css-link" href="/"><span class="click-in-css"></span></a></div>
-            <div class="positive">Inner SVG has an alt but no role, alt is ignored: <a id="svg-incorrect-role" href="/"><svg alt="unread alt" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="5" cy="5" r="4"></circle></svg></a></div>
-            <div class="negative">Inner SVG has an alt and a valid role: <a id="svg-image-role" href="/"><svg role="img" alt="foo bar baz" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="positive">Inner SVG has an alt but no role, alt is ignored: <a id="svg-incorrect-role" href="/"><svg title="unread alt" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"></circle></svg></a></div>
             <div class="negative">Inner SVG has a good title element: <a id="inner-svg-titles" href="/"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>I'm a circle</title></circle>
@@ -201,7 +209,7 @@
             <div class="negative">OK via aria-labelledby to another element: <a id="inner-svg-titles-ok-by-label" aria-labelledby="titled-link" href="/"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>Click</title></circle>
                 <rect x="11" y="1" width="8" height="8"><title>here</title></rect></svg></a></div>
-            <div class="positive">Bad via recursive aria-labelledby: <a id="recursive-svg-click-here" aria-labelledby="recursive-svg-click-here click-in-css" href="/"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="positive">Bad via recursive aria-labelledby: <a id="recursive-svg-click-here" aria-labelledby="recursive-svg-click-here" href="/"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>Click</title></circle>
                 </svg> here</a></div>
             <div class="negative">Good via inner aria-labelled element: <a id="recursive-svg-inner-label" aria-labelledby="recursive-svg-inner-label" href="/"><svg aria-label="meaningful link" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
@@ -370,6 +378,7 @@
                 iterations ++;
                 if (iterations === 10) {
                   console.log('Average run: ' + parseInt((performance.now() - beforeCall)) / 10);
+				  console.log("Don't worry about duplicate tips; skipping reset for performance testing.")
                 } else if (iterations < 10) {
                   Ed11y.checkAll();
                 }
@@ -382,214 +391,19 @@
             <script src="../dist/js/ed11y.umd.js"></script>
             <script src="../dist/js/lang/en.umd.js"></script>
             <script>
-              // Set translations
-              /*
-              Sa11y.Lang.addI18n(Sa11yLangEn.strings);
-              document.addEventListener('ed11yRunCustomTests', e => {
-                // Use event details to get the marked element
-                sa11y.checkAll();
-              });
-              document.addEventListener('sa11y-check-complete', e => {
-                e.detail.results?.forEach((result) => {
-                  Ed11y.results.push({
-                    content: result.content,
-                    dismissalKey: result.dismiss,
-                    element: result.element,
-                    position: 'afterbegin',
-                    test: 'headingLevelSkipped',
-                  })
-                })
-                let resume = new CustomEvent('ed11yResume');
-                document.dispatchEvent(resume);
-
-              });
-              /*
-              const sa11y = new Sa11y.Sa11y({
-                checkRoot: "main",
-                headless: true,
-                readabilityPlugin: false,
-                formLabelsPlugin: false,
-                contrastPlugin: false,
-                // Add props here!
-
-                checks: {
-                  // Heading checks
-                  HEADING_SKIPPED_LEVEL: true,
-                  HEADING_EMPTY_WITH_IMAGE: true,
-                  HEADING_EMPTY: true,
-                  HEADING_FIRST: true,
-                  HEADING_LONG: {
-                    maxLength: 170,
-                  },
-                  HEADING_MISSING_ONE: true,
-
-                  // Image checks
-                  MISSING_ALT_LINK: true,
-                  MISSING_ALT_LINK_HAS_TEXT: true,
-                  MISSING_ALT: true,
-                  IMAGE_DECORATIVE_CAROUSEL: {
-                    sources: '.carousel',
-                  },
-                  LINK_IMAGE_NO_ALT_TEXT: true,
-                  LINK_IMAGE_TEXT: true,
-                  IMAGE_FIGURE_DECORATIVE: true,
-                  IMAGE_DECORATIVE: true,
-                  LINK_ALT_FILE_EXT: true,
-                  ALT_FILE_EXT: true,
-                  LINK_PLACEHOLDER_ALT: true,
-                  ALT_PLACEHOLDER: true,
-                  LINK_SUS_ALT: true,
-                  SUS_ALT: true,
-                  LINK_IMAGE_LONG_ALT: {
-                    maxLength: 250,
-                  },
-                  IMAGE_ALT_TOO_LONG: {
-                    maxLength: 250,
-                  },
-                  LINK_IMAGE_ALT: {
-                    dismissAll: true,
-                  },
-                  LINK_IMAGE_ALT_AND_TEXT: true,
-                  IMAGE_FIGURE_DUPLICATE_ALT: true,
-                  IMAGE_PASS: {
-                    dismissAll: true,
-                  },
-                  ALT_UNPRONOUNCEABLE: true,
-                  LINK_ALT_UNPRONOUNCEABLE: true,
-                  ALT_MAYBE_BAD: {
-                    minLength: 15,
-                  },
-                  LINK_ALT_MAYBE_BAD: {
-                    minLength: 15,
-                  },
-
-                  // Link checks
-                  // overridden
-                  DUPLICATE_TITLE: false,
-                  LINK_EMPTY_LABELLEDBY: true,
-                  LINK_EMPTY_NO_LABEL: true,
-                  LINK_STOPWORD: true,
-                  LINK_STOPWORD_ARIA: true,
-                  LINK_SYMBOLS: true,
-                  LINK_CLICK_HERE: false,
-                  LINK_DOI: false,
-                  LINK_URL: {
-                    maxLength: 40,
-                  },
-                  LINK_LABEL: {
-                    dismissAll: true,
-                  },
-                  LINK_EMPTY: true,
-                  LINK_IDENTICAL_NAME: false,
-                  LINK_NEW_TAB: {
-                    dismissAll: true,
-                  },
-                  LINK_FILE_EXT: true,
-
-                  // Form labels checks
-                  LABELS_MISSING_IMAGE_INPUT: true,
-                  LABELS_INPUT_RESET: true,
-                  LABELS_MISSING_LABEL: true,
-                  LABELS_ARIA_LABEL_INPUT: true,
-                  LABELS_NO_FOR_ATTRIBUTE: true,
-                  LABELS_PLACEHOLDER: true,
-
-                  // Embedded content checks
-                  EMBED_AUDIO: {
-                    sources: '',
-                  },
-                  EMBED_VIDEO: {
-                    sources: '',
-                  },
-                  EMBED_DATA_VIZ: {
-                    sources: '',
-                  },
-                  EMBED_UNFOCUSABLE: true,
-                  EMBED_MISSING_TITLE: true,
-                  EMBED_GENERAL: true,
-
-                  // Quality assurance checks
-                  QA_BAD_LINK: {
-                    sources: '',
-                  },
-                  QA_STRONG_ITALICS: false,
-                  QA_IN_PAGE_LINK: false,
-                  QA_DOCUMENT: {
-                    sources: '',
-                    dismissAll: true,
-                  },
-                  QA_PDF: {
-                    dismissAll: true,
-                  },
-                  QA_BLOCKQUOTE: true,
-                  TABLES_MISSING_HEADINGS: true,
-                  TABLES_SEMANTIC_HEADING: true,
-                  TABLES_EMPTY_HEADING: true,
-                  QA_FAKE_HEADING: true,
-                  QA_FAKE_LIST: true,
-                  QA_UPPERCASE: true,
-                  QA_UNDERLINE: false,
-                  QA_SUBSCRIPT: false,
-                  QA_NESTED_COMPONENTS: {
-                    sources: '',
-                  },
-                  QA_JUSTIFY: false,
-                  QA_SMALL_TEXT: false,
-
-                  // Meta checks
-                  META_LANG: false,
-                  META_SCALABLE: false,
-                  META_MAX: false,
-                  META_REFRESH: false,
-
-                  // Developer checks
-                  DUPLICATE_ID: false,
-                  META_TITLE: false,
-                  UNCONTAINED_LI: false,
-                  TABINDEX_ATTR: true,
-                  HIDDEN_FOCUSABLE: true,
-                  LABEL_IN_NAME: true,
-                  BTN_EMPTY: true,
-                  BTN_EMPTY_LABELLEDBY: true,
-                  BTN_ROLE_IN_NAME: true,
-
-                  // Contrast checks
-                  CONTRAST_WARNING: {
-                    dismissAll: true,
-                  },
-                  CONTRAST_INPUT: true,
-                  CONTRAST_ERROR: true,
-                  CONTRAST_PLACEHOLDER: true,
-                  CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
-                  CONTRAST_ERROR_GRAPHIC: true,
-                  CONTRAST_WARNING_GRAPHIC: {
-                    dismissAll: true,
-                  },
-                  CONTRAST_UNSUPPORTED: {
-                    dismissAll: true,
-                  },
-                },
-
-                linkIgnore: '[aria-hidden][tabindex]',
-                imageIgnore: '[aria-hidden], [aria-hidden] img',
-
-              });*/
 
               Ed11y.Lang.addI18n(Sa11yLangEn.strings);
               const ed11y = new Ed11y.Ed11y({
 
                 alertMode : 'assertive',
                   showDismissed: true,
-                ignoreByKey : {
-                'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
-                  'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
-              },
                 //syncedDismissals: {},
                 //shadowComponents : 'shadow-test, shadow-test-no-hits, element-details',
                 autoDetectShadowComponents: true,
                   hiddenHandlers : '[hidden]',
-                checkRoots : 'main',
+                checkRoot : 'main',
                 //linkIgnoreStrings: /\(link is external\)/i,
+				  ignoreContentOutsideRoots: true, // todo CMS new phrasing.
                 customTests : 0,
                 theme: 'sleekTheme',
                 linkIgnoreSelector : '.ignore-class, .link-purpose-text',
@@ -599,10 +413,18 @@
                 watchForChanges: false,
                 allowOK: true,
                 constrainButtons: '.constrain-position',
+			    initialHeadingLevel: [
+					{
+						selector: '#h4root',
+						previousHeading: 4,
+				  	},
+					{
+						selector: '#h6root',
+						previousHeading: 6,
+					},
+				  ]
 
               });
-              console.log(ed11y);
-              console.log(ed11y.results);
 
 
 

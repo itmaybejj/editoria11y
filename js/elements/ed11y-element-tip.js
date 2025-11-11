@@ -1,10 +1,13 @@
-import {M, State, UI} from "../utils/state.js";
+import {Results, State, UI} from "../utils/state.js";
 import {
   alertOnInvisibleTip,
 	dismissThis,
   jumpTo,
   transferFocus
 } from "../logic/interface.js";
+import Lang from "../../sa11y/utils/lang.js";
+import {Options} from "../utils/options.js";
+import {getElements} from "../utils/utils.js";
 
 export class Ed11yElementTip extends HTMLElement {
   /* global Ed11y */
@@ -23,18 +26,24 @@ export class Ed11yElementTip extends HTMLElement {
     this.style.setProperty('opacity', '0');
     this.style.setProperty('outline', '0px solid transparent');
     const shadow = this.attachShadow({mode: 'open'});
+		this.issueIndex = Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition);
+		this.issueNext = this.issueIndex < State.jumpList.length ?
+			this.issueIndex + 2 : 0;
+		this.issuePrev = this.issueIndex > 0 ? this.issueIndex : State.jumpList.length;
 
     this.wrapper = document.createElement('div');
     this.wrapper.setAttribute('role', 'dialog');
 
-    this.dismissable = this.result.dismissalKey !== false;
+    this.dismissable = this.result.type !== 'error';
     this.dismissed = !!this.result.dismissalStatus;
     this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
     this.wrapper.setAttribute('aria-label',
-      `${M.issue}
-        ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1}`);
+      `${Lang._('ALERT_TEXT')}
+        ${this.issueIndex + 1}`);
 
-    this.addEventListener('mouseover', this.handleHover);
+    this.addEventListener('mouseover', this.handleHover, {
+			passive: true,
+		});
 
     UI.attachCSS(this.wrapper);
 
@@ -43,44 +52,49 @@ export class Ed11yElementTip extends HTMLElement {
 
     let content = document.createElement('div');
     content.classList.add('content');
-    /*this.heading = document.createElement('div');
-    this.heading.classList.add('title');
-    this.heading.setAttribute('tabindex', '-1');
-    this.heading.innerHTML = M[this.result.test].title;
-    content.append(this.heading);
-    const alertBox = document.createElement('div');
-    alertBox.classList.add('ed11y-tip-alert');
-    this.heading.insertAdjacentElement('afterbegin', alertBox);*/
+		const tipAlert = document.createElement('div');
+		tipAlert.classList.add('ed11y-tip-alert');
+		if (this.result.content.includes('class="title"')) {
+			// Sent by Ed11y
+			// This removes Sa11y's injected "Tip!" additions:
+			content.innerHTML = this.result.content.split('<hr')[0];
+			content.querySelector('.title').prepend(tipAlert);
+		} else {
+			// Sent by Sa11y
+			let innerContent = document.createElement('div');
+			const sentences = this.result.content.split('.');
+			const firstSentence = document.createElement('div');
+			firstSentence.innerHTML = sentences.shift() + '.';
+			firstSentence.classList.add('title');
+			firstSentence.prepend(tipAlert);
+			firstSentence.setAttribute('tabindex', '-1');
+			innerContent.append(firstSentence);
+			const theRest = document.createElement('div');
+			theRest.classList.add('sa11y-tip');
+			theRest.innerHTML = sentences.join('.');
+			innerContent.appendChild(theRest);
+			content.append(innerContent);
+		}
+    /**/
 
-    let innerContent = document.createElement('div');
-		const sentences = this.result.content.split('.');
-		const firstSentence = document.createElement('div');
-		firstSentence.innerHTML = sentences.shift() + '.';
-		firstSentence.classList.add('title');
-		firstSentence.setAttribute('tabindex', '-1');
-		innerContent.append(firstSentence);
-		const theRest = document.createElement('span');
-		theRest.innerHTML = sentences.join('.');
-		innerContent.appendChild(theRest);
-    content.append(innerContent);
 
-    if (!State.options.inlineAlerts || State.options.editLinks) {
+    if (!State.inlineAlerts || Options.editLinks) {
       const editBar = document.createElement('div');
 
-      if (!State.options.inlineAlerts) {
+      if (!State.inlineAlerts) {
         editBar.classList.add('ed11y-tip-dismissals');
         const focusTransfer = document.createElement('button');
         const transferIcon = document.createElement('span');
         transferIcon.classList.add('ed11y-transfer-icon');
         transferIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 256 512"><path fill="currentColor" d="M0 29C-1 47 12 62 29 64l8 1C71 67 96 95 96 128L96 224l-32 0c-18 0-32 14-32 32s14 32 32 32l32 0 0 96c0 33-26 61-59 64l-8 1C12 450-1 465 0 483s17 31 35 29l8-1c34-3 64-19 85-43c21 24 51 40 85 43l8 1c18 2 33-12 35-29s-12-33-29-35l-8-1C186 445 160 417 160 384l0-96 32 0c18 0 32-14 32-32s-14-32-32-32l-32 0 0-96c0-33 26-61 59-64l8-1c18-2 31-17 29-35S239-1 221 0l-8 1C179 4 149 20 128 44c-21-24-51-40-85-43l-8-1C17-1 2 12 0 29z"/></svg>';
-        focusTransfer.textContent = M.transferFocus;
+        focusTransfer.textContent = Lang._('transferFocus');
         focusTransfer.prepend(transferIcon);
         focusTransfer.classList.add('dismiss', 'ed11y-transfer-focus');
         editBar.append(focusTransfer);
         focusTransfer.addEventListener('click', function(){transferFocus();});
       } else {
         editBar.classList.add('ed11y-custom-edit-links');
-        editBar.append(State.options.editLinks.cloneNode(true));
+        editBar.append(Options.editLinks.cloneNode(true));
       }
       content.append(editBar);
     }
@@ -96,57 +110,57 @@ export class Ed11yElementTip extends HTMLElement {
       dismissIcon.innerHTML = '<svg aria-hidden="true" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>';
 
       // Dismissal Key is set in [5] if alert has been dismissed.
-      if (State.options.showDismissed && this.dismissed) {
+      if (State.showDismissed && this.dismissed) {
 
         // Check if user has permission to reset this alert.
-        let okd = State.dismissedAlerts[State.options.currentPage][this.result.test][this.result.dismissalKey] === 'ok';
-        if ((okd && State.options.allowOK) || (!okd)) {
+        let okd = State.dismissedAlerts[Options.currentPage][this.result.test][this.result.dismiss] === 'ok';
+        if ((okd && Options.allowOK) || (!okd)) {
           // User can restore this alert.
           const undismissButton = document.createElement('button');
           const unDismissIcon = document.createElement('span');
           unDismissIcon.classList.add('ed11y-dismiss-icon');
           unDismissIcon.innerHTML = '<svg aria-hidden="true" class="shown" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="-30 0 640 512"><path fill="Currentcolor" d="M288 32c-81 0-146 37-193 81C49 156 17 208 3 244c-3 8-3 17 0 25C17 304 49 356 95 399C142.5 443 207 480 288 480s146-37 193-81c47-44 78-95 93-131c3-8 3-17 0-25c-15-36-46-88-93-131C434 69 369 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35-29 64-64 64c-7 0-14-1-20-3c-6-2-12 2-12 7c.3 7 1 14 3 21c14 51 66 82 118 68s82-66 68-118c-11-42-48-69-89-71c-6-.2-9 6-7 12c2 6 3 13 3 20z"/></svg>';
           undismissButton.classList.add('dismiss');
-          undismissButton.textContent = okd ? M.undismissOKButton : M.undismissHideButton;
+          undismissButton.textContent = okd ? Lang._('undismissOKButton') : Lang._('undismissHideButton');
           undismissButton.prepend(unDismissIcon);
           buttonBar.append(undismissButton);
           undismissButton.addEventListener('click', function(){dismissThis('reset');});
         } else {
           const restoreNote = document.createElement('div');
           restoreNote.classList.add('dismissed-note');
-          restoreNote.textContent = M.undismissNotePermissions;
+          restoreNote.textContent = Lang._('undismissNotePermissions');
           buttonBar.append(restoreNote);
         }
       } else {
 
         const pageActions = document.createElement('details');
         const pageActionsSummary = document.createElement('summary');
-        const othersLikeThis = State.results.filter(el => el.test === this.result.test).length;
-        const showPageActions = othersLikeThis > 3 && State.options.allowHide && State.options.allowOK;
+        const othersLikeThis = Results.filter(el => el.test === this.result.test).length;
+        const showPageActions = othersLikeThis > 3 && Options.allowHide && Options.allowOK;
 
         if (showPageActions) {
           pageActions.classList.add('ed11y-bulk-actions', 'dismiss');
-          pageActionsSummary.textContent = M.dismissActions(othersLikeThis);
+          pageActionsSummary.textContent = Lang.sprintf('dismissActions', othersLikeThis);
           pageActions.appendChild(pageActionsSummary);
           buttonBar.appendChild(pageActions);
         }
 
-        if (State.options.allowOK) {
+        if (Options.allowOK) {
           const check = document.createElement('span');
           check.setAttribute('aria-hidden', 'true');
           check.textContent = '✓';
 
           const OkButton = document.createElement('button');
           OkButton.classList.add('dismiss');
-          if (State.options.syncedDismissals) {
-            OkButton.setAttribute('title', M.dismissOkTitle);
+          if (Options.syncedDismissals) {
+            OkButton.setAttribute('title', Lang._('dismissOkTitle'));
           }
-          OkButton.textContent = M.dismissOkButtonContent;
+          OkButton.textContent = Lang._('dismissOkButtonContent');
           buttonBar.prepend(OkButton);
 
           if (showPageActions) {
             const OkAllButton = OkButton.cloneNode(true);
-            OkAllButton.textContent = M.dismissOkAllButton;
+            OkAllButton.textContent = Lang._('dismissOkAllButton');
             OkAllButton.prepend(check.cloneNode(true));
             pageActions.append(OkAllButton);
             OkAllButton.addEventListener('click', function(){dismissThis('ok', true);});
@@ -157,14 +171,13 @@ export class Ed11yElementTip extends HTMLElement {
           OkButton.addEventListener('click', function(){dismissThis('ok');});
         }
 
-        if (State.options.allowHide) {
+        if (Options.allowHide) {
           const ignoreButton = document.createElement('button');
           ignoreButton.classList.add('dismiss');
-          // todo parameterize
-          if (State.options.syncedDismissals) {
-            ignoreButton.setAttribute('title', M.dismissHideTitle);
+          if (Options.syncedDismissals) {
+            ignoreButton.setAttribute('title', `${Lang._('dismissHideTitle')}`);
           }
-          ignoreButton.textContent = M.dismissHideButtonContent;
+          ignoreButton.textContent = Lang._('DISMISS');
           ignoreButton.prepend(dismissIcon.cloneNode(true));
           buttonBar.prepend(ignoreButton);
           ignoreButton.addEventListener('click', function(){dismissThis('hide');});
@@ -172,15 +185,13 @@ export class Ed11yElementTip extends HTMLElement {
           if (showPageActions) {
             const ignoreAllButton = document.createElement('button');
             ignoreAllButton.classList.add('dismiss');
-            ignoreAllButton.textContent = M.dismissHideAllButton;
+            ignoreAllButton.textContent = Lang._('DISMISS_ALL');
             ignoreAllButton.prepend(dismissIcon.cloneNode(true));
             pageActionsSummary.insertAdjacentElement('afterend', ignoreAllButton);
             ignoreAllButton.addEventListener('click', function(){dismissThis('hide', true);});
           }
         }
       }
-
-
       content.append(buttonBar);
     }
     this.tip.append(content);
@@ -189,13 +200,12 @@ export class Ed11yElementTip extends HTMLElement {
     this.navBar.classList.add('ed11y-tip-header');
     this.count = document.createElement('div');
     this.count.classList.add('ed11y-tip-count');
-    this.count.textContent = `${M.issue} ${Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition) + 1} / ${State.jumpList.length}`;
+    this.count.textContent = `${Lang._('ALERT_TEXT')} ${this.issueIndex + 1} / ${State.jumpList.length}`;
     this.navBar.append(this.count);
     if (State.jumpList.length > 1) {
       this.prev = document.createElement('button');
       this.prev.classList.add('ed11y-tip-prev');
-      this.prev.setAttribute('aria-label', M.buttonPrevContent);
-      this.prev.setAttribute('title', M.buttonPrevContent);
+      this.prev.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issuePrev}`);
       this.prev.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 -10 30 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m40 100,-50 -50 50-50 50"></path></svg>';
       this.prev.addEventListener('click', (event) => {
         event.preventDefault();
@@ -205,8 +215,7 @@ export class Ed11yElementTip extends HTMLElement {
 
       this.next = document.createElement('button');
       this.next.classList.add('ed11y-tip-next');
-      this.next.setAttribute('aria-label', M.buttonNextContent);
-      this.next.setAttribute('title', M.buttonNextContent);
+      this.next.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issueNext}`);
       this.next.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 120 120" width="10"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m30 00 50 50-50 50"></path></svg>';
       this.next.addEventListener('click', (event) => {
         event.preventDefault();
@@ -218,18 +227,17 @@ export class Ed11yElementTip extends HTMLElement {
     this.help.classList.add('button');
     this.helpContent = document.createElement('div');
     this.helpContent.classList.add('ed11y-tip-help-content');
-    this.helpContent.innerHTML = M.panelHelp;
+    this.helpContent.innerHTML = Lang._('panelHelp');
     this.help.append(this.helpContent);
     this.helpToggle = document.createElement('summary');
     this.helpToggle.textContent = '?';
-    this.helpToggle.setAttribute('aria-label', M.panelHelpTitle);
-    this.helpToggle.setAttribute('title', M.panelHelpTitle);
+    this.helpToggle.setAttribute('aria-label', Lang._('panelHelpTitle'));
+    this.helpToggle.setAttribute('title', Lang._('panelHelpTitle'));
     this.help.insertAdjacentElement('afterbegin', this.helpToggle);
     this.navBar.append(this.help);
 
     let closeButton = document.createElement('button');
-    closeButton.setAttribute('aria-label',M.closeTip);
-    closeButton.setAttribute('title',M.closeTip);
+    closeButton.setAttribute('title', Lang._('ALERT_CLOSE'));
     closeButton.classList.add('close');
     closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"/></svg>';
     this.navBar.append(closeButton);
@@ -240,21 +248,20 @@ export class Ed11yElementTip extends HTMLElement {
     closeButton.addEventListener('click', (event) => {
       event.preventDefault();
       if(this.open) {
-        // todo this needs to be part of the shadow DOM query I think
-        let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
+        let toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', 'document');
         if (State.toggledFrom) {
           State.toggledFrom.focus();
         }
         // todo postpone: track if this tip was opened by the next button. If so, transfer focus back to it instead
-        toggle?.setAttribute('data-ed11y-action', 'shut');
+        toggle[0]?.setAttribute('data-ed11y-action', 'shut');
         this.setAttribute('data-ed11y-action', 'shut');
       }
     });
     document.addEventListener('click', (event) => {
       // Close tip when mouse is clicked outside it.
       if(this.open && !event.target.closest('ed11y-element-tip, ed11y-element-result, ed11y-element-panel')) {
-        let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
-        toggle?.setAttribute('data-ed11y-action', 'shut');
+        let toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', 'document');
+        toggle[0]?.setAttribute('data-ed11y-action', 'shut');
         this.setAttribute('data-ed11y-action', 'shut');
       }
     });

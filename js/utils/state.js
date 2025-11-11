@@ -1,29 +1,32 @@
 /* Track values and DOM references */
+
 export const State = {
   version: '3.0.0',
+	english: true,
   running: false,
   watching: [],
-  results: [],
   seen: [],
   ignore: '',
   ignoreAll: false,
-  totalCount: Number,
-  warningCount: Number,
-  errorCount: Number,
-  dismissedCount: Number,
+  totalCount: 1,
+  warningCount: 1,
+  errorCount: 1,
+  dismissedCount: 1,
   dismissedAlerts: {},
-  options: {},
   activeRange: false,
+	inlineAlerts: false,
   incremental: false,
   interaction: false,
   forceFullCheck: false,
-  browserSpeed: Number,
-  browserLag: Number,
+  browserSpeed: 1,
+  browserLag: 1,
+	customTestsRemaining: 0,
+	customTestTimeout: 0,
   loopStop: false,
-  currentPage: window.location.pathname,
   roots: [],
   oldResults: [],
   headingOutline: [],
+	headingOutlineOverrides: [],
   elements: { // to be replaced by Sa11y find.
     altMark: [],
     delayedReset: []
@@ -35,6 +38,7 @@ export const State = {
   onLoad: true,
   open: false,
   showPanel: false,
+	showDismissed: false,
   nextText: '',
   panelAttachTo: document.body,
 	visualizing: false,
@@ -44,15 +48,15 @@ export const State = {
   lastOpenTip: Number -1,
   viaJump: false,
   toggledFrom: false,
-  scrollPending: Number,
+  scrollPending: 0,
   scrollTicking: false,
+	tipOpen: false,
   openTip: {
-    button: false,
-    tip: false,
+    button: {},
+    tip: {},
   },
   positionedFrames: [],
-  editableHighlight: [],
-  recentlyAddedNodes: [],
+  recentlyAddedNodes: new WeakMap,
 }
 
 export const Theme = {}
@@ -64,12 +68,12 @@ export const UI = {
   panel: false,
   message: {},
   panelElement: {},
-  panelPin: [],
+  panelNoCover: [],
   panelToggle: {},
   panelToggleTitle: {},
   panelCount: {},
   panelJumpNext: {},
-  showDismissed: {},
+  panelShowDismissed: {},
 }
 
-export const M = {}
+export const Results = []
