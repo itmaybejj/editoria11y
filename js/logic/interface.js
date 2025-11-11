@@ -351,31 +351,15 @@ export function buildJumpList () {
 export function drawResult(result, index) {
   let mark = document.createElement('ed11y-element-result');
   mark.classList.add('ed11y-element');
-  let location;
-  let position = 'beforebegin';
   mark.setAttribute('id', 'ed11y-result-' + index);
   mark.setAttribute('data-ed11y-result', index);
   mark.setAttribute('data-ed11y-open', 'false');
   if (!State.inlineAlerts) {
-    location = State.panelAttachTo;
-    position = 'beforeend';
     mark.classList.add('ed11y-editable-result');
-  } else {
-    location = result.element.closest('a, button, [role="button"], [role="link"]');
-    if (!location && result.element.shadowRoot) {
-      // Must insert outside shadow DOM root.
-      location = result.element;
-      position = 'beforebegin';
-      while (location.parentElement && location.parentElement.shadowRoot) {
-        location = location.parentElement;
-      }
-    }
-    if (!location) {
-      location = result.element;
-      position = result.position;
-    }
+		State.panelAttachTo.insertAdjacentElement('beforeend', mark);
+	} else {
+		result.element.insertAdjacentElement(result.position, mark);
   }
-  location.insertAdjacentElement(position, mark);
 
   const shadow = mark.attachShadow({ mode: 'open' });
 

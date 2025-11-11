@@ -9,8 +9,6 @@ git checkout $GIT_REF
 rm -rf ../sa11y
 mv src/js ../sa11y
 cp ../js-overrides/logic/find-shadow-components.js ../sa11y/logic/find-shadow-components.js
-cp ../js-overrides/rulesets/headers.js ../sa11y/rulesets/headers.js
-cp ../js-overrides/utils/elements.js ../sa11y/utils/elements.js
 cd ../
 rm -rf tmp
 

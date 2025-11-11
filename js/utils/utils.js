@@ -397,13 +397,12 @@ export function countAlerts () {
 			if (Results[i].type === 'good') {
 				Results.splice(i, 1);
 			} else {
-				Results[i].position = 'beforebegin'; // @todo merge use Sa11y keys when ready or closest().
 				if (Results[i].dismiss) {
 					// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
 					if (Options.currentPage in State.dismissedAlerts
 						&& Results[i].test in State.dismissedAlerts[Options.currentPage]
 						&& Results[i].dismiss in State.dismissedAlerts[Options.currentPage][Results[i].test]) {
-						// Remove result if it has been marked OK or ignored, increment dismissed match counter.
+						// Remove Results[i] if it has been marked OK or ignored, increment dismissed match counter.
 						State.dismissedCount++;
 						Results[i].dismissalStatus = true;
 					} else if (Results[i].type === 'warning') {
@@ -412,21 +411,24 @@ export function countAlerts () {
 						State.errorCount++;
 					}
 				}
-			}
-			if (State.headingOutlineOverrides.length > 0 &&
-				Results[i].test === 'HEADING_SKIPPED_LEVEL') {
-				const el = Results[i].element;
-				const remove = State.headingOutlineOverrides.some((override) => {
-					if (el === override) {
-						return true;
+
+				let location = Results[i].element;
+				let position = 'afterbegin';
+				if (Results[i].element.shadowRoot) {
+					position = 'beforebegin';
+					while (location.parentElement && location.parentElement.shadowRoot) {
+						location = location.parentElement;
 					}
-				})
-				if (remove) {
-					Results.splice(i, 1);
 				}
-				//if (elementLevel < override.level) {
-				// this would become a new error, for like...an H2 in a section that should only have h4 or higher...
-				//}
+				let interactive = location.closest('a, button, [role="button"], [role="link"]');
+
+				if (interactive) {
+					Results[i].location = interactive;
+					Results[i].position = 'beforebegin';
+				} else {
+					Results[i].location = location;
+					Results[i].position = position;
+				}
 			}
 		}
 
