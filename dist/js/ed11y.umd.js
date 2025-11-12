@@ -56,15 +56,8 @@
    * @returns {void}
    */
   function removeAlert() {
-    const Sa11yPanel = document.querySelector('sa11y-control-panel').shadowRoot;
-    const alert = Sa11yPanel.getElementById('panel-alert');
-    const alertText = Sa11yPanel.getElementById('panel-alert-text');
-    const alertPreview = Sa11yPanel.getElementById('panel-alert-preview');
-
-    alert.classList.remove('active');
-    alertPreview.classList.remove('panel-alert-preview');
-    while (alertText.firstChild) alertText.removeChild(alertText.firstChild);
-    while (alertPreview.firstChild) alertPreview.removeChild(alertPreview.firstChild);
+  	console.log('need to override removeAlert()');
+  	return false;
   }
 
   /**
@@ -1087,7 +1080,7 @@
     panelShowDismissed: {},
   };
 
-  const Results = [];
+  let Results = [];
 
   const Options = {
   	// Default options.
@@ -1769,6 +1762,87 @@ URL: ${url}</pre>
   	Elements.Found[key] = find( selector, desiredRoot, exclude );
   }
 
+  function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
+  	Constants.Root.areaToCheck = [];
+  	Constants.Root.Readability = [];
+
+  	// If fixed roots provided.
+  	if (fixedRoots) {
+  		Constants.Root.areaToCheck = fixedRoots;
+  		Constants.Root.Readability = fixedRoots;
+  		return;
+  	}
+
+  	/* Main target area */
+  	try {
+  		// Iterate through each selector passed, and push valid ones to final root array.
+  		const roots = document.querySelectorAll(desiredRoot);
+  		if (roots.length > 0) {
+  			roots.forEach((root) => {
+  				Constants.Root.areaToCheck.push(root);
+  			});
+  		}
+  		else {
+  			console.error(`Sa11y: The target readability root (${desiredRoot}) does not exist.`);
+  		}
+  	} catch {
+  		Constants.Root.areaToCheck.length = 0;
+  	}
+
+  	// Push a visible UI alert if not headless and no roots at all are found.
+  	if (Constants.Root.areaToCheck.length === 0 && Constants.Global.headless === false) {
+  		createAlert(Lang.sprintf('MISSING_ROOT', desiredRoot));
+  		Constants.Root.areaToCheck.push(document.body);
+  	}
+
+  	/* Readability target area */
+  	try {
+  		const roots = document.querySelectorAll(desiredReadabilityRoot);
+  		if (roots.length > 0) {
+  			roots.forEach((root) => {
+  				Constants.Root.Readability.push(root);
+  			});
+  		}
+  		else {
+  			console.error(`Sa11y: The target readability root (${selector}) does not exist.`);
+  		}
+
+  	} catch {
+  		Constants.Root.Readability.length = 0;
+  	}
+
+  	if (Constants.Root.Readability.length === 0 && Constants.Global.headless === false) {
+  		if (Constants.Root.areaToCheck.length === 0) {
+  			Constants.Root.Readability.push(document.body);
+  		} else {
+  			// If desired root area is not found, use the root target area.
+  			Constants.Root.Readability = Constants.Root.areaToCheck;
+
+  			// Create a warning if the desired readability root is not found.
+  			setTimeout(() => {
+  				const { readabilityDetails, readabilityToggle } = Constants.Panel;
+  				const readabilityOn = readabilityToggle?.getAttribute('aria-pressed') === 'true';
+  				const alert = Constants.Panel.readability.querySelector('#readability-alert');
+  				if (readabilityDetails && readabilityOn && !alert) {
+  					// Roots that readability will be based on.
+  					const roots = Constants.Root.areaToCheck.map((el) => {
+  						if (el.id) return `#${el.id}`;
+  						if (el.className) return `.${el.className.split(/\s+/).filter(Boolean).join('.')}`;
+  						return el.tagName.toLowerCase();
+  					}).join(', ');
+
+  					// Append note to Readability panel.
+  					const note = document.createElement('div');
+  					note.id = 'readability-alert';
+  					note.innerHTML = `<hr><p>${Lang.sprintf('MISSING_READABILITY_ROOT', roots, desiredReadabilityRoot)}</p>`;
+  					readabilityDetails.insertAdjacentElement('afterend', note);
+  				}
+  			}, 100);
+  		}
+  	}
+  }
+
+
   function addedNodeReadyToCheck(el) {
   	if (!State.recentlyAddedNodes.has(el)) {
   		return true;
@@ -1831,6 +1905,8 @@ URL: ${url}</pre>
   	State.mediaCount = 0;
   	State.headingOutline = [];
 
+  	initializeRoot(Options.checkRoots, Options.checkRoots); // @todo release merge readability, add multiroot.
+
   	for (let i = 0; i < State.roots.length; i++) {
   		if (Options.fixedRoots) {
   			State.roots[i].dataset.ed11yRoot = `${i}`;
@@ -1843,8 +1919,8 @@ URL: ${url}</pre>
   		else {
   			detectShadow(State.roots[i]);
   		}
+  	}
 
-  		Constants.initializeRoot(Options.checkRoots, Options.checkRoots); // @todo release merge readability, add multiroot.
 
   		// Find all web components on the page.
   		findShadowComponents(Options);
@@ -1886,7 +1962,7 @@ URL: ${url}</pre>
   			// Moves panel off conflicting widgets.
   			findElements('panelNoCover', Options.panelNoCover, false);
   		}
-  	}
+
   }
 
   function lagBounce (callback, wait) {
@@ -2093,6 +2169,21 @@ URL: ${url}</pre>
   			: Lang._('SKIP_TO_ISSUE') + ' 1';
   	}
   	// Reset insertions into body content.
+  }
+
+  function newIncrementalResults() {
+  	// Obviously new if there are more results:
+  	if (State.forceFullCheck || Results.length !== State.oldResults.length) {
+  		return true;
+  	}
+  	// Subtly new if a result has changed:
+  	let newResultString = `${State.errorCount} ${State.warningCount}`;
+  	Results.forEach(result => {
+  		newResultString += result.test + result.element.outerHTML;
+  	});
+  	let changed = newResultString !== State.oldResultString;
+  	State.oldResultString = newResultString;
+  	return changed;
   }
 
   function countAlerts () {
@@ -4510,23 +4601,21 @@ URL: ${url}</pre>
     pauseObservers();
     // Stash old values for incremental updates.
 
+
     if (State.incremental) {
       // Check for a change in the result counts.
-      if (State.forceFullCheck) {
+      if (State.forceFullCheck || newIncrementalResults()) {
         State.forceFullCheck = false;
         resetResults(true);
       } else {
         // Reconnect map
-  			Results.length = 0;
-        Results.concat(State.oldResults);
-        window.setTimeout(function() {
-          if ( !State.alignPending ) {
-            alignButtons();
-            alignPanel();
-            State.alignPending = false;
-          }
-          State.running = false;
-        },0);
+  			Results.push(State.oldResults);
+  			if ( !State.alignPending ) {
+  				alignButtons();
+  				alignPanel();
+  				State.alignPending = false;
+  			}
+  			State.running = false;
         resumeObservers();
         return;
       }
@@ -5367,7 +5456,6 @@ URL: ${url}</pre>
   	}
 
   	UI.editableHighlight.forEach((el) => {
-
   		if (!Results[el.resultID]) {
   			State.interaction = true;
   			State.forceFullCheck = true;
@@ -7332,7 +7420,8 @@ URL: ${url}</pre>
 
   	// Initialize global constants and exclusions.
   	preProcessOptions(userOptions);
-  	Constants.initializeRoot(Options.checkRoots, Options.checkRoots);
+  	// We override Sa11y's root initializer because we use strings not arrays.
+  	initializeRoot(Options.checkRoots, Options.checkRoots);
   	Constants.initializeGlobal(Options);
   	// Constants.initializeReadability(Options);
   	Constants.initializeExclusions(Options);
@@ -7399,6 +7488,7 @@ URL: ${url}</pre>
   				initialize(userOptions);
   			} catch (error) {
   				showError(error);}
+  			// @todo merge license and error message.
       }
 
       /* Export exposed interfaces */

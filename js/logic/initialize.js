@@ -3,7 +3,7 @@ import {State, Theme, UI} from "../utils/state.js";
 import Lang from "../../sa11y/utils/lang.js";
 import {Options} from "../utils/options.js";
 import {documentLoadingCheck, store} from "../../sa11y/utils/utils.js";
-import {checkRunPrevent} from "../utils/utils.js";
+import {checkRunPrevent, initializeRoot} from '../utils/utils.js';
 import {checkAll, continueCheck, windowResize} from "./interface.js";
 import ed11yLang from "../lang/localization.js";
 import {Ed11yElementAlt} from "../elements/ed11y-element-alt.js";
@@ -146,7 +146,8 @@ export function initialize (userOptions) {
 
 	// Initialize global constants and exclusions.
 	preProcessOptions(userOptions);
-	Constants.initializeRoot(Options.checkRoots, Options.checkRoots)
+	// We override Sa11y's root initializer because we use strings not arrays.
+	initializeRoot(Options.checkRoots, Options.checkRoots);
 	Constants.initializeGlobal(Options);
 	// Constants.initializeReadability(Options);
 	Constants.initializeExclusions(Options);

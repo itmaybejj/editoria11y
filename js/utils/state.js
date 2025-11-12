@@ -76,4 +76,4 @@ export const UI = {
   panelShowDismissed: {},
 }
 
-export const Results = []
+export let Results = []

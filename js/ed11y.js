@@ -21,6 +21,7 @@ class Ed11y {
 				initialize(userOptions);
 			} catch (error) {
 				showError(error);}
+			// @todo merge license and error message.
     }
 
     /* Export exposed interfaces */

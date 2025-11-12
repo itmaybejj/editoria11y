@@ -3,10 +3,11 @@ import {
 	buildElementList,
 	checkRunPrevent,
 	countAlerts,
-	findElements, firstVisibleParent, lagBounce, pauseObservers,
+	findElements, firstVisibleParent, lagBounce,
+	newIncrementalResults, pauseObservers,
 	resetClass, resetResults, resumeObservers, showError,
 	visible
-} from "../utils/utils.js";
+} from '../utils/utils.js';
 import {remove,
 } from '../../sa11y/utils/utils.js';
 import * as Utils from "../../sa11y/utils/utils.js";
@@ -60,23 +61,21 @@ export function updatePanel () {
   pauseObservers();
   // Stash old values for incremental updates.
 
+
   if (State.incremental) {
     // Check for a change in the result counts.
-    if (State.forceFullCheck) {
+    if (State.forceFullCheck || newIncrementalResults()) {
       State.forceFullCheck = false;
       resetResults(true);
     } else {
       // Reconnect map
-			Results.length = 0;
-      Results.concat(State.oldResults);
-      window.setTimeout(function() {
-        if ( !State.alignPending ) {
-          alignButtons();
-          alignPanel();
-          State.alignPending = false;
-        }
-        State.running = false;
-      },0);
+			Results.push(State.oldResults);
+			if ( !State.alignPending ) {
+				alignButtons();
+				alignPanel();
+				State.alignPending = false;
+			}
+			State.running = false;
       resumeObservers();
       return;
     }
@@ -917,7 +916,6 @@ export function alignHighlights() {
 	}
 
 	UI.editableHighlight.forEach((el) => {
-
 		if (!Results[el.resultID]) {
 			State.interaction = true;
 			State.forceFullCheck = true;
