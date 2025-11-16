@@ -74,6 +74,10 @@ export const UI = {
   panelCount: {},
   panelJumpNext: {},
   panelShowDismissed: {},
+	readabilityDetails: {},
+	readabilityDetailsContent: '',
+	readabilityInfo: {},
+	readabilityInfoContent: '',
 }
 
 export let Results = []

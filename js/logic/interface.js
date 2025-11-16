@@ -33,6 +33,7 @@ import {
 import {Options} from "../utils/options.js";
 import checkEmbeddedContent from '../../sa11y/rulesets/embedded-content';
 import customRuleset from '../rulesets/custom-ruleset';
+import * as Constants from 'node:constants';
 
 export function showResults () {
   buildJumpList();
@@ -118,6 +119,8 @@ export function updatePanel () {
       UI.panelJumpNext.addEventListener('click', panelJumpTo);
       UI.panelShowDismissed = UI.panel.querySelector('#ed11y-show-hidden');
       UI.message = UI.panel.querySelector('#ed11y-message');
+			UI.readabilityInfo = UI.panel.querySelector('#readability-info');
+			UI.readabilityDetails = UI.panel.querySelector('#readability-details');
       window.setTimeout(()=> {
         UI.panelElement.classList.remove('ed11y-preload');
       },0, UI.panel);
@@ -1287,10 +1290,14 @@ export function checkAll() {
 		'checkLinkText',
 		'checkImages',
 		'checkEmbeddedContent',
-		// 'checkLabels',
+		// 'checkLabels', // todo cms merge param
 		'checkQA',
 		'customRuleset',
+		//'checkDeveloper', // todo merge param
 	];
+	if (Options.headless) {
+		queue.push('checkReadability') // todo merge param
+	}
 	// Todo after merge: developer and readability tests added via options here.
 	State.testsRemaining = queue.length;
 	enqueueTests(queue);
@@ -1347,6 +1354,13 @@ export function continueCheck(customCheck = false) {
 	}
 	if (typeof UI.panelToggle.querySelector === 'function') {
 		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
+	}
+	if (State.visualizing) {
+		checkReadability([]);
+		UI.readabilityInfo.innerHTML = UI.readabilityInfoContent;
+		UI.readabilityDetails.innerHTML = UI.readabilityDetailsContent;
+		showHeadingsPanel();
+		showAltPanel();
 	}
 	countAlerts();
 	updatePanel();
@@ -1431,6 +1445,13 @@ export function visualize () {
 	UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
 	showAltPanel();
 	showHeadingsPanel();
+	showReadability();
+}
+
+const showReadability = function() {
+	checkReadability([]);
+	UI.readabilityInfo.innerHTML = UI.readabilityInfoContent;
+	UI.readabilityDetails.innerHTML = UI.readabilityDetailsContent;
 }
 
 export function showHeadingsPanel () {

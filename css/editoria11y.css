@@ -533,6 +533,29 @@ button.ed11y-jump {
   margin: 0 2px -3px 0;
 }
 
+#ed11y-readability-tab {
+	summary svg {
+		width: 18px;
+		margin: 0 2px -3px 0;
+	}
+	strong {
+		font-weight: 600;
+	}
+	#readability-info {
+		margin-bottom: 0;
+		font-size: 1.25em;
+		font-weight: 700;
+	}
+	.readability-score {
+		font-size: 14px;
+		font-weight: 600;
+	}
+	ul {
+		padding: 0;
+		list-style: none;
+	}
+}
+
 .ed11y-decorative {
 	font-style: italic;
 	font-weight: 200;

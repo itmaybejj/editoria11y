@@ -11,6 +11,7 @@
   * The above copyright notice shall be included in all copies or substantial portions of the Software.
 **/
 import { alphaBlend, sRGBtoY, APCAcontrast, fontLookupAPCA } from 'apca-w3';
+import 'node:constants';
 
 /* Translation object */
 const Lang = {
@@ -1136,6 +1137,10 @@ const UI = {
   panelCount: {},
   panelJumpNext: {},
   panelShowDismissed: {},
+	readabilityDetails: {},
+	readabilityDetailsContent: '',
+	readabilityInfo: {},
+	readabilityInfoContent: '',
 };
 
 let Results = [];
@@ -1361,8 +1366,8 @@ const Options = {
 	insertAnnotationBefore: '',
 
 	// Readability
-	readabilityPlugin: false,
-	readabilityRoot: 'body',
+	readabilityPlugin: true,
+	readabilityRoot: 'main',
 	readabilityIgnore: '',
 
 	// Contrast
@@ -2270,7 +2275,7 @@ function countAlerts () {
 
 
 
-			if (Results[i].type === 'good') {
+			if (!Results[i].type || Results[i].type === 'good') {
 				Results.splice(i, 1);
 			} else {
 				// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
@@ -5131,192 +5136,193 @@ function checkDeveloper(results, option) {
  * @link http://stackoverflow.com/questions/5686483/how-to-compute-number-of-syllables-in-a-word-in-javascript
  * @link https://www.simoahava.com/analytics/calculate-readability-scores-for-content/#commento-58ac602191e5c6dc391015c5a6933cf3e4fc99d1dc92644024c331f1ee9b6093
  * @link https://oaji.net/articles/2017/601-1498133639.pdf (Portuguese adaptation).
-*/
+ */
 
 function checkReadability(results) {
-  let readabilityResults;
-  const rememberReadability = store.getItem('sa11y-readability') === 'On';
-  if (rememberReadability) {
-    const readabilityArray = [];
-    // Improve the accuracy of a readability analysis by ensuring that long list items are treated as complete sentences.
-    const punctuation = ['.', '?', '!'];
-    Elements.Found.Readability.forEach(($el) => {
-      const ignore = fnIgnore($el);
-      const text = getText(ignore);
-      if (!text) return;
-      const lastCharacter = text[text.length - 1];
-      const sentence = punctuation.includes(lastCharacter) ? text : `${text}.`;
-      readabilityArray.push(sentence);
-    });
-    const pageText = readabilityArray.join(' ');
+	let readabilityResults = {};
+	//const rememberReadability = Utils.store.getItem('sa11y-readability') === 'On'; override
+	// if (rememberReadability) { override
+	const readabilityArray = [];
+	// Improve the accuracy of a readability analysis by ensuring that long list items are treated as complete sentences.
+	const punctuation = ['.', '?', '!'];
+	Elements.Found.Readability.forEach(($el) => {
+		const ignore = fnIgnore($el);
+		const text = getText(ignore);
+		if (!text) return;
+		const lastCharacter = text[text.length - 1];
+		const sentence = punctuation.includes(lastCharacter) ? text : `${text}.`;
+		readabilityArray.push(sentence);
+	});
+	const pageText = readabilityArray.join(' ');
 
-    /* Flesch Reading Ease for English, French, German, Dutch, and Italian. */
-    if (['en', 'es', 'fr', 'de', 'nl', 'it', 'pt'].includes(Constants.Readability.Lang)) {
-      // Compute syllables
-      const numberOfSyllables = (el) => {
-        let wordCheck = el;
-        wordCheck = wordCheck.toLowerCase().replace('.', '').replace('\n', '');
-        if (wordCheck.length <= 3) {
-          return 1;
-        }
-        wordCheck = wordCheck.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
-        wordCheck = wordCheck.replace(/^y/, '');
-        const syllableString = wordCheck.match(/[aeiouy]{1,2}/g);
-        let syllables = 0;
+	/* Flesch Reading Ease for English, French, German, Dutch, and Italian. */
+	if (['en', 'es', 'fr', 'de', 'nl', 'it', 'pt'].includes(Lang.langStrings.LANG_CODE)) {
+		// Compute syllables
+		const numberOfSyllables = (el) => {
+			let wordCheck = el;
+			wordCheck = wordCheck.toLowerCase().replace('.', '').replace('\n', '');
+			if (wordCheck.length <= 3) {
+				return 1;
+			}
+			wordCheck = wordCheck.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+			wordCheck = wordCheck.replace(/^y/, '');
+			const syllableString = wordCheck.match(/[aeiouy]{1,2}/g);
+			let syllables = 0;
 
-        const syllString = !!syllableString;
-        if (syllString) {
-          syllables = syllableString.length;
-        }
-        return syllables;
-      };
+			const syllString = !!syllableString;
+			if (syllString) {
+				syllables = syllableString.length;
+			}
+			return syllables;
+		};
 
-      // Words
-      const wordsRaw = pageText.replace(/[.!?-]+/g, ' ').split(' ');
-      let words = 0;
-      for (let i = 0; i < wordsRaw.length; i++) {
-        // eslint-disable-next-line eqeqeq
-        if (wordsRaw[i] != 0) {
-          words += 1;
-        }
-      }
+		// Words
+		const wordsRaw = pageText.replace(/[.!?-]+/g, ' ').split(' ');
+		let words = 0;
+		for (let i = 0; i < wordsRaw.length; i++) {
+			// eslint-disable-next-line eqeqeq
+			if (wordsRaw[i] != 0) {
+				words += 1;
+			}
+		}
 
-      // Sentences
-      const sentenceRaw = pageText.split(/[.!?]+/);
-      let sentences = 0;
-      for (let i = 0; i < sentenceRaw.length; i++) {
-        if (sentenceRaw[i] !== '') {
-          sentences += 1;
-        }
-      }
+		// Sentences
+		const sentenceRaw = pageText.split(/[.!?]+/);
+		let sentences = 0;
+		for (let i = 0; i < sentenceRaw.length; i++) {
+			if (sentenceRaw[i] !== '') {
+				sentences += 1;
+			}
+		}
 
-      // Syllables
-      let totalSyllables = 0;
-      let syllables1 = 0;
-      let syllables2 = 0;
-      for (let i = 0; i < wordsRaw.length; i++) {
-        // eslint-disable-next-line eqeqeq
-        if (wordsRaw[i] != 0) {
-          const syllableCount = numberOfSyllables(wordsRaw[i]);
-          if (syllableCount === 1) {
-            syllables1 += 1;
-          }
-          if (syllableCount === 2) {
-            syllables2 += 1;
-          }
-          totalSyllables += syllableCount;
-        }
-      }
+		// Syllables
+		let totalSyllables = 0;
+		let syllables1 = 0;
+		let syllables2 = 0;
+		for (let i = 0; i < wordsRaw.length; i++) {
+			// eslint-disable-next-line eqeqeq
+			if (wordsRaw[i] != 0) {
+				const syllableCount = numberOfSyllables(wordsRaw[i]);
+				if (syllableCount === 1) {
+					syllables1 += 1;
+				}
+				if (syllableCount === 2) {
+					syllables2 += 1;
+				}
+				totalSyllables += syllableCount;
+			}
+		}
 
-      let flesch = false;
-      if (Constants.Readability.Lang === 'en') {
-        flesch = 206.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
-      } else if (Constants.Readability.Lang === 'fr') {
-        flesch = 207 - (1.015 * (words / sentences)) - (73.6 * (totalSyllables / words));
-      } else if (Constants.Readability.Lang === 'es') {
-        flesch = 206.84 - (1.02 * (words / sentences)) - (0.60 * (100 * (totalSyllables / words)));
-      } else if (Constants.Readability.Lang === 'de') {
-        flesch = 180 - (words / sentences) - (58.5 * (totalSyllables / words));
-      } else if (Constants.Readability.Lang === 'nl') {
-        flesch = 206.84 - (0.77 * (100 * (totalSyllables / words))) - (0.93 * (words / sentences));
-      } else if (Constants.Readability.Lang === 'it') {
-        flesch = 217 - (1.3 * (words / sentences)) - (0.6 * (100 * (totalSyllables / words)));
-      } else if (Constants.Readability.Lang === 'pt') {
-        flesch = 248.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
-      }
+		let flesch = false;
+		if (Lang.langStrings.LANG_CODE === 'en') {
+			flesch = 206.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
+		} else if (Lang.langStrings.LANG_CODE === 'fr') {
+			flesch = 207 - (1.015 * (words / sentences)) - (73.6 * (totalSyllables / words));
+		} else if (Lang.langStrings.LANG_CODE === 'es') {
+			flesch = 206.84 - (1.02 * (words / sentences)) - (0.60 * (100 * (totalSyllables / words)));
+		} else if (Lang.langStrings.LANG_CODE === 'de') {
+			flesch = 180 - (words / sentences) - (58.5 * (totalSyllables / words));
+		} else if (Lang.langStrings.LANG_CODE === 'nl') {
+			flesch = 206.84 - (0.77 * (100 * (totalSyllables / words))) - (0.93 * (words / sentences));
+		} else if (Lang.langStrings.LANG_CODE === 'it') {
+			flesch = 217 - (1.3 * (words / sentences)) - (0.6 * (100 * (totalSyllables / words)));
+		} else if (Lang.langStrings.LANG_CODE === 'pt') {
+			flesch = 248.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
+		}
 
-      // Score must be between 0 and 100%.
-      if (flesch > 100) {
-        flesch = 100;
-      } else if (flesch < 0) {
-        flesch = 0;
-      }
+		// Score must be between 0 and 100%.
+		if (flesch > 100) {
+			flesch = 100;
+		} else if (flesch < 0) {
+			flesch = 0;
+		}
 
-      // Compute scores.
-      const fleschScore = flesch.toFixed(1);
-      const avgWordsPerSentence = (words / sentences).toFixed(1);
-      const complexWords = Math.round(100 * ((words - (syllables1 + syllables2)) / words));
+		// Compute scores.
+		const fleschScore = flesch.toFixed(1);
+		const avgWordsPerSentence = (words / sentences).toFixed(1);
+		const complexWords = Math.round(100 * ((words - (syllables1 + syllables2)) / words));
 
-      let difficulty;
-      if (fleschScore >= 0 && fleschScore < 30) {
-        difficulty = Lang._('VERY_DIFFICULT');
-      } else if (fleschScore > 31 && fleschScore < 49) {
-        difficulty = Lang._('DIFFICULT');
-      } else if (fleschScore > 50 && fleschScore < 60) {
-        difficulty = Lang._('FAIRLY_DIFFICULT');
-      } else {
-        difficulty = Lang._('GOOD');
-      }
+		let difficulty;
+		if (fleschScore >= 0 && fleschScore < 30) {
+			difficulty = Lang._('VERY_DIFFICULT');
+		} else if (fleschScore > 31 && fleschScore < 49) {
+			difficulty = Lang._('DIFFICULT');
+		} else if (fleschScore > 50 && fleschScore < 60) {
+			difficulty = Lang._('FAIRLY_DIFFICULT');
+		} else {
+			difficulty = Lang._('GOOD');
+		}
 
-      // Create object for headless mode.
-      readabilityResults = {
-        test: 'READABILITY',
-        score: fleschScore,
-        averageWordsPerSentence: avgWordsPerSentence,
-        complexWords,
-        difficultyLevel: difficulty,
-        wordCount: words,
-      };
-      results.push(readabilityResults);
-    } else if (['sv', 'fi', 'da', 'no', 'nb', 'nn'].includes(Constants.Readability.Lang)) {
-      /* Lix: Danish, Finnish, Norwegian (Bokmål & Nynorsk), Swedish. */
-      const calculateLix = (text) => {
-        const lixWords = () => text.replace(/[-'.]/ig, '').split(/[^a-zA-ZöäåÖÄÅÆæØø0-9]/g).filter(Boolean);
-        const splitSentences = () => {
-          const splitter = /\?|!|\.|\n/g;
-          const arrayOfSentences = text.split(splitter).filter(Boolean);
-          return arrayOfSentences;
-        };
-        const wordCount = lixWords().length;
-        const longWordsCount = lixWords().filter((wordsArray) => wordsArray.length > 6).length;
-        const sentenceCount = splitSentences().length;
-        const score = Math.round((wordCount / sentenceCount) + ((longWordsCount * 100) / wordCount));
-        const avgWordsPerSentence = (wordCount / sentenceCount).toFixed(1);
-        const complexWords = Math.round(100 * (longWordsCount / wordCount));
+		// Create object for headless mode.
+		readabilityResults = {
+			test: 'READABILITY',
+			score: fleschScore,
+			averageWordsPerSentence: avgWordsPerSentence,
+			complexWords,
+			difficultyLevel: difficulty,
+			wordCount: words,
+		};
+		results.push(readabilityResults);
+	} else if (['sv', 'fi', 'da', 'no', 'nb', 'nn'].includes(Lang.langStrings.LANG_CODE)) {
+		/* Lix: Danish, Finnish, Norwegian (Bokmål & Nynorsk), Swedish. */
+		const calculateLix = (text) => {
+			const lixWords = () => text.replace(/[-'.]/ig, '').split(/[^a-zA-ZöäåÖÄÅÆæØø0-9]/g).filter(Boolean);
+			const splitSentences = () => {
+				const splitter = /\?|!|\.|\n/g;
+				const arrayOfSentences = text.split(splitter).filter(Boolean);
+				return arrayOfSentences;
+			};
+			const wordCount = lixWords().length;
+			const longWordsCount = lixWords().filter((wordsArray) => wordsArray.length > 6).length;
+			const sentenceCount = splitSentences().length;
+			const score = Math.round((wordCount / sentenceCount) + ((longWordsCount * 100) / wordCount));
+			const avgWordsPerSentence = (wordCount / sentenceCount).toFixed(1);
+			const complexWords = Math.round(100 * (longWordsCount / wordCount));
 
-        let difficulty;
-        if (score >= 0 && score < 39) {
-          difficulty = Lang._('GOOD');
-        } else if (score > 40 && score < 50) {
-          difficulty = Lang._('FAIRLY_DIFFICULT');
-        } else if (score > 51 && score < 61) {
-          difficulty = Lang._('DIFFICULT');
-        } else {
-          difficulty = Lang._('VERY_DIFFICULT');
-        }
-        return {
-          score, difficulty, avgWordsPerSentence, complexWords, wordCount,
-        };
-      };
+			let difficulty;
+			if (score >= 0 && score < 39) {
+				difficulty = Lang._('GOOD');
+			} else if (score > 40 && score < 50) {
+				difficulty = Lang._('FAIRLY_DIFFICULT');
+			} else if (score > 51 && score < 61) {
+				difficulty = Lang._('DIFFICULT');
+			} else {
+				difficulty = Lang._('VERY_DIFFICULT');
+			}
+			return {
+				score, difficulty, avgWordsPerSentence, complexWords, wordCount,
+			};
+		};
 
-      // Compute LIX
-      const lix = calculateLix(pageText);
+		// Compute LIX
+		const lix = calculateLix(pageText);
 
-      // Create object for headless mode.
-      readabilityResults = {
-        test: 'READABILITY',
-        score: lix.score,
-        averageWordsPerSentence: lix.avgWordsPerSentence,
-        complexWords: lix.complexWords,
-        difficultyLevel: lix.difficulty,
-        wordCount: lix.wordCount,
-      };
-      results.push(readabilityResults);
-    }
+		// Create object for headless mode.
+		readabilityResults = {
+			test: 'READABILITY',
+			score: lix.score,
+			averageWordsPerSentence: lix.avgWordsPerSentence,
+			complexWords: lix.complexWords,
+			difficultyLevel: lix.difficulty,
+			wordCount: lix.wordCount,
+		};
+		results.push(readabilityResults);
+	}
 
-    // Update main panel if not in headless mode.
-    if (Constants.Global.headless === false) {
-      if (pageText.length === 0) {
-        Constants.Panel.readabilityInfo.innerHTML = Lang._('READABILITY_NO_CONTENT');
-      } else if (readabilityResults.wordCount > 30) {
-        Constants.Panel.readabilityInfo.innerHTML = `${Math.ceil(readabilityResults.score)} <span class="readability-score">${readabilityResults.difficultyLevel}</span>`;
-        Constants.Panel.readabilityDetails.innerHTML = `<li><strong>${Lang._('AVG_SENTENCE')}</strong> ${Math.ceil(readabilityResults.averageWordsPerSentence)}</li><li><strong>${Lang._('COMPLEX_WORDS')}</strong> ${readabilityResults.complexWords}%</li><li><strong>${Lang._('TOTAL_WORDS')}</strong> ${readabilityResults.wordCount}</li>`;
-      } else {
-        Constants.Panel.readabilityInfo.textContent = Lang._('READABILITY_NOT_ENOUGH');
-      }
-    }
-  }
-  return results;
+	// Update main panel if not in headless mode.
+	/* references overridden */
+	if (Options.headless === false) {
+		if (pageText.length === 0) {
+			UI.readabilityInfoContent = Lang._('READABILITY_NO_CONTENT');
+		} else if (readabilityResults.wordCount > 30) {
+			UI.readabilityInfoContent = `${Math.ceil(readabilityResults.score)} <span class="readability-score">${readabilityResults.difficultyLevel}</span>`;
+			UI.readabilityDetailsContent = `<li><strong>${Lang._('AVG_SENTENCE')}</strong> ${Math.ceil(readabilityResults.averageWordsPerSentence)}</li><li><strong>${Lang._('COMPLEX_WORDS')}</strong> ${readabilityResults.complexWords}%</li><li><strong>${Lang._('TOTAL_WORDS')}</strong> ${readabilityResults.wordCount}</li>`;
+		} else {
+			UI.readabilityInfoContent = Lang._('READABILITY_NOT_ENOUGH');
+		}
+	}
+	// } override
+	return results;
 }
 
 const intersect = function(a, b, x = 10) {
@@ -5962,6 +5968,8 @@ function updatePanel () {
       UI.panelJumpNext.addEventListener('click', panelJumpTo);
       UI.panelShowDismissed = UI.panel.querySelector('#ed11y-show-hidden');
       UI.message = UI.panel.querySelector('#ed11y-message');
+			UI.readabilityInfo = UI.panel.querySelector('#readability-info');
+			UI.readabilityDetails = UI.panel.querySelector('#readability-details');
       window.setTimeout(()=> {
         UI.panelElement.classList.remove('ed11y-preload');
       },0, UI.panel);
@@ -7131,10 +7139,14 @@ function checkAll() {
 		'checkLinkText',
 		'checkImages',
 		'checkEmbeddedContent',
-		// 'checkLabels',
+		// 'checkLabels', // todo cms merge param
 		'checkQA',
 		'customRuleset',
+		//'checkDeveloper', // todo merge param
 	];
+	if (Options.headless) {
+		queue.push('checkReadability'); // todo merge param
+	}
 	// Todo after merge: developer and readability tests added via options here.
 	State.testsRemaining = queue.length;
 	enqueueTests(queue);
@@ -7191,6 +7203,13 @@ function continueCheck(customCheck = false) {
 	}
 	if (typeof UI.panelToggle.querySelector === 'function') {
 		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
+	}
+	if (State.visualizing) {
+		checkReadability([]);
+		UI.readabilityInfo.innerHTML = UI.readabilityInfoContent;
+		UI.readabilityDetails.innerHTML = UI.readabilityDetailsContent;
+		showHeadingsPanel();
+		showAltPanel();
 	}
 	countAlerts();
 	updatePanel();
@@ -7275,7 +7294,14 @@ function visualize () {
 	UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
 	showAltPanel();
 	showHeadingsPanel();
+	showReadability();
 }
+
+const showReadability = function() {
+	checkReadability([]);
+	UI.readabilityInfo.innerHTML = UI.readabilityInfoContent;
+	UI.readabilityDetails.innerHTML = UI.readabilityDetailsContent;
+};
 
 function showHeadingsPanel () {
 	// Visualize the document outline
@@ -8214,6 +8240,17 @@ class Ed11yElementPanel extends HTMLElement {
                 <ul id='ed11y-alt-list'></ul>
             </div>
         </details>
+        <details id="ed11y-readability-tab">
+            <summary>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" aria-hidden="true"><path fill="currentColor" d="M528.3 46.5l-139.8 0c-48.1 0-89.9 33.3-100.4 80.3-10.6-47-52.3-80.3-100.4-80.3L48 46.5C21.5 46.5 0 68 0 94.5L0 340.3c0 26.5 21.5 48 48 48l89.7 0c102.2 0 132.7 24.4 147.3 75 .7 2.8 5.2 2.8 6 0 14.7-50.6 45.2-75 147.3-75l89.7 0c26.5 0 48-21.5 48-48l0-245.7c0-26.4-21.3-47.9-47.7-48.1zM242 311.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zM501.3 311.8c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.8c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.8-.1 0z"/></svg> <span class="summary-title">${Lang._('READABILITY')}</span>
+            </summary>
+            <div class="details">
+							<div id="readability-content">
+								<p id="readability-info"></p>
+								<ul id="readability-details"></ul>
+							</div>
+						</div>
+        </details>
         </div>
       <button type='button' id='ed11y-toggle'><span class="ed11y-sr-only"></span><span class="ed11y-toggle-circle"><span class='icon'><svg class="errors-icon" xmlns="http://www.w3.org/2000/svg" width="10" aria-hidden="true" viewBox="0 0 448 512"><path fill="currentColor" d="M64 32C64 14 50 0 32 0S0 14 0 32L0 64 0 368 0 480c0 18 14 32 32 32s32-14 32-32l0-128 64-16c41-10 85-5 123 13c44.2 22 96 25 142 7l35-13c13-5 21-17 21-30l0-248c0-23-24-38-45-28l-10 5c-46 23-101 23-147 0c-35-18-75-22-114-13L64 48l0-16z"></path></svg><svg class="pass-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10.1699 19.1777"><path fill="currentColor" d="M3.7031,10.5527c-.3633-.6562-.6426-1.1387-.8379-1.4473l-.3105-.4863-.2344-.3574c-.5117-.7969-1.0449-1.4551-1.5996-1.9746.3164-.2617.6113-.3926.8848-.3926.3359,0,.6348.123.8965.3691s.5918.7148.9902,1.4062c.4531-1.4727,1.0293-2.8691,1.7285-4.1895.3867-.7188.7314-1.2021,1.0342-1.4502s.7041-.3721,1.2041-.3721c.2656,0,.5938.041.9844.123-1.0039.8086-1.8066,1.7695-2.4082,2.8828s-1.3789,3.0762-2.332,5.8887Z"/></svg><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="close-icon" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg></span></span></button>
       <button class='ed11y-jump next' data-ed11y-goto='0' aria-haspopup="dialog"><svg class="hover-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="11" viewBox="0 -15 90 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m30 00 50 50-50 50" stroke-width="18"></path></svg><span class='toggle-count'></span><span class='jump-next ed11y-sr-only'></span></button>
@@ -8241,6 +8278,7 @@ class Ed11yElementPanel extends HTMLElement {
       });
       const altDetails = wrapper.querySelector('#ed11y-alts-tab');
       const headingDetails = wrapper.querySelector('#ed11y-headings-tab');
+			wrapper.querySelector('#ed11y-readability-tab');
       altDetails.addEventListener('toggle', () => {
         if (altDetails.open && headingDetails.open) {
           headingDetails.removeAttribute('open');

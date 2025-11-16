@@ -219,8 +219,8 @@ export const Options = {
 	insertAnnotationBefore: '',
 
 	// Readability
-	readabilityPlugin: false,
-	readabilityRoot: 'body',
+	readabilityPlugin: true,
+	readabilityRoot: 'main',
 	readabilityIgnore: '',
 
 	// Contrast

@@ -478,7 +478,7 @@ export function countAlerts () {
 
 
 
-			if (Results[i].type === 'good') {
+			if (!Results[i].type || Results[i].type === 'good') {
 				Results.splice(i, 1);
 			} else {
 				// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
