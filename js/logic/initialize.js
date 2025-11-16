@@ -162,6 +162,7 @@ export function initialize (userOptions) {
 	// Once document has fully loaded.
 	documentLoadingCheck(() => {
 		if (checkRunPrevent()) {
+			State.disabled = true;
 			return false;
 		}
 

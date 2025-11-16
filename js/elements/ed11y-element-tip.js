@@ -33,6 +33,7 @@ export class Ed11yElementTip extends HTMLElement {
 
     this.wrapper = document.createElement('div');
     this.wrapper.setAttribute('role', 'dialog');
+		this.wrapper.dataset.ed11yTest = this.result.test;
 
     this.dismissable = this.result.type !== 'error';
     this.dismissed = !!this.result.dismissalStatus;

@@ -10,6 +10,8 @@
   * For all acknowledgements, please visit: https://sa11y.netlify.app/acknowledgements/
   * The above copyright notice shall be included in all copies or substantial portions of the Software.
 **/
+import { alphaBlend, sRGBtoY, APCAcontrast, fontLookupAPCA } from 'apca-w3';
+
 /* Translation object */
 const Lang = {
   langStrings: {},
@@ -769,6 +771,37 @@ function documentLoadingCheck(callback) {
 }
 
 /**
+ * Determine whether an element is visually hidden (e.g. .sr-only) based on computed properties.
+ * @param {HTMLElement} element The element to check for.
+ * @returns {boolean} Returns true if visually hidden based on properties.
+ */
+function isScreenReaderOnly(element) {
+  const style = getComputedStyle(element);
+
+  // Modern technique: clip-path inset(50%).
+  if (style.getPropertyValue('clip-path').startsWith('inset(50%)')) return true;
+
+  // Legacy clipping.
+  if (style.clip === 'rect(1px, 1px, 1px, 1px)'
+    || style.clip === 'rect(0px, 0px, 0px, 0px)') return true;
+
+  // Large text-indent offscreen.
+  const indent = parseInt(style.textIndent, 10);
+  if (!Number.isNaN(indent) && Math.abs(indent) > 5000) return true;
+
+  // Tiny box offscreen.
+  if (style.overflow === 'hidden'
+    && parseFloat(style.width) < 2 && parseFloat(style.height) < 2) return true;
+
+  // Absolute positioned far offscreen.
+  if (style.position === 'absolute'
+    && ['left', 'right', 'top', 'bottom'].some((p) => Math.abs(parseInt(style[p], 10)) > 5000)) return true;
+
+  // Font size 1px or 0px.
+  return parseFloat(style.fontSize) < 2;
+}
+
+/**
  * Checks if an element is hidden (display: none) based on its attributes and styles.
  * @param {HTMLElement} element The element to check for visibility.
  * @returns {boolean} 'true' if the element is hidden (display: none).
@@ -807,6 +840,37 @@ function escapeHTML(string) {
  */
 function sanitizeHTML(string) {
   return string.replace(/[^\w. ]/gi, (c) => `&#${c.charCodeAt(0)};`);
+}
+
+/**
+ * Sanitizes HTML by removing script tags, inline event handlers and any dangerous attributes. It returns a clean version of the HTML string.
+ * @param {string} html The HTML string to sanitize.
+ * @param {Boolean} allowStyles Preserve inline style attributes.
+ * @returns {string} The sanitized HTML string.
+ */
+function sanitizeHTMLBlock(html, allowStyles = false) {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+
+  // Remove blocks.
+  ['script', 'style', 'noscript', 'iframe', 'form'].forEach((tag) => {
+    const elements = tempDiv.getElementsByTagName(tag);
+    while (elements.length > 0) {
+      elements[0].parentNode.removeChild(elements[0]);
+    }
+  });
+
+  // Remove inline event handlers and dangerous attributes.
+  const allElements = Array.from(tempDiv.getElementsByTagName('*'));
+  allElements.forEach((element) => {
+    Array.from(element.attributes).forEach((attr) => {
+      if (attr.name.startsWith('on')) element.removeAttribute(attr.name);
+    });
+    if (!allowStyles) {
+      element.removeAttribute('style');
+    }
+  });
+  return tempDiv.innerHTML;
 }
 
 /**
@@ -2224,21 +2288,20 @@ function countAlerts () {
 
 
 				let location = Results[i].element;
-				let position = 'afterbegin';
+				let interactive = location.closest('a, button, img, svg, input, iframe, [role="button"], [role="link"]');
+				let canPositionInside = !interactive && location.closest('p, table, li, blockquote, h1, h2, h3, h4, h5, h6');
+
+				// Todo limit afterBegin to P and TD such.
 				if (Results[i].element.shadowRoot) {
-					position = 'beforebegin';
 					while (location.parentElement && location.parentElement.shadowRoot) {
 						location = location.parentElement;
 					}
-				}
-				let interactive = location.closest('a, button, [role="button"], [role="link"]');
-
-				if (interactive) {
-					Results[i].location = interactive;
+				} else if (!canPositionInside) {
+					Results[i].location = interactive ?? location;
 					Results[i].position = 'beforebegin';
 				} else {
 					Results[i].location = location;
-					Results[i].position = position;
+					Results[i].position = 'afterbegin';
 				}
 			}
 		}
@@ -4006,6 +4069,1256 @@ function checkQA(results, option) {
   return results;
 }
 
+/**
+ * Normalizes a given font weight to a numeric value. Maps keywords to their numeric equivalents.
+ * @param {string|number} weight - The font weight, either as a number or a keyword.
+ * @returns {number} - The numeric font weight.
+*/
+function normalizeFontWeight(weight) {
+  const numericWeight = parseInt(weight, 10);
+  if (!Number.isNaN(numericWeight)) return numericWeight;
+  const weightMap = {
+    lighter: 100,
+    normal: 400,
+    bold: 700,
+    bolder: 900,
+  };
+  return weightMap[weight] || 400;
+}
+
+/**
+ * Convert colour string to RGBA format.
+ * @param {string} color The colour string to convert.
+ * @param {number} opacity The computed opacity of the element (0 to 1).
+ * @returns Returns colour in rgba format with alpha value.
+ */
+function convertToRGBA(color, opacity) {
+  const colorString = color;
+  let r;
+  let g;
+  let b;
+  let a = 1; // Initialize alpha to 1 by default.
+
+  if (!colorString.startsWith('rgb')) {
+    // Unsupported color spaces.
+    if (
+      colorString.startsWith('color(rec2020')
+      || colorString.startsWith('color(display-p3')
+      || colorString.startsWith('url(')
+    ) {
+      return 'unsupported';
+    }
+
+    // Let the browser do conversion in rgb for non-supported colour spaces.
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    context.fillStyle = colorString;
+    context.fillRect(0, 0, 1, 1);
+    const imageData = context.getImageData(0, 0, 1, 1);
+    [r, g, b, a] = imageData.data;
+    a = (a / 255).toFixed(2); // Convert alpha to range [0, 1]
+  } else {
+    // Parse RGB or RGBA values from the color string
+    const rgbaArray = colorString.match(/[\d.]+/g).map(Number);
+    [r, g, b, a] = rgbaArray.length === 4 ? rgbaArray : [...rgbaArray, 1];
+  }
+
+  // If element has opacity attribute, amend the foreground text color string.
+  if (opacity && opacity < 1) {
+    a = (a * opacity).toFixed(2); // Adjust alpha based on the opacity
+  }
+  return [r, g, b, Number(a)];
+}
+
+/**
+ * Retrieves the background colour of an element by traversing up the DOM tree.
+ * @param {HTMLElement} $el - The DOM element from which to start searching for the background.
+ * @returns {string} - The background color in RGBA format, or "image" if background image.
+*/
+function getBackground($el) {
+  let targetEl = $el;
+  while (targetEl && targetEl.nodeType === 1) {
+    // Element is within a shadow component.
+    if (Constants.Global.shadowDetection) {
+      const root = targetEl.getRootNode();
+      if (root instanceof ShadowRoot) {
+        // Traverse upward until the shadow root's host.
+        let node = targetEl;
+        while (node && node !== root.host) {
+          const styles = getComputedStyle(node);
+
+          // Background image check.
+          if (styles.backgroundImage && styles.backgroundImage !== 'none') {
+            return { type: 'image', value: styles.backgroundImage };
+          }
+
+          // Background colour check.
+          const bgColor = convertToRGBA(styles.backgroundColor);
+          if (bgColor[3] !== 0 && bgColor !== 'transparent') {
+            return bgColor;
+          }
+          node = node.parentElement;
+        }
+
+        // If nothing found within the shadow tree, continue with the host.
+        return getBackground(root.host);
+      }
+    }
+
+    // Element has background image.
+    const styles = getComputedStyle(targetEl);
+    const bgImage = styles.backgroundImage;
+    if (bgImage !== 'none') {
+      return { type: 'image', value: bgImage };
+    }
+
+    // Element has background colour.
+    const bgColor = convertToRGBA(styles.backgroundColor);
+    if (bgColor[3] !== 0 && bgColor !== 'transparent') {
+      // If the background colour has an alpha channel.
+      if (bgColor[3] < 1) {
+        // We need to find the first non-transparent parent background and blend them together.
+        let parentEl = targetEl.parentElement;
+        let parentBgColor = 'rgba(255, 255, 255, 1)';
+        while (parentEl && parentEl.nodeType === 1) {
+          const parentStyles = getComputedStyle(parentEl);
+          parentBgColor = parentStyles.backgroundColor;
+
+          // Stop, valid colour found.
+          if (parentBgColor !== 'rgba(0, 0, 0, 0)') break;
+
+          // If we reach the HTML tag, default to white.
+          if (parentBgColor === 'rgba(0, 0, 0, 0)' && parentEl.tagName === 'HTML') {
+            parentBgColor = 'rgba(255, 255, 255, 1)';
+          }
+
+          // Move up the DOM tree.
+          parentEl = parentEl.parentElement;
+        }
+        const parentColor = convertToRGBA(parentBgColor || 'rgba(255, 255, 255, 1)');
+        const blendedBG = alphaBlend(bgColor, parentColor);
+        return blendedBG;
+      }
+      // Return solid color immediately if no alpha channel.
+      return bgColor;
+    }
+    if (targetEl.tagName === 'HTML') {
+      return [255, 255, 255]; // Default to white if we reach the HTML tag.
+    }
+    targetEl = targetEl.parentNode;
+  }
+  return [255, 255, 255]; // Default to white if no background color is found.
+}
+
+/** Get the relative luminance of a colour based on WCAG 2.0
+ * @link http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+ * @param {number[]} color Colour code in [R,G,B] format.
+ * @returns Luminance value.
+ */
+function getLuminance(color) {
+  const rgb = color.slice(0, 3).map((x) => {
+    const normalized = x / 255;
+    return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+}
+
+/**
+ * Get WCAG 2.0 contrast ratio from luminance value.
+ * @link http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
+ * @param {number} l1 Luminance value of foreground colour.
+ * @param {number} l2 Luminance value of background colour.
+ * @returns WCAG 2.0 contrast ratio.
+ */
+function getWCAG2Ratio(l1, l2) {
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+/**
+ * Get the hex code equivalent of an RGB colour.
+ * @param {number[]} color Colour in [R,G,B,A] format.
+ * @returns Hexcode equivalent.
+ */
+function getHex(color) {
+  const [r, g, b] = color.map((value) => Math.min(255, Math.max(0, value)));
+  const hexR = r.toString(16).padStart(2, '0');
+  const hexG = g.toString(16).padStart(2, '0');
+  const hexB = b.toString(16).padStart(2, '0');
+  return `#${hexR}${hexG}${hexB}`;
+}
+
+/**
+ * Get the display-friendly contrast value for output.
+ * @param {Object} value - The value object containing the contrast ratio.
+ * @returns {string|number} The formatted contrast ratio.
+ */
+function ratioToDisplay(value) {
+  if (Constants.Global.contrastAPCA) {
+    return Math.abs(Number(value.toFixed(1)));
+  }
+  // Round to decimal places, and display without decimals if integer.
+  const truncatedRatio = Math.trunc(value * 10) / 10;
+  const formattedRatio = Number.isInteger(truncatedRatio)
+    ? truncatedRatio.toFixed(0)
+    : truncatedRatio;
+  return `${formattedRatio}:1`;
+}
+
+/**
+ * Calculate the contrast ratio or value between two colours.
+ * @param {number[]} color Text colour in [R,G,B,A] format.
+ * @param {Array} bg Background colour in [R,G,B,A] format.
+ * @returns Either WCAG 2.0 contrast ratio or APCA contrast value.
+ */
+function calculateContrast(color, bg) {
+  let ratio;
+  const blendedColor = alphaBlend(color, bg).slice(0, 4);
+  if (Constants.Global.contrastAPCA) {
+    const foreground = sRGBtoY(blendedColor);
+    const background = sRGBtoY(bg);
+    ratio = APCAcontrast(foreground, background);
+  } else {
+    // Uses WCAG 2.0 contrast algorithm based on luminance.
+    const foreground = getLuminance(blendedColor);
+    const background = getLuminance(bg);
+    ratio = getWCAG2Ratio(foreground, background);
+  }
+  return { ratio, blendedColor };
+}
+
+/**
+  * Calculate an elements contrast based on WCAG 2.0 contrast algorithm.
+  * @param {HTMLElement} $el The element in the DOM.
+  * @param {number[]} color Text colour in [R,G,B,A] format.
+  * @param {Array} background Background colour in [R,G,B,A] format.
+  * @param {number} fontSize Element's font size.
+  * @param {number} fontWeight Element's font weight.
+  * @param {number} opacity Element's opacity value.
+  * @param {boolean} contrastAAA Check if AAA threshold is required.
+  * @returns {Object} Object containing the element, ratio, and extra details.
+  */
+function wcagAlgorithm($el, color, background, fontSize, fontWeight, opacity, contrastAAA = false) {
+  const { ratio, blendedColor } = calculateContrast(color, background);
+  const isLargeText = fontSize >= 24 || (fontSize >= 18.67 && fontWeight >= 700);
+
+  let hasLowContrast;
+  if (contrastAAA) {
+    hasLowContrast = isLargeText ? ratio < 4.5 : ratio < 7;
+  } else {
+    const hasLowContrastNormalText = ratio > 1 && ratio < 4.5;
+    hasLowContrast = isLargeText ? ratio < 3 : hasLowContrastNormalText;
+  }
+
+  if (hasLowContrast) {
+    return {
+      $el,
+      ratio: ratioToDisplay(ratio),
+      color: blendedColor,
+      background,
+      fontSize,
+      fontWeight,
+      isLargeText,
+      opacity,
+      textUnderline: getComputedStyle($el).textDecorationLine,
+    };
+  }
+  return null;
+}
+
+/**
+ * Calculate an elements contrast based on APCA algorithm.
+ * @param {HTMLElement} $el The element in the DOM.
+ * @param {number[]} color Text colour in [R,G,B,A] format.
+ * @param {Array} background Background colour in [R,G,B,A] format.
+ * @param {number} fontSize Element's font size.
+ * @param {number} fontWeight Element's font weight.
+ * @param {number} opacity Element's opacity value.
+ * @returns {Object} Object containing the element, ratio, and extra details.
+*/
+function apcaAlgorithm($el, color, background, fontSize, fontWeight, opacity) {
+  const { ratio, blendedColor } = calculateContrast(color, background);
+
+  // Returns 9 font sizes in px corresponding to weights 100 thru 900.
+  // Returns ['LcValue',100,200,300,400,500,600,700,800,900]
+  const fontLookup = fontLookupAPCA(ratio).slice(1);
+
+  // Get minimum font size based on weight.
+  const fontWeightIndex = Math.floor(fontWeight / 100) - 1;
+  const minFontSize = fontLookup[fontWeightIndex];
+
+  if (fontSize < minFontSize) {
+    return {
+      $el,
+      ratio: ratioToDisplay(ratio),
+      color: blendedColor,
+      background,
+      fontWeight,
+      fontSize,
+      opacity,
+      textUnderline: getComputedStyle($el).textDecorationLine,
+    };
+  }
+  return null;
+}
+
+/**
+ * Check an element's contrast based on APCA or WCAG 2.0 algorithm.
+ * @param {HTMLElement} $el The element in the DOM.
+ * @param {number[]} color Text colour in [R,G,B,A] format.
+ * @param {Array} background Background colour in [R,G,B,A] format.
+ * @param {number} fontSize Element's font size.
+ * @param {number} fontWeight Element's font weight.
+ * @param {number} opacity Element's opacity value.
+ * @param {boolean} contrastAAA Use WCAG 2.0 AAA thresholds.
+ * @returns {Object} Object containing the element, ratio, and extra details.
+ */
+function checkElementContrast(
+  $el, color, background, fontSize, fontWeight, opacity, contrastAAA = false,
+) {
+  const algorithm = Constants.Global.contrastAPCA ? apcaAlgorithm : wcagAlgorithm;
+  return algorithm($el, color, background, fontSize, fontWeight, opacity, contrastAAA);
+}
+
+/**
+ * Rulesets: Contrast
+ * @param {Array} results Sa11y's results array.
+ * @param {Object} option Sa11y's options object.
+ * @returns Contrast results.
+ * APCA contrast checking is experimental. References:
+ * @link https://github.com/jasonday/color-contrast
+ * @link https://github.com/gka/chroma.js
+ * @link https://github.com/Myndex/SAPC-APCA
+ */
+function checkContrast(results, option) {
+  // Initialize contrast results array.
+  const contrastResults = [];
+
+  // Iterate through all elements on the page and get computed styles.
+  for (let i = 0; i < Elements.Found.Contrast.length; i++) {
+    const $el = Elements.Found.Contrast[i];
+    const style = getComputedStyle($el);
+
+    // Get computed styles.
+    const opacity = parseFloat(style.opacity);
+    const color = convertToRGBA(style.color, opacity);
+    const fontSize = parseFloat(style.fontSize);
+    const getFontWeight = style.fontWeight;
+    const fontWeight = normalizeFontWeight(getFontWeight);
+    const background = getBackground($el);
+
+    // Check if element is visually hidden to screen readers or explicitly hidden.
+    const isVisuallyHidden = isScreenReaderOnly($el);
+    const isExplicitlyHidden = isElementHidden($el);
+    const isHidden = isExplicitlyHidden || isVisuallyHidden || opacity === 0 || fontSize === 0;
+
+    // Filter only text nodes.
+    const textString = Array.from($el.childNodes)
+      .filter((node) => node.nodeType === 3)
+      .map((node) => node.textContent)
+      .join('');
+    const text = textString.trim();
+
+    // Inputs to check
+    const checkInputs = ['SELECT', 'INPUT', 'TEXTAREA'].includes($el.tagName);
+
+    // Only check elements with text and inputs.
+    if (text.length !== 0 || checkInputs) {
+      const isLargeText = fontSize >= 24 || (fontSize >= 18.67 && fontWeight >= 700);
+      if (color === 'unsupported' || background === 'unsupported') {
+        contrastResults.push({
+          $el,
+          type: 'unsupported',
+          fontSize,
+          fontWeight,
+          isLargeText,
+          opacity,
+          ...(background !== 'unsupported' && { background }),
+          ...(color !== 'unsupported' && { color }),
+        });
+      } else if (background.type === 'image') {
+        if (!isHidden) {
+          contrastResults.push({
+            $el,
+            type: 'background-image',
+            color,
+            isLargeText,
+            background,
+            fontSize,
+            fontWeight,
+            opacity,
+          });
+        }
+      } else if (!isHidden && getHex(color) !== getHex(background)) {
+        const result = checkElementContrast(
+          $el, color, background, fontSize, fontWeight, opacity, option.contrastAAA,
+        );
+        if (result) {
+          result.type = checkInputs ? 'input' : 'text';
+          contrastResults.push(result);
+        }
+      }
+    }
+  }
+
+  // Iterate through all SVGs on the page, separately.
+  Elements.Found.Svg.forEach(($el) => {
+    const generalWarning = { $el, type: 'svg-warning' };
+
+    // Get background.
+    const background = getBackground($el);
+    const hasBackground = background !== 'unsupported' && background.type !== 'image';
+
+    // Process simple SVGs with a single shape.
+    const shapes = $el.querySelectorAll('path, rect, circle, ellipse, polygon, text, use');
+
+    // Push a general warning for any complex SVGs.
+    const complex = $el.querySelectorAll('*:not(path):not(rect):not(circle):not(ellipse):not(polygon):not(text):not(use):not(title)');
+
+    // Check if all nodes within the SVG have the same fill/stroke/opacity.
+    let allSameColour = false;
+    if (shapes.length) {
+      const ref = getComputedStyle(shapes[0]);
+      allSameColour = Array.from(shapes).every((node) => {
+        const style = getComputedStyle(node);
+        return (
+          style.fill === ref.fill
+          && style.fillOpacity === ref.fillOpacity
+          && style.stroke === ref.stroke
+          && style.strokeOpacity === ref.strokeOpacity
+          && style.opacity === ref.opacity
+        );
+      });
+    }
+
+    // If simple SVG (single path) or complex SVG with same colour.
+    if ((shapes.length === 1 || allSameColour) && complex.length === 0) {
+      const style = getComputedStyle(shapes[0]);
+      const { fill, stroke, strokeWidth, opacity } = style;
+
+      // Get computed stroke width/convert % to number.
+      let strokePx = 0;
+      const { width, height } = $el.getBBox();
+      if (stroke && stroke !== 'none') {
+        if (strokeWidth.endsWith('%')) {
+          strokePx = (parseFloat(strokeWidth) / 100) * Math.min(width, height);
+        } else {
+          strokePx = ['inherit', 'initial', 'unset'].includes(strokeWidth)
+            ? 1 : parseFloat(strokeWidth);
+        }
+      }
+
+      // Threshold is arbitrary/not WCAG. Smaller threshold for smaller SVGs.
+      const threshold = Math.min(width, height) < 50 ? 1 : 3;
+      const hasStroke = stroke && strokePx >= threshold && stroke !== 'none';
+
+      // Get resolved fill colour.
+      const hasFill = fill && fill !== 'none' && !fill.startsWith('url(');
+      const resolvedFill = fill === 'currentColor'
+        ? convertToRGBA(getComputedStyle(shapes[0]).color, opacity)
+        : convertToRGBA(fill, opacity);
+
+      // Get resolved stroke colour.
+      const resolvedStroke = stroke === 'currentColor'
+        ? convertToRGBA(getComputedStyle(shapes[0]).color, opacity)
+        : convertToRGBA(stroke, opacity);
+
+      // If supported colours and has background, we can calculate contrast.
+      const supported = ![resolvedFill, resolvedStroke].includes('unsupported');
+      if (supported && hasBackground) {
+        let contrastValue;
+        let fillPasses = false;
+        let strokePasses = false;
+
+        if (hasFill) {
+          contrastValue = calculateContrast(resolvedFill, background);
+          fillPasses = option.contrastAPCA
+            ? contrastValue.ratio >= 45
+            : contrastValue.ratio >= 3;
+        }
+
+        if (hasStroke) {
+          contrastValue = calculateContrast(resolvedStroke, background);
+          strokePasses = option.contrastAPCA
+            ? contrastValue.ratio >= 45
+            : contrastValue.ratio >= 3;
+        }
+
+        // Calculate contrast of both stroke and fill.
+        const failsBoth = hasFill && hasStroke && !fillPasses && !strokePasses;
+        const failsFill = hasFill && !hasStroke && !fillPasses;
+        const failsStroke = !hasFill && hasStroke && !strokePasses;
+
+        // Fails
+        if (failsBoth || failsFill || failsStroke) {
+          // Get hex values.
+          const bgHex = getHex(background);
+          const fillHex = getHex(resolvedFill);
+          const strokeHex = getHex(resolvedStroke);
+
+          // Ignore if foreground equals background.
+          if ((fillHex === bgHex && !hasStroke) || (strokeHex === bgHex && !hasFill)) {
+            return;
+          }
+
+          // Push an error for simple SVGs.
+          contrastResults.push({
+            $el,
+            ratio: ratioToDisplay(contrastValue.ratio),
+            color: contrastValue.blendedColor,
+            type: 'svg-error',
+            isLargeText: true, // To push a suggested colour (3:1).
+            background,
+          });
+        }
+      } else {
+        // General warning for complex SVGs with multiple shapes.
+        // Push whatever colour is valid.
+        if (hasFill && resolvedFill !== 'unsupported') {
+          generalWarning.color = resolvedFill;
+        } else if (hasStroke && resolvedStroke !== 'unsupported') {
+          generalWarning.color = resolvedStroke;
+        }
+        if (hasBackground) generalWarning.background = background;
+        contrastResults.push(generalWarning);
+      }
+    } else {
+      // General warning for complex SVGs.
+      if (hasBackground) generalWarning.background = background;
+      contrastResults.push(generalWarning);
+    }
+  });
+
+  // Check contrast of all placeholder elements.
+  Elements.Found.Inputs.forEach(($el) => {
+    if ($el.placeholder && $el.placeholder.length !== 0) {
+      const placeholder = getComputedStyle($el, '::placeholder');
+      const pColor = convertToRGBA(placeholder.getPropertyValue('color'));
+      const pSize = parseFloat(placeholder.fontSize);
+      const pWeight = normalizeFontWeight(placeholder.fontWeight);
+      const pBackground = getBackground($el);
+      const pOpacity = parseFloat(placeholder.opacity);
+
+      // Placeholder has background image.
+      if (pColor === 'unsupported') {
+        // Unsupported colour
+        contrastResults.push({ $el, type: 'placeholder-unsupported' });
+      } else if (pBackground.type === 'image') ; else {
+        const result = checkElementContrast($el, pColor, pBackground, pSize, pWeight, pOpacity, option.contrastAAA);
+        if (result) {
+          result.type = 'placeholder';
+          contrastResults.push(result);
+        }
+      }
+    }
+  });
+
+  // Do some extra processing on warnings.
+  const processWarnings = (warnings) => {
+    // Separate warnings based on type.
+    const backgroundImages = warnings.filter((warning) => warning.type === 'background-image');
+    const otherWarnings = warnings.filter((warning) => warning.type !== 'background-image');
+
+    let processedBackgroundWarnings;
+
+    // Process background-image warnings based on option.contrastAPCA.
+    if (option.contrastAPCA) {
+      // Do not group warnings, return each warning as-is.
+      processedBackgroundWarnings = backgroundImages.map((warning) => ({ ...warning }));
+    } else {
+      // Group background-image warnings if they share same BG and FG colours.
+      const groupedWarnings = backgroundImages.reduce((groups, warning) => {
+        const grouped = groups;
+        const groupKey = JSON.stringify({
+          background: warning.background.value,
+          color: warning.color,
+          isLargeText: warning.isLargeText,
+        });
+        if (!grouped[groupKey]) grouped[groupKey] = [];
+        grouped[groupKey].push(warning);
+        return grouped;
+      }, {});
+
+      // Process each group.
+      processedBackgroundWarnings = Object.values(groupedWarnings).map((group) => ({ ...group[0] }));
+    }
+
+    // Combine processed background-image warnings with other warnings.
+    return [...processedBackgroundWarnings, ...otherWarnings];
+  };
+
+  const processedResults = processWarnings(contrastResults);
+
+  // Iterate through all contrast results.
+  processedResults.forEach((item) => {
+    const { $el, ratio } = item;
+    const updatedItem = item;
+
+    // Annotation placement.
+    const element = $el.tagName === 'OPTION' ? $el.closest('datalist, select, optgroup') : $el;
+
+    // Process text within element.
+    const nodeText = fnIgnore(element, ['option:not(option:first-child)']);
+    const text = getText(nodeText);
+
+    // Content for tooltip.
+    const truncatedText = truncateString(text, 80);
+    const sanitizedText = sanitizeHTML(truncatedText);
+
+    // Preview text
+    let previewText;
+    if (item.type === 'placeholder' || item.type === 'placeholder-unsupported') {
+      previewText = sanitizeHTML($el.placeholder);
+    } else if (item.type === 'svg-error' || item.type === 'svg-warning') {
+      previewText = '';
+    } else {
+      previewText = sanitizedText;
+    }
+    updatedItem.sanitizedText = previewText;
+
+    // Reference necessary ratios for compliance.
+    let ratioTip = '';
+    if (!option.contrastAPCA) {
+      const normal = option.contrastAAA ? '7:1' : '4.5:1';
+      const large = option.contrastAAA ? '4.5:1' : '3:1';
+      const ratioToDisplay = item.isLargeText ? large : normal;
+      const ratioRequirement = item.isLargeText ? 'CONTRAST_LARGE' : 'CONTRAST_NORMAL';
+      ratioTip = ` ${Lang.sprintf(ratioRequirement, ratioToDisplay)}`;
+    }
+    const graphicsTip = option.contrastAPCA ? '' : ` ${Lang.sprintf('CONTRAST_TIP_GRAPHIC')}`;
+
+    // Iterate through contrast results based on type.
+    switch (item.type) {
+      case 'text':
+        if (option.checks.CONTRAST_ERROR) {
+          results.push({
+            test: 'CONTRAST_ERROR',
+            element: $el,
+            type: option.checks.CONTRAST_ERROR.type || 'error',
+            content: option.checks.CONTRAST_ERROR.content
+              ? Lang.sprintf(option.checks.CONTRAST_ERROR.content)
+              : Lang.sprintf('CONTRAST_ERROR') + ratioTip,
+            dismiss: prepareDismissal(`CONTRAST${sanitizedText}`),
+            dismissAll: option.checks.CONTRAST_ERROR.dismissAll ? 'CONTRAST_ERROR' : false,
+            developer: option.checks.CONTRAST_ERROR.developer || false,
+            contrastDetails: updatedItem,
+          });
+        }
+        break;
+      case 'input':
+        if (option.checks.CONTRAST_INPUT) {
+          const sanitizedInput = sanitizeHTMLBlock($el.outerHTML);
+          results.push({
+            test: 'CONTRAST_INPUT',
+            element,
+            type: option.checks.CONTRAST_INPUT.type || 'error',
+            content: option.checks.CONTRAST_INPUT.content
+              ? Lang.sprintf(option.checks.CONTRAST_INPUT.content)
+              : Lang.sprintf('CONTRAST_INPUT', ratio) + ratioTip,
+            dismiss: prepareDismissal(`CONTRAST${sanitizedInput}`),
+            dismissAll: option.checks.CONTRAST_INPUT.dismissAll ? 'CONTRAST_INPUT' : false,
+            developer: option.checks.CONTRAST_INPUT.developer || true,
+            contrastDetails: updatedItem,
+          });
+        }
+        break;
+      case 'placeholder':
+        if (option.checks.CONTRAST_PLACEHOLDER) {
+          const sanitizedPlaceholder = sanitizeHTMLBlock($el.outerHTML);
+          results.push({
+            test: 'CONTRAST_PLACEHOLDER',
+            element: $el,
+            type: option.checks.CONTRAST_PLACEHOLDER.type || 'error',
+            content: option.checks.CONTRAST_PLACEHOLDER.content
+              ? Lang.sprintf(option.checks.CONTRAST_PLACEHOLDER.content)
+              : Lang.sprintf('CONTRAST_PLACEHOLDER') + ratioTip,
+            position: 'afterend',
+            dismiss: prepareDismissal(`CPLACEHOLDER${sanitizedPlaceholder}`),
+            dismissAll: option.checks.CONTRAST_PLACEHOLDER.dismissAll ? 'CONTRAST_PLACEHOLDER' : false,
+            developer: option.checks.CONTRAST_PLACEHOLDER.developer || true,
+            contrastDetails: updatedItem,
+          });
+        }
+        break;
+      case 'placeholder-unsupported':
+        if (option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED) {
+          const sanitizedPlaceholder = sanitizeHTMLBlock($el.outerHTML);
+          results.push({
+            test: 'CONTRAST_PLACEHOLDER_UNSUPPORTED',
+            element: $el,
+            type: option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.type || 'warning',
+            content: option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.content
+              ? Lang.sprintf(option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.content)
+              : Lang.sprintf('CONTRAST_PLACEHOLDER_UNSUPPORTED') + ratioTip,
+            position: 'afterend',
+            dismiss: prepareDismissal(`CPLACEHOLDERUN${sanitizedPlaceholder}`),
+            dismissAll: option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.dismissAll
+              ? 'CONTRAST_PLACEHOLDER_UNSUPPORTED' : false,
+            developer: option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.developer || true,
+            contrastDetails: updatedItem,
+          });
+        }
+        break;
+      case 'svg-error':
+        if (option.checks.CONTRAST_ERROR_GRAPHIC) {
+          const sanitizedSVG = sanitizeHTMLBlock($el.outerHTML);
+          results.push({
+            test: 'CONTRAST_ERROR_GRAPHIC',
+            element: $el,
+            type: option.checks.CONTRAST_ERROR_GRAPHIC.type || 'error',
+            content: option.checks.CONTRAST_ERROR_GRAPHIC.content
+              ? Lang.sprintf(option.checks.CONTRAST_ERROR_GRAPHIC.content)
+              : Lang.sprintf('CONTRAST_ERROR_GRAPHIC') + graphicsTip,
+            dismiss: prepareDismissal(`CONTRASTERROR${sanitizedSVG}`),
+            dismissAll: option.checks.CONTRAST_ERROR_GRAPHIC.dismissAll ? 'CONTRAST_ERROR_GRAPHIC' : false,
+            developer: option.checks.CONTRAST_ERROR_GRAPHIC.developer || true,
+            contrastDetails: updatedItem,
+            margin: '-25px',
+          });
+        }
+        break;
+      case 'svg-warning':
+        if (option.checks.CONTRAST_WARNING_GRAPHIC) {
+          const sanitizedSVG = sanitizeHTMLBlock($el.outerHTML);
+          results.push({
+            test: 'CONTRAST_WARNING_GRAPHIC',
+            element: $el,
+            type: option.checks.CONTRAST_WARNING_GRAPHIC.type || 'warning',
+            content: option.checks.CONTRAST_WARNING_GRAPHIC.content
+              ? Lang.sprintf(option.checks.CONTRAST_WARNING_GRAPHIC.content)
+              : Lang.sprintf('CONTRAST_WARNING_GRAPHIC') + graphicsTip,
+            dismiss: prepareDismissal(`CONTRASTWARNING${sanitizedSVG}`),
+            dismissAll: option.checks.CONTRAST_WARNING_GRAPHIC.dismissAll ? 'CONTRAST_WARNING_GRAPHIC' : false,
+            developer: option.checks.CONTRAST_WARNING_GRAPHIC.developer || true,
+            contrastDetails: updatedItem,
+            margin: '-25px',
+          });
+        }
+        break;
+      case 'background-image':
+        if (option.checks.CONTRAST_WARNING) {
+          results.push({
+            test: 'CONTRAST_WARNING',
+            element,
+            type: option.checks.CONTRAST_WARNING.type || 'warning',
+            content: option.checks.CONTRAST_WARNING.content
+              ? Lang.sprintf(option.checks.CONTRAST_WARNING.content)
+              : Lang.sprintf('CONTRAST_WARNING') + ratioTip,
+            dismiss: prepareDismissal(`CONTRAST${sanitizedText}`),
+            dismissAll: option.checks.CONTRAST_WARNING.dismissAll ? 'CONTRAST_WARNING' : false,
+            developer: option.checks.CONTRAST_WARNING.developer || false,
+            contrastDetails: updatedItem,
+          });
+        }
+        break;
+      case 'unsupported':
+        if (option.checks.CONTRAST_UNSUPPORTED) {
+          results.push({
+            test: 'CONTRAST_UNSUPPORTED',
+            element,
+            type: option.checks.CONTRAST_UNSUPPORTED.type || 'warning',
+            content: option.checks.CONTRAST_UNSUPPORTED.content
+              ? Lang.sprintf(option.checks.CONTRAST_UNSUPPORTED.content)
+              : Lang.sprintf('CONTRAST_WARNING') + ratioTip,
+            dismiss: prepareDismissal(`CONTRAST${sanitizedText}`),
+            dismissAll: option.checks.CONTRAST_UNSUPPORTED.dismissAll ? 'CONTRAST_UNSUPPORTED' : false,
+            developer: option.checks.CONTRAST_UNSUPPORTED.developer || false,
+            contrastDetails: updatedItem,
+          });
+        }
+        break;
+    }
+  });
+  return results;
+}
+
+function checkDeveloper(results, option) {
+  /* *************************************************************** */
+  /*  Error: Missing language tag. Lang should be at least 2 chars.  */
+  /* *************************************************************** */
+  if (option.checks.META_LANG) {
+    if (!Elements.Found.Language || Elements.Found.Language.length < 2) {
+      results.push({
+        test: 'META_LANG',
+        type: option.checks.META_LANG.type || 'error',
+        content: Lang.sprintf(option.checks.META_LANG.content || 'META_LANG'),
+        dismiss: prepareDismissal('LANG'),
+        developer: option.checks.META_LANG.developer || true,
+      });
+    }
+  }
+
+  /* *************************************************************** */
+  /*  Check for missing meta page title <title>                      */
+  /* *************************************************************** */
+  if (option.checks.META_TITLE) {
+    const metaTitle = document.querySelector('title:not(svg title)');
+    if (!metaTitle || metaTitle.textContent.trim().length === 0) {
+      results.push({
+        test: 'META_TITLE',
+        type: option.checks.META_TITLE.type || 'error',
+        content: Lang.sprintf(option.checks.META_TITLE.content || 'META_TITLE'),
+        dismiss: prepareDismissal('TITLE'),
+        developer: option.checks.META_TITLE.developer || true,
+      });
+    }
+  }
+
+  /* ********************************************* */
+  /*  Zooming and scaling must not be disabled.    */
+  /* ********************************************* */
+  if (option.checks.META_SCALABLE || option.checks.META_MAX) {
+    const metaViewport = document.querySelector('meta[name="viewport"]');
+    if (metaViewport) {
+      const content = metaViewport.getAttribute('content');
+      if (content) {
+        // Parse the content attribute to extract parameters.
+        const params = content.split(',').reduce((acc, param) => {
+          const [key, value] = param.split('=').map((s) => s.trim());
+          acc[key] = value;
+          return acc;
+        }, {});
+
+        // Check for user-scalable parameter.
+        if (option.checks.META_SCALABLE && (params['user-scalable'] === 'no' || params['user-scalable'] === '0')) {
+          results.push({
+            test: 'META_SCALABLE',
+            type: option.checks.META_SCALABLE.type || 'error',
+            content: Lang.sprintf(option.checks.META_SCALABLE.content || 'META_SCALABLE'),
+            dismiss: prepareDismissal('SCALABLE'),
+            developer: option.checks.META_SCALABLE.developer || true,
+          });
+        }
+
+        // Check maximum-scale parameter.
+        const maxScale = parseFloat(params['maximum-scale']);
+        if (option.checks.META_MAX && !Number.isNaN(maxScale) && maxScale < 2) {
+          results.push({
+            test: 'META_MAX',
+            type: option.checks.META_MAX.type || 'error',
+            content: Lang.sprintf(option.checks.META_MAX.content || 'META_MAX'),
+            dismiss: prepareDismissal('MAXSCALE'),
+            developer: option.checks.META_MAX.developer || true,
+          });
+        }
+      }
+    }
+  }
+
+  /* ****************************************** */
+  /*  Page shouldn't automatically refresh.     */
+  /* ****************************************** */
+  if (option.checks.META_REFRESH) {
+    const metaRefresh = document.querySelector('meta[http-equiv="refresh"]');
+    if (metaRefresh) {
+      results.push({
+        test: 'META_REFRESH',
+        type: option.checks.META_REFRESH.type || 'error',
+        content: Lang.sprintf(option.checks.META_REFRESH.content || 'META_REFRESH'),
+        dismiss: prepareDismissal('REFRESH'),
+        developer: option.checks.META_REFRESH.developer || true,
+      });
+    }
+  }
+
+  /* *************************************************************** */
+  /*  Check for duplicate IDs that are referenced by other elements. */
+  /* *************************************************************** */
+  if (option.checks.DUPLICATE_ID) {
+    // Look for duplicate IDs within each DOM.
+    const doms = document.querySelectorAll('body, [data-sa11y-has-shadow-root]');
+    doms.forEach((dom) => {
+      const allIds = new Set();
+      const findDuplicateIds = (ids, withinDOM) => {
+        ids.forEach(($el) => {
+          const { id } = $el;
+
+          // Ignore empty IDs.
+          if (typeof id !== 'string' || id.trim().length === 0) {
+            return;
+          }
+
+          // Only flag duplicate IDs being referenced by same-page links, aria or a label.
+          // Reference: https://accessibilityinsights.io/info-examples/web/duplicate-id-aria/
+          if (id && !allIds.has(id)) {
+            allIds.add(id);
+          } else {
+            const ariaReference = Array.from(
+              withinDOM.querySelectorAll(`
+                a[href*="${id}"],
+                label[for*="${id}"],
+                [aria-labelledby*="${id}"],
+                [aria-controls*="${id}"],
+                [aria-owns*="${id}"]`),
+            );
+            if (ariaReference.length > 0) {
+              results.push({
+                test: 'DUPLICATE_ID',
+                element: $el,
+                type: option.checks.DUPLICATE_ID.type || 'error',
+                content: Lang.sprintf(option.checks.DUPLICATE_ID.content || 'DUPLICATE_ID', id),
+                dismiss: prepareDismissal(`DUPLICATEID${id}${$el.textContent}`),
+                dismissAll: option.checks.DUPLICATE_ID.dismissAll ? 'DUPLICATE_ID' : false,
+                developer: option.checks.DUPLICATE_ID.developer || true,
+              });
+            }
+          }
+        });
+      };
+
+      // Look for duplicate IDs within shadow DOMs.
+      if (dom.shadowRoot) {
+        const shadowRootIds = Array.from(
+          dom.shadowRoot.querySelectorAll(`[id]:not(${Constants.Exclusions.Container})`),
+        );
+        findDuplicateIds(shadowRootIds, dom.shadowRoot);
+      }
+
+      // Look for duplicates IDs in document body.
+      const regularIds = Array.from(
+        dom.querySelectorAll(`[id]:not(${Constants.Exclusions.Container})`),
+      );
+      findDuplicateIds(regularIds, dom);
+    });
+  }
+
+  /* ********************************************* */
+  /*  Buttons must have an accessible name.        */
+  /* ********************************************* */
+  if (option.checks.BTN_EMPTY || option.checks.BTN_EMPTY_LABELLEDBY || option.checks.BTN_LABEL || option.checks.HIDDEN_FOCUSABLE || option.checks.LABEL_IN_NAME) {
+    Elements.Found.Buttons.forEach(($el) => {
+      const accName = computeAccessibleName($el);
+      const buttonText = accName.replace(/'|"|-|\.|\s+/g, '').toLowerCase();
+
+      // Dismissal key.
+      const key = prepareDismissal(`BTN${$el.tagName + $el.id + $el.className + accName}`);
+
+      // Has ARIA
+      const hasAria = $el.querySelector(':scope [aria-labelledby], :scope [aria-label]') || $el.getAttribute('aria-labelledby') || $el.getAttribute('aria-label');
+      const hasAriaLabelledby = $el.querySelector(':scope [aria-labelledby]') || $el.getAttribute('aria-labelledby');
+      const ariaHidden = $el.getAttribute('aria-hidden') === 'true';
+      const negativeTabindex = $el.getAttribute('tabindex') === '-1';
+
+      // Button has aria-hidden but is still focusable.
+      if (ariaHidden) {
+        if (!negativeTabindex) {
+          if (option.checks.HIDDEN_FOCUSABLE) {
+            results.push({
+              test: 'HIDDEN_FOCUSABLE',
+              element: $el,
+              type: option.checks.HIDDEN_FOCUSABLE.type || 'error',
+              content: Lang.sprintf(option.checks.HIDDEN_FOCUSABLE.content || 'HIDDEN_FOCUSABLE'),
+              dismiss: key,
+              dismissAll: option.checks.HIDDEN_FOCUSABLE.dismissAll ? 'BTN_HIDDEN_FOCUSABLE' : false,
+              developer: option.checks.HIDDEN_FOCUSABLE.developer || true,
+            });
+          }
+        }
+        return;
+      }
+
+      // Button doesn't have an accessible name.
+      if (buttonText.length === 0) {
+        if (option.checks.BTN_EMPTY_LABELLEDBY && hasAriaLabelledby) {
+          results.push({
+            test: 'BTN_EMPTY_LABELLEDBY',
+            element: $el,
+            type: option.checks.BTN_EMPTY_LABELLEDBY.type || 'error',
+            content: option.checks.BTN_EMPTY_LABELLEDBY.content
+              ? Lang.sprintf(option.checks.BTN_EMPTY_LABELLEDBY.content)
+              : `${Lang.sprintf('BTN_EMPTY_LABELLEDBY')} ${Lang.sprintf('BTN_TIP')}`,
+            dismiss: prepareDismissal(key),
+            dismissAll: option.checks.BTN_EMPTY_LABELLEDBY.dismissAll ? 'BTN_EMPTY_LABELLEDBY' : false,
+            developer: option.checks.BTN_EMPTY_LABELLEDBY.developer || true,
+          });
+        } else if (option.checks.BTN_EMPTY) {
+          results.push({
+            test: 'BTN_EMPTY',
+            element: $el,
+            type: option.checks.BTN_EMPTY.type || 'error',
+            content: option.checks.BTN_EMPTY.content
+              ? Lang.sprintf(option.checks.BTN_EMPTY.content)
+              : `${Lang.sprintf('BTN_EMPTY')} ${Lang.sprintf('BTN_TIP')}`,
+            dismiss: key,
+            dismissAll: option.checks.BTN_EMPTY.dismissAll ? 'BTN_EMPTY' : false,
+            developer: option.checks.BTN_EMPTY.developer || true,
+          });
+        }
+        return;
+      }
+
+      // Button must have visible label as part of their accessible name.
+      const isVisibleTextInAccessibleName$1 = isVisibleTextInAccessibleName($el);
+      if (option.checks.LABEL_IN_NAME && hasAria && isVisibleTextInAccessibleName$1) {
+        const sanitizedText = sanitizeHTML(accName);
+        results.push({
+          test: 'LABEL_IN_NAME',
+          element: $el,
+          type: option.checks.LABEL_IN_NAME.type || 'warning',
+          content: option.checks.LABEL_IN_NAME.content
+            ? Lang.sprintf(option.checks.LABEL_IN_NAME.content, sanitizedText)
+            : `${Lang.sprintf('LABEL_IN_NAME', sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`,
+          dismiss: key,
+          dismissAll: option.checks.LABEL_IN_NAME.dismissAll ? 'BTN_LABEL_IN_NAME' : false,
+          developer: option.checks.LABEL_IN_NAME.developer || true,
+        });
+        return;
+      }
+
+      // Has "button" in the accessible name.
+      if (option.checks.BTN_ROLE_IN_NAME && accName.includes(Lang._('BTN'))) {
+        results.push({
+          test: 'BTN_ROLE_IN_NAME',
+          element: $el,
+          type: option.checks.BTN_ROLE_IN_NAME.type || 'warning',
+          content: option.checks.BTN_ROLE_IN_NAME.content
+            ? Lang.sprintf(option.checks.BTN_ROLE_IN_NAME.content)
+            : `${Lang.sprintf('BTN_ROLE_IN_NAME')} ${Lang.sprintf('BTN_TIP')}`,
+          dismiss: key,
+          dismissAll: option.checks.BTN_ROLE_IN_NAME.dismissAll ? 'BTN_ROLE_IN_NAME' : false,
+          developer: option.checks.BTN_ROLE_IN_NAME.developer || true,
+        });
+      }
+    });
+  }
+
+  /* ********************************************************** */
+  /* <li> elements must be contained in a <ul>/<ol>/<menu>.     */
+  /* ********************************************************** */
+  if (option.checks.UNCONTAINED_LI) {
+    Elements.Found.Lists.forEach(($el) => {
+      if (!$el.closest('ul, ol, menu')) {
+        results.push({
+          test: 'UNCONTAINED_LI',
+          element: $el,
+          type: option.checks.UNCONTAINED_LI.type || 'error',
+          content: Lang.sprintf(option.checks.UNCONTAINED_LI.content || 'UNCONTAINED_LI'),
+          dismiss: prepareDismissal(`UNCONTAINEDLI${$el.textContent}`),
+          dismissAll: option.checks.UNCONTAINED_LI.dismissAll ? 'UNCONTAINED_LI' : false,
+          developer: option.checks.UNCONTAINED_LI.developer || true,
+        });
+      }
+    });
+  }
+
+  /* ****************************************** */
+  /*  No tabindex values greater than 0.        */
+  /* ****************************************** */
+  if (option.checks.TABINDEX_ATTR) {
+    Elements.Found.TabIndex.forEach(($el) => {
+      results.push({
+        test: 'TABINDEX_ATTR',
+        element: $el,
+        type: option.checks.TABINDEX_ATTR.type || 'error',
+        content: Lang.sprintf(option.checks.TABINDEX_ATTR.content || 'TABINDEX_ATTR'),
+        dismiss: prepareDismissal(`TABINDEX${$el.tagName + $el.id + $el.className}`),
+        dismissAll: option.checks.TABINDEX_ATTR.dismissAll ? 'TABINDEX_ATTR' : false,
+        developer: option.checks.TABINDEX_ATTR.developer || true,
+      });
+    });
+  }
+
+  return results;
+}
+
+/**
+ * Rulesets: Readability
+ * Adapted from Greg Kraus. References for other non-english languages included below.
+ * @link https://accessibility.oit.ncsu.edu/it-accessibility-at-nc-state/developers/tools/readability-bookmarklet/
+ * @link https://core.ac.uk/download/pdf/6552422.pdf
+ * @link https://github.com/Yoast/YoastSEO.js/issues/267
+ * @link http://stackoverflow.com/questions/5686483/how-to-compute-number-of-syllables-in-a-word-in-javascript
+ * @link https://www.simoahava.com/analytics/calculate-readability-scores-for-content/#commento-58ac602191e5c6dc391015c5a6933cf3e4fc99d1dc92644024c331f1ee9b6093
+ * @link https://oaji.net/articles/2017/601-1498133639.pdf (Portuguese adaptation).
+*/
+
+function checkReadability(results) {
+  let readabilityResults;
+  const rememberReadability = store.getItem('sa11y-readability') === 'On';
+  if (rememberReadability) {
+    const readabilityArray = [];
+    // Improve the accuracy of a readability analysis by ensuring that long list items are treated as complete sentences.
+    const punctuation = ['.', '?', '!'];
+    Elements.Found.Readability.forEach(($el) => {
+      const ignore = fnIgnore($el);
+      const text = getText(ignore);
+      if (!text) return;
+      const lastCharacter = text[text.length - 1];
+      const sentence = punctuation.includes(lastCharacter) ? text : `${text}.`;
+      readabilityArray.push(sentence);
+    });
+    const pageText = readabilityArray.join(' ');
+
+    /* Flesch Reading Ease for English, French, German, Dutch, and Italian. */
+    if (['en', 'es', 'fr', 'de', 'nl', 'it', 'pt'].includes(Constants.Readability.Lang)) {
+      // Compute syllables
+      const numberOfSyllables = (el) => {
+        let wordCheck = el;
+        wordCheck = wordCheck.toLowerCase().replace('.', '').replace('\n', '');
+        if (wordCheck.length <= 3) {
+          return 1;
+        }
+        wordCheck = wordCheck.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+        wordCheck = wordCheck.replace(/^y/, '');
+        const syllableString = wordCheck.match(/[aeiouy]{1,2}/g);
+        let syllables = 0;
+
+        const syllString = !!syllableString;
+        if (syllString) {
+          syllables = syllableString.length;
+        }
+        return syllables;
+      };
+
+      // Words
+      const wordsRaw = pageText.replace(/[.!?-]+/g, ' ').split(' ');
+      let words = 0;
+      for (let i = 0; i < wordsRaw.length; i++) {
+        // eslint-disable-next-line eqeqeq
+        if (wordsRaw[i] != 0) {
+          words += 1;
+        }
+      }
+
+      // Sentences
+      const sentenceRaw = pageText.split(/[.!?]+/);
+      let sentences = 0;
+      for (let i = 0; i < sentenceRaw.length; i++) {
+        if (sentenceRaw[i] !== '') {
+          sentences += 1;
+        }
+      }
+
+      // Syllables
+      let totalSyllables = 0;
+      let syllables1 = 0;
+      let syllables2 = 0;
+      for (let i = 0; i < wordsRaw.length; i++) {
+        // eslint-disable-next-line eqeqeq
+        if (wordsRaw[i] != 0) {
+          const syllableCount = numberOfSyllables(wordsRaw[i]);
+          if (syllableCount === 1) {
+            syllables1 += 1;
+          }
+          if (syllableCount === 2) {
+            syllables2 += 1;
+          }
+          totalSyllables += syllableCount;
+        }
+      }
+
+      let flesch = false;
+      if (Constants.Readability.Lang === 'en') {
+        flesch = 206.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
+      } else if (Constants.Readability.Lang === 'fr') {
+        flesch = 207 - (1.015 * (words / sentences)) - (73.6 * (totalSyllables / words));
+      } else if (Constants.Readability.Lang === 'es') {
+        flesch = 206.84 - (1.02 * (words / sentences)) - (0.60 * (100 * (totalSyllables / words)));
+      } else if (Constants.Readability.Lang === 'de') {
+        flesch = 180 - (words / sentences) - (58.5 * (totalSyllables / words));
+      } else if (Constants.Readability.Lang === 'nl') {
+        flesch = 206.84 - (0.77 * (100 * (totalSyllables / words))) - (0.93 * (words / sentences));
+      } else if (Constants.Readability.Lang === 'it') {
+        flesch = 217 - (1.3 * (words / sentences)) - (0.6 * (100 * (totalSyllables / words)));
+      } else if (Constants.Readability.Lang === 'pt') {
+        flesch = 248.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
+      }
+
+      // Score must be between 0 and 100%.
+      if (flesch > 100) {
+        flesch = 100;
+      } else if (flesch < 0) {
+        flesch = 0;
+      }
+
+      // Compute scores.
+      const fleschScore = flesch.toFixed(1);
+      const avgWordsPerSentence = (words / sentences).toFixed(1);
+      const complexWords = Math.round(100 * ((words - (syllables1 + syllables2)) / words));
+
+      let difficulty;
+      if (fleschScore >= 0 && fleschScore < 30) {
+        difficulty = Lang._('VERY_DIFFICULT');
+      } else if (fleschScore > 31 && fleschScore < 49) {
+        difficulty = Lang._('DIFFICULT');
+      } else if (fleschScore > 50 && fleschScore < 60) {
+        difficulty = Lang._('FAIRLY_DIFFICULT');
+      } else {
+        difficulty = Lang._('GOOD');
+      }
+
+      // Create object for headless mode.
+      readabilityResults = {
+        test: 'READABILITY',
+        score: fleschScore,
+        averageWordsPerSentence: avgWordsPerSentence,
+        complexWords,
+        difficultyLevel: difficulty,
+        wordCount: words,
+      };
+      results.push(readabilityResults);
+    } else if (['sv', 'fi', 'da', 'no', 'nb', 'nn'].includes(Constants.Readability.Lang)) {
+      /* Lix: Danish, Finnish, Norwegian (Bokmål & Nynorsk), Swedish. */
+      const calculateLix = (text) => {
+        const lixWords = () => text.replace(/[-'.]/ig, '').split(/[^a-zA-ZöäåÖÄÅÆæØø0-9]/g).filter(Boolean);
+        const splitSentences = () => {
+          const splitter = /\?|!|\.|\n/g;
+          const arrayOfSentences = text.split(splitter).filter(Boolean);
+          return arrayOfSentences;
+        };
+        const wordCount = lixWords().length;
+        const longWordsCount = lixWords().filter((wordsArray) => wordsArray.length > 6).length;
+        const sentenceCount = splitSentences().length;
+        const score = Math.round((wordCount / sentenceCount) + ((longWordsCount * 100) / wordCount));
+        const avgWordsPerSentence = (wordCount / sentenceCount).toFixed(1);
+        const complexWords = Math.round(100 * (longWordsCount / wordCount));
+
+        let difficulty;
+        if (score >= 0 && score < 39) {
+          difficulty = Lang._('GOOD');
+        } else if (score > 40 && score < 50) {
+          difficulty = Lang._('FAIRLY_DIFFICULT');
+        } else if (score > 51 && score < 61) {
+          difficulty = Lang._('DIFFICULT');
+        } else {
+          difficulty = Lang._('VERY_DIFFICULT');
+        }
+        return {
+          score, difficulty, avgWordsPerSentence, complexWords, wordCount,
+        };
+      };
+
+      // Compute LIX
+      const lix = calculateLix(pageText);
+
+      // Create object for headless mode.
+      readabilityResults = {
+        test: 'READABILITY',
+        score: lix.score,
+        averageWordsPerSentence: lix.avgWordsPerSentence,
+        complexWords: lix.complexWords,
+        difficultyLevel: lix.difficulty,
+        wordCount: lix.wordCount,
+      };
+      results.push(readabilityResults);
+    }
+
+    // Update main panel if not in headless mode.
+    if (Constants.Global.headless === false) {
+      if (pageText.length === 0) {
+        Constants.Panel.readabilityInfo.innerHTML = Lang._('READABILITY_NO_CONTENT');
+      } else if (readabilityResults.wordCount > 30) {
+        Constants.Panel.readabilityInfo.innerHTML = `${Math.ceil(readabilityResults.score)} <span class="readability-score">${readabilityResults.difficultyLevel}</span>`;
+        Constants.Panel.readabilityDetails.innerHTML = `<li><strong>${Lang._('AVG_SENTENCE')}</strong> ${Math.ceil(readabilityResults.averageWordsPerSentence)}</li><li><strong>${Lang._('COMPLEX_WORDS')}</strong> ${readabilityResults.complexWords}%</li><li><strong>${Lang._('TOTAL_WORDS')}</strong> ${readabilityResults.wordCount}</li>`;
+      } else {
+        Constants.Panel.readabilityInfo.textContent = Lang._('READABILITY_NOT_ENOUGH');
+      }
+    }
+  }
+  return results;
+}
+
 const intersect = function(a, b, x = 10) {
 	// Compute intersect using browser offsets.
 	return (a.left - x <= b.right &&
@@ -5741,6 +7054,15 @@ const enqueueTests = function(queue) {
 			case 'customRuleset':
 				customRuleset(Results);
 				break
+			case 'checkReadability':
+				checkReadability(Results);
+				break
+			case 'checkDeveloper':
+				checkDeveloper(Results);
+				break
+			case 'checkContrast':
+				checkContrast(Results);
+				break
 		}
 	} catch (error) {
 		showError(error);
@@ -6389,43 +7711,43 @@ const ed11yLang = {
 
   },
 	testNames: {
-		HEADING_SKIPPED_LEVEL_TEST_NAME: 'Manual check: was a heading level skipped?',
+		ALT_FILE_EXT_TEST_NAME: 'Image\'s text alternative is a URL',
+		ALT_MAYBE_BAD_TEST_NAME: 'Manual check: alt text may be meaningless',
+		ALT_PLACEHOLDER_TEST_NAME: 	'Alt text is meaningless',
+		ALT_UNPRONOUNCEABLE_TEST_NAME: 'Image\'s text alternative is unpronounceable',
+		EMBED_AUDIO_TEST_NAME:	'Manual check: is an accurate transcript provided?',
+		EMBED_CUSTOM_TEST_NAME: 'Manual check: is this embedded content accessible?',
+		EMBED_DATA_VIZ_TEST_NAME: 'Manual check: is this visualization accessible?',
+		EMBED_VIDEO_TEST_NAME: 'Manual check: is this video accurately captioned?',
 		HEADING_EMPTY_TEST_NAME: 'Heading tag without any text',
 		HEADING_LONG_TEST_NAME: 'Manual check: long heading',
-		QA_BLOCKQUOTE_TEST_NAME : 'Manual check: is this a blockquote?',
-		MISSING_ALT_TEST_NAME: 'Image has no alternative text attribute',
+		HEADING_SKIPPED_LEVEL_TEST_NAME: 'Manual check: was a heading level skipped?',
+		IMAGE_ALT_TOO_LONG_TEST_NAME: 'Manual check: very long alternative text',
+		IMAGE_DECORATIVE_TEST_NAME: 'Manual check: image has no alt text',
+		LINK_ALT_FILE_EXT_TEST_NAME:	'Linked image\'s text alternative is a URL',
+		LINK_ALT_MAYBE_BAD_TEST_NAME: 'Manual check: alt text may be meaningless',
+		LINK_EMPTY_NO_LABEL_TEST_NAME: 'Link with no accessible text',
+		LINK_EMPTY_TEST_NAME: 'Link with no accessible text',
+		LINK_IMAGE_ALT_AND_TEXT_TEST_NAME: 'Manual check: link contains both text and an image', // 2.3.10.
+		LINK_IMAGE_LONG_ALT_TEST_NAME: 'Manual check: very long alternative text in linked image',
+		LINK_IMAGE_NO_ALT_TEXT_TEST_NAME: 'Linked Image has no alt text',
+		LINK_NEW_TAB_TEST_NAME: 'Manual check: is opening a new window expected?',
+		LINK_PLACEHOLDER_ALT_TEST_NAME: 'Linked alt text is meaningless',
+		LINK_STOPWORD_TEST_NAME: 'Manual check: is this link meaningful and concise?',
+		LINK_SUS_ALT_TEST_NAME: 'Manual check: possibly redundant text in linked image',
+		LINK_URL_TEST_NAME: 'Manual check: is this link text a URL?',
 		MISSING_ALT_LINK_HAS_TEXT_TEST_NAME: 'Image has no alternative text attribute',
 		MISSING_ALT_LINK_TEST_NAME: 'Image has no alternative text attribute',
-		IMAGE_DECORATIVE_TEST_NAME: 'Manual check: image has no alt text',
-		ALT_FILE_EXT_TEST_NAME: 'Image\'s text alternative is a URL',
-		ALT_PLACEHOLDER_TEST_NAME: 	'Alt text is meaningless',
-		ALT_MAYBE_BAD_TEST_NAME: 'Manual check: alt text may be meaningless',
-		LINK_ALT_MAYBE_BAD_TEST_NAME: 'Manual check: alt text may be meaningless',
-		LINK_PLACEHOLDER_ALT_TEST_NAME: 'Linked alt text is meaningless',
-		LINK_ALT_FILE_EXT_TEST_NAME:	'Linked image\'s text alternative is a URL',
-		SUS_ALT_TEST_NAME: 'Manual check: possibly redundant text in alt',
-		LINK_SUS_ALT_TEST_NAME: 'Manual check: possibly redundant text in linked image',
-		ALT_UNPRONOUNCEABLE_TEST_NAME: 'Image\'s text alternative is unpronounceable',
-		LINK_IMAGE_NO_ALT_TEXT_TEST_NAME: 'Linked Image has no alt text',
-		IMAGE_ALT_TOO_LONG_TEST_NAME: 'Manual check: very long alternative text',
-		LINK_IMAGE_LONG_ALT_TEST_NAME: 'Manual check: very long alternative text in linked image',
-		LINK_IMAGE_ALT_AND_TEXT_TEST_NAME: 'Manual check: link contains both text and an image', // 2.3.10.
-		LINK_EMPTY_TEST_NAME: 'Link with no accessible text',
-		LINK_EMPTY_NO_LABEL_TEST_NAME: 'Link with no accessible text',
-		LINK_URL_TEST_NAME: 'Manual check: is this link text a URL?',
-		LINK_STOPWORD_TEST_NAME: 'Manual check: is this link meaningful and concise?',
+		MISSING_ALT_TEST_NAME: 'Image has no alternative text attribute',
+		QA_BLOCKQUOTE_TEST_NAME : 'Manual check: is this a blockquote?',
+		QA_FAKE_HEADING_TEST_NAME: 'Manual check: should this be a heading?',
+		QA_FAKE_LIST_TEST_NAME: 'Manual check: should this have list formatting?',
 		QA_PDF_TEST_NAME: 'Manual check: is the linked document accessible?',
-		LINK_NEW_TAB_TEST_NAME: 'Manual check: is opening a new window expected?',
+		QA_UPPERCASE_TEST_NAME: 'Manual check: is this uppercase text needed?',
+		SUS_ALT_TEST_NAME: 'Manual check: possibly redundant text in alt',
+		TABLES_EMPTY_HEADING_TEST_NAME: 'Empty table header cell',
 		TABLES_MISSING_HEADINGS_TEST_NAME: 'Table has no header cells',
 		TABLES_SEMANTIC_HEADING_TEST_NAME: 'Content heading inside a table',
-		TABLES_EMPTY_HEADING_TEST_NAME: 'Empty table header cell',
-		QA_FAKE_LIST_TEST_NAME: 'Manual check: should this have list formatting?',
-		QA_FAKE_HEADING_TEST_NAME: 'Manual check: should this be a heading?',
-		QA_UPPERCASE_TEST_NAME: 'Manual check: is this uppercase text needed?',
-		EMBED_VIDEO_TEST_NAME: 'Manual check: is this video accurately captioned?',
-		EMBED_AUDIO_TEST_NAME:	'Manual check: is an accurate transcript provided?',
-		EMBED_DATA_VIZ_TEST_NAME: 'Manual check: is this visualization accessible?',
-		EMBED_CUSTOM_TEST_NAME: 'Manual check: is this embedded content accessible?',
 	},
 	tests: {
 		// todo: update Drupal localization file.
@@ -6998,6 +8320,7 @@ class Ed11yElementTip extends HTMLElement {
 
     this.wrapper = document.createElement('div');
     this.wrapper.setAttribute('role', 'dialog');
+		this.wrapper.dataset.ed11yTest = this.result.test;
 
     this.dismissable = this.result.type !== 'error';
     this.dismissed = !!this.result.dismissalStatus;
@@ -7430,6 +8753,7 @@ function initialize (userOptions) {
 	// Once document has fully loaded.
 	documentLoadingCheck(() => {
 		if (checkRunPrevent()) {
+			State.disabled = true;
 			return false;
 		}
 

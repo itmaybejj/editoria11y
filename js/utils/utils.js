@@ -496,21 +496,20 @@ export function countAlerts () {
 
 
 				let location = Results[i].element;
-				let position = 'afterbegin';
+				let interactive = location.closest('a, button, img, svg, input, iframe, [role="button"], [role="link"]');
+				let canPositionInside = !interactive && location.closest('p, table, li, blockquote, h1, h2, h3, h4, h5, h6');
+
+				// Todo limit afterBegin to P and TD such.
 				if (Results[i].element.shadowRoot) {
-					position = 'beforebegin';
 					while (location.parentElement && location.parentElement.shadowRoot) {
 						location = location.parentElement;
 					}
-				}
-				let interactive = location.closest('a, button, [role="button"], [role="link"]');
-
-				if (interactive) {
-					Results[i].location = interactive;
+				} else if (!canPositionInside) {
+					Results[i].location = interactive ?? location;
 					Results[i].position = 'beforebegin';
 				} else {
 					Results[i].location = location;
-					Results[i].position = position;
+					Results[i].position = 'afterbegin';
 				}
 			}
 		}
