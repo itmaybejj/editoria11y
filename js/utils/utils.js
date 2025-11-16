@@ -147,7 +147,7 @@ const dropSomeElements = function(arrayRef, sendTo = false, readyCheck = true, h
 }
 
 // First step in checkAll is getting a fresh set of elements to check.
-export function buildElementList () {
+export function buildElementList (template = false) {
 
 	// Check for ignoreAll elements.
 	State.ignoreAll = Options.ignoreAllIfAbsent && document.querySelector(`:is(${Options.ignoreAllIfAbsent})`) === null;
@@ -155,11 +155,6 @@ export function buildElementList () {
 		State.ignoreAll = document.querySelector(`:is(${Options.ignoreAllIfPresent})`) !== null;
 	}
 
-	if ( State.incremental) {
-		State.oldResults = Results;
-	}
-	// Reset counts
-	Results.length = 0;
 	State.elements = [];
 	State.mediaCount = 0;
 	State.headingOutline = [];

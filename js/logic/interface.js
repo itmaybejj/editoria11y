@@ -1282,6 +1282,12 @@ export function checkAll() {
 		return;
 	}
 
+	if ( State.incremental) {
+		State.oldResults = Results;
+	}
+	// Reset counts
+	Results.length = 0;
+
 	buildElementList();
 
 	// Call rulesets.

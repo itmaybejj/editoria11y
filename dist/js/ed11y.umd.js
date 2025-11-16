@@ -1954,7 +1954,7 @@ URL: ${url}</pre>
   };
 
   // First step in checkAll is getting a fresh set of elements to check.
-  function buildElementList () {
+  function buildElementList (template = false) {
 
   	// Check for ignoreAll elements.
   	State.ignoreAll = Options.ignoreAllIfAbsent && document.querySelector(`:is(${Options.ignoreAllIfAbsent})`) === null;
@@ -1962,11 +1962,6 @@ URL: ${url}</pre>
   		State.ignoreAll = document.querySelector(`:is(${Options.ignoreAllIfPresent})`) !== null;
   	}
 
-  	if ( State.incremental) {
-  		State.oldResults = Results;
-  	}
-  	// Reset counts
-  	Results.length = 0;
   	State.elements = [];
   	State.mediaCount = 0;
   	State.headingOutline = [];
@@ -5143,6 +5138,7 @@ URL: ${url}</pre>
 
   function checkReadability(results) {
   	let readabilityResults = {};
+  	let score = 'warning';
   	//const rememberReadability = Utils.store.getItem('sa11y-readability') === 'On'; override
   	// if (rememberReadability) { override
   	const readabilityArray = [];
@@ -5247,12 +5243,14 @@ URL: ${url}</pre>
 
   		let difficulty;
   		if (fleschScore >= 0 && fleschScore < 30) {
+  			score = 'error';
   			difficulty = Lang._('VERY_DIFFICULT');
   		} else if (fleschScore > 31 && fleschScore < 49) {
   			difficulty = Lang._('DIFFICULT');
   		} else if (fleschScore > 50 && fleschScore < 60) {
   			difficulty = Lang._('FAIRLY_DIFFICULT');
   		} else {
+  			score = 'pass';
   			difficulty = Lang._('GOOD');
   		}
 
@@ -5278,18 +5276,20 @@ URL: ${url}</pre>
   			const wordCount = lixWords().length;
   			const longWordsCount = lixWords().filter((wordsArray) => wordsArray.length > 6).length;
   			const sentenceCount = splitSentences().length;
-  			const score = Math.round((wordCount / sentenceCount) + ((longWordsCount * 100) / wordCount));
+  			const lixScore = Math.round((wordCount / sentenceCount) + ((longWordsCount * 100) / wordCount));
   			const avgWordsPerSentence = (wordCount / sentenceCount).toFixed(1);
   			const complexWords = Math.round(100 * (longWordsCount / wordCount));
 
   			let difficulty;
-  			if (score >= 0 && score < 39) {
+  			if (lixScore >= 0 && lixScore < 39) {
   				difficulty = Lang._('GOOD');
-  			} else if (score > 40 && score < 50) {
+  				score = 'pass';
+  			} else if (lixScore > 40 && lixScore < 50) {
   				difficulty = Lang._('FAIRLY_DIFFICULT');
-  			} else if (score > 51 && score < 61) {
+  			} else if (lixScore > 51 && lixScore < 61) {
   				difficulty = Lang._('DIFFICULT');
   			} else {
+  				score = 'error';
   				difficulty = Lang._('VERY_DIFFICULT');
   			}
   			return {
@@ -5318,7 +5318,7 @@ URL: ${url}</pre>
   		if (pageText.length === 0) {
   			UI.readabilityInfoContent = Lang._('READABILITY_NO_CONTENT');
   		} else if (readabilityResults.wordCount > 30) {
-  			UI.readabilityInfoContent = `${Math.ceil(readabilityResults.score)} <span class="readability-score">${readabilityResults.difficultyLevel}</span>`;
+  			UI.readabilityInfoContent = `${Math.ceil(readabilityResults.score)} <span class="readability-score ed11y-${score}">${readabilityResults.difficultyLevel}</span>`;
   			UI.readabilityDetailsContent = `<li><strong>${Lang._('AVG_SENTENCE')}</strong> ${Math.ceil(readabilityResults.averageWordsPerSentence)}</li><li><strong>${Lang._('COMPLEX_WORDS')}</strong> ${readabilityResults.complexWords}%</li><li><strong>${Lang._('TOTAL_WORDS')}</strong> ${readabilityResults.wordCount}</li>`;
   		} else {
   			UI.readabilityInfoContent = Lang._('READABILITY_NOT_ENOUGH');
@@ -7133,6 +7133,12 @@ URL: ${url}</pre>
   		disable();
   		return;
   	}
+
+  	if ( State.incremental) {
+  		State.oldResults = Results;
+  	}
+  	// Reset counts
+  	Results.length = 0;
 
   	buildElementList();
 
