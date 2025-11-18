@@ -1,16 +1,131 @@
 export const Options = {
 	// Default options.
 
-	checkRoots: false, // @todo CMS merge implement whatever syntax Sa11y releases.
-	fixedRoots: false, // Array of specific nodes, overrides previous.
-	ignoreElements: '',
+	// Sa11y properties =======================
 
+	// Target area to check
+	checkRoot: false, // Editoria11y uses "checkRoots" below.
+	fixedRoots: false, // Array of specific nodes, overrides previous.
+
+	// Exclusions
+	containerIgnore: '',
+	contrastIgnore: '.sr-only',
+	outlineIgnore: '',
+	headerIgnore: '',
+	headerIgnoreSpan: 'ed11y-element-heading-label',
+	headerIgnoreStrings: '',
+	imageIgnore: 'img[aria-hidden], [aria-hidden] img, ' +
+		'img[role="presentation"], ' +
+		'a[href][aria-label] img, button[aria-label] img, ' +
+		'a[href][aria-labelledby] img, button[aria-labelledby] img',
+	linkIgnore: '[aria-hidden][tabindex="-1"]',
+	linkIgnoreSpan: '.ed11y-element',
+	linkIgnoreStrings: '',
+	ignoreContentOutsideRoots: false, // @todo cms was headingsOnlyFromCheckRoots
+
+	// Control panel settings
+	// aboutContent: '', // @todo use?
+	panelPosition: 'right', // @todo use?
+	// showMovePanelToggle: true,
+	// checkAllHideToggles: false,
+	developerChecksOnByDefault: false, // @todo cms use?
+
+	// Page outline
+	showHinPageOutline: false,
+	showTitleInPageOutline: false,
+
+	// Image outline
+	showImageOutline: true,
+	editImageURLofCMS: '',
+	relativePathImageSRC: '',
+	relativePathImageID: '',
+	ignoreEditImageURL: [],
+	ignoreEditImageClass: [],
+
+	// Other features
+	delayCheck: 0,
+	delayCustomCheck: 500,
+	detectSPArouting: false,
+	doNotRun: '',
+	headless: false,
+	selectorPath: false,
+	shadowComponents: '',
+	autoDetectShadowComponents: false,
+
+	// Annotations
+	showGoodImageButton: true,
+	showGoodLinkButton: true,
+	dismissAnnotations: true,
+	dismissAll: true,
+	ignoreHiddenOverflow: '',
+	insertAnnotationBefore: '',
+
+	// Readability
+	readabilityPlugin: true,
+	readabilityRoot: 'main',
+	readabilityIgnore: '',
+
+	// Contrast
+	contrastPlugin: false,
+	contrastAAA: false,
+	contrastAPCA: false,
+
+	// Other plugins
+	customChecks: false,
+	linksAdvancedPlugin: true,
+	formLabelsPlugin: true, // @todo pro
+	embeddedContentPlugin: true,
+	developerPlugin: false, // @todo pro
+	externalDeveloperChecks: false, // @todo pro
+	colourFilterPlugin: false, // @todo pro
+	exportResultsPlugin: false,
+
+	// Options for accName computation: Ignore ARIA on these elements.
 	ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
 	ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
 
-	// Include and modify this entire object in your call
-	// @todo merge test and/or reimplement.
-	headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
+	// Shared properties for some checks
+	// Shared properties for some checks
+	susAltStopWords: '',
+	linkStopWords: '',
+	extraPlaceholderStopWords: '',
+	imageWithinLightbox: '',
+	initialHeadingLevel: [],
+	// @todo merge discuss: how to handle this functionality.
+	// Sets previous heading level for contentEditable fields.
+	// With 'ignore' set, first heading level is ignored in editable zones.
+	// This is ideal for systems with separate backend editing pages.
+	// Set to 'inherit' for fields edited in a frontend context.
+	/*
+	[
+		{
+			selector: '.example-inherit',
+			previousHeading: 'inherit',
+		},
+		{
+			selector: '.example-l3',
+			previousHeading: 3,
+		},
+	],*/
+
+
+	// Editoria11y Only ==============================
+	// checkRoots: false, // todo document change
+	// ignoreElements: '', // todo document change
+
+	splitConfiguration: false,
+	devOnlyChecks: [], // Provide list of dev-only test keys.
+	devConfiguration: {
+		// checkRoot: false,
+		// containerIgnore: '',
+		// contrastIgnore: '.sr-only',
+		// outlineIgnore: '',
+		// headerIgnore: '',,
+		// imageIgnore: '',
+		// linkIgnore: '[aria-hidden][tabindex="-1"]',
+	},
+	// Exclusions
+
 
 	// Set alertModes:
 	// 'headless': do not draw interface
@@ -141,109 +256,11 @@ export const Options = {
 
 	editLinks: false, // Add links to edit content in tooltips.
 
-	// @todo merge discuss: how to handle this functionality.
-	initialHeadingLevel: false,
-		// Sets previous heading level for contentEditable fields.
-		// With 'ignore' set, first heading level is ignored in editable zones.
-		// This is ideal for systems with separate backend editing pages.
-		// Set to 'inherit' for fields edited in a frontend context.
-		/*
-		[
-			{
-				selector: '.example-inherit',
-				previousHeading: 'inherit',
-			},
-			{
-				selector: '.example-l3',
-				previousHeading: 3,
-			},
-		],*/
-
 	userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
 
 	customTests: 0,
 
-	// Target area to check
-	checkRoot: 'body',
-
-	// Exclusions
-	containerIgnore: '',
-	contrastIgnore: '.sr-only',
-	outlineIgnore: '',
-	headerIgnore: '',
-	headerIgnoreSpan: 'ed11y-element-heading-label',
-	headerIgnoreStrings: '',
-	imageIgnore: 'img[aria-hidden], [aria-hidden] img, ' +
-		'img[role="presentation"], ' +
-		'a[href][aria-label] img, button[aria-label] img, ' +
-		'a[href][aria-labelledby] img, button[aria-labelledby] img',
-	linkIgnore: '[aria-hidden][tabindex="-1"]',
-	linkIgnoreSpan: '.ed11y-element',
-	linkIgnoreStrings: '',
-
-	// Control panel settings
-	aboutContent: '',
-	panelPosition: 'right',
-	showMovePanelToggle: true,
-	checkAllHideToggles: false,
-	developerChecksOnByDefault: false,
-
-	// Page outline
-	showHinPageOutline: false,
-	showTitleInPageOutline: false,
-
-	// Image outline
-	showImageOutline: true,
-	editImageURLofCMS: '',
-	relativePathImageSRC: '',
-	relativePathImageID: '',
-	ignoreEditImageURL: [],
-	ignoreEditImageClass: [],
-
-	// Other features
-	delayCheck: 0,
-	delayCustomCheck: 500,
-	detectSPArouting: false,
-	doNotRun: '',
-	headless: false,
-	selectorPath: false,
-	shadowComponents: '',
-	autoDetectShadowComponents: false,
-
-	// Annotations
-	showGoodImageButton: true,
-	showGoodLinkButton: true,
-	dismissAnnotations: true,
-	dismissAll: true,
-	ignoreHiddenOverflow: '',
-	insertAnnotationBefore: '',
-
-	// Readability
-	readabilityPlugin: true,
-	readabilityRoot: 'main',
-	readabilityIgnore: '',
-
-	// Contrast
-	contrastPlugin: false,
-	contrastAAA: false,
-	contrastAPCA: false,
-
-	// Other plugins
-	customChecks: false,
-	linksAdvancedPlugin: true,
-	formLabelsPlugin: true, // @todo pro
-	embeddedContentPlugin: true,
-	developerPlugin: false, // @todo pro
-	externalDeveloperChecks: false, // @todo pro
-	colourFilterPlugin: false, // @todo pro
-	exportResultsPlugin: false,
-
-	// Shared properties for some checks
-	susAltStopWords: '',
-	linkStopWords: '',
-	extraPlaceholderStopWords: '',
-	imageWithinLightbox: '',
-
+	// Sa11y checks ==================
 	checks: {
 		// Sa11y: Heading checks
 		HEADING_SKIPPED_LEVEL: {

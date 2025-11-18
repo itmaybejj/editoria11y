@@ -17,8 +17,18 @@ import {Ed11yElementTip} from "../elements/ed11y-element-tip.js";
 const preProcessOptions = function(userOptions) {
 	Object.assign(Options, userOptions);
 
-	if (!userOptions.checkRoots) {
-		Options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?
+	if (userOptions.splitConfiguration) {
+		State.splitConfiguration.dev = userOptions.devConfiguration;
+		State.splitConfiguration.content = {};
+		Object.keys(userOptions.devConfiguration).forEach(key => {
+			State.splitConfiguration.content[key] = userOptions[key];
+		});
+	}
+
+	// todo split configuration.
+
+	if (!Options.checkRoot) { // todo split configuration.
+		Options.checkRoot = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?
 	}
 
 	/*
@@ -147,7 +157,7 @@ export function initialize (userOptions) {
 	// Initialize global constants and exclusions.
 	preProcessOptions(userOptions);
 	// We override Sa11y's root initializer because we use strings not arrays.
-	initializeRoot(Options.checkRoots, Options.checkRoots);
+
 	Constants.initializeGlobal(Options);
 	// Constants.initializeReadability(Options);
 	Constants.initializeExclusions(Options);

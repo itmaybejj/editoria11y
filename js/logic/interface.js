@@ -1,4 +1,4 @@
-import {Results, State, Theme, UI} from "../utils/state.js";
+import {State, Theme, UI} from "../utils/state.js";
 import {
 	buildElementList,
 	checkRunPrevent,
@@ -33,7 +33,6 @@ import {
 import {Options} from "../utils/options.js";
 import checkEmbeddedContent from '../../sa11y/rulesets/embedded-content';
 import customRuleset from '../rulesets/custom-ruleset';
-import * as Constants from 'node:constants';
 
 export function showResults () {
   buildJumpList();
@@ -73,7 +72,7 @@ export function updatePanel () {
       resetResults(true);
     } else {
       // Reconnect map
-			Results.push(State.oldResults);
+			State.results.push(State.oldResults);
 			if ( !State.alignPending ) {
 				alignButtons();
 				alignPanel();
@@ -119,8 +118,25 @@ export function updatePanel () {
       UI.panelJumpNext.addEventListener('click', panelJumpTo);
       UI.panelShowDismissed = UI.panel.querySelector('#ed11y-show-hidden');
       UI.message = UI.panel.querySelector('#ed11y-message');
-			UI.readabilityInfo = UI.panel.querySelector('#readability-info');
-			UI.readabilityDetails = UI.panel.querySelector('#readability-details');
+			if (Options.readabilityPlugin) {
+				const detailsTab = document.createElement('details');
+				detailsTab.id = 'ed11y-readability-tab';
+				detailsTab.innerHTML = `
+            <summary>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" aria-hidden="true"><path fill="currentColor" d="M528.3 46.5l-139.8 0c-48.1 0-89.9 33.3-100.4 80.3-10.6-47-52.3-80.3-100.4-80.3L48 46.5C21.5 46.5 0 68 0 94.5L0 340.3c0 26.5 21.5 48 48 48l89.7 0c102.2 0 132.7 24.4 147.3 75 .7 2.8 5.2 2.8 6 0 14.7-50.6 45.2-75 147.3-75l89.7 0c26.5 0 48-21.5 48-48l0-245.7c0-26.4-21.3-47.9-47.7-48.1zM242 311.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zM501.3 311.8c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.8c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.8-.1 0z"/></svg> <span class="summary-title"></span>
+            </summary>
+            <div class="details">
+							<div id="readability-content">
+								<p id="readability-info"></p>
+								<ul id="readability-details"></ul>
+							</div>
+						</div>`
+				UI.panel.querySelector('#ed11y-visualizers').appendChild(detailsTab);
+				UI.readabilityInfo = UI.panel.querySelector('#readability-info');
+				UI.readabilityDetails = UI.panel.querySelector('#readability-details');
+				UI.panel.querySelector('#ed11y-readability-tab .summary-title').textContent = Lang._('READABILITY');
+			}
+
       window.setTimeout(()=> {
         UI.panelElement.classList.remove('ed11y-preload');
       },0, UI.panel);
@@ -186,7 +202,7 @@ export function updatePanel () {
       }
     } else if (!State.inlineAlerts) {
 				State.oldResultString = `${State.errorCount} ${State.warningCount}`;
-				Results.forEach(result => {
+				State.results.forEach(result => {
 					State.oldResultString += result.test + result.element.outerHTML;
 				});
 		}
@@ -313,7 +329,7 @@ export function buildJumpList () {
   pauseObservers();
 
   // Initial alignment to get approximate Y position order for jump list.
-  Results.forEach((result, i) => {
+  State.results.forEach((result, i) => {
 
     let top = result.element.getBoundingClientRect().top;
     if (!top) {
@@ -325,20 +341,20 @@ export function buildJumpList () {
     top = top + window.scrollY;
     if (Options.fixedRoots) {
       const root = result.element.closest('[data-ed11y-root]');
-      Results[i].fixedRoot = root.dataset.ed11yRoot;
+      State.results[i].fixedRoot = root.dataset.ed11yRoot;
     }
-    Results[i].scrollableParent = closestScrollable(result.element);
-    if (Results[i].scrollableParent) {
+    State.results[i].scrollableParent = closestScrollable(result.element);
+    if (State.results[i].scrollableParent) {
       // Group these together.
       top = top * 0.000001;
     }
-    Results[i].sortPos = top;
+    State.results[i].sortPos = top;
   });
   // Sort from bottom to top so focus order after insert is top to bottom.
-  Results.sort((a, b) => b.sortPos - a.sortPos);
+  State.results.sort((a, b) => b.sortPos - a.sortPos);
 
-  Results?.forEach(function (result, i) {
-    if (!Results[i].dismissalStatus || State.showDismissed) {
+  State.results?.forEach(function (result, i) {
+    if (!State.results[i].dismissalStatus || State.showDismissed) {
       drawResult(result, i);
     }
   });
@@ -370,7 +386,7 @@ export function drawResult(result, index) {
 
   // Create mark.wrapper with type class
   mark.resultID = mark.dataset.ed11yResult;
-  mark.result = Results[mark.resultID];
+  mark.result = State.results[mark.resultID];
 
   mark.wrapper = document.createElement('div');
 
@@ -414,7 +430,7 @@ export function drawResult(result, index) {
   shadow.appendChild(mark.wrapper);
 
   State.jumpList.unshift(mark);
-  Results[index].toggle = mark;
+  State.results[index].toggle = mark;
 }
 
 export function dismissOne(dismissalType, test, dismissalKey) {
@@ -466,7 +482,7 @@ export function editableHighlighter (resultID, show, firstVisible) {
     UI.editableHighlight[resultID]?.highlight.style.setProperty('opacity', '0');
     return;
   }
-  const result = Results[resultID];
+  const result = State.results[resultID];
   let el = UI.editableHighlight[resultID]?.highlight;
   if (!el) {
     el = document.createElement('ed11y-element-highlight');
@@ -495,7 +511,7 @@ export function transferFocus () {
     return;
   }
   const id = State.openTip.tip.dataset.ed11yResult;
-  const target = Results[id].element;
+  const target = State.results[id].element;
   const editable = target.closest('[contenteditable]');
   if (!editable && !target.closest('textarea, input')) {
     if (target.closest('a')) { // @todo after merge add button?
@@ -682,7 +698,7 @@ export function jumpTo(next = true) {
 		State.lastOpenTip = 0;
 	}
   let result = goto.getAttribute('data-ed11y-result');
-  let gotoResult = Results[result];
+  let gotoResult = State.results[result];
   const target = gotoResult.element;
 
   // First of two scrollTo calls, to trigger any scroll based events.
@@ -738,7 +754,7 @@ export function alignTip (button, toolTip, recheck = 0, reveal = false) {
 
 	const mark = button.getRootNode().host;
 	const resultNum = button.dataset.ed11yResult;
-	const result = Results[resultNum];
+	const result = State.results[resultNum];
 
 	// Find button on page
 	const scrollTop = window.scrollY;
@@ -922,7 +938,7 @@ export function alignHighlights() {
 	}
 
 	UI.editableHighlight.forEach((el) => {
-		if (!Results[el.resultID]) {
+		if (!State.results[el.resultID]) {
 			State.interaction = true;
 			State.forceFullCheck = true;
 			UI.editableHighlight = [];
@@ -930,8 +946,8 @@ export function alignHighlights() {
 			return false;
 		}
 
-		const framePositioner = Results[el.resultID].fixedRoot && State.positionedFrames[Results[el.resultID].fixedRoot] ?
-			State.positionedFrames[Results[el.resultID].fixedRoot] : { top: 0, left: 0 };
+		const framePositioner = State.results[el.resultID].fixedRoot && State.positionedFrames[State.results[el.resultID].fixedRoot] ?
+			State.positionedFrames[State.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
 
 		let targetOffset = el.target.getBoundingClientRect();
 		if (!visible(el.target)) {
@@ -1010,8 +1026,8 @@ export function rangeChange(anchorNode) {
 		typeof anchor.parentNode === 'object' &&
 		typeof anchor.parentNode.matches === 'function';
 	if (!anchor || expandable &&
-		( anchor.parentNode.matches(Options.checkRoots) ||
-			( !anchor.parentNode.matches(Options.checkRoots) && anchor.parentNode.matches('div[contenteditable="true"]')
+		( anchor.parentNode.matches(Options.checkRoot) ||
+			( !anchor.parentNode.matches(Options.checkRoot) && anchor.parentNode.matches('div[contenteditable="true"]')
 			)
 		)
 	) {
@@ -1180,7 +1196,7 @@ export function startObserver (root) {
 
 
 /*const getRuleset = {
-	checkHeaders: checkHeaders(Results, Options, State.headingOutline),
+	checkHeaders: checkHeaders(State.results, Options, State.headingOutline),
 	checkLinkText:
 	checkImages: ,
 	checkLabels: ,
@@ -1189,38 +1205,31 @@ export function startObserver (root) {
 
 const enqueueTests = function(queue) {
 	const test = queue.pop();
+	const results = Options.splitConfiguration ? State.devResults : State.results;
 	State.testsRemaining--;
 	try {
 		switch (test) {
-			case 'checkHeaders':
-				checkHeaders(Results, Options, State.headingOutline)
-				break
-			case 'checkLinkText':
-				checkLinkText(Results, Options)
-				break
-			case 'checkImages':
-				checkImages(Results, Options)
+			case 'quickTests':
+				checkHeaders(results, Options, State.headingOutline)
+				checkLinkText(results, Options)
+				checkImages(results, Options)
+				checkEmbeddedContent(results, Options)
+				customRuleset(results)
 				break
 			case 'checkLabels':
-				checkLabels(Results, Options)
-				break
-			case 'checkEmbeddedContent':
-				checkEmbeddedContent(Results, Options)
+				checkLabels(results, Options)
 				break
 			case 'checkQA':
-				checkQA(Results, Options)
-				break
-			case 'customRuleset':
-				customRuleset(Results)
+				checkQA(results, Options)
 				break
 			case 'checkReadability':
-				checkReadability(Results)
+				checkReadability(results)
 				break
 			case 'checkDeveloper':
-				checkDeveloper(Results)
+				checkDeveloper(results, Options)
 				break
 			case 'checkContrast':
-				checkContrast(Results)
+				checkContrast(results, Options)
 				break
 		}
 	} catch (error) {
@@ -1267,11 +1276,11 @@ export function checkAll() {
 	if (Options.fixedRoots) {
 		Options.fixedRoots.forEach(root => {State.roots.push(root.fixedRoot);});
 	} else {
-		State.roots = document.querySelectorAll(`:is(${Options.checkRoots})`);
+		State.roots = document.querySelectorAll(`:is(${Options.checkRoot})`);
 	}
 	// Initialize root areas to check.
 	if (!State.roots && Options.headless === false) {
-		console.warn(Lang.sprintf('MISSING_ROOT', Options.checkRoots));
+		console.warn(Lang.sprintf('MISSING_ROOT', Options.checkRoot));
 	}
 
 	if (State.roots.length === 0) {
@@ -1283,25 +1292,27 @@ export function checkAll() {
 	}
 
 	if ( State.incremental) {
-		State.oldResults = Results;
+		State.oldResults = State.results;
 	}
 	// Reset counts
-	Results.length = 0;
+	State.results.length = 0;
+	State.devResults.length = 0;
+
+	if ( Options.splitConfiguration ) {
+		Object.assign(Options, State.splitConfiguration.dev);
+	}
 
 	buildElementList();
 
 	// Call rulesets.
 	let queue = [
-		'checkHeaders',
-		'checkLinkText',
-		'checkImages',
-		'checkEmbeddedContent',
+		'quickTests',
 		// 'checkLabels', // todo cms merge param
 		'checkQA',
-		'customRuleset',
-		//'checkDeveloper', // todo merge param
+		'checkDeveloper', // todo merge param
 	];
-	if (Options.headless) {
+	if (Options.headless && Options.readabilityPlugin) {
+		// todo CMS readability not updated on incremental.
 		queue.push('checkReadability') // todo merge param
 	}
 	// Todo after merge: developer and readability tests added via options here.
@@ -1358,13 +1369,62 @@ export function continueCheck(customCheck = false) {
 		// Tests still in progress.
 		return;
 	}
+
+	// Filter split configuration results.
+	if (Options.splitConfiguration && State.devResults.length > 0) {
+		Object.assign(Options, State.splitConfiguration.content);
+
+		buildElementList(true);
+		let everything = false;
+		let headings = false;
+		let images = false;
+		let excludedHeadings = false;
+		let contrast = false;
+		let links = false;
+
+		State.results = State.devResults.filter((result) => {
+			if (!result.element) {
+				return false;
+			}
+			if (result.type.indexOf('HEADING') > -1) {
+				if (!headings) {
+					headings = new WeakSet(Elements.Found.Headings);
+					excludedHeadings = new WeakSet(Elements.Found.ExcludedHeadings)
+				}
+				return headings.has(result.element) && excludedHeadings.has(result.element);
+			}
+			if (result.type.indexOf('CONTRAST') > -1) {
+				if (!contrast) {
+					contrast = new WeakSet(Elements.Found.Contrast);
+				}
+				return contrast.has(result.element);
+			}
+			if (result.element.matches('img')) {
+				if (!images) {
+					images = new WeakSet(Elements.Found.Images);
+				}
+				return images.has(result.element)
+			}
+			if (result.element.matches('a')) {
+				links = new WeakSet(Elements.Found.Links);
+				return links.has(result.element);
+			}
+			if (!everything) {
+				everything = new WeakSet(Elements.Found.Everything);
+			}
+			return everything.has(result.element);
+		})
+	}
+
 	if (typeof UI.panelToggle.querySelector === 'function') {
 		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
 	}
 	if (State.visualizing) {
-		checkReadability([]);
-		UI.readabilityInfo.innerHTML = UI.readabilityInfoContent;
-		UI.readabilityDetails.innerHTML = UI.readabilityDetailsContent;
+		//checkReadability([]); // todo???
+		if (Options.readabilityPlugin) {
+			UI.readabilityInfo.innerHTML = UI.readabilityInfoContent;
+			UI.readabilityDetails.innerHTML = UI.readabilityDetailsContent;
+		}
 		showHeadingsPanel();
 		showAltPanel();
 	}
@@ -1549,7 +1609,7 @@ const showAltPanel = function () {
 	// visualize image alts
 	let altList = UI.panel.querySelector('#ed11y-alt-list');
 	UI.imageAlts = Elements.Found.Images.map((image) => {
-			const match = Results.find((i) => i.element === image);
+			const match = State.results.find((i) => i.element === image);
 			return match && {
 				element: image,
 				type: match.type,
@@ -1660,16 +1720,16 @@ export function dismissThis (dismissalType, all = false) {
 	// Find the active tip and draw its identifying information from the result list
 	let removal = State.openTip;
 	let id = removal.tip.dataset.ed11yResult;
-	let test = Results[id].test;
+	let test = State.results[id].test;
 
 	if (all) {
-		Results.forEach((result) => {
+		State.results.forEach((result) => {
 			if (result.test === test && result.dismissalStatus !==dismissalType) {
 				dismissOne(dismissalType, test, result.dismiss);
 			}
 		});
 	} else {
-		let dismissalKey = Results[id].dismiss;
+		let dismissalKey = State.results[id].dismiss;
 		dismissOne(dismissalType, test, dismissalKey);
 	}
 
@@ -1763,7 +1823,7 @@ export function raceCrash() {
 	State.showPanel = true;
 	checkAll();
 	window.setTimeout(function() {
-		if (Results.length > 0 && State.loopStop) {
+		if (State.results.length > 0 && State.loopStop) {
 			jumpTo();
 			State.loopStop = false;
 		}

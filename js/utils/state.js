@@ -23,14 +23,17 @@ export const State = {
 	customTestsRemaining: 0,
 	customTestTimeout: 0,
   loopStop: false,
-  roots: [],
+	results: [],
   oldResults: [],
-  headingOutline: [],
+	devResults: [],
+	roots: [],
+	headingOutline: [],
 	headingOutlineOverrides: [],
   elements: { // to be replaced by Sa11y find.
     altMark: [],
     delayedReset: []
   },
+	splitConfiguration: {},
 
   /* Panel initial state */
   once: false,
@@ -79,5 +82,3 @@ export const UI = {
 	readabilityInfo: {},
 	readabilityInfoContent: '',
 }
-
-export let Results = []

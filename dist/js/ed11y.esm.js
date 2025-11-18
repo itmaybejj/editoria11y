@@ -10,9 +10,6 @@
   * For all acknowledgements, please visit: https://sa11y.netlify.app/acknowledgements/
   * The above copyright notice shall be included in all copies or substantial portions of the Software.
 **/
-import { alphaBlend, sRGBtoY, APCAcontrast, fontLookupAPCA } from 'apca-w3';
-import 'node:constants';
-
 /* Translation object */
 const Lang = {
   langStrings: {},
@@ -53,8 +50,15 @@ const Lang = {
  * @returns {void}
  */
 function removeAlert() {
-	console.log('need to override removeAlert()');
-	return false;
+  const Sa11yPanel = document.querySelector('sa11y-control-panel').shadowRoot;
+  const alert = Sa11yPanel.getElementById('panel-alert');
+  const alertText = Sa11yPanel.getElementById('panel-alert-text');
+  const alertPreview = Sa11yPanel.getElementById('panel-alert-preview');
+
+  alert.classList.remove('active');
+  alertPreview.classList.remove('panel-alert-preview');
+  while (alertText.firstChild) alertText.removeChild(alertText.firstChild);
+  while (alertPreview.firstChild) alertPreview.removeChild(alertPreview.firstChild);
 }
 
 /**
@@ -221,12 +225,14 @@ const Constants = (function myConstants() {
     /* Main target area */
     try {
       // Iterate through each selector passed, and push valid ones to final root array.
-      const selectorList = desiredRoot.split(',').map((selector) => selector.trim());
-      selectorList.forEach((selector) => {
-        const root = document.querySelector(selector);
-        if (root) Root.areaToCheck.push(root);
-        else console.error(`Sa11y: The target root (${selector}) does not exist.`);
-      });
+      const roots = document.querySelectorAll(desiredRoot);
+      if (roots.length > 0) {
+        roots.forEach((root) => {
+          Constants.Root.areaToCheck.push(root);
+        });
+      } else {
+        console.error(`Sa11y: The target root (${desiredRoot}) does not exist.`);
+      }
     } catch {
       Root.areaToCheck.length = 0;
     }
@@ -239,12 +245,14 @@ const Constants = (function myConstants() {
 
     /* Readability target area */
     try {
-      const selectorList = desiredReadabilityRoot.split(',').map((selector) => selector.trim());
-      selectorList.forEach((selector) => {
-        const root = document.querySelector(selector);
-        if (root) Root.Readability.push(root);
-        else console.error(`Sa11y: The target readability root (${selector}) does not exist.`);
-      });
+      const roots = document.querySelectorAll(desiredReadabilityRoot);
+      if (roots.length > 0) {
+        roots.forEach((root) => {
+          Constants.Root.Readability.push(root);
+        });
+      } else {
+        console.error(`Sa11y: The target readability root (${desiredReadabilityRoot}) does not exist.`);
+      }
     } catch {
       Root.Readability.length = 0;
     }
@@ -558,11 +566,6 @@ const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
   const ariaLabel = computeAriaLabel(element, recursing);
   if (ariaLabel !== 'noAria') return ariaLabel;
 
-  // Textarea with a title.
-  if (element.tagName === 'TEXTAREA' && element.hasAttribute('title')) {
-    return element.getAttribute('title');
-  }
-
   // Return immediately if there is only a text node.
   let computedText = '';
   if (!element.children.length) {
@@ -665,6 +668,12 @@ const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
           aText = false;
         }
         computedText += wrapPseudoContent(node, '');
+        break;
+      case 'INPUT':
+        computedText += wrapPseudoContent(treeWalker.currentNode, '');
+        if (treeWalker.currentNode.hasAttribute('title')) {
+          addTitleIfNoName = treeWalker.currentNode.getAttribute('title');
+        }
         break;
       case 'SLOT': {
         const children = node.assignedNodes?.() || [];
@@ -1086,14 +1095,17 @@ const State = {
 	customTestsRemaining: 0,
 	customTestTimeout: 0,
   loopStop: false,
-  roots: [],
+	results: [],
   oldResults: [],
-  headingOutline: [],
+	devResults: [],
+	roots: [],
+	headingOutline: [],
 	headingOutlineOverrides: [],
   elements: { // to be replaced by Sa11y find.
     altMark: [],
     delayedReset: []
   },
+	splitConfiguration: {},
 
   /* Panel initial state */
   once: false,
@@ -1143,21 +1155,134 @@ const UI = {
 	readabilityInfoContent: '',
 };
 
-let Results = [];
-
 const Options = {
 	// Default options.
 
-	checkRoots: false, // @todo CMS merge implement whatever syntax Sa11y releases.
-	fixedRoots: false, // Array of specific nodes, overrides previous.
-	ignoreElements: '',
+	// Sa11y properties =======================
 
+	// Target area to check
+	checkRoot: false, // Editoria11y uses "checkRoots" below.
+	fixedRoots: false, // Array of specific nodes, overrides previous.
+
+	// Exclusions
+	containerIgnore: '',
+	contrastIgnore: '.sr-only',
+	outlineIgnore: '',
+	headerIgnore: '',
+	headerIgnoreSpan: 'ed11y-element-heading-label',
+	headerIgnoreStrings: '',
+	imageIgnore: 'img[aria-hidden], [aria-hidden] img, ' +
+		'img[role="presentation"], ' +
+		'a[href][aria-label] img, button[aria-label] img, ' +
+		'a[href][aria-labelledby] img, button[aria-labelledby] img',
+	linkIgnore: '[aria-hidden][tabindex="-1"]',
+	linkIgnoreSpan: '.ed11y-element',
+	linkIgnoreStrings: '',
+	ignoreContentOutsideRoots: false, // @todo cms was headingsOnlyFromCheckRoots
+
+	// Control panel settings
+	// aboutContent: '', // @todo use?
+	panelPosition: 'right', // @todo use?
+	// showMovePanelToggle: true,
+	// checkAllHideToggles: false,
+	developerChecksOnByDefault: false, // @todo cms use?
+
+	// Page outline
+	showHinPageOutline: false,
+	showTitleInPageOutline: false,
+
+	// Image outline
+	showImageOutline: true,
+	editImageURLofCMS: '',
+	relativePathImageSRC: '',
+	relativePathImageID: '',
+	ignoreEditImageURL: [],
+	ignoreEditImageClass: [],
+
+	// Other features
+	delayCheck: 0,
+	delayCustomCheck: 500,
+	detectSPArouting: false,
+	doNotRun: '',
+	headless: false,
+	selectorPath: false,
+	shadowComponents: '',
+	autoDetectShadowComponents: false,
+
+	// Annotations
+	showGoodImageButton: true,
+	showGoodLinkButton: true,
+	dismissAnnotations: true,
+	dismissAll: true,
+	ignoreHiddenOverflow: '',
+	insertAnnotationBefore: '',
+
+	// Readability
+	readabilityPlugin: true,
+	readabilityRoot: 'main',
+	readabilityIgnore: '',
+
+	// Contrast
+	contrastPlugin: false,
+	contrastAAA: false,
+	contrastAPCA: false,
+
+	// Other plugins
+	customChecks: false,
+	linksAdvancedPlugin: true,
+	formLabelsPlugin: true, // @todo pro
+	embeddedContentPlugin: true,
+	developerPlugin: false, // @todo pro
+	externalDeveloperChecks: false, // @todo pro
+	colourFilterPlugin: false, // @todo pro
+	exportResultsPlugin: false,
+
+	// Options for accName computation: Ignore ARIA on these elements.
 	ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
 	ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
 
-	// Include and modify this entire object in your call
-	// @todo merge test and/or reimplement.
-	headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
+	// Shared properties for some checks
+	// Shared properties for some checks
+	susAltStopWords: '',
+	linkStopWords: '',
+	extraPlaceholderStopWords: '',
+	imageWithinLightbox: '',
+	initialHeadingLevel: [],
+	// @todo merge discuss: how to handle this functionality.
+	// Sets previous heading level for contentEditable fields.
+	// With 'ignore' set, first heading level is ignored in editable zones.
+	// This is ideal for systems with separate backend editing pages.
+	// Set to 'inherit' for fields edited in a frontend context.
+	/*
+	[
+		{
+			selector: '.example-inherit',
+			previousHeading: 'inherit',
+		},
+		{
+			selector: '.example-l3',
+			previousHeading: 3,
+		},
+	],*/
+
+
+	// Editoria11y Only ==============================
+	// checkRoots: false, // todo document change
+	// ignoreElements: '', // todo document change
+
+	splitConfiguration: false,
+	devOnlyChecks: [], // Provide list of dev-only test keys.
+	devConfiguration: {
+		// checkRoot: false,
+		// containerIgnore: '',
+		// contrastIgnore: '.sr-only',
+		// outlineIgnore: '',
+		// headerIgnore: '',,
+		// imageIgnore: '',
+		// linkIgnore: '[aria-hidden][tabindex="-1"]',
+	},
+	// Exclusions
+
 
 	// Set alertModes:
 	// 'headless': do not draw interface
@@ -1288,109 +1413,11 @@ const Options = {
 
 	editLinks: false, // Add links to edit content in tooltips.
 
-	// @todo merge discuss: how to handle this functionality.
-	initialHeadingLevel: false,
-		// Sets previous heading level for contentEditable fields.
-		// With 'ignore' set, first heading level is ignored in editable zones.
-		// This is ideal for systems with separate backend editing pages.
-		// Set to 'inherit' for fields edited in a frontend context.
-		/*
-		[
-			{
-				selector: '.example-inherit',
-				previousHeading: 'inherit',
-			},
-			{
-				selector: '.example-l3',
-				previousHeading: 3,
-			},
-		],*/
-
 	userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
 
 	customTests: 0,
 
-	// Target area to check
-	checkRoot: 'body',
-
-	// Exclusions
-	containerIgnore: '',
-	contrastIgnore: '.sr-only',
-	outlineIgnore: '',
-	headerIgnore: '',
-	headerIgnoreSpan: 'ed11y-element-heading-label',
-	headerIgnoreStrings: '',
-	imageIgnore: 'img[aria-hidden], [aria-hidden] img, ' +
-		'img[role="presentation"], ' +
-		'a[href][aria-label] img, button[aria-label] img, ' +
-		'a[href][aria-labelledby] img, button[aria-labelledby] img',
-	linkIgnore: '[aria-hidden][tabindex="-1"]',
-	linkIgnoreSpan: '.ed11y-element',
-	linkIgnoreStrings: '',
-
-	// Control panel settings
-	aboutContent: '',
-	panelPosition: 'right',
-	showMovePanelToggle: true,
-	checkAllHideToggles: false,
-	developerChecksOnByDefault: false,
-
-	// Page outline
-	showHinPageOutline: false,
-	showTitleInPageOutline: false,
-
-	// Image outline
-	showImageOutline: true,
-	editImageURLofCMS: '',
-	relativePathImageSRC: '',
-	relativePathImageID: '',
-	ignoreEditImageURL: [],
-	ignoreEditImageClass: [],
-
-	// Other features
-	delayCheck: 0,
-	delayCustomCheck: 500,
-	detectSPArouting: false,
-	doNotRun: '',
-	headless: false,
-	selectorPath: false,
-	shadowComponents: '',
-	autoDetectShadowComponents: false,
-
-	// Annotations
-	showGoodImageButton: true,
-	showGoodLinkButton: true,
-	dismissAnnotations: true,
-	dismissAll: true,
-	ignoreHiddenOverflow: '',
-	insertAnnotationBefore: '',
-
-	// Readability
-	readabilityPlugin: true,
-	readabilityRoot: 'main',
-	readabilityIgnore: '',
-
-	// Contrast
-	contrastPlugin: false,
-	contrastAAA: false,
-	contrastAPCA: false,
-
-	// Other plugins
-	customChecks: false,
-	linksAdvancedPlugin: true,
-	formLabelsPlugin: true, // @todo pro
-	embeddedContentPlugin: true,
-	developerPlugin: false, // @todo pro
-	externalDeveloperChecks: false, // @todo pro
-	colourFilterPlugin: false, // @todo pro
-	exportResultsPlugin: false,
-
-	// Shared properties for some checks
-	susAltStopWords: '',
-	linkStopWords: '',
-	extraPlaceholderStopWords: '',
-	imageWithinLightbox: '',
-
+	// Sa11y checks ==================
 	checks: {
 		// Sa11y: Heading checks
 		HEADING_SKIPPED_LEVEL: {
@@ -1951,7 +1978,7 @@ const dropSomeElements = function(arrayRef, sendTo = false, readyCheck = true, h
 };
 
 // First step in checkAll is getting a fresh set of elements to check.
-function buildElementList (template = false) {
+function buildElementList (onlyForFilter = false) {
 
 	// Check for ignoreAll elements.
 	State.ignoreAll = Options.ignoreAllIfAbsent && document.querySelector(`:is(${Options.ignoreAllIfAbsent})`) === null;
@@ -1963,11 +1990,12 @@ function buildElementList (template = false) {
 	State.mediaCount = 0;
 	State.headingOutline = [];
 
-	initializeRoot(Options.checkRoots, Options.checkRoots); // @todo release merge readability, add multiroot.
+	initializeRoot(Options.checkRoot, Options.checkRoot);
 
 	for (let i = 0; i < State.roots.length; i++) {
 		if (Options.fixedRoots) {
 			State.roots[i].dataset.ed11yRoot = `${i}`;
+			// todo check why not detectShadow here?
 		}
 		if (State.roots[i].shadowRoot) {
 			State.roots.setAttribute('data-ed11y-has-shadow-root', 'true');
@@ -1979,32 +2007,55 @@ function buildElementList (template = false) {
 		}
 	}
 
-
 		// Find all web components on the page.
 		findShadowComponents(Options);
 
 		// Find and cache elements.
+	if (onlyForFilter) {
+
+		// Since 4.0.0: For performance, we filter elements instead of dozens of querySelectors on the DOM.
+		Elements.Found.Everything = find('*', 'root', Constants.Exclusions.Sa11yElements);
+
+		Elements.Found.Contrast = Elements.Found.Everything.filter(($el) => {
+			const matchesSelector = Constants.Exclusions.Contrast.some((exclusion) => $el.matches(exclusion));
+			return !matchesSelector && !Constants.Exclusions.Contrast.includes($el);
+		});
+
+		Elements.Found.Images = Elements.Found.Everything.filter(($el) => $el.tagName === 'IMG'
+			&& !Constants.Exclusions.Images.some((selector) => $el.matches(selector)));
+
+		Elements.Found.Links = Elements.Found.Everything.filter(($el) => ($el.tagName === 'A' || $el.tagName === 'a')
+			&& $el.hasAttribute('href')
+			&& !$el.matches('[role="button"]') // Exclude links with [role="button"]
+			&& !Constants.Exclusions.Links.some((selector) => $el.matches(selector)));
+
+		// We want headings from the entire document for the Page Outline.
+		Elements.Found.Headings = find(
+			'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
+			Options.ignoreContentOutsideRoots || Options.fixedRoots
+				? 'root' : 'document',
+			Constants.Exclusions.Headings,
+		);
+
+		// Excluded via headerIgnore.
+		Elements.Found.ExcludedHeadings = Elements.Found.Headings.filter((heading) => Constants.Exclusions.Headings.some((exclusion) => heading.matches(exclusion)));
+
+		// Excluded via outlineIgnore.
+		Elements.Found.ExcludedOutlineHeadings = Elements.Found.Headings.filter((heading) => Constants.Exclusions.Outline.some((exclusion) => heading.matches(exclusion)));
+
+		// Merge both headerIgnore and outlineIgnore.
+		Elements.Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(Elements.Found.ExcludedHeadings);
+
+	} else {
 		Elements.initializeElements(Options);
+	}
 
-		dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore, true, true);
-		dropSomeElements(Elements.Found.Blockquotes);
-		dropSomeElements(Elements.Found.Tables);
-
-		if (typeof Options.initialHeadingLevel === 'object') {
-			Options.initialHeadingLevel.forEach((level) => {
-				const headingRoots = getElements([level.selector], 'document');
-				if (headingRoots.length > 0) {
-					headingRoots.forEach((headingRoot) => {
-						const firstInSection = headingRoot.querySelector(`h${level.previousHeading}, h${level.previousHeading + 1}`);
-						if (firstInSection) {
-							State.headingOutlineOverrides.push(firstInSection);
-						}
-					});
-				}
-			});
+		if (!onlyForFilter) {
+			dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore, true, true);
+			dropSomeElements(Elements.Found.Blockquotes);
+			dropSomeElements(Elements.Found.Tables);
 		}
 
-		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
 		if (typeof Options.editableContent === 'string') {
 			findElements('editable', Options.editableContent, false);
 		}
@@ -2015,7 +2066,7 @@ function buildElementList (template = false) {
 			State.inlineAlerts = false;
 			console.warn('Editable content detected; Editoria11y inline alerts disabled');
 		}
-		if (Options.embeddedContent) ;
+
 		if (Options.panelNoCover) {
 			// Moves panel off conflicting widgets.
 			findElements('panelNoCover', Options.panelNoCover, false);
@@ -2231,12 +2282,12 @@ function resetResults(incremental) {
 
 function newIncrementalResults() {
 	// Obviously new if there are more results:
-	if (State.forceFullCheck || Results.length !== State.oldResults.length) {
+	if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
 		return true;
 	}
 	// Subtly new if a result has changed:
 	let newResultString = `${State.errorCount} ${State.warningCount}`;
-	Results.forEach(result => {
+	State.results.forEach(result => {
 		newResultString += result.test + result.element.outerHTML;
 	});
 	let changed = newResultString !== State.oldResultString;
@@ -2253,13 +2304,13 @@ function countAlerts () {
 	// Review results array to remove dismissed or ignored items
 
 	State.dismissedCount = 0;
-	for (let i = Results.length - 1; i >= 0; i--) {
+	for (let i = State.results.length - 1; i >= 0; i--) {
 
 		/*
 		if (Options.ignoreTests &&
 			Options.ignoreTests.includes(test)) {
 			// Would be faster to skip test, but this is easy and reliable.
-			Results.splice(i, 1);
+			State.results.splice(i, 1);
 			continue;
 		}*/
 
@@ -2270,38 +2321,38 @@ function countAlerts () {
 
 
 
-			if (!Results[i].type || Results[i].type === 'good') {
-				Results.splice(i, 1);
+			if (!State.results[i].type || State.results[i].type === 'good') {
+				State.results.splice(i, 1);
 			} else {
 				// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
 				if (Options.currentPage in State.dismissedAlerts
-					&& Results[i].test in State.dismissedAlerts[Options.currentPage]
-					&& Results[i].dismiss in State.dismissedAlerts[Options.currentPage][Results[i].test]) {
-					// Remove Results[i] if it has been marked OK or ignored, increment dismissed match counter.
+					&& State.results[i].test in State.dismissedAlerts[Options.currentPage]
+					&& State.results[i].dismiss in State.dismissedAlerts[Options.currentPage][State.results[i].test]) {
+					// Remove State.results[i] if it has been marked OK or ignored, increment dismissed match counter.
 					State.dismissedCount++;
-					Results[i].dismissalStatus = true;
-				} else if (Results[i].type === 'warning') {
+					State.results[i].dismissalStatus = true;
+				} else if (State.results[i].type === 'warning') {
 					State.warningCount++;
 				} else {
 					State.errorCount++;
 				}
 
 
-				let location = Results[i].element;
+				let location = State.results[i].element;
 				let interactive = location.closest('a, button, img, svg, input, iframe, [role="button"], [role="link"]');
 				let canPositionInside = !interactive && location.closest('p, table, li, blockquote, h1, h2, h3, h4, h5, h6');
 
 				// Todo limit afterBegin to P and TD such.
-				if (Results[i].element.shadowRoot) {
+				if (State.results[i].element.shadowRoot) {
 					while (location.parentElement && location.parentElement.shadowRoot) {
 						location = location.parentElement;
 					}
 				} else if (!canPositionInside) {
-					Results[i].location = interactive ?? location;
-					Results[i].position = 'beforebegin';
+					State.results[i].location = interactive ?? location;
+					State.results[i].position = 'beforebegin';
 				} else {
-					Results[i].location = location;
-					Results[i].position = 'afterbegin';
+					State.results[i].location = location;
+					State.results[i].position = 'afterbegin';
 				}
 			}
 		}
@@ -3408,6 +3459,7 @@ function checkLabels(results, option) {
       const alt = $el.getAttribute('alt');
       const type = $el.getAttribute('type');
       const hasTitle = $el.getAttribute('title');
+      const hasPlaceholder = $el.placeholder && $el.placeholder !== 0;
       const hasAria = $el.getAttribute('aria-label') || $el.getAttribute('aria-labelledby');
 
       // Pass: Ignore if it's a submit or hidden button.
@@ -3448,8 +3500,19 @@ function checkLabels(results, option) {
       }
 
       // Uses ARIA or title attribute. Warn them to ensure there's a visible label.
-      if (hasAria || hasTitle) {
-        if (inputName.length === 0) {
+      if (hasAria || hasTitle || hasPlaceholder) {
+        // Avoid using placeholder attributes.
+        if (hasPlaceholder && option.checks.LABELS_PLACEHOLDER) {
+          results.push({
+            test: 'LABELS_PLACEHOLDER',
+            element: $el,
+            type: option.checks.LABELS_PLACEHOLDER.type || 'warning',
+            content: Lang.sprintf(option.checks.LABELS_PLACEHOLDER.content || 'LABELS_PLACEHOLDER'),
+            dismiss: prepareDismissal(`INPUTPLACEHOLDER${type + inputName}`),
+            dismissAll: option.checks.LABELS_PLACEHOLDER.dismissAll ? 'LABELS_PLACEHOLDER' : false,
+            developer: option.checks.LABELS_PLACEHOLDER.developer || true,
+          });
+        } else if (inputName.length === 0) {
           if (option.checks.LABELS_MISSING_LABEL) {
             results.push({
               test: 'LABELS_MISSING_LABEL',
@@ -3512,19 +3575,6 @@ function checkLabels(results, option) {
           dismiss: prepareDismissal(`INPUTNOID${type + inputName}`),
           dismissAll: option.checks.LABELS_MISSING_LABEL.dismissAll ? 'LABELS_MISSING_LABEL' : false,
           developer: option.checks.LABELS_MISSING_LABEL.developer || true,
-        });
-      }
-
-      // Avoid using placeholder attributes.
-      if (option.checks.LABELS_PLACEHOLDER && $el.placeholder && $el.placeholder !== 0) {
-        results.push({
-          test: 'LABELS_PLACEHOLDER',
-          element: $el,
-          type: option.checks.LABELS_PLACEHOLDER.type || 'warning',
-          content: Lang.sprintf(option.checks.LABELS_PLACEHOLDER.content || 'LABELS_PLACEHOLDER'),
-          dismiss: prepareDismissal(`INPUTPLACEHOLDER${type + inputName}`),
-          dismissAll: option.checks.LABELS_PLACEHOLDER.dismissAll ? 'LABELS_PLACEHOLDER' : false,
-          developer: option.checks.LABELS_PLACEHOLDER.developer || true,
         });
       }
     });
@@ -4068,6 +4118,378 @@ function checkQA(results, option) {
 
   return results;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// */ //// END LOCAL TESTING SWITCH
+
+
+/////  Module Scope Object Containing Constants  /////
+/////   APCA   0.0.98G - 4g - W3 Compatible Constants
+
+/////  𝒦 SA98G  ///////////////////////////////////
+    const SA98G = {
+
+        mainTRC: 2.4, // 2.4 exponent for emulating actual monitor perception
+
+            // For reverseAPCA
+        get mainTRCencode() { return 1 / this.mainTRC },
+
+              // sRGB coefficients
+        sRco: 0.2126729, 
+        sGco: 0.7151522, 
+        sBco: 0.0721750, 
+
+              // G-4g constants for use with 2.4 exponent
+        normBG: 0.56, 
+        normTXT: 0.57,
+        revTXT: 0.62,
+        revBG: 0.65,
+
+              // G-4g Clamps and Scalers
+        blkThrs: 0.022,
+        blkClmp: 1.414, 
+        scaleBoW: 1.14,
+        scaleWoB: 1.14,
+        loBoWoffset: 0.027,
+        loWoBoffset: 0.027,
+        deltaYmin: 0.0005,
+        loClip: 0.1,
+
+          ///// MAGIC NUMBERS for UNCLAMP, for use with 0.022 & 1.414 /////
+         // Magic Numbers for reverseAPCA
+        mFactor: 1.94685544331710,
+        get mFactInv() { return 1 / this.mFactor},
+        mOffsetIn: 0.03873938165714010,
+        mExpAdj: 0.2833433964208690,
+        get mExp() { return this.mExpAdj / this.blkClmp},
+        mOffsetOut: 0.3128657958707580,
+      };
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+//////////  APCA CALCULATION FUNCTIONS \/////////////////////////////////////
+
+//////////  ƒ  APCAcontrast()  ////////////////////////////////////////////
+function APCAcontrast (txtY,bgY,places = -1) {
+                 // send linear Y (luminance) for text and background.
+                // txtY and bgY must be between 0.0-1.0
+               // IMPORTANT: Do not swap, polarity is important.
+
+  const icp = [0.0,1.1];     // input range clamp / input error check
+
+  if(isNaN(txtY)||isNaN(bgY)||Math.min(txtY,bgY)<icp[0]||
+                              Math.max(txtY,bgY)>icp[1]){
+    return 0.0;  // return zero on error
+    // return 'error'; // optional string return for error
+  }
+//////////   SAPC LOCAL VARS   /////////////////////////////////////////
+
+  let SAPC = 0.0;            // For raw SAPC values
+  let outputContrast = 0.0; // For weighted final values
+  let polCat = 'BoW';      // Alternate Polarity Indicator. N normal R reverse
+
+  // TUTORIAL
+
+  // Use Y for text and BG, and soft clamp black,
+  // return 0 for very close luminances, determine
+  // polarity, and calculate SAPC raw contrast
+  // Then scale for easy to remember levels.
+
+  // Note that reverse contrast (white text on black)
+  // intentionally returns a negative number
+  // Proper polarity is important!
+
+//////////   BLACK SOFT CLAMP   ////////////////////////////////////////
+
+          // Soft clamps Y for either color if it is near black.
+  txtY = (txtY > SA98G.blkThrs) ? txtY :
+                         txtY + Math.pow(SA98G.blkThrs - txtY, SA98G.blkClmp);
+  bgY = (bgY > SA98G.blkThrs) ? bgY :
+                          bgY + Math.pow(SA98G.blkThrs - bgY, SA98G.blkClmp);
+
+       ///// Return 0 Early for extremely low ∆Y
+  if ( Math.abs(bgY - txtY) < SA98G.deltaYmin ) { return 0.0; }
+
+
+//////////   APCA/SAPC CONTRAST - LOW CLIP (W3 LICENSE)  ///////////////
+
+  if ( bgY > txtY ) {  // For normal polarity, black text on white (BoW)
+
+              // Calculate the SAPC contrast value and scale
+    SAPC = ( Math.pow(bgY, SA98G.normBG) - 
+             Math.pow(txtY, SA98G.normTXT) ) * SA98G.scaleBoW;
+
+            // Low Contrast smooth rollout to prevent polarity reversal
+           // and also a low-clip for very low contrasts
+    outputContrast = (SAPC < SA98G.loClip) ? 0.0 : SAPC - SA98G.loBoWoffset;
+
+  } else {  // For reverse polarity, light text on dark (WoB)
+           // WoB should always return negative value.
+    polCat = 'WoB';
+
+    SAPC = ( Math.pow(bgY, SA98G.revBG) - 
+             Math.pow(txtY, SA98G.revTXT) ) * SA98G.scaleWoB;
+
+    outputContrast = (SAPC > -SA98G.loClip) ? 0.0 : SAPC + SA98G.loWoBoffset;
+  }
+
+         // return Lc (lightness contrast) as a signed numeric value 
+        // Round to the nearest whole number as string is optional.
+       // Rounded can be a signed INT as output will be within ± 127 
+      // places = -1 returns signed float, 1 or more set that many places
+     // 0 returns rounded string, uses BoW or WoB instead of minus sign
+
+  if(places < 0 ){  // Default (-1) number out, all others are strings
+    return  outputContrast * 100.0;
+  } else if(places == 0 ){
+    return  Math.round(Math.abs(outputContrast)*100.0)+'<sub>'+polCat+'</sub>';
+  } else if(Number.isInteger(places)){
+    return  (outputContrast * 100.0).toFixed(places);
+  } else { return 0.0 }
+
+} // End APCAcontrast()
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+//////////  ƒ  fontLookupAPCA()  0.1.7 (G)  \////////////////////////////////
+/////////                                    \//////////////////////////////
+
+function fontLookupAPCA (contrast,places=2) {
+
+////////////////////////////////////////////////////////////////////////////
+/////  CONTRAST * FONT WEIGHT & SIZE  /////////////////////////////////////
+
+// Font size interpolations. Here the chart was re-ordered to put
+// the main contrast levels each on one line, instead of font size per line.
+// First column is LC value, then each following column is font size by weight
+
+// G G G G G G  Public Beta 0.1.7 (G) • MAY 28 2022
+
+// Lc values under 70 should have Lc 15 ADDED if used for body text
+// All font sizes are in px and reference font is Barlow
+
+// 999: prohibited - too low contrast
+// 777: NON TEXT at this minimum weight stroke
+// 666 - this is for spot text, not fluent-Things like copyright or placeholder.
+// 5xx - minimum font at this weight for content, 5xx % 500 for font-size
+// 4xx - minimum font at this weight for any purpose], 4xx % 400 for font-size
+
+// MAIN FONT SIZE LOOKUP
+
+//// ASCENDING SORTED  Public Beta 0.1.7 (G) • MAY 28 2022  ////
+
+//// Lc 45 * 0.2 = 9 which is the index for the row for Lc 45
+
+// MAIN FONT LOOKUP May 28 2022 EXPANDED
+// Sorted by Lc Value
+// First row is standard weights 100-900
+// First column is font size in px
+// All other values are the Lc contrast 
+// 999 = too low. 777 = non-text and spot text only
+
+
+const fontMatrixAscend = [
+    ['Lc',100,200,300,400,500,600,700,800,900],
+    [0,999,999,999,999,999,999,999,999,999],
+    [10,999,999,999,999,999,999,999,999,999],
+    [15,777,777,777,777,777,777,777,777,777],
+    [20,777,777,777,777,777,777,777,777,777],
+    [25,777,777,777,120,120,108,96,96,96],
+    [30,777,777,120,108,108,96,72,72,72],
+    [35,777,120,108,96,72,60,48,48,48],
+    [40,120,108,96,60,48,42,32,32,32],
+    [45,108,96,72,42,32,28,24,24,24],
+    [50,96,72,60,32,28,24,21,21,21],
+    [55,80,60,48,28,24,21,18,18,18],
+    [60,72,48,42,24,21,18,16,16,18],
+    [65,68,46,32,21.75,19,17,15,16,18],
+    [70,64,44,28,19.5,18,16,14.5,16,18],
+    [75,60,42,24,18,16,15,14,16,18],
+    [80,56,38.25,23,17.25,15.81,14.81,14,16,18],
+    [85,52,34.5,22,16.5,15.625,14.625,14,16,18],
+    [90,48,32,21,16,15.5,14.5,14,16,18],
+    [95,45,28,19.5,15.5,15,14,13.5,16,18],
+    [100,42,26.5,18.5,15,14.5,13.5,13,16,18],
+    [105,39,25,18,14.5,14,13,12,16,18],
+    [110,36,24,18,14,13,12,11,16,18],
+    [115,34.5,22.5,17.25,12.5,11.875,11.25,10.625,14.5,16.5],
+    [120,33,21,16.5,11,10.75,10.5,10.25,13,15],
+    [125,32,20,16,10,10,10,10,12,14],
+    ];
+
+
+// ASCENDING SORTED  Public Beta 0.1.7 (G) • MAY 28 2022 ////
+
+// DELTA - MAIN FONT LOOKUP May 28 2022 EXPANDED
+// EXPANDED  Sorted by Lc Value ••  DELTA
+// The pre-calculated deltas of the above array
+
+const fontDeltaAscend = [
+    ['∆Lc',100,200,300,400,500,600,700,800,900],
+    [0,0,0,0,0,0,0,0,0,0],
+    [10,0,0,0,0,0,0,0,0,0],
+    [15,0,0,0,0,0,0,0,0,0],
+    [20,0,0,0,0,0,0,0,0,0],
+    [25,0,0,0,12,12,12,24,24,24],
+    [30,0,0,12,12,36,36,24,24,24],
+    [35,0,12,12,36,24,18,16,16,16],
+    [40,12,12,24,18,16,14,8,8,8],
+    [45,12,24,12,10,4,4,3,3,3],
+    [50,16,12,12,4,4,3,3,3,3],
+    [55,8,12,6,4,3,3,2,2,0],
+    [60,4,2,10,2.25,2,1,1,0,0],
+    [65,4,2,4,2.25,1,1,0.5,0,0],
+    [70,4,2,4,1.5,2,1,0.5,0,0],
+    [75,4,3.75,1,0.75,0.188,0.188,0,0,0],
+    [80,4,3.75,1,0.75,0.188,0.188,0,0,0],
+    [85,4,2.5,1,0.5,0.125,0.125,0,0,0],
+    [90,3,4,1.5,0.5,0.5,0.5,0.5,0,0],
+    [95,3,1.5,1,0.5,0.5,0.5,0.5,0,0],
+    [100,3,1.5,0.5,0.5,0.5,0.5,1,0,0],
+    [105,3,1,0,0.5,1,1,1,0,0],
+    [110,1.5,1.5,0.75,1.5,1.125,0.75,0.375,1.5,1.5],
+    [115,1.5,1.5,0.75,1.5,1.125,0.75,0.375,1.5,1.5],
+    [120,1,1,0.5,1,0.75,0.5,0.25,1,1],
+    [125,0,0,0,0,0,0,0,0,0],
+    ];
+
+  // APCA CONTRAST FONT LOOKUP TABLES
+  // Copyright © 2022 by Myndex Research and Andrew Somers. All Rights Reserved
+  // Public Beta 0.1.7 (G) • MAY 28 2022
+  // For the following arrays, the Y axis is contrastArrayLen
+  // The two x axis are weightArrayLen and scoreArrayLen
+
+  // MAY 28 2022
+
+  const weightArray = [0,100,200,300,400,500,600,700,800,900];
+  const weightArrayLen = weightArray.length; // X axis
+
+  let returnArray = [contrast.toFixed(places),0,0,0,0,0,0,0,0,0,];
+  returnArray.length; // X axis
+
+//// Lc 45 * 0.2 = 9, and 9 is the index for the row for Lc 45
+
+  let tempFont = 777;
+  contrast = Math.abs(contrast); // Polarity unneeded for LUT
+  const factor = 0.2; // 1/5 as LUT is in increments of 5
+  const index = (contrast == 0) ?
+                 1 : (contrast * factor) | 0 ; // LUT row... n|0 is bw floor
+  let w = 0; 
+    // scoreAdj interpolates the needed font side per the Lc
+  let scoreAdj = (contrast - fontMatrixAscend[index][w]) * factor;
+
+  w++; // determines column in font matrix LUT
+
+
+/////////  Font and Score Interpolation  \/////////////////////////////////
+
+// populate returnArray with interpolated values
+
+  for (; w < weightArrayLen; w++) {
+
+    tempFont = fontMatrixAscend[index][w]; 
+
+    if (tempFont > 400) { // declares a specific minimum for the weight.
+        returnArray[w] = tempFont;
+    } else if (contrast < 14.5 ) {
+        returnArray[w] = 999; //  999 = do not use for anything
+    } else if (contrast < 29.5 ) {
+        returnArray[w] = 777; // 777 =  non-text only
+    } else {
+                // INTERPOLATION OF FONT SIZE
+               // sets level for 0.5px size increments of smaller fonts
+              // Note bitwise (n|0) instead of floor
+      (tempFont > 24) ?
+        returnArray[w] =
+            Math.round(tempFont - (fontDeltaAscend[index][w] * scoreAdj)) :
+        returnArray[w] =
+            tempFont - ((2.0 * fontDeltaAscend[index][w] * scoreAdj) | 0) * 0.5;
+                                                      // (n|0) is bitwise floor
+    }
+  }
+/////////  End Interpolation  ////////////////////////////////////////////
+
+  return returnArray
+} // end fontLookupAPCA
+
+/////////\                                      ///////////////////////////\
+//////////\  END  fontLookupAPCA()  0.1.7 (G)  /////////////////////////////\
+/////////////////////////////////////////////////////////////////////////////\
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+//////////  LUMINANCE CONVERTERS  |//////////////////////////////////////////
+
+
+//////////  ƒ  sRGBtoY()  //////////////////////////////////////////////////
+function sRGBtoY (rgb = [0,0,0]) { // send sRGB 8bpc (0xFFFFFF) or string
+
+// NOTE: Currently expects 0-255
+
+/////   APCA   0.0.98G - 4g - W3 Compatible Constants   ////////////////////
+/*
+const mainTRC = 2.4; // 2.4 exponent emulates actual monitor perception
+    
+const sRco = 0.2126729, 
+      sGco = 0.7151522, 
+      sBco = 0.0721750; // sRGB coefficients
+      */
+// Future:
+// 0.2126478133913640	0.7151791475336150	0.0721730390750208
+// Derived from:
+// xW	yW	K	xR	yR	xG	yG	xB	yB
+// 0.312720	0.329030	6504	0.640	0.330	0.300	0.600	0.150	0.060
+
+         // linearize r, g, or b then apply coefficients
+        // and sum then return the resulting luminance
+
+  function simpleExp (chan) { return Math.pow(chan/255.0, SA98G.mainTRC); }
+  return SA98G.sRco * simpleExp(rgb[0]) +
+         SA98G.sGco * simpleExp(rgb[1]) +
+         SA98G.sBco * simpleExp(rgb[2]);
+         
+} // End sRGBtoY()
+
+
+
+
+////////////////////////////////////////////////////////////////////////////
+//////////  UTILITIES  \///////////////////////////////////////////////////
+
+
+//////////  ƒ  alphaBlend()  /////////////////////////////////////////////
+
+                      // send rgba array for text/icon, rgb for background.
+                     // Only foreground allows alpha of 0.0 to 1.0 
+                    // This blends using gamma encoded space (standard)
+                   // rounded 0-255 or set round=false for number 0.0-255.0
+function alphaBlend (rgbaFG=[0,0,0,1.0], rgbBG=[0,0,0], round = true ) {
+	
+	rgbaFG[3] = Math.max(Math.min(rgbaFG[3], 1.0), 0.0); // clamp alpha 0-1
+	let compBlend = 1.0 - rgbaFG[3];
+	let rgbOut = [0,0,0,1,true]; // or just use rgbBG to retain other elements?
+	
+	for (let i=0;i<3;i++) {
+		rgbOut[i] = rgbBG[i] * compBlend + rgbaFG[i] * rgbaFG[3];
+		if (round) rgbOut[i] = Math.min(Math.round(rgbOut[i]),255);
+	}  return rgbOut;
+} // End alphaBlend()
+
+
+
+
+//\                                     ////////////////////////////////////////
+///\                                   ////////////////////////////////////////
+////\                                 ////////////////////////////////////////
+/////\  END APCA 0.1.9  G-4g  BLOCK  ////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
 /**
  * Normalizes a given font weight to a numeric value. Maps keywords to their numeric equivalents.
@@ -5922,7 +6344,7 @@ function updatePanel () {
       resetResults(true);
     } else {
       // Reconnect map
-			Results.push(State.oldResults);
+			State.results.push(State.oldResults);
 			if ( !State.alignPending ) {
 				alignButtons();
 				alignPanel();
@@ -5968,8 +6390,25 @@ function updatePanel () {
       UI.panelJumpNext.addEventListener('click', panelJumpTo);
       UI.panelShowDismissed = UI.panel.querySelector('#ed11y-show-hidden');
       UI.message = UI.panel.querySelector('#ed11y-message');
-			UI.readabilityInfo = UI.panel.querySelector('#readability-info');
-			UI.readabilityDetails = UI.panel.querySelector('#readability-details');
+			if (Options.readabilityPlugin) {
+				const detailsTab = document.createElement('details');
+				detailsTab.id = 'ed11y-readability-tab';
+				detailsTab.innerHTML = `
+            <summary>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" aria-hidden="true"><path fill="currentColor" d="M528.3 46.5l-139.8 0c-48.1 0-89.9 33.3-100.4 80.3-10.6-47-52.3-80.3-100.4-80.3L48 46.5C21.5 46.5 0 68 0 94.5L0 340.3c0 26.5 21.5 48 48 48l89.7 0c102.2 0 132.7 24.4 147.3 75 .7 2.8 5.2 2.8 6 0 14.7-50.6 45.2-75 147.3-75l89.7 0c26.5 0 48-21.5 48-48l0-245.7c0-26.4-21.3-47.9-47.7-48.1zM242 311.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zM501.3 311.8c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.8c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.8-.1 0z"/></svg> <span class="summary-title"></span>
+            </summary>
+            <div class="details">
+							<div id="readability-content">
+								<p id="readability-info"></p>
+								<ul id="readability-details"></ul>
+							</div>
+						</div>`;
+				UI.panel.querySelector('#ed11y-visualizers').appendChild(detailsTab);
+				UI.readabilityInfo = UI.panel.querySelector('#readability-info');
+				UI.readabilityDetails = UI.panel.querySelector('#readability-details');
+				UI.panel.querySelector('#ed11y-readability-tab .summary-title').textContent = Lang._('READABILITY');
+			}
+
       window.setTimeout(()=> {
         UI.panelElement.classList.remove('ed11y-preload');
       },0, UI.panel);
@@ -6035,7 +6474,7 @@ function updatePanel () {
       }
     } else if (!State.inlineAlerts) {
 				State.oldResultString = `${State.errorCount} ${State.warningCount}`;
-				Results.forEach(result => {
+				State.results.forEach(result => {
 					State.oldResultString += result.test + result.element.outerHTML;
 				});
 		}
@@ -6162,7 +6601,7 @@ function buildJumpList () {
   pauseObservers();
 
   // Initial alignment to get approximate Y position order for jump list.
-  Results.forEach((result, i) => {
+  State.results.forEach((result, i) => {
 
     let top = result.element.getBoundingClientRect().top;
     if (!top) {
@@ -6174,20 +6613,20 @@ function buildJumpList () {
     top = top + window.scrollY;
     if (Options.fixedRoots) {
       const root = result.element.closest('[data-ed11y-root]');
-      Results[i].fixedRoot = root.dataset.ed11yRoot;
+      State.results[i].fixedRoot = root.dataset.ed11yRoot;
     }
-    Results[i].scrollableParent = closestScrollable(result.element);
-    if (Results[i].scrollableParent) {
+    State.results[i].scrollableParent = closestScrollable(result.element);
+    if (State.results[i].scrollableParent) {
       // Group these together.
       top = top * 0.000001;
     }
-    Results[i].sortPos = top;
+    State.results[i].sortPos = top;
   });
   // Sort from bottom to top so focus order after insert is top to bottom.
-  Results.sort((a, b) => b.sortPos - a.sortPos);
+  State.results.sort((a, b) => b.sortPos - a.sortPos);
 
-  Results?.forEach(function (result, i) {
-    if (!Results[i].dismissalStatus || State.showDismissed) {
+  State.results?.forEach(function (result, i) {
+    if (!State.results[i].dismissalStatus || State.showDismissed) {
       drawResult(result, i);
     }
   });
@@ -6219,7 +6658,7 @@ function drawResult(result, index) {
 
   // Create mark.wrapper with type class
   mark.resultID = mark.dataset.ed11yResult;
-  mark.result = Results[mark.resultID];
+  mark.result = State.results[mark.resultID];
 
   mark.wrapper = document.createElement('div');
 
@@ -6263,7 +6702,7 @@ function drawResult(result, index) {
   shadow.appendChild(mark.wrapper);
 
   State.jumpList.unshift(mark);
-  Results[index].toggle = mark;
+  State.results[index].toggle = mark;
 }
 
 function dismissOne(dismissalType, test, dismissalKey) {
@@ -6315,7 +6754,7 @@ function editableHighlighter (resultID, show, firstVisible) {
     UI.editableHighlight[resultID]?.highlight.style.setProperty('opacity', '0');
     return;
   }
-  const result = Results[resultID];
+  const result = State.results[resultID];
   let el = UI.editableHighlight[resultID]?.highlight;
   if (!el) {
     el = document.createElement('ed11y-element-highlight');
@@ -6344,7 +6783,7 @@ function transferFocus () {
     return;
   }
   const id = State.openTip.tip.dataset.ed11yResult;
-  const target = Results[id].element;
+  const target = State.results[id].element;
   const editable = target.closest('[contenteditable]');
   if (!editable && !target.closest('textarea, input')) {
     if (target.closest('a')) { // @todo after merge add button?
@@ -6531,7 +6970,7 @@ function jumpTo(next = true) {
 		State.lastOpenTip = 0;
 	}
   let result = goto.getAttribute('data-ed11y-result');
-  let gotoResult = Results[result];
+  let gotoResult = State.results[result];
   const target = gotoResult.element;
 
   // First of two scrollTo calls, to trigger any scroll based events.
@@ -6587,7 +7026,7 @@ function alignTip (button, toolTip, recheck = 0, reveal = false) {
 
 	const mark = button.getRootNode().host;
 	const resultNum = button.dataset.ed11yResult;
-	const result = Results[resultNum];
+	const result = State.results[resultNum];
 
 	// Find button on page
 	const scrollTop = window.scrollY;
@@ -6771,7 +7210,7 @@ function alignHighlights() {
 	}
 
 	UI.editableHighlight.forEach((el) => {
-		if (!Results[el.resultID]) {
+		if (!State.results[el.resultID]) {
 			State.interaction = true;
 			State.forceFullCheck = true;
 			UI.editableHighlight = [];
@@ -6779,8 +7218,8 @@ function alignHighlights() {
 			return false;
 		}
 
-		const framePositioner = Results[el.resultID].fixedRoot && State.positionedFrames[Results[el.resultID].fixedRoot] ?
-			State.positionedFrames[Results[el.resultID].fixedRoot] : { top: 0, left: 0 };
+		const framePositioner = State.results[el.resultID].fixedRoot && State.positionedFrames[State.results[el.resultID].fixedRoot] ?
+			State.positionedFrames[State.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
 
 		let targetOffset = el.target.getBoundingClientRect();
 		if (!visible(el.target)) {
@@ -6859,8 +7298,8 @@ function rangeChange(anchorNode) {
 		typeof anchor.parentNode === 'object' &&
 		typeof anchor.parentNode.matches === 'function';
 	if (!anchor || expandable &&
-		( anchor.parentNode.matches(Options.checkRoots) ||
-			( !anchor.parentNode.matches(Options.checkRoots) && anchor.parentNode.matches('div[contenteditable="true"]')
+		( anchor.parentNode.matches(Options.checkRoot) ||
+			( !anchor.parentNode.matches(Options.checkRoot) && anchor.parentNode.matches('div[contenteditable="true"]')
 			)
 		)
 	) {
@@ -7029,7 +7468,7 @@ function startObserver (root) {
 
 
 /*const getRuleset = {
-	checkHeaders: checkHeaders(Results, Options, State.headingOutline),
+	checkHeaders: checkHeaders(State.results, Options, State.headingOutline),
 	checkLinkText:
 	checkImages: ,
 	checkLabels: ,
@@ -7038,38 +7477,31 @@ function startObserver (root) {
 
 const enqueueTests = function(queue) {
 	const test = queue.pop();
+	const results = Options.splitConfiguration ? State.devResults : State.results;
 	State.testsRemaining--;
 	try {
 		switch (test) {
-			case 'checkHeaders':
-				checkHeaders(Results, Options, State.headingOutline);
-				break
-			case 'checkLinkText':
-				checkLinkText(Results, Options);
-				break
-			case 'checkImages':
-				checkImages(Results, Options);
+			case 'quickTests':
+				checkHeaders(results, Options, State.headingOutline);
+				checkLinkText(results, Options);
+				checkImages(results, Options);
+				checkEmbeddedContent(results, Options);
+				customRuleset(results);
 				break
 			case 'checkLabels':
-				checkLabels(Results, Options);
-				break
-			case 'checkEmbeddedContent':
-				checkEmbeddedContent(Results, Options);
+				checkLabels(results, Options);
 				break
 			case 'checkQA':
-				checkQA(Results, Options);
-				break
-			case 'customRuleset':
-				customRuleset(Results);
+				checkQA(results, Options);
 				break
 			case 'checkReadability':
-				checkReadability(Results);
+				checkReadability(results);
 				break
 			case 'checkDeveloper':
-				checkDeveloper(Results);
+				checkDeveloper(results, Options);
 				break
 			case 'checkContrast':
-				checkContrast(Results);
+				checkContrast(results, Options);
 				break
 		}
 	} catch (error) {
@@ -7116,11 +7548,11 @@ function checkAll() {
 	if (Options.fixedRoots) {
 		Options.fixedRoots.forEach(root => {State.roots.push(root.fixedRoot);});
 	} else {
-		State.roots = document.querySelectorAll(`:is(${Options.checkRoots})`);
+		State.roots = document.querySelectorAll(`:is(${Options.checkRoot})`);
 	}
 	// Initialize root areas to check.
 	if (!State.roots && Options.headless === false) {
-		console.warn(Lang.sprintf('MISSING_ROOT', Options.checkRoots));
+		console.warn(Lang.sprintf('MISSING_ROOT', Options.checkRoot));
 	}
 
 	if (State.roots.length === 0) {
@@ -7132,25 +7564,27 @@ function checkAll() {
 	}
 
 	if ( State.incremental) {
-		State.oldResults = Results;
+		State.oldResults = State.results;
 	}
 	// Reset counts
-	Results.length = 0;
+	State.results.length = 0;
+	State.devResults.length = 0;
+
+	if ( Options.splitConfiguration ) {
+		Object.assign(Options, State.splitConfiguration.dev);
+	}
 
 	buildElementList();
 
 	// Call rulesets.
 	let queue = [
-		'checkHeaders',
-		'checkLinkText',
-		'checkImages',
-		'checkEmbeddedContent',
+		'quickTests',
 		// 'checkLabels', // todo cms merge param
 		'checkQA',
-		'customRuleset',
-		//'checkDeveloper', // todo merge param
+		'checkDeveloper', // todo merge param
 	];
-	if (Options.headless) {
+	if (Options.headless && Options.readabilityPlugin) {
+		// todo CMS readability not updated on incremental.
 		queue.push('checkReadability'); // todo merge param
 	}
 	// Todo after merge: developer and readability tests added via options here.
@@ -7207,13 +7641,62 @@ function continueCheck(customCheck = false) {
 		// Tests still in progress.
 		return;
 	}
+
+	// Filter split configuration results.
+	if (Options.splitConfiguration && State.devResults.length > 0) {
+		Object.assign(Options, State.splitConfiguration.content);
+
+		buildElementList(true);
+		let everything = false;
+		let headings = false;
+		let images = false;
+		let excludedHeadings = false;
+		let contrast = false;
+		let links = false;
+
+		State.results = State.devResults.filter((result) => {
+			if (!result.element) {
+				return false;
+			}
+			if (result.type.indexOf('HEADING') > -1) {
+				if (!headings) {
+					headings = new WeakSet(Elements.Found.Headings);
+					excludedHeadings = new WeakSet(Elements.Found.ExcludedHeadings);
+				}
+				return headings.has(result.element) && excludedHeadings.has(result.element);
+			}
+			if (result.type.indexOf('CONTRAST') > -1) {
+				if (!contrast) {
+					contrast = new WeakSet(Elements.Found.Contrast);
+				}
+				return contrast.has(result.element);
+			}
+			if (result.element.matches('img')) {
+				if (!images) {
+					images = new WeakSet(Elements.Found.Images);
+				}
+				return images.has(result.element)
+			}
+			if (result.element.matches('a')) {
+				links = new WeakSet(Elements.Found.Links);
+				return links.has(result.element);
+			}
+			if (!everything) {
+				everything = new WeakSet(Elements.Found.Everything);
+			}
+			return everything.has(result.element);
+		});
+	}
+
 	if (typeof UI.panelToggle.querySelector === 'function') {
 		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
 	}
 	if (State.visualizing) {
-		checkReadability([]);
-		UI.readabilityInfo.innerHTML = UI.readabilityInfoContent;
-		UI.readabilityDetails.innerHTML = UI.readabilityDetailsContent;
+		//checkReadability([]); // todo???
+		if (Options.readabilityPlugin) {
+			UI.readabilityInfo.innerHTML = UI.readabilityInfoContent;
+			UI.readabilityDetails.innerHTML = UI.readabilityDetailsContent;
+		}
 		showHeadingsPanel();
 		showAltPanel();
 	}
@@ -7398,7 +7881,7 @@ const showAltPanel = function () {
 	// visualize image alts
 	let altList = UI.panel.querySelector('#ed11y-alt-list');
 	UI.imageAlts = Elements.Found.Images.map((image) => {
-			const match = Results.find((i) => i.element === image);
+			const match = State.results.find((i) => i.element === image);
 			return match && {
 				element: image,
 				type: match.type,
@@ -7509,16 +7992,16 @@ function dismissThis (dismissalType, all = false) {
 	// Find the active tip and draw its identifying information from the result list
 	let removal = State.openTip;
 	let id = removal.tip.dataset.ed11yResult;
-	let test = Results[id].test;
+	let test = State.results[id].test;
 
 	if (all) {
-		Results.forEach((result) => {
+		State.results.forEach((result) => {
 			if (result.test === test && result.dismissalStatus !==dismissalType) {
 				dismissOne(dismissalType, test, result.dismiss);
 			}
 		});
 	} else {
-		let dismissalKey = Results[id].dismiss;
+		let dismissalKey = State.results[id].dismiss;
 		dismissOne(dismissalType, test, dismissalKey);
 	}
 
@@ -7612,7 +8095,7 @@ function raceCrash() {
 	State.showPanel = true;
 	checkAll();
 	window.setTimeout(function() {
-		if (Results.length > 0 && State.loopStop) {
+		if (State.results.length > 0 && State.loopStop) {
 			jumpTo();
 			State.loopStop = false;
 		}
@@ -8246,17 +8729,6 @@ class Ed11yElementPanel extends HTMLElement {
                 <ul id='ed11y-alt-list'></ul>
             </div>
         </details>
-        <details id="ed11y-readability-tab">
-            <summary>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" aria-hidden="true"><path fill="currentColor" d="M528.3 46.5l-139.8 0c-48.1 0-89.9 33.3-100.4 80.3-10.6-47-52.3-80.3-100.4-80.3L48 46.5C21.5 46.5 0 68 0 94.5L0 340.3c0 26.5 21.5 48 48 48l89.7 0c102.2 0 132.7 24.4 147.3 75 .7 2.8 5.2 2.8 6 0 14.7-50.6 45.2-75 147.3-75l89.7 0c26.5 0 48-21.5 48-48l0-245.7c0-26.4-21.3-47.9-47.7-48.1zM242 311.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zM501.3 311.8c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.8c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.8-.1 0z"/></svg> <span class="summary-title">${Lang._('READABILITY')}</span>
-            </summary>
-            <div class="details">
-							<div id="readability-content">
-								<p id="readability-info"></p>
-								<ul id="readability-details"></ul>
-							</div>
-						</div>
-        </details>
         </div>
       <button type='button' id='ed11y-toggle'><span class="ed11y-sr-only"></span><span class="ed11y-toggle-circle"><span class='icon'><svg class="errors-icon" xmlns="http://www.w3.org/2000/svg" width="10" aria-hidden="true" viewBox="0 0 448 512"><path fill="currentColor" d="M64 32C64 14 50 0 32 0S0 14 0 32L0 64 0 368 0 480c0 18 14 32 32 32s32-14 32-32l0-128 64-16c41-10 85-5 123 13c44.2 22 96 25 142 7l35-13c13-5 21-17 21-30l0-248c0-23-24-38-45-28l-10 5c-46 23-101 23-147 0c-35-18-75-22-114-13L64 48l0-16z"></path></svg><svg class="pass-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10.1699 19.1777"><path fill="currentColor" d="M3.7031,10.5527c-.3633-.6562-.6426-1.1387-.8379-1.4473l-.3105-.4863-.2344-.3574c-.5117-.7969-1.0449-1.4551-1.5996-1.9746.3164-.2617.6113-.3926.8848-.3926.3359,0,.6348.123.8965.3691s.5918.7148.9902,1.4062c.4531-1.4727,1.0293-2.8691,1.7285-4.1895.3867-.7188.7314-1.2021,1.0342-1.4502s.7041-.3721,1.2041-.3721c.2656,0,.5938.041.9844.123-1.0039.8086-1.8066,1.7695-2.4082,2.8828s-1.3789,3.0762-2.332,5.8887Z"/></svg><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="close-icon" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg></span></span></button>
       <button class='ed11y-jump next' data-ed11y-goto='0' aria-haspopup="dialog"><svg class="hover-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="11" viewBox="0 -15 90 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m30 00 50 50-50 50" stroke-width="18"></path></svg><span class='toggle-count'></span><span class='jump-next ed11y-sr-only'></span></button>
@@ -8284,7 +8756,7 @@ class Ed11yElementPanel extends HTMLElement {
       });
       const altDetails = wrapper.querySelector('#ed11y-alts-tab');
       const headingDetails = wrapper.querySelector('#ed11y-headings-tab');
-			wrapper.querySelector('#ed11y-readability-tab');
+			wrapper.querySelector('#ed11y-readability-tab'); // todo swappy?
       altDetails.addEventListener('toggle', () => {
         if (altDetails.open && headingDetails.open) {
           headingDetails.removeAttribute('open');
@@ -8467,7 +8939,7 @@ class Ed11yElementTip extends HTMLElement {
 
         const pageActions = document.createElement('details');
         const pageActionsSummary = document.createElement('summary');
-        const othersLikeThis = Results.filter(el => el.test === this.result.test).length;
+        const othersLikeThis = State.results.filter(el => el.test === this.result.test).length;
         const showPageActions = othersLikeThis > 3 && Options.allowHide && Options.allowOK;
 
         if (showPageActions) {
@@ -8652,8 +9124,18 @@ class Ed11yElementTip extends HTMLElement {
 const preProcessOptions = function(userOptions) {
 	Object.assign(Options, userOptions);
 
-	if (!userOptions.checkRoots) {
-		Options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?
+	if (userOptions.splitConfiguration) {
+		State.splitConfiguration.dev = userOptions.devConfiguration;
+		State.splitConfiguration.content = {};
+		Object.keys(userOptions.devConfiguration).forEach(key => {
+			State.splitConfiguration.content[key] = userOptions[key];
+		});
+	}
+
+	// todo split configuration.
+
+	if (!Options.checkRoot) { // todo split configuration.
+		Options.checkRoot = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?
 	}
 
 	/*
@@ -8782,7 +9264,7 @@ function initialize (userOptions) {
 	// Initialize global constants and exclusions.
 	preProcessOptions(userOptions);
 	// We override Sa11y's root initializer because we use strings not arrays.
-	initializeRoot(Options.checkRoots, Options.checkRoots);
+
 	Constants.initializeGlobal(Options);
 	// Constants.initializeReadability(Options);
 	Constants.initializeExclusions(Options);
@@ -8860,4 +9342,4 @@ class Ed11y {
 }
 let elements = Elements.Found;
 
-export { Ed11y, Lang, Options, Results, State, Theme, UI, checkAll, computeAccessibleName, elements, findElements, getElements, incrementalCheck, prepareDismissal, reset };
+export { Ed11y, Lang, Options, State, Theme, UI, checkAll, computeAccessibleName, elements, findElements, getElements, incrementalCheck, prepareDismissal, reset };

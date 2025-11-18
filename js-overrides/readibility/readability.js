@@ -8,7 +8,6 @@
  * @link https://www.simoahava.com/analytics/calculate-readability-scores-for-content/#commento-58ac602191e5c6dc391015c5a6933cf3e4fc99d1dc92644024c331f1ee9b6093
  * @link https://oaji.net/articles/2017/601-1498133639.pdf (Portuguese adaptation).
  */
-import Constants from '../utils/constants';
 import Elements from '../utils/elements';
 import * as Utils from '../utils/utils';
 import Lang from '../utils/lang';

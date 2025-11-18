@@ -7,6 +7,7 @@
 <body>
     <header>
         <h1 id="editoria11y-demo">Editoria11y Unit Tests</h1>
+		<h6 class="positive">Developer mode should pick up this h6</h6>
     </header>
     <main>
 
@@ -480,15 +481,27 @@
             //baseFontSize: 18,
             //theme : 'sleekTheme',
             theme : 'sleekTheme',
+			  headingsOnlyFromCheckRoots: true, // @todo merge this is gone. can we move to only excluding header? or use fixedRoots? But fixedRoots would also need devFixedRoots...
             //outlineExclude : '.utility', // @todo CMS this syntax changed for Sa11y to the below.
-			  outlineIgnore: '.utility, h3',
+			  outlineIgnore: '.utility',
+			  splitConfiguration: true,
+			  devOnlyChecks: ['QA_IN_PAGE_LINK'], // Provide list of dev-only test keys.
+			  devConfiguration: {
+				  checkRoot: 'body',
+				  // containerIgnore: '',
+				  // contrastIgnore: '.sr-only',
+				  // outlineIgnore: '',
+				  // headerIgnore: '',,
+				  // imageIgnore: '',
+				  // linkIgnore: '[aria-hidden][tabindex="-1"]',
+			  },
             ignoreAriaOnElements: '.gutenbergBadAria',
             linkIgnoreStrings: ['opens in new window','download'], // @todo CMS was regex.
             linkIgnoreSelector: '.link-purpose',
             embeddedContent: '#embed',
             ignoreElements : 'footer *, [style*="none"] *, [style*="none"]',
             // shadowComponents : 'shadow-test, shadow-test-no-hits, turtle',
-            //autoDetectShadowComponents: false,
+            autoDetectShadowComponents: true,
             hiddenHandlers : '#hidden-handler',
 		  	checkRoot: 'main',
             //showDismissed : true,

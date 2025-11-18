@@ -1,4 +1,4 @@
-import {Results, State, UI} from "./state.js"
+import {State, UI} from "./state.js"
 import Lang from "../../sa11y/utils/lang.js"
 import find from "../../sa11y/utils/find.js"
 import Constants from "../../sa11y/utils/constants.js";
@@ -147,7 +147,7 @@ const dropSomeElements = function(arrayRef, sendTo = false, readyCheck = true, h
 }
 
 // First step in checkAll is getting a fresh set of elements to check.
-export function buildElementList (template = false) {
+export function buildElementList (onlyForFilter = false) {
 
 	// Check for ignoreAll elements.
 	State.ignoreAll = Options.ignoreAllIfAbsent && document.querySelector(`:is(${Options.ignoreAllIfAbsent})`) === null;
@@ -159,11 +159,12 @@ export function buildElementList (template = false) {
 	State.mediaCount = 0;
 	State.headingOutline = [];
 
-	initializeRoot(Options.checkRoots, Options.checkRoots); // @todo release merge readability, add multiroot.
+	initializeRoot(Options.checkRoot, Options.checkRoot);
 
 	for (let i = 0; i < State.roots.length; i++) {
 		if (Options.fixedRoots) {
 			State.roots[i].dataset.ed11yRoot = `${i}`;
+			// todo check why not detectShadow here?
 		}
 		if (State.roots[i].shadowRoot) {
 			State.roots.setAttribute('data-ed11y-has-shadow-root', 'true');
@@ -175,32 +176,55 @@ export function buildElementList (template = false) {
 		}
 	}
 
-
 		// Find all web components on the page.
 		findShadowComponents(Options);
 
 		// Find and cache elements.
+	if (onlyForFilter) {
+
+		// Since 4.0.0: For performance, we filter elements instead of dozens of querySelectors on the DOM.
+		Elements.Found.Everything = find('*', 'root', Constants.Exclusions.Sa11yElements);
+
+		Elements.Found.Contrast = Elements.Found.Everything.filter(($el) => {
+			const matchesSelector = Constants.Exclusions.Contrast.some((exclusion) => $el.matches(exclusion));
+			return !matchesSelector && !Constants.Exclusions.Contrast.includes($el);
+		});
+
+		Elements.Found.Images = Elements.Found.Everything.filter(($el) => $el.tagName === 'IMG'
+			&& !Constants.Exclusions.Images.some((selector) => $el.matches(selector)));
+
+		Elements.Found.Links = Elements.Found.Everything.filter(($el) => ($el.tagName === 'A' || $el.tagName === 'a')
+			&& $el.hasAttribute('href')
+			&& !$el.matches('[role="button"]') // Exclude links with [role="button"]
+			&& !Constants.Exclusions.Links.some((selector) => $el.matches(selector)));
+
+		// We want headings from the entire document for the Page Outline.
+		Elements.Found.Headings = find(
+			'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
+			Options.ignoreContentOutsideRoots || Options.fixedRoots
+				? 'root' : 'document',
+			Constants.Exclusions.Headings,
+		);
+
+		// Excluded via headerIgnore.
+		Elements.Found.ExcludedHeadings = Elements.Found.Headings.filter((heading) => Constants.Exclusions.Headings.some((exclusion) => heading.matches(exclusion)));
+
+		// Excluded via outlineIgnore.
+		Elements.Found.ExcludedOutlineHeadings = Elements.Found.Headings.filter((heading) => Constants.Exclusions.Outline.some((exclusion) => heading.matches(exclusion)));
+
+		// Merge both headerIgnore and outlineIgnore.
+		Elements.Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(Elements.Found.ExcludedHeadings);
+
+	} else {
 		Elements.initializeElements(Options);
+	}
 
-		dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore, true, true);
-		dropSomeElements(Elements.Found.Blockquotes);
-		dropSomeElements(Elements.Found.Tables);
-
-		if (typeof Options.initialHeadingLevel === 'object') {
-			Options.initialHeadingLevel.forEach((level) => {
-				const headingRoots = getElements([level.selector], 'document');
-				if (headingRoots.length > 0) {
-					headingRoots.forEach((headingRoot) => {
-						const firstInSection = headingRoot.querySelector(`h${level.previousHeading}, h${level.previousHeading + 1}`);
-						if (firstInSection) {
-							State.headingOutlineOverrides.push(firstInSection);
-						}
-					})
-				}
-			})
+		if (!onlyForFilter) {
+			dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore, true, true);
+			dropSomeElements(Elements.Found.Blockquotes);
+			dropSomeElements(Elements.Found.Tables);
 		}
 
-		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
 		if (typeof Options.editableContent === 'string') {
 			findElements('editable', Options.editableContent, false);
 		}
@@ -211,9 +235,7 @@ export function buildElementList (template = false) {
 			State.inlineAlerts = false;
 			console.warn('Editable content detected; Editoria11y inline alerts disabled');
 		}
-		if (Options.embeddedContent) { // @todo merge convert to custom check
-			// Ed11y.findElements('embed', Options.embeddedContent);
-		}
+
 		if (Options.panelNoCover) {
 			// Moves panel off conflicting widgets.
 			findElements('panelNoCover', Options.panelNoCover, false);
@@ -434,12 +456,12 @@ export function resetResults(incremental) {
 
 export function newIncrementalResults() {
 	// Obviously new if there are more results:
-	if (State.forceFullCheck || Results.length !== State.oldResults.length) {
+	if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
 		return true;
 	}
 	// Subtly new if a result has changed:
 	let newResultString = `${State.errorCount} ${State.warningCount}`;
-	Results.forEach(result => {
+	State.results.forEach(result => {
 		newResultString += result.test + result.element.outerHTML;
 	});
 	let changed = newResultString !== State.oldResultString;
@@ -456,13 +478,13 @@ export function countAlerts () {
 	// Review results array to remove dismissed or ignored items
 
 	State.dismissedCount = 0;
-	for (let i = Results.length - 1; i >= 0; i--) {
+	for (let i = State.results.length - 1; i >= 0; i--) {
 
 		/*
 		if (Options.ignoreTests &&
 			Options.ignoreTests.includes(test)) {
 			// Would be faster to skip test, but this is easy and reliable.
-			Results.splice(i, 1);
+			State.results.splice(i, 1);
 			continue;
 		}*/
 
@@ -473,38 +495,38 @@ export function countAlerts () {
 
 
 
-			if (!Results[i].type || Results[i].type === 'good') {
-				Results.splice(i, 1);
+			if (!State.results[i].type || State.results[i].type === 'good') {
+				State.results.splice(i, 1);
 			} else {
 				// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
 				if (Options.currentPage in State.dismissedAlerts
-					&& Results[i].test in State.dismissedAlerts[Options.currentPage]
-					&& Results[i].dismiss in State.dismissedAlerts[Options.currentPage][Results[i].test]) {
-					// Remove Results[i] if it has been marked OK or ignored, increment dismissed match counter.
+					&& State.results[i].test in State.dismissedAlerts[Options.currentPage]
+					&& State.results[i].dismiss in State.dismissedAlerts[Options.currentPage][State.results[i].test]) {
+					// Remove State.results[i] if it has been marked OK or ignored, increment dismissed match counter.
 					State.dismissedCount++;
-					Results[i].dismissalStatus = true;
-				} else if (Results[i].type === 'warning') {
+					State.results[i].dismissalStatus = true;
+				} else if (State.results[i].type === 'warning') {
 					State.warningCount++;
 				} else {
 					State.errorCount++;
 				}
 
 
-				let location = Results[i].element;
+				let location = State.results[i].element;
 				let interactive = location.closest('a, button, img, svg, input, iframe, [role="button"], [role="link"]');
 				let canPositionInside = !interactive && location.closest('p, table, li, blockquote, h1, h2, h3, h4, h5, h6');
 
 				// Todo limit afterBegin to P and TD such.
-				if (Results[i].element.shadowRoot) {
+				if (State.results[i].element.shadowRoot) {
 					while (location.parentElement && location.parentElement.shadowRoot) {
 						location = location.parentElement;
 					}
 				} else if (!canPositionInside) {
-					Results[i].location = interactive ?? location;
-					Results[i].position = 'beforebegin';
+					State.results[i].location = interactive ?? location;
+					State.results[i].position = 'beforebegin';
 				} else {
-					Results[i].location = location;
-					Results[i].position = 'afterbegin';
+					State.results[i].location = location;
+					State.results[i].position = 'afterbegin';
 				}
 			}
 		}

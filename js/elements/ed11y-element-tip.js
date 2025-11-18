@@ -1,4 +1,4 @@
-import {Results, State, UI} from "../utils/state.js";
+import {State, UI} from "../utils/state.js";
 import {
   alertOnInvisibleTip,
 	dismissThis,
@@ -136,7 +136,7 @@ export class Ed11yElementTip extends HTMLElement {
 
         const pageActions = document.createElement('details');
         const pageActionsSummary = document.createElement('summary');
-        const othersLikeThis = Results.filter(el => el.test === this.result.test).length;
+        const othersLikeThis = State.results.filter(el => el.test === this.result.test).length;
         const showPageActions = othersLikeThis > 3 && Options.allowHide && Options.allowOK;
 
         if (showPageActions) {
