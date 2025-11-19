@@ -95,7 +95,7 @@ export function updatePanel () {
   }
 
   if (!Options.headless) {
-    // Not headless; draw the interface.
+    // Not headless; draw the run.
 
     if (!State.bodyStyle) {
       paintReady();
@@ -1307,13 +1307,16 @@ export function checkAll() {
 	// Call rulesets.
 	let queue = [
 		'quickTests',
-		// 'checkLabels', // todo cms merge param
+		'checkLabels', // todo cms merge param
 		'checkQA',
 		'checkDeveloper', // todo merge param
 	];
 	if (Options.headless && Options.readabilityPlugin) {
 		// todo CMS readability not updated on incremental.
-		queue.push('checkReadability') // todo merge param
+		queue.push('checkReadability'); // todo merge param
+	}
+	if (Options.contrastPlugin) {
+		queue.push('checkContrast');
 	}
 	// Todo after merge: developer and readability tests added via options here.
 	State.testsRemaining = queue.length;

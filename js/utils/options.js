@@ -128,7 +128,7 @@ export const Options = {
 
 
 	// Set alertModes:
-	// 'headless': do not draw interface
+	// 'headless': do not draw run
 	// 'userPreference: respect user preference.
 	// 'polite': open for new issues.
 	// 'assertive': open for any issues.
@@ -139,7 +139,7 @@ export const Options = {
 	watchForChanges: 'checkRoots', // 'document', false, 'checkRoots';
 
 	// This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
-	editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
+	editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .run-run-skeleton__content',
 
 	// Dismissed alerts
 	currentPage: window.location.pathname, // uses window.location.pathname unless a string is provided.
@@ -399,21 +399,19 @@ export const Options = {
 
 		// Sa11y: Developer checks
 		// Todo pro.
-		/*
 		DUPLICATE_ID: false,
 		META_TITLE: false,
 		UNCONTAINED_LI: false,
-		TABINDEX_ATTR: true,
-		HIDDEN_FOCUSABLE: true,
-		LABEL_IN_NAME: true,
-		BTN_EMPTY: true,
-		BTN_EMPTY_LABELLEDBY: true,
-		BTN_ROLE_IN_NAME: true,
-		*/
+		TABINDEX_ATTR: false,
+		HIDDEN_FOCUSABLE: false,
+		LABEL_IN_NAME: false,
+		BTN_EMPTY: false,
+		BTN_EMPTY_LABELLEDBY: false,
+		BTN_ROLE_IN_NAME: false,
+
 
 		// Sa11y: Contrast checks
 		// Todo pro.
-		/*
 		CONTRAST_WARNING: {
 			dismissAll: true,
 		},
@@ -428,7 +426,7 @@ export const Options = {
 		CONTRAST_UNSUPPORTED: {
 			dismissAll: true,
 		},
-	 	*/
+
 		// dev
 		HEADING_EXCEEDS_LEVEL: true, // todo merge would need text.
 		EMBED_CUSTOM: {

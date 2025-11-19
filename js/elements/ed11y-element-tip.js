@@ -4,7 +4,7 @@ import {
 	dismissThis,
   jumpTo,
   transferFocus
-} from "../logic/interface.js";
+} from "../logic/run.js";
 import Lang from "../../sa11y/utils/lang.js";
 import {Options} from "../utils/options.js";
 import {getElements} from "../utils/utils.js";

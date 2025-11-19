@@ -1,5 +1,5 @@
 import {State, UI} from "../utils/state.js";
-import {togglePanel, toggleShowDismissals, visualize} from "../logic/interface.js";
+import {togglePanel, toggleShowDismissals, visualize} from "../logic/run.js";
 
 export class Ed11yElementPanel extends HTMLElement {
 

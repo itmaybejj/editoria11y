@@ -142,6 +142,10 @@
                 <figcaption>Figcaption is the same as alt</figcaption>
             </figure>
         </section>
+		<section>
+			<h2>Contrast</h2>
+			<p style="background: #ccc; color: #ddd;">Super legible.</p>
+		</section>
         <h3 id="embeds">Embeds</h3>
 
         <p>Flagged as manual check needed for captioning:</p>
@@ -495,6 +499,7 @@
 				  // imageIgnore: '',
 				  // linkIgnore: '[aria-hidden][tabindex="-1"]',
 			  },
+			  contrastPlugin: true,
             ignoreAriaOnElements: '.gutenbergBadAria',
             linkIgnoreStrings: ['opens in new window','download'], // @todo CMS was regex.
             linkIgnoreSelector: '.link-purpose',
@@ -572,7 +577,9 @@
 				  },
 				  LINK_EMPTY_LABELLEDBY: true,
 				  LINK_EMPTY_NO_LABEL: true,
-				  LINK_STOPWORD: true,
+				  LINK_STOPWORD: {
+					  type: 'warning',
+				  },
 				  LINK_STOPWORD_ARIA: true,
 				  LINK_SYMBOLS: true,
 				  LINK_CLICK_HERE: false,

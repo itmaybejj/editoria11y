@@ -4,7 +4,7 @@ import Lang from "../../sa11y/utils/lang.js";
 import {Options} from "../utils/options.js";
 import {documentLoadingCheck, store} from "../../sa11y/utils/utils.js";
 import {checkRunPrevent, initializeRoot} from '../utils/utils.js';
-import {checkAll, continueCheck, windowResize} from "./interface.js";
+import {checkAll, continueCheck, windowResize} from "./run.js";
 import ed11yLang from "../lang/localization.js";
 import {Ed11yElementAlt} from "../elements/ed11y-element-alt.js";
 import {Ed11yElementResult} from "../elements/ed11y-element-result.js";

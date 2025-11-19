@@ -4,7 +4,7 @@ import {prepareDismissal} from "../sa11y/utils/utils.js";
 import {State, Theme, UI} from "./utils/state.js";
 import {Options} from './utils/options.js';
 import Elements from "../sa11y/utils/elements.js";
-import {checkAll, reset, incrementalCheck} from "./logic/interface.js";
+import {checkAll, reset, incrementalCheck} from "./logic/run.js";
 import {
 	initialize,
 } from "./logic/initialize.js";
@@ -24,7 +24,7 @@ class Ed11y {
 			// @todo merge license and error message.
     }
 
-    /* Export exposed interfaces */
+    /* Export exposed runs */
 		this.version = State.version;
 
   }
