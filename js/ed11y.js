@@ -107,7 +107,7 @@ class Ed11y {
       panelOffsetX: '25px',
       panelOffsetY: '25px',
       panelNoCover: '', // select other buttons to avoid.
-      panelAttachTo: document.body,
+      panelAttachTo: document.querySelector('body'),
 
       // Selector list for elements that hide overflow, truncating buttons.
       constrainButtons: false,
