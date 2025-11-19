@@ -830,7 +830,7 @@ class Ed11y {
       mark.setAttribute('data-ed11y-result', index);
       mark.setAttribute('data-ed11y-open', 'false');
       if (!Ed11y.options.inlineAlerts) {
-        location = Ed11y.options.panelAttachTo;
+        location = Ed11y.options.panelAttachTo ?? document.body;
         position = 'beforeend';
         mark.classList.add('ed11y-editable-result');
       } else {
@@ -1280,7 +1280,8 @@ class Ed11y {
         Ed11y.editableHighlight[resultID] = {highlight: el, resultID: resultID};
         el.style.setProperty('position', 'absolute');
         el.style.setProperty('pointer-events', 'none');
-        Ed11y.options.panelAttachTo.appendChild(el);
+        const location = Ed11y.options.panelAttachTo ?? document.body;
+        location.appendChild(el);
       }
       Ed11y.editableHighlight[resultID].target = firstVisible ? firstVisible : result.element;
       const zIndex = result.dismissalKey ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
