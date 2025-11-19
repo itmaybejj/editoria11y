@@ -107,7 +107,7 @@ class Ed11y {
       panelOffsetX: '25px',
       panelOffsetY: '25px',
       panelNoCover: '', // select other buttons to avoid.
-      panelAttachTo: document.querySelector('body'),
+      panelAttachTo: document.body, // provide DOM node or selector.
 
       // Selector list for elements that hide overflow, truncating buttons.
       constrainButtons: false,
@@ -249,6 +249,8 @@ class Ed11y {
     Ed11y.theme.buttonZIndex = Ed11y.options.buttonZIndex;
     Ed11y.theme.baseFontFamily = Ed11y.options.baseFontFamily;
 
+
+
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
     }
@@ -370,6 +372,10 @@ class Ed11y {
 
         if (!Ed11y.options.checkRoots) {
           Ed11y.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
+        }
+
+        if (!Ed11y.options.panelAttachTo) {
+          Ed11y.options.panelAttachTo = document.querySelector('body');
         }
 
         // Run tests
@@ -830,7 +836,7 @@ class Ed11y {
       mark.setAttribute('data-ed11y-result', index);
       mark.setAttribute('data-ed11y-open', 'false');
       if (!Ed11y.options.inlineAlerts) {
-        location = Ed11y.options.panelAttachTo ?? document.body;
+        location = Ed11y.options.panelAttachTo;
         position = 'beforeend';
         mark.classList.add('ed11y-editable-result');
       } else {
@@ -1280,8 +1286,7 @@ class Ed11y {
         Ed11y.editableHighlight[resultID] = {highlight: el, resultID: resultID};
         el.style.setProperty('position', 'absolute');
         el.style.setProperty('pointer-events', 'none');
-        const location = Ed11y.options.panelAttachTo ?? document.body;
-        location.appendChild(el);
+        Ed11y.options.panelAttachTo.appendChild(el);
       }
       Ed11y.editableHighlight[resultID].target = firstVisible ? firstVisible : result.element;
       const zIndex = result.dismissalKey ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)' : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
