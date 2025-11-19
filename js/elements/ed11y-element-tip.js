@@ -8,6 +8,11 @@ import {
 import Lang from "../../sa11y/utils/lang.js";
 import {Options} from "../utils/options.js";
 import {getElements} from "../utils/utils.js";
+import {
+	generateColorSuggestion,
+	generateContrastTools,
+	initializeContrastTools
+} from '../../sa11y/utils/contrast-utils';
 
 export class Ed11yElementTip extends HTMLElement {
   /* global Ed11y */
@@ -76,8 +81,19 @@ export class Ed11yElementTip extends HTMLElement {
 			innerContent.appendChild(theRest);
 			content.append(innerContent);
 		}
-    /**/
+		if (this.result.contrastDetails) {
+			const contrastDiv = document.createElement('div');
+			contrastDiv.classList.add('ed11y-contrast-tools');
+			content.append( contrastDiv);
+			// Append color pickers and suggested color.
+			const tools = generateContrastTools(this.result.contrastDetails);
+			contrastDiv.appendChild(tools);
+			initializeContrastTools(contrastDiv, this.result.contrastDetails);
 
+			// Append suggested color.
+			const suggestion = generateColorSuggestion(this.result.contrastDetails);
+			if (suggestion) contrastDiv.appendChild(suggestion);
+		}
 
     if (!State.inlineAlerts || Options.editLinks) {
       const editBar = document.createElement('div');

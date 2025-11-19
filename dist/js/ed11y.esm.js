@@ -1577,9 +1577,7 @@ const Options = {
 		CONTRAST_PLACEHOLDER: true,
 		CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
 		CONTRAST_ERROR_GRAPHIC: true,
-		CONTRAST_WARNING_GRAPHIC: {
-			dismissAll: true,
-		},
+		CONTRAST_WARNING_GRAPHIC: false,
 		CONTRAST_UNSUPPORTED: {
 			dismissAll: true,
 		},
@@ -2656,8 +2654,10 @@ function checkLinkText(results, option) {
     // Original preserved text to lowercase.
     const originalLinkText = $el.textContent.trim().toLowerCase();
 
+		let oneStop;
     const addStopWordResult = (element, stopword) => {
-      if (option.checks.LINK_STOPWORD) {
+      if (option.checks.LINK_STOPWORD && !oneStop) {
+				oneStop = true;
         results.push({
           test: 'LINK_STOPWORD',
           element,
@@ -3644,12 +3644,12 @@ function checkQA(results, option) {
         if ((href.startsWith('#') || href === '') && hasText && !ignored && !hasAttributes) {
           const targetId = href.substring(1);
           const ariaControls = $el.getAttribute('aria-controls');
-          const targetElement = document.getElementById(targetId)
+					console.log($el);
+          const targetElement = (document.getElementById(targetId)
             || document.getElementById(decodeURIComponent(targetId))
             || document.getElementById(encodeURIComponent(targetId))
             || document.getElementById(ariaControls)
-            || document.querySelector(`a[name="${targetId}"]`);
-
+            || document.querySelector(`a[name="${targetId}"]`));
           // If reference ID doesn't exist.
           if (!targetElement) {
             results.push({
@@ -4117,6 +4117,7 @@ function checkQA(results, option) {
   return results;
 }
 
+// Editoria11y override: replaces APCA dependency with Porter-Duff
 const alphaBlend = function(fg = [0,0,0,1], bg = [0,0,0]) {
 	const bgAlpha = 1 - fg[3];
 	return [
@@ -4296,6 +4297,38 @@ function getWCAG2Ratio(l1, l2) {
 }
 
 /**
+ * Brighten a foreground text colour.
+ * @param {number[]} color Text colour in [R,G,B,A] format.
+ * @param {number} amount Number or increment to brighten by.
+ * @returns Lighter foreground text colour.
+ */
+function brighten(color, amount) {
+	return color.map((value, index) => {
+		if (index < 3) { // Only brighten [R,G,B]
+			const newValue = Math.ceil(value + (255 - value) * amount);
+			return newValue >= 255 ? 255 : newValue;
+		}
+		return value;
+	});
+}
+
+/**
+ * Darken a foreground text colour.
+ * @param {number[]} color Text colour in [R,G,B,A] format.
+ * @param {number} amount Number or increment to darken by.
+ * @returns Darker foreground text colour.
+ */
+function darken(color, amount) {
+	return color.map((value, index) => {
+		if (index < 3) { // Only darken [R,G,B]
+			const newValue = Math.floor(value * (1 - amount));
+			return newValue <= 0 ? 0 : newValue;
+		}
+		return value;
+	});
+}
+
+/**
  * Get the hex code equivalent of an RGB colour.
  * @param {number[]} color Colour in [R,G,B,A] format.
  * @returns Hexcode equivalent.
@@ -4339,6 +4372,268 @@ function calculateContrast(color, bg) {
 	const background = getLuminance(bg);
 	ratio = getWCAG2Ratio(foreground, background);
 	return { ratio, blendedColor };
+}
+
+/**
+ * Suggest a foreground colour with sufficient contrast.
+ * @param {number[]} color Text colour in [R,G,B,A] format.
+ * @param {number[]} background Background colour in [R,G,B,A] format.
+ * @param {boolean} isLargeText Whether text is normal or large size.
+ * @param {boolean} contrastAAA Use WCAG AAA thresholds.
+ * @returns Compliant colour hexcode.
+ */
+function suggestColorWCAG(color, background, isLargeText, contrastAAA = false) {
+	let minContrastRatio;
+	if (contrastAAA) {
+		minContrastRatio = isLargeText ? 4.5 : 7;
+	} else {
+		minContrastRatio = isLargeText ? 3 : 4.5;
+	}
+
+	// Get luminance
+	const fgLuminance = getLuminance(color);
+	const bgLuminance = getLuminance(background);
+
+	// Determine if text color should be lightened or darkened (considers extreme values).
+	const adjustMode = fgLuminance > bgLuminance
+		? getWCAG2Ratio(1, bgLuminance) > minContrastRatio
+		: getWCAG2Ratio(0, bgLuminance) < minContrastRatio;
+
+	const adjustColor = (foregroundColor, amount, mode) => (
+		mode ? brighten(foregroundColor, amount) : darken(foregroundColor, amount)
+	);
+
+	let adjustedColor = color;
+	let lastValidColor = adjustedColor;
+	let contrastRatio = getWCAG2Ratio(fgLuminance, bgLuminance);
+	let bestContrast = contrastRatio;
+	let previousColor = color;
+
+	// Loop parameters.
+	let step = 0.16;
+	const percentChange = 0.5;
+	const precision = 0.01;
+	let iterations = 0;
+	const maxIterations = 100;
+
+	while (step >= precision) {
+		iterations += 1;
+
+		// Return null if no colour found.
+		if (iterations > maxIterations) {
+			return { color: null };
+		}
+
+		adjustedColor = adjustColor(adjustedColor, step, adjustMode);
+		const newLuminance = getLuminance(adjustedColor);
+		contrastRatio = getWCAG2Ratio(newLuminance, bgLuminance);
+
+		// console.log(`%c ${getHex(adjustedColor)} | ${contrastRatio}`, `color:${getHex(adjustedColor)};background:${getHex(background)}`);
+
+		// Save valid colour, go back to previous, and continue with a smaller step.
+		if (contrastRatio >= minContrastRatio) {
+			// Ensure new colour is closer to the contrast minimum than old colour.
+			lastValidColor = (contrastRatio <= bestContrast) ? adjustedColor : lastValidColor;
+			bestContrast = contrastRatio;
+			adjustedColor = previousColor;
+			step *= percentChange;
+		}
+
+		previousColor = adjustedColor;
+	}
+	return { color: getHex(lastValidColor) };
+}
+
+/**
+ * Generates and inserts color suggestions for tooltip upon tooltip opening.
+ * This function is referenced within './interface/tooltips.js'.
+ * For performance reasons, it is only called upon tooltip opening.
+ * @param {HTMLElement} container The container where the color suggestion will be inserted.
+ */
+function generateColorSuggestion(contrastDetails) {
+	let adviceContainer;
+	const { color, background, fontWeight, fontSize, isLargeText, type } = contrastDetails;
+	if (
+		color && background && background.type !== 'image'
+		&& (type === 'text' || type === 'svg-error' || type === 'input')
+	) {
+		const suggested = suggestColorWCAG(color, background, isLargeText, Constants.Global.contrastAAA);
+
+		let advice;
+		const hr = '<hr aria-hidden="true">';
+		const style = `color:${suggested.color};background-color:${getHex(contrastDetails.background)};`;
+		const colorBadge = `<button id="suggest" class="badge" style="${style}">${suggested.color}</button>`;
+		`<strong class="normal-badge">${suggested.size}px</strong>`;
+
+		if (suggested.color === null) {
+			advice = `${hr} ${Lang._('NO_SUGGESTION')}`;
+		} else {
+			advice = `${hr} ${Lang._('CONTRAST_COLOR')} ${colorBadge}`;
+		}
+
+		// Append it to contrast details container.
+		adviceContainer = document.createElement('div');
+		adviceContainer.id = 'advice';
+
+		// If low opacity, suggest increase opacity first.
+		const suggestion = (contrastDetails.opacity < 1)
+			? `<hr aria-hidden="true"> ${Lang.sprintf('CONTRAST_OPACITY')}` : advice;
+
+		// Append advice to contrast details container.
+		adviceContainer.innerHTML = suggestion;
+	}
+	return adviceContainer;
+}
+
+/**
+ * Inject contrast colour pickers into tooltip.
+ * @param {HTMLElement} container The tooltip container to inject the contrast colour pickers.
+ */
+function generateContrastTools(contrastDetails) {
+	const { sanitizedText, color, background, fontWeight, fontSize, ratio, textUnderline } = contrastDetails;
+
+	// Initialize variables.
+	const hasBackgroundColor = background && background.type !== 'image';
+	const backgroundHex = hasBackgroundColor ? getHex(background) : '#000000';
+	const foregroundHex = color ? getHex(color) : '#000000';
+
+	// Other properties.
+	const hasFontWeight = fontWeight ? `font-weight:${fontWeight};` : '';
+	const hasFontSize = fontSize ? `font-size:${fontSize}px;` : '';
+	const textDecoration = textUnderline ? `text-decoration:${textUnderline};` : '';
+
+	// If colour or background colour is unknown; visually indicate so.
+	const unknownFG = color
+		? '' : 'class="unknown"';
+	const unknownBG = background && background.type !== 'image'
+		? '' : 'class="unknown"';
+	const unknownFGText = color
+		? '' : `<span class="visually-hidden">(${Lang._('UNKNOWN')})</span>`;
+	const unknownBGText = background
+		? '' : `<span class="visually-hidden">(${Lang._('UNKNOWN')})</span>`;
+
+	// Ratio to be displayed.
+	let displayedRatio;
+
+	// WCAG 2.0 ratio.
+	displayedRatio = ratio || Lang._('UNKNOWN');
+
+	// Generate HTML layout.
+	const contrastTools = document.createElement('div');
+	contrastTools.id = 'contrast-tools';
+	contrastTools.innerHTML = `
+      <hr aria-hidden="true">
+      <div id="contrast" class="badge">${Lang._('CONTRAST')}</div>
+      <div id="value" class="badge">${displayedRatio}</div>
+      <div id="good" class="badge good-contrast" hidden>${Lang._('GOOD')} <span class="good-icon"></span></div>
+      <div id="contrast-preview" style="color:${foregroundHex};${hasBackgroundColor ? `background:${backgroundHex};` : ''}${hasFontWeight + hasFontSize + textDecoration}">${sanitizedText}</div>
+      <div id="color-pickers">
+        <label for="fg-text">${Lang._('FG')} ${unknownFGText}
+          <input type="color" id="fg-input" value="${foregroundHex}" ${unknownFG}/>
+        </label>
+        <label for="bg">${Lang._('BG')} ${unknownBGText}
+          <input type="color" id="bg-input" value="${backgroundHex}" ${unknownBG}/>
+        </label>
+      </div>`;
+	return contrastTools;
+}
+
+/**
+ * Initializes colour eyedroppers for respective tooltip.
+ * This function is referenced within './interface/tooltips.js'.
+ * @param {HTMLElement} container The container where the color suggestion will be inserted.
+ * @param {Object} contrastDetails Contrast details object containing colour, background, etc.
+ */
+function initializeContrastTools(container, contrastDetails) {
+	const contrastTools = container?.querySelector('#contrast-tools');
+	if (contrastTools) {
+		const { fontSize, fontWeight, type, isLargeText } = contrastDetails;
+
+		// Cache selectors
+		const contrast = container.querySelector('#contrast');
+		const contrastPreview = container.querySelector('#contrast-preview');
+		const fgInput = container.querySelector('#fg-input');
+		const bgInput = container.querySelector('#bg-input');
+		const ratio = container.querySelector('#value');
+		const good = container.querySelector('#good');
+
+		// Helper to update badge classes.
+		const toggleBadges = (elements, condition) => {
+			elements.forEach(($el) => {
+				$el.classList.toggle('good-contrast', condition);
+				$el.classList.toggle('error-badge', !condition);
+			});
+		};
+
+		// Update preview colors and contrast on input change.
+		const updatePreview = () => {
+			const fgColor = fgInput.value;
+			const bgColor = bgInput.value;
+
+			// Remove question mark from inputs.
+			[fgInput, bgInput].forEach((input) => input.classList.remove('unknown'));
+
+			// Adjust colours in preview area.
+			contrastPreview.style.color = fgColor;
+			contrastPreview.style.backgroundColor = bgColor;
+			contrastPreview.style.backgroundImage = 'none';
+
+			// Get contrast ratio.
+			const contrastValue = calculateContrast(convertToRGBA(fgColor), convertToRGBA(bgColor));
+			const elementsToToggle = [ratio, contrast];
+
+			// WCAG 2.0
+			const value = contrastValue.ratio;
+			ratio.textContent = ratioToDisplay(value);
+
+			const useAAA = Constants.Global.contrastAAA; // Use AAA thresholds if true, otherwise AA
+			const nonTextThreshold = 3;
+			const normalTextThreshold = useAAA ? 7 : 4.5;
+			const largeTextThreshold = useAAA ? 4.5 : 3;
+
+			const passesNonText = value >= nonTextThreshold;
+			const passesNormalText = value >= normalTextThreshold;
+			const passesLargeText = value >= largeTextThreshold;
+
+			switch (type) {
+			case 'svg-error':
+			case 'svg-text':
+			case 'svg-warning': {
+				good.hidden = !passesNonText;
+				toggleBadges(elementsToToggle, passesNonText);
+				break;
+			}
+			default: {
+				if (isLargeText) {
+					toggleBadges([ratio, contrast], passesLargeText);
+					good.hidden = !passesLargeText;
+				} else {
+					toggleBadges([ratio, contrast], passesNormalText);
+					good.hidden = !passesNormalText;
+				}
+				break;
+			}
+			}
+		};
+
+		// Event listeners for both colour inputs.
+		fgInput.addEventListener('input', updatePreview);
+		bgInput.addEventListener('input', updatePreview);
+
+		// Clicking on suggested colour updates preview and saves value to clipboard.
+		setTimeout(() => {
+			const suggest = container.querySelector('#suggest');
+			if (suggest) {
+				const updatePreviewWithSuggested = () => {
+					const hex = suggest.textContent;
+					fgInput.value = hex;
+					updatePreview();
+					navigator.clipboard.writeText(hex).catch(() => { });
+				};
+				suggest.addEventListener('click', updatePreviewWithSuggested);
+			}
+		}, 0);
+	}
 }
 
 /**
@@ -8476,8 +8771,19 @@ class Ed11yElementTip extends HTMLElement {
 			innerContent.appendChild(theRest);
 			content.append(innerContent);
 		}
-    /**/
+		if (this.result.contrastDetails) {
+			const contrastDiv = document.createElement('div');
+			contrastDiv.classList.add('ed11y-contrast-tools');
+			content.append( contrastDiv);
+			// Append color pickers and suggested color.
+			const tools = generateContrastTools(this.result.contrastDetails);
+			contrastDiv.appendChild(tools);
+			initializeContrastTools(contrastDiv, this.result.contrastDetails);
 
+			// Append suggested color.
+			const suggestion = generateColorSuggestion(this.result.contrastDetails);
+			if (suggestion) contrastDiv.appendChild(suggestion);
+		}
 
     if (!State.inlineAlerts || Options.editLinks) {
       const editBar = document.createElement('div');

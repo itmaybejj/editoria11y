@@ -475,21 +475,21 @@
         </style>
         <link href="./tests.css" rel="stylesheet">
 		<script src="../dist/js/ed11y.umd.js"></script>
-		<script src="../dist/js/lang/en.umd.js"></script>
+		<script src="../dist/js/lang/enUS.umd.js"></script>
         <!-- Instantiate-->
         <script>
-		  Ed11y.Lang.addI18n(Sa11yLangEn.strings);
+		  Ed11y.Lang.addI18n(Sa11yLangEnUS.strings);
           const ed11y = new Ed11y.Ed11y({
             alertMode : 'assertive',
-            lang : 'en',
+            lang : 'enUS',
             //baseFontSize: 18,
             //theme : 'sleekTheme',
-            theme : 'sleekTheme',
+            theme : 'darkTheme',
 			  headingsOnlyFromCheckRoots: true, // @todo merge this is gone. can we move to only excluding header? or use fixedRoots? But fixedRoots would also need devFixedRoots...
             //outlineExclude : '.utility', // @todo CMS this syntax changed for Sa11y to the below.
 			  outlineIgnore: '.utility',
 			  splitConfiguration: true,
-			  devOnlyChecks: ['QA_IN_PAGE_LINK'], // Provide list of dev-only test keys.
+			  devOnlyChecks: [], // Provide list of dev-only test keys.
 			  devConfiguration: {
 				  checkRoot: 'body',
 				  // containerIgnore: '',
@@ -677,9 +677,7 @@
 				  CONTRAST_PLACEHOLDER: true,
 				  CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
 				  CONTRAST_ERROR_GRAPHIC: true,
-				  CONTRAST_WARNING_GRAPHIC: {
-					  dismissAll: true,
-				  },
+				  CONTRAST_WARNING_GRAPHIC: false,
 				  CONTRAST_UNSUPPORTED: {
 					  dismissAll: true,
 				  },

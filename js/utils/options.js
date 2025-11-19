@@ -420,9 +420,7 @@ export const Options = {
 		CONTRAST_PLACEHOLDER: true,
 		CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
 		CONTRAST_ERROR_GRAPHIC: true,
-		CONTRAST_WARNING_GRAPHIC: {
-			dismissAll: true,
-		},
+		CONTRAST_WARNING_GRAPHIC: false,
 		CONTRAST_UNSUPPORTED: {
 			dismissAll: true,
 		},
