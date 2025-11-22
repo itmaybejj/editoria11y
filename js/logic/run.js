@@ -2,7 +2,6 @@ import {State, Theme, UI} from "../utils/state.js";
 import {
 	buildElementList,
 	checkRunPrevent,
-	countAlerts,
 	findElements, firstVisibleParent, lagBounce,
 	newIncrementalResults, pauseObservers,
 	resetClass, resetResults, resumeObservers, showError,
@@ -18,7 +17,9 @@ import checkLabels from "../../sa11y/rulesets/labels.js";
 import checkQA from "../../sa11y/rulesets/quality-assurance.js";
 import checkContrast from '../../sa11y/rulesets/contrast';
 import checkDeveloper from '../../sa11y/rulesets/developer';
-import checkReadability from '../../sa11y/rulesets/readability';
+import checkReadability, {
+	//computeOnMainThread, computeWithWorker
+} from '../../sa11y/rulesets/readability';
 import Lang from "../../sa11y/utils/lang.js"
 import Elements from "../../sa11y/utils/elements.js";
 import {
@@ -33,6 +34,11 @@ import {
 import {Options} from "../utils/options.js";
 import checkEmbeddedContent from '../../sa11y/rulesets/embedded-content';
 import customRuleset from '../rulesets/custom-ruleset';
+import Constants from '../../sa11y/utils/constants';
+import {
+	countAlerts, handleSyncOnlyResults,
+	processDismissedAlerts, syncResults
+} from '../utils/process_results';
 
 export function showResults () {
   buildJumpList();
@@ -132,8 +138,8 @@ export function updatePanel () {
 							</div>
 						</div>`
 				UI.panel.querySelector('#ed11y-visualizers').appendChild(detailsTab);
-				UI.readabilityInfo = UI.panel.querySelector('#readability-info');
-				UI.readabilityDetails = UI.panel.querySelector('#readability-details');
+				UI.panel.querySelector('#readability-info').appendChild(Constants.Panel.readabilityInfo);
+				UI.panel.querySelector('#readability-details').appendChild(Constants.Panel.readabilityDetails);
 				UI.panel.querySelector('#ed11y-readability-tab .summary-title').textContent = Lang._('READABILITY');
 			}
 
@@ -1203,9 +1209,8 @@ export function startObserver (root) {
 	checkQA: ,
 }*/
 
-const enqueueTests = function(queue) {
+const enqueueTests = function(queue, results) {
 	const test = queue.pop();
-	const results = Options.splitConfiguration ? State.devResults : State.results;
 	State.testsRemaining--;
 	try {
 		switch (test) {
@@ -1222,23 +1227,24 @@ const enqueueTests = function(queue) {
 			case 'checkQA':
 				checkQA(results, Options)
 				break
-			case 'checkReadability':
-				checkReadability(results)
+			case 'checkContrast':
+				checkContrast(results, Options)
 				break
 			case 'checkDeveloper':
 				checkDeveloper(results, Options)
-				break
-			case 'checkContrast':
-				checkContrast(results, Options)
 				break
 		}
 	} catch (error) {
 		showError(error);
 	}
 	if (queue.length > 0) {
-		window.setTimeout(function (queue) {
-			enqueueTests(queue);
-		}, 0, queue);
+		if (State.browserSpeed < 100) {
+			enqueueTests(queue, results);
+		} else {
+			window.setTimeout(function (queue) {
+				enqueueTests(queue, results);
+			}, 0, queue, results);
+		}
 	} else {
 		continueCheck();
 	}
@@ -1296,10 +1302,10 @@ export function checkAll() {
 	}
 	// Reset counts
 	State.results.length = 0;
-	State.devResults.length = 0;
+	State.syncOnlyResults.length = 0;
 
 	if ( Options.splitConfiguration ) {
-		Object.assign(Options, State.splitConfiguration.dev);
+		Object.assign(Options, State.splitConfiguration.sync);
 	}
 
 	buildElementList();
@@ -1311,8 +1317,10 @@ export function checkAll() {
 		'checkQA',
 		'checkDeveloper', // todo merge param
 	];
-	if (Options.headless && Options.readabilityPlugin) {
-		// todo CMS readability not updated on incremental.
+	const results = Options.splitConfiguration ? State.syncOnlyResults : State.results;
+
+	if (Options.readabilityPlugin) {
+		checkReadability(results);
 		queue.push('checkReadability'); // todo merge param
 	}
 	if (Options.contrastPlugin) {
@@ -1320,7 +1328,7 @@ export function checkAll() {
 	}
 	// Todo after merge: developer and readability tests added via options here.
 	State.testsRemaining = queue.length;
-	enqueueTests(queue);
+	enqueueTests(queue, results);
 
 	if (Options.customTests > 0) {
 		// Pause
@@ -1374,64 +1382,24 @@ export function continueCheck(customCheck = false) {
 	}
 
 	// Filter split configuration results.
-	if (Options.splitConfiguration && State.devResults.length > 0) {
-		Object.assign(Options, State.splitConfiguration.content);
-
-		buildElementList(true);
-		let everything = false;
-		let headings = false;
-		let images = false;
-		let excludedHeadings = false;
-		let contrast = false;
-		let links = false;
-
-		State.results = State.devResults.filter((result) => {
-			if (!result.element) {
-				return false;
-			}
-			if (result.type.indexOf('HEADING') > -1) {
-				if (!headings) {
-					headings = new WeakSet(Elements.Found.Headings);
-					excludedHeadings = new WeakSet(Elements.Found.ExcludedHeadings)
-				}
-				return headings.has(result.element) && excludedHeadings.has(result.element);
-			}
-			if (result.type.indexOf('CONTRAST') > -1) {
-				if (!contrast) {
-					contrast = new WeakSet(Elements.Found.Contrast);
-				}
-				return contrast.has(result.element);
-			}
-			if (result.element.matches('img')) {
-				if (!images) {
-					images = new WeakSet(Elements.Found.Images);
-				}
-				return images.has(result.element)
-			}
-			if (result.element.matches('a')) {
-				links = new WeakSet(Elements.Found.Links);
-				return links.has(result.element);
-			}
-			if (!everything) {
-				everything = new WeakSet(Elements.Found.Everything);
-			}
-			return everything.has(result.element);
-		})
+	if (Options.splitConfiguration && State.syncOnlyResults.length > 0) {
+		handleSyncOnlyResults();
+	} else {
+		State.results = processDismissedAlerts(State.results);
+		syncResults(State.results);
 	}
+	countAlerts();
+
 
 	if (typeof UI.panelToggle.querySelector === 'function') {
 		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
 	}
 	if (State.visualizing) {
 		//checkReadability([]); // todo???
-		if (Options.readabilityPlugin) {
-			UI.readabilityInfo.innerHTML = UI.readabilityInfoContent;
-			UI.readabilityDetails.innerHTML = UI.readabilityDetailsContent;
-		}
 		showHeadingsPanel();
 		showAltPanel();
 	}
-	countAlerts();
+
 	updatePanel();
 	window.setTimeout(() => {
 		if (Options.watchForChanges) {
@@ -1480,10 +1448,11 @@ export function incrementalCheck() {
 		// @todo after merge test: if there are no issues and the heading panel is open...it closes!
 		// Increase debounce if runs are slow.
 		runTime = performance.now() - runTime;
-		State.browserSpeed = runTime > 10 ? 10 : (State.browserSpeed + runTime) / 2;
+		State.browserSpeed = runTime > 100 ? 100 : (State.browserSpeed + runTime) / 2;
 		// Todo: optimize tip placement so we do not need as much debounce.
 		State.browserLag = State.browserSpeed < 1 ? 0 : State.browserSpeed * 100 + State.totalCount;
 	} else {
+		console.log('running');
 		// Ed11y was running, try again later.
 		window.setTimeout(() => {incrementalCheckDebounce();}, 250);
 	}
@@ -1518,9 +1487,7 @@ export function visualize () {
 }
 
 const showReadability = function() {
-	checkReadability([]);
-	UI.readabilityInfo.innerHTML = UI.readabilityInfoContent;
-	UI.readabilityDetails.innerHTML = UI.readabilityDetailsContent;
+	checkReadability(State.results);
 }
 
 export function showHeadingsPanel () {
@@ -1770,7 +1737,7 @@ export function toggleShowDismissals () {
 	State.forceFullCheck = true;
 	State.showPanel = true;
 	resetResults();
-	incrementalCheckDebounce();
+	incrementalCheck();
 
 	UI.panelShowDismissed.setAttribute('data-ed11y-pressed', `${State.showDismissed}`);
 	window.setTimeout(function() {

@@ -25,7 +25,7 @@ export const State = {
   loopStop: false,
 	results: [],
   oldResults: [],
-	devResults: [],
+	syncOnlyResults: [], // For split configuration.
 	roots: [],
 	headingOutline: [],
 	headingOutlineOverrides: [],
@@ -33,7 +33,10 @@ export const State = {
     altMark: [],
     delayedReset: []
   },
-	splitConfiguration: {},
+	splitConfiguration: {
+		sync: {},
+		show: {},
+	},
 
   /* Panel initial state */
   once: false,
@@ -77,8 +80,4 @@ export const UI = {
   panelCount: {},
   panelJumpNext: {},
   panelShowDismissed: {},
-	readabilityDetails: {},
-	readabilityDetailsContent: '',
-	readabilityInfo: {},
-	readabilityInfoContent: '',
 }

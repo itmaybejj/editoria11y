@@ -1097,7 +1097,7 @@ const State = {
   loopStop: false,
 	results: [],
   oldResults: [],
-	devResults: [],
+	syncOnlyResults: [], // For split configuration.
 	roots: [],
 	headingOutline: [],
 	headingOutlineOverrides: [],
@@ -1105,7 +1105,10 @@ const State = {
     altMark: [],
     delayedReset: []
   },
-	splitConfiguration: {},
+	splitConfiguration: {
+		sync: {},
+		show: {},
+	},
 
   /* Panel initial state */
   once: false,
@@ -1149,10 +1152,6 @@ const UI = {
   panelCount: {},
   panelJumpNext: {},
   panelShowDismissed: {},
-	readabilityDetails: {},
-	readabilityDetailsContent: '',
-	readabilityInfo: {},
-	readabilityInfoContent: '',
 };
 
 const Options = {
@@ -1271,8 +1270,8 @@ const Options = {
 	// ignoreElements: '', // todo document change
 
 	splitConfiguration: false,
-	devOnlyChecks: [], // Provide list of dev-only test keys.
-	devConfiguration: {
+	syncOnlyChecks: [], // Provide list of dev-only test keys.
+	syncOnlyConfiguration: {
 		// checkRoot: false,
 		// containerIgnore: '',
 		// contrastIgnore: '.sr-only',
@@ -2291,86 +2290,7 @@ function newIncrementalResults() {
 	return changed;
 }
 
-function countAlerts () {
 
-	State.errorCount = 0;
-	State.warningCount = 0;
-	State.dismissedCount = 0;
-
-	// Review results array to remove dismissed or ignored items
-
-	State.dismissedCount = 0;
-	for (let i = State.results.length - 1; i >= 0; i--) {
-
-		/*
-		if (Options.ignoreTests &&
-			Options.ignoreTests.includes(test)) {
-			// Would be faster to skip test, but this is easy and reliable.
-			State.results.splice(i, 1);
-			continue;
-		}*/
-
-		// todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
-		/*if (State.incremental && Ed11y.oldResults.length > 0) {
-			// Don't flag new issues in the active range while people are typing.
-		}*/
-
-
-
-			if (!State.results[i].type || State.results[i].type === 'good') {
-				State.results.splice(i, 1);
-			} else {
-				// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-				if (Options.currentPage in State.dismissedAlerts
-					&& State.results[i].test in State.dismissedAlerts[Options.currentPage]
-					&& State.results[i].dismiss in State.dismissedAlerts[Options.currentPage][State.results[i].test]) {
-					// Remove State.results[i] if it has been marked OK or ignored, increment dismissed match counter.
-					State.dismissedCount++;
-					State.results[i].dismissalStatus = true;
-				} else if (State.results[i].type === 'warning') {
-					State.warningCount++;
-				} else {
-					State.errorCount++;
-				}
-
-
-				let location = State.results[i].element;
-				let interactive = location.closest('a, button, img, svg, input, iframe, [role="button"], [role="link"]');
-				let canPositionInside = !interactive && location.closest('p, table, li, blockquote, h1, h2, h3, h4, h5, h6');
-
-				// Todo limit afterBegin to P and TD such.
-				if (State.results[i].element.shadowRoot) {
-					while (location.parentElement && location.parentElement.shadowRoot) {
-						location = location.parentElement;
-					}
-				} else if (!canPositionInside) {
-					State.results[i].location = interactive ?? location;
-					State.results[i].position = 'beforebegin';
-				} else {
-					State.results[i].location = location;
-					State.results[i].position = 'afterbegin';
-				}
-			}
-		}
-
-	State.totalCount = State.errorCount + State.warningCount;
-
-	// Dispatch event for synchronizers.
-	if (!State.incremental) {
-		window.setTimeout(function () {
-			let syncResults = new CustomEvent('ed11yResults');
-			document.dispatchEvent(syncResults);
-		}, 0);
-	}
-
-	if (State.ignoreAll) {
-		State.dismissedCount = State.totalCount + State.dismissedCount;
-		State.errorCount = 0;
-		State.warningCount = 0;
-		State.totalCount = 0;
-	}
-
-}
 
 function showError(error) {
 	customElements.define('sa11y-console-error', ConsoleErrors);
@@ -2654,10 +2574,10 @@ function checkLinkText(results, option) {
     // Original preserved text to lowercase.
     const originalLinkText = $el.textContent.trim().toLowerCase();
 
-		let oneStop;
+    let oneStop;
     const addStopWordResult = (element, stopword) => {
       if (option.checks.LINK_STOPWORD && !oneStop) {
-				oneStop = true;
+        oneStop = true;
         results.push({
           test: 'LINK_STOPWORD',
           element,
@@ -3644,12 +3564,12 @@ function checkQA(results, option) {
         if ((href.startsWith('#') || href === '') && hasText && !ignored && !hasAttributes) {
           const targetId = href.substring(1);
           const ariaControls = $el.getAttribute('aria-controls');
-					console.log($el);
-          const targetElement = (document.getElementById(targetId)
+          const targetElement = targetId && (document.getElementById(targetId)
             || document.getElementById(decodeURIComponent(targetId))
             || document.getElementById(encodeURIComponent(targetId))
             || document.getElementById(ariaControls)
             || document.querySelector(`a[name="${targetId}"]`));
+
           // If reference ID doesn't exist.
           if (!targetElement) {
             results.push({
@@ -5442,198 +5362,330 @@ function checkDeveloper(results, option) {
  * @link http://stackoverflow.com/questions/5686483/how-to-compute-number-of-syllables-in-a-word-in-javascript
  * @link https://www.simoahava.com/analytics/calculate-readability-scores-for-content/#commento-58ac602191e5c6dc391015c5a6933cf3e4fc99d1dc92644024c331f1ee9b6093
  * @link https://oaji.net/articles/2017/601-1498133639.pdf (Portuguese adaptation).
+*/
+
+/**
+ * Compute the readability score based on an array of text strings.
+ * @param {Array} textArray Array of text strings.
+ * @param {string} lang The page or text language.
+ * @returns Readability object.
  */
+function computeReadability(textArray, lang) {
+  if (!textArray || !lang) return null;
+
+  // If array item does not end with punctuation, add period to improve accuracy.
+  const readabilityArray = [];
+  const punctuation = ['.', '?', '!'];
+  textArray.forEach((text) => {
+    const lastCharacter = text[text.length - 1];
+    const sentence = punctuation.includes(lastCharacter) ? text : `${text}.`;
+    readabilityArray.push(sentence);
+  });
+  const pageText = readabilityArray.join(' ');
+
+  // Flesch Reading Ease: English, French, German, Dutch, Italian, Spanish, Portuguese
+  if (['en', 'es', 'fr', 'de', 'nl', 'it', 'pt'].includes(lang)) {
+    const numberOfSyllables = (el) => {
+      let wordCheck = el;
+      wordCheck = wordCheck.toLowerCase().replace('.', '').replace('\n', '');
+      if (wordCheck.length <= 3) {
+        return 1;
+      }
+      wordCheck = wordCheck.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+      wordCheck = wordCheck.replace(/^y/, '');
+      const syllableString = wordCheck.match(/[aeiouy]{1,2}/g);
+      let syllables = 0;
+      if (syllableString) {
+        syllables = syllableString.length;
+      }
+      return syllables;
+    };
+
+    const wordsRaw = pageText.replace(/[.!?-]+/g, ' ').split(' ');
+    let words = 0;
+    for (let i = 0; i < wordsRaw.length; i++) {
+      // eslint-disable-next-line eqeqeq
+      if (wordsRaw[i] != 0) {
+        words += 1;
+      }
+    }
+
+    const sentenceRaw = pageText.split(/[.!?]+/);
+    let sentences = 0;
+    for (let i = 0; i < sentenceRaw.length; i++) {
+      if (sentenceRaw[i] !== '') {
+        sentences += 1;
+      }
+    }
+
+    let totalSyllables = 0;
+    let syllables1 = 0;
+    let syllables2 = 0;
+    for (let i = 0; i < wordsRaw.length; i++) {
+      // eslint-disable-next-line eqeqeq
+      if (wordsRaw[i] != 0) {
+        const syllableCount = numberOfSyllables(wordsRaw[i]);
+        if (syllableCount === 1) {
+          syllables1 += 1;
+        }
+        if (syllableCount === 2) {
+          syllables2 += 1;
+        }
+        totalSyllables += syllableCount;
+      }
+    }
+
+    if (!words || !sentences) return null;
+
+    let flesch = false;
+    if (lang === 'en') {
+      flesch = 206.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
+    } else if (lang === 'fr') {
+      flesch = 207 - (1.015 * (words / sentences)) - (73.6 * (totalSyllables / words));
+    } else if (lang === 'es') {
+      flesch = 206.84 - (1.02 * (words / sentences)) - (0.60 * (100 * (totalSyllables / words)));
+    } else if (lang === 'de') {
+      flesch = 180 - (words / sentences) - (58.5 * (totalSyllables / words));
+    } else if (lang === 'nl') {
+      flesch = 206.84 - (0.77 * (100 * (totalSyllables / words))) - (0.93 * (words / sentences));
+    } else if (lang === 'it') {
+      flesch = 217 - (1.3 * (words / sentences)) - (0.6 * (100 * (totalSyllables / words)));
+    } else if (lang === 'pt') {
+      flesch = 248.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
+    }
+
+    if (flesch > 100) {
+      flesch = 100;
+    } else if (flesch < 0) {
+      flesch = 0;
+    }
+
+    const fleschScore = Number(flesch.toFixed(1));
+    const avgWordsPerSentence = Number((words / sentences).toFixed(1));
+    const complexWords = Math.round(100 * ((words - (syllables1 + syllables2)) / words));
+
+    let difficultyToken;
+    if (fleschScore >= 0 && fleschScore < 30) {
+      difficultyToken = 'VERY_DIFFICULT';
+    } else if (fleschScore > 31 && fleschScore < 49) {
+      difficultyToken = 'DIFFICULT';
+    } else if (fleschScore > 50 && fleschScore < 60) {
+      difficultyToken = 'FAIRLY_DIFFICULT';
+    } else {
+      difficultyToken = 'GOOD';
+    }
+
+    return {
+      test: 'READABILITY',
+      score: fleschScore,
+      averageWordsPerSentence: avgWordsPerSentence,
+      complexWords,
+      difficultyToken,
+      wordCount: words,
+      charCount: pageText.length,
+    };
+  }
+
+  // LIX: Danish, Finnish, Norwegian (Bokmål & Nynorsk), Swedish
+  if (['sv', 'fi', 'da', 'no', 'nb', 'nn'].includes(lang)) {
+    const lixWords = () => pageText
+      .replace(/[-'.]/ig, '')
+      .split(/[^a-zA-ZöäåÖÄÅÆæØø0-9]/g)
+      .filter(Boolean);
+
+    const splitSentences = () => {
+      const splitter = /\?|!|\.|\n/g;
+      return pageText.split(splitter).filter(Boolean);
+    };
+
+    const wordsArr = lixWords();
+    const wordCount = wordsArr.length;
+    if (!wordCount) return null;
+
+    const longWordsCount = wordsArr.filter((w) => w.length > 6).length;
+    const sentenceCount = splitSentences().length || 1;
+
+    const score = Math.round(
+      (wordCount / sentenceCount) + ((longWordsCount * 100) / wordCount),
+    );
+    const avgWordsPerSentence = Number((wordCount / sentenceCount).toFixed(1));
+    const complexWords = Math.round(100 * (longWordsCount / wordCount));
+
+    let difficultyToken;
+    if (score >= 0 && score < 39) {
+      difficultyToken = 'GOOD';
+    } else if (score > 40 && score < 50) {
+      difficultyToken = 'FAIRLY_DIFFICULT';
+    } else if (score > 51 && score < 61) {
+      difficultyToken = 'DIFFICULT';
+    } else {
+      difficultyToken = 'VERY_DIFFICULT';
+    }
+
+    return {
+      test: 'READABILITY',
+      score,
+      averageWordsPerSentence: avgWordsPerSentence,
+      complexWords,
+      difficultyToken,
+      wordCount,
+      charCount: pageText.length,
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Build readability UI results UI.
+ * @param {Object} output Readability results object.
+ */
+function readabilityUI(output) {
+  if (Constants.Global.headless === false) {
+    if (output.charCount === 0) {
+      Constants.Panel.readabilityInfo.innerHTML = Lang._('READABILITY_NO_CONTENT');
+    } else if (output.wordCount > 30) {
+      Constants.Panel.readabilityInfo.innerHTML = `${Math.ceil(output.score)} <span class="readability-score">${output.difficultyLevel}</span>`;
+      Constants.Panel.readabilityDetails.innerHTML = `<li><strong>${Lang._('AVG_SENTENCE')}</strong> ${Math.ceil(output.averageWordsPerSentence)}</li><li><strong>${Lang._('COMPLEX_WORDS')}</strong> ${output.complexWords}%</li><li><strong>${Lang._('TOTAL_WORDS')}</strong> ${output.wordCount}</li>`;
+    } else {
+      Constants.Panel.readabilityInfo.textContent = Lang._('READABILITY_NOT_ENOUGH');
+    }
+  }
+}
+
+/**
+ * Turn core result into final object pushed to `results`.
+ */
+function handleReadabilityResult(coreResult, results, source) {
+  if (!coreResult) return;
+
+  const result = {
+    ...coreResult,
+    processedBy: source,
+    difficultyLevel: Lang._(coreResult.difficultyToken),
+  };
+  results.push(result);
+  readabilityUI(result);
+
+  // Dispatch custom event when readability results are complete.
+  window.sa11yReadabilityComplete = null;
+  const event = new CustomEvent('sa11y-readability-result', {
+    detail: { detail: result },
+  });
+  window.sa11yReadabilityComplete = event.detail;
+  document.dispatchEvent(event);
+}
+
+/**
+ * Synchronous computation on the main thread.
+ */
+function computeOnMainThread(pageText, results) {
+  handleReadabilityResult(
+    computeReadability(pageText, Constants.Readability.Lang), results, 'main thread',
+  );
+}
+
+/**
+ * Create web worker URL once.
+ */
+let readabilityWorkerUrl = null;
+function getReadabilityWorkerUrl() {
+  if (readabilityWorkerUrl) return readabilityWorkerUrl;
+
+  const workerSource = `
+    ${computeReadability.toString()}
+    self.onmessage = function (e) {
+      const data = e.data || {};
+      const result = computeReadability(data.pageText, data.lang);
+      self.postMessage(result);
+    };
+  `;
+  const blob = new Blob([workerSource], { type: 'text/javascript' });
+  readabilityWorkerUrl = URL.createObjectURL(blob);
+  return readabilityWorkerUrl;
+}
+
+const workerSupported = typeof Worker !== 'undefined'
+  && typeof Blob !== 'undefined'
+  && typeof URL !== 'undefined'
+  && typeof URL.createObjectURL === 'function';
+
+/**
+ * Create and cache worker.
+ */
+let readabilityWorker = null;
+function getReadabilityWorker() {
+  if (!workerSupported) return null;
+  if (readabilityWorker) return readabilityWorker;
+  try {
+    readabilityWorker = new Worker(getReadabilityWorkerUrl());
+    console.log('[readability] Worker created');
+  } catch (e) {
+    console.warn('[readability] Worker creation failed, using main thread', e);
+    readabilityWorker = null;
+  }
+  return readabilityWorker;
+}
+
+/**
+ * Try to compute via (cached) worker; fall back to main thread on failure.
+ */
+function computeWithWorker(pageText, results, source = 'worker') {
+  const worker = getReadabilityWorker();
+  if (!worker) {
+    computeOnMainThread(pageText, results);
+    return;
+  }
+
+  worker.onmessage = (event) => {
+    handleReadabilityResult(event.data || null, results, source);
+  };
+
+  worker.onerror = (err) => {
+    console.error('[readability] Worker error, falling back', err);
+    try {
+      worker.terminate();
+    } catch (e) {
+      console.error('[readability] Worker error, falling back', e);
+    }
+    readabilityWorker = null;
+    computeOnMainThread(pageText, results);
+  };
+
+  try {
+    worker.postMessage({
+      pageText,
+      lang: Constants.Readability.Lang,
+    });
+  } catch (e) {
+    console.error('[readability] postMessage failed, falling back', e);
+    try {
+      worker.terminate();
+    } catch (err) {
+      // ignore
+    }
+    readabilityWorker = null;
+    computeOnMainThread(pageText, results);
+  }
+}
 
 function checkReadability(results) {
-	let readabilityResults = {};
-	let score = 'warning';
-	//const rememberReadability = Utils.store.getItem('sa11y-readability') === 'On'; override
-	// if (rememberReadability) { override
-	const readabilityArray = [];
-	// Improve the accuracy of a readability analysis by ensuring that long list items are treated as complete sentences.
-	const punctuation = ['.', '?', '!'];
-	Elements.Found.Readability.forEach(($el) => {
-		const ignore = fnIgnore($el);
-		const text = getText(ignore);
-		if (!text) return;
-		const lastCharacter = text[text.length - 1];
-		const sentence = punctuation.includes(lastCharacter) ? text : `${text}.`;
-		readabilityArray.push(sentence);
-	});
-	const pageText = readabilityArray.join(' ');
+  // Get text.
+  const pageText = [];
+  Elements.Found.Readability.forEach(($el) => {
+    const ignore = fnIgnore($el);
+    const text = getText(ignore);
+    if (!text) return;
+    pageText.push(text);
+  });
 
-	/* Flesch Reading Ease for English, French, German, Dutch, and Italian. */
-	if (['en', 'es', 'fr', 'de', 'nl', 'it', 'pt'].includes(Lang.langStrings.LANG_CODE)) {
-		// Compute syllables
-		const numberOfSyllables = (el) => {
-			let wordCheck = el;
-			wordCheck = wordCheck.toLowerCase().replace('.', '').replace('\n', '');
-			if (wordCheck.length <= 3) {
-				return 1;
-			}
-			wordCheck = wordCheck.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
-			wordCheck = wordCheck.replace(/^y/, '');
-			const syllableString = wordCheck.match(/[aeiouy]{1,2}/g);
-			let syllables = 0;
-
-			const syllString = !!syllableString;
-			if (syllString) {
-				syllables = syllableString.length;
-			}
-			return syllables;
-		};
-
-		// Words
-		const wordsRaw = pageText.replace(/[.!?-]+/g, ' ').split(' ');
-		let words = 0;
-		for (let i = 0; i < wordsRaw.length; i++) {
-			// eslint-disable-next-line eqeqeq
-			if (wordsRaw[i] != 0) {
-				words += 1;
-			}
-		}
-
-		// Sentences
-		const sentenceRaw = pageText.split(/[.!?]+/);
-		let sentences = 0;
-		for (let i = 0; i < sentenceRaw.length; i++) {
-			if (sentenceRaw[i] !== '') {
-				sentences += 1;
-			}
-		}
-
-		// Syllables
-		let totalSyllables = 0;
-		let syllables1 = 0;
-		let syllables2 = 0;
-		for (let i = 0; i < wordsRaw.length; i++) {
-			// eslint-disable-next-line eqeqeq
-			if (wordsRaw[i] != 0) {
-				const syllableCount = numberOfSyllables(wordsRaw[i]);
-				if (syllableCount === 1) {
-					syllables1 += 1;
-				}
-				if (syllableCount === 2) {
-					syllables2 += 1;
-				}
-				totalSyllables += syllableCount;
-			}
-		}
-
-		let flesch = false;
-		if (Lang.langStrings.LANG_CODE === 'en') {
-			flesch = 206.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
-		} else if (Lang.langStrings.LANG_CODE === 'fr') {
-			flesch = 207 - (1.015 * (words / sentences)) - (73.6 * (totalSyllables / words));
-		} else if (Lang.langStrings.LANG_CODE === 'es') {
-			flesch = 206.84 - (1.02 * (words / sentences)) - (0.60 * (100 * (totalSyllables / words)));
-		} else if (Lang.langStrings.LANG_CODE === 'de') {
-			flesch = 180 - (words / sentences) - (58.5 * (totalSyllables / words));
-		} else if (Lang.langStrings.LANG_CODE === 'nl') {
-			flesch = 206.84 - (0.77 * (100 * (totalSyllables / words))) - (0.93 * (words / sentences));
-		} else if (Lang.langStrings.LANG_CODE === 'it') {
-			flesch = 217 - (1.3 * (words / sentences)) - (0.6 * (100 * (totalSyllables / words)));
-		} else if (Lang.langStrings.LANG_CODE === 'pt') {
-			flesch = 248.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
-		}
-
-		// Score must be between 0 and 100%.
-		if (flesch > 100) {
-			flesch = 100;
-		} else if (flesch < 0) {
-			flesch = 0;
-		}
-
-		// Compute scores.
-		const fleschScore = flesch.toFixed(1);
-		const avgWordsPerSentence = (words / sentences).toFixed(1);
-		const complexWords = Math.round(100 * ((words - (syllables1 + syllables2)) / words));
-
-		let difficulty;
-		if (fleschScore >= 0 && fleschScore < 30) {
-			score = 'error';
-			difficulty = Lang._('VERY_DIFFICULT');
-		} else if (fleschScore > 31 && fleschScore < 49) {
-			difficulty = Lang._('DIFFICULT');
-		} else if (fleschScore > 50 && fleschScore < 60) {
-			difficulty = Lang._('FAIRLY_DIFFICULT');
-		} else {
-			score = 'pass';
-			difficulty = Lang._('GOOD');
-		}
-
-		// Create object for headless mode.
-		readabilityResults = {
-			test: 'READABILITY',
-			score: fleschScore,
-			averageWordsPerSentence: avgWordsPerSentence,
-			complexWords,
-			difficultyLevel: difficulty,
-			wordCount: words,
-		};
-		results.push(readabilityResults);
-	} else if (['sv', 'fi', 'da', 'no', 'nb', 'nn'].includes(Lang.langStrings.LANG_CODE)) {
-		/* Lix: Danish, Finnish, Norwegian (Bokmål & Nynorsk), Swedish. */
-		const calculateLix = (text) => {
-			const lixWords = () => text.replace(/[-'.]/ig, '').split(/[^a-zA-ZöäåÖÄÅÆæØø0-9]/g).filter(Boolean);
-			const splitSentences = () => {
-				const splitter = /\?|!|\.|\n/g;
-				const arrayOfSentences = text.split(splitter).filter(Boolean);
-				return arrayOfSentences;
-			};
-			const wordCount = lixWords().length;
-			const longWordsCount = lixWords().filter((wordsArray) => wordsArray.length > 6).length;
-			const sentenceCount = splitSentences().length;
-			const lixScore = Math.round((wordCount / sentenceCount) + ((longWordsCount * 100) / wordCount));
-			const avgWordsPerSentence = (wordCount / sentenceCount).toFixed(1);
-			const complexWords = Math.round(100 * (longWordsCount / wordCount));
-
-			let difficulty;
-			if (lixScore >= 0 && lixScore < 39) {
-				difficulty = Lang._('GOOD');
-				score = 'pass';
-			} else if (lixScore > 40 && lixScore < 50) {
-				difficulty = Lang._('FAIRLY_DIFFICULT');
-			} else if (lixScore > 51 && lixScore < 61) {
-				difficulty = Lang._('DIFFICULT');
-			} else {
-				score = 'error';
-				difficulty = Lang._('VERY_DIFFICULT');
-			}
-			return {
-				score, difficulty, avgWordsPerSentence, complexWords, wordCount,
-			};
-		};
-
-		// Compute LIX
-		const lix = calculateLix(pageText);
-
-		// Create object for headless mode.
-		readabilityResults = {
-			test: 'READABILITY',
-			score: lix.score,
-			averageWordsPerSentence: lix.avgWordsPerSentence,
-			complexWords: lix.complexWords,
-			difficultyLevel: lix.difficulty,
-			wordCount: lix.wordCount,
-		};
-		results.push(readabilityResults);
-	}
-
-	// Update main panel if not in headless mode.
-	/* references overridden */
-	if (Options.headless === false) {
-		if (pageText.length === 0) {
-			UI.readabilityInfoContent = Lang._('READABILITY_NO_CONTENT');
-		} else if (readabilityResults.wordCount > 30) {
-			UI.readabilityInfoContent = `${Math.ceil(readabilityResults.score)} <span class="readability-score ed11y-${score}">${readabilityResults.difficultyLevel}</span>`;
-			UI.readabilityDetailsContent = `<li><strong>${Lang._('AVG_SENTENCE')}</strong> ${Math.ceil(readabilityResults.averageWordsPerSentence)}</li><li><strong>${Lang._('COMPLEX_WORDS')}</strong> ${readabilityResults.complexWords}%</li><li><strong>${Lang._('TOTAL_WORDS')}</strong> ${readabilityResults.wordCount}</li>`;
-		} else {
-			UI.readabilityInfoContent = Lang._('READABILITY_NOT_ENOUGH');
-		}
-	}
-	// } override
-	return results;
+  // Compute readability analysis.
+  if (Constants.Global.headless) {
+    computeOnMainThread(pageText, results);
+  } else {
+    computeWithWorker(pageText, results);
+  }
+  return results;
 }
 
 const intersect = function(a, b, x = 10) {
@@ -6195,6 +6247,151 @@ function customRuleset(results) {
 	return results;
 }
 
+function syncResults(results) {
+	// Dispatch event for synchronizers.
+	if (!State.incremental) {
+		// todo Sync Only results need dismissal filtering.
+		window.setTimeout(function () {
+			document.dispatchEvent(new CustomEvent('ed11yResults',  {
+				// @todo cms document detail
+				detail: {
+					results: results,
+					totalCount: State.totalCount,
+				}
+			}));
+		}, 0);
+	}
+}
+
+function handleSyncOnlyResults() {
+
+	State.syncOnlyResults = processDismissedAlerts(State.syncOnlyResults);
+
+	Object.assign(Options, State.splitConfiguration.show);
+
+	buildElementList(true);
+
+	let everything = false;
+	let headings = false;
+	let images = false;
+	let excludedHeadings = false;
+	let contrast = false;
+	let links = false;
+
+	syncResults(State.syncOnlyResults);
+
+	State.results = State.syncOnlyResults.filter((result) => {
+		if (!result.element) {
+			return false;
+		}
+		if (result.type.indexOf('HEADING') > -1) {
+			if (!headings) {
+				headings = new WeakSet(Elements.Found.Headings);
+				excludedHeadings = new WeakSet(Elements.Found.ExcludedHeadings);
+			}
+			return headings.has(result.element) && excludedHeadings.has(result.element);
+		}
+		if (result.type.indexOf('CONTRAST') > -1) {
+			if (!contrast) {
+				contrast = new WeakSet(Elements.Found.Contrast);
+			}
+			return contrast.has(result.element);
+		}
+		if (result.element.matches('img')) {
+			if (!images) {
+				images = new WeakSet(Elements.Found.Images);
+			}
+			return images.has(result.element)
+		}
+		if (result.element.matches('a')) {
+			links = new WeakSet(Elements.Found.Links);
+			return links.has(result.element);
+		}
+		if (!everything) {
+			everything = new WeakSet(Elements.Found.Everything);
+		}
+		return everything.has(result.element);
+	});
+}
+
+function countAlerts () {
+	State.dismissedCount = 0;
+	State.errorCount = 0;
+	State.warningCount = 0;
+	State.dismissedCount = 0;
+
+	for (let i = State.results.length - 1; i >= 0; i--) {
+		if (State.results[i].type === 'warning') {
+			State.warningCount++;
+		} else {
+			State.errorCount++;
+		}
+		if (State.results[i].dismissalStatus) {
+			State.dismissedCount++;
+		}
+
+		let location = State.results[i].element;
+		let interactive = location.closest('a, button, img, svg, input, iframe, [role="button"], [role="link"]');
+		let canPositionInside = !interactive && location.closest('p, table, li, blockquote, h1, h2, h3, h4, h5, h6');
+
+		// Todo limit afterBegin to P and TD such.
+		if (State.results[i].element.shadowRoot) {
+			while (location.parentElement && location.parentElement.shadowRoot) {
+				location = location.parentElement;
+			}
+		} else if (!canPositionInside) {
+			State.results[i].location = interactive ?? location;
+			State.results[i].position = 'beforebegin';
+		} else {
+			State.results[i].location = location;
+			State.results[i].position = 'afterbegin';
+		}
+	}
+	State.totalCount = State.errorCount + State.warningCount;
+	if (State.ignoreAll) {
+		State.dismissedCount = State.totalCount + State.dismissedCount;
+		State.errorCount = 0;
+		State.warningCount = 0;
+		State.totalCount = 0;
+	}
+}
+
+function processDismissedAlerts (results) {
+
+	// Review results array to remove dismissed or ignored items
+
+	for (let i = results.length - 1; i >= 0; i--) {
+
+		/*
+		if (Options.ignoreTests &&
+			Options.ignoreTests.includes(test)) {
+			// Would be faster to skip test, but this is easy and reliable.
+			results.splice(i, 1);
+			continue;
+		}*/
+		// todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
+		/*if (State.incremental && Ed11y.oldResults.length > 0) {
+			// Don't flag new issues in the active range while people are typing.
+		}*/
+		if (results[i].test === 'READABILITY') {
+			State.readability = results[i];
+			results.splice(i, 1);
+		} else if (!results[i].type || results[i].type === 'good') {
+			results.splice(i, 1);
+		} else {
+			// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
+			if (Options.currentPage in State.dismissedAlerts
+				&& results[i].test in State.dismissedAlerts[Options.currentPage]
+				&& results[i].dismiss in State.dismissedAlerts[Options.currentPage][results[i].test]) {
+				// Remove results[i] if it has been marked OK or ignored, increment dismissed match counter.
+				results[i].dismissalStatus = true;
+			}
+		}
+	}
+
+	return results;
+}
+
 function showResults () {
   buildJumpList();
   // Announce that buttons have been placed.
@@ -6293,8 +6490,8 @@ function updatePanel () {
 							</div>
 						</div>`;
 				UI.panel.querySelector('#ed11y-visualizers').appendChild(detailsTab);
-				UI.readabilityInfo = UI.panel.querySelector('#readability-info');
-				UI.readabilityDetails = UI.panel.querySelector('#readability-details');
+				UI.panel.querySelector('#readability-info').appendChild(Constants.Panel.readabilityInfo);
+				UI.panel.querySelector('#readability-details').appendChild(Constants.Panel.readabilityDetails);
 				UI.panel.querySelector('#ed11y-readability-tab .summary-title').textContent = Lang._('READABILITY');
 			}
 
@@ -7364,9 +7561,8 @@ function startObserver (root) {
 	checkQA: ,
 }*/
 
-const enqueueTests = function(queue) {
+const enqueueTests = function(queue, results) {
 	const test = queue.pop();
-	const results = Options.splitConfiguration ? State.devResults : State.results;
 	State.testsRemaining--;
 	try {
 		switch (test) {
@@ -7383,23 +7579,24 @@ const enqueueTests = function(queue) {
 			case 'checkQA':
 				checkQA(results, Options);
 				break
-			case 'checkReadability':
-				checkReadability(results);
+			case 'checkContrast':
+				checkContrast(results, Options);
 				break
 			case 'checkDeveloper':
 				checkDeveloper(results, Options);
-				break
-			case 'checkContrast':
-				checkContrast(results, Options);
 				break
 		}
 	} catch (error) {
 		showError(error);
 	}
 	if (queue.length > 0) {
-		window.setTimeout(function (queue) {
-			enqueueTests(queue);
-		}, 0, queue);
+		if (State.browserSpeed < 100) {
+			enqueueTests(queue, results);
+		} else {
+			window.setTimeout(function (queue) {
+				enqueueTests(queue, results);
+			}, 0, queue, results);
+		}
 	} else {
 		continueCheck();
 	}
@@ -7457,10 +7654,10 @@ function checkAll() {
 	}
 	// Reset counts
 	State.results.length = 0;
-	State.devResults.length = 0;
+	State.syncOnlyResults.length = 0;
 
 	if ( Options.splitConfiguration ) {
-		Object.assign(Options, State.splitConfiguration.dev);
+		Object.assign(Options, State.splitConfiguration.sync);
 	}
 
 	buildElementList();
@@ -7472,8 +7669,10 @@ function checkAll() {
 		'checkQA',
 		'checkDeveloper', // todo merge param
 	];
-	if (Options.headless && Options.readabilityPlugin) {
-		// todo CMS readability not updated on incremental.
+	const results = Options.splitConfiguration ? State.syncOnlyResults : State.results;
+
+	if (Options.readabilityPlugin) {
+		checkReadability(results);
 		queue.push('checkReadability'); // todo merge param
 	}
 	if (Options.contrastPlugin) {
@@ -7481,7 +7680,7 @@ function checkAll() {
 	}
 	// Todo after merge: developer and readability tests added via options here.
 	State.testsRemaining = queue.length;
-	enqueueTests(queue);
+	enqueueTests(queue, results);
 
 	if (Options.customTests > 0) {
 		// Pause
@@ -7535,64 +7734,24 @@ function continueCheck(customCheck = false) {
 	}
 
 	// Filter split configuration results.
-	if (Options.splitConfiguration && State.devResults.length > 0) {
-		Object.assign(Options, State.splitConfiguration.content);
-
-		buildElementList(true);
-		let everything = false;
-		let headings = false;
-		let images = false;
-		let excludedHeadings = false;
-		let contrast = false;
-		let links = false;
-
-		State.results = State.devResults.filter((result) => {
-			if (!result.element) {
-				return false;
-			}
-			if (result.type.indexOf('HEADING') > -1) {
-				if (!headings) {
-					headings = new WeakSet(Elements.Found.Headings);
-					excludedHeadings = new WeakSet(Elements.Found.ExcludedHeadings);
-				}
-				return headings.has(result.element) && excludedHeadings.has(result.element);
-			}
-			if (result.type.indexOf('CONTRAST') > -1) {
-				if (!contrast) {
-					contrast = new WeakSet(Elements.Found.Contrast);
-				}
-				return contrast.has(result.element);
-			}
-			if (result.element.matches('img')) {
-				if (!images) {
-					images = new WeakSet(Elements.Found.Images);
-				}
-				return images.has(result.element)
-			}
-			if (result.element.matches('a')) {
-				links = new WeakSet(Elements.Found.Links);
-				return links.has(result.element);
-			}
-			if (!everything) {
-				everything = new WeakSet(Elements.Found.Everything);
-			}
-			return everything.has(result.element);
-		});
+	if (Options.splitConfiguration && State.syncOnlyResults.length > 0) {
+		handleSyncOnlyResults();
+	} else {
+		State.results = processDismissedAlerts(State.results);
+		syncResults(State.results);
 	}
+	countAlerts();
+
 
 	if (typeof UI.panelToggle.querySelector === 'function') {
 		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
 	}
 	if (State.visualizing) {
 		//checkReadability([]); // todo???
-		if (Options.readabilityPlugin) {
-			UI.readabilityInfo.innerHTML = UI.readabilityInfoContent;
-			UI.readabilityDetails.innerHTML = UI.readabilityDetailsContent;
-		}
 		showHeadingsPanel();
 		showAltPanel();
 	}
-	countAlerts();
+
 	updatePanel();
 	window.setTimeout(() => {
 		if (Options.watchForChanges) {
@@ -7641,10 +7800,11 @@ function incrementalCheck() {
 		// @todo after merge test: if there are no issues and the heading panel is open...it closes!
 		// Increase debounce if runs are slow.
 		runTime = performance.now() - runTime;
-		State.browserSpeed = runTime > 10 ? 10 : (State.browserSpeed + runTime) / 2;
+		State.browserSpeed = runTime > 100 ? 100 : (State.browserSpeed + runTime) / 2;
 		// Todo: optimize tip placement so we do not need as much debounce.
 		State.browserLag = State.browserSpeed < 1 ? 0 : State.browserSpeed * 100 + State.totalCount;
 	} else {
+		console.log('running');
 		// Ed11y was running, try again later.
 		window.setTimeout(() => {incrementalCheckDebounce();}, 250);
 	}
@@ -7679,9 +7839,7 @@ function visualize () {
 }
 
 const showReadability = function() {
-	checkReadability([]);
-	UI.readabilityInfo.innerHTML = UI.readabilityInfoContent;
-	UI.readabilityDetails.innerHTML = UI.readabilityDetailsContent;
+	checkReadability(State.results);
 };
 
 function showHeadingsPanel () {
@@ -7931,7 +8089,7 @@ function toggleShowDismissals () {
 	State.forceFullCheck = true;
 	State.showPanel = true;
 	resetResults();
-	incrementalCheckDebounce();
+	incrementalCheck();
 
 	UI.panelShowDismissed.setAttribute('data-ed11y-pressed', `${State.showDismissed}`);
 	window.setTimeout(function() {
@@ -9028,10 +9186,14 @@ const preProcessOptions = function(userOptions) {
 	Object.assign(Options, userOptions);
 
 	if (userOptions.splitConfiguration) {
-		State.splitConfiguration.dev = userOptions.devConfiguration;
-		State.splitConfiguration.content = {};
-		Object.keys(userOptions.devConfiguration).forEach(key => {
-			State.splitConfiguration.content[key] = userOptions[key];
+		console.log(userOptions.splitConfiguration);
+		// Populate sync settings.
+		// We run with the sync settings first, then swap in the show settings.
+		State.splitConfiguration.sync = userOptions.syncOnlyConfiguration;
+		State.splitConfiguration.show = {};
+		Object.keys(userOptions.syncOnlyConfiguration).forEach(key => {
+			// Cache the base configuration to restore after first check.
+			State.splitConfiguration.show[key] = userOptions[key];
 		});
 	}
 
@@ -9109,10 +9271,13 @@ const postProcessOptions = function(userOptions) {
 			containerSelectors.flatMap((item) => [`${item} *`, item]),
 		);
 	}
-	if (Options.ignoreElements) {
-		const elementSelectors = Options.ignoreElements.split(',').map((item) => item.trim());
+	if (userOptions.ignoreElements) {
+		const elementSelectors = userOptions.ignoreElements.split(',').map((item) => item.trim());
 		Constants.Exclusions.Container = Constants.Exclusions.Container.concat(elementSelectors);
 	}
+
+	Constants.Panel.readabilityInfo = document.createElement('div');
+	Constants.Panel.readabilityDetails = document.createElement('div');
 
 	State.english = Lang.langStrings.LANG_CODE.startsWith('en');
 
@@ -9169,7 +9334,8 @@ function initialize (userOptions) {
 	// We override Sa11y's root initializer because we use strings not arrays.
 
 	Constants.initializeGlobal(Options);
-	// Constants.initializeReadability(Options);
+	// @todo readability param
+	Constants.initializeReadability(Options);
 	Constants.initializeExclusions(Options);
 	postProcessOptions(userOptions);
 	customElements.define('ed11y-element-alt', Ed11yElementAlt);
@@ -9245,4 +9411,4 @@ class Ed11y {
 }
 let elements = Elements.Found;
 
-export { Ed11y, Lang, Options, State, Theme, UI, checkAll, computeAccessibleName, elements, findElements, getElements, incrementalCheck, prepareDismissal, reset };
+export { Constants, Ed11y, Lang, Options, State, Theme, UI, checkAll, computeAccessibleName, elements, findElements, getElements, incrementalCheck, prepareDismissal, reset };

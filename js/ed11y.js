@@ -3,6 +3,7 @@ import {computeAccessibleName} from "../sa11y/utils/computeAccessibleName.js";
 import {prepareDismissal} from "../sa11y/utils/utils.js";
 import {State, Theme, UI} from "./utils/state.js";
 import {Options} from './utils/options.js';
+import Constants from '../sa11y/utils/constants';
 import Elements from "../sa11y/utils/elements.js";
 import {checkAll, reset, incrementalCheck} from "./logic/run.js";
 import {
@@ -37,6 +38,7 @@ export {
 	UI,
 	State,
 	Options,
+	Constants,
 	checkAll,
 	computeAccessibleName,
 	findElements,

@@ -478,6 +478,9 @@
 		<script src="../dist/js/lang/enUS.umd.js"></script>
         <!-- Instantiate-->
         <script>
+			document.addEventListener('ed11yResults', (e) => {
+				console.log('Results', e.detail);
+			});
 		  Ed11y.Lang.addI18n(Sa11yLangEnUS.strings);
           const ed11y = new Ed11y.Ed11y({
             alertMode : 'assertive',
@@ -489,8 +492,8 @@
             //outlineExclude : '.utility', // @todo CMS this syntax changed for Sa11y to the below.
 			  outlineIgnore: '.utility',
 			  splitConfiguration: true,
-			  devOnlyChecks: [], // Provide list of dev-only test keys.
-			  devConfiguration: {
+			  syncOnlyChecks: [], // Provide list of dev-only test keys.
+			  syncOnlyConfiguration: {
 				  checkRoot: 'body',
 				  // containerIgnore: '',
 				  // contrastIgnore: '.sr-only',

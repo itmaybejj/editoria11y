@@ -4,7 +4,7 @@ import Lang from "../../sa11y/utils/lang.js";
 import {Options} from "../utils/options.js";
 import {documentLoadingCheck, store} from "../../sa11y/utils/utils.js";
 import {checkRunPrevent, initializeRoot} from '../utils/utils.js';
-import {checkAll, continueCheck, windowResize} from "./run.js";
+import {checkAll, continueCheck, reset, windowResize} from './run.js';
 import ed11yLang from "../lang/localization.js";
 import {Ed11yElementAlt} from "../elements/ed11y-element-alt.js";
 import {Ed11yElementResult} from "../elements/ed11y-element-result.js";
@@ -18,10 +18,14 @@ const preProcessOptions = function(userOptions) {
 	Object.assign(Options, userOptions);
 
 	if (userOptions.splitConfiguration) {
-		State.splitConfiguration.dev = userOptions.devConfiguration;
-		State.splitConfiguration.content = {};
-		Object.keys(userOptions.devConfiguration).forEach(key => {
-			State.splitConfiguration.content[key] = userOptions[key];
+		console.log(userOptions.splitConfiguration);
+		// Populate sync settings.
+		// We run with the sync settings first, then swap in the show settings.
+		State.splitConfiguration.sync = userOptions.syncOnlyConfiguration;
+		State.splitConfiguration.show = {};
+		Object.keys(userOptions.syncOnlyConfiguration).forEach(key => {
+			// Cache the base configuration to restore after first check.
+			State.splitConfiguration.show[key] = userOptions[key];
 		});
 	}
 
@@ -99,10 +103,13 @@ const postProcessOptions = function(userOptions) {
 			containerSelectors.flatMap((item) => [`${item} *`, item]),
 		);
 	}
-	if (Options.ignoreElements) {
-		const elementSelectors = Options.ignoreElements.split(',').map((item) => item.trim());
+	if (userOptions.ignoreElements) {
+		const elementSelectors = userOptions.ignoreElements.split(',').map((item) => item.trim());
 		Constants.Exclusions.Container = Constants.Exclusions.Container.concat(elementSelectors);
 	}
+
+	Constants.Panel.readabilityInfo = document.createElement('div');
+	Constants.Panel.readabilityDetails = document.createElement('div');
 
 	State.english = Lang.langStrings.LANG_CODE.startsWith('en');
 
@@ -159,7 +166,8 @@ export function initialize (userOptions) {
 	// We override Sa11y's root initializer because we use strings not arrays.
 
 	Constants.initializeGlobal(Options);
-	// Constants.initializeReadability(Options);
+	// @todo readability param
+	Constants.initializeReadability(Options);
 	Constants.initializeExclusions(Options);
 	postProcessOptions(userOptions);
 	customElements.define('ed11y-element-alt', Ed11yElementAlt);

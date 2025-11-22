@@ -114,8 +114,8 @@ export const Options = {
 	// ignoreElements: '', // todo document change
 
 	splitConfiguration: false,
-	devOnlyChecks: [], // Provide list of dev-only test keys.
-	devConfiguration: {
+	syncOnlyChecks: [], // Provide list of dev-only test keys.
+	syncOnlyConfiguration: {
 		// checkRoot: false,
 		// containerIgnore: '',
 		// contrastIgnore: '.sr-only',
