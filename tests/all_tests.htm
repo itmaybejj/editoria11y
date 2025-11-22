@@ -491,18 +491,23 @@
 			  headingsOnlyFromCheckRoots: true, // @todo merge this is gone. can we move to only excluding header? or use fixedRoots? But fixedRoots would also need devFixedRoots...
             //outlineExclude : '.utility', // @todo CMS this syntax changed for Sa11y to the below.
 			  outlineIgnore: '.utility',
-			  splitConfiguration: true,
-			  syncOnlyChecks: [], // Provide list of dev-only test keys.
+			  // Split configuration
+			   // Provide list of test keys to check but not display.
 			  syncOnlyConfiguration: {
-				  checkRoot: 'body',
-				  // containerIgnore: '',
-				  // contrastIgnore: '.sr-only',
-				  // outlineIgnore: '',
-				  // headerIgnore: '',,
-				  // imageIgnore: '',
-				  // linkIgnore: '[aria-hidden][tabindex="-1"]',
+				  checks: ['QA_IN_PAGE_LINK'],
+				  options: {
+					  checkRoot: 'body',
+					  // containerIgnore: '',
+					  // contrastIgnore: '.sr-only',
+					  // outlineIgnore: '',
+					  // headerIgnore: '',,
+					  // imageIgnore: '',
+					  // linkIgnore: '[aria-hidden][tabindex="-1"]',
+				  }
 			  },
 			  contrastPlugin: true,
+			  readabilityPlugin: true,
+			  developerPlugin: true,
             ignoreAriaOnElements: '.gutenbergBadAria',
             linkIgnoreStrings: ['opens in new window','download'], // @todo CMS was regex.
             linkIgnoreSelector: '.link-purpose',

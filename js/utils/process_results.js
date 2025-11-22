@@ -2,6 +2,7 @@ import {State} from './state';
 import Elements from '../../sa11y/utils/elements';
 import {Options} from './options';
 import {buildElementList} from './utils';
+import Constants from '../../sa11y/utils/constants';
 
 export function syncResults(results) {
 	// Dispatch event for synchronizers.
@@ -21,9 +22,11 @@ export function syncResults(results) {
 
 export function handleSyncOnlyResults() {
 
-	State.syncOnlyResults = processDismissedAlerts(State.syncOnlyResults, true);
+	State.splitConfiguration.results = processDismissedAlerts(State.splitConfiguration.results);
 
-	Object.assign(Options, State.splitConfiguration.show);
+	Object.assign(Options, State.splitConfiguration.showOptions);
+
+	syncResults(State.splitConfiguration.results);
 
 	buildElementList(true);
 
@@ -34,10 +37,11 @@ export function handleSyncOnlyResults() {
 	let contrast = false;
 	let links = false;
 
-	syncResults(State.syncOnlyResults);
-
-	State.results = State.syncOnlyResults.filter((result) => {
+	State.results = State.splitConfiguration.results.filter((result) => {
 		if (!result.element) {
+			return false;
+		}
+		if (State.splitConfiguration.checks.has(result.type)) {
 			return false;
 		}
 		if (result.type.indexOf('HEADING') > -1) {
@@ -77,13 +81,12 @@ export function countAlerts () {
 	State.dismissedCount = 0;
 
 	for (let i = State.results.length - 1; i >= 0; i--) {
-		if (State.results[i].type === 'warning') {
+		if (State.results[i].dismissalStatus) {
+			State.dismissedCount++;
+		} else if (State.results[i].type === 'warning') {
 			State.warningCount++;
 		} else {
 			State.errorCount++;
-		}
-		if (State.results[i].dismissalStatus) {
-			State.dismissedCount++;
 		}
 
 		let location = State.results[i].element;
@@ -131,6 +134,13 @@ export function processDismissedAlerts (results) {
 		}*/
 		if (results[i].test === 'READABILITY') {
 			State.readability = results[i];
+			if (State.visualizing) {
+				const badge = Constants.Panel.readabilityInfo?.querySelector('.readability-score');
+				if (badge) {
+					const badgeClass = results[i].difficultyToken === 'GOOD' ? 'readability-score' : 'readability-score ed11y-warning';
+					badge.setAttribute('class', badgeClass);
+				}
+			}
 			results.splice(i, 1);
 		} else if (!results[i].type || results[i].type === 'good') {
 			results.splice(i, 1);

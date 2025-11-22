@@ -61,7 +61,7 @@ export const Options = {
 	insertAnnotationBefore: '',
 
 	// Readability
-	readabilityPlugin: true,
+	readabilityPlugin: false,
 	readabilityRoot: 'main',
 	readabilityIgnore: '',
 
@@ -113,28 +113,33 @@ export const Options = {
 	// checkRoots: false, // todo document change
 	// ignoreElements: '', // todo document change
 
-	splitConfiguration: false,
-	syncOnlyChecks: [], // Provide list of dev-only test keys.
-	syncOnlyConfiguration: {
-		// checkRoot: false,
-		// containerIgnore: '',
-		// contrastIgnore: '.sr-only',
-		// outlineIgnore: '',
-		// headerIgnore: '',,
-		// imageIgnore: '',
-		// linkIgnore: '[aria-hidden][tabindex="-1"]',
-	},
-	// Exclusions
+	syncOnlyConfiguration: false,
+	/*
+	// List checks and config for reporting results not shown to editors.
+	// If split configuration is set, the check and option keys must be present.
+	syncOnlyConfiguration {
+		checks: [], // Test keys defined below to not be display on page.
 
+		options: {
+			checkRoot: false,
+			containerIgnore: '',
+			contrastIgnore: '.sr-only',
+			outlineIgnore: '',
+			headerIgnore: '',
+			imageIgnore: '',
+			linkIgnore: '[aria-hidden][tabindex="-1"]',
+		},
+	}
+	*/
 
 	// Set alertModes:
+	alertMode: 'userPreference',
 	// 'headless': do not draw run
 	// 'userPreference: respect user preference.
 	// 'polite': open for new issues.
 	// 'assertive': open for any issues.
 	// 'active': always open.
 	// CMS integrations can switch between polite & headless at runtime.
-	alertMode: 'userPreference',
 	inlineAlerts: true,
 	watchForChanges: 'checkRoots', // 'document', false, 'checkRoots';
 

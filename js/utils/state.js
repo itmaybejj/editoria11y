@@ -25,7 +25,6 @@ export const State = {
   loopStop: false,
 	results: [],
   oldResults: [],
-	syncOnlyResults: [], // For split configuration.
 	roots: [],
 	headingOutline: [],
 	headingOutlineOverrides: [],
@@ -34,8 +33,11 @@ export const State = {
     delayedReset: []
   },
 	splitConfiguration: {
-		sync: {},
-		show: {},
+		active: false,
+		checks: [],
+		results: [],
+		showOptions: {},
+		syncOptions: {},
 	},
 
   /* Panel initial state */

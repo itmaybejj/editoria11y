@@ -17,23 +17,23 @@ import {Ed11yElementTip} from "../elements/ed11y-element-tip.js";
 const preProcessOptions = function(userOptions) {
 	Object.assign(Options, userOptions);
 
-	if (userOptions.splitConfiguration) {
-		console.log(userOptions.splitConfiguration);
-		// Populate sync settings.
-		// We run with the sync settings first, then swap in the show settings.
-		State.splitConfiguration.sync = userOptions.syncOnlyConfiguration;
-		State.splitConfiguration.show = {};
-		Object.keys(userOptions.syncOnlyConfiguration).forEach(key => {
-			// Cache the base configuration to restore after first check.
-			State.splitConfiguration.show[key] = userOptions[key];
-		});
-	}
-
-	// todo split configuration.
-
-	if (!Options.checkRoot) { // todo split configuration.
+	if (!Options.checkRoot) {
 		Options.checkRoot = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?
 	}
+
+	if (userOptions.syncOnlyConfiguration) {
+		State.splitConfiguration.active = true;
+		// Store both "sync" override and default "show" options in State.
+		State.splitConfiguration.syncOptions = userOptions.syncOnlyConfiguration.options;
+		State.splitConfiguration.showOptions = {};
+		// Store "show" value for each sync override.
+		Object.keys(State.splitConfiguration.syncOptions).forEach(key => {
+			// Cache the base configuration to restore after first check.
+			State.splitConfiguration.showOptions[key] = userOptions[key];
+		});
+		State.splitConfiguration.checks = new Set(userOptions.syncOnlyConfiguration.checks );
+	}
+
 
 	/*
 	* Options translation

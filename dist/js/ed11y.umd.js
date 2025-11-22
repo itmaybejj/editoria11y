@@ -912,10 +912,19 @@
    * @param {HTMLElement} element The HTML element to retrieve the text content from.
    * @returns {string} The text content of the HTML element with extra whitespaces and line breaks removed.
    */
+
+  const gotText = new WeakMap();
   function getText(element) {
-    const ignore = fnIgnore(element);
-    return ignore.textContent.replace(/[\r\n]+/g, '').replace(/\s+/g, ' ').trim();
+  	if (gotText.has(element)){
+  		return gotText.get(element);
+  	} else {
+  		const ignore = fnIgnore(element);
+  		const text = ignore.textContent.replace(/[\r\n]+/g, '').replace(/\s+/g, ' ').trim();
+  		gotText.set(element, text);
+  		return text;
+  	}
   }
+
 
   /**
    * Removes extra whitespaces and line breaks from a string.
@@ -1103,7 +1112,6 @@
     loopStop: false,
   	results: [],
     oldResults: [],
-  	syncOnlyResults: [], // For split configuration.
   	roots: [],
   	headingOutline: [],
   	headingOutlineOverrides: [],
@@ -1112,8 +1120,11 @@
       delayedReset: []
     },
   	splitConfiguration: {
-  		sync: {},
-  		show: {},
+  		active: false,
+  		checks: [],
+  		results: [],
+  		showOptions: {},
+  		syncOptions: {},
   	},
 
     /* Panel initial state */
@@ -1223,7 +1234,7 @@
   	insertAnnotationBefore: '',
 
   	// Readability
-  	readabilityPlugin: true,
+  	readabilityPlugin: false,
   	readabilityRoot: 'main',
   	readabilityIgnore: '',
 
@@ -1275,28 +1286,33 @@
   	// checkRoots: false, // todo document change
   	// ignoreElements: '', // todo document change
 
-  	splitConfiguration: false,
-  	syncOnlyChecks: [], // Provide list of dev-only test keys.
-  	syncOnlyConfiguration: {
-  		// checkRoot: false,
-  		// containerIgnore: '',
-  		// contrastIgnore: '.sr-only',
-  		// outlineIgnore: '',
-  		// headerIgnore: '',,
-  		// imageIgnore: '',
-  		// linkIgnore: '[aria-hidden][tabindex="-1"]',
-  	},
-  	// Exclusions
+  	syncOnlyConfiguration: false,
+  	/*
+  	// List checks and config for reporting results not shown to editors.
+  	// If split configuration is set, the check and option keys must be present.
+  	syncOnlyConfiguration {
+  		checks: [], // Test keys defined below to not be display on page.
 
+  		options: {
+  			checkRoot: false,
+  			containerIgnore: '',
+  			contrastIgnore: '.sr-only',
+  			outlineIgnore: '',
+  			headerIgnore: '',
+  			imageIgnore: '',
+  			linkIgnore: '[aria-hidden][tabindex="-1"]',
+  		},
+  	}
+  	*/
 
   	// Set alertModes:
+  	alertMode: 'userPreference',
   	// 'headless': do not draw run
   	// 'userPreference: respect user preference.
   	// 'polite': open for new issues.
   	// 'assertive': open for any issues.
   	// 'active': always open.
   	// CMS integrations can switch between polite & headless at runtime.
-  	alertMode: 'userPreference',
   	inlineAlerts: true,
   	watchForChanges: 'checkRoots', // 'document', false, 'checkRoots';
 
@@ -6271,9 +6287,11 @@ URL: ${url}</pre>
 
   function handleSyncOnlyResults() {
 
-  	State.syncOnlyResults = processDismissedAlerts(State.syncOnlyResults);
+  	State.splitConfiguration.results = processDismissedAlerts(State.splitConfiguration.results);
 
-  	Object.assign(Options, State.splitConfiguration.show);
+  	Object.assign(Options, State.splitConfiguration.showOptions);
+
+  	syncResults(State.splitConfiguration.results);
 
   	buildElementList(true);
 
@@ -6284,10 +6302,11 @@ URL: ${url}</pre>
   	let contrast = false;
   	let links = false;
 
-  	syncResults(State.syncOnlyResults);
-
-  	State.results = State.syncOnlyResults.filter((result) => {
+  	State.results = State.splitConfiguration.results.filter((result) => {
   		if (!result.element) {
+  			return false;
+  		}
+  		if (State.splitConfiguration.checks.has(result.type)) {
   			return false;
   		}
   		if (result.type.indexOf('HEADING') > -1) {
@@ -6327,13 +6346,12 @@ URL: ${url}</pre>
   	State.dismissedCount = 0;
 
   	for (let i = State.results.length - 1; i >= 0; i--) {
-  		if (State.results[i].type === 'warning') {
+  		if (State.results[i].dismissalStatus) {
+  			State.dismissedCount++;
+  		} else if (State.results[i].type === 'warning') {
   			State.warningCount++;
   		} else {
   			State.errorCount++;
-  		}
-  		if (State.results[i].dismissalStatus) {
-  			State.dismissedCount++;
   		}
 
   		let location = State.results[i].element;
@@ -6381,6 +6399,13 @@ URL: ${url}</pre>
   		}*/
   		if (results[i].test === 'READABILITY') {
   			State.readability = results[i];
+  			if (State.visualizing) {
+  				const badge = Constants.Panel.readabilityInfo?.querySelector('.readability-score');
+  				if (badge) {
+  					const badgeClass = results[i].difficultyToken === 'GOOD' ? 'readability-score' : 'readability-score ed11y-warning';
+  					badge.setAttribute('class', badgeClass);
+  				}
+  			}
   			results.splice(i, 1);
   		} else if (!results[i].type || results[i].type === 'good') {
   			results.splice(i, 1);
@@ -6693,27 +6718,55 @@ URL: ${url}</pre>
     pauseObservers();
 
     // Initial alignment to get approximate Y position order for jump list.
-    State.results.forEach((result, i) => {
+  	State.results.forEach(function (result) {
+  		let top = result.element.getBoundingClientRect().top;
+  		if (!top) {
+  			const visibleParent = firstVisibleParent(result.element);
+  			if (visibleParent) {
+  				top = visibleParent.getBoundingClientRect().top;
+  			}
+  		}
+  		top = top + window.scrollY;
+  		if (Options.fixedRoots) {
+  			const root = result.element.closest('[data-ed11y-root]');
+  			result.fixedRoot = root.dataset.ed11yRoot;
+  		}
+  		result.scrollableParent = closestScrollable(result.element);
+  		if (result.scrollableParent) {
+  			// Group these together.
+  			top = top * 0.000001;
+  		}
+  		result.sortPos = top;
+  	});
+  	/* There was once a race condition...
+  	for (let i = State.results.length - 1; i >= 0; i--) {
+  		const result = State.results[i];
+  		if (!result.element) {
+  			console.log(result);
+  			// todo we should never running while checks are running.
+  			State.results.splice(i, 1);
+  		} else {
+  			let top = result.element.getBoundingClientRect().top;
+  			if (!top) {
+  				const visibleParent = firstVisibleParent(result.element);
+  				if (visibleParent) {
+  					top = visibleParent.getBoundingClientRect().top;
+  				}
+  			}
+  			top = top + window.scrollY;
+  			if (Options.fixedRoots) {
+  				const root = result.element.closest('[data-ed11y-root]');
+  				result.fixedRoot = root.dataset.ed11yRoot;
+  			}
+  			result.scrollableParent = closestScrollable(result.element);
+  			if (result.scrollableParent) {
+  				// Group these together.
+  				top = top * 0.000001;
+  			}
+  			result.sortPos = top;
+  		}
+  	}*/
 
-      let top = result.element.getBoundingClientRect().top;
-      if (!top) {
-        const visibleParent = firstVisibleParent(result.element);
-        if (visibleParent) {
-          top = visibleParent.getBoundingClientRect().top;
-        }
-      }
-      top = top + window.scrollY;
-      if (Options.fixedRoots) {
-        const root = result.element.closest('[data-ed11y-root]');
-        State.results[i].fixedRoot = root.dataset.ed11yRoot;
-      }
-      State.results[i].scrollableParent = closestScrollable(result.element);
-      if (State.results[i].scrollableParent) {
-        // Group these together.
-        top = top * 0.000001;
-      }
-      State.results[i].sortPos = top;
-    });
     // Sort from bottom to top so focus order after insert is top to bottom.
     State.results.sort((a, b) => b.sortPos - a.sortPos);
 
@@ -7332,7 +7385,7 @@ URL: ${url}</pre>
   		//State.alignPending = false;
   		State.interaction = true;
   		incrementalCheckDebounce();
-  }, 1000);
+  }, 500);
 
   function windowResize() {
   	if (UI.panel?.classList.contains('ed11y-active') === true) {
@@ -7572,18 +7625,18 @@ URL: ${url}</pre>
   	State.testsRemaining--;
   	try {
   		switch (test) {
-  			case 'quickTests':
+  			case 'group1':
   				checkHeaders(results, Options, State.headingOutline);
-  				checkLinkText(results, Options);
   				checkImages(results, Options);
   				checkEmbeddedContent(results, Options);
   				customRuleset(results);
+  				checkQA(results, Options);
+  				break
+  			case 'group2':
+  				checkLinkText(results, Options);
   				break
   			case 'checkLabels':
   				checkLabels(results, Options);
-  				break
-  			case 'checkQA':
-  				checkQA(results, Options);
   				break
   			case 'checkContrast':
   				checkContrast(results, Options);
@@ -7596,7 +7649,7 @@ URL: ${url}</pre>
   		showError(error);
   	}
   	if (queue.length > 0) {
-  		if (State.browserSpeed < 100) {
+  		if (State.browserSpeed < 100 || Options.headless) {
   			enqueueTests(queue, results);
   		} else {
   			window.setTimeout(function (queue) {
@@ -7660,9 +7713,9 @@ URL: ${url}</pre>
   	}
   	// Reset counts
   	State.results.length = 0;
-  	State.syncOnlyResults.length = 0;
+  	State.splitConfiguration.results.length = 0;
 
-  	if ( Options.splitConfiguration ) {
+  	if ( State.splitConfiguration.active ) {
   		Object.assign(Options, State.splitConfiguration.sync);
   	}
 
@@ -7670,16 +7723,19 @@ URL: ${url}</pre>
 
   	// Call rulesets.
   	let queue = [
-  		'quickTests',
-  		'checkLabels', // todo cms merge param
-  		'checkQA',
-  		'checkDeveloper', // todo merge param
+  		'group1',
+  		'group2',
   	];
-  	const results = Options.splitConfiguration ? State.syncOnlyResults : State.results;
+  	const results = State.splitConfiguration.active ? State.splitConfiguration.results : State.results;
 
-  	if (Options.readabilityPlugin) {
-  		checkReadability(results);
+  	if (Options.readabilityPlugin && (!State.incremental || State.visualizing)) {
   		queue.push('checkReadability'); // todo merge param
+  	}
+  	if (Options.formLabelsPlugin) {
+  		queue.push('checkLabels'); // todo cms merge param
+  	}
+  	if (Options.developerPlugin) {
+  		queue.push('checkDeveloper'); // todo cms merge param
   	}
   	if (Options.contrastPlugin) {
   		queue.push('checkContrast');
@@ -7702,29 +7758,6 @@ URL: ${url}</pre>
   			document.dispatchEvent(customTests); // todo there is a race condition here for slow custom tests. May need to pass State.customTestTimeout and only accept back results that match the ID.
   		},0);
   	}
-  	/*{
-  		"element": {},
-  		"type": "error",
-  		"content": "Empty heading found! To fix, delete this line or change its format from <strong class=\"colour\">Heading 4</strong> to <strong>Normal</strong> or <strong>Paragraph</strong>.",
-  		"dismiss": "H4",
-  		"dismissAll": false,
-  		"isWithinRoot": true,
-  		"developer": false,
-  		"margin": "0",
-  		"dismissalStatus": false,
-  		"scrollableParent": false,
-  		"sortPos": 5495.38330078125
-  		}
-  		content
-  		dismissalKey
-  		dismissalStatus
-  		element
-  		position
-  		scrollableParent
-  		sortPos
-  		test
-  		toggle
-  	* */
   	// @todo CMS merge when Sa11y support is ready.
   	// @todo after merge handle readability and developer checks.
   }
@@ -7740,7 +7773,7 @@ URL: ${url}</pre>
   	}
 
   	// Filter split configuration results.
-  	if (Options.splitConfiguration && State.syncOnlyResults.length > 0) {
+  	if (State.splitConfiguration.active && State.splitConfiguration.results.length > 0) {
   		handleSyncOnlyResults();
   	} else {
   		State.results = processDismissedAlerts(State.results);
@@ -7810,7 +7843,6 @@ URL: ${url}</pre>
   		// Todo: optimize tip placement so we do not need as much debounce.
   		State.browserLag = State.browserSpeed < 1 ? 0 : State.browserSpeed * 100 + State.totalCount;
   	} else {
-  		console.log('running');
   		// Ed11y was running, try again later.
   		window.setTimeout(() => {incrementalCheckDebounce();}, 250);
   	}
@@ -7841,11 +7873,19 @@ URL: ${url}</pre>
   	UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
   	showAltPanel();
   	showHeadingsPanel();
-  	showReadability();
+  	if (Options.readabilityPlugin) {
+  		showReadability();
+  	}
   }
 
   const showReadability = function() {
   	checkReadability(State.results);
+  	for (let i = State.results.length - 1; i >= 0; i--) {
+  		if (!State.results[i].element) {
+  			// It's possible to get here while visualizing.
+  			State.results.splice(i, 1);
+  		}
+  	}
   };
 
   function showHeadingsPanel () {
@@ -9191,23 +9231,23 @@ URL: ${url}</pre>
   const preProcessOptions = function(userOptions) {
   	Object.assign(Options, userOptions);
 
-  	if (userOptions.splitConfiguration) {
-  		console.log(userOptions.splitConfiguration);
-  		// Populate sync settings.
-  		// We run with the sync settings first, then swap in the show settings.
-  		State.splitConfiguration.sync = userOptions.syncOnlyConfiguration;
-  		State.splitConfiguration.show = {};
-  		Object.keys(userOptions.syncOnlyConfiguration).forEach(key => {
-  			// Cache the base configuration to restore after first check.
-  			State.splitConfiguration.show[key] = userOptions[key];
-  		});
-  	}
-
-  	// todo split configuration.
-
-  	if (!Options.checkRoot) { // todo split configuration.
+  	if (!Options.checkRoot) {
   		Options.checkRoot = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?
   	}
+
+  	if (userOptions.syncOnlyConfiguration) {
+  		State.splitConfiguration.active = true;
+  		// Store both "sync" override and default "show" options in State.
+  		State.splitConfiguration.syncOptions = userOptions.syncOnlyConfiguration.options;
+  		State.splitConfiguration.showOptions = {};
+  		// Store "show" value for each sync override.
+  		Object.keys(State.splitConfiguration.syncOptions).forEach(key => {
+  			// Cache the base configuration to restore after first check.
+  			State.splitConfiguration.showOptions[key] = userOptions[key];
+  		});
+  		State.splitConfiguration.checks = new Set(userOptions.syncOnlyConfiguration.checks );
+  	}
+
 
   	/*
   	* Options translation

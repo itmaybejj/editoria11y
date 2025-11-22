@@ -335,27 +335,55 @@ export function buildJumpList () {
   pauseObservers();
 
   // Initial alignment to get approximate Y position order for jump list.
-  State.results.forEach((result, i) => {
+	State.results.forEach(function (result) {
+		let top = result.element.getBoundingClientRect().top;
+		if (!top) {
+			const visibleParent = firstVisibleParent(result.element);
+			if (visibleParent) {
+				top = visibleParent.getBoundingClientRect().top;
+			}
+		}
+		top = top + window.scrollY;
+		if (Options.fixedRoots) {
+			const root = result.element.closest('[data-ed11y-root]');
+			result.fixedRoot = root.dataset.ed11yRoot;
+		}
+		result.scrollableParent = closestScrollable(result.element);
+		if (result.scrollableParent) {
+			// Group these together.
+			top = top * 0.000001;
+		}
+		result.sortPos = top;
+	})
+	/* There was once a race condition...
+	for (let i = State.results.length - 1; i >= 0; i--) {
+		const result = State.results[i];
+		if (!result.element) {
+			console.log(result);
+			// todo we should never running while checks are running.
+			State.results.splice(i, 1);
+		} else {
+			let top = result.element.getBoundingClientRect().top;
+			if (!top) {
+				const visibleParent = firstVisibleParent(result.element);
+				if (visibleParent) {
+					top = visibleParent.getBoundingClientRect().top;
+				}
+			}
+			top = top + window.scrollY;
+			if (Options.fixedRoots) {
+				const root = result.element.closest('[data-ed11y-root]');
+				result.fixedRoot = root.dataset.ed11yRoot;
+			}
+			result.scrollableParent = closestScrollable(result.element);
+			if (result.scrollableParent) {
+				// Group these together.
+				top = top * 0.000001;
+			}
+			result.sortPos = top;
+		}
+	}*/
 
-    let top = result.element.getBoundingClientRect().top;
-    if (!top) {
-      const visibleParent = firstVisibleParent(result.element);
-      if (visibleParent) {
-        top = visibleParent.getBoundingClientRect().top;
-      }
-    }
-    top = top + window.scrollY;
-    if (Options.fixedRoots) {
-      const root = result.element.closest('[data-ed11y-root]');
-      State.results[i].fixedRoot = root.dataset.ed11yRoot;
-    }
-    State.results[i].scrollableParent = closestScrollable(result.element);
-    if (State.results[i].scrollableParent) {
-      // Group these together.
-      top = top * 0.000001;
-    }
-    State.results[i].sortPos = top;
-  });
   // Sort from bottom to top so focus order after insert is top to bottom.
   State.results.sort((a, b) => b.sortPos - a.sortPos);
 
@@ -974,7 +1002,7 @@ export const slowIncremental = lagBounce( () => {
 		//State.alignPending = false;
 		State.interaction = true;
 		incrementalCheckDebounce();
-}, 1000);
+}, 500);
 
 export function windowResize() {
 	if (UI.panel?.classList.contains('ed11y-active') === true) {
@@ -1214,18 +1242,18 @@ const enqueueTests = function(queue, results) {
 	State.testsRemaining--;
 	try {
 		switch (test) {
-			case 'quickTests':
+			case 'group1':
 				checkHeaders(results, Options, State.headingOutline)
-				checkLinkText(results, Options)
 				checkImages(results, Options)
 				checkEmbeddedContent(results, Options)
 				customRuleset(results)
+				checkQA(results, Options)
+				break
+			case 'group2':
+				checkLinkText(results, Options)
 				break
 			case 'checkLabels':
 				checkLabels(results, Options)
-				break
-			case 'checkQA':
-				checkQA(results, Options)
 				break
 			case 'checkContrast':
 				checkContrast(results, Options)
@@ -1238,7 +1266,7 @@ const enqueueTests = function(queue, results) {
 		showError(error);
 	}
 	if (queue.length > 0) {
-		if (State.browserSpeed < 100) {
+		if (State.browserSpeed < 100 || Options.headless) {
 			enqueueTests(queue, results);
 		} else {
 			window.setTimeout(function (queue) {
@@ -1302,9 +1330,9 @@ export function checkAll() {
 	}
 	// Reset counts
 	State.results.length = 0;
-	State.syncOnlyResults.length = 0;
+	State.splitConfiguration.results.length = 0;
 
-	if ( Options.splitConfiguration ) {
+	if ( State.splitConfiguration.active ) {
 		Object.assign(Options, State.splitConfiguration.sync);
 	}
 
@@ -1312,16 +1340,19 @@ export function checkAll() {
 
 	// Call rulesets.
 	let queue = [
-		'quickTests',
-		'checkLabels', // todo cms merge param
-		'checkQA',
-		'checkDeveloper', // todo merge param
+		'group1',
+		'group2',
 	];
-	const results = Options.splitConfiguration ? State.syncOnlyResults : State.results;
+	const results = State.splitConfiguration.active ? State.splitConfiguration.results : State.results;
 
-	if (Options.readabilityPlugin) {
-		checkReadability(results);
+	if (Options.readabilityPlugin && (!State.incremental || State.visualizing)) {
 		queue.push('checkReadability'); // todo merge param
+	}
+	if (Options.formLabelsPlugin) {
+		queue.push('checkLabels') // todo cms merge param
+	}
+	if (Options.developerPlugin) {
+		queue.push('checkDeveloper') // todo cms merge param
 	}
 	if (Options.contrastPlugin) {
 		queue.push('checkContrast');
@@ -1344,29 +1375,6 @@ export function checkAll() {
 			document.dispatchEvent(customTests); // todo there is a race condition here for slow custom tests. May need to pass State.customTestTimeout and only accept back results that match the ID.
 		},0);
 	}
-	/*{
-		"element": {},
-		"type": "error",
-		"content": "Empty heading found! To fix, delete this line or change its format from <strong class=\"colour\">Heading 4</strong> to <strong>Normal</strong> or <strong>Paragraph</strong>.",
-		"dismiss": "H4",
-		"dismissAll": false,
-		"isWithinRoot": true,
-		"developer": false,
-		"margin": "0",
-		"dismissalStatus": false,
-		"scrollableParent": false,
-		"sortPos": 5495.38330078125
-		}
-		content
-		dismissalKey
-		dismissalStatus
-		element
-		position
-		scrollableParent
-		sortPos
-		test
-		toggle
-	* */
 	// @todo CMS merge when Sa11y support is ready.
 	// @todo after merge handle readability and developer checks.
 }
@@ -1382,7 +1390,7 @@ export function continueCheck(customCheck = false) {
 	}
 
 	// Filter split configuration results.
-	if (Options.splitConfiguration && State.syncOnlyResults.length > 0) {
+	if (State.splitConfiguration.active && State.splitConfiguration.results.length > 0) {
 		handleSyncOnlyResults();
 	} else {
 		State.results = processDismissedAlerts(State.results);
@@ -1452,7 +1460,6 @@ export function incrementalCheck() {
 		// Todo: optimize tip placement so we do not need as much debounce.
 		State.browserLag = State.browserSpeed < 1 ? 0 : State.browserSpeed * 100 + State.totalCount;
 	} else {
-		console.log('running');
 		// Ed11y was running, try again later.
 		window.setTimeout(() => {incrementalCheckDebounce();}, 250);
 	}
@@ -1483,11 +1490,19 @@ export function visualize () {
 	UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
 	showAltPanel();
 	showHeadingsPanel();
-	showReadability();
+	if (Options.readabilityPlugin) {
+		showReadability();
+	}
 }
 
 const showReadability = function() {
 	checkReadability(State.results);
+	for (let i = State.results.length - 1; i >= 0; i--) {
+		if (!State.results[i].element) {
+			// It's possible to get here while visualizing.
+			State.results.splice(i, 1);
+		}
+	}
 }
 
 export function showHeadingsPanel () {

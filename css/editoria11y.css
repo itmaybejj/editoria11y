@@ -574,10 +574,6 @@ button.ed11y-jump {
 		background-color: var(--ed11y-warning);
 		box-shadow: inset 0 0 1px;
 	}
-	.ed11y-error {
-		color: var(--ed11y-alertText);
-		background-color: var(--ed11y-alert);
-	}
 	ul {
 		display: flex;
 		flex-wrap: wrap;
