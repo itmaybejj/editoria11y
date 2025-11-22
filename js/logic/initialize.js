@@ -31,7 +31,7 @@ const preProcessOptions = function(userOptions) {
 			// Cache the base configuration to restore after first check.
 			State.splitConfiguration.showOptions[key] = userOptions[key];
 		});
-		State.splitConfiguration.checks = new Set(userOptions.syncOnlyConfiguration.checks );
+		State.splitConfiguration.checks = new Set(userOptions.syncOnlyConfiguration.checks);
 	}
 
 

@@ -6306,17 +6306,19 @@ URL: ${url}</pre>
   		if (!result.element) {
   			return false;
   		}
-  		if (State.splitConfiguration.checks.has(result.type)) {
+  		console.log(State.splitConfiguration.checks);
+  		console.log(result.test, typeof result.test, State.splitConfiguration.checks.has(result.test));
+  		if (State.splitConfiguration.checks.has(result.test)) {
   			return false;
   		}
-  		if (result.type.indexOf('HEADING') > -1) {
+  		if (result.test.indexOf('HEADING') > -1) {
   			if (!headings) {
   				headings = new WeakSet(Elements.Found.Headings);
   				excludedHeadings = new WeakSet(Elements.Found.ExcludedHeadings);
   			}
-  			return headings.has(result.element) && excludedHeadings.has(result.element);
+  			return headings.has(result.element) && !excludedHeadings.has(result.element);
   		}
-  		if (result.type.indexOf('CONTRAST') > -1) {
+  		if (result.test.indexOf('CONTRAST') > -1) {
   			if (!contrast) {
   				contrast = new WeakSet(Elements.Found.Contrast);
   			}
@@ -9245,7 +9247,7 @@ URL: ${url}</pre>
   			// Cache the base configuration to restore after first check.
   			State.splitConfiguration.showOptions[key] = userOptions[key];
   		});
-  		State.splitConfiguration.checks = new Set(userOptions.syncOnlyConfiguration.checks );
+  		State.splitConfiguration.checks = new Set(userOptions.syncOnlyConfiguration.checks);
   	}
 
 
