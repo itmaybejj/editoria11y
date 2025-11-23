@@ -1,4 +1,4 @@
-import {State, UI} from "./state.js"
+import {Results, State, UI} from './state.js';
 import Lang from "../../sa11y/utils/lang.js"
 import find from "../../sa11y/utils/find.js"
 import Constants from "../../sa11y/utils/constants.js";
@@ -10,15 +10,14 @@ import {createAlert} from '../../sa11y/interface/alert';
 
 /*=============== Utilities ================*/
 
-export function getElements(selector, desiredRoot, exclude) {
-	exclude = exclude === false ? [] : exclude;
+export function getElements(selector, desiredRoot, exclude = Constants.Exclusions.Sa11yElements) {
 	return find(selector, desiredRoot, exclude);
 }
+
 export function findElements (key, selector, rootRestrict = true) {
 	// Legacy support for deprecated code.
 	const desiredRoot = rootRestrict ? 'root' : 'document';
-	const exclude = rootRestrict ? [] : Constants.Exclusions.Sa11yElements;
-	Elements.Found[key] = find( selector, desiredRoot, exclude );
+	Elements.Found[key] = find( selector, desiredRoot, Constants.Exclusions.Sa11yElements );
 }
 
 export function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
@@ -226,7 +225,7 @@ export function buildElementList (onlyForFilter = false) {
 		}
 
 		if (typeof Options.editableContent === 'string') {
-			findElements('editable', Options.editableContent, false);
+			Elements.Found.editable = getElements(Options.editableContent, 'document');
 		}
 		else {
 			Elements.Found.editable = Options.editableContent;
@@ -238,7 +237,7 @@ export function buildElementList (onlyForFilter = false) {
 
 		if (Options.panelNoCover) {
 			// Moves panel off conflicting widgets.
-			findElements('panelNoCover', Options.panelNoCover, false);
+			Elements.Found.panelNoCover = getElements(Options.panelNoCover, 'document');
 		}
 
 }
@@ -264,11 +263,10 @@ export function parents(el) {
 }
 
 export function resetClass(classes) {
-  classes?.forEach((el) => {
-    let thisClass = el;
-    findElements('reset', `.${thisClass}`);
-    Elements.Found.reset?.forEach(el => {
-      el.classList.remove(thisClass);
+  classes?.forEach((cls) => {
+		const reset = getElements(`.${cls}`, 'document', []);
+    reset?.forEach(el => {
+      el.classList.remove(cls);
     });
   });
 }
@@ -440,7 +438,6 @@ export function resetResults(incremental) {
 	Elements.Found.reset?.forEach((el) => el.remove());
 
 	// Flicker prevention -- leave old tip in place for 100ms.
-	//findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
 	Elements.Found.delayedReset = getElements('ed11y-element-result, ed11y-element-tip', 'document', []);
 
 	window.setTimeout(()=> {
@@ -456,20 +453,18 @@ export function resetResults(incremental) {
 
 export function newIncrementalResults() {
 	// Obviously new if there are more results:
-	if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
+	if (State.forceFullCheck || Results.length !== State.oldResults.length) {
 		return true;
 	}
 	// Subtly new if a result has changed:
 	let newResultString = `${State.errorCount} ${State.warningCount}`;
-	State.results.forEach(result => {
+	Results.forEach(result => {
 		newResultString += result.test + result.element.outerHTML;
 	});
 	let changed = newResultString !== State.oldResultString;
 	State.oldResultString = newResultString;
 	return changed;
 }
-
-
 
 export function showError(error) {
 	customElements.define('sa11y-console-error', ConsoleErrors);

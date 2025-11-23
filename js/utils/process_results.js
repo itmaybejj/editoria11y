@@ -1,4 +1,4 @@
-import {State} from './state';
+import {Results, State} from './state';
 import Elements from '../../sa11y/utils/elements';
 import {Options} from './options';
 import {buildElementList} from './utils';
@@ -7,13 +7,11 @@ import Constants from '../../sa11y/utils/constants';
 export function syncResults(results) {
 	// Dispatch event for synchronizers.
 	if (!State.incremental) {
-		// todo Sync Only results need dismissal filtering.
 		window.setTimeout(function () {
 			document.dispatchEvent(new CustomEvent('ed11yResults',  {
 				// @todo cms document detail
 				detail: {
 					results: results,
-					totalCount: State.totalCount,
 				}
 			}));
 		}, 0);
@@ -22,7 +20,7 @@ export function syncResults(results) {
 
 export function handleSyncOnlyResults() {
 
-	State.splitConfiguration.results = filterAlerts(State.splitConfiguration.results);
+	State.splitConfiguration.results = filterAlerts(true);
 
 	Object.assign(Options, State.splitConfiguration.showOptions);
 
@@ -37,41 +35,61 @@ export function handleSyncOnlyResults() {
 	let contrast = false;
 	let links = false;
 
-	State.results = State.splitConfiguration.results.filter((result) => {
+	console.log(Results);
+
+	for (let i = 0; i < State.splitConfiguration.results.length; i++) {
+		let result = State.splitConfiguration.results[i];
 		if (!result.element) {
-			return false;
+			continue;
 		}
 		if (State.splitConfiguration.checks.has(result.test)) {
-			return false;
+			continue;
 		}
-		if (result.test.indexOf('HEADING') > -1) {
+		if (result.test.indexOf('HEADING') === 0) {
 			if (!headings) {
 				headings = new WeakSet(Elements.Found.Headings);
 				excludedHeadings = new WeakSet(Elements.Found.ExcludedHeadings)
 			}
-			return headings.has(result.element) && !excludedHeadings.has(result.element);
+			if (headings.has(result.element) && !excludedHeadings.has(result.element)) {
+				Results.push(result);
+			} else {
+				console.log(result)
+			}
+			continue;
 		}
 		if (result.test.indexOf('CONTRAST') > -1) {
 			if (!contrast) {
 				contrast = new WeakSet(Elements.Found.Contrast);
 			}
-			return contrast.has(result.element);
+			if (contrast.has(result.element)) {
+				Results.push(result);
+			}
+			continue;
 		}
 		if (result.element.matches('img')) {
 			if (!images) {
 				images = new WeakSet(Elements.Found.Images);
 			}
-			return images.has(result.element)
+			if (images.has(result.element)) {
+				Results.push(result);
+			}
+			continue;
 		}
 		if (result.element.matches('a')) {
 			links = new WeakSet(Elements.Found.Links);
-			return links.has(result.element);
+			if (links.has(result.element)) {
+				Results.push(result);
+			}
+			continue;
 		}
 		if (!everything) {
 			everything = new WeakSet(Elements.Found.Everything);
 		}
-		return everything.has(result.element);
-	})
+		if (everything.has(result.element)) {
+			Results.push(result);
+		}
+	}
+
 }
 
 export function countAlerts () {
@@ -80,30 +98,30 @@ export function countAlerts () {
 	State.warningCount = 0;
 	State.dismissedCount = 0;
 
-	for (let i = State.results.length - 1; i >= 0; i--) {
-		if (State.results[i].dismissalStatus) {
+	for (let i = Results.length - 1; i >= 0; i--) {
+		if (Results[i].dismissalStatus) {
 			State.dismissedCount++;
-		} else if (State.results[i].type === 'warning') {
+		} else if (Results[i].type === 'warning') {
 			State.warningCount++;
 		} else {
 			State.errorCount++;
 		}
 
-		let location = State.results[i].element;
+		let location = Results[i].element;
 		let interactive = location.closest('a, button, img, svg, input, iframe, [role="button"], [role="link"]');
 		let canPositionInside = !interactive && location.closest('p, table, li, blockquote, h1, h2, h3, h4, h5, h6');
 
 		// Todo limit afterBegin to P and TD such.
-		if (State.results[i].element.shadowRoot) {
+		if (Results[i].element.shadowRoot) {
 			while (location.parentElement && location.parentElement.shadowRoot) {
 				location = location.parentElement;
 			}
 		} else if (!canPositionInside) {
-			State.results[i].location = interactive ?? location;
-			State.results[i].position = 'beforebegin';
+			Results[i].location = interactive ?? location;
+			Results[i].position = 'beforebegin';
 		} else {
-			State.results[i].location = location;
-			State.results[i].position = 'afterbegin';
+			Results[i].location = location;
+			Results[i].position = 'afterbegin';
 		}
 	}
 	State.totalCount = State.errorCount + State.warningCount;
@@ -115,11 +133,14 @@ export function countAlerts () {
 	}
 }
 
-export function filterAlerts (results) {
+export function filterAlerts (splitConfiguration) {
+	// @todo next we can't return and assign results any more; pass string to here instead.
 
 	// Review results array to remove dismissed or ignored items
+	const results = splitConfiguration ? State.splitConfiguration.results : Results;
 
 	for (let i = results.length - 1; i >= 0; i--) {
+		let splice = false;
 
 		/*
 		if (Options.ignoreTests &&
@@ -141,20 +162,35 @@ export function filterAlerts (results) {
 					badge.setAttribute('class', badgeClass);
 				}
 			}
-			results.splice(i, 1);
+			splice = true;
 		} else if (results[i].test === 'META_TITLE') {
 			if (Elements.Found.Headings.length > 0) {
-				results[i].element = Elements.Found.Everything[0];
+				if (splitConfiguration) {
+					State.splitConfiguration.results.element = Elements.Found.Everything[0];
+				} else {
+					Results[i].element = Elements.Found.Everything[0];
+				}
 			}
 		} else if (!results[i].element || results[i].type === 'good') {
-			results.splice(i, 1);
+			splice = true;
 		} else {
 			// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
 			if (Options.currentPage in State.dismissedAlerts
 				&& results[i].test in State.dismissedAlerts[Options.currentPage]
 				&& results[i].dismiss in State.dismissedAlerts[Options.currentPage][results[i].test]) {
 				// Remove results[i] if it has been marked OK or ignored, increment dismissed match counter.
-				results[i].dismissalStatus = true;
+				if (splitConfiguration) {
+					State.splitConfiguration.results.dismissalStatus = true;
+				} else {
+					Results.dismissalStatus = true;
+				}
+			}
+		}
+		if (splice) {
+			if (splitConfiguration) {
+				State.splitConfiguration.results.splice(i, 1);
+			} else {
+				Results.splice(i, 1);
 			}
 		}
 	}

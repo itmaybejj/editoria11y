@@ -1114,7 +1114,6 @@
   	customTestsRemaining: 0,
   	customTestTimeout: 0,
     loopStop: false,
-  	results: [],
     oldResults: [],
   	roots: [],
   	headingOutline: [],
@@ -1174,6 +1173,8 @@
     panelJumpNext: {},
     panelShowDismissed: {},
   };
+
+  const Results = [];
 
   const Options = {
   	// Default options.
@@ -1862,15 +1863,14 @@ URL: ${url}</pre>
 
   /*=============== Utilities ================*/
 
-  function getElements(selector, desiredRoot, exclude) {
-  	exclude = exclude === false ? [] : exclude;
+  function getElements(selector, desiredRoot, exclude = Constants.Exclusions.Sa11yElements) {
   	return find(selector, desiredRoot, exclude);
   }
+
   function findElements (key, selector, rootRestrict = true) {
   	// Legacy support for deprecated code.
   	const desiredRoot = rootRestrict ? 'root' : 'document';
-  	const exclude = rootRestrict ? [] : Constants.Exclusions.Sa11yElements;
-  	Elements.Found[key] = find( selector, desiredRoot, exclude );
+  	Elements.Found[key] = find( selector, desiredRoot, Constants.Exclusions.Sa11yElements );
   }
 
   function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
@@ -2078,7 +2078,7 @@ URL: ${url}</pre>
   		}
 
   		if (typeof Options.editableContent === 'string') {
-  			findElements('editable', Options.editableContent, false);
+  			Elements.Found.editable = getElements(Options.editableContent, 'document');
   		}
   		else {
   			Elements.Found.editable = Options.editableContent;
@@ -2090,7 +2090,7 @@ URL: ${url}</pre>
 
   		if (Options.panelNoCover) {
   			// Moves panel off conflicting widgets.
-  			findElements('panelNoCover', Options.panelNoCover, false);
+  			Elements.Found.panelNoCover = getElements(Options.panelNoCover, 'document');
   		}
 
   }
@@ -2115,11 +2115,10 @@ URL: ${url}</pre>
   }
 
   function resetClass(classes) {
-    classes?.forEach((el) => {
-      let thisClass = el;
-      findElements('reset', `.${thisClass}`);
-      Elements.Found.reset?.forEach(el => {
-        el.classList.remove(thisClass);
+    classes?.forEach((cls) => {
+  		const reset = getElements(`.${cls}`, 'document', []);
+      reset?.forEach(el => {
+        el.classList.remove(cls);
       });
     });
   }
@@ -2287,7 +2286,6 @@ URL: ${url}</pre>
   	Elements.Found.reset?.forEach((el) => el.remove());
 
   	// Flicker prevention -- leave old tip in place for 100ms.
-  	//findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
   	Elements.Found.delayedReset = getElements('ed11y-element-result, ed11y-element-tip', 'document', []);
 
   	window.setTimeout(()=> {
@@ -2303,20 +2301,18 @@ URL: ${url}</pre>
 
   function newIncrementalResults() {
   	// Obviously new if there are more results:
-  	if (State.forceFullCheck || State.results.length !== State.oldResults.length) {
+  	if (State.forceFullCheck || Results.length !== State.oldResults.length) {
   		return true;
   	}
   	// Subtly new if a result has changed:
   	let newResultString = `${State.errorCount} ${State.warningCount}`;
-  	State.results.forEach(result => {
+  	Results.forEach(result => {
   		newResultString += result.test + result.element.outerHTML;
   	});
   	let changed = newResultString !== State.oldResultString;
   	State.oldResultString = newResultString;
   	return changed;
   }
-
-
 
   function showError(error) {
   	customElements.define('sa11y-console-error', ConsoleErrors);
@@ -5379,217 +5375,6 @@ URL: ${url}</pre>
     return results;
   }
 
-  /**
-   * Rulesets: Readability
-   * Adapted from Greg Kraus. References for other non-english languages included below.
-   * @link https://accessibility.oit.ncsu.edu/it-accessibility-at-nc-state/developers/tools/readability-bookmarklet/
-   * @link https://core.ac.uk/download/pdf/6552422.pdf
-   * @link https://github.com/Yoast/YoastSEO.js/issues/267
-   * @link http://stackoverflow.com/questions/5686483/how-to-compute-number-of-syllables-in-a-word-in-javascript
-   * @link https://www.simoahava.com/analytics/calculate-readability-scores-for-content/#commento-58ac602191e5c6dc391015c5a6933cf3e4fc99d1dc92644024c331f1ee9b6093
-   * @link https://oaji.net/articles/2017/601-1498133639.pdf (Portuguese adaptation).
-  */
-
-  /**
-   * Compute the readability score based on an array of text strings.
-   * @param {Array} textArray Array of text strings.
-   * @param {string} lang The page or text language.
-   * @returns Readability object.
-   */
-  function computeReadability(textArray, lang) {
-    // If array item does not end with punctuation, add period to improve accuracy.
-    const readabilityArray = [];
-    const punctuation = ['.', '?', '!'];
-    textArray.forEach((text) => {
-      const lastCharacter = text[text.length - 1];
-      const sentence = punctuation.includes(lastCharacter) ? text : `${text}.`;
-      readabilityArray.push(sentence);
-    });
-    const pageText = readabilityArray.join(' ');
-    if (pageText.length === 0) return null;
-
-    // Flesch Reading Ease: English, French, German, Dutch, Italian, Spanish, Portuguese
-    if (['en', 'es', 'fr', 'de', 'nl', 'it', 'pt'].includes(lang)) {
-      const numberOfSyllables = (el) => {
-        let wordCheck = el;
-        wordCheck = wordCheck.toLowerCase().replace('.', '').replace('\n', '');
-        if (wordCheck.length <= 3) {
-          return 1;
-        }
-        wordCheck = wordCheck.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
-        wordCheck = wordCheck.replace(/^y/, '');
-        const syllableString = wordCheck.match(/[aeiouy]{1,2}/g);
-        let syllables = 0;
-        if (syllableString) {
-          syllables = syllableString.length;
-        }
-        return syllables;
-      };
-
-      const wordsRaw = pageText.replace(/[.!?-]+/g, ' ').split(' ');
-      let words = 0;
-      for (let i = 0; i < wordsRaw.length; i++) {
-        // eslint-disable-next-line eqeqeq
-        if (wordsRaw[i] != 0) {
-          words += 1;
-        }
-      }
-
-      const sentenceRaw = pageText.split(/[.!?]+/);
-      let sentences = 0;
-      for (let i = 0; i < sentenceRaw.length; i++) {
-        if (sentenceRaw[i] !== '') {
-          sentences += 1;
-        }
-      }
-
-      let totalSyllables = 0;
-      let syllables1 = 0;
-      let syllables2 = 0;
-      for (let i = 0; i < wordsRaw.length; i++) {
-        // eslint-disable-next-line eqeqeq
-        if (wordsRaw[i] != 0) {
-          const syllableCount = numberOfSyllables(wordsRaw[i]);
-          if (syllableCount === 1) {
-            syllables1 += 1;
-          }
-          if (syllableCount === 2) {
-            syllables2 += 1;
-          }
-          totalSyllables += syllableCount;
-        }
-      }
-
-      let flesch = false;
-      if (lang === 'en') {
-        flesch = 206.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
-      } else if (lang === 'fr') {
-        flesch = 207 - (1.015 * (words / sentences)) - (73.6 * (totalSyllables / words));
-      } else if (lang === 'es') {
-        flesch = 206.84 - (1.02 * (words / sentences)) - (0.60 * (100 * (totalSyllables / words)));
-      } else if (lang === 'de') {
-        flesch = 180 - (words / sentences) - (58.5 * (totalSyllables / words));
-      } else if (lang === 'nl') {
-        flesch = 206.84 - (0.77 * (100 * (totalSyllables / words))) - (0.93 * (words / sentences));
-      } else if (lang === 'it') {
-        flesch = 217 - (1.3 * (words / sentences)) - (0.6 * (100 * (totalSyllables / words)));
-      } else if (lang === 'pt') {
-        flesch = 248.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
-      }
-
-      // Score must be between 0 and 100%.
-      if (flesch > 100) {
-        flesch = 100;
-      } else if (flesch < 0) {
-        flesch = 0;
-      }
-
-      // Compute scores.
-      const fleschScore = Number(flesch.toFixed(1));
-      const avgWordsPerSentence = Number((words / sentences).toFixed(1));
-      const complexWords = Math.round(100 * ((words - (syllables1 + syllables2)) / words));
-
-      let difficultyToken;
-      if (fleschScore >= 0 && fleschScore < 30) {
-        difficultyToken = 'VERY_DIFFICULT';
-      } else if (fleschScore > 31 && fleschScore < 49) {
-        difficultyToken = 'DIFFICULT';
-      } else if (fleschScore > 50 && fleschScore < 60) {
-        difficultyToken = 'FAIRLY_DIFFICULT';
-      } else {
-        difficultyToken = 'GOOD';
-      }
-
-      return {
-        score: fleschScore,
-        averageWordsPerSentence: avgWordsPerSentence,
-        complexWords,
-        difficultyToken,
-        wordCount: words,
-        charCount: pageText.length,
-      };
-    }
-
-    // LIX: Danish, Finnish, Norwegian (Bokmål & Nynorsk), Swedish
-    if (['sv', 'fi', 'da', 'no', 'nb', 'nn'].includes(lang)) {
-      const lixWords = () => pageText
-        .replace(/[-'.]/ig, '')
-        .split(/[^a-zA-ZöäåÖÄÅÆæØø0-9]/g)
-        .filter(Boolean);
-
-      const splitSentences = () => {
-        const splitter = /\?|!|\.|\n/g;
-        return pageText.split(splitter).filter(Boolean);
-      };
-
-      const wordsArr = lixWords();
-      const wordCount = wordsArr.length;
-      const longWordsCount = wordsArr.filter((w) => w.length > 6).length;
-      const sentenceCount = splitSentences().length || 1;
-      const score = Math.round(
-        (wordCount / sentenceCount) + ((longWordsCount * 100) / wordCount),
-      );
-      const avgWordsPerSentence = Number((wordCount / sentenceCount).toFixed(1));
-      const complexWords = Math.round(100 * (longWordsCount / wordCount));
-
-      let difficultyToken;
-      if (score >= 0 && score < 39) {
-        difficultyToken = 'GOOD';
-      } else if (score > 40 && score < 50) {
-        difficultyToken = 'FAIRLY_DIFFICULT';
-      } else if (score > 51 && score < 61) {
-        difficultyToken = 'DIFFICULT';
-      } else {
-        difficultyToken = 'VERY_DIFFICULT';
-      }
-
-      return {
-        score,
-        averageWordsPerSentence: avgWordsPerSentence,
-        complexWords,
-        difficultyToken,
-        wordCount,
-        charCount: pageText.length,
-      };
-    }
-
-    return null;
-  }
-
-  function checkReadability(results) {
-    // Get text.
-    const pageText = Elements.Found.Readability
-      .map(($el) => getText(fnIgnore($el)))
-      .filter(Boolean);
-
-    // Compute.
-    const computed = computeReadability(pageText, Constants.Readability.Lang);
-
-    // Generate result object.
-    let result;
-    if (computed) {
-      result = {
-        test: 'READABILITY',
-        difficultyLevel: Lang._(computed.difficultyToken),
-        ...computed,
-      };
-      results.push(result);
-    }
-
-    // Paint UI.
-    if (Constants.Global.headless === false) {
-      if (computed && result.wordCount > 30) {
-        Constants.Panel.readabilityInfo.innerHTML = `${Math.ceil(result.score)} <span class="readability-score">${result.difficultyLevel}</span>`;
-        Constants.Panel.readabilityDetails.innerHTML = `<li><strong>${Lang._('AVG_SENTENCE')}</strong> ${Math.ceil(result.averageWordsPerSentence)}</li><li><strong>${Lang._('COMPLEX_WORDS')}</strong> ${result.complexWords}%</li><li><strong>${Lang._('TOTAL_WORDS')}</strong> ${result.wordCount}</li>`;
-      } else {
-        Constants.Panel.readabilityInfo.innerHTML = `<br>${Lang._('READABILITY_NOT_ENOUGH')}`;
-      }
-    }
-
-    // Return readability result object back to this.results array.
-    return results;
-  }
-
   const intersect = function(a, b, x = 10) {
   	// Compute intersect using browser offsets.
   	return (a.left - x <= b.right &&
@@ -6152,13 +5937,11 @@ URL: ${url}</pre>
   function syncResults(results) {
   	// Dispatch event for synchronizers.
   	if (!State.incremental) {
-  		// todo Sync Only results need dismissal filtering.
   		window.setTimeout(function () {
   			document.dispatchEvent(new CustomEvent('ed11yResults',  {
   				// @todo cms document detail
   				detail: {
   					results: results,
-  					totalCount: State.totalCount,
   				}
   			}));
   		}, 0);
@@ -6167,7 +5950,7 @@ URL: ${url}</pre>
 
   function handleSyncOnlyResults() {
 
-  	State.splitConfiguration.results = filterAlerts(State.splitConfiguration.results);
+  	State.splitConfiguration.results = filterAlerts(true);
 
   	Object.assign(Options, State.splitConfiguration.showOptions);
 
@@ -6182,41 +5965,61 @@ URL: ${url}</pre>
   	let contrast = false;
   	let links = false;
 
-  	State.results = State.splitConfiguration.results.filter((result) => {
+  	console.log(Results);
+
+  	for (let i = 0; i < State.splitConfiguration.results.length; i++) {
+  		let result = State.splitConfiguration.results[i];
   		if (!result.element) {
-  			return false;
+  			continue;
   		}
   		if (State.splitConfiguration.checks.has(result.test)) {
-  			return false;
+  			continue;
   		}
-  		if (result.test.indexOf('HEADING') > -1) {
+  		if (result.test.indexOf('HEADING') === 0) {
   			if (!headings) {
   				headings = new WeakSet(Elements.Found.Headings);
   				excludedHeadings = new WeakSet(Elements.Found.ExcludedHeadings);
   			}
-  			return headings.has(result.element) && !excludedHeadings.has(result.element);
+  			if (headings.has(result.element) && !excludedHeadings.has(result.element)) {
+  				Results.push(result);
+  			} else {
+  				console.log(result);
+  			}
+  			continue;
   		}
   		if (result.test.indexOf('CONTRAST') > -1) {
   			if (!contrast) {
   				contrast = new WeakSet(Elements.Found.Contrast);
   			}
-  			return contrast.has(result.element);
+  			if (contrast.has(result.element)) {
+  				Results.push(result);
+  			}
+  			continue;
   		}
   		if (result.element.matches('img')) {
   			if (!images) {
   				images = new WeakSet(Elements.Found.Images);
   			}
-  			return images.has(result.element)
+  			if (images.has(result.element)) {
+  				Results.push(result);
+  			}
+  			continue;
   		}
   		if (result.element.matches('a')) {
   			links = new WeakSet(Elements.Found.Links);
-  			return links.has(result.element);
+  			if (links.has(result.element)) {
+  				Results.push(result);
+  			}
+  			continue;
   		}
   		if (!everything) {
   			everything = new WeakSet(Elements.Found.Everything);
   		}
-  		return everything.has(result.element);
-  	});
+  		if (everything.has(result.element)) {
+  			Results.push(result);
+  		}
+  	}
+
   }
 
   function countAlerts () {
@@ -6225,30 +6028,30 @@ URL: ${url}</pre>
   	State.warningCount = 0;
   	State.dismissedCount = 0;
 
-  	for (let i = State.results.length - 1; i >= 0; i--) {
-  		if (State.results[i].dismissalStatus) {
+  	for (let i = Results.length - 1; i >= 0; i--) {
+  		if (Results[i].dismissalStatus) {
   			State.dismissedCount++;
-  		} else if (State.results[i].type === 'warning') {
+  		} else if (Results[i].type === 'warning') {
   			State.warningCount++;
   		} else {
   			State.errorCount++;
   		}
 
-  		let location = State.results[i].element;
+  		let location = Results[i].element;
   		let interactive = location.closest('a, button, img, svg, input, iframe, [role="button"], [role="link"]');
   		let canPositionInside = !interactive && location.closest('p, table, li, blockquote, h1, h2, h3, h4, h5, h6');
 
   		// Todo limit afterBegin to P and TD such.
-  		if (State.results[i].element.shadowRoot) {
+  		if (Results[i].element.shadowRoot) {
   			while (location.parentElement && location.parentElement.shadowRoot) {
   				location = location.parentElement;
   			}
   		} else if (!canPositionInside) {
-  			State.results[i].location = interactive ?? location;
-  			State.results[i].position = 'beforebegin';
+  			Results[i].location = interactive ?? location;
+  			Results[i].position = 'beforebegin';
   		} else {
-  			State.results[i].location = location;
-  			State.results[i].position = 'afterbegin';
+  			Results[i].location = location;
+  			Results[i].position = 'afterbegin';
   		}
   	}
   	State.totalCount = State.errorCount + State.warningCount;
@@ -6260,11 +6063,14 @@ URL: ${url}</pre>
   	}
   }
 
-  function filterAlerts (results) {
+  function filterAlerts (splitConfiguration) {
+  	// @todo next we can't return and assign results any more; pass string to here instead.
 
   	// Review results array to remove dismissed or ignored items
+  	const results = splitConfiguration ? State.splitConfiguration.results : Results;
 
   	for (let i = results.length - 1; i >= 0; i--) {
+  		let splice = false;
 
   		/*
   		if (Options.ignoreTests &&
@@ -6286,25 +6092,517 @@ URL: ${url}</pre>
   					badge.setAttribute('class', badgeClass);
   				}
   			}
-  			results.splice(i, 1);
+  			splice = true;
   		} else if (results[i].test === 'META_TITLE') {
   			if (Elements.Found.Headings.length > 0) {
-  				results[i].element = Elements.Found.Everything[0];
+  				if (splitConfiguration) {
+  					State.splitConfiguration.results.element = Elements.Found.Everything[0];
+  				} else {
+  					Results[i].element = Elements.Found.Everything[0];
+  				}
   			}
   		} else if (!results[i].element || results[i].type === 'good') {
-  			results.splice(i, 1);
+  			splice = true;
   		} else {
   			// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
   			if (Options.currentPage in State.dismissedAlerts
   				&& results[i].test in State.dismissedAlerts[Options.currentPage]
   				&& results[i].dismiss in State.dismissedAlerts[Options.currentPage][results[i].test]) {
   				// Remove results[i] if it has been marked OK or ignored, increment dismissed match counter.
-  				results[i].dismissalStatus = true;
+  				if (splitConfiguration) {
+  					State.splitConfiguration.results.dismissalStatus = true;
+  				} else {
+  					Results.dismissalStatus = true;
+  				}
+  			}
+  		}
+  		if (splice) {
+  			if (splitConfiguration) {
+  				State.splitConfiguration.results.splice(i, 1);
+  			} else {
+  				Results.splice(i, 1);
   			}
   		}
   	}
 
   	return results;
+  }
+
+  /**
+   * Rulesets: Readability
+   * Adapted from Greg Kraus. References for other non-english languages included below.
+   * @link https://accessibility.oit.ncsu.edu/it-accessibility-at-nc-state/developers/tools/readability-bookmarklet/
+   * @link https://core.ac.uk/download/pdf/6552422.pdf
+   * @link https://github.com/Yoast/YoastSEO.js/issues/267
+   * @link http://stackoverflow.com/questions/5686483/how-to-compute-number-of-syllables-in-a-word-in-javascript
+   * @link https://www.simoahava.com/analytics/calculate-readability-scores-for-content/#commento-58ac602191e5c6dc391015c5a6933cf3e4fc99d1dc92644024c331f1ee9b6093
+   * @link https://oaji.net/articles/2017/601-1498133639.pdf (Portuguese adaptation).
+  */
+
+  /**
+   * Compute the readability score based on an array of text strings.
+   * @param {Array} textArray Array of text strings.
+   * @param {string} lang The page or text language.
+   * @returns Readability object.
+   */
+  function computeReadability(textArray, lang) {
+    // If array item does not end with punctuation, add period to improve accuracy.
+    const readabilityArray = [];
+    const punctuation = ['.', '?', '!'];
+    textArray.forEach((text) => {
+      const lastCharacter = text[text.length - 1];
+      const sentence = punctuation.includes(lastCharacter) ? text : `${text}.`;
+      readabilityArray.push(sentence);
+    });
+    const pageText = readabilityArray.join(' ');
+    if (pageText.length === 0) return null;
+
+    // Flesch Reading Ease: English, French, German, Dutch, Italian, Spanish, Portuguese
+    if (['en', 'es', 'fr', 'de', 'nl', 'it', 'pt'].includes(lang)) {
+      const numberOfSyllables = (el) => {
+        let wordCheck = el;
+        wordCheck = wordCheck.toLowerCase().replace('.', '').replace('\n', '');
+        if (wordCheck.length <= 3) {
+          return 1;
+        }
+        wordCheck = wordCheck.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+        wordCheck = wordCheck.replace(/^y/, '');
+        const syllableString = wordCheck.match(/[aeiouy]{1,2}/g);
+        let syllables = 0;
+        if (syllableString) {
+          syllables = syllableString.length;
+        }
+        return syllables;
+      };
+
+      const wordsRaw = pageText.replace(/[.!?-]+/g, ' ').split(' ');
+      let words = 0;
+      for (let i = 0; i < wordsRaw.length; i++) {
+        // eslint-disable-next-line eqeqeq
+        if (wordsRaw[i] != 0) {
+          words += 1;
+        }
+      }
+
+      const sentenceRaw = pageText.split(/[.!?]+/);
+      let sentences = 0;
+      for (let i = 0; i < sentenceRaw.length; i++) {
+        if (sentenceRaw[i] !== '') {
+          sentences += 1;
+        }
+      }
+
+      let totalSyllables = 0;
+      let syllables1 = 0;
+      let syllables2 = 0;
+      for (let i = 0; i < wordsRaw.length; i++) {
+        // eslint-disable-next-line eqeqeq
+        if (wordsRaw[i] != 0) {
+          const syllableCount = numberOfSyllables(wordsRaw[i]);
+          if (syllableCount === 1) {
+            syllables1 += 1;
+          }
+          if (syllableCount === 2) {
+            syllables2 += 1;
+          }
+          totalSyllables += syllableCount;
+        }
+      }
+
+      let flesch = false;
+      if (lang === 'en') {
+        flesch = 206.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
+      } else if (lang === 'fr') {
+        flesch = 207 - (1.015 * (words / sentences)) - (73.6 * (totalSyllables / words));
+      } else if (lang === 'es') {
+        flesch = 206.84 - (1.02 * (words / sentences)) - (0.60 * (100 * (totalSyllables / words)));
+      } else if (lang === 'de') {
+        flesch = 180 - (words / sentences) - (58.5 * (totalSyllables / words));
+      } else if (lang === 'nl') {
+        flesch = 206.84 - (0.77 * (100 * (totalSyllables / words))) - (0.93 * (words / sentences));
+      } else if (lang === 'it') {
+        flesch = 217 - (1.3 * (words / sentences)) - (0.6 * (100 * (totalSyllables / words)));
+      } else if (lang === 'pt') {
+        flesch = 248.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
+      }
+
+      // Score must be between 0 and 100%.
+      if (flesch > 100) {
+        flesch = 100;
+      } else if (flesch < 0) {
+        flesch = 0;
+      }
+
+      // Compute scores.
+      const fleschScore = Number(flesch.toFixed(1));
+      const avgWordsPerSentence = Number((words / sentences).toFixed(1));
+      const complexWords = Math.round(100 * ((words - (syllables1 + syllables2)) / words));
+
+      let difficultyToken;
+      if (fleschScore >= 0 && fleschScore < 30) {
+        difficultyToken = 'VERY_DIFFICULT';
+      } else if (fleschScore > 31 && fleschScore < 49) {
+        difficultyToken = 'DIFFICULT';
+      } else if (fleschScore > 50 && fleschScore < 60) {
+        difficultyToken = 'FAIRLY_DIFFICULT';
+      } else {
+        difficultyToken = 'GOOD';
+      }
+
+      return {
+        score: fleschScore,
+        averageWordsPerSentence: avgWordsPerSentence,
+        complexWords,
+        difficultyToken,
+        wordCount: words,
+        charCount: pageText.length,
+      };
+    }
+
+    // LIX: Danish, Finnish, Norwegian (Bokmål & Nynorsk), Swedish
+    if (['sv', 'fi', 'da', 'no', 'nb', 'nn'].includes(lang)) {
+      const lixWords = () => pageText
+        .replace(/[-'.]/ig, '')
+        .split(/[^a-zA-ZöäåÖÄÅÆæØø0-9]/g)
+        .filter(Boolean);
+
+      const splitSentences = () => {
+        const splitter = /\?|!|\.|\n/g;
+        return pageText.split(splitter).filter(Boolean);
+      };
+
+      const wordsArr = lixWords();
+      const wordCount = wordsArr.length;
+      const longWordsCount = wordsArr.filter((w) => w.length > 6).length;
+      const sentenceCount = splitSentences().length || 1;
+      const score = Math.round(
+        (wordCount / sentenceCount) + ((longWordsCount * 100) / wordCount),
+      );
+      const avgWordsPerSentence = Number((wordCount / sentenceCount).toFixed(1));
+      const complexWords = Math.round(100 * (longWordsCount / wordCount));
+
+      let difficultyToken;
+      if (score >= 0 && score < 39) {
+        difficultyToken = 'GOOD';
+      } else if (score > 40 && score < 50) {
+        difficultyToken = 'FAIRLY_DIFFICULT';
+      } else if (score > 51 && score < 61) {
+        difficultyToken = 'DIFFICULT';
+      } else {
+        difficultyToken = 'VERY_DIFFICULT';
+      }
+
+      return {
+        score,
+        averageWordsPerSentence: avgWordsPerSentence,
+        complexWords,
+        difficultyToken,
+        wordCount,
+        charCount: pageText.length,
+      };
+    }
+
+    return null;
+  }
+
+  function checkReadability(results) {
+    // Get text.
+    const pageText = Elements.Found.Readability
+      .map(($el) => getText(fnIgnore($el)))
+      .filter(Boolean);
+
+    // Compute.
+    const computed = computeReadability(pageText, Constants.Readability.Lang);
+
+    // Generate result object.
+    let result;
+    if (computed) {
+      result = {
+        test: 'READABILITY',
+        difficultyLevel: Lang._(computed.difficultyToken),
+        ...computed,
+      };
+      results.push(result);
+    }
+
+    // Paint UI.
+    if (Constants.Global.headless === false) {
+      if (computed && result.wordCount > 30) {
+        Constants.Panel.readabilityInfo.innerHTML = `${Math.ceil(result.score)} <span class="readability-score">${result.difficultyLevel}</span>`;
+        Constants.Panel.readabilityDetails.innerHTML = `<li><strong>${Lang._('AVG_SENTENCE')}</strong> ${Math.ceil(result.averageWordsPerSentence)}</li><li><strong>${Lang._('COMPLEX_WORDS')}</strong> ${result.complexWords}%</li><li><strong>${Lang._('TOTAL_WORDS')}</strong> ${result.wordCount}</li>`;
+      } else {
+        Constants.Panel.readabilityInfo.innerHTML = `<br>${Lang._('READABILITY_NOT_ENOUGH')}`;
+      }
+    }
+
+    // Return readability result object back to this.results array.
+    return results;
+  }
+
+  const showAltPanel$1 = function () {
+  	// visualize image alts
+  	let altList = UI.panel.querySelector('#ed11y-alt-list');
+  	UI.imageAlts = Elements.Found.Images.map((image) => {
+  		const match = Results.find((i) => i.element === image);
+  		return match && {
+  			element: image,
+  			type: match.type,
+  			dismiss: match.dismiss,
+  			developer: match.developer,
+  		};
+  	}).filter(Boolean);
+
+  	if (UI.imageAlts.length > 0) {
+  		altList.innerHTML = '';
+  		for (let i = 0; i < UI.imageAlts.length; i++) {
+  			const image = UI.imageAlts[i];
+  			let altText = computeAriaLabel(image.element) === 'noAria'
+  				? escapeHTML(image.element.getAttribute('alt'))
+  				: computeAriaLabel(image.element);
+  			UI.imageAlts[i].altText = altText;
+  			//let alert = {};
+  			/*
+  			// Match dismissed images.
+  			// @todo CMS merge remove once new syntax is ready; this is the Sa11y logic for dev reference:
+  			// const isDismissed = dismissed.some((key) => key.dismiss === image.dismiss);
+  			// if (isDismissed) Object.assign(image, { dismissedImage: true });
+  			// Make developer checks don't show images as error if Developer checks are off!
+  			// const dev = Utils.store.getItem('sa11y-developer');
+  			// const devChecksOff = dev === 'Off' || dev === null;
+  			// const showDeveloperChecks = devChecksOff && (type === 'error' || type === 'warning') && developer === true;
+
+  			// Generate edit link if locally hosted image and prop is enabled.
+  			const edit = Constants.Global.editImageURLofCMS ? generateEditLink(image) : '';
+
+  			// Image is decorative (has null alt)
+  			const decorative = (element.hasAttribute('alt') && altText === '')
+  				? `<div class="badge">${Lang._('DECORATIVE')}</div>` : '';
+
+  			// If image is linked.
+  			const anchor = option.imageWithinLightbox ? `a[href]:not(${option.imageWithinLightbox})` : 'a[href]';
+  			const linked = (element.closest(anchor))
+  				? `<div class="badge"><span class="link-icon"></span><span class="visually-hidden">${Lang._('LINKED')}</span></div>` : '';
+  			const visibleIcon = (hidden === true)
+  				? `<div class="badge"><span class="hidden-icon"></span><span class="visually-hidden">${Lang._('HIDDEN')}</span></div>` : '';
+  			let append;
+        if (type === 'error' && !showDeveloperChecks) {
+        // etc
+  			*/
+
+
+  			// Account for lazy loading libraries.
+
+  			if (State.inlineAlerts) {
+  				// Label images
+  				const mark = document.createElement('ed11y-element-alt');
+  				mark.classList.add('ed11y-element');
+  				mark.dataset.ed11yImg = i.toString();
+  				mark.setAttribute('id', 'ed11y-alt-' + i);
+  				mark.setAttribute('tabindex', '-1');
+  				UI.imageAlts[i].mark = mark;
+  				image.element.insertAdjacentElement('beforebegin', mark);
+  			}
+
+  			// Build alt list in panel
+  			let userText = document.createElement('span');
+  			if (altText !== '') {
+  				userText.textContent = altText;
+  			} else {
+  				const decorative = document.createElement('span');
+  				decorative.classList.add('ed11y-decorative');
+  				decorative.textContent = Lang._('DECORATIVE');
+  				userText.append(decorative);
+  			}
+  			let li = document.createElement('li');
+  			li.classList.add(image.type);
+  			let img = document.createElement('img');
+  			img.setAttribute('src', getBestImageSource(image.element));
+  			img.setAttribute('alt', '');
+
+  			if (State.inlineAlerts) {
+  				let a = document.createElement('a');
+  				a.href = '#ed11y-alt-' + i;
+  				a.classList.add('alt-parent');
+  				li.append(a);
+  				a.append(img);
+  				a.append(userText);
+  			} else {
+  				li.classList.add('alt-parent');
+  				li.append(img);
+  				li.append(userText);
+  			}
+  			altList.append(li);
+  		}
+  		if (State.inlineAlerts) {
+  			alignAlts();
+  		} else {
+  			UI.imageAlts.length = 0;
+  		}
+  		//findElements('altMark', 'ed11y-element-alt', false );
+  	} else {
+  		const noImages = document.createElement('p');
+  		const noItalic = document.createElement('em');
+  		noItalic.textContent = Lang._('NO_IMAGES');
+  		noImages.appendChild(noItalic);
+  		altList.innerHTML = '';
+  		altList.appendChild(noImages);
+  	}
+  };
+
+  function visualize () {
+  	if (!UI.panel) {
+  		return;
+  	}
+  	if (State.inlineAlerts) {
+  		const reset = getElements('ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', 'document', []);
+  		reset?.forEach((el) => el.remove());
+  	}
+  	if (State.visualizing) {
+  		State.visualizing = false;
+  		UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('PANEL_HEADING');
+  		UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
+  		UI.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
+  		return;
+  	}
+  	State.visualizing = true;
+  	UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('buttonToolsActive');
+  	UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
+  	UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
+  	showAltPanel$1();
+  	showHeadingsPanel();
+  	if (Options.readabilityPlugin) {
+  		showReadability();
+  	}
+  }
+
+  const showReadability = function() {
+  	checkReadability(Results);
+  	for (let i = Results.length - 1; i >= 0; i--) {
+  		if (!Results[i].element) {
+  			// It's possible to get here while visualizing.
+  			Results.splice(i, 1);
+  		}
+  	}
+  };
+
+  function showHeadingsPanel () {
+  	// Visualize the document outline
+
+  	let panelOutline = UI.panel.querySelector('#ed11y-outline');
+  	if (State.headingOutline.length) {
+  		panelOutline.innerHTML = '';
+  		State.headingOutline.forEach((result, i) => {
+  			// Todo: draw these in editable mode.
+  			if (State.inlineAlerts) {
+  				const mark = document.createElement('ed11y-element-heading-label');
+  				mark.classList.add('ed11y-element', 'ed11y-element-heading');
+  				mark.dataset.ed11yHeadingOutline = i.toString();
+  				mark.setAttribute('id', 'ed11y-heading-' + i);
+  				mark.setAttribute('tabindex', '-1');
+  				// Array: el, level, outlinePrefix
+  				result.element.insertAdjacentElement('afterbegin', mark);
+  				UI.attachCSS(mark.shadowRoot);
+  			}
+  			let leftPad = 10 * result.headingLevel - 10;
+  			let li = document.createElement('li');
+  			li.classList.add('level' + result.headingLevel);
+  			li.style.setProperty('margin-left', leftPad + 'px');
+  			let levelPrefix = document.createElement('strong');
+  			levelPrefix.textContent = `H${result.headingLevel}: `;
+  			let userText = document.createElement('span');
+  			userText.innerHTML = result.text;
+  			let link = document.createElement('a');
+  			if (State.inlineAlerts) {
+  				link.setAttribute('href', '#ed11y-heading-' + i);
+  				li.append(link);
+  				link.append(levelPrefix);
+  				link.append(userText);
+  			} else {
+  				li.append(levelPrefix);
+  				li.append(userText);
+  			}
+  			if (result.type) { // Has an error message
+  				li.classList.add(`ed11y-${result.type}`);
+  				/*let message = document.createElement('em');
+  				message.classList.add('ed11y-small');
+  				message.textContent = ' ' + el[2];
+  				if (State.inlineAlerts) {
+  					link.append(message);
+  				} else {
+  					li.append(message);
+  				}*/
+  			}
+  			panelOutline.append(li);
+  		});
+  	} else {
+  		panelOutline.innerHTML = `<p><em>${Lang._('PANEL_NO_HEADINGS')}</em></p>`;
+  	}
+  }
+
+
+  // Place markers on elements with issues
+  function drawResult(result, index) {
+  	let mark = document.createElement('ed11y-element-result');
+  	mark.classList.add('ed11y-element');
+  	mark.setAttribute('id', 'ed11y-result-' + index);
+  	mark.setAttribute('data-ed11y-result', index);
+  	mark.setAttribute('data-ed11y-open', 'false');
+  	if (!State.inlineAlerts) {
+  		mark.classList.add('ed11y-editable-result');
+  		State.panelAttachTo.insertAdjacentElement('beforeend', mark);
+  	} else {
+  		result.element.insertAdjacentElement(result.position, mark);
+  	}
+
+  	const shadow = mark.attachShadow({ mode: 'open' });
+
+  	// Create mark.wrapper with type class
+  	mark.resultID = mark.dataset.ed11yResult;
+  	mark.result = Results[mark.resultID];
+
+  	mark.wrapper = document.createElement('div');
+
+  	mark.dismissable = mark.result.type !== 'error';
+  	mark.dismissed = !!mark.result.dismissalStatus;
+  	mark.wrapper.classList.add('ed11y-wrapper', 'ed11y-result-wrapper');
+  	mark.wrapper.classList.add('ed11y-result');
+
+  	// Create tooltip toggle
+  	mark.toggle = document.createElement('button');
+  	mark.toggle.setAttribute('class', 'toggle');
+  	let label = mark.dismissable ? Lang._('WARNING') : Lang._('ERROR');
+  	mark.toggle.setAttribute('aria-label', label);
+  	mark.toggle.setAttribute('aria-expanded', 'false');
+  	mark.toggle.setAttribute('aria-haspopup', 'dialog');
+  	mark.toggle.setAttribute('data-ed11y-result', mark.dataset.ed11yResult);
+  	mark.toggle.setAttribute('data-ed11y-ready', 'false');
+  	mark.toggle.setAttribute('data-ed11y-race', 'false');
+  	if (!State.inlineAlerts) {
+  		mark.toggle.style.setProperty('font-size', '16px');
+  	}
+  	if (mark.dismissed) {
+  		mark.toggle.innerHTML = '<svg aria-hidden="true" width="10" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>';
+  		mark.toggle.classList.add('dismissed');
+  		if (mark.result.dismissalStatus !== 'ok') {
+  			mark.toggle.classList.add('notok');
+  		} else {
+  			mark.toggle.classList.add('ok');
+  		}
+  	} else if (mark.dismissable) {
+  		mark.toggle.classList.add('dismissable');
+  	}
+  	mark.wrapper.appendChild(mark.toggle);
+  	mark.toggle.addEventListener('click', mark.toggleClick);
+  	mark.toggle.addEventListener('focus', mark.handleFocus);
+  	mark.toggle.addEventListener('mouseover', mark.handleHover);
+  	mark.tipNeedsBuild = true;
+
+  	UI.attachCSS(mark.wrapper);
+
+  	shadow.appendChild(mark.wrapper);
+
+  	State.jumpList.unshift(mark);
+  	Results[index].toggle = mark;
   }
 
   function showResults () {
@@ -6345,7 +6643,7 @@ URL: ${url}</pre>
         resetResults(true);
       } else {
         // Reconnect map
-  			State.results.push(State.oldResults);
+  			Results.push(State.oldResults);
   			if ( !State.alignPending ) {
   				alignButtons();
   				alignPanel();
@@ -6475,7 +6773,7 @@ URL: ${url}</pre>
         }
       } else if (!State.inlineAlerts) {
   				State.oldResultString = `${State.errorCount} ${State.warningCount}`;
-  				State.results.forEach(result => {
+  				Results.forEach(result => {
   					State.oldResultString += result.test + result.element.outerHTML;
   				});
   		}
@@ -6602,7 +6900,7 @@ URL: ${url}</pre>
     pauseObservers();
 
     // Initial alignment to get approximate Y position order for jump list.
-  	State.results.forEach(function (result) {
+  	Results.forEach(function (result) {
   		let top = result.element.getBoundingClientRect().top;
   		if (!top) {
   			const visibleParent = firstVisibleParent(result.element);
@@ -6623,11 +6921,11 @@ URL: ${url}</pre>
   		result.sortPos = top;
   	});
   	/* There was once a race condition...
-  	for (let i = State.results.length - 1; i >= 0; i--) {
-  		const result = State.results[i];
+  	for (let i = Results.length - 1; i >= 0; i--) {
+  		const result = Results[i];
   		if (!result.element) {
   			// todo we should never running while checks are running.
-  			State.results.splice(i, 1);
+  			Results.splice(i, 1);
   		} else {
   			let top = result.element.getBoundingClientRect().top;
   			if (!top) {
@@ -6651,10 +6949,10 @@ URL: ${url}</pre>
   	}*/
 
     // Sort from bottom to top so focus order after insert is top to bottom.
-    State.results.sort((a, b) => b.sortPos - a.sortPos);
+    Results.sort((a, b) => b.sortPos - a.sortPos);
 
-    State.results?.forEach(function (result, i) {
-      if (!State.results[i].dismissalStatus || State.showDismissed) {
+    Results?.forEach(function (result, i) {
+      if (!Results[i].dismissalStatus || State.showDismissed) {
         drawResult(result, i);
       }
     });
@@ -6666,71 +6964,6 @@ URL: ${url}</pre>
     let tipsPainted = new CustomEvent('ed11yResultsPainted');
     document.dispatchEvent(tipsPainted);
     resumeObservers();
-  }
-
-  // Place markers on elements with issues
-  function drawResult(result, index) {
-    let mark = document.createElement('ed11y-element-result');
-    mark.classList.add('ed11y-element');
-    mark.setAttribute('id', 'ed11y-result-' + index);
-    mark.setAttribute('data-ed11y-result', index);
-    mark.setAttribute('data-ed11y-open', 'false');
-    if (!State.inlineAlerts) {
-      mark.classList.add('ed11y-editable-result');
-  		State.panelAttachTo.insertAdjacentElement('beforeend', mark);
-  	} else {
-  		result.element.insertAdjacentElement(result.position, mark);
-    }
-
-    const shadow = mark.attachShadow({ mode: 'open' });
-
-    // Create mark.wrapper with type class
-    mark.resultID = mark.dataset.ed11yResult;
-    mark.result = State.results[mark.resultID];
-
-    mark.wrapper = document.createElement('div');
-
-    mark.dismissable = mark.result.type !== 'error';
-    mark.dismissed = !!mark.result.dismissalStatus;
-    mark.wrapper.classList.add('ed11y-wrapper', 'ed11y-result-wrapper');
-    mark.wrapper.classList.add('ed11y-result');
-
-    // Create tooltip toggle
-    mark.toggle = document.createElement('button');
-    mark.toggle.setAttribute('class', 'toggle');
-    let label = mark.dismissable ? Lang._('WARNING') : Lang._('ERROR');
-    mark.toggle.setAttribute('aria-label', label);
-    mark.toggle.setAttribute('aria-expanded', 'false');
-    mark.toggle.setAttribute('aria-haspopup', 'dialog');
-    mark.toggle.setAttribute('data-ed11y-result', mark.dataset.ed11yResult);
-    mark.toggle.setAttribute('data-ed11y-ready', 'false');
-    mark.toggle.setAttribute('data-ed11y-race', 'false');
-    if (!State.inlineAlerts) {
-      mark.toggle.style.setProperty('font-size', '16px');
-    }
-    if (mark.dismissed) {
-      mark.toggle.innerHTML = '<svg aria-hidden="true" width="10" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>';
-      mark.toggle.classList.add('dismissed');
-      if (mark.result.dismissalStatus !== 'ok') {
-        mark.toggle.classList.add('notok');
-      } else {
-        mark.toggle.classList.add('ok');
-      }
-    } else if (mark.dismissable) {
-      mark.toggle.classList.add('dismissable');
-    }
-    mark.wrapper.appendChild(mark.toggle);
-    mark.toggle.addEventListener('click', mark.toggleClick);
-    mark.toggle.addEventListener('focus', mark.handleFocus);
-    mark.toggle.addEventListener('mouseover', mark.handleHover);
-    mark.tipNeedsBuild = true;
-
-    UI.attachCSS(mark.wrapper);
-
-    shadow.appendChild(mark.wrapper);
-
-    State.jumpList.unshift(mark);
-    State.results[index].toggle = mark;
   }
 
   function dismissOne(dismissalType, test, dismissalKey) {
@@ -6811,7 +7044,7 @@ URL: ${url}</pre>
       return;
     }
     const id = State.openTip.tip.dataset.ed11yResult;
-    const target = State.results[id].element;
+    const target = Results[id].element;
     const editable = target.closest('[contenteditable]');
     if (!editable && !target.closest('textarea, input')) {
       if (target.closest('a')) { // @todo after merge add button?
@@ -6998,7 +7231,7 @@ URL: ${url}</pre>
   		State.lastOpenTip = 0;
   	}
     let result = goto.getAttribute('data-ed11y-result');
-    let gotoResult = State.results[result];
+    let gotoResult = Results[result];
     const target = gotoResult.element;
 
     // First of two scrollTo calls, to trigger any scroll based events.
@@ -7054,7 +7287,7 @@ URL: ${url}</pre>
 
   	const mark = button.getRootNode().host;
   	const resultNum = button.dataset.ed11yResult;
-  	const result = State.results[resultNum];
+  	const result = Results[resultNum];
 
   	// Find button on page
   	const scrollTop = window.scrollY;
@@ -7238,7 +7471,7 @@ URL: ${url}</pre>
   	}
 
   	UI.editableHighlight.forEach((el) => {
-  		if (!State.results[el.resultID]) {
+  		if (!Results[el.resultID]) {
   			State.interaction = true;
   			State.forceFullCheck = true;
   			UI.editableHighlight = [];
@@ -7246,8 +7479,8 @@ URL: ${url}</pre>
   			return false;
   		}
 
-  		const framePositioner = State.results[el.resultID].fixedRoot && State.positionedFrames[State.results[el.resultID].fixedRoot] ?
-  			State.positionedFrames[State.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
+  		const framePositioner = Results[el.resultID].fixedRoot && State.positionedFrames[Results[el.resultID].fixedRoot] ?
+  			State.positionedFrames[Results[el.resultID].fixedRoot] : { top: 0, left: 0 };
 
   		let targetOffset = el.target.getBoundingClientRect();
   		if (!visible(el.target)) {
@@ -7496,7 +7729,7 @@ URL: ${url}</pre>
 
 
   /*const getRuleset = {
-  	checkHeaders: checkHeaders(State.results, Options, State.headingOutline),
+  	checkHeaders: checkHeaders(Results, Options, State.headingOutline),
   	checkLinkText:
   	checkImages: ,
   	checkLabels: ,
@@ -7592,10 +7825,10 @@ URL: ${url}</pre>
   	}
 
   	if ( State.incremental) {
-  		State.oldResults = State.results;
+  		State.oldResults = Results;
   	}
   	// Reset counts
-  	State.results.length = 0;
+  	Results.length = 0;
   	State.splitConfiguration.results.length = 0;
 
   	if ( State.splitConfiguration.active ) {
@@ -7609,7 +7842,6 @@ URL: ${url}</pre>
   		'group1',
   		'group2',
   	];
-  	const results = State.splitConfiguration.active ? State.splitConfiguration.results : State.results;
 
   	if (Options.readabilityPlugin && (!State.incremental || State.visualizing)) {
   		queue.push('checkReadability'); // todo merge param
@@ -7625,7 +7857,7 @@ URL: ${url}</pre>
   	}
   	// Todo after merge: developer and readability tests added via options here.
   	State.testsRemaining = queue.length;
-  	enqueueTests(queue, results);
+  	enqueueTests(queue, State.splitConfiguration.active ? State.splitConfiguration.results : Results);
 
   	if (Options.customTests > 0) {
   		// Pause
@@ -7659,8 +7891,8 @@ URL: ${url}</pre>
   	if (State.splitConfiguration.active && State.splitConfiguration.results.length > 0) {
   		handleSyncOnlyResults();
   	} else {
-  		State.results = filterAlerts(State.results);
-  		syncResults(State.results);
+  		filterAlerts(false);
+  		syncResults(Results);
   	}
   	countAlerts();
 
@@ -7735,95 +7967,6 @@ URL: ${url}</pre>
   	incrementalCheck();
   }, 250);
 
-  function visualize () {
-  	if (!UI.panel) {
-  		return;
-  	}
-  	if (State.inlineAlerts) {
-  		findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
-  		Elements.Found.reset?.forEach((el) => el.remove());
-  	}
-  	if (State.visualizing) {
-  		State.visualizing = false;
-  		UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('PANEL_HEADING');
-  		UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
-  		UI.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
-  		return;
-  	}
-  	State.visualizing = true;
-  	UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('buttonToolsActive');
-  	UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
-  	UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
-  	showAltPanel();
-  	showHeadingsPanel();
-  	if (Options.readabilityPlugin) {
-  		showReadability();
-  	}
-  }
-
-  const showReadability = function() {
-  	checkReadability(State.results);
-  	for (let i = State.results.length - 1; i >= 0; i--) {
-  		if (!State.results[i].element) {
-  			// It's possible to get here while visualizing.
-  			State.results.splice(i, 1);
-  		}
-  	}
-  };
-
-  function showHeadingsPanel () {
-  	// Visualize the document outline
-
-  	let panelOutline = UI.panel.querySelector('#ed11y-outline');
-  	if (State.headingOutline.length) {
-  		panelOutline.innerHTML = '';
-  		State.headingOutline.forEach((result, i) => {
-  			// Todo: draw these in editable mode.
-  			if (State.inlineAlerts) {
-  				const mark = document.createElement('ed11y-element-heading-label');
-  				mark.classList.add('ed11y-element', 'ed11y-element-heading');
-  				mark.dataset.ed11yHeadingOutline = i.toString();
-  				mark.setAttribute('id', 'ed11y-heading-' + i);
-  				mark.setAttribute('tabindex', '-1');
-  				// Array: el, level, outlinePrefix
-  				result.element.insertAdjacentElement('afterbegin', mark);
-  				UI.attachCSS(mark.shadowRoot);
-  			}
-  			let leftPad = 10 * result.headingLevel - 10;
-  			let li = document.createElement('li');
-  			li.classList.add('level' + result.headingLevel);
-  			li.style.setProperty('margin-left', leftPad + 'px');
-  			let levelPrefix = document.createElement('strong');
-  			levelPrefix.textContent = `H${result.headingLevel}: `;
-  			let userText = document.createElement('span');
-  			userText.innerHTML = result.text;
-  			let link = document.createElement('a');
-  			if (State.inlineAlerts) {
-  				link.setAttribute('href', '#ed11y-heading-' + i);
-  				li.append(link);
-  				link.append(levelPrefix);
-  				link.append(userText);
-  			} else {
-  				li.append(levelPrefix);
-  				li.append(userText);
-  			}
-  			if (result.type) { // Has an error message
-  				li.classList.add(`ed11y-${result.type}`);
-  				/*let message = document.createElement('em');
-  				message.classList.add('ed11y-small');
-  				message.textContent = ' ' + el[2];
-  				if (State.inlineAlerts) {
-  					link.append(message);
-  				} else {
-  					li.append(message);
-  				}*/
-  			}
-  			panelOutline.append(li);
-  		});
-  	} else {
-  		panelOutline.innerHTML = `<p><em>${Lang._('PANEL_NO_HEADINGS')}</em></p>`;
-  	}
-  }
 
   function resetPanel() {
   	// Reset main panel.
@@ -7856,131 +7999,20 @@ URL: ${url}</pre>
   	resumeObservers();
   });
 
-  const showAltPanel = function () {
-  	// visualize image alts
-  	let altList = UI.panel.querySelector('#ed11y-alt-list');
-  	UI.imageAlts = Elements.Found.Images.map((image) => {
-  			const match = State.results.find((i) => i.element === image);
-  			return match && {
-  				element: image,
-  				type: match.type,
-  				dismiss: match.dismiss,
-  				developer: match.developer,
-  			};
-  		}).filter(Boolean);
-
-  	if (UI.imageAlts.length > 0) {
-  		altList.innerHTML = '';
-  		for (let i = 0; i < UI.imageAlts.length; i++) {
-  			const image = UI.imageAlts[i];
-  			let altText = computeAriaLabel(image.element) === 'noAria'
-  				? escapeHTML(image.element.getAttribute('alt'))
-  				: computeAriaLabel(image.element);
-  			UI.imageAlts[i].altText = altText;
-  			//let alert = {};
-  			/*
-  			// Match dismissed images.
-  			// @todo CMS merge remove once new syntax is ready; this is the Sa11y logic for dev reference:
-  			// const isDismissed = dismissed.some((key) => key.dismiss === image.dismiss);
-  			// if (isDismissed) Object.assign(image, { dismissedImage: true });
-  			// Make developer checks don't show images as error if Developer checks are off!
-  			// const dev = Utils.store.getItem('sa11y-developer');
-  			// const devChecksOff = dev === 'Off' || dev === null;
-  			// const showDeveloperChecks = devChecksOff && (type === 'error' || type === 'warning') && developer === true;
-
-  			// Generate edit link if locally hosted image and prop is enabled.
-  			const edit = Constants.Global.editImageURLofCMS ? generateEditLink(image) : '';
-
-  			// Image is decorative (has null alt)
-  			const decorative = (element.hasAttribute('alt') && altText === '')
-  				? `<div class="badge">${Lang._('DECORATIVE')}</div>` : '';
-
-  			// If image is linked.
-  			const anchor = option.imageWithinLightbox ? `a[href]:not(${option.imageWithinLightbox})` : 'a[href]';
-  			const linked = (element.closest(anchor))
-  				? `<div class="badge"><span class="link-icon"></span><span class="visually-hidden">${Lang._('LINKED')}</span></div>` : '';
-  			const visibleIcon = (hidden === true)
-  				? `<div class="badge"><span class="hidden-icon"></span><span class="visually-hidden">${Lang._('HIDDEN')}</span></div>` : '';
-  			let append;
-        if (type === 'error' && !showDeveloperChecks) {
-        // etc
-  			*/
-
-
-  			// Account for lazy loading libraries.
-
-  			if (State.inlineAlerts) {
-  				// Label images
-  				const mark = document.createElement('ed11y-element-alt');
-  				mark.classList.add('ed11y-element');
-  				mark.dataset.ed11yImg = i.toString();
-  				mark.setAttribute('id', 'ed11y-alt-' + i);
-  				mark.setAttribute('tabindex', '-1');
-  				UI.imageAlts[i].mark = mark;
-  				image.element.insertAdjacentElement('beforebegin', mark);
-  			}
-
-  			// Build alt list in panel
-  			let userText = document.createElement('span');
-  			if (altText !== '') {
-  				userText.textContent = altText;
-  			} else {
-  				const decorative = document.createElement('span');
-  				decorative.classList.add('ed11y-decorative');
-  				decorative.textContent = Lang._('DECORATIVE');
-  				userText.append(decorative);
-  			}
-  			let li = document.createElement('li');
-  			li.classList.add(image.type);
-  			let img = document.createElement('img');
-  			img.setAttribute('src', getBestImageSource(image.element));
-  			img.setAttribute('alt', '');
-
-  			if (State.inlineAlerts) {
-  				let a = document.createElement('a');
-  				a.href = '#ed11y-alt-' + i;
-  				a.classList.add('alt-parent');
-  				li.append(a);
-  				a.append(img);
-  				a.append(userText);
-  			} else {
-  				li.classList.add('alt-parent');
-  				li.append(img);
-  				li.append(userText);
-  			}
-  			altList.append(li);
-  		}
-  		if (State.inlineAlerts) {
-  			alignAlts();
-  		} else {
-  			UI.imageAlts.length = 0;
-  		}
-  		//findElements('altMark', 'ed11y-element-alt', false );
-  	} else {
-  		const noImages = document.createElement('p');
-  		const noItalic = document.createElement('em');
-  		noItalic.textContent = Lang._('NO_IMAGES');
-  		noImages.appendChild(noItalic);
-  		altList.innerHTML = '';
-  		altList.appendChild(noImages);
-  	}
-  };
-
-
   function dismissThis (dismissalType, all = false) {
   	// Find the active tip and draw its identifying information from the result list
   	let removal = State.openTip;
   	let id = removal.tip.dataset.ed11yResult;
-  	let test = State.results[id].test;
+  	let test = Results[id].test;
 
   	if (all) {
-  		State.results.forEach((result) => {
+  		Results.forEach((result) => {
   			if (result.test === test && result.dismissalStatus !==dismissalType) {
   				dismissOne(dismissalType, test, result.dismiss);
   			}
   		});
   	} else {
-  		let dismissalKey = State.results[id].dismiss;
+  		let dismissalKey = Results[id].dismiss;
   		dismissOne(dismissalType, test, dismissalKey);
   	}
 
@@ -8074,7 +8106,7 @@ URL: ${url}</pre>
   	State.showPanel = true;
   	checkAll();
   	window.setTimeout(function() {
-  		if (State.results.length > 0 && State.loopStop) {
+  		if (Results.length > 0 && State.loopStop) {
   			jumpTo();
   			State.loopStop = false;
   		}
@@ -8929,7 +8961,7 @@ URL: ${url}</pre>
 
           const pageActions = document.createElement('details');
           const pageActionsSummary = document.createElement('summary');
-          const othersLikeThis = State.results.filter(el => el.test === this.result.test).length;
+          const othersLikeThis = Results.filter(el => el.test === this.result.test).length;
           const showPageActions = othersLikeThis > 3 && Options.allowHide && Options.allowOK;
 
           if (showPageActions) {
@@ -9319,11 +9351,12 @@ URL: ${url}</pre>
   	});
   }
 
+  // These are copied into rollup config:
+  const version = '3.0.0-dev092225';
+
   class Ed11y {
 
     constructor(userOptions) {
-
-  		State.version = '3.0.0';
 
       if (CSS.supports('selector(:has(body))')) {
   			try {
@@ -9333,17 +9366,15 @@ URL: ${url}</pre>
   			// @todo merge license and error message.
       }
 
-      /* Export exposed runs */
-  		this.version = State.version;
-
     }
   }
-  let elements = Elements.Found;
 
-  exports.Constants = Constants;
+  const elements = Elements.Found;
+
   exports.Ed11y = Ed11y;
   exports.Lang = Lang;
   exports.Options = Options;
+  exports.Results = Results;
   exports.State = State;
   exports.Theme = Theme;
   exports.UI = UI;
@@ -9355,6 +9386,7 @@ URL: ${url}</pre>
   exports.incrementalCheck = incrementalCheck;
   exports.prepareDismissal = prepareDismissal;
   exports.reset = reset;
+  exports.version = version;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

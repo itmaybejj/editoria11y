@@ -23,7 +23,6 @@ export const State = {
 	customTestsRemaining: 0,
 	customTestTimeout: 0,
   loopStop: false,
-	results: [],
   oldResults: [],
 	roots: [],
 	headingOutline: [],
@@ -83,3 +82,5 @@ export const UI = {
   panelJumpNext: {},
   panelShowDismissed: {},
 }
+
+export const Results = [];
