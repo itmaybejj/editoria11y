@@ -1,6 +1,6 @@
-body {background: #f9f9fe; font-family: sans-serif; color:#222; padding: 16px; margin: 0;}
-main {max-width: 50rem; margin: auto; background:#fefeff;
-    box-shadow: 0 8px 8px rgba(0,0,25,.25); padding: 2rem 16px 3rem;}
+body { padding: 16px; margin: 0; font-family: sans-serif; color:#222;background: #f9f9fe;}
+main {max-width: 50rem; padding: 2rem 16px 3rem; margin: auto; background:#fefeff;
+    box-shadow: 0 8px 8px rgba(0,0,25,.25);}
 header, footer {max-width: 52rem; margin: auto;}
 section {padding-top: 2rem;}
 h1 {
@@ -9,63 +9,78 @@ h1 {
     font-weight: 400;
 }
 h2 {
-    margin: 4rem -2.5rem 0 -3.5rem;
-    background: #112f4e;
-    color: #f2f7fb;
     padding: 1.25rem 4.5rem 1rem 2.5rem;
+    margin: 4rem -2.5rem 0 -3.5rem;
     font-size: 1.5rem;
     font-weight: bold;
+    color: #f2f7fb;
+    background: #112f4e;
 }
 h2:first-child {
     margin-top:0;
 }
 h3 {
-    color: #112f4e;
+    padding: 1.125rem 1rem .875rem;
+    margin: 4rem 0 2rem -3.5rem;
     font-size: 1rem;
     line-height: 1;
-    margin: 4rem 0 2rem -3.5rem;
-    padding: 1.125rem 1rem .875rem 1rem;
+    color: #112f4e;
     background: #bde0fc;
     border-left: 2rem solid #112f4e;
 }
 h2 + h3 {margin-top: 2.5rem;}
 .positive {padding: .75rem 1rem .5rem; margin: 1rem 0; border-radius:3px;}
+.positive:not(:has(.ed11y-element), .negative:has(.ed11y-element)), .ed11y-element + .negative {
+	border: 4px dashed firebrick;
+	box-shadow: -35px 0 firebrick;
+}
+.ed11y-element + .positive {border: none !important; box-shadow: none !important;}
 .todo-positive {background-color: orange;}
 .todo-negative {background-color: yellow;}
 .todo-positive::before, .todo-negative::before {
-    content: "todo";
     display: inline-block;
-    transform: rotate(-15deg);
     padding: 8px;
+    content: "todo";
     border: 2px solid red;
+    transform: rotate(-15deg);
 }
 .ed11y-pops-ready .positive:not([data-ed11y-marked])::before,
 .ed11y-pops-ready .negative [data-ed11y-marked]::before {
-    content: "False negative:";
-    font-weight: 700;
-    font-style: italic;
-    font-size: 1.25rem;
-    background: darkred;
-    color: #fff;
-    margin: -1.25rem 1rem -1rem -4.5rem;
-    padding: 1.01rem 1.25rem;
     float: left;
+    padding: 1.01rem 1.25rem;
+    margin: -1.25rem 1rem -1rem -4.5rem;
+    font-size: 1.25rem;
+    font-style: italic;
+    font-weight: 700;
+    color: #fff;
+    content: "False negative:";
+    background: darkred;
 }
-.positive {padding: .75rem 1rem .5rem; background: palegreen;}
-.negative {padding: .75rem 1rem .5rem; margin-bottom: 1rem; border-radius:3px; background-color: palevioletred;}
+.positive {
+	padding: .75rem 1rem .5rem;
+	background: #e0f7ff;
+	border: 2px solid deepskyblue;
+}
+.negative {
+	padding: .75rem 1rem .5rem;
+	margin-bottom: 1rem;
+	background-color: #eee;
+	border: 2px solid #ccc;
+	border-radius: 3px;
+}
 .negative ed11y-element-result { outline: 8px dotted red !important; }
 img {max-width: 45%;}
-td, th {border: 1px solid silver;padding: .25rem .75rem;}
+td, th {padding: .25rem .75rem;border: 1px solid silver;}
 th {background: #5294ca;}
 a:not(:hover) {color: inherit;}
 :focus {outline: 2px solid;}
 
 [contenteditable] {
     max-height: 36em;
-    overflow-y: auto;
-    box-shadow: 0px 0px 0 1px #777, inset 1px 1px 3px;
-    border-radius: 3px;
     padding: 1rem;
+    overflow-y: auto;
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px #777, inset 1px 1px 3px;
 }
 [contenteditable] > * {
     /*min-width: 800px;*/

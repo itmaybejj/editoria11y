@@ -7,6 +7,7 @@
 <body>
     <header>
         <h1 id="editoria11y-demo">Editoria11y Unit Tests</h1>
+		<h6 class="positive">Developer mode should pick up this h6</h6>
     </header>
     <main>
 
@@ -117,7 +118,7 @@
 
             <h3 id="image-with-very-long-alt-text">Image with very long alt text</h3>
 
-            <p class="positive"><img alt="Alt text should be brief. Screen readers cannot jump from sentence to sentence in alt text, so listeners just hear one monster pile of text and if they miss something they have to start over." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><img alt="Alt text should be brief. Screen readers cannot jump from sentence to sentence in alt text, so listeners just hear one monster pile of text and if they miss something they have to start over. This, for example, is really quite awfully long and should be much shorter." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
 
             <h3 id="images-in-links-where-the-alt-text-may-be-describing-the-image-instead-of-the-link">Images in links where the alt text may be describing the image instead of the link</h3>
 
@@ -141,6 +142,10 @@
                 <figcaption>Figcaption is the same as alt</figcaption>
             </figure>
         </section>
+		<section>
+			<h2>Contrast</h2>
+			<p style="background: #ccc; color: #ddd;">Super legible.</p>
+		</section>
         <h3 id="embeds">Embeds</h3>
 
         <p>Flagged as manual check needed for captioning:</p>
@@ -177,8 +182,8 @@
         <p>“Click here,” “learn more,” “download,” etc.</p>
 
         <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Download</a> But should only be yellow</p>
-        <p class="positive"><a class="insert-text-before insert-text-after" href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here</a></p>
-        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">More</a></p>
+        <p class="positive"><a class="insert-text-before" href="https://www.youtube.com/watch?v=DLzxrzFCyOs"></a> Only pseudo-content</p>
+        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here for more</a></p>
 
         <p class="positive">Link with ignored substring: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here (opens in new window)</a></p>
         <p class="negative">Link with new window icon: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">You were warned <em class="link-purpose">(opens in new window)</em></a></p>
@@ -187,10 +192,9 @@
 
         <h3 id="links-that-open-in-a-new-window-without-an-external-link-icon-or-text-warning">Links that open in a new window without an external link icon or text warning</h3>
 
-        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">An informative video.</a></p>
+        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">Alert for opens-in test.</a></p>
 
-        <p class="negative"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">A link in a tab</a></p>
-
+        <p class="negative"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">A link in a new tab</a></p>
 
         <p class="negative">Link that is only an aria-label: <a aria-label="this link opens new window" href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank"></a></p>
         <p class="negative">Link with inner download icon with aria-label: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">Aria label on inner span <span aria-label="download">^</span></a></p>
@@ -219,7 +223,7 @@
 
         <p class="positive"><a href="#"><img alt="http://jpg.gif" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
         </a> linked image with filename.</p>
-        <p class="positive"><a href="#"><img alt="click here" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+        <p class="todo-positive"><a href="#"><img alt="click here" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
         </a> linked image with click here.</p>
         <p class="positive"><a href="#"><img alt="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
         </a> linked image with giant alt.</p>
@@ -232,7 +236,7 @@
         <ul>
             <li class="negative">Title <a href="#"  title="text is in the title"></a></li>
             <li class="negative">Aria-label [todo] <a href="#"  id="aria-test" aria-label="Aria label"></a></li>
-            <li class="negative">Aria-label overriding [todo]<a href="#"  aria-label="Aria label">Click here</a></li>
+            <li class="negative">Aria-label overriding [todo]<a href="#"  aria-label="Aria label"></a></li>
             <li class="negative">Aria-labelledby [todo]<a href="#"  aria-labelledby="aria-test"></a></li>
         </ul>
 
@@ -283,10 +287,7 @@
         <div><p class="positive">1. Fake lists<br>2. Sometimes use<br>BR instead of P tags.</p></div>
 
         <div><p class="positive">* Fake lists</p><p class="negative">* Should only</p><p class="negative">* be flagged</p><p class="negative">* one time.</p></div>
-        <div><p class="positive">(a) apple<br>
-          (b) banana<br>
-          (c) pear</p></div>
-        <div>
+		<div><p>Spacer between lists.</p></div>
             <p class="positive">1 This is split</p>
             <hr><p>2 with HR</p>
             <hr><p>3 but non-contiguous p are detected.</p>
@@ -343,17 +344,11 @@
         <div class="negative"><p>A Bear</p><p>A turtle</p></div>
         <div class="negative"><p>Aardvark</p><p>Bad</p></div>
         <div><p class="positive">🥑 Fake lists with emoji</p><p class="negative">🍅 Oh tomato...</p><p class="negative">🦄 Shiny Unicorn</p>
-          <p class="positive">⊙ Math symbol</p><p class="negative">⊙ Detect on repeat</p>
-          <p class="positive">🚜 Now emoji again, with a line break<br>🛵 Any other emoji</p>
         </div>
         <div class="negative"><p>11</p><p>12</p></div>
         <div class="negative"><p>1 thing</p><p>20 things</p></div>
         <div class="negative"><p>10 things</p><p>20 things</p></div>
         <div class="negative"><p>1 thing</p><p>1 thing</p></div>
-        <div><p class="positive">🥑 Fake lists with emoji</p><p class="negative">🍅 Oh tomato...</p><p class="negative">🦄 Shiny Unicorn</p>
-            <p class="positive">⊙ Math symbol</p><p class="negative">⊙ Detect on repeat</p>
-            <p class="positive">🚜 Now emoji again, with a line break<br>🛵 Any other emoji</p>
-        </div>
 
         <div class="positive"><p>1. This has rich text after the BR<br><a href="#"><strong>2.</strong> Fancy.</a></p></div>
         <div class="negative"><p>1. This has nothing after the BR<br></p></div>
@@ -474,45 +469,57 @@
                 height: 24px;
             }
             .insert-text-before::before {
-                content: "Click ";
-            }
-            .insert-text-after::after {
-                content: " Here";
+                content: "Click here";
             }
             /*footer { position: fixed; z-index: 1; bottom: 0; left: 0; right: 0; background: silver;}*/
         </style>
         <link href="./tests.css" rel="stylesheet">
-        <script src="../js/ed11y-localization.js"></script>
-        <script src="../js/ed11y-element-panel.js"></script>
-        <script src="../js/ed11y-element-result.js"></script>
-        <script src="../js/ed11y-element-tip.js"></script>
-        <script src="../js/ed11y-element-alt.js"></script>
-        <script src="../js/ed11y-test-links.js"></script>
-        <script src="../js/ed11y-test-images.js"></script>
-        <script src="../js/ed11y-test-headings.js"></script>
-        <script src="../js/ed11y-test-text.js"></script>
-        <script src="../js/ed11y-test-embeds.js"></script>
-        <script src="../js/ed11y.js"></script>
+		<script src="../dist/js/ed11y.umd.js"></script>
+		<script src="../dist/js/lang/enUS.umd.js"></script>
         <!-- Instantiate-->
         <script>
-          const ed11y = new Ed11y({
+			document.addEventListener('ed11yResults', (e) => {
+				console.log('Results', e.detail);
+			});
+		  Ed11y.Lang.addI18n(Sa11yLangEnUS.strings);
+          const ed11y = new Ed11y.Ed11y({
             alertMode : 'assertive',
-            lang : 'en',
+            lang : 'enUS',
             //baseFontSize: 18,
             //theme : 'sleekTheme',
             theme : 'darkTheme',
-            outlineExclude : '.utility',
+			  headingsOnlyFromCheckRoots: true, // @todo merge this is gone. can we move to only excluding header? or use fixedRoots? But fixedRoots would also need devFixedRoots...
+            //outlineExclude : '.utility', // @todo CMS this syntax changed for Sa11y to the below.
+			  outlineIgnore: '.utility',
+			  // Split configuration
+			   // Provide list of test keys to check but not display.
+			  /*syncOnlyConfiguration: {
+				  checks: ['QA_IN_PAGE_LINK'],
+				  options: {
+					  checkRoot: 'body',
+					  // containerIgnore: '',
+					  // contrastIgnore: '.sr-only',
+					  // outlineIgnore: '',
+					  // headerIgnore: '',,
+					  // imageIgnore: '',
+					  // linkIgnore: '[aria-hidden][tabindex="-1"]',
+				  }
+			  },*/
+			  contrastPlugin: true,
+			  readabilityPlugin: true,
+			  developerPlugin: true,
             ignoreAriaOnElements: '.gutenbergBadAria',
-            linkIgnoreStrings: /\(opens in new window\)|download/,
+            linkIgnoreStrings: ['opens in new window','download'], // @todo CMS was regex.
             linkIgnoreSelector: '.link-purpose',
             embeddedContent: '#embed',
-            //ignoreElements : 'footer *',
-            shadowComponents : 'shadow-test, shadow-test-no-hits, turtle',
-            //autoDetectShadowComponents: false,
+            ignoreElements : 'footer *, [style*="none"] *, [style*="none"]',
+            // shadowComponents : 'shadow-test, shadow-test-no-hits, turtle',
+            autoDetectShadowComponents: true,
             hiddenHandlers : '#hidden-handler',
-            checkRoots : 'main',
+		  	checkRoot: 'main',
             //showDismissed : true,
-            altPlaceholder: 'This image has an empty alt attribute;',
+            altPlaceholder: ['This image has an empty alt attribute;'], // @todo CMS was string.
+			  //panelAttachTo: 'header',
             //ignoreTests: ['headingLevelSkipped'],
             // syncedDismissals : {},
             //allowOK: false,
@@ -520,9 +527,172 @@
             //ignoreAllIfAbsent : 'maain',
             //ignoreAllIfPresent : 'main',
             //preventCheckingIfAbsent : 'maian',
+
+			  // All checks
+			  checks: {
+				  // Heading checks
+				  HEADING_SKIPPED_LEVEL: true,
+				  HEADING_EMPTY_WITH_IMAGE: true,
+				  HEADING_EMPTY: true,
+				  HEADING_FIRST: true,
+				  HEADING_LONG: {
+					  maxLength: 170,
+				  },
+				  HEADING_MISSING_ONE: true,
+
+				  // Image checks
+				  MISSING_ALT_LINK: true,
+				  MISSING_ALT_LINK_HAS_TEXT: true,
+				  MISSING_ALT: true,
+				  IMAGE_DECORATIVE_CAROUSEL: {
+					  sources: '.carousel',
+				  },
+				  LINK_IMAGE_NO_ALT_TEXT: true,
+				  LINK_IMAGE_TEXT: true,
+				  IMAGE_FIGURE_DECORATIVE: true,
+				  IMAGE_DECORATIVE: true,
+				  LINK_ALT_FILE_EXT: true,
+				  ALT_FILE_EXT: true,
+				  LINK_PLACEHOLDER_ALT: true,
+				  ALT_PLACEHOLDER: true,
+				  LINK_SUS_ALT: true,
+				  SUS_ALT: true,
+				  LINK_IMAGE_LONG_ALT: {
+					  maxLength: 250,
+				  },
+				  IMAGE_ALT_TOO_LONG: {
+					  maxLength: 250,
+				  },
+				  LINK_IMAGE_ALT: false,
+				  // {dismissAll: true,} default.
+				  LINK_IMAGE_ALT_AND_TEXT: true,
+				  IMAGE_FIGURE_DUPLICATE_ALT: true,
+				  IMAGE_PASS: {
+					  dismissAll: true,
+				  },
+				  ALT_UNPRONOUNCEABLE: true,
+				  LINK_ALT_UNPRONOUNCEABLE: true,
+				  ALT_MAYBE_BAD: {
+					  minLength: 15,
+				  },
+				  LINK_ALT_MAYBE_BAD: {
+					  minLength: 15,
+				  },
+
+				  // Link checks
+				  DUPLICATE_TITLE: {
+					  dismissAll: true,
+				  },
+				  LINK_EMPTY_LABELLEDBY: true,
+				  LINK_EMPTY_NO_LABEL: true,
+				  LINK_STOPWORD: {
+					  type: 'warning',
+				  },
+				  LINK_STOPWORD_ARIA: true,
+				  LINK_SYMBOLS: true,
+				  LINK_CLICK_HERE: false,
+				  LINK_DOI: {
+					  dismissAll: true,
+				  },
+				  LINK_URL: {
+					  maxLength: 40,
+				  },
+				  LINK_LABEL: {
+					  dismissAll: true,
+				  },
+				  LINK_EMPTY: true,
+				  LINK_IDENTICAL_NAME: {
+					  dismissAll: true,
+				  },
+				  LINK_NEW_TAB: {
+					  dismissAll: true,
+				  },
+				  LINK_FILE_EXT: true,
+
+				  // Form labels checks
+				  LABELS_MISSING_IMAGE_INPUT: true,
+				  LABELS_INPUT_RESET: true,
+				  LABELS_MISSING_LABEL: true,
+				  LABELS_ARIA_LABEL_INPUT: true,
+				  LABELS_NO_FOR_ATTRIBUTE: true,
+				  LABELS_PLACEHOLDER: true,
+
+				  // Embedded content checks
+				  EMBED_AUDIO: {
+					  sources: '',
+				  },
+				  EMBED_VIDEO: {
+					  sources: '',
+				  },
+				  EMBED_DATA_VIZ: {
+					  sources: '',
+				  },
+				  EMBED_UNFOCUSABLE: true,
+				  EMBED_MISSING_TITLE: true,
+				  EMBED_GENERAL: true,
+
+				  // Quality assurance checks
+				  QA_BAD_LINK: {
+					  sources: '',
+				  },
+				  QA_STRONG_ITALICS: true,
+				  QA_IN_PAGE_LINK: true,
+				  QA_DOCUMENT: {
+					  sources: '',
+					  dismissAll: true,
+				  },
+				  QA_PDF: {
+					  dismissAll: true,
+				  },
+				  QA_BLOCKQUOTE: true,
+				  TABLES_MISSING_HEADINGS: true,
+				  TABLES_SEMANTIC_HEADING: true,
+				  TABLES_EMPTY_HEADING: true,
+				  QA_FAKE_HEADING: true,
+				  QA_FAKE_LIST: true,
+				  QA_UPPERCASE: true,
+				  QA_UNDERLINE: true,
+				  QA_SUBSCRIPT: true,
+				  QA_NESTED_COMPONENTS: {
+					  sources: '',
+				  },
+				  QA_JUSTIFY: true,
+				  QA_SMALL_TEXT: true,
+
+				  // Meta checks
+				  META_LANG: true,
+				  META_SCALABLE: true,
+				  META_MAX: true,
+				  META_REFRESH: true,
+
+				  // Developer checks
+				  DUPLICATE_ID: true,
+				  META_TITLE: true,
+				  UNCONTAINED_LI: true,
+				  TABINDEX_ATTR: true,
+				  HIDDEN_FOCUSABLE: true,
+				  LABEL_IN_NAME: true,
+				  BTN_EMPTY: true,
+				  BTN_EMPTY_LABELLEDBY: true,
+				  BTN_ROLE_IN_NAME: true,
+
+				  // Contrast checks
+				  CONTRAST_WARNING: {
+					  dismissAll: true,
+				  },
+				  CONTRAST_INPUT: true,
+				  CONTRAST_ERROR: true,
+				  CONTRAST_PLACEHOLDER: true,
+				  CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
+				  CONTRAST_ERROR_GRAPHIC: true,
+				  CONTRAST_WARNING_GRAPHIC: false,
+				  CONTRAST_UNSUPPORTED: {
+					  dismissAll: true,
+				  },
+			  },
           });
 
-          let inject = document.querySelector('#all-tests');
+          /*let inject = document.querySelector('#all-tests');
           for (const [key, value] of Object.entries(Ed11y.M)) {
             if (value.title && typeof value.tip()) {
               let item = document.createElement('div');
@@ -532,7 +702,7 @@
               item.prepend(title);
               inject.append(item);
             };
-          }
+          }*/
         </script>
 
     </div>

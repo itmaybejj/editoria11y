@@ -12,6 +12,8 @@
         <h3 class="negative" id="ignored-skipped-heading">Ignored skipped heading outside main</h3>
     </header>
     <main>
+        <section>Initial times: Editoria11y 30ms, ed11y 50-55ms.</section>
+
 
         <section id="overflow">
 
@@ -25,13 +27,22 @@
 
 
         </section>
+
+		<section id="h4root">
+			<h4>This h4 should not be flagged due to #h4root.</h4>
+		</section>
+
+
+		<section id="h6root">
+			<h6>This h6 should not be flagged due to #h6root.</h6>
+		</section>
         <section id="hidden-results">
             <h2>Hidden results</h2>
             <div>Visible wrapper
                 <div style="display: none;">
                     <div class="item-list"><ul><li>
                         <div>
-                            <div><a href="#">Page</a></div>
+                            <div><a href="/">Page</a></div>
                         </div>
                     </li></ul></div>
                 </div>
@@ -39,47 +50,47 @@
             <p style="display: none;">THIS IS A HIDDEN PARAGRAPH WITH CAPS LOCK TO SET OFF THE 0 TEST</p>
             <details>
                 <summary>Summary with tip in details, "click here"</summary>
-                <a href="#">Click here</a>
+                <a href="/">Click here</a>
             </details>
             <div>
                 Visibility hidden. "click"
                 <div style="visibility: hidden;">
-                    <a href="#">Click</a>
+                    <a href="/">Click</a>
                 </div>
-                <a href="#" style="visibility: hidden;">Click</a>
+                <a href="/" style="visibility: hidden;">Click</a>
             </div>
             <div>
                 Display: none. "download"
                 <div style="display: none;">
-                    <a href="#">Download</a>
+                    <a href="/">Download</a>
                 </div>
-                <a href="#" style="display: none;">Download</a>
+                <a href="/" style="display: none;">Download</a>
             </div>
             <div>
                 Hidden. "click"
                 <div hidden>
-                    <a href="#">Click</a>
+                    <a href="/">Click</a>
                 </div>
                 <div>
-                    <a href="#" hidden>Click</a>
+                    <a href="/" hidden>Click</a>
                 </div>
             </div>
             <div>
                 Zindex. "file"
                 <div style="z-index: -1;">
-                    <a href="#">Click</a>
+                    <a href="/">Click</a>
                 </div>
             </div>
             <div>
                 Visually hidden issue.
-                <div style="width: 1px; height: 1px; overflow: hidden;"> <a href="#">here</a></div>
+                <div style="width: 1px; height: 1px; overflow: hidden;"> <a href="/">here</a></div>
             </div>
         </section>
 
         <section id="button-position">
             <h2>Button positioning param</h2>
             <div style="outline: 1px solid; overflow: scroll; position: relative; min-height: 12em;" class="constrain-position"><a href="https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwds.princeton.edu%2F">Safelink</a>
-                <p style="float:right; width:10px;"><a href="#">.</a></p>
+                <p style="float:right; width:10px;"><a href="/">.</a></p>
 
             </div>
         </section>
@@ -159,9 +170,9 @@
             <div class="negative"><div hidden><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
 
             <h3>Hidden click here links</h3>
-            <div class="positive"><div style="display: none;"><a id="visually-hidden-click-here" href="#">Click here</a></div></div>
-            <div class="positive"><div style="visibility: hidden;"><a id="visually-hidden-click-here" href="#">Click here</a></div></div>
-            <div class="positive"><div hidden><a id="hidden-click-here" href="#">Click here</a></div></div>
+            <div class="positive"><div style="display: none;"><a id="visually-hidden-click-here" href="/">Click here</a></div></div>
+            <div class="positive"><div style="visibility: hidden;"><a id="visually-hidden-click-here" href="/">Click here</a></div></div>
+            <div class="positive"><div hidden><a id="hidden-click-here" href="/">Click here</a></div></div>
 
         </section>
 
@@ -177,33 +188,31 @@
             <h3>Pseudo selectors in a link</h3>
             <div class="positive">Link with SVG image with multiple labels, one should be ignored:
                 <a href="https://demo">click here</a></div>
-            <div class="negative">Good link text in ::before: <a id="text-in-css" href="#"></a></div>
-            <div class="positive">Bad link text in ::before:<a id="click-in-css" class="click-in-css" href="#"></a></div>
-            <div class="positive"><div role="region" aria-label="Featured image">
-                Aria labelled region should not negate inner name calculation.
+            <div class="negative">Good link text in ::before: <a id="text-in-css" href="/"></a></div>
+            <div class="positive">Bad link text in ::before:<a id="click-in-css" class="click-in-css" href="/"></a></div>
+            <div class="todo-positive"><div role="region" aria-label="Featured image">
+                We should be testing SVG as a developer test, and an aria labelled region should not negate inner name calculation on an SVG.
                 <svg id="nested-aria-label" role="img"  viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg"/>
             </div></div>
-            <div class="negative">Good link text in title attribute: <a id="titled-link" title="Titled link" href="#"></a></div>
-            <div class="negative">Null aria label: <a id="null-aria" aria-label="" href="#">Null aria</a></div>
-            <div class="positive">Bad link text in title attribute: <a id="titled-link-click-here" title="Click here" href="#"><span></span></a></div>
-            <div class="positive">Bad link text in ::before on inner span: <a id="inner-css-link" href="#"><span class="click-in-css"></span></a></div>
-            <div class="positive">Inner SVG has an alt but no role, alt is ignored: <a id="svg-incorrect-role" href="#"><svg alt="unread alt" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="negative">Good link text in title attribute: <a id="titled-link" title="Potatoes" href="/"></a></div>
+            <div class="negative">Null aria label: <a id="null-aria" aria-label="" href="/">Null aria</a></div>
+            <div class="positive">Bad link text in title attribute: <a id="titled-link-click-here" title="Click here" href="/"><span></span></a></div>
+            <div class="positive">Bad link text in ::before on inner span: <a id="inner-css-link" href="/"><span class="click-in-css"></span></a></div>
+            <div class="positive">Inner SVG has an alt but no role, alt is ignored: <a id="svg-incorrect-role" href="/"><svg title="unread alt" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"></circle></svg></a></div>
-            <div class="negative">Inner SVG has an alt and a valid role: <a id="svg-image-role" href="#"><svg role="img" alt="foo bar baz" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="5" cy="5" r="4"></circle></svg></a></div>
-            <div class="negative">Inner SVG has a good title element: <a id="inner-svg-titles" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="negative">Inner SVG has a good title element: <a id="inner-svg-titles" href="/"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>I'm a circle</title></circle>
                 <rect x="11" y="1" width="8" height="8"><title>I'm a square</title></rect></svg></a></div>
-            <div class="positive">Inner SVG has a bad title element: <a id="inner-svg-titles-click-here" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="positive">Inner SVG has a bad title element: <a id="inner-svg-titles-click-here" href="/"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>Click</title></circle>
                 <rect x="11" y="1" width="8" height="8"><title>here</title></rect></svg></a></div>
-            <div class="negative">OK via aria-labelledby to another element: <a id="inner-svg-titles-ok-by-label" aria-labelledby="titled-link" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="negative">OK via aria-labelledby to another element: <a id="inner-svg-titles-ok-by-label" aria-labelledby="titled-link" href="/"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>Click</title></circle>
                 <rect x="11" y="1" width="8" height="8"><title>here</title></rect></svg></a></div>
-            <div class="positive">Bad via recursive aria-labelledby: <a id="recursive-svg-click-here" aria-labelledby="recursive-svg-click-here click-in-css" href="#"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="positive">Bad via recursive aria-labelledby: <a id="recursive-svg-click-here" aria-labelledby="recursive-svg-click-here" href="/"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>Click</title></circle>
                 </svg> here</a></div>
-            <div class="negative">Good via inner aria-labelled element: <a id="recursive-svg-inner-label" aria-labelledby="recursive-svg-inner-label" href="#"><svg aria-label="meaningful link" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="negative">Good via inner aria-labelled element: <a id="recursive-svg-inner-label" aria-labelledby="recursive-svg-inner-label" href="/"><svg aria-label="meaningful link" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>Click</title></circle></svg> Here</a></div>
             <div class="positive">Bad because IMG tag cannot have a ::before: <img class='click-in-css' src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></div>
 
@@ -267,25 +276,15 @@
         <div id="klaro_toggle_dialog" style="position: fixed; bottom: 10px; right: 10px; width: 25px; height: 25px; border-radius: 25px; background: silver;">@</div>
 
         <div hidden>
-            <link rel="stylesheet" media="all" href="https://cdn.jsdelivr.net/gh/itmaybejj/linkpurpose@main/css/linkpurpose.css">
+            <!--<link rel="stylesheet" media="all" href="https://cdn.jsdelivr.net/gh/itmaybejj/linkpurpose@main/css/linkpurpose.css">
             <script src="https://cdn.jsdelivr.net/gh/itmaybejj/linkpurpose@main/js/linkpurpose.min.js"></script>
             <script>
               console.log('Link purpose loaded from CDN');
-              const linkPurpose = new LinkPurpose({})
+              //const linkPurpose = new LinkPurpose({})
 
-            </script>
+            </script>-->
             <link href="./tests.css" rel="stylesheet">
-            <script src="../js/ed11y-localization.js"></script>
-            <script src="../js/ed11y-element-panel.js"></script>
-            <script src="../js/ed11y-element-result.js"></script>
-            <script src="../js/ed11y-element-tip.js"></script>
-            <script src="../js/ed11y-element-alt.js"></script>
-            <script src="../js/ed11y-test-links.js"></script>
-            <script src="../js/ed11y-test-images.js"></script>
-            <script src="../js/ed11y-test-headings.js"></script>
-            <script src="../js/ed11y-test-text.js"></script>
-            <script src="../js/ed11y-test-embeds.js"></script>
-            <script src="../js/ed11y.js"></script>
+
             <!-- Instantiate-->
             <script>
               customElements.define('element-details',
@@ -352,11 +351,11 @@
                 editIcon.classList.add('ed11y-custom-edit-icon');
                 editIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152L0 424c0 48.6 39.4 88 88 88l272 0c48.6 0 88-39.4 88-88l0-112c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 112c0 22.1-17.9 40-40 40L88 464c-22.1 0-40-17.9-40-40l0-272c0-22.1 17.9-40 40-40l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L88 64z"/></svg>';
                 const editLink = document.createElement('a');
-                editLink.href="#";
+                editLink.href="/";
                 editLink.textContent = "Edit page";
                 editLink.prepend(editIcon.cloneNode(true));
                 const layoutLink = document.createElement('a');
-                layoutLink.href="#";
+                layoutLink.href="/";
                 layoutLink.textContent = "Edit layout";
                 layoutLink.prepend(editIcon.cloneNode(true));
                 editLinks.appendChild(editLink);
@@ -369,48 +368,67 @@
               iterations = 0;
               // Listen for event
               document.addEventListener('ed11yPanelOpened', e => {
-                if (iterations < 2) {
-                  console.log('panel ready at: ' + parseInt(performance.now() - beforeCall));
+                if (iterations < 1) {
+                  console.log('Ed11y first run took ' + parseInt(performance.now() - beforeCall) + 'ms');
                 }
               });
-              document.addEventListener('ed11yResults', e => {
+              document.addEventListener('ed11yPanelOpened', e => {
                 //console.log('results ready at: ' + parseInt(performance.now() - beforeCall));
                 //console.log(iterations);
                 iterations ++;
                 if (iterations === 10) {
                   console.log('Average run: ' + parseInt((performance.now() - beforeCall)) / 10);
+				  console.log("Don't worry about duplicate tips; skipping reset for performance testing.")
                 } else if (iterations < 10) {
                   Ed11y.checkAll();
                 }
               });
-                const ed11y = new Ed11y({
-                    alertMode : 'assertive',
-                  //showDismissed: true,
-                    ignoreByKey : {
-                        'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
-                        'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
-                    },
-                    //syncedDismissals: {},
-                    //shadowComponents : 'shadow-test, shadow-test-no-hits, element-details',
-                    autoDetectShadowComponents: true,
-                    hiddenHandlers : '[hidden]',
-                    checkRoots : 'main',
-                    //linkIgnoreStrings: /\(link is external\)/i,
-                    customTests : 2,
-                    theme: 'sleekTheme',
-                    linkIgnoreSelector : '.ignore-class, .link-purpose-text',
-                    panelNoCover: '#klaro_toggle_dialog',
-                    reportsURL: 'https://www.princeton.edu',
-                  editLinks: editLinks,
-                  watchForChanges: false,
-                  allowOK: true,
-                  constrainButtons: '.constrain-position',
-                  //panelPinTo: 'left',
+            </script>
+            <!-- Instantiate-->
+            <!-- Sa11y (fork the latest code from GitHub) -->
+            <!--<script src="../../../sa11y/dist/js/sa11y.umd.min.js"></script>
+            <script src="../../../sa11y/dist/js/lang/en.umd.js"></script>-->
+            <script src="../dist/js/ed11y.umd.js"></script>
+            <script src="../dist/js/lang/en.umd.js"></script>
+            <script>
 
-                  //ignoreAllIfPresent: 'body',
-                  //allowHide: false,
-                  //allowOK: false,
-                });
+              Ed11y.Lang.addI18n(Sa11yLangEn.strings);
+              const ed11y = new Ed11y.Ed11y({
+
+                alertMode : 'assertive',
+                  showDismissed: true,
+                //syncedDismissals: {},
+                //shadowComponents : 'shadow-test, shadow-test-no-hits, element-details',
+                autoDetectShadowComponents: true,
+                  hiddenHandlers : '[hidden]',
+                checkRoot : 'main',
+                //linkIgnoreStrings: /\(link is external\)/i,
+				  ignoreContentOutsideRoots: true, // todo CMS new phrasing.
+                customTests : 0,
+                theme: 'sleekTheme',
+                linkIgnoreSelector : '.ignore-class, .link-purpose-text',
+                panelNoCover: '#klaro_toggle_dialog',
+                reportsURL: 'https://www.princeton.edu',
+                editLinks: editLinks,
+                watchForChanges: false,
+                allowOK: true,
+                constrainButtons: '.constrain-position',
+			    initialHeadingLevel: [
+					{
+						selector: '#h4root',
+						previousHeading: 4,
+				  	},
+					{
+						selector: '#h6root',
+						previousHeading: 6,
+					},
+				  ]
+
+              });
+
+
+
+              //window.setTimeout(() =>{ed11y.checkAll()}, 500);
             </script>
 
         </div>

@@ -90,17 +90,8 @@
             <!--
             <script src="../dist/editoria11y.min.js"></script>
             -->
-            <script src="../js/ed11y-localization.js"></script>
-            <script src="../js/ed11y-element-panel.js"></script>
-            <script src="../js/ed11y-element-result.js"></script>
-            <script src="../js/ed11y-element-tip.js"></script>
-            <script src="../js/ed11y-element-alt.js"></script>
-            <script src="../js/ed11y-test-links.js"></script>
-            <script src="../js/ed11y-test-images.js"></script>
-            <script src="../js/ed11y-test-headings.js"></script>
-            <script src="../js/ed11y-test-text.js"></script>
-            <script src="../js/ed11y-test-embeds.js"></script>
-            <script src="../js/ed11y.js"></script>
+			<script src="../dist/js/ed11y.umd.js"></script>
+			<script src="../dist/js/lang/en.umd.js"></script>
             <!-- Instantiate-->
             <script>
                 document.addEventListener('ed11yShowHidden', function(e) {
@@ -120,7 +111,7 @@
                 }
                 document.addEventListener('ed11yRunCustomTests', function() {
                     Ed11y.findElements('safeLinks','a[href*="safelinks.protection.outlook.com/?"]');
-                    Ed11y.M.outlookSafeLink = {
+                    Ed11y.Lang.outlookSafeLink = {
                         title: 'URL is an Outlook Safelink',
                         tip: (href) =>
                             `<p>The URL for this link has been copied from an email, and will bounce all clicks through the Microsoft Safelinks server.</p>
@@ -128,37 +119,39 @@
                             ${decodeSafelink(href)}
                                 `,
                     };
-                    Ed11y.elements.safeLinks?.forEach((el) => {
+/*                    Ed11y.elements.safeLinks?.forEach((el) => {
                         Ed11y.results.push({
                             element: el,
                             test: 'outlookSafeLink',
-                            content: Ed11y.M.outlookSafeLink.tip(el.getAttribute('href')),
+                            content: Ed11y.Lang.outlookSafeLink.tip(el.getAttribute('href')),
                             position: 'beforebegin',
                             dismissalKey: false,
                         })
-                    })
+                    })*/ // todo CMS new syntax.
                     let allDone = new CustomEvent('ed11yResume');
                     document.dispatchEvent(allDone);
-                    document.dispatchEvent(allDone);
+					document.dispatchEvent(allDone);
                     })
 
 
                 onload = (event) => {
-                  const ed11y = new Ed11y({
+				Ed11y.Lang.addI18n(Sa11yLangEn.strings);
+				const ed11y = new Ed11y.Ed11y({
                     alertMode : 'assertive',
-                    ignoreByKey : {
+                    /*ignoreByKey : {
                       'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
                       'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
-                    },
-                    ignoreElements: '.tox-editor-header *, .ed11y-ignore *',
-                    hiddenHandlers : '[hidden]',
+                    },*/
+                    // ignoreElements: '.tox-editor-header *, .ed11y-ignore *',
+					//inlineAlerts : false,
+                    //hiddenHandlers : '[hidden]',
                     //inlineAlerts : false,
-                    checkRoots : 'body',
-                    linkIgnoreStrings: '\(link is external\)',
+                    checkRoot : '#editable-region',
+                    //linkIgnoreStrings: ['link is external'], // todo CMS new syntax
                     customTests : 2,
-                    theme: 'darkTheme',
+                    //theme: 'darkTheme',
                     //theme: 'lightTheme',
-                    //theme: 'sleekTheme',
+                    theme: 'sleekTheme',
                     linkIgnoreSelector : '.ignore-class',
                   });
                 };
