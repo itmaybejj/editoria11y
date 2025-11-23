@@ -26,7 +26,7 @@ const banner = `
 	*
 	*	Rulesets co-developed with Sa11y under shared license:
 	* Sa11y, the accessibility quality assurance assistant.
-  * @version 4.4.0-dev
+  * @version 4.93.4
   * @author Adam Chaboryk
   * @license GPL-2.0-or-later
   * @copyright 2020 - ${new Date().getFullYear()} Toronto Metropolitan University.

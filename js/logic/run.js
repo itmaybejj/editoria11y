@@ -7,8 +7,7 @@ import {
 	resetClass, resetResults, resumeObservers, showError,
 	visible
 } from '../utils/utils.js';
-import {remove,
-} from '../../sa11y/utils/utils.js';
+import {remove} from '../../sa11y/utils/utils.js';
 import * as Utils from "../../sa11y/utils/utils.js";
 import checkHeaders from "../../sa11y/rulesets/headers.js";
 import checkLinkText from "../../sa11y/rulesets/link-text.js";
@@ -36,8 +35,8 @@ import checkEmbeddedContent from '../../sa11y/rulesets/embedded-content';
 import customRuleset from '../rulesets/custom-ruleset';
 import Constants from '../../sa11y/utils/constants';
 import {
-	countAlerts, handleSyncOnlyResults,
-	processDismissedAlerts, syncResults
+	countAlerts, filterAlerts, handleSyncOnlyResults,
+	syncResults
 } from '../utils/process_results';
 
 export function showResults () {
@@ -359,7 +358,6 @@ export function buildJumpList () {
 	for (let i = State.results.length - 1; i >= 0; i--) {
 		const result = State.results[i];
 		if (!result.element) {
-			console.log(result);
 			// todo we should never running while checks are running.
 			State.results.splice(i, 1);
 		} else {
@@ -1393,7 +1391,7 @@ export function continueCheck(customCheck = false) {
 	if (State.splitConfiguration.active && State.splitConfiguration.results.length > 0) {
 		handleSyncOnlyResults();
 	} else {
-		State.results = processDismissedAlerts(State.results);
+		State.results = filterAlerts(State.results);
 		syncResults(State.results);
 	}
 	countAlerts();

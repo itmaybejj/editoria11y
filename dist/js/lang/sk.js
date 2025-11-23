@@ -1,12 +1,25 @@
 
 /*!
-  * Sa11y, the accessibility quality assurance assistant.
-  * @version 3.0.0
-  * @author undefined
-  * @license GPLv2
-  * @copyright © 2020 - 2025 Toronto Metropolitan University.
-  * @contact undefined
-  * GitHub: git+https://itmaybejj@github.com/itmaybejj/editoria11y.git | Website: https://sa11y.netlify.app
+	* Editoria11y accessibility checker.
+  * @version 3.0.0-dev092225
+  * @author John Jameson
+  * @license GPL-2.0
+  * @copyright 2025 The Trustees of Princeton University.
+  * @contact jjameson@princeton.edu
+  * GitHub: https://github.com/itmaybejj/editoria11y
+  * The above copyright notice shall be included in all copies or substantial portions of the Software.
+	*
+	* Acknowledgements:
+	*	Icons from Font Awesome by Dave Gandy, http://fontawesome.io, Font Awesome license: CC BY 3.0, URL: http://creativecommons.org/licenses/by/3.0/
+	*
+	*	Rulesets co-developed with Sa11y under shared license:
+	* Sa11y, the accessibility quality assurance assistant.
+  * @version 4.4.0-dev
+  * @author Adam Chaboryk
+  * @license GPL-2.0-or-later
+  * @copyright 2020 - 2025 Toronto Metropolitan University.
+  * @contact adam.chaboryk@torontomu.ca
+  * GitHub: git+https://github.com/ryersondmp/sa11y.git | Website: https://sa11y.netlify.app
   * For all acknowledgements, please visit: https://sa11y.netlify.app/acknowledgements/
   * The above copyright notice shall be included in all copies or substantial portions of the Software.
 **/
@@ -167,7 +180,6 @@ var sk = {
     VERY_DIFFICULT: 'Veľmi ťažké',
     DIFFICULT: 'Ťažké',
     FAIRLY_DIFFICULT: 'Pomerne ťažké',
-    READABILITY_NO_CONTENT: 'Nie je možné vypočítať skóre čitateľnosti. Nenašiel sa žiadny odsek <code>&lt;p&gt;</code> ani obsah zoznamu <code>&lt;li&gt;</code>.',
     READABILITY_NOT_ENOUGH: 'Nedostatok obsahu na výpočet skóre čitateľnosti.',
 
     // Heading

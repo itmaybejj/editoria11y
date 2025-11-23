@@ -68,7 +68,7 @@ export class Ed11yElementTip extends HTMLElement {
 		} else {
 			// Sent by Sa11y
 			let innerContent = document.createElement('div');
-			const sentences = this.result.content.split('.');
+			const sentences = this.result.content.split(/[.!]/);
 			const firstSentence = document.createElement('div');
 			firstSentence.innerHTML = sentences.shift() + '.';
 			firstSentence.classList.add('title');

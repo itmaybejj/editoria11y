@@ -22,7 +22,7 @@ export function syncResults(results) {
 
 export function handleSyncOnlyResults() {
 
-	State.splitConfiguration.results = processDismissedAlerts(State.splitConfiguration.results);
+	State.splitConfiguration.results = filterAlerts(State.splitConfiguration.results);
 
 	Object.assign(Options, State.splitConfiguration.showOptions);
 
@@ -41,8 +41,6 @@ export function handleSyncOnlyResults() {
 		if (!result.element) {
 			return false;
 		}
-		console.log(State.splitConfiguration.checks);
-		console.log(result.test, typeof result.test, State.splitConfiguration.checks.has(result.test));
 		if (State.splitConfiguration.checks.has(result.test)) {
 			return false;
 		}
@@ -117,7 +115,7 @@ export function countAlerts () {
 	}
 }
 
-export function processDismissedAlerts (results) {
+export function filterAlerts (results) {
 
 	// Review results array to remove dismissed or ignored items
 
@@ -144,7 +142,11 @@ export function processDismissedAlerts (results) {
 				}
 			}
 			results.splice(i, 1);
-		} else if (!results[i].type || results[i].type === 'good') {
+		} else if (results[i].test === 'META_TITLE') {
+			if (Elements.Found.Headings.length > 0) {
+				results[i].element = Elements.Found.Everything[0];
+			}
+		} else if (!results[i].element || results[i].type === 'good') {
 			results.splice(i, 1);
 		} else {
 			// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
