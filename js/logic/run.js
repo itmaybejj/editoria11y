@@ -443,7 +443,7 @@ export function editableHighlighter (resultID, show, firstVisible) {
     UI.editableHighlight[resultID]?.highlight.style.setProperty('opacity', '0');
     return;
   }
-  const result = State.results[resultID];
+  const result = Results[resultID];
   let el = UI.editableHighlight[resultID]?.highlight;
   if (!el) {
     el = document.createElement('ed11y-element-highlight');
