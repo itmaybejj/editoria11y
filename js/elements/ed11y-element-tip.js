@@ -43,6 +43,7 @@ export class Ed11yElementTip extends HTMLElement {
     this.dismissable = this.result.type !== 'error';
     this.dismissed = !!this.result.dismissalStatus;
     this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
+		this.wrapper.style.setProperty('opacity', '0');
     this.wrapper.setAttribute('aria-label',
       `${Lang._('ALERT_TEXT')}
         ${this.issueIndex + 1}`);

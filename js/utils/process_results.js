@@ -35,8 +35,6 @@ export function handleSyncOnlyResults() {
 	let contrast = false;
 	let links = false;
 
-	console.log(Results);
-
 	for (let i = 0; i < State.splitConfiguration.results.length; i++) {
 		let result = State.splitConfiguration.results[i];
 		if (!result.element) {
@@ -52,8 +50,6 @@ export function handleSyncOnlyResults() {
 			}
 			if (headings.has(result.element) && !excludedHeadings.has(result.element)) {
 				Results.push(result);
-			} else {
-				console.log(result)
 			}
 			continue;
 		}

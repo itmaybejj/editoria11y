@@ -234,6 +234,7 @@ export function drawResult(result, index) {
 	mark.dismissable = mark.result.type !== 'error';
 	mark.dismissed = !!mark.result.dismissalStatus;
 	mark.wrapper.classList.add('ed11y-wrapper', 'ed11y-result-wrapper');
+	mark.wrapper.style.setProperty('opacity', '0');
 	mark.wrapper.classList.add('ed11y-result');
 
 	// Create tooltip toggle

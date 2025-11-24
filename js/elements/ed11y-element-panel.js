@@ -55,6 +55,7 @@ export class Ed11yElementPanel extends HTMLElement {
       this.classList.add('ed11y-element');
       const shadow = this.attachShadow({mode: 'open'});
       const wrapper = document.createElement('aside');
+			wrapper.style.setProperty('opacity', '0');
       wrapper.setAttribute('id', 'ed11y-panel');
       wrapper.classList.add('ed11y-wrapper', 'ed11y-panel-wrapper', 'ed11y-pass', 'ed11y-preload');
       wrapper.innerHTML = this.template();

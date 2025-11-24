@@ -5965,8 +5965,6 @@ URL: ${url}</pre>
   	let contrast = false;
   	let links = false;
 
-  	console.log(Results);
-
   	for (let i = 0; i < State.splitConfiguration.results.length; i++) {
   		let result = State.splitConfiguration.results[i];
   		if (!result.element) {
@@ -5982,8 +5980,6 @@ URL: ${url}</pre>
   			}
   			if (headings.has(result.element) && !excludedHeadings.has(result.element)) {
   				Results.push(result);
-  			} else {
-  				console.log(result);
   			}
   			continue;
   		}
@@ -6565,6 +6561,7 @@ URL: ${url}</pre>
   	mark.dismissable = mark.result.type !== 'error';
   	mark.dismissed = !!mark.result.dismissalStatus;
   	mark.wrapper.classList.add('ed11y-wrapper', 'ed11y-result-wrapper');
+  	mark.wrapper.style.setProperty('opacity', '0');
   	mark.wrapper.classList.add('ed11y-result');
 
   	// Create tooltip toggle
@@ -7781,7 +7778,7 @@ URL: ${url}</pre>
   	console.error('Editoria11y has disabled a custom test that is not returning results within 1000ms.');
   	Options.customTests--;
   	State.customTestsRemaining = 0;
-  	continueCheck();
+  	continueCheck(true);
   	if (Options.customTests === 0) {
   		document.removeEventListener('ed11yResume', function () {
   			continueCheck(true);
@@ -7837,6 +7834,19 @@ URL: ${url}</pre>
 
   	buildElementList();
 
+  	if (Options.customTests > 0) {
+  		// Pause
+  		State.customTestsRemaining += Options.customTests;
+  		window.clearTimeout(State.customTestTimeout);
+  		State.customTestTimeout = window.setTimeout(function() {
+  			if (State.customTestsRemaining > 0) {
+  				removeCustomTest();
+  			}
+  		}, 1000);
+  		let customTests = new CustomEvent('ed11yRunCustomTests');
+  		document.dispatchEvent(customTests); // todo there is a race condition here for slow custom tests. May need to pass State.customTestTimeout and only accept back results that match the ID.
+  	}
+
   	// Call rulesets.
   	let queue = [
   		'group1',
@@ -7858,21 +7868,6 @@ URL: ${url}</pre>
   	// Todo after merge: developer and readability tests added via options here.
   	State.testsRemaining = queue.length;
   	enqueueTests(queue, State.splitConfiguration.active ? State.splitConfiguration.results : Results);
-
-  	if (Options.customTests > 0) {
-  		// Pause
-  		State.customTestsRemaining += Options.customTests;
-  		window.clearTimeout(State.customTestTimeout);
-  		State.customTestTimeout = window.setTimeout(function() {
-  			if (State.customTestsRemaining > 0) {
-  				removeCustomTest();
-  			}
-  		}, 1500);
-  		window.setTimeout(function() {
-  			let customTests = new CustomEvent('ed11yRunCustomTests');
-  			document.dispatchEvent(customTests); // todo there is a race condition here for slow custom tests. May need to pass State.customTestTimeout and only accept back results that match the ID.
-  		},0);
-  	}
   	// @todo CMS merge when Sa11y support is ready.
   	// @todo after merge handle readability and developer checks.
   }
@@ -8756,6 +8751,7 @@ URL: ${url}</pre>
         this.classList.add('ed11y-element');
         const shadow = this.attachShadow({mode: 'open'});
         const wrapper = document.createElement('aside');
+  			wrapper.style.setProperty('opacity', '0');
         wrapper.setAttribute('id', 'ed11y-panel');
         wrapper.classList.add('ed11y-wrapper', 'ed11y-panel-wrapper', 'ed11y-pass', 'ed11y-preload');
         wrapper.innerHTML = this.template();
@@ -8852,6 +8848,7 @@ URL: ${url}</pre>
       this.dismissable = this.result.type !== 'error';
       this.dismissed = !!this.result.dismissalStatus;
       this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
+  		this.wrapper.style.setProperty('opacity', '0');
       this.wrapper.setAttribute('aria-label',
         `${Lang._('ALERT_TEXT')}
         ${this.issueIndex + 1}`);
