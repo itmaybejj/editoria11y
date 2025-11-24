@@ -950,6 +950,9 @@ ed11y-element-result[data-ed11y-open='true'] {
 
 .ed11y-tip-next {
 	grid-area: next;
+	svg {
+		transform: rotate(180deg);
+	}
 }
 
 .ed11y-tip-help-content {

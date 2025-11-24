@@ -945,7 +945,8 @@ export function windowResize() {
 const scrollWatch = function(container) {
 	container.addEventListener('scroll', function() {
 		// Trigger on scrolling other containers, unless it will flicker a tip.
-		if (!State.inlineAlerts && !State.tipOpen) {
+		if (!State.inlineAlerts) {
+			// @todo removed check for !State.tipOpen in 3.x. Should close tip if mark is scrolled off the screen.
 			State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
 			requestAnimationFrame(() => updateTipLocations());
 		} else if (State.tipOpen) {

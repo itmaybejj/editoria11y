@@ -174,7 +174,7 @@ export function checkEditableIntersects (focusKnown = false) {
 
 
 export function alignButtons() {
-	if (State.jumpList.length === 0 || (State.tipOpen && State.scrollPending === 0)) { // todo always false?
+	if (State.jumpList.length === 0) { // todo always false?
 		return;
 	}
 	State.alignPending = true;

@@ -5537,7 +5537,7 @@ function checkEditableIntersects (focusKnown = false) {
 
 
 function alignButtons() {
-	if (State.jumpList.length === 0 || (State.tipOpen && State.scrollPending === 0)) { // todo always false?
+	if (State.jumpList.length === 0) { // todo always false?
 		return;
 	}
 	State.alignPending = true;
@@ -7508,7 +7508,8 @@ function windowResize() {
 const scrollWatch = function(container) {
 	container.addEventListener('scroll', function() {
 		// Trigger on scrolling other containers, unless it will flicker a tip.
-		if (!State.inlineAlerts && !State.tipOpen) {
+		if (!State.inlineAlerts) {
+			// @todo removed check for !State.tipOpen in 3.x. Should close tip if mark is scrolled off the screen.
 			State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
 			requestAnimationFrame(() => updateTipLocations());
 		} else if (State.tipOpen) {
@@ -9023,7 +9024,7 @@ class Ed11yElementTip extends HTMLElement {
       this.prev = document.createElement('button');
       this.prev.classList.add('ed11y-tip-prev');
       this.prev.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issuePrev}`);
-      this.prev.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 -10 30 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m40 100,-50 -50 50-50 50"></path></svg>';
+      this.prev.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><path fill="currentColor" d="M9 233c-12 12-12 33 0 45l160 160c12 12 33 12 45 0s12-33 0-45L77 256 215 119c12-12 12-33 0-45s-33-12-45 0l-160 160z"/></svg>';
       this.prev.addEventListener('click', (event) => {
         event.preventDefault();
         jumpTo(false);
@@ -9033,7 +9034,7 @@ class Ed11yElementTip extends HTMLElement {
       this.next = document.createElement('button');
       this.next.classList.add('ed11y-tip-next');
       this.next.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issueNext}`);
-      this.next.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 120 120" width="10"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m30 00 50 50-50 50"></path></svg>';
+      this.next.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><path fill="currentColor" d="M9 233c-12 12-12 33 0 45l160 160c12 12 33 12 45 0s12-33 0-45L77 256 215 119c12-12 12-33 0-45s-33-12-45 0l-160 160z"/></svg>';
       this.next.addEventListener('click', (event) => {
         event.preventDefault();
         jumpTo();
@@ -9077,7 +9078,7 @@ class Ed11yElementTip extends HTMLElement {
     document.addEventListener('click', (event) => {
       // Close tip when mouse is clicked outside it.
       if(this.open && !event.target.closest('ed11y-element-tip, ed11y-element-result, ed11y-element-panel')) {
-        let toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', 'document');
+        let toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', 'document', []);
         toggle[0]?.setAttribute('data-ed11y-action', 'shut');
         this.setAttribute('data-ed11y-action', 'shut');
       }
