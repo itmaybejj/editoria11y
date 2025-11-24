@@ -31,7 +31,12 @@ import {
 	countAlerts, filterAlerts, handleSyncOnlyResults,
 	syncResults
 } from '../utils/process_results';
-import {drawResult, showHeadingsPanel, visualize} from './visualize';
+import {
+	drawResult,
+	showAltPanel,
+	showHeadingsPanel,
+	visualize
+} from './visualize';
 
 export function showResults () {
   buildJumpList();

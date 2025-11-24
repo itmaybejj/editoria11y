@@ -6329,7 +6329,7 @@ function checkReadability(results) {
   return results;
 }
 
-const showAltPanel$1 = function () {
+const showAltPanel = function () {
 	// visualize image alts
 	let altList = UI.panel.querySelector('#ed11y-alt-list');
 	UI.imageAlts = Elements.Found.Images.map((image) => {
@@ -6458,7 +6458,7 @@ function visualize () {
 	UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('buttonToolsActive');
 	UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
 	UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
-	showAltPanel$1();
+	showAltPanel();
 	showHeadingsPanel();
 	if (Options.readabilityPlugin) {
 		showReadability();
@@ -8240,8 +8240,8 @@ const ed11yLang = {
 		IMAGE_ALT_TOO_LONG_TEST_NAME: 'Manual check: very long alternative text',
 		IMAGE_DECORATIVE_TEST_NAME: 'Manual check: image has no alt text',
 		LINK_ALT_FILE_EXT_TEST_NAME:	'Linked image\'s text alternative is a URL',
-		LINK_ALT_MAYBE_BAD_TEST_NAME: 'Manual check: alt text may be meaningless',
-		LINK_EMPTY_NO_LABEL_TEST_NAME: 'Link with no accessible text',
+		LINK_ALT_MAYBE_BAD_TEST_NAME: 'Manual check: linked alt text may be meaningless',
+		LINK_EMPTY_NO_LABEL_TEST_NAME: 'Link with no accessible label',
 		LINK_EMPTY_TEST_NAME: 'Link with no accessible text',
 		LINK_IMAGE_ALT_AND_TEXT_TEST_NAME: 'Manual check: link contains both text and an image', // 2.3.10.
 		LINK_IMAGE_LONG_ALT_TEST_NAME: 'Manual check: very long alternative text in linked image',
@@ -8251,8 +8251,8 @@ const ed11yLang = {
 		LINK_STOPWORD_TEST_NAME: 'Manual check: is this link meaningful and concise?',
 		LINK_SUS_ALT_TEST_NAME: 'Manual check: possibly redundant text in linked image',
 		LINK_URL_TEST_NAME: 'Manual check: is this link text a URL?',
-		MISSING_ALT_LINK_HAS_TEXT_TEST_NAME: 'Image has no alternative text attribute',
-		MISSING_ALT_LINK_TEST_NAME: 'Image has no alternative text attribute',
+		MISSING_ALT_LINK_HAS_TEXT_TEST_NAME: 'Image in link with text has no alternative text attribute',
+		MISSING_ALT_LINK_TEST_NAME: 'Linked image has no alternative text attribute',
 		MISSING_ALT_TEST_NAME: 'Image has no alternative text attribute',
 		QA_BLOCKQUOTE_TEST_NAME : 'Manual check: is this a blockquote?',
 		QA_FAKE_HEADING_TEST_NAME: 'Manual check: should this be a heading?',
@@ -9187,6 +9187,7 @@ class Ed11yElementTip extends HTMLElement {
 
 const preProcessOptions = function(userOptions) {
 	Object.assign(Options, userOptions);
+//	Object.assign(Options.checks, userOptions.checks);
 
 	if (!Options.checkRoot) {
 		Options.checkRoot = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?

@@ -16,6 +16,7 @@ import {Ed11yElementTip} from "../elements/ed11y-element-tip.js";
 
 const preProcessOptions = function(userOptions) {
 	Object.assign(Options, userOptions);
+//	Object.assign(Options.checks, userOptions.checks);
 
 	if (!Options.checkRoot) {
 		Options.checkRoot = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?

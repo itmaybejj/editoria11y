@@ -8,7 +8,7 @@ import {getElements} from '../utils/utils';
 import {Options} from '../utils/options';
 import checkReadability from '../../sa11y/rulesets/readability';
 
-const showAltPanel = function () {
+export const showAltPanel = function () {
 	// visualize image alts
 	let altList = UI.panel.querySelector('#ed11y-alt-list');
 	UI.imageAlts = Elements.Found.Images.map((image) => {
