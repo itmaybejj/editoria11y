@@ -1200,7 +1200,7 @@ ed11y-element-result[data-ed11y-open='true'] {
 		box-shadow: 0 1px, 0 -1px;
 	}
 
-	.pass {
+	.ed11y-pass {
 		color: var(--ed11y-primaryText, #fffdf7);
 		background: var(--ed11y-primary, #276499);
 	}

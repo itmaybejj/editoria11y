@@ -6332,15 +6332,23 @@ function checkReadability(results) {
 const showAltPanel = function () {
 	// visualize image alts
 	let altList = UI.panel.querySelector('#ed11y-alt-list');
-	UI.imageAlts = Elements.Found.Images.map((image) => {
-		const match = Results.find((i) => i.element === image);
-		return match && {
-			element: image,
-			type: match.type,
-			dismiss: match.dismiss,
-			developer: match.developer,
-		};
-	}).filter(Boolean);
+	UI.imageAlts = [];
+	Elements.Found.Images.forEach((img) => {
+		const match = Results.find((i) => i.element === img);
+		if (match) {
+			UI.imageAlts.push({
+				element: img,
+				type: match.type,
+				dismiss: match.dismiss,
+				developer: match.developer,
+			});
+		} else {
+			UI.imageAlts.push({
+				element: img,
+				type: 'pass',
+			});
+		}
+	});
 
 	if (UI.imageAlts.length > 0) {
 		altList.innerHTML = '';
@@ -6404,7 +6412,7 @@ const showAltPanel = function () {
 				userText.append(decorative);
 			}
 			let li = document.createElement('li');
-			li.classList.add(image.type);
+			li.classList.add('ed11y-' + image.type);
 			let img = document.createElement('img');
 			img.setAttribute('src', getBestImageSource(image.element));
 			img.setAttribute('alt', '');
