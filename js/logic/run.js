@@ -1218,7 +1218,6 @@ function removeCustomTest() {
 	}
 }
 
-State.testsRunning = true;
 State.testsRemaining = 0;
 // Toggles the outline of all headers, link texts, and images.
 export function checkAll() {
