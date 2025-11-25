@@ -8318,6 +8318,7 @@ URL: ${url}</pre>
   		TABINDEX_ATTR_TEST_NAME: 'Provided tabindex value removes element from reading order',
   		HIDDEN_FOCUSABLE_TEST_NAME: 'Screen readers told not to speak the name of an interactive element',
   		LABEL_IN_NAME_TEST_NAME: 'Visible name different than machine-readable name',
+  		LABELS_ARIA_LABEL_INPUT_TEST_NAME: 'Manual check: is there a visible label for this field?',
   		BTN_EMPTY_TEST_NAME: 'Button purpose is not machine-readable',
   		BTN_EMPTY_LABELLEDBY_TEST_NAME: 'Button has an invalid ARIA label',
   		BTN_ROLE_IN_NAME_TEST_NAME: 'Button name repeats the word "button"',
@@ -8566,6 +8567,9 @@ URL: ${url}</pre>
 							<p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
 
   			EMBED_CUSTOM: '<p>This checker cannot test inside embedded content. Check to sure images inside this embed have alt text, videos have captions, and interactive components can be <a href=\'https://webaim.org/techniques/keyboard/\'>operated by a keyboard</a>.</p>',
+
+  		/* New */
+  		LABELS_ARIA_LABEL_INPUT: '<p>Labeling fields with only a title or placeholder means the label visually disappears as soon as someone starts writing. This makes it difficult for people to review input when there are several fields. Check to make sure a visible field label remains and matches the invisible field title or placeholder.</p><p><strong {B}>Invisible field name:</strong> <strong {C}>%(TEXT)</strong></p>',
   		}
   };
 
