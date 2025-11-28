@@ -20,6 +20,15 @@ export function findElements (key, selector, rootRestrict = true) {
 	Elements.Found[key] = find( selector, desiredRoot, Constants.Exclusions.Sa11yElements );
 }
 
+// Object.assign without losing important bits from the shallow copy.
+export const smush = function(obj1, obj2, skip = []) {
+	Object.entries(obj2).forEach(([key, value]) => {
+		if (!(skip.includes(key))) {
+			obj1[key] = value;
+		}
+	})
+}
+
 export function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
 	Constants.Root.areaToCheck = [];
 	Constants.Root.Readability = [];

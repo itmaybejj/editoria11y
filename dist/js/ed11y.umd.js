@@ -1486,10 +1486,8 @@
   		},
   		LINK_IMAGE_ALT: false, // Not interested.
   		LINK_IMAGE_ALT_AND_TEXT: true,
-  		IMAGE_FIGURE_DUPLICATE_ALT: false, // Todo pro.
-  		IMAGE_PASS: {
-  			dismissAll: true,
-  		},
+  		IMAGE_FIGURE_DUPLICATE_ALT: true,
+  		IMAGE_PASS: false, // Could be used to visualize alt content.
   		ALT_UNPRONOUNCEABLE: true,
   		LINK_ALT_UNPRONOUNCEABLE: true,
   		ALT_MAYBE_BAD: {
@@ -1507,9 +1505,9 @@
   			type: 'warning',
   		},
   		LINK_STOPWORD_ARIA: false, // Todo pro.
-  		LINK_SYMBOLS: false, // Todo pro.
+  		LINK_SYMBOLS: true,
   		LINK_CLICK_HERE: false,
-  		LINK_DOI: false, // Todo consider.
+  		LINK_DOI: true, // Todo consider.
   		LINK_URL: {
   			maxLength: 40,
   		},
@@ -1525,14 +1523,12 @@
 
   		// Form label checks module not yet enabled.
   		// Todo pro.
-  		/*
-  		LABELS_MISSING_IMAGE_INPUT: true,
-  		LABELS_INPUT_RESET: true,
-  		LABELS_MISSING_LABEL: true,
-  		LABELS_ARIA_LABEL_INPUT: true,
-  		LABELS_NO_FOR_ATTRIBUTE: true,
-  		LABELS_PLACEHOLDER: true,
-  		*/
+  		LABELS_MISSING_IMAGE_INPUT: false,
+  		LABELS_INPUT_RESET: false,
+  		LABELS_MISSING_LABEL: false,
+  		LABELS_ARIA_LABEL_INPUT: false,
+  		LABELS_NO_FOR_ATTRIBUTE: false,
+  		LABELS_PLACEHOLDER: false,
 
   		// Embedded content checks
   		EMBED_AUDIO: {
@@ -1554,8 +1550,8 @@
   		QA_BAD_LINK: {
   			sources: '',
   		},
-  		QA_STRONG_ITALICS: false, // Todo pro.
-  		QA_IN_PAGE_LINK: false, // Todo pro.
+  		QA_STRONG_ITALICS: true,
+  		QA_IN_PAGE_LINK: true,
   		QA_DOCUMENT: false, // Todo CMS consider.
   		QA_PDF: {
   			sources: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']',
@@ -1568,10 +1564,10 @@
   		QA_FAKE_HEADING: true,
   		QA_FAKE_LIST: true,
   		QA_UPPERCASE: true,
-  		QA_UNDERLINE: false, // Todo pro.
-  		QA_SUBSCRIPT: false, // Todo pro.
+  		QA_UNDERLINE: true,
+  		QA_SUBSCRIPT: true,
   		QA_NESTED_COMPONENTS: false, // Todo pro.
-  		QA_JUSTIFY: false, // Todo pro.
+  		QA_JUSTIFY: true, // Todo pro.
   		QA_SMALL_TEXT: false, // Todo pro.
 
   		// Sa11y: Meta checks
@@ -1595,18 +1591,14 @@
 
   		// Sa11y: Contrast checks
   		// Todo pro.
-  		CONTRAST_WARNING: {
-  			dismissAll: true,
-  		},
-  		CONTRAST_INPUT: true,
-  		CONTRAST_ERROR: true,
-  		CONTRAST_PLACEHOLDER: true,
-  		CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
-  		CONTRAST_ERROR_GRAPHIC: true,
-  		CONTRAST_WARNING_GRAPHIC: false,
-  		CONTRAST_UNSUPPORTED: {
-  			dismissAll: true,
-  		},
+  		CONTRAST_WARNING: false, // dismissAll
+  		CONTRAST_INPUT: false,
+  		CONTRAST_ERROR: false,
+  		CONTRAST_PLACEHOLDER: false,
+  		CONTRAST_PLACEHOLDER_UNSUPPORTED: false,
+  		CONTRAST_ERROR_GRAPHIC: false,
+  		CONTRAST_WARNING_GRAPHIC: false, // Don't enable.
+  		CONTRAST_UNSUPPORTED: false, // What's this?
 
   		// dev
   		HEADING_EXCEEDS_LEVEL: true, // todo merge would need text.
@@ -1872,6 +1864,15 @@ URL: ${url}</pre>
   	const desiredRoot = rootRestrict ? 'root' : 'document';
   	Elements.Found[key] = find( selector, desiredRoot, Constants.Exclusions.Sa11yElements );
   }
+
+  // Object.assign without losing important bits from the shallow copy.
+  const smush = function(obj1, obj2, skip = []) {
+  	Object.entries(obj2).forEach(([key, value]) => {
+  		if (!(skip.includes(key))) {
+  			obj1[key] = value;
+  		}
+  	});
+  };
 
   function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
   	Constants.Root.areaToCheck = [];
@@ -5952,8 +5953,6 @@ URL: ${url}</pre>
 
   	State.splitConfiguration.results = filterAlerts(true);
 
-  	Object.assign(Options, State.splitConfiguration.showOptions);
-
   	syncResults(State.splitConfiguration.results);
 
   	buildElementList(true);
@@ -5971,6 +5970,7 @@ URL: ${url}</pre>
   			continue;
   		}
   		if (State.splitConfiguration.checks.has(result.test)) {
+  			// Synced but not shown.
   			continue;
   		}
   		if (result.test.indexOf('HEADING') === 0) {
@@ -7809,6 +7809,10 @@ URL: ${url}</pre>
 
   	State.customTestsRunning = false;
 
+  	if (State.splitConfiguration.active) {
+  		Object.assign(Options, State.splitConfiguration.syncOptions);
+  	}
+
   	State.roots = [];
   	// @todo CMS merge rewrite when Sa11y releases fixed root support.
   	if (Options.fixedRoots) {
@@ -7835,10 +7839,6 @@ URL: ${url}</pre>
   	// Reset counts
   	Results.length = 0;
   	State.splitConfiguration.results.length = 0;
-
-  	if ( State.splitConfiguration.active ) {
-  		Object.assign(Options, State.splitConfiguration.sync);
-  	}
 
   	buildElementList();
 
@@ -7896,6 +7896,9 @@ URL: ${url}</pre>
   	} else {
   		filterAlerts(false);
   		syncResults(Results);
+  	}
+  	if (State.splitConfiguration.active) {
+  		Object.assign(Options, State.splitConfiguration.showOptions);
   	}
   	countAlerts();
 
@@ -9204,8 +9207,8 @@ URL: ${url}</pre>
   }
 
   const preProcessOptions = function(userOptions) {
-  	Object.assign(Options, userOptions);
-  //	Object.assign(Options.checks, userOptions.checks);
+  	smush(Options, userOptions, ['checks']);
+  	Object.assign(Options.checks, userOptions.checks);
 
   	if (!Options.checkRoot) {
   		Options.checkRoot = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?

@@ -2,7 +2,7 @@ import {State, Theme, UI, Results} from "../utils/state.js";
 import {
 	buildElementList,
 	checkRunPrevent,
-	firstVisibleParent, getElements, lagBounce,
+	firstVisibleParent, lagBounce,
 	newIncrementalResults, pauseObservers,
 	resetClass, resetResults, resumeObservers, showError,
 	visible
@@ -1237,6 +1237,10 @@ export function checkAll() {
 
 	State.customTestsRunning = false;
 
+	if (State.splitConfiguration.active) {
+		Object.assign(Options, State.splitConfiguration.syncOptions);
+	}
+
 	State.roots = [];
 	// @todo CMS merge rewrite when Sa11y releases fixed root support.
 	if (Options.fixedRoots) {
@@ -1263,10 +1267,6 @@ export function checkAll() {
 	// Reset counts
 	Results.length = 0;
 	State.splitConfiguration.results.length = 0;
-
-	if ( State.splitConfiguration.active ) {
-		Object.assign(Options, State.splitConfiguration.sync);
-	}
 
 	buildElementList();
 
@@ -1324,6 +1324,9 @@ export function continueCheck(customCheck = false) {
 	} else {
 		filterAlerts(false);
 		syncResults(Results);
+	}
+	if (State.splitConfiguration.active) {
+		Object.assign(Options, State.splitConfiguration.showOptions);
 	}
 	countAlerts();
 

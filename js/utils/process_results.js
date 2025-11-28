@@ -1,7 +1,7 @@
 import {Results, State} from './state';
 import Elements from '../../sa11y/utils/elements';
 import {Options} from './options';
-import {buildElementList} from './utils';
+import {buildElementList, smush} from './utils';
 import Constants from '../../sa11y/utils/constants';
 
 export function syncResults(results) {
@@ -22,8 +22,6 @@ export function handleSyncOnlyResults() {
 
 	State.splitConfiguration.results = filterAlerts(true);
 
-	Object.assign(Options, State.splitConfiguration.showOptions);
-
 	syncResults(State.splitConfiguration.results);
 
 	buildElementList(true);
@@ -41,6 +39,7 @@ export function handleSyncOnlyResults() {
 			continue;
 		}
 		if (State.splitConfiguration.checks.has(result.test)) {
+			// Synced but not shown.
 			continue;
 		}
 		if (result.test.indexOf('HEADING') === 0) {

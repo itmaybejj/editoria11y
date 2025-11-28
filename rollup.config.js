@@ -105,7 +105,23 @@ export default [
   /*      Javascript       */
   /* ********************* */
   // ES6 standalone files
-  {
+	// UMD standalone files
+	{
+		input: 'js/ed11y.js',
+		plugins: [
+			nodeResolve(),
+			// css(),
+			replace({
+				preventAssignment: true,
+				'process.env.NODE_ENV': JSON.stringify('production'),
+			}),
+		],
+		output: [
+			{ banner, file: 'dist/js/ed11y.umd.js', format: 'umd', name: 'Ed11y' },
+			{ banner, file: 'dist/js/ed11y.umd.min.js', format: 'umd', name: 'Ed11y', plugins: [terser()] },
+		],
+	},
+	{
     input: 'js/ed11y.js',
     plugins: [
       nodeResolve(),
@@ -118,22 +134,6 @@ export default [
     output: [
       { banner, file: 'dist/js/ed11y.esm.js', format: 'esm' },
       { banner, file: 'dist/js/ed11y.esm.min.js', format: 'esm', plugins: [terser()] },
-    ],
-  },
-  // UMD standalone files
-  {
-    input: 'js/ed11y.js',
-    plugins: [
-      nodeResolve(),
-      // css(),
-      replace({
-        preventAssignment: true,
-        'process.env.NODE_ENV': JSON.stringify('production'),
-      }),
-    ],
-    output: [
-      { banner, file: 'dist/js/ed11y.umd.js', format: 'umd', name: 'Ed11y' },
-      { banner, file: 'dist/js/ed11y.umd.min.js', format: 'umd', name: 'Ed11y', plugins: [terser()] },
     ],
   },
   // Bookmarklet - Automatic language detection.

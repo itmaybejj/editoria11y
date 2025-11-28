@@ -308,10 +308,8 @@ export const Options = {
 		},
 		LINK_IMAGE_ALT: false, // Not interested.
 		LINK_IMAGE_ALT_AND_TEXT: true,
-		IMAGE_FIGURE_DUPLICATE_ALT: false, // Todo pro.
-		IMAGE_PASS: {
-			dismissAll: true,
-		},
+		IMAGE_FIGURE_DUPLICATE_ALT: true,
+		IMAGE_PASS: false, // Could be used to visualize alt content.
 		ALT_UNPRONOUNCEABLE: true,
 		LINK_ALT_UNPRONOUNCEABLE: true,
 		ALT_MAYBE_BAD: {
@@ -329,9 +327,9 @@ export const Options = {
 			type: 'warning',
 		},
 		LINK_STOPWORD_ARIA: false, // Todo pro.
-		LINK_SYMBOLS: false, // Todo pro.
+		LINK_SYMBOLS: true,
 		LINK_CLICK_HERE: false,
-		LINK_DOI: false, // Todo consider.
+		LINK_DOI: true, // Todo consider.
 		LINK_URL: {
 			maxLength: 40,
 		},
@@ -347,14 +345,12 @@ export const Options = {
 
 		// Form label checks module not yet enabled.
 		// Todo pro.
-		/*
-		LABELS_MISSING_IMAGE_INPUT: true,
-		LABELS_INPUT_RESET: true,
-		LABELS_MISSING_LABEL: true,
-		LABELS_ARIA_LABEL_INPUT: true,
-		LABELS_NO_FOR_ATTRIBUTE: true,
-		LABELS_PLACEHOLDER: true,
-		*/
+		LABELS_MISSING_IMAGE_INPUT: false,
+		LABELS_INPUT_RESET: false,
+		LABELS_MISSING_LABEL: false,
+		LABELS_ARIA_LABEL_INPUT: false,
+		LABELS_NO_FOR_ATTRIBUTE: false,
+		LABELS_PLACEHOLDER: false,
 
 		// Embedded content checks
 		EMBED_AUDIO: {
@@ -376,8 +372,8 @@ export const Options = {
 		QA_BAD_LINK: {
 			sources: '',
 		},
-		QA_STRONG_ITALICS: false, // Todo pro.
-		QA_IN_PAGE_LINK: false, // Todo pro.
+		QA_STRONG_ITALICS: true,
+		QA_IN_PAGE_LINK: true,
 		QA_DOCUMENT: false, // Todo CMS consider.
 		QA_PDF: {
 			sources: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']',
@@ -390,10 +386,10 @@ export const Options = {
 		QA_FAKE_HEADING: true,
 		QA_FAKE_LIST: true,
 		QA_UPPERCASE: true,
-		QA_UNDERLINE: false, // Todo pro.
-		QA_SUBSCRIPT: false, // Todo pro.
+		QA_UNDERLINE: true,
+		QA_SUBSCRIPT: true,
 		QA_NESTED_COMPONENTS: false, // Todo pro.
-		QA_JUSTIFY: false, // Todo pro.
+		QA_JUSTIFY: true, // Todo pro.
 		QA_SMALL_TEXT: false, // Todo pro.
 
 		// Sa11y: Meta checks
@@ -417,18 +413,14 @@ export const Options = {
 
 		// Sa11y: Contrast checks
 		// Todo pro.
-		CONTRAST_WARNING: {
-			dismissAll: true,
-		},
-		CONTRAST_INPUT: true,
-		CONTRAST_ERROR: true,
-		CONTRAST_PLACEHOLDER: true,
-		CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
-		CONTRAST_ERROR_GRAPHIC: true,
-		CONTRAST_WARNING_GRAPHIC: false,
-		CONTRAST_UNSUPPORTED: {
-			dismissAll: true,
-		},
+		CONTRAST_WARNING: false, // dismissAll
+		CONTRAST_INPUT: false,
+		CONTRAST_ERROR: false,
+		CONTRAST_PLACEHOLDER: false,
+		CONTRAST_PLACEHOLDER_UNSUPPORTED: false,
+		CONTRAST_ERROR_GRAPHIC: false,
+		CONTRAST_WARNING_GRAPHIC: false, // Don't enable.
+		CONTRAST_UNSUPPORTED: false, // What's this?
 
 		// dev
 		HEADING_EXCEEDS_LEVEL: true, // todo merge would need text.

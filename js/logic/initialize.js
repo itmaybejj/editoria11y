@@ -1,10 +1,10 @@
 import Constants from '../../sa11y/utils/constants.js';
 import {State, Theme, UI} from "../utils/state.js";
 import Lang from "../../sa11y/utils/lang.js";
-import {Options} from "../utils/options.js";
+import {Options} from '../utils/options.js';
 import {documentLoadingCheck, store} from "../../sa11y/utils/utils.js";
-import {checkRunPrevent, initializeRoot} from '../utils/utils.js';
-import {checkAll, continueCheck, reset, windowResize} from './run.js';
+import {checkRunPrevent, smush} from '../utils/utils.js';
+import {checkAll, continueCheck, windowResize} from './run.js';
 import ed11yLang from "../lang/localization.js";
 import {Ed11yElementAlt} from "../elements/ed11y-element-alt.js";
 import {Ed11yElementResult} from "../elements/ed11y-element-result.js";
@@ -15,8 +15,8 @@ import {
 import {Ed11yElementTip} from "../elements/ed11y-element-tip.js";
 
 const preProcessOptions = function(userOptions) {
-	Object.assign(Options, userOptions);
-//	Object.assign(Options.checks, userOptions.checks);
+	smush(Options, userOptions, ['checks']);
+	Object.assign(Options.checks, userOptions.checks);
 
 	if (!Options.checkRoot) {
 		Options.checkRoot = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?
