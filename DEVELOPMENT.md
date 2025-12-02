@@ -1,20 +1,15 @@
 # Setup
-* Run `scripts/get.sh` to pull Sa11y and node dependencies.
-* Use `uglifyjs js/{ed11y-localization,ed11y-element-alt,ed11y-element-panel,ed11y-element-result,ed11y-element-tip,ed11y-test-embeds,ed11y-test-headings,ed11y-test-images,ed11y-test-links,ed11y-test-text,ed11y}.js -c --verbose --output dist/editoria11y.min.js` to help locate unused and duplicated variables.
+* Run `scripts/get.sh` to pull and patch Sa11y library files and install node dependencies.
+* Run NPM scripts as needed:
+  * `npm run watch` compiles and watches JS and CSS folders for changes.
+  * `npm run build` compiles once.
+  * `npm run lint` lints
+  * `npm run test` runs nightwatch tests. 
+    * Note that the ChromeDriver dependency needs to be updated with almost every version of Chrome and may be out of date in the repo.
+    * Note the first test after a computer reboot often times out. Run it twice before assuming ChromeDriver is the problem.
 
 # Distribution
 
 * Update version numbers and copyright information
-* Run NPX and create the dist JS and CSS [todo MVP: preserve license info] `scripts/pack.sh` 
 * remember there is a copy of the readme at index.md (with CSS)
-* There is not currently a CSS minifier set up. Use an online one for now, or set one up...
 
-# Testing
-
-## Unit tests
-Testing is accomplished with the ["Nightwatch" framework](https://nightwatchjs.org/). The tests are declared as development depenencies.
-Run `npx nightwatch tests --workers=4 --env=chrome` from the project root.
-It is often not patient enough for the driver to load after a reboot; just run it a second time if it times out.
-
-## All in one
-From the project root, run `scripts/pack.sh`
