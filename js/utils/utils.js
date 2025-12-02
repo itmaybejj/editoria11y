@@ -163,10 +163,6 @@ export function buildElementList (onlyForFilter = false) {
 		State.ignoreAll = document.querySelector(`:is(${Options.ignoreAllIfPresent})`) !== null;
 	}
 
-	State.elements = [];
-	State.mediaCount = 0;
-	State.headingOutline = [];
-
 	initializeRoot(Options.checkRoot, Options.checkRoot);
 
 	for (let i = 0; i < State.roots.length; i++) {
@@ -189,8 +185,8 @@ export function buildElementList (onlyForFilter = false) {
 
 		// Find and cache elements.
 	if (onlyForFilter) {
+		// Split configuration; do not fully re-initialize Elements.Found for filters.
 
-		// Since 4.0.0: For performance, we filter elements instead of dozens of querySelectors on the DOM.
 		Elements.Found.Everything = find('*', 'root', Constants.Exclusions.Sa11yElements);
 
 		Elements.Found.Contrast = Elements.Found.Everything.filter(($el) => {
@@ -224,14 +220,13 @@ export function buildElementList (onlyForFilter = false) {
 		Elements.Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(Elements.Found.ExcludedHeadings);
 
 	} else {
+		State.headingOutline = [];
 		Elements.initializeElements(Options);
-	}
 
-		if (!onlyForFilter) {
-			dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore, true, true);
-			dropSomeElements(Elements.Found.Blockquotes);
-			dropSomeElements(Elements.Found.Tables);
-		}
+		// Not needed for filter, since they weren't checked in the first loop.
+		dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore, true, true);
+		dropSomeElements(Elements.Found.Blockquotes);
+		dropSomeElements(Elements.Found.Tables);
 
 		if (typeof Options.editableContent === 'string') {
 			Elements.Found.editable = getElements(Options.editableContent, 'document');
@@ -248,6 +243,7 @@ export function buildElementList (onlyForFilter = false) {
 			// Moves panel off conflicting widgets.
 			Elements.Found.panelNoCover = getElements(Options.panelNoCover, 'document');
 		}
+	}
 
 }
 

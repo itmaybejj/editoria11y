@@ -12,6 +12,7 @@ export function syncResults(results) {
 				// @todo cms document detail
 				detail: {
 					results: results,
+					incremental: State.incremental,
 				}
 			}));
 		}, 0);

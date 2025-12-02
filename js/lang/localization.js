@@ -15,8 +15,8 @@ const ed11yLang = {
 		buttonFirstContent: 'Go to first alert',
 		MAIN_TOGGLE_LABEL: 'Toggle accessibility tools',
 		toggleDisabled: 'No content available for Editoria11y to check.',
-		PANEL_HEADING: 'Check headings & alt text',
-		buttonToolsActive: 'Hide headings & alt text',
+		PANEL_HEADING: 'Show visualizers',
+		buttonToolsActive: 'Hide visualizers',
     PANEL_DISMISS_BUTTON: `Show %(dismissCount) hidden alerts`,
 		buttonShowHiddenAlert: 'Show hidden alert',
 		buttonHideHiddenAlert: 'Hide hidden alert',
@@ -29,7 +29,7 @@ const ed11yLang = {
 		panelCheckOutline: '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>', // Shown for EN only.
 		panelCheckAltText: '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>', // Shown for EN only.
     DECORATIVE: 'Marked decorative',
-    /* Outline error explanations currently hidden.
+    /* @todo: Outline error explanations currently hidden.
 		errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
     errorOutlinePrefixHeadingEmpty: '(empty heading) ',
     errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
@@ -87,9 +87,6 @@ const ed11yLang = {
 
 
 		// Tooltips for heading tests =========================
-
-//    headingExample : `<ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>`,
-
   },
 	testNames: {
 		ALT_FILE_EXT_TEST_NAME: 'Image\'s text alternative is a URL',
@@ -171,6 +168,7 @@ const ed11yLang = {
 		HIDDEN_FOCUSABLE_TEST_NAME: 'Screen readers told not to speak the name of an interactive element',
 		LABEL_IN_NAME_TEST_NAME: 'Visible name different than machine-readable name',
 		LABELS_ARIA_LABEL_INPUT_TEST_NAME: 'Manual check: is there a visible label for this field?',
+		LABELS_PLACEHOLDER_TEST_NAME: 'Manual check: placeholder text in label',
 		BTN_EMPTY_TEST_NAME: 'Button purpose is not machine-readable',
 		BTN_EMPTY_LABELLEDBY_TEST_NAME: 'Button has an invalid ARIA label',
 		BTN_ROLE_IN_NAME_TEST_NAME: 'Button name repeats the word "button"',
