@@ -6096,7 +6096,6 @@ URL: ${url}</pre>
   			splice = true;
   		} else {
   			// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-  			console.log('dismissal?');
   			if (Options.currentPage in State.dismissedAlerts
   				&& results[i].test in State.dismissedAlerts[Options.currentPage]
   				&& results[i].dismiss in State.dismissedAlerts[Options.currentPage][results[i].test]) {
