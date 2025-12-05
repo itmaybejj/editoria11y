@@ -6096,14 +6096,15 @@ URL: ${url}</pre>
   			splice = true;
   		} else {
   			// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
+  			console.log('dismissal?');
   			if (Options.currentPage in State.dismissedAlerts
   				&& results[i].test in State.dismissedAlerts[Options.currentPage]
   				&& results[i].dismiss in State.dismissedAlerts[Options.currentPage][results[i].test]) {
   				// Remove results[i] if it has been marked OK or ignored, increment dismissed match counter.
   				if (splitConfiguration) {
-  					State.splitConfiguration.results.dismissalStatus = true;
+  					State.splitConfiguration.results[i].dismissalStatus = true;
   				} else {
-  					Results.dismissalStatus = true;
+  					Results[i].dismissalStatus = true;
   				}
   			}
   		}
