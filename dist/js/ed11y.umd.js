@@ -5948,8 +5948,6 @@ URL: ${url}</pre>
 
   	State.splitConfiguration.results = filterAlerts(true);
 
-  	syncResults(State.splitConfiguration.results);
-
   	buildElementList(true);
 
   	let everything = false;
@@ -5975,6 +5973,8 @@ URL: ${url}</pre>
   			}
   			if (headings.has(result.element) && !excludedHeadings.has(result.element)) {
   				Results.push(result);
+  			} else {
+  				State.splitConfiguration.results[i].syncOnly = true;
   			}
   			continue;
   		}
@@ -5984,6 +5984,8 @@ URL: ${url}</pre>
   			}
   			if (contrast.has(result.element)) {
   				Results.push(result);
+  			} else {
+  				State.splitConfiguration.results[i].syncOnly = true;
   			}
   			continue;
   		}
@@ -5993,6 +5995,8 @@ URL: ${url}</pre>
   			}
   			if (images.has(result.element)) {
   				Results.push(result);
+  			} else {
+  				State.splitConfiguration.results[i].syncOnly = true;
   			}
   			continue;
   		}
@@ -6000,6 +6004,8 @@ URL: ${url}</pre>
   			links = new WeakSet(Elements.Found.Links);
   			if (links.has(result.element)) {
   				Results.push(result);
+  			} else {
+  				State.splitConfiguration.results[i].syncOnly = true;
   			}
   			continue;
   		}
@@ -6008,8 +6014,12 @@ URL: ${url}</pre>
   		}
   		if (everything.has(result.element)) {
   			Results.push(result);
+  		} else {
+  			State.splitConfiguration.results[i].syncOnly = true;
   		}
   	}
+
+  	syncResults(State.splitConfiguration.results);
 
   }
 

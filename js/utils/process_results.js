@@ -23,8 +23,6 @@ export function handleSyncOnlyResults() {
 
 	State.splitConfiguration.results = filterAlerts(true);
 
-	syncResults(State.splitConfiguration.results);
-
 	buildElementList(true);
 
 	let everything = false;
@@ -50,6 +48,8 @@ export function handleSyncOnlyResults() {
 			}
 			if (headings.has(result.element) && !excludedHeadings.has(result.element)) {
 				Results.push(result);
+			} else {
+				State.splitConfiguration.results[i].syncOnly = true;
 			}
 			continue;
 		}
@@ -59,6 +59,8 @@ export function handleSyncOnlyResults() {
 			}
 			if (contrast.has(result.element)) {
 				Results.push(result);
+			} else {
+				State.splitConfiguration.results[i].syncOnly = true;
 			}
 			continue;
 		}
@@ -68,6 +70,8 @@ export function handleSyncOnlyResults() {
 			}
 			if (images.has(result.element)) {
 				Results.push(result);
+			} else {
+				State.splitConfiguration.results[i].syncOnly = true;
 			}
 			continue;
 		}
@@ -75,6 +79,8 @@ export function handleSyncOnlyResults() {
 			links = new WeakSet(Elements.Found.Links);
 			if (links.has(result.element)) {
 				Results.push(result);
+			} else {
+				State.splitConfiguration.results[i].syncOnly = true;
 			}
 			continue;
 		}
@@ -83,8 +89,12 @@ export function handleSyncOnlyResults() {
 		}
 		if (everything.has(result.element)) {
 			Results.push(result);
+		} else {
+			State.splitConfiguration.results[i].syncOnly = true;
 		}
 	}
+
+	syncResults(State.splitConfiguration.results);
 
 }
 
