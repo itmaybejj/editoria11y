@@ -138,12 +138,13 @@
 
             <h3>Aria:hidden image</h3>
             <div class="negative"><div aria-hidden="true">
+				<figure class="figure media--type-image ratio--freeform size--extra-small alignment--left">
+					<img alt="oh hi" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" >
+				</figure>
             </div></div>
             <div>
 
-                <figure class="figure media--type-image ratio--freeform size--extra-small alignment--left">
-                    <a href="https://ihum.princeton.edu/" class="link-purpose link-purpose-external no-border"><img alt="oh hi" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" > .</a>
-                </figure>
+
             </div>
 
 
@@ -304,8 +305,8 @@
                   }
                 });
                 document.addEventListener('ed11yShowHidden', function(e) {
-                    console.log('Event dispatched: ed11yShowHidden for #' + e.detail.result);
-                    Ed11y.findElements('hiddenPop',`#ed11y-result-${e.detail.result}`);
+                    Ed11y.findElements('hiddenPop',`#ed11y-result-${e.detail.result}`, false);
+					// @todo document the new false param.
                     Ed11y.elements['hiddenPop'][0].closest('[hidden]')?.removeAttribute('hidden');
 
                 }, false);
@@ -372,17 +373,17 @@
                   console.log('Ed11y first run took ' + parseInt(performance.now() - beforeCall) + 'ms');
                 }
               });
-              document.addEventListener('ed11yPanelOpened', e => {
+              /*document.addEventListener('ed11yPanelOpened', e => {
                 //console.log('results ready at: ' + parseInt(performance.now() - beforeCall));
                 //console.log(iterations);
                 iterations ++;
                 if (iterations === 10) {
                   console.log('Average run: ' + parseInt((performance.now() - beforeCall)) / 10);
-				  console.log("Don't worry about duplicate tips; skipping reset for performance testing.")
+				  console.log("Don't worry about duplicate tips; skipping reset for performance testing.");
                 } else if (iterations < 10) {
                   Ed11y.checkAll();
                 }
-              });
+              });*/
             </script>
             <!-- Instantiate-->
             <!-- Sa11y (fork the latest code from GitHub) -->

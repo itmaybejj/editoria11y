@@ -104,16 +104,21 @@ export function countAlerts () {
 		}
 
 		let location = Results[i].element;
-		let interactive = location.closest('a, button, img, svg, input, iframe, [role="button"], [role="link"]');
-		let canPositionInside = !interactive && location.closest('p, table, li, blockquote, h1, h2, h3, h4, h5, h6');
+		let interactive = function(location) {
+			return location.closest('a, button, img, svg, input, iframe, [role="button"], [role="link"]');
+		};
+		let canPositionInside = function(location) {
+			return !interactive(location) && location.closest('p, table, li, blockquote, h1, h2, h3, h4, h5, h6');
+		};
 
 		// Todo limit afterBegin to P and TD such.
 		if (Results[i].element.shadowRoot) {
 			while (location.parentElement && location.parentElement.shadowRoot) {
 				location = location.parentElement;
 			}
-		} else if (!canPositionInside) {
-			Results[i].location = interactive ?? location;
+		}
+		if (!canPositionInside(location)) {
+			Results[i].location = interactive(location) ?? location;
 			Results[i].position = 'beforebegin';
 		} else {
 			Results[i].location = location;

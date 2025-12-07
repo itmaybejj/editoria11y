@@ -247,7 +247,7 @@ export const Options = {
 	buttonZIndex: 1299,
 	// CSS overrides and additions.
 
-	baseFontSize: 'clamp(14px, 1.5vw, 16px)',
+	baseFontSize: 'clamp(14px, 1.6vw, 16px)',
 	baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
 
 	// Test customizations
