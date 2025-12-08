@@ -1,8 +1,9 @@
-import {Results, State} from './state';
+import {Results, State, UI} from './state';
 import Elements from '../../sa11y/utils/elements';
 import {Options} from './options';
-import {buildElementList, smush} from './utils';
+import {buildElementList, panelLabel} from './utils';
 import Constants from '../../sa11y/utils/constants';
+import {showHeadingsPanel} from '../logic/visualize';
 
 export function syncResults(results) {
 	// Dispatch event for synchronizers.
@@ -41,6 +42,8 @@ const pushResult = function(i, inContent) {
 export function handleSyncOnlyResults() {
 
 	State.splitConfiguration.devResults = filterAlerts(true);
+
+	Object.assign(Options, State.splitConfiguration.contentOptions);
 
 	buildElementList(true);
 
@@ -91,6 +94,8 @@ export function handleSyncOnlyResults() {
 	}
 
 	syncResults(State.splitConfiguration.devResults);
+
+	Object.assign(Options, State.splitConfiguration.devOptions);
 
 }
 

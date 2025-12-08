@@ -34,6 +34,7 @@ export const State = {
 	splitConfiguration: {
 		active: false,
 		showDev: false,
+		contentOptions: {},
 		devChecks: [],
 		devOptions: {},
 		devResults: [],

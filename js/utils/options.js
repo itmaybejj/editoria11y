@@ -113,10 +113,11 @@ export const Options = {
 	// checkRoots: false, // todo document change
 	// ignoreElements: '', // todo document change
 
-	syncOnlyConfiguration: false,
+	splitConfiguration: false,
 	/*
 	// List checks and config for reporting results not shown to editors.
 	// If split configuration is set, the check and option keys must be present.
+	// @todo check against new format.
 	syncOnlyConfiguration {
 		checks: [], // Test keys defined below to not be display on page.
 

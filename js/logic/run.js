@@ -1320,11 +1320,6 @@ export function continueCheck(customCheck = false) {
 		filterAlerts(false);
 		syncResults(Results);
 	}
-	if (State.splitConfiguration.active) {
-		Object.assign(Options, State.splitConfiguration.showDev ?
-			State.splitConfiguration.devOptions :
-			State.splitConfiguration.contentOptions);
-	}
 	countAlerts();
 
 

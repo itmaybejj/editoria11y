@@ -34,9 +34,9 @@ const preProcessOptions = function(userOptions) {
 			State.splitConfiguration.contentOptions[key] = userOptions[key];
 		});
 		State.splitConfiguration.devChecks = new Set(userOptions.splitConfiguration.devChecks);
-		if (State.splitConfiguration.showDev) {
-			Object.assign(Options, State.splitConfiguration.devOptions);
-		}
+
+		// We run tests in dev mode, then filter them to content mode as needed.
+		Object.assign(Options, State.splitConfiguration.devOptions);
 	}
 
 
