@@ -22,17 +22,21 @@ const preProcessOptions = function(userOptions) {
 		Options.checkRoot = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?
 	}
 
-	if (userOptions.syncOnlyConfiguration) {
+	if (userOptions.splitConfiguration) {
 		State.splitConfiguration.active = true;
-		// Store both "sync" override and default "show" options in State.
-		State.splitConfiguration.syncOptions = userOptions.syncOnlyConfiguration.options;
-		State.splitConfiguration.showOptions = {};
-		// Store "show" value for each sync override.
-		Object.keys(State.splitConfiguration.syncOptions).forEach(key => {
+		State.splitConfiguration.showDev = userOptions.splitConfiguration.showDev;
+		// Store both content (default) and dev options in State.
+		State.splitConfiguration.devOptions = userOptions.splitConfiguration.devOptions;
+		State.splitConfiguration.contentOptions = {};
+		// Store "content" value for each sync override.
+		Object.keys(State.splitConfiguration.devOptions).forEach(key => {
 			// Cache the base configuration to restore after first check.
-			State.splitConfiguration.showOptions[key] = userOptions[key];
+			State.splitConfiguration.contentOptions[key] = userOptions[key];
 		});
-		State.splitConfiguration.checks = new Set(userOptions.syncOnlyConfiguration.checks);
+		State.splitConfiguration.devChecks = new Set(userOptions.splitConfiguration.devChecks);
+		if (State.splitConfiguration.showDev) {
+			Object.assign(Options, State.splitConfiguration.devOptions);
+		}
 	}
 
 

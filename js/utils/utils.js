@@ -390,6 +390,28 @@ export function detectShadow (container) {
   }
 }
 
+export function panelLabel(show = State.showPanel) {
+	if (show) {
+		if (State.english) {
+			UI.panelToggleTitle.textContent = State.totalCount > 0 ?
+				Lang._('main_toggle_hide_alerts') :
+				Lang._('main_toggle_hide');
+		} else {
+			UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
+			UI.panelToggle.ariaExpanded = 'true';
+		}
+	} else {
+		if (State.english) {
+			UI.panelToggleTitle.textContent = State.totalCount > 0 ?
+				Lang._('main_toggle_show_alerts') :
+				Lang._('main_toggle_show');
+		} else {
+			UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
+			UI.panelToggle.ariaExpanded = 'false';
+		}
+	}
+}
+
 export function pauseObservers() {
 	State.watching?.forEach(observer => {
 		observer.observer.disconnect();

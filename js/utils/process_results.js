@@ -19,9 +19,28 @@ export function syncResults(results) {
 	}
 }
 
+const pushResult = function(i, inContent) {
+	const result = State.splitConfiguration.devResults[i];
+	if (!inContent) {
+		// Dev only part of page is for devs only.
+		State.splitConfiguration.devResults[i].outsideContentRoots = true;
+		if (State.splitConfiguration.showDev) {
+			Results.push(result);
+		}
+	} else if (State.splitConfiguration.devChecks.has(result.test)) {
+		// DevOnly test is for devs only.
+		if (State.splitConfiguration.showDev) {
+			Results.push(result);
+		}
+	} else {
+		// Content test in content area is for everyone.
+		Results.push(result);
+	}
+}
+
 export function handleSyncOnlyResults() {
 
-	State.splitConfiguration.results = filterAlerts(true);
+	State.splitConfiguration.devResults = filterAlerts(true);
 
 	buildElementList(true);
 
@@ -32,69 +51,46 @@ export function handleSyncOnlyResults() {
 	let contrast = false;
 	let links = false;
 
-	for (let i = 0; i < State.splitConfiguration.results.length; i++) {
-		let result = State.splitConfiguration.results[i];
+	for (let i = 0; i < State.splitConfiguration.devResults.length; i++) {
+		let result = State.splitConfiguration.devResults[i];
 		if (!result.element) {
+			State.splitConfiguration.devResults.splice(i, 1);
 			continue;
 		}
-		if (State.splitConfiguration.checks.has(result.test)) {
-			// Synced but not shown.
-			continue;
+		if (!everything) {
+			everything = new WeakSet(Elements.Found.Everything);
 		}
 		if (result.test.indexOf('HEADING') === 0) {
 			if (!headings) {
 				headings = new WeakSet(Elements.Found.Headings);
 				excludedHeadings = new WeakSet(Elements.Found.ExcludedHeadings)
 			}
-			if (headings.has(result.element) && !excludedHeadings.has(result.element)) {
-				Results.push(result);
-			} else {
-				State.splitConfiguration.results[i].syncOnly = true;
-			}
+			pushResult(i, headings.has(result.element) && !excludedHeadings.has(result.element));
 			continue;
 		}
 		if (result.test.indexOf('CONTRAST') > -1) {
 			if (!contrast) {
 				contrast = new WeakSet(Elements.Found.Contrast);
 			}
-			if (contrast.has(result.element)) {
-				Results.push(result);
-			} else {
-				State.splitConfiguration.results[i].syncOnly = true;
-			}
+			pushResult(i, contrast.has(result.element));
 			continue;
 		}
 		if (result.element.matches('img')) {
 			if (!images) {
 				images = new WeakSet(Elements.Found.Images);
 			}
-			if (images.has(result.element)) {
-				Results.push(result);
-			} else {
-				State.splitConfiguration.results[i].syncOnly = true;
-			}
+			pushResult(i, images.has(result.element));
 			continue;
 		}
 		if (result.element.matches('a')) {
 			links = new WeakSet(Elements.Found.Links);
-			if (links.has(result.element)) {
-				Results.push(result);
-			} else {
-				State.splitConfiguration.results[i].syncOnly = true;
-			}
+			pushResult(i, links.has(result.element));
 			continue;
 		}
-		if (!everything) {
-			everything = new WeakSet(Elements.Found.Everything);
-		}
-		if (everything.has(result.element)) {
-			Results.push(result);
-		} else {
-			State.splitConfiguration.results[i].syncOnly = true;
-		}
+		pushResult(i, everything.has(result.element));
 	}
 
-	syncResults(State.splitConfiguration.results);
+	syncResults(State.splitConfiguration.devResults);
 
 }
 
@@ -148,7 +144,7 @@ export function filterAlerts (splitConfiguration) {
 	// @todo next we can't return and assign results any more; pass string to here instead.
 
 	// Review results array to remove dismissed or ignored items
-	const results = splitConfiguration ? State.splitConfiguration.results : Results;
+	const results = splitConfiguration ? State.splitConfiguration.devResults : Results;
 
 	for (let i = results.length - 1; i >= 0; i--) {
 		let splice = false;
@@ -177,7 +173,7 @@ export function filterAlerts (splitConfiguration) {
 		} else if (results[i].test === 'META_TITLE') {
 			if (Elements.Found.Headings.length > 0) {
 				if (splitConfiguration) {
-					State.splitConfiguration.results.element = Elements.Found.Everything[0];
+					State.splitConfiguration.devResults.element = Elements.Found.Everything[0];
 				} else {
 					Results[i].element = Elements.Found.Everything[0];
 				}
@@ -191,7 +187,7 @@ export function filterAlerts (splitConfiguration) {
 				&& results[i].dismiss in State.dismissedAlerts[Options.currentPage][results[i].test]) {
 				// Remove results[i] if it has been marked OK or ignored, increment dismissed match counter.
 				if (splitConfiguration) {
-					State.splitConfiguration.results[i].dismissalStatus = true;
+					State.splitConfiguration.devResults[i].dismissalStatus = true;
 				} else {
 					Results[i].dismissalStatus = true;
 				}
@@ -199,7 +195,7 @@ export function filterAlerts (splitConfiguration) {
 		}
 		if (splice) {
 			if (splitConfiguration) {
-				State.splitConfiguration.results.splice(i, 1);
+				State.splitConfiguration.devResults.splice(i, 1);
 			} else {
 				Results.splice(i, 1);
 			}

@@ -479,7 +479,14 @@
         <!-- Instantiate-->
         <script>
 			document.addEventListener('ed11yResults', (e) => {
-				console.log('Results', e.detail);
+				console.log('Sync Results:', e.detail);
+				const syncOnly = [];
+				e.detail.results.forEach((r) => {
+					if (r.outsideContentRoots) {
+						syncOnly.push(r);
+					}
+				})
+				console.log('Outside content roots:', syncOnly);
 			});
 		  Ed11y.Lang.addI18n(Sa11yLangEnUS.strings);
           const ed11y = new Ed11y.Ed11y({
@@ -493,9 +500,10 @@
 			  outlineIgnore: '.utility',
 			  // Split configuration
 			   // Provide list of test keys to check but not display.
-			  syncOnlyConfiguration: {
-				  checks: ['QA_IN_PAGE_LINK'],
-				  options: {
+			  splitConfiguration: {
+				  showDev: true,
+				  devChecks: ['QA_IN_PAGE_LINK'],
+				  devOptions: {
 					  checkRoot: 'body',
 					  // containerIgnore: '',
 					  // contrastIgnore: '.sr-only',
@@ -520,7 +528,7 @@
             // shadowComponents : 'shadow-test, shadow-test-no-hits, turtle',
             autoDetectShadowComponents: true,
             hiddenHandlers : '#hidden-handler',
-		  	checkRoot: 'main',
+		  	checkRoot: 'footer',
             //showDismissed : true,
             altPlaceholder: ['This image has an empty alt attribute;'], // @todo CMS was string.
 			  //panelAttachTo: 'header',

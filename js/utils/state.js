@@ -33,10 +33,10 @@ export const State = {
   },
 	splitConfiguration: {
 		active: false,
-		checks: [],
-		results: [],
-		showOptions: {},
-		syncOptions: {},
+		showDev: false,
+		devChecks: [],
+		devOptions: {},
+		devResults: [],
 	},
 
   /* Panel initial state */

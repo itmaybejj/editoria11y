@@ -1122,10 +1122,10 @@ const State = {
   },
 	splitConfiguration: {
 		active: false,
-		checks: [],
-		results: [],
-		showOptions: {},
-		syncOptions: {},
+		showDev: false,
+		devChecks: [],
+		devOptions: {},
+		devResults: [],
 	},
 
   /* Panel initial state */
@@ -2226,6 +2226,28 @@ function detectShadow (container) {
       }
     });
   }
+}
+
+function panelLabel(show = State.showPanel) {
+	if (show) {
+		if (State.english) {
+			UI.panelToggleTitle.textContent = State.totalCount > 0 ?
+				Lang._('main_toggle_hide_alerts') :
+				Lang._('main_toggle_hide');
+		} else {
+			UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
+			UI.panelToggle.ariaExpanded = 'true';
+		}
+	} else {
+		if (State.english) {
+			UI.panelToggleTitle.textContent = State.totalCount > 0 ?
+				Lang._('main_toggle_show_alerts') :
+				Lang._('main_toggle_show');
+		} else {
+			UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
+			UI.panelToggle.ariaExpanded = 'false';
+		}
+	}
 }
 
 function pauseObservers() {
@@ -5938,9 +5960,28 @@ function syncResults(results) {
 	}
 }
 
+const pushResult = function(i, inContent) {
+	const result = State.splitConfiguration.devResults[i];
+	if (!inContent) {
+		// Dev only part of page is for devs only.
+		State.splitConfiguration.devResults[i].outsideContentRoots = true;
+		if (State.splitConfiguration.showDev) {
+			Results.push(result);
+		}
+	} else if (State.splitConfiguration.devChecks.has(result.test)) {
+		// DevOnly test is for devs only.
+		if (State.splitConfiguration.showDev) {
+			Results.push(result);
+		}
+	} else {
+		// Content test in content area is for everyone.
+		Results.push(result);
+	}
+};
+
 function handleSyncOnlyResults() {
 
-	State.splitConfiguration.results = filterAlerts(true);
+	State.splitConfiguration.devResults = filterAlerts(true);
 
 	buildElementList(true);
 
@@ -5951,69 +5992,46 @@ function handleSyncOnlyResults() {
 	let contrast = false;
 	let links = false;
 
-	for (let i = 0; i < State.splitConfiguration.results.length; i++) {
-		let result = State.splitConfiguration.results[i];
+	for (let i = 0; i < State.splitConfiguration.devResults.length; i++) {
+		let result = State.splitConfiguration.devResults[i];
 		if (!result.element) {
+			State.splitConfiguration.devResults.splice(i, 1);
 			continue;
 		}
-		if (State.splitConfiguration.checks.has(result.test)) {
-			// Synced but not shown.
-			continue;
+		if (!everything) {
+			everything = new WeakSet(Elements.Found.Everything);
 		}
 		if (result.test.indexOf('HEADING') === 0) {
 			if (!headings) {
 				headings = new WeakSet(Elements.Found.Headings);
 				excludedHeadings = new WeakSet(Elements.Found.ExcludedHeadings);
 			}
-			if (headings.has(result.element) && !excludedHeadings.has(result.element)) {
-				Results.push(result);
-			} else {
-				State.splitConfiguration.results[i].syncOnly = true;
-			}
+			pushResult(i, headings.has(result.element) && !excludedHeadings.has(result.element));
 			continue;
 		}
 		if (result.test.indexOf('CONTRAST') > -1) {
 			if (!contrast) {
 				contrast = new WeakSet(Elements.Found.Contrast);
 			}
-			if (contrast.has(result.element)) {
-				Results.push(result);
-			} else {
-				State.splitConfiguration.results[i].syncOnly = true;
-			}
+			pushResult(i, contrast.has(result.element));
 			continue;
 		}
 		if (result.element.matches('img')) {
 			if (!images) {
 				images = new WeakSet(Elements.Found.Images);
 			}
-			if (images.has(result.element)) {
-				Results.push(result);
-			} else {
-				State.splitConfiguration.results[i].syncOnly = true;
-			}
+			pushResult(i, images.has(result.element));
 			continue;
 		}
 		if (result.element.matches('a')) {
 			links = new WeakSet(Elements.Found.Links);
-			if (links.has(result.element)) {
-				Results.push(result);
-			} else {
-				State.splitConfiguration.results[i].syncOnly = true;
-			}
+			pushResult(i, links.has(result.element));
 			continue;
 		}
-		if (!everything) {
-			everything = new WeakSet(Elements.Found.Everything);
-		}
-		if (everything.has(result.element)) {
-			Results.push(result);
-		} else {
-			State.splitConfiguration.results[i].syncOnly = true;
-		}
+		pushResult(i, everything.has(result.element));
 	}
 
-	syncResults(State.splitConfiguration.results);
+	syncResults(State.splitConfiguration.devResults);
 
 }
 
@@ -6067,7 +6085,7 @@ function filterAlerts (splitConfiguration) {
 	// @todo next we can't return and assign results any more; pass string to here instead.
 
 	// Review results array to remove dismissed or ignored items
-	const results = splitConfiguration ? State.splitConfiguration.results : Results;
+	const results = splitConfiguration ? State.splitConfiguration.devResults : Results;
 
 	for (let i = results.length - 1; i >= 0; i--) {
 		let splice = false;
@@ -6096,7 +6114,7 @@ function filterAlerts (splitConfiguration) {
 		} else if (results[i].test === 'META_TITLE') {
 			if (Elements.Found.Headings.length > 0) {
 				if (splitConfiguration) {
-					State.splitConfiguration.results.element = Elements.Found.Everything[0];
+					State.splitConfiguration.devResults.element = Elements.Found.Everything[0];
 				} else {
 					Results[i].element = Elements.Found.Everything[0];
 				}
@@ -6110,7 +6128,7 @@ function filterAlerts (splitConfiguration) {
 				&& results[i].dismiss in State.dismissedAlerts[Options.currentPage][results[i].test]) {
 				// Remove results[i] if it has been marked OK or ignored, increment dismissed match counter.
 				if (splitConfiguration) {
-					State.splitConfiguration.results[i].dismissalStatus = true;
+					State.splitConfiguration.devResults[i].dismissalStatus = true;
 				} else {
 					Results[i].dismissalStatus = true;
 				}
@@ -6118,7 +6136,7 @@ function filterAlerts (splitConfiguration) {
 		}
 		if (splice) {
 			if (splitConfiguration) {
-				State.splitConfiguration.results.splice(i, 1);
+				State.splitConfiguration.devResults.splice(i, 1);
 			} else {
 				Results.splice(i, 1);
 			}
@@ -6833,10 +6851,9 @@ function updatePanel () {
       }, 0);
     }
     // Update buttons.
+		panelLabel();
     if (State.totalCount > 0 || (State.showDismissed && State.dismissedCount > 0)) {
-			UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
 
-			UI.panelToggle.ariaExpanded = `${State.showPanel}`;
       UI.panelJumpNext.removeAttribute('hidden');
       if (State.errorCount > 0) {
         // Errors
@@ -6882,15 +6899,11 @@ function updatePanel () {
 
       if (State.dismissedCount > 0) {
         UI.panelCount.textContent = 'i';
-        if (State.showPanel) {
-          UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
-        } else {
+        if (!State.showPanel) {
           UI.panelToggleTitle.textContent = State.dismissedCount > 1 ?
 						Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount) :
             Lang._('buttonShowHiddenAlert');
         }
-      } else {
-        UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
       }
     }
     UI.panelToggle.classList.remove('disabled');
@@ -7814,7 +7827,7 @@ function checkAll() {
 	State.customTestsRunning = false;
 
 	if (State.splitConfiguration.active) {
-		Object.assign(Options, State.splitConfiguration.syncOptions);
+		Object.assign(Options, State.splitConfiguration.devOptions);
 	}
 
 	State.roots = [];
@@ -7842,7 +7855,7 @@ function checkAll() {
 	}
 	// Reset counts
 	Results.length = 0;
-	State.splitConfiguration.results.length = 0;
+	State.splitConfiguration.devResults.length = 0;
 
 	buildElementList();
 
@@ -7879,7 +7892,7 @@ function checkAll() {
 	}
 	// Todo after merge: developer and readability tests added via options here.
 	State.testsRemaining = queue.length;
-	enqueueTests(queue, State.splitConfiguration.active ? State.splitConfiguration.results : Results);
+	enqueueTests(queue, State.splitConfiguration.active ? State.splitConfiguration.devResults : Results);
 	// @todo CMS merge when Sa11y support is ready.
 	// @todo after merge handle readability and developer checks.
 }
@@ -7895,20 +7908,22 @@ function continueCheck(customCheck = false) {
 	}
 
 	// Filter split configuration results.
-	if (State.splitConfiguration.active && State.splitConfiguration.results.length > 0) {
+	if (State.splitConfiguration.active && State.splitConfiguration.devResults.length > 0) {
 		handleSyncOnlyResults();
 	} else {
 		filterAlerts(false);
 		syncResults(Results);
 	}
 	if (State.splitConfiguration.active) {
-		Object.assign(Options, State.splitConfiguration.showOptions);
+		Object.assign(Options, State.splitConfiguration.showDev ?
+			State.splitConfiguration.devOptions :
+			State.splitConfiguration.contentOptions);
 	}
 	countAlerts();
 
 
 	if (typeof UI.panelToggle.querySelector === 'function') {
-		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
+		panelLabel();
 	}
 	if (State.visualizing) {
 		//checkReadability([]); // todo???
@@ -8090,13 +8105,13 @@ function togglePanel () {
 				localStorage.setItem('editoria11yShow', '1');
 			}
 			else {
-				UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
 				State.showDismissed = false;
 				State.showPanel = false;
 				reset();
 				Options.userPrefersShut = true;
 				localStorage.setItem('editoria11yShow', '0');
 			}
+			panelLabel();
 		}
 	}
 	State.doubleClickPrevent = true;
@@ -8169,6 +8184,10 @@ const ed11yLang = {
 		SKIP_TO_ISSUE: 'Go to issue',
 		buttonFirstContent: 'Go to first alert',
 		MAIN_TOGGLE_LABEL: 'Toggle accessibility tools',
+		main_toggle_show_alerts: 'Show accessibility alerts',
+		main_toggle_show: 'Show accessibility tools',
+		main_toggle_hide_alerts: 'Hide accessibility alerts',
+		main_toggle_hide: 'Hide accessibility tools',
 		toggleDisabled: 'No content available for Editoria11y to check.',
 		PANEL_HEADING: 'Show visualizers',
 		buttonToolsActive: 'Hide visualizers',
@@ -9216,17 +9235,21 @@ const preProcessOptions = function(userOptions) {
 		Options.checkRoot = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?
 	}
 
-	if (userOptions.syncOnlyConfiguration) {
+	if (userOptions.splitConfiguration) {
 		State.splitConfiguration.active = true;
-		// Store both "sync" override and default "show" options in State.
-		State.splitConfiguration.syncOptions = userOptions.syncOnlyConfiguration.options;
-		State.splitConfiguration.showOptions = {};
-		// Store "show" value for each sync override.
-		Object.keys(State.splitConfiguration.syncOptions).forEach(key => {
+		State.splitConfiguration.showDev = userOptions.splitConfiguration.showDev;
+		// Store both content (default) and dev options in State.
+		State.splitConfiguration.devOptions = userOptions.splitConfiguration.devOptions;
+		State.splitConfiguration.contentOptions = {};
+		// Store "content" value for each sync override.
+		Object.keys(State.splitConfiguration.devOptions).forEach(key => {
 			// Cache the base configuration to restore after first check.
-			State.splitConfiguration.showOptions[key] = userOptions[key];
+			State.splitConfiguration.contentOptions[key] = userOptions[key];
 		});
-		State.splitConfiguration.checks = new Set(userOptions.syncOnlyConfiguration.checks);
+		State.splitConfiguration.devChecks = new Set(userOptions.splitConfiguration.devChecks);
+		if (State.splitConfiguration.showDev) {
+			Object.assign(Options, State.splitConfiguration.devOptions);
+		}
 	}
 
 

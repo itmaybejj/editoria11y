@@ -3,7 +3,7 @@ import {
 	buildElementList,
 	checkRunPrevent,
 	firstVisibleParent, lagBounce,
-	newIncrementalResults, pauseObservers,
+	newIncrementalResults, panelLabel, pauseObservers,
 	resetClass, resetResults, resumeObservers, showError,
 	visible
 } from '../utils/utils.js';
@@ -257,10 +257,9 @@ export function updatePanel () {
       }, 0);
     }
     // Update buttons.
+		panelLabel();
     if (State.totalCount > 0 || (State.showDismissed && State.dismissedCount > 0)) {
-			UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
 
-			UI.panelToggle.ariaExpanded = `${State.showPanel}`;
       UI.panelJumpNext.removeAttribute('hidden');
       if (State.errorCount > 0) {
         // Errors
@@ -306,15 +305,11 @@ export function updatePanel () {
 
       if (State.dismissedCount > 0) {
         UI.panelCount.textContent = 'i';
-        if (State.showPanel) {
-          UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
-        } else {
+        if (!State.showPanel) {
           UI.panelToggleTitle.textContent = State.dismissedCount > 1 ?
 						Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount) :
             Lang._('buttonShowHiddenAlert');
         }
-      } else {
-        UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
       }
     }
     UI.panelToggle.classList.remove('disabled');
@@ -1238,7 +1233,7 @@ export function checkAll() {
 	State.customTestsRunning = false;
 
 	if (State.splitConfiguration.active) {
-		Object.assign(Options, State.splitConfiguration.syncOptions);
+		Object.assign(Options, State.splitConfiguration.devOptions);
 	}
 
 	State.roots = [];
@@ -1266,7 +1261,7 @@ export function checkAll() {
 	}
 	// Reset counts
 	Results.length = 0;
-	State.splitConfiguration.results.length = 0;
+	State.splitConfiguration.devResults.length = 0;
 
 	buildElementList();
 
@@ -1303,7 +1298,7 @@ export function checkAll() {
 	}
 	// Todo after merge: developer and readability tests added via options here.
 	State.testsRemaining = queue.length;
-	enqueueTests(queue, State.splitConfiguration.active ? State.splitConfiguration.results : Results);
+	enqueueTests(queue, State.splitConfiguration.active ? State.splitConfiguration.devResults : Results);
 	// @todo CMS merge when Sa11y support is ready.
 	// @todo after merge handle readability and developer checks.
 }
@@ -1319,20 +1314,22 @@ export function continueCheck(customCheck = false) {
 	}
 
 	// Filter split configuration results.
-	if (State.splitConfiguration.active && State.splitConfiguration.results.length > 0) {
+	if (State.splitConfiguration.active && State.splitConfiguration.devResults.length > 0) {
 		handleSyncOnlyResults();
 	} else {
 		filterAlerts(false);
 		syncResults(Results);
 	}
 	if (State.splitConfiguration.active) {
-		Object.assign(Options, State.splitConfiguration.showOptions);
+		Object.assign(Options, State.splitConfiguration.showDev ?
+			State.splitConfiguration.devOptions :
+			State.splitConfiguration.contentOptions);
 	}
 	countAlerts();
 
 
 	if (typeof UI.panelToggle.querySelector === 'function') {
-		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
+		panelLabel();
 	}
 	if (State.visualizing) {
 		//checkReadability([]); // todo???
@@ -1514,13 +1511,13 @@ export function togglePanel () {
 				localStorage.setItem('editoria11yShow', '1');
 			}
 			else {
-				UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
 				State.showDismissed = false;
 				State.showPanel = false;
 				reset();
 				Options.userPrefersShut = true;
 				localStorage.setItem('editoria11yShow', '0');
 			}
+			panelLabel();
 		}
 	}
 	State.doubleClickPrevent = true;
