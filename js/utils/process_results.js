@@ -21,21 +21,22 @@ export function syncResults(results) {
 }
 
 const pushResult = function(i, inContent) {
-	const result = State.splitConfiguration.devResults[i];
 	if (!inContent) {
 		// Dev only part of page is for devs only.
 		State.splitConfiguration.devResults[i].outsideContentRoots = true;
+		// Prepend to dismissal key
+		State.splitConfiguration.devResults[i].dismiss = `≈dev§${State.splitConfiguration.devResults[i].dismiss}`;
 		if (State.splitConfiguration.showDev) {
-			Results.push(result);
+			Results.push(State.splitConfiguration.devResults[i]);
 		}
-	} else if (State.splitConfiguration.devChecks.has(result.test)) {
+	} else if (State.splitConfiguration.devChecks.has(State.splitConfiguration.devResults[i].test)) {
 		// DevOnly test is for devs only.
 		if (State.splitConfiguration.showDev) {
-			Results.push(result);
+			Results.push(State.splitConfiguration.devResults[i]);
 		}
 	} else {
 		// Content test in content area is for everyone.
-		Results.push(result);
+		Results.push(State.splitConfiguration.devResults[i]);
 	}
 }
 
