@@ -181,10 +181,11 @@ export const Options = {
 	// Interface
 	theme: 'sleekTheme',
 	sleekTheme: {
-		bg: '#eff2ff', // e8f4ff
+		bg: '#eff2ff',
 		bgHighlight: '#7b1919',
+		bgOutlines: '#276499',
 		text: '#20160c',
-		primary: '#276499', // 276499
+		primary: '#276499',
 		primaryText: '#eff2ff',
 		button: 'transparent', // deprecate?
 		panelBar: '#1e517c',
@@ -193,7 +194,7 @@ export const Options = {
 		activeTab: '#276499',
 		activeTabText: '#fffffe',
 		focusRing: '#007aff',
-		outlineWidth: '0',
+		outlineWidth: '0px',
 		borderRadius: '3px',
 		ok: '#1f5381',
 		warning: 'rgb(250, 216, 89)',
@@ -204,6 +205,7 @@ export const Options = {
 	darkTheme: {
 		bg: '#0a2051',
 		bgHighlight: '#7b1919',
+		bgOutlines: '#f4f7ff',
 		text: '#f4f7ff',
 		primary: '#3052a0',
 		primaryText: '#f4f7ff',
@@ -225,6 +227,7 @@ export const Options = {
 	lightTheme: {
 		bg: '#fffffe',
 		bgHighlight: '#7b1919',
+		bgOutlines: '#0a307a',
 		text: '#20160c',
 		primary: '#0a307a',
 		primaryText: '#fffdf7',
@@ -235,7 +238,7 @@ export const Options = {
 		activeTab: '#b9c0cf',
 		activeTabText: '#20160c',
 		focusRing: '#007aff',
-		outlineWidth: '0',
+		outlineWidth: '0px',
 		borderRadius: '3px',
 		ok: '#0a307a',
 		warning: 'rgb(250, 216, 89)',
