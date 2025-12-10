@@ -26,6 +26,7 @@ const pushResult = function(i, inContent) {
 		State.splitConfiguration.devResults[i].outsideContentRoots = true;
 		// Prepend to dismissal key
 		State.splitConfiguration.devResults[i].dismiss = `≈dev§${State.splitConfiguration.devResults[i].dismiss}`;
+		checkDismissed(i, true);
 		if (State.splitConfiguration.showDev) {
 			Results.push(State.splitConfiguration.devResults[i]);
 		}
@@ -146,6 +147,20 @@ export function countAlerts () {
 	}
 }
 
+export function checkDismissed(i, splitConfiguration) {
+	const result = splitConfiguration ? State.splitConfiguration.devResults[i] : Results[i];
+	if (Options.currentPage in State.dismissedAlerts
+		&& result.test in State.dismissedAlerts[Options.currentPage]
+		&& result.dismiss in State.dismissedAlerts[Options.currentPage][result.test]) {
+		// Remove results[i] if it has been marked OK or ignored, increment dismissed match counter.
+		if (splitConfiguration) {
+			State.splitConfiguration.devResults[i].dismissalStatus = true;
+		} else {
+			Results.dismissalStatus = true;
+		}
+	}
+}
+
 export function filterAlerts (splitConfiguration) {
 	// @todo next we can't return and assign results any more; pass string to here instead.
 
@@ -186,18 +201,9 @@ export function filterAlerts (splitConfiguration) {
 			}
 		} else if (!results[i].element || results[i].type === 'good') {
 			splice = true;
-		} else {
-			// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-			if (Options.currentPage in State.dismissedAlerts
-				&& results[i].test in State.dismissedAlerts[Options.currentPage]
-				&& results[i].dismiss in State.dismissedAlerts[Options.currentPage][results[i].test]) {
-				// Remove results[i] if it has been marked OK or ignored, increment dismissed match counter.
-				if (splitConfiguration) {
-					State.splitConfiguration.devResults[i].dismissalStatus = true;
-				} else {
-					Results[i].dismissalStatus = true;
-				}
-			}
+		} else if (!splitConfiguration) {
+			// Split config modifies key before checking.
+			checkDismissed(i);
 		}
 		if (splice) {
 			if (splitConfiguration) {

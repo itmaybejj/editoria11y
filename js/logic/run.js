@@ -1433,11 +1433,11 @@ export function dismissThis (dismissalType, all = false) {
 	if (all) {
 		Results.forEach((result) => {
 			if (result.test === test && result.dismissalStatus !==dismissalType) {
-				dismissOne(dismissalType, test, `${Results[id].outsideContentRoots ? '^@dev':''}${result.dismiss}`);
+				dismissOne(dismissalType, test, result.dismiss);
 			}
 		});
 	} else {
-		let dismissalKey = `${Results[id].outsideContentRoots ? '^@dev':''}${Results[id].dismiss}`;
+		let dismissalKey = Results[id].dismiss;
 		dismissOne(dismissalType, test, dismissalKey);
 	}
 
