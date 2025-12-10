@@ -8237,11 +8237,11 @@ URL: ${url}</pre>
       ALERT_TEXT: 'Issue',
       //toggleAriaLabel: `Accessibility %(label)`,
       transferFocus: 'Edit this content', // @todo translate
-      dismissOkButtonContent: 'Confirm this is OK', //@todo translate
-  		DISMISS: 'Skip this check',
+      dismissOkButtonContent: 'Mark this as OK', //@todo translate
+  		DISMISS: 'Ignore this warning',
       dismissActions: `%(count) similar alerts`, // 2.3.10 // @todo translate
   		DISMISS_ALL: 'Skip all like this', // 2.3.10
-      dismissOkAllButton: 'Confirm all like this are OK', // @todo translate
+      dismissOkAllButton: 'Mark all like this as OK', // @todo translate
       dismissOkTitle: 'Hides alert for all editors',  // @todo translate
       dismissHideTitle: 'Only hides alert for you',  // @todo translate
       undismissOKButton: 'Restore this alert marked as OK',  // @todo translate
@@ -8269,46 +8269,47 @@ URL: ${url}</pre>
   		// Tooltips for heading tests =========================
     },
   	testNames: {
-  		ALT_FILE_EXT_TEST_NAME: 'Image\'s text alternative is a URL',
-  		ALT_MAYBE_BAD_TEST_NAME: 'Manual check: alt text may be meaningless',
-  		ALT_PLACEHOLDER_TEST_NAME: 	'Alt text is meaningless',
-  		ALT_UNPRONOUNCEABLE_TEST_NAME: 'Image\'s text alternative is unpronounceable',
-  		EMBED_AUDIO_TEST_NAME:	'Manual check: is an accurate transcript provided?',
-  		EMBED_CUSTOM_TEST_NAME: 'Manual check: is this embedded content accessible?',
-  		EMBED_DATA_VIZ_TEST_NAME: 'Manual check: is this visualization accessible?',
-  		EMBED_VIDEO_TEST_NAME: 'Manual check: is this video accurately captioned?',
-  		HEADING_EMPTY_TEST_NAME: 'Heading tag without any text',
-  		HEADING_LONG_TEST_NAME: 'Manual check: long heading',
-  		HEADING_SKIPPED_LEVEL_TEST_NAME: 'Manual check: was a heading level skipped?',
-  		IMAGE_ALT_TOO_LONG_TEST_NAME: 'Manual check: very long alternative text',
-  		IMAGE_DECORATIVE_TEST_NAME: 'Manual check: image has no alt text',
-  		LINK_ALT_FILE_EXT_TEST_NAME:	'Linked image\'s text alternative is a URL',
-  		LINK_ALT_MAYBE_BAD_TEST_NAME: 'Manual check: linked alt text may be meaningless',
-  		LINK_EMPTY_NO_LABEL_TEST_NAME: 'Link with no accessible label',
-  		LINK_EMPTY_TEST_NAME: 'Link with no accessible text',
-  		LINK_IMAGE_ALT_AND_TEXT_TEST_NAME: 'Manual check: link contains both text and an image', // 2.3.10.
-  		LINK_IMAGE_LONG_ALT_TEST_NAME: 'Manual check: very long alternative text in linked image',
-  		LINK_IMAGE_NO_ALT_TEXT_TEST_NAME: 'Linked Image has no alt text',
-  		LINK_NEW_TAB_TEST_NAME: 'Manual check: is opening a new window expected?',
-  		LINK_PLACEHOLDER_ALT_TEST_NAME: 'Linked alt text is meaningless',
-  		LINK_STOPWORD_TEST_NAME: 'Manual check: is this link meaningful and concise?',
-  		LINK_SUS_ALT_TEST_NAME: 'Manual check: possibly redundant text in linked image',
-  		LINK_URL_TEST_NAME: 'Manual check: is this link text a URL?',
-  		MISSING_ALT_LINK_HAS_TEXT_TEST_NAME: 'Image in link with text has no alternative text attribute',
-  		MISSING_ALT_LINK_TEST_NAME: 'Linked image has no alternative text attribute',
-  		MISSING_ALT_TEST_NAME: 'Image has no alternative text attribute',
-  		QA_BLOCKQUOTE_TEST_NAME : 'Manual check: is this a blockquote?',
-  		QA_FAKE_HEADING_TEST_NAME: 'Manual check: should this be a heading?',
-  		QA_FAKE_LIST_TEST_NAME: 'Manual check: should this have list formatting?',
-  		QA_PDF_TEST_NAME: 'Manual check: is the linked document accessible?',
-  		QA_UPPERCASE_TEST_NAME: 'Manual check: is this uppercase text needed?',
-  		SUS_ALT_TEST_NAME: 'Manual check: possibly redundant text in alt',
-  		TABLES_EMPTY_HEADING_TEST_NAME: 'Empty table header cell',
-  		TABLES_MISSING_HEADINGS_TEST_NAME: 'Table has no header cells',
-  		TABLES_SEMANTIC_HEADING_TEST_NAME: 'Content heading inside a table',
+  		ALT_FILE_EXT_TEST_NAME: 'This image needs meaningful alt text, not a URL',
+  		ALT_MAYBE_BAD_TEST_NAME: 'Is this alt text meaningless?',
+  		ALT_PLACEHOLDER_TEST_NAME: 	'This image needs meaningful alt text, not a placeholder',
+  		ALT_UNPRONOUNCEABLE_TEST_NAME: 'This image\'s alt text is unpronounceable',
+  		EMBED_AUDIO_TEST_NAME:	'Does this audio have a transcript?',
+  		EMBED_CUSTOM_TEST_NAME: 'Is this embedded content accessible?',
+  		EMBED_DATA_VIZ_TEST_NAME: 'Is this visualization accessible?',
+  		EMBED_VIDEO_TEST_NAME: 'Is this video accurately captioned?',
+  		HEADING_EMPTY_TEST_NAME: 'Add text to this heading, or remove it',
+  		HEADING_LONG_TEST_NAME: 'Can this heading be shortened?',
+  		HEADING_SKIPPED_LEVEL_TEST_NAME: 'Was a heading level skipped?',
+  		IMAGE_ALT_TOO_LONG_TEST_NAME: 'Can this alternative text be shortened?',
+  		IMAGE_DECORATIVE_TEST_NAME: 'Is this image meaningless?',
+  		LINK_ALT_FILE_EXT_TEST_NAME:	'This linked image\'s alt text should not be a URL',
+  		LINK_ALT_MAYBE_BAD_TEST_NAME: 'Does this alt text describe the link destination?',
+  		LINK_EMPTY_NO_LABEL_TEST_NAME: 'This link needs a label',
+  		LINK_EMPTY_TEST_NAME: 'This link needs text',
+  		LINK_IMAGE_ALT_AND_TEXT_TEST_NAME: 'Does this alt text make sense inside this link?', // 2.3.10.
+  		LINK_IMAGE_LONG_ALT_TEST_NAME: 'Can this linked alt text be shortened?',
+  		LINK_IMAGE_NO_ALT_TEXT_TEST_NAME: 'This linked image needs alt text',
+  		LINK_NEW_TAB_TEST_NAME: 'Does this link open a new window without warning?',
+  		LINK_PLACEHOLDER_ALT_TEST_NAME: 'This linked image needs meaningful alt text',
+  		LINK_STOPWORD_TEST_NAME: 'Does this link describe its destination?',
+  		LINK_SUS_ALT_TEST_NAME: 'Is there redundant text in this linked image?',
+  		LINK_URL_TEST_NAME: 'Is this link text a URL?',
+  		MISSING_ALT_LINK_HAS_TEXT_TEST_NAME: 'Image in link with text has no alternative text attribute', // Off by default in Editoria11y.
+  		MISSING_ALT_LINK_TEST_NAME: 'This linked image needs an alt text attribute',
+  		MISSING_ALT_TEST_NAME: 'This image has no alt text attribute',
+  		QA_BLOCKQUOTE_TEST_NAME : 'Is this a quote or a heading?',
+  		QA_FAKE_HEADING_TEST_NAME: 'Should this be a heading?',
+  		QA_FAKE_LIST_TEST_NAME: 'Should this have list formatting?',
+  		QA_PDF_TEST_NAME: 'Is the linked document accessible?',
+  		QA_UPPERCASE_TEST_NAME: 'Is this uppercase text needed?',
+  		SUS_ALT_TEST_NAME: 'Are there redundant words in this alt text?',
+  		TABLES_EMPTY_HEADING_TEST_NAME: 'This header cell needs text',
+  		TABLES_MISSING_HEADINGS_TEST_NAME: 'This table needs a header row or column',
+  		TABLES_SEMANTIC_HEADING_TEST_NAME: 'Content headings should not be used inside tables',
 
   		// New
-  		HEADING_EMPTY_WITH_IMAGE_TEST_NAME: 'Heading has no text, but contains an image',
+  		// @todo These are only synced, not displayed.
+  		HEADING_EMPTY_WITH_IMAGE_TEST_NAME: 'This image used as a heading needs alt text',
   		HEADING_FIRST_TEST_NAME: 'The first heading on a page should usually be a Heading 1 or Heading 2',
   		HEADING_MISSING_ONE_TEST_NAME: 'Missing Heading 1',
   		IMAGE_DECORATIVE_CAROUSEL_TEST_NAME: 'Image in a carousel or gallery marked as decorative',
@@ -8352,13 +8353,13 @@ URL: ${url}</pre>
   		BTN_EMPTY_TEST_NAME: 'Button purpose is not machine-readable',
   		BTN_EMPTY_LABELLEDBY_TEST_NAME: 'Button has an invalid ARIA label',
   		BTN_ROLE_IN_NAME_TEST_NAME: 'Button name repeats the word "button"',
-  		CONTRAST_WARNING_TEST_NAME: 'Manual check: does this text have enough contrast?',
+  		CONTRAST_WARNING_TEST_NAME: 'Does this text have enough contrast?',
   		CONTRAST_INPUT_TEST_NAME: 'Input does not provide enough contrast to be easily legible',
   		CONTRAST_ERROR_TEST_NAME: 'Text does not have enough contrast to be easily legible',
   		CONTRAST_PLACEHOLDER_TEST_NAME: 'Placeholder text does not have enough contrast to be easily legible',
-  		CONTRAST_PLACEHOLDER_UNSUPPORTED_TEST_NAME: 'Manual check: does this placeholder text have enough contrast?',
+  		CONTRAST_PLACEHOLDER_UNSUPPORTED_TEST_NAME: 'Does this placeholder text have enough contrast?',
   		CONTRAST_ERROR_GRAPHIC_TEST_NAME: 'Graphic or icon does not have enough contrast with the background',
-  		CONTRAST_WARNING_GRAPHIC_TEST_NAME: 'Manual check: does this graphic or icon have enough contrast?',
+  		CONTRAST_WARNING_GRAPHIC_TEST_NAME: 'Does this graphic or icon have enough contrast?',
   	},
   	tests: {
   		// todo: update Drupal localization file.
