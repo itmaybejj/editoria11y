@@ -6766,7 +6766,6 @@ URL: ${url}</pre>
           reportLink.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M0 96C0 61 29 32 64 32l384 0c35 0 64 29 64 64l0 320c0 35-29 64-64 64L64 480c-35 0-64-29-64-64L0 96zm64 0l0 64 64 0 0-64L64 96zm384 0L192 96l0 64 256 0 0-64zM64 224l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64zM64 352l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64z"/></svg><span class="ed11y-sr-only"></span>';
           reportLink.setAttribute('id' , 'ed11y-reports-link');
           reportLink.setAttribute('href', Options.reportsURL);
-          reportLink.setAttribute('target', '_blank');
           reportLink.setAttribute('aria-label', Lang._('reportsLink'));
           reportLink.querySelector('.ed11y-sr-only').textContent = Lang._('reportsLink');
           UI.panelShowDismissed.insertAdjacentElement('beforebegin', reportLink);
@@ -8238,17 +8237,17 @@ URL: ${url}</pre>
       ALERT_TEXT: 'Issue',
       //toggleAriaLabel: `Accessibility %(label)`,
       transferFocus: 'Edit this content', // @todo translate
-      dismissOkButtonContent: 'Mark as OK', //@todo translate
-  		DISMISS: 'Mark as ignored',
-      dismissActions: `%(count) similar issues`, // 2.3.10 // @todo translate
-  		DISMISS_ALL: 'Ignore all like this', // 2.3.10
-      dismissOkAllButton: 'Mark all like this as OK', // @todo translate
-      dismissOkTitle: 'Hides this alert for all editors',  // @todo translate
-      dismissHideTitle: 'Hides this alert for you',  // @todo translate
+      dismissOkButtonContent: 'Confirm this is OK', //@todo translate
+  		DISMISS: 'Skip this check',
+      dismissActions: `%(count) similar alerts`, // 2.3.10 // @todo translate
+  		DISMISS_ALL: 'Skip all like this', // 2.3.10
+      dismissOkAllButton: 'Confirm all like this are OK', // @todo translate
+      dismissOkTitle: 'Hides alert for all editors',  // @todo translate
+      dismissHideTitle: 'Only hides alert for you',  // @todo translate
       undismissOKButton: 'Restore this alert marked as OK',  // @todo translate
-      undismissHideButton: 'Restore this hidden alert', // @todo translate
-      undismissNotePermissions: 'This alert has been hidden by an administrator', // @todo translate
-      reportsLink: 'Open site reports in new tab', // @todo translate
+      undismissHideButton: 'Restore this skipped check', // @todo translate
+      undismissNotePermissions: 'This check has been hidden by an administrator', // @todo translate
+      reportsLink: 'Open site reports', // @todo translate
       ALERT_CLOSE: 'Close',
       panelHelpTitle: 'About this tool', // @todo translate
       panelHelp: `
@@ -9054,13 +9053,37 @@ URL: ${url}</pre>
           const pageActionsSummary = document.createElement('summary');
           const othersLikeThis = Results.filter(el => el.test === this.result.test).length;
           const showPageActions = othersLikeThis > 3 && Options.allowHide && Options.allowOK;
+  				const pageActionsContent = document.createElement('div');
 
           if (showPageActions) {
             pageActions.classList.add('ed11y-bulk-actions', 'dismiss');
             pageActionsSummary.textContent = Lang.sprintf('dismissActions', othersLikeThis);
             pageActions.appendChild(pageActionsSummary);
+  					pageActionsContent.classList.add('ed11y-bulk-actions-content');
+  					pageActions.appendChild(pageActionsContent);
             buttonBar.appendChild(pageActions);
           }
+
+  				if (Options.allowHide) {
+  					const ignoreButton = document.createElement('button');
+  					ignoreButton.classList.add('dismiss');
+  					if (Options.syncedDismissals) {
+  						ignoreButton.setAttribute('title', `${Lang._('dismissHideTitle')}`);
+  					}
+  					ignoreButton.textContent = Lang._('DISMISS');
+  					ignoreButton.prepend(dismissIcon.cloneNode(true));
+  					buttonBar.prepend(ignoreButton);
+  					ignoreButton.addEventListener('click', function(){dismissThis('hide');});
+
+  					if (showPageActions) {
+  						const ignoreAllButton = document.createElement('button');
+  						ignoreAllButton.classList.add('dismiss');
+  						ignoreAllButton.textContent = Lang._('DISMISS_ALL');
+  						ignoreAllButton.prepend(dismissIcon.cloneNode(true));
+  						pageActionsContent.appendChild(ignoreAllButton);
+  						ignoreAllButton.addEventListener('click', function(){dismissThis('hide', true);});
+  					}
+  				}
 
           if (Options.allowOK) {
             const check = document.createElement('span');
@@ -9079,7 +9102,7 @@ URL: ${url}</pre>
               const OkAllButton = OkButton.cloneNode(true);
               OkAllButton.textContent = Lang._('dismissOkAllButton');
               OkAllButton.prepend(check.cloneNode(true));
-              pageActions.append(OkAllButton);
+              pageActionsContent.insertAdjacentElement('afterbegin', OkAllButton);
               OkAllButton.addEventListener('click', function(){dismissThis('ok', true);});
             }
 
@@ -9088,26 +9111,6 @@ URL: ${url}</pre>
             OkButton.addEventListener('click', function(){dismissThis('ok');});
           }
 
-          if (Options.allowHide) {
-            const ignoreButton = document.createElement('button');
-            ignoreButton.classList.add('dismiss');
-            if (Options.syncedDismissals) {
-              ignoreButton.setAttribute('title', `${Lang._('dismissHideTitle')}`);
-            }
-            ignoreButton.textContent = Lang._('DISMISS');
-            ignoreButton.prepend(dismissIcon.cloneNode(true));
-            buttonBar.prepend(ignoreButton);
-            ignoreButton.addEventListener('click', function(){dismissThis('hide');});
-
-            if (showPageActions) {
-              const ignoreAllButton = document.createElement('button');
-              ignoreAllButton.classList.add('dismiss');
-              ignoreAllButton.textContent = Lang._('DISMISS_ALL');
-              ignoreAllButton.prepend(dismissIcon.cloneNode(true));
-              pageActionsSummary.insertAdjacentElement('afterend', ignoreAllButton);
-              ignoreAllButton.addEventListener('click', function(){dismissThis('hide', true);});
-            }
-          }
         }
         content.append(buttonBar);
       }

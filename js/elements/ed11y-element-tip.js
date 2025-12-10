@@ -155,13 +155,37 @@ export class Ed11yElementTip extends HTMLElement {
         const pageActionsSummary = document.createElement('summary');
         const othersLikeThis = Results.filter(el => el.test === this.result.test).length;
         const showPageActions = othersLikeThis > 3 && Options.allowHide && Options.allowOK;
+				const pageActionsContent = document.createElement('div');
 
         if (showPageActions) {
           pageActions.classList.add('ed11y-bulk-actions', 'dismiss');
           pageActionsSummary.textContent = Lang.sprintf('dismissActions', othersLikeThis);
           pageActions.appendChild(pageActionsSummary);
+					pageActionsContent.classList.add('ed11y-bulk-actions-content');
+					pageActions.appendChild(pageActionsContent);
           buttonBar.appendChild(pageActions);
         }
+
+				if (Options.allowHide) {
+					const ignoreButton = document.createElement('button');
+					ignoreButton.classList.add('dismiss');
+					if (Options.syncedDismissals) {
+						ignoreButton.setAttribute('title', `${Lang._('dismissHideTitle')}`);
+					}
+					ignoreButton.textContent = Lang._('DISMISS');
+					ignoreButton.prepend(dismissIcon.cloneNode(true));
+					buttonBar.prepend(ignoreButton);
+					ignoreButton.addEventListener('click', function(){dismissThis('hide');});
+
+					if (showPageActions) {
+						const ignoreAllButton = document.createElement('button');
+						ignoreAllButton.classList.add('dismiss');
+						ignoreAllButton.textContent = Lang._('DISMISS_ALL');
+						ignoreAllButton.prepend(dismissIcon.cloneNode(true));
+						pageActionsContent.appendChild(ignoreAllButton);
+						ignoreAllButton.addEventListener('click', function(){dismissThis('hide', true);});
+					}
+				}
 
         if (Options.allowOK) {
           const check = document.createElement('span');
@@ -180,7 +204,7 @@ export class Ed11yElementTip extends HTMLElement {
             const OkAllButton = OkButton.cloneNode(true);
             OkAllButton.textContent = Lang._('dismissOkAllButton');
             OkAllButton.prepend(check.cloneNode(true));
-            pageActions.append(OkAllButton);
+            pageActionsContent.insertAdjacentElement('afterbegin', OkAllButton);
             OkAllButton.addEventListener('click', function(){dismissThis('ok', true);});
           }
 
@@ -189,26 +213,6 @@ export class Ed11yElementTip extends HTMLElement {
           OkButton.addEventListener('click', function(){dismissThis('ok');});
         }
 
-        if (Options.allowHide) {
-          const ignoreButton = document.createElement('button');
-          ignoreButton.classList.add('dismiss');
-          if (Options.syncedDismissals) {
-            ignoreButton.setAttribute('title', `${Lang._('dismissHideTitle')}`);
-          }
-          ignoreButton.textContent = Lang._('DISMISS');
-          ignoreButton.prepend(dismissIcon.cloneNode(true));
-          buttonBar.prepend(ignoreButton);
-          ignoreButton.addEventListener('click', function(){dismissThis('hide');});
-
-          if (showPageActions) {
-            const ignoreAllButton = document.createElement('button');
-            ignoreAllButton.classList.add('dismiss');
-            ignoreAllButton.textContent = Lang._('DISMISS_ALL');
-            ignoreAllButton.prepend(dismissIcon.cloneNode(true));
-            pageActionsSummary.insertAdjacentElement('afterend', ignoreAllButton);
-            ignoreAllButton.addEventListener('click', function(){dismissThis('hide', true);});
-          }
-        }
       }
       content.append(buttonBar);
     }

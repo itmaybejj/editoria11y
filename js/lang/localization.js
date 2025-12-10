@@ -61,17 +61,17 @@ const ed11yLang = {
     ALERT_TEXT: 'Issue',
     //toggleAriaLabel: `Accessibility %(label)`,
     transferFocus: 'Edit this content', // @todo translate
-    dismissOkButtonContent: 'Mark as OK', //@todo translate
-		DISMISS: 'Mark as ignored',
-    dismissActions: `%(count) similar issues`, // 2.3.10 // @todo translate
-		DISMISS_ALL: 'Ignore all like this', // 2.3.10
-    dismissOkAllButton: 'Mark all like this as OK', // @todo translate
-    dismissOkTitle: 'Hides this alert for all editors',  // @todo translate
-    dismissHideTitle: 'Hides this alert for you',  // @todo translate
+    dismissOkButtonContent: 'Confirm this is OK', //@todo translate
+		DISMISS: 'Skip this check',
+    dismissActions: `%(count) similar alerts`, // 2.3.10 // @todo translate
+		DISMISS_ALL: 'Skip all like this', // 2.3.10
+    dismissOkAllButton: 'Confirm all like this are OK', // @todo translate
+    dismissOkTitle: 'Hides alert for all editors',  // @todo translate
+    dismissHideTitle: 'Only hides alert for you',  // @todo translate
     undismissOKButton: 'Restore this alert marked as OK',  // @todo translate
-    undismissHideButton: 'Restore this hidden alert', // @todo translate
-    undismissNotePermissions: 'This alert has been hidden by an administrator', // @todo translate
-    reportsLink: 'Open site reports in new tab', // @todo translate
+    undismissHideButton: 'Restore this skipped check', // @todo translate
+    undismissNotePermissions: 'This check has been hidden by an administrator', // @todo translate
+    reportsLink: 'Open site reports', // @todo translate
     ALERT_CLOSE: 'Close',
     panelHelpTitle: 'About this tool', // @todo translate
     panelHelp: `
