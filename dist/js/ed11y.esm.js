@@ -9062,7 +9062,7 @@ class Ed11yElementTip extends HTMLElement {
 
 				if (Options.allowHide) {
 					const ignoreButton = document.createElement('button');
-					ignoreButton.classList.add('dismiss');
+					ignoreButton.classList.add('dismiss', 'ignore');
 					if (Options.syncedDismissals) {
 						ignoreButton.setAttribute('title', `${Lang._('dismissHideTitle')}`);
 					}
@@ -9087,7 +9087,7 @@ class Ed11yElementTip extends HTMLElement {
           check.textContent = '✓';
 
           const OkButton = document.createElement('button');
-          OkButton.classList.add('dismiss');
+          OkButton.classList.add('dismiss', 'ok');
           if (Options.syncedDismissals) {
             OkButton.setAttribute('title', Lang._('dismissOkTitle'));
           }
