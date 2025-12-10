@@ -6591,9 +6591,9 @@ URL: ${url}</pre>
   		&& result.dismiss in State.dismissedAlerts[Options.currentPage][result.test]) {
   		// Remove results[i] if it has been marked OK or ignored, increment dismissed match counter.
   		if (splitConfiguration) {
-  			State.splitConfiguration.devResults[i].dismissalStatus = true;
+  			State.splitConfiguration.devResults[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][result.test][result.dismiss];
   		} else {
-  			Results.dismissalStatus = true;
+  			Results.dismissalStatus = State.dismissedAlerts[Options.currentPage][result.test][result.dismiss];
   		}
   	}
   }
