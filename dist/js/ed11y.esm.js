@@ -6623,9 +6623,11 @@ function filterAlerts (splitConfiguration) {
 			}
 			splice = true;
 		} else if (results[i].test === 'META_TITLE') {
+			// Todo: figure out a better plan than sticking the alert on the first matched element.
 			if (Elements.Found.Headings.length > 0) {
 				if (splitConfiguration) {
-					State.splitConfiguration.devResults.element = Elements.Found.Everything[0];
+					State.splitConfiguration.devResults[i].element = Elements.Found.Everything[0];
+					State.splitConfiguration.devResults[i].outsideContentRoots = true;
 				} else {
 					Results[i].element = Elements.Found.Everything[0];
 				}
@@ -8205,6 +8207,7 @@ const ed11yLang = {
 		buttonShowHiddenAlert: 'Show hidden alert',
 		buttonHideHiddenAlert: 'Hide hidden alert',
     buttonHideHiddenAlerts: `Hide %(count) hidden alerts`,
+		dismissalsHeader: 'Not going to fix this?',
 
 		// Visualization
     NO_IMAGES: 'No images found.',
@@ -8241,10 +8244,10 @@ const ed11yLang = {
     ALERT_TEXT: 'Issue',
     //toggleAriaLabel: `Accessibility %(label)`,
     transferFocus: 'Edit this content', // @todo translate
-    dismissOkButtonContent: 'Mark this as OK', //@todo translate
-		DISMISS: 'Ignore this warning',
+    dismissOkButtonContent: 'Mark as OK', //@todo translate
+		DISMISS: 'Ignore warning',
     dismissActions: `%(count) similar alerts`, // 2.3.10 // @todo translate
-		DISMISS_ALL: 'Skip all like this', // 2.3.10
+		DISMISS_ALL: 'Ignore all like this', // 2.3.10
     dismissOkAllButton: 'Mark all like this as OK', // @todo translate
     dismissOkTitle: 'Hides alert for all editors',  // @todo translate
     dismissHideTitle: 'Only hides alert for you',  // @todo translate
@@ -9069,6 +9072,32 @@ class Ed11yElementTip extends HTMLElement {
           buttonBar.appendChild(pageActions);
         }
 
+				if (Options.allowOK) {
+					const check = document.createElement('span');
+					check.setAttribute('aria-hidden', 'true');
+					check.textContent = '✓';
+
+					const OkButton = document.createElement('button');
+					OkButton.classList.add('dismiss', 'ok');
+					if (Options.syncedDismissals) {
+						OkButton.setAttribute('title', Lang._('dismissOkTitle'));
+					}
+					OkButton.textContent = Lang._('dismissOkButtonContent');
+					buttonBar.prepend(OkButton);
+
+					if (showPageActions) {
+						const OkAllButton = OkButton.cloneNode(true);
+						OkAllButton.textContent = Lang._('dismissOkAllButton');
+						OkAllButton.prepend(check.cloneNode(true));
+						pageActionsContent.insertAdjacentElement('afterbegin', OkAllButton);
+						OkAllButton.addEventListener('click', function(){dismissThis('ok', true);});
+					}
+
+					OkButton.prepend(check);
+
+					OkButton.addEventListener('click', function(){dismissThis('ok');});
+				}
+
 				if (Options.allowHide) {
 					const ignoreButton = document.createElement('button');
 					ignoreButton.classList.add('dismiss', 'ignore');
@@ -9090,33 +9119,13 @@ class Ed11yElementTip extends HTMLElement {
 					}
 				}
 
-        if (Options.allowOK) {
-          const check = document.createElement('span');
-          check.setAttribute('aria-hidden', 'true');
-          check.textContent = '✓';
-
-          const OkButton = document.createElement('button');
-          OkButton.classList.add('dismiss', 'ok');
-          if (Options.syncedDismissals) {
-            OkButton.setAttribute('title', Lang._('dismissOkTitle'));
-          }
-          OkButton.textContent = Lang._('dismissOkButtonContent');
-          buttonBar.prepend(OkButton);
-
-          if (showPageActions) {
-            const OkAllButton = OkButton.cloneNode(true);
-            OkAllButton.textContent = Lang._('dismissOkAllButton');
-            OkAllButton.prepend(check.cloneNode(true));
-            pageActionsContent.insertAdjacentElement('afterbegin', OkAllButton);
-            OkAllButton.addEventListener('click', function(){dismissThis('ok', true);});
-          }
-
-          OkButton.prepend(check);
-
-          OkButton.addEventListener('click', function(){dismissThis('ok');});
-        }
-
       }
+
+			const dismissalsHeader = document.createElement('div');
+			dismissalsHeader.classList.add('dismissals-header');
+			dismissalsHeader.textContent = Lang._('dismissalsHeader');
+			buttonBar.prepend(dismissalsHeader);
+
       content.append(buttonBar);
     }
     this.tip.append(content);

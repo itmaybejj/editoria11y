@@ -25,6 +25,7 @@ const ed11yLang = {
 		buttonShowHiddenAlert: 'Show hidden alert',
 		buttonHideHiddenAlert: 'Hide hidden alert',
     buttonHideHiddenAlerts: `Hide %(count) hidden alerts`,
+		dismissalsHeader: 'Not going to fix this?',
 
 		// Visualization
     NO_IMAGES: 'No images found.',
@@ -61,10 +62,10 @@ const ed11yLang = {
     ALERT_TEXT: 'Issue',
     //toggleAriaLabel: `Accessibility %(label)`,
     transferFocus: 'Edit this content', // @todo translate
-    dismissOkButtonContent: 'Mark this as OK', //@todo translate
-		DISMISS: 'Ignore this warning',
+    dismissOkButtonContent: 'Mark as OK', //@todo translate
+		DISMISS: 'Ignore warning',
     dismissActions: `%(count) similar alerts`, // 2.3.10 // @todo translate
-		DISMISS_ALL: 'Skip all like this', // 2.3.10
+		DISMISS_ALL: 'Ignore all like this', // 2.3.10
     dismissOkAllButton: 'Mark all like this as OK', // @todo translate
     dismissOkTitle: 'Hides alert for all editors',  // @todo translate
     dismissHideTitle: 'Only hides alert for you',  // @todo translate

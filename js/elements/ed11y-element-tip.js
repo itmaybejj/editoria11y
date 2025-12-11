@@ -166,6 +166,32 @@ export class Ed11yElementTip extends HTMLElement {
           buttonBar.appendChild(pageActions);
         }
 
+				if (Options.allowOK) {
+					const check = document.createElement('span');
+					check.setAttribute('aria-hidden', 'true');
+					check.textContent = '✓';
+
+					const OkButton = document.createElement('button');
+					OkButton.classList.add('dismiss', 'ok');
+					if (Options.syncedDismissals) {
+						OkButton.setAttribute('title', Lang._('dismissOkTitle'));
+					}
+					OkButton.textContent = Lang._('dismissOkButtonContent');
+					buttonBar.prepend(OkButton);
+
+					if (showPageActions) {
+						const OkAllButton = OkButton.cloneNode(true);
+						OkAllButton.textContent = Lang._('dismissOkAllButton');
+						OkAllButton.prepend(check.cloneNode(true));
+						pageActionsContent.insertAdjacentElement('afterbegin', OkAllButton);
+						OkAllButton.addEventListener('click', function(){dismissThis('ok', true);});
+					}
+
+					OkButton.prepend(check);
+
+					OkButton.addEventListener('click', function(){dismissThis('ok');});
+				}
+
 				if (Options.allowHide) {
 					const ignoreButton = document.createElement('button');
 					ignoreButton.classList.add('dismiss', 'ignore');
@@ -187,33 +213,13 @@ export class Ed11yElementTip extends HTMLElement {
 					}
 				}
 
-        if (Options.allowOK) {
-          const check = document.createElement('span');
-          check.setAttribute('aria-hidden', 'true');
-          check.textContent = '✓';
-
-          const OkButton = document.createElement('button');
-          OkButton.classList.add('dismiss', 'ok');
-          if (Options.syncedDismissals) {
-            OkButton.setAttribute('title', Lang._('dismissOkTitle'));
-          }
-          OkButton.textContent = Lang._('dismissOkButtonContent');
-          buttonBar.prepend(OkButton);
-
-          if (showPageActions) {
-            const OkAllButton = OkButton.cloneNode(true);
-            OkAllButton.textContent = Lang._('dismissOkAllButton');
-            OkAllButton.prepend(check.cloneNode(true));
-            pageActionsContent.insertAdjacentElement('afterbegin', OkAllButton);
-            OkAllButton.addEventListener('click', function(){dismissThis('ok', true);});
-          }
-
-          OkButton.prepend(check);
-
-          OkButton.addEventListener('click', function(){dismissThis('ok');});
-        }
-
       }
+
+			const dismissalsHeader = document.createElement('div');
+			dismissalsHeader.classList.add('dismissals-header');
+			dismissalsHeader.textContent = Lang._('dismissalsHeader');
+			buttonBar.prepend(dismissalsHeader);
+
       content.append(buttonBar);
     }
     this.tip.append(content);

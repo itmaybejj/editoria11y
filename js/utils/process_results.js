@@ -192,9 +192,11 @@ export function filterAlerts (splitConfiguration) {
 			}
 			splice = true;
 		} else if (results[i].test === 'META_TITLE') {
+			// Todo: figure out a better plan than sticking the alert on the first matched element.
 			if (Elements.Found.Headings.length > 0) {
 				if (splitConfiguration) {
-					State.splitConfiguration.devResults.element = Elements.Found.Everything[0];
+					State.splitConfiguration.devResults[i].element = Elements.Found.Everything[0];
+					State.splitConfiguration.devResults[i].outsideContentRoots = true;
 				} else {
 					Results[i].element = Elements.Found.Everything[0];
 				}
