@@ -62,8 +62,8 @@ const ed11yLang = {
     ALERT_TEXT: 'Issue',
     //toggleAriaLabel: `Accessibility %(label)`,
     transferFocus: 'Edit this content', // @todo translate
-    dismissOkButtonContent: 'Mark as OK', //@todo translate
-		DISMISS: 'Ignore warning',
+    dismissOkButtonContent: 'Mark OK', //@todo translate
+		DISMISS: 'Ignore',
     dismissActions: `%(count) similar alerts`, // 2.3.10 // @todo translate
 		DISMISS_ALL: 'Ignore all like this', // 2.3.10
     dismissOkAllButton: 'Mark all like this as OK', // @todo translate
