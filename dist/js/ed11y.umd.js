@@ -8967,7 +8967,7 @@ URL: ${url}</pre>
 				<div class="message"></div>
 				<div class="content-footer">
 					<div class="edit-links"></div>
-					<div class="count"></div>
+					<div class="count"><span class="count-text"></span> <span class="count-number"></span></div>
 				</div>
 			</div>
 			<div class="footer">
@@ -9143,8 +9143,10 @@ URL: ${url}</pre>
         this.navBar.prepend(buttonBar);
       }
 
-      this.count = this.wrapper.querySelector('.count');
-      this.count.textContent = `${Lang._('ALERT_TEXT')} ${this.issueIndex + 1} / ${State.jumpList.length}`;
+      this.count = this.wrapper.querySelector('.count-number');
+  		this.countText = this.wrapper.querySelector('.count-text');
+  		this.countText.textContent = Lang._('ALERT_TEXT');
+      this.count.textContent = `${this.issueIndex + 1} / ${State.jumpList.length}`;
       if (State.jumpList.length > 1) {
         this.prev = this.wrapper.querySelector('.prev');
         this.prev.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issuePrev}`);
