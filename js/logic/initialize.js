@@ -137,7 +137,7 @@ const postProcessOptions = function(userOptions) {
 	if (State.english) {
 		for(let i = 0; i < overrides.length; i++) {
 			if (State.english) {
-				Lang.langStrings[overrides[i][0]] = `<div class="title" tabindex="-1"><div class="ed11y-tip-alert"></div>${ed11yLang.testNames[overrides[i][0] + '_TEST_NAME']}</div>${overrides[i][1]}`
+				Lang.langStrings[overrides[i][0]] = `<div class="title" tabindex="-1">${ed11yLang.testNames[overrides[i][0] + '_TEST_NAME']}</div>${overrides[i][1]}`
 				// todo CMS merge custom test.
 				// todo after merge names for other tests.
 			}

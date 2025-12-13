@@ -205,8 +205,7 @@ export function buildElementList (onlyForFilter = false) {
 		// We want headings from the entire document for the Page Outline.
 		Elements.Found.Headings = find(
 			'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
-			Options.ignoreContentOutsideRoots || Options.fixedRoots
-				? 'root' : 'document',
+			'root',
 			Constants.Exclusions.Headings,
 		);
 

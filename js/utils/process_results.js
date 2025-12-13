@@ -70,7 +70,7 @@ export function handleSyncOnlyResults() {
 				headings = new WeakSet(Elements.Found.Headings);
 				excludedHeadings = new WeakSet(Elements.Found.ExcludedHeadings)
 			}
-			pushResult(i, headings.has(result.element) && !excludedHeadings.has(result.element));
+			pushResult(i, headings.has(result.element));
 			continue;
 		}
 		if (result.test.indexOf('CONTRAST') > -1) {

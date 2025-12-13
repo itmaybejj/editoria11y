@@ -95,6 +95,10 @@ export class Ed11yElementTip extends HTMLElement {
 			innerContent.appendChild(theRest);
 			content.append(innerContent);
 		}
+		const title = content.querySelector('.title');
+		const invisibleAlert = document.createElement('div');
+		invisibleAlert.classList.add('invisible-alert');
+		title.prepend(invisibleAlert);
 		if (this.result.contrastDetails) {
 			const contrastDiv = document.createElement('div');
 			contrastDiv.classList.add('ed11y-contrast-tools');
@@ -231,10 +235,23 @@ export class Ed11yElementTip extends HTMLElement {
       this.navBar.prepend(buttonBar);
     }
 
-    this.count = this.wrapper.querySelector('.count-number');
-		this.countText = this.wrapper.querySelector('.count-text');
-		this.countText.textContent = Lang._('ALERT_TEXT');
-    this.count.textContent = `${this.issueIndex + 1} / ${State.jumpList.length}`;
+    const countNumber = this.wrapper.querySelector('.count-number');
+		countNumber.textContent = `${this.issueIndex + 1} / ${State.jumpList.length}`;
+		const countText = this.wrapper.querySelector('.count-text');
+		countText.textContent = Lang._('ALERT_TEXT');
+		if (State.english && State.splitConfiguration) {
+			const countPrefix = document.createElement('span');
+			countText.insertAdjacentElement('beforebegin', countPrefix);
+			if (this.result.outsideContentRoots) {
+				countPrefix.textContent = Lang._('issueTemplate') ;
+			} else if (State.splitConfiguration.devChecks[this.result.test]) {
+				countPrefix.textContent = Lang._('issueDeveloper');
+			} else {
+				countPrefix.textContent = Lang._('issueContent');
+			}
+			const br = document.createElement('br');
+			countPrefix.insertAdjacentElement('afterend', br);
+		}
     if (State.jumpList.length > 1) {
       this.prev = this.wrapper.querySelector('.prev');
       this.prev.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issuePrev}`);

@@ -576,7 +576,7 @@ export function alertOnInvisibleTip (button, target) {
     }
     if (firstVisible) {
       // Throw warning that the element cannot be highlighted.
-      const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert');
+      const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.invisible-alert');
       tipAlert.textContent = alertMessage;
     }
     if (State.viaJump) {

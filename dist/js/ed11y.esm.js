@@ -2053,8 +2053,7 @@ function buildElementList (onlyForFilter = false) {
 		// We want headings from the entire document for the Page Outline.
 		Elements.Found.Headings = find(
 			'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
-			Options.ignoreContentOutsideRoots || Options.fixedRoots
-				? 'root' : 'document',
+			'root',
 			Constants.Exclusions.Headings,
 		);
 
@@ -5932,7 +5931,7 @@ function customRuleset(results) {
 
 	if (Options.checks.EMBED_CUSTOM) {
 		const matchedEmbeds = getElements(Options.checks.EMBED_CUSTOM.sources, 'root');
-		Lang.langStrings.embeddedContent = `<div class="title" tabindex="-1"><div class="ed11y-tip-alert"></div>${Options.embeddedContentTitle}</div>${Options.embeddedContentMessage}`;
+		Lang.langStrings.embeddedContent = `<div class="title" tabindex="-1">${Options.embeddedContentTitle}</div>${Options.embeddedContentMessage}`;
 		matchedEmbeds.forEach(($el) => {
 			results.push({
 				test: 'EMBED_CUSTOM',
@@ -6483,7 +6482,6 @@ function handleSyncOnlyResults() {
 	let everything = false;
 	let headings = false;
 	let images = false;
-	let excludedHeadings = false;
 	let contrast = false;
 	let links = false;
 
@@ -6499,9 +6497,9 @@ function handleSyncOnlyResults() {
 		if (result.test.indexOf('HEADING') === 0) {
 			if (!headings) {
 				headings = new WeakSet(Elements.Found.Headings);
-				excludedHeadings = new WeakSet(Elements.Found.ExcludedHeadings);
+				new WeakSet(Elements.Found.ExcludedHeadings);
 			}
-			pushResult(i, headings.has(result.element) && !excludedHeadings.has(result.element));
+			pushResult(i, headings.has(result.element));
 			continue;
 		}
 		if (result.test.indexOf('CONTRAST') > -1) {
@@ -7188,7 +7186,7 @@ function alertOnInvisibleTip (button, target) {
     }
     if (firstVisible) {
       // Throw warning that the element cannot be highlighted.
-      const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert');
+      const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.invisible-alert');
       tipAlert.textContent = alertMessage;
     }
     if (State.viaJump) {
@@ -8241,7 +8239,7 @@ const ed11yLang = {
 
     WARNING: 'manual check needed',
     //ERROR: 'alert',
-    ALERT_TEXT: 'Issue',
+    //ALERT_TEXT: 'Issue',
     //toggleAriaLabel: `Accessibility %(label)`,
     transferFocus: 'Edit this content', // @todo translate
     dismissOkButtonContent: 'Mark OK', //@todo translate
@@ -8269,6 +8267,9 @@ const ed11yLang = {
     <p>And remember that automated checkers cannot replace <a href='https://webaim.org/resources/evalquickref/'> proofreading and testing for accessibility</a>.</p>
     <p><br><a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Report bugs & request changes <span aria-hidden="true">&raquo;</span></a></p>
     `,
+		issueContent: 'Content issue',
+		issueDeveloper: 'Developer issue',
+		issueTemplate: 'Template issue',
 
 		NEW_WINDOW_PHRASES: ['external', 'download', 'new tab', 'new window', 'pop-up', 'pop up', 'opens new tab', 'opens new window'],
 
@@ -9001,6 +9002,10 @@ class Ed11yElementTip extends HTMLElement {
 			innerContent.appendChild(theRest);
 			content.append(innerContent);
 		}
+		const title = content.querySelector('.title');
+		const invisibleAlert = document.createElement('div');
+		invisibleAlert.classList.add('invisible-alert');
+		title.prepend(invisibleAlert);
 		if (this.result.contrastDetails) {
 			const contrastDiv = document.createElement('div');
 			contrastDiv.classList.add('ed11y-contrast-tools');
@@ -9137,10 +9142,23 @@ class Ed11yElementTip extends HTMLElement {
       this.navBar.prepend(buttonBar);
     }
 
-    this.count = this.wrapper.querySelector('.count-number');
-		this.countText = this.wrapper.querySelector('.count-text');
-		this.countText.textContent = Lang._('ALERT_TEXT');
-    this.count.textContent = `${this.issueIndex + 1} / ${State.jumpList.length}`;
+    const countNumber = this.wrapper.querySelector('.count-number');
+		countNumber.textContent = `${this.issueIndex + 1} / ${State.jumpList.length}`;
+		const countText = this.wrapper.querySelector('.count-text');
+		countText.textContent = Lang._('ALERT_TEXT');
+		if (State.english && State.splitConfiguration) {
+			const countPrefix = document.createElement('span');
+			countText.insertAdjacentElement('beforebegin', countPrefix);
+			if (this.result.outsideContentRoots) {
+				countPrefix.textContent = Lang._('issueTemplate') ;
+			} else if (State.splitConfiguration.devChecks[this.result.test]) {
+				countPrefix.textContent = Lang._('issueDeveloper');
+			} else {
+				countPrefix.textContent = Lang._('issueContent');
+			}
+			const br = document.createElement('br');
+			countPrefix.insertAdjacentElement('afterend', br);
+		}
     if (State.jumpList.length > 1) {
       this.prev = this.wrapper.querySelector('.prev');
       this.prev.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issuePrev}`);
@@ -9357,7 +9375,7 @@ const postProcessOptions = function(userOptions) {
 	if (State.english) {
 		for(let i = 0; i < overrides.length; i++) {
 			if (State.english) {
-				Lang.langStrings[overrides[i][0]] = `<div class="title" tabindex="-1"><div class="ed11y-tip-alert"></div>${ed11yLang.testNames[overrides[i][0] + '_TEST_NAME']}</div>${overrides[i][1]}`;
+				Lang.langStrings[overrides[i][0]] = `<div class="title" tabindex="-1">${ed11yLang.testNames[overrides[i][0] + '_TEST_NAME']}</div>${overrides[i][1]}`;
 				// todo CMS merge custom test.
 				// todo after merge names for other tests.
 			}

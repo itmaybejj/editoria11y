@@ -10,7 +10,7 @@ export default function customRuleset(results) {
 
 	if (Options.checks.EMBED_CUSTOM) {
 		const matchedEmbeds = getElements(Options.checks.EMBED_CUSTOM.sources, 'root');
-		Lang.langStrings.embeddedContent = `<div class="title" tabindex="-1"><div class="ed11y-tip-alert"></div>${Options.embeddedContentTitle}</div>${Options.embeddedContentMessage}`;
+		Lang.langStrings.embeddedContent = `<div class="title" tabindex="-1">${Options.embeddedContentTitle}</div>${Options.embeddedContentMessage}`;
 		matchedEmbeds.forEach(($el) => {
 			results.push({
 				test: 'EMBED_CUSTOM',

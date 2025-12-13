@@ -59,7 +59,7 @@ const ed11yLang = {
 
     WARNING: 'manual check needed',
     //ERROR: 'alert',
-    ALERT_TEXT: 'Issue',
+    //ALERT_TEXT: 'Issue',
     //toggleAriaLabel: `Accessibility %(label)`,
     transferFocus: 'Edit this content', // @todo translate
     dismissOkButtonContent: 'Mark OK', //@todo translate
@@ -87,6 +87,9 @@ const ed11yLang = {
     <p>And remember that automated checkers cannot replace <a href='https://webaim.org/resources/evalquickref/'> proofreading and testing for accessibility</a>.</p>
     <p><br><a href='https://github.com/itmaybejj/editoria11y/issues' class='ed11y-small'>Report bugs & request changes <span aria-hidden="true">&raquo;</span></a></p>
     `,
+		issueContent: 'Content issue',
+		issueDeveloper: 'Developer issue',
+		issueTemplate: 'Template issue',
 
 		NEW_WINDOW_PHRASES: ['external', 'download', 'new tab', 'new window', 'pop-up', 'pop up', 'opens new tab', 'opens new window'],
 
