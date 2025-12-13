@@ -23,14 +23,22 @@ export const State = {
 	customTestsRemaining: 0,
 	customTestTimeout: 0,
   loopStop: false,
-  roots: [],
   oldResults: [],
-  headingOutline: [],
+	roots: [],
+	headingOutline: [],
 	headingOutlineOverrides: [],
   elements: { // to be replaced by Sa11y find.
     altMark: [],
     delayedReset: []
   },
+	splitConfiguration: {
+		active: false,
+		showDev: false,
+		contentOptions: {},
+		devChecks: [],
+		devOptions: {},
+		devResults: [],
+	},
 
   /* Panel initial state */
   once: false,
@@ -76,4 +84,4 @@ export const UI = {
   panelShowDismissed: {},
 }
 
-export const Results = []
+export const Results = [];

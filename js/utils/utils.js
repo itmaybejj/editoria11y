@@ -1,4 +1,4 @@
-import {Results, State, UI} from "./state.js"
+import {Results, State, UI} from './state.js';
 import Lang from "../../sa11y/utils/lang.js"
 import find from "../../sa11y/utils/find.js"
 import Constants from "../../sa11y/utils/constants.js";
@@ -6,19 +6,109 @@ import {Options} from "./options.js";
 import findShadowComponents from "../../sa11y/logic/find-shadow-components.js";
 import Elements from "../../sa11y/utils/elements.js";
 import ConsoleErrors from "../elements/ed11y-console-error.js";
+import {createAlert} from '../../sa11y/interface/alert';
 
 /*=============== Utilities ================*/
 
-export function getElements(selector, desiredRoot, exclude) {
-	exclude = exclude === false ? [] : exclude;
+export function getElements(selector, desiredRoot, exclude = Constants.Exclusions.Sa11yElements) {
 	return find(selector, desiredRoot, exclude);
 }
+
 export function findElements (key, selector, rootRestrict = true) {
 	// Legacy support for deprecated code.
 	const desiredRoot = rootRestrict ? 'root' : 'document';
-	const exclude = rootRestrict ? [] : Constants.Exclusions.Sa11yElements;
-	Elements.Found[key] = find( selector, desiredRoot, exclude );
+	Elements.Found[key] = find( selector, desiredRoot, Constants.Exclusions.Sa11yElements );
 }
+
+// Object.assign without losing important bits from the shallow copy.
+export const smush = function(obj1, obj2, skip = []) {
+	Object.entries(obj2).forEach(([key, value]) => {
+		if (!(skip.includes(key))) {
+			obj1[key] = value;
+		}
+	})
+}
+
+export function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
+	Constants.Root.areaToCheck = [];
+	Constants.Root.Readability = [];
+
+	// If fixed roots provided.
+	if (fixedRoots) {
+		Constants.Root.areaToCheck = fixedRoots;
+		Constants.Root.Readability = fixedRoots;
+		return;
+	}
+
+	/* Main target area */
+	try {
+		// Iterate through each selector passed, and push valid ones to final root array.
+		const roots = document.querySelectorAll(desiredRoot);
+		if (roots.length > 0) {
+			roots.forEach((root) => {
+				Constants.Root.areaToCheck.push(root)
+			})
+		}
+		else {
+			console.error(`Sa11y: The target readability root (${desiredRoot}) does not exist.`);
+		}
+	} catch {
+		Constants.Root.areaToCheck.length = 0;
+	}
+
+	// Push a visible UI alert if not headless and no roots at all are found.
+	if (Constants.Root.areaToCheck.length === 0 && Constants.Global.headless === false) {
+		createAlert(Lang.sprintf('MISSING_ROOT', desiredRoot));
+		Constants.Root.areaToCheck.push(document.body);
+	}
+
+	/* Readability target area */
+	try {
+		const roots = document.querySelectorAll(desiredReadabilityRoot);
+		if (roots.length > 0) {
+			roots.forEach((root) => {
+				Constants.Root.Readability.push(root)
+			})
+		}
+		else {
+			console.error(`Sa11y: The target readability root (${selector}) does not exist.`);
+		}
+
+	} catch {
+		Constants.Root.Readability.length = 0;
+	}
+
+	if (Constants.Root.Readability.length === 0 && Constants.Global.headless === false) {
+		if (Constants.Root.areaToCheck.length === 0) {
+			Constants.Root.Readability.push(document.body);
+		} else {
+			// If desired root area is not found, use the root target area.
+			Constants.Root.Readability = Constants.Root.areaToCheck;
+
+			// Create a warning if the desired readability root is not found.
+			setTimeout(() => {
+				const { readabilityDetails, readabilityToggle } = Constants.Panel;
+				const readabilityOn = readabilityToggle?.getAttribute('aria-pressed') === 'true';
+				const alert = Constants.Panel.readability.querySelector('#readability-alert');
+				if (readabilityDetails && readabilityOn && !alert) {
+					// Roots that readability will be based on.
+					const roots = Constants.Root.areaToCheck.map((el) => {
+						if (el.id) return `#${el.id}`;
+						if (el.className) return `.${el.className.split(/\s+/).filter(Boolean).join('.')}`;
+						return el.tagName.toLowerCase();
+					}).join(', ');
+
+					// Append note to Readability panel.
+					const note = document.createElement('div');
+					note.id = 'readability-alert';
+					note.innerHTML = `<hr><p>${Lang.sprintf('MISSING_READABILITY_ROOT', roots, desiredReadabilityRoot)}</p>`;
+					readabilityDetails.insertAdjacentElement('afterend', note);
+				}
+			}, 100);
+		}
+	}
+}
+
 
 export function addedNodeReadyToCheck(el) {
 	if (!State.recentlyAddedNodes.has(el)) {
@@ -65,7 +155,7 @@ const dropSomeElements = function(arrayRef, sendTo = false, readyCheck = true, h
 }
 
 // First step in checkAll is getting a fresh set of elements to check.
-export function buildElementList () {
+export function buildElementList (onlyForFilter = false) {
 
 	// Check for ignoreAll elements.
 	State.ignoreAll = Options.ignoreAllIfAbsent && document.querySelector(`:is(${Options.ignoreAllIfAbsent})`) === null;
@@ -73,18 +163,12 @@ export function buildElementList () {
 		State.ignoreAll = document.querySelector(`:is(${Options.ignoreAllIfPresent})`) !== null;
 	}
 
-	if ( State.incremental) {
-		State.oldResults = Results;
-	}
-	// Reset counts
-	Results.length = 0;
-	State.elements = [];
-	State.mediaCount = 0;
-	State.headingOutline = [];
+	initializeRoot(Options.checkRoot, Options.checkRoot);
 
 	for (let i = 0; i < State.roots.length; i++) {
 		if (Options.fixedRoots) {
 			State.roots[i].dataset.ed11yRoot = `${i}`;
+			// todo check why not detectShadow here?
 		}
 		if (State.roots[i].shadowRoot) {
 			State.roots.setAttribute('data-ed11y-has-shadow-root', 'true');
@@ -94,36 +178,57 @@ export function buildElementList () {
 		else {
 			detectShadow(State.roots[i]);
 		}
-
-		Constants.initializeRoot(Options.checkRoots, Options.checkRoots); // @todo release merge readability, add multiroot.
+	}
 
 		// Find all web components on the page.
 		findShadowComponents(Options);
 
 		// Find and cache elements.
+	if (onlyForFilter) {
+		// Split configuration; do not fully re-initialize Elements.Found for filters.
+
+		Elements.Found.Everything = find('*', 'root', Constants.Exclusions.Sa11yElements);
+
+		Elements.Found.Contrast = Elements.Found.Everything.filter(($el) => {
+			const matchesSelector = Constants.Exclusions.Contrast.some((exclusion) => $el.matches(exclusion));
+			return !matchesSelector && !Constants.Exclusions.Contrast.includes($el);
+		});
+
+		Elements.Found.Images = Elements.Found.Everything.filter(($el) => $el.tagName === 'IMG'
+			&& !Constants.Exclusions.Images.some((selector) => $el.matches(selector)));
+
+		Elements.Found.Links = Elements.Found.Everything.filter(($el) => ($el.tagName === 'A' || $el.tagName === 'a')
+			&& $el.hasAttribute('href')
+			&& !$el.matches('[role="button"]') // Exclude links with [role="button"]
+			&& !Constants.Exclusions.Links.some((selector) => $el.matches(selector)));
+
+		// We want headings from the entire document for the Page Outline.
+		Elements.Found.Headings = find(
+			'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
+			'root',
+			Constants.Exclusions.Headings,
+		);
+
+		// Excluded via headerIgnore.
+		Elements.Found.ExcludedHeadings = Elements.Found.Headings.filter((heading) => Constants.Exclusions.Headings.some((exclusion) => heading.matches(exclusion)));
+
+		// Excluded via outlineIgnore.
+		Elements.Found.ExcludedOutlineHeadings = Elements.Found.Headings.filter((heading) => Constants.Exclusions.Outline.some((exclusion) => heading.matches(exclusion)));
+
+		// Merge both headerIgnore and outlineIgnore.
+		Elements.Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(Elements.Found.ExcludedHeadings);
+
+	} else {
+		State.headingOutline = [];
 		Elements.initializeElements(Options);
 
+		// Not needed for filter, since they weren't checked in the first loop.
 		dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore, true, true);
 		dropSomeElements(Elements.Found.Blockquotes);
 		dropSomeElements(Elements.Found.Tables);
 
-		if (typeof Options.initialHeadingLevel === 'object') {
-			Options.initialHeadingLevel.forEach((level) => {
-				const headingRoots = getElements([level.selector], 'document');
-				if (headingRoots.length > 0) {
-					headingRoots.forEach((headingRoot) => {
-						const firstInSection = headingRoot.querySelector(`h${level.previousHeading}, h${level.previousHeading + 1}`);
-						if (firstInSection) {
-							State.headingOutlineOverrides.push(firstInSection);
-						}
-					})
-				}
-			})
-		}
-
-		// Note: as of 3/28/25 this is as performant as Sa11y's filter() approach.
 		if (typeof Options.editableContent === 'string') {
-			findElements('editable', Options.editableContent, false);
+			Elements.Found.editable = getElements(Options.editableContent, 'document');
 		}
 		else {
 			Elements.Found.editable = Options.editableContent;
@@ -132,14 +237,13 @@ export function buildElementList () {
 			State.inlineAlerts = false;
 			console.warn('Editable content detected; Editoria11y inline alerts disabled');
 		}
-		if (Options.embeddedContent) { // @todo merge convert to custom check
-			// Ed11y.findElements('embed', Options.embeddedContent);
-		}
+
 		if (Options.panelNoCover) {
 			// Moves panel off conflicting widgets.
-			findElements('panelNoCover', Options.panelNoCover, false);
+			Elements.Found.panelNoCover = getElements(Options.panelNoCover, 'document');
 		}
 	}
+
 }
 
 export function lagBounce (callback, wait) {
@@ -163,11 +267,10 @@ export function parents(el) {
 }
 
 export function resetClass(classes) {
-  classes?.forEach((el) => {
-    let thisClass = el;
-    findElements('reset', `.${thisClass}`);
-    Elements.Found.reset?.forEach(el => {
-      el.classList.remove(thisClass);
+  classes?.forEach((cls) => {
+		const reset = getElements(`.${cls}`, 'document', []);
+    reset?.forEach(el => {
+      el.classList.remove(cls);
     });
   });
 }
@@ -286,6 +389,28 @@ export function detectShadow (container) {
   }
 }
 
+export function panelLabel(show = State.showPanel) {
+	if (show) {
+		if (State.english) {
+			UI.panelToggleTitle.textContent = State.totalCount > 0 ?
+				Lang._('main_toggle_hide_alerts') :
+				Lang._('main_toggle_hide');
+		} else {
+			UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
+			UI.panelToggle.ariaExpanded = 'true';
+		}
+	} else {
+		if (State.english) {
+			UI.panelToggleTitle.textContent = State.totalCount > 0 ?
+				Lang._('main_toggle_show_alerts') :
+				Lang._('main_toggle_show');
+		} else {
+			UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
+			UI.panelToggle.ariaExpanded = 'false';
+		}
+	}
+}
+
 export function pauseObservers() {
 	State.watching?.forEach(observer => {
 		observer.observer.disconnect();
@@ -339,7 +464,6 @@ export function resetResults(incremental) {
 	Elements.Found.reset?.forEach((el) => el.remove());
 
 	// Flicker prevention -- leave old tip in place for 100ms.
-	//findElements('delayedReset', 'ed11y-element-result, ed11y-element-tip', false);
 	Elements.Found.delayedReset = getElements('ed11y-element-result, ed11y-element-tip', 'document', []);
 
 	window.setTimeout(()=> {
@@ -366,87 +490,6 @@ export function newIncrementalResults() {
 	let changed = newResultString !== State.oldResultString;
 	State.oldResultString = newResultString;
 	return changed;
-}
-
-export function countAlerts () {
-
-	State.errorCount = 0;
-	State.warningCount = 0;
-	State.dismissedCount = 0;
-
-	// Review results array to remove dismissed or ignored items
-
-	State.dismissedCount = 0;
-	for (let i = Results.length - 1; i >= 0; i--) {
-
-		/*
-		if (Options.ignoreTests &&
-			Options.ignoreTests.includes(test)) {
-			// Would be faster to skip test, but this is easy and reliable.
-			Results.splice(i, 1);
-			continue;
-		}*/
-
-		// todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
-		/*if (State.incremental && Ed11y.oldResults.length > 0) {
-			// Don't flag new issues in the active range while people are typing.
-		}*/
-
-
-
-			if (Results[i].type === 'good') {
-				Results.splice(i, 1);
-			} else {
-				Results[i].position = 'beforebegin'; // @todo merge use Sa11y keys when ready or closest().
-				if (Results[i].dismiss) {
-					// We run the user provided dismissal key through the text sanitization to support legacy data with special characters.
-					if (Options.currentPage in State.dismissedAlerts
-						&& Results[i].test in State.dismissedAlerts[Options.currentPage]
-						&& Results[i].dismiss in State.dismissedAlerts[Options.currentPage][Results[i].test]) {
-						// Remove result if it has been marked OK or ignored, increment dismissed match counter.
-						State.dismissedCount++;
-						Results[i].dismissalStatus = true;
-					} else if (Results[i].type === 'warning') {
-						State.warningCount++;
-					} else {
-						State.errorCount++;
-					}
-				}
-			}
-			if (State.headingOutlineOverrides.length > 0 &&
-				Results[i].test === 'HEADING_SKIPPED_LEVEL') {
-				const el = Results[i].element;
-				const remove = State.headingOutlineOverrides.some((override) => {
-					if (el === override) {
-						return true;
-					}
-				})
-				if (remove) {
-					Results.splice(i, 1);
-				}
-				//if (elementLevel < override.level) {
-				// this would become a new error, for like...an H2 in a section that should only have h4 or higher...
-				//}
-			}
-		}
-
-	State.totalCount = State.errorCount + State.warningCount;
-
-	// Dispatch event for synchronizers.
-	if (!State.incremental) {
-		window.setTimeout(function () {
-			let syncResults = new CustomEvent('ed11yResults');
-			document.dispatchEvent(syncResults);
-		}, 0);
-	}
-
-	if (State.ignoreAll) {
-		State.dismissedCount = State.totalCount + State.dismissedCount;
-		State.errorCount = 0;
-		State.warningCount = 0;
-		State.totalCount = 0;
-	}
-
 }
 
 export function showError(error) {

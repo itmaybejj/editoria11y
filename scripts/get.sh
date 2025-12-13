@@ -8,11 +8,36 @@ git clone git@github.com:ryersondmp/sa11y.git .
 git checkout $GIT_REF
 rm -rf ../sa11y
 mv src/js ../sa11y
+
+# Patches
+# Don't inject Sa11y CSS into shadow components
 cp ../js-overrides/logic/find-shadow-components.js ../sa11y/logic/find-shadow-components.js
-cp ../js-overrides/rulesets/headers.js ../sa11y/rulesets/headers.js
-cp ../js-overrides/utils/elements.js ../sa11y/utils/elements.js
+# Don't instantiate the Sa11y readability panel.
+#cp ../js-overrides/rulesets/readability.js ../sa11y/rulesets/readability.js
+# Don't import any APCA nonCommercial licensed code.
+cp ../js-overrides/utils/contrast-utils.js ../sa11y/utils/contrast-utils.js
+
 cd ../
 rm -rf tmp
+
+# Get library version number.
+filename="js/version.js"
+regex=".*(version = '3)(.*)(';)";
+while IFS= read -r line; do
+  if [[ "$line" =~ $regex ]]; then
+    ED11YV=${BASH_REMATCH[2]}
+  	fi
+done < "$filename"
+sed -i -E "s/.*\(* @version 3\)\(.*\)/  \1${ED11YV}/g" rollup.config.js
+
+filename="js/version.js"
+regex2=".*(sa11yVersion = '4)(.*)(';)";
+while IFS= read -r line; do
+  if [[ "$line" =~ $regex2 ]]; then
+    SA11YV=${BASH_REMATCH[2]}
+    fi
+done < "$filename"
+sed -i -E "s/.*\(* @version 4\)\(.*\)/  \1${SA11YV}/g" rollup.config.js
 
 npm install
 

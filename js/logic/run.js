@@ -1,25 +1,22 @@
-import {Results, State, Theme, UI} from "../utils/state.js";
+import {State, Theme, UI, Results} from "../utils/state.js";
 import {
 	buildElementList,
 	checkRunPrevent,
-	countAlerts,
-	findElements, firstVisibleParent, lagBounce, pauseObservers,
+	firstVisibleParent, lagBounce,
+	newIncrementalResults, panelLabel, pauseObservers,
 	resetClass, resetResults, resumeObservers, showError,
 	visible
-} from "../utils/utils.js";
-import {remove,
-} from '../../sa11y/utils/utils.js';
-import * as Utils from "../../sa11y/utils/utils.js";
+} from '../utils/utils.js';
+import {remove} from '../../sa11y/utils/utils.js';
 import checkHeaders from "../../sa11y/rulesets/headers.js";
 import checkLinkText from "../../sa11y/rulesets/link-text.js";
 import checkImages from "../../sa11y/rulesets/images.js";
 import checkLabels from "../../sa11y/rulesets/labels.js";
 import checkQA from "../../sa11y/rulesets/quality-assurance.js";
+import checkContrast from '../../sa11y/rulesets/contrast';
+import checkDeveloper from '../../sa11y/rulesets/developer';
 import Lang from "../../sa11y/utils/lang.js"
 import Elements from "../../sa11y/utils/elements.js";
-import {
-	computeAriaLabel
-} from "../../sa11y/utils/computeAccessibleName.js";
 import {
 	alignAlts,
 	alignButtons, alignPanel,
@@ -29,6 +26,17 @@ import {
 import {Options} from "../utils/options.js";
 import checkEmbeddedContent from '../../sa11y/rulesets/embedded-content';
 import customRuleset from '../rulesets/custom-ruleset';
+import Constants from '../../sa11y/utils/constants';
+import {
+	countAlerts, filterAlerts, handleSyncOnlyResults,
+	syncResults
+} from '../utils/process_results';
+import {
+	drawResult,
+	showAltPanel,
+	showHeadingsPanel,
+	visualize
+} from './visualize';
 
 export function showResults () {
   buildJumpList();
@@ -60,23 +68,21 @@ export function updatePanel () {
   pauseObservers();
   // Stash old values for incremental updates.
 
+
   if (State.incremental) {
     // Check for a change in the result counts.
-    if (State.forceFullCheck) {
+    if (State.forceFullCheck || newIncrementalResults()) {
       State.forceFullCheck = false;
       resetResults(true);
     } else {
       // Reconnect map
-			Results.length = 0;
-      Results.concat(State.oldResults);
-      window.setTimeout(function() {
-        if ( !State.alignPending ) {
-          alignButtons();
-          alignPanel();
-          State.alignPending = false;
-        }
-        State.running = false;
-      },0);
+			Results.push(State.oldResults);
+			if ( !State.alignPending ) {
+				alignButtons();
+				alignPanel();
+				State.alignPending = false;
+			}
+			State.running = false;
       resumeObservers();
       return;
     }
@@ -93,7 +99,7 @@ export function updatePanel () {
   }
 
   if (!Options.headless) {
-    // Not headless; draw the interface.
+    // Not headless; draw the run.
 
     if (!State.bodyStyle) {
       paintReady();
@@ -116,6 +122,25 @@ export function updatePanel () {
       UI.panelJumpNext.addEventListener('click', panelJumpTo);
       UI.panelShowDismissed = UI.panel.querySelector('#ed11y-show-hidden');
       UI.message = UI.panel.querySelector('#ed11y-message');
+			if (Options.readabilityPlugin) {
+				const detailsTab = document.createElement('details');
+				detailsTab.id = 'ed11y-readability-tab';
+				detailsTab.innerHTML = `
+            <summary>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" aria-hidden="true"><path fill="currentColor" d="M528.3 46.5l-139.8 0c-48.1 0-89.9 33.3-100.4 80.3-10.6-47-52.3-80.3-100.4-80.3L48 46.5C21.5 46.5 0 68 0 94.5L0 340.3c0 26.5 21.5 48 48 48l89.7 0c102.2 0 132.7 24.4 147.3 75 .7 2.8 5.2 2.8 6 0 14.7-50.6 45.2-75 147.3-75l89.7 0c26.5 0 48-21.5 48-48l0-245.7c0-26.4-21.3-47.9-47.7-48.1zM242 311.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zM501.3 311.8c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.8c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.8-.1 0z"/></svg> <span class="summary-title"></span>
+            </summary>
+            <div class="details">
+							<div id="readability-content">
+								<p id="readability-info"></p>
+								<ul id="readability-details"></ul>
+							</div>
+						</div>`
+				UI.panel.querySelector('#ed11y-visualizers').appendChild(detailsTab);
+				UI.panel.querySelector('#readability-info').appendChild(Constants.Panel.readabilityInfo);
+				UI.panel.querySelector('#readability-details').appendChild(Constants.Panel.readabilityDetails);
+				UI.panel.querySelector('#ed11y-readability-tab .summary-title').textContent = Lang._('READABILITY');
+			}
+
       window.setTimeout(()=> {
         UI.panelElement.classList.remove('ed11y-preload');
       },0, UI.panel);
@@ -135,7 +160,6 @@ export function updatePanel () {
         reportLink.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M0 96C0 61 29 32 64 32l384 0c35 0 64 29 64 64l0 320c0 35-29 64-64 64L64 480c-35 0-64-29-64-64L0 96zm64 0l0 64 64 0 0-64L64 96zm384 0L192 96l0 64 256 0 0-64zM64 224l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64zM64 352l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64z"/></svg><span class="ed11y-sr-only"></span>';
         reportLink.setAttribute('id' , 'ed11y-reports-link');
         reportLink.setAttribute('href', Options.reportsURL);
-        reportLink.setAttribute('target', '_blank');
         reportLink.setAttribute('aria-label', Lang._('reportsLink'));
         reportLink.querySelector('.ed11y-sr-only').textContent = Lang._('reportsLink');
         UI.panelShowDismissed.insertAdjacentElement('beforebegin', reportLink);
@@ -232,10 +256,9 @@ export function updatePanel () {
       }, 0);
     }
     // Update buttons.
+		panelLabel();
     if (State.totalCount > 0 || (State.showDismissed && State.dismissedCount > 0)) {
-			UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
 
-			UI.panelToggle.ariaExpanded = `${State.showPanel}`;
       UI.panelJumpNext.removeAttribute('hidden');
       if (State.errorCount > 0) {
         // Errors
@@ -281,15 +304,11 @@ export function updatePanel () {
 
       if (State.dismissedCount > 0) {
         UI.panelCount.textContent = 'i';
-        if (State.showPanel) {
-          UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
-        } else {
+        if (!State.showPanel) {
           UI.panelToggleTitle.textContent = State.dismissedCount > 1 ?
 						Lang.sprintf('PANEL_DISMISS_BUTTON', State.dismissedCount) :
             Lang._('buttonShowHiddenAlert');
         }
-      } else {
-        UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
       }
     }
     UI.panelToggle.classList.remove('disabled');
@@ -308,27 +327,54 @@ export function buildJumpList () {
   pauseObservers();
 
   // Initial alignment to get approximate Y position order for jump list.
-  Results.forEach((result, i) => {
+	Results.forEach(function (result) {
+		let top = result.element.getBoundingClientRect().top;
+		if (!top) {
+			const visibleParent = firstVisibleParent(result.element);
+			if (visibleParent) {
+				top = visibleParent.getBoundingClientRect().top;
+			}
+		}
+		top = top + window.scrollY;
+		if (Options.fixedRoots) {
+			const root = result.element.closest('[data-ed11y-root]');
+			result.fixedRoot = root.dataset.ed11yRoot;
+		}
+		result.scrollableParent = closestScrollable(result.element);
+		if (result.scrollableParent) {
+			// Group these together.
+			top = top * 0.000001;
+		}
+		result.sortPos = top;
+	})
+	/* There was once a race condition...
+	for (let i = Results.length - 1; i >= 0; i--) {
+		const result = Results[i];
+		if (!result.element) {
+			// todo we should never running while checks are running.
+			Results.splice(i, 1);
+		} else {
+			let top = result.element.getBoundingClientRect().top;
+			if (!top) {
+				const visibleParent = firstVisibleParent(result.element);
+				if (visibleParent) {
+					top = visibleParent.getBoundingClientRect().top;
+				}
+			}
+			top = top + window.scrollY;
+			if (Options.fixedRoots) {
+				const root = result.element.closest('[data-ed11y-root]');
+				result.fixedRoot = root.dataset.ed11yRoot;
+			}
+			result.scrollableParent = closestScrollable(result.element);
+			if (result.scrollableParent) {
+				// Group these together.
+				top = top * 0.000001;
+			}
+			result.sortPos = top;
+		}
+	}*/
 
-    let top = result.element.getBoundingClientRect().top;
-    if (!top) {
-      const visibleParent = firstVisibleParent(result.element);
-      if (visibleParent) {
-        top = visibleParent.getBoundingClientRect().top;
-      }
-    }
-    top = top + window.scrollY;
-    if (Options.fixedRoots) {
-      const root = result.element.closest('[data-ed11y-root]');
-      Results[i].fixedRoot = root.dataset.ed11yRoot;
-    }
-    Results[i].scrollableParent = closestScrollable(result.element);
-    if (Results[i].scrollableParent) {
-      // Group these together.
-      top = top * 0.000001;
-    }
-    Results[i].sortPos = top;
-  });
   // Sort from bottom to top so focus order after insert is top to bottom.
   Results.sort((a, b) => b.sortPos - a.sortPos);
 
@@ -345,87 +391,6 @@ export function buildJumpList () {
   let tipsPainted = new CustomEvent('ed11yResultsPainted');
   document.dispatchEvent(tipsPainted);
   resumeObservers();
-}
-
-// Place markers on elements with issues
-export function drawResult(result, index) {
-  let mark = document.createElement('ed11y-element-result');
-  mark.classList.add('ed11y-element');
-  let location;
-  let position = 'beforebegin';
-  mark.setAttribute('id', 'ed11y-result-' + index);
-  mark.setAttribute('data-ed11y-result', index);
-  mark.setAttribute('data-ed11y-open', 'false');
-  if (!State.inlineAlerts) {
-    location = State.panelAttachTo;
-    position = 'beforeend';
-    mark.classList.add('ed11y-editable-result');
-  } else {
-    location = result.element.closest('a, button, [role="button"], [role="link"]');
-    if (!location && result.element.shadowRoot) {
-      // Must insert outside shadow DOM root.
-      location = result.element;
-      position = 'beforebegin';
-      while (location.parentElement && location.parentElement.shadowRoot) {
-        location = location.parentElement;
-      }
-    }
-    if (!location) {
-      location = result.element;
-      position = result.position;
-    }
-  }
-  location.insertAdjacentElement(position, mark);
-
-  const shadow = mark.attachShadow({ mode: 'open' });
-
-  // Create mark.wrapper with type class
-  mark.resultID = mark.dataset.ed11yResult;
-  mark.result = Results[mark.resultID];
-
-  mark.wrapper = document.createElement('div');
-
-  mark.dismissable = mark.result.type !== 'error';
-  mark.dismissed = !!mark.result.dismissalStatus;
-  mark.wrapper.classList.add('ed11y-wrapper', 'ed11y-result-wrapper');
-  mark.wrapper.classList.add('ed11y-result');
-
-  // Create tooltip toggle
-  mark.toggle = document.createElement('button');
-  mark.toggle.setAttribute('class', 'toggle');
-  let label = mark.dismissable ? Lang._('WARNING') : Lang._('ERROR');
-  mark.toggle.setAttribute('aria-label', label);
-  mark.toggle.setAttribute('aria-expanded', 'false');
-  mark.toggle.setAttribute('aria-haspopup', 'dialog');
-  mark.toggle.setAttribute('data-ed11y-result', mark.dataset.ed11yResult);
-  mark.toggle.setAttribute('data-ed11y-ready', 'false');
-  mark.toggle.setAttribute('data-ed11y-race', 'false');
-  if (!State.inlineAlerts) {
-    mark.toggle.style.setProperty('font-size', '16px');
-  }
-  if (mark.dismissed) {
-    mark.toggle.innerHTML = '<svg aria-hidden="true" width="10" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>';
-    mark.toggle.classList.add('dismissed');
-    if (mark.result.dismissalStatus !== 'ok') {
-      mark.toggle.classList.add('notok');
-    } else {
-      mark.toggle.classList.add('ok');
-    }
-  } else if (mark.dismissable) {
-    mark.toggle.classList.add('dismissable');
-  }
-  mark.wrapper.appendChild(mark.toggle);
-  mark.toggle.addEventListener('click', mark.toggleClick);
-  mark.toggle.addEventListener('focus', mark.handleFocus);
-  mark.toggle.addEventListener('mouseover', mark.handleHover);
-  mark.tipNeedsBuild = true;
-
-  UI.attachCSS(mark.wrapper);
-
-  shadow.appendChild(mark.wrapper);
-
-  State.jumpList.unshift(mark);
-  Results[index].toggle = mark;
 }
 
 export function dismissOne(dismissalType, test, dismissalKey) {
@@ -611,7 +576,7 @@ export function alertOnInvisibleTip (button, target) {
     }
     if (firstVisible) {
       // Throw warning that the element cannot be highlighted.
-      const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.ed11y-tip-alert');
+      const tipAlert = State.openTip.tip?.shadowRoot.querySelector('.invisible-alert');
       tipAlert.textContent = alertMessage;
     }
     if (State.viaJump) {
@@ -933,12 +898,11 @@ export function alignHighlights() {
 	}
 
 	UI.editableHighlight.forEach((el) => {
-
 		if (!Results[el.resultID]) {
 			State.interaction = true;
 			State.forceFullCheck = true;
 			UI.editableHighlight = [];
-			incrementalCheck(true);
+			incrementalCheckDebounce(true);
 			return false;
 		}
 
@@ -963,8 +927,8 @@ export const slowIncremental = lagBounce( () => {
 		//incrementalAlign(); // Immediately realign tips.
 		//State.alignPending = false;
 		State.interaction = true;
-		incrementalCheck();
-}, 1000);
+		incrementalCheckDebounce();
+}, 500);
 
 export function windowResize() {
 	if (UI.panel?.classList.contains('ed11y-active') === true) {
@@ -980,7 +944,8 @@ export function windowResize() {
 const scrollWatch = function(container) {
 	container.addEventListener('scroll', function() {
 		// Trigger on scrolling other containers, unless it will flicker a tip.
-		if (!State.inlineAlerts && !State.tipOpen) {
+		if (!State.inlineAlerts) {
+			// @todo removed check for !State.tipOpen in 3.x. Should close tip if mark is scrolled off the screen.
 			State.scrollPending = State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
 			requestAnimationFrame(() => updateTipLocations());
 		} else if (State.tipOpen) {
@@ -1022,8 +987,8 @@ export function rangeChange(anchorNode) {
 		typeof anchor.parentNode === 'object' &&
 		typeof anchor.parentNode.matches === 'function';
 	if (!anchor || expandable &&
-		( anchor.parentNode.matches(Options.checkRoots) ||
-			( !anchor.parentNode.matches(Options.checkRoots) && anchor.parentNode.matches('div[contenteditable="true"]')
+		( anchor.parentNode.matches(Options.checkRoot) ||
+			( !anchor.parentNode.matches(Options.checkRoot) && anchor.parentNode.matches('div[contenteditable="true"]')
 			)
 		)
 	) {
@@ -1153,7 +1118,7 @@ export function startObserver (root) {
 			State.alignPending = false;
 		},0);
 		window.setTimeout(function () {
-			incrementalCheck(); // Recheck after delay.
+			incrementalCheckDebounce(); // Recheck after delay.
 		},0);
 	};
 
@@ -1179,7 +1144,7 @@ export function startObserver (root) {
 		updateTipLocations();
 		window.setTimeout(function () {
 			State.forceFullCheck = true;
-			incrementalCheck();
+			incrementalCheckDebounce();
 		}, 100);
 	}, {
 		passive: true,
@@ -1199,40 +1164,42 @@ export function startObserver (root) {
 	checkQA: ,
 }*/
 
-const enqueueTests = function(queue) {
+const enqueueTests = function(queue, results) {
 	const test = queue.pop();
 	State.testsRemaining--;
 	try {
 		switch (test) {
-			case 'checkHeaders':
-				checkHeaders(Results, Options, State.headingOutline)
+			case 'group1':
+				checkHeaders(results, Options, State.headingOutline)
+				checkImages(results, Options)
+				checkEmbeddedContent(results, Options)
+				customRuleset(results)
+				checkQA(results, Options)
 				break
-			case 'checkLinkText':
-				checkLinkText(Results, Options)
-				break
-			case 'checkImages':
-				checkImages(Results, Options)
+			case 'group2':
+				checkLinkText(results, Options)
 				break
 			case 'checkLabels':
-				checkLabels(Results, Options)
+				checkLabels(results, Options)
 				break
-			case 'checkEmbeddedContent':
-				checkEmbeddedContent(Results, Options)
+			case 'checkContrast':
+				checkContrast(results, Options)
 				break
-			case 'checkQA':
-				checkQA(Results, Options)
-				break
-			case 'customRuleset':
-				customRuleset(Results)
+			case 'checkDeveloper':
+				checkDeveloper(results, Options)
 				break
 		}
 	} catch (error) {
 		showError(error);
 	}
 	if (queue.length > 0) {
-		window.setTimeout(function (queue) {
-			enqueueTests(queue);
-		}, 0, queue);
+		if (State.browserSpeed < 100 || Options.headless) {
+			enqueueTests(queue, results);
+		} else {
+			window.setTimeout(function (queue) {
+				enqueueTests(queue, results);
+			}, 0, queue, results);
+		}
 	} else {
 		continueCheck();
 	}
@@ -1240,8 +1207,9 @@ const enqueueTests = function(queue) {
 
 function removeCustomTest() {
 	console.error('Editoria11y has disabled a custom test that is not returning results within 1000ms.');
-	Options.customTestsRemaining = 1;
 	Options.customTests--;
+	State.customTestsRemaining = 0;
+	continueCheck(true);
 	if (Options.customTests === 0) {
 		document.removeEventListener('ed11yResume', function () {
 			continueCheck(true);
@@ -1249,7 +1217,6 @@ function removeCustomTest() {
 	}
 }
 
-State.testsRunning = true;
 State.testsRemaining = 0;
 // Toggles the outline of all headers, link texts, and images.
 export function checkAll() {
@@ -1264,16 +1231,20 @@ export function checkAll() {
 
 	State.customTestsRunning = false;
 
+	if (State.splitConfiguration.active) {
+		Object.assign(Options, State.splitConfiguration.devOptions);
+	}
+
 	State.roots = [];
 	// @todo CMS merge rewrite when Sa11y releases fixed root support.
 	if (Options.fixedRoots) {
 		Options.fixedRoots.forEach(root => {State.roots.push(root.fixedRoot);});
 	} else {
-		State.roots = document.querySelectorAll(`:is(${Options.checkRoots})`);
+		State.roots = document.querySelectorAll(`:is(${Options.checkRoot})`);
 	}
 	// Initialize root areas to check.
 	if (!State.roots && Options.headless === false) {
-		console.warn(Lang.sprintf('MISSING_ROOT', Options.checkRoots));
+		console.warn(Lang.sprintf('MISSING_ROOT', Options.checkRoot));
 	}
 
 	if (State.roots.length === 0) {
@@ -1284,21 +1255,14 @@ export function checkAll() {
 		return;
 	}
 
-	buildElementList();
+	if ( State.incremental) {
+		State.oldResults = Results;
+	}
+	// Reset counts
+	Results.length = 0;
+	State.splitConfiguration.devResults.length = 0;
 
-	// Call rulesets.
-	let queue = [
-		'checkHeaders',
-		'checkLinkText',
-		'checkImages',
-		'checkEmbeddedContent',
-		// 'checkLabels',
-		'checkQA',
-		'customRuleset',
-	];
-	// Todo after merge: developer and readability tests added via options here.
-	State.testsRemaining = queue.length;
-	enqueueTests(queue);
+	buildElementList();
 
 	if (Options.customTests > 0) {
 		// Pause
@@ -1308,35 +1272,32 @@ export function checkAll() {
 			if (State.customTestsRemaining > 0) {
 				removeCustomTest();
 			}
-		}, 1500);
-		window.setTimeout(function() {
-			let customTests = new CustomEvent('ed11yRunCustomTests');
-			document.dispatchEvent(customTests); // todo there is a race condition here for slow custom tests. May need to pass State.customTestTimeout and only accept back results that match the ID.
-		},0);
+		}, 1000);
+		let customTests = new CustomEvent('ed11yRunCustomTests');
+		document.dispatchEvent(customTests); // todo there is a race condition here for slow custom tests. May need to pass State.customTestTimeout and only accept back results that match the ID.
 	}
-	/*{
-		"element": {},
-		"type": "error",
-		"content": "Empty heading found! To fix, delete this line or change its format from <strong class=\"colour\">Heading 4</strong> to <strong>Normal</strong> or <strong>Paragraph</strong>.",
-		"dismiss": "H4",
-		"dismissAll": false,
-		"isWithinRoot": true,
-		"developer": false,
-		"margin": "0",
-		"dismissalStatus": false,
-		"scrollableParent": false,
-		"sortPos": 5495.38330078125
-		}
-		content
-		dismissalKey
-		dismissalStatus
-		element
-		position
-		scrollableParent
-		sortPos
-		test
-		toggle
-	* */
+
+	// Call rulesets.
+	let queue = [
+		'group1',
+		'group2',
+	];
+
+	if (Options.readabilityPlugin && (!State.incremental || State.visualizing)) {
+		queue.push('checkReadability'); // todo merge param
+	}
+	if (Options.formLabelsPlugin) {
+		queue.push('checkLabels') // todo cms merge param
+	}
+	if (Options.developerPlugin) {
+		queue.push('checkDeveloper') // todo cms merge param
+	}
+	if (Options.contrastPlugin) {
+		queue.push('checkContrast');
+	}
+	// Todo after merge: developer and readability tests added via options here.
+	State.testsRemaining = queue.length;
+	enqueueTests(queue, State.splitConfiguration.active ? State.splitConfiguration.devResults : Results);
 	// @todo CMS merge when Sa11y support is ready.
 	// @todo after merge handle readability and developer checks.
 }
@@ -1350,10 +1311,26 @@ export function continueCheck(customCheck = false) {
 		// Tests still in progress.
 		return;
 	}
-	if (typeof UI.panelToggle.querySelector === 'function') {
-		UI.panelToggle.querySelector('.ed11y-sr-only').textContent = Lang._('MAIN_TOGGLE_LABEL');
+
+	// Filter split configuration results.
+	if (State.splitConfiguration.active && State.splitConfiguration.devResults.length > 0) {
+		handleSyncOnlyResults();
+	} else {
+		filterAlerts(false);
+		syncResults(Results);
 	}
 	countAlerts();
+
+
+	if (typeof UI.panelToggle.querySelector === 'function') {
+		panelLabel();
+	}
+	if (State.visualizing) {
+		//checkReadability([]); // todo???
+		showHeadingsPanel();
+		showAltPanel();
+	}
+
 	updatePanel();
 	window.setTimeout(() => {
 		if (Options.watchForChanges) {
@@ -1363,7 +1340,7 @@ export function continueCheck(customCheck = false) {
 					editable.addEventListener('drop', () => {
 						// This event does not bubble.
 						State.forceFullCheck = true;
-						incrementalCheck();
+						incrementalCheckDebounce();
 					});
 				}
 			});
@@ -1379,7 +1356,7 @@ export function continueCheck(customCheck = false) {
 	}, 0);
 }
 
-export const incrementalCheck = lagBounce( () => {
+export function incrementalCheck() {
 	if (!State.running) {
 		if (State.tipOpen || (!State.interaction && !State.forceFullCheck)) {
 			return;
@@ -1402,91 +1379,19 @@ export const incrementalCheck = lagBounce( () => {
 		// @todo after merge test: if there are no issues and the heading panel is open...it closes!
 		// Increase debounce if runs are slow.
 		runTime = performance.now() - runTime;
-		State.browserSpeed = runTime > 10 ? 10 : (State.browserSpeed + runTime) / 2;
+		State.browserSpeed = runTime > 100 ? 100 : (State.browserSpeed + runTime) / 2;
 		// Todo: optimize tip placement so we do not need as much debounce.
 		State.browserLag = State.browserSpeed < 1 ? 0 : State.browserSpeed * 100 + State.totalCount;
 	} else {
 		// Ed11y was running, try again later.
-		window.setTimeout(() => {incrementalCheck();}, 250);
+		window.setTimeout(() => {incrementalCheckDebounce();}, 250);
 	}
+}
+
+export const incrementalCheckDebounce = lagBounce( () => {
+	incrementalCheck();
 }, 250);
 
-export function visualize () {
-	if (!UI.panel) {
-		return;
-	}
-	if (State.inlineAlerts) {
-		findElements('reset', 'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight', false);
-		Elements.Found.reset?.forEach((el) => el.remove());
-	}
-	if (State.visualizing) {
-		State.visualizing = false;
-		UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('PANEL_HEADING');
-		UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'false');
-		UI.panel.querySelector('#ed11y-visualizers').setAttribute('hidden', 'true');
-		return;
-	}
-	State.visualizing = true;
-	UI.panel.querySelector('#ed11y-visualize .ed11y-sr-only').textContent = Lang._('buttonToolsActive');
-	UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
-	UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
-	showAltPanel();
-	showHeadingsPanel();
-}
-
-export function showHeadingsPanel () {
-	// Visualize the document outline
-
-	let panelOutline = UI.panel.querySelector('#ed11y-outline');
-	if (State.headingOutline.length) {
-		panelOutline.innerHTML = '';
-		State.headingOutline.forEach((result, i) => {
-			// Todo: draw these in editable mode.
-			if (State.inlineAlerts) {
-				const mark = document.createElement('ed11y-element-heading-label');
-				mark.classList.add('ed11y-element', 'ed11y-element-heading');
-				mark.dataset.ed11yHeadingOutline = i.toString();
-				mark.setAttribute('id', 'ed11y-heading-' + i);
-				mark.setAttribute('tabindex', '-1');
-				// Array: el, level, outlinePrefix
-				result.element.insertAdjacentElement('afterbegin', mark);
-				UI.attachCSS(mark.shadowRoot);
-			}
-			let leftPad = 10 * result.headingLevel - 10;
-			let li = document.createElement('li');
-			li.classList.add('level' + result.headingLevel);
-			li.style.setProperty('margin-left', leftPad + 'px');
-			let levelPrefix = document.createElement('strong');
-			levelPrefix.textContent = `H${result.headingLevel}: `;
-			let userText = document.createElement('span');
-			userText.innerHTML = result.text;
-			let link = document.createElement('a');
-			if (State.inlineAlerts) {
-				link.setAttribute('href', '#ed11y-heading-' + i);
-				li.append(link);
-				link.append(levelPrefix);
-				link.append(userText);
-			} else {
-				li.append(levelPrefix);
-				li.append(userText);
-			}
-			if (result.type) { // Has an error message
-				li.classList.add(`ed11y-${result.type}`);
-				/*let message = document.createElement('em');
-				message.classList.add('ed11y-small');
-				message.textContent = ' ' + el[2];
-				if (State.inlineAlerts) {
-					link.append(message);
-				} else {
-					li.append(message);
-				}*/
-			}
-			panelOutline.append(li);
-		});
-	} else {
-		panelOutline.innerHTML = `<p><em>${Lang._('PANEL_NO_HEADINGS')}</em></p>`;
-	}
-}
 
 export function resetPanel() {
 	// Reset main panel.
@@ -1518,117 +1423,6 @@ window.addEventListener('ed11yEndVisualization', ()=>{
 	visualize();
 	resumeObservers();
 })
-
-const showAltPanel = function () {
-	// visualize image alts
-	let altList = UI.panel.querySelector('#ed11y-alt-list');
-	UI.imageAlts = Elements.Found.Images.map((image) => {
-			const match = Results.find((i) => i.element === image);
-			return match && {
-				element: image,
-				type: match.type,
-				dismiss: match.dismiss,
-				developer: match.developer,
-			};
-		}).filter(Boolean);
-
-	if (UI.imageAlts.length > 0) {
-		altList.innerHTML = '';
-		for (let i = 0; i < UI.imageAlts.length; i++) {
-			const image = UI.imageAlts[i];
-			let altText = computeAriaLabel(image.element) === 'noAria'
-				? Utils.escapeHTML(image.element.getAttribute('alt'))
-				: computeAriaLabel(image.element);
-			UI.imageAlts[i].altText = altText;
-			//let alert = {};
-			/*
-			// Match dismissed images.
-			// @todo CMS merge remove once new syntax is ready; this is the Sa11y logic for dev reference:
-			// const isDismissed = dismissed.some((key) => key.dismiss === image.dismiss);
-			// if (isDismissed) Object.assign(image, { dismissedImage: true });
-			// Make developer checks don't show images as error if Developer checks are off!
-			// const dev = Utils.store.getItem('sa11y-developer');
-			// const devChecksOff = dev === 'Off' || dev === null;
-			// const showDeveloperChecks = devChecksOff && (type === 'error' || type === 'warning') && developer === true;
-
-			// Generate edit link if locally hosted image and prop is enabled.
-			const edit = Constants.Global.editImageURLofCMS ? generateEditLink(image) : '';
-
-			// Image is decorative (has null alt)
-			const decorative = (element.hasAttribute('alt') && altText === '')
-				? `<div class="badge">${Lang._('DECORATIVE')}</div>` : '';
-
-			// If image is linked.
-			const anchor = option.imageWithinLightbox ? `a[href]:not(${option.imageWithinLightbox})` : 'a[href]';
-			const linked = (element.closest(anchor))
-				? `<div class="badge"><span class="link-icon"></span><span class="visually-hidden">${Lang._('LINKED')}</span></div>` : '';
-			const visibleIcon = (hidden === true)
-				? `<div class="badge"><span class="hidden-icon"></span><span class="visually-hidden">${Lang._('HIDDEN')}</span></div>` : '';
-			let append;
-      if (type === 'error' && !showDeveloperChecks) {
-      // etc
-			*/
-
-
-			// Account for lazy loading libraries.
-
-			if (State.inlineAlerts) {
-				// Label images
-				const mark = document.createElement('ed11y-element-alt');
-				mark.classList.add('ed11y-element');
-				mark.dataset.ed11yImg = i.toString();
-				mark.setAttribute('id', 'ed11y-alt-' + i);
-				mark.setAttribute('tabindex', '-1');
-				UI.imageAlts[i].mark = mark;
-				image.element.insertAdjacentElement('beforebegin', mark);
-			}
-
-			// Build alt list in panel
-			let userText = document.createElement('span');
-			if (altText !== '') {
-				userText.textContent = altText;
-			} else {
-				const decorative = document.createElement('span');
-				decorative.classList.add('ed11y-decorative');
-				decorative.textContent = Lang._('DECORATIVE');
-				userText.append(decorative);
-			}
-			let li = document.createElement('li');
-			li.classList.add(image.type);
-			let img = document.createElement('img');
-			img.setAttribute('src', Utils.getBestImageSource(image.element));
-			img.setAttribute('alt', '');
-
-			if (State.inlineAlerts) {
-				let a = document.createElement('a');
-				a.href = '#ed11y-alt-' + i;
-				a.classList.add('alt-parent');
-				li.append(a);
-				a.append(img);
-				a.append(userText);
-			} else {
-				li.classList.add('alt-parent');
-				li.append(img);
-				li.append(userText);
-			}
-			altList.append(li);
-		}
-		if (State.inlineAlerts) {
-			alignAlts();
-		} else {
-			UI.imageAlts.length = 0;
-		}
-		//findElements('altMark', 'ed11y-element-alt', false );
-	} else {
-		const noImages = document.createElement('p');
-		const noItalic = document.createElement('em');
-		noItalic.textContent = Lang._('NO_IMAGES');
-		noImages.appendChild(noItalic);
-		altList.innerHTML = '';
-		altList.appendChild(noImages);
-	}
-};
-
 
 export function dismissThis (dismissalType, all = false) {
 	// Find the active tip and draw its identifying information from the result list
@@ -1711,13 +1505,13 @@ export function togglePanel () {
 				localStorage.setItem('editoria11yShow', '1');
 			}
 			else {
-				UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
 				State.showDismissed = false;
 				State.showPanel = false;
 				reset();
 				Options.userPrefersShut = true;
 				localStorage.setItem('editoria11yShow', '0');
 			}
+			panelLabel();
 		}
 	}
 	State.doubleClickPrevent = true;

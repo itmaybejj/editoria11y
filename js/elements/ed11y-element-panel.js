@@ -1,5 +1,6 @@
 import {State, UI} from "../utils/state.js";
-import {togglePanel, toggleShowDismissals, visualize} from "../logic/interface.js";
+import {togglePanel, toggleShowDismissals} from "../logic/run.js";
+import {visualize} from '../logic/visualize';
 
 export class Ed11yElementPanel extends HTMLElement {
 
@@ -54,6 +55,7 @@ export class Ed11yElementPanel extends HTMLElement {
       this.classList.add('ed11y-element');
       const shadow = this.attachShadow({mode: 'open'});
       const wrapper = document.createElement('aside');
+			wrapper.style.setProperty('opacity', '0');
       wrapper.setAttribute('id', 'ed11y-panel');
       wrapper.classList.add('ed11y-wrapper', 'ed11y-panel-wrapper', 'ed11y-pass', 'ed11y-preload');
       wrapper.innerHTML = this.template();
@@ -65,6 +67,7 @@ export class Ed11yElementPanel extends HTMLElement {
       });
       const altDetails = wrapper.querySelector('#ed11y-alts-tab');
       const headingDetails = wrapper.querySelector('#ed11y-headings-tab');
+			const readabilityDetails = wrapper.querySelector('#ed11y-readability-tab'); // todo swappy?
       altDetails.addEventListener('toggle', () => {
         if (altDetails.open && headingDetails.open) {
           headingDetails.removeAttribute('open');

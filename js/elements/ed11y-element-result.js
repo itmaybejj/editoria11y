@@ -1,8 +1,7 @@
 import {State} from "../utils/state.js";
-import {alignTip, buildJumpList, editableHighlighter} from "../logic/interface.js";
+import {alignTip, buildJumpList, editableHighlighter} from "../logic/run.js";
 import {resetClass} from "../utils/utils.js";
 import {alignButtons} from "../utils/align.js";
-import {Options} from "../utils/options.js";
 
 export class Ed11yElementResult extends HTMLElement {
   /* global Ed11y */

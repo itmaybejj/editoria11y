@@ -1,10 +1,10 @@
 import Constants from '../../sa11y/utils/constants.js';
 import {State, Theme, UI} from "../utils/state.js";
 import Lang from "../../sa11y/utils/lang.js";
-import {Options} from "../utils/options.js";
+import {Options} from '../utils/options.js';
 import {documentLoadingCheck, store} from "../../sa11y/utils/utils.js";
-import {checkRunPrevent} from "../utils/utils.js";
-import {checkAll, continueCheck, windowResize} from "./interface.js";
+import {checkRunPrevent, smush} from '../utils/utils.js';
+import {checkAll, continueCheck, windowResize} from './run.js';
 import ed11yLang from "../lang/localization.js";
 import {Ed11yElementAlt} from "../elements/ed11y-element-alt.js";
 import {Ed11yElementResult} from "../elements/ed11y-element-result.js";
@@ -15,11 +15,30 @@ import {
 import {Ed11yElementTip} from "../elements/ed11y-element-tip.js";
 
 const preProcessOptions = function(userOptions) {
-	Object.assign(Options, userOptions);
+	smush(Options, userOptions, ['checks']);
+	Object.assign(Options.checks, userOptions.checks);
 
-	if (!userOptions.checkRoots) {
-		Options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?
+	if (!Options.checkRoot) {
+		Options.checkRoot = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?
 	}
+
+	if (userOptions.splitConfiguration) {
+		State.splitConfiguration.active = true;
+		State.splitConfiguration.showDev = userOptions.splitConfiguration.showDev;
+		// Store both content (default) and dev options in State.
+		State.splitConfiguration.devOptions = userOptions.splitConfiguration.devOptions;
+		State.splitConfiguration.contentOptions = {};
+		// Store "content" value for each sync override.
+		Object.keys(State.splitConfiguration.devOptions).forEach(key => {
+			// Cache the base configuration to restore after first check.
+			State.splitConfiguration.contentOptions[key] = userOptions[key];
+		});
+		State.splitConfiguration.devChecks = new Set(userOptions.splitConfiguration.devChecks);
+
+		// We run tests in dev mode, then filter them to content mode as needed.
+		Object.assign(Options, State.splitConfiguration.devOptions);
+	}
+
 
 	/*
 	* Options translation
@@ -45,12 +64,13 @@ const preProcessOptions = function(userOptions) {
 		Options.linkIgnoreSpan = userOptions.linkIgnoreSelector;
 	}
 
-	let cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
-	if (!userOptions.cssUrls) {
+	let cssUrls = userOptions.cssUrls;
+	if (!cssUrls) {
 		const cssLink = document.querySelector('link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]');
 		if (cssLink) {
 			cssUrls = [cssLink.getAttribute('href')];
 		} else {
+			cssUrls = [`https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${State.version}/dist/editoria11y.min.css`];
 			console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
 		}
 	}
@@ -88,10 +108,13 @@ const postProcessOptions = function(userOptions) {
 			containerSelectors.flatMap((item) => [`${item} *`, item]),
 		);
 	}
-	if (Options.ignoreElements) {
-		const elementSelectors = Options.ignoreElements.split(',').map((item) => item.trim());
+	if (userOptions.ignoreElements) {
+		const elementSelectors = userOptions.ignoreElements.split(',').map((item) => item.trim());
 		Constants.Exclusions.Container = Constants.Exclusions.Container.concat(elementSelectors);
 	}
+
+	Constants.Panel.readabilityInfo = document.createElement('div');
+	Constants.Panel.readabilityDetails = document.createElement('div');
 
 	State.english = Lang.langStrings.LANG_CODE.startsWith('en');
 
@@ -108,16 +131,15 @@ const postProcessOptions = function(userOptions) {
 		Constants.Global.documentSources = userOptions['documentLinks'];
 	}
 
-	Object.assign(Lang.langStrings, ed11yLang.strings);
-	if (Lang.langStrings.LANG_CODE.startsWith('en')) {
-		// todo CMS merge also include as fallbacks untranslated strings.
-		let oldTitle = '';
-		const overrides = Object.entries(ed11yLang.tests);
+	Object.assign(Lang.langStrings, ed11yLang.strings, ed11yLang.testNames);
+	// todo CMS merge also include as fallbacks untranslated strings.
+	const overrides = Object.entries(ed11yLang.tests);
+	if (State.english) {
 		for(let i = 0; i < overrides.length; i++) {
-			if (typeof overrides[i][1] === 'object') {
-				oldTitle = overrides[i][1]['title'];
-			} else {
-				Lang.langStrings[overrides[i][0]] = `<div class="title" tabindex="-1"><div class="ed11y-tip-alert"></div>${oldTitle}</div>${overrides[i][1]}`
+			if (State.english) {
+				Lang.langStrings[overrides[i][0]] = `<div class="title" tabindex="-1">${ed11yLang.testNames[overrides[i][0] + '_TEST_NAME']}</div>${overrides[i][1]}`
+				// todo CMS merge custom test.
+				// todo after merge names for other tests.
 			}
 		}
 	}
@@ -146,9 +168,11 @@ export function initialize (userOptions) {
 
 	// Initialize global constants and exclusions.
 	preProcessOptions(userOptions);
-	Constants.initializeRoot(Options.checkRoots, Options.checkRoots)
+	// We override Sa11y's root initializer because we use strings not arrays.
+
 	Constants.initializeGlobal(Options);
-	// Constants.initializeReadability(Options);
+	// @todo readability param
+	Constants.initializeReadability(Options);
 	Constants.initializeExclusions(Options);
 	postProcessOptions(userOptions);
 	customElements.define('ed11y-element-alt', Ed11yElementAlt);
@@ -161,6 +185,7 @@ export function initialize (userOptions) {
 	// Once document has fully loaded.
 	documentLoadingCheck(() => {
 		if (checkRunPrevent()) {
+			State.disabled = true;
 			return false;
 		}
 

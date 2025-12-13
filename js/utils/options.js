@@ -1,30 +1,151 @@
 export const Options = {
 	// Default options.
 
-	checkRoots: false, // @todo CMS merge implement whatever syntax Sa11y releases.
-	fixedRoots: false, // Array of specific nodes, overrides previous.
-	ignoreElements: '',
+	// Sa11y properties =======================
 
+	// Target area to check
+	checkRoot: false, // Editoria11y uses "checkRoots" below.
+	fixedRoots: false, // Array of specific nodes, overrides previous.
+
+	// Exclusions
+	containerIgnore: '',
+	contrastIgnore: '.sr-only',
+	outlineIgnore: '',
+	headerIgnore: '',
+	headerIgnoreSpan: 'ed11y-element-heading-label',
+	headerIgnoreStrings: '',
+	imageIgnore: 'img[aria-hidden], [aria-hidden] img, ' +
+		'img[role="presentation"], ' +
+		'a[href][aria-label] img, button[aria-label] img, ' +
+		'a[href][aria-labelledby] img, button[aria-labelledby] img',
+	linkIgnore: '[aria-hidden][tabindex="-1"]',
+	linkIgnoreSpan: '.ed11y-element',
+	linkIgnoreStrings: '',
+	ignoreContentOutsideRoots: false, // @todo cms was headingsOnlyFromCheckRoots
+
+	// Control panel settings
+	// aboutContent: '', // @todo use?
+	panelPosition: 'right', // @todo use?
+	// showMovePanelToggle: true,
+	// checkAllHideToggles: false,
+	developerChecksOnByDefault: false, // @todo cms use?
+
+	// Page outline
+	showHinPageOutline: false,
+	showTitleInPageOutline: false,
+
+	// Image outline
+	showImageOutline: true,
+	editImageURLofCMS: '',
+	relativePathImageSRC: '',
+	relativePathImageID: '',
+	ignoreEditImageURL: [],
+	ignoreEditImageClass: [],
+
+	// Other features
+	delayCheck: 0,
+	delayCustomCheck: 500,
+	detectSPArouting: false,
+	doNotRun: '',
+	headless: false,
+	selectorPath: false,
+	shadowComponents: '',
+	autoDetectShadowComponents: false,
+
+	// Annotations
+	showGoodImageButton: true,
+	showGoodLinkButton: true,
+	dismissAnnotations: true,
+	dismissAll: true,
+	ignoreHiddenOverflow: '',
+	insertAnnotationBefore: '',
+
+	// Readability
+	readabilityPlugin: false,
+	readabilityRoot: 'main',
+	readabilityIgnore: '',
+
+	// Contrast
+	contrastPlugin: false,
+	contrastAAA: false,
+	contrastAPCA: false,
+
+	// Other plugins
+	customChecks: false,
+	linksAdvancedPlugin: true,
+	formLabelsPlugin: true, // @todo pro
+	embeddedContentPlugin: true,
+	developerPlugin: false, // @todo pro
+	externalDeveloperChecks: false, // @todo pro
+	colourFilterPlugin: false, // @todo pro
+	exportResultsPlugin: false,
+
+	// Options for accName computation: Ignore ARIA on these elements.
 	ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
 	ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
 
-	// Include and modify this entire object in your call
-	// @todo merge test and/or reimplement.
-	headingsOnlyFromCheckRoots: false, // Whether the Headings panel shows all headings on page or only from checked content.
+	// Shared properties for some checks
+	// Shared properties for some checks
+	susAltStopWords: '',
+	linkStopWords: '',
+	extraPlaceholderStopWords: '',
+	imageWithinLightbox: '',
+	initialHeadingLevel: [],
+	// @todo merge discuss: how to handle this functionality.
+	// Sets previous heading level for contentEditable fields.
+	// With 'ignore' set, first heading level is ignored in editable zones.
+	// This is ideal for systems with separate backend editing pages.
+	// Set to 'inherit' for fields edited in a frontend context.
+	/*
+	[
+		{
+			selector: '.example-inherit',
+			previousHeading: 'inherit',
+		},
+		{
+			selector: '.example-l3',
+			previousHeading: 3,
+		},
+	],*/
+
+
+	// Editoria11y Only ==============================
+	// checkRoots: false, // todo document change
+	// ignoreElements: '', // todo document change
+
+	splitConfiguration: false,
+	/*
+	// List checks and config for reporting results not shown to editors.
+	// If split configuration is set, the check and option keys must be present.
+	// @todo check against new format.
+	syncOnlyConfiguration {
+		checks: [], // Test keys defined below to not be display on page.
+
+		options: {
+			checkRoot: false,
+			containerIgnore: '',
+			contrastIgnore: '.sr-only',
+			outlineIgnore: '',
+			headerIgnore: '',
+			imageIgnore: '',
+			linkIgnore: '[aria-hidden][tabindex="-1"]',
+		},
+	}
+	*/
 
 	// Set alertModes:
-	// 'headless': do not draw interface
+	alertMode: 'userPreference',
+	// 'headless': do not draw run
 	// 'userPreference: respect user preference.
 	// 'polite': open for new issues.
 	// 'assertive': open for any issues.
 	// 'active': always open.
 	// CMS integrations can switch between polite & headless at runtime.
-	alertMode: 'userPreference',
 	inlineAlerts: true,
 	watchForChanges: 'checkRoots', // 'document', false, 'checkRoots';
 
 	// This covers CKEditor, TinyMCE and Gutenberg. Being less specific may help performance.
-	editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .interface-interface-skeleton__content',
+	editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .run-run-skeleton__content',
 
 	// Dismissed alerts
 	currentPage: window.location.pathname, // uses window.location.pathname unless a string is provided.
@@ -60,10 +181,11 @@ export const Options = {
 	// Interface
 	theme: 'sleekTheme',
 	sleekTheme: {
-		bg: '#eff2ff', // e8f4ff
+		bg: '#eff2ff',
 		bgHighlight: '#7b1919',
+		bgOutlines: '#276499',
 		text: '#20160c',
-		primary: '#276499', // 276499
+		primary: '#276499',
 		primaryText: '#eff2ff',
 		button: 'transparent', // deprecate?
 		panelBar: '#1e517c',
@@ -72,7 +194,7 @@ export const Options = {
 		activeTab: '#276499',
 		activeTabText: '#fffffe',
 		focusRing: '#007aff',
-		outlineWidth: '0',
+		outlineWidth: '0px',
 		borderRadius: '3px',
 		ok: '#1f5381',
 		warning: 'rgb(250, 216, 89)',
@@ -83,9 +205,10 @@ export const Options = {
 	darkTheme: {
 		bg: '#0a2051',
 		bgHighlight: '#7b1919',
+		bgOutlines: '#f4f7ff',
 		text: '#f4f7ff',
-		primary: '#3052a0',
-		primaryText: '#f4f7ff',
+		primary: '#cbd8f3', // '#3052a0',
+		primaryText: '#00081d', // '#f4f7ff',
 		button: 'transparent',
 		panelBar: '#3052a0',
 		panelBarText: '#f4f7ff',
@@ -104,6 +227,7 @@ export const Options = {
 	lightTheme: {
 		bg: '#fffffe',
 		bgHighlight: '#7b1919',
+		bgOutlines: '#0a307a',
 		text: '#20160c',
 		primary: '#0a307a',
 		primaryText: '#fffdf7',
@@ -114,7 +238,7 @@ export const Options = {
 		activeTab: '#b9c0cf',
 		activeTabText: '#20160c',
 		focusRing: '#007aff',
-		outlineWidth: '0',
+		outlineWidth: '0px',
 		borderRadius: '3px',
 		ok: '#0a307a',
 		warning: 'rgb(250, 216, 89)',
@@ -127,7 +251,7 @@ export const Options = {
 	buttonZIndex: 1299,
 	// CSS overrides and additions.
 
-	baseFontSize: 'clamp(14px, 1.5vw, 16px)',
+	baseFontSize: 'clamp(14px, 1.6vw, 16px)',
 	baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
 
 	// Test customizations
@@ -141,109 +265,11 @@ export const Options = {
 
 	editLinks: false, // Add links to edit content in tooltips.
 
-	// @todo merge discuss: how to handle this functionality.
-	initialHeadingLevel: false,
-		// Sets previous heading level for contentEditable fields.
-		// With 'ignore' set, first heading level is ignored in editable zones.
-		// This is ideal for systems with separate backend editing pages.
-		// Set to 'inherit' for fields edited in a frontend context.
-		/*
-		[
-			{
-				selector: '.example-inherit',
-				previousHeading: 'inherit',
-			},
-			{
-				selector: '.example-l3',
-				previousHeading: 3,
-			},
-		],*/
-
 	userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
 
 	customTests: 0,
 
-	// Target area to check
-	checkRoot: 'body',
-
-	// Exclusions
-	containerIgnore: '',
-	contrastIgnore: '.sr-only',
-	outlineIgnore: '',
-	headerIgnore: '',
-	headerIgnoreSpan: 'ed11y-element-heading-label',
-	headerIgnoreStrings: '',
-	imageIgnore: 'img[aria-hidden], [aria-hidden] img, ' +
-		'img[role="presentation"], ' +
-		'a[href][aria-label] img, button[aria-label] img, ' +
-		'a[href][aria-labelledby] img, button[aria-labelledby] img',
-	linkIgnore: '[aria-hidden][tabindex="-1"]',
-	linkIgnoreSpan: '.ed11y-element',
-	linkIgnoreStrings: '',
-
-	// Control panel settings
-	aboutContent: '',
-	panelPosition: 'right',
-	showMovePanelToggle: true,
-	checkAllHideToggles: false,
-	developerChecksOnByDefault: false,
-
-	// Page outline
-	showHinPageOutline: false,
-	showTitleInPageOutline: false,
-
-	// Image outline
-	showImageOutline: true,
-	editImageURLofCMS: '',
-	relativePathImageSRC: '',
-	relativePathImageID: '',
-	ignoreEditImageURL: [],
-	ignoreEditImageClass: [],
-
-	// Other features
-	delayCheck: 0,
-	delayCustomCheck: 500,
-	detectSPArouting: false,
-	doNotRun: '',
-	headless: false,
-	selectorPath: false,
-	shadowComponents: '',
-	autoDetectShadowComponents: false,
-
-	// Annotations
-	showGoodImageButton: true,
-	showGoodLinkButton: true,
-	dismissAnnotations: true,
-	dismissAll: true,
-	ignoreHiddenOverflow: '',
-	insertAnnotationBefore: '',
-
-	// Readability
-	readabilityPlugin: false,
-	readabilityRoot: 'body',
-	readabilityIgnore: '',
-
-	// Contrast
-	contrastPlugin: false,
-	contrastAAA: false,
-	contrastAPCA: false,
-
-	// Other plugins
-	customChecks: false,
-	linksAdvancedPlugin: true,
-	formLabelsPlugin: true, // @todo pro
-	embeddedContentPlugin: true,
-	developerPlugin: false, // @todo pro
-	externalDeveloperChecks: false, // @todo pro
-	colourFilterPlugin: false, // @todo pro
-	exportResultsPlugin: false,
-
-	// Shared properties for some checks
-	susAltStopWords: '',
-	linkStopWords: '',
-	extraPlaceholderStopWords: '',
-	imageWithinLightbox: '',
-
+	// Sa11y checks ==================
 	checks: {
 		// Sa11y: Heading checks
 		HEADING_SKIPPED_LEVEL: {
@@ -286,10 +312,8 @@ export const Options = {
 		},
 		LINK_IMAGE_ALT: false, // Not interested.
 		LINK_IMAGE_ALT_AND_TEXT: true,
-		IMAGE_FIGURE_DUPLICATE_ALT: false, // Todo pro.
-		IMAGE_PASS: {
-			dismissAll: true,
-		},
+		IMAGE_FIGURE_DUPLICATE_ALT: true,
+		IMAGE_PASS: false, // Could be used to visualize alt content.
 		ALT_UNPRONOUNCEABLE: true,
 		LINK_ALT_UNPRONOUNCEABLE: true,
 		ALT_MAYBE_BAD: {
@@ -307,9 +331,9 @@ export const Options = {
 			type: 'warning',
 		},
 		LINK_STOPWORD_ARIA: false, // Todo pro.
-		LINK_SYMBOLS: false, // Todo pro.
+		LINK_SYMBOLS: true,
 		LINK_CLICK_HERE: false,
-		LINK_DOI: false, // Todo consider.
+		LINK_DOI: true, // Todo consider.
 		LINK_URL: {
 			maxLength: 40,
 		},
@@ -325,14 +349,12 @@ export const Options = {
 
 		// Form label checks module not yet enabled.
 		// Todo pro.
-		/*
-		LABELS_MISSING_IMAGE_INPUT: true,
-		LABELS_INPUT_RESET: true,
-		LABELS_MISSING_LABEL: true,
-		LABELS_ARIA_LABEL_INPUT: true,
-		LABELS_NO_FOR_ATTRIBUTE: true,
-		LABELS_PLACEHOLDER: true,
-		*/
+		LABELS_MISSING_IMAGE_INPUT: false,
+		LABELS_INPUT_RESET: false,
+		LABELS_MISSING_LABEL: false,
+		LABELS_ARIA_LABEL_INPUT: false,
+		LABELS_NO_FOR_ATTRIBUTE: false,
+		LABELS_PLACEHOLDER: false,
 
 		// Embedded content checks
 		EMBED_AUDIO: {
@@ -354,8 +376,8 @@ export const Options = {
 		QA_BAD_LINK: {
 			sources: '',
 		},
-		QA_STRONG_ITALICS: false, // Todo pro.
-		QA_IN_PAGE_LINK: false, // Todo pro.
+		QA_STRONG_ITALICS: true,
+		QA_IN_PAGE_LINK: true,
 		QA_DOCUMENT: false, // Todo CMS consider.
 		QA_PDF: {
 			sources: 'a[href$=\'.pdf\'], a[href*=\'.pdf?\']',
@@ -368,10 +390,10 @@ export const Options = {
 		QA_FAKE_HEADING: true,
 		QA_FAKE_LIST: true,
 		QA_UPPERCASE: true,
-		QA_UNDERLINE: false, // Todo pro.
-		QA_SUBSCRIPT: false, // Todo pro.
+		QA_UNDERLINE: true,
+		QA_SUBSCRIPT: true,
 		QA_NESTED_COMPONENTS: false, // Todo pro.
-		QA_JUSTIFY: false, // Todo pro.
+		QA_JUSTIFY: true, // Todo pro.
 		QA_SMALL_TEXT: false, // Todo pro.
 
 		// Sa11y: Meta checks
@@ -382,36 +404,28 @@ export const Options = {
 
 		// Sa11y: Developer checks
 		// Todo pro.
-		/*
 		DUPLICATE_ID: false,
 		META_TITLE: false,
 		UNCONTAINED_LI: false,
-		TABINDEX_ATTR: true,
-		HIDDEN_FOCUSABLE: true,
-		LABEL_IN_NAME: true,
-		BTN_EMPTY: true,
-		BTN_EMPTY_LABELLEDBY: true,
-		BTN_ROLE_IN_NAME: true,
-		*/
+		TABINDEX_ATTR: false,
+		HIDDEN_FOCUSABLE: false,
+		LABEL_IN_NAME: false,
+		BTN_EMPTY: false,
+		BTN_EMPTY_LABELLEDBY: false,
+		BTN_ROLE_IN_NAME: false,
+
 
 		// Sa11y: Contrast checks
 		// Todo pro.
-		/*
-		CONTRAST_WARNING: {
-			dismissAll: true,
-		},
-		CONTRAST_INPUT: true,
-		CONTRAST_ERROR: true,
-		CONTRAST_PLACEHOLDER: true,
-		CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
-		CONTRAST_ERROR_GRAPHIC: true,
-		CONTRAST_WARNING_GRAPHIC: {
-			dismissAll: true,
-		},
-		CONTRAST_UNSUPPORTED: {
-			dismissAll: true,
-		},
-	 	*/
+		CONTRAST_WARNING: false, // dismissAll
+		CONTRAST_INPUT: false,
+		CONTRAST_ERROR: false,
+		CONTRAST_PLACEHOLDER: false,
+		CONTRAST_PLACEHOLDER_UNSUPPORTED: false,
+		CONTRAST_ERROR_GRAPHIC: false,
+		CONTRAST_WARNING_GRAPHIC: false, // Don't enable.
+		CONTRAST_UNSUPPORTED: false, // What's this?
+
 		// dev
 		HEADING_EXCEEDS_LEVEL: true, // todo merge would need text.
 		EMBED_CUSTOM: {

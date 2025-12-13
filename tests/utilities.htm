@@ -138,12 +138,13 @@
 
             <h3>Aria:hidden image</h3>
             <div class="negative"><div aria-hidden="true">
+				<figure class="figure media--type-image ratio--freeform size--extra-small alignment--left">
+					<img alt="oh hi" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" >
+				</figure>
             </div></div>
             <div>
 
-                <figure class="figure media--type-image ratio--freeform size--extra-small alignment--left">
-                    <a href="https://ihum.princeton.edu/" class="link-purpose link-purpose-external no-border"><img alt="oh hi" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" > .</a>
-                </figure>
+
             </div>
 
 
@@ -304,8 +305,8 @@
                   }
                 });
                 document.addEventListener('ed11yShowHidden', function(e) {
-                    console.log('Event dispatched: ed11yShowHidden for #' + e.detail.result);
-                    Ed11y.findElements('hiddenPop',`#ed11y-result-${e.detail.result}`);
+                    Ed11y.findElements('hiddenPop',`#ed11y-result-${e.detail.result}`, false);
+					// @todo document the new false param.
                     Ed11y.elements['hiddenPop'][0].closest('[hidden]')?.removeAttribute('hidden');
 
                 }, false);
@@ -349,7 +350,7 @@
               const editLinks = document.createElement('div');
                 const editIcon = document.createElement('span');
                 editIcon.classList.add('ed11y-custom-edit-icon');
-                editIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152L0 424c0 48.6 39.4 88 88 88l272 0c48.6 0 88-39.4 88-88l0-112c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 112c0 22.1-17.9 40-40 40L88 464c-22.1 0-40-17.9-40-40l0-272c0-22.1 17.9-40 40-40l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L88 64z"/></svg>';
+                editIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M441 59L453 71c9 9 9 25 0 34L424 134 378 88 407 59c9-9 25-9 34 0zM210 256L344 122 390 168 256 302c-3 3-7 5-10 6l-59 17 17-59c1-4 3-8 6-10zM373 25L176 222c-9 9-15 19-18 31l-29 100c-2 8-0 17 6 24s15 9 24 6l100-29c12-3 23-10 31-18L487 139c28-28 28-74 0-102L475 25C447-3 401-3 373 25zM88 64C39 64 0 103 0 152L0 424c0 49 39 88 88 88l272 0c49 0 88-39 88-88l0-112c0-13-11-24-24-24s-24 11-24 24l0 112c0 22-18 40-40 40L88 464c-22 0-40-18-40-40l0-272c0-22 18-40 40-40l112 0c13 0 24-11 24-24s-11-24-24-24L88 64z">';
                 const editLink = document.createElement('a');
                 editLink.href="/";
                 editLink.textContent = "Edit page";
@@ -372,17 +373,17 @@
                   console.log('Ed11y first run took ' + parseInt(performance.now() - beforeCall) + 'ms');
                 }
               });
-              document.addEventListener('ed11yPanelOpened', e => {
+              /*document.addEventListener('ed11yPanelOpened', e => {
                 //console.log('results ready at: ' + parseInt(performance.now() - beforeCall));
                 //console.log(iterations);
                 iterations ++;
                 if (iterations === 10) {
                   console.log('Average run: ' + parseInt((performance.now() - beforeCall)) / 10);
-				  console.log("Don't worry about duplicate tips; skipping reset for performance testing.")
+				  console.log("Don't worry about duplicate tips; skipping reset for performance testing.");
                 } else if (iterations < 10) {
                   Ed11y.checkAll();
                 }
-              });
+              });*/
             </script>
             <!-- Instantiate-->
             <!-- Sa11y (fork the latest code from GitHub) -->

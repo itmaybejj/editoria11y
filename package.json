@@ -11,7 +11,7 @@
   },
   "license": "GPLv2",
   "scripts": {
-    "build": "npx eslint ./js/** --fix && ./node_modules/.bin/css-minify -d ./css -o ./dist && rimraf dist && node ./node_modules/rollup/dist/bin/rollup -c rollup.config.js",
+    "build": "npx eslint ./js/** --fix && npm run lint:css && npm run lint:js && rimraf dist && node ./node_modules/rollup/dist/bin/rollup -c rollup.config.js && ./node_modules/.bin/css-minify -d ./css -o ./dist",
     "lint": "npm run lint:css && npm run lint:js",
     "lint:js": "node ./node_modules/eslint/bin/eslint.js ./js/*",
     "lint:css": "stylelint --config .stylelintrc.json \"./css/editoria11y.css\"",
@@ -27,8 +27,9 @@
     "@rollup/plugin-node-resolve": "^13.0.0",
     "@rollup/plugin-replace": "^3.0.0",
     "@types/node": "^20.10.8",
-    "chromedriver": "^142",
+    "apca-w3": "^0.1.9",
     "chokidar-cli": "^3.0.0",
+    "chromedriver": "^142",
     "css-minify": "^2.1.0",
     "eslint": "^9.39.1",
     "nightwatch": "^3.12.3",
@@ -38,6 +39,7 @@
     "stylelint": "^16.25.0",
     "stylelint-config-standard": "^36.0.0",
     "stylelint-order": "^6.0.4",
-    "stylelint-scss": "^6.12.1"
+    "stylelint-scss": "^6.12.1",
+    "ws": "^8.18.3"
   }
 }

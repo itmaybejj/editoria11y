@@ -174,7 +174,7 @@ export function checkEditableIntersects (focusKnown = false) {
 
 
 export function alignButtons() {
-	if (State.jumpList.length === 0 || (State.tipOpen && State.scrollPending === 0)) { // todo always false?
+	if (State.jumpList.length === 0) { // todo always false?
 		return;
 	}
 	State.alignPending = true;
@@ -220,10 +220,10 @@ export function alignButtons() {
 			}
 			let left = targetOffset.left;
 
-			// TD TD different?
 			if (mark.result.element.tagName === 'IMG') {
 				top = top + 10;
 				left = left + 10;
+				// Should we do this for TD too?
 			} else {
 				left = State.inlineAlerts ? left - 34 : left;
 			}
@@ -234,13 +234,6 @@ export function alignButtons() {
 				left = left + State.positionedFrames[mark.result.fixedRoot].left;
 			}
 
-			// TD TD different?
-			if (mark.result.element.tagName === 'IMG') {
-				top = top + 10;
-				left = left + 10;
-			} else {
-				left = State.inlineAlerts ? left - 34 : left;
-			}
 			if (mark.result.scrollableParent) {
 				// Bump alerts that would be X-position out of a scroll zone.
 				State.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
