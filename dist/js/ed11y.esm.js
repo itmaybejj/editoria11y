@@ -6414,6 +6414,7 @@ function drawResult(result, index) {
 		mark.toggle.innerHTML = '<svg aria-hidden="true" width="10" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>';
 		mark.toggle.classList.add('dismissed');
 		if (mark.result.dismissalStatus !== 'ok') {
+			// @todo 3.x okAll?
 			mark.toggle.classList.add('notok');
 		} else {
 			mark.toggle.classList.add('ok');
@@ -6462,11 +6463,13 @@ const pushResult = function(i, inContent) {
 		}
 	} else if (State.splitConfiguration.devChecks.has(State.splitConfiguration.devResults[i].test)) {
 		// DevOnly test is for devs only.
+		checkDismissed(i, true);
 		if (State.splitConfiguration.showDev) {
 			Results.push(State.splitConfiguration.devResults[i]);
 		}
 	} else {
 		// Content test in content area is for everyone.
+		checkDismissed(i, true);
 		Results.push(State.splitConfiguration.devResults[i]);
 	}
 };
@@ -6585,7 +6588,7 @@ function checkDismissed(i, splitConfiguration) {
 		if (splitConfiguration) {
 			State.splitConfiguration.devResults[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][result.test][result.dismiss];
 		} else {
-			Results.dismissalStatus = State.dismissedAlerts[Options.currentPage][result.test][result.dismiss];
+			Results[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][result.test][result.dismiss];
 		}
 	}
 }
@@ -6634,7 +6637,7 @@ function filterAlerts (splitConfiguration) {
 			splice = true;
 		} else if (!splitConfiguration) {
 			// Split config modifies key before checking.
-			checkDismissed(i);
+			checkDismissed(i, false);
 		}
 		if (splice) {
 			if (splitConfiguration) {
@@ -6987,9 +6990,8 @@ function buildJumpList () {
 
   // Sort from bottom to top so focus order after insert is top to bottom.
   Results.sort((a, b) => b.sortPos - a.sortPos);
-
   Results?.forEach(function (result, i) {
-    if (!Results[i].dismissalStatus || State.showDismissed) {
+    if (!result.dismissalStatus || State.showDismissed) {
       drawResult(result, i);
     }
   });
@@ -8042,7 +8044,7 @@ function dismissThis (dismissalType, all = false) {
 
 	if (all) {
 		Results.forEach((result) => {
-			if (result.test === test && result.dismissalStatus !==dismissalType) {
+			if (result.test === test && result.dismissalStatus !== dismissalType) {
 				dismissOne(dismissalType, test, result.dismiss);
 			}
 		});
@@ -9153,8 +9155,6 @@ class Ed11yElementTip extends HTMLElement {
 				countPrefix.textContent = Lang._('issueTemplate') ;
 			} else if (State.splitConfiguration.devChecks[this.result.test]) {
 				countPrefix.textContent = Lang._('issueDeveloper');
-			} else {
-				countPrefix.textContent = Lang._('issueContent');
 			}
 			const br = document.createElement('br');
 			countPrefix.insertAdjacentElement('afterend', br);

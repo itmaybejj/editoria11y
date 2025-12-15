@@ -246,8 +246,6 @@ export class Ed11yElementTip extends HTMLElement {
 				countPrefix.textContent = Lang._('issueTemplate') ;
 			} else if (State.splitConfiguration.devChecks[this.result.test]) {
 				countPrefix.textContent = Lang._('issueDeveloper');
-			} else {
-				countPrefix.textContent = Lang._('issueContent');
 			}
 			const br = document.createElement('br');
 			countPrefix.insertAdjacentElement('afterend', br);

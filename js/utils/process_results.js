@@ -32,11 +32,13 @@ const pushResult = function(i, inContent) {
 		}
 	} else if (State.splitConfiguration.devChecks.has(State.splitConfiguration.devResults[i].test)) {
 		// DevOnly test is for devs only.
+		checkDismissed(i, true);
 		if (State.splitConfiguration.showDev) {
 			Results.push(State.splitConfiguration.devResults[i]);
 		}
 	} else {
 		// Content test in content area is for everyone.
+		checkDismissed(i, true);
 		Results.push(State.splitConfiguration.devResults[i]);
 	}
 }
@@ -156,7 +158,7 @@ export function checkDismissed(i, splitConfiguration) {
 		if (splitConfiguration) {
 			State.splitConfiguration.devResults[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][result.test][result.dismiss];
 		} else {
-			Results.dismissalStatus = State.dismissedAlerts[Options.currentPage][result.test][result.dismiss];
+			Results[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][result.test][result.dismiss];
 		}
 	}
 }
@@ -205,7 +207,7 @@ export function filterAlerts (splitConfiguration) {
 			splice = true;
 		} else if (!splitConfiguration) {
 			// Split config modifies key before checking.
-			checkDismissed(i);
+			checkDismissed(i, false);
 		}
 		if (splice) {
 			if (splitConfiguration) {

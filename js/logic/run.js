@@ -377,9 +377,8 @@ export function buildJumpList () {
 
   // Sort from bottom to top so focus order after insert is top to bottom.
   Results.sort((a, b) => b.sortPos - a.sortPos);
-
   Results?.forEach(function (result, i) {
-    if (!Results[i].dismissalStatus || State.showDismissed) {
+    if (!result.dismissalStatus || State.showDismissed) {
       drawResult(result, i);
     }
   });
@@ -1432,7 +1431,7 @@ export function dismissThis (dismissalType, all = false) {
 
 	if (all) {
 		Results.forEach((result) => {
-			if (result.test === test && result.dismissalStatus !==dismissalType) {
+			if (result.test === test && result.dismissalStatus !== dismissalType) {
 				dismissOne(dismissalType, test, result.dismiss);
 			}
 		});
