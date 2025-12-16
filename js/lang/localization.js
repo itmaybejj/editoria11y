@@ -64,13 +64,14 @@ const ed11yLang = {
     transferFocus: 'Edit this content', // @todo translate
     dismissOkButtonContent: 'Mark OK', //@todo translate
 		DISMISS: 'Ignore',
-    dismissActions: `%(count) similar alerts`, // 2.3.10 // @todo translate
-		DISMISS_ALL: 'Ignore all like this', // 2.3.10
-    dismissOkAllButton: 'Mark all like this as OK', // @todo translate
+    dismissActions: `Similar alerts`, // 2.3.10 // @todo translate
+		DISMISS_ALL: 'Ignore similar alerts on this page', // 2.3.10
+    dismissOkAllButton: 'Similar alerts on this page are OK', // @todo translate
+		dismissOnSite: 'Mark OK on all pages', // @todo translate
     dismissOkTitle: 'Hides alert for all editors',  // @todo translate
     dismissHideTitle: 'Only hides alert for you',  // @todo translate
     undismissOKButton: 'Restore this alert marked as OK',  // @todo translate
-    undismissHideButton: 'Restore this skipped check', // @todo translate
+    undismissHideButton: 'Restore this ignored alert', // @todo translate
     undismissNotePermissions: 'This check has been hidden by an administrator', // @todo translate
     reportsLink: 'Open site reports', // @todo translate
     ALERT_CLOSE: 'Close',

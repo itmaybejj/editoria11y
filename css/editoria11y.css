@@ -36,10 +36,6 @@ ed11y-element-result {
 	all: initial;
 }
 
-.ed11y-hidden {
-	display: none;
-}
-
 .ed11y-wrapper .visually-hidden {
 	position: absolute;
 	width: 1px;
@@ -1409,4 +1405,9 @@ ed11y-element-result.ed11y-preload,
 		border-bottom: none;
 		opacity: .5;
 	}
+}
+
+.ed11y-hidden,
+.ed11y-wrapper .ed11y-hidden {
+	display: none;
 }

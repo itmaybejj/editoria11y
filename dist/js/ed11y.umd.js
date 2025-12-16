@@ -8252,13 +8252,14 @@ URL: ${url}</pre>
       transferFocus: 'Edit this content', // @todo translate
       dismissOkButtonContent: 'Mark OK', //@todo translate
   		DISMISS: 'Ignore',
-      dismissActions: `%(count) similar alerts`, // 2.3.10 // @todo translate
-  		DISMISS_ALL: 'Ignore all like this', // 2.3.10
-      dismissOkAllButton: 'Mark all like this as OK', // @todo translate
+      dismissActions: `Similar alerts`, // 2.3.10 // @todo translate
+  		DISMISS_ALL: 'Ignore similar alerts on this page', // 2.3.10
+      dismissOkAllButton: 'Similar alerts on this page are OK', // @todo translate
+  		dismissOnSite: 'Mark OK on all pages', // @todo translate
       dismissOkTitle: 'Hides alert for all editors',  // @todo translate
       dismissHideTitle: 'Only hides alert for you',  // @todo translate
       undismissOKButton: 'Restore this alert marked as OK',  // @todo translate
-      undismissHideButton: 'Restore this skipped check', // @todo translate
+      undismissHideButton: 'Restore this ignored alert', // @todo translate
       undismissNotePermissions: 'This check has been hidden by an administrator', // @todo translate
       reportsLink: 'Open site reports', // @todo translate
       ALERT_CLOSE: 'Close',
@@ -8974,9 +8975,11 @@ URL: ${url}</pre>
 				</div>
 			</div>
 			<div class="footer">
+				<div class="ed11y-tip-dismissals">
+					<details class="ed11y-bulk-actions dismiss ed11y-hidden"><summary></summary><div class="ed11y-bulk-actions-content"></div></details>
+				</div>
 				<button class="prev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><path fill="currentColor" d="M9 233c-12 12-12 33 0 45l160 160c12 12 33 12 45 0s12-33 0-45L77 256 215 119c12-12 12-33 0-45s-33-12-45 0l-160 160z"></path></svg></button>
 				<button class="next"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><path fill="currentColor" d="M9 233c-12 12-12 33 0 45l160 160c12 12 33 12 45 0s12-33 0-45L77 256 215 119c12-12 12-33 0-45s-33-12-45 0l-160 160z"></path></svg></button>
-			</div>
 		</div>
 		`;
 
@@ -9050,11 +9053,10 @@ URL: ${url}</pre>
         this.contentFooter.prepend(editBar);
       }
 
-      // Draw dismiss or restore buttons
-      if (this.dismissable) {
+  		const buttonBar = this.wrapper.querySelector('.ed11y-tip-dismissals');
 
-        const buttonBar = document.createElement('div');
-        buttonBar.classList.add('ed11y-tip-dismissals');
+  		// Draw dismiss or restore buttons
+      if (this.dismissable) {
 
         const dismissIcon = document.createElement('span');
         dismissIcon.classList.add('ed11y-dismiss-icon');
@@ -9074,30 +9076,26 @@ URL: ${url}</pre>
             undismissButton.classList.add('dismiss');
             undismissButton.textContent = okd ? Lang._('undismissOKButton') : Lang._('undismissHideButton');
             undismissButton.prepend(unDismissIcon);
-            buttonBar.append(undismissButton);
+            buttonBar.prepend(undismissButton);
             undismissButton.addEventListener('click', function(){dismissThis('reset');});
           } else {
             const restoreNote = document.createElement('div');
             restoreNote.classList.add('dismissed-note');
             restoreNote.textContent = Lang._('undismissNotePermissions');
-            buttonBar.append(restoreNote);
+            buttonBar.prepend(restoreNote);
           }
         } else {
 
-          const pageActions = document.createElement('details');
-          const pageActionsSummary = document.createElement('summary');
+          const pageActions = this.wrapper.querySelector('.ed11y-bulk-actions');
+          const pageActionsSummary = pageActions.querySelector('summary');
+  				pageActionsSummary.textContent = Lang.sprintf('dismissActions');
           const othersLikeThis = Results.filter(el => el.test === this.result.test).length;
-          const showPageActions = othersLikeThis > 3 && Options.allowHide && Options.allowOK;
-  				const pageActionsContent = document.createElement('div');
-
-          if (showPageActions) {
-            pageActions.classList.add('ed11y-bulk-actions', 'dismiss');
-            pageActionsSummary.textContent = Lang.sprintf('dismissActions', othersLikeThis);
-            pageActions.appendChild(pageActionsSummary);
-  					pageActionsContent.classList.add('ed11y-bulk-actions-content');
-  					pageActions.appendChild(pageActionsContent);
-            buttonBar.appendChild(pageActions);
-          }
+  				const pageActionsContent = pageActions.querySelector('.ed11y-bulk-actions-content');
+  				// Other cases?
+  				const showPageActions = othersLikeThis > 3 && (Options.allowHide || Options.allowOK);
+  				if (showPageActions) {
+  					pageActions.classList.remove('ed11y-hidden');
+  				}
 
   				if (Options.allowOK) {
   					const check = document.createElement('span');
@@ -9147,7 +9145,6 @@ URL: ${url}</pre>
   				}
 
         }
-        this.navBar.prepend(buttonBar);
       }
 
       const countNumber = this.wrapper.querySelector('.count-number');
