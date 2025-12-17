@@ -162,17 +162,17 @@
             <div class="negative"><div style="display: none;"><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
 
             <h3>Visibility:hidden</h3>
-            <div class="negative"><div style="visibility: hidden;"><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
+            <div class="negative"><div style="visibility: hidden;"><h6 id="this-h6-should-have-been-an-h3-2">Skipped heading level</h6></div></div>
 
             <h3>Aria:hidden text</h3>
-            <div class="negative"><div style="visibility: hidden;"><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
+            <div class="negative"><div style="visibility: hidden;"><h6 id="this-h6-should-have-been-an-h3-3">Skipped heading level</h6></div></div>
 
             <h3>HTML hidden attribute</h3>
-            <div class="negative"><div hidden><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
+            <div class="negative"><div hidden><h6 id="this-h6-should-have-been-an-h3-4">Skipped heading level</h6></div></div>
 
             <h3>Hidden click here links</h3>
             <div class="positive"><div style="display: none;"><a id="visually-hidden-click-here" href="/">Click here</a></div></div>
-            <div class="positive"><div style="visibility: hidden;"><a id="visually-hidden-click-here" href="/">Click here</a></div></div>
+            <div class="positive"><div style="visibility: hidden;"><a id="visually-hidden-click-here-2" href="/">Click here</a></div></div>
             <div class="positive"><div hidden><a id="hidden-click-here" href="/">Click here</a></div></div>
 
         </section>
@@ -199,7 +199,7 @@
             <div class="negative">Null aria label: <a id="null-aria" aria-label="" href="/">Null aria</a></div>
             <div class="positive">Bad link text in title attribute: <a id="titled-link-click-here" title="Click here" href="/"><span></span></a></div>
             <div class="positive">Bad link text in ::before on inner span: <a id="inner-css-link" href="/"><span class="click-in-css"></span></a></div>
-            <div class="positive">Inner SVG has an alt but no role, alt is ignored: <a id="svg-incorrect-role" href="/"><svg title="unread alt" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="positive">Inner SVG has an alt but no role, alt is ignored: <a id="svg-incorrect-role" href="/"><svg alt="turtles" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"></circle></svg></a></div>
             <div class="negative">Inner SVG has a good title element: <a id="inner-svg-titles" href="/"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>I'm a circle</title></circle>
@@ -258,7 +258,6 @@
                                 <h4></h4>
                                 Policy Riders and Endorsements
                             </pds-heading>
-                            </aside>
                         </pds-sidebar>
                     </pds-layout-container>
 

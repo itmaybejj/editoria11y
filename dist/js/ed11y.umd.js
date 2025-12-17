@@ -42,7 +42,7 @@
       let transString = this._(string);
       transString = this.prepHTML(transString);
 
-      if (args && args.length) {
+      if (args?.length) {
         args.forEach((arg) => {
           transString = transString.replace(/%\([a-zA-z]+\)/, arg);
         });
@@ -53,13 +53,17 @@
       return this.langStrings[string] || string;
     },
     prepHTML($el) {
-      return $el.replaceAll(/<hr>/g, '<hr aria-hidden="true">')
+      return $el
+        .replaceAll(/<hr>/g, '<hr aria-hidden="true">')
         .replaceAll(/<a[\s]href=/g, '<a target="_blank" rel="noopener noreferrer" href=')
         .replaceAll(/<\/a>/g, `<span class="visually-hidden"> (${Lang._('NEW_TAB')})</span></a>`)
         .replaceAll(/{C}/g, 'class="colour"')
         .replaceAll(/{B}/g, 'class="badge"')
         .replaceAll(/{ALT}/g, `<strong class="badge">${Lang._('ALT')}</strong>`)
-        .replaceAll(/{L}/g, `<strong class="badge"><span class="link-icon"></span><span class="visually-hidden">${Lang._('LINKED')}</span></strong>`);
+        .replaceAll(
+          /{L}/g,
+          `<strong class="badge"><span class="link-icon"></span><span class="visually-hidden">${Lang._('LINKED')}</span></strong>`,
+        );
     },
   };
 
@@ -76,8 +80,12 @@
 
     alert.classList.remove('active');
     alertPreview.classList.remove('panel-alert-preview');
-    while (alertText.firstChild) alertText.removeChild(alertText.firstChild);
-    while (alertPreview.firstChild) alertPreview.removeChild(alertPreview.firstChild);
+    while (alertText.firstChild) {
+      alertText.removeChild(alertText.firstChild);
+    }
+    while (alertPreview.firstChild) {
+      alertPreview.removeChild(alertPreview.firstChild);
+    }
   }
 
   /**
@@ -103,8 +111,9 @@
     alertText.innerHTML = alertMessage;
 
     // If the issue's element is being previewed.
-    const elementPreview = (extendedPreview)
-      ? `<div class="element-preview">${extendedPreview}</div>` : '';
+    const elementPreview = extendedPreview
+      ? `<div class="element-preview">${extendedPreview}</div>`
+      : '';
 
     // Alert message or tooltip's message.
     if (errorPreview) {
@@ -134,8 +143,6 @@
     };
   }
 
-  /* eslint-disable no-console */
-
   const Constants = (function myConstants() {
     /* **************** */
     /* Global constants */
@@ -147,13 +154,15 @@
       Global.panelPosition = option.panelPosition;
       Global.dismissAnnotations = option.dismissAnnotations;
       Global.aboutContent = option.aboutContent;
-      Global.contrastAPCA = option.contrastAPCA;
-      Global.contrastSuggestions = option.contrastSuggestions;
-      Global.contrastAAA = option.contrastAAA;
-      Global.shadowDetection = option.shadowComponents.length > 0 || option.autoDetectShadowComponents === true;
+      Global.shadowDetection =
+        option.shadowComponents.length > 0 || option.autoDetectShadowComponents === true;
       Global.fixedRoots = option.fixedRoots;
       Global.ignoreAriaOnElements = option.ignoreAriaOnElements;
       Global.ignoreTextInElements = option.ignoreTextInElements;
+
+      // Contrast
+      Global.contrastSuggestions = option.contrastSuggestions;
+      Global.contrastAlgorithm = option.contrastAlgorithm.toUpperCase();
 
       // Toggleable plugins
       Global.developerPlugin = option.developerPlugin;
@@ -174,14 +183,15 @@
       if (typeof window.matchMedia === 'function') {
         reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
       }
-      Global.scrollBehaviour = (!reducedMotion || reducedMotion.matches) ? 'auto' : 'smooth';
+      Global.scrollBehaviour = !reducedMotion || reducedMotion.matches ? 'auto' : 'smooth';
 
       // i18n
-      Global.langDirection = (Global.html.getAttribute('dir') === 'rtl') ? 'rtl' : 'ltr';
+      Global.langDirection = Global.html.getAttribute('dir') === 'rtl' ? 'rtl' : 'ltr';
 
       // Check for document types.
       const documentSources = option.checks.QA_DOCUMENT.sources;
-      const defaultDocumentSources = 'a[href$=".doc"], a[href$=".docx"], a[href*=".doc?"], a[href*=".docx?"], a[href$=".ppt"], a[href$=".pptx"], a[href*=".ppt?"], a[href*=".pptx?"], a[href^="https://drive.google.com/file"], a[href^="https://docs.google."], a[href^="https://sway."]';
+      const defaultDocumentSources =
+        'a[href$=".doc"], a[href$=".docx"], a[href*=".doc?"], a[href*=".docx?"], a[href$=".ppt"], a[href$=".pptx"], a[href*=".ppt?"], a[href*=".pptx?"], a[href^="https://drive.google.com/file"], a[href^="https://docs.google."], a[href^="https://sway."]';
       if (documentSources) {
         Global.documentSources = `${defaultDocumentSources}, ${documentSources}`;
       } else {
@@ -194,7 +204,8 @@
 
       // Video sources.
       const videoSources = option.checks.EMBED_VIDEO.sources;
-      const defaultVideoSources = 'video, [src*="Video"], [src*="video"], [src*="watch"], [src*="youtube.com"], [src*="vimeo.com"], [src*="panopto.com"], [src*="wistia.com"], [src*="dailymotion.com"], [src*="brightcove.com"], [src*="vidyard.com"]';
+      const defaultVideoSources =
+        'video, [src*="Video"], [src*="video"], [src*="watch"], [src*="youtube.com"], [src*="vimeo.com"], [src*="panopto.com"], [src*="wistia.com"], [src*="dailymotion.com"], [src*="brightcove.com"], [src*="vidyard.com"]';
       if (videoSources) {
         const videos = videoSources.split(/\s*[\s,]\s*/).map(($el) => `[src*="${$el}"]`);
         Global.VideoSources = `${defaultVideoSources}, ${videos.join(', ')}`;
@@ -204,7 +215,8 @@
 
       // Audio sources.
       const audioSources = option.checks.EMBED_AUDIO.sources;
-      const defaultAudioSources = 'audio, [src*="soundcloud.com"], [src*="simplecast.com"], [src*="podbean.com"], [src*="buzzsprout.com"], [src*="blubrry.com"], [src*="transistor.fm"], [src*="fusebox.fm"], [src*="libsyn.com"], [src*="spotify.com"], [src*="podcasts.apple.com"], [src*="castbox.fm"], [src*="megaphone.fm"], [src*="spreaker.com"], [src*="anchor.fm"], [src*="rss.com"], [src*="redcircle.com"]';
+      const defaultAudioSources =
+        'audio, [src*="soundcloud.com"], [src*="simplecast.com"], [src*="podbean.com"], [src*="buzzsprout.com"], [src*="blubrry.com"], [src*="transistor.fm"], [src*="fusebox.fm"], [src*="libsyn.com"], [src*="spotify.com"], [src*="podcasts.apple.com"], [src*="castbox.fm"], [src*="megaphone.fm"], [src*="spreaker.com"], [src*="anchor.fm"], [src*="rss.com"], [src*="redcircle.com"]';
       if (audioSources) {
         const audio = audioSources.split(/\s*[\s,]\s*/).map(($el) => `[src*="${$el}"]`);
         Global.AudioSources = `${defaultAudioSources}, ${audio.join(', ')}`;
@@ -214,7 +226,8 @@
 
       // Data viz sources.
       const dataVizSources = option.checks.EMBED_DATA_VIZ.sources;
-      const defaultDataVizSources = '[src*="datastudio"], [src*="tableau"], [src*="lookerstudio"], [src*="powerbi"], [src*="qlik"]';
+      const defaultDataVizSources =
+        '[src*="datastudio"], [src*="tableau"], [src*="lookerstudio"], [src*="powerbi"], [src*="qlik"]';
       if (dataVizSources) {
         const data = dataVizSources.split(/\s*[\s,]\s*/).map(($el) => `[src*="${$el}"]`);
         Global.VisualizationSources = `${defaultDataVizSources}, ${data.join(', ')}`;
@@ -270,7 +283,9 @@
             Constants.Root.Readability.push(root);
           });
         } else {
-          console.error(`Sa11y: The target readability root (${desiredReadabilityRoot}) does not exist.`);
+          console.error(
+            `Sa11y: The target readability root (${desiredReadabilityRoot}) does not exist.`,
+          );
         }
       } catch {
         Root.Readability.length = 0;
@@ -290,11 +305,17 @@
             const alert = Constants.Panel.readability.querySelector('#readability-alert');
             if (readabilityDetails && readabilityOn && !alert) {
               // Roots that readability will be based on.
-              const roots = Root.areaToCheck.map((el) => {
-                if (el.id) return `#${el.id}`;
-                if (el.className) return `.${el.className.split(/\s+/).filter(Boolean).join('.')}`;
-                return el.tagName.toLowerCase();
-              }).join(', ');
+              const roots = Root.areaToCheck
+                .map((el) => {
+                  if (el.id) {
+                    return `#${el.id}`;
+                  }
+                  if (el.className) {
+                    return `.${el.className.split(/\s+/).filter(Boolean).join('.')}`;
+                  }
+                  return el.tagName.toLowerCase();
+                })
+                .join(', ');
 
               // Append note to Readability panel.
               const note = document.createElement('div');
@@ -429,7 +450,16 @@
     const Exclusions = {};
     function initializeExclusions(option) {
       // List of Sa11y's interface components.
-      Exclusions.Sa11yElements = ['sa11y-heading-label', 'sa11y-heading-anchor', 'sa11y-annotation', 'sa11y-tooltips', 'sa11y-panel-tooltips', 'sa11y-control-panel', '#sa11y-colour-filters', '#sa11y-colour-filters *'];
+      Exclusions.Sa11yElements = [
+        'sa11y-heading-label',
+        'sa11y-heading-anchor',
+        'sa11y-annotation',
+        'sa11y-tooltips',
+        'sa11y-panel-tooltips',
+        'sa11y-control-panel',
+        '#sa11y-colour-filters',
+        '#sa11y-colour-filters *',
+      ];
 
       // Global elements to exclude.
       const exclusions = ['style', 'script', 'noscript'];
@@ -444,7 +474,25 @@
       }
 
       // Contrast exclusions
-      Exclusions.Contrast = ['link', 'hr', 'option', 'audio', 'audio *', 'video', 'video *', 'input[type="color"]', 'input[type="range"]', 'progress', 'progress *', 'meter', 'meter *', 'iframe', 'svg title', 'svg desc', ...exclusions];
+      Exclusions.Contrast = [
+        'link',
+        'hr',
+        'option',
+        'audio',
+        'audio *',
+        'video',
+        'video *',
+        'input[type="color"]',
+        'input[type="range"]',
+        'progress',
+        'progress *',
+        'meter',
+        'meter *',
+        'iframe',
+        'svg title',
+        'svg desc',
+        ...exclusions,
+      ];
       if (option.contrastIgnore) {
         Exclusions.Contrast = option.contrastIgnore
           .split(',')
@@ -479,15 +527,23 @@
         : [];
 
       // Ignore specific images.
-      Exclusions.Images = ['img[role="presentation"]:not(a img[role="presentation"]), img[aria-hidden="true"]:not(a img[aria-hidden="true"])'];
+      Exclusions.Images = [
+        'img[role="presentation"]:not(a img[role="presentation"]), img[aria-hidden="true"]:not(a img[aria-hidden="true"])',
+      ];
       if (option.imageIgnore) {
-        Exclusions.Images = option.imageIgnore.split(',').map(($el) => $el.trim()).concat(Exclusions.Images);
+        Exclusions.Images = option.imageIgnore
+          .split(',')
+          .map(($el) => $el.trim())
+          .concat(Exclusions.Images);
       }
 
       // Ignore specific links
       Exclusions.Links = ['.anchorjs-link'];
       if (option.linkIgnore) {
-        Exclusions.Links = option.linkIgnore.split(',').map(($el) => $el.trim()).concat(Exclusions.Links);
+        Exclusions.Links = option.linkIgnore
+          .split(',')
+          .map(($el) => $el.trim())
+          .concat(Exclusions.Links);
       }
 
       // Ignore specific classes within links.
@@ -508,20 +564,23 @@
       initializeExclusions,
       Exclusions,
     };
-  }());
-
-  /* eslint-disable no-continue */
+  })();
 
   /* Get text content of pseudo elements. */
   const wrapPseudoContent = (element, string) => {
     const getAltText = (content) => {
-      if (content === 'none') return '';
-      const match = content.includes('url(') || content.includes('image-set(')
-        ? content.match(/\/\s*"([^"]+)"/) // Content after slash, e.g. url('image.jpg') / "alt text";
-        : content.match(/"([^"]+)"/); // Content between quotes, e.g. "alt text";
+      if (content === 'none') {
+        return '';
+      }
+      const match =
+        content.includes('url(') || content.includes('image-set(')
+          ? content.match(/\/\s*"([^"]+)"/) // Content after slash, e.g. url('image.jpg') / "alt text";
+          : content.match(/"([^"]+)"/); // Content between quotes, e.g. "alt text";
       return match ? match[1] : '';
     };
-    const before = getAltText(window.getComputedStyle(element, ':before').getPropertyValue('content'));
+    const before = getAltText(
+      window.getComputedStyle(element, ':before').getPropertyValue('content'),
+    );
     const after = getAltText(window.getComputedStyle(element, ':after').getPropertyValue('content'));
     return `${before}${string}${after}`;
   };
@@ -544,11 +603,17 @@
   /* Compute ARIA attributes. */
   const computeAriaLabel = (element, recursing = false) => {
     // Ignore ARIA on these elements.
-    if (Constants.Global.ignoreAriaOnElements && element.matches(Constants.Global.ignoreAriaOnElements)) {
+    if (
+      Constants.Global.ignoreAriaOnElements &&
+      element.matches(Constants.Global.ignoreAriaOnElements)
+    ) {
       return 'noAria';
     }
 
-    if (Constants.Global.ignoreTextInElements && element.matches(Constants.Global.ignoreTextInElements)) {
+    if (
+      Constants.Global.ignoreTextInElements &&
+      element.matches(Constants.Global.ignoreTextInElements)
+    ) {
       return '';
     }
 
@@ -560,7 +625,8 @@
         .map((id) => {
           const targetElement = document.querySelector(`#${CSS.escape(id)}`);
           return targetElement ? computeAccessibleName(targetElement, '', 1) : '';
-        }).join(' ');
+        })
+        .join(' ');
     }
 
     const { ariaLabel } = element;
@@ -583,8 +649,9 @@
   const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
     // Return immediately if there is an aria label.
     const ariaLabel = computeAriaLabel(element, recursing);
-    if (ariaLabel !== 'noAria') return ariaLabel;
-
+    if (ariaLabel !== 'noAria') {
+      return ariaLabel;
+    }
     // Return immediately if there is only a text node.
     let computedText = '';
     if (!element.children.length) {
@@ -598,8 +665,12 @@
     // Create tree walker object.
     function createTreeWalker(root, showElement, showText) {
       const acceptNode = (node) => {
-        if (showElement && node.nodeType === Node.ELEMENT_NODE) return NodeFilter.FILTER_ACCEPT;
-        if (showText && node.nodeType === Node.TEXT_NODE) return NodeFilter.FILTER_ACCEPT;
+        if (showElement && node.nodeType === Node.ELEMENT_NODE) {
+          return NodeFilter.FILTER_ACCEPT;
+        }
+        if (showText && node.nodeType === Node.TEXT_NODE) {
+          return NodeFilter.FILTER_ACCEPT;
+        }
         return NodeFilter.FILTER_REJECT;
       };
       return document.createTreeWalker(root, NodeFilter.SHOW_ALL, { acceptNode });
@@ -647,20 +718,26 @@
       }
 
       if (addTitleIfNoName && !node.closest('a')) {
-        if (aText === computedText) computedText += addTitleIfNoName;
+        if (aText === computedText) {
+          computedText += addTitleIfNoName;
+        }
         addTitleIfNoName = false;
         aText = false;
       }
 
       if (node.ariaHidden === 'true' && !(recursing && count < 3)) {
-        if (!nextTreeBranch(treeWalker)) continueWalker = false;
+        if (!nextTreeBranch(treeWalker)) {
+          continueWalker = false;
+        }
         continue;
       }
 
       const aria = computeAriaLabel(node, recursing);
       if (aria !== 'noAria') {
         computedText += ` ${aria}`;
-        if (!nextTreeBranch(treeWalker)) continueWalker = false;
+        if (!nextTreeBranch(treeWalker)) {
+          continueWalker = false;
+        }
         continue;
       }
 
@@ -675,7 +752,9 @@
             computedText += computeAriaLabel(node);
           } else {
             const title = node.querySelector('title');
-            if (title) computedText += title.textContent;
+            if (title) {
+              computedText += title.textContent;
+            }
           }
           break;
         case 'A':
@@ -742,7 +821,9 @@
     const root = [];
     if (desiredRoot === 'document') {
       root.push(document.body);
-      if (Constants.Global.fixedRoots) root.push(Constants.Global.fixedRoots);
+      if (Constants.Global.fixedRoots) {
+        root.push(Constants.Global.fixedRoots);
+      }
     } else if (desiredRoot === 'root') {
       root.push(Constants.Root.areaToCheck);
     } else {
@@ -757,31 +838,38 @@
     const additional = additionalExclusions ? `, ${additionalExclusions}` : '';
 
     let list = [];
-    root.flat().filter(Boolean)?.forEach((r) => {
-      const shadowComponents = r?.querySelectorAll('[data-sa11y-has-shadow-root]');
-      const shadow = shadowComponents ? ', [data-sa11y-has-shadow-root]' : '';
+    root
+      .flat()
+      .filter(Boolean)
+      ?.forEach((r) => {
+        const shadowComponents = r?.querySelectorAll('[data-sa11y-has-shadow-root]');
+        const shadow = shadowComponents ? ', [data-sa11y-has-shadow-root]' : '';
 
-      // 1. Elements array includes web components in the selector to be used as a placeholder.
-      const elements = Array.from(r.querySelectorAll(`:is(${selector}${shadow}):not(${exclusions}${additional})`));
-      if (shadowComponents.length) {
-        // 2. Dive into each shadow root and collect an array of its results.
-        const shadowFind = [];
-        elements.forEach((el, i) => {
-          if (el && el.matches && el.matches('[data-sa11y-has-shadow-root]') && el.shadowRoot) {
-            shadowFind[i] = el.shadowRoot.querySelectorAll(`:is(${selector}):not(${exclusions}${additional})`);
-          }
-        });
-        // 3. Replace the placeholder with any hits found in the shadow root.
-        if (shadowFind.length > 0) {
-          for (let index = shadowFind.length - 1; index >= 0; index--) {
-            if (shadowFind[index]) {
-              elements.splice(index, 1, ...shadowFind[index]);
+        // 1. Elements array includes web components in the selector to be used as a placeholder.
+        const elements = Array.from(
+          r.querySelectorAll(`:is(${selector}${shadow}):not(${exclusions}${additional})`),
+        );
+        if (shadowComponents.length) {
+          // 2. Dive into each shadow root and collect an array of its results.
+          const shadowFind = [];
+          elements.forEach((el, i) => {
+            if (el?.matches?.('[data-sa11y-has-shadow-root]') && el?.shadowRoot) {
+              shadowFind[i] = el.shadowRoot.querySelectorAll(
+                `:is(${selector}):not(${exclusions}${additional})`,
+              );
+            }
+          });
+          // 3. Replace the placeholder with any hits found in the shadow root.
+          if (shadowFind.length > 0) {
+            for (let index = shadowFind.length - 1; index >= 0; index--) {
+              if (shadowFind[index]) {
+                elements.splice(index, 1, ...shadowFind[index]);
+              }
             }
           }
         }
-      }
-      list = list.concat(elements.filter((node) => node.parentNode.tagName !== 'SLOT'));
-    });
+        list = list.concat(elements.filter((node) => node.parentNode.tagName !== 'SLOT'));
+      });
 
     // 4. Return the cleaned up array, filtering out <slot> placeholders.
     return list;
@@ -808,23 +896,33 @@
     const style = getComputedStyle(element);
 
     // Modern technique: clip-path inset(50%).
-    if (style.getPropertyValue('clip-path').startsWith('inset(50%)')) return true;
+    if (style.getPropertyValue('clip-path').startsWith('inset(50%)')) {
+      return true;
+    }
 
     // Legacy clipping.
-    if (style.clip === 'rect(1px, 1px, 1px, 1px)'
-      || style.clip === 'rect(0px, 0px, 0px, 0px)') return true;
+    if (style.clip === 'rect(1px, 1px, 1px, 1px)' || style.clip === 'rect(0px, 0px, 0px, 0px)') {
+      return true;
+    }
 
     // Large text-indent offscreen.
     const indent = parseInt(style.textIndent, 10);
-    if (!Number.isNaN(indent) && Math.abs(indent) > 5000) return true;
+    if (!Number.isNaN(indent) && Math.abs(indent) > 5000) {
+      return true;
+    }
 
     // Tiny box offscreen.
-    if (style.overflow === 'hidden'
-      && parseFloat(style.width) < 2 && parseFloat(style.height) < 2) return true;
+    if (style.overflow === 'hidden' && parseFloat(style.width) < 2 && parseFloat(style.height) < 2) {
+      return true;
+    }
 
     // Absolute positioned far offscreen.
-    if (style.position === 'absolute'
-      && ['left', 'right', 'top', 'bottom'].some((p) => Math.abs(parseInt(style[p], 10)) > 5000)) return true;
+    if (
+      style.position === 'absolute' &&
+      ['left', 'right', 'top', 'bottom'].some((p) => Math.abs(parseInt(style[p], 10)) > 5000)
+    ) {
+      return true;
+    }
 
     // Font size 1px or 0px.
     return parseFloat(style.fontSize) < 2;
@@ -845,8 +943,12 @@
    * @returns {boolean} `true` if the element is visually hidden or hidden, `false` otherwise.
    */
   function isElementVisuallyHiddenOrHidden(element) {
-    if ((element.offsetWidth === 0 && element.offsetHeight === 0)
-      || (element.clientHeight === 1 && element.clientWidth === 1)) return true;
+    if (
+      (element.offsetWidth === 0 && element.offsetHeight === 0) ||
+      (element.clientHeight === 1 && element.clientWidth === 1)
+    ) {
+      return true;
+    }
     return isElementHidden(element);
   }
 
@@ -858,7 +960,23 @@
   function escapeHTML(string) {
     const div = document.createElement('div');
     div.textContent = string;
-    return div.innerHTML.replaceAll('"', '&quot;').replaceAll("'", '&#039;').replaceAll('`', '&#x60;');
+    return div.innerHTML
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;')
+      .replaceAll('`', '&#x60;');
+  }
+
+  /**
+   * Removes non-alphanumeric characters from a string—except for dots, slashes,
+   * and underscores—and normalizes whitespace.
+   * @param {string} string - The input text to be sanitized.
+   * @returns {string} The sanitized and trimmed string.
+   */
+  function stripSpecialCharacters(string) {
+    return string
+      .replace(/[^\w\s./]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   /**
@@ -893,7 +1011,9 @@
     const allElements = Array.from(tempDiv.getElementsByTagName('*'));
     allElements.forEach((element) => {
       Array.from(element.attributes).forEach((attr) => {
-        if (attr.name.startsWith('on')) element.removeAttribute(attr.name);
+        if (attr.name.startsWith('on')) {
+          element.removeAttribute(attr.name);
+        }
       });
       if (!allowStyles) {
         element.removeAttribute('style');
@@ -909,14 +1029,17 @@
    * @param {Array[]} selectors The selector to match elements to be excluded from the clone. Optional.
    * @returns {Element} The cloned element with excluded elements removed.
    */
-  function fnIgnore(element, selectors = []) {
-    const defaultIgnored = ['noscript', 'script', 'style', 'audio', 'video', 'form', 'iframe'];
-    const ignore = [...defaultIgnored, ...selectors].join(', ');
+  function fnIgnore(element, selectors) {
+    let ignoreQuery = 'noscript,script,style,audio,video,form,iframe';
+    if (selectors && selectors.length > 0) {
+      ignoreQuery = `${ignoreQuery},${selectors.join(',')}`;
+    }
     const clone = element.cloneNode(true);
-    const exclude = Array.from(clone.querySelectorAll(ignore));
-    exclude.forEach(($el) => {
-      $el.parentElement.removeChild($el);
-    });
+    const toRemove = clone.querySelectorAll(ignoreQuery);
+    let i = toRemove.length;
+    while (i--) {
+      toRemove[i].remove();
+    }
     return clone;
   }
 
@@ -927,9 +1050,14 @@
    */
   const gotText = new WeakMap();
   function getText(element) {
-    if (gotText.has(element)) return gotText.get(element);
+    if (gotText.has(element)) {
+      return gotText.get(element);
+    }
     const ignore = fnIgnore(element);
-    const text = ignore.textContent.replace(/[\r\n]+/g, '').replace(/\s+/g, ' ').trim();
+    const text = ignore.textContent
+      .replace(/[\r\n]+/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
     gotText.set(element, text);
     return text;
   }
@@ -940,7 +1068,10 @@
    * @returns {string} String with line breaks and extra white space removed.
    */
   function removeWhitespace(string) {
-    return string.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
+    return string
+      .replace(/[\r\n]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   /**
@@ -959,7 +1090,7 @@
    * @param  {String} key
    * @param  {string} value
    * @return {String} Return key.
-  */
+   */
   const store = {
     getItem(key) {
       try {
@@ -967,7 +1098,7 @@
           return sessionStorage.getItem(key);
         }
         return localStorage.getItem(key);
-      } catch (error) {
+      } catch {
         // Cookies totally disabled.
         return false;
       }
@@ -975,7 +1106,7 @@
     setItem(key, value) {
       try {
         localStorage.setItem(key, value);
-      } catch (error) {
+      } catch {
         sessionStorage.setItem(key, value);
       }
       return true;
@@ -983,7 +1114,7 @@
     removeItem(key) {
       try {
         localStorage.removeItem(key);
-      } catch (error) {
+      } catch {
         sessionStorage.removeItem(key);
       }
       return true;
@@ -996,7 +1127,9 @@
    * @returns {string} The truncated string with a maximum of 256 characters.
    */
   function prepareDismissal(string) {
-    return String(string).replace(/([^0-9a-zA-Z])/g, '').substring(0, 256);
+    return String(string)
+      .replace(/([^0-9a-zA-Z])/g, '')
+      .substring(0, 256);
   }
 
   /**
@@ -1005,10 +1138,7 @@
    * @returns {void}
    */
   function remove(elements, root) {
-    const allElements = find(
-      `${elements}`,
-      `${root}`,
-    );
+    const allElements = find(`${elements}`, `${root}`);
     allElements.forEach(($el) => {
       $el?.parentNode?.removeChild($el);
     });
@@ -1026,12 +1156,19 @@
     const resolveUrl = (src) => (src ? new URL(src, window.location.href).href : null);
 
     const dataSrc = getLastSrc(element.getAttribute('data-src') || element.getAttribute('srcset'));
-    if (dataSrc) return resolveUrl(dataSrc);
+    if (dataSrc) {
+      return resolveUrl(dataSrc);
+    }
 
-    const picture = element.closest('picture')?.querySelector('source[srcset]')?.getAttribute('srcset');
+    const picture = element
+      .closest('picture')
+      ?.querySelector('source[srcset]')
+      ?.getAttribute('srcset');
     const pictureSrc = getLastSrc(picture);
 
-    if (pictureSrc) return resolveUrl(pictureSrc);
+    if (pictureSrc) {
+      return resolveUrl(pictureSrc);
+    }
     return resolveUrl(element.getAttribute('src'));
   }
 
@@ -1039,20 +1176,38 @@
    * Check if an element's visible text is included in the accessible name.
    * To minimize false positives: iterate through all child nodes of the element, checking for visibility.
    * @param {element} $el The element to test.
+   * @param {string} accName The computed accessible name of the element.
+   * @param {Array} exclusions Array of exclusions.
+   * @param {Array} linkIgnoreStrings Array of string exclusions.
    * @returns {boolean}
    */
-  function isVisibleTextInAccessibleName($el) {
+  function isVisibleTextInAccName($el, accName, exclusions = [], linkIgnoreStrings) {
     let text = '';
-    const accName = computeAccessibleName($el).toLowerCase();
-    const nodes = $el.childNodes;
-    nodes.forEach((node) => {
+
+    // Prep exclusions.
+    const excludeSelector = exclusions?.length ? exclusions.join(',') : '';
+    const ignoreStrings = Array.isArray(linkIgnoreStrings) ? linkIgnoreStrings : null;
+    const stripIgnored = (value = '') =>
+      ignoreStrings ? ignoreStrings.reduce((result, str) => result.replace(str, ''), value) : value;
+
+    // Iterate though each child node.
+    $el.childNodes.forEach((node) => {
       if (node.nodeType === Node.TEXT_NODE) {
-        text += node.textContent;
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        // Only return text content if it's not hidden.
-        if (!isElementVisuallyHiddenOrHidden(node)) {
-          text += node.textContent;
-        }
+        text += stripIgnored(node.textContent);
+      }
+
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        return;
+      }
+
+      // Exclusions based on matched selectors.
+      if (excludeSelector && node.matches(excludeSelector)) {
+        return;
+      }
+
+      // Only return text content if it's not hidden.
+      if (!isElementVisuallyHiddenOrHidden(node)) {
+        text += stripIgnored(getText(node));
       }
     });
 
@@ -1069,7 +1224,7 @@
     }
 
     // Check if visible text is included in accessible name.
-    return visibleText.length !== 0 && !accName.includes(visibleText);
+    return visibleText.length !== 0 && !accName.toLowerCase().includes(visibleText);
   }
 
   /**
@@ -1082,7 +1237,9 @@
     href = removeWhitespace(href).toLowerCase();
 
     // Remove trailing slash if it exists.
-    if (href.endsWith('/')) href = href.slice(0, -1);
+    if (href.endsWith('/')) {
+      href = href.slice(0, -1);
+    }
 
     // Remove protocol and www., without affecting subdomains.
     href = href.replace(/^https?:\/\/(www\.)?/, '');
@@ -1203,7 +1360,7 @@
   		'a[href][aria-labelledby] img, button[aria-labelledby] img',
   	linkIgnore: '[aria-hidden][tabindex="-1"]',
   	linkIgnoreSpan: '.ed11y-element',
-  	linkIgnoreStrings: '',
+  	linkIgnoreStrings: [], // @todo 3.x this changed to array
   	ignoreContentOutsideRoots: false, // @todo cms was headingsOnlyFromCheckRoots
 
   	// Control panel settings
@@ -1250,8 +1407,7 @@
 
   	// Contrast
   	contrastPlugin: false,
-  	contrastAAA: false,
-  	contrastAPCA: false,
+  	contrastAlgorithm: 'AA',
 
   	// Other plugins
   	customChecks: false,
@@ -1624,29 +1780,35 @@
       Found.Everything = find('*', 'root', Constants.Exclusions.Sa11yElements);
 
       Found.Contrast = Found.Everything.filter(($el) => {
-        const matchesSelector = Constants.Exclusions.Contrast.some((exclusion) => $el.matches(exclusion));
+        const matchesSelector = Constants.Exclusions.Contrast.some((exclusion) =>
+          $el.matches(exclusion),
+        );
         return !matchesSelector && !Constants.Exclusions.Contrast.includes($el);
       });
 
-      Found.Images = Found.Everything.filter(($el) => $el.tagName === 'IMG'
-        && !Constants.Exclusions.Images.some((selector) => $el.matches(selector)));
+      Found.Images = Found.Everything.filter(
+        ($el) =>
+          $el.tagName === 'IMG' &&
+          !Constants.Exclusions.Images.some((selector) => $el.matches(selector)),
+      );
 
-      Found.Links = Found.Everything.filter(($el) => ($el.tagName === 'A' || $el.tagName === 'a')
-        && $el.hasAttribute('href')
-        && !$el.matches('[role="button"]') // Exclude links with [role="button"]
-        && !Constants.Exclusions.Links.some((selector) => $el.matches(selector)));
+      Found.Links = Found.Everything.filter(
+        ($el) =>
+          ($el.tagName === 'A' || $el.tagName === 'a') &&
+          $el.hasAttribute('href') &&
+          !$el.matches('[role="button"]') && // Exclude links with [role="button"]
+          !Constants.Exclusions.Links.some((selector) => $el.matches(selector)),
+      );
 
       // We want headings from the entire document for the Page Outline.
       Found.Headings = find(
         'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
-        option.ignoreContentOutsideRoots || option.fixedRoots
-          ? 'root' : 'document',
+        option.ignoreContentOutsideRoots || option.fixedRoots ? 'root' : 'document',
         Constants.Exclusions.Headings,
       );
       Found.HeadingOne = find(
         'h1, [role="heading"][aria-level="1"]',
-        option.ignoreContentOutsideRoots || option.fixedRoots
-          ? 'root' : 'document',
+        option.ignoreContentOutsideRoots || option.fixedRoots ? 'root' : 'document',
         Constants.Exclusions.Headings,
       );
 
@@ -1654,8 +1816,11 @@
       Found.HeadingOverrideEnd = new WeakMap();
       if (option.initialHeadingLevel) {
         option.initialHeadingLevel.forEach((section) => {
-          const headingsInSection = find(`${section.selector} :is(h1,h2,h3,h4,h5,h6,[aria-role=heading][aria-level])`, option.ignoreContentOutsideRoots || option.fixedRoots
-            ? 'root' : 'document', Constants.Exclusions.Headings);
+          const headingsInSection = find(
+            `${section.selector} :is(h1,h2,h3,h4,h5,h6,[aria-role=heading][aria-level])`,
+            option.ignoreContentOutsideRoots || option.fixedRoots ? 'root' : 'document',
+            Constants.Exclusions.Headings,
+          );
           if (headingsInSection.length > 0) {
             Found.HeadingOverrideStart.set(headingsInSection[0], section.previousHeading);
             Found.HeadingOverrideEnd.set(headingsInSection.pop(), section.previousHeading);
@@ -1664,23 +1829,35 @@
       }
 
       // Excluded via headerIgnore.
-      Found.ExcludedHeadings = Found.Headings.filter((heading) => Constants.Exclusions.Headings.some((exclusion) => heading.matches(exclusion)));
+      Found.ExcludedHeadings = Found.Headings.filter((heading) =>
+        Constants.Exclusions.Headings.some((exclusion) => heading.matches(exclusion)),
+      );
 
       // Excluded via outlineIgnore.
-      Found.ExcludedOutlineHeadings = Found.Headings.filter((heading) => Constants.Exclusions.Outline.some((exclusion) => heading.matches(exclusion)));
+      Found.ExcludedOutlineHeadings = Found.Headings.filter((heading) =>
+        Constants.Exclusions.Outline.some((exclusion) => heading.matches(exclusion)),
+      );
 
       // Merge both headerIgnore and outlineIgnore.
-      Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(Elements.Found.ExcludedHeadings);
+      Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(
+        Elements.Found.ExcludedHeadings,
+      );
 
       // Quality assurance module.
-      Found.Paragraphs = Found.Everything.filter(($el) => $el.tagName === 'P'
-        && !$el.closest('table'));
+      Found.Paragraphs = Found.Everything.filter(
+        ($el) => $el.tagName === 'P' && !$el.closest('table'),
+      );
 
       Found.Lists = Found.Everything.filter(($el) => $el.tagName === 'LI');
 
       Found.Blockquotes = Found.Everything.filter(($el) => $el.tagName === 'BLOCKQUOTE');
 
-      Found.Tables = Found.Everything.filter(($el) => $el.tagName === 'TABLE' && !$el.matches('[role="presentation"]') && !$el.matches('[role="none"]'));
+      Found.Tables = Found.Everything.filter(
+        ($el) =>
+          $el.tagName === 'TABLE' &&
+          !$el.matches('[role="presentation"]') &&
+          !$el.matches('[role="none"]'),
+      );
 
       Found.StrongItalics = Found.Everything.filter(($el) => ['STRONG', 'EM'].includes($el.tagName));
 
@@ -1688,11 +1865,15 @@
 
       const badLinkSources = option.checks.QA_BAD_LINK.sources;
       Found.CustomErrorLinks = badLinkSources.length
-        ? Found.Links.filter(($el) => badLinkSources.split(',').some((selector) => $el.matches(selector.trim()))) : [];
+        ? Found.Links.filter(($el) =>
+            badLinkSources.split(',').some((selector) => $el.matches(selector.trim())),
+          )
+        : [];
 
       // Readability.
-      const readabilityExclusions = ($el) => Constants.Root.Readability.some((rootEl) => rootEl.contains($el))
-        && !Constants.Exclusions.Readability.some((selector) => $el.matches(selector));
+      const readabilityExclusions = ($el) =>
+        Constants.Root.Readability.some((rootEl) => rootEl.contains($el)) &&
+        !Constants.Exclusions.Readability.some((selector) => $el.matches(selector));
 
       Found.Readability = [
         ...Found.Paragraphs.filter(readabilityExclusions),
@@ -1702,26 +1883,40 @@
       // Developer checks.
       const nestedSources = option.checks.QA_NESTED_COMPONENTS.sources || '[role="tablist"], details';
       Found.NestedComponents = nestedSources
-        ? Found.Everything.filter(($el) => $el.matches(nestedSources)) : [];
+        ? Found.Everything.filter(($el) => $el.matches(nestedSources))
+        : [];
 
-      Found.TabIndex = Found.Everything.filter(($el) => $el.hasAttribute('tabindex')
-        && $el.getAttribute('tabindex') !== '0'
-        && !$el.getAttribute('tabindex').startsWith('-'));
+      Found.TabIndex = Found.Everything.filter(
+        ($el) =>
+          $el.hasAttribute('tabindex') &&
+          $el.getAttribute('tabindex') !== '0' &&
+          !$el.getAttribute('tabindex').startsWith('-'),
+      );
 
       Found.Svg = Found.Everything.filter(($el) => $el.tagName === 'svg');
 
-      Found.Buttons = Found.Everything.filter(($el) => $el.tagName === 'BUTTON' || $el.matches('[role="button"]'));
+      Found.Buttons = Found.Everything.filter(
+        ($el) => $el.tagName === 'BUTTON' || $el.matches('[role="button"]'),
+      );
 
-      Found.Inputs = Found.Everything.filter(($el) => ['INPUT', 'SELECT', 'TEXTAREA', 'METER', 'PROGRESS'].includes($el.tagName));
+      Found.Inputs = Found.Everything.filter(($el) =>
+        ['INPUT', 'SELECT', 'TEXTAREA', 'METER', 'PROGRESS'].includes($el.tagName),
+      );
 
       Found.Labels = Found.Everything.filter(($el) => $el.tagName === 'LABEL');
 
       // iFrames.
-      Found.iframes = Found.Everything.filter(($el) => ['IFRAME', 'AUDIO', 'VIDEO'].includes($el.tagName));
+      Found.iframes = Found.Everything.filter(($el) =>
+        ['IFRAME', 'AUDIO', 'VIDEO'].includes($el.tagName),
+      );
       Found.Videos = Found.iframes.filter(($el) => $el.matches(Constants.Global.VideoSources));
       Found.Audio = Found.iframes.filter(($el) => $el.matches(Constants.Global.AudioSources));
-      Found.Visualizations = Found.iframes.filter(($el) => $el.matches(Constants.Global.VisualizationSources));
-      Found.EmbeddedContent = Found.iframes.filter(($el) => !$el.matches(Constants.Global.AllEmbeddedContent));
+      Found.Visualizations = Found.iframes.filter(($el) =>
+        $el.matches(Constants.Global.VisualizationSources),
+      );
+      Found.EmbeddedContent = Found.iframes.filter(
+        ($el) => !$el.matches(Constants.Global.AllEmbeddedContent),
+      );
 
       // Query select <HTML> given that the lang may change on an SPA.
       const html = document.querySelector('html');
@@ -1745,7 +1940,7 @@
       initializeAnnotations,
       Annotations,
     };
-  }());
+  })();
 
   /*
   * Replaces Sa11y finder with one that does not insert CSS.
@@ -2355,13 +2550,16 @@ URL: ${url}</pre>
       // Get accessible name of heading.
       const accName = computeAccessibleName($el, Constants.Exclusions.HeaderSpan);
       const stringMatchExclusions = option.headerIgnoreStrings
-        ? accName.replace(option.headerIgnoreStrings, '') : accName;
+        ? accName.replace(option.headerIgnoreStrings, '')
+        : accName;
       const removeWhitespace$1 = removeWhitespace(stringMatchExclusions);
       const headingText = sanitizeHTML(removeWhitespace$1);
 
       // Check if heading is within root target area.
       const rootContainsHeading = Constants.Root.areaToCheck.some((root) => root.contains($el));
-      const rootContainsShadowHeading = Constants.Root.areaToCheck.some((root) => root.contains($el.getRootNode().host));
+      const rootContainsShadowHeading = Constants.Root.areaToCheck.some((root) =>
+        root.contains($el.getRootNode().host),
+      );
       const isWithinRoot = rootContainsHeading || rootContainsShadowHeading;
 
       // Check if heading starts an override zone.
@@ -2391,9 +2589,14 @@ URL: ${url}</pre>
             if (option.checks.HEADING_EMPTY_WITH_IMAGE) {
               test = 'HEADING_EMPTY_WITH_IMAGE';
               type = option.checks.HEADING_EMPTY_WITH_IMAGE.type || 'error';
-              content = Lang.sprintf(option.checks.HEADING_EMPTY_WITH_IMAGE.content || 'HEADING_EMPTY_WITH_IMAGE', level);
+              content = Lang.sprintf(
+                option.checks.HEADING_EMPTY_WITH_IMAGE.content || 'HEADING_EMPTY_WITH_IMAGE',
+                level,
+              );
               developer = option.checks.HEADING_EMPTY_WITH_IMAGE.developer || false;
-              dismissAll = option.checks.HEADING_EMPTY_WITH_IMAGE.dismissAll ? 'HEADING_EMPTY_WITH_IMAGE' : false;
+              dismissAll = option.checks.HEADING_EMPTY_WITH_IMAGE.dismissAll
+                ? 'HEADING_EMPTY_WITH_IMAGE'
+                : false;
               margin = '-15px 30px';
             }
           }
@@ -2409,9 +2612,18 @@ URL: ${url}</pre>
         if (option.checks.HEADING_SKIPPED_LEVEL) {
           test = 'HEADING_SKIPPED_LEVEL';
           type = option.checks.HEADING_SKIPPED_LEVEL.type || 'error';
-          content = Lang.sprintf(option.checks.HEADING_SKIPPED_LEVEL.content || 'HEADING_SKIPPED_LEVEL', prevLevel, level, truncateString(headingText, 60), truncateString(prevHeadingText, 60), prevLevel + 1);
+          content = Lang.sprintf(
+            option.checks.HEADING_SKIPPED_LEVEL.content || 'HEADING_SKIPPED_LEVEL',
+            prevLevel,
+            level,
+            truncateString(headingText, 60),
+            truncateString(prevHeadingText, 60),
+            prevLevel + 1,
+          );
           developer = option.checks.HEADING_SKIPPED_LEVEL.developer || false;
-          dismissAll = option.checks.HEADING_SKIPPED_LEVEL.dismissAll ? 'HEADING_SKIPPED_LEVEL' : false;
+          dismissAll = option.checks.HEADING_SKIPPED_LEVEL.dismissAll
+            ? 'HEADING_SKIPPED_LEVEL'
+            : false;
         }
       } else if (i === 0 && level !== 1 && level !== 2) {
         if (option.checks.HEADING_FIRST) {
@@ -2425,7 +2637,11 @@ URL: ${url}</pre>
         if (option.checks.HEADING_LONG) {
           test = 'HEADING_LONG';
           type = option.checks.HEADING_LONG.type || 'warning';
-          content = Lang.sprintf(option.checks.HEADING_LONG.content || 'HEADING_LONG', maxHeadingLength, headingLength);
+          content = Lang.sprintf(
+            option.checks.HEADING_LONG.content || 'HEADING_LONG',
+            maxHeadingLength,
+            headingLength,
+          );
           developer = option.checks.HEADING_LONG.developer || false;
           dismissAll = option.checks.HEADING_LONG.dismissAll ? 'HEADING_LONG' : false;
         }
@@ -2477,139 +2693,141 @@ URL: ${url}</pre>
     return { results, headingOutline };
   }
 
+  // Link that points to a file type and indicates as such.
+  const defaultFileTypes = [
+    'pdf',
+    'doc',
+    'docx',
+    'word',
+    'mp3',
+    'ppt',
+    'text',
+    'pptx',
+    'txt',
+    'exe',
+    'dmg',
+    'rtf',
+    'windows',
+    'macos',
+    'csv',
+    'xls',
+    'xlsx',
+    'mp4',
+    'mov',
+    'avi',
+    'zip',
+  ];
+
+  const cssFileTypeSelectors =
+    'a[href$=".pdf"], a[href$=".doc"], a[href$=".docx"], a[href$=".zip"], a[href$=".mp3"], a[href$=".txt"], a[href$=".exe"], a[href$=".dmg"], a[href$=".rtf"], a[href$=".pptx"], a[href$=".ppt"], a[href$=".xls"], a[href$=".xlsx"], a[href$=".csv"], a[href$=".mp4"], a[href$=".mov"], a[href$=".avi"]';
+
+  // Regex pattern for common citations/publications.
+  const citationPattern =
+    /(doi\.org\/|dl\.acm\.org\/|link\.springer\.com\/|pubmed\.ncbi\.nlm\.nih\.gov\/|scholar\.google\.com\/|ieeexplore\.ieee\.org\/|researchgate\.net\/publication\/|sciencedirect\.com\/science\/article\/)[a-z0-9/.-]+/i;
+
+  // Regex pattern for common URL endings.
+  const urlEndings =
+    /\b(?:\.edu\/|\.gob\/|\.gov\/|\.app\/|\.com\/|\.net\/|\.org\/|\.us\/|\.ca\/|\.de\/|\.icu\/|\.uk\/|\.ru\/|\.info\/|\.top\/|\.xyz\/|\.tk\/|\.cn\/|\.ga\/|\.cf\/|\.nl\/|\.io\/|\.fr\/|\.pe\/|\.nz\/|\.pt\/|\.es\/|\.pl\/|\.ua\/)\b/i;
+
+  // Regex pattern to match any special characters (that isn't alpha numeric)
+  const specialCharPattern = /[^a-zA-Z0-9]/g;
+
+  // Regex pattern to match HTML symbols commonly used as CTAs in link text.
+  const htmlSymbols = /([<>↣↳←→↓«»↴]+)/;
+
+  // Utility function for exact stop word matches.
+  const checkStopWords = (textContent, stopWordsSet) => {
+    const testTextContent = textContent.replace(/\./g, '').toLowerCase();
+    if (stopWordsSet.has(testTextContent)) return textContent;
+    return null;
+  };
+
+  // Main check link text function.
   function checkLinkText(results, option) {
-    // List of partial alt stop words.
-    const linkStopWords = option.linkStopWords
-      ? [...Lang._('PARTIAL_ALT_STOPWORDS'), ...option.linkStopWords.split(',').map((word) => word.trim())]
-      : Lang._('PARTIAL_ALT_STOPWORDS');
+    // Generate full list of stop words.
+    const customStopWords = option.linkStopWords
+      ? option.linkStopWords.split(',').map((word) => word.toLowerCase().trim())
+      : [];
+    const linkStopWords = new Set([...Lang._('PARTIAL_ALT_STOPWORDS'), ...customStopWords]);
 
-    // Utility function to strip all space and special chars except forward slash.
-    const stripSpecialCharacters = (string) => string.replace(/[^\w\s./]/g, '').replace(/\s+/g, ' ').trim();
+    // Generate 'click' regex pattern.
+    const clickRegex = new RegExp(
+      Lang._('CLICK')
+        .map((word) => `\\b${word}\\b`)
+        .join('|'),
+      'i',
+    );
 
-    // Utility function to check if text contains stop words.
-    const checkStopWords = (textContent, stopWords) => {
-      const testTextContent = textContent.replace(/\./g, '').toLowerCase();
-      let matchedWord = null;
-      stopWords.forEach((word) => {
-        if (testTextContent.length === word.length && testTextContent.indexOf(word.toLowerCase()) >= 0) {
-          matchedWord = word;
-        }
-      });
-      return matchedWord;
-    };
+    // Generate 'new window' phrases regex pattern.
+    const newWindowRegex = new RegExp(
+      Lang._('NEW_WINDOW_PHRASES')
+        .map((word) => `\\b${word}\\b`)
+        .join('|'),
+      'i',
+    );
 
-    // Check for stop words.
-    const containsLinkTextStopWords = (textContent) => {
-      const hit = [null, null, null, null];
+    // Generate file type phrases regex pattern.
+    const fileTypeRegex = new RegExp(
+      defaultFileTypes
+        .concat(Lang._('FILE_TYPE_PHRASES'))
+        .map((word) => `\\b${word}\\b`)
+        .join('|'),
+      'i',
+    );
 
-      hit[0] = checkStopWords(textContent, linkStopWords);
+    // Generate linkIgnoreStrings set.
+    const linkIgnoreStrings = new Set(option.linkIgnoreStrings.map((word) => word.toLowerCase()));
+    const ignorePattern = option.linkIgnoreStrings?.length
+      ? new RegExp(option.linkIgnoreStrings.join('|'), 'gi')
+      : null;
 
-      // When link text contains "click".
-      Lang._('CLICK').forEach((word) => {
-        const regex = new RegExp(`\\b${word}\\b`, 'i'); // Word boundary.
-        if (regex.test(textContent)) {
-          hit[1] = word;
-        }
-        return false;
-      });
-
-      // Flag citations/references. Check if link text matches a publication source.
-      const doi = [
-        'doi.org/',
-        'dl.acm.org/',
-        'link.springer.com/',
-        'pubmed.ncbi.nlm.nih.gov/',
-        'scholar.google.com/',
-        'ieeexplore.ieee.org/',
-        'researchgate.net/publication/',
-        'sciencedirect.com/science/article/',
-      ];
-      doi.forEach((word) => {
-        if (textContent.toLowerCase().indexOf(word) >= 0) {
-          hit[2] = word;
-        }
-        return false;
-      });
-
-      // URL starts with.
-      ['www.', 'http'].forEach((word) => {
-        if (textContent.toLowerCase().startsWith(word)) {
-          hit[3] = word;
-        }
-        return false;
-      });
-
-      // Flag link containing these typical URL endings.
-      const urlEndings = ['.edu/', '.com/', '.net/', '.org/', '.us/', '.ca/', '.de/', '.icu/', '.uk/', '.ru/', '.info/', '.top/', '.xyz/', '.tk/', '.cn/', '.ga/', '.cf/', '.nl/', '.io/', '.fr/', '.pe/', '.nz/', '.pt/', '.es/', '.pl/', '.ua/'];
-      urlEndings.forEach((word) => {
-        if (textContent.toLowerCase().indexOf(word) >= 0) {
-          hit[3] = word;
-        }
-        return false;
-      });
-
-      return hit;
-    };
-
+    // Start the loop!
     const seen = {};
     Elements.Found.Links.forEach(($el) => {
-      const href = standardizeHref($el);
-
-      // Link text based on COMPUTED ACCESSIBLE NAME.
-      const accName = removeWhitespace(computeAccessibleName($el, Constants.Exclusions.LinkSpan));
-      const linkText = Array.isArray(option.linkIgnoreStrings)
-        ? option.linkIgnoreStrings.reduce((result, str) => result.replace(str, ''), accName)
-        : accName;
-
-      // Ignore special characters (except forward slash).
-      const stripSpecialChars = stripSpecialCharacters(linkText);
-      const error = containsLinkTextStopWords(stripSpecialChars);
-
-      // Match special characters exactly 1 character in length.
-      const specialCharPattern = /[^a-zA-Z0-9]/g;
-      const isSingleSpecialChar = linkText.length === 1 && specialCharPattern.test(linkText);
-
-      // HTML symbols used as call to actions.
-      const htmlSymbols = /([<>↣↳←→↓«»↴]+)/;
-      const matches = linkText.match(htmlSymbols);
-      const matchedSymbol = matches ? matches[1] : null;
-
       // Attributes.
+      const href = standardizeHref($el);
       const titleAttr = $el.getAttribute('title');
       const ariaHidden = $el.getAttribute('aria-hidden') === 'true';
       const negativeTabindex = $el.getAttribute('tabindex') === '-1';
+      const targetBlank = $el.getAttribute('target')?.toLowerCase() === '_blank';
 
-      // Has ARIA.
-      const hasAria = $el.querySelector(':scope [aria-labelledby], :scope [aria-label]') || $el.getAttribute('aria-labelledby') || $el.getAttribute('aria-label');
-      const hasAriaLabelledby = $el.querySelector(':scope [aria-labelledby]') || $el.getAttribute('aria-labelledby');
+      // Get ARIA attributes: caches attributes and uses short-circuit logic to prevent redundant DOM queries.
+      const ariaLabel = $el.getAttribute('aria-label');
+      const ariaLabelledby = $el.getAttribute('aria-labelledby');
+      const childLabelledby = !ariaLabelledby ? $el.querySelector('[aria-labelledby]') : null;
+      const hasAriaLabelledby = ariaLabelledby || childLabelledby;
+      const hasAria = hasAriaLabelledby || ariaLabel || $el.querySelector('[aria-label]');
 
-      // New tab or new window.
-      const containsNewWindowPhrases = Lang._('NEW_WINDOW_PHRASES').some((pass) => accName.toLowerCase().includes(pass));
+      // Link text based on COMPUTED ACCESSIBLE NAME.
+      const accName = removeWhitespace(
+        computeAccessibleName($el, Constants.Exclusions.LinkSpan),
+      );
 
-      // If visible label contains word "click" (regardless of accessible name).
-      const containsClickPhrase = Lang._('CLICK').some((pass) => {
-        const regex = new RegExp(`\\b${pass}\\b`, 'i'); // Word boundary.
-        return regex.test($el.textContent);
-      });
+      // Strip away text from linkIgnoreStrings prop.
+      const linkText = ignorePattern ? accName.replace(ignorePattern, '') : accName;
 
-      // Link that points to a file type and indicates as such.
-      const defaultFileTypes = ['pdf', 'doc', 'docx', 'word', 'mp3', 'ppt', 'text', 'pptx', 'txt', 'exe', 'dmg', 'rtf', 'windows', 'macos', 'csv', 'xls', 'xlsx', 'mp4', 'mov', 'avi', 'zip'];
-      const fileTypes = defaultFileTypes.concat(Lang._('FILE_TYPE_PHRASES'));
+      // Accessible name (lower case) for regex matching.
+      const lowercaseLinkText = linkText.toLowerCase();
 
-      // Evaluate $el.textContent in addition to accessible name to bypass `linkIgnoreSpan` prop.
-      const containsFileTypePhrases = fileTypes.some((pass) => linkText.toLowerCase().includes(pass) || getText($el).toLowerCase().includes(pass));
-      const fileTypeMatch = $el.matches('a[href$=".pdf"], a[href$=".doc"], a[href$=".docx"], a[href$=".zip"], a[href$=".mp3"], a[href$=".txt"], a[href$=".exe"], a[href$=".dmg"], a[href$=".rtf"], a[href$=".pptx"], a[href$=".ppt"], a[href$=".xls"], a[href$=".xlsx"], a[href$=".csv"], a[href$=".mp4"], a[href$=".mov"], a[href$=".avi"]');
+      // Ignore special characters (except forward slash).
+      const normalized = stripSpecialCharacters(linkText).toLowerCase();
 
       // Remove whitespace and special characters to improve accuracy and minimize false positives.
-      const linkTextTrimmed = linkText.replace(/'|"|-|\.|\s+/g, '').toLowerCase();
+      const strippedLinkText = normalized.replace(/'|"|-|\.|\s+/g, '');
 
       // Original preserved text to lowercase.
-      const originalLinkText = $el.textContent.trim().toLowerCase();
+      const textContent = getText($el).toLowerCase();
+
+      // Shared tests.
+      const containsNewWindowPhrases = lowercaseLinkText.match(newWindowRegex)?.[0];
+      const containsFileTypePhrases =
+        lowercaseLinkText.match(fileTypeRegex)?.[0] || textContent.match(fileTypeRegex);
+      const fileTypeMatch = $el.matches(cssFileTypeSelectors);
 
       /**
-        * Don't overlap with Alt Text module.
-      */
-      if (!$el.querySelectorAll('img').length) {
+       * Don't overlap with Alt Text module.
+       */
+      if (!$el.querySelector('img')) {
         // Has aria-hidden.
         if (ariaHidden) {
           if (!negativeTabindex) {
@@ -2622,8 +2840,10 @@ URL: ${url}</pre>
                 content: Lang.sprintf(option.checks.HIDDEN_FOCUSABLE.content || 'HIDDEN_FOCUSABLE'),
                 inline: true,
                 position: 'afterend',
-                dismiss: prepareDismissal(`LINKHIDDENFOCUS${href + linkTextTrimmed}`),
-                dismissAll: option.checks.HIDDEN_FOCUSABLE.dismissAll ? 'LINK_HIDDEN_FOCUSABLE' : false,
+                dismiss: prepareDismissal(`LINKHIDDENFOCUS${href + strippedLinkText}`),
+                dismissAll: option.checks.HIDDEN_FOCUSABLE.dismissAll
+                  ? 'LINK_HIDDEN_FOCUSABLE'
+                  : false,
                 developer: option.checks.HIDDEN_FOCUSABLE.developer || true,
               });
             }
@@ -2632,50 +2852,8 @@ URL: ${url}</pre>
         }
 
         /**
-         * If link text is only "new window" or similar phrases.
-        */
-        let oneStop;
-        const addStopWordResult = (element, stopword) => {
-          if (option.checks.LINK_STOPWORD && !oneStop) {
-            oneStop = true;
-            results.push({
-              test: 'LINK_STOPWORD',
-              element,
-              type: option.checks.LINK_STOPWORD.type || 'error',
-              content: option.checks.LINK_STOPWORD.content
-                ? Lang.sprintf(option.checks.LINK_STOPWORD.content, stopword)
-                : Lang.sprintf('LINK_STOPWORD', stopword) + Lang.sprintf('LINK_TIP'),
-              inline: true,
-              position: 'afterend',
-              dismiss: prepareDismissal(`LINKSTOPWORD${href + linkTextTrimmed}`),
-              dismissAll: option.checks.LINK_STOPWORD.dismissAll ? 'LINK_STOPWORD' : false,
-              developer: option.checks.LINK_STOPWORD.developer || false,
-            });
-          }
-        };
-
-        // If link text is ONLY "new window" or similar phrases.
-        if (containsNewWindowPhrases) {
-          const matchedPhrase = Lang._('NEW_WINDOW_PHRASES').find((phrase) => phrase.toLowerCase() === originalLinkText);
-          if (originalLinkText === matchedPhrase) {
-            addStopWordResult($el, matchedPhrase);
-          }
-        }
-
-        // If link text is ONLY strings that were passed in via prop.
-        let isLinkIgnoreStrings = false;
-        if (option.linkIgnoreStrings) {
-          option.linkIgnoreStrings.forEach((string) => {
-            if (originalLinkText === string.toLowerCase()) {
-              addStopWordResult($el, string);
-              isLinkIgnoreStrings = true;
-            }
-          });
-        }
-
-        /**
          * Links with ARIA
-        */
+         */
         if (hasAria && linkText.length !== 0) {
           // Computed accessible name,
           const sanitizedText = sanitizeHTML(linkText);
@@ -2683,12 +2861,18 @@ URL: ${url}</pre>
           // General warning for visible non-descript link text, regardless of ARIA label.
           const excludeSpan = fnIgnore($el, Constants.Exclusions.LinkSpan);
           const visibleLinkText = option.linkIgnoreStrings
-            ? getText(excludeSpan).replace(option.linkIgnoreStrings, '') : getText(excludeSpan);
+            ? getText(excludeSpan).replace(option.linkIgnoreStrings, '')
+            : getText(excludeSpan);
           const cleanedString = stripSpecialCharacters(visibleLinkText);
           const stopword = checkStopWords(cleanedString, linkStopWords);
 
           // Label in name.
-          const isVisibleTextInAccessibleName$1 = isVisibleTextInAccessibleName($el);
+          const visibleTextInName = isVisibleTextInAccName(
+            $el,
+            accName,
+            Constants.Exclusions.LinkSpan,
+            option.linkIgnoreStrings,
+          );
 
           // ARIA label contains stop word.
           if (option.checks.LINK_STOPWORD_ARIA && stopword !== null) {
@@ -2698,22 +2882,26 @@ URL: ${url}</pre>
               type: option.checks.LINK_STOPWORD_ARIA.type || 'warning',
               content: option.checks.LINK_STOPWORD_ARIA.content
                 ? Lang.sprintf(option.checks.LINK_STOPWORD_ARIA.content, stopword, sanitizedText)
-                : Lang.sprintf('LINK_STOPWORD_ARIA', stopword, sanitizedText) + Lang.sprintf('LINK_TIP'),
+                : Lang.sprintf('LINK_STOPWORD_ARIA', stopword, sanitizedText) +
+                  Lang.sprintf('LINK_TIP'),
               inline: true,
-              dismiss: prepareDismissal(`LINKSTOPWORDARIA${href + linkTextTrimmed}`),
+              dismiss: prepareDismissal(`LINKSTOPWORDARIA${href + strippedLinkText}`),
               dismissAll: option.checks.LINK_STOPWORD_ARIA.dismissAll ? ' LINK_STOPWORD_ARIA' : false,
               developer: option.checks.LINK_STOPWORD_ARIA.developer || true,
             });
-          } else if (option.checks.LABEL_IN_NAME && isVisibleTextInAccessibleName$1 && $el.textContent.length !== 0) {
+          } else if (option.checks.LABEL_IN_NAME && visibleTextInName && textContent.length !== 0) {
             // Link must have visible label as part of their accessible name.
             results.push({
               test: 'LABEL_IN_NAME',
               element: $el,
               type: option.checks.LABEL_IN_NAME.type || 'warning',
-              content: Lang.sprintf(option.checks.LABEL_IN_NAME.content || 'LABEL_IN_NAME', sanitizedText),
+              content: Lang.sprintf(
+                option.checks.LABEL_IN_NAME.content || 'LABEL_IN_NAME',
+                sanitizedText,
+              ),
               inline: true,
               position: 'afterend',
-              dismiss: prepareDismissal(`LINKLABELNAME${href + linkTextTrimmed}`),
+              dismiss: prepareDismissal(`LINKLABELNAME${href + strippedLinkText}`),
               dismissAll: option.checks.LABEL_IN_NAME.dismissAll ? 'BTN_LABEL_IN_NAME' : false,
               developer: option.checks.LABEL_IN_NAME.developer || true,
             });
@@ -2728,7 +2916,7 @@ URL: ${url}</pre>
                 : `${Lang.sprintf('ACC_NAME', sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`,
               inline: true,
               position: 'afterend',
-              dismiss: prepareDismissal(`LINKGOOD${href + linkTextTrimmed}`),
+              dismiss: prepareDismissal(`LINKGOOD${href + strippedLinkText}`),
               dismissAll: option.checks.LINK_LABEL.dismissAll ? 'LINK_LABEL' : false,
               developer: option.checks.LINK_LABEL.developer || true,
             });
@@ -2736,8 +2924,34 @@ URL: ${url}</pre>
         }
 
         /**
+         * If link text is only "new window" or similar phrases.
+         */
+        let oneStop;
+        const addStopWordResult = (element, stopword) => {
+          if (option.checks.LINK_STOPWORD && !oneStop) {
+            oneStop = true;
+            results.push({
+              test: 'LINK_STOPWORD',
+              element,
+              type: option.checks.LINK_STOPWORD.type || 'error',
+              content: option.checks.LINK_STOPWORD.content
+                ? Lang.sprintf(option.checks.LINK_STOPWORD.content, stopword)
+                : Lang.sprintf('LINK_STOPWORD', stopword) + Lang.sprintf('LINK_TIP'),
+              inline: true,
+              position: 'afterend',
+              dismiss: prepareDismissal(`LINKSTOPWORD${href + strippedLinkText}`),
+              dismissAll: option.checks.LINK_STOPWORD.dismissAll ? 'LINK_STOPWORD' : false,
+              developer: option.checks.LINK_STOPWORD.developer || false,
+            });
+          }
+        };
+
+        // Find exact stop word matches that are passed via linkIgnoreStrings prop.
+        const isLinkIgnoreStrings = checkStopWords(textContent, linkIgnoreStrings);
+
+        /**
          * Empty hyperlinks.
-        */
+         */
         if (linkText.length === 0) {
           if (hasAriaLabelledby) {
             // Has ariaLabelledby attribute but empty accessible name.
@@ -2746,11 +2960,15 @@ URL: ${url}</pre>
                 test: 'LINK_EMPTY_LABELLEDBY',
                 element: $el,
                 type: option.checks.LINK_EMPTY_LABELLEDBY.type || 'error',
-                content: Lang.sprintf(option.checks.LINK_EMPTY_LABELLEDBY.content || 'LINK_EMPTY_LABELLEDBY'),
+                content: Lang.sprintf(
+                  option.checks.LINK_EMPTY_LABELLEDBY.content || 'LINK_EMPTY_LABELLEDBY',
+                ),
                 inline: true,
                 position: 'afterend',
                 dismiss: prepareDismissal(`LINKEMPTYLABELLEDBY${href}`),
-                dismissAll: option.checks.LINK_EMPTY_LABELLEDBY.dismissAll ? 'LINK_EMPTY_LABELLEDBY' : false,
+                dismissAll: option.checks.LINK_EMPTY_LABELLEDBY.dismissAll
+                  ? 'LINK_EMPTY_LABELLEDBY'
+                  : false,
                 developer: option.checks.LINK_EMPTY_LABELLEDBY.developer || true,
               });
             }
@@ -2760,8 +2978,8 @@ URL: ${url}</pre>
             if (option.linkIgnoreSpan) {
               const spanEl = $el.querySelector(option.linkIgnoreSpan);
               if (spanEl) {
-                const spanText = stripSpecialCharacters(spanEl.textContent).trim().toLowerCase();
-                if (spanText === originalLinkText) {
+                const spanText = stripSpecialCharacters(spanEl.textContent).toLowerCase();
+                if (spanText === textContent) {
                   addStopWordResult($el, spanText);
                   hasStopWordWarning = true;
                 }
@@ -2774,11 +2992,15 @@ URL: ${url}</pre>
                 test: 'LINK_EMPTY_NO_LABEL',
                 element: $el,
                 type: option.checks.LINK_EMPTY_NO_LABEL.type || 'error',
-                content: Lang.sprintf(option.checks.LINK_EMPTY_NO_LABEL.content || 'LINK_EMPTY_NO_LABEL'),
+                content: Lang.sprintf(
+                  option.checks.LINK_EMPTY_NO_LABEL.content || 'LINK_EMPTY_NO_LABEL',
+                ),
                 inline: true,
                 position: 'afterend',
                 dismiss: prepareDismissal(`LINKEMPTYNOLABEL${href}`),
-                dismissAll: option.checks.LINK_EMPTY_NO_LABEL.dismissAll ? 'LINK_EMPTY_NO_LABEL' : false,
+                dismissAll: option.checks.LINK_EMPTY_NO_LABEL.dismissAll
+                  ? 'LINK_EMPTY_NO_LABEL'
+                  : false,
                 developer: option.checks.LINK_EMPTY_NO_LABEL.developer || false,
               });
             }
@@ -2796,9 +3018,42 @@ URL: ${url}</pre>
               developer: option.checks.LINK_EMPTY.developer || false,
             });
           }
-        } else if (error[0] !== null) {
-          addStopWordResult($el, error[0]);
-        } else if (error[2] !== null) {
+          return;
+        }
+
+        /**
+         * Alt quality/stop word checks.
+         */
+
+        // 1. Check for exact stop words.
+        const isStopWord = checkStopWords(normalized, linkStopWords);
+
+        // 2. Check for "click" words anywhere within string.
+        const hasClickWord = normalized.match(clickRegex)?.[0] || textContent.match(clickRegex)?.[0];
+
+        // 3. Check for citations/references.
+        const isCitation = normalized.match(citationPattern)?.[0];
+
+        // 4. If link text resembles a URL.
+        const urlCheck = normalized.startsWith('www.') || normalized.startsWith('http');
+        const isUrlFragment = urlCheck ? 'URL Prefix' : normalized.match(urlEndings)?.[0];
+
+        // 5. Match special characters exactly 1 character in length.
+        const isSingleSpecialChar = linkText.length === 1 && specialCharPattern.test(linkText);
+
+        // 6. Match HTML symbols.
+        const matchedSymbol = lowercaseLinkText.match(htmlSymbols)?.[0];
+
+        if (containsNewWindowPhrases === textContent) {
+          // If link text is ONLY "new window" or similar phrases.
+          addStopWordResult($el, containsNewWindowPhrases);
+        } else if (isLinkIgnoreStrings === textContent) {
+          // If link text is ONLY strings that were passed in via prop.
+          addStopWordResult($el, isLinkIgnoreStrings);
+        } else if (isStopWord) {
+          // Link is exact stop word.
+          addStopWordResult($el, isStopWord);
+        } else if (isCitation) {
           // Contains DOI URL in link text.
           if (linkText.length > 8) {
             if (option.checks.LINK_DOI) {
@@ -2808,13 +3063,13 @@ URL: ${url}</pre>
                 type: option.checks.LINK_DOI.type || 'warning',
                 content: Lang.sprintf(option.checks.LINK_DOI.content || 'LINK_DOI'),
                 inline: true,
-                dismiss: prepareDismissal(`LINKDOI${href + linkTextTrimmed}`),
+                dismiss: prepareDismissal(`LINKDOI${href + strippedLinkText}`),
                 dismissAll: option.checks.LINK_DOI.dismissAll ? 'LINK_DOI' : false,
                 developer: option.checks.LINK_DOI.developer || false,
               });
             }
           }
-        } else if (error[3] !== null) {
+        } else if (isUrlFragment) {
           // Contains URL in link text (for non ARIA links)
           if (!hasAria && linkText.length > (option.checks.LINK_URL.maxLength || 40)) {
             if (option.checks.LINK_URL) {
@@ -2826,7 +3081,7 @@ URL: ${url}</pre>
                   ? Lang.sprintf(option.checks.LINK_URL.content)
                   : Lang.sprintf('LINK_URL') + Lang.sprintf('LINK_TIP'),
                 inline: true,
-                dismiss: prepareDismissal(`LINKURLNAME${href + linkTextTrimmed}`),
+                dismiss: prepareDismissal(`LINKURLNAME${href + strippedLinkText}`),
                 dismissAll: option.checks.LINK_URL.dismissAll ? 'LINK_URL' : false,
                 developer: option.checks.LINK_URL.developer || false,
               });
@@ -2839,14 +3094,17 @@ URL: ${url}</pre>
               test: 'LINK_SYMBOLS',
               element: $el,
               type: option.checks.LINK_SYMBOLS.type || 'warning',
-              content: Lang.sprintf(option.checks.LINK_SYMBOLS.content || 'LINK_SYMBOLS', matchedSymbol),
+              content: Lang.sprintf(
+                option.checks.LINK_SYMBOLS.content || 'LINK_SYMBOLS',
+                matchedSymbol,
+              ),
               inline: true,
-              dismiss: prepareDismissal(`LINKSYMBOL${href + linkTextTrimmed}`),
+              dismiss: prepareDismissal(`LINKSYMBOL${href + strippedLinkText}`),
               dismissAll: option.checks.LINK_SYMBOLS.dismissAll ? 'LINK_SYMBOLS' : false,
               developer: option.checks.LINK_SYMBOLS.developer || false,
             });
           }
-        } else if (isSingleSpecialChar) {
+        } else if (isSingleSpecialChar && !titleAttr) {
           // Link is ONLY a period, comma, or special character.
           if (option.checks.LINK_EMPTY) {
             results.push({
@@ -2861,12 +3119,13 @@ URL: ${url}</pre>
               developer: option.checks.LINK_EMPTY.developer || false,
             });
           }
+          return;
         }
 
         /**
-          * Uses "click here" in the link text or accessible name.
-        */
-        if (error[1] !== null || containsClickPhrase) {
+         * Uses "click here" in the link text or accessible name.
+         */
+        if (hasClickWord) {
           if (option.checks.LINK_CLICK_HERE) {
             results.push({
               test: 'LINK_CLICK_HERE',
@@ -2876,7 +3135,7 @@ URL: ${url}</pre>
                 ? Lang.sprintf(option.checks.LINK_CLICK_HERE.content)
                 : Lang.sprintf('LINK_CLICK_HERE') + Lang.sprintf('LINK_TIP'),
               inline: true,
-              dismiss: prepareDismissal(`LINKCLICKHERE${href + linkTextTrimmed}`),
+              dismiss: prepareDismissal(`LINKCLICKHERE${href + strippedLinkText}`),
               dismissAll: option.checks.LINK_CLICK_HERE.dismissAll ? 'LINK_CLICK_HERE' : false,
               developer: option.checks.LINK_CLICK_HERE.developer || false,
             });
@@ -2884,9 +3143,9 @@ URL: ${url}</pre>
         }
 
         /**
-         *  Link's title attribute is the same as the link text.
-        */
-        if (getText($el).length !== 0 && titleAttr?.toLowerCase() === linkText.toLowerCase()) {
+         * Link's title attribute is the same as the link text.
+         */
+        if (textContent.length !== 0 && titleAttr?.toLowerCase() === linkText.toLowerCase()) {
           if (option.checks.DUPLICATE_TITLE) {
             results.push({
               test: 'DUPLICATE_TITLE',
@@ -2894,7 +3153,7 @@ URL: ${url}</pre>
               type: option.checks.DUPLICATE_TITLE.type || 'warning',
               content: Lang.sprintf(option.checks.DUPLICATE_TITLE.content || 'DUPLICATE_TITLE'),
               inline: true,
-              dismiss: prepareDismissal(`LINKDUPLICATETITLE${href + linkTextTrimmed}`),
+              dismiss: prepareDismissal(`LINKDUPLICATETITLE${href + strippedLinkText}`),
               dismissAll: option.checks.DUPLICATE_TITLE.dismissAll ? 'DUPLICATE_TITLE' : false,
               developer: option.checks.DUPLICATE_TITLE.developer || false,
             });
@@ -2902,62 +3161,62 @@ URL: ${url}</pre>
         }
       }
 
-      if (option.linksAdvancedPlugin) {
-        if (linkTextTrimmed.length !== 0) {
-          // Links with identical accessible names have equivalent purpose.
-          if (seen[linkTextTrimmed] && !seen[href]) {
-            const ignored = $el.ariaHidden === 'true' && $el.getAttribute('tabindex') === '-1';
-            const hasAttributes = $el.hasAttribute('role') || $el.hasAttribute('disabled');
-            if (option.checks.LINK_IDENTICAL_NAME && !hasAttributes && !ignored) {
-              const sanitizedText = sanitizeHTML(linkText);
-              results.push({
-                test: 'LINK_IDENTICAL_NAME',
-                element: $el,
-                type: option.checks.LINK_IDENTICAL_NAME.type || 'warning',
-                content: option.checks.LINK_IDENTICAL_NAME.content
-                  ? Lang.sprintf(option.checks.LINK_IDENTICAL_NAME.content, sanitizedText)
-                  : `${Lang.sprintf('LINK_IDENTICAL_NAME', sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`,
-                inline: true,
-                dismiss: prepareDismissal(`LINKSEEN${href + linkTextTrimmed}`),
-                dismissAll: option.checks.LINK_IDENTICAL_NAME.dismissAll ? 'LINK_IDENTICAL_NAME' : false,
-                developer: option.checks.LINK_IDENTICAL_NAME.developer || false,
-              });
-            }
-          } else {
-            seen[linkTextTrimmed] = true;
-            seen[href] = true;
+      if (strippedLinkText.length !== 0) {
+        // Links with identical accessible names have equivalent purpose.
+        if (seen[strippedLinkText] && !seen[href]) {
+          const ignored = $el.ariaHidden === 'true' && $el.getAttribute('tabindex') === '-1';
+          const hasAttributes = $el.hasAttribute('role') || $el.hasAttribute('disabled');
+          if (option.checks.LINK_IDENTICAL_NAME && !hasAttributes && !ignored) {
+            const sanitizedText = sanitizeHTML(linkText);
+            results.push({
+              test: 'LINK_IDENTICAL_NAME',
+              element: $el,
+              type: option.checks.LINK_IDENTICAL_NAME.type || 'warning',
+              content: option.checks.LINK_IDENTICAL_NAME.content
+                ? Lang.sprintf(option.checks.LINK_IDENTICAL_NAME.content, sanitizedText)
+                : `${Lang.sprintf('LINK_IDENTICAL_NAME', sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`,
+              inline: true,
+              dismiss: prepareDismissal(`LINKSEEN${href + strippedLinkText}`),
+              dismissAll: option.checks.LINK_IDENTICAL_NAME.dismissAll
+                ? 'LINK_IDENTICAL_NAME'
+                : false,
+              developer: option.checks.LINK_IDENTICAL_NAME.developer || false,
+            });
           }
+        } else {
+          seen[strippedLinkText] = true;
+          seen[href] = true;
+        }
 
-          // Link opens in new tab without warning.
-          if ($el.getAttribute('target')?.toLowerCase() === '_blank' && !fileTypeMatch && !containsNewWindowPhrases) {
-            if (option.checks.LINK_NEW_TAB) {
-              results.push({
-                test: 'LINK_NEW_TAB',
-                element: $el,
-                type: option.checks.LINK_NEW_TAB.type || 'warning',
-                content: Lang.sprintf(option.checks.LINK_NEW_TAB.content || 'LINK_NEW_TAB'),
-                inline: true,
-                dismiss: prepareDismissal(`LINKNEWTAB${href + linkTextTrimmed}`),
-                dismissAll: option.checks.LINK_NEW_TAB.dismissAll ? 'LINK_NEW_TAB' : false,
-                developer: option.checks.LINK_NEW_TAB.developer || false,
-              });
-            }
+        // Link opens in new tab without warning.
+        if (targetBlank && !fileTypeMatch && !containsNewWindowPhrases) {
+          if (option.checks.LINK_NEW_TAB) {
+            results.push({
+              test: 'LINK_NEW_TAB',
+              element: $el,
+              type: option.checks.LINK_NEW_TAB.type || 'warning',
+              content: Lang.sprintf(option.checks.LINK_NEW_TAB.content || 'LINK_NEW_TAB'),
+              inline: true,
+              dismiss: prepareDismissal(`LINKNEWTAB${href + strippedLinkText}`),
+              dismissAll: option.checks.LINK_NEW_TAB.dismissAll ? 'LINK_NEW_TAB' : false,
+              developer: option.checks.LINK_NEW_TAB.developer || false,
+            });
           }
+        }
 
-          // Link points to file (non HTML resource) without warning.
-          if (fileTypeMatch && !containsFileTypePhrases) {
-            if (option.checks.LINK_FILE_EXT) {
-              results.push({
-                test: 'LINK_FILE_EXT',
-                element: $el,
-                type: option.checks.LINK_FILE_EXT.type || 'warning',
-                content: Lang.sprintf(option.checks.LINK_FILE_EXT.content || 'LINK_FILE_EXT'),
-                inline: true,
-                dismiss: prepareDismissal(`LINKEXT${href + linkTextTrimmed}`),
-                dismissAll: option.checks.LINK_FILE_EXT.dismissAll ? 'LINK_FILE_EXT' : false,
-                developer: option.checks.LINK_FILE_EXT.developer || false,
-              });
-            }
+        // Link points to file (non HTML resource) without warning.
+        if (fileTypeMatch && !containsFileTypePhrases) {
+          if (option.checks.LINK_FILE_EXT) {
+            results.push({
+              test: 'LINK_FILE_EXT',
+              element: $el,
+              type: option.checks.LINK_FILE_EXT.type || 'warning',
+              content: Lang.sprintf(option.checks.LINK_FILE_EXT.content || 'LINK_FILE_EXT'),
+              inline: true,
+              dismiss: prepareDismissal(`LINKEXT${href + strippedLinkText}`),
+              dismissAll: option.checks.LINK_FILE_EXT.dismissAll ? 'LINK_FILE_EXT' : false,
+              developer: option.checks.LINK_FILE_EXT.developer || false,
+            });
           }
         }
       }
@@ -2965,92 +3224,124 @@ URL: ${url}</pre>
     return results;
   }
 
+  const url = [
+    '.avif',
+    '.png',
+    '.jpg',
+    '.jpeg',
+    '.webp',
+    '.gif',
+    '.tiff',
+    '.svg',
+    '.heif',
+    '.heic',
+    'http',
+  ];
+
   function checkImages(results, option) {
+    // Generate suspicious alt stop words list.
+    const susAltWords = option.susAltStopWords
+      ? option.susAltStopWords
+        .split(',')
+        .map((word) => word.trim().toLowerCase())
+        .filter(Boolean)
+      : Lang._('SUS_ALT_STOPWORDS');
+
+    // Generate placeholder stop words set.
+    const PLACEHOLDER_ALT_ARR = new Set(Lang._('PLACEHOLDER_ALT_STOPWORDS'));
+
+    // Generate placeholder stop words that are that the START of an alt string.
+    const altPlaceholderPattern = new RegExp(`^(${option.altPlaceholder.join('|')})`, 'i');
+
+    // Generate supplied placeholder stop words.
+    const extraPlaceholderStopWords = option.extraPlaceholderStopWords
+      .split(',')
+      .map((word) => word.trim().toLowerCase())
+      .filter(Boolean);
+
+    // Utility function to process alt text for stop words.
     const containsAltTextStopWords = (alt) => {
-      const altUrl = [
-        '.avif',
-        '.png',
-        '.jpg',
-        '.jpeg',
-        '.webp',
-        '.gif',
-        '.tiff',
-        '.svg',
-        '.heif',
-        '.heic',
-        'http',
-      ];
-
+      const altLowerCase = alt.toLowerCase();
+      const altNoNumbers = altLowerCase.replace(/\d+/g, '').trim();
       const hit = [null, null, null];
-      altUrl.forEach((word) => {
-        if (alt.toLowerCase().indexOf(word.toLowerCase()) !== -1) {
-          hit[0] = word;
-        } else {
-          // Checking for image dimensions in alt text.
-          const imageDimensions = /\b\d{2,6}\s*x\s*\d{2,6}\b/;
-          const match = alt.toLowerCase().match(imageDimensions);
-          if (match) {
-            [hit[0]] = match;
-          }
-        }
-      });
 
-      const susAltWordsOverride = (option.susAltStopWords) ? option.susAltStopWords.split(',').map((word) => word.trim()) : Lang._('SUS_ALT_STOPWORDS');
-      susAltWordsOverride.forEach((word) => {
-        const susWord = alt.toLowerCase().indexOf(word);
-        if (susWord > -1 && susWord < 6) {
-          hit[1] = word;
+      // 1) URL hit.
+      for (const urlHit of url) {
+        if (altLowerCase.includes(urlHit)) {
+          hit[0] = urlHit;
+          break;
         }
-      });
-
-      Lang._('PLACEHOLDER_ALT_STOPWORDS').forEach((word) => {
-        if (alt.length === word.length && alt.toLowerCase().indexOf(word) >= 0) {
-          hit[2] = word;
-        }
-      });
-
-      // Additional placeholder stopwords to flag as an error.
-      const { extraPlaceholderStopWords } = option;
-      if (extraPlaceholderStopWords.length) {
-        const array = extraPlaceholderStopWords.split(',').map((word) => word.trim());
-        array.forEach((word) => {
-          const susWord = alt.toLowerCase().indexOf(word);
-          if (susWord > -1 && susWord < 6) {
-            hit[2] = word;
-          }
-        });
       }
 
+      // 2) Only if no URL hit, check dimensions, e.g. '123x456' or '123 X 456'
+      if (!hit[0]) {
+        const match = altLowerCase.match(/\b\d{2,6}\s*x\s*\d{2,6}\b/);
+        if (match) hit[0] = match[0];
+      }
+
+      // 3) Suspicious alt words near the beginning of a string.
+      for (const word of susAltWords) {
+        const index = altLowerCase.indexOf(word);
+        if (index > -1 && index < 6) {
+          hit[1] = word;
+          break;
+        }
+      }
+
+      // 4) Catch placeholder alt text, e.g. "placeholder", "hero image 1"
+      if (PLACEHOLDER_ALT_ARR.has(altLowerCase) || PLACEHOLDER_ALT_ARR.has(altNoNumbers)) {
+        hit[2] = alt;
+      }
+
+      // 5) Extra placeholder stopwords (near the start of alt)
+      if (extraPlaceholderStopWords.length) {
+        for (const word of extraPlaceholderStopWords) {
+          const index = altLowerCase.indexOf(word);
+          if (index > -1 && index < 6) {
+            hit[2] = word;
+            break;
+          }
+        }
+      }
       return hit;
     };
 
+    /** ************************ */
+    /*  Loop through all images  */
+    /* ************************* */
     Elements.Found.Images.forEach(($el) => {
-      const alt = (computeAriaLabel($el) === 'noAria') ? $el.getAttribute('alt') : computeAriaLabel($el);
-
-      // If selectors passed via prop, it will treat that image as an unlinked image.
-      const link = $el.closest(option.imageWithinLightbox
-        ? `a[href]:not(${option.imageWithinLightbox})`
-        : 'a[href]');
-
-      // Image's source for key.
-      const src = ($el.getAttribute('src')) ? $el.getAttribute('src') : $el.getAttribute('srcset');
-
-      // Process link text exclusions.
-      const linkSpanExclusions = link
-        ? fnIgnore(link, Constants.Exclusions.LinkSpan).textContent : '';
-
-      const stringMatchExclusions = Array.isArray(option.linkIgnoreStrings)
-        ? option.linkIgnoreStrings.reduce((result, str) => result.replace(str, ''), linkSpanExclusions)
-        : linkSpanExclusions;
-
-      const linkTextLength = link
-        ? removeWhitespace(stringMatchExclusions).length : 0;
+      const alt =
+        computeAriaLabel($el) === 'noAria' ? $el.getAttribute('alt') : computeAriaLabel($el);
 
       // Ignore tracking pixels without explicit aria-hidden or nullified alt.
       if ($el.height < 2 && $el.width < 2 && (isElementHidden($el) || alt === '')) {
         return;
       }
 
+      // If selectors passed via prop, it will treat that image as an unlinked image.
+      const link = $el.closest(
+        option.imageWithinLightbox ? `a[href]:not(${option.imageWithinLightbox})` : 'a[href]',
+      );
+
+      // Image's source for key.
+      const src = $el.getAttribute('src') ? $el.getAttribute('src') : $el.getAttribute('srcset');
+
+      // Process link text exclusions.
+      const linkSpanExclusions = link
+        ? fnIgnore(link, Constants.Exclusions.LinkSpan).textContent
+        : '';
+
+      // Process linkIgnoreStrings on parent link.
+      const stringMatchExclusions = Array.isArray(option.linkIgnoreStrings)
+        ? option.linkIgnoreStrings.reduce(
+          (result, str) => result.replace(str, ''),
+          linkSpanExclusions,
+        )
+        : linkSpanExclusions;
+
+      /** ******************** */
+      /*  HIDDEN BUT FOCUSABE  */
+      /* ********************* */
       if (link && link.getAttribute('aria-hidden') === 'true') {
         // If linked image has aria-hidden, but is still focusable.
         const unfocusable = link.getAttribute('tabindex') === '-1';
@@ -3061,22 +3352,26 @@ URL: ${url}</pre>
             type: option.checks.HIDDEN_FOCUSABLE.type || 'error',
             content: Lang.sprintf(option.checks.HIDDEN_FOCUSABLE.content || 'HIDDEN_FOCUSABLE'),
             dismiss: prepareDismissal(`IMGHIDDENFOCUSABLE${src}`),
-            dismissAll: option.checks.HIDDEN_FOCUSABLE.dismissAll
-              ? 'LINK_HIDDEN_FOCUSABLE' : false,
+            dismissAll: option.checks.HIDDEN_FOCUSABLE.dismissAll ? 'LINK_HIDDEN_FOCUSABLE' : false,
             developer: option.checks.HIDDEN_FOCUSABLE.developer || true,
           });
         }
         return;
       }
 
-      // If alt is missing.
+      // Get link text length.
+      const linkTextLength = link ? removeWhitespace(stringMatchExclusions).length : 0;
+
+      /** **************** */
+      /*  ALT IS MISSING   */
+      /* ***************** */
       if (alt === null) {
         if (link) {
-          const rule = (linkTextLength === 0)
-            ? option.checks.MISSING_ALT_LINK
-            : option.checks.MISSING_ALT_LINK_HAS_TEXT;
-          const conditional = linkTextLength === 0
-            ? 'MISSING_ALT_LINK' : 'MISSING_ALT_LINK_HAS_TEXT';
+          const rule =
+            linkTextLength === 0
+              ? option.checks.MISSING_ALT_LINK
+              : option.checks.MISSING_ALT_LINK_HAS_TEXT;
+          const conditional = linkTextLength === 0 ? 'MISSING_ALT_LINK' : 'MISSING_ALT_LINK_HAS_TEXT';
           if (rule) {
             results.push({
               test: conditional,
@@ -3100,308 +3395,315 @@ URL: ${url}</pre>
             developer: option.checks.MISSING_ALT.developer || false,
           });
         }
-      } else {
-        // If image has alt.
-        const sanitizedAlt = sanitizeHTML(alt);
-        const altText = removeWhitespace(sanitizedAlt);
-        const error = containsAltTextStopWords(altText);
-        const hasAria = $el.getAttribute('aria-label') || $el.getAttribute('aria-labelledby');
-        const titleAttr = $el.getAttribute('title');
-        const decorative = (alt === '');
+        return;
+      }
 
-        // Figure elements.
-        const figure = $el.closest('figure');
-        const figcaption = figure?.querySelector('figcaption');
-        const figcaptionText = (figcaption) ? figcaption.textContent.trim() : '';
+      /** *************** */
+      /*  HAS ALT TEXT    */
+      /* **************** */
+      const sanitizedAlt = sanitizeHTML(alt);
+      const altText = removeWhitespace(sanitizedAlt);
+      const hasAria = $el.getAttribute('aria-label') || $el.getAttribute('aria-labelledby');
 
-        // Maximum alt text length
-        const maxAltCharactersLinks = option.checks.LINK_IMAGE_LONG_ALT.maxLength || 250;
-        const maxAltCharacters = option.checks.IMAGE_ALT_TOO_LONG.maxLength || 250;
-
-        // If aria-label or aria-labelledby returns empty or invalid.
-        if (option.checks.MISSING_ALT) {
-          if (hasAria && altText === '') {
-            results.push({
-              test: 'MISSING_ALT',
-              element: $el,
-              type: option.checks.MISSING_ALT.type || 'error',
-              content: Lang.sprintf(option.checks.MISSING_ALT.content || 'MISSING_ALT'),
-              dismiss: prepareDismissal(`IMGNOALTARIA${src}`),
-              dismissAll: option.checks.MISSING_ALT.dismissAll ? 'MISSING_ALT' : false,
-              developer: option.checks.MISSING_ALT.developer || false,
-            });
-            return;
-          }
-        }
-
-        // If alt text starts with a very specific string provided via props.
-        const startsWithSpecificAlt = option.altPlaceholder && option.altPlaceholder.some((text) => alt.toLowerCase().startsWith(text.toLowerCase()));
-
-        // Decorative images.
-        if (decorative || startsWithSpecificAlt) {
-          const carouselSources = option.checks.IMAGE_DECORATIVE_CAROUSEL.sources;
-          const carousel = carouselSources ? $el.closest(carouselSources) : '';
-          if (carousel) {
-            const numberOfSlides = carousel.querySelectorAll('img');
-            const rule = (numberOfSlides.length === 1)
-              ? option.checks.IMAGE_DECORATIVE
-              : option.checks.IMAGE_DECORATIVE_CAROUSEL;
-            const conditional = (numberOfSlides.length === 1)
-              ? 'IMAGE_DECORATIVE'
-              : 'IMAGE_DECORATIVE_CAROUSEL';
-            if (rule) {
-              results.push({
-                test: conditional,
-                element: $el,
-                type: rule.type || 'warning',
-                content: Lang.sprintf(rule.content || conditional),
-                dismiss: prepareDismissal(conditional + src),
-                dismissAll: rule.dismissAll ? conditional : false,
-                developer: rule.developer || false,
-              });
-            }
-          } else if (link) {
-            const rule = (linkTextLength === 0)
-              ? option.checks.LINK_IMAGE_NO_ALT_TEXT
-              : option.checks.LINK_IMAGE_TEXT;
-            const conditional = linkTextLength === 0
-              ? 'LINK_IMAGE_NO_ALT_TEXT' : 'LINK_IMAGE_TEXT';
-            if (rule) {
-              results.push({
-                test: conditional,
-                element: $el,
-                type: rule.type || (linkTextLength === 0 ? 'error' : 'good'),
-                content: Lang.sprintf(rule.content || conditional),
-                dismiss: prepareDismissal(`${conditional + src + linkTextLength}`),
-                dismissAll: rule.dismissAll ? conditional : false,
-                developer: rule.developer || false,
-              });
-            }
-          } else if (figure) {
-            const rule = (figcaption && figcaptionText.length)
-              ? option.checks.IMAGE_FIGURE_DECORATIVE
-              : option.checks.IMAGE_DECORATIVE;
-            const conditional = figcaption && figcaptionText.length
-              ? 'IMAGE_FIGURE_DECORATIVE' : 'IMAGE_DECORATIVE';
-            if (rule) {
-              results.push({
-                test: conditional,
-                element: $el,
-                type: rule.type || 'warning',
-                content: Lang.sprintf(rule.content || conditional),
-                dismiss: prepareDismissal(`${conditional + src + figcaptionText}`),
-                dismissAll: rule.dismissAll ? conditional : false,
-                developer: rule.developer || false,
-              });
-            }
-          } else if (option.checks.IMAGE_DECORATIVE) {
-            results.push({
-              test: 'IMAGE_DECORATIVE',
-              element: $el,
-              type: option.checks.IMAGE_DECORATIVE.type || 'warning',
-              content: Lang.sprintf(option.checks.IMAGE_DECORATIVE.content || 'IMAGE_DECORATIVE'),
-              dismiss: prepareDismissal(`DECIMAGE${src}`),
-              dismissAll: option.checks.IMAGE_DECORATIVE.dismissAll ? 'IMAGE_DECORATIVE' : false,
-              developer: option.checks.IMAGE_DECORATIVE.developer || false,
-            });
-          }
+      // If aria-label or aria-labelledby returns empty or invalid.
+      if (option.checks.MISSING_ALT) {
+        if (hasAria && altText === '') {
+          results.push({
+            test: 'MISSING_ALT',
+            element: $el,
+            type: option.checks.MISSING_ALT.type || 'error',
+            content: Lang.sprintf(option.checks.MISSING_ALT.content || 'MISSING_ALT'),
+            dismiss: prepareDismissal(`IMGNOALTARIA${src}`),
+            dismissAll: option.checks.MISSING_ALT.dismissAll ? 'MISSING_ALT' : false,
+            developer: option.checks.MISSING_ALT.developer || false,
+          });
           return;
         }
+      }
 
-        // Alt is unpronounceable.
-        const unpronounceable = (link)
-          ? option.checks.LINK_ALT_UNPRONOUNCEABLE : option.checks.ALT_UNPRONOUNCEABLE;
-        if (unpronounceable) {
-          if (alt.replace(/"|'|\?|\.|-|\s+/g, '') === '' && linkTextLength === 0) {
-            const conditional = (link) ? 'LINK_ALT_UNPRONOUNCEABLE' : 'ALT_UNPRONOUNCEABLE';
-            results.push({
-              test: conditional,
-              element: $el,
-              type: unpronounceable.type || 'error',
-              content: Lang.sprintf(unpronounceable.content || conditional, altText),
-              dismiss: prepareDismissal(`UNPRONOUNCEABLE${src}`),
-              dismissAll: unpronounceable.dismissAll ? 'ALT_UNPRONOUNCEABLE' : false,
-              developer: unpronounceable.developer || false,
-            });
-            return;
-          }
-        }
+      /* ************** */
+      /*  DECORATIVE    */
+      /* ************** */
+      const decorative = alt === '';
 
-        // Potentially contains auto-generated placeholder text.
-        const maybeBadAlt = (link)
-          ? option.checks.LINK_ALT_MAYBE_BAD : option.checks.ALT_MAYBE_BAD;
-        const isTooLongSingleWord = new RegExp(`^\\S{${maybeBadAlt.minLength || 15},}$`);
-        const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(alt);
+      // Figure elements.
+      const figure = $el.closest('figure');
+      const figcaption = figure?.querySelector('figcaption');
+      const figcaptionText = figcaption ? getText(figcaption) : '';
 
-        // Alt text quality.
-        if (error[0] !== null) {
-          // Has stop words.
-          const rule = (link)
-            ? option.checks.LINK_ALT_FILE_EXT
-            : option.checks.ALT_FILE_EXT;
-          const conditional = (link) ? 'LINK_ALT_FILE_EXT' : 'ALT_FILE_EXT';
-          if (rule) {
-            results.push({
-              test: conditional,
-              element: $el,
-              type: rule.type || 'error',
-              content: Lang.sprintf(rule.content || conditional, error[0], altText),
-              dismiss: prepareDismissal(`${conditional + src + altText}`),
-              dismissAll: rule.dismissAll ? conditional : false,
-              developer: rule.developer || false,
-            });
-          }
-        } else if (error[2] !== null) {
-          // Placeholder words.
-          const rule = (link)
-            ? option.checks.LINK_PLACEHOLDER_ALT
-            : option.checks.ALT_PLACEHOLDER;
-          const conditional = (link) ? 'LINK_PLACEHOLDER_ALT' : 'ALT_PLACEHOLDER';
-          if (rule) {
-            results.push({
-              test: conditional,
-              element: $el,
-              type: rule.type || 'error',
-              content: Lang.sprintf(rule.content || conditional, altText),
-              dismiss: prepareDismissal(`${conditional + src + altText}`),
-              dismissAll: rule.dismissAll ? conditional : false,
-              developer: rule.developer || false,
-            });
-          }
-        } else if (error[1] !== null) {
-          // Suspicious words.
-          const rule = (link)
-            ? option.checks.LINK_SUS_ALT
-            : option.checks.SUS_ALT;
-          const conditional = (link) ? 'LINK_SUS_ALT' : 'SUS_ALT';
+      // Maximum alt text length
+      const maxAltCharactersLinks = option.checks.LINK_IMAGE_LONG_ALT.maxLength || 250;
+      const maxAltCharacters = option.checks.IMAGE_ALT_TOO_LONG.maxLength || 250;
+
+      // If alt text starts with a very specific string provided via props.
+      const startsWithSpecificAlt = alt.match(altPlaceholderPattern)?.[0];
+
+      // Decorative images.
+      if (decorative || startsWithSpecificAlt) {
+        const carouselSources = option.checks.IMAGE_DECORATIVE_CAROUSEL.sources;
+        const carousel = carouselSources ? $el.closest(carouselSources) : '';
+        if (carousel) {
+          const numberOfSlides = carousel.querySelectorAll('img');
+          const rule =
+            numberOfSlides.length === 1
+              ? option.checks.IMAGE_DECORATIVE
+              : option.checks.IMAGE_DECORATIVE_CAROUSEL;
+          const conditional =
+            numberOfSlides.length === 1 ? 'IMAGE_DECORATIVE' : 'IMAGE_DECORATIVE_CAROUSEL';
           if (rule) {
             results.push({
               test: conditional,
               element: $el,
               type: rule.type || 'warning',
-              content: Lang.sprintf(rule.content || conditional, error[1], altText),
-              dismiss: prepareDismissal(`${conditional + src + altText}`),
-              dismissAll: rule.dismissAll ? conditional : false,
-              developer: rule.developer || false,
-            });
-          }
-        } else if (maybeBadAlt && (isTooLongSingleWord.test(alt) && containsNonAlphaChar)) {
-          // Alt text is a single word greater than 15 characters that is potentially auto-generated.
-          const conditional = (link) ? 'LINK_ALT_MAYBE_BAD' : 'ALT_MAYBE_BAD';
-          results.push({
-            test: conditional,
-            element: $el,
-            type: maybeBadAlt.type || 'warning',
-            content: Lang.sprintf(maybeBadAlt.content || conditional, altText),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
-            dismissAll: maybeBadAlt.dismissAll ? conditional : false,
-            developer: maybeBadAlt.developer || false,
-          });
-        } else if (link
-          ? alt.length > maxAltCharactersLinks
-          : alt.length > maxAltCharacters) {
-          // Alt is too long.
-          const rule = (link)
-            ? option.checks.LINK_IMAGE_LONG_ALT
-            : option.checks.IMAGE_ALT_TOO_LONG;
-          const conditional = (link) ? 'LINK_IMAGE_LONG_ALT' : 'IMAGE_ALT_TOO_LONG';
-          const truncated = truncateString(altText, 600);
-          if (rule) {
-            results.push({
-              test: conditional,
-              element: $el,
-              type: rule.type || 'warning',
-              content: Lang.sprintf(rule.content || conditional, alt.length, truncated),
-              dismiss: prepareDismissal(`${conditional + src + altText}`),
+              content: Lang.sprintf(rule.content || conditional),
+              dismiss: prepareDismissal(conditional + src),
               dismissAll: rule.dismissAll ? conditional : false,
               developer: rule.developer || false,
             });
           }
         } else if (link) {
-          const rule = (linkTextLength === 0)
-            ? option.checks.LINK_IMAGE_ALT
-            : option.checks.LINK_IMAGE_ALT_AND_TEXT;
-          const conditional = (linkTextLength === 0) ? 'LINK_IMAGE_ALT' : 'LINK_IMAGE_ALT_AND_TEXT';
-
+          const rule =
+            linkTextLength === 0
+              ? option.checks.LINK_IMAGE_NO_ALT_TEXT
+              : option.checks.LINK_IMAGE_TEXT;
+          const conditional = linkTextLength === 0 ? 'LINK_IMAGE_NO_ALT_TEXT' : 'LINK_IMAGE_TEXT';
           if (rule) {
-            // Has both link text and alt text.
-            const linkAccName = computeAccessibleName(link);
-            const removeWhitespace$1 = removeWhitespace(linkAccName);
-            const sanitizedText = sanitizeHTML(removeWhitespace$1);
-
-            const tooltip = (linkTextLength === 0)
-              ? Lang.sprintf('LINK_IMAGE_ALT', altText)
-              : `${Lang.sprintf('LINK_IMAGE_ALT_AND_TEXT', altText, sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`;
-
             results.push({
               test: conditional,
               element: $el,
-              type: rule.type || 'warning',
-              content: rule.content
-                ? Lang.sprintf(rule.content, altText, sanitizedText)
-                : tooltip,
-              dismiss: prepareDismissal(`${conditional + src + altText}`),
+              type: rule.type || (linkTextLength === 0 ? 'error' : 'good'),
+              content: Lang.sprintf(rule.content || conditional),
+              dismiss: prepareDismissal(`${conditional + src + linkTextLength}`),
               dismissAll: rule.dismissAll ? conditional : false,
               developer: rule.developer || false,
             });
           }
         } else if (figure) {
-          // Figure element has same alt and caption text.
-          const duplicate = !!figcaption && (figcaptionText.toLowerCase() === altText.trim().toLowerCase());
-          if (duplicate) {
-            if (option.checks.IMAGE_FIGURE_DUPLICATE_ALT) {
-              results.push({
-                test: 'IMAGE_FIGURE_DUPLICATE_ALT',
-                element: $el,
-                type: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.type || 'warning',
-                content: Lang.sprintf(option.checks.IMAGE_FIGURE_DUPLICATE_ALT.content || 'IMAGE_FIGURE_DUPLICATE_ALT', altText),
-                dismiss: prepareDismissal(`FIGDUPLICATE${src}`),
-                dismissAll: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.dismissAll ? 'IMAGE_FIGURE_DUPLICATE_ALT' : false,
-                developer: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.developer || false,
-              });
-            }
-          } else if (option.checks.IMAGE_PASS) {
-            // Figure has alt text!
+          const rule =
+            figcaption && figcaptionText.length
+              ? option.checks.IMAGE_FIGURE_DECORATIVE
+              : option.checks.IMAGE_DECORATIVE;
+          const conditional =
+            figcaption && figcaptionText.length ? 'IMAGE_FIGURE_DECORATIVE' : 'IMAGE_DECORATIVE';
+          if (rule) {
             results.push({
-              test: 'IMAGE_PASS',
+              test: conditional,
               element: $el,
-              type: option.checks.IMAGE_PASS.type || 'good',
-              content: Lang.sprintf(option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
-              dismiss: prepareDismissal(`FIGIMGPASS${src + altText}`),
-              dismissAll: option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
-              developer: option.checks.IMAGE_PASS.developer || false,
+              type: rule.type || 'warning',
+              content: Lang.sprintf(rule.content || conditional),
+              dismiss: prepareDismissal(`${conditional + src + figcaptionText}`),
+              dismissAll: rule.dismissAll ? conditional : false,
+              developer: rule.developer || false,
+            });
+          }
+        } else if (option.checks.IMAGE_DECORATIVE) {
+          results.push({
+            test: 'IMAGE_DECORATIVE',
+            element: $el,
+            type: option.checks.IMAGE_DECORATIVE.type || 'warning',
+            content: Lang.sprintf(option.checks.IMAGE_DECORATIVE.content || 'IMAGE_DECORATIVE'),
+            dismiss: prepareDismissal(`DECIMAGE${src}`),
+            dismissAll: option.checks.IMAGE_DECORATIVE.dismissAll ? 'IMAGE_DECORATIVE' : false,
+            developer: option.checks.IMAGE_DECORATIVE.developer || false,
+          });
+        }
+        return;
+      }
+
+      /* ********************** */
+      /*  UNPRONOUNCEABLE ALT   */
+      /* ********************** */
+      const unpronounceable = link
+        ? option.checks.LINK_ALT_UNPRONOUNCEABLE
+        : option.checks.ALT_UNPRONOUNCEABLE;
+      if (unpronounceable) {
+        if (alt.replace(/"|'|\?|\.|-|\s+/g, '') === '' && linkTextLength === 0) {
+          const conditional = link ? 'LINK_ALT_UNPRONOUNCEABLE' : 'ALT_UNPRONOUNCEABLE';
+          results.push({
+            test: conditional,
+            element: $el,
+            type: unpronounceable.type || 'error',
+            content: Lang.sprintf(unpronounceable.content || conditional, altText),
+            dismiss: prepareDismissal(`UNPRONOUNCEABLE${src}`),
+            dismissAll: unpronounceable.dismissAll ? 'ALT_UNPRONOUNCEABLE' : false,
+            developer: unpronounceable.developer || false,
+          });
+          return;
+        }
+      }
+
+      /* ********************* */
+      /*  ALT TEXT QUALITY     */
+      /* ********************* */
+      const error = containsAltTextStopWords(altText);
+
+      // Potentially contains auto-generated placeholder text.
+      const maybeBadAlt = link ? option.checks.LINK_ALT_MAYBE_BAD : option.checks.ALT_MAYBE_BAD;
+      const isTooLongSingleWord = new RegExp(`^\\S{${maybeBadAlt.minLength || 15},}$`);
+      const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(alt);
+
+      if (error[0] !== null) {
+        // Has stop words.
+        const rule = link ? option.checks.LINK_ALT_FILE_EXT : option.checks.ALT_FILE_EXT;
+        const conditional = link ? 'LINK_ALT_FILE_EXT' : 'ALT_FILE_EXT';
+        if (rule) {
+          results.push({
+            test: conditional,
+            element: $el,
+            type: rule.type || 'error',
+            content: Lang.sprintf(rule.content || conditional, error[0], altText),
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (error[2] !== null) {
+        // Placeholder words.
+        const rule = link ? option.checks.LINK_PLACEHOLDER_ALT : option.checks.ALT_PLACEHOLDER;
+        const conditional = link ? 'LINK_PLACEHOLDER_ALT' : 'ALT_PLACEHOLDER';
+        if (rule) {
+          results.push({
+            test: conditional,
+            element: $el,
+            type: rule.type || 'error',
+            content: Lang.sprintf(rule.content || conditional, altText),
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (error[1] !== null) {
+        // Suspicious words.
+        const rule = link ? option.checks.LINK_SUS_ALT : option.checks.SUS_ALT;
+        const conditional = link ? 'LINK_SUS_ALT' : 'SUS_ALT';
+        if (rule) {
+          results.push({
+            test: conditional,
+            element: $el,
+            type: rule.type || 'warning',
+            content: Lang.sprintf(rule.content || conditional, error[1], altText),
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (maybeBadAlt && isTooLongSingleWord.test(alt) && containsNonAlphaChar) {
+        // Alt text is a single word greater than 15 characters that is potentially auto-generated.
+        const conditional = link ? 'LINK_ALT_MAYBE_BAD' : 'ALT_MAYBE_BAD';
+        results.push({
+          test: conditional,
+          element: $el,
+          type: maybeBadAlt.type || 'warning',
+          content: Lang.sprintf(maybeBadAlt.content || conditional, altText),
+          dismiss: prepareDismissal(`${conditional + src + altText}`),
+          dismissAll: maybeBadAlt.dismissAll ? conditional : false,
+          developer: maybeBadAlt.developer || false,
+        });
+      } else if (link ? alt.length > maxAltCharactersLinks : alt.length > maxAltCharacters) {
+        // Alt is too long.
+        const rule = link ? option.checks.LINK_IMAGE_LONG_ALT : option.checks.IMAGE_ALT_TOO_LONG;
+        const conditional = link ? 'LINK_IMAGE_LONG_ALT' : 'IMAGE_ALT_TOO_LONG';
+        const truncated = truncateString(altText, 600);
+        if (rule) {
+          results.push({
+            test: conditional,
+            element: $el,
+            type: rule.type || 'warning',
+            content: Lang.sprintf(rule.content || conditional, alt.length, truncated),
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (link) {
+        const rule =
+          linkTextLength === 0 ? option.checks.LINK_IMAGE_ALT : option.checks.LINK_IMAGE_ALT_AND_TEXT;
+        const conditional = linkTextLength === 0 ? 'LINK_IMAGE_ALT' : 'LINK_IMAGE_ALT_AND_TEXT';
+
+        if (rule) {
+          // Has both link text and alt text.
+          const linkAccName = computeAccessibleName(link);
+          const removeWhitespace$1 = removeWhitespace(linkAccName);
+          const sanitizedText = sanitizeHTML(removeWhitespace$1);
+
+          const tooltip =
+            linkTextLength === 0
+              ? Lang.sprintf('LINK_IMAGE_ALT', altText)
+              : `${Lang.sprintf('LINK_IMAGE_ALT_AND_TEXT', altText, sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`;
+
+          results.push({
+            test: conditional,
+            element: $el,
+            type: rule.type || 'warning',
+            content: rule.content ? Lang.sprintf(rule.content, altText, sanitizedText) : tooltip,
+            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false,
+          });
+        }
+      } else if (figure) {
+        // Figure element has same alt and caption text.
+        const duplicate = !!figcaption && figcaptionText.toLowerCase() === altText.toLowerCase();
+        if (duplicate) {
+          if (option.checks.IMAGE_FIGURE_DUPLICATE_ALT) {
+            results.push({
+              test: 'IMAGE_FIGURE_DUPLICATE_ALT',
+              element: $el,
+              type: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.type || 'warning',
+              content: Lang.sprintf(
+                option.checks.IMAGE_FIGURE_DUPLICATE_ALT.content || 'IMAGE_FIGURE_DUPLICATE_ALT',
+                altText,
+              ),
+              dismiss: prepareDismissal(`FIGDUPLICATE${src}`),
+              dismissAll: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.dismissAll
+                ? 'IMAGE_FIGURE_DUPLICATE_ALT'
+                : false,
+              developer: option.checks.IMAGE_FIGURE_DUPLICATE_ALT.developer || false,
             });
           }
         } else if (option.checks.IMAGE_PASS) {
-          if (!$el.closest('button, [role="button"]')) {
-            // Image has alt text!
-            results.push({
-              test: 'IMAGE_PASS',
-              element: $el,
-              type: option.checks.IMAGE_PASS.type || 'good',
-              content: Lang.sprintf(option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
-              dismiss: prepareDismissal(`IMAGEPASS${src + altText}`),
-              dismissAll: option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
-              developer: option.checks.IMAGE_PASS.developer || false,
-            });
-          }
+          // Figure has alt text!
+          results.push({
+            test: 'IMAGE_PASS',
+            element: $el,
+            type: option.checks.IMAGE_PASS.type || 'good',
+            content: Lang.sprintf(option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
+            dismiss: prepareDismissal(`FIGIMGPASS${src + altText}`),
+            dismissAll: option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
+            developer: option.checks.IMAGE_PASS.developer || false,
+          });
         }
+      } else if (option.checks.IMAGE_PASS) {
+        if (!$el.closest('button, [role="button"]')) {
+          // Image has alt text!
+          results.push({
+            test: 'IMAGE_PASS',
+            element: $el,
+            type: option.checks.IMAGE_PASS.type || 'good',
+            content: Lang.sprintf(option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
+            dismiss: prepareDismissal(`IMAGEPASS${src + altText}`),
+            dismissAll: option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
+            developer: option.checks.IMAGE_PASS.developer || false,
+          });
+        }
+      }
 
-        // Image's title attribute is the same as the alt.
-        // Since this is extra, it's okay if it overlaps "good" annotation.
-        if (titleAttr?.toLowerCase() === alt.toLowerCase()) {
-          if (option.checks.DUPLICATE_TITLE) {
-            results.push({
-              test: 'DUPLICATE_TITLE',
-              element: $el,
-              type: option.checks.DUPLICATE_TITLE.type || 'warning',
-              content: Lang.sprintf(option.checks.DUPLICATE_TITLE.content || 'DUPLICATE_TITLE'),
-              inline: true,
-              dismiss: prepareDismissal(`ALTDUPLICATETITLE${altText}`),
-              dismissAll: option.checks.DUPLICATE_TITLE.dismissAll ? 'DUPLICATE_TITLE' : false,
-              developer: option.checks.DUPLICATE_TITLE.developer || false,
-            });
-          }
+      /* ************************ */
+      /*  DUPLICATE ALT & TITLE.  */
+      /* ************************ */
+      const titleAttr = $el.getAttribute('title');
+      if (titleAttr?.toLowerCase() === alt.toLowerCase()) {
+        if (option.checks.DUPLICATE_TITLE) {
+          results.push({
+            test: 'DUPLICATE_TITLE',
+            element: $el,
+            type: option.checks.DUPLICATE_TITLE.type || 'warning',
+            content: Lang.sprintf(option.checks.DUPLICATE_TITLE.content || 'DUPLICATE_TITLE'),
+            inline: true,
+            dismiss: prepareDismissal(`ALTDUPLICATETITLE${altText}`),
+            dismissAll: option.checks.DUPLICATE_TITLE.dismissAll ? 'DUPLICATE_TITLE' : false,
+            developer: option.checks.DUPLICATE_TITLE.developer || false,
+          });
         }
       }
     });
@@ -3437,14 +3739,23 @@ URL: ${url}</pre>
 
         // Error: Input with type="image" without accessible name or alt.
         if (type === 'image') {
-          if (option.checks.LABELS_MISSING_IMAGE_INPUT && (!alt || alt.trim() === '') && !hasAria && !hasTitle) {
+          if (
+            option.checks.LABELS_MISSING_IMAGE_INPUT &&
+            (!alt || alt.trim() === '') &&
+            !hasAria &&
+            !hasTitle
+          ) {
             results.push({
               test: 'LABELS_MISSING_IMAGE_INPUT',
               element: $el,
               type: option.checks.LABELS_MISSING_IMAGE_INPUT.type || 'error',
-              content: Lang.sprintf(option.checks.LABELS_MISSING_IMAGE_INPUT.content || 'LABELS_MISSING_IMAGE_INPUT'),
+              content: Lang.sprintf(
+                option.checks.LABELS_MISSING_IMAGE_INPUT.content || 'LABELS_MISSING_IMAGE_INPUT',
+              ),
               dismiss: prepareDismissal(`INPUTIMAGE${type + inputName}`),
-              dismissAll: option.checks.LABELS_MISSING_IMAGE_INPUT.dismissAll ? 'LABELS_MISSING_IMAGE_INPUT' : false,
+              dismissAll: option.checks.LABELS_MISSING_IMAGE_INPUT.dismissAll
+                ? 'LABELS_MISSING_IMAGE_INPUT'
+                : false,
               developer: option.checks.LABELS_MISSING_IMAGE_INPUT.developer || true,
             });
           }
@@ -3486,9 +3797,13 @@ URL: ${url}</pre>
                 test: 'LABELS_MISSING_LABEL',
                 element: $el,
                 type: option.checks.LABELS_MISSING_LABEL.type || 'error',
-                content: Lang.sprintf(option.checks.LABELS_MISSING_LABEL.content || 'LABELS_MISSING_LABEL'),
+                content: Lang.sprintf(
+                  option.checks.LABELS_MISSING_LABEL.content || 'LABELS_MISSING_LABEL',
+                ),
                 dismiss: prepareDismissal(`INPUTMISSING${type + inputName}`),
-                dismissAll: option.checks.LABELS_MISSING_LABEL.dismissAll ? 'LABELS_MISSING_LABEL' : false,
+                dismissAll: option.checks.LABELS_MISSING_LABEL.dismissAll
+                  ? 'LABELS_MISSING_LABEL'
+                  : false,
                 developer: option.checks.LABELS_MISSING_LABEL.developer || true,
               });
             }
@@ -3502,7 +3817,9 @@ URL: ${url}</pre>
                 ? Lang.sprintf(option.checks.LABELS_ARIA_LABEL_INPUT.content, sanitizedText)
                 : `${Lang.sprintf('LABELS_ARIA_LABEL_INPUT', sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`,
               dismiss: prepareDismissal(`INPUTARIA${type + inputName}`),
-              dismissAll: option.checks.LABELS_ARIA_LABEL_INPUT.dismissAll ? 'LABELS_ARIA_LABEL_INPUT' : false,
+              dismissAll: option.checks.LABELS_ARIA_LABEL_INPUT.dismissAll
+                ? 'LABELS_ARIA_LABEL_INPUT'
+                : false,
               developer: option.checks.LABELS_ARIA_LABEL_INPUT.developer || true,
             });
           }
@@ -3511,7 +3828,9 @@ URL: ${url}</pre>
 
         // Implicit label: <label>First name: <input type="text"/><label>
         const closestLabel = $el.closest('label');
-        const labelName = (closestLabel) ? removeWhitespace(computeAccessibleName(closestLabel)) : '';
+        const labelName = closestLabel
+          ? removeWhitespace(computeAccessibleName(closestLabel))
+          : '';
         if (closestLabel && labelName.length) {
           return;
         }
@@ -3526,9 +3845,14 @@ URL: ${url}</pre>
                 test: 'LABELS_NO_FOR_ATTRIBUTE',
                 element: $el,
                 type: option.checks.LABELS_NO_FOR_ATTRIBUTE.type || 'error',
-                content: Lang.sprintf(option.checks.LABELS_NO_FOR_ATTRIBUTE.content || 'LABELS_NO_FOR_ATTRIBUTE', id),
+                content: Lang.sprintf(
+                  option.checks.LABELS_NO_FOR_ATTRIBUTE.content || 'LABELS_NO_FOR_ATTRIBUTE',
+                  id,
+                ),
                 dismiss: prepareDismissal(`INPUTNOFOR${type + inputName}`),
-                dismissAll: option.checks.LABELS_NO_FOR_ATTRIBUTE.dismissAll ? 'LABELS_NO_FOR_ATTRIBUTE' : false,
+                dismissAll: option.checks.LABELS_NO_FOR_ATTRIBUTE.dismissAll
+                  ? 'LABELS_NO_FOR_ATTRIBUTE'
+                  : false,
                 developer: option.checks.LABELS_NO_FOR_ATTRIBUTE.developer || true,
               });
             }
@@ -3539,9 +3863,13 @@ URL: ${url}</pre>
             test: 'LABELS_MISSING_LABEL',
             element: $el,
             type: option.checks.LABELS_MISSING_LABEL.type || 'error',
-            content: Lang.sprintf(option.checks.LABELS_MISSING_LABEL.content || 'LABELS_MISSING_LABEL'),
+            content: Lang.sprintf(
+              option.checks.LABELS_MISSING_LABEL.content || 'LABELS_MISSING_LABEL',
+            ),
             dismiss: prepareDismissal(`INPUTNOID${type + inputName}`),
-            dismissAll: option.checks.LABELS_MISSING_LABEL.dismissAll ? 'LABELS_MISSING_LABEL' : false,
+            dismissAll: option.checks.LABELS_MISSING_LABEL.dismissAll
+              ? 'LABELS_MISSING_LABEL'
+              : false,
             developer: option.checks.LABELS_MISSING_LABEL.developer || true,
           });
         }
@@ -3604,21 +3932,24 @@ URL: ${url}</pre>
         if (option.checks.QA_IN_PAGE_LINK) {
           const hasText = getText($el).length !== 0;
           const ignored = $el.ariaHidden === 'true' && $el.getAttribute('tabindex') === '-1';
-          const hasAttributes = $el.hasAttribute('role')
-            || $el.hasAttribute('aria-haspopup')
-            || $el.hasAttribute('aria-expanded')
-            || $el.hasAttribute('onclick')
-            || $el.hasAttribute('disabled')
-            || $el.closest('nav, [role="navigation"]');
+          const hasAttributes =
+            $el.hasAttribute('role') ||
+            $el.hasAttribute('aria-haspopup') ||
+            $el.hasAttribute('aria-expanded') ||
+            $el.hasAttribute('onclick') ||
+            $el.hasAttribute('disabled') ||
+            $el.closest('nav, [role="navigation"]');
 
           if ((href.startsWith('#') || href === '') && hasText && !ignored && !hasAttributes) {
             const targetId = href.substring(1);
             const ariaControls = $el.getAttribute('aria-controls');
-            const targetElement = targetId && (document.getElementById(targetId)
-              || document.getElementById(decodeURIComponent(targetId))
-              || document.getElementById(encodeURIComponent(targetId))
-              || document.getElementById(ariaControls)
-              || document.querySelector(`a[name="${targetId}"]`));
+            const targetElement =
+              targetId &&
+              (document.getElementById(targetId) ||
+                document.getElementById(decodeURIComponent(targetId)) ||
+                document.getElementById(encodeURIComponent(targetId)) ||
+                document.getElementById(ariaControls) ||
+                document.querySelector(`a[name="${targetId}"]`));
 
             // If reference ID doesn't exist.
             if (!targetElement) {
@@ -3675,7 +4006,10 @@ URL: ${url}</pre>
             test: 'QA_BLOCKQUOTE',
             element: $el,
             type: option.checks.QA_BLOCKQUOTE.type || 'warning',
-            content: Lang.sprintf(option.checks.QA_BLOCKQUOTE.content || 'QA_BLOCKQUOTE', sanitizedText),
+            content: Lang.sprintf(
+              option.checks.QA_BLOCKQUOTE.content || 'QA_BLOCKQUOTE',
+              sanitizedText,
+            ),
             dismiss: prepareDismissal(`BLOCKQUOTE${sanitizedText}`),
             dismissAll: option.checks.QA_BLOCKQUOTE.dismissAll ? 'QA_BLOCKQUOTE' : false,
             developer: option.checks.QA_BLOCKQUOTE.developer || false,
@@ -3697,9 +4031,13 @@ URL: ${url}</pre>
             test: 'TABLES_MISSING_HEADINGS',
             element: $el,
             type: option.checks.TABLES_MISSING_HEADINGS.type || 'error',
-            content: Lang.sprintf(option.checks.TABLES_MISSING_HEADINGS.content || 'TABLES_MISSING_HEADINGS'),
+            content: Lang.sprintf(
+              option.checks.TABLES_MISSING_HEADINGS.content || 'TABLES_MISSING_HEADINGS',
+            ),
             dismiss: key,
-            dismissAll: option.checks.TABLES_MISSING_HEADINGS.dismissAll ? 'TABLES_MISSING_HEADINGS' : false,
+            dismissAll: option.checks.TABLES_MISSING_HEADINGS.dismissAll
+              ? 'TABLES_MISSING_HEADINGS'
+              : false,
             developer: option.checks.TABLES_MISSING_HEADINGS.developer || false,
           });
         }
@@ -3709,9 +4047,13 @@ URL: ${url}</pre>
               test: 'TABLES_SEMANTIC_HEADING',
               element: heading,
               type: option.checks.TABLES_SEMANTIC_HEADING.type || 'error',
-              content: Lang.sprintf(option.checks.TABLES_SEMANTIC_HEADING.content || 'TABLES_SEMANTIC_HEADING'),
+              content: Lang.sprintf(
+                option.checks.TABLES_SEMANTIC_HEADING.content || 'TABLES_SEMANTIC_HEADING',
+              ),
               dismiss: key,
-              dismissAll: option.checks.TABLES_SEMANTIC_HEADING.dismissAll ? 'TABLES_SEMANTIC_HEADING' : false,
+              dismissAll: option.checks.TABLES_SEMANTIC_HEADING.dismissAll
+                ? 'TABLES_SEMANTIC_HEADING'
+                : false,
               developer: option.checks.TABLES_SEMANTIC_HEADING.developer || false,
             });
           });
@@ -3722,10 +4064,14 @@ URL: ${url}</pre>
               test: 'TABLES_EMPTY_HEADING',
               element: th,
               type: option.checks.TABLES_EMPTY_HEADING.type || 'error',
-              content: Lang.sprintf(option.checks.TABLES_EMPTY_HEADING.content || 'TABLES_EMPTY_HEADING'),
+              content: Lang.sprintf(
+                option.checks.TABLES_EMPTY_HEADING.content || 'TABLES_EMPTY_HEADING',
+              ),
               position: 'afterbegin',
               dismiss: key,
-              dismissAll: option.checks.TABLES_EMPTY_HEADING.dismissAll ? 'TABLES_EMPTY_HEADING' : false,
+              dismissAll: option.checks.TABLES_EMPTY_HEADING.dismissAll
+                ? 'TABLES_EMPTY_HEADING'
+                : false,
               developer: option.checks.TABLES_EMPTY_HEADING.developer || false,
             });
           }
@@ -3742,7 +4088,10 @@ URL: ${url}</pre>
           test: 'QA_FAKE_HEADING',
           element,
           type: option.checks.QA_FAKE_HEADING.type || 'warning',
-          content: Lang.sprintf(option.checks.QA_FAKE_HEADING.content || 'QA_FAKE_HEADING', sanitizedText),
+          content: Lang.sprintf(
+            option.checks.QA_FAKE_HEADING.content || 'QA_FAKE_HEADING',
+            sanitizedText,
+          ),
           dismiss: prepareDismissal(`BOLD${sanitizedText}`),
           inline: true,
           dismissAll: option.checks.QA_FAKE_HEADING.dismissAll ? 'QA_FAKE_HEADING' : false,
@@ -3753,7 +4102,9 @@ URL: ${url}</pre>
       // To minimize false positives/number of warnings...
       const isPreviousElementAHeading = (p) => {
         const previousElement = p.previousElementSibling;
-        if (!previousElement) return false;
+        if (!previousElement) {
+          return false;
+        }
         const headingTags = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'];
         return headingTags.includes(previousElement.tagName);
       };
@@ -3766,7 +4117,13 @@ URL: ${url}</pre>
         const maybeSentence = getText$1.match(/[.;?!"]/) === null;
         const typicalHeadingLength = getText$1.length >= 4 && getText$1.length <= 120;
 
-        if (size >= 24 && !p.closest(ignoreParents) && typicalHeadingLength && maybeSentence && !isPreviousElementAHeading(p)) {
+        if (
+          size >= 24 &&
+          !p.closest(ignoreParents) &&
+          typicalHeadingLength &&
+          maybeSentence &&
+          !isPreviousElementAHeading(p)
+        ) {
           const sanitizedText = sanitizeHTML(getText$1);
           addResult(p, sanitizedText);
         }
@@ -3782,7 +4139,8 @@ URL: ${url}</pre>
 
           // Conditions
           const notASentence = possibleHeadingText.match(/[.:;?!"']/) === null;
-          const typicalHeadingLength = possibleHeadingText.length >= 3 && possibleHeadingText.length <= 120;
+          const typicalHeadingLength =
+            possibleHeadingText.length >= 3 && possibleHeadingText.length <= 120;
 
           if (typicalHeadingLength && notASentence) {
             // Be a little forgiving if it's a small paragraph.
@@ -3809,7 +4167,8 @@ URL: ${url}</pre>
     /* *************************************************************** */
     if (option.checks.QA_FAKE_LIST) {
       const numberMatch = new RegExp(/(([023456789][\d\s])|(1\d))/, ''); // All numbers but 1.
-      const alphabeticMatch = new RegExp(/(^[aA1αаΑ]|[^\p{Alphabetic}\s])[-\s.)]/, 'u');
+      const alphabeticMatch = new RegExp(/(^[aA1αаΑ]|[^p{Alphabetic}\s])[-\s.)]/, 'u');
+      // biome-ignore lint/complexity/noUselessEscapeInRegex: Escape is indeed needed!
       const emojiMatch = new RegExp(/\p{Extended_Pictographic}/, 'u');
       const secondTextNoMatch = ['a', 'A', 'α', 'Α', 'а', 'А', '1'];
       const specialCharsMatch = /[([{#]/;
@@ -3822,7 +4181,8 @@ URL: ${url}</pre>
         б: 'а',
         Б: 'А',
       };
-      const decrement = (element) => element.replace(/^b|^B|^б|^Б|^β|^В|^2/, (match) => prefixDecrement[match]);
+      const decrement = (element) =>
+        element.replace(/^b|^B|^б|^Б|^β|^В|^2/, (match) => prefixDecrement[match]);
 
       // Variables to carry in loop.
       let activeMatch = ''; // Carried in loop for second paragraph.
@@ -3842,10 +4202,10 @@ URL: ${url}</pre>
         const isSpecialChar = specialCharsMatch.test(firstPrefix.charAt(0));
 
         if (
-          firstPrefix.length > 0
-          && firstPrefix !== activeMatch
-          && !isNumber
-          && (isAlphabetic || isEmoji || isSpecialChar)
+          firstPrefix.length > 0 &&
+          firstPrefix !== activeMatch &&
+          !isNumber &&
+          (isAlphabetic || isEmoji || isSpecialChar)
         ) {
           // We have a prefix and a possible hit; check next detected paragraph.
           const secondP = Elements.Found.Paragraphs[i + 1];
@@ -3874,20 +4234,29 @@ URL: ${url}</pre>
             // Split p by carriage return if there was a firstPrefix and compare.
             let textAfterBreak = p?.querySelector('br')?.nextSibling?.nodeValue;
             if (textAfterBreak) {
-              textAfterBreak = textAfterBreak.replace(/<\/?[^>]+(>|$)/g, '').trim().substring(0, 2);
+              textAfterBreak = textAfterBreak
+                .replace(/<\/?[^>]+(>|$)/g, '')
+                .trim()
+                .substring(0, 2);
               const checkForOtherPrefixChars = specialCharsMatch.test(textAfterBreak.charAt(0));
-              if (checkForOtherPrefixChars
-                || firstPrefix === decrement(textAfterBreak)
-                || (!lastHitWasEmoji && textAfterBreak.match(emojiMatch))) {
+              if (
+                checkForOtherPrefixChars ||
+                firstPrefix === decrement(textAfterBreak) ||
+                (!lastHitWasEmoji && textAfterBreak.match(emojiMatch))
+              ) {
                 hit = true;
               }
             }
-          } if (hit) {
+          }
+          if (hit) {
             results.push({
               test: 'QA_FAKE_LIST',
               element: p,
               type: option.checks.QA_FAKE_LIST.type || 'warning',
-              content: Lang.sprintf(option.checks.QA_FAKE_LIST.content || 'QA_FAKE_LIST', firstPrefix),
+              content: Lang.sprintf(
+                option.checks.QA_FAKE_LIST.content || 'QA_FAKE_LIST',
+                firstPrefix,
+              ),
               dismiss: prepareDismissal(`LIST${p.textContent}`),
               dismissAll: option.checks.QA_FAKE_LIST.dismissAll ? 'QA_FAKE_LIST' : false,
               developer: option.checks.QA_FAKE_LIST.developer || false,
@@ -3935,10 +4304,18 @@ URL: ${url}</pre>
           });
         }
       };
-      Elements.Found.Paragraphs.forEach(($el) => checkCaps($el));
-      Elements.Found.Headings.forEach(($el) => checkCaps($el));
-      Elements.Found.Lists.forEach(($el) => checkCaps($el));
-      Elements.Found.Blockquotes.forEach(($el) => checkCaps($el));
+      Elements.Found.Paragraphs.forEach(($el) => {
+        checkCaps($el);
+      });
+      Elements.Found.Headings.forEach(($el) => {
+        checkCaps($el);
+      });
+      Elements.Found.Lists.forEach(($el) => {
+        checkCaps($el);
+      });
+      Elements.Found.Blockquotes.forEach(($el) => {
+        checkCaps($el);
+      });
     }
 
     /* ************************************************************** */
@@ -3987,12 +4364,13 @@ URL: ${url}</pre>
       const { textDecorationLine, textAlign, fontSize } = style;
 
       /* Check: Underlined text. */
-      const interactive = 'a[href], button, abbr, [role="link"], [role="button"], [tabindex="0"], [onclick]';
+      const interactive =
+        'a[href], button, abbr, [role="link"], [role="button"], [tabindex="0"], [onclick]';
       if (
-        option.checks.QA_UNDERLINE
-        && ($el.closest('u') || textDecorationLine === 'underline')
-        && !$el.closest(interactive)
-        && !$el.matches(interactive)
+        option.checks.QA_UNDERLINE &&
+        ($el.closest('u') || textDecorationLine === 'underline') &&
+        !$el.closest(interactive) &&
+        !$el.matches(interactive)
       ) {
         addUnderlineResult($el);
       }
@@ -4014,9 +4392,7 @@ URL: ${url}</pre>
       }
 
       /* Check: Check if text is justify-aligned. */
-      const parentJustify = $el.parentElement
-        ? getComputedStyle($el.parentElement).textAlign
-        : null;
+      const parentJustify = $el.parentElement ? getComputedStyle($el.parentElement).textAlign : null;
       const justifyInherited = parentJustify === textAlign;
       if (option.checks.QA_JUSTIFY && textAlign === 'justify' && !justifyInherited) {
         addJustifyResult($el);
@@ -4075,9 +4451,13 @@ URL: ${url}</pre>
             test: 'QA_NESTED_COMPONENTS',
             element: $el,
             type: option.checks.QA_NESTED_COMPONENTS.type || 'warning',
-            content: Lang.sprintf(option.checks.QA_NESTED_COMPONENTS.content || 'QA_NESTED_COMPONENTS'),
+            content: Lang.sprintf(
+              option.checks.QA_NESTED_COMPONENTS.content || 'QA_NESTED_COMPONENTS',
+            ),
             dismiss: prepareDismissal(`NESTED${$el.textContent}`),
-            dismissAll: option.checks.QA_NESTED_COMPONENTS.dismissAll ? 'QA_NESTED_COMPONENTS' : false,
+            dismissAll: option.checks.QA_NESTED_COMPONENTS.dismissAll
+              ? 'QA_NESTED_COMPONENTS'
+              : false,
             developer: option.checks.QA_NESTED_COMPONENTS.developer || false,
           });
         }
@@ -4087,15 +4467,187 @@ URL: ${url}</pre>
     return results;
   }
 
-  // Editoria11y override: replaces APCA dependency with Porter-Duff
-  const alphaBlend = function(fg = [0,0,0,1], bg = [0,0,0]) {
-  	const bgAlpha = 1 - fg[3];
-  	return [
-  		((fg[0] * fg[3]) + (bgAlpha * bg[0])),
-  		((fg[1] * fg[3]) + (bgAlpha * bg[1])),
-  		((fg[2] * fg[3]) + (bgAlpha * bg[2]))
-  	];
+  // biome-ignore-all lint: third party APCA library.
+
+  /**
+   * @license
+   *
+   * The APCA contrast prediction algorithm is based of the formulas published
+   * in the APCA-1.0.98G specification by Myndex.
+   *
+   * @link https://github.com/Myndex/apca-w3/tree/master
+   * @license https://github.com/Myndex/apca-w3/tree/master?tab=License-1-ov-file
+   */
+
+  const SA98G = {
+    mainTRC: 2.4,
+    get mainTRCencode() {
+      return 1 / this.mainTRC;
+    },
+    sRco: 0.2126729,
+    sGco: 0.7151522,
+    sBco: 0.072175,
+    normBG: 0.56,
+    normTXT: 0.57,
+    revTXT: 0.62,
+    revBG: 0.65,
+    blkThrs: 0.022,
+    blkClmp: 1.414,
+    scaleBoW: 1.14,
+    scaleWoB: 1.14,
+    loBoWoffset: 0.027,
+    loWoBoffset: 0.027,
+    deltaYmin: 0.0005,
+    loClip: 0.1,
+    mFactor: 1.9468554433171,
+    get mFactInv() {
+      return 1 / this.mFactor;
+    },
+    mOffsetIn: 0.0387393816571401,
+    mExpAdj: 0.283343396420869,
+    get mExp() {
+      return this.mExpAdj / this.blkClmp;
+    },
+    mOffsetOut: 0.312865795870758,
   };
+
+  function APCAcontrast(txtY, bgY, places = -1) {
+    const icp = [0.0, 1.1];
+    if (isNaN(txtY) || isNaN(bgY) || Math.min(txtY, bgY) < icp[0] || Math.max(txtY, bgY) > icp[1]) {
+      return 0.0;
+    }
+    let SAPC = 0.0;
+    let outputContrast = 0.0;
+    let polCat = 'BoW';
+    txtY = txtY > SA98G.blkThrs ? txtY : txtY + Math.pow(SA98G.blkThrs - txtY, SA98G.blkClmp);
+    bgY = bgY > SA98G.blkThrs ? bgY : bgY + Math.pow(SA98G.blkThrs - bgY, SA98G.blkClmp);
+    if (Math.abs(bgY - txtY) < SA98G.deltaYmin) {
+      return 0.0;
+    }
+    if (bgY > txtY) {
+      SAPC = (Math.pow(bgY, SA98G.normBG) - Math.pow(txtY, SA98G.normTXT)) * SA98G.scaleBoW;
+      outputContrast = SAPC < SA98G.loClip ? 0.0 : SAPC - SA98G.loBoWoffset;
+    } else {
+      polCat = 'WoB';
+      SAPC = (Math.pow(bgY, SA98G.revBG) - Math.pow(txtY, SA98G.revTXT)) * SA98G.scaleWoB;
+      outputContrast = SAPC > -SA98G.loClip ? 0.0 : SAPC + SA98G.loWoBoffset;
+    }
+    if (places < 0) {
+      return outputContrast * 100.0;
+    } else if (places == 0) {
+      return Math.round(Math.abs(outputContrast) * 100.0) + '<sub>' + polCat + '</sub>';
+    } else if (Number.isInteger(places)) {
+      return (outputContrast * 100.0).toFixed(places);
+    } else {
+      return 0.0;
+    }
+  }
+
+  function fontLookupAPCA(contrast, places = 2) {
+    const fontMatrixAscend = [
+      ['Lc', 100, 200, 300, 400, 500, 600, 700, 800, 900],
+      [0, 999, 999, 999, 999, 999, 999, 999, 999, 999],
+      [10, 999, 999, 999, 999, 999, 999, 999, 999, 999],
+      [15, 777, 777, 777, 777, 777, 777, 777, 777, 777],
+      [20, 777, 777, 777, 777, 777, 777, 777, 777, 777],
+      [25, 777, 777, 777, 120, 120, 108, 96, 96, 96],
+      [30, 777, 777, 120, 108, 108, 96, 72, 72, 72],
+      [35, 777, 120, 108, 96, 72, 60, 48, 48, 48],
+      [40, 120, 108, 96, 60, 48, 42, 32, 32, 32],
+      [45, 108, 96, 72, 42, 32, 28, 24, 24, 24],
+      [50, 96, 72, 60, 32, 28, 24, 21, 21, 21],
+      [55, 80, 60, 48, 28, 24, 21, 18, 18, 18],
+      [60, 72, 48, 42, 24, 21, 18, 16, 16, 18],
+      [65, 68, 46, 32, 21.75, 19, 17, 15, 16, 18],
+      [70, 64, 44, 28, 19.5, 18, 16, 14.5, 16, 18],
+      [75, 60, 42, 24, 18, 16, 15, 14, 16, 18],
+      [80, 56, 38.25, 23, 17.25, 15.81, 14.81, 14, 16, 18],
+      [85, 52, 34.5, 22, 16.5, 15.625, 14.625, 14, 16, 18],
+      [90, 48, 32, 21, 16, 15.5, 14.5, 14, 16, 18],
+      [95, 45, 28, 19.5, 15.5, 15, 14, 13.5, 16, 18],
+      [100, 42, 26.5, 18.5, 15, 14.5, 13.5, 13, 16, 18],
+      [105, 39, 25, 18, 14.5, 14, 13, 12, 16, 18],
+      [110, 36, 24, 18, 14, 13, 12, 11, 16, 18],
+      [115, 34.5, 22.5, 17.25, 12.5, 11.875, 11.25, 10.625, 14.5, 16.5],
+      [120, 33, 21, 16.5, 11, 10.75, 10.5, 10.25, 13, 15],
+      [125, 32, 20, 16, 10, 10, 10, 10, 12, 14],
+    ];
+
+    const fontDeltaAscend = [
+      ['∆Lc', 100, 200, 300, 400, 500, 600, 700, 800, 900],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [10, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [15, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [20, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [25, 0, 0, 0, 12, 12, 12, 24, 24, 24],
+      [30, 0, 0, 12, 12, 36, 36, 24, 24, 24],
+      [35, 0, 12, 12, 36, 24, 18, 16, 16, 16],
+      [40, 12, 12, 24, 18, 16, 14, 8, 8, 8],
+      [45, 12, 24, 12, 10, 4, 4, 3, 3, 3],
+      [50, 16, 12, 12, 4, 4, 3, 3, 3, 3],
+      [55, 8, 12, 6, 4, 3, 3, 2, 2, 0],
+      [60, 4, 2, 10, 2.25, 2, 1, 1, 0, 0],
+      [65, 4, 2, 4, 2.25, 1, 1, 0.5, 0, 0],
+      [70, 4, 2, 4, 1.5, 2, 1, 0.5, 0, 0],
+      [75, 4, 3.75, 1, 0.75, 0.188, 0.188, 0, 0, 0],
+      [80, 4, 3.75, 1, 0.75, 0.188, 0.188, 0, 0, 0],
+      [85, 4, 2.5, 1, 0.5, 0.125, 0.125, 0, 0, 0],
+      [90, 3, 4, 1.5, 0.5, 0.5, 0.5, 0.5, 0, 0],
+      [95, 3, 1.5, 1, 0.5, 0.5, 0.5, 0.5, 0, 0],
+      [100, 3, 1.5, 0.5, 0.5, 0.5, 0.5, 1, 0, 0],
+      [105, 3, 1, 0, 0.5, 1, 1, 1, 0, 0],
+      [110, 1.5, 1.5, 0.75, 1.5, 1.125, 0.75, 0.375, 1.5, 1.5],
+      [115, 1.5, 1.5, 0.75, 1.5, 1.125, 0.75, 0.375, 1.5, 1.5],
+      [120, 1, 1, 0.5, 1, 0.75, 0.5, 0.25, 1, 1],
+      [125, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ];
+    const weightArray = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900];
+    const weightArrayLen = weightArray.length;
+    let returnArray = [contrast.toFixed(places), 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    returnArray.length;
+    let tempFont = 777;
+    contrast = Math.abs(contrast);
+    const factor = 0.2;
+    const index = contrast == 0 ? 1 : (contrast * factor) | 0;
+    let w = 0;
+    let scoreAdj = (contrast - fontMatrixAscend[index][w]) * factor;
+    w++;
+    for (; w < weightArrayLen; w++) {
+      tempFont = fontMatrixAscend[index][w];
+      if (tempFont > 400) {
+        returnArray[w] = tempFont;
+      } else if (contrast < 14.5) {
+        returnArray[w] = 999;
+      } else if (contrast < 29.5) {
+        returnArray[w] = 777;
+      } else {
+        tempFont > 24
+          ? (returnArray[w] = Math.round(tempFont - fontDeltaAscend[index][w] * scoreAdj))
+          : (returnArray[w] = tempFont - ((2.0 * fontDeltaAscend[index][w] * scoreAdj) | 0) * 0.5);
+      }
+    }
+    return returnArray;
+  }
+
+  function sRGBtoY(rgb = [0, 0, 0]) {
+    function simpleExp(chan) {
+      return Math.pow(chan / 255.0, SA98G.mainTRC);
+    }
+    return (
+      SA98G.sRco * simpleExp(rgb[0]) + SA98G.sGco * simpleExp(rgb[1]) + SA98G.sBco * simpleExp(rgb[2])
+    );
+  }
+
+  function alphaBlend$1(rgbaFG = [0, 0, 0, 1.0], rgbBG = [0, 0, 0], round = true) {
+    rgbaFG[3] = Math.max(Math.min(rgbaFG[3], 1.0), 0.0);
+    let compBlend = 1.0 - rgbaFG[3];
+    let rgbOut = [0, 0, 0, 1, true];
+    for (let i = 0; i < 3; i++) {
+      rgbOut[i] = rgbBG[i] * compBlend + rgbaFG[i] * rgbaFG[3];
+      if (round) rgbOut[i] = Math.min(Math.round(rgbOut[i]), 255);
+    }
+    return rgbOut;
+  }
 
   /**
    * Normalizes a given font weight to a numeric value. Maps keywords to their numeric equivalents.
@@ -4103,15 +4655,17 @@ URL: ${url}</pre>
    * @returns {number} - The numeric font weight.
    */
   function normalizeFontWeight(weight) {
-  	const numericWeight = parseInt(weight, 10);
-  	if (!Number.isNaN(numericWeight)) return numericWeight;
-  	const weightMap = {
-  		lighter: 100,
-  		normal: 400,
-  		bold: 700,
-  		bolder: 900,
-  	};
-  	return weightMap[weight] || 400;
+    const numericWeight = parseInt(weight, 10);
+    if (!Number.isNaN(numericWeight)) {
+      return numericWeight;
+    }
+    const weightMap = {
+      lighter: 100,
+      normal: 400,
+      bold: 700,
+      bolder: 900,
+    };
+    return weightMap[weight] || 400;
   }
 
   /**
@@ -4120,137 +4674,139 @@ URL: ${url}</pre>
    * @param {number} opacity The computed opacity of the element (0 to 1).
    * @returns Returns colour in rgba format with alpha value.
    */
-  function convertToRGBA(color, opacity) {
-  	const colorString = color;
-  	let r;
-  	let g;
-  	let b;
-  	let a = 1; // Initialize alpha to 1 by default.
+  function convertToRGBA$1(color, opacity) {
+    const colorString = color;
+    let r;
+    let g;
+    let b;
+    let a = 1; // Initialize alpha to 1 by default.
 
-  	if (!colorString.startsWith('rgb')) {
-  		// Unsupported color spaces.
-  		if (
-  			colorString.startsWith('color(rec2020')
-  			|| colorString.startsWith('color(display-p3')
-  			|| colorString.startsWith('url(')
-  		) {
-  			return 'unsupported';
-  		}
+    if (!colorString.startsWith('rgb')) {
+      // Unsupported color spaces.
+      if (
+        colorString.startsWith('color(rec2020') ||
+        colorString.startsWith('color(display-p3') ||
+        colorString.startsWith('url(')
+      ) {
+        return 'unsupported';
+      }
 
-  		// Let the browser do conversion in rgb for non-supported colour spaces.
-  		const canvas = document.createElement('canvas');
-  		const context = canvas.getContext('2d');
-  		context.fillStyle = colorString;
-  		context.fillRect(0, 0, 1, 1);
-  		const imageData = context.getImageData(0, 0, 1, 1);
-  		[r, g, b, a] = imageData.data;
-  		a = (a / 255).toFixed(2); // Convert alpha to range [0, 1]
-  	} else {
-  		// Parse RGB or RGBA values from the color string
-  		const rgbaArray = colorString.match(/[\d.]+/g).map(Number);
-  		[r, g, b, a] = rgbaArray.length === 4 ? rgbaArray : [...rgbaArray, 1];
-  	}
+      // Let the browser do conversion in rgb for non-supported colour spaces.
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      context.fillStyle = colorString;
+      context.fillRect(0, 0, 1, 1);
+      const imageData = context.getImageData(0, 0, 1, 1);
+      [r, g, b, a] = imageData.data;
+      a = (a / 255).toFixed(2); // Convert alpha to range [0, 1]
+    } else {
+      // Parse RGB or RGBA values from the color string
+      const rgbaArray = colorString.match(/[\d.]+/g).map(Number);
+      [r, g, b, a] = rgbaArray.length === 4 ? rgbaArray : [...rgbaArray, 1];
+    }
 
-  	// If element has opacity attribute, amend the foreground text color string.
-  	if (opacity && opacity < 1) {
-  		a = (a * opacity).toFixed(2); // Adjust alpha based on the opacity
-  	}
-  	return [r, g, b, Number(a)];
+    // If element has opacity attribute, amend the foreground text color string.
+    if (opacity && opacity < 1) {
+      a = (a * opacity).toFixed(2); // Adjust alpha based on the opacity
+    }
+    return [r, g, b, Number(a)];
   }
 
   /**
    * Retrieves the background colour of an element by traversing up the DOM tree.
    * @param {HTMLElement} $el - The DOM element from which to start searching for the background.
+   * @param {Boolean} shadowDetection - Whether to traverse shadow DOM.
    * @returns {string} - The background color in RGBA format, or "image" if background image.
    */
-  function getBackground($el) {
-  	let targetEl = $el;
-  	while (targetEl && targetEl.nodeType === 1) {
-  		// Element is within a shadow component.
-  		if (Constants.Global.shadowDetection) {
-  			const root = targetEl.getRootNode();
-  			if (root instanceof ShadowRoot) {
-  				// Traverse upward until the shadow root's host.
-  				let node = targetEl;
-  				while (node && node !== root.host) {
-  					const styles = getComputedStyle(node);
+  function getBackground($el, shadowDetection) {
+    let targetEl = $el;
+    while (targetEl && targetEl.nodeType === 1) {
+      // Element is within a shadow component.
+      if (shadowDetection) {
+        const root = targetEl.getRootNode();
+        if (root instanceof ShadowRoot) {
+          // Traverse upward until the shadow root's host.
+          let node = targetEl;
+          while (node && node !== root.host) {
+            const styles = getComputedStyle(node);
 
-  					// Background image check.
-  					if (styles.backgroundImage && styles.backgroundImage !== 'none') {
-  						return { type: 'image', value: styles.backgroundImage };
-  					}
+            // Background image check.
+            if (styles.backgroundImage && styles.backgroundImage !== 'none') {
+              return { type: 'image', value: styles.backgroundImage };
+            }
 
-  					// Background colour check.
-  					const bgColor = convertToRGBA(styles.backgroundColor);
-  					if (bgColor[3] !== 0 && bgColor !== 'transparent') {
-  						return bgColor;
-  					}
-  					node = node.parentElement;
-  				}
+            // Background colour check.
+            const bgColor = convertToRGBA$1(styles.backgroundColor);
+            if (bgColor[3] !== 0 && bgColor !== 'transparent') {
+              return bgColor;
+            }
+            node = node.parentElement;
+          }
 
-  				// If nothing found within the shadow tree, continue with the host.
-  				return getBackground(root.host);
-  			}
-  		}
+          // If nothing found within the shadow tree, continue with the host.
+          return getBackground(root.host);
+        }
+      }
 
-  		// Element has background image.
-  		const styles = getComputedStyle(targetEl);
-  		const bgImage = styles.backgroundImage;
-  		if (bgImage !== 'none') {
-  			return { type: 'image', value: bgImage };
-  		}
+      // Element has background image.
+      const styles = getComputedStyle(targetEl);
+      const bgImage = styles.backgroundImage;
+      if (bgImage !== 'none') {
+        return { type: 'image', value: bgImage };
+      }
 
-  		// Element has background colour.
-  		const bgColor = convertToRGBA(styles.backgroundColor);
-  		if (bgColor[3] !== 0 && bgColor !== 'transparent') {
-  			// If the background colour has an alpha channel.
-  			if (bgColor[3] < 1) {
-  				// We need to find the first non-transparent parent background and blend them together.
-  				let parentEl = targetEl.parentElement;
-  				let parentBgColor = 'rgba(255, 255, 255, 1)';
-  				while (parentEl && parentEl.nodeType === 1) {
-  					const parentStyles = getComputedStyle(parentEl);
-  					parentBgColor = parentStyles.backgroundColor;
+      // Element has background colour.
+      const bgColor = convertToRGBA$1(styles.backgroundColor);
+      if (bgColor[3] !== 0 && bgColor !== 'transparent') {
+        // If the background colour has an alpha channel.
+        if (bgColor[3] < 1) {
+          // We need to find the first non-transparent parent background and blend them together.
+          let parentEl = targetEl.parentElement;
+          let parentBgColor = 'rgba(255, 255, 255, 1)';
+          while (parentEl && parentEl.nodeType === 1) {
+            const parentStyles = getComputedStyle(parentEl);
+            parentBgColor = parentStyles.backgroundColor;
 
-  					// Stop, valid colour found.
-  					if (parentBgColor !== 'rgba(0, 0, 0, 0)') break;
+            // Stop, valid colour found.
+            if (parentBgColor !== 'rgba(0, 0, 0, 0)') {
+              break;
+            }
 
-  					// If we reach the HTML tag, default to white.
-  					if (parentBgColor === 'rgba(0, 0, 0, 0)' && parentEl.tagName === 'HTML') {
-  						parentBgColor = 'rgba(255, 255, 255, 1)';
-  					}
+            // If we reach the HTML tag, default to white.
+            if (parentBgColor === 'rgba(0, 0, 0, 0)' && parentEl.tagName === 'HTML') {
+              parentBgColor = 'rgba(255, 255, 255, 1)';
+            }
 
-  					// Move up the DOM tree.
-  					parentEl = parentEl.parentElement;
-  				}
-  				const parentColor = convertToRGBA(parentBgColor || 'rgba(255, 255, 255, 1)');
-
-  				const blendedBG = alphaBlend(bgColor, parentColor);
-
-  				return blendedBG;
-  			}
-  			// Return solid color immediately if no alpha channel.
-  			return bgColor;
-  		}
-  		if (targetEl.tagName === 'HTML') {
-  			return [255, 255, 255]; // Default to white if we reach the HTML tag.
-  		}
-  		targetEl = targetEl.parentNode;
-  	}
-  	return [255, 255, 255]; // Default to white if no background color is found.
+            // Move up the DOM tree.
+            parentEl = parentEl.parentElement;
+          }
+          const parentColor = convertToRGBA$1(parentBgColor || 'rgba(255, 255, 255, 1)');
+          const blendedBG = alphaBlend$1(bgColor, parentColor);
+          return blendedBG;
+        }
+        // Return solid color immediately if no alpha channel.
+        return bgColor;
+      }
+      if (targetEl.tagName === 'HTML') {
+        return [255, 255, 255]; // Default to white if we reach the HTML tag.
+      }
+      targetEl = targetEl.parentNode;
+    }
+    return [255, 255, 255]; // Default to white if no background color is found.
   }
 
-  /** Get the relative luminance of a colour based on WCAG 2.0
+  /**
+   * Get the relative luminance of a colour based on WCAG 2.0
    * @link http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
    * @param {number[]} color Colour code in [R,G,B] format.
    * @returns Luminance value.
    */
-  function getLuminance(color) {
-  	const rgb = color.slice(0, 3).map((x) => {
-  		const normalized = x / 255;
-  		return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
-  	});
-  	return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+  function getLuminance$1(color) {
+    const rgb = color.slice(0, 3).map((x) => {
+      const normalized = x / 255;
+      return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
   }
 
   /**
@@ -4260,42 +4816,10 @@ URL: ${url}</pre>
    * @param {number} l2 Luminance value of background colour.
    * @returns WCAG 2.0 contrast ratio.
    */
-  function getWCAG2Ratio(l1, l2) {
-  	const lighter = Math.max(l1, l2);
-  	const darker = Math.min(l1, l2);
-  	return (lighter + 0.05) / (darker + 0.05);
-  }
-
-  /**
-   * Brighten a foreground text colour.
-   * @param {number[]} color Text colour in [R,G,B,A] format.
-   * @param {number} amount Number or increment to brighten by.
-   * @returns Lighter foreground text colour.
-   */
-  function brighten(color, amount) {
-  	return color.map((value, index) => {
-  		if (index < 3) { // Only brighten [R,G,B]
-  			const newValue = Math.ceil(value + (255 - value) * amount);
-  			return newValue >= 255 ? 255 : newValue;
-  		}
-  		return value;
-  	});
-  }
-
-  /**
-   * Darken a foreground text colour.
-   * @param {number[]} color Text colour in [R,G,B,A] format.
-   * @param {number} amount Number or increment to darken by.
-   * @returns Darker foreground text colour.
-   */
-  function darken(color, amount) {
-  	return color.map((value, index) => {
-  		if (index < 3) { // Only darken [R,G,B]
-  			const newValue = Math.floor(value * (1 - amount));
-  			return newValue <= 0 ? 0 : newValue;
-  		}
-  		return value;
-  	});
+  function getWCAG2Ratio$1(l1, l2) {
+    const lighter = Math.max(l1, l2);
+    const darker = Math.min(l1, l2);
+    return (lighter + 0.05) / (darker + 0.05);
   }
 
   /**
@@ -4303,363 +4827,183 @@ URL: ${url}</pre>
    * @param {number[]} color Colour in [R,G,B,A] format.
    * @returns Hexcode equivalent.
    */
-  function getHex(color) {
-  	const [r, g, b] = color.map((value) => Math.min(255, Math.max(0, value)));
-  	const hexR = r.toString(16).padStart(2, '0');
-  	const hexG = g.toString(16).padStart(2, '0');
-  	const hexB = b.toString(16).padStart(2, '0');
-  	return `#${hexR}${hexG}${hexB}`;
+  function getHex$1(color) {
+    const [r, g, b] = color.map((value) => Math.min(255, Math.max(0, value)));
+    const hexR = r.toString(16).padStart(2, '0');
+    const hexG = g.toString(16).padStart(2, '0');
+    const hexB = b.toString(16).padStart(2, '0');
+    return `#${hexR}${hexG}${hexB}`;
+  }
+
+  /**
+   * Get the display-friendly APCA contrast value for output.
+   * @param {Object} value - The value object containing the contrast ratio.
+   * @returns {string|number} The formatted APCA contrast value.
+   */
+  function displayAPCAValue(value) {
+    return Math.abs(Number(value.toFixed(1)));
+  }
+
+  /**
+   * Get the display-friendly WCAG ratio for output.
+   * @param {Object} value - The value object containing the contrast ratio.
+   * @returns {string|number} The formatted contrast ratio.
+   */
+  function displayWCAGRatio(value) {
+    const truncatedRatio = Math.trunc(value * 10) / 10;
+    // Round to decimal places, and display without decimals if integer.
+    const formattedRatio = Number.isInteger(truncatedRatio)
+      ? truncatedRatio.toFixed(0)
+      : truncatedRatio;
+    return `${formattedRatio}:1`;
   }
 
   /**
    * Get the display-friendly contrast value for output.
    * @param {Object} value - The value object containing the contrast ratio.
+   * @param {String} contrastAlgorithm - Preferred contrast algorithm.
    * @returns {string|number} The formatted contrast ratio.
    */
-  function ratioToDisplay(value) {
-  	if (Constants.Global.contrastAPCA) {
-  		return Math.abs(Number(value.toFixed(1)));
-  	}
-  	// Round to decimal places, and display without decimals if integer.
-  	const truncatedRatio = Math.trunc(value * 10) / 10;
-  	const formattedRatio = Number.isInteger(truncatedRatio)
-  		? truncatedRatio.toFixed(0)
-  		: truncatedRatio;
-  	return `${formattedRatio}:1`;
+  function ratioToDisplay$1(value, contrastAlgorithm) {
+    return contrastAlgorithm === 'APCA' ? displayAPCAValue(value) : displayWCAGRatio(value);
   }
 
   /**
    * Calculate the contrast ratio or value between two colours.
    * @param {number[]} color Text colour in [R,G,B,A] format.
    * @param {Array} bg Background colour in [R,G,B,A] format.
+   * @param {String} contrastAlgorithm Preferred algorithm.
    * @returns Either WCAG 2.0 contrast ratio or APCA contrast value.
    */
-  function calculateContrast(color, bg) {
-  	let ratio;
-  	const blendedColor = alphaBlend(color, bg).slice(0, 4);
-  	// Uses WCAG 2.0 contrast algorithm based on luminance.
-  	const foreground = getLuminance(blendedColor);
-  	const background = getLuminance(bg);
-  	ratio = getWCAG2Ratio(foreground, background);
-  	return { ratio, blendedColor };
-  }
-
-  /**
-   * Suggest a foreground colour with sufficient contrast.
-   * @param {number[]} color Text colour in [R,G,B,A] format.
-   * @param {number[]} background Background colour in [R,G,B,A] format.
-   * @param {boolean} isLargeText Whether text is normal or large size.
-   * @param {boolean} contrastAAA Use WCAG AAA thresholds.
-   * @returns Compliant colour hexcode.
-   */
-  function suggestColorWCAG(color, background, isLargeText, contrastAAA = false) {
-  	let minContrastRatio;
-  	if (contrastAAA) {
-  		minContrastRatio = isLargeText ? 4.5 : 7;
-  	} else {
-  		minContrastRatio = isLargeText ? 3 : 4.5;
-  	}
-
-  	// Get luminance
-  	const fgLuminance = getLuminance(color);
-  	const bgLuminance = getLuminance(background);
-
-  	// Determine if text color should be lightened or darkened (considers extreme values).
-  	const adjustMode = fgLuminance > bgLuminance
-  		? getWCAG2Ratio(1, bgLuminance) > minContrastRatio
-  		: getWCAG2Ratio(0, bgLuminance) < minContrastRatio;
-
-  	const adjustColor = (foregroundColor, amount, mode) => (
-  		mode ? brighten(foregroundColor, amount) : darken(foregroundColor, amount)
-  	);
-
-  	let adjustedColor = color;
-  	let lastValidColor = adjustedColor;
-  	let contrastRatio = getWCAG2Ratio(fgLuminance, bgLuminance);
-  	let bestContrast = contrastRatio;
-  	let previousColor = color;
-
-  	// Loop parameters.
-  	let step = 0.16;
-  	const percentChange = 0.5;
-  	const precision = 0.01;
-  	let iterations = 0;
-  	const maxIterations = 100;
-
-  	while (step >= precision) {
-  		iterations += 1;
-
-  		// Return null if no colour found.
-  		if (iterations > maxIterations) {
-  			return { color: null };
-  		}
-
-  		adjustedColor = adjustColor(adjustedColor, step, adjustMode);
-  		const newLuminance = getLuminance(adjustedColor);
-  		contrastRatio = getWCAG2Ratio(newLuminance, bgLuminance);
-
-  		// console.log(`%c ${getHex(adjustedColor)} | ${contrastRatio}`, `color:${getHex(adjustedColor)};background:${getHex(background)}`);
-
-  		// Save valid colour, go back to previous, and continue with a smaller step.
-  		if (contrastRatio >= minContrastRatio) {
-  			// Ensure new colour is closer to the contrast minimum than old colour.
-  			lastValidColor = (contrastRatio <= bestContrast) ? adjustedColor : lastValidColor;
-  			bestContrast = contrastRatio;
-  			adjustedColor = previousColor;
-  			step *= percentChange;
-  		}
-
-  		previousColor = adjustedColor;
-  	}
-  	return { color: getHex(lastValidColor) };
-  }
-
-  /**
-   * Generates and inserts color suggestions for tooltip upon tooltip opening.
-   * This function is referenced within './interface/tooltips.js'.
-   * For performance reasons, it is only called upon tooltip opening.
-   * @param {HTMLElement} container The container where the color suggestion will be inserted.
-   */
-  function generateColorSuggestion(contrastDetails) {
-  	let adviceContainer;
-  	const { color, background, fontWeight, fontSize, isLargeText, type } = contrastDetails;
-  	if (
-  		color && background && background.type !== 'image'
-  		&& (type === 'text' || type === 'svg-error' || type === 'input')
-  	) {
-  		const suggested = suggestColorWCAG(color, background, isLargeText, Constants.Global.contrastAAA);
-
-  		let advice;
-  		const hr = '<hr aria-hidden="true">';
-  		const style = `color:${suggested.color};background-color:${getHex(contrastDetails.background)};`;
-  		const colorBadge = `<button id="suggest" class="badge" style="${style}">${suggested.color}</button>`;
-  		`<strong class="normal-badge">${suggested.size}px</strong>`;
-
-  		if (suggested.color === null) {
-  			advice = `${hr} ${Lang._('NO_SUGGESTION')}`;
-  		} else {
-  			advice = `${hr} ${Lang._('CONTRAST_COLOR')} ${colorBadge}`;
-  		}
-
-  		// Append it to contrast details container.
-  		adviceContainer = document.createElement('div');
-  		adviceContainer.id = 'advice';
-
-  		// If low opacity, suggest increase opacity first.
-  		const suggestion = (contrastDetails.opacity < 1)
-  			? `<hr aria-hidden="true"> ${Lang.sprintf('CONTRAST_OPACITY')}` : advice;
-
-  		// Append advice to contrast details container.
-  		adviceContainer.innerHTML = suggestion;
-  	}
-  	return adviceContainer;
-  }
-
-  /**
-   * Inject contrast colour pickers into tooltip.
-   * @param {HTMLElement} container The tooltip container to inject the contrast colour pickers.
-   */
-  function generateContrastTools(contrastDetails) {
-  	const { sanitizedText, color, background, fontWeight, fontSize, ratio, textUnderline } = contrastDetails;
-
-  	// Initialize variables.
-  	const hasBackgroundColor = background && background.type !== 'image';
-  	const backgroundHex = hasBackgroundColor ? getHex(background) : '#000000';
-  	const foregroundHex = color ? getHex(color) : '#000000';
-
-  	// Other properties.
-  	const hasFontWeight = fontWeight ? `font-weight:${fontWeight};` : '';
-  	const hasFontSize = fontSize ? `font-size:${fontSize}px;` : '';
-  	const textDecoration = textUnderline ? `text-decoration:${textUnderline};` : '';
-
-  	// If colour or background colour is unknown; visually indicate so.
-  	const unknownFG = color
-  		? '' : 'class="unknown"';
-  	const unknownBG = background && background.type !== 'image'
-  		? '' : 'class="unknown"';
-  	const unknownFGText = color
-  		? '' : `<span class="visually-hidden">(${Lang._('UNKNOWN')})</span>`;
-  	const unknownBGText = background
-  		? '' : `<span class="visually-hidden">(${Lang._('UNKNOWN')})</span>`;
-
-  	// Ratio to be displayed.
-  	let displayedRatio;
-
-  	// WCAG 2.0 ratio.
-  	displayedRatio = ratio || Lang._('UNKNOWN');
-
-  	// Generate HTML layout.
-  	const contrastTools = document.createElement('div');
-  	contrastTools.id = 'contrast-tools';
-  	contrastTools.innerHTML = `
-      <hr aria-hidden="true">
-      <div id="contrast" class="badge">${Lang._('CONTRAST')}</div>
-      <div id="value" class="badge">${displayedRatio}</div>
-      <div id="good" class="badge good-contrast" hidden>${Lang._('GOOD')} <span class="good-icon"></span></div>
-      <div id="contrast-preview" style="color:${foregroundHex};${hasBackgroundColor ? `background:${backgroundHex};` : ''}${hasFontWeight + hasFontSize + textDecoration}">${sanitizedText}</div>
-      <div id="color-pickers">
-        <label for="fg-text">${Lang._('FG')} ${unknownFGText}
-          <input type="color" id="fg-input" value="${foregroundHex}" ${unknownFG}/>
-        </label>
-        <label for="bg">${Lang._('BG')} ${unknownBGText}
-          <input type="color" id="bg-input" value="${backgroundHex}" ${unknownBG}/>
-        </label>
-      </div>`;
-  	return contrastTools;
-  }
-
-  /**
-   * Initializes colour eyedroppers for respective tooltip.
-   * This function is referenced within './interface/tooltips.js'.
-   * @param {HTMLElement} container The container where the color suggestion will be inserted.
-   * @param {Object} contrastDetails Contrast details object containing colour, background, etc.
-   */
-  function initializeContrastTools(container, contrastDetails) {
-  	const contrastTools = container?.querySelector('#contrast-tools');
-  	if (contrastTools) {
-  		const { fontSize, fontWeight, type, isLargeText } = contrastDetails;
-
-  		// Cache selectors
-  		const contrast = container.querySelector('#contrast');
-  		const contrastPreview = container.querySelector('#contrast-preview');
-  		const fgInput = container.querySelector('#fg-input');
-  		const bgInput = container.querySelector('#bg-input');
-  		const ratio = container.querySelector('#value');
-  		const good = container.querySelector('#good');
-
-  		// Helper to update badge classes.
-  		const toggleBadges = (elements, condition) => {
-  			elements.forEach(($el) => {
-  				$el.classList.toggle('good-contrast', condition);
-  				$el.classList.toggle('error-badge', !condition);
-  			});
-  		};
-
-  		// Update preview colors and contrast on input change.
-  		const updatePreview = () => {
-  			const fgColor = fgInput.value;
-  			const bgColor = bgInput.value;
-
-  			// Remove question mark from inputs.
-  			[fgInput, bgInput].forEach((input) => input.classList.remove('unknown'));
-
-  			// Adjust colours in preview area.
-  			contrastPreview.style.color = fgColor;
-  			contrastPreview.style.backgroundColor = bgColor;
-  			contrastPreview.style.backgroundImage = 'none';
-
-  			// Get contrast ratio.
-  			const contrastValue = calculateContrast(convertToRGBA(fgColor), convertToRGBA(bgColor));
-  			const elementsToToggle = [ratio, contrast];
-
-  			// WCAG 2.0
-  			const value = contrastValue.ratio;
-  			ratio.textContent = ratioToDisplay(value);
-
-  			const useAAA = Constants.Global.contrastAAA; // Use AAA thresholds if true, otherwise AA
-  			const nonTextThreshold = 3;
-  			const normalTextThreshold = useAAA ? 7 : 4.5;
-  			const largeTextThreshold = useAAA ? 4.5 : 3;
-
-  			const passesNonText = value >= nonTextThreshold;
-  			const passesNormalText = value >= normalTextThreshold;
-  			const passesLargeText = value >= largeTextThreshold;
-
-  			switch (type) {
-  			case 'svg-error':
-  			case 'svg-text':
-  			case 'svg-warning': {
-  				good.hidden = !passesNonText;
-  				toggleBadges(elementsToToggle, passesNonText);
-  				break;
-  			}
-  			default: {
-  				if (isLargeText) {
-  					toggleBadges([ratio, contrast], passesLargeText);
-  					good.hidden = !passesLargeText;
-  				} else {
-  					toggleBadges([ratio, contrast], passesNormalText);
-  					good.hidden = !passesNormalText;
-  				}
-  				break;
-  			}
-  			}
-  		};
-
-  		// Event listeners for both colour inputs.
-  		fgInput.addEventListener('input', updatePreview);
-  		bgInput.addEventListener('input', updatePreview);
-
-  		// Clicking on suggested colour updates preview and saves value to clipboard.
-  		setTimeout(() => {
-  			const suggest = container.querySelector('#suggest');
-  			if (suggest) {
-  				const updatePreviewWithSuggested = () => {
-  					const hex = suggest.textContent;
-  					fgInput.value = hex;
-  					updatePreview();
-  					navigator.clipboard.writeText(hex).catch(() => { });
-  				};
-  				suggest.addEventListener('click', updatePreviewWithSuggested);
-  			}
-  		}, 0);
-  	}
+  function calculateContrast$1(color, bg, contrastAlgorithm) {
+    let ratio;
+    const blendedColor = alphaBlend$1(color, bg).slice(0, 4);
+    if (contrastAlgorithm === 'APCA') {
+      const foreground = sRGBtoY(blendedColor);
+      const background = sRGBtoY(bg);
+      ratio = APCAcontrast(foreground, background);
+    } else {
+      // Uses WCAG 2.0 contrast algorithm based on luminance.
+      const foreground = getLuminance$1(blendedColor);
+      const background = getLuminance$1(bg);
+      ratio = getWCAG2Ratio$1(foreground, background);
+    }
+    return { ratio, blendedColor };
   }
 
   /**
    * Calculate an elements contrast based on WCAG 2.0 contrast algorithm.
    * @param {HTMLElement} $el The element in the DOM.
-   * @param {number[]} color Text colour in [R,G,B,A] format.
+   * @param {Array} color Text colour in [R,G,B,A] format.
    * @param {Array} background Background colour in [R,G,B,A] format.
    * @param {number} fontSize Element's font size.
    * @param {number} fontWeight Element's font weight.
    * @param {number} opacity Element's opacity value.
-   * @param {boolean} contrastAAA Check if AAA threshold is required.
+   * @param {boolean} contrastAlgorithm Preferred contrast algorithm.
    * @returns {Object} Object containing the element, ratio, and extra details.
    */
-  function wcagAlgorithm($el, color, background, fontSize, fontWeight, opacity, contrastAAA = false) {
-  	const { ratio, blendedColor } = calculateContrast(color, background);
-  	const isLargeText = fontSize >= 24 || (fontSize >= 18.67 && fontWeight >= 700);
+  function wcagAlgorithm(
+    $el,
+    color,
+    background,
+    fontSize,
+    fontWeight,
+    opacity,
+    contrastAlgorithm,
+  ) {
+    const { ratio, blendedColor } = calculateContrast$1(color, background);
+    const isLargeText = fontSize >= 24 || (fontSize >= 18.67 && fontWeight >= 700);
 
-  	let hasLowContrast;
-  	if (contrastAAA) {
-  		hasLowContrast = isLargeText ? ratio < 4.5 : ratio < 7;
-  	} else {
-  		const hasLowContrastNormalText = ratio > 1 && ratio < 4.5;
-  		hasLowContrast = isLargeText ? ratio < 3 : hasLowContrastNormalText;
-  	}
+    let hasLowContrast;
+    if (contrastAlgorithm === 'AAA') {
+      hasLowContrast = isLargeText ? ratio < 4.5 : ratio < 7;
+    } else {
+      const hasLowContrastNormalText = ratio > 1 && ratio < 4.5;
+      hasLowContrast = isLargeText ? ratio < 3 : hasLowContrastNormalText;
+    }
 
-  	if (hasLowContrast) {
-  		return {
-  			$el,
-  			ratio: ratioToDisplay(ratio),
-  			color: blendedColor,
-  			background,
-  			fontSize,
-  			fontWeight,
-  			isLargeText,
-  			opacity,
-  			textUnderline: getComputedStyle($el).textDecorationLine,
-  		};
-  	}
-  	return null;
+    if (hasLowContrast) {
+      return {
+        $el,
+        ratio: displayWCAGRatio(ratio),
+        color: blendedColor,
+        background,
+        fontSize,
+        fontWeight,
+        isLargeText,
+        opacity,
+        textUnderline: getComputedStyle($el).textDecorationLine,
+      };
+    }
+    return null;
   }
 
   /**
-   * Check an element's contrast based on WCAG 2.0 algorithm.
+   * Calculate an elements contrast based on APCA algorithm.
    * @param {HTMLElement} $el The element in the DOM.
    * @param {number[]} color Text colour in [R,G,B,A] format.
    * @param {Array} background Background colour in [R,G,B,A] format.
    * @param {number} fontSize Element's font size.
    * @param {number} fontWeight Element's font weight.
    * @param {number} opacity Element's opacity value.
-   * @param {boolean} contrastAAA Use WCAG 2.0 AAA thresholds.
+   * @returns {Object} Object containing the element, ratio, and extra details.
+   */
+  function apcaAlgorithm(
+    $el,
+    color,
+    background,
+    fontSize,
+    fontWeight,
+    opacity,
+    contrastAlgorithm,
+  ) {
+    const { ratio, blendedColor } = calculateContrast$1(color, background, contrastAlgorithm);
+
+    // Returns 9 font sizes in px corresponding to weights 100 thru 900.
+    // Returns ['LcValue',100,200,300,400,500,600,700,800,900]
+    const fontLookup = fontLookupAPCA(ratio).slice(1);
+
+    // Get minimum font size based on weight.
+    const fontWeightIndex = Math.floor(fontWeight / 100) - 1;
+    const minFontSize = fontLookup[fontWeightIndex];
+
+    if (fontSize < minFontSize) {
+      return {
+        $el,
+        ratio: displayAPCAValue(ratio),
+        color: blendedColor,
+        background,
+        fontWeight,
+        fontSize,
+        opacity,
+        textUnderline: getComputedStyle($el).textDecorationLine,
+      };
+    }
+    return null;
+  }
+
+  /**
+   * Check an element's contrast based on APCA or WCAG 2.0 algorithm.
+   * @param {HTMLElement} $el The element in the DOM.
+   * @param {number[]} color Text colour in [R,G,B,A] format.
+   * @param {Array} background Background colour in [R,G,B,A] format.
+   * @param {number} fontSize Element's font size.
+   * @param {number} fontWeight Element's font weight.
+   * @param {number} opacity Element's opacity value.
+   * @param {boolean} contrastAlgorithm Which algorithm to use.
    * @returns {Object} Object containing the element, ratio, and extra details.
    */
   function checkElementContrast(
-  	$el, color, background, fontSize, fontWeight, opacity, contrastAAA = false,
+    $el,
+    color,
+    background,
+    fontSize,
+    fontWeight,
+    opacity,
+    contrastAlgorithm,
   ) {
-  	return wcagAlgorithm($el, color, background, fontSize, fontWeight, opacity, contrastAAA);
+    const algorithm = contrastAlgorithm === 'APCA' ? apcaAlgorithm : wcagAlgorithm;
+    return algorithm($el, color, background, fontSize, fontWeight, opacity, contrastAlgorithm);
   }
 
   /**
@@ -4683,11 +5027,11 @@ URL: ${url}</pre>
 
       // Get computed styles.
       const opacity = parseFloat(style.opacity);
-      const color = convertToRGBA(style.color, opacity);
+      const color = convertToRGBA$1(style.color, opacity);
       const fontSize = parseFloat(style.fontSize);
       const getFontWeight = style.fontWeight;
       const fontWeight = normalizeFontWeight(getFontWeight);
-      const background = getBackground($el);
+      const background = getBackground($el, Constants.Global.shadowDetection);
 
       // Check if element is visually hidden to screen readers or explicitly hidden.
       const isVisuallyHidden = isScreenReaderOnly($el);
@@ -4731,9 +5075,15 @@ URL: ${url}</pre>
               opacity,
             });
           }
-        } else if (!isHidden && getHex(color) !== getHex(background)) {
+        } else if (!isHidden && getHex$1(color) !== getHex$1(background)) {
           const result = checkElementContrast(
-            $el, color, background, fontSize, fontWeight, opacity, option.contrastAAA,
+            $el,
+            color,
+            background,
+            fontSize,
+            fontWeight,
+            opacity,
+            option.contrastAlgorithm,
           );
           if (result) {
             result.type = checkInputs ? 'input' : 'text';
@@ -4748,14 +5098,16 @@ URL: ${url}</pre>
       const generalWarning = { $el, type: 'svg-warning' };
 
       // Get background.
-      const background = getBackground($el);
+      const background = getBackground($el, Constants.Global.shadowDetection);
       const hasBackground = background !== 'unsupported' && background.type !== 'image';
 
       // Process simple SVGs with a single shape.
       const shapes = $el.querySelectorAll('path, rect, circle, ellipse, polygon, text, use');
 
       // Push a general warning for any complex SVGs.
-      const complex = $el.querySelectorAll('*:not(path):not(rect):not(circle):not(ellipse):not(polygon):not(text):not(use):not(title)');
+      const complex = $el.querySelectorAll(
+        '*:not(path):not(rect):not(circle):not(ellipse):not(polygon):not(text):not(use):not(title)',
+      );
 
       // Check if all nodes within the SVG have the same fill/stroke/opacity.
       let allSameColour = false;
@@ -4764,11 +5116,11 @@ URL: ${url}</pre>
         allSameColour = Array.from(shapes).every((node) => {
           const style = getComputedStyle(node);
           return (
-            style.fill === ref.fill
-            && style.fillOpacity === ref.fillOpacity
-            && style.stroke === ref.stroke
-            && style.strokeOpacity === ref.strokeOpacity
-            && style.opacity === ref.opacity
+            style.fill === ref.fill &&
+            style.fillOpacity === ref.fillOpacity &&
+            style.stroke === ref.stroke &&
+            style.strokeOpacity === ref.strokeOpacity &&
+            style.opacity === ref.opacity
           );
         });
       }
@@ -4786,7 +5138,8 @@ URL: ${url}</pre>
             strokePx = (parseFloat(strokeWidth) / 100) * Math.min(width, height);
           } else {
             strokePx = ['inherit', 'initial', 'unset'].includes(strokeWidth)
-              ? 1 : parseFloat(strokeWidth);
+              ? 1
+              : parseFloat(strokeWidth);
           }
         }
 
@@ -4796,14 +5149,16 @@ URL: ${url}</pre>
 
         // Get resolved fill colour.
         const hasFill = fill && fill !== 'none' && !fill.startsWith('url(');
-        const resolvedFill = fill === 'currentColor'
-          ? convertToRGBA(getComputedStyle(shapes[0]).color, opacity)
-          : convertToRGBA(fill, opacity);
+        const resolvedFill =
+          fill === 'currentColor'
+            ? convertToRGBA$1(getComputedStyle(shapes[0]).color, opacity)
+            : convertToRGBA$1(fill, opacity);
 
         // Get resolved stroke colour.
-        const resolvedStroke = stroke === 'currentColor'
-          ? convertToRGBA(getComputedStyle(shapes[0]).color, opacity)
-          : convertToRGBA(stroke, opacity);
+        const resolvedStroke =
+          stroke === 'currentColor'
+            ? convertToRGBA$1(getComputedStyle(shapes[0]).color, opacity)
+            : convertToRGBA$1(stroke, opacity);
 
         // If supported colours and has background, we can calculate contrast.
         const supported = ![resolvedFill, resolvedStroke].includes('unsupported');
@@ -4813,17 +5168,27 @@ URL: ${url}</pre>
           let strokePasses = false;
 
           if (hasFill) {
-            contrastValue = calculateContrast(resolvedFill, background);
-            fillPasses = option.contrastAPCA
-              ? contrastValue.ratio >= 45
-              : contrastValue.ratio >= 3;
+            contrastValue = calculateContrast$1(
+              resolvedFill,
+              background,
+              option.contrastAlgorithm,
+            );
+            fillPasses =
+              option.contrastAlgorithm === 'APCA'
+                ? contrastValue.ratio >= 45
+                : contrastValue.ratio >= 3;
           }
 
           if (hasStroke) {
-            contrastValue = calculateContrast(resolvedStroke, background);
-            strokePasses = option.contrastAPCA
-              ? contrastValue.ratio >= 45
-              : contrastValue.ratio >= 3;
+            contrastValue = calculateContrast$1(
+              resolvedStroke,
+              background,
+              option.contrastAlgorithm,
+            );
+            strokePasses =
+              option.contrastAlgorithm === 'APCA'
+                ? contrastValue.ratio >= 45
+                : contrastValue.ratio >= 3;
           }
 
           // Calculate contrast of both stroke and fill.
@@ -4834,9 +5199,9 @@ URL: ${url}</pre>
           // Fails
           if (failsBoth || failsFill || failsStroke) {
             // Get hex values.
-            const bgHex = getHex(background);
-            const fillHex = getHex(resolvedFill);
-            const strokeHex = getHex(resolvedStroke);
+            const bgHex = getHex$1(background);
+            const fillHex = getHex$1(resolvedFill);
+            const strokeHex = getHex$1(resolvedStroke);
 
             // Ignore if foreground equals background.
             if ((fillHex === bgHex && !hasStroke) || (strokeHex === bgHex && !hasFill)) {
@@ -4846,7 +5211,7 @@ URL: ${url}</pre>
             // Push an error for simple SVGs.
             contrastResults.push({
               $el,
-              ratio: ratioToDisplay(contrastValue.ratio),
+              ratio: ratioToDisplay$1(contrastValue.ratio, option.contrastAlgorithm),
               color: contrastValue.blendedColor,
               type: 'svg-error',
               isLargeText: true, // To push a suggested colour (3:1).
@@ -4861,12 +5226,16 @@ URL: ${url}</pre>
           } else if (hasStroke && resolvedStroke !== 'unsupported') {
             generalWarning.color = resolvedStroke;
           }
-          if (hasBackground) generalWarning.background = background;
+          if (hasBackground) {
+            generalWarning.background = background;
+          }
           contrastResults.push(generalWarning);
         }
       } else {
         // General warning for complex SVGs.
-        if (hasBackground) generalWarning.background = background;
+        if (hasBackground) {
+          generalWarning.background = background;
+        }
         contrastResults.push(generalWarning);
       }
     });
@@ -4875,10 +5244,10 @@ URL: ${url}</pre>
     Elements.Found.Inputs.forEach(($el) => {
       if ($el.placeholder && $el.placeholder.length !== 0) {
         const placeholder = getComputedStyle($el, '::placeholder');
-        const pColor = convertToRGBA(placeholder.getPropertyValue('color'));
+        const pColor = convertToRGBA$1(placeholder.getPropertyValue('color'));
         const pSize = parseFloat(placeholder.fontSize);
         const pWeight = normalizeFontWeight(placeholder.fontWeight);
-        const pBackground = getBackground($el);
+        const pBackground = getBackground($el, Constants.Global.shadowDetection);
         const pOpacity = parseFloat(placeholder.opacity);
 
         // Placeholder has background image.
@@ -4886,7 +5255,15 @@ URL: ${url}</pre>
           // Unsupported colour
           contrastResults.push({ $el, type: 'placeholder-unsupported' });
         } else if (pBackground.type === 'image') ; else {
-          const result = checkElementContrast($el, pColor, pBackground, pSize, pWeight, pOpacity, option.contrastAAA);
+          const result = checkElementContrast(
+            $el,
+            pColor,
+            pBackground,
+            pSize,
+            pWeight,
+            pOpacity,
+            option.contrastAlgorithm,
+          );
           if (result) {
             result.type = 'placeholder';
             contrastResults.push(result);
@@ -4903,8 +5280,8 @@ URL: ${url}</pre>
 
       let processedBackgroundWarnings;
 
-      // Process background-image warnings based on option.contrastAPCA.
-      if (option.contrastAPCA) {
+      // Process background-image warnings based on prop.
+      if (option.contrastAlgorithm === 'APCA') {
         // Do not group warnings, return each warning as-is.
         processedBackgroundWarnings = backgroundImages.map((warning) => ({ ...warning }));
       } else {
@@ -4916,13 +5293,17 @@ URL: ${url}</pre>
             color: warning.color,
             isLargeText: warning.isLargeText,
           });
-          if (!grouped[groupKey]) grouped[groupKey] = [];
+          if (!grouped[groupKey]) {
+            grouped[groupKey] = [];
+          }
           grouped[groupKey].push(warning);
           return grouped;
         }, {});
 
         // Process each group.
-        processedBackgroundWarnings = Object.values(groupedWarnings).map((group) => ({ ...group[0] }));
+        processedBackgroundWarnings = Object.values(groupedWarnings).map((group) => ({
+          ...group[0],
+        }));
       }
 
       // Combine processed background-image warnings with other warnings.
@@ -4960,14 +5341,15 @@ URL: ${url}</pre>
 
       // Reference necessary ratios for compliance.
       let ratioTip = '';
-      if (!option.contrastAPCA) {
-        const normal = option.contrastAAA ? '7:1' : '4.5:1';
-        const large = option.contrastAAA ? '4.5:1' : '3:1';
+      if (option.contrastAlgorithm === 'AA' || option.contrastAlgorithm === 'AAA') {
+        const normal = option.contrastAlgorithm === 'AAA' ? '7:1' : '4.5:1';
+        const large = option.contrastAlgorithm === 'AAA' ? '4.5:1' : '3:1';
         const ratioToDisplay = item.isLargeText ? large : normal;
         const ratioRequirement = item.isLargeText ? 'CONTRAST_LARGE' : 'CONTRAST_NORMAL';
         ratioTip = ` ${Lang.sprintf(ratioRequirement, ratioToDisplay)}`;
       }
-      const graphicsTip = option.contrastAPCA ? '' : ` ${Lang.sprintf('CONTRAST_TIP_GRAPHIC')}`;
+      const graphicsTip =
+        option.contrastAlgorithm === 'APCA' ? '' : ` ${Lang.sprintf('CONTRAST_TIP_GRAPHIC')}`;
 
       // Iterate through contrast results based on type.
       switch (item.type) {
@@ -5016,7 +5398,9 @@ URL: ${url}</pre>
                 : Lang.sprintf('CONTRAST_PLACEHOLDER') + ratioTip,
               position: 'afterend',
               dismiss: prepareDismissal(`CPLACEHOLDER${sanitizedPlaceholder}`),
-              dismissAll: option.checks.CONTRAST_PLACEHOLDER.dismissAll ? 'CONTRAST_PLACEHOLDER' : false,
+              dismissAll: option.checks.CONTRAST_PLACEHOLDER.dismissAll
+                ? 'CONTRAST_PLACEHOLDER'
+                : false,
               developer: option.checks.CONTRAST_PLACEHOLDER.developer || true,
               contrastDetails: updatedItem,
             });
@@ -5035,7 +5419,8 @@ URL: ${url}</pre>
               position: 'afterend',
               dismiss: prepareDismissal(`CPLACEHOLDERUN${sanitizedPlaceholder}`),
               dismissAll: option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.dismissAll
-                ? 'CONTRAST_PLACEHOLDER_UNSUPPORTED' : false,
+                ? 'CONTRAST_PLACEHOLDER_UNSUPPORTED'
+                : false,
               developer: option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.developer || true,
               contrastDetails: updatedItem,
             });
@@ -5052,7 +5437,9 @@ URL: ${url}</pre>
                 ? Lang.sprintf(option.checks.CONTRAST_ERROR_GRAPHIC.content)
                 : Lang.sprintf('CONTRAST_ERROR_GRAPHIC') + graphicsTip,
               dismiss: prepareDismissal(`CONTRASTERROR${sanitizedSVG}`),
-              dismissAll: option.checks.CONTRAST_ERROR_GRAPHIC.dismissAll ? 'CONTRAST_ERROR_GRAPHIC' : false,
+              dismissAll: option.checks.CONTRAST_ERROR_GRAPHIC.dismissAll
+                ? 'CONTRAST_ERROR_GRAPHIC'
+                : false,
               developer: option.checks.CONTRAST_ERROR_GRAPHIC.developer || true,
               contrastDetails: updatedItem,
               margin: '-25px',
@@ -5070,7 +5457,9 @@ URL: ${url}</pre>
                 ? Lang.sprintf(option.checks.CONTRAST_WARNING_GRAPHIC.content)
                 : Lang.sprintf('CONTRAST_WARNING_GRAPHIC') + graphicsTip,
               dismiss: prepareDismissal(`CONTRASTWARNING${sanitizedSVG}`),
-              dismissAll: option.checks.CONTRAST_WARNING_GRAPHIC.dismissAll ? 'CONTRAST_WARNING_GRAPHIC' : false,
+              dismissAll: option.checks.CONTRAST_WARNING_GRAPHIC.dismissAll
+                ? 'CONTRAST_WARNING_GRAPHIC'
+                : false,
               developer: option.checks.CONTRAST_WARNING_GRAPHIC.developer || true,
               contrastDetails: updatedItem,
               margin: '-25px',
@@ -5103,7 +5492,9 @@ URL: ${url}</pre>
                 ? Lang.sprintf(option.checks.CONTRAST_UNSUPPORTED.content)
                 : Lang.sprintf('CONTRAST_WARNING') + ratioTip,
               dismiss: prepareDismissal(`CONTRAST${sanitizedText}`),
-              dismissAll: option.checks.CONTRAST_UNSUPPORTED.dismissAll ? 'CONTRAST_UNSUPPORTED' : false,
+              dismissAll: option.checks.CONTRAST_UNSUPPORTED.dismissAll
+                ? 'CONTRAST_UNSUPPORTED'
+                : false,
               developer: option.checks.CONTRAST_UNSUPPORTED.developer || false,
               contrastDetails: updatedItem,
             });
@@ -5162,7 +5553,10 @@ URL: ${url}</pre>
           }, {});
 
           // Check for user-scalable parameter.
-          if (option.checks.META_SCALABLE && (params['user-scalable'] === 'no' || params['user-scalable'] === '0')) {
+          if (
+            option.checks.META_SCALABLE &&
+            (params['user-scalable'] === 'no' || params['user-scalable'] === '0')
+          ) {
             results.push({
               test: 'META_SCALABLE',
               type: option.checks.META_SCALABLE.type || 'error',
@@ -5267,7 +5661,13 @@ URL: ${url}</pre>
     /* ********************************************* */
     /*  Buttons must have an accessible name.        */
     /* ********************************************* */
-    if (option.checks.BTN_EMPTY || option.checks.BTN_EMPTY_LABELLEDBY || option.checks.BTN_LABEL || option.checks.HIDDEN_FOCUSABLE || option.checks.LABEL_IN_NAME) {
+    if (
+      option.checks.BTN_EMPTY ||
+      option.checks.BTN_EMPTY_LABELLEDBY ||
+      option.checks.BTN_LABEL ||
+      option.checks.HIDDEN_FOCUSABLE ||
+      option.checks.LABEL_IN_NAME
+    ) {
       Elements.Found.Buttons.forEach(($el) => {
         const accName = computeAccessibleName($el);
         const buttonText = accName.replace(/'|"|-|\.|\s+/g, '').toLowerCase();
@@ -5276,8 +5676,12 @@ URL: ${url}</pre>
         const key = prepareDismissal(`BTN${$el.tagName + $el.id + $el.className + accName}`);
 
         // Has ARIA
-        const hasAria = $el.querySelector(':scope [aria-labelledby], :scope [aria-label]') || $el.getAttribute('aria-labelledby') || $el.getAttribute('aria-label');
-        const hasAriaLabelledby = $el.querySelector(':scope [aria-labelledby]') || $el.getAttribute('aria-labelledby');
+        const hasAria =
+          $el.querySelector(':scope [aria-labelledby], :scope [aria-label]') ||
+          $el.getAttribute('aria-labelledby') ||
+          $el.getAttribute('aria-label');
+        const hasAriaLabelledby =
+          $el.querySelector(':scope [aria-labelledby]') || $el.getAttribute('aria-labelledby');
         const ariaHidden = $el.getAttribute('aria-hidden') === 'true';
         const negativeTabindex = $el.getAttribute('tabindex') === '-1';
 
@@ -5291,7 +5695,9 @@ URL: ${url}</pre>
                 type: option.checks.HIDDEN_FOCUSABLE.type || 'error',
                 content: Lang.sprintf(option.checks.HIDDEN_FOCUSABLE.content || 'HIDDEN_FOCUSABLE'),
                 dismiss: key,
-                dismissAll: option.checks.HIDDEN_FOCUSABLE.dismissAll ? 'BTN_HIDDEN_FOCUSABLE' : false,
+                dismissAll: option.checks.HIDDEN_FOCUSABLE.dismissAll
+                  ? 'BTN_HIDDEN_FOCUSABLE'
+                  : false,
                 developer: option.checks.HIDDEN_FOCUSABLE.developer || true,
               });
             }
@@ -5310,7 +5716,9 @@ URL: ${url}</pre>
                 ? Lang.sprintf(option.checks.BTN_EMPTY_LABELLEDBY.content)
                 : `${Lang.sprintf('BTN_EMPTY_LABELLEDBY')} ${Lang.sprintf('BTN_TIP')}`,
               dismiss: prepareDismissal(key),
-              dismissAll: option.checks.BTN_EMPTY_LABELLEDBY.dismissAll ? 'BTN_EMPTY_LABELLEDBY' : false,
+              dismissAll: option.checks.BTN_EMPTY_LABELLEDBY.dismissAll
+                ? 'BTN_EMPTY_LABELLEDBY'
+                : false,
               developer: option.checks.BTN_EMPTY_LABELLEDBY.developer || true,
             });
           } else if (option.checks.BTN_EMPTY) {
@@ -5329,9 +5737,9 @@ URL: ${url}</pre>
           return;
         }
 
-        // Button must have visible label as part of their accessible name.
-        const isVisibleTextInAccessibleName$1 = isVisibleTextInAccessibleName($el);
-        if (option.checks.LABEL_IN_NAME && hasAria && isVisibleTextInAccessibleName$1) {
+        /* Button must have visible label as part of their accessible name. */
+        const isVisibleTextInAccName$1 = isVisibleTextInAccName($el, accName);
+        if (option.checks.LABEL_IN_NAME && hasAria && isVisibleTextInAccName$1) {
           const sanitizedText = sanitizeHTML(accName);
           results.push({
             test: 'LABEL_IN_NAME',
@@ -5795,10 +6203,11 @@ URL: ${url}</pre>
 
   function checkEmbeddedContent(results, option) {
     // iFrame's SRC attribute.
-    const src = ($el) => $el.getAttribute('src')
-      || $el.querySelector('source[src]')?.getAttribute('src')
-      || $el.querySelector('[src]')?.getAttribute('src')
-      || null;
+    const src = ($el) =>
+      $el.getAttribute('src') ||
+      $el.querySelector('source[src]')?.getAttribute('src') ||
+      $el.querySelector('[src]')?.getAttribute('src') ||
+      null;
 
     // Warning: Audio content.
     if (option.checks.EMBED_AUDIO) {
@@ -5883,7 +6292,7 @@ URL: ${url}</pre>
       if (option.checks.EMBED_MISSING_TITLE) {
         // Accessible name is missing for iFrame.
         const aria = computeAriaLabel($el);
-        const checkTitle = (aria === 'noAria') ? ($el.getAttribute('title') || '') : aria;
+        const checkTitle = aria === 'noAria' ? $el.getAttribute('title') || '' : aria;
         const accessibleName = removeWhitespace(checkTitle);
         if (accessibleName.length === 0) {
           results.push({
@@ -5964,7 +6373,7 @@ URL: ${url}</pre>
    * @link http://stackoverflow.com/questions/5686483/how-to-compute-number-of-syllables-in-a-word-in-javascript
    * @link https://www.simoahava.com/analytics/calculate-readability-scores-for-content/#commento-58ac602191e5c6dc391015c5a6933cf3e4fc99d1dc92644024c331f1ee9b6093
    * @link https://oaji.net/articles/2017/601-1498133639.pdf (Portuguese adaptation).
-  */
+   */
 
   /**
    * Compute the readability score based on an array of text strings.
@@ -5982,7 +6391,9 @@ URL: ${url}</pre>
       readabilityArray.push(sentence);
     });
     const pageText = readabilityArray.join(' ');
-    if (pageText.length === 0) return null;
+    if (pageText.length === 0) {
+      return null;
+    }
 
     // Flesch Reading Ease: English, French, German, Dutch, Italian, Spanish, Portuguese
     if (['en', 'es', 'fr', 'de', 'nl', 'it', 'pt'].includes(lang)) {
@@ -6005,8 +6416,7 @@ URL: ${url}</pre>
       const wordsRaw = pageText.replace(/[.!?-]+/g, ' ').split(' ');
       let words = 0;
       for (let i = 0; i < wordsRaw.length; i++) {
-        // eslint-disable-next-line eqeqeq
-        if (wordsRaw[i] != 0) {
+        if (wordsRaw[i].trim() !== '') {
           words += 1;
         }
       }
@@ -6023,13 +6433,12 @@ URL: ${url}</pre>
       let syllables1 = 0;
       let syllables2 = 0;
       for (let i = 0; i < wordsRaw.length; i++) {
-        // eslint-disable-next-line eqeqeq
-        if (wordsRaw[i] != 0) {
-          const syllableCount = numberOfSyllables(wordsRaw[i]);
+        const word = wordsRaw[i];
+        if (word.length > 0) {
+          const syllableCount = numberOfSyllables(word);
           if (syllableCount === 1) {
             syllables1 += 1;
-          }
-          if (syllableCount === 2) {
+          } else if (syllableCount === 2) {
             syllables2 += 1;
           }
           totalSyllables += syllableCount;
@@ -6038,19 +6447,19 @@ URL: ${url}</pre>
 
       let flesch = false;
       if (lang === 'en') {
-        flesch = 206.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
+        flesch = 206.835 - 1.015 * (words / sentences) - 84.6 * (totalSyllables / words);
       } else if (lang === 'fr') {
-        flesch = 207 - (1.015 * (words / sentences)) - (73.6 * (totalSyllables / words));
+        flesch = 207 - 1.015 * (words / sentences) - 73.6 * (totalSyllables / words);
       } else if (lang === 'es') {
-        flesch = 206.84 - (1.02 * (words / sentences)) - (0.60 * (100 * (totalSyllables / words)));
+        flesch = 206.84 - 1.02 * (words / sentences) - 0.6 * (100 * (totalSyllables / words));
       } else if (lang === 'de') {
-        flesch = 180 - (words / sentences) - (58.5 * (totalSyllables / words));
+        flesch = 180 - words / sentences - 58.5 * (totalSyllables / words);
       } else if (lang === 'nl') {
-        flesch = 206.84 - (0.77 * (100 * (totalSyllables / words))) - (0.93 * (words / sentences));
+        flesch = 206.84 - 0.77 * (100 * (totalSyllables / words)) - 0.93 * (words / sentences);
       } else if (lang === 'it') {
-        flesch = 217 - (1.3 * (words / sentences)) - (0.6 * (100 * (totalSyllables / words)));
+        flesch = 217 - 1.3 * (words / sentences) - 0.6 * (100 * (totalSyllables / words));
       } else if (lang === 'pt') {
-        flesch = 248.835 - (1.015 * (words / sentences)) - (84.6 * (totalSyllables / words));
+        flesch = 248.835 - 1.015 * (words / sentences) - 84.6 * (totalSyllables / words);
       }
 
       // Score must be between 0 and 100%.
@@ -6088,10 +6497,11 @@ URL: ${url}</pre>
 
     // LIX: Danish, Finnish, Norwegian (Bokmål & Nynorsk), Swedish
     if (['sv', 'fi', 'da', 'no', 'nb', 'nn'].includes(lang)) {
-      const lixWords = () => pageText
-        .replace(/[-'.]/ig, '')
-        .split(/[^a-zA-ZöäåÖÄÅÆæØø0-9]/g)
-        .filter(Boolean);
+      const lixWords = () =>
+        pageText
+          .replace(/[-'.]/gi, '')
+          .split(/[^a-zA-ZöäåÖÄÅÆæØø0-9]/g)
+          .filter(Boolean);
 
       const splitSentences = () => {
         const splitter = /\?|!|\.|\n/g;
@@ -6102,9 +6512,7 @@ URL: ${url}</pre>
       const wordCount = wordsArr.length;
       const longWordsCount = wordsArr.filter((w) => w.length > 6).length;
       const sentenceCount = splitSentences().length || 1;
-      const score = Math.round(
-        (wordCount / sentenceCount) + ((longWordsCount * 100) / wordCount),
-      );
+      const score = Math.round(wordCount / sentenceCount + (longWordsCount * 100) / wordCount);
       const avgWordsPerSentence = Number((wordCount / sentenceCount).toFixed(1));
       const complexWords = Math.round(100 * (longWordsCount / wordCount));
 
@@ -6134,9 +6542,9 @@ URL: ${url}</pre>
 
   function checkReadability(results) {
     // Get text.
-    const pageText = Elements.Found.Readability
-      .map(($el) => getText(fnIgnore($el)))
-      .filter(Boolean);
+    const pageText = Elements.Found.Readability.map(($el) =>
+      getText(fnIgnore($el)),
+    ).filter(Boolean);
 
     // Compute.
     const computed = computeReadability(pageText, Constants.Readability.Lang);
@@ -8282,7 +8690,6 @@ URL: ${url}</pre>
 
   		NEW_WINDOW_PHRASES: ['external', 'download', 'new tab', 'new window', 'pop-up', 'pop up', 'opens new tab', 'opens new window'],
 
-
   		// Tooltips for heading tests =========================
     },
   	testNames: {
@@ -8928,6 +9335,426 @@ URL: ${url}</pre>
         this.initialized = true;
       }
     }
+  }
+
+  // Editoria11y override: replaces APCA dependency with Porter-Duff
+  const alphaBlend = function(fg = [0,0,0,1], bg = [0,0,0]) {
+  	const bgAlpha = 1 - fg[3];
+  	return [
+  		((fg[0] * fg[3]) + (bgAlpha * bg[0])),
+  		((fg[1] * fg[3]) + (bgAlpha * bg[1])),
+  		((fg[2] * fg[3]) + (bgAlpha * bg[2]))
+  	];
+  };
+
+  /**
+   * Convert colour string to RGBA format.
+   * @param {string} color The colour string to convert.
+   * @param {number} opacity The computed opacity of the element (0 to 1).
+   * @returns Returns colour in rgba format with alpha value.
+   */
+  function convertToRGBA(color, opacity) {
+  	const colorString = color;
+  	let r;
+  	let g;
+  	let b;
+  	let a = 1; // Initialize alpha to 1 by default.
+
+  	if (!colorString.startsWith('rgb')) {
+  		// Unsupported color spaces.
+  		if (
+  			colorString.startsWith('color(rec2020')
+  			|| colorString.startsWith('color(display-p3')
+  			|| colorString.startsWith('url(')
+  		) {
+  			return 'unsupported';
+  		}
+
+  		// Let the browser do conversion in rgb for non-supported colour spaces.
+  		const canvas = document.createElement('canvas');
+  		const context = canvas.getContext('2d');
+  		context.fillStyle = colorString;
+  		context.fillRect(0, 0, 1, 1);
+  		const imageData = context.getImageData(0, 0, 1, 1);
+  		[r, g, b, a] = imageData.data;
+  		a = (a / 255).toFixed(2); // Convert alpha to range [0, 1]
+  	} else {
+  		// Parse RGB or RGBA values from the color string
+  		const rgbaArray = colorString.match(/[\d.]+/g).map(Number);
+  		[r, g, b, a] = rgbaArray.length === 4 ? rgbaArray : [...rgbaArray, 1];
+  	}
+
+  	// If element has opacity attribute, amend the foreground text color string.
+  	if (opacity && opacity < 1) {
+  		a = (a * opacity).toFixed(2); // Adjust alpha based on the opacity
+  	}
+  	return [r, g, b, Number(a)];
+  }
+
+  /** Get the relative luminance of a colour based on WCAG 2.0
+   * @link http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+   * @param {number[]} color Colour code in [R,G,B] format.
+   * @returns Luminance value.
+   */
+  function getLuminance(color) {
+  	const rgb = color.slice(0, 3).map((x) => {
+  		const normalized = x / 255;
+  		return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+  	});
+  	return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+  }
+
+  /**
+   * Get WCAG 2.0 contrast ratio from luminance value.
+   * @link http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
+   * @param {number} l1 Luminance value of foreground colour.
+   * @param {number} l2 Luminance value of background colour.
+   * @returns WCAG 2.0 contrast ratio.
+   */
+  function getWCAG2Ratio(l1, l2) {
+  	const lighter = Math.max(l1, l2);
+  	const darker = Math.min(l1, l2);
+  	return (lighter + 0.05) / (darker + 0.05);
+  }
+
+  /**
+   * Brighten a foreground text colour.
+   * @param {number[]} color Text colour in [R,G,B,A] format.
+   * @param {number} amount Number or increment to brighten by.
+   * @returns Lighter foreground text colour.
+   */
+  function brighten(color, amount) {
+  	return color.map((value, index) => {
+  		if (index < 3) { // Only brighten [R,G,B]
+  			const newValue = Math.ceil(value + (255 - value) * amount);
+  			return newValue >= 255 ? 255 : newValue;
+  		}
+  		return value;
+  	});
+  }
+
+  /**
+   * Darken a foreground text colour.
+   * @param {number[]} color Text colour in [R,G,B,A] format.
+   * @param {number} amount Number or increment to darken by.
+   * @returns Darker foreground text colour.
+   */
+  function darken(color, amount) {
+  	return color.map((value, index) => {
+  		if (index < 3) { // Only darken [R,G,B]
+  			const newValue = Math.floor(value * (1 - amount));
+  			return newValue <= 0 ? 0 : newValue;
+  		}
+  		return value;
+  	});
+  }
+
+  /**
+   * Get the hex code equivalent of an RGB colour.
+   * @param {number[]} color Colour in [R,G,B,A] format.
+   * @returns Hexcode equivalent.
+   */
+  function getHex(color) {
+  	const [r, g, b] = color.map((value) => Math.min(255, Math.max(0, value)));
+  	const hexR = r.toString(16).padStart(2, '0');
+  	const hexG = g.toString(16).padStart(2, '0');
+  	const hexB = b.toString(16).padStart(2, '0');
+  	return `#${hexR}${hexG}${hexB}`;
+  }
+
+  /**
+   * Get the display-friendly contrast value for output.
+   * @param {Object} value - The value object containing the contrast ratio.
+   * @returns {string|number} The formatted contrast ratio.
+   */
+  function ratioToDisplay(value) {
+  	if (Constants.Global.contrastAPCA) {
+  		return Math.abs(Number(value.toFixed(1)));
+  	}
+  	// Round to decimal places, and display without decimals if integer.
+  	const truncatedRatio = Math.trunc(value * 10) / 10;
+  	const formattedRatio = Number.isInteger(truncatedRatio)
+  		? truncatedRatio.toFixed(0)
+  		: truncatedRatio;
+  	return `${formattedRatio}:1`;
+  }
+
+  /**
+   * Calculate the contrast ratio or value between two colours.
+   * @param {number[]} color Text colour in [R,G,B,A] format.
+   * @param {Array} bg Background colour in [R,G,B,A] format.
+   * @returns Either WCAG 2.0 contrast ratio or APCA contrast value.
+   */
+  function calculateContrast(color, bg) {
+  	let ratio;
+  	const blendedColor = alphaBlend(color, bg).slice(0, 4);
+  	// Uses WCAG 2.0 contrast algorithm based on luminance.
+  	const foreground = getLuminance(blendedColor);
+  	const background = getLuminance(bg);
+  	ratio = getWCAG2Ratio(foreground, background);
+  	return { ratio, blendedColor };
+  }
+
+  /**
+   * Suggest a foreground colour with sufficient contrast.
+   * @param {number[]} color Text colour in [R,G,B,A] format.
+   * @param {number[]} background Background colour in [R,G,B,A] format.
+   * @param {boolean} isLargeText Whether text is normal or large size.
+   * @param {boolean} contrastAAA Use WCAG AAA thresholds.
+   * @returns Compliant colour hexcode.
+   */
+  function suggestColorWCAG(color, background, isLargeText, contrastAAA = false) {
+  	let minContrastRatio;
+  	if (contrastAAA) {
+  		minContrastRatio = isLargeText ? 4.5 : 7;
+  	} else {
+  		minContrastRatio = isLargeText ? 3 : 4.5;
+  	}
+
+  	// Get luminance
+  	const fgLuminance = getLuminance(color);
+  	const bgLuminance = getLuminance(background);
+
+  	// Determine if text color should be lightened or darkened (considers extreme values).
+  	const adjustMode = fgLuminance > bgLuminance
+  		? getWCAG2Ratio(1, bgLuminance) > minContrastRatio
+  		: getWCAG2Ratio(0, bgLuminance) < minContrastRatio;
+
+  	const adjustColor = (foregroundColor, amount, mode) => (
+  		mode ? brighten(foregroundColor, amount) : darken(foregroundColor, amount)
+  	);
+
+  	let adjustedColor = color;
+  	let lastValidColor = adjustedColor;
+  	let contrastRatio = getWCAG2Ratio(fgLuminance, bgLuminance);
+  	let bestContrast = contrastRatio;
+  	let previousColor = color;
+
+  	// Loop parameters.
+  	let step = 0.16;
+  	const percentChange = 0.5;
+  	const precision = 0.01;
+  	let iterations = 0;
+  	const maxIterations = 100;
+
+  	while (step >= precision) {
+  		iterations += 1;
+
+  		// Return null if no colour found.
+  		if (iterations > maxIterations) {
+  			return { color: null };
+  		}
+
+  		adjustedColor = adjustColor(adjustedColor, step, adjustMode);
+  		const newLuminance = getLuminance(adjustedColor);
+  		contrastRatio = getWCAG2Ratio(newLuminance, bgLuminance);
+
+  		// console.log(`%c ${getHex(adjustedColor)} | ${contrastRatio}`, `color:${getHex(adjustedColor)};background:${getHex(background)}`);
+
+  		// Save valid colour, go back to previous, and continue with a smaller step.
+  		if (contrastRatio >= minContrastRatio) {
+  			// Ensure new colour is closer to the contrast minimum than old colour.
+  			lastValidColor = (contrastRatio <= bestContrast) ? adjustedColor : lastValidColor;
+  			bestContrast = contrastRatio;
+  			adjustedColor = previousColor;
+  			step *= percentChange;
+  		}
+
+  		previousColor = adjustedColor;
+  	}
+  	return { color: getHex(lastValidColor) };
+  }
+
+  /**
+   * Generates and inserts color suggestions for tooltip upon tooltip opening.
+   * This function is referenced within './interface/tooltips.js'.
+   * For performance reasons, it is only called upon tooltip opening.
+   * @param {HTMLElement} container The container where the color suggestion will be inserted.
+   */
+  function generateColorSuggestion(contrastDetails) {
+  	let adviceContainer;
+  	const { color, background, fontWeight, fontSize, isLargeText, type } = contrastDetails;
+  	if (
+  		color && background && background.type !== 'image'
+  		&& (type === 'text' || type === 'svg-error' || type === 'input')
+  	) {
+  		const suggested = suggestColorWCAG(color, background, isLargeText, Constants.Global.contrastAAA);
+
+  		let advice;
+  		const hr = '<hr aria-hidden="true">';
+  		const style = `color:${suggested.color};background-color:${getHex(contrastDetails.background)};`;
+  		const colorBadge = `<button id="suggest" class="badge" style="${style}">${suggested.color}</button>`;
+  		`<strong class="normal-badge">${suggested.size}px</strong>`;
+
+  		if (suggested.color === null) {
+  			advice = `${hr} ${Lang._('NO_SUGGESTION')}`;
+  		} else {
+  			advice = `${hr} ${Lang._('CONTRAST_COLOR')} ${colorBadge}`;
+  		}
+
+  		// Append it to contrast details container.
+  		adviceContainer = document.createElement('div');
+  		adviceContainer.id = 'advice';
+
+  		// If low opacity, suggest increase opacity first.
+  		const suggestion = (contrastDetails.opacity < 1)
+  			? `<hr aria-hidden="true"> ${Lang.sprintf('CONTRAST_OPACITY')}` : advice;
+
+  		// Append advice to contrast details container.
+  		adviceContainer.innerHTML = suggestion;
+  	}
+  	return adviceContainer;
+  }
+
+  /**
+   * Inject contrast colour pickers into tooltip.
+   * @param {HTMLElement} container The tooltip container to inject the contrast colour pickers.
+   */
+  function generateContrastTools(contrastDetails) {
+  	const { sanitizedText, color, background, fontWeight, fontSize, ratio, textUnderline } = contrastDetails;
+
+  	// Initialize variables.
+  	const hasBackgroundColor = background && background.type !== 'image';
+  	const backgroundHex = hasBackgroundColor ? getHex(background) : '#000000';
+  	const foregroundHex = color ? getHex(color) : '#000000';
+
+  	// Other properties.
+  	const hasFontWeight = fontWeight ? `font-weight:${fontWeight};` : '';
+  	const hasFontSize = fontSize ? `font-size:${fontSize}px;` : '';
+  	const textDecoration = textUnderline ? `text-decoration:${textUnderline};` : '';
+
+  	// If colour or background colour is unknown; visually indicate so.
+  	const unknownFG = color
+  		? '' : 'class="unknown"';
+  	const unknownBG = background && background.type !== 'image'
+  		? '' : 'class="unknown"';
+  	const unknownFGText = color
+  		? '' : `<span class="visually-hidden">(${Lang._('UNKNOWN')})</span>`;
+  	const unknownBGText = background
+  		? '' : `<span class="visually-hidden">(${Lang._('UNKNOWN')})</span>`;
+
+  	// Ratio to be displayed.
+  	let displayedRatio;
+
+  	// WCAG 2.0 ratio.
+  	displayedRatio = ratio || Lang._('UNKNOWN');
+
+  	// Generate HTML layout.
+  	const contrastTools = document.createElement('div');
+  	contrastTools.id = 'contrast-tools';
+  	contrastTools.innerHTML = `
+      <hr aria-hidden="true">
+      <div id="contrast" class="badge">${Lang._('CONTRAST')}</div>
+      <div id="value" class="badge">${displayedRatio}</div>
+      <div id="good" class="badge good-contrast" hidden>${Lang._('GOOD')} <span class="good-icon"></span></div>
+      <div id="contrast-preview" style="color:${foregroundHex};${hasBackgroundColor ? `background:${backgroundHex};` : ''}${hasFontWeight + hasFontSize + textDecoration}">${sanitizedText}</div>
+      <div id="color-pickers">
+        <label for="fg-text">${Lang._('FG')} ${unknownFGText}
+          <input type="color" id="fg-input" value="${foregroundHex}" ${unknownFG}/>
+        </label>
+        <label for="bg">${Lang._('BG')} ${unknownBGText}
+          <input type="color" id="bg-input" value="${backgroundHex}" ${unknownBG}/>
+        </label>
+      </div>`;
+  	return contrastTools;
+  }
+
+  /**
+   * Initializes colour eyedroppers for respective tooltip.
+   * This function is referenced within './interface/tooltips.js'.
+   * @param {HTMLElement} container The container where the color suggestion will be inserted.
+   * @param {Object} contrastDetails Contrast details object containing colour, background, etc.
+   */
+  function initializeContrastTools(container, contrastDetails) {
+  	const contrastTools = container?.querySelector('#contrast-tools');
+  	if (contrastTools) {
+  		const { fontSize, fontWeight, type, isLargeText } = contrastDetails;
+
+  		// Cache selectors
+  		const contrast = container.querySelector('#contrast');
+  		const contrastPreview = container.querySelector('#contrast-preview');
+  		const fgInput = container.querySelector('#fg-input');
+  		const bgInput = container.querySelector('#bg-input');
+  		const ratio = container.querySelector('#value');
+  		const good = container.querySelector('#good');
+
+  		// Helper to update badge classes.
+  		const toggleBadges = (elements, condition) => {
+  			elements.forEach(($el) => {
+  				$el.classList.toggle('good-contrast', condition);
+  				$el.classList.toggle('error-badge', !condition);
+  			});
+  		};
+
+  		// Update preview colors and contrast on input change.
+  		const updatePreview = () => {
+  			const fgColor = fgInput.value;
+  			const bgColor = bgInput.value;
+
+  			// Remove question mark from inputs.
+  			[fgInput, bgInput].forEach((input) => input.classList.remove('unknown'));
+
+  			// Adjust colours in preview area.
+  			contrastPreview.style.color = fgColor;
+  			contrastPreview.style.backgroundColor = bgColor;
+  			contrastPreview.style.backgroundImage = 'none';
+
+  			// Get contrast ratio.
+  			const contrastValue = calculateContrast(convertToRGBA(fgColor), convertToRGBA(bgColor));
+  			const elementsToToggle = [ratio, contrast];
+
+  			// WCAG 2.0
+  			const value = contrastValue.ratio;
+  			ratio.textContent = ratioToDisplay(value);
+
+  			const useAAA = Constants.Global.contrastAAA; // Use AAA thresholds if true, otherwise AA
+  			const nonTextThreshold = 3;
+  			const normalTextThreshold = useAAA ? 7 : 4.5;
+  			const largeTextThreshold = useAAA ? 4.5 : 3;
+
+  			const passesNonText = value >= nonTextThreshold;
+  			const passesNormalText = value >= normalTextThreshold;
+  			const passesLargeText = value >= largeTextThreshold;
+
+  			switch (type) {
+  			case 'svg-error':
+  			case 'svg-text':
+  			case 'svg-warning': {
+  				good.hidden = !passesNonText;
+  				toggleBadges(elementsToToggle, passesNonText);
+  				break;
+  			}
+  			default: {
+  				if (isLargeText) {
+  					toggleBadges([ratio, contrast], passesLargeText);
+  					good.hidden = !passesLargeText;
+  				} else {
+  					toggleBadges([ratio, contrast], passesNormalText);
+  					good.hidden = !passesNormalText;
+  				}
+  				break;
+  			}
+  			}
+  		};
+
+  		// Event listeners for both colour inputs.
+  		fgInput.addEventListener('input', updatePreview);
+  		bgInput.addEventListener('input', updatePreview);
+
+  		// Clicking on suggested colour updates preview and saves value to clipboard.
+  		setTimeout(() => {
+  			const suggest = container.querySelector('#suggest');
+  			if (suggest) {
+  				const updatePreviewWithSuggested = () => {
+  					const hex = suggest.textContent;
+  					fgInput.value = hex;
+  					updatePreview();
+  					navigator.clipboard.writeText(hex).catch(() => { });
+  				};
+  				suggest.addEventListener('click', updatePreviewWithSuggested);
+  			}
+  		}, 0);
+  	}
   }
 
   class Ed11yElementTip extends HTMLElement {

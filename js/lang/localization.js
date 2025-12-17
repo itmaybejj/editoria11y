@@ -94,7 +94,6 @@ const ed11yLang = {
 
 		NEW_WINDOW_PHRASES: ['external', 'download', 'new tab', 'new window', 'pop-up', 'pop up', 'opens new tab', 'opens new window'],
 
-
 		// Tooltips for heading tests =========================
   },
 	testNames: {

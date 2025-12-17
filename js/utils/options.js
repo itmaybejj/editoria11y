@@ -20,7 +20,7 @@ export const Options = {
 		'a[href][aria-labelledby] img, button[aria-labelledby] img',
 	linkIgnore: '[aria-hidden][tabindex="-1"]',
 	linkIgnoreSpan: '.ed11y-element',
-	linkIgnoreStrings: '',
+	linkIgnoreStrings: [], // @todo 3.x this changed to array
 	ignoreContentOutsideRoots: false, // @todo cms was headingsOnlyFromCheckRoots
 
 	// Control panel settings
@@ -67,8 +67,7 @@ export const Options = {
 
 	// Contrast
 	contrastPlugin: false,
-	contrastAAA: false,
-	contrastAPCA: false,
+	contrastAlgorithm: 'AA',
 
 	// Other plugins
 	customChecks: false,

@@ -13,7 +13,7 @@ import checkLinkText from "../../sa11y/rulesets/link-text.js";
 import checkImages from "../../sa11y/rulesets/images.js";
 import checkLabels from "../../sa11y/rulesets/labels.js";
 import checkQA from "../../sa11y/rulesets/quality-assurance.js";
-import checkContrast from '../../sa11y/rulesets/contrast';
+import checkContrast from '../../sa11y/contrast/checkContrast.js';
 import checkDeveloper from '../../sa11y/rulesets/developer';
 import Lang from "../../sa11y/utils/lang.js"
 import Elements from "../../sa11y/utils/elements.js";
