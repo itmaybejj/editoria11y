@@ -1,43 +1,48 @@
 {
-  "name": "editoria11y",
-  "homepage": "https://itmaybejj.github.io/editoria11y/",
-  "version": "3.0.0",
-  "repository": {
-    "type": "git",
-    "url": "git+https://itmaybejj@github.com/itmaybejj/editoria11y.git"
-  },
-  "bugs": {
-    "url": "https://github.com/itmaybejj/editoria11y/issues"
-  },
-  "license": "GPLv2",
-  "scripts": {
-    "build": "npx eslint ./js/** --fix && ./node_modules/.bin/css-minify -d ./css -o ./dist && rimraf dist && node ./node_modules/rollup/dist/bin/rollup -c rollup.config.js",
-    "lint": "npm run lint:css && npm run lint:js",
-    "lint:js": "node ./node_modules/eslint/bin/eslint.js ./js/*",
-    "lint:css": "stylelint --config .stylelintrc.json \"./css/editoria11y.css\"",
-    "playright": "npx playwright test",
-    "test": "npx nightwatch tests --workers=4 --env=chrome",
-    "watch": "npm run build && chokidar \"./js\" \"./css\" -c \"npm run build\""
-  },
-  "devDependencies": {
-    "@babel/core": "^7.14.6",
-    "@babel/preset-env": "^7.14.7",
-    "@playwright/test": "^1.40.1",
-    "@rollup/plugin-babel": "^5.3.0",
-    "@rollup/plugin-node-resolve": "^13.0.0",
-    "@rollup/plugin-replace": "^3.0.0",
-    "@types/node": "^20.10.8",
-    "chromedriver": "^142",
-    "chokidar-cli": "^3.0.0",
-    "css-minify": "^2.1.0",
-    "eslint": "^9.39.1",
-    "nightwatch": "^3.12.3",
-    "rimraf": "^3.0.2",
-    "rollup": "^2.52.7",
-    "rollup-plugin-terser": "^7.0.2",
-    "stylelint": "^16.25.0",
-    "stylelint-config-standard": "^36.0.0",
-    "stylelint-order": "^6.0.4",
-    "stylelint-scss": "^6.12.1"
-  }
+	"name": "editoria11y",
+	"version": "3.0.0",
+	"sa11yVersion": "4.4.0",
+	"description": "Editoria11y is a content accessibility checker that shows results inline in Web pages and rich text editors.",
+	"main": "src/js/ed11y.js",
+	"type": "module",
+	"author": "John Jameson",
+	"repository": {
+		"type": "git",
+		"url": "git+https://itmaybejj@github.com/itmaybejj/editoria11y.git"
+	},
+	"license": "GPLv2",
+	"bugs": {
+		"url": "https://github.com/itmaybejj/editoria11y/issues"
+	},
+	"homepage": "https://editoria11y.princeton.edu",
+	"keywords": [
+		"Editoria11y",
+		"accessibility",
+		"checker"
+	],
+	"scripts": {
+		"build:css": "node build/build-css.js",
+		"build:js": "node build/build.js",
+		"build": "npm run lint:fix && rimraf dist && npm run build:css && npm run build:js",
+		"lint": "biome check src",
+		"lint:fix": "biome check --write src",
+		"lint:fix-unsafe": "biome check --write --unsafe src",
+		"serve": "vite",
+		"dev": "npm run serve",
+		"test": "npx nightwatch tests --workers=4 --env=chrome",
+		"watch": "npm run build && chokidar \"./src/js\" \"./src/css\" -c \"npm run build\""
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.8",
+		"@playwright/test": "^1.40.1",
+		"chokidar-cli": "^3.0.0",
+		"browserslist": "^4.28.1",
+		"lightningcss": "^1.30.2",
+		"rimraf": "^6.1.2",
+		"chromedriver": "^142",
+		"css-minify": "^2.1.0",
+		"eslint": "^9.39.1",
+		"nightwatch": "^3.12.3",
+		"vite": "^7.2.6"
+	}
 }
