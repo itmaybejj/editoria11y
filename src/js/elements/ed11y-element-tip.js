@@ -7,7 +7,7 @@ import {
   generateColorSuggestion,
   generateContrastTools,
   initializeContrastTools,
-} from '../../sa11y/utils/contrast-utils';
+} from '../../sa11y/contrast/ui-tools.js';
 import { spriteClose, spriteCursor, spriteDismiss, spriteNext, spriteUnDismiss } from './sprite.js';
 
 export class Ed11yElementTip extends HTMLElement {

@@ -9,7 +9,7 @@
         <h1 id="editoria11y-demo">Editoria11y Unit Tests</h1>
 		<h6 class="positive">Developer mode should pick up this h6</h6>
     </header>
-    <main>
+    <main id="main">
 
         <section id="headings">
 
@@ -32,7 +32,7 @@
                 <h4><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></h4>
             </div>
             <div class="positive">empty linked heading
-                <a href="#"><h4></h4></a>
+                <a href="main"><h4></h4></a>
             </div>
 
             <div class="positive"><h4 id="a-very-long-heading">Suspiciously long heading. Headings should not be used for emphasis, but rather for a document outline, so if you find yourself talking this much, this probably is being used for visual formatting, not a heading.</h4>
@@ -114,7 +114,7 @@
 
             <h3 id="image-with-placeholder alt">Image with placeholder alt</h3>
             <p class="positive"><img alt="TBD" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
-            <p class="positive"><a href="#"><img alt="TBD" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+            <p class="positive"><a href="main"><img alt="TBD" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
 
             <h3 id="image-with-very-long-alt-text">Image with very long alt text</h3>
 
@@ -126,7 +126,7 @@
 
             <h3 id="images-ignored">Ignore handling on images</h3>
             <p class="negative">Aria hidden image <img aria-hidden src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
-            <p class="negative"><a href="#" aria-label="ok">Image inside an aria-labelled link.<img alt="tbd" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+            <p class="negative"><a href="main" aria-label="ok">Image inside an aria-labelled link.<img alt="tbd" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
             <p class="positive">Aria labelled image <img aria-label="tbd" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
 
 
@@ -166,10 +166,10 @@
         <h3 id="links-with-no-text-at-all">Links with no text at all</h3>
 
         <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"></a> No characters</p>
-        <p class="positive"><a href="#"> </a> Space character</p>
-        <p class="positive">Image with deadspace: <a href="#"><img alt="'" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" class=""></a></p>
-        <p class="positive">Content is image in CSS ::before: <a href="#" class="insert-image-before"></a></p>
-        <p class="positive only">Content is in CSS ::before: <a href="#" class="insert-text-before insert-text-after"><span class="insert-image-before"></span></a></p>
+        <p class="positive"><a href="main"> </a> Space character</p>
+        <p class="positive">Image with deadspace: <a href="main"><img alt="'" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" class=""></a></p>
+        <p class="positive">Content is image in CSS ::before: <a href="main" class="insert-image-before"></a></p>
+        <p class="positive only">Content is in CSS ::before: <a href="main" class="insert-text-before insert-text-after"><span class="insert-image-before"></span></a></p>
 
         <h3 id="links-titled-with-a-url">Links titled with a URL</h3>
 
@@ -196,8 +196,8 @@
 
         <p class="negative"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">A link in a new tab</a></p>
 
-        <p class="negative">Link that is only an aria-label: <a aria-label="this link opens new window" href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank"></a></p>
-        <p class="negative">Link with inner download icon with aria-label: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank" class="link-purpose">Aria label on inner span <span aria-label="download">^</span></a></p>
+        <p class="negative">Link that is only an aria-label: <a aria-label="hello this opens new window" href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank"></a></p>
+        <p class="negative">Link with inner download icon with aria-label: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank" class="link-purpose">Aria label on inner span <span aria-label="opens new window"></span></a></p>
 
         <p class="negative"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">An informative video (opens in new window).</a></p>
 
@@ -210,34 +210,34 @@
 
         <h3>Silent but interactive links</h3>
 
-        <p class="todo-positive"><a href="#" aria-hidden="true">Aria-hidden links without a negative tabindex.</a></p>
+        <p class="todo-positive"><a href="main" aria-hidden="true">Aria-hidden links without a negative tabindex.</a></p>
 
-        <p class="positive"><a href="#"><span aria-hidden="true">Link with all text content aria-hidden.</span></a></p>
+        <p class="positive"><a href="main"><span aria-hidden="true">Link with all text content aria-hidden.</span></a></p>
 
-        <p class="positive"><a href="#"><img class="insert-text-before" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+        <p class="positive"><a href="main"><img class="insert-text-before" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
         </a> linked image with empty alt.</p>
-        <p class="positive"><a href="#"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+        <p class="positive"><a href="main"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
         </a> linked image with no alt.</p>
 
-        <p class="positive"><a href="#"><img alt="'" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a> Linked image with an unpronounceable (unvoiced characters) alt text.</p>
+        <p class="positive"><a href="main"><img alt="'" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a> Linked image with an unpronounceable (unvoiced characters) alt text.</p>
 
-        <p class="positive"><a href="#"><img alt="http://jpg.gif" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+        <p class="positive"><a href="main"><img alt="http://jpg.gif" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
         </a> linked image with filename.</p>
-        <p class="todo-positive"><a href="#"><img alt="click here" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+        <p class="todo-positive"><a href="main"><img alt="click here" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
         </a> linked image with click here.</p>
-        <p class="positive"><a href="#"><img alt="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+        <p class="positive"><a href="main"><img alt="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
         </a> linked image with giant alt.</p>
-        <p class="positive"><a href="#">Link text with image text<img  alt="a butterfly" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
-        <p class="negative"><a href="#">Link text with text and empty image text<img  alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+        <p class="positive"><a href="main">Link text with image text<img  alt="a butterfly" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+        <p class="negative"><a href="#main">Link text with text and empty image text<img  alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
         <h3>
             Links with accessible text added programmatically
         </h3>
         <p>These should all pass.</p>
         <ul>
-            <li class="negative">Title <a href="#"  title="text is in the title"></a></li>
-            <li class="negative">Aria-label [todo] <a href="#"  id="aria-test" aria-label="Aria label"></a></li>
-            <li class="negative">Aria-label overriding [todo]<a href="#"  aria-label="Aria label"></a></li>
-            <li class="negative">Aria-labelledby [todo]<a href="#"  aria-labelledby="aria-test"></a></li>
+            <li class="negative">Title <a href="main"  title="text is in the title"></a></li>
+            <li class="negative">Aria-label [todo] <a href="main"  id="aria-test" aria-label="Aria label"></a></li>
+            <li class="negative">Aria-label overriding [todo]<a href="main"  aria-label="Aria label"></a></li>
+            <li class="negative">Aria-labelledby [todo]<a href="main"  aria-labelledby="aria-test"></a></li>
         </ul>
 
 
@@ -350,7 +350,7 @@
         <div class="negative"><p>10 things</p><p>20 things</p></div>
         <div class="negative"><p>1 thing</p><p>1 thing</p></div>
 
-        <div class="positive"><p>1. This has rich text after the BR<br><a href="#"><strong>2.</strong> Fancy.</a></p></div>
+        <div class="positive"><p>1. This has rich text after the BR<br><a href="main"><strong>2.</strong> Fancy.</a></p></div>
         <div class="negative"><p>1. This has nothing after the BR<br></p></div>
         <div class="negative"><p></p></div>
         <div class="negative"><p>1.</p></div>
@@ -380,7 +380,7 @@
         <section id="recursion">
             <h2 id="recursion-tests">JS Recursion handling</h2>
             <div class="positive">
-                <a href="#"><h4>Alert within a link should be drawn outside the link.</h4></a>
+                <a href="main"><h4>Alert within a link should be drawn outside the link.</h4></a>
             </div>
             <ul><li><span class="negative">Caps lock test should not flag LI parent</span><ul class="positive"><li >ONLY THE INTERIOR LI SHOULD BE FLAGGED</li></ul></li></ul>
             <table class="positive"><tr><td><h4>ALL CAPS HEADING OUTLINE IN TABLE OUT OF ORDER SHOULD HAVE 3 HITS</h4></td></tr></table>

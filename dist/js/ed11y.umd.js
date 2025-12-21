@@ -3462,7 +3462,7 @@ URL: ${url2}</pre>
     }
     return SA98G.sRco * simpleExp(rgb[0]) + SA98G.sGco * simpleExp(rgb[1]) + SA98G.sBco * simpleExp(rgb[2]);
   }
-  function alphaBlend$1(rgbaFG = [0, 0, 0, 1], rgbBG = [0, 0, 0], round = true) {
+  function alphaBlend(rgbaFG = [0, 0, 0, 1], rgbBG = [0, 0, 0], round = true) {
     rgbaFG[3] = Math.max(Math.min(rgbaFG[3], 1), 0);
     let compBlend = 1 - rgbaFG[3];
     let rgbOut = [0, 0, 0, 1, true];
@@ -3485,7 +3485,7 @@ URL: ${url2}</pre>
     };
     return weightMap[weight] || 400;
   }
-  function convertToRGBA$1(color, opacity) {
+  function convertToRGBA(color, opacity) {
     const colorString = color;
     let r;
     let g;
@@ -3523,7 +3523,7 @@ URL: ${url2}</pre>
             if (styles2.backgroundImage && styles2.backgroundImage !== "none") {
               return { type: "image", value: styles2.backgroundImage };
             }
-            const bgColor2 = convertToRGBA$1(styles2.backgroundColor);
+            const bgColor2 = convertToRGBA(styles2.backgroundColor);
             if (bgColor2[3] !== 0 && bgColor2 !== "transparent") {
               return bgColor2;
             }
@@ -3537,7 +3537,7 @@ URL: ${url2}</pre>
       if (bgImage !== "none") {
         return { type: "image", value: bgImage };
       }
-      const bgColor = convertToRGBA$1(styles.backgroundColor);
+      const bgColor = convertToRGBA(styles.backgroundColor);
       if (bgColor[3] !== 0 && bgColor !== "transparent") {
         if (bgColor[3] < 1) {
           let parentEl = targetEl.parentElement;
@@ -3553,8 +3553,8 @@ URL: ${url2}</pre>
             }
             parentEl = parentEl.parentElement;
           }
-          const parentColor = convertToRGBA$1(parentBgColor || "rgba(255, 255, 255, 1)");
-          const blendedBG = alphaBlend$1(bgColor, parentColor);
+          const parentColor = convertToRGBA(parentBgColor || "rgba(255, 255, 255, 1)");
+          const blendedBG = alphaBlend(bgColor, parentColor);
           return blendedBG;
         }
         return bgColor;
@@ -3566,19 +3566,44 @@ URL: ${url2}</pre>
     }
     return [255, 255, 255];
   }
-  function getLuminance$1(color) {
+  function getLuminance(color) {
     const rgb = color.slice(0, 3).map((x) => {
       const normalized = x / 255;
       return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
     });
     return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
   }
-  function getWCAG2Ratio$1(l1, l2) {
+  function getAPCAValue(color, bg) {
+    const blendedColor = alphaBlend(color, bg).slice(0, 4);
+    const foreground = sRGBtoY(blendedColor);
+    const background = sRGBtoY(bg);
+    const ratio = APCAcontrast(foreground, background);
+    return { ratio, blendedColor };
+  }
+  function getWCAG2Ratio(l1, l2) {
     const lighter = Math.max(l1, l2);
     const darker = Math.min(l1, l2);
     return (lighter + 0.05) / (darker + 0.05);
   }
-  function getHex$1(color) {
+  function brighten(color, amount) {
+    return color.map((value, index) => {
+      if (index < 3) {
+        const newValue = Math.ceil(value + (255 - value) * amount);
+        return newValue >= 255 ? 255 : newValue;
+      }
+      return value;
+    });
+  }
+  function darken(color, amount) {
+    return color.map((value, index) => {
+      if (index < 3) {
+        const newValue = Math.floor(value * (1 - amount));
+        return newValue <= 0 ? 0 : newValue;
+      }
+      return value;
+    });
+  }
+  function getHex(color) {
     const [r, g, b] = color.map((value) => Math.min(255, Math.max(0, value)));
     const hexR = r.toString(16).padStart(2, "0");
     const hexG = g.toString(16).padStart(2, "0");
@@ -3593,25 +3618,145 @@ URL: ${url2}</pre>
     const formattedRatio = Number.isInteger(truncatedRatio) ? truncatedRatio.toFixed(0) : truncatedRatio;
     return `${formattedRatio}:1`;
   }
-  function ratioToDisplay$1(value, contrastAlgorithm) {
+  function ratioToDisplay(value, contrastAlgorithm) {
     return contrastAlgorithm === "APCA" ? displayAPCAValue(value) : displayWCAGRatio(value);
   }
-  function calculateContrast$1(color, bg, contrastAlgorithm) {
+  function calculateContrast(color, bg, contrastAlgorithm) {
     let ratio;
-    const blendedColor = alphaBlend$1(color, bg).slice(0, 4);
+    const blendedColor = alphaBlend(color, bg).slice(0, 4);
     if (contrastAlgorithm === "APCA") {
       const foreground = sRGBtoY(blendedColor);
       const background = sRGBtoY(bg);
       ratio = APCAcontrast(foreground, background);
     } else {
-      const foreground = getLuminance$1(blendedColor);
-      const background = getLuminance$1(bg);
-      ratio = getWCAG2Ratio$1(foreground, background);
+      const foreground = getLuminance(blendedColor);
+      const background = getLuminance(bg);
+      ratio = getWCAG2Ratio(foreground, background);
     }
     return { ratio, blendedColor };
   }
+  function suggestColorWCAG(color, background, isLargeText, contrastAlgorithm) {
+    let minContrastRatio;
+    if (contrastAlgorithm === "AAA") {
+      minContrastRatio = isLargeText ? 4.5 : 7;
+    } else {
+      minContrastRatio = isLargeText ? 3 : 4.5;
+    }
+    const fgLuminance = getLuminance(color);
+    const bgLuminance = getLuminance(background);
+    const adjustMode = fgLuminance > bgLuminance ? getWCAG2Ratio(1, bgLuminance) > minContrastRatio : getWCAG2Ratio(0, bgLuminance) < minContrastRatio;
+    const adjustColor = (foregroundColor, amount, mode) => mode ? brighten(foregroundColor, amount) : darken(foregroundColor, amount);
+    let adjustedColor = color;
+    let lastValidColor = adjustedColor;
+    let contrastRatio = getWCAG2Ratio(fgLuminance, bgLuminance);
+    let bestContrast = contrastRatio;
+    let previousColor = color;
+    let step = 0.16;
+    const percentChange = 0.5;
+    const precision = 0.01;
+    let iterations = 0;
+    const maxIterations = 100;
+    while (step >= precision) {
+      iterations += 1;
+      if (iterations > maxIterations) {
+        return { color: null };
+      }
+      adjustedColor = adjustColor(adjustedColor, step, adjustMode);
+      const newLuminance = getLuminance(adjustedColor);
+      contrastRatio = getWCAG2Ratio(newLuminance, bgLuminance);
+      if (contrastRatio >= minContrastRatio) {
+        lastValidColor = contrastRatio <= bestContrast ? adjustedColor : lastValidColor;
+        bestContrast = contrastRatio;
+        adjustedColor = previousColor;
+        step *= percentChange;
+      }
+      previousColor = adjustedColor;
+    }
+    return { color: getHex(lastValidColor) };
+  }
+  const getOptimalAPCACombo = (background, fontWeight) => {
+    const contrastWithDark = getAPCAValue(background, [0, 0, 0, 1]);
+    const contrastWithLight = getAPCAValue(background, [255, 255, 255, 1]);
+    const isDarkBetter = Math.abs(contrastWithDark.ratio) > Math.abs(contrastWithLight.ratio);
+    const suggestedColor = isDarkBetter ? [0, 0, 0, 1] : [255, 255, 255, 1];
+    const bestContrastRatio = isDarkBetter ? contrastWithDark.ratio : contrastWithLight.ratio;
+    const newFontLookup = fontLookupAPCA(bestContrastRatio).slice(1);
+    const size = Math.ceil(newFontLookup[Math.floor(fontWeight / 100) - 1]);
+    return { suggestedColor, size };
+  };
+  function suggestColorAPCA(color, background, fontWeight, fontSize) {
+    const graphicMinLc = 45;
+    const isGraphic = fontWeight == null || fontSize == null;
+    const bgLuminance = sRGBtoY(background);
+    const adjustColor = (foregroundColor, amount) => bgLuminance <= 0.179 ? brighten(foregroundColor, amount) : darken(foregroundColor, amount);
+    let adjustedColor = color;
+    let contrast = getAPCAValue(adjustedColor, background);
+    let { ratio } = contrast;
+    let bestTextCombo = null;
+    let bestContrast = ratio;
+    let lastValidColor = null;
+    let fontLookup;
+    let fontWeightIndex;
+    let minimumSizeRequired;
+    const passesText = () => {
+      fontLookup = fontLookupAPCA(ratio).slice(1);
+      fontWeightIndex = Math.min(
+        Math.max(Math.floor(fontWeight / 100) - 1, 0),
+        fontLookup.length - 1
+      );
+      minimumSizeRequired = fontLookup[fontWeightIndex];
+      return minimumSizeRequired <= fontSize && minimumSizeRequired !== 999 && minimumSizeRequired !== 777;
+    };
+    const passesGraphic = () => Math.abs(ratio) >= graphicMinLc;
+    if (!isGraphic) {
+      bestTextCombo = getOptimalAPCACombo(background, fontWeight);
+      if (bestTextCombo.size > fontSize) {
+        return {
+          color: getHex(bestTextCombo.suggestedColor),
+          size: bestTextCombo.size
+        };
+      }
+      if (passesText()) {
+        return { color: getHex(color), size: null };
+      }
+    } else if (passesGraphic()) {
+      return { color: getHex(color), size: null };
+    }
+    let previousColor = color;
+    let step = 0.16;
+    const percentChange = 0.5;
+    const precision = 0.01;
+    let iterations = 0;
+    const maxIterations = 50;
+    while (step >= precision && iterations < maxIterations) {
+      iterations += 1;
+      adjustedColor = adjustColor(adjustedColor, step);
+      contrast = getAPCAValue(adjustedColor, background);
+      ratio = contrast.ratio;
+      const passes = isGraphic ? passesGraphic() : passesText();
+      if (passes) {
+        if (Math.abs(ratio) <= Math.abs(bestContrast) || !lastValidColor) {
+          lastValidColor = adjustedColor;
+          bestContrast = ratio;
+        }
+        adjustedColor = previousColor;
+        step *= percentChange;
+      }
+      previousColor = adjustedColor;
+    }
+    if (lastValidColor) {
+      return { color: getHex(lastValidColor), size: null };
+    }
+    if (!isGraphic && bestTextCombo) {
+      return {
+        color: getHex(bestTextCombo.suggestedColor),
+        size: bestTextCombo.size
+      };
+    }
+    return { color: getHex(color), size: null };
+  }
   function wcagAlgorithm($el, color, background, fontSize, fontWeight, opacity, contrastAlgorithm) {
-    const { ratio, blendedColor } = calculateContrast$1(color, background);
+    const { ratio, blendedColor } = calculateContrast(color, background);
     const isLargeText = fontSize >= 24 || fontSize >= 18.67 && fontWeight >= 700;
     let hasLowContrast;
     if (contrastAlgorithm === "AAA") {
@@ -3636,7 +3781,7 @@ URL: ${url2}</pre>
     return null;
   }
   function apcaAlgorithm($el, color, background, fontSize, fontWeight, opacity, contrastAlgorithm) {
-    const { ratio, blendedColor } = calculateContrast$1(color, background, contrastAlgorithm);
+    const { ratio, blendedColor } = calculateContrast(color, background, contrastAlgorithm);
     const fontLookup = fontLookupAPCA(ratio).slice(1);
     const fontWeightIndex = Math.floor(fontWeight / 100) - 1;
     const minFontSize = fontLookup[fontWeightIndex];
@@ -3664,7 +3809,7 @@ URL: ${url2}</pre>
       const $el = Elements.Found.Contrast[i];
       const style = getComputedStyle($el);
       const opacity = parseFloat(style.opacity);
-      const color = convertToRGBA$1(style.color, opacity);
+      const color = convertToRGBA(style.color, opacity);
       const fontSize = parseFloat(style.fontSize);
       const getFontWeight = style.fontWeight;
       const fontWeight = normalizeFontWeight(getFontWeight);
@@ -3701,7 +3846,7 @@ URL: ${url2}</pre>
               opacity
             });
           }
-        } else if (!isHidden && getHex$1(color) !== getHex$1(background)) {
+        } else if (!isHidden && getHex(color) !== getHex(background)) {
           const result = checkElementContrast(
             $el,
             color,
@@ -3749,15 +3894,15 @@ URL: ${url2}</pre>
         const threshold = Math.min(width, height) < 50 ? 1 : 3;
         const hasStroke = stroke && strokePx >= threshold && stroke !== "none";
         const hasFill = fill && fill !== "none" && !fill.startsWith("url(");
-        const resolvedFill = fill === "currentColor" ? convertToRGBA$1(getComputedStyle(shapes[0]).color, opacity) : convertToRGBA$1(fill, opacity);
-        const resolvedStroke = stroke === "currentColor" ? convertToRGBA$1(getComputedStyle(shapes[0]).color, opacity) : convertToRGBA$1(stroke, opacity);
+        const resolvedFill = fill === "currentColor" ? convertToRGBA(getComputedStyle(shapes[0]).color, opacity) : convertToRGBA(fill, opacity);
+        const resolvedStroke = stroke === "currentColor" ? convertToRGBA(getComputedStyle(shapes[0]).color, opacity) : convertToRGBA(stroke, opacity);
         const supported = ![resolvedFill, resolvedStroke].includes("unsupported");
         if (supported && hasBackground) {
           let contrastValue;
           let fillPasses = false;
           let strokePasses = false;
           if (hasFill) {
-            contrastValue = calculateContrast$1(
+            contrastValue = calculateContrast(
               resolvedFill,
               background,
               option.contrastAlgorithm
@@ -3765,7 +3910,7 @@ URL: ${url2}</pre>
             fillPasses = option.contrastAlgorithm === "APCA" ? contrastValue.ratio >= 45 : contrastValue.ratio >= 3;
           }
           if (hasStroke) {
-            contrastValue = calculateContrast$1(
+            contrastValue = calculateContrast(
               resolvedStroke,
               background,
               option.contrastAlgorithm
@@ -3776,15 +3921,15 @@ URL: ${url2}</pre>
           const failsFill = hasFill && !hasStroke && !fillPasses;
           const failsStroke = !hasFill && hasStroke && !strokePasses;
           if (failsBoth || failsFill || failsStroke) {
-            const bgHex = getHex$1(background);
-            const fillHex = getHex$1(resolvedFill);
-            const strokeHex = getHex$1(resolvedStroke);
+            const bgHex = getHex(background);
+            const fillHex = getHex(resolvedFill);
+            const strokeHex = getHex(resolvedStroke);
             if (fillHex === bgHex && !hasStroke || strokeHex === bgHex && !hasFill) {
               return;
             }
             contrastResults.push({
               $el,
-              ratio: ratioToDisplay$1(contrastValue.ratio, option.contrastAlgorithm),
+              ratio: ratioToDisplay(contrastValue.ratio, option.contrastAlgorithm),
               color: contrastValue.blendedColor,
               type: "svg-error",
               isLargeText: true,
@@ -3813,7 +3958,7 @@ URL: ${url2}</pre>
     Elements.Found.Inputs.forEach(($el) => {
       if ($el.placeholder && $el.placeholder.length !== 0) {
         const placeholder = getComputedStyle($el, "::placeholder");
-        const pColor = convertToRGBA$1(placeholder.getPropertyValue("color"));
+        const pColor = convertToRGBA(placeholder.getPropertyValue("color"));
         const pSize = parseFloat(placeholder.fontSize);
         const pWeight = normalizeFontWeight(placeholder.fontWeight);
         const pBackground = getBackground($el, Constants.Global.shadowDetection);
@@ -7206,151 +7351,6 @@ URL: ${url2}</pre>
       }
     }
   }
-  const alphaBlend = function(fg = [0, 0, 0, 1], bg = [0, 0, 0]) {
-    const bgAlpha = 1 - fg[3];
-    return [
-      fg[0] * fg[3] + bgAlpha * bg[0],
-      fg[1] * fg[3] + bgAlpha * bg[1],
-      fg[2] * fg[3] + bgAlpha * bg[2]
-    ];
-  };
-  function convertToRGBA(color, opacity) {
-    const colorString = color;
-    let r;
-    let g;
-    let b;
-    let a = 1;
-    if (!colorString.startsWith("rgb")) {
-      if (colorString.startsWith("color(rec2020") || colorString.startsWith("color(display-p3") || colorString.startsWith("url(")) {
-        return "unsupported";
-      }
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
-      context.fillStyle = colorString;
-      context.fillRect(0, 0, 1, 1);
-      const imageData = context.getImageData(0, 0, 1, 1);
-      [r, g, b, a] = imageData.data;
-      a = (a / 255).toFixed(2);
-    } else {
-      const rgbaArray = colorString.match(/[\d.]+/g).map(Number);
-      [r, g, b, a] = rgbaArray.length === 4 ? rgbaArray : [...rgbaArray, 1];
-    }
-    return [r, g, b, Number(a)];
-  }
-  function getLuminance(color) {
-    const rgb = color.slice(0, 3).map((x) => {
-      const normalized = x / 255;
-      return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
-    });
-    return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
-  }
-  function getWCAG2Ratio(l1, l2) {
-    const lighter = Math.max(l1, l2);
-    const darker = Math.min(l1, l2);
-    return (lighter + 0.05) / (darker + 0.05);
-  }
-  function brighten(color, amount) {
-    return color.map((value, index) => {
-      if (index < 3) {
-        const newValue = Math.ceil(value + (255 - value) * amount);
-        return newValue >= 255 ? 255 : newValue;
-      }
-      return value;
-    });
-  }
-  function darken(color, amount) {
-    return color.map((value, index) => {
-      if (index < 3) {
-        const newValue = Math.floor(value * (1 - amount));
-        return newValue <= 0 ? 0 : newValue;
-      }
-      return value;
-    });
-  }
-  function getHex(color) {
-    const [r, g, b] = color.map((value) => Math.min(255, Math.max(0, value)));
-    const hexR = r.toString(16).padStart(2, "0");
-    const hexG = g.toString(16).padStart(2, "0");
-    const hexB = b.toString(16).padStart(2, "0");
-    return `#${hexR}${hexG}${hexB}`;
-  }
-  function ratioToDisplay(value) {
-    if (Constants.Global.contrastAPCA) {
-      return Math.abs(Number(value.toFixed(1)));
-    }
-    const truncatedRatio = Math.trunc(value * 10) / 10;
-    const formattedRatio = Number.isInteger(truncatedRatio) ? truncatedRatio.toFixed(0) : truncatedRatio;
-    return `${formattedRatio}:1`;
-  }
-  function calculateContrast(color, bg) {
-    let ratio;
-    const blendedColor = alphaBlend(color, bg).slice(0, 4);
-    const foreground = getLuminance(blendedColor);
-    const background = getLuminance(bg);
-    ratio = getWCAG2Ratio(foreground, background);
-    return { ratio, blendedColor };
-  }
-  function suggestColorWCAG(color, background, isLargeText, contrastAAA = false) {
-    let minContrastRatio;
-    if (contrastAAA) {
-      minContrastRatio = isLargeText ? 4.5 : 7;
-    } else {
-      minContrastRatio = isLargeText ? 3 : 4.5;
-    }
-    const fgLuminance = getLuminance(color);
-    const bgLuminance = getLuminance(background);
-    const adjustMode = fgLuminance > bgLuminance ? getWCAG2Ratio(1, bgLuminance) > minContrastRatio : getWCAG2Ratio(0, bgLuminance) < minContrastRatio;
-    const adjustColor = (foregroundColor, amount, mode) => mode ? brighten(foregroundColor, amount) : darken(foregroundColor, amount);
-    let adjustedColor = color;
-    let lastValidColor = adjustedColor;
-    let contrastRatio = getWCAG2Ratio(fgLuminance, bgLuminance);
-    let bestContrast = contrastRatio;
-    let previousColor = color;
-    let step = 0.16;
-    const percentChange = 0.5;
-    const precision = 0.01;
-    let iterations = 0;
-    const maxIterations = 100;
-    while (step >= precision) {
-      iterations += 1;
-      if (iterations > maxIterations) {
-        return { color: null };
-      }
-      adjustedColor = adjustColor(adjustedColor, step, adjustMode);
-      const newLuminance = getLuminance(adjustedColor);
-      contrastRatio = getWCAG2Ratio(newLuminance, bgLuminance);
-      if (contrastRatio >= minContrastRatio) {
-        lastValidColor = contrastRatio <= bestContrast ? adjustedColor : lastValidColor;
-        bestContrast = contrastRatio;
-        adjustedColor = previousColor;
-        step *= percentChange;
-      }
-      previousColor = adjustedColor;
-    }
-    return { color: getHex(lastValidColor) };
-  }
-  function generateColorSuggestion(contrastDetails) {
-    let adviceContainer;
-    const { color, background, fontWeight, fontSize, isLargeText, type } = contrastDetails;
-    if (color && background && background.type !== "image" && (type === "text" || type === "svg-error" || type === "input")) {
-      const suggested = suggestColorWCAG(color, background, isLargeText, Constants.Global.contrastAAA);
-      let advice;
-      const hr = '<hr aria-hidden="true">';
-      const style = `color:${suggested.color};background-color:${getHex(contrastDetails.background)};`;
-      const colorBadge = `<button id="suggest" class="badge" style="${style}">${suggested.color}</button>`;
-      `<strong class="normal-badge">${suggested.size}px</strong>`;
-      if (suggested.color === null) {
-        advice = `${hr} ${Lang._("NO_SUGGESTION")}`;
-      } else {
-        advice = `${hr} ${Lang._("CONTRAST_COLOR")} ${colorBadge}`;
-      }
-      adviceContainer = document.createElement("div");
-      adviceContainer.id = "advice";
-      const suggestion = contrastDetails.opacity < 1 ? `<hr aria-hidden="true"> ${Lang.sprintf("CONTRAST_OPACITY")}` : advice;
-      adviceContainer.innerHTML = suggestion;
-    }
-    return adviceContainer;
-  }
   function generateContrastTools(contrastDetails) {
     const { sanitizedText, color, background, fontWeight, fontSize, ratio, textUnderline } = contrastDetails;
     const hasBackgroundColor = background && background.type !== "image";
@@ -7361,10 +7361,14 @@ URL: ${url2}</pre>
     const textDecoration = textUnderline ? `text-decoration:${textUnderline};` : "";
     const unknownFG = color ? "" : 'class="unknown"';
     const unknownBG = background && background.type !== "image" ? "" : 'class="unknown"';
-    const unknownFGText = color ? "" : `<span class="visually-hidden">(${Lang._("UNKNOWN")})</span>`;
-    const unknownBGText = background ? "" : `<span class="visually-hidden">(${Lang._("UNKNOWN")})</span>`;
+    const unknownFGText = color ? "" : `<span id="fg-input-unknown" class="visually-hidden">(${Lang._("UNKNOWN")})</span>`;
+    const unknownBGText = background ? "" : `<span id="bg-input-unknown" class="visually-hidden">(${Lang._("UNKNOWN")})</span>`;
     let displayedRatio;
-    displayedRatio = ratio || Lang._("UNKNOWN");
+    if (Constants.Global.contrastAlgorithm === "APCA") {
+      displayedRatio = Math.abs(ratio) === 0 ? 0 : Math.abs(ratio) || Lang._("UNKNOWN");
+    } else {
+      displayedRatio = ratio || Lang._("UNKNOWN");
+    }
     const contrastTools = document.createElement("div");
     contrastTools.id = "contrast-tools";
     contrastTools.innerHTML = `
@@ -7375,46 +7379,101 @@ URL: ${url2}</pre>
       <div id="contrast-preview" style="color:${foregroundHex};${hasBackgroundColor ? `background:${backgroundHex};` : ""}${hasFontWeight + hasFontSize + textDecoration}">${sanitizedText}</div>
       <div id="color-pickers">
         <label for="fg-text">${Lang._("FG")} ${unknownFGText}
-          <input type="color" id="fg-input" value="${foregroundHex}" ${unknownFG}/>
+          <div id="fg-color-wrapper" ${unknownFG}>
+            <input type="color" id="fg-input" value="${foregroundHex}" ${unknownFG}/>
+          </div>
         </label>
         <label for="bg">${Lang._("BG")} ${unknownBGText}
-          <input type="color" id="bg-input" value="${backgroundHex}" ${unknownBG}/>
+          <div id="bg-color-wrapper" ${unknownBG}>
+            <input type="color" id="bg-input" value="${backgroundHex}" ${unknownBG}/>
+          </div>
         </label>
       </div>`;
     return contrastTools;
   }
   function initializeContrastTools(container, contrastDetails) {
     const contrastTools = container?.querySelector("#contrast-tools");
-    if (contrastTools) {
-      const { fontSize, fontWeight, type, isLargeText } = contrastDetails;
-      const contrast = container.querySelector("#contrast");
-      const contrastPreview = container.querySelector("#contrast-preview");
-      const fgInput = container.querySelector("#fg-input");
-      const bgInput = container.querySelector("#bg-input");
-      const ratio = container.querySelector("#value");
-      const good = container.querySelector("#good");
-      const toggleBadges = (elements2, condition) => {
-        elements2.forEach(($el) => {
-          $el.classList.toggle("good-contrast", condition);
-          $el.classList.toggle("error-badge", !condition);
-        });
-      };
-      const updatePreview = () => {
-        const fgColor = fgInput.value;
-        const bgColor = bgInput.value;
-        [fgInput, bgInput].forEach((input) => input.classList.remove("unknown"));
-        contrastPreview.style.color = fgColor;
-        contrastPreview.style.backgroundColor = bgColor;
-        contrastPreview.style.backgroundImage = "none";
-        const contrastValue = calculateContrast(convertToRGBA(fgColor), convertToRGBA(bgColor));
-        const elementsToToggle = [ratio, contrast];
+    if (!contrastTools) return;
+    const { fontSize: initialFontSize, fontWeight, type, isLargeText } = contrastDetails;
+    const contrast = container.querySelector("#contrast");
+    const contrastPreview = container.querySelector("#contrast-preview");
+    const fgInput = container.querySelector("#fg-input");
+    const bgInput = container.querySelector("#bg-input");
+    const ratio = container.querySelector("#value");
+    const good = container.querySelector("#good");
+    const toggleBadges = (elements2, condition) => {
+      elements2.forEach(($el) => {
+        $el.classList.toggle("good-contrast", condition);
+        $el.classList.toggle("error-badge", !condition);
+      });
+    };
+    const getPreviewFontSize = () => {
+      if (contrastPreview.style.fontSize) {
+        const match = contrastPreview.style.fontSize.match(/([\d.]+)/);
+        if (match) return parseFloat(match[1]);
+      }
+      const computed = getComputedStyle(contrastPreview).fontSize;
+      if (computed) {
+        const match = computed.match(/([\d.]+)/);
+        if (match) return parseFloat(match[1]);
+      }
+      return initialFontSize;
+    };
+    const updatePreview = (e) => {
+      const fgColor = fgInput.value;
+      const bgColor = bgInput.value;
+      const currentFontSize = getPreviewFontSize();
+      setTimeout(() => {
+        const unknownFG = fgInput.classList.contains("unknown");
+        const unknownBG = bgInput.classList.contains("unknown");
+        contrastPreview.style.color = unknownFG ? "" : fgColor;
+        contrastPreview.style.backgroundColor = unknownBG ? "" : bgColor;
+        contrastPreview.style.backgroundImage = unknownBG ? "" : "none";
+      }, 0);
+      if (e?.target) {
+        e.target.classList.remove("unknown");
+        e.target.parentElement.classList.remove("unknown");
+        container.querySelector(`#${e.target.id}-unknown`)?.remove();
+      }
+      if (fgInput.classList.contains("unknown") || bgInput.classList.contains("unknown")) return;
+      const algorithm = Constants.Global.contrastAlgorithm;
+      const contrastValue = calculateContrast(
+        convertToRGBA(fgColor),
+        convertToRGBA(bgColor),
+        Constants.Global.contrastAlgorithm
+      );
+      const elementsToToggle = [ratio, contrast];
+      if (algorithm === "APCA") {
         const value = contrastValue.ratio;
-        ratio.textContent = ratioToDisplay(value);
-        const useAAA = Constants.Global.contrastAAA;
+        ratio.textContent = displayAPCAValue(value);
+        const fontArray = fontLookupAPCA(value).slice(1);
+        const nonTextPasses = value >= 45 && fontArray[0] >= 0 && fontArray[0] <= 777;
+        let passes;
+        switch (type) {
+          case "svg-error":
+          case "svg-warning": {
+            good.hidden = !nonTextPasses;
+            passes = nonTextPasses;
+            toggleBadges(elementsToToggle, passes);
+            break;
+          }
+          default: {
+            const minFontSize = fontArray[Math.floor(fontWeight / 100) - 1];
+            passes = currentFontSize >= minFontSize;
+            toggleBadges(elementsToToggle, passes);
+            good.hidden = !passes;
+            break;
+          }
+        }
+      } else {
+        const value = contrastValue.ratio;
+        ratio.textContent = displayWCAGRatio(value);
+        const useAAA = algorithm === "AAA";
         const nonTextThreshold = 3;
         const normalTextThreshold = useAAA ? 7 : 4.5;
         const largeTextThreshold = useAAA ? 4.5 : 3;
         const passesNonText = value >= nonTextThreshold;
+        const dynamicIsLargeText = currentFontSize >= 24 || currentFontSize >= 18.66 && fontWeight >= 700 || isLargeText;
         const passesNormalText = value >= normalTextThreshold;
         const passesLargeText = value >= largeTextThreshold;
         switch (type) {
@@ -7426,7 +7485,7 @@ URL: ${url2}</pre>
             break;
           }
           default: {
-            if (isLargeText) {
+            if (dynamicIsLargeText) {
               toggleBadges([ratio, contrast], passesLargeText);
               good.hidden = !passesLargeText;
             } else {
@@ -7436,23 +7495,64 @@ URL: ${url2}</pre>
             break;
           }
         }
+      }
+    };
+    fgInput.addEventListener("input", updatePreview);
+    bgInput.addEventListener("input", updatePreview);
+    setTimeout(() => {
+      const bindSuggest = (id, action) => {
+        const el = container.querySelector(id);
+        if (!el) return;
+        el.addEventListener("click", () => {
+          action(el.textContent);
+          updatePreview();
+          navigator.clipboard.writeText(el.textContent).catch(() => {
+          });
+        });
       };
-      fgInput.addEventListener("input", updatePreview);
-      bgInput.addEventListener("input", updatePreview);
-      setTimeout(() => {
-        const suggest = container.querySelector("#suggest");
-        if (suggest) {
-          const updatePreviewWithSuggested = () => {
-            const hex = suggest.textContent;
-            fgInput.value = hex;
-            updatePreview();
-            navigator.clipboard.writeText(hex).catch(() => {
-            });
-          };
-          suggest.addEventListener("click", updatePreviewWithSuggested);
+      bindSuggest("#suggest", (val) => {
+        fgInput.value = val;
+      });
+      bindSuggest("#suggest-size", (val) => {
+        contrastPreview.style.fontSize = val;
+      });
+    }, 0);
+  }
+  function generateColorSuggestion(contrastDetails) {
+    let adviceContainer;
+    const { color, background, fontWeight, fontSize, isLargeText, type } = contrastDetails;
+    if (color && background && background.type !== "image" && (type === "text" || type === "svg-error" || type === "input")) {
+      const suggested = Constants.Global.contrastAlgorithm === "APCA" ? suggestColorAPCA(color, background, fontWeight, fontSize) : suggestColorWCAG(
+        color,
+        background,
+        isLargeText,
+        Constants.Global.contrastAlgorithm
+      );
+      let advice;
+      const hr = '<hr aria-hidden="true">';
+      const bgHex = getHex(contrastDetails.background);
+      const style = `color:${suggested.color};background-color:${bgHex};`;
+      const colorBadge = `<button id="suggest" class="badge" style="${style}">${suggested.color}</button>`;
+      const sizeBadge = `<button id="suggest-size" class="normal-badge">${suggested.size}px</button>`;
+      if (Constants.Global.contrastAlgorithm === "AA" || Constants.Global.contrastAlgorithm === "AAA") {
+        if (suggested.color === null) {
+          advice = `${hr} ${Lang._("NO_SUGGESTION")}`;
+        } else {
+          advice = `${hr} ${Lang._("CONTRAST_COLOR")} ${colorBadge}`;
         }
-      }, 0);
+      } else if (suggested.color && suggested.size) {
+        advice = `${hr} ${Lang._("CONTRAST_APCA")} ${colorBadge} ${sizeBadge}`;
+      } else if (suggested.color) {
+        advice = `${hr} ${Lang._("CONTRAST_COLOR")} ${colorBadge}`;
+      } else if (suggested.size) {
+        advice = `${hr} ${Lang._("CONTRAST_SIZE")} ${sizeBadge}`;
+      }
+      adviceContainer = document.createElement("div");
+      adviceContainer.id = "advice";
+      const suggestion = contrastDetails.opacity < 1 ? `<hr aria-hidden="true"> ${Lang.sprintf("CONTRAST_OPACITY")}` : advice;
+      adviceContainer.innerHTML = suggestion;
     }
+    return adviceContainer;
   }
   class Ed11yElementTip extends HTMLElement {
     connectedCallback() {

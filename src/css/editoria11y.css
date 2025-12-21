@@ -1497,19 +1497,23 @@ ed11y-element-result.ed11y-preload,
 	input[type="color" i].unknown {
 		box-shadow: 0 0 0 2px var(--ed11y-warning);
 	}
-	input[type="color" i].unknown::after {
-		position: absolute;
-		z-index: 2;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 44px;
-		height: 44px;
-		margin: -40px -3px;
-		font-size: 22px;
-		color: #fff;
-		pointer-events: none;
-		content: "?";
+	.unknown {
+		display: inline-block;
+		position: relative;
+		&::after {
+			z-index: 2;
+			color: #fff;
+			pointer-events: none;
+			content: "?";
+			justify-content: center;
+			align-items: center;
+			width: 44px;
+			height: 44px;
+			margin: -46px 7px;
+			font-size: 22px;
+			display: flex;
+			position: absolute;
+		}
 	}
 	.badge {
 		color: #fefefe;

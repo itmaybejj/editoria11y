@@ -1299,7 +1299,12 @@ ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
   box-shadow: 0 0 0 2px var(--ed11y-warning);
 }
 
-.ed11y-contrast-tools input[type="color" i].unknown:after {
+.ed11y-contrast-tools .unknown {
+  display: inline-block;
+  position: relative;
+}
+
+.ed11y-contrast-tools .unknown:after {
   z-index: 2;
   color: #fff;
   pointer-events: none;
@@ -1308,7 +1313,7 @@ ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
   align-items: center;
   width: 44px;
   height: 44px;
-  margin: -40px -3px;
+  margin: -46px 7px;
   font-size: 22px;
   display: flex;
   position: absolute;
