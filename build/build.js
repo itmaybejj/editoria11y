@@ -54,7 +54,6 @@ const getDefine = () => ({
 const runBuild = async (config) => {
 	await build({
 		configFile: false,
-		logLevel: 'info',
 		...config,
 	});
 };
@@ -83,12 +82,12 @@ const runBuild = async (config) => {
 		},
 	});
 
-	const languages = ['enUS', 'bg', 'cs', 'da', 'de', 'el', 'en', 'enUS', 'es', 'et', 'fi', 'fr', 'hu', 'id', 'it', 'ja', 'ko', 'lt', 'lv', 'nb', 'nl', 'pl', 'ptBR', 'ptPT', 'ro', 'sk', 'sl', 'sv', 'tr', 'ua', 'zh'];
+	const languageOverrides = ['enUS', 'en'];
 
-	console.log(`Processing ${languages.length} language files...`);
+	console.log(`Processing ${languageOverrides.length} language files...`);
 
-	for (const lang of languages) {
-		const langEntry = path.resolve(dirname, `../src/sa11y/lang/${lang}.js`);
+	for (const lang of languageOverrides) {
+		const langEntry = path.resolve(dirname, `../src/js/lang/${lang}.js`);
 
 		// Build ESM
 		await runBuild({
@@ -106,6 +105,46 @@ const runBuild = async (config) => {
 
 		// Build UMD
 		await runBuild({
+			logLevel: 'warning',
+			build: {
+				emptyOutDir: false,
+				minify: false,
+				outDir: 'dist/js/lang',
+				lib: {
+					entry: langEntry,
+					name: `Ed11yLang${lang.charAt(0).toUpperCase() + lang.slice(1)}`,
+					fileName: () => `${lang}.umd.js`,
+					formats: ['umd'],
+				},
+			},
+		});
+	}
+
+	const languages = ['bg', 'cs', 'da', 'de', 'el', 'es', 'et', 'fi', 'fr', 'hu', 'id', 'it', 'ja', 'ko', 'lt', 'lv', 'nb', 'nl', 'pl', 'ptBR', 'ptPT', 'ro', 'sk', 'sl', 'sv', 'tr', 'ua', 'zh'];
+
+	console.log(`Processing ${languages.length} language files...`);
+
+	for (const lang of languages) {
+		const langEntry = path.resolve(dirname, `../src/sa11y/lang/${lang}.js`);
+
+		// Build ESM
+		await runBuild({
+			logLevel: 'warning',
+			build: {
+				emptyOutDir: false,
+				minify: false,
+				outDir: 'dist/js/lang',
+				lib: {
+					entry: langEntry,
+					fileName: () => `${lang}.js`,
+					formats: ['es'],
+				},
+			},
+		});
+
+		// Build UMD
+		await runBuild({
+			logLevel: 'warning',
 			build: {
 				emptyOutDir: false,
 				minify: false,
@@ -122,6 +161,7 @@ const runBuild = async (config) => {
 
 	// UMD - Minified (using esbuild)
 	await runBuild({
+		logLevel: 'warning',
 		define: getDefine(),
 		plugins: [
 			injectCSSintoJS(),
@@ -137,6 +177,7 @@ const runBuild = async (config) => {
 
 	// ESM - Unminified
 	await runBuild({
+		logLevel: 'warning',
 		define: getDefine(),
 		plugins: [
 			injectCSSintoJS(),
@@ -152,6 +193,7 @@ const runBuild = async (config) => {
 
 	// ESM - Minified (using esbuild)
 	await runBuild({
+		logLevel: 'warning',
 		define: getDefine(),
 		plugins: [
 			injectCSSintoJS(),

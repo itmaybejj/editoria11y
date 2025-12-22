@@ -1,4 +1,4 @@
-export const langKeyMap = {
+export const legacyKeyMap = {
   headingLevelSkipped: 'HEADING_SKIPPED_LEVEL',
   headingEmpty: 'HEADING_EMPTY',
   headingIsLong: 'HEADING_LONG',

@@ -155,24 +155,28 @@ export function checkEditableIntersects(focusKnown = false) {
     });
     return;
   }
+  const activeRects = State.activeRange.getBoundingClientRect();
+
   State.jumpList?.forEach((el) => {
+    const toggle = el.shadowRoot.querySelector('.toggle');
+
     const framePositioner =
       el.result.fixedRoot && State.positionedFrames[el.result.fixedRoot]
         ? State.positionedFrames[el.result.fixedRoot]
         : { top: 0, left: 0 };
-    const activeRects = State.activeRange.getBoundingClientRect();
+
     const rects = {};
     rects.top = activeRects.top + framePositioner.top;
     rects.left = activeRects.left + framePositioner.left;
     rects.bottom = activeRects.bottom + framePositioner.top;
     rects.right = activeRects.right + framePositioner.left;
 
-    const toggle = el.shadowRoot.querySelector('.toggle');
-    if (intersect(rects, toggle.getBoundingClientRect(), 0)) {
-      if (!toggle.classList.contains('was-intersecting')) {
-        el.classList.add('intersecting');
-        toggle.classList.add('intersecting');
-      }
+    if (
+      intersect(rects, el.result.element.getBoundingClientRect(), 0) ||
+      intersect(rects, toggle.getBoundingClientRect(), 0)
+    ) {
+      el.classList.add('intersecting');
+      toggle.classList.add('intersecting');
     } else {
       el.classList.remove('intersecting', 'was-intersecting');
       toggle.classList.remove('intersecting', 'was-intersecting');

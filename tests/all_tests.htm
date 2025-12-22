@@ -473,11 +473,7 @@
             }
             /*footer { position: fixed; z-index: 1; bottom: 0; left: 0; right: 0; background: silver;}*/
         </style>
-        <link href="./tests.css" rel="stylesheet">
-		<script src="../dist/js/ed11y.umd.js"></script>
-		<script src="../dist/js/lang/enUS.umd.js"></script>
-        <!-- Instantiate-->
-        <script>
+		<script>
 			document.addEventListener('ed11yResults', (e) => {
 				console.log('Sync Results:', e.detail);
 				const syncOnly = [];
@@ -488,13 +484,19 @@
 				})
 				console.log('Outside content roots:', syncOnly);
 			});
-		  Ed11y.Lang.addI18n(Sa11yLangEnUS.strings);
+		</script>
+
+		<!-- Instantiate-->
+		<link href="./tests.css" rel="stylesheet">
+		<script src="../dist/js/ed11y.umd.js"></script>
+		<script src="../dist/js/lang/enUS.umd.js"></script>
+        <script>
+		  Ed11y.Lang.addI18n(Ed11yLangEnUS.strings);
           const ed11y = new Ed11y.Ed11y({
             alertMode : 'assertive',
-            lang : 'enUS',
             //baseFontSize: 18,
             //theme : 'sleekTheme',
-            theme : 'darkTheme',
+            //theme : 'darkTheme',
 			  headingsOnlyFromCheckRoots: true, // @todo merge this is gone. can we move to only excluding header? or use fixedRoots? But fixedRoots would also need devFixedRoots...
             //outlineExclude : '.utility', // @todo CMS this syntax changed for Sa11y to the below.
 			  outlineIgnore: '.utility',

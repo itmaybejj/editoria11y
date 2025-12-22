@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <link rel="stylesheet" media="all" href="../css/editoria11y.css">
+        <link rel="stylesheet" media="all" href="../dist/css/editoria11y.css">
         <title>Live Editing Tests</title>
     </head>
 <body>
@@ -96,7 +96,7 @@
 			<script src="../dist/js/lang/en.umd.js"></script>
 			<!-- Instantiate-->
 			<script>
-				Ed11y.Lang.addI18n(Sa11yLangEn.strings);
+				Ed11y.Lang.addI18n(Ed11yLangEn.strings);
 
                 onload = (event) => {
 
@@ -111,7 +111,7 @@
                     inlineAlerts : false,
                     checkRoots : '.gutenberg__editor .is-root-container, [contenteditable="true"]:not(.gutenberg__editor [contenteditable])',
                     //linkIgnoreStrings: '\(link is external\)',
-                    customTests : 2,
+                    //customTests : 2,
                     //theme: 'darkTheme',
                     //theme: 'lightTheme',
                     //theme: 'sleekTheme',

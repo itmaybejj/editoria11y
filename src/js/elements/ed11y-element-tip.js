@@ -146,23 +146,23 @@ export class Ed11yElementTip extends HTMLElement {
           'ok';
         if ((okd && Options.allowOK) || !okd) {
           // User can restore this alert.
-          const undismissButton = document.createElement('button');
+          const unDismissButton = document.createElement('button');
           const unDismissIcon = document.createElement('span');
           unDismissIcon.classList.add('ed11y-dismiss-icon');
           unDismissIcon.innerHTML = spriteUnDismiss;
-          undismissButton.classList.add('dismiss');
-          undismissButton.textContent = okd
-            ? Lang._('undismissOKButton')
-            : Lang._('undismissHideButton');
-          undismissButton.prepend(unDismissIcon);
-          buttonBar.prepend(undismissButton);
-          undismissButton.addEventListener('click', () => {
+          unDismissButton.classList.add('dismiss');
+          unDismissButton.textContent = okd
+            ? Lang._('unDismissOKButton')
+            : Lang._('unDismissHideButton');
+          unDismissButton.prepend(unDismissIcon);
+          buttonBar.prepend(unDismissButton);
+          unDismissButton.addEventListener('click', () => {
             dismissThis('reset');
           });
         } else {
           const restoreNote = document.createElement('div');
           restoreNote.classList.add('dismissed-note');
-          restoreNote.textContent = Lang._('undismissNotePermissions');
+          restoreNote.textContent = Lang._('unDismissNotePermissions');
           buttonBar.prepend(restoreNote);
         }
       } else {
@@ -193,7 +193,9 @@ export class Ed11yElementTip extends HTMLElement {
           if (showPageActions) {
             const OkAllButton = OkButton.cloneNode(true);
             OkAllButton.textContent = Lang._('dismissOkAllButton');
-            OkAllButton.prepend(check.cloneNode(true));
+            const icon = check.cloneNode(true);
+            icon.classList.add('badge');
+            OkAllButton.prepend(icon);
             pageActionsContent.insertAdjacentElement('afterbegin', OkAllButton);
             OkAllButton.addEventListener('click', () => {
               dismissThis('ok', true);
@@ -224,7 +226,9 @@ export class Ed11yElementTip extends HTMLElement {
             const ignoreAllButton = document.createElement('button');
             ignoreAllButton.classList.add('dismiss');
             ignoreAllButton.textContent = Lang._('DISMISS_ALL');
-            ignoreAllButton.prepend(dismissIcon.cloneNode(true));
+            const icon = dismissIcon.cloneNode(true);
+            icon.classList.add('badge');
+            ignoreAllButton.prepend(icon);
             pageActionsContent.appendChild(ignoreAllButton);
             ignoreAllButton.addEventListener('click', () => {
               dismissThis('hide', true);

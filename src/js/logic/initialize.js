@@ -5,11 +5,11 @@ import { Options } from '../utils/options.js';
 import { documentLoadingCheck, store } from '../../sa11y/utils/utils.js';
 import { checkRunPrevent, smush } from '../utils/utils.js';
 import { checkAll, continueCheck, windowResize } from './run.js';
-import ed11yLang from '../lang/localization.js';
 import { Ed11yElementAlt } from '../elements/ed11y-element-alt.js';
 import { Ed11yElementResult } from '../elements/ed11y-element-result.js';
 import { Ed11yElementHeadingLabel, Ed11yElementPanel } from '../elements/ed11y-element-panel.js';
 import { Ed11yElementTip } from '../elements/ed11y-element-tip.js';
+import { testNames } from '../lang/english.js';
 
 const preProcessOptions = (userOptions) => {
   smush(Options, userOptions, ['checks']);
@@ -130,17 +130,13 @@ const postProcessOptions = (userOptions) => {
     Constants.Global.documentSources = userOptions.documentLinks;
   }
 
-  Object.assign(Lang.langStrings, ed11yLang.strings, ed11yLang.testNames);
   // todo CMS merge also include as fallbacks untranslated strings.
-  const overrides = Object.entries(ed11yLang.tests);
+  // todo CMS merge custom test.
   if (State.english) {
+    const overrides = Object.entries(testNames);
     for (let i = 0; i < overrides.length; i++) {
-      if (State.english) {
-        Lang.langStrings[overrides[i][0]] =
-          `<div class="title" tabindex="-1">${ed11yLang.testNames[`${overrides[i][0]}_TEST_NAME`]}</div>${overrides[i][1]}`;
-        // todo CMS merge custom test.
-        // todo after merge names for other tests.
-      }
+      Lang.langStrings[overrides[i][0]] =
+        `<div class="title" tabindex="-1">${testNames[`${overrides[i][0]}`]}</div>${Lang.langStrings[overrides[i][0]]}`;
     }
   }
 

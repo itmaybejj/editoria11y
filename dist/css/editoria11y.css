@@ -835,11 +835,10 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 .ed11y-tip-wrapper .invisible-alert:not(:empty) {
-  margin: -16px calc(-38px + var(--ed11y-outlineWidth)) 12px -16px;
   color: #010101;
   background: var(--ed11y-warning);
-  border-top: 2px solid var(--ed11y-primary);
-  padding: 20px 42px 18px 16px;
+  margin: 0 6px 10px -1px;
+  padding: 13px 12px 12px 16px;
   font-size: 90%;
   font-style: italic;
   font-weight: bold;
@@ -930,13 +929,29 @@ button.ed11y-jump:hover .toggle-count {
   margin-block: .6125em;
 }
 
+.ed11y-tip-wrapper p.hr {
+  margin-top: 1em;
+}
+
+.ed11y-tip-wrapper p.hr:before {
+  content: "";
+  opacity: .5;
+  border-top: 1px solid;
+  height: .9em;
+  display: block;
+}
+
 .ed11y-tip-wrapper p:last-child {
   margin-block-end: .306em;
 }
 
+.ed11y-tip-wrapper .title + p {
+  margin-top: 0;
+}
+
 .ed11y-tip-wrapper .title {
   outline: #0000;
-  padding: 14px 1.5em 0 0;
+  padding: 14px 1.5em .6125em 0;
   font-size: 1.0625em;
   font-weight: bold;
 }
@@ -1007,7 +1022,7 @@ button.ed11y-jump:hover .toggle-count {
   opacity: 0;
 }
 
-.ed11y-tip-wrapper .dismiss, .ed11y-tip-wrapper .ed11y-custom-edit-links a {
+.ed11y-tip-wrapper .dismiss, .ed11y-tip-wrapper .ed11y-custom-edit-links a, .ed11y-tip-wrapper .ed11y-tip-button {
   vertical-align: bottom;
   cursor: pointer;
   align-items: center;
@@ -1020,14 +1035,14 @@ button.ed11y-jump:hover .toggle-count {
   display: inline-flex;
 }
 
-:is(.ed11y-tip-wrapper .dismiss, .ed11y-tip-wrapper .ed11y-custom-edit-links a) summary {
+:is(.ed11y-tip-wrapper .dismiss, .ed11y-tip-wrapper .ed11y-custom-edit-links a, .ed11y-tip-wrapper .ed11y-tip-button) summary {
   user-select: none;
   height: 100%;
   padding: 0 10px;
   line-height: 2.75em;
 }
 
-:is(.ed11y-tip-wrapper .dismiss, .ed11y-tip-wrapper .ed11y-custom-edit-links a) span {
+:is(.ed11y-tip-wrapper .dismiss, .ed11y-tip-wrapper .ed11y-custom-edit-links a, .ed11y-tip-wrapper .ed11y-tip-button) span {
   align-items: center;
   margin-right: 6px;
   display: inline-flex;
@@ -1062,16 +1077,18 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 :is(:is(.ed11y-tip-wrapper .ed11y-custom-edit-links, .ed11y-tip-wrapper .ed11y-tip-buttons) a, :is(.ed11y-tip-wrapper .ed11y-custom-edit-links, .ed11y-tip-wrapper .ed11y-tip-buttons) button):first-child {
-  border-radius: var(--ed11y-borderRadius, 1px) 0 0 var(--ed11y-borderRadius, 1px);
+  border-top-left-radius: var(--ed11y-borderRadius, 1px);
+  border-bottom-left-radius: var(--ed11y-borderRadius, 1px);
 }
 
 :is(:is(.ed11y-tip-wrapper .ed11y-custom-edit-links, .ed11y-tip-wrapper .ed11y-tip-buttons) a, :is(.ed11y-tip-wrapper .ed11y-custom-edit-links, .ed11y-tip-wrapper .ed11y-tip-buttons) button):last-child {
-  border-radius: 0 var(--ed11y-borderRadius, 1px) var(--ed11y-borderRadius, 1px) 0;
+  border-top-right-radius: var(--ed11y-borderRadius, 1px);
+  border-bottom-right-radius: var(--ed11y-borderRadius, 1px);
 }
 
 :is(.ed11y-tip-wrapper .ed11y-custom-edit-links, .ed11y-tip-wrapper .ed11y-tip-buttons) .ed11y-transfer-icon svg {
-  height: 14px;
-  margin: 0 4px -2px;
+  height: 12px;
+  margin: 0 2px 0 0;
 }
 
 :is(.ed11y-tip-wrapper .ed11y-custom-edit-links, .ed11y-tip-wrapper .ed11y-tip-buttons) .ed11y-custom-edit-icon {
