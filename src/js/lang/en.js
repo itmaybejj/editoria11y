@@ -1,10 +1,12 @@
 // noinspection JSUnusedGlobalSymbols
 
 import strings from '../../sa11y/lang/en.js';
-import { ed11yStrings } from './english.js';
+import { interfaceStrings, testNames } from './baseAll.js';
+import { englishOverrides } from './baseEnglishOnly.js';
 
 const newStrings = {
-  strings: Object.assign(strings.strings, ed11yStrings),
+  strings: Object.assign(strings.strings, interfaceStrings, englishOverrides),
+  testNames: testNames,
 };
 
 export default newStrings;

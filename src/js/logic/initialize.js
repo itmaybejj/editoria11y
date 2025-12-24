@@ -9,7 +9,7 @@ import { Ed11yElementAlt } from '../elements/ed11y-element-alt.js';
 import { Ed11yElementResult } from '../elements/ed11y-element-result.js';
 import { Ed11yElementHeadingLabel, Ed11yElementPanel } from '../elements/ed11y-element-panel.js';
 import { Ed11yElementTip } from '../elements/ed11y-element-tip.js';
-import { testNames } from '../lang/english.js';
+import { testNames } from '../lang/baseAll.js';
 
 const preProcessOptions = (userOptions) => {
   smush(Options, userOptions, ['checks']);
@@ -131,7 +131,8 @@ const postProcessOptions = (userOptions) => {
   }
 
   // todo CMS merge also include as fallbacks untranslated strings.
-  // todo CMS merge custom test.
+  // At the moment only English uses Editoria11y tip styles.
+  // Todo change
   if (State.english) {
     const overrides = Object.entries(testNames);
     for (let i = 0; i < overrides.length; i++) {

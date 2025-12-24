@@ -1,42 +1,14 @@
-export const ed11yStrings = {
-  // Main Panel =========================================
-  OUTLINE: 'Headings',
-  IMAGES: 'Alt text',
-
-  // Extended English strings with translated fallback.
-  SKIP_TO_ISSUE: 'Go to issue',
-  buttonFirstContent: 'Go to first alert',
-  MAIN_TOGGLE_LABEL: 'Toggle accessibility tools',
-  main_toggle_show_alerts: 'Show accessibility alerts',
-  main_toggle_show: 'Show accessibility tools',
-  main_toggle_hide_alerts: 'Hide accessibility alerts',
-  main_toggle_hide: 'Hide accessibility tools',
-  toggleDisabled: 'No content available for Editoria11y to check.',
-  PANEL_HEADING: 'Show visualizers',
-  buttonToolsActive: 'Hide visualizers',
-  PANEL_DISMISS_BUTTON: `Show %(dismissCount) hidden alerts`,
-  buttonShowHiddenAlert: 'Show hidden alert',
-  buttonHideHiddenAlert: 'Hide hidden alert',
-  buttonHideHiddenAlerts: `Hide %(count) hidden alerts`,
-  dismissalsHeader: 'Not going to fix this?',
-
-  // Visualization
-  NO_IMAGES: 'No images found.',
-  ALT: 'Alt Text: ',
-  MISSING: '(missing!)',
+export const englishOverrides = {
   panelCheckOutline:
     '<p class="ed11y-small">This shows the <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading outline</a>. Check that it matches how the content is organized visually.</p>', // Shown for EN only.
   panelCheckAltText:
     '<p class="ed11y-small">Check that each image <a href="https://www.w3.org/WAI/tutorials/images/informative/">describes what it means in context</a>, and that there are no images of text.</p>', // Shown for EN only.
   DECORATIVE: 'Marked decorative',
-  /* @todo: Outline error explanations currently hidden.
-		errorOutlinePrefixSkippedLevel: '(flagged for skipped level) ',
-		errorOutlinePrefixHeadingEmpty: '(empty heading) ',
-		errorOutlinePrefixHeadingIsLong: '(flagged for length) ',
-		*/
+  // @todo: Outline error explanations currently hidden.
+  errorOutlinePrefixSkippedLevel: '(flagged for skipped level',
+  errorOutlinePrefixHeadingEmpty: '(empty heading)',
+  errorOutlinePrefixHeadingIsLong: '(flagged for length)',
 
-  // Errors and alerts ==================================
-  NOT_VISIBLE: 'Note: this content may not be visible. Look for it inside the outlined container.',
   SUS_ALT_STOPWORDS: [
     'image',
     'graphic',
@@ -69,23 +41,6 @@ export const ed11yStrings = {
   //ERROR: 'alert',
   //ALERT_TEXT: 'Issue',
   //toggleAriaLabel: `Accessibility %(label)`,
-  transferFocus: 'Edit this content', // @todo translate
-  dismissOkButtonContent: 'Mark OK', //@todo translate
-  DISMISS: 'Ignore',
-  dismissActions: `Similar alerts`, // 2.3.10 // @todo translate
-  DISMISS_ALL: 'On this page: ignore', // 2.3.10
-  dismissOkAllButton: 'On this page: mark OK', // @todo translate
-  dismissOnSite: 'On all pages: mark OK', // @todo translate
-  dismissOkTitle: 'Hides alert for all editors', // @todo translate
-  dismissHideTitle: 'Only hides alert for you', // @todo translate
-  unDismissOKButton: 'Restore this alert marked as OK', // @todo translate
-  unDismissHideButton: 'Restore this ignored alert', // @todo translate
-  unDismissNotePermissions: 'This check has been hidden by an administrator', // @todo translate
-  reportsLink: 'Open site reports', // @todo translate
-  ALERT_CLOSE: 'Close',
-  issueContent: 'Content issue',
-  issueDeveloper: 'Developer issue',
-  issueTemplate: 'Template issue',
 
   NEW_WINDOW_PHRASES: [
     'external',
@@ -331,100 +286,4 @@ export const ed11yStrings = {
   /* New */
   LABELS_ARIA_LABEL_INPUT:
     '<p>Labeling fields with only a title or placeholder means the label visually disappears as soon as someone starts writing. This makes it difficult for people to review input when there are several fields. Check to make sure a visible field label remains and matches the invisible field title or placeholder.</p><p><strong {B}>Invisible field name:</strong> <strong {C}>%(TEXT)</strong></p>',
-};
-
-export const testNames = {
-  ALT_FILE_EXT: 'This image needs meaningful alt text, not a URL',
-  ALT_MAYBE_BAD: 'Is this alt text meaningless?',
-  ALT_PLACEHOLDER: 'This placeholder alt text must be replaced',
-  ALT_UNPRONOUNCEABLE: "This image's alt text is unpronounceable",
-  EMBED_AUDIO: 'Does this audio have a transcript?',
-  EMBED_CUSTOM: 'Is this embedded content accessible?',
-  EMBED_DATA_VIZ: 'Is this visualization accessible?',
-  EMBED_VIDEO: 'Is this video accurately captioned?',
-  HEADING_EMPTY: 'Add text to this heading, or remove it',
-  HEADING_LONG: 'Can this heading be shortened?',
-  HEADING_SKIPPED_LEVEL: 'Was a heading level skipped?',
-  IMAGE_ALT_TOO_LONG: 'Can this alternative text be shortened?',
-  IMAGE_DECORATIVE: 'Is this image meaningless?',
-  LINK_ALT_FILE_EXT: "This linked image's alt text should not be a URL",
-  LINK_ALT_MAYBE_BAD: 'Does this alt text describe the link destination?',
-  LINK_EMPTY_NO_LABEL: 'This link needs a label',
-  LINK_EMPTY: 'This link needs text',
-  LINK_IMAGE_ALT_AND_TEXT: 'Does this alt text make sense as part of this link?',
-  LINK_IMAGE_LONG_ALT: 'Can this linked alt text be shortened?',
-  LINK_IMAGE_NO_ALT_TEXT: 'This linked image needs alt text',
-  LINK_NEW_TAB: 'Does this link open a new window without warning?',
-  LINK_PLACEHOLDER_ALT: 'This linked image needs meaningful alt text',
-  LINK_STOPWORD: 'Does this link describe its destination?',
-  LINK_SUS_ALT: 'Is there redundant text in this linked image?',
-  LINK_URL: 'Is this link text a URL?',
-  MISSING_ALT_LINK_HAS_TEXT: 'Invalid HTML: image in link missing alt attribute', // Off by default in Editoria11y.
-  MISSING_ALT_LINK: 'Invalid HTML: linked image missing alt attribute',
-  MISSING_ALT: 'Invalid HTML: missing alt text attribute',
-  QA_BLOCKQUOTE: 'Is this a quote or a heading?',
-  QA_FAKE_HEADING: 'Should this be a heading?',
-  QA_FAKE_LIST: 'Should this have list formatting?',
-  QA_PDF: 'Is the linked document accessible?',
-  QA_UPPERCASE: 'Is this uppercase text needed?',
-  SUS_ALT: 'Are there redundant words in this alt text?',
-  TABLES_EMPTY_HEADING: 'This header cell needs text',
-  TABLES_MISSING_HEADINGS: 'This table needs a header row and/or column',
-  TABLES_SEMANTIC_HEADING: 'Content headings should not be used inside tables',
-
-  // New
-  // @todo These are only synced, not displayed.
-  HEADING_EMPTY_WITH_IMAGE: 'An image used as a heading must have alt text',
-  HEADING_FIRST: 'The first heading on a page should usually be a Heading 1 or Heading 2',
-  HEADING_MISSING_ONE: 'Missing Heading 1',
-  IMAGE_DECORATIVE_CAROUSEL: 'Image in a carousel or gallery marked as decorative',
-  LINK_IMAGE_TEXT:
-    'Manual check: Image is marked as decorative, although the link is using the surrounding text as a descriptive label.',
-  IMAGE_FIGURE_DECORATIVE: 'Manual check: image in a figure marked as decorative',
-  LINK_IMAGE_ALT: 'Manual check: linked image link contains alt text',
-  IMAGE_FIGURE_DUPLICATE_ALT: 'Alt text should not be the same as caption text',
-  LINK_ALT_UNPRONOUNCEABLE: 'This linked image needs pronounceable alt text',
-  DUPLICATE_TITLE: 'Duplicate title attribute',
-  LINK_EMPTY_LABELLEDBY: 'Link invalid aria-labelledby attribute',
-  LINK_STOPWORD_ARIA: 'Manual check: link text overridden by ARIA that may not be meaningful',
-  LINK_SYMBOLS: 'Manual check: are the symbols or emoji in this link meaningful?',
-  LINK_CLICK_HERE: 'Manual check: link contains "click here"',
-  LINK_DOI: 'APA Style guide recommends using descriptive DOI links',
-  LINK_IDENTICAL_NAME:
-    'Manual check: link has identical text as another link but points to a different page',
-  LINK_FILE_EXT: 'Link points to a file without warning',
-  EMBED_UNFOCUSABLE: 'Frame with tabindex="-1" will not be keyboard accessible.',
-  EMBED_MISSING_TITLE: 'Frame missing title attribute',
-  EMBED_GENERAL: 'Manual check: iframe content',
-  QA_BAD_LINK: 'Manual check: link target may be invalid',
-  QA_STRONG_ITALICS: 'Manual check: entire paragraph is emphasized',
-  QA_IN_PAGE_LINK: 'Broken same-page link',
-  QA_DOCUMENT: 'Manual check: linked document',
-  QA_UNDERLINE: 'Underlined text',
-  QA_SUBSCRIPT: 'Manual check: use of subscript or superscript as visual formatting',
-  QA_NESTED_COMPONENTS: 'Nested interactive layout components',
-  QA_JUSTIFY: 'Justified text',
-  QA_SMALL_TEXT: 'Small text',
-  META_LANG: 'Meta tag for page language missing',
-  META_SCALABLE: 'Meta tag prevents user scaling',
-  META_MAX: 'Meta tag sets max user scaling',
-  META_REFRESH: 'Meta tag automatically refreshes page',
-  DUPLICATE_ID: 'Manual check: duplicate ID',
-  META_TITLE: 'Meta tag for page title missing',
-  UNCONTAINED_LI: 'Invalid HTML list',
-  TABINDEX_ATTR: 'Provided tabindex value removes element from reading order',
-  HIDDEN_FOCUSABLE: 'Screen readers told not to speak the name of an interactive element',
-  LABEL_IN_NAME: 'Visible name different than machine-readable name',
-  LABELS_ARIA_LABEL_INPUT: 'Manual check: is there a visible label for this field?',
-  LABELS_PLACEHOLDER: 'Manual check: placeholder text in label',
-  BTN_EMPTY: 'Button purpose is not machine-readable',
-  BTN_EMPTY_LABELLEDBY: 'Button has an invalid ARIA label',
-  BTN_ROLE_IN_NAME: 'Button name repeats the word "button"',
-  CONTRAST_WARNING: 'Does this text have enough contrast?',
-  CONTRAST_INPUT: 'Input does not provide enough contrast to be easily legible',
-  CONTRAST_ERROR: 'Text does not have enough contrast to be easily legible',
-  CONTRAST_PLACEHOLDER: 'Placeholder text does not have enough contrast to be easily legible',
-  CONTRAST_PLACEHOLDER_UNSUPPORTED: 'Does this placeholder text have enough contrast?',
-  CONTRAST_ERROR_GRAPHIC: 'Graphic or icon does not have enough contrast with the background',
-  CONTRAST_WARNING_GRAPHIC: 'Does this graphic or icon have enough contrast?',
 };
