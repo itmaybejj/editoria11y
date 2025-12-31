@@ -420,6 +420,9 @@ export function buildJumpList() {
 
 export function dismissOne(dismissalType, test, dismissalKey) {
   // Update dismissal record.
+  if (State.dismissKeys[dismissalKey]) {
+    dismissalKey = State.dismissKeys[dismissalKey];
+  }
   if (dismissalType === 'reset') {
     delete State.dismissedAlerts[Options.currentPage][test][dismissalKey];
     if (Object.keys(State.dismissedAlerts[Options.currentPage][test]).length === 0) {
@@ -1304,7 +1307,7 @@ const enqueueTests = (queue, results) => {
       );
     }
   } else {
-    continueCheck();
+    continueCheck().then();
   }
 };
 
@@ -1314,10 +1317,10 @@ function removeCustomTest() {
   );
   Options.customTests--;
   State.customTestsRemaining = 0;
-  continueCheck(true);
+  continueCheck(true).then();
   if (Options.customTests === 0) {
     document.removeEventListener('ed11yResume', () => {
-      continueCheck(true);
+      continueCheck(true).then();
     });
   }
 }
@@ -1362,6 +1365,7 @@ export function checkAll() {
     return;
   }
 
+  // @todo 3.x what of split configuration?
   if (State.incremental) {
     State.oldResults = Results;
   }
@@ -1409,7 +1413,7 @@ export function checkAll() {
   // @todo after merge handle readability and developer checks.
 }
 
-export function continueCheck(customCheck = false) {
+export async function continueCheck(customCheck = false) {
   if (customCheck) {
     State.customTestsRemaining--;
   }
@@ -1421,9 +1425,9 @@ export function continueCheck(customCheck = false) {
 
   // Filter split configuration results.
   if (State.splitConfiguration.active && State.splitConfiguration.devResults.length > 0) {
-    handleSyncOnlyResults();
+    await handleSyncOnlyResults();
   } else {
-    filterAlerts(false);
+    await filterAlerts(false);
     syncResults(Results);
   }
   countAlerts();

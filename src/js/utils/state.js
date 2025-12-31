@@ -24,6 +24,7 @@ export const State = {
   customTestTimeout: 0,
   loopStop: false,
   oldResults: [],
+  dismissKeys: {},
   roots: [],
   headingOutline: [],
   headingOutlineOverrides: [],

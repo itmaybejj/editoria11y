@@ -87,7 +87,7 @@ const runBuild = async (config) => {
 	console.log(`Processing ${languageOverrides.length} language files...`);
 
 	for (const lang of languageOverrides) {
-		const langEntry = path.resolve(dirname, `../src/js/lang/${lang}.js`);
+		const langEntry = path.resolve(dirname, `../src/lang/${lang}.js`);
 
 		// Build ESM
 		await runBuild({

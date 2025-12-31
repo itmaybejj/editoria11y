@@ -148,10 +148,11 @@ export const Options = {
     '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .run-run-skeleton__content',
 
   // Dismissed alerts
-  currentPage: window.location.pathname, // uses window.location.pathname unless a string is provided.
-  allowHide: true, // enables end-user ignore button
-  allowOK: true, // enables end-user mark OK button
-  syncedDismissals: false, // provide empty or populated object {} to enable sync functions
+  currentPage: window.location.pathname,
+  allowHide: true, // Enables end-user ignore button
+  allowOK: true, // Enables end-user mark OK button
+  syncedDismissals: false, // Provide empty or populated object {} to enable sync functions
+  pepper: window.location.hostname, // Provide a string to seed hashes.
   reportsURL: false, // Provides a link to site-wide reports
   showDismissed: false, // start panel with dismissed items visible; used when coming directly from a dashboard
 

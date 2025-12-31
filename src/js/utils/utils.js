@@ -29,6 +29,18 @@ export const smush = (obj1, obj2, skip = []) => {
   });
 };
 
+// Convert dismissal key to encoded hex.
+export async function dismissDigest(message) {
+  const msgUint8 = new TextEncoder().encode(Options.pepper + message);
+  const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgUint8);
+  if (Uint8Array.prototype.toHex) {
+    // Use toHex to create text string if supported.
+    return new Uint8Array(hashBuffer).toHex();
+  }
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 export function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
   Constants.Root.areaToCheck = [];
   Constants.Root.Readability = [];

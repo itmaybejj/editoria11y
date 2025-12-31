@@ -141,9 +141,12 @@ export class Ed11yElementTip extends HTMLElement {
       // Dismissal Key is set in [5] if alert has been dismissed.
       if (State.showDismissed && this.dismissed) {
         // Check if user has permission to reset this alert.
+
+        // todo see if we need fallback if digest is missing.
         const okd =
-          State.dismissedAlerts[Options.currentPage][this.result.test][this.result.dismiss] ===
-          'ok';
+          State.dismissedAlerts[Options.currentPage][this.result.test][
+            this.result.dismissDigest
+          ] === 'ok';
         if ((okd && Options.allowOK) || !okd) {
           // User can restore this alert.
           const unDismissButton = document.createElement('button');

@@ -11,7 +11,7 @@ mv src/js ../src/sa11y
 
 # Patches
 # Don't inject Sa11y CSS into shadow components
-cp ../src/js-overrides/logic/find-shadow-components.js ../src/sa11y/logic/find-shadow-components.js
+cp ../src/sa11y-patch/logic/find-shadow-components.js ../src/sa11y/logic/find-shadow-components.js
 
 cd ../
 rm -rf tmp

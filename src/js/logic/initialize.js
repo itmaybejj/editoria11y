@@ -9,7 +9,7 @@ import { Ed11yElementAlt } from '../elements/ed11y-element-alt.js';
 import { Ed11yElementResult } from '../elements/ed11y-element-result.js';
 import { Ed11yElementHeadingLabel, Ed11yElementPanel } from '../elements/ed11y-element-panel.js';
 import { Ed11yElementTip } from '../elements/ed11y-element-tip.js';
-import { testNames } from '../lang/baseAll.js';
+import { testNames } from '../../lang/baseAll.js';
 
 const preProcessOptions = (userOptions) => {
   smush(Options, userOptions, ['checks']);
@@ -190,7 +190,7 @@ export function initialize(userOptions) {
     checkAll();
 
     document.addEventListener('ed11yResume', () => {
-      continueCheck(true);
+      continueCheck(true).then();
     });
     // Set up observers.
     // Todo only needed if we are watching for changes.

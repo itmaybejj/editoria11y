@@ -829,6 +829,7 @@
     customTestTimeout: 0,
     loopStop: false,
     oldResults: [],
+    dismissKeys: {},
     roots: [],
     headingOutline: [],
     headingOutlineOverrides: [],
@@ -1028,13 +1029,14 @@
     editableContent: '[contenteditable="true"]:not(.gutenberg__editor [contenteditable]), .gutenberg__editor .run-run-skeleton__content',
     // Dismissed alerts
     currentPage: window.location.pathname,
-    // uses window.location.pathname unless a string is provided.
     allowHide: true,
-    // enables end-user ignore button
+    // Enables end-user ignore button
     allowOK: true,
-    // enables end-user mark OK button
+    // Enables end-user mark OK button
     syncedDismissals: false,
-    // provide empty or populated object {} to enable sync functions
+    // Provide empty or populated object {} to enable sync functions
+    pepper: window.location.hostname,
+    // Provide a string to seed hashes.
     reportsURL: false,
     // Provides a link to site-wide reports
     showDismissed: false,
@@ -1530,6 +1532,15 @@ URL: ${url2}</pre>
       }
     });
   };
+  async function dismissDigest(message) {
+    const msgUint8 = new TextEncoder().encode(Options.pepper + message);
+    const hashBuffer = await window.crypto.subtle.digest("SHA-256", msgUint8);
+    if (Uint8Array.prototype.toHex) {
+      return new Uint8Array(hashBuffer).toHex();
+    }
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
   function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
     Constants.Root.areaToCheck = [];
     Constants.Root.Readability = [];
@@ -4829,26 +4840,28 @@ URL: ${url2}</pre>
       }, 0);
     }
   }
-  const pushResult = (i, inContent) => {
+  const pushResult = async (i, inContent) => {
     if (!inContent) {
       State.splitConfiguration.devResults[i].outsideContentRoots = true;
       State.splitConfiguration.devResults[i].dismiss = `≈dev§${State.splitConfiguration.devResults[i].dismiss}`;
-      checkDismissed(i, true);
+      await checkDismissed(i, true);
       if (State.splitConfiguration.showDev) {
         Results.push(State.splitConfiguration.devResults[i]);
       }
     } else if (State.splitConfiguration.devChecks.has(State.splitConfiguration.devResults[i].test)) {
-      checkDismissed(i, true);
+      await checkDismissed(i, true);
       if (State.splitConfiguration.showDev) {
         Results.push(State.splitConfiguration.devResults[i]);
       }
     } else {
-      checkDismissed(i, true);
+      await checkDismissed(i, true);
       Results.push(State.splitConfiguration.devResults[i]);
     }
   };
-  function handleSyncOnlyResults() {
-    State.splitConfiguration.devResults = filterAlerts(true);
+  async function handleSyncOnlyResults() {
+    await filterAlerts(true).then((results) => {
+      State.splitConfiguration.devResults = results;
+    });
     Object.assign(Options, State.splitConfiguration.contentOptions);
     buildElementList(true);
     let everything = false;
@@ -4870,29 +4883,29 @@ URL: ${url2}</pre>
           headings = new WeakSet(Elements.Found.Headings);
           new WeakSet(Elements.Found.ExcludedHeadings);
         }
-        pushResult(i, headings.has(result.element));
+        await pushResult(i, headings.has(result.element));
         continue;
       }
       if (result.test.indexOf("CONTRAST") > -1) {
         if (!contrast) {
           contrast = new WeakSet(Elements.Found.Contrast);
         }
-        pushResult(i, contrast.has(result.element));
+        await pushResult(i, contrast.has(result.element));
         continue;
       }
       if (result.element.matches("img")) {
         if (!images) {
           images = new WeakSet(Elements.Found.Images);
         }
-        pushResult(i, images.has(result.element));
+        await pushResult(i, images.has(result.element));
         continue;
       }
       if (result.element.matches("a")) {
         links = new WeakSet(Elements.Found.Links);
-        pushResult(i, links.has(result.element));
+        await pushResult(i, links.has(result.element));
         continue;
       }
-      pushResult(i, everything.has(result.element));
+      await pushResult(i, everything.has(result.element));
     }
     syncResults(State.splitConfiguration.devResults);
     Object.assign(Options, State.splitConfiguration.devOptions);
@@ -4934,17 +4947,38 @@ URL: ${url2}</pre>
       State.totalCount = 0;
     }
   }
-  function checkDismissed(i, splitConfiguration) {
-    const result = splitConfiguration ? State.splitConfiguration.devResults[i] : Results[i];
-    if (Options.currentPage in State.dismissedAlerts && result.test in State.dismissedAlerts[Options.currentPage] && result.dismiss in State.dismissedAlerts[Options.currentPage][result.test]) {
+  const inDismissals = (result, i, splitConfiguration, digest) => {
+    if (Options.currentPage in State.dismissedAlerts && result.test in State.dismissedAlerts[Options.currentPage] && digest in State.dismissedAlerts[Options.currentPage][result.test]) {
       if (splitConfiguration) {
-        State.splitConfiguration.devResults[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][result.test][result.dismiss];
+        State.splitConfiguration.devResults[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][result.test][digest];
       } else {
-        Results[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][result.test][result.dismiss];
+        Results[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][result.test][digest];
       }
     }
+  };
+  async function checkDismissed(i, splitConfiguration) {
+    const result = splitConfiguration ? State.splitConfiguration.devResults[i] : Results[i];
+    const digested = State.dismissKeys[result.dismiss];
+    if (digested) {
+      if (splitConfiguration) {
+        State.splitConfiguration.devResults[i].dismiss = digested;
+      } else {
+        Results[i].dismiss = digested;
+      }
+      inDismissals(result, i, splitConfiguration, digested);
+    } else {
+      await dismissDigest(result.dismiss).then((digest) => {
+        State.dismissKeys[result.dismiss] = digest;
+        if (splitConfiguration) {
+          State.splitConfiguration.devResults[i].dismiss = digest;
+        } else {
+          Results[i].dismiss = digest;
+        }
+        inDismissals(result, i, splitConfiguration, digest);
+      });
+    }
   }
-  function filterAlerts(splitConfiguration) {
+  async function filterAlerts(splitConfiguration) {
     const results = splitConfiguration ? State.splitConfiguration.devResults : Results;
     for (let i = results.length - 1; i >= 0; i--) {
       let splice = false;
@@ -4970,7 +5004,7 @@ URL: ${url2}</pre>
       } else if (!results[i].element || results[i].type === "good") {
         splice = true;
       } else if (!splitConfiguration) {
-        checkDismissed(i, false);
+        await checkDismissed(i, false);
       }
       if (splice) {
         if (splitConfiguration) {
@@ -5631,6 +5665,9 @@ URL: ${url2}</pre>
     resumeObservers();
   }
   function dismissOne(dismissalType, test, dismissalKey) {
+    if (State.dismissKeys[dismissalKey]) {
+      dismissalKey = State.dismissKeys[dismissalKey];
+    }
     if (dismissalType === "reset") {
       delete State.dismissedAlerts[Options.currentPage][test][dismissalKey];
       if (Object.keys(State.dismissedAlerts[Options.currentPage][test]).length === 0) {
@@ -6344,7 +6381,7 @@ URL: ${url2}</pre>
         );
       }
     } else {
-      continueCheck();
+      continueCheck().then();
     }
   };
   function removeCustomTest() {
@@ -6353,10 +6390,10 @@ URL: ${url2}</pre>
     );
     Options.customTests--;
     State.customTestsRemaining = 0;
-    continueCheck(true);
+    continueCheck(true).then();
     if (Options.customTests === 0) {
       document.removeEventListener("ed11yResume", () => {
-        continueCheck(true);
+        continueCheck(true).then();
       });
     }
   }
@@ -6427,7 +6464,7 @@ URL: ${url2}</pre>
       State.splitConfiguration.active ? State.splitConfiguration.devResults : Results
     );
   }
-  function continueCheck(customCheck = false) {
+  async function continueCheck(customCheck = false) {
     if (customCheck) {
       State.customTestsRemaining--;
     }
@@ -6435,9 +6472,9 @@ URL: ${url2}</pre>
       return;
     }
     if (State.splitConfiguration.active && State.splitConfiguration.devResults.length > 0) {
-      handleSyncOnlyResults();
+      await handleSyncOnlyResults();
     } else {
-      filterAlerts(false);
+      await filterAlerts(false);
       syncResults(Results);
     }
     countAlerts();
@@ -7247,7 +7284,7 @@ URL: ${url2}</pre>
         dismissIcon.classList.add("ed11y-dismiss-icon");
         dismissIcon.innerHTML = spriteDismiss;
         if (State.showDismissed && this.dismissed) {
-          const okd = State.dismissedAlerts[Options.currentPage][this.result.test][this.result.dismiss] === "ok";
+          const okd = State.dismissedAlerts[Options.currentPage][this.result.test][this.result.dismissDigest] === "ok";
           if (okd && Options.allowOK || !okd) {
             const unDismissButton = document.createElement("button");
             const unDismissIcon = document.createElement("span");
@@ -7657,7 +7694,7 @@ URL: ${url2}</pre>
       State.running = true;
       checkAll();
       document.addEventListener("ed11yResume", () => {
-        continueCheck(true);
+        continueCheck(true).then();
       });
       window.addEventListener(
         "keydown",

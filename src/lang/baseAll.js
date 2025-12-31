@@ -1,5 +1,3 @@
-import Lang from '../../sa11y/utils/lang.js';
-
 export const interfaceStrings = {
   OUTLINE: 'Headings',
   IMAGES: 'Alt text',

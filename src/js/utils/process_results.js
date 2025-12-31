@@ -1,7 +1,7 @@
 import { Results, State } from './state';
 import Elements from '../../sa11y/utils/elements';
 import { Options } from './options';
-import { buildElementList } from './utils';
+import { buildElementList, dismissDigest } from './utils';
 import Constants from '../../sa11y/utils/constants';
 
 export function syncResults(results) {
@@ -21,32 +21,34 @@ export function syncResults(results) {
   }
 }
 
-const pushResult = (i, inContent) => {
+const pushResult = async (i, inContent) => {
   if (!inContent) {
     // Dev only part of page is for devs only.
     State.splitConfiguration.devResults[i].outsideContentRoots = true;
-    // Prepend to dismissal key
+    // Separate dismissal key stack outside content area.
     State.splitConfiguration.devResults[i].dismiss =
       `≈dev§${State.splitConfiguration.devResults[i].dismiss}`;
-    checkDismissed(i, true);
+    await checkDismissed(i, true);
     if (State.splitConfiguration.showDev) {
       Results.push(State.splitConfiguration.devResults[i]);
     }
   } else if (State.splitConfiguration.devChecks.has(State.splitConfiguration.devResults[i].test)) {
     // DevOnly test is for devs only.
-    checkDismissed(i, true);
+    await checkDismissed(i, true);
     if (State.splitConfiguration.showDev) {
       Results.push(State.splitConfiguration.devResults[i]);
     }
   } else {
-    // Content test in content area is for everyone.
-    checkDismissed(i, true);
+    // Content test, in content area, so it is for everyone.
+    await checkDismissed(i, true);
     Results.push(State.splitConfiguration.devResults[i]);
   }
 };
 
-export function handleSyncOnlyResults() {
-  State.splitConfiguration.devResults = filterAlerts(true);
+export async function handleSyncOnlyResults() {
+  await filterAlerts(true).then((results) => {
+    State.splitConfiguration.devResults = results;
+  });
 
   Object.assign(Options, State.splitConfiguration.contentOptions);
 
@@ -73,29 +75,29 @@ export function handleSyncOnlyResults() {
         headings = new WeakSet(Elements.Found.Headings);
         _excludedHeadings = new WeakSet(Elements.Found.ExcludedHeadings);
       }
-      pushResult(i, headings.has(result.element));
+      await pushResult(i, headings.has(result.element));
       continue;
     }
     if (result.test.indexOf('CONTRAST') > -1) {
       if (!contrast) {
         contrast = new WeakSet(Elements.Found.Contrast);
       }
-      pushResult(i, contrast.has(result.element));
+      await pushResult(i, contrast.has(result.element));
       continue;
     }
     if (result.element.matches('img')) {
       if (!images) {
         images = new WeakSet(Elements.Found.Images);
       }
-      pushResult(i, images.has(result.element));
+      await pushResult(i, images.has(result.element));
       continue;
     }
     if (result.element.matches('a')) {
       links = new WeakSet(Elements.Found.Links);
-      pushResult(i, links.has(result.element));
+      await pushResult(i, links.has(result.element));
       continue;
     }
-    pushResult(i, everything.has(result.element));
+    await pushResult(i, everything.has(result.element));
   }
 
   syncResults(State.splitConfiguration.devResults);
@@ -148,25 +150,51 @@ export function countAlerts() {
   }
 }
 
-export function checkDismissed(i, splitConfiguration) {
-  const result = splitConfiguration ? State.splitConfiguration.devResults[i] : Results[i];
+const inDismissals = (result, i, splitConfiguration, digest) => {
   if (
     Options.currentPage in State.dismissedAlerts &&
     result.test in State.dismissedAlerts[Options.currentPage] &&
-    result.dismiss in State.dismissedAlerts[Options.currentPage][result.test]
+    digest in State.dismissedAlerts[Options.currentPage][result.test]
   ) {
     // Remove results[i] if it has been marked OK or ignored, increment dismissed match counter.
+    // @todo we could use the presence of a key to convert to a version without a key.
     if (splitConfiguration) {
       State.splitConfiguration.devResults[i].dismissalStatus =
-        State.dismissedAlerts[Options.currentPage][result.test][result.dismiss];
+        State.dismissedAlerts[Options.currentPage][result.test][digest];
     } else {
-      Results[i].dismissalStatus =
-        State.dismissedAlerts[Options.currentPage][result.test][result.dismiss];
+      Results[i].dismissalStatus = State.dismissedAlerts[Options.currentPage][result.test][digest];
     }
+  }
+};
+
+export async function checkDismissed(i, splitConfiguration) {
+  // @todo 3.x convert old keys.
+  // @todo drop keys not found in a run to prevent object expansion.
+  const result = splitConfiguration ? State.splitConfiguration.devResults[i] : Results[i];
+  const digested = State.dismissKeys[result.dismiss];
+  if (digested) {
+    if (splitConfiguration) {
+      State.splitConfiguration.devResults[i].dismiss = digested;
+    } else {
+      Results[i].dismiss = digested;
+    }
+    inDismissals(result, i, splitConfiguration, digested);
+  } else {
+    // todo: test memory consumption while editing if digest keeps changing.
+    await dismissDigest(result.dismiss).then((digest) => {
+      State.dismissKeys[result.dismiss] = digest;
+      if (splitConfiguration) {
+        State.splitConfiguration.devResults[i].dismiss = digest;
+      } else {
+        Results[i].dismiss = digest;
+      }
+      // Cache a copy.
+      inDismissals(result, i, splitConfiguration, digest);
+    });
   }
 }
 
-export function filterAlerts(splitConfiguration) {
+export async function filterAlerts(splitConfiguration) {
   // @todo next we can't return and assign results any more; pass string to here instead.
 
   // Review results array to remove dismissed or ignored items
@@ -175,13 +203,6 @@ export function filterAlerts(splitConfiguration) {
   for (let i = results.length - 1; i >= 0; i--) {
     let splice = false;
 
-    /*
-		if (Options.ignoreTests &&
-			Options.ignoreTests.includes(test)) {
-			// Would be faster to skip test, but this is easy and reliable.
-			results.splice(i, 1);
-			continue;
-		}*/
     // todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
     /*if (State.incremental && Ed11y.oldResults.length > 0) {
 			// Don't flag new issues in the active range while people are typing.
@@ -213,7 +234,7 @@ export function filterAlerts(splitConfiguration) {
       splice = true;
     } else if (!splitConfiguration) {
       // Split config modifies key before checking.
-      checkDismissed(i, false);
+      await checkDismissed(i, false);
     }
     if (splice) {
       if (splitConfiguration) {
