@@ -212,7 +212,7 @@ ed11y-element-result {
 .ed11y-buttonbar {
 	display: inline-grid;
 	grid-template-columns: 1fr repeat(5, min-content);
-	grid-template-rows: 0.429em 1.714em 0.5em 1fr;
+	grid-template-rows: 0.429em 2em 0.5em 1fr;
 	grid-template-areas:
 		"upad   upad        upad        upad        upad    upad"
 		"pad    reports     showHidden  visualize   toggle  next"
@@ -224,8 +224,8 @@ ed11y-element-result {
 
 	& > button,
 	& > a {
-		min-width: 2.0625em;
-		height: 1.714em;
+		min-width: 2.125em;
+		height: 2em;
 		padding: 0;
 		font-size: 1em;
 		line-height: 1.5em;
@@ -249,7 +249,7 @@ ed11y-element-result {
 
 	&:hover,
 	&:focus-within {
-		grid-template-rows: 2em 1.714em 0.5em 1fr;
+		grid-template-rows: 2em 2em 0.5em 1fr;
 	}
 
 	&:has(#ed11y-toggle.disabled) #ed11y-visualize,
@@ -260,7 +260,8 @@ ed11y-element-result {
 
 button.ed11y-jump {
 	grid-area: next;
-	margin-left: -3px;
+	margin-left: -6px;
+	padding-left: 3px;
 	border-radius: 0 0.5em 0.5em 0;
 	box-shadow:
 		0 0 0 1px var(--ed11y-activePanelBorder),
@@ -269,8 +270,7 @@ button.ed11y-jump {
 	.toggle-count {
 		display: block;
 		min-width: 1.375em;
-		padding: 0 6px 0 8px;
-		font-size: 0.9em;
+		padding: 0 6px 0 9px;
 	}
 
 	svg {
@@ -281,7 +281,7 @@ button.ed11y-jump {
 		svg {
 			display: initial;
 			width: 0.643em;
-			margin: 0.4em 0 0 5%;
+			margin: 0.5em 0 0 5%;
 		}
 
 		.toggle-count {
@@ -418,7 +418,7 @@ button.ed11y-jump {
 	min-width: 1.5em;
 	height: 1.5em;
 	padding: 0.375em;
-	font-size: clamp(1em, 2vw, 1.1em);
+	font-size: clamp(1em, 2vw, 1.2em);
 	border: 0;
 	border-radius: 100%;
 	transition: box-shadow 0.1s;
@@ -520,7 +520,7 @@ button.ed11y-jump {
 	&#ed11y-panel:not(.ed11y-pin-left) .ed11y-jump,
 	&#ed11y-panel:not(.ed11y-pin-left) .ed11y-buttonbar:hover > *,
 	&:has(:focus-visible) .ed11y-buttonbar > *:not(#ed11y-toggle) {
-		min-width: 2.0625em;
+		min-width: 2.125em;
 		overflow: visible;
 		opacity: 1;
 	}

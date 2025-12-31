@@ -180,7 +180,7 @@ ed11y-element-result {
 }
 
 .ed11y-buttonbar {
-  grid-template-rows: .429em 1.714em .5em 1fr;
+  grid-template-rows: .429em 2em .5em 1fr;
   grid-template-columns: 1fr repeat(5, min-content);
   grid-template-areas: "upad upad upad upad upad upad"
                        "pad reports showHidden visualize toggle next"
@@ -193,8 +193,8 @@ ed11y-element-result {
 }
 
 .ed11y-buttonbar > button, .ed11y-buttonbar > a {
-  min-width: 2.0625em;
-  height: 1.714em;
+  min-width: 2.125em;
+  height: 2em;
   color: var(--ed11y-activeColor);
   text-align: center;
   background: var(--ed11y-activeBackground);
@@ -212,7 +212,7 @@ ed11y-element-result {
 }
 
 .ed11y-buttonbar:hover, .ed11y-buttonbar:focus-within {
-  grid-template-rows: 2em 1.714em .5em 1fr;
+  grid-template-rows: 2em 2em .5em 1fr;
 }
 
 .ed11y-buttonbar:has(#ed11y-toggle.disabled) #ed11y-visualize, .ed11y-buttonbar:has(#ed11y-toggle.disabled) #ed11y-visualizers {
@@ -223,13 +223,13 @@ button.ed11y-jump {
   box-shadow: 0 0 0 1px var(--ed11y-activePanelBorder), -2px 0 var(--ed11y-activeBackground);
   border-radius: 0 .5em .5em 0;
   grid-area: next;
-  margin-left: -3px;
+  margin-left: -6px;
+  padding-left: 3px;
 }
 
 button.ed11y-jump .toggle-count {
   min-width: 1.375em;
-  padding: 0 6px 0 8px;
-  font-size: .9em;
+  padding: 0 6px 0 9px;
   display: block;
 }
 
@@ -240,7 +240,7 @@ button.ed11y-jump svg {
 button.ed11y-jump:hover svg {
   display: initial;
   width: .643em;
-  margin: .4em 0 0 5%;
+  margin: .5em 0 0 5%;
 }
 
 button.ed11y-jump:hover .toggle-count {
@@ -345,7 +345,7 @@ button.ed11y-jump:hover .toggle-count {
   min-width: 1.5em;
   height: 1.5em;
   padding: .375em;
-  font-size: clamp(1em, 2vw, 1.1em);
+  font-size: clamp(1em, 2vw, 1.2em);
   transition: box-shadow .1s;
   display: flex;
   position: relative;
@@ -431,7 +431,7 @@ button.ed11y-jump:hover .toggle-count {
 
 .ed11y-shut#ed11y-panel:not(.ed11y-pin-left) .ed11y-jump, .ed11y-shut#ed11y-panel:not(.ed11y-pin-left) .ed11y-buttonbar:hover > *, .ed11y-shut:has(:focus-visible) .ed11y-buttonbar > :not(#ed11y-toggle) {
   opacity: 1;
-  min-width: 2.0625em;
+  min-width: 2.125em;
   overflow: visible;
 }
 

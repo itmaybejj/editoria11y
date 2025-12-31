@@ -901,7 +901,7 @@
     contrastIgnore: ".sr-only",
     outlineIgnore: "",
     headerIgnore: "",
-    headerIgnoreSpan: "ed11y-element-heading-label",
+    headerIgnoreSpan: "ed11y-element-heading-label, .ed11y-wrapper",
     headerIgnoreStrings: "",
     imageIgnore: 'img[aria-hidden], [aria-hidden] img, img[role="presentation"], a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img',
     linkIgnore: '[aria-hidden][tabindex="-1"]',

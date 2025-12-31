@@ -12,7 +12,7 @@ export const Options = {
   contrastIgnore: '.sr-only',
   outlineIgnore: '',
   headerIgnore: '',
-  headerIgnoreSpan: 'ed11y-element-heading-label',
+  headerIgnoreSpan: 'ed11y-element-heading-label, .ed11y-wrapper',
   headerIgnoreStrings: '',
   imageIgnore:
     'img[aria-hidden], [aria-hidden] img, ' +

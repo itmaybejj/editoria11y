@@ -154,6 +154,7 @@ export function visualize() {
   UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
   UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
   showAltPanel();
+  // @todo 3.x headings are showing alert numbers again.
   showHeadingsPanel();
   if (Options.readabilityPlugin) {
     showReadability();
