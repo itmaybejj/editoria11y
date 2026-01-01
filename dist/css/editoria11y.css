@@ -265,7 +265,7 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 #ed11y-show-hidden svg {
-  margin: 5px 1px 2px -1px;
+  margin: 5px 1px 2px 0;
 }
 
 #ed11y-show-hidden svg:first-child, #ed11y-show-hidden[data-ed11y-pressed="true"] svg + svg {
@@ -295,7 +295,7 @@ button.ed11y-jump:hover .toggle-count {
 
 #ed11y-reports-link svg {
   width: 1em;
-  margin: .375em 0 0 -1px;
+  margin: .5em 0 0 -1px;
 }
 
 #ed11y-panel .ed11y-buttonbar > a:hover, #ed11y-panel .ed11y-buttonbar > button:not(#ed11y-toggle):hover {

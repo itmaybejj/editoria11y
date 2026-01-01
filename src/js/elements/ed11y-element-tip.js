@@ -190,14 +190,17 @@ export class Ed11yElementTip extends HTMLElement {
           if (Options.syncedDismissals) {
             OkButton.setAttribute('title', Lang._('dismissOkTitle'));
           }
-          OkButton.textContent = Lang._('dismissOkButtonContent');
+          const OkText = document.createElement('span');
+          OkText.classList.add('text');
+          OkText.textContent = Lang._('dismissOkButtonContent');
+          OkButton.append(OkText);
           buttonBar.prepend(OkButton);
 
           if (showPageActions) {
             const OkAllButton = OkButton.cloneNode(true);
-            OkAllButton.textContent = Lang._('dismissOkAllButton');
+            const OkAllText = OkAllButton.querySelector('.text');
+            OkAllText.textContent = Lang._('dismissOkAllButton');
             const icon = check.cloneNode(true);
-            icon.classList.add('badge');
             OkAllButton.prepend(icon);
             pageActionsContent.insertAdjacentElement('afterbegin', OkAllButton);
             OkAllButton.addEventListener('click', () => {
@@ -218,7 +221,10 @@ export class Ed11yElementTip extends HTMLElement {
           if (Options.syncedDismissals) {
             ignoreButton.setAttribute('title', `${Lang._('dismissHideTitle')}`);
           }
-          ignoreButton.textContent = Lang._('DISMISS');
+          const ignoreText = document.createElement('span');
+          ignoreText.classList.add('text');
+          ignoreText.textContent = Lang._('DISMISS');
+          ignoreButton.append(ignoreText);
           ignoreButton.prepend(dismissIcon.cloneNode(true));
           buttonBar.prepend(ignoreButton);
           ignoreButton.addEventListener('click', () => {
@@ -228,9 +234,11 @@ export class Ed11yElementTip extends HTMLElement {
           if (showPageActions) {
             const ignoreAllButton = document.createElement('button');
             ignoreAllButton.classList.add('dismiss');
-            ignoreAllButton.textContent = Lang._('DISMISS_ALL');
+            const ignoreAllText = document.createElement('span');
+            ignoreAllText.classList.add('text');
+            ignoreAllText.textContent = Lang._('DISMISS_ALL');
+            ignoreAllButton.append(ignoreAllText);
             const icon = dismissIcon.cloneNode(true);
-            icon.classList.add('badge');
             ignoreAllButton.prepend(icon);
             pageActionsContent.appendChild(ignoreAllButton);
             ignoreAllButton.addEventListener('click', () => {
@@ -280,21 +288,17 @@ export class Ed11yElementTip extends HTMLElement {
     closeButton.addEventListener('click', (event) => {
       event.preventDefault();
       if (this.open) {
-        const toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', 'document');
         if (State.toggledFrom) {
           State.toggledFrom.focus();
         }
         // todo postpone: track if this tip was opened by the next button. If so, transfer focus back to it instead
-        toggle[0]?.setAttribute('data-ed11y-action', 'shut');
         this.setAttribute('data-ed11y-action', 'shut');
+        this.result?.toggle?.setAttribute('data-ed11y-action', 'shut');
       }
     });
     document.addEventListener('click', (event) => {
       // Close tip when mouse is clicked outside it.
-      if (
-        this.open &&
-        !event.target.closest('ed11y-element-tip, ed11y-element-result, ed11y-element-panel')
-      ) {
+      if (this.open && !event.target.closest('.ed11y-element')) {
         const toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', 'document', []);
         toggle[0]?.setAttribute('data-ed11y-action', 'shut');
         this.setAttribute('data-ed11y-action', 'shut');
