@@ -519,6 +519,18 @@ button.ed11y-jump:hover .toggle-count {
   font-weight: 700;
 }
 
+#ed11y-readability-tab #readability-info:has(br) {
+  font-size: 1em;
+}
+
+#ed11y-readability-tab #readability-info:has(br) + ul {
+  display: none;
+}
+
+#ed11y-readability-tab #readability-info br {
+  display: none;
+}
+
 #ed11y-readability-tab .readability-score {
   color: var(--ed11y-primaryText);
   background-color: var(--ed11y-primary);
@@ -629,7 +641,7 @@ button.ed11y-jump:hover .toggle-count {
 :host(ed11y-element-result.ed11y-element) {
   z-index: calc(var(--ed11y-buttonZIndex, 9999)  - 1);
   opacity: 0;
-  transition: opacity .25s ease-in;
+  transition: opacity .5s ease-out;
   position: absolute;
 }
 

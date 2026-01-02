@@ -632,6 +632,15 @@ button.ed11y-jump {
 		margin: 0.7em 0 0.25em;
 		font-size: 1.25em;
 		font-weight: 700;
+		&:has(br) {
+			font-size: 1em;
+			& + ul {
+				display: none;
+			}
+		}
+		br {
+			display: none;
+		}
 	}
 	.readability-score {
 		padding: 2px 5px;
@@ -757,7 +766,7 @@ button.ed11y-jump {
 	position: absolute;
 	z-index: calc(var(--ed11y-buttonZIndex, 9999) - 1);
 	opacity: 0;
-	transition: opacity 0.25s ease-in;
+	transition: opacity 0.5s ease-out;
 }
 
 :host(ed11y-element-result.ed11y-element[data-ed11y-open="true"]),

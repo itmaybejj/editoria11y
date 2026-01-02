@@ -17,7 +17,7 @@ class Ed11y {
       } catch (error) {
         showError(error);
       }
-      // @todo merge license and error message.
+      // @todo 3.x need website: license, error message, reporting.
     }
   }
 }

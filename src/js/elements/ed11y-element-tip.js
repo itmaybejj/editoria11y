@@ -67,10 +67,8 @@ export class Ed11yElementTip extends HTMLElement {
     this.tip = this.wrapper.querySelector('.tip');
 
     const content = this.wrapper.querySelector('.message');
-    this.navBar = this.wrapper.querySelector('.footer');
     if (this.result.content.includes('class="title"')) {
       // Sent by Ed11y
-      // todo title.
       content.innerHTML = this.result.content.split('<hr')[0];
     } else {
       // Sent by Sa11y
@@ -142,11 +140,9 @@ export class Ed11yElementTip extends HTMLElement {
       if (State.showDismissed && this.dismissed) {
         // Check if user has permission to reset this alert.
 
-        // todo see if we need fallback if digest is missing.
         const okd =
-          State.dismissedAlerts[Options.currentPage][this.result.test][
-            this.result.dismissDigest
-          ] === 'ok';
+          State.dismissedAlerts[Options.currentPage][this.result.test][this.result.dismiss] ===
+          'ok';
         if ((okd && Options.allowOK) || !okd) {
           // User can restore this alert.
           const unDismissButton = document.createElement('button');

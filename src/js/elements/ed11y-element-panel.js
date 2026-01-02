@@ -67,14 +67,11 @@ export class Ed11yElementPanel extends HTMLElement {
       shadow.appendChild(wrapper);
       const panelTabs = wrapper.querySelectorAll('.ed11y-buttonbar button');
       panelTabs.forEach((tab) => {
-        // todo: may not be needed for details elements.
         tab.addEventListener('click', this.handleBarClick);
       });
       const altDetails = wrapper.querySelector('#ed11y-alts-tab');
-      // @todo 3.x restore explanations for why headings are flagged.
-      // @todo link even in editable mode.
+      // @todo postpone: make clickable in editable mode.
       const headingDetails = wrapper.querySelector('#ed11y-headings-tab');
-      const _readabilityDetails = wrapper.querySelector('#ed11y-readability-tab'); // todo swappy?
       altDetails.addEventListener('toggle', () => {
         if (altDetails.open && headingDetails.open) {
           headingDetails.removeAttribute('open');

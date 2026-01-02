@@ -41,6 +41,7 @@ import {
   syncResults,
 } from '../utils/process_results';
 import { drawResult, showAltPanel, showHeadingsPanel, visualize } from './visualize';
+import checkReadability from '../../sa11y/rulesets/readability.js';
 
 export function showResults() {
   buildJumpList();
@@ -223,7 +224,7 @@ export function updatePanel() {
     } else if (!State.inlineAlerts) {
       State.oldResultString = `${State.errorCount} ${State.warningCount}`;
       Results.forEach((result) => {
-        State.oldResultString += result.test + result.element.outerHTML;
+        State.oldResultString += result.test + result.element?.outerHTML;
       });
     }
     // Now we can open or close the panel.
@@ -373,33 +374,6 @@ export function buildJumpList() {
     }
     result.sortPos = top;
   });
-  /* There was once a race condition...
-	for (let i = Results.length - 1; i >= 0; i--) {
-		const result = Results[i];
-		if (!result.element) {
-			// todo we should never running while checks are running.
-			Results.splice(i, 1);
-		} else {
-			let top = result.element.getBoundingClientRect().top;
-			if (!top) {
-				const visibleParent = firstVisibleParent(result.element);
-				if (visibleParent) {
-					top = visibleParent.getBoundingClientRect().top;
-				}
-			}
-			top = top + window.scrollY;
-			if (Options.fixedRoots) {
-				const root = result.element.closest('[data-ed11y-root]');
-				result.fixedRoot = root.dataset.ed11yRoot;
-			}
-			result.scrollableParent = closestScrollable(result.element);
-			if (result.scrollableParent) {
-				// Group these together.
-				top = top * 0.000001;
-			}
-			result.sortPos = top;
-		}
-	}*/
 
   // Sort from bottom to top so focus order after insert is top to bottom.
   Results.sort((a, b) => b.sortPos - a.sortPos);
@@ -503,9 +477,8 @@ export function transferFocus() {
   const target = Results[id].element;
   const editable = target.closest('[contenteditable]');
   if (!editable && !target.closest('textarea, input')) {
-    if (target.closest('a')) {
-      // @todo after merge add button?
-      State.toggledFrom = target.closest('a');
+    if (target.closest('a, button')) {
+      State.toggledFrom = target.closest('a, button');
     } else if (target.getAttribute('tabindex') !== null) {
       State.toggledFrom = target;
     } else {
@@ -573,7 +546,11 @@ export function paintReady() {
       });
     }
   });
-  State.bodyStyle = true;
+  State.bodyStyle = 'drawing';
+  window.setTimeout(() => {
+    // Let first tips fade in.
+    State.bodyStyle = true;
+  }, 1000);
 }
 
 export function alertOnInvisibleTip(button, target) {
@@ -1024,7 +1001,6 @@ const scrollWatch = (container) => {
     () => {
       // Trigger on scrolling other containers, unless it will flicker a tip.
       if (!State.inlineAlerts) {
-        // @todo removed check for !State.tipOpen in 3.x. Should close tip if mark is scrolled off the screen.
         State.scrollPending =
           State.scrollPending < 2 ? State.scrollPending + 1 : State.scrollPending;
         requestAnimationFrame(() => updateTipLocations());
@@ -1074,18 +1050,16 @@ export function rangeChange(anchorNode) {
   if (
     !anchor ||
     (expandable &&
-      (anchor.parentNode.matches(Options.checkRoot) ||
-        (!anchor.parentNode.matches(Options.checkRoot) &&
-          anchor.parentNode.matches('div[contenteditable="true"]'))))
+      (State.roots.includes(anchor.parentNode) ||
+        anchor.parentNode.matches('div[contenteditable="true"]')))
   ) {
     State.activeRange = false;
     return false;
   }
-  // todo: is this redundant?
   if (expandable) {
-    const closest = anchor.parentNode.closest('p, td, th, li, h2, h3, h4, h5, h6');
-    if (closest) {
-      anchor = closest;
+    const textParent = anchor.parentNode.closest('p, td, th, li, h2, h3, h4, h5, h6');
+    if (textParent) {
+      anchor = textParent;
     }
   }
   const range = document.createRange();
@@ -1344,10 +1318,9 @@ export function checkAll() {
   }
 
   State.roots = [];
-  // @todo CMS merge rewrite when Sa11y releases fixed root support.
   if (Options.fixedRoots) {
     Options.fixedRoots.forEach((root) => {
-      State.roots.push(root.fixedRoot);
+      State.roots.push(root);
     });
   } else {
     State.roots = document.querySelectorAll(`:is(${Options.checkRoot})`);
@@ -1365,8 +1338,8 @@ export function checkAll() {
     return;
   }
 
-  // @todo 3.x what of split configuration?
   if (State.incremental) {
+    // They get restored if unchanged.
     State.oldResults = Results;
   }
   // Reset counts
@@ -1385,32 +1358,26 @@ export function checkAll() {
       }
     }, 1000);
     const customTests = new CustomEvent('ed11yRunCustomTests');
-    document.dispatchEvent(customTests); // todo there is a race condition here for slow custom tests. May need to pass State.customTestTimeout and only accept back results that match the ID.
+    document.dispatchEvent(customTests); // todo postpone: there is a possible race condition here for slow custom tests that are removed but return results during the next run.
   }
 
   // Call rulesets.
   const queue = ['group1', 'group2'];
 
-  if (Options.readabilityPlugin && (!State.incremental || State.visualizing)) {
-    queue.push('checkReadability'); // todo merge param
-  }
   if (Options.formLabelsPlugin) {
-    queue.push('checkLabels'); // todo cms merge param
+    queue.push('checkLabels');
   }
   if (Options.developerPlugin) {
-    queue.push('checkDeveloper'); // todo cms merge param
+    queue.push('checkDeveloper');
   }
   if (Options.contrastPlugin) {
     queue.push('checkContrast');
   }
-  // Todo after merge: developer and readability tests added via options here.
   State.testsRemaining = queue.length;
   enqueueTests(
     queue,
     State.splitConfiguration.active ? State.splitConfiguration.devResults : Results,
   );
-  // @todo CMS merge when Sa11y support is ready.
-  // @todo after merge handle readability and developer checks.
 }
 
 export async function continueCheck(customCheck = false) {
@@ -1436,7 +1403,12 @@ export async function continueCheck(customCheck = false) {
     panelLabel();
   }
   if (State.visualizing) {
-    //checkReadability([]); // todo???
+    if (Options.readabilityPlugin && (!State.incremental || State.visualizing)) {
+      checkReadability(
+        State.splitConfiguration.active ? State.splitConfiguration.devResults : Results,
+        Options,
+      );
+    }
     showHeadingsPanel();
     showAltPanel();
   }
@@ -1486,7 +1458,6 @@ export function incrementalCheck() {
         document.dispatchEvent(new CustomEvent('ed11yEndVisualization'));
       }
     }, 500);
-    // @todo after merge test: if there are no issues and the heading panel is open...it closes!
     // Increase debounce if runs are slow.
     runTime = performance.now() - runTime;
     State.browserSpeed = runTime > 100 ? 100 : (State.browserSpeed + runTime) / 2;

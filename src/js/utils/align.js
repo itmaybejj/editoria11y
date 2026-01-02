@@ -22,6 +22,7 @@ export const overlap = (rect1Left, rect1Top, rect2Left, rect2Top, size = 17) => 
 
 export const nudgeMark = (el, x, y) => {
   // todo: these can get nudged out of an editable area.
+  // todo postone: draggable marks.
   if (el.style.transform) {
     const computedStyle = window.getComputedStyle(el);
     let matrix = computedStyle.getPropertyValue('transform');
@@ -186,7 +187,6 @@ export function checkEditableIntersects(focusKnown = false) {
 
 export function alignButtons() {
   if (State.jumpList.length === 0) {
-    // todo always false?
     return;
   }
   State.alignPending = true;
@@ -421,9 +421,11 @@ export function alignButtons() {
       }
     });
   }
-  State.jumpList?.forEach((mark) => {
-    // Now make visible.
-    // todo: Edge still flickers on redraw.
-    mark.classList.remove('ed11y-preload');
-  });
+  window.setTimeout(() => {
+    State.jumpList?.forEach((mark) => {
+      // Now make visible.
+      // todo: Edge still flickers on redraw.
+      mark.classList.remove('ed11y-preload');
+    });
+  }, 0);
 }

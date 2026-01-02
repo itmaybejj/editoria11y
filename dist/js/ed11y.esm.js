@@ -844,6 +844,7 @@ const State = {
   },
   /* Panel initial state */
   once: false,
+  bodyStyle: false,
   disabled: false,
   onLoad: true,
   open: false,
@@ -903,15 +904,15 @@ const Options = {
   linkIgnore: '[aria-hidden][tabindex="-1"]',
   linkIgnoreSpan: ".ed11y-element",
   linkIgnoreStrings: [],
-  // @todo 3.x this changed to array
+  // @todo cms/documentation this changed to array
   ignoreContentOutsideRoots: false,
-  // @todo cms was headingsOnlyFromCheckRoots
+  // @todo cms/documentation was headingsOnlyFromCheckRoots
   // Control panel settings
-  // aboutContent: '', // @todo use?
+  // aboutContent: '', // @todo implement?
   panelPosition: "right",
   // @todo use?
-  // showMovePanelToggle: true,
-  // checkAllHideToggles: false,
+  // showMovePanelToggle: true, // @todo implement?
+  // checkAllHideToggles: false, // @todo implement?
   developerChecksOnByDefault: false,
   // @todo cms use?
   // Page outline
@@ -951,14 +952,11 @@ const Options = {
   customChecks: false,
   linksAdvancedPlugin: true,
   formLabelsPlugin: true,
-  // @todo pro
   embeddedContentPlugin: true,
   developerPlugin: false,
-  // @todo pro
+  // @todo CMS enable following
   externalDeveloperChecks: false,
-  // @todo pro
   colourFilterPlugin: false,
-  // @todo pro
   exportResultsPlugin: false,
   // Options for accName computation: Ignore ARIA on these elements.
   ignoreAriaOnElements: false,
@@ -966,13 +964,12 @@ const Options = {
   ignoreTextInElements: false,
   // e.g. '.inner-node-hidden-in-CSS'
   // Shared properties for some checks
-  // Shared properties for some checks
   susAltStopWords: "",
   linkStopWords: "",
   extraPlaceholderStopWords: "",
   imageWithinLightbox: "",
   initialHeadingLevel: [],
-  // @todo merge discuss: how to handle this functionality.
+  // @todo document change?
   // Sets previous heading level for contentEditable fields.
   // With 'ignore' set, first heading level is ignored in editable zones.
   // This is ideal for systems with separate backend editing pages.
@@ -995,7 +992,6 @@ const Options = {
   /*
   	// List checks and config for reporting results not shown to editors.
   	// If split configuration is set, the check and option keys must be present.
-  	// @todo check against new format.
   	syncOnlyConfiguration {
   		checks: [], // Test keys defined below to not be display on page.
   
@@ -1041,7 +1037,7 @@ const Options = {
   // Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
   ignoreAllIfAbsent: false,
   ignoreAllIfPresent: false,
-  // @todo CMS merge dismissal system.
+  // @todo CMS test.
   // Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
   preventCheckingIfPresent: false,
   preventCheckingIfAbsent: false,
@@ -1135,14 +1131,13 @@ const Options = {
   baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
   // Test customizations
   embeddedContent: false,
-  // @todo merge replace with custom test.
   embeddedContentTitle: "",
   embeddedContentMessage: "",
   linksUrls: false,
   // get from language pack
   linksMeaningless: false,
   // get from language pack
-  // @todo 3.x wp this was a string.
+  // @todo cms/document wp this was a string.
   altPlaceholder: [],
   // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
   editLinks: false,
@@ -1158,7 +1153,7 @@ const Options = {
     HEADING_EMPTY_WITH_IMAGE: true,
     HEADING_EMPTY: true,
     HEADING_FIRST: true,
-    // @todo CMS migrate to this from the complicated setters.
+    // @todo CMS
     HEADING_LONG: {
       maxLength: 170
     },
@@ -1321,7 +1316,7 @@ const Options = {
     // What's this?
     // dev
     HEADING_EXCEEDS_LEVEL: true,
-    // todo merge would need text.
+    // todo 3.x need test and alert content?
     EMBED_CUSTOM: {
       sources: "#embed"
     }
@@ -1540,6 +1535,11 @@ async function dismissDigest(message) {
 function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
   Constants.Root.areaToCheck = [];
   Constants.Root.Readability = [];
+  if (fixedRoots) {
+    Constants.Root.areaToCheck = fixedRoots;
+    Constants.Root.Readability = fixedRoots;
+    return;
+  }
   try {
     const roots = document.querySelectorAll(desiredRoot);
     if (roots.length > 0) {
@@ -1633,7 +1633,7 @@ function buildElementList(onlyForFilter = false) {
   if (!State.ignoreAll && !!Options.ignoreAllIfPresent) {
     State.ignoreAll = document.querySelector(`:is(${Options.ignoreAllIfPresent})`) !== null;
   }
-  initializeRoot(Options.checkRoot, Options.checkRoot);
+  initializeRoot(Options.checkRoot, Options.checkRoot, Options.fixedRoots);
   for (let i = 0; i < State.roots.length; i++) {
     if (Options.fixedRoots) {
       State.roots[i].dataset.ed11yRoot = `${i}`;
@@ -4688,9 +4688,11 @@ function alignButtons() {
       }
     });
   }
-  State.jumpList?.forEach((mark) => {
-    mark.classList.remove("ed11y-preload");
-  });
+  window.setTimeout(() => {
+    State.jumpList?.forEach((mark) => {
+      mark.classList.remove("ed11y-preload");
+    });
+  }, 0);
 }
 function checkEmbeddedContent(results, option) {
   const src = ($el) => $el.getAttribute("src") || $el.querySelector("source[src]")?.getAttribute("src") || $el.querySelector("[src]")?.getAttribute("src") || null;
@@ -4826,7 +4828,7 @@ function syncResults(results) {
     window.setTimeout(() => {
       document.dispatchEvent(
         new CustomEvent("ed11yResults", {
-          // @todo cms document detail
+          // @todo cms/document new detail
           detail: {
             results,
             incremental: State.incremental
@@ -5339,6 +5341,9 @@ function showHeadingsPanel() {
 }
 function drawResult(result, index) {
   const mark = document.createElement("ed11y-element-result");
+  if (State.bodyStyle !== true) {
+    mark.classList.add("ed11y-preload");
+  }
   mark.classList.add("ed11y-element");
   mark.setAttribute("id", `ed11y-result-${index}`);
   mark.setAttribute("data-ed11y-result", index);
@@ -5524,7 +5529,7 @@ function updatePanel() {
     } else if (!State.inlineAlerts) {
       State.oldResultString = `${State.errorCount} ${State.warningCount}`;
       Results.forEach((result) => {
-        State.oldResultString += result.test + result.element.outerHTML;
+        State.oldResultString += result.test + result.element?.outerHTML;
       });
     }
     if (!State.showPanel) {
@@ -5734,8 +5739,8 @@ function transferFocus() {
   const target = Results[id].element;
   const editable = target.closest("[contenteditable]");
   if (!editable && !target.closest("textarea, input")) {
-    if (target.closest("a")) {
-      State.toggledFrom = target.closest("a");
+    if (target.closest("a, button")) {
+      State.toggledFrom = target.closest("a, button");
     } else if (target.getAttribute("tabindex") !== null) {
       State.toggledFrom = target;
     } else {
@@ -5793,7 +5798,10 @@ function paintReady() {
       });
     }
   });
-  State.bodyStyle = true;
+  State.bodyStyle = "drawing";
+  window.setTimeout(() => {
+    State.bodyStyle = true;
+  }, 1e3);
 }
 function alertOnInvisibleTip(button, target) {
   let delay = 100;
@@ -6198,14 +6206,14 @@ const selectionChanged = lagBounce(() => {
 function rangeChange(anchorNode) {
   let anchor = window.getSelection()?.anchorNode;
   const expandable = anchor?.parentNode && typeof anchor.parentNode === "object" && typeof anchor.parentNode.matches === "function";
-  if (!anchor || expandable && (anchor.parentNode.matches(Options.checkRoot) || !anchor.parentNode.matches(Options.checkRoot) && anchor.parentNode.matches('div[contenteditable="true"]'))) {
+  if (!anchor || expandable && (State.roots.includes(anchor.parentNode) || anchor.parentNode.matches('div[contenteditable="true"]'))) {
     State.activeRange = false;
     return false;
   }
   if (expandable) {
-    const closest = anchor.parentNode.closest("p, td, th, li, h2, h3, h4, h5, h6");
-    if (closest) {
-      anchor = closest;
+    const textParent = anchor.parentNode.closest("p, td, th, li, h2, h3, h4, h5, h6");
+    if (textParent) {
+      anchor = textParent;
     }
   }
   const range = document.createRange();
@@ -6409,7 +6417,7 @@ function checkAll() {
   State.roots = [];
   if (Options.fixedRoots) {
     Options.fixedRoots.forEach((root) => {
-      State.roots.push(root.fixedRoot);
+      State.roots.push(root);
     });
   } else {
     State.roots = document.querySelectorAll(`:is(${Options.checkRoot})`);
@@ -6442,9 +6450,6 @@ function checkAll() {
     document.dispatchEvent(customTests);
   }
   const queue = ["group1", "group2"];
-  if (Options.readabilityPlugin && (!State.incremental || State.visualizing)) {
-    queue.push("checkReadability");
-  }
   if (Options.formLabelsPlugin) {
     queue.push("checkLabels");
   }
@@ -6478,6 +6483,11 @@ async function continueCheck(customCheck = false) {
     panelLabel();
   }
   if (State.visualizing) {
+    if (Options.readabilityPlugin && (!State.incremental || State.visualizing)) {
+      checkReadability(
+        State.splitConfiguration.active ? State.splitConfiguration.devResults : Results
+      );
+    }
     showHeadingsPanel();
     showAltPanel();
   }
@@ -6817,6 +6827,7 @@ class Ed11yElementResult extends HTMLElement {
       }
       requestAnimationFrame(() => alignTip(this.toggle, this.tip, 4, true));
       if (State.jumpList.length === 0) {
+        console.warn("Editoria11y race condition: toggle without jump list");
         buildJumpList();
       }
       State.lastOpenTip = Number(this.getAttribute("data-ed11y-jump-position"));
@@ -6917,7 +6928,6 @@ class Ed11yElementPanel extends HTMLElement {
       });
       const altDetails = wrapper.querySelector("#ed11y-alts-tab");
       const headingDetails = wrapper.querySelector("#ed11y-headings-tab");
-      wrapper.querySelector("#ed11y-readability-tab");
       altDetails.addEventListener("toggle", () => {
         if (altDetails.open && headingDetails.open) {
           headingDetails.removeAttribute("open");
@@ -7221,7 +7231,6 @@ class Ed11yElementTip extends HTMLElement {
     UI.attachCSS(this.wrapper);
     this.tip = this.wrapper.querySelector(".tip");
     const content = this.wrapper.querySelector(".message");
-    this.navBar = this.wrapper.querySelector(".footer");
     if (this.result.content.includes('class="title"')) {
       content.innerHTML = this.result.content.split("<hr")[0];
     } else {
@@ -7280,7 +7289,7 @@ class Ed11yElementTip extends HTMLElement {
       dismissIcon.classList.add("ed11y-dismiss-icon");
       dismissIcon.innerHTML = spriteDismiss;
       if (State.showDismissed && this.dismissed) {
-        const okd = State.dismissedAlerts[Options.currentPage][this.result.test][this.result.dismissDigest] === "ok";
+        const okd = State.dismissedAlerts[Options.currentPage][this.result.test][this.result.dismiss] === "ok";
         if (okd && Options.allowOK || !okd) {
           const unDismissButton = document.createElement("button");
           const unDismissIcon = document.createElement("span");
@@ -7572,7 +7581,9 @@ const testNames = {
 const preProcessOptions = (userOptions) => {
   smush(Options, userOptions, ["checks"]);
   Object.assign(Options.checks, userOptions.checks);
-  if (!Options.checkRoot) {
+  if (Options.fixedRoots) {
+    Options.checkRoot = Options.fixedRoots;
+  } else if (!Options.checkRoot) {
     Options.checkRoot = document.querySelector("main") !== null ? "main" : "body";
   }
   if (userOptions.splitConfiguration) {

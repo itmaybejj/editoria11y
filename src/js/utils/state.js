@@ -44,6 +44,7 @@ export const State = {
 
   /* Panel initial state */
   once: false,
+  bodyStyle: false,
   disabled: false,
   onLoad: true,
   open: false,

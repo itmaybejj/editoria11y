@@ -15,7 +15,9 @@ const preProcessOptions = (userOptions) => {
   smush(Options, userOptions, ['checks']);
   Object.assign(Options.checks, userOptions.checks);
 
-  if (!Options.checkRoot) {
+  if (Options.fixedRoots) {
+    Options.checkRoot = Options.fixedRoots;
+  } else if (!Options.checkRoot) {
     Options.checkRoot = document.querySelector('main') !== null ? 'main' : 'body'; // needed or redundant?
   }
 
@@ -130,9 +132,7 @@ const postProcessOptions = (userOptions) => {
     Constants.Global.documentSources = userOptions.documentLinks;
   }
 
-  // todo CMS merge also include as fallbacks untranslated strings.
   // At the moment only English uses Editoria11y tip styles.
-  // Todo change
   if (State.english) {
     const overrides = Object.entries(testNames);
     for (let i = 0; i < overrides.length; i++) {
@@ -167,7 +167,7 @@ export function initialize(userOptions) {
   // We override Sa11y's root initializer because we use strings not arrays.
 
   Constants.initializeGlobal(Options);
-  // @todo readability param
+  // @todo CMS readability param
   Constants.initializeReadability(Options);
   Constants.initializeExclusions(Options);
   postProcessOptions(userOptions);

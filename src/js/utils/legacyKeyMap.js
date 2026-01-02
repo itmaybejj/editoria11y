@@ -8,7 +8,7 @@ export const legacyKeyMap = {
   altURL: 'ALT_FILE_EXT',
   altMeaningless: 'ALT_PLACEHOLDER',
   altMeaninglessLinked: 'LINK_PLACEHOLDER_ALT',
-  altURLLinked: 'LINK_ALT_FILE_EXT', // @todo but adopt Adam's wording
+  altURLLinked: 'LINK_ALT_FILE_EXT', // @todo adopt Adam's wording
   altImageOf: 'SUS_ALT',
   altImageOfLinked: 'LINK_SUS_ALT',
   altDeadspace: 'ALT_UNPRONOUNCEABLE',

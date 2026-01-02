@@ -21,14 +21,14 @@ export const Options = {
     'a[href][aria-labelledby] img, button[aria-labelledby] img',
   linkIgnore: '[aria-hidden][tabindex="-1"]',
   linkIgnoreSpan: '.ed11y-element',
-  linkIgnoreStrings: [], // @todo 3.x this changed to array
-  ignoreContentOutsideRoots: false, // @todo cms was headingsOnlyFromCheckRoots
+  linkIgnoreStrings: [], // @todo cms/documentation this changed to array
+  ignoreContentOutsideRoots: false, // @todo cms/documentation was headingsOnlyFromCheckRoots
 
   // Control panel settings
-  // aboutContent: '', // @todo use?
+  // aboutContent: '', // @todo implement?
   panelPosition: 'right', // @todo use?
-  // showMovePanelToggle: true,
-  // checkAllHideToggles: false,
+  // showMovePanelToggle: true, // @todo implement?
+  // checkAllHideToggles: false, // @todo implement?
   developerChecksOnByDefault: false, // @todo cms use?
 
   // Page outline
@@ -73,11 +73,11 @@ export const Options = {
   // Other plugins
   customChecks: false,
   linksAdvancedPlugin: true,
-  formLabelsPlugin: true, // @todo pro
+  formLabelsPlugin: true,
   embeddedContentPlugin: true,
-  developerPlugin: false, // @todo pro
-  externalDeveloperChecks: false, // @todo pro
-  colourFilterPlugin: false, // @todo pro
+  developerPlugin: false, // @todo CMS enable following
+  externalDeveloperChecks: false,
+  colourFilterPlugin: false,
   exportResultsPlugin: false,
 
   // Options for accName computation: Ignore ARIA on these elements.
@@ -85,13 +85,12 @@ export const Options = {
   ignoreTextInElements: false, // e.g. '.inner-node-hidden-in-CSS'
 
   // Shared properties for some checks
-  // Shared properties for some checks
   susAltStopWords: '',
   linkStopWords: '',
   extraPlaceholderStopWords: '',
   imageWithinLightbox: '',
   initialHeadingLevel: [],
-  // @todo merge discuss: how to handle this functionality.
+  // @todo document change?
   // Sets previous heading level for contentEditable fields.
   // With 'ignore' set, first heading level is ignored in editable zones.
   // This is ideal for systems with separate backend editing pages.
@@ -116,7 +115,6 @@ export const Options = {
   /*
 	// List checks and config for reporting results not shown to editors.
 	// If split configuration is set, the check and option keys must be present.
-	// @todo check against new format.
 	syncOnlyConfiguration {
 		checks: [], // Test keys defined below to not be display on page.
 
@@ -159,7 +157,7 @@ export const Options = {
   // Hide all alerts if these elements are absent, e.g., ".edit-button"
   // Used to not heckle editors on pages they cannot fix; they can still click a "show hidden" button to check manually.
   ignoreAllIfAbsent: false,
-  ignoreAllIfPresent: false, // @todo CMS merge dismissal system.
+  ignoreAllIfPresent: false, // @todo CMS test.
 
   // Disable checker altogether if these elements are present or absent, e.g., ".live-editing-toolbar, .frontpage" or ".editable-content"
   preventCheckingIfPresent: false,
@@ -257,13 +255,13 @@ export const Options = {
     '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
 
   // Test customizations
-  embeddedContent: false, // @todo merge replace with custom test.
+  embeddedContent: false,
   embeddedContentTitle: '',
   embeddedContentMessage: '',
 
   linksUrls: false, // get from language pack
   linksMeaningless: false, // get from language pack
-  // @todo 3.x wp this was a string.
+  // @todo cms/document wp this was a string.
   altPlaceholder: [], // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
 
   editLinks: false, // Add links to edit content in tooltips.
@@ -280,7 +278,7 @@ export const Options = {
     },
     HEADING_EMPTY_WITH_IMAGE: true,
     HEADING_EMPTY: true,
-    HEADING_FIRST: true, // @todo CMS migrate to this from the complicated setters.
+    HEADING_FIRST: true, // @todo CMS
     HEADING_LONG: {
       maxLength: 170,
     },
@@ -429,7 +427,7 @@ export const Options = {
     CONTRAST_UNSUPPORTED: false, // What's this?
 
     // dev
-    HEADING_EXCEEDS_LEVEL: true, // todo merge would need text.
+    HEADING_EXCEEDS_LEVEL: true, // todo 3.x need test and alert content?
     EMBED_CUSTOM: {
       sources: '#embed',
     },

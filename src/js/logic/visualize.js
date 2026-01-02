@@ -154,7 +154,6 @@ export function visualize() {
   UI.panel.querySelector('#ed11y-visualize').setAttribute('data-ed11y-pressed', 'true');
   UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
   showAltPanel();
-  // @todo 3.x headings are showing alert numbers again.
   showHeadingsPanel();
   if (Options.readabilityPlugin) {
     showReadability();
@@ -210,6 +209,7 @@ export function showHeadingsPanel() {
       if (result.type) {
         // Has an error message
         li.classList.add(`ed11y-${result.type}`);
+        // @todo 3.x add result key to Sa11y heading outline.
         /*let message = document.createElement('em');
 				message.classList.add('ed11y-small');
 				message.textContent = ' ' + el[2];
@@ -229,6 +229,10 @@ export function showHeadingsPanel() {
 // Place markers on elements with issues
 export function drawResult(result, index) {
   const mark = document.createElement('ed11y-element-result');
+  if (State.bodyStyle !== true) {
+    // "Drawing" for first second.
+    mark.classList.add('ed11y-preload');
+  }
   mark.classList.add('ed11y-element');
   mark.setAttribute('id', `ed11y-result-${index}`);
   mark.setAttribute('data-ed11y-result', index);
@@ -271,7 +275,7 @@ export function drawResult(result, index) {
     mark.toggle.innerHTML = spriteUnDismiss;
     mark.toggle.classList.add('dismissed');
     if (mark.result.dismissalStatus !== 'ok') {
-      // @todo 3.x okAll?
+      // @todo 3.x test okAll
       mark.toggle.classList.add('notok');
     } else {
       mark.toggle.classList.add('ok');

@@ -10,7 +10,7 @@ export function syncResults(results) {
     window.setTimeout(() => {
       document.dispatchEvent(
         new CustomEvent('ed11yResults', {
-          // @todo cms document detail
+          // @todo cms/document new detail
           detail: {
             results: results,
             incremental: State.incremental,
@@ -157,7 +157,6 @@ const inDismissals = (result, i, splitConfiguration, digest) => {
     digest in State.dismissedAlerts[Options.currentPage][result.test]
   ) {
     // Remove results[i] if it has been marked OK or ignored, increment dismissed match counter.
-    // @todo we could use the presence of a key to convert to a version without a key.
     if (splitConfiguration) {
       State.splitConfiguration.devResults[i].dismissalStatus =
         State.dismissedAlerts[Options.currentPage][result.test][digest];
@@ -168,7 +167,7 @@ const inDismissals = (result, i, splitConfiguration, digest) => {
 };
 
 export async function checkDismissed(i, splitConfiguration) {
-  // @todo 3.x convert old keys.
+  // @todo cms convert old keys.
   // @todo drop keys not found in a run to prevent object expansion.
   const result = splitConfiguration ? State.splitConfiguration.devResults[i] : Results[i];
   const digested = State.dismissKeys[result.dismiss];
@@ -180,7 +179,6 @@ export async function checkDismissed(i, splitConfiguration) {
     }
     inDismissals(result, i, splitConfiguration, digested);
   } else {
-    // todo: test memory consumption while editing if digest keeps changing.
     await dismissDigest(result.dismiss).then((digest) => {
       State.dismissKeys[result.dismiss] = digest;
       if (splitConfiguration) {
@@ -195,8 +193,6 @@ export async function checkDismissed(i, splitConfiguration) {
 }
 
 export async function filterAlerts(splitConfiguration) {
-  // @todo next we can't return and assign results any more; pass string to here instead.
-
   // Review results array to remove dismissed or ignored items
   const results = splitConfiguration ? State.splitConfiguration.devResults : Results;
 

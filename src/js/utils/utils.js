@@ -178,12 +178,12 @@ export function buildElementList(onlyForFilter = false) {
     State.ignoreAll = document.querySelector(`:is(${Options.ignoreAllIfPresent})`) !== null;
   }
 
-  initializeRoot(Options.checkRoot, Options.checkRoot);
+  initializeRoot(Options.checkRoot, Options.checkRoot, Options.fixedRoots);
 
   for (let i = 0; i < State.roots.length; i++) {
     if (Options.fixedRoots) {
+      // todo what if fixed root is a shadow host? What here is used, how?
       State.roots[i].dataset.ed11yRoot = `${i}`;
-      // todo check why not detectShadow here?
     }
     if (State.roots[i].shadowRoot) {
       State.roots.setAttribute('data-ed11y-has-shadow-root', 'true');

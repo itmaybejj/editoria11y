@@ -121,7 +121,8 @@ export class Ed11yElementResult extends HTMLElement {
       }
       requestAnimationFrame(() => alignTip(this.toggle, this.tip, 4, true));
       if (State.jumpList.length === 0) {
-        // todo is it still possible to have a tip and no jumpList?
+        // todo remove if this race condition is gone.
+        console.warn('Editoria11y race condition: toggle without jump list');
         buildJumpList();
       }
       State.lastOpenTip = Number(this.getAttribute('data-ed11y-jump-position'));
