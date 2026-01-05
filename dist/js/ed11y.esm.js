@@ -1315,8 +1315,6 @@ const Options = {
     CONTRAST_UNSUPPORTED: false,
     // What's this?
     // dev
-    HEADING_EXCEEDS_LEVEL: true,
-    // todo 3.x need test and alert content?
     EMBED_CUSTOM: {
       sources: "#embed"
     }
@@ -5376,13 +5374,8 @@ function drawResult(result, index) {
     mark.toggle.style.setProperty("font-size", "16px");
   }
   if (mark.dismissed) {
-    mark.toggle.innerHTML = spriteUnDismiss;
+    mark.toggle.innerHTML = spriteDismiss;
     mark.toggle.classList.add("dismissed");
-    if (mark.result.dismissalStatus !== "ok") {
-      mark.toggle.classList.add("notok");
-    } else {
-      mark.toggle.classList.add("ok");
-    }
   } else if (mark.dismissable) {
     mark.toggle.classList.add("dismissable");
   }
@@ -6876,8 +6869,8 @@ class Ed11yElementPanel extends HTMLElement {
     return `
     <div class='ed11y-buttonbar'>
       <button id='ed11y-show-hidden' data-ed11y-pressed='false' hidden>
-        ${spriteDismiss}
         ${spriteUnDismiss}
+        ${spriteDismiss}
         <span class="ed11y-sr-only"></span>
       </button>
       <button id='ed11y-visualize' data-ed11y-pressed="false" class='ed11y-panel-fa'>

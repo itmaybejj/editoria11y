@@ -254,6 +254,10 @@ button.ed11y-jump:hover .toggle-count {
     transition: background-color .2s ease-in, opacity .2s ease-in, box-shadow .2s ease-in;
     box-shadow: 0 1px, 0 -1px, -1px 0;
   }
+
+  .ed11y-result button {
+    transition: none;
+  }
 }
 
 #ed11y-show-hidden {
@@ -664,6 +668,7 @@ button.ed11y-jump:hover .toggle-count {
 .ed11y-result-wrapper button {
   background: var(--ed11y-primary, #276499);
   font-weight: 600;
+  transition: width .2s, height .2s, margin .2s;
 }
 
 .ed11y-result-wrapper .toggle {
@@ -722,6 +727,12 @@ button.ed11y-jump:hover .toggle-count {
 .ed11y-result-wrapper .toggle.dismissable:hover, .ed11y-result-wrapper .toggle.dismissable[aria-expanded="true"] {
   border: 2px solid var(--ed11y-primary, #276499);
   box-shadow: inset 0 0 0 2px #276499, inset 0 0 0 3px var(--ed11y-warning, #fad859), inset 0 0 0 4px #444, inset 0 0 0 6px var(--ed11y-warning, #fad859);
+}
+
+:host(ed11y-element-result.ed11y-preload) button {
+  width: 4em;
+  height: 4em;
+  margin: -1em 0 0 -1em;
 }
 
 :host(ed11y-element-tip.ed11y-element) {

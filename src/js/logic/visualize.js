@@ -7,7 +7,7 @@ import { alignAlts } from '../utils/align';
 import { getElements } from '../utils/utils';
 import { Options } from '../utils/options';
 import checkReadability from '../../sa11y/rulesets/readability';
-import { spriteUnDismiss } from '../elements/sprite.js';
+import { spriteDismiss } from '../elements/sprite.js';
 
 export const showAltPanel = () => {
   // visualize image alts
@@ -177,7 +177,7 @@ export function showHeadingsPanel() {
   if (State.headingOutline.length) {
     panelOutline.innerHTML = '';
     State.headingOutline.forEach((result, i) => {
-      // Todo: draw these in editable mode.
+      // Todo 3.1: draw these and alts in editable mode.
       if (State.inlineAlerts) {
         const mark = document.createElement('ed11y-element-heading-label');
         mark.classList.add('ed11y-element', 'ed11y-element-heading');
@@ -209,7 +209,7 @@ export function showHeadingsPanel() {
       if (result.type) {
         // Has an error message
         li.classList.add(`ed11y-${result.type}`);
-        // @todo 3.x add result key to Sa11y heading outline.
+        // @todo 3.1 add result key to Sa11y heading outline.
         /*let message = document.createElement('em');
 				message.classList.add('ed11y-small');
 				message.textContent = ' ' + el[2];
@@ -272,14 +272,8 @@ export function drawResult(result, index) {
     mark.toggle.style.setProperty('font-size', '16px');
   }
   if (mark.dismissed) {
-    mark.toggle.innerHTML = spriteUnDismiss;
+    mark.toggle.innerHTML = spriteDismiss;
     mark.toggle.classList.add('dismissed');
-    if (mark.result.dismissalStatus !== 'ok') {
-      // @todo 3.x test okAll
-      mark.toggle.classList.add('notok');
-    } else {
-      mark.toggle.classList.add('ok');
-    }
   } else if (mark.dismissable) {
     mark.toggle.classList.add('dismissable');
   }

@@ -427,7 +427,6 @@ export const Options = {
     CONTRAST_UNSUPPORTED: false, // What's this?
 
     // dev
-    HEADING_EXCEEDS_LEVEL: true, // todo 3.x need test and alert content?
     EMBED_CUSTOM: {
       sources: '#embed',
     },

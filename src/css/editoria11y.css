@@ -304,6 +304,9 @@ button.ed11y-jump {
 			opacity 0.2s ease-in,
 			box-shadow 0.2s ease-in;
 	}
+	.ed11y-result button {
+		transition: none;
+	}
 }
 
 #ed11y-show-hidden {
@@ -788,6 +791,10 @@ ed11y-element-result[data-ed11y-open="true"] {
 	button {
 		font-weight: 600;
 		background: var(--ed11y-primary, #276499);
+		transition:
+			width 0.2s ease,
+			height 0.2s ease,
+			margin 0.2s ease;
 	}
 
 	.toggle {
@@ -869,6 +876,11 @@ ed11y-element-result[data-ed11y-open="true"] {
 			}
 		}
 	}
+}
+:host(ed11y-element-result.ed11y-preload) button {
+	width: 4em;
+	height: 4em;
+	margin: -1em 0 0 -1em;
 }
 
 /* Tip/modal ============================ */

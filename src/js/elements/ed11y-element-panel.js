@@ -18,8 +18,8 @@ export class Ed11yElementPanel extends HTMLElement {
     return `
     <div class='ed11y-buttonbar'>
       <button id='ed11y-show-hidden' data-ed11y-pressed='false' hidden>
-        ${spriteDismiss}
         ${spriteUnDismiss}
+        ${spriteDismiss}
         <span class="ed11y-sr-only"></span>
       </button>
       <button id='ed11y-visualize' data-ed11y-pressed="false" class='ed11y-panel-fa'>
