@@ -140,11 +140,21 @@ ed11y-element-result {
   color: var(--ed11y-primaryText);
   cursor: pointer;
   background-color: var(--ed11y-primary);
-  padding: 6px 10px;
+  padding: 6px 10px 6px 0;
   font-weight: 400;
   position: sticky;
   top: 0;
   box-shadow: 0 0 1px;
+}
+
+.ed11y-panel-wrapper .content summary::marker {
+  color: #0000;
+  display: none;
+}
+
+.ed11y-panel-wrapper .content summary::-webkit-details-marker {
+  color: #0000;
+  display: none;
 }
 
 .ed11y-panel-wrapper .content summary:hover {
@@ -336,6 +346,17 @@ button.ed11y-jump:hover .toggle-count {
   outline-offset: -4px;
 }
 
+#ed11y-panel summary .close-details svg {
+  display: none;
+}
+
+#ed11y-panel details[open] .close-details svg {
+  float: right;
+  width: 12px;
+  margin: 2px 0 0 10px;
+  display: block;
+}
+
 .ed11y-pin-left .ed11y-buttonbar > :hover .ed11y-sr-only, .ed11y-pin-left .ed11y-buttonbar > :focus-visible .ed11y-sr-only {
   left: 0;
   right: auto;
@@ -498,19 +519,19 @@ button.ed11y-jump:hover .toggle-count {
   padding-right: 10px;
 }
 
-#ed11y-headings-tab summary svg {
+#ed11y-headings-tab summary > svg {
   width: 16px;
-  margin: 0 4px -3px -1px;
+  margin: 0 8px -3px -1px;
 }
 
-#ed11y-alts-tab summary svg {
+#ed11y-alts-tab summary > svg {
   width: 18px;
-  margin: 0 2px -3px 0;
+  margin: 0 8px -3px -2px;
 }
 
-#ed11y-readability-tab summary svg {
+#ed11y-readability-tab summary > svg {
   width: 18px;
-  margin: 0 2px -3px 0;
+  margin: 0 8px -3px -2px;
 }
 
 #ed11y-readability-tab strong {
@@ -577,9 +598,17 @@ button.ed11y-jump:hover .toggle-count {
   background-color: var(--ed11y-warning);
 }
 
+#ed11y-visualizers details:has(.ed11y-warning) {
+  scrollbar-color: var(--ed11y-text) var(--ed11y-bg);
+}
+
 #ed11y-visualizers details:has(.ed11y-error) summary {
   color: #fffe;
   background-color: var(--ed11y-alert);
+}
+
+#ed11y-visualizers details:has(.ed11y-error) {
+  scrollbar-color: var(--ed11y-alert) var(--ed11y-bg);
 }
 
 #ed11y-visualizers li.ed11y-warning {

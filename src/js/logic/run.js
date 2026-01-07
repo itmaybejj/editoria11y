@@ -42,6 +42,7 @@ import {
 } from '../utils/process_results';
 import { drawResult, showAltPanel, showHeadingsPanel, visualize } from './visualize';
 import checkReadability from '../../sa11y/rulesets/readability.js';
+import { spriteClose, spriteReadability } from '../elements/sprite.js';
 
 export function showResults() {
   buildJumpList();
@@ -129,8 +130,7 @@ export function updatePanel() {
         const detailsTab = document.createElement('details');
         detailsTab.id = 'ed11y-readability-tab';
         detailsTab.innerHTML = `
-            <summary>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" aria-hidden="true"><path fill="currentColor" d="M528.3 46.5l-139.8 0c-48.1 0-89.9 33.3-100.4 80.3-10.6-47-52.3-80.3-100.4-80.3L48 46.5C21.5 46.5 0 68 0 94.5L0 340.3c0 26.5 21.5 48 48 48l89.7 0c102.2 0 132.7 24.4 147.3 75 .7 2.8 5.2 2.8 6 0 14.7-50.6 45.2-75 147.3-75l89.7 0c26.5 0 48-21.5 48-48l0-245.7c0-26.4-21.3-47.9-47.7-48.1zM242 311.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zM501.3 311.8c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.8c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.8-.1 0z"/></svg> <span class="summary-title"></span>
+            <summary>${spriteReadability}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
             </summary>
             <div class="details">
 							<div id="readability-content">
@@ -354,31 +354,31 @@ export function buildJumpList() {
   pauseObservers();
 
   // Initial alignment to get approximate Y position order for jump list.
-  Results.forEach((result) => {
-    let top = result.element.getBoundingClientRect().top;
+  for (let i = 0; i < Results.length; i++) {
+    let top = Results[i].element.getBoundingClientRect().top;
     if (!top) {
-      const visibleParent = firstVisibleParent(result.element);
+      const visibleParent = firstVisibleParent(Results[i].element);
       if (visibleParent) {
         top = visibleParent.getBoundingClientRect().top;
       }
     }
     top = top + window.scrollY;
     if (Options.fixedRoots) {
-      const root = result.element.closest('[data-ed11y-root]');
-      result.fixedRoot = root.dataset.ed11yRoot;
+      const root = Results[i].element.closest('[data-ed11y-root]');
+      Results[i].fixedRoot = root ? root.dataset.ed11yRoot : false;
     }
-    result.scrollableParent = closestScrollable(result.element);
-    if (result.scrollableParent) {
+    Results[i].scrollableParent = closestScrollable(Results[i].element);
+    if (Results[i].scrollableParent) {
       // Group these together.
       top = top * 0.000001;
     }
-    result.sortPos = top;
-  });
+    Results[i].sortPos = top;
+  }
 
   // Sort from bottom to top so focus order after insert is top to bottom.
   Results.sort((a, b) => b.sortPos - a.sortPos);
   Results?.forEach((result, i) => {
-    if (!result.dismissalStatus || State.showDismissed) {
+    if (result.element && (!result.dismissalStatus || State.showDismissed)) {
       drawResult(result, i);
     }
   });

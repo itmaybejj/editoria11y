@@ -2,6 +2,7 @@ import { firstVisibleParent, visible } from './utils.js';
 import { State, UI } from './state.js';
 import { Options } from './options.js';
 import Elements from '../../sa11y/utils/elements.js';
+import { incrementalCheckDebounce } from '../logic/run.js';
 
 export const intersect = (a, b, x = 10) => {
   // Compute intersect using browser offsets.
@@ -211,7 +212,13 @@ export function alignButtons() {
   if (!State.inlineAlerts) {
     // Compute based on target position.
 
-    State.jumpList.forEach((mark, i) => {
+    for (let i = 0; i < State.jumpList.length; i++) {
+      const mark = State.jumpList[i];
+      if (!mark.result.element) {
+        // @todo 3.x Test to see if edge case still exists.
+        console.warn('Editoria11y debug: element disappeared');
+        continue;
+      }
       if (!mark.result.element.isConnected) {
         // Something broke; rebuild jumpList on next loop.
         State.forceFullCheck = true;
@@ -268,7 +275,7 @@ export function alignButtons() {
       State.jumpList[i].targetOffset = targetOffset;
       State.jumpList[i].markTop = top;
       State.jumpList[i].markLeft = left;
-    });
+    }
   } else {
     // Compute based on self position.
 

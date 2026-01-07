@@ -193,7 +193,7 @@ export const Options = {
     activeTab: '#276499',
     activeTabText: '#fffffe',
     focusRing: '#007aff',
-    outlineWidth: '0px',
+    outlineWidth: '1px',
     borderRadius: '3px',
     ok: '#1f5381',
     warning: 'rgb(250, 216, 89)',

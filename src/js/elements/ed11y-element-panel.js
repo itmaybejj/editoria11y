@@ -3,6 +3,7 @@ import { togglePanel, toggleShowDismissals } from '../logic/run.js';
 import { visualize } from '../logic/visualize';
 import {
   spriteAlts,
+  spriteClose,
   spriteDismiss,
   spriteHeadings,
   spriteNext,
@@ -28,8 +29,7 @@ export class Ed11yElementPanel extends HTMLElement {
       </button>
       <div id='ed11y-visualizers' class="content" hidden>
           <details id="ed11y-headings-tab">
-              <summary>
-                  ${spriteHeadings}
+              <summary>${spriteHeadings}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
               </summary>
               <div class="details">
                   <span class="details-title"></span>
@@ -37,8 +37,7 @@ export class Ed11yElementPanel extends HTMLElement {
               </div>
           </details>
           <details id="ed11y-alts-tab">
-            <summary>
-                ${spriteAlts}
+            <summary>${spriteAlts}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
             </summary>
             <div class="details">
                 <span class="details-title"></span>

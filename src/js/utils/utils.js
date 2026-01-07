@@ -533,7 +533,7 @@ export function newIncrementalResults() {
   // Subtly new if a result has changed:
   let newResultString = `${State.errorCount} ${State.warningCount}`;
   Results.forEach((result) => {
-    newResultString += result.test + result.element.outerHTML;
+    newResultString += result.test + result.element?.outerHTML;
   });
   const changed = newResultString !== State.oldResultString;
   State.oldResultString = newResultString;
