@@ -1267,6 +1267,9 @@ ed11y-element-result[data-ed11y-open="true"] {
 		padding-top: 1em;
 		margin-bottom: -4px;
 	}
+	.message:has(.ed11y-contrast-tools) + .content-footer {
+		padding-top: 0;
+	}
 	.count {
 		margin-bottom: -2px;
 		font-size: 0.857em;
@@ -1516,7 +1519,6 @@ ed11y-element-result.ed11y-preload,
 	#color-pickers {
 		display: flex;
 		margin-top: 10px;
-		margin-bottom: 10px;
 	}
 	#color-pickers label {
 		display: flex;
