@@ -340,7 +340,8 @@
     issueDeveloper: "Developer issue",
     issueTemplate: "Template issue",
     EMBED_CUSTOM: `<div class="title" tabindex="-1">Is this embedded content accessible?</div>
-		<p>This checker cannot test inside embedded content. Manually check that images inside this embed have alt text, videos have captions, and interactive components can be <a href='https://webaim.org/techniques/keyboard/'>operated by a keyboard</a>.</p>`
+		<p>This checker cannot test inside embedded content. Manually check that images inside this embed have alt text, videos have captions, and interactive components can be <a href='https://webaim.org/techniques/keyboard/'>operated by a keyboard</a>.</p>`,
+    CONTRAST_WARNING: "An image or gradient means this checker is not sure what color is behind this text. Use the color picker below to check manually."
   };
   const testNames = {
     ALT_FILE_EXT: "This alt text is a URL, not a description",
