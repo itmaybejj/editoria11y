@@ -180,7 +180,7 @@ class Ed11yElementTip extends HTMLElement {
       this.prev.classList.add('ed11y-tip-prev');
       this.prev.setAttribute('aria-label', Ed11y.M.buttonPrevContent);
       this.prev.setAttribute('title', Ed11y.M.buttonPrevContent);
-      this.prev.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 -10 30 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="m40 100,-50 -50 50-50 50"></path></svg>';
+      this.prev.innerHTML = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="11" viewBox="0 -15 90 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m30 00 50 50-50 50" stroke-width="18"></path></svg>';
       this.prev.addEventListener('click', (event) => {
         event.preventDefault();
         Ed11y.jumpTo(-1);

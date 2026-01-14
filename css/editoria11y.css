@@ -823,6 +823,10 @@ ed11y-element-result[data-ed11y-open='true'] {
     height: 1em;
     margin: 1px 0 -1px;
   }
+  .ed11y-tip-prev svg {
+    rotate: 180deg;
+    margin-bottom: -2px;
+  }
 
   button,
   summary {
