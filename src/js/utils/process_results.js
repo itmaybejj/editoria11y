@@ -1,8 +1,9 @@
 import { Results, State } from './state';
 import Elements from '../../sa11y/utils/elements';
 import { Options } from './options';
-import { buildElementList, dismissDigest } from './utils';
+import { buildElementList } from './utils';
 import Constants from '../../sa11y/utils/constants';
+import { dismissDigest } from '../../sa11y/utils/utils.js';
 
 export function syncResults(results) {
   // Dispatch event for synchronizers.
@@ -179,7 +180,7 @@ export async function checkDismissed(i, splitConfiguration) {
     }
     inDismissals(result, i, splitConfiguration, digested);
   } else {
-    await dismissDigest(result.dismiss).then((digest) => {
+    await dismissDigest(Options.pepper, result.dismiss).then((digest) => {
       State.dismissKeys[result.dismiss] = digest;
       if (splitConfiguration) {
         State.splitConfiguration.devResults[i].dismiss = digest;

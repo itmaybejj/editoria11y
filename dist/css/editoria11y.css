@@ -1108,8 +1108,8 @@ button.ed11y-jump:hover .toggle-count {
   display: flex;
 }
 
-.ed11y-tip-wrapper .message:has(.ed11y-contrast-tools) + .content-footer {
-  padding-top: 0;
+.ed11y-tip-wrapper .message:has(#color-pickers:last-child) + .content-footer .count {
+  margin-top: -2em;
 }
 
 .ed11y-tip-wrapper .count {

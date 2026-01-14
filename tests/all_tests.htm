@@ -492,13 +492,18 @@
 		<script src="../dist/js/ed11y.umd.js"></script>
 		<script src="../dist/js/lang/en.umd.js"></script>
         <script>
+
+			// todo determine PHP equivalent hash for 'META_TITLE'
+			//PHPstorm says 7ff8ffc6ba42a34e087837c5f2a2df2e90267a3aac38c6c2f9ea6d205489efa7
+
 		  Ed11y.Lang.addI18n(Ed11yLangEn.strings);
           const ed11y = new Ed11y.Ed11y({
             alertMode : 'assertive',
             //baseFontSize: 18,
             //theme : 'sleekTheme',
             //theme : 'darkTheme',
-			  headingsOnlyFromCheckRoots: true, // @todo merge this is gone. can we move to only excluding header? or use fixedRoots? But fixedRoots would also need devFixedRoots...
+			  headingsOnlyFromCheckRoots: true, // @todo merge this is gone. replaced with ignoreContentOutsideRoots. Does that work?
+			  ignoreContentOutsideRoots: true,
             //outlineExclude : '.utility', // @todo CMS this syntax changed for Sa11y to the below.
 			  outlineIgnore: '.utility',
 			  // Split configuration
@@ -507,7 +512,7 @@
 				  showDev: true,
 				  devChecks: ['QA_IN_PAGE_LINK'],
 				  devOptions: {
-					  checkRoot: 'body',
+					  //checkRoot: 'footer',
 					  // containerIgnore: '',
 					  // contrastIgnore: '.sr-only',
 					  // outlineIgnore: '',
@@ -531,7 +536,7 @@
             // shadowComponents : 'shadow-test, shadow-test-no-hits, turtle',
             autoDetectShadowComponents: true,
             hiddenHandlers : '#hidden-handler',
-		  	checkRoot: 'main',
+		  	checkRoot: 'body',
             //showDismissed : true,
             altPlaceholder: ['This image has an empty alt attribute;'], // @todo CMS was string.
 			  //panelAttachTo: 'header',
@@ -682,7 +687,9 @@
 
 				  // Developer checks
 				  DUPLICATE_ID: true,
-				  META_TITLE: true,
+				  META_TITLE: {
+					  warning: true,
+				  },
 				  UNCONTAINED_LI: true,
 				  TABINDEX_ATTR: true,
 				  HIDDEN_FOCUSABLE: true,

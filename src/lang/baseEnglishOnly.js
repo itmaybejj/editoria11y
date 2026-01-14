@@ -103,7 +103,7 @@ export const englishOverrides = {
                 <li>The size 4 ball is the right size for this 9-year-old child.</li>
             </ul>`,
 
-  ALT_FILE_EXT: `This image's alt text is "%(alt)," which probably describes the file name, not the contents of the image.
+  ALT_FILE_EXT: `This image's alt text includes "%(alt)," which probably describes the file name, not the contents of the image.
         <p><strong>To fix:</strong> set this image's alternative text to a concise description of what this image means in this context.</p>
         <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
             <ul>
@@ -124,7 +124,7 @@ export const englishOverrides = {
             </ul>`,
 
   // Machine generated string.
-  ALT_MAYBE_BAD: `<p>This image's alt text is "%(alt)," which was flagged as containing a suspicious number of characters that may not form words.</p>
+  ALT_MAYBE_BAD: `<p>This image's alt text includes "%(alt)," which was flagged as containing a suspicious number of characters that may not form words.</p>
         <p><strong>To fix:</strong> if this is placeholder text, set this image's alternative text to a concise description of what this image means in this context.</p>
         <p>Note that a <a href="https://www.w3.org/WAI/tutorials/images/informative">good alt describes the image's message</a>, not simply what it contains. Depending on the context, the alt for the picture of a child kicking a ball might emphasize the setting, the child, the kick or the ball:</p>
             <ul>
@@ -136,13 +136,13 @@ export const englishOverrides = {
 
   LINK_ALT_MAYBE_BAD: `<p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
             Links should clearly and concisely describe their destination, even out of context.</p>
-           <p>This image's alt text is "%(alt)," which may not describe this link.</p>`,
+           <p>This image's alt text includes "%(alt)," which may not describe this link.</p>`,
 
   LINK_PLACEHOLDER_ALT: `<p>When a link includes an image, <a href="https://webaim.org/techniques/hypertext/link_text#alt_link" title="opens in new tab">the image's alt text becomes the link text</a> announced by screen readers.
             Links should clearly and concisely describe their destination, even out of context.</p>
            <p>This image's alt text is "%(alt)," which probably does not describe this link.</p>`,
 
-  LINK_ALT_FILE_EXT: `<p>This image's alt text is "%(alt)," which is probably a filename.</p>
+  LINK_ALT_FILE_EXT: `<p>This image's alt text includes "%(alt)," which is probably a filename.</p>
         <p>When a link is wrapped around an image and there is no other text, the <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">image's alt text becomes the link text</a> announced by screen readers.
             Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
             <ul>
@@ -150,14 +150,14 @@ export const englishOverrides = {
                 <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess"</li>
             </ul>`, // @todo after merge: compare with Sa11y's wording.
 
-  SUS_ALT: `<p>This image's alt text is "%(alt)," which mentions that this image is an image.</p>
+  SUS_ALT: `<p>This image's alt text includes "%(alt)," which mentions that this image is an image.</p>
         <p>Screen readers announce they are describing an image when reading alt text, so 
             phrases like "image of" and "photo of" are usually redundant in alt text; the screen reader user hears "image: image of something."</p>
             <p>Note that this is OK if the format is referring to the <strong>content</strong> of the image:</p>
             <ul><li>Format is redundant: "<em>photo of</em> a VHS tape"</li>
             <li>Format is relevant: "<em>photo of</em> a VHS tape in a photo album being discussed in a history class"</li></ul>`,
 
-  LINK_SUS_ALT: `<p>This image's alt text is "%(alt)," which mentions that this image is an image.</p>
+  LINK_SUS_ALT: `<p>This image's alt text includes "%(alt)," which mentions that this image is an image.</p>
         <hr><p>Links should clearly and concisely describe their destination. Since words like "image," "graphic" or "photo" are already redundant in text alternatives (screen readers already identify the image as an image), their presence in a linked image usually means the image's text alternative is <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">describing the image instead of the link</a>.</p>
             <ul>
                 <li>Good link text: "About us"</li>

@@ -62,16 +62,35 @@ export default function checkContrast(results, option) {
         });
       } else if (background.type === 'image') {
         if (!isHidden) {
-          contrastResults.push({
-            $el,
-            type: 'background-image',
-            color,
-            isLargeText,
-            background,
-            fontSize,
-            fontWeight,
-            opacity,
-          });
+          // Extract all colour codes from background-image value and check contrast.
+          const extractColours = Contrast.extractColorFromString(background.value);
+          const hasFailure =
+            !extractColours ||
+            extractColours.some((gradientStop) =>
+              Contrast.checkElementContrast(
+                $el,
+                color,
+                gradientStop,
+                fontSize,
+                fontWeight,
+                opacity,
+                option.contrastAlgorithm,
+              ),
+            );
+
+          // Push a warning if gradient stop fails contrast, or contains url().
+          if (hasFailure || background.value.includes('url(')) {
+            contrastResults.push({
+              $el,
+              type: 'background-image',
+              color,
+              isLargeText,
+              background,
+              fontSize,
+              fontWeight,
+              opacity,
+            });
+          }
         }
       } else if (!isHidden && Contrast.getHex(color) !== Contrast.getHex(background)) {
         const result = Contrast.checkElementContrast(
@@ -362,7 +381,7 @@ export default function checkContrast(results, option) {
             content: option.checks.CONTRAST_ERROR.content
               ? Lang.sprintf(option.checks.CONTRAST_ERROR.content)
               : Lang.sprintf('CONTRAST_ERROR') + ratioTip,
-            dismiss: Utils.prepareDismissal(`CONTRAST${sanitizedText}`),
+            dismiss: Utils.prepareDismissal(`CONTRAST_ERROR ${sanitizedText}`),
             dismissAll: option.checks.CONTRAST_ERROR.dismissAll ? 'CONTRAST_ERROR' : false,
             developer: option.checks.CONTRAST_ERROR.developer || false,
             contrastDetails: updatedItem,
@@ -379,7 +398,7 @@ export default function checkContrast(results, option) {
             content: option.checks.CONTRAST_INPUT.content
               ? Lang.sprintf(option.checks.CONTRAST_INPUT.content)
               : Lang.sprintf('CONTRAST_INPUT', ratio) + ratioTip,
-            dismiss: Utils.prepareDismissal(`CONTRAST${sanitizedInput}`),
+            dismiss: Utils.prepareDismissal(`CONTRAST_INPUT ${sanitizedInput}`),
             dismissAll: option.checks.CONTRAST_INPUT.dismissAll ? 'CONTRAST_INPUT' : false,
             developer: option.checks.CONTRAST_INPUT.developer || true,
             contrastDetails: updatedItem,
@@ -397,7 +416,7 @@ export default function checkContrast(results, option) {
               ? Lang.sprintf(option.checks.CONTRAST_PLACEHOLDER.content)
               : Lang.sprintf('CONTRAST_PLACEHOLDER') + ratioTip,
             position: 'afterend',
-            dismiss: Utils.prepareDismissal(`CPLACEHOLDER${sanitizedPlaceholder}`),
+            dismiss: Utils.prepareDismissal(`CONTRAST_PLACEHOLDER ${sanitizedPlaceholder}`),
             dismissAll: option.checks.CONTRAST_PLACEHOLDER.dismissAll
               ? 'CONTRAST_PLACEHOLDER'
               : false,
@@ -417,7 +436,9 @@ export default function checkContrast(results, option) {
               ? Lang.sprintf(option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.content)
               : Lang.sprintf('CONTRAST_PLACEHOLDER_UNSUPPORTED') + ratioTip,
             position: 'afterend',
-            dismiss: Utils.prepareDismissal(`CPLACEHOLDERUN${sanitizedPlaceholder}`),
+            dismiss: Utils.prepareDismissal(
+              `CONTRAST_PLACEHOLDER_UNSUPPORTED ${sanitizedPlaceholder}`,
+            ),
             dismissAll: option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.dismissAll
               ? 'CONTRAST_PLACEHOLDER_UNSUPPORTED'
               : false,
@@ -436,7 +457,7 @@ export default function checkContrast(results, option) {
             content: option.checks.CONTRAST_ERROR_GRAPHIC.content
               ? Lang.sprintf(option.checks.CONTRAST_ERROR_GRAPHIC.content)
               : Lang.sprintf('CONTRAST_ERROR_GRAPHIC') + graphicsTip,
-            dismiss: Utils.prepareDismissal(`CONTRASTERROR${sanitizedSVG}`),
+            dismiss: Utils.prepareDismissal(`CONTRAST_ERROR_GRAPHIC ${sanitizedSVG}`),
             dismissAll: option.checks.CONTRAST_ERROR_GRAPHIC.dismissAll
               ? 'CONTRAST_ERROR_GRAPHIC'
               : false,
@@ -456,7 +477,7 @@ export default function checkContrast(results, option) {
             content: option.checks.CONTRAST_WARNING_GRAPHIC.content
               ? Lang.sprintf(option.checks.CONTRAST_WARNING_GRAPHIC.content)
               : Lang.sprintf('CONTRAST_WARNING_GRAPHIC') + graphicsTip,
-            dismiss: Utils.prepareDismissal(`CONTRASTWARNING${sanitizedSVG}`),
+            dismiss: Utils.prepareDismissal(`CONTRAST_WARNING_GRAPHIC ${sanitizedSVG}`),
             dismissAll: option.checks.CONTRAST_WARNING_GRAPHIC.dismissAll
               ? 'CONTRAST_WARNING_GRAPHIC'
               : false,
@@ -475,7 +496,7 @@ export default function checkContrast(results, option) {
             content: option.checks.CONTRAST_WARNING.content
               ? Lang.sprintf(option.checks.CONTRAST_WARNING.content)
               : Lang.sprintf('CONTRAST_WARNING') + ratioTip,
-            dismiss: Utils.prepareDismissal(`CONTRAST${sanitizedText}`),
+            dismiss: Utils.prepareDismissal(`CONTRAST_WARNING ${sanitizedText}`),
             dismissAll: option.checks.CONTRAST_WARNING.dismissAll ? 'CONTRAST_WARNING' : false,
             developer: option.checks.CONTRAST_WARNING.developer || false,
             contrastDetails: updatedItem,
@@ -491,7 +512,7 @@ export default function checkContrast(results, option) {
             content: option.checks.CONTRAST_UNSUPPORTED.content
               ? Lang.sprintf(option.checks.CONTRAST_UNSUPPORTED.content)
               : Lang.sprintf('CONTRAST_WARNING') + ratioTip,
-            dismiss: Utils.prepareDismissal(`CONTRAST${sanitizedText}`),
+            dismiss: Utils.prepareDismissal(`CONTRAST_UNSUPPORTED ${sanitizedText}`),
             dismissAll: option.checks.CONTRAST_UNSUPPORTED.dismissAll
               ? 'CONTRAST_UNSUPPORTED'
               : false,

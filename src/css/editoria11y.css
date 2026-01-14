@@ -1267,8 +1267,8 @@ ed11y-element-result[data-ed11y-open="true"] {
 		padding-top: 1em;
 		margin-bottom: -4px;
 	}
-	.message:has(.ed11y-contrast-tools) + .content-footer {
-		padding-top: 0;
+	.message:has(#color-pickers:last-child) + .content-footer .count {
+		margin-top: -2em;
 	}
 	.count {
 		margin-bottom: -2px;

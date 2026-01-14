@@ -1050,7 +1050,7 @@ export function rangeChange(anchorNode) {
   if (
     !anchor ||
     (expandable &&
-      (State.roots.includes(anchor.parentNode) ||
+      (Array.prototype.includes.call(State.roots, anchor.parentNode) ||
         anchor.parentNode.matches('div[contenteditable="true"]')))
   ) {
     State.activeRange = false;

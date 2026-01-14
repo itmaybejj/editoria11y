@@ -15,6 +15,7 @@ import {
   dismissLogic,
   dismissButtons,
   removeDismissListeners,
+  upgradeSa11yDismissed,
 } from './features/dismiss-annotations';
 import { addColourFilters, resetColourFilters } from './features/colour-filters';
 import { exportResults, removeExportListeners } from './features/export-results';
@@ -80,6 +81,9 @@ class Sa11y {
         Constants.initializeReadability(option);
         Constants.initializeExclusions(option);
 
+        // One time upgrade of local storage values. To be removed in later version.
+        upgradeSa11yDismissed();
+
         // Make "Developer checks" on by default or if toggle switch is visually hidden.
         if (option.developerChecksOnByDefault) {
           if (Utils.store.getItem('sa11y-developer') === null || option.checkAllHideToggles) {
@@ -92,17 +96,17 @@ class Sa11y {
           if (option.headless) {
             // Headless: Perform all checks without loading UI.
             this.checkAll();
-            Utils.store.removeItem('sa11y-dismissed');
+            Utils.store.removeItem('sa11y-dismissed-digest');
           } else {
             // Save panel position preference if not already set or if position changes via props.
             const rememberPosition = Utils.store.getItem('sa11y-position');
-            const { panelPosition } = option;
+            const position = Constants.Global.panelPosition;
+            const isTop = (position) => position.includes('top');
             if (
               option.showMovePanelToggle &&
-              (!rememberPosition ||
-                !rememberPosition.includes('top') !== !panelPosition.includes('top'))
+              (!rememberPosition || isTop(rememberPosition) !== isTop(position))
             ) {
-              Utils.store.setItem('sa11y-position', panelPosition);
+              Utils.store.setItem('sa11y-position', position);
             }
 
             // Build control panel.
@@ -183,19 +187,6 @@ class Sa11y {
           checkReadability(this.results);
         }
 
-        // Build array of images to be used for image panel.
-        this.imageResults = Elements.Found.Images.map((image) => {
-          const match = this.results.find((i) => i.element === image);
-          return (
-            match && {
-              element: image,
-              type: match.type,
-              dismiss: match.dismiss,
-              developer: match.developer,
-            }
-          );
-        }).filter(Boolean);
-
         /* Custom checks */
         if (option.customChecks === true) {
           // Option 1: Provide via sa11y-custom-checks.js
@@ -238,7 +229,7 @@ class Sa11y {
       }
     };
 
-    this.updateResults = () => {
+    this.updateResults = async () => {
       // Filter out heading issues that are outside of the target root.
       this.results = this.results.filter((heading) => heading.isWithinRoot !== false);
 
@@ -256,13 +247,32 @@ class Sa11y {
       }
 
       // Generate HTML path, and optionally CSS selector path of element.
-      this.results.forEach(($el, id) => {
-        const cssPath = option.selectorPath ? Utils.generateSelectorPath($el.element) : '';
-        const htmlPath = $el.element?.outerHTML.replace(/\s{2,}/g, ' ').trim() || '';
-        Object.assign($el, { htmlPath, cssPath, id });
-      });
+      // @4.4.2 - Encrypt dismiss keys.
+      await Promise.all(
+        this.results.map(async ($el, id) =>
+          Object.assign($el, {
+            id,
+            cssPath: option.selectorPath ? Utils.generateSelectorPath($el.element) : '',
+            htmlPath: $el.element?.outerHTML.replace(/\s{2,}/g, ' ').trim() || '',
+            ...($el.dismiss && { dismissDigest: await Utils.dismissDigest($el.dismiss) }),
+          }),
+        ),
+      );
 
       if (option.headless === false) {
+        // Build array of images to be used for image panel.
+        this.imageResults = Elements.Found.Images.map((image) => {
+          const match = this.results.find((i) => i.element === image);
+          return (
+            match && {
+              element: image,
+              type: match.type,
+              dismissDigest: match.dismissDigest,
+              developer: match.developer,
+            }
+          );
+        }).filter(Boolean);
+
         // Check for dismissed items and update results array.
         const dismiss = dismissLogic(
           this.results,
