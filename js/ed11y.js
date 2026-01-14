@@ -107,7 +107,7 @@ class Ed11y {
       panelOffsetX: '25px',
       panelOffsetY: '25px',
       panelNoCover: '', // select other buttons to avoid.
-      panelAttachTo: document.body,
+      panelAttachTo: document.body, // provide DOM node or selector.
 
       // Selector list for elements that hide overflow, truncating buttons.
       constrainButtons: false,
@@ -249,6 +249,8 @@ class Ed11y {
     Ed11y.theme.buttonZIndex = Ed11y.options.buttonZIndex;
     Ed11y.theme.baseFontFamily = Ed11y.options.baseFontFamily;
 
+
+
     if (Ed11y.options.currentPage === false) {
       Ed11y.options.currentPage = window.location.pathname;
     }
@@ -370,6 +372,10 @@ class Ed11y {
 
         if (!Ed11y.options.checkRoots) {
           Ed11y.options.checkRoots = document.querySelector('main') !== null ? 'main' : 'body';
+        }
+
+        if (!Ed11y.options.panelAttachTo) {
+          Ed11y.options.panelAttachTo = document.querySelector('body');
         }
 
         // Run tests
