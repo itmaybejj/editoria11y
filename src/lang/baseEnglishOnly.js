@@ -56,7 +56,7 @@ export const englishOverrides = {
   // My style tests.
   HEADING_SKIPPED_LEVEL: `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
             <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>
-            <p>This heading skipped from level %(prevLevel) to level %(level). From a screen reader, this sounds like content is missing.</p>
+            <p>This heading skipped from <strong>level %(prevLevel) to level %(level)</strong>. From a screen reader, this sounds like content is missing.</p>
             <p><strong>To fix:</strong> adjust levels to form an accurate outline, without gaps.</p>
             `,
 
@@ -212,7 +212,7 @@ export const englishOverrides = {
 
   LINK_STOPWORD: `<p>This link's text is: <strong>%(text)</strong></p>
         <p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
-                <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully enough to figure out each link's purpose from context. Few readers do this, so click-through rates on meaningless links are extremely poor.</p>
+                <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully enough to figure out each link's purpose from context. Few readers do this, so they often miss generic links.</p>
                 <ul>
                 <li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text">meaningful links"</a></strong></li>
                 <li>Not meaningful: "Click <a href="https://webaim.org/techniques/hypertext/link_text">here</a> to learn about meaningful links."</li>

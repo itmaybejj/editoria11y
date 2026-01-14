@@ -53,6 +53,17 @@ export const interfaceStrings = {
 
 	CONTRAST_WARNING:
 		'A background image or gradient means this checker is not sure what color is behind this text. Use the color picker below to check manually.',
+
+	LINK_IDENTICAL_NAME:
+		`<p><strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong></p>
+		<p>Multiple links on this page have the same name. Links should uniquely describe their destination, even when read out of context. Consider ways to reword this link.</p>
+		<p>Duplicate links expect the reader be reading slowly and carefully enough to figure out each link's purpose from context. Few readers do this, so they often miss important links.</p>
+                <ul>
+                <li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text">meaningful links"</a></strong></li>
+                <li>Not unique: "Click <a href="https://webaim.org/techniques/hypertext/link_text">here</a> to learn about meaningful links."</li>
+                <li>Not concise: "<a href="https://webaim.org/techniques/hypertext/link_text">Click here to learn more about meaningful links</a>"</li>
+                </ul>
+		`,
 };
 
 export const testNames = {
@@ -66,7 +77,7 @@ export const testNames = {
   EMBED_VIDEO: 'Is this video accurately captioned?',
   HEADING_EMPTY: 'Add text to this heading, or remove it',
   HEADING_LONG: 'Can this heading be shorter?',
-  HEADING_SKIPPED_LEVEL: 'This heading is at the wrong level',
+  HEADING_SKIPPED_LEVEL: 'This heading is tagged with the wrong level',
   IMAGE_ALT_TOO_LONG: 'Can this alt text be shorter?',
   IMAGE_DECORATIVE: 'Is this image meaningless?',
   LINK_ALT_FILE_EXT: 'Alt text used as a link should not be a URL',
@@ -110,7 +121,7 @@ export const testNames = {
   LINK_CLICK_HERE: 'Manual check: link contains "click here"',
   LINK_DOI: 'APA Style guide recommends using descriptive DOI links',
   LINK_IDENTICAL_NAME:
-    'Manual check: link has identical text as another link but points to a different page',
+    'Does this link uniquely describe its destination?',
   LINK_FILE_EXT: 'Link points to a file without warning',
   EMBED_UNFOCUSABLE: 'Frame with tabindex="-1" will not be keyboard accessible.', // Contains html
   EMBED_MISSING_TITLE: 'Frame missing "title" attribute', // Contains value

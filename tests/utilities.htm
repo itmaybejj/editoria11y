@@ -304,9 +304,11 @@
                   }
                 });
                 document.addEventListener('ed11yShowHidden', function(e) {
-                    Ed11y.findElements('hiddenPop',`#ed11y-result-${e.detail.result}`, false);
+
+                    const foo = Ed11y.getElements(`#ed11y-result-${e.detail.result}`, 'document', []);
 					// @todo document the new false param.
-                    Ed11y.elements['hiddenPop'][0].closest('[hidden]')?.removeAttribute('hidden');
+                    foo[0]?.closest('[hidden]')?.removeAttribute('hidden');
+					console.log('page successfully opened ', foo[0])
 
                 }, false);
 
@@ -417,7 +419,7 @@
 				  developerPlugin: true,
 				  embeddedContentPlugin: true,
 				  linksAdvancedPlugin: true,
-                constrainButtons: '.constrain-position',
+                constrainButtons: '.constrain-position, main, body',
 				  checks: {
 					  // Heading checks
 					  HEADING_SKIPPED_LEVEL: true,

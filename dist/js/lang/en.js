@@ -190,7 +190,7 @@ const strings = {
     // Links advanced
     LINK_NEW_TAB: `Link opens in a new tab or window without warning. Doing so can be disorienting, especially for people who have difficulty perceiving visual content. Secondly, it is not always a good practice to control someone's experience or make decisions for them. Indicate that the link opens in a new window within the link text. <hr> <strong>Tip!</strong> Learn best practices: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">opening links in new browser windows and tabs.</a>`,
     LINK_FILE_EXT: 'Link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning. Indicate the file type within the link text. If it is a large file, consider including the file size. For example: "Executive Report (PDF, 3MB)"',
-    LINK_IDENTICAL_NAME: "Link has identical text as another link, although it points to a different page. Multiple links with the same text may cause confusion for people who use screen readers. <strong>Consider making the following link more descriptive to help distinguish it from other links.</strong> <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
+    LINK_IDENTICAL_NAME: "<p>Multiple links with the same text can be confusing. <strong>Consider making this link more descriptive to help distinguish it from other links.</strong></p><p><strong {B}>Link: </strong> <strong {C}>%(TEXT)</strong></p>",
     // Images
     ALT_UNPRONOUNCEABLE: "The alt text only contains unpronounceable symbols and/or spaces. Screen readers will announce the image and then pause. If the image is decorative, ensure there are no spaces within the alt text. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
     LINK_ALT_UNPRONOUNCEABLE: "The alt text within this linked image only contains unpronounceable symbols and/or spaces. Screen readers will announce the image and then pause. Ensure the alt text describes the destination of the link. <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
@@ -241,7 +241,7 @@ const strings = {
     QA_UPPERCASE: "Found all caps. Some screen readers may interpret all caps text as an acronym and will read each letter individually. Additionally, some people find all caps more difficult to read and it may give the appearance of SHOUTING.",
     QA_UNDERLINE: "Underlined text can be confused with links. Consider using a different style such as <code>&lt;strong&gt;</code><strong>strong importance</strong><code>&lt;/strong&gt;</code> or <code>&lt;em&gt;</code><em>emphasis</em><code>&lt;/em&gt;</code>.",
     QA_SUBSCRIPT: "The subscript and superscript formatting options should only be used to change the position of text for typographical conventions or standards. It should <strong>not</strong> solely be used for presentation or appearance purposes. Formatting entire sentences poses readability issues. Appropriate use cases would include displaying exponents, ordinal numbers such as 4<sup>th</sup> instead of fourth, and chemical formulas (e.g. H<sub>2</sub>O).",
-    QA_IN_PAGE_LINK: "Broken same-page link. The link target does not match any element on the page.",
+    QA_IN_PAGE_LINK: "The link target does not match any element on the page.",
     QA_NESTED_COMPONENTS: "Avoid nesting interactive layout components, such as placing accordions within other accordions, or placing tabs inside accordions and vice versa. This can complicate navigation, increase cognitive overload, and lead to people overlooking content.",
     QA_JUSTIFY: "Avoid using justified text, which aligns to both the left and right margins. This can be difficult for some people to read due to the uneven spaces between words. Use left-aligned text for better readability.",
     QA_SMALL_TEXT: "Small text is harder to read, particularly for those with low vision. To ensure better readability, avoid using font sizes smaller than the default.",
@@ -337,7 +337,16 @@ const interfaceStrings = {
   issueTemplate: "Template issue",
   EMBED_CUSTOM: `<div class="title" tabindex="-1">Is this embedded content accessible?</div>
 		<p>This checker cannot test inside embedded content. Manually check that images inside this embed have alt text, videos have captions, and interactive components can be <a href='https://webaim.org/techniques/keyboard/'>operated by a keyboard</a>.</p>`,
-  CONTRAST_WARNING: "A background image or gradient means this checker is not sure what color is behind this text. Use the color picker below to check manually."
+  CONTRAST_WARNING: "A background image or gradient means this checker is not sure what color is behind this text. Use the color picker below to check manually.",
+  LINK_IDENTICAL_NAME: `<p><strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong></p>
+		<p>Multiple links on this page have the same name. Links should uniquely describe their destination, even when read out of context. Consider ways to reword this link.</p>
+		<p>Duplicate links expect the reader be reading slowly and carefully enough to figure out each link's purpose from context. Few readers do this, so they often miss important links.</p>
+                <ul>
+                <li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text">meaningful links"</a></strong></li>
+                <li>Not unique: "Click <a href="https://webaim.org/techniques/hypertext/link_text">here</a> to learn about meaningful links."</li>
+                <li>Not concise: "<a href="https://webaim.org/techniques/hypertext/link_text">Click here to learn more about meaningful links</a>"</li>
+                </ul>
+		`
 };
 const testNames = {
   ALT_FILE_EXT: "This alt text is a URL, not a description",
@@ -350,7 +359,7 @@ const testNames = {
   EMBED_VIDEO: "Is this video accurately captioned?",
   HEADING_EMPTY: "Add text to this heading, or remove it",
   HEADING_LONG: "Can this heading be shorter?",
-  HEADING_SKIPPED_LEVEL: "This heading is at the wrong level",
+  HEADING_SKIPPED_LEVEL: "This heading is tagged with the wrong level",
   IMAGE_ALT_TOO_LONG: "Can this alt text be shorter?",
   IMAGE_DECORATIVE: "Is this image meaningless?",
   LINK_ALT_FILE_EXT: "Alt text used as a link should not be a URL",
@@ -395,7 +404,7 @@ const testNames = {
   LINK_SYMBOLS: "Manual check: are the symbols or emoji in this link meaningful?",
   LINK_CLICK_HERE: 'Manual check: link contains "click here"',
   LINK_DOI: "APA Style guide recommends using descriptive DOI links",
-  LINK_IDENTICAL_NAME: "Manual check: link has identical text as another link but points to a different page",
+  LINK_IDENTICAL_NAME: "Does this link uniquely describe its destination?",
   LINK_FILE_EXT: "Link points to a file without warning",
   EMBED_UNFOCUSABLE: 'Frame with tabindex="-1" will not be keyboard accessible.',
   // Contains html
@@ -489,7 +498,7 @@ const englishOverrides = {
   // My style tests.
   HEADING_SKIPPED_LEVEL: `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
             <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li><li>Heading level 2: a new topic</li></ul></li></ul>
-            <p>This heading skipped from level %(prevLevel) to level %(level). From a screen reader, this sounds like content is missing.</p>
+            <p>This heading skipped from <strong>level %(prevLevel) to level %(level)</strong>. From a screen reader, this sounds like content is missing.</p>
             <p><strong>To fix:</strong> adjust levels to form an accurate outline, without gaps.</p>
             `,
   HEADING_EMPTY: `<p>Headings and subheadings create a <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">navigable table of contents</a> for assistive devices. The numbers indicate indents in a nesting relationship:</p>
@@ -618,7 +627,7 @@ const englishOverrides = {
             </ul>`,
   LINK_STOPWORD: `<p>This link's text is: <strong>%(text)</strong></p>
         <p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
-                <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully enough to figure out each link's purpose from context. Few readers do this, so click-through rates on meaningless links are extremely poor.</p>
+                <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully enough to figure out each link's purpose from context. Few readers do this, so they often miss generic links.</p>
                 <ul>
                 <li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text">meaningful links"</a></strong></li>
                 <li>Not meaningful: "Click <a href="https://webaim.org/techniques/hypertext/link_text">here</a> to learn about meaningful links."</li>
