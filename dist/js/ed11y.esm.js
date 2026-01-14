@@ -5743,6 +5743,9 @@ function editableHighlighter(resultID, show, firstVisible) {
     return;
   }
   const result = Results[resultID];
+  if (!result || !firstVisible && !result.element) {
+    return;
+  }
   let el = UI.editableHighlight[resultID]?.highlight;
   if (!el) {
     el = document.createElement("ed11y-element-highlight");

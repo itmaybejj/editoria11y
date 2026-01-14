@@ -2,7 +2,6 @@ import { firstVisibleParent, visible } from './utils.js';
 import { State, UI } from './state.js';
 import { Options } from './options.js';
 import Elements from '../../sa11y/utils/elements.js';
-import { incrementalCheckDebounce } from '../logic/run.js';
 
 export const intersect = (a, b, x = 10) => {
   // Compute intersect using browser offsets.
