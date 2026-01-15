@@ -1,12 +1,12 @@
 import { Results, State, UI } from '../utils/state';
-import Lang from '../../sa11y/utils/lang';
-import Elements from '../../sa11y/utils/elements';
-import { computeAriaLabel } from '../../sa11y/utils/computeAccessibleName';
-import * as Utils from '../../sa11y/utils/utils';
+import Lang from '../../sa11y-js/utils/lang';
+import Elements from '../../sa11y-js/utils/elements';
+import { computeAriaLabel } from '../../sa11y-js/utils/computeAccessibleName';
+import * as Utils from '../../sa11y-js/utils/utils';
 import { alignAlts } from '../utils/align';
 import { getElements } from '../utils/utils';
 import { Options } from '../utils/options';
-import checkReadability from '../../sa11y/rulesets/readability';
+import checkReadability from '../../sa11y-js/rulesets/readability';
 import { spriteDismiss } from '../elements/sprite.js';
 
 export const showAltPanel = () => {

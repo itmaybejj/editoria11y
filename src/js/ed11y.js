@@ -1,9 +1,9 @@
-import Lang from '../sa11y/utils/lang';
-import { computeAccessibleName } from '../sa11y/utils/computeAccessibleName.js';
-import { prepareDismissal } from '../sa11y/utils/utils.js';
+import Lang from '../sa11y-js/utils/lang';
+import { computeAccessibleName } from '../sa11y-js/utils/computeAccessibleName.js';
+import { prepareDismissal } from '../sa11y-js/utils/utils.js';
 import { State, Theme, UI, Results } from './utils/state.js';
 import { Options } from './utils/options.js';
-import Elements from '../sa11y/utils/elements.js';
+import Elements from '../sa11y-js/utils/elements.js';
 import { checkAll, reset, incrementalCheck } from './logic/run.js';
 import { initialize } from './logic/initialize.js';
 import { getElements, findElements, showError } from './utils/utils.js';

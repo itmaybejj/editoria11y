@@ -1,4 +1,4 @@
-import Constants from "../../sa11y/utils/constants.js";
+import Constants from "../../sa11y-js/utils/constants.js";
 
 /*
 * Replaces Sa11y finder with one that does not insert CSS.

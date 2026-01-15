@@ -1,12 +1,12 @@
 import { Results, State, UI } from './state.js';
-import Lang from '../../sa11y/utils/lang.js';
-import find from '../../sa11y/utils/find.js';
-import Constants from '../../sa11y/utils/constants.js';
+import Lang from '../../sa11y-js/utils/lang.js';
+import find from '../../sa11y-js/utils/find.js';
+import Constants from '../../sa11y-js/utils/constants.js';
 import { Options } from './options.js';
-import findShadowComponents from '../../sa11y/logic/find-shadow-components.js';
-import Elements from '../../sa11y/utils/elements.js';
+import findShadowComponents from '../../sa11y-js/logic/find-shadow-components.js';
+import Elements from '../../sa11y-js/utils/elements.js';
 import ConsoleErrors from '../elements/ed11y-console-error.js';
-import { createAlert } from '../../sa11y/interface/alert';
+import { createAlert } from '../../sa11y-js/interface/alert';
 
 /*=============== Utilities ================*/
 

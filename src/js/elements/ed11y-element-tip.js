@@ -1,13 +1,13 @@
 import { Results, State, UI } from '../utils/state.js';
 import { alertOnInvisibleTip, dismissThis, jumpTo, transferFocus } from '../logic/run.js';
-import Lang from '../../sa11y/utils/lang.js';
+import Lang from '../../sa11y-js/utils/lang.js';
 import { Options } from '../utils/options.js';
 import { getElements } from '../utils/utils.js';
 import {
   generateColorSuggestion,
   generateContrastTools,
   initializeContrastTools,
-} from '../../sa11y/contrast/ui-tools.js';
+} from '../../sa11y-js/contrast/ui-tools.js';
 import { spriteClose, spriteCursor, spriteDismiss, spriteNext, spriteUnDismiss } from './sprite.js';
 
 export class Ed11yElementTip extends HTMLElement {

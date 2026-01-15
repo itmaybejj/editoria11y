@@ -1,9 +1,9 @@
 import { Results, State } from './state';
-import Elements from '../../sa11y/utils/elements';
+import Elements from '../../sa11y-js/utils/elements';
 import { Options } from './options';
 import { buildElementList } from './utils';
-import Constants from '../../sa11y/utils/constants';
-import { dismissDigest } from '../../sa11y/utils/utils.js';
+import Constants from '../../sa11y-js/utils/constants';
+import { dismissDigest } from '../../sa11y-js/utils/utils.js';
 
 export function syncResults(results) {
   // Dispatch event for synchronizers.

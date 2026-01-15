@@ -1,8 +1,8 @@
-import Constants from '../../sa11y/utils/constants.js';
+import Constants from '../../sa11y-js/utils/constants.js';
 import { State, Theme, UI } from '../utils/state.js';
-import Lang from '../../sa11y/utils/lang.js';
+import Lang from '../../sa11y-js/utils/lang.js';
 import { Options } from '../utils/options.js';
-import { documentLoadingCheck, store } from '../../sa11y/utils/utils.js';
+import { documentLoadingCheck, store } from '../../sa11y-js/utils/utils.js';
 import { checkRunPrevent, smush } from '../utils/utils.js';
 import { checkAll, continueCheck, windowResize } from './run.js';
 import { Ed11yElementAlt } from '../elements/ed11y-element-alt.js';

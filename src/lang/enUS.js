@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 
-import strings from '../sa11y/lang/enUS.js';
+import strings from '../sa11y-lang/enUS.js';
 import { interfaceStrings, testNames } from './baseAll.js';
 import { englishOverrides } from './baseEnglishOnly.js';
 

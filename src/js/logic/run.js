@@ -13,16 +13,16 @@ import {
   showError,
   visible,
 } from '../utils/utils.js';
-import { remove } from '../../sa11y/utils/utils.js';
-import checkHeaders from '../../sa11y/rulesets/headers.js';
-import checkLinkText from '../../sa11y/rulesets/link-text.js';
-import checkImages from '../../sa11y/rulesets/images.js';
-import checkLabels from '../../sa11y/rulesets/labels.js';
-import checkQA from '../../sa11y/rulesets/quality-assurance.js';
-import checkContrast from '../../sa11y/contrast/checkContrast.js';
-import checkDeveloper from '../../sa11y/rulesets/developer';
-import Lang from '../../sa11y/utils/lang.js';
-import Elements from '../../sa11y/utils/elements.js';
+import { remove } from '../../sa11y-js/utils/utils.js';
+import checkHeaders from '../../sa11y-js/rulesets/headers.js';
+import checkLinkText from '../../sa11y-js/rulesets/link-text.js';
+import checkImages from '../../sa11y-js/rulesets/images.js';
+import checkLabels from '../../sa11y-js/rulesets/labels.js';
+import checkQA from '../../sa11y-js/rulesets/quality-assurance.js';
+import checkContrast from '../../sa11y-js/contrast/checkContrast.js';
+import checkDeveloper from '../../sa11y-js/rulesets/developer';
+import Lang from '../../sa11y-js/utils/lang.js';
+import Elements from '../../sa11y-js/utils/elements.js';
 import {
   alignAlts,
   alignButtons,
@@ -31,9 +31,9 @@ import {
   closestScrollable,
 } from '../utils/align.js';
 import { Options } from '../utils/options.js';
-import checkEmbeddedContent from '../../sa11y/rulesets/embedded-content';
+import checkEmbeddedContent from '../../sa11y-js/rulesets/embedded-content';
 import customRuleset from '../rulesets/custom-ruleset';
-import Constants from '../../sa11y/utils/constants';
+import Constants from '../../sa11y-js/utils/constants';
 import {
   countAlerts,
   filterAlerts,
@@ -41,7 +41,7 @@ import {
   syncResults,
 } from '../utils/process_results';
 import { drawResult, showAltPanel, showHeadingsPanel, visualize } from './visualize';
-import checkReadability from '../../sa11y/rulesets/readability.js';
+import checkReadability from '../../sa11y-js/rulesets/readability.js';
 import { spriteClose, spriteReadability } from '../elements/sprite.js';
 
 export function showResults() {
@@ -938,8 +938,9 @@ export function updateTipLocations() {
 }
 
 export function alignHighlights() {
+  // This duplicates code in alignButtons; can it be dropped?
   if (Options.fixedRoots && UI.editableHighlight.length > 0) {
-    State.positionedFrames = [];
+    State.positionedFrames.length = 0;
 
     Options.fixedRoots.forEach((root) => {
       if (root.framePositioner) {

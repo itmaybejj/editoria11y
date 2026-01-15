@@ -8,7 +8,7 @@
 		**/
     /*!
       * Sa11y, the accessibility quality assurance assistant.
-      * @version 4.4.0
+      * @version 4.4.2
       * @author Adam Chaboryk
       * @license GPL-2.0-or-later
       * @copyright © 2020 - 2026 Toronto Metropolitan University.
@@ -1486,7 +1486,7 @@ ${this.error.stack}
 ## Comments
 `;
       const encodedTemplate = encodeURIComponent(template);
-      const github = `https://github.com/ryersondmp/sa11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
+      const github = `https://github.com/ryersondmp/sa11y-js/issues/new?title=Bug%20report&body=${encodedTemplate}`;
       content.innerHTML = `
       <button class="close-btn" aria-describedby="ed11y-console-error"><span aria-hidden="true">&times</span> ${Lang._("ALERT_CLOSE")}</button>
       <h2 id="ed11y-console-error">${Lang._("ERROR")}</h2>
@@ -2477,7 +2477,7 @@ URL: ${url2}</pre>
       const link = $el.closest(
         option.imageWithinLightbox ? `a[href]:not(${option.imageWithinLightbox})` : "a[href]"
       );
-      const src = $el.getAttribute("src") ? $el.getAttribute("src") : $el.getAttribute("srcset");
+      const src = $el.getAttribute("src") ? $el.getAttribute("src").split("?")[0] : $el.getAttribute("srcset");
       const linkText = link ? fnIgnore(link, Constants.Exclusions.LinkSpan).textContent.replace(
         linkIgnoreStringPattern,
         ""
@@ -3012,6 +3012,7 @@ URL: ${url2}</pre>
       if (isElementHidden($el) === false) {
         const tableHeaders = $el.querySelectorAll("th");
         const semanticHeadings = $el.querySelectorAll("h1, h2, h3, h4, h5, h6");
+        const firstRow = $el.querySelector("tr") ? $el.querySelector("tr").innerHTML : $el.innerHTML;
         if (option.checks.TABLES_MISSING_HEADINGS && tableHeaders.length === 0) {
           results.push({
             test: "TABLES_MISSING_HEADINGS",
@@ -3020,7 +3021,7 @@ URL: ${url2}</pre>
             content: Lang.sprintf(
               option.checks.TABLES_MISSING_HEADINGS.content || "TABLES_MISSING_HEADINGS"
             ),
-            dismiss: prepareDismissal(`TABLES_MISSING_HEADINGS ${$el.textContent}`),
+            dismiss: prepareDismissal(`TABLES_MISSING_HEADINGS ${firstRow}`),
             dismissAll: option.checks.TABLES_MISSING_HEADINGS.dismissAll ? "TABLES_MISSING_HEADINGS" : false,
             developer: option.checks.TABLES_MISSING_HEADINGS.developer || false
           });
@@ -3034,7 +3035,7 @@ URL: ${url2}</pre>
               content: Lang.sprintf(
                 option.checks.TABLES_SEMANTIC_HEADING.content || "TABLES_SEMANTIC_HEADING"
               ),
-              dismiss: prepareDismissal(`TABLES_SEMANTIC_HEADING ${$el.textContent}`),
+              dismiss: prepareDismissal(`TABLES_SEMANTIC_HEADING ${firstRow}`),
               dismissAll: option.checks.TABLES_SEMANTIC_HEADING.dismissAll ? "TABLES_SEMANTIC_HEADING" : false,
               developer: option.checks.TABLES_SEMANTIC_HEADING.developer || false
             });
@@ -3050,7 +3051,7 @@ URL: ${url2}</pre>
                 option.checks.TABLES_EMPTY_HEADING.content || "TABLES_EMPTY_HEADING"
               ),
               position: "afterbegin",
-              dismiss: prepareDismissal(`TABLES_EMPTY_HEADING ${$el.textContent}`),
+              dismiss: prepareDismissal(`TABLES_EMPTY_HEADING ${firstRow}`),
               dismissAll: option.checks.TABLES_EMPTY_HEADING.dismissAll ? "TABLES_EMPTY_HEADING" : false,
               developer: option.checks.TABLES_EMPTY_HEADING.developer || false
             });
@@ -6158,7 +6159,7 @@ URL: ${url2}</pre>
   }
   function alignHighlights() {
     if (Options.fixedRoots && UI.editableHighlight.length > 0) {
-      State.positionedFrames = [];
+      State.positionedFrames.length = 0;
       Options.fixedRoots.forEach((root) => {
         if (root.framePositioner) {
           State.positionedFrames.push(root.framePositioner.getBoundingClientRect());

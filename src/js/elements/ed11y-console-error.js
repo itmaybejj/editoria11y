@@ -1,5 +1,5 @@
-import Lang from '../../sa11y/utils/lang.js';
-import { escapeHTML } from '../../sa11y/utils/utils';
+import Lang from '../../sa11y-js/utils/lang.js';
+import { escapeHTML } from '../../sa11y-js/utils/utils';
 import { State } from '../utils/state.js';
 
 // Replaces Sa11y error with one that does not attach CSS.
@@ -39,7 +39,7 @@ ${this.error.stack}
 ## Comments
 `;
     const encodedTemplate = encodeURIComponent(template);
-    const github = `https://github.com/ryersondmp/sa11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
+    const github = `https://github.com/ryersondmp/sa11y-js/issues/new?title=Bug%20report&body=${encodedTemplate}`;
 
     // Message
     content.innerHTML = `

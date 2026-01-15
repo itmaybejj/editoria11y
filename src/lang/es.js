@@ -1,4 +1,4 @@
-import strings from '../sa11y/lang/es.js';
+import strings from '../sa11y-lang/es.js';
 
 const baseStrings = {
   OUTLINE: 'Encabezados',

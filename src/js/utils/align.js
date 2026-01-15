@@ -1,7 +1,7 @@
 import { firstVisibleParent, visible } from './utils.js';
 import { State, UI } from './state.js';
 import { Options } from './options.js';
-import Elements from '../../sa11y/utils/elements.js';
+import Elements from '../../sa11y-js/utils/elements.js';
 
 export const intersect = (a, b, x = 10) => {
   // Compute intersect using browser offsets.

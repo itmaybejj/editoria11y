@@ -6,12 +6,14 @@ mkdir -p tmp/
 cd tmp/
 git clone git@github.com:ryersondmp/sa11y.git .
 git checkout $GIT_REF
-rm -rf ../src/sa11y
-mv src/js ../src/sa11y
+rm -rf ../src/sa11y-js
+rm -rf ../src/sa11y-lang
+mv src/js ../src/sa11y-js
+mv src/lang ../src/sa11y-lang
 
 # Patches
 # Don't inject Sa11y CSS into shadow components
-cp ../src/sa11y-patch/logic/find-shadow-components.js ../src/sa11y/logic/find-shadow-components.js
+cp ../src/sa11y-patch/logic/find-shadow-components.js ../src/sa11y-js/logic/find-shadow-components.js
 
 cd ../
 rm -rf tmp
@@ -24,7 +26,7 @@ while IFS= read -r line; do
     ED11YV=${BASH_REMATCH[2]}
   	fi
 done < "$filename"
-sed -i -E "s/.*\(* @version 3\)\(.*\)/  \1${ED11YV}/g" rollup.config.js
+#sed -i -E "s/.*\(* @version 3\)\(.*\)/  \1${ED11YV}/g" rollup.config.js
 
 npm install
 
