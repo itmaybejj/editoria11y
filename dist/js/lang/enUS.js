@@ -604,10 +604,10 @@ const englishOverrides = {
   IMAGE_ALT_TOO_LONG: `<p>Image text alternatives are announced by screen readers as a single run-on sentence; listeners must listen to the entire alt a second time if they miss something. If this cannot be reworded to something succinct, it is better to use the alt to reference a <em>visible</em> <a href="https://www.w3.org/WAI/tutorials/images/complex/">text alternative for complex images</a>. For example:</p>
             <ul><li>"Event poster; details follow in caption"</li>
             <li>"Chart showing our issues going to zero; details follow in table"</li></ul>
-            This image's alt text is: <em>%(alt)</em>
+            This image's %(altLength) character alt text is: <em>%(ALT_TEXT)</em>
             `,
   LINK_IMAGE_LONG_ALT: `<p><a href="https://webaim.org/techniques/hypertext/link_text#alt_link">The alt text on a linked image is used to describe the link destination</a>. Links should be brief, clear and concise, as screen reader users often listen to the list of links on the page to find content of interest. Long alternative text inside a link often indicates that the image's text alternative is describing the image instead rather than the link.</p>
-        This image's alt text is: <em>%(alt)</em>`,
+        This image's %(altLength) character alt text is: <em>%(ALT_TEXT)</em>`,
   LINK_IMAGE_ALT_AND_TEXT: `<p>Screen readers will <a href="https://www.w3.org/WAI/tutorials/images/functional/">include this image's alt text</a> when describing the link.</p><p>Check to make sure this helps describe the link's destination, rather than providing irrelevant or redundant information:</p>
             <p><strong class="badge">Alt</strong> "<em><strong>%(alt)</strong></em>"</p>
         `,

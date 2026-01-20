@@ -56,7 +56,7 @@ export const State = {
 
   /* Annotations initial states */
   jumpList: [],
-  lastOpenTip: Number - 1,
+  openJumpPosition: Number - 1,
   viaJump: false,
   toggledFrom: false,
   scrollPending: 0,
@@ -73,7 +73,7 @@ export const State = {
 export const Theme = {};
 
 export const UI = {
-  editableHighlight: [],
+  editableHighlight: {},
   imageAlts: [],
   attachCSS: () => {},
   panel: false,

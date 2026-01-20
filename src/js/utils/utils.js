@@ -464,7 +464,7 @@ export function resetResults(incremental) {
     button: false,
     tip: false,
   };
-  State.lastOpenTip = -1;
+  State.openJumpPosition = -1;
   resetClass([
     'ed11y-ring-red',
     'ed11y-ring-yellow',

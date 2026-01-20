@@ -125,7 +125,7 @@ export class Ed11yElementResult extends HTMLElement {
         console.warn('Editoria11y race condition: toggle without jump list');
         buildJumpList();
       }
-      State.lastOpenTip = Number(this.getAttribute('data-ed11y-jump-position'));
+      State.openJumpPosition = Number(this.getAttribute('data-ed11y-jump-position'));
       State.tipOpen = true;
       State.openTip = {
         button: this,

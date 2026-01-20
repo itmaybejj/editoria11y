@@ -32,6 +32,7 @@ export class Ed11yElementTip extends HTMLElement {
     this.wrapper = document.createElement('div');
     this.wrapper.setAttribute('role', 'dialog');
     this.wrapper.dataset.ed11yTest = this.result.test;
+    this.wrapper.dataset.ed11yDismiss = this.result.dismiss;
     this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
     this.wrapper.style.setProperty('opacity', '0');
     this.wrapper.setAttribute(
@@ -153,10 +154,11 @@ export class Ed11yElementTip extends HTMLElement {
           unDismissButton.textContent = okd
             ? Lang._('unDismissOKButton')
             : Lang._('unDismissHideButton');
+          unDismissButton.dataset.ed11yAll = 'false';
           unDismissButton.prepend(unDismissIcon);
           buttonBar.prepend(unDismissButton);
-          unDismissButton.addEventListener('click', () => {
-            dismissThis('reset');
+          unDismissButton.addEventListener('click', (e) => {
+            dismissThis('reset', e.target.closest('button'));
           });
         } else {
           const restoreNote = document.createElement('div');
@@ -198,16 +200,18 @@ export class Ed11yElementTip extends HTMLElement {
             OkAllText.textContent = Lang._('dismissOkAllButton');
             const icon = check.cloneNode(true);
             OkAllButton.prepend(icon);
+            OkAllButton.dataset.ed11yAll = 'true';
             pageActionsContent.insertAdjacentElement('afterbegin', OkAllButton);
-            OkAllButton.addEventListener('click', () => {
-              dismissThis('ok', true);
+            OkAllButton.addEventListener('click', (e) => {
+              dismissThis('ok', e.target.closest('button'));
             });
           }
 
           OkButton.prepend(check);
+          OkButton.dataset.ed11yAll = 'false';
 
-          OkButton.addEventListener('click', () => {
-            dismissThis('ok');
+          OkButton.addEventListener('click', (e) => {
+            dismissThis('ok', e.target.closest('button'));
           });
         }
 
@@ -222,9 +226,10 @@ export class Ed11yElementTip extends HTMLElement {
           ignoreText.textContent = Lang._('DISMISS');
           ignoreButton.append(ignoreText);
           ignoreButton.prepend(dismissIcon.cloneNode(true));
+          ignoreButton.dataset.ed11yAll = 'false';
           buttonBar.prepend(ignoreButton);
-          ignoreButton.addEventListener('click', () => {
-            dismissThis('hide');
+          ignoreButton.addEventListener('click', (e) => {
+            dismissThis('hide', e.target.closest('button'));
           });
 
           if (showPageActions) {
@@ -236,9 +241,10 @@ export class Ed11yElementTip extends HTMLElement {
             ignoreAllButton.append(ignoreAllText);
             const icon = dismissIcon.cloneNode(true);
             ignoreAllButton.prepend(icon);
+            ignoreAllButton.dataset.ed11yAll = 'true';
             pageActionsContent.appendChild(ignoreAllButton);
-            ignoreAllButton.addEventListener('click', () => {
-              dismissThis('hide', true);
+            ignoreAllButton.addEventListener('click', (e) => {
+              dismissThis('hide', e.target.closest('button'));
             });
           }
         }

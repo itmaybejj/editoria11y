@@ -306,10 +306,10 @@ export const Options = {
     LINK_SUS_ALT: true,
     SUS_ALT: true,
     LINK_IMAGE_LONG_ALT: {
-      maxLength: 250,
+      maxLength: 160,
     },
     IMAGE_ALT_TOO_LONG: {
-      maxLength: 250,
+      maxLength: 160,
     },
     LINK_IMAGE_ALT: false, // Not interested.
     LINK_IMAGE_ALT_AND_TEXT: true,

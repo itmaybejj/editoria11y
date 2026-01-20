@@ -13,7 +13,6 @@ import {
   showError,
   visible,
 } from '../utils/utils.js';
-import { remove } from '../../sa11y-js/utils/utils.js';
 import checkHeaders from '../../sa11y-js/rulesets/headers.js';
 import checkLinkText from '../../sa11y-js/rulesets/link-text.js';
 import checkImages from '../../sa11y-js/rulesets/images.js';
@@ -454,6 +453,9 @@ export function editableHighlighter(resultID, show, firstVisible) {
     el.style.setProperty('position', 'absolute');
     el.style.setProperty('pointer-events', 'none');
     State.panelAttachTo.appendChild(el);
+  } else if (!el.parentElement) {
+    // detached due to reset.
+    document.body.appendChild(el);
   }
   UI.editableHighlight[resultID].target = firstVisible ? firstVisible : result.element;
   const zIndex = result.dismissalStatus
@@ -655,7 +657,7 @@ export function jumpTo(next = true) {
   State.viaJump = true;
   // Determine target result.
   const goMax = State.jumpList.length - 1;
-  let goNum = next ? +State.lastOpenTip + 1 : +State.lastOpenTip - 1;
+  let goNum = next ? +State.openJumpPosition + 1 : +State.openJumpPosition - 1;
   if (goNum < 0) {
     // Reached end of loop or dismissal pushed us out of loop
     State.nextText = Lang._('SKIP_TO_ISSUE');
@@ -667,7 +669,7 @@ export function jumpTo(next = true) {
     const showNum = Number.isNaN(goNum) ? 2 : goNum + 2;
     State.nextText = `${Lang._('SKIP_TO_ISSUE')} ${showNum}`;
   }
-  State.lastOpenTip = goNum;
+  State.openJumpPosition = goNum;
   window.setTimeout(() => {
     UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = State.nextText;
   }, 250);
@@ -680,7 +682,7 @@ export function jumpTo(next = true) {
   let goto = State.jumpList[goNum];
   if (!goto) {
     goto = State.jumpList[0];
-    State.lastOpenTip = 0;
+    State.openJumpPosition = 0;
   }
   const result = goto.getAttribute('data-ed11y-result');
   const gotoResult = Results[result];
@@ -939,7 +941,7 @@ export function updateTipLocations() {
 
 export function alignHighlights() {
   // This duplicates code in alignButtons; can it be dropped?
-  if (Options.fixedRoots && UI.editableHighlight.length > 0) {
+  if (Options.fixedRoots && Object.keys(UI.editableHighlight).length > 0) {
     State.positionedFrames.length = 0;
 
     Options.fixedRoots.forEach((root) => {
@@ -949,7 +951,7 @@ export function alignHighlights() {
     });
   }
 
-  UI.editableHighlight.every((el) => {
+  Object.values(UI.editableHighlight).every((el) => {
     if (!Results[el.resultID]) {
       State.interaction = true;
       State.forceFullCheck = true;
@@ -958,6 +960,12 @@ export function alignHighlights() {
       return false;
     }
 
+    if (!Object.keys(State.openTip.button).length) {
+      return false;
+    }
+    if (State.openTip.button.dataset.ed11yResult !== el.resultID) {
+      return true;
+    }
     const framePositioner =
       Results[el.resultID].fixedRoot && State.positionedFrames[Results[el.resultID].fixedRoot]
         ? State.positionedFrames[Results[el.resultID].fixedRoot]
@@ -1513,40 +1521,33 @@ window.addEventListener('ed11yEndVisualization', () => {
   resumeObservers();
 });
 
-export function dismissThis(dismissalType, all = false) {
+export function dismissThis(dismissalType, button) {
   // Find the active tip and draw its identifying information from the result list
-  const removal = State.openTip;
-  const id = removal.tip.dataset.ed11yResult;
-  const test = Results[id].test;
+  const tip = button.closest('.ed11y-wrapper');
+  const test = tip.dataset.ed11yTest;
+  const dismissKey = tip.dataset.ed11yDismiss;
 
-  if (all) {
+  if (button.dataset.ed11yAll === 'true') {
     Results.forEach((result) => {
       if (result.test === test && result.dismissalStatus !== dismissalType) {
-        dismissOne(dismissalType, test, result.dismiss);
+        dismissOne(dismissalType, test, dismissKey);
       }
     });
   } else {
-    const dismissalKey = Results[id].dismiss;
-    dismissOne(dismissalType, test, dismissalKey);
+    dismissOne(dismissalType, test, dismissKey);
   }
 
   // Remove tip and reset borders around element
-  resetClass(['ed11y-hidden-highlight', 'ed11y-ring-red', 'ed11y-ring-yellow']);
-  removal.tip?.parentNode?.removeChild(removal.tip);
-  removal.button?.parentNode?.removeChild(removal.button);
-  remove('ed11y-element-highlight', 'document');
-  UI.editableHighlight = [];
-
   reset();
   State.showPanel = true;
   checkAll();
 
-  const rememberGoto = State.lastOpenTip;
+  const rememberGoto = State.openJumpPosition;
 
   window.setTimeout(
     () => {
       if (State.jumpList.length > 0) {
-        State.lastOpenTip = rememberGoto - 1;
+        State.openJumpPosition = rememberGoto - 1;
         UI.panelJumpNext?.focus();
       } else {
         window.setTimeout(() => {
