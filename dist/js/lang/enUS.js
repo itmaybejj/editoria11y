@@ -336,8 +336,8 @@ const interfaceStrings = {
   issueContent: "Content issue",
   issueDeveloper: "Developer issue",
   issueTemplate: "Template issue",
-  EMBED_CUSTOM: `<div class="title" tabindex="-1">Is this embedded content accessible?</div>
-		<p>This checker cannot test inside embedded content. Manually check that images inside this embed have alt text, videos have captions, and interactive components can be <a href='https://webaim.org/techniques/keyboard/'>operated by a keyboard</a>.</p>`,
+  /*  EMBED_CUSTOM: `<div class="title" tabindex="-1">Is this embedded content accessible?</div>
+  		<p>This checker cannot test inside embedded content. Manually check that images inside this embed have alt text, videos have captions, and interactive components can be <a href='https://webaim.org/techniques/keyboard/'>operated by a keyboard</a>.</p>`,*/
   CONTRAST_WARNING: "A background image or gradient means this checker is not sure what color is behind this text. Use the color picker below to check manually.",
   LINK_IDENTICAL_NAME: `<p><strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong></p>
 		<p>Multiple links on this page have the same name. Links should uniquely describe their destination, even when read out of context. Consider ways to reword this link.</p>
@@ -347,7 +347,8 @@ const interfaceStrings = {
                 <li>Not unique: "Click <a href="https://webaim.org/techniques/hypertext/link_text">here</a> to learn about meaningful links."</li>
                 <li>Not concise: "<a href="https://webaim.org/techniques/hypertext/link_text">Click here to learn more about meaningful links</a>"</li>
                 </ul>
-		`
+		`,
+  EMBED_GENERAL: 'Automated checkers cannot test content inside embeds. Make sure someone has checked that all images inside this embed have alt text, videos have captions, text has sufficient contrast, and links and buttons are <a href="https://webaim.org/techniques/keyboard/">keyboard accessible.</a>'
 };
 const testNames = {
   ALT_FILE_EXT: "This alt text is a URL, not a description",
@@ -355,7 +356,7 @@ const testNames = {
   ALT_PLACEHOLDER: "This alt text is meaningless placeholder text",
   ALT_UNPRONOUNCEABLE: "This alt text is unpronounceable",
   EMBED_AUDIO: "Does this audio have a transcript?",
-  EMBED_CUSTOM: "Is this embedded content accessible?",
+  // EMBED_CUSTOM: 'Is this embedded content accessible?',
   EMBED_DATA_VIZ: "Is this visualization accessible?",
   EMBED_VIDEO: "Is this video accurately captioned?",
   HEADING_EMPTY: "Add text to this heading, or remove it",
@@ -411,7 +412,7 @@ const testNames = {
   // Contains html
   EMBED_MISSING_TITLE: 'Frame missing "title" attribute',
   // Contains value
-  EMBED_GENERAL: 'Manual check: "iframe" content',
+  EMBED_GENERAL: "Embedded iframes need manual checks",
   QA_BAD_LINK: "Manual check: link target may be invalid",
   QA_STRONG_ITALICS: "Manual check: entire paragraph is emphasized",
   QA_IN_PAGE_LINK: "Broken same-page link",
@@ -683,7 +684,6 @@ const englishOverrides = {
             <p>Note that automatic, machine-generated transcripts must be proofread, and speaker identifications must be added, before being considered an equal alternative</p>`,
   EMBED_DATA_VIZ: `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
 							<p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
-  EMBED_CUSTOM: "<p>This checker cannot test inside embedded content. Check to sure images inside this embed have alt text, videos have captions, and interactive components can be <a href='https://webaim.org/techniques/keyboard/'>operated by a keyboard</a>.</p>",
   /* New */
   LABELS_ARIA_LABEL_INPUT: "<p>Labeling fields with only a title or placeholder means the label visually disappears as soon as someone starts writing. This makes it difficult for people to review input when there are several fields. Check to make sure a visible field label remains and matches the invisible field title or placeholder.</p><p><strong {B}>Invisible field name:</strong> <strong {C}>%(TEXT)</strong></p>"
 };

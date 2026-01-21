@@ -569,259 +569,6 @@
     }
     return computedText;
   };
-  function find(selector, desiredRoot, exclude) {
-    const root = [];
-    if (desiredRoot === "document") {
-      root.push(document.body);
-      if (Constants.Global.fixedRoots) {
-        root.push(Constants.Global.fixedRoots);
-      }
-    } else if (desiredRoot === "root") {
-      root.push(Constants.Root.areaToCheck);
-    } else {
-      root.push(document.querySelectorAll(desiredRoot));
-    }
-    const exclusions = Constants.Exclusions.Container.join(", ");
-    const additionalExclusions = exclude?.join(", ") || "";
-    const additional = additionalExclusions ? `, ${additionalExclusions}` : "";
-    let list = [];
-    root.flat().filter(Boolean)?.forEach((r) => {
-      const shadowComponents = r?.querySelectorAll("[data-sa11y-has-shadow-root]");
-      const shadow = shadowComponents ? ", [data-sa11y-has-shadow-root]" : "";
-      const elements2 = Array.from(
-        r.querySelectorAll(`:is(${selector}${shadow}):not(${exclusions}${additional})`)
-      );
-      if (shadowComponents.length) {
-        const shadowFind = [];
-        elements2.forEach((el, i) => {
-          if (el?.matches?.("[data-sa11y-has-shadow-root]") && el?.shadowRoot) {
-            shadowFind[i] = el.shadowRoot.querySelectorAll(
-              `:is(${selector}):not(${exclusions}${additional})`
-            );
-          }
-        });
-        if (shadowFind.length > 0) {
-          for (let index = shadowFind.length - 1; index >= 0; index--) {
-            if (shadowFind[index]) {
-              elements2.splice(index, 1, ...shadowFind[index]);
-            }
-          }
-        }
-      }
-      list = list.concat(elements2.filter((node) => node.parentNode.tagName !== "SLOT"));
-    });
-    return list;
-  }
-  function documentLoadingCheck(callback) {
-    if (document.readyState === "complete") {
-      callback();
-    } else {
-      window.addEventListener("load", callback);
-    }
-  }
-  function isScreenReaderOnly(element) {
-    const style = getComputedStyle(element);
-    if (style.getPropertyValue("clip-path").startsWith("inset(50%)")) {
-      return true;
-    }
-    if (style.clip === "rect(1px, 1px, 1px, 1px)" || style.clip === "rect(0px, 0px, 0px, 0px)") {
-      return true;
-    }
-    const indent = parseInt(style.textIndent, 10);
-    if (!Number.isNaN(indent) && Math.abs(indent) > 5e3) {
-      return true;
-    }
-    if (style.overflow === "hidden" && parseFloat(style.width) < 2 && parseFloat(style.height) < 2) {
-      return true;
-    }
-    if (style.position === "absolute" && ["left", "right", "top", "bottom"].some((p) => Math.abs(parseInt(style[p], 10)) > 5e3)) {
-      return true;
-    }
-    return parseFloat(style.fontSize) < 2;
-  }
-  function isElementHidden(element) {
-    return element.hidden || getComputedStyle(element).getPropertyValue("display") === "none";
-  }
-  function isElementVisuallyHiddenOrHidden(element) {
-    if (element.offsetWidth === 0 && element.offsetHeight === 0 || element.clientHeight === 1 && element.clientWidth === 1) {
-      return true;
-    }
-    return isElementHidden(element);
-  }
-  function escapeHTML(string) {
-    const div = document.createElement("div");
-    div.textContent = string;
-    return div.innerHTML.replaceAll('"', "&quot;").replaceAll("'", "&#039;").replaceAll("`", "&#x60;");
-  }
-  function stripAllSpecialCharacters(string) {
-    return string.replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
-  }
-  function sanitizeHTML(string) {
-    return string.replace(/[^\w. ]/gi, (c) => `&#${c.charCodeAt(0)};`);
-  }
-  function sanitizeHTMLBlock(html, allowStyles = false) {
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = html;
-    ["script", "style", "noscript", "iframe", "form"].forEach((tag) => {
-      const elements2 = tempDiv.getElementsByTagName(tag);
-      while (elements2.length > 0) {
-        elements2[0].parentNode.removeChild(elements2[0]);
-      }
-    });
-    const allElements = Array.from(tempDiv.getElementsByTagName("*"));
-    allElements.forEach((element) => {
-      Array.from(element.attributes).forEach((attr) => {
-        if (attr.name.startsWith("on")) {
-          element.removeAttribute(attr.name);
-        }
-      });
-      if (!allowStyles) {
-        element.removeAttribute("style");
-      }
-    });
-    return tempDiv.innerHTML;
-  }
-  function fnIgnore(element, selectors) {
-    let ignoreQuery = "noscript,script,style,audio,video,form,iframe";
-    if (selectors && selectors.length > 0) {
-      ignoreQuery = `${ignoreQuery},${selectors.join(",")}`;
-    }
-    const clone = element.cloneNode(true);
-    const toRemove = clone.querySelectorAll(ignoreQuery);
-    let i = toRemove.length;
-    while (i--) {
-      toRemove[i].remove();
-    }
-    return clone;
-  }
-  const gotText = /* @__PURE__ */ new WeakMap();
-  function getText(element) {
-    if (gotText.has(element)) {
-      return gotText.get(element);
-    }
-    const ignore = fnIgnore(element);
-    const text = ignore.textContent.replace(/[\r\n]+/g, "").replace(/\s+/g, " ").trim();
-    gotText.set(element, text);
-    return text;
-  }
-  function removeWhitespace(string) {
-    return string.replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
-  }
-  function truncateString(string, maxLength) {
-    const truncatedString = string.substring(0, maxLength).trimEnd();
-    return string.length > maxLength ? `${truncatedString}...` : string;
-  }
-  const store = {
-    getItem(key) {
-      try {
-        if (localStorage.getItem(key) === null) {
-          return sessionStorage.getItem(key);
-        }
-        return localStorage.getItem(key);
-      } catch {
-        return false;
-      }
-    },
-    setItem(key, value) {
-      try {
-        localStorage.setItem(key, value);
-      } catch {
-        sessionStorage.setItem(key, value);
-      }
-      return true;
-    },
-    removeItem(key) {
-      try {
-        localStorage.removeItem(key);
-      } catch {
-        sessionStorage.removeItem(key);
-      }
-      return true;
-    }
-  };
-  function prepareDismissal(string) {
-    return String(string).replace(/([^0-9a-zA-Z])/g, "").substring(0, 256);
-  }
-  function getBestImageSource(element) {
-    const getLastSrc = (src) => src?.split(/,\s+/).pop()?.trim()?.split(/\s+/)[0];
-    const resolveUrl = (src) => src ? new URL(src, window.location.href).href : null;
-    const dataSrc = getLastSrc(element.getAttribute("data-src") || element.getAttribute("srcset"));
-    if (dataSrc) {
-      return resolveUrl(dataSrc);
-    }
-    const picture = element.closest("picture")?.querySelector("source[srcset]")?.getAttribute("srcset");
-    const pictureSrc = getLastSrc(picture);
-    if (pictureSrc) {
-      return resolveUrl(pictureSrc);
-    }
-    return resolveUrl(element.getAttribute("src"));
-  }
-  function isVisibleTextInAccName($el, accName, exclusions = [], linkIgnoreStrings) {
-    let text = "";
-    const excludeSelector = exclusions?.length ? exclusions.join(",") : "";
-    const ignoreStrings = Array.isArray(linkIgnoreStrings) ? linkIgnoreStrings : null;
-    const stripIgnored = (value = "") => ignoreStrings ? ignoreStrings.reduce((result, str) => result.replace(str, ""), value) : value;
-    $el.childNodes.forEach((node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        text += stripIgnored(node.textContent);
-      }
-      if (node.nodeType !== Node.ELEMENT_NODE) {
-        return;
-      }
-      if (excludeSelector && node.matches(excludeSelector)) {
-        return;
-      }
-      if (!isElementVisuallyHiddenOrHidden(node)) {
-        text += stripIgnored(getText(node));
-      }
-    });
-    const emojiRegex = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu;
-    let visibleText = text.replace(emojiRegex, "");
-    visibleText = removeWhitespace(visibleText).toLowerCase();
-    if (visibleText === "x") {
-      return false;
-    }
-    return visibleText.length !== 0 && !accName.toLowerCase().includes(visibleText);
-  }
-  function standardizeHref($el) {
-    let href = $el.getAttribute("href");
-    href = removeWhitespace(href).toLowerCase();
-    if (href.endsWith("/")) {
-      href = href.slice(0, -1);
-    }
-    href = href.replace(/^https?:\/\/(www\.)?/, "");
-    href = href.replace(/\.(html|php|htm|asp|aspx)$/i, "");
-    return href;
-  }
-  function generateRegexString(input, matchStart = false) {
-    if (!input) return null;
-    if (input instanceof RegExp) return input;
-    let patterns = [];
-    if (Array.isArray(input)) {
-      patterns = input;
-    } else if (typeof input === "string") {
-      patterns = input.split(",").map((s) => s.trim());
-    } else {
-      return null;
-    }
-    patterns = patterns.filter((p) => p && p.length > 0);
-    if (patterns.length === 0) return null;
-    const escapeRegExp = (string) => {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    };
-    const joinedPatterns = patterns.map(escapeRegExp).join("|");
-    const finalPattern = matchStart ? `^(?:${joinedPatterns})` : joinedPatterns;
-    return new RegExp(finalPattern, "gi");
-  }
-  async function dismissDigest(pepper, message) {
-    const msgUint8 = new TextEncoder().encode(pepper + message);
-    const hashBuffer = await window.crypto.subtle.digest("SHA-256", msgUint8);
-    if (Uint8Array.prototype.toHex) {
-      return new Uint8Array(hashBuffer).toHex();
-    }
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-  }
   const State = {
     version: "3.0.0",
     english: true,
@@ -1330,17 +1077,270 @@
       CONTRAST_ERROR: false,
       CONTRAST_PLACEHOLDER: false,
       CONTRAST_PLACEHOLDER_UNSUPPORTED: false,
+      // Show error on unsupported color spaces.
       CONTRAST_ERROR_GRAPHIC: false,
       CONTRAST_WARNING_GRAPHIC: false,
       // Don't enable.
-      CONTRAST_UNSUPPORTED: false,
-      // What's this?
-      // dev
-      EMBED_CUSTOM: {
-        sources: "#embed"
-      }
+      CONTRAST_UNSUPPORTED: false
+      // Show error on unsupported color spaces.
+      // @todo remove from CMS and deprecate.
+      // EMBED_CUSTOM: { sources: '#embed', },
     }
   };
+  function find(selector, desiredRoot, exclude) {
+    const root = [];
+    if (desiredRoot === "document") {
+      root.push(document.body);
+      if (Constants.Global.fixedRoots) {
+        root.push(Constants.Global.fixedRoots);
+      }
+    } else if (desiredRoot === "root") {
+      root.push(Constants.Root.areaToCheck);
+    } else {
+      root.push(document.querySelectorAll(desiredRoot));
+    }
+    const exclusions = Constants.Exclusions.Container.join(", ");
+    const additionalExclusions = exclude?.join(", ") || "";
+    const additional = additionalExclusions ? `, ${additionalExclusions}` : "";
+    let list = [];
+    root.flat().filter(Boolean)?.forEach((r) => {
+      const shadowComponents = r?.querySelectorAll("[data-sa11y-has-shadow-root]");
+      const shadow = shadowComponents ? ", [data-sa11y-has-shadow-root]" : "";
+      const elements2 = Array.from(
+        r.querySelectorAll(`:is(${selector}${shadow}):not(${exclusions}${additional})`)
+      );
+      if (shadowComponents.length) {
+        const shadowFind = [];
+        elements2.forEach((el, i) => {
+          if (el?.matches?.("[data-sa11y-has-shadow-root]") && el?.shadowRoot) {
+            shadowFind[i] = el.shadowRoot.querySelectorAll(
+              `:is(${selector}):not(${exclusions}${additional})`
+            );
+          }
+        });
+        if (shadowFind.length > 0) {
+          for (let index = shadowFind.length - 1; index >= 0; index--) {
+            if (shadowFind[index]) {
+              elements2.splice(index, 1, ...shadowFind[index]);
+            }
+          }
+        }
+      }
+      list = list.concat(elements2.filter((node) => node.parentNode.tagName !== "SLOT"));
+    });
+    return list;
+  }
+  function documentLoadingCheck(callback) {
+    if (document.readyState === "complete") {
+      callback();
+    } else {
+      window.addEventListener("load", callback);
+    }
+  }
+  function isScreenReaderOnly(element) {
+    const style = getComputedStyle(element);
+    if (style.getPropertyValue("clip-path").startsWith("inset(50%)")) {
+      return true;
+    }
+    if (style.clip === "rect(1px, 1px, 1px, 1px)" || style.clip === "rect(0px, 0px, 0px, 0px)") {
+      return true;
+    }
+    const indent = parseInt(style.textIndent, 10);
+    if (!Number.isNaN(indent) && Math.abs(indent) > 5e3) {
+      return true;
+    }
+    if (style.overflow === "hidden" && parseFloat(style.width) < 2 && parseFloat(style.height) < 2) {
+      return true;
+    }
+    if (style.position === "absolute" && ["left", "right", "top", "bottom"].some((p) => Math.abs(parseInt(style[p], 10)) > 5e3)) {
+      return true;
+    }
+    return parseFloat(style.fontSize) < 2;
+  }
+  function isElementHidden(element) {
+    return element.hidden || getComputedStyle(element).getPropertyValue("display") === "none";
+  }
+  function isElementVisuallyHiddenOrHidden(element) {
+    if (element.offsetWidth === 0 && element.offsetHeight === 0 || element.clientHeight === 1 && element.clientWidth === 1) {
+      return true;
+    }
+    return isElementHidden(element);
+  }
+  function escapeHTML(string) {
+    const div = document.createElement("div");
+    div.textContent = string;
+    return div.innerHTML.replaceAll('"', "&quot;").replaceAll("'", "&#039;").replaceAll("`", "&#x60;");
+  }
+  function stripAllSpecialCharacters(string) {
+    return string.replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
+  }
+  function sanitizeHTML(string) {
+    return string.replace(/[^\w. ]/gi, (c) => `&#${c.charCodeAt(0)};`);
+  }
+  function sanitizeHTMLBlock(html, allowStyles = false) {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    ["script", "style", "noscript", "iframe", "form"].forEach((tag) => {
+      const elements2 = tempDiv.getElementsByTagName(tag);
+      while (elements2.length > 0) {
+        elements2[0].parentNode.removeChild(elements2[0]);
+      }
+    });
+    const allElements = Array.from(tempDiv.getElementsByTagName("*"));
+    allElements.forEach((element) => {
+      Array.from(element.attributes).forEach((attr) => {
+        if (attr.name.startsWith("on")) {
+          element.removeAttribute(attr.name);
+        }
+      });
+      if (!allowStyles) {
+        element.removeAttribute("style");
+      }
+    });
+    return tempDiv.innerHTML;
+  }
+  function fnIgnore(element, selectors) {
+    let ignoreQuery = "noscript,script,style,audio,video,form,iframe";
+    if (selectors && selectors.length > 0) {
+      ignoreQuery = `${ignoreQuery},${selectors.join(",")}`;
+    }
+    const clone = element.cloneNode(true);
+    const toRemove = clone.querySelectorAll(ignoreQuery);
+    let i = toRemove.length;
+    while (i--) {
+      toRemove[i].remove();
+    }
+    return clone;
+  }
+  const gotText = /* @__PURE__ */ new WeakMap();
+  function getText(element) {
+    if (gotText.has(element)) {
+      return gotText.get(element);
+    }
+    const ignore = fnIgnore(element);
+    const text = ignore.textContent.replace(/[\r\n]+/g, "").replace(/\s+/g, " ").trim();
+    gotText.set(element, text);
+    return text;
+  }
+  function removeWhitespace(string) {
+    return string.replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+  }
+  function truncateString(string, maxLength) {
+    const truncatedString = string.substring(0, maxLength).trimEnd();
+    return string.length > maxLength ? `${truncatedString}...` : string;
+  }
+  const store = {
+    getItem(key) {
+      try {
+        if (localStorage.getItem(key) === null) {
+          return sessionStorage.getItem(key);
+        }
+        return localStorage.getItem(key);
+      } catch {
+        return false;
+      }
+    },
+    setItem(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch {
+        sessionStorage.setItem(key, value);
+      }
+      return true;
+    },
+    removeItem(key) {
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        sessionStorage.removeItem(key);
+      }
+      return true;
+    }
+  };
+  function prepareDismissal(string) {
+    return String(string).replace(/([^0-9a-zA-Z])/g, "").substring(0, 256);
+  }
+  function getBestImageSource(element) {
+    const getLastSrc = (src) => src?.split(/,\s+/).pop()?.trim()?.split(/\s+/)[0];
+    const resolveUrl = (src) => src ? new URL(src, window.location.href).href : null;
+    const dataSrc = getLastSrc(element.getAttribute("data-src") || element.getAttribute("srcset"));
+    if (dataSrc) {
+      return resolveUrl(dataSrc);
+    }
+    const picture = element.closest("picture")?.querySelector("source[srcset]")?.getAttribute("srcset");
+    const pictureSrc = getLastSrc(picture);
+    if (pictureSrc) {
+      return resolveUrl(pictureSrc);
+    }
+    return resolveUrl(element.getAttribute("src"));
+  }
+  function isVisibleTextInAccName($el, accName, exclusions = [], linkIgnoreStrings) {
+    let text = "";
+    const excludeSelector = exclusions?.length ? exclusions.join(",") : "";
+    const ignoreStrings = Array.isArray(linkIgnoreStrings) ? linkIgnoreStrings : null;
+    const stripIgnored = (value = "") => ignoreStrings ? ignoreStrings.reduce((result, str) => result.replace(str, ""), value) : value;
+    $el.childNodes.forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        text += stripIgnored(node.textContent);
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        return;
+      }
+      if (excludeSelector && node.matches(excludeSelector)) {
+        return;
+      }
+      if (!isElementVisuallyHiddenOrHidden(node)) {
+        text += stripIgnored(getText(node));
+      }
+    });
+    const emojiRegex = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu;
+    let visibleText = text.replace(emojiRegex, "");
+    visibleText = removeWhitespace(visibleText).toLowerCase();
+    if (visibleText === "x") {
+      return false;
+    }
+    return visibleText.length !== 0 && !accName.toLowerCase().includes(visibleText);
+  }
+  function standardizeHref($el) {
+    let href = $el.getAttribute("href");
+    href = removeWhitespace(href).toLowerCase();
+    if (href.endsWith("/")) {
+      href = href.slice(0, -1);
+    }
+    href = href.replace(/^https?:\/\/(www\.)?/, "");
+    href = href.replace(/\.(html|php|htm|asp|aspx)$/i, "");
+    return href;
+  }
+  function generateRegexString(input, matchStart = false) {
+    if (!input) return null;
+    if (input instanceof RegExp) return input;
+    let patterns = [];
+    if (Array.isArray(input)) {
+      patterns = input;
+    } else if (typeof input === "string") {
+      patterns = input.split(",").map((s) => s.trim());
+    } else {
+      return null;
+    }
+    patterns = patterns.filter((p) => p && p.length > 0);
+    if (patterns.length === 0) return null;
+    const escapeRegExp = (string) => {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    };
+    const joinedPatterns = patterns.map(escapeRegExp).join("|");
+    const finalPattern = matchStart ? `^(?:${joinedPatterns})` : joinedPatterns;
+    return new RegExp(finalPattern, "gi");
+  }
+  async function dismissDigest(pepper, message) {
+    console.log(pepper, message);
+    const msgUint8 = new TextEncoder().encode(pepper + message);
+    const hashBuffer = await window.crypto.subtle.digest("SHA-256", msgUint8);
+    if (Uint8Array.prototype.toHex) {
+      return new Uint8Array(hashBuffer).toHex();
+    }
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
   const Elements = /* @__PURE__ */ (function myElements() {
     const Found = {};
     function initializeElements(option) {
@@ -1858,6 +1858,9 @@ URL: ${url2}</pre>
       }
     }
     return preventCheck;
+  }
+  function createDismissalKey(string) {
+    return dismissDigest(Options.pepper, prepareDismissal(string));
   }
   function resetResults(incremental) {
     State.jumpList = [];
@@ -4903,25 +4906,6 @@ URL: ${url2}</pre>
     }
     return results;
   }
-  function customRuleset(results) {
-    if (Options.checks.EMBED_CUSTOM) {
-      const matchedEmbeds = getElements(Options.checks.EMBED_CUSTOM.sources, "root");
-      Lang.langStrings.embeddedContent = `<div class="title" tabindex="-1">${Options.embeddedContentTitle}</div>${Options.embeddedContentMessage}`;
-      matchedEmbeds.forEach(($el) => {
-        results.push({
-          test: "EMBED_CUSTOM",
-          element: $el,
-          type: "warning",
-          content: Lang.sprintf("EMBED_CUSTOM"),
-          inline: false,
-          dismiss: prepareDismissal($el.tagName + $el.getAttribute("src")),
-          dismissAll: "embeddedContent",
-          developer: false
-        });
-      });
-    }
-    return results;
-  }
   function syncResults(results) {
     if (!State.incremental) {
       window.setTimeout(() => {
@@ -6454,7 +6438,6 @@ URL: ${url2}</pre>
           checkHeaders(results, Options, State.headingOutline);
           checkImages(results, Options);
           checkEmbeddedContent(results, Options);
-          customRuleset(results);
           checkQA(results, Options);
           break;
         case "group2":
@@ -7586,7 +7569,7 @@ URL: ${url2}</pre>
     ALT_PLACEHOLDER: "This alt text is meaningless placeholder text",
     ALT_UNPRONOUNCEABLE: "This alt text is unpronounceable",
     EMBED_AUDIO: "Does this audio have a transcript?",
-    EMBED_CUSTOM: "Is this embedded content accessible?",
+    // EMBED_CUSTOM: 'Is this embedded content accessible?',
     EMBED_DATA_VIZ: "Is this visualization accessible?",
     EMBED_VIDEO: "Is this video accurately captioned?",
     HEADING_EMPTY: "Add text to this heading, or remove it",
@@ -7642,7 +7625,7 @@ URL: ${url2}</pre>
     // Contains html
     EMBED_MISSING_TITLE: 'Frame missing "title" attribute',
     // Contains value
-    EMBED_GENERAL: 'Manual check: "iframe" content',
+    EMBED_GENERAL: "Embedded iframes need manual checks",
     QA_BAD_LINK: "Manual check: link target may be invalid",
     QA_STRONG_ITALICS: "Manual check: entire paragraph is emphasized",
     QA_IN_PAGE_LINK: "Broken same-page link",
@@ -7875,11 +7858,11 @@ URL: ${url2}</pre>
   exports2.UI = UI;
   exports2.checkAll = checkAll;
   exports2.computeAccessibleName = computeAccessibleName;
+  exports2.createDismissalKey = createDismissalKey;
   exports2.elements = elements;
   exports2.findElements = findElements;
   exports2.getElements = getElements;
   exports2.incrementalCheck = incrementalCheck;
-  exports2.prepareDismissal = prepareDismissal;
   exports2.reset = reset;
   exports2.version = version;
   Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });

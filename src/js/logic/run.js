@@ -31,7 +31,6 @@ import {
 } from '../utils/align.js';
 import { Options } from '../utils/options.js';
 import checkEmbeddedContent from '../../sa11y-js/rulesets/embedded-content';
-import customRuleset from '../rulesets/custom-ruleset';
 import Constants from '../../sa11y-js/utils/constants';
 import {
   countAlerts,
@@ -1260,7 +1259,7 @@ const enqueueTests = (queue, results) => {
         checkHeaders(results, Options, State.headingOutline);
         checkImages(results, Options);
         checkEmbeddedContent(results, Options);
-        customRuleset(results);
+        // customRuleset(results);
         checkQA(results, Options);
         break;
       case 'group2':

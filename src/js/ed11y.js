@@ -1,12 +1,11 @@
 import Lang from '../sa11y-js/utils/lang';
 import { computeAccessibleName } from '../sa11y-js/utils/computeAccessibleName.js';
-import { prepareDismissal } from '../sa11y-js/utils/utils.js';
 import { State, Theme, UI, Results } from './utils/state.js';
 import { Options } from './utils/options.js';
 import Elements from '../sa11y-js/utils/elements.js';
 import { checkAll, reset, incrementalCheck } from './logic/run.js';
 import { initialize } from './logic/initialize.js';
-import { getElements, findElements, showError } from './utils/utils.js';
+import { createDismissalKey, getElements, findElements, showError } from './utils/utils.js';
 import version from './version.js';
 
 class Ed11y {
@@ -33,10 +32,10 @@ export {
   UI,
   checkAll,
   computeAccessibleName,
+  createDismissalKey,
   findElements,
   getElements,
   incrementalCheck,
-  prepareDismissal,
   reset,
   version,
   Ed11y,

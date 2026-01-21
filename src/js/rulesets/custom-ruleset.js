@@ -4,10 +4,10 @@ import { getElements } from '../utils/utils';
 import * as Utils from '../../sa11y-js/utils/utils';
 
 export default function customRuleset(results) {
-  /* *********************************************************** */
-  /*  Error: Find all links pointing to development environment. */
-  /* *********************************************************** */
-
+  /*
+   * Disabled as of 3.0.0.
+   * */
+  /*
   if (Options.checks.EMBED_CUSTOM) {
     const matchedEmbeds = getElements(Options.checks.EMBED_CUSTOM.sources, 'root');
     Lang.langStrings.embeddedContent = `<div class="title" tabindex="-1">${Options.embeddedContentTitle}</div>${Options.embeddedContentMessage}`;
@@ -24,6 +24,7 @@ export default function customRuleset(results) {
       });
     });
   }
+  */
 
   return results;
 }

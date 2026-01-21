@@ -7,6 +7,7 @@ import findShadowComponents from '../../sa11y-js/logic/find-shadow-components.js
 import Elements from '../../sa11y-js/utils/elements.js';
 import ConsoleErrors from '../elements/ed11y-console-error.js';
 import { createAlert } from '../../sa11y-js/interface/alert';
+import { dismissDigest, prepareDismissal } from '../../sa11y-js/utils/utils.js';
 
 /*=============== Utilities ================*/
 
@@ -455,6 +456,10 @@ export function checkRunPrevent() {
     }
   }
   return preventCheck;
+}
+
+export function createDismissalKey(string) {
+  return dismissDigest(Options.pepper, prepareDismissal(string));
 }
 
 export function resetResults(incremental) {

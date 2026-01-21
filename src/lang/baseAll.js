@@ -48,8 +48,8 @@ export const interfaceStrings = {
   issueDeveloper: 'Developer issue',
   issueTemplate: 'Template issue',
 
-  EMBED_CUSTOM: `<div class="title" tabindex="-1">Is this embedded content accessible?</div>
-		<p>This checker cannot test inside embedded content. Manually check that images inside this embed have alt text, videos have captions, and interactive components can be <a href='https://webaim.org/techniques/keyboard/'>operated by a keyboard</a>.</p>`,
+/*  EMBED_CUSTOM: `<div class="title" tabindex="-1">Is this embedded content accessible?</div>
+		<p>This checker cannot test inside embedded content. Manually check that images inside this embed have alt text, videos have captions, and interactive components can be <a href='https://webaim.org/techniques/keyboard/'>operated by a keyboard</a>.</p>`,*/
 
 	CONTRAST_WARNING:
 		'A background image or gradient means this checker is not sure what color is behind this text. Use the color picker below to check manually.',
@@ -64,6 +64,8 @@ export const interfaceStrings = {
                 <li>Not concise: "<a href="https://webaim.org/techniques/hypertext/link_text">Click here to learn more about meaningful links</a>"</li>
                 </ul>
 		`,
+	EMBED_GENERAL:
+		'Automated checkers cannot test content inside embeds. Make sure someone has checked that all images inside this embed have alt text, videos have captions, text has sufficient contrast, and links and buttons are <a href="https://webaim.org/techniques/keyboard/">keyboard accessible.</a>',
 };
 
 export const testNames = {
@@ -72,7 +74,7 @@ export const testNames = {
   ALT_PLACEHOLDER: 'This alt text is meaningless placeholder text',
   ALT_UNPRONOUNCEABLE: 'This alt text is unpronounceable',
   EMBED_AUDIO: 'Does this audio have a transcript?',
-  EMBED_CUSTOM: 'Is this embedded content accessible?',
+  // EMBED_CUSTOM: 'Is this embedded content accessible?',
   EMBED_DATA_VIZ: 'Is this visualization accessible?',
   EMBED_VIDEO: 'Is this video accurately captioned?',
   HEADING_EMPTY: 'Add text to this heading, or remove it',
@@ -125,7 +127,7 @@ export const testNames = {
   LINK_FILE_EXT: 'Link points to a file without warning',
   EMBED_UNFOCUSABLE: 'Frame with tabindex="-1" will not be keyboard accessible.', // Contains html
   EMBED_MISSING_TITLE: 'Frame missing "title" attribute', // Contains value
-  EMBED_GENERAL: 'Manual check: "iframe" content',
+  EMBED_GENERAL: 'Embedded iframes need manual checks',
   QA_BAD_LINK: 'Manual check: link target may be invalid',
   QA_STRONG_ITALICS: 'Manual check: entire paragraph is emphasized',
   QA_IN_PAGE_LINK: 'Broken same-page link',

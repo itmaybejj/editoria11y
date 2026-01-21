@@ -421,14 +421,12 @@ export const Options = {
     CONTRAST_INPUT: false,
     CONTRAST_ERROR: false,
     CONTRAST_PLACEHOLDER: false,
-    CONTRAST_PLACEHOLDER_UNSUPPORTED: false,
+    CONTRAST_PLACEHOLDER_UNSUPPORTED: false, // Show error on unsupported color spaces.
     CONTRAST_ERROR_GRAPHIC: false,
     CONTRAST_WARNING_GRAPHIC: false, // Don't enable.
-    CONTRAST_UNSUPPORTED: false, // What's this?
+    CONTRAST_UNSUPPORTED: false, // Show error on unsupported color spaces.
 
-    // dev
-    EMBED_CUSTOM: {
-      sources: '#embed',
-    },
+    // @todo remove from CMS and deprecate.
+    // EMBED_CUSTOM: { sources: '#embed', },
   },
 };

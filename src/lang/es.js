@@ -53,7 +53,6 @@ Verifica que cada imagen describa lo que significaen contexto, y que no haya im�
   issueDeveloper: 'Problema de desarrollo',
   issueTemplate: 'Problema de plantilla',
 
-  EMBED_CUSTOM: `<div class="title" tabindex="-1">¿Este contenido incrustado es accesible?</div><p>Este verificador no puede evaluar el contenido incrustado. Verifica que las imágenes dentro de este contenido tengan texto alternativo, que los videos tengan subtítulos y que los componentes interactivos puedan operarse con el teclado.</p>`,
 };
 
 const testNames = {
@@ -62,7 +61,6 @@ const testNames = {
   ALT_PLACEHOLDER: 'Este texto alternativo es un marcador de posición sin sentido',
   ALT_UNPRONOUNCEABLE: 'Este texto alternativo es impronunciable',
   EMBED_AUDIO: '¿Este audio tiene transcripción?',
-  EMBED_CUSTOM: '¿Este contenido incrustado es accesible?',
   EMBED_DATA_VIZ: '¿Esta visualización es accesible?',
   EMBED_VIDEO: '¿Este video está correctamente subtitulado?',
   HEADING_EMPTY: 'Agrega texto a este encabezado o elimínalo',
