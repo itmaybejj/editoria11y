@@ -5,6 +5,7 @@ import { Options } from './utils/options.js';
 import Elements from '../sa11y-js/utils/elements.js';
 import { checkAll, reset, incrementalCheck } from './logic/run.js';
 import { initialize } from './logic/initialize.js';
+import { sanitizeHTML } from '../sa11y-js/utils/utils.js';
 import { createDismissalKey, getElements, findElements, showError } from './utils/utils.js';
 import version from './version.js';
 
@@ -37,6 +38,7 @@ export {
   getElements,
   incrementalCheck,
   reset,
+  sanitizeHTML,
   version,
   Ed11y,
 };

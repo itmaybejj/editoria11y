@@ -7860,5 +7860,6 @@ export {
   getElements,
   incrementalCheck,
   reset,
+  sanitizeHTML,
   version
 };
