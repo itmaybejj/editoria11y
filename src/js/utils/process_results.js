@@ -181,8 +181,6 @@ export async function checkDismissed(i, splitConfiguration) {
     inDismissals(result, i, splitConfiguration, digested);
   } else {
     await dismissDigest(Options.pepper, result.dismiss).then((digest) => {
-      //digest = result.dismiss;
-      //console.log(digest);
       State.dismissKeys[result.dismiss] = digest;
       if (splitConfiguration) {
         State.splitConfiguration.devResults[i].dismiss = digest;

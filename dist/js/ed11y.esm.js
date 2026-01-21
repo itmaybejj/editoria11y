@@ -1328,7 +1328,6 @@ function generateRegexString(input, matchStart = false) {
   return new RegExp(finalPattern, "gi");
 }
 async function dismissDigest(pepper, message) {
-  console.log(pepper, message);
   const msgUint8 = new TextEncoder().encode(pepper + message);
   const hashBuffer = await window.crypto.subtle.digest("SHA-256", msgUint8);
   if (Uint8Array.prototype.toHex) {
