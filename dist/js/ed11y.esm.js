@@ -4577,15 +4577,11 @@ function alignAlts() {
   });
 }
 function checkEditableIntersects(focusKnown = false) {
-  if (!focusKnown && !document.querySelector("[contenteditable]:focus, [contenteditable] :focus")) {
+  if (!State.activeRange || !focusKnown && !document.querySelector("[contenteditable]:focus, [contenteditable] :focus")) {
     State.jumpList?.forEach((el) => {
-      el.classList.remove("intersecting");
-    });
-    return;
-  }
-  if (!State.activeRange) {
-    State.jumpList?.forEach((el) => {
-      el.classList.remove("intersecting");
+      if (el.matches(".intersecting")) {
+        el.classList.remove("intersecting");
+      }
     });
     return;
   }
@@ -6189,7 +6185,9 @@ function updateTipLocations() {
   }
   State.scrollTicking = false;
   if (State.scrollPending > 0) {
-    requestAnimationFrame(() => updateTipLocations());
+    window.setTimeout(() => {
+      requestAnimationFrame(() => updateTipLocations());
+    }, 0);
   }
 }
 function alignHighlights() {
@@ -7265,7 +7263,7 @@ class Ed11yElementTip extends HTMLElement {
     this.style.setProperty("outline", "0px solid transparent");
     const shadow = this.attachShadow({ mode: "open" });
     this.issueIndex = Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition, 10);
-    this.issueNext = this.issueIndex < State.jumpList.length ? this.issueIndex + 2 : 0;
+    this.issueNext = this.issueIndex < State.jumpList.length - 1 ? this.issueIndex + 2 : 1;
     this.issuePrev = this.issueIndex > 0 ? this.issueIndex : State.jumpList.length;
     this.dismissable = this.result.type !== "error";
     this.dismissed = !!this.result.dismissalStatus;

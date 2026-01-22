@@ -23,7 +23,7 @@ export class Ed11yElementTip extends HTMLElement {
     this.style.setProperty('outline', '0px solid transparent');
     const shadow = this.attachShadow({ mode: 'open' });
     this.issueIndex = Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition, 10);
-    this.issueNext = this.issueIndex < State.jumpList.length ? this.issueIndex + 2 : 0;
+    this.issueNext = this.issueIndex < State.jumpList.length - 1 ? this.issueIndex + 2 : 1;
     this.issuePrev = this.issueIndex > 0 ? this.issueIndex : State.jumpList.length;
 
     this.dismissable = this.result.type !== 'error';

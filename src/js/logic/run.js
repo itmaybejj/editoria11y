@@ -934,7 +934,9 @@ export function updateTipLocations() {
   }
   State.scrollTicking = false;
   if (State.scrollPending > 0) {
-    requestAnimationFrame(() => updateTipLocations());
+    window.setTimeout(() => {
+      requestAnimationFrame(() => updateTipLocations());
+    }, 0);
   }
 }
 

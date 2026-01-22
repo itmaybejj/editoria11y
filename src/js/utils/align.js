@@ -142,17 +142,15 @@ export function alignAlts() {
  * Hide tips that are in front of text currently being edited.
  * */
 export function checkEditableIntersects(focusKnown = false) {
-  if (!focusKnown && !document.querySelector('[contenteditable]:focus, [contenteditable] :focus')) {
-    //Reset classes to measure.
+  if (
+    !State.activeRange ||
+    (!focusKnown && !document.querySelector('[contenteditable]:focus, [contenteditable] :focus'))
+  ) {
+    // Reset classes to measure.
     State.jumpList?.forEach((el) => {
-      el.classList.remove('intersecting');
-    });
-    return;
-  }
-  if (!State.activeRange) {
-    // Range isn't on a node we can measure.
-    State.jumpList?.forEach((el) => {
-      el.classList.remove('intersecting');
+      if (el.matches('.intersecting')) {
+        el.classList.remove('intersecting');
+      }
     });
     return;
   }
