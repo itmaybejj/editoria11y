@@ -126,6 +126,10 @@ export class Ed11yElementTip extends HTMLElement {
         editBar.append(Options.editLinks.cloneNode(true));
       }
       this.contentFooter = this.wrapper.querySelector('.content-footer');
+      const why = this.wrapper.querySelector('.why');
+      if (why) {
+        why.insertAdjacentElement('beforebegin', this.contentFooter);
+      }
       this.contentFooter.prepend(editBar);
     }
 

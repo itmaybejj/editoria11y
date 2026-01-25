@@ -217,7 +217,9 @@ export async function filterAlerts(splitConfiguration) {
         }
       }
       splice = true;
-    } else if (results[i].test === 'META_TITLE') {
+    } else if (results[i].type === 'good') {
+      splice = true;
+    } else if (!results[i].element) {
       // Todo: figure out a better plan than sticking the alert on the first matched element.
       if (Elements.Found.Headings.length > 0) {
         if (splitConfiguration) {
@@ -227,8 +229,11 @@ export async function filterAlerts(splitConfiguration) {
           Results[i].element = Elements.Found.Everything[0];
         }
       }
-    } else if (!results[i].element || results[i].type === 'good') {
-      splice = true;
+    } else if (
+      results[i].test === 'TABLES_EMPTY_HEADING' &&
+      results[i].element.matches(':first-child')
+    ) {
+      results[i].type = 'warning';
     } else if (!splitConfiguration) {
       // Split config modifies key before checking.
       await checkDismissed(i, false);

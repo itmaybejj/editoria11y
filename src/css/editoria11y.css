@@ -75,10 +75,12 @@ ed11y-element-result {
 	font-size: var(--ed11y-baseFontSize, 14px);
 	line-height: 1.5;
 	opacity: 1 !important;
+	word-wrap: break-word;
 	.badge {
 		display: inline-block;
+		vertical-align: top;
 		padding: 0 0.5em;
-		margin-right: 0.25em;
+		margin: 2px 0.25em -2px 0;
 		font-size: 12px;
 		font-weight: 400;
 		color: var(--ed11y-primaryText);
@@ -92,7 +94,7 @@ ed11y-element-result {
 }
 
 .ed11y-small {
-	font-size: 0.93em;
+	font-size: max(0.9em, 13px);
 	opacity: 0.9;
 }
 
@@ -1059,6 +1061,18 @@ ed11y-element-result[data-ed11y-open="true"] {
 		background: var(--ed11y-warning);
 	}
 
+	.why {
+		font-size: max(0.9em, 14px);
+		opacity: 0.9;
+	}
+	.why::before {
+		border-top: 1px solid #0005;
+		display: block;
+		content: "";
+		padding-top: 0.5em;
+		margin-top: 1.25em;
+	}
+
 	.footer {
 		display: grid;
 		clear: both;
@@ -1194,9 +1208,9 @@ ed11y-element-result[data-ed11y-open="true"] {
 	}
 
 	li {
-		line-height: 1.357;
+		line-height: 1.143;
 		& + li {
-			margin-top: 0.643em;
+			margin-top: 0.5em;
 		}
 	}
 
@@ -1266,6 +1280,9 @@ ed11y-element-result[data-ed11y-open="true"] {
 		justify-content: space-between;
 		padding-top: 1em;
 		margin-bottom: -4px;
+	}
+	.message .content-footer {
+		padding: 0.5em 0 4px;
 	}
 	.message:has(#color-pickers:last-child) + .content-footer .count {
 		margin-top: -2em;

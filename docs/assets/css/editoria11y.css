@@ -45,18 +45,16 @@ ed11y-element-result {
 .ed11y-wrapper {
   font-family: var(--ed11y-baseFontFamily, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial), sans-serif;
   font-size: var(--ed11y-baseFontSize, 14px);
-  word-wrap: break-word;
   line-height: 1.5;
   opacity: 1 !important;
 }
 
 .ed11y-wrapper .badge {
-  vertical-align: top;
   color: var(--ed11y-primaryText);
   background: var(--ed11y-primary);
   border: 1px solid;
   border-radius: 1em;
-  margin: 2px .25em -2px 0;
+  margin-right: .25em;
   padding: 0 .5em;
   font-size: 12px;
   font-weight: 400;
@@ -69,7 +67,7 @@ ed11y-element-result {
 
 .ed11y-small {
   opacity: .9;
-  font-size: max(.9em, 13px);
+  font-size: .93em;
 }
 
 .ed11y-sr-only {
@@ -899,19 +897,6 @@ button.ed11y-jump:hover .toggle-count {
   line-height: 1.2;
 }
 
-.ed11y-tip-wrapper .why {
-  opacity: .9;
-  font-size: max(.9em, 14px);
-}
-
-.ed11y-tip-wrapper .why:before {
-  content: "";
-  border-top: 1px solid #0005;
-  margin-top: 1.25em;
-  padding-top: .5em;
-  display: block;
-}
-
 .ed11y-tip-wrapper .footer {
   clear: both;
   color: var(--ed11y-primaryText, #fffdf7);
@@ -1049,11 +1034,11 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 .ed11y-tip-wrapper li {
-  line-height: 1.143;
+  line-height: 1.357;
 }
 
 .ed11y-tip-wrapper li + li {
-  margin-top: .5em;
+  margin-top: .643em;
 }
 
 .ed11y-tip-wrapper table {
@@ -1121,10 +1106,6 @@ button.ed11y-jump:hover .toggle-count {
   margin-bottom: -4px;
   padding-top: 1em;
   display: flex;
-}
-
-.ed11y-tip-wrapper .message .content-footer {
-  padding: .5em 0 4px;
 }
 
 .ed11y-tip-wrapper .message:has(#color-pickers:last-child) + .content-footer .count {
