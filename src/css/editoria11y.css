@@ -1063,7 +1063,11 @@ ed11y-element-result[data-ed11y-open="true"] {
 
 	.why {
 		font-size: max(0.9em, 14px);
+		line-height: 1.2;
 		opacity: 0.9;
+		li {
+			line-height: 1.2;
+		}
 	}
 	.why::before {
 		border-top: 1px solid #0005;

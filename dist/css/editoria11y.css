@@ -902,6 +902,11 @@ button.ed11y-jump:hover .toggle-count {
 .ed11y-tip-wrapper .why {
   opacity: .9;
   font-size: max(.9em, 14px);
+  line-height: 1.2;
+}
+
+.ed11y-tip-wrapper .why li {
+  line-height: 1.2;
 }
 
 .ed11y-tip-wrapper .why:before {

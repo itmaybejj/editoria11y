@@ -1,23 +1,35 @@
-const headingWhy = `<div class="why">
+const why = {
+	fix: `<strong class="badge">To fix</strong> `,
+	check: `<strong class="badge">Manual check</strong> `,
+	buttons: `<div class="why"><p>Note: the accessible name for a button should make it clear what it will do. Buttons that change on click should change their name as well:</p><ul><li>Changing labels:<br>"Play/Pause," "Show details/Hide details"</li><li>Changing <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">state attributes</a>:<br>"Play/Play, pressed," "Details, collapsed/Details, expanded."</li></ul>
+	<p>Just don't change both at once. Changing "Play" to "Pause, pressed" means the player is paused, not playing!</p></div>`,
+	headings: `<div class="why">
 			<p>Tip: headings and subheadings organize content into a nested outline. Screen reader users rely on this outline to understand and explore pages:</p>
 				<ul><li>Heading level 1: page titles<ul><li>Heading level 2: major topics<ul><li>Heading level 3: subtopics</li></ul></li></ul></li></ul>
-			</div>`;
-const imageWhy = `<div class="why">
+			</div>`,
+	images: `<div class="why">
 			<p>Tip: describe what an image means, not just what it contains, when writing an alt. Depending on context, a photo of a child kicking a ball might mean:</p>
 				<ul>
 						<li>They played in the pouring rain.</li>
 						<li>The new team uniforms have cool dragon logos.</li>
 						<li>She kicked the game-winning goal from the left sideline!</li>
 				</ul>
-		</div>`;
-const linkedImageWhy = `<div class="why">
+		</div>`,
+	links:`<div class="why"><p>Readers skim by links and use in-page search to find links by name, so effective links are meaningful, unique and concise:</p>
+	<ul>
+		<li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text">meaningful links</a>"</strong></li>
+	<li>Not unique: "Click <a href="https://webaim.org/techniques/hypertext/link_text">here</a> to learn about meaningful links."</li>
+	<li>Not concise: "<a href="https://webaim.org/techniques/hypertext/link_text">Click here to learn more about meaningful links</a>"</li>
+</ul></div>`,
+	imageLinks: `<div class="why">
     <p>The purpose of alt text is to provide an alternative for what an image means, not what it contains. The meaning of a linked image is the link destination:
 				<ul>
-					<li>Describing an image: "A magnifying glass"</li>
-					<li>Describing a link: "Search"</li>
+					<li>"A magnifying glass" describe an image, not a link.</li>
+					<li>"<em>Search</em>" is a link destination.</li>
 					</ul>
 				</p>
-			</div>`
+			</div>`,
+}
 
 export const interfaceStrings = {
   OUTLINE: 'Headings',
@@ -76,70 +88,66 @@ export const interfaceStrings = {
 		'A background image or gradient means this checker is not sure what color is behind this text. Use the color picker below to check manually.',
 
 	LINK_IDENTICAL_NAME:
-		`<p><strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong></p>
-		<p>Multiple links on this page have the same name. Links should uniquely describe their destination, even when read out of context. Consider ways to reword this link.</p>
-		<p>Duplicate links expect the reader be reading slowly and carefully enough to figure out each link's purpose from context. Few readers do this, so they often miss important links.</p>
-                <ul>
-                <li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text">meaningful links"</a></strong></li>
-                <li>Not unique: "Click <a href="https://webaim.org/techniques/hypertext/link_text">here</a> to learn about meaningful links."</li>
-                <li>Not concise: "<a href="https://webaim.org/techniques/hypertext/link_text">Click here to learn more about meaningful links</a>"</li>
-                </ul>
-		`,
+		`<p>Links to different destinations share the label "<strong>%(TEXT)</strong>."</p>
+			<p>${why.fix}Reword links that go different places with the unique titles of their different destinations.</p>${why.links}`,
 	EMBED_GENERAL:
-		'Automated checkers cannot test content inside embeds. Make sure someone has checked that all images inside this embed have alt text, videos have captions, text has sufficient contrast, and links and buttons are <a href="https://webaim.org/techniques/keyboard/">keyboard accessible.</a>',
+		'Automated checkers cannot test content inside embeds. Make sure someone has checked that all images inside this embed have alt text, videos have captions, text has sufficient contrast, and links and buttons are <a href="https://webaim.org/techniques/keyboard/">keyboard accessible</a>, then dismiss this alert.',
 
 
 	// My style tests.
 	HEADING_SKIPPED_LEVEL: `<p>This heading skipped from <strong>level %(prevLevel) to level %(level)</strong>. From a screen reader, this sounds like content is missing.</p>
-		<p><strong class="badge">To fix</strong> adjust levels to form an accurate outline, without gaps.</p>${headingWhy}`,
+		<p>${why.fix}Adjust levels to form an accurate outline, without gaps.</p>${why.headings}`,
 
 	HEADING_EMPTY: `<p>Empty headings create confusing gaps in the page outline.</p>
-		<p><strong class="badge">To fix</strong> Add text to this heading, or delete this empty line.</p>${headingWhy}`,
+		<p>${why.fix}Add text to this heading, or delete this empty line.</p>${why.headings}`,
 
-	HEADING_LONG: `<p><strong class="badge">To fix</strong> Unless this is something of fixed length like the title of a published article, shorten it to help people skim.</p>${headingWhy}`,
+	HEADING_LONG: `<p>${why.fix}Unless this is something of fixed length like the title of a published article, shorten it to help people skim.</p>${why.headings}`,
 
 	QA_BLOCKQUOTE:
-		`<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. This was flagged because short blockquotes are <em>sometimes</em> actually <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">headings</a>. If this is a heading and not a quotation, use heading formatting instead, so this appears in the page outline.</p>${headingWhy}`,
+		`<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. Short blockquotes are often actually headings.</p>
+			<p>${why.fix}If this is a heading and not a quotation, use heading formatting instead, so it appears in the page outline.</p>${why.headings}`,
 
 	// Tooltips for image tests =========================
 
 	MISSING_ALT: `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.</p>
-            <p><strong class="badge">To fix</strong> either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>${imageWhy}`,
+	<p>${why.fix}Either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>${why.images}`,
 
-	MISSING_ALT_LINK_HAS_TEXT: `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.</p>
-		<p>This image is part of a link with text. If the visible text is sufficient to describe the link, add an empty alt (alt="") to tell screen readers to ignore this image. Otherwise, provide the title of the linked page as the alt text.</p>`,
+	MISSING_ALT_LINK_HAS_TEXT: `<p>This image is part of a link with text. If the visible text is sufficient to describe the link, add an empty alt (alt="") to tell screen readers to ignore this image. Otherwise, add an alt that describes the link's destination or purpose.</p>${why.imageLinks}`,
 
 	MISSING_ALT_LINK: `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time. This is especially a problem for linked images.</p>
-            <p><strong class="badge">To fix</strong> either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>
+            <p>${why.fix}Add alt text that matches the link's destination.</p>${why.imageLinks}
             `,
 
-	IMAGE_DECORATIVE: `<p>This image has been hidden from screen readers using a blank alt. Only meaningless images like redundant icons and background textures should be hidden like this.</p><p><strong class="badge">To fix</strong> if this image adds value to the page, provide alt text.</p>${imageWhy}`,
+	IMAGE_DECORATIVE: `<p>This image has been hidden from screen readers using a blank alt. Only meaningless images like redundant icons and background textures should be hidden like this.</p><p>${why.fix}If this image adds value to the page, provide alt text.</p>${why.images}`,
 
-	ALT_FILE_EXT: `<p>Screen readers will dictate this url, often one letter at a time. This probably does not provide the same meaning as seeing the image.</p><p><strong class="badge">To fix</strong> either add an empty alt (alt="") if this is a meaningless decoration that should be ignored by screen readers, or add descriptive alt text.</p>${imageWhy}`,
+	ALT_FILE_EXT: `<p>Screen readers will dictate this url, often one letter at a time. This probably does not provide the same meaning as seeing the image.</p><p>${why.fix}Either add an empty alt (alt="") if this is a meaningless decoration that should be ignored by screen readers, or add descriptive alt text.</p>${why.images}`,
 
 	ALT_PLACEHOLDER: `<p>Provided description of this image: <strong>"%(alt)"</strong></p>
-        <p><strong class="badge">To fix</strong> set this image's alternative text to a concise description of what this image means in this context.</p>${imageWhy}`,
+        <p>${why.fix}Set this image's alternative text to a concise description of what this image means in this context.</p>${why.images}`,
 
 	// Machine generated string.
 	ALT_MAYBE_BAD: `<p>Provided description of this image: <strong>"%(alt)"</strong></p>
-        <p><strong class="badge">To fix</strong> set this image's alternative text to a concise description of what this image means in this context.</p>${imageWhy}`,
+        <p>${why.fix}Set this image's alternative text to a concise description of what this image means in this context.</p>${why.images}`,
 
-	LINK_ALT_MAYBE_BAD: `<p>This image's alt text is "%(alt)," which is probably a placeholder.</p>
-	<p><strong class="badge">To fix</strong> set this image's alt text to the name of the link destination.</p>${linkedImageWhy}\``,
+	LINK_ALT_MAYBE_BAD: `<p>This image's alt text is a placeholder: "<strong>%(alt)</strong>."</p>
+	<p>${why.fix}Set this image's alt text to the name of the link destination.</p>${why.imageLinks}`,
 
-	LINK_PLACEHOLDER_ALT: `<p>This image's alt text is "%(alt)," which is probably a placeholder.</p>
-						<p><strong class="badge">To fix</strong> set this image's alt text to the name of the link destination.</p>${linkedImageWhy}`,
+	LINK_PLACEHOLDER_ALT: `<p>This image's alt text is a placeholder: "<strong>%(alt)</strong>."</p>
+	<p>${why.fix}Set this image's alt text to the name of the link destination.</p>${why.imageLinks}`,
 
-	LINK_ALT_FILE_EXT: `<p>This image's alt text includes "%(alt)," which is probably a filename.</p>
-        <p>When a link is wrapped around an image and there is no other text, the <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">image's alt text becomes the link text</a> announced by screen readers.
-            Links should clearly and concisely describe their destination; a URL (usually pronounced by the screen reader one letter at a time) does not.</p>
-            <ul>
-                <li>Good link text: "About us"</li>
-                <li>Bad link text: "H T T P S colon forward slash forward slash example dot com forward slash aye bee oh you tee you ess"</li>
-            </ul>`, // @todo after merge: compare with Sa11y's wording.
+	LINK_ALT_FILE_EXT: `<p>This image's alt text includes "%(alt)," which means it is probably a filename instead of a meaningful name for the link.</p>
+	<p>${why.fix}Set this image's alt text to the name of the link destination.</p><div class="why">
+    <p>The purpose of alt text is to provide an alternative for what an image means, not what it contains. The meaning of a linked image is the link destination:
+				<ul>
+					<li>"Page with writing" describes the image, not a link.</li>
+					<li>"IMG_1234.jpg" is just a filename.</li>
+					<li>"<strong><em>Event registration form (.doc)</em></strong>" is a link destination.</li>
+					</ul>
+				</p>
+			</div>`,
 
-	SUS_ALT: `<p>This image's alt text includes "%(alt)," which is probably redundant.</p>
-		<p><strong class="badge">To fix</strong> reword the alt to briefly convey what the image means.</p>
+	SUS_ALT: `<p>This image's alt text includes the word "%(alt)," which is probably redundant:</p><p><strong class="badge">Alt text</strong> "%(ALT_TEXT)"</p>
+		<p>To fix: reword the alt to briefly convey what the image means.</p>
 		<div class="why">
 			<p>Tip: screen readers announce they are describing an image when reading alt text, so phrases like "image of" and "photo of" are usually redundant; the screen reader user hears <em>"Image of something, Image."</em></p>
             <p>Note that this is OK if the words refer to content inside the image:</p>
@@ -148,18 +156,15 @@ export const interfaceStrings = {
             </ul>
 		</div>`,
 
-	LINK_SUS_ALT: `<p>This image's alt text includes "%(alt)," which mentions that this image is an image.</p>
-        <hr><p>Links should clearly and concisely describe their destination. Since words like "image," "graphic" or "photo" are already redundant in text alternatives (screen readers already identify the image as an image), their presence in a linked image usually means the image's text alternative is <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">describing the image instead of the link</a>.</p>
-            <ul>
-                <li>Good link text: "About us"</li>
-                <li>Bad link text: "Image of five people jumping"</li>
-            </ul>`,
+	LINK_SUS_ALT: `<p>This image's alt text includes the word "%(alt)," which usually mean it is not describing the link destination.</p><strong class="badge">Alt text</strong> "%(ALT_TEXT)"
+	<p>To fix: make sure this alt is the link's destination or purpose. <br></strong></p>${why.imageLinks}`,
+
 
 	ALT_UNPRONOUNCEABLE: `<p>This image's alt text is "%(alt)," which only contains unpronounceable symbols and/or spaces. Screen readers will announce that an image is present, and then pause awkwardly: "image: ____."</p>
-        <p><strong class="badge">To fix</strong> add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") if this is just an icon or spacer, and screen readers should ignore it.</p>${imageWhy}`,
+        <p>${why.fix}Add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") if this is just an icon or spacer, and screen readers should ignore it.</p>${why.images}`,
 
 	LINK_IMAGE_NO_ALT_TEXT: `<p>When a link is wrapped around an image, the image's alt text <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">provides the link's title for screen readers</a>.</p>
-        <p><strong class="badge">To fix</strong> set this image's alternative text to something that describes the link's destination, or add text next to the image, within the link.</p>`,
+        <p>${why.fix}Set this image's alternative text the link's destination or purpose.</p>${why.imageLinks}`,
 
 	IMAGE_ALT_TOO_LONG: `<p>Image text alternatives are announced by screen readers as a single run-on sentence; listeners must listen to the entire alt a second time if they miss something.</p><p>This image's %(altLength) character alt text is: <em class="ed11y-small">%(ALT_TEXT)</em></p>
             <div class="why"><p>Tip: complicated images that convey more information than fit in a sentence usually need a <strong>visible</strong> caption or alternative that describes or interprets key details. It is OK to refer screen reader users to such text:</p>
@@ -170,143 +175,157 @@ export const interfaceStrings = {
         This image's %(altLength) character alt text is: <em>%(ALT_TEXT)</em>`,
 
 	LINK_IMAGE_ALT_AND_TEXT: `<p>Check to make sure this helps describe the link's destination, rather than providing irrelevant or redundant information:</p>
-            <p><strong class="badge">Alt</strong> "<em><strong>%(alt)</strong></em>"</p>${linkedImageWhy}`,
+            <p><strong class="badge">Alt</strong> "<em><strong>%(alt)</strong></em>"</p>${why.imageLinks}`,
 
 	IMAGE_FIGURE_DUPLICATE_ALT:
-		'<p>Captions provide context for images, on the assumption that the person has already seen the image. Alt text visually describes an image for people who cannot see it.</p><p><strong>To fix</strong> provide an alt that can replace the visual meaning of the image, so that screen reader users can understand what the caption is describing.</p>',
+		`<p>${why.fix}Provide an alt that can replace the visual meaning of the image, so that screen reader users can understand what the caption is describing.</p><div class="why"><p>Tip: images, alts and captions work together:</p><ul>
+				<li>Captions provide context and interpretation for an image.</li>
+				<li>Alts describe an image for people who cannot see it, so they know what the caption is talking about.</li>
+				</ul></div>`,
 
-	LINK_EMPTY: `<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
-        <p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>
-        <p><strong class="badge">To fix</strong></p>
-        <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describe where it goes.</li>`,
+	LINK_EMPTY: `<p>${why.fix}Add text describing its destination, or delete it if is just a typo like a linked space character.</p>
+		<div class="why">
+		<p>Screen readers struggle to describe empty links, either falling silent ("Link, [...awkward pause where the link title should be...]"), or reading the URL: Link, H-T-T-P-S forward-slash forward-slash example dot com."</p>
+		<p>Note: linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p>
+		</div>`,
 
-	LINK_EMPTY_NO_LABEL: `<p>This link is either a typo (a linked space character), or a linked image with no text alternative.</p>
-        <p>Screen readers will either say nothing when they reach this link: <br><em>"Link, [...awkward pause where the link title should be...],"</em><br>or read the URL: <br><em>"Link, H-T-T-P-S forward-slash forward-slash example dot com"</em></p>
-        <p><strong class="badge">To fix</strong></p>
-        <ul><li>If this a typo, delete it. Note that typo links can be hard to see if they are next to a "real" link: one will be on the text, one on a space.</li><li>If it is a real link, add text to describe where it goes.</li>`,
+	LINK_EMPTY_NO_LABEL: `<p>${why.fix}Add text describing its destination, or delete it if is just a typo like a linked space character.</p>
+		<div class="why">
+		<p>Screen readers struggle to describe empty links, either falling silent ("Link, [...awkward pause where the link title should be...]"), or reading the URL: Link, H-T-T-P-S forward-slash forward-slash example dot com."</p>
+		<p>Note: linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p>
+		</div>`,
 
-	LINK_URL: `<p><a href="https://webaim.org/techniques/hypertext/link_text">Links should be meaningful and concise</a>. Readers often skim by link titles. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
-         <p>A linked URL breaks this pattern; the reader has to read the preceding paragraph to figure out the link's purpose from context.</p>
-            <ul>
-                <li>Meaningful and concise link: "Tips for writing meaningful links"</li>
-                <li>Linked URL, as pronounced by a screen reader: "H T T P S colon forward-slash forward-slash example dot com forward-slash tips forward-slash meaningful-links"</li>
-            </ul>`,
+	LINK_URL: `<p>${why.fix}Change this link to the title of its destination or purpose.</p>
+		<div class="why">
+		<p>Readers skim for links by name. This is especially true of screen reader users, who navigate and search using a list of on-page links.</p>
+		 <p>Linked URLs cannot be skimmed or found by in-page searches, so people are less likely to find them and less likely to click them.</p>
+			</div>`,
 
-	LINK_STOPWORD: `<p>This link's text is: <strong>%(text)</strong></p>
-        <p>Readers skim for links. This is especially true of screen reader users, who navigate using a list of on-page links.</p>
-                <p>Generic links like "click here," "read more" or "download" expect the reader be reading slowly and carefully enough to figure out each link's purpose from context. Few readers do this, so they often miss generic links.</p>
-                <ul>
-                <li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text">meaningful links"</a></strong></li>
-                <li>Not meaningful: "Click <a href="https://webaim.org/techniques/hypertext/link_text">here</a> to learn about meaningful links."</li>
-                <li>Not concise: "<a href="https://webaim.org/techniques/hypertext/link_text">Click here to learn more about meaningful links</a>"</li>
-                </ul>
-                `,
+	LINK_STOPWORD: `<p>This link contains text that does not help uniquely describe a destination:<br><strong>%(text)</strong></p><p>${why.fix}Rewrite this link to concisely describe its destination or purpose.</p>${why.links}`,
 
-	QA_PDF: `<p>Many mobile and assistive device users struggle to read content in PDFs. PDFs generally do not allow for changing font sizes, and often contain features that are incompatible with screen readers.</p>
-        <p>Ideally make the content of this linked PDF available on a Web page or in an editable document, and only link to this PDF as a "printable" alternative. If this PDF is the only way you are providing to access this content, you will need to <a href='https://webaim.org/techniques/acrobat/' target='_blank'>manually check that the PDF is well-structured</a>, with headings, lists and table headers, and provides alt text for its images.</p>`,
+	QA_PDF: `
+	<p>${why.fix}Do one of the following, then dismiss this alert:</p>
+	<ul>
+		<li>Link to a Web page instead,</li>
+		<li><em>Also</em> link to a Web page or editable document, so this PDF is only the "printable" option, or</li>
+		<li>At a minumum make sure this PDF readable with screen readers by <a href='https://webaim.org/techniques/acrobat/' target='_blank'>manually checking that it has been tagged</a> with headings, column reading order, table headers, and alt text.</li>
+	</ul>
+	<div class="why"><p>Mobile and assistive device users almost universally prefer Web pages to PDFs. PDFs do not reflow for mobile devices, and are often missing tags that must be present to navigate their text with screen readers.</p></div>`,
 
-	LINK_NEW_TAB: `<p>Readers can always choose to open a link a new window. When a link forces open a new window, it can be confusing and annoying, especially for assistive device users who may wonder why their browser's "back" button is suddenly disabled.</p>
-                <p>There are two general exceptions:</p>
-                <ul>
-                    <li>When the user is filling out a form, and opening a link in the same window would cause them to lose their work.</li>
-                    <li>When the user is clearly warned a link will open a new window.</li>
-                </ul>
-                <p><strong>To fix</strong> set this link back its default target, or add a screen-reader accessible warning (text or an icon with alt text).</p>
+	LINK_NEW_TAB: `
+		<p>${why.fix}Set this link to open in the same tab, or <a href="https://itmaybejj.github.io/linkpurpose/">warn users</a> first.</p>
+		<div class="why">
+			<p>Readers can always <em>choose</em> to open a link in a new tab. When a link forces open a new tab, it is often confusing or annoying, especially for assistive device users who wonder why their browser's "back" button stopped working.</p>
+			<p>Note: forms are the exception. When the user is filling out a form, opening a link in the same window could cause them to lose their work, so links within forms usually open in new tabs.
+		</div>
+		
+                
                 `,
 
 	// Tooltips for Text QA ===============================
 
 	TABLES_MISSING_HEADINGS: `
-                <p>To fix:</p>
-                <ul><li>If this table contains data that is meaningfully organized by row and column, edit the table's properties and specify whether headers have been placed in the first row, column or both. This lets screen reader users hear the headers repeated while navigating the content.</li>
-                <li>If this table does not contain rows and columns of data, but is instead being used for visual layout, remove it. Tables overflow the page rather than reflowing on mobile devices, and should only be used when the horizontal relationships are necessary to understand the content.</li></ul>
+                <p>${why.fix}Edit the table's properties and specify whether headers have been placed in the first row, column or both.</p>
+                <div class="why">
+                <p>Tip: screen readers use headers to orient users as they explore a table. The relevant header repeats as the cursor enters each column or row.</p>
+                <p>If this table has no headers because it is only being used for visual layout, remove the table formatting and use visual-only column formatting instead.</p>
+								</div>
             `,
 
 	TABLES_SEMANTIC_HEADING: `
-        <p>Table header cells label their specific columns or rows for screen readers.</p>
-        <p>Content headings ("Heading 2") label all content <strong>until the next heading</strong>, usually including unrelated rows and columns:</p>
-            <p></p>
-            <table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">A <strong>table</strong> header in cell 2 labels column 2 alone. <br><br>
-            A <strong>content</strong> heading in cell 2 labels cells 3, A, B and C, as well as this text, and the next paragraph.</td></tr>
+        <p>${why.fix}Remove this heading (h2, h3) formatting. Provide header rows and columns instead. If you need multiple header rows, break this into more than one table.</p>
+        <div class="why">
+					<p>Tip: Table headers are directional: one row or column. Content headings label all subsequent text, even in unrelated columns:</p>
+            <table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">A <strong>table header</strong> in cell 2 labels cell B. <br><br>
+            A <strong>content heading</strong> in cell 2 labels cells 3, A, B and C, as well as this text and this tooltip's footer.</td></tr>
             <tr><td>A</td><td>B</td><td>C</td></table>
-            <p><strong class="badge">To fix</strong> remove this heading formatting. Provide header cells if needed.</p>
-            `,
+				</div>`,
 
 	TABLES_EMPTY_HEADING: `
-                <p>When exploring tables, screen readers repeat table header cells as needed to orient users. 
-                Without headers, it is very easy to get lost; screen reader users have to count columns and rows and try to remember which columns went with which rows.</p>
-                <p><strong class="badge">To fix</strong> make sure each header cell in this table contains text.</p>
+                <p>${why.fix}Make sure each header cell contains text.</p>
+                <div class="why"><p>Tip: screen readers use headers to orient users as they explore a table. The relevant header repeats as the cursor enters each column or row.</p></div>`,
+
+	QA_FAKE_LIST: `<p>${why.fix}If this "%(text)" is part of a list, replace it with list formatting.</p>
+			<div class="why"><p>List formatting is structural, both visually and navigationally:</p> 
+      <ol><li>Lists align their indents for easy reading.</li>
+            <li>Lists are machine-readable. Screen readers orient their users by regularly announcing their position in the list ("item 3 of 7").</li></ol>
+            <p>&nbsp;&nbsp;&nbsp;3. But a sentence with a number in front of it like this does not indent its second line on overflow, and is not included in the count of items for screen reader users.</p></div> 
+            
             `,
 
-	QA_FAKE_LIST: `<p>List formatting is structural:</p> 
-            <ol><li>List formatting preserve indents on overflow.</li>
-            <li>Lists are machine-readable. Screen readers can orient their users, announcing this as "list item, 2 of 3."</li></ol>
-            <p>&nbsp;&nbsp;&nbsp;3. But this third item is just a sentence with a number in front of it. Its indents do not align, and screen readers do not know it is related to the other items in the list.</p>
-            <p><strong class="badge">To fix</strong> if this "%(text)" is part of a list, replace it with list formatting.</p>
-            `,
-
-	QA_FAKE_HEADING: `<p><strong class="badge">To fix</strong> if this all-bold line of text introduces a topic, replace the visual-only bold formatting with a heading style.</p>
+	QA_FAKE_HEADING: `<p>${why.fix}If this all-bold line of text introduces a topic, replace the visual-only bold formatting with a heading style.</p>
         <div class="why">
         <p>Tip: headings and subheadings create a navigable table of contents for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p>
             <ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li></ul></li></ul>
         </div>`,
 
-	QA_UPPERCASE: `<p>UPPERCASE TEXT CAN BE MORE DIFFICULT TO READ FOR MANY PEOPLE, AND IS OFTEN INTERPRETED AS SHOUTING.</p>
-         <p>Consider using sentence case instead, and using bold text or font changes for visual emphasis, or structural formatting like headings for emphasis that will also be announced by screen readers.</p>`,
+	QA_UPPERCASE: `<p>LARGE BLOCKS OF UPPERCASE TEXT ARE MORE DIFFICULT TO READ, AND ARE OFTEN INTERPRETED AS SHOUTING.</p>
+         <p>${why.fix}Only emphasize a few words at a time, preferably via bold formatting rather than caps lock.</p>
+         <div class="why"><p>Note: screen readers do not announce visual only formatting like bold text. Use a heading style instead if this emphasized text introduces a topic change or critically important content.</p></div>`,
 
-	EMBED_VIDEO: `<p>If a recorded video contains speech or meaningful sounds, it must <a href="https://www.w3.org/WAI/media/av/captions/" title="Opens in new window">provide captions</a>.</p>
-            <p>Note that automatic, machine-generated captions must be proofread, and speaker identifications must be added, before being considered an equal alternative.</p>`,
+	EMBED_VIDEO: `<p>Videos must provide captions.</p>
+            <p>Note that a human needs to proofread automatic, machine-generated captions and make sure speakers and meaningful sound effects are accurately identified.</p>
+						<p>${why.fix}Add or proofread the captions, then dismiss this alert.</p>`,
 
 	EMBED_AUDIO: `<p>If this audio contains speech, a <a href="https://www.w3.org/WAI/media/av/transcribing/" title="Opens in new window">text alternative</a> must be provided on this page or linked.</p>
-            <p>Note that automatic, machine-generated transcripts must be proofread, and speaker identifications must be added, before being considered an equal alternative</p>`,
+		<p>Note that a human needs to proofread automatic, machine-generated captions and make sure speakers and meaningful sound effects are accurately identified.</p>`,
 
-	EMBED_DATA_VIZ: `<p>Visualization widgets are often difficult or impossible for assistive devices to operate, and can be difficult to understand for readers with low vision or colorblindness.</p>
-							<p>Unless this particular widget has high visual contrast, can be operated by a keyboard and described by a screen reader, assume that an alternate format (text description, data table or downloadable spreadsheet) should also be provided.</p>`,
+	EMBED_DATA_VIZ: `<p>Embedded visualization widgets are often difficult or impossible for assistive devices to operate, can be difficult to understand for readers with low vision or colorblindness, and may require extensive horizontal scrolling on phones.</p>
+	<p>${why.fix}Unless this particular embed has high visual contrast, can be operated by a keyboard <strong><em>and</em></strong> described by a screen reader, add an equivalent, alternate format such as a text description, data table or downloadable spreadsheet, then dismiss this alert.</p>`,
 
 	/* New */
 	LABELS_ARIA_LABEL_INPUT:
-		'<p>Labeling fields with only a title or placeholder means the label visually disappears as soon as someone starts writing. This makes it difficult for people to review input when there are several fields. Check to make sure a visible field label remains and matches the invisible field title or placeholder.</p><p><strong {B}>Invisible field name:</strong> <strong {C}>%(TEXT)</strong></p>',
+		'<p><strong {B}>Invisible field label:</strong> <strong {C}>%(TEXT)</strong></p><p>Check to make sure there is a visible field label, that it remains when there is text in this field, and it matches the invisible field name.</p><div class="why"><p>Labeling fields with only a title or placeholder means the label visually disappears as soon as someone starts writing. This makes it difficult for people to review input when there are several fields. It also makes it easy to forget to update the invisible field label.</p></div>',
 
 	HEADING_EMPTY_WITH_IMAGE:
 		`<p>Empty headings create confusing gaps in the page outline.</p>
-		<p><strong class="badge">To fix</strong> If this is not a heading, change its format from <strong {C}>Heading %(level)</strong> to <strong>Paragraph</strong>. Otherwise, put the meaning of the image in its alt.</p>${headingWhy}`,
+		<p>${why.fix}If this is not a heading, change its format from <strong {C}>Heading %(level)</strong> to <strong>Paragraph</strong>. Otherwise, put the meaning of the image in its alt.</p>${why.headings}`,
 
 
 	// Headings
 	HEADING_FIRST:
-		'The first heading on a page should usually be a Heading 1 or Heading 2. Heading 1 should be the start of the main content section, and is the main heading that describes the overall purpose of the page. Learn more about <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading structure.</a>',
+		`${why.fix}Make sure the page title is marked as a Heading 1 or Heading 2. ${why.headings}`,
 	HEADING_MISSING_ONE:
-		'Missing Heading 1. Heading 1 should be the start of the main content area, and is the main heading that describes the overall purpose of the page. Learn more about <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading structure.</a>',
+		`<p>${why.fix}Tag the page title as a level 1 heading, to mark the beginning of the document outline.</p>${why.headings}`,
 	PANEL_HEADING_MISSING_ONE: 'Missing Heading 1!',
 	PANEL_NO_HEADINGS: 'No headings found.',
 
 	// Links
 	LINK_EMPTY_LABELLEDBY:
-		'Link has an <code>aria-labelledby</code> value that is empty or does not match the <code>id</code> value of another element on the page.',
+		`<p>This link has an <code>aria-labelledby</code> attribute that does not match the <code>ID</code> of any element on the page.</p>
+		<p>${why.fix}Provide a valid <code>ID</code>, or remove this attribute and describe the button in another way.</p>`,
+
 	LINK_STOPWORD_ARIA:
-		'Although an accessible name was provided, consider revising the visible link text. Phrases like &quot;<strong {C}>%(ERROR)</strong>&quot; are not meaningful.',
-	LINK_TIP:
-		'<hr> <strong>Tip!</strong> Use clear and unique link text that describes the destination of the link, typically the page or document title.',
+		`<p>An accessible name was provided using ARIA, but the visible and searchable link text is generic: &quot;<strong {C}>%(ERROR)</strong>&quot;.</p><p>${why.fix}Write meaningful links for everyone, not just screen reader users, and make sure each element's visual <a href="https://www.w3.org/WAI/WCAG22/Understanding/label-in-name.html">label matches its accessible name</a>.</p>${why.links}`,
 	LINK_CLICK_HERE:
-		'The phrase "click" or "click here" places focus on mouse mechanics, when many people do not use a mouse or may be viewing this website on a mobile device. Consider using a different verb that relates to the task.',
+		`The phrase "click" or "click here" is redundant, and takes focus away from the link's purpose.`,
 	DUPLICATE_TITLE:
-		'The <code>title</code> attribute on links and images is meant to provide extra information, and should be <strong>different</strong> than the text or alt text. The title text appears when hovering over an element, but is not accessible with a keyboard or touch input. Consider <a href="https://www.a11yproject.com/posts/title-attributes/">avoiding the title attribute completely.</a>',
+		`<p>${why.fix}Delete the link's <code>title</code> attribute.</p>
+		<div class="why">
+			<p>Note: <code>title</code> tooltips only appear when hovering with a mouse. They cannot be seen when navigating on a phone or with a keyboard, so many users will never see them. They should never contain unique or important information.</p>
+		</div>`,
 	LINK_SYMBOLS:
-		'Avoid using symbols as calls to action within link text unless they are hidden from assistive technologies. Screen readers may read the symbols out loud, which can be confusing. Consider removing: <strong {C}>%(ERROR)</strong>',
+		`${why.fix}Avoid using symbols as calls to action within link text unless they are hidden from assistive technologies. Screen readers may read the symbols out loud, which can be confusing. Consider removing: <strong {C}>%(ERROR)</strong>`,
 	LINK_DOI:
-		'For web pages or online-only resources, the <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">APA Style guide</a> recommends using descriptive links by wrapping the URL or DOI of the work around its title. Longer, less intelligible URLs used as link text might be difficult to comprehend with assistive technology.',
+		`<p>${why.fix}Link the article title and provide the DOI number as plain text, rather than linking the DOI number and leaving the article title as plain text.</p><div class="why"><p>The <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">APA Style guide</a> recommends using descriptive links on websites because users skim by links and use in-page search for links by name. Users are much more likely to notice articles of interest when the title is linked.</p><p>This also allows screen readers to describe each link meaningfully, rather than speaking a meaningless sequence of numbers.</p></div>`,
 	LINK_FILE_EXT:
-		'Link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning. Indicate the file type within the link text. If it is a large file, consider including the file size. For example: "Executive Report (PDF, 3MB)"',
+		`<p>This link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning.</p>
+		<p>${why.fix}Use text or an icon to <a href="https://itmaybejj.github.io/linkpurpose/">indicate the file type</a> within the link text.</p><p class="why">For large files, consider including the file size. For example: "Executive Report (PDF, 3MB)"</p>`,
 
 	// Images
 	LINK_ALT_UNPRONOUNCEABLE:
-		'The alt text within this linked image only contains unpronounceable symbols and/or spaces. Screen readers will announce the image and then pause. Ensure the alt text describes the destination of the link. <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>',
+			`<p>The alt text within this linked image only contains unpronounceable symbols and/or spaces: "%(ALT_TEXT)". Screen readers will announce there is a link, and then be unable to describe it.</p>
+        <p>${why.fix}Set this image's alt to the link's destination or purpose.</p>${why.imageLinks}`,
 	LINK_IMAGE_TEXT:
 		'Image is marked as decorative, although the link is using the surrounding text as a descriptive label.',
 	LINK_IMAGE_ALT:
-		'Image link contains alt text. Does the alt text describe where the link takes you? <strong>Consider using the title of the page it links to as the alt text.</strong> <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>',
+		`Make sure this alt describes where the link goes:</p><p> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong></p>${why.imageLinks}`,
 	IMAGE_FIGURE_DECORATIVE:
-		'Image is marked as <strong>decorative</strong> and will be ignored by assistive technology. <hr> Although a <strong>caption</strong> was provided, the image should also have alt text in most cases. <ul><li>The alt text should provide a concise description of what is in the image.</li><li>The caption should usually provide context to relate the image back to the surrounding content, or give attention to a particular piece of information.</li></ul> Learn more: <a href="https://thoughtbot.com/blog/alt-vs-figcaption#the-figcaption-element">alt versus figcaption.</a>',
+			`<p>This image will be ignored by assistive technology. Will its caption make sense without the image?</p><p>${why.fix}If the caption does not describe both the image's visuals and its meaning, provide alt text for whatever the caption does not describe.</p><div class="why"><p>Tip: images, alts and captions work together:</p><ul>
+				<li>Captions provide context and interpretation for an image.</li>
+				<li>Alts describe an image for people who cannot see it, so they know what the caption is talking about.</li>
+				</ul></div>`,
+
 	IMAGE_DECORATIVE_CAROUSEL:
 		'Image is marked as <strong>decorative</strong>, but all images in a carousel or gallery should include descriptive alt text to ensure an equivalent experience for everyone.',
 	//IMAGE_PASS: '{ALT} %(ALT_TEXT)',
@@ -320,31 +339,33 @@ export const interfaceStrings = {
 	LABELS_MISSING_LABEL:
 		'There is no label associated with this input. Please add an <code>id</code> to this input, and add a matching <code>for</code> attribute to the label.',
 	LABELS_PLACEHOLDER:
-		'Disappearing placeholder text makes it hard for people to remember what information belongs in a field and to identify and correct validation issues. Instead, consider using a permanently visible hint before the form field. <hr> Learn more: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Placeholders in form fields are harmful.</a>',
+		`<p>Placeholder text disappears as soon as someone starts typing, and often either has too little contrast to be easily legible or enough contrast to be easily mistaken for content.</p><p>${why.fix}Make sure key information like the field label, help text and format instructions remain visible when there is content in this field, and consider dropping the placeholder altogether.</p>`,
 
 	// Embedded content
 	EMBED_MISSING_TITLE:
-		'Embedded content requires an accessible name that describes its contents. Please provide a unique <code>title</code> or <code>aria-label</code> attribute on the <code>iframe</code> element. Learn more about <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrames.</a>',
+		`<p>Embeds need an accessible name that describes their contents for screen readers.</p><p>${why.fix}Provide a unique <code>title</code> or <code>aria-label</code> attribute.</p>`,
 	EMBED_UNFOCUSABLE:
-		'<code>&lt;iframe&gt;</code> with focusable elements should not have <code>tabindex="-1"</code>. The embedded content will not be keyboard accessible.',
+		`This attribute tells keyboards and assistive devices to skip over the element. Unless the content of this iframe does not contain any links, buttons or form elements and cannot be scrolled, this attribute needs to be removed.`,
 
 	// Quality assurance
 	QA_BAD_LINK:
-		'Bad link found. Link appears to point to a development environment. <hr> {L} <strong {C}>%(LINK)</strong>',
+		`<p>Link appears to point to a development environment:<br>{L} <strong {C}>%(LINK)</strong></p><p>${why.fix}Change this to point a relative path (/folder) or the public URL.</p>`,
 	QA_STRONG_ITALICS:
-		'Bold and italic tags have semantic meaning, and should <strong>not</strong> be used to highlight entire paragraphs. Bolded text should be used to provide strong <strong>emphasis</strong> on a word or phrase. Italics should be used to highlight proper names (i.e. book and article titles), foreign words, quotes. Long quotes should be formatted as a blockquote.',
+		`<p>${why.fix}Reserve bold and italic for key words and phrases.</p>
+			<div class="why"><p>Note: if this is a quotation, the blockquote tag can be used to set it apart.</div>`,
 	QA_DOCUMENT:
-		'Unable to check document for accessibility. Linked documents are considered web content and must be made accessible as well. Please manually review this document. <ul><li>Make your <a href="https://support.google.com/docs/answer/6199477?hl=en">Google Workspace document or presentation more accessible.</a></li><li>Make your <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Office documents more accessible.</a></li></ul>',
+		`<p>Linked documents are considered web content and must be made accessible as well. Check that this document has tagged its headings, table headers and image alt text, then dismiss this alert.</p><ul class="why"><li>Make your <a href="https://support.google.com/docs/answer/6199477?hl=en">Google Workspace document or presentation more accessible.</a></li><li>Make your <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Office documents more accessible.</a></li></ul>`,
 	QA_UNDERLINE:
-		'Underlined text can be confused with links. Consider using a different style such as <code>&lt;strong&gt;</code><strong>strong importance</strong><code>&lt;/strong&gt;</code> or <code>&lt;em&gt;</code><em>emphasis</em><code>&lt;/em&gt;</code>.',
+		`<p>Underlined text on the Web indicates a link, not emphasized text. Users will think they can click this.</p>
+		 <p>${why.fix} Use <strong>bold</strong> or <em>italic</em> for emphasis, and tag text as headings to mark topic changes.</p><div class="why"><p>Note: screen readers do not announce visual-only formatting like underlines. Only headings add text to the page outline.</p></div>`,
 	QA_SUBSCRIPT:
-		'The subscript and superscript formatting options should only be used to change the position of text for typographical conventions or standards. It should <strong>not</strong> solely be used for presentation or appearance purposes. Formatting entire sentences poses readability issues. Appropriate use cases would include displaying exponents, ordinal numbers such as 4<sup>th</sup> instead of fourth, and chemical formulas (e.g. H<sub>2</sub>O).',
+		`Subscript and superscript formatting makes text too small to be easily read for many people. It should only be used for individual words or phrases, such as ordinal numbers (4<sup>th</sup>), chemical formulas (H<sub>2</sub>O) and references to footnotes.`,
 	QA_IN_PAGE_LINK:
-		'Broken same-page link. The link target does not match any element on this page.',
+		`<p>The link target does not match any elements on this page.</p><div class="why"><p>Note for developers: if this not a normal link, and the link target is a placeholder for a JavaScript event, make sure to test that it works when clicked with a keyboard before adding this to the checker ignore list.</p></div>`,
 	QA_NESTED_COMPONENTS:
 		'Avoid nesting interactive layout components, such as placing accordions within other accordions, or placing tabs inside accordions and vice versa. This can complicate navigation, increase cognitive overload, and lead to people overlooking content.',
 	QA_JUSTIFY:
-		'Avoid using justified text, which aligns to both the left and right margins. This can be difficult for some people to read due to the uneven spaces between words. Use left-aligned text for better readability.',
+		`<p>Justified text inserts extra spaces to align paragraphs to both the left and right margins. The irregular gaps from line to line make the text more difficult to read for many people.</p><p>${why.fix}Use left-aligned text.</p>`,
 	QA_SMALL_TEXT:
 		'Small text is harder to read, particularly for those with low vision. To ensure better readability, avoid using font sizes smaller than the default.',
 
@@ -353,38 +374,29 @@ export const interfaceStrings = {
 	ACC_NAME_TIP:
 		'<hr><strong>Tip!</strong> The "accessible name" is the final label that gets communicated to people who use assistive technology. This helps them understand the link or button\'s purpose.',
 	HIDDEN_FOCUSABLE:
-		'Link or button has <code>aria-hidden=&quot;true&quot;</code> but is still keyboard focusable. If you are intending to hide a duplicate link or button, add <code>tabindex=&quot;-1&quot;</code> as well. Otherwise, <code>aria-hidden=&quot;true&quot;</code> should not be used on elements that can receive focus. <hr> Learn more about the <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden attribute.</a>',
+		'This interactive element has an <code>aria-hidden=&quot;true&quot;</code> attribute, but is still keyboard focusable. If you are <strong>intending</strong> to hide this element from screen readers, you must also add <code>tabindex=&quot;-1&quot;</code>. Otherwise, remove the <code>aria-hidden=&quot;true&quot;</code> attribute.',
 
 	// Developer checks
 	DUPLICATE_ID:
-		'Found <strong>duplicate ID</strong>. Duplicate ID errors are known to cause problems for assistive technologies when they are trying to interact with content. Please remove or change the following ID. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>',
-	UNCONTAINED_LI:
-		'All <code>&lt;li&gt;</code> list items must be placed inside <code>&lt;ul&gt;</code> unordered or <code>&lt;ol&gt;</code> ordered elements. This structure helps screen readers announce the list and its items accurately.',
-	TABINDEX_ATTR: 'Element should not have a <code>tabindex</code> attribute greater than 0.',
-
-	// Meta checks
-	META_TITLE:
-		'Missing page title! Please provide a <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title">page title.</a>',
-	META_SCALABLE:
-		'Remove the <code>user-scalable="no"</code> parameter in the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">viewport meta tag</a> in order to allow zooming.',
-	META_MAX:
-		'Ensure the <code>maximum-scale</code> parameter in the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">viewport meta tag</a> is not less than 2.',
-	META_LANG:
-		'Page language not declared! Please <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare language on HTML tag.</a>',
-	META_REFRESH: 'Page should not automatically refresh using a meta tag.',
+		`<p>IDs are being used on this page for labels or link targets, which means they must be unique.</p><p>${why.fix}Change this ID: <strong>#%(id)</strong></p><div class="why"><p>In most content management systems, this comes from a field called "name" or "id" in the element properties. In HTML, it is an attribute: <code>&lt;a id="MY-ID"&gt;</code></p></div>`,
+	TABINDEX_ATTR: `<p>${why.fix}Never use tabindex values greater than "0" (the default order). Change the order of elements in the HTML instead, so tab order and reading order stay the same.</p><div class="why"><p>Why this matters: by default, the visual order, the order keyboards tab through elements, and the order screen readers announce elements are all the same.</p><p>Assigning a positive tabindex to an element moves it to the beginning of the tab order, <strong>but not the visual or reading order</strong>. Assistive device users have to look for overridden buttons and form elements at opposite ends of the page from their labels and instructions.</p></div>`,
 
 	// Buttons
+	BTN_EMPTY: `<p>${why.fix}Use any valid method to tell screen readers what this button does, e.g. text, alt text on an icon, or a title attribute.</p>`,
+	BTN_TIP: why.buttons,
 	BTN_EMPTY_LABELLEDBY:
-		'Button has an <code>aria-labelledby</code> value that is empty or does not match the <code>id</code> value of another element on the page.',
+		`<p>This button has an <code>aria-labelledby</code> value that is empty or does not match the <code>ID</code> value of another element on the page.</p>
+		<p>${why.fix}Reconnect the ID to an element on the page, or remove this attribute and describe the button in another way.</p>`,
 
 	LABEL_IN_NAME:
-		'The visible text for this element appears to be different than the accessible name, which may cause confusion for assistive technologies users. Please review: <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>',
+		`<p>The visible text for this element appears to be different from the accessible name. This may cause confusion for screen reader users, and may break voice control.</p><p>${why.check}Make sure the visible label starts with the text of the invisible label, and does not contain any additional meaningful information.</p><p><strong>Invisible Label:</strong> "%(TEXT)"</p>`,
 
+	META_REFRESH: `<p>Pages should not automatically refresh using a meta tag. This interrupts the user without warning or the ability to prevent refresh, makes them lose their place while reading, and can reset form progress.</p><p>${why.fix}To refresh content on the same page, use AJAX to refresh sections in place without a reload, or use JavaScript to trigger the reload, so the user can be warned first and have the option to delay the event.</p>`,
 };
 
 export const testNames = {
   ALT_FILE_EXT: 'This alt text is a filename, not a description',
-  ALT_MAYBE_BAD: 'This alt text is not made of machine-readable words',
+  ALT_MAYBE_BAD: 'This alt text cannot be pronounced by a screen reader',
   ALT_PLACEHOLDER: 'This alt text is meaningless placeholder text',
   ALT_UNPRONOUNCEABLE: 'This alt text is unpronounceable',
   EMBED_AUDIO: 'Does this audio have a transcript?',
@@ -397,16 +409,16 @@ export const testNames = {
   IMAGE_ALT_TOO_LONG: 'Can this alt text be shorter?',
   IMAGE_DECORATIVE: 'Is this image actually meaningless?',
   LINK_ALT_FILE_EXT: 'Alt text used as a link should not be a URL',
-  LINK_ALT_MAYBE_BAD: 'Does this alt text describe the link destination?',
+  LINK_ALT_MAYBE_BAD: 'This linked alt cannot be pronounced by a screen reader',
   LINK_EMPTY_NO_LABEL: 'This link needs a label',
-  LINK_EMPTY: 'This link needs text',
+  LINK_EMPTY: 'This link has no text',
   LINK_IMAGE_ALT_AND_TEXT: 'Does this alt text make sense as part of this link?',
   LINK_IMAGE_LONG_ALT: 'Can this linked alt text be shorter?',
   LINK_IMAGE_NO_ALT_TEXT: 'This linked image needs alt text',
-  LINK_NEW_TAB: 'Does this link open a new window without warning?',
+  LINK_NEW_TAB: 'Does this link open a new tab without warning?',
   LINK_PLACEHOLDER_ALT: 'This linked image needs meaningful alt text',
   LINK_STOPWORD: 'Does this link describe its destination?',
-  LINK_SUS_ALT: 'Is there redundant text in this linked image?',
+  LINK_SUS_ALT: `Does this image's alt describe the image or the link?`,
   LINK_URL: 'Link text should not be a URL',
   MISSING_ALT_LINK_HAS_TEXT: 'Invalid HTML: image in link missing alt attribute',
   MISSING_ALT_LINK: 'Invalid HTML: linked image missing alt attribute',
@@ -414,7 +426,7 @@ export const testNames = {
   QA_BLOCKQUOTE: 'Should this quote be a heading?',
   QA_FAKE_HEADING: 'Should this bold text be a heading?',
   QA_FAKE_LIST: 'Should this have list formatting?',
-  QA_PDF: 'Is the linked document accessible?',
+  QA_PDF: 'Is there an alternative for this PDF?',
   QA_UPPERCASE: 'Is this uppercase text needed?',
   SUS_ALT: 'Are there redundant words in this alt text?',
   TABLES_EMPTY_HEADING: 'This header cell needs text',
@@ -422,48 +434,48 @@ export const testNames = {
   TABLES_SEMANTIC_HEADING: 'Content headings should not be used inside tables',
 
   HEADING_EMPTY_WITH_IMAGE: 'This image is used as a heading, so it needs alt text',
-  HEADING_FIRST: 'The first heading on a page should usually be a Heading 1 or Heading 2',
+  HEADING_FIRST: 'The first heading on this page is a subheading',
   HEADING_MISSING_ONE: 'This page is missing a Heading 1',
   IMAGE_DECORATIVE_CAROUSEL: 'Image in a carousel or gallery marked as decorative',
   LINK_IMAGE_TEXT: 'Manual check: Image inside a link marked as decorative.',
-  IMAGE_FIGURE_DECORATIVE: 'Manual check: image in a figure marked as decorative',
+  IMAGE_FIGURE_DECORATIVE: 'Manual check: captioned image has no alt text',
   LINK_IMAGE_ALT: 'Manual check: linked image with alt text',
   IMAGE_FIGURE_DUPLICATE_ALT: 'Alt text should not be the same as caption text',
   LINK_ALT_UNPRONOUNCEABLE: 'Linked images need pronounceable alt text',
-  DUPLICATE_TITLE: 'Duplicate "title" attributes are redundant', // Contains html
+  DUPLICATE_TITLE: 'This link has a tooltip with the same text as the link', // Contains html
   LINK_EMPTY_LABELLEDBY: 'Link with invalid "aria-labelledby" attribute', // Contains html
-  LINK_STOPWORD_ARIA: 'Manual check: link text overridden by ARIA that may not be meaningful', // Contains html
+  LINK_STOPWORD_ARIA: 'Meaningful link text only available to screen reader users', // Contains html
   LINK_SYMBOLS: 'Manual check: are the symbols or emoji in this link meaningful?',
   LINK_CLICK_HERE: 'Manual check: link contains "click here"',
-  LINK_DOI: 'APA Style guide recommends using descriptive DOI links',
+  LINK_DOI: 'Link article titles, not DOI numbers',
   LINK_IDENTICAL_NAME:
     'Does this link uniquely describe its destination?',
   LINK_FILE_EXT: 'Link points to a file without warning',
-  EMBED_UNFOCUSABLE: 'Frame with tabindex="-1" will not be keyboard accessible.', // Contains html
+  EMBED_UNFOCUSABLE: 'Frame with tabindex="-1" will not be keyboard accessible.',
   EMBED_MISSING_TITLE: 'Frame missing "title" attribute', // Contains value
   EMBED_GENERAL: 'Embedded iframes need manual checks',
   QA_BAD_LINK: 'Manual check: link target may be invalid',
-  QA_STRONG_ITALICS: 'Manual check: entire paragraph is emphasized',
+  QA_STRONG_ITALICS: 'Large blocks of emphasized text are harder to read',
   QA_IN_PAGE_LINK: 'Broken same-page link',
-  QA_DOCUMENT: 'Manual check: linked document',
+  QA_DOCUMENT: 'Has this document been tagged for screen readers?',
   QA_UNDERLINE: 'Only links should be underlined',
-  QA_SUBSCRIPT: 'Manual check: use of subscript or superscript as visual formatting',
+  QA_SUBSCRIPT: 'Do not use sub/superscript as visual formatting',
   QA_NESTED_COMPONENTS: 'Nested interactive layout components',
-  QA_JUSTIFY: 'Justified text',
-  QA_SMALL_TEXT: 'Small text',
+  QA_JUSTIFY: 'Do not justify text',
+  QA_SMALL_TEXT: 'Text is too small',
   META_LANG: 'Meta tag for page language missing',
-  META_SCALABLE: 'Meta tag prevents user scaling',
-  META_MAX: 'Meta tag sets max user scaling',
+  META_SCALABLE: 'Meta tag prevents users from enlarging text',
+  META_MAX: 'Meta tag limits how much users can enlarge text',
   META_REFRESH: 'Meta tag automatically refreshes page',
-  DUPLICATE_ID: 'Manual check: duplicate ID tag', // Contains value
+  DUPLICATE_ID: 'Duplicate ID attribute', // Contains value
   META_TITLE: 'Meta tag for page title missing',
   UNCONTAINED_LI: 'Invalid HTML list', // Contains value
-  TABINDEX_ATTR: 'Provided tabindex value removes element from reading order',
-  HIDDEN_FOCUSABLE: 'Screen readers told not to speak the name of an interactive element',
-  LABEL_IN_NAME: 'Visible name different than machine-readable name',
-  LABELS_ARIA_LABEL_INPUT: 'Manual check: is there a visible label for this field?',
-  LABELS_PLACEHOLDER: 'Manual check: placeholder text in label',
-  BTN_EMPTY: 'Button purpose is not machine-readable',
+  TABINDEX_ATTR: 'Tabindex attribute on this element breaks the reading order',
+  HIDDEN_FOCUSABLE: 'This element cannot be described by screen readers',
+  LABEL_IN_NAME: 'Visible label does not match invisible label',
+  LABELS_ARIA_LABEL_INPUT: 'Is there a visible label for this field?',
+  LABELS_PLACEHOLDER: 'Manual check: placeholder text',
+  BTN_EMPTY: 'Button is missing an accessible label',
   BTN_EMPTY_LABELLEDBY: 'Button has an invalid ARIA label', // Contains value
   BTN_ROLE_IN_NAME: 'Button name repeats the word "button"',
   CONTRAST_WARNING: 'Does this text have enough contrast?',
@@ -471,6 +483,6 @@ export const testNames = {
   CONTRAST_ERROR: 'Text does not have enough contrast to be easily legible',
   CONTRAST_PLACEHOLDER: 'Placeholder text does not have enough contrast to be easily legible',
   CONTRAST_PLACEHOLDER_UNSUPPORTED: 'Does this placeholder text have enough contrast?',
-  CONTRAST_ERROR_GRAPHIC: 'Graphic or icon does not have enough contrast with the background',
+  CONTRAST_ERROR_GRAPHIC: 'Graphic or icon does not have enough contrast',
   CONTRAST_WARNING_GRAPHIC: 'Does this graphic or icon have enough contrast?',
 };
