@@ -7572,7 +7572,9 @@ URL: ${url2}</pre>
     ALT_PLACEHOLDER: "This alt text is meaningless placeholder text",
     ALT_UNPRONOUNCEABLE: "This alt text is unpronounceable",
     EMBED_AUDIO: "Does this audio have a transcript?",
-    // EMBED_CUSTOM: 'Is this embedded content accessible?',
+    // EMBED_CUSTOM: 'Is this
+    // embedded content
+    // accessible?',
     EMBED_DATA_VIZ: "Is this visualization accessible?",
     EMBED_VIDEO: "Is this video accurately captioned?",
     HEADING_EMPTY: "This heading has no text",
@@ -7614,9 +7616,11 @@ URL: ${url2}</pre>
     IMAGE_FIGURE_DUPLICATE_ALT: "Alt text should not be the same as caption text",
     LINK_ALT_UNPRONOUNCEABLE: "Linked images need pronounceable alt text",
     DUPLICATE_TITLE: "This link has a tooltip with the same text as the link",
-    // Contains html
+    // Contains
+    // html
     LINK_EMPTY_LABELLEDBY: 'Link with invalid "aria-labelledby" attribute',
-    // Contains html
+    // Contains
+    // html
     LINK_STOPWORD_ARIA: "Meaningful link text only available to screen reader users",
     // Contains html
     LINK_SYMBOLS: "Manual check: are the symbols or emoji in this link meaningful?",
