@@ -1,304 +1,299 @@
 import strings from '../sa11y-lang/pl.js';
 
-// todo check each file for link integrity, and escaping of tags in code blocks.
 export const testNames = {
 	ALT_FILE_EXT: 'Ten tekst alternatywny jest nazwą pliku, a nie opisem',
-	ALT_MAYBE_BAD: 'Ten tekst alternatywny nie może zostać poprawnie odczytany przez czytnik ekranu',
-	ALT_PLACEHOLDER: 'Ten tekst alternatywny jest bezwartościowym tekstem zastępczym',
+	ALT_MAYBE_BAD: 'Ten tekst alternatywny może być niepoprawnie odczytywany przez czytnik ekranu',
+	ALT_PLACEHOLDER: 'Ten tekst alternatywny jest bezwartościową treścią zastępczą',
 	ALT_UNPRONOUNCEABLE: 'Ten tekst alternatywny jest niewymawialny',
 	BTN_EMPTY: 'Przycisk nie ma dostępnej etykiety',
 	BTN_EMPTY_LABELLEDBY: 'Przycisk ma nieprawidłową etykietę ARIA',
 	BTN_ROLE_IN_NAME: 'Nazwa przycisku powtarza słowo „button”',
-	CONTRAST_ERROR: 'Tekst ma zbyt niski kontrast, aby był łatwo czytelny',
+	CONTRAST_ERROR: 'Tekst ma zbyt niski kontrast, aby był czytelny',
 	CONTRAST_ERROR_GRAPHIC: 'Grafika lub ikona ma zbyt niski kontrast',
-	CONTRAST_INPUT: 'Pole tekstowe ma zbyt niski kontrast, aby było czytelne',
-	CONTRAST_PLACEHOLDER: 'Tekst zastępczy ma zbyt niski kontrast, aby był łatwo czytelny',
+	CONTRAST_INPUT: 'Pole wprowadzania ma zbyt niski kontrast, aby było czytelne',
+	CONTRAST_PLACEHOLDER: 'Tekst zastępczy ma zbyt niski kontrast',
 	CONTRAST_PLACEHOLDER_UNSUPPORTED: 'Czy ten tekst zastępczy ma wystarczający kontrast?',
 	CONTRAST_WARNING: 'Czy ten tekst ma wystarczający kontrast?',
 	CONTRAST_WARNING_GRAPHIC: 'Czy ta grafika lub ikona ma wystarczający kontrast?',
 	DUPLICATE_ID: 'Zduplikowany atrybut ID',
-	DUPLICATE_TITLE: 'Ten link ma podpowiedź (tooltip) z taką samą treścią jak sam link',
+	DUPLICATE_TITLE: 'Ten link ma podpowiedź (tooltip) z taką samą treścią jak link',
 	EMBED_AUDIO: 'Czy ten materiał audio ma transkrypcję?',
 	EMBED_DATA_VIZ: 'Czy ta wizualizacja jest dostępna?',
-	EMBED_GENERAL: 'Osadzone elementy iframe wymagają ręcznej kontroli',
+	EMBED_GENERAL: 'Osadzone elementy iframe wymagają ręcznej weryfikacji',
 	EMBED_MISSING_TITLE: 'Brak atrybutu „title” w ramce (iframe)',
-	EMBED_UNFOCUSABLE: 'Ramka z tabindex="-1" nie będzie dostępna z klawiatury.',
+	EMBED_UNFOCUSABLE: 'Ramka z tabindex="‑1" nie będzie dostępna z klawiatury',
 	EMBED_VIDEO: 'Czy ten film ma poprawne napisy?',
-	HEADING_EMPTY: 'Nagłówek nie zawiera żadnego tekstu',
-	HEADING_EMPTY_WITH_IMAGE: 'To zdjęcie jest użyte jako nagłówek, więc wymaga tekstu alternatywnego',
-	HEADING_FIRST: 'Pierwszy nagłówek na tej stronie jest nagłówkiem niższego poziomu',
-	HEADING_LONG: 'Czy ten nagłówek mógłby być krótszy?',
+	HEADING_EMPTY: 'Nagłówek nie zawiera tekstu',
+	HEADING_EMPTY_WITH_IMAGE: 'Ten obraz jest użyty jako nagłówek, więc wymaga tekstu alternatywnego',
+	HEADING_FIRST: 'Pierwszy nagłówek na stronie jest nagłówkiem niższego poziomu',
+	HEADING_LONG: 'Czy ten nagłówek może być krótszy?',
 	HEADING_MISSING_ONE: 'Na tej stronie brakuje nagłówka poziomu 1',
-	HEADING_SKIPPED_LEVEL: 'Ten nagłówek ma nieprawidłowy poziom hierarchii',
-	HIDDEN_FOCUSABLE: 'Ten element nie może zostać poprawnie zinterpretowany przez czytniki ekranu',
+	HEADING_SKIPPED_LEVEL: 'Ten nagłówek ma nieprawidłowy poziom',
+	HIDDEN_FOCUSABLE: 'Tego elementu nie można właściwie opisać w czytniku ekranu',
 	IMAGE_ALT_TOO_LONG: 'Czy ten tekst alternatywny może być krótszy?',
-	IMAGE_DECORATIVE: 'Czy to zdjęcie naprawdę nie ma żadnego znaczenia?',
-	IMAGE_DECORATIVE_CAROUSEL: 'Obraz w karuzeli lub galerii oznaczony jako dekoracyjny',
-	IMAGE_FIGURE_DECORATIVE: 'Ręczna kontrola: obraz z podpisem, lecz bez tekstu alternatywnego',
-	IMAGE_FIGURE_DUPLICATE_ALT: 'Tekst alternatywny nie powinien być taki sam jak podpis pod zdjęciem',
+	IMAGE_DECORATIVE: 'Czy ta grafika rzeczywiście jest tylko dekoracyjna?',
+	IMAGE_DECORATIVE_CAROUSEL: 'Obraz w karuzeli/galerii oznaczony jako dekoracyjny',
+	IMAGE_FIGURE_DECORATIVE: 'Ręczna kontrola: obraz z podpisem, ale bez tekstu alternatywnego',
+	IMAGE_FIGURE_DUPLICATE_ALT: 'Tekst alternatywny nie powinien być identyczny z podpisem pod obrazem',
 	LABELS_ARIA_LABEL_INPUT: 'Czy to pole ma widoczną etykietę?',
 	LABELS_PLACEHOLDER: 'Ręczna kontrola: tekst zastępczy',
-	LABELS_INPUT_RESET: 'Czy ten przycisk „resetuj” jest naprawdę potrzebny?',
-	LABEL_IN_NAME: 'Widoczna etykieta nie zgadza się z etykietą ukrytą',
+	LABELS_INPUT_RESET: 'Czy ten przycisk „Resetuj” jest potrzebny?',
+	LABEL_IN_NAME: 'Widoczna etykieta nie zgadza się z dostępną nazwą',
 	LINK_ALT_FILE_EXT: 'Alt użyty jako link nie powinien być adresem URL',
-	LINK_ALT_MAYBE_BAD: 'Ten tekst alternatywny w linku nie może zostać odczytany przez czytnik ekranu',
-	LINK_ALT_UNPRONOUNCEABLE: 'Obrazy będące linkami muszą mieć wymawialny tekst alternatywny',
-	LINK_CLICK_HERE: 'Ręczna kontrola: link zawiera słowa „kliknij tutaj”',
-	LINK_DOI: 'Linkuj tytuły artykułów, a nie numery DOI',
+	LINK_ALT_MAYBE_BAD: 'Ten alt w linku może być nieczytelny dla czytników ekranu',
+	LINK_ALT_UNPRONOUNCEABLE: 'Obrazy‑linki muszą mieć wymawialny tekst alternatywny',
+	LINK_CLICK_HERE: 'Ręczna kontrola: link zawiera „kliknij tutaj”',
+	LINK_DOI: 'Linkuj tytuły artykułów, nie numery DOI',
 	LINK_EMPTY: 'Ten link nie ma tekstu',
-	LINK_EMPTY_LABELLEDBY: 'Link z nieprawidłowym atrybutem aria-labelledby',
+	LINK_EMPTY_LABELLEDBY: 'Link ma nieprawidłowy atrybut aria‑labelledby',
 	LINK_EMPTY_NO_LABEL: 'Ten link wymaga etykiety',
-	LINK_FILE_EXT: 'Link prowadzi do pliku bez ostrzeżenia',
+	LINK_FILE_EXT: 'Link prowadzi do pliku bez wcześniejszej informacji',
 	LINK_IDENTICAL_NAME: 'Czy ten link jednoznacznie opisuje swój cel?',
 	LINK_IMAGE_ALT: 'Ręczna kontrola: obraz użyty jako link z tekstem alternatywnym',
-	LINK_IMAGE_ALT_AND_TEXT: 'Czy ten tekst alternatywny ma sens wewnątrz linku?',
-	LINK_IMAGE_LONG_ALT: 'Czy tekst alternatywny tego obrazu‑linku może być krótszy?',
-	LINK_IMAGE_NO_ALT_TEXT: 'Obraz użyty jako link wymaga tekstu alternatywnego',
-	LINK_IMAGE_TEXT: 'Ręczna kontrola: obraz wewnątrz linku oznaczony jako dekoracyjny.',
-	LINK_NEW_TAB: 'Czy ten link otwiera nowe okno/zakładkę bez ostrzeżenia?',
-	LINK_PLACEHOLDER_ALT: 'Ten obraz‑link wymaga znaczącego tekstu alternatywnego',
-	LINK_STOPWORD: 'Czy ten link opisuje swoją destynację?',
-	LINK_STOPWORD_ARIA: 'Znaczący tekst linku dostępny jest tylko dla czytników ekranu',
-	LINK_SUS_ALT: 'Czy tekst alternatywny opisuje obraz, czy link?',
-	LINK_SYMBOLS: 'Ręczna kontrola: czy symbole lub emoji w tym linku mają znaczenie?',
+	LINK_IMAGE_ALT_AND_TEXT: 'Czy ten alt ma sens w kontekście linku?',
+	LINK_IMAGE_LONG_ALT: 'Czy alt obrazu‑linku może być krótszy?',
+	LINK_IMAGE_NO_ALT_TEXT: 'Obraz użyty jako link wymaga alt‑tekstu',
+	LINK_IMAGE_TEXT: 'Ręczna kontrola: obraz w linku oznaczony jako dekoracyjny',
+	LINK_NEW_TAB: 'Czy link otwiera nowe okno/zakładkę bez uprzedzenia?',
+	LINK_PLACEHOLDER_ALT: 'Obraz‑link wymaga znaczącego tekstu alternatywnego',
+	LINK_STOPWORD: 'Czy link opisuje swoją destynację?',
+	LINK_STOPWORD_ARIA: 'Zrozumiała treść linku dostępna jest tylko dla czytników ekranu',
+	LINK_SUS_ALT: 'Czy alt opisuje obraz, czy cel linku?',
+	LINK_SYMBOLS: 'Ręczna kontrola: czy symbole/emoji w linku są znaczące?',
 	LINK_URL: 'Tekst linku nie powinien być adresem URL',
-	META_LANG: 'Brakuje meta tagu określającego język strony',
-	META_MAX: 'Meta tag ogranicza skalowanie tekstu przez użytkownika',
-	META_REFRESH: 'Meta tag automatycznie odświeża stronę',
-	META_SCALABLE: 'Meta tag uniemożliwia powiększanie tekstu',
-	META_TITLE: 'Brakuje meta tagu „title” strony',
+	META_LANG: 'Brakuje meta‑tagu określającego język strony',
+	META_MAX: 'Meta‑tag ogranicza powiększanie tekstu przez użytkownika',
+	META_REFRESH: 'Meta‑tag automatycznie odświeża stronę',
+	META_SCALABLE: 'Meta‑tag uniemożliwia powiększanie',
+	META_TITLE: 'Brakuje meta‑tagu tytułu strony',
 	MISSING_ALT: 'Nieprawidłowy HTML: obraz bez atrybutu alt',
 	MISSING_ALT_LINK: 'Nieprawidłowy HTML: obraz‑link bez atrybutu alt',
-	MISSING_ALT_LINK_HAS_TEXT: 'Nieprawidłowy HTML: obraz wewnątrz linku bez atrybutu alt',
-	QA_BAD_LINK: 'Ręczna kontrola: link może prowadzić do niepoprawnego miejsca',
-	QA_BLOCKQUOTE: 'Czy ten blok cytatu powinien być nagłówkiem?',
-	QA_DOCUMENT: 'Czy ten dokument jest poprawnie otagowany dla czytników ekranu?',
-	QA_FAKE_HEADING: 'Czy ten pogrubiony tekst powinien być nagłówkiem?',
+	MISSING_ALT_LINK_HAS_TEXT: 'Nieprawidłowy HTML: obraz w linku bez atrybutu alt',
+	QA_BAD_LINK: 'Ręczna kontrola: link może być nieprawidłowy',
+	QA_BLOCKQUOTE: 'Czy ten cytat powinien być nagłówkiem?',
+	QA_DOCUMENT: 'Czy dokument jest prawidłowo otagowany dla czytników ekranu?',
+	QA_FAKE_HEADING: 'Czy ten pogrubiony tekst to w istocie nagłówek?',
 	QA_FAKE_LIST: 'Czy to powinno być sformatowane jako lista?',
 	QA_IN_PAGE_LINK: 'Uszkodzony link wewnętrzny',
-	QA_JUSTIFY: 'Nie używaj justowania tekstu',
+	QA_JUSTIFY: 'Prosimy nie stosować justowania tekstu',
 	QA_NESTED_COMPONENTS: 'Zagnieżdżone komponenty interaktywne',
-	QA_PDF: 'Czy istnieje alternatywa dla tego pliku PDF?',
+	QA_PDF: 'Czy jest alternatywa dla tego pliku PDF?',
 	QA_SMALL_TEXT: 'Tekst jest zbyt mały',
-	QA_STRONG_ITALICS: 'Duże bloki wyróżnionego tekstu są trudniejsze w czytaniu',
-	QA_SUBSCRIPT: 'Nie używaj indeksu górnego/dolnego tylko dla efektu wizualnego',
-	QA_UNDERLINE: 'Podkreślenie powinno oznaczać linki — nie zwykły tekst',
-	QA_UPPERCASE: 'Czy ten tekst WIELKIMI LITERAMI jest konieczny?',
-	SUS_ALT: 'Czy w tym tekście alternatywnym są zbędne słowa?',
-	TABINDEX_ATTR: 'Atrybut tabindex zakłóca kolejność czytania',
-	TABLES_EMPTY_HEADING: 'Ta komórka nagłówka tabeli wymaga tekstu',
-	TABLES_MISSING_HEADINGS: 'W tej tabeli brakuje rzędu i/lub kolumny nagłówków',
-	TABLES_SEMANTIC_HEADING: 'Nagłówków treści nie należy używać wewnątrz tabel',
-	UNCONTAINED_LI: 'Niepoprawna lista HTML',
+	QA_STRONG_ITALICS: 'Duże bloki wyróżnień (pogrubienie/kursywa) pogarszają czytelność',
+	QA_SUBSCRIPT: 'Prosimy nie używać indeksu górnego/dolnego tylko dla efektu wizualnego',
+	QA_UNDERLINE: 'Podkreślenie powinno oznaczać link — nie zwykły akcent',
+	QA_UPPERCASE: 'Czy WIELKIE LITERY są tu konieczne?',
+	SUS_ALT: 'Czy w alt‑tekście są zbędne słowa?',
+	TABINDEX_ATTR: 'Atrybut tabindex może zaburzać kolejność czytania',
+	TABLES_EMPTY_HEADING: 'Komórka nagłówka tabeli wymaga tekstu',
+	TABLES_MISSING_HEADINGS: 'W tabeli brakuje wiersza nagłówków i/lub nagłówków kolumn',
+	TABLES_SEMANTIC_HEADING: 'Nagłówków treści nie należy używać w tabelach',
+	UNCONTAINED_LI: 'Nieprawidłowa lista HTML',
 };
 
 const why = {
-	fix: `<strong class="badge">Jak naprawić</strong> `,
-	check: `<strong class="badge">Wymaga ręcznej kontroli</strong> `,
+	fix: `<strong class="badge">Jak naprawić</strong>`,
+	check: `<strong class="badge">Wymaga ręcznej kontroli</strong>`,
 
-	buttons: `<div class="why"><p>Uwaga: dostępna nazwa przycisku powinna jasno wskazywać jego działanie. Przyciski, które zmieniają swoje działanie po kliknięciu, muszą również zmieniać swoją nazwę:</p><ul>
-<li>Zmiana etykiet:<br>"Odtwórz/Pauza", "Pokaż szczegóły/Ukryj szczegóły"</li>
-<li>Zmiana <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">atrybutów stanu ARIA</a>:<br>"Odtwórz/Odtwórz — wciśnięty", "Szczegóły — zwinięte/Szczegóły — rozwinięte."</li>
+	buttons: `<div class="why"><p>Uwaga: dostępna nazwa przycisku musi jasno wskazywać jego działanie. Przyciski, które po kliknięciu zmieniają stan, powinny zmieniać również swoją nazwę:</p><ul>
+<li>Zmiana etykiet:<br>„Odtwórz/Pauza”, „Pokaż szczegóły/Ukryj szczegóły”</li>
+<li>Zmiana https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_propertiesatrybutów stanu ARIA</a>:<br>„Odtwórz/Odtwórz — wciśnięty”, „Szczegóły — zwinięte/Szczegóły — rozwinięte”.</li>
 </ul>
-<p>Nie zmieniaj obu rzeczy jednocześnie. Zmiana „Odtwórz” na „Pauza — wciśnięty” oznacza, że odtwarzacz jest wstrzymany, a nie że odtwarza!</p></div>`,
+<p>Nie zmieniaj jednocześnie etykiety <em>i</em> stanu. Zastąpienie „Odtwórz” etykietą „Pauza — wciśnięty” oznacza pauzę — nie odtwarzanie.</p></div>`,
 
-	headings: `<div class="why"><p>Wskazówka: nagłówki i podnagłówki organizują treść w strukturę hierarchiczną. Użytkownicy czytników ekranu polegają na tej strukturze, aby rozumieć i poruszać się po stronie:</p><ul>
-<li>Nagłówek poziomu 1: tytuł strony
+	headings: `<div class="why"><p>Wskazówka: nagłówki i podnagłówki porządkują treść w strukturę hierarchiczną. Użytkownicy czytników ekranu polegają na niej podczas nawigacji:</p>
+<ul><li>Nagłówek poziomu 1: tytuł strony
 <ul><li>Nagłówek poziomu 2: główne sekcje
-<ul><li>Nagłówek poziomu 3: podsekcje</li></ul>
-</li></ul>
-</li>
+<ul><li>Nagłówek poziomu 3: podsekcje</li></ul></li></ul></li></ul></div>`,
+
+	images: `<div class="why"><p>Wskazówka: pisząc alt‑tekst, opisz to, co obraz <em>znaczy</em> w danym kontekście, nie tylko to, co przedstawia. Zdjęcie dziecka kopiącego piłkę może oznaczać:</p>
+<ul><li>Grali mimo ulewy.</li>
+<li>Nowe stroje mają efektowne smocze logo.</li>
+<li>Zdobyła zwycięskiego gola z lewej strony boiska!</li></ul></div>`,
+
+	links: `<div class="why"><p>Użytkownicy skanują strony po linkach i szukają ich nazwą. Dobre linki są znaczące, unikalne i zwięzłe:</p>
+<ul>
+<li>Idealnie: „Przeczytaj o https://webaim.org/techniques/hypertext/link_textznaczących linkach</a>”.</li>
+<li>Nieunikalnie: „Kliknij https://webaim.org/techniques/hypertext/link_texther</a>, aby dowiedzieć się więcej”.</li>
+<li>Niezwięźle: „https://webaim.org/techniques/hypertext/link_textKliknij tutaj, aby dowiedzieć się więcej o znaczących linkach</a>”.</li>
 </ul></div>`,
 
-	images: `<div class="why"><p>Wskazówka: pisząc tekst alternatywny, opisz to, co obraz <em>znaczy</em>, a nie tylko to, co przedstawia. W zależności od kontekstu to samo zdjęcie może oznaczać:</p><ul>
-<li>Grali na zewnątrz mimo ulewy.</li>
-<li>Nowe stroje drużyny mają efektowne smocze logo.</li>
-<li>Zdobyła zwycięskiego gola z lewej strony boiska!</li>
+	imageLinks: `<div class="why"><p>Celem alt‑tekstu jest przekazanie <em>znaczenia</em> obrazu. Dla obrazu‑linku znaczeniem jest cel linku:</p>
+<ul>
+<li>„<em>Lupa</em>” opisuje obraz, nie link.</li>
+<li>„<em>Lupa wyszukiwania</em>” jest niejednoznaczne.</li>
+<li>„<em>Szukaj</em>” poprawnie opisuje cel linku.</li>
 </ul></div>`,
-
-	links: `<div class="why"><p>Użytkownicy przeglądają stronę, skanując linki i wyszukując je po nazwie. Dlatego linki powinny być znaczące, unikalne i zwięzłe:</p><ul>
-<li>Idealny przykład: "Dowiedz się więcej o <a href="https://webaim.org/techniques/hypertext/link_text">znaczących linkach</a>"</li>
-<li>Nieunikalny: "Kliknij <a href="https://webaim.org/techniques/hypertext/link_text">her</a>, aby dowiedzieć się więcej."</li>
-<li>Niezwięzły: "<a href="https://webaim.org/techniques/hypertext/link_text">Kliknij tutaj, aby dowiedzieć się więcej o znaczących linkach</a>"</li>
-</ul></div>`,
-
-	imageLinks: `<div class="why"><p>Celem tekstu alternatywnego jest przekazanie znaczenia obrazu. W przypadku obrazów użytych jako linki ich znaczeniem jest cel linku:</p><ul>
-<li>"<em>Lupa</em>" opisuje obraz, a nie link.</li>
-<li>"<em>Lupa wyszukiwania</em>" niejasno opisuje oba.</li>
-<li>"<em>Szukaj</em>" opisuje cel linku poprawnie.</li>
-</ul></p></div>`,
 };
 
 export const tips = {
+	ALT_FILE_EXT: `<p>Czytniki ekranu przeczytają ten adres URL — często litera po literze. To zwykle nie oddaje sensu obrazu.</p><p>${why.fix}Dodaj pusty alt (alt=""), jeśli to dekoracja i ma być ignorowana, lub dodaj opisowy alt‑tekst.</p>${why.images}`,
 
-	ALT_FILE_EXT: `<p>Czytniki ekranu przeczytają ten adres URL, często litera po literze. Prawdopodobnie nie przekazuje to tego samego znaczenia, co obejrzenie obrazu.</p><p>${why.fix}Dodaj pusty atrybut alt (alt=""), jeśli jest to dekoracja i powinna być ignorowana przez czytniki ekranu, lub dodaj opisowy tekst alternatywny.</p>${why.images}`,
+	ALT_MAYBE_BAD: `<p>Podany opis obrazu: <strong>"%(alt)"</strong></p><p>${why.fix}Ustaw krótki alt‑tekst, który oddaje znaczenie obrazu w tym kontekście.</p>${why.images}`,
 
-	ALT_MAYBE_BAD: `<p>Podany opis tego obrazu: <strong>"%(alt)"</strong></p><p>${why.fix}Ustaw tekst alternatywny jako zwięzły opis tego, co obraz znaczy w tym kontekście.</p>${why.images}`,
+	ALT_PLACEHOLDER: `<p>Podany opis obrazu: <strong>"%(alt)"</strong></p><p>${why.fix}Ustaw krótki alt‑tekst, który oddaje znaczenie obrazu w tym kontekście.</p>${why.images}`,
 
-	ALT_PLACEHOLDER: `<p>Podany opis tego obrazu: <strong>"%(alt)"</strong></p><p>${why.fix}Ustaw tekst alternatywny jako zwięzły opis tego, co obraz znaczy w tym kontekście.</p>${why.images}`,
+	ALT_UNPRONOUNCEABLE: `<p>Alt‑tekst „%(alt)” składa się wyłącznie z niewymawialnych znaków/odstępów. Czytnik ogłosi „obraz”, po czym nastąpi cisza: „obraz: ____”.</p><p>${why.fix}Dodaj opisowy alt‑tekst lub użyj alt="" dla elementów, które mają być ignorowane (np. ikony dekoracyjne).</p>${why.images}`,
 
-	ALT_UNPRONOUNCEABLE: `<p>Tekst alternatywny tego obrazu to "%(alt)", ale zawiera tylko symbole i/lub spacje, których nie da się wypowiedzieć. Czytniki ekranu ogłoszą, że obraz jest obecny, a następnie zrobią znaczącą pauzę: „obraz: ____”.</p><p>${why.fix}Dodaj opisowy tekst alternatywny lub pozostaw alt całkowicie pusty (alt=""), jeśli to tylko ikona lub element odstępu, który powinien być ignorowany.</p>${why.images}`,
+	BTN_EMPTY: `<p>${why.fix}Nadaj przyciskowi dostępną nazwę (np. tekstem, alt‑tekstem ikony lub atrybutem <code>title</code>).</p>`,
 
-	BTN_EMPTY: `<p>${why.fix}Użyj dowolnej poprawnej metody, aby poinformować czytniki ekranu, co robi ten przycisk — tekst, alt‑tekst ikony lub atrybut title.</p>`,
-
-	BTN_EMPTY_LABELLEDBY: `<p>Ten przycisk ma atrybut <code>aria-labelledby</code>, który jest pusty lub nie odpowiada żadnemu atrybutowi <code>ID</code> na stronie.</p><p>${why.fix}Połącz ten ID z istniejącym elementem lub usuń atrybut i opisz przycisk w inny sposób.</p>`,
+	BTN_EMPTY_LABELLEDBY: `<p>Atrybut <code>aria-labelledby</code> jest pusty lub wskazuje nieistniejące <code>ID</code>.</p><p>${why.fix}Powiąż poprawne ID albo usuń atrybut i zastosuj inną metodę nazwania przycisku.</p>`,
 
 	BTN_TIP: `${why.buttons}`,
 
-	CONTRAST_WARNING: 'Obraz tła lub gradient utrudnia określenie koloru znajdującego się za tekstem. Użyj selektora kolorów poniżej, aby ręcznie sprawdzić kontrast.',
+	CONTRAST_WARNING: 'Obraz tła/gradient utrudnia automatyczne rozpoznanie koloru tła. Użyj selektora poniżej, aby ręcznie sprawdzić kontrast.',
 
-	DUPLICATE_ID: `<p>Atrybuty ID są używane na tej stronie jako etykiety lub cele linków, więc muszą być unikalne.</p><p>${why.fix}Zmień ten ID: <strong>#%(id)</strong></p><div class="why"><p>W większości CMS wartość ta pochodzi z pola „name” lub „id” w opcjach edycji. W HTML jest to atrybut: <code><a id="MY-ID"></code></p></div>`,
+	DUPLICATE_ID: `<p>ID na tej stronie służą jako etykiety i cele linków, więc muszą być unikalne.</p><p>${why.fix}Zmień ten identyfikator: <strong>#%(id)</strong></p><div class="why"><p>W wielu CMS pochodzi z pól „name/id”. W HTML to atrybut: <code><a id="MY-ID"></a></code></p></div>`,
 
-	DUPLICATE_TITLE: `<p>${why.fix}Usuń atrybut <code>title</code> z tego linku.</p><div class="why"><p>Uwaga: podpowiedzi <code>title</code> pojawiają się tylko po najechaniu myszą. Nie są widoczne na telefonach ani przy użyciu klawiatury, więc wielu użytkowników ich nie zobaczy. Nigdy nie powinny zawierać kluczowych informacji.</p></div>`,
+	DUPLICATE_TITLE: `<p>${why.fix}Usuń atrybut <code>title</code> z linku.</p><div class="why"><p>Uwaga: tooltips <code>title</code> są widoczne tylko przy najechaniu myszą — nie na urządzeniach mobilnych i nie w nawigacji klawiaturą; nie umieszczaj w nich kluczowych informacji.</p></div>`,
 
-	EMBED_AUDIO: `<p>Jeśli ten materiał audio zawiera mowę, należy udostępnić https://www.w3.org/WAI/media/av/transcribing/alternatywną wersję tekstową</a> na tej stronie lub podlinkować ją osobno.</p><p>Automatyczne transkrypcje muszą zostać sprawdzone przez człowieka, aby zapewnić poprawną identyfikację mówców i ważnych dźwięków.</p>`,
+	EMBED_AUDIO: `<p>Jeśli audio zawiera mowę, zapewnij https://www.w3.org/WAI/media/av/transcribing/tekstową alternatywę</a> na stronie lub jako link.</p><p>Automatyczne transkrypcje/napisy należy skorygować (mówcy, znaczące dźwięki).</p>`,
 
-	EMBED_DATA_VIZ: `<p>Osadzone wizualizacje są często trudne lub niemożliwe do obsługi przez technologie wspomagające. Mogą być nieczytelne dla osób niedowidzących lub z zaburzeniami widzenia barw, i mogą wymagać nadmiernego przewijania poziomego na telefonach.</p><p>${why.fix}Jeśli ta wizualizacja nie ma wysokiego kontrastu, nie jest w pełni obsługiwana klawiaturą <strong><em>i</em></strong> nie jest poprawnie interpretowana przez czytniki ekranu, należy udostępnić równoważną alternatywę: opis tekstowy, tabelę lub pobieralny arkusz danych.</p>`,
+	EMBED_DATA_VIZ: `<p>Osadzone wizualizacje bywają trudne dla technologii wspomagających, mało czytelne dla osób niedowidzących/ze ślepotą barw oraz wymagają przewijania w poziomie na urządzeniach mobilnych.</p><p>${why.fix}Jeśli nie zapewniają wysokiego kontrastu, pełnej obsługi klawiaturą <strong><em>i</em></strong> zrozumiałego opisu przez czytnik, udostępnij równoważnik (opis, tabelę, plik do pobrania), a następnie zamknij alert.</p>`,
 
-	EMBED_GENERAL: 'Automatyczne narzędzia testujące nie mogą analizować treści wewnątrz elementów embed. Upewnij się, że wszystkie obrazy mają alt‑tekst, filmy mają napisy, tekst ma wystarczający kontrast, a linki i przyciski są <a href="https://webaim.org/techniques/keyboard/">dostępne z klawiatury</a>, a następnie możesz zignorować ten alert.',
+	EMBED_GENERAL: 'Automatyczne testy nie analizują zawartości wewnątrz osadzeń. Upewnij się, że obrazy mają alt, filmy — napisy, tekst — odpowiedni kontrast, a linki/przyciski są https://webaim.org/techniques/keyboard/dostępne z klawiatury</a>. Potem możesz zignorować alert.',
 
-	EMBED_MISSING_TITLE: `<p>Elementy osadzone wymagają dostępnej nazwy opisującej ich treść dla czytników ekranu.</p><p>${why.fix}Dodaj unikalny atrybut <code>title</code> lub <code>aria-label</code>.</p>`,
+	EMBED_MISSING_TITLE: `<p>Osadzony element potrzebuje dostępnej nazwy opisującej zawartość.</p><p>${why.fix}Dodaj unikalny <code>title</code> lub <code>aria-label</code>.</p>`,
 
-	EMBED_UNFOCUSABLE: `Ten atrybut informuje klawiatury i technologie wspomagające, aby ignorowały ten element. Jeśli wewnątrz iframa znajdują się linki, przyciski lub pola formularzy albo jeśli można go przewijać, należy usunąć ten atrybut.`,
+	EMBED_UNFOCUSABLE: `Atrybut nakazuje pominąć element klawiaturze i technologiom wspomagającym. Jeśli iframe zawiera linki/przyciski/formularze albo jest przewijalny — usuń atrybut.`,
 
-	EMBED_VIDEO: `<p>Filmy muszą mieć napisy.</p><p>Automatyczne napisy wymagają ręcznej korekty w celu poprawnego oznaczenia mówców i istotnych dźwięków.</p><p>${why.fix}Dodaj lub popraw napisy, a następnie zamknij ten alert.</p>`,
+	EMBED_VIDEO: `<p>Filmy muszą mieć napisy.</p><p>Automatyczne napisy wymagają korekty (mówcy, dźwięki).</p><p>${why.fix}Dodaj/popraw napisy i zamknij alert.</p>`,
 
-	HEADING_EMPTY: `<p>Puste nagłówki tworzą luki w strukturze strony.</p><p>${why.fix}Dodaj tekst do tego nagłówka lub usuń pustą linię.</p>${why.headings}`,
+	HEADING_EMPTY: `<p>Puste nagłówki powodują luki w strukturze.</p><p>${why.fix}Dodaj treść albo usuń pustą linię.</p>${why.headings}`,
 
-	HEADING_EMPTY_WITH_IMAGE: `<p>Puste nagłówki tworzą luki w strukturze strony.</p><p>${why.fix}Jeśli to nie jest nagłówek, zmień format z <strong {C}>Nagłówka %(level)</strong> na <strong>Akapit</strong>. Jeśli jest to nagłówek, przenieś znaczenie obrazu do tekstu alternatywnego.</p>${why.headings}`,
+	HEADING_EMPTY_WITH_IMAGE: `<p>Puste nagłówki zaburzają strukturę.</p><p>${why.fix}Jeśli to nie jest nagłówek, zmień format z <strong {C}>Nagłówka %(level)</strong> na <strong>Akapit</strong>. Jeśli to nagłówek — opisz znaczenie obrazu w alt‑tekście.</p>${why.headings}`,
 
-	HEADING_FIRST: `<p>${why.fix}Upewnij się, że tytuł strony jest oznaczony jako nagłówek poziomu 1 lub 2.</p>${why.headings}`,
+	HEADING_FIRST: `${why.fix}Upewnij się, że tytuł strony jest oznaczony jako Nagłówek 1 albo 2. ${why.headings}`,
 
-	HEADING_LONG: `<p>${why.fix}Jeśli nie jest to tytuł formalny (np. artykułu naukowego), skróć go, aby ułatwić użytkownikom skanowanie treści.</p>${why.headings}`,
+	HEADING_LONG: `<p>${why.fix}Jeśli to nie tytuł formalny, skróć nagłówek dla lepszej skanowalności.</p>${why.headings}`,
 
-	HEADING_MISSING_ONE: `<p>${why.fix}Oznacz tytuł strony jako nagłówek poziomu 1, aby zaznaczyć początek struktury dokumentu.</p>${why.headings}`,
+	HEADING_MISSING_ONE: `<p>${why.fix}Oznacz tytuł strony jako nagłówek poziomu 1 — to początek struktury dokumentu.</p>${why.headings}`,
 
-	HEADING_SKIPPED_LEVEL: `<p>Ten nagłówek przeskoczył z <strong>poziomu %(prevLevel)</strong> na <strong>poziom %(level)</strong>. Dla czytników ekranu wygląda to tak, jakby brakowało części treści.</p><p>${why.fix}Dostosuj poziomy nagłówków, aby zachować logiczną strukturę.</p>${why.headings}`,
+	HEADING_SKIPPED_LEVEL: `<p>Nagłówek przeskoczył z <strong>poziomu %(prevLevel)</strong> na <strong>poziom %(level)</strong>. Dla czytników brzmi to jak brak treści.</p><p>${why.fix}Ujednolić poziomy, aby zachować spójność.</p>${why.headings}`,
 
-	HIDDEN_FOCUSABLE: 'Ten interaktywny element ma <code>aria-hidden="true"</code>, ale nadal może otrzymać fokus z klawiatury. Jeśli ma być ukryty dla czytników ekranu, dodaj także <code>tabindex="-1"</code>. W przeciwnym razie usuń <code>aria-hidden="true"</code>.',
+	HIDDEN_FOCUSABLE: `Element ma <code>aria-hidden="true"</code>, a mimo to może otrzymać fokus klawiatury. Jeśli ma być niewidoczny dla czytników, dodaj też <code>tabindex="-1"</code>; w przeciwnym razie usuń <code>aria-hidden</code>.`,
 
-	IMAGE_ALT_TOO_LONG: `<p>Tekst alternatywny jest odczytywany przez czytniki ekranu jako jedno zdanie — jeśli użytkownik coś przegapi, musi odsłuchać wszystko od nowa.</p><p>Ten tekst alternatywny ma %(altLength) znaków: <em class="ed11y-small">%(ALT_TEXT)</em></p><div class="why"><p>Wskazówka: złożone obrazy, potrzebujące więcej niż jedno zdanie opisu, zwykle wymagają <strong>widocznego</strong> podpisu lub dłuższego opisu tekstowego.</p></div>`,
+	IMAGE_ALT_TOO_LONG: `<p>Czytniki czytają alt jako jedną frazę; przy długim tekście trudno wrócić do fragmentu.</p><p>Długość alt: %(altLength) znaków. <em class="ed11y-small">%(ALT_TEXT)</em></p><div class="why"><p>Wskazówka: złożone obrazy zwykle wymagają <strong>widocznego</strong> opisu (podpisu/tekstu) — alt może do niego odsyłać:</p><ul><li>„Plakat balu w piątek — szczegóły w opisie poniżej”.</li><li>„Wykres: −10% r/r — szczegóły w tabeli”.</li></ul></div>`,
 
-	IMAGE_DECORATIVE: `<p>To zdjęcie zostało ukryte przed czytnikami ekranu poprzez pusty alt. Tylko obrazy bez znaczenia — np. dekoracyjne ikony — powinny być ukrywane w ten sposób.</p><p>${why.fix}Jeśli to zdjęcie wnosi treść, dodaj do niego tekst alternatywny.</p>${why.images}`,
+	IMAGE_DECORATIVE: `<p>Obraz ukryto przed czytnikami przez alt="". Tylko obrazy bez znaczenia treściowego powinny być tak oznaczane.</p><p>${why.fix}Jeśli obraz wnosi treść, dodaj alt‑tekst.</p>${why.images}`,
 
-	IMAGE_DECORATIVE_CAROUSEL: 'Zdjęcie oznaczone jako <strong>dekoracyjne</strong>, ale wszystkie obrazy w karuzeli lub galerii powinny mieć opisowy tekst alternatywny.',
+	IMAGE_DECORATIVE_CAROUSEL: 'Obraz oznaczony jako <strong>dekoracyjny</strong>, ale w karuzeli/galerii wszystkie obrazy powinny mieć opisowy alt‑tekst.',
 
-	IMAGE_FIGURE_DECORATIVE: `<p>To zdjęcie będzie ignorowane przez technologie asystujące. Czy podpis ma sens bez samego obrazu?</p><p>${why.fix}Jeśli podpis nie opisuje w pełni znaczenia wizualnego, dodaj tekst alternatywny uzupełniający brakujące informacje.</p><div class="why"><p>Wskazówka: obrazy, teksty alternatywne i podpisy działają razem:</p><ul><li>Widoczne podpisy zapewniają kontekst i interpretację.</li><li>Teksty alternatywne opisują obraz dla osób, które go nie widzą.</li></ul></div>`,
+	IMAGE_FIGURE_DECORATIVE: `<p>Obraz zostanie pominięty przez technologie wspomagające. Czy sam podpis wystarcza?</p><p>${why.fix}Jeśli nie — uzupełnij brakujące informacje w alt‑tekście.</p><div class="why"><p>Wskazówka: obraz + alt + podpis współdziałają:</p><ul><li>Podpis daje kontekst.</li><li>Alt opisuje, co jest na obrazie, dla osób, które go nie widzą.</li></ul></div>`,
 
-	IMAGE_FIGURE_DUPLICATE_ALT: `<p>${why.fix}Zmień tekst alternatywny tak, aby opisywał znaczenie wizualne obrazu.</p><div class="why"><p>Wskazówka: obrazy, teksty alternatywne i podpisy działają razem:</p><ul><li>Widoczne podpisy zapewniają kontekst i interpretację.</li><li>Tekst alternatywny opisuje obraz, aby osoby niewidzące mogły zrozumieć, do czego odnosi się podpis.</li></ul></div>`,
+	IMAGE_FIGURE_DUPLICATE_ALT: `<p>${why.fix}Zmień alt tak, aby opisywał znaczenie wizualne, a nie powtarzał podpis.</p><div class="why"><p>Wskazówka: podpis to kontekst/interpretacja; alt wyjaśnia, co podpis opisuje.</p></div>`,
 
-	LABELS_ARIA_LABEL_INPUT: '<p><strong {B}>Niewidoczna etykieta pola:</strong> <strong {C}>%(TEXT)</strong></p><p>Upewnij się, że istnieje widoczna etykieta, że pozostaje widoczna po wprowadzeniu tekstu i że zgadza się z niewidoczną etykietą ARIA.</p><div class="why"><p>Etykiety dostępne wyłącznie przez title lub placeholder znikają podczas pisania i utrudniają przeglądanie oraz wprowadzanie danych.</p></div>',
+	LABELS_ARIA_LABEL_INPUT: `<p><strong {B}>Niewidoczna etykieta pola:</strong> <strong {C}>%(TEXT)</strong></p><p>Sprawdź, czy istnieje etykieta widoczna, pozostaje widoczna po wprowadzeniu treści i jest zgodna z nazwą dostępną.</p><div class="why"><p>Etykiety wyłącznie jako <em>title</em>/<em>placeholder</em> znikają podczas pisania i utrudniają weryfikację.</p></div>`,
 
-	LABELS_INPUT_RESET: `<p>Przyciski resetowania można łatwo kliknąć przypadkowo, co może spowodować utratę danych bez możliwości cofnięcia.</p><p>${why.fix}Jeśli nie resetuje on tylko jednego pola, rozważ jego usunięcie lub dodanie potwierdzenia przed wykonaniem działania.</p>`,
+	LABELS_INPUT_RESET: `<p>Przyciski „Resetuj” łatwo kliknąć przypadkowo — ryzyko utraty danych.</p><p>${why.fix}Jeśli nie resetuje pojedynczego pola, usuń lub wymagaj potwierdzenia.</p>`,
 
-	LABELS_MISSING_IMAGE_INPUT: 'Przycisk‑obrazek nie ma tekstu alternatywnego. Dodaj alt opisujący cel przycisku, np. <em>Szukaj</em> lub <em>Wyślij</em>.',
+	LABELS_MISSING_IMAGE_INPUT: 'Przycisk‑obrazek nie ma alt‑tekstu. Dodaj np. <em>Szukaj</em> lub <em>Wyślij</em>.',
 
-	LABELS_MISSING_LABEL: 'Do tego pola nie jest przypisana żadna etykieta. Dodaj atrybut <code>id</code> do pola i dopasowany atrybut <code>for</code> w etykiecie.',
+	LABELS_MISSING_LABEL: 'To pole nie ma powiązanej etykiety. Dodaj <code>id</code> i pasujące <code>for</code> w etykiecie.',
 
-	LABELS_NO_FOR_ATTRIBUTE: 'Brak powiązanej etykiety dla tego pola. Dodaj do etykiety atrybut <code>for</code> zgodny z atrybutem <code>id</code> pola.<hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>',
+	LABELS_NO_FOR_ATTRIBUTE: 'Pole nie ma powiązanej etykiety. Dodaj w etykiecie <code>for</code> zgodny z <code>id</code> pola.<hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>',
 
-	LABELS_PLACEHOLDER: `<p>Tekst zastępczy znika po rozpoczęciu pisania, często ma niski kontrast lub może wyglądać jak treść właściwa.</p><p>${why.fix}Upewnij się, że kluczowe informacje — etykieta, instrukcje, wskazówki — pozostają widoczne, nawet gdy użytkownik wpisuje tekst.</p>`,
+	LABELS_PLACEHOLDER: `<p>Tekst zastępczy znika przy pisaniu, bywa słabo kontrastowy lub mylony z treścią.</p><p>${why.fix}Zapewnij stałą widoczność etykiet, wskazówek i wymagań formatowania.</p>`,
 
-	LABEL_IN_NAME: `<p>Widoczna etykieta tego elementu wydaje się różna od jego dostępnej nazwy. Może to dezorientować użytkowników czytników ekranu oraz utrudniać korzystanie z komend głosowych.</p><p>${why.check}Upewnij się, że widoczna etykieta rozpoczyna się od niewidocznej etykiety, a także nie zawiera dodatkowych, ważnych informacji nieobecnych w ARIA.</p><p><strong>Niewidoczna etykieta:</strong> "%(TEXT)"</p>`,
+	LABEL_IN_NAME: `<p>Widoczna etykieta różni się od nazwy dostępnej. To myli użytkowników i utrudnia sterowanie głosem.</p><p>${why.check}Zadbaj, aby widoczny tekst zaczynał się od nazwy dostępnej i nie dodawał nowej, ważnej treści.</p><p><strong>Niewidoczna etykieta:</strong> „%(TEXT)”</p>`,
 
-	LINK_ALT_FILE_EXT: `<p>Tekst alternatywny tego obrazu zawiera "%(alt)", co prawdopodobnie oznacza nazwę pliku, a nie opis celu linku.</p><p>${why.fix}Ustaw tekst alternatywny tak, aby opisywał cel linku.</p><div class="why"> <p>Teksty alternatywne powinny odzwierciedlać znaczenie obrazu. W przypadku obrazów‑linków znaczeniem jest <strong>cel linku</strong>:</p><ul><li>"Strona z tekstem" opisuje obraz, a nie link.</li><li>"IMG_1234.jpg" to tylko nazwa pliku.</li><li>"<strong><em>Formularz zgłoszeniowy (doc)</em></strong>" opisuje faktyczny cel linku.</li></ul></p></div>`,
+	LINK_ALT_FILE_EXT: `<p>Alt obrazu zawiera „%(alt)”, co zwykle oznacza nazwę pliku, a nie cel linku.</p><p>${why.fix}Ustaw alt na opis celu linku.</p><div class="why"><p>Alt przekazuje znaczenie; dla obrazu‑linku jest nim jego cel:</p><ul><li>„Strona z tekstem” — opis obrazu.</li><li>„IMG_1234.jpg” — nazwa pliku.</li><li>„<strong><em>Formularz zgłoszeniowy (doc)</em></strong>” — faktyczny cel.</li></ul></div>`,
 
-	LINK_ALT_MAYBE_BAD: `<p>Tekst alternatywny tego obrazu jest tekstem zastępczym: "<strong>%(alt)</strong>".</p><p>${why.fix}Ustaw alt tak, aby opisywał cel linku.</p>${why.imageLinks}`,
+	LINK_ALT_MAYBE_BAD: `<p>Alt tego obrazu to placeholder: „<strong>%(alt)</strong>”.</p><p>${why.fix}Ustaw alt na cel linku.</p>${why.imageLinks}`,
 
-	LINK_ALT_UNPRONOUNCEABLE: `<p>Tekst alternatywny tego obrazu‑linku zawiera jedynie niewymawialne znaki lub spacje: "%(ALT_TEXT)". Czytniki ekranu ogłoszą link, ale nie będą w stanie go opisać.</p><p>${why.fix}Ustaw alt tak, aby opisywał przeznaczenie lub funkcję linku.</p>${why.imageLinks}`,
+	LINK_ALT_UNPRONOUNCEABLE: `<p>Alt „%(ALT_TEXT)” zawiera niewymawialne znaki/odstępy — linku nie da się opisać.</p><p>${why.fix}Opisz w alcie cel lub funkcję linku.</p>${why.imageLinks}`,
 
-	LINK_CLICK_HERE: `Sformułowania „kliknij” lub „kliknij tutaj” są zbędne i odwracają uwagę od właściwego celu linku.`,
+	LINK_CLICK_HERE: `Unikaj „kliknij tutaj” — nie przekazuje celu linku.`,
 
-	LINK_DOI: `<p>${why.fix}Podlinkuj tytuł artykułu, a numer DOI pozostaw jako zwykły tekst — zamiast linkować DOI i pozostawiać tytuł niepodlinkowany.</p><div class="why"><p>https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20linksZasady APA</a> zalecają stosowanie opisowych linków, ponieważ użytkownicy skanują listy linków, szukając nazw.</p><p>Ułatwia to także czytnikom ekranu ogłaszanie znaczących linków zamiast nic nieznaczących numerów.</p></div>`,
+	LINK_DOI: `<p>${why.fix}Podlinkuj tytuł artykułu; DOI podaj jako zwykły tekst.</p><div class="why"><p>Opisowe linki ułatwiają skanowanie oraz zapowiedzi w czytnikach.</p></div>`,
 
-	LINK_EMPTY: `<p>${why.fix}Dodaj tekst opisujący cel linku lub usuń link, jeśli został przypadkowo utworzony (np. link na pustej spacji).</p><div class="why"><p>Czytniki ekranu mają trudności z linkami pustymi — mogą milczeć lub odczytywać adres URL znak po znaku.</p><p>Czasem trudno usunąć pusty link — w niektórych edytorach trzeba przepisać tekst wokół niego.</p></div>`,
+	LINK_EMPTY: `<p>${why.fix}Dodaj opisowy tekst linku lub usuń go, jeśli powstał przez pomyłkę (np. na spacji).</p><div class="why"><p>Puste linki skutkują ciszą albo literowaniem URL.</p><p>Usunięcie „zlinkowanej spacji” może wymagać przepisania fragmentu.</p></div>`,
 
-	LINK_EMPTY_LABELLEDBY: `<p>Ten link ma atrybut <code>aria-labelledby</code>, który nie odpowiada żadnemu ID na stronie.</p><p>${why.fix}Dodaj poprawne ID lub usuń ten atrybut.</p>`,
+	LINK_EMPTY_LABELLEDBY: `<p><code>aria-labelledby</code> wskazuje na nieistniejące <code>ID</code>.</p><p>${why.fix}Popraw odwołanie lub usuń atrybut.</p>`,
 
-	LINK_EMPTY_NO_LABEL: `<p>${why.fix}Dodaj opisowy tekst lub usuń link, jeśli to pomyłka.</p><div class="why"><p>Czytniki ekranu nie radzą sobie dobrze z pustymi linkami i mogą czytać adres URL litera po literze.</p><p>Aby usunąć pusty link, czasami trzeba przepisać fragment tekstu.</p></div>`,
+	LINK_EMPTY_NO_LABEL: `<p>${why.fix}Dodaj opisowy tekst albo usuń pusty link.</p><div class="why"><p>Czytniki nie są w stanie sensownie zapowiedzieć pustych linków.</p></div>`,
 
-	LINK_FILE_EXT: `<p>Ten link prowadzi do pliku (PDF, MP3, ZIP, Word itp.) bez wcześniejszej informacji o tym.</p><p>${why.fix}Użyj tekstu lub ikony, aby https://itmaybejj.github.io/linkpurpose/oznaczyć typ pliku</a>.</p><p class="why">W przypadku dużych plików warto podać rozmiar, np. "Raport roczny (PDF, 3 MB)".</p>`,
+	LINK_FILE_EXT: `<p>Link prowadzi do pliku (PDF/MP3/ZIP/Word) bez uprzedzenia.</p><p>${why.fix}Wskaż typ pliku w tekście/ikonie: https://itmaybejj.github.io/linkpurpose/</a>.</p><p class="why">Przy dużych plikach podaj rozmiar, np. „Raport (PDF, 3 MB)”.</p>`,
 
-	LINK_IDENTICAL_NAME: `<p>Wiele linków mających różne cele ma tę samą nazwę: "<strong>%(TEXT)</strong>".</p><p>${why.fix}Przepisz linki tak, aby każdy z nich jasno i jednoznacznie opisywał swój cel.</p>${why.links}`,
+	LINK_IDENTICAL_NAME: `<p>Wiele różnych linków używa tej samej etykiety: „<strong>%(TEXT)</strong>”.</p><p>${why.fix}Nadaj każdemu unikalną, opisową nazwę.</p>${why.links}`,
 
-	LINK_IMAGE_ALT: `Upewnij się, że ten tekst alternatywny opisuje cel linku:</p><p> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong></p>${why.imageLinks}`,
+	LINK_IMAGE_ALT: `Upewnij się, że alt opisuje cel linku:</p><p> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong></p>${why.imageLinks}`,
 
-	LINK_IMAGE_ALT_AND_TEXT: `<p>Sprawdź, czy ta alt‑tekst pomaga opisać cel linku i nie dodaje zbędnych, mylących informacji:</p><p><strong class="badge">Alt</strong> "<em><strong>%(alt)</strong></em>"</p>${why.imageLinks}`,
+	LINK_IMAGE_ALT_AND_TEXT: `<p>Sprawdź, czy alt pomaga opisać cel linku, nie dublując informacji:</p><p><strong class="badge">Alt</strong> „<em><strong>%(alt)</strong></em>”</p>${why.imageLinks}`,
 
-	LINK_IMAGE_LONG_ALT: `<p>https://webaim.org/techniques/hypertext/link_text#alt_linkWedług zaleceń WebAIM</a> tekst alternatywny obrazu będącego linkiem powinien opisywać cel linku. Linki muszą być krótkie i jasne, ponieważ użytkownicy często przeglądają tylko listę linków. Długi alt sugeruje opis obrazu, a nie celu.</p>Tekst alternatywny ma %(altLength) znaków: <em>%(ALT_TEXT)</em>`,
+	LINK_IMAGE_LONG_ALT: `<p>https://webaim.org/techniques/hypertext/link_text#alt_linkAlt obrazu‑linku powinien opisywać cel linku</a>. Długie alty zwykle opisują obraz, nie cel.</p>Ten alt ma %(altLength) znaków: <em>%(ALT_TEXT)</em>`,
 
-	LINK_IMAGE_NO_ALT_TEXT: `<p>Gdy obraz jest częścią linku, jego alt‑tekst https://webaim.org/techniques/hypertext/link_text#alt_linkstaje się nazwą linku</a> dla czytnika ekranu.</p><p>${why.fix}Ustaw alternatywny tekst opisujący cel lub funkcję linku.</p>${why.imageLinks}`,
+	LINK_IMAGE_NO_ALT_TEXT: `<p>Gdy link zawiera obraz, jego alt staje się https://webaim.org/techniques/hypertext/link_text#alt_linknazwą linku</a> dla czytnika.</p><p>${why.fix}Opisz w alcie cel/funkcję linku.</p>${why.imageLinks}`,
 
-	LINK_IMAGE_TEXT: 'Obraz oznaczono jako dekoracyjny, ale link wykorzystuje otaczający tekst jako widoczną etykietę.',
+	LINK_IMAGE_TEXT: 'Obraz oznaczono jako dekoracyjny, a link opiera się na otaczającym tekście jako etykiecie.',
 
-	LINK_NEW_TAB: `<p>${why.fix}Ustaw link tak, aby otwierał się w tej samej karcie lub https://itmaybejj.github.io/linkpurpose/poinformuj użytkowników</a>, jeśli ma otwierać nową kartę.</p><div class="why"><p>Narzucanie otwierania w nowej karcie może być mylące, szczególnie gdy użytkownicy polegają na przycisku „cofnij”.</p><p>Uwaga: linki w formularzach często otwierają się w nowych kartach, aby zapobiec utracie danych.</p></div>`,
+	LINK_NEW_TAB: `<p>${why.fix}Otwieraj w tej samej karcie lub https://itmaybejj.github.io/linkpurpose/poinformuj z wyprzedzeniem</a> o nowej karcie.</p><div class="why"><p>Wymuszanie nowej karty bywa dezorientujące (np. „Cofnij” działa inaczej). Wyjątek: linki w formularzach często otwierają się w nowej karcie, aby nie utracić danych.</p></div>`,
 
-	LINK_PLACEHOLDER_ALT: `<p>Alternatywny tekst tego obrazu‑linku to tekst zastępczy: "<strong>%(alt)</strong>".</p><p>${why.fix}Ustaw tekst alternatywny tak, aby opisywał cel linku.</p>${why.imageLinks}`,
+	LINK_PLACEHOLDER_ALT: `<p>Alt w obrazie‑linku to placeholder: „<strong>%(alt)</strong>”.</p><p>${why.fix}Ustaw alt na cel linku.</p>${why.imageLinks}`,
 
-	LINK_STOPWORD: `<p>Ten link zawiera tekst, który nie opisuje celu linku:<br><strong>%(text)</strong></p><p>${why.fix}Przepisz tekst linku tak, aby jasno opisywał jego cel.</p>${why.links}`,
+	LINK_STOPWORD: `<p>Link zawiera tekst, który nie opisuje celu:<br><strong>%(text)</strong></p><p>${why.fix}Zastąp go krótkim, jasnym opisem celu/funkcji.</p>${why.links}`,
 
-	LINK_STOPWORD_ARIA: `<p>Podano dostępną nazwę ARIA, ale widoczna etykieta linku jest ogólnikowa: "<strong {C}>%(ERROR)</strong>".</p><p>${why.fix}Upewnij się, że widoczny tekst linku jest znaczący i zgodny z nazwą ARIA.</p>${why.links}`,
+	LINK_STOPWORD_ARIA: `<p>Jest nazwa ARIA, ale widoczny tekst jest ogólny: „<strong {C}>%(ERROR)</strong>”.</p><p>${why.fix}Zadbaj o znaczącą widoczną etykietę i spójność z ARIA.</p>${why.links}`,
 
-	LINK_SUS_ALT: `<p>Tekst alternatywny zawiera słowo "%(alt)", co często jest sygnałem, że opisuje obraz zamiast celu linku.</p><strong class="badge">Tekst alternatywny</strong> "%(ALT_TEXT)"    <p>Aby poprawić: upewnij się, że alt opisuje cel lub funkcję linku.<br></p>${why.imageLinks}`,
+	LINK_SUS_ALT: `<p>Alt zawiera „%(alt)”, co może oznaczać, że opisuje obraz zamiast celu linku.</p><strong class="badge">Alt‑tekst</strong> „%(ALT_TEXT)”<p>Naprawa: alt powinien opisywać cel/funkcję linku.<br></p>${why.imageLinks}`,
 
-	LINK_SYMBOLS: `${why.fix}Unikaj używania symboli jako elementów zachęcających do kliknięcia w tekstach linków, chyba że są ukryte przed czytnikami ekranu. Mogą być wymawiane w niejednoznaczny sposób. Rozważ usunięcie: <strong {C}>%(ERROR)</strong>`,
+	LINK_SYMBOLS: `${why.fix}Unikaj symboli jako „wezwania do działania” w treści linku (chyba że ukryte przed czytnikami). Mogą być myląco odczytywane. Rozważ usunięcie: <strong {C}>%(ERROR)</strong>`,
 
-	LINK_URL: `<p>${why.fix}Użyj nazwy opisującej cel linku zamiast adresu URL.</p><div class="why"><p>Użytkownicy — w tym osoby korzystające z czytników ekranu — przeglądają linki po ich treści.</p><p>URL jako tekst linku jest trudny do szybkiego zeskanowania i znalezienia.</p></div>`,
+	LINK_URL: `<p>${why.fix}Użyj tytułu celu lub jego funkcji zamiast adresu URL jako tekstu linku.</p><div class="why"><p>Użytkownicy — szczególnie z czytnikiem — skanują linki po nazwie.</p><p>URL w roli tekstu linku gorzej się skanuje i wyszukuje.</p></div>`,
 
-	META_LANG: `<p>${why.fix}Dodaj https://www.w3.org/International/questions/qa-html-language-declarationsatrybut języka</a> do elementu HTML na stronie.</p><div class="why"><p>Czytniki ekranu używają tego atrybutu, aby poprawnie wymówić tekst. Niepoprawny język utrudnia zrozumienie.</p></div>`,
+	META_LANG: `<p>${why.fix}Dodaj https://www.w3.org/International/questions/qa-html-language-declarationsatrybut języka</a> do elementu HTML.</p><div class="why"><p>Czytniki dobierają wymowę na podstawie języka; błędny język utrudnia zrozumienie.</p></div>`,
 
-	META_MAX: `<p>Ten meta tag ogranicza możliwość powiększania tekstu przez użytkownika.</p><p>${why.fix}Usuń to ograniczenie lub zmodyfikuj je, aby umożliwić pełne powiększanie.</p>`,
+	META_MAX: `<p>Meta‑tag ogranicza powiększanie.</p><p>${why.fix}Zezwól na pełny zoom, modyfikując lub usuwając ograniczenie.</p>`,
 
-	META_REFRESH: `<p>Strony nie powinny odświeżać się automatycznie przy użyciu meta tagu, ponieważ może to utrudnić pracę użytkownikom, spowodować utratę wpisanych danych czy przenieść ich w inne miejsce.</p><p>${why.fix}Użyj AJAX lub JavaScript, aby odświeżać treść i jednocześnie poinformować użytkownika lub pozwolić mu opóźnić odświeżenie.</p>`,
+	META_REFRESH: `<p>Automatyczne odświeżanie bez uprzedzenia przerywa pracę i może resetować formularze.</p><p>${why.fix}Użyj AJAX/JS z komunikatem i opcją odłożenia.</p>`,
 
-	META_SCALABLE: `<p>Ten meta tag uniemożliwia powiększanie strony.</p><p>${why.fix}Zezwól na pełne skalowanie, usuwając lub dostosowując ten atrybut.</p>`,
+	META_SCALABLE: `<p>Ten meta‑tag blokuje powiększanie.</p><p>${why.fix}Usuń lub zmień ustawienia, aby dopuścić zoom.</p>`,
 
-	META_TITLE: `<p>${why.fix}Dodaj tag <code><title></code> wewnątrz elementu <code><head></code>.</p><div class="why"><p>https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/titleKrótki i unikalny tytuł strony</a> jest niezbędny dla:</p><ul><li>wyników wyszukiwarek,</li><li>nazw kart w przeglądarkach,</li><li>czytników ekranu — odczytujących tytuł podczas przełączania kart.</li></ul><p>Bez tytułu użytkownik zobaczy tylko adres URL.</p></div>`,
+	META_TITLE: `<p>${why.fix}Dodaj <code><title></code> w sekcji <code><head></code>.</p><div class="why"><p>https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/titleKrótki, unikalny tytuł</a> jest kluczowy (wyniki wyszukiwarki, karty przeglądarki, czytniki podczas przełączania kart).</p><p>Bez tytułu użytkownik widzi tylko URL.</p></div>`,
 
-	MISSING_ALT: `<p>Gdy czytniki ekranu napotkają obraz bez alt, czytają adres URL obrazu litera po literze.</p><p>${why.fix}Dodaj alt="" dla obrazów dekoracyjnych lub opisowy tekst alternatywny dla obrazów znaczących.</p>${why.images}`,
+	MISSING_ALT: `<p>Bez alt czytnik odczyta URL obrazu (często znak po znaku).</p><p>${why.fix}Użyj alt="" dla obrazów dekoracyjnych, a opisowego alt‑tekstu dla obrazów treściowych.</p>${why.images}`,
 
-	MISSING_ALT_LINK: `<p>Gdy obraz znajdujący się w linku nie ma alt, czytniki ekranu odczytują adres URL — co jest szczególnie problematyczne.</p><p>${why.fix}Dodaj tekst alternatywny opisujący cel linku.</p>${why.imageLinks}`,
+	MISSING_ALT_LINK: `<p>Obraz w linku bez alt skutkuje odczytaniem URL — szczególnie kłopotliwe.</p><p>${why.fix}Dodaj alt opisujący cel linku.</p>${why.imageLinks}`,
 
-	MISSING_ALT_LINK_HAS_TEXT: `<p>Ten obraz jest częścią linku posiadającego tekst widoczny dla użytkownika. Jeśli ten tekst dokładnie opisuje cel linku, dodaj alt="" aby czytniki go ignorowały. W przeciwnym razie dodaj alt opisujący cel linku.</p>${why.imageLinks}`,
+	MISSING_ALT_LINK_HAS_TEXT: `<p>Obraz jest częścią linku z tekstem. Jeśli tekst opisuje cel — użyj alt=""; w przeciwnym razie dodaj alt z celem linku.</p>${why.imageLinks}`,
 
-	QA_BAD_LINK: `<p>Link wydaje się prowadzić do środowiska programistycznego:<br>{L} <strong {C}>%(LINK)</strong></p><p>${why.fix}Zmień go na ścieżkę względną (/folder) lub publiczny adres URL.</p>`,
+	QA_BAD_LINK: `<p>Link wygląda na wewnętrzny (deweloperski):<br>{L} <strong {C}>%(LINK)</strong></p><p>${why.fix}Użyj ścieżki względnej (/folder) albo publicznego URL.</p>`,
 
-	QA_BLOCKQUOTE: `<p>Format blockquote oznacza cytat wyczytywany przez czytniki ekranu. Krótkie cytaty często są faktycznie nagłówkami.</p><p>${why.fix}Jeśli to nagłówek, użyj stylu nagłówka.</p>${why.headings}`,
+	QA_BLOCKQUOTE: `<p><code>blockquote</code> oznacza cytat. Krótkie „cytaty” bywają w rzeczywistości nagłówkami.</p><p>${why.fix}Jeśli to nagłówek — użyj stylu nagłówka, by pojawił się w strukturze.</p>${why.headings}`,
 
-	QA_DOCUMENT: `<p>Linkowane dokumenty są traktowane jako treści internetowe i również muszą być dostępne. Sprawdź nagłówki, tabele i teksty alternatywne, a następnie możesz zignorować ten alert.</p><ul class="why"><li>Dostępność dokumentów https://support.google.com/docs/answer/6199477?hl=plGoogle Workspace</a>.</li><li>Dostępność dokumentów https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155Microsoft Office</a>.</li></ul>`,
+	QA_DOCUMENT: `<p>Linkowane pliki także są treścią WWW i muszą być dostępne. Sprawdź nagłówki, tabele i alty, po czym zamknij alert.</p><ul class="why"><li>Zobacz: https://support.google.com/docs/answer/6199477?hl=plGoogle Workspace — dostępność</a>.</li><li>Zobacz: https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155Microsoft Office — dostępność</a>.</li></ul>`,
 
-	QA_FAKE_HEADING: `<p>${why.fix}Jeśli ten pogrubiony tekst wprowadza nowy temat, zastąp formatowanie wizualne stylem nagłówka.</p><div class="why"><p>Wskazówka: nagłówki tworzą czytelną strukturę dokumentu i pomagają w nawigacji czytnikom ekranu.</p></div>`,
+	QA_FAKE_HEADING: `<p>${why.fix}Jeśli pogrubiony wiersz wprowadza nowy temat, zastosuj styl nagłówka zamiast samego wyróżnienia.</p><div class="why"><p>Nagłówki tworzą nawigowalną strukturę dla technologii wspomagających.</p></div>`,
 
-	QA_FAKE_LIST: `<p>${why.fix}Jeśli "%(text)" faktycznie jest elementem listy, sformatuj go jako listę.</p><div class="why"><p>Listy mają strukturę wizualną i semantyczną:</p><ol><li>Lepiej organizują treść i ułatwiają skanowanie.</li><li>Są rozpoznawane przez czytniki ekranu, które ogłaszają pozycję, np. „element 3 z 7”.</li></ol><p>Akapit zaczynający się od liczby nie jest prawdziwą listą.</p></div>`,
+	QA_FAKE_LIST: `<p>${why.fix}Jeśli „%(text)” to element listy — użyj prawdziwej listy.</p><div class="why"><p>Listy mają strukturę wizualną i semantyczną:</p><ol><li>Wyrównane wcięcia poprawiają czytelność.</li><li>Czytniki podają pozycję („3 z 7”).</li></ol><p>Sama liczba na początku zdania nie czyni listy.</p></div>`,
 
-	QA_IN_PAGE_LINK: `<p>Cel tego linku wewnętrznego nie odpowiada żadnemu elementowi na stronie.</p><div class="why"><p>Uwaga dla programistów: jeśli link wywołuje zdarzenie JavaScript, upewnij się, że działa także przy użyciu klawiatury.</p></div>`,
+	QA_IN_PAGE_LINK: `<p>Cel linku wewnętrznego nie istnieje na stronie.</p><div class="why"><p>Dla programistów: jeśli to handler JS — zweryfikuj obsługę klawiaturą, zanim wyłączysz kontrolę.</p></div>`,
 
-	QA_JUSTIFY: `<p>Justowanie tekstu wprowadza nierówne odstępy między słowami, co utrudnia czytanie wielu osobom.</p><p>${why.fix}Użyj wyrównania do lewej.</p>`,
+	QA_JUSTIFY: `<p>Justowanie tworzy nierówne odstępy i utrudnia czytanie.</p><p>${why.fix}Użyj wyrównania do lewej.</p>`,
 
-	QA_NESTED_COMPONENTS: 'Unikaj zagnieżdżania komponentów interaktywnych — np. akordeonów w akordeonach lub zakładek w akordeonach. To utrudnia nawigację i może powodować pomijanie treści.',
+	QA_NESTED_COMPONENTS: 'Unikaj zagnieżdżonych interaktywnych komponentów (np. akordeon w akordeonie, zakładki w akordeonie) — zwiększają obciążenie poznawcze i utrudniają nawigację.',
 
-	QA_PDF: `<p>${why.fix}Wykonaj jedną z poniższych czynności, a następnie możesz zignorować ten alert:</p><ul><li>Linkuj do strony internetowej zamiast do PDF,</li><li>lub udostępnij również wersję HTML lub edytowalną,</li><li>lub upewnij się, że PDF jest dostępny (ma nagłówki, poprawny porządek odczytu, tabele i teksty alternatywne).</li></ul><div class="why"><p>Użytkownicy mobilni i osoby korzystające z czytników ekranu zwykle wolą strony internetowe niż PDF — pliki PDF często nie są responsywne i brakuje im struktury dostępności.</p></div>`,
+	QA_PDF: `<p>${why.fix}Wykonaj jedną z opcji i zamknij alert:</p><ul><li>Linkuj do strony WWW zamiast PDF,</li><li>albo obok PDF zapewnij wersję HTML/edytowalną,</li><li>albo upewnij się, że PDF ma znaczniki dostępności (nagłówki, kolejność czytania, nagłówki tabel, alty).</li></ul><div class="why"><p>Użytkownicy mobilni i korzystający z technologii asystujących zwykle wolą strony WWW — PDF nie reflowuje i często nie ma znaczników dostępności.</p></div>`,
 
-	QA_SMALL_TEXT: 'Zbyt mały tekst jest trudny do czytania, szczególnie dla osób niedowidzących. Unikaj rozmiarów mniejszych niż domyślne.',
+	QA_SMALL_TEXT: 'Zbyt mały tekst jest trudny do czytania, zwłaszcza dla osób słabowidzących. Unikaj rozmiarów poniżej domyślnych.',
 
-	QA_STRONG_ITALICS: `<p>${why.fix}Używaj pogrubienia i kursywy oszczędnie — tylko dla najważniejszych słów.</p><div class="why"><p>Uwaga: jeśli jest to cytat, użyj elementu blockquote.</p></div>`,
+	QA_STRONG_ITALICS: `<p>${why.fix}Używaj pogrubienia/kursywy oszczędnie — dla słów kluczowych.</p><div class="why"><p>Jeśli to cytat, użyj <code>blockquote</code>.</p></div>`,
 
-	QA_SUBSCRIPT: `Indeks górny i dolny zmniejsza czytelność tekstu. Używaj go tylko w przypadkach takich jak liczebniki porządkowe (np. 4<sup>ta</sup>), wzory chemiczne (H<sub>2</sub>O) lub przypisy.`,
+	QA_SUBSCRIPT: `Indeks górny/dolny zmniejsza czytelność. Stosuj go celowo (4<sup>ta</sup>, H<sub>2</sub>O, odnośniki).`,
 
-	QA_UNDERLINE: `<p>W sieci tekst podkreślony oznacza link. Użytkownicy będą zakładać, że mogą go kliknąć.</p><p>${why.fix}Używaj <strong>pogrubienia</strong> lub <em>kursywy</em> do wyróżnień oraz nagłówków do zmian sekcji.</p><div class="why"><p>Uwaga: czytniki ekranu nie ogłaszają stylów wizualnych, takich jak podkreślenie. Tylko nagłówki nadają strukturę.</p></div>`,
+	QA_UNDERLINE: `<p>Podkreślenie zwykle oznacza link — użytkownik będzie oczekiwał klikalności.</p><p>${why.fix}Wyróżniaj <strong>pogrubieniem</strong> lub <em>kursywą</em>; zmiany sekcji sygnalizuj nagłówkiem.</p><div class="why"><p>Czytniki nie zapowiadają stylu podkreślenia; strukturę daje nagłówek.</p></div>`,
 
-	QA_UPPERCASE: `<p>TEKST WIELKIMI LITERAMI JEST TRUDNIEJSZY DO CZYTANIA I MOŻE SPRAWIAĆ WRAŻENIE KRZYKU.</p><p>${why.fix}Podkreślaj tylko pojedyncze słowa lub użyj pogrubienia zamiast wielkich liter.</p><div class="why"><p>Uwaga: czytniki ekranu nie informują o pogrubieniu. Używaj nagłówków, jeśli tekst wprowadza nowy temat.</p></div>`,
+	QA_UPPERCASE: `<p>DUŻE BLOKI TEKSTU WIELKIMI LITERAMI SĄ TRUDNIEJSZE DO CZYTANIA I BRZMIĄ JAK KRZYK.</p><p>${why.fix}Akcentuj krótkie frazy, lepiej pogrubieniem niż kapitalikami.</p><div class="why"><p>Czytniki nie zapowiadają pogrubienia; nowy temat sygnalizuj nagłówkiem.</p></div>`,
 
-	SUS_ALT: `<p>Tekst alternatywny zawiera słowo "%(alt)", co może być zbędne:</p><p><strong class="badge">Tekst alternatywny</strong> "%(ALT_TEXT)"</p><p>Aby poprawić: napisz krótki i zwięzły opis znaczenia obrazu.</p><div class="why"><p>Wskazówka: czytniki ekranu ogłaszają już, że to opis obrazu, więc zwroty typu „obraz przedstawiający” są zwykle zbędne.</p></div>`,
+	SUS_ALT: `<p>Alt zawiera „%(alt)”, co bywa zbędne:</p><p><strong class="badge">Alt‑tekst</strong> „%(ALT_TEXT)”</p><p>Popraw: napisz krótki opis znaczenia obrazu.</p><div class="why"><p>Wskazówka: czytniki i tak zapowiadają obraz, więc zwroty „obraz/zdjęcie …” zwykle są zbędne.</p></div>`,
 
-	TABINDEX_ATTR: `<p>${why.fix}Nigdy nie używaj wartości tabindex większych niż „0”. Zamiast tego zmień kolejność elementów w HTML, tak aby kolejność wizualna, klawiaturowa i logiczna były spójne.</p><div class="why"><p>Domyślnie kolejność wizualna, kolejność tabulacji i kolejność odczytu są zgodne.</p><p>Dodatnie tabindex przenosi element na początek kolejności tabulacji, <strong>ale nie w strukturze wizualnej</strong>, co może być mylące.</p></div>`,
+	TABINDEX_ATTR: `<p>${why.fix}Nie używaj dodatnich wartości <code>tabindex</code>. Uporządkuj HTML tak, by porządek wizualny, tabulacji i czytania był spójny.</p><div class="why"><p>Domyślnie trzy porządki się pokrywają.</p><p>Pozytywny tabindex zmienia tylko kolejność tabulacji — <strong>nie</strong> wizualną — co wprowadza chaos.</p></div>`,
 
-	TABLES_EMPTY_HEADING: ` <p>${why.fix}Upewnij się, że każda komórka nagłówka zawiera tekst.</p><div class="why"><p>Wskazówka: czytniki ekranu używają nagłówków, aby pomagać użytkownikom orientować się w tabeli.</p></div>`,
+	TABLES_EMPTY_HEADING: ` <p>${why.fix}Upewnij się, że każda komórka nagłówka ma tekst.</p><div class="why"><p>Nagłówki pomagają czytnikom opisać kontekst komórek.</p></div>`,
 
-	TABLES_MISSING_HEADINGS: ` <p>${why.fix}Określ w ustawieniach tabeli, czy nagłówki znajdują się w pierwszym wierszu, pierwszej kolumnie, czy w obu.</p><div class="why"> <p>Wskazówka: czytniki ekranu powtarzają odpowiedni nagłówek przy wejściu do każdej komórki.</p><p>Jeśli tabela służy wyłącznie do układu graficznego, usuń formatowanie tabeli.</p></div>`,
+	TABLES_MISSING_HEADINGS: ` <p>${why.fix}Wskaż w ustawieniach, czy nagłówki znajdują się w pierwszym wierszu, pierwszej kolumnie czy w obu.</p><div class="why"> <p>Czytniki powtarzają odpowiedni nagłówek przy wejściu do komórki.</p><p>Jeśli tabela służy tylko layoutowi, rozważ usunięcie formatowania tabeli.</p></div>`,
 
-	TABLES_SEMANTIC_HEADING: ` <p>${why.fix}Usuń ten nagłówek treści (h2, h3). Zamiast tego użyj nagłówków wierszy lub kolumn. Jeśli potrzebne są różne poziomy nagłówków, rozważ podział tabeli na kilka mniejszych.</p><div class="why"> <p>Wskazówka: nagłówki tabel przypisują znaczenie do wierszy lub kolumn, natomiast nagłówki treści wpływają na całą strukturę poniżej.</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2"><strong>Nagłówek tabeli</strong> w komórce 2 opisuje komórkę B. <br><br> <strong>Nagłówek treści</strong> opisuje komórki 3, A, B, C, a także ten tekst i przypis.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`,
-
+	TABLES_SEMANTIC_HEADING: ` <p>${why.fix}Usuń nagłówek treści (h2, h3) z wnętrza tabeli; użyj nagłówków wierszy/kolumn. Jeśli potrzebne są poziomy — podziel tabelę.</p><div class="why"> <p>Nagłówki tabel działają „w rzędzie/kolumnie”; nagłówek treści wpływa na całą sekcję poniżej — nawet w innych kolumnach:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2"><strong>Nagłówek tabeli</strong> w komórce 2 oznacza komórkę B.<br><br><strong>Nagłówek treści</strong> w komórce 2 „obejmuje” 3, A, B, C oraz ten tekst i stopkę podpowiedzi.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`,
 };
 
 export const interfaceStrings = {
@@ -314,8 +309,8 @@ export const interfaceStrings = {
 	IMAGES: 'Tekst alternatywny',
 	MAIN_TOGGLE_LABEL: 'Włącz narzędzia dostępności',
 	MISSING: '(brak!)',
-	NOT_VISIBLE: 'Uwaga: ta treść może być niewidoczna. Poszukaj jej wewnątrz zaznaczonego obszaru.',
-	NO_IMAGES: 'Nie znaleziono żadnych obrazów.',
+	NOT_VISIBLE: 'Uwaga: ta treść może być niewidoczna. Poszukaj jej w zaznaczonym obszarze.',
+	NO_IMAGES: 'Nie znaleziono obrazów.',
 	OUTLINE: 'Nagłówki',
 	PANEL_DISMISS_BUTTON: `Pokaż %(dismissCount) ukrytych alertów`,
 	PANEL_HEADING: 'Pokaż wizualizacje',
@@ -339,21 +334,21 @@ export const interfaceStrings = {
 	errorOutlinePrefixSkippedLevel: '(oznaczony jako pominięty poziom)',
 	issueContent: 'Problem z treścią',
 	issueDeveloper: 'Problem techniczny',
-	issueTemplate: 'Problem w szablonie',
+	issueTemplate: 'Problem szablonu',
 	main_toggle_hide: 'Ukryj narzędzia dostępności',
 	main_toggle_hide_alerts: 'Ukryj alerty dostępności',
 	main_toggle_show: 'Pokaż narzędzia dostępności',
 	main_toggle_show_alerts: 'Pokaż alerty dostępności',
-	panelCheckAltText: '<p class="ed11y-small">Upewnij się, że każdy obraz opisuje swoje znaczenie w kontekście i że nie ma obrazów zawierających tekst.</p>',
-	panelCheckOutline: '<p class="ed11y-small">To narzędzie pokazuje strukturę nagłówków. Sprawdź, czy odpowiada ona wizualnej strukturze treści.</p>',
+	panelCheckAltText: `<p class="ed11y-small">Sprawdź, czy każdy obraz oddaje swoje znaczenie w kontekście i czy nie ma obrazów zawierających tekst.</p>`,
+	panelCheckOutline: `<p class="ed11y-small">To narzędzie pokazuje strukturę nagłówków. Sprawdź, czy odpowiada ona wizualnej organizacji treści.</p>`,
 	PANEL_HEADING_MISSING_ONE: 'Brakuje nagłówka poziomu 1.',
-	PANEL_NO_HEADINGS: 'Nie znaleziono żadnych nagłówków.',
+	PANEL_NO_HEADINGS: 'Nie znaleziono nagłówków.',
 	reportsLink: 'Otwórz raporty serwisu',
-	toggleDisabled: 'Brak treści dostępnej do sprawdzenia w Editoria11y.',
+	toggleDisabled: 'Brak treści, które Editoria11y może sprawdzić.',
 	transferFocus: 'Edytuj tę treść',
 	unDismissHideButton: 'Przywróć ten ukryty alert',
-	unDismissNotePermissions: 'Ten alert został ukryty przez administratora',
-	unDismissOKButton: 'Przywróć ten alert oznaczony jako OK',
+	unDismissNotePermissions: 'Ten test został ukryty przez administratora',
+	unDismissOKButton: 'Przywróć alert oznaczony jako OK',
 };
 
 const newStrings = {
