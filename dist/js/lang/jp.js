@@ -548,7 +548,7 @@ const interfaceStrings = {
   edit_page: "ページを編集",
   edit_layout: "レイアウトを編集",
   edit_term: "用語を編集",
-  edit_tags: "ユーザーを編集",
+  edit_user: "ユーザーを編集",
   IMAGES: "代替テキスト",
   MAIN_TOGGLE_LABEL: "アクセシビリティツールの切り替え",
   MISSING: "(不足しています!)",

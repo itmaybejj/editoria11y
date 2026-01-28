@@ -308,7 +308,7 @@ export const interfaceStrings = {
 	edit_page: 'Редагувати сторінку',
 	edit_layout: 'Редагувати макет',
 	edit_term: 'Редагувати термін',
-	edit_tags: 'Редагувати користувача',
+	edit_user: 'Редагувати користувача',
 	IMAGES: 'Альтернативний текст',
 	MAIN_TOGGLE_LABEL: 'Увімкнути інструменти доступності',
 	MISSING: '(відсутній!)',

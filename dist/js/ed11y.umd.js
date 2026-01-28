@@ -8052,7 +8052,7 @@ URL: ${url2}</pre>
     edit_page: "Edit page",
     edit_layout: "Edit layout",
     edit_term: "Edit term",
-    edit_tags: "Edit user",
+    edit_user: "Edit user",
     IMAGES: "Alt text",
     MAIN_TOGGLE_LABEL: "Toggle accessibility tools",
     MISSING: "(missing!)",

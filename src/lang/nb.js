@@ -306,7 +306,7 @@ export const interfaceStrings = {
 	edit_page: 'Rediger side',
 	edit_layout: 'Rediger oppsett',
 	edit_term: 'Rediger term',
-	edit_tags: 'Rediger bruker',
+	edit_user: 'Rediger bruker',
 	IMAGES: 'Alternativ tekst',
 	MAIN_TOGGLE_LABEL: 'Aktiver tilgjengelighetsverktøy',
 	MISSING: '(mangler!)',

@@ -513,7 +513,7 @@ const interfaceStrings = {
   edit_page: "编辑页面",
   edit_layout: "编辑布局",
   edit_term: "编辑术语",
-  edit_tags: "编辑用户",
+  edit_user: "编辑用户",
   IMAGES: "替代文本",
   MAIN_TOGGLE_LABEL: "启用可访问性工具",
   MISSING: "(缺失！)",

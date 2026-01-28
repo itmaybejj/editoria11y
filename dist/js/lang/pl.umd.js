@@ -515,7 +515,7 @@
     edit_page: "Edytuj stronę",
     edit_layout: "Edytuj układ",
     edit_term: "Edytuj termin",
-    edit_tags: "Edytuj użytkownika",
+    edit_user: "Edytuj użytkownika",
     IMAGES: "Tekst alternatywny",
     MAIN_TOGGLE_LABEL: "Włącz narzędzia dostępności",
     MISSING: "(brak!)",

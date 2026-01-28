@@ -306,7 +306,7 @@ export const interfaceStrings = {
 	edit_page: 'Pagina bewerken',
 	edit_layout: 'Lay‑out bewerken',
 	edit_term: 'Term bewerken',
-	edit_tags: 'Gebruiker bewerken',
+	edit_user: 'Gebruiker bewerken',
 	IMAGES: 'Alt‑tekst',
 	MAIN_TOGGLE_LABEL: 'Toegankelijkheidstools aan/uit zetten',
 	MISSING: '(ontbreekt!)',

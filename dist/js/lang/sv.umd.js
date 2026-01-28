@@ -531,7 +531,7 @@
     edit_page: "Redigera sida",
     edit_layout: "Redigera layout",
     edit_term: "Redigera term",
-    edit_tags: "Redigera användare",
+    edit_user: "Redigera användare",
     IMAGES: "Alt‑text",
     MAIN_TOGGLE_LABEL: "Aktivera tillgänglighetsverktyg",
     MISSING: "(saknas!)",

@@ -507,7 +507,7 @@ const interfaceStrings = {
   edit_page: "Modifica pagina",
   edit_layout: "Modifica layout",
   edit_term: "Modifica termine",
-  edit_tags: "Modifica utente",
+  edit_user: "Modifica utente",
   IMAGES: "Testo alternativo",
   MAIN_TOGGLE_LABEL: "Attiva strumenti di accessibilità",
   MISSING: "(mancante!)",

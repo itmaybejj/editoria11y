@@ -511,7 +511,7 @@
     edit_page: "Editar página",
     edit_layout: "Editar layout",
     edit_term: "Editar termo",
-    edit_tags: "Editar usuário",
+    edit_user: "Editar usuário",
     IMAGES: "Texto alternativo",
     MAIN_TOGGLE_LABEL: "Alternar ferramentas de acessibilidade",
     MISSING: "(faltando!)",

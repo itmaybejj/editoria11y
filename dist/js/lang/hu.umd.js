@@ -514,7 +514,7 @@
     edit_page: "Oldal szerkesztése",
     edit_layout: "Elrendezés szerkesztése",
     edit_term: "Kifejezés szerkesztése",
-    edit_tags: "Felhasználó szerkesztése",
+    edit_user: "Felhasználó szerkesztése",
     IMAGES: "Alternatív szöveg",
     MAIN_TOGGLE_LABEL: "Hozzáférhetőségi eszközök be/ki",
     MISSING: "(hiányzik!)",

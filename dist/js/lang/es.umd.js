@@ -496,7 +496,7 @@
     edit_page: "Editar página",
     edit_layout: "Editar diseño",
     edit_term: "Editar término",
-    edit_tags: "Editar usuario",
+    edit_user: "Editar usuario",
     IMAGES: "Texto alternativo",
     MAIN_TOGGLE_LABEL: "Activar herramientas de accesibilidad",
     MISSING: "(faltante!)",

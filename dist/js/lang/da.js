@@ -511,7 +511,7 @@ const interfaceStrings = {
   edit_page: "Rediger side",
   edit_layout: "Rediger layout",
   edit_term: "Rediger term",
-  edit_tags: "Rediger bruger",
+  edit_user: "Rediger bruger",
   IMAGES: "Alt‑tekst",
   MAIN_TOGGLE_LABEL: "Aktivér tilgængelighedsværktøjer",
   MISSING: "(mangler!)",

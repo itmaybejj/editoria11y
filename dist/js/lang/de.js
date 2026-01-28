@@ -557,7 +557,7 @@ const interfaceStrings = {
   edit_page: "Seite bearbeiten",
   edit_layout: "Layout bearbeiten",
   edit_term: "Begriff bearbeiten",
-  edit_tags: "Benutzer bearbeiten",
+  edit_user: "Benutzer bearbeiten",
   IMAGES: "Alt‑Text",
   MAIN_TOGGLE_LABEL: "Barrierefreiheits‑Werkzeuge ein-/ausschalten",
   MISSING: "(fehlt!)",
