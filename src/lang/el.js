@@ -1,7 +1,7 @@
-import strings from '../sa11y-lang/el.js';
+import {default as Sa11yStrings} from '../sa11y-lang/el.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: 'Το εναλλακτικό κείμενο (alt) είναι όνομα αρχείου, όχι περιγραφή',
 	ALT_MAYBE_BAD: 'Το εναλλακτικό κείμενο δεν μπορεί να προφερθεί σωστά από αναγνώστη οθόνης',
 	ALT_PLACEHOLDER: 'Το εναλλακτικό κείμενο είναι κενό/γενικό placeholder χωρίς νόημα',
@@ -143,7 +143,7 @@ export const tips = {
 
 	CONTRAST_WARNING: `Εικόνα φόντου ή gradient εμποδίζει τον ελεγκτή να προσδιορίσει με ασφάλεια το φόντο του κειμένου. Χρησιμοποιήστε τον επιλογέα χρώματος παρακάτω για χειροκίνητο έλεγχο.`,
 
-	DUPLICATE_ID: `<p>Τα ID χρησιμοποιούνται για ετικέτες ή στόχους συνδέσμων στη σελίδα, άρα πρέπει να είναι μοναδικά.</p><p>${why.fix}Αλλάξτε αυτό το ID: <strong>#%(id)</strong></p><div class="why"><p>Σε πολλά CMS, το ID προέρχεται από πεδίο “name” ή “id” στις ιδιότητες. Στο HTML είναι ιδιότητα: <code><a id="MY-ID"></a></code></p></div>`,
+	DUPLICATE_ID: `<p>Τα ID χρησιμοποιούνται για ετικέτες ή στόχους συνδέσμων στη σελίδα, άρα πρέπει να είναι μοναδικά.</p><p>${why.fix}Αλλάξτε αυτό το ID: <strong>#%(id)</strong></p><div class="why"><p>Σε πολλά CMS, το ID προέρχεται από πεδίο “name” ή “id” στις ιδιότητες. Στο HTML είναι ιδιότητα: <code>&lt;a id=""></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Αφαιρέστε την ιδιότητα <code>title</code> από τον σύνδεσμο.</p><div class="why"><p>Σημείωση: tooltips <code>title</code> εμφανίζονται μόνο στο hover ποντικιού—δεν είναι ορατά σε κινητά ή με πληκτρολόγιο, οπότε δεν πρέπει να περιέχουν κρίσιμες πληροφορίες.</p></div>`,
 
@@ -351,9 +351,7 @@ const interfaceStrings = {
 	unDismissOKButton: 'Επαναφορά της ειδοποίησης που σημειώθηκε ως OK',
 };
 
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}

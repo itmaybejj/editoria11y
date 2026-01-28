@@ -1,7 +1,7 @@
-import Lang from '../../sa11y-js/utils/lang';
-import { Options } from '../utils/options';
-import { getElements } from '../utils/utils';
-import * as Utils from '../../sa11y-js/utils/utils';
+//import Lang from '../../sa11y-js/utils/lang';
+//import { Options } from '../utils/options';
+//import { getElements } from '../utils/utils';
+//import * as Utils from '../../sa11y-js/utils/utils';
 
 export default function customRuleset(results) {
   /*

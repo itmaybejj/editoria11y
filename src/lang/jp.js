@@ -1,6 +1,6 @@
-import strings from '../sa11y-lang/ja.js';
+import {default as Sa11yStrings} from '../sa11y-lang/ja.js';
 
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: 'この代替テキストは説明ではなくファイル名です',
 	ALT_MAYBE_BAD: 'この代替テキストはスクリーンリーダーで正しく読み上げられない可能性があります',
 	ALT_PLACEHOLDER: 'この代替テキストは意味のないプレースホルダーです',
@@ -143,7 +143,7 @@ export const tips = {
 
 	CONTRAST_WARNING: '背景画像またはグラデーションのため、この検査ではテキスト背後の色を確実に判定できません。下のカラーピッカーで手動確認してください。',
 
-	DUPLICATE_ID: `<p>ID はラベル付けやリンク先のターゲットとして使用されるため、ページ内で一意でなければなりません。</p><p>${why.fix}この ID を変更してください：<strong>#%(id)</strong></p><div class="why"><p>多くの CMS では「name」または「id」フィールドに由来します。HTML では <code><a id="MY-ID"></a></code> のように記述します。</p></div>`,
+	DUPLICATE_ID: `<p>ID はラベル付けやリンク先のターゲットとして使用されるため、ページ内で一意でなければなりません。</p><p>${why.fix}この ID を変更してください：<strong>#%(id)</strong></p><div class="why"><p>多くの CMS では「name」または「id」フィールドに由来します。HTML では <code>&lt;a id=""></code> のように記述します。</p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}このリンクの <code>title</code> 属性を削除してください。</p><div class="why"><p>注意：<code>title</code> のツールチップはマウス操作でしか表示されず、モバイルやキーボードでは見えません。重要情報は入れないでください。</p></div>`,
 
@@ -351,9 +351,7 @@ export const interfaceStrings = {
 	unDismissOKButton: '「OK」とマークされたメッセージを元に戻す',
 };
 
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}

@@ -69,6 +69,7 @@ const runBuild = async (config) => {
 
 	// UMD - Unminified
 	await runBuild({
+		logLevel: 'warning',
 		define: getDefine(),
 		plugins: [
 			injectCSSintoJS(),
@@ -82,26 +83,30 @@ const runBuild = async (config) => {
 		},
 	});
 
-	const languageOverrides = ['enUS', 'en', 'es'];
+	const langs = [
+		'en-us',
+		'en',
+		'da',
+		'de',
+		'el',
+		'es',
+		'fr',
+		'hu',
+		'it',
+		'jp',
+		'nb',
+		'nl',
+		'pl',
+		'pt-br',
+		'pt-pt',
+		'sv',
+		'zh',
+	];
 
-	console.log(`Processing ${languageOverrides.length} language files...`);
+	console.log(`Processing ${ langs.length} language files...`);
 
-	for (const lang of languageOverrides) {
+	for (const lang of  langs) {
 		const langEntry = path.resolve(dirname, `../src/lang/${lang}.js`);
-
-		// Build ESM
-		await runBuild({
-			build: {
-				emptyOutDir: false,
-				minify: false,
-				outDir: 'dist/js/lang',
-				lib: {
-					entry: langEntry,
-					fileName: () => `${lang}.js`,
-					formats: ['es'],
-				},
-			},
-		});
 
 		// Build UMD
 		await runBuild({
@@ -118,14 +123,6 @@ const runBuild = async (config) => {
 				},
 			},
 		});
-	}
-
-	const languages = ['bg', 'cs', 'da', 'de', 'el', 'et', 'fi', 'fr', 'hu', 'id', 'it', 'ja', 'ko', 'lt', 'lv', 'nb', 'nl', 'pl', 'ptBR', 'ptPT', 'ro', 'sk', 'sl', 'sv', 'tr', 'ua', 'zh'];
-
-	console.log(`Processing ${languages.length} language files...`);
-
-	for (const lang of languages) {
-		const langEntry = path.resolve(dirname, `../src/sa11y-lang/${lang}.js`);
 
 		// Build ESM
 		await runBuild({
@@ -138,22 +135,6 @@ const runBuild = async (config) => {
 					entry: langEntry,
 					fileName: () => `${lang}.js`,
 					formats: ['es'],
-				},
-			},
-		});
-
-		// Build UMD
-		await runBuild({
-			logLevel: 'warning',
-			build: {
-				emptyOutDir: false,
-				minify: false,
-				outDir: 'dist/js/lang',
-				lib: {
-					entry: langEntry,
-					name: `Sa11yLang${lang.charAt(0).toUpperCase() + lang.slice(1)}`,
-					fileName: () => `${lang}.umd.js`,
-					formats: ['umd'],
 				},
 			},
 		});

@@ -1,7 +1,7 @@
-import strings from '../sa11y-lang/de.js';
+import {default as Sa11yStrings} from '../sa11y-lang/de.js';
 // Machine translation.
 
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: 'Dieser Alt‑Text ist ein Dateiname, keine Beschreibung',
 	ALT_MAYBE_BAD: 'Dieser Alt‑Text kann von einem Screenreader nicht ausgesprochen werden',
 	ALT_PLACEHOLDER: 'Dieser Alt‑Text ist ein bedeutungsloser Platzhalter',
@@ -144,7 +144,7 @@ export const tips = {
 
 	CONTRAST_WARNING: 'Ein Hintergrundbild oder Farbverlauf verhindert, dass dieses Tool die tatsächliche Hintergrundfarbe sicher bestimmen kann. Nutzen Sie den Farbwähler unten für eine manuelle Prüfung.',
 
-	DUPLICATE_ID: `<p>IDs werden auf dieser Seite für Beschriftungen oder Linkziele verwendet und müssen daher eindeutig sein.</p><p>${why.fix}Ändern Sie diese ID: <strong>#%(id)</strong></p><div class="why"><p>In vielen CMS stammt sie aus einem Feld „name“ oder „id“. In HTML ist sie ein Attribut: <code><a id="MY-ID"></a></code></p></div>`,
+	DUPLICATE_ID: `<p>IDs werden auf dieser Seite für Beschriftungen oder Linkziele verwendet und müssen daher eindeutig sein.</p><p>${why.fix}Ändern Sie diese ID: <strong>#%(id)</strong></p><div class="why"><p>In vielen CMS stammt sie aus einem Feld „name“ oder „id“. In HTML ist sie ein Attribut: <code>&lt;a id=""></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Löschen Sie das <code>title</code>‑Attribut dieses Links.</p><div class="why"><p>Hinweis: <code>title</code>‑Tooltips erscheinen nur beim Maus‑Hover. Auf Mobilgeräten oder per Tastatur sind sie nicht sichtbar und sollten daher keine wichtigen Informationen enthalten.</p></div>`,
 
@@ -353,9 +353,7 @@ export const interfaceStrings = {
 };
 
 
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}

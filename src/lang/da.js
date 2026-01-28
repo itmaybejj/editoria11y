@@ -1,7 +1,7 @@
-import strings from '../sa11y-lang/da.js';
+import {default as Sa11yStrings} from '../sa11y-lang/da.js';
 // Machine translation.
 
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: 'Denne alt‑tekst er et filnavn, ikke en beskrivelse',
 	ALT_MAYBE_BAD: 'Denne alt‑tekst kan ikke udtales af en skærmlæser',
 	ALT_PLACEHOLDER: 'Denne alt‑tekst er et meningsløst placeholder‑indhold',
@@ -144,7 +144,7 @@ export const tips = {
 
 	CONTRAST_WARNING: 'Et baggrundsbillede eller en gradient gør, at værktøjet ikke sikkert kan fastslå farven bag teksten. Brug farvevælgeren herunder til et manuelt tjek.',
 
-	DUPLICATE_ID: `<p>ID’er bruges her som etiketter eller linkmål og skal derfor være unikke.</p><p>${why.fix}Redigér denne ID: <strong>#%(id)</strong></p><div class="why"><p>I mange CMS stammer den fra et felt “name” eller “id”. I HTML er det attributten: <code><a id="MY-ID"></a></code></p></div>`,
+	DUPLICATE_ID: `<p>ID’er bruges her som etiketter eller linkmål og skal derfor være unikke.</p><p>${why.fix}Redigér denne ID: <strong>#%(id)</strong></p><div class="why"><p>I mange CMS stammer den fra et felt “name” eller “id”. I HTML er det attributten: <code>&lt;a id=""></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Fjern linkets <code>title</code>‑attribut.</p><div class="why"><p>Bemærk: <code>title</code>‑tooltips ses kun ved muse‑hover, ikke på mobil eller med tastatur. De bør ikke indeholde unik eller vigtig information.</p></div>`,
 
@@ -352,9 +352,7 @@ export const interfaceStrings = {
 	unDismissOKButton: 'Gendan denne besked markeret som OK',
 };
 
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}

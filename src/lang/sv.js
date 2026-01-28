@@ -1,7 +1,7 @@
-import strings from '../sa11y-lang/sv.js';
+import {default as Sa11yStrings} from '../sa11y-lang/sv.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: 'Denna alt‑text är ett filnamn, inte en beskrivning',
 	ALT_MAYBE_BAD: 'Denna alt‑text kan vara svår för en skärmläsare att läsa korrekt',
 	ALT_PLACEHOLDER: 'Denna alt‑text är en meningslös platshållare',
@@ -144,7 +144,7 @@ export const tips = {
 
 	CONTRAST_WARNING: 'Bakgrundsbild/gradient gör det osäkert att avgöra bakgrunden. Verifiera manuellt med färgväljaren.',
 
-	DUPLICATE_ID: `<p>ID används som etiketter eller länkmål och måste därför vara unika.</p><p>${why.fix}Ändra detta ID: <strong>#%(id)</strong></p><div class="why"><p>I många CMS hämtas det från fälten ”name/id”. I HTML är det <code><a id="MY-ID"></a></code>.</p></div>`,
+	DUPLICATE_ID: `<p>ID används som etiketter eller länkmål och måste därför vara unika.</p><p>${why.fix}Ändra detta ID: <strong>#%(id)</strong></p><div class="why"><p>I många CMS hämtas det från fälten ”name/id”. I HTML är det <code>&lt;a id=""></code>.</p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Ta bort <code>title</code> från länken.</p><div class="why"><p>Obs: <code>title</code>‑tooltips visas endast med muspekare; de syns inte med tangentbord eller på mobil och ska inte innehålla viktig information.</p></div>`,
 
@@ -352,9 +352,7 @@ export const interfaceStrings = {
 	unDismissOKButton: 'Återställ denna varning markerad som OK',
 };
 
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}

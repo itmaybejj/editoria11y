@@ -341,42 +341,38 @@
             }
             /*footer { position: fixed; z-index: 1; bottom: 0; left: 0; right: 0; background: silver;}*/
         </style>
-		<script>
+
+		<!-- Instantiate-->
+		<link href="./tests.css" rel="stylesheet">
+
+		<script src="../dist/js/ed11y.umd.js"></script>
+		<script src="../dist/js/lang/en.umd.js"></script>
+		<script src="../dist/js/lang/es.umd.js"></script>
+		<script src="../dist/js/lang/de.umd.js"></script>
+        <script>
+
+		  const editLinks = document.createElement('div');
+		  const editIcon = document.createElement('span');
+		  editIcon.classList.add('ed11y-custom-edit-icon');
+		  editIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M441 59L453 71c9 9 9 25 0 34L424 134 378 88 407 59c9-9 25-9 34 0zM210 256L344 122 390 168 256 302c-3 3-7 5-10 6l-59 17 17-59c1-4 3-8 6-10zM373 25L176 222c-9 9-15 19-18 31l-29 100c-2 8-0 17 6 24s15 9 24 6l100-29c12-3 23-10 31-18L487 139c28-28 28-74 0-102L475 25C447-3 401-3 373 25zM88 64C39 64 0 103 0 152L0 424c0 49 39 88 88 88l272 0c49 0 88-39 88-88l0-112c0-13-11-24-24-24s-24 11-24 24l0 112c0 22-18 40-40 40L88 464c-22 0-40-18-40-40l0-272c0-22 18-40 40-40l112 0c13 0 24-11 24-24s-11-24-24-24L88 64z">';
+		  const editLink = document.createElement('a');
+		  editLink.href="./editable.htm";
+		  editLink.textContent = Ed11yLangEn.lang.strings.edit_page;
+		  editLink.prepend(editIcon.cloneNode(true));
+		  editLinks.appendChild(editLink);
 
 			document.addEventListener('ed11yResults', (e) => {
-				const testsFound = new Set(Object.keys(Ed11yLangEn.testNames))
+				/*const testsFound = new Set(Object.keys(Ed11yLangEs.testNames))
 				testsFound.delete('LINK_IMAGE_TEXT');
-				console.log("Total tests: ", Object.keys(Ed11yLangEn.testNames).length);
+				console.log("Total tests: ", Object.keys(Ed11yLangEs.testNames).length);
 				Ed11y.Results.forEach(r => {
 					if (!testsFound.has(r.test)) {
 						console.log('duplicate test: ', r.test, r.element);
 					}
 					testsFound.delete(r.test);
 				})
-				console.log("Tests not on page", testsFound);
+				console.log("Tests not on page", testsFound);*/
 			});
-		</script>
-
-		<!-- Instantiate-->
-		<link href="./tests.css" rel="stylesheet">
-		<script src="../dist/js/ed11y.umd.js"></script>
-		<script src="../dist/js/lang/en.umd.js"></script>
-        <script>
-
-			const editLinks = document.createElement('div');
-			const editIcon = document.createElement('span');
-			editIcon.classList.add('ed11y-custom-edit-icon');
-			editIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M441 59L453 71c9 9 9 25 0 34L424 134 378 88 407 59c9-9 25-9 34 0zM210 256L344 122 390 168 256 302c-3 3-7 5-10 6l-59 17 17-59c1-4 3-8 6-10zM373 25L176 222c-9 9-15 19-18 31l-29 100c-2 8-0 17 6 24s15 9 24 6l100-29c12-3 23-10 31-18L487 139c28-28 28-74 0-102L475 25C447-3 401-3 373 25zM88 64C39 64 0 103 0 152L0 424c0 49 39 88 88 88l272 0c49 0 88-39 88-88l0-112c0-13-11-24-24-24s-24 11-24 24l0 112c0 22-18 40-40 40L88 464c-22 0-40-18-40-40l0-272c0-22 18-40 40-40l112 0c13 0 24-11 24-24s-11-24-24-24L88 64z">';
-			const editLink = document.createElement('a');
-			editLink.href="./editable.htm";
-			editLink.textContent = "Edit page";
-			editLink.prepend(editIcon.cloneNode(true));
-			editLinks.appendChild(editLink);
-
-			// todo determine PHP equivalent hash for 'META_TITLE'
-			//PHPstorm says 7ff8ffc6ba42a34e087837c5f2a2df2e90267a3aac38c6c2f9ea6d205489efa7
-
-		  Ed11y.Lang.addI18n(Ed11yLangEn.strings);
           const ed11y = new Ed11y.Ed11y({
             alertMode : 'assertive',
             //baseFontSize: 18,
@@ -409,6 +405,7 @@
 
 
             ignoreAriaOnElements: '.gutenbergBadAria',
+			lang: Ed11yLangDe.lang,
             linkIgnoreStrings: ['opens in new window','download'], // @todo CMS was regex.
             linkIgnoreSelector: '.link-purpose',
             embeddedContent: '#embed',

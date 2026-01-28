@@ -1,6 +1,6 @@
-import strings from '../sa11y-lang/es.js';
+import {default as Sa11yStrings} from '../sa11y-lang/es.js';
 
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: 'Este texto alternativo es un nombre de archivo, no una descripción',
 	ALT_MAYBE_BAD: 'Este texto alternativo no puede ser pronunciado por un lector de pantalla',
 	ALT_PLACEHOLDER: 'Este texto alternativo es un marcador de posición sin significado',
@@ -124,15 +124,15 @@ const tips = {
 
 	CONTRAST_WARNING: `Una imagen de fondo o un degradado impide a este verificador determinar con seguridad el color detrás de este texto. Use el selector de color a continuación para verificar manualmente.`,
 
-	DUPLICATE_ID: `<p>Los ID se usan en esta página para etiquetas o destinos de enlace, por lo que deben ser únicos.</p><p>${why.fix}Cambie este ID: <strong>#%(id)</strong></p><div class="why"><p>En la mayoría de los sistemas de gestión de contenido, esto proviene de un campo “name” o “id” en las propiedades del elemento. En HTML, es un atributo: <code><a id="MY-ID"></a></code></p></div>`,
+	DUPLICATE_ID: `<p>Los ID se usan en esta página para etiquetas o destinos de enlace, por lo que deben ser únicos.</p><p>${why.fix}Cambie este ID: <strong>#%(id)</strong></p><div class="why"><p>En la mayoría de los sistemas de gestión de contenido, esto proviene de un campo “name” o “id” en las propiedades del elemento. En HTML, es un atributo: <code>&lt;a id=""></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Elimine el atributo <code>title</code> del enlace.</p><div class="why"><p>Nota: los textos emergentes de <code>title</code> solo aparecen al pasar el puntero del mouse. No se ven al navegar en un teléfono o con el teclado, por lo que muchas personas nunca los verán. No deben contener información única o importante.</p></div>`,
 
-	EMBED_AUDIO: `<p>Si este audio contiene habla, se debe proporcionar una https://www.w3.org/WAI/media/av/transcribing/alternativa en texto</a> en esta página o mediante un enlace.</p><p>Tenga en cuenta que una persona debe revisar las transcripciones automáticas y asegurarse de que los hablantes y los efectos de sonido significativos estén correctamente identificados.</p>`,
+	EMBED_AUDIO: `<p>Si este audio contiene habla, se debe proporcionar una <a href="https://www.w3.org/WAI/media/av/transcribing/">alternativa en texto</a> en esta página o mediante un enlace.</p><p>Tenga en cuenta que una persona debe revisar las transcripciones automáticas y asegurarse de que los hablantes y los efectos de sonido significativos estén correctamente identificados.</p>`,
 
 	EMBED_DATA_VIZ: `<p>Los elementos de visualización incrustados a menudo son difíciles o imposibles de operar con tecnologías de asistencia; pueden resultar difíciles de comprender para personas con baja visión o daltonismo, y pueden requerir mucho desplazamiento horizontal en teléfonos.</p><p>${why.fix}A menos que este embed tenga alto contraste visual, se pueda operar con teclado <strong><em>y</em></strong> sea descrito por un lector de pantalla, agregue un formato alternativo equivalente (descripción textual, tabla de datos o hoja de cálculo descargable) y luego descarte esta alerta.</p>`,
 
-	EMBED_GENERAL: `Los verificadores automáticos no pueden evaluar el contenido dentro de elementos incrustados. Asegúrese de que todas las imágenes dentro de este embed tengan texto alternativo, los videos tengan subtítulos, el texto tenga suficiente contraste y que los enlaces y los botones sean https://webaim.org/techniques/keyboard/accesibles mediante teclado</a>, y luego descarte esta alerta.`,
+	EMBED_GENERAL: `Los verificadores automáticos no pueden evaluar el contenido dentro de elementos incrustados. Asegúrese de que todas las imágenes dentro de este embed tengan texto alternativo, los videos tengan subtítulos, el texto tenga suficiente contraste y que los enlaces y los botones sean <a href="https://webaim.org/techniques/keyboard/">accesibles mediante teclado</a>, y luego descarte esta alerta.`,
 
 	EMBED_MISSING_TITLE: `<p>Los contenidos incrustados necesitan un nombre accesible que describa su contenido para los lectores de pantalla.</p><p>${why.fix}Agregue un atributo <code>title</code> o <code>aria-label</code> único.</p>`,
 
@@ -194,7 +194,7 @@ const tips = {
 
 	LINK_EMPTY_NO_LABEL: `<p>${why.fix}Agregue texto que describa su destino, o elimine este enlace si fue un error.</p><div class="why"><p>Los enlaces vacíos ocasionan silencio o la lectura completa de la URL.</p><p>Los espacios vinculados a veces requieren reescribir el texto adyacente para eliminarlos.</p></div>`,
 
-	LINK_FILE_EXT: `<p>Este enlace apunta a un archivo descargable (PDF, MP3, Zip, Word, etc.) sin advertencia.</p><p>${why.fix}Use texto o un ícono para https://itmaybejj.github.io/linkpurpose/indicar el tipo de archivo</a> en el propio enlace.</p><p class="why">Para archivos grandes, considere incluir el tamaño. Ejemplo: "Informe anual (PDF, 3 MB)"</p>`,
+	LINK_FILE_EXT: `<p>Este enlace apunta a un archivo descargable (PDF, MP3, Zip, Word, etc.) sin advertencia.</p><p>${why.fix}Use texto o un ícono para <a href="https://itmaybejj.github.io/linkpurpose/">indicar el tipo de archivo</a> en el propio enlace.</p><p class="why">Para archivos grandes, considere incluir el tamaño. Ejemplo: "Informe anual (PDF, 3 MB)"</p>`,
 
 	LINK_IDENTICAL_NAME: `<p>Varios enlaces que llevan a destinos distintos usan la misma etiqueta "<strong>%(TEXT)</strong>".</p><p>${why.fix}Reescriba los enlaces que llevan a lugares distintos para que cada etiqueta describa claramente su destino único.</p>${why.links}`,
 
@@ -202,13 +202,13 @@ const tips = {
 
 	LINK_IMAGE_ALT_AND_TEXT: `<p>Verifique que esto ayude a describir el destino del enlace y no agregue información redundante:</p><p><strong class="badge">Alt</strong> "<em><strong>%(alt)</strong></em>"</p>${why.imageLinks}`,
 
-	LINK_IMAGE_LONG_ALT: `<p>https://webaim.org/techniques/hypertext/link_text#alt_linkEl alt de una imagen vinculada se usa para describir el destino del enlace</a>. Los enlaces deben ser breves y claros, ya que las personas que usan lectores de pantalla suelen explorar la lista de enlaces de la página. Un alt largo suele indicar que está describiendo la imagen en lugar del destino.</p>El texto alternativo de %(altLength) caracteres de esta imagen es: <em>%(ALT_TEXT)</em>`,
+	LINK_IMAGE_LONG_ALT: `<p><a href="https://webaim.org/techniques/hypertext/link_text#alt_link">El alt de una imagen vinculada se usa para describir el destino del enlace</a>. Los enlaces deben ser breves y claros, ya que las personas que usan lectores de pantalla suelen explorar la lista de enlaces de la página. Un alt largo suele indicar que está describiendo la imagen en lugar del destino.</p>El texto alternativo de %(altLength) caracteres de esta imagen es: <em>%(ALT_TEXT)</em>`,
 
-	LINK_IMAGE_NO_ALT_TEXT: `<p>Cuando un enlace envuelve una imagen, el alt de la imagen https://webaim.org/techniques/hypertext/link_text#alt_linkproporciona el título del enlace</a>.</p><p>${why.fix}Establezca el texto alternativo con la finalidad o el destino del enlace.</p>${why.imageLinks}`,
+	LINK_IMAGE_NO_ALT_TEXT: `<p>Cuando un enlace envuelve una imagen, el alt de la imagen <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">proporciona el título del enlace</a>.</p><p>${why.fix}Establezca el texto alternativo con la finalidad o el destino del enlace.</p>${why.imageLinks}`,
 
 	LINK_IMAGE_TEXT: `La imagen está marcada como decorativa, aunque el enlace utiliza el texto circundante como etiqueta descriptiva.`,
 
-	LINK_NEW_TAB: `<p>${why.fix}Configure este enlace para que se abra en la misma pestaña o https://itmaybejj.github.io/linkpurpose/avise a las personas usuarias</a> con antelación.</p><div class="why"><p>Las personas siempre pueden elegir abrir un enlace en una pestaña nueva. Forzar una nueva pestaña sin aviso puede resultar confuso, especialmente para quienes usan tecnologías de asistencia.</p><p>Nota: los enlaces dentro de formularios suelen abrirse en otra pestaña para evitar la pérdida de datos.</p></div>`,
+	LINK_NEW_TAB: `<p>${why.fix}Configure este enlace para que se abra en la misma pestaña o <a href="https://itmaybejj.github.io/linkpurpose/">avise a las personas usuarias</a> con antelación.</p><div class="why"><p>Las personas siempre pueden elegir abrir un enlace en una pestaña nueva. Forzar una nueva pestaña sin aviso puede resultar confuso, especialmente para quienes usan tecnologías de asistencia.</p><p>Nota: los enlaces dentro de formularios suelen abrirse en otra pestaña para evitar la pérdida de datos.</p></div>`,
 
 	LINK_PLACEHOLDER_ALT: `<p>El alt de esta imagen vinculada es un marcador de posición: "<strong>%(alt)</strong>".</p><p>${why.fix}Use un alt que describa el destino del enlace.</p>${why.imageLinks}`,
 
@@ -222,7 +222,7 @@ const tips = {
 
 	LINK_URL: `<p>${why.fix}Cambie este enlace para usar el título de su destino o su finalidad.</p><div class="why"><p>Las personas localizan contenido por sus enlaces —especialmente quienes usan lectores de pantalla—.</p><p>Las URL como texto de enlace son difíciles de recorrer y de buscar.</p></div>`,
 
-	META_LANG: `<p>${why.fix}Agregue un https://www.w3.org/International/questions/qa-html-language-declarationsatributo de idioma</a> en la etiqueta HTML de la página.</p><div class="why"><p>Consejo: los lectores de pantalla pronuncian las palabras según el idioma declarado. Un idioma incorrecto produce un discurso ininteligible.</p></div>`,
+	META_LANG: `<p>${why.fix}Agregue un <a href="https://www.w3.org/International/questions/qa-html-language-declarations">atributo de idioma</a> en la etiqueta HTML de la página.</p><div class="why"><p>Consejo: los lectores de pantalla pronuncian las palabras según el idioma declarado. Un idioma incorrecto produce un discurso ininteligible.</p></div>`,
 
 	META_MAX: `<p>Esta metaetiqueta limita cuánto pueden ampliar el texto las personas usuarias.</p><p>${why.fix}Ajuste o elimine esta limitación para permitir zoom completo.</p>`,
 
@@ -230,7 +230,7 @@ const tips = {
 
 	META_SCALABLE: `<p>Esta metaetiqueta impide que las personas amplíen el texto.</p><p>${why.fix}Permita zoom completo eliminando o ajustando este parámetro.</p>`,
 
-	META_TITLE: `<p>${why.fix}Agregue una etiqueta <code><title></code> dentro de la etiqueta <code><head></code> de la página.</p><div class="why"><p>Un https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/titletítulo breve y único</a> es esencial:</p><ul><li>Los motores de búsqueda lo usan para titular resultados.</li><li>Los navegadores lo usan para titular pestañas.</li><li>Los lectores de pantalla lo anuncian al cambiar de pestaña.</li></ul><p>Sin título, las personas ven u oyen una URL en bruto.</p></div>`,
+	META_TITLE: `<p>${why.fix}Agregue una etiqueta <code>&lt;title&gt;</code> dentro de la etiqueta <code>&lt;head&gt;</code> de la página.</p><div class="why"><p>Un <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">título breve y único</a> es esencial:</p><ul><li>Los motores de búsqueda lo usan para titular resultados.</li><li>Los navegadores lo usan para titular pestañas.</li><li>Los lectores de pantalla lo anuncian al cambiar de pestaña.</li></ul><p>Sin título, las personas ven u oyen una URL en bruto.</p></div>`,
 
 	MISSING_ALT: `<p>Cuando los lectores de pantalla encuentran una imagen sin atributo alt, leen la URL del archivo de imagen, a menudo letra por letra.</p><p>${why.fix}Agregue alt="" si la imagen debe ser ignorada, o un alt descriptivo si es significativa.</p>${why.images}`,
 
@@ -242,7 +242,7 @@ const tips = {
 
 	QA_BLOCKQUOTE: `<p>El formato <em>blockquote</em> indica a los lectores de pantalla que el texto debe anunciarse como una cita. Las citas cortas a menudo son, en realidad, encabezados.</p><p>${why.fix}Si esto es un encabezado, use un estilo de encabezado para que aparezca en el esquema de la página.</p>${why.headings}`,
 
-	QA_DOCUMENT: `<p>Los documentos vinculados cuentan como contenido web y deben ser accesibles. Verifique encabezados, tablas y textos alternativos, y luego descarte esta alerta.</p><ul class="why"><li>Haga accesibles sus https://support.google.com/docs/answer/6199477?hl=esdocumentos o presentaciones de Google Workspace</a>.</li><li>Haga accesibles sus https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155documentos de Office</a>.</li></ul>`,
+	QA_DOCUMENT: `<p>Los documentos vinculados cuentan como contenido web y deben ser accesibles. Verifique encabezados, tablas y textos alternativos, y luego descarte esta alerta.</p><ul class="why"><li>Haga accesibles sus <a href="https://support.google.com/docs/answer/6199477?hl=es">documentos o presentaciones de Google Workspace</a>.</li><li>Haga accesibles sus <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">documentos de Office</a>.</li></ul>`,
 
 	QA_FAKE_HEADING: `<p>${why.fix}Si esta línea en negrita introduce un tema, reemplácela por un estilo de encabezado.</p><div class="why"><p>Consejo: los encabezados crean una tabla de contenido navegable para tecnologías de asistencia. Su número indica su nivel de anidación.</p></div>`,
 
@@ -332,10 +332,7 @@ const interfaceStrings = {
 	unDismissOKButton: 'Restaurar esta alerta marcada como OK',
 };
 
-
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}

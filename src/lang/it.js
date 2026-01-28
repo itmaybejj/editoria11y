@@ -1,8 +1,8 @@
-import strings from '../sa11y-lang/it.js';
+import {default as Sa11yStrings} from '../sa11y-lang/it.js';
 // Machine translation.
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: 'Questo testo alternativo è un nome file, non una descrizione',
 	ALT_MAYBE_BAD: 'Questo testo alternativo non può essere pronunciato da un lettore di schermo',
 	ALT_PLACEHOLDER: 'Questo testo alternativo è un segnaposto privo di significato',
@@ -145,7 +145,7 @@ export const tips = {
 
 	CONTRAST_WARNING: 'Uno sfondo (immagine/gradiente) impedisce di determinare con certezza il colore dietro al testo. Usa il selettore qui sotto per il controllo manuale.',
 
-	DUPLICATE_ID: `<p>Gli ID sono usati per etichette o destinazioni di link e devono essere unici.</p><p>${why.fix}Modifica questo ID: <strong>#%(id)</strong></p><div class="why"><p>Nei CMS l’ID proviene spesso da un campo “name/id”. In HTML è l’attributo: <code><a id="MY-ID"></a></code></p></div>`,
+	DUPLICATE_ID: `<p>Gli ID sono usati per etichette o destinazioni di link e devono essere unici.</p><p>${why.fix}Modifica questo ID: <strong>#%(id)</strong></p><div class="why"><p>Nei CMS l’ID proviene spesso da un campo “name/id”. In HTML è l’attributo: <code>&lt;a id=""></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Rimuovi l’attributo <code>title</code> del link.</p><div class="why"><p>Nota: i tooltip <code>title</code> appaiono solo al passaggio del mouse; non sono visibili su mobile o con tastiera, quindi non devono contenere informazioni importanti.</p></div>`,
 
@@ -353,9 +353,7 @@ export const interfaceStrings = {
 	unDismissOKButton: 'Ripristina questo avviso segnato come OK',
 };
 
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}

@@ -1,7 +1,7 @@
-import strings from '../sa11y-lang/zh.js';
+import {default as Sa11yStrings} from '../sa11y-lang/zh.js';
 // Caution: machine translation.
 
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: '此替代文本是文件名，而不是描述',
 	ALT_MAYBE_BAD: '此替代文本可能无法被读屏软件正确朗读',
 	ALT_PLACEHOLDER: '此替代文本是无意义的占位内容',
@@ -145,7 +145,7 @@ const tips = {
 
 	CONTRAST_WARNING: '由于存在背景图或渐变色，检测工具无法确定该文本后方的实际底色。请使用下方取色器进行手动对比度检查。',
 
-	DUPLICATE_ID: `<p>本页使用 ID 作为标签或链接目标，因此 ID 必须唯一。</p><p>${why.fix}请修改该 ID：<strong>#%(id)</strong></p><div class="why"><p>在多数 CMS 中，该值来自元素属性中的 “name” 或 “id” 字段。在 HTML 中，它是一个属性：<code><a id="MY-ID"></a></code></p></div>`,
+	DUPLICATE_ID: `<p>本页使用 ID 作为标签或链接目标，因此 ID 必须唯一。</p><p>${why.fix}请修改该 ID：<strong>#%(id)</strong></p><div class="why"><p>在多数 CMS 中，该值来自元素属性中的 “name” 或 “id” 字段。在 HTML 中，它是一个属性：<code>&lt;a id=""></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}删除链接的 <code>title</code> 属性。</p><div class="why"><p>注意：<code>title</code> 工具提示仅在鼠标悬停时出现；在手机或键盘导航时不可见，因此不应包含独有或重要信息。</p></div>`,
 
@@ -353,9 +353,7 @@ export const interfaceStrings = {
 	unDismissOKButton: '恢复这条被标记为 OK 的提示',
 };
 
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}

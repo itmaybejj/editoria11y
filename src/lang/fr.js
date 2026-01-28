@@ -1,7 +1,7 @@
-import strings from '../sa11y-lang/fr.js';
+import {default as Sa11yStrings} from '../sa11y-lang/fr.js';
 // Caution: uncorrected machine translation. Contact us on GitHub to contribute.
 
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: 'Ce texte alternatif est un nom de fichier, pas une description',
 	ALT_MAYBE_BAD: 'Ce texte alternatif ne peut pas être prononcé par un lecteur d’écran',
 	ALT_PLACEHOLDER: 'Ce texte alternatif est un texte de remplacement sans signification',
@@ -147,7 +147,7 @@ const tips = {
 
 	CONTRAST_WARNING: `Une image d’arrière-plan ou un dégradé empêche ce vérificateur de connaître précisément la couleur derrière ce texte. Utilisez l’outil pipette ci‑dessous pour vérifier manuellement.`,
 
-	DUPLICATE_ID: `<p>Les ID sont utilisés sur cette page pour des étiquettes ou des cibles de lien, ce qui implique qu’ils doivent être uniques.</p><p>${why.fix}Modifiez cet ID : <strong>#%(id)</strong></p><div class="why"><p>Dans la plupart des systèmes de gestion de contenu, cela provient d’un champ “name” ou “id” dans les propriétés de l’élément. En HTML, il s’agit d’un attribut : <code><a id="MY-ID"></a></code></p></div>`,
+	DUPLICATE_ID: `<p>Les ID sont utilisés sur cette page pour des étiquettes ou des cibles de lien, ce qui implique qu’ils doivent être uniques.</p><p>${why.fix}Modifiez cet ID : <strong>#%(id)</strong></p><div class="why"><p>Dans la plupart des systèmes de gestion de contenu, cela provient d’un champ “name” ou “id” dans les propriétés de l’élément. En HTML, il s’agit d’un attribut : <code>&lt;a id=""></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Supprimez l’attribut <code>title</code> du lien.</p><div class="why"><p>Note : les info‑bulles <code>title</code> n’apparaissent qu’au survol de la souris. Elles ne sont pas visibles sur mobile ni au clavier ; de nombreux utilisateurs ne les verront jamais. Elles ne doivent jamais contenir d’information importante ou unique.</p></div>`,
 
@@ -355,9 +355,7 @@ const interfaceStrings = {
 	unDismissOKButton: 'Restaurer cette alerte marquée comme OK',
 };
 
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}

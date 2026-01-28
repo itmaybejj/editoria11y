@@ -1,6 +1,6 @@
-import strings from '../sa11y-lang/pl.js';
+import {default as Sa11yStrings} from '../sa11y-lang/pl.js';
 
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: 'Ten tekst alternatywny jest nazwą pliku, a nie opisem',
 	ALT_MAYBE_BAD: 'Ten tekst alternatywny może być niepoprawnie odczytywany przez czytnik ekranu',
 	ALT_PLACEHOLDER: 'Ten tekst alternatywny jest bezwartościową treścią zastępczą',
@@ -143,7 +143,7 @@ export const tips = {
 
 	CONTRAST_WARNING: 'Obraz tła/gradient utrudnia automatyczne rozpoznanie koloru tła. Użyj selektora poniżej, aby ręcznie sprawdzić kontrast.',
 
-	DUPLICATE_ID: `<p>ID na tej stronie służą jako etykiety i cele linków, więc muszą być unikalne.</p><p>${why.fix}Zmień ten identyfikator: <strong>#%(id)</strong></p><div class="why"><p>W wielu CMS pochodzi z pól „name/id”. W HTML to atrybut: <code><a id="MY-ID"></a></code></p></div>`,
+	DUPLICATE_ID: `<p>ID na tej stronie służą jako etykiety i cele linków, więc muszą być unikalne.</p><p>${why.fix}Zmień ten identyfikator: <strong>#%(id)</strong></p><div class="why"><p>W wielu CMS pochodzi z pól „name/id”. W HTML to atrybut: <code>&lt;a id=""></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Usuń atrybut <code>title</code> z linku.</p><div class="why"><p>Uwaga: tooltips <code>title</code> są widoczne tylko przy najechaniu myszą — nie na urządzeniach mobilnych i nie w nawigacji klawiaturą; nie umieszczaj w nich kluczowych informacji.</p></div>`,
 
@@ -351,9 +351,7 @@ export const interfaceStrings = {
 	unDismissOKButton: 'Przywróć alert oznaczony jako OK',
 };
 
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}

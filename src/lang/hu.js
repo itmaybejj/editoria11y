@@ -1,7 +1,7 @@
-import strings from '../sa11y-lang/hu.js';
+import {default as Sa11yStrings} from '../sa11y-lang/hu.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: 'Ez az alternatív szöveg fájlnév, nem leírás',
 	ALT_MAYBE_BAD: 'Ez az alternatív szöveg nem olvasható fel helyesen képernyőolvasóval',
 	ALT_PLACEHOLDER: 'Ez az alternatív szöveg értelmetlen helykitöltő',
@@ -128,178 +128,6 @@ const why = {
 };
 
 const tips = {
-
-	ALT_FILE_EXT: `<p>A képernyőolvasók ezt az URL‑t fogják felolvasni, gyakran karakterenként. Ez valószínűleg nem közvetíti ugyanazt a jelentést, mint a kép látványa.</p><p>${why.fix}Adj meg üres alt attribútumot (alt=""), ha ez jelentés nélküli dekoráció, amelyet a képernyőolvasók figyelmen kívül hagyhatnak, vagy adj meg értelmes, leíró alternatív szöveget.</p>${why.images}`,
-
-	ALT_MAYBE_BAD: `<p>A képhez tartozó megadott leírás: <strong>"%(alt)"</strong></p><p>${why.fix}Állíts be rövid, lényegre törő alt szöveget, amely leírja a kép jelentését ebben a kontextusban.</p>${why.images}`,
-
-	ALT_PLACEHOLDER: `<p>A képhez tartozó megadott leírás: <strong>"%(alt)"</strong></p><p>${why.fix}Állíts be rövid, lényegre törő alt szöveget, amely leírja a kép jelentését ebben a kontextusban.</p>${why.images}`,
-
-	ALT_UNPRONOUNCEABLE: `<p>A kép alt szövege "%(alt)", de csak kimondhatatlan karaktereket és/vagy szóközöket tartalmaz. A képernyőolvasó bejelenti, hogy „kép”, majd kínos szünetet tart: „kép: ____.”</p><p>${why.fix}Adj meg leíró alt szöveget, vagy teljesen üres alt attribútumot (alt=""), ha a képet figyelmen kívül kell hagyni.</p>${why.images}`,
-
-	BTN_EMPTY: `<p>${why.fix}Biztosíts a gomb számára hozzáférhető nevet — például normál szöveg, ikon alt szövege vagy title attribútum használatával.</p>`,
-
-	BTN_EMPTY_LABELLEDBY: `<p>Ennek a gombnak a <code>aria-labelledby</code> attribútuma üres, vagy nem egyezik egyetlen <code>ID</code> értékkel sem az oldalon.</p><p>${why.fix}Kösd össze érvényes ID‑vel, vagy távolítsd el az attribútumot, és adj más módon hozzáférhető nevet.</p>`,
-
-	BTN_TIP: `${why.buttons}`,
-
-	CONTRAST_WARNING: 'A háttérkép vagy színátmenet miatt ez az ellenőrzés nem tudja biztosan megállapítani a szöveg mögötti háttérszínt. Használd az alábbi színválasztót a kézi ellenőrzéshez.',
-
-	DUPLICATE_ID: `<p>Az ID attribútumok címkék vagy linkcélok az oldalon, ezért egyedinek kell lenniük.</p><p>${why.fix}Módosítsd ezt az ID‑t: <strong>#%(id)</strong></p><div class="why"><p>A legtöbb tartalomkezelő rendszerben ez a mező a „name” vagy „id” beállításból származik. HTML‑ben ez maga az attribútum: <code><a id="MY-ID"></code></p></div>`,
-
-	DUPLICATE_TITLE: `<p>${why.fix}Távolítsd el a hivatkozás <code>title</code> attribútumát.</p><div class="why"><p>Megjegyzés: a <code>title</code> eszköztippek csak egérmutató fölé vitelekor jelennek meg. Mobilon és billentyűzettel nem láthatók, ezért nem tartalmazhatnak fontos információt.</p></div>`,
-
-	EMBED_AUDIO: `<p>Ha a hanganyag beszédet tartalmaz, a <a href="https://www.w3.org/WAI/media/av/transcribing/">szöveges átirat</a> elérhető kell legyen a lapon vagy linkelve onnan.</p><p>Az automatikus átiratokat kézzel kell ellenőrizni, hogy a beszélők és a releváns hangok helyesen szerepeljenek.</p>`,
-
-	EMBED_DATA_VIZ: `<p>A beágyazott adatvizualizációk gyakran nem használhatók megfelelően képernyőolvasóval, nehezen értelmezhetők gyengénlátó vagy színtévesztő felhasználóknak, és mobilon vízszintes görgetést igényelhetnek.</p><p>${why.fix}Ha a vizualizáció nem rendelkezik magas kontraszttal, teljes billentyűzet‑támogatással <strong><em>és</em></strong> képernyőolvasóval értelmezhető szerkezettel, biztosíts értékegyenértékű alternatívát: szöveges leírást, táblázatot vagy letölthető adatfájlt.</p>`,
-
-	EMBED_GENERAL: 'Az automatikus eszközök nem tudják ellenőrizni a beágyazott tartalmat. Győződj meg róla, hogy a képek rendelkeznek alt szöveggel, a videók felirattal, a szöveg megfelelő kontraszttal, és a hivatkozások/vezérlők <a href="https://webaim.org/techniques/keyboard/">billentyűzettel elérhetők</a>. Ezután figyelmen kívül hagyhatod ezt a figyelmeztetést.',
-
-	EMBED_MISSING_TITLE: `<p>A beágyazott elemeknek hozzáférhető névre van szükségük a képernyőolvasók számára.</p><p>${why.fix}Adj egyedi <code>title</code> vagy <code>aria-label</code> attribútumot.</p>`,
-
-	EMBED_UNFOCUSABLE: `Ez az attribútum azt jelzi a billentyűzetnek és a képernyőolvasóknak, hogy ugorják át az elemet. Ha az iframe hivatkozásokat, gombokat vagy űrlapelemeket tartalmaz, vagy görgethető, az attribútumot el kell távolítani.`,
-
-	EMBED_VIDEO: `<p>A videóknak felirattal kell rendelkezniük.</p><p>Az automatikus feliratokat kézzel kell javítani.</p><p>${why.fix}Adj hozzá vagy javítsd a feliratokat, majd figyelmen kívül hagyhatod a figyelmeztetést.</p>`,
-
-	HEADING_EMPTY: `<p>Az üres címsorok zavart okoznak a dokumentumszerkezetben.</p><p>${why.fix}Adj szöveget ehhez a címsorhoz, vagy távolítsd el az üres sort.</p>${why.headings}`,
-
-	HEADING_EMPTY_WITH_IMAGE: `<p>Az üres címsorok zavart okoznak a dokumentumszerkezetben.</p><p>${why.fix}Ha nem címsor, változtasd meg a formátumot <strong {C}>%(level). szintű címsorból</strong> <strong>bekezdéssé</strong>. Ha címsor, írd le a kép jelentését az alt szövegben.</p>${why.headings}`,
-
-	HEADING_FIRST: `${why.fix}Győződj meg róla, hogy az oldal címe 1. vagy 2. szintű címsorként van megadva. ${why.headings}`,
-
-	HEADING_LONG: `<p>${why.fix}Hacsak nem hivatalos cím (például publikált tanulmány címe), rövidítsd a címsort az átláthatóság érdekében.</p>${why.headings}`,
-
-	HEADING_MISSING_ONE: `<p>${why.fix}Add meg az oldal címét 1. szintű címsorként, hogy a dokumentum szerkezete világos legyen.</p>${why.headings}`,
-
-	HEADING_SKIPPED_LEVEL: `<p>A címsor kihagyott egy szintet: <strong>%(prevLevel)</strong> → <strong>%(level)</strong>. Ez képernyőolvasó számára hiányzó tartalomnak tűnhet.</p><p>${why.fix}Állítsd be a címsorszinteket megfelelő hierarchiába.</p>${why.headings}`,
-
-	HIDDEN_FOCUSABLE: 'Ez az interaktív elem <code>aria-hidden="true"</code> beállítással rendelkezik, mégis fókuszálható. Ha el akarod rejteni a képernyőolvasók elől, adj hozzá <code>tabindex="-1"</code>. Ha nem, távolítsd el az aria-hidden attribútumot.',
-
-	IMAGE_ALT_TOO_LONG: `<p>A képernyőolvasók az alt szöveget folyamatosan, egyetlen mondatként olvassák fel; ha a felhasználó lemarad róla, nehéz visszatérni egy adott részhez.</p><p>Ennek az alt szövegnek a hossza: %(altLength) karakter. <em class="ed11y-small">%(ALT_TEXT)</em></p><div class="why"><p>Tipp: az összetett képekhez általában <strong>látható felirat</strong> vagy részletesebb leírás szükséges.</p></div>`,
-
-	IMAGE_DECORATIVE: `<p>Ez a kép üres alt attribútummal van ellátva, így a képernyőolvasók figyelmen kívül hagyják. Csak valódi dekorációkat szabad így megjelölni.</p><p>${why.fix}Ha a kép információt hordoz, adj hozzá alt szöveget.</p>${why.images}`,
-
-	IMAGE_DECORATIVE_CAROUSEL: 'A kép <strong>dekoratív</strong> jelölést kapott, de diavetítésben vagy galériában minden képnek rendelkeznie kell alt szöveggel.',
-
-	IMAGE_FIGURE_DECORATIVE: `<p>Ezt a képet a kisegítő technológiák figyelmen kívül hagyják. A képaláírás önmagában érthető a kép nélkül?</p><p>${why.fix}Ha a képaláírás nem írja le a teljes vizuális jelentést, adj meg kiegészítő alt szöveget.</p><div class="why"><p>Tipp: a képek, az alt szövegek és a képaláírások együtt működnek:</p><ul><li>A látható képaláírás kontextust ad.</li><li>Az alt szöveg leírja a vizuális tartalmat azok számára, akik nem látják a képet.</li></ul></div>`,
-
-	IMAGE_FIGURE_DUPLICATE_ALT: `<p>${why.fix}Módosítsd az alt szöveget úgy, hogy az a kép vizuális jelentését írja le.</p><div class="why"><p>Tipp: a képek, alt szövegek és képaláírások együtt működnek:</p><ul><li>A képaláírás kontextust és értelmezést ad.</li><li>Az alt szöveg leírja a képet, hogy a képaláírás érthető legyen.</li></ul></div>`,
-
-	LABELS_ARIA_LABEL_INPUT: '<p><strong {B}>Rejtett mezőcímke:</strong> <strong {C}>%(TEXT)</strong></p><p>Ellenőrizd, hogy van‑e látható címke, amely bemenet után is látható marad, és megegyezik a hozzáférhető névvel.</p><div class="why"><p>A csak placeholder‑ként vagy title‑ként megadott címkék eltűnnek gépeléskor, így nehéz ellenőrizni a bevitt adatokat.</p></div>',
-
-	LABELS_INPUT_RESET: `<p>A törlés gomb könnyen véletlenül aktiválható, és adatvesztést okozhat.</p><p>${why.fix}Ha nem csak egy mezőt töröl, érdemes eltávolítani vagy megerősítést kérni a használata előtt.</p>`,
-
-	LABELS_MISSING_IMAGE_INPUT: 'A képalapú gombnak nincs alt szövege. Adj meg hozzá olyan alt szöveget, mint például <em>Keresés</em> vagy <em>Küldés</em>.',
-
-	LABELS_MISSING_LABEL: 'Ehhez a mezőhöz nincs társítva címke. Adj meg egy <code>id</code> attribútumot, és egy hozzá illő <code>for</code> attribútumot a label elemben.',
-
-	LABELS_NO_FOR_ATTRIBUTE: 'Ehhez a mezőhöz nincs címke társítva. Adj a címkének <code>for</code> attribútumot, amely megegyezik a mező <code>id</code> értékével.<hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>',
-
-	LABELS_PLACEHOLDER: `<p>A placeholder szöveg eltűnik gépeléskor, és gyakran alacsony kontraszttal rendelkezik, vagy összetéveszthető a valódi tartalommal.</p><p>${why.fix}Biztosítsd, hogy fontos információk (címke, útmutatás, formátumkövetelmények) mindig láthatók legyenek.</p>`,
-
-	LABEL_IN_NAME: `<p>Ennek az elemnek a látható címkéje nem egyezik a hozzáférhető névvel. Ez összezavarhatja a képernyőolvasót használókat és a hangvezérlést.</p><p>${why.check}Győződj meg róla, hogy a látható címke a hozzáférhető névvel kezdődik, és nem tartalmaz extra jelentést.</p><p><strong>Hozzáférhető név:</strong> "%(TEXT)"</p>`,
-
-	LINK_ALT_FILE_EXT: `<p>A kép alt szövege "%(alt)", ami fájlnévre utal, nem pedig linkcélra.</p><p>${why.fix}Állítsd be az alt szöveget a link céljának megfelelően.</p><div class="why"><p>Az alt szöveg a kép jelentését közvetíti. Ha a kép hivatkozás, akkor a jelentés a link célja:</p><ul><li>„Egy oldal szöveggel” → a képet írja le, nem a linket</li><li>„IMG_1234.jpg” → fájlnév</li><li>„<strong><em>Jelentkezési űrlap (.doc)</em></strong>” → valódi linkcél</li></ul></p></div>`,
-
-	LINK_ALT_MAYBE_BAD: `<p>A kép alt szövege helykitöltő: "<strong>%(alt)</strong>".</p><p>${why.fix}Állítsd be az alt szöveget a link céljának megfelelően.</p>${why.imageLinks}`,
-
-	LINK_ALT_UNPRONOUNCEABLE: `<p>A linkként használt kép alt szövege ki nem ejthető karakterekből áll: "%(ALT_TEXT)".</p><p>${why.fix}Írj a link célját leíró alt szöveget.</p>${why.imageLinks}`,
-
-	LINK_CLICK_HERE: `A „kattints ide” típusú szöveg felesleges, és nem mondja el a link célját.`,
-
-	LINK_DOI: `<p>${why.fix}A DOI szám helyett a cikk címét kell linkelni.</p><div class="why"><p>A https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20linksAPA irányelvek</a> szerint a leíró linkek hozzáférhetőbbek és könnyebben áttekinthetők.</p></div>`,
-
-	LINK_EMPTY: `<p>${why.fix}Adj hozzá leíró linkszöveget, vagy töröld, ha véletlenül került oda (pl. linkelt szóköz).</p><div class="why"><p>A képernyőolvasók nehezen kezelik az üres linkeket — csendben maradnak, vagy betűnként olvassák a címet.</p></div>`,
-
-	LINK_EMPTY_LABELLEDBY: `<p>A link <code>aria-labelledby</code> értéke nem felel meg egyetlen ID‑nek sem.</p><p>${why.fix}Adj meg érvényes ID‑t vagy távolítsd el az attribútumot.</p>`,
-
-	LINK_EMPTY_NO_LABEL: `<p>${why.fix}Adj leíró szöveget vagy töröld ezt az üres linket.</p><div class="why"><p>A képernyőolvasók számára az üres linkek értelmezhetetlenek.</p></div>`,
-
-	LINK_FILE_EXT: `<p>A link fájlra mutat (PDF, MP3, ZIP stb.) előzetes tájékoztatás nélkül.</p><p>${why.fix}Jelezd a fájltípust szöveggel vagy ikonnal (lásd: https://itmaybejj.github.io/linkpurpose/).</p><p class="why">Nagy fájlok esetén érdemes feltüntetni a méretet is: „PDF, 3 MB”.</p>`,
-
-	LINK_IDENTICAL_NAME: `<p>Több különböző link azonos névvel rendelkezik: "<strong>%(TEXT)</strong>".</p><p>${why.fix}Készíts egyedi, céljukat leíró linkneveket.</p>${why.links}`,
-
-	LINK_IMAGE_ALT: `Ügyelj arra, hogy az alt szöveg a link célját írja le:</p><p> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong></p>${why.imageLinks}`,
-
-	LINK_IMAGE_ALT_AND_TEXT: `<p>Ellenőrizd, hogy az alt szöveg segíti‑e a link céljának megértését, nem pedig ismétli a környező szöveget:</p><p><strong class="badge">Alt</strong> "<em><strong>%(alt)</strong></em>"</p>${why.imageLinks}`,
-
-	LINK_IMAGE_LONG_ALT: `<p>A https://webaim.org/techniques/hypertext/link_text#alt_linkWebAIM irányelvei</a> szerint a képlink alt szövege a link célját kell hogy leírja. Ha túl hosszú, valószínűleg a képet írja le.</p>Ez az alt szöveg %(altLength) karakter: <em>%(ALT_TEXT)</em>`,
-
-	LINK_IMAGE_NO_ALT_TEXT: `<p>Ha egy link képben jelenik meg, az alt szöveg https://webaim.org/techniques/hypertext/link_text#alt_linka link neveként hangzik el</a>.</p><p>${why.fix}Adj meg olyan alt szöveget, amely a link célját írja le.</p>${why.imageLinks}`,
-
-	LINK_IMAGE_TEXT: 'A kép dekoratívnak van jelölve, de a link környező szövege adja a jelentést.',
-
-	LINK_NEW_TAB: `<p>${why.fix}Állítsd be, hogy ugyanabban a lapon nyíljon meg, vagy https://itmaybejj.github.io/linkpurpose/előre jelezd</a> a felhasználónak.</p><div class="why"><p>A kényszerített új lap megnyitása zavaró lehet, különösen, ha a „vissza” gomb nem működik a várt módon.</p></div>`,
-
-	LINK_PLACEHOLDER_ALT: `<p>A képlink alt szövege helykitöltő: "<strong>%(alt)</strong>".</p><p>${why.fix}Állítsd be a link célját leíró alt szöveget.</p>${why.imageLinks}`,
-
-	LINK_STOPWORD: `<p>A link olyan szót tartalmaz, amely nem írja le a célját:<br><strong>%(text)</strong></p><p>${why.fix}Írj helyette rövid, a célját leíró szöveget.</p>${why.links}`,
-
-	LINK_STOPWORD_ARIA: `<p>A link ARIA névvel rendelkezik, de a látható szöveg általános: "<strong {C}>%(ERROR)</strong>".</p><p>${why.fix}Legyen minden felhasználó számára érthető, jelentéssel bíró linkszöveg, amely megegyezik az ARIA névvel.</p>${why.links}`,
-
-	LINK_SUS_ALT: `<p>Az alt szöveg tartalmazza a következőt: "%(alt)", ami általában azt jelenti, hogy a képet írja le, nem a linket.</p><strong class="badge">Alt szöveg</strong> "%(ALT_TEXT)"    <p>Megoldás: az alt szöveg írja le a link célját.</p>${why.imageLinks}`,
-
-	LINK_SYMBOLS: `${why.fix}Ne használj szimbólumokat cselekvésre ösztönző linkszövegként, hacsak nincsenek elrejtve a képernyőolvasók elől. A képernyőolvasók félreérthetően olvashatják fel őket. Távolítsd el: <strong {C}>%(ERROR)</strong>`,
-
-	LINK_URL: `<p>${why.fix}Használj a link célját leíró szöveget az URL helyett.</p><div class="why"><p>A felhasználók — különösen képernyőolvasó‑felhasználók — neveket keresnek, nem URL‑eket.</p></div>`,
-
-	META_LANG: `<p>${why.fix}Adj hozzá https://www.w3.org/International/questions/qa-html-language-declarationslang attribútumot</a> a HTML elemhez.</p><div class="why"><p>A képernyőolvasók a kijelölt nyelv alapján határozzák meg a helyes kiejtést.</p></div>`,
-
-	META_MAX: `<p>Ez a meta címke korlátozza a nagyítást.</p><p>${why.fix}Engedélyezd a teljes nagyíthatóságot a korlátozás módosításával vagy eltávolításával.</p>`,
-
-	META_REFRESH: `<p>A meta frissítés megszakíthatja a felhasználó munkáját, és adatvesztést okozhat űrlapokban.</p><p>${why.fix}Használj AJAX‑ot vagy kérj megerősítést a frissítés előtt.</p>`,
-
-	META_SCALABLE: `<p>Ez a meta címke megakadályozza a nagyítást.</p><p>${why.fix}Távolítsd el vagy módosítsd, hogy engedélyezd a nagyítást.</p>`,
-
-	META_TITLE: `<p>${why.fix}Adj meg <code><title></code> elemet a <code><head></code> részben.</p><div class="why"><p>A https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/titlerövid és egyedi oldalcím</a> fontos:</p><ul><li>Keresési találatokhoz</li><li>Böngészőlapokhoz</li><li>Képernyőolvasók számára lapváltáskor</li></ul><p>Cím nélkül a felhasználó csak az URL‑t látja.</p></div>`,
-
-	MISSING_ALT: `<p>A képernyőolvasók alt hiányában a kép URL‑jét olvassák fel, karakterenként.</p><p>${why.fix}Adj üres alt attribútumot a dekoratív képekhez, vagy leíró alt szöveget az információhordozó képekhez.</p>${why.images}`,
-
-	MISSING_ALT_LINK: `<p>Ha egy linkben lévő képnek nincs alt attribútuma, a képernyőolvasó az URL‑t olvassa fel — ami különösen zavaró.</p><p>${why.fix}Adj meg alt szöveget, amely leírja a link célját.</p>${why.imageLinks}`,
-
-	MISSING_ALT_LINK_HAS_TEXT: `<p>Ez a kép része egy linknek, amely látható szöveget is tartalmaz. Ha ez a szöveg teljesen leírja a link célját, használj alt="". Ha nem, adj meg alt szöveget, amely a link célját írja le.</p>${why.imageLinks}`,
-
-	QA_BAD_LINK: `<p>A link valószínűleg fejlesztői környezetre mutat:<br>{L} <strong {C}>%(LINK)</strong></p><p>${why.fix}Használj relatív útvonalat (/folder) vagy nyilvános URL‑t.</p>`,
-
-	QA_BLOCKQUOTE: `<p>A blockquote elemet a képernyőolvasók idézetként jelentik be. Rövid idézetek gyakran valójában címsorok.</p><p>${why.fix}Ha ez címsor, állítsd át címsorstílusra.</p>${why.headings}`,
-
-	QA_DOCUMENT: `<p>A hivatkozott dokumentumok webes tartalomnak minősülnek, ezért hozzáférhetőnek kell lenniük. Ellenőrizd a címsorokat, táblázatfejléceket és alt szövegeket.</p><ul class="why"><li>Google Dokumentumok hozzáférhetővé tétele: https://support.google.com/docs/answer/6199477?hl=hu</a></li><li>Microsoft Office dokumentumok hozzáférhetővé tétele: https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155</a></li></ul>`,
-
-	QA_FAKE_HEADING: `<p>${why.fix}Ha a félkövér sor egy témát vezet be, használj helyette címsorstílust.</p><div class="why"><p>Tipp: a címsorok a dokumentum tartalmi térképét adják a képernyőolvasók számára.</p></div>`,
-
-	QA_FAKE_LIST: `<p>${why.fix}Ha a „%(text)” egy lista része, alakítsd listává.</p><div class="why"><p>A listák vizuális és szemantikai struktúrát adnak:</p><ol><li>Az egységes behúzás segíti az olvashatóságot.</li><li>A képernyőolvasók a pozíciót is bemondják („3/7 elem”).</li></ol><p>Egy szám elején nem teszi valódi listává a bekezdést.</p></div>`,
-
-	QA_IN_PAGE_LINK: `<p>A hivatkozás célja nem található a lapon.</p><div class="why"><p>Megjegyzés fejlesztőknek: ha ez JavaScript által vezérelt, ellenőrizd, hogy billentyűzettel is működik.</p></div>`,
-
-	QA_JUSTIFY: `<p>A sorkizárt szöveg egyenetlen szóközöket eredményez, ami sok felhasználó számára nehéz olvasást okoz.</p><p>${why.fix}Használj balra igazítást.</p>`,
-
-	QA_NESTED_COMPONENTS: 'Kerüld az egymásba ágyazott interaktív komponenseket (pl. tabok tabokon belül vagy harmonikák más harmonikákban).',
-
-	QA_PDF: `<p>${why.fix}Hajts végre egyet az alábbiakból, majd figyelmen kívül hagyhatod ezt a figyelmeztetést:</p><ul><li>Linkelj PDF helyett weboldalra;</li><li>vagy adj meg webes vagy szerkeszthető alternatívát is;</li><li>vagy ellenőrizd, hogy a PDF megfelelően tagelt‑e, helyes olvasási sorrenddel, táblázatfejlécekkel és alt szövegekkel.</li></ul><div class="why"><p>A felhasználók — különösen mobilon és képernyőolvasót használva — általában a HTML oldalt részesítik előnyben a PDF‑tel szemben.</p></div>`,
-
-	QA_SMALL_TEXT: 'A túl kicsi szöveg nehezen olvasható, különösen gyengénlátók számára. Kerüld az alapértelmezettnél kisebb betűméreteket.',
-
-	QA_STRONG_ITALICS: `<p>${why.fix}A félkövér és dőlt formázást ritkán, kiemelésre használd.</p><div class="why"><p>Megjegyzés: ha idézet, használj blockquote elemet.</p></div>`,
-
-	QA_SUBSCRIPT: `A felső‑ és alsóindex csökkenti az olvashatóságot. Csak speciális esetekben használd (4<sup>.</sup>, H<sub>2</sub>O, lábjegyzet).`,
-
-	QA_UNDERLINE: `<p>Az aláhúzott szöveg a weben általában linket jelent. A felhasználók rákattinthatónak gondolják.</p><p>${why.fix}Használj <strong>félkövér</strong> vagy <em>dőlt</em> formázást kiemeléshez, és címsort új szakasz jelzésére.</p><div class="why"><p>Képernyőolvasók a formázást nem jelzik — a címsorok viszont szerkezetet adnak.</p></div>`,
-
-	QA_UPPERCASE: `<p>A CSUPA NAGYBETŰS SZÖVEG NEHEZEBBEN OLVASHATÓ, ÉS KIABÁLÁSNAK HANGZIK.</p><p>${why.fix}Használj inkább félkövér kiemelést, ne nagybetűsítést.</p><div class="why"><p>A képernyőolvasók nem jelzik a félkövérséget — új témához használj címsort.</p></div>`,
-
-	SUS_ALT: `<p>Ez az alt szöveg tartalmazza a következőt: "%(alt)", ami valószínűleg felesleges:</p><p><strong class="badge">Alt szöveg</strong> "%(ALT_TEXT)"</p><p>Megoldás: írd át rövid, lényegre törő leírásra.</p><div class="why"><p>Tipp: a képernyőolvasók már így is bejelentik, hogy „kép”, ezért a „kép:” típusú kifejezések feleslegesek.</p></div>`,
-
-	TABINDEX_ATTR: `<p>${why.fix}Kerüld a pozitív tabindex értékeket. A HTML elemek sorrendje tükrözze a vizuális és logikai sorrendet.</p><div class="why"><p>Alapesetben a vizuális, a tabulátor és az olvasási sorrend megegyezik.</p><p>A pozitív tabindex eltéríti a tabulátor sorrendjét — de nem a vizuális sorrendet — így zavart okozhat.</p></div>`,
-
-	TABLES_EMPTY_HEADING: ` <p>${why.fix}Biztosítsd, hogy minden táblázatfejléc tartalmazzon szöveget.</p><div class="why"><p>Tip: a képernyőolvasók a fejlécből tudják meg, hogy milyen adatot látnak.</p></div>`,
-
-	TABLES_MISSING_HEADINGS: ` <p>${why.fix}Add meg a táblázat beállításaiban, hogy a fejléc az első sorban, első oszlopban vagy mindkettőben található.</p><div class="why"> <p>Tipp: a képernyőolvasók minden cellánál ismétlik a sor‑ vagy oszlopcímet, hogy segítsék a megértést.</p><p>Ha a táblázat csak elrendezési célból van használva, ne használj táblázatot.</p></div>`,
-
-	TABLES_SEMANTIC_HEADING: ` <p>${why.fix}Távolítsd el a tartalmi címsort (h2, h3). Helyette használj táblázatfejléceket. Ha több hierarchiaszint kell, bontsd több táblázatra.</p><div class="why"> <p>Magyarázat: a táblázatfejlécek egy irányba (sor vagy oszlop) érvényesek. A tartalmi címsor a teljes alatta lévő tartalomra hatással van.</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2"><strong>A táblázatfejléc</strong> a 2. cellában csak a B cellát jelöli.<br><br><strong>A tartalmi címsor</strong> a 2. cellában a 3., A, B, C cellákat, valamint az egész szöveget és lábjegyzetet is érinti.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`,
-
-};
-
-const tips = {
 	ALT_FILE_EXT: `<p>A képernyőolvasók ezt az URL‑t fogják felolvasni, gyakran karakterenként. Ez valószínűleg nem adja vissza ugyanazt a jelentést, mint a kép látványa.</p><p>${why.fix}Adjon meg üres alt attribútumot (alt=""), ha ez jelentés nélküli dekoráció, amelyet a képernyőolvasók figyelmen kívül hagyhatnak; különben adjon meg értelmes, leíró alternatív szöveget.</p>${why.images}`,
 
 	ALT_MAYBE_BAD: `<p>A képhez tartozó megadott leírás: <strong>"%(alt)"</strong></p><p>${why.fix}Állítson be rövid, lényegre törő alt szöveget, amely leírja a kép jelentését ebben a kontextusban.</p>${why.images}`,
@@ -316,7 +144,7 @@ const tips = {
 
 	CONTRAST_WARNING: 'A háttérkép vagy színátmenet miatt ez az ellenőrzés nem tudja biztosan megállapítani a szöveg mögötti háttérszínt. Használja az alábbi színválasztót a kézi ellenőrzéshez.',
 
-	DUPLICATE_ID: `<p>Az ID attribútumokat címkékhez vagy linkcélokhoz használjuk az oldalon, ezért egyedieknek kell lenniük.</p><p>${why.fix}Módosítsa ezt az ID‑t: <strong>#%(id)</strong></p><div class="why"><p>A legtöbb tartalomkezelő rendszerben ez a mező a „name” vagy „id” beállításból származik. HTML‑ben ez maga az attribútum: <code><a id="MY-ID"></a></code></p></div>`,
+	DUPLICATE_ID: `<p>Az ID attribútumokat címkékhez vagy linkcélokhoz használjuk az oldalon, ezért egyedieknek kell lenniük.</p><p>${why.fix}Módosítsa ezt az ID‑t: <strong>#%(id)</strong></p><div class="why"><p>A legtöbb tartalomkezelő rendszerben ez a mező a „name” vagy „id” beállításból származik. HTML‑ben ez maga az attribútum: <code>&lt;a id=""></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Távolítsa el a hivatkozás <code>title</code> attribútumát.</p><div class="why"><p>Megjegyzés: a <code>title</code> eszköztippek csak egérmutató fölé vitelekor jelennek meg; mobilon és billentyűzettel nem láthatók, ezért ne tartalmazzanak fontos információt.</p></div>`,
 
@@ -525,9 +353,7 @@ const interfaceStrings = {
 };
 
 
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}

@@ -1,7 +1,7 @@
-import strings from '../sa11y-lang/nl.js';
+import {default as Sa11yStrings} from '../sa11y-lang/nl.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: 'Deze alt‑tekst is een bestandsnaam, geen beschrijving',
 	ALT_MAYBE_BAD: 'Deze alt‑tekst kan voor een schermlezer lastig correct uit te spreken zijn',
 	ALT_PLACEHOLDER: 'Deze alt‑tekst is een betekenisloze placeholder',
@@ -144,7 +144,7 @@ export const tips = {
 
 	CONTRAST_WARNING: 'Een achtergrondafbeelding of verloop verhindert een zekere bepaling van de achtergrondkleur. Gebruik de kleurenkiezer hieronder voor handmatige controle.',
 
-	DUPLICATE_ID: `<p>Op deze pagina worden ID’s gebruikt als labels of linkdoelen en moeten daarom uniek zijn.</p><p>${why.fix}Wijzig deze ID: <strong>#%(id)</strong></p><div class="why"><p>In veel CMS’en komt dit uit een veld “name” of “id”. In HTML is het een attribuut: <code><a id="MY-ID"></a></code></p></div>`,
+	DUPLICATE_ID: `<p>Op deze pagina worden ID’s gebruikt als labels of linkdoelen en moeten daarom uniek zijn.</p><p>${why.fix}Wijzig deze ID: <strong>#%(id)</strong></p><div class="why"><p>In veel CMS’en komt dit uit een veld “name” of “id”. In HTML is het een attribuut: <code>&lt;a id=""></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Verwijder het <code>title</code>‑attribuut van deze link.</p><div class="why"><p>Opmerking: <code>title</code>‑tooltips verschijnen alleen bij muis‑hover; op mobiel of met toetsenbord zijn ze niet zichtbaar en mogen geen essentiële informatie bevatten.</p></div>`,
 
@@ -352,9 +352,7 @@ export const interfaceStrings = {
 	unDismissOKButton: 'Als OK gemarkeerde melding herstellen',
 };
 
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}

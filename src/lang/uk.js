@@ -1,7 +1,7 @@
-import strings from '../sa11y-lang/uk.js';
+import {default as Sa11yStrings} from '../sa11y-lang/uk.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: 'Цей альтернативний текст є назвою файлу, а не описом',
 	ALT_MAYBE_BAD: 'Цей альтернативний текст може бути некоректно озвучений читачем з екрана',
 	ALT_PLACEHOLDER: 'Цей альтернативний текст є порожнім заповнювачем без змісту',
@@ -146,7 +146,7 @@ export const tips = {
 
 	CONTRAST_WARNING: 'Фонове зображення/градієнт заважає автоматично визначити колір фону. Перевірте контраст вручну піпеткою нижче.',
 
-	DUPLICATE_ID: `<p>ID використовуються як ярлики або цілі лінків, тому мають бути унікальними.</p><p>${why.fix}Змініть цей ID: <strong>#%(id)</strong></p><div class="why"><p>У CMS значення часто походить з полів «name/id». В HTML це <code><a id="MY-ID"></a></code>.</p></div>`,
+	DUPLICATE_ID: `<p>ID використовуються як ярлики або цілі лінків, тому мають бути унікальними.</p><p>${why.fix}Змініть цей ID: <strong>#%(id)</strong></p><div class="why"><p>У CMS значення часто походить з полів «name/id». В HTML це <code>&lt;a id=""></code>.</p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Видаліть атрибут <code>title</code> у цього лінку.</p><div class="why"><p><code>title</code>‑tooltips видимі лише при наведенні миші; їх не бачать користувачі клавіатури та мобільних пристроїв. Не використовуйте їх для важливої інформації.</p></div>`,
 
@@ -354,9 +354,7 @@ export const interfaceStrings = {
 	unDismissOKButton: 'Відновити попередження, позначене як OK',
 };
 
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}

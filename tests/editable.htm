@@ -96,7 +96,6 @@
 			<script src="../dist/js/lang/en.umd.js"></script>
 			<!-- Instantiate-->
 			<script>
-				Ed11y.Lang.addI18n(Ed11yLangEn.strings);
 
                 onload = (event) => {
 
@@ -109,6 +108,7 @@
                     ignoreElements: '.tox-editor-header *, .ed11y-ignore *',
                     hiddenHandlers : '[hidden]',
                     inlineAlerts : false,
+			  		lang: Ed11yLangEn.lang,
                     fixedRoots : Array.from(document.querySelectorAll('#editable-region')),
                     //linkIgnoreStrings: '\(link is external\)',
                     //customTests : 2,

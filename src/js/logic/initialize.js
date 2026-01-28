@@ -9,11 +9,22 @@ import { Ed11yElementAlt } from '../elements/ed11y-element-alt.js';
 import { Ed11yElementResult } from '../elements/ed11y-element-result.js';
 import { Ed11yElementHeadingLabel, Ed11yElementPanel } from '../elements/ed11y-element-panel.js';
 import { Ed11yElementTip } from '../elements/ed11y-element-tip.js';
-import { testNames } from '../../lang/baseAll.js';
+import { lang } from '../../lang/en-us.js';
 
-const preProcessOptions = (userOptions) => {
+const preProcessOptions = async (userOptions) => {
   smush(Options, userOptions, ['checks']);
   Object.assign(Options.checks, userOptions.checks);
+
+  if (!userOptions.lang) {
+    Options.lang = lang;
+  }
+  Lang.addI18n(Options.lang.strings);
+  Lang.testNames = Options.lang.testNames;
+  const titles = Object.entries(Lang.testNames);
+  for (let i = 0; i < titles.length; i++) {
+    Lang.langStrings[titles[i][0]] =
+      `<div class="title" tabindex="-1">${Lang.testNames[`${titles[i][0]}`]}</div>${Lang.langStrings[titles[i][0]]}`;
+  }
 
   if (Options.fixedRoots) {
     Options.checkRoot = Options.fixedRoots;
@@ -130,15 +141,6 @@ const postProcessOptions = (userOptions) => {
 
   if (userOptions.documentLinks) {
     Constants.Global.documentSources = userOptions.documentLinks;
-  }
-
-  // At the moment only English uses Editoria11y tip styles.
-  if (State.english) {
-    const overrides = Object.entries(testNames);
-    for (let i = 0; i < overrides.length; i++) {
-      Lang.langStrings[overrides[i][0]] =
-        `<div class="title" tabindex="-1">${testNames[`${overrides[i][0]}`]}</div>${Lang.langStrings[overrides[i][0]]}`;
-    }
   }
 
   const localResultCount = store.getItem('editoria11yResultCount');

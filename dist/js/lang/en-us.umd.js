@@ -1,8 +1,8 @@
 (function(global, factory) {
-  typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory() : typeof define === "function" && define.amd ? define(factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, global.Ed11yLangEnUS = factory());
-})(this, (function() {
+  typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global["Ed11yLangEn-us"] = {}));
+})(this, (function(exports2) {
   "use strict";
-  const strings = {
+  const Sa11yStrings = {
     // English
     strings: {
       LANG_CODE: "en-US",
@@ -482,58 +482,58 @@
     TABLES_SEMANTIC_HEADING: ` <p>${why.fix}Remove this heading (h2, h3) formatting. Provide header rows and columns instead. If you need multiple header rows, break this into more than one table.</p><div class="why"> <p>Tip: Table headers are directional: one row or column. Content headings label all subsequent text, even in unrelated columns:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">A <strong>table header</strong> in cell 2 labels cell B. <br><br> A <strong>content heading</strong> in cell 2 labels cells 3, A, B and C, as well as this text and this tooltip's footer.</td></tr> <tr><td>A</td><td>B</td><td>C</td></table> </div>`
   };
   const interfaceStrings = {
-    ALERT_CLOSE: "Fermer",
-    ALT: "Texte alternatif : ",
-    DECORATIVE: "Marqué comme décoratif",
-    DISMISS: "Ignorer",
-    DISMISS_ALL: "Sur cette page : ignorer",
-    edit_page: "Modifier la page",
-    edit_layout: "Modifier la mise en page",
-    edit_term: "Modifier le terme",
-    edit_tags: "Modifier l’utilisateur",
-    IMAGES: "Texte alternatif",
-    MAIN_TOGGLE_LABEL: "Activer les outils d’accessibilité",
-    MISSING: "(manquant !)",
-    NOT_VISIBLE: "Note : ce contenu peut ne pas être visible. Cherchez‑le dans le conteneur délimité.",
-    NO_IMAGES: "Aucune image trouvée.",
-    OUTLINE: "En‑têtes",
-    PANEL_DISMISS_BUTTON: `Afficher %(dismissCount) alertes masquées`,
-    PANEL_HEADING: "Afficher les visualisations",
-    SKIP_TO_ISSUE: "Aller au problème",
-    WARNING: "vérification manuelle requise",
-    WARNINGS: "vérifications manuelles requises",
-    buttonFirstContent: "Aller à la première alerte",
-    buttonHideHiddenAlert: "Masquer l’alerte masquée",
-    buttonHideHiddenAlerts: `Masquer %(count) alertes masquées`,
-    buttonShowHiddenAlert: "Afficher l’alerte masquée",
-    buttonToolsActive: "Masquer les visualisations",
-    dismissActions: `Alertes similaires`,
-    dismissHideTitle: "Masque seulement l’alerte pour vous",
-    dismissOkAllButton: "Sur cette page : marquer comme OK",
-    dismissOkButtonContent: "Marquer comme OK",
-    dismissOkTitle: "Masque l’alerte pour tous les éditeurs",
-    dismissOnSite: "Sur toutes les pages : marquer comme OK",
-    dismissalsHeader: "Vous n’allez pas corriger ceci ?",
-    errorOutlinePrefixHeadingEmpty: "(en‑tête vide)",
-    errorOutlinePrefixHeadingIsLong: "(signalé pour longueur)",
-    errorOutlinePrefixSkippedLevel: "(signalé pour niveau sauté)",
-    issueContent: "Problème de contenu",
-    issueDeveloper: "Problème de développement",
-    issueTemplate: "Problème de modèle",
-    main_toggle_hide: "Masquer les outils d’accessibilité",
-    main_toggle_hide_alerts: "Masquer les alertes d’accessibilité",
-    main_toggle_show: "Afficher les outils d’accessibilité",
-    main_toggle_show_alerts: "Afficher les alertes d’accessibilité",
-    panelCheckAltText: '<p class="ed11y-small">Vérifiez que chaque image décrit ce qu’elle signifie dans le contexte et qu’il n’y a pas d’images contenant du texte.</p>',
-    panelCheckOutline: '<p class="ed11y-small">Ceci affiche la structure des en‑têtes. Vérifiez qu’elle correspond à l’organisation visuelle du contenu.</p>',
-    PANEL_HEADING_MISSING_ONE: "En‑tête de niveau 1 manquant.",
-    PANEL_NO_HEADINGS: "Aucun en‑tête trouvé.",
-    reportsLink: "Ouvrir les rapports du site",
-    toggleDisabled: "Aucun contenu disponible à vérifier pour Editoria11y.",
-    transferFocus: "Modifier ce contenu",
-    unDismissHideButton: "Restaurer cette alerte ignorée",
-    unDismissNotePermissions: "Cette vérification a été masquée par un administrateur",
-    unDismissOKButton: "Restaurer cette alerte marquée comme OK"
+    ALERT_CLOSE: "Close",
+    ALT: "Alt Text: ",
+    DECORATIVE: "Marked decorative",
+    DISMISS: "Ignore",
+    DISMISS_ALL: "On this page: ignore",
+    edit_page: "Edit page",
+    edit_layout: "Edit layout",
+    edit_term: "Edit term",
+    edit_tags: "Edit user",
+    IMAGES: "Alt text",
+    MAIN_TOGGLE_LABEL: "Toggle accessibility tools",
+    MISSING: "(missing!)",
+    NOT_VISIBLE: "Note: this content may not be visible. Look for it inside the outlined container.",
+    NO_IMAGES: "No images found.",
+    OUTLINE: "Headings",
+    PANEL_DISMISS_BUTTON: `Show %(dismissCount) hidden alerts`,
+    PANEL_HEADING: "Show visualizers",
+    SKIP_TO_ISSUE: "Go to issue",
+    WARNING: "manual check needed",
+    WARNINGS: "manual checks needed",
+    buttonFirstContent: "Go to first alert",
+    buttonHideHiddenAlert: "Hide hidden alert",
+    buttonHideHiddenAlerts: `Hide %(count) hidden alerts`,
+    buttonShowHiddenAlert: "Show hidden alert",
+    buttonToolsActive: "Hide visualizers",
+    dismissActions: `Similar alerts`,
+    dismissHideTitle: "Only hides alert for you",
+    dismissOkAllButton: "On this page: mark OK",
+    dismissOkButtonContent: "Mark OK",
+    dismissOkTitle: "Hides alert for all editors",
+    dismissOnSite: "On all pages: mark OK",
+    dismissalsHeader: "Not going to fix this?",
+    errorOutlinePrefixHeadingEmpty: "(empty heading)",
+    errorOutlinePrefixHeadingIsLong: "(flagged for length)",
+    errorOutlinePrefixSkippedLevel: "(flagged for skipped level)",
+    issueContent: "Content issue",
+    issueDeveloper: "Developer issue",
+    issueTemplate: "Template issue",
+    main_toggle_hide: "Hide accessibility tools",
+    main_toggle_hide_alerts: "Hide accessibility alerts",
+    main_toggle_show: "Show accessibility tools",
+    main_toggle_show_alerts: "Show accessibility alerts",
+    panelCheckAltText: '<p class="ed11y-small">Check that each image describes what it means in context, and that there are no images of text.</p>',
+    panelCheckOutline: '<p class="ed11y-small">This shows the heading outline. Check that it matches how the content is organized visually.</p>',
+    PANEL_HEADING_MISSING_ONE: "Missing Heading 1.",
+    PANEL_NO_HEADINGS: "No headings found.",
+    reportsLink: "Open site reports",
+    toggleDisabled: "No content available for Editoria11y to check.",
+    transferFocus: "Edit this content",
+    unDismissHideButton: "Restore this ignored alert",
+    unDismissNotePermissions: "This check has been hidden by an administrator",
+    unDismissOKButton: "Restore this alert marked as OK"
   };
   const englishOverrides = {
     // @todo: Outline error explanations currently hidden.
@@ -575,9 +575,10 @@
       "opens new window"
     ]
   };
-  const newStrings = {
-    strings: Object.assign(strings.strings, interfaceStrings, tips, englishOverrides),
+  const lang = {
+    strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips, englishOverrides),
     testNames
   };
-  return newStrings;
+  exports2.lang = lang;
+  Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });
 }));

@@ -1,7 +1,7 @@
-import strings from '../sa11y-lang/nb.js';
+import {default as Sa11yStrings} from '../sa11y-lang/nb.js';
 // Machine translation.
 
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: 'Denne alternative teksten er et filnavn, ikke en beskrivelse',
 	ALT_MAYBE_BAD: 'Denne alternative teksten kan være vanskelig for en skjermleser å lese korrekt',
 	ALT_PLACEHOLDER: 'Denne alternative teksten er en meningsløs plassholder',
@@ -144,7 +144,7 @@ export const tips = {
 
 	CONTRAST_WARNING: 'Et bakgrunnsbilde eller en gradient gjør at sjekken ikke kan fastslå bakgrunnsfargen sikkert. Bruk fargevelgeren nedenfor for manuell kontroll.',
 
-	DUPLICATE_ID: `<p>ID‑er brukes som etiketter og lenkemål, og må være unike.</p><p>${why.fix}Endre denne ID‑en: <strong>#%(id)</strong></p><div class="why"><p>I mange CMS kommer den fra «name» eller «id». I HTML er det et attributt: <code><a id="MY-ID"></a></code></p></div>`,
+	DUPLICATE_ID: `<p>ID‑er brukes som etiketter og lenkemål, og må være unike.</p><p>${why.fix}Endre denne ID‑en: <strong>#%(id)</strong></p><div class="why"><p>I mange CMS kommer den fra «name» eller «id». I HTML er det et attributt: <code>&lt;a id=""></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Fjern <code>title</code>‑attributtet fra lenken.</p><div class="why"><p>Merk: <code>title</code> vises kun ved hover med mus. Det er ikke synlig på mobil eller ved tastatur, og bør ikke inneholde viktig informasjon.</p></div>`,
 
@@ -352,9 +352,7 @@ export const interfaceStrings = {
 	unDismissOKButton: 'Gjenopprett varslet som er merket som OK',
 };
 
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}

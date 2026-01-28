@@ -156,12 +156,10 @@ export function updatePanel() {
         Lang._('PANEL_HEADING');
       UI.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = Lang._('OUTLINE');
       UI.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = Lang._('IMAGES');
-      if (State.english) {
-        UI.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML =
-          Lang._('panelCheckOutline');
-        UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML =
-          Lang._('panelCheckAltText');
-      }
+      UI.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML =
+        Lang._('panelCheckOutline');
+      UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML =
+        Lang._('panelCheckAltText');
       UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = State.english
         ? Lang._('buttonFirstContent')
         : `${Lang._('SKIP_TO_ISSUE')} 1`;

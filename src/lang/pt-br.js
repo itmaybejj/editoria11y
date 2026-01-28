@@ -1,7 +1,7 @@
-import strings from '../sa11y-lang/ptBR.js';
+import {default as Sa11yStrings} from '../sa11y-lang/ptBR.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
-export const testNames = {
+const testNames = {
 	ALT_FILE_EXT: 'Este texto alternativo é um nome de arquivo, não uma descrição',
 	ALT_MAYBE_BAD: 'Este texto alternativo pode não ser pronunciado corretamente por um leitor de tela',
 	ALT_PLACEHOLDER: 'Este texto alternativo é um preenchimento sem significado',
@@ -144,7 +144,7 @@ export const tips = {
 
 	CONTRAST_WARNING: 'Imagem de fundo/gradiente impede determinar com segurança a cor por trás do texto. Use o seletor para verificar manualmente.',
 
-	DUPLICATE_ID: `<p>IDs servem como rótulos ou destinos de link, portanto precisam ser únicos.</p><p>${why.fix}Altere este ID: <strong>#%(id)</strong></p><div class="why"><p>Em muitos CMS vem de “name/id”. Em HTML é o atributo: <code><a id="MY-ID"></a></code></p></div>`,
+	DUPLICATE_ID: `<p>IDs servem como rótulos ou destinos de link, portanto precisam ser únicos.</p><p>${why.fix}Altere este ID: <strong>#%(id)</strong></p><div class="why"><p>Em muitos CMS vem de “name/id”. Em HTML é o atributo: <code>&lt;a id=""></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Remova o atributo <code>title</code> do link.</p><div class="why"><p>Observação: tooltips de <code>title</code> só aparecem no hover do mouse — não são visíveis ao teclado nem no celular — e não devem conter informação essencial.</p></div>`,
 
@@ -352,9 +352,7 @@ export const interfaceStrings = {
 	unDismissOKButton: 'Restaurar alerta marcado como OK',
 };
 
-const newStrings = {
-  strings: Object.assign(strings.strings, interfaceStrings, tips),
-  testNames: testNames,
-};
-
-export default newStrings;
+export const lang = {
+	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
+	testNames: testNames,
+}
