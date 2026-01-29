@@ -5258,7 +5258,10 @@ const spriteTogglePass = '<svg class="pass-icon" aria-hidden="true" xmlns="http:
 const spriteToggleWarnings = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="close-icon" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>';
 const spriteVisualize = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 10 512 512"><path fill="Currentcolor" d="M152 38c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 113C-2 104-2 88 7 79s25-9 34 0l22 22 55-61c9-10 24-11 34-2zm0 160c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 273c-9-9-9-25 0-34s25-9 35 0l22 22 55-61c9-10 24-11 34-2zM224 96c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zm0 160c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zM160 416c0-18 14-32 32-32l288 0c18 0 32 14 32 32s-14 32-32 32l-288 0c-18 0-32-14-32-32zM48 368a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/></svg>';
 const showAltPanel = () => {
-  const altList = UI.panel.querySelector("#ed11y-alt-list");
+  const altList = UI.panel?.querySelector("#ed11y-alt-list");
+  if (!altList) {
+    return;
+  }
   UI.imageAlts = [];
   Elements.Found.Images.forEach((img) => {
     const match = Results.find((i) => i.element === img);
@@ -5373,7 +5376,10 @@ const showReadability = () => {
   }
 };
 function showHeadingsPanel() {
-  const panelOutline = UI.panel.querySelector("#ed11y-outline");
+  const panelOutline = UI.panel?.querySelector("#ed11y-outline");
+  if (!panelOutline) {
+    return;
+  }
   if (State.headingOutline.length) {
     panelOutline.innerHTML = "";
     State.headingOutline.forEach((result, i) => {

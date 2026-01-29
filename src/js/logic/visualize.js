@@ -11,7 +11,10 @@ import { spriteDismiss } from '../elements/sprite.js';
 
 export const showAltPanel = () => {
   // visualize image alts
-  const altList = UI.panel.querySelector('#ed11y-alt-list');
+  const altList = UI.panel?.querySelector('#ed11y-alt-list');
+  if (!altList) {
+    return;
+  }
   UI.imageAlts = [];
   Elements.Found.Images.forEach((img) => {
     const match = Results.find((i) => i.element === img);
@@ -173,7 +176,10 @@ const showReadability = () => {
 export function showHeadingsPanel() {
   // Visualize the document outline
 
-  const panelOutline = UI.panel.querySelector('#ed11y-outline');
+  const panelOutline = UI.panel?.querySelector('#ed11y-outline');
+  if (!panelOutline) {
+    return;
+  }
   if (State.headingOutline.length) {
     panelOutline.innerHTML = '';
     State.headingOutline.forEach((result, i) => {
