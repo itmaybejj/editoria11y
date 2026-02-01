@@ -7279,7 +7279,6 @@ URL: ${url2}</pre>
       this.dismissed = !!this.result.dismissalStatus;
       this.wrapper = document.createElement("div");
       this.wrapper.setAttribute("role", "dialog");
-      this.wrapper.dataset.ed11yTest = this.result.test;
       this.wrapper.dataset.ed11yDismiss = this.result.dismiss;
       this.wrapper.classList.add("ed11y-tip-wrapper", "ed11y-wrapper");
       this.wrapper.style.setProperty("opacity", "0");
@@ -7291,7 +7290,7 @@ URL: ${url2}</pre>
       this.wrapper.innerHTML = `
 		<div class="tip">
 			<button class="close ed11y-tip-close">${spriteClose}</button>
-			<div class="content">
+			<div class="content" data-test="${this.result.test}">
 				<div class="message"></div>
 				<div class="content-footer">
 					<div class="edit-links"></div>
