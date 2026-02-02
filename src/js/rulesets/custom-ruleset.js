@@ -1,30 +1,27 @@
-//import Lang from '../../sa11y-js/utils/lang';
-//import { Options } from '../utils/options';
-//import { getElements } from '../utils/utils';
-//import * as Utils from '../../sa11y-js/utils/utils';
+import Lang from '../../sa11y-js/utils/lang';
+import { Options } from '../utils/options';
+import { getElements } from '../utils/utils';
+import * as Utils from '../../sa11y-js/utils/utils';
 
 export default function customRuleset(results) {
   /*
    * Disabled as of 3.0.0.
    * */
-  /*
   if (Options.checks.EMBED_CUSTOM) {
     const matchedEmbeds = getElements(Options.checks.EMBED_CUSTOM.sources, 'root');
-    Lang.langStrings.embeddedContent = `<div class="title" tabindex="-1">${Options.embeddedContentTitle}</div>${Options.embeddedContentMessage}`;
     matchedEmbeds.forEach(($el) => {
       results.push({
-        test: 'EMBED_CUSTOM',
+        test: 'EMBED_GENERAL',
         element: $el,
         type: 'warning',
-        content: Lang.sprintf('EMBED_CUSTOM'),
         inline: false,
         dismiss: Utils.prepareDismissal($el.tagName + $el.getAttribute('src')),
-        dismissAll: 'embeddedContent',
-        developer: false,
+        content: Lang.sprintf(Options.checks.EMBED_GENERAL.content || 'EMBED_GENERAL'),
+        dismissAll: Options.checks.EMBED_GENERAL.dismissAll ? 'EMBED_GENERAL' : false,
+        developer: Options.checks.EMBED_GENERAL.developer || false,
       });
     });
   }
-  */
 
   return results;
 }

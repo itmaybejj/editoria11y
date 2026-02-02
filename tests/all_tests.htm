@@ -149,6 +149,11 @@
 			<iframe title="example" sandbox="" src="./iframe.htm?tableau"></iframe>
 		</div>
 
+		<p>Custom embed selector</p>
+		<div class="positive">
+			<div title="example" id="embed_custom">?</div>
+		</div>
+
 		<p>Unfocusable iframe:</p>
 		<div class="positive">
 			<iframe title="example" sandbox="" tabindex="-1" src="./iframe.htm"></iframe>
@@ -405,7 +410,8 @@
 
 
             ignoreAriaOnElements: '.gutenbergBadAria',
-			lang: Ed11yLangDe.lang,
+			//lang: Ed11yLangDe.lang,
+			  lang: Ed11yLangEn.lang,
             linkIgnoreStrings: ['opens in new window','download'], // @todo CMS was regex.
             linkIgnoreSelector: '.link-purpose',
             embeddedContent: '#embed',
@@ -523,6 +529,9 @@
 				  },
 				  EMBED_DATA_VIZ: {
 					  sources: '',
+				  },
+				  EMBED_CUSTOM: {
+					  sources: '#embed_custom',
 				  },
 				  EMBED_UNFOCUSABLE: true,
 				  EMBED_MISSING_TITLE: true,

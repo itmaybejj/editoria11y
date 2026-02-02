@@ -41,6 +41,7 @@ import {
 import { drawResult, showAltPanel, showHeadingsPanel, visualize } from './visualize';
 import checkReadability from '../../sa11y-js/rulesets/readability.js';
 import { spriteClose, spriteReadability } from '../elements/sprite.js';
+import customRuleset from '../rulesets/custom-ruleset.js';
 
 export function showResults() {
   buildJumpList();
@@ -1259,7 +1260,7 @@ const enqueueTests = (queue, results) => {
         checkHeaders(results, Options, State.headingOutline);
         checkImages(results, Options);
         checkEmbeddedContent(results, Options);
-        // customRuleset(results);
+        customRuleset(results);
         checkQA(results, Options);
         break;
       case 'group2':
