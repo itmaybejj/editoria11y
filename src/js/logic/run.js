@@ -1524,7 +1524,7 @@ window.addEventListener('ed11yEndVisualization', () => {
 export function dismissThis(dismissalType, button) {
   // Find the active tip and draw its identifying information from the result list
   const tip = button.closest('.ed11y-wrapper');
-  const test = tip.dataset.ed11yTest;
+  const test = tip.querySelector('[data-test]').dataset.test;
   const dismissKey = tip.dataset.ed11yDismiss;
 
   if (button.dataset.ed11yAll === 'true') {

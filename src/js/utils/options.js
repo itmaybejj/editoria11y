@@ -254,11 +254,6 @@ export const Options = {
   baseFontFamily:
     '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
 
-  // Test customizations
-  embeddedContent: false,
-  embeddedContentTitle: '',
-  embeddedContentMessage: '',
-
   linksUrls: false, // get from language pack
   linksMeaningless: false, // get from language pack
   // @todo cms/document wp this was a string.

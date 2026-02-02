@@ -897,10 +897,6 @@
     // CSS overrides and additions.
     baseFontSize: "clamp(14px, 1.6vw, 16px)",
     baseFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-    // Test customizations
-    embeddedContent: false,
-    embeddedContentTitle: "",
-    embeddedContentMessage: "",
     linksUrls: false,
     // get from language pack
     linksMeaningless: false,
@@ -6678,7 +6674,7 @@ URL: ${url2}</pre>
   });
   function dismissThis(dismissalType, button) {
     const tip = button.closest(".ed11y-wrapper");
-    const test = tip.dataset.ed11yTest;
+    const test = tip.querySelector("[data-test]").dataset.test;
     const dismissKey = tip.dataset.ed11yDismiss;
     if (button.dataset.ed11yAll === "true") {
       Results.forEach((result) => {
