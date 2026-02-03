@@ -7,7 +7,7 @@ import * as Utils from '../utils/utils';
 import { State } from './state';
 
 /* ************************************************************ */
-/*  Skip to Issue button core within panel.                    */
+/*  Skip to Issue button logic within panel.                    */
 /* ************************************************************ */
 
 // Check element visibility based on offsetHeight and offsetWidth.

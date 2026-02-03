@@ -88,7 +88,7 @@ export default function checkLinkText() {
     const negativeTabindex = $el.getAttribute('tabindex') === '-1';
     const targetBlank = $el.getAttribute('target')?.toLowerCase() === '_blank';
 
-    // Get ARIA attributes: caches attributes and uses short-circuit core to prevent redundant DOM queries.
+    // Get ARIA attributes: caches attributes and uses short-circuit logic to prevent redundant DOM queries.
     const ariaLabel = $el.getAttribute('aria-label');
     const ariaLabelledby = $el.getAttribute('aria-labelledby');
     const childLabelledby = !ariaLabelledby ? $el.querySelector('[aria-labelledby]') : null;

@@ -59,7 +59,7 @@ const defaultOptions = {
   linkIgnore: "",
   linkIgnoreSpan: "",
   linkIgnoreStrings: [],
-  paragraphIgnore: "",
+  paragraphIgnore: "table p",
   ignoreContentOutsideRoots: false,
   // Control panel settings
   aboutContent: "",
@@ -255,7 +255,7 @@ const defaultOptions = {
     META_MAX: true,
     META_REFRESH: true,
     PAGE_LANG_CONFIDENCE: {
-      confidence: 0.9
+      confidence: 0.95
     },
     LANG_OF_PARTS: true,
     LANG_MISMATCH: true,
@@ -1123,10 +1123,9 @@ const Elements = /* @__PURE__ */ (function myElements() {
     Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(
       Elements.Found.ExcludedHeadings
     );
-    Found.Paragraphs = Found.Everything.filter(($el) => {
-      const isExcluded = Constants.Exclusions.Paragraphs.some((selector) => $el.matches(selector));
-      return $el.tagName === "P" && !$el.closest("table") && !isExcluded;
-    });
+    Found.Paragraphs = Found.Everything.filter(
+      ($el) => $el.tagName === "P" && !Constants.Exclusions.Paragraphs.some((selector) => $el.matches(selector))
+    );
     Found.Lists = Found.Everything.filter(($el) => $el.tagName === "LI");
     Found.Blockquotes = Found.Everything.filter(($el) => $el.tagName === "BLOCKQUOTE");
     Found.Tables = Found.Everything.filter(
