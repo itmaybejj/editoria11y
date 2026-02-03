@@ -8364,6 +8364,7 @@ export {
   getElements,
   incrementalCheck,
   reset,
+  resetResults,
   sanitizeHTML,
   version
 };

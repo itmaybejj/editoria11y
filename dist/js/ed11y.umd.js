@@ -8367,6 +8367,7 @@ URL: ${url2}</pre>
   exports2.getElements = getElements;
   exports2.incrementalCheck = incrementalCheck;
   exports2.reset = reset;
+  exports2.resetResults = resetResults;
   exports2.sanitizeHTML = sanitizeHTML;
   exports2.version = version;
   Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });

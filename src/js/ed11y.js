@@ -6,7 +6,13 @@ import Elements from '../sa11y-js/utils/elements.js';
 import { checkAll, reset, incrementalCheck } from './logic/run.js';
 import { initialize } from './logic/initialize.js';
 import { sanitizeHTML } from '../sa11y-js/utils/utils.js';
-import { createDismissalKey, getElements, findElements, showError } from './utils/utils.js';
+import {
+  createDismissalKey,
+  getElements,
+  findElements,
+  resetResults,
+  showError,
+} from './utils/utils.js';
 import version from './version.js';
 
 class Ed11y {
@@ -38,6 +44,7 @@ export {
   getElements,
   incrementalCheck,
   reset,
+  resetResults,
   sanitizeHTML,
   version,
   Ed11y,
