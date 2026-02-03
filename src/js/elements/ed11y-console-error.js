@@ -1,6 +1,6 @@
 import Lang from '../../sa11y-js/utils/lang.js';
 import { escapeHTML } from '../../sa11y-js/utils/utils';
-import { State } from '../utils/state.js';
+import { UI } from '../core/ui.js';
 
 // Replaces Sa11y error with one that does not attach CSS.
 
@@ -34,7 +34,7 @@ ${this.error.stack}
 
 ## Details
 - **URL:** ${url}
-- **Version:** ${State.version}
+- **Version:** ${UI.version}
 
 ## Comments
 `;
@@ -48,7 +48,7 @@ ${this.error.stack}
       <p>${Lang.sprintf('CONSOLE_ERROR', google, github)}</p>
       <p><strong>${Lang._('DEVELOPER_CHECKS')}:</strong></p>
       <pre>
-Version: ${State.version}
+Version: ${UI.version}
 URL: ${url}</pre>
   		<p><strong>${Lang._('ERRORS')}:</strong></p>
 <pre>${escapeHTML(this.error.stack)}</pre>

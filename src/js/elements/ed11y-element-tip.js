@@ -1,7 +1,5 @@
-import { Results, State, UI } from '../utils/state.js';
-import { alertOnInvisibleTip, dismissThis, jumpTo, transferFocus } from '../logic/run.js';
+import { alertOnInvisibleTip, dismissThis, jumpTo, transferFocus } from '../core/run.js';
 import Lang from '../../sa11y-js/utils/lang.js';
-import { Options } from '../utils/options.js';
 import { getElements } from '../utils/utils.js';
 import {
   generateColorSuggestion,
@@ -9,6 +7,8 @@ import {
   initializeContrastTools,
 } from '../../sa11y-js/contrast/ui-tools.js';
 import { spriteClose, spriteCursor, spriteDismiss, spriteNext, spriteUnDismiss } from './sprite.js';
+import { UI } from '../core/ui.js';
+import { State } from '../../sa11y-js/core/state.js';
 
 export class Ed11yElementTip extends HTMLElement {
   connectedCallback() {
@@ -23,8 +23,8 @@ export class Ed11yElementTip extends HTMLElement {
     this.style.setProperty('outline', '0px solid transparent');
     const shadow = this.attachShadow({ mode: 'open' });
     this.issueIndex = Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition, 10);
-    this.issueNext = this.issueIndex < State.jumpList.length - 1 ? this.issueIndex + 2 : 1;
-    this.issuePrev = this.issueIndex > 0 ? this.issueIndex : State.jumpList.length;
+    this.issueNext = this.issueIndex < UI.jumpList.length - 1 ? this.issueIndex + 2 : 1;
+    this.issuePrev = this.issueIndex > 0 ? this.issueIndex : UI.jumpList.length;
 
     this.dismissable = this.result.type !== 'error';
     this.dismissed = !!this.result.dismissalStatus;
@@ -104,10 +104,10 @@ export class Ed11yElementTip extends HTMLElement {
       if (suggestion) contrastDiv.appendChild(suggestion);
     }
 
-    if (!State.inlineAlerts || Options.editLinks) {
+    if (!UI.inlineAlerts || State.option.editLinks) {
       const editBar = document.createElement('div');
 
-      if (!State.inlineAlerts) {
+      if (!UI.inlineAlerts) {
         editBar.classList.add('ed11y-tip-buttons');
         const focusTransfer = document.createElement('button');
         const transferIcon = document.createElement('span');
@@ -122,7 +122,7 @@ export class Ed11yElementTip extends HTMLElement {
         });
       } else {
         editBar.classList.add('ed11y-custom-edit-links');
-        editBar.append(Options.editLinks.cloneNode(true));
+        editBar.append(State.option.editLinks.cloneNode(true));
       }
       this.contentFooter = this.wrapper.querySelector('.content-footer');
       const why = this.wrapper.querySelector('.why');
@@ -141,13 +141,13 @@ export class Ed11yElementTip extends HTMLElement {
       dismissIcon.innerHTML = spriteDismiss;
 
       // Dismissal Key is set in [5] if alert has been dismissed.
-      if (State.showDismissed && this.dismissed) {
+      if (UI.showDismissed && this.dismissed) {
         // Check if user has permission to reset this alert.
 
         const okd =
-          State.dismissedAlerts[Options.currentPage][this.result.test][this.result.dismiss] ===
+          UI.dismissedAlerts[State.option.currentPage][this.result.test][this.result.dismiss] ===
           'ok';
-        if ((okd && Options.allowOK) || !okd) {
+        if ((okd && State.option.allowOK) || !okd) {
           // User can restore this alert.
           const unDismissButton = document.createElement('button');
           const unDismissIcon = document.createElement('span');
@@ -173,22 +173,23 @@ export class Ed11yElementTip extends HTMLElement {
         const pageActions = this.wrapper.querySelector('.ed11y-bulk-actions');
         const pageActionsSummary = pageActions.querySelector('summary');
         pageActionsSummary.textContent = Lang.sprintf('dismissActions');
-        const othersLikeThis = Results.filter((el) => el.test === this.result.test).length;
+        const othersLikeThis = State.results.filter((el) => el.test === this.result.test).length;
         const pageActionsContent = pageActions.querySelector('.ed11y-bulk-actions-content');
         // Other cases?
-        const showPageActions = othersLikeThis > 3 && (Options.allowHide || Options.allowOK);
+        const showPageActions =
+          othersLikeThis > 3 && (State.option.allowHide || State.option.allowOK);
         if (showPageActions) {
           pageActions.classList.remove('ed11y-hidden');
         }
 
-        if (Options.allowOK) {
+        if (State.option.allowOK) {
           const check = document.createElement('span');
           check.setAttribute('aria-hidden', 'true');
           check.textContent = '✓';
 
           const OkButton = document.createElement('button');
           OkButton.classList.add('dismiss', 'ok');
-          if (Options.syncedDismissals) {
+          if (State.option.syncedDismissals) {
             OkButton.setAttribute('title', Lang._('dismissOkTitle'));
           }
           const OkText = document.createElement('span');
@@ -218,10 +219,10 @@ export class Ed11yElementTip extends HTMLElement {
           });
         }
 
-        if (Options.allowHide) {
+        if (State.option.allowHide) {
           const ignoreButton = document.createElement('button');
           ignoreButton.classList.add('dismiss', 'ignore');
-          if (Options.syncedDismissals) {
+          if (State.option.syncedDismissals) {
             ignoreButton.setAttribute('title', `${Lang._('dismissHideTitle')}`);
           }
           const ignoreText = document.createElement('span');
@@ -255,21 +256,21 @@ export class Ed11yElementTip extends HTMLElement {
     }
 
     const countNumber = this.wrapper.querySelector('.count-number');
-    countNumber.textContent = `${this.issueIndex + 1} / ${State.jumpList.length}`;
+    countNumber.textContent = `${this.issueIndex + 1} / ${UI.jumpList.length}`;
     const countText = this.wrapper.querySelector('.count-text');
     countText.textContent = Lang._('ALERT_TEXT');
-    if (State.english && State.splitConfiguration) {
+    if (UI.english && UI.splitConfiguration) {
       const countPrefix = document.createElement('span');
       countText.insertAdjacentElement('beforebegin', countPrefix);
       if (this.result.outsideContentRoots) {
         countPrefix.textContent = Lang._('issueTemplate');
-      } else if (State.splitConfiguration.devChecks[this.result.test]) {
+      } else if (UI.splitConfiguration.devChecks[this.result.test]) {
         countPrefix.textContent = Lang._('issueDeveloper');
       }
       const br = document.createElement('br');
       countPrefix.insertAdjacentElement('afterend', br);
     }
-    if (State.jumpList.length > 1) {
+    if (UI.jumpList.length > 1) {
       this.prev = this.wrapper.querySelector('.prev');
       this.prev.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issuePrev}`);
       this.prev.addEventListener('click', (event) => {
@@ -293,8 +294,8 @@ export class Ed11yElementTip extends HTMLElement {
     closeButton.addEventListener('click', (event) => {
       event.preventDefault();
       if (this.open) {
-        if (State.toggledFrom) {
-          State.toggledFrom.focus();
+        if (UI.toggledFrom) {
+          UI.toggledFrom.focus();
         }
         // todo postpone: track if this tip was opened by the next button. If so, transfer focus back to it instead
         this.setAttribute('data-ed11y-action', 'shut');

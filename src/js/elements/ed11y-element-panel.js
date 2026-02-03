@@ -1,6 +1,6 @@
-import { State, UI } from '../utils/state.js';
-import { togglePanel, toggleShowDismissals } from '../logic/run.js';
-import { visualize } from '../logic/visualize';
+import { UI } from '../core/ui.js';
+import { togglePanel, toggleShowDismissals } from '../core/run.js';
+import { visualize } from '../core/visualize';
 import {
   spriteAlts,
   spriteClose,
@@ -13,6 +13,7 @@ import {
   spriteUnDismiss,
   spriteVisualize,
 } from './sprite.js';
+import { State } from '../../sa11y-js/core/state.js';
 
 export class Ed11yElementPanel extends HTMLElement {
   template() {
@@ -97,7 +98,7 @@ export class Ed11yElementPanel extends HTMLElement {
         toggleShowDismissals();
         break;
       case 'ed11y-visualize':
-        if (!State.showPanel) {
+        if (!UI.showPanel) {
           togglePanel();
         }
         visualize();

@@ -13,7 +13,7 @@ mv src/lang ../src/sa11y-lang
 
 # Patches
 # Don't inject Sa11y CSS into shadow components
-cp ../src/sa11y-patch/logic/find-shadow-components.js ../src/sa11y-js/logic/find-shadow-components.js
+cp ../src/sa11y-patch/core/find-shadow-components.js ../src/sa11y-js/core/find-shadow-components.js
 
 cd ../
 rm -rf tmp

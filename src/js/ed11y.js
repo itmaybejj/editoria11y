@@ -1,19 +1,12 @@
 import Lang from '../sa11y-js/utils/lang';
 import { computeAccessibleName } from '../sa11y-js/utils/computeAccessibleName.js';
-import { State, Theme, UI, Results } from './utils/state.js';
-import { Options } from './utils/options.js';
 import Elements from '../sa11y-js/utils/elements.js';
-import { checkAll, reset, incrementalCheck } from './logic/run.js';
-import { initialize } from './logic/initialize.js';
+import { reset, refresh } from './core/run.js';
+import { initialize } from './core/initialize.js';
 import { sanitizeHTML } from '../sa11y-js/utils/utils.js';
-import {
-  createDismissalKey,
-  getElements,
-  findElements,
-  resetResults,
-  showError,
-} from './utils/utils.js';
-import version from './version.js';
+import { createDismissalKey, getElements, findElements, showError } from './utils/utils.js';
+import { State } from '../sa11y-js/core/state.js';
+import { UI } from './core/ui.js';
 
 class Ed11y {
   constructor(userOptions) {
@@ -32,20 +25,14 @@ export const elements = Elements.Found;
 
 export {
   Lang,
-  Options,
-  Results,
   State,
-  Theme,
   UI,
-  checkAll,
   computeAccessibleName,
   createDismissalKey,
-  findElements,
-  getElements,
-  incrementalCheck,
+  findElements, // Adds elements to the Elements.Found object.
+  getElements, // Directly returns elements.
+  refresh,
   reset,
-  resetResults,
   sanitizeHTML,
-  version,
   Ed11y,
 };

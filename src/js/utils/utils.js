@@ -1,13 +1,13 @@
-import { Results, State, UI } from './state.js';
 import Lang from '../../sa11y-js/utils/lang.js';
 import find from '../../sa11y-js/utils/find.js';
 import Constants from '../../sa11y-js/utils/constants.js';
-import { Options } from './options.js';
-import findShadowComponents from '../../sa11y-js/logic/find-shadow-components.js';
+import findShadowComponents from '../../sa11y-js/core/find-shadow-components.js';
 import Elements from '../../sa11y-js/utils/elements.js';
 import ConsoleErrors from '../elements/ed11y-console-error.js';
 import { createAlert } from '../../sa11y-js/interface/alert';
 import { dismissDigest, prepareDismissal } from '../../sa11y-js/utils/utils.js';
+import { UI } from '../core/ui.js';
+import { State } from '../../sa11y-js/core/state.js';
 
 /*=============== Utilities ================*/
 
@@ -110,13 +110,13 @@ export function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) 
 }
 
 export function addedNodeReadyToCheck(el) {
-  if (!State.recentlyAddedNodes.has(el)) {
+  if (!UI.recentlyAddedNodes.has(el)) {
     return true;
   }
   const hasText = el.textContent.trim().length;
   if (
-    (!hasText && State.recentlyAddedNodes.get(el) > Date.now() - 5000) ||
-    (State.activeRange && el.contains(State.activeRange.startContainer))
+    (!hasText && UI.recentlyAddedNodes.get(el) > Date.now() - 5000) ||
+    (UI.activeRange && el.contains(UI.activeRange.startContainer))
   ) {
     // Do not check recent nodes if they are empty or selected.
     return false;
@@ -133,12 +133,12 @@ export function addedNodeReadyToCheck(el) {
       return false;
     } else {
       // Text in body cells.
-      State.recentlyAddedNodes.delete(el);
+      UI.recentlyAddedNodes.delete(el);
       return true;
     }
   } else {
     // New node is ready for checking.
-    State.recentlyAddedNodes.delete(el);
+    UI.recentlyAddedNodes.delete(el);
     return true;
   }
 }
@@ -160,31 +160,31 @@ const dropSomeElements = (arrayRef, sendTo = false, readyCheck = true, hiddenChe
 // First step in checkAll is getting a fresh set of elements to check.
 export function buildElementList(onlyForFilter = false) {
   // Check for ignoreAll elements.
-  State.ignoreAll =
-    Options.ignoreAllIfAbsent &&
-    document.querySelector(`:is(${Options.ignoreAllIfAbsent})`) === null;
-  if (!State.ignoreAll && !!Options.ignoreAllIfPresent) {
-    State.ignoreAll = document.querySelector(`:is(${Options.ignoreAllIfPresent})`) !== null;
+  UI.ignoreAll =
+    State.option.ignoreAllIfAbsent &&
+    document.querySelector(`:is(${State.option.ignoreAllIfAbsent})`) === null;
+  if (!UI.ignoreAll && !!State.option.ignoreAllIfPresent) {
+    UI.ignoreAll = document.querySelector(`:is(${State.option.ignoreAllIfPresent})`) !== null;
   }
 
-  initializeRoot(Options.checkRoot, Options.checkRoot, Options.fixedRoots);
+  initializeRoot(State.option.checkRoot, State.option.checkRoot, State.option.fixedRoots);
 
-  for (let i = 0; i < State.roots.length; i++) {
-    if (Options.fixedRoots) {
+  for (let i = 0; i < UI.roots.length; i++) {
+    if (State.option.fixedRoots) {
       // todo what if fixed root is a shadow host? What here is used, how?
-      State.roots[i].dataset.ed11yRoot = `${i}`;
+      UI.roots[i].dataset.ed11yRoot = `${i}`;
     }
-    if (State.roots[i].shadowRoot) {
-      State.roots.setAttribute('data-ed11y-has-shadow-root', 'true');
-      detectShadow(State.roots[i]);
-      State.roots[i] = State.roots[i].shadowRoot;
+    if (UI.roots[i].shadowRoot) {
+      UI.roots.setAttribute('data-ed11y-has-shadow-root', 'true');
+      detectShadow(UI.roots[i]);
+      UI.roots[i] = UI.roots[i].shadowRoot;
     } else {
-      detectShadow(State.roots[i]);
+      detectShadow(UI.roots[i]);
     }
   }
 
   // Find all web components on the page.
-  findShadowComponents(Options);
+  findShadowComponents(State.option);
 
   // Find and cache elements.
   if (onlyForFilter) {
@@ -236,26 +236,26 @@ export function buildElementList(onlyForFilter = false) {
     );
   } else {
     State.headingOutline = [];
-    Elements.initializeElements(Options);
+    Elements.initializeElements(State.option);
 
     // Not needed for filter, since they weren't checked in the first loop.
     dropSomeElements(Elements.Found.Headings, Elements.Found.OutlineIgnore, true, true);
     dropSomeElements(Elements.Found.Blockquotes);
     dropSomeElements(Elements.Found.Tables);
 
-    if (typeof Options.editableContent === 'string') {
-      Elements.Found.editable = getElements(Options.editableContent, 'document');
+    if (typeof State.option.editableContent === 'string') {
+      Elements.Found.editable = getElements(State.option.editableContent, 'document');
     } else {
-      Elements.Found.editable = Options.editableContent;
+      Elements.Found.editable = State.option.editableContent;
     }
-    if (State.inlineAlerts && Elements.Found.editable.length > 0) {
-      State.inlineAlerts = false;
+    if (UI.inlineAlerts && Elements.Found.editable.length > 0) {
+      UI.inlineAlerts = false;
       console.warn('Editable content detected; Editoria11y inline alerts disabled');
     }
 
-    if (Options.panelNoCover) {
+    if (State.option.panelNoCover) {
       // Moves panel off conflicting widgets.
-      Elements.Found.panelNoCover = getElements(Options.panelNoCover, 'document');
+      Elements.Found.panelNoCover = getElements(State.option.panelNoCover, 'document');
     }
   }
 }
@@ -266,7 +266,7 @@ export function lagBounce(callback, wait) {
     window.clearTimeout(timeoutId);
     timeoutId = window.setTimeout(() => {
       callback.apply(null, args);
-    }, wait + State.browserLag);
+    }, wait + UI.browserLag);
   };
 }
 
@@ -369,7 +369,7 @@ export function elementNotHidden(el) {
 }
 
 export function detectShadow(container) {
-  if (Options.autoDetectShadowComponents) {
+  if (State.option.autoDetectShadowComponents) {
     const select = `*:not(${Constants.Exclusions.Container.join(', ')}, .ed11y-element)`;
 
     let search;
@@ -388,8 +388,8 @@ export function detectShadow(container) {
         detectShadow(component);
       }
     });
-  } else if (Options.shadowComponents) {
-    const providedShadow = container.querySelectorAll(Options.shadowComponents);
+  } else if (State.option.shadowComponents) {
+    const providedShadow = container.querySelectorAll(State.option.shadowComponents);
     providedShadow.forEach((component) => {
       if (component.shadowRoot && component.shadowRoot.mode === 'open') {
         if (!container.matches('[data-ed11y-has-shadow-root]')) {
@@ -407,19 +407,19 @@ export function detectShadow(container) {
   }
 }
 
-export function panelLabel(show = State.showPanel) {
+export function panelLabel(show = UI.showPanel) {
   if (show) {
-    if (State.english) {
+    if (UI.english) {
       UI.panelToggleTitle.textContent =
-        State.totalCount > 0 ? Lang._('main_toggle_hide_alerts') : Lang._('main_toggle_hide');
+        UI.totalCount > 0 ? Lang._('main_toggle_hide_alerts') : Lang._('main_toggle_hide');
     } else {
       UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
       UI.panelToggle.ariaExpanded = 'true';
     }
   } else {
-    if (State.english) {
+    if (UI.english) {
       UI.panelToggleTitle.textContent =
-        State.totalCount > 0 ? Lang._('main_toggle_show_alerts') : Lang._('main_toggle_show');
+        UI.totalCount > 0 ? Lang._('main_toggle_show_alerts') : Lang._('main_toggle_show');
     } else {
       UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
       UI.panelToggle.ariaExpanded = 'false';
@@ -428,30 +428,30 @@ export function panelLabel(show = State.showPanel) {
 }
 
 export function pauseObservers() {
-  State.watching?.forEach((observer) => {
+  UI.watching?.forEach((observer) => {
     observer.observer.disconnect();
   });
 }
 
 export function resumeObservers() {
-  State.watching?.forEach((observer) => {
+  UI.watching?.forEach((observer) => {
     observer.observer.observe(observer.root, observer.config);
   });
 }
 
 export function checkRunPrevent() {
-  let preventCheck = Options.preventCheckingIfPresent
-    ? document.querySelector(Options.preventCheckingIfPresent)
+  let preventCheck = State.option.preventCheckingIfPresent
+    ? document.querySelector(State.option.preventCheckingIfPresent)
     : false;
   if (preventCheck) {
     console.warn(
-      `Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${Options.preventCheckingIfPresent}"`,
+      `Editoria11y is disabled because an element matched the "preventCheckingIfPresent" parameter:  "${State.option.preventCheckingIfPresent}"`,
     );
-  } else if (!preventCheck && !!Options.preventCheckingIfAbsent) {
-    preventCheck = document.querySelector(`:is(${Options.preventCheckingIfAbsent})`) === null;
+  } else if (!preventCheck && !!State.option.preventCheckingIfAbsent) {
+    preventCheck = document.querySelector(`:is(${State.option.preventCheckingIfAbsent})`) === null;
     if (preventCheck) {
       console.warn(
-        `Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${Options.preventCheckingIfAbsent}"`,
+        `Editoria11y is disabled because no elements matched the "preventCheckingIfAbsent" parameter: "${State.option.preventCheckingIfAbsent}"`,
       );
     }
   }
@@ -459,17 +459,17 @@ export function checkRunPrevent() {
 }
 
 export function createDismissalKey(string) {
-  return dismissDigest(Options.pepper, prepareDismissal(string));
+  return dismissDigest(State.option.pepper, prepareDismissal(string));
 }
 
 export function resetResults(incremental) {
-  State.jumpList = [];
-  State.tipOpen = false;
-  State.openTip = {
+  UI.jumpList = [];
+  UI.tipOpen = false;
+  UI.openTip = {
     button: false,
     tip: false,
   };
-  State.openJumpPosition = -1;
+  UI.openJumpPosition = -1;
   resetClass([
     'ed11y-ring-red',
     'ed11y-ring-yellow',
@@ -511,7 +511,7 @@ export function resetResults(incremental) {
   );
 
   if (typeof UI.panelJumpNext === 'function') {
-    UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = State.english
+    UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = UI.english
       ? Lang._('buttonFirstContent')
       : `${Lang._('SKIP_TO_ISSUE')} 1`;
   }
@@ -520,16 +520,16 @@ export function resetResults(incremental) {
 
 export function newIncrementalResults() {
   // Obviously new if there are more results:
-  if (State.forceFullCheck || Results.length !== State.oldResults.length) {
+  if (UI.forceFullCheck || State.results.length !== UI.oldResults.length) {
     return true;
   }
   // Subtly new if a result has changed:
-  let newResultString = `${State.errorCount} ${State.warningCount}`;
-  Results.forEach((result) => {
+  let newResultString = `${UI.errorCount} ${UI.warningCount}`;
+  State.results.forEach((result) => {
     newResultString += result.test + result.element?.outerHTML;
   });
-  const changed = newResultString !== State.oldResultString;
-  State.oldResultString = newResultString;
+  const changed = newResultString !== UI.oldResultString;
+  UI.oldResultString = newResultString;
   return changed;
 }
 

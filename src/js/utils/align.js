@@ -1,7 +1,7 @@
 import { firstVisibleParent, visible } from './utils.js';
-import { State, UI } from './state.js';
-import { Options } from './options.js';
 import Elements from '../../sa11y-js/utils/elements.js';
+import { UI } from '../core/ui.js';
+import { State } from '../../sa11y-js/core/state.js';
 
 export const intersect = (a, b, x = 10) => {
   // Compute intersect using browser offsets.
@@ -43,8 +43,8 @@ export const scrollableElem = (el) => {
 };
 
 export function closestScrollable(el) {
-  if (Options.constrainButtons && el.closest(Options.constrainButtons)) {
-    return el.closest(Options.constrainButtons);
+  if (State.option.constrainButtons && el.closest(State.option.constrainButtons)) {
+    return el.closest(State.option.constrainButtons);
   }
 
   let parent = el.parentElement;
@@ -70,7 +70,7 @@ export function alignPanel() {
   if (!UI.panelElement) {
     return false;
   }
-  if (Options.panelPosition === 'left') {
+  if (State.option.panelPosition === 'left') {
     UI.panel.classList.add('ed11y-pin-left');
   }
   let xMost = 0;
@@ -78,7 +78,7 @@ export function alignPanel() {
   if (Elements.Found.panelNoCover) {
     Elements.Found.panelNoCover.forEach((el) => {
       const bounds = el.getBoundingClientRect();
-      if (Options.panelPosition === 'right') {
+      if (State.option.panelPosition === 'right') {
         xMost =
           window.innerWidth - bounds.left > xMost && bounds.left > window.innerWidth / 3
             ? window.innerWidth - bounds.left
@@ -97,16 +97,16 @@ export function alignPanel() {
   }
   if (xMost > 0 && xMost < window.innerWidth - 240) {
     // push off horizontal
-    UI.panelElement.style.setProperty(Options.panelPosition, `${xMost + 10}px`);
-    UI.panelElement.style.setProperty('bottom', Options.panelOffsetY);
+    UI.panelElement.style.setProperty(State.option.panelPosition, `${xMost + 10}px`);
+    UI.panelElement.style.setProperty('bottom', State.option.panelOffsetY);
   } else if (xMost > 0 && xMost > window.innerWidth - 240 && yMost > 0) {
     // push off vertical
-    UI.panelElement.style.setProperty(Options.panelPosition, Options.panelOffsetX);
-    UI.panelElement.style.setProperty('bottom', `calc(${Options.panelOffsetY} + ${yMost}px)`);
+    UI.panelElement.style.setProperty(State.option.panelPosition, State.option.panelOffsetX);
+    UI.panelElement.style.setProperty('bottom', `calc(${State.option.panelOffsetY} + ${yMost}px)`);
   } else {
     // no push
-    UI.panelElement.style.setProperty(Options.panelPosition, Options.panelOffsetX);
-    UI.panelElement.style.setProperty('bottom', Options.panelOffsetY);
+    UI.panelElement.style.setProperty(State.option.panelPosition, State.option.panelOffsetX);
+    UI.panelElement.style.setProperty('bottom', State.option.panelOffsetY);
   }
 }
 
@@ -143,25 +143,25 @@ export function alignAlts() {
  * */
 export function checkEditableIntersects(focusKnown = false) {
   if (
-    !State.activeRange ||
+    !UI.activeRange ||
     (!focusKnown && !document.querySelector('[contenteditable]:focus, [contenteditable] :focus'))
   ) {
     // Reset classes to measure.
-    State.jumpList?.forEach((el) => {
+    UI.jumpList?.forEach((el) => {
       if (el.matches('.intersecting')) {
         el.classList.remove('intersecting');
       }
     });
     return;
   }
-  const activeRects = State.activeRange.getBoundingClientRect();
+  const activeRects = UI.activeRange.getBoundingClientRect();
 
-  State.jumpList?.forEach((el) => {
+  UI.jumpList?.forEach((el) => {
     const toggle = el.shadowRoot.querySelector('.toggle');
 
     const framePositioner =
-      el.result.fixedRoot && State.positionedFrames[el.result.fixedRoot]
-        ? State.positionedFrames[el.result.fixedRoot]
+      el.result.fixedRoot && UI.positionedFrames[el.result.fixedRoot]
+        ? UI.positionedFrames[el.result.fixedRoot]
         : { top: 0, left: 0 };
 
     const rects = {};
@@ -184,20 +184,20 @@ export function checkEditableIntersects(focusKnown = false) {
 }
 
 export function alignButtons() {
-  if (State.jumpList.length === 0) {
+  if (UI.jumpList.length === 0) {
     return;
   }
-  State.alignPending = true;
+  UI.alignPending = true;
 
   // Reading and writing in a loop creates paint thrashing.
   // We iterate the array for reads, then iterate for writes.
 
-  if (Options.fixedRoots) {
-    State.positionedFrames.length = 0;
+  if (State.option.fixedRoots) {
+    UI.positionedFrames.length = 0;
 
-    Options.fixedRoots.forEach((root) => {
+    State.option.fixedRoots.forEach((root) => {
       if (root.framePositioner) {
-        State.positionedFrames.push(root.framePositioner.getBoundingClientRect());
+        UI.positionedFrames.push(root.framePositioner.getBoundingClientRect());
       }
     });
   }
@@ -206,11 +206,11 @@ export function alignButtons() {
   let previousNudgeTop = 0;
   let previousNudgeLeft = 0;
   const scrollTop = window.scrollY;
-  if (!State.inlineAlerts) {
+  if (!UI.inlineAlerts) {
     // Compute based on target position.
 
-    for (let i = 0; i < State.jumpList.length; i++) {
-      const mark = State.jumpList[i];
+    for (let i = 0; i < UI.jumpList.length; i++) {
+      const mark = UI.jumpList[i];
       if (!mark.result.element) {
         // @todo 3.x Test to see if edge case still exists.
         console.warn('Editoria11y debug: element disappeared');
@@ -218,8 +218,8 @@ export function alignButtons() {
       }
       if (!mark.result.element.isConnected) {
         // Something broke; rebuild jumpList on next loop.
-        State.forceFullCheck = true;
-        State.interaction = true;
+        UI.forceFullCheck = true;
+        UI.interaction = true;
         mark.style.display = 'none';
       } else {
         //mark.visibility = 'visible';
@@ -243,41 +243,41 @@ export function alignButtons() {
         left = left + 10;
         // Should we do this for TD too?
       } else {
-        left = State.inlineAlerts ? left - 34 : left;
+        left = UI.inlineAlerts ? left - 34 : left;
       }
 
       // Add iframe positon to calculated position
-      if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
-        top = top + State.positionedFrames[mark.result.fixedRoot].top;
-        left = left + State.positionedFrames[mark.result.fixedRoot].left;
+      if (mark.result.fixedRoot && UI.positionedFrames[mark.result.fixedRoot]) {
+        top = top + UI.positionedFrames[mark.result.fixedRoot].top;
+        left = left + UI.positionedFrames[mark.result.fixedRoot].left;
       }
 
       if (mark.result.scrollableParent) {
         // Bump alerts that would be X-position out of a scroll zone.
-        State.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
-        if (left < State.jumpList[i].bounds.left) {
-          left = State.jumpList[i].bounds.left;
-        } else if (left + 40 > State.jumpList[i].bounds.right) {
-          left = State.jumpList[i].bounds.right - 40;
+        UI.jumpList[i].bounds = mark.result.scrollableParent.getBoundingClientRect();
+        if (left < UI.jumpList[i].bounds.left) {
+          left = UI.jumpList[i].bounds.left;
+        } else if (left + 40 > UI.jumpList[i].bounds.right) {
+          left = UI.jumpList[i].bounds.right - 40;
         }
-      } else if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
+      } else if (mark.result.fixedRoot && UI.positionedFrames[mark.result.fixedRoot]) {
         // Bump alerts that would x-position out of an iframe.
-        State.jumpList[i].bounds = State.positionedFrames[mark.result.fixedRoot];
-        if (left < State.jumpList[i].bounds.left) {
-          left = State.jumpList[i].bounds.left;
-        } else if (left + 40 > State.jumpList[i].bounds.right) {
-          left = State.jumpList[i].bounds.right - 40;
+        UI.jumpList[i].bounds = UI.positionedFrames[mark.result.fixedRoot];
+        if (left < UI.jumpList[i].bounds.left) {
+          left = UI.jumpList[i].bounds.left;
+        } else if (left + 40 > UI.jumpList[i].bounds.right) {
+          left = UI.jumpList[i].bounds.right - 40;
         }
       }
-      State.jumpList[i].targetOffset = targetOffset;
-      State.jumpList[i].markTop = top;
-      State.jumpList[i].markLeft = left;
+      UI.jumpList[i].targetOffset = targetOffset;
+      UI.jumpList[i].markTop = top;
+      UI.jumpList[i].markLeft = left;
     }
   } else {
     // Compute based on self position.
 
     // Clear old transforms first. Batch write first...
-    State.jumpList.forEach((mark) => {
+    UI.jumpList.forEach((mark) => {
       // Reset positions.
       mark.style.setProperty('transform', null);
       mark.style.setProperty('top', 'initial');
@@ -294,7 +294,7 @@ export function alignButtons() {
       }
     });
     // ...then batch read new positions.
-    State.jumpList.forEach((mark) => {
+    UI.jumpList.forEach((mark) => {
       mark.markOffset = mark.getBoundingClientRect();
       mark.markLeft = mark.markOffset.left;
       mark.markTop = mark.markOffset.top;
@@ -302,7 +302,7 @@ export function alignButtons() {
   }
 
   // Check for overlaps, then write out transforms.
-  State.jumpList.forEach((mark, i) => {
+  UI.jumpList.forEach((mark, i) => {
     // Now check for any needed nudges
     let nudgeTop = 10;
     let nudgeLeft = mark.result.element.tagName === 'IMG' ? 10 : -34;
@@ -316,22 +316,22 @@ export function alignButtons() {
         overlap(
           mark.markLeft,
           mark.markTop,
-          State.jumpList[i - 1].markLeft,
-          State.jumpList[i - 1].markTop,
+          UI.jumpList[i - 1].markLeft,
+          UI.jumpList[i - 1].markTop,
         )) ||
       (i > 1 &&
         overlap(
           mark.markLeft,
           mark.markTop,
-          State.jumpList[i - 2].markLeft,
-          State.jumpList[i - 2].markTop,
+          UI.jumpList[i - 2].markLeft,
+          UI.jumpList[i - 2].markTop,
         )) ||
       (i > 2 &&
         overlap(
           mark.markLeft,
           mark.markTop,
-          State.jumpList[i - 3].markLeft,
-          State.jumpList[i - 3].markTop,
+          UI.jumpList[i - 3].markLeft,
+          UI.jumpList[i - 3].markTop,
         ))
     ) {
       // todo postpone: compute actual overlap? We're bouncing by the full amount no matter what which adds too much gapping.
@@ -346,9 +346,9 @@ export function alignButtons() {
       const constrained = mark.result.scrollableParent.getBoundingClientRect();
       constrainLeft = constrained.left;
       constrainRight = constrainLeft + constrained.width;
-    } else if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
-      constrainLeft = State.positionedFrames[mark.result.fixedRoot].left;
-      constrainRight = State.positionedFrames[mark.result.fixedRoot].right;
+    } else if (mark.result.fixedRoot && UI.positionedFrames[mark.result.fixedRoot]) {
+      constrainLeft = UI.positionedFrames[mark.result.fixedRoot].left;
+      constrainRight = UI.positionedFrames[mark.result.fixedRoot].right;
     }
 
     let needNudge = false;
@@ -363,7 +363,7 @@ export function alignButtons() {
     } else if (nudgeTop !== 0) {
       needNudge = true;
     }
-    if (!State.inlineAlerts) {
+    if (!UI.inlineAlerts) {
       if (needNudge) {
         mark.style.transform = `translate(${mark.markLeft + nudgeLeft}px, ${mark.markTop + nudgeTop}px)`;
       } else {
@@ -379,9 +379,9 @@ export function alignButtons() {
   });
 
   // Last pass: check for elements offscreen within scrollable areas.
-  if (!State.inlineAlerts) {
+  if (!UI.inlineAlerts) {
     // Alerts have to be positioned relative to viewport.
-    State.jumpList.forEach((mark) => {
+    UI.jumpList.forEach((mark) => {
       if (mark.result.scrollableParent) {
         // Hide alerts outside a scroll zone.
         if (
@@ -401,7 +401,7 @@ export function alignButtons() {
           mark.classList.remove('ed11y-offscreen');
           mark.style.pointerEvents = 'auto';
         }
-      } else if (mark.result.fixedRoot && State.positionedFrames[mark.result.fixedRoot]) {
+      } else if (mark.result.fixedRoot && UI.positionedFrames[mark.result.fixedRoot]) {
         if (
           !!mark.bounds &&
           (mark.targetOffset.top < -40 ||
@@ -426,7 +426,7 @@ export function alignButtons() {
     });
   }
   window.setTimeout(() => {
-    State.jumpList?.forEach((mark) => {
+    UI.jumpList?.forEach((mark) => {
       // Now make visible.
       // todo: Edge still flickers on redraw.
       mark.classList.remove('ed11y-preload');

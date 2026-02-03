@@ -1,7 +1,4 @@
 # Ignore build and test artifacts.
-sa11y/
-src/sa11y-lang
-src/sa11y-js
 logs/*
 tests_output/*
 tests/tinymce/
