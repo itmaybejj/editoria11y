@@ -1,4 +1,4 @@
-import { version } from '../ed11y.js';
+import version from '../version.js';
 
 export const UI = {
   editableHighlight: {},

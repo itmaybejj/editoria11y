@@ -7,6 +7,7 @@ import { sanitizeHTML } from '../sa11y-js/utils/utils.js';
 import { createDismissalKey, getElements, findElements, showError } from './utils/utils.js';
 import { State } from '../sa11y-js/core/state.js';
 import { UI } from './core/ui.js';
+import version from './version.js';
 
 class Ed11y {
   constructor(userOptions) {
@@ -34,5 +35,6 @@ export {
   refresh,
   reset,
   sanitizeHTML,
+  version,
   Ed11y,
 };
