@@ -164,7 +164,7 @@ export function visualize() {
 }
 
 const showReadability = () => {
-  checkReadability(State.results);
+  checkReadability();
   for (let i = State.results.length - 1; i >= 0; i--) {
     if (!State.results[i].element) {
       // It's possible to get here while visualizing.

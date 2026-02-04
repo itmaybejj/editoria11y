@@ -352,9 +352,15 @@ export function updatePanel() {
 export function buildJumpList() {
   UI.jumpList = [];
   pauseObservers();
+  const toSplice = [];
 
   // Initial alignment to get approximate Y position order for jump list.
   for (let i = 0; i < State.results.length; i++) {
+    if (!State.results[i].element) {
+      // E.g. readability. Should never happen but race conditions are possible.
+      toSplice.push(i);
+      continue;
+    }
     let top = State.results[i].element.getBoundingClientRect().top;
     if (!top) {
       const visibleParent = firstVisibleParent(State.results[i].element);
@@ -374,6 +380,9 @@ export function buildJumpList() {
     }
     State.results[i].sortPos = top;
   }
+  toSplice.forEach((i) => {
+    State.results.splice(i, 1);
+  });
 
   // Sort from bottom to top so focus order after insert is top to bottom.
   State.results.sort((a, b) => b.sortPos - a.sortPos);

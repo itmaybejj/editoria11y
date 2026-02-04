@@ -100,8 +100,12 @@ export class Ed11yElementPanel extends HTMLElement {
       case 'ed11y-visualize':
         if (!UI.showPanel) {
           togglePanel();
+          window.setTimeout(() => {
+            visualize();
+          }, 500);
+        } else {
+          visualize();
         }
-        visualize();
         break;
       default:
         break;

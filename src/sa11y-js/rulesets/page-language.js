@@ -42,21 +42,24 @@ export function getLanguageDetector() {
 // Get the reader-friendly language label, e.g. "English"
 const getLanguageLabel = (lang) => {
   try {
-    return `<span lang="${navigator.language}">${new Intl.DisplayNames(navigator.language, {
+    // 1. Validate and standardise the code first (e.g. cleans up 'EN-us' to 'en-US').
+    const canonicalLang = Intl.getCanonicalLocales(lang)[0];
+
+    // 2. Extract just the base language (e.g. 'en' from 'en-US').
+    const baseLang = new Intl.Locale(canonicalLang).language;
+
+    // 3. Get the human readable name.
+    const displayName = new Intl.DisplayNames(navigator.language, {
       type: 'language',
-    }).of(lang.split('-')[0])}</span>`;
+    }).of(baseLang);
+    return `<span lang="${navigator.language}">${displayName}</span>`;
   } catch {
-    return lang;
+    return Lang.sprintf(`<strong {C}>${lang}</strong>`);
   }
 };
 
 // Identify primary language code.
 const primary = (lang) => String(lang).toLowerCase().split('-')[0];
-
-// We're looking for significant changes for text before running this expensive check.
-const getCacheKey = (url) => {
-  return url;
-};
 
 // Get local storage value.
 const getCache = () => {
@@ -70,11 +73,16 @@ const getCache = () => {
 };
 
 // Save minimal, but key info to cache.
-const setCache = (key, test, element, type, variables, confidence, textLength) => {
-  if (!State.option.langOfPartsCache) return;
+const setCache = (data) => {
+  // Cache featured turned off.
+  if (!State.option.langOfPartsCache) {
+    Utils.store.removeItem(STORAGE_KEY);
+    return;
+  }
+
   try {
-    const cache = getCache().filter((item) => item.key !== key);
-    cache.push({ key, test, element, type, variables, confidence, textLength });
+    const cache = getCache().filter((item) => item.key !== data.key);
+    cache.push(data);
     while (cache.length > MAX_CACHE_SIZE) cache.shift();
     Utils.store.setItem(STORAGE_KEY, JSON.stringify(cache));
   } catch (e) {
@@ -87,31 +95,43 @@ export default async function checkPageLanguage() {
   if (!State.option.langOfPartsPlugin) return;
   if (!(await getLanguageDetector())) return;
 
-  // Remove storage key if caching is turned off via prop.
-  if (!State.option.langOfPartsCache && Utils.store.getItem(STORAGE_KEY))
-    Utils.store.removeItem(STORAGE_KEY);
-
   // Get the declared page language.
   const declared = Elements.Found.Language;
   if (!declared) return;
 
   // Leverage existing DOM query for readability given it's an expensive check.
-  const pageText = (Elements.Found.pageText || []).join();
+  const pageText = (Elements.Found.pageText || []).join(' ');
   if (pageText.length < 100) {
     console.warn('Sa11y: Not enough content on this page to determine page language.');
     return;
   }
 
   // Generate a unique cache key so we're not running this function frequently.
-  const cacheKey = getCacheKey(window.location.href);
+  const cacheKey = window.location.href;
 
   // The displayed (cached) result.
   const cached = getCache().find((item) => item.key === cacheKey);
-  const isStale = cached && Math.abs(cached.textLength - pageText.length) > 5;
+
+  // Text length or declared page language changed substantially.
+  const langChanged = cached?.declared && cached.declared !== declared;
+  let isStale = cached && (Math.abs(cached.textLength - pageText.length) > 5 || langChanged);
+
+  // User fixed the error by adding 'lang'
+  if (cached && !isStale && cached.element) {
+    const currentElement = find(cached.element, 'root')[0];
+    if (!currentElement) {
+      isStale = true;
+    } else if (currentElement.hasAttribute('lang')) {
+      isStale = true;
+    }
+  }
+
+  // Push cached version to page.
   if (cached && !isStale) {
     if (cached.test) {
       const tip = cached.element ? Lang.sprintf('LANG_TIP') : '';
       const getElement = cached.element ? find(cached.element, 'root')[0] : null;
+      const processVariables = cached.variables.map((variable) => getLanguageLabel(variable));
       State.results.push({
         element: getElement || null,
         test: cached.test,
@@ -119,7 +139,7 @@ export default async function checkPageLanguage() {
         content:
           Lang.sprintf(
             State.option.checks[cached.test].content || [cached.test],
-            ...cached.variables,
+            ...processVariables,
           ) + tip,
         dismiss: Utils.prepareDismissal(cached.test),
         developer: State.option.checks[cached.test].developer ?? false,
@@ -136,10 +156,7 @@ export default async function checkPageLanguage() {
   const detected = await detector.detect(pageText);
 
   // Identify the primary and secondary page languages.
-  const detectedLang = detected[0];
-  const detectedLangCode = detectedLang.detectedLanguage;
-  const declaredPageLang = getLanguageLabel(declared) || declared;
-  const likelyLanguage = getLanguageLabel(detectedLangCode);
+  const detectedLangCode = detected[0].detectedLanguage;
 
   // Cache data.
   let test = null;
@@ -155,28 +172,45 @@ export default async function checkPageLanguage() {
     test = 'PAGE_LANG_CONFIDENCE';
     content = Lang.sprintf(
       State.option.checks.PAGE_LANG_CONFIDENCE.content || 'PAGE_LANG_CONFIDENCE',
-      likelyLanguage,
-      declaredPageLang,
+      getLanguageLabel(detectedLangCode),
+      getLanguageLabel(declared),
     );
     dismiss = Utils.prepareDismissal(cacheKey);
-    type = detectedLang.confidence >= 0.6 ? 'error' : 'warning';
-    confidence = detectedLang.confidence;
-    variables = [likelyLanguage, declaredPageLang];
-    setCache(cacheKey, test, null, type, variables, confidence, pageText.length);
+    type = detected[0].confidence >= 0.6 ? 'error' : 'warning';
+    confidence = detected[0].confidence;
+    variables = [detectedLangCode, declared];
+    setCache({
+      key: cacheKey,
+      test: test,
+      type: type,
+      variables: variables,
+      confidence: confidence,
+      textLength: pageText.length,
+      declared: declared,
+    });
   }
 
   // If declared page language matches most likely language.
   if (primary(detectedLangCode) === primary(declared)) {
     // Pass if we're 90% confident.
     const confidenceTarget = State.option.PAGE_LANG_CONFIDENCE?.confidence || 0.95;
-    if (detectedLang.confidence >= confidenceTarget) {
-      setCache(cacheKey, null, null, null, null, null, pageText.length);
+    if (detected[0].confidence >= confidenceTarget) {
+      setCache({
+        key: cacheKey,
+        textLength: pageText.length,
+        declared: declared,
+      });
       return;
     }
 
     // Otherwise, we're going to iterate through every text node and check the language.
     // Break on the first detection of a node that doesn't match page language.
     for (const node of Elements.Found.Everything) {
+      // Cheap check before running expensive processing.
+      if (node.nodeName !== 'IMG' && (!node.textContent || node.textContent.length < 30)) {
+        continue;
+      }
+
       // Get text of the node, including image alt text.
       let textString = '';
       if (node.nodeName === 'IMG') textString = node.alt || '';
@@ -194,13 +228,12 @@ export default async function checkPageLanguage() {
       // Node data.
       const detectNode = await detector.detect(nodeText);
       const nodeLang = detectNode[0].detectedLanguage;
-      const nodeLangLabel = getLanguageLabel(nodeLang);
-      const nodeConfidence = Math.floor(detectNode[0].confidence * 100);
+      const nodeConfidence = detectNode[0].confidence;
       const langAttribute = node?.getAttribute('lang');
 
       if (nodeLang !== declared && nodeConfidence >= 0.6) {
         // Lang attribute matches detected language of node.
-        if (langAttribute && langAttribute === nodeLang) return;
+        if (langAttribute && primary(langAttribute) === primary(nodeLang)) continue;
 
         // Language tag doesn't match.
         if (langAttribute && langAttribute !== nodeLang) {
@@ -208,10 +241,10 @@ export default async function checkPageLanguage() {
           content =
             Lang.sprintf(
               State.option.checks.LANG_MISMATCH.content || 'LANG_MISMATCH',
-              nodeLangLabel,
+              getLanguageLabel(nodeLang),
               getLanguageLabel(langAttribute),
             ) + Lang.sprintf('LANG_TIP');
-          variables = [nodeLangLabel, getLanguageLabel(langAttribute)];
+          variables = [nodeLang, langAttribute];
         } else if (node.nodeName === 'IMG' && node?.alt?.length !== 0) {
           // Alt text is in different language.
           const alt = Utils.sanitizeHTML(node.alt);
@@ -220,21 +253,21 @@ export default async function checkPageLanguage() {
           content =
             Lang.sprintf(
               State.option.checks.LANG_OF_PARTS_ALT.content || 'LANG_OF_PARTS_ALT',
-              nodeLangLabel,
-              declaredPageLang,
+              getLanguageLabel(nodeLang),
+              getLanguageLabel(declared),
               altText,
             ) + Lang.sprintf('LANG_TIP');
-          variables = [nodeLangLabel, declaredPageLang, altText];
+          variables = [nodeLang, declared, altText];
         } else {
           // Text node is in different language.
           test = 'LANG_OF_PARTS';
           content =
             Lang.sprintf(
               State.option.checks.LANG_OF_PARTS.content || 'LANG_OF_PARTS',
-              declaredPageLang,
-              nodeLangLabel,
+              getLanguageLabel(declared),
+              getLanguageLabel(nodeLang),
             ) + Lang.sprintf('LANG_TIP');
-          variables = [declaredPageLang, nodeLangLabel];
+          variables = [declared, nodeLang];
         }
 
         // Shared data.
@@ -245,22 +278,33 @@ export default async function checkPageLanguage() {
         const selector = Utils.generateSelectorPath(node);
 
         // Break the loop on first match.
-        setCache(cacheKey, test, selector, type, variables, nodeConfidence, pageText.length);
+        setCache({
+          key: cacheKey,
+          test: test,
+          element: selector,
+          type: type,
+          variables: variables,
+          confidence: nodeConfidence,
+          textLength: pageText.length,
+          declared: declared,
+        });
         break;
       }
     }
   }
 
   // Non-cached result.
-  State.results.push({
-    element: element,
-    test: test,
-    type: State.option.checks[test].type || type,
-    content: content,
-    dismiss: dismiss,
-    developer: State.option.checks[test].developer ?? false,
-    cached: false,
-    pageText: pageText.length,
-    confidence: confidence,
-  });
+  if (test) {
+    State.results.push({
+      element: element,
+      test: test,
+      type: State.option.checks[test].type || type,
+      content: content,
+      dismiss: dismiss,
+      developer: State.option.checks[test].developer ?? false,
+      cached: false,
+      pageText: pageText.length,
+      confidence: confidence,
+    });
+  }
 }

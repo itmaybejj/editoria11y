@@ -61,7 +61,6 @@ export const UI = {
   bodyStyle: false,
   disabled: false,
   onLoad: true,
-  open: false,
   showPanel: false,
   showDismissed: false,
   nextText: '',

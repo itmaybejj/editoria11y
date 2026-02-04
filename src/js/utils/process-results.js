@@ -199,6 +199,9 @@ export async function filterAlerts(splitConfiguration) {
   // Review results array to remove dismissed or ignored items
   const results = splitConfiguration ? UI.splitConfiguration.devResults : State.results;
 
+  if (!results.length) {
+    return;
+  }
   for (let i = results.length - 1; i >= 0; i--) {
     let splice = false;
 

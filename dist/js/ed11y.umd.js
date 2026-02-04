@@ -932,18 +932,27 @@
     });
     return tempDiv.innerHTML;
   }
-  function fnIgnore(element, selectors) {
-    let ignoreQuery = "noscript,script,style,audio,video,form,iframe";
-    if (selectors && selectors.length > 0) {
-      ignoreQuery = `${ignoreQuery},${selectors.join(",")}`;
+  function fnIgnore(element, selectors = []) {
+    const baseIgnores = "noscript,script,style,audio,video,form,iframe";
+    const ignoreQuery = selectors.length ? `${baseIgnores},${selectors.join(",")}` : baseIgnores;
+    if (element.matches(ignoreQuery)) return null;
+    function cloneTree(node) {
+      const type = node.nodeType;
+      if (type === Node.ELEMENT_NODE) {
+        if (node.matches(ignoreQuery)) return null;
+        const clone = node.cloneNode(false);
+        let child = node.firstChild;
+        while (child) {
+          const clonedChild = cloneTree(child);
+          if (clonedChild) clone.appendChild(clonedChild);
+          child = child.nextSibling;
+        }
+        return clone;
+      }
+      if (type === Node.TEXT_NODE) return node.cloneNode(true);
+      return null;
     }
-    const clone = element.cloneNode(true);
-    const toRemove = clone.querySelectorAll(ignoreQuery);
-    let i = toRemove.length;
-    while (i--) {
-      toRemove[i].remove();
-    }
-    return clone;
+    return cloneTree(element);
   }
   const gotText = /* @__PURE__ */ new WeakMap();
   function getText(element) {
@@ -1288,7 +1297,6 @@
     bodyStyle: false,
     disabled: false,
     onLoad: true,
-    open: false,
     showPanel: false,
     showDismissed: false,
     nextText: "",
@@ -4919,6 +4927,9 @@ URL: ${url2}</pre>
   }
   async function filterAlerts(splitConfiguration) {
     const results = splitConfiguration ? UI.splitConfiguration.devResults : State.results;
+    if (!results.length) {
+      return;
+    }
     for (let i = results.length - 1; i >= 0; i--) {
       let splice = false;
       if (results[i].test === "READABILITY") {
@@ -5089,7 +5100,6 @@ URL: ${url2}</pre>
     return null;
   }
   function checkReadability() {
-    if (!State.option.readabilityPlugin || store.getItem("sa11y-readability") !== "On") return;
     const computed = computeReadability(Elements.Found.Readability, Constants.Readability.Lang);
     let result;
     if (computed) {
@@ -5232,7 +5242,7 @@ URL: ${url2}</pre>
     }
   }
   const showReadability = () => {
-    checkReadability(State.results);
+    checkReadability();
     for (let i = State.results.length - 1; i >= 0; i--) {
       if (!State.results[i].element) {
         State.results.splice(i, 1);
@@ -5587,7 +5597,12 @@ URL: ${url2}</pre>
   function buildJumpList() {
     UI.jumpList = [];
     pauseObservers();
+    const toSplice = [];
     for (let i = 0; i < State.results.length; i++) {
+      if (!State.results[i].element) {
+        toSplice.push(i);
+        continue;
+      }
       let top = State.results[i].element.getBoundingClientRect().top;
       if (!top) {
         const visibleParent = firstVisibleParent(State.results[i].element);
@@ -5606,6 +5621,9 @@ URL: ${url2}</pre>
       }
       State.results[i].sortPos = top;
     }
+    toSplice.forEach((i) => {
+      State.results.splice(i, 1);
+    });
     State.results.sort((a, b) => b.sortPos - a.sortPos);
     State.results?.forEach((result, i) => {
       if (result.element && (!result.dismissalStatus || UI.showDismissed)) {
@@ -6920,8 +6938,12 @@ URL: ${url2}</pre>
         case "ed11y-visualize":
           if (!UI.showPanel) {
             togglePanel();
+            window.setTimeout(() => {
+              visualize();
+            }, 500);
+          } else {
+            visualize();
           }
-          visualize();
           break;
       }
     }
