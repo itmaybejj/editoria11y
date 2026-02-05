@@ -30,6 +30,8 @@
 
             <p style=""><img style="float: right; width: 50%;" class='click-in-css' src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">An image with no alt text</p>
             <hr style="clear: both;">
+			<p style=""><img style="float: right; width: 50%;" alt="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." class='click-in-css' src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">An image with long alt text</p>
+			<hr style="clear: both;">
             <p style="clear:both;"><img style="float: right; width: 50%;" class='click-in-css' src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">An image with blank alt text</p><hr style="clear: both;">
 
             <h2 id="tables">Tables</h2>
@@ -100,36 +102,9 @@
                 onload = (event) => {
 
                   const ed11y = new Ed11y.Ed11y({
-                    alertMode : 'assertive',
-                    ignoreByKey : {
-                      'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
-                      'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
-                    },
-                    ignoreElements: '.tox-editor-header *, .ed11y-ignore *',
-                    hiddenHandlers : '[hidden]',
-                    inlineAlerts : false,
-			  		lang: Ed11yLangEn.lang,
-                    fixedRoots : Array.from(document.querySelectorAll('#editable-region')),
-                    //linkIgnoreStrings: '\(link is external\)',
-                    //customTests : 2,
-                    //theme: 'darkTheme',
-                    //theme: 'lightTheme',
-                    //theme: 'sleekTheme',
-                    headingsOnlyFromCheckRoots: true,
-					  initialHeadingLevel:
-					  [
-						  {
-							  selector: '#editable-region',
-							  previousHeading: 2,
-						  },
-					  ],
-                    linkIgnoreSelector : '.ignore-class',
-					  contrastPlugin: true,
-					  readabilityPlugin: true,
-					  developerPlugin: true,
-					  embeddedContentPlugin: true,
-					  linksAdvancedPlugin: true,
+
                   });
+				  console.log('hi');
                 };
 
             </script>

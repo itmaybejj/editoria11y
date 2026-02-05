@@ -92,7 +92,7 @@ ed11y-element-result {
 }
 
 :host(ed11y-element-panel.ed11y-element) {
-  z-index: calc(var(--ed11y-buttonZIndex, 9999)  + 9000);
+  z-index: calc(var(--ed11y-buttonZIndex, 9999)  + 10000);
   opacity: 0;
   transition: opacity .25s ease-in;
   position: fixed;
@@ -679,7 +679,7 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 :host(ed11y-element-result.ed11y-element[data-ed11y-open="true"]), ed11y-element-result[data-ed11y-open="true"] {
-  z-index: calc(var(--ed11y-buttonZIndex, 9999)  + 9000) !important;
+  z-index: calc(var(--ed11y-buttonZIndex, 9999)  + 10000) !important;
 }
 
 .ed11y-editable-result {

@@ -32,7 +32,7 @@ export default function checkImages() {
   const placeholderAltSet = new Set(Lang._('PLACEHOLDER_ALT_STOPWORDS'));
 
   // Generate placeholder stop words that are that the START of an alt string.
-  const altPlaceholderPattern = Utils.generateRegexString(State.option.altPlaceholder, true);
+	const altPlaceholderPattern = Utils.generateRegexString(State.option.altPlaceholder, true);
   const linkIgnoreStringPattern = Utils.generateRegexString(State.option.linkIgnoreStrings);
 
   // Generate supplied placeholder stop words.
@@ -212,7 +212,7 @@ export default function checkImages() {
     /* ************** */
     /*  DECORATIVE    */
     /* ************** */
-    const decorative = alt === '';
+    let decorative = alt === '';
 
     // Figure elements.
     const figure = $el.closest('figure');
@@ -224,10 +224,12 @@ export default function checkImages() {
     const maxAltCharacters = State.option.checks.IMAGE_ALT_TOO_LONG.maxLength || 250;
 
     // If alt text starts with a very specific string provided via props.
-    const startsWithSpecificAlt = alt.match(altPlaceholderPattern)?.[0];
+		if (!decorative && State.option.altPlaceholder.length) {
+			decorative = alt.match(altPlaceholderPattern)?.[0];
+		}
 
     // Decorative images.
-    if (decorative || startsWithSpecificAlt) {
+    if (decorative) {
       const carouselSources = State.option.checks.IMAGE_DECORATIVE_CAROUSEL.sources;
       const carousel = carouselSources ? $el.closest(carouselSources) : '';
       if (carousel) {
