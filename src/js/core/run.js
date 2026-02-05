@@ -575,7 +575,11 @@ export function alertOnInvisibleTip(button, target) {
     delay = 333;
     document.dispatchEvent(
       new CustomEvent('ed11yShowHidden', {
-        detail: { result: button.getAttribute('data-ed11y-result') },
+        // heeeere: can we pass via-jump?
+        detail: {
+          result: button.getAttribute('data-ed11y-result'),
+          viaJump: UI.viaJump,
+        },
       }),
     );
   }
