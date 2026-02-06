@@ -102,9 +102,41 @@
                 onload = (event) => {
 
                   const ed11y = new Ed11y.Ed11y({
-
+                    alertMode : 'assertive',
+                    ignoreByKey : {
+                      'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
+                      'a': '[aria-hidden][tabindex]', // disable link text check on properly disabled links
+                    },
+                    ignoreElements: '.tox-editor-header *, .ed11y-ignore *',
+                    hiddenHandlers : '[hidden]',
+                    inlineAlerts : false,
+			  		lang: Ed11yLangEn.lang,
+                    fixedRoots : Array.from(document.querySelectorAll('#editable-region')),
+                    //linkIgnoreStrings: '\(link is external\)',
+                    //customTests : 2,
+                    //theme: 'darkTheme',
+                    //theme: 'lightTheme',
+                    //theme: 'sleekTheme',
+                    headingsOnlyFromCheckRoots: true,
+					  initialHeadingLevel:
+					  [
+						  {
+							  selector: '#editable-region',
+							  previousHeading: 2,
+						  },
+					  ],
+                    linkIgnoreSelector : '.ignore-class',
+					  contrastPlugin: true,
+					  readabilityPlugin: true,
+					  developerPlugin: true,
+					  embeddedContentPlugin: true,
+					  linksAdvancedPlugin: true,
                   });
-				  console.log('hi');
+
+					document.addEventListener('ed11yPop', function(e) {
+						console.log('Event dispatched: ed11yPop for #' + e.detail.id);
+						console.log(e.detail);
+					}, false);
                 };
 
             </script>

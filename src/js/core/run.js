@@ -575,7 +575,6 @@ export function alertOnInvisibleTip(button, target) {
     delay = 333;
     document.dispatchEvent(
       new CustomEvent('ed11yShowHidden', {
-        // heeeere: can we pass via-jump?
         detail: {
           result: button.getAttribute('data-ed11y-result'),
           viaJump: UI.viaJump,
@@ -1409,7 +1408,7 @@ export async function continueCheck(customCheck = false) {
   }
 
   // Filter split configuration results.
-  if (UI.splitConfiguration.active && UI.splitConfiguration.devResults.length > 0) {
+  if (UI.splitConfiguration.active && State.results.length > 0) {
     await handleSyncOnlyResults();
   } else {
     await filterAlerts(false);

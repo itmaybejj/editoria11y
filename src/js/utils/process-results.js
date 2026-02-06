@@ -47,7 +47,8 @@ const pushResult = async (i, inContent) => {
 };
 
 export async function handleSyncOnlyResults() {
-  UI.splitConfiguration.devResults = State.results;
+  UI.splitConfiguration.devResults.length = 0;
+  UI.splitConfiguration.devResults = Array.from(State.results);
   State.results.length = 0;
   await filterAlerts(true).then();
 

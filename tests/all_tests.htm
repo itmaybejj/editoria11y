@@ -393,7 +393,7 @@
 				  showDev: true,
 				  devChecks: ['QA_IN_PAGE_LINK'],
 				  devOptions: {
-					  //checkRoot: 'footer',
+					  checkRoot: 'body',
 					  // containerIgnore: '',
 					  // contrastIgnore: '.sr-only',
 					  // outlineIgnore: '',
@@ -418,7 +418,7 @@
             ignoreElements : 'footer *, [style*="none"] *, [style*="none"]',
             // shadowComponents : 'shadow-test, shadow-test-no-hits, turtle',
             autoDetectShadowComponents: true,
-		  	checkRoot: 'body',
+		  	checkRoot: 'main',
 			  editLinks: editLinks,
             //showDismissed : true,
             altPlaceholder: ['This image has an empty alt attribute;'], // @todo CMS was string.

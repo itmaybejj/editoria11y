@@ -251,6 +251,8 @@ const defaultOptions = {
     QA_SMALL_TEXT: true,
     // Meta checks
     META_LANG: true,
+    META_LANG_VALID: true,
+    META_LANG_SUGGEST: true,
     META_SCALABLE: true,
     META_MAX: true,
     META_REFRESH: true,
@@ -495,6 +497,7 @@ const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
   return computedText;
 };
 function removeAlert() {
+  if (State.option.headless) return;
   const Sa11yPanel = document.querySelector("sa11y-control-panel").shadowRoot;
   const alert = Sa11yPanel.getElementById("panel-alert");
   const alertText = Sa11yPanel.getElementById("panel-alert-text");
@@ -509,6 +512,7 @@ function removeAlert() {
   }
 }
 function createAlert(alertMessage, errorPreview, extendedPreview) {
+  if (State.option.headless) return;
   removeAlert();
   const Sa11yPanel = document.querySelector("sa11y-control-panel").shadowRoot;
   const alert = Sa11yPanel.getElementById("panel-alert");
@@ -700,7 +704,6 @@ const Constants = /* @__PURE__ */ (function myConstants() {
   const Readability = {};
   function initializeReadability() {
     if (State.option.readabilityPlugin) {
-      Readability.Lang = Lang._("LANG_CODE").substring(0, 2);
       const supported = [
         "en",
         "fr",
@@ -716,17 +719,11 @@ const Constants = /* @__PURE__ */ (function myConstants() {
         "nn",
         "pt"
       ];
-      const pageLang = Constants.Global.html.getAttribute("lang");
-      if (!pageLang) {
-        Readability.Plugin = false;
-      } else {
-        const pageLangLowerCase = pageLang.toLowerCase().substring(0, 2);
-        if (!supported.includes(pageLangLowerCase) || !supported.includes(Readability.Lang)) {
-          Readability.Plugin = false;
-        } else {
-          Readability.Plugin = true;
-        }
-      }
+      const langCode = Lang._("LANG_CODE").substring(0, 2);
+      const pageLang = Constants.Global.html.getAttribute("lang")?.toLowerCase().substring(0, 2);
+      Readability.Lang = langCode;
+      const isSupported = pageLang && supported.includes(pageLang) && supported.includes(langCode);
+      Readability.Plugin = Boolean(isSupported);
     }
   }
   const Exclusions = {};
@@ -931,12 +928,19 @@ function sanitizeHTMLBlock(html, allowStyles = false) {
 function fnIgnore(element, selectors = []) {
   const baseIgnores = "noscript,script,style,audio,video,form,iframe";
   const ignoreQuery = selectors.length ? `${baseIgnores},${selectors.join(",")}` : baseIgnores;
-  if (element.matches(ignoreQuery)) return null;
-  function cloneTree(node) {
+  if (!element || element.nodeType !== Node.ELEMENT_NODE) {
+    return element ? element.cloneNode(true) : null;
+  }
+  function cloneTree(node, isRoot = false) {
     const type = node.nodeType;
     if (type === Node.ELEMENT_NODE) {
-      if (node.matches(ignoreQuery)) return null;
+      if (node.matches(ignoreQuery) && !isRoot) {
+        return null;
+      }
       const clone = node.cloneNode(false);
+      if (node.matches(ignoreQuery) && isRoot) {
+        return clone;
+      }
       let child = node.firstChild;
       while (child) {
         const clonedChild = cloneTree(child);
@@ -948,7 +952,7 @@ function fnIgnore(element, selectors = []) {
     if (type === Node.TEXT_NODE) return node.cloneNode(true);
     return null;
   }
-  return cloneTree(element);
+  return cloneTree(element, true);
 }
 const gotText = /* @__PURE__ */ new WeakMap();
 function getText(element) {
@@ -1080,6 +1084,30 @@ async function dismissDigest(pepper, message) {
   }
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+let langCache;
+function validateLang(code, displayLangCode) {
+  if (typeof code !== "string") return { valid: false };
+  const norm = code.trim().replace(/_/g, "-");
+  if (!langCache && typeof Intl !== "undefined") {
+    try {
+      langCache = new Intl.DisplayNames([displayLangCode], { type: "language", fallback: "none" });
+    } catch {
+    }
+  }
+  if (langCache) {
+    const check = (val) => {
+      try {
+        return langCache.of(val);
+      } catch {
+        return false;
+      }
+    };
+    if (check(code)) return { valid: true };
+    if (check(norm)) return { valid: false, suggest: norm };
+    return { valid: false };
+  }
+  return { valid: /^[a-z]{2,3}(-[a-z]{4})?(-[a-z]{2,4})?$/i.test(norm) };
 }
 const Elements = /* @__PURE__ */ (function myElements() {
   const Found = {};
@@ -4116,15 +4144,27 @@ function checkContrast() {
   });
 }
 function checkDeveloper() {
-  if (State.option.checks.META_LANG) {
-    if (!Elements.Found.Language || Elements.Found.Language.length < 2) {
-      State.results.push({
-        test: "META_LANG",
-        type: State.option.checks.META_LANG.type || "error",
-        content: Lang.sprintf(State.option.checks.META_LANG.content || "META_LANG"),
-        dismiss: prepareDismissal("META_LANG"),
-        developer: State.option.checks.META_LANG.developer || true
-      });
+  const report = (key, ...args) => {
+    const rule = State.option.checks[key];
+    if (!rule) return;
+    State.results.push({
+      test: key,
+      type: rule.type || "error",
+      content: Lang.sprintf(rule.content || key, ...args),
+      dismiss: prepareDismissal(key),
+      developer: rule.developer || true
+    });
+  };
+  if (!Elements.Found.Language) {
+    report("META_LANG");
+  } else {
+    const { valid, suggest } = validateLang(Elements.Found.Language, Lang._("LANG_CODE"));
+    if (!valid) {
+      if (suggest) {
+        report("META_LANG_SUGGEST", Elements.Found.Language, suggest);
+      } else {
+        report("META_LANG_VALID", Elements.Found.Language);
+      }
     }
   }
   if (State.option.checks.META_TITLE) {
@@ -4804,7 +4844,8 @@ const pushResult = async (i, inContent) => {
   }
 };
 async function handleSyncOnlyResults() {
-  UI.splitConfiguration.devResults = State.results;
+  UI.splitConfiguration.devResults.length = 0;
+  UI.splitConfiguration.devResults = Array.from(State.results);
   State.results.length = 0;
   await filterAlerts(true).then();
   Object.assign(State.option, UI.splitConfiguration.contentOptions);
@@ -5786,7 +5827,6 @@ function alertOnInvisibleTip(button, target) {
     delay = 333;
     document.dispatchEvent(
       new CustomEvent("ed11yShowHidden", {
-        // heeeere: can we pass via-jump?
         detail: {
           result: button.getAttribute("data-ed11y-result"),
           viaJump: UI.viaJump
@@ -6457,7 +6497,7 @@ async function continueCheck(customCheck = false) {
   if (UI.customTestsRemaining + UI.testsRemaining > 0) {
     return;
   }
-  if (UI.splitConfiguration.active && UI.splitConfiguration.devResults.length > 0) {
+  if (UI.splitConfiguration.active && State.results.length > 0) {
     await handleSyncOnlyResults();
   } else {
     await filterAlerts(false);
@@ -7740,6 +7780,8 @@ const Sa11yStrings = {
     META_MAX: 'Ensure the <code>maximum-scale</code> parameter in the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">viewport meta tag</a> is not less than 2.',
     META_LANG: 'Page language not declared! Please <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare language on the HTML tag.</a>',
     META_REFRESH: "Page should not automatically refresh using a meta tag.",
+    META_LANG_SUGGEST: "The following language code <code>%(CODE)</code> is not valid. Did you mean <code>%(CODE)</code>?",
+    META_LANG_VALID: 'The page language code <code>%(CODE)</code> is not valid. Please <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare a valid language on the HTML tag.</a>',
     // Buttons
     BTN_EMPTY: "Button is missing an accessible name that describes its purpose.",
     BTN_EMPTY_LABELLEDBY: "Button has an <code>aria-labelledby</code> value that is empty or does not match the <code>id</code> value of another element on the page.",
@@ -7938,7 +7980,8 @@ const tips = {
   LINK_STOPWORD: `<p>This link contains text that does not help uniquely describe a destination:<br><strong>%(text)</strong></p><p>${why.fix}Rewrite this link to concisely describe its destination or purpose.</p>${why.links}`,
   LINK_STOPWORD_ARIA: `<p>An accessible name was provided using ARIA, but the visible and searchable link text is generic: &quot;<strong {C}>%(ERROR)</strong>&quot;.</p><p>${why.fix}Write meaningful links for everyone, not just screen reader users, and make sure each element's visual <a href="https://www.w3.org/WAI/WCAG22/Understanding/label-in-name.html">label matches its accessible name</a>.</p>${why.links}`,
   LINK_SUS_ALT: `<p>This image's alt text includes the word "%(alt)," which usually mean it is not describing the link destination.</p><strong class="badge">Alt text</strong> "%(ALT_TEXT)"	<p>To fix: make sure this alt is the link's destination or purpose. <br></strong></p>${why.imageLinks}`,
-  LINK_SYMBOLS: `${why.fix}Avoid using symbols as calls to action within link text unless they are hidden from assistive technologies. Screen readers may read the symbols out loud, which can be confusing. Consider removing: <strong {C}>%(ERROR)</strong>`,
+  LINK_SYMBOLS: `<p>Symbol found: <strong {C}>%(ERROR)</strong></p>${why.fix}Avoid using symbols as calls to action within link text unless they are hidden from assistive technologies. Screen readers may read the symbols out loud, which can be confusing.</p>`,
+  // Updated
   LINK_URL: `<p>${why.fix}Change this link to the title of its destination or purpose.</p><div class="why"><p>Readers skim for links by name. This is especially true of screen reader users, who navigate and search using a list of on-page links.</p><p>Linked URLs cannot be skimmed or found by in-page searches, so people are less likely to find them and less likely to click them.</p></div>`,
   META_LANG: `<p>${why.fix}Add a <a href="https://www.w3.org/International/questions/qa-html-language-declarations">language attribute on the page HTML tag</a>.</p><div class="why"><p>Tip: screen readers pronounce words using language tags. Pronouncing a language with the wrong language pack produces unintelligible speech. If your language is not tagged, the screen reader will either use the browser's default language or try to guess, with unpredictable results.</p></div>`,
   META_REFRESH: `<p>Pages should not automatically refresh using a meta tag. This interrupts the user without warning or the ability to prevent refresh, makes them lose their place while reading, and can reset form progress.</p><p>${why.fix}To refresh content on the same page, use AJAX to refresh sections in place without a reload, or use JavaScript to trigger the reload, so the user can be warned first and have the option to delay the event.</p>`,
