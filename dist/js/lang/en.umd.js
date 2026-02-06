@@ -399,12 +399,14 @@
   const why = {
     fix: `<strong class="badge">To fix</strong> `,
     check: `<strong class="badge">Manual check</strong> `,
-    buttons: `<div class="why"><p>Tip: the accessible name for a button should make it clear what it will do. Buttons that change on click should change their name as well:</p><ul><li>Changing labels:<br>"Play/Pause," "Show details/Hide details"</li><li>Changing <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">state attributes</a>:<br>"Play/Play, pressed," "Details, collapsed/Details, expanded."</li></ul> // Updated
+    buttons: `<div class="why"><p>Tip: the accessible name for a button should make it clear what it will do. Buttons that change on click should change their name as well:</p><ul><li>Changing labels:<br>"Play/Pause," "Show details/Hide details"</li><li>Changing <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">state attributes</a>:<br>"Play/Play, pressed," "Details, collapsed/Details, expanded."</li></ul>
 	<p>Just don't change both at once. Changing "Play" to "Pause, pressed" means the player is paused, not playing!</p></div>`,
+    // Updated
     headings: `<div class="why"><p>Tip: headings and subheadings organize content into a nested outline. Screen reader users rely on this outline to understand and explore pages:</p><ul><li>Heading level 1: page titles<ul><li>Heading level 2: major topics<ul><li>Heading level 3: subtopics</li></ul></li></ul></li></ul></div>`,
     images: `<div class="why"><p>Tip: describe what an image means, not just what it contains, when writing an alt. Depending on context, a photo of a child kicking a ball might mean:</p><ul><li>They played in the pouring rain.</li><li>The new team uniforms have cool dragon logos.</li><li>She kicked the game-winning goal from the left sideline!</li></ul></div>`,
-    links: `<div class="why"><p>Tip: readers skim by links and use in-page search to find links by name, so effective links are meaningful, unique and concise:</p><ul><li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text">meaningful links</a>"</strong></li><li>Not unique: "Click <a href="https://webaim.org/techniques/hypertext/link_text">here</a> to learn about meaningful links."</li> // Updated
+    links: `<div class="why"><p>Tip: readers skim by links and use in-page search to find links by name, so effective links are meaningful, unique and concise:</p><ul><li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text">meaningful links</a>"</strong></li><li>Not unique: "Click <a href="https://webaim.org/techniques/hypertext/link_text">here</a> to learn about meaningful links."</li>
 	<li>Not concise: "<a href="https://webaim.org/techniques/hypertext/link_text">Click here to learn more about meaningful links</a>"</li></ul></div>`,
+    // Updated
     imageLinks: `<div class="why"><p>Tip: the purpose of alt text is to provide an alternative for what an image means, not what it contains. The meaning of a linked image is the link destination:<ul><li>"<em>A magnifying glass</em>" describes an image, not a link.</li><li>"<em>A magnifying glass search</em>" confusingly describes both.</li><li>"<em>Search</em>" describes the link destination accurately.</li></ul></p></div>`
     // Updated.
   };
@@ -513,10 +515,12 @@
     OUTLINE: "Headings",
     PANEL_DISMISS_BUTTON: `Show %(dismissCount) hidden alerts`,
     PANEL_HEADING: "Show visualizers",
-    SKIP_TO_ISSUE: "Go to issue",
+    SKIP_TO_ISSUE: "Show alert",
+    // updated
     WARNING: "manual check needed",
     WARNINGS: "manual checks needed",
-    buttonFirstContent: "Go to first alert",
+    buttonFirstContent: "Show first alert",
+    // updated
     buttonHideHiddenAlert: "Hide hidden alert",
     buttonHideHiddenAlerts: `Hide %(count) hidden alerts`,
     buttonShowHiddenAlert: "Show hidden alert",

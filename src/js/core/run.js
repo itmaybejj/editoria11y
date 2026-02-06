@@ -161,9 +161,7 @@ export function updatePanel() {
         Lang._('panelCheckOutline');
       UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML =
         Lang._('panelCheckAltText');
-      UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = UI.english
-        ? Lang._('buttonFirstContent')
-        : `${Lang._('SKIP_TO_ISSUE')} 1`;
+      UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = Lang._('buttonFirstContent');
       UI.panel.setAttribute('aria-label', Lang._('CONTAINER_LABEL'));
 
       if (State.option.reportsURL) {
@@ -673,11 +671,11 @@ export function jumpTo(next = true) {
   let goNum = next ? +UI.openJumpPosition + 1 : +UI.openJumpPosition - 1;
   if (goNum < 0) {
     // Reached end of loop or dismissal pushed us out of loop
-    UI.nextText = Lang._('SKIP_TO_ISSUE');
     goNum = goMax;
-  } else if (goNum > goMax) {
+    UI.nextText = `${Lang._('SKIP_TO_ISSUE')} 1`;
+  } else if (goNum >= goMax) {
     goNum = 0;
-    UI.nextText = Lang._('SKIP_TO_ISSUE');
+    UI.nextText = `${Lang._('SKIP_TO_ISSUE')} ${goNum + 1}`;
   } else {
     const showNum = Number.isNaN(goNum) ? 2 : goNum + 2;
     UI.nextText = `${Lang._('SKIP_TO_ISSUE')} ${showNum}`;
@@ -1598,11 +1596,12 @@ export function togglePanel() {
         UI.incremental = false;
         UI.showPanel = true;
         if (UI.dismissedCount > 0 && UI.warningCount === 0 && UI.errorCount === 0) {
-          UI.showDismissed = false;
-          toggleShowDismissals();
-        } else {
-          checkAll();
+          UI.ignoreAll = false;
+          UI.showDismissed = true;
+          UI.panelShowDismissed.setAttribute('data-ed11y-pressed', `${UI.showDismissed}`);
         }
+        checkAll();
+
         State.option.userPrefersShut = false;
         localStorage.setItem('editoria11yShow', '1');
       } else {
