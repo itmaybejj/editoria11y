@@ -911,7 +911,8 @@ button.ed11y-jump:hover .toggle-count {
 
 .ed11y-tip-wrapper .why:before {
   content: "";
-  border-top: 1px solid #0005;
+  border-top: 1px solid var(--ed11y-text);
+  opacity: .45;
   margin-top: 1.25em;
   padding-top: .5em;
   display: block;

@@ -1070,11 +1070,12 @@ ed11y-element-result[data-ed11y-open="true"] {
 		}
 	}
 	.why::before {
-		border-top: 1px solid #0005;
-		display: block;
 		content: "";
-		padding-top: 0.5em;
+		border-top: 1px solid var(--ed11y-text);
 		margin-top: 1.25em;
+		padding-top: 0.5em;
+		display: block;
+		opacity: 0.45;
 	}
 
 	.footer {
