@@ -673,11 +673,14 @@ export function jumpTo(next = true) {
     // Reached end of loop or dismissal pushed us out of loop
     goNum = goMax;
     UI.nextText = `${Lang._('SKIP_TO_ISSUE')} 1`;
-  } else if (goNum >= goMax) {
+  } else if (goNum > goMax) {
     goNum = 0;
     UI.nextText = `${Lang._('SKIP_TO_ISSUE')} ${goNum + 1}`;
   } else {
-    const showNum = Number.isNaN(goNum) ? 2 : goNum + 2;
+    let showNum = Number.isNaN(goNum) ? 2 : goNum + 2;
+    if (showNum > goMax + 1) {
+      showNum = 1;
+    }
     UI.nextText = `${Lang._('SKIP_TO_ISSUE')} ${showNum}`;
   }
   UI.openJumpPosition = goNum;
@@ -1536,8 +1539,11 @@ export function dismissThis(dismissalType, button) {
 
   if (button.dataset.ed11yAll === 'true') {
     State.results.forEach((result) => {
-      if (result.test === test && result.dismissalStatus !== dismissalType) {
-        dismissOne(dismissalType, test, dismissKey);
+      if (
+        result.test === test &&
+        (!result.dismissalStatus || result.dismissalStatus !== dismissalType)
+      ) {
+        dismissOne(dismissalType, test, result.dismiss);
       }
     });
   } else {

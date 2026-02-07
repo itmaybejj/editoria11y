@@ -5920,11 +5920,14 @@ URL: ${url2}</pre>
     if (goNum < 0) {
       goNum = goMax;
       UI.nextText = `${Lang._("SKIP_TO_ISSUE")} 1`;
-    } else if (goNum >= goMax) {
+    } else if (goNum > goMax) {
       goNum = 0;
       UI.nextText = `${Lang._("SKIP_TO_ISSUE")} ${goNum + 1}`;
     } else {
-      const showNum = Number.isNaN(goNum) ? 2 : goNum + 2;
+      let showNum = Number.isNaN(goNum) ? 2 : goNum + 2;
+      if (showNum > goMax + 1) {
+        showNum = 1;
+      }
       UI.nextText = `${Lang._("SKIP_TO_ISSUE")} ${showNum}`;
     }
     UI.openJumpPosition = goNum;
@@ -6608,8 +6611,8 @@ URL: ${url2}</pre>
     const dismissKey = tip.dataset.ed11yDismiss;
     if (button.dataset.ed11yAll === "true") {
       State.results.forEach((result) => {
-        if (result.test === test && result.dismissalStatus !== dismissalType) {
-          dismissOne(dismissalType, test, dismissKey);
+        if (result.test === test && (!result.dismissalStatus || result.dismissalStatus !== dismissalType)) {
+          dismissOne(dismissalType, test, result.dismiss);
         }
       });
     } else {
@@ -7998,7 +8001,8 @@ URL: ${url2}</pre>
     MISSING_ALT_LINK_HAS_TEXT: `<p>This image is part of a link with text. If the visible text is sufficient to describe the link, add an empty alt (alt="") to tell screen readers to ignore this image. Otherwise, add an alt that describes the link's destination or purpose.</p>${why.imageLinks}`,
     QA_BAD_LINK: `<p>Link appears to point to a development environment:<br>{L} <strong {C}>%(LINK)</strong></p><p>${why.fix}Change this to point a relative path (/folder) or the public URL.</p>`,
     QA_BLOCKQUOTE: `<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. Short blockquotes are often actually headings.</p><p>${why.fix}If this is a heading and not a quotation, use heading formatting instead, so it appears in the page outline.</p>${why.headings}`,
-    QA_DOCUMENT: `<p>Linked documents are considered web content and must be made accessible as well. Check that this document has tagged its headings, table headers and image alt text, then dismiss this alert.</p><ul class="why"><li>Make your <a href="https://support.google.com/docs/answer/6199477?hl=en">Google Workspace document or presentation more accessible.</a></li><li>Make your <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Office documents more accessible.</a></li></ul>`,
+    QA_DOCUMENT: `<p>Linked documents are considered web content and must be made accessible as well. Check that this document has tagged its headings, table headers and image alt text, then dismiss this alert.</p><div class="why"><ul><li>Make your <a href="https://support.google.com/docs/answer/6199477?hl=en">Google Workspace document or presentation more accessible.</a></li><li>Make your <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Office documents more accessible.</a></li></ul></div>`,
+    // updated
     QA_FAKE_HEADING: `<p>${why.fix}If this all-bold line of text introduces a topic, replace the visual-only bold formatting with a heading style.</p><div class="why"> <p>Tip: headings and subheadings create a navigable table of contents for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p><ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li></ul></li></ul> </div>`,
     QA_FAKE_LIST: `<p>${why.fix}If this "%(text)" is part of a list, replace it with list formatting.</p><div class="why"><p>List formatting is structural, both visually and navigationally:</p> <ol><li>Lists align their indents for easy reading.</li> <li>Lists are machine-readable. Screen readers orient their users by regularly announcing their position in the list ("item 3 of 7").</li></ol> <p>&nbsp;&nbsp;&nbsp;3. But a sentence with a number in front of it like this does not indent its second line on overflow, and is not included in the count of items for screen reader users.</p></div> `,
     QA_IN_PAGE_LINK: `<p>The link target does not match any elements on this page.</p><div class="why"><p>Note for developers: if this not a normal link, and the link target is a placeholder for a JavaScript event, make sure to test that it works when clicked with a keyboard before adding this to the checker ignore list.</p></div>`,
