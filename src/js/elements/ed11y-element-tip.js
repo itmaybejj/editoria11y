@@ -50,6 +50,7 @@ export class Ed11yElementTip extends HTMLElement {
 				</div>
 			</div>
 			<div class="footer">
+				<div class="error-badge">${this.dismissable ? Lang._('WARNING') : Lang._('ERROR')}</div>
 				<div class="ed11y-tip-dismissals">
 					<details class="ed11y-bulk-actions dismiss ed11y-hidden"><summary></summary><div class="ed11y-bulk-actions-content"></div></details>
 				</div>

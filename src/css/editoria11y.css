@@ -1083,9 +1083,9 @@ ed11y-element-result[data-ed11y-open="true"] {
 		clear: both;
 		color: var(--ed11y-primaryText, #fffdf7);
 		background: var(--ed11y-primary, #276499);
-		grid-template-columns: 1fr repeat(3, min-content);
+		grid-template-columns: min-content 1fr repeat(3, min-content);
 		grid-template-rows: 2.124em;
-		grid-template-areas: "buttons previous next focus";
+		grid-template-areas: "badge buttons previous next focus";
 
 		svg {
 			width: 12px;
@@ -1384,11 +1384,31 @@ ed11y-element-result[data-ed11y-open="true"] {
 		flex-wrap: wrap;
 		justify-content: end;
 	}
+
+	.error-badge {
+		grid-area: badge;
+		display: inline-flex;
+		width: max-content;
+		align-items: center;
+		height: 100%;
+		padding: 0 11px;
+		line-height: 1;
+		font-size: 14px;
+		opacity: 0.9;
+	}
 }
 
 .ed11y-dismiss-icon {
 	width: 0.9em;
 	margin-bottom: -0.1em;
+}
+
+@media screen and (max-width: 50rem) {
+	.ed11y-tip-wrapper {
+		.error-badge {
+			display: none;
+		}
+	}
 }
 
 /* Heading level visualizer ============= */

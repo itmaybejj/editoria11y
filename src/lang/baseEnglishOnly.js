@@ -18,12 +18,15 @@ export const englishOverrides = {
     'todo',
     'copyright',
     'courtesy of',
-  ], // todo Ed11y test use to catch these at the end as well as the beginning.
+		'alt text',
+  ],
+	// todo Ed11y test use to catch these at the end as well as the beginning.
+	extraPlaceholderStopWords: 'placeholder, alt text, add alt text, tbd, please add, todo, to do, please insert', // updated
+	// @todo: photo by, photograph by, courtesy of as separate test.
 
   // Strings used in tests ==============================
 
-  // @todo after merge Add courtesy of, copyright, and photo by to Sa11y.
-  // suspiciousWords: ['image of','graphic of','picture of','photo of','photograph of','placeholder','spacer','tbd','todo', 'copyright', 'courtesy of', 'photo by'],
+  // @todo after merge: discuss:
   // badEndingForAlt: ['photo', 'image', 'photograph', 'picture'],
   // @todo after merge Compare Sa11y test.
   //linksUrls: ['http:/', 'https:/', '.asp', '.htm', '.php', '.edu/', '.com/'],

@@ -923,8 +923,8 @@ button.ed11y-jump:hover .toggle-count {
   color: var(--ed11y-primaryText, #fffdf7);
   background: var(--ed11y-primary, #276499);
   grid-template-rows: 2.124em;
-  grid-template-columns: 1fr repeat(3, min-content);
-  grid-template-areas: "buttons previous next focus";
+  grid-template-columns: min-content 1fr repeat(3, min-content);
+  grid-template-areas: "badge buttons previous next focus";
   display: grid;
 }
 
@@ -1233,9 +1233,27 @@ button.ed11y-jump:hover .toggle-count {
   display: flex;
 }
 
+.ed11y-tip-wrapper .error-badge {
+  opacity: .9;
+  grid-area: badge;
+  align-items: center;
+  width: max-content;
+  height: 100%;
+  padding: 0 11px;
+  font-size: 14px;
+  line-height: 1;
+  display: inline-flex;
+}
+
 .ed11y-dismiss-icon {
   width: .9em;
   margin-bottom: -.1em;
+}
+
+@media screen and (width <= 50rem) {
+  .ed11y-tip-wrapper .error-badge {
+    display: none;
+  }
 }
 
 :host(ed11y-element-heading-label.ed11y-element) {

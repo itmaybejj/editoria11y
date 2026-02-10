@@ -72,7 +72,6 @@ const defaultOptions = {
   externalDeveloperChecks: false,
   colourFilterPlugin: true,
   exportResultsPlugin: false,
-  langOfPartsPlugin: false,
 
   // Options for accName computation: Ignore ARIA on these elements.
   ignoreAriaOnElements: false, // e.g. 'h1,h2,h3,h4,h5,h6'
@@ -85,6 +84,9 @@ const defaultOptions = {
   extraPlaceholderStopWords: '',
   imageWithinLightbox: '',
   initialHeadingLevel: [],
+
+  // Shared properties for page language detection
+  langOfPartsPlugin: false,
   langOfPartsCache: true,
 
   // All checks
@@ -214,8 +216,12 @@ const defaultOptions = {
     QA_NESTED_COMPONENTS: {
       sources: '',
     },
-    QA_JUSTIFY: true,
-    QA_SMALL_TEXT: true,
+    QA_JUSTIFY: {
+      dismissAll: true,
+    },
+    QA_SMALL_TEXT: {
+      dismissAll: true,
+    },
 
     // Meta checks
     META_LANG: true,

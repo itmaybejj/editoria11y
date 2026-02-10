@@ -94,17 +94,20 @@ export default async function checkPageLanguage() {
   // Hard return if neither page language checks are enabled or if feature not supported.
   if (!State.option.langOfPartsPlugin) return;
   if (!(await getLanguageDetector())) return;
+  if (!State.option.langOfPartsCache) Utils.store.removeItem(STORAGE_KEY);
 
-  // Get the declared page language.
-  const declared = Elements.Found.Language;
-  if (!declared) return;
+  // Check validity of declared page language.
+  const isDeclaredValid = Elements.Found.Language
+    ? Utils.validateLang(Elements.Found.Language)
+    : null;
+  if (!isDeclaredValid) return;
 
-  // Leverage existing DOM query for readability given it's an expensive check.
+  // Get primary lang code.
+  const declared = primary(Elements.Found.Language);
+
+  // Only run analysis on page if more than 100 characters.
   const pageText = (Elements.Found.pageText || []).join(' ');
-  if (pageText.length < 100) {
-    console.warn('Sa11y: Not enough content on this page to determine page language.');
-    return;
-  }
+  if (pageText.length < 100) return;
 
   // Generate a unique cache key so we're not running this function frequently.
   const cacheKey = window.location.href;
@@ -156,7 +159,7 @@ export default async function checkPageLanguage() {
   const detected = await detector.detect(pageText);
 
   // Identify the primary and secondary page languages.
-  const detectedLangCode = detected[0].detectedLanguage;
+  const detectedLangCode = primary(detected[0].detectedLanguage);
 
   // Cache data.
   let test = null;
@@ -168,7 +171,7 @@ export default async function checkPageLanguage() {
   let variables = null;
 
   // Declared page language doesn't match the detected content.
-  if (primary(detectedLangCode) !== primary(declared)) {
+  if (detectedLangCode !== declared) {
     test = 'PAGE_LANG_CONFIDENCE';
     content = Lang.sprintf(
       State.option.checks.PAGE_LANG_CONFIDENCE.content || 'PAGE_LANG_CONFIDENCE',
@@ -191,7 +194,7 @@ export default async function checkPageLanguage() {
   }
 
   // If declared page language matches most likely language.
-  if (primary(detectedLangCode) === primary(declared)) {
+  if (detectedLangCode === declared) {
     // Pass if we're 90% confident.
     const confidenceTarget = State.option.PAGE_LANG_CONFIDENCE?.confidence || 0.95;
     if (detected[0].confidence >= confidenceTarget) {
@@ -199,6 +202,7 @@ export default async function checkPageLanguage() {
         key: cacheKey,
         textLength: pageText.length,
         declared: declared,
+        confidence: detected[0].confidence,
       });
       return;
     }
@@ -227,13 +231,13 @@ export default async function checkPageLanguage() {
 
       // Node data.
       const detectNode = await detector.detect(nodeText);
-      const nodeLang = detectNode[0].detectedLanguage;
+      const nodeLang = primary(detectNode[0].detectedLanguage);
       const nodeConfidence = detectNode[0].confidence;
-      const langAttribute = node?.getAttribute('lang');
+      const langAttribute = node?.getAttribute('lang') ? primary(node.getAttribute('lang')) : null;
 
       if (nodeLang !== declared && nodeConfidence >= 0.6) {
-        // Lang attribute matches detected language of node.
-        if (langAttribute && primary(langAttribute) === primary(nodeLang)) continue;
+        // Node or lang attribute matches detected language of node.
+        if (nodeLang === declared || langAttribute === nodeLang) continue;
 
         // Language tag doesn't match.
         if (langAttribute && langAttribute !== nodeLang) {
@@ -248,7 +252,7 @@ export default async function checkPageLanguage() {
         } else if (node.nodeName === 'IMG' && node?.alt?.length !== 0) {
           // Alt text is in different language.
           const alt = Utils.sanitizeHTML(node.alt);
-          const altText = Utils.removeWhitespace(alt);
+          const altText = Utils.truncateString(alt, 600);
           test = 'LANG_OF_PARTS_ALT';
           content =
             Lang.sprintf(
@@ -288,7 +292,6 @@ export default async function checkPageLanguage() {
           textLength: pageText.length,
           declared: declared,
         });
-        break;
       }
     }
   }

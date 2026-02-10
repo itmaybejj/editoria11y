@@ -27,6 +27,14 @@ const preProcessOptions = async (userOptions) => {
       `<div class="title" tabindex="-1">${Lang.testNames[`${titles[i][0]}`]}</div>${Lang.langStrings[titles[i][0]]}`;
   }
 
+  UI.english = Lang.langStrings.LANG_CODE.startsWith('en');
+
+  if (UI.english) {
+    State.option.extraPlaceholderStopWords = userOptions.extraPlaceholderStopWords
+      ? userOptions.extraPlaceholderStopWords.Lang.langStrings.extraPlaceholderStopWords
+      : Lang.langStrings.extraPlaceholderStopWords;
+  }
+
   if (State.option.fixedRoots) {
     State.option.checkRoot = State.option.fixedRoots;
   } else if (!State.option.checkRoot) {
@@ -128,8 +136,6 @@ const postProcessOptions = (userOptions) => {
 
   Constants.Panel.readabilityInfo = document.createElement('div');
   Constants.Panel.readabilityDetails = document.createElement('div');
-
-  UI.english = Lang.langStrings.LANG_CODE.startsWith('en');
 
   Object.assign(UI.theme, State.option[State.option.theme]);
   UI.theme.baseFontSize = State.option.baseFontSize;
