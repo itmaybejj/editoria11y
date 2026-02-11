@@ -19,6 +19,7 @@ export const ed11yDefaultOptions = {
     'img[role="presentation"], ' +
     'a[href][aria-label] img, button[aria-label] img, ' +
     'a[href][aria-labelledby] img, button[aria-labelledby] img',
+  ignoreByTest: {},
   linkIgnore: '[aria-hidden][tabindex="-1"]',
   linkIgnoreSpan: '.ed11y-element',
   linkIgnoreStrings: [], // @todo cms/documentation this changed to array

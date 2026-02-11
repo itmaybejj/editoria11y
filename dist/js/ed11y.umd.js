@@ -4987,7 +4987,11 @@ URL: ${url2}</pre>
     }
     for (let i = results.length - 1; i >= 0; i--) {
       let splice = false;
-      if (results[i].test === "READABILITY") {
+      const checkIgnored = State.option.ignoreByTest[results[i].test];
+      console.log(results[i].test, State.option.ignoreByTest, checkIgnored);
+      if (checkIgnored && results[i].element.matches(checkIgnored)) {
+        splice = true;
+      } else if (results[i].test === "READABILITY") {
         UI.readability = results[i];
         if (UI.visualizing) {
           const badge = Constants.Panel.readabilityInfo?.querySelector(".readability-score");
@@ -8001,8 +8005,10 @@ URL: ${url2}</pre>
     LINK_CLICK_HERE: `The phrase "click" or "click here" is redundant, and takes focus away from the link's purpose.`,
     LINK_DOI: `<p>${why.fix}Link the article title and provide the DOI number as plain text, rather than linking the DOI number and leaving the article title as plain text.</p><div class="why"><p>The <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">APA Style guide</a> recommends using descriptive links on websites because users skim by links and use in-page search for links by name. Users are much more likely to notice articles of interest when the title is linked.</p><p>This also allows screen readers to describe each link meaningfully, rather than speaking a meaningless sequence of numbers.</p></div>`,
     LINK_EMPTY: `<p>${why.fix}Add text describing its destination, or delete it if is just a typo or linked space character.</p><div class="why"><p>Tip: screen readers cannot describe empty links. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the URL: Link, H-T-T-P-S forward-slash forward-slash example dot com."</p><p>Note that linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p></div>`,
+    // updated
     LINK_EMPTY_LABELLEDBY: `<p>This link has an <code>aria-labelledby</code> attribute that does not match the <code>ID</code> of any element on the page.</p><p>${why.fix}Provide a valid <code>ID</code>, or remove this attribute and describe the button in another way.</p>`,
     LINK_EMPTY_NO_LABEL: `<p>${why.fix}Add text describing its destination, or delete it if is just a typo like a linked space character.</p><div class="why"><p>Tip: screen readers cannot describe empty links. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the URL: Link, H-T-T-P-S forward-slash forward-slash example dot com."</p><p>Note that linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p></div>`,
+    // updated
     LINK_FILE_EXT: `<p>This link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning.</p><p>${why.fix}Use text or an icon to <a href="https://itmaybejj.github.io/linkpurpose/">indicate the file type</a> within the link text.</p><p class="why">For large files, consider including the file size. For example: "Executive Report (PDF, 3MB)"</p>`,
     LINK_IDENTICAL_NAME: `<p>Link text: "<strong>%(TEXT)</strong>"</p><p>${why.fix}Reword links that go different places with the unique titles of their different destinations.</p>${why.links}`,
     // updated
@@ -8171,6 +8177,7 @@ URL: ${url2}</pre>
     headerIgnoreSpan: "ed11y-element-heading-label, .ed11y-wrapper",
     headerIgnoreStrings: "",
     imageIgnore: 'img[aria-hidden], [aria-hidden] img, img[role="presentation"], a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img',
+    ignoreByTest: {},
     linkIgnore: '[aria-hidden][tabindex="-1"]',
     linkIgnoreSpan: ".ed11y-element",
     linkIgnoreStrings: [],
@@ -8628,9 +8635,6 @@ URL: ${url2}</pre>
     UI.theme.baseFontFamily = State.option.baseFontFamily;
     UI.inlineAlerts = State.option.inlineAlerts;
     UI.showDismissed = State.option.showDismissed;
-    if (userOptions.linkIgnoreSelector && !userOptions.linkIgnoreSpan) {
-      State.option.linkIgnoreSpan = userOptions.linkIgnoreSelector;
-    }
     let cssUrls = userOptions.cssUrls;
     if (!cssUrls) {
       const cssLink = document.querySelector(

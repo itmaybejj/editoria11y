@@ -210,7 +210,11 @@ export async function filterAlerts(splitConfiguration) {
     /*if (UI.incremental && Ed11y.oldResults.length > 0) {
 			// Don't flag new issues in the active range while people are typing.
 		}*/
-    if (results[i].test === 'READABILITY') {
+    const checkIgnored = State.option.ignoreByTest[results[i].test];
+    console.log(results[i].test, State.option.ignoreByTest, checkIgnored);
+    if (checkIgnored && results[i].element.matches(checkIgnored)) {
+      splice = true;
+    } else if (results[i].test === 'READABILITY') {
       UI.readability = results[i];
       if (UI.visualizing) {
         const badge = Constants.Panel.readabilityInfo?.querySelector('.readability-score');

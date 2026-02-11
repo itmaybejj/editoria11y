@@ -78,9 +78,10 @@ const preProcessOptions = async (userOptions) => {
   UI.inlineAlerts = State.option.inlineAlerts;
   UI.showDismissed = State.option.showDismissed;
 
-  if (userOptions.linkIgnoreSelector && !userOptions.linkIgnoreSpan) {
+  // Deprecated
+  /*if (userOptions.linkIgnoreSelector && !userOptions.linkIgnoreSpan) {
     State.option.linkIgnoreSpan = userOptions.linkIgnoreSelector;
-  }
+  }*/
 
   let cssUrls = userOptions.cssUrls;
   if (!cssUrls) {
