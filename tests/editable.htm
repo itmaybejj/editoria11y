@@ -115,13 +115,16 @@
                     //linkIgnoreStrings: '\(link is external\)',
                     //customTests : 2,
                     theme: 'darkTheme',
+					  checks: {
+						  HEADING_FIRST: false,
+					  },
                     //theme: 'lightTheme',
                     //theme: 'sleekTheme',
                     headingsOnlyFromCheckRoots: true,
 					  initialHeadingLevel:
 					  [
 						  {
-							  selector: '#editable-region',
+							  selector: '*',
 							  previousHeading: 2,
 						  },
 					  ],
