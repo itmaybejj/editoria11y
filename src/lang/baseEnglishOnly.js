@@ -21,7 +21,8 @@ export const englishOverrides = {
 		'alt text',
   ],
 	// todo Ed11y test use to catch these at the end as well as the beginning.
-	extraPlaceholderStopWords: 'placeholder, alt text, add alt text, tbd, please add, todo, to do, please insert', // updated
+	extraPlaceholderStopWords: 'placeholder, alt text, tbd, todo, to do', // updated
+	// please add, please insert, add alt text
 	// @todo: photo by, photograph by, courtesy of as separate test.
 
   // Strings used in tests ==============================
