@@ -211,7 +211,6 @@ export async function filterAlerts(splitConfiguration) {
 			// Don't flag new issues in the active range while people are typing.
 		}*/
     const checkIgnored = State.option.ignoreByTest[results[i].test];
-    console.log(results[i].test, State.option.ignoreByTest, checkIgnored);
     if (checkIgnored && results[i].element.matches(checkIgnored)) {
       splice = true;
     } else if (results[i].test === 'READABILITY') {

@@ -4988,7 +4988,6 @@ URL: ${url2}</pre>
     for (let i = results.length - 1; i >= 0; i--) {
       let splice = false;
       const checkIgnored = State.option.ignoreByTest[results[i].test];
-      console.log(results[i].test, State.option.ignoreByTest, checkIgnored);
       if (checkIgnored && results[i].element.matches(checkIgnored)) {
         splice = true;
       } else if (results[i].test === "READABILITY") {
