@@ -13,11 +13,10 @@ class Ed11y {
   constructor(userOptions) {
     if (CSS.supports('selector(:has(body))')) {
       try {
-        initialize(userOptions);
+        initialize(userOptions).then();
       } catch (error) {
         showError(error);
       }
-      // @todo 3.x need website: license, error message, reporting.
     }
   }
 }

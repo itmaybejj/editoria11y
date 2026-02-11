@@ -24,7 +24,7 @@ export default class ConsoleErrors extends HTMLElement {
 
     // Google Form & GitHub error link.
     const url = window.location;
-    const google = 'https://forms.gle/sjzK9XykETaoqZv99';
+    const google = '';
 
     // GitHub template
     const template = `## Error Description
@@ -39,7 +39,7 @@ ${this.error.stack}
 ## Comments
 `;
     const encodedTemplate = encodeURIComponent(template);
-    const github = `https://github.com/ryersondmp/sa11y-js/issues/new?title=Bug%20report&body=${encodedTemplate}`;
+    const github = `https://github.com/itmaybejj/editoria11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
 
     // Message
     content.innerHTML = `

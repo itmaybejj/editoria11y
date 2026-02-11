@@ -1272,7 +1272,7 @@
       });
     }
   }
-  const version = "3.0.0-dev0113";
+  const version = "3.0.0-dev0211";
   const UI = {
     editableHighlight: {},
     imageAlts: [],
@@ -1363,7 +1363,7 @@
       const content = document.createElement("dialog");
       content.ariaLabel = Lang._("ERROR");
       const url2 = window.location;
-      const google = "https://forms.gle/sjzK9XykETaoqZv99";
+      const google = "";
       const template = `## Error Description
 \`\`\`javascript
 ${this.error.stack}
@@ -1376,7 +1376,7 @@ ${this.error.stack}
 ## Comments
 `;
       const encodedTemplate = encodeURIComponent(template);
-      const github = `https://github.com/ryersondmp/sa11y-js/issues/new?title=Bug%20report&body=${encodedTemplate}`;
+      const github = `https://github.com/itmaybejj/editoria11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
       content.innerHTML = `
       <button class="close-btn" aria-describedby="ed11y-console-error"><span aria-hidden="true">&times</span> ${Lang._("ALERT_CLOSE")}</button>
       <h2 id="ed11y-console-error">${Lang._("ERROR")}</h2>
@@ -8067,6 +8067,8 @@ URL: ${url2}</pre>
   const interfaceStrings = {
     ALERT_CLOSE: "Close",
     ALT: "Alt Text: ",
+    CONSOLE_ERROR: 'There is an issue with the accessibility checker on this page. Please %(link)<a href="%(link)">report it on GitHub</a>.',
+    // updated new
     DECORATIVE: "Marked decorative",
     DISMISS: "Ignore",
     DISMISS_ALL: "On this page: ignore",
@@ -8780,7 +8782,7 @@ URL: ${url2}</pre>
     constructor(userOptions) {
       if (CSS.supports("selector(:has(body))")) {
         try {
-          initialize(userOptions);
+          initialize(userOptions).then();
         } catch (error) {
           showError(error);
         }

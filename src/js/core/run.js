@@ -42,7 +42,7 @@ import { spriteClose, spriteReadability } from '../elements/sprite.js';
 import customRuleset from '../rulesets/custom-ruleset.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
-import { gotText, resetGotText } from '../../sa11y-js/utils/utils.js';
+import { resetGotText } from '../../sa11y-js/utils/utils.js';
 
 export function showResults() {
   buildJumpList();

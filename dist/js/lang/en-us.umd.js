@@ -524,6 +524,8 @@
   const interfaceStrings = {
     ALERT_CLOSE: "Close",
     ALT: "Alt Text: ",
+    CONSOLE_ERROR: 'There is an issue with the accessibility checker on this page. Please %(link)<a href="%(link)">report it on GitHub</a>.',
+    // updated new
     DECORATIVE: "Marked decorative",
     DISMISS: "Ignore",
     DISMISS_ALL: "On this page: ignore",
