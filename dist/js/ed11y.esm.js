@@ -959,7 +959,10 @@ function fnIgnore(element, selectors = []) {
   }
   return cloneTree(element, true);
 }
-const gotText = /* @__PURE__ */ new WeakMap();
+let gotText = /* @__PURE__ */ new WeakMap();
+function resetGotText() {
+  gotText = /* @__PURE__ */ new WeakMap();
+}
 function getText(element) {
   if (gotText.has(element)) {
     return gotText.get(element);
@@ -6565,6 +6568,7 @@ function incrementalCheck() {
     }
     UI.interaction = false;
     UI.running = true;
+    resetGotText();
     let runTime = performance.now();
     UI.incremental = true;
     if (UI.disabled && UI.closedByDisable) {
