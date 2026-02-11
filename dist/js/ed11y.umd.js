@@ -8420,9 +8420,7 @@ URL: ${url2}</pre>
     // Sa11y checks ==================
     checks: {
       // Sa11y: Heading checks
-      HEADING_SKIPPED_LEVEL: {
-        type: "warning"
-      },
+      HEADING_SKIPPED_LEVEL: true,
       HEADING_EMPTY_WITH_IMAGE: true,
       HEADING_EMPTY: true,
       HEADING_FIRST: true,
