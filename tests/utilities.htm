@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <link rel="stylesheet" media="all" href="../css/editoria11y.css">
+		<link rel="stylesheet" media="all" href="../src/css/editoria11y.css">
         <title>Editorially Utility Functions</title>
     </head>
 <body>
@@ -162,17 +162,17 @@
             <div class="negative"><div style="display: none;"><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
 
             <h3>Visibility:hidden</h3>
-            <div class="negative"><div style="visibility: hidden;"><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
+            <div class="negative"><div style="visibility: hidden;"><h6 id="this-h6-should-have-been-an-h3-2">Skipped heading level</h6></div></div>
 
             <h3>Aria:hidden text</h3>
-            <div class="negative"><div style="visibility: hidden;"><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
+            <div class="negative"><div style="visibility: hidden;"><h6 id="this-h6-should-have-been-an-h3-3">Skipped heading level</h6></div></div>
 
             <h3>HTML hidden attribute</h3>
-            <div class="negative"><div hidden><h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div></div>
+            <div class="negative"><div hidden><h6 id="this-h6-should-have-been-an-h3-4">Skipped heading level</h6></div></div>
 
             <h3>Hidden click here links</h3>
             <div class="positive"><div style="display: none;"><a id="visually-hidden-click-here" href="/">Click here</a></div></div>
-            <div class="positive"><div style="visibility: hidden;"><a id="visually-hidden-click-here" href="/">Click here</a></div></div>
+            <div class="positive"><div style="visibility: hidden;"><a id="visually-hidden-click-here-2" href="/">Click here</a></div></div>
             <div class="positive"><div hidden><a id="hidden-click-here" href="/">Click here</a></div></div>
 
         </section>
@@ -199,7 +199,7 @@
             <div class="negative">Null aria label: <a id="null-aria" aria-label="" href="/">Null aria</a></div>
             <div class="positive">Bad link text in title attribute: <a id="titled-link-click-here" title="Click here" href="/"><span></span></a></div>
             <div class="positive">Bad link text in ::before on inner span: <a id="inner-css-link" href="/"><span class="click-in-css"></span></a></div>
-            <div class="positive">Inner SVG has an alt but no role, alt is ignored: <a id="svg-incorrect-role" href="/"><svg title="unread alt" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+            <div class="positive">Inner SVG has an alt but no role, alt is ignored: <a id="svg-incorrect-role" href="/"><svg alt="turtles" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"></circle></svg></a></div>
             <div class="negative">Inner SVG has a good title element: <a id="inner-svg-titles" href="/"><svg viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="5" cy="5" r="4"><title>I'm a circle</title></circle>
@@ -258,7 +258,6 @@
                                 <h4></h4>
                                 Policy Riders and Endorsements
                             </pds-heading>
-                            </aside>
                         </pds-sidebar>
                     </pds-layout-container>
 
@@ -305,9 +304,11 @@
                   }
                 });
                 document.addEventListener('ed11yShowHidden', function(e) {
-                    Ed11y.findElements('hiddenPop',`#ed11y-result-${e.detail.result}`, false);
+
+                    const foo = Ed11y.getElements(`#ed11y-result-${e.detail.result}`, 'document', []);
 					// @todo document the new false param.
-                    Ed11y.elements['hiddenPop'][0].closest('[hidden]')?.removeAttribute('hidden');
+                    foo[0]?.closest('[hidden]')?.removeAttribute('hidden');
+					console.log('page successfully opened ', foo[0])
 
                 }, false);
 
@@ -393,7 +394,7 @@
             <script src="../dist/js/lang/en.umd.js"></script>
             <script>
 
-              Ed11y.Lang.addI18n(Sa11yLangEn.strings);
+              Ed11y.Lang.addI18n(Ed11yLangEn.strings);
               const ed11y = new Ed11y.Ed11y({
 
                 alertMode : 'assertive',
@@ -413,7 +414,175 @@
                 editLinks: editLinks,
                 watchForChanges: false,
                 allowOK: true,
-                constrainButtons: '.constrain-position',
+				  contrastPlugin: true,
+				  readabilityPlugin: true,
+				  developerPlugin: true,
+				  embeddedContentPlugin: true,
+				  linksAdvancedPlugin: true,
+                constrainButtons: '.constrain-position, main, body',
+				  checks: {
+					  // Heading checks
+					  HEADING_SKIPPED_LEVEL: true,
+					  HEADING_EMPTY_WITH_IMAGE: true,
+					  HEADING_EMPTY: true,
+					  HEADING_FIRST: true,
+					  HEADING_LONG: {
+						  maxLength: 170,
+					  },
+					  HEADING_MISSING_ONE: true,
+
+					  // Image checks
+					  MISSING_ALT_LINK: true,
+					  MISSING_ALT_LINK_HAS_TEXT: true,
+					  MISSING_ALT: true,
+					  IMAGE_DECORATIVE_CAROUSEL: {
+						  sources: '.carousel',
+					  },
+					  LINK_IMAGE_NO_ALT_TEXT: true,
+					  LINK_IMAGE_TEXT: true,
+					  IMAGE_FIGURE_DECORATIVE: true,
+					  IMAGE_DECORATIVE: true,
+					  LINK_ALT_FILE_EXT: true,
+					  ALT_FILE_EXT: true,
+					  LINK_PLACEHOLDER_ALT: true,
+					  ALT_PLACEHOLDER: true,
+					  LINK_SUS_ALT: true,
+					  SUS_ALT: true,
+					  LINK_IMAGE_LONG_ALT: {
+						  maxLength: 250,
+					  },
+					  IMAGE_ALT_TOO_LONG: {
+						  maxLength: 250,
+					  },
+					  LINK_IMAGE_ALT: false,
+					  // {dismissAll: true,} default.
+					  LINK_IMAGE_ALT_AND_TEXT: true,
+					  IMAGE_FIGURE_DUPLICATE_ALT: true,
+					  IMAGE_PASS: {
+						  dismissAll: true,
+					  },
+					  ALT_UNPRONOUNCEABLE: true,
+					  LINK_ALT_UNPRONOUNCEABLE: true,
+					  ALT_MAYBE_BAD: {
+						  minLength: 15,
+					  },
+					  LINK_ALT_MAYBE_BAD: {
+						  minLength: 15,
+					  },
+
+					  // Link checks
+					  DUPLICATE_TITLE: {
+						  dismissAll: true,
+					  },
+					  LINK_EMPTY_LABELLEDBY: true,
+					  LINK_EMPTY_NO_LABEL: true,
+					  LINK_STOPWORD: {
+						  type: 'warning',
+					  },
+					  LINK_STOPWORD_ARIA: true,
+					  LINK_SYMBOLS: true,
+					  LINK_CLICK_HERE: false,
+					  LINK_DOI: {
+						  dismissAll: true,
+					  },
+					  LINK_URL: {
+						  maxLength: 40,
+					  },
+					  LINK_LABEL: {
+						  dismissAll: true,
+					  },
+					  LINK_EMPTY: true,
+					  LINK_IDENTICAL_NAME: {
+						  dismissAll: true,
+					  },
+					  LINK_NEW_TAB: {
+						  dismissAll: true,
+					  },
+					  LINK_FILE_EXT: true,
+
+					  // Form labels checks
+					  LABELS_MISSING_IMAGE_INPUT: true,
+					  LABELS_INPUT_RESET: true,
+					  LABELS_MISSING_LABEL: true,
+					  LABELS_ARIA_LABEL_INPUT: true,
+					  LABELS_NO_FOR_ATTRIBUTE: true,
+					  LABELS_PLACEHOLDER: true,
+
+					  // Embedded content checks
+					  EMBED_AUDIO: {
+						  sources: '',
+					  },
+					  EMBED_VIDEO: {
+						  sources: '',
+					  },
+					  EMBED_DATA_VIZ: {
+						  sources: '',
+					  },
+					  EMBED_UNFOCUSABLE: true,
+					  EMBED_MISSING_TITLE: true,
+					  EMBED_GENERAL: true,
+
+					  // Quality assurance checks
+					  QA_BAD_LINK: {
+						  sources: '',
+					  },
+					  QA_STRONG_ITALICS: true,
+					  QA_IN_PAGE_LINK: true,
+					  /*QA_DOCUMENT: {
+						  sources: '',
+						  dismissAll: true,
+					  },*/
+					  QA_PDF: {
+						  dismissAll: true,
+					  },
+					  QA_BLOCKQUOTE: true,
+					  TABLES_MISSING_HEADINGS: true,
+					  TABLES_SEMANTIC_HEADING: true,
+					  TABLES_EMPTY_HEADING: true,
+					  QA_FAKE_HEADING: true,
+					  QA_FAKE_LIST: true,
+					  QA_UPPERCASE: true,
+					  QA_UNDERLINE: true,
+					  QA_SUBSCRIPT: true,
+					  QA_NESTED_COMPONENTS: {
+						  sources: '',
+					  },
+					  QA_JUSTIFY: true,
+					  QA_SMALL_TEXT: true,
+
+					  // Meta checks
+					  META_LANG: true,
+					  META_SCALABLE: true,
+					  META_MAX: true,
+					  META_REFRESH: true,
+
+					  // Developer checks
+					  DUPLICATE_ID: true,
+					  META_TITLE: {
+						  warning: true,
+					  },
+					  UNCONTAINED_LI: true,
+					  TABINDEX_ATTR: true,
+					  HIDDEN_FOCUSABLE: true,
+					  LABEL_IN_NAME: true,
+					  BTN_EMPTY: true,
+					  BTN_EMPTY_LABELLEDBY: true,
+					  BTN_ROLE_IN_NAME: true,
+
+					  // Contrast checks
+					  CONTRAST_WARNING: {
+						  dismissAll: true,
+					  },
+					  CONTRAST_INPUT: true,
+					  CONTRAST_ERROR: true,
+					  CONTRAST_PLACEHOLDER: true,
+					  CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
+					  CONTRAST_ERROR_GRAPHIC: true,
+					  CONTRAST_WARNING_GRAPHIC: false,
+					  CONTRAST_UNSUPPORTED: {
+						  dismissAll: true,
+					  },
+				  },
 			    initialHeadingLevel: [
 					{
 						selector: '#h4root',

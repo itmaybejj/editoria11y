@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <link rel="stylesheet" media="all" href="../css/editoria11y.css">
+        <link rel="stylesheet" media="all" href="../dist/css/editoria11y.css">
         <title>Live Editing Tests</title>
     </head>
 <body>
@@ -30,6 +30,8 @@
 
             <p style=""><img style="float: right; width: 50%;" class='click-in-css' src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">An image with no alt text</p>
             <hr style="clear: both;">
+			<p style=""><img style="float: right; width: 50%;" alt="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." class='click-in-css' src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">An image with long alt text</p>
+			<hr style="clear: both;">
             <p style="clear:both;"><img style="float: right; width: 50%;" class='click-in-css' src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">An image with blank alt text</p><hr style="clear: both;">
 
             <h2 id="tables">Tables</h2>
@@ -41,7 +43,7 @@
             <table class="negati" role="presentation"><tr><td>No table header, but table has role="presentation."</td></tr></table>-->
 
             <table><tbody>
-            <tr><td>Tables without heading cells will be flagged</th><td>Cell</td></tr></tbody>
+            <tr><td>Tables without heading cells will be flagged</td><td>Cell</td></tr></tbody>
                 <tr><td>Cell</td><td>Cell</td></tr>
             </table>
             <h3 id="empty-table-header-cells">Empty table header cells</h3>
@@ -54,7 +56,7 @@
             <ul><li>There are five alerts here and the buttons don't fit; the collision detection is moving them off each other too far, so several are only reachable via the main panel "next" button. Need to improve collision handling.</li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li><li><a href>click here</a></li></ul>
 
         </section>
-        <script src=" https://cdn.jsdelivr.net/npm/tinymce@7.1.2/tinymce.min.js "></script>
+        <script src="https://cdn.jsdelivr.net/npm/tinymce@7.1.2/tinymce.min.js"></script>
         <script>tinymce.init({
           selector: '#editable-region',  // change this value according to your HTML
           license_key: 'gpl',
@@ -96,7 +98,6 @@
 			<script src="../dist/js/lang/en.umd.js"></script>
 			<!-- Instantiate-->
 			<script>
-				Ed11y.Lang.addI18n(Sa11yLangEn.strings);
 
                 onload = (event) => {
 
@@ -109,22 +110,36 @@
                     ignoreElements: '.tox-editor-header *, .ed11y-ignore *',
                     hiddenHandlers : '[hidden]',
                     inlineAlerts : false,
-                    checkRoots : '.gutenberg__editor .is-root-container, [contenteditable="true"]:not(.gutenberg__editor [contenteditable])',
+			  		lang: Ed11yLangEn.lang,
+                    fixedRoots : Array.from(document.querySelectorAll('#editable-region')),
                     //linkIgnoreStrings: '\(link is external\)',
-                    customTests : 2,
-                    //theme: 'darkTheme',
+                    //customTests : 2,
+                    theme: 'darkTheme',
+					  checks: {
+						  HEADING_FIRST: false,
+					  },
                     //theme: 'lightTheme',
                     //theme: 'sleekTheme',
                     headingsOnlyFromCheckRoots: true,
 					  initialHeadingLevel:
 					  [
 						  {
-							  selector: '#editable-region',
+							  selector: '*',
 							  previousHeading: 2,
 						  },
 					  ],
                     linkIgnoreSelector : '.ignore-class',
+					  contrastPlugin: true,
+					  readabilityPlugin: true,
+					  developerPlugin: true,
+					  embeddedContentPlugin: true,
+					  linksAdvancedPlugin: true,
                   });
+
+					document.addEventListener('ed11yPop', function(e) {
+						console.log('Event dispatched: ed11yPop for #' + e.detail.id);
+						console.log(e.detail);
+					}, false);
                 };
 
             </script>

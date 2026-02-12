@@ -1,4 +1,4 @@
-# Ignore testing artifacts.
+# Ignore build and test artifacts.
 logs/*
 tests_output/*
 tests/tinymce/
@@ -29,8 +29,3 @@ npm-debug.log
 # Windows
 Thumbs.db
 Desktop.ini
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/sa11y/
