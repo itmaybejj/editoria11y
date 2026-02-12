@@ -2,128 +2,128 @@ import {default as Sa11yStrings} from '../sa11y-lang/hu.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
 const testNames = {
-	ALT_FILE_EXT: 'Ez az alternatív szöveg fájlnév, nem leírás',
-	ALT_MAYBE_BAD: 'Ez az alternatív szöveg nem olvasható fel helyesen képernyőolvasóval',
-	ALT_PLACEHOLDER: 'Ez az alternatív szöveg értelmetlen helykitöltő',
-	ALT_UNPRONOUNCEABLE: 'Ez az alternatív szöveg nem ejthető ki',
-	BTN_EMPTY: 'A gombnak nincs hozzáférhető címkéje',
+	ALT_FILE_EXT: 'Ez az alternatív szöveg fájlnév, nem valódi leírás',                                   // refined wording
+	ALT_MAYBE_BAD: 'Ez az alternatív szöveg nem olvasható fel természetesen képernyőolvasóval',          // polished
+	ALT_PLACEHOLDER: 'Ez az alternatív szöveg értelmetlen helykitöltő',                                   // kept
+	ALT_UNPRONOUNCEABLE: 'Ez az alternatív szöveg nem ejthető ki',                                        // kept
+	BTN_EMPTY: 'A gombnak nincs hozzáférhető neve',
 	BTN_EMPTY_LABELLEDBY: 'A gomb érvénytelen ARIA‑címkét használ',
 	BTN_ROLE_IN_NAME: 'A gomb neve ismétli a „button” szót',
 	CONTRAST_ERROR: 'A szöveg kontrasztja túl alacsony, nehezen olvasható',
-	CONTRAST_ERROR_GRAPHIC: 'A grafika vagy ikon nem rendelkezik megfelelő kontraszttal',
+	CONTRAST_ERROR_GRAPHIC: 'A grafika vagy ikon kontrasztja nem elegendő',
 	CONTRAST_INPUT: 'A beviteli mező kontrasztja túl alacsony',
 	CONTRAST_PLACEHOLDER: 'A helykitöltő szöveg kontrasztja túl alacsony',
-	CONTRAST_PLACEHOLDER_UNSUPPORTED: 'A helykitöltő szövegnek elegendő a kontrasztja?',
+	CONTRAST_PLACEHOLDER_UNSUPPORTED: 'A helykitöltő szövegnek van elegendő kontrasztja?',
 	CONTRAST_WARNING: 'Ennek a szövegnek elegendő a kontrasztja?',
 	CONTRAST_WARNING_GRAPHIC: 'Ennek a grafikának vagy ikonnak elegendő a kontrasztja?',
-	DUPLICATE_ID: 'Duplikált ID attribútum',
-	DUPLICATE_TITLE: 'Ez a hivatkozás olyan eszköztippet tartalmaz, amely megegyezik a link szövegével',
-	EMBED_AUDIO: 'Ennek a hanganyagnak van átirata?',
+	DUPLICATE_ID: 'Duplikált ID‑attribútum',
+	DUPLICATE_TITLE: 'A link title‑je megegyezik a link szövegével',                                       // polished
+	EMBED_AUDIO: 'Van ennek a hanganyagnak szöveges átirata?',
 	EMBED_DATA_VIZ: 'Ez az adatvizualizáció hozzáférhető?',
 	EMBED_GENERAL: 'A beágyazott iframe‑ek kézi ellenőrzést igényelnek',
-	EMBED_MISSING_TITLE: 'A keret hiányolja a „title” attribútumot',
-	EMBED_UNFOCUSABLE: 'A tabindex="‑1" értékű keret nem érhető el billentyűzettel.',
-	EMBED_VIDEO: 'Van ennek a videónak megfelelő felirata?',
-	HEADING_EMPTY: 'Ez a címsor nem tartalmaz szöveget',
-	HEADING_EMPTY_WITH_IMAGE: 'Ez a kép címsorként van használva, ezért alt szöveget igényel',
-	HEADING_FIRST: 'A lap első címsora alacsonyabb szintű címsor',
+	EMBED_MISSING_TITLE: 'Az iframe hiányolja a „title” attribútumot',
+	EMBED_UNFOCUSABLE: 'A tabindex="‑1" iframe nem érhető el billentyűzettel',
+	EMBED_VIDEO: 'Ennek a videónak van megfelelő felirata?',
+	HEADING_EMPTY: 'A címsor nem tartalmaz szöveget',
+	HEADING_EMPTY_WITH_IMAGE: 'A kép címsorként szerepel, alt‑szöveg szükséges',
+	HEADING_FIRST: 'A lap első címsora nem 1. szintű',
 	HEADING_LONG: 'Ez a címsor lehetne rövidebb?',
-	HEADING_MISSING_ONE: 'A lapon hiányzik egy 1. szintű címsor',
-	HEADING_SKIPPED_LEVEL: 'A címsor rossz szintet használ',
-	HIDDEN_FOCUSABLE: 'Ez az elem nem olvasható fel képernyőolvasóval',
-	IMAGE_ALT_TOO_LONG: 'Ez az alternatív szöveg lehetne rövidebb?',
-	IMAGE_DECORATIVE: 'Ez a kép valóban dekoratív (jelentés nélküli)?',
-	IMAGE_DECORATIVE_CAROUSEL: 'A képgalériában található kép dekoratívként van megjelölve',
-	IMAGE_FIGURE_DECORATIVE: 'Kézi ellenőrzés: a képaláírással rendelkező kép nem tartalmaz alt szöveget',
-	IMAGE_FIGURE_DUPLICATE_ALT: 'Az alt szöveg nem lehet azonos a képaláírással',
-	LABELS_ARIA_LABEL_INPUT: 'Van ennek a mezőnek látható címkéje?',
+	HEADING_MISSING_ONE: 'A lapon nincs 1. szintű címsor',
+	HEADING_SKIPPED_LEVEL: 'A címsor szintje hibás',
+	HIDDEN_FOCUSABLE: 'Ez az elem nem érthető a képernyőolvasók számára',
+	IMAGE_ALT_TOO_LONG: 'Ez az alternatív szöveg túl hosszú',
+	IMAGE_DECORATIVE: 'Ez a kép valóban dekoratív?',
+	IMAGE_DECORATIVE_CAROUSEL: 'Diavetítésben szereplő kép dekoratívként van jelölve',
+	IMAGE_FIGURE_DECORATIVE: 'A képaláírással rendelkező képnek nincs alt‑szövege',
+	IMAGE_FIGURE_DUPLICATE_ALT: 'Az alt‑szöveg nem lehet azonos a képaláírással',
+	LABELS_ARIA_LABEL_INPUT: 'Van ehhez a mezőhez látható címke?',
 	LABELS_PLACEHOLDER: 'Kézi ellenőrzés: helykitöltő szöveg',
 	LABELS_INPUT_RESET: 'Szükséges ez a „Törlés/Alaphelyzet” gomb?',
-	LABEL_IN_NAME: 'A látható címke nem egyezik a hozzáférhető címkével',
-	LINK_ALT_FILE_EXT: 'A hivatkozás alt szövege nem lehet URL',
-	LINK_ALT_MAYBE_BAD: 'Ez a linkhez tartozó alt szöveg nem olvasható fel helyesen',
-	LINK_ALT_UNPRONOUNCEABLE: 'A képlinkeknek ejthető alt szöveggel kell rendelkezniük',
+	LABEL_IN_NAME: 'A látható címke nem egyezik a hozzáférhető címmel',
+	LINK_ALT_FILE_EXT: 'A hivatkozás alt‑szövege nem lehet URL',
+	LINK_ALT_MAYBE_BAD: 'A linkhez tartozó alt‑szöveg nem olvasható fel természetesen',
+	LINK_ALT_UNPRONOUNCEABLE: 'A képlinkek alt‑szövegének ejthetőnek kell lennie',
 	LINK_CLICK_HERE: 'Kézi ellenőrzés: a link „kattints ide” szöveget tartalmaz',
-	LINK_DOI: 'A DOI szám helyett a cikk címére kell hivatkozni',
-	LINK_EMPTY: 'Ez a hivatkozás nem tartalmaz szöveget',
-	LINK_EMPTY_LABELLEDBY: 'A hivatkozás érvénytelen aria‑labelledby attribútumot használ',
-	LINK_EMPTY_NO_LABEL: 'A hivatkozás címkét igényel',
-	LINK_FILE_EXT: 'A hivatkozás fájlra mutat figyelmeztetés nélkül',
-	LINK_IDENTICAL_NAME: 'Ez a hivatkozás egyértelműen leírja a célját?',
-	LINK_IMAGE_ALT: 'Kézi ellenőrzés: kép linkben alt szöveggel',
-	LINK_IMAGE_ALT_AND_TEXT: 'Ez az alt szöveg logikus része a linknek?',
-	LINK_IMAGE_LONG_ALT: 'Ennek a képlinknek az alt szövege lehetne rövidebb?',
-	LINK_IMAGE_NO_ALT_TEXT: 'Ez a képlink alt szöveget igényel',
-	LINK_IMAGE_TEXT: 'Kézi ellenőrzés: linkben található kép dekoratívként van jelölve.',
-	LINK_NEW_TAB: 'A hivatkozás új lapon nyílik meg figyelmeztetés nélkül?',
-	LINK_PLACEHOLDER_ALT: 'Ez a képlink jelentéssel bíró alt szöveget igényel',
-	LINK_STOPWORD: 'Ez a link megfelelően leírja a célját?',
-	LINK_STOPWORD_ARIA: 'A link jelentéssel bíró szövege csak képernyőolvasóknak érhető el',
-	LINK_SUS_ALT: 'Ez az alt szöveg a képet vagy a link célját írja le?',
-	LINK_SYMBOLS: 'Kézi ellenőrzés: a linkben található szimbólumok vagy emojik jelentéssel bírnak?',
-	LINK_URL: 'A link szövege nem lehet URL',
-	META_LANG: 'Hiányzik a lap nyelvét megadó meta címke',
-	META_MAX: 'Ez a meta címke korlátozza a felhasználói nagyítást',
-	META_REFRESH: 'Ez a meta címke automatikusan frissíti az oldalt',
-	META_SCALABLE: 'Ez a meta címke megakadályozza a nagyítást',
-	META_TITLE: 'Hiányzik a lap címét megadó meta címke',
-	MISSING_ALT: 'Érvénytelen HTML: a kép nem tartalmaz alt attribútumot',
-	MISSING_ALT_LINK: 'Érvénytelen HTML: a linkben lévő kép nem tartalmaz alt attribútumot',
-	MISSING_ALT_LINK_HAS_TEXT: 'Érvénytelen HTML: a hivatkozáson belüli kép alt attribútuma hiányzik',
-	QA_BAD_LINK: 'Kézi ellenőrzés: a link célja lehet, hogy érvénytelen',
-	QA_BLOCKQUOTE: 'Ez az idézet valójában címsor kellene legyen?',
-	QA_DOCUMENT: 'Ez a dokumentum megfelelően tagelve van a képernyőolvasók számára?',
+	LINK_DOI: 'A DOI helyett a cikk címére kell linkelni',
+	LINK_EMPTY: 'Ez a link nem tartalmaz szöveget',
+	LINK_EMPTY_LABELLEDBY: 'A link érvénytelen aria‑labelledby értéket használ',
+	LINK_EMPTY_NO_LABEL: 'A linkhez címke szükséges',
+	LINK_FILE_EXT: 'A link fájlra mutat figyelmeztetés nélkül',
+	LINK_IDENTICAL_NAME: 'Az azonos szövegű linkek különböző helyre mutatnak',
+	LINK_IMAGE_ALT: 'Kézi ellenőrzés: alt‑szöveges kép a linkben',
+	LINK_IMAGE_ALT_AND_TEXT: 'Az alt‑szöveg illeszkedik a link tartalmához?',
+	LINK_IMAGE_LONG_ALT: 'A képlink alt‑szövege lehetne rövidebb?',
+	LINK_IMAGE_NO_ALT_TEXT: 'A képlink alt‑szöveget igényel',
+	LINK_IMAGE_TEXT: 'A linkben lévő kép dekoratívként van jelölve',
+	LINK_NEW_TAB: 'A link új lapon nyílik meg figyelmeztetés nélkül',
+	LINK_PLACEHOLDER_ALT: 'A képlinknek értelmes alt‑szövegre van szüksége',
+	LINK_STOPWORD: 'A link csak általános szavakat tartalmaz',
+	LINK_STOPWORD_ARIA: 'A leíró linknév csak képernyőolvasók számára érhető el',
+	LINK_SUS_ALT: 'Az alt‑szöveg a képet vagy a link célját írja le?',
+	LINK_SYMBOLS: 'Kézi ellenőrzés: a linkben lévő szimbólumok/emoji értelmesek?',
+	LINK_URL: 'Linkfelirat nem lehet puszta URL',
+	META_LANG: 'A dokumentum nyelvét megadó meta‑címke hiányzik',
+	META_MAX: 'A meta‑címke korlátozza a nagyítást',
+	META_REFRESH: 'Ez a meta‑címke automatikusan frissíti az oldalt',
+	META_SCALABLE: 'Ez a meta‑címke tiltja a nagyítást',
+	META_TITLE: 'Hiányzik az oldal címét megadó meta‑címke',
+	MISSING_ALT: 'A kép nem tartalmaz alt attribútumot',
+	MISSING_ALT_LINK: 'A linkben lévő kép nem tartalmaz alt attribútumot',
+	MISSING_ALT_LINK_HAS_TEXT: 'A linkben lévő kép alt attribútuma hiányzik',
+	QA_BAD_LINK: 'Kézi ellenőrzés: a link célja hibás lehet',
+	QA_BLOCKQUOTE: 'Lehet, hogy ez az idézet valójában címsor lenne?',
+	QA_DOCUMENT: 'Ez a dokumentum megfelelően tagelt a képernyőolvasók számára?',
 	QA_FAKE_HEADING: 'Ez a félkövér szöveg valójában címsor?',
 	QA_FAKE_LIST: 'Ezt a tartalmat listaként kellene formázni?',
 	QA_IN_PAGE_LINK: 'Hibás oldalon belüli hivatkozás',
 	QA_JUSTIFY: 'Ne használjon sorkizárt igazítást',
-	QA_NESTED_COMPONENTS: 'Beágyazott interaktív komponensek',
+	QA_NESTED_COMPONENTS: 'Beágyazott interaktív elemek találhatók',
 	QA_PDF: 'Van alternatívája ennek a PDF‑nek?',
 	QA_SMALL_TEXT: 'A szöveg túl kicsi',
-	QA_STRONG_ITALICS: 'A nagy mennyiségű kiemelt szöveg nehezen olvasható',
-	QA_SUBSCRIPT: 'A felső‑ vagy alsóindexet ne használja pusztán vizuális formázásként',
+	QA_STRONG_ITALICS: 'A túl sok kiemelt szöveg nehezen olvasható',
+	QA_SUBSCRIPT: 'A felső‑/alsóindexet ne használja pusztán formázásként',
 	QA_UNDERLINE: 'Csak a linkek legyenek aláhúzva',
-	QA_UPPERCASE: 'Szükséges ez a NAGYBETŰS szöveg?',
-	SUS_ALT: 'Vannak felesleges szavak az alt szövegben?',
-	TABINDEX_ATTR: 'A tabindex attribútum megzavarja az olvasási sorrendet',
-	TABLES_EMPTY_HEADING: 'A táblázat fejléccellája hiányolja a szöveget',
-	TABLES_MISSING_HEADINGS: 'A táblázatból hiányoznak sor‑ és/vagy oszlopfejlécek',
-	TABLES_SEMANTIC_HEADING: 'Tartalmi címsorokat nem szabad táblázatokban használni',
-	UNCONTAINED_LI: 'Érvénytelen HTML lista',
+	QA_UPPERCASE: 'Szükséges a CSUPA NAGYBETŰS szöveg?',
+	SUS_ALT: 'Felesleges szavak lehetnek az alt‑szövegben',
+	TABINDEX_ATTR: 'A tabindex megzavarja a természetes olvasási sorrendet',
+	TABLES_EMPTY_HEADING: 'A táblázat fejléccellája hiányzik',
+	TABLES_MISSING_HEADINGS: 'A táblázatból hiányoznak a sor‑/oszlopfejlécek',
+	TABLES_SEMANTIC_HEADING: 'Tartalmi címsor nem használható táblázaton belül',
+	UNCONTAINED_LI: 'Érvénytelen HTML‑lista',
 };
 
 const why = {
-	fix: `<strong class="badge">Hogyan javítható</strong>`,
+	fix: `<strong class="badge">Hogyan javítható</strong>`,  // concise, natural HU
 	check: `<strong class="badge">Kézi ellenőrzés</strong>`,
 
-	buttons: `<div class="why"><p>Megjegyzés: egy gomb hozzáférhető neve egyértelműen jelezze, mit csinál. Olyan gomboknál, amelyek kattintás után állapotot váltanak, a névnek is változnia kell:</p><ul>
+	buttons: `<div class="why"><p>Megjegyzés: a gomb hozzáférhető neve egyértelműen jelezze a funkcióját. Azoknál a gomboknál, amelyek kattintás után állapotot váltanak, a névnek is változnia kell:</p><ul>
 <li>Váltó címkék:<br>„Lejátszás/Szünet”, „Részletek megjelenítése/Részletek elrejtése”</li>
-<li>Állapotváltozás ARIA-tulajdonságokban:<br><a ref="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">összekapcsolt szerepek, állapotok és tulajdonságok</a>: „Lejátszás/Lejátszás – megnyomva”, „Részletek – összecsukva/Részletek – kinyitva”.</li>
+<li>Állapotváltozás ARIA‑tulajdonságokban:<br><a ref="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">kapcsolódó szerepek, állapotok és tulajdonságok</a>: „Lejátszás/Lejátszás – megnyomva”, „Részletek – összecsukva/Részletek – kinyitva”.</li>
 </ul>
-<p>Ne változtassa meg egyszerre a címkét <em>és</em> az állapotot. Ha a „Lejátszás” feliratot „Szünet – megnyomva” értékre cseréli, az azt jelenti, hogy a lejátszó szünetel — nem azt, hogy játszik!</p></div>`,
+<p>Ne változtassa meg egyszerre a címkét <em>és</em> az állapotot. A „Szünet – megnyomva” azt jelenti, hogy a lejátszó megállt — nem azt, hogy játszik!</p></div>`,
 
-	headings: `<div class="why"><p>Tipp: a címsorok és alcímek hierarchikus szerkezetbe rendezik a tartalmat. A képernyőolvasót használók erre a szerkezetre támaszkodnak a megértéshez és a navigációhoz:</p>
-<ul><li>1. szintű címsor: oldal címe
+	headings: `<div class="why"><p>Tipp: a címsorok hierarchiát alkotnak, amelyet a képernyőolvasók a tartalom megértéséhez és navigációjához használnak:</p>
+<ul><li>1. szintű címsor: az oldal címe
 <ul><li>2. szintű címsor: fő témák
 <ul><li>3. szintű címsor: altémák</li></ul></li></ul></li></ul></div>`,
 
-	images: `<div class="why"><p>Tipp: amikor alt szöveget ír, azt adja vissza, mit <em>jelent</em> a kép a kontextusban — nem csak azt, mi látható. Egy gyerekről készült kép, ahogy labdába rúg, a helyzettől függően jelentheti például:</p>
-<ul><li>Esőben is folytatták a játékot.</li>
-<li>Az új mezek menő sárkánylogóval készültek.</li>
-<li>A bal oldalvonal mellől lőtt győztes gólt!</li></ul></div>`,
+	images: `<div class="why"><p>Tipp: az alt szöveg azt írja le, mit <em>jelent</em> a kép a kontextusban — nem pusztán azt, ami látható. Például egy gyermekről készült kép, ahogy labdát rúg, jelentheti:</p>
+<ul><li>Esőben is folyt a játék.</li>
+<li>Az új mezek menő sárkány‑logóval készültek.</li>
+<li>Bal oldalról lőtte a győztes gólt!</li></ul></div>`,
 
-	links: `<div class="why"><p>Az emberek gyakran a linkek alapján tájékozódnak az oldalon, és név szerint keresik őket. Ezért a jó linkek legyenek: egyértelműek, egyediek és tömörek:</p>
+	links: `<div class="why"><p>A felhasználók gyakran a linkek alapján tájékozódnak és név alapján keresnek. Ezért legyen a link:</p>
 <ul>
-<li>Ideális: „További információk az <a href="https://webaim.org/techniques/hypertext/link_text">értelmes hivatkozásokról</a>”</li>
-<li>Nem egyedi: „<a href="https://webaim.org/techniques/hypertext/link_text">Kattintson ide</a> további tudnivalókért.”</li>
-<li>Nem tömör: „<a href="https://webaim.org/techniques/hypertext/link_text">Kattintson ide, ha többet szeretne megtudni az értelmes hivatkozásokról</a>”</li>
+<li>egyértelmű: „További információk az <a href="https://webaim.org/techniques/hypertext/link_text">értelmes hivatkozásokról</a>”</li>
+<li>ne legyen generikus: „<a href="https://webaim.org/techniques/hypertext/link_text">Kattintson ide</a> további információért”</li>
+<li>legyen tömör: „<a href="https://webaim.org/techniques/hypertext/link_text">További részletek</a>”</li>
 </ul></div>`,
 
-	imageLinks: `<div class="why"><p>Az alt szöveg célja a kép <em>jelentésének</em> közvetítése, nem a puszta tartalomé. Ha a kép egy hivatkozás része, a jelentés a link célja:
+	imageLinks: `<div class="why"><p>Az alt szöveg egy kép <em>jelentését</em> közvetíti. Ha a kép link, a jelentés maga a link célja:</p>
 <ul>
 <li>„<em>Nagyító</em>” — a képet írja le, nem a linket.</li>
-<li>„<em>Kereső ikon</em>” — kétértelmű, mindkettőt sugallja.</li>
-<li>„<em>Keresés</em>” — pontosan a link funkcióját/célját írja le.</li>
+<li>„<em>Kereső ikon</em>” — kétértelmű.</li>
+<li>„<em>Keresés</em>” — a link funkcióját írja le.</li>
 </ul></p></div>`,
 };
 
@@ -144,7 +144,7 @@ const tips = {
 
 	CONTRAST_WARNING: 'A háttérkép vagy színátmenet miatt ez az ellenőrzés nem tudja biztosan megállapítani a szöveg mögötti háttérszínt. Használja az alábbi színválasztót a kézi ellenőrzéshez.',
 
-	DUPLICATE_ID: `<p>Az ID attribútumokat címkékhez vagy linkcélokhoz használjuk az oldalon, ezért egyedieknek kell lenniük.</p><p>${why.fix}Módosítsa ezt az ID‑t: <strong>#%(id)</strong></p><div class="why"><p>A legtöbb tartalomkezelő rendszerben ez a mező a „name” vagy „id” beállításból származik. HTML‑ben ez maga az attribútum: <code>&lt;a id=""></code></p></div>`,
+	DUPLICATE_ID: `<p>Az ID attribútumokat címkékhez vagy linkcélokhoz használjuk az oldalon, ezért egyedieknek kell lenniük.</p><p>${why.fix}Módosítsa ezt az ID‑t: <strong>#%(id)</strong></p><div class="why"><p>A legtöbb tartalomkezelő rendszerben ez a mező a „name” vagy „id” beállításból származik. HTML‑ben ez maga az attribútum: <code><a id=""></a></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Távolítsa el a hivatkozás <code>title</code> attribútumát.</p><div class="why"><p>Megjegyzés: a <code>title</code> eszköztippek csak egérmutató fölé vitelekor jelennek meg; mobilon és billentyűzettel nem láthatók, ezért ne tartalmazzanak fontos információt.</p></div>`,
 
@@ -250,7 +250,7 @@ const tips = {
 
 	META_SCALABLE: `<p>Ez a meta címke megakadályozza a nagyítást.</p><p>${why.fix}Távolítsa el vagy módosítsa, hogy engedélyezze a nagyítást.</p>`,
 
-	META_TITLE: `<p>${why.fix}Adjon meg <code><title></code> elemet a <code><head></code> részben.</p><div class="why"><p>Egy <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">rövid és egyedi oldalcím</a> kulcsfontosságú:</p><ul><li>Keresési találatok címeként,</li><li>lapfülek címeként,</li><li>képernyőolvasó-felolvasásnál lapváltáskor.</li></ul><p>Cím nélkül a felhasználó csak az URL‑t látja/hallja.</p></div>`,
+	META_TITLE: `<p>${why.fix}Adjon meg <code><title></title></code> elemet a <code><head></head></code> részben.</p><div class="why"><p>Egy <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">rövid és egyedi oldalcím</a> kulcsfontosságú:</p><ul><li>Keresési találatok címeként,</li><li>lapfülek címeként,</li><li>képernyőolvasó-felolvasásnál lapváltáskor.</li></ul><p>Cím nélkül a felhasználó csak az URL‑t látja/hallja.</p></div>`,
 
 	MISSING_ALT: `<p>Alt hiányában a képernyőolvasók a kép URL‑jét olvassák fel, gyakran karakterenként.</p><p>${why.fix}Adjon alt="" értéket a dekoratív képekhez, illetve leíró alt szöveget az információhordozó képekhez.</p>${why.images}`,
 
@@ -288,7 +288,7 @@ const tips = {
 
 	SUS_ALT: `<p>Ez az alt szöveg tartalmazza: „%(alt)”, ami tipikusan felesleges:</p><p><strong class="badge">Alt szöveg</strong> „%(ALT_TEXT)”</p><p>Megoldás: írja át rövid, lényegre törő leírásra, amely a kép jelentését adja vissza.</p><div class="why"><p>Tipp: a képernyőolvasók már így is bejelentik, hogy „kép”, ezért az olyan kifejezések, mint „kép a/egy…”, rendszerint feleslegesek.</p></div>`,
 
-	TABINDEX_ATTR: `<p>${why.fix}Kerülje a pozitív <code>tabindex</code> értékeket. A HTML-elemek sorrendje tükrözze a vizuális, a tabulátor- és az olvasási sorrendet.</p><div class="why"><p>Alapesetben a három sorrend megegyezik.</p><p>A pozitív tabindex a tabulátorsorrend elejére helyezi az elemet, <strong>de</strong> nem változtatja meg a vizuális sorrendet — ez zavart okoz.</p></div>`,
+	TABINDEX_ATTR: `<p>${why.fix}Kerülje a pozitív <code>tabindex</code> értékeket. A HTML‑elemek sorrendje tükrözze a vizuális, a tabulátor- és az olvasási sorrendet.</p><div class="why"><p>Alapesetben a három sorrend megegyezik.</p><p>A pozitív tabindex a tabulátorsorrend elejére helyezi az elemet, <strong>de</strong> nem változtatja meg a vizuális sorrendet — ez zavart okoz.</p></div>`,
 
 	TABLES_EMPTY_HEADING: ` <p>${why.fix}Biztosítsa, hogy minden táblázatfejléc tartalmazzon szöveget.</p><div class="why"><p>Tipp: a képernyőolvasók a fejlécből tudják meg, hogy milyen adatot látnak.</p></div>`,
 
@@ -351,7 +351,6 @@ const interfaceStrings = {
 	unDismissNotePermissions: 'Ezt az ellenőrzést egy adminisztrátor rejtette el',
 	unDismissOKButton: '„OK”-ként jelölt figyelmeztetés visszaállítása',
 };
-
 
 export const lang = {
 	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),

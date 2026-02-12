@@ -314,7 +314,8 @@
   const testNames = {
     ALT_FILE_EXT: "Ce texte alternatif est un nom de fichier, pas une description",
     ALT_MAYBE_BAD: "Ce texte alternatif ne peut pas être prononcé par un lecteur d’écran",
-    ALT_PLACEHOLDER: "Ce texte alternatif est un texte de remplacement sans signification",
+    ALT_PLACEHOLDER: "Ce texte alternatif ne décrit pas l’image",
+    // updated
     ALT_UNPRONOUNCEABLE: "Ce texte alternatif est impossible à prononcer",
     BTN_EMPTY: "Le bouton n’a pas d’étiquette accessible",
     BTN_EMPTY_LABELLEDBY: "Le bouton possède une étiquette ARIA non valide",
@@ -350,6 +351,8 @@
     LABELS_PLACEHOLDER: "Vérification manuelle : texte de remplacement",
     LABELS_INPUT_RESET: "Ce bouton de réinitialisation est‑il nécessaire ?",
     LABEL_IN_NAME: "L’étiquette visible ne correspond pas à l’étiquette invisible",
+    LABELS_MISSING_LABEL: "Ce champ n’est pas connecté à une étiquette",
+    // updated new
     LINK_ALT_FILE_EXT: "Un texte alternatif utilisé comme lien ne doit pas être une URL",
     LINK_ALT_MAYBE_BAD: "Ce texte alternatif lié ne peut pas être prononcé par un lecteur d’écran",
     LINK_ALT_UNPRONOUNCEABLE: "Les images liées doivent avoir un texte alternatif prononçable",
@@ -359,7 +362,8 @@
     LINK_EMPTY_LABELLEDBY: "Lien avec attribut « aria‑labelledby » non valide",
     LINK_EMPTY_NO_LABEL: "Ce lien a besoin d’une étiquette",
     LINK_FILE_EXT: "Ce lien pointe vers un fichier sans avertissement",
-    LINK_IDENTICAL_NAME: "Ce lien décrit‑il de manière unique sa destination ?",
+    LINK_IDENTICAL_NAME: "Des liens avec le même texte mènent à des pages différentes",
+    // updated
     LINK_IMAGE_ALT: "Vérification manuelle : image liée avec texte alternatif",
     LINK_IMAGE_ALT_AND_TEXT: "Ce texte alternatif a‑t‑il un sens dans ce lien ?",
     LINK_IMAGE_LONG_ALT: "Ce texte alternatif lié peut‑il être plus court ?",
@@ -367,7 +371,8 @@
     LINK_IMAGE_TEXT: "Vérification manuelle : image dans un lien marquée comme décorative.",
     LINK_NEW_TAB: "Ce lien ouvre‑t‑il un nouvel onglet sans avertissement ?",
     LINK_PLACEHOLDER_ALT: "Cette image liée nécessite un texte alternatif significatif",
-    LINK_STOPWORD: "Ce lien décrit‑il correctement sa destination ?",
+    LINK_STOPWORD: "Ce lien contient uniquement des mots génériques",
+    // updated
     LINK_STOPWORD_ARIA: "Le texte du lien n’est significatif que pour les utilisateurs de lecteurs d’écran",
     LINK_SUS_ALT: "Le texte alternatif décrit‑il l’image ou le lien ?",
     LINK_SYMBOLS: "Vérification manuelle : les symboles ou émojis dans ce lien sont‑ils significatifs ?",
@@ -403,7 +408,6 @@
   };
   const why = {
     fix: `<strong class="badge">À corriger</strong>`,
-    check: `<strong class="badge">Vérification manuelle</strong>`,
     buttons: `<div class="why"><p>Note : le nom accessible d’un bouton doit indiquer clairement ce qu’il fait. Les boutons qui changent après un clic doivent également changer de nom :</p><ul>
 <li>Changement de libellés :<br>"Lecture/Pause", "Afficher les détails/Masquer les détails"</li>
 <li>Changement d’<a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">attributs d’état</a> :<br>"Lecture/Lecture, activé", "Détails, réduit/Détails, développé."</li>
@@ -434,9 +438,9 @@
 </ul></p></div>`
   };
   const tips = {
-    ALT_FILE_EXT: `<p>Les lecteurs d’écran liront cette URL, souvent lettre par lettre. Cela ne transmet probablement pas la même signification que de voir l’image.</p><p>${why.fix}Ajoutez un texte alternatif vide (alt="") si cette image est purement décorative et doit être ignorée par les lecteurs d’écran, ou ajoutez un texte alternatif descriptif.</p>${why.images}`,
-    ALT_MAYBE_BAD: `<p>Description fournie pour cette image : <strong>"%(alt)"</strong></p><p>${why.fix}Définissez le texte alternatif de cette image sur une description concise de ce que l’image signifie dans ce contexte.</p>${why.images}`,
-    ALT_PLACEHOLDER: `<p>Description fournie pour cette image : <strong>"%(alt)"</strong></p><p>${why.fix}Définissez le texte alternatif de cette image sur une description concise de ce que l’image signifie dans ce contexte.</p>${why.images}`,
+    ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Texte alternatif : <strong>"%(ALT_TEXT)"</strong></p><p>Les lecteurs d’écran liront cette URL, souvent lettre par lettre. Cela ne transmet probablement pas la même signification que de voir l’image.</p><p>${why.fix}Ajoutez un texte alternatif vide (alt="") si cette image est purement décorative et doit être ignorée par les lecteurs d’écran, ou ajoutez un texte alternatif descriptif.</p>${why.images}`,
+    ALT_MAYBE_BAD: `<p>Texte alternatif : <strong>"%(alt)"</strong></p><p>${why.fix}Définissez le texte alternatif de cette image sur une description concise de ce que l’image signifie dans ce contexte.</p>${why.images}`,
+    ALT_PLACEHOLDER: `<p>Texte alternatif : <strong>"%(alt)"</strong></p><p>${why.fix}Définissez le texte alternatif de cette image sur une description concise de ce que l’image signifie dans ce contexte.</p>${why.images}`,
     ALT_UNPRONOUNCEABLE: `<p>Le texte alternatif de cette image est "%(alt)", et ne contient que des symboles imprononçables et/ou des espaces. Les lecteurs d’écran annonceront qu’une image est présente, puis feront une pause embarrassante : "image : ____."</p><p>${why.fix}Ajoutez un texte alternatif descriptif, ou un texte alternatif <em>entièrement</em> vide (alt="") si ce n’est qu’une icône ou un espaceur devant être ignoré par les lecteurs d’écran.</p>${why.images}`,
     BTN_EMPTY: `<p>${why.fix}Utilisez une méthode valide pour indiquer aux lecteurs d’écran l’action de ce bouton : texte, alt sur une icône ou attribut <code>title</code>.</p>`,
     BTN_EMPTY_LABELLEDBY: `<p>Ce bouton possède un attribut <code>aria-labelledby</code> vide ou ne correspondant à aucun <code>ID</code> d’un autre élément sur la page.</p><p>${why.fix}Reconnectez l’ID à un élément existant sur la page, ou supprimez cet attribut et décrivez le bouton autrement.</p>`,
@@ -465,12 +469,14 @@
     LABELS_ARIA_LABEL_INPUT: `<p><strong {B}>Étiquette invisible :</strong> <strong {C}>%(TEXT)</strong></p><p>Vérifiez qu’il existe une étiquette visible, qu’elle reste visible quand du texte est saisi, et qu’elle correspond à l’étiquette invisible.</p><div class="why"><p>Des étiquettes visibles uniquement via <em>title</em> ou <em>placeholder</em> disparaissent dès la saisie, ce qui complique la relecture et facilite l’oubli de mettre à jour l’étiquette invisible.</p></div>`,
     LABELS_INPUT_RESET: `<p>Les boutons de réinitialisation sont facilement activés par erreur, provoquant une perte de données sans possibilité d’annuler.</p><p>${why.fix}À moins de réinitialiser un seul champ, envisagez de le retirer ou de proposer une confirmation avant l’action.</p>`,
     LABELS_MISSING_IMAGE_INPUT: `Le bouton image n’a pas de texte alternatif. Ajoutez‑en un pour fournir un nom accessible, par exemple : <em>Chercher</em> ou <em>Envoyer</em>.`,
-    LABELS_MISSING_LABEL: `Aucune étiquette n’est associée à ce champ. Ajoutez un <code>id</code> au champ et un attribut <code>for</code> correspondant à l’étiquette.`,
+    LABELS_MISSING_LABEL: `<p>${why.fix}Ajoutez un <code>id</code> à ce champ, et ajoutez un attribut <code>for</code> correspondant à l’étiquette.</p>`,
+    // updated to mirror baseAll
     LABELS_NO_FOR_ATTRIBUTE: `Aucune étiquette n’est associée à ce champ. Ajoutez un attribut <code>for</code> à l’étiquette correspondant au <code>id</code> du champ. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>`,
     LABELS_PLACEHOLDER: `<p>Le placeholder disparaît dès que l’on saisit du texte, et peut manquer de contraste ou ressembler à du contenu réel.</p><p>${why.fix}Assurez‑vous que les informations clés (étiquette, aide, instructions) restent visibles même lorsque le champ contient du texte.</p>`,
-    LABEL_IN_NAME: `<p>Le texte visible de cet élément semble différent de son nom accessible. Cela peut dérouter les utilisateurs de lecteurs d’écran et gêner le contrôle vocal.</p><p>${why.check}Assurez‑vous que l’étiquette visible commence par l’étiquette invisible et n’ajoute aucune information significative supplémentaire.</p><p><strong>Étiquette invisible :</strong> "%(TEXT)"</p>`,
-    LINK_ALT_FILE_EXT: `<p>Le texte alternatif de cette image contient "%(alt)", ce qui indique probablement un nom de fichier plutôt qu’un nom significatif pour le lien.</p><p>${why.fix}Définissez le texte alternatif sur le nom de la destination du lien.</p><div class="why"><p>Le texte alternatif doit refléter la signification, pas le contenu brut : pour une image liée, la signification est la destination du lien :</p><ul><li>"Page avec texte" décrit l’image, pas le lien.</li><li>"IMG_1234.jpg" est un simple nom de fichier.</li><li>"<strong><em>Formulaire d’inscription (doc)</em></strong>" est une vraie destination.</li></ul></div>`,
-    LINK_ALT_MAYBE_BAD: `<p>Le texte alternatif de cette image est un placeholder : "<strong>%(alt)</strong>".</p><p>${why.fix}Définissez le texte alternatif sur la destination du lien.</p>${why.imageLinks}`,
+    LABEL_IN_NAME: `<p>Le texte visible de cet élément semble différent de son nom accessible. Cela peut dérouter les utilisateurs de lecteurs d’écran et gêner le contrôle vocal.</p><p>${why.fix}Assurez‑vous que l’étiquette visible commence par l’étiquette invisible et n’ajoute aucune information significative supplémentaire.</p><p><strong>Étiquette invisible :</strong> "%(TEXT)"</p>`,
+    // updated to match baseAll
+    LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Texte alternatif : "<strong>%(alt)</strong>"</p><p>Le texte alternatif de cette image est probablement un nom de fichier au lieu d’un libellé utile pour un lien.</p><p>${why.fix}Définissez le texte alternatif de cette image sur le nom de la destination du lien.</p><div class="why"> <p>Le texte alternatif doit refléter la signification, pas le contenu brut : pour une image liée, la signification est la destination du lien :</p><ul><li>"Page avec texte" décrit l’image, pas le lien.</li><li>"IMG_1234.jpg" est un simple nom de fichier.</li><li>"<strong><em>Formulaire d’inscription (doc)</em></strong>" est une vraie destination.</li></ul></div>`,
+    LINK_ALT_MAYBE_BAD: `<p>Le texte alternatif de cette image est un placeholder : "<strong>%(alt)</strong>".</p><p>${why.fix}Définissez le texte alternatif de cette image sur la destination du lien.</p>${why.imageLinks}`,
     LINK_ALT_UNPRONOUNCEABLE: `<p>Le texte alternatif de cette image liée ne contient que des symboles imprononçables ou des espaces : "%(ALT_TEXT)". Les lecteurs d’écran annonceront le lien mais seront incapables de le décrire.</p><p>${why.fix}Définissez le texte alternatif selon la destination ou la fonction du lien.</p>${why.imageLinks}`,
     LINK_CLICK_HERE: `L’expression "cliquer" ou "cliquer ici" est redondante et détourne l’attention de la destination du lien.`,
     LINK_DOI: `<p>${why.fix}Liez le titre de l’article et laissez le DOI en texte simple, au lieu de lier le DOI et laisser le titre sans lien.</p><div class="why"><p>Selon les recommandations de l’APA, les liens doivent être descriptifs : ils aident les utilisateurs à trouver les contenus pertinents en parcourant uniquement les liens.</p><p>Les lecteurs d’écran peuvent ainsi annoncer des liens significatifs plutôt qu’une série de chiffres incompréhensibles.</p></div>`,
@@ -478,10 +484,10 @@
     LINK_EMPTY_LABELLEDBY: `<p>Ce lien possède un attribut <code>aria-labelledby</code> qui ne correspond à aucun <code>ID</code> sur la page.</p><p>${why.fix}Fournissez un ID valide ou supprimez cet attribut.</p>`,
     LINK_EMPTY_NO_LABEL: `<p>${why.fix}Ajoutez du texte décrivant sa destination, ou supprimez ce lien s’il s’agit d’un accident.</p><div class="why"><p>Les liens vides provoquent silence ou lecture des URL.</p><p>Les espaces liés nécessitent parfois de réécrire le texte environnant pour les supprimer.</p></div>`,
     LINK_FILE_EXT: `<p>Ce lien pointe vers un fichier téléchargeable (PDF, MP3, Zip, Word, etc.) sans avertissement.</p><p>${why.fix}Utilisez du texte ou une icône pour <a href="https://itmaybejj.github.io/linkpurpose/">indiquer le type de fichier</a> dans le lien.</p><p class="why">Pour les fichiers volumineux, indiquez la taille : ex. "Rapport annuel (PDF, 3 Mo)"</p>`,
-    LINK_IDENTICAL_NAME: `<p>Plusieurs liens menant à des destinations différentes utilisent le même libellé "<strong>%(TEXT)</strong>".</p><p>${why.fix}Réécrivez les liens afin que chaque libellé corresponde clairement à sa destination unique.</p>${why.links}`,
+    LINK_IDENTICAL_NAME: `<p>Texte du lien : "<strong>%(TEXT)</strong>"</p><p>${why.fix}Réécrivez les liens menant à des destinations différentes en utilisant les titres uniques de chaque destination.</p>${why.links}`,
     LINK_IMAGE_ALT: `Assurez‑vous que ce texte alternatif décrit la destination du lien :</p><p> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong></p>${why.imageLinks}`,
     LINK_IMAGE_ALT_AND_TEXT: `<p>Vérifiez que le texte alternatif contribue à décrire la destination du lien, sans ajouter d’information redondante :</p><p><strong class="badge">Alt</strong> "<em><strong>%(alt)</strong></em>"</p>${why.imageLinks}`,
-    LINK_IMAGE_LONG_ALT: `<p><a href="https://webaim.org/techniques/hypertext/link_text#alt_link">Le texte alternatif d’une image liée sert à décrire la destination du lien</a>. Les liens doivent être brefs et clairs ; les utilisateurs de lecteurs d’écran parcourent souvent uniquement la liste des liens. Un texte alternatif long indique souvent qu’il décrit l’image plutôt que la destination.</p>Le texte alternatif de %(altLength) caractères de cette image est : <em>%(ALT_TEXT)</em>`,
+    LINK_IMAGE_LONG_ALT: `<p><a href="https://webaim.org/techniques/hypertext/link_text#alt_link">Le texte alternatif d’une image liée sert à décrire la destination du lien</a>. Les liens doivent être brefs et clairs ; les utilisateurs de lecteurs d’écran parcourent souvent la liste des liens. Un texte alternatif long indique souvent qu’il décrit l’image plutôt que la destination.</p>Le texte alternatif de %(altLength) caractères de cette image est : <em>%(ALT_TEXT)</em>`,
     LINK_IMAGE_NO_ALT_TEXT: `<p>Quand une image est utilisée comme lien, son texte alternatif <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">doit décrire la destination du lien</a>.</p><p>${why.fix}Définissez le texte alternatif sur la destination ou la fonction du lien.</p>${why.imageLinks}`,
     LINK_IMAGE_TEXT: `L’image est marquée comme décorative, mais le lien utilise le texte environnant comme libellé descriptif.`,
     LINK_NEW_TAB: `<p>${why.fix}Configurez ce lien pour s’ouvrir dans le même onglet, ou <a href="https://itmaybejj.github.io/linkpurpose/">prévoyez un avertissement aux utilisateurs</a> avant l’ouverture dans un nouvel onglet.</p><div class="why"><p>Les utilisateurs peuvent toujours choisir d’ouvrir un lien dans un nouvel onglet. Forcer l’ouverture peut être déroutant, surtout pour les technologies d’assistance.</p><p>Note : les liens dans les formulaires ouvrent souvent un nouvel onglet pour éviter la perte de données.</p></div>`,
@@ -513,7 +519,7 @@
     QA_SUBSCRIPT: `Les exposants et indices rendent le texte trop petit et difficile à lire. Ne les utilisez que pour des usages spécifiques : nombres ordinaux (4<sup>e</sup>), formules chimiques (H<sub>2</sub>O), références de notes.`,
     QA_UNDERLINE: `<p>Le texte souligné indique un lien sur le Web. Les utilisateurs penseront qu’il est cliquable.</p><p>${why.fix}Utilisez <strong>gras</strong> ou <em>italique</em> pour l’emphase, ou un style d’en‑tête pour marquer un changement de section.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le soulignement. Seuls les en‑têtes créent de la structure.</p></div>`,
     QA_UPPERCASE: `<p>LES BLOCS DE TEXTE EN MAJUSCULES SONT PLUS DIFFICILES À LIRE ET PEUVENT ÊTRE PERCUS COMME DES CRIS.</p><p>${why.fix}N’utilisez les majuscules que pour quelques mots à la fois ; préférez le gras.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas le gras. Utilisez un en‑tête si vous introduisez un nouveau sujet.</p></div>`,
-    SUS_ALT: `<p>Le texte alternatif contient le mot "%(alt)", ce qui est probablement redondant :</p><p><strong class="badge">Texte alternatif</strong> "%(ALT_TEXT)"</p><p>Pour corriger : reformulez le texte alternatif pour transmettre brièvement la signification de l’image.</p><div class="why"><p>Astuce : les lecteurs d’écran annoncent déjà qu’ils lisent la description d’une image. Des expressions comme "image de" ou "photo de" sont souvent redondantes.</p><p>Ce n’est acceptable que si ces mots font partie du contenu réel :</p><ul><li>Non redondant : "<em>Une photo dans</em> un album photo montré à la classe."</li><li>Redondant : "<em>Photo de</em> une photo dans un album…"</li></ul></div>`,
+    SUS_ALT: `<p>Le texte alternatif contient le mot "%(alt)", ce qui est probablement redondant :</p><p><strong class="badge">Texte alternatif</strong> "%(ALT_TEXT)"</p><p>Pour corriger : reformulez le texte alternatif pour transmettre brièvement la signification de l’image.</p><div class="why"><p>Astuce : les lecteurs d’écran annoncent déjà qu’ils lisent la description d’une image. Des expressions comme "image de" ou "photo de" sont souvent redondantes.</p></div>`,
     TABINDEX_ATTR: `<p>${why.fix}N’utilisez jamais une valeur de <code>tabindex</code> supérieure à "0" (ordre par défaut). Modifiez l’ordre des éléments dans le HTML pour que l’ordre visuel, de tabulation et de lecture restent identiques.</p><div class="why"><p>Par défaut, l’ordre visuel, l’ordre de tabulation et l’ordre de lecture sont alignés.</p><p>Un <em>tabindex</em> positif place l’élément au début du cycle de tabulation, <strong>mais pas dans l’ordre visuel</strong>, ce qui déroute les utilisateurs.</p></div>`,
     TABLES_EMPTY_HEADING: ` <p>${why.fix}Assurez‑vous que chaque cellule d’en‑tête contient du texte.</p><div class="why"><p>Astuce : les lecteurs d’écran utilisent les en‑têtes pour orienter les utilisateurs dans un tableau.</p></div>`,
     TABLES_MISSING_HEADINGS: ` <p>${why.fix}Modifiez les propriétés du tableau et indiquez si les en‑têtes se trouvent dans la première ligne, la première colonne ou les deux.</p><div class="why"> <p>Astuce : les lecteurs d’écran répètent l’en‑tête pertinent en entrant dans chaque ligne ou colonne.</p><p>Si ce tableau n’a pas d’en‑têtes car il sert de mise en page visuelle, remplacez‑le par autre chose qu’un tableau.</p></div>`,
@@ -522,6 +528,8 @@
   const interfaceStrings = {
     ALERT_CLOSE: "Fermer",
     ALT: "Texte alternatif : ",
+    CONSOLE_ERROR: 'Un problème affecte le vérificateur d’accessibilité sur cette page. Veuillez %(link)<a href="%(link)">le signaler sur GitHub</a>.',
+    // updated new
     DECORATIVE: "Marqué comme décoratif",
     DISMISS: "Ignorer",
     DISMISS_ALL: "Sur cette page : ignorer",
@@ -537,10 +545,12 @@
     OUTLINE: "En‑têtes",
     PANEL_DISMISS_BUTTON: `Afficher %(dismissCount) alertes masquées`,
     PANEL_HEADING: "Afficher les visualisations",
-    SKIP_TO_ISSUE: "Aller au problème",
+    SKIP_TO_ISSUE: "Afficher l’alerte",
+    // updated
     WARNING: "vérification manuelle requise",
     WARNINGS: "vérifications manuelles requises",
-    buttonFirstContent: "Aller à la première alerte",
+    buttonFirstContent: "Afficher la première alerte",
+    // updated
     buttonHideHiddenAlert: "Masquer l’alerte masquée",
     buttonHideHiddenAlerts: `Masquer %(count) alertes masquées`,
     buttonShowHiddenAlert: "Afficher l’alerte masquée",
@@ -578,5 +588,6 @@
     testNames
   };
   exports2.lang = lang;
+  exports2.tips = tips;
   Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });
 }));
