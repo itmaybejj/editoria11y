@@ -1,7 +1,7 @@
-import { State } from '../utils/state.js';
-import { alignTip, buildJumpList, editableHighlighter } from '../logic/run.js';
+import { alignTip, buildJumpList, editableHighlighter } from '../core/run.js';
 import { resetClass } from '../utils/utils.js';
 import { alignButtons } from '../utils/align.js';
+import { UI } from '../core/ui.js';
 
 export class Ed11yElementResult extends HTMLElement {
   connectedCallback() {
@@ -21,7 +21,7 @@ export class Ed11yElementResult extends HTMLElement {
       this.open = true;
       host.racing = true;
       host.toggleTip(true);
-      State.toggledFrom = this;
+      UI.toggledFrom = this;
       window.setTimeout(
         () => {
           host.racing = false;
@@ -46,7 +46,7 @@ export class Ed11yElementResult extends HTMLElement {
     // Todo: fast rechecks and double clicks not being correctly intercepted.
     if (host.racing === false) {
       host.racing = true;
-      State.toggledFrom = this;
+      UI.toggledFrom = this;
       const stateChange = host.getAttribute('data-ed11y-open') === 'false' ? 'open' : 'close';
       host.setAttribute('data-ed11y-action', stateChange);
       if (stateChange === 'open') {
@@ -66,8 +66,8 @@ export class Ed11yElementResult extends HTMLElement {
   }
 
   closeOtherTips() {
-    if (State.tipOpen) {
-      State.openTip.button.setAttribute('data-ed11y-action', 'close');
+    if (UI.tipOpen) {
+      UI.openTip.button.setAttribute('data-ed11y-action', 'close');
     }
   }
 
@@ -79,7 +79,7 @@ export class Ed11yElementResult extends HTMLElement {
     tip.setAttribute('data-ed11y-result', this.resultID);
     tip.classList.add('ed11y-element');
     tip.style.setProperty('opacity', '0');
-    State.panelAttachTo.insertAdjacentElement('beforeend', tip);
+    UI.panelAttachTo.insertAdjacentElement('beforeend', tip);
     this.tip = tip;
   }
 
@@ -89,7 +89,7 @@ export class Ed11yElementResult extends HTMLElement {
     }
     this.toggle.setAttribute('aria-expanded', changeTo);
     const highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
-    if (State.inlineAlerts) {
+    if (UI.inlineAlerts) {
       resetClass([
         'ed11y-hidden-highlight',
         'ed11y-ring-red',
@@ -116,17 +116,18 @@ export class Ed11yElementResult extends HTMLElement {
       );
       this.closeOtherTips();
       this.tip.setAttribute('data-ed11y-action', 'open');
-      if (State.inlineAlerts) {
+      if (UI.inlineAlerts) {
         this.result.element.classList.add(highlightOutline);
       }
       requestAnimationFrame(() => alignTip(this.toggle, this.tip, 4, true));
-      if (State.jumpList.length === 0) {
-        // todo is it still possible to have a tip and no jumpList?
+      if (UI.jumpList.length === 0) {
+        // todo remove if this race condition is gone.
+        console.warn('Editoria11y race condition: toggle without jump list');
         buildJumpList();
       }
-      State.lastOpenTip = Number(this.getAttribute('data-ed11y-jump-position'));
-      State.tipOpen = true;
-      State.openTip = {
+      UI.openJumpPosition = Number(this.getAttribute('data-ed11y-jump-position'));
+      UI.tipOpen = true;
+      UI.openTip = {
         button: this,
         tip: this.tip,
       };
@@ -140,8 +141,8 @@ export class Ed11yElementResult extends HTMLElement {
       );
       this.tip.setAttribute('data-ed11y-action', 'shut');
       this.result.highlight?.style.setProperty('opacity', '0');
-      State.tipOpen = false;
-      State.openTip = {
+      UI.tipOpen = false;
+      UI.openTip = {
         button: false,
         tip: false,
       };

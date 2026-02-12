@@ -1,5 +1,5 @@
-import { UI } from '../utils/state.js';
-import Lang from '../../sa11y/utils/lang.js';
+import Lang from '../../sa11y-js/utils/lang.js';
+import { UI } from '../core/ui.js';
 
 export class Ed11yElementAlt extends HTMLElement {
   connectedCallback() {

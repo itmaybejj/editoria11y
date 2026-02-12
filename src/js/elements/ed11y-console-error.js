@@ -1,6 +1,6 @@
-import Lang from '../../sa11y/utils/lang.js';
-import { escapeHTML } from '../../sa11y/utils/utils';
-import { State } from '../utils/state.js';
+import Lang from '../../sa11y-js/utils/lang.js';
+import { escapeHTML } from '../../sa11y-js/utils/utils';
+import { UI } from '../core/ui.js';
 
 // Replaces Sa11y error with one that does not attach CSS.
 
@@ -24,7 +24,7 @@ export default class ConsoleErrors extends HTMLElement {
 
     // Google Form & GitHub error link.
     const url = window.location;
-    const google = 'https://forms.gle/sjzK9XykETaoqZv99';
+    const google = '';
 
     // GitHub template
     const template = `## Error Description
@@ -34,12 +34,12 @@ ${this.error.stack}
 
 ## Details
 - **URL:** ${url}
-- **Version:** ${State.version}
+- **Version:** ${UI.version}
 
 ## Comments
 `;
     const encodedTemplate = encodeURIComponent(template);
-    const github = `https://github.com/ryersondmp/sa11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
+    const github = `https://github.com/itmaybejj/editoria11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
 
     // Message
     content.innerHTML = `
@@ -48,7 +48,7 @@ ${this.error.stack}
       <p>${Lang.sprintf('CONSOLE_ERROR', google, github)}</p>
       <p><strong>${Lang._('DEVELOPER_CHECKS')}:</strong></p>
       <pre>
-Version: ${State.version}
+Version: ${UI.version}
 URL: ${url}</pre>
   		<p><strong>${Lang._('ERRORS')}:</strong></p>
 <pre>${escapeHTML(this.error.stack)}</pre>

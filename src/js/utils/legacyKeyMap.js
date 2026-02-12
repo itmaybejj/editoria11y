@@ -1,0 +1,36 @@
+export const legacyKeyMap = {
+  headingLevelSkipped: 'HEADING_SKIPPED_LEVEL',
+  headingEmpty: 'HEADING_EMPTY',
+  headingIsLong: 'HEADING_LONG',
+  blockquoteIsShort: 'QA_BLOCKQUOTE',
+  altMissing: 'MISSING_ALT',
+  altNull: 'IMAGE_DECORATIVE',
+  altURL: 'ALT_FILE_EXT',
+  altMeaningless: 'ALT_PLACEHOLDER',
+  altMeaninglessLinked: 'LINK_PLACEHOLDER_ALT',
+  altURLLinked: 'LINK_ALT_FILE_EXT', // @todo adopt Adam's wording
+  altImageOf: 'SUS_ALT',
+  altImageOfLinked: 'LINK_SUS_ALT',
+  altDeadspace: 'ALT_UNPRONOUNCEABLE',
+  altEmptyLinked: 'LINK_IMAGE_NO_ALT_TEXT', //and 'MISSING_ALT_LINKED'?
+  altLong: 'IMAGE_ALT_TOO_LONG',
+  altLongLinked: 'LINK_IMAGE_LONG_ALT',
+  altPartOfLinkWithText: 'LINK_IMAGE_ALT_AND_TEXT',
+  linkNoText: 'LINK_EMPTY',
+  linkNoLabel: 'LINK_EMPTY_NO_LABEL', // New.
+  linkTextIsURL: 'LINK_URL',
+  linkTextIsGeneric: 'LINK_STOPWORD',
+  linkDocument: 'QA_PDF', // QA_DOCUMENT is new and closer.
+  linkNewWindow: 'LINK_NEW_TAB',
+  tableNoHeaderCells: 'TABLES_MISSING_HEADINGS',
+  tableContainsContentHeading: 'TABLES_SEMANTIC_HEADING',
+  tableEmptyHeaderCell: 'TABLES_EMPTY_HEADING',
+  textPossibleList: 'QA_FAKE_LIST',
+  textPossibleHeading: 'QA_FAKE_HEADING',
+  textUppercase: 'QA_UPPERCASE',
+  embedVideo: 'EMBED_VIDEO',
+  embedAudio: 'EMBED_AUDIO',
+  embedVisualization: 'EMBED_DATA_VIZ',
+  embedTwitter: 'EMBED_GENERAL',
+  embedCustom: 'EMBED_GENERAL',
+};

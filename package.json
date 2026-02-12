@@ -1,7 +1,7 @@
 {
 	"name": "editoria11y",
 	"version": "3.0.0",
-	"sa11yVersion": "4.4.0",
+	"sa11yVersion": "4.4.2",
 	"description": "Editoria11y is a content accessibility checker that shows results inline in Web pages and rich text editors.",
 	"main": "src/js/ed11y.js",
 	"type": "module",
@@ -21,8 +21,8 @@
 		"checker"
 	],
 	"scripts": {
-		"build:css": "node build/build-css.js",
-		"build:js": "node build/build.js",
+		"build:css": "node scripts/build-css.js",
+		"build:js": "node scripts/build.js",
 		"build": "npm run lint:fix && rimraf dist && npm run build:css && npm run build:js",
 		"lint": "biome check src",
 		"lint:fix": "biome check --write src",
@@ -30,7 +30,7 @@
 		"serve": "vite",
 		"dev": "npm run serve",
 		"test": "npx nightwatch tests --workers=4 --env=chrome",
-		"watch": "npm run build && chokidar \"./src/js\" \"./src/css\" -c \"npm run build\""
+		"watch": "npm run build && chokidar \"./src/\" -c \"npm run build\""
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.8",

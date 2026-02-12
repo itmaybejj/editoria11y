@@ -1,0 +1,332 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+	<link rel="stylesheet" media="all" href="../src/css/editoria11y.css">
+    <title>Editorially Utility Functions</title>
+</head>
+<body>
+<p style="display: none;">THIS IS A HIDDEN PARAGRAPH WITH CAPS LOCK TO SET OFF THE 0 TEST</p>
+<header>
+    <h1 id="editoria11y-demo">Editoria11y Utility Functions</h1>
+</header>
+<main>
+
+    <section id="dev">
+        <h2>Dev</h2>
+		<p class="positive"><a href="/work-with-us/apprenticeships" class="callout-read-more" data-once="ps-core-link-behavior">Learn More </a><a href="/graduate" class="callout-read-more ed11y-ring-yellow" data-once="ps-core-link-behavior">Learn More </a></p>
+		<p class="todo">
+			Photo by example.
+			<img alt="Photo by example" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+		</p>
+
+		<p class="positive">
+			Test
+			<img alt="test" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+		</p>
+		<p class="positive">
+			tbd
+			<img alt="tbd" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+		</p>
+		<p class="positive">
+			Add alt text
+			<img alt="Add alt text" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+		</p>
+		<p class="positive">
+			Please add alt text here.
+			<img alt="Please add alt text here." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+		</p>
+		<p class="positive">
+			Placeholder alt text.
+			<img alt="Placeholder alt text." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+		</p>
+		<p class="positive">
+			Image of alt text.
+			<img alt="Image of alt text." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+		</p>
+    </section>
+
+
+    <div hidden>
+
+		<!-- Instantiate-->
+		<link href="./tests.css" rel="stylesheet">
+
+		<script src="../dist/js/ed11y.umd.js"></script>
+		<script src="../dist/js/lang/en.umd.js"></script>
+		<script src="../dist/js/lang/es.umd.js"></script>
+		<script src="../dist/js/lang/de.umd.js"></script>
+		<script>
+
+			const editLinks = document.createElement('div');
+			const editIcon = document.createElement('span');
+			editIcon.classList.add('ed11y-custom-edit-icon');
+			editIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M441 59L453 71c9 9 9 25 0 34L424 134 378 88 407 59c9-9 25-9 34 0zM210 256L344 122 390 168 256 302c-3 3-7 5-10 6l-59 17 17-59c1-4 3-8 6-10zM373 25L176 222c-9 9-15 19-18 31l-29 100c-2 8-0 17 6 24s15 9 24 6l100-29c12-3 23-10 31-18L487 139c28-28 28-74 0-102L475 25C447-3 401-3 373 25zM88 64C39 64 0 103 0 152L0 424c0 49 39 88 88 88l272 0c49 0 88-39 88-88l0-112c0-13-11-24-24-24s-24 11-24 24l0 112c0 22-18 40-40 40L88 464c-22 0-40-18-40-40l0-272c0-22 18-40 40-40l112 0c13 0 24-11 24-24s-11-24-24-24L88 64z">';
+			const editLink = document.createElement('a');
+			editLink.href="./editable.htm";
+			editLink.textContent = Ed11yLangEn.lang.strings.edit_page;
+			editLink.prepend(editIcon.cloneNode(true));
+			editLinks.appendChild(editLink);
+
+			document.addEventListener('ed11yResults', (e) => {
+				/*const testsFound = new Set(Object.keys(Ed11yLangEs.testNames))
+				testsFound.delete('LINK_IMAGE_TEXT');
+				console.log("Total tests: ", Object.keys(Ed11yLangEs.testNames).length);
+				Ed11y.Results.forEach(r => {
+					if (!testsFound.has(r.test)) {
+						console.log('duplicate test: ', r.test, r.element);
+					}
+					testsFound.delete(r.test);
+				})
+				console.log("Tests not on page", testsFound);*/
+			});
+			const ed11y = new Ed11y.Ed11y({
+				//extraPlaceholderStopWords: 'placeholder, alt text, add alt text, tbd, please add, todo, to do',
+				alertMode : 'assertive',
+				//baseFontSize: 18,
+				checkRoot: 'main',
+				//theme : 'sleekTheme',
+				//theme : 'darkTheme',
+				headingsOnlyFromCheckRoots: true, // @todo merge this is gone. replaced with ignoreContentOutsideRoots. Does that work?
+				ignoreContentOutsideRoots: true,
+				//outlineExclude : '.utility', // @todo CMS this syntax changed for Sa11y to the below.
+				outlineIgnore: '.utility',
+				// Split configuration
+				// Provide list of test keys to check but not display.
+				splitConfiguration: {
+					showDev: true,
+					devChecks: ['QA_IN_PAGE_LINK'],
+					devOptions: {
+						checkRoot: 'body',
+						// containerIgnore: '',
+						// contrastIgnore: '.sr-only',
+						// outlineIgnore: '',
+						// headerIgnore: '',,
+						// imageIgnore: '',
+						// linkIgnore: '[aria-hidden][tabindex="-1"]',
+					}
+				},
+				contrastPlugin: true,
+				readabilityPlugin: true,
+				developerPlugin: true,
+				embeddedContentPlugin: true,
+				linksAdvancedPlugin: true,
+
+
+				ignoreAriaOnElements: '.gutenbergBadAria',
+				//lang: Ed11yLangDe.lang,
+				lang: Ed11yLangEn.lang,
+				linkIgnoreStrings: ['opens in new window','download'], // @todo CMS was regex.
+				linkIgnoreSelector: '.link-purpose',
+				embeddedContent: '#embed',
+				ignoreElements : 'footer *, [style*="none"] *, [style*="none"]',
+				ignoreByTest: {
+					LINK_IDENTICAL_NAME: 'a',
+				},
+
+				// shadowComponents : 'shadow-test, shadow-test-no-hits, turtle',
+				autoDetectShadowComponents: true,
+				editLinks: editLinks,
+				//showDismissed : true,
+				altPlaceholder: ['This image has an empty alt attribute;'], // @todo CMS was string.
+				//panelAttachTo: 'header',
+				//ignoreTests: ['headingLevelSkipped'],
+				// syncedDismissals : {},
+				//allowOK: false,
+				//allowHide: false,
+				//ignoreAllIfAbsent : 'maain',
+				//ignoreAllIfPresent : 'main',
+				//preventCheckingIfAbsent : 'maian',
+
+				// All checks
+				checks: {
+					// Heading checks
+					HEADING_SKIPPED_LEVEL: true,
+					HEADING_EMPTY_WITH_IMAGE: true,
+					HEADING_EMPTY: true,
+					HEADING_FIRST: true,
+					HEADING_LONG: {
+						maxLength: 170,
+					},
+					HEADING_MISSING_ONE: true,
+
+					// Image checks
+					MISSING_ALT_LINK: true,
+					MISSING_ALT_LINK_HAS_TEXT: true,
+					MISSING_ALT: true,
+					IMAGE_DECORATIVE_CAROUSEL: {
+						sources: '.carousel',
+					},
+					LINK_IMAGE_NO_ALT_TEXT: true,
+					LINK_IMAGE_TEXT: true,
+					IMAGE_FIGURE_DECORATIVE: true,
+					IMAGE_DECORATIVE: true,
+					LINK_ALT_FILE_EXT: true,
+					ALT_FILE_EXT: true,
+					LINK_PLACEHOLDER_ALT: true,
+					ALT_PLACEHOLDER: true,
+					LINK_SUS_ALT: true,
+					SUS_ALT: true,
+					LINK_IMAGE_LONG_ALT: {
+						maxLength: 250,
+					},
+					IMAGE_ALT_TOO_LONG: {
+						maxLength: 250,
+					},
+					LINK_IMAGE_ALT: true,
+					// {dismissAll: true,} default.
+					LINK_IMAGE_ALT_AND_TEXT: true,
+					IMAGE_FIGURE_DUPLICATE_ALT: true,
+					IMAGE_PASS: {
+						dismissAll: true,
+					},
+					ALT_UNPRONOUNCEABLE: true,
+					LINK_ALT_UNPRONOUNCEABLE: true,
+					ALT_MAYBE_BAD: {
+						minLength: 15,
+					},
+					LINK_ALT_MAYBE_BAD: {
+						minLength: 15,
+					},
+
+					// Link checks
+					DUPLICATE_TITLE: {
+						dismissAll: true,
+					},
+					LINK_EMPTY_LABELLEDBY: true,
+					LINK_EMPTY_NO_LABEL: true,
+					LINK_STOPWORD: {
+						type: 'warning',
+					},
+					LINK_STOPWORD_ARIA: true,
+					LINK_SYMBOLS: true,
+					LINK_CLICK_HERE: true,
+					LINK_DOI: {
+						dismissAll: true,
+					},
+					LINK_URL: {
+						maxLength: 40,
+					},
+					LINK_LABEL: {
+						dismissAll: true,
+					},
+					LINK_EMPTY: true,
+					LINK_IDENTICAL_NAME: {
+						dismissAll: true,
+					},
+					LINK_NEW_TAB: {
+						dismissAll: true,
+					},
+					LINK_FILE_EXT: true,
+
+					// Form labels checks
+					LABELS_MISSING_IMAGE_INPUT: true,
+					LABELS_INPUT_RESET: true,
+					LABELS_MISSING_LABEL: true,
+					LABELS_ARIA_LABEL_INPUT: true,
+					LABELS_NO_FOR_ATTRIBUTE: true,
+					LABELS_PLACEHOLDER: true,
+
+					// Embedded content checks
+					EMBED_AUDIO: {
+						sources: '',
+					},
+					EMBED_VIDEO: {
+						sources: '',
+					},
+					EMBED_DATA_VIZ: {
+						sources: '',
+					},
+					EMBED_CUSTOM: {
+						sources: '#embed_custom',
+					},
+					EMBED_UNFOCUSABLE: true,
+					EMBED_MISSING_TITLE: true,
+					EMBED_GENERAL: true,
+
+					// Quality assurance checks
+					QA_BAD_LINK: {
+						sources: '[href*="tugboatqa.com"]',
+					},
+					QA_STRONG_ITALICS: true,
+					QA_IN_PAGE_LINK: true,
+					QA_DOCUMENT: {
+						//sources: '',
+						dismissAll: true,
+					},
+					QA_PDF: {
+						dismissAll: true,
+					},
+					QA_BLOCKQUOTE: true,
+					TABLES_MISSING_HEADINGS: true,
+					TABLES_SEMANTIC_HEADING: true,
+					TABLES_EMPTY_HEADING: true,
+					QA_FAKE_HEADING: true,
+					QA_FAKE_LIST: true,
+					QA_UPPERCASE: true,
+					QA_UNDERLINE: true,
+					QA_SUBSCRIPT: true,
+					QA_NESTED_COMPONENTS: {
+						sources: '',
+					},
+					QA_JUSTIFY: true,
+					QA_SMALL_TEXT: true,
+
+					// Meta checks
+					META_LANG: true,
+					META_SCALABLE: true,
+					META_MAX: true,
+					META_REFRESH: true,
+
+					// Developer checks
+					DUPLICATE_ID: true,
+					META_TITLE: {
+						warning: true,
+					},
+					UNCONTAINED_LI: true,
+					TABINDEX_ATTR: true,
+					HIDDEN_FOCUSABLE: true,
+					LABEL_IN_NAME: true,
+					BTN_EMPTY: true,
+					BTN_EMPTY_LABELLEDBY: true,
+					BTN_ROLE_IN_NAME: true,
+
+					// Contrast checks
+					CONTRAST_WARNING: {
+						dismissAll: true,
+					},
+					CONTRAST_INPUT: true,
+					CONTRAST_ERROR: true,
+					CONTRAST_PLACEHOLDER: true,
+					CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
+					CONTRAST_ERROR_GRAPHIC: true,
+					CONTRAST_WARNING_GRAPHIC: true,
+					CONTRAST_UNSUPPORTED: {
+						dismissAll: true,
+					},
+				},
+			});
+
+			/*let inject = document.querySelector('#all-tests');
+			for (const [key, value] of Object.entries(Ed11y.M)) {
+			  if (value.title && typeof value.tip()) {
+				let item = document.createElement('div');
+				item.innerHTML = value.tip('example');
+				let title = document.createElement('h3');
+				title.prepend(value.title);
+				item.prepend(title);
+				inject.append(item);
+			  };
+			}*/
+		</script>
+
+    </div>
+</main>
+
+
+
+
+</body>
+
+</html>

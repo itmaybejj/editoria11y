@@ -1,8 +1,9 @@
-import { State, UI } from '../utils/state.js';
-import { togglePanel, toggleShowDismissals } from '../logic/run.js';
-import { visualize } from '../logic/visualize';
+import { UI } from '../core/ui.js';
+import { togglePanel, toggleShowDismissals } from '../core/run.js';
+import { visualize } from '../core/visualize';
 import {
   spriteAlts,
+  spriteClose,
   spriteDismiss,
   spriteHeadings,
   spriteNext,
@@ -12,14 +13,15 @@ import {
   spriteUnDismiss,
   spriteVisualize,
 } from './sprite.js';
+import { State } from '../../sa11y-js/core/state.js';
 
 export class Ed11yElementPanel extends HTMLElement {
   template() {
     return `
     <div class='ed11y-buttonbar'>
       <button id='ed11y-show-hidden' data-ed11y-pressed='false' hidden>
-        ${spriteDismiss}
         ${spriteUnDismiss}
+        ${spriteDismiss}
         <span class="ed11y-sr-only"></span>
       </button>
       <button id='ed11y-visualize' data-ed11y-pressed="false" class='ed11y-panel-fa'>
@@ -28,8 +30,7 @@ export class Ed11yElementPanel extends HTMLElement {
       </button>
       <div id='ed11y-visualizers' class="content" hidden>
           <details id="ed11y-headings-tab">
-              <summary>
-                  ${spriteHeadings}
+              <summary>${spriteHeadings}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
               </summary>
               <div class="details">
                   <span class="details-title"></span>
@@ -37,8 +38,7 @@ export class Ed11yElementPanel extends HTMLElement {
               </div>
           </details>
           <details id="ed11y-alts-tab">
-            <summary>
-                ${spriteAlts}
+            <summary>${spriteAlts}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
             </summary>
             <div class="details">
                 <span class="details-title"></span>
@@ -67,12 +67,11 @@ export class Ed11yElementPanel extends HTMLElement {
       shadow.appendChild(wrapper);
       const panelTabs = wrapper.querySelectorAll('.ed11y-buttonbar button');
       panelTabs.forEach((tab) => {
-        // todo: may not be needed for details elements.
         tab.addEventListener('click', this.handleBarClick);
       });
       const altDetails = wrapper.querySelector('#ed11y-alts-tab');
+      // @todo postpone: make clickable in editable mode.
       const headingDetails = wrapper.querySelector('#ed11y-headings-tab');
-      const _readabilityDetails = wrapper.querySelector('#ed11y-readability-tab'); // todo swappy?
       altDetails.addEventListener('toggle', () => {
         if (altDetails.open && headingDetails.open) {
           headingDetails.removeAttribute('open');
@@ -99,10 +98,14 @@ export class Ed11yElementPanel extends HTMLElement {
         toggleShowDismissals();
         break;
       case 'ed11y-visualize':
-        if (!State.showPanel) {
+        if (!UI.showPanel) {
           togglePanel();
+          window.setTimeout(() => {
+            visualize();
+          }, 500);
+        } else {
+          visualize();
         }
-        visualize();
         break;
       default:
         break;
