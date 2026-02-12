@@ -269,9 +269,6 @@ export function fnIgnore(element, selectors = []) {
  * @returns {string} The text content of the HTML element with extra whitespaces and line breaks removed.
  */
 let gotText = new WeakMap();
-export function resetGotText() {
-	gotText = new WeakMap();
-}
 export function getText(element) {
   if (gotText.has(element)) {
     return gotText.get(element);
@@ -283,6 +280,9 @@ export function getText(element) {
     .trim();
   gotText.set(element, text);
   return text;
+}
+export function resetGetText() {
+  gotText = new WeakMap();
 }
 
 /**

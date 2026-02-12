@@ -61,6 +61,7 @@ const defaultOptions = {
   linkIgnoreStrings: [],
   paragraphIgnore: "table p",
   ignoreContentOutsideRoots: false,
+  ignoreByTest: {},
   // Control panel settings
   aboutContent: "",
   panelPosition: "right",
@@ -960,9 +961,6 @@ function fnIgnore(element, selectors = []) {
   return cloneTree(element, true);
 }
 let gotText = /* @__PURE__ */ new WeakMap();
-function resetGotText() {
-  gotText = /* @__PURE__ */ new WeakMap();
-}
 function getText(element) {
   if (gotText.has(element)) {
     return gotText.get(element);
@@ -971,6 +969,9 @@ function getText(element) {
   const text = ignore.textContent.replace(/[\r\n]+/g, "").replace(/\s+/g, " ").trim();
   gotText.set(element, text);
   return text;
+}
+function resetGetText() {
+  gotText = /* @__PURE__ */ new WeakMap();
 }
 function removeWhitespace(string) {
   return string.replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
@@ -6568,7 +6569,7 @@ function incrementalCheck() {
     }
     UI.interaction = false;
     UI.running = true;
-    resetGotText();
+    resetGetText();
     let runTime = performance.now();
     UI.incremental = true;
     if (UI.disabled && UI.closedByDisable) {

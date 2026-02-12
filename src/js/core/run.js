@@ -42,7 +42,7 @@ import { spriteClose, spriteReadability } from '../elements/sprite.js';
 import customRuleset from '../rulesets/custom-ruleset.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
-import { resetGotText } from '../../sa11y-js/utils/utils.js';
+import { resetGetText } from '../../sa11y-js/utils/utils.js';
 
 export function showResults() {
   buildJumpList();
@@ -1464,7 +1464,7 @@ export function incrementalCheck() {
     }
     UI.interaction = false;
     UI.running = true;
-    resetGotText();
+    resetGetText();
     let runTime = performance.now();
     UI.incremental = true;
     if (UI.disabled && UI.closedByDisable) {
