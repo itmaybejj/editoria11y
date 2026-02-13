@@ -5,6 +5,8 @@ Editoria11y and Sa11y are co-developed and released under open source licenses. 
 Editoria11y uses icons from Font Awesome by Dave Gandy, http://fontawesome.io
 Font Awesome license: CC BY 3.0, URL: http://creativecommons.org/licenses/by/3.0/
 
+The translation Lang files were machine-generated in M365 Copilot. The rest is human made.
+
 # Editoria11y - License
 
 This version of Editoria11y has been released by John Jameson under the GNU GPLv2 License.
