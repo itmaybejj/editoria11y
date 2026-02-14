@@ -13,7 +13,7 @@ const Lang = {
 
     if (args?.length) {
       args.forEach((arg) => {
-        transString = transString.replace(/%\([a-zA-z]+\)/, arg);
+        transString = transString.replace(/%\([a-zA-Z]+\)/, arg);
       });
     }
     return transString;

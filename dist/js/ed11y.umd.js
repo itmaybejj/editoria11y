@@ -33,7 +33,7 @@
       transString = this.prepHTML(transString);
       if (args?.length) {
         args.forEach((arg) => {
-          transString = transString.replace(/%\([a-zA-z]+\)/, arg);
+          transString = transString.replace(/%\([a-zA-Z]+\)/, arg);
         });
       }
       return transString;
@@ -913,6 +913,23 @@
   function sanitizeHTML(string) {
     return string.replace(/[^\w. ]/gi, (c) => `&#${c.charCodeAt(0)};`);
   }
+  function sanitizeURL(string) {
+    if (!string) return "#";
+    const sanitizedInput = String(string).trim();
+    try {
+      const parsedUrl = new URL(sanitizedInput);
+      if (sanitizedInput.startsWith("#")) {
+        return parsedUrl.hash;
+      }
+      const protocols = ["file:", "http:", "https:", "mailto:", "tel:", "ftp:"];
+      if (!protocols.includes(parsedUrl.protocol)) {
+        return "";
+      }
+      return parsedUrl.href;
+    } catch (error) {
+      return false;
+    }
+  }
   function sanitizeHTMLBlock(html, allowStyles = false) {
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = html;
@@ -1363,7 +1380,7 @@
       const shadow = this.attachShadow({ mode: "open" });
       const content = document.createElement("dialog");
       content.ariaLabel = Lang._("ERROR");
-      const url2 = window.location;
+      const url2 = sanitizeURL(window.location);
       const google = "";
       const template = `## Error Description
 \`\`\`javascript
@@ -1376,6 +1393,8 @@ ${this.error.stack}
 
 ## Comments
 `;
+      const preContents = `Version: ${UI.version}
+URL: ${url2}`;
       const encodedTemplate = encodeURIComponent(template);
       const github = `https://github.com/itmaybejj/editoria11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
       content.innerHTML = `
@@ -1384,12 +1403,13 @@ ${this.error.stack}
       <p>${Lang.sprintf("CONSOLE_ERROR", google, github)}</p>
       <p><strong>${Lang._("DEVELOPER_CHECKS")}:</strong></p>
       <pre>
-Version: ${UI.version}
-URL: ${url2}</pre>
+</pre>
   		<p><strong>${Lang._("ERRORS")}:</strong></p>
 <pre>${escapeHTML(this.error.stack)}</pre>
     `;
       shadow.appendChild(content);
+      const pre = content.querySelector("pre");
+      pre.textContent = preContents;
       setTimeout(() => {
         content.show();
         const button = content.querySelector("button");
@@ -1403,8 +1423,8 @@ URL: ${url2}</pre>
           hidden.style.setProperty("overflow", "hidden");
         });
         const preS = content.querySelectorAll("pre");
-        preS.forEach((pre) => {
-          pre.style.setProperty("margin-left", "18px");
+        preS.forEach((pre2) => {
+          pre2.style.setProperty("margin-left", "18px");
         });
         const close = content.querySelector(".close-btn");
         close.addEventListener("click", () => {
