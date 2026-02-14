@@ -1,5 +1,5 @@
 import Lang from '../../sa11y-js/utils/lang.js';
-import { escapeHTML } from '../../sa11y-js/utils/utils';
+import { escapeHTML, sanitizeURL } from '../../sa11y-js/utils/utils';
 import { UI } from '../core/ui.js';
 
 // Replaces Sa11y error with one that does not attach CSS.
@@ -23,7 +23,7 @@ export default class ConsoleErrors extends HTMLElement {
     content.ariaLabel = Lang._('ERROR');
 
     // Google Form & GitHub error link.
-    const url = window.location;
+    const url = sanitizeURL(window.location);
     const google = '';
 
     // GitHub template
@@ -38,6 +38,8 @@ ${this.error.stack}
 
 ## Comments
 `;
+    const preContents = `Version: ${UI.version}
+URL: ${url}`;
     const encodedTemplate = encodeURIComponent(template);
     const github = `https://github.com/itmaybejj/editoria11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
 
@@ -48,12 +50,13 @@ ${this.error.stack}
       <p>${Lang.sprintf('CONSOLE_ERROR', google, github)}</p>
       <p><strong>${Lang._('DEVELOPER_CHECKS')}:</strong></p>
       <pre>
-Version: ${UI.version}
-URL: ${url}</pre>
+</pre>
   		<p><strong>${Lang._('ERRORS')}:</strong></p>
 <pre>${escapeHTML(this.error.stack)}</pre>
     `;
     shadow.appendChild(content);
+    const pre = content.querySelector('pre');
+    pre.textContent = preContents;
 
     // Set focus and hide Sa11y's toggle.
     setTimeout(() => {

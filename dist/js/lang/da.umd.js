@@ -311,9 +311,12 @@
     }
   };
   const testNames = {
+    ALT_PLACEHOLDER: "Denne alt‑tekst beskriver ikke billedet",
+    LABELS_MISSING_LABEL: "Dette inputfelt er ikke tilknyttet en etiket",
+    LINK_IDENTICAL_NAME: "Links med samme tekst fører til forskellige sider",
+    LINK_STOPWORD: "Dette link indeholder kun generiske ord",
     ALT_FILE_EXT: "Denne alt‑tekst er et filnavn, ikke en beskrivelse",
     ALT_MAYBE_BAD: "Denne alt‑tekst kan ikke udtales af en skærmlæser",
-    ALT_PLACEHOLDER: "Denne alt‑tekst beskriver ikke billedet",
     ALT_UNPRONOUNCEABLE: "Denne alt‑tekst kan ikke udtales",
     BTN_EMPTY: "Knappen mangler et tilgængeligt navn",
     BTN_EMPTY_LABELLEDBY: "Knappen har et ugyldigt ARIA‑label",
@@ -349,7 +352,6 @@
     LABELS_PLACEHOLDER: "Manuel kontrol: placeholder‑tekst",
     LABELS_INPUT_RESET: "Er denne “Nulstil”‑knap nødvendig?",
     LABEL_IN_NAME: "Den synlige etiket matcher ikke den usynlige etiket",
-    LABELS_MISSING_LABEL: "Dette inputfelt mangler en label",
     LINK_ALT_FILE_EXT: "Alt‑tekst brugt som link må ikke være en URL",
     LINK_ALT_MAYBE_BAD: "Denne alt‑tekst i linket kan ikke udtales af en skærmlæser",
     LINK_ALT_UNPRONOUNCEABLE: "Billeder brugt som links skal have udtalelig alt‑tekst",
@@ -359,7 +361,6 @@
     LINK_EMPTY_LABELLEDBY: "Linket har et ugyldigt “aria‑labelledby”‑attribut",
     LINK_EMPTY_NO_LABEL: "Dette link behøver en etiket",
     LINK_FILE_EXT: "Link fører til en fil uden advarsel",
-    LINK_IDENTICAL_NAME: "Flere links med samme tekst fører til forskellige sider",
     LINK_IMAGE_ALT: "Manuel kontrol: billede i link med alt‑tekst",
     LINK_IMAGE_ALT_AND_TEXT: "Giver denne alt‑tekst mening i linket?",
     LINK_IMAGE_LONG_ALT: "Kan denne alt‑tekst i linket være kortere?",
@@ -367,7 +368,6 @@
     LINK_IMAGE_TEXT: "Manuel kontrol: billede i link er markeret som dekorativt.",
     LINK_NEW_TAB: "Åbner dette link en ny fane uden advarsel?",
     LINK_PLACEHOLDER_ALT: "Dette billede‑link behøver meningsfuld alt‑tekst",
-    LINK_STOPWORD: "Dette link indeholder kun generiske ord",
     LINK_STOPWORD_ARIA: "Meningsfuld linktekst er kun tilgængelig for skærmlæsere",
     LINK_SUS_ALT: "Beskriver denne alt‑tekst billedet eller linket?",
     LINK_SYMBOLS: "Manuel kontrol: er symboler/emoji i dette link meningsfulde?",
@@ -402,44 +402,25 @@
     UNCONTAINED_LI: "Ugyldig HTML‑liste"
   };
   const why = {
+    buttons: `<div class="why"><p>Tip: det tilgængelige navn for en knap skal gøre det klart, hvad den gør. Knapper der ændrer tilstand ved klik, bør også ændre deres navn:</p><ul><li>Ændring af label:<br>"Afspil/Pause", "Vis detaljer/Skjul detaljer"</li><li>Ændring af <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">tilstands‑attributter</a>:<br>"Afspil/Afspil, aktiveret", "Detaljer, kollapset/Detaljer, udvidet"</li></ul><p>Skift ikke begge ting på samme tid. At ændre “Afspil” til “Pause, aktiveret” betyder, at afspilleren er sat på pause — ikke at den afspiller!</p></div>`,
     fix: `<strong class="badge">Sådan løser du det</strong>`,
-    buttons: `<div class="why"><p>Bemærk: en knaps tilgængelige navn skal tydeligt angive, hvad den gør. Knapper, der ændrer funktion ved klik, skal også ændre navn:</p><ul>
-<li>Skiftende etiketter:<br>“Afspil/Pause”, “Vis detaljer/Skjul detaljer”</li>
-<li>Skift af <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">ARIA‑tilstandsattributter</a>:<br>“Afspil/Afspil (trykket)”, “Detaljer (sammenfoldet)/Detaljer (udfoldet)”.</li>
-</ul>
-<p>Skift ikke både etiket og ARIA‑tilstand samtidigt. At ændre “Afspil” til “Pause (trykket)” betyder, at afspilleren er på pause — ikke at den spiller!</p></div>`,
-    headings: `<div class="why"><p>Tip: overskrifter og underoverskrifter strukturerer indhold i et hierarki. Skærmlæsere bruger denne struktur til at forstå og navigere sider:</p>
-<ul><li>Overskrift niveau 1: sidetitel
-<ul><li>Overskrift niveau 2: hovedemner
-<ul><li>Overskrift niveau 3: underemner</li></ul></li></ul></li></ul></div>`,
-    images: `<div class="why"><p>Tip: når du skriver alt‑tekst, så beskriv hvad billedet <em>betyder</em> i konteksten — ikke kun hvad det viser. Et billede af et barn, der sparker til en bold, kan betyde:</p>
-<ul><li>De spillede i kraftig regn.</li>
-<li>De nye trøjer har flotte drage‑logoer.</li>
-<li>Hun scorede sejrsmålet fra venstre side!</li></ul></div>`,
-    links: `<div class="why"><p>Brugere skimmer efter links og bruger søg‑på‑side for at finde dem ved navn; effektive links er derfor meningsfulde, unikke og korte:</p>
-<ul>
-<li>Ideelt: “Læs mere om <a href="https://webaim.org/techniques/hypertext/link_text">meningsfulde links</a>”</li>
-<li>Ikke unikt: “Klik <a href="https://webaim.org/techniques/hypertext/link_text">her</a> for at læse mere.”</li>
-<li>Ikke kort: “<a href="https://webaim.org/techniques/hypertext/link_text">Klik her for at lære mere</a>”</li>
-</ul></div>`,
-    imageLinks: `<div class="why"><p>Alt‑tekst skal beskrive et billedes <em>betydning</em> — ikke bare udseendet. Når billedet er et link, er betydningen linkets destination:
-<ul>
-<li>“<em>Et forstørrelsesglas</em>” beskriver et billede, ikke et link.</li>
-<li>“<em>Et søge‑forstørrelsesglas</em>” beskriver uklart begge dele.</li>
-<li>“<em>Søg</em>” beskriver korrekt linkets destination.</li>
-</ul></p></div>`
+    headings: `<div class="why"><p>Tip: overskrifter og underoverskrifter strukturerer indhold i et hierarki. Skærmlæsere bruger denne struktur til at forstå og navigere sider:</p><ul><li>Overskrift niveau 1: sidetitel<ul><li>Overskrift niveau 2: hovedemner<ul><li>Overskrift niveau 3: underemner</li></ul></li></ul></li></ul></div>`,
+    imageLinks: `<div class="why"><p>Tip: formålet med alt‑tekst er at beskrive, hvad et billede betyder — ikke blot hvad det indeholder. For et linket billede er betydningen selve linkets destination:<ul><li>"<em>Et forstørrelsesglas</em>" beskriver billedet, ikke linket.</li><li>"<em>Forstørrelsesglassets søgning</em>" beskriver begge dele og er forvirrende.</li><li>"<em>Søg</em>" beskriver linkets destination præcist.</li></ul></p></div>`,
+    images: `<div class="why"><p>Tip: når du skriver alt‑tekst, så beskriv hvad billedet <em>betyder</em> i konteksten — ikke kun hvad det viser. Et billede af et barn, der sparker til en bold, kan betyde:</p><ul><li>De spillede i kraftig regn.</li><li>De nye trøjer har flotte drage‑logoer.</li><li>Hun scorede sejrsmålet fra venstre side!</li></ul></div>`,
+    links: `<div class="why"><p>Tip: brugere skimlæser ofte kun linkene og bruger søgning på siden til at finde dem efter navn. Gode links er meningsfulde, unikke og korte:</p><ul><li>Ideelt: "Læs om <a href="https://webaim.org/techniques/hypertext/link_text">meningsfulde links</a>"</strong></li><li>Ikke unikt: "Klik <a href="https://webaim.org/techniques/hypertext/link_text">her</a> for at læse om meningsfulde links."</li>
+    <li>Ikke kort: "<a href="https://webaim.org/techniques/hypertext/link_text">Klik her for at lære mere om meningsfulde links</a>"</li></ul></div>`
   };
   const tips = {
-    ALT_FILE_EXT: `<p>Skærmlæsere læser denne URL højt, ofte én bogstav ad gangen. Det svarer sjældent til at se billedet.</p><p>${why.fix}Tilføj tom alt (alt="") hvis billedet er ren dekoration, eller tilføj en beskrivende alt‑tekst.</p>${why.images}`,
-    ALT_MAYBE_BAD: `<p>Angivet beskrivelse: <strong>"%(alt)"</strong></p><p>${why.fix}Giv en kort alt‑tekst, der beskriver, hvad billedet betyder i konteksten.</p>${why.images}`,
-    ALT_PLACEHOLDER: `<p>Angivet beskrivelse: <strong>"%(alt)"</strong></p><p>${why.fix}Giv en kort alt‑tekst, der beskriver, hvad billedet betyder i konteksten.</p>${why.images}`,
-    ALT_UNPRONOUNCEABLE: `<p>Alt‑teksten “%(alt)” indeholder kun uudtalelige tegn eller mellemrum. Skærmlæseren annoncerer “billede” og holder en akavet pause: “billede: ____”.</p><p>${why.fix}Tilføj en beskrivende alt‑tekst — eller en helt tom alt (alt=""), hvis det er et ikon/afstandselement, som bør ignoreres.</p>${why.images}`,
-    BTN_EMPTY: `<p>${why.fix}Brug en gyldig metode til at fortælle skærmlæsere, hvad knappen gør — fx synlig tekst, alt‑tekst på et ikon eller et <code>title</code>‑attribut.</p>`,
+    ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt‑tekst: <strong>"%(ALT_TEXT)"</strong></p><p>Skærmlæsere læser denne URL op — ofte tegn for tegn. Det formidler sjældent samme betydning som at se billedet.</p><p><strong class="badge">Løsning</strong> Tilføj alt="" hvis billedet er ren dekoration, eller skriv en beskrivende alt‑tekst.</p>${why.images}`,
+    ALT_MAYBE_BAD: `<p>Alt‑tekst: <strong>"%(alt)"</strong></p><p><strong class="badge">Løsning</strong> Sæt billedets alternative tekst til en kort og præcis beskrivelse af, hvad billedet betyder i denne sammenhæng.</p>${why.images}`,
+    ALT_PLACEHOLDER: `<p>Alt‑tekst: <strong>"%(alt)"</strong></p><p><strong class="badge">Løsning</strong> Sæt billedets alternative tekst til en kort og præcis beskrivelse af, hvad billedet betyder i denne sammenhæng.</p>${why.images}`,
+    ALT_UNPRONOUNCEABLE: `<p>Alt‑tekst: "<strong>%(alt)</strong>"</p><p>Denne alt‑tekst består kun af tegn, der ikke kan udtales, og/eller mellemrum. Skærmlæsere vil annoncere et billede og derefter holde en akavet pause eller læse noget uforståeligt.</p><p><strong class="badge">Løsning</strong> Tilføj en beskrivende alt‑tekst, eller brug alt="" hvis billedet blot er et ikon eller et afstandselement.</p>${why.images}`,
+    BTN_EMPTY: `<p><strong class="badge">Løsning</strong> Brug enhver gyldig metode til at forklare for skærmlæsere, hvad denne knap gør, f.eks. tekst, alt‑tekst på et ikon eller en title‑attribut.</p>`,
     BTN_EMPTY_LABELLEDBY: `<p>Knappens <code>aria-labelledby</code> er tom eller matcher ikke et <code>ID</code> på siden.</p><p>${why.fix}Kobl ID’et til et eksisterende element eller fjern attributten og beskriv knappen på en anden måde.</p>`,
     BTN_TIP: `${why.buttons}`,
     CONTRAST_WARNING: "Et baggrundsbillede eller en gradient gør, at værktøjet ikke sikkert kan fastslå farven bag teksten. Brug farvevælgeren herunder til et manuelt tjek.",
     DUPLICATE_ID: `<p>ID’er bruges her som etiketter eller linkmål og skal derfor være unikke.</p><p>${why.fix}Redigér denne ID: <strong>#%(id)</strong></p><div class="why"><p>I mange CMS stammer den fra et felt “name” eller “id”. I HTML er det attributten: <code>&lt;a id=""></code></p></div>`,
-    DUPLICATE_TITLE: `<p>${why.fix}Fjern linkets tekst eller <code>title</code>‑attribut.</p><div class="why"><p>Bemærk: <code>title</code>‑tooltips ses kun ved muse‑hover, ikke på mobil eller med tastatur. De bør ikke indeholde unik eller vigtig information.</p></div>`,
+    DUPLICATE_TITLE: `<p><strong class="badge">Løsning</strong> Slet linkets tekst eller dets <code>title</code>-attribut.</p><div class="why"><p>Tip: <code>title</code>-værktøjstip vises kun ved muse‑hover. De kan ikke ses på mobil eller med tastatur, så mange brugere ser dem aldrig. De bør ikke indeholde vigtige oplysninger.</p></div>`,
     EMBED_AUDIO: `<p>Hvis lydklippet indeholder tale, skal der leveres en <a href="https://www.w3.org/WAI/media/av/transcribing/">tekstlig version</a> på siden eller via link.</p><p>Automatiske transskriptioner skal efterses manuelt (talere og betydende lyde).</p>`,
     EMBED_DATA_VIZ: `<p>Indlejrede visualiseringer er ofte svære for hjælpemidler, for personer med nedsat syn/farvesyn og kan kræve vandret rulning på mobil.</p><p>${why.fix}Medmindre visualiseringen har høj kontrast, fuld tastaturbetjening <strong><em>og</em></strong> kan beskrives af skærmlæsere, så tilføj en ligeværdig alternativ form (tekstbeskrivelse, datatabel eller download).</p>`,
     EMBED_GENERAL: 'Automatiske værktøjer kan ikke analysere indhold inde i embeds. Sørg for alt‑tekst, undertekster, tilstrækkelig kontrast og at links/knapper er <a href="https://webaim.org/techniques/keyboard/">tastaturtilgængelige</a>, og luk derefter advarslen.',
@@ -453,7 +434,7 @@
     HEADING_MISSING_ONE: `<p>${why.fix}Markér sidetitlen som overskrift på niveau 1 for at markere dokumentstart.</p>${why.headings}`,
     HEADING_SKIPPED_LEVEL: `<p>Overskriften sprang fra <strong>niveau %(prevLevel)</strong> til <strong>niveau %(level)</strong>; for skærmlæsere lyder det som manglende indhold.</p><p>${why.fix}Juster niveauerne, så strukturen er uden huller.</p>${why.headings}`,
     HIDDEN_FOCUSABLE: `Dette interaktive element har <code>aria-hidden="true"</code>, men kan stadig fokuseres med tastatur. Skal det skjules for skærmlæsere, tilføj også <code>tabindex="-1"</code>; ellers fjern <code>aria-hidden</code>.`,
-    IMAGE_ALT_TOO_LONG: `<p>Alt‑tekst læses som en sammenhængende sætning; hvis noget misse, må alt høres igen.</p><p>Alt‑tekstlængde: %(altLength) tegn. <em class="ed11y-small">%(ALT_TEXT)</em></p><div class="why"><p>Tip: komplekse billeder kræver ofte en <strong>synlig</strong> billedtekst eller alternativ beskrivelse. Det er okay at henvise i alt‑teksten:</p><ul><li>“Plakat for fredag; detaljer i billedteksten.”</li><li>“Diagram: −10 % i år; detaljer i tabellen.”</li></ul></div>`,
+    IMAGE_ALT_TOO_LONG: `<p>Alt‑tekst med %(altLength) tegn: <strong class="ed11y-small">%(ALT_TEXT)</strong></p><p><strong class="badge">Løsning</strong> Sammenfat teksten, eller flyt nogle detaljer til en billedtekst.</p><div class="why"><p>Tip: komplekse billeder, der formidler mere information end der kan være i én sætning, har ofte brug for en <strong>synlig</strong> billedtekst eller alternativ tekst, der beskriver de væsentligste punkter. Det er helt fint at henvise skærmlæserbrugere til en sådan tekst:</p><ul><li>"Plakat for fredagens dans; detaljer i billedteksten."</li><li>"Diagram der viser, at fejl er faldet med 10% i år; detaljer i tabellen."</li></ul></div>`,
     IMAGE_DECORATIVE: `<p>Billedet er skjult for skærmlæsere via tom alt. Kun reelt dekorative billeder bør skjules.</p><p>${why.fix}Hvis billedet har betydning, tilføj alt‑tekst.</p>${why.images}`,
     IMAGE_DECORATIVE_CAROUSEL: "Billedet er markeret som <strong>dekorativt</strong>, men i slideshows/gallerier bør alle billeder have beskrivende alt‑tekst.",
     IMAGE_FIGURE_DECORATIVE: `<p>Billedet ignoreres af hjælpemidler. Giver billedteksten mening uden selve billedet?</p><p>${why.fix}Hvis ikke, tilføj alt‑tekst for det, billedteksten ikke dækker.</p><div class="why"><p>Tip: billeder, alt‑tekster og billedtekster arbejder sammen:</p><ul><li>Billedtekster giver kontekst/fortolkning.</li><li>Alt‑tekster beskriver billedet for dem, der ikke ser det.</li></ul></div>`,
@@ -461,31 +442,31 @@
     LABELS_ARIA_LABEL_INPUT: `<p><strong {B}>Usynlig feltetiket:</strong> <strong {C}>%(TEXT)</strong></p><p>Sørg for, at feltet har en synlig etiket, at den forbliver synlig under input, og at den matcher det usynlige navn.</p><div class="why"><p>Etiketter kun i <em>placeholder</em>/<em>title</em> forsvinder ved indtastning og gør kontrol vanskelig.</p></div>`,
     LABELS_INPUT_RESET: `<p>Nulstillingsknapper aktiveres let ved et uheld og kan medføre datatab.</p><p>${why.fix}Medmindre kun ét felt nulstilles, fjern knappen eller kræv bekræftelse.</p>`,
     LABELS_MISSING_IMAGE_INPUT: "Billedknappen mangler alt‑tekst. Tilføj fx <em>Søg</em> eller <em>Send</em>.",
-    LABELS_MISSING_LABEL: `<p>${why.fix}Tilføj et <code>id</code> til dette inputfelt, og tilføj et matchende <code>for</code>-attribut til label'en.</p>`,
-    LABELS_NO_FOR_ATTRIBUTE: "Dette inputfelt mangler en label. Tilføj en <code>for</code> på label, der matcher feltets <code>id</code>.<hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
+    LABELS_MISSING_LABEL: `<p><strong class="badge">Løsning</strong> Tilføj et <code>id</code> til dette felt, og tilføj en matchende <code>for</code>-attribut til etiketten.</p>`,
+    LABELS_NO_FOR_ATTRIBUTE: `Dette felt har ingen tilknyttet etiket. Tilføj en <code>for</code>-attribut til etiketten, som matcher dette felts <code>id</code>. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>`,
     LABELS_PLACEHOLDER: `<p>Placeholder‑tekst forsvinder under indtastning og kan have lav kontrast eller ligne indhold.</p><p>${why.fix}Sørg for, at vigtig info (label, hjælp, formatkrav) altid er synlig.</p>`,
-    LABEL_IN_NAME: `<p>Synlig tekst ser ud til at afvige fra det tilgængelige navn. Det kan forvirre skærmlæser‑brugere og tale‑styring.</p><p>${why.fix}Den synlige etiket skal starte med teksten fra den usynlige etiket og må ikke indeholde yderligere meningsfuld information.</p><p><strong>Skjult etiket:</strong> “%(TEXT)”</p>`,
-    LINK_ALT_FILE_EXT: `<p>Alt‑teksten indeholder “%(alt)”, hvilket sandsynligvis er et filnavn, ikke en linkbetegnelse.</p><p>${why.fix}Sæt alt‑teksten til linkets destination.</p><div class="why"><p>Alt‑tekst afspejler betydning; for billeder‑som‑links er det destinationen:</p><ul><li>“Side med tekst” beskriver et billede, ikke et link.</li><li>“IMG_1234.jpg” er et filnavn.</li><li>“<strong><em>Tilmeldingsformular (doc)</em></strong>” beskriver linkets mål.</li></ul></div>`,
-    LINK_ALT_MAYBE_BAD: `<p>Alt‑tekst: "<strong>%(alt)</strong>"</p><p>${why.fix}Sæt alt‑teksten for dette billede til linkets destination.</p>${why.imageLinks}`,
+    LABEL_IN_NAME: `<p>Den synlige tekst for dette element ser ud til at være forskellig fra dets tilgængelige navn. Det kan forvirre skærmlæserbrugere og ødelægge stemmestyring.</p><p><strong class="badge">Løsning</strong> Sørg for, at den synlige etiket begynder med den skjulte etikets tekst og ikke tilføjer yderligere meningsfuld information.</p><p><strong>Skjult etiket:</strong> "%(TEXT)"</p>`,
+    LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt‑tekst: "<strong>%(alt)</strong>"</p><p>Denne alt‑tekst er sandsynligvis et filnavn og ikke en meningsfuld linketiket.</p><p><strong class="badge">Løsning</strong> Sæt billedets alt‑tekst til navnet på linkets destination.</p><div class="why"><p>Formålet med alt‑tekst er at forklare billedets betydning. For et linket billede er dette selve linkdestinationen:</p><ul><li>"Side med tekst" beskriver billedet, ikke linket.</li><li>"IMG_1234.jpg" er kun et filnavn.</li><li>"<strong><em>Tilmeldingsformular til arrangement (.doc)</em></strong>" beskriver linkets mål.</li></ul></p></div>`,
+    LINK_ALT_MAYBE_BAD: `<p>Alt‑tekst: "<strong>%(alt)</strong>"</p><p><strong class="badge">Løsning</strong> Sæt denne billedes alt‑tekst til linkdestinationens navn.</p>${why.imageLinks}`,
     LINK_ALT_UNPRONOUNCEABLE: `<p>Alt‑teksten for dette linkede billede består kun af uudtalelige tegn: “%(ALT_TEXT)”.</p><p>${why.fix}Sæt alt‑teksten til linkets mål eller formål.</p>${why.imageLinks}`,
     LINK_CLICK_HERE: "“Klik”/“Klik her” er overflødigt og skjuler linkets formål.",
     LINK_DOI: `<p>${why.fix}Brug artiklens titel som link og lad DOI stå som tekst, ikke omvendt.</p><div class="why"><p>Beskrivende links er nemmere at skimme efter navn og mere tilgængelige.</p><p>Skærmlæsere kan dermed annoncere meningsfulde links fremfor talrækker.</p></div>`,
-    LINK_EMPTY: `<p>${why.fix}Tilføj beskrivende tekst eller slet linket, hvis det er et uheld (fx et linket mellemrum).</p><div class="why"><p>Skærmlæsere kæmper med tomme links: stilhed eller bogstavvis URL.</p><p>Linkede mellemrum kan kræve at omskrive teksten omkring.</p></div>`,
+    LINK_EMPTY: `<p><strong class="badge">Løsning</strong> Tilføj tekst, der beskriver linkets destination, eller slet det, hvis det blot er en fejl — fx et linket mellemrum.</p><div class="why"><p>Tip: skærmlæsere kan ikke beskrive tomme links. De er enten tavse ("Link, [...pause...]") eller læser URL’en op tegn for tegn.</p><p>Linkede mellemrum kan være svære at slette; nogle gange må teksten på begge sider slettes og skrives igen.</p></div>`,
     LINK_EMPTY_LABELLEDBY: `<p>Linkets <code>aria-labelledby</code> henviser ikke til et eksisterende <code>ID</code>.</p><p>${why.fix}Angiv et gyldigt ID eller fjern attributten.</p>`,
-    LINK_EMPTY_NO_LABEL: `<p>${why.fix}Tilføj tekst der beskriver destinationen, eller slet linket.</p><div class="why"><p>Tomme links kan ikke beskrives.</p><p>Kan kræve omskrivning af omkringstående tekst.</p></div>`,
+    LINK_EMPTY_NO_LABEL: `<p><strong class="badge">Løsning</strong> Tilføj beskrivende tekst, eller slet linket, hvis det var en fejl.</p><div class="why"><p>Tip: skærmlæsere kan ikke beskrive tomme links.</p><p>Nogle editorer gør linkede mellemrum svære at fjerne; slet ord på begge sider og skriv dem igen.</p></div>`,
     LINK_FILE_EXT: `<p>Linket fører til en fil (PDF, MP3, Zip, Word, …) uden advarsel.</p><p>${why.fix}Angiv filtype i linket via tekst/ikon.</a>.</p><p class="why">Angiv evt. filstørrelse: “Årsrapport (PDF, 3 MB)”.</p>`,
-    LINK_IDENTICAL_NAME: `<p>Tekst for linket: "<strong>%(TEXT)</strong>"</p><p>${why.fix}Gør linkteksterne unikke ved at bruge de forskellige destinations titler.</p>${why.links}`,
+    LINK_IDENTICAL_NAME: `<p>Linktekst: "<strong>%(TEXT)</strong>"</p><p><strong class="badge">Løsning</strong> Omskriv links, der fører til forskellige steder, så deres tekst entydigt afspejler deres destination.</p>${why.links}`,
     LINK_IMAGE_ALT: `Sørg for at denne alt‑tekst beskriver linkets destination:</p><p> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong></p>${why.imageLinks}`,
-    LINK_IMAGE_ALT_AND_TEXT: `<p><span style="display: none;">%(ALT)</span>Link med alt‑tekst:<br>"<strong>%(LINK)</strong>"</p><p>${why.fix}Redigér eller fjern alt‑teksten, hvis den tilføjer irrelevant eller redundant information.</p>${why.imageLinks}`,
-    LINK_IMAGE_LONG_ALT: `<p><a href="https://webaim.org/techniques/hypertext/link_text#alt_link">Alt‑tekst for linkede billeder beskriver linkets mål</a>. Lange alt‑tekster tyder ofte på, at billedet beskrives i stedet for linket.</p>Alt‑teksten er %(altLength) tegn: <em>%(ALT_TEXT)</em>`,
+    LINK_IMAGE_ALT_AND_TEXT: `<p><span style="display: none;">%(ALT)</span>Link med alt‑tekst:<br>"<strong>%(LINK)</strong>"</p><p><strong class="badge">Løsning</strong> Ændr eller fjern alt‑teksten, hvis den tilføjer irrelevant eller gentaget information.</p>${why.imageLinks}`,
+    LINK_IMAGE_LONG_ALT: `<p>Alt‑tekst på %(altLength) tegn: <strong class="ed11y-small">%(ALT_TEXT)</strong></p><p><strong class="badge">Løsning</strong> Sæt denne billedes alt‑tekst til linkdestinationens titel.</p><div class="why"><p>Skærmlæserbrugere hører ofte en liste over links uden kontekst. Alt‑teksten for et linket billede bliver linkets titel, så den bør beskrive destinationen — ikke billedets indhold.</p></div>`,
     LINK_IMAGE_NO_ALT_TEXT: `<p>Når et link indeholder et billede, bruges billedets alt‑tekst https://webaim.org/techniques/hypertext/link_text#alt_linksom linkets navn</p><p>${why.fix}Sæt alt‑teksten til linkets mål/formål.</p>${why.imageLinks}`,
     LINK_IMAGE_TEXT: "Billedet er markeret som dekorativt, men linket bruger omkringstående tekst som etiket.",
     LINK_NEW_TAB: `<p>${why.fix}Åbn i samme fane eller <a href="https://itmaybejj.github.io/linkpurpose/">advar brugeren</a> om ny fane.</p><div class="why"><p>Brugere kan selv vælge ny fane; tvang kan forvirre, især mht. “tilbage”.</p><p>I formularer åbner links ofte i ny fane for at undgå datatab.</p></div>`,
     LINK_PLACEHOLDER_ALT: `<p>Alt‑teksten for dette linkede billede er en placeholder: “<strong>%(alt)</strong>”.</p><p>${why.fix}Sæt alt‑teksten til linkets destination.</p>${why.imageLinks}`,
-    LINK_STOPWORD: `<p>Linket indeholder ord, der ikke hjælper med at beskrive formålet:<br><strong>%(text)</strong></p><p>${why.fix}Omskriv så formål eller destination er klart.</p>${why.links}`,
+    LINK_STOPWORD: `<p>Linktekst: "<strong>%(text)</strong>"</p><p><strong class="badge">Løsning</strong> Brug linktekst, der beskriver destinationen.</p>${why.links}`,
     LINK_STOPWORD_ARIA: `<p>ARIA leverer et tilgængeligt navn, men den synlige tekst er generisk: “<strong {C}>%(ERROR)</strong>”.</p><p>${why.fix}Skriv meningsfulde, synlige linktekster, der matcher ARIA‑navnet.</p>${why.links}`,
-    LINK_SUS_ALT: `<p>Alt‑teksten indeholder “%(alt)”, hvilket ofte betyder, at billedet beskrives frem for linkdestinationen.</p><p>Alt‑tekst: "<strong>%(ALT_TEXT)</strong>"</p><p>For at rette: sørg for at alt‑teksten beskriver linkets formål eller destination.</p>${why.imageLinks}`,
-    LINK_SYMBOLS: `${why.fix}Undgå symboler som call‑to‑action i linktekst, medmindre de skjules for hjælpemidler. Skærmlæsere kan udtale dem forvirrende. Overvej at fjerne: <strong {C}>%(ERROR)</strong>`,
+    LINK_SUS_ALT: `<p>Denne alt‑tekst indeholder ordet "%(alt)", hvilket normalt betyder, at den ikke beskriver linkets destination.</p><p>Alt‑tekst: "<strong>%(ALT_TEXT)</strong>"</p><p><strong class="badge">Løsning</strong> Sørg for, at alt‑teksten beskriver linkets formål eller destination.</p>${why.imageLinks}`,
+    LINK_SYMBOLS: `<p>Fundet symbol: <strong {C}>%(ERROR)</strong></p><p><strong class="badge">Løsning</strong> Undgå at bruge symboler som handlingsopfordringer, medmindre de skjules for hjælpemidler. Skærmlæsere kan læse symbolerne højt og skabe forvirring.</p>`,
     LINK_URL: `<p>${why.fix}Erstat URL som linktekst med titel eller formål.</p><div class="why"><p>Brugere — særligt skærmlæser‑brugere — skimmer links ved navn.</p><p>URL’er er svære at skimme/søge i.</p></div>`,
     META_LANG: `<p>${why.fix}Tilføj <a href="https://www.w3.org/International/questions/qa-html-language-declarations">sprog‑attribut</a> på sidens HTML‑tag.</p><div class="why"><p>Skærmlæsere vælger udtale efter sprog. Forkert sprog ⇒ uforståelig tale.</p></div>`,
     META_MAX: `<p>Dette meta‑tag begrænser zoom.</p><p>${why.fix}Fjern/tilpas begrænsningen, så fuld zoom er mulig.</p>`,
@@ -496,8 +477,8 @@
     MISSING_ALT_LINK: `<p>Ved linkede billeder uden alt læses billed‑URL’en — særligt problematisk.</p><p>${why.fix}Tilføj en alt‑tekst, der beskriver linkets mål.</p>${why.imageLinks}`,
     MISSING_ALT_LINK_HAS_TEXT: `<p>Billedet er del af et link med tekst. Hvis synlig tekst er tilstrækkelig, brug alt="". Ellers tilføj alt‑tekst, der beskriver målet.</p>${why.imageLinks}`,
     QA_BAD_LINK: `<p>Linket ser ud til at pege på et udviklingsmiljø:<br>{L} <strong {C}>%(LINK)</strong></p><p>${why.fix}Brug en relativ sti (/folder) eller offentlig URL.</p>`,
-    QA_BLOCKQUOTE: `<p><code>blockquote</code> tolkes som citat. Korte “citat‑blokke” er ofte overskrifter.</p><p>${why.fix}Er det en overskrift, så brug overskriftsformat.</p>${why.headings}`,
-    QA_DOCUMENT: `<p>Linkede dokumenter er webindhold og skal være tilgængelige. Tjek overskrifter, tabelhoveder og alt‑tekster; luk derefter advarslen.</p><div class="why"><ul><li>Gør dine <a href="https://support.google.com/docs/answer/6199477?hl=da">Google‑dokumenter</a> tilgængelige.</li><li>Gør dine <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Office‑dokumenter</a> tilgængelige.</li></ul></div>`,
+    QA_BLOCKQUOTE: `<p><code>blockquote</code> formatering får skærmlæsere til at opfatte teksten som et citat. Mange korte blockquotes er i virkeligheden overskrifter.</p><p><strong class="badge">Løsning</strong> Hvis dette er en overskrift og ikke et citat, brug overskriftsformatering, så det vises i sidens struktur.</p>${why.headings}`,
+    QA_DOCUMENT: `<p>Linkede dokumenter betragtes som webindhold og skal også være tilgængelige. Kontroller, at dokumentet har korrekte overskrifter, tabeloverskrifter og alt‑tekster, før du ignorerer denne advarsel.</p><div class="why"><ul><li>Gør dine <a href="https://support.google.com/docs/answer/6199477?hl=en">Google Workspace‑dokumenter og præsentationer</a> mere tilgængelige.</li><li>Gør dine <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Microsoft Office‑dokumenter</a> mere tilgængelige.</li></ul></div>`,
     QA_FAKE_HEADING: `<p>${why.fix}Hvis den fede linje introducerer et emne, så brug overskriftsformat.</p><div class="why"><p>Tip: overskrifter giver en navigérbar indholdsfortegnelse for hjælpemidler.</p></div>`,
     QA_FAKE_LIST: `<p>${why.fix}Hvis “%(text)” er et punktopstillingselement, så brug listeformat.</p><div class="why"><p>Lister har visuel og semantisk struktur:</p><ol><li>Jævne indryk gør læsning lettere.</li><li>Skærmlæsere annoncerer placering (“punkt 3 af 7”).</li></ol><p>En sætning med et tal i starten er ikke en rigtig liste.</p></div>`,
     QA_IN_PAGE_LINK: `<p>Linkets mål matcher ikke noget element på siden.</p><div class="why"><p>Udviklernote: hvis det er en JS‑anker, så test tastaturbetjening før udelukkelse.</p></div>`,
@@ -509,8 +490,8 @@
     QA_SUBSCRIPT: `Hævet/sænket skrift gør teksten lille og svær at læse. Brug kun til fx 4<sup>e</sup>, H<sub>2</sub>O, fodnoter.`,
     QA_UNDERLINE: `<p>Understregning betyder “link” på webben. Brugere vil tro, det kan klikkes.</p><p>${why.fix}Brug <strong>fed</strong> eller <em>kursiv</em> til fremhævelse, og overskrifter til nye sektioner.</p><div class="why"><p>Skærmlæsere annoncerer ikke visuelle stilarter; struktur skabes af overskrifter.</p></div>`,
     QA_UPPERCASE: `<p>STORE BLOKKE MED VERSALER ER SVÆRERE AT LÆSE OG KAN OPFATTES SOM “RAAB”.</p><p>${why.fix}Fremhæv få ord ad gangen, helst med fed frem for versaler.</p><div class="why"><p>Skærmlæsere annoncerer ikke “fed”. Brug overskrift ved nyt emne.</p></div>`,
-    SUS_ALT: `<p>Alt‑teksten indeholder “%(alt)” og er formentlig redundant:</p><p><strong class="badge">Alt‑tekst</strong> “%(ALT_TEXT)”</p><p>${why.fix}Omskriv alt‑teksten kort og betydningsbærende.</p><div class="why"><p>Skærmlæsere annoncerer allerede “billede”, så “billede af …” er ofte unødvendigt.</p></div>`,
-    TABINDEX_ATTR: `<p>${why.fix}Brug aldrig tabindex > "0". Tilpas HTML‑rækkefølgen, så tab‑, læse‑ og visuel rækkefølge matcher.</p><div class="why"><p>Som standard matcher de tre rækkefølger.</p><p>Positiv tabindex flytter elementet op i tab‑rækkefølgen, <strong>uden</strong> at flytte det visuelt — det forvirrer.</p></div>`,
+    SUS_ALT: `<p>Denne alt‑tekst indeholder ordet "%(alt)", hvilket sandsynligvis er overflødigt.</p><p>Alt‑tekst: "<strong>%(ALT_TEXT)</strong>"</p><p><strong class="badge">Løsning</strong> Omskriv alt‑teksten, så den kort formidler billedets betydning.</p><div class="why"><p>Tip: skærmlæsere annoncerer, at de beskriver et billede, før de læser alt‑teksten op, så udtryk som "billede af" og "foto af" er ofte overflødige — medmindre ordene refererer til noget inde i billedet:</p><ul><li>Ikke overflødigt: "<em>Et foto i</em> et fotoalbum, der vises for klassen."</li><li>Overflødigt: "<em>Foto af</em> et foto i et fotoalbum."</li></ul></div>`,
+    TABINDEX_ATTR: `<p><strong class="badge">Løsning</strong> Brug aldrig tabindex‑værdier større end 0. Omarrangér i stedet elementerne i HTML’en, så tab‑rækkefølge og læserækkefølge følger samme logik som den visuelle rækkefølge.</p><div class="why"><p>Tip: som udgangspunkt er den visuelle rækkefølge, tab‑rækkefølgen og skærmlæserens læserækkefølge identiske.</p><p>En positiv tabindex flytter elementet til begyndelsen af tab‑rækkefølgen, <strong>men ikke i den visuelle eller semantiske rækkefølge</strong>. Hjælpemiddelbrugere kan derfor komme til at lede efter tilhørende etiketter og felter i hver sin ende af siden.</p></div>`,
     TABLES_EMPTY_HEADING: ` <p>${why.fix}Sørg for, at hver tabeloverskriftscelle indeholder tekst.</p><div class="why"><p>Tip: skærmlæsere bruger overskrifter til at orientere i tabeller.</p></div>`,
     TABLES_MISSING_HEADINGS: ` <p>${why.fix}Angiv i tabellens indstillinger om overskrifter findes i første række, første kolonne eller begge.</p><div class="why"> <p>Tip: skærmlæsere gentager relevante overskrifter i celler.</p><p>Er tabellen kun til layout, fjern tabel‑formatet.</p></div>`,
     TABLES_SEMANTIC_HEADING: ` <p>${why.fix}Fjern indholdsoverskrifter (h2, h3) fra tabellen. Brug tabeloverskrifter. For flere niveauer: del i flere tabeller.</p><div class="why"> <p>Tip: tabeloverskrifter er rettede (række/kolonne). Indholdsoverskrifter gælder alt efterfølgende — også i andre kolonner:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">En <strong>tabeloverskrift</strong> i celle 2 mærker celle B. <br><br> En <strong>indholdsoverskrift</strong> i celle 2 påvirker 3, A, B, C og denne tekst samt tooltip‑fod.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`
@@ -518,13 +499,10 @@
   const interfaceStrings = {
     ALERT_CLOSE: "Luk",
     ALT: "Alt‑tekst: ",
+    CONSOLE_ERROR: "Der opstod et problem med tilgængelighedskontrollen på denne side. %(link)%(link)Rapportér det på GitHub</a>.",
     DECORATIVE: "Markeret som dekorativ",
     DISMISS: "Ignorer",
     DISMISS_ALL: "På denne side: ignorer",
-    edit_page: "Rediger side",
-    edit_layout: "Rediger layout",
-    edit_term: "Rediger term",
-    edit_user: "Rediger bruger",
     IMAGES: "Alt‑tekst",
     MAIN_TOGGLE_LABEL: "Aktivér tilgængelighedsværktøjer",
     MISSING: "(mangler!)",
@@ -533,10 +511,12 @@
     OUTLINE: "Overskrifter",
     PANEL_DISMISS_BUTTON: `Vis %(dismissCount) skjulte beskeder`,
     PANEL_HEADING: "Vis visualiseringer",
+    PANEL_HEADING_MISSING_ONE: "Overskrift på niveau 1 mangler.",
+    PANEL_NO_HEADINGS: "Ingen overskrifter fundet.",
     SKIP_TO_ISSUE: "Vis advarsel",
     WARNING: "kræver manuel kontrol",
     WARNINGS: "kræver manuelle kontroller",
-    buttonFirstContent: "Vis den første advarsel",
+    buttonFirstContent: "Vis første advarsel",
     buttonHideHiddenAlert: "Skjul skjult besked",
     buttonHideHiddenAlerts: `Skjul %(count) skjulte beskeder`,
     buttonShowHiddenAlert: "Vis skjult besked",
@@ -548,6 +528,10 @@
     dismissOkTitle: "Skjuler beskeden for alle redaktører",
     dismissOnSite: "På hele sitet: marker som OK",
     dismissalsHeader: "Tænker du ikke at løse dette?",
+    edit_layout: "Rediger layout",
+    edit_page: "Rediger side",
+    edit_term: "Rediger term",
+    edit_user: "Rediger bruger",
     errorOutlinePrefixHeadingEmpty: "(tom overskrift)",
     errorOutlinePrefixHeadingIsLong: "(markeret for længde)",
     errorOutlinePrefixSkippedLevel: "(markeret for niveau‑spring)",
@@ -560,8 +544,6 @@
     main_toggle_show_alerts: "Vis tilgængelighedsbeskeder",
     panelCheckAltText: `<p class="ed11y-small">Kontrollér at hvert billede beskriver sin betydning i konteksten, og at der ikke er “tekst i billeder”.</p>`,
     panelCheckOutline: `<p class="ed11y-small">Dette viser overskriftsstrukturen. Sørg for at den matcher sidens visuelle struktur.</p>`,
-    PANEL_HEADING_MISSING_ONE: "Overskrift på niveau 1 mangler.",
-    PANEL_NO_HEADINGS: "Ingen overskrifter fundet.",
     reportsLink: "Åbn webstedsrapporter",
     toggleDisabled: "Der er intet indhold som Editoria11y kan kontrollere.",
     transferFocus: "Redigér dette indhold",
