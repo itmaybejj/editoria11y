@@ -346,7 +346,7 @@ const Sa11yStrings = {
 const testNames = {
   ALT_FILE_EXT: "この代替テキストは説明ではなくファイル名です",
   ALT_MAYBE_BAD: "この代替テキストはスクリーンリーダーで正しく読み上げられない可能性があります",
-  ALT_PLACEHOLDER: "この代替テキストは意味のないプレースホルダーです",
+  ALT_PLACEHOLDER: "この代替テキストは画像の内容を説明していません",
   ALT_UNPRONOUNCEABLE: "この代替テキストは発音できません",
   BTN_EMPTY: "このボタンにはアクセシブルな名称がありません",
   BTN_EMPTY_LABELLEDBY: "このボタンの ARIA ラベルが無効です",
@@ -379,8 +379,9 @@ const testNames = {
   IMAGE_FIGURE_DECORATIVE: "手動チェック：キャプション付きの画像に alt テキストがありません",
   IMAGE_FIGURE_DUPLICATE_ALT: "alt テキストはキャプションと同じ内容にすべきではありません",
   LABELS_ARIA_LABEL_INPUT: "このフィールドには可視ラベルがありますか？",
-  LABELS_PLACEHOLDER: "手動チェック：プレースホルダーのテキスト",
   LABELS_INPUT_RESET: "このリセットボタンは必要ですか？",
+  LABELS_MISSING_LABEL: "この入力欄はラベルと関連付けられていません",
+  LABELS_PLACEHOLDER: "手動チェック：プレースホルダーのテキスト",
   LABEL_IN_NAME: "可視ラベルが非表示ラベルと一致していません",
   LINK_ALT_FILE_EXT: "リンクの alt テキストが URL になっています",
   LINK_ALT_MAYBE_BAD: "リンク画像の alt テキストがスクリーンリーダーで読み上げられません",
@@ -391,7 +392,7 @@ const testNames = {
   LINK_EMPTY_LABELLEDBY: "このリンクの aria‑labelledby が無効です",
   LINK_EMPTY_NO_LABEL: "このリンクにはラベルが必要です",
   LINK_FILE_EXT: "警告なしにファイルへリンクしています",
-  LINK_IDENTICAL_NAME: "このリンクは行き先を一意に説明していますか？",
+  LINK_IDENTICAL_NAME: "同じテキストのリンクが異なるページに移動しています",
   LINK_IMAGE_ALT: "手動チェック：alt テキスト付きリンク画像",
   LINK_IMAGE_ALT_AND_TEXT: "この alt テキストはリンク文脈において意味がありますか？",
   LINK_IMAGE_LONG_ALT: "このリンク画像の alt テキストを短縮できますか？",
@@ -399,7 +400,7 @@ const testNames = {
   LINK_IMAGE_TEXT: "手動チェック：リンク内の画像が装飾扱いになっています。",
   LINK_NEW_TAB: "このリンクは警告なしに新しいタブを開きますか？",
   LINK_PLACEHOLDER_ALT: "このリンク画像には意味のある代替テキストが必要です",
-  LINK_STOPWORD: "このリンクは目的地を説明していますか？",
+  LINK_STOPWORD: "このリンクは一般的すぎる語のみで構成されています",
   LINK_STOPWORD_ARIA: "リンクの意味がスクリーンリーダー利用者にしか伝わりません",
   LINK_SUS_ALT: "この alt テキストは画像を説明していますか？リンクを説明していますか？",
   LINK_SYMBOLS: "手動チェック：このリンク内の記号／絵文字に意味はありますか？",
@@ -434,45 +435,25 @@ const testNames = {
   UNCONTAINED_LI: "無効な HTML リストです"
 };
 const why = {
+  buttons: `<div class="why"><p>ヒント：ボタンのアクセシブルネームは、そのボタンが何を行うかを明確に示す必要があります。クリックで状態が変わるボタンは、名前もそれに合わせて変える必要があります：</p><ul><li>ラベルを変える例：<br>"再生/一時停止"、"詳細を表示/詳細を非表示"</li><li><a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">状態属性</a>を変える例：<br>"再生/再生（押下）"、"詳細（折りたたみ）/詳細（展開）"</li></ul><p>ただし両方を同時に変えないでください。"再生" を "一時停止（押下）" に変えると、プレーヤーが再生中ではなく一時停止中であることを意味してしまいます。</p></div>`,
   fix: `<strong class="badge">修正方法</strong>`,
-  check: `<strong class="badge">手動チェック</strong>`,
-  buttons: `<div class="why"><p>注意：ボタンのアクセシブルネームは、そのボタンが何をするのかを明確に示す必要があります。クリック後に状態が変わるボタンは、名前も変わるべきです：</p><ul>
-<li>ラベルが変化する例：<br>「再生／一時停止」、「詳細を表示／非表示」</li>
-<li>ARIA 状態属性が変化する例：<br>「再生／再生（押下）」、「詳細（折りたたみ）／詳細（展開）」</li>
-</ul>
-<p>ただし、ラベルと状態の両方を同時に変えてはいけません。「再生」を「一時停止（押下）」にすると、プレーヤーが再生中ではなく一時停止中であると解釈されます！</p></div>`,
-  headings: `<div class="why"><p>ヒント：見出しは内容を階層構造に整理します。スクリーンリーダー利用者は、この構造を頼りにページを理解し、移動します：</p>
-<ul><li>見出しレベル 1：ページタイトル
-<ul><li>見出しレベル 2：主要なセクション
-<ul><li>見出しレベル 3：サブセクション</li></ul></li></ul></li></ul></div>`,
-  images: `<div class="why"><p>ヒント：代替テキストは「何が写っているか」ではなく、その画像が文脈で<em>何を意味するか</em>を書きます。たとえば、子どもがボールを蹴る写真は文脈により次のように解釈できます：</p>
-<ul><li>激しい雨の中でもプレーを続けている。</li>
-<li>新しいユニフォームにかっこいいドラゴンのロゴが付いている。</li>
-<li>左サイドから決勝ゴールを決めた！</li></ul></div>`,
-  links: `<div class="why"><p>多くのユーザーはページをスクロールしながらリンク名で探します。したがって、良いリンクテキストは「意味がある・固有・簡潔」である必要があります：</p>
-<ul>
-<li>理想的な例：「有意義なリンクについて読む： https://webaim.org/techniques/hypertext/link_text」</li>
-<li>固有でない例：「詳しくは https://webaim.org/techniques/hypertext/link_textここ</a> をクリック」</li>
-<li>簡潔でない例：「https://webaim.org/techniques/hypertext/link_textここをクリックして有意義なリンクについてさらに学ぶ</a>」</li>
-</ul></div>`,
-  imageLinks: `<div class="why"><p>代替テキストの目的は、画像の<em>意味</em>を伝えることです。画像がリンクとして使われている場合、その意味は「リンク先」です：</p>
-<ul>
-<li>「<em>虫眼鏡</em>」→ 画像の説明であり、リンクの説明ではありません。</li>
-<li>「<em>検索アイコン</em>」→ 画像か動作かが曖昧です。</li>
-<li>「<em>検索</em>」→ リンクの目的（行き先）を正しく説明します。</li>
-</ul></div>`
+  headings: `<div class="why"><p>ヒント：見出しは内容を階層構造に整理します。スクリーンリーダー利用者は、この構造を頼りにページを理解し、移動します：</p><ul><li>見出しレベル 1：ページタイトル<ul><li>見出しレベル 2：主要なセクション<ul><li>見出しレベル 3：サブセクション</li></ul></li></ul></li></ul></div>`,
+  imageLinks: `<div class="why"><p>ヒント：alt テキストは画像が「何を表しているか」を伝えるものであり、「何が写っているか」ではありません。リンク画像の場合、意味はリンク先になります：<ul><li>"<em>虫眼鏡の画像</em>" は画像の説明であり、リンクの説明ではありません。</li><li>"<em>検索用虫眼鏡</em>" は両方を説明しようとして混乱を招きます。</li><li>"<em>検索</em>" はリンク先の目的を正しく表します。</li></ul></p></div>`,
+  images: `<div class="why"><p>ヒント：代替テキストは「何が写っているか」ではなく、その画像が文脈で<em>何を意味するか</em>を書きます。たとえば、子どもがボールを蹴る写真は文脈により次のように解釈できます：</p><ul><li>激しい雨の中でもプレーを続けている。</li><li>新しいユニフォームにかっこいいドラゴンのロゴが付いている。</li><li>左サイドから決勝ゴールを決めた！</li></ul></div>`,
+  links: `<div class="why"><p>ヒント：利用者はリンクのみをざっと読み、ページ内検索でリンク名を探します。意味が明確で一意かつ簡潔なリンクが効果的です：</p><ul><li>理想的："Learn about <a href="https://webaim.org/techniques/hypertext/link_text">meaningful links</a>"</li><li>一意でない："ここをクリックして <a href="https://webaim.org/techniques/hypertext/link_text">meaningful links</a> について学ぶ"</li>
+    <li>簡潔でない："<a href="https://webaim.org/techniques/hypertext/link_text">meaningful links について詳しく知るにはここをクリック</a>"</li></ul></div>`
 };
 const tips = {
-  ALT_FILE_EXT: `<p>スクリーンリーダーはこの URL を読み上げますが、多くの場合 1 文字ずつ読み上げます。これは実際の画像を見る場合の意味を十分に伝えません。</p><p>${why.fix}意味のない装飾でスクリーンリーダーに無視させたい場合は空の alt（alt=""）を設定し、意味がある場合は説明的な代替テキストを追加してください。</p>${why.images}`,
-  ALT_MAYBE_BAD: `<p>この画像に提供された説明：<strong>"%(alt)"</strong></p><p>${why.fix}この画像がこの文脈で何を意味するか、簡潔に説明する代替テキストを設定してください。</p>${why.images}`,
-  ALT_PLACEHOLDER: `<p>この画像に提供された説明：<strong>"%(alt)"</strong></p><p>${why.fix}この画像がこの文脈で何を意味するか、簡潔に説明する代替テキストを設定してください。</p>${why.images}`,
-  ALT_UNPRONOUNCEABLE: `<p>この alt テキスト「%(alt)」は記号や空白のみで構成され、発音できません。スクリーンリーダーは「画像：____」という不自然な読み上げになります。</p><p>${why.fix}意味のある alt を追加するか、装飾目的で無視させたい場合は完全に空の alt（alt=""）を設定してください。</p>${why.images}`,
-  BTN_EMPTY: `<p>${why.fix}可視ラベル、アイコンの alt、または <code>title</code> 属性など、適切な方法でボタンの名称を提供してください。</p>`,
+  ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt テキスト：<strong>"%(ALT_TEXT)"</strong></p><p>スクリーンリーダーはこの URL を一文字ずつ読み上げることがあり、画像を見たときと同じ意味にはなりません。</p><p><strong class="badge">修正方法</strong> 無意味な装飾でスクリーンリーダーに無視させたい場合は alt=""（空の alt）を、意味がある場合は説明的な alt を追加してください。</p>${why.images}`,
+  ALT_MAYBE_BAD: `<p>Alt テキスト：<strong>"%(alt)"</strong></p><p><strong class="badge">修正方法</strong> この画像がこの文脈で何を意味するのか、簡潔に説明する alt に設定してください。</p>${why.images}`,
+  ALT_PLACEHOLDER: `<p>Alt テキスト：<strong>"%(alt)"</strong></p><p><strong class="badge">修正方法</strong> この画像がこの文脈で何を意味するのか、簡潔に説明する alt に設定してください。</p>${why.images}`,
+  ALT_UNPRONOUNCEABLE: `<p>Alt テキスト：" <strong>%(alt)</strong> "</p><p>この alt テキストには発音できない記号や空白のみが含まれています。スクリーンリーダーは画像があることを知らせた後、不自然に間を置くか、意味のない読み上げになります。</p><p><strong class="badge">修正方法</strong> 説明的な alt を追加するか、ただのアイコンやスペーサーなど無視させたい場合は完全な空の alt (alt="") を指定してください。</p>${why.images}`,
+  BTN_EMPTY: `<p><strong class="badge">修正方法</strong> テキスト、アイコンの alt、title 属性など、任意の方法でこのボタンの目的をスクリーンリーダーに伝えてください。</p>`,
   BTN_EMPTY_LABELLEDBY: `<p>このボタンの <code>aria-labelledby</code> 属性は空、または存在しない <code>ID</code> を参照しています。</p><p>${why.fix}有効な ID を参照するよう修正するか、この属性を削除して別の方法で名称を提供してください。</p>`,
   BTN_TIP: `${why.buttons}`,
   CONTRAST_WARNING: "背景画像またはグラデーションのため、この検査ではテキスト背後の色を確実に判定できません。下のカラーピッカーで手動確認してください。",
   DUPLICATE_ID: `<p>ID はラベル付けやリンク先のターゲットとして使用されるため、ページ内で一意でなければなりません。</p><p>${why.fix}この ID を変更してください：<strong>#%(id)</strong></p><div class="why"><p>多くの CMS では「name」または「id」フィールドに由来します。HTML では <code>&lt;a id=""></code> のように記述します。</p></div>`,
-  DUPLICATE_TITLE: `<p>${why.fix}このリンクの <code>title</code> 属性を削除してください。</p><div class="why"><p>注意：<code>title</code> のツールチップはマウス操作でしか表示されず、モバイルやキーボードでは見えません。重要情報は入れないでください。</p></div>`,
+  DUPLICATE_TITLE: `<p><strong class="badge">修正方法</strong> リンクの <code>title</code> 属性を削除してください。</p><div class="why"><p>ヒント：<code>title</code> のツールチップはマウス操作時にのみ表示されます。スマートフォンやキーボード操作では見えないため、重要な情報を含めるべきではありません。</p></div>`,
   EMBED_AUDIO: `<p>音声に話者の発話が含まれる場合、このページ内またはリンク先に https://www.w3.org/WAI/media/av/transcribing/文字起こし</a>を提供してください。</p><p>自動生成の字幕や原稿は、人の確認（話者・重要な音の明示）が必要です。</p>`,
   EMBED_DATA_VIZ: `<p>埋め込みのデータ可視化は、支援技術での操作が困難であったり、弱視や色覚障害の方には理解しづらかったり、モバイルで横スクロールが必要になりがちです。</p><p>${why.fix}高コントラストで、完全にキーボード操作が可能で、<strong><em>なおかつ</em></strong>スクリーンリーダーで説明できる構造でない限り、同等の情報を提供するテキスト説明やデータ表（またはダウンロードシート）を用意してから、この警告を無視してください。</p>`,
   EMBED_GENERAL: "自動チェックでは埋め込み要素内部を検査できません。画像の alt、動画の字幕、十分なテキストコントラスト、そしてリンクやボタンが https://webaim.org/techniques/keyboard/キーボード操作</a>で利用できるかを確認してから、この警告を無視してください。",
@@ -486,7 +467,7 @@ const tips = {
   HEADING_MISSING_ONE: `<p>${why.fix}ページタイトルをレベル 1 の見出しとしてマークしてください。</p>${why.headings}`,
   HEADING_SKIPPED_LEVEL: `<p>この見出しは <strong>%(prevLevel)</strong> から <strong>%(level)</strong> へレベルが飛んでいます。スクリーンリーダーには抜け落ちがあるように伝わります。</p><p>${why.fix}適切な階層になるようにレベルを調整してください。</p>${why.headings}`,
   HIDDEN_FOCUSABLE: `このインタラクティブ要素は <code>aria-hidden="true"</code> が設定されていますが、キーボードでフォーカスできます。スクリーンリーダーから隠したい場合は <code>tabindex="-1"</code> を追加してください。隠さない場合は <code>aria-hidden</code> を削除してください。`,
-  IMAGE_ALT_TOO_LONG: `<p>スクリーンリーダーは alt を一続きの文として読み上げます。長すぎると聞き返しが困難です。</p><p>この alt テキストの長さは %(altLength) 文字です： <em class="ed11y-small">%(ALT_TEXT)</em></p><div class="why"><p>ヒント：複雑な画像は、<strong>可視のキャプション</strong>や詳しい説明が必要になることがあります。alt からそれへ誘導して構いません：</p><ul><li>「金曜ダンスのポスター。詳細はキャプション参照。」</li><li>「今年 10% 減を示すグラフ。詳細は表参照。」</li></ul></div>`,
+  IMAGE_ALT_TOO_LONG: `<p>%(altLength) 文字の alt テキスト：<strong class="ed11y-small">%(ALT_TEXT)</strong></p><p><strong class="badge">修正方法</strong> 要約するか、一部の説明をキャプションに移してください。</p><div class="why"><p>ヒント：1 文に収まらない情報量のある複雑な画像は、重要な詳細を説明・解釈する<strong>目に見える</strong>キャプションや別の代替テキストが必要になることが多いです。スクリーンリーダー利用者をそのテキストに誘導しても構いません：</p><ul><li>"金曜のダンスのポスター。詳細はキャプションに記載。"</li><li>"今年の問題件数が 10% 減少したことを示すグラフ。詳細は表に記載。"</li></ul></div>`,
   IMAGE_DECORATIVE: `<p>この画像は alt="" によりスクリーンリーダーから隠されています。本当に意味を持たない装飾画像のみ、この方法を使ってください。</p><p>${why.fix}意味を持つ場合は alt を追加してください。</p>${why.images}`,
   IMAGE_DECORATIVE_CAROUSEL: "この画像は<strong>装飾</strong>としてマークされていますが、カルーセル／ギャラリー内の画像はすべて説明的な alt が必要です。",
   IMAGE_FIGURE_DECORATIVE: `<p>この画像は支援技術から無視されます。キャプションだけで画像の意味が伝わりますか？</p><p>${why.fix}十分でない場合は、キャプションで触れていない視覚的意味を alt で補ってください。</p><div class="why"><p>ヒント：画像・代替テキスト・キャプションは相互補完します：</p><ul><li>キャプションは文脈や解釈を提供します。</li><li>代替テキストは、画像を見られない方に視覚情報を伝えます。</li></ul></div>`,
@@ -494,43 +475,44 @@ const tips = {
   LABELS_ARIA_LABEL_INPUT: `<p><strong {B}>非表示のフィールドラベル：</strong> <strong {C}>%(TEXT)</strong></p><p>可視ラベルが存在するか、入力後も見えるままか、非可視ラベルと一致しているかを確認してください。</p><div class="why"><p><em>title</em> や <em>placeholder</em> に依存するラベルは入力中に消え、確認が難しくなりがちです。</p></div>`,
   LABELS_INPUT_RESET: `<p>リセットボタンは誤操作されやすく、取り消しできないデータ消失につながります。</p><p>${why.fix}1 フィールドのみをクリアする用途でない限り、削除するか実行前の確認を求めるようにしてください。</p>`,
   LABELS_MISSING_IMAGE_INPUT: "画像ボタンに alt がありません。<em>検索</em> や <em>送信</em> など、機能を説明する alt を追加してください。",
-  LABELS_MISSING_LABEL: "この入力フィールドには関連付けられたラベルがありません。<code>id</code> を追加し、<code>for</code> を持つラベルと結び付けてください。",
-  LABELS_NO_FOR_ATTRIBUTE: "この入力フィールドにはラベルがありません。ラベルにこのフィールドの <code>id</code> と一致する <code>for</code> を追加してください。<hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
+  LABELS_MISSING_LABEL: `<p><strong class="badge">修正方法</strong> この入力欄に <code>id</code> を追加し、対応する <code>for</code> 属性をラベルに追加してください。</p>`,
+  LABELS_NO_FOR_ATTRIBUTE: `この入力欄にはラベルが関連付けられていません。ラベルに <code>for</code> 属性を追加し、この入力欄の <code>id</code> と一致させてください。 <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>`,
   LABELS_PLACEHOLDER: `<p>プレースホルダーは入力を始めると消え、コントラスト不足や本文との見分けにくさを招く場合があります。</p><p>${why.fix}重要な情報（ラベル、ヘルプ、書式指示）は、フィールドに入力があっても見えるようにしてください。</p>`,
-  LABEL_IN_NAME: `<p>この要素の可視ラベルがアクセシブルネームと一致していません。これはスクリーンリーダーや音声操作のユーザーに混乱を招きます。</p><p>${why.check}可視ラベルが非可視ラベルの内容で始まり、意味の追加がないことを確認してください。</p><p><strong>非表示ラベル：</strong>「%(TEXT)」</p>`,
-  LINK_ALT_FILE_EXT: `<p>この画像の alt に「%(alt)」が含まれていますが、これは多くの場合ファイル名で、リンク先の意味を説明していません。</p><p>${why.fix}alt にはリンク先の名称（目的）を設定してください。</p><div class="why"><p>代替テキストは画像の意味を伝えます。画像がリンクで使われている場合、意味とはリンク先です：</p><ul><li>「テキストのあるページ」→ 画像の説明です。</li><li>「IMG_1234.jpg」→ ファイル名に過ぎません。</li><li>「<strong><em>申込フォーム（doc）</em></strong>」→ 適切なリンク先の説明です。</li></ul></div>`,
-  LINK_ALT_MAYBE_BAD: `<p>この画像の alt はプレースホルダーです：「<strong>%(alt)</strong>」</p><p>${why.fix}リンクの目的に応じた alt にしてください。</p>${why.imageLinks}`,
+  LABEL_IN_NAME: `<p>この要素の視覚的なテキストとアクセシブルネームが異なっている可能性があります。スクリーンリーダー利用者を混乱させたり、音声操作が正常に働かない可能性があります。</p><p><strong class="badge">修正方法</strong> 視覚的なラベルが非表示のラベルのテキストで始まり、追加の重要情報を含まないようにしてください。</p><p><strong>非表示のラベル：</strong> "%(TEXT)"</p>`,
+  LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt テキスト：" <strong>%(alt)</strong> "</p><p>この alt テキストは、意味のあるリンクラベルではなく、ファイル名である可能性があります。</p><p><strong class="badge">修正方法</strong> この画像の alt をリンク先のタイトルに設定してください。</p><div class="why"><p>alt テキストは画像が何を「意味するか」を伝えるためのものです。リンク画像の場合、その意味はリンク先です：</p><ul><li>"文字の書かれたページ" は画像の説明であり、リンクの説明ではありません。</li><li>"IMG_1234.jpg" はただのファイル名です。</li><li>"<strong><em>イベント申込書（.doc）</em></strong>" はリンク先の説明です。</li></ul></p></div>`,
+  LINK_ALT_MAYBE_BAD: `<p>Alt テキスト：" <strong>%(alt)</strong> "</p><p><strong class="badge">修正方法</strong> この画像の alt をリンク先のタイトルに設定してください。</p>${why.imageLinks}`,
   LINK_ALT_UNPRONOUNCEABLE: `<p>このリンク画像の alt「%(ALT_TEXT)」は発音できない文字や空白のみです。リンクの説明として機能しません。</p><p>${why.fix}リンクの目的（行き先・機能）を説明する alt にしてください。</p>${why.imageLinks}`,
   LINK_CLICK_HERE: `「クリックしてください」などの表現は冗長で、リンクの意味を示しません。`,
   LINK_DOI: `<p>${why.fix}DOI をリンクにせず、記事タイトルをリンクにしてください（DOI はプレーンテキストで示します）。</p><div class="why"><p>記述的なリンクは、リンク名だけで一覧を走査する利用者に分かりやすく、目的の情報に到達しやすくします。</p><p>スクリーンリーダーも、数字列ではなく意味のあるリンク名を案内できます。</p></div>`,
-  LINK_EMPTY: `<p>${why.fix}リンクの目的を説明するテキストを追加するか、誤って作成された場合（たとえば空白にリンク）は削除してください。</p><div class="why"><p>空のリンクはスクリーンリーダーで沈黙になったり、URL を文字ごとに読み上げたりします。</p><p>空白に付いたリンクは削除しにくい場合があり、前後の語を打ち直す必要があることがあります。</p></div>`,
+  LINK_EMPTY: `<p><strong class="badge">修正方法</strong> リンク先を説明するテキストを追加するか、単なる誤入力（リンク化された空白など）の場合はリンクを削除してください。</p><div class="why"><p>ヒント：スクリーンリーダーは空のリンクを説明できません。「リンク、（本来あるはずのタイトルの無音の間）」のようになるか、URL を読み上げます："リンク、エイチ・ティー・ティー・ピー・エス・スラッシュスラッシュ example ドットコム"。</p><p>リンク化された空白は編集画面で削除しづらいことがあります。周囲の単語ごと削除・再入力が必要なことがあります。</p></div>`,
   LINK_EMPTY_LABELLEDBY: `<p>この <code>aria-labelledby</code> は、ページ内の有効な <code>ID</code> を参照していません。</p><p>${why.fix}有効な ID を指定するか、この属性を削除してください。</p>`,
-  LINK_EMPTY_NO_LABEL: `<p>${why.fix}目的を説明するテキストを追加するか、誤って作成されたリンクは削除してください。</p><div class="why"><p>空のリンクは適切に読み上げできません。</p><p>削除のために周囲のテキストを書き直す必要がある場合があります。</p></div>`,
+  LINK_EMPTY_NO_LABEL: `<p><strong class="badge">修正方法</strong> リンク先を説明するテキストを追加するか、誤入力の場合はリンクを削除してください。</p><div class="why"><p>ヒント：スクリーンリーダーは空のリンクを説明できません。「リンク、（本来あるはずのタイトルの無音の間）」のようになるか、URL を読み上げます。</p><p>リンク化された空白は編集画面で削除しづらいことがあります。周囲の単語ごと削除・再入力が必要なことがあります。</p></div>`,
   LINK_FILE_EXT: `<p>このリンクは PDF／MP3／ZIP／Word などのファイルに遷移しますが、その旨の表示がありません。</p><p>${why.fix}リンクテキスト内で https://itmaybejj.github.io/linkpurpose/ファイル形式を明示</a>してください（テキストやアイコンなど）。</p><p class="why">大きいファイルはサイズも明示すると親切です（例：「年次報告書（PDF、3 MB）」）。</p>`,
-  LINK_IDENTICAL_NAME: `<p>異なるリンク先を持つ複数のリンクが同じテキスト「<strong>%(TEXT)</strong>」を使用しています。</p><p>${why.fix}各リンク先に対応した、固有で説明的なテキストに書き換えてください。</p>${why.links}`,
+  LINK_IDENTICAL_NAME: `<p>リンクテキスト：" <strong>%(TEXT)</strong> "</p><p><strong class="badge">修正方法</strong> 異なるページへ移動するリンクは、それぞれのリンク先に固有のタイトルとなるよう書き換えてください。</p>${why.links}`,
   LINK_IMAGE_ALT: `この alt がリンクの目的を説明しているか確認してください：</p><p> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong></p>${why.imageLinks}`,
-  LINK_IMAGE_ALT_AND_TEXT: `<p>この alt テキストが、冗長にならずリンクの目的の説明に寄与しているか確認してください：</p><p><strong class="badge">Alt</strong> 「<em><strong>%(alt)</strong></em>」</p>${why.imageLinks}`,
-  LINK_IMAGE_LONG_ALT: `<p>https://webaim.org/techniques/hypertext/link_text#alt_linkリンク画像の alt はリンク先を説明するためのものです</a>。リンクは短く明確であるべきです。長い alt は画像自体を説明している可能性があります。</p>この alt の長さは %(altLength) 文字です： <em>%(ALT_TEXT)</em>`,
+  LINK_IMAGE_ALT_AND_TEXT: `<p><span style="display: none;">%(ALT)</span>Alt を含むリンク：<br>"<strong>%(LINK)</strong>"</p><p><strong class="badge">修正方法</strong> alt が不要または冗長な場合は修正または削除してください。</p>${why.imageLinks}`,
+  LINK_IMAGE_LONG_ALT: `<p>%(altLength) 文字の alt テキスト：<strong class="ed11y-small">%(ALT_TEXT)</strong></p><p><strong class="badge">修正方法</strong> この画像の alt をリンク先のタイトルに設定してください。</p><div class="why"><p>スクリーンリーダー利用者は文脈なしでページ内のリンク一覧を聞くことがあります。リンク画像の alt はリンクのタイトルとして読み上げられるため、<a href="https://webaim.org/techniques/hypertext/link_text#alt_link">画像の内容ではなくリンク先の説明</a>である必要があります。</p></div>`,
   LINK_IMAGE_NO_ALT_TEXT: `<p>リンクに使用する画像の alt は、スクリーンリーダーにとって https://webaim.org/techniques/hypertext/link_text#alt_linkリンク名</a>になります。</p><p>${why.fix}リンクの目的を説明する alt にしてください。</p>${why.imageLinks}`,
   LINK_IMAGE_TEXT: "この画像は装飾扱いですが、リンクのラベルは周囲のテキストによって提供されています。",
   LINK_NEW_TAB: `<p>${why.fix}同じタブで開くようにするか、新しいタブで開くことを https://itmaybejj.github.io/linkpurpose/事前に知らせてください</a>。</p><div class="why"><p>ユーザーは自分で「新しいタブで開く」ことを選べます。強制すると混乱のもとになります（「戻る」が期待通りに動作しない等）。</p><p>注：フォーム内のリンクは、入力内容の消失を避けるために新しいタブで開くことがあります。</p></div>`,
   LINK_PLACEHOLDER_ALT: `<p>このリンク画像の alt はプレースホルダーです：「<strong>%(alt)</strong>」</p><p>${why.fix}リンク先を説明する alt を設定してください。</p>${why.imageLinks}`,
-  LINK_STOPWORD: `<p>このリンクには、目的を示さない語句が含まれています：<br><strong>%(text)</strong></p><p>${why.fix}目的を簡潔に説明するテキストに書き換えてください。</p>${why.links}`,
+  LINK_STOPWORD: `<p>リンクテキスト：" <strong>%(text)</strong> "</p><p><strong class="badge">修正方法</strong> リンク先を説明するテキストを使用してください。</p>${why.links}`,
   LINK_STOPWORD_ARIA: `<p>ARIA では有意義な名前が提供されていますが、可視テキストは一般的で分かりにくい状態です：「<strong {C}>%(ERROR)</strong>」</p><p>${why.fix}可視テキストも意味のある内容にし、アクセシブルネームと一致させてください。</p>${why.links}`,
-  LINK_SUS_ALT: `<p>この alt には「%(alt)」が含まれており、リンク先ではなく画像自体を説明している可能性があります。</p><strong class="badge">Alt テキスト</strong> 「%(ALT_TEXT)」<p>修正：リンクの目的（行き先・機能）を説明してください。<br></p>${why.imageLinks}`,
-  LINK_SYMBOLS: `${why.fix}スクリーンリーダーが読み上げて混乱を招く可能性があるため、特別な意味のない記号をリンクの呼びかけ文として使用しないでください。削除を検討してください： <strong {C}>%(ERROR)</strong>`,
+  LINK_SUS_ALT: `<p>この画像の alt には "%(alt)" という単語が含まれており、リンク先を説明していない可能性があります。</p><p>Alt テキスト：" <strong>%(ALT_TEXT)</strong> "</p><p><strong class="badge">修正方法</strong> alt がリンクの目的を示すようにしてください。</p>${why.imageLinks}`,
+  LINK_SYMBOLS: `<p>検出された記号：<strong {C}>%(ERROR)</strong></p><p><strong class="badge">修正方法</strong> シンボルのみをリンクの呼びかけとして使用しないでください。支援技術ではそのまま読み上げられ、混乱の原因になります。</p>`,
   LINK_URL: `<p>${why.fix}URL ではなく、リンク先の内容や目的を示すテキストを使用してください。</p><div class="why"><p>多くのユーザー（特にスクリーンリーダー利用者）は、リンク名だけでページを走査します。</p><p>URL をリンクテキストにすると、走査や検索が難しくなります。</p></div>`,
   META_LANG: `<p>${why.fix}HTML 要素に https://www.w3.org/International/questions/qa-html-language-declarationslang 属性</a>を追加してください。</p><div class="why"><p>スクリーンリーダーは言語指定に基づいて正しい発音規則を適用します。誤った言語指定は不明瞭な読み上げにつながります。</p></div>`,
   META_MAX: `<p>この meta タグはユーザーの拡大操作を制限しています。</p><p>${why.fix}制限を削除するか、完全なズームを許可する設定に変更してください。</p>`,
   META_REFRESH: `<p>meta による自動更新は、予告なく操作を中断し、フォームの入力内容を失わせることがあります。</p><p>${why.fix}AJAX 等で内容を更新し、事前通知と延期の選択肢を提供してください。</p>`,
   META_SCALABLE: `<p>この meta タグはページの拡大を禁止しています。</p><p>${why.fix}スケーリングを許可するよう設定を変更または削除してください。</p>`,
+  // REVIEW
   META_TITLE: `<p>${why.fix}<code><head></code> 内に <code><title></code> を追加してください。</p><div class="why"><p>短く一意な https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/titleページタイトル</a>は重要です：</p><ul><li>検索結果の見出しとして使用されます。</li><li>ブラウザのタブ名として表示されます。</li><li>タブ切り替え時にスクリーンリーダーが読み上げます。</li></ul><p>タイトルがないと、ユーザーは生の URL しか得られません。</p></div>`,
   MISSING_ALT: `<p>画像に alt がない場合、スクリーンリーダーは画像ファイルの URL を 1 文字ずつ読み上げます。</p><p>${why.fix}装飾画像には alt="" を、意味のある画像には説明的な alt を設定してください。</p>${why.images}`,
   MISSING_ALT_LINK: `<p>リンク画像に alt がないと、スクリーンリーダーは画像の URL を読み上げてしまいます。特に不便です。</p><p>${why.fix}リンク先に対応した alt を設定してください。</p>${why.imageLinks}`,
   MISSING_ALT_LINK_HAS_TEXT: `<p>この画像はテキスト付きリンクの一部です。可視テキストが目的を十分説明していれば、画像は alt="" にしてください。そうでない場合は、目的を説明する alt を設定してください。</p>${why.imageLinks}`,
   QA_BAD_LINK: `<p>このリンクは開発環境（内部 URL）を指している可能性があります：<br>{L} <strong {C}>%(LINK)</strong></p><p>${why.fix}相対パス（/folder）か、公開 URL に変更してください。</p>`,
-  QA_BLOCKQUOTE: `<p><code>blockquote</code> は「引用」であることを示します。短い引用は、多くの場合「見出し」であるべき内容です。</p><p>${why.fix}見出しである場合は見出しスタイルを使用し、構造に反映させてください。</p>${why.headings}`,
-  QA_DOCUMENT: `<p>リンクされている文書も Web コンテンツであり、アクセシブルである必要があります。見出し、表見出し、画像の代替テキストを確認してから、この警告を無視してください。</p><ul class="why"><li>Google ドキュメントをアクセシブルに： https://support.google.com/docs/answer/6199477?hl=ja</a></li><li>Microsoft Office 文書をアクセシブルに： https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155</a></li></ul>`,
+  QA_BLOCKQUOTE: `<p><code>blockquote</code> は引用として読み上げるようスクリーンリーダーに指示します。短い引用文の多くは実際には見出しです。</p><p><strong class="badge">修正方法</strong> 引用ではなく見出しである場合は、ページ構造に表示されるよう見出し書式に変更してください。</p>${why.headings}`,
+  QA_DOCUMENT: `<p>リンクされた文書も Web コンテンツとしてアクセシブルである必要があります。見出し、表の見出し、画像の alt が正しくタグ付けされていることを確認した上で、この警告を無視してください。</p><div class="why"><ul><li><a href="https://support.google.com/docs/answer/6199477?hl=en">Google Workspace 文書やプレゼンテーションをアクセシブルにする方法</a></li><li><a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Microsoft Office 文書をアクセシブルにする方法</a></li></ul></div>`,
   QA_FAKE_HEADING: `<p>${why.fix}この太字テキストが新しいトピックの導入であれば、視覚的強調ではなく見出しスタイルを使用してください。</p><div class="why"><p>見出しは支援技術のためのナビゲーション構造を作ります。</p></div>`,
   QA_FAKE_LIST: `<p>${why.fix}「%(text)」がリスト項目であるべきなら、リスト形式にしてください。</p><div class="why"><p>リストは視覚・技術の両面で構造を提供します：</p><ol><li>整ったインデントで読みやすくなります。</li><li>スクリーンリーダーは「7 件中 3 件目」のように位置を読み上げます。</li></ol><p>先頭に数字を付けるだけではリストになりません。</p></div>`,
   QA_IN_PAGE_LINK: `<p>このページ内リンクのターゲットが存在しません。</p><div class="why"><p>開発者向け：JavaScript で処理している場合は、キーボード操作でも動作することを確認してください。</p></div>`,
@@ -542,8 +524,9 @@ const tips = {
   QA_SUBSCRIPT: `上付き・下付きは文字を小さくし、読みにくくします。序数（4<sup>th</sup>）、化学式（H<sub>2</sub>O）、脚注記号などに限って使用してください。`,
   QA_UNDERLINE: `<p>Web では下線は通常リンクを示します。本文の強調に下線を使うと、クリックできると誤解されます。</p><p>${why.fix}<strong>太字</strong>や<em>斜体</em>を使用し、節の切り替えは見出しで示してください。</p><div class="why"><p>スクリーンリーダーは下線などの視覚スタイルを読み上げません。構造として反映されるのは見出しだけです。</p></div>`,
   QA_UPPERCASE: `<p>全文大文字は読みにくく、「怒鳴っている」ように感じられることがあります。</p><p>${why.fix}強調には太字を使用し、大文字表記の多用は避けてください。</p><div class="why"><p>スクリーンリーダーは太字などの視覚強調を読み上げないため、新しい主題の提示には見出しを使ってください。</p></div>`,
-  SUS_ALT: `<p>この alt には「%(alt)」が含まれており、冗長な可能性があります：</p><p><strong class="badge">Alt テキスト</strong> 「%(ALT_TEXT)」</p><p>修正：画像の意味を短く、的確に表現してください。</p><div class="why"><p>ヒント：「〜の画像」などはスクリーンリーダーがすでに画像であることを伝えるため、通常不要です。</p></div>`,
-  TABINDEX_ATTR: `<p>${why.fix}0 より大きい <code>tabindex</code> は使用しないでください。HTML の要素順序（視覚順・タブ順・読み順）を一致させてください。</p><div class="why"><p>本来、視覚順・タブ順・読み順は一致します。</p><p>正の <em>tabindex</em> はタブ順だけを先頭へ移し、視覚順を変えないため混乱を招きます。</p></div>`,
+  SUS_ALT: `<p>この画像の alt には "%(alt)" という語が含まれており、冗長である可能性があります。</p><p>Alt テキスト：" <strong>%(ALT_TEXT)</strong> "</p><p><strong class="badge">修正方法</strong> 画像が何を意味するのかを簡潔に伝える alt にしてください。</p><div class="why"><p>ヒント：スクリーンリーダーは alt を読む前に「画像」と伝えるため、「〜の画像」「〜の写真」といった語は通常不要です。ただし画像の内容自体を指す場合は例外です：</p><ul><li>冗長でない："<em>クラスに見せているアルバムの「写真」</em>"</li><li>冗長："<em>写真の</em> アルバムにある写真"</li></ul></div>`,
+  // REVIEW
+  TABINDEX_ATTR: `<p><strong class="badge">修正方法</strong> tabindex の値に "0" より大きい数を使わないでください。HTML 内の要素順序を変更して、タブ順と読み上げ順、視覚的な並びを一致させてください。</p><div class="why"><p>ヒント：初期設定では視覚的な順序、キーボードのタブ順、スクリーンリーダーの読み上げ順はすべて一致しています。</p><p>正の tabindex を設定すると、タブ順だけが先頭に移動しますが、視覚順や読み上げ順は移動しません。支援技術利用者は説明と要素がページの両端に散らばってしまい、混乱します。</p></div>`,
   TABLES_EMPTY_HEADING: ` <p>${why.fix}すべての表ヘッダーセルにテキストを含めてください。</p><div class="why"><p>ヒント：スクリーンリーダーは、セルに入る際に対応する見出しを手がかりに内容を理解します。</p></div>`,
   TABLES_MISSING_HEADINGS: ` <p>${why.fix}表の設定で、ヘッダーが最初の行・最初の列、またはその両方にあることを指定してください。</p><div class="why"> <p>ヒント：スクリーンリーダーは各セルで該当する行見出し／列見出しを読み上げます。</p><p>レイアウト目的のみの表は、表以外の方法に置き換えてください。</p></div>`,
   TABLES_SEMANTIC_HEADING: ` <p>${why.fix}表の内部から（h2／h3 などの）内容見出しを削除し、行・列の表ヘッダーを使用してください。複数レベルが必要な場合は、表を分割してください。</p><div class="why"> <p>ヒント：表ヘッダーは行または列方向に作用します。一方、内容見出しはそれ以降の広い範囲に作用します。</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">セル 2 の<strong>表ヘッダー</strong>は B セルをラベル付けします。<br><br><strong>内容見出し</strong>をセル 2 に置くと、3・A・B・C と本文、注釈まで広く及びます。</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`
@@ -551,13 +534,10 @@ const tips = {
 const interfaceStrings = {
   ALERT_CLOSE: "閉じる",
   ALT: "代替テキスト: ",
+  CONSOLE_ERROR: 'このページのアクセシビリティチェッカーに問題があります。%(link)<a href="%(link)">GitHub で報告してください</a>。',
   DECORATIVE: "装飾としてマークされています",
   DISMISS: "非表示にする",
   DISMISS_ALL: "このページで非表示",
-  edit_page: "ページを編集",
-  edit_layout: "レイアウトを編集",
-  edit_term: "用語を編集",
-  edit_user: "ユーザーを編集",
   IMAGES: "代替テキスト",
   MAIN_TOGGLE_LABEL: "アクセシビリティツールの切り替え",
   MISSING: "(不足しています!)",
@@ -566,10 +546,12 @@ const interfaceStrings = {
   OUTLINE: "見出し構造",
   PANEL_DISMISS_BUTTON: `%(dismissCount) 件の非表示メッセージを表示`,
   PANEL_HEADING: "ビューアーを表示",
-  SKIP_TO_ISSUE: "問題へ移動",
+  PANEL_HEADING_MISSING_ONE: "レベル 1 の見出しがありません。",
+  PANEL_NO_HEADINGS: "見出しが見つかりません。",
+  SKIP_TO_ISSUE: "警告を表示",
   WARNING: "手動チェックが必要",
   WARNINGS: "手動チェックが必要",
-  buttonFirstContent: "最初のメッセージへ移動",
+  buttonFirstContent: "最初の警告を表示",
   buttonHideHiddenAlert: "非表示メッセージを隠す",
   buttonHideHiddenAlerts: `%(count) 件の非表示メッセージを隠す`,
   buttonShowHiddenAlert: "非表示メッセージを表示",
@@ -581,6 +563,10 @@ const interfaceStrings = {
   dismissOkTitle: "すべての編集者に対してこのメッセージを隠します",
   dismissOnSite: "サイト全体で「OK」にする",
   dismissalsHeader: "この問題を修正しない予定ですか？",
+  edit_layout: "レイアウトを編集",
+  edit_page: "ページを編集",
+  edit_term: "用語を編集",
+  edit_user: "ユーザーを編集",
   errorOutlinePrefixHeadingEmpty: "(空の見出し)",
   errorOutlinePrefixHeadingIsLong: "(長すぎるためフラグ)",
   errorOutlinePrefixSkippedLevel: "(レベル抜けのためフラグ)",
@@ -593,8 +579,6 @@ const interfaceStrings = {
   main_toggle_show_alerts: "アクセシビリティ警告を表示",
   panelCheckAltText: `<p class="ed11y-small">すべての画像が文脈上の意味を伝えているか、テキストを含む画像がないかを確認してください。</p>`,
   panelCheckOutline: `<p class="ed11y-small">見出しの階層を表示します。ページの視覚的構造と一致しているか確認してください。</p>`,
-  PANEL_HEADING_MISSING_ONE: "レベル 1 の見出しがありません。",
-  PANEL_NO_HEADINGS: "見出しが見つかりません。",
   reportsLink: "サイトレポートを開く",
   toggleDisabled: "Editoria11y がチェック可能なコンテンツがありません。",
   transferFocus: "このコンテンツを編集",

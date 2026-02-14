@@ -33,7 +33,7 @@
       transString = this.prepHTML(transString);
       if (args?.length) {
         args.forEach((arg) => {
-          transString = transString.replace(/%\([a-zA-z]+\)/, arg);
+          transString = transString.replace(/%\([a-zA-Z]+\)/, arg);
         });
       }
       return transString;
@@ -913,6 +913,23 @@
   function sanitizeHTML(string) {
     return string.replace(/[^\w. ]/gi, (c) => `&#${c.charCodeAt(0)};`);
   }
+  function sanitizeURL(string) {
+    if (!string) return "#";
+    const sanitizedInput = String(string).trim();
+    try {
+      const parsedUrl = new URL(sanitizedInput);
+      if (sanitizedInput.startsWith("#")) {
+        return parsedUrl.hash;
+      }
+      const protocols = ["file:", "http:", "https:", "mailto:", "tel:", "ftp:"];
+      if (!protocols.includes(parsedUrl.protocol)) {
+        return "";
+      }
+      return parsedUrl.href;
+    } catch (error) {
+      return false;
+    }
+  }
   function sanitizeHTMLBlock(html, allowStyles = false) {
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = html;
@@ -1363,7 +1380,7 @@
       const shadow = this.attachShadow({ mode: "open" });
       const content = document.createElement("dialog");
       content.ariaLabel = Lang._("ERROR");
-      const url2 = window.location;
+      const url2 = sanitizeURL(window.location);
       const google = "";
       const template = `## Error Description
 \`\`\`javascript
@@ -1376,6 +1393,8 @@ ${this.error.stack}
 
 ## Comments
 `;
+      const preContents = `Version: ${UI.version}
+URL: ${url2}`;
       const encodedTemplate = encodeURIComponent(template);
       const github = `https://github.com/itmaybejj/editoria11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
       content.innerHTML = `
@@ -1384,12 +1403,13 @@ ${this.error.stack}
       <p>${Lang.sprintf("CONSOLE_ERROR", google, github)}</p>
       <p><strong>${Lang._("DEVELOPER_CHECKS")}:</strong></p>
       <pre>
-Version: ${UI.version}
-URL: ${url2}</pre>
+</pre>
   		<p><strong>${Lang._("ERRORS")}:</strong></p>
 <pre>${escapeHTML(this.error.stack)}</pre>
     `;
       shadow.appendChild(content);
+      const pre = content.querySelector("pre");
+      pre.textContent = preContents;
       setTimeout(() => {
         content.show();
         const button = content.querySelector("button");
@@ -1403,8 +1423,8 @@ URL: ${url2}</pre>
           hidden.style.setProperty("overflow", "hidden");
         });
         const preS = content.querySelectorAll("pre");
-        preS.forEach((pre) => {
-          pre.style.setProperty("margin-left", "18px");
+        preS.forEach((pre2) => {
+          pre2.style.setProperty("margin-left", "18px");
         });
         const close = content.querySelector(".close-btn");
         close.addEventListener("click", () => {
@@ -5109,11 +5129,11 @@ URL: ${url2}</pre>
       const avgWordsPerSentence = Number((words / sentences).toFixed(1));
       const complexWords = Math.round(100 * ((words - (syllables1 + syllables2)) / words));
       let difficultyToken;
-      if (fleschScore >= 0 && fleschScore < 30) {
+      if (fleschScore <= 30) {
         difficultyToken = "VERY_DIFFICULT";
-      } else if (fleschScore > 31 && fleschScore < 49) {
+      } else if (fleschScore <= 50) {
         difficultyToken = "DIFFICULT";
-      } else if (fleschScore > 50 && fleschScore < 60) {
+      } else if (fleschScore <= 60) {
         difficultyToken = "FAIRLY_DIFFICULT";
       } else {
         difficultyToken = "GOOD";
@@ -5141,11 +5161,11 @@ URL: ${url2}</pre>
       const avgWordsPerSentence = Number((wordCount / sentenceCount).toFixed(1));
       const complexWords = Math.round(100 * (longWordsCount / wordCount));
       let difficultyToken;
-      if (score >= 0 && score < 39) {
+      if (score <= 40) {
         difficultyToken = "GOOD";
-      } else if (score > 40 && score < 50) {
+      } else if (score <= 50) {
         difficultyToken = "FAIRLY_DIFFICULT";
-      } else if (score > 51 && score < 61) {
+      } else if (score <= 60) {
         difficultyToken = "DIFFICULT";
       } else {
         difficultyToken = "VERY_DIFFICULT";
@@ -7996,7 +8016,7 @@ URL: ${url2}</pre>
     LABELS_ARIA_LABEL_INPUT: '<p><strong {B}>Invisible field label:</strong> <strong {C}>%(TEXT)</strong></p><p>Check to make sure there is a visible field label, that it remains when there is text in this field, and it matches the invisible field name.</p><div class="why"><p>Labeling fields with only a title or placeholder means the label visually disappears as soon as someone starts writing. This makes it difficult for people to review input when there are several fields. It also makes it easy to forget to update the invisible field label.</p></div>',
     LABELS_INPUT_RESET: `<p>Reset buttons are easy to activate by mistake, causing data loss without an opportunity to cancel or undo.</p><p>${why.fix}Unless this is resetting a single field, consider removing it or providing a method to cancel before executing the action.</p>`,
     LABELS_MISSING_IMAGE_INPUT: "Image button is missing alt text. Please add alt text to provide an accessible name. For example: <em>Search</em> or <em>Submit</em>.",
-    LABELS_MISSING_LABEL: "<p>${why.fix}Add an <code>id</code> to this input, and add a matching <code>for</code> attribute to the label.</p>",
+    LABELS_MISSING_LABEL: `<p>${why.fix}Add an <code>id</code> to this input, and add a matching <code>for</code> attribute to the label.</p>`,
     // updated
     LABELS_NO_FOR_ATTRIBUTE: "There is no label associated with this input. Add a <code>for</code> attribute to the label that matches the <code>id</code> of this input. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
     LABELS_PLACEHOLDER: `<p>Placeholder text disappears as soon as someone starts typing, and often either has too little contrast to be easily legible or enough contrast to be easily mistaken for content.</p><p>${why.fix}Make sure key information like the field label, help text and format instructions remain visible when there is content in this field, and consider dropping the placeholder altogether.</p>`,

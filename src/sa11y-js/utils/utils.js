@@ -160,27 +160,26 @@ export function sanitizeHTML(string) {
  * @returns {string} The sanitized URL if valid, or an empty string if invalid.
  */
 export function sanitizeURL(string) {
-  if (!string) return '#';
-  const sanitizedInput = String(string).trim();
+	if (!string) return '#';
+	const sanitizedInput = String(string).trim();
 
-  // Remove protocols.
-  if (/^javascript:/i.test(sanitizedInput)) return '#';
-  if (/^data:/i.test(sanitizedInput)) return '#';
+	try {
+		const parsedUrl = new URL(sanitizedInput);
 
-  // Ensure valid protocol.
-  const protocols = ['http:', 'https:', 'mailto:', 'tel:', 'ftp:'];
-  const hasValidProtocol = protocols.some((protocol) =>
-    sanitizedInput.toLowerCase().startsWith(protocol),
-  );
+		if (sanitizedInput.startsWith('#')) {
+			return parsedUrl.hash;
+		}
 
-  // Assume relative URLs.
-  if (!hasValidProtocol && !sanitizedInput.startsWith('/') && !sanitizedInput.startsWith('#')) {
-    return `./${sanitizedInput}`;
-  }
+		// Ensure valid protocol.
+		const protocols = ['file:', 'http:', 'https:', 'mailto:', 'tel:', 'ftp:'];
+		if (!protocols.includes(parsedUrl.protocol)) {
+			return '';
+		}
 
-  // Remove any HTML tags.
-  const cleanedString = sanitizedInput.replace(/<[^>]*>/g, '');
-  return encodeURI(cleanedString);
+		return parsedUrl.href;
+	} catch (error) {
+		return false;
+	}
 }
 
 /**
