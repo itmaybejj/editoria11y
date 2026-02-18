@@ -343,29 +343,9 @@ export function firstVisibleParent(el) {
   }
 }
 
-// @todo discuss differences
-export function hiddenElementCheck(el) {
-  // Checks if this element has been removed from the accessibility tree
-  const style = window.getComputedStyle(el);
-  return !(
-    style.getPropertyValue('display') === 'none' ||
-    style.getPropertyValue('visibility') === 'hidden' ||
-    el.hasAttribute('aria-hidden') ||
-    el.hasAttribute('hidden')
-  );
-}
-
 export function elementNotHidden(el) {
   // Recurse element and ancestors to make sure it is visible
-  if (!hiddenElementCheck(el)) {
-    // Element is hidden
-    return false;
-  } else {
-    // Element is not known to be hidden.
-    const theParents = parents(el);
-    const notHiddenParent = (parent) => hiddenElementCheck(parent);
-    return theParents.every(notHiddenParent);
-  }
+  return el.checkVisibility() && !el.closest('[aria-hidden="true"]');
 }
 
 export function detectShadow(container) {

@@ -1667,18 +1667,8 @@ function firstVisibleParent(el) {
     return false;
   }
 }
-function hiddenElementCheck(el) {
-  const style = window.getComputedStyle(el);
-  return !(style.getPropertyValue("display") === "none" || style.getPropertyValue("visibility") === "hidden" || el.hasAttribute("aria-hidden") || el.hasAttribute("hidden"));
-}
 function elementNotHidden(el) {
-  if (!hiddenElementCheck(el)) {
-    return false;
-  } else {
-    const theParents = parents(el);
-    const notHiddenParent = (parent) => hiddenElementCheck(parent);
-    return theParents.every(notHiddenParent);
-  }
+  return el.checkVisibility() && !el.closest('[aria-hidden="true"]');
 }
 function detectShadow(container) {
   if (State.option.autoDetectShadowComponents) {
@@ -8200,9 +8190,9 @@ const ed11yDefaultOptions = {
   headerIgnore: "",
   headerIgnoreSpan: "ed11y-element-heading-label, .ed11y-wrapper",
   headerIgnoreStrings: "",
-  imageIgnore: 'img[aria-hidden], [aria-hidden] img, img[role="presentation"], a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img',
+  imageIgnore: 'img[aria-hidden="true"], [aria-hidden="true"] img, img[role="presentation"], a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img',
   ignoreByTest: {},
-  linkIgnore: '[aria-hidden][tabindex="-1"]',
+  linkIgnore: '[aria-hidden="true"][tabindex="-1"]',
   linkIgnoreSpan: ".ed11y-element",
   linkIgnoreStrings: [],
   // @todo cms/documentation this changed to array

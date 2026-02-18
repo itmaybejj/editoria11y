@@ -1381,7 +1381,6 @@ ed11y-element-result[data-ed11y-open="true"] {
 	.ed11y-tip-dismissals {
 		grid-area: buttons;
 		display: flex;
-		flex-wrap: wrap;
 		justify-content: end;
 	}
 

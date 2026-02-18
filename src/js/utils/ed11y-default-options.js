@@ -15,12 +15,12 @@ export const ed11yDefaultOptions = {
   headerIgnoreSpan: 'ed11y-element-heading-label, .ed11y-wrapper',
   headerIgnoreStrings: '',
   imageIgnore:
-    'img[aria-hidden], [aria-hidden] img, ' +
+    'img[aria-hidden="true"], [aria-hidden="true"] img, ' +
     'img[role="presentation"], ' +
     'a[href][aria-label] img, button[aria-label] img, ' +
     'a[href][aria-labelledby] img, button[aria-labelledby] img',
   ignoreByTest: {},
-  linkIgnore: '[aria-hidden][tabindex="-1"]',
+  linkIgnore: '[aria-hidden="true"][tabindex="-1"]',
   linkIgnoreSpan: '.ed11y-element',
   linkIgnoreStrings: [], // @todo cms/documentation this changed to array
   ignoreContentOutsideRoots: false, // @todo cms/documentation was headingsOnlyFromCheckRoots

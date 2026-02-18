@@ -1227,7 +1227,6 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 .ed11y-tip-wrapper .ed11y-tip-dismissals {
-  flex-wrap: wrap;
   grid-area: buttons;
   justify-content: end;
   display: flex;
