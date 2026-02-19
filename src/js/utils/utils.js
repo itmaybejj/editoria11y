@@ -58,7 +58,7 @@ export function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) 
 
   // Push a visible UI alert if not headless and no roots at all are found.
   if (Constants.Root.areaToCheck.length === 0 && Constants.Global.headless === false) {
-    createAlert(Lang.sprintf('MISSING_ROOT', desiredRoot));
+    createAlert(Lang.sprintf('MISSING_ROOT', desiredRoot), '', '');
     Constants.Root.areaToCheck.push(document.body);
   }
 

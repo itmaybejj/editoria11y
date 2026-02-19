@@ -535,11 +535,16 @@
     const Sa11yPanel = document.querySelector("sa11y-control-panel").shadowRoot;
     const alert = Sa11yPanel.getElementById("panel-alert");
     const alertText = Sa11yPanel.getElementById("panel-alert-text");
-    Sa11yPanel.getElementById("panel-alert-preview");
+    const alertPreview = Sa11yPanel.getElementById("panel-alert-preview");
     const alertClose = Sa11yPanel.getElementById("close-alert");
     const skipButton = Sa11yPanel.getElementById("skip-button");
     alert.classList.add("active");
     alertText.innerHTML = alertMessage;
+    const elementPreview = extendedPreview ? `<div class="element-preview">${extendedPreview}</div>` : "";
+    if (errorPreview) {
+      alertPreview.classList.add("panel-alert-preview");
+      alertPreview.innerHTML = `${elementPreview}<div class="preview-message">${errorPreview}</div>`;
+    }
     setTimeout(() => alertClose.focus(), 300);
     function closeAlert() {
       removeAlert();
@@ -1515,7 +1520,7 @@ URL: ${url2}`;
       Constants.Root.areaToCheck.length = 0;
     }
     if (Constants.Root.areaToCheck.length === 0 && Constants.Global.headless === false) {
-      createAlert(Lang.sprintf("MISSING_ROOT", desiredRoot));
+      createAlert(Lang.sprintf("MISSING_ROOT", desiredRoot), "", "");
       Constants.Root.areaToCheck.push(document.body);
     }
     try {
