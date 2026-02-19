@@ -31,12 +31,20 @@
     sprintf(string, ...args) {
       let transString = this._(string);
       transString = this.prepHTML(transString);
+      const el = document.createElement("div");
+      el.innerHTML = transString;
       if (args?.length) {
-        args.forEach((arg) => {
-          transString = transString.replace(/%\([a-zA-Z]+\)/, arg);
+        args.forEach((_arg, index) => {
+          el.innerHTML = el.innerHTML.replace(/%\([a-zA-z]+\)/, `<span data-arg='${index}'></span>`);
+        });
+        args.forEach((arg, index) => {
+          const replacement = el.querySelector(`[data-arg="${index}"]`);
+          if (replacement && arg !== null) {
+            replacement.textContent = arg;
+          }
         });
       }
-      return transString;
+      return el;
     },
     translate(string) {
       return this.langStrings[string] || string;
@@ -902,55 +910,98 @@
     }
     return isElementHidden(element);
   }
-  function escapeHTML(string) {
-    const div = document.createElement("div");
-    div.textContent = string;
-    return div.innerHTML.replaceAll('"', "&quot;").replaceAll("'", "&#039;").replaceAll("`", "&#x60;");
-  }
   function stripAllSpecialCharacters(string) {
+    if (!string) return "";
     return string.replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
   }
-  function sanitizeHTML(string) {
+  function escapeHTML(string) {
+    if (!string) return "";
     return string.replace(/[^\w. ]/gi, (c) => `&#${c.charCodeAt(0)};`);
   }
-  function sanitizeURL(string) {
-    if (!string) return "#";
-    const sanitizedInput = String(string).trim();
+  const invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
+  const htmlEntitiesRegex = /&#(\w+)(^\w|;)?/g;
+  const htmlCtrlEntityRegex = /&(newline|tab);/gi;
+  const ctrlCharactersRegex = (
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: original lib.
+    /[\u0000-\u001F\u007F-\u009F\u2000-\u200D\uFEFF]/gim
+  );
+  const urlSchemeRegex = /^.+(:|&colon;)/gim;
+  const whitespaceEscapeCharsRegex = /(\\|%5[cC])((%(6[eE]|72|74))|[nrt])/g;
+  const relativeFirstCharacters = [".", "/"];
+  const BLANK_URL = "about:blank";
+  function isRelativeUrlWithoutProtocol(url2) {
+    return relativeFirstCharacters.indexOf(url2[0]) > -1;
+  }
+  function decodeHtmlCharacters(str) {
+    const removedNullByte = str.replace(ctrlCharactersRegex, "");
+    return removedNullByte.replace(htmlEntitiesRegex, (match, dec) => {
+      return String.fromCharCode(dec);
+    });
+  }
+  function isValidUrl(url2) {
+    if (typeof URL.canParse === "function") {
+      return URL.canParse(url2);
+    }
     try {
-      const parsedUrl = new URL(sanitizedInput);
-      if (sanitizedInput.startsWith("#")) {
-        return parsedUrl.hash;
-      }
-      const protocols = ["file:", "http:", "https:", "mailto:", "tel:", "ftp:"];
-      if (!protocols.includes(parsedUrl.protocol)) {
-        return "";
-      }
-      return parsedUrl.href;
-    } catch (error) {
+      const parsedUrl = new URL(url2);
+      return Boolean(parsedUrl);
+    } catch {
       return false;
     }
   }
-  function sanitizeHTMLBlock(html, allowStyles = false) {
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = html;
-    ["script", "style", "noscript", "iframe", "form"].forEach((tag) => {
-      const elements2 = tempDiv.getElementsByTagName(tag);
-      while (elements2.length > 0) {
-        elements2[0].parentNode.removeChild(elements2[0]);
-      }
+  const decodeURIs = (uri) => {
+    try {
+      return decodeURIComponent(uri);
+    } catch {
+      return uri;
+    }
+  };
+  function sanitizeURL(url2) {
+    if (!url2) return BLANK_URL;
+    let charsToDecode;
+    let decodedUrl = decodeURIs(url2.trim());
+    do {
+      decodedUrl = decodeHtmlCharacters(decodedUrl).replace(htmlCtrlEntityRegex, "").replace(ctrlCharactersRegex, "").replace(whitespaceEscapeCharsRegex, "").trim();
+      decodedUrl = decodeURIs(decodedUrl);
+      charsToDecode = decodedUrl.match(ctrlCharactersRegex) || decodedUrl.match(htmlEntitiesRegex) || decodedUrl.match(htmlCtrlEntityRegex) || decodedUrl.match(whitespaceEscapeCharsRegex);
+    } while (charsToDecode && charsToDecode.length > 0);
+    const sanitizedUrl = decodedUrl;
+    if (!sanitizedUrl) return BLANK_URL;
+    if (isRelativeUrlWithoutProtocol(sanitizedUrl)) return sanitizedUrl;
+    const trimmedUrl = sanitizedUrl.trimStart();
+    const urlSchemeParseResults = trimmedUrl.match(urlSchemeRegex);
+    if (!urlSchemeParseResults) return sanitizedUrl;
+    const urlScheme = urlSchemeParseResults[0].toLowerCase().trim();
+    if (invalidProtocolRegex.test(urlScheme)) return BLANK_URL;
+    const backSanitized = trimmedUrl.replace(/\\/g, "/");
+    if (urlScheme === "mailto:" || urlScheme.includes("://")) return backSanitized;
+    if (urlScheme === "http:" || urlScheme === "https:") {
+      if (!isValidUrl(backSanitized)) return BLANK_URL;
+      const url3 = new URL(backSanitized);
+      url3.protocol = url3.protocol.toLowerCase();
+      url3.hostname = url3.hostname.toLowerCase();
+      return url3.toString();
+    }
+    return backSanitized;
+  }
+  function sanitizeHTML(string) {
+    const doc = new DOMParser().parseFromString(string, "text/html");
+    const dangerousTags = "script, iframe, object, embed, applet, style";
+    doc.body.querySelectorAll(dangerousTags).forEach((node) => {
+      node.remove();
     });
-    const allElements = Array.from(tempDiv.getElementsByTagName("*"));
-    allElements.forEach((element) => {
-      Array.from(element.attributes).forEach((attr) => {
-        if (attr.name.startsWith("on")) {
-          element.removeAttribute(attr.name);
+    doc.body.querySelectorAll("*").forEach((node) => {
+      [...node.attributes].forEach(({ name, value }) => {
+        const val = value.replace(/\s+/g, "").toLowerCase();
+        const isEvent = name.startsWith("on");
+        const isUrl = ["src", "href", "xlink:href"].includes(name);
+        const isPhishy = val.includes("javascript:") || val.includes("data:text/html") || val.includes("vbscript:");
+        if (isEvent || isUrl && isPhishy) {
+          node.removeAttribute(name);
         }
       });
-      if (!allowStyles) {
-        element.removeAttribute("style");
-      }
     });
-    return tempDiv.innerHTML;
+    return doc.body.innerHTML;
   }
   function fnIgnore(element, selectors = []) {
     const baseIgnores = "noscript,script,style,audio,video,form,iframe";
@@ -1039,14 +1090,10 @@
     const getLastSrc = (src) => src?.split(/,\s+/).pop()?.trim()?.split(/\s+/)[0];
     const resolveUrl = (src) => src ? new URL(src, window.location.href).href : null;
     const dataSrc = getLastSrc(element.getAttribute("data-src") || element.getAttribute("srcset"));
-    if (dataSrc) {
-      return resolveUrl(dataSrc);
-    }
-    const picture = element.closest("picture")?.querySelector("source[srcset]")?.getAttribute("srcset");
-    const pictureSrc = getLastSrc(picture);
-    if (pictureSrc) {
-      return resolveUrl(pictureSrc);
-    }
+    if (dataSrc) return resolveUrl(dataSrc);
+    const pictureSrcset = element.closest("picture")?.querySelector("source[srcset]")?.getAttribute("srcset");
+    const pictureSrc = getLastSrc(pictureSrcset);
+    if (pictureSrc) return resolveUrl(pictureSrc);
     return resolveUrl(element.getAttribute("src"));
   }
   function isVisibleTextInAccName($el, accName, exclusions = [], linkIgnoreStrings) {
@@ -1830,7 +1877,7 @@ URL: ${url2}`;
       const accName = computeAccessibleName($el, Constants.Exclusions.HeaderSpan);
       const stringMatchExclusions = accName.replace(stringExclusionPattern, "");
       const removeWhitespace$1 = removeWhitespace(stringMatchExclusions);
-      const headingText = sanitizeHTML(removeWhitespace$1);
+      const headingText = escapeHTML(removeWhitespace$1);
       const rootContainsHeading = Constants.Root.areaToCheck.some((root) => root.contains($el));
       const rootContainsShadowHeading = Constants.Root.areaToCheck.some(
         (root) => root.contains($el.getRootNode().host)
@@ -2035,7 +2082,6 @@ URL: ${url2}`;
           return;
         }
         if (hasAria && linkText.length !== 0) {
-          const sanitizedText = sanitizeHTML(linkText);
           const excludeSpan = fnIgnore($el, Constants.Exclusions.LinkSpan);
           const visibleLinkText = getText(excludeSpan).replace(ignorePattern, "");
           const cleanedString = stripAllSpecialCharacters(visibleLinkText);
@@ -2051,11 +2097,11 @@ URL: ${url2}`;
               test: "LINK_STOPWORD_ARIA",
               element: $el,
               type: State.option.checks.LINK_STOPWORD_ARIA.type || "warning",
-              content: State.option.checks.LINK_STOPWORD_ARIA.content ? Lang.sprintf(
-                State.option.checks.LINK_STOPWORD_ARIA.content,
+              content: Lang.sprintf(
+                State.option.checks.LINK_STOPWORD_ARIA.content || Lang._("LINK_STOPWORD_ARIA") + Lang._("LINK_TIP"),
                 stopword,
-                sanitizedText
-              ) : Lang.sprintf("LINK_STOPWORD_ARIA", stopword, sanitizedText) + Lang.sprintf("LINK_TIP"),
+                linkText
+              ),
               inline: true,
               dismiss: prepareDismissal(`LINK_STOPWORD_ARIA ${strippedLinkText}`),
               dismissAll: State.option.checks.LINK_STOPWORD_ARIA.dismissAll ? " LINK_STOPWORD_ARIA" : false,
@@ -2068,7 +2114,7 @@ URL: ${url2}`;
               type: State.option.checks.LABEL_IN_NAME.type || "warning",
               content: Lang.sprintf(
                 State.option.checks.LABEL_IN_NAME.content || "LABEL_IN_NAME",
-                sanitizedText
+                linkText
               ),
               inline: true,
               position: "afterend",
@@ -2081,7 +2127,10 @@ URL: ${url2}`;
               test: "LINK_LABEL",
               element: $el,
               type: State.option.checks.LINK_LABEL.type || "good",
-              content: State.option.checks.LINK_LABEL.content ? Lang.sprintf(State.option.checks.LINK_LABEL.content, sanitizedText) : `${Lang.sprintf("ACC_NAME", sanitizedText)} ${Lang.sprintf("ACC_NAME_TIP")}`,
+              content: Lang.sprintf(
+                State.option.checks.LINK_LABEL.content || Lang._("ACC_NAME") + Lang._("ACC_NAME_TIP"),
+                linkText
+              ),
               inline: true,
               position: "afterend",
               dismiss: prepareDismissal(`LINK_LABEL ${strippedLinkText}`),
@@ -2098,7 +2147,10 @@ URL: ${url2}`;
               test: "LINK_STOPWORD",
               element,
               type: State.option.checks.LINK_STOPWORD.type || "error",
-              content: State.option.checks.LINK_STOPWORD.content ? Lang.sprintf(State.option.checks.LINK_STOPWORD.content, stopword) : Lang.sprintf("LINK_STOPWORD", stopword) + Lang.sprintf("LINK_TIP"),
+              content: Lang.sprintf(
+                State.option.checks.LINK_STOPWORD.content || Lang._("LINK_STOPWORD") + Lang._("LINK_TIP"),
+                stopword
+              ),
               inline: true,
               position: "afterend",
               dismiss: prepareDismissal(`LINK_STOPWORD ${strippedLinkText}`),
@@ -2205,7 +2257,9 @@ URL: ${url2}`;
                 test: "LINK_URL",
                 element: $el,
                 type: State.option.checks.LINK_URL.type || "warning",
-                content: State.option.checks.LINK_URL.content ? Lang.sprintf(State.option.checks.LINK_URL.content) : Lang.sprintf("LINK_URL") + Lang.sprintf("LINK_TIP"),
+                content: Lang.sprintf(
+                  State.option.checks.LINK_URL.content || Lang._("LINK_URL") + Lang._("LINK_TIP")
+                ),
                 inline: true,
                 dismiss: prepareDismissal(`LINK_URL ${strippedLinkText}`),
                 dismissAll: State.option.checks.LINK_URL.dismissAll ? "LINK_URL" : false,
@@ -2251,7 +2305,9 @@ URL: ${url2}`;
               test: "LINK_CLICK_HERE",
               element: $el,
               type: State.option.checks.LINK_CLICK_HERE.type || "warning",
-              content: State.option.checks.LINK_CLICK_HERE.content ? Lang.sprintf(State.option.checks.LINK_CLICK_HERE.content) : Lang.sprintf("LINK_CLICK_HERE") + Lang.sprintf("LINK_TIP"),
+              content: Lang.sprintf(
+                State.option.checks.LINK_CLICK_HERE.content || Lang._("LINK_CLICK_HERE") + Lang._("LINK_TIP")
+              ),
               inline: true,
               dismiss: prepareDismissal(`LINK_CLICK_HERE ${strippedLinkText}`),
               dismissAll: State.option.checks.LINK_CLICK_HERE.dismissAll ? "LINK_CLICK_HERE" : false,
@@ -2279,12 +2335,14 @@ URL: ${url2}`;
           const ignored = $el.ariaHidden === "true" && $el.getAttribute("tabindex") === "-1";
           const hasAttributes = $el.hasAttribute("role") || $el.hasAttribute("disabled");
           if (State.option.checks.LINK_IDENTICAL_NAME && !hasAttributes && !ignored) {
-            const sanitizedText = sanitizeHTML(linkText);
             State.results.push({
               test: "LINK_IDENTICAL_NAME",
               element: $el,
               type: State.option.checks.LINK_IDENTICAL_NAME.type || "warning",
-              content: State.option.checks.LINK_IDENTICAL_NAME.content ? Lang.sprintf(State.option.checks.LINK_IDENTICAL_NAME.content, sanitizedText) : `${Lang.sprintf("LINK_IDENTICAL_NAME", sanitizedText)} ${Lang.sprintf("ACC_NAME_TIP")}`,
+              content: Lang.sprintf(
+                State.option.checks.LINK_IDENTICAL_NAME.content || Lang._("LINK_IDENTICAL_NAME") + Lang._("ACC_NAME_TIP"),
+                linkText
+              ),
               inline: true,
               dismiss: prepareDismissal(`LINK_IDENTICAL_NAME ${strippedLinkText}`),
               dismissAll: State.option.checks.LINK_IDENTICAL_NAME.dismissAll ? "LINK_IDENTICAL_NAME" : false,
@@ -2381,10 +2439,10 @@ URL: ${url2}`;
       return hit;
     };
     Elements.Found.Images.forEach(($el) => {
-      const alt = computeAriaLabel($el) === "noAria" ? $el.getAttribute("alt") : computeAriaLabel($el);
+      const rawAlt = computeAriaLabel($el) === "noAria" ? $el.getAttribute("alt") : computeAriaLabel($el);
       const ariaHidden = $el?.getAttribute("aria-hidden") === "true";
       const presentationRole = $el?.getAttribute("role") === "presentation";
-      if ($el.height < 2 && $el.width < 2 && (isElementHidden($el) || alt === "")) {
+      if ($el.height < 2 && $el.width < 2 && (isElementHidden($el) || rawAlt === "")) {
         return;
       }
       const link = $el.closest(
@@ -2411,7 +2469,7 @@ URL: ${url2}`;
         }
         return;
       }
-      if (alt === null) {
+      if (rawAlt === null) {
         if (link) {
           const hasAriaHiddenOrPresentationRole = linkTextLength > 0 && (ariaHidden || presentationRole);
           if (!hasAriaHiddenOrPresentationRole) {
@@ -2442,11 +2500,10 @@ URL: ${url2}`;
         }
         return;
       }
-      const sanitizedAlt = sanitizeHTML(alt);
-      const altText = removeWhitespace(sanitizedAlt);
+      const altText = removeWhitespace(rawAlt);
       const hasAria = $el.getAttribute("aria-label") || $el.getAttribute("aria-labelledby");
       if (State.option.checks.MISSING_ALT) {
-        if (hasAria && altText === "") {
+        if (hasAria && rawAlt === "") {
           State.results.push({
             test: "MISSING_ALT",
             element: $el,
@@ -2459,14 +2516,14 @@ URL: ${url2}`;
           return;
         }
       }
-      let decorative = alt === "";
+      let decorative = rawAlt === "";
       const figure = $el.closest("figure");
       const figcaption = figure?.querySelector("figcaption");
       const figcaptionText = figcaption ? getText(figcaption) : "";
       const maxAltCharactersLinks = State.option.checks.LINK_IMAGE_LONG_ALT.maxLength || 250;
       const maxAltCharacters = State.option.checks.IMAGE_ALT_TOO_LONG.maxLength || 250;
       if (!decorative && State.option.altPlaceholder.length) {
-        decorative = alt.match(altPlaceholderPattern)?.[0];
+        decorative = rawAlt.match(altPlaceholderPattern)?.[0];
       }
       if (decorative) {
         const carouselSources = State.option.checks.IMAGE_DECORATIVE_CAROUSEL.sources;
@@ -2529,7 +2586,7 @@ URL: ${url2}`;
       }
       const unpronounceable = link ? State.option.checks.LINK_ALT_UNPRONOUNCEABLE : State.option.checks.ALT_UNPRONOUNCEABLE;
       if (unpronounceable) {
-        if (alt.replace(/"|'|\?|\.|-|\s+/g, "") === "" && linkTextLength === 0) {
+        if (rawAlt.replace(/"|'|\?|\.|-|\s+/g, "") === "" && linkTextLength === 0) {
           const conditional = link ? "LINK_ALT_UNPRONOUNCEABLE" : "ALT_UNPRONOUNCEABLE";
           State.results.push({
             test: conditional,
@@ -2543,10 +2600,10 @@ URL: ${url2}`;
           return;
         }
       }
-      const error = containsAltTextStopWords(altText);
+      const error = containsAltTextStopWords(rawAlt);
       const maybeBadAlt = link ? State.option.checks.LINK_ALT_MAYBE_BAD : State.option.checks.ALT_MAYBE_BAD;
       const isTooLongSingleWord = new RegExp(`^\\S{${maybeBadAlt.minLength || 15},}$`);
-      const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(alt);
+      const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(rawAlt);
       if (error[0] !== null) {
         const rule = link ? State.option.checks.LINK_ALT_FILE_EXT : State.option.checks.ALT_FILE_EXT;
         const conditional = link ? "LINK_ALT_FILE_EXT" : "ALT_FILE_EXT";
@@ -2556,7 +2613,7 @@ URL: ${url2}`;
             element: $el,
             type: rule.type || "error",
             content: Lang.sprintf(rule.content || conditional, error[0], altText),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
@@ -2570,7 +2627,7 @@ URL: ${url2}`;
             element: $el,
             type: rule.type || "error",
             content: Lang.sprintf(rule.content || conditional, altText),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
@@ -2584,23 +2641,23 @@ URL: ${url2}`;
             element: $el,
             type: rule.type || "warning",
             content: Lang.sprintf(rule.content || conditional, error[1], altText),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
         }
-      } else if (maybeBadAlt && isTooLongSingleWord.test(alt) && containsNonAlphaChar) {
+      } else if (maybeBadAlt && isTooLongSingleWord.test(rawAlt) && containsNonAlphaChar) {
         const conditional = link ? "LINK_ALT_MAYBE_BAD" : "ALT_MAYBE_BAD";
         State.results.push({
           test: conditional,
           element: $el,
           type: maybeBadAlt.type || "error",
           content: Lang.sprintf(maybeBadAlt.content || conditional, altText),
-          dismiss: prepareDismissal(`${conditional + src + altText}`),
+          dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
           dismissAll: maybeBadAlt.dismissAll ? conditional : false,
           developer: maybeBadAlt.developer || false
         });
-      } else if (link ? alt.length > maxAltCharactersLinks : alt.length > maxAltCharacters) {
+      } else if (link ? rawAlt.length > maxAltCharactersLinks : rawAlt.length > maxAltCharacters) {
         const rule = link ? State.option.checks.LINK_IMAGE_LONG_ALT : State.option.checks.IMAGE_ALT_TOO_LONG;
         const conditional = link ? "LINK_IMAGE_LONG_ALT" : "IMAGE_ALT_TOO_LONG";
         const truncated = truncateString(altText, 600);
@@ -2609,8 +2666,8 @@ URL: ${url2}`;
             test: conditional,
             element: $el,
             type: rule.type || "warning",
-            content: Lang.sprintf(rule.content || conditional, alt.length, truncated),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            content: Lang.sprintf(rule.content || conditional, rawAlt.length, truncated),
+            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
@@ -2620,21 +2677,24 @@ URL: ${url2}`;
         const conditional = linkTextLength === 0 ? "LINK_IMAGE_ALT" : "LINK_IMAGE_ALT_AND_TEXT";
         if (rule) {
           const linkAccName = computeAccessibleName(link);
-          const removeWhitespace$1 = removeWhitespace(linkAccName);
-          const sanitizedText = sanitizeHTML(removeWhitespace$1);
-          const tooltip = linkTextLength === 0 ? Lang.sprintf("LINK_IMAGE_ALT", altText) : `${Lang.sprintf("LINK_IMAGE_ALT_AND_TEXT", altText, sanitizedText)} ${Lang.sprintf("ACC_NAME_TIP")}`;
+          const accName = removeWhitespace(linkAccName);
+          const tooltip = Lang.sprintf(
+            linkTextLength === 0 ? Lang._("LINK_IMAGE_ALT") : Lang._("LINK_IMAGE_ALT_AND_TEXT") + Lang._("ACC_NAME_TIP"),
+            altText,
+            accName
+          );
           State.results.push({
             test: conditional,
             element: $el,
             type: rule.type || "warning",
-            content: rule.content ? Lang.sprintf(rule.content, altText, sanitizedText) : tooltip,
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            content: rule.content ? Lang.sprintf(rule.content, altText, accName) : tooltip,
+            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
         }
       } else if (figure) {
-        const duplicate = !!figcaption && figcaptionText.toLowerCase() === altText.toLowerCase();
+        const duplicate = !!figcaption && figcaptionText.toLowerCase() === rawAlt.toLowerCase();
         if (duplicate) {
           if (State.option.checks.IMAGE_FIGURE_DUPLICATE_ALT) {
             State.results.push({
@@ -2656,7 +2716,7 @@ URL: ${url2}`;
             element: $el,
             type: State.option.checks.IMAGE_PASS.type || "good",
             content: Lang.sprintf(State.option.checks.IMAGE_PASS.content || "IMAGE_PASS", altText),
-            dismiss: prepareDismissal(`IMAGE_PASS FIGURE ${src + altText}`),
+            dismiss: prepareDismissal(`IMAGE_PASS FIGURE ${src + rawAlt}`),
             dismissAll: State.option.checks.IMAGE_PASS.dismissAll ? "IMAGE_PASS" : false,
             developer: State.option.checks.IMAGE_PASS.developer || false
           });
@@ -2668,14 +2728,14 @@ URL: ${url2}`;
             element: $el,
             type: State.option.checks.IMAGE_PASS.type || "good",
             content: Lang.sprintf(State.option.checks.IMAGE_PASS.content || "IMAGE_PASS", altText),
-            dismiss: prepareDismissal(`IMAGE_PASS ${src + altText}`),
+            dismiss: prepareDismissal(`IMAGE_PASS ${src + rawAlt}`),
             dismissAll: State.option.checks.IMAGE_PASS.dismissAll ? "IMAGE_PASS" : false,
             developer: State.option.checks.IMAGE_PASS.developer || false
           });
         }
       }
       const titleAttr = $el.getAttribute("title");
-      if (titleAttr?.toLowerCase() === alt.toLowerCase()) {
+      if (titleAttr?.toLowerCase() === rawAlt.toLowerCase()) {
         if (State.option.checks.DUPLICATE_TITLE) {
           State.results.push({
             test: "DUPLICATE_TITLE",
@@ -2683,7 +2743,7 @@ URL: ${url2}`;
             type: State.option.checks.DUPLICATE_TITLE.type || "warning",
             content: Lang.sprintf(State.option.checks.DUPLICATE_TITLE.content || "DUPLICATE_TITLE"),
             inline: true,
-            dismiss: prepareDismissal(`DUPLICATE_TITLE ${altText}`),
+            dismiss: prepareDismissal(`DUPLICATE_TITLE ${rawAlt}`),
             dismissAll: State.option.checks.DUPLICATE_TITLE.dismissAll ? "DUPLICATE_TITLE" : false,
             developer: State.option.checks.DUPLICATE_TITLE.developer || false
           });
@@ -2778,12 +2838,12 @@ URL: ${url2}`;
                 if (target && !isElementHidden(target)) return;
               }
             }
-            const sanitizedText = sanitizeHTML(inputName);
+            const escapedText = escapeHTML(inputName);
             State.results.push({
               test: "LABELS_ARIA_LABEL_INPUT",
               element: $el,
               type: State.option.checks.LABELS_ARIA_LABEL_INPUT.type || "warning",
-              content: State.option.checks.LABELS_ARIA_LABEL_INPUT.content ? Lang.sprintf(State.option.checks.LABELS_ARIA_LABEL_INPUT.content, sanitizedText) : `${Lang.sprintf("LABELS_ARIA_LABEL_INPUT", sanitizedText)} ${Lang.sprintf("ACC_NAME_TIP")}`,
+              content: State.option.checks.LABELS_ARIA_LABEL_INPUT.content ? Lang.sprintf(State.option.checks.LABELS_ARIA_LABEL_INPUT.content, escapedText) : Lang.sprintf(Lang._("LABELS_ARIA_LABEL_INPUT") + Lang._("ACC_NAME_TIP"), escapedText),
               dismiss: prepareDismissal(`LABELS_ARIA_LABEL_INPUT ${type + inputName}`),
               dismissAll: State.option.checks.LABELS_ARIA_LABEL_INPUT.dismissAll ? "LABELS_ARIA_LABEL_INPUT" : false,
               developer: State.option.checks.LABELS_ARIA_LABEL_INPUT.developer || true
@@ -2920,16 +2980,16 @@ URL: ${url2}`;
       Elements.Found.Blockquotes.forEach(($el) => {
         const text = getText($el);
         if (text.length !== 0 && text.length < 25) {
-          const sanitizedText = sanitizeHTML(text);
+          const escapedText = escapeHTML(text);
           State.results.push({
             test: "QA_BLOCKQUOTE",
             element: $el,
             type: State.option.checks.QA_BLOCKQUOTE.type || "warning",
             content: Lang.sprintf(
               State.option.checks.QA_BLOCKQUOTE.content || "QA_BLOCKQUOTE",
-              sanitizedText
+              escapedText
             ),
-            dismiss: prepareDismissal(`QA_BLOCKQUOTE ${sanitizedText}`),
+            dismiss: prepareDismissal(`QA_BLOCKQUOTE ${escapedText}`),
             dismissAll: State.option.checks.QA_BLOCKQUOTE.dismissAll ? "QA_BLOCKQUOTE" : false,
             developer: State.option.checks.QA_BLOCKQUOTE.developer || false
           });
@@ -2988,16 +3048,16 @@ URL: ${url2}`;
       }
     });
     if (State.option.checks.QA_FAKE_HEADING) {
-      const addResult = (element, sanitizedText) => {
+      const addResult = (element, escapedText) => {
         State.results.push({
           test: "QA_FAKE_HEADING",
           element,
           type: State.option.checks.QA_FAKE_HEADING.type || "warning",
           content: Lang.sprintf(
             State.option.checks.QA_FAKE_HEADING.content || "QA_FAKE_HEADING",
-            sanitizedText
+            escapedText
           ),
-          dismiss: prepareDismissal(`QA_FAKE_HEADING ${sanitizedText}`),
+          dismiss: prepareDismissal(`QA_FAKE_HEADING ${escapedText}`),
           inline: true,
           dismissAll: State.option.checks.QA_FAKE_HEADING.dismissAll ? "QA_FAKE_HEADING" : false,
           developer: State.option.checks.QA_FAKE_HEADING.developer || false
@@ -3016,8 +3076,8 @@ URL: ${url2}`;
         const maybeSentence = getText$1.match(/[.;?!"]/) === null;
         const typicalHeadingLength = getText$1.length >= 4 && getText$1.length <= 120;
         if (size >= 24 && !p.closest(ignoreParents) && typicalHeadingLength && maybeSentence && !isPreviousElementAHeading(p)) {
-          const sanitizedText = sanitizeHTML(getText$1);
-          addResult(p, sanitizedText);
+          const escapedText = escapeHTML(getText$1);
+          addResult(p, escapedText);
         }
       };
       const computeBoldTextParagraphs = (p) => {
@@ -3031,7 +3091,7 @@ URL: ${url2}`;
         if (text.length < 3 || text.length > 120 || /[.:;?!"']/.test(text)) return;
         const paragraph = fnIgnore(p, ["strong", "b"]).textContent.trim();
         if (paragraph && paragraph.length <= 250) return;
-        addResult(possibleHeading, sanitizeHTML(text));
+        addResult(possibleHeading, escapeHTML(text));
       };
       Elements.Found.Paragraphs.forEach((p) => {
         computeLargeParagraphs(p);
@@ -4027,25 +4087,21 @@ URL: ${url2}`;
       const nodeText = fnIgnore(element, ["State.option:not(State.option:first-child)"]);
       const text = getText(nodeText);
       const truncatedText = truncateString(text, 80);
-      const sanitizedText = sanitizeHTML(truncatedText);
+      const sanitizedText = escapeHTML(truncatedText);
       let previewText;
       if (item.type === "placeholder" || item.type === "placeholder-unsupported") {
-        previewText = sanitizeHTML($el.placeholder);
+        previewText = escapeHTML($el.placeholder);
       } else if (item.type === "svg-error" || item.type === "svg-warning") {
         previewText = "";
       } else {
         previewText = sanitizedText;
       }
       updatedItem.sanitizedText = previewText;
-      let ratioTip = "";
-      if (State.option.contrastAlgorithm === "AA" || State.option.contrastAlgorithm === "AAA") {
-        const normal = State.option.contrastAlgorithm === "AAA" ? "7:1" : "4.5:1";
-        const large = State.option.contrastAlgorithm === "AAA" ? "4.5:1" : "3:1";
-        const ratioToDisplay2 = item.isLargeText ? large : normal;
-        const ratioRequirement = item.isLargeText ? "CONTRAST_LARGE" : "CONTRAST_NORMAL";
-        ratioTip = ` ${Lang.sprintf(ratioRequirement, ratioToDisplay2)}`;
-      }
-      const graphicsTip = State.option.contrastAlgorithm === "APCA" ? "" : ` ${Lang.sprintf("CONTRAST_TIP_GRAPHIC")}`;
+      const isWcag = State.option.contrastAlgorithm === "AA" || State.option.contrastAlgorithm === "AAA";
+      const normal = State.option.contrastAlgorithm === "AAA" ? "7:1" : "4.5:1";
+      const large = State.option.contrastAlgorithm === "AAA" ? "4.5:1" : "3:1";
+      const ratioToDisplay2 = item.isLargeText ? large : normal;
+      const ratioRequirementKey = item.isLargeText ? "CONTRAST_LARGE" : "CONTRAST_NORMAL";
       switch (item.type) {
         case "text":
           if (State.option.checks.CONTRAST_ERROR) {
@@ -4053,7 +4109,10 @@ URL: ${url2}`;
               test: "CONTRAST_ERROR",
               element: $el,
               type: State.option.checks.CONTRAST_ERROR.type || "error",
-              content: State.option.checks.CONTRAST_ERROR.content ? Lang.sprintf(State.option.checks.CONTRAST_ERROR.content) : Lang.sprintf("CONTRAST_ERROR") + ratioTip,
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_ERROR.content || (isWcag ? `${Lang._("CONTRAST_ERROR")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_ERROR")),
+                ratioToDisplay2
+              ),
               dismiss: prepareDismissal(`CONTRAST_ERROR ${sanitizedText}`),
               dismissAll: State.option.checks.CONTRAST_ERROR.dismissAll ? "CONTRAST_ERROR" : false,
               developer: State.option.checks.CONTRAST_ERROR.developer || false,
@@ -4063,12 +4122,16 @@ URL: ${url2}`;
           break;
         case "input":
           if (State.option.checks.CONTRAST_INPUT) {
-            const sanitizedInput = sanitizeHTMLBlock($el.outerHTML);
+            const sanitizedInput = sanitizeHTML($el.outerHTML);
             State.results.push({
               test: "CONTRAST_INPUT",
               element,
               type: State.option.checks.CONTRAST_INPUT.type || "error",
-              content: State.option.checks.CONTRAST_INPUT.content ? Lang.sprintf(State.option.checks.CONTRAST_INPUT.content) : Lang.sprintf("CONTRAST_INPUT", ratio) + ratioTip,
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_INPUT.content || (isWcag ? `${Lang._("CONTRAST_INPUT")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_INPUT")),
+                ratio,
+                ratioToDisplay2
+              ),
               dismiss: prepareDismissal(`CONTRAST_INPUT ${sanitizedInput}`),
               dismissAll: State.option.checks.CONTRAST_INPUT.dismissAll ? "CONTRAST_INPUT" : false,
               developer: State.option.checks.CONTRAST_INPUT.developer || true,
@@ -4078,12 +4141,15 @@ URL: ${url2}`;
           break;
         case "placeholder":
           if (State.option.checks.CONTRAST_PLACEHOLDER) {
-            const sanitizedPlaceholder = sanitizeHTMLBlock($el.outerHTML);
+            const sanitizedPlaceholder = sanitizeHTML($el.outerHTML);
             State.results.push({
               test: "CONTRAST_PLACEHOLDER",
               element: $el,
               type: State.option.checks.CONTRAST_PLACEHOLDER.type || "error",
-              content: State.option.checks.CONTRAST_PLACEHOLDER.content ? Lang.sprintf(State.option.checks.CONTRAST_PLACEHOLDER.content) : Lang.sprintf("CONTRAST_PLACEHOLDER") + ratioTip,
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_PLACEHOLDER.content || (isWcag ? `${Lang._("CONTRAST_PLACEHOLDER")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_PLACEHOLDER")),
+                ratioToDisplay2
+              ),
               position: "afterend",
               dismiss: prepareDismissal(`CONTRAST_PLACEHOLDER ${sanitizedPlaceholder}`),
               dismissAll: State.option.checks.CONTRAST_PLACEHOLDER.dismissAll ? "CONTRAST_PLACEHOLDER" : false,
@@ -4094,16 +4160,17 @@ URL: ${url2}`;
           break;
         case "placeholder-unsupported":
           if (State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED) {
-            const sanitizedPlaceholder = sanitizeHTMLBlock($el.outerHTML);
+            const sanitizedPlaceholder = sanitizeHTML($el.outerHTML);
             State.results.push({
               test: "CONTRAST_PLACEHOLDER_UNSUPPORTED",
               element: $el,
               type: State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.type || "warning",
-              content: State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.content ? Lang.sprintf(State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.content) : Lang.sprintf("CONTRAST_PLACEHOLDER_UNSUPPORTED") + ratioTip,
-              position: "afterend",
-              dismiss: prepareDismissal(
-                `CONTRAST_PLACEHOLDER_UNSUPPORTED ${sanitizedPlaceholder}`
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.content || (isWcag ? `${Lang._("CONTRAST_PLACEHOLDER_UNSUPPORTED")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_PLACEHOLDER_UNSUPPORTED")),
+                ratioToDisplay2
               ),
+              position: "afterend",
+              dismiss: prepareDismissal(`CONTRAST_PLACEHOLDER_UNSUPPORTED ${sanitizedPlaceholder}`),
               dismissAll: State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.dismissAll ? "CONTRAST_PLACEHOLDER_UNSUPPORTED" : false,
               developer: State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.developer || true,
               contrastDetails: updatedItem
@@ -4112,12 +4179,15 @@ URL: ${url2}`;
           break;
         case "svg-error":
           if (State.option.checks.CONTRAST_ERROR_GRAPHIC) {
-            const sanitizedSVG = sanitizeHTMLBlock($el.outerHTML);
+            const sanitizedSVG = sanitizeHTML($el.outerHTML);
             State.results.push({
               test: "CONTRAST_ERROR_GRAPHIC",
               element: $el,
               type: State.option.checks.CONTRAST_ERROR_GRAPHIC.type || "error",
-              content: State.option.checks.CONTRAST_ERROR_GRAPHIC.content ? Lang.sprintf(State.option.checks.CONTRAST_ERROR_GRAPHIC.content) : Lang.sprintf("CONTRAST_ERROR_GRAPHIC") + graphicsTip,
+              // No trailing variable needed since the graphic tip is just static text
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_ERROR_GRAPHIC.content || (State.option.contrastAlgorithm !== "APCA" ? `${Lang._("CONTRAST_ERROR_GRAPHIC")} ${Lang._("CONTRAST_TIP_GRAPHIC")}` : Lang._("CONTRAST_ERROR_GRAPHIC"))
+              ),
               dismiss: prepareDismissal(`CONTRAST_ERROR_GRAPHIC ${sanitizedSVG}`),
               dismissAll: State.option.checks.CONTRAST_ERROR_GRAPHIC.dismissAll ? "CONTRAST_ERROR_GRAPHIC" : false,
               developer: State.option.checks.CONTRAST_ERROR_GRAPHIC.developer || true,
@@ -4128,12 +4198,14 @@ URL: ${url2}`;
           break;
         case "svg-warning":
           if (State.option.checks.CONTRAST_WARNING_GRAPHIC) {
-            const sanitizedSVG = sanitizeHTMLBlock($el.outerHTML);
+            const sanitizedSVG = sanitizeHTML($el.outerHTML);
             State.results.push({
               test: "CONTRAST_WARNING_GRAPHIC",
               element: $el,
               type: State.option.checks.CONTRAST_WARNING_GRAPHIC.type || "warning",
-              content: State.option.checks.CONTRAST_WARNING_GRAPHIC.content ? Lang.sprintf(State.option.checks.CONTRAST_WARNING_GRAPHIC.content) : Lang.sprintf("CONTRAST_WARNING_GRAPHIC") + graphicsTip,
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_WARNING_GRAPHIC.content || (State.option.contrastAlgorithm !== "APCA" ? `${Lang._("CONTRAST_WARNING_GRAPHIC")} ${Lang._("CONTRAST_TIP_GRAPHIC")}` : Lang._("CONTRAST_WARNING_GRAPHIC"))
+              ),
               dismiss: prepareDismissal(`CONTRAST_WARNING_GRAPHIC ${sanitizedSVG}`),
               dismissAll: State.option.checks.CONTRAST_WARNING_GRAPHIC.dismissAll ? "CONTRAST_WARNING_GRAPHIC" : false,
               developer: State.option.checks.CONTRAST_WARNING_GRAPHIC.developer || true,
@@ -4148,7 +4220,10 @@ URL: ${url2}`;
               test: "CONTRAST_WARNING",
               element,
               type: State.option.checks.CONTRAST_WARNING.type || "warning",
-              content: State.option.checks.CONTRAST_WARNING.content ? Lang.sprintf(State.option.checks.CONTRAST_WARNING.content) : Lang.sprintf("CONTRAST_WARNING") + ratioTip,
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_WARNING.content || (isWcag ? `${Lang._("CONTRAST_WARNING")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_WARNING")),
+                ratioToDisplay2
+              ),
               dismiss: prepareDismissal(`CONTRAST_WARNING ${sanitizedText}`),
               dismissAll: State.option.checks.CONTRAST_WARNING.dismissAll ? "CONTRAST_WARNING" : false,
               developer: State.option.checks.CONTRAST_WARNING.developer || false,
@@ -4162,7 +4237,10 @@ URL: ${url2}`;
               test: "CONTRAST_UNSUPPORTED",
               element,
               type: State.option.checks.CONTRAST_UNSUPPORTED.type || "warning",
-              content: State.option.checks.CONTRAST_UNSUPPORTED.content ? Lang.sprintf(State.option.checks.CONTRAST_UNSUPPORTED.content) : Lang.sprintf("CONTRAST_WARNING") + ratioTip,
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_UNSUPPORTED.content || (isWcag ? `${Lang._("CONTRAST_WARNING")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_WARNING")),
+                ratioToDisplay2
+              ),
               dismiss: prepareDismissal(`CONTRAST_UNSUPPORTED ${sanitizedText}`),
               dismissAll: State.option.checks.CONTRAST_UNSUPPORTED.dismissAll ? "CONTRAST_UNSUPPORTED" : false,
               developer: State.option.checks.CONTRAST_UNSUPPORTED.developer || false,
@@ -4337,7 +4415,9 @@ URL: ${url2}`;
               test: "BTN_EMPTY_LABELLEDBY",
               element: $el,
               type: State.option.checks.BTN_EMPTY_LABELLEDBY.type || "error",
-              content: State.option.checks.BTN_EMPTY_LABELLEDBY.content ? Lang.sprintf(State.option.checks.BTN_EMPTY_LABELLEDBY.content) : `${Lang.sprintf("BTN_EMPTY_LABELLEDBY")} ${Lang.sprintf("BTN_TIP")}`,
+              content: Lang.sprintf(
+                State.option.checks.BTN_EMPTY_LABELLEDBY.content || Lang._("BTN_EMPTY_LABELLEDBY") + Lang._("BTN_TIP")
+              ),
               dismiss: prepareDismissal(
                 `BTN_EMPTY_LABELLEDBY ${$el.tagName + $el.id + $el.className + accName}`
               ),
@@ -4349,7 +4429,7 @@ URL: ${url2}`;
               test: "BTN_EMPTY",
               element: $el,
               type: State.option.checks.BTN_EMPTY.type || "error",
-              content: State.option.checks.BTN_EMPTY.content ? Lang.sprintf(State.option.checks.BTN_EMPTY.content) : `${Lang.sprintf("BTN_EMPTY")} ${Lang.sprintf("BTN_TIP")}`,
+              content: Lang.sprintf(State.option.checks.BTN_EMPTY.content || Lang._("BTN_EMPTY") + Lang._("BTN_TIP")),
               dismiss: prepareDismissal(
                 `BTN_EMPTY ${$el.tagName + $el.id + $el.className + accName}`
               ),
@@ -4361,12 +4441,15 @@ URL: ${url2}`;
         }
         const isVisibleTextInAccName$1 = isVisibleTextInAccName($el, accName);
         if (State.option.checks.LABEL_IN_NAME && hasAria && isVisibleTextInAccName$1) {
-          const sanitizedText = sanitizeHTML(accName);
+          const escapedText = escapeHTML(accName);
           State.results.push({
             test: "LABEL_IN_NAME",
             element: $el,
             type: State.option.checks.LABEL_IN_NAME.type || "warning",
-            content: State.option.checks.LABEL_IN_NAME.content ? Lang.sprintf(State.option.checks.LABEL_IN_NAME.content, sanitizedText) : `${Lang.sprintf("LABEL_IN_NAME", sanitizedText)} ${Lang.sprintf("ACC_NAME_TIP")}`,
+            content: State.option.checks.LABEL_IN_NAME.content ? Lang.sprintf(State.option.checks.LABEL_IN_NAME.content, escapedText) : Lang.sprintf(
+              Lang._("LABEL_IN_NAME") + Lang._("ACC_NAME_TIP"),
+              escapedText
+            ),
             dismiss: prepareDismissal(
               `LABEL_IN_NAME ${$el.tagName + $el.id + $el.className + accName}`
             ),
@@ -4380,7 +4463,9 @@ URL: ${url2}`;
             test: "BTN_ROLE_IN_NAME",
             element: $el,
             type: State.option.checks.BTN_ROLE_IN_NAME.type || "warning",
-            content: State.option.checks.BTN_ROLE_IN_NAME.content ? Lang.sprintf(State.option.checks.BTN_ROLE_IN_NAME.content) : `${Lang.sprintf("BTN_ROLE_IN_NAME")} ${Lang.sprintf("BTN_TIP")}`,
+            content: Lang.sprintf(
+              State.option.checks.BTN_ROLE_IN_NAME.content || Lang._("BTN_ROLE_IN_NAME") + Lang._("BTN_TIP")
+            ),
             dismiss: prepareDismissal(
               `BTN_ROLE_IN_NAME ${$el.tagName + $el.id + $el.className + accName}`
             ),
@@ -7298,21 +7383,29 @@ URL: ${url2}`;
       UI.attachCSS(this.wrapper);
       this.tip = this.wrapper.querySelector(".tip");
       const content = this.wrapper.querySelector(".message");
-      if (this.result.content.includes('class="title"')) {
-        content.innerHTML = this.result.content.split("<hr")[0];
+      if (this.result.content.querySelector(".title")) {
+        content.appendChild(this.result.content);
+        const sallyTips = content.querySelectorAll("hr, hr ~ *");
+        if (sallyTips) {
+          const tipSet = Array.from(sallyTips);
+          for (let i = tipSet.length; i >= 0; i--) {
+            const el = tipSet[i];
+            if (el) {
+              el.nextSibling?.remove();
+              el.remove();
+            }
+          }
+        }
       } else {
         const innerContent = document.createElement("div");
-        const sentences = this.result.content.split(/[.!]/);
         const firstSentence = document.createElement("div");
-        firstSentence.innerHTML = `${sentences.shift()}.`;
         firstSentence.classList.add("title");
         firstSentence.setAttribute("tabindex", "-1");
+        firstSentence.style.setProperty("position", "absolute");
         innerContent.append(firstSentence);
-        const theRest = document.createElement("div");
-        theRest.classList.add("sa11y-tip");
-        theRest.innerHTML = sentences.join(".");
-        innerContent.appendChild(theRest);
+        innerContent.appendChild(this.result.content);
         content.append(innerContent);
+        console.warn(`Editoria11y tip title not found for ${this.result.test}.`);
       }
       const title = content.querySelector(".title");
       const invisibleAlert = document.createElement("div");
@@ -8790,11 +8883,7 @@ URL: ${url2}`;
   class Ed11y {
     constructor(userOptions) {
       if (CSS.supports("selector(:has(body))")) {
-        try {
-          initialize(userOptions).then();
-        } catch (error) {
-          showError(error);
-        }
+        initialize(userOptions).catch((error) => console.error(error.message));
       }
     }
   }

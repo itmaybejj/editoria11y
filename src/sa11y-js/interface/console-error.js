@@ -3,11 +3,12 @@ import styles from '../../css/console-errors.css?inline';
 import sharedStyles from '../../css/shared.css?inline';
 import Constants from '../utils/constants';
 import Lang from '../utils/lang';
-import { escapeHTML } from '../utils/utils';
+import { escapeHTML, sanitizeURL } from '../utils/utils';
 
 export default class ConsoleErrors extends HTMLElement {
   constructor(error) {
     super();
+		console.log('hi');
     this.error = error;
   }
 
@@ -25,7 +26,8 @@ export default class ConsoleErrors extends HTMLElement {
     content.setAttribute('tabindex', '-1');
 
     // Google Form & GitHub error link.
-    const url = window.location;
+		console.log('hi');
+    const url = sanitizeURL(window.location);
     const google = 'https://forms.gle/sjzK9XykETaoqZv99';
 
     // GitHub template

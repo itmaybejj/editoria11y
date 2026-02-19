@@ -152,9 +152,6 @@ export default function checkLinkText() {
        * Links with ARIA
        */
       if (hasAria && linkText.length !== 0) {
-        // Computed accessible name,
-        const sanitizedText = Utils.sanitizeHTML(linkText);
-
         // General warning for visible non-descript link text, regardless of ARIA label.
         const excludeSpan = Utils.fnIgnore($el, Constants.Exclusions.LinkSpan);
         const visibleLinkText = Utils.getText(excludeSpan).replace(ignorePattern, '');
@@ -175,14 +172,11 @@ export default function checkLinkText() {
             test: 'LINK_STOPWORD_ARIA',
             element: $el,
             type: State.option.checks.LINK_STOPWORD_ARIA.type || 'warning',
-            content: State.option.checks.LINK_STOPWORD_ARIA.content
-              ? Lang.sprintf(
-                  State.option.checks.LINK_STOPWORD_ARIA.content,
-                  stopword,
-                  sanitizedText,
-                )
-              : Lang.sprintf('LINK_STOPWORD_ARIA', stopword, sanitizedText) +
-                Lang.sprintf('LINK_TIP'),
+            content: Lang.sprintf(
+              State.option.checks.LINK_STOPWORD_ARIA.content || (Lang._('LINK_STOPWORD_ARIA') + Lang._('LINK_TIP')),
+              stopword,
+              linkText
+            ),
             inline: true,
             dismiss: Utils.prepareDismissal(`LINK_STOPWORD_ARIA ${strippedLinkText}`),
             dismissAll: State.option.checks.LINK_STOPWORD_ARIA.dismissAll
@@ -202,7 +196,7 @@ export default function checkLinkText() {
             type: State.option.checks.LABEL_IN_NAME.type || 'warning',
             content: Lang.sprintf(
               State.option.checks.LABEL_IN_NAME.content || 'LABEL_IN_NAME',
-              sanitizedText,
+              linkText,
             ),
             inline: true,
             position: 'afterend',
@@ -216,9 +210,10 @@ export default function checkLinkText() {
             test: 'LINK_LABEL',
             element: $el,
             type: State.option.checks.LINK_LABEL.type || 'good',
-            content: State.option.checks.LINK_LABEL.content
-              ? Lang.sprintf(State.option.checks.LINK_LABEL.content, sanitizedText)
-              : `${Lang.sprintf('ACC_NAME', sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`,
+            content: Lang.sprintf(
+              State.option.checks.LINK_LABEL.content || Lang._('ACC_NAME') + Lang._('ACC_NAME_TIP'),
+              linkText
+            ),
             inline: true,
             position: 'afterend',
             dismiss: Utils.prepareDismissal(`LINK_LABEL ${strippedLinkText}`),
@@ -239,9 +234,10 @@ export default function checkLinkText() {
             test: 'LINK_STOPWORD',
             element,
             type: State.option.checks.LINK_STOPWORD.type || 'error',
-            content: State.option.checks.LINK_STOPWORD.content
-              ? Lang.sprintf(State.option.checks.LINK_STOPWORD.content, stopword)
-              : Lang.sprintf('LINK_STOPWORD', stopword) + Lang.sprintf('LINK_TIP'),
+            content: Lang.sprintf(
+              State.option.checks.LINK_STOPWORD.content || Lang._('LINK_STOPWORD') + Lang._('LINK_TIP'),
+              stopword
+            ),
             inline: true,
             position: 'afterend',
             dismiss: Utils.prepareDismissal(`LINK_STOPWORD ${strippedLinkText}`),
@@ -395,9 +391,9 @@ export default function checkLinkText() {
               test: 'LINK_URL',
               element: $el,
               type: State.option.checks.LINK_URL.type || 'warning',
-              content: State.option.checks.LINK_URL.content
-                ? Lang.sprintf(State.option.checks.LINK_URL.content)
-                : Lang.sprintf('LINK_URL') + Lang.sprintf('LINK_TIP'),
+              content: Lang.sprintf(
+                State.option.checks.LINK_URL.content || Lang._('LINK_URL') + Lang._('LINK_TIP')
+              ),
               inline: true,
               dismiss: Utils.prepareDismissal(`LINK_URL ${strippedLinkText}`),
               dismissAll: State.option.checks.LINK_URL.dismissAll ? 'LINK_URL' : false,
@@ -449,9 +445,9 @@ export default function checkLinkText() {
             test: 'LINK_CLICK_HERE',
             element: $el,
             type: State.option.checks.LINK_CLICK_HERE.type || 'warning',
-            content: State.option.checks.LINK_CLICK_HERE.content
-              ? Lang.sprintf(State.option.checks.LINK_CLICK_HERE.content)
-              : Lang.sprintf('LINK_CLICK_HERE') + Lang.sprintf('LINK_TIP'),
+            content: Lang.sprintf(
+              State.option.checks.LINK_CLICK_HERE.content || Lang._('LINK_CLICK_HERE') + Lang._('LINK_TIP')
+            ),
             inline: true,
             dismiss: Utils.prepareDismissal(`LINK_CLICK_HERE ${strippedLinkText}`),
             dismissAll: State.option.checks.LINK_CLICK_HERE.dismissAll ? 'LINK_CLICK_HERE' : false,
@@ -485,14 +481,15 @@ export default function checkLinkText() {
         const ignored = $el.ariaHidden === 'true' && $el.getAttribute('tabindex') === '-1';
         const hasAttributes = $el.hasAttribute('role') || $el.hasAttribute('disabled');
         if (State.option.checks.LINK_IDENTICAL_NAME && !hasAttributes && !ignored) {
-          const sanitizedText = Utils.sanitizeHTML(linkText);
           State.results.push({
             test: 'LINK_IDENTICAL_NAME',
             element: $el,
             type: State.option.checks.LINK_IDENTICAL_NAME.type || 'warning',
-            content: State.option.checks.LINK_IDENTICAL_NAME.content
-              ? Lang.sprintf(State.option.checks.LINK_IDENTICAL_NAME.content, sanitizedText)
-              : `${Lang.sprintf('LINK_IDENTICAL_NAME', sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`,
+            content: Lang.sprintf(
+              State.option.checks.LINK_IDENTICAL_NAME.content
+              || Lang._('LINK_IDENTICAL_NAME') + Lang._('ACC_NAME_TIP'),
+              linkText
+            ),
             inline: true,
             dismiss: Utils.prepareDismissal(`LINK_IDENTICAL_NAME ${strippedLinkText}`),
             dismissAll: State.option.checks.LINK_IDENTICAL_NAME.dismissAll

@@ -23,9 +23,9 @@ export default function checkImages() {
   // Generate suspicious alt stop words list.
   const susAltWords = State.option.susAltStopWords
     ? State.option.susAltStopWords
-        .split(',')
-        .map((word) => word.trim().toLowerCase())
-        .filter(Boolean)
+      .split(',')
+      .map((word) => word.trim().toLowerCase())
+      .filter(Boolean)
     : Lang._('SUS_ALT_STOPWORDS');
 
   // Generate placeholder stop words set.
@@ -92,13 +92,13 @@ export default function checkImages() {
   /*  Loop through all images  */
   /* ************************* */
   Elements.Found.Images.forEach(($el) => {
-    const alt =
+    const rawAlt =
       computeAriaLabel($el) === 'noAria' ? $el.getAttribute('alt') : computeAriaLabel($el);
     const ariaHidden = $el?.getAttribute('aria-hidden') === 'true';
     const presentationRole = $el?.getAttribute('role') === 'presentation';
 
     // Ignore tracking pixels without explicit aria-hidden or nullified alt.
-    if ($el.height < 2 && $el.width < 2 && (Utils.isElementHidden($el) || alt === '')) {
+    if ($el.height < 2 && $el.width < 2 && (Utils.isElementHidden($el) || rawAlt === '')) {
       return;
     }
 
@@ -117,9 +117,9 @@ export default function checkImages() {
     // Process link text exclusions.
     const linkText = link
       ? Utils.fnIgnore(link, Constants.Exclusions.LinkSpan).textContent.replace(
-          linkIgnoreStringPattern,
-          '',
-        )
+        linkIgnoreStringPattern,
+        '',
+      )
       : '';
     const linkTextLength = Utils.removeWhitespace(linkText).length;
 
@@ -148,7 +148,7 @@ export default function checkImages() {
     /** **************** */
     /*  ALT IS MISSING   */
     /* ***************** */
-    if (alt === null) {
+    if (rawAlt === null) {
       if (link) {
         const hasAriaHiddenOrPresentationRole =
           linkTextLength > 0 && (ariaHidden || presentationRole);
@@ -189,13 +189,12 @@ export default function checkImages() {
     /** *************** */
     /*  HAS ALT TEXT    */
     /* **************** */
-    const sanitizedAlt = Utils.sanitizeHTML(alt);
-    const altText = Utils.removeWhitespace(sanitizedAlt);
+    const altText = Utils.removeWhitespace(rawAlt);
     const hasAria = $el.getAttribute('aria-label') || $el.getAttribute('aria-labelledby');
 
     // If aria-label or aria-labelledby returns empty or invalid.
     if (State.option.checks.MISSING_ALT) {
-      if (hasAria && altText === '') {
+      if (hasAria && rawAlt === '') {
         State.results.push({
           test: 'MISSING_ALT',
           element: $el,
@@ -212,7 +211,7 @@ export default function checkImages() {
     /* ************** */
     /*  DECORATIVE    */
     /* ************** */
-    let decorative = alt === '';
+    let decorative = rawAlt === '';
 
     // Figure elements.
     const figure = $el.closest('figure');
@@ -225,7 +224,7 @@ export default function checkImages() {
 
     // If alt text starts with a very specific string provided via props.
     if (!decorative && State.option.altPlaceholder.length) {
-      decorative = alt.match(altPlaceholderPattern)?.[0];
+      decorative = rawAlt.match(altPlaceholderPattern)?.[0];
     }
 
     // Decorative images.
@@ -307,7 +306,7 @@ export default function checkImages() {
       ? State.option.checks.LINK_ALT_UNPRONOUNCEABLE
       : State.option.checks.ALT_UNPRONOUNCEABLE;
     if (unpronounceable) {
-      if (alt.replace(/"|'|\?|\.|-|\s+/g, '') === '' && linkTextLength === 0) {
+      if (rawAlt.replace(/"|'|\?|\.|-|\s+/g, '') === '' && linkTextLength === 0) {
         const conditional = link ? 'LINK_ALT_UNPRONOUNCEABLE' : 'ALT_UNPRONOUNCEABLE';
         State.results.push({
           test: conditional,
@@ -325,14 +324,14 @@ export default function checkImages() {
     /* ********************* */
     /*  ALT TEXT QUALITY     */
     /* ********************* */
-    const error = containsAltTextStopWords(altText);
+    const error = containsAltTextStopWords(rawAlt);
 
     // Potentially contains auto-generated placeholder text.
     const maybeBadAlt = link
       ? State.option.checks.LINK_ALT_MAYBE_BAD
       : State.option.checks.ALT_MAYBE_BAD;
     const isTooLongSingleWord = new RegExp(`^\\S{${maybeBadAlt.minLength || 15},}$`);
-    const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(alt);
+    const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(rawAlt);
 
     if (error[0] !== null) {
       // Has stop words.
@@ -344,7 +343,7 @@ export default function checkImages() {
           element: $el,
           type: rule.type || 'error',
           content: Lang.sprintf(rule.content || conditional, error[0], altText),
-          dismiss: Utils.prepareDismissal(`${conditional + src + altText}`),
+          dismiss: Utils.prepareDismissal(`${conditional + src + rawAlt}`),
           dismissAll: rule.dismissAll ? conditional : false,
           developer: rule.developer || false,
         });
@@ -361,7 +360,7 @@ export default function checkImages() {
           element: $el,
           type: rule.type || 'error',
           content: Lang.sprintf(rule.content || conditional, altText),
-          dismiss: Utils.prepareDismissal(`${conditional + src + altText}`),
+          dismiss: Utils.prepareDismissal(`${conditional + src + rawAlt}`),
           dismissAll: rule.dismissAll ? conditional : false,
           developer: rule.developer || false,
         });
@@ -376,12 +375,12 @@ export default function checkImages() {
           element: $el,
           type: rule.type || 'warning',
           content: Lang.sprintf(rule.content || conditional, error[1], altText),
-          dismiss: Utils.prepareDismissal(`${conditional + src + altText}`),
+          dismiss: Utils.prepareDismissal(`${conditional + src + rawAlt}`),
           dismissAll: rule.dismissAll ? conditional : false,
           developer: rule.developer || false,
         });
       }
-    } else if (maybeBadAlt && isTooLongSingleWord.test(alt) && containsNonAlphaChar) {
+    } else if (maybeBadAlt && isTooLongSingleWord.test(rawAlt) && containsNonAlphaChar) {
       // Alt text is a single word greater than 15 characters that is potentially auto-generated.
       const conditional = link ? 'LINK_ALT_MAYBE_BAD' : 'ALT_MAYBE_BAD';
       State.results.push({
@@ -389,11 +388,11 @@ export default function checkImages() {
         element: $el,
         type: maybeBadAlt.type || 'error',
         content: Lang.sprintf(maybeBadAlt.content || conditional, altText),
-        dismiss: Utils.prepareDismissal(`${conditional + src + altText}`),
+        dismiss: Utils.prepareDismissal(`${conditional + src + rawAlt}`),
         dismissAll: maybeBadAlt.dismissAll ? conditional : false,
         developer: maybeBadAlt.developer || false,
       });
-    } else if (link ? alt.length > maxAltCharactersLinks : alt.length > maxAltCharacters) {
+    } else if (link ? rawAlt.length > maxAltCharactersLinks : rawAlt.length > maxAltCharacters) {
       // Alt is too long.
       const rule = link
         ? State.option.checks.LINK_IMAGE_LONG_ALT
@@ -405,8 +404,8 @@ export default function checkImages() {
           test: conditional,
           element: $el,
           type: rule.type || 'warning',
-          content: Lang.sprintf(rule.content || conditional, alt.length, truncated),
-          dismiss: Utils.prepareDismissal(`${conditional + src + altText}`),
+          content: Lang.sprintf(rule.content || conditional, rawAlt.length, truncated),
+          dismiss: Utils.prepareDismissal(`${conditional + src + rawAlt}`),
           dismissAll: rule.dismissAll ? conditional : false,
           developer: rule.developer || false,
         });
@@ -421,27 +420,29 @@ export default function checkImages() {
       if (rule) {
         // Has both link text and alt text.
         const linkAccName = computeAccessibleName(link);
-        const removeWhitespace = Utils.removeWhitespace(linkAccName);
-        const sanitizedText = Utils.sanitizeHTML(removeWhitespace);
+        const accName = Utils.removeWhitespace(linkAccName);
 
-        const tooltip =
+        const tooltip = Lang.sprintf(
           linkTextLength === 0
-            ? Lang.sprintf('LINK_IMAGE_ALT', altText)
-            : `${Lang.sprintf('LINK_IMAGE_ALT_AND_TEXT', altText, sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`;
+            ? Lang._('LINK_IMAGE_ALT')
+            : Lang._('LINK_IMAGE_ALT_AND_TEXT') + Lang._('ACC_NAME_TIP'),
+          altText,
+          accName
+        );
 
         State.results.push({
           test: conditional,
           element: $el,
           type: rule.type || 'warning',
-          content: rule.content ? Lang.sprintf(rule.content, altText, sanitizedText) : tooltip,
-          dismiss: Utils.prepareDismissal(`${conditional + src + altText}`),
+          content: rule.content ? Lang.sprintf(rule.content, altText, accName) : tooltip,
+          dismiss: Utils.prepareDismissal(`${conditional + src + rawAlt}`),
           dismissAll: rule.dismissAll ? conditional : false,
           developer: rule.developer || false,
         });
       }
     } else if (figure) {
       // Figure element has same alt and caption text.
-      const duplicate = !!figcaption && figcaptionText.toLowerCase() === altText.toLowerCase();
+      const duplicate = !!figcaption && figcaptionText.toLowerCase() === rawAlt.toLowerCase();
       if (duplicate) {
         if (State.option.checks.IMAGE_FIGURE_DUPLICATE_ALT) {
           State.results.push({
@@ -450,7 +451,7 @@ export default function checkImages() {
             type: State.option.checks.IMAGE_FIGURE_DUPLICATE_ALT.type || 'warning',
             content: Lang.sprintf(
               State.option.checks.IMAGE_FIGURE_DUPLICATE_ALT.content ||
-                'IMAGE_FIGURE_DUPLICATE_ALT',
+              'IMAGE_FIGURE_DUPLICATE_ALT',
               altText,
             ),
             dismiss: Utils.prepareDismissal(`IMAGE_FIGURE_DUPLICATE_ALT ${src}`),
@@ -467,7 +468,7 @@ export default function checkImages() {
           element: $el,
           type: State.option.checks.IMAGE_PASS.type || 'good',
           content: Lang.sprintf(State.option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
-          dismiss: Utils.prepareDismissal(`IMAGE_PASS FIGURE ${src + altText}`),
+          dismiss: Utils.prepareDismissal(`IMAGE_PASS FIGURE ${src + rawAlt}`),
           dismissAll: State.option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
           developer: State.option.checks.IMAGE_PASS.developer || false,
         });
@@ -480,7 +481,7 @@ export default function checkImages() {
           element: $el,
           type: State.option.checks.IMAGE_PASS.type || 'good',
           content: Lang.sprintf(State.option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
-          dismiss: Utils.prepareDismissal(`IMAGE_PASS ${src + altText}`),
+          dismiss: Utils.prepareDismissal(`IMAGE_PASS ${src + rawAlt}`),
           dismissAll: State.option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
           developer: State.option.checks.IMAGE_PASS.developer || false,
         });
@@ -491,7 +492,7 @@ export default function checkImages() {
     /*  DUPLICATE ALT & TITLE.  */
     /* ************************ */
     const titleAttr = $el.getAttribute('title');
-    if (titleAttr?.toLowerCase() === alt.toLowerCase()) {
+    if (titleAttr?.toLowerCase() === rawAlt.toLowerCase()) {
       if (State.option.checks.DUPLICATE_TITLE) {
         State.results.push({
           test: 'DUPLICATE_TITLE',
@@ -499,7 +500,7 @@ export default function checkImages() {
           type: State.option.checks.DUPLICATE_TITLE.type || 'warning',
           content: Lang.sprintf(State.option.checks.DUPLICATE_TITLE.content || 'DUPLICATE_TITLE'),
           inline: true,
-          dismiss: Utils.prepareDismissal(`DUPLICATE_TITLE ${altText}`),
+          dismiss: Utils.prepareDismissal(`DUPLICATE_TITLE ${rawAlt}`),
           dismissAll: State.option.checks.DUPLICATE_TITLE.dismissAll ? 'DUPLICATE_TITLE' : false,
           developer: State.option.checks.DUPLICATE_TITLE.developer || false,
         });

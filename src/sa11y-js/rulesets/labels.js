@@ -46,7 +46,7 @@ export default function checkLabels() {
             type: State.option.checks.LABELS_MISSING_IMAGE_INPUT.type || 'error',
             content: Lang.sprintf(
               State.option.checks.LABELS_MISSING_IMAGE_INPUT.content ||
-                'LABELS_MISSING_IMAGE_INPUT',
+              'LABELS_MISSING_IMAGE_INPUT',
             ),
             dismiss: Utils.prepareDismissal(`LABELS_MISSING_IMAGE_INPUT ${type + inputName}`),
             dismissAll: State.option.checks.LABELS_MISSING_IMAGE_INPUT.dismissAll
@@ -123,14 +123,14 @@ export default function checkLabels() {
           }
 
           // Everything else that is not visible (aria-label, title, placeholder).
-          const sanitizedText = Utils.sanitizeHTML(inputName);
+          const escapedText = Utils.escapeHTML(inputName);
           State.results.push({
             test: 'LABELS_ARIA_LABEL_INPUT',
             element: $el,
             type: State.option.checks.LABELS_ARIA_LABEL_INPUT.type || 'warning',
             content: State.option.checks.LABELS_ARIA_LABEL_INPUT.content
-              ? Lang.sprintf(State.option.checks.LABELS_ARIA_LABEL_INPUT.content, sanitizedText)
-              : `${Lang.sprintf('LABELS_ARIA_LABEL_INPUT', sanitizedText)} ${Lang.sprintf('ACC_NAME_TIP')}`,
+              ? Lang.sprintf(State.option.checks.LABELS_ARIA_LABEL_INPUT.content, escapedText)
+              : Lang.sprintf(Lang._('LABELS_ARIA_LABEL_INPUT') + Lang._('ACC_NAME_TIP'), escapedText),
             dismiss: Utils.prepareDismissal(`LABELS_ARIA_LABEL_INPUT ${type + inputName}`),
             dismissAll: State.option.checks.LABELS_ARIA_LABEL_INPUT.dismissAll
               ? 'LABELS_ARIA_LABEL_INPUT'
