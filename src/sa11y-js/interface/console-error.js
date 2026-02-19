@@ -8,7 +8,6 @@ import { escapeHTML, sanitizeURL } from '../utils/utils';
 export default class ConsoleErrors extends HTMLElement {
   constructor(error) {
     super();
-		console.log('hi');
     this.error = error;
   }
 
@@ -26,7 +25,6 @@ export default class ConsoleErrors extends HTMLElement {
     content.setAttribute('tabindex', '-1');
 
     // Google Form & GitHub error link.
-		console.log('hi');
     const url = sanitizeURL(window.location);
     const google = 'https://forms.gle/sjzK9XykETaoqZv99';
 
