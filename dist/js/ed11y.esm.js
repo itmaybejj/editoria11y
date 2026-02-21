@@ -5531,14 +5531,18 @@ function showResults() {
 }
 const panelJumpTo = (event) => {
   event.preventDefault();
+  pauseObservers();
   UI.toggledFrom = event.target.closest("button");
   if (!UI.showPanel) {
     togglePanel();
     window.setTimeout(() => {
+      pauseObservers();
       jumpTo();
+      resumeObservers();
     }, 500);
   } else {
     jumpTo();
+    resumeObservers();
   }
 };
 function updatePanel() {

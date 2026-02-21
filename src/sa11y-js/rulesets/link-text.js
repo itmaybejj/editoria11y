@@ -267,7 +267,7 @@ export default function checkLinkText() {
       /**
        * Empty hyperlinks.
        */
-      if (linkText.length === 0) {
+			if (linkText.length === 0) {
         if (hasAriaLabelledby) {
           // Has ariaLabelledby attribute but empty accessible name.
           if (State.option.checks.LINK_EMPTY_LABELLEDBY) {

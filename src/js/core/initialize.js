@@ -75,6 +75,8 @@ const preProcessOptions = async (userOptions) => {
   UI.theme.baseFontSize = State.option.baseFontSize;
   UI.theme.buttonZIndex = State.option.buttonZIndex;
   UI.theme.baseFontFamily = State.option.baseFontFamily;
+  //  UI.inlineAlerts = !document.querySelector('[cotenteditable]') && State.option.inlineAlerts;
+  // todo change to that after next action.
   UI.inlineAlerts = State.option.inlineAlerts;
   UI.showDismissed = State.option.showDismissed;
 
