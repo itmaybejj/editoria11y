@@ -75,8 +75,14 @@ const panelJumpTo = (event) => {
 
 export function updatePanel() {
   pauseObservers();
-  // Stash old values for incremental updates.
 
+  // Beware dynamically appearing editable content.
+  if (UI.inlineAlerts && document.querySelector('[contenteditable]')) {
+    UI.forceFullCheck = true;
+    UI.inlineAlerts = false;
+  }
+
+  // Stash old values for incremental updates.
   if (UI.incremental) {
     // Check for a change in the result counts.
     if (UI.forceFullCheck || newIncrementalResults()) {

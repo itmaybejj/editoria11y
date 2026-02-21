@@ -5551,6 +5551,10 @@ URL: ${url2}`;
   };
   function updatePanel() {
     pauseObservers();
+    if (UI.inlineAlerts && document.querySelector("[contenteditable]")) {
+      UI.forceFullCheck = true;
+      UI.inlineAlerts = false;
+    }
     if (UI.incremental) {
       if (UI.forceFullCheck || newIncrementalResults()) {
         UI.forceFullCheck = false;
@@ -8751,7 +8755,7 @@ URL: ${url2}`;
     UI.theme.baseFontSize = State.option.baseFontSize;
     UI.theme.buttonZIndex = State.option.buttonZIndex;
     UI.theme.baseFontFamily = State.option.baseFontFamily;
-    UI.inlineAlerts = State.option.inlineAlerts;
+    UI.inlineAlerts = !document.querySelector("[contenteditable]") && State.option.inlineAlerts;
     UI.showDismissed = State.option.showDismissed;
     let cssUrls = userOptions.cssUrls;
     if (!cssUrls) {
