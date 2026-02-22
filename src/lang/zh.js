@@ -144,7 +144,7 @@ const tips = {
 	LINK_ALT_UNPRONOUNCEABLE: `<p>该链接图片的替代文本仅包含不可发音的符号和/或空格：“%(ALT_TEXT)”。读屏软件会宣布存在链接，但无法描述其含义。</p><p>${why.fix}请将替代文本设置为链接的目标或用途。</p>${why.imageLinks}`,
 	LINK_CLICK_HERE: `“点击”或“点击这里”这类词语是多余的，并会分散对链接目的的注意力。`,
 	LINK_DOI: `<p>${why.fix}请链接文章标题，并以纯文本提供 DOI 号码，而不是把 DOI 设为链接、标题留作纯文本。</p><div class="why"><p>APA 指南建议在网站中使用具描述性的链接——用户会按链接名称扫描与搜索，标题被链接更易被注意。</p><p>这也能让读屏软件用有意义的文本描述链接，而不是一串数字。</p></div>`,
-	LINK_EMPTY: `<p><strong class="badge">To fix</strong> 添加描述链接目标的文本；如果这只是误操作（例如链接了一个空格），请删除该链接。</p><div class="why"><p>提示：读屏软件无法描述空链接。它可能直接静默，或读出 URL（例如逐字符朗读）。</p><p>在某些编辑器中，空格链接难以删除；可能需要删除空格两侧的文字并重新输入。</p></div>`,
+	LINK_EMPTY: `<p>${why.fix}添加描述其目标的文本，或者如果只是打字错误或链接空格字符，则将其删除。</p><div class="why"><p>提示：屏幕阅读器无法描述仅包含空格或符号的链接。它们要么保持沉默（"链接，[...链接标题应该在的地方出现尴尬的停顿...]"），要么读出URL：链接，H-T-T-P-S 正斜杠 正斜杠 示例 点 com。</p><p>请注意，链接空格字符在某些内容编辑器中可能很难删除；有时需要通过删除并重新键入链接空格两侧的单词来"跨越空隙"进行删除。</p></div>`,
 	LINK_EMPTY_LABELLEDBY: `<p>此链接的 <code>aria-labelledby</code> 并未匹配到页面中的任何 <code>ID</code>。</p><p>${why.fix}请提供有效的 ID，或移除此属性并用其他方式描述按钮。</p>`,
 	LINK_EMPTY_NO_LABEL: `<p><strong class="badge">To fix</strong> 添加描述目的地的文本，或删除此误加的链接。</p><div class="why"><p>提示：读屏软件无法描述空链接。</p><p>空格链接可能难以删除；有时需要删除前后文字再重写。</p></div>`,
 	LINK_FILE_EXT: `<p>该链接指向可下载文件（如 PDF、MP3、Zip、Word）但未提前告知。</p><p>${why.fix}请在链接文本中使用文字或图标<a href="https://itmaybejj.github.io/linkpurpose/">标明文件类型</a>。</p><p class="why">对于大文件，建议标注文件大小，例如：“年度报告（PDF，3 MB）”。</p>`,

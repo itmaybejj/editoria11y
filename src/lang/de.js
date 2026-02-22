@@ -198,7 +198,7 @@ const tips = {
 
 	LINK_DOI: `<p>${why.fix}Verlinken Sie den Artikeltitel und geben Sie die DOI‑Nummer im Klartext an, nicht umgekehrt.</p><div class="why"><p>Die APA‑Richtlinie empfiehlt beschreibende Links, weil Nutzende Links nach Name scannen. So werden relevante Artikel eher gefunden.</p><p>Screenreader können so sinnvolle Links ansagen statt Zahlenreihen.</p></div>`,
 
-	LINK_EMPTY: `<p>${why.fix}Fügen Sie Text hinzu, der das Ziel beschreibt, oder löschen Sie den Link, wenn er ein Tippfehler ist (z. B. verlinktes Leerzeichen).</p><div class="why"><p>Tipp: Screenreader können leere Links nicht beschreiben. Sie bleiben stumm oder lesen die URL buchstabenweise.</p><p>Verlinkte Leerzeichen sind in manchen Editoren schwer zu löschen; manchmal hilft das Neuschreiben des umliegenden Texts.</p></div>`,
+	LINK_EMPTY: `<p>${why.fix}Fügen Sie Text hinzu, der das Ziel beschreibt, oder löschen Sie es, wenn es sich nur um einen Tippfehler oder ein verlinktes Leerzeichen handelt.</p><div class="why"><p>Tipp: Bildschirmleser können Links, die nur Leerzeichen oder Symbole enthalten, nicht beschreiben. Sie werden entweder stumm ("Link, [...unangenehme Pause, wo der Linktitel sein sollte...]"), oder lesen die URL vor: Link, H-T-T-P-S Schrägstrich Schrägstrich Beispiel Punkt com.</p><p>Beachten Sie, dass verlinkte Leerzeichen in einigen Editoren schwer zu löschen sein können; manchmal ist es notwendig, "über die Lücke hinweg" zu löschen, indem Sie die Wörter auf beiden Seiten des verlinkten Leerzeichens entfernen und neu eingeben.</p></div>`,
 
 	LINK_EMPTY_LABELLEDBY: `<p>Dieses <code>aria-labelledby</code> verweist auf kein vorhandenes <code>ID</code>.</p><p>${why.fix}Hinterlegen Sie eine gültige ID oder entfernen Sie das Attribut.</p>`,
 
