@@ -123,24 +123,25 @@ export function countAlerts() {
       UI.errorCount++;
     }
 
-    let location = State.results[i].element;
-    const interactive = (location) =>
-      location.closest('a, button, img, svg, input, iframe, [role="button"], [role="link"]');
-    const canPositionInside = (location) =>
-      !interactive(location) &&
-      location.closest('p, table, li, blockquote, h1, h2, h3, h4, h5, h6');
-
-    // Todo limit afterBegin to P and TD such.
+    State.results[i].position = 'beforebegin';
     if (State.results[i].element.shadowRoot) {
-      while (location.parentElement?.shadowRoot) {
-        location = location.parentElement;
+      while (State.results[i].element.parentElement?.shadowRoot) {
+        State.results[i].element = location.parentElement;
       }
     }
-    if (!canPositionInside(location)) {
-      State.results[i].location = interactive(location) ?? location;
-      State.results[i].position = 'beforebegin';
-    } else {
-      State.results[i].location = location;
+    if (
+      State.results[i].element.closest(
+        'a, button, img, svg, input, iframe, [role="button"], [role="link"]',
+      )
+    ) {
+      State.results[i].element =
+        State.results[i].element.closest('a, button, input, [role="button"], [role="link"]') ??
+        State.results[i].element;
+    } else if (
+      State.results[i].element.matches(
+        'p, strong, em, i, u, table, td, th, li, blockquote, h1, h2, h3, h4, h5, h6',
+      )
+    ) {
       State.results[i].position = 'afterbegin';
     }
   }
