@@ -322,6 +322,7 @@ const interfaceStrings = {
 	main_toggle_hide_alerts: 'Ocultar alertas de accesibilidad',
 	main_toggle_show: 'Mostrar herramientas de accesibilidad',
 	main_toggle_show_alerts: 'Mostrar alertas de accesibilidad',
+	MISSING_ROOT: `Editoria11y no encontró ningún elemento que coincida con la configuración del área de verificación: <code>%(root)</code>`,
 	panelCheckAltText: `<p class="ed11y-small">Verifique que cada imagen describa lo que significa en contexto y que no haya imágenes que contengan texto.</p>`,
 	panelCheckOutline: `<p class="ed11y-small">Esto muestra el esquema de encabezados. Verifique que coincida con la organización visual del contenido.</p>`,
 	PANEL_HEADING_MISSING_ONE: 'Falta el Encabezado 1.',

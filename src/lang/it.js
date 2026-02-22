@@ -248,6 +248,7 @@ export const interfaceStrings = {
 	main_toggle_hide_alerts: 'Nascondi avvisi di accessibilità',
 	main_toggle_show: 'Mostra strumenti di accessibilità',
 	main_toggle_show_alerts: 'Mostra avvisi di accessibilità',
+	MISSING_ROOT: `Editoria11y non ha trovato alcun elemento che corrisponda alla configurazione dell'area di controllo: <code>%(root)</code>`,
 	panelCheckAltText: `<p class="ed11y-small">Verifica che ogni immagine esprima il proprio significato nel contesto e che non ci siano immagini con testo incorporato.</p>`,
 	panelCheckOutline: `<p class="ed11y-small">Mostra la struttura delle intestazioni. Verifica che corrisponda all’organizzazione visiva.</p>`,
 	reportsLink: 'Apri i rapporti del sito',

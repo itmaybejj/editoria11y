@@ -44,6 +44,7 @@ URL: ${url}`;
     const github = `https://github.com/itmaybejj/editoria11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
 
     // Message
+    // Todo: sprintf now returns an object.
     content.innerHTML = `
       <button class="close-btn" aria-describedby="ed11y-console-error"><span aria-hidden="true">&times</span> ${Lang._('ALERT_CLOSE')}</button>
       <h2 id="ed11y-console-error">${Lang._('ERROR')}</h2>

@@ -1105,6 +1105,10 @@ ed11y-element-result[data-ed11y-open="true"] {
 			width: 2.75em;
 		}
 
+		summary > div {
+			display: inline-block;
+		}
+
 		& > details summary {
 			display: flex;
 			align-items: center;

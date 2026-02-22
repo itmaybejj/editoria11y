@@ -237,6 +237,7 @@ export const interfaceStrings = {
 	main_toggle_hide_alerts: 'Dölj tillgänglighetsvarningar',
 	main_toggle_show: 'Visa tillgänglighetsverktyg',
 	main_toggle_show_alerts: 'Visa tillgänglighetsvarningar',
+	MISSING_ROOT: `Editoria11y hittade inga element som matchade konfigurationen för kontrollområdet: <code>%(root)</code>`,
 	panelCheckAltText: `<p class="ed11y-small">Kontrollera att varje bilds alt‑text förmedlar betydelsen i sammanhanget, och att inga ”bilder med inbäddad text” används.</p>`,
 	panelCheckOutline: `<p class="ed11y-small">Visar rubrikstrukturen. Kontrollera att den motsvarar sidans visuella struktur.</p>`,
 	reportsLink: 'Öppna webbplatsrapporter',

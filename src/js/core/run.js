@@ -245,7 +245,7 @@ export function updatePanel() {
       // Prepare show hidden alerts button.
       const preferredDismissHide =
         UI.dismissedCount > 1
-          ? Lang.sprintf('buttonHideHiddenAlerts', UI.dismissedCount)
+          ? Lang.sprintf('buttonHideHiddenAlerts', UI.dismissedCount).textContent
           : Lang._('buttonHideHiddenAlert');
       if (UI.dismissedCount === 0) {
         // Reset show hidden default option when irrelevant.
@@ -255,7 +255,7 @@ export function updatePanel() {
       } else if (UI.dismissedCount === 1) {
         const show = UI.english
           ? Lang._('buttonShowHiddenAlert')
-          : Lang.sprintf('PANEL_DISMISS_BUTTON', '1');
+          : Lang.sprintf('PANEL_DISMISS_BUTTON', '1').textContent;
         UI.panelShowDismissed.querySelector('.ed11y-sr-only').textContent = UI.showDismissed
           ? preferredDismissHide
           : show;
@@ -267,7 +267,7 @@ export function updatePanel() {
       } else {
         UI.panelShowDismissed.querySelector('.ed11y-sr-only').textContent = UI.showDismissed
           ? preferredDismissHide
-          : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount);
+          : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount).textContent;
         UI.panelShowDismissed.dataset.ed11yPressed = `${UI.showDismissed}`;
         if (!UI.english) {
           UI.panelShowDismissed.ariaPressed = UI.showDismissed;
@@ -343,7 +343,7 @@ export function updatePanel() {
         if (!UI.showPanel) {
           UI.panelToggleTitle.textContent =
             UI.dismissedCount > 1
-              ? Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount)
+              ? Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount).textContent
               : Lang._('buttonShowHiddenAlert');
         }
       }
@@ -1358,13 +1358,9 @@ export function checkAll() {
     UI.roots = document.querySelectorAll(`:is(${State.option.checkRoot})`);
   }
   // Initialize root areas to check.
-  if (!UI.roots && State.option.headless === false) {
-    console.warn(Lang.sprintf('MISSING_ROOT', State.option.checkRoot));
-  }
-
-  if (UI.roots.length === 0) {
+  if (UI.roots.length === 0 && State.option.headless === false) {
     if (UI.onLoad) {
-      console.warn(Lang._('MISSING_ROOT'));
+      console.warn(Lang.sprintf('MISSING_ROOT', `"${State.option.checkRoot}"`).textContent);
     }
     disable();
     return;
@@ -1518,7 +1514,7 @@ export function resetPanel() {
     UI.panelToggleTitle.textContent =
       UI.dismissedCount === 1
         ? Lang._('buttonShowHiddenAlert')
-        : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount);
+        : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount).textContent;
   }
 
   if (typeof UI.panel === 'object') {
@@ -1530,7 +1526,7 @@ export function resetPanel() {
       UI.panelShowDismissed.querySelector('.ed11y-sr-only').textContent =
         UI.dismissedCount === 1
           ? Lang._('buttonShowHiddenAlert')
-          : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount);
+          : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount).textContent;
     }
   }
 }

@@ -235,6 +235,7 @@ export const interfaceStrings = {
 	main_toggle_hide_alerts: 'Toegankelijkheidsmeldingen verbergen',
 	main_toggle_show: 'Toegankelijkheidstools tonen',
 	main_toggle_show_alerts: 'Toegankelijkheidsmeldingen tonen',
+	MISSING_ROOT: `Editoria11y vond geen elementen die overeenkwamen met de configuratie van het controlegebied: <code>%(root)</code>`,
 	panelCheckAltText: `<p class="ed11y-small">Controleer of elke afbeelding duidelijk maakt wat zij in de context betekent, en dat er geen afbeeldingen met tekst worden gebruikt.</p>`,
 	panelCheckOutline: `<p class="ed11y-small">Toont de koppenstructuur. Controleer of deze overeenkomt met de visuele opbouw van de inhoud.</p>`,
 	reportsLink: 'Websiterapporten openen',

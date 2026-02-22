@@ -182,7 +182,7 @@ export class Ed11yElementTip extends HTMLElement {
       } else {
         const pageActions = this.wrapper.querySelector('.ed11y-bulk-actions');
         const pageActionsSummary = pageActions.querySelector('summary');
-        pageActionsSummary.textContent = Lang.sprintf('dismissActions');
+        pageActionsSummary.textContent = Lang._('dismissActions');
         const othersLikeThis = State.results.filter((el) => el.test === this.result.test).length;
         const pageActionsContent = pageActions.querySelector('.ed11y-bulk-actions-content');
         // Other cases?

@@ -234,6 +234,7 @@ const interfaceStrings = {
 	main_toggle_hide_alerts: 'Hozzáférhetőségi figyelmeztetések elrejtése',
 	main_toggle_show: 'Hozzáférhetőségi eszközök megjelenítése',
 	main_toggle_show_alerts: 'Hozzáférhetőségi figyelmeztetések megjelenítése',
+	MISSING_ROOT: `Az Editoria11y nem talált olyan elemeket, amelyek megfelelnek az ellenőrzési terület konfigurációjának: <code>%(root)</code>`,
 	panelCheckAltText: `<p class="ed11y-small">Ellenőrizze, hogy minden kép visszaadja‑e a jelentését a kontextusban, és hogy nincs‑e „képben lévő szöveg”.</p>`,
 	panelCheckOutline: `<p class="ed11y-small">Ez megjeleníti a címsorstruktúrát. Ellenőrizze, hogy megfelel‑e a vizuális szerkezetnek.</p>`,
 	PANEL_HEADING_MISSING_ONE: 'Hiányzik az 1. szintű címsor.',

@@ -945,6 +945,10 @@ button.ed11y-jump:hover .toggle-count {
   display: flex;
 }
 
+.ed11y-tip-wrapper .footer summary > div {
+  display: inline-block;
+}
+
 .ed11y-tip-wrapper .footer > details summary {
   cursor: pointer;
   background: var(--ed11y-primary, #276499);

@@ -330,6 +330,7 @@ const interfaceStrings = {
 	main_toggle_hide_alerts: 'Barrierefreiheits‑Meldungen ausblenden',
 	main_toggle_show: 'Barrierefreiheits‑Werkzeuge anzeigen',
 	main_toggle_show_alerts: 'Barrierefreiheits‑Meldungen anzeigen',
+	MISSING_ROOT: `Editoria11y hat keine Elemente gefunden, die der Konfiguration des Prüfbereichs entsprachen: <code>%(root)</code>`,
 	panelCheckAltText: `<p class="ed11y-small">Prüfen Sie, dass jedes Bild seine Bedeutung im Kontext beschreibt und dass es keine Bilder mit eingebettetem Text gibt.</p>`,
 	panelCheckOutline: `<p class="ed11y-small">Dies zeigt die Überschriftenstruktur. Stellen Sie sicher, dass sie der visuellen Struktur entspricht.</p>`,
 	PANEL_HEADING_MISSING_ONE: 'Überschrift Ebene 1 fehlt.',

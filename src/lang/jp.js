@@ -239,6 +239,7 @@ export const interfaceStrings = {
 	main_toggle_hide_alerts: 'アクセシビリティ警告を隠す',
 	main_toggle_show: 'アクセシビリティツールを表示',
 	main_toggle_show_alerts: 'アクセシビリティ警告を表示',
+	MISSING_ROOT: `Editoria11yはチェック領域構成に一致する要素を見つけられませんでした: <code>%(root)</code>`,
 	panelCheckAltText: `<p class="ed11y-small">すべての画像が文脈上の意味を伝えているか、テキストを含む画像がないかを確認してください。</p>`,
 	panelCheckOutline: `<p class="ed11y-small">見出しの階層を表示します。ページの視覚的構造と一致しているか確認してください。</p>`,
 	reportsLink: 'サイトレポートを開く',

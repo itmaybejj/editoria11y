@@ -230,6 +230,7 @@ export const interfaceStrings = {
 	main_toggle_hide_alerts: 'Hide accessibility alerts',
 	main_toggle_show: 'Show accessibility tools',
 	main_toggle_show_alerts: 'Show accessibility alerts',
+	MISSING_ROOT: `Editoria11y did not find any elements that matched the check area configuration: <code>%(root)</code>`,
 	panelCheckAltText: '<p class="ed11y-small">Check that each image describes what it means in context, and that there are no images of text.</p>',
 	panelCheckOutline: '<p class="ed11y-small">This shows the heading outline. Check that it matches how the content is organized visually.</p>',
 	PANEL_HEADING_MISSING_ONE: 'Missing Heading 1.',

@@ -238,6 +238,7 @@ export const interfaceStrings = {
 	main_toggle_hide_alerts: 'Skjul tilgængelighedsbeskeder',
 	main_toggle_show: 'Vis tilgængelighedsværktøjer',
 	main_toggle_show_alerts: 'Vis tilgængelighedsbeskeder',
+	MISSING_ROOT: `Editoria11y fandt ingen elementer, der matchede konfigurationen for kontrolområdet: <code>%(root)</code>`,
 	panelCheckAltText: `<p class="ed11y-small">Kontrollér at hvert billede beskriver sin betydning i konteksten, og at der ikke er “tekst i billeder”.</p>`,
 	panelCheckOutline: `<p class="ed11y-small">Dette viser overskriftsstrukturen. Sørg for at den matcher sidens visuelle struktur.</p>`,
 	reportsLink: 'Åbn webstedsrapporter',
