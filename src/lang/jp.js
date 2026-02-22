@@ -45,7 +45,7 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'リンク画像には発音可能な代替テキストが必要です',
 	LINK_CLICK_HERE: '手動チェック：リンクに「クリックしてください」が含まれています',
 	LINK_DOI: 'DOI 番号ではなく記事タイトルをリンクしてください',
-	LINK_EMPTY: 'このリンクにはテキストがありません',
+	LINK_EMPTY: 'このリンクに単語がありません。',
 	LINK_EMPTY_LABELLEDBY: 'このリンクの aria‑labelledby が無効です',
 	LINK_EMPTY_NO_LABEL: 'このリンクにはラベルが必要です',
 	LINK_FILE_EXT: '警告なしにファイルへリンクしています',

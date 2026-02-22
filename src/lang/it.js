@@ -47,7 +47,7 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'Le immagini linkate devono avere un alt pronunciabile',
 	LINK_CLICK_HERE: 'Verifica manuale: il link contiene “clicca qui”',
 	LINK_DOI: 'Collegare i titoli degli articoli, non i numeri DOI',
-	LINK_EMPTY: 'Questo link non ha testo',
+	LINK_EMPTY: 'Questo link non contiene parole.',
 	LINK_EMPTY_LABELLEDBY: 'Attributo “aria‑labelledby” del link non valido',
 	LINK_EMPTY_NO_LABEL: 'Questo link necessita di un’etichetta',
 	LINK_FILE_EXT: 'Il link punta a un file senza avviso',

@@ -47,7 +47,7 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'Obrazy‑linki muszą mieć wymawialny tekst alternatywny',
 	LINK_CLICK_HERE: 'Ręczna kontrola: link zawiera „kliknij tutaj”',
 	LINK_DOI: 'Linkuj tytuły artykułów, nie numery DOI',
-	LINK_EMPTY: 'Ten link nie ma tekstu',
+	LINK_EMPTY: 'Ten link nie zawiera żadnych słów.',
 	LINK_EMPTY_LABELLEDBY: 'Link ma nieprawidłowy atrybut aria‑labelledby',
 	LINK_EMPTY_NO_LABEL: 'Ten link wymaga etykiety',
 	LINK_FILE_EXT: 'Link prowadzi do pliku bez wcześniejszej informacji',

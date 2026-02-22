@@ -48,7 +48,7 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'Billeder brugt som links skal have udtalelig alt‑tekst',
 	LINK_CLICK_HERE: 'Manuel kontrol: link indeholder “klik her”',
 	LINK_DOI: 'Link til artikeltitler, ikke DOI‑numre',
-	LINK_EMPTY: 'Dette link har ingen tekst',
+	LINK_EMPTY: 'Dette link indeholder ingen ord.',
 	LINK_EMPTY_LABELLEDBY: 'Linket har et ugyldigt “aria‑labelledby”‑attribut',
 	LINK_EMPTY_NO_LABEL: 'Dette link behøver en etiket',
 	LINK_FILE_EXT: 'Link fører til en fil uden advarsel',

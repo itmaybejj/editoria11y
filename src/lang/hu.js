@@ -46,7 +46,7 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'A képlinkek alt‑szövegének ejthetőnek kell lennie',
 	LINK_CLICK_HERE: 'Kézi ellenőrzés: a link „kattints ide” szöveget tartalmaz',
 	LINK_DOI: 'A DOI helyett a cikk címére kell linkelni',
-	LINK_EMPTY: 'Ez a link nem tartalmaz szöveget',
+	LINK_EMPTY: 'Ez a hivatkozás nem tartalmaz szavakat.',
 	LINK_EMPTY_LABELLEDBY: 'A link érvénytelen aria‑labelledby értéket használ',
 	LINK_EMPTY_NO_LABEL: 'A linkhez címke szükséges',
 	LINK_FILE_EXT: 'A link fájlra mutat figyelmeztetés nélkül',

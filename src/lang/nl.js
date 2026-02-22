@@ -46,7 +46,7 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'Gekoppelde afbeeldingen moeten uitspreekbare alt‑tekst hebben',
 	LINK_CLICK_HERE: 'Handmatige controle: link bevat “klik hier”',
 	LINK_DOI: 'Link artikeltitels, niet DOI‑nummers',
-	LINK_EMPTY: 'Deze link heeft geen tekst',
+	LINK_EMPTY: 'Deze link bevat geen woorden.',
 	LINK_EMPTY_LABELLEDBY: 'Link heeft een ongeldig “aria‑labelledby”‑attribuut',
 	LINK_EMPTY_NO_LABEL: 'Deze link heeft een label nodig',
 	LINK_FILE_EXT: 'Link verwijst naar een bestand zonder dat dit vooraf wordt vermeld',

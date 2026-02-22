@@ -46,7 +46,7 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'Länkade bilder måste ha uttalbar alt‑text',
 	LINK_CLICK_HERE: 'Manuell granskning: länk innehåller ”klicka här”',
 	LINK_DOI: 'Länka artikelrubriker, inte DOI‑nummer',
-	LINK_EMPTY: 'Denna länk saknar text',
+	LINK_EMPTY: 'Den här länken innehåller inga ord.',
 	LINK_EMPTY_LABELLEDBY: 'Länk med ogiltigt attribut aria‑labelledby',
 	LINK_EMPTY_NO_LABEL: 'Denna länk behöver en etikett',
 	LINK_FILE_EXT: 'Länken leder till en fil utan förvarning',

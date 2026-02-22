@@ -46,7 +46,7 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'Imagens usadas como link precisam de texto alternativo pronunciável',
 	LINK_CLICK_HERE: 'Verificação manual: o link contém “clique aqui”',
 	LINK_DOI: 'Use o título do artigo como link, não o número DOI',
-	LINK_EMPTY: 'Este link não possui texto',
+	LINK_EMPTY: 'Este link não contém palavras.',
 	LINK_EMPTY_LABELLEDBY: 'Link com atributo “aria‑labelledby” inválido',
 	LINK_EMPTY_NO_LABEL: 'Este link precisa de um rótulo',
 	LINK_FILE_EXT: 'O link leva a um arquivo sem aviso prévio',

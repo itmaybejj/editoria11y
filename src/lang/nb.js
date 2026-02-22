@@ -46,7 +46,7 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'Bilder brukt som lenker må ha uttalbar alternativ tekst',
 	LINK_CLICK_HERE: 'Manuell gjennomgang: lenken inneholder «klikk her»',
 	LINK_DOI: 'Lenk til artikkeltitler, ikke DOI‑numre',
-	LINK_EMPTY: 'Denne lenken mangler tekst',
+	LINK_EMPTY: 'Denne lenken inneholder ingen ord.',
 	LINK_EMPTY_LABELLEDBY: 'Lenke med ugyldig «aria‑labelledby»‑attributt',
 	LINK_EMPTY_NO_LABEL: 'Denne lenken trenger en etikett',
 	LINK_FILE_EXT: 'Lenken peker til en fil uten at det opplyses på forhånd',

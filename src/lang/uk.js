@@ -46,7 +46,7 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'Зображення‑лінки повинні мати вимовний альтернативний текст',
 	LINK_CLICK_HERE: 'Ручна перевірка: лінк містить «натисніть тут»',
 	LINK_DOI: 'Лінкуйте назви статей, а не номери DOI',
-	LINK_EMPTY: 'Це посилання не має тексту',
+	LINK_EMPTY: 'Це посилання не містить слів.',
 	LINK_EMPTY_LABELLEDBY: 'Лінк має недійсний атрибут «aria‑labelledby»',
 	LINK_EMPTY_NO_LABEL: 'Це посилання потребує ярлика',
 	LINK_FILE_EXT: 'Лінк веде до файлу без попередження',

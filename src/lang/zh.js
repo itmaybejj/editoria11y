@@ -46,7 +46,7 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: '链接图片需要可发音的替代文本',
 	LINK_CLICK_HERE: '手动检查：链接包含“点击这里”',
 	LINK_DOI: '应链接文章标题，而非 DOI 编号',
-	LINK_EMPTY: '该链接没有文本',
+	LINK_EMPTY: '此链接不包含任何单词。',
 	LINK_EMPTY_LABELLEDBY: '链接的 aria‑labelledby 属性无效',
 	LINK_EMPTY_NO_LABEL: '该链接需要标签',
 	LINK_FILE_EXT: '链接指向文件但未提前告知',
