@@ -208,7 +208,7 @@ export function updatePanel() {
       });
 
       // Decide whether to open the panel on load.
-      if (UI.ignoreAll || (!UI.inlineAlerts && UI.totalCount > 75)) {
+      if (UI.ignoreAll || (!UI.inlineAlerts && UI.totalCount > 99)) {
         UI.showPanel = false;
       } else if (
         State.option.alertMode === 'active' ||
@@ -1488,7 +1488,7 @@ export function incrementalCheck() {
     runTime = performance.now() - runTime;
     UI.browserSpeed = runTime > 100 ? 100 : (UI.browserSpeed + runTime) / 2;
     // Todo: optimize tip placement so we do not need as much debounce.
-    UI.browserLag = UI.browserSpeed < 1 ? 0 : UI.browserSpeed * 100 + UI.totalCount;
+    UI.browserLag = UI.browserSpeed < 1 ? 0 : UI.browserSpeed * 40 + UI.totalCount;
   } else {
     // Ed11y was running, try again later.
     window.setTimeout(() => {
