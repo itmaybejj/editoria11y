@@ -8605,7 +8605,7 @@ const ed11yDefaultOptions = {
       sources: ""
     },
     EMBED_VIDEO: {
-      sources: ""
+      sources: "youtube-nocookie.com"
     },
     EMBED_DATA_VIZ: {
       sources: ""

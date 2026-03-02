@@ -8609,7 +8609,7 @@ URL: ${url2}`;
         sources: ""
       },
       EMBED_VIDEO: {
-        sources: ""
+        sources: "youtube-nocookie.com"
       },
       EMBED_DATA_VIZ: {
         sources: ""
