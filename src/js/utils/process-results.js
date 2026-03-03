@@ -151,6 +151,8 @@ export function countAlerts() {
     UI.errorCount = 0;
     UI.warningCount = 0;
     UI.totalCount = 0;
+  } else if (UI.showDismissed) {
+    UI.totalCount += UI.dismissedCount;
   }
 }
 

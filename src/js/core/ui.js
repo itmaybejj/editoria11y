@@ -35,6 +35,7 @@ export const UI = {
   browserSpeed: 1,
   browserLag: 1,
   customTestsRemaining: 0,
+  testsRemaining: 0,
   customTestTimeout: 0,
   loopStop: false,
   oldResults: [],

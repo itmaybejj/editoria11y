@@ -1373,6 +1373,7 @@
     browserSpeed: 1,
     browserLag: 1,
     customTestsRemaining: 0,
+    testsRemaining: 0,
     customTestTimeout: 0,
     loopStop: false,
     oldResults: [],
@@ -5047,6 +5048,8 @@ URL: ${url2}`;
       UI.errorCount = 0;
       UI.warningCount = 0;
       UI.totalCount = 0;
+    } else if (UI.showDismissed) {
+      UI.totalCount += UI.dismissedCount;
     }
   }
   const inDismissals = (result, i, splitConfiguration, digest) => {
@@ -6504,7 +6507,6 @@ URL: ${url2}`;
   }
   const enqueueTests = (queue) => {
     const test = queue.pop();
-    UI.testsRemaining--;
     try {
       switch (test) {
         case "group1":
@@ -6530,6 +6532,7 @@ URL: ${url2}`;
     } catch (error) {
       showError(error);
     }
+    UI.testsRemaining--;
     if (queue.length > 0) {
       if (UI.browserSpeed < 100 || State.option.headless) {
         enqueueTests(queue);
@@ -6542,7 +6545,7 @@ URL: ${url2}`;
           queue
         );
       }
-    } else {
+    } else if (UI.customTestsRemaining === 0) {
       continueCheck().then();
     }
   };
@@ -6552,10 +6555,15 @@ URL: ${url2}`;
     );
     State.option.customTests--;
     UI.customTestsRemaining = 0;
-    continueCheck(true).then();
+    if (UI.testsRemaining === 0) {
+      continueCheck().then();
+    }
     if (State.option.customTests === 0) {
       document.removeEventListener("ed11yResume", () => {
-        continueCheck(true).then();
+        UI.customTestsRemaining--;
+        if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
+          continueCheck().then();
+        }
       });
     }
   }
@@ -6593,17 +6601,6 @@ URL: ${url2}`;
     State.results.length = 0;
     UI.splitConfiguration.devResults.length = 0;
     buildElementList();
-    if (State.option.customTests > 0) {
-      UI.customTestsRemaining += State.option.customTests;
-      window.clearTimeout(UI.customTestTimeout);
-      UI.customTestTimeout = window.setTimeout(() => {
-        if (UI.customTestsRemaining > 0) {
-          removeCustomTest();
-        }
-      }, 1e3);
-      const customTests = new CustomEvent("ed11yRunCustomTests");
-      document.dispatchEvent(customTests);
-    }
     const queue = ["group1", "group2"];
     if (State.option.formLabelsPlugin) {
       queue.push("checkLabels");
@@ -6615,15 +6612,26 @@ URL: ${url2}`;
       queue.push("checkContrast");
     }
     UI.testsRemaining = queue.length;
+    if (State.option.customTests > 0) {
+      UI.customTestsRemaining = State.option.customTests;
+      const customTests = new CustomEvent("ed11yRunCustomTests");
+      document.dispatchEvent(customTests);
+      window.clearTimeout(UI.customTestTimeout);
+      const customTestRace = performance.now();
+      UI.customTestRace = customTestRace;
+      UI.customTestTimeout = window.setTimeout(
+        () => {
+          if (UI.customTestRace === customTestRace && UI.customTestsRemaining > 0) {
+            removeCustomTest();
+          }
+        },
+        1e3,
+        customTestRace
+      );
+    }
     enqueueTests(queue);
   }
-  async function continueCheck(customCheck = false) {
-    if (customCheck) {
-      UI.customTestsRemaining--;
-    }
-    if (UI.customTestsRemaining + UI.testsRemaining > 0) {
-      return;
-    }
+  async function continueCheck() {
     if (UI.splitConfiguration.active && State.results.length > 0) {
       await handleSyncOnlyResults();
     } else {
@@ -8699,7 +8707,7 @@ URL: ${url2}`;
     }
     UI.english = Lang.langStrings.LANG_CODE.startsWith("en");
     if (UI.english) {
-      State.option.extraPlaceholderStopWords = userOptions.extraPlaceholderStopWords ? userOptions.extraPlaceholderStopWords.Lang.langStrings.extraPlaceholderStopWords : Lang.langStrings.extraPlaceholderStopWords;
+      State.option.extraPlaceholderStopWords = userOptions.extraPlaceholderStopWords ? `${userOptions.extraPlaceholderStopWords}, ${Lang.langStrings.extraPlaceholderStopWords}` : Lang.langStrings.extraPlaceholderStopWords;
     }
     if (State.option.fixedRoots) {
       State.option.checkRoot = State.option.fixedRoots;
@@ -8816,10 +8824,13 @@ URL: ${url2}`;
         return false;
       }
       UI.running = true;
-      checkAll();
       document.addEventListener("ed11yResume", () => {
-        continueCheck(true).then();
+        UI.customTestsRemaining--;
+        if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
+          continueCheck().then();
+        }
       });
+      checkAll();
       window.addEventListener(
         "keydown",
         () => {

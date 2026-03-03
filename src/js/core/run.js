@@ -1264,17 +1264,8 @@ export function startObserver(root) {
   }, 1000);
 }
 
-/*const getRuleset = {
-	checkHeaders: checkHeaders(Results, Options, State.headingOutline),
-	checkLinkText:
-	checkImages: ,
-	checkLabels: ,
-	checkQA: ,
-}*/
-
 const enqueueTests = (queue) => {
   const test = queue.pop();
-  UI.testsRemaining--;
   try {
     switch (test) {
       case 'group1':
@@ -1300,6 +1291,7 @@ const enqueueTests = (queue) => {
   } catch (error) {
     showError(error);
   }
+  UI.testsRemaining--;
   if (queue.length > 0) {
     if (UI.browserSpeed < 100 || State.option.headless) {
       enqueueTests(queue);
@@ -1312,7 +1304,7 @@ const enqueueTests = (queue) => {
         queue,
       );
     }
-  } else {
+  } else if (UI.customTestsRemaining === 0) {
     continueCheck().then();
   }
 };
@@ -1323,10 +1315,15 @@ function removeCustomTest() {
   );
   State.option.customTests--;
   UI.customTestsRemaining = 0;
-  continueCheck(true).then();
+  if (UI.testsRemaining === 0) {
+    continueCheck(true).then();
+  }
   if (State.option.customTests === 0) {
     document.removeEventListener('ed11yResume', () => {
-      continueCheck(true).then();
+      UI.customTestsRemaining--;
+      if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
+        continueCheck(true).then();
+      }
     });
   }
 }
@@ -1376,19 +1373,6 @@ export function checkAll() {
 
   buildElementList();
 
-  if (State.option.customTests > 0) {
-    // Pause
-    UI.customTestsRemaining += State.option.customTests;
-    window.clearTimeout(UI.customTestTimeout);
-    UI.customTestTimeout = window.setTimeout(() => {
-      if (UI.customTestsRemaining > 0) {
-        removeCustomTest();
-      }
-    }, 1000);
-    const customTests = new CustomEvent('ed11yRunCustomTests');
-    document.dispatchEvent(customTests); // todo postpone: there is a possible race condition here for slow custom tests that are removed but return results during the next run.
-  }
-
   // Call rulesets.
   const queue = ['group1', 'group2'];
 
@@ -1402,19 +1386,30 @@ export function checkAll() {
     queue.push('checkContrast');
   }
   UI.testsRemaining = queue.length;
+
+  if (State.option.customTests > 0) {
+    // Pause
+    UI.customTestsRemaining = State.option.customTests;
+    const customTests = new CustomEvent('ed11yRunCustomTests');
+    document.dispatchEvent(customTests);
+    window.clearTimeout(UI.customTestTimeout);
+    const customTestRace = performance.now();
+    UI.customTestRace = customTestRace;
+    UI.customTestTimeout = window.setTimeout(
+      () => {
+        if (UI.customTestRace === customTestRace && UI.customTestsRemaining > 0) {
+          removeCustomTest();
+        }
+      },
+      1000,
+      customTestRace,
+    );
+  }
+
   enqueueTests(queue);
 }
 
-export async function continueCheck(customCheck = false) {
-  if (customCheck) {
-    UI.customTestsRemaining--;
-  }
-  // change to only countering fro custom tests
-  if (UI.customTestsRemaining + UI.testsRemaining > 0) {
-    // Tests still in progress.
-    return;
-  }
-
+export async function continueCheck() {
   // Filter split configuration results.
   if (UI.splitConfiguration.active && State.results.length > 0) {
     await handleSyncOnlyResults();
