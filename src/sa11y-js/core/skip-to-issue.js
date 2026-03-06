@@ -51,8 +51,22 @@ const getScrollPosition = ($el, results) => {
 
     // Alert if tooltip is hidden.
     getHiddenParent($el);
-    const tooltip = $el.getAttribute('data-tippy-content');
-    createAlert(`${Lang._('NOT_VISIBLE')}`, tooltip, elementPreview);
+    const result = State.results.find((item) => String(item.id) === String(annotationIndex));
+    // Update tooltip content wrapper.
+    if (result.content instanceof Element) {
+      result.content.setAttribute('lang', Lang._('LANG_CODE'));
+      result.content.className = result.type;
+
+      // Add issue type label.
+      let h3 = result.content.querySelector('.issue-label');
+      if (!h3) {
+        h3 = document.createElement('h3');
+        h3.className = 'issue-label';
+        result.content.prepend(h3);
+      }
+      h3.textContent = result.issueLabel;
+    }
+    createAlert(`${Lang._('NOT_VISIBLE')}`, result.content, elementPreview);
 
     closeAnyActiveTooltips();
 

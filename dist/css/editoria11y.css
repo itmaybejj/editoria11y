@@ -6,28 +6,40 @@ ed11y-element-panel {
 ed11y-element-result {
   opacity: 1;
   outline: 0;
-  z-index: calc(var(--ed11y-buttonZIndex, 9999)  - 1) !important;
+  z-index: calc(var(--ed11y-buttonZIndex, 9999) - 1) !important;
   position: absolute !important;
 }
 
 .ed11y-hidden-highlight {
-  box-shadow: inset 0 0 0 2px var(--ed11y-warning, #fad859), inset 0 0 0 3px var(--ed11y-primary, #276499), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary, #276499), 0 0 1px 5px !important;
+  box-shadow: inset 0 0 0 2px var(--ed11y-warning, #fad859),
+		inset 0 0 0 3px var(--ed11y-primary, #276499),
+		0 0 0 3px var(--ed11y-warning, #fad859),
+		0 0 0 4px var(--ed11y-primary, #276499),
+		0 0 1px 5px !important;
 }
 
 .ed11y-ring-red {
   outline: 2px solid #0000;
-  box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px !important;
+  box-shadow: 0 0 0 1px #fff,
+		inset 0 0 0 2px var(--ed11y-alert, #b80519),
+		0 0 0 3px var(--ed11y-alert, #b80519),
+		0 0 1px 3px !important;
 }
 
 .ed11y-ring-yellow {
   outline: 2px solid var(--ed11y-warning, #fad859) !important;
   outline-offset: 1px !important;
-  box-shadow: 0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px !important;
+  box-shadow: 0 0 0 1px #fff,
+		inset 0 0 0 2px var(--ed11y-warning, #fad859),
+		0 0 0 3px var(--ed11y-warning, #fad859),
+		0 0 0 4px !important;
 }
 
 .ed11y-wrapper :focus-visible:not([tabindex="-1"]) {
   outline: 2px solid var(--ed11y-focusRing);
-  box-shadow: inset 0 0 0 1px #fff, 0 0 0 3px var(--ed11y-primary, #276499), 0 0 0 5px var(--ed11y-primaryText) !important;
+  box-shadow: inset 0 0 0 1px #fff,
+		0 0 0 3px var(--ed11y-primary, #276499),
+		0 0 0 5px var(--ed11y-primaryText) !important;
 }
 
 :host(.ed11y-element) {
@@ -43,7 +55,13 @@ ed11y-element-result {
 }
 
 .ed11y-wrapper {
-  font-family: var(--ed11y-baseFontFamily, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial), sans-serif;
+  font-family: var(--ed11y-baseFontFamily, -apple-system,
+			BlinkMacSystemFont,
+			"Segoe UI",
+			Roboto,
+			"Helvetica Neue",
+			Arial),
+		sans-serif;
   font-size: var(--ed11y-baseFontSize, 14px);
   word-wrap: break-word;
   line-height: 1.5;
@@ -94,7 +112,7 @@ ed11y-element-result {
 }
 
 :host(ed11y-element-panel.ed11y-element) {
-  z-index: calc(var(--ed11y-buttonZIndex, 9999)  + 10000);
+  z-index: calc(var(--ed11y-buttonZIndex, 9999) + 10000);
   opacity: 0;
   transition: opacity .25s ease-in;
   position: fixed;
@@ -160,7 +178,9 @@ ed11y-element-result {
 }
 
 .ed11y-panel-wrapper .content summary:hover {
-  box-shadow: 0 0 0 1px var(--ed11y-primaryText), inset 0 0 0 1px var(--ed11y-primary), inset 0 0 0 2px;
+  box-shadow: 0 0 0 1px var(--ed11y-primaryText),
+					inset 0 0 0 1px var(--ed11y-primary),
+					inset 0 0 0 2px;
 }
 
 .ed11y-panel-wrapper .content details {
@@ -210,7 +230,11 @@ ed11y-element-result {
   color: var(--ed11y-activeColor);
   text-align: center;
   background: var(--ed11y-activeBackground);
-  box-shadow: 0 1px var(--ed11y-activePanelBorder), 0 -1px var(--ed11y-activePanelBorder), -1px 0 var(--ed11y-activeBorder), 2px 0 var(--ed11y-activeBackground), -2px 0 var(--ed11y-activeBackground);
+  box-shadow: 0 1px var(--ed11y-activePanelBorder),
+			0 -1px var(--ed11y-activePanelBorder),
+			-1px 0 var(--ed11y-activeBorder),
+			2px 0 var(--ed11y-activeBackground),
+			-2px 0 var(--ed11y-activeBackground);
   padding: 0;
   font-size: 1em;
   line-height: 1.5em;
@@ -232,7 +256,8 @@ ed11y-element-result {
 }
 
 button.ed11y-jump {
-  box-shadow: 0 0 0 1px var(--ed11y-activePanelBorder), -2px 0 var(--ed11y-activeBackground);
+  box-shadow: 0 0 0 1px var(--ed11y-activePanelBorder),
+		-2px 0 var(--ed11y-activeBackground);
   border-radius: 0 .5em .5em 0;
   grid-area: next;
   margin-left: -6px;
@@ -295,7 +320,10 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 #ed11y-reports-link, #ed11y-show-hidden:first-child, .ed11y-buttonbar [hidden]:first-child + #ed11y-visualize {
-  box-shadow: -1px 0 var(--ed11y-activePanelBorder), 0 -1px var(--ed11y-activePanelBorder), 0 1px var(--ed11y-activePanelBorder), 2px 0 var(--ed11y-activeBackground);
+  box-shadow: -1px 0 var(--ed11y-activePanelBorder),
+		0 -1px var(--ed11y-activePanelBorder),
+		0 1px var(--ed11y-activePanelBorder),
+		2px 0 var(--ed11y-activeBackground);
   border-radius: .5em 0 0 .5em;
   padding: 0 6px 0 10px;
 }
@@ -316,11 +344,15 @@ button.ed11y-jump:hover .toggle-count {
 
 #ed11y-panel .ed11y-buttonbar > a:hover, #ed11y-panel .ed11y-buttonbar > button:not(#ed11y-toggle):hover {
   z-index: 1;
-  box-shadow: 0 0 0 1px var(--ed11y-activePanelBorder), inset 0 0 0 1px var(--ed11y-activeBackground), inset 0 0 0 2px var(--ed11y-activeColor);
+  box-shadow: 0 0 0 1px var(--ed11y-activePanelBorder),
+				inset 0 0 0 1px var(--ed11y-activeBackground),
+				inset 0 0 0 2px var(--ed11y-activeColor);
 }
 
 #ed11y-panel .ed11y-buttonbar button[data-ed11y-pressed="true"], #ed11y-panel .ed11y-buttonbar button[aria-pressed="true"], #ed11y-panel .ed11y-buttonbar #ed11y-visualize[data-ed11y-pressed="true"] {
-  box-shadow: inset 1px 1px 3px 1px #000, 0 0 0 1px var(--ed11y-activeBackground), 7px 0 var(--ed11y-activeBackground);
+  box-shadow: inset 1px 1px 3px 1px #000,
+				0 0 0 1px var(--ed11y-activeBackground),
+				7px 0 var(--ed11y-activeBackground);
 }
 
 #ed11y-panel .ed11y-buttonbar button .ed11y-sr-only {
@@ -467,7 +499,8 @@ button.ed11y-jump:hover .toggle-count {
   height: 1.25em;
   color: var(--ed11y-primaryText, #fffdf7);
   background: var(--ed11y-primary, #276499);
-  box-shadow: inset 0 0 0 1px var(--ed11y-activeBackground, #276499), inset 0 0 0 2.5px #fffe;
+  box-shadow: inset 0 0 0 1px var(--ed11y-activeBackground, #276499),
+			inset 0 0 0 2.5px #fffe;
   font-family: georgia, serif;
   line-height: 1;
 }
@@ -481,7 +514,9 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 .ed11y-pass #ed11y-toggle:hover .ed11y-toggle-circle {
-  box-shadow: inset 0 0 0 1px #fffe, inset 0 0 0 3px var(--ed11y-primary, #276499), 0 0 1px var(--ed11y-primary, #276499);
+  box-shadow: inset 0 0 0 1px #fffe,
+			inset 0 0 0 3px var(--ed11y-primary, #276499),
+			0 0 1px var(--ed11y-primary, #276499);
 }
 
 .ed11y-pass #ed11y-toggle:hover .ed11y-toggle-circle .close-icon {
@@ -492,15 +527,20 @@ button.ed11y-jump:hover .toggle-count {
 .ed11y-warnings .ed11y-toggle-circle {
   color: #000b;
   background-color: var(--ed11y-warning, #fad859);
-  box-shadow: inset 0 0 0 2px var(--ed11y-warning, #fad859), inset 0 0 0 3px #000b, 0 0 2px #000;
+  box-shadow: inset 0 0 0 2px var(--ed11y-warning, #fad859),
+			inset 0 0 0 3px #000b,
+			0 0 2px #000;
 }
 
 .ed11y-warnings #ed11y-toggle:hover .ed11y-toggle-circle {
-  box-shadow: inset 0 0 0 2px var(--ed11y-warning, #fad859), inset 0 0 0 4px #000b, 0 0 2px #000;
+  box-shadow: inset 0 0 0 2px var(--ed11y-warning, #fad859),
+			inset 0 0 0 4px #000b,
+			0 0 2px #000;
 }
 
 .ed11y-warnings.ed11y-active #ed11y-toggle:hover .ed11y-toggle-circle {
-  box-shadow: inset 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 1px 1px;
+  box-shadow: inset 0 0 0 3px var(--ed11y-warning, #fad859),
+			0 0 1px 1px;
 }
 
 .ed11y-errors #ed11y-toggle .ed11y-toggle-circle {
@@ -510,7 +550,9 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 .ed11y-errors #ed11y-toggle:hover .ed11y-toggle-circle {
-  box-shadow: inset 0 0 0 1px var(--ed11y-alert), inset 0 0 0 5px #fffd, 1px 1px 5px 0 #00000080;
+  box-shadow: inset 0 0 0 1px var(--ed11y-alert),
+				inset 0 0 0 5px #fffd,
+				1px 1px 5px 0 #00000080;
 }
 
 .ed11y-errors.ed11y-active #ed11y-toggle:hover .ed11y-toggle-circle {
@@ -614,7 +656,7 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 #ed11y-visualizers li.ed11y-warning {
-  box-shadow: inset 0 0 0 1px #111;
+  box-shadow: inset 0 0 1px #000;
 }
 
 #ed11y-outline, #ed11y-alt-list {
@@ -624,13 +666,19 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 #ed11y-outline li {
-  margin: 0 -8px;
-  padding: 5px 8px;
+  border-radius: 12px 0 0 12px;
+  margin: 5px -8px;
+  padding: 3px 8px;
 }
 
 #ed11y-outline a {
+  font-weight: 300;
   text-decoration: none;
   display: block;
+}
+
+#ed11y-outline a strong {
+  font-weight: 500;
 }
 
 #ed11y-outline a:hover {
@@ -642,7 +690,9 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 #ed11y-alt-list .alt-parent {
-  box-shadow: 0 4px var(--ed11y-bg, #fffffe), 0 5px var(--ed11y-primary, #276499);
+  word-break: break-word;
+  box-shadow: 0 0 0 3px var(--ed11y-bg, #fffffe),
+			0 -3px 1px var(--ed11y-primary, #276499);
   flex-wrap: wrap;
   align-items: center;
   gap: 1em;
@@ -665,6 +715,14 @@ button.ed11y-jump:hover .toggle-count {
   width: 80px;
 }
 
+:is(#ed11y-alt-list .ed11y-warning, #ed11y-alt-list .ed11y-error, #ed11y-alt-list .ed11y-warning + li, #ed11y-alt-list .ed11y-error + li) a {
+  box-shadow: none;
+}
+
+#ed11y-alt-list .ed11y-warning, #ed11y-alt-list .ed11y-error {
+  border-radius: 10px;
+}
+
 #ed11y-message:not(:empty) {
   color: #fff;
   background: var(--ed11y-alert);
@@ -674,14 +732,14 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 :host(ed11y-element-result.ed11y-element) {
-  z-index: calc(var(--ed11y-buttonZIndex, 9999)  - 1);
+  z-index: calc(var(--ed11y-buttonZIndex, 9999) - 1);
   opacity: 0;
   transition: opacity .5s ease-out;
   position: absolute;
 }
 
 :host(ed11y-element-result.ed11y-element[data-ed11y-open="true"]), ed11y-element-result[data-ed11y-open="true"] {
-  z-index: calc(var(--ed11y-buttonZIndex, 9999)  + 10000) !important;
+  z-index: calc(var(--ed11y-buttonZIndex, 9999) + 10000) !important;
 }
 
 .ed11y-editable-result {
@@ -709,7 +767,9 @@ button.ed11y-jump:hover .toggle-count {
   color: var(--ed11y-alert, #b80519);
   vertical-align: middle;
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px var(--ed11y-alert, #b80519), inset 0 0 0 2px #fefefe, inset 0 0 0 6px var(--ed11y-alert, #b80519);
+  box-shadow: inset 0 0 0 1px var(--ed11y-alert, #b80519),
+			inset 0 0 0 2px #fefefe,
+			inset 0 0 0 6px var(--ed11y-alert, #b80519);
   background: #fefefe;
   border: 0;
   border-radius: 50%;
@@ -726,13 +786,19 @@ button.ed11y-jump:hover .toggle-count {
 
 .ed11y-result-wrapper .toggle:hover, .ed11y-result-wrapper .toggle[aria-expanded="true"] {
   border: 2px solid var(--ed11y-ok, #1f5381);
-  box-shadow: inset 0 0 0 1px var(--ed11y-alert, #b80519), inset 0 0 0 2px #fefefe, inset 0 0 0 6px var(--ed11y-alert, #b80519), 0 0 0 2px var(--ed11y-primary, #276499), 0 0 0 3px transparent;
+  box-shadow: inset 0 0 0 1px var(--ed11y-alert, #b80519),
+				inset 0 0 0 2px #fefefe,
+				inset 0 0 0 6px var(--ed11y-alert, #b80519),
+				0 0 0 2px var(--ed11y-primary, #276499),
+				0 0 0 3px transparent;
 }
 
 .ed11y-result-wrapper .toggle.dismissed {
   color: #fffdf7;
   background: var(--ed11y-ok, #1f5381);
-  box-shadow: inset 0 0 0 2px var(--ed11y-ok, #1f5381), inset 0 0 0 3px #fffdf7, inset 0 0 0 6px var(--ed11y-ok, #1f5381);
+  box-shadow: inset 0 0 0 2px var(--ed11y-ok, #1f5381),
+				inset 0 0 0 3px #fffdf7,
+				inset 0 0 0 6px var(--ed11y-ok, #1f5381);
 }
 
 .ed11y-result-wrapper .toggle.dismissed svg {
@@ -748,7 +814,11 @@ button.ed11y-jump:hover .toggle-count {
 .ed11y-result-wrapper .toggle.dismissable {
   color: #333;
   background: var(--ed11y-warning, #fad859);
-  box-shadow: inset 0 0 0 1px #000d, inset 0 0 0 2px #0005, inset 0 0 0 3px var(--ed11y-warning, #fad859), inset 0 0 0 4px #444, inset 0 0 0 6px var(--ed11y-warning, #fad859);
+  box-shadow: inset 0 0 0 1px #000d,
+				inset 0 0 0 2px #0005,
+				inset 0 0 0 3px var(--ed11y-warning, #fad859),
+				inset 0 0 0 4px #444,
+				inset 0 0 0 6px var(--ed11y-warning, #fad859);
 }
 
 .ed11y-result-wrapper .toggle.dismissable:before {
@@ -757,7 +827,10 @@ button.ed11y-jump:hover .toggle-count {
 
 .ed11y-result-wrapper .toggle.dismissable:hover, .ed11y-result-wrapper .toggle.dismissable[aria-expanded="true"] {
   border: 2px solid var(--ed11y-primary, #276499);
-  box-shadow: inset 0 0 0 2px #276499, inset 0 0 0 3px var(--ed11y-warning, #fad859), inset 0 0 0 4px #444, inset 0 0 0 6px var(--ed11y-warning, #fad859);
+  box-shadow: inset 0 0 0 2px #276499,
+					inset 0 0 0 3px var(--ed11y-warning, #fad859),
+					inset 0 0 0 4px #444,
+					inset 0 0 0 6px var(--ed11y-warning, #fad859);
 }
 
 :host(ed11y-element-result.ed11y-preload) button {
@@ -767,7 +840,7 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 :host(ed11y-element-tip.ed11y-element) {
-  z-index: calc(var(--ed11y-buttonZIndex, 9999)  - 1);
+  z-index: calc(var(--ed11y-buttonZIndex, 9999) - 1);
   display: none;
   position: absolute;
   top: 10vh;
@@ -776,7 +849,7 @@ button.ed11y-jump:hover .toggle-count {
 
 :host(ed11y-element-tip.ed11y-element[data-ed11y-open="true"]) {
   display: block;
-  z-index: calc(var(--ed11y-buttonZIndex, 9999)  + 10001) !important;
+  z-index: calc(var(--ed11y-buttonZIndex, 9999) + 10001) !important;
 }
 
 .ed11y-tip-wrapper {
@@ -789,7 +862,7 @@ button.ed11y-jump:hover .toggle-count {
   z-index: 1;
   width: clamp(18em, 36em, 80vw);
   min-width: 200px;
-  margin: calc(var(--ed11y-outlineWidth, 0px)  + var(--ed11y-outlineWidth, 0px));
+  margin: calc(var(--ed11y-outlineWidth, 0px) + var(--ed11y-outlineWidth, 0px));
   background: var(--ed11y-bg, #fffffe);
   border: 2px solid var(--ed11y-primary, #276499);
   border-radius: var(--ed11y-borderRadius);
@@ -800,7 +873,7 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 .ed11y-tip-wrapper .close {
-  border-radius: 0 calc(var(--ed11y-borderRadius)  - 2px);
+  border-radius: 0 calc(var(--ed11y-borderRadius) - 2px);
   width: 32px;
   height: 32px;
   position: absolute;
@@ -831,9 +904,11 @@ button.ed11y-jump:hover .toggle-count {
 .ed11y-tip-wrapper .arrow {
   width: 20px;
   height: 20px;
-  margin: 0 0 0 calc(var(--ed11y-outlineWidth)  + var(--ed11y-outlineWidth));
+  margin: 0 0 0 calc(var(--ed11y-outlineWidth) + var(--ed11y-outlineWidth));
   content: "";
-  box-shadow: inset 0 0 0 2px var(--ed11y-primary, #276499), inset 0 0 0 3px var(--ed11y-bg, #fffffe), 0 0 0 1px var(--ed11y-primary, #276499);
+  box-shadow: inset 0 0 0 2px var(--ed11y-primary, #276499),
+			inset 0 0 0 3px var(--ed11y-bg, #fffffe),
+			0 0 0 1px var(--ed11y-primary, #276499);
   display: none;
   position: absolute;
   transform: rotate(45deg);
@@ -844,30 +919,42 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 .ed11y-tip-wrapper .arrow[data-direction="left"] {
-  margin: 0 calc(var(--ed11y-outlineWidth, 0px)  + var(--ed11y-outlineWidth, 0px)) 0 0;
-  background: linear-gradient(45deg, transparent 0%, transparent 48%, var(--ed11y-primary, #276499) 49%);
+  margin: 0 calc(var(--ed11y-outlineWidth, 0px) + var(--ed11y-outlineWidth, 0px)) 0 0;
+  background: linear-gradient(45deg,
+				transparent 0%,
+				transparent 48%,
+				var(--ed11y-primary, #276499) 49%);
 }
 
 .ed11y-tip-wrapper .arrow[data-direction="left"] + .tip {
-  margin-right: calc(var(--ed11y-outlineWidth)  + var(--ed11y-outlineWidth));
+  margin-right: calc(var(--ed11y-outlineWidth) + var(--ed11y-outlineWidth));
 }
 
 .ed11y-tip-wrapper .arrow[data-direction="under"] {
-  margin: calc(var(--ed11y-outlineWidth, 0px)  + var(--ed11y-outlineWidth, 0px)) 0 0;
-  background: linear-gradient(-45deg, transparent 0%, transparent 48%, var(--ed11y-primary, #276499) 49%);
+  margin: calc(var(--ed11y-outlineWidth, 0px) + var(--ed11y-outlineWidth, 0px)) 0 0;
+  background: linear-gradient(-45deg,
+				transparent 0%,
+				transparent 48%,
+				var(--ed11y-primary, #276499) 49%);
 }
 
 .ed11y-tip-wrapper .arrow[data-direction="above"] {
   margin: 0 0 var(--ed11y-outlineWidth, 0) 0;
-  background: linear-gradient(135deg, transparent 0%, transparent 48%, var(--ed11y-primary, #276499) 49%);
+  background: linear-gradient(135deg,
+				transparent 0%,
+				transparent 48%,
+				var(--ed11y-primary, #276499) 49%);
 }
 
 .ed11y-tip-wrapper .arrow[data-direction="above"] + .tip {
-  margin-bottom: calc(var(--ed11y-outlineWidth)  + var(--ed11y-outlineWidth));
+  margin-bottom: calc(var(--ed11y-outlineWidth) + var(--ed11y-outlineWidth));
 }
 
 .ed11y-tip-wrapper .arrow[data-direction="right"] {
-  background: linear-gradient(-135deg, transparent 0%, transparent 48%, var(--ed11y-primary, #276499) 49%);
+  background: linear-gradient(-135deg,
+				transparent 0%,
+				transparent 48%,
+				var(--ed11y-primary, #276499) 49%);
 }
 
 .ed11y-tip-wrapper.open .arrow {
@@ -1082,6 +1169,7 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 .ed11y-tip-wrapper a:hover, .ed11y-tip-wrapper a:focus-visible {
+  -webkit-text-decoration-skip-ink: none;
   text-decoration-skip-ink: none;
   text-decoration-style: double;
 }
@@ -1113,6 +1201,7 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 :is(.ed11y-tip-wrapper .dismiss, .ed11y-tip-wrapper .ed11y-custom-edit-links a, .ed11y-tip-wrapper .ed11y-tip-button) summary {
+  -webkit-user-select: none;
   user-select: none;
   height: 100%;
   padding: 0 10px;
@@ -1268,7 +1357,9 @@ button.ed11y-jump:hover .toggle-count {
   color: var(--ed11y-primaryText, #fffdf7);
   background: var(--ed11y-primary, #276499);
   border-radius: var(--ed11y-borderRadius, 1px);
-  box-shadow: 0 0 1px var(--ed11y-bg, #fffffe), 0 0 0 4px var(--ed11y-primary, #276499), 1px 1px 5px 2px #000;
+  box-shadow: 0 0 1px var(--ed11y-bg, #fffffe),
+		0 0 0 4px var(--ed11y-primary, #276499),
+		1px 1px 5px 2px #000;
   opacity: .95;
   margin-left: 35px;
   padding: 0 .5em;
@@ -1288,7 +1379,7 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 .ed11y-alt-wrapper span {
-  z-index: calc(var(--ed11y-buttonZIndex, 9999)  - 1);
+  z-index: calc(var(--ed11y-buttonZIndex, 9999) - 1);
   min-width: 10em;
   padding: 6px;
   font-weight: 500;

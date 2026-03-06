@@ -475,6 +475,7 @@ export function resetResults(incremental) {
   Elements.Found.reset?.forEach((el) => {
     el.remove();
   });
+  UI.altMarks.clear();
 
   // Flicker prevention -- leave old tip in place for 100ms.
   Elements.Found.delayedReset = getElements(

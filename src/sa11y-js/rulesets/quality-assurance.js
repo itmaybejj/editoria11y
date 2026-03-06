@@ -135,16 +135,12 @@ export default function checkQA() {
     Elements.Found.Blockquotes.forEach(($el) => {
       const text = Utils.getText($el);
       if (text.length !== 0 && text.length < 25) {
-        const escapedText = Utils.escapeHTML(text);
         State.results.push({
           test: 'QA_BLOCKQUOTE',
           element: $el,
           type: State.option.checks.QA_BLOCKQUOTE.type || 'warning',
-          content: Lang.sprintf(
-            State.option.checks.QA_BLOCKQUOTE.content || 'QA_BLOCKQUOTE',
-            escapedText,
-          ),
-          dismiss: Utils.prepareDismissal(`QA_BLOCKQUOTE ${escapedText}`),
+          content: Lang.sprintf(State.option.checks.QA_BLOCKQUOTE.content || 'QA_BLOCKQUOTE', text),
+          dismiss: Utils.prepareDismissal(`QA_BLOCKQUOTE ${text}`),
           dismissAll: State.option.checks.QA_BLOCKQUOTE.dismissAll ? 'QA_BLOCKQUOTE' : false,
           developer: State.option.checks.QA_BLOCKQUOTE.developer || false,
         });
@@ -257,8 +253,7 @@ export default function checkQA() {
         maybeSentence &&
         !isPreviousElementAHeading(p)
       ) {
-        const escapedText = Utils.escapeHTML(getText);
-        addResult(p, escapedText);
+        addResult(p, getText);
       }
     };
 
@@ -354,8 +349,9 @@ export default function checkQA() {
           }
           const secondPrefix = decrement(secondText);
           if (isAlphabetic) {
-            // Check for repeats (*,*) or increments(a,b)
-            if (firstPrefix !== 'A ' && firstPrefix === secondPrefix) {
+            const firstChar = firstPrefix.charAt(0);
+            const secondChar = secondText.charAt(0);
+            if (decrement(secondChar) === firstChar) {
               hit = true;
             }
           } else if (isEmoji && !lastHitWasEmoji) {

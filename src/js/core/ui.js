@@ -43,9 +43,9 @@ export const UI = {
   dismissKeys: {},
   roots: [],
   headingOutlineOverrides: [],
+  altMarks: new Set(),
   elements: {
     // to be replaced by Sa11y find.
-    altMark: [],
     delayedReset: [],
   },
   splitConfiguration: {

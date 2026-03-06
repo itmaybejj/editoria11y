@@ -97,6 +97,7 @@ const defaultOptions = {
   autoDetectShadowComponents: false,
   pepper: window.location.hostname,
   // Provide a string to seed hashes.
+  unitTestMode: false,
   // Annotations
   showGoodImageButton: true,
   showGoodLinkButton: true,
@@ -531,11 +532,16 @@ function createAlert(alertMessage, errorPreview, extendedPreview) {
   const Sa11yPanel = document.querySelector("sa11y-control-panel").shadowRoot;
   const alert = Sa11yPanel.getElementById("panel-alert");
   const alertText = Sa11yPanel.getElementById("panel-alert-text");
-  Sa11yPanel.getElementById("panel-alert-preview");
+  const alertPreview = Sa11yPanel.getElementById("panel-alert-preview");
   const alertClose = Sa11yPanel.getElementById("close-alert");
   const skipButton = Sa11yPanel.getElementById("skip-button");
   alert.classList.add("active");
-  alertText.innerHTML = alertMessage;
+  if (typeof alertMessage === "string") {
+    alertText.textContent = alertMessage;
+  } else {
+    alertText.appendChild(alertMessage);
+  }
+  alertPreview.innerHTML = "";
   setTimeout(() => alertClose.focus(), 300);
   function closeAlert() {
     removeAlert();
@@ -630,35 +636,31 @@ const Constants = /* @__PURE__ */ (function myConstants() {
           Constants.Root.Readability.push(root);
         });
       } else {
+        Root.Readability = Root.areaToCheck;
         console.error(
           `Sa11y: The target readability root (${desiredReadabilityRoot}) does not exist.`
         );
-      }
-    } catch {
-      Root.Readability.length = 0;
-    }
-    if (Root.Readability.length === 0 && Global.headless === false) {
-      if (Root.areaToCheck.length === 0) {
-        Root.Readability.push(document.body);
-      } else {
-        Root.Readability = Root.areaToCheck;
         setTimeout(() => {
           const { readabilityDetails, readabilityToggle } = Constants.Panel;
           const readabilityOn = readabilityToggle?.getAttribute("aria-pressed") === "true";
           const alert = Constants.Panel.readability.querySelector("#readability-alert");
           if (readabilityDetails && readabilityOn && !alert) {
-            const roots = Root.areaToCheck.map((el) => {
+            const roots2 = Root.areaToCheck.map((el) => {
               if (el.id) return `#${el.id}`;
               if (el.className) return `.${el.className.split(/\s+/).filter(Boolean).join(".")}`;
               return el.tagName.toLowerCase();
             }).join(", ");
             const note = document.createElement("div");
             note.id = "readability-alert";
-            note.innerHTML = `<hr><p>${Lang.sprintf("MISSING_READABILITY_ROOT", roots, desiredReadabilityRoot)}</p>`;
+            note.appendChild(document.createElement("hr"));
+            const message = Lang.sprintf("MISSING_READABILITY_ROOT", roots2, desiredReadabilityRoot);
+            note.appendChild(message);
             readabilityDetails.insertAdjacentElement("afterend", note);
           }
         }, 100);
       }
+    } catch {
+      Root.Readability.length = 0;
     }
   }
   const Panel = {};
@@ -953,7 +955,7 @@ const decodeURIs = (uri) => {
   }
 };
 function sanitizeURL(url2) {
-  if (!url2) return BLANK_URL;
+  if (!url2 || typeof url2 !== "string") return BLANK_URL;
   let charsToDecode;
   let decodedUrl = decodeURIs(url2.trim());
   do {
@@ -1377,9 +1379,9 @@ const UI = {
   dismissKeys: {},
   roots: [],
   headingOutlineOverrides: [],
+  altMarks: /* @__PURE__ */ new Set(),
   elements: {
     // to be replaced by Sa11y find.
-    altMark: [],
     delayedReset: []
   },
   splitConfiguration: {
@@ -1831,6 +1833,7 @@ function resetResults(incremental) {
   Elements.Found.reset?.forEach((el) => {
     el.remove();
   });
+  UI.altMarks.clear();
   Elements.Found.delayedReset = getElements(
     "ed11y-element-result, ed11y-element-tip",
     "document",
@@ -1874,8 +1877,7 @@ function checkHeaders() {
   Elements.Found.Headings.forEach(($el, i) => {
     const accName = computeAccessibleName($el, Constants.Exclusions.HeaderSpan);
     const stringMatchExclusions = accName.replace(stringExclusionPattern, "");
-    const removeWhitespace$1 = removeWhitespace(stringMatchExclusions);
-    const headingText = escapeHTML(removeWhitespace$1);
+    const headingText = removeWhitespace(stringMatchExclusions);
     const rootContainsHeading = Constants.Root.areaToCheck.some((root) => root.contains($el));
     const rootContainsShadowHeading = Constants.Root.areaToCheck.some(
       (root) => root.contains($el.getRootNode().host)
@@ -1886,7 +1888,7 @@ function checkHeaders() {
       prevLevel = headingStartsOverride;
     }
     const level = parseInt($el.getAttribute("aria-level") || $el.tagName.slice(1), 10);
-    const headingLength = removeWhitespace$1.length;
+    const headingLength = headingText.length;
     const maxHeadingLength = State.option.checks.HEADING_LONG.maxLength || 160;
     let test = null;
     let type = null;
@@ -2755,15 +2757,12 @@ function checkLabels() {
       const ariaHidden = $el.getAttribute("aria-hidden") === "true";
       const negativeTabindex = $el.getAttribute("tabindex") === "-1";
       const hidden = isElementHidden($el);
-      if (hidden || ariaHidden && negativeTabindex) {
-        return;
-      }
+      if (hidden || ariaHidden && negativeTabindex) return;
       const computeName = computeAccessibleName($el);
       const inputName = removeWhitespace(computeName);
       const alt = $el.getAttribute("alt");
       const type = $el.getAttribute("type");
       const hasTitle = $el.getAttribute("title");
-      const hasPlaceholder = $el.placeholder && $el.placeholder !== 0;
       const hasAria = $el.getAttribute("aria-label") || $el.getAttribute("aria-labelledby");
       if (type === "submit" || type === "button" || type === "hidden") {
         return;
@@ -2800,20 +2799,22 @@ function checkLabels() {
         }
         return;
       }
-      if (hasAria || hasTitle || hasPlaceholder) {
-        if (hasPlaceholder && State.option.checks.LABELS_PLACEHOLDER) {
-          State.results.push({
-            test: "LABELS_PLACEHOLDER",
-            element: $el,
-            type: State.option.checks.LABELS_PLACEHOLDER.type || "warning",
-            content: Lang.sprintf(
-              State.option.checks.LABELS_PLACEHOLDER.content || "LABELS_PLACEHOLDER"
-            ),
-            dismiss: prepareDismissal(`LABELS_PLACEHOLDER ${type + inputName}`),
-            dismissAll: State.option.checks.LABELS_PLACEHOLDER.dismissAll ? "LABELS_PLACEHOLDER" : false,
-            developer: State.option.checks.LABELS_PLACEHOLDER.developer || true
-          });
-        } else if (inputName.length === 0) {
+      const hasPlaceholder = $el.placeholder && $el.placeholder !== 0;
+      if (hasPlaceholder && State.option.checks.LABELS_PLACEHOLDER) {
+        State.results.push({
+          test: "LABELS_PLACEHOLDER",
+          element: $el,
+          type: State.option.checks.LABELS_PLACEHOLDER.type || "warning",
+          content: Lang.sprintf(
+            State.option.checks.LABELS_PLACEHOLDER.content || "LABELS_PLACEHOLDER"
+          ),
+          dismiss: prepareDismissal(`LABELS_PLACEHOLDER ${type + inputName}`),
+          dismissAll: State.option.checks.LABELS_PLACEHOLDER.dismissAll ? "LABELS_PLACEHOLDER" : false,
+          developer: State.option.checks.LABELS_PLACEHOLDER.developer || true
+        });
+      }
+      if (hasAria || hasTitle) {
+        if (inputName.length === 0) {
           if (State.option.checks.LABELS_MISSING_LABEL) {
             State.results.push({
               test: "LABELS_MISSING_LABEL",
@@ -2836,12 +2837,11 @@ function checkLabels() {
               if (target && !isElementHidden(target)) return;
             }
           }
-          const escapedText = escapeHTML(inputName);
           State.results.push({
             test: "LABELS_ARIA_LABEL_INPUT",
             element: $el,
             type: State.option.checks.LABELS_ARIA_LABEL_INPUT.type || "warning",
-            content: State.option.checks.LABELS_ARIA_LABEL_INPUT.content ? Lang.sprintf(State.option.checks.LABELS_ARIA_LABEL_INPUT.content, escapedText) : Lang.sprintf(Lang._("LABELS_ARIA_LABEL_INPUT") + Lang._("ACC_NAME_TIP"), escapedText),
+            content: State.option.checks.LABELS_ARIA_LABEL_INPUT.content ? Lang.sprintf(State.option.checks.LABELS_ARIA_LABEL_INPUT.content, inputName) : Lang.sprintf(Lang._("LABELS_ARIA_LABEL_INPUT") + Lang._("ACC_NAME_TIP"), inputName),
             dismiss: prepareDismissal(`LABELS_ARIA_LABEL_INPUT ${type + inputName}`),
             dismissAll: State.option.checks.LABELS_ARIA_LABEL_INPUT.dismissAll ? "LABELS_ARIA_LABEL_INPUT" : false,
             developer: State.option.checks.LABELS_ARIA_LABEL_INPUT.developer || true
@@ -2850,25 +2850,27 @@ function checkLabels() {
         return;
       }
       const closestLabel = $el.closest("label");
-      const labelName = closestLabel ? removeWhitespace(computeAccessibleName(closestLabel)) : "";
+      const labelName = closestLabel ? computeAccessibleName(closestLabel) : "";
       if (closestLabel && labelName.length) return;
       const id = $el.getAttribute("id");
       if (id) {
-        if (!Elements.Found.Labels.some((label) => label.getAttribute("for") === id)) {
-          if (State.option.checks.LABELS_NO_FOR_ATTRIBUTE) {
-            State.results.push({
-              test: "LABELS_NO_FOR_ATTRIBUTE",
-              element: $el,
-              type: State.option.checks.LABELS_NO_FOR_ATTRIBUTE.type || "error",
-              content: Lang.sprintf(
-                State.option.checks.LABELS_NO_FOR_ATTRIBUTE.content || "LABELS_NO_FOR_ATTRIBUTE",
-                id
-              ),
-              dismiss: prepareDismissal(`LABELS_NO_FOR_ATTRIBUTE ${type + inputName}`),
-              dismissAll: State.option.checks.LABELS_NO_FOR_ATTRIBUTE.dismissAll ? "LABELS_NO_FOR_ATTRIBUTE" : false,
-              developer: State.option.checks.LABELS_NO_FOR_ATTRIBUTE.developer || true
-            });
-          }
+        const hasMatchingLabel = Elements.Found.Labels.some(
+          (label) => label.getAttribute("for") === id
+        );
+        if (hasMatchingLabel) return;
+        if (State.option.checks.LABELS_NO_FOR_ATTRIBUTE) {
+          State.results.push({
+            test: "LABELS_NO_FOR_ATTRIBUTE",
+            element: $el,
+            type: State.option.checks.LABELS_NO_FOR_ATTRIBUTE.type || "error",
+            content: Lang.sprintf(
+              State.option.checks.LABELS_NO_FOR_ATTRIBUTE.content || "LABELS_NO_FOR_ATTRIBUTE",
+              id
+            ),
+            dismiss: prepareDismissal(`LABELS_NO_FOR_ATTRIBUTE ${type + inputName}`),
+            dismissAll: State.option.checks.LABELS_NO_FOR_ATTRIBUTE.dismissAll ? "LABELS_NO_FOR_ATTRIBUTE" : false,
+            developer: State.option.checks.LABELS_NO_FOR_ATTRIBUTE.developer || true
+          });
         }
       } else if (State.option.checks.LABELS_MISSING_LABEL) {
         State.results.push({
@@ -2978,16 +2980,12 @@ function checkQA() {
     Elements.Found.Blockquotes.forEach(($el) => {
       const text = getText($el);
       if (text.length !== 0 && text.length < 25) {
-        const escapedText = escapeHTML(text);
         State.results.push({
           test: "QA_BLOCKQUOTE",
           element: $el,
           type: State.option.checks.QA_BLOCKQUOTE.type || "warning",
-          content: Lang.sprintf(
-            State.option.checks.QA_BLOCKQUOTE.content || "QA_BLOCKQUOTE",
-            escapedText
-          ),
-          dismiss: prepareDismissal(`QA_BLOCKQUOTE ${escapedText}`),
+          content: Lang.sprintf(State.option.checks.QA_BLOCKQUOTE.content || "QA_BLOCKQUOTE", text),
+          dismiss: prepareDismissal(`QA_BLOCKQUOTE ${text}`),
           dismissAll: State.option.checks.QA_BLOCKQUOTE.dismissAll ? "QA_BLOCKQUOTE" : false,
           developer: State.option.checks.QA_BLOCKQUOTE.developer || false
         });
@@ -3074,8 +3072,7 @@ function checkQA() {
       const maybeSentence = getText$1.match(/[.;?!"]/) === null;
       const typicalHeadingLength = getText$1.length >= 4 && getText$1.length <= 120;
       if (size >= 24 && !p.closest(ignoreParents) && typicalHeadingLength && maybeSentence && !isPreviousElementAHeading(p)) {
-        const escapedText = escapeHTML(getText$1);
-        addResult(p, escapedText);
+        addResult(p, getText$1);
       }
     };
     const computeBoldTextParagraphs = (p) => {
@@ -3133,7 +3130,9 @@ function checkQA() {
           }
           const secondPrefix = decrement(secondText);
           if (isAlphabetic) {
-            if (firstPrefix !== "A " && firstPrefix === secondPrefix) {
+            const firstChar = firstPrefix.charAt(0);
+            const secondChar = secondText.charAt(0);
+            if (decrement(secondChar) === firstChar) {
               hit = true;
             }
           } else if (isEmoji && !lastHitWasEmoji) {
@@ -4168,7 +4167,9 @@ function checkContrast() {
               ratioToDisplay2
             ),
             position: "afterend",
-            dismiss: prepareDismissal(`CONTRAST_PLACEHOLDER_UNSUPPORTED ${sanitizedPlaceholder}`),
+            dismiss: prepareDismissal(
+              `CONTRAST_PLACEHOLDER_UNSUPPORTED ${sanitizedPlaceholder}`
+            ),
             dismissAll: State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.dismissAll ? "CONTRAST_PLACEHOLDER_UNSUPPORTED" : false,
             developer: State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.developer || true,
             contrastDetails: updatedItem
@@ -4427,7 +4428,9 @@ function checkDeveloper() {
             test: "BTN_EMPTY",
             element: $el,
             type: State.option.checks.BTN_EMPTY.type || "error",
-            content: Lang.sprintf(State.option.checks.BTN_EMPTY.content || Lang._("BTN_EMPTY") + Lang._("BTN_TIP")),
+            content: Lang.sprintf(
+              State.option.checks.BTN_EMPTY.content || Lang._("BTN_EMPTY") + Lang._("BTN_TIP")
+            ),
             dismiss: prepareDismissal(
               `BTN_EMPTY ${$el.tagName + $el.id + $el.className + accName}`
             ),
@@ -4439,15 +4442,11 @@ function checkDeveloper() {
       }
       const isVisibleTextInAccName$1 = isVisibleTextInAccName($el, accName);
       if (State.option.checks.LABEL_IN_NAME && hasAria && isVisibleTextInAccName$1) {
-        const escapedText = escapeHTML(accName);
         State.results.push({
           test: "LABEL_IN_NAME",
           element: $el,
           type: State.option.checks.LABEL_IN_NAME.type || "warning",
-          content: State.option.checks.LABEL_IN_NAME.content ? Lang.sprintf(State.option.checks.LABEL_IN_NAME.content, escapedText) : Lang.sprintf(
-            Lang._("LABEL_IN_NAME") + Lang._("ACC_NAME_TIP"),
-            escapedText
-          ),
+          content: State.option.checks.LABEL_IN_NAME.content ? Lang.sprintf(State.option.checks.LABEL_IN_NAME.content, accName) : Lang.sprintf(Lang._("LABEL_IN_NAME") + Lang._("ACC_NAME_TIP"), accName),
           dismiss: prepareDismissal(
             `LABEL_IN_NAME ${$el.tagName + $el.id + $el.className + accName}`
           ),
@@ -5312,9 +5311,13 @@ const showAltPanel = () => {
   });
   if (UI.imageAlts.length > 0) {
     altList.innerHTML = "";
+    const oldMarks = getElements("ed11y-element-alt", "root", []);
+    oldMarks?.forEach((mark) => {
+      mark.remove();
+    });
     for (let i = 0; i < UI.imageAlts.length; i++) {
       const image = UI.imageAlts[i];
-      const altText = computeAriaLabel(image.element) === "noAria" ? escapeHTML(image.element.getAttribute("alt")) : computeAriaLabel(image.element);
+      const altText = computeAriaLabel(image.element) === "noAria" ? image.element.getAttribute("alt") : computeAriaLabel(image.element);
       UI.imageAlts[i].altText = altText;
       if (UI.inlineAlerts) {
         const mark = document.createElement("ed11y-element-alt");
@@ -5380,6 +5383,7 @@ function visualize() {
     reset2?.forEach((el) => {
       el.remove();
     });
+    UI.altMarks.clear();
   }
   if (UI.visualizing) {
     UI.visualizing = false;
@@ -7306,38 +7310,76 @@ function initializeContrastTools(container, contrastDetails) {
   }, 0);
 }
 function generateColorSuggestion(contrastDetails) {
-  let adviceContainer;
-  const { color, background, fontWeight, fontSize, isLargeText, type } = contrastDetails;
-  if (color && background && background.type !== "image" && (type === "text" || type === "svg-error" || type === "input")) {
-    const suggested = Constants.Global.contrastAlgorithm === "APCA" ? suggestColorAPCA(color, background, fontWeight, fontSize) : suggestColorWCAG(
-      color,
-      background,
-      isLargeText,
-      Constants.Global.contrastAlgorithm
-    );
-    let advice;
-    const hr = '<hr aria-hidden="true">';
-    const bgHex = getHex(contrastDetails.background);
-    const style = `color:${suggested.color};background-color:${bgHex};`;
-    const colorBadge = `<button id="suggest" class="badge" style="${style}">${suggested.color}</button>`;
-    const sizeBadge = `<button id="suggest-size" class="normal-badge">${suggested.size}px</button>`;
-    if (Constants.Global.contrastAlgorithm === "AA" || Constants.Global.contrastAlgorithm === "AAA") {
-      if (suggested.color === null) {
-        advice = `${hr} ${Lang._("NO_SUGGESTION")}`;
-      } else {
-        advice = `${hr} ${Lang._("CONTRAST_COLOR")} ${colorBadge}`;
-      }
-    } else if (suggested.color && suggested.size) {
-      advice = `${hr} ${Lang._("CONTRAST_APCA")} ${colorBadge} ${sizeBadge}`;
-    } else if (suggested.color) {
-      advice = `${hr} ${Lang._("CONTRAST_COLOR")} ${colorBadge}`;
-    } else if (suggested.size) {
-      advice = `${hr} ${Lang._("CONTRAST_SIZE")} ${sizeBadge}`;
+  const { color, background, fontWeight, fontSize, isLargeText, type, opacity } = contrastDetails;
+  if (!color || !background || background.type === "image" || !(type === "text" || type === "svg-error" || type === "input")) {
+    return;
+  }
+  const suggested = Constants.Global.contrastAlgorithm === "APCA" ? suggestColorAPCA(color, background, fontWeight, fontSize) : suggestColorWCAG(
+    color,
+    background,
+    isLargeText,
+    Constants.Global.contrastAlgorithm
+  );
+  const adviceContainer = document.createElement("div");
+  adviceContainer.id = "advice";
+  const createHr = () => {
+    const hr = document.createElement("hr");
+    hr.setAttribute("aria-hidden", "true");
+    return hr;
+  };
+  const createColorBadge = (suggestedColor) => {
+    const btn = document.createElement("button");
+    btn.id = "suggest";
+    btn.className = "badge";
+    const bgHex = getHex(background);
+    btn.style.color = suggestedColor;
+    btn.style.backgroundColor = bgHex;
+    btn.textContent = suggestedColor;
+    return btn;
+  };
+  const createSizeBadge = (size) => {
+    const btn = document.createElement("button");
+    btn.id = "suggest-size";
+    btn.className = "normal-badge";
+    btn.textContent = `${size}px`;
+    return btn;
+  };
+  if (opacity < 1) {
+    adviceContainer.append(createHr(), " ", Lang.sprintf("CONTRAST_OPACITY"));
+    return adviceContainer;
+  }
+  const algo = Constants.Global.contrastAlgorithm;
+  if (algo === "AA" || algo === "AAA") {
+    if (suggested.color === null) {
+      adviceContainer.append(createHr(), " ", Lang._("NO_SUGGESTION"));
+    } else {
+      adviceContainer.append(
+        createHr(),
+        " ",
+        Lang._("CONTRAST_COLOR"),
+        " ",
+        createColorBadge(suggested.color)
+      );
     }
-    adviceContainer = document.createElement("div");
-    adviceContainer.id = "advice";
-    const suggestion = contrastDetails.opacity < 1 ? `<hr aria-hidden="true"> ${Lang.sprintf("CONTRAST_OPACITY")}` : advice;
-    adviceContainer.innerHTML = suggestion;
+  } else {
+    const hasColor = !!suggested.color;
+    const hasSize = !!suggested.size;
+    if (hasColor || hasSize) {
+      adviceContainer.append(createHr(), " ");
+      if (hasColor && hasSize) {
+        adviceContainer.append(
+          Lang._("CONTRAST_APCA"),
+          " ",
+          createColorBadge(suggested.color),
+          " ",
+          createSizeBadge(suggested.size)
+        );
+      } else if (hasColor) {
+        adviceContainer.append(Lang._("CONTRAST_COLOR"), " ", createColorBadge(suggested.color));
+      } else if (hasSize) {
+        adviceContainer.append(Lang._("CONTRAST_SIZE"), " ", createSizeBadge(suggested.size));
+      }
+    }
   }
   return adviceContainer;
 }
@@ -7709,7 +7751,7 @@ const Sa11yStrings = {
     PAGE_TITLE: "Page title",
     RESULTS: "Results",
     EXPORT_RESULTS: "Export results",
-    GENERATED: "Results generated with %(tool).",
+    GENERATED: 'Results generated with <a href="https://sa11y.netlify.app">Sa11y.</a>',
     PREVIEW: "Preview",
     ELEMENT: "Element",
     PATH: "Path",
