@@ -1459,7 +1459,7 @@
       });
     }
   }
-  const version = "3.0.0-dev0211";
+  const version = "3.0.0-dev0311";
   const UI = {
     editableHighlight: {},
     imageAlts: [],
