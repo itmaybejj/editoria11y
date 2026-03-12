@@ -1567,3 +1567,19 @@ ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
 .ed11y-hidden, .ed11y-wrapper .ed11y-hidden {
   display: none;
 }
+
+.ed11y-console-error {
+  border: 4px solid var(--ed11y-primary, #276499);
+  color: #222;
+  z-index: 99999;
+  background: #fff;
+  width: 90%;
+  position: fixed;
+  bottom: 0;
+  left: 5%;
+}
+
+.ed11y-console-error .error {
+  border: 1px dashed;
+  padding: 1em;
+}

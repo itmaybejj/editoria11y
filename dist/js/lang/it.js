@@ -499,7 +499,7 @@ const tips = {
 const interfaceStrings = {
   ALERT_CLOSE: "Chiudi",
   ALT: "Testo alternativo: ",
-  CONSOLE_ERROR: 'C’è un problema con il controllo di accessibilità in questa pagina. %(link)<a href="%(link)">segnalalo su GitHub</a>.',
+  CONSOLE_ERROR: 'C’è un problema con il controllo di accessibilità in questa pagina. <a class="g-link">segnalalo su GitHub</a>.',
   DECORATIVE: "Marcato come decorativo",
   DISMISS: "Ignora",
   DISMISS_ALL: "In questa pagina: ignora",

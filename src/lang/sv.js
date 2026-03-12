@@ -196,7 +196,7 @@ export const tips = {
 export const interfaceStrings = {
 	ALERT_CLOSE: 'Stäng',
 	ALT: 'Alt‑text: ',
-	CONSOLE_ERROR: 'Det uppstod ett problem med tillgänglighetskontrollen på denna sida. %(link)<a href="%(link)">Rapportera på GitHub</a>.',
+	CONSOLE_ERROR: 'Det uppstod ett problem med tillgänglighetskontrollen på denna sida. <a class="g-link">Rapportera på GitHub</a>.',
 	DECORATIVE: 'Markerad som dekorativ',
 	DISMISS: 'Avfärda',
 	DISMISS_ALL: 'På denna sida: avfärda',

@@ -500,7 +500,7 @@
   const interfaceStrings = {
     ALERT_CLOSE: "Fechar",
     ALT: "Texto alternativo: ",
-    CONSOLE_ERROR: 'Existe um problema com o verificador de acessibilidade nesta página. %(link)<a href="%(link)">Comunicar no GitHub</a>.',
+    CONSOLE_ERROR: 'Existe um problema com o verificador de acessibilidade nesta página. <a class="g-link">Comunicar no GitHub</a>.',
     DECORATIVE: "Marcado como decorativo",
     DISMISS: "Ignorar",
     DISMISS_ALL: "Nesta página: ignorar",

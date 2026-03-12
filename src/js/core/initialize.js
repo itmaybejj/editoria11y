@@ -20,6 +20,38 @@ const preProcessOptions = async (userOptions) => {
     State.option.lang = lang;
   }
   Lang.addI18n(State.option.lang.strings);
+  let cssUrls = userOptions.cssUrls;
+  if (!cssUrls) {
+    const cssLink = document.querySelector(
+      'link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]',
+    );
+    if (cssLink) {
+      cssUrls = [cssLink.getAttribute('href')];
+    } else {
+      cssUrls = [
+        `https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${UI.version}/dist/editoria11y.min.css`,
+      ];
+      console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
+    }
+  }
+  const cssBundle = document.createElement('div');
+  cssBundle.classList.add('ed11y-style');
+  cssBundle.setAttribute('hidden', '');
+  cssUrls?.forEach((sheet) => {
+    const cssLink = document.createElement('link');
+    cssLink.setAttribute('rel', 'stylesheet');
+    // @todo after merge possibly lost some preload functionality.
+    cssLink.setAttribute('media', 'all');
+    if (sheet.indexOf('?') < 0) {
+      sheet = `${sheet}?ver=${UI.version}`;
+    }
+    cssLink.setAttribute('href', sheet);
+    cssBundle.append(cssLink);
+  });
+  UI.attachCSS = (appendTo) => {
+    const link = cssBundle.cloneNode(true);
+    appendTo.appendChild(link);
+  };
   Lang.testNames = State.option.lang.testNames;
   const titles = Object.entries(Lang.testNames);
   for (let i = 0; i < titles.length; i++) {
@@ -82,39 +114,6 @@ const preProcessOptions = async (userOptions) => {
   /*if (userOptions.linkIgnoreSelector && !userOptions.linkIgnoreSpan) {
     State.option.linkIgnoreSpan = userOptions.linkIgnoreSelector;
   }*/
-
-  let cssUrls = userOptions.cssUrls;
-  if (!cssUrls) {
-    const cssLink = document.querySelector(
-      'link[href*="editoria11y.css"], link[href*="editoria11y.min.css"]',
-    );
-    if (cssLink) {
-      cssUrls = [cssLink.getAttribute('href')];
-    } else {
-      cssUrls = [
-        `https://cdn.jsdelivr.net/gh/itmaybejj/editoria11y@${UI.version}/dist/editoria11y.min.css`,
-      ];
-      console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
-    }
-  }
-  const cssBundle = document.createElement('div');
-  cssBundle.classList.add('ed11y-style');
-  cssBundle.setAttribute('hidden', '');
-  cssUrls?.forEach((sheet) => {
-    const cssLink = document.createElement('link');
-    cssLink.setAttribute('rel', 'stylesheet');
-    // @todo after merge possibly lost some preload functionality.
-    cssLink.setAttribute('media', 'all');
-    if (sheet.indexOf('?') < 0) {
-      sheet = `${sheet}?ver=${UI.version}`;
-    }
-    cssLink.setAttribute('href', sheet);
-    cssBundle.append(cssLink);
-  });
-  UI.attachCSS = (appendTo) => {
-    const link = cssBundle.cloneNode(true);
-    appendTo.appendChild(link);
-  };
 };
 
 const postProcessOptions = (userOptions) => {

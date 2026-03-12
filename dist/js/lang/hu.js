@@ -495,7 +495,7 @@ const tips = {
   TABLES_SEMANTIC_HEADING: ` <p>${why.fix}Távolítsa el a tartalmi címsort (h2, h3). Használjon inkább táblázatfejléceket. Ha több szint kell, bontsa több táblázatra.</p><div class="why"> <p>Magyarázat: a táblázatfejlécek irányhoz kötöttek (sor vagy oszlop). A tartalmi címsor az alatta következő teljes tartalomra hatással van.</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">A <strong>táblázatfejléc</strong> a 2. cellában a B cellát jelöli.<br><br> A <strong>tartalmi címsor</strong> a 2. cellában a 3., A, B, C cellákat, valamint ezt a szöveget és a lábjegyzetet is „címkézi”.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`
 };
 const interfaceStrings = {
-  CONSOLE_ERROR: 'Az akadálymentességi ellenőrző hibát észlelt ezen az oldalon. Kérjük, %(link)<a href="%(link)">jelentse a GitHubon</a>.',
+  CONSOLE_ERROR: 'Az akadálymentességi ellenőrző hibát észlelt ezen az oldalon. Kérjük, <a class="g-link">jelentse a GitHubon</a>.',
   SKIP_TO_ISSUE: "Figyelmeztetés megjelenítése",
   buttonFirstContent: "Első figyelmeztetés megjelenítése",
   ALERT_CLOSE: "Bezárás",

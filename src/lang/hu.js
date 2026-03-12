@@ -193,7 +193,7 @@ const tips = {
 };
 
 const interfaceStrings = {
-	CONSOLE_ERROR: 'Az akadálymentességi ellenőrző hibát észlelt ezen az oldalon. Kérjük, %(link)<a href="%(link)">jelentse a GitHubon</a>.',
+	CONSOLE_ERROR: 'Az akadálymentességi ellenőrző hibát észlelt ezen az oldalon. Kérjük, <a class="g-link">jelentse a GitHubon</a>.',
 	SKIP_TO_ISSUE: 'Figyelmeztetés megjelenítése',
 	buttonFirstContent: 'Első figyelmeztetés megjelenítése',
 	ALERT_CLOSE: 'Bezárás',

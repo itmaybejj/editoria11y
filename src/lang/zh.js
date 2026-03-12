@@ -195,7 +195,7 @@ const tips = {
 export const interfaceStrings = {
 	ALERT_CLOSE: '关闭',
 	ALT: '替代文本：',
-	CONSOLE_ERROR: '此页面的可访问性检查器出现问题。%(link)<a href="%(link)">请在 GitHub 上报告</a>。',
+	CONSOLE_ERROR: '此页面的可访问性检查器出现问题。<a class="g-link">请在 GitHub 上报告</a>。',
 	DECORATIVE: '标记为装饰性',
 	DISMISS: '忽略',
 	DISMISS_ALL: '在此页面：忽略',

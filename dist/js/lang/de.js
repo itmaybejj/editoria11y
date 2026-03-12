@@ -553,6 +553,7 @@ const tips = {
 const interfaceStrings = {
   ALERT_CLOSE: "Schließen",
   ALT: "Alt‑Text: ",
+  CONSOLE_ERROR: 'Es gibt ein Problem mit dem Barrierefreiheitsprüfer auf dieser Seite. Bitte <a class="g-link">melden Sie es auf GitHub</a>.',
   DECORATIVE: "Als dekorativ markiert",
   DISMISS: "Ignorieren",
   DISMISS_ALL: "Auf dieser Seite: ignorieren",
