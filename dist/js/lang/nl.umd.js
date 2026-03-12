@@ -509,7 +509,7 @@
   const interfaceStrings = {
     ALERT_CLOSE: "Sluiten",
     ALT: "Alt‑tekst: ",
-    CONSOLE_ERROR: 'Er is een probleem met de toegankelijkheidscontrole op deze pagina. %(link)<a href="%(link)">Meld het op GitHub</a>.',
+    CONSOLE_ERROR: 'Er is een probleem met de toegankelijkheidscontrole op deze pagina. <a class="g-link">Meld het op GitHub</a>.',
     DECORATIVE: "Als decoratief gemarkeerd",
     DISMISS: "Negeren",
     DISMISS_ALL: "Op deze pagina: negeren",

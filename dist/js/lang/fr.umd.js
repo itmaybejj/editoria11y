@@ -531,7 +531,7 @@
   const interfaceStrings = {
     ALERT_CLOSE: "Fermer",
     ALT: "Texte alternatif : ",
-    CONSOLE_ERROR: 'Un problème affecte le vérificateur d’accessibilité sur cette page. Veuillez %(link)<a href="%(link)">le signaler sur GitHub</a>.',
+    CONSOLE_ERROR: 'Un problème affecte le vérificateur d’accessibilité sur cette page. Veuillez <a class="g-link">le signaler sur GitHub</a>.',
     // updated new
     DECORATIVE: "Marqué comme décoratif",
     DISMISS: "Ignorer",

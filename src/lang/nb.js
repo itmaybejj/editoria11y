@@ -196,7 +196,7 @@ export const tips = {
 export const interfaceStrings = {
 	ALERT_CLOSE: 'Lukk',
 	ALT: 'Alternativ tekst: ',
-	CONSOLE_ERROR: 'Det er et problem med tilgjengelighetssjekken på denne siden. %(link)<a href="%(link)">Rapporter det på GitHub</a>.',
+	CONSOLE_ERROR: 'Det er et problem med tilgjengelighetssjekken på denne siden. <a class="g-link">Rapporter det på GitHub</a>.',
 	DECORATIVE: 'Merket som dekorativ',
 	DISMISS: 'Ignorer',
 	DISMISS_ALL: 'På denne siden: ignorer',

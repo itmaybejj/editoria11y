@@ -1,9 +1,9 @@
 import Lang from '../../sa11y-js/utils/lang.js';
 import { sanitizeURL } from '../../sa11y-js/utils/utils';
-import { UI } from '../core/ui.js';
+import version from '../version.js';
+import { spriteClose } from './sprite.js';
 
 // Replaces Sa11y error with one that does not attach CSS.
-
 export default class ConsoleErrors extends HTMLElement {
   constructor(error) {
     super();
@@ -13,18 +13,17 @@ export default class ConsoleErrors extends HTMLElement {
   connectedCallback() {
     const shadow = this.attachShadow({ mode: 'open' });
 
-    // Styles
-    //		const style = document.createElement('style');
-    //		style.innerHTML = styles + sharedStyles;
-    //		shadow.appendChild(style);
-
     // Container
-    const content = document.createElement('dialog');
-    content.ariaLabel = Lang._('ERROR');
+    const wrapper = document.createElement('div');
+    wrapper.ariaLabel = Lang._('ERROR');
+    wrapper.id = 'dialog';
+    wrapper.classList.add('ed11y-wrapper', 'ed11y-tip-wrapper', 'ed11y-console-error');
+    wrapper.setAttribute('tabindex', '-1');
+    const content = document.createElement('div');
+    content.classList.add('content');
 
     // Google Form & GitHub error link.
-    const url = sanitizeURL(window.location);
-    const google = '';
+    const url = sanitizeURL(window.location.href);
 
     // GitHub template
     const template = `## Error Description
@@ -34,58 +33,63 @@ ${this.error.stack}
 
 ## Details
 - **URL:** ${url}
-- **Version:** ${UI.version}
+- **Version:** ${version}
 
 ## Comments
 `;
-    const preContents = `Version: ${UI.version}
-URL: ${url}`;
     const encodedTemplate = encodeURIComponent(template);
     const github = `https://github.com/itmaybejj/editoria11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
 
-    // Message
-    // Todo: sprintf now returns an object.
-    content.innerHTML = `
-      <button class="close-btn" aria-describedby="ed11y-console-error"><span aria-hidden="true">&times</span> ${Lang._('ALERT_CLOSE')}</button>
-      <h2 id="ed11y-console-error">${Lang._('ERROR')}</h2>
-      <p>${Lang.sprintf('CONSOLE_ERROR', google, github)}</p>
-      <p><strong>${Lang._('DEVELOPER_CHECKS')}:</strong></p>
-      <pre>
-</pre>
-  		
-    `; /*  		<p><strong>${Lang._('ERRORS')}:</strong></p>
-<pre>${escapeHTML(this.error.stack)}</pre>
-    `;
-*/
-    shadow.appendChild(content);
-    const pre = content.querySelector('pre');
-    pre.textContent = preContents;
+    // 1. Create the Close Button.
+    const closeWrapper = document.createElement('div');
+    closeWrapper.innerHTML = `<button class="close ed11y-tip-close" title="Close">${spriteClose}</button>`;
+    const closeBtn = closeWrapper.querySelector('.close');
+    closeBtn.setAttribute('aria-label', Lang._('ALERT_CLOSE'));
 
-    // Set focus and hide Sa11y's toggle.
-    setTimeout(() => {
-      content.show();
-      // Constants.Panel.toggle.style.display = 'none';
-      const button = content.querySelector('button');
-      button.style.setProperty('padding', '1em;');
-      button.style.setProperty('filter', 'invert(1)');
-      const hiddenItems = content.querySelectorAll('.visually-hidden');
-      hiddenItems?.forEach((hidden) => {
-        hidden.style.setProperty('position', 'absolute');
-        hidden.style.setProperty('width', '1px');
-        hidden.style.setProperty('height', '1px');
-        hidden.style.setProperty('overflow', 'hidden');
-      });
-      const preS = content.querySelectorAll('pre');
-      preS.forEach((pre) => {
-        pre.style.setProperty('margin-left', '18px');
-      });
-      //const dialog = container.shadowRoot.getElementById('dialog');
-      //dialog.focus();
+    // 2. Create the Heading.
+    const h2 = document.createElement('h2');
+    h2.classList.add('title');
+    h2.textContent = Lang._('ERROR');
 
-      const close = content.querySelector('.close-btn');
-      close.addEventListener('click', () => {
-        content.close();
-      });
-    }, 0);
+    // 3. Create the main message.
+    const p1 = document.createElement('p');
+    p1.className = 'p1';
+    p1.append(Lang.sprintf('CONSOLE_ERROR'));
+    if (p1.querySelector('.g-link')) {
+      p1.querySelector('.g-link').href = github;
+    }
+
+    // 4. Create the Error Details (Stack trace and version).
+    const p2 = document.createElement('p');
+    p2.className = 'error';
+
+    // Use line breaks and text nodes to avoid parsing strings as HTML.
+    p2.append(
+      this.error.stack,
+      document.createElement('br'),
+      document.createElement('br'),
+      `Version: ${version}`,
+      document.createElement('br'),
+      `URL: ${url}`,
+    );
+
+    // 5. Assemble and append.
+    content.append(h2, p1, p2);
+    wrapper.append(closeWrapper, content);
+    shadow.appendChild(wrapper);
+
+    // 6. Set focus and hide Sa11y's toggle.
+    setTimeout(
+      () => {
+        wrapper.focus();
+
+        const close = content.querySelector('.close');
+        close.addEventListener('click', () => {
+          wrapper.remove();
+        });
+      },
+      0,
+      wrapper,
+    );
   }
 }

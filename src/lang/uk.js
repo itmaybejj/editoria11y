@@ -199,7 +199,7 @@ export const tips = {
 export const interfaceStrings = {
 	ALERT_CLOSE: 'Закрити',
 	ALT: 'Альтернативний текст: ',
-	CONSOLE_ERROR: 'На цій сторінці виникла проблема з перевіркою доступності. %(link)<a href="%(link)">Повідомте про неї на GitHub</a>.',
+	CONSOLE_ERROR: 'На цій сторінці виникла проблема з перевіркою доступності. <a class="g-link">Повідомте про неї на GitHub</a>.',
 	DECORATIVE: 'Позначено як декоративне',
 	DISMISS: 'Ігнорувати',
 	DISMISS_ALL: 'На цій сторінці: ігнорувати',

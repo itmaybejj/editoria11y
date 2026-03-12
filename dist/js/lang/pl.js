@@ -497,7 +497,7 @@ const tips = {
 const interfaceStrings = {
   ALERT_CLOSE: "Zamknij",
   ALT: "Tekst alternatywny: ",
-  CONSOLE_ERROR: 'Wystąpił problem z modułem sprawdzania dostępności na tej stronie. %(link)<a href="%(link)">Zgłoś problem na GitHubie</a>.',
+  CONSOLE_ERROR: 'Wystąpił problem z modułem sprawdzania dostępności na tej stronie. <a class="g-link">Zgłoś problem na GitHubie</a>.',
   DECORATIVE: "Oznaczone jako dekoracyjne",
   DISMISS: "Ignoruj",
   DISMISS_ALL: "Na tej stronie: ignoruj",

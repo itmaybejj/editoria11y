@@ -8,11 +8,18 @@ import { createDismissalKey, getElements, findElements } from './utils/utils.js'
 import { State } from '../sa11y-js/core/state.js';
 import { UI } from './core/ui.js';
 import version from './version.js';
+import ConsoleErrors from './elements/ed11y-console-error.js';
 
 class Ed11y {
   constructor(userOptions) {
     if (CSS.supports('selector(:has(body))')) {
-      initialize(userOptions).catch((error) => console.error(error.message));
+      initialize(userOptions).catch((error) => {
+        customElements.define('ed11y-console-error', ConsoleErrors);
+        const consoleErrors = new ConsoleErrors(error);
+        document.body.appendChild(consoleErrors);
+        UI.attachCSS(consoleErrors.shadowRoot.querySelector('*'));
+        throw Error(error);
+      });
     }
   }
 }

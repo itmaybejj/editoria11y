@@ -283,7 +283,7 @@ const interfaceStrings = {
 	ALERT_CLOSE: 'Cerrar',
 	ALT: 'Texto alternativo: ',
 	CONSOLE_ERROR:
-		'Hay un problema con el comprobador de accesibilidad en esta página. Por favor %(link)<a href="%(link)">repórtelo en GitHub</a>.',
+		'Hay un problema con el comprobador de accesibilidad en esta página. Por favor <a class="g-link">repórtelo en GitHub</a>.',
 	DECORATIVE: 'Marcado como decorativo',
 	DISMISS: 'Ignorar',
 	DISMISS_ALL: 'En esta página: ignorar',

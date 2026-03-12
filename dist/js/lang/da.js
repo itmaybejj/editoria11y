@@ -652,7 +652,7 @@ const tips = {
 const interfaceStrings = {
   ALERT_CLOSE: "Luk",
   ALT: "Alt‑tekst: ",
-  CONSOLE_ERROR: "Der opstod et problem med tilgængelighedskontrollen på denne side. %(link)%(link)Rapportér det på GitHub</a>.",
+  CONSOLE_ERROR: 'Der opstod et problem med tilgængelighedskontrollen på denne side. <a class="g-link">Rapportér det på GitHub</a>.',
   DECORATIVE: "Markeret som dekorativ",
   DISMISS: "Ignorer",
   DISMISS_ALL: "På denne side: ignorer",

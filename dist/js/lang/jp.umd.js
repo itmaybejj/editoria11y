@@ -541,7 +541,7 @@
   const interfaceStrings = {
     ALERT_CLOSE: "閉じる",
     ALT: "代替テキスト: ",
-    CONSOLE_ERROR: 'このページのアクセシビリティチェッカーに問題があります。%(link)<a href="%(link)">GitHub で報告してください</a>。',
+    CONSOLE_ERROR: 'このページのアクセシビリティチェッカーに問題があります。<a class="g-link">GitHub で報告してください</a>。',
     DECORATIVE: "装飾としてマークされています",
     DISMISS: "非表示にする",
     DISMISS_ALL: "このページで非表示",
