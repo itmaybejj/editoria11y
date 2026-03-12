@@ -4,7 +4,6 @@ import Constants from '../../sa11y-js/utils/constants.js';
 import findShadowComponents from '../../sa11y-js/core/find-shadow-components.js';
 import Elements from '../../sa11y-js/utils/elements.js';
 import ConsoleErrors from '../elements/ed11y-console-error.js';
-import { createAlert } from '../../sa11y-js/interface/alert';
 import { dismissDigest, prepareDismissal } from '../../sa11y-js/utils/utils.js';
 import { UI } from '../core/ui.js';
 import { State } from '../../sa11y-js/core/state.js';
@@ -56,10 +55,11 @@ export function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) 
     Constants.Root.areaToCheck.length = 0;
   }
 
-  // Push a visible UI alert if not headless and no roots at all are found.
   if (Constants.Root.areaToCheck.length === 0 && Constants.Global.headless === false) {
-    createAlert(Lang.sprintf('MISSING_ROOT', desiredRoot));
-    Constants.Root.areaToCheck.push(document.body);
+    // Todo: determine what state causes this.
+    console.warn(Lang.sprintf('MISSING_ROOT', `"${State.option.checkRoot}"`).textContent);
+    // createAlert(Lang.sprintf('MISSING_ROOT', desiredRoot), '', '');
+    Constants.Root.areaToCheck.push(document.querySelector('body'));
   }
 
   /* Readability target area */
@@ -101,7 +101,10 @@ export function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) 
           // Append note to Readability panel.
           const note = document.createElement('div');
           note.id = 'readability-alert';
-          note.innerHTML = `<hr><p>${Lang.sprintf('MISSING_READABILITY_ROOT', roots, desiredReadabilityRoot)}</p>`;
+          note.innerHTML = `<hr><p></p>`;
+          note
+            .querySelector('p')
+            .append(Lang.sprintf('MISSING_READABILITY_ROOT', roots, desiredReadabilityRoot));
           readabilityDetails.insertAdjacentElement('afterend', note);
         }
       }, 100);
@@ -343,29 +346,9 @@ export function firstVisibleParent(el) {
   }
 }
 
-// @todo discuss differences
-export function hiddenElementCheck(el) {
-  // Checks if this element has been removed from the accessibility tree
-  const style = window.getComputedStyle(el);
-  return !(
-    style.getPropertyValue('display') === 'none' ||
-    style.getPropertyValue('visibility') === 'hidden' ||
-    el.hasAttribute('aria-hidden') ||
-    el.hasAttribute('hidden')
-  );
-}
-
 export function elementNotHidden(el) {
   // Recurse element and ancestors to make sure it is visible
-  if (!hiddenElementCheck(el)) {
-    // Element is hidden
-    return false;
-  } else {
-    // Element is not known to be hidden.
-    const theParents = parents(el);
-    const notHiddenParent = (parent) => hiddenElementCheck(parent);
-    return theParents.every(notHiddenParent);
-  }
+  return el.checkVisibility() && !el.closest('[aria-hidden="true"]');
 }
 
 export function detectShadow(container) {
@@ -492,6 +475,7 @@ export function resetResults(incremental) {
   Elements.Found.reset?.forEach((el) => {
     el.remove();
   });
+  UI.altMarks.clear();
 
   // Flicker prevention -- leave old tip in place for 100ms.
   Elements.Found.delayedReset = getElements(

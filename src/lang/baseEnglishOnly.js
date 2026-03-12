@@ -20,7 +20,7 @@ export const englishOverrides = {
     'courtesy of',
 		'alt text',
   ],
-	// todo Ed11y test use to catch these at the end as well as the beginning.
+	// todo Ed11y test used to catch these at the end as well as the beginning.
 	extraPlaceholderStopWords: 'placeholder, alt text, tbd, todo, to do', // updated
 	// please add, please insert, add alt text
 	// @todo: photo by, photograph by, courtesy of as separate test.

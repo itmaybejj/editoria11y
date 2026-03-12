@@ -58,21 +58,31 @@ export function showResults() {
 const panelJumpTo = (event) => {
   // Handle jump
   event.preventDefault();
+  pauseObservers();
   UI.toggledFrom = event.target.closest('button');
   if (!UI.showPanel) {
     togglePanel();
     window.setTimeout(() => {
+      pauseObservers();
       jumpTo();
+      resumeObservers();
     }, 500);
   } else {
     jumpTo();
+    resumeObservers();
   }
 };
 
 export function updatePanel() {
   pauseObservers();
-  // Stash old values for incremental updates.
 
+  // Beware dynamically appearing editable content.
+  if (UI.inlineAlerts && document.querySelector('[contenteditable]')) {
+    UI.forceFullCheck = true;
+    UI.inlineAlerts = false;
+  }
+
+  // Stash old values for incremental updates.
   if (UI.incremental) {
     // Check for a change in the result counts.
     if (UI.forceFullCheck || newIncrementalResults()) {
@@ -198,7 +208,7 @@ export function updatePanel() {
       });
 
       // Decide whether to open the panel on load.
-      if (UI.ignoreAll || (!UI.inlineAlerts && UI.totalCount > 75)) {
+      if (UI.ignoreAll || (!UI.inlineAlerts && UI.totalCount > 99)) {
         UI.showPanel = false;
       } else if (
         State.option.alertMode === 'active' ||
@@ -235,7 +245,7 @@ export function updatePanel() {
       // Prepare show hidden alerts button.
       const preferredDismissHide =
         UI.dismissedCount > 1
-          ? Lang.sprintf('buttonHideHiddenAlerts', UI.dismissedCount)
+          ? Lang.sprintf('buttonHideHiddenAlerts', UI.dismissedCount).textContent
           : Lang._('buttonHideHiddenAlert');
       if (UI.dismissedCount === 0) {
         // Reset show hidden default option when irrelevant.
@@ -245,7 +255,7 @@ export function updatePanel() {
       } else if (UI.dismissedCount === 1) {
         const show = UI.english
           ? Lang._('buttonShowHiddenAlert')
-          : Lang.sprintf('PANEL_DISMISS_BUTTON', '1');
+          : Lang.sprintf('PANEL_DISMISS_BUTTON', '1').textContent;
         UI.panelShowDismissed.querySelector('.ed11y-sr-only').textContent = UI.showDismissed
           ? preferredDismissHide
           : show;
@@ -257,7 +267,7 @@ export function updatePanel() {
       } else {
         UI.panelShowDismissed.querySelector('.ed11y-sr-only').textContent = UI.showDismissed
           ? preferredDismissHide
-          : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount);
+          : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount).textContent;
         UI.panelShowDismissed.dataset.ed11yPressed = `${UI.showDismissed}`;
         if (!UI.english) {
           UI.panelShowDismissed.ariaPressed = UI.showDismissed;
@@ -333,7 +343,7 @@ export function updatePanel() {
         if (!UI.showPanel) {
           UI.panelToggleTitle.textContent =
             UI.dismissedCount > 1
-              ? Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount)
+              ? Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount).textContent
               : Lang._('buttonShowHiddenAlert');
         }
       }
@@ -1254,17 +1264,8 @@ export function startObserver(root) {
   }, 1000);
 }
 
-/*const getRuleset = {
-	checkHeaders: checkHeaders(Results, Options, State.headingOutline),
-	checkLinkText:
-	checkImages: ,
-	checkLabels: ,
-	checkQA: ,
-}*/
-
 const enqueueTests = (queue) => {
   const test = queue.pop();
-  UI.testsRemaining--;
   try {
     switch (test) {
       case 'group1':
@@ -1290,6 +1291,7 @@ const enqueueTests = (queue) => {
   } catch (error) {
     showError(error);
   }
+  UI.testsRemaining--;
   if (queue.length > 0) {
     if (UI.browserSpeed < 100 || State.option.headless) {
       enqueueTests(queue);
@@ -1302,7 +1304,7 @@ const enqueueTests = (queue) => {
         queue,
       );
     }
-  } else {
+  } else if (UI.customTestsRemaining === 0) {
     continueCheck().then();
   }
 };
@@ -1313,10 +1315,15 @@ function removeCustomTest() {
   );
   State.option.customTests--;
   UI.customTestsRemaining = 0;
-  continueCheck(true).then();
+  if (UI.testsRemaining === 0) {
+    continueCheck(true).then();
+  }
   if (State.option.customTests === 0) {
     document.removeEventListener('ed11yResume', () => {
-      continueCheck(true).then();
+      UI.customTestsRemaining--;
+      if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
+        continueCheck(true).then();
+      }
     });
   }
 }
@@ -1348,13 +1355,9 @@ export function checkAll() {
     UI.roots = document.querySelectorAll(`:is(${State.option.checkRoot})`);
   }
   // Initialize root areas to check.
-  if (!UI.roots && State.option.headless === false) {
-    console.warn(Lang.sprintf('MISSING_ROOT', State.option.checkRoot));
-  }
-
-  if (UI.roots.length === 0) {
+  if (UI.roots.length === 0 && State.option.headless === false) {
     if (UI.onLoad) {
-      console.warn(Lang._('MISSING_ROOT'));
+      console.warn(Lang.sprintf('MISSING_ROOT', `"${State.option.checkRoot}"`).textContent);
     }
     disable();
     return;
@@ -1370,19 +1373,6 @@ export function checkAll() {
 
   buildElementList();
 
-  if (State.option.customTests > 0) {
-    // Pause
-    UI.customTestsRemaining += State.option.customTests;
-    window.clearTimeout(UI.customTestTimeout);
-    UI.customTestTimeout = window.setTimeout(() => {
-      if (UI.customTestsRemaining > 0) {
-        removeCustomTest();
-      }
-    }, 1000);
-    const customTests = new CustomEvent('ed11yRunCustomTests');
-    document.dispatchEvent(customTests); // todo postpone: there is a possible race condition here for slow custom tests that are removed but return results during the next run.
-  }
-
   // Call rulesets.
   const queue = ['group1', 'group2'];
 
@@ -1396,19 +1386,30 @@ export function checkAll() {
     queue.push('checkContrast');
   }
   UI.testsRemaining = queue.length;
+
+  if (State.option.customTests > 0) {
+    // Pause
+    UI.customTestsRemaining = State.option.customTests;
+    const customTests = new CustomEvent('ed11yRunCustomTests');
+    document.dispatchEvent(customTests);
+    window.clearTimeout(UI.customTestTimeout);
+    const customTestRace = performance.now();
+    UI.customTestRace = customTestRace;
+    UI.customTestTimeout = window.setTimeout(
+      () => {
+        if (UI.customTestRace === customTestRace && UI.customTestsRemaining > 0) {
+          removeCustomTest();
+        }
+      },
+      1000,
+      customTestRace,
+    );
+  }
+
   enqueueTests(queue);
 }
 
-export async function continueCheck(customCheck = false) {
-  if (customCheck) {
-    UI.customTestsRemaining--;
-  }
-  // change to only countering fro custom tests
-  if (UI.customTestsRemaining + UI.testsRemaining > 0) {
-    // Tests still in progress.
-    return;
-  }
-
+export async function continueCheck() {
   // Filter split configuration results.
   if (UI.splitConfiguration.active && State.results.length > 0) {
     await handleSyncOnlyResults();
@@ -1482,7 +1483,7 @@ export function incrementalCheck() {
     runTime = performance.now() - runTime;
     UI.browserSpeed = runTime > 100 ? 100 : (UI.browserSpeed + runTime) / 2;
     // Todo: optimize tip placement so we do not need as much debounce.
-    UI.browserLag = UI.browserSpeed < 1 ? 0 : UI.browserSpeed * 100 + UI.totalCount;
+    UI.browserLag = UI.browserSpeed < 1 ? 0 : UI.browserSpeed * 40 + UI.totalCount;
   } else {
     // Ed11y was running, try again later.
     window.setTimeout(() => {
@@ -1508,7 +1509,7 @@ export function resetPanel() {
     UI.panelToggleTitle.textContent =
       UI.dismissedCount === 1
         ? Lang._('buttonShowHiddenAlert')
-        : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount);
+        : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount).textContent;
   }
 
   if (typeof UI.panel === 'object') {
@@ -1520,7 +1521,7 @@ export function resetPanel() {
       UI.panelShowDismissed.querySelector('.ed11y-sr-only').textContent =
         UI.dismissedCount === 1
           ? Lang._('buttonShowHiddenAlert')
-          : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount);
+          : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount).textContent;
     }
   }
 }

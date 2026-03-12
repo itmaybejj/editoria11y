@@ -31,7 +31,7 @@ const preProcessOptions = async (userOptions) => {
 
   if (UI.english) {
     State.option.extraPlaceholderStopWords = userOptions.extraPlaceholderStopWords
-      ? userOptions.extraPlaceholderStopWords.Lang.langStrings.extraPlaceholderStopWords
+      ? `${userOptions.extraPlaceholderStopWords}, ${Lang.langStrings.extraPlaceholderStopWords}`
       : Lang.langStrings.extraPlaceholderStopWords;
   }
 
@@ -75,7 +75,7 @@ const preProcessOptions = async (userOptions) => {
   UI.theme.baseFontSize = State.option.baseFontSize;
   UI.theme.buttonZIndex = State.option.buttonZIndex;
   UI.theme.baseFontFamily = State.option.baseFontFamily;
-  UI.inlineAlerts = State.option.inlineAlerts;
+  UI.inlineAlerts = !document.querySelector('[contenteditable]') && State.option.inlineAlerts;
   UI.showDismissed = State.option.showDismissed;
 
   // Deprecated
@@ -196,12 +196,16 @@ export async function initialize(userOptions) {
 
     UI.running = true;
 
+    document.addEventListener('ed11yResume', () => {
+      UI.customTestsRemaining--;
+      if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
+        continueCheck(true).then();
+      }
+    });
+
     // Run tests
     checkAll();
 
-    document.addEventListener('ed11yResume', () => {
-      continueCheck(true).then();
-    });
     // Set up observers.
     // Todo only needed if we are watching for changes.
     window.addEventListener(

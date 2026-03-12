@@ -47,6 +47,7 @@ const defaultOptions = {
   shadowComponents: '',
   autoDetectShadowComponents: false,
   pepper: window.location.hostname, // Provide a string to seed hashes.
+  unitTestMode: false,
 
   // Annotations
   showGoodImageButton: true,
@@ -169,6 +170,7 @@ const defaultOptions = {
       dismissAll: true,
     },
     LINK_FILE_EXT: true,
+    LINK_UNPRONOUNCEABLE: true,
 
     // Form labels checks
     LABELS_MISSING_IMAGE_INPUT: true,

@@ -30,6 +30,7 @@
 		"recommended": true,
 			"style": {
 			"useBlockStatements": "off",
+				"noDescendingSpecificity": "off",
 				"useTemplate": "error",
 				"useConst": "error",
 				"useSelfClosingElements": "error"

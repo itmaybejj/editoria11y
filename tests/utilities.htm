@@ -312,41 +312,74 @@
 
                 }, false);
 
-                const decodeSafelink = function(url) {
-                  if (!url) {
-                    return '[translation server error]';
-                  }
-                    const params = new URL(url).searchParams;
-                    let decoded = params.get('url');
-                    if (!!decoded) {
-                        decoded = Ed11y.sanitizeForHTML(decoded);
-                        return `<p>The actual URL may be:<br><em style='word-wrap: break-word;'>${decoded}</em></p>`
-                    }
-                    return '';
-                }
-                document.addEventListener('ed11yRunCustomTests', function() {
-                    Ed11y.findElements('safeLinks','a[href*="safelinks.protection.outlook.com/?"]');
-                    Ed11y.M.outlookSafeLink = {
-                        title: 'URL is an Outlook Safelink',
-                        tip: (href) =>
-                            `<p>The URL for this link has been copied from an email, and will bounce all clicks through the Microsoft Safelinks server.</p>
-                            <p>The specified URL is:<br><em style='word-break: break-all;'>${Ed11y.sanitizeForHTML(href)}</em></p>
-                            ${decodeSafelink(href)}
-                                `,
-                    };
-                    Ed11y.elements.safeLinks?.forEach((el) => {
-                        Ed11y.results.push({
-                            element: el,
-                            test: 'outlookSafeLink',
-                            content: Ed11y.M.outlookSafeLink.tip(el.getAttribute('href')),
-                            position: 'beforebegin',
-                            dismissalKey: false,
-                        })
-                    })
-                    let allDone = new CustomEvent('ed11yResume');
-                    document.dispatchEvent(allDone);
-                    document.dispatchEvent(allDone);
-                    })
+			  const decodeSafelink = function(url) {
+				  const params = new URL(url).searchParams;
+				  let decoded = params.get('url');
+				  const p = document.createElement('p');
+				  if (!!decoded) {
+					  p.innerHTML = `<p><span class="badge">To fix</span>Update this link with the correct URL, which is probably:<br>
+    <em style='word-wrap: break-word;font-size: 90%;line-height: 1.2;display: block;'></em></p>`
+					  p.querySelector('em').textContent = Ed11y.sanitizeHTML(decoded);
+				  }
+				  return p;
+			  };
+			  const psEd11yCustomTests = function() {
+				  const allDone = new CustomEvent('ed11yResume');
+
+				  const safeLinks = Ed11y.getElements('a[href*="safelinks.protection.outlook.com/?"]', 'root');
+				  Ed11yLangEn.lang.testNames.outlookSafeLink = 'URL is Safe Link encoded';
+				  safeLinks?.forEach((el) => {
+
+					  const content = document.createElement('div');
+					  content.innerHTML = `<div class="title">Please fix this Outlook "Safe Link"</div>
+            <div class="why">
+                <p>The URL for this link is an Outlook "Safe Link" that was copied from an email.
+                It includes the original recipient's email address,
+                and will break if Microsoft shuts down the service.</p>
+                <p>The pasted URL is:<br>
+                <em style='word-break: break-all;font-size: 90%;line-height: 1.2;
+                display: block;'></em></p>
+            </div>
+            `;
+					  content.querySelector('em').textContent = Ed11y.sanitizeHTML(el.href);
+					  content.querySelector('.why').insertAdjacentElement('beforebegin', decodeSafelink(el.href));
+
+
+					  Ed11y.State.results.push({
+						  element: el,
+						  test: 'outlookSafeLink',
+						  type: 'error',
+						  content: content,
+						  position: 'beforebegin',
+						  inline: false,
+						  dismiss: false,
+					  });
+				  });
+
+				  const lazyVideo = Ed11y.getElements('.lazy-video', 'root');
+				  lazyVideo?.forEach((el) => {
+					  let dismissKey = Ed11y.createDismissalKey(
+						  el.getAttribute('data-lazy-video') ?
+							  el.getAttribute('data-lazy-video') :
+							  el.querySelector('iframe')?.getAttribute('data-lazy-src') );
+					  Ed11y.State.results.push({
+						  element: el,
+						  test: 'EMBED_VIDEO',
+						  type: 'warning',
+						  content: Ed11y.Lang.sprintf('EMBED_VIDEO'),
+						  position: 'beforebegin',
+						  dismiss: dismissKey,
+					  });
+				  });
+
+				  document.dispatchEvent(allDone);
+			  };
+
+			  document.addEventListener('ed11yRunCustomTests', () => {
+				  window.setTimeout( function () {
+					  psEd11yCustomTests();
+				  },0);
+			  });
 
               const editLinks = document.createElement('div');
                 const editIcon = document.createElement('span');
@@ -394,7 +427,7 @@
             <script src="../dist/js/lang/en.umd.js"></script>
             <script>
 
-              Ed11y.Lang.addI18n(Ed11yLangEn.strings);
+              //Ed11y.Lang.addI18n(Ed11yLangEn.strings);
               const ed11y = new Ed11y.Ed11y({
 
                 alertMode : 'assertive',
@@ -406,7 +439,7 @@
                 checkRoot : 'main',
                 //linkIgnoreStrings: /\(link is external\)/i,
 				  ignoreContentOutsideRoots: true, // todo CMS new phrasing.
-                customTests : 0,
+                customTests : 1,
                 theme: 'sleekTheme',
                 linkIgnoreSelector : '.ignore-class, .link-purpose-text',
                 panelNoCover: '#klaro_toggle_dialog',
@@ -582,6 +615,19 @@
 					  CONTRAST_UNSUPPORTED: {
 						  dismissAll: true,
 					  },
+				  },
+				  splitConfiguration: {
+					  showDev: true,
+					  devChecks: ['QA_IN_PAGE_LINK'],
+					  devOptions: {
+						  checkRoot: 'body',
+						  // containerIgnore: '',
+						  // contrastIgnore: '.sr-only',
+						  // outlineIgnore: '',
+						  // headerIgnore: '',,
+						  // imageIgnore: '',
+						  // linkIgnore: '[aria-hidden][tabindex="-1"]',
+					  }
 				  },
 			    initialHeadingLevel: [
 					{

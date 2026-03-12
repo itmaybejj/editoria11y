@@ -46,9 +46,10 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'Verlinkte Bilder benötigen aussprechbaren Alt‑Text',
 	LINK_CLICK_HERE: 'Manuelle Prüfung: Link enthält „Hier klicken“',
 	LINK_DOI: 'Artikel sollten über ihren Titel verlinkt werden, nicht über DOI‑Nummern',
-	LINK_EMPTY: 'Dieser Link hat keinen Text',
+	LINK_EMPTY: 'Dieser Link enthält keine Wörter.',
 	LINK_EMPTY_LABELLEDBY: 'Link mit ungültigem „aria‑labelledby“‑Attribut',
 	LINK_EMPTY_NO_LABEL: 'Dieser Link benötigt eine Beschriftung',
+	LINK_UNPRONOUNCEABLE: 'Dieser Link ist nicht aussprechbar',
 	LINK_FILE_EXT: 'Link führt zu einer Datei ohne vorherigen Hinweis',
 	LINK_IDENTICAL_NAME: 'Mehrere Links mit demselben Text führen zu verschiedenen Seiten',
 	LINK_IMAGE_ALT: 'Manuelle Prüfung: verlinktes Bild mit Alt‑Text',
@@ -198,11 +199,12 @@ const tips = {
 
 	LINK_DOI: `<p>${why.fix}Verlinken Sie den Artikeltitel und geben Sie die DOI‑Nummer im Klartext an, nicht umgekehrt.</p><div class="why"><p>Die APA‑Richtlinie empfiehlt beschreibende Links, weil Nutzende Links nach Name scannen. So werden relevante Artikel eher gefunden.</p><p>Screenreader können so sinnvolle Links ansagen statt Zahlenreihen.</p></div>`,
 
-	LINK_EMPTY: `<p>${why.fix}Fügen Sie Text hinzu, der das Ziel beschreibt, oder löschen Sie den Link, wenn er ein Tippfehler ist (z. B. verlinktes Leerzeichen).</p><div class="why"><p>Tipp: Screenreader können leere Links nicht beschreiben. Sie bleiben stumm oder lesen die URL buchstabenweise.</p><p>Verlinkte Leerzeichen sind in manchen Editoren schwer zu löschen; manchmal hilft das Neuschreiben des umliegenden Texts.</p></div>`,
+	LINK_EMPTY: `<p>${why.fix}Fügen Sie Text hinzu, der das Ziel beschreibt, oder löschen Sie es, wenn es sich nur um einen Tippfehler oder ein verlinktes Leerzeichen handelt.</p><div class="why"><p>Tipp: Bildschirmleser können Links, die nur Leerzeichen oder Symbole enthalten, nicht beschreiben. Sie werden entweder stumm ("Link, [...unangenehme Pause, wo der Linktitel sein sollte...]"), oder lesen die URL vor: Link, H-T-T-P-S Schrägstrich Schrägstrich Beispiel Punkt com.</p><p>Beachten Sie, dass verlinkte Leerzeichen in einigen Editoren schwer zu löschen sein können; manchmal ist es notwendig, "über die Lücke hinweg" zu löschen, indem Sie die Wörter auf beiden Seiten des verlinkten Leerzeichens entfernen und neu eingeben.</p></div>`,
 
 	LINK_EMPTY_LABELLEDBY: `<p>Dieses <code>aria-labelledby</code> verweist auf kein vorhandenes <code>ID</code>.</p><p>${why.fix}Hinterlegen Sie eine gültige ID oder entfernen Sie das Attribut.</p>`,
 
 	LINK_EMPTY_NO_LABEL: `<p>${why.fix}Fügen Sie Text hinzu, der das Ziel beschreibt, oder löschen Sie den versehentlichen Link.</p><div class="why"><p>Leere Links können nicht sinnvoll angekündigt werden.</p><p>Oft hilft es, das umgebende Textfragment neu zu schreiben.</p></div>`,
+	LINK_UNPRONOUNCEABLE: `<p>${why.fix}Fügen Sie Text oder einen Titel hinzu, der das Ziel beschreibt, oder löschen Sie ihn, wenn es sich nur um einen Tippfehler oder ein verlinktes Leerzeichen handelt.</p><div class="why"><p>Tipp: Bildschirmleser können Links, die nur Leerzeichen oder Symbole enthalten, nicht beschreiben. Sie werden entweder stumm ("Link, [...unangenehme Pause, wo der Linktitel sein sollte...]"), oder lesen den Namen des Symbols vor.</p></div>`,
 
 	LINK_FILE_EXT: `<p>Dieser Link führt zu einer Datei (z. B. PDF, MP3, Zip, Word), ohne das anzuzeigen.</p><p>${why.fix}Geben Sie im Linktext den Dateityp an – z. B. per Text oder Icon (<a href="https://itmaybejj.github.io/linkpurpose/">Beispiele</a>).</p><p class="why">Bei großen Dateien nennen Sie die Größe, z. B. „Jahresbericht (PDF, 3 MB)“.</p>`,
 
@@ -330,6 +332,7 @@ const interfaceStrings = {
 	main_toggle_hide_alerts: 'Barrierefreiheits‑Meldungen ausblenden',
 	main_toggle_show: 'Barrierefreiheits‑Werkzeuge anzeigen',
 	main_toggle_show_alerts: 'Barrierefreiheits‑Meldungen anzeigen',
+	MISSING_ROOT: `Editoria11y hat keine Elemente gefunden, die der Konfiguration des Prüfbereichs entsprachen: <code>%(root)</code>`,
 	panelCheckAltText: `<p class="ed11y-small">Prüfen Sie, dass jedes Bild seine Bedeutung im Kontext beschreibt und dass es keine Bilder mit eingebettetem Text gibt.</p>`,
 	panelCheckOutline: `<p class="ed11y-small">Dies zeigt die Überschriftenstruktur. Stellen Sie sicher, dass sie der visuellen Struktur entspricht.</p>`,
 	PANEL_HEADING_MISSING_ONE: 'Überschrift Ebene 1 fehlt.',

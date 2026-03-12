@@ -68,24 +68,33 @@ export class Ed11yElementTip extends HTMLElement {
     this.tip = this.wrapper.querySelector('.tip');
 
     const content = this.wrapper.querySelector('.message');
-    if (this.result.content.includes('class="title"')) {
+    if (this.result.content.querySelector('.title')) {
       // Sent by Ed11y
-      content.innerHTML = this.result.content.split('<hr')[0];
+      content.appendChild(this.result.content);
+      // Strip Sa11y plaintext tips.
+      const sallyTips = content.querySelectorAll('hr, hr ~ *');
+      if (sallyTips) {
+        const tipSet = Array.from(sallyTips);
+        for (let i = tipSet.length; i >= 0; i--) {
+          const el = tipSet[i];
+          if (el) {
+            el.nextSibling?.remove();
+            el.remove();
+          }
+        }
+      }
     } else {
       // Sent by Sa11y
       // This removes Sa11y's injected "Tip!" additions:
       const innerContent = document.createElement('div');
-      const sentences = this.result.content.split(/[.!]/);
       const firstSentence = document.createElement('div');
-      firstSentence.innerHTML = `${sentences.shift()}.`;
       firstSentence.classList.add('title');
       firstSentence.setAttribute('tabindex', '-1');
+      firstSentence.style.setProperty('position', 'absolute');
       innerContent.append(firstSentence);
-      const theRest = document.createElement('div');
-      theRest.classList.add('sa11y-tip');
-      theRest.innerHTML = sentences.join('.');
-      innerContent.appendChild(theRest);
+      innerContent.appendChild(this.result.content);
       content.append(innerContent);
+      console.warn(`Editoria11y tip title not found for ${this.result.test}.`);
     }
     const title = content.querySelector('.title');
     const invisibleAlert = document.createElement('div');
@@ -173,7 +182,7 @@ export class Ed11yElementTip extends HTMLElement {
       } else {
         const pageActions = this.wrapper.querySelector('.ed11y-bulk-actions');
         const pageActionsSummary = pageActions.querySelector('summary');
-        pageActionsSummary.textContent = Lang.sprintf('dismissActions');
+        pageActionsSummary.textContent = Lang._('dismissActions');
         const othersLikeThis = State.results.filter((el) => el.test === this.result.test).length;
         const pageActionsContent = pageActions.querySelector('.ed11y-bulk-actions-content');
         // Other cases?

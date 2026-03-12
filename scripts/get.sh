@@ -17,6 +17,12 @@ cp ../src/sa11y-patch/core/find-shadow-components.js ../src/sa11y-js/core/find-s
 
 cd ../
 rm -rf tmp
+rm src/sa11y-js/interface/console-error.js
+rm src/sa11y-js/interface/control-panel.js
+rm src/sa11y-js/interface/heading-labels.js
+rm src/sa11y-js/interface/image-outline.js
+rm src/sa11y-js/interface/page-outline.js
+rm src/sa11y-js/interface/tooltips.js
 
 # Get library version number.
 filename="src/js/version.js"

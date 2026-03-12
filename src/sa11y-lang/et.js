@@ -64,7 +64,7 @@ export default {
     PAGE_TITLE: 'Lehe pealkiri',
     RESULTS: 'Tulemused',
     EXPORT_RESULTS: 'Ekspordi tulemused',
-    GENERATED: 'Tulemused genereeritud %(tool) abil.',
+    GENERATED: 'Tulemused genereeritud <a href="https://sa11y.netlify.app">Sa11y</a> abil.',
     PREVIEW: 'Eelvaade',
     ELEMENT: 'Element',
     PATH: 'Rada',
@@ -229,6 +229,8 @@ export default {
       'Link viitab ilma hoiatuseta PDF- või allalaaditavale failile (nt MP3, Zip, Word Doc). Märkige faili tüüp lingi tekstis. Kui tegemist on suure failiga, kaaluge faili suuruse lisamist. <hr> <strong>Näide:</strong> Juhtkonna aruanne (PDF, 3MB)',
     LINK_IDENTICAL_NAME:
       'Lingi tekst on identne teise lingiga, kuigi see viitab teisele lehele. Mitu sama tekstiga linki võib tekitada segadust inimestele, kes kasutavad ekraanilugejaid. <strong>Võtke arvesse, et järgmine link oleks kirjeldavam, et aidata seda teistest linkidest eristada.</strong> <hr> <strong {B}>Ligipääsetav nimi</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_UNPRONOUNCEABLE:
+      'Lingi tekst sisaldab ainult sümboleid. Kui arvate, et see link on kopeerimis- või kleepimisvea tõttu vale, kaaluge selle kustutamist.',
 
     // Images
     ALT_UNPRONOUNCEABLE:
