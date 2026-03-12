@@ -100,6 +100,7 @@ const runBuild = async (config) => {
 		'pt-br',
 		'pt-pt',
 		'sv',
+		'uk',
 		'zh',
 	];
 

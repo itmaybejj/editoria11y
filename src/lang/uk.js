@@ -1,4 +1,4 @@
-import {default as Sa11yStrings} from '../sa11y-lang/uk.js';
+import {default as Sa11yStrings} from '../sa11y-lang/ua.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
 const testNames = {
