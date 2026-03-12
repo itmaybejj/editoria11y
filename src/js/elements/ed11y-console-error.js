@@ -1,5 +1,5 @@
 import Lang from '../../sa11y-js/utils/lang.js';
-import { escapeHTML, sanitizeURL } from '../../sa11y-js/utils/utils';
+import { sanitizeURL } from '../../sa11y-js/utils/utils';
 import { UI } from '../core/ui.js';
 
 // Replaces Sa11y error with one that does not attach CSS.
@@ -44,6 +44,7 @@ URL: ${url}`;
     const github = `https://github.com/itmaybejj/editoria11y/issues/new?title=Bug%20report&body=${encodedTemplate}`;
 
     // Message
+    // Todo: sprintf now returns an object.
     content.innerHTML = `
       <button class="close-btn" aria-describedby="ed11y-console-error"><span aria-hidden="true">&times</span> ${Lang._('ALERT_CLOSE')}</button>
       <h2 id="ed11y-console-error">${Lang._('ERROR')}</h2>
@@ -51,9 +52,11 @@ URL: ${url}`;
       <p><strong>${Lang._('DEVELOPER_CHECKS')}:</strong></p>
       <pre>
 </pre>
-  		<p><strong>${Lang._('ERRORS')}:</strong></p>
+  		
+    `; /*  		<p><strong>${Lang._('ERRORS')}:</strong></p>
 <pre>${escapeHTML(this.error.stack)}</pre>
     `;
+*/
     shadow.appendChild(content);
     const pre = content.querySelector('pre');
     pre.textContent = preContents;

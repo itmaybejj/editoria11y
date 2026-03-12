@@ -45,10 +45,11 @@ const testNames = {
 	LINK_ALT_MAYBE_BAD: 'Ce texte alternatif lié ne peut pas être prononcé par un lecteur d’écran',
 	LINK_ALT_UNPRONOUNCEABLE: 'Les images liées doivent avoir un texte alternatif prononçable',
 	LINK_CLICK_HERE: 'Vérification manuelle : le lien contient « cliquer ici »',
-	LINK_DOI: 'Liez les titres d’articles, pas les numéros DOI',
-	LINK_EMPTY: 'Ce lien n’a pas de texte',
+	LINK_DOI: "Liez les titres d’articles, pas les numéros DOI",
+	LINK_EMPTY: 'Ce lien ne contient aucun mot.',
 	LINK_EMPTY_LABELLEDBY: 'Lien avec attribut « aria‑labelledby » non valide',
 	LINK_EMPTY_NO_LABEL: 'Ce lien a besoin d’une étiquette',
+	LINK_UNPRONOUNCEABLE: 'Ce lien est imprononçable',
 	LINK_FILE_EXT: 'Ce lien pointe vers un fichier sans avertissement',
 	LINK_IDENTICAL_NAME: 'Des liens avec le même texte mènent à des pages différentes', // updated
 	LINK_IMAGE_ALT: 'Vérification manuelle : image liée avec texte alternatif',
@@ -212,11 +213,12 @@ export const tips = {
 
 	LINK_DOI: `<p>${why.fix}Liez le titre de l’article et laissez le DOI en texte simple, au lieu de lier le DOI et laisser le titre sans lien.</p><div class="why"><p>Selon les recommandations de l’APA, les liens doivent être descriptifs : ils aident les utilisateurs à trouver les contenus pertinents en parcourant uniquement les liens.</p><p>Les lecteurs d’écran peuvent ainsi annoncer des liens significatifs plutôt qu’une série de chiffres incompréhensibles.</p></div>`,
 
-	LINK_EMPTY: `<p>${why.fix}Ajoutez du texte décrivant la destination, ou supprimez ce lien s’il s’agit d’un accident (comme un espace lié).</p><div class="why"><p>Les lecteurs d’écran peinent avec les liens vides, restant silencieux ou lisant l’URL lettre par lettre.</p><p>Les espaces liés peuvent être difficiles à supprimer ; il faut parfois réécrire les mots de part et d’autre.</p></div>`,
+	LINK_EMPTY: `<p>${why.fix}Ajoutez du texte décrivant sa destination, ou supprimez-le s'il s'agit simplement d'une faute de frappe ou d'un caractère d'espace lié.</p><div class="why"><p>Conseil : les lecteurs d'écran ne peuvent pas décrire les liens qui ne contiennent que des espaces ou des symboles. Ils restent soit silencieux (« Lien, [...pause maladroite là où le titre du lien devrait être...]»), soit lisent l'URL : Lien, H-T-T-P-S barre oblique barre oblique exemple point com.</p><p>Notez que les caractères d'espace liés peuvent être difficiles à supprimer dans certains éditeurs de contenu ; il est parfois nécessaire de supprimer « à travers l'écart » en supprimant et en retapant les mots de chaque côté d'un espace lié.</p></div>`,
 
 	LINK_EMPTY_LABELLEDBY: `<p>Ce lien possède un attribut <code>aria-labelledby</code> qui ne correspond à aucun <code>ID</code> sur la page.</p><p>${why.fix}Fournissez un ID valide ou supprimez cet attribut.</p>`,
 
 	LINK_EMPTY_NO_LABEL: `<p>${why.fix}Ajoutez du texte décrivant sa destination, ou supprimez ce lien s’il s’agit d’un accident.</p><div class="why"><p>Les liens vides provoquent silence ou lecture des URL.</p><p>Les espaces liés nécessitent parfois de réécrire le texte environnant pour les supprimer.</p></div>`,
+	LINK_UNPRONOUNCEABLE: `<p>${why.fix}Ajoutez du texte ou un titre décrivant sa destination, ou supprimez-le s'il s'agit simplement d'une faute de frappe ou d'un caractère d'espace lié.</p><div class="why"><p>Conseil : les lecteurs d'écran ne peuvent pas décrire les liens qui ne contiennent que des espaces ou des symboles. Ils restent soit silencieux (« Lien, [...pause maladroite là où le titre du lien devrait être...] »), soit lisent le nom du symbole.</p></div>`,
 
 	LINK_FILE_EXT: `<p>Ce lien pointe vers un fichier téléchargeable (PDF, MP3, Zip, Word, etc.) sans avertissement.</p><p>${why.fix}Utilisez du texte ou une icône pour <a href="https://itmaybejj.github.io/linkpurpose/">indiquer le type de fichier</a> dans le lien.</p><p class="why">Pour les fichiers volumineux, indiquez la taille : ex. "Rapport annuel (PDF, 3 Mo)"</p>`,
 
@@ -346,6 +348,7 @@ const interfaceStrings = {
 	main_toggle_hide_alerts: 'Masquer les alertes d’accessibilité',
 	main_toggle_show: 'Afficher les outils d’accessibilité',
 	main_toggle_show_alerts: 'Afficher les alertes d’accessibilité',
+	MISSING_ROOT: `Editoria11y n'a trouvé aucun élément correspondant à la configuration de la zone de vérification : <code>%(root)</code>`,
 	panelCheckAltText: `<p class="ed11y-small">Vérifiez que chaque image décrit ce qu’elle signifie dans le contexte et qu’il n’y a pas d’images contenant du texte.</p>`,
 	panelCheckOutline: `<p class="ed11y-small">Ceci affiche la structure des en‑têtes. Vérifiez qu’elle correspond à l’organisation visuelle du contenu.</p>`,
 	PANEL_HEADING_MISSING_ONE: 'En‑tête de niveau 1 manquant.',

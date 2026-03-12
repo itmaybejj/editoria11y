@@ -758,7 +758,7 @@ const Options = {
   	// If split configuration is set, the check and option keys must be present.
   	syncOnlyConfiguration {
   		checks: [], // Test keys defined below to not be display on page.
-  
+
   		options: {
   			checkRoot: false,
   			containerIgnore: '',
@@ -5585,7 +5585,7 @@ function updatePanel() {
       document.addEventListener("keyup", (event) => {
         escapeWatch(event);
       });
-      if (State.ignoreAll || !State.inlineAlerts && State.totalCount > 75) {
+      if (State.ignoreAll || !State.inlineAlerts && State.totalCount > 99) {
         State.showPanel = false;
       } else if (Options.alertMode === "active" || !Options.userPrefersShut || State.showDismissed) {
         State.showPanel = true;

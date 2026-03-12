@@ -64,7 +64,7 @@ export default {
     PAGE_TITLE: 'Paginatitel',
     RESULTS: 'Resultaten',
     EXPORT_RESULTS: 'Resultaten exporteren',
-    GENERATED: 'Resultaten gegenereerd met %(tool).',
+    GENERATED: 'Resultaten gegenereerd met <a href="https://sa11y.netlify.app">Sa11y.</a>',
     PREVIEW: 'Voorbeeld',
     ELEMENT: 'Element',
     PATH: 'Pad',
@@ -238,6 +238,8 @@ export default {
       'Link verwijst naar een PDF of downloadbaar bestand (bijv. MP3, Zip, Word Doc) zonder waarschuwing. Vermeld het bestandstype in de linktekst. Als het een groot bestand is, kun je overwegen de bestandsgrootte te vermelden. <hr> <strong>Voorbeeld:</strong> Uitvoerend rapport (PDF, 3 MB)',
     LINK_IDENTICAL_NAME:
       'Link heeft dezelfde tekst als een andere link, maar verwijst naar een andere pagina. Meerdere links met dezelfde tekst kunnen verwarring veroorzaken voor mensen die schermlezers gebruiken. <strong>Overweeg om de volgende link beschrijvender te maken om hem te helpen onderscheiden van andere links.</strong> <hr> <strong {B}>Toegankelijk naam</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_UNPRONOUNCEABLE:
+      'Linktekst bevat alleen symbolen. Als je denkt dat deze link een fout is door een kopieer-/plakfout, overweeg dan om deze te verwijderen.',
 
     // Images
     ALT_UNPRONOUNCEABLE:

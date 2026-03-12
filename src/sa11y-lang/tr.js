@@ -64,7 +64,7 @@ export default {
     PAGE_TITLE: 'Sayfa başlığı',
     RESULTS: 'Sonuçlar',
     EXPORT_RESULTS: 'Sonuçları dışa aktar',
-    GENERATED: '%(tool) ile oluşturulan sonuçlar.',
+    GENERATED: '<a href="https://sa11y.netlify.app">Sa11y</a> ile oluşturulan sonuçlar.',
     PREVIEW: 'Önizleme',
     ELEMENT: 'Öğe',
     PATH: 'Yol',
@@ -231,6 +231,8 @@ export default {
       'Bağlantı, uyarı vermeden bir PDF veya indirilebilir dosyaya (örn. MP3, Zip, Word Doc) işaret ediyor. Bağlantı metni içinde dosya türünü belirtin. Büyük bir dosya ise, dosya boyutunu da eklemeyi düşünün. <hr> <strong>Örnek:</strong> Yönetici Raporu (PDF, 3MB)',
     LINK_IDENTICAL_NAME:
       'Bağlantı, farklı bir sayfaya işaret etmesine rağmen başka bir bağlantıyla aynı metne sahip. Aynı metne sahip birden fazla bağlantı, ekran okuyucu kullanan kişiler için kafa karışıklığına neden olabilir. <strong>Aşağıdaki bağlantıyı diğer bağlantılardan ayırt etmeye yardımcı olmak için daha açıklayıcı hale getirmeyi düşünün.</strong> <hr> <strong {B}>Erişilebilir ad</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_UNPRONOUNCEABLE:
+      'Bağlantı metni yalnızca semboller içeriyor. Bu bağlantının kopyala/yapıştır hatasından kaynaklandığını düşünüyorsanız silmeyi düşünebilirsiniz.',
 
     // Images
     ALT_UNPRONOUNCEABLE:

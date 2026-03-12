@@ -35,6 +35,7 @@ export const UI = {
   browserSpeed: 1,
   browserLag: 1,
   customTestsRemaining: 0,
+  testsRemaining: 0,
   customTestTimeout: 0,
   loopStop: false,
   oldResults: [],
@@ -42,9 +43,9 @@ export const UI = {
   dismissKeys: {},
   roots: [],
   headingOutlineOverrides: [],
+  altMarks: new Set(),
   elements: {
     // to be replaced by Sa11y find.
-    altMark: [],
     delayedReset: [],
   },
   splitConfiguration: {

@@ -31,12 +31,21 @@
     sprintf(string, ...args) {
       let transString = this._(string);
       transString = this.prepHTML(transString);
+      const el = document.createElement("span");
+      el.innerHTML = transString;
       if (args?.length) {
-        args.forEach((arg) => {
-          transString = transString.replace(/%\([a-zA-Z]+\)/, arg);
+        args.forEach((_arg, index) => {
+          el.innerHTML = el.innerHTML.replace(/%\([a-zA-z]+\)/, `<span data-arg='${index}'></span>`);
+        });
+        args.forEach((arg, index) => {
+          const replacement = el.querySelector(`[data-arg="${index}"]`);
+          if (!replacement || arg === null) return;
+          const match = String(arg).match(/{{langAttr:([\w-]+)\|([^}]+)}}/);
+          if (match) replacement.setAttribute("lang", match[1]);
+          replacement.textContent = match ? match[2] : arg;
         });
       }
-      return transString;
+      return el;
     },
     translate(string) {
       return this.langStrings[string] || string;
@@ -93,6 +102,7 @@
     autoDetectShadowComponents: false,
     pepper: window.location.hostname,
     // Provide a string to seed hashes.
+    unitTestMode: false,
     // Annotations
     showGoodImageButton: true,
     showGoodLinkButton: true,
@@ -208,6 +218,7 @@
         dismissAll: true
       },
       LINK_FILE_EXT: true,
+      LINK_UNPRONOUNCEABLE: true,
       // Form labels checks
       LABELS_MISSING_IMAGE_INPUT: true,
       LABELS_INPUT_RESET: true,
@@ -527,11 +538,16 @@
     const Sa11yPanel = document.querySelector("sa11y-control-panel").shadowRoot;
     const alert = Sa11yPanel.getElementById("panel-alert");
     const alertText = Sa11yPanel.getElementById("panel-alert-text");
-    Sa11yPanel.getElementById("panel-alert-preview");
+    const alertPreview = Sa11yPanel.getElementById("panel-alert-preview");
     const alertClose = Sa11yPanel.getElementById("close-alert");
     const skipButton = Sa11yPanel.getElementById("skip-button");
     alert.classList.add("active");
-    alertText.innerHTML = alertMessage;
+    if (typeof alertMessage === "string") {
+      alertText.textContent = alertMessage;
+    } else {
+      alertText.appendChild(alertMessage);
+    }
+    alertPreview.innerHTML = "";
     setTimeout(() => alertClose.focus(), 300);
     function closeAlert() {
       removeAlert();
@@ -626,35 +642,31 @@
             Constants.Root.Readability.push(root);
           });
         } else {
+          Root.Readability = Root.areaToCheck;
           console.error(
             `Sa11y: The target readability root (${desiredReadabilityRoot}) does not exist.`
           );
-        }
-      } catch {
-        Root.Readability.length = 0;
-      }
-      if (Root.Readability.length === 0 && Global.headless === false) {
-        if (Root.areaToCheck.length === 0) {
-          Root.Readability.push(document.body);
-        } else {
-          Root.Readability = Root.areaToCheck;
           setTimeout(() => {
             const { readabilityDetails, readabilityToggle } = Constants.Panel;
             const readabilityOn = readabilityToggle?.getAttribute("aria-pressed") === "true";
             const alert = Constants.Panel.readability.querySelector("#readability-alert");
             if (readabilityDetails && readabilityOn && !alert) {
-              const roots = Root.areaToCheck.map((el) => {
+              const roots2 = Root.areaToCheck.map((el) => {
                 if (el.id) return `#${el.id}`;
                 if (el.className) return `.${el.className.split(/\s+/).filter(Boolean).join(".")}`;
                 return el.tagName.toLowerCase();
               }).join(", ");
               const note = document.createElement("div");
               note.id = "readability-alert";
-              note.innerHTML = `<hr><p>${Lang.sprintf("MISSING_READABILITY_ROOT", roots, desiredReadabilityRoot)}</p>`;
+              note.appendChild(document.createElement("hr"));
+              const message = Lang.sprintf("MISSING_READABILITY_ROOT", roots2, desiredReadabilityRoot);
+              note.appendChild(message);
               readabilityDetails.insertAdjacentElement("afterend", note);
             }
           }, 100);
         }
+      } catch {
+        Root.Readability.length = 0;
       }
     }
     const Panel = {};
@@ -902,58 +914,219 @@
     }
     return isElementHidden(element);
   }
-  function escapeHTML(string) {
-    const div = document.createElement("div");
-    div.textContent = string;
-    return div.innerHTML.replaceAll('"', "&quot;").replaceAll("'", "&#039;").replaceAll("`", "&#x60;");
-  }
   function stripAllSpecialCharacters(string) {
+    if (!string) return "";
     return string.replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
   }
-  function sanitizeHTML(string) {
-    return string.replace(/[^\w. ]/gi, (c) => `&#${c.charCodeAt(0)};`);
+  const invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
+  const htmlEntitiesRegex = /&#(\w+)(^\w|;)?/g;
+  const htmlCtrlEntityRegex = /&(newline|tab);/gi;
+  const ctrlCharactersRegex = (
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: original lib.
+    /[\u0000-\u001F\u007F-\u009F\u2000-\u200D\uFEFF]/gim
+  );
+  const urlSchemeRegex = /^.+(:|&colon;)/gim;
+  const whitespaceEscapeCharsRegex = /(\\|%5[cC])((%(6[eE]|72|74))|[nrt])/g;
+  const relativeFirstCharacters = [".", "/"];
+  const BLANK_URL = "about:blank";
+  function isRelativeUrlWithoutProtocol(url2) {
+    return relativeFirstCharacters.indexOf(url2[0]) > -1;
   }
-  function sanitizeURL(string) {
-    if (!string) return "#";
-    const sanitizedInput = String(string).trim();
+  function decodeHtmlCharacters(str) {
+    const removedNullByte = str.replace(ctrlCharactersRegex, "");
+    return removedNullByte.replace(htmlEntitiesRegex, (match, dec) => {
+      return String.fromCharCode(dec);
+    });
+  }
+  function isValidUrl(url2) {
+    if (typeof URL.canParse === "function") {
+      return URL.canParse(url2);
+    }
     try {
-      const parsedUrl = new URL(sanitizedInput);
-      if (sanitizedInput.startsWith("#")) {
-        return parsedUrl.hash;
-      }
-      const protocols = ["file:", "http:", "https:", "mailto:", "tel:", "ftp:"];
-      if (!protocols.includes(parsedUrl.protocol)) {
-        return "";
-      }
-      return parsedUrl.href;
-    } catch (error) {
+      const parsedUrl = new URL(url2);
+      return Boolean(parsedUrl);
+    } catch {
       return false;
     }
   }
-  function sanitizeHTMLBlock(html, allowStyles = false) {
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = html;
-    ["script", "style", "noscript", "iframe", "form"].forEach((tag) => {
-      const elements2 = tempDiv.getElementsByTagName(tag);
-      while (elements2.length > 0) {
-        elements2[0].parentNode.removeChild(elements2[0]);
+  const decodeURIs = (uri) => {
+    try {
+      return decodeURIComponent(uri);
+    } catch {
+      return uri;
+    }
+  };
+  function sanitizeURL(url2) {
+    if (!url2 || typeof url2 !== "string") return BLANK_URL;
+    const isBase64Data = /^data:([a-z]+\/[a-z0-9-+.]+)?;base64,/i.test(url2.trim());
+    if (isBase64Data) return url2.trim();
+    let charsToDecode;
+    let decodedUrl = decodeURIs(url2.trim());
+    do {
+      decodedUrl = decodeHtmlCharacters(decodedUrl).replace(htmlCtrlEntityRegex, "").replace(ctrlCharactersRegex, "").replace(whitespaceEscapeCharsRegex, "").trim();
+      decodedUrl = decodeURIs(decodedUrl);
+      charsToDecode = decodedUrl.match(ctrlCharactersRegex) || decodedUrl.match(htmlEntitiesRegex) || decodedUrl.match(htmlCtrlEntityRegex) || decodedUrl.match(whitespaceEscapeCharsRegex);
+    } while (charsToDecode && charsToDecode.length > 0);
+    const sanitizedUrl = decodedUrl;
+    if (!sanitizedUrl) return BLANK_URL;
+    if (isRelativeUrlWithoutProtocol(sanitizedUrl)) return sanitizedUrl;
+    const trimmedUrl = sanitizedUrl.trimStart();
+    const urlSchemeParseResults = trimmedUrl.match(urlSchemeRegex);
+    if (!urlSchemeParseResults) return sanitizedUrl;
+    const urlScheme = urlSchemeParseResults[0].toLowerCase().trim();
+    if (invalidProtocolRegex.test(urlScheme)) return BLANK_URL;
+    const backSanitized = trimmedUrl.replace(/\\/g, "/");
+    if (urlScheme === "mailto:" || urlScheme.includes("://")) return backSanitized;
+    if (urlScheme === "http:" || urlScheme === "https:") {
+      if (!isValidUrl(backSanitized)) return BLANK_URL;
+      const url3 = new URL(backSanitized);
+      url3.protocol = url3.protocol.toLowerCase();
+      url3.hostname = url3.hostname.toLowerCase();
+      return url3.toString();
+    }
+    return backSanitized;
+  }
+  const allowedTags = [
+    "a",
+    "abbr",
+    "address",
+    "article",
+    "aside",
+    "audio",
+    "b",
+    "bdo",
+    "blockquote",
+    "br",
+    "button",
+    "canvas",
+    "cite",
+    "code",
+    "data",
+    "dd",
+    "del",
+    "details",
+    "dfn",
+    "div",
+    "dl",
+    "dt",
+    "em",
+    "fieldset",
+    "figcaption",
+    "figure",
+    "footer",
+    "form",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "header",
+    "hr",
+    "i",
+    "iframe",
+    "img",
+    "input",
+    "ins",
+    "kbd",
+    "label",
+    "li",
+    "main",
+    "mark",
+    "meter",
+    "nav",
+    "noscript",
+    "ol",
+    "output",
+    "p",
+    "picture",
+    "pre",
+    "progress",
+    "q",
+    "rp",
+    "rt",
+    "s",
+    "samp",
+    "section",
+    "select",
+    "small",
+    "source",
+    "span",
+    "strong",
+    "sub",
+    "summary",
+    "sup",
+    "svg",
+    "table",
+    "tbody",
+    "td",
+    "textarea",
+    "tfoot",
+    "th",
+    "thead",
+    "time",
+    "tr",
+    "track",
+    "u",
+    "ul",
+    "var",
+    "video",
+    "wbr",
+    "path"
+  ];
+  const attrWhitelist = {
+    a: ["href", "title", "target", "rel", "download"],
+    img: ["src", "alt", "title", "width", "height", "loading", "srcset", "sizes"],
+    iframe: [
+      "src",
+      "width",
+      "height",
+      "title",
+      "frameborder",
+      "allowfullscreen",
+      "loading",
+      "sandbox"
+    ],
+    details: ["open"],
+    ol: ["start", "type", "reversed"],
+    li: ["value"],
+    td: ["colspan", "rowspan"],
+    th: ["colspan", "rowspan", "scope"],
+    global: ["class", "id", "role", "lang", "dir", "name"],
+    path: ["d", "fill", "fill-rule"]
+  };
+  function sanitizeHTML(string) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(string, "text/html");
+    const allElements = doc.body.querySelectorAll("*");
+    allElements.forEach((node) => {
+      const tag = node.tagName.toLowerCase();
+      if (!allowedTags.includes(tag)) {
+        node.remove();
+        return;
       }
-    });
-    const allElements = Array.from(tempDiv.getElementsByTagName("*"));
-    allElements.forEach((element) => {
-      Array.from(element.attributes).forEach((attr) => {
-        if (attr.name.startsWith("on")) {
-          element.removeAttribute(attr.name);
+      const allowedForThisTag = attrWhitelist[tag] || [];
+      const globals = attrWhitelist.global;
+      [...node.attributes].forEach(({ name, value }) => {
+        const isAria = name.startsWith("aria-");
+        const isAllowed = allowedForThisTag.includes(name) || globals.includes(name) || isAria;
+        const isUrlAttr = ["src", "href", "srcset"].includes(name);
+        if (!isAllowed) {
+          node.removeAttribute(name);
+        } else if (isUrlAttr) {
+          const cleanURL = sanitizeURL(value);
+          if (!cleanURL) {
+            node.removeAttribute(name);
+          } else {
+            node.setAttribute(name, cleanURL);
+          }
         }
       });
-      if (!allowStyles) {
-        element.removeAttribute("style");
-      }
     });
-    return tempDiv.innerHTML;
+    return doc.body.innerHTML;
   }
+  const baseIgnores = "noscript,script,style,audio,video,form,iframe";
   function fnIgnore(element, selectors = []) {
-    const baseIgnores = "noscript,script,style,audio,video,form,iframe";
     const ignoreQuery = selectors.length ? `${baseIgnores},${selectors.join(",")}` : baseIgnores;
     if (!element || element.nodeType !== Node.ELEMENT_NODE) {
       return element ? element.cloneNode(true) : null;
@@ -1039,14 +1212,10 @@
     const getLastSrc = (src) => src?.split(/,\s+/).pop()?.trim()?.split(/\s+/)[0];
     const resolveUrl = (src) => src ? new URL(src, window.location.href).href : null;
     const dataSrc = getLastSrc(element.getAttribute("data-src") || element.getAttribute("srcset"));
-    if (dataSrc) {
-      return resolveUrl(dataSrc);
-    }
-    const picture = element.closest("picture")?.querySelector("source[srcset]")?.getAttribute("srcset");
-    const pictureSrc = getLastSrc(picture);
-    if (pictureSrc) {
-      return resolveUrl(pictureSrc);
-    }
+    if (dataSrc) return resolveUrl(dataSrc);
+    const pictureSrcset = element.closest("picture")?.querySelector("source[srcset]")?.getAttribute("srcset");
+    const pictureSrc = getLastSrc(pictureSrcset);
+    if (pictureSrc) return resolveUrl(pictureSrc);
     return resolveUrl(element.getAttribute("src"));
   }
   function isVisibleTextInAccName($el, accName, exclusions = [], linkIgnoreStrings) {
@@ -1326,6 +1495,7 @@
     browserSpeed: 1,
     browserLag: 1,
     customTestsRemaining: 0,
+    testsRemaining: 0,
     customTestTimeout: 0,
     loopStop: false,
     oldResults: [],
@@ -1333,9 +1503,9 @@
     dismissKeys: {},
     roots: [],
     headingOutlineOverrides: [],
+    altMarks: /* @__PURE__ */ new Set(),
     elements: {
       // to be replaced by Sa11y find.
-      altMark: [],
       delayedReset: []
     },
     splitConfiguration: {
@@ -1404,8 +1574,7 @@ URL: ${url2}`;
       <p><strong>${Lang._("DEVELOPER_CHECKS")}:</strong></p>
       <pre>
 </pre>
-  		<p><strong>${Lang._("ERRORS")}:</strong></p>
-<pre>${escapeHTML(this.error.stack)}</pre>
+  		
     `;
       shadow.appendChild(content);
       const pre = content.querySelector("pre");
@@ -1468,8 +1637,8 @@ URL: ${url2}`;
       Constants.Root.areaToCheck.length = 0;
     }
     if (Constants.Root.areaToCheck.length === 0 && Constants.Global.headless === false) {
-      createAlert(Lang.sprintf("MISSING_ROOT", desiredRoot));
-      Constants.Root.areaToCheck.push(document.body);
+      console.warn(Lang.sprintf("MISSING_ROOT", `"${State.option.checkRoot}"`).textContent);
+      Constants.Root.areaToCheck.push(document.querySelector("body"));
     }
     try {
       const roots = document.querySelectorAll(desiredReadabilityRoot);
@@ -1500,7 +1669,8 @@ URL: ${url2}`;
             }).join(", ");
             const note = document.createElement("div");
             note.id = "readability-alert";
-            note.innerHTML = `<hr><p>${Lang.sprintf("MISSING_READABILITY_ROOT", roots, desiredReadabilityRoot)}</p>`;
+            note.innerHTML = `<hr><p></p>`;
+            note.querySelector("p").append(Lang.sprintf("MISSING_READABILITY_ROOT", roots, desiredReadabilityRoot));
             readabilityDetails.insertAdjacentElement("afterend", note);
           }
         }, 100);
@@ -1671,18 +1841,8 @@ URL: ${url2}`;
       return false;
     }
   }
-  function hiddenElementCheck(el) {
-    const style = window.getComputedStyle(el);
-    return !(style.getPropertyValue("display") === "none" || style.getPropertyValue("visibility") === "hidden" || el.hasAttribute("aria-hidden") || el.hasAttribute("hidden"));
-  }
   function elementNotHidden(el) {
-    if (!hiddenElementCheck(el)) {
-      return false;
-    } else {
-      const theParents = parents(el);
-      const notHiddenParent = (parent) => hiddenElementCheck(parent);
-      return theParents.every(notHiddenParent);
-    }
+    return el.checkVisibility() && !el.closest('[aria-hidden="true"]');
   }
   function detectShadow(container) {
     if (State.option.autoDetectShadowComponents) {
@@ -1796,6 +1956,7 @@ URL: ${url2}`;
     Elements.Found.reset?.forEach((el) => {
       el.remove();
     });
+    UI.altMarks.clear();
     Elements.Found.delayedReset = getElements(
       "ed11y-element-result, ed11y-element-tip",
       "document",
@@ -1839,8 +2000,7 @@ URL: ${url2}`;
     Elements.Found.Headings.forEach(($el, i) => {
       const accName = computeAccessibleName($el, Constants.Exclusions.HeaderSpan);
       const stringMatchExclusions = accName.replace(stringExclusionPattern, "");
-      const removeWhitespace$1 = removeWhitespace(stringMatchExclusions);
-      const headingText = sanitizeHTML(removeWhitespace$1);
+      const headingText = removeWhitespace(stringMatchExclusions);
       const rootContainsHeading = Constants.Root.areaToCheck.some((root) => root.contains($el));
       const rootContainsShadowHeading = Constants.Root.areaToCheck.some(
         (root) => root.contains($el.getRootNode().host)
@@ -1851,7 +2011,7 @@ URL: ${url2}`;
         prevLevel = headingStartsOverride;
       }
       const level = parseInt($el.getAttribute("aria-level") || $el.tagName.slice(1), 10);
-      const headingLength = removeWhitespace$1.length;
+      const headingLength = headingText.length;
       const maxHeadingLength = State.option.checks.HEADING_LONG.maxLength || 160;
       let test = null;
       let type = null;
@@ -2045,7 +2205,6 @@ URL: ${url2}`;
           return;
         }
         if (hasAria && linkText.length !== 0) {
-          const sanitizedText = sanitizeHTML(linkText);
           const excludeSpan = fnIgnore($el, Constants.Exclusions.LinkSpan);
           const visibleLinkText = getText(excludeSpan).replace(ignorePattern, "");
           const cleanedString = stripAllSpecialCharacters(visibleLinkText);
@@ -2061,11 +2220,11 @@ URL: ${url2}`;
               test: "LINK_STOPWORD_ARIA",
               element: $el,
               type: State.option.checks.LINK_STOPWORD_ARIA.type || "warning",
-              content: State.option.checks.LINK_STOPWORD_ARIA.content ? Lang.sprintf(
-                State.option.checks.LINK_STOPWORD_ARIA.content,
+              content: Lang.sprintf(
+                State.option.checks.LINK_STOPWORD_ARIA.content || Lang._("LINK_STOPWORD_ARIA") + Lang._("LINK_TIP"),
                 stopword,
-                sanitizedText
-              ) : Lang.sprintf("LINK_STOPWORD_ARIA", stopword, sanitizedText) + Lang.sprintf("LINK_TIP"),
+                linkText
+              ),
               inline: true,
               dismiss: prepareDismissal(`LINK_STOPWORD_ARIA ${strippedLinkText}`),
               dismissAll: State.option.checks.LINK_STOPWORD_ARIA.dismissAll ? " LINK_STOPWORD_ARIA" : false,
@@ -2078,7 +2237,7 @@ URL: ${url2}`;
               type: State.option.checks.LABEL_IN_NAME.type || "warning",
               content: Lang.sprintf(
                 State.option.checks.LABEL_IN_NAME.content || "LABEL_IN_NAME",
-                sanitizedText
+                linkText
               ),
               inline: true,
               position: "afterend",
@@ -2091,7 +2250,10 @@ URL: ${url2}`;
               test: "LINK_LABEL",
               element: $el,
               type: State.option.checks.LINK_LABEL.type || "good",
-              content: State.option.checks.LINK_LABEL.content ? Lang.sprintf(State.option.checks.LINK_LABEL.content, sanitizedText) : `${Lang.sprintf("ACC_NAME", sanitizedText)} ${Lang.sprintf("ACC_NAME_TIP")}`,
+              content: Lang.sprintf(
+                State.option.checks.LINK_LABEL.content || Lang._("ACC_NAME") + Lang._("ACC_NAME_TIP"),
+                linkText
+              ),
               inline: true,
               position: "afterend",
               dismiss: prepareDismissal(`LINK_LABEL ${strippedLinkText}`),
@@ -2108,7 +2270,10 @@ URL: ${url2}`;
               test: "LINK_STOPWORD",
               element,
               type: State.option.checks.LINK_STOPWORD.type || "error",
-              content: State.option.checks.LINK_STOPWORD.content ? Lang.sprintf(State.option.checks.LINK_STOPWORD.content, stopword) : Lang.sprintf("LINK_STOPWORD", stopword) + Lang.sprintf("LINK_TIP"),
+              content: Lang.sprintf(
+                State.option.checks.LINK_STOPWORD.content || Lang._("LINK_STOPWORD") + Lang._("LINK_TIP"),
+                stopword
+              ),
               inline: true,
               position: "afterend",
               dismiss: prepareDismissal(`LINK_STOPWORD ${strippedLinkText}`),
@@ -2215,7 +2380,9 @@ URL: ${url2}`;
                 test: "LINK_URL",
                 element: $el,
                 type: State.option.checks.LINK_URL.type || "warning",
-                content: State.option.checks.LINK_URL.content ? Lang.sprintf(State.option.checks.LINK_URL.content) : Lang.sprintf("LINK_URL") + Lang.sprintf("LINK_TIP"),
+                content: Lang.sprintf(
+                  State.option.checks.LINK_URL.content || Lang._("LINK_URL") + Lang._("LINK_TIP")
+                ),
                 inline: true,
                 dismiss: prepareDismissal(`LINK_URL ${strippedLinkText}`),
                 dismissAll: State.option.checks.LINK_URL.dismissAll ? "LINK_URL" : false,
@@ -2223,7 +2390,7 @@ URL: ${url2}`;
               });
             }
           }
-        } else if (matchedSymbol) {
+        } else if (matchedSymbol && linkText.length > 1) {
           if (State.option.checks.LINK_SYMBOLS) {
             State.results.push({
               test: "LINK_SYMBOLS",
@@ -2239,18 +2406,20 @@ URL: ${url2}`;
               developer: State.option.checks.LINK_SYMBOLS.developer || false
             });
           }
-        } else if (isSingleSpecialChar && !titleAttr) {
-          if (State.option.checks.LINK_EMPTY) {
+        } else if ((isSingleSpecialChar || matchedSymbol) && !titleAttr) {
+          if (State.option.checks.LINK_UNPRONOUNCEABLE) {
             State.results.push({
-              test: "LINK_EMPTY",
+              test: "LINK_UNPRONOUNCEABLE",
               element: $el,
-              type: State.option.checks.LINK_EMPTY.type || "error",
-              content: Lang.sprintf(State.option.checks.LINK_EMPTY.content || "LINK_EMPTY"),
+              type: State.option.checks.LINK_UNPRONOUNCEABLE.type || "error",
+              content: Lang.sprintf(
+                State.option.checks.LINK_UNPRONOUNCEABLE.content || Lang._("LINK_UNPRONOUNCEABLE") + Lang._("LINK_TIP")
+              ),
               inline: true,
               position: "afterend",
-              dismiss: prepareDismissal(`LINK_EMPTY ${href}`),
-              dismissAll: State.option.checks.LINK_EMPTY.dismissAll ? "LINK_EMPTY" : false,
-              developer: State.option.checks.LINK_EMPTY.developer || false
+              dismiss: prepareDismissal(`LINK_UNPRONOUNCEABLE ${href}`),
+              dismissAll: State.option.checks.LINK_UNPRONOUNCEABLE.dismissAll ? "LINK_UNPRONOUNCEABLE" : false,
+              developer: State.option.checks.LINK_UNPRONOUNCEABLE.developer || false
             });
           }
           return;
@@ -2261,7 +2430,9 @@ URL: ${url2}`;
               test: "LINK_CLICK_HERE",
               element: $el,
               type: State.option.checks.LINK_CLICK_HERE.type || "warning",
-              content: State.option.checks.LINK_CLICK_HERE.content ? Lang.sprintf(State.option.checks.LINK_CLICK_HERE.content) : Lang.sprintf("LINK_CLICK_HERE") + Lang.sprintf("LINK_TIP"),
+              content: Lang.sprintf(
+                State.option.checks.LINK_CLICK_HERE.content || Lang._("LINK_CLICK_HERE") + Lang._("LINK_TIP")
+              ),
               inline: true,
               dismiss: prepareDismissal(`LINK_CLICK_HERE ${strippedLinkText}`),
               dismissAll: State.option.checks.LINK_CLICK_HERE.dismissAll ? "LINK_CLICK_HERE" : false,
@@ -2289,12 +2460,14 @@ URL: ${url2}`;
           const ignored = $el.ariaHidden === "true" && $el.getAttribute("tabindex") === "-1";
           const hasAttributes = $el.hasAttribute("role") || $el.hasAttribute("disabled");
           if (State.option.checks.LINK_IDENTICAL_NAME && !hasAttributes && !ignored) {
-            const sanitizedText = sanitizeHTML(linkText);
             State.results.push({
               test: "LINK_IDENTICAL_NAME",
               element: $el,
               type: State.option.checks.LINK_IDENTICAL_NAME.type || "warning",
-              content: State.option.checks.LINK_IDENTICAL_NAME.content ? Lang.sprintf(State.option.checks.LINK_IDENTICAL_NAME.content, sanitizedText) : `${Lang.sprintf("LINK_IDENTICAL_NAME", sanitizedText)} ${Lang.sprintf("ACC_NAME_TIP")}`,
+              content: Lang.sprintf(
+                State.option.checks.LINK_IDENTICAL_NAME.content || Lang._("LINK_IDENTICAL_NAME") + Lang._("ACC_NAME_TIP"),
+                linkText
+              ),
               inline: true,
               dismiss: prepareDismissal(`LINK_IDENTICAL_NAME ${strippedLinkText}`),
               dismissAll: State.option.checks.LINK_IDENTICAL_NAME.dismissAll ? "LINK_IDENTICAL_NAME" : false,
@@ -2391,10 +2564,10 @@ URL: ${url2}`;
       return hit;
     };
     Elements.Found.Images.forEach(($el) => {
-      const alt = computeAriaLabel($el) === "noAria" ? $el.getAttribute("alt") : computeAriaLabel($el);
+      const rawAlt = computeAriaLabel($el) === "noAria" ? $el.getAttribute("alt") : computeAriaLabel($el);
       const ariaHidden = $el?.getAttribute("aria-hidden") === "true";
       const presentationRole = $el?.getAttribute("role") === "presentation";
-      if ($el.height < 2 && $el.width < 2 && (isElementHidden($el) || alt === "")) {
+      if ($el.height < 2 && $el.width < 2 && (isElementHidden($el) || rawAlt === "")) {
         return;
       }
       const link = $el.closest(
@@ -2421,7 +2594,7 @@ URL: ${url2}`;
         }
         return;
       }
-      if (alt === null) {
+      if (rawAlt === null) {
         if (link) {
           const hasAriaHiddenOrPresentationRole = linkTextLength > 0 && (ariaHidden || presentationRole);
           if (!hasAriaHiddenOrPresentationRole) {
@@ -2452,11 +2625,10 @@ URL: ${url2}`;
         }
         return;
       }
-      const sanitizedAlt = sanitizeHTML(alt);
-      const altText = removeWhitespace(sanitizedAlt);
+      const altText = removeWhitespace(rawAlt);
       const hasAria = $el.getAttribute("aria-label") || $el.getAttribute("aria-labelledby");
       if (State.option.checks.MISSING_ALT) {
-        if (hasAria && altText === "") {
+        if (hasAria && rawAlt === "") {
           State.results.push({
             test: "MISSING_ALT",
             element: $el,
@@ -2469,14 +2641,14 @@ URL: ${url2}`;
           return;
         }
       }
-      let decorative = alt === "";
+      let decorative = rawAlt === "";
       const figure = $el.closest("figure");
       const figcaption = figure?.querySelector("figcaption");
       const figcaptionText = figcaption ? getText(figcaption) : "";
       const maxAltCharactersLinks = State.option.checks.LINK_IMAGE_LONG_ALT.maxLength || 250;
       const maxAltCharacters = State.option.checks.IMAGE_ALT_TOO_LONG.maxLength || 250;
       if (!decorative && State.option.altPlaceholder.length) {
-        decorative = alt.match(altPlaceholderPattern)?.[0];
+        decorative = rawAlt.match(altPlaceholderPattern)?.[0];
       }
       if (decorative) {
         const carouselSources = State.option.checks.IMAGE_DECORATIVE_CAROUSEL.sources;
@@ -2539,7 +2711,7 @@ URL: ${url2}`;
       }
       const unpronounceable = link ? State.option.checks.LINK_ALT_UNPRONOUNCEABLE : State.option.checks.ALT_UNPRONOUNCEABLE;
       if (unpronounceable) {
-        if (alt.replace(/"|'|\?|\.|-|\s+/g, "") === "" && linkTextLength === 0) {
+        if (rawAlt.replace(/"|'|\?|\.|-|\s+/g, "") === "" && linkTextLength === 0) {
           const conditional = link ? "LINK_ALT_UNPRONOUNCEABLE" : "ALT_UNPRONOUNCEABLE";
           State.results.push({
             test: conditional,
@@ -2553,10 +2725,10 @@ URL: ${url2}`;
           return;
         }
       }
-      const error = containsAltTextStopWords(altText);
+      const error = containsAltTextStopWords(rawAlt);
       const maybeBadAlt = link ? State.option.checks.LINK_ALT_MAYBE_BAD : State.option.checks.ALT_MAYBE_BAD;
       const isTooLongSingleWord = new RegExp(`^\\S{${maybeBadAlt.minLength || 15},}$`);
-      const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(alt);
+      const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(rawAlt);
       if (error[0] !== null) {
         const rule = link ? State.option.checks.LINK_ALT_FILE_EXT : State.option.checks.ALT_FILE_EXT;
         const conditional = link ? "LINK_ALT_FILE_EXT" : "ALT_FILE_EXT";
@@ -2566,7 +2738,7 @@ URL: ${url2}`;
             element: $el,
             type: rule.type || "error",
             content: Lang.sprintf(rule.content || conditional, error[0], altText),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
@@ -2580,7 +2752,7 @@ URL: ${url2}`;
             element: $el,
             type: rule.type || "error",
             content: Lang.sprintf(rule.content || conditional, altText),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
@@ -2594,23 +2766,23 @@ URL: ${url2}`;
             element: $el,
             type: rule.type || "warning",
             content: Lang.sprintf(rule.content || conditional, error[1], altText),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
         }
-      } else if (maybeBadAlt && isTooLongSingleWord.test(alt) && containsNonAlphaChar) {
+      } else if (maybeBadAlt && isTooLongSingleWord.test(rawAlt) && containsNonAlphaChar) {
         const conditional = link ? "LINK_ALT_MAYBE_BAD" : "ALT_MAYBE_BAD";
         State.results.push({
           test: conditional,
           element: $el,
           type: maybeBadAlt.type || "error",
           content: Lang.sprintf(maybeBadAlt.content || conditional, altText),
-          dismiss: prepareDismissal(`${conditional + src + altText}`),
+          dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
           dismissAll: maybeBadAlt.dismissAll ? conditional : false,
           developer: maybeBadAlt.developer || false
         });
-      } else if (link ? alt.length > maxAltCharactersLinks : alt.length > maxAltCharacters) {
+      } else if (link ? rawAlt.length > maxAltCharactersLinks : rawAlt.length > maxAltCharacters) {
         const rule = link ? State.option.checks.LINK_IMAGE_LONG_ALT : State.option.checks.IMAGE_ALT_TOO_LONG;
         const conditional = link ? "LINK_IMAGE_LONG_ALT" : "IMAGE_ALT_TOO_LONG";
         const truncated = truncateString(altText, 600);
@@ -2619,8 +2791,8 @@ URL: ${url2}`;
             test: conditional,
             element: $el,
             type: rule.type || "warning",
-            content: Lang.sprintf(rule.content || conditional, alt.length, truncated),
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            content: Lang.sprintf(rule.content || conditional, rawAlt.length, truncated),
+            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
@@ -2630,21 +2802,24 @@ URL: ${url2}`;
         const conditional = linkTextLength === 0 ? "LINK_IMAGE_ALT" : "LINK_IMAGE_ALT_AND_TEXT";
         if (rule) {
           const linkAccName = computeAccessibleName(link);
-          const removeWhitespace$1 = removeWhitespace(linkAccName);
-          const sanitizedText = sanitizeHTML(removeWhitespace$1);
-          const tooltip = linkTextLength === 0 ? Lang.sprintf("LINK_IMAGE_ALT", altText) : `${Lang.sprintf("LINK_IMAGE_ALT_AND_TEXT", altText, sanitizedText)} ${Lang.sprintf("ACC_NAME_TIP")}`;
+          const accName = removeWhitespace(linkAccName);
+          const tooltip = Lang.sprintf(
+            linkTextLength === 0 ? Lang._("LINK_IMAGE_ALT") : Lang._("LINK_IMAGE_ALT_AND_TEXT") + Lang._("ACC_NAME_TIP"),
+            altText,
+            accName
+          );
           State.results.push({
             test: conditional,
             element: $el,
             type: rule.type || "warning",
-            content: rule.content ? Lang.sprintf(rule.content, altText, sanitizedText) : tooltip,
-            dismiss: prepareDismissal(`${conditional + src + altText}`),
+            content: rule.content ? Lang.sprintf(rule.content, altText, accName) : tooltip,
+            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
         }
       } else if (figure) {
-        const duplicate = !!figcaption && figcaptionText.toLowerCase() === altText.toLowerCase();
+        const duplicate = !!figcaption && figcaptionText.toLowerCase() === rawAlt.toLowerCase();
         if (duplicate) {
           if (State.option.checks.IMAGE_FIGURE_DUPLICATE_ALT) {
             State.results.push({
@@ -2666,7 +2841,7 @@ URL: ${url2}`;
             element: $el,
             type: State.option.checks.IMAGE_PASS.type || "good",
             content: Lang.sprintf(State.option.checks.IMAGE_PASS.content || "IMAGE_PASS", altText),
-            dismiss: prepareDismissal(`IMAGE_PASS FIGURE ${src + altText}`),
+            dismiss: prepareDismissal(`IMAGE_PASS FIGURE ${src + rawAlt}`),
             dismissAll: State.option.checks.IMAGE_PASS.dismissAll ? "IMAGE_PASS" : false,
             developer: State.option.checks.IMAGE_PASS.developer || false
           });
@@ -2678,14 +2853,14 @@ URL: ${url2}`;
             element: $el,
             type: State.option.checks.IMAGE_PASS.type || "good",
             content: Lang.sprintf(State.option.checks.IMAGE_PASS.content || "IMAGE_PASS", altText),
-            dismiss: prepareDismissal(`IMAGE_PASS ${src + altText}`),
+            dismiss: prepareDismissal(`IMAGE_PASS ${src + rawAlt}`),
             dismissAll: State.option.checks.IMAGE_PASS.dismissAll ? "IMAGE_PASS" : false,
             developer: State.option.checks.IMAGE_PASS.developer || false
           });
         }
       }
       const titleAttr = $el.getAttribute("title");
-      if (titleAttr?.toLowerCase() === alt.toLowerCase()) {
+      if (titleAttr?.toLowerCase() === rawAlt.toLowerCase()) {
         if (State.option.checks.DUPLICATE_TITLE) {
           State.results.push({
             test: "DUPLICATE_TITLE",
@@ -2693,7 +2868,7 @@ URL: ${url2}`;
             type: State.option.checks.DUPLICATE_TITLE.type || "warning",
             content: Lang.sprintf(State.option.checks.DUPLICATE_TITLE.content || "DUPLICATE_TITLE"),
             inline: true,
-            dismiss: prepareDismissal(`DUPLICATE_TITLE ${altText}`),
+            dismiss: prepareDismissal(`DUPLICATE_TITLE ${rawAlt}`),
             dismissAll: State.option.checks.DUPLICATE_TITLE.dismissAll ? "DUPLICATE_TITLE" : false,
             developer: State.option.checks.DUPLICATE_TITLE.developer || false
           });
@@ -2707,15 +2882,12 @@ URL: ${url2}`;
         const ariaHidden = $el.getAttribute("aria-hidden") === "true";
         const negativeTabindex = $el.getAttribute("tabindex") === "-1";
         const hidden = isElementHidden($el);
-        if (hidden || ariaHidden && negativeTabindex) {
-          return;
-        }
+        if (hidden || ariaHidden && negativeTabindex) return;
         const computeName = computeAccessibleName($el);
         const inputName = removeWhitespace(computeName);
         const alt = $el.getAttribute("alt");
         const type = $el.getAttribute("type");
         const hasTitle = $el.getAttribute("title");
-        const hasPlaceholder = $el.placeholder && $el.placeholder !== 0;
         const hasAria = $el.getAttribute("aria-label") || $el.getAttribute("aria-labelledby");
         if (type === "submit" || type === "button" || type === "hidden") {
           return;
@@ -2752,20 +2924,22 @@ URL: ${url2}`;
           }
           return;
         }
-        if (hasAria || hasTitle || hasPlaceholder) {
-          if (hasPlaceholder && State.option.checks.LABELS_PLACEHOLDER) {
-            State.results.push({
-              test: "LABELS_PLACEHOLDER",
-              element: $el,
-              type: State.option.checks.LABELS_PLACEHOLDER.type || "warning",
-              content: Lang.sprintf(
-                State.option.checks.LABELS_PLACEHOLDER.content || "LABELS_PLACEHOLDER"
-              ),
-              dismiss: prepareDismissal(`LABELS_PLACEHOLDER ${type + inputName}`),
-              dismissAll: State.option.checks.LABELS_PLACEHOLDER.dismissAll ? "LABELS_PLACEHOLDER" : false,
-              developer: State.option.checks.LABELS_PLACEHOLDER.developer || true
-            });
-          } else if (inputName.length === 0) {
+        const hasPlaceholder = $el.placeholder && $el.placeholder !== 0;
+        if (hasPlaceholder && State.option.checks.LABELS_PLACEHOLDER) {
+          State.results.push({
+            test: "LABELS_PLACEHOLDER",
+            element: $el,
+            type: State.option.checks.LABELS_PLACEHOLDER.type || "warning",
+            content: Lang.sprintf(
+              State.option.checks.LABELS_PLACEHOLDER.content || "LABELS_PLACEHOLDER"
+            ),
+            dismiss: prepareDismissal(`LABELS_PLACEHOLDER ${type + inputName}`),
+            dismissAll: State.option.checks.LABELS_PLACEHOLDER.dismissAll ? "LABELS_PLACEHOLDER" : false,
+            developer: State.option.checks.LABELS_PLACEHOLDER.developer || true
+          });
+        }
+        if (hasAria || hasTitle) {
+          if (inputName.length === 0) {
             if (State.option.checks.LABELS_MISSING_LABEL) {
               State.results.push({
                 test: "LABELS_MISSING_LABEL",
@@ -2788,12 +2962,11 @@ URL: ${url2}`;
                 if (target && !isElementHidden(target)) return;
               }
             }
-            const sanitizedText = sanitizeHTML(inputName);
             State.results.push({
               test: "LABELS_ARIA_LABEL_INPUT",
               element: $el,
               type: State.option.checks.LABELS_ARIA_LABEL_INPUT.type || "warning",
-              content: State.option.checks.LABELS_ARIA_LABEL_INPUT.content ? Lang.sprintf(State.option.checks.LABELS_ARIA_LABEL_INPUT.content, sanitizedText) : `${Lang.sprintf("LABELS_ARIA_LABEL_INPUT", sanitizedText)} ${Lang.sprintf("ACC_NAME_TIP")}`,
+              content: State.option.checks.LABELS_ARIA_LABEL_INPUT.content ? Lang.sprintf(State.option.checks.LABELS_ARIA_LABEL_INPUT.content, inputName) : Lang.sprintf(Lang._("LABELS_ARIA_LABEL_INPUT") + Lang._("ACC_NAME_TIP"), inputName),
               dismiss: prepareDismissal(`LABELS_ARIA_LABEL_INPUT ${type + inputName}`),
               dismissAll: State.option.checks.LABELS_ARIA_LABEL_INPUT.dismissAll ? "LABELS_ARIA_LABEL_INPUT" : false,
               developer: State.option.checks.LABELS_ARIA_LABEL_INPUT.developer || true
@@ -2802,25 +2975,27 @@ URL: ${url2}`;
           return;
         }
         const closestLabel = $el.closest("label");
-        const labelName = closestLabel ? removeWhitespace(computeAccessibleName(closestLabel)) : "";
+        const labelName = closestLabel ? computeAccessibleName(closestLabel) : "";
         if (closestLabel && labelName.length) return;
         const id = $el.getAttribute("id");
         if (id) {
-          if (!Elements.Found.Labels.some((label) => label.getAttribute("for") === id)) {
-            if (State.option.checks.LABELS_NO_FOR_ATTRIBUTE) {
-              State.results.push({
-                test: "LABELS_NO_FOR_ATTRIBUTE",
-                element: $el,
-                type: State.option.checks.LABELS_NO_FOR_ATTRIBUTE.type || "error",
-                content: Lang.sprintf(
-                  State.option.checks.LABELS_NO_FOR_ATTRIBUTE.content || "LABELS_NO_FOR_ATTRIBUTE",
-                  id
-                ),
-                dismiss: prepareDismissal(`LABELS_NO_FOR_ATTRIBUTE ${type + inputName}`),
-                dismissAll: State.option.checks.LABELS_NO_FOR_ATTRIBUTE.dismissAll ? "LABELS_NO_FOR_ATTRIBUTE" : false,
-                developer: State.option.checks.LABELS_NO_FOR_ATTRIBUTE.developer || true
-              });
-            }
+          const hasMatchingLabel = Elements.Found.Labels.some(
+            (label) => label.getAttribute("for") === id
+          );
+          if (hasMatchingLabel) return;
+          if (State.option.checks.LABELS_NO_FOR_ATTRIBUTE) {
+            State.results.push({
+              test: "LABELS_NO_FOR_ATTRIBUTE",
+              element: $el,
+              type: State.option.checks.LABELS_NO_FOR_ATTRIBUTE.type || "error",
+              content: Lang.sprintf(
+                State.option.checks.LABELS_NO_FOR_ATTRIBUTE.content || "LABELS_NO_FOR_ATTRIBUTE",
+                id
+              ),
+              dismiss: prepareDismissal(`LABELS_NO_FOR_ATTRIBUTE ${type + inputName}`),
+              dismissAll: State.option.checks.LABELS_NO_FOR_ATTRIBUTE.dismissAll ? "LABELS_NO_FOR_ATTRIBUTE" : false,
+              developer: State.option.checks.LABELS_NO_FOR_ATTRIBUTE.developer || true
+            });
           }
         } else if (State.option.checks.LABELS_MISSING_LABEL) {
           State.results.push({
@@ -2930,16 +3105,12 @@ URL: ${url2}`;
       Elements.Found.Blockquotes.forEach(($el) => {
         const text = getText($el);
         if (text.length !== 0 && text.length < 25) {
-          const sanitizedText = sanitizeHTML(text);
           State.results.push({
             test: "QA_BLOCKQUOTE",
             element: $el,
             type: State.option.checks.QA_BLOCKQUOTE.type || "warning",
-            content: Lang.sprintf(
-              State.option.checks.QA_BLOCKQUOTE.content || "QA_BLOCKQUOTE",
-              sanitizedText
-            ),
-            dismiss: prepareDismissal(`QA_BLOCKQUOTE ${sanitizedText}`),
+            content: Lang.sprintf(State.option.checks.QA_BLOCKQUOTE.content || "QA_BLOCKQUOTE", text),
+            dismiss: prepareDismissal(`QA_BLOCKQUOTE ${text}`),
             dismissAll: State.option.checks.QA_BLOCKQUOTE.dismissAll ? "QA_BLOCKQUOTE" : false,
             developer: State.option.checks.QA_BLOCKQUOTE.developer || false
           });
@@ -2998,16 +3169,16 @@ URL: ${url2}`;
       }
     });
     if (State.option.checks.QA_FAKE_HEADING) {
-      const addResult = (element, sanitizedText) => {
+      const addResult = (element, escapedText) => {
         State.results.push({
           test: "QA_FAKE_HEADING",
           element,
           type: State.option.checks.QA_FAKE_HEADING.type || "warning",
           content: Lang.sprintf(
             State.option.checks.QA_FAKE_HEADING.content || "QA_FAKE_HEADING",
-            sanitizedText
+            escapedText
           ),
-          dismiss: prepareDismissal(`QA_FAKE_HEADING ${sanitizedText}`),
+          dismiss: prepareDismissal(`QA_FAKE_HEADING ${escapedText}`),
           inline: true,
           dismissAll: State.option.checks.QA_FAKE_HEADING.dismissAll ? "QA_FAKE_HEADING" : false,
           developer: State.option.checks.QA_FAKE_HEADING.developer || false
@@ -3026,8 +3197,7 @@ URL: ${url2}`;
         const maybeSentence = getText$1.match(/[.;?!"]/) === null;
         const typicalHeadingLength = getText$1.length >= 4 && getText$1.length <= 120;
         if (size >= 24 && !p.closest(ignoreParents) && typicalHeadingLength && maybeSentence && !isPreviousElementAHeading(p)) {
-          const sanitizedText = sanitizeHTML(getText$1);
-          addResult(p, sanitizedText);
+          addResult(p, getText$1);
         }
       };
       const computeBoldTextParagraphs = (p) => {
@@ -3041,7 +3211,7 @@ URL: ${url2}`;
         if (text.length < 3 || text.length > 120 || /[.:;?!"']/.test(text)) return;
         const paragraph = fnIgnore(p, ["strong", "b"]).textContent.trim();
         if (paragraph && paragraph.length <= 250) return;
-        addResult(possibleHeading, sanitizeHTML(text));
+        addResult(possibleHeading, text);
       };
       Elements.Found.Paragraphs.forEach((p) => {
         computeLargeParagraphs(p);
@@ -3085,7 +3255,9 @@ URL: ${url2}`;
             }
             const secondPrefix = decrement(secondText);
             if (isAlphabetic) {
-              if (firstPrefix !== "A " && firstPrefix === secondPrefix) {
+              const firstChar = firstPrefix.charAt(0);
+              const secondChar = secondText.charAt(0);
+              if (decrement(secondChar) === firstChar) {
                 hit = true;
               }
             } else if (isEmoji && !lastHitWasEmoji) {
@@ -4037,25 +4209,20 @@ URL: ${url2}`;
       const nodeText = fnIgnore(element, ["State.option:not(State.option:first-child)"]);
       const text = getText(nodeText);
       const truncatedText = truncateString(text, 80);
-      const sanitizedText = sanitizeHTML(truncatedText);
       let previewText;
       if (item.type === "placeholder" || item.type === "placeholder-unsupported") {
-        previewText = sanitizeHTML($el.placeholder);
+        previewText = $el.placeholder;
       } else if (item.type === "svg-error" || item.type === "svg-warning") {
         previewText = "";
       } else {
-        previewText = sanitizedText;
+        previewText = truncatedText;
       }
-      updatedItem.sanitizedText = previewText;
-      let ratioTip = "";
-      if (State.option.contrastAlgorithm === "AA" || State.option.contrastAlgorithm === "AAA") {
-        const normal = State.option.contrastAlgorithm === "AAA" ? "7:1" : "4.5:1";
-        const large = State.option.contrastAlgorithm === "AAA" ? "4.5:1" : "3:1";
-        const ratioToDisplay2 = item.isLargeText ? large : normal;
-        const ratioRequirement = item.isLargeText ? "CONTRAST_LARGE" : "CONTRAST_NORMAL";
-        ratioTip = ` ${Lang.sprintf(ratioRequirement, ratioToDisplay2)}`;
-      }
-      const graphicsTip = State.option.contrastAlgorithm === "APCA" ? "" : ` ${Lang.sprintf("CONTRAST_TIP_GRAPHIC")}`;
+      updatedItem.previewText = previewText;
+      const isWcag = State.option.contrastAlgorithm === "AA" || State.option.contrastAlgorithm === "AAA";
+      const normal = State.option.contrastAlgorithm === "AAA" ? "7:1" : "4.5:1";
+      const large = State.option.contrastAlgorithm === "AAA" ? "4.5:1" : "3:1";
+      const ratioToDisplay2 = item.isLargeText ? large : normal;
+      const ratioRequirementKey = item.isLargeText ? "CONTRAST_LARGE" : "CONTRAST_NORMAL";
       switch (item.type) {
         case "text":
           if (State.option.checks.CONTRAST_ERROR) {
@@ -4063,8 +4230,11 @@ URL: ${url2}`;
               test: "CONTRAST_ERROR",
               element: $el,
               type: State.option.checks.CONTRAST_ERROR.type || "error",
-              content: State.option.checks.CONTRAST_ERROR.content ? Lang.sprintf(State.option.checks.CONTRAST_ERROR.content) : Lang.sprintf("CONTRAST_ERROR") + ratioTip,
-              dismiss: prepareDismissal(`CONTRAST_ERROR ${sanitizedText}`),
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_ERROR.content || (isWcag ? `${Lang._("CONTRAST_ERROR")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_ERROR")),
+                ratioToDisplay2
+              ),
+              dismiss: prepareDismissal(`CONTRAST_ERROR ${previewText}`),
               dismissAll: State.option.checks.CONTRAST_ERROR.dismissAll ? "CONTRAST_ERROR" : false,
               developer: State.option.checks.CONTRAST_ERROR.developer || false,
               contrastDetails: updatedItem
@@ -4073,13 +4243,16 @@ URL: ${url2}`;
           break;
         case "input":
           if (State.option.checks.CONTRAST_INPUT) {
-            const sanitizedInput = sanitizeHTMLBlock($el.outerHTML);
             State.results.push({
               test: "CONTRAST_INPUT",
               element,
               type: State.option.checks.CONTRAST_INPUT.type || "error",
-              content: State.option.checks.CONTRAST_INPUT.content ? Lang.sprintf(State.option.checks.CONTRAST_INPUT.content) : Lang.sprintf("CONTRAST_INPUT", ratio) + ratioTip,
-              dismiss: prepareDismissal(`CONTRAST_INPUT ${sanitizedInput}`),
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_INPUT.content || (isWcag ? `${Lang._("CONTRAST_INPUT")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_INPUT")),
+                ratio,
+                ratioToDisplay2
+              ),
+              dismiss: prepareDismissal(`CONTRAST_INPUT ${$el.outerHTML}`),
               dismissAll: State.option.checks.CONTRAST_INPUT.dismissAll ? "CONTRAST_INPUT" : false,
               developer: State.option.checks.CONTRAST_INPUT.developer || true,
               contrastDetails: updatedItem
@@ -4088,14 +4261,16 @@ URL: ${url2}`;
           break;
         case "placeholder":
           if (State.option.checks.CONTRAST_PLACEHOLDER) {
-            const sanitizedPlaceholder = sanitizeHTMLBlock($el.outerHTML);
             State.results.push({
               test: "CONTRAST_PLACEHOLDER",
               element: $el,
               type: State.option.checks.CONTRAST_PLACEHOLDER.type || "error",
-              content: State.option.checks.CONTRAST_PLACEHOLDER.content ? Lang.sprintf(State.option.checks.CONTRAST_PLACEHOLDER.content) : Lang.sprintf("CONTRAST_PLACEHOLDER") + ratioTip,
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_PLACEHOLDER.content || (isWcag ? `${Lang._("CONTRAST_PLACEHOLDER")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_PLACEHOLDER")),
+                ratioToDisplay2
+              ),
               position: "afterend",
-              dismiss: prepareDismissal(`CONTRAST_PLACEHOLDER ${sanitizedPlaceholder}`),
+              dismiss: prepareDismissal(`CONTRAST_PLACEHOLDER ${$el.outerHTML}`),
               dismissAll: State.option.checks.CONTRAST_PLACEHOLDER.dismissAll ? "CONTRAST_PLACEHOLDER" : false,
               developer: State.option.checks.CONTRAST_PLACEHOLDER.developer || true,
               contrastDetails: updatedItem
@@ -4104,16 +4279,16 @@ URL: ${url2}`;
           break;
         case "placeholder-unsupported":
           if (State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED) {
-            const sanitizedPlaceholder = sanitizeHTMLBlock($el.outerHTML);
             State.results.push({
               test: "CONTRAST_PLACEHOLDER_UNSUPPORTED",
               element: $el,
               type: State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.type || "warning",
-              content: State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.content ? Lang.sprintf(State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.content) : Lang.sprintf("CONTRAST_PLACEHOLDER_UNSUPPORTED") + ratioTip,
-              position: "afterend",
-              dismiss: prepareDismissal(
-                `CONTRAST_PLACEHOLDER_UNSUPPORTED ${sanitizedPlaceholder}`
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.content || (isWcag ? `${Lang._("CONTRAST_PLACEHOLDER_UNSUPPORTED")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_PLACEHOLDER_UNSUPPORTED")),
+                ratioToDisplay2
               ),
+              position: "afterend",
+              dismiss: prepareDismissal(`CONTRAST_PLACEHOLDER_UNSUPPORTED ${$el.outerHTML}`),
               dismissAll: State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.dismissAll ? "CONTRAST_PLACEHOLDER_UNSUPPORTED" : false,
               developer: State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.developer || true,
               contrastDetails: updatedItem
@@ -4122,13 +4297,14 @@ URL: ${url2}`;
           break;
         case "svg-error":
           if (State.option.checks.CONTRAST_ERROR_GRAPHIC) {
-            const sanitizedSVG = sanitizeHTMLBlock($el.outerHTML);
             State.results.push({
               test: "CONTRAST_ERROR_GRAPHIC",
               element: $el,
               type: State.option.checks.CONTRAST_ERROR_GRAPHIC.type || "error",
-              content: State.option.checks.CONTRAST_ERROR_GRAPHIC.content ? Lang.sprintf(State.option.checks.CONTRAST_ERROR_GRAPHIC.content) : Lang.sprintf("CONTRAST_ERROR_GRAPHIC") + graphicsTip,
-              dismiss: prepareDismissal(`CONTRAST_ERROR_GRAPHIC ${sanitizedSVG}`),
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_ERROR_GRAPHIC.content || (State.option.contrastAlgorithm !== "APCA" ? `${Lang._("CONTRAST_ERROR_GRAPHIC")} ${Lang._("CONTRAST_TIP_GRAPHIC")}` : Lang._("CONTRAST_ERROR_GRAPHIC"))
+              ),
+              dismiss: prepareDismissal(`CONTRAST_ERROR_GRAPHIC ${$el.outerHTML}`),
               dismissAll: State.option.checks.CONTRAST_ERROR_GRAPHIC.dismissAll ? "CONTRAST_ERROR_GRAPHIC" : false,
               developer: State.option.checks.CONTRAST_ERROR_GRAPHIC.developer || true,
               contrastDetails: updatedItem,
@@ -4138,13 +4314,14 @@ URL: ${url2}`;
           break;
         case "svg-warning":
           if (State.option.checks.CONTRAST_WARNING_GRAPHIC) {
-            const sanitizedSVG = sanitizeHTMLBlock($el.outerHTML);
             State.results.push({
               test: "CONTRAST_WARNING_GRAPHIC",
               element: $el,
               type: State.option.checks.CONTRAST_WARNING_GRAPHIC.type || "warning",
-              content: State.option.checks.CONTRAST_WARNING_GRAPHIC.content ? Lang.sprintf(State.option.checks.CONTRAST_WARNING_GRAPHIC.content) : Lang.sprintf("CONTRAST_WARNING_GRAPHIC") + graphicsTip,
-              dismiss: prepareDismissal(`CONTRAST_WARNING_GRAPHIC ${sanitizedSVG}`),
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_WARNING_GRAPHIC.content || (State.option.contrastAlgorithm !== "APCA" ? `${Lang._("CONTRAST_WARNING_GRAPHIC")} ${Lang._("CONTRAST_TIP_GRAPHIC")}` : Lang._("CONTRAST_WARNING_GRAPHIC"))
+              ),
+              dismiss: prepareDismissal(`CONTRAST_WARNING_GRAPHIC ${$el.outerHTML}`),
               dismissAll: State.option.checks.CONTRAST_WARNING_GRAPHIC.dismissAll ? "CONTRAST_WARNING_GRAPHIC" : false,
               developer: State.option.checks.CONTRAST_WARNING_GRAPHIC.developer || true,
               contrastDetails: updatedItem,
@@ -4158,8 +4335,11 @@ URL: ${url2}`;
               test: "CONTRAST_WARNING",
               element,
               type: State.option.checks.CONTRAST_WARNING.type || "warning",
-              content: State.option.checks.CONTRAST_WARNING.content ? Lang.sprintf(State.option.checks.CONTRAST_WARNING.content) : Lang.sprintf("CONTRAST_WARNING") + ratioTip,
-              dismiss: prepareDismissal(`CONTRAST_WARNING ${sanitizedText}`),
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_WARNING.content || (isWcag ? `${Lang._("CONTRAST_WARNING")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_WARNING")),
+                ratioToDisplay2
+              ),
+              dismiss: prepareDismissal(`CONTRAST_WARNING ${previewText}`),
               dismissAll: State.option.checks.CONTRAST_WARNING.dismissAll ? "CONTRAST_WARNING" : false,
               developer: State.option.checks.CONTRAST_WARNING.developer || false,
               contrastDetails: updatedItem
@@ -4172,8 +4352,11 @@ URL: ${url2}`;
               test: "CONTRAST_UNSUPPORTED",
               element,
               type: State.option.checks.CONTRAST_UNSUPPORTED.type || "warning",
-              content: State.option.checks.CONTRAST_UNSUPPORTED.content ? Lang.sprintf(State.option.checks.CONTRAST_UNSUPPORTED.content) : Lang.sprintf("CONTRAST_WARNING") + ratioTip,
-              dismiss: prepareDismissal(`CONTRAST_UNSUPPORTED ${sanitizedText}`),
+              content: Lang.sprintf(
+                State.option.checks.CONTRAST_UNSUPPORTED.content || (isWcag ? `${Lang._("CONTRAST_WARNING")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_WARNING")),
+                ratioToDisplay2
+              ),
+              dismiss: prepareDismissal(`CONTRAST_UNSUPPORTED ${previewText}`),
               dismissAll: State.option.checks.CONTRAST_UNSUPPORTED.dismissAll ? "CONTRAST_UNSUPPORTED" : false,
               developer: State.option.checks.CONTRAST_UNSUPPORTED.developer || false,
               contrastDetails: updatedItem
@@ -4347,7 +4530,9 @@ URL: ${url2}`;
               test: "BTN_EMPTY_LABELLEDBY",
               element: $el,
               type: State.option.checks.BTN_EMPTY_LABELLEDBY.type || "error",
-              content: State.option.checks.BTN_EMPTY_LABELLEDBY.content ? Lang.sprintf(State.option.checks.BTN_EMPTY_LABELLEDBY.content) : `${Lang.sprintf("BTN_EMPTY_LABELLEDBY")} ${Lang.sprintf("BTN_TIP")}`,
+              content: Lang.sprintf(
+                State.option.checks.BTN_EMPTY_LABELLEDBY.content || Lang._("BTN_EMPTY_LABELLEDBY") + Lang._("BTN_TIP")
+              ),
               dismiss: prepareDismissal(
                 `BTN_EMPTY_LABELLEDBY ${$el.tagName + $el.id + $el.className + accName}`
               ),
@@ -4359,7 +4544,9 @@ URL: ${url2}`;
               test: "BTN_EMPTY",
               element: $el,
               type: State.option.checks.BTN_EMPTY.type || "error",
-              content: State.option.checks.BTN_EMPTY.content ? Lang.sprintf(State.option.checks.BTN_EMPTY.content) : `${Lang.sprintf("BTN_EMPTY")} ${Lang.sprintf("BTN_TIP")}`,
+              content: Lang.sprintf(
+                State.option.checks.BTN_EMPTY.content || Lang._("BTN_EMPTY") + Lang._("BTN_TIP")
+              ),
               dismiss: prepareDismissal(
                 `BTN_EMPTY ${$el.tagName + $el.id + $el.className + accName}`
               ),
@@ -4371,12 +4558,11 @@ URL: ${url2}`;
         }
         const isVisibleTextInAccName$1 = isVisibleTextInAccName($el, accName);
         if (State.option.checks.LABEL_IN_NAME && hasAria && isVisibleTextInAccName$1) {
-          const sanitizedText = sanitizeHTML(accName);
           State.results.push({
             test: "LABEL_IN_NAME",
             element: $el,
             type: State.option.checks.LABEL_IN_NAME.type || "warning",
-            content: State.option.checks.LABEL_IN_NAME.content ? Lang.sprintf(State.option.checks.LABEL_IN_NAME.content, sanitizedText) : `${Lang.sprintf("LABEL_IN_NAME", sanitizedText)} ${Lang.sprintf("ACC_NAME_TIP")}`,
+            content: State.option.checks.LABEL_IN_NAME.content ? Lang.sprintf(State.option.checks.LABEL_IN_NAME.content, accName) : Lang.sprintf(Lang._("LABEL_IN_NAME") + Lang._("ACC_NAME_TIP"), accName),
             dismiss: prepareDismissal(
               `LABEL_IN_NAME ${$el.tagName + $el.id + $el.className + accName}`
             ),
@@ -4390,7 +4576,9 @@ URL: ${url2}`;
             test: "BTN_ROLE_IN_NAME",
             element: $el,
             type: State.option.checks.BTN_ROLE_IN_NAME.type || "warning",
-            content: State.option.checks.BTN_ROLE_IN_NAME.content ? Lang.sprintf(State.option.checks.BTN_ROLE_IN_NAME.content) : `${Lang.sprintf("BTN_ROLE_IN_NAME")} ${Lang.sprintf("BTN_TIP")}`,
+            content: Lang.sprintf(
+              State.option.checks.BTN_ROLE_IN_NAME.content || Lang._("BTN_ROLE_IN_NAME") + Lang._("BTN_TIP")
+            ),
             dismiss: prepareDismissal(
               `BTN_ROLE_IN_NAME ${$el.tagName + $el.id + $el.className + accName}`
             ),
@@ -4949,19 +5137,19 @@ URL: ${url2}`;
       } else {
         UI.errorCount++;
       }
-      let location = State.results[i].element;
-      const interactive = (location2) => location2.closest('a, button, img, svg, input, iframe, [role="button"], [role="link"]');
-      const canPositionInside = (location2) => !interactive(location2) && location2.closest("p, table, li, blockquote, h1, h2, h3, h4, h5, h6");
+      State.results[i].position = "beforebegin";
       if (State.results[i].element.shadowRoot) {
-        while (location.parentElement?.shadowRoot) {
-          location = location.parentElement;
+        while (State.results[i].element.parentElement?.shadowRoot) {
+          State.results[i].element = location.parentElement;
         }
       }
-      if (!canPositionInside(location)) {
-        State.results[i].location = interactive(location) ?? location;
-        State.results[i].position = "beforebegin";
-      } else {
-        State.results[i].location = location;
+      if (State.results[i].element.closest(
+        'a, button, img, svg, input, iframe, [role="button"], [role="link"]'
+      )) {
+        State.results[i].element = State.results[i].element.closest('a, button, input, [role="button"], [role="link"]') ?? State.results[i].element;
+      } else if (State.results[i].element.matches(
+        "p, strong, em, i, u, table, td, th, li, blockquote, h1, h2, h3, h4, h5, h6"
+      )) {
         State.results[i].position = "afterbegin";
       }
     }
@@ -4971,6 +5159,8 @@ URL: ${url2}`;
       UI.errorCount = 0;
       UI.warningCount = 0;
       UI.totalCount = 0;
+    } else if (UI.showDismissed) {
+      UI.totalCount += UI.dismissedCount;
     }
   }
   const inDismissals = (result, i, splitConfiguration, digest) => {
@@ -5237,9 +5427,13 @@ URL: ${url2}`;
     });
     if (UI.imageAlts.length > 0) {
       altList.innerHTML = "";
+      const oldMarks = getElements("ed11y-element-alt", "root", []);
+      oldMarks?.forEach((mark) => {
+        mark.remove();
+      });
       for (let i = 0; i < UI.imageAlts.length; i++) {
         const image = UI.imageAlts[i];
-        const altText = computeAriaLabel(image.element) === "noAria" ? escapeHTML(image.element.getAttribute("alt")) : computeAriaLabel(image.element);
+        const altText = computeAriaLabel(image.element) === "noAria" ? image.element.getAttribute("alt") : computeAriaLabel(image.element);
         UI.imageAlts[i].altText = altText;
         if (UI.inlineAlerts) {
           const mark = document.createElement("ed11y-element-alt");
@@ -5305,6 +5499,7 @@ URL: ${url2}`;
       reset2?.forEach((el) => {
         el.remove();
       });
+      UI.altMarks.clear();
     }
     if (UI.visualizing) {
       UI.visualizing = false;
@@ -5455,18 +5650,26 @@ URL: ${url2}`;
   }
   const panelJumpTo = (event) => {
     event.preventDefault();
+    pauseObservers();
     UI.toggledFrom = event.target.closest("button");
     if (!UI.showPanel) {
       togglePanel();
       window.setTimeout(() => {
+        pauseObservers();
         jumpTo();
+        resumeObservers();
       }, 500);
     } else {
       jumpTo();
+      resumeObservers();
     }
   };
   function updatePanel() {
     pauseObservers();
+    if (UI.inlineAlerts && document.querySelector("[contenteditable]")) {
+      UI.forceFullCheck = true;
+      UI.inlineAlerts = false;
+    }
     if (UI.incremental) {
       if (UI.forceFullCheck || newIncrementalResults()) {
         UI.forceFullCheck = false;
@@ -5564,7 +5767,7 @@ URL: ${url2}`;
         document.addEventListener("keyup", (event) => {
           escapeWatch(event);
         });
-        if (UI.ignoreAll || !UI.inlineAlerts && UI.totalCount > 75) {
+        if (UI.ignoreAll || !UI.inlineAlerts && UI.totalCount > 99) {
           UI.showPanel = false;
         } else if (State.option.alertMode === "active" || !State.option.userPrefersShut || UI.showDismissed) {
           UI.showPanel = true;
@@ -5583,13 +5786,13 @@ URL: ${url2}`;
         UI.showPanel = true;
         UI.panel.classList.remove("ed11y-shut");
         UI.panel.classList.add("ed11y-active");
-        const preferredDismissHide = UI.dismissedCount > 1 ? Lang.sprintf("buttonHideHiddenAlerts", UI.dismissedCount) : Lang._("buttonHideHiddenAlert");
+        const preferredDismissHide = UI.dismissedCount > 1 ? Lang.sprintf("buttonHideHiddenAlerts", UI.dismissedCount).textContent : Lang._("buttonHideHiddenAlert");
         if (UI.dismissedCount === 0) {
           UI.panelShowDismissed.setAttribute("hidden", "");
           UI.panelShowDismissed.setAttribute("data-ed11y-pressed", "false");
           UI.showDismissed = false;
         } else if (UI.dismissedCount === 1) {
-          const show = UI.english ? Lang._("buttonShowHiddenAlert") : Lang.sprintf("PANEL_DISMISS_BUTTON", "1");
+          const show = UI.english ? Lang._("buttonShowHiddenAlert") : Lang.sprintf("PANEL_DISMISS_BUTTON", "1").textContent;
           UI.panelShowDismissed.querySelector(".ed11y-sr-only").textContent = UI.showDismissed ? preferredDismissHide : show;
           UI.panelShowDismissed.dataset.ed11yPressed = `${UI.showDismissed}`;
           if (!UI.english) {
@@ -5597,7 +5800,7 @@ URL: ${url2}`;
           }
           UI.panelShowDismissed.removeAttribute("hidden");
         } else {
-          UI.panelShowDismissed.querySelector(".ed11y-sr-only").textContent = UI.showDismissed ? preferredDismissHide : Lang.sprintf("PANEL_DISMISS_BUTTON", UI.dismissedCount);
+          UI.panelShowDismissed.querySelector(".ed11y-sr-only").textContent = UI.showDismissed ? preferredDismissHide : Lang.sprintf("PANEL_DISMISS_BUTTON", UI.dismissedCount).textContent;
           UI.panelShowDismissed.dataset.ed11yPressed = `${UI.showDismissed}`;
           if (!UI.english) {
             UI.panelShowDismissed.ariaPressed = UI.showDismissed;
@@ -5664,7 +5867,7 @@ URL: ${url2}`;
         if (UI.dismissedCount > 0) {
           UI.panelCount.textContent = "i";
           if (!UI.showPanel) {
-            UI.panelToggleTitle.textContent = UI.dismissedCount > 1 ? Lang.sprintf("PANEL_DISMISS_BUTTON", UI.dismissedCount) : Lang._("buttonShowHiddenAlert");
+            UI.panelToggleTitle.textContent = UI.dismissedCount > 1 ? Lang.sprintf("PANEL_DISMISS_BUTTON", UI.dismissedCount).textContent : Lang._("buttonShowHiddenAlert");
           }
         }
       }
@@ -6420,7 +6623,6 @@ URL: ${url2}`;
   }
   const enqueueTests = (queue) => {
     const test = queue.pop();
-    UI.testsRemaining--;
     try {
       switch (test) {
         case "group1":
@@ -6446,6 +6648,7 @@ URL: ${url2}`;
     } catch (error) {
       showError(error);
     }
+    UI.testsRemaining--;
     if (queue.length > 0) {
       if (UI.browserSpeed < 100 || State.option.headless) {
         enqueueTests(queue);
@@ -6458,7 +6661,7 @@ URL: ${url2}`;
           queue
         );
       }
-    } else {
+    } else if (UI.customTestsRemaining === 0) {
       continueCheck().then();
     }
   };
@@ -6468,10 +6671,15 @@ URL: ${url2}`;
     );
     State.option.customTests--;
     UI.customTestsRemaining = 0;
-    continueCheck(true).then();
+    if (UI.testsRemaining === 0) {
+      continueCheck().then();
+    }
     if (State.option.customTests === 0) {
       document.removeEventListener("ed11yResume", () => {
-        continueCheck(true).then();
+        UI.customTestsRemaining--;
+        if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
+          continueCheck().then();
+        }
       });
     }
   }
@@ -6496,12 +6704,9 @@ URL: ${url2}`;
     } else {
       UI.roots = document.querySelectorAll(`:is(${State.option.checkRoot})`);
     }
-    if (!UI.roots && State.option.headless === false) {
-      console.warn(Lang.sprintf("MISSING_ROOT", State.option.checkRoot));
-    }
-    if (UI.roots.length === 0) {
+    if (UI.roots.length === 0 && State.option.headless === false) {
       if (UI.onLoad) {
-        console.warn(Lang._("MISSING_ROOT"));
+        console.warn(Lang.sprintf("MISSING_ROOT", `"${State.option.checkRoot}"`).textContent);
       }
       disable();
       return;
@@ -6512,17 +6717,6 @@ URL: ${url2}`;
     State.results.length = 0;
     UI.splitConfiguration.devResults.length = 0;
     buildElementList();
-    if (State.option.customTests > 0) {
-      UI.customTestsRemaining += State.option.customTests;
-      window.clearTimeout(UI.customTestTimeout);
-      UI.customTestTimeout = window.setTimeout(() => {
-        if (UI.customTestsRemaining > 0) {
-          removeCustomTest();
-        }
-      }, 1e3);
-      const customTests = new CustomEvent("ed11yRunCustomTests");
-      document.dispatchEvent(customTests);
-    }
     const queue = ["group1", "group2"];
     if (State.option.formLabelsPlugin) {
       queue.push("checkLabels");
@@ -6534,15 +6728,26 @@ URL: ${url2}`;
       queue.push("checkContrast");
     }
     UI.testsRemaining = queue.length;
+    if (State.option.customTests > 0) {
+      UI.customTestsRemaining = State.option.customTests;
+      const customTests = new CustomEvent("ed11yRunCustomTests");
+      document.dispatchEvent(customTests);
+      window.clearTimeout(UI.customTestTimeout);
+      const customTestRace = performance.now();
+      UI.customTestRace = customTestRace;
+      UI.customTestTimeout = window.setTimeout(
+        () => {
+          if (UI.customTestRace === customTestRace && UI.customTestsRemaining > 0) {
+            removeCustomTest();
+          }
+        },
+        1e3,
+        customTestRace
+      );
+    }
     enqueueTests(queue);
   }
-  async function continueCheck(customCheck = false) {
-    if (customCheck) {
-      UI.customTestsRemaining--;
-    }
-    if (UI.customTestsRemaining + UI.testsRemaining > 0) {
-      return;
-    }
+  async function continueCheck() {
     if (UI.splitConfiguration.active && State.results.length > 0) {
       await handleSyncOnlyResults();
     } else {
@@ -6609,7 +6814,7 @@ URL: ${url2}`;
       }, 500);
       runTime = performance.now() - runTime;
       UI.browserSpeed = runTime > 100 ? 100 : (UI.browserSpeed + runTime) / 2;
-      UI.browserLag = UI.browserSpeed < 1 ? 0 : UI.browserSpeed * 100 + UI.totalCount;
+      UI.browserLag = UI.browserSpeed < 1 ? 0 : UI.browserSpeed * 40 + UI.totalCount;
     } else {
       window.setTimeout(() => {
         incrementalCheckDebounce();
@@ -6627,7 +6832,7 @@ URL: ${url2}`;
     visualize();
     if (UI.totalCount === 0 && UI.dismissedCount > 0) {
       UI.panelCount.textContent = "i";
-      UI.panelToggleTitle.textContent = UI.dismissedCount === 1 ? Lang._("buttonShowHiddenAlert") : Lang.sprintf("PANEL_DISMISS_BUTTON", UI.dismissedCount);
+      UI.panelToggleTitle.textContent = UI.dismissedCount === 1 ? Lang._("buttonShowHiddenAlert") : Lang.sprintf("PANEL_DISMISS_BUTTON", UI.dismissedCount).textContent;
     }
     if (typeof UI.panel === "object") {
       UI.panel?.classList.add("ed11y-shut");
@@ -6635,7 +6840,7 @@ URL: ${url2}`;
       UI.panelToggle.ariaExpanded = false;
       if (!UI.showDismissed && typeof UI.panelShowDismissed === "function") {
         UI.panelShowDismissed.setAttribute("data-ed11y-pressed", "false");
-        UI.panelShowDismissed.querySelector(".ed11y-sr-only").textContent = UI.dismissedCount === 1 ? Lang._("buttonShowHiddenAlert") : Lang.sprintf("PANEL_DISMISS_BUTTON", UI.dismissedCount);
+        UI.panelShowDismissed.querySelector(".ed11y-sr-only").textContent = UI.dismissedCount === 1 ? Lang._("buttonShowHiddenAlert") : Lang.sprintf("PANEL_DISMISS_BUTTON", UI.dismissedCount).textContent;
       }
     }
   }
@@ -7054,7 +7259,7 @@ URL: ${url2}`;
     }
   }
   function generateContrastTools(contrastDetails) {
-    const { sanitizedText, color, background, fontWeight, fontSize, ratio, textUnderline } = contrastDetails;
+    const { previewText, color, background, fontWeight, fontSize, ratio, textUnderline } = contrastDetails;
     const hasBackgroundColor = background && background.type !== "image";
     const backgroundHex = hasBackgroundColor ? getHex(background) : "#000000";
     const foregroundHex = color ? getHex(color) : "#000000";
@@ -7078,7 +7283,7 @@ URL: ${url2}`;
       <div id="contrast" class="badge">${Lang._("CONTRAST")}</div>
       <div id="value" class="badge">${displayedRatio}</div>
       <div id="good" class="badge good-contrast" hidden>${Lang._("GOOD")} <span class="good-icon"></span></div>
-      <div id="contrast-preview" style="color:${foregroundHex};${hasBackgroundColor ? `background:${backgroundHex};` : ""}${hasFontWeight + hasFontSize + textDecoration}">${sanitizedText}</div>
+      <div id="contrast-preview" style="color:${foregroundHex};${hasBackgroundColor ? `background:${backgroundHex};` : ""}${hasFontWeight + hasFontSize + textDecoration}"></div>
       <div id="color-pickers">
         <label for="fg-text">${Lang._("FG")} ${unknownFGText}
           <div id="fg-color-wrapper" ${unknownFG}>
@@ -7091,6 +7296,7 @@ URL: ${url2}`;
           </div>
         </label>
       </div>`;
+    contrastTools.querySelector("#contrast-preview").textContent = previewText;
     return contrastTools;
   }
   function initializeContrastTools(container, contrastDetails) {
@@ -7221,38 +7427,76 @@ URL: ${url2}`;
     }, 0);
   }
   function generateColorSuggestion(contrastDetails) {
-    let adviceContainer;
-    const { color, background, fontWeight, fontSize, isLargeText, type } = contrastDetails;
-    if (color && background && background.type !== "image" && (type === "text" || type === "svg-error" || type === "input")) {
-      const suggested = Constants.Global.contrastAlgorithm === "APCA" ? suggestColorAPCA(color, background, fontWeight, fontSize) : suggestColorWCAG(
-        color,
-        background,
-        isLargeText,
-        Constants.Global.contrastAlgorithm
-      );
-      let advice;
-      const hr = '<hr aria-hidden="true">';
-      const bgHex = getHex(contrastDetails.background);
-      const style = `color:${suggested.color};background-color:${bgHex};`;
-      const colorBadge = `<button id="suggest" class="badge" style="${style}">${suggested.color}</button>`;
-      const sizeBadge = `<button id="suggest-size" class="normal-badge">${suggested.size}px</button>`;
-      if (Constants.Global.contrastAlgorithm === "AA" || Constants.Global.contrastAlgorithm === "AAA") {
-        if (suggested.color === null) {
-          advice = `${hr} ${Lang._("NO_SUGGESTION")}`;
-        } else {
-          advice = `${hr} ${Lang._("CONTRAST_COLOR")} ${colorBadge}`;
-        }
-      } else if (suggested.color && suggested.size) {
-        advice = `${hr} ${Lang._("CONTRAST_APCA")} ${colorBadge} ${sizeBadge}`;
-      } else if (suggested.color) {
-        advice = `${hr} ${Lang._("CONTRAST_COLOR")} ${colorBadge}`;
-      } else if (suggested.size) {
-        advice = `${hr} ${Lang._("CONTRAST_SIZE")} ${sizeBadge}`;
+    const { color, background, fontWeight, fontSize, isLargeText, type, opacity } = contrastDetails;
+    if (!color || !background || background.type === "image" || !(type === "text" || type === "svg-error" || type === "input")) {
+      return;
+    }
+    const suggested = Constants.Global.contrastAlgorithm === "APCA" ? suggestColorAPCA(color, background, fontWeight, fontSize) : suggestColorWCAG(
+      color,
+      background,
+      isLargeText,
+      Constants.Global.contrastAlgorithm
+    );
+    const adviceContainer = document.createElement("div");
+    adviceContainer.id = "advice";
+    const createHr = () => {
+      const hr = document.createElement("hr");
+      hr.setAttribute("aria-hidden", "true");
+      return hr;
+    };
+    const createColorBadge = (suggestedColor) => {
+      const btn = document.createElement("button");
+      btn.id = "suggest";
+      btn.className = "badge";
+      const bgHex = getHex(background);
+      btn.style.color = suggestedColor;
+      btn.style.backgroundColor = bgHex;
+      btn.textContent = suggestedColor;
+      return btn;
+    };
+    const createSizeBadge = (size) => {
+      const btn = document.createElement("button");
+      btn.id = "suggest-size";
+      btn.className = "normal-badge";
+      btn.textContent = `${size}px`;
+      return btn;
+    };
+    if (opacity < 1) {
+      adviceContainer.append(createHr(), " ", Lang.sprintf("CONTRAST_OPACITY"));
+      return adviceContainer;
+    }
+    const algo = Constants.Global.contrastAlgorithm;
+    if (algo === "AA" || algo === "AAA") {
+      if (suggested.color === null) {
+        adviceContainer.append(createHr(), " ", Lang._("NO_SUGGESTION"));
+      } else {
+        adviceContainer.append(
+          createHr(),
+          " ",
+          Lang._("CONTRAST_COLOR"),
+          " ",
+          createColorBadge(suggested.color)
+        );
       }
-      adviceContainer = document.createElement("div");
-      adviceContainer.id = "advice";
-      const suggestion = contrastDetails.opacity < 1 ? `<hr aria-hidden="true"> ${Lang.sprintf("CONTRAST_OPACITY")}` : advice;
-      adviceContainer.innerHTML = suggestion;
+    } else {
+      const hasColor = !!suggested.color;
+      const hasSize = !!suggested.size;
+      if (hasColor || hasSize) {
+        adviceContainer.append(createHr(), " ");
+        if (hasColor && hasSize) {
+          adviceContainer.append(
+            Lang._("CONTRAST_APCA"),
+            " ",
+            createColorBadge(suggested.color),
+            " ",
+            createSizeBadge(suggested.size)
+          );
+        } else if (hasColor) {
+          adviceContainer.append(Lang._("CONTRAST_COLOR"), " ", createColorBadge(suggested.color));
+        } else if (hasSize) {
+          adviceContainer.append(Lang._("CONTRAST_SIZE"), " ", createSizeBadge(suggested.size));
+        }
+      }
     }
     return adviceContainer;
   }
@@ -7308,21 +7552,29 @@ URL: ${url2}`;
       UI.attachCSS(this.wrapper);
       this.tip = this.wrapper.querySelector(".tip");
       const content = this.wrapper.querySelector(".message");
-      if (this.result.content.includes('class="title"')) {
-        content.innerHTML = this.result.content.split("<hr")[0];
+      if (this.result.content.querySelector(".title")) {
+        content.appendChild(this.result.content);
+        const sallyTips = content.querySelectorAll("hr, hr ~ *");
+        if (sallyTips) {
+          const tipSet = Array.from(sallyTips);
+          for (let i = tipSet.length; i >= 0; i--) {
+            const el = tipSet[i];
+            if (el) {
+              el.nextSibling?.remove();
+              el.remove();
+            }
+          }
+        }
       } else {
         const innerContent = document.createElement("div");
-        const sentences = this.result.content.split(/[.!]/);
         const firstSentence = document.createElement("div");
-        firstSentence.innerHTML = `${sentences.shift()}.`;
         firstSentence.classList.add("title");
         firstSentence.setAttribute("tabindex", "-1");
+        firstSentence.style.setProperty("position", "absolute");
         innerContent.append(firstSentence);
-        const theRest = document.createElement("div");
-        theRest.classList.add("sa11y-tip");
-        theRest.innerHTML = sentences.join(".");
-        innerContent.appendChild(theRest);
+        innerContent.appendChild(this.result.content);
         content.append(innerContent);
+        console.warn(`Editoria11y tip title not found for ${this.result.test}.`);
       }
       const title = content.querySelector(".title");
       const invisibleAlert = document.createElement("div");
@@ -7393,7 +7645,7 @@ URL: ${url2}`;
         } else {
           const pageActions = this.wrapper.querySelector(".ed11y-bulk-actions");
           const pageActionsSummary = pageActions.querySelector("summary");
-          pageActionsSummary.textContent = Lang.sprintf("dismissActions");
+          pageActionsSummary.textContent = Lang._("dismissActions");
           const othersLikeThis = State.results.filter((el) => el.test === this.result.test).length;
           const pageActionsContent = pageActions.querySelector(".ed11y-bulk-actions-content");
           const showPageActions = othersLikeThis > 3 && (State.option.allowHide || State.option.allowOK);
@@ -7616,7 +7868,7 @@ URL: ${url2}`;
       PAGE_TITLE: "Page title",
       RESULTS: "Results",
       EXPORT_RESULTS: "Export results",
-      GENERATED: "Results generated with %(tool).",
+      GENERATED: 'Results generated with <a href="https://sa11y.netlify.app">Sa11y.</a>',
       PREVIEW: "Preview",
       ELEMENT: "Element",
       PATH: "Path",
@@ -7760,6 +8012,7 @@ URL: ${url2}`;
       LINK_NEW_TAB: `Link opens in a new tab or window without warning. Doing so can be disorienting, especially for people who have difficulty perceiving visual content. Secondly, it is not always a good practice to control someone's experience or make decisions for them. Indicate that the link opens in a new window within the link text. <hr> <strong>Tip!</strong> Learn best practices: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">opening links in new browser windows and tabs.</a>`,
       LINK_FILE_EXT: 'Link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning. Indicate the file type within the link text. If it is a large file, consider including the file size. For example: "Executive Report (PDF, 3MB)"',
       LINK_IDENTICAL_NAME: "Link has identical text as another link, although it points to a different page. Multiple links with the same text may cause confusion for people who use screen readers. <strong>Consider making the following link more descriptive to help distinguish it from other links.</strong> <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
+      LINK_UNPRONOUNCEABLE: "Link text only contains symbols. If you think this link is an error due to a copy/paste bug, consider deleting it.",
       // Images
       ALT_UNPRONOUNCEABLE: "The alt text only contains unpronounceable symbols and/or spaces. Screen readers will announce the image and then pause. If the image is decorative, ensure there are no spaces within the alt text. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
       LINK_ALT_UNPRONOUNCEABLE: "The alt text within this linked image only contains unpronounceable symbols and/or spaces. Screen readers will announce the image and then pause. Ensure the alt text describes the destination of the link. <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
@@ -7874,7 +8127,6 @@ URL: ${url2}`;
     ALT_FILE_EXT: "This alt text is a filename, not a description",
     ALT_MAYBE_BAD: "This alt text cannot be pronounced by a screen reader",
     ALT_PLACEHOLDER: "This alt text does not describe its image",
-    // updated
     ALT_UNPRONOUNCEABLE: "This alt text is unpronounceable",
     BTN_EMPTY: "Button is missing an accessible label",
     BTN_EMPTY_LABELLEDBY: "Button has an invalid ARIA label",
@@ -7911,18 +8163,17 @@ URL: ${url2}`;
     LABELS_INPUT_RESET: "Is this reset button needed?",
     LABEL_IN_NAME: "Visible label does not match invisible label",
     LABELS_MISSING_LABEL: "This input is not connected to a label",
-    // updated
     LINK_ALT_FILE_EXT: "Alt text used as a link should not be a URL",
     LINK_ALT_MAYBE_BAD: "This linked alt cannot be pronounced by a screen reader",
     LINK_ALT_UNPRONOUNCEABLE: "Linked images need pronounceable alt text",
     LINK_CLICK_HERE: 'This link contains "click here"',
     LINK_DOI: "Link article titles, not DOI numbers",
-    LINK_EMPTY: "This link has no text",
+    LINK_EMPTY: "This link contains no words",
     LINK_EMPTY_LABELLEDBY: 'Link with invalid "aria-labelledby" attribute',
     LINK_EMPTY_NO_LABEL: "This link needs a label",
+    LINK_UNPRONOUNCEABLE: "This link is unpronounceable",
     LINK_FILE_EXT: "Link points to a file without warning",
     LINK_IDENTICAL_NAME: "Links with the same text link to different pages",
-    // updated
     LINK_IMAGE_ALT: "Does this alt text describe the link or the image?",
     LINK_IMAGE_ALT_AND_TEXT: "Does this alt text make sense as part of this link?",
     LINK_IMAGE_LONG_ALT: "Can this linked alt text be shorter?",
@@ -7931,7 +8182,6 @@ URL: ${url2}`;
     LINK_NEW_TAB: "Does this link open a new tab without warning?",
     LINK_PLACEHOLDER_ALT: "This linked image needs meaningful alt text",
     LINK_STOPWORD: "This link only contains generic words",
-    // updated
     LINK_STOPWORD_ARIA: "Meaningful link text only available to screen reader users",
     LINK_SUS_ALT: `Does this image's alt describe the image or the link?`,
     LINK_SYMBOLS: "Are the symbols or emoji in this link meaningful?",
@@ -7968,38 +8218,35 @@ URL: ${url2}`;
   const why = {
     fix: `<strong class="badge">To fix</strong> `,
     buttons: `<div class="why"><p>Tip: the accessible name for a button should make it clear what it will do. Buttons that change on click should change their name as well:</p><ul><li>Changing labels:<br>"Play/Pause," "Show details/Hide details"</li><li>Changing <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">state attributes</a>:<br>"Play/Play, pressed," "Details, collapsed/Details, expanded."</li></ul><p>Just don't change both at once. Changing "Play" to "Pause, pressed" means the player is paused, not playing!</p></div>`,
-    // updated
     headings: `<div class="why"><p>Tip: headings and subheadings organize content into a nested outline. Screen reader users rely on this outline to understand and explore pages:</p><ul><li>Heading level 1: page titles<ul><li>Heading level 2: major topics<ul><li>Heading level 3: subtopics</li></ul></li></ul></li></ul></div>`,
     images: `<div class="why"><p>Tip: describe what an image means, not just what it contains, when writing an alt. Depending on context, a photo of a child kicking a ball might mean:</p><ul><li>They played in the pouring rain.</li><li>The new team uniforms have cool dragon logos.</li><li>She kicked the game-winning goal from the left sideline!</li></ul></div>`,
     links: `<div class="why"><p>Tip: readers skim by links and use in-page search to find links by name, so effective links are meaningful, unique and concise:</p><ul><li>Ideal: "Learn about <a href="https://webaim.org/techniques/hypertext/link_text">meaningful links</a>"</strong></li><li>Not unique: "Click <a href="https://webaim.org/techniques/hypertext/link_text">here</a> to learn about meaningful links."</li>
 	<li>Not concise: "<a href="https://webaim.org/techniques/hypertext/link_text">Click here to learn more about meaningful links</a>"</li></ul></div>`,
-    // updated
     imageLinks: `<div class="why"><p>Tip: the purpose of alt text is to provide an alternative for what an image means, not what it contains. The meaning of a linked image is the link destination:<ul><li>"<em>A magnifying glass</em>" describes an image, not a link.</li><li>"<em>A magnifying glass search</em>" confusingly describes both.</li><li>"<em>Search</em>" describes the link destination accurately.</li></ul></p></div>`
-    // updated.
   };
   const tips = {
     ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt text: <strong>"%(ALT_TEXT)"</strong></p><p>Screen readers will dictate this url, often one letter at a time. This probably does not provide the same meaning as seeing the image.</p><p>${why.fix}Either add an empty alt (alt="") if this is a meaningless decoration that should be ignored by screen readers, or add descriptive alt text.</p>${why.images}`,
-    // updated
     ALT_MAYBE_BAD: `<p>Alt text: <strong>"%(alt)"</strong></p><p>${why.fix}Set this image's alternative text to a concise description of what this image means in this context.</p>${why.images}`,
-    // updated
     ALT_PLACEHOLDER: `<p>Alt text: <strong>"%(alt)"</strong></p><p>${why.fix}Set this image's alternative text to a concise description of what this image means in this context.</p>${why.images}`,
     //updated
     ALT_UNPRONOUNCEABLE: `<p>Alt text: "<strong>%(alt)</strong>"</p><p>This alt text only contains unpronounceable symbols and/or spaces. Screen readers will announce that an image is present and then pause awkwardly or say something unintelligible.</p><p>${why.fix}Add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") if this is just an icon or spacer, and screen readers should ignore it.</p>${why.images}`,
-    // updated
     BTN_EMPTY: `<p>${why.fix}Use any valid method to tell screen readers what this button does, e.g. text, alt text on an icon, or a title attribute.</p>`,
-    // updated
     BTN_EMPTY_LABELLEDBY: `<p>This button has an <code>aria-labelledby</code> value that is empty or does not match the <code>ID</code> value of another element on the page.</p><p>${why.fix}Reconnect the ID to an element on the page, or remove this attribute and describe the button in another way.</p>`,
     BTN_TIP: `${why.buttons}`,
+    BTN_ROLE_IN_NAME: `<p>Screen readers use the word "button" to announce they are describing a button, so this word is redundant.</p><p>${why.fix}The button's label should match its action. If the visible label is an icon instead of text, label the button with the icon's meaning, e.g. "Play," "Search" or "Menu."</p>`,
+    // Updated
     CONTRAST_WARNING: "A background image or gradient means this checker is not sure what color is behind this text. Use the color picker below to check manually.",
     DUPLICATE_ID: `<p>IDs are being used on this page for labels or link targets, which means they must be unique.</p><p>${why.fix}Change this ID: <strong>#%(id)</strong></p><div class="why"><p>In most content management systems, this comes from a field called "name" or "id" in the element properties. In HTML, it is an attribute: <code>&lt;a id="MY-ID"&gt;</code></p></div>`,
     DUPLICATE_TITLE: `<p>${why.fix}Delete the link's text or <code>title</code> attribute.</p><div class="why"><p>Tip: <code>title</code> tooltips only appear when hovering with a mouse. They cannot be seen when navigating on a phone or with a keyboard, so many users will never see them. They should never contain unique or important information.</p></div>`,
-    // updated
     EMBED_AUDIO: `<p>If this audio contains speech, a <a href="https://www.w3.org/WAI/media/av/transcribing/">text alternative</a> must be provided on this page or linked.</p><p>Note that a human needs to proofread automatic, machine-generated captions and make sure speakers and meaningful sound effects are accurately identified.</p>`,
-    EMBED_DATA_VIZ: `<p>Embedded visualization widgets are often difficult or impossible for assistive devices to operate, can be difficult to understand for readers with low vision or colorblindness, and may require extensive horizontal scrolling on phones.</p>	<p>${why.fix}Unless this particular embed has high visual contrast, can be operated by a keyboard <strong><em>and</em></strong> described by a screen reader, add an equivalent, alternate format such as a text description, data table or downloadable spreadsheet, then dismiss this alert.</p>`,
-    EMBED_GENERAL: 'Automated checkers cannot test content inside embeds. Make sure someone has checked that all images inside this embed have alt text, videos have captions, text has sufficient contrast, and links and buttons are <a href="https://webaim.org/techniques/keyboard/">keyboard accessible</a>, then dismiss this alert.',
+    EMBED_DATA_VIZ: `<p>Embedded visualization widgets are often difficult or impossible for assistive devices to operate, can be difficult to understand for readers with low vision or colorblindness, and may require extensive horizontal scrolling on phones.</p>	<p>${why.fix}Unless this particular embed has high visual contrast, can be operated by a keyboard <strong><em>and</em></strong> described by a screen reader, add an equivalent, alternate format such as a text description, data table or downloadable spreadsheet.</p>`,
+    // Updated
+    EMBED_GENERAL: 'Automated checkers cannot test content inside embeds. Make sure someone has checked that all images inside this embed have alt text, videos have captions, text has sufficient contrast, and links and buttons are <a href="https://webaim.org/techniques/keyboard/">keyboard accessible</a>.',
+    // Updated
     EMBED_MISSING_TITLE: `<p>Embeds need an accessible name that describes their contents for screen readers.</p><p>${why.fix}Provide a unique <code>title</code> or <code>aria-label</code> attribute.</p>`,
     EMBED_UNFOCUSABLE: `This attribute tells keyboards and assistive devices to skip over the element. Unless the content of this iframe does not contain any links, buttons or form elements and cannot be scrolled, this attribute needs to be removed.`,
-    EMBED_VIDEO: `<p>Videos must provide captions.</p><p>Note that a human needs to proofread automatic, machine-generated captions and make sure speakers and meaningful sound effects are accurately identified.</p><p>${why.fix}Add or proofread the captions, then dismiss this alert.</p>`,
+    EMBED_VIDEO: `<p>Videos must provide captions.</p><p>Note that a human needs to proofread automatic, machine-generated captions and make sure speakers and meaningful sound effects are accurately identified.</p><p>${why.fix}Add or proofread the captions.</p>`,
+    // Updated
     HEADING_EMPTY: `<p>Empty headings create confusing gaps in the page outline.</p><p>${why.fix}Add text to this heading, or delete this empty line.</p>${why.headings}`,
     HEADING_EMPTY_WITH_IMAGE: `<p>Empty headings create confusing gaps in the page outline.</p><p>${why.fix}If this is not a heading, change its format from <strong {C}>Heading %(level)</strong> to <strong>Paragraph</strong>. Otherwise, put the meaning of the image in its alt.</p>${why.headings}`,
     HEADING_FIRST: `${why.fix}Make sure the page title is marked as a Heading 1 or Heading 2. ${why.headings}`,
@@ -8008,7 +8255,6 @@ URL: ${url2}`;
     HEADING_SKIPPED_LEVEL: `<p>This heading skipped from <strong>level %(prevLevel) to level %(level)</strong>. From a screen reader, this sounds like content is missing.</p><p>${why.fix}Adjust levels to form an accurate outline, without gaps.</p>${why.headings}`,
     HIDDEN_FOCUSABLE: `<p>This interactive element has an <code>aria-hidden=&quot;true&quot;</code> attribute, but is still keyboard focusable.</p><p>${why.fix}If you are <strong>intending</strong> to hide this element from screen readers, you must also add <code>tabindex=&quot;-1&quot;</code>. Otherwise, remove the <code>aria-hidden=&quot;true&quot;</code> attribute.</p>`,
     IMAGE_ALT_TOO_LONG: `<p>%(altLength) character alt text: <strong class="ed11y-small">%(ALT_TEXT)</strong></p><p>${why.fix}Summarize, or move some of the description into a caption.</p><div class="why"><p>Tip: complicated images that convey more information than fit in a sentence usually need a <strong>visible</strong> caption or alternative that describes or interprets key details. It is OK to refer screen reader users to such text:</p><ul><li>"Poster for the dance on Friday; details follow in caption."</li> <li>"Chart showing issues are down 10% this year; details follow in table."</li></ul></div>`,
-    // updated
     IMAGE_DECORATIVE: `<p>This image has been hidden from screen readers using a blank alt. Only meaningless images like redundant icons and background textures should be hidden like this.</p><p>${why.fix}If this image adds value to the page, provide alt text.</p>${why.images}`,
     IMAGE_DECORATIVE_CAROUSEL: "Image is marked as <strong>decorative</strong>, but all images in a carousel or gallery should include descriptive alt text to ensure an equivalent experience for everyone.",
     IMAGE_FIGURE_DECORATIVE: `<p>This image will be ignored by assistive technology. Will its caption make sense without the image?</p><p>${why.fix}If the caption does not describe the image's visual meaning, provide alt text for whatever the caption does not describe.</p><div class="why"><p>Tip: images, alts and captions work together:</p><ul><li>Visible captions provide context and interpretation for an image.</li><li>Invisible alts describe an image for people who cannot see it, so they know what the caption is describing.</li></ul></div>`,
@@ -8017,68 +8263,56 @@ URL: ${url2}`;
     LABELS_INPUT_RESET: `<p>Reset buttons are easy to activate by mistake, causing data loss without an opportunity to cancel or undo.</p><p>${why.fix}Unless this is resetting a single field, consider removing it or providing a method to cancel before executing the action.</p>`,
     LABELS_MISSING_IMAGE_INPUT: "Image button is missing alt text. Please add alt text to provide an accessible name. For example: <em>Search</em> or <em>Submit</em>.",
     LABELS_MISSING_LABEL: `<p>${why.fix}Add an <code>id</code> to this input, and add a matching <code>for</code> attribute to the label.</p>`,
-    // updated
     LABELS_NO_FOR_ATTRIBUTE: "There is no label associated with this input. Add a <code>for</code> attribute to the label that matches the <code>id</code> of this input. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
     LABELS_PLACEHOLDER: `<p>Placeholder text disappears as soon as someone starts typing, and often either has too little contrast to be easily legible or enough contrast to be easily mistaken for content.</p><p>${why.fix}Make sure key information like the field label, help text and format instructions remain visible when there is content in this field, and consider dropping the placeholder altogether.</p>`,
     LABEL_IN_NAME: `<p>The visible text for this element appears to be different from the accessible name. This may cause confusion for screen reader users, and may break voice control.</p><p>${why.fix}Make sure the visible label starts with the text of the invisible label, and does not contain any additional meaningful information.</p><p><strong>Invisible Label:</strong> "%(TEXT)"</p>`,
-    // updated
     LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt text: "<strong>%(alt)</strong>"</p><p>This alt text is probably a filename instead of a meaningful label for a link.</p><p>${why.fix}Set this image's alt text to the name of the link destination.</p><div class="why"> <p>The purpose of alt text is to provide an alternative for what an image means, not what it contains. The meaning of a linked image is the link destination:</p><ul><li>"Page with writing" describes the image, not a link.</li><li>"IMG_1234.jpg" is just a filename.</li><li>"<strong><em>Event registration form (.doc)</em></strong>" is a link destination.</li></ul></p></div>`,
-    // updated
     LINK_ALT_MAYBE_BAD: `<p>Alt text: "<strong>%(alt)</strong>."</p><p>${why.fix}Set this image's alt text to the name of the link destination.</p>${why.imageLinks}`,
-    // updated
     LINK_ALT_UNPRONOUNCEABLE: `<p>The alt text within this linked image only contains unpronounceable symbols and/or spaces: "%(ALT_TEXT)". Screen readers will announce there is a link, and then be unable to describe it.</p><p>${why.fix}Set this image's alt to the link's destination or purpose.</p>${why.imageLinks}`,
     LINK_CLICK_HERE: `The phrase "click" or "click here" is redundant, and takes focus away from the link's purpose.`,
     LINK_DOI: `<p>${why.fix}Link the article title and provide the DOI number as plain text, rather than linking the DOI number and leaving the article title as plain text.</p><div class="why"><p>The <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">APA Style guide</a> recommends using descriptive links on websites because users skim by links and use in-page search for links by name. Users are much more likely to notice articles of interest when the title is linked.</p><p>This also allows screen readers to describe each link meaningfully, rather than speaking a meaningless sequence of numbers.</p></div>`,
-    LINK_EMPTY: `<p>${why.fix}Add text describing its destination, or delete it if is just a typo or linked space character.</p><div class="why"><p>Tip: screen readers cannot describe empty links. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the URL: Link, H-T-T-P-S forward-slash forward-slash example dot com."</p><p>Note that linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p></div>`,
-    // updated
+    LINK_EMPTY: `<p>${why.fix}Add text describing its destination, or delete it if is just a typo or linked space character.</p><div class="why"><p>Tip: screen readers cannot describe links that only contain spaces or symbols. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the URL: Link, H-T-T-P-S forward-slash forward-slash example dot com."</p><p>Note that linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p></div>`,
     LINK_EMPTY_LABELLEDBY: `<p>This link has an <code>aria-labelledby</code> attribute that does not match the <code>ID</code> of any element on the page.</p><p>${why.fix}Provide a valid <code>ID</code>, or remove this attribute and describe the button in another way.</p>`,
     LINK_EMPTY_NO_LABEL: `<p>${why.fix}Add text describing its destination, or delete it if is just a typo like a linked space character.</p><div class="why"><p>Tip: screen readers cannot describe empty links. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the URL: Link, H-T-T-P-S forward-slash forward-slash example dot com."</p><p>Note that linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p></div>`,
-    // updated
+    LINK_UNPRONOUNCEABLE: `<p>${why.fix}Add text or a title describing its destination, or delete it if is just a typo or linked space character.</p><div class="why"><p>Tip: screen readers cannot describe links that only contain spaces or symbols. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the name of the symbol.</p></div>`,
     LINK_FILE_EXT: `<p>This link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning.</p><p>${why.fix}Use text or an icon to <a href="https://itmaybejj.github.io/linkpurpose/">indicate the file type</a> within the link text.</p><p class="why">For large files, consider including the file size. For example: "Executive Report (PDF, 3MB)"</p>`,
     LINK_IDENTICAL_NAME: `<p>Link text: "<strong>%(TEXT)</strong>"</p><p>${why.fix}Reword links that go different places with the unique titles of their different destinations.</p>${why.links}`,
-    // updated
-    LINK_IMAGE_ALT: `Make sure this alt describes the link destination:</p><p> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong></p>${why.imageLinks}`,
+    LINK_IMAGE_ALT: `<p>Make sure this alt describes the link destination, not just the visual contents of the image:</p><p> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong></p>${why.imageLinks}`,
     LINK_IMAGE_ALT_AND_TEXT: `<p><span style="display: none;">%(ALT)</span>Link including alt text:<br>"<strong>%(LINK)</strong>"</p><p>${why.fix}Modify or remove the alt text if it is adding irrelevant or redundant information.</p>${why.imageLinks}`,
-    // updated
     LINK_IMAGE_LONG_ALT: `<p>%(altLength) character alt text: <strong class="ed11y-small">%(ALT_TEXT)</strong></p><p>${why.fix}Set this image's alt text to the title of the link destination.</p><div class="why"><p>Screen reader users often hear a list of links on the page out of context. Since the alt text of a linked image becomes the link's title in this list, it should <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">describe the link's destination</a>, not the image's contents.</p></div>`,
-    // updated
-    LINK_IMAGE_NO_ALT_TEXT: `<p>When a link is wrapped around an image, the image's alt text <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">provides the link's title for screen readers</a>.</p><p>${why.fix}Set this image's alternative text the link's destination or purpose.</p>${why.imageLinks}`,
+    LINK_IMAGE_NO_ALT_TEXT: `<p>When a link is wrapped around an image, the image's alt text <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">provides the link's title for screen readers</a>.</p><p>${why.fix}Set this image's alternative text to the link's destination or purpose.</p>${why.imageLinks}`,
     LINK_IMAGE_TEXT: "Image is marked as decorative, although the link is using the surrounding text as a descriptive label.",
     LINK_NEW_TAB: `<p>${why.fix}Set this link to open in the same tab, or <a href="https://itmaybejj.github.io/linkpurpose/">warn users</a> first.</p><div class="why"><p>Readers can always <em>choose</em> to open a link in a new tab. When a link forces open a new tab, it is often confusing or annoying, especially for assistive device users who wonder why their browser's "back" button stopped working.</p><p>Note: forms are the exception. When the user is filling out a form, opening a link in the same window could cause them to lose their work, so links within forms usually open in new tabs.</p></div>`,
     LINK_PLACEHOLDER_ALT: `<p>This image's alt text is a placeholder: "<strong>%(alt)</strong>."</p><p>${why.fix}Set this image's alt text to the name of the link destination.</p>${why.imageLinks}`,
     LINK_STOPWORD: `<p>Link text: "<strong>%(text)</strong>"</p><p>${why.fix}Use link text that describes its destination.</p>${why.links}`,
-    // updated
     LINK_STOPWORD_ARIA: `<p>An accessible name was provided using ARIA, but the visible and searchable link text is generic: &quot;<strong {C}>%(ERROR)</strong>&quot;.</p><p>${why.fix}Write meaningful links for everyone, not just screen reader users, and make sure each element's visual <a href="https://www.w3.org/WAI/WCAG22/Understanding/label-in-name.html">label matches its accessible name</a>.</p>${why.links}`,
     LINK_SUS_ALT: `<p>This image's alt text includes the word "%(alt)," which usually means the alt is not describing the link destination.</p><p>Alt text: "<strong>%(ALT_TEXT)</strong>"</p><p>To fix: make sure this alt is the link's destination or purpose. <br></strong></p>${why.imageLinks}`,
-    // updated
     LINK_SYMBOLS: `<p>Symbol found: <strong {C}>%(ERROR)</strong></p>${why.fix}Avoid using symbols as calls to action within link text unless they are hidden from assistive technologies. Screen readers may read the symbols out loud, which can be confusing.</p>`,
-    // updated
     LINK_URL: `<p>${why.fix}Change this link to the title of its destination or purpose.</p><div class="why"><p>Readers skim for links by name. This is especially true of screen reader users, who navigate and search using a list of on-page links.</p><p>Linked URLs cannot be skimmed or found by in-page searches, so people are less likely to find them and less likely to click them.</p></div>`,
     META_LANG: `<p>${why.fix}Add a <a href="https://www.w3.org/International/questions/qa-html-language-declarations">language attribute on the page HTML tag</a>.</p><div class="why"><p>Tip: screen readers pronounce words using language tags. Pronouncing a language with the wrong language pack produces unintelligible speech. If your language is not tagged, the screen reader will either use the browser's default language or try to guess, with unpredictable results.</p></div>`,
     META_REFRESH: `<p>Pages should not automatically refresh using a meta tag. This interrupts the user without warning or the ability to prevent refresh, makes them lose their place while reading, and can reset form progress.</p><p>${why.fix}To refresh content on the same page, use AJAX to refresh sections in place without a reload, or use JavaScript to trigger the reload, so the user can be warned first and have the option to delay the event.</p>`,
-    META_TITLE: `<p>${why.fix}Add a <code>&lt;title&gt</code> tag to the page's <code>&lt;head&gt;</code> element.</p><div class="why"><p>Many parts of the browsing experience depend on a <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">short and unique title tag</a>:</p><ul><li>Search engines use it to title results.</li><li>Browsers use it to title tabs.</li><li>Screen readers speak it when switching tabs.</li></ul><p>Without a page title, people see/hear a raw URL instead.</p></div>`,
+    META_TITLE: `<p>${why.fix}Add a <code>&lt;title&gt;</code> tag to the page's <code>&lt;head&gt;</code> element.</p><div class="why"><p>Many parts of the browsing experience depend on a <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">short and unique title tag</a>:</p><ul><li>Search engines use it to title results.</li><li>Browsers use it to title tabs.</li><li>Screen readers speak it when switching tabs.</li></ul><p>Without a page title, people see/hear a raw URL instead.</p></div>`,
     MISSING_ALT: `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time.</p>	<p>${why.fix}Either add an empty alt (alt="") to indicate this image should be ignored by screen readers, or add descriptive alt text.</p>${why.images}`,
     MISSING_ALT_LINK: `<p>When screen readers encounter an image with no alt attribute at all, they dictate the url of the image file instead, often one letter at a time. This is especially a problem for linked images.</p><p>${why.fix}Add alt text that matches the link's destination.</p>${why.imageLinks} `,
     MISSING_ALT_LINK_HAS_TEXT: `<p>This image is part of a link with text. If the visible text is sufficient to describe the link, add an empty alt (alt="") to tell screen readers to ignore this image. Otherwise, add an alt that describes the link's destination or purpose.</p>${why.imageLinks}`,
     QA_BAD_LINK: `<p>Link appears to point to a development environment:<br>{L} <strong {C}>%(LINK)</strong></p><p>${why.fix}Change this to point a relative path (/folder) or the public URL.</p>`,
     QA_BLOCKQUOTE: `<p>Blockquote formatting tells screen readers that the text should be announced as a quotation. Short blockquotes are often actually headings.</p><p>${why.fix}If this is a heading and not a quotation, use heading formatting instead, so it appears in the page outline.</p>${why.headings}`,
-    QA_DOCUMENT: `<p>Linked documents are considered web content and must be made accessible as well. Check that this document has tagged its headings, table headers and image alt text, then dismiss this alert.</p><div class="why"><ul><li>Make your <a href="https://support.google.com/docs/answer/6199477?hl=en">Google Workspace document or presentation more accessible.</a></li><li>Make your <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Office documents more accessible.</a></li></ul></div>`,
-    // updated
+    QA_DOCUMENT: `<p>Linked documents are considered web content and must be made accessible as well. Check that this document has tagged its headings, table headers and image alt text.</p><div class="why"><ul><li>Make your <a href="https://support.google.com/docs/answer/6199477?hl=en">Google Workspace document or presentation more accessible.</a></li><li>Make your <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Office documents more accessible.</a></li></ul></div>`,
+    // Updated
     QA_FAKE_HEADING: `<p>${why.fix}If this all-bold line of text introduces a topic, replace the visual-only bold formatting with a heading style.</p><div class="why"> <p>Tip: headings and subheadings create a navigable table of contents for assistive devices. The heading's <strong><em>number</em></strong> indicates its <strong><em>depth</em></strong> in the page outline; e.g.:</p><ul><li>Heading level 1<ul><li>Heading level 2: a topic<ul><li>Heading level 3: a subtopic</li></ul></li></ul></li></ul> </div>`,
     QA_FAKE_LIST: `<p>${why.fix}If this "%(text)" is part of a list, replace it with list formatting.</p><div class="why"><p>List formatting is structural, both visually and navigationally:</p> <ol><li>Lists align their indents for easy reading.</li> <li>Lists are machine-readable. Screen readers orient their users by regularly announcing their position in the list ("item 3 of 7").</li></ol> <p>&nbsp;&nbsp;&nbsp;3. But a sentence with a number in front of it like this does not indent its second line on overflow, and is not included in the count of items for screen reader users.</p></div> `,
     QA_IN_PAGE_LINK: `<p>The link target does not match any elements on this page.</p><div class="why"><p>Note for developers: if this not a normal link, and the link target is a placeholder for a JavaScript event, make sure to test that it works when clicked with a keyboard before adding this to the checker ignore list.</p></div>`,
     QA_JUSTIFY: `<p>Justified text inserts extra spaces to align paragraphs to both the left and right margins. The irregular gaps from line to line make the text more difficult to read for many people.</p><p>${why.fix}Use left-aligned text.</p>`,
     QA_NESTED_COMPONENTS: "Avoid nesting interactive layout components, such as placing accordions within other accordions, or placing tabs inside accordions and vice versa. This can complicate navigation, increase cognitive overload, and lead to people overlooking content.",
-    QA_PDF: `<p>${why.fix}Do one of the following, then dismiss this alert:</p><ul><li>Link to a Web page instead,</li><li><em>Also</em> link to a Web page or editable document, so this PDF is only the "printable" option, or</li><li>At a minumum make sure this PDF readable with screen readers by <a href='https://webaim.org/techniques/acrobat/' target='_blank'>manually checking that it has been tagged</a> with headings, column reading order, table headers, and alt text.</li>	</ul>	<div class="why"><p>Mobile and assistive device users almost universally prefer Web pages to PDFs. PDFs do not reflow for mobile devices, and are often missing tags that must be present to navigate their text with screen readers.</p></div>`,
+    QA_PDF: `<p>${why.fix}Do one of the following:</p><ul><li>Link to a Web page instead,</li><li><em>Also</em> link to a Web page or editable document, so this PDF is only the "printable" option, or</li><li>At a minimum make sure this PDF is readable with screen readers by <a href='https://webaim.org/techniques/acrobat/' target='_blank'>manually checking that it has been tagged</a> with headings, column reading order, table headers, and alt text.</li>	</ul>	<div class="why"><p>Mobile and assistive device users almost universally prefer Web pages to PDFs. PDFs do not reflow for mobile devices, and are often missing tags that must be present to navigate their text with screen readers.</p></div>`,
+    // Updated
     QA_SMALL_TEXT: "Small text is harder to read, particularly for those with low vision. To ensure better readability, avoid using font sizes smaller than the default.",
-    QA_STRONG_ITALICS: `<p>${why.fix}Reserve bold and italic for key words and phrases.</p><div class="why"><p>Note: if this is a quotation, the blockquote tag can be used to set it apart.</div>`,
+    QA_STRONG_ITALICS: `<p>${why.fix}Reserve bold and italic for key words and phrases.</p><div class="why"><p>Note: if this is a quotation, the blockquote tag can be used to set it apart.</p></div>`,
     QA_SUBSCRIPT: `Subscript and superscript formatting makes text too small to be easily read for many people. It should only be used for individual words or phrases, such as ordinal numbers (4<sup>th</sup>), chemical formulas (H<sub>2</sub>O) and references to footnotes.`,
     QA_UNDERLINE: `<p>Underlined text on the Web indicates a link, not emphasized text. Users will think they can click this.</p><p>${why.fix} Use <strong>bold</strong> or <em>italic</em> for emphasis, and tag text as headings to mark topic changes.</p><div class="why"><p>Note: screen readers do not announce visual-only formatting like underlines. Only headings add text to the page outline.</p></div>`,
     QA_UPPERCASE: `<p>LARGE BLOCKS OF UPPERCASE TEXT ARE MORE DIFFICULT TO READ, AND ARE OFTEN INTERPRETED AS SHOUTING.</p><p>${why.fix}Only emphasize a few words at a time, preferably via bold formatting rather than caps lock.</p><div class="why"><p>Note: screen readers do not announce visual only formatting like bold text. Use a heading style instead if this emphasized text introduces a topic change or critically important content.</p></div>`,
-    SUS_ALT: `<p>This image's alt text includes the word "%(alt)," which is probably redundant.</p><p>Alt text: "<strong>%(ALT_TEXT)</strong>"</p><p><strong class="badge">To fix</strong> Reword the alt to briefly convey what the image means.</p><div class="why"><p>Tip: screen readers announce they are describing an image when reading alt text, so phrases like "image of" and "photo of" are usually redundant; the screen reader user hears <em>"Image of something, Image."</em></p><p>Note that this is OK if the words refer to content inside the image:</p><ul><li>Not redundant: "<em>A photo in</em> a photo album being shown to the class."</li><li>Redundant: "<em>Photo of</em> a photo in a photo album being show to the class."</li></ul></div>`,
-    // updated
+    SUS_ALT: `<p>This image's alt text includes the word "%(alt)," which is probably redundant.</p><p>Alt text: "<strong>%(ALT_TEXT)</strong>"</p><p><strong class="badge">To fix</strong> Reword the alt to briefly convey what the image means.</p><div class="why"><p>Tip: screen readers announce they are describing an image when reading alt text, so phrases like "image of" and "photo of" are usually redundant; the screen reader user hears <em>"Image of something, Image."</em></p><p>Note that this is OK if the words refer to content inside the image:</p><ul><li>Not redundant: "<em>A photo in</em> a photo album being shown to the class."</li><li>Redundant: "<em>Photo of</em> a photo in a photo album being shown to the class."</li></ul></div>`,
     TABINDEX_ATTR: `<p>${why.fix}Never use tabindex values greater than "0" (the default order). Change the order of elements in the HTML instead, so tab order and reading order stay the same.</p><div class="why"><p>Tip: by default, the visual order, the order keyboards tab through elements, and the order screen readers announce elements are all the same.</p><p>Assigning a positive tabindex to an element moves it to the beginning of the tab order, <strong>but not the visual or reading order</strong>. Assistive device users have to look for overridden buttons and form elements at opposite ends of the page from their labels and instructions.</p></div>`,
-    // updated
     TABLES_EMPTY_HEADING: `<p>${why.fix}Make sure each header cell contains text.</p><div class="why"><p>Tip: screen readers use headers to orient users as they explore a table. The relevant header repeats as the cursor enters each column or row.</p></div>`,
     TABLES_MISSING_HEADINGS: `<p>${why.fix}Edit the table's properties and specify whether headers have been placed in the first row, column or both.</p><div class="why"> <p>Tip: screen readers use headers to orient users as they explore a table. The relevant header repeats as the cursor enters each column or row.</p><p>If this table has no headers because it is only being used for visual layout, remove the table formatting and use visual-only column formatting instead.</p></div> `,
     TABLES_SEMANTIC_HEADING: `<p>${why.fix}Remove this heading (h2, h3) formatting. Provide header rows and columns instead. If you need multiple header rows, break this into more than one table.</p><div class="why"> <p>Tip: Table headers are directional: one row or column. Content headings label all subsequent text, even in unrelated columns:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">A <strong>table header</strong> in cell 2 labels cell B. <br><br> A <strong>content heading</strong> in cell 2 labels cells 3, A, B and C, as well as this text and this tooltip's footer.</td></tr> <tr><td>A</td><td>B</td><td>C</td></table> </div>`
@@ -8087,7 +8321,6 @@ URL: ${url2}`;
     ALERT_CLOSE: "Close",
     ALT: "Alt Text: ",
     CONSOLE_ERROR: 'There is an issue with the accessibility checker on this page. Please %(link)<a href="%(link)">report it on GitHub</a>.',
-    // updated
     DECORATIVE: "Marked decorative",
     DISMISS: "Ignore",
     DISMISS_ALL: "On this page: ignore",
@@ -8104,11 +8337,9 @@ URL: ${url2}`;
     PANEL_DISMISS_BUTTON: `Show %(dismissCount) hidden alerts`,
     PANEL_HEADING: "Show visualizers",
     SKIP_TO_ISSUE: "Show alert",
-    // updated
     WARNING: "Manual check",
     WARNINGS: "manual checks needed",
     buttonFirstContent: "Show first alert",
-    // updated
     buttonHideHiddenAlert: "Hide hidden alert",
     buttonHideHiddenAlerts: `Hide %(count) hidden alerts`,
     buttonShowHiddenAlert: "Show hidden alert",
@@ -8130,6 +8361,7 @@ URL: ${url2}`;
     main_toggle_hide_alerts: "Hide accessibility alerts",
     main_toggle_show: "Show accessibility tools",
     main_toggle_show_alerts: "Show accessibility alerts",
+    MISSING_ROOT: `Editoria11y did not find any elements that matched the check area configuration: <code>%(root)</code>`,
     panelCheckAltText: '<p class="ed11y-small">Check that each image describes what it means in context, and that there are no images of text.</p>',
     panelCheckOutline: '<p class="ed11y-small">This shows the heading outline. Check that it matches how the content is organized visually.</p>',
     PANEL_HEADING_MISSING_ONE: "Missing Heading 1.",
@@ -8161,7 +8393,7 @@ URL: ${url2}`;
       "courtesy of",
       "alt text"
     ],
-    // todo Ed11y test use to catch these at the end as well as the beginning.
+    // todo Ed11y test used to catch these at the end as well as the beginning.
     extraPlaceholderStopWords: "placeholder, alt text, tbd, todo, to do",
     // updated
     // please add, please insert, add alt text
@@ -8204,9 +8436,9 @@ URL: ${url2}`;
     headerIgnore: "",
     headerIgnoreSpan: "ed11y-element-heading-label, .ed11y-wrapper",
     headerIgnoreStrings: "",
-    imageIgnore: 'img[aria-hidden], [aria-hidden] img, img[role="presentation"], a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img',
+    imageIgnore: 'img[aria-hidden="true"], [aria-hidden="true"] img, img[role="presentation"], a[href][aria-label] img, button[aria-label] img, a[href][aria-labelledby] img, button[aria-labelledby] img',
     ignoreByTest: {},
-    linkIgnore: '[aria-hidden][tabindex="-1"]',
+    linkIgnore: '[aria-hidden="true"][tabindex="-1"]',
     linkIgnoreSpan: ".ed11y-element",
     linkIgnoreStrings: [],
     // @todo cms/documentation this changed to array
@@ -8543,7 +8775,7 @@ URL: ${url2}`;
         sources: ""
       },
       EMBED_VIDEO: {
-        sources: ""
+        sources: "youtube-nocookie.com"
       },
       EMBED_DATA_VIZ: {
         sources: ""
@@ -8633,7 +8865,7 @@ URL: ${url2}`;
     }
     UI.english = Lang.langStrings.LANG_CODE.startsWith("en");
     if (UI.english) {
-      State.option.extraPlaceholderStopWords = userOptions.extraPlaceholderStopWords ? userOptions.extraPlaceholderStopWords.Lang.langStrings.extraPlaceholderStopWords : Lang.langStrings.extraPlaceholderStopWords;
+      State.option.extraPlaceholderStopWords = userOptions.extraPlaceholderStopWords ? `${userOptions.extraPlaceholderStopWords}, ${Lang.langStrings.extraPlaceholderStopWords}` : Lang.langStrings.extraPlaceholderStopWords;
     }
     if (State.option.fixedRoots) {
       State.option.checkRoot = State.option.fixedRoots;
@@ -8659,7 +8891,7 @@ URL: ${url2}`;
     UI.theme.baseFontSize = State.option.baseFontSize;
     UI.theme.buttonZIndex = State.option.buttonZIndex;
     UI.theme.baseFontFamily = State.option.baseFontFamily;
-    UI.inlineAlerts = State.option.inlineAlerts;
+    UI.inlineAlerts = !document.querySelector("[contenteditable]") && State.option.inlineAlerts;
     UI.showDismissed = State.option.showDismissed;
     let cssUrls = userOptions.cssUrls;
     if (!cssUrls) {
@@ -8750,10 +8982,13 @@ URL: ${url2}`;
         return false;
       }
       UI.running = true;
-      checkAll();
       document.addEventListener("ed11yResume", () => {
-        continueCheck(true).then();
+        UI.customTestsRemaining--;
+        if (UI.testsRemaining === 0 && UI.customTestsRemaining === 0) {
+          continueCheck().then();
+        }
       });
+      checkAll();
       window.addEventListener(
         "keydown",
         () => {
@@ -8800,11 +9035,7 @@ URL: ${url2}`;
   class Ed11y {
     constructor(userOptions) {
       if (CSS.supports("selector(:has(body))")) {
-        try {
-          initialize(userOptions).then();
-        } catch (error) {
-          showError(error);
-        }
+        initialize(userOptions).catch((error) => console.error(error.message));
       }
     }
   }

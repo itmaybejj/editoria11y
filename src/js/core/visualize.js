@@ -35,11 +35,15 @@ export const showAltPanel = () => {
 
   if (UI.imageAlts.length > 0) {
     altList.innerHTML = '';
+    const oldMarks = getElements('ed11y-element-alt', 'root', []);
+    oldMarks?.forEach((mark) => {
+      mark.remove();
+    });
     for (let i = 0; i < UI.imageAlts.length; i++) {
       const image = UI.imageAlts[i];
       const altText =
         computeAriaLabel(image.element) === 'noAria'
-          ? Utils.escapeHTML(image.element.getAttribute('alt'))
+          ? image.element.getAttribute('alt')
           : computeAriaLabel(image.element);
       UI.imageAlts[i].altText = altText;
       //let alert = {};
@@ -143,6 +147,7 @@ export function visualize() {
     reset?.forEach((el) => {
       el.remove();
     });
+    UI.altMarks.clear();
   }
   if (UI.visualizing) {
     UI.visualizing = false;

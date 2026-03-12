@@ -45,9 +45,10 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'Las imágenes vinculadas necesitan texto alternativo pronunciable',
 	LINK_CLICK_HERE: 'Revisión manual: el enlace contiene «haz clic aquí»',
 	LINK_DOI: 'Vincula los títulos de artículos, no los números DOI',
-	LINK_EMPTY: 'Este enlace no tiene texto',
+	LINK_EMPTY: 'Este enlace no contiene palabras.',
 	LINK_EMPTY_LABELLEDBY: 'Enlace con atributo «aria‑labelledby» no válido',
 	LINK_EMPTY_NO_LABEL: 'Este enlace necesita una etiqueta',
+	LINK_UNPRONOUNCEABLE: 'Este enlace no se puede pronunciar',
 	LINK_FILE_EXT: 'El enlace apunta a un archivo sin advertencia',
 	LINK_IDENTICAL_NAME: 'Varios enlaces con el mismo texto dirigen a páginas diferentes',
 	LINK_IMAGE_ALT: 'Revisión manual: imagen vinculada con texto alternativo',
@@ -188,11 +189,12 @@ const tips = {
 
 	LINK_DOI: `<p>${why.fix}Vincule el título del artículo y deje el DOI como texto plano, en lugar de vincular el DOI y dejar el título sin enlace.</p><div class="why"><p>La guía de estilo de la APA recomienda usar enlaces descriptivos porque las personas recorren los enlaces y usan la búsqueda dentro de la página para encontrarlos.</p><p>Esto también permite a los lectores de pantalla describir los enlaces de forma significativa, en lugar de leer una sucesión de números.</p></div>`,
 
-	LINK_EMPTY: `<p>${why.fix}Agregue texto que describa su destino o elimínelo si fue un error (por ejemplo, un espacio vinculado).</p><div class="why"><p>Consejo: los lectores de pantalla no pueden describir enlaces vacíos. Permanecen en silencio o leen la URL letra por letra.</p><p>Los espacios vinculados pueden ser difíciles de eliminar; a veces es necesario reescribir los textos a ambos lados.</p></div>`,
+	LINK_EMPTY: `<p>${why.fix}Añada texto que describa su destino, o elimínelo si es solo un error tipográfico o un carácter de espacio vinculado.</p><div class="why"><p>Consejo: Los lectores de pantalla no pueden describir enlaces que solo contengan espacios o símbolos. Quedan silenciosos ("Enlace, [...pausa incómoda donde debería estar el título del enlace...]"), o leen la URL: Enlace, H-T-T-P-S barra diagonal barra diagonal ejemplo punto com.</p><p>Tenga en cuenta que los caracteres de espacio vinculados pueden ser difíciles de eliminar en algunos editores de contenido; a veces es necesario eliminar "cruzando la brecha" eliminando y reescribiendo las palabras a ambos lados de un espacio vinculado.</p></div>`,
 
 	LINK_EMPTY_LABELLEDBY: `<p>Este enlace tiene un atributo <code>aria-labelledby</code> que no coincide con el <code>ID</code> de ningún elemento en la página.</p><p>${why.fix}Proporcione un ID válido o elimine este atributo.</p>`,
 
 	LINK_EMPTY_NO_LABEL: `<p>${why.fix}Agregue texto que describa su destino, o elimínelo si fue un error.</p><div class="why"><p>Los enlaces vacíos ocasionan silencio o la lectura completa de la URL.</p><p>Los espacios vinculados a veces requieren reescribir el texto adyacente para eliminarlos.</p></div>`,
+	LINK_UNPRONOUNCEABLE: `<p>${why.fix}Añada texto o un título que describa su destino, o elimínelo si es solo un error tipográfico o un carácter de espacio vinculado.</p><div class="why"><p>Consejo: Los lectores de pantalla no pueden describir enlaces que solo contengan espacios o símbolos. Quedan silenciosos ("Enlace, [...pausa incómoda donde debería estar el título del enlace...]"), o leen el nombre del símbolo.</p></div>`,
 
 	LINK_FILE_EXT: `<p>Este enlace apunta a un archivo descargable (PDF, MP3, Zip, Word, etc.) sin advertencia.</p><p>${why.fix}Use texto o un ícono para <a href="https://itmaybejj.github.io/linkpurpose/">indicar el tipo de archivo</a> en el propio enlace.</p><p class="why">Para archivos grandes, considere incluir el tamaño. Ejemplo: "Informe anual (PDF, 3 MB)"</p>`,
 
@@ -322,6 +324,7 @@ const interfaceStrings = {
 	main_toggle_hide_alerts: 'Ocultar alertas de accesibilidad',
 	main_toggle_show: 'Mostrar herramientas de accesibilidad',
 	main_toggle_show_alerts: 'Mostrar alertas de accesibilidad',
+	MISSING_ROOT: `Editoria11y no encontró ningún elemento que coincida con la configuración del área de verificación: <code>%(root)</code>`,
 	panelCheckAltText: `<p class="ed11y-small">Verifique que cada imagen describa lo que significa en contexto y que no haya imágenes que contengan texto.</p>`,
 	panelCheckOutline: `<p class="ed11y-small">Esto muestra el esquema de encabezados. Verifique que coincida con la organización visual del contenido.</p>`,
 	PANEL_HEADING_MISSING_ONE: 'Falta el Encabezado 1.',

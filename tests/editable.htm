@@ -102,6 +102,7 @@
                 onload = (event) => {
 
                   const ed11y = new Ed11y.Ed11y({
+					  //checkRoot: 'o',
                     alertMode : 'assertive',
                     ignoreByKey : {
                       'img': '[aria-hidden], [aria-hidden] img', // disable alt text tests on aria-hidden images by default
@@ -114,6 +115,19 @@
                     fixedRoots : Array.from(document.querySelectorAll('#editable-region')),
                     //linkIgnoreStrings: '\(link is external\)',
                     //customTests : 2,
+				  splitConfiguration: {
+					  showDev: true,
+					  devChecks: ['QA_IN_PAGE_LINK'],
+					  devOptions: {
+						  checkRoot: 'body',
+						  // containerIgnore: '',
+						  // contrastIgnore: '.sr-only',
+						  // outlineIgnore: '',
+						  // headerIgnore: '',,
+						  // imageIgnore: '',
+						  // linkIgnore: '[aria-hidden][tabindex="-1"]',
+					  }
+				  },
                     theme: 'darkTheme',
 					  checks: {
 						  HEADING_FIRST: false,

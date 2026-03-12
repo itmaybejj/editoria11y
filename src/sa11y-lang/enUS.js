@@ -55,7 +55,7 @@ export default {
     PAGE_TITLE: 'Page title',
     RESULTS: 'Results',
     EXPORT_RESULTS: 'Export results',
-    GENERATED: 'Results generated with %(tool).',
+    GENERATED: 'Results generated with <a href="https://sa11y.netlify.app">Sa11y.</a>',
     PREVIEW: 'Preview',
     ELEMENT: 'Element',
     PATH: 'Path',
@@ -226,6 +226,8 @@ export default {
       'Link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning. Indicate the file type within the link text. If it is a large file, consider including the file size. For example: "Executive Report (PDF, 3MB)"',
     LINK_IDENTICAL_NAME:
       'Link has identical text as another link, although it points to a different page. Multiple links with the same text may cause confusion for people who use screen readers. <strong>Consider making the following link more descriptive to help distinguish it from other links.</strong> <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_UNPRONOUNCEABLE:
+      'Link text only contains symbols. If you think this link is an error due to a copy/paste bug, consider deleting it.',
 
     // Images
     ALT_UNPRONOUNCEABLE:
