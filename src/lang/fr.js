@@ -49,6 +49,7 @@ const testNames = {
 	LINK_EMPTY: 'Ce lien ne contient aucun mot.',
 	LINK_EMPTY_LABELLEDBY: 'Lien avec attribut « aria‑labelledby » non valide',
 	LINK_EMPTY_NO_LABEL: 'Ce lien a besoin d’une étiquette',
+	LINK_UNPRONOUNCEABLE: 'Ce lien est imprononçable',
 	LINK_FILE_EXT: 'Ce lien pointe vers un fichier sans avertissement',
 	LINK_IDENTICAL_NAME: 'Des liens avec le même texte mènent à des pages différentes', // updated
 	LINK_IMAGE_ALT: 'Vérification manuelle : image liée avec texte alternatif',
@@ -217,6 +218,7 @@ export const tips = {
 	LINK_EMPTY_LABELLEDBY: `<p>Ce lien possède un attribut <code>aria-labelledby</code> qui ne correspond à aucun <code>ID</code> sur la page.</p><p>${why.fix}Fournissez un ID valide ou supprimez cet attribut.</p>`,
 
 	LINK_EMPTY_NO_LABEL: `<p>${why.fix}Ajoutez du texte décrivant sa destination, ou supprimez ce lien s’il s’agit d’un accident.</p><div class="why"><p>Les liens vides provoquent silence ou lecture des URL.</p><p>Les espaces liés nécessitent parfois de réécrire le texte environnant pour les supprimer.</p></div>`,
+	LINK_UNPRONOUNCEABLE: `<p>${why.fix}Ajoutez du texte ou un titre décrivant sa destination, ou supprimez-le s'il s'agit simplement d'une faute de frappe ou d'un caractère d'espace lié.</p><div class="why"><p>Conseil : les lecteurs d'écran ne peuvent pas décrire les liens qui ne contiennent que des espaces ou des symboles. Ils restent soit silencieux (« Lien, [...pause maladroite là où le titre du lien devrait être...] »), soit lisent le nom du symbole.</p></div>`,
 
 	LINK_FILE_EXT: `<p>Ce lien pointe vers un fichier téléchargeable (PDF, MP3, Zip, Word, etc.) sans avertissement.</p><p>${why.fix}Utilisez du texte ou une icône pour <a href="https://itmaybejj.github.io/linkpurpose/">indiquer le type de fichier</a> dans le lien.</p><p class="why">Pour les fichiers volumineux, indiquez la taille : ex. "Rapport annuel (PDF, 3 Mo)"</p>`,
 

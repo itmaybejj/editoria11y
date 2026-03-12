@@ -48,6 +48,7 @@ const testNames = {
 	LINK_EMPTY: 'Este enlace no contiene palabras.',
 	LINK_EMPTY_LABELLEDBY: 'Enlace con atributo «aria‑labelledby» no válido',
 	LINK_EMPTY_NO_LABEL: 'Este enlace necesita una etiqueta',
+	LINK_UNPRONOUNCEABLE: 'Este enlace no se puede pronunciar',
 	LINK_FILE_EXT: 'El enlace apunta a un archivo sin advertencia',
 	LINK_IDENTICAL_NAME: 'Varios enlaces con el mismo texto dirigen a páginas diferentes',
 	LINK_IMAGE_ALT: 'Revisión manual: imagen vinculada con texto alternativo',
@@ -193,6 +194,7 @@ const tips = {
 	LINK_EMPTY_LABELLEDBY: `<p>Este enlace tiene un atributo <code>aria-labelledby</code> que no coincide con el <code>ID</code> de ningún elemento en la página.</p><p>${why.fix}Proporcione un ID válido o elimine este atributo.</p>`,
 
 	LINK_EMPTY_NO_LABEL: `<p>${why.fix}Agregue texto que describa su destino, o elimínelo si fue un error.</p><div class="why"><p>Los enlaces vacíos ocasionan silencio o la lectura completa de la URL.</p><p>Los espacios vinculados a veces requieren reescribir el texto adyacente para eliminarlos.</p></div>`,
+	LINK_UNPRONOUNCEABLE: `<p>${why.fix}Añada texto o un título que describa su destino, o elimínelo si es solo un error tipográfico o un carácter de espacio vinculado.</p><div class="why"><p>Consejo: Los lectores de pantalla no pueden describir enlaces que solo contengan espacios o símbolos. Quedan silenciosos ("Enlace, [...pausa incómoda donde debería estar el título del enlace...]"), o leen el nombre del símbolo.</p></div>`,
 
 	LINK_FILE_EXT: `<p>Este enlace apunta a un archivo descargable (PDF, MP3, Zip, Word, etc.) sin advertencia.</p><p>${why.fix}Use texto o un ícono para <a href="https://itmaybejj.github.io/linkpurpose/">indicar el tipo de archivo</a> en el propio enlace.</p><p class="why">Para archivos grandes, considere incluir el tamaño. Ejemplo: "Informe anual (PDF, 3 MB)"</p>`,
 

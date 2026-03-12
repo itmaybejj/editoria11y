@@ -31,7 +31,7 @@
     sprintf(string, ...args) {
       let transString = this._(string);
       transString = this.prepHTML(transString);
-      const el = document.createElement("div");
+      const el = document.createElement("span");
       el.innerHTML = transString;
       if (args?.length) {
         args.forEach((_arg, index) => {
@@ -39,9 +39,10 @@
         });
         args.forEach((arg, index) => {
           const replacement = el.querySelector(`[data-arg="${index}"]`);
-          if (replacement && arg !== null) {
-            replacement.textContent = arg;
-          }
+          if (!replacement || arg === null) return;
+          const match = String(arg).match(/{{langAttr:([\w-]+)\|([^}]+)}}/);
+          if (match) replacement.setAttribute("lang", match[1]);
+          replacement.textContent = match ? match[2] : arg;
         });
       }
       return el;
@@ -217,6 +218,7 @@
         dismissAll: true
       },
       LINK_FILE_EXT: true,
+      LINK_UNPRONOUNCEABLE: true,
       // Form labels checks
       LABELS_MISSING_IMAGE_INPUT: true,
       LABELS_INPUT_RESET: true,
@@ -916,10 +918,6 @@
     if (!string) return "";
     return string.replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
   }
-  function escapeHTML(string) {
-    if (!string) return "";
-    return string.replace(/[^\w. ]/gi, (c) => `&#${c.charCodeAt(0)};`);
-  }
   const invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
   const htmlEntitiesRegex = /&#(\w+)(^\w|;)?/g;
   const htmlCtrlEntityRegex = /&(newline|tab);/gi;
@@ -960,6 +958,8 @@
   };
   function sanitizeURL(url2) {
     if (!url2 || typeof url2 !== "string") return BLANK_URL;
+    const isBase64Data = /^data:([a-z]+\/[a-z0-9-+.]+)?;base64,/i.test(url2.trim());
+    if (isBase64Data) return url2.trim();
     let charsToDecode;
     let decodedUrl = decodeURIs(url2.trim());
     do {
@@ -986,27 +986,147 @@
     }
     return backSanitized;
   }
+  const allowedTags = [
+    "a",
+    "abbr",
+    "address",
+    "article",
+    "aside",
+    "audio",
+    "b",
+    "bdo",
+    "blockquote",
+    "br",
+    "button",
+    "canvas",
+    "cite",
+    "code",
+    "data",
+    "dd",
+    "del",
+    "details",
+    "dfn",
+    "div",
+    "dl",
+    "dt",
+    "em",
+    "fieldset",
+    "figcaption",
+    "figure",
+    "footer",
+    "form",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "header",
+    "hr",
+    "i",
+    "iframe",
+    "img",
+    "input",
+    "ins",
+    "kbd",
+    "label",
+    "li",
+    "main",
+    "mark",
+    "meter",
+    "nav",
+    "noscript",
+    "ol",
+    "output",
+    "p",
+    "picture",
+    "pre",
+    "progress",
+    "q",
+    "rp",
+    "rt",
+    "s",
+    "samp",
+    "section",
+    "select",
+    "small",
+    "source",
+    "span",
+    "strong",
+    "sub",
+    "summary",
+    "sup",
+    "svg",
+    "table",
+    "tbody",
+    "td",
+    "textarea",
+    "tfoot",
+    "th",
+    "thead",
+    "time",
+    "tr",
+    "track",
+    "u",
+    "ul",
+    "var",
+    "video",
+    "wbr",
+    "path"
+  ];
+  const attrWhitelist = {
+    a: ["href", "title", "target", "rel", "download"],
+    img: ["src", "alt", "title", "width", "height", "loading", "srcset", "sizes"],
+    iframe: [
+      "src",
+      "width",
+      "height",
+      "title",
+      "frameborder",
+      "allowfullscreen",
+      "loading",
+      "sandbox"
+    ],
+    details: ["open"],
+    ol: ["start", "type", "reversed"],
+    li: ["value"],
+    td: ["colspan", "rowspan"],
+    th: ["colspan", "rowspan", "scope"],
+    global: ["class", "id", "role", "lang", "dir", "name"],
+    path: ["d", "fill", "fill-rule"]
+  };
   function sanitizeHTML(string) {
-    const doc = new DOMParser().parseFromString(string, "text/html");
-    const dangerousTags = "script, iframe, object, embed, applet, style";
-    doc.body.querySelectorAll(dangerousTags).forEach((node) => {
-      node.remove();
-    });
-    doc.body.querySelectorAll("*").forEach((node) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(string, "text/html");
+    const allElements = doc.body.querySelectorAll("*");
+    allElements.forEach((node) => {
+      const tag = node.tagName.toLowerCase();
+      if (!allowedTags.includes(tag)) {
+        node.remove();
+        return;
+      }
+      const allowedForThisTag = attrWhitelist[tag] || [];
+      const globals = attrWhitelist.global;
       [...node.attributes].forEach(({ name, value }) => {
-        const val = value.replace(/\s+/g, "").toLowerCase();
-        const isEvent = name.startsWith("on");
-        const isUrl = ["src", "href", "xlink:href"].includes(name);
-        const isPhishy = val.includes("javascript:") || val.includes("data:text/html") || val.includes("vbscript:");
-        if (isEvent || isUrl && isPhishy) {
+        const isAria = name.startsWith("aria-");
+        const isAllowed = allowedForThisTag.includes(name) || globals.includes(name) || isAria;
+        const isUrlAttr = ["src", "href", "srcset"].includes(name);
+        if (!isAllowed) {
           node.removeAttribute(name);
+        } else if (isUrlAttr) {
+          const cleanURL = sanitizeURL(value);
+          if (!cleanURL) {
+            node.removeAttribute(name);
+          } else {
+            node.setAttribute(name, cleanURL);
+          }
         }
       });
     });
     return doc.body.innerHTML;
   }
+  const baseIgnores = "noscript,script,style,audio,video,form,iframe";
   function fnIgnore(element, selectors = []) {
-    const baseIgnores = "noscript,script,style,audio,video,form,iframe";
     const ignoreQuery = selectors.length ? `${baseIgnores},${selectors.join(",")}` : baseIgnores;
     if (!element || element.nodeType !== Node.ELEMENT_NODE) {
       return element ? element.cloneNode(true) : null;
@@ -1454,8 +1574,7 @@ URL: ${url2}`;
       <p><strong>${Lang._("DEVELOPER_CHECKS")}:</strong></p>
       <pre>
 </pre>
-  		<p><strong>${Lang._("ERRORS")}:</strong></p>
-<pre>${escapeHTML(this.error.stack)}</pre>
+  		
     `;
       shadow.appendChild(content);
       const pre = content.querySelector("pre");
@@ -2271,7 +2390,7 @@ URL: ${url2}`;
               });
             }
           }
-        } else if (matchedSymbol) {
+        } else if (matchedSymbol && linkText.length > 1) {
           if (State.option.checks.LINK_SYMBOLS) {
             State.results.push({
               test: "LINK_SYMBOLS",
@@ -2287,18 +2406,20 @@ URL: ${url2}`;
               developer: State.option.checks.LINK_SYMBOLS.developer || false
             });
           }
-        } else if (isSingleSpecialChar && !titleAttr) {
-          if (State.option.checks.LINK_EMPTY) {
+        } else if ((isSingleSpecialChar || matchedSymbol) && !titleAttr) {
+          if (State.option.checks.LINK_UNPRONOUNCEABLE) {
             State.results.push({
-              test: "LINK_EMPTY",
+              test: "LINK_UNPRONOUNCEABLE",
               element: $el,
-              type: State.option.checks.LINK_EMPTY.type || "error",
-              content: Lang.sprintf(State.option.checks.LINK_EMPTY.content || "LINK_EMPTY"),
+              type: State.option.checks.LINK_UNPRONOUNCEABLE.type || "error",
+              content: Lang.sprintf(
+                State.option.checks.LINK_UNPRONOUNCEABLE.content || Lang._("LINK_UNPRONOUNCEABLE") + Lang._("LINK_TIP")
+              ),
               inline: true,
               position: "afterend",
-              dismiss: prepareDismissal(`LINK_EMPTY ${href}`),
-              dismissAll: State.option.checks.LINK_EMPTY.dismissAll ? "LINK_EMPTY" : false,
-              developer: State.option.checks.LINK_EMPTY.developer || false
+              dismiss: prepareDismissal(`LINK_UNPRONOUNCEABLE ${href}`),
+              dismissAll: State.option.checks.LINK_UNPRONOUNCEABLE.dismissAll ? "LINK_UNPRONOUNCEABLE" : false,
+              developer: State.option.checks.LINK_UNPRONOUNCEABLE.developer || false
             });
           }
           return;
@@ -3090,7 +3211,7 @@ URL: ${url2}`;
         if (text.length < 3 || text.length > 120 || /[.:;?!"']/.test(text)) return;
         const paragraph = fnIgnore(p, ["strong", "b"]).textContent.trim();
         if (paragraph && paragraph.length <= 250) return;
-        addResult(possibleHeading, escapeHTML(text));
+        addResult(possibleHeading, text);
       };
       Elements.Found.Paragraphs.forEach((p) => {
         computeLargeParagraphs(p);
@@ -4088,16 +4209,15 @@ URL: ${url2}`;
       const nodeText = fnIgnore(element, ["State.option:not(State.option:first-child)"]);
       const text = getText(nodeText);
       const truncatedText = truncateString(text, 80);
-      const sanitizedText = escapeHTML(truncatedText);
       let previewText;
       if (item.type === "placeholder" || item.type === "placeholder-unsupported") {
-        previewText = escapeHTML($el.placeholder);
+        previewText = $el.placeholder;
       } else if (item.type === "svg-error" || item.type === "svg-warning") {
         previewText = "";
       } else {
-        previewText = sanitizedText;
+        previewText = truncatedText;
       }
-      updatedItem.sanitizedText = previewText;
+      updatedItem.previewText = previewText;
       const isWcag = State.option.contrastAlgorithm === "AA" || State.option.contrastAlgorithm === "AAA";
       const normal = State.option.contrastAlgorithm === "AAA" ? "7:1" : "4.5:1";
       const large = State.option.contrastAlgorithm === "AAA" ? "4.5:1" : "3:1";
@@ -4114,7 +4234,7 @@ URL: ${url2}`;
                 State.option.checks.CONTRAST_ERROR.content || (isWcag ? `${Lang._("CONTRAST_ERROR")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_ERROR")),
                 ratioToDisplay2
               ),
-              dismiss: prepareDismissal(`CONTRAST_ERROR ${sanitizedText}`),
+              dismiss: prepareDismissal(`CONTRAST_ERROR ${previewText}`),
               dismissAll: State.option.checks.CONTRAST_ERROR.dismissAll ? "CONTRAST_ERROR" : false,
               developer: State.option.checks.CONTRAST_ERROR.developer || false,
               contrastDetails: updatedItem
@@ -4123,7 +4243,6 @@ URL: ${url2}`;
           break;
         case "input":
           if (State.option.checks.CONTRAST_INPUT) {
-            const sanitizedInput = sanitizeHTML($el.outerHTML);
             State.results.push({
               test: "CONTRAST_INPUT",
               element,
@@ -4133,7 +4252,7 @@ URL: ${url2}`;
                 ratio,
                 ratioToDisplay2
               ),
-              dismiss: prepareDismissal(`CONTRAST_INPUT ${sanitizedInput}`),
+              dismiss: prepareDismissal(`CONTRAST_INPUT ${$el.outerHTML}`),
               dismissAll: State.option.checks.CONTRAST_INPUT.dismissAll ? "CONTRAST_INPUT" : false,
               developer: State.option.checks.CONTRAST_INPUT.developer || true,
               contrastDetails: updatedItem
@@ -4142,7 +4261,6 @@ URL: ${url2}`;
           break;
         case "placeholder":
           if (State.option.checks.CONTRAST_PLACEHOLDER) {
-            const sanitizedPlaceholder = sanitizeHTML($el.outerHTML);
             State.results.push({
               test: "CONTRAST_PLACEHOLDER",
               element: $el,
@@ -4152,7 +4270,7 @@ URL: ${url2}`;
                 ratioToDisplay2
               ),
               position: "afterend",
-              dismiss: prepareDismissal(`CONTRAST_PLACEHOLDER ${sanitizedPlaceholder}`),
+              dismiss: prepareDismissal(`CONTRAST_PLACEHOLDER ${$el.outerHTML}`),
               dismissAll: State.option.checks.CONTRAST_PLACEHOLDER.dismissAll ? "CONTRAST_PLACEHOLDER" : false,
               developer: State.option.checks.CONTRAST_PLACEHOLDER.developer || true,
               contrastDetails: updatedItem
@@ -4161,7 +4279,6 @@ URL: ${url2}`;
           break;
         case "placeholder-unsupported":
           if (State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED) {
-            const sanitizedPlaceholder = sanitizeHTML($el.outerHTML);
             State.results.push({
               test: "CONTRAST_PLACEHOLDER_UNSUPPORTED",
               element: $el,
@@ -4171,9 +4288,7 @@ URL: ${url2}`;
                 ratioToDisplay2
               ),
               position: "afterend",
-              dismiss: prepareDismissal(
-                `CONTRAST_PLACEHOLDER_UNSUPPORTED ${sanitizedPlaceholder}`
-              ),
+              dismiss: prepareDismissal(`CONTRAST_PLACEHOLDER_UNSUPPORTED ${$el.outerHTML}`),
               dismissAll: State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.dismissAll ? "CONTRAST_PLACEHOLDER_UNSUPPORTED" : false,
               developer: State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.developer || true,
               contrastDetails: updatedItem
@@ -4182,16 +4297,14 @@ URL: ${url2}`;
           break;
         case "svg-error":
           if (State.option.checks.CONTRAST_ERROR_GRAPHIC) {
-            const sanitizedSVG = sanitizeHTML($el.outerHTML);
             State.results.push({
               test: "CONTRAST_ERROR_GRAPHIC",
               element: $el,
               type: State.option.checks.CONTRAST_ERROR_GRAPHIC.type || "error",
-              // No trailing variable needed since the graphic tip is just static text
               content: Lang.sprintf(
                 State.option.checks.CONTRAST_ERROR_GRAPHIC.content || (State.option.contrastAlgorithm !== "APCA" ? `${Lang._("CONTRAST_ERROR_GRAPHIC")} ${Lang._("CONTRAST_TIP_GRAPHIC")}` : Lang._("CONTRAST_ERROR_GRAPHIC"))
               ),
-              dismiss: prepareDismissal(`CONTRAST_ERROR_GRAPHIC ${sanitizedSVG}`),
+              dismiss: prepareDismissal(`CONTRAST_ERROR_GRAPHIC ${$el.outerHTML}`),
               dismissAll: State.option.checks.CONTRAST_ERROR_GRAPHIC.dismissAll ? "CONTRAST_ERROR_GRAPHIC" : false,
               developer: State.option.checks.CONTRAST_ERROR_GRAPHIC.developer || true,
               contrastDetails: updatedItem,
@@ -4201,7 +4314,6 @@ URL: ${url2}`;
           break;
         case "svg-warning":
           if (State.option.checks.CONTRAST_WARNING_GRAPHIC) {
-            const sanitizedSVG = sanitizeHTML($el.outerHTML);
             State.results.push({
               test: "CONTRAST_WARNING_GRAPHIC",
               element: $el,
@@ -4209,7 +4321,7 @@ URL: ${url2}`;
               content: Lang.sprintf(
                 State.option.checks.CONTRAST_WARNING_GRAPHIC.content || (State.option.contrastAlgorithm !== "APCA" ? `${Lang._("CONTRAST_WARNING_GRAPHIC")} ${Lang._("CONTRAST_TIP_GRAPHIC")}` : Lang._("CONTRAST_WARNING_GRAPHIC"))
               ),
-              dismiss: prepareDismissal(`CONTRAST_WARNING_GRAPHIC ${sanitizedSVG}`),
+              dismiss: prepareDismissal(`CONTRAST_WARNING_GRAPHIC ${$el.outerHTML}`),
               dismissAll: State.option.checks.CONTRAST_WARNING_GRAPHIC.dismissAll ? "CONTRAST_WARNING_GRAPHIC" : false,
               developer: State.option.checks.CONTRAST_WARNING_GRAPHIC.developer || true,
               contrastDetails: updatedItem,
@@ -4227,7 +4339,7 @@ URL: ${url2}`;
                 State.option.checks.CONTRAST_WARNING.content || (isWcag ? `${Lang._("CONTRAST_WARNING")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_WARNING")),
                 ratioToDisplay2
               ),
-              dismiss: prepareDismissal(`CONTRAST_WARNING ${sanitizedText}`),
+              dismiss: prepareDismissal(`CONTRAST_WARNING ${previewText}`),
               dismissAll: State.option.checks.CONTRAST_WARNING.dismissAll ? "CONTRAST_WARNING" : false,
               developer: State.option.checks.CONTRAST_WARNING.developer || false,
               contrastDetails: updatedItem
@@ -4244,7 +4356,7 @@ URL: ${url2}`;
                 State.option.checks.CONTRAST_UNSUPPORTED.content || (isWcag ? `${Lang._("CONTRAST_WARNING")} ${Lang._(ratioRequirementKey)}` : Lang._("CONTRAST_WARNING")),
                 ratioToDisplay2
               ),
-              dismiss: prepareDismissal(`CONTRAST_UNSUPPORTED ${sanitizedText}`),
+              dismiss: prepareDismissal(`CONTRAST_UNSUPPORTED ${previewText}`),
               dismissAll: State.option.checks.CONTRAST_UNSUPPORTED.dismissAll ? "CONTRAST_UNSUPPORTED" : false,
               developer: State.option.checks.CONTRAST_UNSUPPORTED.developer || false,
               contrastDetails: updatedItem
@@ -7147,7 +7259,7 @@ URL: ${url2}`;
     }
   }
   function generateContrastTools(contrastDetails) {
-    const { sanitizedText, color, background, fontWeight, fontSize, ratio, textUnderline } = contrastDetails;
+    const { previewText, color, background, fontWeight, fontSize, ratio, textUnderline } = contrastDetails;
     const hasBackgroundColor = background && background.type !== "image";
     const backgroundHex = hasBackgroundColor ? getHex(background) : "#000000";
     const foregroundHex = color ? getHex(color) : "#000000";
@@ -7171,7 +7283,7 @@ URL: ${url2}`;
       <div id="contrast" class="badge">${Lang._("CONTRAST")}</div>
       <div id="value" class="badge">${displayedRatio}</div>
       <div id="good" class="badge good-contrast" hidden>${Lang._("GOOD")} <span class="good-icon"></span></div>
-      <div id="contrast-preview" style="color:${foregroundHex};${hasBackgroundColor ? `background:${backgroundHex};` : ""}${hasFontWeight + hasFontSize + textDecoration}">${sanitizedText}</div>
+      <div id="contrast-preview" style="color:${foregroundHex};${hasBackgroundColor ? `background:${backgroundHex};` : ""}${hasFontWeight + hasFontSize + textDecoration}"></div>
       <div id="color-pickers">
         <label for="fg-text">${Lang._("FG")} ${unknownFGText}
           <div id="fg-color-wrapper" ${unknownFG}>
@@ -7184,6 +7296,7 @@ URL: ${url2}`;
           </div>
         </label>
       </div>`;
+    contrastTools.querySelector("#contrast-preview").textContent = previewText;
     return contrastTools;
   }
   function initializeContrastTools(container, contrastDetails) {
@@ -7899,6 +8012,7 @@ URL: ${url2}`;
       LINK_NEW_TAB: `Link opens in a new tab or window without warning. Doing so can be disorienting, especially for people who have difficulty perceiving visual content. Secondly, it is not always a good practice to control someone's experience or make decisions for them. Indicate that the link opens in a new window within the link text. <hr> <strong>Tip!</strong> Learn best practices: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">opening links in new browser windows and tabs.</a>`,
       LINK_FILE_EXT: 'Link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning. Indicate the file type within the link text. If it is a large file, consider including the file size. For example: "Executive Report (PDF, 3MB)"',
       LINK_IDENTICAL_NAME: "Link has identical text as another link, although it points to a different page. Multiple links with the same text may cause confusion for people who use screen readers. <strong>Consider making the following link more descriptive to help distinguish it from other links.</strong> <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
+      LINK_UNPRONOUNCEABLE: "Link text only contains symbols. If you think this link is an error due to a copy/paste bug, consider deleting it.",
       // Images
       ALT_UNPRONOUNCEABLE: "The alt text only contains unpronounceable symbols and/or spaces. Screen readers will announce the image and then pause. If the image is decorative, ensure there are no spaces within the alt text. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
       LINK_ALT_UNPRONOUNCEABLE: "The alt text within this linked image only contains unpronounceable symbols and/or spaces. Screen readers will announce the image and then pause. Ensure the alt text describes the destination of the link. <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
@@ -8057,6 +8171,7 @@ URL: ${url2}`;
     LINK_EMPTY: "This link contains no words",
     LINK_EMPTY_LABELLEDBY: 'Link with invalid "aria-labelledby" attribute',
     LINK_EMPTY_NO_LABEL: "This link needs a label",
+    LINK_UNPRONOUNCEABLE: "This link is unpronounceable",
     LINK_FILE_EXT: "Link points to a file without warning",
     LINK_IDENTICAL_NAME: "Links with the same text link to different pages",
     LINK_IMAGE_ALT: "Does this alt text describe the link or the image?",
@@ -8159,6 +8274,7 @@ URL: ${url2}`;
     LINK_EMPTY: `<p>${why.fix}Add text describing its destination, or delete it if is just a typo or linked space character.</p><div class="why"><p>Tip: screen readers cannot describe links that only contain spaces or symbols. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the URL: Link, H-T-T-P-S forward-slash forward-slash example dot com."</p><p>Note that linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p></div>`,
     LINK_EMPTY_LABELLEDBY: `<p>This link has an <code>aria-labelledby</code> attribute that does not match the <code>ID</code> of any element on the page.</p><p>${why.fix}Provide a valid <code>ID</code>, or remove this attribute and describe the button in another way.</p>`,
     LINK_EMPTY_NO_LABEL: `<p>${why.fix}Add text describing its destination, or delete it if is just a typo like a linked space character.</p><div class="why"><p>Tip: screen readers cannot describe empty links. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the URL: Link, H-T-T-P-S forward-slash forward-slash example dot com."</p><p>Note that linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p></div>`,
+    LINK_UNPRONOUNCEABLE: `<p>${why.fix}Add text or a title describing its destination, or delete it if is just a typo or linked space character.</p><div class="why"><p>Tip: screen readers cannot describe links that only contain spaces or symbols. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the name of the symbol.</p></div>`,
     LINK_FILE_EXT: `<p>This link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning.</p><p>${why.fix}Use text or an icon to <a href="https://itmaybejj.github.io/linkpurpose/">indicate the file type</a> within the link text.</p><p class="why">For large files, consider including the file size. For example: "Executive Report (PDF, 3MB)"</p>`,
     LINK_IDENTICAL_NAME: `<p>Link text: "<strong>%(TEXT)</strong>"</p><p>${why.fix}Reword links that go different places with the unique titles of their different destinations.</p>${why.links}`,
     LINK_IMAGE_ALT: `<p>Make sure this alt describes the link destination, not just the visual contents of the image:</p><p> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong></p>${why.imageLinks}`,
@@ -8277,7 +8393,7 @@ URL: ${url2}`;
       "courtesy of",
       "alt text"
     ],
-    // todo Ed11y test use to catch these at the end as well as the beginning.
+    // todo Ed11y test used to catch these at the end as well as the beginning.
     extraPlaceholderStopWords: "placeholder, alt text, tbd, todo, to do",
     // updated
     // please add, please insert, add alt text

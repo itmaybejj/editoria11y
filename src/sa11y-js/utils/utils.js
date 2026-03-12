@@ -78,49 +78,6 @@ export function isElementVisuallyHiddenOrHidden(element) {
 }
 
 /**
- * Decodes/unescapes HTML entities back to their corresponding character.
- * @param {string} string The string.
- * @returns {string} Decoded string.
- */
-export function decodeHTML(string) {
-  if (!string) return '';
-  return string.replace(/&(#?[a-zA-Z0-9]+);/g, (match, entity) => {
-    switch (entity) {
-      case 'amp':
-        return '&';
-      case 'lt':
-        return '<';
-      case 'gt':
-        return '>';
-      case 'quot':
-        return "'";
-      case '#39':
-        return "'"; // Convert single quotes to actual single quotes.
-      default:
-        // For numeric entities, convert them back to the corresponding character.
-        if (entity.charAt(0) === '#') {
-          return String.fromCharCode(
-            entity.charAt(1) === 'x'
-              ? parseInt(entity.substr(2), 16)
-              : parseInt(entity.substr(1), 10),
-          );
-        }
-        return match;
-    }
-  });
-}
-
-/**
- * Strips HTML tags from a string.
- * @param {string} string The string.
- * @returns {string} String without any HTML tags.
- */
-export function stripHTMLtags(string) {
-  if (!string) return '';
-  return string.replace(/<[^>]*>/g, '');
-}
-
-/**
  * Removes ALL non-alphanumeric characters and normalizes whitespace. Accounts for non-Latin characters.
  * @param {string} string - The input text to be sanitized.
  * @returns {string} The sanitized and trimmed string.
@@ -131,17 +88,6 @@ export function stripAllSpecialCharacters(string) {
     .replace(/[^\p{L}\p{N}\s]/gu, '')
     .replace(/\s+/g, ' ')
     .trim();
-}
-
-/**
- * Encodes special characters with their corresponding HTML entities for safe escape.
- * @param {string} string The HTML string to encode.
- * @returns {string} The encoded HTML string with special characters replaced by their corresponding entities.
- * @link https://portswigger.net/web-security/cross-site-scripting/preventing
- */
-export function escapeHTML(string) {
-  if (!string) return '';
-  return string.replace(/[^\w. ]/gi, (c) => `&#${c.charCodeAt(0)};`);
 }
 
 /**
@@ -202,9 +148,12 @@ const decodeURIs = (uri) => {
 export function sanitizeURL(url) {
   if (!url || typeof url !== 'string') return BLANK_URL;
 
+  // Quick bypass for legitimate base64 data URIs
+  const isBase64Data = /^data:([a-z]+\/[a-z0-9-+.]+)?;base64,/i.test(url.trim());
+  if (isBase64Data) return url.trim();
+
   let charsToDecode;
   let decodedUrl = decodeURIs(url.trim());
-
   do {
     decodedUrl = decodeHtmlCharacters(decodedUrl)
       .replace(htmlCtrlEntityRegex, '')
@@ -245,33 +194,153 @@ export function sanitizeURL(url) {
   return backSanitized;
 }
 
+// Sanitize allow list.
+const allowedTags = [
+  'a',
+  'abbr',
+  'address',
+  'article',
+  'aside',
+  'audio',
+  'b',
+  'bdo',
+  'blockquote',
+  'br',
+  'button',
+  'canvas',
+  'cite',
+  'code',
+  'data',
+  'dd',
+  'del',
+  'details',
+  'dfn',
+  'div',
+  'dl',
+  'dt',
+  'em',
+  'fieldset',
+  'figcaption',
+  'figure',
+  'footer',
+  'form',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'header',
+  'hr',
+  'i',
+  'iframe',
+  'img',
+  'input',
+  'ins',
+  'kbd',
+  'label',
+  'li',
+  'main',
+  'mark',
+  'meter',
+  'nav',
+  'noscript',
+  'ol',
+  'output',
+  'p',
+  'picture',
+  'pre',
+  'progress',
+  'q',
+  'rp',
+  'rt',
+  's',
+  'samp',
+  'section',
+  'select',
+  'small',
+  'source',
+  'span',
+  'strong',
+  'sub',
+  'summary',
+  'sup',
+  'svg',
+  'table',
+  'tbody',
+  'td',
+  'textarea',
+  'tfoot',
+  'th',
+  'thead',
+  'time',
+  'tr',
+  'track',
+  'u',
+  'ul',
+  'var',
+  'video',
+  'wbr',
+  'path',
+];
+const attrWhitelist = {
+  a: ['href', 'title', 'target', 'rel', 'download'],
+  img: ['src', 'alt', 'title', 'width', 'height', 'loading', 'srcset', 'sizes'],
+  iframe: [
+    'src',
+    'width',
+    'height',
+    'title',
+    'frameborder',
+    'allowfullscreen',
+    'loading',
+    'sandbox',
+  ],
+  details: ['open'],
+  ol: ['start', 'type', 'reversed'],
+  li: ['value'],
+  td: ['colspan', 'rowspan'],
+  th: ['colspan', 'rowspan', 'scope'],
+  global: ['class', 'id', 'role', 'lang', 'dir', 'name'],
+  path: ['d', 'fill', 'fill-rule'],
+};
 /**
  * A lightweight method for sanitizes HTML strings.
  * @param {string} string - The raw HTML string to sanitize.
  * @returns {string} The sanitized HTML string.
- * Adapted from gomakethings.com/how-to-sanitize-html-strings-with-vanilla-js-to-reduce-your-risk-of-xss-attacks/
  */
 export function sanitizeHTML(string) {
-  const doc = new DOMParser().parseFromString(string, 'text/html');
-  const dangerousTags = 'script, iframe, object, embed, applet, style';
-  doc.body.querySelectorAll(dangerousTags).forEach((node) => {
-    node.remove();
-  });
-  doc.body.querySelectorAll('*').forEach((node) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(string, 'text/html');
+  const allElements = doc.body.querySelectorAll('*');
+  allElements.forEach((node) => {
+    const tag = node.tagName.toLowerCase();
+    if (!allowedTags.includes(tag)) {
+      node.remove();
+      return;
+    }
+    const allowedForThisTag = attrWhitelist[tag] || [];
+    const globals = attrWhitelist.global;
     [...node.attributes].forEach(({ name, value }) => {
-      const val = value.replace(/\s+/g, '').toLowerCase();
-      const isEvent = name.startsWith('on');
-      const isUrl = ['src', 'href', 'xlink:href'].includes(name);
-      const isPhishy =
-        val.includes('javascript:') || val.includes('data:text/html') || val.includes('vbscript:');
-      if (isEvent || (isUrl && isPhishy)) {
+      const isAria = name.startsWith('aria-');
+      const isAllowed = allowedForThisTag.includes(name) || globals.includes(name) || isAria;
+      const isUrlAttr = ['src', 'href', 'srcset'].includes(name);
+      if (!isAllowed) {
         node.removeAttribute(name);
+      } else if (isUrlAttr) {
+        const cleanURL = sanitizeURL(value);
+        if (!cleanURL) {
+          node.removeAttribute(name);
+        } else {
+          node.setAttribute(name, cleanURL);
+        }
       }
     });
   });
   return doc.body.innerHTML;
 }
 
+const baseIgnores = 'noscript,script,style,audio,video,form,iframe';
 /**
  * Creates a clone of an element while ignoring specified elements or elements matching a selector.
  * @param {Element} element The element to clone.
@@ -279,7 +348,6 @@ export function sanitizeHTML(string) {
  * @returns {Element|null} The cloned element or null if the root itself is ignored.
  */
 export function fnIgnore(element, selectors = []) {
-  const baseIgnores = 'noscript,script,style,audio,video,form,iframe';
   const ignoreQuery = selectors.length ? `${baseIgnores},${selectors.join(',')}` : baseIgnores;
 
   // Safety check: if it's not an element, return a clone or null.

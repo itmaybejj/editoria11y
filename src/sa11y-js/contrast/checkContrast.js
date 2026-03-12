@@ -356,18 +356,17 @@ export default function checkContrast() {
 
     // Content for tooltip.
     const truncatedText = Utils.truncateString(text, 80);
-    const sanitizedText = Utils.escapeHTML(truncatedText);
 
     // Preview text
     let previewText;
     if (item.type === 'placeholder' || item.type === 'placeholder-unsupported') {
-      previewText = Utils.escapeHTML($el.placeholder);
+      previewText = $el.placeholder;
     } else if (item.type === 'svg-error' || item.type === 'svg-warning') {
       previewText = '';
     } else {
-      previewText = sanitizedText;
+      previewText = truncatedText;
     }
-    updatedItem.sanitizedText = previewText;
+    updatedItem.previewText = previewText;
 
     // Reference necessary ratios for compliance.
     const isWcag =
@@ -392,7 +391,7 @@ export default function checkContrast() {
                   : Lang._('CONTRAST_ERROR')),
               ratioToDisplay,
             ),
-            dismiss: Utils.prepareDismissal(`CONTRAST_ERROR ${sanitizedText}`),
+            dismiss: Utils.prepareDismissal(`CONTRAST_ERROR ${previewText}`),
             dismissAll: State.option.checks.CONTRAST_ERROR.dismissAll ? 'CONTRAST_ERROR' : false,
             developer: State.option.checks.CONTRAST_ERROR.developer || false,
             contrastDetails: updatedItem,
@@ -401,7 +400,6 @@ export default function checkContrast() {
         break;
       case 'input':
         if (State.option.checks.CONTRAST_INPUT) {
-          const sanitizedInput = Utils.sanitizeHTML($el.outerHTML);
           State.results.push({
             test: 'CONTRAST_INPUT',
             element,
@@ -414,7 +412,7 @@ export default function checkContrast() {
               ratio,
               ratioToDisplay,
             ),
-            dismiss: Utils.prepareDismissal(`CONTRAST_INPUT ${sanitizedInput}`),
+            dismiss: Utils.prepareDismissal(`CONTRAST_INPUT ${$el.outerHTML}`),
             dismissAll: State.option.checks.CONTRAST_INPUT.dismissAll ? 'CONTRAST_INPUT' : false,
             developer: State.option.checks.CONTRAST_INPUT.developer || true,
             contrastDetails: updatedItem,
@@ -423,7 +421,6 @@ export default function checkContrast() {
         break;
       case 'placeholder':
         if (State.option.checks.CONTRAST_PLACEHOLDER) {
-          const sanitizedPlaceholder = Utils.sanitizeHTML($el.outerHTML);
           State.results.push({
             test: 'CONTRAST_PLACEHOLDER',
             element: $el,
@@ -436,7 +433,7 @@ export default function checkContrast() {
               ratioToDisplay,
             ),
             position: 'afterend',
-            dismiss: Utils.prepareDismissal(`CONTRAST_PLACEHOLDER ${sanitizedPlaceholder}`),
+            dismiss: Utils.prepareDismissal(`CONTRAST_PLACEHOLDER ${$el.outerHTML}`),
             dismissAll: State.option.checks.CONTRAST_PLACEHOLDER.dismissAll
               ? 'CONTRAST_PLACEHOLDER'
               : false,
@@ -448,7 +445,6 @@ export default function checkContrast() {
 
       case 'placeholder-unsupported':
         if (State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED) {
-          const sanitizedPlaceholder = Utils.sanitizeHTML($el.outerHTML);
           State.results.push({
             test: 'CONTRAST_PLACEHOLDER_UNSUPPORTED',
             element: $el,
@@ -461,9 +457,7 @@ export default function checkContrast() {
               ratioToDisplay,
             ),
             position: 'afterend',
-            dismiss: Utils.prepareDismissal(
-              `CONTRAST_PLACEHOLDER_UNSUPPORTED ${sanitizedPlaceholder}`,
-            ),
+            dismiss: Utils.prepareDismissal(`CONTRAST_PLACEHOLDER_UNSUPPORTED ${$el.outerHTML}`),
             dismissAll: State.option.checks.CONTRAST_PLACEHOLDER_UNSUPPORTED.dismissAll
               ? 'CONTRAST_PLACEHOLDER_UNSUPPORTED'
               : false,
@@ -475,19 +469,17 @@ export default function checkContrast() {
 
       case 'svg-error':
         if (State.option.checks.CONTRAST_ERROR_GRAPHIC) {
-          const sanitizedSVG = Utils.sanitizeHTML($el.outerHTML);
           State.results.push({
             test: 'CONTRAST_ERROR_GRAPHIC',
             element: $el,
             type: State.option.checks.CONTRAST_ERROR_GRAPHIC.type || 'error',
-            // No trailing variable needed since the graphic tip is just static text
             content: Lang.sprintf(
               State.option.checks.CONTRAST_ERROR_GRAPHIC.content ||
                 (State.option.contrastAlgorithm !== 'APCA'
                   ? `${Lang._('CONTRAST_ERROR_GRAPHIC')} ${Lang._('CONTRAST_TIP_GRAPHIC')}`
                   : Lang._('CONTRAST_ERROR_GRAPHIC')),
             ),
-            dismiss: Utils.prepareDismissal(`CONTRAST_ERROR_GRAPHIC ${sanitizedSVG}`),
+            dismiss: Utils.prepareDismissal(`CONTRAST_ERROR_GRAPHIC ${$el.outerHTML}`),
             dismissAll: State.option.checks.CONTRAST_ERROR_GRAPHIC.dismissAll
               ? 'CONTRAST_ERROR_GRAPHIC'
               : false,
@@ -500,7 +492,6 @@ export default function checkContrast() {
 
       case 'svg-warning':
         if (State.option.checks.CONTRAST_WARNING_GRAPHIC) {
-          const sanitizedSVG = Utils.sanitizeHTML($el.outerHTML);
           State.results.push({
             test: 'CONTRAST_WARNING_GRAPHIC',
             element: $el,
@@ -511,7 +502,7 @@ export default function checkContrast() {
                   ? `${Lang._('CONTRAST_WARNING_GRAPHIC')} ${Lang._('CONTRAST_TIP_GRAPHIC')}`
                   : Lang._('CONTRAST_WARNING_GRAPHIC')),
             ),
-            dismiss: Utils.prepareDismissal(`CONTRAST_WARNING_GRAPHIC ${sanitizedSVG}`),
+            dismiss: Utils.prepareDismissal(`CONTRAST_WARNING_GRAPHIC ${$el.outerHTML}`),
             dismissAll: State.option.checks.CONTRAST_WARNING_GRAPHIC.dismissAll
               ? 'CONTRAST_WARNING_GRAPHIC'
               : false,
@@ -535,7 +526,7 @@ export default function checkContrast() {
                   : Lang._('CONTRAST_WARNING')),
               ratioToDisplay,
             ),
-            dismiss: Utils.prepareDismissal(`CONTRAST_WARNING ${sanitizedText}`),
+            dismiss: Utils.prepareDismissal(`CONTRAST_WARNING ${previewText}`),
             dismissAll: State.option.checks.CONTRAST_WARNING.dismissAll
               ? 'CONTRAST_WARNING'
               : false,
@@ -558,7 +549,7 @@ export default function checkContrast() {
                   : Lang._('CONTRAST_WARNING')),
               ratioToDisplay,
             ),
-            dismiss: Utils.prepareDismissal(`CONTRAST_UNSUPPORTED ${sanitizedText}`),
+            dismiss: Utils.prepareDismissal(`CONTRAST_UNSUPPORTED ${previewText}`),
             dismissAll: State.option.checks.CONTRAST_UNSUPPORTED.dismissAll
               ? 'CONTRAST_UNSUPPORTED'
               : false,

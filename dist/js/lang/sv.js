@@ -212,6 +212,7 @@ const Sa11yStrings = {
     LINK_NEW_TAB: 'Länken öppnas i en ny flik eller ett nytt fönster utan förvarning. Att göra det kan vara desorienterande, särskilt för personer som har svårt att uppfatta visuellt innehåll. För det andra är det inte alltid en bra praxis att styra någons erfarenhet eller fatta beslut åt dem. Ange att länken öppnas i ett nytt fönster i länktexten. <hr> <strong>Tips!</strong> Lär dig bästa praxis: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">att öppna länkar i nya webbläsarfönster och flikar.</a>',
     LINK_FILE_EXT: "Länken pekar till en PDF eller nedladdningsbar fil (t.ex. MP3, Zip, Word Doc) utan förvarning. Ange filtypen i länktexten. Om det är en stor fil, överväg att ta med filstorleken. <hr> <strong>Exempel:</strong> Verkställande rapport (PDF, 3MB)",
     LINK_IDENTICAL_NAME: "Länken har identisk text som en annan länk, även om den pekar på en annan sida. Flera länkar med samma text kan orsaka förvirring för personer som använder skärmläsare. <strong>Överväg att göra följande länk mer beskrivande för att hjälpa till att skilja den från andra länkar.</strong> <hr> <strong {B}>Tillgängligt namn</strong> <strong {C}>%(TEXT)</strong>",
+    LINK_UNPRONOUNCEABLE: "Länktexten innehåller endast symboler. Om du tror att den här länken är ett fel på grund av en kopiera/klistra in-bugg, bör du överväga att ta bort den.",
     // Images
     ALT_UNPRONOUNCEABLE: "Alternativtexten innehåller endast outtalbara symboler och/eller mellanslag. Skärmläsare meddelar bilden och pausar sedan. Om bilden är dekorativ, se till att det inte finns några mellanslag i alternativtexten. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
     LINK_ALT_UNPRONOUNCEABLE: "Alternativtexten i denna länkade bild innehåller endast outtalbara symboler och/eller mellanslag. Skärmläsare meddelar bilden och pausar sedan. Se till att alternativtexten beskriver länkens mål. <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
@@ -370,6 +371,7 @@ const testNames = {
   LINK_EMPTY: "Den här länken innehåller inga ord.",
   LINK_EMPTY_LABELLEDBY: "Länk med ogiltigt attribut aria‑labelledby",
   LINK_EMPTY_NO_LABEL: "Denna länk behöver en etikett",
+  LINK_UNPRONOUNCEABLE: "Den här länken går inte att uttala",
   LINK_FILE_EXT: "Länken leder till en fil utan förvarning",
   LINK_IDENTICAL_NAME: "Länkar med samma text leder till olika sidor",
   LINK_IMAGE_ALT: "Manuell granskning: länkad bild med alt‑text",
@@ -465,6 +467,7 @@ const tips = {
   LINK_DOI: `<p>${why.fix}Länka artikelns titel och visa DOI som vanlig text.</p><div class="why"><p>Beskrivande länkar underlättar skanning och uppläsning i länklister.</p></div>`,
   LINK_EMPTY: `<p>${why.fix}Lägg till text som beskriver dess destination, eller ta bort den om det bara är ett stavfel eller ett länkat mellanslag.</p><div class="why"><p>Tips: Skärmläsare kan inte beskriva länkar som bara innehåller mellanslag eller symboler. De blir antingen tysta ("Länk, [...opretentiös paus där länktiteln borde vara...]"), eller läser URL-adressen: Länk, H-T-T-P-S snedstreck snedstreck exempel punkt com.</p><p>Observera att länkade mellanslag kan vara svåra att ta bort i vissa innehållsredigerare; det är ibland nödvändigt att ta bort "över gapet" genom att ta bort och skriva om orden på båda sidor om ett länkat mellanslag.</p></div>`,
   LINK_EMPTY_LABELLEDBY: `<p><code>aria-labelledby</code> pekar inte på ett giltigt <code>ID</code>.</p><p>${why.fix}Korrigera referensen eller ta bort attributet.</p>`,
+  LINK_UNPRONOUNCEABLE: `<p>${why.fix}Lägg till text eller en titel som beskriver dess destination, eller ta bort den om det bara är ett stavfel eller ett länkat mellanslag.</p><div class="why"><p>Tips: Skärmläsare kan inte beskriva länkar som bara innehåller mellanslag eller symboler. De blir antingen tysta ("Länk, [...obekväm paus där länktiteln borde vara...]"), eller läser upp symbolens namn.</p></div>`,
   LINK_FILE_EXT: `<p>Länken leder till en fil (PDF/MP3/ZIP/Word) utan att informera användaren.</p><p>${why.fix}Ange filtyp i länktext/ikon: https://itmaybejj.github.io/linkpurpose/</a>.</p><p class="why">För stora filer, ange gärna storlek (t.ex. ”Årsrapport (PDF, 3 MB)”).</p>`,
   LINK_IDENTICAL_NAME: `<p>Länktext: "<strong>%(TEXT)</strong>"</p><p><strong class="badge">Åtgärda</strong> Skriv om länkar som går till olika mål så att texten återspeglar deras unika destinationer.</p>${why.links}`,
   LINK_IMAGE_ALT: `Kontrollera att alt‑texten beskriver länkens mål:</p><p> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong></p>${why.imageLinks}`,

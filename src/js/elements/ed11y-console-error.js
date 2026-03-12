@@ -1,5 +1,5 @@
 import Lang from '../../sa11y-js/utils/lang.js';
-import { escapeHTML, sanitizeURL } from '../../sa11y-js/utils/utils';
+import { sanitizeURL } from '../../sa11y-js/utils/utils';
 import { UI } from '../core/ui.js';
 
 // Replaces Sa11y error with one that does not attach CSS.
@@ -52,9 +52,11 @@ URL: ${url}`;
       <p><strong>${Lang._('DEVELOPER_CHECKS')}:</strong></p>
       <pre>
 </pre>
-  		<p><strong>${Lang._('ERRORS')}:</strong></p>
+  		
+    `; /*  		<p><strong>${Lang._('ERRORS')}:</strong></p>
 <pre>${escapeHTML(this.error.stack)}</pre>
     `;
+*/
     shadow.appendChild(content);
     const pre = content.querySelector('pre');
     pre.textContent = preContents;

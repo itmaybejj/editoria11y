@@ -49,6 +49,7 @@ const testNames = {
 	LINK_EMPTY: 'Dieser Link enthält keine Wörter.',
 	LINK_EMPTY_LABELLEDBY: 'Link mit ungültigem „aria‑labelledby“‑Attribut',
 	LINK_EMPTY_NO_LABEL: 'Dieser Link benötigt eine Beschriftung',
+	LINK_UNPRONOUNCEABLE: 'Dieser Link ist nicht aussprechbar',
 	LINK_FILE_EXT: 'Link führt zu einer Datei ohne vorherigen Hinweis',
 	LINK_IDENTICAL_NAME: 'Mehrere Links mit demselben Text führen zu verschiedenen Seiten',
 	LINK_IMAGE_ALT: 'Manuelle Prüfung: verlinktes Bild mit Alt‑Text',
@@ -203,6 +204,7 @@ const tips = {
 	LINK_EMPTY_LABELLEDBY: `<p>Dieses <code>aria-labelledby</code> verweist auf kein vorhandenes <code>ID</code>.</p><p>${why.fix}Hinterlegen Sie eine gültige ID oder entfernen Sie das Attribut.</p>`,
 
 	LINK_EMPTY_NO_LABEL: `<p>${why.fix}Fügen Sie Text hinzu, der das Ziel beschreibt, oder löschen Sie den versehentlichen Link.</p><div class="why"><p>Leere Links können nicht sinnvoll angekündigt werden.</p><p>Oft hilft es, das umgebende Textfragment neu zu schreiben.</p></div>`,
+	LINK_UNPRONOUNCEABLE: `<p>${why.fix}Fügen Sie Text oder einen Titel hinzu, der das Ziel beschreibt, oder löschen Sie ihn, wenn es sich nur um einen Tippfehler oder ein verlinktes Leerzeichen handelt.</p><div class="why"><p>Tipp: Bildschirmleser können Links, die nur Leerzeichen oder Symbole enthalten, nicht beschreiben. Sie werden entweder stumm ("Link, [...unangenehme Pause, wo der Linktitel sein sollte...]"), oder lesen den Namen des Symbols vor.</p></div>`,
 
 	LINK_FILE_EXT: `<p>Dieser Link führt zu einer Datei (z. B. PDF, MP3, Zip, Word), ohne das anzuzeigen.</p><p>${why.fix}Geben Sie im Linktext den Dateityp an – z. B. per Text oder Icon (<a href="https://itmaybejj.github.io/linkpurpose/">Beispiele</a>).</p><p class="why">Bei großen Dateien nennen Sie die Größe, z. B. „Jahresbericht (PDF, 3 MB)“.</p>`,
 
