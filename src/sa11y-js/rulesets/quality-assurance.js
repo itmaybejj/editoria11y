@@ -302,7 +302,7 @@ export default function checkQA() {
     const alphabeticMatch = new RegExp(/(^[aA1αаΑ]|[^p{Alphabetic}\s])[-\s.)\]]/, 'u');
     // biome-ignore lint/complexity/noUselessEscapeInRegex: Escape is indeed needed!
     const emojiMatch = new RegExp(/\p{Extended_Pictographic}/, 'u');
-    const secondTextNoMatch = ['a', 'A', 'α', 'Α', 'а', 'А', '1'];
+    const secondTextNoMatch = ['a', 'A', 'α', 'Α', 'а', 'А', '1', 'i'];
     const specialCharsMatch = /[([{#]/;
     const prefixDecrement = {
       2: '1',

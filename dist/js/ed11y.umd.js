@@ -3281,7 +3281,7 @@ ${this.error.stack}
       const numberMatch = new RegExp(/(([023456789][\d\s])|(1\d))/, "");
       const alphabeticMatch = new RegExp(/(^[aA1αаΑ]|[^p{Alphabetic}\s])[-\s.)\]]/, "u");
       const emojiMatch = new RegExp(/\p{Extended_Pictographic}/, "u");
-      const secondTextNoMatch = ["a", "A", "α", "Α", "а", "А", "1"];
+      const secondTextNoMatch = ["a", "A", "α", "Α", "а", "А", "1", "i"];
       const specialCharsMatch = /[([{#]/;
       const prefixDecrement = {
         2: "1",
