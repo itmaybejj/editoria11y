@@ -1459,7 +1459,7 @@
       });
     }
   }
-  const version = "3.0.0-dev0311";
+  const version = "3.0.0-dev0312";
   const spriteAlts = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>';
   const spriteClose = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>';
   const spriteCursor = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 256 512"><path fill="currentColor" d="M0 29C-1 47 12 62 29 64l8 1C71 67 96 95 96 128L96 224l-32 0c-18 0-32 14-32 32s14 32 32 32l32 0 0 96c0 33-26 61-59 64l-8 1C12 450-1 465 0 483s17 31 35 29l8-1c34-3 64-19 85-43c21 24 51 40 85 43l8 1c18 2 33-12 35-29s-12-33-29-35l-8-1C186 445 160 417 160 384l0-96 32 0c18 0 32-14 32-32s-14-32-32-32l-32 0 0-96c0-33 26-61 59-64l8-1c18-2 31-17 29-35S239-1 221 0l-8 1C179 4 149 20 128 44c-21-24-51-40-85-43l-8-1C17-1 2 12 0 29z"/></svg>';
@@ -1547,6 +1547,7 @@ ${this.error.stack}
     panel: false,
     message: {},
     panelElement: {},
+    panelInitial: 1,
     panelNoCover: [],
     panelToggle: {},
     panelToggleTitle: {},
@@ -1899,22 +1900,62 @@ ${this.error.stack}
       });
     }
   }
+  const initialPanel = (ifNo) => {
+    if (UI.panelInitial && UI.totalCount >= UI.panelInitial) {
+      UI.panelToggle.classList.add("ed11y-preview");
+      UI.panelInitial = UI.totalCount;
+      if (UI.totalCount > 2) {
+        UI.panelToggleTitle.innerHTML = "";
+        UI.panelToggleTitle.appendChild(Lang.sprintf("main_toggle_plural", UI.totalCount));
+      } else if (UI.totalCount > 1) {
+        UI.panelToggleTitle.textContent = Lang._("main_toggle_2");
+      } else {
+        UI.panelToggleTitle.textContent = Lang._("main_toggle_1");
+      }
+      UI.panel.addEventListener("mouseover", () => {
+        hideInitialCount();
+      });
+      UI.panel.addEventListener("focus", () => {
+        hideInitialCount();
+      });
+    } else {
+      UI.panelInitial = false;
+      UI.panelToggle.classList.remove("ed11y-preview");
+      UI.panelToggleTitle.textContent = ifNo;
+    }
+  };
   function panelLabel(show = UI.showPanel) {
     if (show) {
       if (UI.english) {
-        UI.panelToggleTitle.textContent = UI.totalCount > 0 ? Lang._("main_toggle_hide_alerts") : Lang._("main_toggle_hide");
+        initialPanel(
+          UI.totalCount > 0 ? Lang._("main_toggle_hide_alerts") : Lang._("main_toggle_hide")
+        );
       } else {
-        UI.panelToggleTitle.textContent = Lang._("MAIN_TOGGLE_LABEL");
+        initialPanel(Lang._("MAIN_TOGGLE_LABEL"));
         UI.panelToggle.ariaExpanded = "true";
       }
     } else {
       if (UI.english) {
-        UI.panelToggleTitle.textContent = UI.totalCount > 0 ? Lang._("main_toggle_show_alerts") : Lang._("main_toggle_show");
+        initialPanel(
+          UI.totalCount > 0 ? Lang._("main_toggle_show_alerts") : Lang._("main_toggle_show")
+        );
       } else {
-        UI.panelToggleTitle.textContent = Lang._("MAIN_TOGGLE_LABEL");
+        initialPanel(Lang._("MAIN_TOGGLE_LABEL"));
         UI.panelToggle.ariaExpanded = "false";
       }
     }
+  }
+  function hideInitialCount() {
+    if (UI.panelInitial) {
+      UI.panelInitial = false;
+      panelLabel();
+    }
+    UI.panel.removeEventListener("mouseover", () => {
+      hideInitialCount();
+    });
+    UI.panel.removeEventListener("focus", () => {
+      hideInitialCount();
+    });
   }
   function pauseObservers() {
     UI.watching?.forEach((observer) => {
@@ -2160,7 +2201,7 @@ ${this.error.stack}
     "zip"
   ];
   const cssFileTypeSelectors = 'a[href$=".pdf"], a[href$=".doc"], a[href$=".docx"], a[href$=".zip"], a[href$=".mp3"], a[href$=".txt"], a[href$=".exe"], a[href$=".dmg"], a[href$=".rtf"], a[href$=".pptx"], a[href$=".ppt"], a[href$=".xls"], a[href$=".xlsx"], a[href$=".csv"], a[href$=".mp4"], a[href$=".mov"], a[href$=".avi"]';
-  const citationPattern = /(doi\.org\/|dl\.acm\.org\/|link\.springer\.com\/|pubmed\.ncbi\.nlm\.nih\.gov\/|scholar\.google\.com\/|ieeexplore\.ieee\.org\/|researchgate\.net\/publication\/|sciencedirect\.com\/science\/article\/)[a-z0-9/.-]+/i;
+  const citationPattern = /(doi\.org\/|dl\.acm\.org\/|link\.springer\.com\/|pubmed\.ncbi\.nlm\.nih\.gov\/|scholar\.google\.com\/|ieeexplore\.ieee\.org\/|researchgate\.net\/publication\/|sciencedirect\.com\/science\/article\/|10\.\d{4,}\/)[a-z0-9/.-]+/i;
   const urlEndings = /\b(?:\.edu\/|\.gob\/|\.gov\/|\.app\/|\.com\/|\.net\/|\.org\/|\.us\/|\.ca\/|\.de\/|\.icu\/|\.uk\/|\.ru\/|\.info\/|\.top\/|\.xyz\/|\.tk\/|\.cn\/|\.ga\/|\.cf\/|\.nl\/|\.io\/|\.fr\/|\.pe\/|\.nz\/|\.pt\/|\.es\/|\.pl\/|\.ua\/)\b/i;
   const specialCharPattern = /[^a-zA-Z0-9]/g;
   const htmlSymbols = /([<>↣↳←→↓«»↴]+)/;
@@ -3238,7 +3279,7 @@ ${this.error.stack}
     }
     if (State.option.checks.QA_FAKE_LIST) {
       const numberMatch = new RegExp(/(([023456789][\d\s])|(1\d))/, "");
-      const alphabeticMatch = new RegExp(/(^[aA1αаΑ]|[^p{Alphabetic}\s])[-\s.)]/, "u");
+      const alphabeticMatch = new RegExp(/(^[aA1αаΑ]|[^p{Alphabetic}\s])[-\s.)\]]/, "u");
       const emojiMatch = new RegExp(/\p{Extended_Pictographic}/, "u");
       const secondTextNoMatch = ["a", "A", "α", "Α", "а", "А", "1"];
       const specialCharsMatch = /[([{#]/;
@@ -3251,23 +3292,24 @@ ${this.error.stack}
         б: "а",
         Б: "А"
       };
-      const decrement = (element) => element.replace(/^b|^B|^б|^Б|^β|^В|^2/, (match) => prefixDecrement[match]);
+      const decrement = (element) => element.replace(/^b|^B|^б|^Б|^β|^В|^[2-9]/, (match) => prefixDecrement[match]);
       let activeMatch = "";
       let firstText = "";
       let lastHitWasEmoji = false;
       Elements.Found.Paragraphs.forEach((p, i) => {
         let secondText = false;
         let hit = false;
-        firstText = firstText || getText(p).replace("(", "");
+        firstText = firstText || getText(p).replace(/[([]/, "");
         const firstPrefix = firstText.substring(0, 2);
         const isAlphabetic = firstPrefix.match(alphabeticMatch);
         const isNumber = firstPrefix.match(numberMatch);
         const isEmoji = firstPrefix.match(emojiMatch);
         const isSpecialChar = specialCharsMatch.test(firstPrefix.charAt(0));
         if (firstPrefix.length > 0 && firstPrefix !== activeMatch && !isNumber && (isAlphabetic || isEmoji || isSpecialChar)) {
+          if (/^[A-Z]\.[A-Z]\./.test(firstText)) return;
           const secondP = Elements.Found.Paragraphs[i + 1];
           if (secondP) {
-            secondText = getText(secondP).replace("(", "").substring(0, 2);
+            secondText = getText(secondP).replace(/[([]/, "").substring(0, 2);
             if (secondTextNoMatch.includes(secondText?.toLowerCase().trim())) {
               return;
             }
@@ -3275,7 +3317,7 @@ ${this.error.stack}
             if (isAlphabetic) {
               const firstChar = firstPrefix.charAt(0);
               const secondChar = secondText.charAt(0);
-              if (decrement(secondChar) === firstChar) {
+              if (decrement(secondChar) === firstChar && !/\w/.test(secondText.charAt(1))) {
                 hit = true;
               }
             } else if (isEmoji && !lastHitWasEmoji) {
@@ -5147,6 +5189,7 @@ ${this.error.stack}
     UI.errorCount = 0;
     UI.warningCount = 0;
     UI.dismissedCount = 0;
+    const insertBefore = 'a, button, input, iframe, [role="button"], [role="link"]';
     for (let i = State.results.length - 1; i >= 0; i--) {
       if (State.results[i].dismissalStatus) {
         UI.dismissedCount++;
@@ -5161,10 +5204,12 @@ ${this.error.stack}
           State.results[i].element = location.parentElement;
         }
       }
-      if (State.results[i].element.closest(
-        'a, button, img, svg, input, iframe, [role="button"], [role="link"]'
-      )) {
-        State.results[i].element = State.results[i].element.closest('a, button, input, [role="button"], [role="link"]') ?? State.results[i].element;
+      if (State.option.insertAnnotationBefore && State.results[i].element.closest(State.option.insertAnnotationBefore)) {
+        State.results[i].element = State.results[i].element.closest(
+          State.option.insertAnnotationBefore
+        );
+      } else if (State.results[i].element.closest(`${insertBefore}, img, svg`)) {
+        State.results[i].element = State.results[i].element.closest(insertBefore) ?? State.results[i].element;
       } else if (State.results[i].element.matches(
         "p, strong, em, i, u, table, td, th, li, blockquote, h1, h2, h3, h4, h5, h6"
       )) {
@@ -5780,6 +5825,7 @@ ${this.error.stack}
         } else if (UI.totalCount > 0 && !UI.ignoreAll && (State.option.alertMode === "assertive" || State.option.alertMode === "polite" && UI.seen[encodeURI(State.option.currentPage)] !== UI.totalCount)) {
           UI.showPanel = true;
         }
+        UI.panelInitial = State.option.alertMode !== "polite" ? 1 : false;
       } else if (!UI.inlineAlerts) {
         UI.oldResultString = `${UI.errorCount} ${UI.warningCount}`;
         State.results.forEach((result) => {
@@ -7515,6 +7561,7 @@ ${this.error.stack}
     renderOnce() {
       this.initialized = true;
       this.open = true;
+      hideInitialCount();
       this.style.setProperty("opacity", "0");
       this.style.setProperty("outline", "0px solid transparent");
       const shadow = this.attachShadow({ mode: "open" });
@@ -8367,6 +8414,9 @@ ${this.error.stack}
     main_toggle_hide_alerts: "Hide accessibility alerts",
     main_toggle_show: "Show accessibility tools",
     main_toggle_show_alerts: "Show accessibility alerts",
+    main_toggle_1: "One accessibility alert",
+    main_toggle_2: "Two accessibility alerts",
+    main_toggle_plural: `%(count) accessibility alerts`,
     MISSING_ROOT: `Editoria11y did not find any elements that matched the check area configuration: <code>%(root)</code>`,
     panelCheckAltText: '<p class="ed11y-small">Check that each image describes what it means in context, and that there are no images of text.</p>',
     panelCheckOutline: '<p class="ed11y-small">This shows the heading outline. Check that it matches how the content is organized visually.</p>',
@@ -8483,7 +8533,9 @@ ${this.error.stack}
     dismissAnnotations: true,
     dismissAll: true,
     ignoreHiddenOverflow: "",
+    // Not yet implemented.
     insertAnnotationBefore: "",
+    // Not yet implemented.
     // Readability
     readabilityPlugin: false,
     readabilityRoot: "main",

@@ -256,7 +256,8 @@ ed11y-element-result {
 	}
 
 	&:hover,
-	&:focus-within {
+	&:focus-within,
+	&:has(.ed11y-preview) {
 		grid-template-rows: 2em 2em 0.5em 1fr;
 	}
 
@@ -392,20 +393,28 @@ button.ed11y-jump {
 		}
 
 		& > :hover .ed11y-sr-only,
-		& > :focus-visible .ed11y-sr-only {
+		& > :focus-visible .ed11y-sr-only,
+		.ed11y-preview .ed11y-sr-only {
 			top: -0.1875em;
 			right: 0;
 			width: auto;
 			min-width: max-content;
-			height: auto;
 			padding: 0 0.5em;
 			line-height: 1.75;
+			height: 1.75em;
 			color: var(--ed11y-activeColor);
 			text-align: start;
 			white-space: nowrap;
 			background: var(--ed11y-activeBackground);
 			box-shadow: 0 0 1px;
 			opacity: 1;
+			border-radius: var(--ed11y-borderRadius);
+			overflow: visible;
+			&::after {
+				content: "";
+				display: block;
+				height: 10px;
+			}
 		}
 	}
 
@@ -425,6 +434,7 @@ button.ed11y-jump {
 }
 
 /* todo 3.x: test*/
+.ed11y-pin-left .ed11y-buttonbar .ed11y-preview .ed11y-sr-only,
 .ed11y-pin-left .ed11y-buttonbar > :hover .ed11y-sr-only,
 .ed11y-pin-left .ed11y-buttonbar > :focus-visible .ed11y-sr-only {
 	right: auto;

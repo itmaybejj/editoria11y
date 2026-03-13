@@ -227,6 +227,7 @@ export function updatePanel() {
         // Show sometimes for assertive/polite if there are new items.
         UI.showPanel = true;
       }
+      UI.panelInitial = State.option.alertMode !== 'polite' ? 1 : false;
     } else if (!UI.inlineAlerts) {
       UI.oldResultString = `${UI.errorCount} ${UI.warningCount}`;
       State.results.forEach((result) => {

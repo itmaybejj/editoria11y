@@ -113,7 +113,7 @@ export function countAlerts() {
   UI.errorCount = 0;
   UI.warningCount = 0;
   UI.dismissedCount = 0;
-
+  const insertBefore = 'a, button, input, iframe, [role="button"], [role="link"]';
   for (let i = State.results.length - 1; i >= 0; i--) {
     if (State.results[i].dismissalStatus) {
       UI.dismissedCount++;
@@ -130,13 +130,15 @@ export function countAlerts() {
       }
     }
     if (
-      State.results[i].element.closest(
-        'a, button, img, svg, input, iframe, [role="button"], [role="link"]',
-      )
+      State.option.insertAnnotationBefore &&
+      State.results[i].element.closest(State.option.insertAnnotationBefore)
     ) {
+      State.results[i].element = State.results[i].element.closest(
+        State.option.insertAnnotationBefore,
+      );
+    } else if (State.results[i].element.closest(`${insertBefore}, img, svg`)) {
       State.results[i].element =
-        State.results[i].element.closest('a, button, input, [role="button"], [role="link"]') ??
-        State.results[i].element;
+        State.results[i].element.closest(insertBefore) ?? State.results[i].element;
     } else if (
       State.results[i].element.matches(
         'p, strong, em, i, u, table, td, th, li, blockquote, h1, h2, h3, h4, h5, h6',

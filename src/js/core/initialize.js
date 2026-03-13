@@ -109,6 +109,7 @@ const preProcessOptions = async (userOptions) => {
   UI.theme.baseFontFamily = State.option.baseFontFamily;
   UI.inlineAlerts = !document.querySelector('[contenteditable]') && State.option.inlineAlerts;
   UI.showDismissed = State.option.showDismissed;
+  //UI.panelInitial = State.option.
 
   // Deprecated
   /*if (userOptions.linkIgnoreSelector && !userOptions.linkIgnoreSpan) {

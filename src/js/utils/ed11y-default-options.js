@@ -59,8 +59,8 @@ export const ed11yDefaultOptions = {
   showGoodLinkButton: true,
   dismissAnnotations: true,
   dismissAll: true,
-  ignoreHiddenOverflow: '',
-  insertAnnotationBefore: '',
+  ignoreHiddenOverflow: '', // Not yet implemented.
+  insertAnnotationBefore: '', // Not yet implemented.
 
   // Readability
   readabilityPlugin: false,
