@@ -291,7 +291,7 @@
         <div><p>a. Fake lists</p><p>b. use letters or numbers.</p><p>c. rather than real formatting.</p></div>
         <div><p class="positive">1. Fake lists<br>2. Sometimes use<br>BR instead of P tags.</p></div>
 
-        <div><p class="positive">* Fake lists</p><p class="negative">* Should only</p><p class="negative">* be flagged</p><p class="negative">* one time.</p></div>
+        <div><p class="positive">* Fake lists</p><p class="negative">* Should only</p><p class="todo-negative">* be flagged</p><p class="negative">* one time.</p><p class="todo-negative">* not two.</p><p>* or three</p></div>
 		<div><p>Spacer between lists.</p></div>
             <p class="positive">1 This is split</p>
             <hr><p>2 with HR</p>
@@ -357,7 +357,7 @@
         <div class="negative"><p>11</p><p>12</p></div>
         <div class="negative"><p>1 thing</p><p>20 things</p></div>
         <div class="negative"><p>10 things</p><p>20 things</p></div>
-        <div class="negative"><p>1 thing</p><p>1 thing</p></div>
+        <div class="negative"><p>1 thing</p><p>1 thing</p><p>3 thing</p></div>
 
         <div class="positive"><p>1. This has rich text after the BR<br><a href="main"><strong>2.</strong> Fancy.</a></p></div>
         <div class="negative"><p>1. This has nothing after the BR<br></p></div>
@@ -368,6 +368,14 @@
         <h3 id="caps-lock">Caps lock</h3>
 
         <div class="positive"><p>SEVERAL WORDS IN A ROW OF CAPS LOCK TEXT WILL TRIGGER A MANUAL CHECK WARNING.</p></div>
+
+		<section class="forms">
+			<h2 id="forms">Forms</h2>
+			<div class="positive">
+				<label for="edit-keys" class="form-label visually-hidden">Search</label>
+				<input title="Enter the terms you wish to search for." placeholder="Search by keyword, ingredient, dish" data-drupal-selector="edit-keys" type="search" id="edit-keys" name="keys" value="" size="15" maxlength="128" class="form-search">
+			</div>
+		</section>
 
         <section class="shadow-root">
             <h2 id="shadow-root-1">Shadow root handling 1</h2>
