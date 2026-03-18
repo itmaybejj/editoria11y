@@ -9,6 +9,7 @@ const Sa11yStrings = {
     WARNING: "Figyelmeztetés",
     WARNINGS: "Figyelmeztetések",
     GOOD: "Jó",
+    REVIEW: "Ellenőrzés",
     ON: "A oldalon.",
     OFF: "Off",
     ALERT_TEXT: "Riasztás",

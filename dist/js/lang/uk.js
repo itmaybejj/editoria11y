@@ -9,6 +9,7 @@ const Sa11yStrings = {
     WARNING: "Попередження",
     WARNINGS: "Попередження",
     GOOD: "Добре",
+    REVIEW: "Переглянути",
     ON: "Увімкнено",
     OFF: "Вимкнено",
     ALERT_TEXT: "Попередження",

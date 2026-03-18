@@ -9,6 +9,7 @@ const Sa11yStrings = {
     WARNING: "Warnung",
     WARNINGS: "Warnungen",
     GOOD: "Gut",
+    REVIEW: "Überprüfung",
     ON: "An",
     OFF: "Aus",
     ALERT_TEXT: "Alarm",

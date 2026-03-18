@@ -70,7 +70,10 @@ const defaultOptions = {
   linkIgnoreStrings: [],
   paragraphIgnore: "table p",
   ignoreContentOutsideRoots: false,
-  ignoreByTest: {},
+  ignoreByTest: {
+    LABELS_ARIA_LABELS_INPUT: ':is(header, footer) [type="search"]',
+    LABELS_PLACEHOLDER: ':is(header, footer) [type="search"]'
+  },
   // Control panel settings
   aboutContent: "",
   panelPosition: "right",
@@ -219,9 +222,9 @@ const defaultOptions = {
     LABELS_MISSING_IMAGE_INPUT: true,
     LABELS_INPUT_RESET: true,
     LABELS_MISSING_LABEL: true,
-    LABELS_ARIA_LABEL_INPUT: true,
     LABELS_NO_FOR_ATTRIBUTE: true,
     LABELS_PLACEHOLDER: true,
+    LABELS_ARIA_LABEL_INPUT: true,
     // Embedded content checks
     EMBED_AUDIO: {
       sources: ""
@@ -2780,10 +2783,10 @@ function checkImages() {
         return;
       }
     }
-    const error = containsAltTextStopWords(rawAlt);
+    const error = containsAltTextStopWords(altText);
     const maybeBadAlt = link ? State.option.checks.LINK_ALT_MAYBE_BAD : State.option.checks.ALT_MAYBE_BAD;
     const isTooLongSingleWord = new RegExp(`^\\S{${maybeBadAlt.minLength || 15},}$`);
-    const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(rawAlt);
+    const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(altText);
     if (error[0] !== null) {
       const rule = link ? State.option.checks.LINK_ALT_FILE_EXT : State.option.checks.ALT_FILE_EXT;
       const conditional = link ? "LINK_ALT_FILE_EXT" : "ALT_FILE_EXT";
@@ -7885,6 +7888,7 @@ const Sa11yStrings = {
     WARNING: "Warning",
     WARNINGS: "Warnings",
     GOOD: "Good",
+    REVIEW: "Review",
     ON: "On",
     OFF: "Off",
     ALERT_TEXT: "Alert",

@@ -9,6 +9,7 @@ const Sa11yStrings = {
     WARNING: "Advarsel",
     WARNINGS: "Advarsler",
     GOOD: "God",
+    REVIEW: "Gennemse",
     ON: "På",
     OFF: "Af",
     ALERT_TEXT: "Alarm",
