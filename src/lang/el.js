@@ -184,7 +184,7 @@ const tips = {
 
 	LINK_ALT_MAYBE_BAD: `<p>Alt: "<strong>%(alt)</strong>"</p><p>${why.fix}Ορίστε alt που να περιγράφει τον προορισμό.</p>${why.imageLinks}`, // updated
 
-	LINK_ALT_UNPRONOUNCEABLE: `<p>Το alt περιέχει μη προφερτά σύμβολα: "%(ALT_TEXT)". Ο αναγνώστης οθόνης θα πει ότι υπάρχει σύνδεσμος αλλά δεν θα μπορεί να τον περιγράψει.</p><p>${why.fix}Ορίστε alt που να δηλώνει τον προορισμό.</p>${why.imageLinks}`,
+	LINK_ALT_UNPRONOUNCEABLE: `<p>Το alt περιέχει μη προφερτά σύμβολα: <strong>"%(ALT_TEXT)"</strong>.</p><p>Ο αναγνώστης οθόνης θα πει ότι υπάρχει σύνδεσμος αλλά δεν θα μπορεί να τον περιγράψει.</p><p>${why.fix}Ορίστε alt που να δηλώνει τον προορισμό.</p>${why.imageLinks}`,
 
 	LINK_CLICK_HERE: `Η φράση "κάντε κλικ" είναι περιττή και δεν περιγράφει τον προορισμό.`,
 

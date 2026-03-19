@@ -194,6 +194,8 @@
       LINK_ALT_MAYBE_BAD: {
         minLength: 15
       },
+      ALT_MAYBE_BAD_WARNING: true,
+      LINK_ALT_MAYBE_BAD_WARNING: true,
       // Link checks
       DUPLICATE_TITLE: {
         dismissAll: true
@@ -380,6 +382,9 @@
       return ariaLabel;
     }
     let computedText = "";
+    const and = (word) => {
+      computedText += ` ${word}`;
+    };
     if (!element.children.length) {
       computedText = wrapPseudoContent(element, element.textContent);
       if (!computedText.trim() && element.hasAttribute("title")) {
@@ -419,19 +424,19 @@
         for (let i = 0; i < shadowChildren.length; i++) {
           const child = shadowChildren[i];
           if (!excludeSelector || !child.closest(excludeSelector)) {
-            computedText += computeAccessibleName(child, exclusions, recursing + 1);
+            and(computeAccessibleName(child, exclusions, recursing + 1));
           }
         }
       }
       if (node.nodeType === Node.TEXT_NODE) {
         if (node.parentNode.tagName !== "SLOT") {
-          computedText += ` ${node.nodeValue}`;
+          and(node.nodeValue);
         }
         continue;
       }
       if (addTitleIfNoName && !node.closest("a")) {
         if (aText === computedText) {
-          computedText += addTitleIfNoName;
+          and(addTitleIfNoName);
         }
         addTitleIfNoName = false;
         aText = false;
@@ -444,7 +449,7 @@
       }
       const aria = computeAriaLabel(node, recursing);
       if (aria !== "noAria") {
-        computedText += ` ${aria}`;
+        and(aria);
         if (!nextTreeBranch(treeWalker)) {
           continueWalker = false;
         }
@@ -453,16 +458,16 @@
       switch (node.tagName) {
         case "IMG":
           if (node.hasAttribute("alt") && node.role !== "presentation") {
-            computedText += node.getAttribute("alt");
+            and(node.getAttribute("alt"));
           }
           break;
         case "SVG":
           if (node.role === "img" || node.role === "graphics-document") {
-            computedText += computeAriaLabel(node);
+            and(computeAriaLabel(node));
           } else {
             const title = node.querySelector("title");
             if (title) {
-              computedText += title.textContent;
+              and(title.textContent);
             }
           }
           break;
@@ -474,10 +479,10 @@
             addTitleIfNoName = false;
             aText = false;
           }
-          computedText += wrapPseudoContent(node, "");
+          and(wrapPseudoContent(node, ""));
           break;
         case "INPUT":
-          computedText += wrapPseudoContent(treeWalker.currentNode, "");
+          and(wrapPseudoContent(treeWalker.currentNode, ""));
           if (treeWalker.currentNode.hasAttribute("title")) {
             addTitleIfNoName = treeWalker.currentNode.getAttribute("title");
           }
@@ -492,24 +497,24 @@
               slotText += child.nodeValue;
             }
           });
-          computedText += slotText;
-          computedText += wrapPseudoContent(node, "");
+          and(slotText);
+          and(wrapPseudoContent(node, ""));
           break;
         }
         case "SPAN": {
-          computedText += wrapPseudoContent(treeWalker.currentNode, "");
+          and(wrapPseudoContent(treeWalker.currentNode, ""));
           if (treeWalker.currentNode.hasAttribute("title")) {
             addTitleIfNoName = treeWalker.currentNode.getAttribute("title");
           }
           break;
         }
         default:
-          computedText += wrapPseudoContent(node, "");
+          and(wrapPseudoContent(node, ""));
           break;
       }
     }
     if (addTitleIfNoName && !aText) {
-      computedText += ` ${addTitleIfNoName}`;
+      and(addTitleIfNoName);
     }
     computedText = computedText.replace(/[\uE000-\uF8FF]/gu, "");
     if (!computedText.trim()) {
@@ -2592,7 +2597,7 @@ ${this.error.stack}
     const extraPlaceholderStopWords = State.option.extraPlaceholderStopWords.split(",").map((word) => word.trim().toLowerCase()).filter(Boolean);
     const containsAltTextStopWords = (alt) => {
       const altLowerCase = alt.toLowerCase();
-      const altNoNumbers = altLowerCase.replace(/\d+/g, "").trim();
+      const altOnlyLetters = altLowerCase.replace(/[^\p{L}\s]/gu, "").trim();
       const hit = [null, null, null];
       for (const urlHit of url) {
         if (altLowerCase.includes(urlHit)) {
@@ -2611,7 +2616,7 @@ ${this.error.stack}
           break;
         }
       }
-      if (placeholderAltSet.has(altLowerCase) || placeholderAltSet.has(altNoNumbers)) {
+      if (placeholderAltSet.has(altLowerCase) || placeholderAltSet.has(altOnlyLetters)) {
         hit[2] = alt;
       }
       if (extraPlaceholderStopWords.length) {
@@ -2790,7 +2795,13 @@ ${this.error.stack}
       const error = containsAltTextStopWords(altText);
       const maybeBadAlt = link ? State.option.checks.LINK_ALT_MAYBE_BAD : State.option.checks.ALT_MAYBE_BAD;
       const isTooLongSingleWord = new RegExp(`^\\S{${maybeBadAlt.minLength || 15},}$`);
-      const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(altText);
+      const containsNonAlphaChar = /[^\p{L}\-,.!? ]/u.test(altText);
+      const isBadFilename = new RegExp(
+        `^(?=[^_-]*([_-][^_-]*){3,})\\S{${maybeBadAlt.minLength || 15},}$`
+      ).test(altText);
+      const hasTooMuchNoise = /^(?:\s*\d){5,}\s*$/.test(altText) || // Is a number longer than 5 digits.
+      (altText.match(/[_-]/g) || []).length >= 3 || // Contains more than 3 delimiters (- or _)
+      (altText.match(/[^\p{L}\s,.!?\-\d]/gu) || []).length >= 5;
       if (error[0] !== null) {
         const rule = link ? State.option.checks.LINK_ALT_FILE_EXT : State.option.checks.ALT_FILE_EXT;
         const conditional = link ? "LINK_ALT_FILE_EXT" : "ALT_FILE_EXT";
@@ -2833,17 +2844,34 @@ ${this.error.stack}
             developer: rule.developer || false
           });
         }
-      } else if (maybeBadAlt && isTooLongSingleWord.test(rawAlt) && containsNonAlphaChar) {
+      } else if (isBadFilename || maybeBadAlt && isTooLongSingleWord.test(rawAlt) && containsNonAlphaChar) {
+        const rule = link ? State.option.checks.LINK_ALT_MAYBE_BAD : State.option.checks.ALT_MAYBE_BAD;
         const conditional = link ? "LINK_ALT_MAYBE_BAD" : "ALT_MAYBE_BAD";
-        State.results.push({
-          test: conditional,
-          element: $el,
-          type: maybeBadAlt.type || "error",
-          content: Lang.sprintf(maybeBadAlt.content || conditional, altText),
-          dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
-          dismissAll: maybeBadAlt.dismissAll ? conditional : false,
-          developer: maybeBadAlt.developer || false
-        });
+        if (rule) {
+          State.results.push({
+            test: conditional,
+            element: $el,
+            type: rule.type || "error",
+            content: Lang.sprintf(rule.content || conditional, altText),
+            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false
+          });
+        }
+      } else if (hasTooMuchNoise) {
+        const conditional = link ? "LINK_ALT_MAYBE_BAD" : "ALT_MAYBE_BAD";
+        const rule = link ? State.option.checks.LINK_ALT_MAYBE_BAD_WARNING : State.option.checks.ALT_MAYBE_BAD_WARNING;
+        if (rule) {
+          State.results.push({
+            test: link ? "LINK_ALT_MAYBE_BAD_WARNING" : "ALT_MAYBE_BAD_WARNING",
+            element: $el,
+            type: rule.type || "warning",
+            content: Lang.sprintf(rule.content || conditional, altText),
+            dismiss: prepareDismissal(`${conditional}WARNING${src + rawAlt} `),
+            dismissAll: rule.dismissAll ? conditional : false,
+            developer: rule.developer || false
+          });
+        }
       } else if (link ? rawAlt.length > maxAltCharactersLinks : rawAlt.length > maxAltCharacters) {
         const rule = link ? State.option.checks.LINK_IMAGE_LONG_ALT : State.option.checks.IMAGE_ALT_TOO_LONG;
         const conditional = link ? "LINK_IMAGE_LONG_ALT" : "IMAGE_ALT_TOO_LONG";
@@ -7994,7 +8022,10 @@ ${this.error.stack}
         "hero slide",
         "homepage feature image",
         "featured image",
-        "untitled"
+        "untitled",
+        "untitled image",
+        "unnamed",
+        "copy"
       ],
       LINK_STOPWORDS: [
         "click",
@@ -8207,7 +8238,7 @@ ${this.error.stack}
   const testNames = {
     ALT_FILE_EXT: "This alt text is a filename, not a description",
     ALT_MAYBE_BAD: "This alt text cannot be pronounced by a screen reader",
-    ALT_PLACEHOLDER: "This alt text does not describe its image",
+    ALT_PLACEHOLDER: "This alt text sounds like a placeholder",
     ALT_UNPRONOUNCEABLE: "This alt text is unpronounceable",
     BTN_EMPTY: "Button is missing an accessible label",
     BTN_EMPTY_LABELLEDBY: "Button has an invalid ARIA label",
@@ -8261,7 +8292,7 @@ ${this.error.stack}
     LINK_IMAGE_NO_ALT_TEXT: "This linked image needs alt text",
     LINK_IMAGE_TEXT: "Does this linked image need a description?",
     LINK_NEW_TAB: "Does this link open a new tab without warning?",
-    LINK_PLACEHOLDER_ALT: "This linked image needs meaningful alt text",
+    LINK_PLACEHOLDER_ALT: "This linked alt text sounds like a placeholder",
     LINK_STOPWORD: "This link only contains generic words",
     LINK_STOPWORD_ARIA: "Meaningful link text only available to screen reader users",
     LINK_SUS_ALT: `Does this image's alt describe the image or the link?`,
@@ -8349,7 +8380,7 @@ ${this.error.stack}
     LABEL_IN_NAME: `<p>The visible text for this element appears to be different from the accessible name. This may cause confusion for screen reader users, and may break voice control.</p><p>${why.fix}Make sure the visible label starts with the text of the invisible label, and does not contain any additional meaningful information.</p><p><strong>Invisible Label:</strong> "%(TEXT)"</p>`,
     LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt text: "<strong>%(alt)</strong>"</p><p>This alt text is probably a filename instead of a meaningful label for a link.</p><p>${why.fix}Set this image's alt text to the name of the link destination.</p><div class="why"> <p>The purpose of alt text is to provide an alternative for what an image means, not what it contains. The meaning of a linked image is the link destination:</p><ul><li>"Page with writing" describes the image, not a link.</li><li>"IMG_1234.jpg" is just a filename.</li><li>"<strong><em>Event registration form (.doc)</em></strong>" is a link destination.</li></ul></p></div>`,
     LINK_ALT_MAYBE_BAD: `<p>Alt text: "<strong>%(alt)</strong>."</p><p>${why.fix}Set this image's alt text to the name of the link destination.</p>${why.imageLinks}`,
-    LINK_ALT_UNPRONOUNCEABLE: `<p>The alt text within this linked image only contains unpronounceable symbols and/or spaces: "%(ALT_TEXT)". Screen readers will announce there is a link, and then be unable to describe it.</p><p>${why.fix}Set this image's alt to the link's destination or purpose.</p>${why.imageLinks}`,
+    LINK_ALT_UNPRONOUNCEABLE: `<p>The alt text within this linked image only contains unpronounceable symbols and/or spaces: <strong>"%(ALT_TEXT)"</strong>.</p><p>Screen readers will announce there is a link, and then be unable to describe it.</p><p>${why.fix}Set this image's alt to the link's destination or purpose.</p>${why.imageLinks}`,
     LINK_CLICK_HERE: `The phrase "click" or "click here" is redundant, and takes focus away from the link's purpose.`,
     LINK_DOI: `<p>${why.fix}Link the article title and provide the DOI number as plain text, rather than linking the DOI number and leaving the article title as plain text.</p><div class="why"><p>The <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">APA Style guide</a> recommends using descriptive links on websites because users skim by links and use in-page search for links by name. Users are much more likely to notice articles of interest when the title is linked.</p><p>This also allows screen readers to describe each link meaningfully, rather than speaking a meaningless sequence of numbers.</p></div>`,
     LINK_EMPTY: `<p>${why.fix}Add text describing its destination, or delete it if is just a typo or linked space character.</p><div class="why"><p>Tip: screen readers cannot describe links that only contain spaces or symbols. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the URL: Link, H-T-T-P-S forward-slash forward-slash example dot com."</p><p>Note that linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p></div>`,

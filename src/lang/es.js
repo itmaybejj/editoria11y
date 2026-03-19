@@ -183,7 +183,7 @@ const tips = {
 
 	LINK_ALT_MAYBE_BAD: `<p>Texto alternativo: "<strong>%(alt)</strong>"</p><p>${why.fix}Establezca el alt de esta imagen con el nombre del destino del enlace.</p>${why.imageLinks}`,
 
-	LINK_ALT_UNPRONOUNCEABLE: `<p>El alt de esta imagen vinculada contiene solo símbolos impronunciables o espacios: "%(ALT_TEXT)". Los lectores de pantalla anunciarán que hay un enlace, pero no podrán describirlo.</p><p>${why.fix}Establezca el alt según la finalidad o el destino del enlace.</p>${why.imageLinks}`,
+	LINK_ALT_UNPRONOUNCEABLE: `<p>El alt de esta imagen vinculada contiene solo símbolos impronunciables o espacios: <strong>"%(ALT_TEXT)"</strong>.</p><p>Los lectores de pantalla anunciarán que hay un enlace, pero no podrán describirlo.</p><p>${why.fix}Establezca el alt según la finalidad o el destino del enlace.</p>${why.imageLinks}`,
 
 	LINK_CLICK_HERE: `La frase «haz clic» o «haz clic aquí» es redundante y desvía la atención del propósito del enlace.`,
 

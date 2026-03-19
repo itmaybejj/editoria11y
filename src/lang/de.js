@@ -193,7 +193,7 @@ const tips = {
 
 	LINK_ALT_MAYBE_BAD: `<p>Alt‑Text: "<strong>%(alt)</strong>"</p><p>${why.fix}Setzen Sie den Alt‑Text dieses Bildes auf den Namen des Linkziels.</p>${why.imageLinks}`,
 
-	LINK_ALT_UNPRONOUNCEABLE: `<p>Der Alt‑Text dieses verlinkten Bildes besteht nur aus unaussprechlichen Symbolen/Leerzeichen: "%(ALT_TEXT)". Screenreader kündigen einen Link an, können ihn dann aber nicht beschreiben.</p><p>${why.fix}Setzen Sie den Alt‑Text auf das Linkziel oder den Zweck.</p>${why.imageLinks}`,
+	LINK_ALT_UNPRONOUNCEABLE: `<p>Der Alt‑Text dieses verlinkten Bildes besteht nur aus unaussprechlichen Symbolen/Leerzeichen: <strong>"%(ALT_TEXT)"</strong>.</p><p>Screenreader kündigen einen Link an, können ihn dann aber nicht beschreiben.</p><p>${why.fix}Setzen Sie den Alt‑Text auf das Linkziel oder den Zweck.</p>${why.imageLinks}`,
 
 	LINK_CLICK_HERE: `Die Formulierungen „klicken“/„hier klicken“ sind überflüssig und lenken vom Linkzweck ab.`,
 
