@@ -547,15 +547,15 @@ const interfaceStrings = {
   PANEL_HEADING: "Afficher les visualisations",
   SKIP_TO_ISSUE: "Afficher l’alerte",
   // updated
-  WARNING: "vérification manuelle requise",
-  WARNINGS: "vérifications manuelles requises",
+  WARNING: "vérification manuelle",
+  WARNINGS: "vérifications manuelles",
   buttonFirstContent: "Afficher la première alerte",
   // updated
   buttonHideHiddenAlert: "Masquer l’alerte masquée",
   buttonHideHiddenAlerts: `Masquer %(count) alertes masquées`,
   buttonShowHiddenAlert: "Afficher l’alerte masquée",
   buttonToolsActive: "Masquer les visualisations",
-  dismissActions: `Alertes similaires`,
+  dismissActions: `Similaires`,
   dismissHideTitle: "Masque seulement l’alerte pour vous",
   dismissOkAllButton: "Sur cette page : marquer comme OK",
   dismissOkButtonContent: "Marquer comme OK",
