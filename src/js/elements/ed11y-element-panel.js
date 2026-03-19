@@ -32,16 +32,16 @@ export class Ed11yElementPanel extends HTMLElement {
           <details id="ed11y-headings-tab">
               <summary>${spriteHeadings}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
               </summary>
-              <div class="details">
-                  <span class="details-title"></span>
+              <div class="details ed11y-small">
+                  <p class="details-title"></p>
                   <ul id='ed11y-outline'></ul>
               </div>
           </details>
           <details id="ed11y-alts-tab">
             <summary>${spriteAlts}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
             </summary>
-            <div class="details">
-                <span class="details-title"></span>
+            <div class="details ed11y-small">
+                <p class="details-title"></p>
                 <ul id='ed11y-alt-list'></ul>
             </div>
         </details>

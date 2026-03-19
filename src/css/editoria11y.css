@@ -194,7 +194,7 @@ ed11y-element-result {
 		}
 
 		.details {
-			padding: 0 8px 8px 24px;
+			padding: 0 8px 8px 13px;
 		}
 	}
 
@@ -734,11 +734,11 @@ button.ed11y-jump {
 #ed11y-outline,
 #ed11y-alt-list {
 	padding: 0;
-	margin: 0;
 	list-style: none;
 }
 
 #ed11y-outline {
+	margin: 0 0 0 -7px;
 	li {
 		padding: 3px 8px;
 		margin: 5px -8px;
@@ -759,6 +759,7 @@ button.ed11y-jump {
 }
 
 #ed11y-alt-list {
+	margin: 0 4px 0 6px;
 	li {
 		margin-left: -8px;
 	}
@@ -802,7 +803,7 @@ button.ed11y-jump {
 	}
 	.ed11y-warning,
 	.ed11y-error {
-		border-radius: 10px;
+		border-radius: 4px;
 	}
 }
 
@@ -1475,7 +1476,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 	bottom: 0;
 	left: 0;
 
-	span {
+	& > span {
 		position: absolute;
 		right: 0;
 		bottom: 12px;

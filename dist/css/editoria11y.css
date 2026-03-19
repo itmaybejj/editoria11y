@@ -190,7 +190,7 @@ ed11y-element-result {
 }
 
 .ed11y-panel-wrapper .content .details {
-  padding: 0 8px 8px 24px;
+  padding: 0 8px 8px 13px;
 }
 
 .ed11y-panel-wrapper:has(details[open]) .content {
@@ -668,9 +668,12 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 #ed11y-outline, #ed11y-alt-list {
-  margin: 0;
   padding: 0;
   list-style: none;
+}
+
+#ed11y-outline {
+  margin: 0 0 0 -7px;
 }
 
 #ed11y-outline li {
@@ -691,6 +694,10 @@ button.ed11y-jump:hover .toggle-count {
 
 #ed11y-outline a:hover {
   text-decoration: underline;
+}
+
+#ed11y-alt-list {
+  margin: 0 4px 0 6px;
 }
 
 #ed11y-alt-list li {
@@ -728,7 +735,7 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 #ed11y-alt-list .ed11y-warning, #ed11y-alt-list .ed11y-error {
-  border-radius: 10px;
+  border-radius: 4px;
 }
 
 #ed11y-message:not(:empty) {
@@ -1386,7 +1393,7 @@ button.ed11y-jump:hover .toggle-count {
   right: 0;
 }
 
-.ed11y-alt-wrapper span {
+.ed11y-alt-wrapper > span {
   z-index: calc(var(--ed11y-buttonZIndex, 9999) - 1);
   min-width: 10em;
   padding: 6px;

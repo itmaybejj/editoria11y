@@ -168,9 +168,9 @@ export function updatePanel() {
         Lang._('PANEL_HEADING');
       UI.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = Lang._('OUTLINE');
       UI.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = Lang._('IMAGES');
-      UI.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML =
+      UI.panel.querySelector('#ed11y-headings-tab .details-title').textContent =
         Lang._('panelCheckOutline');
-      UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML =
+      UI.panel.querySelector('#ed11y-alts-tab .details-title').textContent =
         Lang._('panelCheckAltText');
       UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = Lang._('buttonFirstContent');
       UI.panel.setAttribute('aria-label', Lang._('CONTAINER_LABEL'));

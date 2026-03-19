@@ -5477,7 +5477,8 @@ ${this.error.stack}
           element: img,
           type: match.type,
           dismiss: match.dismiss,
-          developer: match.developer
+          developer: match.developer,
+          test: match.test
         });
       } else {
         UI.imageAlts.push({
@@ -5502,17 +5503,23 @@ ${this.error.stack}
           mark.dataset.ed11yImg = i.toString();
           mark.setAttribute("id", `ed11y-alt-${i}`);
           mark.setAttribute("tabindex", "-1");
+          mark.title = Lang.testNames[image.test];
           UI.imageAlts[i].mark = mark;
           image.element.insertAdjacentElement("beforebegin", mark);
         }
         const userText = document.createElement("span");
-        if (altText !== "") {
-          userText.textContent = altText;
-        } else {
+        if (altText === "") {
           const decorative = document.createElement("span");
           decorative.classList.add("ed11y-decorative");
           decorative.textContent = Lang._("DECORATIVE");
           userText.append(decorative);
+        } else if (altText === null) {
+          const decorative = document.createElement("span");
+          decorative.classList.add("ed11y-decorative");
+          decorative.textContent = Lang.testNames[image.test];
+          userText.append(decorative);
+        } else {
+          userText.textContent = altText;
         }
         const li = document.createElement("li");
         li.classList.add(`ed11y-${image.type}`);
@@ -5523,6 +5530,7 @@ ${this.error.stack}
           const a = document.createElement("a");
           a.href = `#ed11y-alt-${i}`;
           a.classList.add("alt-parent");
+          a.title = Lang.testNames[image.test];
           li.append(a);
           a.append(img);
           a.append(userText);
@@ -5604,14 +5612,14 @@ ${this.error.stack}
           result.element.insertAdjacentElement("afterbegin", mark);
           UI.attachCSS(mark.shadowRoot);
         }
-        const leftPad = 10 * result.headingLevel - 10;
+        const leftPad = 7 * result.headingLevel - 7;
         const li = document.createElement("li");
         li.classList.add(`level${result.headingLevel}`);
         li.style.setProperty("margin-left", `${leftPad}px`);
         const levelPrefix = document.createElement("strong");
         levelPrefix.textContent = `H${result.headingLevel}: `;
         const userText = document.createElement("span");
-        userText.innerHTML = result.text;
+        userText.textContent = result.text;
         const link = document.createElement("a");
         if (UI.inlineAlerts) {
           link.setAttribute("href", `#ed11y-heading-${i}`);
@@ -5799,8 +5807,8 @@ ${this.error.stack}
         UI.panel.querySelector("#ed11y-visualize .ed11y-sr-only").textContent = Lang._("PANEL_HEADING");
         UI.panel.querySelector("#ed11y-headings-tab .summary-title").textContent = Lang._("OUTLINE");
         UI.panel.querySelector("#ed11y-alts-tab .summary-title").textContent = Lang._("IMAGES");
-        UI.panel.querySelector("#ed11y-headings-tab .details-title").innerHTML = Lang._("panelCheckOutline");
-        UI.panel.querySelector("#ed11y-alts-tab .details-title").innerHTML = Lang._("panelCheckAltText");
+        UI.panel.querySelector("#ed11y-headings-tab .details-title").textContent = Lang._("panelCheckOutline");
+        UI.panel.querySelector("#ed11y-alts-tab .details-title").textContent = Lang._("panelCheckAltText");
         UI.panel.querySelector(".jump-next.ed11y-sr-only").textContent = Lang._("buttonFirstContent");
         UI.panel.setAttribute("aria-label", Lang._("CONTAINER_LABEL"));
         if (State.option.reportsURL) {
@@ -7043,16 +7051,25 @@ ${this.error.stack}
       if (!this.initialized) {
         const shadow = this.attachShadow({ mode: "open" });
         const altTextWrapper = document.createElement("div");
-        altTextWrapper.classList.add("ed11y-wrapper", "ed11y-alt-wrapper");
+        altTextWrapper.classList.add("ed11y-wrapper", "ed11y-alt-wrapper", "ed11y-small");
         const img = UI.imageAlts[this.dataset.ed11yImg];
         const altSpan = document.createElement("span");
-        if (img.altText !== "") {
-          altSpan.textContent = img.altText;
+        if (img.altText === "") {
+          const decorative = document.createElement("span");
+          decorative.classList.add("ed11y-decorative");
+          decorative.textContent = Lang._("DECORATIVE");
+          altSpan.append(decorative);
+          altSpan.classList.add(`ed11y-${img.type}`);
+        } else if (img.altText === null) {
+          const decorative = document.createElement("span");
+          decorative.classList.add("ed11y-decorative");
+          decorative.textContent = img.type === "pass" ? Lang._("MISSING") : Lang.testNames[img.test];
+          altSpan.append(decorative);
+          altSpan.classList.add(`ed11y-error`);
         } else {
-          altSpan.classList.add("ed11y-decorative");
-          altSpan.textContent = Lang._("DECORATIVE");
+          altSpan.textContent = img.altText;
+          altSpan.classList.add(`ed11y-pass`);
         }
-        altSpan.classList.add(`ed11y-${img.type}`);
         altTextWrapper.appendChild(altSpan);
         UI.attachCSS(altTextWrapper);
         shadow.appendChild(altTextWrapper);
@@ -7229,16 +7246,16 @@ ${this.error.stack}
           <details id="ed11y-headings-tab">
               <summary>${spriteHeadings}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
               </summary>
-              <div class="details">
-                  <span class="details-title"></span>
+              <div class="details ed11y-small">
+                  <p class="details-title"></p>
                   <ul id='ed11y-outline'></ul>
               </div>
           </details>
           <details id="ed11y-alts-tab">
             <summary>${spriteAlts}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
             </summary>
-            <div class="details">
-                <span class="details-title"></span>
+            <div class="details ed11y-small">
+                <p class="details-title"></p>
                 <ul id='ed11y-alt-list'></ul>
             </div>
         </details>
@@ -8429,8 +8446,8 @@ ${this.error.stack}
     main_toggle_2: "Two accessibility alerts",
     main_toggle_plural: `%(count) accessibility alerts`,
     MISSING_ROOT: `Editoria11y did not find any elements that matched the check area configuration: <code>%(root)</code>`,
-    panelCheckAltText: '<p class="ed11y-small">Check that each image describes what it means in context, and that there are no images of text.</p>',
-    panelCheckOutline: '<p class="ed11y-small">This shows the heading outline. Check that it matches how the content is organized visually.</p>',
+    panelCheckAltText: "Check that each image describes what it means in context, and that there are no images of text.",
+    panelCheckOutline: "This shows the heading outline. Check that it matches how the content is organized visually.",
     PANEL_HEADING_MISSING_ONE: "Missing Heading 1.",
     PANEL_NO_HEADINGS: "No headings found.",
     reportsLink: "Open site reports",

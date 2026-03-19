@@ -24,6 +24,7 @@ export const showAltPanel = () => {
         type: match.type,
         dismiss: match.dismiss,
         developer: match.developer,
+        test: match.test,
       });
     } else {
       UI.imageAlts.push({
@@ -46,36 +47,6 @@ export const showAltPanel = () => {
           ? image.element.getAttribute('alt')
           : computeAriaLabel(image.element);
       UI.imageAlts[i].altText = altText;
-      //let alert = {};
-      /*
-			// Match dismissed images.
-			// @todo CMS merge remove once new syntax is ready; this is the Sa11y core for dev reference:
-			// const isDismissed = dismissed.some((key) => key.dismiss === image.dismiss);
-			// if (isDismissed) Object.assign(image, { dismissedImage: true });
-			// Make developer checks don't show images as error if Developer checks are off!
-			// const dev = Utils.store.getItem('sa11y-developer');
-			// const devChecksOff = dev === 'Off' || dev === null;
-			// const showDeveloperChecks = devChecksOff && (type === 'error' || type === 'warning') && developer === true;
-
-			// Generate edit link if locally hosted image and prop is enabled.
-			const edit = Constants.Global.editImageURLofCMS ? generateEditLink(image) : '';
-
-			// Image is decorative (has null alt)
-			const decorative = (element.hasAttribute('alt') && altText === '')
-				? `<div class="badge">${Lang._('DECORATIVE')}</div>` : '';
-
-			// If image is linked.
-			const anchor = option.imageWithinLightbox ? `a[href]:not(${option.imageWithinLightbox})` : 'a[href]';
-			const linked = (element.closest(anchor))
-				? `<div class="badge"><span class="link-icon"></span><span class="visually-hidden">${Lang._('LINKED')}</span></div>` : '';
-			const visibleIcon = (hidden === true)
-				? `<div class="badge"><span class="hidden-icon"></span><span class="visually-hidden">${Lang._('HIDDEN')}</span></div>` : '';
-			let append;
-      if (type === 'error' && !showDeveloperChecks) {
-      // etc
-			*/
-
-      // Account for lazy loading libraries.
 
       if (UI.inlineAlerts) {
         // Label images
@@ -84,19 +55,25 @@ export const showAltPanel = () => {
         mark.dataset.ed11yImg = i.toString();
         mark.setAttribute('id', `ed11y-alt-${i}`);
         mark.setAttribute('tabindex', '-1');
+        mark.title = Lang.testNames[image.test];
         UI.imageAlts[i].mark = mark;
         image.element.insertAdjacentElement('beforebegin', mark);
       }
 
       // Build alt list in panel
       const userText = document.createElement('span');
-      if (altText !== '') {
-        userText.textContent = altText;
-      } else {
+      if (altText === '') {
         const decorative = document.createElement('span');
         decorative.classList.add('ed11y-decorative');
         decorative.textContent = Lang._('DECORATIVE');
         userText.append(decorative);
+      } else if (altText === null) {
+        const decorative = document.createElement('span');
+        decorative.classList.add('ed11y-decorative');
+        decorative.textContent = Lang.testNames[image.test];
+        userText.append(decorative);
+      } else {
+        userText.textContent = altText;
       }
       const li = document.createElement('li');
       li.classList.add(`ed11y-${image.type}`);
@@ -108,6 +85,7 @@ export const showAltPanel = () => {
         const a = document.createElement('a');
         a.href = `#ed11y-alt-${i}`;
         a.classList.add('alt-parent');
+        a.title = Lang.testNames[image.test];
         li.append(a);
         a.append(img);
         a.append(userText);
@@ -199,14 +177,14 @@ export function showHeadingsPanel() {
         result.element.insertAdjacentElement('afterbegin', mark);
         UI.attachCSS(mark.shadowRoot);
       }
-      const leftPad = 10 * result.headingLevel - 10;
+      const leftPad = 7 * result.headingLevel - 7;
       const li = document.createElement('li');
       li.classList.add(`level${result.headingLevel}`);
       li.style.setProperty('margin-left', `${leftPad}px`);
       const levelPrefix = document.createElement('strong');
       levelPrefix.textContent = `H${result.headingLevel}: `;
       const userText = document.createElement('span');
-      userText.innerHTML = result.text;
+      userText.textContent = result.text;
       const link = document.createElement('a');
       if (UI.inlineAlerts) {
         link.setAttribute('href', `#ed11y-heading-${i}`);
@@ -220,15 +198,6 @@ export function showHeadingsPanel() {
       if (result.type) {
         // Has an error message
         li.classList.add(`ed11y-${result.type}`);
-        // @todo 3.1 add result key to Sa11y heading outline.
-        /*let message = document.createElement('em');
-				message.classList.add('ed11y-small');
-				message.textContent = ' ' + el[2];
-				if (UI.inlineAlerts) {
-					link.append(message);
-				} else {
-					li.append(message);
-				}*/
       }
       panelOutline.append(li);
     });
