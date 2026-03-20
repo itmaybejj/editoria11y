@@ -1631,7 +1631,7 @@ ed11y-element-result.ed11y-preload,
 	input[type="color" i].unknown {
 		box-shadow: 0 0 0 2px var(--ed11y-warning);
 	}
-	.unknown {
+	div.unknown {
 		display: inline-block;
 		position: relative;
 		&::after {
