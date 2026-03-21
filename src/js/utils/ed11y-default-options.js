@@ -60,7 +60,7 @@ export const ed11yDefaultOptions = {
   dismissAnnotations: true,
   dismissAll: true,
   ignoreHiddenOverflow: '', // Not yet implemented.
-  insertAnnotationBefore: '', // Not yet implemented.
+  insertAnnotationBefore: '',
 
   // Readability
   readabilityPlugin: false,
@@ -72,7 +72,8 @@ export const ed11yDefaultOptions = {
   contrastAlgorithm: 'AA',
 
   // Other plugins
-  customChecks: false,
+  customChecks: false, // boolean, whether to emit array
+  customRules: [], // Rules for the rulebuilder
   linksAdvancedPlugin: true,
   formLabelsPlugin: true,
   embeddedContentPlugin: true,

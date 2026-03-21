@@ -5715,22 +5715,73 @@ function drawResult(result, index) {
   UI.jumpList.unshift(mark);
   State.results[index].toggle = mark;
 }
-function customRuleset() {
-  if (State.option.checks.EMBED_CUSTOM) {
-    const matchedEmbeds = getElements(State.option.checks.EMBED_CUSTOM.sources, "root");
-    matchedEmbeds.forEach(($el) => {
-      State.results.push({
-        test: "EMBED_GENERAL",
-        element: $el,
-        type: "warning",
-        inline: false,
-        dismiss: prepareDismissal($el.tagName + $el.getAttribute("src")),
-        content: Lang.sprintf(State.option.checks.EMBED_GENERAL.content || "EMBED_GENERAL"),
-        dismissAll: State.option.checks.EMBED_GENERAL.dismissAll ? "EMBED_GENERAL" : false,
-        developer: State.option.checks.EMBED_GENERAL.developer || false
-      });
-    });
+function prepareCustomRuleset() {
+  State.option.customRules?.forEach((cr) => {
+    Lang.testNames[cr.testKey] = cr.testName;
+    Lang.langStrings[cr.testKey] = `<div class="title" tabindex="-1">${sanitizeHTML(cr.testName)}</div>${sanitizeHTML(cr.tipContent)}`;
+  });
+}
+const pushCustomRule = (cr, el, text) => {
+  let dismissKey = `${cr.test}`;
+  switch (cr.dismissKey) {
+    case "text":
+      dismissKey = text || getText(el);
+      break;
+    case "attributes": {
+      const attributes = el.attributes;
+      if (attributes.length > 0) {
+        for (const attr of attributes) {
+          dismissKey += `${attr.name}${attr.value}`;
+        }
+      }
+      break;
+    }
+    default:
+      dismissKey = el.innerHTML;
   }
+  State.results.push({
+    test: cr.testKey,
+    element: el,
+    type: cr.type || "error",
+    content: Lang.sprintf(cr.testKey),
+    // inline: true, // Ed11y computes this.
+    // position: 'beforebegin', // Ed11y computes this.
+    dismiss: prepareDismissal(dismissKey)
+    // dismissAll: cr.dismissAll || false, // Ed11y computes this.
+    // developer: cr.developer || true, // Ed11y computes this.
+  });
+};
+function checkCustomRuleset() {
+  State.option.customRules?.forEach((cr) => {
+    let elements2 = Elements.Found[cr.elementSet];
+    if (!elements2.length) return;
+    if (cr.filterSelector) {
+      elements2 = elements2.filter((el) => el.matches(cr.filterSelector));
+    }
+    if (elements2.length && (cr.includeText || cr.excludeText)) {
+      elements2.forEach((el) => {
+        let text = getText(el);
+        if (!cr.caseSensitive) {
+          text = text.toLowerCase();
+        }
+        let match = false;
+        let noMatch = false;
+        if (cr.includeText) {
+          match = cr.includeText.some((inc) => text.includes(inc));
+        }
+        if (cr.excludeText && (match || !cr.includeText)) {
+          noMatch = cr.excludeText.some((exc) => text.includes(exc));
+        }
+        if (match && !noMatch) {
+          pushCustomRule(cr, el, text);
+        }
+      });
+    } else if (elements2.length) {
+      elements2.forEach((el) => {
+        pushCustomRule(cr, el);
+      });
+    }
+  });
 }
 function showResults() {
   buildJumpList();
@@ -6723,7 +6774,7 @@ const enqueueTests = (queue) => {
         checkHeaders();
         checkImages();
         checkEmbeddedContent();
-        customRuleset();
+        checkCustomRuleset();
         checkQA();
         break;
       case "group2":
@@ -8591,7 +8642,6 @@ const ed11yDefaultOptions = {
   ignoreHiddenOverflow: "",
   // Not yet implemented.
   insertAnnotationBefore: "",
-  // Not yet implemented.
   // Readability
   readabilityPlugin: false,
   readabilityRoot: "main",
@@ -8601,6 +8651,9 @@ const ed11yDefaultOptions = {
   contrastAlgorithm: "AA",
   // Other plugins
   customChecks: false,
+  // boolean, whether to emit array
+  customRules: [],
+  // Rules for the rulebuilder
   linksAdvancedPlugin: true,
   formLabelsPlugin: true,
   embeddedContentPlugin: true,
@@ -9007,6 +9060,9 @@ const preProcessOptions = async (userOptions) => {
   const titles = Object.entries(Lang.testNames);
   for (let i = 0; i < titles.length; i++) {
     Lang.langStrings[titles[i][0]] = `<div class="title" tabindex="-1">${Lang.testNames[`${titles[i][0]}`]}</div>${Lang.langStrings[titles[i][0]]}`;
+  }
+  if (State.option.customRules) {
+    prepareCustomRuleset();
   }
   UI.english = Lang.langStrings.LANG_CODE.startsWith("en");
   if (UI.english) {
