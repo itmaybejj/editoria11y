@@ -28,6 +28,7 @@ const pushCustomRule = (cr, el, text) => {
     }
     default:
       dismissKey = el.innerHTML;
+      break;
   }
 
   // Pushes a custom rule result to the State.results array.

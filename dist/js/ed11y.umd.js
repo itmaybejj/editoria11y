@@ -5742,6 +5742,7 @@ ${this.error.stack}
       }
       default:
         dismissKey = el.innerHTML;
+        break;
     }
     State.results.push({
       test: cr.testKey,
@@ -8654,10 +8655,32 @@ ${this.error.stack}
     contrastPlugin: false,
     contrastAlgorithm: "AA",
     // Other plugins
-    customChecks: false,
-    // boolean, whether to emit array
+    customTests: 0,
+    // Wait for external JS to insert results.
     customRules: [],
-    // Rules for the rulebuilder
+    // Rulebuilder. Provide an array of objects:
+    /**
+     * [
+     *  {
+     *  // Required:
+     *  testKey        Machine name:    'myTest'
+     *  testName       Tip title:       'My Test'
+     *  tipContent     Tip HTML:        '<p>Hello.</p>'
+     *  elementSet     State.Found set: 'Links'
+     *
+     *  // Optional:
+     *  filterSelector CSS selector: '.bad:not(.ok)'
+     *  includeText    Alert if string in text: ['annual report', 'form']
+     *  caseSensitive  true/false (default)
+     *  excludeText    Don't alert if string in text: ['print']
+     *  dismissKey     'text', 'attributes' or 'html' (default)
+     *  type           'warning' or 'error' (default)
+     *  }
+     *  {
+     *   (another rule)
+     *  }
+     * ]
+     */
     linksAdvancedPlugin: true,
     formLabelsPlugin: true,
     embeddedContentPlugin: true,
@@ -8847,7 +8870,6 @@ ${this.error.stack}
     editLinks: false,
     // Add links to edit content in tooltips.
     userPrefersShut: localStorage.getItem("editoria11yShow") === "0",
-    customTests: 0,
     // Sa11y checks ==================
     checks: {
       // Sa11y: Heading checks

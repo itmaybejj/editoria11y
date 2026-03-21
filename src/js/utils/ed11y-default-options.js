@@ -72,8 +72,30 @@ export const ed11yDefaultOptions = {
   contrastAlgorithm: 'AA',
 
   // Other plugins
-  customChecks: false, // boolean, whether to emit array
-  customRules: [], // Rules for the rulebuilder
+  customTests: 0, // Wait for external JS to insert results.
+  customRules: [], // Rulebuilder. Provide an array of objects:
+  /**
+   * [
+   *  {
+   *  // Required:
+   *  testKey        Machine name:    'myTest'
+   *  testName       Tip title:       'My Test'
+   *  tipContent     Tip HTML:        '<p>Hello.</p>'
+   *  elementSet     State.Found set: 'Links'
+   *
+   *  // Optional:
+   *  filterSelector CSS selector: '.bad:not(.ok)'
+   *  includeText    Alert if string in text: ['annual report', 'form']
+   *  caseSensitive  true/false (default)
+   *  excludeText    Don't alert if string in text: ['print']
+   *  dismissKey     'text', 'attributes' or 'html' (default)
+   *  type           'warning' or 'error' (default)
+   *  }
+   *  {
+   *   (another rule)
+   *  }
+   * ]
+   */
   linksAdvancedPlugin: true,
   formLabelsPlugin: true,
   embeddedContentPlugin: true,
@@ -264,8 +286,6 @@ export const ed11yDefaultOptions = {
   editLinks: false, // Add links to edit content in tooltips.
 
   userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
-
-  customTests: 0,
 
   // Sa11y checks ==================
   checks: {
