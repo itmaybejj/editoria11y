@@ -65,34 +65,36 @@ export function checkCustomRuleset() {
    * developer
    */
   State.option.customRules?.forEach((cr) => {
-    let elements = Elements.Found[cr.elementSet];
-    if (!elements.length) return;
-    if (cr.filterSelector) {
-      elements = elements.filter((el) => el.matches(cr.filterSelector));
-    }
+    cr.elementSet?.forEach((found) => {
+      let elements = Elements.Found[found];
+      if (!elements.length) return;
+      if (cr.filterSelector) {
+        elements = elements.filter((el) => el.matches(cr.filterSelector));
+      }
 
-    if (elements.length && (cr.includeText || cr.excludeText)) {
-      elements.forEach((el) => {
-        let text = Utils.getText(el);
-        if (!cr.caseSensitive) {
-          text = text.toLowerCase();
-        }
-        let match = false;
-        let noMatch = false;
-        if (cr.includeText) {
-          match = cr.includeText.some((inc) => text.includes(inc));
-        }
-        if (cr.excludeText && (match || !cr.includeText)) {
-          noMatch = cr.excludeText.some((exc) => text.includes(exc));
-        }
-        if (match && !noMatch) {
-          pushCustomRule(cr, el, text);
-        }
-      });
-    } else if (elements.length) {
-      elements.forEach((el) => {
-        pushCustomRule(cr, el);
-      });
-    }
+      if (elements.length && (cr.includeText || cr.excludeText)) {
+        elements.forEach((el) => {
+          let text = Utils.getText(el);
+          if (!cr.caseSensitive) {
+            text = text.toLowerCase();
+          }
+          let match = false;
+          let noMatch = false;
+          if (cr.includeText) {
+            match = cr.includeText.some((inc) => text.includes(inc));
+          }
+          if (cr.excludeText && (match || !cr.includeText)) {
+            noMatch = cr.excludeText.some((exc) => text.includes(exc));
+          }
+          if (match && !noMatch) {
+            pushCustomRule(cr, el, text);
+          }
+        });
+      } else if (elements.length) {
+        elements.forEach((el) => {
+          pushCustomRule(cr, el);
+        });
+      }
+    });
   });
 }

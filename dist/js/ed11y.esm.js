@@ -5754,34 +5754,36 @@ const pushCustomRule = (cr, el, text) => {
 };
 function checkCustomRuleset() {
   State.option.customRules?.forEach((cr) => {
-    let elements2 = Elements.Found[cr.elementSet];
-    if (!elements2.length) return;
-    if (cr.filterSelector) {
-      elements2 = elements2.filter((el) => el.matches(cr.filterSelector));
-    }
-    if (elements2.length && (cr.includeText || cr.excludeText)) {
-      elements2.forEach((el) => {
-        let text = getText(el);
-        if (!cr.caseSensitive) {
-          text = text.toLowerCase();
-        }
-        let match = false;
-        let noMatch = false;
-        if (cr.includeText) {
-          match = cr.includeText.some((inc) => text.includes(inc));
-        }
-        if (cr.excludeText && (match || !cr.includeText)) {
-          noMatch = cr.excludeText.some((exc) => text.includes(exc));
-        }
-        if (match && !noMatch) {
-          pushCustomRule(cr, el, text);
-        }
-      });
-    } else if (elements2.length) {
-      elements2.forEach((el) => {
-        pushCustomRule(cr, el);
-      });
-    }
+    cr.elementSet?.forEach((found) => {
+      let elements2 = Elements.Found[found];
+      if (!elements2.length) return;
+      if (cr.filterSelector) {
+        elements2 = elements2.filter((el) => el.matches(cr.filterSelector));
+      }
+      if (elements2.length && (cr.includeText || cr.excludeText)) {
+        elements2.forEach((el) => {
+          let text = getText(el);
+          if (!cr.caseSensitive) {
+            text = text.toLowerCase();
+          }
+          let match = false;
+          let noMatch = false;
+          if (cr.includeText) {
+            match = cr.includeText.some((inc) => text.includes(inc));
+          }
+          if (cr.excludeText && (match || !cr.includeText)) {
+            noMatch = cr.excludeText.some((exc) => text.includes(exc));
+          }
+          if (match && !noMatch) {
+            pushCustomRule(cr, el, text);
+          }
+        });
+      } else if (elements2.length) {
+        elements2.forEach((el) => {
+          pushCustomRule(cr, el);
+        });
+      }
+    });
   });
 }
 function showResults() {
