@@ -5768,10 +5768,10 @@ function checkCustomRuleset() {
           }
           let match = false;
           let noMatch = false;
-          if (cr.includeText) {
+          if (cr.includeText.length) {
             match = cr.includeText.some((inc) => text.includes(inc));
           }
-          if (cr.excludeText && (match || !cr.includeText)) {
+          if (cr.excludeText.length && (match || !cr.includeText.length)) {
             noMatch = cr.excludeText.some((exc) => text.includes(exc));
           }
           if (match && !noMatch) {
