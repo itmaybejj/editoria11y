@@ -1,3 +1,3 @@
 // These are copied into rollup config:
-const version = '3.0.0-dev0312';
+const version = '3.0.0-dev0322';
 export default version;
