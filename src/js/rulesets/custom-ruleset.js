@@ -73,7 +73,7 @@ export function checkCustomRuleset() {
         elements = elements.filter((el) => el.matches(cr.filterSelector));
       }
 
-      if (elements.length && (cr.includeText || cr.excludeText)) {
+      if (elements.length && (cr.includeText.length || cr.excludeText.length)) {
         elements.forEach((el) => {
           let text = Utils.getText(el);
           if (!cr.caseSensitive) {
@@ -91,7 +91,7 @@ export function checkCustomRuleset() {
             pushCustomRule(cr, el, text);
           }
         });
-      } else if (elements.length) {
+      } else if (elements.length > 0) {
         elements.forEach((el) => {
           pushCustomRule(cr, el);
         });

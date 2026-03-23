@@ -5764,7 +5764,7 @@ ${this.error.stack}
         if (cr.filterSelector) {
           elements2 = elements2.filter((el) => el.matches(cr.filterSelector));
         }
-        if (elements2.length && (cr.includeText || cr.excludeText)) {
+        if (elements2.length && (cr.includeText.length || cr.excludeText.length)) {
           elements2.forEach((el) => {
             let text = getText(el);
             if (!cr.caseSensitive) {
@@ -5782,7 +5782,7 @@ ${this.error.stack}
               pushCustomRule(cr, el, text);
             }
           });
-        } else if (elements2.length) {
+        } else if (elements2.length > 0) {
           elements2.forEach((el) => {
             pushCustomRule(cr, el);
           });

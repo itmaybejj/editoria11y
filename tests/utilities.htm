@@ -19,6 +19,8 @@
             <p class="negative">Text selector for "I like turtles" excluded by class.</p>
             <p class="positive">Text selector for "I love Turtles".</p>
             <p class="negative">Text selector for "I like Turtles" excluded on like and case sensitivity.</p>
+            <p class="positive"><a href="/" id="custom-rule-link">Link</a></p>
+            <p class="positive"><a href="/" id="custom-rule-link">Link</a></p>
 
         </section>
 
@@ -478,6 +480,18 @@
                         caseSensitive: true,
                         includeText: ['Turtles'],
                         excludeText: ['like'],
+                        type: 'error',
+                        dismissKey: 'text',
+                    },
+                    {
+                        testKey: 'iloveTurtlez',
+                        testName: 'Link filter only',
+                        tipContent: 'Yes I do',
+                        elementSet: ['Links'],
+                        filterSelector: '#custom-rule-link',
+                        caseSensitive: true,
+                        includeText: false,
+                        excludeText: false,
                         type: 'error',
                         dismissKey: 'text',
                     }
