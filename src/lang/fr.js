@@ -207,7 +207,7 @@ export const tips = {
 
 	LINK_ALT_MAYBE_BAD: `<p>Le texte alternatif de cette image est un placeholder : "<strong>%(alt)</strong>".</p><p>${why.fix}Définissez le texte alternatif de cette image sur la destination du lien.</p>${why.imageLinks}`,
 
-	LINK_ALT_UNPRONOUNCEABLE: `<p>Le texte alternatif de cette image liée ne contient que des symboles imprononçables ou des espaces : "%(ALT_TEXT)". Les lecteurs d’écran annonceront le lien mais seront incapables de le décrire.</p><p>${why.fix}Définissez le texte alternatif selon la destination ou la fonction du lien.</p>${why.imageLinks}`,
+	LINK_ALT_UNPRONOUNCEABLE: `<p>Le texte alternatif de cette image liée ne contient que des symboles imprononçables ou des espaces : <strong>"%(ALT_TEXT)"</strong>.</p><p>Les lecteurs d’écran annonceront le lien mais seront incapables de le décrire.</p><p>${why.fix}Définissez le texte alternatif selon la destination ou la fonction du lien.</p>${why.imageLinks}`,
 
 	LINK_CLICK_HERE: `L’expression "cliquer" ou "cliquer ici" est redondante et détourne l’attention de la destination du lien.`,
 
@@ -307,7 +307,7 @@ const interfaceStrings = {
 	ALERT_CLOSE: 'Fermer',
 	ALT: 'Texte alternatif : ',
 	CONSOLE_ERROR:
-		'Un problème affecte le vérificateur d’accessibilité sur cette page. Veuillez %(link)<a href="%(link)">le signaler sur GitHub</a>.', // updated new
+		'Un problème affecte le vérificateur d’accessibilité sur cette page. Veuillez <a class="g-link">le signaler sur GitHub</a>.', // updated new
 	DECORATIVE: 'Marqué comme décoratif',
 	DISMISS: 'Ignorer',
 	DISMISS_ALL: 'Sur cette page : ignorer',
@@ -324,14 +324,14 @@ const interfaceStrings = {
 	PANEL_DISMISS_BUTTON: `Afficher %(dismissCount) alertes masquées`,
 	PANEL_HEADING: 'Afficher les visualisations',
 	SKIP_TO_ISSUE: 'Afficher l’alerte', // updated
-	WARNING: 'vérification manuelle requise',
-	WARNINGS: 'vérifications manuelles requises',
+	WARNING: 'vérification manuelle',
+	WARNINGS: 'vérifications manuelles',
 	buttonFirstContent: 'Afficher la première alerte', // updated
 	buttonHideHiddenAlert: 'Masquer l’alerte masquée',
 	buttonHideHiddenAlerts: `Masquer %(count) alertes masquées`,
 	buttonShowHiddenAlert: 'Afficher l’alerte masquée',
 	buttonToolsActive: 'Masquer les visualisations',
-	dismissActions: `Alertes similaires`,
+	dismissActions: `Similaires`,
 	dismissHideTitle: 'Masque seulement l’alerte pour vous',
 	dismissOkAllButton: 'Sur cette page : marquer comme OK',
 	dismissOkButtonContent: 'Marquer comme OK',
@@ -348,10 +348,13 @@ const interfaceStrings = {
 	main_toggle_hide_alerts: 'Masquer les alertes d’accessibilité',
 	main_toggle_show: 'Afficher les outils d’accessibilité',
 	main_toggle_show_alerts: 'Afficher les alertes d’accessibilité',
+	main_toggle_1: 'Une alerte d’accessibilité',
+	main_toggle_2: 'Deux alertes d’accessibilité',
+	main_toggle_plural: `%(count) alertes d’accessibilité`,
 	MISSING_ROOT: `Editoria11y n'a trouvé aucun élément correspondant à la configuration de la zone de vérification : <code>%(root)</code>`,
-	panelCheckAltText: `<p class="ed11y-small">Vérifiez que chaque image décrit ce qu’elle signifie dans le contexte et qu’il n’y a pas d’images contenant du texte.</p>`,
-	panelCheckOutline: `<p class="ed11y-small">Ceci affiche la structure des en‑têtes. Vérifiez qu’elle correspond à l’organisation visuelle du contenu.</p>`,
-	PANEL_HEADING_MISSING_ONE: 'En‑tête de niveau 1 manquant.',
+	panelCheckAltText: `Vérifiez que chaque image décrit ce qu’elle signifie dans le contexte et qu’il n’y a pas d’images contenant du texte.`,
+	panelCheckOutline: `Ceci affiche la structure des en‑têtes. Vérifiez qu’elle correspond à l’organisation visuelle du contenu.`,
+	panel_HEADING_MISSING_ONE: 'En‑tête de niveau 1 manquant.',
 	PANEL_NO_HEADINGS: 'Aucun en‑tête trouvé.',
 	reportsLink: 'Ouvrir les rapports du site',
 	toggleDisabled: 'Aucun contenu disponible à vérifier pour Editoria11y.',

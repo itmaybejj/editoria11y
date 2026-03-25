@@ -1,4 +1,4 @@
-import {default as Sa11yStrings} from '../sa11y-lang/uk.js';
+import {default as Sa11yStrings} from '../sa11y-lang/ua.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
 const testNames = {
@@ -199,7 +199,7 @@ export const tips = {
 export const interfaceStrings = {
 	ALERT_CLOSE: 'Закрити',
 	ALT: 'Альтернативний текст: ',
-	CONSOLE_ERROR: 'На цій сторінці виникла проблема з перевіркою доступності. %(link)<a href="%(link)">Повідомте про неї на GitHub</a>.',
+	CONSOLE_ERROR: 'На цій сторінці виникла проблема з перевіркою доступності. <a class="g-link">Повідомте про неї на GitHub</a>.',
 	DECORATIVE: 'Позначено як декоративне',
 	DISMISS: 'Ігнорувати',
 	DISMISS_ALL: 'На цій сторінці: ігнорувати',
@@ -214,14 +214,14 @@ export const interfaceStrings = {
 	PANEL_HEADING_MISSING_ONE: 'Відсутній заголовок рівня 1.',
 	PANEL_NO_HEADINGS: 'Заголовків не знайдено.',
 	SKIP_TO_ISSUE: 'Показати попередження',
-	WARNING: 'потрібна ручна перевірка',
-	WARNINGS: 'потрібні ручні перевірки',
+	WARNING: 'Ручна перевірка',
+	WARNINGS: 'ручні перевірки',
 	buttonFirstContent: 'Показати перше попередження',
 	buttonHideHiddenAlert: 'Приховати приховане попередження',
 	buttonHideHiddenAlerts: `Приховати %(count) прихованих попереджень`,
 	buttonShowHiddenAlert: 'Показати приховане попередження',
 	buttonToolsActive: 'Приховати візуалізатори',
-	dismissActions: `Подібні попередження`,
+	dismissActions: `Подібні`,
 	dismissHideTitle: 'Приховує попередження лише для вас',
 	dismissOkAllButton: 'На цій сторінці: позначити як OK',
 	dismissOkButtonContent: 'Позначити як OK',
@@ -242,8 +242,11 @@ export const interfaceStrings = {
 	main_toggle_hide_alerts: 'Приховати попередження доступності',
 	main_toggle_show: 'Показати інструменти доступності',
 	main_toggle_show_alerts: 'Показати попередження доступності',
-	panelCheckAltText: `<p class="ed11y-small">Переконайтеся, що кожне зображення має alt‑текст, який передає його значення в контексті, і що немає «зображень із вбудованим текстом».</p>`,
-	panelCheckOutline: `<p class="ed11y-small">Показує структуру заголовків. Перевірте відповідність візуальній структурі сторінки.</p>`,
+	main_toggle_1: 'Одне попередження щодо доступності',
+	main_toggle_2: 'Два попередження щодо доступності',
+	main_toggle_plural: `%(count) попереджень щодо доступності`,
+	panelCheckAltText: `Переконайтеся, що кожне зображення має alt‑текст, який передає його значення в контексті, і що немає «зображень із вбудованим текстом».`,
+	panelCheckOutline: `Показує структуру заголовків. Перевірте відповідність візуальній структурі сторінки.`,
 	reportsLink: 'Відкрити звіти сайту',
 	toggleDisabled: 'Немає вмісту, доступного для перевірки Editoria11y.',
 	transferFocus: 'Редагувати цей вміст',

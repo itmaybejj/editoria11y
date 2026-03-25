@@ -14,6 +14,16 @@
     <main>
         <section>Initial times: Editoria11y 30ms, ed11y 50-55ms.</section>
 
+        <section id="custom-ruleSet">
+            <p class="positive">Text selector for "I like turtles".</p>
+            <p class="negative">Text selector for "I like turtles" excluded by class.</p>
+            <p class="positive">Text selector for "I love Turtles".</p>
+            <p class="negative">Text selector for "I like Turtles" excluded on like and case sensitivity.</p>
+            <p class="positive"><a href="/" id="custom-rule-link">Link</a></p>
+            <p class="positive"><a href="/" id="custom-rule-link">Link</a></p>
+
+        </section>
+
 
         <section id="overflow">
 
@@ -191,10 +201,13 @@
                 <a href="https://demo">click here</a></div>
             <div class="negative">Good link text in ::before: <a id="text-in-css" href="/"></a></div>
             <div class="positive">Bad link text in ::before:<a id="click-in-css" class="click-in-css" href="/"></a></div>
-            <div class="todo-positive"><div role="region" aria-label="Featured image">
+            <div class="todo-positive">
+                <div role="region" aria-label="Featured image">
                 We should be testing SVG as a developer test, and an aria labelled region should not negate inner name calculation on an SVG.
-                <svg id="nested-aria-label" role="img"  viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg"/>
-            </div></div>
+                <svg id="nested-aria-label" role="img" viewBox="0 0 20 10" xmlns="http://www.w3.org/2000/svg">
+                </svg>
+                </div>
+            </div>
             <div class="negative">Good link text in title attribute: <a id="titled-link" title="Potatoes" href="/"></a></div>
             <div class="negative">Null aria label: <a id="null-aria" aria-label="" href="/">Null aria</a></div>
             <div class="positive">Bad link text in title attribute: <a id="titled-link-click-here" title="Click here" href="/"><span></span></a></div>
@@ -427,11 +440,10 @@
             <script src="../dist/js/lang/en.umd.js"></script>
             <script>
 
-              //Ed11y.Lang.addI18n(Ed11yLangEn.strings);
               const ed11y = new Ed11y.Ed11y({
 
                 alertMode : 'assertive',
-                  showDismissed: true,
+                showDismissed: true,
                 //syncedDismissals: {},
                 //shadowComponents : 'shadow-test, shadow-test-no-hits, element-details',
                 autoDetectShadowComponents: true,
@@ -446,6 +458,44 @@
                 reportsURL: 'https://www.princeton.edu',
                 editLinks: editLinks,
                 watchForChanges: false,
+                customRules: [
+                    {
+                        testKey: 'ilikeTurtles',
+                        testName: 'I like turtles',
+                        tipContent: 'Yes I do',
+                        elementSet: ['Paragraphs'],
+                        filterSelector: ':not(.negative)',
+                        caseSensitive: true,
+                        includeText: ['turtles'],
+                        excludeText: false,
+                        type: 'error',
+                        dismissKey: 'text',
+                    },
+                    {
+                        testKey: 'iloveTurtles',
+                        testName: 'I love turtles',
+                        tipContent: 'Yes I do',
+                        elementSet: ['Paragraphs','Headings'],
+                        filterSelector: false,
+                        caseSensitive: true,
+                        includeText: ['Turtles'],
+                        excludeText: ['like'],
+                        type: 'error',
+                        dismissKey: 'text',
+                    },
+                    {
+                        testKey: 'iloveTurtlez',
+                        testName: 'Link filter only',
+                        tipContent: 'Yes I do',
+                        elementSet: ['Links'],
+                        filterSelector: '#custom-rule-link',
+                        caseSensitive: true,
+                        includeText: false,
+                        excludeText: false,
+                        type: 'error',
+                        dismissKey: 'text',
+                    }
+                ],
                 allowOK: true,
 				  contrastPlugin: true,
 				  readabilityPlugin: true,

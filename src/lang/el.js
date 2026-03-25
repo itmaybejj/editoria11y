@@ -184,7 +184,7 @@ const tips = {
 
 	LINK_ALT_MAYBE_BAD: `<p>Alt: "<strong>%(alt)</strong>"</p><p>${why.fix}Ορίστε alt που να περιγράφει τον προορισμό.</p>${why.imageLinks}`, // updated
 
-	LINK_ALT_UNPRONOUNCEABLE: `<p>Το alt περιέχει μη προφερτά σύμβολα: "%(ALT_TEXT)". Ο αναγνώστης οθόνης θα πει ότι υπάρχει σύνδεσμος αλλά δεν θα μπορεί να τον περιγράψει.</p><p>${why.fix}Ορίστε alt που να δηλώνει τον προορισμό.</p>${why.imageLinks}`,
+	LINK_ALT_UNPRONOUNCEABLE: `<p>Το alt περιέχει μη προφερτά σύμβολα: <strong>"%(ALT_TEXT)"</strong>.</p><p>Ο αναγνώστης οθόνης θα πει ότι υπάρχει σύνδεσμος αλλά δεν θα μπορεί να τον περιγράψει.</p><p>${why.fix}Ορίστε alt που να δηλώνει τον προορισμό.</p>${why.imageLinks}`,
 
 	LINK_CLICK_HERE: `Η φράση "κάντε κλικ" είναι περιττή και δεν περιγράφει τον προορισμό.`,
 
@@ -280,7 +280,7 @@ const tips = {
 	const interfaceStrings = {
 	ALERT_CLOSE: 'Κλείσιμο',
 	ALT: 'Εναλλακτικό κείμενο: ',
-	CONSOLE_ERROR: 'Υπάρχει θέμα με τον έλεγχο προσβασιμότητας σε αυτή τη σελίδα. Παρακαλώ %(link)<a href="%(link)">αναφέρετέ το στο GitHub</a>.',
+	CONSOLE_ERROR: 'Υπάρχει θέμα με τον έλεγχο προσβασιμότητας σε αυτή τη σελίδα. Παρακαλώ <a class="g-link">αναφέρετέ το στο GitHub</a>.',
 	DECORATIVE: 'Σημειωμένο ως διακοσμητικό',
 	DISMISS: 'Απόκρυψη',
 	DISMISS_ALL: 'Σε αυτή τη σελίδα: απόκρυψη',
@@ -298,13 +298,13 @@ const tips = {
 	PANEL_HEADING: 'Εμφάνιση οπτικοποιήσεων',
 	SKIP_TO_ISSUE: 'Εμφάνιση ειδοποίησης',
 	WARNING: 'Χειροκίνητος έλεγχος',
-	WARNINGS: 'Απαιτούνται χειροκίνητοι έλεγχοι',
+	WARNINGS: 'Χειροκίνητοι έλεγχοι',
 	buttonFirstContent: 'Εμφάνιση πρώτης ειδοποίησης',
 	buttonHideHiddenAlert: 'Απόκρυψη κρυφής ειδοποίησης',
 	buttonHideHiddenAlerts: `Απόκρυψη %(count) κρυφών ειδοποιήσεων`,
 	buttonShowHiddenAlert: 'Εμφάνιση κρυφής ειδοποίησης',
 	buttonToolsActive: 'Απόκρυψη οπτικοποιήσεων',
-	dismissActions: `Παρόμοιες ειδοποιήσεις`,
+	dismissActions: `Παρόμοιες`,
 	dismissHideTitle: 'Απόκρυψη μόνο για εσάς',
 	dismissOkAllButton: 'Σε αυτή τη σελίδα: σημείωση ως OK',
 	dismissOkButtonContent: 'Σημείωση ως OK',
@@ -321,10 +321,13 @@ const tips = {
 	main_toggle_hide_alerts: 'Απόκρυψη ειδοποιήσεων προσβασιμότητας',
 	main_toggle_show: 'Εμφάνιση εργαλείων προσβασιμότητας',
 	main_toggle_show_alerts: 'Εμφάνιση ειδοποιήσεων προσβασιμότητας',
+	main_toggle_1: 'Μία ειδοποίηση προσβασιμότητας',
+	main_toggle_2: 'Δύο ειδοποιήσεις προσβασιμότητας',
+	main_toggle_plural: `%(count) ειδοποιήσεις προσβασιμότητας`,
 	MISSING_ROOT: `Το Editoria11y δεν βρήκε καμία στοιχεία που να ταιριάζουν με τη διαμόρφωση της περιοχής ελέγχου: <code>%(root)</code>`,
-	panelCheckAltText: `<p class="ed11y-small">Ελέγξτε ότι κάθε εικόνα περιγράφει τι σημαίνει στο πλαίσιο και ότι δεν υπάρχουν εικόνες κειμένου.</p>`,
-	panelCheckOutline: `<p class="ed11y-small">Αυτό εμφανίζει τη δομή επικεφαλίδων. Ελέγξτε ότι ταιριάζει με την οπτική διάταξη.</p>`,
-	PANEL_HEADING_MISSING_ONE: 'Λείπει Επικεφαλίδα 1.',
+	panelCheckAltText: `Ελέγξτε ότι κάθε εικόνα περιγράφει τι σημαίνει στο πλαίσιο και ότι δεν υπάρχουν εικόνες κειμένου.`,
+	panelCheckOutline: `Αυτό εμφανίζει τη δομή επικεφαλίδων. Ελέγξτε ότι ταιριάζει με την οπτική διάταξη.`,
+	panel_HEADING_MISSING_ONE: 'Λείπει Επικεφαλίδα 1.',
 	PANEL_NO_HEADINGS: 'Δεν βρέθηκαν επικεφαλίδες.',
 	reportsLink: 'Άνοιγμα αναφορών ιστότοπου',
 	toggleDisabled: 'Δεν υπάρχει διαθέσιμο περιεχόμενο για έλεγχο από το Editoria11y.',
