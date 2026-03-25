@@ -390,24 +390,64 @@ export function detectShadow(container) {
   }
 }
 
+const initialPanel = (ifNo) => {
+  if (UI.panelInitial && UI.totalCount >= UI.panelInitial) {
+    UI.panelToggle.classList.add('ed11y-preview');
+    UI.panelInitial = UI.totalCount;
+    if (UI.totalCount > 2) {
+      UI.panelToggleTitle.innerHTML = '';
+      UI.panelToggleTitle.appendChild(Lang.sprintf('main_toggle_plural', UI.totalCount));
+    } else if (UI.totalCount > 1) {
+      UI.panelToggleTitle.textContent = Lang._('main_toggle_2');
+    } else {
+      UI.panelToggleTitle.textContent = Lang._('main_toggle_1');
+    }
+    UI.panel.addEventListener('mouseover', () => {
+      hideInitialCount();
+    });
+    UI.panel.addEventListener('focus', () => {
+      hideInitialCount();
+    });
+  } else {
+    UI.panelInitial = false;
+    UI.panelToggle.classList.remove('ed11y-preview');
+    UI.panelToggleTitle.textContent = ifNo;
+  }
+};
+
 export function panelLabel(show = UI.showPanel) {
   if (show) {
     if (UI.english) {
-      UI.panelToggleTitle.textContent =
-        UI.totalCount > 0 ? Lang._('main_toggle_hide_alerts') : Lang._('main_toggle_hide');
+      initialPanel(
+        UI.totalCount > 0 ? Lang._('main_toggle_hide_alerts') : Lang._('main_toggle_hide'),
+      );
     } else {
-      UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
+      initialPanel(Lang._('MAIN_TOGGLE_LABEL'));
       UI.panelToggle.ariaExpanded = 'true';
     }
   } else {
     if (UI.english) {
-      UI.panelToggleTitle.textContent =
-        UI.totalCount > 0 ? Lang._('main_toggle_show_alerts') : Lang._('main_toggle_show');
+      initialPanel(
+        UI.totalCount > 0 ? Lang._('main_toggle_show_alerts') : Lang._('main_toggle_show'),
+      );
     } else {
-      UI.panelToggleTitle.textContent = Lang._('MAIN_TOGGLE_LABEL');
+      initialPanel(Lang._('MAIN_TOGGLE_LABEL'));
       UI.panelToggle.ariaExpanded = 'false';
     }
   }
+}
+
+export function hideInitialCount() {
+  if (UI.panelInitial) {
+    UI.panelInitial = false;
+    panelLabel();
+  }
+  UI.panel.removeEventListener('mouseover', () => {
+    hideInitialCount();
+  });
+  UI.panel.removeEventListener('focus', () => {
+    hideInitialCount();
+  });
 }
 
 export function pauseObservers() {

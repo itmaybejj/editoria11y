@@ -1,12 +1,105 @@
 import Lang from '../../sa11y-js/utils/lang';
-import { getElements } from '../utils/utils';
+import Elements from '../../sa11y-js/utils/elements.js';
 import * as Utils from '../../sa11y-js/utils/utils';
 import { State } from '../../sa11y-js/core/state.js';
+import { getElements } from '../utils/utils.js';
 
-export default function customRuleset() {
-  /*
-   * Disabled as of 3.0.0.
-   * */
+export function prepareCustomRuleset() {
+  State.option.customRules?.forEach((cr) => {
+    Lang.testNames[cr.testKey] = cr.testName;
+    Lang.langStrings[cr.testKey] =
+      `<div class="title" tabindex="-1">${Utils.sanitizeHTML(cr.testName)}</div>${Utils.sanitizeHTML(cr.tipContent)}`;
+  });
+}
+
+const pushCustomRule = (cr, el, text) => {
+  let dismissKey = `${cr.test}`;
+  switch (cr.dismissKey) {
+    case 'text':
+      dismissKey = text || Utils.getText(el);
+      break;
+    case 'attributes': {
+      const attributes = el.attributes;
+      if (attributes.length > 0) {
+        for (const attr of attributes) {
+          dismissKey += `${attr.name}${attr.value}`;
+        }
+      }
+      break;
+    }
+    default:
+      dismissKey = el.innerHTML;
+      break;
+  }
+
+  // Pushes a custom rule result to the State.results array.
+  State.results.push({
+    test: cr.testKey,
+    element: el,
+    type: cr.type || 'error',
+    content: Lang.sprintf(cr.testKey),
+    // inline: true, // Ed11y computes this.
+    // position: 'beforebegin', // Ed11y computes this.
+    dismiss: Utils.prepareDismissal(dismissKey),
+    // dismissAll: cr.dismissAll || false, // Ed11y computes this.
+    // developer: cr.developer || true, // Ed11y computes this.
+  });
+};
+
+export function checkCustomRuleset() {
+  /**
+   * testKey
+   * testName
+   * tipContent
+   * elementSet
+   * filterSelector
+   * caseSensitive
+   * includeText
+   * excludeText
+   * type
+   * dismissKey
+   *
+   * not implemented in Ed11y:
+   * inline
+   * position
+   * dismissAll
+   * developer
+   */
+  State.option.customRules?.forEach((cr) => {
+    cr.elementSet?.forEach((found) => {
+      let elements = Elements.Found[found];
+      if (!elements.length) return;
+      if (cr.filterSelector) {
+        elements = elements.filter((el) => el.matches(cr.filterSelector));
+      }
+
+      if (elements.length && (cr.includeText.length || cr.excludeText.length)) {
+        elements.forEach((el) => {
+          let text = Utils.getText(el);
+          if (!cr.caseSensitive) {
+            text = text.toLowerCase();
+          }
+          let match = false;
+          let noMatch = false;
+          if (cr.includeText.length) {
+            match = cr.includeText.some((inc) => text.includes(inc));
+          }
+          if (cr.excludeText.length && (match || !cr.includeText.length)) {
+            noMatch = cr.excludeText.some((exc) => text.includes(exc));
+          }
+          if (match && !noMatch) {
+            pushCustomRule(cr, el, text);
+          }
+        });
+      } else if (elements.length > 0) {
+        elements.forEach((el) => {
+          pushCustomRule(cr, el);
+        });
+      }
+    });
+  });
+
+  // Legacy support for Drupal/WordPress plugins.
   if (State.option.checks.EMBED_CUSTOM) {
     const matchedEmbeds = getElements(State.option.checks.EMBED_CUSTOM.sources, 'root');
     matchedEmbeds.forEach(($el) => {

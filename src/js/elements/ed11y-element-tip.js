@@ -1,6 +1,6 @@
 import { alertOnInvisibleTip, dismissThis, jumpTo, transferFocus } from '../core/run.js';
 import Lang from '../../sa11y-js/utils/lang.js';
-import { getElements } from '../utils/utils.js';
+import { getElements, hideInitialCount } from '../utils/utils.js';
 import {
   generateColorSuggestion,
   generateContrastTools,
@@ -19,6 +19,7 @@ export class Ed11yElementTip extends HTMLElement {
   renderOnce() {
     this.initialized = true;
     this.open = true;
+    hideInitialCount();
     this.style.setProperty('opacity', '0');
     this.style.setProperty('outline', '0px solid transparent');
     const shadow = this.attachShadow({ mode: 'open' });

@@ -39,7 +39,7 @@ import {
 import { drawResult, showAltPanel, showHeadingsPanel, visualize } from './visualize';
 import checkReadability from '../../sa11y-js/rulesets/readability.js';
 import { spriteClose, spriteReadability } from '../elements/sprite.js';
-import customRuleset from '../rulesets/custom-ruleset.js';
+import { checkCustomRuleset } from '../rulesets/custom-ruleset.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { resetGetText } from '../../sa11y-js/utils/utils.js';
@@ -168,9 +168,9 @@ export function updatePanel() {
         Lang._('PANEL_HEADING');
       UI.panel.querySelector('#ed11y-headings-tab .summary-title').textContent = Lang._('OUTLINE');
       UI.panel.querySelector('#ed11y-alts-tab .summary-title').textContent = Lang._('IMAGES');
-      UI.panel.querySelector('#ed11y-headings-tab .details-title').innerHTML =
+      UI.panel.querySelector('#ed11y-headings-tab .details-title').textContent =
         Lang._('panelCheckOutline');
-      UI.panel.querySelector('#ed11y-alts-tab .details-title').innerHTML =
+      UI.panel.querySelector('#ed11y-alts-tab .details-title').textContent =
         Lang._('panelCheckAltText');
       UI.panel.querySelector('.jump-next.ed11y-sr-only').textContent = Lang._('buttonFirstContent');
       UI.panel.setAttribute('aria-label', Lang._('CONTAINER_LABEL'));
@@ -227,6 +227,7 @@ export function updatePanel() {
         // Show sometimes for assertive/polite if there are new items.
         UI.showPanel = true;
       }
+      UI.panelInitial = State.option.alertMode !== 'polite' ? 1 : false;
     } else if (!UI.inlineAlerts) {
       UI.oldResultString = `${UI.errorCount} ${UI.warningCount}`;
       State.results.forEach((result) => {
@@ -1272,7 +1273,7 @@ const enqueueTests = (queue) => {
         checkHeaders();
         checkImages();
         checkEmbeddedContent();
-        customRuleset();
+        checkCustomRuleset();
         checkQA();
         break;
       case 'group2':

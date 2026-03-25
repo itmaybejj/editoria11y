@@ -70,7 +70,10 @@ const defaultOptions = {
   linkIgnoreStrings: [],
   paragraphIgnore: "table p",
   ignoreContentOutsideRoots: false,
-  ignoreByTest: {},
+  ignoreByTest: {
+    LABELS_ARIA_LABELS_INPUT: ':is(header, footer) [type="search"]',
+    LABELS_PLACEHOLDER: ':is(header, footer) [type="search"]'
+  },
   // Control panel settings
   aboutContent: "",
   panelPosition: "right",
@@ -187,6 +190,8 @@ const defaultOptions = {
     LINK_ALT_MAYBE_BAD: {
       minLength: 15
     },
+    ALT_MAYBE_BAD_WARNING: true,
+    LINK_ALT_MAYBE_BAD_WARNING: true,
     // Link checks
     DUPLICATE_TITLE: {
       dismissAll: true
@@ -219,9 +224,9 @@ const defaultOptions = {
     LABELS_MISSING_IMAGE_INPUT: true,
     LABELS_INPUT_RESET: true,
     LABELS_MISSING_LABEL: true,
-    LABELS_ARIA_LABEL_INPUT: true,
     LABELS_NO_FOR_ATTRIBUTE: true,
     LABELS_PLACEHOLDER: true,
+    LABELS_ARIA_LABEL_INPUT: true,
     // Embedded content checks
     EMBED_AUDIO: {
       sources: ""
@@ -373,6 +378,9 @@ const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
     return ariaLabel;
   }
   let computedText = "";
+  const and = (word) => {
+    computedText += ` ${word}`;
+  };
   if (!element.children.length) {
     computedText = wrapPseudoContent(element, element.textContent);
     if (!computedText.trim() && element.hasAttribute("title")) {
@@ -412,19 +420,19 @@ const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
       for (let i = 0; i < shadowChildren.length; i++) {
         const child = shadowChildren[i];
         if (!excludeSelector || !child.closest(excludeSelector)) {
-          computedText += computeAccessibleName(child, exclusions, recursing + 1);
+          and(computeAccessibleName(child, exclusions, recursing + 1));
         }
       }
     }
     if (node.nodeType === Node.TEXT_NODE) {
       if (node.parentNode.tagName !== "SLOT") {
-        computedText += ` ${node.nodeValue}`;
+        and(node.nodeValue);
       }
       continue;
     }
     if (addTitleIfNoName && !node.closest("a")) {
       if (aText === computedText) {
-        computedText += addTitleIfNoName;
+        and(addTitleIfNoName);
       }
       addTitleIfNoName = false;
       aText = false;
@@ -437,7 +445,7 @@ const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
     }
     const aria = computeAriaLabel(node, recursing);
     if (aria !== "noAria") {
-      computedText += ` ${aria}`;
+      and(aria);
       if (!nextTreeBranch(treeWalker)) {
         continueWalker = false;
       }
@@ -446,16 +454,16 @@ const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
     switch (node.tagName) {
       case "IMG":
         if (node.hasAttribute("alt") && node.role !== "presentation") {
-          computedText += node.getAttribute("alt");
+          and(node.getAttribute("alt"));
         }
         break;
       case "SVG":
         if (node.role === "img" || node.role === "graphics-document") {
-          computedText += computeAriaLabel(node);
+          and(computeAriaLabel(node));
         } else {
           const title = node.querySelector("title");
           if (title) {
-            computedText += title.textContent;
+            and(title.textContent);
           }
         }
         break;
@@ -467,10 +475,10 @@ const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
           addTitleIfNoName = false;
           aText = false;
         }
-        computedText += wrapPseudoContent(node, "");
+        and(wrapPseudoContent(node, ""));
         break;
       case "INPUT":
-        computedText += wrapPseudoContent(treeWalker.currentNode, "");
+        and(wrapPseudoContent(treeWalker.currentNode, ""));
         if (treeWalker.currentNode.hasAttribute("title")) {
           addTitleIfNoName = treeWalker.currentNode.getAttribute("title");
         }
@@ -485,24 +493,24 @@ const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
             slotText += child.nodeValue;
           }
         });
-        computedText += slotText;
-        computedText += wrapPseudoContent(node, "");
+        and(slotText);
+        and(wrapPseudoContent(node, ""));
         break;
       }
       case "SPAN": {
-        computedText += wrapPseudoContent(treeWalker.currentNode, "");
+        and(wrapPseudoContent(treeWalker.currentNode, ""));
         if (treeWalker.currentNode.hasAttribute("title")) {
           addTitleIfNoName = treeWalker.currentNode.getAttribute("title");
         }
         break;
       }
       default:
-        computedText += wrapPseudoContent(node, "");
+        and(wrapPseudoContent(node, ""));
         break;
     }
   }
   if (addTitleIfNoName && !aText) {
-    computedText += ` ${addTitleIfNoName}`;
+    and(addTitleIfNoName);
   }
   computedText = computedText.replace(/[\uE000-\uF8FF]/gu, "");
   if (!computedText.trim()) {
@@ -1455,7 +1463,7 @@ function findShadowComponents(option) {
     });
   }
 }
-const version = "3.0.0-dev0311";
+const version = "3.0.0-dev0322";
 const spriteAlts = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>';
 const spriteClose = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>';
 const spriteCursor = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 256 512"><path fill="currentColor" d="M0 29C-1 47 12 62 29 64l8 1C71 67 96 95 96 128L96 224l-32 0c-18 0-32 14-32 32s14 32 32 32l32 0 0 96c0 33-26 61-59 64l-8 1C12 450-1 465 0 483s17 31 35 29l8-1c34-3 64-19 85-43c21 24 51 40 85 43l8 1c18 2 33-12 35-29s-12-33-29-35l-8-1C186 445 160 417 160 384l0-96 32 0c18 0 32-14 32-32s-14-32-32-32l-32 0 0-96c0-33 26-61 59-64l8-1c18-2 31-17 29-35S239-1 221 0l-8 1C179 4 149 20 128 44c-21-24-51-40-85-43l-8-1C17-1 2 12 0 29z"/></svg>';
@@ -1543,6 +1551,7 @@ const UI = {
   panel: false,
   message: {},
   panelElement: {},
+  panelInitial: 1,
   panelNoCover: [],
   panelToggle: {},
   panelToggleTitle: {},
@@ -1895,22 +1904,62 @@ function detectShadow(container) {
     });
   }
 }
+const initialPanel = (ifNo) => {
+  if (UI.panelInitial && UI.totalCount >= UI.panelInitial) {
+    UI.panelToggle.classList.add("ed11y-preview");
+    UI.panelInitial = UI.totalCount;
+    if (UI.totalCount > 2) {
+      UI.panelToggleTitle.innerHTML = "";
+      UI.panelToggleTitle.appendChild(Lang.sprintf("main_toggle_plural", UI.totalCount));
+    } else if (UI.totalCount > 1) {
+      UI.panelToggleTitle.textContent = Lang._("main_toggle_2");
+    } else {
+      UI.panelToggleTitle.textContent = Lang._("main_toggle_1");
+    }
+    UI.panel.addEventListener("mouseover", () => {
+      hideInitialCount();
+    });
+    UI.panel.addEventListener("focus", () => {
+      hideInitialCount();
+    });
+  } else {
+    UI.panelInitial = false;
+    UI.panelToggle.classList.remove("ed11y-preview");
+    UI.panelToggleTitle.textContent = ifNo;
+  }
+};
 function panelLabel(show = UI.showPanel) {
   if (show) {
     if (UI.english) {
-      UI.panelToggleTitle.textContent = UI.totalCount > 0 ? Lang._("main_toggle_hide_alerts") : Lang._("main_toggle_hide");
+      initialPanel(
+        UI.totalCount > 0 ? Lang._("main_toggle_hide_alerts") : Lang._("main_toggle_hide")
+      );
     } else {
-      UI.panelToggleTitle.textContent = Lang._("MAIN_TOGGLE_LABEL");
+      initialPanel(Lang._("MAIN_TOGGLE_LABEL"));
       UI.panelToggle.ariaExpanded = "true";
     }
   } else {
     if (UI.english) {
-      UI.panelToggleTitle.textContent = UI.totalCount > 0 ? Lang._("main_toggle_show_alerts") : Lang._("main_toggle_show");
+      initialPanel(
+        UI.totalCount > 0 ? Lang._("main_toggle_show_alerts") : Lang._("main_toggle_show")
+      );
     } else {
-      UI.panelToggleTitle.textContent = Lang._("MAIN_TOGGLE_LABEL");
+      initialPanel(Lang._("MAIN_TOGGLE_LABEL"));
       UI.panelToggle.ariaExpanded = "false";
     }
   }
+}
+function hideInitialCount() {
+  if (UI.panelInitial) {
+    UI.panelInitial = false;
+    panelLabel();
+  }
+  UI.panel.removeEventListener("mouseover", () => {
+    hideInitialCount();
+  });
+  UI.panel.removeEventListener("focus", () => {
+    hideInitialCount();
+  });
 }
 function pauseObservers() {
   UI.watching?.forEach((observer) => {
@@ -2156,7 +2205,7 @@ const defaultFileTypes = [
   "zip"
 ];
 const cssFileTypeSelectors = 'a[href$=".pdf"], a[href$=".doc"], a[href$=".docx"], a[href$=".zip"], a[href$=".mp3"], a[href$=".txt"], a[href$=".exe"], a[href$=".dmg"], a[href$=".rtf"], a[href$=".pptx"], a[href$=".ppt"], a[href$=".xls"], a[href$=".xlsx"], a[href$=".csv"], a[href$=".mp4"], a[href$=".mov"], a[href$=".avi"]';
-const citationPattern = /(doi\.org\/|dl\.acm\.org\/|link\.springer\.com\/|pubmed\.ncbi\.nlm\.nih\.gov\/|scholar\.google\.com\/|ieeexplore\.ieee\.org\/|researchgate\.net\/publication\/|sciencedirect\.com\/science\/article\/)[a-z0-9/.-]+/i;
+const citationPattern = /(doi\.org\/|dl\.acm\.org\/|link\.springer\.com\/|pubmed\.ncbi\.nlm\.nih\.gov\/|scholar\.google\.com\/|ieeexplore\.ieee\.org\/|researchgate\.net\/publication\/|sciencedirect\.com\/science\/article\/|10\.\d{4,}\/)[a-z0-9/.-]+/i;
 const urlEndings = /\b(?:\.edu\/|\.gob\/|\.gov\/|\.app\/|\.com\/|\.net\/|\.org\/|\.us\/|\.ca\/|\.de\/|\.icu\/|\.uk\/|\.ru\/|\.info\/|\.top\/|\.xyz\/|\.tk\/|\.cn\/|\.ga\/|\.cf\/|\.nl\/|\.io\/|\.fr\/|\.pe\/|\.nz\/|\.pt\/|\.es\/|\.pl\/|\.ua\/)\b/i;
 const specialCharPattern = /[^a-zA-Z0-9]/g;
 const htmlSymbols = /([<>↣↳←→↓«»↴]+)/;
@@ -2544,7 +2593,7 @@ function checkImages() {
   const extraPlaceholderStopWords = State.option.extraPlaceholderStopWords.split(",").map((word) => word.trim().toLowerCase()).filter(Boolean);
   const containsAltTextStopWords = (alt) => {
     const altLowerCase = alt.toLowerCase();
-    const altNoNumbers = altLowerCase.replace(/\d+/g, "").trim();
+    const altOnlyLetters = altLowerCase.replace(/[^\p{L}\s]/gu, "").trim();
     const hit = [null, null, null];
     for (const urlHit of url) {
       if (altLowerCase.includes(urlHit)) {
@@ -2563,7 +2612,7 @@ function checkImages() {
         break;
       }
     }
-    if (placeholderAltSet.has(altLowerCase) || placeholderAltSet.has(altNoNumbers)) {
+    if (placeholderAltSet.has(altLowerCase) || placeholderAltSet.has(altOnlyLetters)) {
       hit[2] = alt;
     }
     if (extraPlaceholderStopWords.length) {
@@ -2739,10 +2788,16 @@ function checkImages() {
         return;
       }
     }
-    const error = containsAltTextStopWords(rawAlt);
+    const error = containsAltTextStopWords(altText);
     const maybeBadAlt = link ? State.option.checks.LINK_ALT_MAYBE_BAD : State.option.checks.ALT_MAYBE_BAD;
     const isTooLongSingleWord = new RegExp(`^\\S{${maybeBadAlt.minLength || 15},}$`);
-    const containsNonAlphaChar = /[^\p{L}\-,.!?]/u.test(rawAlt);
+    const containsNonAlphaChar = /[^\p{L}\-,.!? ]/u.test(altText);
+    const isBadFilename = new RegExp(
+      `^(?=[^_-]*([_-][^_-]*){3,})\\S{${maybeBadAlt.minLength || 15},}$`
+    ).test(altText);
+    const hasTooMuchNoise = /^(?:\s*\d){5,}\s*$/.test(altText) || // Is a number longer than 5 digits.
+    (altText.match(/[_-]/g) || []).length >= 3 || // Contains more than 3 delimiters (- or _)
+    (altText.match(/[^\p{L}\s,.!?\-\d]/gu) || []).length >= 5;
     if (error[0] !== null) {
       const rule = link ? State.option.checks.LINK_ALT_FILE_EXT : State.option.checks.ALT_FILE_EXT;
       const conditional = link ? "LINK_ALT_FILE_EXT" : "ALT_FILE_EXT";
@@ -2785,17 +2840,34 @@ function checkImages() {
           developer: rule.developer || false
         });
       }
-    } else if (maybeBadAlt && isTooLongSingleWord.test(rawAlt) && containsNonAlphaChar) {
+    } else if (isBadFilename || maybeBadAlt && isTooLongSingleWord.test(rawAlt) && containsNonAlphaChar) {
+      const rule = link ? State.option.checks.LINK_ALT_MAYBE_BAD : State.option.checks.ALT_MAYBE_BAD;
       const conditional = link ? "LINK_ALT_MAYBE_BAD" : "ALT_MAYBE_BAD";
-      State.results.push({
-        test: conditional,
-        element: $el,
-        type: maybeBadAlt.type || "error",
-        content: Lang.sprintf(maybeBadAlt.content || conditional, altText),
-        dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
-        dismissAll: maybeBadAlt.dismissAll ? conditional : false,
-        developer: maybeBadAlt.developer || false
-      });
+      if (rule) {
+        State.results.push({
+          test: conditional,
+          element: $el,
+          type: rule.type || "error",
+          content: Lang.sprintf(rule.content || conditional, altText),
+          dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
+          dismissAll: rule.dismissAll ? conditional : false,
+          developer: rule.developer || false
+        });
+      }
+    } else if (hasTooMuchNoise) {
+      const conditional = link ? "LINK_ALT_MAYBE_BAD" : "ALT_MAYBE_BAD";
+      const rule = link ? State.option.checks.LINK_ALT_MAYBE_BAD_WARNING : State.option.checks.ALT_MAYBE_BAD_WARNING;
+      if (rule) {
+        State.results.push({
+          test: link ? "LINK_ALT_MAYBE_BAD_WARNING" : "ALT_MAYBE_BAD_WARNING",
+          element: $el,
+          type: rule.type || "warning",
+          content: Lang.sprintf(rule.content || conditional, altText),
+          dismiss: prepareDismissal(`${conditional}WARNING${src + rawAlt} `),
+          dismissAll: rule.dismissAll ? conditional : false,
+          developer: rule.developer || false
+        });
+      }
     } else if (link ? rawAlt.length > maxAltCharactersLinks : rawAlt.length > maxAltCharacters) {
       const rule = link ? State.option.checks.LINK_IMAGE_LONG_ALT : State.option.checks.IMAGE_ALT_TOO_LONG;
       const conditional = link ? "LINK_IMAGE_LONG_ALT" : "IMAGE_ALT_TOO_LONG";
@@ -3234,7 +3306,7 @@ function checkQA() {
   }
   if (State.option.checks.QA_FAKE_LIST) {
     const numberMatch = new RegExp(/(([023456789][\d\s])|(1\d))/, "");
-    const alphabeticMatch = new RegExp(/(^[aA1αаΑ]|[^p{Alphabetic}\s])[-\s.)]/, "u");
+    const alphabeticMatch = new RegExp(/(^[aA1αаΑ]|[^\p{Alphabetic}\s])[-\s.)\]]/, "u");
     const emojiMatch = new RegExp(/\p{Extended_Pictographic}/, "u");
     const secondTextNoMatch = ["a", "A", "α", "Α", "а", "А", "1"];
     const specialCharsMatch = /[([{#]/;
@@ -3247,31 +3319,37 @@ function checkQA() {
       б: "а",
       Б: "А"
     };
-    const decrement = (element) => element.replace(/^b|^B|^б|^Б|^β|^В|^2/, (match) => prefixDecrement[match]);
+    const decrement = (element) => element.replace(/^b|^B|^б|^Б|^β|^В|^[2-9]/, (match) => prefixDecrement[match]);
     let activeMatch = "";
     let firstText = "";
     let lastHitWasEmoji = false;
     Elements.Found.Paragraphs.forEach((p, i) => {
       let secondText = false;
       let hit = false;
-      firstText = firstText || getText(p).replace("(", "");
+      firstText = firstText || getText(p).replace(/[([]/, "");
       const firstPrefix = firstText.substring(0, 2);
       const isAlphabetic = firstPrefix.match(alphabeticMatch);
       const isNumber = firstPrefix.match(numberMatch);
       const isEmoji = firstPrefix.match(emojiMatch);
       const isSpecialChar = specialCharsMatch.test(firstPrefix.charAt(0));
-      if (firstPrefix.length > 0 && firstPrefix !== activeMatch && !isNumber && (isAlphabetic || isEmoji || isSpecialChar)) {
+      const isRoman = /^(I|i)[.)\]]/.test(firstPrefix);
+      if (firstPrefix.length > 0 && firstPrefix !== activeMatch && !isNumber && (isAlphabetic || isEmoji || isSpecialChar || isRoman)) {
+        if (/^[A-Z]\.[A-Z]\./.test(firstText)) return;
         const secondP = Elements.Found.Paragraphs[i + 1];
         if (secondP) {
-          secondText = getText(secondP).replace("(", "").substring(0, 2);
+          secondText = getText(secondP).replace(/[([]/, "").substring(0, 2);
           if (secondTextNoMatch.includes(secondText?.toLowerCase().trim())) {
             return;
           }
           const secondPrefix = decrement(secondText);
-          if (isAlphabetic) {
+          if (isRoman) {
+            if (secondText.toLowerCase() === "ii") {
+              hit = true;
+            }
+          } else if (isAlphabetic) {
             const firstChar = firstPrefix.charAt(0);
             const secondChar = secondText.charAt(0);
-            if (decrement(secondChar) === firstChar) {
+            if (decrement(secondChar) === firstChar && !/\w/.test(secondText.charAt(1))) {
               hit = true;
             }
           } else if (isEmoji && !lastHitWasEmoji) {
@@ -3286,7 +3364,7 @@ function checkQA() {
           if (textAfterBreak) {
             textAfterBreak = textAfterBreak.replace(/<\/?[^>]+(>|$)/g, "").trim().substring(0, 2);
             const checkForOtherPrefixChars = specialCharsMatch.test(textAfterBreak.charAt(0));
-            if (checkForOtherPrefixChars || firstPrefix === decrement(textAfterBreak) || !lastHitWasEmoji && textAfterBreak.match(emojiMatch)) {
+            if (checkForOtherPrefixChars || firstPrefix === decrement(textAfterBreak) || isRoman && textAfterBreak.toLowerCase() === "ii" || !lastHitWasEmoji && textAfterBreak.match(emojiMatch)) {
               hit = true;
             }
           }
@@ -3308,6 +3386,8 @@ function checkQA() {
         } else {
           activeMatch = "";
         }
+      } else {
+        activeMatch = "";
       }
       firstText = secondText ? "" : secondText;
     });
@@ -5143,6 +5223,7 @@ function countAlerts() {
   UI.errorCount = 0;
   UI.warningCount = 0;
   UI.dismissedCount = 0;
+  const insertBefore = 'a, button, input, iframe, [role="button"], [role="link"]';
   for (let i = State.results.length - 1; i >= 0; i--) {
     if (State.results[i].dismissalStatus) {
       UI.dismissedCount++;
@@ -5157,10 +5238,12 @@ function countAlerts() {
         State.results[i].element = location.parentElement;
       }
     }
-    if (State.results[i].element.closest(
-      'a, button, img, svg, input, iframe, [role="button"], [role="link"]'
-    )) {
-      State.results[i].element = State.results[i].element.closest('a, button, input, [role="button"], [role="link"]') ?? State.results[i].element;
+    if (State.option.insertAnnotationBefore && State.results[i].element.closest(State.option.insertAnnotationBefore)) {
+      State.results[i].element = State.results[i].element.closest(
+        State.option.insertAnnotationBefore
+      );
+    } else if (State.results[i].element.closest(`${insertBefore}, img, svg`)) {
+      State.results[i].element = State.results[i].element.closest(insertBefore) ?? State.results[i].element;
     } else if (State.results[i].element.matches(
       "p, strong, em, i, u, table, td, th, li, blockquote, h1, h2, h3, h4, h5, h6"
     )) {
@@ -5418,7 +5501,8 @@ const showAltPanel = () => {
         element: img,
         type: match.type,
         dismiss: match.dismiss,
-        developer: match.developer
+        developer: match.developer,
+        test: match.test
       });
     } else {
       UI.imageAlts.push({
@@ -5443,17 +5527,23 @@ const showAltPanel = () => {
         mark.dataset.ed11yImg = i.toString();
         mark.setAttribute("id", `ed11y-alt-${i}`);
         mark.setAttribute("tabindex", "-1");
+        mark.title = Lang.testNames[image.test];
         UI.imageAlts[i].mark = mark;
         image.element.insertAdjacentElement("beforebegin", mark);
       }
       const userText = document.createElement("span");
-      if (altText !== "") {
-        userText.textContent = altText;
-      } else {
+      if (altText === "") {
         const decorative = document.createElement("span");
         decorative.classList.add("ed11y-decorative");
         decorative.textContent = Lang._("DECORATIVE");
         userText.append(decorative);
+      } else if (altText === null) {
+        const decorative = document.createElement("span");
+        decorative.classList.add("ed11y-decorative");
+        decorative.textContent = Lang.testNames[image.test];
+        userText.append(decorative);
+      } else {
+        userText.textContent = altText;
       }
       const li = document.createElement("li");
       li.classList.add(`ed11y-${image.type}`);
@@ -5464,6 +5554,7 @@ const showAltPanel = () => {
         const a = document.createElement("a");
         a.href = `#ed11y-alt-${i}`;
         a.classList.add("alt-parent");
+        a.title = Lang.testNames[image.test];
         li.append(a);
         a.append(img);
         a.append(userText);
@@ -5545,14 +5636,14 @@ function showHeadingsPanel() {
         result.element.insertAdjacentElement("afterbegin", mark);
         UI.attachCSS(mark.shadowRoot);
       }
-      const leftPad = 10 * result.headingLevel - 10;
+      const leftPad = 7 * result.headingLevel - 7;
       const li = document.createElement("li");
       li.classList.add(`level${result.headingLevel}`);
       li.style.setProperty("margin-left", `${leftPad}px`);
       const levelPrefix = document.createElement("strong");
       levelPrefix.textContent = `H${result.headingLevel}: `;
       const userText = document.createElement("span");
-      userText.innerHTML = result.text;
+      userText.textContent = result.text;
       const link = document.createElement("a");
       if (UI.inlineAlerts) {
         link.setAttribute("href", `#ed11y-heading-${i}`);
@@ -5624,7 +5715,76 @@ function drawResult(result, index) {
   UI.jumpList.unshift(mark);
   State.results[index].toggle = mark;
 }
-function customRuleset() {
+function prepareCustomRuleset() {
+  State.option.customRules?.forEach((cr) => {
+    Lang.testNames[cr.testKey] = cr.testName;
+    Lang.langStrings[cr.testKey] = `<div class="title" tabindex="-1">${sanitizeHTML(cr.testName)}</div>${sanitizeHTML(cr.tipContent)}`;
+  });
+}
+const pushCustomRule = (cr, el, text) => {
+  let dismissKey = `${cr.test}`;
+  switch (cr.dismissKey) {
+    case "text":
+      dismissKey = text || getText(el);
+      break;
+    case "attributes": {
+      const attributes = el.attributes;
+      if (attributes.length > 0) {
+        for (const attr of attributes) {
+          dismissKey += `${attr.name}${attr.value}`;
+        }
+      }
+      break;
+    }
+    default:
+      dismissKey = el.innerHTML;
+      break;
+  }
+  State.results.push({
+    test: cr.testKey,
+    element: el,
+    type: cr.type || "error",
+    content: Lang.sprintf(cr.testKey),
+    // inline: true, // Ed11y computes this.
+    // position: 'beforebegin', // Ed11y computes this.
+    dismiss: prepareDismissal(dismissKey)
+    // dismissAll: cr.dismissAll || false, // Ed11y computes this.
+    // developer: cr.developer || true, // Ed11y computes this.
+  });
+};
+function checkCustomRuleset() {
+  State.option.customRules?.forEach((cr) => {
+    cr.elementSet?.forEach((found) => {
+      let elements2 = Elements.Found[found];
+      if (!elements2.length) return;
+      if (cr.filterSelector) {
+        elements2 = elements2.filter((el) => el.matches(cr.filterSelector));
+      }
+      if (elements2.length && (cr.includeText.length || cr.excludeText.length)) {
+        elements2.forEach((el) => {
+          let text = getText(el);
+          if (!cr.caseSensitive) {
+            text = text.toLowerCase();
+          }
+          let match = false;
+          let noMatch = false;
+          if (cr.includeText.length) {
+            match = cr.includeText.some((inc) => text.includes(inc));
+          }
+          if (cr.excludeText.length && (match || !cr.includeText.length)) {
+            noMatch = cr.excludeText.some((exc) => text.includes(exc));
+          }
+          if (match && !noMatch) {
+            pushCustomRule(cr, el, text);
+          }
+        });
+      } else if (elements2.length > 0) {
+        elements2.forEach((el) => {
+          pushCustomRule(cr, el);
+        });
+      }
+    });
+  });
   if (State.option.checks.EMBED_CUSTOM) {
     const matchedEmbeds = getElements(State.option.checks.EMBED_CUSTOM.sources, "root");
     matchedEmbeds.forEach(($el) => {
@@ -5740,8 +5900,8 @@ function updatePanel() {
       UI.panel.querySelector("#ed11y-visualize .ed11y-sr-only").textContent = Lang._("PANEL_HEADING");
       UI.panel.querySelector("#ed11y-headings-tab .summary-title").textContent = Lang._("OUTLINE");
       UI.panel.querySelector("#ed11y-alts-tab .summary-title").textContent = Lang._("IMAGES");
-      UI.panel.querySelector("#ed11y-headings-tab .details-title").innerHTML = Lang._("panelCheckOutline");
-      UI.panel.querySelector("#ed11y-alts-tab .details-title").innerHTML = Lang._("panelCheckAltText");
+      UI.panel.querySelector("#ed11y-headings-tab .details-title").textContent = Lang._("panelCheckOutline");
+      UI.panel.querySelector("#ed11y-alts-tab .details-title").textContent = Lang._("panelCheckAltText");
       UI.panel.querySelector(".jump-next.ed11y-sr-only").textContent = Lang._("buttonFirstContent");
       UI.panel.setAttribute("aria-label", Lang._("CONTAINER_LABEL"));
       if (State.option.reportsURL) {
@@ -5776,6 +5936,7 @@ function updatePanel() {
       } else if (UI.totalCount > 0 && !UI.ignoreAll && (State.option.alertMode === "assertive" || State.option.alertMode === "polite" && UI.seen[encodeURI(State.option.currentPage)] !== UI.totalCount)) {
         UI.showPanel = true;
       }
+      UI.panelInitial = State.option.alertMode !== "polite" ? 1 : false;
     } else if (!UI.inlineAlerts) {
       UI.oldResultString = `${UI.errorCount} ${UI.warningCount}`;
       State.results.forEach((result) => {
@@ -6631,7 +6792,7 @@ const enqueueTests = (queue) => {
         checkHeaders();
         checkImages();
         checkEmbeddedContent();
-        customRuleset();
+        checkCustomRuleset();
         checkQA();
         break;
       case "group2":
@@ -6983,16 +7144,25 @@ class Ed11yElementAlt extends HTMLElement {
     if (!this.initialized) {
       const shadow = this.attachShadow({ mode: "open" });
       const altTextWrapper = document.createElement("div");
-      altTextWrapper.classList.add("ed11y-wrapper", "ed11y-alt-wrapper");
+      altTextWrapper.classList.add("ed11y-wrapper", "ed11y-alt-wrapper", "ed11y-small");
       const img = UI.imageAlts[this.dataset.ed11yImg];
       const altSpan = document.createElement("span");
-      if (img.altText !== "") {
-        altSpan.textContent = img.altText;
+      if (img.altText === "") {
+        const decorative = document.createElement("span");
+        decorative.classList.add("ed11y-decorative");
+        decorative.textContent = Lang._("DECORATIVE");
+        altSpan.append(decorative);
+        altSpan.classList.add(`ed11y-${img.type}`);
+      } else if (img.altText === null) {
+        const decorative = document.createElement("span");
+        decorative.classList.add("ed11y-decorative");
+        decorative.textContent = img.type === "pass" ? Lang._("MISSING") : Lang.testNames[img.test];
+        altSpan.append(decorative);
+        altSpan.classList.add(`ed11y-error`);
       } else {
-        altSpan.classList.add("ed11y-decorative");
-        altSpan.textContent = Lang._("DECORATIVE");
+        altSpan.textContent = img.altText;
+        altSpan.classList.add(`ed11y-pass`);
       }
-      altSpan.classList.add(`ed11y-${img.type}`);
       altTextWrapper.appendChild(altSpan);
       UI.attachCSS(altTextWrapper);
       shadow.appendChild(altTextWrapper);
@@ -7169,16 +7339,16 @@ class Ed11yElementPanel extends HTMLElement {
           <details id="ed11y-headings-tab">
               <summary>${spriteHeadings}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
               </summary>
-              <div class="details">
-                  <span class="details-title"></span>
+              <div class="details ed11y-small">
+                  <p class="details-title"></p>
                   <ul id='ed11y-outline'></ul>
               </div>
           </details>
           <details id="ed11y-alts-tab">
             <summary>${spriteAlts}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
             </summary>
-            <div class="details">
-                <span class="details-title"></span>
+            <div class="details ed11y-small">
+                <p class="details-title"></p>
                 <ul id='ed11y-alt-list'></ul>
             </div>
         </details>
@@ -7511,6 +7681,7 @@ class Ed11yElementTip extends HTMLElement {
   renderOnce() {
     this.initialized = true;
     this.open = true;
+    hideInitialCount();
     this.style.setProperty("opacity", "0");
     this.style.setProperty("outline", "0px solid transparent");
     const shadow = this.attachShadow({ mode: "open" });
@@ -7831,6 +8002,7 @@ const Sa11yStrings = {
     WARNING: "Warning",
     WARNINGS: "Warnings",
     GOOD: "Good",
+    REVIEW: "Review",
     ON: "On",
     OFF: "Off",
     ALERT_TEXT: "Alert",
@@ -7915,7 +8087,10 @@ const Sa11yStrings = {
       "hero slide",
       "homepage feature image",
       "featured image",
-      "untitled"
+      "untitled",
+      "untitled image",
+      "unnamed",
+      "copy"
     ],
     LINK_STOPWORDS: [
       "click",
@@ -8128,7 +8303,7 @@ const Sa11yStrings = {
 const testNames = {
   ALT_FILE_EXT: "This alt text is a filename, not a description",
   ALT_MAYBE_BAD: "This alt text cannot be pronounced by a screen reader",
-  ALT_PLACEHOLDER: "This alt text does not describe its image",
+  ALT_PLACEHOLDER: "This alt text sounds like a placeholder",
   ALT_UNPRONOUNCEABLE: "This alt text is unpronounceable",
   BTN_EMPTY: "Button is missing an accessible label",
   BTN_EMPTY_LABELLEDBY: "Button has an invalid ARIA label",
@@ -8182,7 +8357,7 @@ const testNames = {
   LINK_IMAGE_NO_ALT_TEXT: "This linked image needs alt text",
   LINK_IMAGE_TEXT: "Does this linked image need a description?",
   LINK_NEW_TAB: "Does this link open a new tab without warning?",
-  LINK_PLACEHOLDER_ALT: "This linked image needs meaningful alt text",
+  LINK_PLACEHOLDER_ALT: "This linked alt text sounds like a placeholder",
   LINK_STOPWORD: "This link only contains generic words",
   LINK_STOPWORD_ARIA: "Meaningful link text only available to screen reader users",
   LINK_SUS_ALT: `Does this image's alt describe the image or the link?`,
@@ -8270,7 +8445,7 @@ const tips = {
   LABEL_IN_NAME: `<p>The visible text for this element appears to be different from the accessible name. This may cause confusion for screen reader users, and may break voice control.</p><p>${why.fix}Make sure the visible label starts with the text of the invisible label, and does not contain any additional meaningful information.</p><p><strong>Invisible Label:</strong> "%(TEXT)"</p>`,
   LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt text: "<strong>%(alt)</strong>"</p><p>This alt text is probably a filename instead of a meaningful label for a link.</p><p>${why.fix}Set this image's alt text to the name of the link destination.</p><div class="why"> <p>The purpose of alt text is to provide an alternative for what an image means, not what it contains. The meaning of a linked image is the link destination:</p><ul><li>"Page with writing" describes the image, not a link.</li><li>"IMG_1234.jpg" is just a filename.</li><li>"<strong><em>Event registration form (.doc)</em></strong>" is a link destination.</li></ul></p></div>`,
   LINK_ALT_MAYBE_BAD: `<p>Alt text: "<strong>%(alt)</strong>."</p><p>${why.fix}Set this image's alt text to the name of the link destination.</p>${why.imageLinks}`,
-  LINK_ALT_UNPRONOUNCEABLE: `<p>The alt text within this linked image only contains unpronounceable symbols and/or spaces: "%(ALT_TEXT)". Screen readers will announce there is a link, and then be unable to describe it.</p><p>${why.fix}Set this image's alt to the link's destination or purpose.</p>${why.imageLinks}`,
+  LINK_ALT_UNPRONOUNCEABLE: `<p>The alt text within this linked image only contains unpronounceable symbols and/or spaces: <strong>"%(ALT_TEXT)"</strong>.</p><p>Screen readers will announce there is a link, and then be unable to describe it.</p><p>${why.fix}Set this image's alt to the link's destination or purpose.</p>${why.imageLinks}`,
   LINK_CLICK_HERE: `The phrase "click" or "click here" is redundant, and takes focus away from the link's purpose.`,
   LINK_DOI: `<p>${why.fix}Link the article title and provide the DOI number as plain text, rather than linking the DOI number and leaving the article title as plain text.</p><div class="why"><p>The <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">APA Style guide</a> recommends using descriptive links on websites because users skim by links and use in-page search for links by name. Users are much more likely to notice articles of interest when the title is linked.</p><p>This also allows screen readers to describe each link meaningfully, rather than speaking a meaningless sequence of numbers.</p></div>`,
   LINK_EMPTY: `<p>${why.fix}Add text describing its destination, or delete it if is just a typo or linked space character.</p><div class="why"><p>Tip: screen readers cannot describe links that only contain spaces or symbols. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the URL: Link, H-T-T-P-S forward-slash forward-slash example dot com."</p><p>Note that linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p></div>`,
@@ -8340,13 +8515,14 @@ const interfaceStrings = {
   PANEL_HEADING: "Show visualizers",
   SKIP_TO_ISSUE: "Show alert",
   WARNING: "Manual check",
-  WARNINGS: "manual checks needed",
+  WARNINGS: "manual checks",
+  // Not in use?
   buttonFirstContent: "Show first alert",
   buttonHideHiddenAlert: "Hide hidden alert",
   buttonHideHiddenAlerts: `Hide %(count) hidden alerts`,
   buttonShowHiddenAlert: "Show hidden alert",
   buttonToolsActive: "Hide visualizers",
-  dismissActions: `Similar alerts`,
+  dismissActions: `Similar`,
   dismissHideTitle: "Only hides alert for you",
   dismissOkAllButton: "On this page: mark OK",
   dismissOkButtonContent: "Mark OK",
@@ -8363,9 +8539,12 @@ const interfaceStrings = {
   main_toggle_hide_alerts: "Hide accessibility alerts",
   main_toggle_show: "Show accessibility tools",
   main_toggle_show_alerts: "Show accessibility alerts",
+  main_toggle_1: "One accessibility alert",
+  main_toggle_2: "Two accessibility alerts",
+  main_toggle_plural: `%(count) accessibility alerts`,
   MISSING_ROOT: `Editoria11y did not find any elements that matched the check area configuration: <code>%(root)</code>`,
-  panelCheckAltText: '<p class="ed11y-small">Check that each image describes what it means in context, and that there are no images of text.</p>',
-  panelCheckOutline: '<p class="ed11y-small">This shows the heading outline. Check that it matches how the content is organized visually.</p>',
+  panelCheckAltText: "Check that each image describes what it means in context, and that there are no images of text.",
+  panelCheckOutline: "This shows the heading outline. Check that it matches how the content is organized visually.",
   PANEL_HEADING_MISSING_ONE: "Missing Heading 1.",
   PANEL_NO_HEADINGS: "No headings found.",
   reportsLink: "Open site reports",
@@ -8479,6 +8658,7 @@ const ed11yDefaultOptions = {
   dismissAnnotations: true,
   dismissAll: true,
   ignoreHiddenOverflow: "",
+  // Not yet implemented.
   insertAnnotationBefore: "",
   // Readability
   readabilityPlugin: false,
@@ -8488,7 +8668,32 @@ const ed11yDefaultOptions = {
   contrastPlugin: false,
   contrastAlgorithm: "AA",
   // Other plugins
-  customChecks: false,
+  customTests: 0,
+  // Wait for external JS to insert results.
+  customRules: [],
+  // Rulebuilder. Provide an array of objects:
+  /**
+   * [
+   *  {
+   *  // Required:
+   *  testKey        Machine name:    'myTest'
+   *  testName       Tip title:       'My Test'
+   *  tipContent     Tip HTML:        '<p>Hello.</p>'
+   *  elementSet     State.Found set: 'Links'
+   *
+   *  // Optional:
+   *  filterSelector CSS selector: '.bad:not(.ok)'
+   *  includeText    Alert if string in text: ['annual report', 'form']
+   *  caseSensitive  true/false (default)
+   *  excludeText    Don't alert if string in text: ['print']
+   *  dismissKey     'text', 'attributes' or 'html' (default)
+   *  type           'warning' or 'error' (default)
+   *  }
+   *  {
+   *   (another rule)
+   *  }
+   * ]
+   */
   linksAdvancedPlugin: true,
   formLabelsPlugin: true,
   embeddedContentPlugin: true,
@@ -8678,7 +8883,6 @@ const ed11yDefaultOptions = {
   editLinks: false,
   // Add links to edit content in tooltips.
   userPrefersShut: localStorage.getItem("editoria11yShow") === "0",
-  customTests: 0,
   // Sa11y checks ==================
   checks: {
     // Sa11y: Heading checks
@@ -8895,6 +9099,9 @@ const preProcessOptions = async (userOptions) => {
   const titles = Object.entries(Lang.testNames);
   for (let i = 0; i < titles.length; i++) {
     Lang.langStrings[titles[i][0]] = `<div class="title" tabindex="-1">${Lang.testNames[`${titles[i][0]}`]}</div>${Lang.langStrings[titles[i][0]]}`;
+  }
+  if (State.option.customRules) {
+    prepareCustomRuleset();
   }
   UI.english = Lang.langStrings.LANG_CODE.startsWith("en");
   if (UI.english) {

@@ -7,6 +7,7 @@ export const UI = {
   panel: false,
   message: {},
   panelElement: {},
+  panelInitial: 1,
   panelNoCover: [],
   panelToggle: {},
   panelToggleTitle: {},

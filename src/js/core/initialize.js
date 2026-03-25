@@ -11,6 +11,7 @@ import { lang } from '../../lang/en-us.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { UI } from './ui.js';
 import { ed11yDefaultOptions } from '../utils/ed11y-default-options.js';
+import { prepareCustomRuleset } from '../rulesets/custom-ruleset.js';
 
 const preProcessOptions = async (userOptions) => {
   smush(State.option, ed11yDefaultOptions, ['checks']);
@@ -57,6 +58,10 @@ const preProcessOptions = async (userOptions) => {
   for (let i = 0; i < titles.length; i++) {
     Lang.langStrings[titles[i][0]] =
       `<div class="title" tabindex="-1">${Lang.testNames[`${titles[i][0]}`]}</div>${Lang.langStrings[titles[i][0]]}`;
+  }
+
+  if (State.option.customRules) {
+    prepareCustomRuleset();
   }
 
   UI.english = Lang.langStrings.LANG_CODE.startsWith('en');
@@ -109,6 +114,7 @@ const preProcessOptions = async (userOptions) => {
   UI.theme.baseFontFamily = State.option.baseFontFamily;
   UI.inlineAlerts = !document.querySelector('[contenteditable]') && State.option.inlineAlerts;
   UI.showDismissed = State.option.showDismissed;
+  //UI.panelInitial = State.option.
 
   // Deprecated
   /*if (userOptions.linkIgnoreSelector && !userOptions.linkIgnoreSpan) {
