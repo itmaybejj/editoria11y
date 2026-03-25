@@ -1467,7 +1467,7 @@
       });
     }
   }
-  const version = "3.0.0-dev0312";
+  const version = "3.0.0-dev0322";
   const spriteAlts = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>';
   const spriteClose = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>';
   const spriteCursor = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 256 512"><path fill="currentColor" d="M0 29C-1 47 12 62 29 64l8 1C71 67 96 95 96 128L96 224l-32 0c-18 0-32 14-32 32s14 32 32 32l32 0 0 96c0 33-26 61-59 64l-8 1C12 450-1 465 0 483s17 31 35 29l8-1c34-3 64-19 85-43c21 24 51 40 85 43l8 1c18 2 33-12 35-29s-12-33-29-35l-8-1C186 445 160 417 160 384l0-96 32 0c18 0 32-14 32-32s-14-32-32-32l-32 0 0-96c0-33 26-61 59-64l8-1c18-2 31-17 29-35S239-1 221 0l-8 1C179 4 149 20 128 44c-21-24-51-40-85-43l-8-1C17-1 2 12 0 29z"/></svg>';
@@ -5719,7 +5719,76 @@ ${this.error.stack}
     UI.jumpList.unshift(mark);
     State.results[index].toggle = mark;
   }
-  function customRuleset() {
+  function prepareCustomRuleset() {
+    State.option.customRules?.forEach((cr) => {
+      Lang.testNames[cr.testKey] = cr.testName;
+      Lang.langStrings[cr.testKey] = `<div class="title" tabindex="-1">${sanitizeHTML(cr.testName)}</div>${sanitizeHTML(cr.tipContent)}`;
+    });
+  }
+  const pushCustomRule = (cr, el, text) => {
+    let dismissKey = `${cr.test}`;
+    switch (cr.dismissKey) {
+      case "text":
+        dismissKey = text || getText(el);
+        break;
+      case "attributes": {
+        const attributes = el.attributes;
+        if (attributes.length > 0) {
+          for (const attr of attributes) {
+            dismissKey += `${attr.name}${attr.value}`;
+          }
+        }
+        break;
+      }
+      default:
+        dismissKey = el.innerHTML;
+        break;
+    }
+    State.results.push({
+      test: cr.testKey,
+      element: el,
+      type: cr.type || "error",
+      content: Lang.sprintf(cr.testKey),
+      // inline: true, // Ed11y computes this.
+      // position: 'beforebegin', // Ed11y computes this.
+      dismiss: prepareDismissal(dismissKey)
+      // dismissAll: cr.dismissAll || false, // Ed11y computes this.
+      // developer: cr.developer || true, // Ed11y computes this.
+    });
+  };
+  function checkCustomRuleset() {
+    State.option.customRules?.forEach((cr) => {
+      cr.elementSet?.forEach((found) => {
+        let elements2 = Elements.Found[found];
+        if (!elements2.length) return;
+        if (cr.filterSelector) {
+          elements2 = elements2.filter((el) => el.matches(cr.filterSelector));
+        }
+        if (elements2.length && (cr.includeText.length || cr.excludeText.length)) {
+          elements2.forEach((el) => {
+            let text = getText(el);
+            if (!cr.caseSensitive) {
+              text = text.toLowerCase();
+            }
+            let match = false;
+            let noMatch = false;
+            if (cr.includeText.length) {
+              match = cr.includeText.some((inc) => text.includes(inc));
+            }
+            if (cr.excludeText.length && (match || !cr.includeText.length)) {
+              noMatch = cr.excludeText.some((exc) => text.includes(exc));
+            }
+            if (match && !noMatch) {
+              pushCustomRule(cr, el, text);
+            }
+          });
+        } else if (elements2.length > 0) {
+          elements2.forEach((el) => {
+            pushCustomRule(cr, el);
+          });
+        }
+      });
+    });
     if (State.option.checks.EMBED_CUSTOM) {
       const matchedEmbeds = getElements(State.option.checks.EMBED_CUSTOM.sources, "root");
       matchedEmbeds.forEach(($el) => {
@@ -6727,7 +6796,7 @@ ${this.error.stack}
           checkHeaders();
           checkImages();
           checkEmbeddedContent();
-          customRuleset();
+          checkCustomRuleset();
           checkQA();
           break;
         case "group2":
@@ -8595,7 +8664,6 @@ ${this.error.stack}
     ignoreHiddenOverflow: "",
     // Not yet implemented.
     insertAnnotationBefore: "",
-    // Not yet implemented.
     // Readability
     readabilityPlugin: false,
     readabilityRoot: "main",
@@ -8604,7 +8672,32 @@ ${this.error.stack}
     contrastPlugin: false,
     contrastAlgorithm: "AA",
     // Other plugins
-    customChecks: false,
+    customTests: 0,
+    // Wait for external JS to insert results.
+    customRules: [],
+    // Rulebuilder. Provide an array of objects:
+    /**
+     * [
+     *  {
+     *  // Required:
+     *  testKey        Machine name:    'myTest'
+     *  testName       Tip title:       'My Test'
+     *  tipContent     Tip HTML:        '<p>Hello.</p>'
+     *  elementSet     State.Found set: 'Links'
+     *
+     *  // Optional:
+     *  filterSelector CSS selector: '.bad:not(.ok)'
+     *  includeText    Alert if string in text: ['annual report', 'form']
+     *  caseSensitive  true/false (default)
+     *  excludeText    Don't alert if string in text: ['print']
+     *  dismissKey     'text', 'attributes' or 'html' (default)
+     *  type           'warning' or 'error' (default)
+     *  }
+     *  {
+     *   (another rule)
+     *  }
+     * ]
+     */
     linksAdvancedPlugin: true,
     formLabelsPlugin: true,
     embeddedContentPlugin: true,
@@ -8794,7 +8887,6 @@ ${this.error.stack}
     editLinks: false,
     // Add links to edit content in tooltips.
     userPrefersShut: localStorage.getItem("editoria11yShow") === "0",
-    customTests: 0,
     // Sa11y checks ==================
     checks: {
       // Sa11y: Heading checks
@@ -9011,6 +9103,9 @@ ${this.error.stack}
     const titles = Object.entries(Lang.testNames);
     for (let i = 0; i < titles.length; i++) {
       Lang.langStrings[titles[i][0]] = `<div class="title" tabindex="-1">${Lang.testNames[`${titles[i][0]}`]}</div>${Lang.langStrings[titles[i][0]]}`;
+    }
+    if (State.option.customRules) {
+      prepareCustomRuleset();
     }
     UI.english = Lang.langStrings.LANG_CODE.startsWith("en");
     if (UI.english) {

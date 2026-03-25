@@ -39,7 +39,7 @@ import {
 import { drawResult, showAltPanel, showHeadingsPanel, visualize } from './visualize';
 import checkReadability from '../../sa11y-js/rulesets/readability.js';
 import { spriteClose, spriteReadability } from '../elements/sprite.js';
-import customRuleset from '../rulesets/custom-ruleset.js';
+import { checkCustomRuleset } from '../rulesets/custom-ruleset.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { resetGetText } from '../../sa11y-js/utils/utils.js';
@@ -1273,7 +1273,7 @@ const enqueueTests = (queue) => {
         checkHeaders();
         checkImages();
         checkEmbeddedContent();
-        customRuleset();
+        checkCustomRuleset();
         checkQA();
         break;
       case 'group2':
