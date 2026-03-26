@@ -944,7 +944,7 @@ class Ed11y {
             Ed11y.attachCSS(container.shadowRoot);
             Ed11y.attachCSS(container);
           }
-          search = container.shadowRoot.querySelectorAll(select);
+          search = container.shadowRoot?.querySelectorAll(select);
         } else {
           search = container.querySelectorAll(select);
         }
@@ -955,7 +955,7 @@ class Ed11y {
         });
       } else if (Ed11y.options.shadowComponents) {
         const providedShadow = container.querySelectorAll(Ed11y.options.shadowComponents);
-        providedShadow.forEach((component) => {
+        providedShadow?.forEach((component) => {
           if (component.shadowRoot && component.shadowRoot.mode === 'open') {
             if (!container.matches('[data-ed11y-has-shadow-root]')){
               component.setAttribute('data-ed11y-has-shadow-root', 'true');
@@ -963,7 +963,8 @@ class Ed11y {
               Ed11y.attachCSS(component);
             }
             Ed11y.detectShadow(component);
-          } else {
+          } else if (!Ed11y.options.shadowWarned){
+            Ed11y.options.shadowWarned = true;
             console.warn(`Editoria11y: A specified shadow host has no shadowRoot: ${component.tagName}`);
           }
         });
@@ -974,7 +975,7 @@ class Ed11y {
       if (container.matches(selector)) {
         return([container]);
       } else {
-        let inners = container.shadowRoot.querySelectorAll(select);
+        let inners = container.shadowRoot?.querySelectorAll(select);
         if (typeof(inners) === 'object' && inners.length > 0) {
           // Replace shadow host with inner elements.
           inners.forEach(inner => {
@@ -2750,7 +2751,7 @@ class Ed11y {
       // Return immediately if there is only a text node.
       let computedText = '';
       if (el.shadowRoot) {
-        const shadowChildren = el.shadowRoot.querySelectorAll('*');
+        const shadowChildren = el.shadowRoot?.querySelectorAll('*');
         shadowChildren.forEach(child => {
           computedText += Ed11y.computeText(child);
         });
@@ -2796,7 +2797,7 @@ class Ed11y {
 
         // Inner nodes with shadowRoots.
         if (treeWalker.currentNode.shadowRoot) {
-          const shadowChildren = treeWalker.currentNode.shadowRoot.querySelectorAll('*');
+          const shadowChildren = treeWalker.currentNode.shadowRoot?.querySelectorAll('*');
           shadowChildren.forEach(child => {
             computedText += Ed11y.computeText(child);
           });

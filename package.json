@@ -11,7 +11,7 @@
   },
   "license": "GPLv2",
   "devDependencies": {
-    "chromedriver": "^142",
+    "chromedriver": "^146",
     "eslint": "^8.32.0",
     "nightwatch": "^3.12.2",
     "stylelint": "^16.3.1",
