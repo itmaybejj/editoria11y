@@ -14,7 +14,7 @@ class Ed11yElementTip extends HTMLElement {
     this.open = true;
     this.style.setProperty('opacity', '0');
     this.style.setProperty('outline', '0px solid transparent');
-    const shadow = this.attachShadow({mode: 'open'});
+    const shadow = this.attachShadow({ mode: 'open' });
 
     this.wrapper = document.createElement('div');
     this.wrapper.setAttribute('role', 'dialog');
@@ -45,7 +45,14 @@ class Ed11yElementTip extends HTMLElement {
     this.heading.insertAdjacentElement('afterbegin', alertBox);
 
     let innerContent = document.createElement('div');
-    innerContent.innerHTML = this.result.content;
+    // Defense-in-depth: individual test modules are expected to pass
+    // result.content through Ed11y.sanitizeForHTML() for any user-derived
+    // substrings, but this sanitizer strips <script>, inline event handler
+    // attributes, and javascript: URLs as a safety net in case a custom
+    // rule, localization, or future code path forgets.
+    innerContent.innerHTML = Ed11y.sanitizeTipHTML
+      ? Ed11y.sanitizeTipHTML(this.result.content)
+      : this.result.content;
     content.append(innerContent);
 
     if (!Ed11y.options.inlineAlerts || Ed11y.options.editLinks) {
@@ -61,7 +68,7 @@ class Ed11yElementTip extends HTMLElement {
         transferFocus.prepend(transferIcon);
         transferFocus.classList.add('dismiss', 'ed11y-transfer-focus');
         editBar.append(transferFocus);
-        transferFocus.addEventListener('click', function(){Ed11y.transferFocus();});
+        transferFocus.addEventListener('click', function () { Ed11y.transferFocus(); });
       } else {
         editBar.classList.add('ed11y-custom-edit-links');
         editBar.append(Ed11y.options.editLinks.cloneNode(true));
@@ -94,7 +101,7 @@ class Ed11yElementTip extends HTMLElement {
           undismissButton.textContent = okd ? Ed11y.M.undismissOKButton : Ed11y.M.undismissHideButton;
           undismissButton.prepend(unDismissIcon);
           buttonBar.append(undismissButton);
-          undismissButton.addEventListener('click', function(){Ed11y.dismissThis('reset');});
+          undismissButton.addEventListener('click', function () { Ed11y.dismissThis('reset'); });
         } else {
           const undismissNote = document.createElement('div');
           undismissNote.classList.add('dismissed-note');
@@ -133,12 +140,12 @@ class Ed11yElementTip extends HTMLElement {
             OkAllButton.textContent = Ed11y.M.dismissOkAllButton;
             OkAllButton.prepend(check.cloneNode(true));
             pageActions.append(OkAllButton);
-            OkAllButton.addEventListener('click', function(){Ed11y.dismissThis('ok', true);});
+            OkAllButton.addEventListener('click', function () { Ed11y.dismissThis('ok', true); });
           }
 
           OkButton.prepend(check);
 
-          OkButton.addEventListener('click', function(){Ed11y.dismissThis('ok');});
+          OkButton.addEventListener('click', function () { Ed11y.dismissThis('ok'); });
         }
 
         if (Ed11y.options.allowHide) {
@@ -151,7 +158,7 @@ class Ed11yElementTip extends HTMLElement {
           ignoreButton.textContent = Ed11y.M.dismissHideButtonContent;
           ignoreButton.prepend(dismissIcon.cloneNode(true));
           buttonBar.prepend(ignoreButton);
-          ignoreButton.addEventListener('click', function(){Ed11y.dismissThis('hide');});
+          ignoreButton.addEventListener('click', function () { Ed11y.dismissThis('hide'); });
 
           if (showPageActions) {
             const ignoreAllButton = document.createElement('button');
@@ -159,7 +166,7 @@ class Ed11yElementTip extends HTMLElement {
             ignoreAllButton.textContent = Ed11y.M.dismissHideAllButton;
             ignoreAllButton.prepend(dismissIcon.cloneNode(true));
             pageActionsSummary.insertAdjacentElement('afterend', ignoreAllButton);
-            ignoreAllButton.addEventListener('click', function(){Ed11y.dismissThis('hide', true);});
+            ignoreAllButton.addEventListener('click', function () { Ed11y.dismissThis('hide', true); });
           }
         }
       }
@@ -212,8 +219,8 @@ class Ed11yElementTip extends HTMLElement {
     this.navBar.append(this.help);
 
     let closeButton = document.createElement('button');
-    closeButton.setAttribute('aria-label',Ed11y.M.closeTip);
-    closeButton.setAttribute('title',Ed11y.M.closeTip);
+    closeButton.setAttribute('aria-label', Ed11y.M.closeTip);
+    closeButton.setAttribute('title', Ed11y.M.closeTip);
     closeButton.classList.add('close');
     closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"/></svg>';
     this.navBar.append(closeButton);
@@ -223,7 +230,7 @@ class Ed11yElementTip extends HTMLElement {
     arrow.classList.add('arrow');
     closeButton.addEventListener('click', (event) => {
       event.preventDefault();
-      if(this.open) {
+      if (this.open) {
         // todo this needs to be part of the shadow DOM query I think
         let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
         if (Ed11y.toggledFrom) {
@@ -234,14 +241,16 @@ class Ed11yElementTip extends HTMLElement {
         this.setAttribute('data-ed11y-action', 'shut');
       }
     });
-    document.addEventListener('click', (event) => {
-      // Close tip when mouse is clicked outside it.
-      if(this.open && !event.target.closest('ed11y-element-tip, ed11y-element-result, ed11y-element-panel')) {
+    // Bind as a named handler so disconnectedCallback can remove it.
+    // Without cleanup, every tip leaks a permanent document click listener.
+    this._handleDocumentClick = (event) => {
+      if (this.open && !event.target.closest('ed11y-element-tip, ed11y-element-result, ed11y-element-panel')) {
         let toggle = document.querySelector('ed11y-element-result[data-ed11y-open="true"]');
         toggle?.setAttribute('data-ed11y-action', 'shut');
         this.setAttribute('data-ed11y-action', 'shut');
       }
-    });
+    };
+    document.addEventListener('click', this._handleDocumentClick);
     shadow.appendChild(this.wrapper);
     let focusLoopLeft = document.createElement('div');
     focusLoopLeft.setAttribute('tabIndex', '0');
@@ -270,7 +279,16 @@ class Ed11yElementTip extends HTMLElement {
     } else {
       this.wrapper.classList.remove('open');
     }
-    this.setAttribute('data-ed11y-open',changeTo);
+    this.setAttribute('data-ed11y-open', changeTo);
+  }
+
+  disconnectedCallback() {
+    // Clear handler.
+    if (this._handleDocumentClick) {
+      document.removeEventListener('click', this._handleDocumentClick);
+      this._handleDocumentClick = null;
+    }
+    this.removeEventListener('mouseover', this.handleHover);
   }
 
   static get observedAttributes() { return ['data-ed11y-action']; }
@@ -281,14 +299,14 @@ class Ed11yElementTip extends HTMLElement {
     }
     if (this.initialized) {
       switch (attr) {
-      case 'data-ed11y-action':
-        if (newValue !== 'false') {
-          let changeTo = newValue === 'open';
-          this.open = changeTo;
-          this.setAttribute('data-ed11y-action', 'false');
-          this.toggleTip(changeTo);
-        }
-        break;
+        case 'data-ed11y-action':
+          if (newValue !== 'false') {
+            let changeTo = newValue === 'open';
+            this.open = changeTo;
+            this.setAttribute('data-ed11y-action', 'false');
+            this.toggleTip(changeTo);
+          }
+          break;
       }
     }
   }
