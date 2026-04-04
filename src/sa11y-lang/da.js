@@ -230,8 +230,7 @@ export default {
       'Link åbner i en ny fane eller et nyt vindue uden advarsel. Det kan være desorienterende, især for folk, der har svært ved at opfatte visuelt indhold. For det andet er det ikke altid en god praksis at kontrollere andres oplevelse eller træffe beslutninger for dem. Angiv, at linket åbner i et nyt vindue i linkteksten. <hr> <strong>Tip!</strong> Lær bedste praksis: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">åbning af links i nye browservinduer og faner.</a>',
     LINK_FILE_EXT:
       'Link peger på en PDF eller en downloadbar fil (f.eks. MP3, Zip, Word Doc) uden advarsel. Angiv filtypen i linkteksten. Hvis det er en stor fil, kan du overveje at inkludere filstørrelsen. <hr> <strong>Eksempel:</strong> Executive Report (PDF, 3MB)',
-    LINK_IDENTICAL_NAME:
-      'Linket har samme tekst som et andet link, selvom det peger på en anden side. Flere links med samme tekst kan skabe forvirring for folk, der bruger skærmlæsere. <strong>Overvej at gøre følgende link mere beskrivende for at hjælpe med at skelne det fra andre links.</strong> <hr> <strong {B}>Tilgængeligt navn</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Flere links på denne side bruger samme linktekst, men peger på forskellige steder. Dette kan skabe forvirring for brugere af hjælpemidler. For at løse det skal denne linktekst gøres mere beskrivende.',
     LINK_UNPRONOUNCEABLE:
       'Linktekst indeholder kun symboler. Hvis du mener, at dette link er en fejl på grund af en kopier/sæt ind-fejl, bør du overveje at slette det.',
 
@@ -315,8 +314,7 @@ export default {
     // QA
     QA_BAD_LINK:
       'Dårligt link fundet. Linket ser ud til at pege på et udviklingsmiljø. <hr> {L} <strong {C}>%(LINK)</strong>',
-    QA_IN_PAGE_LINK:
-      'Brudt samme-sides link. Linkmålet stemmer ikke overens med nogen element på denne side.',
+    QA_IN_PAGE_LINK: 'Brudt link på samme side. Dette link forsøger at navigere til en sektion på siden, der ikke kan findes. For at løse dette skal du sikre dig, at linket matcher <code>id</code> på det element, du vil springe til.',
     QA_STRONG_ITALICS:
       'Fede og kursive tags har semantisk betydning og bør <strong>ikke</strong> bruges til at fremhæve hele afsnit. Fed tekst skal bruges til at give stærk <strong>fremhævelse</strong> af et ord eller en sætning. Kursiv bør bruges til at fremhæve egennavne (f.eks. bog- og artikeltitler), fremmedord og citater. Lange citater skal formateres som blokcitater.',
     QA_PDF:
@@ -343,7 +341,8 @@ export default {
       'Lille tekst er sværere at læse, især for dem med nedsat syn. For at sikre bedre læsbarhed skal du undgå at bruge skriftstørrelser, der er mindre end standarden.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Tilgængeligt navn</strong> %(TEXT)',
+    LINK_TEXT: '<strong {B}>Linktekst</strong> <strong {C}>%(TEXT)</strong>',
+    ACC_NAME: '<strong {B}>Tilgængeligt navn</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Tip!</strong> "Tilgængeligt navn" er den endelige etiket, der kommunikeres til personer, der bruger hjælpemidler. Dette hjælper dem med at forstå formålet med linket eller knappen.',
     HIDDEN_FOCUSABLE:
@@ -379,7 +378,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Inkluder ikke ordet "knap" i navnet på en knap. Skærmlæsere meddeler allerede elementets rolle ud over dets navn.',
     LABEL_IN_NAME:
-      'Den synlige tekst for dette element ser ud til at være forskellig fra det tilgængelige navn, hvilket kan forårsage forvirring for brugere af hjælpeværktøjer. Gennemgå venligst: <hr> <strong {B}>Tilgængeligt navn</strong> <strong {C}>%(TEXT)</strong>',
+      'Den synlige tekst for dette element ser ud til at være forskellig fra det tilgængelige navn, hvilket kan forårsage forvirring for brugere af hjælpeværktøjer. Gennemgå venligst: <hr> <strong {B}>Tekst</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Tilgængeligt navn</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Dette link har en ugyldig destination, og det tilgængelige navn indeholder ordet "<strong>%(NAME)</strong>". Dette tyder på, at det måske slet ikke er et link, men i stedet styrer en scriptet adfærd på siden. For at løse det skal linket erstattes med en <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">tilgængelig knap</a>, eller linkets destination skal korrigeres. <hr> <strong>Tip!</strong> Hjælpemidler behandler knapper og links forskelligt. Brug af det korrekte HTML-element sikrer, at brugerne ved, hvilke tastaturgenveje de skal bruge, og hvilken handling der udløses.',
+    POTENTIAL_UI_ELEMENTS: ['menu', 'luk', 'skift', 'åbn', 'udvid', 'skjul', 'næste', 'forrige', 'afspil', 'pause', 'undermenu', 'vis', 'skjul', 'rullemenu', 'tilbage', 'frem', 'spring over', 'indsend', 'annuller', 'gem', 'rediger', 'slet', 'fjern', 'søg', 'filter', 'sorter', 'stop', 'lydløs', 'slå lyd til', 'fuldskærm', 'minimer', 'maksimer'],
 
     // Tables
     TABLES_MISSING_HEADINGS:

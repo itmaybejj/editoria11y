@@ -1,4 +1,4 @@
-import {default as Sa11yStrings} from '../sa11y-lang/el.js';
+import { default as Sa11yStrings } from '../sa11y-lang/el.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
 const testNames = {
@@ -277,7 +277,7 @@ const tips = {
 };
 
 
-	const interfaceStrings = {
+const interfaceStrings = {
 	ALERT_CLOSE: 'Κλείσιμο',
 	ALT: 'Εναλλακτικό κείμενο: ',
 	CONSOLE_ERROR: 'Υπάρχει θέμα με τον έλεγχο προσβασιμότητας σε αυτή τη σελίδα. Παρακαλώ <a class="g-link">αναφέρετέ το στο GitHub</a>.',
@@ -323,7 +323,7 @@ const tips = {
 	main_toggle_show_alerts: 'Εμφάνιση ειδοποιήσεων προσβασιμότητας',
 	main_toggle_1: 'Μία ειδοποίηση προσβασιμότητας',
 	main_toggle_2: 'Δύο ειδοποιήσεις προσβασιμότητας',
-	main_toggle_plural: `%(count) ειδοποιήσεις προσβασιμότητας`,
+	main_toggle_plural: ` ειδοποιήσεις προσβασιμότητας`,
 	MISSING_ROOT: `Το Editoria11y δεν βρήκε καμία στοιχεία που να ταιριάζουν με τη διαμόρφωση της περιοχής ελέγχου: <code>%(root)</code>`,
 	panelCheckAltText: `Ελέγξτε ότι κάθε εικόνα περιγράφει τι σημαίνει στο πλαίσιο και ότι δεν υπάρχουν εικόνες κειμένου.`,
 	panelCheckOutline: `Αυτό εμφανίζει τη δομή επικεφαλίδων. Ελέγξτε ότι ταιριάζει με την οπτική διάταξη.`,

@@ -31,18 +31,23 @@
     sprintf(string, ...args) {
       let transString = this._(string);
       transString = this.prepHTML(transString);
-      const el = document.createElement("span");
-      el.innerHTML = transString;
+      const el = document.createElement("div");
+      const p = document.createElement("p");
+      p.innerHTML = transString;
+      el.appendChild(p);
       if (args?.length) {
-        args.forEach((_arg, index) => {
-          el.innerHTML = el.innerHTML.replace(/%\([a-zA-z]+\)/, `<span data-arg='${index}'></span>`);
+        args.forEach((arg, index) => {
+          const argString = String(arg);
+          if (argString.startsWith("https://")) {
+            p.innerHTML = p.innerHTML.replace(/%\([a-zA-z]+\)/, argString);
+          } else {
+            p.innerHTML = p.innerHTML.replace(/%\([a-zA-z]+\)/, `<span data-arg='${index}'></span>`);
+          }
         });
         args.forEach((arg, index) => {
           const replacement = el.querySelector(`[data-arg="${index}"]`);
           if (!replacement || arg === null) return;
-          const match = String(arg).match(/{{langAttr:([\w-]+)\|([^}]+)}}/);
-          if (match) replacement.setAttribute("lang", match[1]);
-          replacement.textContent = match ? match[2] : arg;
+          replacement.textContent = this.truncateString(String(arg), 300);
         });
       }
       return el;
@@ -55,6 +60,10 @@
         /{L}/g,
         `<strong class="badge"><span class="link-icon"></span><span class="visually-hidden">${Lang._("LINKED")}</span></strong>`
       );
+    },
+    truncateString(string, maxLength) {
+      const truncatedString = string.substring(0, maxLength).trimEnd();
+      return string.length > maxLength ? `${truncatedString}...` : string;
     }
   };
   const defaultOptions = {
@@ -298,6 +307,7 @@
       BTN_EMPTY: true,
       BTN_EMPTY_LABELLEDBY: true,
       BTN_ROLE_IN_NAME: true,
+      LINK_MAYBE_BUTTON: true,
       // Contrast checks
       CONTRAST_WARNING: {
         dismissAll: true
@@ -525,324 +535,6 @@
     }
     return computedText;
   };
-  function removeAlert() {
-    if (State.option.headless) return;
-    const Sa11yPanel = document.querySelector("sa11y-control-panel").shadowRoot;
-    const alert = Sa11yPanel.getElementById("panel-alert");
-    const alertText = Sa11yPanel.getElementById("panel-alert-text");
-    const alertPreview = Sa11yPanel.getElementById("panel-alert-preview");
-    alert.classList.remove("active");
-    alertPreview.classList.remove("panel-alert-preview");
-    while (alertText.firstChild) {
-      alertText.removeChild(alertText.firstChild);
-    }
-    while (alertPreview.firstChild) {
-      alertPreview.removeChild(alertPreview.firstChild);
-    }
-  }
-  function createAlert(alertMessage, errorPreview, extendedPreview) {
-    if (State.option.headless) return;
-    removeAlert();
-    const Sa11yPanel = document.querySelector("sa11y-control-panel").shadowRoot;
-    const alert = Sa11yPanel.getElementById("panel-alert");
-    const alertText = Sa11yPanel.getElementById("panel-alert-text");
-    const alertPreview = Sa11yPanel.getElementById("panel-alert-preview");
-    const alertClose = Sa11yPanel.getElementById("close-alert");
-    const skipButton = Sa11yPanel.getElementById("skip-button");
-    alert.classList.add("active");
-    if (typeof alertMessage === "string") {
-      alertText.textContent = alertMessage;
-    } else {
-      alertText.appendChild(alertMessage);
-    }
-    alertPreview.innerHTML = "";
-    setTimeout(() => alertClose.focus(), 300);
-    function closeAlert() {
-      removeAlert();
-      const focusTarget = skipButton.hasAttribute("disabled") ? Sa11yPanel.getElementById("toggle") : skipButton;
-      focusTarget.focus();
-    }
-    alertClose.addEventListener("click", closeAlert);
-    alert.onkeydown = (e) => {
-      const evt = e || window.event;
-      if (evt.key === "Escape" && alert.classList.contains("active")) {
-        closeAlert();
-      }
-    };
-  }
-  const Constants = /* @__PURE__ */ (function myConstants() {
-    const Global = {};
-    function initializeGlobal() {
-      Global.html = document.querySelector("html");
-      Global.shadowDetection = State.option.shadowComponents.length > 0 || State.option.autoDetectShadowComponents === true;
-      const panelPositions = /* @__PURE__ */ new Set(["top-left", "top-right", "left", "right"]);
-      const positionValue = State.option.panelPosition?.trim().toLowerCase();
-      Global.panelPosition = panelPositions.has(positionValue) ? positionValue : "right";
-      Global.contrastAlgorithm = State.option.contrastAlgorithm.toUpperCase();
-      let reducedMotion = false;
-      if (typeof window.matchMedia === "function") {
-        reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-      }
-      Global.scrollBehaviour = !reducedMotion || reducedMotion.matches ? "auto" : "smooth";
-      Global.langDirection = Global.html.getAttribute("dir") === "rtl" ? "rtl" : "ltr";
-      const documentSources = State.option.checks.QA_DOCUMENT.sources;
-      const defaultDocumentSources = 'a[href$=".doc"], a[href$=".docx"], a[href*=".doc?"], a[href*=".docx?"], a[href$=".ppt"], a[href$=".pptx"], a[href*=".ppt?"], a[href*=".pptx?"], a[href^="https://drive.google.com/file"], a[href^="https://docs.google."], a[href^="https://sway."]';
-      if (documentSources) {
-        Global.documentSources = `${defaultDocumentSources}, ${documentSources}`;
-      } else {
-        Global.documentSources = defaultDocumentSources;
-      }
-      const videoSources = State.option.checks.EMBED_VIDEO.sources;
-      const defaultVideoSources = 'video, [src*="Video"], [src*="video"], [src*="watch"], [src*="youtube.com"], [src*="vimeo.com"], [src*="panopto.com"], [src*="wistia.com"], [src*="dailymotion.com"], [src*="brightcove.com"], [src*="vidyard.com"]';
-      if (videoSources) {
-        const videos = videoSources.split(/\s*[\s,]\s*/).map(($el) => `[src*="${$el}"]`);
-        Global.VideoSources = `${defaultVideoSources}, ${videos.join(", ")}`;
-      } else {
-        Global.VideoSources = defaultVideoSources;
-      }
-      const audioSources = State.option.checks.EMBED_AUDIO.sources;
-      const defaultAudioSources = 'audio, [src*="soundcloud.com"], [src*="simplecast.com"], [src*="podbean.com"], [src*="buzzsprout.com"], [src*="blubrry.com"], [src*="transistor.fm"], [src*="fusebox.fm"], [src*="libsyn.com"], [src*="spotify.com"], [src*="podcasts.apple.com"], [src*="castbox.fm"], [src*="megaphone.fm"], [src*="spreaker.com"], [src*="anchor.fm"], [src*="rss.com"], [src*="redcircle.com"]';
-      if (audioSources) {
-        const audio = audioSources.split(/\s*[\s,]\s*/).map(($el) => `[src*="${$el}"]`);
-        Global.AudioSources = `${defaultAudioSources}, ${audio.join(", ")}`;
-      } else {
-        Global.AudioSources = defaultAudioSources;
-      }
-      const dataVizSources = State.option.checks.EMBED_DATA_VIZ.sources;
-      const defaultDataVizSources = '[src*="datastudio"], [src*="tableau"], [src*="lookerstudio"], [src*="powerbi"], [src*="qlik"]';
-      if (dataVizSources) {
-        const data = dataVizSources.split(/\s*[\s,]\s*/).map(($el) => `[src*="${$el}"]`);
-        Global.VisualizationSources = `${defaultDataVizSources}, ${data.join(", ")}`;
-      } else {
-        Global.VisualizationSources = defaultDataVizSources;
-      }
-      Global.AllEmbeddedContent = `${Global.VideoSources}, ${Global.AudioSources}, ${Global.VisualizationSources}`;
-    }
-    const Root = {};
-    function initializeRoot2(desiredRoot, desiredReadabilityRoot, fixedRoots) {
-      Root.areaToCheck = [];
-      Root.Readability = [];
-      if (fixedRoots) {
-        Root.areaToCheck = fixedRoots;
-        Root.Readability = fixedRoots;
-        return;
-      }
-      try {
-        const roots = document.querySelectorAll(desiredRoot);
-        if (roots.length > 0) {
-          roots.forEach((root) => {
-            Constants.Root.areaToCheck.push(root);
-          });
-        } else {
-          console.error(`Sa11y: The target root (${desiredRoot}) does not exist.`);
-        }
-      } catch {
-        Root.areaToCheck.length = 0;
-      }
-      if (Root.areaToCheck.length === 0 && Global.headless === false) {
-        createAlert(Lang.sprintf("MISSING_ROOT", desiredRoot));
-        Root.areaToCheck.push(document.body);
-      }
-      try {
-        const roots = document.querySelectorAll(desiredReadabilityRoot);
-        if (roots.length > 0) {
-          roots.forEach((root) => {
-            Constants.Root.Readability.push(root);
-          });
-        } else {
-          Root.Readability = Root.areaToCheck;
-          console.error(
-            `Sa11y: The target readability root (${desiredReadabilityRoot}) does not exist.`
-          );
-          setTimeout(() => {
-            const { readabilityDetails, readabilityToggle } = Constants.Panel;
-            const readabilityOn = readabilityToggle?.getAttribute("aria-pressed") === "true";
-            const alert = Constants.Panel.readability.querySelector("#readability-alert");
-            if (readabilityDetails && readabilityOn && !alert) {
-              const roots2 = Root.areaToCheck.map((el) => {
-                if (el.id) return `#${el.id}`;
-                if (el.className) return `.${el.className.split(/\s+/).filter(Boolean).join(".")}`;
-                return el.tagName.toLowerCase();
-              }).join(", ");
-              const note = document.createElement("div");
-              note.id = "readability-alert";
-              note.appendChild(document.createElement("hr"));
-              const message = Lang.sprintf("MISSING_READABILITY_ROOT", roots2, desiredReadabilityRoot);
-              note.appendChild(message);
-              readabilityDetails.insertAdjacentElement("afterend", note);
-            }
-          }, 100);
-        }
-      } catch {
-        Root.Readability.length = 0;
-      }
-    }
-    const Panel = {};
-    function initializePanelSelectors() {
-      const Sa11yPanel = document.querySelector("sa11y-control-panel").shadowRoot;
-      Panel.panel = Sa11yPanel.getElementById("panel");
-      Panel.content = Sa11yPanel.getElementById("panel-content");
-      Panel.controls = Sa11yPanel.getElementById("panel-controls");
-      Panel.outline = Sa11yPanel.getElementById("outline-panel");
-      Panel.outlineContent = Sa11yPanel.getElementById("outline-content");
-      Panel.outlineList = Sa11yPanel.getElementById("outline-list");
-      Panel.outlineHeader = Sa11yPanel.getElementById("outline-header");
-      Panel.images = Sa11yPanel.getElementById("images-panel");
-      Panel.imagesContent = Sa11yPanel.getElementById("images-content");
-      Panel.imagesList = Sa11yPanel.getElementById("images-list");
-      Panel.imagesHeader = Sa11yPanel.getElementById("images-header");
-      Panel.notifBadge = Sa11yPanel.getElementById("notification-badge");
-      Panel.notifCount = Sa11yPanel.getElementById("notification-count");
-      Panel.notifText = Sa11yPanel.getElementById("notification-text");
-      Panel.status = Sa11yPanel.getElementById("status");
-      Panel.pageIssues = Sa11yPanel.getElementById("page-issues");
-      Panel.pageIssuesList = Sa11yPanel.getElementById("page-issues-list");
-      Panel.pageIssuesHeader = Sa11yPanel.getElementById("page-issues-header");
-      Panel.pageIssuesContent = Sa11yPanel.getElementById("page-issues-content");
-      Panel.settings = Sa11yPanel.getElementById("settings-panel");
-      Panel.settingsHeader = Sa11yPanel.getElementById("settings-header");
-      Panel.settingsContent = Sa11yPanel.getElementById("settings-content");
-      Panel.developerToggle = Sa11yPanel.getElementById("developer-toggle");
-      Panel.readabilityToggle = Sa11yPanel.getElementById("readability-toggle");
-      Panel.themeToggle = Sa11yPanel.getElementById("theme-toggle");
-      Panel.developerItem = Sa11yPanel.getElementById("developer-item");
-      Panel.readabilityItem = Sa11yPanel.getElementById("readability-item");
-      Panel.darkModeItem = Sa11yPanel.getElementById("dark-mode-item");
-      Panel.colourPanel = Sa11yPanel.getElementById("panel-colour-filters");
-      Panel.colourFilterItem = Sa11yPanel.getElementById("colour-filter-item");
-      Panel.colourFilterSelect = Sa11yPanel.getElementById("colour-filter-select");
-      Panel.colourFilterIcon = Sa11yPanel.getElementById("filter-icon");
-      Panel.toggle = Sa11yPanel.getElementById("toggle");
-      Panel.outlineToggle = Sa11yPanel.getElementById("outline-toggle");
-      Panel.imagesToggle = Sa11yPanel.getElementById("images-toggle");
-      Panel.settingsToggle = Sa11yPanel.getElementById("settings-toggle");
-      Panel.movePanelToggle = Sa11yPanel.getElementById("move-panel");
-      Panel.skipButton = Sa11yPanel.getElementById("skip-button");
-      Panel.dismissButton = Sa11yPanel.getElementById("dismiss-button");
-      Panel.dismissTooltip = Sa11yPanel.getElementById("dismiss-tooltip");
-      Panel.skipToPageIssues = Sa11yPanel.getElementById("skip-to-page-issues");
-      Panel.exportHTML = Sa11yPanel.getElementById("export-html");
-      Panel.exportCSV = Sa11yPanel.getElementById("export-csv");
-      Panel.alert = Sa11yPanel.getElementById("panel-alert");
-      Panel.alertText = Sa11yPanel.getElementById("panel-alert-text");
-      Panel.alertPreview = Sa11yPanel.getElementById("panel-alert-preview");
-      Panel.alertClose = Sa11yPanel.getElementById("close-alert");
-      Panel.readability = Sa11yPanel.getElementById("readability-panel");
-      Panel.readabilityInfo = Sa11yPanel.getElementById("readability-info");
-      Panel.readabilityDetails = Sa11yPanel.getElementById("readability-details");
-    }
-    const Readability = {};
-    function initializeReadability() {
-      if (State.option.readabilityPlugin) {
-        const supported = [
-          "en",
-          "fr",
-          "es",
-          "de",
-          "nl",
-          "it",
-          "sv",
-          "fi",
-          "da",
-          "no",
-          "nb",
-          "nn",
-          "pt"
-        ];
-        const langCode = Lang._("LANG_CODE").substring(0, 2);
-        const pageLang = Constants.Global.html.getAttribute("lang")?.toLowerCase().substring(0, 2);
-        Readability.Lang = langCode;
-        const isSupported = pageLang && supported.includes(pageLang) && supported.includes(langCode);
-        Readability.Plugin = Boolean(isSupported);
-      }
-    }
-    const Exclusions = {};
-    function initializeExclusions() {
-      Exclusions.Sa11yElements = [
-        "sa11y-heading-label",
-        "sa11y-heading-anchor",
-        "sa11y-annotation",
-        "sa11y-tooltips",
-        "sa11y-panel-tooltips",
-        "sa11y-control-panel",
-        "#sa11y-colour-filters",
-        "#sa11y-colour-filters *"
-      ];
-      const exclusions = ["style", "script", "noscript"];
-      Exclusions.Container = ["#wpadminbar", "#wpadminbar *", ...exclusions];
-      if (State.option.containerIgnore) {
-        const containerSelectors = State.option.containerIgnore.split(",").map((item) => item.trim());
-        Exclusions.Container = Exclusions.Container.concat(
-          containerSelectors.flatMap((item) => [`${item} *`, item])
-        );
-      }
-      Exclusions.Contrast = [
-        "link",
-        "hr",
-        "State.option",
-        "audio",
-        "audio *",
-        "video",
-        "video *",
-        'input[type="color"]',
-        'input[type="range"]',
-        "progress",
-        "progress *",
-        "meter",
-        "meter *",
-        "iframe",
-        "svg",
-        "svg *",
-        "script",
-        "style",
-        "noscript",
-        "template",
-        "head",
-        "head *",
-        "title",
-        "meta",
-        "link",
-        "base",
-        "datalist",
-        "datalist *",
-        ...exclusions
-      ];
-      if (State.option.contrastIgnore) {
-        Exclusions.Contrast = State.option.contrastIgnore.split(",").map(($el) => $el.trim()).flatMap(($el) => [$el, `${$el} *`]).concat(Exclusions.Contrast);
-      }
-      Exclusions.Readability = ["nav li", '[role="navigation"] li', ...exclusions];
-      if (State.option.readabilityIgnore) {
-        Exclusions.Readability = State.option.readabilityIgnore.split(",").map(($el) => $el.trim()).flatMap(($el) => [$el, `${$el} *`]).concat(Exclusions.Readability);
-      }
-      Exclusions.Headings = State.option.headerIgnore ? State.option.headerIgnore.split(",").map(($el) => $el.trim()) : [];
-      Exclusions.HeaderSpan = State.option.headerIgnoreSpan ? State.option.headerIgnoreSpan.split(",").map(($el) => $el.trim()) : [];
-      Exclusions.Outline = State.option.outlineIgnore ? State.option.outlineIgnore.split(",").map(($el) => $el.trim()) : [];
-      Exclusions.Images = [
-        'img[role="presentation"]:not(a img[role="presentation"]), img[aria-hidden="true"]:not(a img[aria-hidden="true"])'
-      ];
-      if (State.option.imageIgnore) {
-        Exclusions.Images = State.option.imageIgnore.split(",").map(($el) => $el.trim()).concat(Exclusions.Images);
-      }
-      Exclusions.Links = [".anchorjs-link"];
-      if (State.option.linkIgnore) {
-        Exclusions.Links = State.option.linkIgnore.split(",").map(($el) => $el.trim()).concat(Exclusions.Links);
-      }
-      Exclusions.LinkSpan = State.option.linkIgnoreSpan ? State.option.linkIgnoreSpan.split(",").map(($el) => $el.trim()) : [];
-      Exclusions.Paragraphs = State.option.paragraphIgnore ? State.option.paragraphIgnore.split(",").map(($el) => $el.trim()) : [];
-    }
-    return {
-      initializeRoot: initializeRoot2,
-      Root,
-      initializeGlobal,
-      Global,
-      initializePanelSelectors,
-      Panel,
-      initializeReadability,
-      Readability,
-      initializeExclusions,
-      Exclusions
-    };
-  })();
   function find(selector, desiredRoot, exclude) {
     const root = [];
     if (desiredRoot === "document") {
@@ -1316,6 +1008,340 @@
     }
     return { valid: /^[a-z]{2,3}(-[a-z]{4})?(-[a-z]{2,4})?$/i.test(norm) };
   }
+  function removeAlert() {
+    if (State.option.headless) return;
+    const Sa11yPanel = document.querySelector("sa11y-control-panel").shadowRoot;
+    const alert = Sa11yPanel.getElementById("panel-alert");
+    const alertText = Sa11yPanel.getElementById("panel-alert-text");
+    const alertPreview = Sa11yPanel.getElementById("panel-alert-preview");
+    alert.classList.remove("active");
+    alertPreview.classList.remove("panel-alert-preview");
+    while (alertText.firstChild) {
+      alertText.removeChild(alertText.firstChild);
+    }
+    while (alertPreview.firstChild) {
+      alertPreview.removeChild(alertPreview.firstChild);
+    }
+  }
+  function createAlert(alertMessage, errorPreview, extendedPreview, dismissable = false) {
+    if (State.option.headless) return;
+    const storageKey = dismissable ? `sa11y-dismissed-alert-${alertMessage.textContent.substring(0, 20)}` : "";
+    if (dismissable && store.getItem(storageKey)) return;
+    removeAlert();
+    const Sa11yPanel = document.querySelector("sa11y-control-panel").shadowRoot;
+    const alert = Sa11yPanel.getElementById("panel-alert");
+    const alertText = Sa11yPanel.getElementById("panel-alert-text");
+    const alertPreview = Sa11yPanel.getElementById("panel-alert-preview");
+    const alertClose = Sa11yPanel.getElementById("close-alert");
+    const skipButton = Sa11yPanel.getElementById("skip-button");
+    alert.classList.add("active");
+    if (typeof alertMessage === "string") {
+      alertText.textContent = alertMessage;
+    } else {
+      alertText.appendChild(alertMessage);
+    }
+    alertPreview.innerHTML = "";
+    if (dismissable) {
+      const dismissBtn = document.createElement("button");
+      dismissBtn.setAttribute("type", "button");
+      dismissBtn.setAttribute("class", "dismiss-alert");
+      dismissBtn.textContent = Lang._("Dismiss");
+      dismissBtn.id = "dismiss-alert";
+      dismissBtn.setAttribute("aria-labelledby", "dismiss-alert alert-heading");
+      dismissBtn.setAttribute("aria-describedby", "panel-alert-text");
+      dismissBtn.addEventListener("click", () => {
+        store.setItem(storageKey, "true");
+        closeAlert();
+      });
+      alertText.appendChild(dismissBtn);
+    }
+    setTimeout(() => alertClose.focus(), 300);
+    function closeAlert() {
+      removeAlert();
+      const focusTarget = skipButton.hasAttribute("disabled") ? Sa11yPanel.getElementById("toggle") : skipButton;
+      focusTarget.focus();
+    }
+    alertClose.addEventListener("click", closeAlert);
+    alert.onkeydown = (e) => {
+      const evt = e || window.event;
+      if (evt.key === "Escape" && alert.classList.contains("active")) {
+        closeAlert();
+      }
+    };
+  }
+  const Constants = /* @__PURE__ */ (function myConstants() {
+    const Global = {};
+    function initializeGlobal() {
+      Global.html = document.querySelector("html");
+      Global.shadowDetection = State.option.shadowComponents.length > 0 || State.option.autoDetectShadowComponents === true;
+      const panelPositions = /* @__PURE__ */ new Set(["top-left", "top-right", "left", "right"]);
+      const positionValue = State.option.panelPosition?.trim().toLowerCase();
+      Global.panelPosition = panelPositions.has(positionValue) ? positionValue : "right";
+      Global.contrastAlgorithm = State.option.contrastAlgorithm.toUpperCase();
+      let reducedMotion = false;
+      if (typeof window.matchMedia === "function") {
+        reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      }
+      Global.scrollBehaviour = !reducedMotion || reducedMotion.matches ? "auto" : "smooth";
+      Global.langDirection = Global.html.getAttribute("dir") === "rtl" ? "rtl" : "ltr";
+      const documentSources = State.option.checks.QA_DOCUMENT.sources;
+      const defaultDocumentSources = 'a[href$=".doc"], a[href$=".docx"], a[href*=".doc?"], a[href*=".docx?"], a[href$=".ppt"], a[href$=".pptx"], a[href*=".ppt?"], a[href*=".pptx?"], a[href^="https://drive.google.com/file"], a[href^="https://docs.google."], a[href^="https://sway."]';
+      if (documentSources) {
+        Global.documentSources = `${defaultDocumentSources}, ${documentSources}`;
+      } else {
+        Global.documentSources = defaultDocumentSources;
+      }
+      const videoSources = State.option.checks.EMBED_VIDEO.sources;
+      const defaultVideoSources = 'video, [src*="Video"], [src*="video"], [src*="watch"], [src*="youtube.com"], [src*="vimeo.com"], [src*="panopto.com"], [src*="wistia.com"], [src*="dailymotion.com"], [src*="brightcove.com"], [src*="vidyard.com"]';
+      if (videoSources) {
+        const videos = videoSources.split(/\s*[\s,]\s*/).map(($el) => `[src*="${$el}"]`);
+        Global.VideoSources = `${defaultVideoSources}, ${videos.join(", ")}`;
+      } else {
+        Global.VideoSources = defaultVideoSources;
+      }
+      const audioSources = State.option.checks.EMBED_AUDIO.sources;
+      const defaultAudioSources = 'audio, [src*="soundcloud.com"], [src*="simplecast.com"], [src*="podbean.com"], [src*="buzzsprout.com"], [src*="blubrry.com"], [src*="transistor.fm"], [src*="fusebox.fm"], [src*="libsyn.com"], [src*="spotify.com"], [src*="podcasts.apple.com"], [src*="castbox.fm"], [src*="megaphone.fm"], [src*="spreaker.com"], [src*="anchor.fm"], [src*="rss.com"], [src*="redcircle.com"]';
+      if (audioSources) {
+        const audio = audioSources.split(/\s*[\s,]\s*/).map(($el) => `[src*="${$el}"]`);
+        Global.AudioSources = `${defaultAudioSources}, ${audio.join(", ")}`;
+      } else {
+        Global.AudioSources = defaultAudioSources;
+      }
+      const dataVizSources = State.option.checks.EMBED_DATA_VIZ.sources;
+      const defaultDataVizSources = '[src*="datastudio"], [src*="tableau"], [src*="lookerstudio"], [src*="powerbi"], [src*="qlik"]';
+      if (dataVizSources) {
+        const data = dataVizSources.split(/\s*[\s,]\s*/).map(($el) => `[src*="${$el}"]`);
+        Global.VisualizationSources = `${defaultDataVizSources}, ${data.join(", ")}`;
+      } else {
+        Global.VisualizationSources = defaultDataVizSources;
+      }
+      Global.AllEmbeddedContent = `${Global.VideoSources}, ${Global.AudioSources}, ${Global.VisualizationSources}`;
+    }
+    const Root = {};
+    function initializeRoot2(desiredRoot, desiredReadabilityRoot, fixedRoots) {
+      Root.areaToCheck = [];
+      Root.Readability = [];
+      if (fixedRoots) {
+        Root.areaToCheck = fixedRoots;
+        Root.Readability = fixedRoots;
+        return;
+      }
+      try {
+        const roots = document.querySelectorAll(desiredRoot);
+        if (roots.length > 0) {
+          roots.forEach((root) => {
+            Constants.Root.areaToCheck.push(root);
+          });
+        } else {
+          console.error(`Sa11y: The target root (${desiredRoot}) does not exist.`);
+        }
+      } catch {
+        Root.areaToCheck.length = 0;
+      }
+      if (Root.areaToCheck.length === 0 && Global.headless === false) {
+        createAlert(Lang.sprintf("MISSING_ROOT", desiredRoot));
+        Root.areaToCheck.push(document.body);
+      }
+      try {
+        const roots = document.querySelectorAll(desiredReadabilityRoot);
+        if (roots.length > 0) {
+          roots.forEach((root) => {
+            Constants.Root.Readability.push(root);
+          });
+        } else {
+          Root.Readability = Root.areaToCheck;
+          console.error(
+            `Sa11y: The target readability root (${desiredReadabilityRoot}) does not exist.`
+          );
+          setTimeout(() => {
+            const { readabilityDetails, readabilityToggle } = Constants.Panel;
+            const readabilityOn = readabilityToggle?.getAttribute("aria-pressed") === "true";
+            const alert = Constants.Panel.readability.querySelector("#readability-alert");
+            if (readabilityDetails && readabilityOn && !alert) {
+              const roots2 = Root.areaToCheck.map((el) => {
+                if (el.id) return `#${el.id}`;
+                if (el.className) return `.${el.className.split(/\s+/).filter(Boolean).join(".")}`;
+                return el.tagName.toLowerCase();
+              }).join(", ");
+              const note = document.createElement("div");
+              note.id = "readability-alert";
+              note.appendChild(document.createElement("hr"));
+              const message = Lang.sprintf("MISSING_READABILITY_ROOT", roots2, desiredReadabilityRoot);
+              note.appendChild(message);
+              readabilityDetails.insertAdjacentElement("afterend", note);
+            }
+          }, 100);
+        }
+      } catch {
+        Root.Readability.length = 0;
+      }
+    }
+    const Panel = {};
+    function initializePanelSelectors() {
+      const Sa11yPanel = document.querySelector("sa11y-control-panel").shadowRoot;
+      Panel.panel = Sa11yPanel.getElementById("panel");
+      Panel.content = Sa11yPanel.getElementById("panel-content");
+      Panel.controls = Sa11yPanel.getElementById("panel-controls");
+      Panel.outline = Sa11yPanel.getElementById("outline-panel");
+      Panel.outlineContent = Sa11yPanel.getElementById("outline-content");
+      Panel.outlineList = Sa11yPanel.getElementById("outline-list");
+      Panel.outlineHeader = Sa11yPanel.getElementById("outline-header");
+      Panel.images = Sa11yPanel.getElementById("images-panel");
+      Panel.imagesContent = Sa11yPanel.getElementById("images-content");
+      Panel.imagesList = Sa11yPanel.getElementById("images-list");
+      Panel.imagesHeader = Sa11yPanel.getElementById("images-header");
+      Panel.notifBadge = Sa11yPanel.getElementById("notification-badge");
+      Panel.notifCount = Sa11yPanel.getElementById("notification-count");
+      Panel.notifText = Sa11yPanel.getElementById("notification-text");
+      Panel.status = Sa11yPanel.getElementById("status");
+      Panel.pageIssues = Sa11yPanel.getElementById("page-issues");
+      Panel.pageIssuesList = Sa11yPanel.getElementById("page-issues-list");
+      Panel.pageIssuesHeader = Sa11yPanel.getElementById("page-issues-header");
+      Panel.pageIssuesContent = Sa11yPanel.getElementById("page-issues-content");
+      Panel.settings = Sa11yPanel.getElementById("settings-panel");
+      Panel.settingsHeader = Sa11yPanel.getElementById("settings-header");
+      Panel.settingsContent = Sa11yPanel.getElementById("settings-content");
+      Panel.developerToggle = Sa11yPanel.getElementById("developer-toggle");
+      Panel.readabilityToggle = Sa11yPanel.getElementById("readability-toggle");
+      Panel.themeToggle = Sa11yPanel.getElementById("theme-toggle");
+      Panel.developerItem = Sa11yPanel.getElementById("developer-item");
+      Panel.readabilityItem = Sa11yPanel.getElementById("readability-item");
+      Panel.darkModeItem = Sa11yPanel.getElementById("dark-mode-item");
+      Panel.colourPanel = Sa11yPanel.getElementById("panel-colour-filters");
+      Panel.colourFilterItem = Sa11yPanel.getElementById("colour-filter-item");
+      Panel.colourFilterSelect = Sa11yPanel.getElementById("colour-filter-select");
+      Panel.colourFilterIcon = Sa11yPanel.getElementById("filter-icon");
+      Panel.toggle = Sa11yPanel.getElementById("toggle");
+      Panel.outlineToggle = Sa11yPanel.getElementById("outline-toggle");
+      Panel.imagesToggle = Sa11yPanel.getElementById("images-toggle");
+      Panel.settingsToggle = Sa11yPanel.getElementById("settings-toggle");
+      Panel.movePanelToggle = Sa11yPanel.getElementById("move-panel");
+      Panel.skipButton = Sa11yPanel.getElementById("skip-button");
+      Panel.dismissButton = Sa11yPanel.getElementById("dismiss-button");
+      Panel.dismissTooltip = Sa11yPanel.getElementById("dismiss-tooltip");
+      Panel.skipToPageIssues = Sa11yPanel.getElementById("skip-to-page-issues");
+      Panel.exportHTML = Sa11yPanel.getElementById("export-html");
+      Panel.exportCSV = Sa11yPanel.getElementById("export-csv");
+      Panel.alert = Sa11yPanel.getElementById("panel-alert");
+      Panel.alertText = Sa11yPanel.getElementById("panel-alert-text");
+      Panel.alertPreview = Sa11yPanel.getElementById("panel-alert-preview");
+      Panel.alertClose = Sa11yPanel.getElementById("close-alert");
+      Panel.readability = Sa11yPanel.getElementById("readability-panel");
+      Panel.readabilityInfo = Sa11yPanel.getElementById("readability-info");
+      Panel.readabilityDetails = Sa11yPanel.getElementById("readability-details");
+    }
+    const Readability = {};
+    function initializeReadability() {
+      if (State.option.readabilityPlugin) {
+        const supported = [
+          "en",
+          "fr",
+          "es",
+          "de",
+          "nl",
+          "it",
+          "sv",
+          "fi",
+          "da",
+          "no",
+          "nb",
+          "nn",
+          "pt"
+        ];
+        const langCode = Lang._("LANG_CODE").substring(0, 2);
+        const pageLang = Constants.Global.html.getAttribute("lang")?.toLowerCase().substring(0, 2);
+        Readability.Lang = langCode;
+        const isSupported = pageLang && supported.includes(pageLang) && supported.includes(langCode);
+        Readability.Plugin = Boolean(isSupported);
+      }
+    }
+    const Exclusions = {};
+    function initializeExclusions() {
+      Exclusions.Sa11yElements = [
+        "sa11y-heading-label",
+        "sa11y-heading-anchor",
+        "sa11y-annotation",
+        "sa11y-tooltips",
+        "sa11y-panel-tooltips",
+        "sa11y-control-panel",
+        "#sa11y-colour-filters",
+        "#sa11y-colour-filters *"
+      ];
+      const exclusions = ["style", "script", "noscript"];
+      Exclusions.Container = ["#wpadminbar", "#wpadminbar *", ...exclusions];
+      if (State.option.containerIgnore) {
+        const containerSelectors = State.option.containerIgnore.split(",").map((item) => item.trim());
+        Exclusions.Container = Exclusions.Container.concat(
+          containerSelectors.flatMap((item) => [`${item} *`, item])
+        );
+      }
+      Exclusions.Contrast = [
+        "link",
+        "hr",
+        "State.option",
+        "audio",
+        "audio *",
+        "video",
+        "video *",
+        'input[type="color"]',
+        'input[type="range"]',
+        "progress",
+        "progress *",
+        "meter",
+        "meter *",
+        "iframe",
+        "svg",
+        "svg *",
+        "script",
+        "style",
+        "noscript",
+        "template",
+        "head",
+        "head *",
+        "title",
+        "meta",
+        "link",
+        "base",
+        "datalist",
+        "datalist *",
+        ...exclusions
+      ];
+      if (State.option.contrastIgnore) {
+        Exclusions.Contrast = State.option.contrastIgnore.split(",").map(($el) => $el.trim()).flatMap(($el) => [$el, `${$el} *`]).concat(Exclusions.Contrast);
+      }
+      Exclusions.Readability = ["nav li", '[role="navigation"] li', ...exclusions];
+      if (State.option.readabilityIgnore) {
+        Exclusions.Readability = State.option.readabilityIgnore.split(",").map(($el) => $el.trim()).flatMap(($el) => [$el, `${$el} *`]).concat(Exclusions.Readability);
+      }
+      Exclusions.Headings = State.option.headerIgnore ? State.option.headerIgnore.split(",").map(($el) => $el.trim()) : [];
+      Exclusions.HeaderSpan = State.option.headerIgnoreSpan ? State.option.headerIgnoreSpan.split(",").map(($el) => $el.trim()) : [];
+      Exclusions.Outline = State.option.outlineIgnore ? State.option.outlineIgnore.split(",").map(($el) => $el.trim()) : [];
+      Exclusions.Images = [
+        'img[role="presentation"]:not(a img[role="presentation"]), img[aria-hidden="true"]:not(a img[aria-hidden="true"])'
+      ];
+      if (State.option.imageIgnore) {
+        Exclusions.Images = State.option.imageIgnore.split(",").map(($el) => $el.trim()).concat(Exclusions.Images);
+      }
+      Exclusions.Links = [".anchorjs-link"];
+      if (State.option.linkIgnore) {
+        Exclusions.Links = State.option.linkIgnore.split(",").map(($el) => $el.trim()).concat(Exclusions.Links);
+      }
+      Exclusions.LinkSpan = State.option.linkIgnoreSpan ? State.option.linkIgnoreSpan.split(",").map(($el) => $el.trim()) : [];
+      Exclusions.Paragraphs = State.option.paragraphIgnore ? State.option.paragraphIgnore.split(",").map(($el) => $el.trim()) : [];
+    }
+    return {
+      initializeRoot: initializeRoot2,
+      Root,
+      initializeGlobal,
+      Global,
+      initializePanelSelectors,
+      Panel,
+      initializeReadability,
+      Readability,
+      initializeExclusions,
+      Exclusions
+    };
+  })();
   const Elements = /* @__PURE__ */ (function myElements() {
     const Found = {};
     function initializeElements() {
@@ -1402,7 +1428,12 @@
         } else if ($el.tagName === "LI") {
           text = Array.from($el.childNodes).filter((n) => n.nodeType === 3).map((n) => n.textContent).join(" ");
         } else {
-          text = getText(fnIgnore($el));
+          const clone = $el.cloneNode(true);
+          if (clone.querySelectorAll) {
+            const nestedLangNodes = clone.querySelectorAll("[lang]");
+            for (const node of nestedLangNodes) node.remove();
+          }
+          text = getText(fnIgnore(clone));
         }
         return normalizeString(text);
       }).filter(Boolean);
@@ -1751,7 +1782,7 @@ ${this.error.stack}
         UI.roots[i].dataset.ed11yRoot = `${i}`;
       }
       if (UI.roots[i].shadowRoot) {
-        UI.roots.setAttribute("data-ed11y-has-shadow-root", "true");
+        UI.roots[i].setAttribute("data-ed11y-has-shadow-root", "true");
         detectShadow(UI.roots[i]);
         UI.roots[i] = UI.roots[i].shadowRoot;
       } else {
@@ -1908,24 +1939,23 @@ ${this.error.stack}
       });
     }
   }
+  const handleInitialPanelInteraction = () => {
+    hideInitialCount();
+  };
   const initialPanel = (ifNo) => {
     if (UI.panelInitial && UI.totalCount >= UI.panelInitial) {
       UI.panelToggle.classList.add("ed11y-preview");
       UI.panelInitial = UI.totalCount;
       if (UI.totalCount > 2) {
         UI.panelToggleTitle.innerHTML = "";
-        UI.panelToggleTitle.appendChild(Lang.sprintf("main_toggle_plural", UI.totalCount));
+        UI.panelToggleTitle.textContent = `${UI.totalCount}${Lang._("main_toggle_plural")}`;
       } else if (UI.totalCount > 1) {
         UI.panelToggleTitle.textContent = Lang._("main_toggle_2");
       } else {
         UI.panelToggleTitle.textContent = Lang._("main_toggle_1");
       }
-      UI.panel.addEventListener("mouseover", () => {
-        hideInitialCount();
-      });
-      UI.panel.addEventListener("focus", () => {
-        hideInitialCount();
-      });
+      UI.panel.addEventListener("mouseover", handleInitialPanelInteraction);
+      UI.panel.addEventListener("focus", handleInitialPanelInteraction);
     } else {
       UI.panelInitial = false;
       UI.panelToggle.classList.remove("ed11y-preview");
@@ -1958,12 +1988,8 @@ ${this.error.stack}
       UI.panelInitial = false;
       panelLabel();
     }
-    UI.panel.removeEventListener("mouseover", () => {
-      hideInitialCount();
-    });
-    UI.panel.removeEventListener("focus", () => {
-      hideInitialCount();
-    });
+    UI.panel.removeEventListener("mouseover", handleInitialPanelInteraction);
+    UI.panel.removeEventListener("focus", handleInitialPanelInteraction);
   }
   function pauseObservers() {
     UI.watching?.forEach((observer) => {
@@ -2086,6 +2112,7 @@ ${this.error.stack}
       let developer = null;
       let dismissAll = null;
       let margin = null;
+      let args = null;
       if (headingLength === 0) {
         const image = $el.querySelector("img");
         if (image) {
@@ -2098,6 +2125,7 @@ ${this.error.stack}
                 State.option.checks.HEADING_EMPTY_WITH_IMAGE.content || "HEADING_EMPTY_WITH_IMAGE",
                 level
               );
+              args = [level];
               developer = State.option.checks.HEADING_EMPTY_WITH_IMAGE.developer || false;
               dismissAll = State.option.checks.HEADING_EMPTY_WITH_IMAGE.dismissAll ? "HEADING_EMPTY_WITH_IMAGE" : false;
               margin = "-15px 30px";
@@ -2107,6 +2135,7 @@ ${this.error.stack}
           test = "HEADING_EMPTY";
           type = State.option.checks.HEADING_EMPTY.type || "error";
           content = Lang.sprintf(State.option.checks.HEADING_EMPTY.content || "HEADING_EMPTY", level);
+          args = [level];
           developer = State.option.checks.HEADING_EMPTY.developer || false;
           dismissAll = State.option.checks.HEADING_EMPTY.dismissAll ? "HEADING_EMPTY" : false;
           margin = "0";
@@ -2123,6 +2152,13 @@ ${this.error.stack}
             truncateString(prevHeadingText, 60),
             prevLevel + 1
           );
+          args = [
+            prevLevel,
+            level,
+            truncateString(headingText, 60),
+            truncateString(prevHeadingText, 60),
+            prevLevel + 1
+          ];
           developer = State.option.checks.HEADING_SKIPPED_LEVEL.developer || false;
           dismissAll = State.option.checks.HEADING_SKIPPED_LEVEL.dismissAll ? "HEADING_SKIPPED_LEVEL" : false;
         }
@@ -2141,8 +2177,10 @@ ${this.error.stack}
           content = Lang.sprintf(
             State.option.checks.HEADING_LONG.content || "HEADING_LONG",
             maxHeadingLength,
-            headingLength
+            headingLength,
+            headingText
           );
+          args = [maxHeadingLength, headingLength, headingText];
           developer = State.option.checks.HEADING_LONG.developer || false;
           dismissAll = State.option.checks.HEADING_LONG.dismissAll ? "HEADING_LONG" : false;
         }
@@ -2153,6 +2191,7 @@ ${this.error.stack}
           element: $el,
           type,
           content,
+          args,
           dismiss: prepareDismissal(`${test + level + headingText}`),
           dismissAll,
           isWithinRoot,
@@ -2211,7 +2250,7 @@ ${this.error.stack}
   const cssFileTypeSelectors = 'a[href$=".pdf"], a[href$=".doc"], a[href$=".docx"], a[href$=".zip"], a[href$=".mp3"], a[href$=".txt"], a[href$=".exe"], a[href$=".dmg"], a[href$=".rtf"], a[href$=".pptx"], a[href$=".ppt"], a[href$=".xls"], a[href$=".xlsx"], a[href$=".csv"], a[href$=".mp4"], a[href$=".mov"], a[href$=".avi"]';
   const citationPattern = /(doi\.org\/|dl\.acm\.org\/|link\.springer\.com\/|pubmed\.ncbi\.nlm\.nih\.gov\/|scholar\.google\.com\/|ieeexplore\.ieee\.org\/|researchgate\.net\/publication\/|sciencedirect\.com\/science\/article\/|10\.\d{4,}\/)[a-z0-9/.-]+/i;
   const urlEndings = /\b(?:\.edu\/|\.gob\/|\.gov\/|\.app\/|\.com\/|\.net\/|\.org\/|\.us\/|\.ca\/|\.de\/|\.icu\/|\.uk\/|\.ru\/|\.info\/|\.top\/|\.xyz\/|\.tk\/|\.cn\/|\.ga\/|\.cf\/|\.nl\/|\.io\/|\.fr\/|\.pe\/|\.nz\/|\.pt\/|\.es\/|\.pl\/|\.ua\/)\b/i;
-  const specialCharPattern = /[^a-zA-Z0-9]/g;
+  const specialCharPattern = /[^a-zA-Z0-9]/;
   const htmlSymbols = /([<>↣↳←→↓«»↴]+)/;
   const checkStopWords = (textContent, stopWordsSet, stripStrings) => {
     const stripped = textContent.replace(stripStrings, "").trim();
@@ -2247,6 +2286,9 @@ ${this.error.stack}
       const lowercaseLinkText = linkText.toLowerCase();
       const strippedLinkText = stripAllSpecialCharacters(lowercaseLinkText);
       const textContent = getText($el).toLowerCase();
+      const textContentIgnoredStrings = getText(
+        fnIgnore($el, Constants.Exclusions.LinkSpan)
+      ).replace(ignorePattern, "");
       const containsNewWindowPhrases = lowercaseLinkText.match(newWindowRegex)?.[0] || textContent.match(newWindowRegex)?.[0];
       const containsFileTypePhrases = lowercaseLinkText.match(fileTypeRegex)?.[0] || textContent.match(fileTypeRegex)?.[0];
       const fileTypeMatch = $el.matches(cssFileTypeSelectors);
@@ -2292,6 +2334,7 @@ ${this.error.stack}
                 stopword,
                 linkText
               ),
+              args: [stopword, linkText],
               inline: true,
               dismiss: prepareDismissal(`LINK_STOPWORD_ARIA ${strippedLinkText}`),
               dismissAll: State.option.checks.LINK_STOPWORD_ARIA.dismissAll ? " LINK_STOPWORD_ARIA" : false,
@@ -2303,9 +2346,11 @@ ${this.error.stack}
               element: $el,
               type: State.option.checks.LABEL_IN_NAME.type || "warning",
               content: Lang.sprintf(
-                State.option.checks.LABEL_IN_NAME.content || "LABEL_IN_NAME",
+                State.option.checks.LABEL_IN_NAME.content || Lang._("LABEL_IN_NAME") + Lang._("ACC_NAME_TIP"),
+                textContentIgnoredStrings,
                 linkText
               ),
+              args: [textContentIgnoredStrings, linkText],
               inline: true,
               position: "afterend",
               dismiss: prepareDismissal(`LABEL_IN_NAME ${strippedLinkText}`),
@@ -2321,6 +2366,7 @@ ${this.error.stack}
                 State.option.checks.LINK_LABEL.content || Lang._("ACC_NAME") + Lang._("ACC_NAME_TIP"),
                 linkText
               ),
+              args: [linkText],
               inline: true,
               position: "afterend",
               dismiss: prepareDismissal(`LINK_LABEL ${strippedLinkText}`),
@@ -2330,7 +2376,7 @@ ${this.error.stack}
           }
         }
         let oneStop;
-        const addStopWordResult = (element, stopword) => {
+        const addStopWordResult = (element) => {
           if (State.option.checks.LINK_STOPWORD && !oneStop) {
             oneStop = true;
             State.results.push({
@@ -2339,8 +2385,9 @@ ${this.error.stack}
               type: State.option.checks.LINK_STOPWORD.type || "error",
               content: Lang.sprintf(
                 State.option.checks.LINK_STOPWORD.content || Lang._("LINK_STOPWORD") + Lang._("LINK_TIP"),
-                stopword
+                linkText
               ),
+              args: [linkText],
               inline: true,
               position: "afterend",
               dismiss: prepareDismissal(`LINK_STOPWORD ${strippedLinkText}`),
@@ -2351,9 +2398,9 @@ ${this.error.stack}
         };
         const isLinkIgnoreStrings = checkStopWords(textContent, linkIgnoreStrings);
         if (isLinkIgnoreStrings === textContent || isLinkIgnoreStrings === strippedLinkText) {
-          addStopWordResult($el, isLinkIgnoreStrings);
+          addStopWordResult($el);
         } else if (containsNewWindowPhrases === textContent || containsNewWindowPhrases === strippedLinkText) {
-          addStopWordResult($el, containsNewWindowPhrases);
+          addStopWordResult($el);
           return;
         }
         if (linkText.length === 0) {
@@ -2380,7 +2427,7 @@ ${this.error.stack}
               if (spanEl) {
                 const spanText = stripAllSpecialCharacters(spanEl.textContent).trim().toLowerCase();
                 if (spanText === textContent) {
-                  addStopWordResult($el, spanText);
+                  addStopWordResult($el);
                   hasStopWordWarning = true;
                 }
               }
@@ -2424,7 +2471,7 @@ ${this.error.stack}
         const isSingleSpecialChar = linkText.length === 1 && specialCharPattern.test(linkText);
         const matchedSymbol = lowercaseLinkText.match(htmlSymbols)?.[0];
         if (isStopWord) {
-          addStopWordResult($el, isStopWord);
+          addStopWordResult($el);
         } else if (isCitation) {
           if (linkText.length > 8) {
             if (State.option.checks.LINK_DOI) {
@@ -2432,7 +2479,8 @@ ${this.error.stack}
                 test: "LINK_DOI",
                 element: $el,
                 type: State.option.checks.LINK_DOI.type || "warning",
-                content: Lang.sprintf(State.option.checks.LINK_DOI.content || "LINK_DOI"),
+                content: Lang.sprintf(State.option.checks.LINK_DOI.content || "LINK_DOI", linkText),
+                args: [linkText],
                 inline: true,
                 dismiss: prepareDismissal(`LINK_DOI ${strippedLinkText}`),
                 dismissAll: State.option.checks.LINK_DOI.dismissAll ? "LINK_DOI" : false,
@@ -2448,8 +2496,10 @@ ${this.error.stack}
                 element: $el,
                 type: State.option.checks.LINK_URL.type || "warning",
                 content: Lang.sprintf(
-                  State.option.checks.LINK_URL.content || Lang._("LINK_URL") + Lang._("LINK_TIP")
+                  State.option.checks.LINK_URL.content || Lang._("LINK_URL") + Lang._("LINK_TIP"),
+                  linkText
                 ),
+                args: [linkText],
                 inline: true,
                 dismiss: prepareDismissal(`LINK_URL ${strippedLinkText}`),
                 dismissAll: State.option.checks.LINK_URL.dismissAll ? "LINK_URL" : false,
@@ -2465,8 +2515,10 @@ ${this.error.stack}
               type: State.option.checks.LINK_SYMBOLS.type || "warning",
               content: Lang.sprintf(
                 State.option.checks.LINK_SYMBOLS.content || "LINK_SYMBOLS",
-                matchedSymbol
+                matchedSymbol,
+                linkText
               ),
+              args: [matchedSymbol, linkText],
               inline: true,
               dismiss: prepareDismissal(`LINK_SYMBOLS ${strippedLinkText}`),
               dismissAll: State.option.checks.LINK_SYMBOLS.dismissAll ? "LINK_SYMBOLS" : false,
@@ -2480,8 +2532,10 @@ ${this.error.stack}
               element: $el,
               type: State.option.checks.LINK_UNPRONOUNCEABLE.type || "error",
               content: Lang.sprintf(
-                State.option.checks.LINK_UNPRONOUNCEABLE.content || Lang._("LINK_UNPRONOUNCEABLE") + Lang._("LINK_TIP")
+                State.option.checks.LINK_UNPRONOUNCEABLE.content || Lang._("LINK_UNPRONOUNCEABLE") + Lang._("LINK_TIP"),
+                linkText
               ),
+              args: [linkText],
               inline: true,
               position: "afterend",
               dismiss: prepareDismissal(`LINK_UNPRONOUNCEABLE ${href}`),
@@ -2498,8 +2552,10 @@ ${this.error.stack}
               element: $el,
               type: State.option.checks.LINK_CLICK_HERE.type || "warning",
               content: Lang.sprintf(
-                State.option.checks.LINK_CLICK_HERE.content || Lang._("LINK_CLICK_HERE") + Lang._("LINK_TIP")
+                State.option.checks.LINK_CLICK_HERE.content || Lang._("LINK_CLICK_HERE") + Lang._("LINK_TIP"),
+                linkText
               ),
+              args: [linkText],
               inline: true,
               dismiss: prepareDismissal(`LINK_CLICK_HERE ${strippedLinkText}`),
               dismissAll: State.option.checks.LINK_CLICK_HERE.dismissAll ? "LINK_CLICK_HERE" : false,
@@ -2526,15 +2582,19 @@ ${this.error.stack}
         if (seen[strippedLinkText] && !seen[href]) {
           const ignored = $el.ariaHidden === "true" && $el.getAttribute("tabindex") === "-1";
           const hasAttributes = $el.hasAttribute("role") || $el.hasAttribute("disabled");
+          const condition = linkText.toLowerCase() !== textContentIgnoredStrings.toLowerCase();
+          const diffAccName = condition ? `<hr> ${Lang._("ACC_NAME")}` : `<hr> ${Lang._("LINK_TEXT")}`;
+          const variable = condition ? linkText : textContentIgnoredStrings;
           if (State.option.checks.LINK_IDENTICAL_NAME && !hasAttributes && !ignored) {
             State.results.push({
               test: "LINK_IDENTICAL_NAME",
               element: $el,
               type: State.option.checks.LINK_IDENTICAL_NAME.type || "warning",
               content: Lang.sprintf(
-                State.option.checks.LINK_IDENTICAL_NAME.content || Lang._("LINK_IDENTICAL_NAME") + Lang._("ACC_NAME_TIP"),
-                linkText
+                State.option.checks.LINK_IDENTICAL_NAME.content || Lang._("LINK_IDENTICAL_NAME") + diffAccName + Lang._("LINK_TIP"),
+                variable
               ),
+              args: [textContentIgnoredStrings, linkText],
               inline: true,
               dismiss: prepareDismissal(`LINK_IDENTICAL_NAME ${strippedLinkText}`),
               dismissAll: State.option.checks.LINK_IDENTICAL_NAME.dismissAll ? "LINK_IDENTICAL_NAME" : false,
@@ -2542,16 +2602,22 @@ ${this.error.stack}
             });
           }
         } else {
-          seen[strippedLinkText] = true;
+          seen[strippedLinkText] = href;
           seen[href] = true;
         }
         if (targetBlank && !fileTypeMatch && !containsNewWindowPhrases) {
+          const condition = linkText.toLowerCase() !== textContentIgnoredStrings.toLowerCase();
+          const diffAccName = condition ? `<hr> ${Lang._("ACC_NAME") + Lang._("ACC_NAME_TIP")}` : `<hr> ${Lang._("LINK_TEXT")}`;
           if (State.option.checks.LINK_NEW_TAB) {
             State.results.push({
               test: "LINK_NEW_TAB",
               element: $el,
               type: State.option.checks.LINK_NEW_TAB.type || "warning",
-              content: Lang.sprintf(State.option.checks.LINK_NEW_TAB.content || "LINK_NEW_TAB"),
+              content: Lang.sprintf(
+                State.option.checks.LINK_NEW_TAB.content || Lang._("LINK_NEW_TAB") + diffAccName,
+                linkText
+              ),
+              args: [linkText],
               inline: true,
               dismiss: prepareDismissal(`LINK_NEW_TAB ${strippedLinkText}`),
               dismissAll: State.option.checks.LINK_NEW_TAB.dismissAll ? "LINK_NEW_TAB" : false,
@@ -2565,7 +2631,11 @@ ${this.error.stack}
               test: "LINK_FILE_EXT",
               element: $el,
               type: State.option.checks.LINK_FILE_EXT.type || "warning",
-              content: Lang.sprintf(State.option.checks.LINK_FILE_EXT.content || "LINK_FILE_EXT"),
+              content: Lang.sprintf(
+                State.option.checks.LINK_FILE_EXT.content || "LINK_FILE_EXT",
+                linkText
+              ),
+              args: [linkText],
               inline: true,
               dismiss: prepareDismissal(`LINK_FILE_EXT ${strippedLinkText}`),
               dismissAll: State.option.checks.LINK_FILE_EXT.dismissAll ? "LINK_FILE_EXT" : false,
@@ -2596,8 +2666,8 @@ ${this.error.stack}
     const linkIgnoreStringPattern = generateRegexString(State.option.linkIgnoreStrings);
     const extraPlaceholderStopWords = State.option.extraPlaceholderStopWords.split(",").map((word) => word.trim().toLowerCase()).filter(Boolean);
     const containsAltTextStopWords = (alt) => {
-      const altLowerCase = alt.toLowerCase();
-      const altOnlyLetters = altLowerCase.replace(/[^\p{L}\s]/gu, "").trim();
+      const altLowerCase = removeWhitespace(alt).toLowerCase();
+      const altOnlyLetters = removeWhitespace(altLowerCase.replace(/[^\p{L}\s]/gu, ""));
       const hit = [null, null, null];
       for (const urlHit of url) {
         if (altLowerCase.includes(urlHit)) {
@@ -2785,6 +2855,7 @@ ${this.error.stack}
             element: $el,
             type: unpronounceable.type || "error",
             content: Lang.sprintf(unpronounceable.content || conditional, altText),
+            args: [altText],
             dismiss: prepareDismissal(`${conditional + src}`),
             dismissAll: unpronounceable.dismissAll ? "ALT_UNPRONOUNCEABLE" : false,
             developer: unpronounceable.developer || false
@@ -2800,8 +2871,7 @@ ${this.error.stack}
         `^(?=[^_-]*([_-][^_-]*){3,})\\S{${maybeBadAlt.minLength || 15},}$`
       ).test(altText);
       const hasTooMuchNoise = /^(?:\s*\d){5,}\s*$/.test(altText) || // Is a number longer than 5 digits.
-      (altText.match(/[_-]/g) || []).length >= 3 || // Contains more than 3 delimiters (- or _)
-      (altText.match(/[^\p{L}\s,.!?\-\d]/gu) || []).length >= 5;
+      (altText.match(/[_-]/g) || []).length >= 3;
       if (error[0] !== null) {
         const rule = link ? State.option.checks.LINK_ALT_FILE_EXT : State.option.checks.ALT_FILE_EXT;
         const conditional = link ? "LINK_ALT_FILE_EXT" : "ALT_FILE_EXT";
@@ -2811,6 +2881,7 @@ ${this.error.stack}
             element: $el,
             type: rule.type || "error",
             content: Lang.sprintf(rule.content || conditional, error[0], altText),
+            args: [error[0], altText],
             dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
@@ -2825,6 +2896,7 @@ ${this.error.stack}
             element: $el,
             type: rule.type || "error",
             content: Lang.sprintf(rule.content || conditional, altText),
+            args: [altText],
             dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
@@ -2839,6 +2911,7 @@ ${this.error.stack}
             element: $el,
             type: rule.type || "warning",
             content: Lang.sprintf(rule.content || conditional, error[1], altText),
+            args: [error[1], altText],
             dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
@@ -2853,6 +2926,7 @@ ${this.error.stack}
             element: $el,
             type: rule.type || "error",
             content: Lang.sprintf(rule.content || conditional, altText),
+            args: [altText],
             dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
@@ -2867,6 +2941,7 @@ ${this.error.stack}
             element: $el,
             type: rule.type || "warning",
             content: Lang.sprintf(rule.content || conditional, altText),
+            args: [altText],
             dismiss: prepareDismissal(`${conditional}WARNING${src + rawAlt} `),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
@@ -2875,13 +2950,13 @@ ${this.error.stack}
       } else if (link ? rawAlt.length > maxAltCharactersLinks : rawAlt.length > maxAltCharacters) {
         const rule = link ? State.option.checks.LINK_IMAGE_LONG_ALT : State.option.checks.IMAGE_ALT_TOO_LONG;
         const conditional = link ? "LINK_IMAGE_LONG_ALT" : "IMAGE_ALT_TOO_LONG";
-        const truncated = truncateString(altText, 600);
         if (rule) {
           State.results.push({
             test: conditional,
             element: $el,
             type: rule.type || "warning",
-            content: Lang.sprintf(rule.content || conditional, rawAlt.length, truncated),
+            content: Lang.sprintf(rule.content || conditional, rawAlt.length, altText),
+            args: [rawAlt.length, altText],
             dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
@@ -2903,6 +2978,7 @@ ${this.error.stack}
             element: $el,
             type: rule.type || "warning",
             content: rule.content ? Lang.sprintf(rule.content, altText, accName) : tooltip,
+            args: [altText, accName],
             dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
@@ -2920,6 +2996,7 @@ ${this.error.stack}
                 State.option.checks.IMAGE_FIGURE_DUPLICATE_ALT.content || "IMAGE_FIGURE_DUPLICATE_ALT",
                 altText
               ),
+              args: [altText],
               dismiss: prepareDismissal(`IMAGE_FIGURE_DUPLICATE_ALT ${src}`),
               dismissAll: State.option.checks.IMAGE_FIGURE_DUPLICATE_ALT.dismissAll ? "IMAGE_FIGURE_DUPLICATE_ALT" : false,
               developer: State.option.checks.IMAGE_FIGURE_DUPLICATE_ALT.developer || false
@@ -2931,6 +3008,7 @@ ${this.error.stack}
             element: $el,
             type: State.option.checks.IMAGE_PASS.type || "good",
             content: Lang.sprintf(State.option.checks.IMAGE_PASS.content || "IMAGE_PASS", altText),
+            args: [altText],
             dismiss: prepareDismissal(`IMAGE_PASS FIGURE ${src + rawAlt}`),
             dismissAll: State.option.checks.IMAGE_PASS.dismissAll ? "IMAGE_PASS" : false,
             developer: State.option.checks.IMAGE_PASS.developer || false
@@ -2943,6 +3021,7 @@ ${this.error.stack}
             element: $el,
             type: State.option.checks.IMAGE_PASS.type || "good",
             content: Lang.sprintf(State.option.checks.IMAGE_PASS.content || "IMAGE_PASS", altText),
+            args: [altText],
             dismiss: prepareDismissal(`IMAGE_PASS ${src + rawAlt}`),
             dismissAll: State.option.checks.IMAGE_PASS.dismissAll ? "IMAGE_PASS" : false,
             developer: State.option.checks.IMAGE_PASS.developer || false
@@ -3057,6 +3136,7 @@ ${this.error.stack}
               element: $el,
               type: State.option.checks.LABELS_ARIA_LABEL_INPUT.type || "warning",
               content: State.option.checks.LABELS_ARIA_LABEL_INPUT.content ? Lang.sprintf(State.option.checks.LABELS_ARIA_LABEL_INPUT.content, inputName) : Lang.sprintf(Lang._("LABELS_ARIA_LABEL_INPUT") + Lang._("ACC_NAME_TIP"), inputName),
+              args: [inputName],
               dismiss: prepareDismissal(`LABELS_ARIA_LABEL_INPUT ${type + inputName}`),
               dismissAll: State.option.checks.LABELS_ARIA_LABEL_INPUT.dismissAll ? "LABELS_ARIA_LABEL_INPUT" : false,
               developer: State.option.checks.LABELS_ARIA_LABEL_INPUT.developer || true
@@ -3082,6 +3162,7 @@ ${this.error.stack}
                 State.option.checks.LABELS_NO_FOR_ATTRIBUTE.content || "LABELS_NO_FOR_ATTRIBUTE",
                 id
               ),
+              args: [id],
               dismiss: prepareDismissal(`LABELS_NO_FOR_ATTRIBUTE ${type + inputName}`),
               dismissAll: State.option.checks.LABELS_NO_FOR_ATTRIBUTE.dismissAll ? "LABELS_NO_FOR_ATTRIBUTE" : false,
               developer: State.option.checks.LABELS_NO_FOR_ATTRIBUTE.developer || true
@@ -3107,11 +3188,13 @@ ${this.error.stack}
   function checkQA() {
     if (State.option.checks.QA_BAD_LINK) {
       Elements.Found.CustomErrorLinks.forEach(($el) => {
+        const text = getText($el);
         State.results.push({
           test: "QA_BAD_LINK",
           element: $el,
           type: State.option.checks.QA_BAD_LINK.type || "error",
-          content: Lang.sprintf(State.option.checks.QA_BAD_LINK.content || "QA_BAD_LINK", $el),
+          content: Lang.sprintf(State.option.checks.QA_BAD_LINK.content || "QA_BAD_LINK", $el, text),
+          args: [$el, text],
           inline: true,
           dismiss: prepareDismissal(`QA_BAD_LINK ${$el.tagName + $el.textContent}`),
           dismissAll: State.option.checks.QA_BAD_LINK.dismissAll ? "QA_BAD_LINK" : false,
@@ -3128,8 +3211,10 @@ ${this.error.stack}
             element: $el.parentNode,
             type: State.option.checks.QA_STRONG_ITALICS.type || "warning",
             content: Lang.sprintf(
-              State.option.checks.QA_STRONG_ITALICS.content || "QA_STRONG_ITALICS"
+              State.option.checks.QA_STRONG_ITALICS.content || "QA_STRONG_ITALICS",
+              text
             ),
+            args: [text],
             dismiss: prepareDismissal(`QA_STRONG_ITALICS ${$el.tagName + $el.textContent}`),
             dismissAll: State.option.checks.QA_STRONG_ITALICS.dismissAll ? "QA_STRONG_ITALICS" : false,
             developer: State.option.checks.QA_STRONG_ITALICS.developer || false
@@ -3140,29 +3225,62 @@ ${this.error.stack}
     Elements.Found.Links.forEach(($el) => {
       if ($el.hasAttribute("href")) {
         const href = $el.getAttribute("href");
+        const accName = removeWhitespace(
+          computeAccessibleName($el, Constants.Exclusions.LinkSpan)
+        );
         const hasExtension = $el.matches(Constants.Global.documentSources);
         const hasPDF = $el.matches('a[href$=".pdf"], a[href*=".pdf?"]');
-        if (State.option.checks.QA_IN_PAGE_LINK) {
+        if (State.option.checks.QA_IN_PAGE_LINK || State.option.checks.LINK_MAYBE_BUTTON) {
           const hasText = getText($el).length !== 0;
           const ignored = $el.ariaHidden === "true" && $el.getAttribute("tabindex") === "-1";
-          const hasAttributes = $el.hasAttribute("role") || $el.hasAttribute("aria-haspopup") || $el.hasAttribute("aria-expanded") || $el.hasAttribute("onclick") || $el.hasAttribute("disabled") || $el.closest('nav, [role="navigation"]');
+          const hasAttributes = $el.hasAttribute("role") || $el.hasAttribute("aria-haspopup") || $el.hasAttribute("aria-expanded") || $el.hasAttribute("onclick") || $el.hasAttribute("disabled") || !!$el.closest('nav, [role="navigation"]');
           if ((href.startsWith("#") || href === "") && hasText && !ignored && !hasAttributes) {
             const targetId = href.substring(1);
             const ariaControls = $el.getAttribute("aria-controls");
-            const targetElement = targetId && (document.getElementById(targetId) || document.getElementById(decodeURIComponent(targetId)) || document.getElementById(encodeURIComponent(targetId)) || document.getElementById(ariaControls) || document.querySelector(`a[name="${targetId}"]`));
+            const decoded = targetId ? decodeURIComponent(targetId) : "";
+            const encoded = targetId ? encodeURIComponent(targetId) : "";
+            const targetElement = targetId && (document.getElementById(targetId) || ariaControls && document.getElementById(ariaControls) || decoded !== targetId && document.getElementById(decoded) || encoded !== targetId && document.getElementById(encoded) || document.querySelector(`a[name="${CSS.escape(targetId)}"]`));
             if (!targetElement) {
-              State.results.push({
-                test: "QA_IN_PAGE_LINK",
-                element: $el,
-                type: State.option.checks.QA_IN_PAGE_LINK.type || "error",
-                content: Lang.sprintf(
-                  State.option.checks.QA_IN_PAGE_LINK.content || "QA_IN_PAGE_LINK"
-                ),
-                inline: true,
-                dismiss: prepareDismissal(`QA_IN_PAGE_LINK ${href}`),
-                dismissAll: State.option.checks.QA_IN_PAGE_LINK.dismissAll ? "QA_IN_PAGE_LINK" : false,
-                developer: State.option.checks.QA_IN_PAGE_LINK.developer || false
-              });
+              let isFauxButton = false;
+              if (State.option.checks.LINK_MAYBE_BUTTON) {
+                const keywords = Lang._("POTENTIAL_UI_ELEMENTS");
+                const matchedKeyword = keywords.find((word) => accName.toLowerCase().includes(word));
+                if (matchedKeyword && accName.length <= 15) {
+                  isFauxButton = true;
+                  State.results.push({
+                    test: "LINK_MAYBE_BUTTON",
+                    element: $el,
+                    type: State.option.checks.LINK_MAYBE_BUTTON.type || "error",
+                    content: Lang.sprintf(
+                      State.option.checks.LINK_MAYBE_BUTTON.content || "LINK_MAYBE_BUTTON",
+                      matchedKeyword,
+                      accName
+                    ),
+                    args: [matchedKeyword, accName],
+                    inline: true,
+                    dismiss: prepareDismissal(`LINK_MAYBE_BUTTON_${matchedKeyword}`),
+                    dismissAll: State.option.checks.LINK_MAYBE_BUTTON.dismissAll ? "LINK_MAYBE_BUTTON" : false,
+                    developer: State.option.checks.LINK_MAYBE_BUTTON.developer || true
+                  });
+                }
+              }
+              if (State.option.checks.QA_IN_PAGE_LINK && !isFauxButton) {
+                State.results.push({
+                  test: "QA_IN_PAGE_LINK",
+                  element: $el,
+                  type: State.option.checks.QA_IN_PAGE_LINK.type || "error",
+                  content: Lang.sprintf(
+                    State.option.checks.QA_IN_PAGE_LINK.content || "QA_IN_PAGE_LINK",
+                    targetId,
+                    accName
+                  ),
+                  args: [targetId, accName],
+                  inline: true,
+                  dismiss: prepareDismissal(`QA_IN_PAGE_LINK ${href}`),
+                  dismissAll: State.option.checks.QA_IN_PAGE_LINK.dismissAll ? "QA_IN_PAGE_LINK" : false,
+                  developer: State.option.checks.QA_IN_PAGE_LINK.developer || false
+                });
+              }
             }
           }
         }
@@ -3171,7 +3289,8 @@ ${this.error.stack}
             test: "QA_DOCUMENT",
             element: $el,
             type: State.option.checks.QA_DOCUMENT.type || "warning",
-            content: Lang.sprintf(State.option.checks.QA_DOCUMENT.content || "QA_DOCUMENT"),
+            content: Lang.sprintf(State.option.checks.QA_DOCUMENT.content || "QA_DOCUMENT", accName),
+            args: [accName],
             inline: true,
             dismiss: prepareDismissal(`QA_DOCUMENT ${href}`),
             dismissAll: State.option.checks.QA_DOCUMENT.dismissAll ? "QA_DOCUMENT" : false,
@@ -3182,7 +3301,8 @@ ${this.error.stack}
             test: "QA_PDF",
             element: $el,
             type: State.option.checks.QA_PDF.type || "warning",
-            content: Lang.sprintf(State.option.checks.QA_PDF.content || "QA_PDF"),
+            content: Lang.sprintf(State.option.checks.QA_PDF.content || "QA_PDF", accName),
+            args: [accName],
             inline: true,
             dismiss: prepareDismissal(`QA_PDF ${href}`),
             dismissAll: State.option.checks.QA_PDF.dismissAll ? "QA_PDF" : false,
@@ -3200,6 +3320,7 @@ ${this.error.stack}
             element: $el,
             type: State.option.checks.QA_BLOCKQUOTE.type || "warning",
             content: Lang.sprintf(State.option.checks.QA_BLOCKQUOTE.content || "QA_BLOCKQUOTE", text),
+            args: [text],
             dismiss: prepareDismissal(`QA_BLOCKQUOTE ${text}`),
             dismissAll: State.option.checks.QA_BLOCKQUOTE.dismissAll ? "QA_BLOCKQUOTE" : false,
             developer: State.option.checks.QA_BLOCKQUOTE.developer || false
@@ -3259,16 +3380,17 @@ ${this.error.stack}
       }
     });
     if (State.option.checks.QA_FAKE_HEADING) {
-      const addResult = (element, escapedText) => {
+      const addResult = (element, text) => {
         State.results.push({
           test: "QA_FAKE_HEADING",
           element,
           type: State.option.checks.QA_FAKE_HEADING.type || "warning",
           content: Lang.sprintf(
             State.option.checks.QA_FAKE_HEADING.content || "QA_FAKE_HEADING",
-            escapedText
+            text
           ),
-          dismiss: prepareDismissal(`QA_FAKE_HEADING ${escapedText}`),
+          args: [text],
+          dismiss: prepareDismissal(`QA_FAKE_HEADING ${text}`),
           inline: true,
           dismissAll: State.option.checks.QA_FAKE_HEADING.dismissAll ? "QA_FAKE_HEADING" : false,
           developer: State.option.checks.QA_FAKE_HEADING.developer || false
@@ -3380,8 +3502,10 @@ ${this.error.stack}
               type: State.option.checks.QA_FAKE_LIST.type || "warning",
               content: Lang.sprintf(
                 State.option.checks.QA_FAKE_LIST.content || "QA_FAKE_LIST",
-                firstPrefix
+                firstPrefix,
+                firstText
               ),
+              args: [firstPrefix, firstText],
               dismiss: prepareDismissal(`QA_FAKE_LIST ${p.textContent}`),
               dismissAll: State.option.checks.QA_FAKE_LIST.dismissAll ? "QA_FAKE_LIST" : false,
               developer: State.option.checks.QA_FAKE_LIST.developer || false
@@ -3415,7 +3539,11 @@ ${this.error.stack}
             test: "QA_UPPERCASE",
             element: $el,
             type: State.option.checks.QA_UPPERCASE.type || "warning",
-            content: Lang.sprintf(State.option.checks.QA_UPPERCASE.content || "QA_UPPERCASE"),
+            content: Lang.sprintf(
+              State.option.checks.QA_UPPERCASE.content || "QA_UPPERCASE",
+              thisText
+            ),
+            args: [thisText],
             dismiss: prepareDismissal(`QA_UPPERCASE ${thisText}`),
             dismissAll: State.option.checks.QA_UPPERCASE.dismissAll ? "QA_UPPERCASE" : false,
             developer: State.option.checks.QA_UPPERCASE.developer || false
@@ -3436,35 +3564,41 @@ ${this.error.stack}
       });
     }
     const addUnderlineResult = ($el) => {
+      const text = getText($el);
       State.results.push({
         test: "QA_UNDERLINE",
         element: $el,
         type: State.option.checks.QA_UNDERLINE.type || "warning",
-        content: Lang.sprintf(State.option.checks.QA_UNDERLINE.content || "QA_UNDERLINE"),
+        content: Lang.sprintf(State.option.checks.QA_UNDERLINE.content || "QA_UNDERLINE", text),
+        args: [text],
         inline: true,
-        dismiss: prepareDismissal(`QA_UNDERLINE ${$el.textContent}`),
+        dismiss: prepareDismissal(`QA_UNDERLINE ${text}`),
         dismissAll: State.option.checks.QA_UNDERLINE.dismissAll ? "QA_UNDERLINE" : false,
         developer: State.option.checks.QA_UNDERLINE.developer || false
       });
     };
     const addJustifyResult = ($el) => {
+      const text = getText($el);
       State.results.push({
         test: "QA_JUSTIFY",
         element: $el,
         type: State.option.checks.QA_JUSTIFY.type || "warning",
-        content: Lang.sprintf(State.option.checks.QA_JUSTIFY.content || "QA_JUSTIFY"),
-        dismiss: prepareDismissal(`QA_JUSTIFY ${$el.textContent}`),
+        content: Lang.sprintf(State.option.checks.QA_JUSTIFY.content || "QA_JUSTIFY", text),
+        args: [text],
+        dismiss: prepareDismissal(`QA_JUSTIFY ${text}`),
         dismissAll: State.option.checks.QA_JUSTIFY.dismissAll ? "QA_JUSTIFY" : true,
         developer: State.option.checks.QA_JUSTIFY.developer || false
       });
     };
     const addSmallTextResult = ($el) => {
+      const text = getText($el);
       State.results.push({
         test: "QA_SMALL_TEXT",
         element: $el,
         type: State.option.checks.QA_SMALL_TEXT.type || "warning",
-        content: Lang.sprintf(State.option.checks.QA_SMALL_TEXT.content || "QA_SMALL_TEXT"),
-        dismiss: prepareDismissal(`QA_SMALL_TEXT ${$el.textContent}`),
+        content: Lang.sprintf(State.option.checks.QA_SMALL_TEXT.content || "QA_SMALL_TEXT", text),
+        args: [text],
+        dismiss: prepareDismissal(`QA_SMALL_TEXT ${text}`),
         dismissAll: State.option.checks.QA_SMALL_TEXT.dismissAll ? "QA_SMALL_TEXT" : true,
         developer: State.option.checks.QA_SMALL_TEXT.developer || false
       });
@@ -3480,7 +3614,8 @@ ${this.error.stack}
       const computedFontSize = parseFloat(fontSize);
       const parentFontSize = $el.parentElement ? parseFloat(getComputedStyle($el.parentElement).fontSize) : null;
       const isInherited = parentFontSize === computedFontSize;
-      const withinRange = !isInherited && computedFontSize > 1 && computedFontSize <= defaultSize;
+      const isSup = $el.closest("sup, sub") !== null;
+      const withinRange = !isInherited && !isSup && computedFontSize > 1 && computedFontSize <= defaultSize;
       if (State.option.checks.QA_SMALL_TEXT && withinRange) {
         addSmallTextResult($el);
       }
@@ -3508,7 +3643,8 @@ ${this.error.stack}
             test: "QA_SUBSCRIPT",
             element: $el,
             type: State.option.checks.QA_SUBSCRIPT.type || "warning",
-            content: Lang.sprintf(State.option.checks.QA_SUBSCRIPT.content || "QA_SUBSCRIPT"),
+            content: Lang.sprintf(State.option.checks.QA_SUBSCRIPT.content || "QA_SUBSCRIPT", text),
+            args: [text],
             inline: true,
             dismiss: prepareDismissal(`QA_SUBSCRIPT ${$el.tagName + text}`),
             dismissAll: State.option.checks.QA_SUBSCRIPT.dismissAll ? "QA_SUBSCRIPT" : false,
@@ -3766,48 +3902,47 @@ ${this.error.stack}
     return weightMap[weight] || 400;
   }
   function getBackground($el, shadowDetection) {
-    let targetEl = $el;
-    while (targetEl && targetEl.nodeType === 1) {
+    const getVisualParent = (node) => {
+      if (!node) return null;
       if (shadowDetection) {
-        const root = targetEl.getRootNode();
-        if (root instanceof ShadowRoot) {
-          let node = targetEl;
-          while (node && node !== root.host) {
-            const styles2 = getComputedStyle(node);
-            if (styles2.backgroundImage && styles2.backgroundImage !== "none") {
-              return { type: "image", value: styles2.backgroundImage };
-            }
-            const bgColor2 = convertToRGBA(styles2.backgroundColor);
-            if (bgColor2[3] !== 0 && bgColor2 !== "transparent") {
-              return bgColor2;
-            }
-            node = node.parentElement;
-          }
-          return getBackground(root.host);
-        }
+        if (node.assignedSlot) return node.assignedSlot;
+        if (node instanceof ShadowRoot) return node.host;
+      }
+      return node.parentElement || node.parentNode;
+    };
+    let targetEl = $el;
+    while (targetEl && (targetEl.nodeType === 1 || targetEl.nodeType === 11)) {
+      if (targetEl instanceof ShadowRoot) {
+        targetEl = targetEl.host;
+        continue;
       }
       const styles = getComputedStyle(targetEl);
       const bgImage = styles.backgroundImage;
-      if (bgImage !== "none") {
+      if (bgImage && bgImage !== "none") {
         return { type: "image", value: bgImage };
       }
       const bgColor = convertToRGBA(styles.backgroundColor);
       if (bgColor[3] !== 0 && bgColor !== "transparent") {
         if (bgColor[3] < 1) {
-          let parentEl = targetEl.parentElement;
+          let parentEl = getVisualParent(targetEl);
           let parentBgColor = "rgba(255, 255, 255, 1)";
-          while (parentEl && parentEl.nodeType === 1) {
+          while (parentEl && (parentEl.nodeType === 1 || parentEl.nodeType === 11)) {
+            if (parentEl instanceof ShadowRoot) {
+              parentEl = parentEl.host;
+              continue;
+            }
             const parentStyles = getComputedStyle(parentEl);
-            parentBgColor = parentStyles.backgroundColor;
-            if (parentBgColor !== "rgba(0, 0, 0, 0)") {
+            const currentParentBg = parentStyles.backgroundColor;
+            if (currentParentBg !== "rgba(0, 0, 0, 0)" && currentParentBg !== "transparent") {
+              parentBgColor = currentParentBg;
               break;
             }
-            if (parentBgColor === "rgba(0, 0, 0, 0)" && parentEl.tagName === "HTML") {
-              parentBgColor = "rgba(255, 255, 255, 1)";
-            }
-            parentEl = parentEl.parentElement;
+            parentEl = getVisualParent(parentEl);
           }
-          const parentColor = convertToRGBA(parentBgColor || "rgba(255, 255, 255, 1)");
+          if (parentBgColor === "rgba(0, 0, 0, 0)" || parentBgColor === "transparent") {
+            parentBgColor = "rgba(255, 255, 255, 1)";
+          }
+          const parentColor = convertToRGBA(parentBgColor);
           const blendedBG = alphaBlend(bgColor, parentColor);
           return blendedBG;
         }
@@ -3816,7 +3951,7 @@ ${this.error.stack}
       if (targetEl.tagName === "HTML") {
         return [255, 255, 255];
       }
-      targetEl = targetEl.parentNode;
+      targetEl = getVisualParent(targetEl);
     }
     return [255, 255, 255];
   }
@@ -4091,8 +4226,9 @@ ${this.error.stack}
       const style = window.getComputedStyle($el);
       const opacity = parseFloat(style.opacity);
       const fontSize = parseFloat(style.fontSize);
-      if (opacity === 0 || fontSize === 0 || isElementHidden($el)) continue;
+      if ($el.disabled || opacity === 0 || fontSize === 0 || isElementHidden($el)) continue;
       if (isScreenReaderOnly($el)) continue;
+      if (text.length === 1 && "|/\\".includes(text)) continue;
       const color = convertToRGBA(style.color, opacity);
       const getFontWeight = style.fontWeight;
       const fontWeight = normalizeFontWeight(getFontWeight);
@@ -4472,6 +4608,7 @@ ${this.error.stack}
         test: key,
         type: rule.type || "error",
         content: Lang.sprintf(rule.content || key, ...args),
+        args: [...args],
         dismiss: prepareDismissal(key),
         developer: rule.developer || true
       });
@@ -4574,6 +4711,7 @@ ${this.error.stack}
                     State.option.checks.DUPLICATE_ID.content || "DUPLICATE_ID",
                     id
                   ),
+                  args: [id],
                   dismiss: prepareDismissal(`DUPLICATE_ID ${id}${$el.textContent}`),
                   dismissAll: State.option.checks.DUPLICATE_ID.dismissAll ? "DUPLICATE_ID" : false,
                   developer: State.option.checks.DUPLICATE_ID.developer || true
@@ -4598,6 +4736,7 @@ ${this.error.stack}
       Elements.Found.Buttons.forEach(($el) => {
         const accName = computeAccessibleName($el);
         const buttonText = accName.replace(/'|"|-|\.|\s+/g, "").toLowerCase();
+        const textContent = getText($el);
         const hasAria = $el.querySelector(":scope [aria-labelledby], :scope [aria-label]") || $el.getAttribute("aria-labelledby") || $el.getAttribute("aria-label");
         const hasAriaLabelledby = $el.querySelector(":scope [aria-labelledby]") || $el.getAttribute("aria-labelledby");
         const ariaHidden = $el.getAttribute("aria-hidden") === "true";
@@ -4645,9 +4784,7 @@ ${this.error.stack}
               content: Lang.sprintf(
                 State.option.checks.BTN_EMPTY.content || Lang._("BTN_EMPTY") + Lang._("BTN_TIP")
               ),
-              dismiss: prepareDismissal(
-                `BTN_EMPTY ${$el.tagName + $el.id + $el.className + accName}`
-              ),
+              dismiss: prepareDismissal(`BTN_EMPTY ${$el.tagName + $el.id + $el.className}`),
               dismissAll: State.option.checks.BTN_EMPTY.dismissAll ? "BTN_EMPTY" : false,
               developer: State.option.checks.BTN_EMPTY.developer || true
             });
@@ -4660,7 +4797,12 @@ ${this.error.stack}
             test: "LABEL_IN_NAME",
             element: $el,
             type: State.option.checks.LABEL_IN_NAME.type || "warning",
-            content: State.option.checks.LABEL_IN_NAME.content ? Lang.sprintf(State.option.checks.LABEL_IN_NAME.content, accName) : Lang.sprintf(Lang._("LABEL_IN_NAME") + Lang._("ACC_NAME_TIP"), accName),
+            content: Lang.sprintf(
+              State.option.checks.LABEL_IN_NAME.content || Lang._("LABEL_IN_NAME") + Lang._("ACC_NAME_TIP"),
+              textContent,
+              accName
+            ),
+            args: [textContent, accName],
             dismiss: prepareDismissal(
               `LABEL_IN_NAME ${$el.tagName + $el.id + $el.className + accName}`
             ),
@@ -4675,8 +4817,10 @@ ${this.error.stack}
             element: $el,
             type: State.option.checks.BTN_ROLE_IN_NAME.type || "warning",
             content: Lang.sprintf(
-              State.option.checks.BTN_ROLE_IN_NAME.content || Lang._("BTN_ROLE_IN_NAME") + Lang._("BTN_TIP")
+              State.option.checks.BTN_ROLE_IN_NAME.content || Lang._("BTN_ROLE_IN_NAME") + Lang._("ACC_NAME_TIP") + Lang._("BTN_TIP"),
+              accName
             ),
+            args: [accName],
             dismiss: prepareDismissal(
               `BTN_ROLE_IN_NAME ${$el.tagName + $el.id + $el.className + accName}`
             ),
@@ -4689,11 +4833,16 @@ ${this.error.stack}
     if (State.option.checks.UNCONTAINED_LI) {
       Elements.Found.Lists.forEach(($el) => {
         if (!$el.closest("ul, ol, menu")) {
+          const text = getText($el);
           State.results.push({
             test: "UNCONTAINED_LI",
             element: $el,
             type: State.option.checks.UNCONTAINED_LI.type || "error",
-            content: Lang.sprintf(State.option.checks.UNCONTAINED_LI.content || "UNCONTAINED_LI"),
+            content: Lang.sprintf(
+              State.option.checks.UNCONTAINED_LI.content || "UNCONTAINED_LI",
+              text
+            ),
+            args: [text],
             dismiss: prepareDismissal(`UNCONTAINED_LI ${$el.textContent}`),
             dismissAll: State.option.checks.UNCONTAINED_LI.dismissAll ? "UNCONTAINED_LI" : false,
             developer: State.option.checks.UNCONTAINED_LI.developer || true
@@ -4904,9 +5053,6 @@ ${this.error.stack}
       }
     } else {
       UI.jumpList.forEach((mark) => {
-        mark.style.setProperty("transform", null);
-        mark.style.setProperty("top", "initial");
-        mark.style.setProperty("left", "initial");
         if (mark.style.transform) {
           const computedStyle = window.getComputedStyle(mark);
           let matrix = computedStyle.getPropertyValue("transform");
@@ -4917,6 +5063,11 @@ ${this.error.stack}
           mark.xOffset = 0;
           mark.yOffset = 0;
         }
+      });
+      UI.jumpList.forEach((mark) => {
+        mark.style.setProperty("transform", null);
+        mark.style.setProperty("top", "initial");
+        mark.style.setProperty("left", "initial");
       });
       UI.jumpList.forEach((mark) => {
         mark.markOffset = mark.getBoundingClientRect();
@@ -5841,7 +5992,7 @@ ${this.error.stack}
         UI.forceFullCheck = false;
         resetResults(true);
       } else {
-        State.results.push(UI.oldResults);
+        State.results.push(...UI.oldResults);
         if (!UI.alignPending) {
           alignButtons();
           alignPanel();
@@ -6049,10 +6200,9 @@ ${this.error.stack}
   function buildJumpList() {
     UI.jumpList = [];
     pauseObservers();
-    const toSplice = [];
-    for (let i = 0; i < State.results.length; i++) {
-      if (!State.results[i].element) {
-        toSplice.push(i);
+    for (let i = State.results.length - 1; i >= 0; i--) {
+      if (!State.results[i].element || !State.results[i].element.isConnected) {
+        State.results.splice(i, 1);
         continue;
       }
       let top = State.results[i].element.getBoundingClientRect().top;
@@ -6073,9 +6223,6 @@ ${this.error.stack}
       }
       State.results[i].sortPos = top;
     }
-    toSplice.forEach((i) => {
-      State.results.splice(i, 1);
-    });
     State.results.sort((a, b) => b.sortPos - a.sortPos);
     State.results?.forEach((result, i) => {
       if (result.element && (!result.dismissalStatus || UI.showDismissed)) {
@@ -6387,16 +6534,11 @@ ${this.error.stack}
     const tip = arrow.nextElementSibling;
     const loopCount = recheck - 1;
     if (recheck > 0) {
-      window.setTimeout(
-        () => {
-          requestAnimationFrame(() => alignTip(button, toolTip, loopCount, reveal));
-        },
-        200 / loopCount,
-        button,
-        toolTip,
-        loopCount,
-        reveal
-      );
+      requestAnimationFrame(() => {
+        window.setTimeout(() => {
+          alignTip(button, toolTip, loopCount, reveal);
+        }, 200 / loopCount);
+      });
     }
     if (reveal) {
       window.setTimeout(
@@ -6445,10 +6587,10 @@ ${this.error.stack}
     document.documentElement.style.setProperty("--ed11y-buttonWidth", `${buttonSize}px`);
     tip.style.setProperty("max-width", `min(${containWidth > 280 ? containWidth : 280}px, 90vw)`);
     const containRight = Math.min(window.innerWidth, containLeft + containWidth);
-    toolTip.style.setProperty("top", `${buttonOffset.top + scrollTop}px`);
-    toolTip.style.setProperty("left", `${buttonOffset.left + leftAdd}px`);
     const tipWidth = tip.offsetWidth;
     const tipHeight = tip.offsetHeight;
+    toolTip.style.setProperty("top", `${buttonOffset.top + scrollTop}px`);
+    toolTip.style.setProperty("left", `${buttonOffset.left + leftAdd}px`);
     let direction = "under";
     if (buttonTop === 0 && buttonLeft === 0) {
       direction = "whompWhomp";
@@ -6757,63 +6899,69 @@ ${this.error.stack}
       root,
       config
     });
-    document.addEventListener(
-      "readystatechange",
-      () => {
-        window.setTimeout(() => {
+    if (!UI.globalListenersAttached) {
+      UI.globalListenersAttached = true;
+      document.addEventListener(
+        "readystatechange",
+        () => {
+          window.setTimeout(() => {
+            UI.scrollPending++;
+            updateTipLocations();
+          }, 100);
+        },
+        {
+          passive: true
+        }
+      );
+      document.addEventListener(
+        "paste",
+        () => {
           UI.scrollPending++;
           updateTipLocations();
-        }, 100);
-      },
-      {
-        passive: true
-      }
-    );
-    document.addEventListener(
-      "paste",
-      () => {
-        UI.scrollPending++;
-        updateTipLocations();
-        window.setTimeout(() => {
-          UI.forceFullCheck = true;
-          incrementalCheckDebounce();
-        }, 100);
-      },
-      {
-        passive: true
-      }
-    );
+          window.setTimeout(() => {
+            UI.forceFullCheck = true;
+            incrementalCheckDebounce();
+          }, 100);
+        },
+        {
+          passive: true
+        }
+      );
+    }
     window.setTimeout(() => {
       UI.scrollPending++;
       updateTipLocations();
     }, 1e3);
   }
-  const enqueueTests = (queue) => {
-    const test = queue.pop();
+  const safeRun = (fn) => {
     try {
-      switch (test) {
-        case "group1":
-          checkHeaders();
-          checkImages();
-          checkEmbeddedContent();
-          checkCustomRuleset();
-          checkQA();
-          break;
-        case "group2":
-          checkLinkText();
-          break;
-        case "checkLabels":
-          checkLabels();
-          break;
-        case "checkContrast":
-          checkContrast();
-          break;
-        case "checkDeveloper":
-          checkDeveloper();
-          break;
-      }
+      fn();
     } catch (error) {
       showError(error);
+    }
+  };
+  const enqueueTests = (queue) => {
+    const test = queue.pop();
+    switch (test) {
+      case "group1":
+        safeRun(checkHeaders);
+        safeRun(checkImages);
+        safeRun(checkEmbeddedContent);
+        safeRun(checkCustomRuleset);
+        safeRun(checkQA);
+        break;
+      case "group2":
+        safeRun(checkLinkText);
+        break;
+      case "checkLabels":
+        safeRun(checkLabels);
+        break;
+      case "checkContrast":
+        safeRun(checkContrast);
+        break;
+      case "checkDeveloper":
+        safeRun(checkDeveloper);
+        break;
     }
     UI.testsRemaining--;
     if (queue.length > 0) {
@@ -6869,7 +7017,7 @@ ${this.error.stack}
         UI.roots.push(root);
       });
     } else {
-      UI.roots = document.querySelectorAll(`:is(${State.option.checkRoot})`);
+      UI.roots = [...document.querySelectorAll(`:is(${State.option.checkRoot})`)];
     }
     if (UI.roots.length === 0 && State.option.headless === false) {
       if (UI.onLoad) {
@@ -6879,7 +7027,7 @@ ${this.error.stack}
       return;
     }
     if (UI.incremental) {
-      UI.oldResults = State.results;
+      UI.oldResults = [...State.results];
     }
     State.results.length = 0;
     UI.splitConfiguration.devResults.length = 0;
@@ -6960,6 +7108,7 @@ ${this.error.stack}
   }
   function incrementalCheck() {
     if (!UI.running) {
+      UI.incrementalRetryPending = false;
       if (UI.tipOpen || !UI.interaction && !UI.forceFullCheck) {
         return;
       }
@@ -6982,7 +7131,8 @@ ${this.error.stack}
       runTime = performance.now() - runTime;
       UI.browserSpeed = runTime > 100 ? 100 : (UI.browserSpeed + runTime) / 2;
       UI.browserLag = UI.browserSpeed < 1 ? 0 : UI.browserSpeed * 40 + UI.totalCount;
-    } else {
+    } else if (!UI.incrementalRetryPending) {
+      UI.incrementalRetryPending = true;
       window.setTimeout(() => {
         incrementalCheckDebounce();
       }, 250);
@@ -7707,7 +7857,7 @@ ${this.error.stack}
       this.wrapper.innerHTML = `
 		<div class="tip">
 			<button class="close ed11y-tip-close">${spriteClose}</button>
-			<div class="content" data-test="${this.result.test}">
+			<div class="content">
 				<div class="message"></div>
 				<div class="content-footer">
 					<div class="edit-links"></div>
@@ -7723,6 +7873,7 @@ ${this.error.stack}
 				<button class="next">${spriteNext}</button>
 		</div>
 		`;
+      this.wrapper.querySelector(".content").dataset.test = this.result.test;
       this.addEventListener("mouseover", this.handleHover, {
         passive: true
       });
@@ -7938,13 +8089,14 @@ ${this.error.stack}
           this.result?.toggle?.setAttribute("data-ed11y-action", "shut");
         }
       });
-      document.addEventListener("click", (event) => {
+      this._handleDocumentClick = (event) => {
         if (this.open && !event.target.closest(".ed11y-element")) {
           const toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', "document", []);
           toggle[0]?.setAttribute("data-ed11y-action", "shut");
           this.setAttribute("data-ed11y-action", "shut");
         }
-      });
+      };
+      document.addEventListener("click", this._handleDocumentClick);
       shadow.appendChild(this.wrapper);
       const focusLoopLeft = document.createElement("div");
       focusLoopLeft.setAttribute("tabIndex", "0");
@@ -7964,6 +8116,12 @@ ${this.error.stack}
       });
       this.initialized = true;
       this.rendering = false;
+    }
+    disconnectedCallback() {
+      if (this._handleDocumentClick) {
+        document.removeEventListener("click", this._handleDocumentClick);
+      }
+      this.removeEventListener("mouseover", this.handleHover);
     }
     toggleTip(changeTo) {
       if (changeTo) {
@@ -8089,12 +8247,14 @@ ${this.error.stack}
         "hero image",
         "hero image",
         "hero slide",
+        "slide image",
         "homepage feature image",
         "featured image",
         "untitled",
         "untitled image",
         "unnamed",
-        "copy"
+        "copy",
+        "undefined"
       ],
       LINK_STOPWORDS: [
         "click",
@@ -8170,9 +8330,9 @@ ${this.error.stack}
       FAIRLY_DIFFICULT: "Fairly difficult",
       READABILITY_NOT_ENOUGH: "Not enough content to calculate readability score.",
       // Headings
-      HEADING_SKIPPED_LEVEL: "Headings should not skip levels or jump from <strong>Heading %(PREV_LEVEL)</strong> to <strong {C}>Heading %(LEVEL)</strong>, as this disrupts the content's order and hierarchy, making it harder to follow. <hr> If <strong {C}>%(HEADING)</strong> falls under the <strong>%(PREV_HEADING)</strong> section, then consider formatting it as a <strong>Heading %(level)</strong> instead.",
+      HEADING_SKIPPED_LEVEL: `Headings should not skip levels or jump from <strong>Heading %(PREV_LEVEL)</strong> to <strong {C}>Heading %(LEVEL)</strong>, as this disrupts the content's order and hierarchy, making it harder to follow. <hr> <strong {B}>Heading</strong> <strong {C}>%(HEADING)</strong> <hr> <strong>Tip!</strong> If this heading falls under the "<em>%(PREV_HEADING)</em>" section, then consider formatting it as a Heading %(level) instead.`,
       HEADING_EMPTY: "Empty heading found! To fix, delete this line or change its format from <strong {C}>Heading %(level)</strong> to <strong>Normal</strong> or <strong>Paragraph</strong>.",
-      HEADING_LONG: "Heading is long! Headings should be used to organize content and convey structure. They should be brief, informative, and unique. Please keep headings less than %(MAX_LENGTH) characters (no more than a sentence). <hr> <strong {B}>%(HEADING_LENGTH) Characters</strong>",
+      HEADING_LONG: "Heading is long! Headings should be used to organize content and convey structure. They should be brief, informative, and unique. Please keep headings less than %(MAX_LENGTH) characters (no more than a sentence). <hr> <strong {B}>Heading</strong> <strong {B}>%(HEADING_LENGTH) Characters</strong> <strong {C}>%(TEXT)</strong>",
       HEADING_FIRST: 'The first heading on a page should usually be a Heading 1 or Heading 2. Heading 1 should be the start of the main content section, and is the main heading that describes the overall purpose of the page. Learn more about <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading structure.</a>',
       HEADING_MISSING_ONE: 'Missing Heading 1. Heading 1 should be the start of the main content area, and is the main heading that describes the overall purpose of the page. Learn more about <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading structure.</a>',
       HEADING_EMPTY_WITH_IMAGE: "Heading has no text, but contains an image. If this is not a heading, change its format from <strong {C}>Heading %(level)</strong> to <strong>Normal</strong> or <strong>Paragraph</strong>. Otherwise, please add alt text to the image if it is not decorative.",
@@ -8182,18 +8342,18 @@ ${this.error.stack}
       LINK_EMPTY: "Remove empty links without any text.",
       LINK_EMPTY_LABELLEDBY: "Link has an <code>aria-labelledby</code> value that is empty or does not match the <code>id</code> value of another element on the page.",
       LINK_EMPTY_NO_LABEL: 'Link does not have discernible text that is visible to screen readers and other assistive technology. To fix: <ul><li>Add concise text that describes where the link takes you.</li><li>If it is an <a href="https://a11y-101.com/development/icons-and-links">icon link or SVG,</a> it is likely missing a descriptive label.</li><li>If you think this link is an error due to a copy/paste bug, consider deleting it.</li></ul>',
-      LINK_STOPWORD: "Link text may not be descriptive enough out of context: <strong {C}>%(ERROR)</strong>",
+      LINK_STOPWORD: "Link text may not be descriptive enough out of context. <hr> <strong {B}>Link text</strong> <strong {C}>%(ERROR)</strong>",
       LINK_STOPWORD_ARIA: "Although an accessible name was provided, consider revising the visible link text. Phrases like &quot;<strong {C}>%(ERROR)</strong>&quot; are not meaningful.",
       LINK_TIP: "<hr> <strong>Tip!</strong> Use clear and unique link text that describes the destination of the link, typically the page or document title.",
-      LINK_CLICK_HERE: 'The phrase "click" or "click here" places focus on mouse mechanics, when many people do not use a mouse or may be viewing this website on a mobile device. Consider using a different verb that relates to the task.',
+      LINK_CLICK_HERE: 'The phrase "click" or "click here" places focus on mouse mechanics, when many people do not use a mouse or may be viewing this website on a mobile device. Consider using a different verb that relates to the task. <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
       DUPLICATE_TITLE: 'The <code>title</code> attribute on links and images is meant to provide extra information, and should be <strong>different</strong> than the text or alt text. The title text appears when hovering over an element, but is not accessible with a keyboard or touch input. Consider <a href="https://www.a11yproject.com/posts/title-attributes/">avoiding the title attribute completely.</a>',
-      LINK_SYMBOLS: "Avoid using symbols as calls to action within link text unless they are hidden from assistive technologies. Screen readers may read the symbols out loud, which can be confusing. Consider removing: <strong {C}>%(ERROR)</strong>",
-      LINK_URL: "Longer, less intelligible URLs used as link text might be difficult to comprehend with assistive technology. In most cases, it is better to use human-readable text instead of the URL. Short URLs (such as a site's homepage) are okay.",
-      LINK_DOI: 'For web pages or online-only resources, the <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">APA Style guide</a> recommends using descriptive links by wrapping the URL or DOI of the work around its title. Longer, less intelligible URLs used as link text might be difficult to comprehend with assistive technology.',
-      LINK_NEW_TAB: `Link opens in a new tab or window without warning. Doing so can be disorienting, especially for people who have difficulty perceiving visual content. Secondly, it is not always a good practice to control someone's experience or make decisions for them. Indicate that the link opens in a new window within the link text. <hr> <strong>Tip!</strong> Learn best practices: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">opening links in new browser windows and tabs.</a>`,
-      LINK_FILE_EXT: 'Link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning. Indicate the file type within the link text. If it is a large file, consider including the file size. For example: "Executive Report (PDF, 3MB)"',
-      LINK_IDENTICAL_NAME: "Link has identical text as another link, although it points to a different page. Multiple links with the same text may cause confusion for people who use screen readers. <strong>Consider making the following link more descriptive to help distinguish it from other links.</strong> <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
-      LINK_UNPRONOUNCEABLE: "Link text only contains symbols. If you think this link is an error due to a copy/paste bug, consider deleting it.",
+      LINK_SYMBOLS: "Avoid using symbols as calls to action within link text unless they are hidden from assistive technologies. Screen readers may read the symbols out loud, which can be confusing. Consider removing: <strong {C}>%(ERROR)</strong> <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>",
+      LINK_URL: "Longer, less intelligible URLs used as link text might be difficult to comprehend with assistive technology. In most cases, it is better to use human-readable text instead of the URL. Short URLs (such as a site's homepage) are okay. <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>",
+      LINK_DOI: 'For web pages or online-only resources, the <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">APA Style guide</a> recommends using descriptive links by wrapping the URL or DOI of the work around its title. Longer, less intelligible URLs used as link text might be difficult to comprehend with assistive technology. <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
+      LINK_NEW_TAB: `Link opens in a new tab or window without warning. Doing so can be disorienting, especially for people who have difficulty perceiving visual content. Secondly, it is not always a good practice to control someone's experience or make decisions for them. Indicate that the link opens in a new window within the link text. Learn best practices when <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">opening links in new browser windows and tabs.</a>`,
+      LINK_FILE_EXT: 'Link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning. Indicate the file type within the link text. If it is a large file, consider including the file size. For example: "Executive Report (PDF, 3MB)" <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
+      LINK_IDENTICAL_NAME: "Multiple links on this page use the same link text but point to different places. This may cause confusion for assistive technology users. To fix, make this link text more descriptive.",
+      LINK_UNPRONOUNCEABLE: "Link text only contains symbols. If you think this link is an error due to a copy/paste bug, consider deleting it.  <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>",
       // Images
       ALT_UNPRONOUNCEABLE: "The alt text only contains unpronounceable symbols and/or spaces. Screen readers will announce the image and then pause. If the image is decorative, ensure there are no spaces within the alt text. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
       LINK_ALT_UNPRONOUNCEABLE: "The alt text within this linked image only contains unpronounceable symbols and/or spaces. Screen readers will announce the image and then pause. Ensure the alt text describes the destination of the link. <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
@@ -8235,26 +8395,27 @@ ${this.error.stack}
       EMBED_UNFOCUSABLE: '<code>&lt;iframe&gt;</code> with focusable elements should not have <code>tabindex="-1"</code>. The embedded content will not be keyboard accessible.',
       // Quality assurance
       QA_BAD_LINK: "Bad link found. Link appears to point to a development environment. <hr> {L} <strong {C}>%(LINK)</strong>",
-      QA_STRONG_ITALICS: "Bold and italic tags have semantic meaning, and should <strong>not</strong> be used to highlight entire paragraphs. Bolded text should be used to provide strong <strong>emphasis</strong> on a word or phrase. Italics should be used to highlight proper names (i.e. book and article titles), foreign words, quotes. Long quotes should be formatted as a blockquote.",
-      QA_PDF: 'Unable to check PDFs for accessibility. PDFs are considered web content and must be made accessible as well. PDFs often contain issues for people who use screen readers (missing structural tags or missing form field labels) and people who have low vision (text does not reflow when enlarged). <ul><li>If this is a form, consider using an accessible HTML form as an alternative.</li><li>If this is a document, consider converting it into a web page.</li></ul>Otherwise, please check <a href="https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html">PDF for accessibility in Acrobat DC.</a>',
-      QA_DOCUMENT: 'Unable to check document for accessibility. Linked documents are considered web content and must be made accessible as well. Please manually review this document. <ul><li>Make your <a href="https://support.google.com/docs/answer/6199477?hl=en">Google Workspace document or presentation more accessible.</a></li><li>Make your <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Office documents more accessible.</a></li></ul>',
-      QA_BLOCKQUOTE: "Is this a heading? <strong {C}>%(TEXT)</strong> <hr> Blockquotes should be used for quotes only. If this is intended to be a heading, change this blockquote to a semantic heading (e.g. Heading 2 or Heading 3).",
-      QA_FAKE_HEADING: "Is this a heading? <strong {C}>%(TEXT)</strong> <hr> A line of bold or large text might look like a heading, but someone using a screen reader cannot tell that it is important or jump to its content. Bold or large text should never replace semantic headings (Heading 2 to Heading 6).",
-      QA_FAKE_LIST: 'Are you trying to create a list? Possible list item found: <strong {C}>%(firstPrefix)</strong> <hr> Make sure to use semantic lists by using the bullet or number formatting buttons instead. When using a semantic list, assistive technologies are able to convey information such as the total number of items and the relative position of each item in the list. Learn more about <a href="https://www.w3.org/WAI/tutorials/page-structure/content/#lists">semantic lists.</a>',
-      QA_UPPERCASE: "Found all caps. Some screen readers may interpret all caps text as an acronym and will read each letter individually. Additionally, some people find all caps more difficult to read and it may give the appearance of SHOUTING.",
-      QA_UNDERLINE: "Underlined text can be confused with links. Consider using a different style such as <code>&lt;strong&gt;</code><strong>strong importance</strong><code>&lt;/strong&gt;</code> or <code>&lt;em&gt;</code><em>emphasis</em><code>&lt;/em&gt;</code>.",
-      QA_SUBSCRIPT: "The subscript and superscript formatting options should only be used to change the position of text for typographical conventions or standards. It should <strong>not</strong> solely be used for presentation or appearance purposes. Formatting entire sentences poses readability issues. Appropriate use cases would include displaying exponents, ordinal numbers such as 4<sup>th</sup> instead of fourth, and chemical formulas (e.g. H<sub>2</sub>O).",
-      QA_IN_PAGE_LINK: "Broken same-page link. The link target does not match any element on this page.",
+      QA_STRONG_ITALICS: "Bold and italic tags have semantic meaning, and should <strong>not</strong> be used to highlight entire paragraphs. Bolded text should be used to provide strong <strong>emphasis</strong> on a word or phrase. Italics should be used to highlight proper names (i.e. book and article titles), foreign words, quotes. Long quotes should be formatted as a blockquote. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+      QA_PDF: 'Unable to check PDFs for accessibility. PDFs are considered web content and must be made accessible as well. PDFs often contain issues for people who use screen readers (missing structural tags or missing form field labels) and people who have low vision (text does not reflow when enlarged). <ul><li>If this is a form, consider using an accessible HTML form as an alternative.</li><li>If this is a document, consider converting it into a web page.</li></ul>Otherwise, please check <a href="https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html">PDF for accessibility in Acrobat DC.</a> <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
+      QA_DOCUMENT: 'Unable to check document for accessibility. Linked documents are considered web content and must be made accessible as well. Please manually review this document. <ul><li>Make your <a href="https://support.google.com/docs/answer/6199477?hl=en">Google Workspace document or presentation more accessible.</a></li><li>Make your <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Office documents more accessible.</a></li></ul> <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
+      QA_BLOCKQUOTE: "Should this blockquote be a heading? Blockquotes should be used for quotes only. If this is intended to be a heading, change this blockquote to a semantic heading (e.g. Heading 2 or Heading 3). <hr> <strong {B}>Blockquote</strong> <strong {C}>%(TEXT)</strong>",
+      QA_FAKE_HEADING: "Is this a heading? A line of bold or large text might look like a heading, but someone using a screen reader cannot tell that it is important or jump to its content. Bold or large text should never replace semantic headings (Heading 2 to Heading 6). <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+      QA_FAKE_LIST: 'Are you trying to create a list? Possible list item found: <strong {C}>%(PREFIX)</strong> <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> Make sure to use semantic lists by using the bullet or number formatting buttons instead. When using a semantic list, assistive technologies are able to convey information such as the total number of items and the relative position of each item in the list. Learn more about <a href="https://www.w3.org/WAI/tutorials/page-structure/content/#lists">semantic lists.</a>',
+      QA_UPPERCASE: "Found all caps. Some screen readers may interpret all caps text as an acronym and will read each letter individually. Additionally, some people find all caps more difficult to read and it may give the appearance of SHOUTING. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+      QA_UNDERLINE: "Underlined text can be confused with links. Consider using a different style such as <code>&lt;strong&gt;</code><strong>strong importance</strong><code>&lt;/strong&gt;</code> or <code>&lt;em&gt;</code><em>emphasis</em><code>&lt;/em&gt;</code>. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+      QA_SUBSCRIPT: "The subscript and superscript formatting options should only be used to change the position of text for typographical conventions or standards. It should <strong>not</strong> solely be used for presentation or appearance purposes. Formatting entire sentences poses readability issues. Appropriate use cases would include displaying exponents, ordinal numbers such as 4<sup>th</sup> instead of fourth, and chemical formulas (e.g. H<sub>2</sub>O). <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+      QA_IN_PAGE_LINK: "Broken same-page link. This link tries to navigate to a section of the page that cannot be found. To fix this, make sure the link matches the <code>id</code> of the element you want to jump to. <hr> <strong {B}>ID</strong> <strong {C}>#%(ID)</strong>",
       QA_NESTED_COMPONENTS: "Avoid nesting interactive layout components, such as placing accordions within other accordions, or placing tabs inside accordions and vice versa. This can complicate navigation, increase cognitive overload, and lead to people overlooking content.",
-      QA_JUSTIFY: "Avoid using justified text, which aligns to both the left and right margins. This can be difficult for some people to read due to the uneven spaces between words. Use left-aligned text for better readability.",
-      QA_SMALL_TEXT: "Small text is harder to read, particularly for those with low vision. To ensure better readability, avoid using font sizes smaller than the default.",
+      QA_JUSTIFY: "Avoid using justified text, which aligns to both the left and right margins. This can be difficult for some people to read due to the uneven spaces between words. Use left-aligned text for better readability. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+      QA_SMALL_TEXT: "Small text is harder to read, particularly for those with low vision. To ensure better readability, avoid using font sizes smaller than the default. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
       // Shared
-      ACC_NAME: "<strong {B}>Accessible Name</strong> %(TEXT)",
+      LINK_TEXT: "<strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>",
+      ACC_NAME: "<strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
       ACC_NAME_TIP: `<hr><strong>Tip!</strong> The "accessible name" is the final label that gets communicated to people who use assistive technology. This helps them understand the link or button's purpose.`,
       HIDDEN_FOCUSABLE: 'Link or button has <code>aria-hidden=&quot;true&quot;</code> but is still keyboard focusable. If you are intending to hide a duplicate link or button, add <code>tabindex=&quot;-1&quot;</code> as well. Otherwise, <code>aria-hidden=&quot;true&quot;</code> should not be used on elements that can receive focus. <hr> Learn more about the <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden attribute.</a>',
       // Developer checks
       DUPLICATE_ID: "Found <strong>duplicate ID</strong>. Duplicate ID errors are known to cause problems for assistive technologies when they are trying to interact with content. Please remove or change the following ID. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
-      UNCONTAINED_LI: "All <code>&lt;li&gt;</code> list items must be placed inside <code>&lt;ul&gt;</code> unordered or <code>&lt;ol&gt;</code> ordered elements. This structure helps screen readers announce the list and its items accurately.",
+      UNCONTAINED_LI: "All <code>&lt;li&gt;</code> list items must be placed inside <code>&lt;ul&gt;</code> unordered or <code>&lt;ol&gt;</code> ordered elements. This structure helps screen readers announce the list and its items accurately. <hr> <strong {B}>List item</strong> <strong {C}>%(TEXT)</strong>",
       TABINDEX_ATTR: "Element should not have a <code>tabindex</code> attribute greater than 0.",
       // Meta checks
       META_TITLE: 'Missing page title! Please provide a <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title">page title.</a>',
@@ -8268,9 +8429,44 @@ ${this.error.stack}
       BTN_EMPTY: "Button is missing an accessible name that describes its purpose.",
       BTN_EMPTY_LABELLEDBY: "Button has an <code>aria-labelledby</code> value that is empty or does not match the <code>id</code> value of another element on the page.",
       BTN: "button",
-      BTN_TIP: 'Learn how to make an <a href="https://www.sarasoueidan.com/blog/accessible-icon-buttons/">accessible button.</a>',
-      BTN_ROLE_IN_NAME: 'Do not include the word "button" in the name of a button. Screen readers already convey the role of an element in addition to its name.',
-      LABEL_IN_NAME: "The visible text for this element appears to be different than the accessible name, which may cause confusion for assistive technologies users. Please review: <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
+      BTN_TIP: ' Learn how to make an <a href="https://www.sarasoueidan.com/blog/accessible-icon-buttons/">accessible button.</a>',
+      BTN_ROLE_IN_NAME: 'Do not include the word "button" in the name of a button. Screen readers already convey the role of an element in addition to its name. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>',
+      LABEL_IN_NAME: "The visible text for this element appears to be different than the accessible name, which may cause confusion for assistive technologies users. Please review: <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
+      LINK_MAYBE_BUTTON: `This link has an invalid target, and the accessible name contains the word "<strong {C}>%(NAME)</strong>". This suggests that this might not be a link at all, and instead controls some scripted behaviour on the page. To fix, replace the link with an <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">accessible button</a>, or correct the link's destination. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tip!</strong> Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.`,
+      POTENTIAL_UI_ELEMENTS: [
+        "menu",
+        "close",
+        "toggle",
+        "open",
+        "expand",
+        "collapse",
+        "next",
+        "previous",
+        "play",
+        "pause",
+        "submenu",
+        "show",
+        "hide",
+        "dropdown",
+        "back",
+        "forward",
+        "skip",
+        "submit",
+        "cancel",
+        "save",
+        "edit",
+        "delete",
+        "remove",
+        "search",
+        "filter",
+        "sort",
+        "stop",
+        "mute",
+        "unmute",
+        "fullscreen",
+        "minimize",
+        "maximize"
+      ],
       // Tables
       TABLES_MISSING_HEADINGS: 'Missing table headers! Accessible tables need HTML markup that indicates header cells and data cells which defines their relationship. This information provides context to people who use assistive technology. Tables should be used for tabular data only. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
       TABLES_SEMANTIC_HEADING: 'Semantic headings such as Heading 2 or Heading 3 should only be used for sections of content; <strong>not</strong> in HTML tables. Indicate table headings using the <code>&lt;th&gt;</code> element instead. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
@@ -8297,8 +8493,8 @@ ${this.error.stack}
       NO_SUGGESTION: "No accessible combination can be found by changing the text color. Try changing the background color.",
       // Language of parts
       PAGE_LANG_CONFIDENCE: 'More than half of the text on this page appears to be %(LIKELY_LANG), but the declared page language is %(PAGE_LANG). Consider updating the <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declared page language</a> to match the content.',
-      LANG_OF_PARTS: "The page language was declared as %(PAGE_LANG), but this content appears to be %(LIKELY_LANG). Ensure the content is tagged appropriately.",
-      LANG_MISMATCH: "This content appears to be %(DETECTED_LANG), however, it was tagged as %(WRONG_LANG).",
+      LANG_OF_PARTS: "The page language was declared as %(PAGE_LANG), but this content appears to be %(LIKELY_LANG). Ensure the content is tagged appropriately. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+      LANG_MISMATCH: "This content appears to be %(DETECTED_LANG), however, it was tagged as %(WRONG_LANG). <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
       LANG_OF_PARTS_ALT: "This alt text appears to be %(LIKELY_LANG), but the page language was declared as %(PAGE_LANG). Ensure the alt text is in the same language as the rest of the page. <hr> {ALT} <strong {C}>%(ALT)</strong>",
       LANG_TIP: '<hr><strong>Tip!</strong> Screen readers pronounce words using language tags. Pronouncing a language with a mismatched language pack produces unintelligible speech. Learn more about <a href="https://www.w3.org/WAI/WCAG22/Understanding/language-of-parts.html">language of parts.</a>',
       LANG_UNSUPPORTED: "Language-related accessibility checks were skipped because automatic language detection isn’t supported in this browser."
@@ -8545,7 +8741,7 @@ ${this.error.stack}
     main_toggle_show_alerts: "Show accessibility alerts",
     main_toggle_1: "One accessibility alert",
     main_toggle_2: "Two accessibility alerts",
-    main_toggle_plural: `%(count) accessibility alerts`,
+    main_toggle_plural: ` accessibility alerts`,
     MISSING_ROOT: `Editoria11y did not find any elements that matched the check area configuration: <code>%(root)</code>`,
     panelCheckAltText: "Check that each image describes what it means in context, and that there are no images of text.",
     panelCheckOutline: "This shows the heading outline. Check that it matches how the content is organized visually.",
@@ -9060,7 +9256,37 @@ ${this.error.stack}
       // EMBED_CUSTOM: { sources: '#embed', },
     }
   };
+  const validateSelectorOptions = (userOptions) => {
+    const selectorKeys = [
+      "checkRoot",
+      "ignoreAllIfAbsent",
+      "ignoreAllIfPresent",
+      "preventCheckingIfPresent",
+      "preventCheckingIfAbsent",
+      "linkIgnoreSpan",
+      "shadowComponents",
+      "containerIgnore",
+      "embeddedContent",
+      "panelNoCover",
+      "doNotRun",
+      "ignoreElements",
+      "editableContent",
+      "hiddenHandlers"
+    ];
+    for (const key of selectorKeys) {
+      const val = userOptions[key];
+      if (val && typeof val === "string") {
+        try {
+          document.querySelector(val);
+        } catch {
+          console.error(`Editoria11y: invalid CSS selector in option "${key}": "${val}"`);
+          delete userOptions[key];
+        }
+      }
+    }
+  };
   const preProcessOptions = async (userOptions) => {
+    validateSelectorOptions(userOptions);
     smush(State.option, ed11yDefaultOptions, ["checks"]);
     smush(State.option, userOptions, ["checks"]);
     Object.assign(State.option.checks, ed11yDefaultOptions.checks, userOptions.checks);

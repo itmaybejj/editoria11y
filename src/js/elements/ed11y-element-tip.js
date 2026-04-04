@@ -43,7 +43,7 @@ export class Ed11yElementTip extends HTMLElement {
     this.wrapper.innerHTML = `
 		<div class="tip">
 			<button class="close ed11y-tip-close">${spriteClose}</button>
-			<div class="content" data-test="${this.result.test}">
+			<div class="content">
 				<div class="message"></div>
 				<div class="content-footer">
 					<div class="edit-links"></div>
@@ -59,6 +59,8 @@ export class Ed11yElementTip extends HTMLElement {
 				<button class="next">${spriteNext}</button>
 		</div>
 		`;
+
+    this.wrapper.querySelector('.content').dataset.test = this.result.test;
 
     this.addEventListener('mouseover', this.handleHover, {
       passive: true,
@@ -313,14 +315,15 @@ export class Ed11yElementTip extends HTMLElement {
         this.result?.toggle?.setAttribute('data-ed11y-action', 'shut');
       }
     });
-    document.addEventListener('click', (event) => {
+    this._handleDocumentClick = (event) => {
       // Close tip when mouse is clicked outside it.
       if (this.open && !event.target.closest('.ed11y-element')) {
         const toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', 'document', []);
         toggle[0]?.setAttribute('data-ed11y-action', 'shut');
         this.setAttribute('data-ed11y-action', 'shut');
       }
-    });
+    };
+    document.addEventListener('click', this._handleDocumentClick);
     shadow.appendChild(this.wrapper);
     const focusLoopLeft = document.createElement('div');
     focusLoopLeft.setAttribute('tabIndex', '0');
@@ -340,6 +343,13 @@ export class Ed11yElementTip extends HTMLElement {
     });
     this.initialized = true;
     this.rendering = false;
+  }
+
+  disconnectedCallback() {
+    if (this._handleDocumentClick) {
+      document.removeEventListener('click', this._handleDocumentClick);
+    }
+    this.removeEventListener('mouseover', this.handleHover);
   }
 
   toggleTip(changeTo) {

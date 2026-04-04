@@ -228,8 +228,7 @@ export default {
       'A ligação abre num novo separador ou janela sem aviso. Se o fizer, pode ser desorientador, especialmente para as pessoas que têm dificuldade em percecionar conteúdos visuais. Em segundo lugar, nem sempre é uma boa prática controlar a experiência de alguém ou tomar decisões por ele. Indique que a hiperligação abre numa nova janela no texto da hiperligação<hr><strong>Dica!</strong> Conheça as melhores práticas: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">abrir ligações em novas janelas e separadores do browser.</a>',
     LINK_FILE_EXT:
       'A ligação aponta para um PDF ou um ficheiro descarregável (por exemplo, MP3, Zip, Word Doc) sem aviso. Indique o tipo de ficheiro no texto da ligação. Se for um ficheiro grande, considere incluir o tamanho do ficheiro. <hr> <strong>Exemplo:</strong> Relatório executivo (PDF, 3MB)',
-    LINK_IDENTICAL_NAME:
-      'A ligação tem um texto idêntico ao de outra ligação, embora aponte para uma página diferente. Vários links com o mesmo texto podem causar confusão para pessoas que usam leitores de tela. <strong>Considere tornar o link a seguir mais descritivo para ajudar a distingui-lo de outros links.</strong> <hr> <strong {B}>Nome acessível</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Vários links nesta página utilizam o mesmo texto, mas apontam para locais diferentes. Isto pode causar confusão aos utilizadores de tecnologias de apoio. Para corrigir, torne o texto deste link mais descritivo.',
     LINK_UNPRONOUNCEABLE:
       'O texto do link contém apenas símbolos. Se considerar que este link é um erro devido a uma falha de copiar/colar, considere eliminá-lo.',
 
@@ -313,8 +312,7 @@ export default {
     // QA
     QA_BAD_LINK:
       'Encontrada uma ligação incorrecta. O link parece apontar para um ambiente de desenvolvimento. <hr> {L} <strong {C}>%(LINK)</strong>',
-    QA_IN_PAGE_LINK:
-      'Link quebrado na mesma página. O destino do link não corresponde a nenhum elemento nesta página.',
+    QA_IN_PAGE_LINK: 'Ligação interna quebrada. Esta ligação tenta navegar para uma secção da página que não foi encontrada. Para corrigir, certifique-se de que a ligação corresponde ao <code>id</code> do elemento para o qual pretende saltar.',
     QA_STRONG_ITALICS:
       'As etiquetas de negrito e itálico têm um significado semântico e não devem ser utilizadas para destacar parágrafos inteiros. O texto em negrito deve ser utilizado para dar <strong>ênfase</strong> a uma palavra ou frase. O itálico deve ser usado para destacar nomes próprios (ou seja, títulos de livros e artigos), palavras estrangeiras e citações. As citações longas devem ser formatadas como uma citação em bloco.',
     QA_PDF:
@@ -341,7 +339,8 @@ export default {
       'O texto pequeno é mais difícil de ler, especialmente para pessoas com baixa visão. Para garantir melhor legibilidade, evite usar tamanhos de fonte menores que o padrão.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Nome acessível</strong> %(TEXT)',
+    LINK_TEXT: '<strong {B}>Texto da ligação</strong> <strong {C}>%(TEXT)</strong>',
+    ACC_NAME: '<strong {B}>Nome acessível</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Dica!</strong> O "nome acessível" é o rótulo final que é comunicado às pessoas que utilizam tecnologia assistiva e é calculado pelo ARIA. Isso ajuda a compreender o propósito do link ou botão.',
     HIDDEN_FOCUSABLE:
@@ -377,7 +376,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Não inclua a palavra "botão" no nome de um botão. Os leitores de tela já informam o papel do elemento além do seu nome.',
     LABEL_IN_NAME:
-      'O texto visível deste elemento parece ser diferente do nome acessível, o que pode causar confusão para os usuários de tecnologias assistivas. Por favor, reveja: <hr> <strong {B}>Nome Acessível</strong> <strong {C}>%(TEXT)</strong>',
+      'O texto visível deste elemento parece ser diferente do nome acessível, o que pode causar confusão para os usuários de tecnologias assistivas. Por favor, reveja: <hr> <strong {B}>Texto</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Nome Acessível</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Esta ligação tem um destino inválido e o nome acessível contém a palavra "<strong>%(NAME)</strong>". Isto sugere que pode não ser uma ligação, mas sim um controlo de comportamento programado na página. Para corrigir, substitua a ligação por um <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">botão acessível</a> ou corrija o destino da ligação. <hr> <strong>Dica!</strong> As tecnologias de apoio tratam botões e ligações de forma diferente. A utilização do elemento HTML correto garante que os utilizadores saibam quais os atalhos de teclado a utilizar e que ação será desencadeada.',
+    POTENTIAL_UI_ELEMENTS: ['menu', 'fechar', 'alternar', 'abrir', 'expandir', 'recolher', 'seguinte', 'anterior', 'reproduzir', 'pausa', 'submenu', 'mostrar', 'ocultar', 'pendente', 'voltar', 'avançar', 'saltar', 'submeter', 'cancelar', 'guardar', 'editar', 'eliminar', 'remover', 'procurar', 'filtrar', 'ordenar', 'parar', 'mudo', 'ativar som', 'ecrã inteiro', 'minimizar', 'maximizar'],
 
     // Tables
     TABLES_MISSING_HEADINGS:

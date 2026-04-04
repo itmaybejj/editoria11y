@@ -1,4 +1,4 @@
-import {default as Sa11yStrings} from '../sa11y-lang/nb.js';
+import { default as Sa11yStrings } from '../sa11y-lang/nb.js';
 // Machine translation.
 
 const testNames = {
@@ -241,7 +241,7 @@ export const interfaceStrings = {
 	main_toggle_show_alerts: 'Vis tilgjengelighetsvarsler',
 	main_toggle_1: 'En tilgjengelighetsadvarsel',
 	main_toggle_2: 'To tilgjengelighetsadvarsler',
-	main_toggle_plural: `%(count) tilgjengelighetsadvarsler`,
+	main_toggle_plural: ` tilgjengelighetsadvarsler`,
 	MISSING_ROOT: `Editoria11y fant ingen elementer som samsvarte med konfigurasjonen for kontrolområdet: <code>%(root)</code>`,
 	panelCheckAltText: `Kontroller at hvert bilde formidler betydning i konteksten, og at det ikke brukes bilder med innebygd tekst.`,
 	panelCheckOutline: `Dette viser overskriftsstrukturen. Kontroller at den samsvarer med sidens visuelle struktur.`,

@@ -224,8 +224,7 @@ export default {
       'Linkki avautuu uuteen välilehteen tai ikkunaan ilman varoitusta. Tämä voi olla hämmentävää erityisesti henkilöille, joilla on vaikeuksia visuaalisen sisällön hahmottamisessa. Toiseksi, ei ole aina hyvä käytäntö hallita toisen kokemusta tai tehdä päätöksiä hänen puolestaan. Ilmoita linkkitekstissä, että linkki avautuu uuteen ikkunaan<hr><strong>Vinkki!</strong> Opi parhaat käytännöt: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">Linkkien avaaminen uusissa selainikkunoissa ja välilehdissä.</a>',
     LINK_FILE_EXT:
       'Linkki osoittaa PDF-tiedostoon tai ladattavaan tiedostoon (esim. MP3, Zip, Word Doc) ilman varoitusta. Ilmoita tiedostotyyppi linkkitekstissä. Jos kyseessä on suuri tiedosto, harkitse tiedoston koon ilmoittamista. <hr> <strong>Esimerkki:</strong> Toimitusjohtajan raportti (PDF, 3MB)',
-    LINK_IDENTICAL_NAME:
-      'Linkillä on sama teksti kuin toisella linkillä, vaikka se osoittaa eri sivulle. Useat linkit, joissa on sama teksti, voivat aiheuttaa sekaannusta ruudunlukuohjelmia käyttäville henkilöille. <strong>Harkitse seuraavan linkin tekemistä kuvaavammaksi, jotta se erottuu paremmin muista linkeistä.</strong> <hr> <strong {B}>Saavutettava nimi</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Useat linkit tällä sivulla käyttävät samaa linkkitekstiä, mutta osoittavat eri paikkoihin. Tämä voi aiheuttaa hämmennystä avustavan teknologian käyttäjille. Korjaa ongelma tekemällä tästä linkkitekstistä kuvaavampi.',
     LINK_UNPRONOUNCEABLE:
       'Linkin teksti sisältää vain symboleja. Jos uskot, että tämä linkki on kopiointi-/liittämisvirhe, harkitse sen poistamista.',
 
@@ -309,8 +308,7 @@ export default {
     // QA
     QA_BAD_LINK:
       'Huono linkki löytyi. Linkki näyttää osoittavan kehitysympäristöön. <hr> {L} <strong {C}>%(LINK)</strong>',
-    QA_IN_PAGE_LINK:
-      'Rikkinäinen samalla sivulla oleva linkki. Linkin kohde ei vastaa mitään tämän sivun elementtiä.',
+    QA_IN_PAGE_LINK: 'Rikkoutunut saman sivun linkki. Tämä linkki yrittää navigoida sivun osioon, jota ei löydy. Korjaa ongelma varmistamalla, että linkki vastaa sen elementin <code>id</code>-tunnusta, johon haluat hypätä.',
     QA_STRONG_ITALICS:
       'Lihavointi- ja kursivointitunnisteilla on semanttinen merkitys, eikä niitä tulisi <strong>ei</strong> käyttää kokonaisten kappaleiden korostamiseen. Lihavoitua tekstiä tulisi käyttää sanan tai lauseen voimakkaaseen <strong>korostamiseen</strong>. Kursivointia tulisi käyttää oikeiden nimien (esim. kirjan ja artikkelin otsikot), vierasperäisten sanojen ja lainausmerkkien korostamiseen. Pitkät lainaukset olisi muotoiltava blokkilainauksiksi.',
     QA_PDF:
@@ -337,7 +335,8 @@ export default {
       'Pientä tekstiä on vaikeampi lukea, erityisesti heikkonäköisille. Varmistaaksesi paremman luettavuuden, vältä käyttämästä oletusarvoa pienempiä kirjasinkokoja.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Saavutettava nimi</strong> %(TEXT)',
+    ACC_NAME: '<strong {B}>Saavutettava nimi</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_TEXT: '<strong {B}>Linkkiteksti</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr> <strong>Vinkki!</strong> "Saavutettava nimi" on lopullinen etiketti, joka viestitään apuvälineitä käyttävien henkilöiden kanssa ja joka lasketaan ARIA:n avulla. Tämä auttaa heitä ymmärtämään linkin tai painikkeen tarkoituksen.',
     HIDDEN_FOCUSABLE:
@@ -374,7 +373,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Älä sisällytä sanaa "painike" painikkeen nimeen. Ruudunlukijat ilmoittavat jo elementin roolin sen nimen lisäksi.',
     LABEL_IN_NAME:
-      'Tämän elementin näkyvä teksti näyttää olevan erilainen kuin saavutettava nimi, mikä saattaa aiheuttaa hämmennystä avustavien teknologioiden käyttäjille. Tarkista: <hr> <strong {B}>Saavutettava nimi</strong> <strong {C}>%(TEXT)</strong>',
+      'Tämän elementin näkyvä teksti näyttää olevan erilainen kuin saavutettava nimi, mikä saattaa aiheuttaa hämmennystä avustavien teknologioiden käyttäjille. Tarkista: <hr> <strong {B}>Teksti</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Saavutettava nimi</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Tällä linkillä on virheellinen kohde, ja saavutettava nimi sisältää sanan "<strong>%(NAME)</strong>". Tämä viittaa siihen, ettei kyseessä välttämättä ole linkki lainkaan, vaan se ohjaa jotakin sivun skriptattua toimintaa. Korjaa ongelma korvaamalla linkki <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">saavutettavalla painikkeella</a> tai korjaamalla linkin kohde. <hr> <strong>Vinkki!</strong> Avustavat teknologiat käsittelevät painikkeita ja linkkejä eri tavalla. Oikean HTML-elementin käyttö varmistaa, että käyttäjät tietävät, mitä pikanäppäimiä käyttää ja mikä toiminto käynnistyy.',
+    POTENTIAL_UI_ELEMENTS: ['valikko', 'sulje', 'vaihda', 'avaa', 'laajenna', 'supista', 'seuraava', 'edellinen', 'toista', 'tauko', 'alavalikko', 'näytä', 'piilota', 'pudotusvalikko', 'takaisin', 'eteenpäin', 'ohita', 'lähetä', 'peruuta', 'tallenna', 'muokkaa', 'poista', 'poista', 'etsi', 'suodata', 'lajittele', 'pysäytä', 'vaimenna', 'poista vaimennus', 'koko näyttö', 'minimoi', 'maksimoi'],
 
     // Tables
     TABLES_MISSING_HEADINGS:

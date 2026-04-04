@@ -43,8 +43,8 @@ export default function checkImages() {
 
   // Utility function to process alt text for stop words.
   const containsAltTextStopWords = (alt) => {
-    const altLowerCase = alt.toLowerCase();
-    const altOnlyLetters = altLowerCase.replace(/[^\p{L}\s]/gu, '').trim();
+    const altLowerCase = Utils.removeWhitespace(alt).toLowerCase();
+    const altOnlyLetters = Utils.removeWhitespace(altLowerCase.replace(/[^\p{L}\s]/gu, ''));
     const hit = [null, null, null];
 
     // 1) URL hit.
@@ -313,6 +313,7 @@ export default function checkImages() {
           element: $el,
           type: unpronounceable.type || 'error',
           content: Lang.sprintf(unpronounceable.content || conditional, altText),
+          args: [altText],
           dismiss: Utils.prepareDismissal(`${conditional + src}`),
           dismissAll: unpronounceable.dismissAll ? 'ALT_UNPRONOUNCEABLE' : false,
           developer: unpronounceable.developer || false,
@@ -341,8 +342,7 @@ export default function checkImages() {
     // Maybe bad alt... but not high confidence.
     const hasTooMuchNoise =
       /^(?:\s*\d){5,}\s*$/.test(altText) || // Is a number longer than 5 digits.
-      (altText.match(/[_-]/g) || []).length >= 3 || // Contains more than 3 delimiters (- or _)
-      (altText.match(/[^\p{L}\s,.!?\-\d]/gu) || []).length >= 5; // More than 5 special chars.
+      (altText.match(/[_-]/g) || []).length >= 3; // Contains more than 3 delimiters (- or _)
 
     if (error[0] !== null) {
       // Has stop words.
@@ -354,6 +354,7 @@ export default function checkImages() {
           element: $el,
           type: rule.type || 'error',
           content: Lang.sprintf(rule.content || conditional, error[0], altText),
+          args: [error[0], altText],
           dismiss: Utils.prepareDismissal(`${conditional + src + rawAlt}`),
           dismissAll: rule.dismissAll ? conditional : false,
           developer: rule.developer || false,
@@ -371,6 +372,7 @@ export default function checkImages() {
           element: $el,
           type: rule.type || 'error',
           content: Lang.sprintf(rule.content || conditional, altText),
+          args: [altText],
           dismiss: Utils.prepareDismissal(`${conditional + src + rawAlt}`),
           dismissAll: rule.dismissAll ? conditional : false,
           developer: rule.developer || false,
@@ -386,6 +388,7 @@ export default function checkImages() {
           element: $el,
           type: rule.type || 'warning',
           content: Lang.sprintf(rule.content || conditional, error[1], altText),
+          args: [error[1], altText],
           dismiss: Utils.prepareDismissal(`${conditional + src + rawAlt}`),
           dismissAll: rule.dismissAll ? conditional : false,
           developer: rule.developer || false,
@@ -406,6 +409,7 @@ export default function checkImages() {
           element: $el,
           type: rule.type || 'error',
           content: Lang.sprintf(rule.content || conditional, altText),
+          args: [altText],
           dismiss: Utils.prepareDismissal(`${conditional + src + rawAlt}`),
           dismissAll: rule.dismissAll ? conditional : false,
           developer: rule.developer || false,
@@ -422,6 +426,7 @@ export default function checkImages() {
           element: $el,
           type: rule.type || 'warning',
           content: Lang.sprintf(rule.content || conditional, altText),
+          args: [altText],
           dismiss: Utils.prepareDismissal(`${conditional}WARNING${src + rawAlt} `),
           dismissAll: rule.dismissAll ? conditional : false,
           developer: rule.developer || false,
@@ -433,13 +438,13 @@ export default function checkImages() {
         ? State.option.checks.LINK_IMAGE_LONG_ALT
         : State.option.checks.IMAGE_ALT_TOO_LONG;
       const conditional = link ? 'LINK_IMAGE_LONG_ALT' : 'IMAGE_ALT_TOO_LONG';
-      const truncated = Utils.truncateString(altText, 600);
       if (rule) {
         State.results.push({
           test: conditional,
           element: $el,
           type: rule.type || 'warning',
-          content: Lang.sprintf(rule.content || conditional, rawAlt.length, truncated),
+          content: Lang.sprintf(rule.content || conditional, rawAlt.length, altText),
+          args: [rawAlt.length, altText],
           dismiss: Utils.prepareDismissal(`${conditional + src + rawAlt}`),
           dismissAll: rule.dismissAll ? conditional : false,
           developer: rule.developer || false,
@@ -470,6 +475,7 @@ export default function checkImages() {
           element: $el,
           type: rule.type || 'warning',
           content: rule.content ? Lang.sprintf(rule.content, altText, accName) : tooltip,
+          args: [altText, accName],
           dismiss: Utils.prepareDismissal(`${conditional + src + rawAlt}`),
           dismissAll: rule.dismissAll ? conditional : false,
           developer: rule.developer || false,
@@ -489,6 +495,7 @@ export default function checkImages() {
                 'IMAGE_FIGURE_DUPLICATE_ALT',
               altText,
             ),
+            args: [altText],
             dismiss: Utils.prepareDismissal(`IMAGE_FIGURE_DUPLICATE_ALT ${src}`),
             dismissAll: State.option.checks.IMAGE_FIGURE_DUPLICATE_ALT.dismissAll
               ? 'IMAGE_FIGURE_DUPLICATE_ALT'
@@ -503,6 +510,7 @@ export default function checkImages() {
           element: $el,
           type: State.option.checks.IMAGE_PASS.type || 'good',
           content: Lang.sprintf(State.option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
+          args: [altText],
           dismiss: Utils.prepareDismissal(`IMAGE_PASS FIGURE ${src + rawAlt}`),
           dismissAll: State.option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
           developer: State.option.checks.IMAGE_PASS.developer || false,
@@ -516,6 +524,7 @@ export default function checkImages() {
           element: $el,
           type: State.option.checks.IMAGE_PASS.type || 'good',
           content: Lang.sprintf(State.option.checks.IMAGE_PASS.content || 'IMAGE_PASS', altText),
+          args: [altText],
           dismiss: Utils.prepareDismissal(`IMAGE_PASS ${src + rawAlt}`),
           dismissAll: State.option.checks.IMAGE_PASS.dismissAll ? 'IMAGE_PASS' : false,
           developer: State.option.checks.IMAGE_PASS.developer || false,

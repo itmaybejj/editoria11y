@@ -1,4 +1,4 @@
-import {default as Sa11yStrings} from '../sa11y-lang/nl.js';
+import { default as Sa11yStrings } from '../sa11y-lang/nl.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
 const testNames = {
@@ -237,9 +237,6 @@ export const interfaceStrings = {
 	main_toggle_hide_alerts: 'Toegankelijkheidsmeldingen verbergen',
 	main_toggle_show: 'Toegankelijkheidstools tonen',
 	main_toggle_show_alerts: 'Toegankelijkheidsmeldingen tonen',
-	main_toggle_1: 'Één toegankelijkheidswaarschuwing',
-	main_toggle_2: 'Twee toegankelijkheidswaarschuwingen',
-	main_toggle_plural: `%(count) toegankelijkheidswaarschuwingen`,
 	MISSING_ROOT: `Editoria11y vond geen elementen die overeenkwamen met de configuratie van het controlegebied: <code>%(root)</code>`,
 	panelCheckAltText: `Controleer of elke afbeelding duidelijk maakt wat zij in de context betekent, en dat er geen afbeeldingen met tekst worden gebruikt.`,
 	panelCheckOutline: `Toont de koppenstructuur. Controleer of deze overeenkomt met de visuele opbouw van de inhoud.`,

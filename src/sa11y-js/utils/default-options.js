@@ -255,6 +255,7 @@ const defaultOptions = {
     BTN_EMPTY: true,
     BTN_EMPTY_LABELLEDBY: true,
     BTN_ROLE_IN_NAME: true,
+    LINK_MAYBE_BUTTON: true,
 
     // Contrast checks
     CONTRAST_WARNING: {

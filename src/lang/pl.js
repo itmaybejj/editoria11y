@@ -1,4 +1,4 @@
-import {default as Sa11yStrings} from '../sa11y-lang/pl.js';
+import { default as Sa11yStrings } from '../sa11y-lang/pl.js';
 
 const testNames = {
 	ALT_PLACEHOLDER: 'Ten tekst alternatywny nie opisuje obrazu',
@@ -238,7 +238,7 @@ export const interfaceStrings = {
 	main_toggle_show_alerts: 'Pokaż alerty dostępności',
 	main_toggle_1: 'Jedno ostrzeżenie dotyczące dostępności',
 	main_toggle_2: 'Dwa ostrzeżenia dotyczące dostępności',
-	main_toggle_plural: `%(count) ostrzeżeń dotyczących dostępności`,
+	main_toggle_plural: ` ostrzeżeń dotyczących dostępności`,
 	MISSING_ROOT: `Editoria11y nie znalazł żadnych elementów pasujących do konfiguracji obszaru sprawdzania: <code>%(root)</code>`,
 	panelCheckAltText: `Sprawdź, czy każdy obraz opisuje, co oznacza w kontekście, i czy nie ma obrazów tekstu.`,
 	panelCheckOutline: `To narzędzie pokazuje strukturę nagłówków. Sprawdź, czy odpowiada ona wizualnej organizacji treści.`,

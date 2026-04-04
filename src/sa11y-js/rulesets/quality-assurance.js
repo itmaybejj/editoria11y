@@ -2,6 +2,7 @@ import Constants from '../utils/constants';
 import Elements from '../utils/elements';
 import Lang from '../utils/lang';
 import * as Utils from '../utils/utils';
+import { computeAccessibleName } from '../utils/computeAccessibleName';
 import { State } from '../core/state';
 
 export default function checkQA() {
@@ -10,11 +11,13 @@ export default function checkQA() {
   /* *********************************************************** */
   if (State.option.checks.QA_BAD_LINK) {
     Elements.Found.CustomErrorLinks.forEach(($el) => {
+      const text = Utils.getText($el);
       State.results.push({
         test: 'QA_BAD_LINK',
         element: $el,
         type: State.option.checks.QA_BAD_LINK.type || 'error',
-        content: Lang.sprintf(State.option.checks.QA_BAD_LINK.content || 'QA_BAD_LINK', $el),
+        content: Lang.sprintf(State.option.checks.QA_BAD_LINK.content || 'QA_BAD_LINK', $el, text),
+        args: [$el, text],
         inline: true,
         dismiss: Utils.prepareDismissal(`QA_BAD_LINK ${$el.tagName + $el.textContent}`),
         dismissAll: State.option.checks.QA_BAD_LINK.dismissAll ? 'QA_BAD_LINK' : false,
@@ -36,7 +39,9 @@ export default function checkQA() {
           type: State.option.checks.QA_STRONG_ITALICS.type || 'warning',
           content: Lang.sprintf(
             State.option.checks.QA_STRONG_ITALICS.content || 'QA_STRONG_ITALICS',
+            text,
           ),
+          args: [text],
           dismiss: Utils.prepareDismissal(`QA_STRONG_ITALICS ${$el.tagName + $el.textContent}`),
           dismissAll: State.option.checks.QA_STRONG_ITALICS.dismissAll
             ? 'QA_STRONG_ITALICS'
@@ -53,50 +58,90 @@ export default function checkQA() {
   Elements.Found.Links.forEach(($el) => {
     if ($el.hasAttribute('href')) {
       const href = $el.getAttribute('href');
+      const accName = Utils.removeWhitespace(
+        computeAccessibleName($el, Constants.Exclusions.LinkSpan),
+      );
 
       // Has file extension.
       const hasExtension = $el.matches(Constants.Global.documentSources);
       const hasPDF = $el.matches('a[href$=".pdf"], a[href*=".pdf?"]');
 
-      // Check for broken same-page links.
-      if (State.option.checks.QA_IN_PAGE_LINK) {
+      // Check for broken same-page links and missing interactive semantics.
+      if (State.option.checks.QA_IN_PAGE_LINK || State.option.checks.LINK_MAYBE_BUTTON) {
         const hasText = Utils.getText($el).length !== 0;
         const ignored = $el.ariaHidden === 'true' && $el.getAttribute('tabindex') === '-1';
+
         const hasAttributes =
           $el.hasAttribute('role') ||
           $el.hasAttribute('aria-haspopup') ||
           $el.hasAttribute('aria-expanded') ||
           $el.hasAttribute('onclick') ||
           $el.hasAttribute('disabled') ||
-          $el.closest('nav, [role="navigation"]');
+          !!$el.closest('nav, [role="navigation"]');
 
         if ((href.startsWith('#') || href === '') && hasText && !ignored && !hasAttributes) {
           const targetId = href.substring(1);
           const ariaControls = $el.getAttribute('aria-controls');
+          const decoded = targetId ? decodeURIComponent(targetId) : '';
+          const encoded = targetId ? encodeURIComponent(targetId) : '';
           const targetElement =
             targetId &&
             (document.getElementById(targetId) ||
-              document.getElementById(decodeURIComponent(targetId)) ||
-              document.getElementById(encodeURIComponent(targetId)) ||
-              document.getElementById(ariaControls) ||
-              document.querySelector(`a[name="${targetId}"]`));
+              (ariaControls && document.getElementById(ariaControls)) ||
+              (decoded !== targetId && document.getElementById(decoded)) ||
+              (encoded !== targetId && document.getElementById(encoded)) ||
+              document.querySelector(`a[name="${CSS.escape(targetId)}"]`));
 
-          // If reference ID doesn't exist.
+          // If reference ID doesn't exist (Target failed)
           if (!targetElement) {
-            State.results.push({
-              test: 'QA_IN_PAGE_LINK',
-              element: $el,
-              type: State.option.checks.QA_IN_PAGE_LINK.type || 'error',
-              content: Lang.sprintf(
-                State.option.checks.QA_IN_PAGE_LINK.content || 'QA_IN_PAGE_LINK',
-              ),
-              inline: true,
-              dismiss: Utils.prepareDismissal(`QA_IN_PAGE_LINK ${href}`),
-              dismissAll: State.option.checks.QA_IN_PAGE_LINK.dismissAll
-                ? 'QA_IN_PAGE_LINK'
-                : false,
-              developer: State.option.checks.QA_IN_PAGE_LINK.developer || false,
-            });
+            let isFauxButton = false;
+
+            // 1. Broken same page link AND most likely a button!
+            if (State.option.checks.LINK_MAYBE_BUTTON) {
+              const keywords = Lang._('POTENTIAL_UI_ELEMENTS');
+              const matchedKeyword = keywords.find((word) => accName.toLowerCase().includes(word));
+              if (matchedKeyword && accName.length <= 15) {
+                isFauxButton = true;
+                State.results.push({
+                  test: 'LINK_MAYBE_BUTTON',
+                  element: $el,
+                  type: State.option.checks.LINK_MAYBE_BUTTON.type || 'error',
+                  content: Lang.sprintf(
+                    State.option.checks.LINK_MAYBE_BUTTON.content || 'LINK_MAYBE_BUTTON',
+                    matchedKeyword,
+                    accName,
+                  ),
+                  args: [matchedKeyword, accName],
+                  inline: true,
+                  dismiss: Utils.prepareDismissal(`LINK_MAYBE_BUTTON_${matchedKeyword}`),
+                  dismissAll: State.option.checks.LINK_MAYBE_BUTTON.dismissAll
+                    ? 'LINK_MAYBE_BUTTON'
+                    : false,
+                  developer: State.option.checks.LINK_MAYBE_BUTTON.developer || true,
+                });
+              }
+            }
+
+            // 2. Mostly likely broken same-page link.
+            if (State.option.checks.QA_IN_PAGE_LINK && !isFauxButton) {
+              State.results.push({
+                test: 'QA_IN_PAGE_LINK',
+                element: $el,
+                type: State.option.checks.QA_IN_PAGE_LINK.type || 'error',
+                content: Lang.sprintf(
+                  State.option.checks.QA_IN_PAGE_LINK.content || 'QA_IN_PAGE_LINK',
+                  targetId,
+                  accName,
+                ),
+                args: [targetId, accName],
+                inline: true,
+                dismiss: Utils.prepareDismissal(`QA_IN_PAGE_LINK ${href}`),
+                dismissAll: State.option.checks.QA_IN_PAGE_LINK.dismissAll
+                  ? 'QA_IN_PAGE_LINK'
+                  : false,
+                developer: State.option.checks.QA_IN_PAGE_LINK.developer || false,
+              });
+            }
           }
         }
       }
@@ -107,7 +152,8 @@ export default function checkQA() {
           test: 'QA_DOCUMENT',
           element: $el,
           type: State.option.checks.QA_DOCUMENT.type || 'warning',
-          content: Lang.sprintf(State.option.checks.QA_DOCUMENT.content || 'QA_DOCUMENT'),
+          content: Lang.sprintf(State.option.checks.QA_DOCUMENT.content || 'QA_DOCUMENT', accName),
+          args: [accName],
           inline: true,
           dismiss: Utils.prepareDismissal(`QA_DOCUMENT ${href}`),
           dismissAll: State.option.checks.QA_DOCUMENT.dismissAll ? 'QA_DOCUMENT' : false,
@@ -118,7 +164,8 @@ export default function checkQA() {
           test: 'QA_PDF',
           element: $el,
           type: State.option.checks.QA_PDF.type || 'warning',
-          content: Lang.sprintf(State.option.checks.QA_PDF.content || 'QA_PDF'),
+          content: Lang.sprintf(State.option.checks.QA_PDF.content || 'QA_PDF', accName),
+          args: [accName],
           inline: true,
           dismiss: Utils.prepareDismissal(`QA_PDF ${href}`),
           dismissAll: State.option.checks.QA_PDF.dismissAll ? 'QA_PDF' : false,
@@ -140,6 +187,7 @@ export default function checkQA() {
           element: $el,
           type: State.option.checks.QA_BLOCKQUOTE.type || 'warning',
           content: Lang.sprintf(State.option.checks.QA_BLOCKQUOTE.content || 'QA_BLOCKQUOTE', text),
+          args: [text],
           dismiss: Utils.prepareDismissal(`QA_BLOCKQUOTE ${text}`),
           dismissAll: State.option.checks.QA_BLOCKQUOTE.dismissAll ? 'QA_BLOCKQUOTE' : false,
           developer: State.option.checks.QA_BLOCKQUOTE.developer || false,
@@ -214,16 +262,17 @@ export default function checkQA() {
   /*  Warning: Detect fake headings                                     */
   /* ****************************************************************** */
   if (State.option.checks.QA_FAKE_HEADING) {
-    const addResult = (element, escapedText) => {
+    const addResult = (element, text) => {
       State.results.push({
         test: 'QA_FAKE_HEADING',
         element,
         type: State.option.checks.QA_FAKE_HEADING.type || 'warning',
         content: Lang.sprintf(
           State.option.checks.QA_FAKE_HEADING.content || 'QA_FAKE_HEADING',
-          escapedText,
+          text,
         ),
-        dismiss: Utils.prepareDismissal(`QA_FAKE_HEADING ${escapedText}`),
+        args: [text],
+        dismiss: Utils.prepareDismissal(`QA_FAKE_HEADING ${text}`),
         inline: true,
         dismissAll: State.option.checks.QA_FAKE_HEADING.dismissAll ? 'QA_FAKE_HEADING' : false,
         developer: State.option.checks.QA_FAKE_HEADING.developer || false,
@@ -404,7 +453,9 @@ export default function checkQA() {
             content: Lang.sprintf(
               State.option.checks.QA_FAKE_LIST.content || 'QA_FAKE_LIST',
               firstPrefix,
+              firstText,
             ),
+            args: [firstPrefix, firstText],
             dismiss: Utils.prepareDismissal(`QA_FAKE_LIST ${p.textContent}`),
             dismissAll: State.option.checks.QA_FAKE_LIST.dismissAll ? 'QA_FAKE_LIST' : false,
             developer: State.option.checks.QA_FAKE_LIST.developer || false,
@@ -447,7 +498,11 @@ export default function checkQA() {
           test: 'QA_UPPERCASE',
           element: $el,
           type: State.option.checks.QA_UPPERCASE.type || 'warning',
-          content: Lang.sprintf(State.option.checks.QA_UPPERCASE.content || 'QA_UPPERCASE'),
+          content: Lang.sprintf(
+            State.option.checks.QA_UPPERCASE.content || 'QA_UPPERCASE',
+            thisText,
+          ),
+          args: [thisText],
           dismiss: Utils.prepareDismissal(`QA_UPPERCASE ${thisText}`),
           dismissAll: State.option.checks.QA_UPPERCASE.dismissAll ? 'QA_UPPERCASE' : false,
           developer: State.option.checks.QA_UPPERCASE.developer || false,
@@ -473,37 +528,43 @@ export default function checkQA() {
   /* ************************************************************** */
   // Check underlined text. Created by Brian Teeman!
   const addUnderlineResult = ($el) => {
+    const text = Utils.getText($el);
     State.results.push({
       test: 'QA_UNDERLINE',
       element: $el,
       type: State.option.checks.QA_UNDERLINE.type || 'warning',
-      content: Lang.sprintf(State.option.checks.QA_UNDERLINE.content || 'QA_UNDERLINE'),
+      content: Lang.sprintf(State.option.checks.QA_UNDERLINE.content || 'QA_UNDERLINE', text),
+      args: [text],
       inline: true,
-      dismiss: Utils.prepareDismissal(`QA_UNDERLINE ${$el.textContent}`),
+      dismiss: Utils.prepareDismissal(`QA_UNDERLINE ${text}`),
       dismissAll: State.option.checks.QA_UNDERLINE.dismissAll ? 'QA_UNDERLINE' : false,
       developer: State.option.checks.QA_UNDERLINE.developer || false,
     });
   };
 
   const addJustifyResult = ($el) => {
+    const text = Utils.getText($el);
     State.results.push({
       test: 'QA_JUSTIFY',
       element: $el,
       type: State.option.checks.QA_JUSTIFY.type || 'warning',
-      content: Lang.sprintf(State.option.checks.QA_JUSTIFY.content || 'QA_JUSTIFY'),
-      dismiss: Utils.prepareDismissal(`QA_JUSTIFY ${$el.textContent}`),
+      content: Lang.sprintf(State.option.checks.QA_JUSTIFY.content || 'QA_JUSTIFY', text),
+      args: [text],
+      dismiss: Utils.prepareDismissal(`QA_JUSTIFY ${text}`),
       dismissAll: State.option.checks.QA_JUSTIFY.dismissAll ? 'QA_JUSTIFY' : true,
       developer: State.option.checks.QA_JUSTIFY.developer || false,
     });
   };
 
   const addSmallTextResult = ($el) => {
+    const text = Utils.getText($el);
     State.results.push({
       test: 'QA_SMALL_TEXT',
       element: $el,
       type: State.option.checks.QA_SMALL_TEXT.type || 'warning',
-      content: Lang.sprintf(State.option.checks.QA_SMALL_TEXT.content || 'QA_SMALL_TEXT'),
-      dismiss: Utils.prepareDismissal(`QA_SMALL_TEXT ${$el.textContent}`),
+      content: Lang.sprintf(State.option.checks.QA_SMALL_TEXT.content || 'QA_SMALL_TEXT', text),
+      args: [text],
+      dismiss: Utils.prepareDismissal(`QA_SMALL_TEXT ${text}`),
       dismissAll: State.option.checks.QA_SMALL_TEXT.dismissAll ? 'QA_SMALL_TEXT' : true,
       developer: State.option.checks.QA_SMALL_TEXT.developer || false,
     });
@@ -536,7 +597,9 @@ export default function checkQA() {
     const isInherited = parentFontSize === computedFontSize;
 
     // Ensure the font size is specific to the element, not inherited.
-    const withinRange = !isInherited && computedFontSize > 1 && computedFontSize <= defaultSize;
+    const isSup = $el.closest('sup, sub') !== null;
+    const withinRange =
+      !isInherited && !isSup && computedFontSize > 1 && computedFontSize <= defaultSize;
     if (State.option.checks.QA_SMALL_TEXT && withinRange) {
       addSmallTextResult($el);
     }
@@ -583,7 +646,8 @@ export default function checkQA() {
           test: 'QA_SUBSCRIPT',
           element: $el,
           type: State.option.checks.QA_SUBSCRIPT.type || 'warning',
-          content: Lang.sprintf(State.option.checks.QA_SUBSCRIPT.content || 'QA_SUBSCRIPT'),
+          content: Lang.sprintf(State.option.checks.QA_SUBSCRIPT.content || 'QA_SUBSCRIPT', text),
+          args: [text],
           inline: true,
           dismiss: Utils.prepareDismissal(`QA_SUBSCRIPT ${$el.tagName + text}`),
           dismissAll: State.option.checks.QA_SUBSCRIPT.dismissAll ? 'QA_SUBSCRIPT' : false,

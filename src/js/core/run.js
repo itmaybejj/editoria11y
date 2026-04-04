@@ -90,7 +90,7 @@ export function updatePanel() {
       resetResults(true);
     } else {
       // Reconnect map
-      State.results.push(UI.oldResults);
+      State.results.push(...UI.oldResults);
       if (!UI.alignPending) {
         alignButtons();
         alignPanel();
@@ -362,13 +362,12 @@ export function updatePanel() {
 export function buildJumpList() {
   UI.jumpList = [];
   pauseObservers();
-  const toSplice = [];
 
   // Initial alignment to get approximate Y position order for jump list.
-  for (let i = 0; i < State.results.length; i++) {
-    if (!State.results[i].element) {
-      // E.g. readability. Should never happen but race conditions are possible.
-      toSplice.push(i);
+  for (let i = State.results.length - 1; i >= 0; i--) {
+    if (!State.results[i].element || !State.results[i].element.isConnected) {
+      // E.g. readability, or stale reference to removed DOM node.
+      State.results.splice(i, 1);
       continue;
     }
     let top = State.results[i].element.getBoundingClientRect().top;
@@ -390,9 +389,6 @@ export function buildJumpList() {
     }
     State.results[i].sortPos = top;
   }
-  toSplice.forEach((i) => {
-    State.results.splice(i, 1);
-  });
 
   // Sort from bottom to top so focus order after insert is top to bottom.
   State.results.sort((a, b) => b.sortPos - a.sortPos);
@@ -757,16 +753,11 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
 
   // Various hiddenHandlers may cause element to animate open.
   if (recheck > 0) {
-    window.setTimeout(
-      () => {
-        requestAnimationFrame(() => alignTip(button, toolTip, loopCount, reveal));
-      },
-      200 / loopCount,
-      button,
-      toolTip,
-      loopCount,
-      reveal,
-    );
+    requestAnimationFrame(() => {
+      window.setTimeout(() => {
+        alignTip(button, toolTip, loopCount, reveal);
+      }, 200 / loopCount);
+    });
   }
   if (reveal) {
     window.setTimeout(
@@ -832,10 +823,13 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
   document.documentElement.style.setProperty('--ed11y-buttonWidth', `${buttonSize}px`);
   tip.style.setProperty('max-width', `min(${containWidth > 280 ? containWidth : 280}px, 90vw)`);
   const containRight = Math.min(window.innerWidth, containLeft + containWidth);
-  toolTip.style.setProperty('top', `${buttonOffset.top + scrollTop}px`);
-  toolTip.style.setProperty('left', `${buttonOffset.left + leftAdd}px`);
+
+  // Read layout dimensions before writing position to avoid forced reflow.
   const tipWidth = tip.offsetWidth;
   const tipHeight = tip.offsetHeight;
+
+  toolTip.style.setProperty('top', `${buttonOffset.top + scrollTop}px`);
+  toolTip.style.setProperty('left', `${buttonOffset.left + leftAdd}px`);
 
   let direction = 'under';
 
@@ -1233,64 +1227,71 @@ export function startObserver(root) {
     root: root,
     config: config,
   });
-  document.addEventListener(
-    'readystatechange',
-    () => {
-      window.setTimeout(() => {
+  if (!UI.globalListenersAttached) {
+    UI.globalListenersAttached = true;
+    document.addEventListener(
+      'readystatechange',
+      () => {
+        window.setTimeout(() => {
+          UI.scrollPending++;
+          updateTipLocations();
+        }, 100);
+      },
+      {
+        passive: true,
+      },
+    );
+    document.addEventListener(
+      'paste',
+      () => {
         UI.scrollPending++;
         updateTipLocations();
-      }, 100);
-    },
-    {
-      passive: true,
-    },
-  );
-  document.addEventListener(
-    'paste',
-    () => {
-      UI.scrollPending++;
-      updateTipLocations();
-      window.setTimeout(() => {
-        UI.forceFullCheck = true;
-        incrementalCheckDebounce();
-      }, 100);
-    },
-    {
-      passive: true,
-    },
-  );
+        window.setTimeout(() => {
+          UI.forceFullCheck = true;
+          incrementalCheckDebounce();
+        }, 100);
+      },
+      {
+        passive: true,
+      },
+    );
+  }
   window.setTimeout(() => {
     UI.scrollPending++;
     updateTipLocations();
   }, 1000);
 }
 
-const enqueueTests = (queue) => {
-  const test = queue.pop();
+const safeRun = (fn) => {
   try {
-    switch (test) {
-      case 'group1':
-        checkHeaders();
-        checkImages();
-        checkEmbeddedContent();
-        checkCustomRuleset();
-        checkQA();
-        break;
-      case 'group2':
-        checkLinkText();
-        break;
-      case 'checkLabels':
-        checkLabels();
-        break;
-      case 'checkContrast':
-        checkContrast();
-        break;
-      case 'checkDeveloper':
-        checkDeveloper();
-        break;
-    }
+    fn();
   } catch (error) {
     showError(error);
+  }
+};
+
+const enqueueTests = (queue) => {
+  const test = queue.pop();
+  switch (test) {
+    case 'group1':
+      safeRun(checkHeaders);
+      safeRun(checkImages);
+      safeRun(checkEmbeddedContent);
+      safeRun(checkCustomRuleset);
+      safeRun(checkQA);
+      break;
+    case 'group2':
+      safeRun(checkLinkText);
+      break;
+    case 'checkLabels':
+      safeRun(checkLabels);
+      break;
+    case 'checkContrast':
+      safeRun(checkContrast);
+      break;
+    case 'checkDeveloper':
+      safeRun(checkDeveloper);
+      break;
   }
   UI.testsRemaining--;
   if (queue.length > 0) {
@@ -1353,7 +1354,7 @@ export function checkAll() {
       UI.roots.push(root);
     });
   } else {
-    UI.roots = document.querySelectorAll(`:is(${State.option.checkRoot})`);
+    UI.roots = [...document.querySelectorAll(`:is(${State.option.checkRoot})`)];
   }
   // Initialize root areas to check.
   if (UI.roots.length === 0 && State.option.headless === false) {
@@ -1366,7 +1367,7 @@ export function checkAll() {
 
   if (UI.incremental) {
     // They get restored if unchanged.
-    UI.oldResults = State.results;
+    UI.oldResults = [...State.results];
   }
   // Reset counts
   State.results.length = 0;
@@ -1461,6 +1462,7 @@ export async function continueCheck() {
 
 export function incrementalCheck() {
   if (!UI.running) {
+    UI.incrementalRetryPending = false;
     if (UI.tipOpen || (!UI.interaction && !UI.forceFullCheck)) {
       return;
     }
@@ -1485,8 +1487,9 @@ export function incrementalCheck() {
     UI.browserSpeed = runTime > 100 ? 100 : (UI.browserSpeed + runTime) / 2;
     // Todo: optimize tip placement so we do not need as much debounce.
     UI.browserLag = UI.browserSpeed < 1 ? 0 : UI.browserSpeed * 40 + UI.totalCount;
-  } else {
-    // Ed11y was running, try again later.
+  } else if (!UI.incrementalRetryPending) {
+    // Ed11y was running; schedule one retry (not a chain).
+    UI.incrementalRetryPending = true;
     window.setTimeout(() => {
       incrementalCheckDebounce();
     }, 250);

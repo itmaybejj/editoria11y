@@ -1,4 +1,4 @@
-import {default as Sa11yStrings} from '../sa11y-lang/ua.js';
+import { default as Sa11yStrings } from '../sa11y-lang/ua.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
 const testNames = {
@@ -244,7 +244,7 @@ export const interfaceStrings = {
 	main_toggle_show_alerts: 'Показати попередження доступності',
 	main_toggle_1: 'Одне попередження щодо доступності',
 	main_toggle_2: 'Два попередження щодо доступності',
-	main_toggle_plural: `%(count) попереджень щодо доступності`,
+	main_toggle_plural: ` попереджень щодо доступності`,
 	panelCheckAltText: `Переконайтеся, що кожне зображення має alt‑текст, який передає його значення в контексті, і що немає «зображень із вбудованим текстом».`,
 	panelCheckOutline: `Показує структуру заголовків. Перевірте відповідність візуальній структурі сторінки.`,
 	reportsLink: 'Відкрити звіти сайту',

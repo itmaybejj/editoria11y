@@ -227,8 +227,7 @@ export default {
       'Il link si apre in una nuova scheda o finestra senza preavviso. Ciò può disorientare, soprattutto le persone che hanno difficoltà a percepire i contenuti visivi. In secondo luogo, non è sempre una buona pratica controllare l\'esperienza di una persona o prendere decisioni al posto suo. Indicate che il link si apre in una nuova finestra all\'interno del testo del link. <hr> <strong>Tip!</strong> Imparate le migliori pratiche: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">aprire i link in nuove finestre e schede del browser.</a>',
     LINK_FILE_EXT:
       'Il link punta a un PDF o a un file scaricabile (ad es. MP3, Zip, Word Doc) senza alcun avviso. Indicate il tipo di file nel testo del link. Se si tratta di un file di grandi dimensioni, considerate la possibilità di includere la dimensione del file. <hr> <strong>Esempio:</strong> Relazione esecutiva (PDF, 3MB)',
-    LINK_IDENTICAL_NAME:
-      'Il link ha lo stesso testo di un altro link, anche se punta a una pagina diversa. Più link con lo stesso testo possono creare confusione per le persone che utilizzano gli screen reader. <strong>Considerate di rendere il seguente link più descrittivo per aiutarlo a distinguersi dagli altri link.</strong> <hr> <strong {B}>Nome accessibile</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Più link in questa pagina utilizzano lo stesso testo ma puntano a destinazioni diverse. Ciò può causare confusione agli utenti di tecnologie assistive. Per risolvere il problema, rendi il testo del link più descrittivo.',
     LINK_UNPRONOUNCEABLE:
       'Il testo del collegamento contiene solo simboli. Se ritieni che questo collegamento sia un errore dovuto a un bug di copia/incolla, valuta di eliminarlo.',
 
@@ -312,8 +311,7 @@ export default {
     // QA
     QA_BAD_LINK:
       'Trovato un link errato. Il link sembra puntare a un ambiente di sviluppo. <hr> {L} <strong {C}>%(LINK)</strong>',
-    QA_IN_PAGE_LINK:
-      'Link interno rotto. Il target del link non corrisponde a nessun elemento di questa pagina.',
+    QA_IN_PAGE_LINK: 'Link interno alla pagina non funzionante. Questo link tenta di navigare verso una sezione della pagina che non è stata trovata. Per risolvere il problema, assicurati che il link corrisponda all\'<code>id</code> dell\'elemento a cui vuoi saltare.',
     QA_STRONG_ITALICS:
       'I tag grassetto e corsivo hanno un significato semantico e non devono essere usati per evidenziare interi paragrafi. Il testo in grassetto deve essere usato per dare un forte <strong>enfasi</strong> su una parola o una frase. Il corsivo deve essere usato per evidenziare nomi propri (ad esempio, titoli di libri e articoli), parole straniere e citazioni. Le citazioni lunghe devono essere formattate come blockquote.',
     QA_PDF:
@@ -340,7 +338,8 @@ export default {
       'Il testo piccolo è più difficile da leggere, in particolare per coloro che hanno problemi di vista. Per garantire una migliore leggibilità, evitare di usare dimensioni di carattere inferiori a quelle predefinite.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Nome accessibile</strong> %(TEXT)',
+    LINK_TEXT: '<strong {B}>Testo del link</strong> <strong {C}>%(TEXT)</strong>',
+    ACC_NAME: '<strong {B}>Nome accessibile</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Consiglio!</strong> Il "nome accessibile" è l\'etichetta finale comunicata alle persone che utilizzano tecnologie assistive e viene calcolata da ARIA. Questo aiuta a comprendere lo scopo del collegamento o del pulsante.',
     HIDDEN_FOCUSABLE:
@@ -376,7 +375,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Non includere la parola "pulsante" nel nome di un pulsante. Gli screen reader comunicano già il ruolo di un elemento oltre al suo nome.',
     LABEL_IN_NAME:
-      'Il testo visibile per questo elemento sembra essere diverso dal nome accessibile, il che potrebbe causare confusione per gli utenti di tecnologie assistive. Si prega di rivedere: <hr> <strong {B}>Nome Accessibile</strong> <strong {C}>%(TEXT)</strong>',
+      'Il testo visibile per questo elemento sembra essere diverso dal nome accessibile, il che potrebbe causare confusione per gli utenti di tecnologie assistive. Si prega di rivedere: <hr> <strong {B}>Testo</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Nome Accessibile</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Questo link ha una destinazione non valida e il nome accessibile contiene la parola "<strong>%(NAME)</strong>". Ciò suggerisce che potrebbe non essere affatto un link, ma che controlli invece un comportamento scriptato sulla pagina. Per risolvere il problema, sostituisci il link con un <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">pulsante accessibile</a> o correggi la destinazione del link. <hr> <strong>Suggerimento!</strong> Le tecnologie assistive trattano i pulsanti e i link in modo diverso. L\'uso dell\'elemento HTML corretto garantisce che gli utenti sappiano quali scorciatoie da tastiera utilizzare e quale azione verrà attivata.',
+    POTENTIAL_UI_ELEMENTS: ['menu', 'chiudi', 'attiva/disattiva', 'apri', 'espandi', 'comprimi', 'successivo', 'precedente', 'riproduci', 'pausa', 'sottomenu', 'mostra', 'nascondi', 'menu a discesa', 'indietro', 'avanti', 'salta', 'invia', 'annulla', 'salva', 'modifica', 'elimina', 'rimuovi', 'cerca', 'filtra', 'ordina', 'stop', 'muto', 'riattiva audio', 'schermo intero', 'minimizza', 'massimizza'],
 
     // Tables
     TABLES_MISSING_HEADINGS:
