@@ -39,7 +39,8 @@
         args.forEach((arg, index) => {
           const argString = String(arg);
           if (argString.startsWith("https://")) {
-            p.innerHTML = p.innerHTML.replace(/%\([a-zA-z]+\)/, argString);
+            const safeURL = argString.replace(/["'<>&]/g, (c) => `&#${c.charCodeAt(0)};`);
+            p.innerHTML = p.innerHTML.replace(/%\([a-zA-z]+\)/, safeURL);
           } else {
             p.innerHTML = p.innerHTML.replace(/%\([a-zA-z]+\)/, `<span data-arg='${index}'></span>`);
           }
@@ -1939,24 +1940,23 @@ ${this.error.stack}
       });
     }
   }
+  const handleInitialPanelInteraction = () => {
+    hideInitialCount();
+  };
   const initialPanel = (ifNo) => {
     if (UI.panelInitial && UI.totalCount >= UI.panelInitial) {
       UI.panelToggle.classList.add("ed11y-preview");
       UI.panelInitial = UI.totalCount;
       if (UI.totalCount > 2) {
         UI.panelToggleTitle.innerHTML = "";
-        UI.panelToggleTitle.appendChild(Lang.sprintf("main_toggle_plural", UI.totalCount));
+        UI.panelToggleTitle.textContent = `${UI.totalCount}${Lang._("main_toggle_plural")}`;
       } else if (UI.totalCount > 1) {
         UI.panelToggleTitle.textContent = Lang._("main_toggle_2");
       } else {
         UI.panelToggleTitle.textContent = Lang._("main_toggle_1");
       }
-      UI.panel.addEventListener("mouseover", () => {
-        hideInitialCount();
-      });
-      UI.panel.addEventListener("focus", () => {
-        hideInitialCount();
-      });
+      UI.panel.addEventListener("mouseover", handleInitialPanelInteraction);
+      UI.panel.addEventListener("focus", handleInitialPanelInteraction);
     } else {
       UI.panelInitial = false;
       UI.panelToggle.classList.remove("ed11y-preview");
@@ -1989,12 +1989,8 @@ ${this.error.stack}
       UI.panelInitial = false;
       panelLabel();
     }
-    UI.panel.removeEventListener("mouseover", () => {
-      hideInitialCount();
-    });
-    UI.panel.removeEventListener("focus", () => {
-      hideInitialCount();
-    });
+    UI.panel.removeEventListener("mouseover", handleInitialPanelInteraction);
+    UI.panel.removeEventListener("focus", handleInitialPanelInteraction);
   }
   function pauseObservers() {
     UI.watching?.forEach((observer) => {
@@ -5058,9 +5054,6 @@ ${this.error.stack}
       }
     } else {
       UI.jumpList.forEach((mark) => {
-        mark.style.setProperty("transform", null);
-        mark.style.setProperty("top", "initial");
-        mark.style.setProperty("left", "initial");
         if (mark.style.transform) {
           const computedStyle = window.getComputedStyle(mark);
           let matrix = computedStyle.getPropertyValue("transform");
@@ -5071,6 +5064,11 @@ ${this.error.stack}
           mark.xOffset = 0;
           mark.yOffset = 0;
         }
+      });
+      UI.jumpList.forEach((mark) => {
+        mark.style.setProperty("transform", null);
+        mark.style.setProperty("top", "initial");
+        mark.style.setProperty("left", "initial");
       });
       UI.jumpList.forEach((mark) => {
         mark.markOffset = mark.getBoundingClientRect();
@@ -5995,7 +5993,7 @@ ${this.error.stack}
         UI.forceFullCheck = false;
         resetResults(true);
       } else {
-        State.results.push(UI.oldResults);
+        State.results.push(...UI.oldResults);
         if (!UI.alignPending) {
           alignButtons();
           alignPanel();
@@ -6203,10 +6201,9 @@ ${this.error.stack}
   function buildJumpList() {
     UI.jumpList = [];
     pauseObservers();
-    const toSplice = [];
-    for (let i = 0; i < State.results.length; i++) {
-      if (!State.results[i].element) {
-        toSplice.push(i);
+    for (let i = State.results.length - 1; i >= 0; i--) {
+      if (!State.results[i].element || !State.results[i].element.isConnected) {
+        State.results.splice(i, 1);
         continue;
       }
       let top = State.results[i].element.getBoundingClientRect().top;
@@ -6227,9 +6224,6 @@ ${this.error.stack}
       }
       State.results[i].sortPos = top;
     }
-    toSplice.forEach((i) => {
-      State.results.splice(i, 1);
-    });
     State.results.sort((a, b) => b.sortPos - a.sortPos);
     State.results?.forEach((result, i) => {
       if (result.element && (!result.dismissalStatus || UI.showDismissed)) {
@@ -6541,16 +6535,11 @@ ${this.error.stack}
     const tip = arrow.nextElementSibling;
     const loopCount = recheck - 1;
     if (recheck > 0) {
-      window.setTimeout(
-        () => {
-          requestAnimationFrame(() => alignTip(button, toolTip, loopCount, reveal));
-        },
-        200 / loopCount,
-        button,
-        toolTip,
-        loopCount,
-        reveal
-      );
+      requestAnimationFrame(() => {
+        window.setTimeout(() => {
+          alignTip(button, toolTip, loopCount, reveal);
+        }, 200 / loopCount);
+      });
     }
     if (reveal) {
       window.setTimeout(
@@ -6599,10 +6588,10 @@ ${this.error.stack}
     document.documentElement.style.setProperty("--ed11y-buttonWidth", `${buttonSize}px`);
     tip.style.setProperty("max-width", `min(${containWidth > 280 ? containWidth : 280}px, 90vw)`);
     const containRight = Math.min(window.innerWidth, containLeft + containWidth);
-    toolTip.style.setProperty("top", `${buttonOffset.top + scrollTop}px`);
-    toolTip.style.setProperty("left", `${buttonOffset.left + leftAdd}px`);
     const tipWidth = tip.offsetWidth;
     const tipHeight = tip.offsetHeight;
+    toolTip.style.setProperty("top", `${buttonOffset.top + scrollTop}px`);
+    toolTip.style.setProperty("left", `${buttonOffset.left + leftAdd}px`);
     let direction = "under";
     if (buttonTop === 0 && buttonLeft === 0) {
       direction = "whompWhomp";
@@ -6911,63 +6900,69 @@ ${this.error.stack}
       root,
       config
     });
-    document.addEventListener(
-      "readystatechange",
-      () => {
-        window.setTimeout(() => {
+    if (!UI.globalListenersAttached) {
+      UI.globalListenersAttached = true;
+      document.addEventListener(
+        "readystatechange",
+        () => {
+          window.setTimeout(() => {
+            UI.scrollPending++;
+            updateTipLocations();
+          }, 100);
+        },
+        {
+          passive: true
+        }
+      );
+      document.addEventListener(
+        "paste",
+        () => {
           UI.scrollPending++;
           updateTipLocations();
-        }, 100);
-      },
-      {
-        passive: true
-      }
-    );
-    document.addEventListener(
-      "paste",
-      () => {
-        UI.scrollPending++;
-        updateTipLocations();
-        window.setTimeout(() => {
-          UI.forceFullCheck = true;
-          incrementalCheckDebounce();
-        }, 100);
-      },
-      {
-        passive: true
-      }
-    );
+          window.setTimeout(() => {
+            UI.forceFullCheck = true;
+            incrementalCheckDebounce();
+          }, 100);
+        },
+        {
+          passive: true
+        }
+      );
+    }
     window.setTimeout(() => {
       UI.scrollPending++;
       updateTipLocations();
     }, 1e3);
   }
-  const enqueueTests = (queue) => {
-    const test = queue.pop();
+  const safeRun = (fn) => {
     try {
-      switch (test) {
-        case "group1":
-          checkHeaders();
-          checkImages();
-          checkEmbeddedContent();
-          checkCustomRuleset();
-          checkQA();
-          break;
-        case "group2":
-          checkLinkText();
-          break;
-        case "checkLabels":
-          checkLabels();
-          break;
-        case "checkContrast":
-          checkContrast();
-          break;
-        case "checkDeveloper":
-          checkDeveloper();
-          break;
-      }
+      fn();
     } catch (error) {
       showError(error);
+    }
+  };
+  const enqueueTests = (queue) => {
+    const test = queue.pop();
+    switch (test) {
+      case "group1":
+        safeRun(checkHeaders);
+        safeRun(checkImages);
+        safeRun(checkEmbeddedContent);
+        safeRun(checkCustomRuleset);
+        safeRun(checkQA);
+        break;
+      case "group2":
+        safeRun(checkLinkText);
+        break;
+      case "checkLabels":
+        safeRun(checkLabels);
+        break;
+      case "checkContrast":
+        safeRun(checkContrast);
+        break;
+      case "checkDeveloper":
+        safeRun(checkDeveloper);
+        break;
     }
     UI.testsRemaining--;
     if (queue.length > 0) {
@@ -7033,7 +7028,7 @@ ${this.error.stack}
       return;
     }
     if (UI.incremental) {
-      UI.oldResults = State.results;
+      UI.oldResults = [...State.results];
     }
     State.results.length = 0;
     UI.splitConfiguration.devResults.length = 0;
@@ -7114,6 +7109,7 @@ ${this.error.stack}
   }
   function incrementalCheck() {
     if (!UI.running) {
+      UI.incrementalRetryPending = false;
       if (UI.tipOpen || !UI.interaction && !UI.forceFullCheck) {
         return;
       }
@@ -7136,7 +7132,8 @@ ${this.error.stack}
       runTime = performance.now() - runTime;
       UI.browserSpeed = runTime > 100 ? 100 : (UI.browserSpeed + runTime) / 2;
       UI.browserLag = UI.browserSpeed < 1 ? 0 : UI.browserSpeed * 40 + UI.totalCount;
-    } else {
+    } else if (!UI.incrementalRetryPending) {
+      UI.incrementalRetryPending = true;
       window.setTimeout(() => {
         incrementalCheckDebounce();
       }, 250);
@@ -7861,7 +7858,7 @@ ${this.error.stack}
       this.wrapper.innerHTML = `
 		<div class="tip">
 			<button class="close ed11y-tip-close">${spriteClose}</button>
-			<div class="content" data-test="${this.result.test}">
+			<div class="content">
 				<div class="message"></div>
 				<div class="content-footer">
 					<div class="edit-links"></div>
@@ -7877,6 +7874,7 @@ ${this.error.stack}
 				<button class="next">${spriteNext}</button>
 		</div>
 		`;
+      this.wrapper.querySelector(".content").dataset.test = this.result.test;
       this.addEventListener("mouseover", this.handleHover, {
         passive: true
       });
@@ -8092,13 +8090,14 @@ ${this.error.stack}
           this.result?.toggle?.setAttribute("data-ed11y-action", "shut");
         }
       });
-      document.addEventListener("click", (event) => {
+      this._handleDocumentClick = (event) => {
         if (this.open && !event.target.closest(".ed11y-element")) {
           const toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', "document", []);
           toggle[0]?.setAttribute("data-ed11y-action", "shut");
           this.setAttribute("data-ed11y-action", "shut");
         }
-      });
+      };
+      document.addEventListener("click", this._handleDocumentClick);
       shadow.appendChild(this.wrapper);
       const focusLoopLeft = document.createElement("div");
       focusLoopLeft.setAttribute("tabIndex", "0");
@@ -8118,6 +8117,12 @@ ${this.error.stack}
       });
       this.initialized = true;
       this.rendering = false;
+    }
+    disconnectedCallback() {
+      if (this._handleDocumentClick) {
+        document.removeEventListener("click", this._handleDocumentClick);
+      }
+      this.removeEventListener("mouseover", this.handleHover);
     }
     toggleTip(changeTo) {
       if (changeTo) {
@@ -8737,7 +8742,7 @@ ${this.error.stack}
     main_toggle_show_alerts: "Show accessibility alerts",
     main_toggle_1: "One accessibility alert",
     main_toggle_2: "Two accessibility alerts",
-    main_toggle_plural: `%(count) accessibility alerts`,
+    main_toggle_plural: ` accessibility alerts`,
     MISSING_ROOT: `Editoria11y did not find any elements that matched the check area configuration: <code>%(root)</code>`,
     panelCheckAltText: "Check that each image describes what it means in context, and that there are no images of text.",
     panelCheckOutline: "This shows the heading outline. Check that it matches how the content is organized visually.",
@@ -9252,7 +9257,37 @@ ${this.error.stack}
       // EMBED_CUSTOM: { sources: '#embed', },
     }
   };
+  const validateSelectorOptions = (userOptions) => {
+    const selectorKeys = [
+      "checkRoot",
+      "ignoreAllIfAbsent",
+      "ignoreAllIfPresent",
+      "preventCheckingIfPresent",
+      "preventCheckingIfAbsent",
+      "linkIgnoreSpan",
+      "shadowComponents",
+      "containerIgnore",
+      "embeddedContent",
+      "panelNoCover",
+      "doNotRun",
+      "ignoreElements",
+      "editableContent",
+      "hiddenHandlers"
+    ];
+    for (const key of selectorKeys) {
+      const val = userOptions[key];
+      if (val && typeof val === "string") {
+        try {
+          document.querySelector(val);
+        } catch {
+          console.error(`Editoria11y: invalid CSS selector in option "${key}": "${val}"`);
+          delete userOptions[key];
+        }
+      }
+    }
+  };
   const preProcessOptions = async (userOptions) => {
+    validateSelectorOptions(userOptions);
     smush(State.option, ed11yDefaultOptions, ["checks"]);
     smush(State.option, userOptions, ["checks"]);
     Object.assign(State.option.checks, ed11yDefaultOptions.checks, userOptions.checks);

@@ -1,4 +1,4 @@
-import {default as Sa11yStrings} from '../sa11y-lang/it.js';
+import { default as Sa11yStrings } from '../sa11y-lang/it.js';
 // Machine translation.
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
@@ -252,7 +252,7 @@ export const interfaceStrings = {
 	main_toggle_show_alerts: 'Mostra avvisi di accessibilità',
 	main_toggle_1: 'Un avviso di accessibilità',
 	main_toggle_2: 'Due avvisi di accessibilità',
-	main_toggle_plural: `%(count) avvisi di accessibilità`,
+	main_toggle_plural: ` avvisi di accessibilità`,
 	MISSING_ROOT: `Editoria11y non ha trovato alcun elemento che corrisponda alla configurazione dell'area di controllo: <code>%(root)</code>`,
 	panelCheckAltText: `Verifica che ogni immagine esprima il proprio significato nel contesto e che non ci siano immagini con testo incorporato.`,
 	panelCheckOutline: `Mostra la struttura delle intestazioni. Verifica che corrisponda all’organizzazione visiva.`,

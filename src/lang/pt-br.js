@@ -1,4 +1,4 @@
-import {default as Sa11yStrings} from '../sa11y-lang/ptBR.js';
+import { default as Sa11yStrings } from '../sa11y-lang/ptBR.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
 const testNames = {
@@ -312,7 +312,7 @@ export const interfaceStrings = {
 	main_toggle_show_alerts: 'Mostrar alertas de acessibilidade',
 	main_toggle_1: 'Um alerta de acessibilidade',
 	main_toggle_2: 'Dois alertas de acessibilidade',
-	main_toggle_plural: `%(count) alertas de acessibilidade`,
+	main_toggle_plural: ` alertas de acessibilidade`,
 	MISSING_ROOT: `O Editoria11y não encontrou nenhum elemento que correspondesse à configuração da área de verificação: <code>%(root)</code>`,
 	panelCheckAltText: `Verifique se cada imagem descreve o que significa no contexto e se não há imagens de texto.`,
 	panelCheckOutline: `Exibe a estrutura de cabeçalhos. Verifique se corresponde à organização visual.`,

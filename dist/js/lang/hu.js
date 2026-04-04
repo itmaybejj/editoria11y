@@ -544,7 +544,7 @@ const interfaceStrings = {
   main_toggle_show_alerts: "Hozzáférhetőségi figyelmeztetések megjelenítése",
   main_toggle_1: "Egy akadálymentességi figyelmeztetés",
   main_toggle_2: "Két akadálymentességi figyelmeztetés",
-  main_toggle_plural: `%(count) akadálymentességi figyelmeztetés`,
+  main_toggle_plural: ` akadálymentességi figyelmeztetés`,
   MISSING_ROOT: `Az Editoria11y nem talált olyan elemeket, amelyek megfelelnek az ellenőrzési terület konfigurációjának: <code>%(root)</code>`,
   panelCheckAltText: `Ellenőrizze, hogy minden kép visszaadja‑e a jelentését a kontextusban, és hogy nincs‑e „képben lévő szöveg”.`,
   panelCheckOutline: `Ez megjeleníti a címsorstruktúrát. Ellenőrizze, hogy megfelel‑e a vizuális szerkezetnek.`,

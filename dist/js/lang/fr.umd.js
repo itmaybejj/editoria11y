@@ -581,7 +581,7 @@
     main_toggle_show_alerts: "Afficher les alertes d’accessibilité",
     main_toggle_1: "Une alerte d’accessibilité",
     main_toggle_2: "Deux alertes d’accessibilité",
-    main_toggle_plural: `%(count) alertes d’accessibilité`,
+    main_toggle_plural: ` alertes d’accessibilité`,
     MISSING_ROOT: `Editoria11y n'a trouvé aucun élément correspondant à la configuration de la zone de vérification : <code>%(root)</code>`,
     panelCheckAltText: `Vérifiez que chaque image décrit ce qu’elle signifie dans le contexte et qu’il n’y a pas d’images contenant du texte.`,
     panelCheckOutline: `Ceci affiche la structure des en‑têtes. Vérifiez qu’elle correspond à l’organisation visuelle du contenu.`,

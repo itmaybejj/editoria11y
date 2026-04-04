@@ -586,7 +586,7 @@ const interfaceStrings = {
   main_toggle_show_alerts: "アクセシビリティ警告を表示",
   main_toggle_1: "1件のアクセシビリティ警告",
   main_toggle_2: "2件のアクセシビリティ警告",
-  main_toggle_plural: `%(count)件のアクセシビリティ警告`,
+  main_toggle_plural: `件のアクセシビリティ警告`,
   MISSING_ROOT: `Editoria11yはチェック領域構成に一致する要素を見つけられませんでした: <code>%(root)</code>`,
   panelCheckAltText: `すべての画像が文脈上の意味を伝えているか、テキストを含む画像がないかを確認してください。`,
   panelCheckOutline: `見出しの階層を表示します。ページの視覚的構造と一致しているか確認してください。`,

@@ -547,7 +547,7 @@ const interfaceStrings = {
   main_toggle_show_alerts: "Vis tilgængelighedsbeskeder",
   main_toggle_1: "En tilgængelighedsadvarsel",
   main_toggle_2: "To tilgængelighedsadvarsler",
-  main_toggle_plural: `%(count) tilgængelighedsadvarsler`,
+  main_toggle_plural: ` tilgængelighedsadvarsler`,
   MISSING_ROOT: `Editoria11y fandt ingen elementer, der matchede konfigurationen for kontrolområdet: <code>%(root)</code>`,
   panelCheckAltText: `Kontrollér at hvert billede beskriver sin betydning i konteksten, og at der ikke er “tekst i billeder”.`,
   panelCheckOutline: `Dette viser overskriftsstrukturen. Sørg for at den matcher sidens visuelle struktur.`,

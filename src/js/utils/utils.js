@@ -390,24 +390,25 @@ export function detectShadow(container) {
   }
 }
 
+const handleInitialPanelInteraction = () => {
+  hideInitialCount();
+};
+
 const initialPanel = (ifNo) => {
   if (UI.panelInitial && UI.totalCount >= UI.panelInitial) {
     UI.panelToggle.classList.add('ed11y-preview');
     UI.panelInitial = UI.totalCount;
     if (UI.totalCount > 2) {
       UI.panelToggleTitle.innerHTML = '';
-      UI.panelToggleTitle.appendChild(Lang.sprintf('main_toggle_plural', UI.totalCount));
+
+      UI.panelToggleTitle.textContent = `${UI.totalCount}${Lang._('main_toggle_plural')}`;
     } else if (UI.totalCount > 1) {
       UI.panelToggleTitle.textContent = Lang._('main_toggle_2');
     } else {
       UI.panelToggleTitle.textContent = Lang._('main_toggle_1');
     }
-    UI.panel.addEventListener('mouseover', () => {
-      hideInitialCount();
-    });
-    UI.panel.addEventListener('focus', () => {
-      hideInitialCount();
-    });
+    UI.panel.addEventListener('mouseover', handleInitialPanelInteraction);
+    UI.panel.addEventListener('focus', handleInitialPanelInteraction);
   } else {
     UI.panelInitial = false;
     UI.panelToggle.classList.remove('ed11y-preview');
@@ -442,12 +443,8 @@ export function hideInitialCount() {
     UI.panelInitial = false;
     panelLabel();
   }
-  UI.panel.removeEventListener('mouseover', () => {
-    hideInitialCount();
-  });
-  UI.panel.removeEventListener('focus', () => {
-    hideInitialCount();
-  });
+  UI.panel.removeEventListener('mouseover', handleInitialPanelInteraction);
+  UI.panel.removeEventListener('focus', handleInitialPanelInteraction);
 }
 
 export function pauseObservers() {

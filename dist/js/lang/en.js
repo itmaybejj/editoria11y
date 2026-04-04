@@ -586,7 +586,7 @@ const interfaceStrings = {
   main_toggle_show_alerts: "Show accessibility alerts",
   main_toggle_1: "One accessibility alert",
   main_toggle_2: "Two accessibility alerts",
-  main_toggle_plural: `%(count) accessibility alerts`,
+  main_toggle_plural: ` accessibility alerts`,
   MISSING_ROOT: `Editoria11y did not find any elements that matched the check area configuration: <code>%(root)</code>`,
   panelCheckAltText: "Check that each image describes what it means in context, and that there are no images of text.",
   panelCheckOutline: "This shows the heading outline. Check that it matches how the content is organized visually.",

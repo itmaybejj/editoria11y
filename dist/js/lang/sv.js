@@ -562,7 +562,7 @@ const interfaceStrings = {
   main_toggle_show_alerts: "Visa tillgänglighetsvarningar",
   main_toggle_1: "En tillgänglighetsvarning",
   main_toggle_2: "Två tillgänglighetsvarningar",
-  main_toggle_plural: `%(count) tillgänglighetsvarningar`,
+  main_toggle_plural: ` tillgänglighetsvarningar`,
   MISSING_ROOT: `Editoria11y hittade inga element som matchade konfigurationen för kontrollområdet: <code>%(root)</code>`,
   panelCheckAltText: `Kontrollera att varje bilds alt‑text förmedlar betydelsen i sammanhanget, och att inga ”bilder med inbäddad text” används.`,
   panelCheckOutline: `Visar rubrikstrukturen. Kontrollera att den motsvarar sidans visuella struktur.`,

@@ -558,7 +558,7 @@
     main_toggle_show_alerts: "Toegankelijkheidsmeldingen tonen",
     main_toggle_1: "Één toegankelijkheidswaarschuwing",
     main_toggle_2: "Twee toegankelijkheidswaarschuwingen",
-    main_toggle_plural: `%(count) toegankelijkheidswaarschuwingen`,
+    main_toggle_plural: ` toegankelijkheidswaarschuwingen`,
     MISSING_ROOT: `Editoria11y vond geen elementen die overeenkwamen met de configuratie van het controlegebied: <code>%(root)</code>`,
     panelCheckAltText: `Controleer of elke afbeelding duidelijk maakt wat zij in de context betekent, en dat er geen afbeeldingen met tekst worden gebruikt.`,
     panelCheckOutline: `Toont de koppenstructuur. Controleer of deze overeenkomt met de visuele opbouw van de inhoud.`,

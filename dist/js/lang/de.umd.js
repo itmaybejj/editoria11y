@@ -604,7 +604,7 @@
     main_toggle_show_alerts: "Barrierefreiheits‑Meldungen anzeigen",
     main_toggle_1: "Eine Barrierefreiheitswarnung",
     main_toggle_2: "Zwei Barrierefreiheitswarnungen",
-    main_toggle_plural: `%(count) Barrierefreiheitswarnungen`,
+    main_toggle_plural: ` Barrierefreiheitswarnungen`,
     MISSING_ROOT: `Editoria11y hat keine Elemente gefunden, die der Konfiguration des Prüfbereichs entsprachen: <code>%(root)</code>`,
     panelCheckAltText: `Prüfen Sie, dass jedes Bild seine Bedeutung im Kontext beschreibt und dass es keine Bilder mit eingebettetem Text gibt.`,
     panelCheckOutline: `Dies zeigt die Überschriftenstruktur. Stellen Sie sicher, dass sie der visuellen Struktur entspricht.`,

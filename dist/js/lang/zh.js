@@ -548,7 +548,7 @@ const interfaceStrings = {
   main_toggle_show_alerts: "显示可访问性提示",
   main_toggle_1: "1个无障碍警报",
   main_toggle_2: "2个无障碍警报",
-  main_toggle_plural: `%(count)个无障碍警报`,
+  main_toggle_plural: `个无障碍警报`,
   MISSING_ROOT: `Editoria11y 未找到与检查区域配置匹配的任何元素: <code>%(root)</code>`,
   panelCheckAltText: `检查每张图片是否在语境中表达其含义，并确保页面没有"图片中的文字"。`,
   panelCheckOutline: `该面板显示标题层级结构。请检查是否与内容的视觉组织一致。`,
