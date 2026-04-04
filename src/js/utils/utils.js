@@ -178,7 +178,7 @@ export function buildElementList(onlyForFilter = false) {
       UI.roots[i].dataset.ed11yRoot = `${i}`;
     }
     if (UI.roots[i].shadowRoot) {
-      UI.roots.setAttribute('data-ed11y-has-shadow-root', 'true');
+      UI.roots[i].setAttribute('data-ed11y-has-shadow-root', 'true');
       detectShadow(UI.roots[i]);
       UI.roots[i] = UI.roots[i].shadowRoot;
     } else {

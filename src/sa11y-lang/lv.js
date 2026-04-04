@@ -232,8 +232,7 @@ export default {
       'Saite atveras jaunā cilnē vai logā bez brīdinājuma. Tas var radīt apjukumu, jo īpaši cilvēkiem, kuriem ir grūtības uztvert vizuālo saturu. Otrkārt, ne vienmēr ir laba prakse kontrolēt kāda cilvēka pieredzi vai pieņemt lēmumus viņa vietā. Norādiet, ka saite atveras jaunā logā, saites tekstā. <hr> <strong>Padoms!</strong> Apgūstiet labāko praksi: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">atvērt saites jaunos pārlūkprogrammas logos un cilnēs</a>.',
     LINK_FILE_EXT:
       'Saite norāda uz PDF vai lejupielādējamu failu (piemēram, MP3, Zip, Word Doc) bez brīdinājuma. Saites tekstā norādiet faila veidu. Ja tas ir liels fails, apsveriet iespēju norādīt faila lielumu. <hr> <strong>Piemērs:</strong> Vadības ziņojums (PDF, 3 MB).',
-    LINK_IDENTICAL_NAME:
-      'Saitei ir identisks teksts kā citai saitei, lai gan tā norāda uz citu lapu. Vairākas saites ar vienādu tekstu var radīt neskaidrības cilvēkiem, kuri izmanto ekrānlasītājus. <strong>Padomājiet, vai šādu saiti nevajadzētu padarīt aprakstošāku, lai palīdzētu to atšķirt no citām saitēm.</strong> <hr> <strong {B}>Pieejamais nosaukums</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Vairākas saites šajā lapā izmanto vienu un to pašu tekstu, bet norāda uz dažādām vietām. Tas var radīt neskaidrības asistenttehnoloģiju lietotājiem. Lai to labotu, padariet šīs saites tekstu aprakstošāku.',
     LINK_UNPRONOUNCEABLE:
       'Saites tekstā ir tikai simboli. Ja uzskatāt, ka šī saite ir kļūda kopēšanas/ielīmēšanas kļūdas dēļ, apsveriet iespēju to dzēst.',
 
@@ -317,8 +316,7 @@ export default {
     // QA
     QA_BAD_LINK:
       'Atrasta slikta saite. Šķiet, ka saite norāda uz izstrādes vidi. <hr> {L} <strong {C}>%(LINK)</strong>',
-    QA_IN_PAGE_LINK:
-      'Sapušušā saites uz vienu un to pašu lapu. Saistītās lapas mērķis neatbilst nevienam elementam šajā lapā.',
+    QA_IN_PAGE_LINK: 'Bojāta tās pašas lapas saite. Šī saite mēģina pāriet uz lapas sadaļu, kas nav atrodama. Lai to labotu, pārliecinieties, vai saite atbilst tā elementa <code>id</code>, uz kuru vēlaties pāriet.',
     QA_STRONG_ITALICS:
       'Trešraksta un slīpraksta tagiem ir semantiska nozīme, un tos nevajadzētu izmantot, lai izceltu veselas rindkopas. Teksts treknrakstā jāizmanto, lai <strong>uzsvērtu kādu vārdu vai frāzi</strong>. Kursīvs jāizmanto, lai izceltu īpašvārdus (piemēram, grāmatu un rakstu nosaukumus), svešvārdus, citātus. Garie citāti jānoformē kā bloka citāts.',
     QA_PDF:
@@ -345,7 +343,8 @@ export default {
       'Mazs teksts ir grūtāk lasāms, it īpaši cilvēkiem ar vāju redzi. Lai nodrošinātu labāku lasāmību, izvairieties no fontu izmēriem, kas ir mazāki par noklusējuma izmēru.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Pieejamais nosaukums</strong> %(TEXT)',
+    LINK_TEXT: '<strong {B}>Saites teksts</strong> <strong {C}>%(TEXT)</strong>',
+    ACC_NAME: '<strong {B}>Pieejamais nosaukums</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Ieteikums!</strong> "Pieejamais nosaukums" ir galīgā etiķete, kas tiek sazināta ar cilvēkiem, kuri izmanto palīgtehnoloģijas, un kuru aprēķina ARIA. Tas palīdz viņiem saprast saites vai pogas mērķi.',
     HIDDEN_FOCUSABLE:
@@ -382,7 +381,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Neiekļaujiet vārdu "poga" pogas nosaukumā. Ekrāna lasītāji jau paziņo elementa lomu papildus tā nosaukumam.',
     LABEL_IN_NAME:
-      'Šī elementa redzamais teksts šķiet atšķirīgs no pieejamā nosaukuma, kas var radīt neskaidrības palīdzības tehnoloģiju lietotājiem. Lūdzu, pārskatiet: <hr> <strong {B}>Pieejams Nosaukums</strong> <strong {C}>%(TEXT)</strong>',
+      'Šī elementa redzamais teksts šķiet atšķirīgs no pieejamā nosaukuma, kas var radīt neskaidrības palīdzības tehnoloģiju lietotājiem. Lūdzu, pārskatiet: <hr> <strong {B}>Teksts</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Pieejams Nosaukums</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Šai saitei ir nederīgs mērķis, un pieejamais nosaukums satur vārdu "<strong>%(NAME)</strong>". Tas liecina, ka tā, iespējams, nemaz nav saite, bet tā vietā kontrolē kādu skriptētu darbību lapā. Lai to labotu, aizstājiet saiti ar <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">pieejamu pogu</a> vai izlabojiet saites mērķi. <hr> <strong>Padoms!</strong> Asistenttehnoloģijas pogas un saites apstrādā atšķirīgi. Izmantojot pareizo HTML elementu, lietotāji zina, kurus tastatūras īsinājumtaustiņus izmantot un kāda darbība tiks aktivizēta.',
+    POTENTIAL_UI_ELEMENTS: ['izvēlne', 'aizvērt', 'pārslēgt', 'atvērt', 'izvērst', 'samazināt', 'nākamais', 'iepriekšējais', 'atskaņot', 'pauze', 'apakšizvēlne', 'rādīt', 'paslēpt', 'nolaižamā izvēlne', 'atpakaļ', 'uz priekšu', 'izlaist', 'iesniegt', 'atcelt', 'saglabāt', 'rediģēt', 'dzēst', 'noņemt', 'meklēt', 'filtrs', 'kārtot', 'stop', 'izslēgt skaņu', 'ieslēgt skaņu', 'pilnekrāna režīms', 'minimizēt', 'maksimizēt'],
 
     // Tables
     TABLES_MISSING_HEADINGS:

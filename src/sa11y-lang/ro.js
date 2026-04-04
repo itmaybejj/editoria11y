@@ -231,8 +231,7 @@ export default {
       'Legătura se deschide într-o fereastră sau într-un tab nou fără avertisment. Acest lucru poate fi dezorientant, în special pentru persoanele care au dificultăți în perceperea conținutului vizual. În al doilea rând, nu este întotdeauna o practică bună să controlați experiența unei persoane sau să luați decizii în locul ei. Indicați că link-ul se deschide într-o fereastră nouă în textul linkului<hr><strong>Tip!</strong> Învățați cele mai bune practici: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">deschiderea linkurilor în ferestre și file noi de browser.</a>.',
     LINK_FILE_EXT:
       'Legătura trimite la un fișier PDF sau la un fișier descărcabil (de exemplu, MP3, Zip, Word Doc) fără avertisment. Indicați tipul de fișier în textul linkului. Dacă este un fișier de mari dimensiuni, luați în considerare posibilitatea de a include dimensiunea fișierului. <hr> <strong>Exemplu:</strong> Raport executiv (PDF, 3MB)',
-    LINK_IDENTICAL_NAME:
-      'Linkul are un text identic cu cel al unui alt link, deși trimite la o pagină diferită. Mai multe linkuri cu același text pot crea confuzie pentru persoanele care utilizează cititoare de ecran. <strong>Considerați posibilitatea de a face următorul link mai descriptiv pentru a ajuta la distingerea acestuia de alte linkuri.</strong> <hr> <strong {B}>Numele accesibil</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Mai multe linkuri de pe această pagină folosesc același text, dar indică locuri diferite. Acest lucru poate crea confuzie pentru utilizatorii de tehnologii de asistență. Pentru a remedia problema, faceți textul acestui link mai descriptiv.',
     LINK_UNPRONOUNCEABLE:
       'Textul linkului conține doar simboluri. Dacă credeți că acest link este o eroare din cauza unei probleme de copiere/lipire, luați în considerare ștergerea acestuia.',
 
@@ -316,8 +315,7 @@ export default {
     // QA
     QA_BAD_LINK:
       'Link greșit găsit. Linkul pare să indice un mediu de dezvoltare. <hr> {L} <strong {C}>%(LINK)</strong>.',
-    QA_IN_PAGE_LINK:
-      'Legătură internă ruptă. Destinația linkului nu se potrivește cu niciun element de pe această pagină.',
+    QA_IN_PAGE_LINK: 'Link intern nefuncțional. Acest link încearcă să navigheze către o secțiune a paginii care nu poate fi găsită. Pentru a remedia problema, asigurați-vă că linkul corespunde cu <code>id</code>-ul elementului către care doriți să faceți saltul.',
     QA_STRONG_ITALICS:
       'Etichetele bold și italic au o semnificație semantică și nu trebuie <strong>nu</strong> folosite pentru a evidenția paragrafe întregi. Textul cu caractere aldine trebuie folosit pentru a oferi o <strong>accentuare</strong> puternică asupra unui cuvânt sau a unei fraze. Italicul ar trebui utilizat pentru a evidenția nume proprii (de exemplu, titluri de cărți și articole), cuvinte străine, ghilimele. Citatele lungi ar trebui să fie formatate ca un blockquote.',
     QA_PDF:
@@ -344,7 +342,8 @@ export default {
       'Textul mic este mai greu de citit, în special pentru persoanele cu vedere slabă. Pentru a asigura o lizibilitate mai bună, evitați utilizarea dimensiunilor de font mai mici decât cele implicite.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Numele accesibil</strong> %(TEXT)',
+    LINK_TEXT: '<strong {B}>Text link</strong> <strong {C}>%(TEXT)</strong>',
+    ACC_NAME: '<strong {B}>Numele accesibil</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Sfat!</strong> "Numele accesibil" este eticheta finală care este comunicată persoanelor care utilizează tehnologii de asistență și este calculată de ARIA. Acest lucru le ajută să înțeleagă scopul legăturii sau butonului.',
     HIDDEN_FOCUSABLE:
@@ -380,7 +379,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Nu includeți cuvântul „buton” în numele unui buton. Cititoarele de ecran deja comunică rolul unui element în plus față de numele său.',
     LABEL_IN_NAME:
-      'Textul vizibil pentru acest element pare a fi diferit de numele accesibil, ceea ce poate cauza confuzie pentru utilizatorii de tehnologii asistive. Vă rugăm să verificați: <hr> <strong {B}>Nume Accesibil</strong> <strong {C}>%(TEXT)</strong>',
+      'Textul vizibil pentru acest element pare a fi diferit de numele accesibil, ceea ce poate cauza confuzie pentru utilizatorii de tehnologii asistive. Vă rugăm să verificați: <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Nume Accesibil</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Acest link are o țintă nevalidă, iar numele accesibil conține cuvântul „<strong>%(NAME)</strong>”. Acest lucru sugerează că s-ar putea să nu fie deloc un link, ci să controleze un comportament scriptat pe pagină. Pentru a remedia problema, înlocuiți linkul cu un <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">buton accesibil</a> sau corectați destinația linkului. <hr> <strong>Sfat!</strong> Tehnologiile de asistență tratează butoanele și linkurile în mod diferit. Utilizarea elementului HTML corect asigură că utilizatorii știu ce scurtături de tastatură să folosească și ce acțiune va fi declanșată.',
+    POTENTIAL_UI_ELEMENTS: ['meniu', 'închide', 'comută', 'deschide', 'extinde', 'restrânge', 'următorul', 'anteriorul', 'redare', 'pauză', 'submeniu', 'afișează', 'ascunde', 'meniu derulant', 'înapoi', 'înainte', 'omite', 'trimite', 'anulează', 'salvează', 'editează', 'șterge', 'elimină', 'caută', 'filtrează', 'sortează', 'stop', 'fără sunet', 'activează sunetul', 'ecran complet', 'minimizează', 'maximizează'],
 
     // Tables
     TABLES_MISSING_HEADINGS:

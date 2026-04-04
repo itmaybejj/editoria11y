@@ -229,8 +229,7 @@ export default {
       'Povezava se brez opozorila odpre v novem zavihku ali oknu. To je lahko moteče, zlasti za ljudi, ki imajo težave z zaznavanjem vizualne vsebine. Drugič, ni vedno dobra praksa, da bi nadzorovali izkušnjo nekoga ali sprejemali odločitve namesto njega. Navedite, da se povezava odpre v novem oknu, v besedilu povezave. <hr> <strong>Tip!</strong> Spoznajte najboljše prakse: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">odpiranje povezav v novih oknih in zavihkih brskalnika.</a>',
     LINK_FILE_EXT:
       'Povezava kaže na datoteko PDF ali datoteko za prenos (npr. MP3, Zip, Wordov dokument) brez opozorila. V besedilu povezave navedite vrsto datoteke. Če gre za veliko datoteko, razmislite o vključitvi velikosti datoteke. <hr> <strong>Primer:</strong> Izvršno poročilo (PDF, 3 MB)',
-    LINK_IDENTICAL_NAME:
-      'Povezava ima enako besedilo kot druga povezava, čeprav kaže na drugo stran. Več povezav z enakim besedilom lahko povzroči zmedo pri ljudeh, ki uporabljajo bralnike zaslona. <strong>Premislite, ali naj bo naslednja povezava bolj opisna, da jo boste lažje razlikovali od drugih povezav.</strong> <hr> <strong {B}>Dostopno ime</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Več povezav na tej strani uporablja isto besedilo, vendar kažejo na različna mesta. To lahko zmede uporabnike asistivne tehnologije. Če želite to popraviti, naredite besedilo te povezave bolj opisno.',
     LINK_UNPRONOUNCEABLE:
       'Besedilo povezave vsebuje le simbole. Če menite, da je ta povezava napaka zaradi napake pri kopiranju/lepljenju, jo poskusite izbrisati.',
 
@@ -314,8 +313,7 @@ export default {
     // QA
     QA_BAD_LINK:
       'Najdena slaba povezava. Zdi se, da povezava kaže na razvojno okolje. <hr> {L} <strong {C}>%(LINK)</strong>',
-    QA_IN_PAGE_LINK:
-      'Okvarjena povezava na isto stran. Cilj povezave se ne ujema z nobenim elementom na tej strani.',
+    QA_IN_PAGE_LINK: 'Nedelujoča povezava na isto stran. Ta povezava poskuša navigirati do razdelka strani, ki ga ni mogoče najti. Če želite to popraviti, se prepričajte, da se povezava ujema z <code>id</code>-jem elementa, na katerega želite skočiti.',
     QA_STRONG_ITALICS:
       'Oznake krepko in poševno imajo semantični pomen in se ne smejo uporabljati za poudarjanje celotnih odstavkov. Krepko označeno besedilo je treba uporabiti za močno <strong>izpostavitev</strong> besede ali besedne zveze. Ležečo pisavo je treba uporabljati za poudarjanje lastnih imen (npr. naslovov knjig in člankov), tujih besed, narekovajev. Dolgi citati morajo biti oblikovani kot blokovski citati.',
     QA_PDF:
@@ -342,7 +340,8 @@ export default {
       'Majhno besedilo je težje brati, zlasti za osebe s slabim vidom. Za boljšo berljivost se izogibajte uporabi velikosti pisave, ki so manjše od privzetih.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Dostopno ime</strong> %(TEXT)',
+    LINK_TEXT: '<strong {B}>Besedilo povezave</strong> <strong {C}>%(TEXT)</strong>',
+    ACC_NAME: '<strong {B}>Dostopno ime</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr> <strong>Nasvet!</strong> "Dostopno ime" je končna oznaka, ki se sporoča ljudem, ki uporabljajo pripomočke, in se izračuna z ARIA. To jim pomaga razumeti namen povezave ali gumba.',
     HIDDEN_FOCUSABLE:
@@ -378,7 +377,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Ne vključujte besede „gumb“ v ime gumba. Bralniki zaslona že posredujejo vlogo elementa poleg njegovega imena.',
     LABEL_IN_NAME:
-      'Vidno besedilo za ta element se zdi drugačno od dostopnega imena, kar lahko povzroči zmedo pri uporabnikih podpornih tehnologij. Preverite: <hr> <strong {B}>Dostopno ime</strong> <strong {C}>%(TEXT)</strong>',
+      'Vidno besedilo za ta element se zdi drugačno od dostopnega imena, kar lahko povzroči zmedo pri uporabnikih podpornih tehnologij. Preverite: <hr> <strong {B}>Besedilo</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Dostopno ime</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Ta povezava ima neveljaven cilj, dostopno ime pa vsebuje besedo »<strong>%(NAME)</strong>«. To nakazuje, da to morda sploh ni povezava, ampak element, ki upravlja skriptno vedenje na strani. Če želite to popraviti, zamenjajte povezavo z <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">dostopnim gumbom</a> ali popravite cilj povezave. <hr> <strong>Nasvet!</strong> Asistivne tehnologije obravnavajo gumbe in povezave različno. Uporaba pravilnega elementa HTML zagotavlja, da uporabniki vedo, katere tipkovne bližnjice uporabiti in katero dejanje se bo sprožilo.',
+    POTENTIAL_UI_ELEMENTS: ['meni', 'zapri', 'preklopi', 'odpri', 'razširi', 'strni', 'naslednji', 'prejšnji', 'predvajaj', 'premor', 'podmeni', 'pokaži', 'skrij', 'spustni meni', 'nazaj', 'naprej', 'preskoči', 'pošlji', 'prekliči', 'shrani', 'uredi', 'izbriši', 'odstrani', 'išči', 'filter', 'razvrsti', 'ustavi', 'nemo', 'vklopi zvok', 'celozaslonski način', 'pomanjšaj', 'povečaj'],
 
     // Tables
     TABLES_MISSING_HEADINGS:

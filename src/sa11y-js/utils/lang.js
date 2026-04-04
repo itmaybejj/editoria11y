@@ -10,26 +10,29 @@ const Lang = {
   sprintf(string, ...args) {
     let transString = this._(string);
     transString = this.prepHTML(transString);
-    const el = document.createElement('span');
-    el.innerHTML = transString;
+    const el = document.createElement('div');
+    const p = document.createElement('p');
+    p.innerHTML = transString;
+    el.appendChild(p);
 
     // Replace placeholders with span markers.
     if (args?.length) {
-      args.forEach((_arg, index) => {
-        el.innerHTML = el.innerHTML.replace(/%\([a-zA-z]+\)/, `<span data-arg='${index}'></span>`);
+      args.forEach((arg, index) => {
+        const argString = String(arg);
+        // If it's a URL, replace the placeholder with the raw string.
+        if (argString.startsWith('https://')) {
+          p.innerHTML = p.innerHTML.replace(/%\([a-zA-z]+\)/, argString);
+        } else {
+          // If it's a normal string, use the span marker for safe injection later.
+          p.innerHTML = p.innerHTML.replace(/%\([a-zA-z]+\)/, `<span data-arg='${index}'></span>`);
+        }
       });
 
       // Inject the actual values as textContent.
       args.forEach((arg, index) => {
         const replacement = el.querySelector(`[data-arg="${index}"]`);
         if (!replacement || arg === null) return;
-
-        // Super specific: but this is needed to meet Language of Parts for the tooltip content.
-        const match = String(arg).match(/{{langAttr:([\w-]+)\|([^}]+)}}/);
-        if (match) replacement.setAttribute('lang', match[1]);
-
-        // Always return user content via textContent.
-        replacement.textContent = match ? match[2] : arg;
+        replacement.textContent = this.truncateString(String(arg), 300);
       });
     }
     return el;
@@ -49,6 +52,10 @@ const Lang = {
         /{L}/g,
         `<strong class="badge"><span class="link-icon"></span><span class="visually-hidden">${Lang._('LINKED')}</span></strong>`,
       );
+  },
+  truncateString(string, maxLength) {
+    const truncatedString = string.substring(0, maxLength).trimEnd();
+    return string.length > maxLength ? `${truncatedString}...` : string;
   },
 };
 export default Lang;

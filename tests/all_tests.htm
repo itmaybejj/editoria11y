@@ -1,116 +1,171 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-		<meta name="viewport" content="width=320,maximum-scale=1, user-scalable=no">
-		<meta http-equiv="refresh" content="5000000;url=./demo.htm">
-        <link rel="stylesheet" media="all" href="../src/css/editoria11y.css">
-    </head>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=320,maximum-scale=1, user-scalable=no">
+	<meta http-equiv="refresh" content="5000000;url=./demo.htm">
+	<link rel="stylesheet" media="all" href="../src/css/editoria11y.css">
+</head>
+
 <body>
-		<h3 class="positive" style="float:right; margin-top: 0; position: relative; z-index: 3">Page-level meta tag errors</h3>
-    <main id="main">
+	<h3 class="positive" style="float:right; margin-top: 0; position: relative; z-index: 3">Page-level meta tag errors
+	</h3>
+	<main id="main">
 		<div id="editoria11y-demo" style="font-size: 2rem; font-family: serif;">Editoria11y: All Tests</div>
 
-        <section id="headings">
+		<section id="headings">
 
-            <h2 id="heading-tests">Headings</h2>
+			<h2 id="heading-tests">Headings</h2>
 
 			<p>This heading skipped a level:</p>
-            <div class="positive"><h6 id="this-h6-should-have-been-an-h3">Oops</h6></div>
+			<div class="positive">
+				<h6 id="this-h6-should-have-been-an-h3">Oops</h6>
+			</div>
 
-            <p>This heading has no text at all:</p>
-			<div class="positive"><h4 class="empty-example"> </h4>
-            </div>
+			<p>This heading has no text at all:</p>
+			<div class="positive">
+				<h4 class="empty-example"> </h4>
+			</div>
 
 			<p>This short blockquote might be heading:</p>
-            <div class="positive"><blockquote>I'm a fake heading</blockquote></div>
+			<div class="positive">
+				<blockquote>I'm a fake heading</blockquote>
+			</div>
 
 			<p>This all-bold paragraph might be a heading:</p>
-            <p class="positive"><strong>I am a fake heading</strong></p>
+			<p class="positive"><strong>I am a fake heading</strong></p>
 
 			<p>This heading is really long:</p>
-			<div class="positive"><h4>Headings and subheadings create a navigable table of contents for assistive devices. The numbers indicate indents in a nesting relationship. Very long headings probably mean the author is saying too much in the heading.</h4></div>
+			<div class="positive">
+				<h4>Headings and subheadings create a navigable table of contents for assistive devices. The numbers
+					indicate indents in a nesting relationship. Very long headings probably mean the author is saying
+					too much in the heading.</h4>
+			</div>
 
-        </section>
+		</section>
 
 
-        <section>
-            <h2 id="text-alternatives">Text alternatives for images</h2>
+		<section>
+			<h2 id="text-alternatives">Text alternatives for images</h2>
 
 			<p>This heading is made of an image of text with no alt:</p>
 			<div class="positive">
-				<h4><img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" ></h4>
+				<h4><img alt=""
+						src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+				</h4>
 			</div>
 
 			<p>Image with no alt attribute at all:</p>
-            <p class="positive"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+			<p class="positive"><img
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+			</p>
 
-            <p>Image with an invalid alt attribute, e.g., <code class="language-plaintext highlighter-rouge">alt="'"</code></p>
+			<p>Image with an invalid alt attribute, e.g., <code
+					class="language-plaintext highlighter-rouge">alt="'"</code></p>
 
-            <p class="positive"><img alt="'" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+			<p class="positive"><img alt="'"
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+			</p>
 
-            <p id="image-with-a-filename-as-an-alt">Image with a filename as an alt</p>
+			<p id="image-with-a-filename-as-an-alt">Image with a filename as an alt</p>
 
-            <p class="positive"><img alt="filename.jpg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+			<p class="positive"><img alt="filename.jpg"
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+			</p>
 
-            <p id="image-with-redundant-text-in-its-alt">Image with redundant text in its alt, such as “image of:”</p>
+			<p id="image-with-redundant-text-in-its-alt">Image with redundant text in its alt, such as “image of:”</p>
 
-            <p class="positive"><img alt="Image of a characters like åø´ñ'&rsquo;$#'&quot;<script>alert('hi')</script>." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+			<p class="positive"><img alt="Image of a characters like åø´ñ'&rsquo;$#'&quot;<script>alert('hi')</script>."
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+			</p>
 
-			<p id="linked-image-with-redundant-text-in-its-alt">Linked image with redundant text in its alt, such as “image of:”</p>
+			<p id="linked-image-with-redundant-text-in-its-alt">Linked image with redundant text in its alt, such as
+				“image of:”</p>
 
-			<p class="positive"><a href="./editable.htm"><img alt="Image of a turtledove." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+			<p class="positive"><a href="./editable.htm"><img alt="Image of a turtledove."
+						src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a>
+			</p>
 
-            <p id="image-with-placeholder-alt">Image with placeholder alt:</p>
-            <p class="positive"><img alt="TBD" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+			<p id="image-with-placeholder-alt">Image with placeholder alt:</p>
+			<p class="positive"><img alt="TBD"
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+			</p>
 
 			<p id="linked-image-with-placeholder-alt"><strong>Linked</strong> image with placeholder alt:</p>
-            <p class="positive"><a href="./editable.htm"><img alt="TBD" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+			<p class="positive"><a href="./editable.htm"><img alt="TBD"
+						src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a>
+			</p>
 
 			<p id="image-with-machine-alt">Image with machine code alt:</p>
-			<p class="positive"><img alt="$700VIDEOSABOUTTURTLESALL2SECONDSLONG" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+			<p class="positive"><img alt="$700VIDEOSABOUTTURTLESALL2SECONDSLONG"
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+			</p>
 
 			<p id="linked-image-with-machine-alt">Linked image with machine code alt:</p>
-			<p class="positive"><a href="./editable.htm"><img alt="$700VIDEOSABOUTTURTLESALL2SECONDSLONG" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+			<p class="positive"><a href="./editable.htm"><img alt="$700VIDEOSABOUTTURTLESALL2SECONDSLONG"
+						src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a>
+			</p>
 
-            <p id="image-with-very-long-alt-text">Image with very long alt text:</p>
+			<p id="image-with-very-long-alt-text">Image with very long alt text:</p>
 
-            <p class="positive"><img alt="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+			<p class="positive"><img
+					alt="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+			</p>
 			<p id="linked-image-with-very-long-alt-text">Linked image with very long alt text:</p>
 
-			<p class="positive"><a href="/"><img alt="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+			<p class="positive"><a href="/"><img
+						alt="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+						src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a>
+			</p>
 
-            <p id="images-in-links-where-the-alt-text-may-be-describing-the-image-instead-of-the-link">Images in links where the alt text may be describing the image instead of the link</p>
+			<p id="images-in-links-where-the-alt-text-may-be-describing-the-image-instead-of-the-link">Images in links
+				where the alt text may be describing the image instead of the link</p>
 
-            <p class="positive"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs">This link has text and an image.<img alt="A lovely gray box" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+			<p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">This link has text and an
+					image.<img alt="A lovely gray box"
+						src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a>
+			</p>
 
 			<p id="images-in-links-decorative">Any linked image (test off by default)</p>
-			<p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"><img alt="Hello there" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+			<p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"><img alt="Hello there"
+						src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a>
+			</p>
 
 			<p>Image in figure marked decorative:</p>
 			<figure class="positive">
-				<img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+				<img alt=""
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
 				<figcaption>Figcaption is present.</figcaption>
 			</figure>
 
 			<p>Image in figure with an alt the same as the figcaption:</p>
-            <figure class="positive">
-                <img alt="Figcaption is the same as alt" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
-                <figcaption>Figcaption is the same as alt</figcaption>
-            </figure>
+			<figure class="positive">
+				<img alt="Figcaption is the same as alt"
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+				<figcaption>Figcaption is the same as alt</figcaption>
+			</figure>
 			<p>Image in a carousel without an alt:</p>
 			<div class="positive">
-				<img alt="" class="carousel" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+				<img alt="" class="carousel"
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
 			</div>
-        </section>
+		</section>
 		<section>
 			<h2>Contrast</h2>
 			<p>Illegible color combination:</p>
-			<div class="positive"><p style="background: #ccc; color: #ddd;">Super legible.</p></div>
+			<div class="positive">
+				<p style="background: #ccc; color: #ddd;">Super legible.</p>
+			</div>
 			<p>Color needs a manual check:</p>
-			<div class="positive"><p style="background: linear-gradient(45deg,#ccc 25%,#0000 25% 75%,#ccc 75%,#ccc),linear-gradient(45deg,#ccc 25%,#0000 25% 75%,#ccc 75%,#ccc)">And incalculable.</p></div>
+			<div class="positive">
+				<p
+					style="background: linear-gradient(45deg,#ccc 25%,#0000 25% 75%,#ccc 75%,#ccc),linear-gradient(45deg,#ccc 25%,#0000 25% 75%,#ccc 75%,#ccc)">
+					And incalculable.</p>
+			</div>
 			<div class="positive"><label>Input with low contrast
-				<input type="text" style="color: #777;"></label></div>
+					<input type="text" style="color: #777;"></label></div>
 
 			<style>
 				#unsupported-placeholder::placeholder {
@@ -119,18 +174,30 @@
 			</style>
 
 			<label for="unsupported-placeholder">Color of placeholder cannot be calculated</label>
-			<div class="positive" style="background: transparent;"><input type="text" id="unsupported-placeholder" placeholder="Rec2020 color space"></div>
+			<div class="positive" style="background: transparent;"><input type="text" id="unsupported-placeholder"
+					placeholder="Rec2020 color space"></div>
 
 
 			<p>SVG graphic without enough contrast</p>
-			<div class="positive"><svg style="width: 16px; height: 16px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path fill="#999" d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376C296.3 401.1 253.9 416 208 416 93.1 416 0 322.9 0 208S93.1 0 208 0 416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg></div>
+			<div class="positive"><svg style="width: 16px; height: 16px;" xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 512 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+					<path fill="#999"
+						d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376C296.3 401.1 253.9 416 208 416 93.1 416 0 322.9 0 208S93.1 0 208 0 416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
+				</svg></div>
 
 			<p>SVG graphic where contrast needs a manual check</p>
-			<div class="positive" style="background: linear-gradient(45deg,#ccc 45%,#0000 45% 75%,#ccc 75%,#ccc),linear-gradient(145deg,#ccc 45%,#0000 45% 75%,#ccc 75%,#ccc)"><button aria-label="contrast test"><svg style="width: 16px; height: 16px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path fill="color(rec2020 0.9 0.4 0.2)" d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376C296.3 401.1 253.9 416 208 416 93.1 416 0 322.9 0 208S93.1 0 208 0 416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg></button></div>
+			<div class="positive"
+				style="background: linear-gradient(45deg,#ccc 45%,#0000 45% 75%,#ccc 75%,#ccc),linear-gradient(145deg,#ccc 45%,#0000 45% 75%,#ccc 75%,#ccc)">
+				<button aria-label="contrast test"><svg style="width: 16px; height: 16px;"
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 512 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+						<path fill="color(rec2020 0.9 0.4 0.2)"
+							d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376C296.3 401.1 253.9 416 208 416 93.1 416 0 322.9 0 208S93.1 0 208 0 416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
+					</svg></button></div>
 
 
 		</section>
-        <h3 id="embeds">Embeds &amp; Interactives</h3>
+		<h3 id="embeds">Embeds &amp; Interactives</h3>
 
 		<p>Video flagged as manual check needed for captioning:</p>
 		<div class="positive">
@@ -138,7 +205,8 @@
 		</div>
 		<p>Audio needs a transcript:</p>
 		<div class="positive">
-			<div style="border: 1px solid #444; background: #ccc; width: 320px; height: 60px;"><audio style="height: 60px;"></audio>
+			<div style="border: 1px solid #444; background: #ccc; width: 320px; height: 60px;"><audio
+					style="height: 60px;"></audio>
 			</div>
 		</div>
 
@@ -164,41 +232,54 @@
 
 		<p>Nested interactive components</p>
 		<div class="positive">
-			<details><summary>Accordion</summary>
-				<details><summary>Accordion</summary>Surprise!</details>
+			<details>
+				<summary>Accordion</summary>
+				<details>
+					<summary>Accordion</summary>Surprise!
+				</details>
 			</details>
 		</div>
 
-        <h2 id="meaningful-links">Meaningful Links</h2>
+		<h2 id="meaningful-links">Meaningful Links</h2>
 
-        <p id="links-with-no-text-at-all">Links with no text at all</p>
-        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"
-		style="display: inline-block; width: 3rem; border-bottom: 1px solid;"></a> Empty links</p>
+		<p id="links-with-no-text-at-all">Links with no text at all</p>
+		<p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"
+				style="display: inline-block; width: 3rem; border-bottom: 1px solid;"></a> Empty links</p>
 
 		<p id="links-titled-with-a-url">Links only labelled with a URL:</p>
-        <p class="positive"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs">https://www.youtube.com/watch?v=DLzxrzFCyOs</a></p>
+		<p class="positive"><a
+				href="https://www.youtube.com/watch?v=DLzxrzFCyOs">https://www.youtube.com/watch?v=DLzxrzFCyOs</a></p>
 
 		<p id="links-titled-with-a-symbol">Links only labelled with symbols:</p>
 		<p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">↣</a></p>
 
 		<p>Links with the same names go different places</p>
-		<p class="positive"><a href="https://www.youtube.com/watch?v=fjOeJssZX_Q">Turtles</a> <a href="https://www.youtube.com/watch?v=cWppAbqm9I8">Turtles</a></p>
+		<p class="positive"><a href="https://www.youtube.com/watch?v=fjOeJssZX_Q">Turtles</a> <a
+				href="https://www.youtube.com/watch?v=cWppAbqm9I8">Turtles</a></p>
 
 		<p id="links-titled-with-doi">Links only labelled with a DOI number:</p>
 		<p class="positive"><a href="https://doi.org/10.1145/3493612.3520468">doi.org/10.1145/3493612.3520468</a></p>
 
 		<p id="links-titled-with-click">Links with meaningless labels:</p>
-		<p class="positive"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs" title="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here</a></p>
+		<p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"
+				title="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here</a></p>
 
 		<p id="links-titled-with-empty">Linked icons without text alternatives:</p>
-		<p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"><svg style="width: 16px; height: 16px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376C296.3 401.1 253.9 416 208 416 93.1 416 0 322.9 0 208S93.1 0 208 0 416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg></a></p>
+		<p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"><svg
+					style="width: 16px; height: 16px;" xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 512 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+					<path
+						d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376C296.3 401.1 253.9 416 208 416 93.1 416 0 322.9 0 208S93.1 0 208 0 416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
+				</svg></a></p>
 
-        <p id="links-that-open-in-a-new-window-without-an-external-link-icon-or-text-warning">Links that open in a new window without an external link icon or text warning</h3>
+		<p id="links-that-open-in-a-new-window-without-an-external-link-icon-or-text-warning">Links that open in a new
+			window without an external link icon or text warning</h3>
 
-        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">Alert for opens-in test.</a></p>
+		<p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">Alert for opens-in
+				test.</a></p>
 
-        <p id="links-to-PDF">Links to PDFs</p>
-        <p class="positive"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ#.pdf" class="">Have fun.</a></p>
+		<p id="links-to-PDF">Links to PDFs</p>
+		<p class="positive"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ#.pdf" class="">Have fun.</a></p>
 
 		<p id="links-to-doc">Links to other documents</p>
 		<p class="positive"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ#.doc" class="">A fake doc link.</a></p>
@@ -206,8 +287,9 @@
 		<p id="links-redundant">Links with redundant title attributes</p>
 		<p class="positive"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" title="Hover me">Hover me</a></p>
 
-        <p>Links with attributes that remove them from the tab index:</p>
-        <p class="positive"><a href="./editable.htm" aria-hidden="true">Aria-hidden links without a negative tabindex.</a></p>
+		<p>Links with attributes that remove them from the tab index:</p>
+		<p class="positive"><a href="./editable.htm" aria-hidden="true">Aria-hidden links without a negative
+				tabindex.</a></p>
 
 		<p>Links aria-labelledby attributes to elements with no text:</p>
 		<p class="positive"><a href="./editable.htm" id="oopsy" aria-labelledby="oopsy"></a></p>
@@ -216,20 +298,29 @@
 		<p class="positive"><a href="www.google.com/" aria-label="has aria label">learn more</a></p>
 
 		<p>Linked image with no alt text:</p>
-		<p class="positive"><a href="./editable.htm"><img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" class=""></a></p>
+		<p class="positive"><a href="./editable.htm"><img alt=""
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"
+					class=""></a></p>
 
 		<p>Linked image with unpronounceable alt text:</p>
-		<p class="positive"><a href="./editable.htm"><img alt="'" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" class=""></a></p>
+		<p class="positive"><a href="./editable.htm"><img alt="'"
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"
+					class=""></a></p>
 
 		<p>Linked image with no alt text attribute:</p>
-		<p class="positive"><a href="./editable.htm"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" class=""></a></p>
+		<p class="positive"><a href="./editable.htm"><img
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"
+					class=""></a></p>
 
 		<p>Linked image with no alt text attribute in a link with text:</p>
-		<p class="positive"><a href="./editable.htm">Search <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" class=""></a></p>
+		<p class="positive"><a href="./editable.htm">Search <img
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"
+					class=""></a></p>
 
 		<p>Linked image with only a filename as alt text:</p>
-        <p class="positive"><a href="./editable.htm"><img alt="http://jpg.gif" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
-        </a></p>
+		<p class="positive"><a href="./editable.htm"><img alt="http://jpg.gif"
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+			</a></p>
 
 		<p>Broken in page links</p>
 		<p class="positive">
@@ -244,48 +335,71 @@
 		<p>Duplicate anchors</p>
 		<p class="positive"><a id="dupe" href="#dupe">Anchor 1</a> <a id="dupe" href="#dupe">Anchor 2</a></p>
 
-        <h2 id="tables">Tables</h2>
+		<h2 id="tables">Tables</h2>
 
-        <h3 id="tables-without-valid-headers">Tables without valid headers</h3>
+		<h3 id="tables-without-valid-headers">Tables without valid headers</h3>
 
-        <table class="positive"><tbody><tr><td>A table without a TH header is invalid</td><td class="positive"><h4 >Outline headers do not count</h4></td><td class="negative"><p><strong>Disable should be content header test inside tables</strong></p></td></tr></tbody></table>
+		<table class="positive">
+			<tbody>
+				<tr>
+					<td>A table without a TH header is invalid</td>
+					<td class="positive">
+						<h4>Outline headers do not count</h4>
+					</td>
+					<td class="negative">
+						<p><strong>Disable should be content header test inside tables</strong></p>
+					</td>
+				</tr>
+			</tbody>
+		</table>
 
-        <table><thead>
-        <tr>
-            <th class="positive"></th>
-			<th class="negative">Empty headers</th>
-		</tr>
-        </thead>
-            <tbody>
-            <tr class="negative">
-                <th>I found</th>
-                <td>700 Videos of Turtles</td>
-            </tr>
-            <tr class="negative">
-                <th>Each</th>
-                <td>2 Seconds Long</td>
-            </tr>
-            </tbody>
-        </table>
-        <h2 id="legibility">Legibility</h2>
+		<table>
+			<thead>
+				<tr>
+					<th class="positive"></th>
+					<th class="negative">Empty headers</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr class="negative">
+					<th>I found</th>
+					<td>700 Videos of Turtles</td>
+				</tr>
+				<tr class="negative">
+					<th>Each</th>
+					<td>2 Seconds Long</td>
+				</tr>
+			</tbody>
+		</table>
+		<h2 id="legibility">Legibility</h2>
 
-		<div class="positive"><p>SEVERAL WORDS IN A ROW OF CAPS LOCK TEXT WILL TRIGGER A MANUAL CHECK WARNING.</p></div>
+		<div class="positive">
+			<p>SEVERAL WORDS IN A ROW OF CAPS LOCK TEXT WILL TRIGGER A MANUAL CHECK WARNING.</p>
+		</div>
 
 		<p class="positive"><u>Underlined text</u></p>
 
-		<p class="positive"><em>A little italics is fine, but large blocks of of emphasized text are not very legible. A little is acceptable of course, but there are limits, and a whole paragraph is way too much. This, for example, is a whole paragraph. It's kind of hard to read, isn't it? But this test does not trip until it is this long, so you should not see false positives in your content unless you write really big paragraphs like this regularly.</em></p>
+		<p class="positive"><em>A little italics is fine, but large blocks of of emphasized text are not very legible. A
+				little is acceptable of course, but there are limits, and a whole paragraph is way too much. This, for
+				example, is a whole paragraph. It's kind of hard to read, isn't it? But this test does not trip until it
+				is this long, so you should not see false positives in your content unless you write really big
+				paragraphs like this regularly.</em></p>
 
 		<p class="positive" style="text-align: justify;">Justified text</p>
 
-		<p class="positive">Excessive superscript or subscript; <sub>subscript should be used for small references and footnotes, not entire sentences or paragraphs.</sub></p>
+		<p class="positive">Excessive superscript or subscript; <sub>subscript should be used for small references and
+				footnotes, not entire sentences or paragraphs.</sub></p>
 
 		<p class="positive"><span style="font-size: 10px;">Teeny fonts</span></p>
 
 		<div class="positive">
-			<p>* Fake lists using common characters,</p><p>* letters, numbers and emoji.</p>
+			<p>* Fake lists using common characters,</p>
+			<p>* letters, numbers and emoji.</p>
 		</div>
 
-		<div class="positive"><li>Missing UL tag</li></div>
+		<div class="positive">
+			<li>Missing UL tag</li>
+		</div>
 
 		<h2>Forms</h2>
 
@@ -327,24 +441,30 @@
 		<p class="positive"><a href="./editable.htm" tabindex="2">Jumbling the tab index</a></p>
 
 
-    </main>
-    <footer></footer>
+	</main>
+	<footer></footer>
 
 
-    <div hidden>
-        <style>
-            main {position: relative; z-index: 0;}
-            .insert-image-before::before {
-                content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E");
-                display: inline-block;
-                width: 24px;
-                height: 24px;
-            }
-            .insert-text-before::before {
-                content: "Click here";
-            }
-            /*footer { position: fixed; z-index: 1; bottom: 0; left: 0; right: 0; background: silver;}*/
-        </style>
+	<div hidden>
+		<style>
+			main {
+				position: relative;
+				z-index: 0;
+			}
+
+			.insert-image-before::before {
+				content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E");
+				display: inline-block;
+				width: 24px;
+				height: 24px;
+			}
+
+			.insert-text-before::before {
+				content: "Click here";
+			}
+
+			/*footer { position: fixed; z-index: 1; bottom: 0; left: 0; right: 0; background: silver;}*/
+		</style>
 
 		<!-- Instantiate-->
 		<link href="./tests.css" rel="stylesheet">
@@ -353,17 +473,17 @@
 		<script src="../dist/js/lang/en.umd.js"></script>
 		<script src="../dist/js/lang/es.umd.js"></script>
 		<script src="../dist/js/lang/de.umd.js"></script>
-        <script>
+		<script>
 
-		  const editLinks = document.createElement('div');
-		  const editIcon = document.createElement('span');
-		  editIcon.classList.add('ed11y-custom-edit-icon');
-		  editIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M441 59L453 71c9 9 9 25 0 34L424 134 378 88 407 59c9-9 25-9 34 0zM210 256L344 122 390 168 256 302c-3 3-7 5-10 6l-59 17 17-59c1-4 3-8 6-10zM373 25L176 222c-9 9-15 19-18 31l-29 100c-2 8-0 17 6 24s15 9 24 6l100-29c12-3 23-10 31-18L487 139c28-28 28-74 0-102L475 25C447-3 401-3 373 25zM88 64C39 64 0 103 0 152L0 424c0 49 39 88 88 88l272 0c49 0 88-39 88-88l0-112c0-13-11-24-24-24s-24 11-24 24l0 112c0 22-18 40-40 40L88 464c-22 0-40-18-40-40l0-272c0-22 18-40 40-40l112 0c13 0 24-11 24-24s-11-24-24-24L88 64z">';
-		  const editLink = document.createElement('a');
-		  editLink.href="./editable.htm";
-		  editLink.textContent = Ed11yLangEn.lang.strings.edit_page;
-		  editLink.prepend(editIcon.cloneNode(true));
-		  editLinks.appendChild(editLink);
+			const editLinks = document.createElement('div');
+			const editIcon = document.createElement('span');
+			editIcon.classList.add('ed11y-custom-edit-icon');
+			editIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M441 59L453 71c9 9 9 25 0 34L424 134 378 88 407 59c9-9 25-9 34 0zM210 256L344 122 390 168 256 302c-3 3-7 5-10 6l-59 17 17-59c1-4 3-8 6-10zM373 25L176 222c-9 9-15 19-18 31l-29 100c-2 8-0 17 6 24s15 9 24 6l100-29c12-3 23-10 31-18L487 139c28-28 28-74 0-102L475 25C447-3 401-3 373 25zM88 64C39 64 0 103 0 152L0 424c0 49 39 88 88 88l272 0c49 0 88-39 88-88l0-112c0-13-11-24-24-24s-24 11-24 24l0 112c0 22-18 40-40 40L88 464c-22 0-40-18-40-40l0-272c0-22 18-40 40-40l112 0c13 0 24-11 24-24s-11-24-24-24L88 64z">';
+			const editLink = document.createElement('a');
+			editLink.href = "./editable.htm";
+			editLink.textContent = Ed11yLangEn.lang.strings.edit_page;
+			editLink.prepend(editIcon.cloneNode(true));
+			editLinks.appendChild(editLink);
 
 			document.addEventListener('ed11yResults', (e) => {
 				/*const testsFound = new Set(Object.keys(Ed11yLangEs.testNames))
@@ -377,242 +497,242 @@
 				})
 				console.log("Tests not on page", testsFound);*/
 			});
-          const ed11y = new Ed11y.Ed11y({
-            alertMode : 'assertive',
-            //baseFontSize: 18,
-            //theme : 'sleekTheme',
-            //theme : 'darkTheme',
-			  headingsOnlyFromCheckRoots: true, // @todo merge this is gone. replaced with ignoreContentOutsideRoots. Does that work?
-			  ignoreContentOutsideRoots: true,
-            //outlineExclude : '.utility', // @todo CMS this syntax changed for Sa11y to the below.
-			  outlineIgnore: '.utility',
-			  // Split configuration
-			   // Provide list of test keys to check but not display.
-			  splitConfiguration: {
-				  showDev: true,
-				  devChecks: ['QA_IN_PAGE_LINK'],
-				  devOptions: {
-					  checkRoot: 'body',
-					  // containerIgnore: '',
-					  // contrastIgnore: '.sr-only',
-					  // outlineIgnore: '',
-					  // headerIgnore: '',,
-					  // imageIgnore: '',
-					  // linkIgnore: '[aria-hidden][tabindex="-1"]',
-				  }
-			  },
-			  contrastPlugin: true,
-			  readabilityPlugin: true,
-			  developerPlugin: true,
-			  embeddedContentPlugin: true,
-			  linksAdvancedPlugin: true,
+			const ed11y = new Ed11y.Ed11y({
+				alertMode: 'assertive',
+				//baseFontSize: 18,
+				//theme : 'sleekTheme',
+				//theme : 'darkTheme',
+				headingsOnlyFromCheckRoots: true, // @todo merge this is gone. replaced with ignoreContentOutsideRoots. Does that work?
+				ignoreContentOutsideRoots: true,
+				//outlineExclude : '.utility', // @todo CMS this syntax changed for Sa11y to the below.
+				outlineIgnore: '.utility',
+				// Split configuration
+				// Provide list of test keys to check but not display.
+				splitConfiguration: {
+					showDev: true,
+					devChecks: ['QA_IN_PAGE_LINK'],
+					devOptions: {
+						checkRoot: 'body',
+						// containerIgnore: '',
+						// contrastIgnore: '.sr-only',
+						// outlineIgnore: '',
+						// headerIgnore: '',,
+						// imageIgnore: '',
+						// linkIgnore: '[aria-hidden][tabindex="-1"]',
+					}
+				},
+				contrastPlugin: true,
+				readabilityPlugin: true,
+				developerPlugin: true,
+				embeddedContentPlugin: true,
+				linksAdvancedPlugin: true,
 
 
-            ignoreAriaOnElements: '.gutenbergBadAria',
-			//lang: Ed11yLangDe.lang,
-			  lang: Ed11yLangEn.lang,
-            linkIgnoreStrings: ['opens in new window','download'], // @todo CMS was regex.
-            linkIgnoreSelector: '.link-purpose',
-            embeddedContent: '#embed',
-            ignoreElements : 'footer *, [style*="none"] *, [style*="none"]',
-			  // @todo test shadow components
-            // shadowComponents : 'shadow-test, shadow-test-no-hits, turtle',
-            autoDetectShadowComponents: true,
-		  	checkRoot: 'main',
-			  editLinks: editLinks,
-            //showDismissed : true,
-            altPlaceholder: ['This image has an empty alt attribute;'], // @todo CMS was string.
-			  //panelAttachTo: 'header',
-            //ignoreTests: ['headingLevelSkipped'],
-            // syncedDismissals : {},
-            //allowOK: false,
-            //allowHide: false,
-            //ignoreAllIfAbsent : 'maain',
-            //ignoreAllIfPresent : 'main',
-            //preventCheckingIfAbsent : 'maian',
-			  // All checks
-			  checks: {
-				  // Heading checks
-				  HEADING_SKIPPED_LEVEL: true,
-				  HEADING_EMPTY_WITH_IMAGE: true,
-				  HEADING_EMPTY: true,
-				  HEADING_FIRST: true,
-				  HEADING_LONG: {
-					  maxLength: 170,
-				  },
-				  HEADING_MISSING_ONE: true,
+				ignoreAriaOnElements: '.gutenbergBadAria',
+				//lang: Ed11yLangDe.lang,
+				lang: Ed11yLangEn.lang,
+				linkIgnoreStrings: ['opens in new window', 'download'], // @todo CMS was regex.
+				linkIgnoreSelector: '.link-purpose',
+				embeddedContent: '#embed',
+				ignoreElements: 'footer *, [style*="none"] *, [style*="none"]',
+				// @todo test shadow components
+				// shadowComponents : 'shadow-test, shadow-test-no-hits, turtle',
+				autoDetectShadowComponents: true,
+				checkRoot: 'main',
+				editLinks: editLinks,
+				//showDismissed : true,
+				//altPlaceholder: ['This image has an empty alt attribute;'], // @todo CMS was string.
+				//panelAttachTo: 'header',
+				//ignoreTests: ['headingLevelSkipped'],
+				// syncedDismissals : {},
+				//allowOK: false,
+				//allowHide: false,
+				//ignoreAllIfAbsent : 'maain',
+				//ignoreAllIfPresent : 'main',
+				//preventCheckingIfAbsent : 'maian',
+				// All checks
+				checks: {
+					// Heading checks
+					HEADING_SKIPPED_LEVEL: true,
+					HEADING_EMPTY_WITH_IMAGE: true,
+					HEADING_EMPTY: true,
+					HEADING_FIRST: true,
+					HEADING_LONG: {
+						maxLength: 170,
+					},
+					HEADING_MISSING_ONE: true,
 
-				  // Image checks
-				  MISSING_ALT_LINK: true,
-				  MISSING_ALT_LINK_HAS_TEXT: true,
-				  MISSING_ALT: true,
-				  IMAGE_DECORATIVE_CAROUSEL: {
-					  sources: '.carousel',
-				  },
-				  LINK_IMAGE_NO_ALT_TEXT: true,
-				  LINK_IMAGE_TEXT: true,
-				  IMAGE_FIGURE_DECORATIVE: true,
-				  IMAGE_DECORATIVE: true,
-				  LINK_ALT_FILE_EXT: true,
-				  ALT_FILE_EXT: true,
-				  LINK_PLACEHOLDER_ALT: true,
-				  ALT_PLACEHOLDER: true,
-				  LINK_SUS_ALT: true,
-				  SUS_ALT: true,
-				  LINK_IMAGE_LONG_ALT: {
-					  maxLength: 250,
-				  },
-				  IMAGE_ALT_TOO_LONG: {
-					  maxLength: 250,
-				  },
-				  LINK_IMAGE_ALT: true,
-				  // {dismissAll: true,} default.
-				  LINK_IMAGE_ALT_AND_TEXT: true,
-				  IMAGE_FIGURE_DUPLICATE_ALT: true,
-				  IMAGE_PASS: {
-					  dismissAll: true,
-				  },
-				  ALT_UNPRONOUNCEABLE: true,
-				  LINK_ALT_UNPRONOUNCEABLE: true,
-				  ALT_MAYBE_BAD: {
-					  minLength: 15,
-				  },
-				  LINK_ALT_MAYBE_BAD: {
-					  minLength: 15,
-				  },
+					// Image checks
+					MISSING_ALT_LINK: true,
+					MISSING_ALT_LINK_HAS_TEXT: true,
+					MISSING_ALT: true,
+					IMAGE_DECORATIVE_CAROUSEL: {
+						sources: '.carousel',
+					},
+					LINK_IMAGE_NO_ALT_TEXT: true,
+					LINK_IMAGE_TEXT: true,
+					IMAGE_FIGURE_DECORATIVE: true,
+					IMAGE_DECORATIVE: true,
+					LINK_ALT_FILE_EXT: true,
+					ALT_FILE_EXT: true,
+					LINK_PLACEHOLDER_ALT: true,
+					ALT_PLACEHOLDER: true,
+					LINK_SUS_ALT: true,
+					SUS_ALT: true,
+					LINK_IMAGE_LONG_ALT: {
+						maxLength: 250,
+					},
+					IMAGE_ALT_TOO_LONG: {
+						maxLength: 250,
+					},
+					LINK_IMAGE_ALT: true,
+					// {dismissAll: true,} default.
+					LINK_IMAGE_ALT_AND_TEXT: true,
+					IMAGE_FIGURE_DUPLICATE_ALT: true,
+					IMAGE_PASS: {
+						dismissAll: true,
+					},
+					ALT_UNPRONOUNCEABLE: true,
+					LINK_ALT_UNPRONOUNCEABLE: true,
+					ALT_MAYBE_BAD: {
+						//minLength: 15,
+					},
+					LINK_ALT_MAYBE_BAD: {
+						minLength: 15,
+					},
 
-				  // Link checks
-				  DUPLICATE_TITLE: {
-					  dismissAll: true,
-				  },
-				  LINK_EMPTY_LABELLEDBY: true,
-				  LINK_EMPTY_NO_LABEL: true,
-				  LINK_STOPWORD: {
-					  type: 'warning',
-				  },
-				  LINK_STOPWORD_ARIA: true,
-				  LINK_SYMBOLS: true,
-				  LINK_CLICK_HERE: true,
-				  LINK_DOI: {
-					  dismissAll: true,
-				  },
-				  LINK_URL: {
-					  maxLength: 40,
-				  },
-				  LINK_LABEL: {
-					  dismissAll: true,
-				  },
-				  LINK_EMPTY: true,
-				  LINK_IDENTICAL_NAME: {
-					  dismissAll: true,
-				  },
-				  LINK_NEW_TAB: {
-					  dismissAll: true,
-				  },
-				  LINK_FILE_EXT: true,
+					// Link checks
+					DUPLICATE_TITLE: {
+						dismissAll: true,
+					},
+					LINK_EMPTY_LABELLEDBY: true,
+					LINK_EMPTY_NO_LABEL: true,
+					LINK_STOPWORD: {
+						type: 'warning',
+					},
+					LINK_STOPWORD_ARIA: true,
+					LINK_SYMBOLS: true,
+					LINK_CLICK_HERE: true,
+					LINK_DOI: {
+						dismissAll: true,
+					},
+					LINK_URL: {
+						maxLength: 40,
+					},
+					LINK_LABEL: {
+						dismissAll: true,
+					},
+					LINK_EMPTY: true,
+					LINK_IDENTICAL_NAME: {
+						dismissAll: true,
+					},
+					LINK_NEW_TAB: {
+						dismissAll: true,
+					},
+					LINK_FILE_EXT: true,
 
-				  // Form labels checks
-				  LABELS_MISSING_IMAGE_INPUT: true,
-				  LABELS_INPUT_RESET: true,
-				  LABELS_MISSING_LABEL: true,
-				  LABELS_ARIA_LABEL_INPUT: true,
-				  LABELS_NO_FOR_ATTRIBUTE: true,
-				  LABELS_PLACEHOLDER: true,
+					// Form labels checks
+					LABELS_MISSING_IMAGE_INPUT: true,
+					LABELS_INPUT_RESET: true,
+					LABELS_MISSING_LABEL: true,
+					LABELS_ARIA_LABEL_INPUT: true,
+					LABELS_NO_FOR_ATTRIBUTE: true,
+					LABELS_PLACEHOLDER: true,
 
-				  // Embedded content checks
-				  EMBED_AUDIO: {
-					  sources: '',
-				  },
-				  EMBED_VIDEO: {
-					  sources: '',
-				  },
-				  EMBED_DATA_VIZ: {
-					  sources: '',
-				  },
-				  EMBED_CUSTOM: {
-					  sources: '#embed_custom',
-				  },
-				  EMBED_UNFOCUSABLE: true,
-				  EMBED_MISSING_TITLE: true,
-				  EMBED_GENERAL: true,
+					// Embedded content checks
+					EMBED_AUDIO: {
+						sources: '',
+					},
+					EMBED_VIDEO: {
+						sources: '',
+					},
+					EMBED_DATA_VIZ: {
+						sources: '',
+					},
+					EMBED_CUSTOM: {
+						sources: '#embed_custom',
+					},
+					EMBED_UNFOCUSABLE: true,
+					EMBED_MISSING_TITLE: true,
+					EMBED_GENERAL: true,
 
-				  // Quality assurance checks
-				  QA_BAD_LINK: {
-					  sources: '[href*="tugboatqa.com"]',
-				  },
-				  QA_STRONG_ITALICS: true,
-				  QA_IN_PAGE_LINK: true,
-				  QA_DOCUMENT: {
-					  //sources: '',
-					  dismissAll: true,
-				  },
-				  QA_PDF: {
-					  dismissAll: true,
-				  },
-				  QA_BLOCKQUOTE: true,
-				  TABLES_MISSING_HEADINGS: true,
-				  TABLES_SEMANTIC_HEADING: true,
-				  TABLES_EMPTY_HEADING: true,
-				  QA_FAKE_HEADING: true,
-				  QA_FAKE_LIST: true,
-				  QA_UPPERCASE: true,
-				  QA_UNDERLINE: true,
-				  QA_SUBSCRIPT: true,
-				  QA_NESTED_COMPONENTS: {
-					  sources: '',
-				  },
-				  QA_JUSTIFY: true,
-				  QA_SMALL_TEXT: true,
+					// Quality assurance checks
+					QA_BAD_LINK: {
+						sources: '[href*="tugboatqa.com"]',
+					},
+					QA_STRONG_ITALICS: true,
+					QA_IN_PAGE_LINK: true,
+					QA_DOCUMENT: {
+						//sources: '',
+						dismissAll: true,
+					},
+					QA_PDF: {
+						dismissAll: true,
+					},
+					QA_BLOCKQUOTE: true,
+					TABLES_MISSING_HEADINGS: true,
+					TABLES_SEMANTIC_HEADING: true,
+					TABLES_EMPTY_HEADING: true,
+					QA_FAKE_HEADING: true,
+					QA_FAKE_LIST: true,
+					QA_UPPERCASE: true,
+					QA_UNDERLINE: true,
+					QA_SUBSCRIPT: true,
+					QA_NESTED_COMPONENTS: {
+						sources: '',
+					},
+					QA_JUSTIFY: true,
+					QA_SMALL_TEXT: true,
 
-				  // Meta checks
-				  META_LANG: true,
-				  META_SCALABLE: true,
-				  META_MAX: true,
-				  META_REFRESH: true,
+					// Meta checks
+					META_LANG: true,
+					META_SCALABLE: true,
+					META_MAX: true,
+					META_REFRESH: true,
 
-				  // Developer checks
-				  DUPLICATE_ID: true,
-				  META_TITLE: {
-					  warning: true,
-				  },
-				  UNCONTAINED_LI: true,
-				  TABINDEX_ATTR: true,
-				  HIDDEN_FOCUSABLE: true,
-				  LABEL_IN_NAME: true,
-				  BTN_EMPTY: true,
-				  BTN_EMPTY_LABELLEDBY: true,
-				  BTN_ROLE_IN_NAME: true,
+					// Developer checks
+					DUPLICATE_ID: true,
+					META_TITLE: {
+						warning: true,
+					},
+					UNCONTAINED_LI: true,
+					TABINDEX_ATTR: true,
+					HIDDEN_FOCUSABLE: true,
+					LABEL_IN_NAME: true,
+					BTN_EMPTY: true,
+					BTN_EMPTY_LABELLEDBY: true,
+					BTN_ROLE_IN_NAME: true,
 
-				  // Contrast checks
-				  CONTRAST_WARNING: {
-					  dismissAll: true,
-				  },
-				  CONTRAST_INPUT: true,
-				  CONTRAST_ERROR: true,
-				  CONTRAST_PLACEHOLDER: true,
-				  CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
-				  CONTRAST_ERROR_GRAPHIC: true,
-				  CONTRAST_WARNING_GRAPHIC: true,
-				  CONTRAST_UNSUPPORTED: {
-					  dismissAll: true,
-				  },
-			  },
-          });
+					// Contrast checks
+					CONTRAST_WARNING: {
+						dismissAll: true,
+					},
+					CONTRAST_INPUT: true,
+					CONTRAST_ERROR: true,
+					CONTRAST_PLACEHOLDER: true,
+					CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
+					CONTRAST_ERROR_GRAPHIC: true,
+					CONTRAST_WARNING_GRAPHIC: true,
+					CONTRAST_UNSUPPORTED: {
+						dismissAll: true,
+					},
+				},
+			});
 
-          /*let inject = document.querySelector('#all-tests');
-          for (const [key, value] of Object.entries(Ed11y.M)) {
-            if (value.title && typeof value.tip()) {
-              let item = document.createElement('div');
-              item.innerHTML = value.tip('example');
-              let title = document.createElement('h3');
-              title.prepend(value.title);
-              item.prepend(title);
-              inject.append(item);
-            };
-          }*/
-        </script>
+			/*let inject = document.querySelector('#all-tests');
+			for (const [key, value] of Object.entries(Ed11y.M)) {
+			  if (value.title && typeof value.tip()) {
+				let item = document.createElement('div');
+				item.innerHTML = value.tip('example');
+				let title = document.createElement('h3');
+				title.prepend(value.title);
+				item.prepend(title);
+				inject.append(item);
+			  };
+			}*/
+		</script>
 
-    </div>
+	</div>
 
 </body>
 

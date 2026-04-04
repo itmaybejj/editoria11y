@@ -228,8 +228,7 @@ export default {
       'Link avaneb uues vahekaardis või aknas ilma hoiatuseta. See võib olla häiriv, eriti inimestele, kellel on raskusi visuaalse sisu tajumisega. Teiseks ei ole alati hea tava kontrollida kellegi kogemust või teha otsuseid tema eest. Märkige lingi tekstis, et link avaneb uues aknas. <hr> <strong>Nipp!</strong> Õppige ära parimad tavad: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">Linkide avamine uues brauseriaknas ja vahekaardis.</a>',
     LINK_FILE_EXT:
       'Link viitab ilma hoiatuseta PDF- või allalaaditavale failile (nt MP3, Zip, Word Doc). Märkige faili tüüp lingi tekstis. Kui tegemist on suure failiga, kaaluge faili suuruse lisamist. <hr> <strong>Näide:</strong> Juhtkonna aruanne (PDF, 3MB)',
-    LINK_IDENTICAL_NAME:
-      'Lingi tekst on identne teise lingiga, kuigi see viitab teisele lehele. Mitu sama tekstiga linki võib tekitada segadust inimestele, kes kasutavad ekraanilugejaid. <strong>Võtke arvesse, et järgmine link oleks kirjeldavam, et aidata seda teistest linkidest eristada.</strong> <hr> <strong {B}>Ligipääsetav nimi</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Mitu selle lehe linki kasutavad sama teksti, kuid viitavad erinevatesse kohtadesse. See võib abitehnoloogia kasutajates segadust tekitada. Parandamiseks muutke see lingi tekst kirjeldavamaks.',
     LINK_UNPRONOUNCEABLE:
       'Lingi tekst sisaldab ainult sümboleid. Kui arvate, et see link on kopeerimis- või kleepimisvea tõttu vale, kaaluge selle kustutamist.',
 
@@ -313,8 +312,7 @@ export default {
     // QA
     QA_BAD_LINK:
       'Leitud halb link. Link näib viitavat arenduskeskkonnale. <hr> {L} <strong {C}>%(LINK)</strong>',
-    QA_IN_PAGE_LINK:
-      'Katkine samalehekülje link. Lingi sihtmärk ei vasta sellel lehel ühelegi elemendile.',
+    QA_IN_PAGE_LINK: 'Katkine sama lehe link. See link üritab navigeerida lehe sektsiooni, mida ei leita. Parandamiseks veenduge, et link ühtiks selle elemendi <code>id</code>-ga, kuhu soovite hüpata.',
     QA_STRONG_ITALICS:
       'Paks ja kursiivne märgistus on semantilise tähendusega ja neid ei tohiks <strong>ei</strong> kasutada tervete lõigete esiletõstmiseks. Häälestatud teksti tuleks kasutada selleks, et rõhutada sõna või fraasi tugevalt <strong>kõrge</strong>. Kursiivkirjas tuleks kasutada pärisnimede (st raamatute ja artiklite pealkirjade), võõrsõnade, jutumärkide esiletõstmiseks. Pikad tsitaadid tuleks vormistada plokktsitaatidena.',
     QA_PDF:
@@ -341,7 +339,8 @@ export default {
       'Väikest teksti on raskem lugeda, eriti inimestel, kellel on nägemishäired. Parema loetavuse tagamiseks vältige väiksemate fontide kasutamist kui vaikefondi suurus.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Ligipääsetav nimi</strong> %(TEXT)',
+    ACC_NAME: '<strong {B}>Ligipääsetav nimi</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_TEXT: '<strong {B}>Lingi tekst</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Nõuanne!</strong> "Ligipääsetav nimi" on lõplik silt, mis edastatakse abivahendeid kasutavatele inimestele ja mille arvutamine toimub ARIA kaudu. See aitab neil mõista lingi või nupu eesmärki.',
     HIDDEN_FOCUSABLE:
@@ -377,7 +376,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Ära lisa sõna "nupp" nupu nimesse. Ekraani lugejad edastavad juba elemendi rolli lisaks selle nimele.',
     LABEL_IN_NAME:
-      'Selle elemendi nähtav tekst näib olevat erinev ligipääsetavast nimest, mis võib tekitada segadust abivahendite kasutajatele. Palun vaata üle: <hr> <strong {B}>Ligipääsetav nimi</strong> <strong {C}>%(TEXT)</strong>',
+      'Selle elemendi nähtav tekst näib olevat erinev ligipääsetavast nimest, mis võib tekitada segadust abivahendite kasutajatele. Palun vaata üle: <hr> <strong {B}>Tekst</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Ligipääsetav nimi</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Sellel lingil on vigane sihtkoht ja selle juurdepääsetav nimi sisaldab sõna "<strong>%(NAME)</strong>". See viitab sellele, že tegu ei pruugi üldse olla lingiga, vaid see juhib hoopis mingit skriptitud käitumist lehel. Parandamiseks asendage link <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">juurdepääsetava nupuga</a> või parandage lingi sihtkoht. <hr> <strong>Nõuanne!</strong> Abitehnoloogiad käsitlevad nuppe ja linke erinevalt. Õige HTML-elemendi kasutamine tagab, et kasutajad teavad, milliseid kiirklahve kasutada ja milline tegevus käivitub.',
+    POTENTIAL_UI_ELEMENTS: ['menüü', 'sulge', 'lülita', 'ava', 'laienda', 'ahenda', 'järgmine', 'eelmine', 'mängi', 'paus', 'alammenüü', 'näita', 'peida', 'rippmenüü', 'tagasi', 'edasi', 'jäta vahele', 'esita', 'tühista', 'salvesta', 'muuda', 'kustuta', 'eemalda', 'otsi', 'filtreeri', 'sorteeri', 'peata', 'vaigista', 'lülita heli sisse', 'täisekraan', 'minimeeri', 'maksimeeri'],
 
     // Tables
     TABLES_MISSING_HEADINGS:

@@ -229,8 +229,7 @@ export default {
       'El enlace se abre en una nueva pestaña o ventana sin previo aviso. Si lo hace, puede ser desorientador, especialmente para las personas que tienen dificultades para percibir el contenido visual. En segundo lugar, no siempre es una buena práctica controlar la experiencia de alguien o tomar decisiones por ellos. Indique que el enlace se abre en una nueva ventana dentro del texto del enlace. <hr> <strong>¡Consejo!</strong> Aprenda las mejores prácticas: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">abrir enlaces en nuevas ventanas y pestañas del navegador.</a>',
     LINK_FILE_EXT:
       'El enlace apunta a un archivo PDF o descargable (por ejemplo, MP3, Zip, Word Doc) sin previo aviso. Indique el tipo de archivo dentro del texto del enlace. Si es un archivo grande, considere incluir el tamaño del archivo. <hr> <strong>Ejemplo:</strong> Informe ejecutivo (PDF, 3 MB)',
-    LINK_IDENTICAL_NAME:
-      'El enlace tiene el mismo texto que otro enlace, aunque apunta a una página diferente. Varios enlaces con el mismo texto pueden causar confusión a las personas que usan lectores de pantalla. <strong>Considere hacer el siguiente enlace más descriptivo para ayudar a distinguirlo de otros enlaces.</strong> <hr> <strong {B}>Nombre accesible</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Varios enlaces de esta página utilizan el mismo texto pero apuntan a lugares diferentes. Esto puede causar confusión a los usuarios de tecnologías de asistencia. Para solucionarlo, haga que el texto de este enlace sea más descriptivo.',
     LINK_UNPRONOUNCEABLE:
       'El texto del enlace solo contiene símbolos. Si cree que este enlace es un error debido a un fallo al copiar y pegar, considere eliminarlo.',
 
@@ -334,8 +333,7 @@ export default {
       'El texto subrayado se puede confundir con enlaces. Considere usar un estilo diferente como <code>&lt;strong&gt;</code><strong>gran importancia</strong><code>&lt;/strong&gt;</code> o <code>&lt;em&gt;</code><em>énfasis</em><code>&lt;/em&gt;</code>.',
     QA_SUBSCRIPT:
       'Las opciones de formato de subíndice y superíndice solo deben usarse para cambiar la posición del texto por convenciones o estándares tipográficos. <strong>No</strong> debe usarse únicamente con fines de presentación o apariencia. Dar formato a oraciones completas plantea problemas de legibilidad. Los casos de uso apropiados incluirían mostrar exponentes, números ordinales como 4<sup>th</sup> en lugar de cuarto y fórmulas químicas (por ejemplo, H<sub>2</sub>O).',
-    QA_IN_PAGE_LINK:
-      'Enlace interno roto. El destino del enlace no coincide con ningún elemento en esta página.',
+    QA_IN_PAGE_LINK: 'Enlace roto a la misma página. Este enlace intenta navegar a una sección de la página que no se puede encontrar. Para solucionar esto, asegúrese de que el enlace coincida con el <code>id</code> del elemento al que desea saltar.',
     QA_NESTED_COMPONENTS:
       'Evita anidar componentes de diseño interactivos, como colocar acordeones dentro de pestañas o pestañas dentro de acordeones. Esto puede complicar la navegación, aumentar la carga cognitiva y llevar a que las personas pasen por alto el contenido.',
     QA_JUSTIFY:
@@ -344,7 +342,8 @@ export default {
       'El texto pequeño es más difícil de leer, especialmente para aquellos con baja visión. Para garantizar una mejor legibilidad, evite usar tamaños de fuente más pequeños que el predeterminado.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Nombre accesible</strong> %(TEXT)',
+    LINK_TEXT: '<strong {B}>Texto del enlace</strong> <strong {C}>%(TEXT)</strong>',
+    ACC_NAME: '<strong {B}>Nombre accesible</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr> <strong>Consejo!</strong> El "nombre accesible" es la etiqueta final que se comunica a las personas que utilizan tecnología de asistencia. Esto les ayuda a entender el propósito del enlace o botón.',
     HIDDEN_FOCUSABLE:
@@ -380,7 +379,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'No incluyas la palabra "botón" en el nombre de un botón. Los lectores de pantalla ya comunican el rol de un elemento además de su nombre.',
     LABEL_IN_NAME:
-      'El texto visible para este elemento parece ser diferente al nombre accesible, lo que puede causar confusión para los usuarios de tecnologías de asistencia. Por favor revisa: <hr> <strong {B}>Nombre Accesible</strong> <strong {C}>%(TEXT)</strong>',
+      'El texto visible para este elemento parece ser diferente al nombre accesible, lo que puede causar confusión para los usuarios de tecnologías de asistencia. Por favor revisa: <hr> <strong {B}>Texto</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Nombre Accesible</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Este enlace tiene un destino no válido y el nombre accesible contiene la palabra "<strong>%(NAME)</strong>". Esto sugiere que tal vez no sea un enlace en absoluto y que, en su lugar, controle algún comportamiento programado en la página. Para solucionarlo, reemplace el enlace con un <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">botón accesible</a> o corrija el destino del enlace. <hr> <strong>¡Consejo!</strong> Las tecnologías de asistencia tratan los botones y los enlaces de manera diferente. El uso del elemento HTML correcto garantiza que los usuarios sepan qué atajos de teclado usar y qué acción se activará.',
+    POTENTIAL_UI_ELEMENTS: ['menú', 'cerrar', 'alternar', 'abrir', 'expandir', 'contraer', 'siguiente', 'anterior', 'reproducir', 'pausar', 'submenú', 'mostrar', 'ocultar', 'desplegable', 'atrás', 'adelante', 'omitir', 'enviar', 'cancelar', 'guardar', 'editar', 'eliminar', 'quitar', 'buscar', 'filtrar', 'ordenar', 'detener', 'silenciar', 'activar sonido', 'pantalla completa', 'minimizar', 'maximizar'],
 
     // Tables
     TABLES_MISSING_HEADINGS:

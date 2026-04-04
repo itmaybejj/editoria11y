@@ -1353,7 +1353,7 @@ export function checkAll() {
       UI.roots.push(root);
     });
   } else {
-    UI.roots = document.querySelectorAll(`:is(${State.option.checkRoot})`);
+    UI.roots = [...document.querySelectorAll(`:is(${State.option.checkRoot})`)];
   }
   // Initialize root areas to check.
   if (UI.roots.length === 0 && State.option.headless === false) {

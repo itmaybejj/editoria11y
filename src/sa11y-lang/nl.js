@@ -237,8 +237,7 @@ export default {
       'Link opent in een nieuw tabblad of venster zonder waarschuwing. Dit kan desoriënterend zijn, vooral voor mensen die moeite hebben met het waarnemen van visuele inhoud. Ten tweede is het niet altijd een goede gewoonte om iemands ervaring te controleren of beslissingen voor hem te nemen. Geef in de tekst van de koppeling aan dat deze in een nieuw venster wordt geopend. <hr> <strong>Tip!</strong> Leer de beste werkwijzen: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">links openen in nieuwe browservensters en tabbladen.</a>',
     LINK_FILE_EXT:
       'Link verwijst naar een PDF of downloadbaar bestand (bijv. MP3, Zip, Word Doc) zonder waarschuwing. Vermeld het bestandstype in de linktekst. Als het een groot bestand is, kun je overwegen de bestandsgrootte te vermelden. <hr> <strong>Voorbeeld:</strong> Uitvoerend rapport (PDF, 3 MB)',
-    LINK_IDENTICAL_NAME:
-      'Link heeft dezelfde tekst als een andere link, maar verwijst naar een andere pagina. Meerdere links met dezelfde tekst kunnen verwarring veroorzaken voor mensen die schermlezers gebruiken. <strong>Overweeg om de volgende link beschrijvender te maken om hem te helpen onderscheiden van andere links.</strong> <hr> <strong {B}>Toegankelijk naam</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Meerdere links op deze pagina gebruiken dezelfde tekst, maar verwijzen naar verschillende locaties. Dit kan verwarrend zijn voor gebruikers van ondersteunende technologieën. Maak deze linktekst beschrijvender om dit op te lossen.',
     LINK_UNPRONOUNCEABLE:
       'Linktekst bevat alleen symbolen. Als je denkt dat deze link een fout is door een kopieer-/plakfout, overweeg dan om deze te verwijderen.',
 
@@ -324,8 +323,7 @@ export default {
     // QA
     QA_BAD_LINK:
       'Slechte link gevonden. Link lijkt te verwijzen naar een ontwikkelomgeving. <hr> {L} <strong {C}>%(LINK)</strong>',
-    QA_IN_PAGE_LINK:
-      'Gebroken koppeling naar dezelfde pagina. Het koppelingsdoel komt niet overeen met enig element op deze pagina.',
+    QA_IN_PAGE_LINK: 'Defecte link op dezelfde pagina. Deze link probeert te navigeren naar een gedeelte van de pagina dat niet kan worden gevonden. Zorg er voor dat de link overeenkomt met de <code>id</code> van het element waarnaar u wilt springen om dit op te lossen.',
     QA_STRONG_ITALICS:
       "Vetgedrukte en cursieve tags hebben een semantische betekenis en moeten <strong>niet</strong> worden gebruikt om hele alinea's te benadrukken. Vetgedrukte tekst moet worden gebruikt om een woord of zin sterk te <strong>accentueren</strong>. Cursief moet worden gebruikt om eigennamen (bijv. titels van boeken en artikelen), vreemde woorden en aanhalingstekens te benadrukken. Lange citaten moeten worden opgemaakt als een blokcitaat.",
     QA_PDF:
@@ -352,7 +350,8 @@ export default {
       'Kleine tekst is moeilijker te lezen, vooral voor mensen met een verminderd gezichtsvermogen. Gebruik geen lettergroottes die kleiner zijn dan de standaard, om de leesbaarheid te verbeteren.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Toegankelijk naam</strong> %(TEXT)',
+    LINK_TEXT: '<strong {B}>Linktekst</strong> <strong {C}>%(TEXT)</strong>',
+    ACC_NAME: '<strong {B}>Toegankelijk naam</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Tip!</strong> De "toegankelijke naam" is het uiteindelijke label dat wordt gecommuniceerd aan mensen die gebruik maken van ondersteunende technologie. Dit helpt hen om het doel van de link of knop te begrijpen.',
     HIDDEN_FOCUSABLE:
@@ -388,7 +387,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Gebruik het woord "knop" niet in de naam van een knop. Schermlezers vermelden al de rol van een element naast de naam.',
     LABEL_IN_NAME:
-      'De zichtbare tekst voor dit element lijkt te verschillen van de toegankelijke naam, wat verwarring kan veroorzaken voor gebruikers van ondersteunende technologieën. Controleer alstublieft: <hr> <strong {B}>Toegankelijke Naam</strong> <strong {C}>%(TEXT)</strong>',
+      'De zichtbare tekst voor dit element lijkt te verschillen van de toegankelijke naam, wat verwarring kan veroorzaken voor gebruikers van ondersteunende technologieën. Controleer alstublieft: <hr> <strong {B}>Tekst</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Toegankelijke Naam</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Deze link heeft een ongeldig doel en de toegankelijke naam bevat het woord "<strong>%(NAME)</strong>". Dit suggereert dat dit misschien helemaal geen link is, maar in plaats daarvan gescript gedrag op de pagina aanstuurt. Vervang de link door een <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">toegankelijke knop</a> of corrigeer de bestemming van de link om dit op te lossen. <hr> <strong>Tip!</strong> Ondersteunende technologieën behandelen knoppen en links verschillend. Het gebruik van het juiste HTML-element zorgt ervoor dat gebruikers weten welke sneltoetsen ze moeten gebruiken en welke actie wordt geactiveerd.',
+    POTENTIAL_UI_ELEMENTS: ['menu', 'sluiten', 'schakelen', 'openen', 'uitvouwen', 'samenvouwen', 'volgende', 'vorige', 'afspelen', 'pauzeren', 'submenu', 'tonen', 'verbergen', 'dropdown', 'terug', 'vooruit', 'overslaan', 'verzenden', 'annuleren', 'opslaan', 'bewerken', 'verwijderen', 'verwijderen', 'zoeken', 'filteren', 'sorteren', 'stoppen', 'dempen', 'dempen opheffen', 'volledig scherm', 'minimaliseren', 'maximaliseren'],
 
     // Tables
     TABLES_MISSING_HEADINGS:

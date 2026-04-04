@@ -3,7 +3,6 @@ import * as Utils from '../utils/utils';
 import Lang from '../utils/lang';
 import Elements from '../utils/elements';
 import { State } from '../core/state';
-import { createAlert } from '../interface/alert';
 import find from '../utils/find';
 
 // FIFO cache for language detection.
@@ -23,15 +22,13 @@ export function getLanguageDetector() {
     try {
       if (!('LanguageDetector' in globalThis)) {
         if (!Utils.store.getItem(STORAGE_KEY)) {
-          createAlert(Lang.sprintf('LANG_UNSUPPORTED'));
           Utils.store.setItem(STORAGE_KEY, []);
+          console.error(`Sa11y: ${Lang._('LANG_UNSUPPORTED')}`);
         }
-        console.error(`Sa11y: ${Lang._('LANG_UNSUPPORTED')}`);
         return null;
       }
       return await globalThis.LanguageDetector.create();
     } catch {
-      createAlert(Lang.sprintf('LANG_UNSUPPORTED'));
       console.error(`Sa11y: ${Lang._('LANG_UNSUPPORTED')}`);
       return null;
     }
@@ -44,13 +41,10 @@ const getLanguageLabel = (lang) => {
   try {
     const canonicalLang = Intl.getCanonicalLocales(lang)[0];
     const baseLang = new Intl.Locale(canonicalLang).language;
-    const label = new Intl.DisplayNames(navigator.language, {
+    const label = new Intl.DisplayNames(Lang._('LANG_CODE') || navigator.language, {
       type: 'language',
     }).of(baseLang);
-
-    // sprintf will regex replace {{langAttr:}} with respective lang attribute and readable language label.
-    const browserLang = primary(navigator.language);
-    return `{{langAttr:${browserLang}|${label}}}`;
+    return label;
   } catch {
     return lang;
   }
@@ -117,12 +111,12 @@ export default async function checkPageLanguage() {
   const langChanged = cached?.declared && cached.declared !== declared;
   let isStale = cached && (Math.abs(cached.textLength - pageText.length) > 5 || langChanged);
 
-  // User fixed the error by adding 'lang'
+  // User fixed the error by adding 'lang' and correct lang attr.
   if (cached && !isStale && cached.element) {
     const currentElement = find(cached.element, 'root')[0];
     if (!currentElement) {
       isStale = true;
-    } else if (currentElement.hasAttribute('lang')) {
+    } else if (currentElement.getAttribute('lang') === cached.args[0]) {
       isStale = true;
     }
   }
@@ -131,17 +125,25 @@ export default async function checkPageLanguage() {
   if (cached && !isStale) {
     if (cached.test) {
       const getElement = cached.element ? find(cached.element, 'root')[0] : null;
-      const processVariables = cached.variables.map((variable) => getLanguageLabel(variable));
+
+      // Get text of flagged element.
+      const elementText = getElement ? Utils.getText(getElement) : null;
+
+      // Get language labels.
+      const processArgs = cached.args.map((arg) => getLanguageLabel(arg));
+
+      // Push processed args to tooltip.
+      const finalArgs = [...processArgs];
+      if (elementText) finalArgs.push(elementText);
+
+      // Generate tooltip content.
+      const mainContent = Lang.sprintf(
+        State.option.checks[cached.test].content || [cached.test],
+        ...finalArgs,
+      );
 
       // Build the content container safely
       const contentContainer = document.createElement('div');
-
-      // Get the translated node
-      const mainContent = Lang.sprintf(
-        State.option.checks[cached.test].content || [cached.test],
-        ...processVariables,
-      );
-
       contentContainer.append(mainContent);
       if (cached.element) {
         contentContainer.append(' ', Lang.sprintf('LANG_TIP'));
@@ -176,7 +178,7 @@ export default async function checkPageLanguage() {
   let element = null;
   let dismiss = null;
   let confidence = null;
-  let variables = null;
+  let args = null;
 
   // Declared page language doesn't match the detected content.
   if (detectedLangCode !== declared) {
@@ -189,12 +191,13 @@ export default async function checkPageLanguage() {
     dismiss = Utils.prepareDismissal(cacheKey);
     type = detected[0].confidence >= 0.6 ? 'error' : 'warning';
     confidence = detected[0].confidence;
-    variables = [detectedLangCode, declared];
+    args = [detectedLangCode, declared];
+
     setCache({
       key: cacheKey,
       test: test,
       type: type,
-      variables: variables,
+      args: args,
       confidence: confidence,
       textLength: pageText.length,
       declared: declared,
@@ -203,9 +206,12 @@ export default async function checkPageLanguage() {
 
   // If declared page language matches most likely language.
   if (detectedLangCode === declared) {
-    // Pass if we're 90% confident.
+    // Check for presence of lang attributes on the page.
+    const langAttributes = find('[lang]', 'root');
+
+    // Pass if we're highly confident and there are no custom lang attributes.
     const confidenceTarget = State.option.PAGE_LANG_CONFIDENCE?.confidence || 0.95;
-    if (detected[0].confidence >= confidenceTarget) {
+    if (detected[0].confidence >= confidenceTarget && langAttributes.length === 0) {
       setCache({
         key: cacheKey,
         textLength: pageText.length,
@@ -215,93 +221,98 @@ export default async function checkPageLanguage() {
       return;
     }
 
-    // Otherwise, we're going to iterate through every text node and check the language.
-    // Break on the first detection of a node that doesn't match page language.
+    // Otherwise, iterate through every text node to check the language.
+    // Break on the first detection of a node that doesn't match the expected language.
     for (const node of Elements.Found.Everything) {
-      // Cheap check before running expensive processing.
-      if (node.nodeName !== 'IMG' && (!node.textContent || node.textContent.length < 30)) {
+      const isImage = node.nodeName === 'IMG';
+
+      // Cheap check before running expensive text extraction and processing.
+      if (!isImage && (!node.textContent || node.textContent.length < 30)) {
         continue;
       }
 
-      // Get text of the node, including image alt text.
+      // Get text of the node (image alt text vs text nodes).
       let textString = '';
-      if (node.nodeName === 'IMG') textString = node.alt || '';
-      else {
+      if (isImage) {
+        textString = node.alt || '';
+      } else {
         textString = Array.from(node.childNodes)
-          .filter((child) => child.nodeType === 3)
+          .filter((child) => child.nodeType === Node.TEXT_NODE) // Using semantic constant instead of '3'
           .map((child) => child.textContent)
           .join(' ');
       }
       const nodeText = Utils.normalizeString(textString);
 
-      // Skip nodes that are too short.
+      // Skip nodes that are too short to accurately detect.
       if (nodeText.length <= 30) continue;
 
       // Node data.
       const detectNode = await detector.detect(nodeText);
       const nodeLang = primary(detectNode[0].detectedLanguage);
       const nodeConfidence = detectNode[0].confidence;
-      const langAttribute = node?.getAttribute('lang') ? primary(node.getAttribute('lang')) : null;
 
-      if (nodeLang !== declared && nodeConfidence >= 0.6) {
-        // Node or lang attribute matches detected language of node.
-        if (nodeLang === declared || langAttribute === nodeLang) continue;
+      // Only proceed if we have reasonable confidence in the detected language.
+      if (nodeConfidence >= 0.6) {
+        const langAttribute = node.getAttribute('lang') ? primary(node.getAttribute('lang')) : '';
+        const selector = Utils.generateSelectorPath(node);
 
-        // Language tag doesn't match.
+        // 1. 'lang' attribute contradicts detected text.
         if (langAttribute && langAttribute !== nodeLang) {
           test = 'LANG_MISMATCH';
           content = Lang.sprintf(
             State.option.checks.LANG_MISMATCH.content || 'LANG_MISMATCH',
             getLanguageLabel(nodeLang),
             getLanguageLabel(langAttribute),
+            textString,
           );
+          args = [nodeLang, langAttribute];
 
-          // Append the tip node safely to the result.
-          const wrapper = document.createElement('div');
-          wrapper.append(content, ' ', Lang.sprintf('LANG_TIP'));
-          content = wrapper;
-          variables = [nodeLang, langAttribute];
-        } else if (node.nodeName === 'IMG' && node?.alt?.length !== 0) {
-          // Alt text is in different language.
-          const alt = node.alt;
-          const altText = Utils.truncateString(alt, 600);
-          test = 'LANG_OF_PARTS_ALT';
-          content = Lang.sprintf(
-            State.option.checks.LANG_OF_PARTS_ALT.content || 'LANG_OF_PARTS_ALT',
-            getLanguageLabel(nodeLang),
-            getLanguageLabel(declared),
-            altText,
-          );
-          variables = [nodeLang, declared, altText];
+          // 2. No specific 'lang' attribute, but text contradicts page language.
+        } else if (!langAttribute && nodeLang !== declared) {
+          // Image alt text is different language.
+          if (isImage && node.alt) {
+            test = 'LANG_OF_PARTS_ALT';
+            content = Lang.sprintf(
+              State.option.checks.LANG_OF_PARTS_ALT.content || 'LANG_OF_PARTS_ALT',
+              getLanguageLabel(nodeLang),
+              getLanguageLabel(declared),
+              node.alt,
+            );
+            args = [nodeLang, declared, node.alt];
+          } else {
+            // Text node is different language.
+            test = 'LANG_OF_PARTS';
+            content = Lang.sprintf(
+              State.option.checks.LANG_OF_PARTS.content || 'LANG_OF_PARTS',
+              getLanguageLabel(declared),
+              getLanguageLabel(nodeLang),
+              textString,
+            );
+            args = [declared, nodeLang];
+          }
+          // 3. No conflict detected.
         } else {
-          // Text node is in different language.
-          test = 'LANG_OF_PARTS';
-          content = Lang.sprintf(
-            State.option.checks.LANG_OF_PARTS.content || 'LANG_OF_PARTS',
-            getLanguageLabel(declared),
-            getLanguageLabel(nodeLang),
-          );
-          variables = [declared, nodeLang];
+          continue;
         }
 
-        // Shared data.
+        // Set shared values.
         element = node;
         type = nodeConfidence >= 0.9 ? 'error' : 'warning';
         dismiss = Utils.prepareDismissal(nodeText.slice(0, 256));
         confidence = nodeConfidence;
-        const selector = Utils.generateSelectorPath(node);
 
-        // Break the loop on first match.
+        // Cache the result.
         setCache({
           key: cacheKey,
           test: test,
           element: selector,
           type: type,
-          variables: variables,
+          args: args,
           confidence: nodeConfidence,
           textLength: pageText.length,
           declared: declared,
         });
+        break;
       }
     }
   }
