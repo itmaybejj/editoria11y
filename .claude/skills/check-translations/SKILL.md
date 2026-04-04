@@ -8,87 +8,144 @@ disable-model-invocation: true
 
 Uses `src/lang/TRANSLATION_MANIFEST.json` to track which English commit each translation was last synced to, then generates targeted diffs to identify what changed.
 
+## Scope
+
+- **We translate**: `src/lang/*.js` files only (editoria11y's own strings)
+- **We do NOT translate**: `src/sa11y-lang/*.js` files (managed in the Sa11y repo)
+- **We do report**: changes in `src/sa11y-lang/en.js` for cross-repo sync review
+
 ## Manifest location
 
 `src/lang/TRANSLATION_MANIFEST.json` — contains:
-- `englishSources`: the English base files whose changes drive translations
+- `englishSources`: the editoria11y English base files (`baseAll.js`, `baseEnglishOnly.js`)
+- `sa11yEnglishSource`: the Sa11y English source (`src/sa11y-lang/en.js`) — monitored for changes but not translated here
 - `baseline`: the commit all translations were initially baselined to
-- `translations`: map of `{ "src/lang/xx.js": "<commit>" }` for every translation file
+- `translations`: map of `{ "src/lang/xx.js": "<commit>" }` for each translation file
 
 ## Step 1: Identify what changed in English
 
-For each English source file listed in `englishSources`, diff from the oldest translation commit to HEAD:
+Diff from the oldest translation commit to HEAD:
 
 ```bash
-git diff <oldest_commit> HEAD -- src/lang/baseAll.js src/lang/baseEnglishOnly.js src/sa11y-lang/en.js
+git diff <oldest_commit> HEAD -- src/lang/baseAll.js src/lang/baseEnglishOnly.js
 ```
 
-If no diff, all translations are up to date — report that and stop.
+If no diff, all translations are up to date — skip to Step 3.
 
 If there is a diff, summarize:
 - **Added keys** (new strings that need translation)
 - **Removed keys** (strings that should be deleted from translations)
 - **Changed values** (English wording changed — translation needs update)
 
-## Step 2: Audit each translation
+## Step 2: Update translations (parallel agents)
 
-For each translation file in the manifest:
+Launch one Agent per language **in parallel** (use a single message with multiple Agent tool calls). Each agent receives the same English diff context.
 
-1. Read the translation file and extract its exported keys
-2. Read the corresponding English base:
-   - `src/lang/*.js` translations → compare against keys in `src/lang/baseAll.js` (testNames + interfaceStrings + tips)
-   - `src/sa11y-lang/*.js` translations → compare against keys in `src/sa11y-lang/en.js`
-3. Report:
-   - **Missing keys**: in English but not in translation
-   - **Extra keys**: in translation but not in English (possibly removed)
-   - **Stale keys**: keys whose English value changed since the translation's recorded commit
+### Critical agent instructions
 
-## Step 3: Output summary
+Include ALL of the following rules in every agent prompt — these were learned from production failures:
 
 ```
-| Language | File               | Missing | Extra | Stale | Last synced |
-|----------|--------------------|---------|-------|-------|-------------|
-| da       | src/lang/da.js     | 2       | 0     | 5     | 590d164     |
-| da       | src/sa11y-lang/da.js | 0     | 1     | 3     | 590d164     |
-...
+CRITICAL RULES FOR WRITING TRANSLATION FILES:
+
+1. NEVER use curly/smart quotes (' ' " ") as JavaScript string delimiters.
+   Only use straight single quotes ('), straight double quotes ("), or backticks (`).
+
+2. When a translated string contains an apostrophe (e.g., Italian "l'immagine",
+   French "l'image"), you MUST either:
+   - Use backtick delimiters: `L'immagine è marcata...`
+   - Or escape the apostrophe: 'L\'immagine è marcata...'
+   NEVER use curly quotes to work around apostrophes.
+
+3. Use the Edit tool with targeted old_string/new_string replacements.
+   Do NOT use the Write tool to rewrite the entire file — this risks
+   corrupting unchanged content or introducing encoding issues.
+
+4. After making all edits, verify the file parses by running:
+   node -c <filepath>
+   If it fails, fix the syntax error before finishing.
+
+5. Preserve the exact indentation style of the file (tabs, not spaces).
+
+6. Keep all HTML markup, ${why.fix}, %(NAME) placeholders, and URLs
+   exactly as-is — only translate the human-readable text.
 ```
 
-Then list the specific keys per language that need attention.
+### Agent prompt pattern
 
-## Updating translations (parallel agents)
-
-To update all stale translations, launch one Agent per language **in parallel** (use a single message with multiple Agent tool calls). Each agent should:
-
-1. Receive the English diff (changed/added/removed keys with old and new English values)
-2. Read the target translation file
-3. For **added keys**: translate the English value, matching the style/tone of existing translations in that file
-4. For **removed keys**: delete them from the translation
-5. For **changed keys**: update the translation to reflect the new English meaning, preserving the translation's natural phrasing where possible
-6. Write the updated file
-7. Do NOT touch keys that haven't changed in English
-
-Example agent prompt pattern:
 ```
-Update the Danish translation file src/lang/da.js.
+Update the [Language] translation file at [path].
 
-English changes since last sync (commit 590d164):
-- ADDED: NEW_KEY = "New English string"
-- CHANGED: EXISTING_KEY: "Old English" → "New English"  
+English changes since last sync:
+- ADDED testName: KEY = "English string"
+- ADDED tip: KEY = `<p>English tip...</p>`
+- CHANGED tip KEY — new English: `<p>New English...</p>`
 - REMOVED: OLD_KEY
 
-Read the current translation file, apply these changes (translate added/changed keys to Danish, remove deleted keys), and write the result. Match the existing translation style. Do not modify unchanged keys.
+CRITICAL RULES FOR WRITING TRANSLATION FILES:
+[paste the rules block above]
+
+Read the file first. Use the Edit tool for targeted replacements.
+Insert new keys alphabetically among existing keys.
+Match the existing translation style and tone.
+Run `node -c [filepath]` when done to verify syntax.
 ```
 
-After all agents complete, update the manifest:
+### After all agents complete
+
+1. Run `npm run build` to verify everything compiles
+2. Fix any syntax errors (most likely: unescaped apostrophes or curly quotes)
+3. Update each translation's commit in `TRANSLATION_MANIFEST.json` to current HEAD
+
+## Step 3: Report Sa11y English changes
+
+Always check for changes in the Sa11y English source, even if editoria11y strings haven't changed:
+
 ```bash
-COMMIT=$(git rev-parse HEAD)
-# Update each translation's commit in TRANSLATION_MANIFEST.json to $COMMIT
+git diff <oldest_commit> HEAD -- src/sa11y-lang/en.js
 ```
 
-## Important notes
+If there are changes, print a structured report for human review:
 
-- `src/lang/en.js` and `src/lang/en-us.js` are **not** translations — they assemble the English bundle. Skip them.
-- `src/lang/_template.js` is a template. Skip it.
-- `src/sa11y-lang/en.js` and `src/sa11y-lang/enUS.js` are English sources, not translations. Skip them.
-- The `src/lang/*.js` files contain `testNames`, `interfaceStrings`, and `tips` objects. The `src/sa11y-lang/*.js` files contain a single `strings` object.
-- Some translations are marked "Machine translation" in a comment — these are lower priority for human review but should still be kept in sync.
+```markdown
+## Sa11y English String Changes (for cross-repo sync)
+
+These changes are in `src/sa11y-lang/en.js` and need to be synced
+to the Sa11y repo and other consuming projects.
+
+### New keys
+| Key | Value |
+|-----|-------|
+| NEW_KEY | "New English string" |
+
+### Changed keys
+| Key | Old value | New value |
+|-----|-----------|-----------|
+| CHANGED_KEY | "Old text" | "New text" |
+
+### Removed keys
+| Key | Old value |
+|-----|-----------|
+| OLD_KEY | "Was this" |
+```
+
+This report is for the developer to manually sync across repos — do NOT attempt to translate or modify `src/sa11y-lang/` files.
+
+## Files to skip
+
+These are NOT translation targets — never modify them:
+- `src/lang/en.js` — English bundle assembler
+- `src/lang/en-us.js` — English US variant assembler
+- `src/lang/_template.js` — template file
+- `src/lang/baseAll.js` — English source (testNames, interfaceStrings, tips)
+- `src/lang/baseEnglishOnly.js` — English-only overrides
+- `src/sa11y-lang/*.js` — all Sa11y lang files (managed externally)
+
+## File structure reference
+
+Each `src/lang/*.js` translation file contains:
+- An import of its corresponding `src/sa11y-lang/*.js` file
+- A `testNames` object (short alert titles)
+- A `tips` object (detailed tooltip HTML using template literals with `${why.fix}`, `%(placeholder)` syntax)
+- An `interfaceStrings` object (UI labels)
+- An export combining everything with Sa11y strings via `Object.assign`
