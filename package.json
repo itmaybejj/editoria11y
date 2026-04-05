@@ -30,7 +30,7 @@
 		"serve": "vite",
 		"dev": "npm run serve",
 		"test": "npx nightwatch tests --workers=4 --env=chrome",
-		"watch": "npm run build && chokidar \"./src/\" -c \"npm run build\""
+		"watch": "npm run build && chokidar \"./src/\" -i \"./src/js/version.js\" -c \"npm run build\""
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.6",

@@ -314,7 +314,8 @@ const Sa11yStrings = {
 };
 const testNames = {
   ALT_FILE_EXT: "Ce texte alternatif est un nom de fichier, pas une description",
-  ALT_MAYBE_BAD: "Ce texte alternatif ne peut pas être prononcé par un lecteur d’écran",
+  ALT_MAYBE_BAD: `S’agit‑il d’une description claire et concise de l’image ?`,
+  ALT_MAYBE_BAD_WARNING: `S’agit‑il d’une description claire et concise de l’image ?`,
   ALT_PLACEHOLDER: "Ce texte alternatif ne décrit pas l’image",
   // updated
   ALT_UNPRONOUNCEABLE: "Ce texte alternatif est impossible à prononcer",
@@ -355,7 +356,8 @@ const testNames = {
   LABELS_MISSING_LABEL: "Ce champ n’est pas connecté à une étiquette",
   // updated new
   LINK_ALT_FILE_EXT: "Un texte alternatif utilisé comme lien ne doit pas être une URL",
-  LINK_ALT_MAYBE_BAD: "Ce texte alternatif lié ne peut pas être prononcé par un lecteur d’écran",
+  LINK_ALT_MAYBE_BAD: `Ce texte alternatif lié n’est peut‑être pas clair et concis`,
+  LINK_ALT_MAYBE_BAD_WARNING: `Ce texte alternatif lié n’est peut‑être pas clair et concis`,
   LINK_ALT_UNPRONOUNCEABLE: "Les images liées doivent avoir un texte alternatif prononçable",
   LINK_CLICK_HERE: "Vérification manuelle : le lien contient « cliquer ici »",
   LINK_DOI: "Liez les titres d’articles, pas les numéros DOI",
@@ -371,6 +373,7 @@ const testNames = {
   LINK_IMAGE_LONG_ALT: "Ce texte alternatif lié peut‑il être plus court ?",
   LINK_IMAGE_NO_ALT_TEXT: "Cette image liée nécessite un texte alternatif",
   LINK_IMAGE_TEXT: "Vérification manuelle : image dans un lien marquée comme décorative.",
+  LINK_MAYBE_BUTTON: "Ce lien ressemble à un bouton",
   LINK_NEW_TAB: "Ce lien ouvre‑t‑il un nouvel onglet sans avertissement ?",
   LINK_PLACEHOLDER_ALT: "Cette image liée nécessite un texte alternatif significatif",
   LINK_STOPWORD: "Ce lien contient uniquement des mots génériques",
@@ -442,6 +445,7 @@ const why = {
 const tips = {
   ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Texte alternatif : <strong>"%(ALT_TEXT)"</strong></p><p>Les lecteurs d’écran liront cette URL, souvent lettre par lettre. Cela ne transmet probablement pas la même signification que de voir l’image.</p><p>${why.fix}Ajoutez un texte alternatif vide (alt="") si cette image est purement décorative et doit être ignorée par les lecteurs d’écran, ou ajoutez un texte alternatif descriptif.</p>${why.images}`,
   ALT_MAYBE_BAD: `<p>Texte alternatif : <strong>"%(alt)"</strong></p><p>${why.fix}Définissez le texte alternatif de cette image sur une description concise de ce que l’image signifie dans ce contexte.</p>${why.images}`,
+  ALT_MAYBE_BAD_WARNING: `<p>Texte alternatif : <strong>"%(alt)"</strong></p><p>${why.fix}Définissez le texte alternatif de cette image sur une description concise de ce que l’image signifie dans ce contexte.</p>${why.images}`,
   ALT_PLACEHOLDER: `<p>Texte alternatif : <strong>"%(alt)"</strong></p><p>${why.fix}Définissez le texte alternatif de cette image sur une description concise de ce que l’image signifie dans ce contexte.</p>${why.images}`,
   ALT_UNPRONOUNCEABLE: `<p>Le texte alternatif de cette image est "%(alt)", et ne contient que des symboles imprononçables et/ou des espaces. Les lecteurs d’écran annonceront qu’une image est présente, puis feront une pause embarrassante : "image : ____."</p><p>${why.fix}Ajoutez un texte alternatif descriptif, ou un texte alternatif <em>entièrement</em> vide (alt="") si ce n’est qu’une icône ou un espaceur devant être ignoré par les lecteurs d’écran.</p>${why.images}`,
   BTN_EMPTY: `<p>${why.fix}Utilisez une méthode valide pour indiquer aux lecteurs d’écran l’action de ce bouton : texte, alt sur une icône ou attribut <code>title</code>.</p>`,
@@ -450,12 +454,12 @@ const tips = {
   CONTRAST_WARNING: `Une image d’arrière-plan ou un dégradé empêche ce vérificateur de connaître précisément la couleur derrière ce texte. Utilisez l’outil pipette ci‑dessous pour vérifier manuellement.`,
   DUPLICATE_ID: `<p>Les ID sont utilisés sur cette page pour des étiquettes ou des cibles de lien, ce qui implique qu’ils doivent être uniques.</p><p>${why.fix}Modifiez cet ID : <strong>#%(id)</strong></p><div class="why"><p>Dans la plupart des systèmes de gestion de contenu, cela provient d’un champ “name” ou “id” dans les propriétés de l’élément. En HTML, il s’agit d’un attribut : <code>&lt;a id=""></code></p></div>`,
   DUPLICATE_TITLE: `<p>${why.fix}Supprimez l’attribut <code>title</code> du lien.</p><div class="why"><p>Note : les info‑bulles <code>title</code> n’apparaissent qu’au survol de la souris. Elles ne sont pas visibles sur mobile ni au clavier ; de nombreux utilisateurs ne les verront jamais. Elles ne doivent jamais contenir d’information importante ou unique.</p></div>`,
-  EMBED_AUDIO: `<p>Si l’audio contient de la parole, une <a href="https://www.w3.org/WAI/media/av/transcribing/">alternative textuelle</a> doit être fournie sur cette page ou via un lien.</p><p>Note : une personne doit relire et corriger les transcriptions automatiques, et identifier les locuteurs et sons significatifs.</p>`,
+  EMBED_AUDIO: `<p>Ce vérificateur ne peut pas déterminer si un lecteur audio dispose d’une transcription, ni si celle‑ci est exacte.</p><p>${why.fix}Assurez‑vous qu’une <a href="https://www.w3.org/WAI/media/av/transcribing/">transcription ou alternative textuelle</a> est disponible, et que les locuteurs et effets sonores significatifs sont correctement identifiés.</p>`,
   EMBED_DATA_VIZ: `<p>Les visualisations intégrées sont souvent difficiles, voire impossibles, à utiliser pour les technologies d’assistance ; elles peuvent être difficiles à comprendre pour les personnes malvoyantes ou daltoniennes, et nécessiter un défilement horizontal important sur mobile.</p><p>${why.fix}À moins que cette visualisation ne présente un contraste visuel élevé, soit entièrement utilisable au clavier <strong><em>et</em></strong> décrite par un lecteur d’écran, ajoutez un format équivalent (description textuelle, tableau de données ou feuille de calcul téléchargeable), puis ignorez cette alerte.</p>`,
   EMBED_GENERAL: `Les vérificateurs automatiques ne peuvent pas analyser le contenu des éléments intégrés. Assurez‑vous que toutes les images ont un texte alternatif, que les vidéos ont des sous‑titres, que le texte a un contraste suffisant et que les liens et boutons sont <a href="https://webaim.org/techniques/keyboard/">accessibles au clavier</a>, puis ignorez cette alerte.`,
   EMBED_MISSING_TITLE: `<p>Les contenus intégrés doivent avoir un nom accessible décrivant leur contenu pour les lecteurs d’écran.</p><p>${why.fix}Fournissez un attribut <code>title</code> ou <code>aria-label</code> unique.</p>`,
-  EMBED_UNFOCUSABLE: `Cet attribut indique au clavier et aux technologies d’assistance d’ignorer cet élément. À moins que l’iframe ne contienne aucun lien, bouton ou champ de saisie et ne puisse défiler, cet attribut doit être supprimé.`,
-  EMBED_VIDEO: `<p>Les vidéos doivent être sous‑titrées.</p><p>Note : une personne doit relire et corriger les sous‑titres automatiques, identifier les locuteurs et les sons significatifs.</p><p>${why.fix}Ajoutez ou corrigez les sous‑titres, puis ignorez cette alerte.</p>`,
+  EMBED_UNFOCUSABLE: `<p>Cet attribut indique au clavier et aux technologies d’assistance d’ignorer cet élément. À moins que le contenu de cette iframe ne contienne aucun lien, bouton ou champ de saisie et ne puisse défiler, cet attribut doit être supprimé.</p>`,
+  EMBED_VIDEO: `<p>Ce vérificateur ne peut pas « voir » si les vidéos ont des sous‑titres, ni si quelqu'un les a relus ; une vérification manuelle est donc nécessaire.</p><p>${why.fix}Assurez‑vous que des <a href="https://www.w3.org/WAI/media/av/captions/">sous‑titres (« CC ») précis</a> sont disponibles, et que les locuteurs et effets sonores significatifs sont correctement identifiés.</p>`,
   HEADING_EMPTY: `<p>Les en‑têtes vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}Ajoutez du texte à cet en‑tête ou supprimez cette ligne vide.</p>${why.headings}`,
   HEADING_EMPTY_WITH_IMAGE: `<p>Les en‑têtes vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}S’il ne s’agit pas d’un en‑tête, changez son style de <strong {C}>En‑tête %(level)</strong> à <strong>Paragraphe</strong>. Sinon, placez la signification de l’image dans son texte alternatif.</p>${why.headings}`,
   HEADING_FIRST: `${why.fix}Assurez‑vous que le titre de la page est marqué comme En‑tête de niveau 1 ou 2. ${why.headings}`,
@@ -479,6 +483,7 @@ const tips = {
   // updated to match baseAll
   LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Texte alternatif : "<strong>%(alt)</strong>"</p><p>Le texte alternatif de cette image est probablement un nom de fichier au lieu d’un libellé utile pour un lien.</p><p>${why.fix}Définissez le texte alternatif de cette image sur le nom de la destination du lien.</p><div class="why"> <p>Le texte alternatif doit refléter la signification, pas le contenu brut : pour une image liée, la signification est la destination du lien :</p><ul><li>"Page avec texte" décrit l’image, pas le lien.</li><li>"IMG_1234.jpg" est un simple nom de fichier.</li><li>"<strong><em>Formulaire d’inscription (doc)</em></strong>" est une vraie destination.</li></ul></div>`,
   LINK_ALT_MAYBE_BAD: `<p>Le texte alternatif de cette image est un placeholder : "<strong>%(alt)</strong>".</p><p>${why.fix}Définissez le texte alternatif de cette image sur la destination du lien.</p>${why.imageLinks}`,
+  LINK_ALT_MAYBE_BAD_WARNING: `<p>Le texte alternatif de cette image est un placeholder : "<strong>%(alt)</strong>".</p><p>${why.fix}Définissez le texte alternatif de cette image sur la destination du lien.</p>${why.imageLinks}`,
   LINK_ALT_UNPRONOUNCEABLE: `<p>Le texte alternatif de cette image liée ne contient que des symboles imprononçables ou des espaces : <strong>"%(ALT_TEXT)"</strong>.</p><p>Les lecteurs d’écran annonceront le lien mais seront incapables de le décrire.</p><p>${why.fix}Définissez le texte alternatif selon la destination ou la fonction du lien.</p>${why.imageLinks}`,
   LINK_CLICK_HERE: `L’expression "cliquer" ou "cliquer ici" est redondante et détourne l’attention de la destination du lien.`,
   LINK_DOI: `<p>${why.fix}Liez le titre de l’article et laissez le DOI en texte simple, au lieu de lier le DOI et laisser le titre sans lien.</p><div class="why"><p>Selon les recommandations de l’APA, les liens doivent être descriptifs : ils aident les utilisateurs à trouver les contenus pertinents en parcourant uniquement les liens.</p><p>Les lecteurs d’écran peuvent ainsi annoncer des liens significatifs plutôt qu’une série de chiffres incompréhensibles.</p></div>`,
@@ -493,6 +498,7 @@ const tips = {
   LINK_IMAGE_LONG_ALT: `<p><a href="https://webaim.org/techniques/hypertext/link_text#alt_link">Le texte alternatif d’une image liée sert à décrire la destination du lien</a>. Les liens doivent être brefs et clairs ; les utilisateurs de lecteurs d’écran parcourent souvent la liste des liens. Un texte alternatif long indique souvent qu’il décrit l’image plutôt que la destination.</p>Le texte alternatif de %(altLength) caractères de cette image est : <em>%(ALT_TEXT)</em>`,
   LINK_IMAGE_NO_ALT_TEXT: `<p>Quand une image est utilisée comme lien, son texte alternatif <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">doit décrire la destination du lien</a>.</p><p>${why.fix}Définissez le texte alternatif sur la destination ou la fonction du lien.</p>${why.imageLinks}`,
   LINK_IMAGE_TEXT: `L’image est marquée comme décorative, mais le lien utilise le texte environnant comme libellé descriptif.`,
+  LINK_MAYBE_BUTTON: `<p>Ce lien a une cible invalide, et contient le mot « <strong>%(NAME)</strong> ». Cela suggère qu’il ne s’agit peut‑être pas d’un lien, mais qu’il contrôle un comportement scripté sur la page.</p><p>${why.fix}remplacez le lien par un <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">bouton accessible</a>, ou corrigez la destination du lien.</p><div class="why"><p>Astuce : les technologies d’assistance traitent les boutons et les liens différemment. Utiliser le bon élément HTML garantit que les utilisateurs connaissent les raccourcis clavier appropriés et l’action qui sera déclenchée.</p></div>`,
   LINK_NEW_TAB: `<p>${why.fix}Configurez ce lien pour s’ouvrir dans le même onglet, ou <a href="https://itmaybejj.github.io/linkpurpose/">prévoyez un avertissement aux utilisateurs</a> avant l’ouverture dans un nouvel onglet.</p><div class="why"><p>Les utilisateurs peuvent toujours choisir d’ouvrir un lien dans un nouvel onglet. Forcer l’ouverture peut être déroutant, surtout pour les technologies d’assistance.</p><p>Note : les liens dans les formulaires ouvrent souvent un nouvel onglet pour éviter la perte de données.</p></div>`,
   LINK_PLACEHOLDER_ALT: `<p>Le texte alternatif de cette image liée est un placeholder : "<strong>%(alt)</strong>".</p><p>${why.fix}Définissez le texte alternatif sur la destination du lien.</p>${why.imageLinks}`,
   LINK_STOPWORD: `<p>Ce lien contient du texte qui n’aide pas à décrire sa destination :<br><strong>%(text)</strong></p><p>${why.fix}Réécrivez ce lien pour décrire sa destination de manière concise.</p>${why.links}`,

@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.0
+			* @version 3.0.0-405
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -1494,7 +1494,7 @@ function findShadowComponents(option) {
     });
   }
 }
-const version = "3.0.0-dev0322";
+const version = "3.0.0-405";
 const spriteAlts = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>';
 const spriteClose = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>';
 const spriteCursor = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 256 512"><path fill="currentColor" d="M0 29C-1 47 12 62 29 64l8 1C71 67 96 95 96 128L96 224l-32 0c-18 0-32 14-32 32s14 32 32 32l32 0 0 96c0 33-26 61-59 64l-8 1C12 450-1 465 0 483s17 31 35 29l8-1c34-3 64-19 85-43c21 24 51 40 85 43l8 1c18 2 33-12 35-29s-12-33-29-35l-8-1C186 445 160 417 160 384l0-96 32 0c18 0 32-14 32-32s-14-32-32-32l-32 0 0-96c0-33 26-61 59-64l8-1c18-2 31-17 29-35S239-1 221 0l-8 1C179 4 149 20 128 44c-21-24-51-40-85-43l-8-1C17-1 2 12 0 29z"/></svg>';
@@ -8498,7 +8498,8 @@ const Sa11yStrings = {
 };
 const testNames = {
   ALT_FILE_EXT: "This alt text is a filename, not a description",
-  ALT_MAYBE_BAD: "This alt text cannot be pronounced by a screen reader",
+  ALT_MAYBE_BAD: "Is this a clear and concise description of the image?",
+  ALT_MAYBE_BAD_WARNING: "Is this a clear and concise description of the image?",
   ALT_PLACEHOLDER: "This alt text sounds like a placeholder",
   ALT_UNPRONOUNCEABLE: "This alt text is unpronounceable",
   BTN_EMPTY: "Button is missing an accessible label",
@@ -8537,7 +8538,8 @@ const testNames = {
   LABEL_IN_NAME: "Visible label does not match invisible label",
   LABELS_MISSING_LABEL: "This input is not connected to a label",
   LINK_ALT_FILE_EXT: "Alt text used as a link should not be a URL",
-  LINK_ALT_MAYBE_BAD: "This linked alt cannot be pronounced by a screen reader",
+  LINK_ALT_MAYBE_BAD: "This linked alt might not be clear and concise",
+  LINK_ALT_MAYBE_BAD_WARNING: "This linked alt might not be clear and concise",
   LINK_ALT_UNPRONOUNCEABLE: "Linked images need pronounceable alt text",
   LINK_CLICK_HERE: 'This link contains "click here"',
   LINK_DOI: "Link article titles, not DOI numbers",
@@ -8552,6 +8554,7 @@ const testNames = {
   LINK_IMAGE_LONG_ALT: "Can this linked alt text be shorter?",
   LINK_IMAGE_NO_ALT_TEXT: "This linked image needs alt text",
   LINK_IMAGE_TEXT: "Does this linked image need a description?",
+  LINK_MAYBE_BUTTON: "This link looks like it should be a button",
   LINK_NEW_TAB: "Does this link open a new tab without warning?",
   LINK_PLACEHOLDER_ALT: "This linked alt text sounds like a placeholder",
   LINK_STOPWORD: "This link only contains generic words",
@@ -8600,8 +8603,8 @@ const why = {
 const tips = {
   ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt text: <strong>"%(ALT_TEXT)"</strong></p><p>Screen readers will dictate this url, often one letter at a time. This probably does not provide the same meaning as seeing the image.</p><p>${why.fix}Either add an empty alt (alt="") if this is a meaningless decoration that should be ignored by screen readers, or add descriptive alt text.</p>${why.images}`,
   ALT_MAYBE_BAD: `<p>Alt text: <strong>"%(alt)"</strong></p><p>${why.fix}Set this image's alternative text to a concise description of what this image means in this context.</p>${why.images}`,
+  ALT_MAYBE_BAD_WARNING: `<p>Alt text: <strong>"%(alt)"</strong></p><p>${why.fix}Set this image's alternative text to a concise description of what this image means in this context.</p>${why.images}`,
   ALT_PLACEHOLDER: `<p>Alt text: <strong>"%(alt)"</strong></p><p>${why.fix}Set this image's alternative text to a concise description of what this image means in this context.</p>${why.images}`,
-  //updated
   ALT_UNPRONOUNCEABLE: `<p>Alt text: "<strong>%(alt)</strong>"</p><p>This alt text only contains unpronounceable symbols and/or spaces. Screen readers will announce that an image is present and then pause awkwardly or say something unintelligible.</p><p>${why.fix}Add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") if this is just an icon or spacer, and screen readers should ignore it.</p>${why.images}`,
   BTN_EMPTY: `<p>${why.fix}Use any valid method to tell screen readers what this button does, e.g. text, alt text on an icon, or a title attribute.</p>`,
   BTN_EMPTY_LABELLEDBY: `<p>This button has an <code>aria-labelledby</code> value that is empty or does not match the <code>ID</code> value of another element on the page.</p><p>${why.fix}Reconnect the ID to an element on the page, or remove this attribute and describe the button in another way.</p>`,
@@ -8611,15 +8614,14 @@ const tips = {
   CONTRAST_WARNING: "A background image or gradient means this checker is not sure what color is behind this text. Use the color picker below to check manually.",
   DUPLICATE_ID: `<p>IDs are being used on this page for labels or link targets, which means they must be unique.</p><p>${why.fix}Change this ID: <strong>#%(id)</strong></p><div class="why"><p>In most content management systems, this comes from a field called "name" or "id" in the element properties. In HTML, it is an attribute: <code>&lt;a id="MY-ID"&gt;</code></p></div>`,
   DUPLICATE_TITLE: `<p>${why.fix}Delete the link's text or <code>title</code> attribute.</p><div class="why"><p>Tip: <code>title</code> tooltips only appear when hovering with a mouse. They cannot be seen when navigating on a phone or with a keyboard, so many users will never see them. They should never contain unique or important information.</p></div>`,
-  EMBED_AUDIO: `<p>If this audio contains speech, a <a href="https://www.w3.org/WAI/media/av/transcribing/">text alternative</a> must be provided on this page or linked.</p><p>Note that a human needs to proofread automatic, machine-generated captions and make sure speakers and meaningful sound effects are accurately identified.</p>`,
+  EMBED_AUDIO: `<p>This checker cannot tell whether an audio player has a transcript, or tell if the transcript is accurate.</p><p>${why.fix}Check to make sure that a <a href="https://www.w3.org/WAI/media/av/transcribing/">transcript or text alternative</a> is available, and make sure speakers and meaningful sound effects are accurately identified.</p>`,
   EMBED_DATA_VIZ: `<p>Embedded visualization widgets are often difficult or impossible for assistive devices to operate, can be difficult to understand for readers with low vision or colorblindness, and may require extensive horizontal scrolling on phones.</p>	<p>${why.fix}Unless this particular embed has high visual contrast, can be operated by a keyboard <strong><em>and</em></strong> described by a screen reader, add an equivalent, alternate format such as a text description, data table or downloadable spreadsheet.</p>`,
   // Updated
   EMBED_GENERAL: 'Automated checkers cannot test content inside embeds. Make sure someone has checked that all images inside this embed have alt text, videos have captions, text has sufficient contrast, and links and buttons are <a href="https://webaim.org/techniques/keyboard/">keyboard accessible</a>.',
   // Updated
   EMBED_MISSING_TITLE: `<p>Embeds need an accessible name that describes their contents for screen readers.</p><p>${why.fix}Provide a unique <code>title</code> or <code>aria-label</code> attribute.</p>`,
-  EMBED_UNFOCUSABLE: `This attribute tells keyboards and assistive devices to skip over the element. Unless the content of this iframe does not contain any links, buttons or form elements and cannot be scrolled, this attribute needs to be removed.`,
-  EMBED_VIDEO: `<p>Videos must provide captions.</p><p>Note that a human needs to proofread automatic, machine-generated captions and make sure speakers and meaningful sound effects are accurately identified.</p><p>${why.fix}Add or proofread the captions.</p>`,
-  // Updated
+  EMBED_UNFOCUSABLE: `<p>This attribute tells keyboards and assistive devices to skip over the element. Unless the content of this iframe does not contain any links, buttons or form elements and cannot be scrolled, this attribute needs to be removed.</p>`,
+  EMBED_VIDEO: `<p>This checker cannot "see" whether videos have captions, or tell if someone has proofread them, so a manual check is needed.</p><p>${why.fix}Check to make sure that <a href="https://www.w3.org/WAI/media/av/captions/">accurate captions ("CC") or subtitles</a> are available, and make sure speakers and meaningful sound effects are accurately identified.</p>`,
   HEADING_EMPTY: `<p>Empty headings create confusing gaps in the page outline.</p><p>${why.fix}Add text to this heading, or delete this empty line.</p>${why.headings}`,
   HEADING_EMPTY_WITH_IMAGE: `<p>Empty headings create confusing gaps in the page outline.</p><p>${why.fix}If this is not a heading, change its format from <strong {C}>Heading %(level)</strong> to <strong>Paragraph</strong>. Otherwise, put the meaning of the image in its alt.</p>${why.headings}`,
   HEADING_FIRST: `${why.fix}Make sure the page title is marked as a Heading 1 or Heading 2. ${why.headings}`,
@@ -8641,6 +8643,7 @@ const tips = {
   LABEL_IN_NAME: `<p>The visible text for this element appears to be different from the accessible name. This may cause confusion for screen reader users, and may break voice control.</p><p>${why.fix}Make sure the visible label starts with the text of the invisible label, and does not contain any additional meaningful information.</p><p><strong>Invisible Label:</strong> "%(TEXT)"</p>`,
   LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt text: "<strong>%(alt)</strong>"</p><p>This alt text is probably a filename instead of a meaningful label for a link.</p><p>${why.fix}Set this image's alt text to the name of the link destination.</p><div class="why"> <p>The purpose of alt text is to provide an alternative for what an image means, not what it contains. The meaning of a linked image is the link destination:</p><ul><li>"Page with writing" describes the image, not a link.</li><li>"IMG_1234.jpg" is just a filename.</li><li>"<strong><em>Event registration form (.doc)</em></strong>" is a link destination.</li></ul></p></div>`,
   LINK_ALT_MAYBE_BAD: `<p>Alt text: "<strong>%(alt)</strong>."</p><p>${why.fix}Set this image's alt text to the name of the link destination.</p>${why.imageLinks}`,
+  LINK_ALT_MAYBE_BAD_WARNING: `<p>Alt text: "<strong>%(alt)</strong>."</p><p>${why.fix}Set this image's alt text to the name of the link destination.</p>${why.imageLinks}`,
   LINK_ALT_UNPRONOUNCEABLE: `<p>The alt text within this linked image only contains unpronounceable symbols and/or spaces: <strong>"%(ALT_TEXT)"</strong>.</p><p>Screen readers will announce there is a link, and then be unable to describe it.</p><p>${why.fix}Set this image's alt to the link's destination or purpose.</p>${why.imageLinks}`,
   LINK_CLICK_HERE: `The phrase "click" or "click here" is redundant, and takes focus away from the link's purpose.`,
   LINK_DOI: `<p>${why.fix}Link the article title and provide the DOI number as plain text, rather than linking the DOI number and leaving the article title as plain text.</p><div class="why"><p>The <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">APA Style guide</a> recommends using descriptive links on websites because users skim by links and use in-page search for links by name. Users are much more likely to notice articles of interest when the title is linked.</p><p>This also allows screen readers to describe each link meaningfully, rather than speaking a meaningless sequence of numbers.</p></div>`,
@@ -8655,6 +8658,7 @@ const tips = {
   LINK_IMAGE_LONG_ALT: `<p>%(altLength) character alt text: <strong class="ed11y-small">%(ALT_TEXT)</strong></p><p>${why.fix}Set this image's alt text to the title of the link destination.</p><div class="why"><p>Screen reader users often hear a list of links on the page out of context. Since the alt text of a linked image becomes the link's title in this list, it should <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">describe the link's destination</a>, not the image's contents.</p></div>`,
   LINK_IMAGE_NO_ALT_TEXT: `<p>When a link is wrapped around an image, the image's alt text <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">provides the link's title for screen readers</a>.</p><p>${why.fix}Set this image's alternative text to the link's destination or purpose.</p>${why.imageLinks}`,
   LINK_IMAGE_TEXT: "Image is marked as decorative, although the link is using the surrounding text as a descriptive label.",
+  LINK_MAYBE_BUTTON: `<p>This link has an invalid target, and contains the word "<strong>%(NAME)</strong>". This suggests that this might not be a link at all, and instead controls some scripted behaviour on the page.</p><p>${why.fix}replace the link with an <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">accessible button</a>, or correct the link's destination.</p><div class="why"><p>Tip: Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.</p></div>`,
   LINK_NEW_TAB: `<p>${why.fix}Set this link to open in the same tab, or <a href="https://itmaybejj.github.io/linkpurpose/">warn users</a> first.</p><div class="why"><p>Readers can always <em>choose</em> to open a link in a new tab. When a link forces open a new tab, it is often confusing or annoying, especially for assistive device users who wonder why their browser's "back" button stopped working.</p><p>Note: forms are the exception. When the user is filling out a form, opening a link in the same window could cause them to lose their work, so links within forms usually open in new tabs.</p></div>`,
   LINK_PLACEHOLDER_ALT: `<p>This image's alt text is a placeholder: "<strong>%(alt)</strong>."</p><p>${why.fix}Set this image's alt text to the name of the link destination.</p>${why.imageLinks}`,
   LINK_STOPWORD: `<p>Link text: "<strong>%(text)</strong>"</p><p>${why.fix}Use link text that describes its destination.</p>${why.links}`,
