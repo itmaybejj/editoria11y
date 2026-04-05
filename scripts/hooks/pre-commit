@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Pre-commit hook for editoria11y.
+#
+# 1. Refuses direct commits on the protected branch (3.0.x). PR merges happen
+#    on GitHub and never hit this hook, so the only commits it blocks are
+#    local work-in-progress landing straight on the default branch.
+#    GitHub branch protection rules are the authoritative enforcement; this
+#    hook is a local belt-and-suspenders check.
+# 2. On every other branch, runs the full build + pack so the committed
+#    dist/ is always in sync with src/.
+#
+# Install (one-time, per clone):
+#   git config core.hooksPath scripts/hooks
+#
+# Bypass (use sparingly):
+#   git commit --no-verify
+set -euo pipefail
+
+PROTECTED_BRANCH="3.0.x"
+BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
+
+if [[ "$BRANCH" == "$PROTECTED_BRANCH" ]]; then
+	echo "✗ Direct commits to '$PROTECTED_BRANCH' are not allowed." >&2
+	echo "  Create a feature branch and open a pull request:" >&2
+	echo "    git checkout -b my-change" >&2
+	echo "    git commit ..." >&2
+	echo "    gh pr create --base $PROTECTED_BRANCH" >&2
+	echo "" >&2
+	echo "  (To bypass in an emergency: git commit --no-verify)" >&2
+	exit 1
+fi
+
+# Skip build if nothing under src/ is staged — saves time for doc-only or
+# config-only commits.
+if git diff --cached --name-only --diff-filter=ACMR | grep -q '^src/'; then
+	echo "→ src/ changes staged; running full build…"
+	npm run lint:fix
+	npm run build
+	npm run test
+	# Re-stage any dist/ files the build regenerated so the commit ships them.
+	git add dist/
+else
+	echo "→ No src/ changes staged; skipping build."
+fi
