@@ -10,6 +10,9 @@ on:
       - 3.0.x
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build and upload dist artifact
@@ -41,4 +44,4 @@ jobs:
         with:
           name: editoria11y-dist-${{ github.sha }}
           path: dist/
-          retention-days: 30
+          retention-days: 1

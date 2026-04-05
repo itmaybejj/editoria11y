@@ -1,5 +1,6 @@
 # Setup
 * Run `scripts/get.sh` to pull and patch Sa11y library files and install node dependencies.
+* git config core.hooksPath scripts/hooks
 * Run NPM scripts as needed:
   * `npm run watch` compiles and watches JS and CSS folders for changes.
   * `npm run build` compiles once.
