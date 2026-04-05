@@ -13,7 +13,38 @@ import { UI } from './ui.js';
 import { ed11yDefaultOptions } from '../utils/ed11y-default-options.js';
 import { prepareCustomRuleset } from '../rulesets/custom-ruleset.js';
 
+const validateSelectorOptions = (userOptions) => {
+  const selectorKeys = [
+    'checkRoot',
+    'ignoreAllIfAbsent',
+    'ignoreAllIfPresent',
+    'preventCheckingIfPresent',
+    'preventCheckingIfAbsent',
+    'linkIgnoreSpan',
+    'shadowComponents',
+    'containerIgnore',
+    'embeddedContent',
+    'panelNoCover',
+    'doNotRun',
+    'ignoreElements',
+    'editableContent',
+    'hiddenHandlers',
+  ];
+  for (const key of selectorKeys) {
+    const val = userOptions[key];
+    if (val && typeof val === 'string') {
+      try {
+        document.querySelector(val);
+      } catch {
+        console.error(`Editoria11y: invalid CSS selector in option "${key}": "${val}"`);
+        delete userOptions[key];
+      }
+    }
+  }
+};
+
 const preProcessOptions = async (userOptions) => {
+  validateSelectorOptions(userOptions);
   smush(State.option, ed11yDefaultOptions, ['checks']);
   smush(State.option, userOptions, ['checks']);
   Object.assign(State.option.checks, ed11yDefaultOptions.checks, userOptions.checks);

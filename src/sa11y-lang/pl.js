@@ -229,8 +229,7 @@ export default {
       'Łącze otwiera się na nowej karcie lub w oknie bez ostrzeżenia. Może to być dezorientujące, szczególnie dla osób, które mają problemy z&nbsp;odbiorem treści wizualnych. Ponadto, nie zawsze dobrym zwyczajem jest kontrolowanie czyichś doświadczeń lub podejmowanie decyzji za kogoś. Wskaż w tekście łącza, że łącze otwiera się w nowym oknie. <hr> <strong>Porada!</strong> Poznaj najlepsze praktyki: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">otwieranie łączy w nowych oknach i kartach przeglądarki.</a>',
     LINK_FILE_EXT:
       'Łącze wskazuje  bez ostrzeżenia na plik PDF lub plik do pobrania (np. MP3, zip, doc). Wskaż typ pliku w tekście łącza. Jeśli jest to duży plik, rozważ podanie jego rozmiaru. <hr> <strong>Przykład:</strong> Raport końcowy (PDF, 3MB)',
-    LINK_IDENTICAL_NAME:
-      'Łącze ma identyczny tekst jak inne łącze, choć wskazuje na inną stronę. Wiele łączy z takim samym tekstem może powodować zamieszanie u osób korzystających z czytników ekranu. <strong>Rozważ nadanie poniższemu łączu bardziej opisowego charakteru, aby odróżnić je od innych łączy.</strong> <hr> <strong {B}>Dostępna nazwa</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Wiele linków na tej stronie używa tego samego tekstu, ale prowadzi do różnych miejsc. Może to wprowadzać w błąd użytkowników technologii wspomagających. Aby to naprawić, nadaj temu linkowi bardziej opisowy tekst.',
     LINK_UNPRONOUNCEABLE:
       'Tekst linku zawiera tylko symbole. Jeśli uważasz, że ten link jest błędem wynikającym z kopiowania/wklejania, rozważ jego usunięcie.',
 
@@ -314,8 +313,7 @@ export default {
     // Quality assurance
     QA_BAD_LINK:
       'Podejrzane łącze. Łącze wydaje się wskazywać środowisko programistyczne. <hr> {L} <strong {C}>%(LINK)</strong>',
-    QA_IN_PAGE_LINK:
-      'Uszkodzony link na tej samej stronie. Cel linku nie odpowiada żadnemu elementowi na tej stronie.',
+    QA_IN_PAGE_LINK: 'Uszkodzony link wewnątrzstronicowy. Ten link próbuje prowadzić do sekcji strony, której nie można znaleźć. Aby to naprawit, upewnij się, że link pasuje do identyfikatora <code>id</code> elementu, do którego chcesz przejść.',
     QA_STRONG_ITALICS:
       'Znaczniki pogrubienia i kursywy mają znaczenie semantyczne i <strong>nie powinny</strong> być używane do wyróżniania całych akapitów. Pogrubiony tekst powinien być używany w celu <strong>silnego podkreślenia słowa lub frazy</strong>. Kursywa powinna być używana do wyróżnienia nazw własnych (np. tytułów książek i artykułów), wyrazów obcych, cytatów. Długie cytaty powinny być sformatowane jako blockquote.',
     QA_PDF:
@@ -342,7 +340,8 @@ export default {
       'Mały tekst jest trudniejszy do odczytania, szczególnie dla osób słabowidzących. Aby zapewnić lepszą czytelność, unikaj używania czcionek mniejszych niż domyślne.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Dostępna nazwa</strong> %(TEXT)',
+    LINK_TEXT: '<strong {B}>Tekst linku</strong> <strong {C}>%(TEXT)</strong>',
+    ACC_NAME: '<strong {B}>Dostępna nazwa</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Wskazówka!</strong> "Dostępna nazwa" to ostateczna etykieta, która jest przekazywana osobom korzystającym z technologii wspomagających i jest obliczana przez ARIA. Pomaga to im zrozumieć cel linku lub przycisku.',
     HIDDEN_FOCUSABLE:
@@ -378,7 +377,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Nie włączaj słowa „przycisk” w nazwie przycisku. Czytniki ekranowe już podają rolę elementu oprócz jego nazwy.',
     LABEL_IN_NAME:
-      'Widoczny tekst tego elementu wydaje się różnić od dostępnej nazwy, co może wprowadzać w błąd użytkowników technologii wspomagających. Sprawdź: <hr> <strong {B}>Dostępna nazwa</strong> <strong {C}>%(TEXT)</strong>',
+      'Widoczny tekst tego elementu wydaje się różnić od dostępnej nazwy, co może wprowadzać w błąd użytkowników technologii wspomagających. Sprawdź: <hr> <strong {B}>Tekst</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Dostępna nazwa</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Ten link ma nieprawidłowy cel, a nazwa dostępna zawiera słowo „<strong>%(NAME)</strong>”. Sugeruje to, że może to w ogóle nie być link, lecz element sterujący skryptowym zachowaniem na stronie. Aby to naprawić, zastąp link <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">dostępnym przyciskiem</a> lub popraw cel linku. <hr> <strong>Wskazówka!</strong> Technologie wspomagające traktują przyciski i linki w różny sposób. Użycie właściwego elementu HTML daje pewność, że użytkownicy wiedzą, jakich skrótów klawiszowych użyć i jaka akcja zostanie wywołana.',
+    POTENTIAL_UI_ELEMENTS: ['menu', 'zamknij', 'przełącz', 'otwórz', 'rozwiń', 'zwiń', 'następny', 'poprzedni', 'odtwórz', 'pauza', 'podmenu', 'pokaż', 'ukryj', 'rozwijane', 'wstecz', 'dalej', 'pomiń', 'wyślij', 'anuluj', 'zapisz', 'edytuj', 'usuń', 'usuń', 'szukaj', 'filtr', 'sortuj', 'stop', 'wycisz', 'wyłącz wyciszenie', 'pełny ekran', 'minimalizuj', 'maksymalizuj'],
 
     // Tables
     TABLES_MISSING_HEADINGS:

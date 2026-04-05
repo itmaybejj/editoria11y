@@ -227,8 +227,7 @@ export default {
       'Tautan terbuka di tab atau jendela baru tanpa peringatan. Hal ini dapat membingungkan, terutama bagi orang yang mengalami kesulitan dalam memahami konten visual. Kedua, tidak selalu merupakan praktik yang baik untuk mengontrol pengalaman seseorang atau membuat keputusan untuk mereka. Tunjukkan bahwa tautan akan terbuka di jendela baru di dalam teks tautan. <hr> <strong>Tip!</strong> Pelajari praktik terbaik: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">membuka tautan di jendela dan tab peramban baru</a>.',
     LINK_FILE_EXT:
       'Tautan mengarah ke PDF atau file yang dapat diunduh (mis. MP3, Zip, Word Doc) tanpa peringatan. Tunjukkan jenis file di dalam teks tautan. Jika file berukuran besar, pertimbangkan untuk menyertakan ukuran file tersebut. <hr> <strong>Contoh:</strong> Laporan Eksekutif (PDF, 3MB)',
-    LINK_IDENTICAL_NAME:
-      'Tautan memiliki teks yang sama dengan tautan lain, meskipun mengarah ke halaman yang berbeda. Beberapa tautan dengan teks yang sama dapat menyebabkan kebingungan bagi orang yang menggunakan pembaca layar. <strong>Pertimbangkan untuk membuat tautan berikut ini lebih deskriptif untuk membantu membedakannya dari tautan lain.</strong> <hr> <strong {B}>Nama yang dapat diakses</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Beberapa tautan di halaman ini menggunakan teks yang sama tetapi mengarah ke tempat yang berbeda. Hal ini dapat membingungkan pengguna teknologi asistif. Untuk memperbaikinya, buatlah teks tautan ini lebih deskriptif.',
     LINK_UNPRONOUNCEABLE:
       'Teks tautan hanya berisi simbol. Jika menurut Anda tautan ini salah karena bug salin/tempel, pertimbangkan untuk menghapusnya.',
 
@@ -312,8 +311,7 @@ export default {
     // QA
     QA_BAD_LINK:
       'Tautan buruk ditemukan. Tautan yang muncul mengarah ke lingkungan pengembangan. <hr> {L} <strong {C}>%(LINK)</strong>',
-    QA_IN_PAGE_LINK:
-      'Tautan dalam halaman rusak. Tujuan tautan tidak cocok dengan elemen apa pun di halaman ini.',
+    QA_IN_PAGE_LINK: 'Tautan halaman yang sama rusak. Tautan ini mencoba menavigasi ke bagian halaman yang tidak dapat ditemukan. Untuk memperbaikinya, pastikan tautan cocok dengan <code>id</code> elemen yang ingin Anda tuju.',
     QA_STRONG_ITALICS:
       'Tag cetak tebal dan miring memiliki makna semantik, dan tidak boleh digunakan untuk menyorot seluruh paragraf. Teks yang dicetak tebal harus digunakan untuk memberikan <strong>penekanan</strong> yang kuat pada sebuah kata atau frasa. Huruf miring harus digunakan untuk menyoroti nama diri (misalnya judul buku dan artikel), kata-kata asing, kutipan. Kutipan panjang harus diformat sebagai kutipan blok.',
     QA_PDF:
@@ -340,7 +338,8 @@ export default {
       'Teks kecil lebih sulit dibaca, terutama bagi mereka yang memiliki penglihatan rendah. Untuk memastikan keterbacaan yang lebih baik, hindari menggunakan ukuran font yang lebih kecil dari ukuran default.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Nama yang dapat diakses</strong> %(TEXT)',
+    LINK_TEXT: '<strong {B}>Teks tautan</strong> <strong {C}>%(TEXT)</strong>',
+    ACC_NAME: '<strong {B}>Nama yang dapat diakses</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Tips!</strong> "Nama yang dapat diakses" adalah label akhir yang dikomunikasikan kepada orang-orang yang menggunakan teknologi bantuan dan dihitung oleh ARIA. Ini membantu mereka memahami tujuan tautan atau tombol.',
     HIDDEN_FOCUSABLE:
@@ -377,7 +376,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Jangan sertakan kata "tombol" dalam nama tombol. Pembaca layar sudah menyampaikan peran elemen selain namanya.',
     LABEL_IN_NAME:
-      'Teks yang terlihat untuk elemen ini tampaknya berbeda dari nama aksesibel, yang dapat menyebabkan kebingungan bagi pengguna teknologi bantuan. Harap periksa: <hr> <strong {B}>Nama Aksesibel</strong> <strong {C}>%(TEXT)</strong>',
+      'Teks yang terlihat untuk elemen ini tampaknya berbeda dari nama aksesibel, yang dapat menyebabkan kebingungan bagi pengguna teknologi bantuan. Harap periksa: <hr> <strong {B}>Teks</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Nama Aksesibel</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Tautan ini memiliki target yang tidak valid, dan nama yang dapat diakses mengandung kata "<strong>%(NAME)</strong>". Ini menunjukkan bahwa ini mungkin bukan tautan sama sekali, melainkan mengontrol beberapa perilaku skrip di halaman. Untuk memperbaikinya, ganti tautan dengan <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">tombol yang dapat diakses</a>, atau perbaiki tujuan tautan. <hr> <strong>Tips!</strong> Teknologi asistif memperlakukan tombol dan tautan secara berbeda. Menggunakan elemen HTML yang benar memastikan pengguna mengetahui pintasan keyboard mana yang harus digunakan dan tindakan apa yang akan dipicu.',
+    POTENTIAL_UI_ELEMENTS: ['menu', 'tutup', 'alihkan', 'buka', 'perluas', 'ciutkan', 'berikutnya', 'sebelumnya', 'putar', 'jeda', 'submenu', 'tampilkan', 'sembunyikan', 'dropdown', 'kembali', 'maju', 'lewati', 'kirim', 'batal', 'simpan', 'edit', 'hapus', 'hapus', 'cari', 'filter', 'urutkan', 'berhenti', 'bisukan', 'bunyikan', 'layar penuh', 'minimalkan', 'maksimalkan'],
 
     // Tables
     TABLES_MISSING_HEADINGS:

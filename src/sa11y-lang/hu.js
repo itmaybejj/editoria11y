@@ -229,8 +229,7 @@ export default {
       'A link figyelmeztetés nélkül új lapon vagy ablakban nyílik meg. Ez zavaró lehet, különösen azok számára, akik nehezen érzékelik a vizuális tartalmakat. Másodszor, nem mindig jó gyakorlat, ha valakinek az élményét irányítjuk, vagy döntéseket hozunk helyettük. Jelezze, hogy a link új ablakban nyílik meg a link szövegében<hr><strong>Tipp!</strong> Ismerje meg a legjobb gyakorlatokat: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">Hivatkozások megnyitása új böngészőablakban és lapon.</a>',
     LINK_FILE_EXT:
       'A link figyelmeztetés nélkül PDF vagy letölthető fájlra (pl. MP3, Zip, Word Doc) mutat. A hivatkozás szövegében tüntesse fel a fájl típusát. Ha nagyméretű fájlról van szó, fontolja meg a fájlméret feltüntetését. <hr> <strong>Példa:</strong> Vezetői jelentés (PDF, 3MB)',
-    LINK_IDENTICAL_NAME:
-      'A link szövege megegyezik egy másik link szövegével, bár egy másik oldalra mutat. A több azonos szövegű hivatkozás zavart okozhat a képernyőolvasót használó emberek számára. <strong>Figyeljen arra, hogy a következő hivatkozás leíróbb legyen, hogy jobban megkülönböztethető legyen a többi hivatkozástól.</strong> <hr> <strong {B}>Hozzáférhető név</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Az oldalon több hivatkozás ugyanazt a szöveget használja, de különböző helyekre mutatnak. Ez zavaró lehet a segítő technológiát használók számára. A javításhoz tegye leíróbbá a hivatkozás szövegét.',
     LINK_UNPRONOUNCEABLE:
       'A hivatkozás szövege csak szimbólumokat tartalmaz. Ha úgy gondolja, hogy ez a hivatkozás másolási/beillesztési hiba miatt hibás, fontolja meg a törlését.',
 
@@ -314,8 +313,7 @@ export default {
     // QA
     QA_BAD_LINK:
       'Rossz linket találtunk. Úgy tűnik, hogy a link egy fejlesztői környezetre mutat. <hr> {L} <strong {C}>%(LINK)</strong>',
-    QA_IN_PAGE_LINK:
-      'Sérült azonos oldalú link. A hivatkozás célja nem egyezik meg egyetlen elemmel sem ezen az oldalon.',
+    QA_IN_PAGE_LINK: 'Hibás belső hivatkozás. Ez a hivatkozás az oldal egy olyan szakaszára próbál navigálni, amely nem található. A javításhoz győződjön meg arról, hogy a hivatkozás megegyezik annak az elemnek az <code>id</code> azonosítójával, amelyre ugrani szeretne.',
     QA_STRONG_ITALICS:
       'A vastag és dőlt betűs címkéknek szemantikai jelentésük van, és <strong>nem</strong> szabad egész bekezdések kiemelésére használni őket. A félkövérrel kiemelt szöveget egy szó vagy kifejezés erős <strong>kiemelésére</strong> kell használni. A dőlt betűt a tulajdonnevek (pl. könyv- és cikkcímek), idegen szavak, idézőjelek kiemelésére kell használni. A hosszú idézeteket blokkidézetként kell formázni.',
     QA_PDF:
@@ -342,7 +340,8 @@ export default {
       'A kis betűméret nehezebben olvasható, különösen a gyengén látók számára. A jobb olvashatóság érdekében kerülje a kisebb betűméretek használatát az alapértelmezettnél.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Hozzáférhető név</strong> %(TEXT)',
+    LINK_TEXT: '<strong {B}>Hivatkozás szövege</strong> <strong {C}>%(TEXT)</strong>',
+    ACC_NAME: '<strong {B}>Hozzáférhető név</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr> <strong>Tippek!</strong> A "hozzáférhető név" az a végső címke, amelyet a segédeszközöket használó embereknek kommunikálnak, és amelyet az ARIA számít. Ez segít nekik megérteni a hivatkozás vagy gomb célját.',
     HIDDEN_FOCUSABLE:
@@ -378,7 +377,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Ne tartalmazza a "gomb" szót a gomb nevében. A képernyőolvasók már közlik az elem szerepét annak neve mellett.',
     LABEL_IN_NAME:
-      'Ennek az elemnek a látható szövege eltérhet az akadálymentes névtől, ami zavart okozhat az akadálymentes technológiákat használó felhasználók számára. Kérem, ellenőrizze: <hr> <strong {B}>Akadálymentes Név</strong> <strong {C}>%(TEXT)</strong>',
+      'Ennek az elemnek a látható szövege eltérhet az akadálymentes névtől, ami zavart okozhat az akadálymentes technológiákat használó felhasználók számára. Kérem, ellenőrizze: <hr> <strong {B}>Szöveg</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Akadálymentes Név</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Ez a hivatkozás érvénytelen céllal rendelkezik, és a hozzáférhető név tartalmazza a „<strong>%(NAME)</strong>” szót. Ez arra utal, hogy ez egyáltalán nem hivatkozás, hanem valamilyen szkriptelt viselkedést vezérel az oldalon. A javításhoz cserélje ki a hivatkozást egy <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">hozzáférhető gombra</a>, vagy javítsa ki a hivatkozás célját. <hr> <strong>Tipp!</strong> A segítő technológiák eltérően kezelik a gombokat és a hivatkozásokat. A megfelelő HTML-elem használata biztosítja, hogy a felhasználók tudják, melyik billentyűparancsokat használják, és milyen művelet fog elindulni.',
+    POTENTIAL_UI_ELEMENTS: ['menü', 'bezárás', 'váltás', 'megnyitás', 'kibontás', 'összecsukás', 'következő', 'előző', 'lejátszás', 'szünet', 'almenü', 'megjelenítés', 'elrejtés', 'legördülő', 'vissza', 'előre', 'kihagyás', 'beküldés', 'mégse', 'mentés', 'szerkesztés', 'törlés', 'eltávolítás', 'keresés', 'szűrés', 'rendezés', 'leállítás', 'némítás', 'visszahangosítás', 'teljes képernyő', 'minimalizálás', 'maximalizálás'],
 
     // Tables
     TABLES_MISSING_HEADINGS:

@@ -276,12 +276,8 @@ export function alignButtons() {
   } else {
     // Compute based on self position.
 
-    // Clear old transforms first. Batch write first...
+    // Batch read existing transforms before clearing...
     UI.jumpList.forEach((mark) => {
-      // Reset positions.
-      mark.style.setProperty('transform', null);
-      mark.style.setProperty('top', 'initial');
-      mark.style.setProperty('left', 'initial');
       if (mark.style.transform) {
         const computedStyle = window.getComputedStyle(mark);
         let matrix = computedStyle.getPropertyValue('transform');
@@ -292,6 +288,12 @@ export function alignButtons() {
         mark.xOffset = 0;
         mark.yOffset = 0;
       }
+    });
+    // ...then batch clear old positions...
+    UI.jumpList.forEach((mark) => {
+      mark.style.setProperty('transform', null);
+      mark.style.setProperty('top', 'initial');
+      mark.style.setProperty('left', 'initial');
     });
     // ...then batch read new positions.
     UI.jumpList.forEach((mark) => {

@@ -1,82 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <link rel="stylesheet" media="all" href="../src/css/editoria11y.css">
-    </head>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" media="all" href="../src/css/editoria11y.css">
+</head>
+
 <body>
     <header>
         <h1 id="editoria11y-demo">Editoria11y Unit Tests</h1>
-		<h6 class="positive">Developer mode should pick up this h6</h6>
+        <h6 class="positive">Developer mode should pick up this h6</h6>
     </header>
     <main id="main">
 
         <section id="headings">
 
-			<p>Todo:</p>
-			<p class="todo-positive"> <strong>Short bold lines</strong><br>with a carriage return can be missed.</p>
-			<p class="todo-positive"> <strong>I'm a fake heading</strong></p>
+            <p>Todo:</p>
+            <p class="todo-positive"> <strong>Short bold lines</strong><br>with a carriage return can be missed.</p>
+            <p class="todo-positive"> <strong>I'm a fake heading</strong></p>
 
             <h2 id="heading-tests">Headings</h2>
             <h3>Outline structure &amp;amp; empty headings.</h3>
 
-            <div class="positive">skipped heading<h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6></div>
+            <div class="positive">skipped heading<h6 id="this-h6-should-have-been-an-h3">Skipped heading level</h6>
+            </div>
 
             <h3>Empty headings</h3>
             <div class="positive" id="hidden-handler">space character (with hidden handler)
                 <h4> </h4>
             </div>
             <div class="positive">empty alt
-                <h4><img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" ></h4>
+                <h4><img alt=""
+                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+                </h4>
             </div>
             <div class="positive">CMS-provided-placeholder alternative for null alt
-              <h4><img alt="This image has an empty alt attribute; its filename is image.jpg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" ></h4>
-          </div>
+                <h4><img alt="This image has an empty alt attribute; its filename is image.jpg"
+                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+                </h4>
+            </div>
             <div class="positive">null alt
-                <h4><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></h4>
+                <h4><img
+                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+                </h4>
             </div>
             <div class="positive">empty linked heading
-                <a href="main"><h4></h4></a>
+                <a href="main">
+                    <h4></h4>
+                </a>
             </div>
 
-            <div class="positive"><h4 id="a-very-long-heading">Suspiciously long heading. Headings should not be used for emphasis, but rather for a document outline, so if you find yourself talking this much, this probably is being used for visual formatting, not a heading.</h4>
+            <div class="positive">
+                <h4 id="a-very-long-heading">Suspiciously long heading. Headings should not be used for emphasis, but
+                    rather for a document outline, so if you find yourself talking this much, this probably is being
+                    used for visual formatting, not a heading.</h4>
             </div>
 
-            <div class="positive"><h4>Skipped and empty heading (duplicate alert check)</h4><h6></h6></div>
+            <div class="positive">
+                <h4>Skipped and empty heading (duplicate alert check)</h4>
+                <h6></h6>
+            </div>
             <div class="negative">
-                <h4 class="gutenbergBadAria" aria-label="">This heading has a blank aria-label, but that should be ignored by config (needed for Gutenberg)</h4>
+                <h4 class="gutenbergBadAria" aria-label="">This heading has a blank aria-label, but that should be
+                    ignored by config (needed for Gutenberg)</h4>
             </div>
             <div class="negative">Heading with alt
-                <h4><img alt="I am the alt text for this heading" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" ></h4>
+                <h4><img alt="I am the alt text for this heading"
+                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+                </h4>
             </div>
 
             <h3>Heading hidden from screen readers</h3>
             <div class="negative">
-              <p>This should be excluded from the outline.</p>
-              <h6 style="display:none;">This should not be visible in the page outline</h6>
+                <p>This should be excluded from the outline.</p>
+                <h6 style="display:none;">This should not be visible in the page outline</h6>
             </div>
 
             <h3>Possible fake headings</h3>
 
-            <div class="positive"><blockquote>Short quote needs check</blockquote></div>
+            <div class="positive">
+                <blockquote>Short quote needs check</blockquote>
+            </div>
 
             <blockquote class="negative">Longer quotes are OK and should not be flagged.</blockquote>
 
             <p class="positive"><strong>All &lt;strong&gt; paragraph needs manual check</strong></p>
 
-            <p class="negative">You can aggregate Posts by a specific category and display the posts in a grid or in a standard list layout. In the example below, we created a Post Category named <strong>Announcement</strong>&nbsp;and used the Post List Block to list Posts<strong> </strong>tagged with the<strong> Announcement</strong> category.</p>
+            <p class="negative">You can aggregate Posts by a specific category and display the posts in a grid or in a
+                standard list layout. In the example below, we created a Post Category named
+                <strong>Announcement</strong>&nbsp;and used the Post List Block to list Posts<strong> </strong>tagged
+                with the<strong> Announcement</strong> category.
+            </p>
 
             <p class="positive"><b>All &lt;b&gt;old paragraph needs manual check</b></p>
 
-            <p class="positive"> <strong>Short lines with <span>spans</span>, &nbsp;non-breaking whitespace should still be flagged </strong></p>
+            <p class="positive"> <strong>Short lines with <span>spans</span>, &nbsp;non-breaking whitespace should still
+                    be flagged </strong></p>
 
             <p class="todo-positive"> <strong>Short bold line</strong><br>With a carriage return.</p>
 
 
-            <p class="negative"><strong>Headings with certain punctuation are assumed to be sentences, and not flagged. (!?)</strong></p>
+            <p class="negative"><strong>Headings with certain punctuation are assumed to be sentences, and not flagged.
+                    (!?)</strong></p>
 
             <p class="negative">
-                <strong>A bold paragraph of very many characters is probably not a heading and probably shouldn't be flagged even if it does not end in a period</strong>
+                <strong>A bold paragraph of very many characters is probably not a heading and probably shouldn't be
+                    flagged even if it does not end in a period</strong>
             </p>
 
 
@@ -90,80 +119,121 @@
 
             <p>Screen readers end up reading this as a filename.</p>
 
-            <p class="positive"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><img
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </p>
 
             <h3 id="image-marked-as-decorative-with-an-empty-alt">Image marked as decorative with an empty alt</h3>
 
             <p>This might be OK; flagged as needing manual review.</p>
 
-            <p class="positive"><img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><img alt=""
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </p>
 
             <h3 id="image-with-an-invalid-alt-attribute">Image with an invalid alt attribute</h3>
 
             <p>E.g., <code class="language-plaintext highlighter-rouge">alt="'"</code></p>
 
-            <p class="positive"><img alt="'" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><img alt="'"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </p>
 
             <h3 id="image-with-a-filename-as-an-alt">Image with a filename as an alt</h3>
 
-            <p class="positive"><img alt="filename.jpg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><img alt="filename.jpg"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </p>
 
             <h3 id="image-with-redundant-text-in-its-alt">Image with redundant text in its alt</h3>
 
             <p>E.g., “image of.”</p>
 
-            <p class="positive"><img alt="             Image of a photo of a turtledove." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><img alt="             Image of a photo of a turtledove."
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </p>
 
-            <p class="positive"><img alt="Bob photo." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><img alt="Bob photo."
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </p>
 
             <h3 id="image-with-placeholder alt">Image with placeholder alt</h3>
-            <p class="positive"><img alt="TBD" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
-            <p class="positive"><a href="main"><img alt="TBD" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+            <p class="positive"><img alt="TBD"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </p>
+            <p class="positive"><a href="main"><img alt="TBD"
+                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a>
+            </p>
 
             <h3 id="image-with-very-long-alt-text">Image with very long alt text</h3>
 
-            <p class="positive"><img alt="Alt text should be brief. Screen readers cannot jump from sentence to sentence in alt text, so listeners just hear one monster pile of text and if they miss something they have to start over. This, for example, is really quite awfully long and should be much shorter." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="positive"><img
+                    alt="Alt text should be brief. Screen readers cannot jump from sentence to sentence in alt text, so listeners just hear one monster pile of text and if they miss something they have to start over. This, for example, is really quite awfully long and should be much shorter."
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </p>
 
-            <h3 id="images-in-links-where-the-alt-text-may-be-describing-the-image-instead-of-the-link">Images in links where the alt text may be describing the image instead of the link</h3>
+            <h3 id="images-in-links-where-the-alt-text-may-be-describing-the-image-instead-of-the-link">Images in links
+                where the alt text may be describing the image instead of the link</h3>
 
-            <p class="positive"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs">This link has text and an image.<img alt="A lovely gray box" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+            <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">This link has text and an
+                    image.<img alt="A lovely gray box"
+                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a>
+            </p>
 
             <h3 id="images-ignored">Ignore handling on images</h3>
-            <p class="negative">Aria hidden image <img aria-hidden="true" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
-            <p class="negative"><a href="main" aria-label="ok">Image inside an aria-labelled link.<img alt="tbd" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
-            <p class="positive">Aria labelled image <img aria-label="tbd" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></p>
+            <p class="negative">Aria hidden image <img aria-hidden="true"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </p>
+            <p class="negative"><a href="main" aria-label="ok">Image inside an aria-labelled link.<img alt="tbd"
+                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a>
+            </p>
+            <p class="positive">Aria labelled image <img aria-label="tbd"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </p>
 
+            <p>Uses chart but not too bad.</p>
+
+            <p class="negative"><img
+                    alt="Chart showing the ten-year rolling averages for Princeton's endowment returns from fiscal year 1991 (14.5 percent) to fiscal year 2025 (9 percent)."
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </p>
 
         </section>
         <section>
             <h2>Figures</h2>
             <figure>
-                <img class="todo-positive" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+                <img class="todo-positive" alt=""
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
                 <figcaption>Figcaption with empty image alt</figcaption>
             </figure>
             <figure class="todo-positive">
-                <img alt="Figcaption is the same as alt" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+                <img alt="Figcaption is the same as alt"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
                 <figcaption>Figcaption is the same as alt</figcaption>
             </figure>
         </section>
-		<section>
-			<h2>Contrast</h2>
-			<p style="background: #ccc; color: #ddd;">Super legible.</p>
-			<p style="background: linear-gradient(45deg,#ccc 25%,#0000 25% 75%,#ccc 75%,#ccc),linear-gradient(45deg,#ccc 25%,#0000 25% 75%,#ccc 75%,#ccc)">And incalculable.</p>
-		</section>
+        <section>
+            <h2>Contrast</h2>
+            <p style="background: #ccc; color: #ddd;">Super legible.</p>
+            <p
+                style="background: linear-gradient(45deg,#ccc 25%,#0000 25% 75%,#ccc 75%,#ccc),linear-gradient(45deg,#ccc 25%,#0000 25% 75%,#ccc 75%,#ccc)">
+                And incalculable.</p>
+        </section>
         <h3 id="embeds">Embeds</h3>
 
         <p>Flagged as manual check needed for captioning:</p>
-<hr>
+        <hr>
         <div class="positive">YouTube<iframe src="/youtube.com/"></iframe></div>
         <hr>
         <div class="positive">HTML5 video<video></video></div>
 
         <hr>
-        <div class="positive"><div id="embed" style="width: 50%; height: 4rem; background: aquamarine;">E.g., a social media feed</div></div>
+        <div class="positive">
+            <div id="embed" style="width: 50%; height: 4rem; background: aquamarine;">E.g., a social media feed</div>
+        </div>
 
         <iframe src="pass.htm" sandbox="" allowfullscreen="" width="300" height="240" frameborder="0"></iframe>
-[iframe commented out during development]
+        [iframe commented out during development]
         <p>Also flagged: embedded audio and social media.</p>
 
         <h2 id="meaningful-links">Meaningful Links</h2>
@@ -172,77 +242,110 @@
 
         <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"></a> No characters</p>
         <p class="positive"><a href="main"> </a> Space character</p>
-        <p class="positive">Image with deadspace: <a href="main"><img alt="'" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E" class=""></a></p>
+        <p class="positive">Image with deadspace: <a href="main"><img alt="'"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"
+                    class=""></a></p>
         <p class="positive">Content is image in CSS ::before: <a href="main" class="insert-image-before"></a></p>
-        <p class="positive only">Content is in CSS ::before: <a href="main" class="insert-text-before insert-text-after"><span class="insert-image-before"></span></a></p>
+        <p class="positive only">Content is in CSS ::before: <a href="main"
+                class="insert-text-before insert-text-after"><span class="insert-image-before"></span></a></p>
 
         <h3 id="links-titled-with-a-url">Links titled with a URL</h3>
 
-        <p class="positive"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs">https://www.youtube.com/watch?v=DLzxrzFCyOs</a></p>
-        <p class="positive"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs" title="https://www.youtube.com/watch?v=DLzxrzFCyOs"></a></p>
-        <p class="positive"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs" title="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here</a></p>
+        <p class="positive"><a
+                href="https://www.youtube.com/watch?v=DLzxrzFCyOs">https://www.youtube.com/watch?v=DLzxrzFCyOs</a></p>
+        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"
+                title="https://www.youtube.com/watch?v=DLzxrzFCyOs"></a></p>
+        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"
+                title="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here</a></p>
 
         <h3 id="links-only-titled-with-generic-text">Links only titled with generic text</h3>
 
         <p>“Click here,” “learn more,” “download,” etc.</p>
 
-        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Download</a> But should only be yellow</p>
-        <p class="positive"><a class="insert-text-before" href="https://www.youtube.com/watch?v=DLzxrzFCyOs"></a> Only pseudo-content</p>
+        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Download</a> But should only be yellow
+        </p>
+        <p class="positive"><a class="insert-text-before" href="https://www.youtube.com/watch?v=DLzxrzFCyOs"></a> Only
+            pseudo-content</p>
         <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here for more</a></p>
 
-        <p class="positive">Link with ignored substring: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click here (opens in new window)</a></p>
-        <p class="negative">Link with new window icon: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">You were warned <em class="link-purpose">(opens in new window)</em></a></p>
+        <p class="positive">Link with ignored substring: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">Click
+                here (opens in new window)</a></p>
+        <p class="negative">Link with new window icon: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">You were
+                warned <em class="link-purpose">(opens in new window)</em></a></p>
 
         <p class="negative"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs">A great video</a></p>
 
-        <h3 id="links-that-open-in-a-new-window-without-an-external-link-icon-or-text-warning">Links that open in a new window without an external link icon or text warning</h3>
+        <h3 id="links-that-open-in-a-new-window-without-an-external-link-icon-or-text-warning">Links that open in a new
+            window without an external link icon or text warning</h3>
 
-        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">Alert for opens-in test.</a></p>
+        <p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">Alert for opens-in
+                test.</a></p>
 
-        <p class="negative"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">A link in a new tab</a></p>
+        <p class="negative"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">A link in a new
+                tab</a></p>
 
-        <p class="negative">Link that is only an aria-label: <a aria-label="hello this opens new window" href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank"></a></p>
-        <p class="negative">Link with inner download icon with aria-label: <a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank" class="link-purpose">Aria label on inner span <span aria-label="opens new window"></span></a></p>
+        <p class="negative">Link that is only an aria-label: <a aria-label="hello this opens new window"
+                href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank"></a></p>
+        <p class="negative">Link with inner download icon with aria-label: <a
+                href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank" class="link-purpose">Aria label on
+                inner span <span aria-label="opens new window"></span></a></p>
 
-        <p class="negative"><a  href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">An informative video (opens in new window).</a></p>
+        <p class="negative"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">An informative video
+                (opens in new window).</a></p>
 
         <h3 id="links-to-a-documents">Links to a documents</h3>
 
-        <p>Note that you can set what Editoria11y should look for in your preferences file. By default it checks for PDF and DOC files.</p>
+        <p>Note that you can set what Editoria11y should look for in your preferences file. By default it checks for PDF
+            and DOC files.</p>
 
         <p class="positive"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ#.pdf" class="">A fake PDF link.</a></p>
-        <p class="positive"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ#2.pdf" class="">A fake PDF link with a different url.</a></p>
+        <p class="positive"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ#2.pdf" class="">A fake PDF link with a
+                different url.</a></p>
 
         <h3>Silent but interactive links</h3>
 
-        <p class="todo-positive"><a href="main" aria-hidden="true">Aria-hidden links without a negative tabindex.</a></p>
+        <p class="todo-positive"><a href="main" aria-hidden="true">Aria-hidden links without a negative tabindex.</a>
+        </p>
 
-        <p class="positive"><a href="main"><span aria-hidden="true">Link with all text content aria-hidden.</span></a></p>
+        <p class="positive"><a href="main"><span aria-hidden="true">Link with all text content aria-hidden.</span></a>
+        </p>
 
-        <p class="positive"><a href="main"><img class="insert-text-before" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
-        </a> linked image with empty alt.</p>
-        <p class="positive"><a href="main"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
-        </a> linked image with no alt.</p>
+        <p class="positive"><a href="main"><img class="insert-text-before" alt=""
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </a> linked image with empty alt.</p>
+        <p class="positive"><a href="main"><img
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </a> linked image with no alt.</p>
 
-        <p class="positive"><a href="main"><img alt="'" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a> Linked image with an unpronounceable (unvoiced characters) alt text.</p>
+        <p class="positive"><a href="main"><img alt="'"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a>
+            Linked image with an unpronounceable (unvoiced characters) alt text.</p>
 
-        <p class="positive"><a href="main"><img alt="http://jpg.gif" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
-        </a> linked image with filename.</p>
-        <p class="todo-positive"><a href="main"><img alt="click here" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
-        </a> linked image with click here.</p>
-        <p class="positive"><a href="main"><img alt="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
-        </a> linked image with giant alt.</p>
-        <p class="positive"><a href="main">Link text with image text<img  alt="a butterfly" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
-        <p class="negative"><a href="#main">Link text with text and empty image text<img  alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a></p>
+        <p class="positive"><a href="main"><img alt="http://jpg.gif"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </a> linked image with filename.</p>
+        <p class="todo-positive"><a href="main"><img alt="click here"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </a> linked image with click here.</p>
+        <p class="positive"><a href="main"><img
+                    alt="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+            </a> linked image with giant alt.</p>
+        <p class="positive"><a href="main">Link text with image text<img alt="a butterfly"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a>
+        </p>
+        <p class="negative"><a href="#main">Link text with text and empty image text<img alt=""
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E"></a>
+        </p>
         <h3>
             Links with accessible text added programmatically
         </h3>
         <p>These should all pass.</p>
         <ul>
-            <li class="negative">Title <a href="main"  title="text is in the title"></a></li>
-            <li class="negative">Aria-label [todo] <a href="main"  id="aria-test" aria-label="Aria label"></a></li>
-            <li class="negative">Aria-label overriding [todo]<a href="main"  aria-label="Aria label"></a></li>
-            <li class="negative">Aria-labelledby [todo]<a href="main"  aria-labelledby="aria-test"></a></li>
+            <li class="negative">Title <a href="main" title="text is in the title"></a></li>
+            <li class="negative">Aria-label [todo] <a href="main" id="aria-test" aria-label="Aria label"></a></li>
+            <li class="negative">Aria-label overriding [todo]<a href="main" aria-label="Aria label"></a></li>
+            <li class="negative">Aria-labelledby [todo]<a href="main" aria-labelledby="aria-test"></a></li>
         </ul>
 
 
@@ -251,131 +354,221 @@
 
         <h3 id="tables-without-valid-headers">Tables without valid headers</h3>
 
-        <table class="positive"><tbody><tr><td>A table without a TH header is invalid</td><td class="positive"><h4 >Outline headers do not count</h4></td><td class="negative"><p><strong>Disable should be content header test inside tables</strong></p></td></tr></tbody></table>
-
-        <table class="negative" role="presentation"><tr><td>No table header, but table has role="presentation."</td></tr></table>
-
-        <table><thead>
-        <tr>
-            <th class="positive"></th>
-            <th class="negative"><p>Numbers in tables</p><p>Should not be checked for lists</p>
-            </th>
-            <th class="positive"></th>
-        </tr>
-        </thead>
+        <table class="positive">
             <tbody>
-            <tr class="negative">
-                <th>   <p>1.</p>
-                </th>
-                <td>   <p>2. Turtles</p>
-                </td>
-                <td>And Peggy</td>
+                <tr>
+                    <td>A table without a TH header is invalid</td>
+                    <td class="positive">
+                        <h4>Outline headers do not count</h4>
+                    </td>
+                    <td class="negative">
+                        <p><strong>Disable should be content header test inside tables</strong></p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="negative" role="presentation">
+            <tr>
+                <td>No table header, but table has role="presentation."</td>
             </tr>
-            <tr class="negative">
-                <th>   <p>2.</p>
-                </th>
-                <td>   <p>Bears</p>
-                </td>
-                <td></td>
-            </tr>
+        </table>
+
+        <table>
+            <thead>
+                <tr>
+                    <th class="positive"></th>
+                    <th class="negative">
+                        <p>Numbers in tables</p>
+                        <p>Should not be checked for lists</p>
+                    </th>
+                    <th class="positive"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="negative">
+                    <th>
+                        <p>1.</p>
+                    </th>
+                    <td>
+                        <p>2. Turtles</p>
+                    </td>
+                    <td>And Peggy</td>
+                </tr>
+                <tr class="negative">
+                    <th>
+                        <p>2.</p>
+                    </th>
+                    <td>
+                        <p>Bears</p>
+                    </td>
+                    <td></td>
+                </tr>
             </tbody>
         </table>
         <h3 id="empty-table-header-cells">Empty table header cells</h3>
 
-        <table><tbody><tr><th>Empty table heading cells will also be flagged:</th><th class="positive"> &nbsp;</th></tr></tbody></table>
+        <table>
+            <tbody>
+                <tr>
+                    <th>Empty table heading cells will also be flagged:</th>
+                    <th class="positive"> &nbsp;</th>
+                </tr>
+            </tbody>
+        </table>
 
         <h2 id="legibility">Legibility</h2>
 
         <h3 id="lists">Lists</h3>
 
-        <div><p>a. Fake lists</p><p>b. use letters or numbers.</p><p>c. rather than real formatting.</p></div>
-        <div><p class="positive">1. Fake lists<br>2. Sometimes use<br>BR instead of P tags.</p></div>
-
-        <div><p class="positive">* Fake lists</p><p class="negative">* Should only</p><p class="todo-negative">* be flagged</p><p class="negative">* one time.</p><p class="todo-negative">* not two.</p><p>* or three</p></div>
-		<div><p>Spacer between lists.</p></div>
-            <p class="positive">1 This is split</p>
-            <hr><p>2 with HR</p>
-            <hr><p>3 but non-contiguous p are detected.</p>
+        <div>
+            <p>a. Fake lists</p>
+            <p>b. use letters or numbers.</p>
+            <p>c. rather than real formatting.</p>
         </div>
         <div>
-          <p class="positive">(1) A parenthesis list</p>
-          <p class="negative">(2) Two</p>
-          <p>(3) Three</p>
+            <p class="positive">1. Fake lists<br>2. Sometimes use<br>BR instead of P tags.</p>
         </div>
-		<div>
-			<p class="negative">I want an apple.</p>
-			<p>I want a turtle.</p>
-		</div>
-        <dl id="ps_accordionfield_ps_accordion_block_content_1191" data-expanded-default="false" class="ps-accordion" role="presentation" data-once="ps-accordion">
+
+        <div>
+            <p class="positive">* Fake lists</p>
+            <p class="negative">* Should only</p>
+            <p class="todo-negative">* be flagged</p>
+            <p class="negative">* one time.</p>
+            <p class="todo-negative">* not two.</p>
+            <p>* or three</p>
+        </div>
+        <div>
+            <p>Spacer between lists.</p>
+        </div>
+        <p class="positive">1 This is split</p>
+        <hr>
+        <p>2 with HR</p>
+        <hr>
+        <p>3 but non-contiguous p are detected.</p>
+        </div>
+        <div>
+            <p class="positive">(1) A parenthesis list</p>
+            <p class="negative">(2) Two</p>
+            <p>(3) Three</p>
+        </div>
+        <div>
+            <p class="negative">I want an apple.</p>
+            <p>I want a turtle.</p>
+        </div>
+        <dl id="ps_accordionfield_ps_accordion_block_content_1191" data-expanded-default="false" class="ps-accordion"
+            role="presentation" data-once="ps-accordion">
             <dt class="ps-accordion-item expanded">
                 <div role="heading" aria-level="3">
-                    <div id="acc-btn" role="button" aria-controls="acc-panel" aria-expanded="true" tabindex="0" class="ps-accordion-item-button">
-            <span class="indicator" aria-hidden="true">
-              <span class="indicator-target">
-                <span class="indicator-target--plus"><!--?xml version='1.0' encoding='utf-8'?-->
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="56px" height="56px" viewBox="0 0 56 56" style="enable-background:new 0 0 56 56;" xml:space="preserve" fill="currentColor">
-  <g transform="translate(0,-952.36218)">
-  <path class="st0" d="M28,952.4c-2.8,0-5,2.2-5,5v18H5c-2.8,0-5,2.2-5,5s2.2,5,5,5h18v18c0,2.8,2.2,5,5,5s5-2.2,5-5v-18h18 c2.8,0,5-2.2,5-5c0-2.8-2.2-5-5-5H33v-18C33,954.6,30.8,952.4,28,952.4z"></path>
-  </g>
-</svg>
-</span>
-                <span class="indicator-target--minus"><!--?xml version='1.0' encoding='utf-8'?-->
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve" fill="currentColor">
-  <g>
-    <path class="st0" d="M90.2,59.7H9.8c-5.3,0-9.6-4.3-9.6-9.6s4.3-9.6,9.6-9.6h80.4c5.3,0,9.6,4.3,9.6,9.6S95.5,59.7,90.2,59.7z"></path>
-  </g>
-</svg>
-</span>
-              </span>
-            </span>
+                    <div id="acc-btn" role="button" aria-controls="acc-panel" aria-expanded="true" tabindex="0"
+                        class="ps-accordion-item-button">
+                        <span class="indicator" aria-hidden="true">
+                            <span class="indicator-target">
+                                <span class="indicator-target--plus"><!--?xml version='1.0' encoding='utf-8'?-->
+                                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="56px"
+                                        height="56px" viewBox="0 0 56 56" style="enable-background:new 0 0 56 56;"
+                                        xml:space="preserve" fill="currentColor">
+                                        <g transform="translate(0,-952.36218)">
+                                            <path class="st0"
+                                                d="M28,952.4c-2.8,0-5,2.2-5,5v18H5c-2.8,0-5,2.2-5,5s2.2,5,5,5h18v18c0,2.8,2.2,5,5,5s5-2.2,5-5v-18h18 c2.8,0,5-2.2,5-5c0-2.8-2.2-5-5-5H33v-18C33,954.6,30.8,952.4,28,952.4z">
+                                            </path>
+                                        </g>
+                                    </svg>
+                                </span>
+                                <span class="indicator-target--minus"><!--?xml version='1.0' encoding='utf-8'?-->
+                                    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                                        width="100px" height="100px" viewBox="0 0 100 100"
+                                        style="enable-background:new 0 0 100 100;" xml:space="preserve"
+                                        fill="currentColor">
+                                        <g>
+                                            <path class="st0"
+                                                d="M90.2,59.7H9.8c-5.3,0-9.6-4.3-9.6-9.6s4.3-9.6,9.6-9.6h80.4c5.3,0,9.6,4.3,9.6,9.6S95.5,59.7,90.2,59.7z">
+                                            </path>
+                                        </g>
+                                    </svg>
+                                </span>
+                            </span>
+                        </span>
                         National Science Foundation
                     </div>
                 </div>
             </dt>
             <dd class="ps-accordion-content" style="">
                 <div id="acc-panel" role="region" aria-labelledby="acc-btn">
-                    <p>•Engineering Research Centers</p><p>•Science and Technology Centers</p><p>•Materials Research Science &amp; Engineering Centers</p><p>•Harnessing the Data Revolution (HDR) Institutes</p><p>NSF INCLUDES</p><p>*Innovation Corps (I-Corps)</p><p>*Mid-scale Research Infrastructure</p><p>*National Artificial Intelligence Research Institutes</p><p>*Research Coordination Networks</p><p>•NSF Research Traineeships</p><p>•Major Research Instrumentation</p><p>•Research Experiences for Undergraduates</p>
+                    <p>•Engineering Research Centers</p>
+                    <p>•Science and Technology Centers</p>
+                    <p>•Materials Research Science &amp; Engineering Centers</p>
+                    <p>•Harnessing the Data Revolution (HDR) Institutes</p>
+                    <p>NSF INCLUDES</p>
+                    <p>*Innovation Corps (I-Corps)</p>
+                    <p>*Mid-scale Research Infrastructure</p>
+                    <p>*National Artificial Intelligence Research Institutes</p>
+                    <p>*Research Coordination Networks</p>
+                    <p>•NSF Research Traineeships</p>
+                    <p>•Major Research Instrumentation</p>
+                    <p>•Research Experiences for Undergraduates</p>
                 </div>
             </dd>
             <dt class="ps-accordion-item ">
                 <div role="heading" aria-level="3">
-                    <div id="acc-btn--2" role="button" aria-controls="acc-panel--2" aria-expanded="false" tabindex="0" class="ps-accordion-item-button">
+                    <div id="acc-btn--2" role="button" aria-controls="acc-panel--2" aria-expanded="false" tabindex="0"
+                        class="ps-accordion-item-button">
                         National Institutes of Health
                     </div>
                 </div>
             </dt>
         </dl>
-        <div class="negative"><p>B bear.</p><p>A turtle.</p></div>
-        <div class="negative"><p>Apple</p></div>
-        <div class="negative"><p>Appeal</p></div>
-        <div class="negative"><p>Apple</p></div>
-        <div class="negative"><p>Bear</p></div>
-        <div class="negative"><p>A Bear</p><p>A turtle</p></div>
-        <div class="negative"><p>Aardvark</p><p>Bad</p></div>
-        <div><p class="positive">🥑 Fake lists with emoji</p><p class="negative">🍅 Oh tomato...</p><p class="negative">🦄 Shiny Unicorn</p>
+        <div class="negative">
+            <p>B bear.</p>
+            <p>A turtle.</p>
         </div>
-        <div class="negative"><p>11</p><p>12</p></div>
-        <div class="negative"><p>1 thing</p><p>20 things</p></div>
-        <div class="negative"><p>10 things</p><p>20 things</p></div>
-        <div class="negative"><p>1 thing</p><p>1 thing</p><p>3 thing</p></div>
+        <div class="negative">
+            <p>11</p>
+            <p>12</p>
+        </div>
+        <div class="negative">
+            <p>1 thing</p>
+            <p>20 things</p>
+        </div>
+        <div class="negative">
+            <p>10 things</p>
+            <p>20 things</p>
+        </div>
+        <div class="negative">
+            <p>1 thing</p>
+            <p>1 thing</p>
+            <p>3 thing</p>
+        </div>
 
-        <div class="positive"><p>1. This has rich text after the BR<br><a href="main"><strong>2.</strong> Fancy.</a></p></div>
-        <div class="negative"><p>1. This has nothing after the BR<br></p></div>
-        <div class="negative"><p></p></div>
-        <div class="negative"><p>1.</p></div>
+        <div class="positive">
+            <p>1. This has rich text after the BR<br><a href="main"><strong>2.</strong> Fancy.</a></p>
+        </div>
+        <div class="negative">
+            <p>1. This has nothing after the BR<br></p>
+        </div>
+        <div class="negative">
+            <p></p>
+        </div>
+        <div class="negative">
+            <p>1.</p>
+        </div>
         <p class="negative">🍅 Oh tomato...</p>
 
         <h3 id="caps-lock">Caps lock</h3>
 
-        <div class="positive"><p>SEVERAL WORDS IN A ROW OF CAPS LOCK TEXT WILL TRIGGER A MANUAL CHECK WARNING.</p></div>
+        <div class="positive">
+            <p>SEVERAL WORDS IN A ROW OF CAPS LOCK TEXT WILL TRIGGER A MANUAL CHECK WARNING.</p>
+        </div>
 
-		<section class="forms">
-			<h2 id="forms">Forms</h2>
-			<div class="positive">
-				<label for="edit-keys" class="form-label visually-hidden">Search</label>
-				<input title="Enter the terms you wish to search for." placeholder="Search by keyword, ingredient, dish" data-drupal-selector="edit-keys" type="search" id="edit-keys" name="keys" value="" size="15" maxlength="128" class="form-search">
-			</div>
-		</section>
+        <section class="forms">
+            <h2 id="forms">Forms</h2>
+            <div class="positive">
+                <label for="edit-keys" class="form-label visually-hidden">Search</label>
+                <input title="Enter the terms you wish to search for." placeholder="Search by keyword, ingredient, dish"
+                    data-drupal-selector="edit-keys" type="search" id="edit-keys" name="keys" value="" size="15"
+                    maxlength="128" class="form-search">
+            </div>
+        </section>
 
         <section class="shadow-root">
             <h2 id="shadow-root-1">Shadow root handling 1</h2>
@@ -387,9 +580,9 @@
             <div>This shadow component has no elements to find.</div>
         </section>
         <section class="shadow-root-no-root">
-          <turtle>
-            This custom component has no shadow root.
-          </turtle>
+            <turtle>
+                This custom component has no shadow root.
+            </turtle>
         </section>
 
 
@@ -397,350 +590,531 @@
         <section id="recursion">
             <h2 id="recursion-tests">JS Recursion handling</h2>
             <div class="positive">
-                <a href="main"><h4>Alert within a link should be drawn outside the link.</h4></a>
+                <a href="main">
+                    <h4>Alert within a link should be drawn outside the link.</h4>
+                </a>
             </div>
-            <ul><li><span class="negative">Caps lock test should not flag LI parent</span><ul class="positive"><li >ONLY THE INTERIOR LI SHOULD BE FLAGGED</li></ul></li></ul>
-            <table class="positive"><tr><td><h4>ALL CAPS HEADING OUTLINE IN TABLE OUT OF ORDER SHOULD HAVE 3 HITS</h4></td></tr></table>
+            <ul>
+                <li><span class="negative">Caps lock test should not flag LI parent</span>
+                    <ul class="positive">
+                        <li>ONLY THE INTERIOR LI SHOULD BE FLAGGED</li>
+                    </ul>
+                </li>
+            </ul>
+            <table class="positive">
+                <tr>
+                    <td>
+                        <h4>ALL CAPS HEADING OUTLINE IN TABLE OUT OF ORDER SHOULD HAVE 3 HITS</h4>
+                    </td>
+                </tr>
+            </table>
         </section>
 
         <section class="shadow-root">
             <h2 id="shadow-root-3">Shadow root handling 3</h2>
         </section>
 
+        <section id="edge-cases">
+            <h2 id="edge-case-tests">Edge Cases &amp; Crash Tests</h2>
+
+            <h3>Shadow root as check root</h3>
+            <div class="negative">
+                <p>The shadow-root-as-checkroot element below tests that a checkRoot with a shadowRoot doesn't throw
+                    "read-only" TypeError.</p>
+            </div>
+            <shadow-root-host id="shadow-root-checkroot-test"></shadow-root-host>
+
+            <h3>Images with unusual alt text</h3>
+            <p class="positive">Invisible Unicode braille spaces:
+                <img alt="⠀⠀⠀"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E">
+            </p>
+            <p class="positive">Only whitespace alt:
+                <img alt="   "
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E">
+            </p>
+            <p class="positive">Only special characters alt:
+                <img alt="'&quot;?.-"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E">
+            </p>
+            <p class="negative">Alt text is the word null:
+                <img alt="null"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E">
+            </p>
+
+            <h3>Links with unusual structures</h3>
+            <p class="positive">Link containing only an empty span: <a href="main"><span></span></a></p>
+            <p class="positive">Link containing only a BR: <a href="main"><br></a></p>
+            <p class="positive">Link with zero-width space only: <a href="main">&#8203;</a></p>
+            <p class="positive">Link with empty SVG only: <a href="main"><svg viewBox="0 0 1 1"></svg></a></p>
+            <p class="positive">Link with only an empty icon element: <a href="main"><i></i></a></p>
+
+            <h3>Headings with unusual content</h3>
+            <div class="positive">
+                <h4><img
+                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E">
+                </h4>
+            </div>
+            <div class="positive">
+                <h4>&#8203;</h4>
+            </div>
+
+            <h3>Tables with unusual structures</h3>
+            <table class="positive">
+                <thead>
+                    <tr></tr>
+                </thead>
+            </table>
+
+            <table class="positive">
+                <tbody>
+                    <tr>
+                        <th><span aria-label="hidden label"></span></th>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="positive">
+                <tr>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>Nested table with no headers</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <h3>Form inputs with edge-case labeling</h3>
+            <div class="positive">
+                <input type="text" aria-labelledby="">
+            </div>
+            <div class="positive">
+                <input type="text" aria-labelledby="nonexistent-id-12345">
+            </div>
+
+            <h3>Buttons with no accessible name</h3>
+            <div class="positive">
+                <button></button>
+            </div>
+            <div class="positive">
+                <button><span></span></button>
+            </div>
+            <div class="positive">
+                <button aria-labelledby="nonexistent-id-67890"></button>
+            </div>
+
+            <h3>Focusable hidden elements</h3>
+            <div class="positive">
+                <div aria-hidden="true" tabindex="0">Hidden but focusable div</div>
+            </div>
+
+            <h3>Headings with unusual role/level</h3>
+            <div class="positive">
+                <div role="heading" aria-level="">Content with empty aria-level</div>
+            </div>
+
+            <h3>Embedded content edge cases</h3>
+            <div class="positive">
+                <iframe title></iframe>
+            </div>
+            <div class="positive">
+                <iframe aria-label=" "></iframe>
+            </div>
+            <div class="positive">
+                <video>
+                    <track>
+                </video>
+            </div>
+            <div class="positive">
+                <video>
+                    <track src>
+                </video>
+            </div>
+
+            <h3>SVG edge cases</h3>
+            <p class="negative">Empty SVG (should not crash contrast checker): <svg></svg></p>
+            <p class="negative">SVG with only title: <svg>
+                    <title>SVG Title</title>
+                </svg></p>
+
+            <h3>Contrast edge cases</h3>
+            <p class="negative" style="color: transparent;">Transparent text should not crash</p>
+            <p class="negative" style="color: rgba(0,0,0,0);">RGBA zero alpha text</p>
+            <p class="negative" style="background: inherit; color: inherit;">Inherited styles</p>
+
+        </section>
+
         <section id="all-tests">
-          <h2 id="all-tests-heading">All tips</h2>
+            <h2 id="all-tests-heading">All tips</h2>
         </section>
     </main>
-    <footer><div class="negative"><h6>Heading level skip in footer should not be flagged.</h6></div></footer>
+    <footer>
+        <div class="negative">
+            <h6>Heading level skip in footer should not be flagged.</h6>
+        </div>
+    </footer>
 
+    <div class="a-root shadow-root">Potentially troublesome roots</div>
+    <script></script>
+    <noscript></noscript>
+    <iframe></iframe>
+    <a></a>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PC4TR4" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
 
     <div hidden>
         <script>
-          class shadowTest extends HTMLElement {
-            constructor() {
-              super();
+            class shadowTest extends HTMLElement {
+                constructor() {
+                    super();
+                }
+                connectedCallback() {
+                    if (!this.initialized) {
+                        const shadow = this.attachShadow({ mode: 'open' });
+                        let wrapper = document.createElement('div');
+                        wrapper.setAttribute('class', 'wrapper');
+                        wrapper.innerHTML = `<h4>Header skip in the shadow DOM</h4><p>ALL CAPS IN THE SHADOW DOM</p>`
+                        shadow.appendChild(wrapper);
+                        this.initialized = true;
+                    }
+                }
             }
-            connectedCallback() {
-              if (!this.initialized) {
-                const shadow = this.attachShadow({mode: 'open'});
-                let wrapper = document.createElement('div');
-                wrapper.setAttribute('class','wrapper');
-                wrapper.innerHTML = `<h4>Header skip in the shadow DOM</h4><p>ALL CAPS IN THE SHADOW DOM</p>`
-                shadow.appendChild(wrapper);
-                this.initialized = true;
-              }
+            customElements.define('shadow-test', shadowTest);
+            class shadowTestNoHits extends HTMLElement {
+                constructor() {
+                    super();
+                }
+                connectedCallback() {
+                    if (!this.initialized) {
+                        const shadow = this.attachShadow({ mode: 'open' });
+                        let wrapper = document.createElement('div');
+                        wrapper.setAttribute('class', 'wrapper');
+                        shadow.appendChild(wrapper);
+                        this.initialized = true;
+                    }
+                }
             }
-          }
-          customElements.define('shadow-test', shadowTest);
-          class shadowTestNoHits extends HTMLElement {
-            constructor() {
-              super();
+            customElements.define('shadow-test-no-hits', shadowTestNoHits);
+
+            // Shadow root host that can be used as a checkRoot
+            class shadowRootHost extends HTMLElement {
+                constructor() {
+                    super();
+                }
+                connectedCallback() {
+                    if (!this.initialized) {
+                        const shadow = this.attachShadow({ mode: 'open' });
+                        let wrapper = document.createElement('div');
+                        wrapper.innerHTML = `<h4>Content inside a shadow root check target</h4><p>This tests that checkRoot elements with shadow roots don't throw read-only errors.</p>`;
+                        shadow.appendChild(wrapper);
+                        this.initialized = true;
+                    }
+                }
             }
-            connectedCallback() {
-              if (!this.initialized) {
-                const shadow = this.attachShadow({mode: 'open'});
-                let wrapper = document.createElement('div');
-                wrapper.setAttribute('class','wrapper');
-                shadow.appendChild(wrapper);
-                this.initialized = true;
-              }
-            }
-          }
-          customElements.define('shadow-test-no-hits', shadowTestNoHits);
+            customElements.define('shadow-root-host', shadowRootHost);
 
-          document.querySelectorAll('.shadow-root').forEach((el) => {
-            let testShadowElement = document.createElement('shadow-test');
-            el.append(testShadowElement);
-            el.append('hi');
-          })
+            document.querySelectorAll('.shadow-root').forEach((el) => {
+                let testShadowElement = document.createElement('shadow-test');
+                el.append(testShadowElement);
+                el.append('hi');
+            })
 
-          document.querySelectorAll('.shadow-root-no-hits').forEach((el) => {
-            let testShadowElement2 = document.createElement('shadow-test-no-hits');
-            el.append(testShadowElement2);
-          });
+            document.querySelectorAll('.shadow-root-no-hits').forEach((el) => {
+                let testShadowElement2 = document.createElement('shadow-test-no-hits');
+                el.append(testShadowElement2);
+            });
 
-          document.addEventListener('ed11yPop', function(e) {
-            console.log('Event dispatched: ed11yPop for #' + e.detail.id);
-            console.log(e.detail);
-          }, false);
+            document.addEventListener('ed11yPop', function (e) {
+                console.log('Event dispatched: ed11yPop for #' + e.detail.id);
+                console.log(e.detail);
+            }, false);
 
-          document.addEventListener('ed11yShowHidden', function(e) {
-            console.log('Event dispatched: ed11yShowHidden for ' + e.detail.result);
-            document.querySelector('#hidden-handler').style.transition="padding-top .25s";
-            document.querySelector('#hidden-handler').style.paddingTop="10em";
-            document.querySelector('#hidden-handler h4').style.padding="1em";
-          }, false);
+            document.addEventListener('ed11yShowHidden', function (e) {
+                console.log('Event dispatched: ed11yShowHidden for ' + e.detail.result);
+                document.querySelector('#hidden-handler').style.transition = "padding-top .25s";
+                document.querySelector('#hidden-handler').style.paddingTop = "10em";
+                document.querySelector('#hidden-handler h4').style.padding = "1em";
+            }, false);
 
-          document.addEventListener('ed11yDismissalUpdate', function(e) {
-            console.log('Event dispatched: ed11yDismissalUpdate');
-            console.log(e.detail);
-          }, false);
+            document.addEventListener('ed11yDismissalUpdate', function (e) {
+                console.log('Event dispatched: ed11yDismissalUpdate');
+                console.log(e.detail);
+            }, false);
 
         </script>
         <style>
-            main {position: relative; z-index: 0;}
+            main {
+                position: relative;
+                z-index: 0;
+            }
+
             .insert-image-before::before {
                 content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E");
                 display: inline-block;
                 width: 24px;
                 height: 24px;
             }
+
             .insert-text-before::before {
                 content: "Click here";
             }
+
             /*footer { position: fixed; z-index: 1; bottom: 0; left: 0; right: 0; background: silver;}*/
         </style>
-		<script>
-			document.addEventListener('ed11yResults', (e) => {
-				console.log('Sync Results:', e.detail);
-				const syncOnly = [];
-				e.detail.results.forEach((r) => {
-					if (r.outsideContentRoots) {
-						syncOnly.push(r);
-					}
-				})
-				console.log('Outside content roots:', syncOnly);
-			});
-		</script>
+        <script>
+            document.addEventListener('ed11yResults', (e) => {
+                console.log('Sync Results:', e.detail);
+                const syncOnly = [];
+                e.detail.results.forEach((r) => {
+                    if (r.outsideContentRoots) {
+                        syncOnly.push(r);
+                    }
+                })
+                console.log('Outside content roots:', syncOnly);
+            });
+        </script>
 
-		<!-- Instantiate-->
-		<link href="./tests.css" rel="stylesheet">
-		<script src="../dist/js/ed11y.umd.js"></script>
-		<script src="../dist/js/lang/en.umd.js"></script>
+        <!-- Instantiate-->
+        <link href="./tests.css" rel="stylesheet">
+        <script src="../dist/js/ed11y.umd.js"></script>
+        <script src="../dist/js/lang/en.umd.js"></script>
         <script>
 
-			// todo determine PHP equivalent hash for 'META_TITLE'
-			//PHPstorm says 7ff8ffc6ba42a34e087837c5f2a2df2e90267a3aac38c6c2f9ea6d205489efa7
+            // todo determine PHP equivalent hash for 'META_TITLE'
+            //PHPstorm says 7ff8ffc6ba42a34e087837c5f2a2df2e90267a3aac38c6c2f9ea6d205489efa7
 
-		  Ed11y.Lang.addI18n(Ed11yLangEn.strings);
-          const ed11y = new Ed11y.Ed11y({
-            alertMode : 'assertive',
-            //baseFontSize: 18,
-            //theme : 'sleekTheme',
-            //theme : 'darkTheme',
-			  headingsOnlyFromCheckRoots: true, // @todo merge this is gone. replaced with ignoreContentOutsideRoots. Does that work?
-			  ignoreContentOutsideRoots: true,
-            //outlineExclude : '.utility', // @todo CMS this syntax changed for Sa11y to the below.
-			  outlineIgnore: '.utility',
-			  // Split configuration
-			   // Provide list of test keys to check but not display.
-			  splitConfiguration: {
-				  showDev: true,
-				  devChecks: ['QA_IN_PAGE_LINK'],
-				  devOptions: {
-					  //checkRoot: 'footer',
-					  // containerIgnore: '',
-					  // contrastIgnore: '.sr-only',
-					  // outlineIgnore: '',
-					  // headerIgnore: '',,
-					  // imageIgnore: '',
-					  // linkIgnore: '[aria-hidden][tabindex="-1"]',
-				  }
-			  },
-			  contrastPlugin: true,
-			  readabilityPlugin: true,
-			  developerPlugin: true,
-			  embeddedContentPlugin: true,
-			  linksAdvancedPlugin: true,
+            Ed11y.Lang.addI18n(Ed11yLangEn.strings);
+            const ed11y = new Ed11y.Ed11y({
+                alertMode: 'assertive',
+                //baseFontSize: 18,
+                //theme : 'sleekTheme',
+                //theme : 'darkTheme',
+                headingsOnlyFromCheckRoots: true, // @todo merge this is gone. replaced with ignoreContentOutsideRoots. Does that work?
+                ignoreContentOutsideRoots: true,
+                //outlineExclude : '.utility', // @todo CMS this syntax changed for Sa11y to the below.
+                outlineIgnore: '.utility',
+                // Split configuration
+                // Provide list of test keys to check but not display.
+                splitConfiguration: {
+                    showDev: true,
+                    devChecks: ['QA_IN_PAGE_LINK'],
+                    devOptions: {
+                        checkRoot: 'body > *:not(.ed11y-element), .a-root > *:not(.ed11y-element)',
+                        // containerIgnore: '',
+                        // contrastIgnore: '.sr-only',
+                        // outlineIgnore: '',
+                        // headerIgnore: '',,
+                        // imageIgnore: '',
+                        // linkIgnore: '[aria-hidden][tabindex="-1"]',
+                    }
+                },
+                contrastPlugin: true,
+                readabilityPlugin: true,
+                developerPlugin: true,
+                embeddedContentPlugin: true,
+                linksAdvancedPlugin: true,
 
 
-            ignoreAriaOnElements: '.gutenbergBadAria',
-            linkIgnoreStrings: ['opens in new window','download'], // @todo CMS was regex.
-            linkIgnoreSelector: '.link-purpose',
-            embeddedContent: '#embed',
-            ignoreElements : 'footer *, [style*="none"] *, [style*="none"]',
-            // shadowComponents : 'shadow-test, shadow-test-no-hits, turtle',
-            autoDetectShadowComponents: true,
-            hiddenHandlers : '#hidden-handler',
-		  	checkRoot: 'body',
-            //showDismissed : true,
-            altPlaceholder: ['This image has an empty alt attribute;'], // @todo CMS was string.
-			  //panelAttachTo: 'header',
-            //ignoreTests: ['headingLevelSkipped'],
-            // syncedDismissals : {},
-            //allowOK: false,
-            //allowHide: false,
-            //ignoreAllIfAbsent : 'maain',
-            //ignoreAllIfPresent : 'main',
-            //preventCheckingIfAbsent : 'maian',
+                ignoreAriaOnElements: '.gutenbergBadAria',
+                linkIgnoreStrings: ['opens in new window', 'download'], // @todo CMS was regex.
+                linkIgnoreSelector: '.link-purpose',
+                embeddedContent: '#embed',
+                ignoreElements: 'footer *, [style*="none"] *, [style*="none"]',
+                // shadowComponents : 'shadow-test, shadow-test-no-hits, turtle',
+                autoDetectShadowComponents: true,
+                hiddenHandlers: '#hidden-handler',
+                checkRoot: 'body',
+                //showDismissed : true,
+                altPlaceholder: ['This image has an empty alt attribute;'], // @todo CMS was string.
+                //panelAttachTo: 'header',
+                //ignoreTests: ['headingLevelSkipped'],
+                // syncedDismissals : {},
+                //allowOK: false,
+                //allowHide: false,
+                //ignoreAllIfAbsent : 'maain',
+                //ignoreAllIfPresent : 'main',
+                //preventCheckingIfAbsent : 'maian',
 
-			  // All checks
-			  checks: {
-				  // Heading checks
-				  HEADING_SKIPPED_LEVEL: true,
-				  HEADING_EMPTY_WITH_IMAGE: true,
-				  HEADING_EMPTY: true,
-				  HEADING_FIRST: true,
-				  HEADING_LONG: {
-					  maxLength: 170,
-				  },
-				  HEADING_MISSING_ONE: true,
+                // All checks
+                checks: {
+                    // Heading checks
+                    HEADING_SKIPPED_LEVEL: true,
+                    HEADING_EMPTY_WITH_IMAGE: true,
+                    HEADING_EMPTY: true,
+                    HEADING_FIRST: true,
+                    HEADING_LONG: {
+                        maxLength: 170,
+                    },
+                    HEADING_MISSING_ONE: true,
 
-				  // Image checks
-				  MISSING_ALT_LINK: true,
-				  MISSING_ALT_LINK_HAS_TEXT: true,
-				  MISSING_ALT: true,
-				  IMAGE_DECORATIVE_CAROUSEL: {
-					  sources: '.carousel',
-				  },
-				  LINK_IMAGE_NO_ALT_TEXT: true,
-				  LINK_IMAGE_TEXT: true,
-				  IMAGE_FIGURE_DECORATIVE: true,
-				  IMAGE_DECORATIVE: true,
-				  LINK_ALT_FILE_EXT: true,
-				  ALT_FILE_EXT: true,
-				  LINK_PLACEHOLDER_ALT: true,
-				  ALT_PLACEHOLDER: true,
-				  LINK_SUS_ALT: true,
-				  SUS_ALT: true,
-				  LINK_IMAGE_LONG_ALT: {
-					  maxLength: 250,
-				  },
-				  IMAGE_ALT_TOO_LONG: {
-					  maxLength: 250,
-				  },
-				  LINK_IMAGE_ALT: false,
-				  // {dismissAll: true,} default.
-				  LINK_IMAGE_ALT_AND_TEXT: true,
-				  IMAGE_FIGURE_DUPLICATE_ALT: true,
-				  IMAGE_PASS: {
-					  dismissAll: true,
-				  },
-				  ALT_UNPRONOUNCEABLE: true,
-				  LINK_ALT_UNPRONOUNCEABLE: true,
-				  ALT_MAYBE_BAD: {
-					  minLength: 15,
-				  },
-				  LINK_ALT_MAYBE_BAD: {
-					  minLength: 15,
-				  },
+                    // Image checks
+                    MISSING_ALT_LINK: true,
+                    MISSING_ALT_LINK_HAS_TEXT: true,
+                    MISSING_ALT: true,
+                    IMAGE_DECORATIVE_CAROUSEL: {
+                        sources: '.carousel',
+                    },
+                    LINK_IMAGE_NO_ALT_TEXT: true,
+                    LINK_IMAGE_TEXT: true,
+                    IMAGE_FIGURE_DECORATIVE: true,
+                    IMAGE_DECORATIVE: true,
+                    LINK_ALT_FILE_EXT: true,
+                    ALT_FILE_EXT: true,
+                    LINK_PLACEHOLDER_ALT: true,
+                    ALT_PLACEHOLDER: true,
+                    LINK_SUS_ALT: true,
+                    SUS_ALT: true,
+                    LINK_IMAGE_LONG_ALT: {
+                        maxLength: 250,
+                    },
+                    IMAGE_ALT_TOO_LONG: {
+                        maxLength: 250,
+                    },
+                    LINK_IMAGE_ALT: false,
+                    // {dismissAll: true,} default.
+                    LINK_IMAGE_ALT_AND_TEXT: true,
+                    IMAGE_FIGURE_DUPLICATE_ALT: true,
+                    IMAGE_PASS: {
+                        dismissAll: true,
+                    },
+                    ALT_UNPRONOUNCEABLE: true,
+                    LINK_ALT_UNPRONOUNCEABLE: true,
+                    ALT_MAYBE_BAD: {
+                        minLength: 15,
+                    },
+                    LINK_ALT_MAYBE_BAD: {
+                        minLength: 15,
+                    },
 
-				  // Link checks
-				  DUPLICATE_TITLE: {
-					  dismissAll: true,
-				  },
-				  LINK_EMPTY_LABELLEDBY: true,
-				  LINK_EMPTY_NO_LABEL: true,
-				  LINK_STOPWORD: {
-					  type: 'warning',
-				  },
-				  LINK_STOPWORD_ARIA: true,
-				  LINK_SYMBOLS: true,
-				  LINK_CLICK_HERE: false,
-				  LINK_DOI: {
-					  dismissAll: true,
-				  },
-				  LINK_URL: {
-					  maxLength: 40,
-				  },
-				  LINK_LABEL: {
-					  dismissAll: true,
-				  },
-				  LINK_EMPTY: true,
-				  LINK_IDENTICAL_NAME: {
-					  dismissAll: true,
-				  },
-				  LINK_NEW_TAB: {
-					  dismissAll: true,
-				  },
-				  LINK_FILE_EXT: true,
+                    // Link checks
+                    DUPLICATE_TITLE: {
+                        dismissAll: true,
+                    },
+                    LINK_EMPTY_LABELLEDBY: true,
+                    LINK_EMPTY_NO_LABEL: true,
+                    LINK_STOPWORD: {
+                        type: 'warning',
+                    },
+                    LINK_STOPWORD_ARIA: true,
+                    LINK_SYMBOLS: true,
+                    LINK_CLICK_HERE: false,
+                    LINK_DOI: {
+                        dismissAll: true,
+                    },
+                    LINK_URL: {
+                        maxLength: 40,
+                    },
+                    LINK_LABEL: {
+                        dismissAll: true,
+                    },
+                    LINK_EMPTY: true,
+                    LINK_IDENTICAL_NAME: {
+                        dismissAll: true,
+                    },
+                    LINK_NEW_TAB: {
+                        dismissAll: true,
+                    },
+                    LINK_FILE_EXT: true,
 
-				  // Form labels checks
-				  LABELS_MISSING_IMAGE_INPUT: true,
-				  LABELS_INPUT_RESET: true,
-				  LABELS_MISSING_LABEL: true,
-				  LABELS_ARIA_LABEL_INPUT: true,
-				  LABELS_NO_FOR_ATTRIBUTE: true,
-				  LABELS_PLACEHOLDER: true,
+                    // Form labels checks
+                    LABELS_MISSING_IMAGE_INPUT: true,
+                    LABELS_INPUT_RESET: true,
+                    LABELS_MISSING_LABEL: true,
+                    LABELS_ARIA_LABEL_INPUT: true,
+                    LABELS_NO_FOR_ATTRIBUTE: true,
+                    LABELS_PLACEHOLDER: true,
 
-				  // Embedded content checks
-				  EMBED_AUDIO: {
-					  sources: '',
-				  },
-				  EMBED_VIDEO: {
-					  sources: '',
-				  },
-				  EMBED_DATA_VIZ: {
-					  sources: '',
-				  },
-				  EMBED_UNFOCUSABLE: true,
-				  EMBED_MISSING_TITLE: true,
-				  EMBED_GENERAL: true,
+                    // Embedded content checks
+                    EMBED_AUDIO: {
+                        sources: '',
+                    },
+                    EMBED_VIDEO: {
+                        sources: '',
+                    },
+                    EMBED_DATA_VIZ: {
+                        sources: '',
+                    },
+                    EMBED_UNFOCUSABLE: true,
+                    EMBED_MISSING_TITLE: true,
+                    EMBED_GENERAL: true,
 
-				  // Quality assurance checks
-				  QA_BAD_LINK: {
-					  sources: '',
-				  },
-				  QA_STRONG_ITALICS: true,
-				  QA_IN_PAGE_LINK: true,
-				  /*QA_DOCUMENT: {
-					  sources: '',
-					  dismissAll: true,
-				  },*/
-				  QA_PDF: {
-					  dismissAll: true,
-				  },
-				  QA_BLOCKQUOTE: true,
-				  TABLES_MISSING_HEADINGS: true,
-				  TABLES_SEMANTIC_HEADING: true,
-				  TABLES_EMPTY_HEADING: true,
-				  QA_FAKE_HEADING: true,
-				  QA_FAKE_LIST: true,
-				  QA_UPPERCASE: true,
-				  QA_UNDERLINE: true,
-				  QA_SUBSCRIPT: true,
-				  QA_NESTED_COMPONENTS: {
-					  sources: '',
-				  },
-				  QA_JUSTIFY: true,
-				  QA_SMALL_TEXT: true,
+                    // Quality assurance checks
+                    QA_BAD_LINK: {
+                        sources: '',
+                    },
+                    QA_STRONG_ITALICS: true,
+                    QA_IN_PAGE_LINK: true,
+                    /*QA_DOCUMENT: {
+                        sources: '',
+                        dismissAll: true,
+                    },*/
+                    QA_PDF: {
+                        dismissAll: true,
+                    },
+                    QA_BLOCKQUOTE: true,
+                    TABLES_MISSING_HEADINGS: true,
+                    TABLES_SEMANTIC_HEADING: true,
+                    TABLES_EMPTY_HEADING: true,
+                    QA_FAKE_HEADING: true,
+                    QA_FAKE_LIST: true,
+                    QA_UPPERCASE: true,
+                    QA_UNDERLINE: true,
+                    QA_SUBSCRIPT: true,
+                    QA_NESTED_COMPONENTS: {
+                        sources: '',
+                    },
+                    QA_JUSTIFY: true,
+                    QA_SMALL_TEXT: true,
 
-				  // Meta checks
-				  META_LANG: true,
-				  META_SCALABLE: true,
-				  META_MAX: true,
-				  META_REFRESH: true,
+                    // Meta checks
+                    META_LANG: true,
+                    META_SCALABLE: true,
+                    META_MAX: true,
+                    META_REFRESH: true,
 
-				  // Developer checks
-				  DUPLICATE_ID: true,
-				  META_TITLE: {
-					  warning: true,
-				  },
-				  UNCONTAINED_LI: true,
-				  TABINDEX_ATTR: true,
-				  HIDDEN_FOCUSABLE: true,
-				  LABEL_IN_NAME: true,
-				  BTN_EMPTY: true,
-				  BTN_EMPTY_LABELLEDBY: true,
-				  BTN_ROLE_IN_NAME: true,
+                    // Developer checks
+                    DUPLICATE_ID: true,
+                    META_TITLE: {
+                        warning: true,
+                    },
+                    UNCONTAINED_LI: true,
+                    TABINDEX_ATTR: true,
+                    HIDDEN_FOCUSABLE: true,
+                    LABEL_IN_NAME: true,
+                    BTN_EMPTY: true,
+                    BTN_EMPTY_LABELLEDBY: true,
+                    BTN_ROLE_IN_NAME: true,
 
-				  // Contrast checks
-				  CONTRAST_WARNING: {
-					  dismissAll: true,
-				  },
-				  CONTRAST_INPUT: true,
-				  CONTRAST_ERROR: true,
-				  CONTRAST_PLACEHOLDER: true,
-				  CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
-				  CONTRAST_ERROR_GRAPHIC: true,
-				  CONTRAST_WARNING_GRAPHIC: false,
-				  CONTRAST_UNSUPPORTED: {
-					  dismissAll: true,
-				  },
-			  },
-          });
+                    // Contrast checks
+                    CONTRAST_WARNING: {
+                        dismissAll: true,
+                    },
+                    CONTRAST_INPUT: true,
+                    CONTRAST_ERROR: true,
+                    CONTRAST_PLACEHOLDER: true,
+                    CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
+                    CONTRAST_ERROR_GRAPHIC: true,
+                    CONTRAST_WARNING_GRAPHIC: false,
+                    CONTRAST_UNSUPPORTED: {
+                        dismissAll: true,
+                    },
+                },
+            });
 
-          /*let inject = document.querySelector('#all-tests');
-          for (const [key, value] of Object.entries(Ed11y.M)) {
-            if (value.title && typeof value.tip()) {
-              let item = document.createElement('div');
-              item.innerHTML = value.tip('example');
-              let title = document.createElement('h3');
-              title.prepend(value.title);
-              item.prepend(title);
-              inject.append(item);
-            };
-          }*/
+            /*let inject = document.querySelector('#all-tests');
+            for (const [key, value] of Object.entries(Ed11y.M)) {
+              if (value.title && typeof value.tip()) {
+                let item = document.createElement('div');
+                item.innerHTML = value.tip('example');
+                let title = document.createElement('h3');
+                title.prepend(value.title);
+                item.prepend(title);
+                inject.append(item);
+              };
+            }*/
         </script>
 
     </div>

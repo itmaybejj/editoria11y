@@ -230,8 +230,7 @@ export default {
       'Bağlantı uyarı vermeden yeni bir sekmede veya pencerede açılır. Bunu yapmak, özellikle görsel içeriği algılamakta zorluk çeken kişiler için kafa karıştırıcı olabilir. İkinci olarak, bir kişinin deneyimini kontrol etmek veya onun yerine karar vermek her zaman iyi bir uygulama değildir. Bağlantı metninde bağlantının yeni bir pencerede açıldığını belirtin. <hr> <strong>İpucu!</strong> En iyi uygulamaları öğrenin: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">bağlantıları yeni tarayıcı pencerelerinde ve sekmelerinde açma.</a>',
     LINK_FILE_EXT:
       'Bağlantı, uyarı vermeden bir PDF veya indirilebilir dosyaya (örn. MP3, Zip, Word Doc) işaret ediyor. Bağlantı metni içinde dosya türünü belirtin. Büyük bir dosya ise, dosya boyutunu da eklemeyi düşünün. <hr> <strong>Örnek:</strong> Yönetici Raporu (PDF, 3MB)',
-    LINK_IDENTICAL_NAME:
-      'Bağlantı, farklı bir sayfaya işaret etmesine rağmen başka bir bağlantıyla aynı metne sahip. Aynı metne sahip birden fazla bağlantı, ekran okuyucu kullanan kişiler için kafa karışıklığına neden olabilir. <strong>Aşağıdaki bağlantıyı diğer bağlantılardan ayırt etmeye yardımcı olmak için daha açıklayıcı hale getirmeyi düşünün.</strong> <hr> <strong {B}>Erişilebilir ad</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Bu sayfadaki birden fazla bağlantı aynı metni kullanıyor ancak farklı yerlere gidiyor. Bu durum yardımcı teknoloji kullanıcıları için kafa karıştırıcı olabilir. Düzeltmek için bu bağlantı metnini daha açıklayıcı hale getirin.',
     LINK_UNPRONOUNCEABLE:
       'Bağlantı metni yalnızca semboller içeriyor. Bu bağlantının kopyala/yapıştır hatasından kaynaklandığını düşünüyorsanız silmeyi düşünebilirsiniz.',
 
@@ -315,8 +314,7 @@ export default {
     // QA
     QA_BAD_LINK:
       'Kötü bağlantı bulundu. Bağlantı bir geliştirme ortamına işaret ediyor gibi görünüyor. <hr> {L} <strong {C}>%(LINK)</strong>',
-    QA_IN_PAGE_LINK:
-      'Kırık aynı sayfa bağlantısı. Bağlantı hedefi, bu sayfadaki herhangi bir öğeyle eşleşmiyor.',
+    QA_IN_PAGE_LINK: 'Bozuk sayfa içi bağlantı. Bu bağlantı, sayfanın bulunamayan ஒரு bölümüne gitmeye çalışıyor. Bunu düzeltmek için bağlantının, atlamak istediğiniz öğenin <code>id</code>\'siyle eşleştiğinden emin olun.',
     QA_STRONG_ITALICS:
       'Kalın ve italik etiketlerinin anlamsal bir anlamı vardır ve paragrafların tamamını vurgulamak için <strong>kullanılmamalıdır</strong>. Kalınlaştırılmış metin, bir kelime veya cümleye güçlü bir <strong>vurgu</strong> yapmak için kullanılmalıdır. İtalik yazılar özel isimleri (kitap ve makale başlıkları gibi), yabancı kelimeleri ve alıntıları vurgulamak için kullanılmalıdır. Uzun alıntılar blok alıntı olarak biçimlendirilmelidir.',
     QA_PDF:
@@ -343,7 +341,8 @@ export default {
       'Küçük metin, özellikle görme sorunu yaşayanlar için okumak daha zordur. Daha iyi okunabilirlik sağlamak için varsayılandan daha küçük yazı tipi boyutlarını kullanmaktan kaçının.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Erişilebilir ad</strong> %(TEXT)',
+    LINK_TEXT: '<strong {B}>Bağlantı metni</strong> <strong {C}>%(TEXT)</strong>',
+    ACC_NAME: '<strong {B}>Erişilebilir ad</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>İpucu!</strong> "Erişilebilir ad", yardımcı teknolojiyi kullanan kişilere iletilen son etikettir ve ARIA tarafından hesaplanır. Bu, bağlantının veya düğmenin amacını anlamalarına yardımcı olur.',
     HIDDEN_FOCUSABLE:
@@ -379,7 +378,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Bir düğmenin adında "düğme" kelimesini içermeyin. Ekran okuyucular zaten öğenin rolünü adıyla birlikte iletir.',
     LABEL_IN_NAME:
-      'Bu öğe için görünen metin, erişilebilir ad ile farklı görünüyor, bu da yardımcı teknoloji kullanıcıları için kafa karışıklığına neden olabilir. Lütfen gözden geçirin: <hr> <strong {B}>Erişilebilir Ad</strong> <strong {C}>%(TEXT)</strong>',
+      'Bu öğe için görünen metin, erişilebilir ad ile farklı görünüyor, bu da yardımcı teknoloji kullanıcıları için kafa karışıklığına neden olabilir. Lütfen gözden geçirin: <hr> <strong {B}>Metin</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Erişilebilir Ad</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Bu bağlantının geçersiz bir hedefi var ve erişilebilir ad "<strong>%(NAME)</strong>" kelimesini içeriyor. Bu, bunun bir bağlantı olmayabileceğini, bunun yerine sayfadaki bazı komut dosyası davranışlarını kontrol ettiğini gösteriyor. Düzeltmek için bağlantıyı <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">erişilebilir bir düğme</a> ile değiştirin veya bağlantının hedefini düzeltin. <hr> <strong>İpucu!</strong> Yardımcı teknolojiler düğmelere ve bağlantılara farklı şekilde davranır. Doğru HTML öğesinin kullanılması, kullanıcıların hangi klavye kısayollarını kullanacaklarını ve hangi eylemin tetikleneceğini bilmelerini sağlar.',
+    POTENTIAL_UI_ELEMENTS: ['menü', 'kapat', 'değiştir', 'aç', 'genişlet', 'daralt', 'sonraki', 'önceki', 'oynat', 'duraklat', 'alt menü', 'göster', 'gizle', 'açılır menü', 'geri', 'ileri', 'atla', 'gönder', 'iptal', 'kaydet', 'düzenle', 'sil', 'kaldır', 'ara', 'filtre', 'sırala', 'dur', 'sessiz', 'sesi aç', 'tam ekran', 'küçült', 'büyüt'],
 
     // Tables
     TABLES_MISSING_HEADINGS:

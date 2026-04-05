@@ -230,8 +230,7 @@ export default {
       'Odkaz se bez varování otevře v nové kartě nebo okně. To může být dezorientující, zejména pro lidi, kteří mají potíže s vnímáním vizuálního obsahu. Za druhé, není vždy vhodné kontrolovat něčí zážitek nebo rozhodovat za něj. Uveďte, že se odkaz otevírá v novém okně, v textu odkazu<hr><strong>Tip!</strong> Naučte se osvědčené postupy: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">otevírání odkazů v nových oknech a kartách prohlížeče.</a>',
     LINK_FILE_EXT:
       'Odkaz odkazuje na soubor PDF nebo soubor ke stažení (např. MP3, Zip, dokument Word) bez varování. Typ souboru uveďte v textu odkazu. Pokud se jedná o velký soubor, zvažte uvedení jeho velikosti.<hr><strong>Příklad:</strong> Výkonná zpráva (PDF, 3 MB)',
-    LINK_IDENTICAL_NAME:
-      'Odkaz má stejný text jako jiný odkaz, přestože odkazuje na jinou stránku. Více odkazů se stejným textem může způsobit zmatek u lidí, kteří používají čtečky obrazovky. <strong>Zvažte, zda následující odkaz nebude více popisný, abyste ho lépe odlišili od ostatních odkazů.</strong> <hr> <strong {B}>Přístupné jméno</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Několik odkazů na této stránce používá stejný text, ale směřují na různá místa. To může zmást uživatele asistivních technologií. Chcete-li to napravit, upravte text tohoto odkazu tak, aby byl popisnější.',
     LINK_UNPRONOUNCEABLE:
       'Text odkazu obsahuje pouze symboly. Pokud si myslíte, že je tento odkaz chybný kvůli chybě při kopírování/vkládání, zvažte jeho odstranění.',
 
@@ -315,8 +314,7 @@ export default {
     // QA
     QA_BAD_LINK:
       'Nalezen špatný odkaz. Zdá se, že odkaz vede na vývojové prostředí. <hr> {L} <strong {C}>%(LINK)</strong>',
-    QA_IN_PAGE_LINK:
-      'Porušený odkaz na stejnou stránku. Cíl odkazu neodpovídá žádnému prvku na této stránce.',
+    QA_IN_PAGE_LINK: 'Nefunkční odkaz na stejnou stránku. Tento odkaz se pokouší navigovat do sekce stránky, kterou nelze nalézt. Chcete-li to napravit, ujistěte se, že odkaz odpovídá <code>id</code> prvku, na který chcete přejít.',
     QA_STRONG_ITALICS:
       'Tučné písmo a kurzíva mají sémantický význam a neměly by se <strong>používat</strong> ke zvýraznění celých odstavců. Tučný text by měl být používán k výraznému <strong>zdůraznění</strong> slova nebo slovního spojení. Kurzíva by se měla používat ke zvýraznění vlastních jmen (tj. názvů knih a článků), cizích slov, citátů. Dlouhé citace by měly být formátovány jako blokové citace.',
     QA_PDF:
@@ -343,7 +341,8 @@ export default {
       'Malý text je těžší číst, zejména pro osoby se slabým zrakem. Pro lepší čitelnost se vyhněte používání velikostí písma menších než výchozí.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Přístupné jméno</strong> %(TEXT)',
+    LINK_TEXT: '<strong {B}>Text odkazu</strong> <strong {C}>%(TEXT)</strong>',
+    ACC_NAME: '<strong {B}>Přístupné jméno</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Tip!</strong> "Přístupné jméno" je konečný štítek, který je komunikován lidem používajícím asistenční technologie. To jim pomáhá pochopit účel odkazu nebo tlačítka.',
     HIDDEN_FOCUSABLE:
@@ -379,7 +378,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Nezahrnujte slovo „tlačítko“ do názvu tlačítka. Čtečky obrazovky již oznamují roli prvku kromě jeho názvu.',
     LABEL_IN_NAME:
-      'Viditelný text tohoto prvku se zdá být odlišný od přístupného jména, což může způsobit zmatek u uživatelů asistivních technologií. Prosím, zkontrolujte: <hr> <strong {B}>Přístupné jméno</strong> <strong {C}>%(TEXT)</strong>',
+      'Viditelný text tohoto prvku se zdá být odlišný od přístupného jména, což může způsobit zmatek u uživatelů asistivních technologií. Prosím, zkontrolujte: <hr> <strong {B}>Теxt</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Přístupné jméno</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Tento odkaz má neplatný cíl a přístupný název obsahuje slovo „<strong>%(NAME)</strong>“. To naznačuje, že se možná vůbec nejedná o odkaz, ale o prvek ovládající skriptované chování na stránce. Chcete-li to napravit, nahraďte odkaz <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">přístupným tlačítkem</a> nebo opravte cíl odkazu. <hr> <strong>Tip!</strong> Asistivní technologie zacházejí s tlačítky a odkazy odlišně. Použití správného HTML prvku zajišťuje, že uživatelé vědí, které klávesové zkratky mají použít a jaká akce se spustí.',
+    POTENTIAL_UI_ELEMENTS: ['menu', 'zavřít', 'přepnout', 'otevřít', 'rozbalit', 'sbalit', 'další', 'předchozí', 'přehrát', 'pozastavit', 'podnabídka', 'zobrazit', 'skrýt', 'rozbalovací nabídka', 'zpět', 'vpřed', 'přeskočit', 'odeslat', 'zrušit', 'uložit', 'upravit', 'smazat', 'odstranit', 'hledat', 'filtr', 'seřadit', 'zastavit', 'ztlumit', 'zrušit ztlumení', 'celá obrazovka', 'minimalizovat', 'maximalizovat'],
 
     // Tables
     TABLES_MISSING_HEADINGS:

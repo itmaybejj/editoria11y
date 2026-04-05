@@ -43,8 +43,11 @@ export default function checkContrast() {
     // Early exit for hidden elements.
     const opacity = parseFloat(style.opacity);
     const fontSize = parseFloat(style.fontSize);
-    if (opacity === 0 || fontSize === 0 || Utils.isElementHidden($el)) continue;
+    if ($el.disabled || opacity === 0 || fontSize === 0 || Utils.isElementHidden($el)) continue;
     if (Utils.isScreenReaderOnly($el)) continue;
+
+    // Ignore decorative seperators, e.g. breadcrumbs and navigation seperators.
+    if (text.length === 1 && '|/\\'.includes(text)) continue;
 
     // Expensive calculations only after we know the element is visible and has content.
     const color = convertToRGBA(style.color, opacity);

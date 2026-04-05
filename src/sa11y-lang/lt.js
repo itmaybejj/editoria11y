@@ -229,8 +229,7 @@ export default {
       'Nuoroda atsidaro naujame skirtuke arba lange be įspėjimo. Tai gali trikdyti, ypač žmones, kuriems sunku suvokti vaizdinį turinį. Antra, ne visada yra gera praktika kontroliuoti kieno nors patirtį ar priimti sprendimus už jį. Nuorodos tekste nurodykite, kad nuoroda atidaroma naujame lange. <hr> <strong>Tipas!</strong> Išmokite geriausios praktikos: <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">atidaryti nuorodas naujuose naršyklės languose ir skirtukuose.</a>',
     LINK_FILE_EXT:
       'Nuoroda nukreipia į PDF arba atsisiunčiamą failą (pvz., MP3, Zip, "Word" dokumentą) be įspėjimo. Nuorodos tekste nurodykite failo tipą. Jei tai didelis failas, apsvarstykite galimybę nurodyti failo dydį. <hr> <strong>Pavyzdys:</strong> Vykdomoji ataskaita (PDF, 3 MB)',
-    LINK_IDENTICAL_NAME:
-      'Nuoroda turi tokį patį tekstą kaip ir kita nuoroda, nors nukreipia į kitą puslapį. Kelios nuorodos su tuo pačiu tekstu gali klaidinti ekrano skaitytuvus naudojančius žmones. <strong>Pagalvokite, ar nevertėtų šios nuorodos aprašyti labiau, kad ją būtų lengviau atskirti nuo kitų nuorodų.</strong> <hr> <strong {B}>Prieinamas pavadinimas</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: 'Kelios nuorodos šiame puslapyje naudoja tą patį tekstą, bet veda į skirtingas vietas. Tai gali suklaidinti pagalbinių technologijų naudotojus. Norėdami tai ištaisyti, padarykite šį nuorodos tekstą vaizdingesnį.',
     LINK_UNPRONOUNCEABLE:
       'Nuorodos tekste yra tik simboliai. Jei manote, kad ši nuoroda yra klaida dėl kopijavimo / įklijavimo klaidos, apsvarstykite galimybę ją ištrinti.',
 
@@ -314,8 +313,7 @@ export default {
     // QA
     QA_BAD_LINK:
       'Rasta bloga nuoroda. Atrodo, kad nuoroda nukreipia į kūrimo aplinką. <hr> {L} <strong {C}>%(LINK)</strong>',
-    QA_IN_PAGE_LINK:
-      'Nugriautas tos pačios puslapio nuorodas. Nuorodos tikslas nesutampa su jokiu šios puslapio elementu.',
+    QA_IN_PAGE_LINK: 'Sugedusi nuoroda į tą patį puslapį. Ši nuoroda bando nuvesti į puslapio skiltį, kurios nepavyko rasti. Norėdami tai ištaisyti, įsitikinkite, kad nuoroda sutampa su elemento, į kurį norite nušokti, <code>id</code>.',
     QA_STRONG_ITALICS:
       'Paryškinimo ir kursyvo žymės turi semantinę reikšmę ir neturėtų būti naudojamos <strong>ne</strong> ištisoms pastraipoms paryškinti. Paryškintas tekstas turėtų būti naudojamas stipriai <strong>pabrėžti</strong> žodį ar frazę. Kursyvu reikėtų paryškinti tikruosius vardus (t. y. knygų ir straipsnių pavadinimus), svetimžodžius, kabutes. Ilgos citatos turėtų būti formatuojamos kaip blokinė citata.',
     QA_PDF:
@@ -342,7 +340,8 @@ export default {
       'Mažas tekstas yra sunkiau skaitomas, ypač žmonėms, turintiems silpną regėjimą. Siekiant geresnio skaitomumo, venkite naudoti šrifto dydžių, mažesnių už numatytąjį.',
 
     // Shared
-    ACC_NAME: '<strong {B}>Prieinamas pavadinimas</strong> %(TEXT)',
+    LINK_TEXT: '<strong {B}>Nuorodos tekstas</strong> <strong {C}>%(TEXT)</strong>',
+    ACC_NAME: '<strong {B}>Prieinamas pavadinimas</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Patarimas!</strong> "Prieinamas pavadinimas" yra galutinis etiketas, kuris perduodamas žmonėms, naudojantiems pagalbines technologijas, ir skaičiuojamas ARIA. Tai padeda jiems suprasti nuorodos ar mygtuko tikslą.',
     HIDDEN_FOCUSABLE:
@@ -378,7 +377,9 @@ export default {
     BTN_ROLE_IN_NAME:
       'Nepalikite žodžio „mygtukas“ mygtuko pavadinime. Ekrano skaitytuvai jau praneša elemento vaidmenį be jo pavadinimo.',
     LABEL_IN_NAME:
-      'Matomas šio elemento tekstas atrodo skirtingas nei prieinamas pavadinimas, kas gali sukelti painiavą pagalbinių technologijų naudotojams. Peržiūrėkite: <hr> <strong {B}>Prieinamas Pavadinimas</strong> <strong {C}>%(TEXT)</strong>',
+      'Matomas šio elemento tekstas atrodo skirtingas nei prieinamas pavadinimas, kas gali sukelti painiavą pagalbinių technologijų naudotojams. Peržiūrėkite: <hr> <strong {B}>Tekstas</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Prieinamas Pavadinimas</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_MAYBE_BUTTON: 'Ši nuoroda turi negaliojantį tikslą, o jos prieinamame pavadinime yra žodis „<strong>%(NAME)</strong>“. Tai rodo, kad tai gali būti visai ne nuoroda, o elementas, valdantis tam tikrą skriptų elgseną puslapyje. Norėdami tai ištaisyti, pakeiskite nuorodą <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">prieinamu mygtuku</a> arba ištaisykite nuorodos tikslą. <hr> <strong>Patarimas!</strong> Pagalbinės technologijos mygtukus ir nuorodas apdoroja skirtingai. Teisingo HTML elemento naudojimas užtikrina, kad naudotojai žinotų, kuriuos sparčiuosius klavišus naudoti ir koks veiksmas bus atliktas.',
+    POTENTIAL_UI_ELEMENTS: ['meniu', 'uždaryti', 'perjungti', 'atidaryti', 'išskleisti', 'suskleisti', 'kitas', 'ankstesnis', 'leisti', 'pauzė', 'papildomas meniu', 'rodyti', 'slėpti', 'išskleidžiamasis meniu', 'atgal', 'pirmyn', 'praleisti', 'pateikti', 'atšaukti', 'išsaugoti', 'redaguoti', 'ištrinti', 'pašalinti', 'ieškoti', 'filtras', 'rūšiuoti', 'sustabdyti', 'nutildyti', 'atitildyti', 'visas ekranas', 'sumažinti', 'padidinti'],
 
     // Tables
     TABLES_MISSING_HEADINGS:
