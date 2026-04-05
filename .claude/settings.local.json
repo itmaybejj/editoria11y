@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls /Users/jjameson/Sites/editoria11y/editoria11y/src/lang/*.js)"
+      "Bash(ls /Users/jjameson/Sites/editoria11y/editoria11y/src/lang/*.js)",
+      "Bash(node -c /Users/jjameson/Sites/editoria11y/editoria11y/src/lang/nl.js)"
     ]
   }
 }

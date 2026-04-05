@@ -363,7 +363,8 @@
   };
   const testNames = {
     ALT_FILE_EXT: "Dieser Alt‑Text ist ein Dateiname, keine Beschreibung",
-    ALT_MAYBE_BAD: "Dieser Alt‑Text kann von einem Screenreader nicht ausgesprochen werden",
+    ALT_MAYBE_BAD: "Ist dies eine klare und prägnante Beschreibung des Bildes?",
+    ALT_MAYBE_BAD_WARNING: "Ist dies eine klare und prägnante Beschreibung des Bildes?",
     ALT_PLACEHOLDER: "Dieser Alt‑Text beschreibt das Bild nicht",
     ALT_UNPRONOUNCEABLE: "Dieser Alt‑Text ist unaussprechlich",
     BTN_EMPTY: "Schaltfläche hat keine zugängliche Beschriftung",
@@ -402,7 +403,8 @@
     LABEL_IN_NAME: "Sichtbare Beschriftung stimmt nicht mit der unsichtbaren überein",
     LABELS_MISSING_LABEL: "Dieses Eingabefeld hat keine zugeordnete Beschriftung",
     LINK_ALT_FILE_EXT: "Als Link verwendeter Alt‑Text sollte keine URL sein",
-    LINK_ALT_MAYBE_BAD: "Dieser verlinkte Alt‑Text kann von einem Screenreader nicht ausgesprochen werden",
+    LINK_ALT_MAYBE_BAD: "Dieser verlinkte Alt‑Text ist möglicherweise nicht klar und prägnant",
+    LINK_ALT_MAYBE_BAD_WARNING: "Dieser verlinkte Alt‑Text ist möglicherweise nicht klar und prägnant",
     LINK_ALT_UNPRONOUNCEABLE: "Verlinkte Bilder benötigen aussprechbaren Alt‑Text",
     LINK_CLICK_HERE: "Manuelle Prüfung: Link enthält „Hier klicken“",
     LINK_DOI: "Artikel sollten über ihren Titel verlinkt werden, nicht über DOI‑Nummern",
@@ -475,6 +477,7 @@
   const tips = {
     ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt‑Text: <strong>"%(ALT_TEXT)"</strong></p><p>Screenreader lesen diese URL vor – oft Buchstabe für Buchstabe. Das vermittelt kaum die gleiche Bedeutung wie das Bild selbst.</p><p>${why.fix}Fügen Sie entweder ein leeres alt (alt="") hinzu, wenn dies eine bedeutungslose Dekoration ist, die ignoriert werden soll, oder fügen Sie einen beschreibenden Alt‑Text hinzu.</p>${why.images}`,
     ALT_MAYBE_BAD: `<p>Angegebene Beschreibung für dieses Bild: <strong>"%(alt)"</strong></p><p>${why.fix}Geben Sie einen kurzen Alt‑Text an, der beschreibt, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
+    ALT_MAYBE_BAD_WARNING: `<p>Angegebene Beschreibung für dieses Bild: <strong>"%(alt)"</strong></p><p>${why.fix}Geben Sie einen kurzen Alt‑Text an, der beschreibt, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
     ALT_PLACEHOLDER: `<p>Angegebene Beschreibung für dieses Bild: <strong>"%(alt)"</strong></p><p>${why.fix}Geben Sie einen kurzen Alt‑Text an, der beschreibt, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
     ALT_UNPRONOUNCEABLE: `<p>Der Alt‑Text dieses Bildes lautet „%(alt)“ und enthält nur unaussprechliche Zeichen oder Leerzeichen. Screenreader kündigen ein Bild an und halten dann peinlich inne: „Bild: ____“.</p><p>${why.fix}Fügen Sie einen beschreibenden Alt‑Text hinzu – oder lassen Sie den Alt‑Text <em>vollständig</em> leer (alt=""), wenn es sich nur um ein Icon/Abstandshalter handelt, der ignoriert werden soll.</p>${why.images}`,
     BTN_EMPTY: `<p>${why.fix}Verwenden Sie eine gültige Methode, um Screenreadern mitzuteilen, was diese Schaltfläche tut – z. B. Text, Alt‑Text auf einem Icon oder ein <code>title</code>‑Attribut.</p>`,
@@ -510,6 +513,7 @@
     LABEL_IN_NAME: `<p>Der sichtbare Text scheint vom zugänglichen Namen abzuweichen. Das kann Screenreader‑Nutzende verwirren und die Sprachsteuerung beeinträchtigen.</p><p>${why.fix}Stellen Sie sicher, dass das sichtbare Label mit dem unsichtbaren beginnt und keine zusätzliche Bedeutung hinzufügt.</p><p><strong>Unsichtbares Label:</strong> "%(TEXT)"</p>`,
     LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt‑Text: "<strong>%(alt)</strong>"</p><p>Dieser Alt‑Text ist wahrscheinlich ein Dateiname statt einer sinnvollen Bezeichnung für das Linkziel.</p><p>${why.fix}Setzen Sie den Alt‑Text dieses Bildes auf den Namen des Linkziels.</p><div class="why"><p>Alt‑Text soll die Bedeutung eines Bildes wiedergeben, nicht nur dessen Inhalt. Bei verlinkten Bildern ist die Bedeutung das Linkziel:</p><ul><li>„Seite mit Text“ beschreibt das Bild, nicht den Link.</li><li>„IMG_1234.jpg“ ist nur ein Dateiname.</li><li>„<strong><em>Anmeldeformular (doc)</em></strong>“ ist eine Linkdestination.</li></ul></div>`,
     LINK_ALT_MAYBE_BAD: `<p>Alt‑Text: "<strong>%(alt)</strong>"</p><p>${why.fix}Setzen Sie den Alt‑Text dieses Bildes auf den Namen des Linkziels.</p>${why.imageLinks}`,
+    LINK_ALT_MAYBE_BAD_WARNING: `<p>Alt‑Text: "<strong>%(alt)</strong>"</p><p>${why.fix}Setzen Sie den Alt‑Text dieses Bildes auf den Namen des Linkziels.</p>${why.imageLinks}`,
     LINK_ALT_UNPRONOUNCEABLE: `<p>Der Alt‑Text dieses verlinkten Bildes besteht nur aus unaussprechlichen Symbolen/Leerzeichen: <strong>"%(ALT_TEXT)"</strong>.</p><p>Screenreader kündigen einen Link an, können ihn dann aber nicht beschreiben.</p><p>${why.fix}Setzen Sie den Alt‑Text auf das Linkziel oder den Zweck.</p>${why.imageLinks}`,
     LINK_CLICK_HERE: `Die Formulierungen „klicken“/„hier klicken“ sind überflüssig und lenken vom Linkzweck ab.`,
     LINK_DOI: `<p>${why.fix}Verlinken Sie den Artikeltitel und geben Sie die DOI‑Nummer im Klartext an, nicht umgekehrt.</p><div class="why"><p>Die APA‑Richtlinie empfiehlt beschreibende Links, weil Nutzende Links nach Name scannen. So werden relevante Artikel eher gefunden.</p><p>Screenreader können so sinnvolle Links ansagen statt Zahlenreihen.</p></div>`,

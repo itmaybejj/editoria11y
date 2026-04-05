@@ -333,7 +333,8 @@
   };
   const testNames = {
     ALT_FILE_EXT: "Denna alt‑text är ett filnamn, inte en beskrivning",
-    ALT_MAYBE_BAD: "Denna alt‑text kan vara svår för en skärmläsare att läsa korrekt",
+    ALT_MAYBE_BAD: "Är detta en tydlig och koncis beskrivning av bilden?",
+    ALT_MAYBE_BAD_WARNING: "Är detta en tydlig och koncis beskrivning av bilden?",
     ALT_PLACEHOLDER: "Denna alt‑text beskriver inte bilden",
     ALT_UNPRONOUNCEABLE: "Denna alt‑text går inte att uttala",
     BTN_EMPTY: "Knappen saknar ett tillgängligt namn",
@@ -372,7 +373,8 @@
     LABELS_PLACEHOLDER: "Manuell granskning: platshållartext",
     LABEL_IN_NAME: "Den synliga etiketten matchar inte det tillgängliga namnet",
     LINK_ALT_FILE_EXT: "Alt‑text i länk ska inte vara en URL",
-    LINK_ALT_MAYBE_BAD: "Denna alt‑text i länk kan vara svår att uttala för skärmläsare",
+    LINK_ALT_MAYBE_BAD: "Denna alt‑text i länk är kanske inte tydlig och koncis",
+    LINK_ALT_MAYBE_BAD_WARNING: "Denna alt‑text i länk är kanske inte tydlig och koncis",
     LINK_ALT_UNPRONOUNCEABLE: "Länkade bilder måste ha uttalbar alt‑text",
     LINK_CLICK_HERE: "Manuell granskning: länk innehåller ”klicka här”",
     LINK_DOI: "Länka artikelrubriker, inte DOI‑nummer",
@@ -436,6 +438,7 @@
   const tips = {
     ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt‑text: <strong>"%(ALT_TEXT)"</strong></p><p>Skärmläsare läser upp denna URL, ofta tecken för tecken. Det ger sällan samma mening som att se bilden.</p><p><strong class="badge">Åtgärda</strong> Lägg till alt="" om detta är ren dekoration som bör ignoreras av skärmläsare, eller lägg till en beskrivande alt‑text.</p>${why.images}`,
     ALT_MAYBE_BAD: `<p>Alt‑text: <strong>"%(alt)"</strong></p><p><strong class="badge">Åtgärda</strong> Ange en alt‑text som kort beskriver vad bilden betyder i detta sammanhang.</p>${why.images}`,
+    ALT_MAYBE_BAD_WARNING: `<p>Alt‑text: <strong>"%(alt)"</strong></p><p><strong class="badge">Åtgärda</strong> Ange en alt‑text som kort beskriver vad bilden betyder i detta sammanhang.</p>${why.images}`,
     ALT_PLACEHOLDER: `<p>Alt‑text: <strong>"%(alt)"</strong></p><p><strong class="badge">Åtgärda</strong> Ange en alt‑text som kort beskriver vad bilden betyder i detta sammanhang.</p>${why.images}`,
     ALT_UNPRONOUNCEABLE: `<p>Alt‑text: "<strong>%(alt)</strong>"</p><p>Denna alt‑text innehåller endast tecken som inte kan uttalas eller bara mellanslag. Skärmläsare kommer att meddela att en bild finns och sedan göra en onaturlig paus eller läsa något oförståeligt.</p><p><strong class="badge">Åtgärda</strong> Lägg till en beskrivande alt‑text, eller använd alt="" om detta bara är en ikon eller ett mellanrum som bör ignoreras.</p>${why.images}`,
     BTN_EMPTY: `<p><strong class="badge">Åtgärda</strong> Använd valfri metod för att tala om för skärmläsare vad knappen gör — t.ex. synlig text, alt‑text på en ikon eller ett title‑attribut.</p>`,
@@ -471,6 +474,7 @@
     LABEL_IN_NAME: `<p>Den synliga texten i detta element verkar skilja sig från det tillgängliga namnet. Detta kan förvirra skärmläsaranvändare och påverka röststyrning.</p><p><strong class="badge">Åtgärda</strong> Se till att den synliga etiketten börjar med texten i den osynliga etiketten och inte innehåller ytterligare betydelsefull information.</p><p><strong>Osynlig etikett:</strong> "%(TEXT)"</p>`,
     LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt‑text: "<strong>%(alt)</strong>"</p><p>Denna alt‑text är troligen ett filnamn i stället för ett meningsfullt länk‑namn.</p><p><strong class="badge">Åtgärda</strong> Ange bildens alt‑text som namnet på länkens mål.</p><div class="why"><p>Alt‑text ska beskriva vad en bild betyder. För en länkad bild är betydelsen målet:</p><ul><li>"Sida med text" beskriver bilden, inte länken.</li><li>"IMG_1234.jpg" är bara ett filnamn.</li><li>"<strong><em>Anmälningsformulär för evenemang (.doc)</em></strong>" är länkens mål.</li></ul></p></div>`,
     LINK_ALT_MAYBE_BAD: `<p>Alt‑text: "<strong>%(alt)</strong>"</p><p><strong class="badge">Åtgärda</strong> Ange alt‑texten som namnet på länkens mål.</p>${why.imageLinks}`,
+    LINK_ALT_MAYBE_BAD_WARNING: `<p>Alt‑text: "<strong>%(alt)</strong>"</p><p><strong class="badge">Åtgärda</strong> Ange alt‑texten som namnet på länkens mål.</p>${why.imageLinks}`,
     LINK_ALT_UNPRONOUNCEABLE: `<p>Alt‑texten ”%(ALT_TEXT)” består av tecken som inte kan uttalas; länken kan inte beskrivas.</p><p>${why.fix}Ange alt som beskriver länkens syfte eller mål.</p>${why.imageLinks}`,
     LINK_CLICK_HERE: `Undvik ”klicka här” — det förklarar inte vad länken leder till.`,
     LINK_DOI: `<p>${why.fix}Länka artikelns titel och visa DOI som vanlig text.</p><div class="why"><p>Beskrivande länkar underlättar skanning och uppläsning i länklister.</p></div>`,

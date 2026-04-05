@@ -314,7 +314,8 @@ const Sa11yStrings = {
 };
 const testNames = {
   ALT_FILE_EXT: "Ce texte alternatif est un nom de fichier, pas une description",
-  ALT_MAYBE_BAD: "Ce texte alternatif ne peut pas être prononcé par un lecteur d’écran",
+  ALT_MAYBE_BAD: `S’agit‑il d’une description claire et concise de l’image ?`,
+  ALT_MAYBE_BAD_WARNING: `S’agit‑il d’une description claire et concise de l’image ?`,
   ALT_PLACEHOLDER: "Ce texte alternatif ne décrit pas l’image",
   // updated
   ALT_UNPRONOUNCEABLE: "Ce texte alternatif est impossible à prononcer",
@@ -355,7 +356,8 @@ const testNames = {
   LABELS_MISSING_LABEL: "Ce champ n’est pas connecté à une étiquette",
   // updated new
   LINK_ALT_FILE_EXT: "Un texte alternatif utilisé comme lien ne doit pas être une URL",
-  LINK_ALT_MAYBE_BAD: "Ce texte alternatif lié ne peut pas être prononcé par un lecteur d’écran",
+  LINK_ALT_MAYBE_BAD: `Ce texte alternatif lié n’est peut‑être pas clair et concis`,
+  LINK_ALT_MAYBE_BAD_WARNING: `Ce texte alternatif lié n’est peut‑être pas clair et concis`,
   LINK_ALT_UNPRONOUNCEABLE: "Les images liées doivent avoir un texte alternatif prononçable",
   LINK_CLICK_HERE: "Vérification manuelle : le lien contient « cliquer ici »",
   LINK_DOI: "Liez les titres d’articles, pas les numéros DOI",
@@ -443,6 +445,7 @@ const why = {
 const tips = {
   ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Texte alternatif : <strong>"%(ALT_TEXT)"</strong></p><p>Les lecteurs d’écran liront cette URL, souvent lettre par lettre. Cela ne transmet probablement pas la même signification que de voir l’image.</p><p>${why.fix}Ajoutez un texte alternatif vide (alt="") si cette image est purement décorative et doit être ignorée par les lecteurs d’écran, ou ajoutez un texte alternatif descriptif.</p>${why.images}`,
   ALT_MAYBE_BAD: `<p>Texte alternatif : <strong>"%(alt)"</strong></p><p>${why.fix}Définissez le texte alternatif de cette image sur une description concise de ce que l’image signifie dans ce contexte.</p>${why.images}`,
+  ALT_MAYBE_BAD_WARNING: `<p>Texte alternatif : <strong>"%(alt)"</strong></p><p>${why.fix}Définissez le texte alternatif de cette image sur une description concise de ce que l’image signifie dans ce contexte.</p>${why.images}`,
   ALT_PLACEHOLDER: `<p>Texte alternatif : <strong>"%(alt)"</strong></p><p>${why.fix}Définissez le texte alternatif de cette image sur une description concise de ce que l’image signifie dans ce contexte.</p>${why.images}`,
   ALT_UNPRONOUNCEABLE: `<p>Le texte alternatif de cette image est "%(alt)", et ne contient que des symboles imprononçables et/ou des espaces. Les lecteurs d’écran annonceront qu’une image est présente, puis feront une pause embarrassante : "image : ____."</p><p>${why.fix}Ajoutez un texte alternatif descriptif, ou un texte alternatif <em>entièrement</em> vide (alt="") si ce n’est qu’une icône ou un espaceur devant être ignoré par les lecteurs d’écran.</p>${why.images}`,
   BTN_EMPTY: `<p>${why.fix}Utilisez une méthode valide pour indiquer aux lecteurs d’écran l’action de ce bouton : texte, alt sur une icône ou attribut <code>title</code>.</p>`,
@@ -480,6 +483,7 @@ const tips = {
   // updated to match baseAll
   LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Texte alternatif : "<strong>%(alt)</strong>"</p><p>Le texte alternatif de cette image est probablement un nom de fichier au lieu d’un libellé utile pour un lien.</p><p>${why.fix}Définissez le texte alternatif de cette image sur le nom de la destination du lien.</p><div class="why"> <p>Le texte alternatif doit refléter la signification, pas le contenu brut : pour une image liée, la signification est la destination du lien :</p><ul><li>"Page avec texte" décrit l’image, pas le lien.</li><li>"IMG_1234.jpg" est un simple nom de fichier.</li><li>"<strong><em>Formulaire d’inscription (doc)</em></strong>" est une vraie destination.</li></ul></div>`,
   LINK_ALT_MAYBE_BAD: `<p>Le texte alternatif de cette image est un placeholder : "<strong>%(alt)</strong>".</p><p>${why.fix}Définissez le texte alternatif de cette image sur la destination du lien.</p>${why.imageLinks}`,
+  LINK_ALT_MAYBE_BAD_WARNING: `<p>Le texte alternatif de cette image est un placeholder : "<strong>%(alt)</strong>".</p><p>${why.fix}Définissez le texte alternatif de cette image sur la destination du lien.</p>${why.imageLinks}`,
   LINK_ALT_UNPRONOUNCEABLE: `<p>Le texte alternatif de cette image liée ne contient que des symboles imprononçables ou des espaces : <strong>"%(ALT_TEXT)"</strong>.</p><p>Les lecteurs d’écran annonceront le lien mais seront incapables de le décrire.</p><p>${why.fix}Définissez le texte alternatif selon la destination ou la fonction du lien.</p>${why.imageLinks}`,
   LINK_CLICK_HERE: `L’expression "cliquer" ou "cliquer ici" est redondante et détourne l’attention de la destination du lien.`,
   LINK_DOI: `<p>${why.fix}Liez le titre de l’article et laissez le DOI en texte simple, au lieu de lier le DOI et laisser le titre sans lien.</p><div class="why"><p>Selon les recommandations de l’APA, les liens doivent être descriptifs : ils aident les utilisateurs à trouver les contenus pertinents en parcourant uniquement les liens.</p><p>Les lecteurs d’écran peuvent ainsi annoncer des liens significatifs plutôt qu’une série de chiffres incompréhensibles.</p></div>`,

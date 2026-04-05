@@ -3,7 +3,8 @@ import { default as Sa11yStrings } from '../sa11y-lang/nl.js';
 // todo check each file for link integrity, and escaping of tags in code blocks.
 const testNames = {
 	ALT_FILE_EXT: 'Deze alt‑tekst is een bestandsnaam, geen beschrijving',
-	ALT_MAYBE_BAD: 'Deze alt‑tekst kan voor een schermlezer lastig correct uit te spreken zijn',
+	ALT_MAYBE_BAD: 'Is dit een duidelijke en beknopte beschrijving van de afbeelding?',
+	ALT_MAYBE_BAD_WARNING: 'Is dit een duidelijke en beknopte beschrijving van de afbeelding?',
 	ALT_PLACEHOLDER: 'Deze alt‑tekst beschrijft de afbeelding niet',
 	ALT_UNPRONOUNCEABLE: 'Deze alt‑tekst is niet uit te spreken',
 	BTN_EMPTY: 'Knop mist een toegankelijke label',
@@ -42,7 +43,8 @@ const testNames = {
 	LABELS_PLACEHOLDER: 'Handmatige controle: placeholder‑tekst',
 	LABEL_IN_NAME: 'Zichtbare label komt niet overeen met de toegankelijke naam',
 	LINK_ALT_FILE_EXT: 'Alt‑tekst die als link wordt gebruikt, mag geen URL zijn',
-	LINK_ALT_MAYBE_BAD: 'Deze gekoppelde alt‑tekst kan lastig worden uitgesproken door een schermlezer',
+	LINK_ALT_MAYBE_BAD: 'Deze gekoppelde alt‑tekst is mogelijk niet duidelijk en beknopt',
+	LINK_ALT_MAYBE_BAD_WARNING: 'Deze gekoppelde alt‑tekst is mogelijk niet duidelijk en beknopt',
 	LINK_ALT_UNPRONOUNCEABLE: 'Gekoppelde afbeeldingen moeten uitspreekbare alt‑tekst hebben',
 	LINK_CLICK_HERE: 'Handmatige controle: link bevat “klik hier”',
 	LINK_DOI: 'Link artikeltitels, niet DOI‑nummers',
@@ -107,6 +109,7 @@ const why = {
 export const tips = {
 	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt‑tekst: <strong>"%(ALT_TEXT)"</strong></p><p>Schermlezers lezen deze URL voor, vaak letter voor letter. Dit geeft meestal niet dezelfde betekenis als het beeld zelf.</p><p><strong class="badge">Oplossen</strong> Gebruik alt="" als dit decoratief is en door schermlezers genegeerd mag worden, of voeg een beschrijvende alt‑tekst toe.</p>${why.images}`,
 	ALT_MAYBE_BAD: `<p>Alt‑tekst: <strong>"%(alt)"</strong></p><p><strong class="badge">Oplossen</strong> Stel de alt‑tekst in op een korte beschrijving van wat de afbeelding in deze context betekent.</p>${why.images}`,
+	ALT_MAYBE_BAD_WARNING: `<p>Alt‑tekst: <strong>"%(alt)"</strong></p><p><strong class="badge">Oplossen</strong> Stel de alt‑tekst in op een korte beschrijving van wat de afbeelding in deze context betekent.</p>${why.images}`,
 	ALT_PLACEHOLDER: `<p>Alt‑tekst: <strong>"%(alt)"</strong></p><p><strong class="badge">Oplossen</strong> Stel de alt‑tekst in op een korte beschrijving van wat de afbeelding in deze context betekent.</p>${why.images}`,
 	ALT_UNPRONOUNCEABLE: `<p>Alt‑tekst: "<strong>%(alt)</strong>"</p><p>Deze alt‑tekst bevat alleen niet‑uitspreekbare symbolen of spaties. Schermlezers kondigen een afbeelding aan en vallen daarna stil of lezen iets onbegrijpelijks op.</p><p><strong class="badge">Oplossen</strong> Voeg een beschrijvende alt‑tekst toe, of gebruik een volledig lege alt (alt="") als dit slechts een pictogram of spatiehouder is.</p>${why.images}`,
 	BTN_EMPTY: `<p><strong class="badge">Oplossen</strong> Geef schermlezers aan wat deze knop doet, via tekst, alt‑tekst op een icoon of een title‑attribuut.</p>`,
@@ -142,6 +145,7 @@ export const tips = {
 	LABEL_IN_NAME: `<p>De zichtbare tekst van dit element lijkt anders te zijn dan de toegankelijke naam. Dit kan schermlezergebruikers verwarren en spraakbesturing verstoren.</p><p><strong class="badge">Oplossen</strong> Zorg dat het zichtbare label begint met de tekst van het onzichtbare label en geen extra betekenisvolle informatie bevat.</p><p><strong>Onzichtbaar label:</strong> "%(TEXT)"</p>`,
 	LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt‑tekst: "<strong>%(alt)</strong>"</p><p>Deze alt‑tekst is waarschijnlijk een bestandsnaam in plaats van een betekenisvolle linktitel.</p><p><strong class="badge">Oplossen</strong> Stel de alt‑tekst in op de naam van het linkdoel.</p><div class="why"><p>Alt‑tekst moet de betekenis van een afbeelding beschrijven. Voor een gelinkte afbeelding is dat de bestemming:</p><ul><li>"Pagina met tekst" beschrijft het beeld, niet de link.</li><li>"IMG_1234.jpg" is slechts een bestandsnaam.</li><li>"<strong><em>Formulier voor evenementregistratie (.doc)</em></strong>" is het linkdoel.</li></ul></p></div>`,
 	LINK_ALT_MAYBE_BAD: `<p>Alt‑tekst: "<strong>%(alt)</strong>"</p><p><strong class="badge">Oplossen</strong> Stel de alt‑tekst in op de naam van het linkdoel.</p>${why.imageLinks}`,
+	LINK_ALT_MAYBE_BAD_WARNING: `<p>Alt‑tekst: "<strong>%(alt)</strong>"</p><p><strong class="badge">Oplossen</strong> Stel de alt‑tekst in op de naam van het linkdoel.</p>${why.imageLinks}`,
 	LINK_ALT_UNPRONOUNCEABLE: `<p>De alt‑tekst “%(ALT_TEXT)” bestaat uit niet‑uitspreekbare tekens/spaties; het linkdoel kan niet worden aangekondigd.</p><p>${why.fix}Beschrijf de linkbestemming of functie in de alt‑tekst.</p>${why.imageLinks}`,
 	LINK_CLICK_HERE: `Gebruik alstublieft geen “klik hier”: het doel blijft zo onduidelijk.`,
 	LINK_DOI: `<p>${why.fix}Link de artikeltitel en geef de DOI in platte tekst; link niet de DOI zelf.</p><div class="why"><p>Beschrijvende links zijn makkelijker te scannen en helpen schermlezers betekenisvolle linknamen voor te lezen.</p></div>`,

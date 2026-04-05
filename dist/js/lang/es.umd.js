@@ -317,7 +317,8 @@
   };
   const testNames = {
     ALT_FILE_EXT: "Este texto alternativo es un nombre de archivo, no una descripción",
-    ALT_MAYBE_BAD: "Este texto alternativo no puede ser pronunciado por un lector de pantalla",
+    ALT_MAYBE_BAD: "¿Es esta una descripción clara y concisa de la imagen?",
+    ALT_MAYBE_BAD_WARNING: "¿Es esta una descripción clara y concisa de la imagen?",
     ALT_PLACEHOLDER: "Este texto alternativo no describe la imagen",
     ALT_UNPRONOUNCEABLE: "Este texto alternativo es impronunciable",
     BTN_EMPTY: "El botón no tiene una etiqueta accesible",
@@ -356,7 +357,8 @@
     LABEL_IN_NAME: "La etiqueta visible no coincide con la etiqueta invisible",
     LABELS_MISSING_LABEL: "Este campo no está conectado a una etiqueta",
     LINK_ALT_FILE_EXT: "El texto alternativo usado como vínculo no debe ser una URL",
-    LINK_ALT_MAYBE_BAD: "Este texto alternativo vinculado no puede ser pronunciado por un lector de pantalla",
+    LINK_ALT_MAYBE_BAD: "Este texto alternativo vinculado podría no ser claro ni conciso",
+    LINK_ALT_MAYBE_BAD_WARNING: "Este texto alternativo vinculado podría no ser claro ni conciso",
     LINK_ALT_UNPRONOUNCEABLE: "Las imágenes vinculadas necesitan texto alternativo pronunciable",
     LINK_CLICK_HERE: "Revisión manual: el enlace contiene «haz clic aquí»",
     LINK_DOI: "Vincula los títulos de artículos, no los números DOI",
@@ -420,6 +422,7 @@
   const tips = {
     ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Texto alternativo: <strong>"%(ALT_TEXT)"</strong></p><p>Los lectores de pantalla dictarán esta URL, a menudo letra por letra. Esto probablemente no transmite el mismo significado que ver la imagen.</p><p>${why.fix}Agregue un alt vacío (alt="") si esto es una decoración sin significado que deba ser ignorada por los lectores de pantalla, o agregue un texto alternativo descriptivo.</p>${why.images}`,
     ALT_MAYBE_BAD: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Establezca el texto alternativo de esta imagen como una descripción concisa de lo que significa en este contexto.</p>${why.images}`,
+    ALT_MAYBE_BAD_WARNING: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Establezca el texto alternativo de esta imagen como una descripción concisa de lo que significa en este contexto.</p>${why.images}`,
     ALT_PLACEHOLDER: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Establezca el texto alternativo de esta imagen como una descripción concisa de lo que significa en este contexto.</p>${why.images}`,
     ALT_UNPRONOUNCEABLE: `<p>Texto alternativo: "<strong>%(alt)</strong>"</p><p>Este texto alternativo solo contiene símbolos impronunciables y/o espacios. Los lectores de pantalla anunciarán que hay una imagen y luego harán una pausa incómoda o dirán algo ininteligible.</p><p>${why.fix}Agregue un texto alternativo descriptivo, o proporcione un alt <em>completamente</em> vacío (alt="") si esto es solo un ícono o separador que los lectores de pantalla deben ignorar.</p>${why.images}`,
     BTN_EMPTY: `<p>${why.fix}Use cualquier método válido para indicar a los lectores de pantalla qué hace este botón; por ejemplo: texto, texto alternativo en un icono o el atributo <code>title</code>.</p>`,
@@ -455,6 +458,7 @@
     LABEL_IN_NAME: `<p>El texto visible de este elemento parece distinto del nombre accesible. Esto puede causar confusión a quienes usan lectores de pantalla y afectar el control por voz.</p><p>${why.fix}Asegúrese de que la etiqueta visible comience con el texto de la etiqueta invisible y no contenga información significativa adicional.</p><p><strong>Etiqueta invisible:</strong> "%(TEXT)"</p>`,
     LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Texto alternativo: "<strong>%(alt)</strong>"</p><p>Este texto alternativo probablemente es un nombre de archivo en lugar de un nombre significativo para el destino del enlace.</p><p>${why.fix}Establezca el alt de esta imagen con el nombre del destino del enlace.</p><div class="why"><p>El propósito del texto alternativo es describir lo que la imagen significa, no lo que contiene. El significado de una imagen vinculada es el destino del enlace:</p><ul><li>"Página con texto" describe la imagen, no un enlace.</li><li>"IMG_1234.jpg" es solo un nombre de archivo.</li><li>"<strong><em>Formulario de registro (doc)</em></strong>" es un destino del enlace.</li></ul></p></div>`,
     LINK_ALT_MAYBE_BAD: `<p>Texto alternativo: "<strong>%(alt)</strong>"</p><p>${why.fix}Establezca el alt de esta imagen con el nombre del destino del enlace.</p>${why.imageLinks}`,
+    LINK_ALT_MAYBE_BAD_WARNING: `<p>Texto alternativo: "<strong>%(alt)</strong>"</p><p>${why.fix}Establezca el alt de esta imagen con el nombre del destino del enlace.</p>${why.imageLinks}`,
     LINK_ALT_UNPRONOUNCEABLE: `<p>El alt de esta imagen vinculada contiene solo símbolos impronunciables o espacios: <strong>"%(ALT_TEXT)"</strong>.</p><p>Los lectores de pantalla anunciarán que hay un enlace, pero no podrán describirlo.</p><p>${why.fix}Establezca el alt según la finalidad o el destino del enlace.</p>${why.imageLinks}`,
     LINK_CLICK_HERE: `La frase «haz clic» o «haz clic aquí» es redundante y desvía la atención del propósito del enlace.`,
     LINK_DOI: `<p>${why.fix}Vincule el título del artículo y deje el DOI como texto plano, en lugar de vincular el DOI y dejar el título sin enlace.</p><div class="why"><p>La guía de estilo de la APA recomienda usar enlaces descriptivos porque las personas recorren los enlaces y usan la búsqueda dentro de la página para encontrarlos.</p><p>Esto también permite a los lectores de pantalla describir los enlaces de forma significativa, en lugar de leer una sucesión de números.</p></div>`,

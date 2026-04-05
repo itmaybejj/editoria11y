@@ -2,7 +2,8 @@ import { default as Sa11yStrings } from '../sa11y-lang/ja.js';
 
 const testNames = {
 	ALT_FILE_EXT: 'この代替テキストは説明ではなくファイル名です',
-	ALT_MAYBE_BAD: 'この代替テキストはスクリーンリーダーで正しく読み上げられない可能性があります',
+	ALT_MAYBE_BAD: 'これは画像の明確で簡潔な説明になっていますか？',
+	ALT_MAYBE_BAD_WARNING: 'これは画像の明確で簡潔な説明になっていますか？',
 	ALT_PLACEHOLDER: 'この代替テキストは画像の内容を説明していません',
 	ALT_UNPRONOUNCEABLE: 'この代替テキストは発音できません',
 	BTN_EMPTY: 'このボタンにはアクセシブルな名称がありません',
@@ -41,7 +42,8 @@ const testNames = {
 	LABELS_PLACEHOLDER: '手動チェック：プレースホルダーのテキスト',
 	LABEL_IN_NAME: '可視ラベルが非表示ラベルと一致していません',
 	LINK_ALT_FILE_EXT: 'リンクの alt テキストが URL になっています',
-	LINK_ALT_MAYBE_BAD: 'リンク画像の alt テキストがスクリーンリーダーで読み上げられません',
+	LINK_ALT_MAYBE_BAD: 'このリンク画像の alt は明確で簡潔でない可能性があります',
+	LINK_ALT_MAYBE_BAD_WARNING: 'このリンク画像の alt は明確で簡潔でない可能性があります',
 	LINK_ALT_UNPRONOUNCEABLE: 'リンク画像には発音可能な代替テキストが必要です',
 	LINK_CLICK_HERE: '手動チェック：リンクに「クリックしてください」が含まれています',
 	LINK_DOI: 'DOI 番号ではなく記事タイトルをリンクしてください',
@@ -108,6 +110,7 @@ const why = {
 export const tips = {
 	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt テキスト：<strong>"%(ALT_TEXT)"</strong></p><p>スクリーンリーダーはこの URL を一文字ずつ読み上げることがあり、画像を見たときと同じ意味にはなりません。</p><p><strong class="badge">修正方法</strong> 無意味な装飾でスクリーンリーダーに無視させたい場合は alt=""（空の alt）を、意味がある場合は説明的な alt を追加してください。</p>${why.images}`,
 	ALT_MAYBE_BAD: `<p>Alt テキスト：<strong>"%(alt)"</strong></p><p><strong class="badge">修正方法</strong> この画像がこの文脈で何を意味するのか、簡潔に説明する alt に設定してください。</p>${why.images}`,
+	ALT_MAYBE_BAD_WARNING: `<p>Alt テキスト：<strong>"%(alt)"</strong></p><p><strong class="badge">修正方法</strong> この画像がこの文脈で何を意味するのか、簡潔に説明する alt に設定してください。</p>${why.images}`,
 	ALT_PLACEHOLDER: `<p>Alt テキスト：<strong>"%(alt)"</strong></p><p><strong class="badge">修正方法</strong> この画像がこの文脈で何を意味するのか、簡潔に説明する alt に設定してください。</p>${why.images}`,
 	ALT_UNPRONOUNCEABLE: `<p>Alt テキスト：" <strong>%(alt)</strong> "</p><p>この alt テキストには発音できない記号や空白のみが含まれています。スクリーンリーダーは画像があることを知らせた後、不自然に間を置くか、意味のない読み上げになります。</p><p><strong class="badge">修正方法</strong> 説明的な alt を追加するか、ただのアイコンやスペーサーなど無視させたい場合は完全な空の alt (alt="") を指定してください。</p>${why.images}`,
 	BTN_EMPTY: `<p><strong class="badge">修正方法</strong> テキスト、アイコンの alt、title 属性など、任意の方法でこのボタンの目的をスクリーンリーダーに伝えてください。</p>`,
@@ -143,6 +146,7 @@ export const tips = {
 	LABEL_IN_NAME: `<p>この要素の視覚的なテキストとアクセシブルネームが異なっている可能性があります。スクリーンリーダー利用者を混乱させたり、音声操作が正常に働かない可能性があります。</p><p><strong class="badge">修正方法</strong> 視覚的なラベルが非表示のラベルのテキストで始まり、追加の重要情報を含まないようにしてください。</p><p><strong>非表示のラベル：</strong> "%(TEXT)"</p>`,
 	LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt テキスト：" <strong>%(alt)</strong> "</p><p>この alt テキストは、意味のあるリンクラベルではなく、ファイル名である可能性があります。</p><p><strong class="badge">修正方法</strong> この画像の alt をリンク先のタイトルに設定してください。</p><div class="why"><p>alt テキストは画像が何を「意味するか」を伝えるためのものです。リンク画像の場合、その意味はリンク先です：</p><ul><li>"文字の書かれたページ" は画像の説明であり、リンクの説明ではありません。</li><li>"IMG_1234.jpg" はただのファイル名です。</li><li>"<strong><em>イベント申込書（.doc）</em></strong>" はリンク先の説明です。</li></ul></p></div>`,
 	LINK_ALT_MAYBE_BAD: `<p>Alt テキスト：" <strong>%(alt)</strong> "</p><p><strong class="badge">修正方法</strong> この画像の alt をリンク先のタイトルに設定してください。</p>${why.imageLinks}`,
+	LINK_ALT_MAYBE_BAD_WARNING: `<p>Alt テキスト：" <strong>%(alt)</strong> "</p><p><strong class="badge">修正方法</strong> この画像の alt をリンク先のタイトルに設定してください。</p>${why.imageLinks}`,
 	LINK_ALT_UNPRONOUNCEABLE: `<p>このリンク画像の alt「%(ALT_TEXT)」は発音できない文字や空白のみです。リンクの説明として機能しません。</p><p>${why.fix}リンクの目的（行き先・機能）を説明する alt にしてください。</p>${why.imageLinks}`,
 	LINK_CLICK_HERE: `「クリックしてください」などの表現は冗長で、リンクの意味を示しません。`,
 	LINK_DOI: `<p>${why.fix}DOI をリンクにせず、記事タイトルをリンクにしてください（DOI はプレーンテキストで示します）。</p><div class="why"><p>記述的なリンクは、リンク名だけで一覧を走査する利用者に分かりやすく、目的の情報に到達しやすくします。</p><p>スクリーンリーダーも、数字列ではなく意味のあるリンク名を案内できます。</p></div>`,

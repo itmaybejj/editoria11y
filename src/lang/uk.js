@@ -3,7 +3,8 @@ import { default as Sa11yStrings } from '../sa11y-lang/ua.js';
 // todo check each file for link integrity, and escaping of tags in code blocks.
 const testNames = {
 	ALT_FILE_EXT: 'Цей альтернативний текст є назвою файлу, а не описом',
-	ALT_MAYBE_BAD: 'Цей альтернативний текст може бути некоректно озвучений читачем з екрана',
+	ALT_MAYBE_BAD: 'Чи є це чітким і стислим описом зображення?',
+	ALT_MAYBE_BAD_WARNING: 'Чи є це чітким і стислим описом зображення?',
 	ALT_PLACEHOLDER: 'Цей текст alt не описує зображення',
 	ALT_UNPRONOUNCEABLE: 'Цей альтернативний текст неможливо вимовити',
 	BTN_EMPTY: 'Кнопка не має доступної назви',
@@ -42,7 +43,8 @@ const testNames = {
 	LABELS_PLACEHOLDER: 'Ручна перевірка: текст заповнювача',
 	LABEL_IN_NAME: 'Видима назва не відповідає доступній назві',
 	LINK_ALT_FILE_EXT: 'Alt‑текст у лінку не повинен бути URL‑адресою',
-	LINK_ALT_MAYBE_BAD: 'Цей alt‑текст у лінку може бути важко вимовити читачу з екрана',
+	LINK_ALT_MAYBE_BAD: 'Alt‑текст у лінку може бути не чітким і не стислим',
+	LINK_ALT_MAYBE_BAD_WARNING: 'Alt‑текст у лінку може бути не чітким і не стислим',
 	LINK_ALT_UNPRONOUNCEABLE: 'Зображення‑лінки повинні мати вимовний альтернативний текст',
 	LINK_CLICK_HERE: 'Ручна перевірка: лінк містить «натисніть тут»',
 	LINK_DOI: 'Лінкуйте назви статей, а не номери DOI',
@@ -112,6 +114,7 @@ const why = {
 export const tips = {
 	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt‑текст: <strong>"%(ALT_TEXT)"</strong></p><p>Зчитувачі екрана зазвичай читають URL, інколи — по символах. Це навряд чи передає те саме значення, що й зображення.</p><p><strong class="badge">To fix</strong> Додайте порожній alt (alt=""), якщо це декоративний елемент, або опишіть значення зображення, якщо воно важливе.</p>${why.images}`,
 	ALT_MAYBE_BAD: `<p>Alt‑текст: <strong>"%(alt)"</strong></p><p><strong class="badge">To fix</strong> Встановіть короткий опис того, що це зображення означає в цьому контексті.</p>${why.images}`,
+	ALT_MAYBE_BAD_WARNING: `<p>Alt‑текст: <strong>"%(alt)"</strong></p><p><strong class="badge">To fix</strong> Встановіть короткий опис того, що це зображення означає в цьому контексті.</p>${why.images}`,
 	ALT_PLACEHOLDER: `<p>Alt‑текст: <strong>"%(alt)"</strong></p><p><strong class="badge">To fix</strong> Встановіть короткий опис того, що це зображення означає в цьому контексті.</p>${why.images}`,
 	ALT_UNPRONOUNCEABLE: `<p>Alt‑текст: "<strong>%(alt)</strong>"</p><p>Цей alt‑текст містить лише непридатні до вимови символи або пробіли. Зчитувач екрана оголосить наявність зображення, а потім зробить незручну паузу або прочитає щось незрозуміле.</p><p><strong class="badge">To fix</strong> Додайте описовий alt або використайте alt="" для декоративних елементів.</p>${why.images}`,
 	BTN_EMPTY: `<p><strong class="badge">To fix</strong> Додайте будь‑яким способом інформацію про дію кнопки — звичайний текст, alt‑текст на іконці або атрибут title.</p>`,
@@ -147,6 +150,7 @@ export const tips = {
 	LABEL_IN_NAME: `<p>Здається, видимий текст цього елемента не збігається з доступним ім’ям. Це може заплутати користувачів зчитувачів екрана та порушити голосове керування.</p><p><strong class="badge">To fix</strong> Переконайтеся, що видима мітка починається з тексту прихованої мітки й не містить додаткової важливої інформації.</p><p><strong>Прихована мітка:</strong> "%(TEXT)"</p>`,
 	LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt‑текст: "<strong>%(alt)</strong>"</p><p>Ймовірно, цей alt‑текст — це назва файлу, а не опис мети посилання.</p><p><strong class="badge">To fix</strong> Установіть alt‑текст як назву цілі посилання.</p><div class="why"><p>Alt‑текст має передавати значення зображення. Для зображення‑посилання значення — це ціль переходу:</p><ul><li>"Сторінка з текстом" — описує зображення, не посилання.</li><li>"IMG_1234.jpg" — лише ім’я файлу.</li><li>"<strong><em>Форма реєстрації на подію (.doc)</em></strong>" — описує ціль посилання.</li></ul></p></div>`,
 	LINK_ALT_MAYBE_BAD: `<p>Alt‑текст: "<strong>%(alt)</strong>"</p><p><strong class="badge">To fix</strong> Встановіть alt‑текст як назву цільової сторінки.</p>${why.imageLinks}`,
+	LINK_ALT_MAYBE_BAD_WARNING: `<p>Alt‑текст: "<strong>%(alt)</strong>"</p><p><strong class="badge">To fix</strong> Встановіть alt‑текст як назву цільової сторінки.</p>${why.imageLinks}`,
 	LINK_ALT_UNPRONOUNCEABLE: `<p>Alt‑текст «%(ALT_TEXT)» складається з невимовних символів; лінк неможливо описати.</p><p>${why.fix}Опишіть у alt призначення/функцію лінку.</p>${why.imageLinks}`,
 	LINK_CLICK_HERE: `Уникайте «натисніть тут» — це не повідомляє про призначення.`,
 	LINK_DOI: `<p>${why.fix}Лінкуйте назву статті; DOI подавайте як звичайний текст.</p><div class="why"><p>Змістовні назви лінків легше сканувати і коректно озвучувати.</p></div>`,

@@ -61,9 +61,9 @@ CRITICAL RULES FOR WRITING TRANSLATION FILES:
    Do NOT use the Write tool to rewrite the entire file — this risks
    corrupting unchanged content or introducing encoding issues.
 
-4. After making all edits, verify the file parses by running:
+4. After the last edit is made, verify the file parses by running:
    node -c <filepath>
-   If it fails, fix the syntax error before finishing.
+   If it fails, fix the syntax error before finishing. Each node command pauses for user error, so try to group this into as few commands as possible.
 
 5. Preserve the exact indentation style of the file (tabs, not spaces).
 

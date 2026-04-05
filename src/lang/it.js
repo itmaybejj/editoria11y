@@ -4,7 +4,8 @@ import { default as Sa11yStrings } from '../sa11y-lang/it.js';
 // todo check each file for link integrity, and escaping of tags in code blocks.
 const testNames = {
 	ALT_FILE_EXT: 'Questo testo alternativo è un nome file, non una descrizione',
-	ALT_MAYBE_BAD: 'Questo testo alternativo non può essere pronunciato da un lettore di schermo',
+	ALT_MAYBE_BAD: `È una descrizione chiara e concisa dell'immagine?`,
+	ALT_MAYBE_BAD_WARNING: `È una descrizione chiara e concisa dell'immagine?`,
 	ALT_PLACEHOLDER: "Questo testo alternativo non descrive l’immagine",
 	ALT_UNPRONOUNCEABLE: 'Questo testo alternativo è impossibile da pronunciare',
 	BTN_EMPTY: 'Il pulsante non ha un’etichetta accessibile',
@@ -43,7 +44,8 @@ const testNames = {
 	LABEL_IN_NAME: 'L’etichetta visibile non corrisponde al nome accessibile',
 	LABELS_MISSING_LABEL: "Questo campo non è collegato a un’etichetta",
 	LINK_ALT_FILE_EXT: 'Il testo alternativo usato come link non deve essere un URL',
-	LINK_ALT_MAYBE_BAD: 'Questo alt associato al link non può essere pronunciato',
+	LINK_ALT_MAYBE_BAD: `Questo alt del link potrebbe non essere chiaro e conciso`,
+	LINK_ALT_MAYBE_BAD_WARNING: `Questo alt del link potrebbe non essere chiaro e conciso`,
 	LINK_ALT_UNPRONOUNCEABLE: 'Le immagini linkate devono avere un alt pronunciabile',
 	LINK_CLICK_HERE: 'Verifica manuale: il link contiene “clicca qui”',
 	LINK_DOI: 'Collegare i titoli degli articoli, non i numeri DOI',
@@ -120,6 +122,7 @@ const why = {
 export const tips = {
 	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Testo alternativo: <strong>"%(ALT_TEXT)"</strong></p><p>I lettori di schermo possono leggere questo URL lettera per lettera; difficilmente trasmette lo stesso significato dell’immagine.</p><p>${why.fix}Aggiungi alt vuoto (alt="") se è decorativa, oppure un testo alternativo descrittivo.</p>${why.images}`,
 	ALT_MAYBE_BAD: `<p>Testo alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Imposta un testo alternativo conciso che esprima cosa significa l’immagine in questo contesto.</p>${why.images}`,
+	ALT_MAYBE_BAD_WARNING: `<p>Testo alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Imposta un testo alternativo conciso che esprima cosa significa l’immagine in questo contesto.</p>${why.images}`,
 	ALT_PLACEHOLDER: `<p>Testo alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Imposta un testo alternativo conciso che esprima cosa significa l’immagine in questo contesto.</p>${why.images}`,
 	ALT_UNPRONOUNCEABLE: `<p>Testo alternativo: "<strong>%(alt)</strong>"</p><p>Questo testo alternativo contiene solo simboli o spazi non pronunciabili. Un lettore di schermo annuncerà “immagine”, poi farà una pausa o produrrà un risultato incomprensibile.</p><p>${why.fix}Aggiungi un alt descrittivo oppure alt="" se è solo un’icona o uno spazio funzionale.</p>${why.images}`,
 	BTN_EMPTY: `<p>${why.fix}Indica cosa fa il pulsante tramite testo, alt su un’icona oppure un attributo title.</p>`,
@@ -155,6 +158,7 @@ export const tips = {
 	LABEL_IN_NAME: `<p>Il testo visibile sembra diverso dal nome accessibile. Questo può confondere i lettori di schermo e compromettere il controllo vocale.</p><p>${why.fix}Assicurati che l’etichetta visibile inizi con il testo dell’etichetta invisibile e non aggiunga informazioni extra.</p><p><strong>Etichetta invisibile:</strong> "%(TEXT)"</p>`,
 	LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Testo alternativo: "<strong>%(alt)</strong>"</p><p>Questo alt sembra essere un nome file, non una descrizione della destinazione del link.</p><p>${why.fix}Imposta l’alt sul nome della destinazione del link.</p><div class="why"><p>Il testo alternativo deve esprimere la destinazione del link:</p><ul><li>“Pagina con testo” descrive l’immagine, non il link.</li><li>“IMG_1234.jpg” è un file.</li><li>“<strong><em>Modulo di registrazione (.doc)</em></strong>” è una destinazione.</li></ul></div>`,
 	LINK_ALT_MAYBE_BAD: `<p>Testo alternativo: "<strong>%(alt)</strong>."</p><p>${why.fix}Imposta l’alt sulla destinazione del link.</p>${why.imageLinks}`,
+	LINK_ALT_MAYBE_BAD_WARNING: `<p>Testo alternativo: "<strong>%(alt)</strong>."</p><p>${why.fix}Imposta l’alt sulla destinazione del link.</p>${why.imageLinks}`,
 	LINK_ALT_UNPRONOUNCEABLE: `<p>L’alt per l’immagine linkata contiene solo simboli/spazi: <strong>“%(ALT_TEXT)”</strong>.</p><p>${why.fix}Usa un alt che descriva destinazione o scopo del link.</p>${why.imageLinks}`,
 	LINK_CLICK_HERE: `“Clicca qui” è ridondante e non comunica lo scopo.`,
 	LINK_DOI: `<p>${why.fix}Collega il titolo dell’articolo e lascia il DOI in testo semplice.</p><div class="why"><p>I link descrittivi aiutano gli utenti a scansionare e i lettori a pronunciare testi significativi.</p></div>`,

@@ -3,7 +3,8 @@ import { default as Sa11yStrings } from '../sa11y-lang/zh.js';
 
 const testNames = {
 	ALT_FILE_EXT: '此替代文本是文件名，而不是描述',
-	ALT_MAYBE_BAD: '此替代文本可能无法被读屏软件正确朗读',
+	ALT_MAYBE_BAD: '这是否是对图片清晰且简洁的描述？',
+	ALT_MAYBE_BAD_WARNING: '这是否是对图片清晰且简洁的描述？',
 	ALT_PLACEHOLDER: '此替代文本未描述该图像',
 	ALT_UNPRONOUNCEABLE: '此替代文本不可发音',
 	BTN_EMPTY: '按钮缺少可访问名称',
@@ -42,7 +43,8 @@ const testNames = {
 	LABELS_PLACEHOLDER: '手动检查：占位符文本',
 	LABEL_IN_NAME: '可见标签与不可见标签不一致',
 	LINK_ALT_FILE_EXT: '作为链接使用的替代文本不应为 URL',
-	LINK_ALT_MAYBE_BAD: '该链接图片的替代文本可能无法被朗读',
+	LINK_ALT_MAYBE_BAD: '该链接的替代文本可能不够清晰简洁',
+	LINK_ALT_MAYBE_BAD_WARNING: '该链接的替代文本可能不够清晰简洁',
 	LINK_ALT_UNPRONOUNCEABLE: '链接图片需要可发音的替代文本',
 	LINK_CLICK_HERE: '手动检查：链接包含“点击这里”',
 	LINK_DOI: '应链接文章标题，而非 DOI 编号',
@@ -108,6 +110,7 @@ const why = {
 const tips = {
 	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>替代文本：<strong>"%(ALT_TEXT)"</strong></p><p>读屏软件会逐字逐字符朗读此 URL，无法传达与看到图片相同的含义。</p><p><strong class="badge">To fix</strong> 若此图像为无意义装饰，请使用空 alt（alt=""）；若为内容图像，请提供描述其意义的替代文本。</p>${why.images}`,
 	ALT_MAYBE_BAD: `<p>替代文本：<strong>"%(alt)"</strong></p><p><strong class="badge">To fix</strong> 将替代文本改为简要且符合当前语境的描述，表达图片的意义。</p>${why.images}`,
+	ALT_MAYBE_BAD_WARNING: `<p>替代文本：<strong>"%(alt)"</strong></p><p><strong class="badge">To fix</strong> 将替代文本改为简要且符合当前语境的描述，表达图片的意义。</p>${why.images}`,
 	ALT_PLACEHOLDER: `<p>替代文本：<strong>"%(alt)"</strong></p><p><strong class="badge">To fix</strong> 将替代文本改为简要且符合当前语境的描述，表达图片的意义。</p>${why.images}`,
 	ALT_UNPRONOUNCEABLE: `<p>替代文本：" <strong>%(alt)</strong> "</p><p>此替代文本仅包含无法发音的符号和/或空格。读屏软件会提示有图像存在，然后出现尴尬的停顿或读出无法理解的内容。</p><p><strong class="badge">To fix</strong> 请添加描述性替代文本；若此图像仅为图标或占位，请提供空 alt（alt=""）。</p>${why.images}`,
 	BTN_EMPTY: `<p><strong class="badge">To fix</strong> 使用任何有效方式告知读屏软件此按钮的用途：例如可见文本、图标的 alt 文本或 title 属性。</p>`,
@@ -143,6 +146,7 @@ const tips = {
 	LABEL_IN_NAME: `<p>该元素的可见文本似乎与其可访问名称不同。这可能导致读屏用户困惑，或导致语音控制失败。</p><p><strong class="badge">To fix</strong> 可见标签应以前置文本包含隐藏标签内容，并且不应加入其他有意义的信息。</p><p><strong>隐藏标签：</strong> "%(TEXT)"</p>`,
 	LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>替代文本：" <strong>%(alt)</strong> "</p><p>此替代文本可能是文件名，而非有意义的链接标签。</p><p><strong class="badge">To fix</strong> 请将替代文本改为链接目标的名称。</p><div class="why"><p>替代文本应表达图像的意义。对于作为链接的图像，其意义是链接要前往的目标：</p><ul><li>"带文字的页面" 描述的是图像，而非链接。</li><li>"IMG_1234.jpg" 只是文件名。</li><li>"<strong><em>活动报名表（.doc）</em></strong>" 描述的是链接目标。</li></ul></p></div>`,
 	LINK_ALT_MAYBE_BAD: `<p>替代文本：" <strong>%(alt)</strong> "</p><p><strong class="badge">To fix</strong> 请将替代文本设置为链接目标的名称。</p>${why.imageLinks}`,
+	LINK_ALT_MAYBE_BAD_WARNING: `<p>替代文本：" <strong>%(alt)</strong> "</p><p><strong class="badge">To fix</strong> 请将替代文本设置为链接目标的名称。</p>${why.imageLinks}`,
 	LINK_ALT_UNPRONOUNCEABLE: `<p>该链接图片的替代文本仅包含不可发音的符号和/或空格：“%(ALT_TEXT)”。读屏软件会宣布存在链接，但无法描述其含义。</p><p>${why.fix}请将替代文本设置为链接的目标或用途。</p>${why.imageLinks}`,
 	LINK_CLICK_HERE: `“点击”或“点击这里”这类词语是多余的，并会分散对链接目的的注意力。`,
 	LINK_DOI: `<p>${why.fix}请链接文章标题，并以纯文本提供 DOI 号码，而不是把 DOI 设为链接、标题留作纯文本。</p><div class="why"><p>APA 指南建议在网站中使用具描述性的链接——用户会按链接名称扫描与搜索，标题被链接更易被注意。</p><p>这也能让读屏软件用有意义的文本描述链接，而不是一串数字。</p></div>`,

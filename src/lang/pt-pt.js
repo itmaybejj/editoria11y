@@ -3,7 +3,8 @@ import { default as Sa11yStrings } from '../sa11y-lang/ptPT.js';
 // todo check each file for link integrity, and escaping of tags in code blocks.
 const testNames = {
 	ALT_FILE_EXT: 'Este texto alternativo é um nome de ficheiro, não uma descrição',
-	ALT_MAYBE_BAD: 'Este texto alternativo pode não ser pronunciado corretamente por um leitor de ecrã',
+	ALT_MAYBE_BAD: 'Esta é uma descrição clara e concisa da imagem?',
+	ALT_MAYBE_BAD_WARNING: 'Esta é uma descrição clara e concisa da imagem?',
 	ALT_PLACEHOLDER: 'Este texto alternativo não descreve a imagem',
 	ALT_UNPRONOUNCEABLE: 'Este texto alternativo é impossível de pronunciar',
 	BTN_EMPTY: 'O botão não tem um rótulo acessível',
@@ -42,7 +43,8 @@ const testNames = {
 	LABELS_PLACEHOLDER: 'Verificação manual: texto de marcador de posição',
 	LABEL_IN_NAME: 'O rótulo visível não corresponde ao nome acessível',
 	LINK_ALT_FILE_EXT: 'O alt usado como ligação não deve ser um URL',
-	LINK_ALT_MAYBE_BAD: 'Este alt em ligação pode não ser pronunciado corretamente por leitores de ecrã',
+	LINK_ALT_MAYBE_BAD: 'Este alt em ligação pode não ser claro e conciso',
+	LINK_ALT_MAYBE_BAD_WARNING: 'Este alt em ligação pode não ser claro e conciso',
 	LINK_ALT_UNPRONOUNCEABLE: 'Imagens usadas como ligação precisam de texto alternativo pronunciável',
 	LINK_CLICK_HERE: 'Verificação manual: a ligação contém “clique aqui”',
 	LINK_DOI: 'Ligue títulos de artigos, não números DOI',
@@ -112,6 +114,7 @@ const why = {
 const tips = {
 	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Texto alternativo: <strong>"%(ALT_TEXT)"</strong></p><p>Os leitores de ecrã irão ler este URL, muitas vezes carácter a carácter. Isto dificilmente transmite o mesmo significado que ver a imagem.</p><p>${why.fix}Se for um elemento decorativo sem significado, adicione um alt vazio (alt="") para que seja ignorado por leitores de ecrã; caso contrário, forneça um texto alternativo descritivo.</p>${why.images}`,
 	ALT_MAYBE_BAD: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Defina o texto alternativo desta imagem como uma descrição concisa do que ela significa neste contexto.</p>${why.images}`,
+	ALT_MAYBE_BAD_WARNING: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Defina o texto alternativo desta imagem como uma descrição concisa do que ela significa neste contexto.</p>${why.images}`,
 	ALT_PLACEHOLDER: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Defina o texto alternativo desta imagem como uma descrição concisa do que ela significa neste contexto.</p>${why.images}`,
 	ALT_UNPRONOUNCEABLE: `<p>Texto alternativo: "<strong>%(alt)</strong>"</p><p>Este texto alternativo contém apenas símbolos impossíveis de pronunciar e/ou espaços. Os leitores de ecrã irão anunciar que existe uma imagem e, em seguida, fazer uma pausa estranha ou ler algo ininteligível.</p><p>${why.fix}Adicione um texto alternativo descritivo ou use um alt completamente vazio (alt="") se for apenas um ícone ou espaçador que deve ser ignorado.</p>${why.images}`,
 	BTN_EMPTY: `<p>${why.fix}Use qualquer método válido para indicar aos leitores de ecrã o que este botão faz, por exemplo, texto visível, alt num ícone ou um atributo title.</p>`,
@@ -147,6 +150,7 @@ const tips = {
 	LABEL_IN_NAME: `<p>O texto visível deste elemento parece ser diferente do seu nome acessível. Isto pode confundir utilizadores de leitores de ecrã e prejudicar o controlo por voz.</p><p>${why.fix}Garanta que a legenda visível começa pelo texto da legenda invisível e não contém informação significativa adicional.</p><p><strong>Legenda invisível:</strong> "%(TEXT)"</p>`,
 	LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Texto alternativo: "<strong>%(alt)</strong>"</p><p>Este texto alternativo é provavelmente apenas o nome de um ficheiro, e não um rótulo significativo para a ligação.</p><p>${why.fix}Defina o texto alternativo desta imagem como o nome do destino da ligação.</p><div class="why"><p>O propósito do texto alternativo é descrever o que a imagem significa, não apenas o que mostra. No caso de uma imagem que é uma ligação, o significado é o destino dessa ligação:</p><ul><li>"Página com texto" descreve a imagem, não a ligação.</li><li>"IMG_1234.jpg" é apenas o nome do ficheiro.</li><li>"<strong><em>Formulário de inscrição no evento (.doc)</em></strong>" descreve o destino da ligação.</li></ul></p></div>`,
 	LINK_ALT_MAYBE_BAD: `<p>Texto alternativo: "<strong>%(alt)</strong>"</p><p>${why.fix}Defina o texto alternativo desta imagem como o nome do destino da ligação.</p>${why.imageLinks}`,
+	LINK_ALT_MAYBE_BAD_WARNING: `<p>Texto alternativo: "<strong>%(alt)</strong>."</p><p>${why.fix}Defina o texto alternativo desta imagem como o nome do destino da ligação.</p>${why.imageLinks}`,
 	LINK_ALT_UNPRONOUNCEABLE: `<p>Alt “%(ALT_TEXT)” contém caracteres impronunciáveis; não descreve a ligação.</p><p>${why.fix}Use alt que descreva a função/destino da ligação.</p>${why.imageLinks}`,
 	LINK_CLICK_HERE: `Evite “clique aqui” — não comunica a finalidade.`,
 	LINK_DOI: `<p>${why.fix}Ligue o título do artigo; apresente o DOI como texto simples.</p><div class="why"><p>Ligações descritivas facilitam a procura e o anúncio por leitores de ecrã.</p></div>`,

@@ -3,7 +3,8 @@ import { default as Sa11yStrings } from '../sa11y-lang/nb.js';
 
 const testNames = {
 	ALT_FILE_EXT: 'Denne alternative teksten er et filnavn, ikke en beskrivelse',
-	ALT_MAYBE_BAD: 'Denne alternative teksten kan være vanskelig for en skjermleser å lese korrekt',
+	ALT_MAYBE_BAD: 'Er dette en tydelig og kortfattet beskrivelse av bildet?',
+	ALT_MAYBE_BAD_WARNING: 'Er dette en tydelig og kortfattet beskrivelse av bildet?',
 	ALT_PLACEHOLDER: 'Denne alt-teksten beskriver ikke bildet',
 	ALT_UNPRONOUNCEABLE: 'Denne alternative teksten kan ikke uttales',
 	BTN_EMPTY: 'Knappen mangler en tilgjengelig etikett',
@@ -42,7 +43,8 @@ const testNames = {
 	LABELS_PLACEHOLDER: 'Manuell gjennomgang: plassholdertekst',
 	LABEL_IN_NAME: 'Den synlige etiketten samsvarer ikke med den tilgjengelige etiketten',
 	LINK_ALT_FILE_EXT: 'Alternativ tekst brukt som lenke bør ikke være en URL',
-	LINK_ALT_MAYBE_BAD: 'Denne alternative teksten i lenken kan være vanskelig å lese for en skjermleser',
+	LINK_ALT_MAYBE_BAD: 'Denne alt-teksten i lenken er kanskje ikke tydelig og kortfattet',
+	LINK_ALT_MAYBE_BAD_WARNING: 'Denne alt-teksten i lenken er kanskje ikke tydelig og kortfattet',
 	LINK_ALT_UNPRONOUNCEABLE: 'Bilder brukt som lenker må ha uttalbar alternativ tekst',
 	LINK_CLICK_HERE: 'Manuell gjennomgang: lenken inneholder «klikk her»',
 	LINK_DOI: 'Lenk til artikkeltitler, ikke DOI‑numre',
@@ -109,6 +111,7 @@ const why = {
 export const tips = {
 	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt-tekst: <strong>"%(ALT_TEXT)"</strong></p><p>Skjermlesere vil lese opp denne URL-en, ofte bokstav for bokstav. Det gir vanligvis ikke samme mening som å se bildet.</p><p><strong class="badge">Slik løser du det</strong> Legg til tom alt (alt="") hvis dette er ren dekorasjon som bør ignoreres av skjermlesere, eller legg til en beskrivende alt-tekst.</p>${why.images}`,
 	ALT_MAYBE_BAD: `<p>Alt-tekst: <strong>"%(alt)"</strong></p><p><strong class="badge">Slik løser du det</strong> Sett en alt-tekst som kort beskriver hva dette bildet betyr i konteksten.</p>${why.images}`,
+	ALT_MAYBE_BAD_WARNING: `<p>Alt-tekst: <strong>"%(alt)"</strong></p><p><strong class="badge">Slik løser du det</strong> Sett en alt-tekst som kort beskriver hva dette bildet betyr i konteksten.</p>${why.images}`,
 	ALT_PLACEHOLDER: `<p>Alt-tekst: <strong>"%(alt)"</strong></p><p><strong class="badge">Slik løser du det</strong> Sett en alt-tekst som kort beskriver hva dette bildet betyr i konteksten.</p>${why.images}`,
 	ALT_UNPRONOUNCEABLE: `<p>Alt-tekst: "<strong>%(alt)</strong>"</p><p>Denne alt-teksten inneholder bare tegn som ikke kan uttales og/eller mellomrom. Skjermlesere vil annonsere bildet og så pause unaturlig, eller lese noe uforståelig.</p><p><strong class="badge">Slik løser du det</strong> Legg til en beskrivende alt-tekst, eller bruk en helt tom alt (alt="") hvis dette bare er et ikon eller mellomrom som skjermlesere skal ignorere.</p>${why.images}`,
 	BTN_EMPTY: `<p><strong class="badge">Slik løser du det</strong> Bruk en hvilken som helst metode for å fortelle skjermlesere hva knappen gjør, f.eks. tekst, alt-tekst på et ikon eller en title-attributt.</p>`,
@@ -144,6 +147,7 @@ export const tips = {
 	LABEL_IN_NAME: `<p>Den synlige teksten for dette elementet ser ut til å være forskjellig fra det tilgjengelige navnet. Dette kan forvirre skjermleserbrukere og ødelegge stemmestyring.</p><p><strong class="badge">Slik løser du det</strong> Sørg for at den synlige etiketten begynner med den skjulte etikettens tekst og ikke inneholder ekstra meningsfull informasjon.</p><p><strong>Skjult etikett:</strong> "%(TEXT)"</p>`,
 	LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt-tekst: "<strong>%(alt)</strong>"</p><p>Denne alt-teksten er sannsynligvis et filnavn i stedet for en meningsfull lenketittel.</p><p><strong class="badge">Slik løser du det</strong> Sett denne bildets alt-tekst til navnet på lenkemålet.</p><div class="why"><p>Formålet med alt-tekst er å beskrive hva et bilde betyr, ikke hva det inneholder. For et lenket bilde er meningen lenkemålet:</p><ul><li>"Side med tekst" beskriver bildet, ikke lenken.</li><li>"IMG_1234.jpg" er bare et filnavn.</li><li>"<strong><em>Påmeldingsskjema for arrangement (.doc)</em></strong>" er et lenkemål.</li></ul></p></div>`,
 	LINK_ALT_MAYBE_BAD: `<p>Alt-tekst: "<strong>%(alt)</strong>"</p><p><strong class="badge">Slik løser du det</strong> Sett alt-teksten til navnet på lenkemålet.</p>${why.imageLinks}`,
+	LINK_ALT_MAYBE_BAD_WARNING: `<p>Alt-tekst: "<strong>%(alt)</strong>."</p><p><strong class="badge">Slik løser du det</strong> Sett alt-teksten til navnet på lenkemålet.</p>${why.imageLinks}`,
 	LINK_ALT_UNPRONOUNCEABLE: `<p>Alt‑teksten «%(ALT_TEXT)» består av tegn som ikke kan uttales og kan ikke beskrive lenken.</p><p>${why.fix}Beskriv lenkens formål eller mål med alt‑teksten.</p>${why.imageLinks}`,
 	LINK_CLICK_HERE: `Vennligst unngå «klikk her» – det kommuniserer ikke hva lenken gjør.`,
 	LINK_DOI: `<p>${why.fix}Lenk til artikkeltittelen, og vis DOI som ren tekst (ikke lenk DOI direkte).</p><div class="why"><p>Beskrivende lenker gjør skanning enklere, og skjermlesere kan annonsere meningsfulle navn i stedet for tall.</p></div>`,

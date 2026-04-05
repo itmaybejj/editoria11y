@@ -312,7 +312,8 @@ const Sa11yStrings = {
 };
 const testNames = {
   ALT_FILE_EXT: "Ez az alternatív szöveg fájlnév, nem valódi leírás",
-  ALT_MAYBE_BAD: "Ez az alternatív szöveg nem olvasható fel természetesen képernyőolvasóval",
+  ALT_MAYBE_BAD: "Világos és tömör leírása ez a képnek?",
+  ALT_MAYBE_BAD_WARNING: "Világos és tömör leírása ez a képnek?",
   ALT_PLACEHOLDER: "Ez az alt szöveg nem írja le a képet",
   ALT_UNPRONOUNCEABLE: "Ez az alternatív szöveg nem ejthető ki",
   BTN_EMPTY: "A gombnak nincs hozzáférhető neve",
@@ -351,7 +352,8 @@ const testNames = {
   LABELS_PLACEHOLDER: "Kézi ellenőrzés: helykitöltő szöveg",
   LABEL_IN_NAME: "A látható címke nem egyezik a hozzáférhető címmel",
   LINK_ALT_FILE_EXT: "A hivatkozás alt‑szövege nem lehet URL",
-  LINK_ALT_MAYBE_BAD: "A linkhez tartozó alt‑szöveg nem olvasható fel természetesen",
+  LINK_ALT_MAYBE_BAD: "A linkhez tartozó alt‑szöveg nem biztos, hogy világos és tömör",
+  LINK_ALT_MAYBE_BAD_WARNING: "A linkhez tartozó alt‑szöveg nem biztos, hogy világos és tömör",
   LINK_ALT_UNPRONOUNCEABLE: "A képlinkek alt‑szövegének ejthetőnek kell lennie",
   LINK_CLICK_HERE: "Kézi ellenőrzés: a link „kattints ide” szöveget tartalmaz",
   LINK_DOI: "A DOI helyett a cikk címére kell linkelni",
@@ -415,6 +417,7 @@ const why = {
 const tips = {
   ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt szöveg: <strong>"%(ALT_TEXT)"</strong></p><p>A képernyőolvasók gyakran betűnként olvassák fel ezt az URL-t. Ez nem adja vissza a kép látványának jelentését.</p><p><strong class="badge">Megoldás</strong> Ha a kép csupán dekoráció, adjon alt="" értéket, hogy a képernyőolvasók figyelmen kívül hagyják. Ha jelentése van, adjon meg leíró alt szöveget.</p>${why.images}`,
   ALT_MAYBE_BAD: `<p>Alt szöveg: <strong>"%(alt)"</strong></p><p><strong class="badge">Megoldás</strong> Állítsa be ezt a kép alt szövegét rövid, a kontextusnak megfelelő jelentésleírásra.</p>${why.images}`,
+  ALT_MAYBE_BAD_WARNING: `<p>Alt szöveg: <strong>"%(alt)"</strong></p><p><strong class="badge">Megoldás</strong> Állítsa be ezt a kép alt szövegét rövid, a kontextusnak megfelelő jelentésleírásra.</p>${why.images}`,
   ALT_PLACEHOLDER: `<p>Alt szöveg: <strong>"%(alt)"</strong></p><p><strong class="badge">Megoldás</strong> Állítsa be ezt a kép alt szövegét rövid, a kontextusnak megfelelő jelentésleírásra.</p>${why.images}`,
   ALT_UNPRONOUNCEABLE: `<p>Alt szöveg: "<strong>%(alt)</strong>"</p><p>Ez az alt szöveg csak kiejthetetlen karaktereket és/vagy szóközöket tartalmaz. A képernyőolvasók bejelentik, hogy kép található itt, majd zavartan szünetelnek vagy értelmezhetetlen hangzást olvasnak fel.</p><p><strong class="badge">Megoldás</strong> Adjon meg leíró alt szöveget, vagy ha ez csak ikon/spacer, használjon teljesen üres alt="" értéket.</p>${why.images}`,
   BTN_EMPTY: `<p><strong class="badge">Megoldás</strong> Használjon bármely érvényes módszert (szöveget, ikon altját vagy title attribútumot), hogy a képernyőolvasók számára egyértelművé tegye a gomb funkcióját.</p>`,
@@ -450,6 +453,7 @@ const tips = {
   LABEL_IN_NAME: `<p>Ennek az elemnek a látható szövege eltér a hozzá tartozó akadálymentes névtől. Ez megzavarhatja a képernyőolvasó‑felhasználókat, és problémát okozhat a hangvezérlésben.</p><p><strong class="badge">Megoldás</strong> Győződjön meg róla, hogy a látható címke a rejtett címke szövegével kezdődik, és nem tartalmaz plusz jelentést.</p><p><strong>Láthatatlan címke:</strong> "%(TEXT)"</p>`,
   LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt szöveg: "<strong>%(alt)</strong>"</p><p>Ez az alt szöveg valószínűleg egy fájlnév, nem pedig a link célját leíró címke.</p><p><strong class="badge">Megoldás</strong> Állítsa be a kép alt szövegét a link céljának nevére.</p><div class="why"><p>Az alt célja a kép jelentésének közvetítése. Képlink esetén ez maga a céloldal:</p><ul><li>"Szöveges oldal" — a képet írja le, nem a linket.</li><li>"IMG_1234.jpg" — csak fájlnév.</li><li>"<strong><em>Eseményregisztrációs űrlap (.doc)</em></strong>" — a link célját írja le.</li></ul></p></div>`,
   LINK_ALT_MAYBE_BAD: `<p>Alt szöveg: "<strong>%(alt)</strong>"</p><p><strong class="badge">Megoldás</strong> Állítsa a kép alt szövegét a link céljának címére.</p>${why.imageLinks}`,
+  LINK_ALT_MAYBE_BAD_WARNING: `<p>Alt szöveg: "<strong>%(alt)</strong>"</p><p><strong class="badge">Megoldás</strong> Állítsa a kép alt szövegét a link céljának címére.</p>${why.imageLinks}`,
   LINK_ALT_UNPRONOUNCEABLE: `<p>A képlink alt szövege csak kimondhatatlan karaktereket és/vagy szóközöket tartalmaz: „%(ALT_TEXT)”. A link nem írható le.</p><p>${why.fix}Adjon meg alt szöveget, amely a link célját vagy funkcióját írja le.</p>${why.imageLinks}`,
   LINK_CLICK_HERE: `A „kattintson/kattints ide” típusú szöveg felesleges, és nem mondja el a link célját.`,
   LINK_DOI: `<p>${why.fix}A DOI szám helyett a cikk címét linkelje, a DOI maradjon sima szöveg.</p><div class="why"><p>A leíró linkek segítik a keresést és szkennelést; a képernyőolvasók is így tudnak értelmes linklistát felolvasni.</p></div>`,
