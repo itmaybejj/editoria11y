@@ -8542,7 +8542,7 @@ ${this.error.stack}
     LABEL_IN_NAME: "Visible label does not match invisible label",
     LABELS_MISSING_LABEL: "This input is not connected to a label",
     LINK_ALT_FILE_EXT: "Alt text used as a link should not be a URL",
-    LINK_ALT_MAYBE_BAD: "This linked alt cannot be pronounced by a screen reader",
+    LINK_ALT_MAYBE_BAD: "This linked alt might not be a clear and concise",
     LINK_ALT_MAYBE_BAD_WARNING: testNames.LINK_ALT_MAYBE_BAD,
     LINK_ALT_UNPRONOUNCEABLE: "Linked images need pronounceable alt text",
     LINK_CLICK_HERE: 'This link contains "click here"',
