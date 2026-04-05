@@ -19,10 +19,9 @@ const Lang = {
     if (args?.length) {
       args.forEach((arg, index) => {
         const argString = String(arg);
-        // If it's a URL, sanitize and replace the placeholder.
+        // If it's a URL, replace the placeholder with the raw string.
         if (argString.startsWith('https://')) {
-          const safeURL = argString.replace(/["'<>&]/g, (c) => `&#${c.charCodeAt(0)};`);
-          p.innerHTML = p.innerHTML.replace(/%\([a-zA-z]+\)/, safeURL);
+          p.innerHTML = p.innerHTML.replace(/%\([a-zA-z]+\)/, argString);
         } else {
           // If it's a normal string, use the span marker for safe injection later.
           p.innerHTML = p.innerHTML.replace(/%\([a-zA-z]+\)/, `<span data-arg='${index}'></span>`);

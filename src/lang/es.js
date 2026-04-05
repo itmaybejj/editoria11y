@@ -2,7 +2,8 @@ import { default as Sa11yStrings } from '../sa11y-lang/es.js';
 
 const testNames = {
 	ALT_FILE_EXT: 'Este texto alternativo es un nombre de archivo, no una descripción',
-	ALT_MAYBE_BAD: 'Este texto alternativo no puede ser pronunciado por un lector de pantalla',
+	ALT_MAYBE_BAD: '¿Es esta una descripción clara y concisa de la imagen?',
+	ALT_MAYBE_BAD_WARNING: '¿Es esta una descripción clara y concisa de la imagen?',
 	ALT_PLACEHOLDER: 'Este texto alternativo no describe la imagen',
 	ALT_UNPRONOUNCEABLE: 'Este texto alternativo es impronunciable',
 	BTN_EMPTY: 'El botón no tiene una etiqueta accesible',
@@ -41,7 +42,8 @@ const testNames = {
 	LABEL_IN_NAME: 'La etiqueta visible no coincide con la etiqueta invisible',
 	LABELS_MISSING_LABEL: 'Este campo no está conectado a una etiqueta',
 	LINK_ALT_FILE_EXT: 'El texto alternativo usado como vínculo no debe ser una URL',
-	LINK_ALT_MAYBE_BAD: 'Este texto alternativo vinculado no puede ser pronunciado por un lector de pantalla',
+	LINK_ALT_MAYBE_BAD: 'Este texto alternativo vinculado podría no ser claro ni conciso',
+	LINK_ALT_MAYBE_BAD_WARNING: 'Este texto alternativo vinculado podría no ser claro ni conciso',
 	LINK_ALT_UNPRONOUNCEABLE: 'Las imágenes vinculadas necesitan texto alternativo pronunciable',
 	LINK_CLICK_HERE: 'Revisión manual: el enlace contiene «haz clic aquí»',
 	LINK_DOI: 'Vincula los títulos de artículos, no los números DOI',
@@ -56,6 +58,7 @@ const testNames = {
 	LINK_IMAGE_LONG_ALT: '¿Puede este texto alternativo vinculado ser más corto?',
 	LINK_IMAGE_NO_ALT_TEXT: 'Esta imagen vinculada necesita texto alternativo',
 	LINK_IMAGE_TEXT: 'Revisión manual: imagen dentro de un enlace marcada como decorativa.',
+	LINK_MAYBE_BUTTON: 'Este enlace parece que debería ser un botón',
 	LINK_NEW_TAB: '¿Este enlace abre una pestaña nueva sin advertencia?',
 	LINK_PLACEHOLDER_ALT: 'Esta imagen vinculada necesita un texto alternativo significativo',
 	LINK_STOPWORD: 'Este enlace solo contiene palabras genéricas',
@@ -113,6 +116,8 @@ const tips = {
 
 	ALT_MAYBE_BAD: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Establezca el texto alternativo de esta imagen como una descripción concisa de lo que significa en este contexto.</p>${why.images}`,
 
+	ALT_MAYBE_BAD_WARNING: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Establezca el texto alternativo de esta imagen como una descripción concisa de lo que significa en este contexto.</p>${why.images}`,
+
 	ALT_PLACEHOLDER: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Establezca el texto alternativo de esta imagen como una descripción concisa de lo que significa en este contexto.</p>${why.images}`,
 
 	ALT_UNPRONOUNCEABLE: `<p>Texto alternativo: "<strong>%(alt)</strong>"</p><p>Este texto alternativo solo contiene símbolos impronunciables y/o espacios. Los lectores de pantalla anunciarán que hay una imagen y luego harán una pausa incómoda o dirán algo ininteligible.</p><p>${why.fix}Agregue un texto alternativo descriptivo, o proporcione un alt <em>completamente</em> vacío (alt="") si esto es solo un ícono o separador que los lectores de pantalla deben ignorar.</p>${why.images}`,
@@ -129,7 +134,7 @@ const tips = {
 
 	DUPLICATE_TITLE: `<p>${why.fix}Elimine el texto del enlace o el atributo <code>title</code>.</p><div class="why"><p>Nota: los textos emergentes de <code>title</code> solo aparecen al pasar el puntero del ratón. No se ven al navegar en un teléfono o con el teclado, por lo que muchas personas nunca los verán. No deben contener información única o importante.</p></div>`,
 
-	EMBED_AUDIO: `<p>Si este audio contiene habla, se debe proporcionar una <a href="https://www.w3.org/WAI/media/av/transcribing/">alternativa en texto</a> en esta página o mediante un enlace.</p><p>Tenga en cuenta que una persona debe revisar las transcripciones automáticas y asegurarse de que los hablantes y los efectos de sonido significativos estén correctamente identificados.</p>`,
+	EMBED_AUDIO: `<p>Este verificador no puede determinar si un reproductor de audio tiene una transcripción, ni si la transcripción es precisa.</p><p>${why.fix}Asegúrese de que haya disponible una <a href="https://www.w3.org/WAI/media/av/transcribing/">transcripción o alternativa en texto</a>, y verifique que los hablantes y los efectos de sonido significativos estén correctamente identificados.</p>`,
 
 	EMBED_DATA_VIZ: `<p>Los elementos de visualización incrustados a menudo son difíciles o imposibles de operar con tecnologías de asistencia; pueden resultar difíciles de comprender para personas con baja visión o daltonismo, y pueden requerir mucho desplazamiento horizontal en teléfonos.</p><p>${why.fix}A menos que este embed tenga alto contraste visual, se pueda operar con teclado <strong><em>y</em></strong> sea descrito por un lector de pantalla, agregue un formato alternativo equivalente (descripción textual, tabla de datos o hoja de cálculo descargable) y luego descarte esta alerta.</p>`,
 
@@ -137,9 +142,9 @@ const tips = {
 
 	EMBED_MISSING_TITLE: `<p>Los contenidos incrustados necesitan un nombre accesible que describa su contenido para los lectores de pantalla.</p><p>${why.fix}Agregue un atributo <code>title</code> o <code>aria-label</code> único.</p>`,
 
-	EMBED_UNFOCUSABLE: `Este atributo indica a los teclados y tecnologías de asistencia que omitan este elemento. A menos que el contenido del iframe no contenga enlaces, botones ni campos y no se pueda desplazar, este atributo debe eliminarse.`,
+	EMBED_UNFOCUSABLE: `<p>Este atributo indica a los teclados y tecnologías de asistencia que omitan este elemento. A menos que el contenido del iframe no contenga enlaces, botones ni campos y no se pueda desplazar, este atributo debe eliminarse.</p>`,
 
-	EMBED_VIDEO: `<p>Los videos deben proporcionar subtítulos.</p><p>Tenga en cuenta que una persona debe revisar los subtítulos automáticos y asegurarse de que los hablantes y los sonidos significativos estén correctamente identificados.</p><p>${why.fix}Agregue o corrija los subtítulos y, luego, descarte esta alerta.</p>`,
+	EMBED_VIDEO: `<p>Este verificador no puede «ver» si los videos tienen subtítulos, ni determinar si alguien los ha revisado, por lo que se necesita una verificación manual.</p><p>${why.fix}Asegúrese de que haya disponibles <a href="https://www.w3.org/WAI/media/av/captions/">subtítulos precisos («CC»)</a>, y verifique que los hablantes y los efectos de sonido significativos estén correctamente identificados.</p>`,
 
 	HEADING_EMPTY: `<p>Los encabezados vacíos crean huecos confusos en el esquema de la página.</p><p>${why.fix}Agregue texto a este encabezado o elimine esta línea vacía.</p>${why.headings}`,
 
@@ -183,6 +188,8 @@ const tips = {
 
 	LINK_ALT_MAYBE_BAD: `<p>Texto alternativo: "<strong>%(alt)</strong>"</p><p>${why.fix}Establezca el alt de esta imagen con el nombre del destino del enlace.</p>${why.imageLinks}`,
 
+	LINK_ALT_MAYBE_BAD_WARNING: `<p>Texto alternativo: "<strong>%(alt)</strong>"</p><p>${why.fix}Establezca el alt de esta imagen con el nombre del destino del enlace.</p>${why.imageLinks}`,
+
 	LINK_ALT_UNPRONOUNCEABLE: `<p>El alt de esta imagen vinculada contiene solo símbolos impronunciables o espacios: <strong>"%(ALT_TEXT)"</strong>.</p><p>Los lectores de pantalla anunciarán que hay un enlace, pero no podrán describirlo.</p><p>${why.fix}Establezca el alt según la finalidad o el destino del enlace.</p>${why.imageLinks}`,
 
 	LINK_CLICK_HERE: `La frase «haz clic» o «haz clic aquí» es redundante y desvía la atención del propósito del enlace.`,
@@ -209,6 +216,8 @@ const tips = {
 	LINK_IMAGE_NO_ALT_TEXT: `<p>Cuando un enlace envuelve una imagen, el alt de la imagen <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">proporciona el título del enlace</a>.</p><p>${why.fix}Establezca el texto alternativo con la finalidad o el destino del enlace.</p>${why.imageLinks}`,
 
 	LINK_IMAGE_TEXT: 'La imagen está marcada como decorativa, aunque el enlace utiliza el texto circundante como etiqueta descriptiva.',
+
+	LINK_MAYBE_BUTTON: `<p>Este enlace tiene un destino no válido y contiene la palabra "<strong>%(NAME)</strong>". Esto sugiere que podría no ser un enlace, sino que controla algún comportamiento programado en la página.</p><p>${why.fix}reemplace el enlace por un <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">botón accesible</a>, o corrija el destino del enlace.</p><div class="why"><p>Consejo: las tecnologías de asistencia tratan los botones y los enlaces de manera diferente. Usar el elemento HTML correcto asegura que las personas usuarias sepan qué atajos de teclado usar y qué acción se activará.</p></div>`,
 
 	LINK_NEW_TAB: `<p>${why.fix}Configure este enlace para que se abra en la misma pestaña o <a href="https://itmaybejj.github.io/linkpurpose/">avise a las personas usuarias</a> con antelación.</p><div class="why"><p>Las personas siempre pueden elegir abrir un enlace en una pestaña nueva. Forzar una nueva pestaña sin aviso puede resultar confuso, especialmente para quienes usan tecnologías de asistencia.</p><p>Nota: los enlaces dentro de formularios suelen abrirse en otra pestaña para evitar la pérdida de datos.</p></div>`,
 

@@ -1,0 +1,28 @@
+{
+  "_comment": "Tracks the English source commit each translation was last synced to. Used by the check-translations skill to generate targeted diffs for translators.",
+  "englishSources": [
+    "src/lang/baseAll.js",
+    "src/lang/baseEnglishOnly.js"
+  ],
+  "sa11yEnglishSource": "src/sa11y-lang/en.js",
+  "baseline": "590d1644b90fa47416f59fd98556d485f91e7981",
+  "translations": {
+    "src/lang/da.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/de.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/el.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/en-us.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/es.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/fr.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/hu.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/it.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/jp.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/nb.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/nl.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/pl.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/pt-br.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/pt-pt.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/sv.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/uk.js": "244ea9533712204454f491290f70a8500cd39505",
+    "src/lang/zh.js": "244ea9533712204454f491290f70a8500cd39505"
+  }
+}
