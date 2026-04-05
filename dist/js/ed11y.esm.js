@@ -8498,7 +8498,8 @@ const Sa11yStrings = {
 };
 const testNames = {
   ALT_FILE_EXT: "This alt text is a filename, not a description",
-  ALT_MAYBE_BAD: "This alt text cannot be pronounced by a screen reader",
+  ALT_MAYBE_BAD: "Is this a clear and concise description of the image?",
+  ALT_MAYBE_BAD_WARNING: testNames.ALT_MAYBE_BAD,
   ALT_PLACEHOLDER: "This alt text sounds like a placeholder",
   ALT_UNPRONOUNCEABLE: "This alt text is unpronounceable",
   BTN_EMPTY: "Button is missing an accessible label",
@@ -8538,6 +8539,7 @@ const testNames = {
   LABELS_MISSING_LABEL: "This input is not connected to a label",
   LINK_ALT_FILE_EXT: "Alt text used as a link should not be a URL",
   LINK_ALT_MAYBE_BAD: "This linked alt cannot be pronounced by a screen reader",
+  LINK_ALT_MAYBE_BAD_WARNING: testNames.LINK_ALT_MAYBE_BAD,
   LINK_ALT_UNPRONOUNCEABLE: "Linked images need pronounceable alt text",
   LINK_CLICK_HERE: 'This link contains "click here"',
   LINK_DOI: "Link article titles, not DOI numbers",
@@ -8601,6 +8603,7 @@ const why = {
 const tips = {
   ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt text: <strong>"%(ALT_TEXT)"</strong></p><p>Screen readers will dictate this url, often one letter at a time. This probably does not provide the same meaning as seeing the image.</p><p>${why.fix}Either add an empty alt (alt="") if this is a meaningless decoration that should be ignored by screen readers, or add descriptive alt text.</p>${why.images}`,
   ALT_MAYBE_BAD: `<p>Alt text: <strong>"%(alt)"</strong></p><p>${why.fix}Set this image's alternative text to a concise description of what this image means in this context.</p>${why.images}`,
+  ALT_MAYBE_BAD_WARNING: tips.ALT_MAYBE_BAD,
   ALT_PLACEHOLDER: `<p>Alt text: <strong>"%(alt)"</strong></p><p>${why.fix}Set this image's alternative text to a concise description of what this image means in this context.</p>${why.images}`,
   //updated
   ALT_UNPRONOUNCEABLE: `<p>Alt text: "<strong>%(alt)</strong>"</p><p>This alt text only contains unpronounceable symbols and/or spaces. Screen readers will announce that an image is present and then pause awkwardly or say something unintelligible.</p><p>${why.fix}Add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") if this is just an icon or spacer, and screen readers should ignore it.</p>${why.images}`,
@@ -8641,6 +8644,7 @@ const tips = {
   LABEL_IN_NAME: `<p>The visible text for this element appears to be different from the accessible name. This may cause confusion for screen reader users, and may break voice control.</p><p>${why.fix}Make sure the visible label starts with the text of the invisible label, and does not contain any additional meaningful information.</p><p><strong>Invisible Label:</strong> "%(TEXT)"</p>`,
   LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt text: "<strong>%(alt)</strong>"</p><p>This alt text is probably a filename instead of a meaningful label for a link.</p><p>${why.fix}Set this image's alt text to the name of the link destination.</p><div class="why"> <p>The purpose of alt text is to provide an alternative for what an image means, not what it contains. The meaning of a linked image is the link destination:</p><ul><li>"Page with writing" describes the image, not a link.</li><li>"IMG_1234.jpg" is just a filename.</li><li>"<strong><em>Event registration form (.doc)</em></strong>" is a link destination.</li></ul></p></div>`,
   LINK_ALT_MAYBE_BAD: `<p>Alt text: "<strong>%(alt)</strong>."</p><p>${why.fix}Set this image's alt text to the name of the link destination.</p>${why.imageLinks}`,
+  LINK_ALT_MAYBE_BAD_WARNING: tips.LINK_ALT_MAYBE_BAD,
   LINK_ALT_UNPRONOUNCEABLE: `<p>The alt text within this linked image only contains unpronounceable symbols and/or spaces: <strong>"%(ALT_TEXT)"</strong>.</p><p>Screen readers will announce there is a link, and then be unable to describe it.</p><p>${why.fix}Set this image's alt to the link's destination or purpose.</p>${why.imageLinks}`,
   LINK_CLICK_HERE: `The phrase "click" or "click here" is redundant, and takes focus away from the link's purpose.`,
   LINK_DOI: `<p>${why.fix}Link the article title and provide the DOI number as plain text, rather than linking the DOI number and leaving the article title as plain text.</p><div class="why"><p>The <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">APA Style guide</a> recommends using descriptive links on websites because users skim by links and use in-page search for links by name. Users are much more likely to notice articles of interest when the title is linked.</p><p>This also allows screen readers to describe each link meaningfully, rather than speaking a meaningless sequence of numbers.</p></div>`,
