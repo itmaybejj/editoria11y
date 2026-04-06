@@ -44,7 +44,7 @@
       MISSING_ROOT: "The full page was checked for accessibility because the target area <code>%(root)</code> does not exist.",
       MISSING_READABILITY_ROOT: "The readability score is based on the <code>%(fallback)</code> content area, because the target area <code>%(root)</code> does not exist.",
       SKIP_TO_PAGE_ISSUES: "Skip to Page Issues",
-      CONSOLE_ERROR: 'Sorry, but there is an issue with the accessibility checker on this page. Can you please <a href="%(link)">report it through this form</a> or on <a href="%(link)">GitHub</a>?',
+      CONSOLE_ERROR: 'Sorry, but there is an issue with the accessibility checker on this page. Can you please <a href="https://forms.gle/sjzK9XykETaoqZv99">report it through this form</a> or on <a href="https://github.com/ryersondmp/sa11y/issues/new?title=Bug%20report">GitHub</a>?',
       APPEARANCE: "Appearance",
       MOVE_PANEL: "Move panel",
       HIDDEN: "Hidden",
@@ -550,7 +550,7 @@
   const interfaceStrings = {
     ALERT_CLOSE: "Close",
     ALT: "Alt Text: ",
-    CONSOLE_ERROR: 'There is an issue with the accessibility checker on this page. Please <a class="g-link">report it on GitHub</a>.',
+    CONSOLE_ERROR: 'There is an issue with the accessibility checker on this page. Please <a class="g-link">report it on GitHub</a>. Debug information:',
     DECORATIVE: "Marked decorative",
     DISMISS: "Ignore",
     DISMISS_ALL: "On this page: ignore",

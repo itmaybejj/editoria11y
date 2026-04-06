@@ -2,6 +2,7 @@ import Lang from '../../sa11y-js/utils/lang.js';
 import { sanitizeURL } from '../../sa11y-js/utils/utils';
 import version from '../version.js';
 import { spriteClose } from './sprite.js';
+import { State } from '../../sa11y-js/core/state.js';
 
 // Replaces Sa11y error with one that does not attach CSS.
 export default class ConsoleErrors extends HTMLElement {
@@ -54,7 +55,16 @@ ${this.error.stack}
     // 3. Create the main message.
     const p1 = document.createElement('p');
     p1.className = 'p1';
-    p1.append(Lang.sprintf('CONSOLE_ERROR'));
+    let heading = Lang.sprintf('CONSOLE_ERROR');
+    if (heading?.textContent === 'CONSOLE_ERROR') {
+      // Fallback if translation is missing.
+      heading = Lang.sprintf(
+        'There is an issue with the accessibility checker on this page. Please <a class="g-link">report it on GitHub</a>. Debug information:',
+      );
+      heading.querySelector('a span')?.style?.setProperty('position', 'absolute');
+      heading.querySelector('a span')?.style?.setProperty('opacity', '0');
+    }
+    p1.append(heading);
     if (p1.querySelector('.g-link')) {
       p1.querySelector('.g-link').href = github;
     }
@@ -65,13 +75,34 @@ ${this.error.stack}
 
     // Use line breaks and text nodes to avoid parsing strings as HTML.
     p2.append(
+      `Version: ${version}`,
+      document.createElement('br'),
+      document.createElement('br'),
+      `URL: ${url}`,
+      document.createElement('br'),
+      document.createElement('br'),
       this.error.stack,
       document.createElement('br'),
       document.createElement('br'),
-      `Version: ${version}`,
-      document.createElement('br'),
-      `URL: ${url}`,
     );
+    p2.style.setProperty('max-height', 'min(66vh, 300px)');
+    p2.style.setProperty('overflow', 'auto');
+
+    const optionsInfo = document.createElement('span');
+    try {
+      if (State.option) {
+        const oldPepper = State.option.pepper;
+        State.option.pepper = 'hidden';
+        optionsInfo.textContent += `Options: ${JSON.stringify(State.option)}`;
+        State.option.pepper = oldPepper;
+      } else {
+        optionsInfo.textContent += 'Options object is not available.';
+      }
+    } catch (e) {
+      optionsInfo.textContent += 'Options object is not available.';
+      console.warn('State object is not accessible for error details.', e);
+    }
+    p2.append(optionsInfo);
 
     // 5. Assemble and append.
     content.append(h2, p1, p2);

@@ -558,5 +558,6 @@ export function showError(error) {
   customElements.define('sa11y-console-error', ConsoleErrors);
   const consoleErrors = new ConsoleErrors(error);
   document.body.appendChild(consoleErrors);
+  UI.attachCSS(consoleErrors.shadowRoot.querySelector('*'));
   throw Error(error);
 }
