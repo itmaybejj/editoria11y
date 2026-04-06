@@ -1,0 +1,47 @@
+name: Build dist
+
+on:
+  push:
+    branches:
+      - 3.0.x
+      - 'features/**'
+  pull_request:
+    branches:
+      - 3.0.x
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and upload dist artifact
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify dist was produced
+        run: |
+          test -d dist/js || { echo "dist/js missing"; exit 1; }
+          test -d dist/css || { echo "dist/css missing"; exit 1; }
+          ls -la dist/js dist/css
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: editoria11y-dist-${{ github.sha }}
+          path: dist/
+          retention-days: 1

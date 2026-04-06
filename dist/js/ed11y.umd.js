@@ -36,13 +36,8 @@
       p.innerHTML = transString;
       el.appendChild(p);
       if (args?.length) {
-        args.forEach((arg, index) => {
-          const argString = String(arg);
-          if (argString.startsWith("https://")) {
-            p.innerHTML = p.innerHTML.replace(/%\([a-zA-z]+\)/, argString);
-          } else {
-            p.innerHTML = p.innerHTML.replace(/%\([a-zA-z]+\)/, `<span data-arg='${index}'></span>`);
-          }
+        args.forEach((_arg, index) => {
+          p.innerHTML = p.innerHTML.replace(/%\([a-zA-Z_]+\)/, `<span data-arg='${index}'></span>`);
         });
         args.forEach((arg, index) => {
           const replacement = el.querySelector(`[data-arg="${index}"]`);
@@ -1548,20 +1543,48 @@ ${this.error.stack}
       h2.textContent = Lang._("ERROR");
       const p1 = document.createElement("p");
       p1.className = "p1";
-      p1.append(Lang.sprintf("CONSOLE_ERROR"));
+      let heading = Lang.sprintf("CONSOLE_ERROR");
+      if (heading?.textContent === "CONSOLE_ERROR") {
+        heading = Lang.sprintf(
+          'There is an issue with the accessibility checker on this page. Please <a class="g-link">report it on GitHub</a>. Debug information:'
+        );
+        heading.querySelector("a span")?.style?.setProperty("position", "absolute");
+        heading.querySelector("a span")?.style?.setProperty("opacity", "0");
+      }
+      p1.append(heading);
       if (p1.querySelector(".g-link")) {
         p1.querySelector(".g-link").href = github;
       }
       const p2 = document.createElement("p");
       p2.className = "error";
       p2.append(
-        this.error.stack,
-        document.createElement("br"),
-        document.createElement("br"),
         `Version: ${version}`,
         document.createElement("br"),
-        `URL: ${url2}`
+        document.createElement("br"),
+        `URL: ${url2}`,
+        document.createElement("br"),
+        document.createElement("br"),
+        this.error.stack,
+        document.createElement("br"),
+        document.createElement("br")
       );
+      p2.style.setProperty("max-height", "min(66vh, 300px)");
+      p2.style.setProperty("overflow", "auto");
+      const optionsInfo = document.createElement("span");
+      try {
+        if (State.option) {
+          const oldPepper = State.option.pepper;
+          State.option.pepper = "hidden";
+          optionsInfo.textContent += `Options: ${JSON.stringify(State.option)}`;
+          State.option.pepper = oldPepper;
+        } else {
+          optionsInfo.textContent += "Options object is not available.";
+        }
+      } catch (e) {
+        optionsInfo.textContent += "Options object is not available.";
+        console.warn("State object is not accessible for error details.", e);
+      }
+      p2.append(optionsInfo);
       content.append(h2, p1, p2);
       wrapper.append(closeWrapper, content);
       shadow.appendChild(wrapper);
@@ -2084,6 +2107,7 @@ ${this.error.stack}
     customElements.define("sa11y-console-error", ConsoleErrors);
     const consoleErrors = new ConsoleErrors(error);
     document.body.appendChild(consoleErrors);
+    UI.attachCSS(consoleErrors.shadowRoot.querySelector("*"));
     throw Error(error);
   }
   function checkHeaders() {
@@ -8195,7 +8219,7 @@ ${this.error.stack}
       MISSING_ROOT: "The full page was checked for accessibility because the target area <code>%(root)</code> does not exist.",
       MISSING_READABILITY_ROOT: "The readability score is based on the <code>%(fallback)</code> content area, because the target area <code>%(root)</code> does not exist.",
       SKIP_TO_PAGE_ISSUES: "Skip to Page Issues",
-      CONSOLE_ERROR: 'Sorry, but there is an issue with the accessibility checker on this page. Can you please <a href="%(link)">report it through this form</a> or on <a href="%(link)">GitHub</a>?',
+      CONSOLE_ERROR: 'Sorry, but there is an issue with the accessibility checker on this page. Can you please <a href="https://forms.gle/sjzK9XykETaoqZv99">report it through this form</a> or on <a href="https://github.com/ryersondmp/sa11y/issues/new?title=Bug%20report">GitHub</a>?',
       APPEARANCE: "Appearance",
       MOVE_PANEL: "Move panel",
       HIDDEN: "Hidden",
@@ -8701,7 +8725,7 @@ ${this.error.stack}
   const interfaceStrings = {
     ALERT_CLOSE: "Close",
     ALT: "Alt Text: ",
-    CONSOLE_ERROR: 'There is an issue with the accessibility checker on this page. Please <a class="g-link">report it on GitHub</a>.',
+    CONSOLE_ERROR: 'There is an issue with the accessibility checker on this page. Please <a class="g-link">report it on GitHub</a>. Debug information:',
     DECORATIVE: "Marked decorative",
     DISMISS: "Ignore",
     DISMISS_ALL: "On this page: ignore",
@@ -8924,36 +8948,36 @@ ${this.error.stack}
     // Set to 'inherit' for fields edited in a frontend context.
     /*
     [
-    	{
-    		selector: '.example-inherit',
-    		previousHeading: 'inherit',
-    	},
-    	{
-    		selector: '.example-l3',
-    		previousHeading: 3,
-    	},
+      {
+        selector: '.example-inherit',
+        previousHeading: 'inherit',
+      },
+      {
+        selector: '.example-l3',
+        previousHeading: 3,
+      },
     ],*/
     // Editoria11y Only ==============================
     // checkRoots: false, // todo document change
     // ignoreElements: '', // todo document change
     splitConfiguration: false,
     /*
-      	// List checks and config for reporting results not shown to editors.
-      	// If split configuration is set, the check and option keys must be present.
-      	syncOnlyConfiguration {
-      		checks: [], // Test keys defined below to not be display on page.
+        // List checks and config for reporting results not shown to editors.
+        // If split configuration is set, the check and option keys must be present.
+        syncOnlyConfiguration {
+          checks: [], // Test keys defined below to not be display on page.
     
-      		options: {
-      			checkRoot: false,
-      			containerIgnore: '',
-      			contrastIgnore: '.sr-only',
-      			outlineIgnore: '',
-      			headerIgnore: '',
-      			imageIgnore: '',
-      			linkIgnore: '[aria-hidden][tabindex="-1"]',
-      		},
-      	}
-      	*/
+          options: {
+            checkRoot: false,
+            containerIgnore: '',
+            contrastIgnore: '.sr-only',
+            outlineIgnore: '',
+            headerIgnore: '',
+            imageIgnore: '',
+            linkIgnore: '[aria-hidden][tabindex="-1"]',
+          },
+        }
+        */
     // Set alertModes:
     alertMode: "userPreference",
     // 'headless': do not draw run
@@ -9090,10 +9114,14 @@ ${this.error.stack}
     // Sa11y checks ==================
     checks: {
       // Sa11y: Heading checks
-      HEADING_SKIPPED_LEVEL: true,
+      HEADING_SKIPPED_LEVEL: {
+        type: "warning"
+      },
       HEADING_EMPTY_WITH_IMAGE: true,
       HEADING_EMPTY: true,
-      HEADING_FIRST: true,
+      HEADING_FIRST: {
+        type: "warning"
+      },
       // @todo CMS
       HEADING_LONG: {
         maxLength: 170

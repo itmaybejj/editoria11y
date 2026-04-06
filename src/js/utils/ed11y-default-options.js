@@ -120,16 +120,16 @@ export const ed11yDefaultOptions = {
   // This is ideal for systems with separate backend editing pages.
   // Set to 'inherit' for fields edited in a frontend context.
   /*
-	[
-		{
-			selector: '.example-inherit',
-			previousHeading: 'inherit',
-		},
-		{
-			selector: '.example-l3',
-			previousHeading: 3,
-		},
-	],*/
+  [
+    {
+      selector: '.example-inherit',
+      previousHeading: 'inherit',
+    },
+    {
+      selector: '.example-l3',
+      previousHeading: 3,
+    },
+  ],*/
 
   // Editoria11y Only ==============================
   // checkRoots: false, // todo document change
@@ -137,22 +137,22 @@ export const ed11yDefaultOptions = {
 
   splitConfiguration: false,
   /*
-	// List checks and config for reporting results not shown to editors.
-	// If split configuration is set, the check and option keys must be present.
-	syncOnlyConfiguration {
-		checks: [], // Test keys defined below to not be display on page.
+  // List checks and config for reporting results not shown to editors.
+  // If split configuration is set, the check and option keys must be present.
+  syncOnlyConfiguration {
+    checks: [], // Test keys defined below to not be display on page.
 
-		options: {
-			checkRoot: false,
-			containerIgnore: '',
-			contrastIgnore: '.sr-only',
-			outlineIgnore: '',
-			headerIgnore: '',
-			imageIgnore: '',
-			linkIgnore: '[aria-hidden][tabindex="-1"]',
-		},
-	}
-	*/
+    options: {
+      checkRoot: false,
+      containerIgnore: '',
+      contrastIgnore: '.sr-only',
+      outlineIgnore: '',
+      headerIgnore: '',
+      imageIgnore: '',
+      linkIgnore: '[aria-hidden][tabindex="-1"]',
+    },
+  }
+  */
 
   // Set alertModes:
   alertMode: 'userPreference',
@@ -290,10 +290,14 @@ export const ed11yDefaultOptions = {
   // Sa11y checks ==================
   checks: {
     // Sa11y: Heading checks
-    HEADING_SKIPPED_LEVEL: true,
+    HEADING_SKIPPED_LEVEL: {
+      type: 'warning',
+    },
     HEADING_EMPTY_WITH_IMAGE: true,
     HEADING_EMPTY: true,
-    HEADING_FIRST: true, // @todo CMS
+    HEADING_FIRST: {
+      type: 'warning',
+    }, // @todo CMS
     HEADING_LONG: {
       maxLength: 170,
     },
