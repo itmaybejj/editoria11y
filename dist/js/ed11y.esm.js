@@ -33,7 +33,7 @@ const Lang = {
     el.appendChild(p);
     if (args?.length) {
       args.forEach((_arg, index) => {
-        p.innerHTML = p.innerHTML.replace(/%\([a-zA-z]+\)/, `<span data-arg='${index}'></span>`);
+        p.innerHTML = p.innerHTML.replace(/%\([a-zA-Z_]+\)/, `<span data-arg='${index}'></span>`);
       });
       args.forEach((arg, index) => {
         const replacement = el.querySelector(`[data-arg="${index}"]`);
