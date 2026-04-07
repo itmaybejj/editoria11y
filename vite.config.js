@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import pkg from './package.json';
-import { injectCSSintoJS } from './build/utils.js';
+import { injectCSSintoJS } from './scripts/utils.js';
 
 export default defineConfig({
 	define: {

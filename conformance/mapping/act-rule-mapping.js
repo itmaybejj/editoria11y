@@ -82,7 +82,7 @@ export const actRuleMapping = {
   'c487ae': {
     ruleName: 'Link has non-empty accessible name',
     wcag: ['2.4.4', '2.4.9', '4.1.2'],
-    coverage: 'full',
+    coverage: 'partial',
     checkKeys: [
       'LINK_EMPTY',
       'LINK_EMPTY_NO_LABEL',
@@ -90,7 +90,7 @@ export const actRuleMapping = {
       'LINK_IMAGE_NO_ALT_TEXT',
       'LINK_UNPRONOUNCEABLE',
     ],
-    notes: '',
+    notes: 'Ed11y catches most empty-link patterns. Some ACT test cases use ARIA or role-based accessible names that ed11y does not evaluate for links. Image-level checks (MISSING_ALT_LINK) fire on some failing cases but also false-positive on passing ones, so they are excluded.',
     options: {},
   },
 
@@ -391,67 +391,170 @@ export const conformanceOptions = {
 
   // Enable all checks that map to ACT rules (many disabled by default)
   checks: {
-    // Headings — already enabled by default
-    HEADING_SKIPPED_LEVEL: { type: 'warning' },
+    // Heading checks
+    HEADING_SKIPPED_LEVEL: true,
     HEADING_EMPTY_WITH_IMAGE: true,
     HEADING_EMPTY: true,
-    HEADING_LONG: { maxLength: 170 },
+    HEADING_FIRST: true,
+    HEADING_LONG: {
+      maxLength: 170,
+    },
+    HEADING_MISSING_ONE: true,
 
-    // Images — most enabled by default
-    MISSING_ALT: true,
+    // Image checks
     MISSING_ALT_LINK: true,
     MISSING_ALT_LINK_HAS_TEXT: true,
+    MISSING_ALT: true,
+    IMAGE_DECORATIVE_CAROUSEL: {
+      sources: '.carousel',
+    },
     LINK_IMAGE_NO_ALT_TEXT: true,
-    ALT_FILE_EXT: true,
+    LINK_IMAGE_TEXT: true,
+    IMAGE_FIGURE_DECORATIVE: true,
+    IMAGE_DECORATIVE: true,
     LINK_ALT_FILE_EXT: true,
-    ALT_PLACEHOLDER: true,
+    ALT_FILE_EXT: true,
     LINK_PLACEHOLDER_ALT: true,
-    SUS_ALT: { type: 'warning' },
-    LINK_SUS_ALT: { type: 'warning' },
-    IMAGE_ALT_TOO_LONG: { maxLength: 160 },
-    LINK_IMAGE_LONG_ALT: { maxLength: 160 },
+    ALT_PLACEHOLDER: true,
+    LINK_SUS_ALT: true,
+    SUS_ALT: true,
+    LINK_IMAGE_LONG_ALT: {
+      maxLength: 250,
+    },
+    IMAGE_ALT_TOO_LONG: {
+      maxLength: 250,
+    },
+    LINK_IMAGE_ALT: true,
+    // {dismissAll: true,} default.
+    LINK_IMAGE_ALT_AND_TEXT: true,
+    IMAGE_FIGURE_DUPLICATE_ALT: true,
+    IMAGE_PASS: {
+      dismissAll: true,
+    },
     ALT_UNPRONOUNCEABLE: true,
     LINK_ALT_UNPRONOUNCEABLE: true,
-    ALT_MAYBE_BAD: true,
-    LINK_ALT_MAYBE_BAD: true,
+    ALT_MAYBE_BAD: {
+      //minLength: 15,
+    },
+    LINK_ALT_MAYBE_BAD: {
+      minLength: 15,
+    },
 
-    // Links — most enabled by default
-    LINK_EMPTY: true,
-    LINK_EMPTY_NO_LABEL: true,
+    // Link checks
+    DUPLICATE_TITLE: {
+      dismissAll: true,
+    },
     LINK_EMPTY_LABELLEDBY: true,
-    LINK_STOPWORD: true,
-    LINK_URL: { maxLength: 40 },
+    LINK_EMPTY_NO_LABEL: true,
+    LINK_STOPWORD: {
+      type: 'warning',
+    },
+    LINK_STOPWORD_ARIA: true,
+    LINK_SYMBOLS: true,
+    LINK_CLICK_HERE: true,
+    LINK_DOI: {
+      dismissAll: true,
+    },
+    LINK_URL: {
+      maxLength: 40,
+    },
+    LINK_LABEL: {
+      dismissAll: true,
+    },
+    LINK_EMPTY: true,
+    LINK_IDENTICAL_NAME: {
+      dismissAll: true,
+    },
+    LINK_NEW_TAB: {
+      dismissAll: true,
+    },
+    LINK_FILE_EXT: true,
 
-    // Form labels — disabled by default, must enable
-    LABELS_MISSING_LABEL: true,
+    // Form labels checks
     LABELS_MISSING_IMAGE_INPUT: true,
+    LABELS_INPUT_RESET: true,
+    LABELS_MISSING_LABEL: true,
+    LABELS_ARIA_LABEL_INPUT: true,
     LABELS_NO_FOR_ATTRIBUTE: true,
-    LABELS_ARIA_LABEL_INPUT: { type: 'warning' },
-    LABELS_PLACEHOLDER: { type: 'warning' },
+    LABELS_PLACEHOLDER: true,
 
-    // Tables
-    TABLES_MISSING_HEADINGS: true,
-
-    // Embedded content
-    EMBED_MISSING_TITLE: { type: 'warning' },
+    // Embedded content checks
+    EMBED_AUDIO: {
+      sources: '',
+    },
+    EMBED_VIDEO: {
+      sources: '',
+    },
+    EMBED_DATA_VIZ: {
+      sources: '',
+    },
+    EMBED_CUSTOM: {
+      sources: '#embed_custom',
+    },
     EMBED_UNFOCUSABLE: true,
+    EMBED_MISSING_TITLE: true,
+    EMBED_GENERAL: true,
 
-    // Developer checks — disabled by default, must enable
-    META_TITLE: true,
+    // Quality assurance checks
+    QA_BAD_LINK: {
+      sources: '[href*="tugboatqa.com"]',
+    },
+    QA_STRONG_ITALICS: true,
+    QA_IN_PAGE_LINK: true,
+    QA_DOCUMENT: {
+      //sources: '',
+      dismissAll: true,
+    },
+    QA_PDF: {
+      dismissAll: true,
+    },
+    QA_BLOCKQUOTE: true,
+    TABLES_MISSING_HEADINGS: true,
+    TABLES_SEMANTIC_HEADING: true,
+    TABLES_EMPTY_HEADING: true,
+    QA_FAKE_HEADING: true,
+    QA_FAKE_LIST: true,
+    QA_UPPERCASE: true,
+    QA_UNDERLINE: true,
+    QA_SUBSCRIPT: true,
+    QA_NESTED_COMPONENTS: {
+      sources: '',
+    },
+    QA_JUSTIFY: true,
+    QA_SMALL_TEXT: true,
+
+    // Meta checks
+    META_LANG: true,
     META_SCALABLE: true,
     META_MAX: true,
     META_REFRESH: true,
-    META_LANG: true,
+
+    // Developer checks
+    DUPLICATE_ID: true,
+    META_TITLE: {
+      warning: true,
+    },
+    UNCONTAINED_LI: true,
+    TABINDEX_ATTR: true,
+    HIDDEN_FOCUSABLE: true,
+    LABEL_IN_NAME: true,
     BTN_EMPTY: true,
     BTN_EMPTY_LABELLEDBY: true,
-    HIDDEN_FOCUSABLE: true,
-    DUPLICATE_ID: true,
-    TABINDEX_ATTR: true,
+    BTN_ROLE_IN_NAME: true,
 
-    // Contrast — disabled by default
-    CONTRAST_ERROR: true,
-    CONTRAST_WARNING: { type: 'warning' },
+    // Contrast checks
+    CONTRAST_WARNING: {
+      dismissAll: true,
+    },
     CONTRAST_INPUT: true,
+    CONTRAST_ERROR: true,
+    CONTRAST_PLACEHOLDER: true,
+    CONTRAST_PLACEHOLDER_UNSUPPORTED: true,
+    CONTRAST_ERROR_GRAPHIC: true,
+    CONTRAST_WARNING_GRAPHIC: true,
+    CONTRAST_UNSUPPORTED: {
+      dismissAll: true,
+    },
   },
 };
 

@@ -221,14 +221,22 @@ function generateHtml(rules, counts, resultLookup, version, hasResults, hasDisco
 
       const result = resultLookup.get(`${rule.id}:${tc.testcaseId}`);
       let statusCell;
+      let actualCell;
       if (result) {
         testedCount++;
         if (result.consistent) consistentCount++;
         const cls = result.consistent ? 'pass' : 'fail';
-        const text = result.consistent ? 'OK' : 'MISS';
+        const text = result.consistent ? 'Correct' : 'MISS';
         statusCell = `<span class="badge ${cls}">${text}</span>`;
+
+        // "Actual" = what ed11y did: flagged (found matching check keys) or clear (didn't)
+        const flagged = result.matchedCheckKeys?.length > 0;
+        actualCell = flagged
+          ? '<code class="expected-failed">flagged</code>'
+          : '<code class="expected-passed">clear</code>';
       } else {
         statusCell = '<span class="badge untested">—</span>';
+        actualCell = '<span class="muted">—</span>';
       }
 
       const url = isNonHtml
@@ -249,6 +257,7 @@ function generateHtml(rules, counts, resultLookup, version, hasResults, hasDisco
         <tr>
           <td>${statusCell}</td>
           <td><code class="${expectedClass}">${esc(tc.expected)}</code></td>
+          <td>${actualCell}</td>
           <td>${isNonHtml ? esc(tc.testcaseTitle) : `<a href="${url}" target="_blank">${esc(tc.testcaseTitle)}</a>`}</td>
           <td><code>${esc(keysFound)}</code></td>
           <td><code>${esc(allKeys)}</code></td>
@@ -317,6 +326,7 @@ function generateHtml(rules, counts, resultLookup, version, hasResults, hasDisco
               <tr>
                 <th>Result</th>
                 <th>Expected</th>
+                <th>Actual</th>
                 <th>Test Case</th>
                 <th>Matched Keys</th>
                 <th>All ed11y Results</th>
@@ -406,6 +416,7 @@ function generateHtml(rules, counts, resultLookup, version, hasResults, hasDisco
     .expected-failed { color: var(--fail); }
     .expected-passed { color: var(--pass); }
     .expected-inapplicable { color: #888; }
+    .muted { color: #ccc; }
 
     code {
       font-family: ui-monospace, monospace; font-size: 0.85em;
