@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(ls /Users/jjameson/Sites/editoria11y/editoria11y/src/lang/*.js)",
-      "Bash(node -c /Users/jjameson/Sites/editoria11y/editoria11y/src/lang/nl.js)"
+      "Bash(node -c /Users/jjameson/Sites/editoria11y/editoria11y/src/lang/nl.js)",
+      "WebFetch(domain:www.w3.org)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }
