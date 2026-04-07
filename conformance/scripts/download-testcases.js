@@ -1,33 +1,60 @@
 #!/usr/bin/env node
 
 /**
- * Downloads ACT Rule test cases from W3C.
+ * Downloads ACT Rule test cases from the w3c/wcag-act-rules Git repository.
  *
- * Fetches the test case index (testcases.json) and downloads the HTML files
- * for all mapped rules into conformance/.cache/pages/{ruleId}/{testcaseId}.html
+ * Performs a shallow clone (or updates an existing clone) into
+ * conformance/.cache/repo/, then creates symlinks so existing scripts
+ * can find test cases and metadata at their expected paths:
+ *
+ *   .cache/pages/         → repo testcases directory
+ *   .cache/testcases.json → repo testcases.json
+ *   .cache/wcag-mapping.json → repo wcag-mapping.json
  *
  * Usage:
- *   node conformance/scripts/download-testcases.js          # download new files only
- *   node conformance/scripts/download-testcases.js --force   # re-download all
- *   node conformance/scripts/download-testcases.js --all     # download ALL rules, not just mapped
+ *   node conformance/scripts/download-testcases.js          # clone or update
+ *   node conformance/scripts/download-testcases.js --force   # delete and re-clone
  */
 
-import { mkdir, writeFile, access } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { mkdir, symlink, readlink, rm, access, lstat } from 'node:fs/promises';
+import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getMappedRuleIds } from '../mapping/act-rule-mapping.js';
+import { execSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CACHE_DIR = join(__dirname, '..', '.cache');
-const PAGES_DIR = join(CACHE_DIR, 'pages');
-const INDEX_URL = 'https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases.json';
-const DELAY_MS = 100;
+const REPO_DIR = join(CACHE_DIR, 'repo');
+const REPO_URL = 'https://github.com/w3c/wcag-act-rules.git';
+
+// Paths inside the cloned repo (for verification)
+const REPO_TESTCASES_JSON = join(
+  REPO_DIR,
+  'content-assets',
+  'wcag-act-rules',
+  'testcases.json',
+);
+const REPO_MAPPING_JSON = join(REPO_DIR, 'wcag-mapping.json');
+
+// Symlink definitions: [link path, target relative to .cache/]
+const SYMLINKS = [
+  [
+    join(CACHE_DIR, 'pages'),
+    join('repo', 'content-assets', 'wcag-act-rules', 'testcases'),
+  ],
+  [
+    join(CACHE_DIR, 'testcases.json'),
+    join('repo', 'content-assets', 'wcag-act-rules', 'testcases.json'),
+  ],
+  [
+    join(CACHE_DIR, 'wcag-mapping.json'),
+    join('repo', 'wcag-mapping.json'),
+  ],
+];
 
 const args = process.argv.slice(2);
 const force = args.includes('--force');
-const downloadAll = args.includes('--all');
 
-async function fileExists(path) {
+async function pathExists(path) {
   try {
     await access(path);
     return true;
@@ -36,88 +63,76 @@ async function fileExists(path) {
   }
 }
 
-async function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function run(cmd, opts = {}) {
+  console.log(`  $ ${cmd}`);
+  execSync(cmd, { stdio: 'inherit', ...opts });
 }
 
-async function fetchWithRetry(url, retries = 3) {
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status} for ${url}`);
-      }
-      return res;
-    } catch (err) {
-      if (attempt === retries) throw err;
-      console.warn(`  Retry ${attempt}/${retries} for ${url}: ${err.message}`);
-      await sleep(1000 * attempt);
-    }
+/**
+ * Create a relative symlink, replacing any existing file/directory at that path.
+ */
+async function ensureSymlink(linkPath, target) {
+  // Check if a correct symlink already exists
+  try {
+    const existing = await readlink(linkPath);
+    if (existing === target) return;
+  } catch {
+    // Not a symlink or doesn't exist — that's fine, we'll create it
   }
+
+  // Remove whatever is at the link path (file, directory, or wrong symlink)
+  try {
+    await lstat(linkPath);
+    await rm(linkPath, { recursive: true, force: true });
+  } catch {
+    // Nothing there — that's fine
+  }
+
+  await symlink(target, linkPath);
+  console.log(`  Linked ${linkPath} → ${target}`);
 }
 
 async function main() {
-  // 1. Fetch or read the test case index
-  const indexPath = join(CACHE_DIR, 'testcases.json');
-  let indexData;
+  await mkdir(CACHE_DIR, { recursive: true });
 
-  if (!force && (await fileExists(indexPath))) {
-    console.log('Using cached testcases.json (use --force to re-download)');
-    const { readFile } = await import('node:fs/promises');
-    indexData = JSON.parse(await readFile(indexPath, 'utf-8'));
+  const repoExists = await pathExists(join(REPO_DIR, '.git'));
+
+  // 1. Clone or update
+  if (force && repoExists) {
+    console.log('Force flag: removing existing clone...');
+    await rm(REPO_DIR, { recursive: true, force: true });
+  }
+
+  if (!repoExists || force) {
+    console.log(`Cloning ${REPO_URL} (shallow)...`);
+    run(`git clone --depth 1 "${REPO_URL}" "${REPO_DIR}"`);
   } else {
-    console.log(`Fetching ${INDEX_URL}...`);
-    const res = await fetchWithRetry(INDEX_URL);
-    indexData = await res.json();
-    await mkdir(CACHE_DIR, { recursive: true });
-    await writeFile(indexPath, JSON.stringify(indexData, null, 2));
-    console.log(`Saved testcases.json (${indexData.count} test cases)`);
+    console.log('Updating existing clone...');
+    run('git fetch --depth 1 origin main', { cwd: REPO_DIR });
+    run('git reset --hard origin/main', { cwd: REPO_DIR });
   }
 
-  // 2. Filter to mapped rules
-  const mappedIds = new Set(getMappedRuleIds());
-  const testcases = downloadAll
-    ? indexData.testcases
-    : indexData.testcases.filter((tc) => mappedIds.has(tc.ruleId));
+  // 2. Verify expected files exist in the clone
+  for (const path of [REPO_TESTCASES_JSON, REPO_MAPPING_JSON]) {
+    if (!(await pathExists(path))) {
+      throw new Error(
+        `Expected file not found: ${path}\nThe w3c/wcag-act-rules repo structure may have changed.`,
+      );
+    }
+  }
 
-  const ruleIds = new Set(testcases.map((tc) => tc.ruleId));
+  // 3. Create symlinks for backward compatibility
+  for (const [linkPath, target] of SYMLINKS) {
+    await ensureSymlink(linkPath, target);
+  }
+
+  // 4. Report stats
+  const { readFile } = await import('node:fs/promises');
+  const indexData = JSON.parse(await readFile(REPO_TESTCASES_JSON, 'utf-8'));
+  const ruleIds = new Set(indexData.testcases.map((tc) => tc.ruleId));
   console.log(
-    `\n${downloadAll ? 'All' : 'Mapped'} rules: ${ruleIds.size} rules, ${testcases.length} test cases`,
+    `\nDone: ${ruleIds.size} rules, ${indexData.testcases.length} test cases available`,
   );
-
-  // 3. Download each test case HTML
-  let downloaded = 0;
-  let skipped = 0;
-  let failed = 0;
-
-  for (const tc of testcases) {
-    const ext = tc.relativePath.endsWith('.svg') ? '.svg' : '.html';
-    const filePath = join(PAGES_DIR, tc.ruleId, `${tc.testcaseId}${ext}`);
-
-    if (!force && (await fileExists(filePath))) {
-      skipped++;
-      continue;
-    }
-
-    try {
-      await mkdir(dirname(filePath), { recursive: true });
-      const res = await fetchWithRetry(tc.url);
-      const html = await res.text();
-      await writeFile(filePath, html);
-      downloaded++;
-
-      if (downloaded % 50 === 0) {
-        console.log(`  Downloaded ${downloaded}...`);
-      }
-
-      await sleep(DELAY_MS);
-    } catch (err) {
-      console.error(`  FAILED: ${tc.ruleId}/${tc.testcaseId} — ${err.message}`);
-      failed++;
-    }
-  }
-
-  console.log(`\nDone: ${downloaded} downloaded, ${skipped} cached, ${failed} failed`);
 }
 
 main().catch((err) => {

@@ -34,5 +34,9 @@ Desktop.ini
 
 # ACT Conformance testing
 conformance/.cache/
-conformance/reports/
+conformance/reports/parts/
+conformance/reports/discovery-analysis.json
+conformance/reports/discovery-raw.json
+conformance/reports/playwright-results.json
+conformance/reports/conformance-data.json
 conformance/test-results/

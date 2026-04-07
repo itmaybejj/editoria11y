@@ -302,6 +302,69 @@ export const actRuleMapping = {
       contrastPlugin: true,
     },
   },
+
+  // ── Links (descriptive) ──────────────────────────────────────────
+
+  '5effbb': {
+    ruleName: 'Link in context is descriptive',
+    wcag: ['2.4.4', '2.4.9'],
+    coverage: 'partial',
+    checkKeys: [
+      'LINK_STOPWORD',
+    ],
+    notes: 'Ed11y catches links with only non-descriptive stopwords (e.g., "click here"). The ACT rule evaluates whether the link is descriptive in context, which is broader.',
+    options: {},
+  },
+
+  // ── Embedded content (keyboard) ──────────────────────────────────
+
+  'akn7bn': {
+    ruleName: 'Iframe with interactive elements is not excluded from tab-order',
+    wcag: ['2.1.1', '2.1.3'],
+    coverage: 'partial',
+    checkKeys: [
+      'EMBED_UNFOCUSABLE',
+    ],
+    notes: 'Ed11y flags iframes with tabindex="-1" regardless of interactive content. The ACT rule specifically requires the iframe to contain interactive elements. Discovery showed high false positive rate on inapplicable cases.',
+    options: {
+      embeddedContentPlugin: true,
+    },
+  },
+
+  // ── Tables ───────────────────────────────────────────────────────
+
+  // TODO: Review — Ed11y checks if a table has ANY <th> elements, while
+  // the ACT rule checks if `headers` attributes on <td> cells reference
+  // valid <th> cell IDs. Different scopes with limited overlap.
+  'a25f45': {
+    ruleName: 'Headers attribute specified on a cell refers to cells in the same table element',
+    wcag: ['1.3.1'],
+    coverage: 'todo',
+    checkKeys: [
+      'TABLES_MISSING_HEADINGS',
+    ],
+    notes: 'Ed11y checks for the presence of <th> elements in a table. The ACT rule validates that headers attributes point to valid cells. Discovery showed 2/4 failed detected with 2 false positives.',
+    options: {},
+  },
+
+  // ── Buttons (menuitem) ───────────────────────────────────────────
+
+  // TODO: Review — BTN_EMPTY targets <button> and [role="button"], NOT
+  // [role="menuitem"]. Discovery showed BTN_EMPTY firing on 2/2 failed
+  // test cases, but this may be coincidental if the test HTML also
+  // contains empty buttons.
+  'm6b1q3': {
+    ruleName: 'Menuitem has non-empty accessible name',
+    wcag: ['4.1.2'],
+    coverage: 'todo',
+    checkKeys: [
+      'BTN_EMPTY',
+    ],
+    notes: 'BTN_EMPTY does not currently target [role="menuitem"]. The discovery signal (0.83) may be from empty buttons in the test case HTML, not the menuitems themselves. Needs investigation.',
+    options: {
+      developerPlugin: true,
+    },
+  },
 };
 
 /**
@@ -365,6 +428,9 @@ export const conformanceOptions = {
     LABELS_NO_FOR_ATTRIBUTE: true,
     LABELS_ARIA_LABEL_INPUT: { type: 'warning' },
     LABELS_PLACEHOLDER: { type: 'warning' },
+
+    // Tables
+    TABLES_MISSING_HEADINGS: true,
 
     // Embedded content
     EMBED_MISSING_TITLE: { type: 'warning' },
