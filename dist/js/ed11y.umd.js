@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.0-405
+			* @version 3.0.0-409
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -334,675 +334,9 @@
       running: false,
       finished: 0
     },
-    dismissedResults: []
+    dismissedResults: [],
+    start: 0
   };
-  const wrapPseudoContent = (element, string) => {
-    const getAltText = (content) => {
-      if (content === "none") {
-        return "";
-      }
-      const match = content.includes("url(") || content.includes("image-set(") ? content.match(/\/\s*"([^"]+)"/) : content.match(/"([^"]+)"/);
-      return match ? match[1] : "";
-    };
-    const before = getAltText(
-      window.getComputedStyle(element, ":before").getPropertyValue("content")
-    );
-    const after = getAltText(window.getComputedStyle(element, ":after").getPropertyValue("content"));
-    return `${before}${string}${after}`;
-  };
-  const nextTreeBranch = (tree) => {
-    for (let i = 0; i < 1e3; i++) {
-      if (tree.nextSibling()) {
-        return tree.previousNode();
-      }
-      if (!tree.parentNode()) {
-        return false;
-      }
-    }
-    return false;
-  };
-  const computeAriaLabel = (element, recursing = false) => {
-    if (State.option.ignoreAriaOnElements && element.matches(State.option.ignoreAriaOnElements)) {
-      return "noAria";
-    }
-    if (State.option.ignoreTextInElements && element.matches(State.option.ignoreTextInElements)) {
-      return "";
-    }
-    const labelledBy = element.getAttribute("aria-labelledby");
-    if (!recursing && labelledBy) {
-      return labelledBy.split(/\s+/).filter((id) => id.trim()).map((id) => {
-        const targetElement = document.querySelector(`#${CSS.escape(id)}`);
-        return targetElement ? computeAccessibleName(targetElement, "", 1) : "";
-      }).join(" ");
-    }
-    const { ariaLabel } = element;
-    if (ariaLabel && ariaLabel.trim().length > 0) {
-      return ariaLabel;
-    }
-    return "noAria";
-  };
-  const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
-    const ariaLabel = computeAriaLabel(element, recursing);
-    if (ariaLabel !== "noAria") {
-      return ariaLabel;
-    }
-    let computedText = "";
-    const and = (word) => {
-      computedText += ` ${word}`;
-    };
-    if (!element.children.length) {
-      computedText = wrapPseudoContent(element, element.textContent);
-      if (!computedText.trim() && element.hasAttribute("title")) {
-        return element.getAttribute("title");
-      }
-      return computedText;
-    }
-    function createTreeWalker(root, showElement, showText) {
-      const acceptNode = (node) => {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          return NodeFilter.FILTER_ACCEPT;
-        }
-        if (node.nodeType === Node.TEXT_NODE) {
-          return NodeFilter.FILTER_ACCEPT;
-        }
-        return NodeFilter.FILTER_REJECT;
-      };
-      return document.createTreeWalker(root, NodeFilter.SHOW_ALL, { acceptNode });
-    }
-    const treeWalker = createTreeWalker(element);
-    const alwaysExclude = ["noscript", "style", "script", "video", "audio"];
-    const excludeSelector = [...exclusions, ...alwaysExclude].join(", ");
-    const exclude = excludeSelector ? element.querySelectorAll(excludeSelector) : [];
-    let addTitleIfNoName = false;
-    let aText = false;
-    let count = 0;
-    let continueWalker = true;
-    while (treeWalker.nextNode() && continueWalker) {
-      count += 1;
-      const node = treeWalker.currentNode;
-      const excluded = Array.from(exclude).some((ex) => ex.contains(node));
-      if (excluded) {
-        continue;
-      }
-      if (node.shadowRoot) {
-        const shadowChildren = node.shadowRoot.querySelectorAll("*");
-        for (let i = 0; i < shadowChildren.length; i++) {
-          const child = shadowChildren[i];
-          if (!excludeSelector || !child.closest(excludeSelector)) {
-            and(computeAccessibleName(child, exclusions, recursing + 1));
-          }
-        }
-      }
-      if (node.nodeType === Node.TEXT_NODE) {
-        if (node.parentNode.tagName !== "SLOT") {
-          and(node.nodeValue);
-        }
-        continue;
-      }
-      if (addTitleIfNoName && !node.closest("a")) {
-        if (aText === computedText) {
-          and(addTitleIfNoName);
-        }
-        addTitleIfNoName = false;
-        aText = false;
-      }
-      if (node.ariaHidden === "true" && !(recursing && count < 3)) {
-        if (!nextTreeBranch(treeWalker)) {
-          continueWalker = false;
-        }
-        continue;
-      }
-      const aria = computeAriaLabel(node, recursing);
-      if (aria !== "noAria") {
-        and(aria);
-        if (!nextTreeBranch(treeWalker)) {
-          continueWalker = false;
-        }
-        continue;
-      }
-      switch (node.tagName) {
-        case "IMG":
-          if (node.hasAttribute("alt") && node.role !== "presentation") {
-            and(node.getAttribute("alt"));
-          }
-          break;
-        case "SVG":
-          if (node.role === "img" || node.role === "graphics-document") {
-            and(computeAriaLabel(node));
-          } else {
-            const title = node.querySelector("title");
-            if (title) {
-              and(title.textContent);
-            }
-          }
-          break;
-        case "A":
-          if (node.hasAttribute("title")) {
-            addTitleIfNoName = node.getAttribute("title");
-            aText = computedText;
-          } else {
-            addTitleIfNoName = false;
-            aText = false;
-          }
-          and(wrapPseudoContent(node, ""));
-          break;
-        case "INPUT":
-          and(wrapPseudoContent(treeWalker.currentNode, ""));
-          if (treeWalker.currentNode.hasAttribute("title")) {
-            addTitleIfNoName = treeWalker.currentNode.getAttribute("title");
-          }
-          break;
-        case "SLOT": {
-          const children = node.assignedNodes?.() || [];
-          let slotText = "";
-          children.forEach((child) => {
-            if (child.nodeType === Node.ELEMENT_NODE) {
-              slotText += computeAccessibleName(child);
-            } else if (child.nodeType === Node.TEXT_NODE) {
-              slotText += child.nodeValue;
-            }
-          });
-          and(slotText);
-          and(wrapPseudoContent(node, ""));
-          break;
-        }
-        case "SPAN": {
-          and(wrapPseudoContent(treeWalker.currentNode, ""));
-          if (treeWalker.currentNode.hasAttribute("title")) {
-            addTitleIfNoName = treeWalker.currentNode.getAttribute("title");
-          }
-          break;
-        }
-        default:
-          and(wrapPseudoContent(node, ""));
-          break;
-      }
-    }
-    if (addTitleIfNoName && !aText) {
-      and(addTitleIfNoName);
-    }
-    computedText = computedText.replace(/[\uE000-\uF8FF]/gu, "");
-    if (!computedText.trim()) {
-      computedText = wrapPseudoContent(element, "");
-      if (!computedText.trim() && element.hasAttribute("title")) {
-        return element.getAttribute("title");
-      }
-    }
-    return computedText;
-  };
-  function find(selector, desiredRoot, exclude) {
-    const root = [];
-    if (desiredRoot === "document") {
-      root.push(document.body);
-      if (State.option.fixedRoots) {
-        root.push(State.option.fixedRoots);
-      }
-    } else if (desiredRoot === "root") {
-      root.push(Constants.Root.areaToCheck);
-    } else {
-      root.push(document.querySelectorAll(desiredRoot));
-    }
-    const exclusions = Constants.Exclusions.Container.join(", ");
-    const additionalExclusions = exclude?.join(", ") || "";
-    const additional = additionalExclusions ? `, ${additionalExclusions}` : "";
-    let list = [];
-    root.flat().filter(Boolean)?.forEach((r) => {
-      const shadowComponents = r?.querySelectorAll("[data-sa11y-has-shadow-root]");
-      const shadow = shadowComponents ? ", [data-sa11y-has-shadow-root]" : "";
-      const elements2 = Array.from(
-        r.querySelectorAll(`:is(${selector}${shadow}):not(${exclusions}${additional})`)
-      );
-      if (shadowComponents.length) {
-        const shadowFind = [];
-        elements2.forEach((el, i) => {
-          if (el?.matches?.("[data-sa11y-has-shadow-root]") && el?.shadowRoot) {
-            shadowFind[i] = el.shadowRoot.querySelectorAll(
-              `:is(${selector}):not(${exclusions}${additional})`
-            );
-          }
-        });
-        if (shadowFind.length > 0) {
-          for (let index = shadowFind.length - 1; index >= 0; index--) {
-            if (shadowFind[index]) {
-              elements2.splice(index, 1, ...shadowFind[index]);
-            }
-          }
-        }
-      }
-      list = list.concat(elements2.filter((node) => node.parentNode.tagName !== "SLOT"));
-    });
-    return list;
-  }
-  function documentLoadingCheck(callback) {
-    if (document.readyState === "complete") {
-      callback();
-    } else {
-      window.addEventListener("load", callback);
-    }
-  }
-  function isScreenReaderOnly(element) {
-    const style = getComputedStyle(element);
-    if (style.getPropertyValue("clip-path").startsWith("inset(50%)")) {
-      return true;
-    }
-    if (style.clip === "rect(1px, 1px, 1px, 1px)" || style.clip === "rect(0px, 0px, 0px, 0px)") {
-      return true;
-    }
-    const indent = parseInt(style.textIndent, 10);
-    if (!Number.isNaN(indent) && Math.abs(indent) > 5e3) {
-      return true;
-    }
-    if (style.overflow === "hidden" && parseFloat(style.width) < 2 && parseFloat(style.height) < 2) {
-      return true;
-    }
-    if (style.position === "absolute" && ["left", "right", "top", "bottom"].some((p) => Math.abs(parseInt(style[p], 10)) > 5e3)) {
-      return true;
-    }
-    return parseFloat(style.fontSize) < 2;
-  }
-  function isElementHidden(element) {
-    return element.hidden || getComputedStyle(element).getPropertyValue("display") === "none";
-  }
-  function isElementVisuallyHiddenOrHidden(element) {
-    if (element.offsetWidth === 0 && element.offsetHeight === 0 || element.clientHeight === 1 && element.clientWidth === 1) {
-      return true;
-    }
-    return isElementHidden(element);
-  }
-  function stripAllSpecialCharacters(string) {
-    if (!string) return "";
-    return string.replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
-  }
-  const invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
-  const htmlEntitiesRegex = /&#(\w+)(^\w|;)?/g;
-  const htmlCtrlEntityRegex = /&(newline|tab);/gi;
-  const ctrlCharactersRegex = (
-    // biome-ignore lint/suspicious/noControlCharactersInRegex: original lib.
-    /[\u0000-\u001F\u007F-\u009F\u2000-\u200D\uFEFF]/gim
-  );
-  const urlSchemeRegex = /^.+(:|&colon;)/gim;
-  const whitespaceEscapeCharsRegex = /(\\|%5[cC])((%(6[eE]|72|74))|[nrt])/g;
-  const relativeFirstCharacters = [".", "/"];
-  const BLANK_URL = "about:blank";
-  function isRelativeUrlWithoutProtocol(url2) {
-    return relativeFirstCharacters.indexOf(url2[0]) > -1;
-  }
-  function decodeHtmlCharacters(str) {
-    const removedNullByte = str.replace(ctrlCharactersRegex, "");
-    return removedNullByte.replace(htmlEntitiesRegex, (match, dec) => {
-      return String.fromCharCode(dec);
-    });
-  }
-  function isValidUrl(url2) {
-    if (typeof URL.canParse === "function") {
-      return URL.canParse(url2);
-    }
-    try {
-      const parsedUrl = new URL(url2);
-      return Boolean(parsedUrl);
-    } catch {
-      return false;
-    }
-  }
-  const decodeURIs = (uri) => {
-    try {
-      return decodeURIComponent(uri);
-    } catch {
-      return uri;
-    }
-  };
-  function sanitizeURL(url2) {
-    if (!url2 || typeof url2 !== "string") return BLANK_URL;
-    const isBase64Data = /^data:([a-z]+\/[a-z0-9-+.]+)?;base64,/i.test(url2.trim());
-    if (isBase64Data) return url2.trim();
-    let charsToDecode;
-    let decodedUrl = decodeURIs(url2.trim());
-    do {
-      decodedUrl = decodeHtmlCharacters(decodedUrl).replace(htmlCtrlEntityRegex, "").replace(ctrlCharactersRegex, "").replace(whitespaceEscapeCharsRegex, "").trim();
-      decodedUrl = decodeURIs(decodedUrl);
-      charsToDecode = decodedUrl.match(ctrlCharactersRegex) || decodedUrl.match(htmlEntitiesRegex) || decodedUrl.match(htmlCtrlEntityRegex) || decodedUrl.match(whitespaceEscapeCharsRegex);
-    } while (charsToDecode && charsToDecode.length > 0);
-    const sanitizedUrl = decodedUrl;
-    if (!sanitizedUrl) return BLANK_URL;
-    if (isRelativeUrlWithoutProtocol(sanitizedUrl)) return sanitizedUrl;
-    const trimmedUrl = sanitizedUrl.trimStart();
-    const urlSchemeParseResults = trimmedUrl.match(urlSchemeRegex);
-    if (!urlSchemeParseResults) return sanitizedUrl;
-    const urlScheme = urlSchemeParseResults[0].toLowerCase().trim();
-    if (invalidProtocolRegex.test(urlScheme)) return BLANK_URL;
-    const backSanitized = trimmedUrl.replace(/\\/g, "/");
-    if (urlScheme === "mailto:" || urlScheme.includes("://")) return backSanitized;
-    if (urlScheme === "http:" || urlScheme === "https:") {
-      if (!isValidUrl(backSanitized)) return BLANK_URL;
-      const url3 = new URL(backSanitized);
-      url3.protocol = url3.protocol.toLowerCase();
-      url3.hostname = url3.hostname.toLowerCase();
-      return url3.toString();
-    }
-    return backSanitized;
-  }
-  const allowedTags = [
-    "a",
-    "abbr",
-    "address",
-    "article",
-    "aside",
-    "audio",
-    "b",
-    "bdo",
-    "blockquote",
-    "br",
-    "button",
-    "canvas",
-    "cite",
-    "code",
-    "data",
-    "dd",
-    "del",
-    "details",
-    "dfn",
-    "div",
-    "dl",
-    "dt",
-    "em",
-    "fieldset",
-    "figcaption",
-    "figure",
-    "footer",
-    "form",
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "h5",
-    "h6",
-    "header",
-    "hr",
-    "i",
-    "iframe",
-    "img",
-    "input",
-    "ins",
-    "kbd",
-    "label",
-    "li",
-    "main",
-    "mark",
-    "meter",
-    "nav",
-    "noscript",
-    "ol",
-    "output",
-    "p",
-    "picture",
-    "pre",
-    "progress",
-    "q",
-    "rp",
-    "rt",
-    "s",
-    "samp",
-    "section",
-    "select",
-    "small",
-    "source",
-    "span",
-    "strong",
-    "sub",
-    "summary",
-    "sup",
-    "svg",
-    "table",
-    "tbody",
-    "td",
-    "textarea",
-    "tfoot",
-    "th",
-    "thead",
-    "time",
-    "tr",
-    "track",
-    "u",
-    "ul",
-    "var",
-    "video",
-    "wbr",
-    "path"
-  ];
-  const attrWhitelist = {
-    a: ["href", "title", "target", "rel", "download"],
-    img: ["src", "alt", "title", "width", "height", "loading", "srcset", "sizes"],
-    iframe: [
-      "src",
-      "width",
-      "height",
-      "title",
-      "frameborder",
-      "allowfullscreen",
-      "loading",
-      "sandbox"
-    ],
-    details: ["open"],
-    ol: ["start", "type", "reversed"],
-    li: ["value"],
-    td: ["colspan", "rowspan"],
-    th: ["colspan", "rowspan", "scope"],
-    global: ["class", "id", "role", "lang", "dir", "name"],
-    path: ["d", "fill", "fill-rule"]
-  };
-  function sanitizeHTML(string) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(string, "text/html");
-    const allElements = doc.body.querySelectorAll("*");
-    allElements.forEach((node) => {
-      const tag = node.tagName.toLowerCase();
-      if (!allowedTags.includes(tag)) {
-        node.remove();
-        return;
-      }
-      const allowedForThisTag = attrWhitelist[tag] || [];
-      const globals = attrWhitelist.global;
-      [...node.attributes].forEach(({ name, value }) => {
-        const isAria = name.startsWith("aria-");
-        const isAllowed = allowedForThisTag.includes(name) || globals.includes(name) || isAria;
-        const isUrlAttr = ["src", "href", "srcset"].includes(name);
-        if (!isAllowed) {
-          node.removeAttribute(name);
-        } else if (isUrlAttr) {
-          const cleanURL = sanitizeURL(value);
-          if (!cleanURL) {
-            node.removeAttribute(name);
-          } else {
-            node.setAttribute(name, cleanURL);
-          }
-        }
-      });
-    });
-    return doc.body.innerHTML;
-  }
-  const baseIgnores = "noscript,script,style,audio,video,form,iframe";
-  function fnIgnore(element, selectors = []) {
-    const ignoreQuery = selectors.length ? `${baseIgnores},${selectors.join(",")}` : baseIgnores;
-    if (!element || element.nodeType !== Node.ELEMENT_NODE) {
-      return element ? element.cloneNode(true) : null;
-    }
-    function cloneTree(node, isRoot = false) {
-      const type = node.nodeType;
-      if (type === Node.ELEMENT_NODE) {
-        if (node.matches(ignoreQuery) && !isRoot) {
-          return null;
-        }
-        const clone = node.cloneNode(false);
-        if (node.matches(ignoreQuery) && isRoot) {
-          return clone;
-        }
-        let child = node.firstChild;
-        while (child) {
-          const clonedChild = cloneTree(child);
-          if (clonedChild) clone.appendChild(clonedChild);
-          child = child.nextSibling;
-        }
-        return clone;
-      }
-      if (type === Node.TEXT_NODE) return node.cloneNode(true);
-      return null;
-    }
-    return cloneTree(element, true);
-  }
-  let gotText = /* @__PURE__ */ new WeakMap();
-  function getText(element) {
-    if (gotText.has(element)) {
-      return gotText.get(element);
-    }
-    const ignore = fnIgnore(element);
-    const text = ignore.textContent.replace(/[\r\n]+/g, "").replace(/\s+/g, " ").trim();
-    gotText.set(element, text);
-    return text;
-  }
-  function resetGetText() {
-    gotText = /* @__PURE__ */ new WeakMap();
-  }
-  function removeWhitespace(string) {
-    return string.replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
-  }
-  function normalizeString(string) {
-    return removeWhitespace(string.replace(/[\u0000-\u001F\u007F-\u009F]/g, ""));
-  }
-  function truncateString(string, maxLength) {
-    const truncatedString = string.substring(0, maxLength).trimEnd();
-    return string.length > maxLength ? `${truncatedString}...` : string;
-  }
-  const store = {
-    getItem(key) {
-      try {
-        if (localStorage.getItem(key) === null) {
-          return sessionStorage.getItem(key);
-        }
-        return localStorage.getItem(key);
-      } catch {
-        return false;
-      }
-    },
-    setItem(key, value) {
-      try {
-        localStorage.setItem(key, value);
-      } catch {
-        sessionStorage.setItem(key, value);
-      }
-      return true;
-    },
-    removeItem(key) {
-      try {
-        localStorage.removeItem(key);
-      } catch {
-        sessionStorage.removeItem(key);
-      }
-      return true;
-    }
-  };
-  function prepareDismissal(string) {
-    return String(string).replace(/([^0-9a-zA-Z])/g, "").substring(0, 256);
-  }
-  function getBestImageSource(element) {
-    const getLastSrc = (src) => src?.split(/,\s+/).pop()?.trim()?.split(/\s+/)[0];
-    const resolveUrl = (src) => src ? new URL(src, window.location.href).href : null;
-    const dataSrc = getLastSrc(element.getAttribute("data-src") || element.getAttribute("srcset"));
-    if (dataSrc) return resolveUrl(dataSrc);
-    const pictureSrcset = element.closest("picture")?.querySelector("source[srcset]")?.getAttribute("srcset");
-    const pictureSrc = getLastSrc(pictureSrcset);
-    if (pictureSrc) return resolveUrl(pictureSrc);
-    return resolveUrl(element.getAttribute("src"));
-  }
-  function isVisibleTextInAccName($el, accName, exclusions = [], linkIgnoreStrings) {
-    let text = "";
-    const excludeSelector = exclusions?.length ? exclusions.join(",") : "";
-    const ignoreStrings = Array.isArray(linkIgnoreStrings) ? linkIgnoreStrings : null;
-    const stripIgnored = (value = "") => ignoreStrings ? ignoreStrings.reduce((result, str) => result.replace(str, ""), value) : value;
-    $el.childNodes.forEach((node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        text += stripIgnored(node.textContent);
-      }
-      if (node.nodeType !== Node.ELEMENT_NODE) {
-        return;
-      }
-      if (excludeSelector && node.matches(excludeSelector)) {
-        return;
-      }
-      if (!isElementVisuallyHiddenOrHidden(node)) {
-        text += stripIgnored(getText(node));
-      }
-    });
-    const emojiRegex = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu;
-    let visibleText = text.replace(emojiRegex, "");
-    visibleText = removeWhitespace(visibleText).toLowerCase();
-    if (visibleText === "x") {
-      return false;
-    }
-    return visibleText.length !== 0 && !accName.toLowerCase().includes(visibleText);
-  }
-  function standardizeHref($el) {
-    let href = $el.getAttribute("href");
-    href = removeWhitespace(href).toLowerCase();
-    if (href.endsWith("/")) {
-      href = href.slice(0, -1);
-    }
-    href = href.replace(/^https?:\/\/(www\.)?/, "");
-    href = href.replace(/\.(html|php|htm|asp|aspx)$/i, "");
-    return href;
-  }
-  function generateRegexString(input, matchStart = false) {
-    if (!input) return null;
-    if (input instanceof RegExp) return input;
-    let patterns = [];
-    if (Array.isArray(input)) {
-      patterns = input;
-    } else if (typeof input === "string") {
-      patterns = input.split(",").map((s) => s.trim());
-    } else {
-      return null;
-    }
-    patterns = patterns.filter((p) => p && p.length > 0);
-    if (patterns.length === 0) return null;
-    const escapeRegExp = (string) => {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    };
-    const joinedPatterns = patterns.map(escapeRegExp).join("|");
-    const finalPattern = matchStart ? `^(?:${joinedPatterns})` : joinedPatterns;
-    return new RegExp(finalPattern, "gi");
-  }
-  async function dismissDigest(pepper, message) {
-    const msgUint8 = new TextEncoder().encode(pepper + message);
-    const hashBuffer = await window.crypto.subtle.digest("SHA-256", msgUint8);
-    if (Uint8Array.prototype.toHex) {
-      return new Uint8Array(hashBuffer).toHex();
-    }
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-  }
-  let langCache;
-  function validateLang(code, displayLangCode) {
-    if (typeof code !== "string") return { valid: false };
-    const norm = code.trim().replace(/_/g, "-");
-    if (!langCache && typeof Intl !== "undefined") {
-      try {
-        langCache = new Intl.DisplayNames([displayLangCode], { type: "language", fallback: "none" });
-      } catch {
-      }
-    }
-    if (langCache) {
-      const check = (val) => {
-        try {
-          return langCache.of(val);
-        } catch {
-          return false;
-        }
-      };
-      if (check(code)) return { valid: true };
-      if (check(norm)) return { valid: false, suggest: norm };
-      return { valid: false };
-    }
-    return { valid: /^[a-z]{2,3}(-[a-z]{4})?(-[a-z]{2,4})?$/i.test(norm) };
-  }
   function removeAlert() {
     if (State.option.headless) return;
     const Sa11yPanel = document.querySelector("sa11y-control-panel").shadowRoot;
@@ -1273,7 +607,7 @@
       Exclusions.Contrast = [
         "link",
         "hr",
-        "State.option",
+        "option",
         "audio",
         "audio *",
         "video",
@@ -1337,78 +671,767 @@
       Exclusions
     };
   })();
-  const Elements = /* @__PURE__ */ (function myElements() {
-    const Found = {};
-    function initializeElements() {
-      Found.Everything = find("*", "root", Constants.Exclusions.Sa11yElements);
-      Found.Contrast = Found.Everything.filter(($el) => {
-        const matchesSelector = Constants.Exclusions.Contrast.some(
-          (exclusion) => $el.matches(exclusion)
-        );
-        return !matchesSelector && !Constants.Exclusions.Contrast.includes($el);
-      });
-      Found.Images = Found.Everything.filter(
-        ($el) => $el.tagName === "IMG" && !Constants.Exclusions.Images.some((selector) => $el.matches(selector))
+  function find(selector, desiredRoot, exclude) {
+    const root = [];
+    if (desiredRoot === "document") {
+      root.push(document.body);
+      if (State.option.fixedRoots) {
+        root.push(State.option.fixedRoots);
+      }
+    } else if (desiredRoot === "root") {
+      root.push(Constants.Root.areaToCheck);
+    } else {
+      root.push(document.querySelectorAll(desiredRoot));
+    }
+    const exclusions = Constants.Exclusions.Container.join(", ");
+    const additionalExclusions = exclude?.join(", ") || "";
+    const additional = additionalExclusions ? `, ${additionalExclusions}` : "";
+    let list = [];
+    root.flat().filter(Boolean)?.forEach((r) => {
+      const shadowComponents = r?.querySelectorAll("[data-sa11y-has-shadow-root]");
+      const shadow = shadowComponents ? ", [data-sa11y-has-shadow-root]" : "";
+      const elements2 = Array.from(
+        r.querySelectorAll(`:is(${selector}${shadow}):not(${exclusions}${additional})`)
       );
-      Found.Links = Found.Everything.filter(
-        ($el) => ($el.tagName === "A" || $el.tagName === "a") && $el.hasAttribute("href") && !$el.matches('[role="button"]') && // Exclude links with [role="button"]
-        !Constants.Exclusions.Links.some((selector) => $el.matches(selector))
-      );
-      Found.Headings = find(
-        'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
-        State.option.ignoreContentOutsideRoots || State.option.fixedRoots ? "root" : "document",
-        Constants.Exclusions.Headings
-      );
-      Found.HeadingOne = find(
-        'h1, [role="heading"][aria-level="1"]',
-        State.option.ignoreContentOutsideRoots || State.option.fixedRoots ? "root" : "document",
-        Constants.Exclusions.Headings
-      );
-      Found.HeadingOverrideStart = /* @__PURE__ */ new WeakMap();
-      Found.HeadingOverrideEnd = /* @__PURE__ */ new WeakMap();
-      if (State.option.initialHeadingLevel) {
-        State.option.initialHeadingLevel.forEach((section) => {
-          const headingsInSection = find(
-            `${section.selector} :is(h1,h2,h3,h4,h5,h6,[aria-role=heading][aria-level])`,
-            State.option.ignoreContentOutsideRoots || State.option.fixedRoots ? "root" : "document",
-            Constants.Exclusions.Headings
-          );
-          if (headingsInSection.length > 0) {
-            Found.HeadingOverrideStart.set(headingsInSection[0], section.previousHeading);
-            Found.HeadingOverrideEnd.set(headingsInSection.pop(), section.previousHeading);
+      if (shadowComponents.length) {
+        const shadowFind = [];
+        elements2.forEach((el, i) => {
+          if (el?.matches?.("[data-sa11y-has-shadow-root]") && el?.shadowRoot) {
+            shadowFind[i] = el.shadowRoot.querySelectorAll(
+              `:is(${selector}):not(${exclusions}${additional})`
+            );
           }
         });
+        if (shadowFind.length > 0) {
+          for (let index = shadowFind.length - 1; index >= 0; index--) {
+            if (shadowFind[index]) {
+              elements2.splice(index, 1, ...shadowFind[index]);
+            }
+          }
+        }
       }
-      Found.ExcludedHeadings = Found.Headings.filter(
-        (heading) => Constants.Exclusions.Headings.some((exclusion) => heading.matches(exclusion))
-      );
-      Found.ExcludedOutlineHeadings = Found.Headings.filter(
-        (heading) => Constants.Exclusions.Outline.some((exclusion) => heading.matches(exclusion))
-      );
-      Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(
-        Elements.Found.ExcludedHeadings
-      );
-      Found.Paragraphs = Found.Everything.filter(
-        ($el) => $el.tagName === "P" && !Constants.Exclusions.Paragraphs.some((selector) => $el.matches(selector))
-      );
-      Found.Lists = Found.Everything.filter(($el) => $el.tagName === "LI");
-      Found.Blockquotes = Found.Everything.filter(($el) => $el.tagName === "BLOCKQUOTE");
-      Found.Tables = Found.Everything.filter(
-        ($el) => $el.tagName === "TABLE" && !$el.matches('[role="presentation"]') && !$el.matches('[role="none"]')
-      );
-      Found.StrongItalics = Found.Everything.filter(($el) => ["STRONG", "EM"].includes($el.tagName));
-      Found.Subscripts = Found.Everything.filter(($el) => ["SUP", "SUB"].includes($el.tagName));
-      const badLinkSources = State.option.checks.QA_BAD_LINK.sources;
-      Found.CustomErrorLinks = badLinkSources.length ? Found.Links.filter(
-        ($el) => badLinkSources.split(",").some((selector) => $el.matches(selector.trim()))
-      ) : [];
-      const readabilityExclusions = ($el) => Constants.Root.Readability.some((rootEl) => rootEl.contains($el)) && !Constants.Exclusions.Readability.some((selector) => $el.matches(selector));
-      Found.Readability = [
-        ...Found.Paragraphs.filter(readabilityExclusions),
-        ...Found.Lists.filter(readabilityExclusions)
-      ].map(($el) => getText(fnIgnore($el))).filter(Boolean);
+      list = list.concat(elements2.filter((node) => node.parentNode.tagName !== "SLOT"));
+    });
+    return list;
+  }
+  function documentLoadingCheck(callback) {
+    if (document.readyState === "complete") {
+      callback();
+    } else {
+      window.addEventListener("load", callback);
+    }
+  }
+  function isScreenReaderOnly(element) {
+    const style = getCachedStyle(element);
+    if (style.getPropertyValue("clip-path").startsWith("inset(50%)")) {
+      return true;
+    }
+    if (style.clip === "rect(1px, 1px, 1px, 1px)" || style.clip === "rect(0px, 0px, 0px, 0px)") {
+      return true;
+    }
+    const indent = parseInt(style.textIndent, 10);
+    if (!Number.isNaN(indent) && Math.abs(indent) > 5e3) {
+      return true;
+    }
+    if (style.overflow === "hidden" && parseFloat(style.width) < 2 && parseFloat(style.height) < 2) {
+      return true;
+    }
+    if (style.position === "absolute" && ["left", "right", "top", "bottom"].some((p) => Math.abs(parseInt(style[p], 10)) > 5e3)) {
+      return true;
+    }
+    return parseFloat(style.fontSize) < 2;
+  }
+  function isElementHidden(element) {
+    return element.hidden || getCachedStyle(element).getPropertyValue("display") === "none";
+  }
+  function isElementVisuallyHiddenOrHidden(element) {
+    if (element.offsetWidth === 0 && element.offsetHeight === 0 || element.clientHeight === 1 && element.clientWidth === 1) {
+      return true;
+    }
+    return isElementHidden(element);
+  }
+  function stripAllSpecialCharacters(string) {
+    if (!string) return "";
+    return string.replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
+  }
+  const invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
+  const htmlEntitiesRegex = /&#(\w+)(^\w|;)?/g;
+  const htmlCtrlEntityRegex = /&(newline|tab);/gi;
+  const ctrlCharactersRegex = (
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: original lib.
+    /[\u0000-\u001F\u007F-\u009F\u2000-\u200D\uFEFF]/gim
+  );
+  const urlSchemeRegex = /^.+(:|&colon;)/gim;
+  const whitespaceEscapeCharsRegex = /(\\|%5[cC])((%(6[eE]|72|74))|[nrt])/g;
+  const relativeFirstCharacters = [".", "/"];
+  const BLANK_URL = "about:blank";
+  function isRelativeUrlWithoutProtocol(url2) {
+    return relativeFirstCharacters.indexOf(url2[0]) > -1;
+  }
+  function decodeHtmlCharacters(str) {
+    const removedNullByte = str.replace(ctrlCharactersRegex, "");
+    return removedNullByte.replace(htmlEntitiesRegex, (match, dec) => {
+      return String.fromCharCode(dec);
+    });
+  }
+  function isValidUrl(url2) {
+    if (typeof URL.canParse === "function") {
+      return URL.canParse(url2);
+    }
+    try {
+      const parsedUrl = new URL(url2);
+      return Boolean(parsedUrl);
+    } catch {
+      return false;
+    }
+  }
+  const decodeURIs = (uri) => {
+    try {
+      return decodeURIComponent(uri);
+    } catch {
+      return uri;
+    }
+  };
+  function sanitizeURL(url2) {
+    if (!url2 || typeof url2 !== "string") return BLANK_URL;
+    const isBase64Data = /^data:([a-z]+\/[a-z0-9-+.]+)?;base64,/i.test(url2.trim());
+    if (isBase64Data) return url2.trim();
+    let charsToDecode;
+    let decodedUrl = decodeURIs(url2.trim());
+    do {
+      decodedUrl = decodeHtmlCharacters(decodedUrl).replace(htmlCtrlEntityRegex, "").replace(ctrlCharactersRegex, "").replace(whitespaceEscapeCharsRegex, "").trim();
+      decodedUrl = decodeURIs(decodedUrl);
+      charsToDecode = decodedUrl.match(ctrlCharactersRegex) || decodedUrl.match(htmlEntitiesRegex) || decodedUrl.match(htmlCtrlEntityRegex) || decodedUrl.match(whitespaceEscapeCharsRegex);
+    } while (charsToDecode && charsToDecode.length > 0);
+    const sanitizedUrl = decodedUrl;
+    if (!sanitizedUrl) return BLANK_URL;
+    if (isRelativeUrlWithoutProtocol(sanitizedUrl)) return sanitizedUrl;
+    const trimmedUrl = sanitizedUrl.trimStart();
+    const urlSchemeParseResults = trimmedUrl.match(urlSchemeRegex);
+    if (!urlSchemeParseResults) return sanitizedUrl;
+    const urlScheme = urlSchemeParseResults[0].toLowerCase().trim();
+    if (invalidProtocolRegex.test(urlScheme)) return BLANK_URL;
+    const backSanitized = trimmedUrl.replace(/\\/g, "/");
+    if (urlScheme === "mailto:" || urlScheme.includes("://")) return backSanitized;
+    if (urlScheme === "http:" || urlScheme === "https:") {
+      if (!isValidUrl(backSanitized)) return BLANK_URL;
+      const url3 = new URL(backSanitized);
+      url3.protocol = url3.protocol.toLowerCase();
+      url3.hostname = url3.hostname.toLowerCase();
+      return url3.toString();
+    }
+    return backSanitized;
+  }
+  const allowedTags = [
+    "a",
+    "abbr",
+    "address",
+    "article",
+    "aside",
+    "audio",
+    "b",
+    "bdo",
+    "blockquote",
+    "br",
+    "button",
+    "canvas",
+    "cite",
+    "code",
+    "data",
+    "dd",
+    "del",
+    "details",
+    "dfn",
+    "div",
+    "dl",
+    "dt",
+    "em",
+    "fieldset",
+    "figcaption",
+    "figure",
+    "footer",
+    "form",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "header",
+    "hr",
+    "i",
+    "iframe",
+    "img",
+    "input",
+    "ins",
+    "kbd",
+    "label",
+    "li",
+    "main",
+    "mark",
+    "meter",
+    "nav",
+    "noscript",
+    "ol",
+    "output",
+    "p",
+    "picture",
+    "pre",
+    "progress",
+    "q",
+    "rp",
+    "rt",
+    "s",
+    "samp",
+    "section",
+    "select",
+    "small",
+    "source",
+    "span",
+    "strong",
+    "sub",
+    "summary",
+    "sup",
+    "svg",
+    "table",
+    "tbody",
+    "td",
+    "textarea",
+    "tfoot",
+    "th",
+    "thead",
+    "time",
+    "tr",
+    "track",
+    "u",
+    "ul",
+    "var",
+    "video",
+    "wbr",
+    "path"
+  ];
+  const attrWhitelist = {
+    a: ["href", "title", "target", "rel", "download"],
+    img: ["src", "alt", "title", "width", "height", "loading", "srcset", "sizes"],
+    iframe: [
+      "src",
+      "width",
+      "height",
+      "title",
+      "frameborder",
+      "allowfullscreen",
+      "loading",
+      "sandbox"
+    ],
+    details: ["open"],
+    ol: ["start", "type", "reversed"],
+    li: ["value"],
+    td: ["colspan", "rowspan"],
+    th: ["colspan", "rowspan", "scope"],
+    global: ["class", "id", "role", "lang", "dir", "name"],
+    path: ["d", "fill", "fill-rule"]
+  };
+  function sanitizeHTML(string) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(string, "text/html");
+    const allElements = doc.body.querySelectorAll("*");
+    allElements.forEach((node) => {
+      const tag = node.tagName.toLowerCase();
+      if (!allowedTags.includes(tag)) {
+        node.remove();
+        return;
+      }
+      const allowedForThisTag = attrWhitelist[tag] || [];
+      const globals = attrWhitelist.global;
+      [...node.attributes].forEach(({ name, value }) => {
+        const isAria = name.startsWith("aria-");
+        const isAllowed = allowedForThisTag.includes(name) || globals.includes(name) || isAria;
+        const isUrlAttr = ["src", "href", "srcset"].includes(name);
+        if (!isAllowed) {
+          node.removeAttribute(name);
+        } else if (isUrlAttr) {
+          const cleanURL = sanitizeURL(value);
+          if (!cleanURL) {
+            node.removeAttribute(name);
+          } else {
+            node.setAttribute(name, cleanURL);
+          }
+        }
+      });
+    });
+    return doc.body.innerHTML;
+  }
+  const baseIgnores = "noscript,script,style,audio,video,form,iframe";
+  function fnIgnore(element, selectors = []) {
+    const ignoreQuery = selectors.length ? `${baseIgnores},${selectors.join(",")}` : baseIgnores;
+    if (!element || element.nodeType !== Node.ELEMENT_NODE) {
+      return element ? element.cloneNode(true) : null;
+    }
+    function cloneTree(node, isRoot = false) {
+      const type = node.nodeType;
+      if (type === Node.ELEMENT_NODE) {
+        if (node.matches(ignoreQuery) && !isRoot) {
+          return null;
+        }
+        const clone = node.cloneNode(false);
+        if (node.matches(ignoreQuery) && isRoot) {
+          return clone;
+        }
+        let child = node.firstChild;
+        while (child) {
+          const clonedChild = cloneTree(child);
+          if (clonedChild) clone.appendChild(clonedChild);
+          child = child.nextSibling;
+        }
+        return clone;
+      }
+      if (type === Node.TEXT_NODE) return node.cloneNode(true);
+      return null;
+    }
+    return cloneTree(element, true);
+  }
+  let gotText = /* @__PURE__ */ new WeakMap();
+  function getText(element) {
+    if (gotText.has(element)) {
+      return gotText.get(element);
+    }
+    const ignore = fnIgnore(element);
+    const text = ignore.textContent.replace(/[\r\n]+/g, "").replace(/\s+/g, " ").trim();
+    gotText.set(element, text);
+    return text;
+  }
+  function resetGetText() {
+    gotText = /* @__PURE__ */ new WeakMap();
+  }
+  let styleCaches = {};
+  const getCachedStyle = (node, pseudoElt = null) => {
+    if (!node) return null;
+    const cacheKey = pseudoElt || "base";
+    if (!styleCaches[cacheKey]) {
+      styleCaches[cacheKey] = /* @__PURE__ */ new WeakMap();
+    }
+    const targetCache = styleCaches[cacheKey];
+    if (!targetCache.has(node)) {
+      targetCache.set(node, getComputedStyle(node, pseudoElt));
+    }
+    return targetCache.get(node);
+  };
+  let parentCache = /* @__PURE__ */ new WeakMap();
+  function getCachedClosest(element, selector) {
+    if (!element || !selector) return null;
+    if (!parentCache.has(element)) {
+      parentCache.set(element, /* @__PURE__ */ new Map());
+    }
+    const elementCache = parentCache.get(element);
+    if (elementCache.has(selector)) {
+      return elementCache.get(selector);
+    }
+    const result = element.closest(selector);
+    elementCache.set(selector, result);
+    return result;
+  }
+  function removeWhitespace(string) {
+    return string.replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+  }
+  function normalizeString(string) {
+    return removeWhitespace(string.replace(/[\u0000-\u001F\u007F-\u009F]/g, ""));
+  }
+  function truncateString(string, maxLength) {
+    const truncatedString = string.substring(0, maxLength).trimEnd();
+    return string.length > maxLength ? `${truncatedString}...` : string;
+  }
+  const store = {
+    getItem(key) {
+      try {
+        if (localStorage.getItem(key) === null) {
+          return sessionStorage.getItem(key);
+        }
+        return localStorage.getItem(key);
+      } catch {
+        return false;
+      }
+    },
+    setItem(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch {
+        sessionStorage.setItem(key, value);
+      }
+      return true;
+    },
+    removeItem(key) {
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        sessionStorage.removeItem(key);
+      }
+      return true;
+    }
+  };
+  function prepareDismissal(string) {
+    return String(string).replace(/([^0-9a-zA-Z])/g, "").substring(0, 256);
+  }
+  function getBestImageSource(element) {
+    const getLastSrc = (src) => src?.split(/,\s+/).pop()?.trim()?.split(/\s+/)[0];
+    const resolveUrl = (src) => src ? new URL(src, window.location.href).href : null;
+    const dataSrc = getLastSrc(element.getAttribute("data-src") || element.getAttribute("srcset"));
+    if (dataSrc) return resolveUrl(dataSrc);
+    const pictureSrcset = getCachedClosest(element, "picture")?.querySelector("source[srcset]")?.getAttribute("srcset");
+    const pictureSrc = getLastSrc(pictureSrcset);
+    if (pictureSrc) return resolveUrl(pictureSrc);
+    return resolveUrl(element.getAttribute("src"));
+  }
+  function isVisibleTextInAccName($el, accName, exclusions = [], linkIgnoreStrings) {
+    let text = "";
+    const excludeSelector = exclusions?.length ? exclusions.join(",") : "";
+    const ignoreStrings = Array.isArray(linkIgnoreStrings) ? linkIgnoreStrings : null;
+    const stripIgnored = (value = "") => ignoreStrings ? ignoreStrings.reduce((result, str) => result.replace(str, ""), value) : value;
+    $el.childNodes.forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        text += stripIgnored(node.textContent);
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        return;
+      }
+      if (excludeSelector && node.matches(excludeSelector)) {
+        return;
+      }
+      if (!isElementVisuallyHiddenOrHidden(node)) {
+        text += stripIgnored(getText(node));
+      }
+    });
+    const emojiRegex = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu;
+    let visibleText = text.replace(emojiRegex, "");
+    visibleText = removeWhitespace(visibleText).toLowerCase();
+    if (visibleText === "x") {
+      return false;
+    }
+    return visibleText.length !== 0 && !accName.toLowerCase().includes(visibleText);
+  }
+  function standardizeHref($el) {
+    let href = $el.getAttribute("href");
+    href = removeWhitespace(href).toLowerCase();
+    if (href.endsWith("/")) {
+      href = href.slice(0, -1);
+    }
+    href = href.replace(/^https?:\/\/(www\.)?/, "");
+    href = href.replace(/\.(html|php|htm|asp|aspx)$/i, "");
+    return href;
+  }
+  function generateRegexString(input, matchStart = false) {
+    if (!input) return null;
+    if (input instanceof RegExp) return input;
+    let patterns = [];
+    if (Array.isArray(input)) {
+      patterns = input;
+    } else if (typeof input === "string") {
+      patterns = input.split(",").map((s) => s.trim());
+    } else {
+      return null;
+    }
+    patterns = patterns.filter((p) => p && p.length > 0);
+    if (patterns.length === 0) return null;
+    const escapeRegExp = (string) => {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    };
+    const joinedPatterns = patterns.map(escapeRegExp).join("|");
+    const finalPattern = matchStart ? `^(?:${joinedPatterns})` : joinedPatterns;
+    return new RegExp(finalPattern, "gi");
+  }
+  async function dismissDigest(pepper, message) {
+    const msgUint8 = new TextEncoder().encode(pepper + message);
+    const hashBuffer = await window.crypto.subtle.digest("SHA-256", msgUint8);
+    if (Uint8Array.prototype.toHex) {
+      return new Uint8Array(hashBuffer).toHex();
+    }
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  let langCache;
+  function validateLang(code, displayLangCode) {
+    if (typeof code !== "string") return { valid: false };
+    const norm = code.trim().replace(/_/g, "-");
+    if (!langCache && typeof Intl !== "undefined") {
+      try {
+        langCache = new Intl.DisplayNames([displayLangCode], { type: "language", fallback: "none" });
+      } catch {
+      }
+    }
+    if (langCache) {
+      const check = (val) => {
+        try {
+          return langCache.of(val);
+        } catch {
+          return false;
+        }
+      };
+      if (check(code)) return { valid: true };
+      if (check(norm)) return { valid: false, suggest: norm };
+      return { valid: false };
+    }
+    return { valid: /^[a-z]{2,3}(-[a-z]{4})?(-[a-z]{2,4})?$/i.test(norm) };
+  }
+  const wrapPseudoContent = (element, string) => {
+    const getAltText = (content) => {
+      if (content === "none") {
+        return "";
+      }
+      const match = content.includes("url(") || content.includes("image-set(") ? content.match(/\/\s*"([^"]+)"/) : content.match(/"([^"]+)"/);
+      return match ? match[1] : "";
+    };
+    const before = getAltText(getCachedStyle(element, ":before").getPropertyValue("content"));
+    const after = getAltText(getCachedStyle(element, ":after").getPropertyValue("content"));
+    return `${before}${string}${after}`;
+  };
+  const nextTreeBranch = (tree) => {
+    for (let i = 0; i < 1e3; i++) {
+      if (tree.nextSibling()) {
+        return tree.previousNode();
+      }
+      if (!tree.parentNode()) {
+        return false;
+      }
+    }
+    return false;
+  };
+  const computeAriaLabel = (element, recursing = false) => {
+    if (State.option.ignoreAriaOnElements && element.matches(State.option.ignoreAriaOnElements)) {
+      return "noAria";
+    }
+    if (State.option.ignoreTextInElements && element.matches(State.option.ignoreTextInElements)) {
+      return "";
+    }
+    const labelledBy = element.getAttribute("aria-labelledby");
+    if (!recursing && labelledBy) {
+      return labelledBy.split(/\s+/).filter((id) => id.trim()).map((id) => {
+        const targetElement = document.querySelector(`#${CSS.escape(id)}`);
+        return targetElement ? computeAccessibleName(targetElement, "", 1) : "";
+      }).join(" ");
+    }
+    const { ariaLabel } = element;
+    if (ariaLabel && ariaLabel.trim().length > 0) {
+      return ariaLabel;
+    }
+    return "noAria";
+  };
+  const computeAccessibleName = (element, exclusions = [], recursing = 0) => {
+    const ariaLabel = computeAriaLabel(element, recursing);
+    if (ariaLabel !== "noAria") {
+      return ariaLabel;
+    }
+    let computedText = "";
+    const and = (word) => {
+      computedText += ` ${word}`;
+    };
+    if (!element.children.length) {
+      computedText = wrapPseudoContent(element, element.textContent);
+      if (!computedText.trim() && element.hasAttribute("title")) {
+        return element.getAttribute("title");
+      }
+      return computedText;
+    }
+    function createTreeWalker(root, showElement, showText) {
+      const acceptNode = (node) => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          return NodeFilter.FILTER_ACCEPT;
+        }
+        if (node.nodeType === Node.TEXT_NODE) {
+          return NodeFilter.FILTER_ACCEPT;
+        }
+        return NodeFilter.FILTER_REJECT;
+      };
+      return document.createTreeWalker(root, NodeFilter.SHOW_ALL, { acceptNode });
+    }
+    const treeWalker = createTreeWalker(element);
+    const alwaysExclude = ["noscript", "style", "script", "video", "audio"];
+    const excludeSelector = [...exclusions, ...alwaysExclude].join(", ");
+    const exclude = excludeSelector ? element.querySelectorAll(excludeSelector) : [];
+    let addTitleIfNoName = false;
+    let aText = false;
+    let count = 0;
+    let continueWalker = true;
+    while (treeWalker.nextNode() && continueWalker) {
+      count += 1;
+      const node = treeWalker.currentNode;
+      const excluded = Array.from(exclude).some((ex) => ex.contains(node));
+      if (excluded) {
+        continue;
+      }
+      if (node.shadowRoot) {
+        const shadowChildren = node.shadowRoot.querySelectorAll("*");
+        for (let i = 0; i < shadowChildren.length; i++) {
+          const child = shadowChildren[i];
+          if (!excludeSelector || !getCachedClosest(child, excludeSelector)) {
+            and(computeAccessibleName(child, exclusions, recursing + 1));
+          }
+        }
+      }
+      if (node.nodeType === Node.TEXT_NODE) {
+        if (node.parentNode.tagName !== "SLOT") {
+          and(node.nodeValue);
+        }
+        continue;
+      }
+      if (addTitleIfNoName && !getCachedClosest(node, "a")) {
+        if (aText === computedText) {
+          and(addTitleIfNoName);
+        }
+        addTitleIfNoName = false;
+        aText = false;
+      }
+      if (node.ariaHidden === "true" && !(recursing && count < 3)) {
+        if (!nextTreeBranch(treeWalker)) {
+          continueWalker = false;
+        }
+        continue;
+      }
+      const aria = computeAriaLabel(node, recursing);
+      if (aria !== "noAria") {
+        and(aria);
+        if (!nextTreeBranch(treeWalker)) {
+          continueWalker = false;
+        }
+        continue;
+      }
+      switch (node.tagName) {
+        case "IMG":
+          if (node.hasAttribute("alt") && node.role !== "presentation") {
+            and(node.getAttribute("alt"));
+          }
+          break;
+        case "SVG":
+          if (node.role === "img" || node.role === "graphics-document") {
+            and(computeAriaLabel(node));
+          } else {
+            const title = node.querySelector("title");
+            if (title) {
+              and(title.textContent);
+            }
+          }
+          break;
+        case "A":
+          if (node.hasAttribute("title")) {
+            addTitleIfNoName = node.getAttribute("title");
+            aText = computedText;
+          } else {
+            addTitleIfNoName = false;
+            aText = false;
+          }
+          and(wrapPseudoContent(node, ""));
+          break;
+        case "INPUT":
+          and(wrapPseudoContent(treeWalker.currentNode, ""));
+          if (treeWalker.currentNode.hasAttribute("title")) {
+            addTitleIfNoName = treeWalker.currentNode.getAttribute("title");
+          }
+          break;
+        case "SLOT": {
+          const children = node.assignedNodes?.() || [];
+          let slotText = "";
+          children.forEach((child) => {
+            if (child.nodeType === Node.ELEMENT_NODE) {
+              slotText += computeAccessibleName(child);
+            } else if (child.nodeType === Node.TEXT_NODE) {
+              slotText += child.nodeValue;
+            }
+          });
+          and(slotText);
+          and(wrapPseudoContent(node, ""));
+          break;
+        }
+        case "SPAN": {
+          and(wrapPseudoContent(treeWalker.currentNode, ""));
+          if (treeWalker.currentNode.hasAttribute("title")) {
+            addTitleIfNoName = treeWalker.currentNode.getAttribute("title");
+          }
+          break;
+        }
+        default:
+          and(wrapPseudoContent(node, ""));
+          break;
+      }
+    }
+    if (addTitleIfNoName && !aText) {
+      and(addTitleIfNoName);
+    }
+    computedText = computedText.replace(/[\uE000-\uF8FF]/gu, "");
+    if (!computedText.trim()) {
+      computedText = wrapPseudoContent(element, "");
+      if (!computedText.trim() && element.hasAttribute("title")) {
+        return element.getAttribute("title");
+      }
+    }
+    return computedText;
+  };
+  const Elements = (function myElements() {
+    const Found = {};
+    const contrastExcludedTags = /* @__PURE__ */ new Set([
+      "AUDIO",
+      "VIDEO",
+      "IFRAME",
+      "SVG",
+      "SCRIPT",
+      "STYLE",
+      "NOSCRIPT",
+      "TEMPLATE",
+      "HEAD",
+      "TITLE",
+      "META",
+      "BASE",
+      "DATALIST",
+      "PROGRESS",
+      "METER",
+      "LINK",
+      "HR",
+      "OPTION"
+    ]);
+    const contrastAncestorSelector = "audio,video,meter,progress,datalist,head,svg";
+    let contrastAttrSelector = "";
+    function buildContrastAttrSelector() {
+      const base = ['input[type="color"]', 'input[type="range"]'];
+      if (State.option.contrastIgnore) {
+        const userSelectors = State.option.contrastIgnore.split(",").map((s) => s.trim()).flatMap((s) => [s, `${s} *`]);
+        base.push(...userSelectors);
+      }
+      contrastAttrSelector = base.join(",");
+    }
+    let _pageTextComputed = false;
+    let _pageTextValue = null;
+    let _readabilityComputed = false;
+    let _readabilityValue = null;
+    Object.defineProperty(Found, "pageText", {
+      get() {
+        if (!_pageTextComputed) {
+          _pageTextValue = computePageText();
+          _pageTextComputed = true;
+        }
+        return _pageTextValue;
+      },
+      set(val) {
+        _pageTextValue = val;
+        _pageTextComputed = true;
+      },
+      configurable: true,
+      enumerable: true
+    });
+    Object.defineProperty(Found, "Readability", {
+      get() {
+        if (!_readabilityComputed) {
+          _readabilityValue = computeReadabilityText();
+          _readabilityComputed = true;
+        }
+        return _readabilityValue;
+      },
+      set(val) {
+        _readabilityValue = val;
+        _readabilityComputed = true;
+      },
+      configurable: true,
+      enumerable: true
+    });
+    function computePageText() {
       const elementSet = new Set(Found.Everything);
-      Found.pageText = Found.Everything.filter(($el) => {
+      return Found.Everything.filter(($el) => {
         if ($el instanceof HTMLImageElement) return true;
         let parent = $el.parentElement;
         while (parent) {
@@ -1432,32 +1455,221 @@
         }
         return normalizeString(text);
       }).filter(Boolean);
+    }
+    function computeReadabilityText() {
+      const readabilityExclusions = ($el) => Constants.Root.Readability.some((rootEl) => rootEl.contains($el)) && !Constants.Exclusions.Readability.some((selector) => $el.matches(selector));
+      return [
+        ...Found.Paragraphs.filter(readabilityExclusions),
+        ...Found.Lists.filter(readabilityExclusions)
+      ].map(($el) => getText(fnIgnore($el))).filter(Boolean);
+    }
+    function initializeElements() {
+      _pageTextComputed = false;
+      _pageTextValue = null;
+      _readabilityComputed = false;
+      _readabilityValue = null;
+      buildContrastAttrSelector();
+      const badLinkSourcesRaw = State.option.checks.QA_BAD_LINK.sources;
+      const badLinkSelectors = badLinkSourcesRaw.length ? badLinkSourcesRaw.split(",").map((s) => s.trim()) : [];
       const nestedSources = State.option.checks.QA_NESTED_COMPONENTS.sources || '[role="tablist"], details';
-      Found.NestedComponents = Found.Everything.filter(($el) => $el.matches(nestedSources));
-      Found.TabIndex = Found.Everything.filter(
-        ($el) => $el.hasAttribute("tabindex") && $el.getAttribute("tabindex") !== "0" && !$el.getAttribute("tabindex").startsWith("-")
+      Found.Everything = find("*", "root", Constants.Exclusions.Sa11yElements);
+      Found.Images = [];
+      Found.Links = [];
+      Found.Paragraphs = [];
+      Found.Lists = [];
+      Found.Blockquotes = [];
+      Found.Tables = [];
+      Found.StrongItalics = [];
+      Found.Subscripts = [];
+      Found.Buttons = [];
+      Found.Inputs = [];
+      Found.Labels = [];
+      Found.iframes = [];
+      Found.Svg = [];
+      Found.Contrast = [];
+      Found.TabIndex = [];
+      Found.NestedComponents = [];
+      Found.CustomErrorLinks = [];
+      for (let i = 0; i < Found.Everything.length; i++) {
+        const $el = Found.Everything[i];
+        const tag = $el.tagName;
+        switch (tag) {
+          case "IMG":
+            if (!Constants.Exclusions.Images.some((s) => $el.matches(s)))
+              Found.Images.push($el);
+            break;
+          case "A":
+          // HTML anchor
+          case "a":
+            if ($el.hasAttribute("href") && !$el.matches('[role="button"]') && !Constants.Exclusions.Links.some((s) => $el.matches(s))) {
+              Found.Links.push($el);
+              if (badLinkSelectors.length > 0 && badLinkSelectors.some((s) => $el.matches(s))) {
+                Found.CustomErrorLinks.push($el);
+              }
+            }
+            break;
+          case "P":
+            if (!Constants.Exclusions.Paragraphs.some((s) => $el.matches(s)))
+              Found.Paragraphs.push($el);
+            break;
+          case "LI":
+            Found.Lists.push($el);
+            break;
+          case "BLOCKQUOTE":
+            Found.Blockquotes.push($el);
+            break;
+          case "TABLE":
+            if (!$el.matches('[role="presentation"],[role="none"]'))
+              Found.Tables.push($el);
+            break;
+          case "STRONG":
+          case "EM":
+            Found.StrongItalics.push($el);
+            break;
+          case "SUP":
+          case "SUB":
+            Found.Subscripts.push($el);
+            break;
+          case "BUTTON":
+            Found.Buttons.push($el);
+            break;
+          case "INPUT":
+          case "SELECT":
+          case "TEXTAREA":
+          case "METER":
+          case "PROGRESS":
+            Found.Inputs.push($el);
+            break;
+          case "LABEL":
+            Found.Labels.push($el);
+            break;
+          case "IFRAME":
+          case "AUDIO":
+          case "VIDEO":
+            Found.iframes.push($el);
+            break;
+          case "svg":
+            Found.Svg.push($el);
+            break;
+        }
+        if (tag !== "BUTTON" && $el.matches('[role="button"]'))
+          Found.Buttons.push($el);
+        if ($el.hasAttribute("tabindex")) {
+          const ti = $el.getAttribute("tabindex");
+          if (ti !== "0" && !ti.startsWith("-"))
+            Found.TabIndex.push($el);
+        }
+        if ($el.matches(nestedSources))
+          Found.NestedComponents.push($el);
+        if (!contrastExcludedTags.has(tag)) {
+          if (!$el.closest(contrastAncestorSelector)) {
+            if (!contrastAttrSelector || !$el.matches(contrastAttrSelector)) {
+              Found.Contrast.push($el);
+            }
+          }
+        }
+      }
+      const headingScope = State.option.ignoreContentOutsideRoots || State.option.fixedRoots ? "root" : "document";
+      Found.Headings = find(
+        'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
+        headingScope,
+        Constants.Exclusions.Headings
       );
-      Found.Svg = Found.Everything.filter(($el) => $el.tagName === "svg");
-      Found.Buttons = Found.Everything.filter(
-        ($el) => $el.tagName === "BUTTON" || $el.matches('[role="button"]')
+      Found.HeadingOne = Found.Headings.filter(
+        ($el) => $el.tagName === "H1" || $el.matches('[role="heading"]') && $el.getAttribute("aria-level") === "1"
       );
-      Found.Inputs = Found.Everything.filter(
-        ($el) => ["INPUT", "SELECT", "TEXTAREA", "METER", "PROGRESS"].includes($el.tagName)
-      );
-      Found.Labels = Found.Everything.filter(($el) => $el.tagName === "LABEL");
-      Found.iframes = Found.Everything.filter(
-        ($el) => ["IFRAME", "AUDIO", "VIDEO"].includes($el.tagName)
-      );
-      Found.Videos = Found.iframes.filter(($el) => $el.matches(Constants.Global.VideoSources));
-      Found.Audio = Found.iframes.filter(($el) => $el.matches(Constants.Global.AudioSources));
-      Found.Visualizations = Found.iframes.filter(
-        ($el) => $el.matches(Constants.Global.VisualizationSources)
-      );
-      Found.EmbeddedContent = Found.iframes.filter(
-        ($el) => !$el.matches(Constants.Global.AllEmbeddedContent)
-      );
+      Found.HeadingOverrideStart = /* @__PURE__ */ new WeakMap();
+      Found.HeadingOverrideEnd = /* @__PURE__ */ new WeakMap();
+      if (State.option.initialHeadingLevel) {
+        State.option.initialHeadingLevel.forEach((section) => {
+          const headingsInSection = find(
+            `${section.selector} :is(h1,h2,h3,h4,h5,h6,[aria-role=heading][aria-level])`,
+            headingScope,
+            Constants.Exclusions.Headings
+          );
+          if (headingsInSection.length > 0) {
+            Found.HeadingOverrideStart.set(headingsInSection[0], section.previousHeading);
+            Found.HeadingOverrideEnd.set(headingsInSection.pop(), section.previousHeading);
+          }
+        });
+      }
+      Found.ExcludedHeadings = [];
+      Found.ExcludedOutlineHeadings = [];
+      for (const heading of Found.Headings) {
+        if (Constants.Exclusions.Headings.some((ex) => heading.matches(ex)))
+          Found.ExcludedHeadings.push(heading);
+        if (Constants.Exclusions.Outline.some((ex) => heading.matches(ex)))
+          Found.ExcludedOutlineHeadings.push(heading);
+      }
+      Found.OutlineIgnore = Found.ExcludedOutlineHeadings.concat(Found.ExcludedHeadings);
+      Found.Videos = [];
+      Found.Audio = [];
+      Found.Visualizations = [];
+      Found.EmbeddedContent = [];
+      for (const $el of Found.iframes) {
+        let matched = false;
+        if ($el.matches(Constants.Global.VideoSources)) {
+          Found.Videos.push($el);
+          matched = true;
+        }
+        if ($el.matches(Constants.Global.AudioSources)) {
+          Found.Audio.push($el);
+          matched = true;
+        }
+        if ($el.matches(Constants.Global.VisualizationSources)) {
+          Found.Visualizations.push($el);
+          matched = true;
+        }
+        if (!matched) {
+          Found.EmbeddedContent.push($el);
+        }
+      }
       const html = document.querySelector("html");
       Found.Language = html.getAttribute("lang")?.trim();
+    }
+    function initializeFilterElements() {
+      buildContrastAttrSelector();
+      Found.Everything = find("*", "root", Constants.Exclusions.Sa11yElements);
+      Found.Images = [];
+      Found.Links = [];
+      Found.Contrast = [];
+      for (let i = 0; i < Found.Everything.length; i++) {
+        const $el = Found.Everything[i];
+        const tag = $el.tagName;
+        switch (tag) {
+          case "IMG":
+            if (!Constants.Exclusions.Images.some((s) => $el.matches(s)))
+              Found.Images.push($el);
+            break;
+          case "A":
+          case "a":
+            if ($el.hasAttribute("href") && !$el.matches('[role="button"]') && !Constants.Exclusions.Links.some((s) => $el.matches(s))) {
+              Found.Links.push($el);
+            }
+            break;
+        }
+        if (!contrastExcludedTags.has(tag)) {
+          if (!$el.closest(contrastAncestorSelector)) {
+            if (!contrastAttrSelector || !$el.matches(contrastAttrSelector)) {
+              Found.Contrast.push($el);
+            }
+          }
+        }
+      }
+      Found.Headings = find(
+        'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
+        "root",
+        Constants.Exclusions.Headings
+      );
+      Found.ExcludedHeadings = [];
+      Found.ExcludedOutlineHeadings = [];
+      for (const heading of Found.Headings) {
+        if (Constants.Exclusions.Headings.some((ex) => heading.matches(ex)))
+          Found.ExcludedHeadings.push(heading);
+        if (Constants.Exclusions.Outline.some((ex) => heading.matches(ex)))
+          Found.ExcludedOutlineHeadings.push(heading);
+      }
+      Found.OutlineIgnore = Found.ExcludedOutlineHeadings.concat(Found.ExcludedHeadings);
     }
     const Annotations = {};
     function initializeAnnotations() {
@@ -1468,6 +1680,7 @@
     }
     return {
       initializeElements,
+      initializeFilterElements,
       Found,
       initializeAnnotations,
       Annotations
@@ -1493,7 +1706,7 @@
       });
     }
   }
-  const version = "3.0.0-405";
+  const version = "3.0.0-409";
   const spriteAlts = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>';
   const spriteClose = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>';
   const spriteCursor = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 256 512"><path fill="currentColor" d="M0 29C-1 47 12 62 29 64l8 1C71 67 96 95 96 128L96 224l-32 0c-18 0-32 14-32 32s14 32 32 32l32 0 0 96c0 33-26 61-59 64l-8 1C12 450-1 465 0 483s17 31 35 29l8-1c34-3 64-19 85-43c21 24 51 40 85 43l8 1c18 2 33-12 35-29s-12-33-29-35l-8-1C186 445 160 417 160 384l0-96 32 0c18 0 32-14 32-32s-14-32-32-32l-32 0 0-96c0-33 26-61 59-64l8-1c18-2 31-17 29-35S239-1 221 0l-8 1C179 4 149 20 128 44c-21-24-51-40-85-43l-8-1C17-1 2 12 0 29z"/></svg>';
@@ -1814,34 +2027,7 @@ ${this.error.stack}
     }
     findShadowComponents(State.option);
     if (onlyForFilter) {
-      Elements.Found.Everything = find("*", "root", Constants.Exclusions.Sa11yElements);
-      Elements.Found.Contrast = Elements.Found.Everything.filter(($el) => {
-        const matchesSelector = Constants.Exclusions.Contrast.some(
-          (exclusion) => $el.matches(exclusion)
-        );
-        return !matchesSelector && !Constants.Exclusions.Contrast.includes($el);
-      });
-      Elements.Found.Images = Elements.Found.Everything.filter(
-        ($el) => $el.tagName === "IMG" && !Constants.Exclusions.Images.some((selector) => $el.matches(selector))
-      );
-      Elements.Found.Links = Elements.Found.Everything.filter(
-        ($el) => ($el.tagName === "A" || $el.tagName === "a") && $el.hasAttribute("href") && !$el.matches('[role="button"]') && // Exclude links with [role="button"]
-        !Constants.Exclusions.Links.some((selector) => $el.matches(selector))
-      );
-      Elements.Found.Headings = find(
-        'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
-        "root",
-        Constants.Exclusions.Headings
-      );
-      Elements.Found.ExcludedHeadings = Elements.Found.Headings.filter(
-        (heading) => Constants.Exclusions.Headings.some((exclusion) => heading.matches(exclusion))
-      );
-      Elements.Found.ExcludedOutlineHeadings = Elements.Found.Headings.filter(
-        (heading) => Constants.Exclusions.Outline.some((exclusion) => heading.matches(exclusion))
-      );
-      Elements.Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(
-        Elements.Found.ExcludedHeadings
-      );
+      Elements.initializeFilterElements();
     } else {
       State.headingOutline = [];
       Elements.initializeElements(State.option);
@@ -2731,7 +2917,8 @@ ${this.error.stack}
       if ($el.height < 2 && $el.width < 2 && (isElementHidden($el) || rawAlt === "")) {
         return;
       }
-      const link = $el.closest(
+      const link = getCachedClosest(
+        $el,
         State.option.imageWithinLightbox ? `a[href]:not(${State.option.imageWithinLightbox})` : "a[href]"
       );
       const src = $el.getAttribute("src") ? $el.getAttribute("src").split("?")[0] : $el.getAttribute("srcset");
@@ -2803,7 +2990,7 @@ ${this.error.stack}
         }
       }
       let decorative = rawAlt === "";
-      const figure = $el.closest("figure");
+      const figure = getCachedClosest($el, "figure");
       const figcaption = figure?.querySelector("figcaption");
       const figcaptionText = figcaption ? getText(figcaption) : "";
       const maxAltCharactersLinks = State.option.checks.LINK_IMAGE_LONG_ALT.maxLength || 250;
@@ -2813,7 +3000,7 @@ ${this.error.stack}
       }
       if (decorative) {
         const carouselSources = State.option.checks.IMAGE_DECORATIVE_CAROUSEL.sources;
-        const carousel = carouselSources ? $el.closest(carouselSources) : "";
+        const carousel = carouselSources ? getCachedClosest($el, carouselSources) : "";
         if (carousel) {
           const numberOfSlides = carousel.querySelectorAll("img");
           const rule = numberOfSlides.length === 1 ? State.option.checks.IMAGE_DECORATIVE : State.option.checks.IMAGE_DECORATIVE_CAROUSEL;
@@ -3039,7 +3226,8 @@ ${this.error.stack}
           });
         }
       } else if (State.option.checks.IMAGE_PASS) {
-        if (!$el.closest('button, [role="button"]')) {
+        const button = getCachedClosest($el, 'button, [role="button"]');
+        if (!button) {
           State.results.push({
             test: "IMAGE_PASS",
             element: $el,
@@ -3168,7 +3356,7 @@ ${this.error.stack}
           }
           return;
         }
-        const closestLabel = $el.closest("label");
+        const closestLabel = getCachedClosest($el, "label");
         const labelName = closestLabel ? computeAccessibleName(closestLabel) : "";
         if (closestLabel && labelName.length) return;
         const id = $el.getAttribute("id");
@@ -3257,7 +3445,7 @@ ${this.error.stack}
         if (State.option.checks.QA_IN_PAGE_LINK || State.option.checks.LINK_MAYBE_BUTTON) {
           const hasText = getText($el).length !== 0;
           const ignored = $el.ariaHidden === "true" && $el.getAttribute("tabindex") === "-1";
-          const hasAttributes = $el.hasAttribute("role") || $el.hasAttribute("aria-haspopup") || $el.hasAttribute("aria-expanded") || $el.hasAttribute("onclick") || $el.hasAttribute("disabled") || !!$el.closest('nav, [role="navigation"]');
+          const hasAttributes = $el.hasAttribute("role") || $el.hasAttribute("aria-haspopup") || $el.hasAttribute("aria-expanded") || $el.hasAttribute("onclick") || $el.hasAttribute("disabled") || !!getCachedClosest($el, 'nav, [role="navigation"]');
           if ((href.startsWith("#") || href === "") && hasText && !ignored && !hasAttributes) {
             const targetId = href.substring(1);
             const ariaControls = $el.getAttribute("aria-controls");
@@ -3428,11 +3616,11 @@ ${this.error.stack}
       };
       const ignoreParents = 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level], blockquote, table';
       const computeLargeParagraphs = (p) => {
-        const size = getComputedStyle(p).fontSize.replace("px", "");
+        const size = parseFloat(getCachedStyle(p).fontSize);
         const getText$1 = getText(p);
         const maybeSentence = getText$1.match(/[.;?!"]/) === null;
         const typicalHeadingLength = getText$1.length >= 4 && getText$1.length <= 120;
-        if (size >= 24 && !p.closest(ignoreParents) && typicalHeadingLength && maybeSentence && !isPreviousElementAHeading(p)) {
+        if (size >= 24 && !getCachedClosest(p, ignoreParents) && typicalHeadingLength && maybeSentence && !isPreviousElementAHeading(p)) {
           addResult(p, getText$1);
         }
       };
@@ -3440,7 +3628,7 @@ ${this.error.stack}
         const html = p.innerHTML.trim();
         if (html[0] !== "<") return;
         const likelyFakeHeading = /^<\s*(?:strong|b)\b[^>]*>[\s\S]*?<\/\s*(?:strong|b)\s*>(?:<\s*\/?\s*br\s*>|$)/i.test(html);
-        if (!likelyFakeHeading || p.closest(ignoreParents)) return;
+        if (!likelyFakeHeading || getCachedClosest(p, ignoreParents)) return;
         const possibleHeading = p.querySelector("strong, b");
         if (!possibleHeading) return;
         const text = getText(possibleHeading);
@@ -3627,35 +3815,48 @@ ${this.error.stack}
         developer: State.option.checks.QA_SMALL_TEXT.developer || false
       });
     };
-    const computeStyle = ($el) => {
-      const style = getComputedStyle($el);
-      const { textDecorationLine, textAlign, fontSize } = style;
-      const interactive = 'a[href], button, abbr, [role="link"], [role="button"], [tabindex="0"], [onclick]';
-      if (State.option.checks.QA_UNDERLINE && ($el.closest("u") || textDecorationLine === "underline") && !$el.closest(interactive) && !$el.matches(interactive)) {
-        addUnderlineResult($el);
-      }
-      const defaultSize = State.option.checks.QA_SMALL_TEXT.fontSize || 10;
-      const computedFontSize = parseFloat(fontSize);
-      const parentFontSize = $el.parentElement ? parseFloat(getComputedStyle($el.parentElement).fontSize) : null;
-      const isInherited = parentFontSize === computedFontSize;
-      const isSup = $el.closest("sup, sub") !== null;
-      const withinRange = !isInherited && !isSup && computedFontSize > 1 && computedFontSize <= defaultSize;
-      if (State.option.checks.QA_SMALL_TEXT && withinRange) {
-        addSmallTextResult($el);
-      }
-      const parentJustify = $el.parentElement ? getComputedStyle($el.parentElement).textAlign : null;
-      const justifyInherited = parentJustify === textAlign;
-      if (State.option.checks.QA_JUSTIFY && textAlign === "justify" && !justifyInherited) {
-        addJustifyResult($el);
-      }
-    };
-    if (State.option.checks.QA_UNDERLINE || State.option.checks.QA_JUSTIFY || State.option.checks.QA_SMALL_TEXT) {
+    const checkUnderline = State.option.checks.QA_UNDERLINE;
+    const checkSmallText = State.option.checks.QA_SMALL_TEXT;
+    const checkJustify = State.option.checks.QA_JUSTIFY;
+    if (checkUnderline || checkJustify || checkSmallText) {
+      const defaultSize = checkSmallText?.fontSize || 10;
+      const interactiveSelector = 'a[href], button, abbr, [role="link"], [role="button"], [tabindex="0"], [onclick]';
+      const hasDirectText = (el) => {
+        let node = el.firstChild;
+        while (node) {
+          if (node.nodeType === 3 && node.nodeValue.trim().length > 0) {
+            return true;
+          }
+          node = node.nextSibling;
+        }
+        return false;
+      };
       for (let i = 0; i < Elements.Found.Everything.length; i++) {
         const $el = Elements.Found.Everything[i];
-        const textString = Array.from($el.childNodes).filter((node) => node.nodeType === 3).map((node) => node.textContent).join("");
-        const text = textString.trim();
-        if (text.length !== 0) {
-          computeStyle($el);
+        if (!hasDirectText($el)) continue;
+        const style = getCachedStyle($el);
+        const parentStyle = getCachedStyle($el.parentElement);
+        if (checkUnderline) {
+          if ((style.textDecorationLine === "underline" || getCachedClosest($el, "u")) && !$el.matches(interactiveSelector) && !getCachedClosest($el, interactiveSelector)) {
+            addUnderlineResult($el);
+          }
+        }
+        if (checkSmallText) {
+          const computedFontSize = parseFloat(style.fontSize);
+          if (computedFontSize > 1 && computedFontSize <= defaultSize) {
+            const parentFontSize = parentStyle ? parseFloat(parentStyle.fontSize) : null;
+            const isInherited = parentFontSize === computedFontSize;
+            if (!isInherited && !getCachedClosest($el, "sup, sub")) {
+              addSmallTextResult($el);
+            }
+          }
+        }
+        if (checkJustify && style.textAlign === "justify") {
+          const parentJustify = parentStyle ? parentStyle.textAlign : null;
+          const justifyInherited = parentJustify === style.textAlign;
+          if (!justifyInherited) {
+            addJustifyResult($el);
+          }
         }
       }
     }
@@ -3912,6 +4113,22 @@ ${this.error.stack}
     setCache(cacheKey, result);
     return result;
   }
+  function memoize(fn, keyResolver) {
+    const cache = /* @__PURE__ */ new Map();
+    const memoized = (...args) => {
+      const key = keyResolver ? keyResolver(...args) : JSON.stringify(args);
+      if (cache.has(key)) {
+        return cache.get(key);
+      }
+      const result = fn.apply(this, args);
+      cache.set(key, result);
+      return result;
+    };
+    memoized.clear = () => {
+      cache.clear();
+    };
+    return memoized;
+  }
   function normalizeFontWeight(weight) {
     const numericWeight = parseInt(weight, 10);
     if (!Number.isNaN(numericWeight)) {
@@ -3925,7 +4142,11 @@ ${this.error.stack}
     };
     return weightMap[weight] || 400;
   }
+  let backgroundCache = /* @__PURE__ */ new WeakMap();
   function getBackground($el, shadowDetection) {
+    if (backgroundCache.has($el)) {
+      return backgroundCache.get($el);
+    }
     const getVisualParent = (node) => {
       if (!node) return null;
       if (shadowDetection) {
@@ -3935,15 +4156,17 @@ ${this.error.stack}
       return node.parentElement || node.parentNode;
     };
     let targetEl = $el;
+    let finalBackground = [255, 255, 255];
     while (targetEl && (targetEl.nodeType === 1 || targetEl.nodeType === 11)) {
       if (targetEl instanceof ShadowRoot) {
         targetEl = targetEl.host;
         continue;
       }
-      const styles = getComputedStyle(targetEl);
+      const styles = getCachedStyle(targetEl);
       const bgImage = styles.backgroundImage;
       if (bgImage && bgImage !== "none") {
-        return { type: "image", value: bgImage };
+        finalBackground = { type: "image", value: bgImage };
+        break;
       }
       const bgColor = convertToRGBA(styles.backgroundColor);
       if (bgColor[3] !== 0 && bgColor !== "transparent") {
@@ -3955,7 +4178,7 @@ ${this.error.stack}
               parentEl = parentEl.host;
               continue;
             }
-            const parentStyles = getComputedStyle(parentEl);
+            const parentStyles = getCachedStyle(parentEl);
             const currentParentBg = parentStyles.backgroundColor;
             if (currentParentBg !== "rgba(0, 0, 0, 0)" && currentParentBg !== "transparent") {
               parentBgColor = currentParentBg;
@@ -3967,32 +4190,42 @@ ${this.error.stack}
             parentBgColor = "rgba(255, 255, 255, 1)";
           }
           const parentColor = convertToRGBA(parentBgColor);
-          const blendedBG = alphaBlend(bgColor, parentColor);
-          return blendedBG;
+          finalBackground = alphaBlend(bgColor, parentColor);
+          break;
         }
-        return bgColor;
+        finalBackground = bgColor;
+        break;
       }
       if (targetEl.tagName === "HTML") {
-        return [255, 255, 255];
+        finalBackground = [255, 255, 255];
+        break;
       }
       targetEl = getVisualParent(targetEl);
     }
-    return [255, 255, 255];
+    backgroundCache.set($el, finalBackground);
+    return finalBackground;
   }
-  function getLuminance(color) {
-    const rgb = color.slice(0, 3).map((x) => {
-      const normalized = x / 255;
-      return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
-    });
-    return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
-  }
-  function getAPCAValue(color, bg) {
-    const blendedColor = alphaBlend(color, bg).slice(0, 4);
-    const foreground = sRGBtoY(blendedColor);
-    const background = sRGBtoY(bg);
-    const ratio = APCAcontrast(foreground, background);
-    return { ratio, blendedColor };
-  }
+  const getLuminance = memoize(
+    function getLuminance2(color) {
+      const rgb = color.slice(0, 3).map((x) => {
+        const normalized = x / 255;
+        return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+    },
+    (color) => color.join(",")
+    // Key resolver: e.g., "255,255,255,1"
+  );
+  const getAPCAValue = memoize(
+    function getAPCAValue2(color, bg) {
+      const blendedColor = alphaBlend(color, bg).slice(0, 4);
+      const foreground = sRGBtoY(blendedColor);
+      const background = sRGBtoY(bg);
+      const ratio = APCAcontrast(foreground, background);
+      return { ratio, blendedColor };
+    },
+    (color, bg) => `${color.join(",")}|${bg.join(",")}`
+  );
   function getWCAG2Ratio(l1, l2) {
     const lighter = Math.max(l1, l2);
     const darker = Math.min(l1, l2);
@@ -4034,59 +4267,65 @@ ${this.error.stack}
   function ratioToDisplay(value, contrastAlgorithm) {
     return contrastAlgorithm === "APCA" ? displayAPCAValue(value) : displayWCAGRatio(value);
   }
-  function calculateContrast(color, bg, contrastAlgorithm) {
-    let ratio;
-    const blendedColor = alphaBlend(color, bg).slice(0, 4);
-    if (contrastAlgorithm === "APCA") {
-      const foreground = sRGBtoY(blendedColor);
-      const background = sRGBtoY(bg);
-      ratio = APCAcontrast(foreground, background);
-    } else {
-      const foreground = getLuminance(blendedColor);
-      const background = getLuminance(bg);
-      ratio = getWCAG2Ratio(foreground, background);
-    }
-    return { ratio, blendedColor };
-  }
-  function suggestColorWCAG(color, background, isLargeText, contrastAlgorithm) {
-    let minContrastRatio;
-    if (contrastAlgorithm === "AAA") {
-      minContrastRatio = isLargeText ? 4.5 : 7;
-    } else {
-      minContrastRatio = isLargeText ? 3 : 4.5;
-    }
-    const fgLuminance = getLuminance(color);
-    const bgLuminance = getLuminance(background);
-    const adjustMode = fgLuminance > bgLuminance ? getWCAG2Ratio(1, bgLuminance) > minContrastRatio : getWCAG2Ratio(0, bgLuminance) < minContrastRatio;
-    const adjustColor = (foregroundColor, amount, mode) => mode ? brighten(foregroundColor, amount) : darken(foregroundColor, amount);
-    let adjustedColor = color;
-    let lastValidColor = adjustedColor;
-    let contrastRatio = getWCAG2Ratio(fgLuminance, bgLuminance);
-    let bestContrast = contrastRatio;
-    let previousColor = color;
-    let step = 0.16;
-    const percentChange = 0.5;
-    const precision = 0.01;
-    let iterations = 0;
-    const maxIterations = 100;
-    while (step >= precision) {
-      iterations += 1;
-      if (iterations > maxIterations) {
-        return { color: null };
+  const calculateContrast = memoize(
+    function calculateContrast2(color, bg, contrastAlgorithm) {
+      let ratio;
+      const blendedColor = alphaBlend(color, bg).slice(0, 4);
+      if (contrastAlgorithm === "APCA") {
+        const foreground = sRGBtoY(blendedColor);
+        const background = sRGBtoY(bg);
+        ratio = APCAcontrast(foreground, background);
+      } else {
+        const foreground = getLuminance(blendedColor);
+        const background = getLuminance(bg);
+        ratio = getWCAG2Ratio(foreground, background);
       }
-      adjustedColor = adjustColor(adjustedColor, step, adjustMode);
-      const newLuminance = getLuminance(adjustedColor);
-      contrastRatio = getWCAG2Ratio(newLuminance, bgLuminance);
-      if (contrastRatio >= minContrastRatio) {
-        lastValidColor = contrastRatio <= bestContrast ? adjustedColor : lastValidColor;
-        bestContrast = contrastRatio;
-        adjustedColor = previousColor;
-        step *= percentChange;
+      return { ratio, blendedColor };
+    },
+    (color, bg, alg) => `${color.join(",")}|${bg.join(",")}|${alg}`
+  );
+  const suggestColorWCAG = memoize(
+    function suggestColorWCAG2(color, background, isLargeText, contrastAlgorithm) {
+      let minContrastRatio;
+      if (contrastAlgorithm === "AAA") {
+        minContrastRatio = isLargeText ? 4.5 : 7;
+      } else {
+        minContrastRatio = isLargeText ? 3 : 4.5;
       }
-      previousColor = adjustedColor;
-    }
-    return { color: getHex(lastValidColor) };
-  }
+      const fgLuminance = getLuminance(color);
+      const bgLuminance = getLuminance(background);
+      const adjustMode = fgLuminance > bgLuminance ? getWCAG2Ratio(1, bgLuminance) > minContrastRatio : getWCAG2Ratio(0, bgLuminance) < minContrastRatio;
+      const adjustColor = (foregroundColor, amount, mode) => mode ? brighten(foregroundColor, amount) : darken(foregroundColor, amount);
+      let adjustedColor = color;
+      let lastValidColor = adjustedColor;
+      let contrastRatio = getWCAG2Ratio(fgLuminance, bgLuminance);
+      let bestContrast = contrastRatio;
+      let previousColor = color;
+      let step = 0.16;
+      const percentChange = 0.5;
+      const precision = 0.01;
+      let iterations = 0;
+      const maxIterations = 100;
+      while (step >= precision) {
+        iterations += 1;
+        if (iterations > maxIterations) {
+          return { color: null };
+        }
+        adjustedColor = adjustColor(adjustedColor, step, adjustMode);
+        const newLuminance = getLuminance(adjustedColor);
+        contrastRatio = getWCAG2Ratio(newLuminance, bgLuminance);
+        if (contrastRatio >= minContrastRatio) {
+          lastValidColor = contrastRatio <= bestContrast ? adjustedColor : lastValidColor;
+          bestContrast = contrastRatio;
+          adjustedColor = previousColor;
+          step *= percentChange;
+        }
+        previousColor = adjustedColor;
+      }
+      return { color: getHex(lastValidColor) };
+    },
+    (color, bg, isLargeText, alg) => `${color.join(",")}|${bg.join(",")}|${isLargeText}|${alg}`
+  );
   const getOptimalAPCACombo = (background, fontWeight) => {
     const contrastWithDark = getAPCAValue(background, [0, 0, 0, 1]);
     const contrastWithLight = getAPCAValue(background, [255, 255, 255, 1]);
@@ -4097,77 +4336,80 @@ ${this.error.stack}
     const size = Math.ceil(newFontLookup[Math.floor(fontWeight / 100) - 1]);
     return { suggestedColor, size };
   };
-  function suggestColorAPCA(color, background, fontWeight, fontSize) {
-    const graphicMinLc = 45;
-    const isGraphic = fontWeight == null || fontSize == null;
-    const bgLuminance = sRGBtoY(background);
-    const adjustColor = (foregroundColor, amount) => bgLuminance <= 0.179 ? brighten(foregroundColor, amount) : darken(foregroundColor, amount);
-    let adjustedColor = color;
-    let contrast = getAPCAValue(adjustedColor, background);
-    let { ratio } = contrast;
-    let bestTextCombo = null;
-    let bestContrast = ratio;
-    let lastValidColor = null;
-    let fontLookup;
-    let fontWeightIndex;
-    let minimumSizeRequired;
-    const passesText = () => {
-      fontLookup = fontLookupAPCA(ratio).slice(1);
-      fontWeightIndex = Math.min(
-        Math.max(Math.floor(fontWeight / 100) - 1, 0),
-        fontLookup.length - 1
-      );
-      minimumSizeRequired = fontLookup[fontWeightIndex];
-      return minimumSizeRequired <= fontSize && minimumSizeRequired !== 999 && minimumSizeRequired !== 777;
-    };
-    const passesGraphic = () => Math.abs(ratio) >= graphicMinLc;
-    if (!isGraphic) {
-      bestTextCombo = getOptimalAPCACombo(background, fontWeight);
-      if (bestTextCombo.size > fontSize) {
+  const suggestColorAPCA = memoize(
+    function suggestColorAPCA2(color, background, fontWeight, fontSize) {
+      const graphicMinLc = 45;
+      const isGraphic = fontWeight == null || fontSize == null;
+      const bgLuminance = sRGBtoY(background);
+      const adjustColor = (foregroundColor, amount) => bgLuminance <= 0.179 ? brighten(foregroundColor, amount) : darken(foregroundColor, amount);
+      let adjustedColor = color;
+      let contrast = getAPCAValue(adjustedColor, background);
+      let { ratio } = contrast;
+      let bestTextCombo = null;
+      let bestContrast = ratio;
+      let lastValidColor = null;
+      let fontLookup;
+      let fontWeightIndex;
+      let minimumSizeRequired;
+      const passesText = () => {
+        fontLookup = fontLookupAPCA(ratio).slice(1);
+        fontWeightIndex = Math.min(
+          Math.max(Math.floor(fontWeight / 100) - 1, 0),
+          fontLookup.length - 1
+        );
+        minimumSizeRequired = fontLookup[fontWeightIndex];
+        return minimumSizeRequired <= fontSize && minimumSizeRequired !== 999 && minimumSizeRequired !== 777;
+      };
+      const passesGraphic = () => Math.abs(ratio) >= graphicMinLc;
+      if (!isGraphic) {
+        bestTextCombo = getOptimalAPCACombo(background, fontWeight);
+        if (bestTextCombo.size > fontSize) {
+          return {
+            color: getHex(bestTextCombo.suggestedColor),
+            size: bestTextCombo.size
+          };
+        }
+        if (passesText()) {
+          return { color: getHex(color), size: null };
+        }
+      } else if (passesGraphic()) {
+        return { color: getHex(color), size: null };
+      }
+      let previousColor = color;
+      let step = 0.16;
+      const percentChange = 0.5;
+      const precision = 0.01;
+      let iterations = 0;
+      const maxIterations = 50;
+      while (step >= precision && iterations < maxIterations) {
+        iterations += 1;
+        adjustedColor = adjustColor(adjustedColor, step);
+        contrast = getAPCAValue(adjustedColor, background);
+        ratio = contrast.ratio;
+        const passes = isGraphic ? passesGraphic() : passesText();
+        if (passes) {
+          if (Math.abs(ratio) <= Math.abs(bestContrast) || !lastValidColor) {
+            lastValidColor = adjustedColor;
+            bestContrast = ratio;
+          }
+          adjustedColor = previousColor;
+          step *= percentChange;
+        }
+        previousColor = adjustedColor;
+      }
+      if (lastValidColor) {
+        return { color: getHex(lastValidColor), size: null };
+      }
+      if (!isGraphic && bestTextCombo) {
         return {
           color: getHex(bestTextCombo.suggestedColor),
           size: bestTextCombo.size
         };
       }
-      if (passesText()) {
-        return { color: getHex(color), size: null };
-      }
-    } else if (passesGraphic()) {
       return { color: getHex(color), size: null };
-    }
-    let previousColor = color;
-    let step = 0.16;
-    const percentChange = 0.5;
-    const precision = 0.01;
-    let iterations = 0;
-    const maxIterations = 50;
-    while (step >= precision && iterations < maxIterations) {
-      iterations += 1;
-      adjustedColor = adjustColor(adjustedColor, step);
-      contrast = getAPCAValue(adjustedColor, background);
-      ratio = contrast.ratio;
-      const passes = isGraphic ? passesGraphic() : passesText();
-      if (passes) {
-        if (Math.abs(ratio) <= Math.abs(bestContrast) || !lastValidColor) {
-          lastValidColor = adjustedColor;
-          bestContrast = ratio;
-        }
-        adjustedColor = previousColor;
-        step *= percentChange;
-      }
-      previousColor = adjustedColor;
-    }
-    if (lastValidColor) {
-      return { color: getHex(lastValidColor), size: null };
-    }
-    if (!isGraphic && bestTextCombo) {
-      return {
-        color: getHex(bestTextCombo.suggestedColor),
-        size: bestTextCombo.size
-      };
-    }
-    return { color: getHex(color), size: null };
-  }
+    },
+    (color, bg, weight, size) => `${color.join(",")}|${bg.join(",")}|${weight}|${size}`
+  );
   function wcagAlgorithm($el, color, background, fontSize, fontWeight, opacity, contrastAlgorithm) {
     const { ratio, blendedColor } = calculateContrast(color, background);
     const isLargeText = fontSize >= 24 || fontSize >= 18.67 && fontWeight >= 700;
@@ -4188,7 +4430,7 @@ ${this.error.stack}
         fontWeight,
         isLargeText,
         opacity,
-        textUnderline: getComputedStyle($el).textDecorationLine
+        textUnderline: getCachedStyle($el).textDecorationLine
       };
     }
     return null;
@@ -4207,7 +4449,7 @@ ${this.error.stack}
         fontWeight,
         fontSize,
         opacity,
-        textUnderline: getComputedStyle($el).textDecorationLine
+        textUnderline: getCachedStyle($el).textDecorationLine
       };
     }
     return null;
@@ -4217,17 +4459,20 @@ ${this.error.stack}
     return algorithm($el, color, background, fontSize, fontWeight, opacity, contrastAlgorithm);
   }
   const colorTokenPattern = /#(?:[\da-f]{3,4}|[\da-f]{6}|[\da-f]{8})\b|\b(?:rgb|hsl|lab|lch|oklab|oklch)a?\([^)]+\)|\b[a-z]+\b/gi;
-  function extractColorFromString(cssValue) {
-    const tokens = cssValue.match(colorTokenPattern);
-    if (!tokens) return [];
-    const colors = [];
-    for (const token of tokens) {
-      if (/^[a-z]+$/i.test(token) && !CSS.supports("color", token)) continue;
-      const color = convertToRGBA(token);
-      if (color) colors.push(color);
-    }
-    return colors;
-  }
+  const extractColorFromString = memoize(
+    function extractColorFromString2(cssValue) {
+      const tokens = cssValue.match(colorTokenPattern);
+      if (!tokens) return [];
+      const colors = [];
+      for (const token of tokens) {
+        if (/^[a-z]+$/i.test(token) && !CSS.supports("color", token)) continue;
+        const color = convertToRGBA(token);
+        if (color) colors.push(color);
+      }
+      return colors;
+    },
+    (cssValue) => cssValue
+  );
   function checkContrast() {
     if (!State.option.contrastPlugin) return;
     const contrastResults = [];
@@ -4247,7 +4492,7 @@ ${this.error.stack}
         text = text.trim();
         if (!text) continue;
       }
-      const style = window.getComputedStyle($el);
+      const style = getCachedStyle($el);
       const opacity = parseFloat(style.opacity);
       const fontSize = parseFloat(style.fontSize);
       if ($el.disabled || opacity === 0 || fontSize === 0 || isElementHidden($el)) continue;
@@ -4323,14 +4568,14 @@ ${this.error.stack}
       );
       let allSameColour = false;
       if (shapes.length) {
-        const ref = getComputedStyle(shapes[0]);
+        const ref = getCachedStyle(shapes[0]);
         allSameColour = Array.from(shapes).every((node) => {
-          const style = getComputedStyle(node);
+          const style = getCachedStyle(node);
           return style.fill === ref.fill && style.fillOpacity === ref.fillOpacity && style.stroke === ref.stroke && style.strokeOpacity === ref.strokeOpacity && style.opacity === ref.opacity;
         });
       }
       if ((shapes.length === 1 || allSameColour) && complex.length === 0) {
-        const style = getComputedStyle(shapes[0]);
+        const style = getCachedStyle(shapes[0]);
         const { fill, stroke, strokeWidth, opacity } = style;
         let strokePx = 0;
         const { width, height } = $el.getBBox();
@@ -4344,8 +4589,8 @@ ${this.error.stack}
         const threshold = Math.min(width, height) < 50 ? 1 : 3;
         const hasStroke = stroke && strokePx >= threshold && stroke !== "none";
         const hasFill = fill && fill !== "none" && !fill.startsWith("url(");
-        const resolvedFill = fill === "currentColor" ? convertToRGBA(getComputedStyle(shapes[0]).color, opacity) : convertToRGBA(fill, opacity);
-        const resolvedStroke = stroke === "currentColor" ? convertToRGBA(getComputedStyle(shapes[0]).color, opacity) : convertToRGBA(stroke, opacity);
+        const resolvedFill = fill === "currentColor" ? convertToRGBA(getCachedStyle(shapes[0]).color, opacity) : convertToRGBA(fill, opacity);
+        const resolvedStroke = stroke === "currentColor" ? convertToRGBA(getCachedStyle(shapes[0]).color, opacity) : convertToRGBA(stroke, opacity);
         const supported = ![resolvedFill, resolvedStroke].includes("unsupported");
         if (supported && hasBackground) {
           let contrastValue;
@@ -4407,7 +4652,7 @@ ${this.error.stack}
     });
     Elements.Found.Inputs.forEach(($el) => {
       if ($el.placeholder && $el.placeholder.length !== 0) {
-        const placeholder = getComputedStyle($el, "::placeholder");
+        const placeholder = getCachedStyle($el, "::placeholder");
         const pColor = convertToRGBA(placeholder.getPropertyValue("color"));
         const pSize = parseFloat(placeholder.fontSize);
         const pWeight = normalizeFontWeight(placeholder.fontWeight);
@@ -4463,8 +4708,8 @@ ${this.error.stack}
     processedResults.forEach((item) => {
       const { $el, ratio } = item;
       const updatedItem = item;
-      const element = $el.tagName === "State.option" ? $el.closest("datalist, select, optgroup") : $el;
-      const nodeText = fnIgnore(element, ["State.option:not(State.option:first-child)"]);
+      const element = $el.tagName === "OPTION" ? getCachedClosest($el, "datalist, select, optgroup") : $el;
+      const nodeText = fnIgnore(element, ["option:not(option:first-child)"]);
       const text = getText(nodeText);
       const truncatedText = truncateString(text, 80);
       let previewText;
@@ -4856,7 +5101,7 @@ ${this.error.stack}
     }
     if (State.option.checks.UNCONTAINED_LI) {
       Elements.Found.Lists.forEach(($el) => {
-        if (!$el.closest("ul, ol, menu")) {
+        if (!getCachedClosest($el, "ul, ol, menu")) {
           const text = getText($el);
           State.results.push({
             test: "UNCONTAINED_LI",
@@ -7670,7 +7915,7 @@ ${this.error.stack}
         const match = contrastPreview.style.fontSize.match(/([\d.]+)/);
         if (match) return parseFloat(match[1]);
       }
-      const computed = getComputedStyle(contrastPreview).fontSize;
+      const computed = getCachedStyle(contrastPreview).fontSize;
       if (computed) {
         const match = computed.match(/([\d.]+)/);
         if (match) return parseFloat(match[1]);
@@ -7778,7 +8023,7 @@ ${this.error.stack}
   }
   function generateColorSuggestion(contrastDetails) {
     const { color, background, fontWeight, fontSize, isLargeText, type, opacity } = contrastDetails;
-    if (!color || !background || background.type === "image" || !(type === "text" || type === "svg-error" || type === "input")) {
+    if (!color || !background || background.type === "image" || !(type === "text" || type === "svg-error" || type === "input" || type === "placeholder")) {
       return;
     }
     const suggested = Constants.Global.contrastAlgorithm === "APCA" ? suggestColorAPCA(color, background, fontWeight, fontSize) : suggestColorWCAG(

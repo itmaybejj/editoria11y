@@ -486,6 +486,48 @@
 		<script src="../dist/js/lang/de.umd.js"></script>
 		<script>
 
+			/*
+				* Performance tests
+				* */
+			/*let beforeCall = performance.now();
+			iterations = 0;
+			runs = 50;
+			// Listen for event
+			document.addEventListener('ed11yPanelOpened', e => {
+				if (iterations < 1) {
+					console.log('panel ready at: ' + parseInt(performance.now() - beforeCall));
+					console.log('average was 180-212 on 2026-04-09')
+				}
+
+			});
+			document.addEventListener('ed11yResults', e => {
+				//console.log('results ready at: ' + parseInt(performance.now() - beforeCall));
+				//console.log(iterations);
+				if (iterations < 2) {
+					window.setTimeout(() => {
+						beforeCall = performance.now();
+						iterations++;
+						Ed11y.reset();
+						Ed11y.UI.incremental = false;
+						Ed11y.UI.panelToggle.click();
+						//Ed11y.refresh();
+					}, 200);
+				}
+				else if (iterations === runs + 2) {
+					console.log('Average run: ' + parseInt((performance.now() - beforeCall)) / (runs));
+				} else if (iterations < runs + 2) {
+					window.setTimeout(() => {
+						console.log(iterations + ': ' + (parseInt((performance.now() - beforeCall)) / (iterations)));
+						beforeCall = beforeCall + 200;
+						iterations++;
+						Ed11y.reset();
+						Ed11y.UI.incremental = false;
+						Ed11y.UI.panelToggle.click();
+						//Ed11y.refresh();
+					}, 200);
+				}
+			});*/
+
 			const editLinks = document.createElement('div');
 			const editIcon = document.createElement('span');
 			editIcon.classList.add('ed11y-custom-edit-icon');
@@ -508,6 +550,7 @@
 				})
 				console.log("Tests not on page", testsFound);*/
 			});
+
 			const ed11y = new Ed11y.Ed11y({
 				alertMode: 'assertive',
 				//baseFontSize: 18,

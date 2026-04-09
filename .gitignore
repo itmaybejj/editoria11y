@@ -9,6 +9,10 @@ tests_output/
 screens/
 .vscode/
 
+# temporary until act-rules is merged
+conformance/
+test-results/
+
 # IDE & System Related Files
 .buildpath
 .project

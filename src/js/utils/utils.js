@@ -191,52 +191,8 @@ export function buildElementList(onlyForFilter = false) {
 
   // Find and cache elements.
   if (onlyForFilter) {
-    // Split configuration; do not fully re-initialize Elements.Found for filters.
-
-    Elements.Found.Everything = find('*', 'root', Constants.Exclusions.Sa11yElements);
-
-    Elements.Found.Contrast = Elements.Found.Everything.filter(($el) => {
-      const matchesSelector = Constants.Exclusions.Contrast.some((exclusion) =>
-        $el.matches(exclusion),
-      );
-      return !matchesSelector && !Constants.Exclusions.Contrast.includes($el);
-    });
-
-    Elements.Found.Images = Elements.Found.Everything.filter(
-      ($el) =>
-        $el.tagName === 'IMG' &&
-        !Constants.Exclusions.Images.some((selector) => $el.matches(selector)),
-    );
-
-    Elements.Found.Links = Elements.Found.Everything.filter(
-      ($el) =>
-        ($el.tagName === 'A' || $el.tagName === 'a') &&
-        $el.hasAttribute('href') &&
-        !$el.matches('[role="button"]') && // Exclude links with [role="button"]
-        !Constants.Exclusions.Links.some((selector) => $el.matches(selector)),
-    );
-
-    // We want headings from the entire document for the Page Outline.
-    Elements.Found.Headings = find(
-      'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
-      'root',
-      Constants.Exclusions.Headings,
-    );
-
-    // Excluded via headerIgnore.
-    Elements.Found.ExcludedHeadings = Elements.Found.Headings.filter((heading) =>
-      Constants.Exclusions.Headings.some((exclusion) => heading.matches(exclusion)),
-    );
-
-    // Excluded via outlineIgnore.
-    Elements.Found.ExcludedOutlineHeadings = Elements.Found.Headings.filter((heading) =>
-      Constants.Exclusions.Outline.some((exclusion) => heading.matches(exclusion)),
-    );
-
-    // Merge both headerIgnore and outlineIgnore.
-    Elements.Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(
-      Elements.Found.ExcludedHeadings,
-    );
+    // Split configuration; compute only the subset of collections needed.
+    Elements.initializeFilterElements();
   } else {
     State.headingOutline = [];
     Elements.initializeElements(State.option);
