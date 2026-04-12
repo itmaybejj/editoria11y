@@ -402,7 +402,7 @@ export default {
 
     // Meta checks
     META_LANG:
-      'Seitensprache nicht angegeben! Bitte <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklariere die Sprache im HTML-Tag.</a>',
+      'Seitensprache nicht angegeben! Bitte <a href="https://www.w3.org/International/questions/qa-html-language-declarations.de.html">deklariere die Sprache im HTML-Tag.</a>',
     META_TITLE:
       'Seitentitel fehlt! Bitte gib einen <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title">Seitentitel</a> an.',
     META_SCALABLE:
@@ -412,7 +412,7 @@ export default {
     META_REFRESH:
       'Die Seite sollte nicht automatisch mithilfe eines Meta-Tags aktualisiert werden.',
     META_LANG_SUGGEST: 'Der folgende Sprachcode <code>%(CODE)</code> ist ungültig. Meinten Sie <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Der Sprachcode der Seite <code>%(CODE)</code> ist ungültig. Bitte <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarieren Sie eine gültige Sprache im HTML-Tag.</a>',
+    META_LANG_VALID: 'Der Sprachcode für dieses Element ist ungültig. Um dies zu beheben, ersetzen Sie das lang-Attribut durch einen gültigen Sprachcode. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Erfahren Sie mehr über die <a href="https://www.w3.org/International/questions/qa-html-language-declarations.de.html">Sprachdeklaration in HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Der Schaltfläche fehlt ein zugänglicher Name, der ihren Zweck beschreibt.',
@@ -426,7 +426,7 @@ export default {
     LABEL_IN_NAME:
       'Der sichtbare Text dieses Elements scheint sich vom zugänglichen Namen zu unterscheiden, was für Benutzer von Hilfstechnologien verwirrend sein kann. Bitte überprüfen: <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Zugänglicher Name</strong> <strong {C}>%(TEXT)</strong>',
     LINK_MAYBE_BUTTON: 'Dieser Link hat ein ungültiges Ziel und der barrierefreie Name enthält das Wort „<strong>%(NAME)</strong>“. Dies deutet darauf hin, dass es sich möglicherweise gar nicht um einen Link handelt, sondern stattdessen ein skriptgesteuertes Verhalten auf der Seite steuert. Um dies zu beheben, ersetzen Sie den Link durch eine <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">barrierefreie Schaltfläche</a> oder korrigieren Sie das Ziel des Links. <hr> <strong>Tipp!</strong> Hilfsmittel behandeln Schaltflächen und Links unterschiedlich. Die Verwendung des richtigen HTML-Elements stellt sicher, dass die Benutzer wissen, welche Tastenkombinationen sie verwenden müssen und welche Aktion ausgelöst wird.',
-    POTENTIAL_UI_ELEMENTS: ['Menü', 'Schließen', 'Umschalten', 'Öffnen', 'Erweitern', 'Reduzieren', 'Weiter', 'Zurück', 'Abspielen', 'Pause', 'Untermenü', 'Anzeigen', 'Ausblenden', 'Dropdown', 'Zurück', 'Vorwärts', 'Überspringen', 'Absenden', 'Abbrechen', 'Speichern', 'Bearbeiten', 'Löschen', 'Entfernen', 'Suche', 'Filter', 'Sortieren', 'Stopp', 'Stummschalten', 'Ton an', 'Vollbild', 'Minimieren', 'Maximieren'],
+    POTENTIAL_UI_ELEMENTS: ['menü', 'schließen', 'umschalten', 'öffnen', 'erweitern', 'reduzieren', 'weiter', 'zurück', 'abspielen', 'pause', 'untermenü', 'anzeigen', 'ausblenden', 'dropdown', 'zurück', 'vorwärts', 'überspringen', 'absenden', 'abbrechen', 'speichern', 'bearbeiten', 'löschen', 'entfernen', 'suche', 'filter', 'sortieren', 'stopp', 'stummschalten', 'ton an', 'vollbild', 'minimieren', 'maximieren'],
 
     // Tables
     TABLES_MISSING_HEADINGS:
@@ -468,7 +468,7 @@ export default {
       'Es kann keine barrierefreie Kombination durch Ändern der Textfarbe gefunden werden. Versuchen Sie, die Hintergrundfarbe zu ändern.',
 
     // Page language
-    PAGE_LANG_CONFIDENCE: 'Mehr als die Hälfte des Textes auf dieser Seite scheint in %(LIKELY_LANG) zu sein, aber die deklarierte Seitensprache ist %(PAGE_LANG). Erwägen Sie, die <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarierte Seitensprache</a> so zu aktualisieren, dass sie dem Inhalt entspricht.',
+    PAGE_LANG_CONFIDENCE: 'Mehr als die Hälfte des Textes auf dieser Seite scheint in %(LIKELY_LANG) zu sein, aber die deklarierte Seitensprache ist %(PAGE_LANG). Erwägen Sie, die <a href="https://www.w3.org/International/questions/qa-html-language-declarations.de.html">deklarierte Seitensprache</a> so zu aktualisieren, dass sie dem Inhalt entspricht.',
     LANG_OF_PARTS: 'Die Seitensprache wurde als %(PAGE_LANG) deklariert, aber dieser Inhalt scheint in %(LIKELY_LANG) zu sein. Stellen Sie sicher, dass der Inhalt entsprechend gekennzeichnet ist.',
     LANG_MISMATCH: 'Dieser Inhalt scheint in %(DETECTED_LANG) zu sein, wurde jedoch als %(WRONG_LANG) gekennzeichnet.',
     LANG_OF_PARTS_ALT: 'Dieser Alternativtext scheint in %(LIKELY_LANG) zu sein, aber die Seitensprache wurde als %(PAGE_LANG) deklariert. Stellen Sie sicher, dass der Alternativtext in derselben Sprache wie der Rest der Seite verfasst ist. <hr> {ALT} <strong {C}>%(ALT)</strong>',

@@ -368,7 +368,7 @@ export default {
       'Page language not declared! Please <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare language on the HTML tag.</a>',
     META_REFRESH: 'Page should not automatically refresh using a meta tag.',
     META_LANG_SUGGEST: 'The following language code <code>%(CODE)</code> is not valid. Did you mean <code>%(CODE)</code>?',
-    META_LANG_VALID: 'The page language code <code>%(CODE)</code> is not valid. Please <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare a valid language on the HTML tag.</a>',
+    META_LANG_VALID: 'The language code for this element is not valid. To fix, replace the lang attribute with a valid language code. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Learn more about <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declaring language in HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Button is missing an accessible name that describes its purpose.',
@@ -383,7 +383,7 @@ export default {
       'The visible text for this element appears to be different than the accessible name, which may cause confusion for assistive technologies users. Please review: <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>',
     LINK_MAYBE_BUTTON: 'This link has an invalid target, and the accessible name contains the word "<strong {C}>%(NAME)</strong>". This suggests that this might not be a link at all, and instead controls some scripted behaviour on the page. To fix, replace the link with an <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">accessible button</a>, or correct the link\'s destination. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tip!</strong> Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.',
     POTENTIAL_UI_ELEMENTS: [
-      'menu', 'close', 'toggle', 'open', 'expand', 'collapse', 'next', 'previous', 'play', 'pause', 'submenu', 'show', 'hide', 'dropdown', 'back', 'forward', 'skip', 'submit', 'cancel', 'save', 'edit', 'delete', 'remove', 'search', 'filter', 'sort', 'stop', 'mute', 'unmute', 'fullscreen', 'minimize', 'maximize',
+      'menu', 'close', 'toggle', 'open', 'expand', 'collapse', 'next', 'previous', 'play', 'pause', 'submenu', 'show', 'hide', 'dropdown', 'back', 'forward', 'skip', 'submit', 'cancel', 'save', 'edit', 'delete', 'remove', 'search', 'filter', 'sort', 'stop', 'mute', 'unmute', 'fullscreen', 'minimize', 'maximize', 'slide', 'modal',
     ],
 
     // Tables

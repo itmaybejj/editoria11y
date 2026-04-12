@@ -108,7 +108,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Text has enhanced contrast",
@@ -522,7 +522,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Text has enhanced contrast",
@@ -558,7 +558,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Text has enhanced contrast",
@@ -612,7 +612,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Text has enhanced contrast",
@@ -702,7 +702,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Image has non-empty accessible name",
@@ -756,7 +756,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Image has non-empty accessible name",
@@ -810,7 +810,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Image has non-empty accessible name",
@@ -864,7 +864,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:failed"
           },
           "test": {
             "title": "Image has non-empty accessible name",
@@ -900,7 +900,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:failed"
           },
           "test": {
             "title": "Image has non-empty accessible name",
@@ -1206,7 +1206,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:failed"
           },
           "test": {
             "title": "Image button has non-empty accessible name",
@@ -1320,7 +1320,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Image button has non-empty accessible name",
@@ -1422,6 +1422,348 @@
             "isPartOf": [
               "WCAG2:1.1.1",
               "WCAG2:4.1.2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/c7661d61606728f898297f6e69f68af3d5b6c6d0.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/9863e3ea603a1bdde28e5b94f8675579e33a16d7.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/771c36b9967faec9926af86041d834b4a108a52e.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/2eb4856e68c4cf8b3ed55f7d34b08ad4ae8b3fdd.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/b130285915a8ca42926a11553a5791f44b65d487.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/a1e9ff296f0728e180aeb920beacb26bf88ddb12.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/474db50232349ade7714e41c88af801d1f1e378b.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/e4f70ef2843c6239d0bebe46b97a682bd901e749.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/4e89fcc7903980482fe12350f864ca75963d6efd.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/b2a671d96ac510ccc6e34dd58a141d13bb196508.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/bf3ba787eb7a6819ea1a6adccdfd1f30842ed788.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/e6a7c924092d2351c3a5b4361ccde7917ad23c66.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/98f0638a038a244b0bde70ff316cde1be7ce9a3b.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/43730455b69439980b95151be477ca594e0d7556.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/45d884e81c4ef8234cfbd85d259dd6a64685c9d2.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/e64416f9e9792cd76b77ee209a26269d47c3ff97.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/afcf56e62d62b8f69b4a2881475f625a1ed7ecf9.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/ca563b842b32b8fc79ac872f8fc4e799fcf76072.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Link in context is descriptive",
+            "isPartOf": [
+              "WCAG2:2.4.4",
+              "WCAG2:2.4.9"
             ]
           }
         }
@@ -2118,7 +2460,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Button has non-empty accessible name",
@@ -2172,12 +2514,354 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Button has non-empty accessible name",
             "isPartOf": [
               "WCAG2:4.1.2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/f99c8bd6aa53c3b2f4d63fee994333453df410c6.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/1400d13aa5a86dbacf71db631f5de1abfc982094.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/8391fee07d35c11cfb3fecd19ddaad0fb8c68871.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/c02748c85d58e188b3c13773986272df616b2f3c.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/d935494fdcd2c1fef14d14842c0a19c8f8c54c78.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/ba5019010a6e0cfbcb46b2f7e9e63a6117e06f97.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/b1b17ab86ee2ebce350af1c41d2e6ff8911a33f1.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/7291b4b36dfa21e666a765a51c01e777d40a5174.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/7f2be26b42fa5846a09019bb949c44be95586e0d.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/cd25fd6cc4fde1734fc90c2f11e71886e3458007.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/d0c53c06c9e0a766fd5830fbbaa7df76f8cef92a.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/1bdbd209a611d68876d5b6e37541f7ddc2038f97.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/9f7979f4854efa0b1ac299f920229d20246710b9.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/09d9fb1862a6f579a948259a44e1117af595d937.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/76b79146e3be6b8ea6920df93b68352b8b9d3c8b.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/57382c6bd42af05f3b9836a95bee672d1b9330d7.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/e6fd17797e01f46032b6d8edf24831b2775cc831.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/cb36dcc6ce2d1787e287ff967559b186eb77d6bd.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/a25f45/add6f67d15c10ce6195ff5488ae7f5dab8bc3632.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Headers attribute specified on a cell refers to cells in the same table element",
+            "isPartOf": [
+              "WCAG2:1.3.1"
             ]
           }
         }
@@ -2304,7 +2988,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Text has minimum contrast",
@@ -2684,7 +3368,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Text has minimum contrast",
@@ -2722,7 +3406,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Text has minimum contrast",
@@ -2779,7 +3463,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Text has minimum contrast",
@@ -2798,7 +3482,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Text has minimum contrast",
@@ -2824,6 +3508,196 @@
             "isPartOf": [
               "WCAG2:1.4.3",
               "WCAG2:1.4.6"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/akn7bn/1e3939d9f8e0f78f9c564ec6feb12cc5635c0acb.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Iframe with interactive elements is not excluded from tab-order",
+            "isPartOf": [
+              "WCAG2:2.1.1",
+              "WCAG2:2.1.3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/akn7bn/a16be608639d0976b9d044360695d853384f56f0.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Iframe with interactive elements is not excluded from tab-order",
+            "isPartOf": [
+              "WCAG2:2.1.1",
+              "WCAG2:2.1.3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/akn7bn/62673162e22ee1e95e962522b1d1c3b549dbfc49.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Iframe with interactive elements is not excluded from tab-order",
+            "isPartOf": [
+              "WCAG2:2.1.1",
+              "WCAG2:2.1.3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/akn7bn/c90de6661c91b4449b96fb31e487c70d1e3350df.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Iframe with interactive elements is not excluded from tab-order",
+            "isPartOf": [
+              "WCAG2:2.1.1",
+              "WCAG2:2.1.3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/akn7bn/033e04cced5973596d9aa724feacb027d23b4c53.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Iframe with interactive elements is not excluded from tab-order",
+            "isPartOf": [
+              "WCAG2:2.1.1",
+              "WCAG2:2.1.3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/akn7bn/63cd20ec8886f4c59ff54f406a0e5933847bce75.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Iframe with interactive elements is not excluded from tab-order",
+            "isPartOf": [
+              "WCAG2:2.1.1",
+              "WCAG2:2.1.3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/akn7bn/aa153f6799d28563054ce66bcf7dfcedf9b75288.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Iframe with interactive elements is not excluded from tab-order",
+            "isPartOf": [
+              "WCAG2:2.1.1",
+              "WCAG2:2.1.3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/akn7bn/17a371c470316dc29e424101065ebfe9f7b2e990.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Iframe with interactive elements is not excluded from tab-order",
+            "isPartOf": [
+              "WCAG2:2.1.1",
+              "WCAG2:2.1.3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/akn7bn/c88fcaf4d90e2156de75a1cdad8734a3d75c49e4.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Iframe with interactive elements is not excluded from tab-order",
+            "isPartOf": [
+              "WCAG2:2.1.1",
+              "WCAG2:2.1.3"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/akn7bn/a13349ef619df6256bd52acb8008760c3711f5dd.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Iframe with interactive elements is not excluded from tab-order",
+            "isPartOf": [
+              "WCAG2:2.1.1",
+              "WCAG2:2.1.3"
             ]
           }
         }
@@ -3326,7 +4200,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay",
@@ -3346,7 +4220,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay",
@@ -3366,7 +4240,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay",
@@ -3386,7 +4260,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay",
@@ -3406,7 +4280,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay",
@@ -3426,7 +4300,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay",
@@ -3446,7 +4320,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay",
@@ -3466,7 +4340,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay",
@@ -3486,7 +4360,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay",
@@ -3506,7 +4380,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay",
@@ -3526,7 +4400,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay",
@@ -3546,7 +4420,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay",
@@ -3768,7 +4642,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -3787,7 +4661,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -3806,7 +4680,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -3825,7 +4699,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -3844,7 +4718,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -3863,7 +4737,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -3882,7 +4756,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -3901,7 +4775,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -3920,7 +4794,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:cantTell"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -5585,7 +6459,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Heading has non-empty accessible name",
@@ -5686,6 +6560,150 @@
           "test": {
             "title": "Heading has non-empty accessible name",
             "isPartOf": []
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/m6b1q3/895a5b0d06d892bc50351cfd2db426b31cfcc97f.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Menuitem has non-empty accessible name",
+            "isPartOf": [
+              "WCAG2:4.1.2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/m6b1q3/78c41b8461997477cb7b6a9d163ba8a387ad56b8.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Menuitem has non-empty accessible name",
+            "isPartOf": [
+              "WCAG2:4.1.2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/m6b1q3/83a0c030f9172c3d8d862d01138e75ec7aaf4f4e.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Menuitem has non-empty accessible name",
+            "isPartOf": [
+              "WCAG2:4.1.2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/m6b1q3/c05155744a79e6ff72f1b691b8bae15338e8146b.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Menuitem has non-empty accessible name",
+            "isPartOf": [
+              "WCAG2:4.1.2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/m6b1q3/f3a40579bcb3cab4f12a31639bc9dd0ca5c14d87.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Menuitem has non-empty accessible name",
+            "isPartOf": [
+              "WCAG2:4.1.2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/m6b1q3/c261108b8bb62e118a47a52d0a157b4265a6e143.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Menuitem has non-empty accessible name",
+            "isPartOf": [
+              "WCAG2:4.1.2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/m6b1q3/4eec4a33bca54e6313e0af600af41797bb7c4213.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:passed"
+          },
+          "test": {
+            "title": "Menuitem has non-empty accessible name",
+            "isPartOf": [
+              "WCAG2:4.1.2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "@type": "TestSubject",
+      "source": "https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/m6b1q3/0edc121ac393fa9661fc1c18156e040775313779.html",
+      "assertions": [
+        {
+          "@type": "Assertion",
+          "result": {
+            "outcome": "earl:failed"
+          },
+          "test": {
+            "title": "Menuitem has non-empty accessible name",
+            "isPartOf": [
+              "WCAG2:4.1.2"
+            ]
           }
         }
       ]

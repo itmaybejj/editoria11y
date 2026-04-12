@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.0-410
+			* @version 3.0.0-412
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -646,7 +646,7 @@
       Exclusions.HeaderSpan = State.option.headerIgnoreSpan ? State.option.headerIgnoreSpan.split(",").map(($el) => $el.trim()) : [];
       Exclusions.Outline = State.option.outlineIgnore ? State.option.outlineIgnore.split(",").map(($el) => $el.trim()) : [];
       Exclusions.Images = [
-        'img[role="presentation"]:not(a img[role="presentation"]), img[aria-hidden="true"]:not(a img[aria-hidden="true"])'
+        'img[role="presentation"]:not(a img[role="presentation"]), img[aria-hidden="true"]:not(a img[aria-hidden="true"]), img[role="none"]:not(a img[role="none"])'
       ];
       if (State.option.imageIgnore) {
         Exclusions.Images = State.option.imageIgnore.split(",").map(($el) => $el.trim()).concat(Exclusions.Images);
@@ -1294,11 +1294,13 @@
         continue;
       }
       switch (node.tagName) {
-        case "IMG":
-          if (node.hasAttribute("alt") && node.role !== "presentation") {
+        case "IMG": {
+          const role = node.getAttribute("role");
+          if (node.hasAttribute("alt") && role !== "presentation" && role !== "none") {
             and(node.getAttribute("alt"));
           }
           break;
+        }
         case "SVG":
           if (node.role === "img" || node.role === "graphics-document") {
             and(computeAriaLabel(node));
@@ -1490,13 +1492,22 @@
       Found.TabIndex = [];
       Found.NestedComponents = [];
       Found.CustomErrorLinks = [];
+      Found.LangTags = [];
       for (let i = 0; i < Found.Everything.length; i++) {
         const $el = Found.Everything[i];
         const tag = $el.tagName;
         switch (tag) {
+          case "DIV": {
+            const role = $el.getAttribute("role")?.trim().toLowerCase();
+            if (role === "img") {
+              if (!Constants.Exclusions.Images.some((s) => $el.matches(s))) {
+                Found.Images.push($el);
+              }
+            }
+            break;
+          }
           case "IMG":
-            if (!Constants.Exclusions.Images.some((s) => $el.matches(s)))
-              Found.Images.push($el);
+            if (!Constants.Exclusions.Images.some((s) => $el.matches(s))) Found.Images.push($el);
             break;
           case "A":
           // HTML anchor
@@ -1519,8 +1530,7 @@
             Found.Blockquotes.push($el);
             break;
           case "TABLE":
-            if (!$el.matches('[role="presentation"],[role="none"]'))
-              Found.Tables.push($el);
+            if (!$el.matches('[role="presentation"],[role="none"]')) Found.Tables.push($el);
             break;
           case "STRONG":
           case "EM":
@@ -1530,9 +1540,13 @@
           case "SUB":
             Found.Subscripts.push($el);
             break;
-          case "BUTTON":
-            Found.Buttons.push($el);
+          case "BUTTON": {
+            const isDecorative = $el.matches('[role="none"], [role="presentation"]');
+            const isNeutralized = $el.hasAttribute("disabled") || $el.getAttribute("tabindex") < 0;
+            if (!isElementHidden($el) && !(isDecorative && isNeutralized))
+              Found.Buttons.push($el);
             break;
+          }
           case "INPUT":
           case "SELECT":
           case "TEXTAREA":
@@ -1552,21 +1566,21 @@
             Found.Svg.push($el);
             break;
         }
-        if (tag !== "BUTTON" && $el.matches('[role="button"]'))
-          Found.Buttons.push($el);
+        if (tag !== "BUTTON" && $el.matches('[role="button"]')) Found.Buttons.push($el);
         if ($el.hasAttribute("tabindex")) {
           const ti = $el.getAttribute("tabindex");
-          if (ti !== "0" && !ti.startsWith("-"))
-            Found.TabIndex.push($el);
+          if (ti !== "0" && !ti.startsWith("-")) Found.TabIndex.push($el);
         }
-        if ($el.matches(nestedSources))
-          Found.NestedComponents.push($el);
+        if ($el.matches(nestedSources)) Found.NestedComponents.push($el);
         if (!contrastExcludedTags.has(tag)) {
-          if (!$el.closest(contrastAncestorSelector)) {
+          if (!getCachedClosest($el, contrastAncestorSelector)) {
             if (!contrastAttrSelector || !$el.matches(contrastAttrSelector)) {
               Found.Contrast.push($el);
             }
           }
+        }
+        if ($el.hasAttribute("lang")) {
+          Found.LangTags.push($el);
         }
       }
       const headingScope = State.option.ignoreContentOutsideRoots || State.option.fixedRoots ? "root" : "document";
@@ -1624,8 +1638,8 @@
           Found.EmbeddedContent.push($el);
         }
       }
-      const html = document.querySelector("html");
-      Found.Language = html.getAttribute("lang")?.trim();
+      Found.html = document.querySelector("html");
+      Found.Language = Found.html.getAttribute("lang")?.trim();
     }
     function initializeFilterElements() {
       buildContrastAttrSelector();
@@ -1638,8 +1652,7 @@
         const tag = $el.tagName;
         switch (tag) {
           case "IMG":
-            if (!Constants.Exclusions.Images.some((s) => $el.matches(s)))
-              Found.Images.push($el);
+            if (!Constants.Exclusions.Images.some((s) => $el.matches(s))) Found.Images.push($el);
             break;
           case "A":
           case "a":
@@ -1649,7 +1662,7 @@
             break;
         }
         if (!contrastExcludedTags.has(tag)) {
-          if (!$el.closest(contrastAncestorSelector)) {
+          if (!getCachedClosest($el, contrastAncestorSelector)) {
             if (!contrastAttrSelector || !$el.matches(contrastAttrSelector)) {
               Found.Contrast.push($el);
             }
@@ -1706,7 +1719,7 @@
       });
     }
   }
-  const version = "3.0.0-410";
+  const version = "3.0.0-412";
   const spriteAlts = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>';
   const spriteClose = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>';
   const spriteCursor = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 256 512"><path fill="currentColor" d="M0 29C-1 47 12 62 29 64l8 1C71 67 96 95 96 128L96 224l-32 0c-18 0-32 14-32 32s14 32 32 32l32 0 0 96c0 33-26 61-59 64l-8 1C12 450-1 465 0 483s17 31 35 29l8-1c34-3 64-19 85-43c21 24 51 40 85 43l8 1c18 2 33-12 35-29s-12-33-29-35l-8-1C186 445 160 417 160 384l0-96 32 0c18 0 32-14 32-32s-14-32-32-32l-32 0 0-96c0-33 26-61 59-64l8-1c18-2 31-17 29-35S239-1 221 0l-8 1C179 4 149 20 128 44c-21-24-51-40-85-43l-8-1C17-1 2 12 0 29z"/></svg>';
@@ -2327,7 +2340,7 @@ ${this.error.stack}
         const image = $el.querySelector("img");
         if (image) {
           const alt = image?.getAttribute("alt");
-          if (image && (!alt || alt.trim() === "")) {
+          if (image && (!alt || alt.trim() === "" || accName === "")) {
             if (State.option.checks.HEADING_EMPTY_WITH_IMAGE) {
               test = "HEADING_EMPTY_WITH_IMAGE";
               type = State.option.checks.HEADING_EMPTY_WITH_IMAGE.type || "error";
@@ -2854,6 +2867,88 @@ ${this.error.stack}
           }
         }
       }
+      const hasExtension = $el.matches(Constants.Global.documentSources);
+      const hasPDF = $el.matches('a[href$=".pdf"], a[href*=".pdf?"]');
+      if (State.option.checks.QA_DOCUMENT && hasExtension) {
+        State.results.push({
+          test: "QA_DOCUMENT",
+          element: $el,
+          type: State.option.checks.QA_DOCUMENT.type || "warning",
+          content: Lang.sprintf(State.option.checks.QA_DOCUMENT.content || "QA_DOCUMENT", linkText),
+          args: [linkText],
+          inline: true,
+          dismiss: prepareDismissal(`QA_DOCUMENT ${href}`),
+          dismissAll: State.option.checks.QA_DOCUMENT.dismissAll ? "QA_DOCUMENT" : false,
+          developer: State.option.checks.QA_DOCUMENT.developer || false
+        });
+      } else if (State.option.checks.QA_PDF && hasPDF) {
+        State.results.push({
+          test: "QA_PDF",
+          element: $el,
+          type: State.option.checks.QA_PDF.type || "warning",
+          content: Lang.sprintf(State.option.checks.QA_PDF.content || "QA_PDF", linkText),
+          args: [linkText],
+          inline: true,
+          dismiss: prepareDismissal(`QA_PDF ${href}`),
+          dismissAll: State.option.checks.QA_PDF.dismissAll ? "QA_PDF" : false,
+          developer: State.option.checks.QA_PDF.developer || false
+        });
+      }
+      if (State.option.checks.QA_IN_PAGE_LINK || State.option.checks.LINK_MAYBE_BUTTON) {
+        const hasText = getText($el).length !== 0;
+        const ignored = ariaHidden && negativeTabindex;
+        const hasAttributes = $el.hasAttribute("role") || $el.hasAttribute("aria-haspopup") || $el.hasAttribute("aria-expanded") || $el.hasAttribute("onclick") || $el.hasAttribute("disabled") || !!getCachedClosest($el, 'nav, [role="navigation"]');
+        const rawHref = $el.getAttribute("href");
+        if ((!rawHref || rawHref.startsWith("#")) && hasText && !ignored && !hasAttributes) {
+          const targetId = rawHref.substring(1);
+          const ariaControls = $el.getAttribute("aria-controls");
+          const decoded = targetId ? decodeURIComponent(targetId) : "";
+          const encoded = targetId ? encodeURIComponent(targetId) : "";
+          const targetElement = targetId && (document.getElementById(targetId) || ariaControls && document.getElementById(ariaControls) || decoded !== targetId && document.getElementById(decoded) || encoded !== targetId && document.getElementById(encoded) || document.querySelector(`a[name="${CSS.escape(targetId)}"]`));
+          if (!targetElement) {
+            let isFauxButton = false;
+            if (State.option.checks.LINK_MAYBE_BUTTON) {
+              const keywords = Lang._("POTENTIAL_UI_ELEMENTS");
+              const matchedKeyword = keywords.find((word) => accName.toLowerCase().includes(word));
+              if (matchedKeyword && accName.length <= 15) {
+                isFauxButton = true;
+                State.results.push({
+                  test: "LINK_MAYBE_BUTTON",
+                  element: $el,
+                  type: State.option.checks.LINK_MAYBE_BUTTON.type || "error",
+                  content: Lang.sprintf(
+                    State.option.checks.LINK_MAYBE_BUTTON.content || "LINK_MAYBE_BUTTON",
+                    matchedKeyword,
+                    accName
+                  ),
+                  args: [matchedKeyword, accName],
+                  inline: true,
+                  dismiss: prepareDismissal(`LINK_MAYBE_BUTTON_${matchedKeyword}`),
+                  dismissAll: State.option.checks.LINK_MAYBE_BUTTON.dismissAll ? "LINK_MAYBE_BUTTON" : false,
+                  developer: State.option.checks.LINK_MAYBE_BUTTON.developer || true
+                });
+              }
+            }
+            if (State.option.checks.QA_IN_PAGE_LINK && !isFauxButton) {
+              State.results.push({
+                test: "QA_IN_PAGE_LINK",
+                element: $el,
+                type: State.option.checks.QA_IN_PAGE_LINK.type || "error",
+                content: Lang.sprintf(
+                  State.option.checks.QA_IN_PAGE_LINK.content || "QA_IN_PAGE_LINK",
+                  targetId,
+                  accName
+                ),
+                args: [targetId, accName],
+                inline: true,
+                dismiss: prepareDismissal(`QA_IN_PAGE_LINK ${href}`),
+                dismissAll: State.option.checks.QA_IN_PAGE_LINK.dismissAll ? "QA_IN_PAGE_LINK" : false,
+                developer: State.option.checks.QA_IN_PAGE_LINK.developer || false
+              });
+            }
+          }
+        }
+      }
     });
   }
   const url = [
@@ -2911,10 +3006,11 @@ ${this.error.stack}
       return hit;
     };
     Elements.Found.Images.forEach(($el) => {
-      const rawAlt = computeAriaLabel($el) === "noAria" ? $el.getAttribute("alt") : computeAriaLabel($el);
+      const alt = computeAriaLabel($el) === "noAria" ? $el.getAttribute("alt") ?? $el.getAttribute("title") : computeAriaLabel($el);
       const ariaHidden = $el?.getAttribute("aria-hidden") === "true";
       const presentationRole = $el?.getAttribute("role") === "presentation";
-      if ($el.height < 2 && $el.width < 2 && (isElementHidden($el) || rawAlt === "")) {
+      const noneRole = $el.getAttribute("role") === "none";
+      if ($el.height < 2 && $el.width < 2 && (isElementHidden($el) || alt === "")) {
         return;
       }
       const link = getCachedClosest(
@@ -2942,9 +3038,9 @@ ${this.error.stack}
         }
         return;
       }
-      if (rawAlt === null) {
+      if (alt === null) {
         if (link) {
-          const hasAriaHiddenOrPresentationRole = linkTextLength > 0 && (ariaHidden || presentationRole);
+          const hasAriaHiddenOrPresentationRole = linkTextLength > 0 && (ariaHidden || presentationRole || noneRole);
           if (!hasAriaHiddenOrPresentationRole) {
             const rule = linkTextLength === 0 ? State.option.checks.MISSING_ALT_LINK : State.option.checks.MISSING_ALT_LINK_HAS_TEXT;
             const conditional = linkTextLength === 0 ? "MISSING_ALT_LINK" : "MISSING_ALT_LINK_HAS_TEXT";
@@ -2973,10 +3069,10 @@ ${this.error.stack}
         }
         return;
       }
-      const altText = removeWhitespace(rawAlt);
+      const altText = removeWhitespace(alt);
       const hasAria = $el.getAttribute("aria-label") || $el.getAttribute("aria-labelledby");
       if (State.option.checks.MISSING_ALT) {
-        if (hasAria && rawAlt === "") {
+        if (hasAria && alt === "") {
           State.results.push({
             test: "MISSING_ALT",
             element: $el,
@@ -2989,14 +3085,14 @@ ${this.error.stack}
           return;
         }
       }
-      let decorative = rawAlt === "";
+      let decorative = alt === "";
       const figure = getCachedClosest($el, "figure");
       const figcaption = figure?.querySelector("figcaption");
       const figcaptionText = figcaption ? getText(figcaption) : "";
       const maxAltCharactersLinks = State.option.checks.LINK_IMAGE_LONG_ALT.maxLength || 250;
       const maxAltCharacters = State.option.checks.IMAGE_ALT_TOO_LONG.maxLength || 250;
       if (!decorative && State.option.altPlaceholder.length) {
-        decorative = rawAlt.match(altPlaceholderPattern)?.[0];
+        decorative = alt.match(altPlaceholderPattern)?.[0];
       }
       if (decorative) {
         const carouselSources = State.option.checks.IMAGE_DECORATIVE_CAROUSEL.sources;
@@ -3059,7 +3155,7 @@ ${this.error.stack}
       }
       const unpronounceable = link ? State.option.checks.LINK_ALT_UNPRONOUNCEABLE : State.option.checks.ALT_UNPRONOUNCEABLE;
       if (unpronounceable) {
-        if (rawAlt.replace(/"|'|\?|\.|-|\s+/g, "") === "" && linkTextLength === 0) {
+        if (alt.replace(/"|'|\?|\.|-|\s+/g, "") === "" && linkTextLength === 0) {
           const conditional = link ? "LINK_ALT_UNPRONOUNCEABLE" : "ALT_UNPRONOUNCEABLE";
           State.results.push({
             test: conditional,
@@ -3093,7 +3189,7 @@ ${this.error.stack}
             type: rule.type || "error",
             content: Lang.sprintf(rule.content || conditional, error[0], altText),
             args: [error[0], altText],
-            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
+            dismiss: prepareDismissal(`${conditional + src + alt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
@@ -3108,7 +3204,7 @@ ${this.error.stack}
             type: rule.type || "error",
             content: Lang.sprintf(rule.content || conditional, altText),
             args: [altText],
-            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
+            dismiss: prepareDismissal(`${conditional + src + alt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
@@ -3123,12 +3219,12 @@ ${this.error.stack}
             type: rule.type || "warning",
             content: Lang.sprintf(rule.content || conditional, error[1], altText),
             args: [error[1], altText],
-            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
+            dismiss: prepareDismissal(`${conditional + src + alt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
         }
-      } else if (isBadFilename || maybeBadAlt && isTooLongSingleWord.test(rawAlt) && containsNonAlphaChar) {
+      } else if (isBadFilename || maybeBadAlt && isTooLongSingleWord.test(alt) && containsNonAlphaChar) {
         const rule = link ? State.option.checks.LINK_ALT_MAYBE_BAD : State.option.checks.ALT_MAYBE_BAD;
         const conditional = link ? "LINK_ALT_MAYBE_BAD" : "ALT_MAYBE_BAD";
         if (rule) {
@@ -3138,7 +3234,7 @@ ${this.error.stack}
             type: rule.type || "error",
             content: Lang.sprintf(rule.content || conditional, altText),
             args: [altText],
-            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
+            dismiss: prepareDismissal(`${conditional + src + alt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
@@ -3153,12 +3249,12 @@ ${this.error.stack}
             type: rule.type || "warning",
             content: Lang.sprintf(rule.content || conditional, altText),
             args: [altText],
-            dismiss: prepareDismissal(`${conditional}WARNING${src + rawAlt} `),
+            dismiss: prepareDismissal(`${conditional}WARNING${src + alt} `),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
         }
-      } else if (link ? rawAlt.length > maxAltCharactersLinks : rawAlt.length > maxAltCharacters) {
+      } else if (link ? alt.length > maxAltCharactersLinks : alt.length > maxAltCharacters) {
         const rule = link ? State.option.checks.LINK_IMAGE_LONG_ALT : State.option.checks.IMAGE_ALT_TOO_LONG;
         const conditional = link ? "LINK_IMAGE_LONG_ALT" : "IMAGE_ALT_TOO_LONG";
         if (rule) {
@@ -3166,9 +3262,9 @@ ${this.error.stack}
             test: conditional,
             element: $el,
             type: rule.type || "warning",
-            content: Lang.sprintf(rule.content || conditional, rawAlt.length, altText),
-            args: [rawAlt.length, altText],
-            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
+            content: Lang.sprintf(rule.content || conditional, alt.length, altText),
+            args: [alt.length, altText],
+            dismiss: prepareDismissal(`${conditional + src + alt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
@@ -3190,13 +3286,13 @@ ${this.error.stack}
             type: rule.type || "warning",
             content: rule.content ? Lang.sprintf(rule.content, altText, accName) : tooltip,
             args: [altText, accName],
-            dismiss: prepareDismissal(`${conditional + src + rawAlt}`),
+            dismiss: prepareDismissal(`${conditional + src + alt}`),
             dismissAll: rule.dismissAll ? conditional : false,
             developer: rule.developer || false
           });
         }
       } else if (figure) {
-        const duplicate = !!figcaption && figcaptionText.toLowerCase() === rawAlt.toLowerCase();
+        const duplicate = !!figcaption && figcaptionText.toLowerCase() === alt.toLowerCase();
         if (duplicate) {
           if (State.option.checks.IMAGE_FIGURE_DUPLICATE_ALT) {
             State.results.push({
@@ -3220,7 +3316,7 @@ ${this.error.stack}
             type: State.option.checks.IMAGE_PASS.type || "good",
             content: Lang.sprintf(State.option.checks.IMAGE_PASS.content || "IMAGE_PASS", altText),
             args: [altText],
-            dismiss: prepareDismissal(`IMAGE_PASS FIGURE ${src + rawAlt}`),
+            dismiss: prepareDismissal(`IMAGE_PASS FIGURE ${src + alt}`),
             dismissAll: State.option.checks.IMAGE_PASS.dismissAll ? "IMAGE_PASS" : false,
             developer: State.option.checks.IMAGE_PASS.developer || false
           });
@@ -3234,14 +3330,14 @@ ${this.error.stack}
             type: State.option.checks.IMAGE_PASS.type || "good",
             content: Lang.sprintf(State.option.checks.IMAGE_PASS.content || "IMAGE_PASS", altText),
             args: [altText],
-            dismiss: prepareDismissal(`IMAGE_PASS ${src + rawAlt}`),
+            dismiss: prepareDismissal(`IMAGE_PASS ${src + alt}`),
             dismissAll: State.option.checks.IMAGE_PASS.dismissAll ? "IMAGE_PASS" : false,
             developer: State.option.checks.IMAGE_PASS.developer || false
           });
         }
       }
       const titleAttr = $el.getAttribute("title");
-      if (titleAttr?.toLowerCase() === rawAlt.toLowerCase()) {
+      if ($el.getAttribute("alt") && $el.getAttribute("alt")?.toLowerCase() === titleAttr?.toLowerCase()) {
         if (State.option.checks.DUPLICATE_TITLE) {
           State.results.push({
             test: "DUPLICATE_TITLE",
@@ -3249,7 +3345,7 @@ ${this.error.stack}
             type: State.option.checks.DUPLICATE_TITLE.type || "warning",
             content: Lang.sprintf(State.option.checks.DUPLICATE_TITLE.content || "DUPLICATE_TITLE"),
             inline: true,
-            dismiss: prepareDismissal(`DUPLICATE_TITLE ${rawAlt}`),
+            dismiss: prepareDismissal(`DUPLICATE_TITLE ${alt}`),
             dismissAll: State.option.checks.DUPLICATE_TITLE.dismissAll ? "DUPLICATE_TITLE" : false,
             developer: State.option.checks.DUPLICATE_TITLE.developer || false
           });
@@ -3266,7 +3362,6 @@ ${this.error.stack}
         if (hidden || ariaHidden && negativeTabindex) return;
         const computeName = computeAccessibleName($el);
         const inputName = removeWhitespace(computeName);
-        const alt = $el.getAttribute("alt");
         const type = $el.getAttribute("type");
         const hasTitle = $el.getAttribute("title");
         const hasAria = $el.getAttribute("aria-label") || $el.getAttribute("aria-labelledby");
@@ -3274,7 +3369,7 @@ ${this.error.stack}
           return;
         }
         if (type === "image") {
-          if (State.option.checks.LABELS_MISSING_IMAGE_INPUT && (!alt || alt.trim() === "") && !hasAria && !hasTitle) {
+          if (State.option.checks.LABELS_MISSING_IMAGE_INPUT && inputName === "") {
             State.results.push({
               test: "LABELS_MISSING_IMAGE_INPUT",
               element: $el,
@@ -3434,95 +3529,6 @@ ${this.error.stack}
         }
       });
     }
-    Elements.Found.Links.forEach(($el) => {
-      if ($el.hasAttribute("href")) {
-        const href = $el.getAttribute("href");
-        const accName = removeWhitespace(
-          computeAccessibleName($el, Constants.Exclusions.LinkSpan)
-        );
-        const hasExtension = $el.matches(Constants.Global.documentSources);
-        const hasPDF = $el.matches('a[href$=".pdf"], a[href*=".pdf?"]');
-        if (State.option.checks.QA_IN_PAGE_LINK || State.option.checks.LINK_MAYBE_BUTTON) {
-          const hasText = getText($el).length !== 0;
-          const ignored = $el.ariaHidden === "true" && $el.getAttribute("tabindex") === "-1";
-          const hasAttributes = $el.hasAttribute("role") || $el.hasAttribute("aria-haspopup") || $el.hasAttribute("aria-expanded") || $el.hasAttribute("onclick") || $el.hasAttribute("disabled") || !!getCachedClosest($el, 'nav, [role="navigation"]');
-          if ((href.startsWith("#") || href === "") && hasText && !ignored && !hasAttributes) {
-            const targetId = href.substring(1);
-            const ariaControls = $el.getAttribute("aria-controls");
-            const decoded = targetId ? decodeURIComponent(targetId) : "";
-            const encoded = targetId ? encodeURIComponent(targetId) : "";
-            const targetElement = targetId && (document.getElementById(targetId) || ariaControls && document.getElementById(ariaControls) || decoded !== targetId && document.getElementById(decoded) || encoded !== targetId && document.getElementById(encoded) || document.querySelector(`a[name="${CSS.escape(targetId)}"]`));
-            if (!targetElement) {
-              let isFauxButton = false;
-              if (State.option.checks.LINK_MAYBE_BUTTON) {
-                const keywords = Lang._("POTENTIAL_UI_ELEMENTS");
-                const matchedKeyword = keywords.find((word) => accName.toLowerCase().includes(word));
-                if (matchedKeyword && accName.length <= 15) {
-                  isFauxButton = true;
-                  State.results.push({
-                    test: "LINK_MAYBE_BUTTON",
-                    element: $el,
-                    type: State.option.checks.LINK_MAYBE_BUTTON.type || "error",
-                    content: Lang.sprintf(
-                      State.option.checks.LINK_MAYBE_BUTTON.content || "LINK_MAYBE_BUTTON",
-                      matchedKeyword,
-                      accName
-                    ),
-                    args: [matchedKeyword, accName],
-                    inline: true,
-                    dismiss: prepareDismissal(`LINK_MAYBE_BUTTON_${matchedKeyword}`),
-                    dismissAll: State.option.checks.LINK_MAYBE_BUTTON.dismissAll ? "LINK_MAYBE_BUTTON" : false,
-                    developer: State.option.checks.LINK_MAYBE_BUTTON.developer || true
-                  });
-                }
-              }
-              if (State.option.checks.QA_IN_PAGE_LINK && !isFauxButton) {
-                State.results.push({
-                  test: "QA_IN_PAGE_LINK",
-                  element: $el,
-                  type: State.option.checks.QA_IN_PAGE_LINK.type || "error",
-                  content: Lang.sprintf(
-                    State.option.checks.QA_IN_PAGE_LINK.content || "QA_IN_PAGE_LINK",
-                    targetId,
-                    accName
-                  ),
-                  args: [targetId, accName],
-                  inline: true,
-                  dismiss: prepareDismissal(`QA_IN_PAGE_LINK ${href}`),
-                  dismissAll: State.option.checks.QA_IN_PAGE_LINK.dismissAll ? "QA_IN_PAGE_LINK" : false,
-                  developer: State.option.checks.QA_IN_PAGE_LINK.developer || false
-                });
-              }
-            }
-          }
-        }
-        if (State.option.checks.QA_DOCUMENT && hasExtension) {
-          State.results.push({
-            test: "QA_DOCUMENT",
-            element: $el,
-            type: State.option.checks.QA_DOCUMENT.type || "warning",
-            content: Lang.sprintf(State.option.checks.QA_DOCUMENT.content || "QA_DOCUMENT", accName),
-            args: [accName],
-            inline: true,
-            dismiss: prepareDismissal(`QA_DOCUMENT ${href}`),
-            dismissAll: State.option.checks.QA_DOCUMENT.dismissAll ? "QA_DOCUMENT" : false,
-            developer: State.option.checks.QA_DOCUMENT.developer || false
-          });
-        } else if (State.option.checks.QA_PDF && hasPDF) {
-          State.results.push({
-            test: "QA_PDF",
-            element: $el,
-            type: State.option.checks.QA_PDF.type || "warning",
-            content: Lang.sprintf(State.option.checks.QA_PDF.content || "QA_PDF", accName),
-            args: [accName],
-            inline: true,
-            dismiss: prepareDismissal(`QA_PDF ${href}`),
-            dismissAll: State.option.checks.QA_PDF.dismissAll ? "QA_PDF" : false,
-            developer: State.option.checks.QA_PDF.developer || false
-          });
-        }
-      }
-    });
     if (State.option.checks.QA_BLOCKQUOTE) {
       Elements.Found.Blockquotes.forEach(($el) => {
         const text = getText($el);
@@ -4413,8 +4419,13 @@ ${this.error.stack}
   function wcagAlgorithm($el, color, background, fontSize, fontWeight, opacity, contrastAlgorithm) {
     const { ratio, blendedColor } = calculateContrast(color, background);
     const isLargeText = fontSize >= 24 || fontSize >= 18.67 && fontWeight >= 700;
+    const tagName = $el.tagName.toLowerCase();
+    const isCloseIcon = /^[x×✕✖✗✘]$/i.test($el.textContent);
+    const isCloseButton = (tagName === "button" || tagName === "a") && isCloseIcon;
     let hasLowContrast;
-    if (contrastAlgorithm === "AAA") {
+    if (isCloseButton) {
+      hasLowContrast = ratio > 0 && ratio < 3;
+    } else if (contrastAlgorithm === "AAA") {
       hasLowContrast = isLargeText ? ratio < 4.5 : ratio < 7;
     } else {
       const hasLowContrastNormalText = ratio > 0 && ratio < 4.5;
@@ -4495,9 +4506,11 @@ ${this.error.stack}
       const style = getCachedStyle($el);
       const opacity = parseFloat(style.opacity);
       const fontSize = parseFloat(style.fontSize);
-      if ($el.disabled || opacity === 0 || fontSize === 0 || isElementHidden($el)) continue;
+      if (opacity === 0 || fontSize === 0 || isElementHidden($el)) continue;
       if (isScreenReaderOnly($el)) continue;
-      if (text.length === 1 && "|/\\".includes(text)) continue;
+      const isDisabled = (node) => node && (node.matches?.(":disabled") || node.disabled || node.getAttribute?.("aria-disabled") === "true");
+      if (isDisabled($el) || isDisabled(getCachedClosest($el, "label")?.control)) continue;
+      if (!checkInputs && !/[\p{L}\p{N}]/u.test(text)) continue;
       const color = convertToRGBA(style.color, opacity);
       const getFontWeight = style.fontWeight;
       const fontWeight = normalizeFontWeight(getFontWeight);
@@ -4870,29 +4883,47 @@ ${this.error.stack}
     });
   }
   function checkDeveloper() {
-    const report = (key, ...args) => {
+    const report = (key, $el, ...args) => {
       const rule = State.option.checks[key];
       if (!rule) return;
-      State.results.push({
+      const result = {
         test: key,
         type: rule.type || "error",
         content: Lang.sprintf(rule.content || key, ...args),
         args: [...args],
         dismiss: prepareDismissal(key),
         developer: rule.developer || true
-      });
+      };
+      if ($el) {
+        result.element = $el;
+      }
+      State.results.push(result);
     };
     if (!Elements.Found.Language) {
-      report("META_LANG");
+      report("META_LANG", null);
     } else {
       const { valid, suggest } = validateLang(Elements.Found.Language, Lang._("LANG_CODE"));
       if (!valid) {
         if (suggest) {
-          report("META_LANG_SUGGEST", Elements.Found.Language, suggest);
+          report("META_LANG_SUGGEST", null, Elements.Found.Language, suggest);
         } else {
-          report("META_LANG_VALID", Elements.Found.Language);
+          report("META_LANG_VALID", null, "html", Elements.Found.Language);
         }
       }
+    }
+    if (Elements.Found.LangTags && Elements.Found.LangTags.length > 0) {
+      Elements.Found.LangTags.forEach(($el) => {
+        const rawLang = $el.getAttribute("lang");
+        const langValue = rawLang.trim();
+        const { valid, suggest } = validateLang(langValue, Lang._("LANG_CODE"));
+        if (!valid) {
+          if (suggest) {
+            report("META_LANG_SUGGEST", $el, langValue, suggest);
+          } else {
+            report("META_LANG_VALID", $el, $el.tagName.toLowerCase(), langValue);
+          }
+        }
+      });
     }
     if (State.option.checks.META_TITLE) {
       const metaTitle = document.querySelector("title:not(svg title)");
@@ -4939,14 +4970,17 @@ ${this.error.stack}
       }
     }
     if (State.option.checks.META_REFRESH) {
-      const metaRefresh = document.querySelector('meta[http-equiv="refresh"]');
-      if (metaRefresh) {
+      const actuallyRefreshes = Array.from(
+        document.querySelectorAll('meta[http-equiv="refresh" i]')
+      ).some((tag) => parseInt(tag.getAttribute("content"), 10) > 0);
+      if (actuallyRefreshes) {
+        const option = State.option.checks.META_REFRESH;
         State.results.push({
           test: "META_REFRESH",
-          type: State.option.checks.META_REFRESH.type || "error",
-          content: Lang.sprintf(State.option.checks.META_REFRESH.content || "META_REFRESH"),
+          type: option.type || "error",
+          content: Lang.sprintf(option.content || "META_REFRESH"),
           dismiss: prepareDismissal("META_REFRESH"),
-          developer: State.option.checks.META_REFRESH.developer || true
+          developer: option.developer ?? true
         });
       }
     }
@@ -8696,7 +8730,7 @@ ${this.error.stack}
       META_LANG: 'Page language not declared! Please <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare language on the HTML tag.</a>',
       META_REFRESH: "Page should not automatically refresh using a meta tag.",
       META_LANG_SUGGEST: "The following language code <code>%(CODE)</code> is not valid. Did you mean <code>%(CODE)</code>?",
-      META_LANG_VALID: 'The page language code <code>%(CODE)</code> is not valid. Please <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare a valid language on the HTML tag.</a>',
+      META_LANG_VALID: 'The language code for this element is not valid. To fix, replace the lang attribute with a valid language code. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Learn more about <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declaring language in HTML.</a>',
       // Buttons
       BTN_EMPTY: "Button is missing an accessible name that describes its purpose.",
       BTN_EMPTY_LABELLEDBY: "Button has an <code>aria-labelledby</code> value that is empty or does not match the <code>id</code> value of another element on the page.",
@@ -8737,7 +8771,9 @@ ${this.error.stack}
         "unmute",
         "fullscreen",
         "minimize",
-        "maximize"
+        "maximize",
+        "slide",
+        "modal"
       ],
       // Tables
       TABLES_MISSING_HEADINGS: 'Missing table headers! Accessible tables need HTML markup that indicates header cells and data cells which defines their relationship. This information provides context to people who use assistive technology. Tables should be used for tabular data only. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
