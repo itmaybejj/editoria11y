@@ -42,7 +42,7 @@
 
   <div class="summary">
     <div class="stat">
-      <div class="number">22</div>
+      <div class="number">26</div>
       <div class="label">Rules Tested</div>
     </div>
     <div class="stat">
@@ -50,11 +50,11 @@
       <div class="label">Fully Consistent</div>
     </div>
     <div class="stat">
-      <div class="number">254/362</div>
+      <div class="number">306/434</div>
       <div class="label">Test Cases Consistent</div>
     </div>
     <div class="stat">
-      <div class="number">70%</div>
+      <div class="number">71%</div>
       <div class="label">Overall Rate</div>
     </div>
   </div>
@@ -882,6 +882,178 @@
 
 			shadow.appendChild(template.content)
 		&lt;/script&gt;</code></pre></details></td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="rule-section partial">
+        <h3>
+          <span class="rule-status partial">93%</span>
+          Visible label is part of accessible name
+          <small>(2ee8b8)</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG 2.5.3 &middot;
+          Coverage: <strong>partial</strong> &middot;
+          14/15 consistent
+          <br><em>Strong discovery signal (0.90). Ed11y checks if the visible label text is part of the accessible name. 5/5 failed detected with 1 false positive.</em>
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Test Case</th>
+              <th>Expected</th>
+              <th>Matched Keys</th>
+              <th>All Ed11y Results</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 1</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/326f6768ecbf60ca31149e65ab2853c138095fd7.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;https://act-rules.github.io/&quot; aria-label=&quot;ACT rules&quot;&gt;ACT rules&lt;/a&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 2</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/02f6608c4242efccba3ceeb8b73cc6b1255e362d.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;https://act-rules.github.io/&quot; aria-label=&quot;  ACT rules  &quot;&gt;ACT rules&lt;/a&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 3</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/71c4a612a2e00a8abd3d33b4a66ca8e5079fff1b.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;https://act-rules.github.io/&quot; aria-label=&quot;act rules&quot;&gt;ACT rules&lt;/a&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 4</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/f88ac89cc14d59302666047a0da91bbc51d27bb2.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;button aria-label=&quot;Next Page in the list&quot;&gt;Next Page&lt;/button&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 5</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/79af5d3e531aecd27961f0b9ed260d95f39440c0.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;button aria-label=&quot;anything&quot;&gt;X&lt;/button&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 6</td>
+          <td><code>passed</code></td>
+          <td><code>LABEL_IN_NAME</code></td>
+          <td><code>LABEL_IN_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/efa9543339cdad5412c7719b266a633a29ce149e.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;link href=&quot;https://fonts.googleapis.com/icon?family=Material+Icons&quot; rel=&quot;stylesheet&quot; /&gt;
+	&lt;style&gt;
+		button {
+			font-family: 'Material Icons';
+		}
+	&lt;/style&gt;
+	&lt;button aria-label=&quot;Find&quot;&gt;search&lt;/button&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 1</td>
+          <td><code>failed</code></td>
+          <td><code>LABEL_IN_NAME</code></td>
+          <td><code>LABEL_IN_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/4ee91039726503da19c9bc58e08e800464d94d82.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;https://act-rules.github.io/&quot; aria-label=&quot;WCAG&quot;&gt;ACT rules&lt;/a&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 2</td>
+          <td><code>failed</code></td>
+          <td><code>LABEL_IN_NAME</code></td>
+          <td><code>LABEL_IN_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/8db20b5fa0a59906a7b182c5698d6a9ce7e85f10.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;button aria-label=&quot;the full&quot;&gt;The full label&lt;/button&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 3</td>
+          <td><code>failed</code></td>
+          <td><code>LABEL_IN_NAME</code></td>
+          <td><code>LABEL_IN_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/20a5e321fc6a5cb2bfcd520acb8cda21e6925254.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;/&quot; aria-label=&quot;Proof of two multiplied by two is four&quot;&gt;Proof of 2&amp;times;2=4&lt;/a&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 4</td>
+          <td><code>failed</code></td>
+          <td><code>LABEL_IN_NAME</code></td>
+          <td><code>LABEL_IN_NAME, QA_IN_PAGE_LINK, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/e9bbdbec137223e2973c6d2896050770c84c26e5.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;#&quot; aria-label=&quot;non-standard&quot;&gt;nonstandard&lt;/a&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 5</td>
+          <td><code>failed</code></td>
+          <td><code>LABEL_IN_NAME</code></td>
+          <td><code>LABEL_IN_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/fd0c075f565b6f42be0ded6a959bea82ebff15e5.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a aria-label=&quot;1 2 3. 4 5 6. 7 8 9 0&quot; href=&quot;tel:1234567890&quot;&gt;123.456.7890&lt;/a&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 1</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/cf98c9678e70f160afcd5af246c0070550ad7398.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;nav aria-label=&quot;main nav&quot;&gt;W3C navigation&lt;/nav&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 2</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>LABELS_ARIA_LABEL_INPUT, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/87e3c42fdc98d63d89a6a0d984f44f00adf02015.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div&gt;E-mail&lt;/div&gt;
+	&lt;input type=&quot;email&quot; aria-label=&quot;E-mail&quot; value=&quot;Contact&quot; /&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 3</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/f02ba15667ff1b80a269e5ce66f152e93396c029.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div role=&quot;tooltip&quot; aria-label=&quot;OK&quot;&gt;Next&lt;/div&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 4</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2ee8b8/8c26a3506e424766019341f3b86d2f758ca1aced.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;https://w3.org&quot; aria-label=&quot;W3C homepage&quot;&gt;
+		&lt;img src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/shared/w3c-logo.png&quot; alt=&quot;w3c logo&quot; /&gt;
+	&lt;/a&gt;</code></pre></details></td></tr>
           </tbody>
         </table>
       </section>
@@ -2721,6 +2893,197 @@
           </tbody>
         </table>
       </section>
+      <section class="rule-section partial">
+        <h3>
+          <span class="rule-status partial">67%</span>
+          Link is descriptive
+          <small>(aizyf1)</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG 2.4.9 &middot;
+          Coverage: <strong>partial</strong> &middot;
+          8/12 consistent
+          <br><em>Broader version of 5effbb (no context requirement). Ed11y catches links with only non-descriptive stopwords. 1/5 failed detected — only catches the most obvious non-descriptive patterns.</em>
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Test Case</th>
+              <th>Expected</th>
+              <th>Matched Keys</th>
+              <th>All Ed11y Results</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 1</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/c7661d61606728f898297f6e69f68af3d5b6c6d0.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;#desc&quot;&gt;See the description of this product.&lt;/a&gt;
+	
+	&lt;p id=&quot;desc&quot;&gt;This product consists of several web pages.&lt;/p&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 2</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE, LINK_IMAGE_ALT</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/9863e3ea603a1bdde28e5b94f8675579e33a16d7.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;#main&quot;&gt;&lt;img src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/5effbb/main.png&quot; alt=&quot;Go to the main content&quot;/&gt;&lt;/a&gt;
+	
+	&lt;main&gt;
+		&lt;p id=&quot;main&quot;&gt;This is the main content.&lt;/p&gt;
+	&lt;/main&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 3</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/2eb4856e68c4cf8b3ed55f7d34b08ad4ae8b3fdd.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;span role=&quot;link&quot; tabindex=&quot;0&quot; onclick=&quot;document.location+='#desc'&quot;&gt;See description of the product.&lt;/span&gt;
+	
+	&lt;p id=&quot;desc&quot;&gt;This product consists of several web pages.&lt;/p&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 4</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>CONTRAST_WARNING_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/474db50232349ade7714e41c88af801d1f1e378b.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p id=&quot;instructions&quot;&gt;Go to the main content.&lt;/p&gt;
+	&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; x=&quot;0&quot; y=&quot;0&quot;&gt;
+		&lt;a href=&quot;#main&quot; aria-labelledby=&quot;instructions&quot;&gt;
+			&lt;path
+				style=&quot;fill:#1E201D;&quot;
+				d=&quot;M21.205,5.007c-0.429-0.444-1.143-0.444-1.587,0c-0.429,0.429-0.429,1.143,0,1.571l8.047,8.047H1.111
+				C0.492,14.626,0,15.118,0,15.737c0,0.619,0.492,1.127,1.111,1.127h26.554l-8.047,8.032c-0.429,0.444-0.429,1.159,0,1.587
+				c0.444,0.444,1.159,0.444,1.587,0l9.952-9.952c0.444-0.429,0.444-1.143,0-1.571L21.205,5.007z&quot;
+			/&gt;
+		&lt;/a&gt;
+	&lt;/svg&gt;
+	
+	&lt;main&gt;
+		&lt;p id=&quot;main&quot;&gt;This is the main content.&lt;/p&gt;
+	&lt;/main&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 1</td>
+          <td><code>failed</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/b2a671d96ac510ccc6e34dd58a141d13bb196508.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;#desc&quot;&gt;More&lt;/a&gt;
+	
+	&lt;p id=&quot;desc&quot;&gt;This product consists of several web pages.&lt;/p&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Failed Example 2</td>
+          <td><code>failed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/bf3ba787eb7a6819ea1a6adccdfd1f30842ed788.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div role=&quot;link&quot; tabindex=&quot;0&quot; onclick=&quot;document.location+='#main'&quot;&gt;More&lt;/div&gt;
+	
+	&lt;main&gt;
+		&lt;p id=&quot;main&quot;&gt;This is the main content.&lt;/p&gt;
+	&lt;/main&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Failed Example 3</td>
+          <td><code>failed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>CONTRAST_WARNING_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/e6a7c924092d2351c3a5b4361ccde7917ad23c66.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; x=&quot;0&quot; y=&quot;0&quot;&gt;
+		&lt;a href=&quot;#main&quot;&gt;
+			&lt;text x=&quot;20&quot; y=&quot;20&quot;&gt;
+				Go
+			&lt;/text&gt;
+		&lt;/a&gt;
+	&lt;/svg&gt;
+	
+	&lt;main&gt;
+		&lt;p id=&quot;main&quot;&gt;This is the main content.&lt;/p&gt;
+	&lt;/main&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Failed Example 4</td>
+          <td><code>failed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/771c36b9967faec9926af86041d834b4a108a52e.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;See the description of &lt;a href=&quot;#desc&quot;&gt;this product&lt;/a&gt;.&lt;/p&gt;
+	
+	&lt;p id=&quot;desc&quot;&gt;This product consists of several web pages.&lt;/p&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Failed Example 5</td>
+          <td><code>failed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/b130285915a8ca42926a11553a5791f44b65d487.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;ul&gt;
+		&lt;li&gt;
+			Ulysses
+			&lt;ul&gt;
+				&lt;li&gt;&lt;a href=&quot;https://www.gutenberg.org/files/4300/4300-h/4300-h.htm&quot;&gt; HTML &lt;/a&gt;&lt;/li&gt;
+				&lt;li&gt;
+					&lt;a href=&quot;https://www.gutenberg.org/ebooks/4300.epub.images?session_id=04cd710372888de8d8d322215cdfe8ce5b0f8d73&quot;&gt;
+						EPUB
+					&lt;/a&gt;
+				&lt;/li&gt;
+				&lt;li&gt;&lt;a href=&quot;https://www.gutenberg.org/files/4300/4300-0.txt&quot;&gt; Plain text &lt;/a&gt;&lt;/li&gt;
+			&lt;/ul&gt;
+		&lt;/li&gt;
+	&lt;/ul&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 1</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/e64416f9e9792cd76b77ee209a26269d47c3ff97.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;https://www.w3.org/WAI&quot; role=&quot;button&quot;&gt;Web Accessibility Initiative (WAI)&lt;/a&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 2</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE, LINK_IMAGE_ALT_AND_TEXT</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/afcf56e62d62b8f69b4a2881475f625a1ed7ecf9.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;https://www.w3.org/WAI&quot; style=&quot;display: none;&quot;
+		&gt;&lt;img src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/5effbb/cart.svg&quot; alt=&quot;Checkout&quot; /&gt;Checkout&lt;/a
+	&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 3</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/ca563b842b32b8fc79ac872f8fc4e799fcf76072.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a&gt;placeholder&lt;/a&gt;</code></pre></details></td></tr>
+          </tbody>
+        </table>
+      </section>
       <section class="rule-section inconsistent">
         <h3>
           <span class="rule-status inconsistent">40%</span>
@@ -2868,6 +3231,375 @@
 		ppDialog.addEventListener('close', () =&gt; (myFrame.tabIndex = 0))
 		window.addEventListener('DOMContentLoaded', openDialog)
 	&lt;/script&gt;</code></pre></details></td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="rule-section partial">
+        <h3>
+          <span class="rule-status partial">67%</span>
+          Links with identical accessible names have equivalent purpose
+          <small>(b20e66)</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG 2.4.9 &middot;
+          Coverage: <strong>partial</strong> &middot;
+          14/21 consistent
+          <br><em>Broader version of fd3a94 (no context requirement). 5/6 failed detected. Same false positive pattern — identical names that do serve equivalent purpose.</em>
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Test Case</th>
+              <th>Expected</th>
+              <th>Matched Keys</th>
+              <th>All Ed11y Results</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 1</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/9ccf7853c269dfcc3832333ee3785257fa7b9018.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html&quot;&gt;Contact us&lt;/a&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html&quot;&gt;Contact us&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 2</td>
+          <td><code>passed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/3a84bd09a817b707c44e3b8af1f710e5a5f41f98.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html&quot;&gt;Contact us&lt;/a&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/redirect.html&quot;&gt;Contact us&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 3</td>
+          <td><code>passed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/2594532c9868b1b639214e54380a2e9b2f91243b.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html&quot;&gt;Contact us&lt;/a&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index-copy.html&quot;&gt;Contact us&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 4</td>
+          <td><code>passed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/6f97807f5525832037d676099a26cde32e519776.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/about/contact.html&quot;&gt;Contact us&lt;/a&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/careers/contact.html&quot;&gt;Contact us&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 5</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/d6b244548c375ed83a8f3fb60193ed66442e7c68.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/&quot;&gt;Contact us&lt;/a&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66&quot;&gt;Contact us&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 6</td>
+          <td><code>passed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/11e8780590560ae2acdf79d708b541ca0666def5.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/page1.html&quot;&gt;Call us&lt;/a&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/page2.html&quot;&gt;Call us&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 7</td>
+          <td><code>passed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/4b5fcfab90a85fabcfffb143e0c886236f360d6c.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/page1.html&quot;&gt;Contact us&lt;/a&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/page3.html&quot;&gt;Contact us&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 8</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/39078d73e0c274100c3518259a3e30fe52ecd3b3.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;span
+		role=&quot;link&quot;
+		tabindex=&quot;0&quot;
+		onclick=&quot;location='/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html'&quot;
+	&gt;
+		Link text
+	&lt;/span&gt;
+
+	&lt;span
+		role=&quot;link&quot;
+		tabindex=&quot;0&quot;
+		onclick=&quot;location='/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html'&quot;
+	&gt;
+		Link text
+	&lt;/span&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 9</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>CONTRAST_WARNING_GRAPHIC, META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/1e657a8e23e1ec1f52032bc68d5403cea50bc003.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;svg viewBox=&quot;0 0 100 100&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot;&gt;
+		&lt;a href=&quot;https://act-rules.github.io/&quot; aria-label=&quot;ACT rules&quot;&gt;
+			&lt;circle cx=&quot;50&quot; cy=&quot;40&quot; r=&quot;35&quot; /&gt;
+		&lt;/a&gt;
+
+		&lt;a href=&quot;https://act-rules.github.io/&quot;&gt;
+			&lt;text x=&quot;50&quot; y=&quot;90&quot; text-anchor=&quot;middle&quot;&gt;
+				ACT rules
+			&lt;/text&gt;
+		&lt;/a&gt;
+	&lt;/svg&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 10</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>CONTRAST_WARNING_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/b9f1dad8a8d15e046de4628e8d4e29d31b950048.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;https://act-rules.github.io/&quot;&gt;ACT rules&lt;/a&gt;
+	
+	&lt;svg viewBox=&quot;0 0 100 100&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot;&gt;
+		&lt;a href=&quot;https://act-rules.github.io/&quot; aria-label=&quot;ACT rules&quot;&gt;
+			&lt;circle cx=&quot;50&quot; cy=&quot;40&quot; r=&quot;35&quot; /&gt;
+		&lt;/a&gt;
+	&lt;/svg&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 11</td>
+          <td><code>passed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/2283add5996728d458e4b6a7376071b354744a19.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/about/contact.html&quot;&gt;Contact us&lt;/a&gt;
+	all the time.
+	
+	&lt;div id=&quot;host&quot;&gt;
+		&lt;span
+			&gt;&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/admissions/contact.html&quot;
+				&gt;Contact us&lt;/a
+			&gt;
+			from the light.&lt;/span
+		&gt;
+	&lt;/div&gt;
+	
+	&lt;script&gt;
+		const host = document.getElementById('host')
+		const shadowRoot = host.attachShadow({ mode: 'open' })
+	
+		shadowRoot.innerHTML =
+			'&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/about/contact.html&quot;&gt;Contact us&lt;/a&gt; from the shadow.'
+	&lt;/script&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 12</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_MISSING_TITLE, EMBED_GENERAL</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/e339e9e7b77f88ce8041dba8e672a618f515df84.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/about/contact.html&quot;&gt;Contact us&lt;/a&gt;
+	from the top level.
+	
+	&lt;iframe
+		srcdoc=&quot;&lt;a href='/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/about/contact.html'&gt;Contact us&lt;/a&gt; from the iframe&quot;
+	&gt;&lt;/iframe&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 1</td>
+          <td><code>failed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/f34241fb3e5b4e23fa3813f2f29ddb7227a79c65.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;a href=&quot;https://act-rules.github.io/&quot;&gt;ACT rules&lt;/a&gt;
+	&lt;a href=&quot;https://www.w3.org/community/act-r/&quot;&gt;ACT rules&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 2</td>
+          <td><code>failed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/2bb9bd2d4cc0781427cb9ebaed949695a016afc0.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/about/contact.html&quot;&gt;Contact us&lt;/a&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/admissions/contact.html&quot;
+		&gt;Contact us&lt;/a
+	&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Failed Example 3</td>
+          <td><code>failed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/578b693f3a1818b17b0bd678b75750e2824dff09.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;span
+		role=&quot;link&quot;
+		tabindex=&quot;0&quot;
+		onclick=&quot;location='/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/about/contact.html'&quot;
+	&gt;
+		Link text
+	&lt;/span&gt;
+
+	&lt;span
+		role=&quot;link&quot;
+		tabindex=&quot;0&quot;
+		onclick=&quot;location='/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/admissions/contact.html'&quot;
+	&gt;
+		Link text
+	&lt;/span&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 4</td>
+          <td><code>failed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE, LINK_IMAGE_ALT, LINK_IMAGE_ALT</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/71d6745fb37e3348784179c751be9af0b997fa5b.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;a href=&quot;https://act-rules.github.io/&quot;&gt;&lt;img src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/shared/act-logo.png&quot; alt=&quot;ACT rules&quot;/&gt;&lt;/a&gt;
+	&lt;a href=&quot;https://www.w3.org/community/act-r/&quot;&gt;&lt;img src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/shared/act-logo.png&quot; alt=&quot;ACT rules&quot;/&gt;&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 5</td>
+          <td><code>failed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>CONTRAST_WARNING_GRAPHIC, META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/a9c292b40ed314545cf73b58a2496f47a268592e.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;svg viewBox=&quot;0 0 100 100&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot;&gt;
+		&lt;a href=&quot;https://act-rules.github.io/&quot; aria-label=&quot;ACT rules&quot;&gt;
+			&lt;circle cx=&quot;50&quot; cy=&quot;40&quot; r=&quot;35&quot; /&gt;
+		&lt;/a&gt;
+
+		&lt;a href=&quot;https://www.w3.org/community/act-r/&quot;&gt;
+			&lt;text x=&quot;50&quot; y=&quot;90&quot; text-anchor=&quot;middle&quot;&gt;
+				ACT rules
+			&lt;/text&gt;
+		&lt;/a&gt;
+	&lt;/svg&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 6</td>
+          <td><code>failed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/a67cf3bac5c43ae2c280736f9c86f57457c35537.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html&quot;&gt;Contact us&lt;/a&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/redirect1.html&quot;&gt;Contact us&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 1</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/547d69dca1d88658ee7036136b8cd29e05a28823.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;a&gt;Link text&lt;/a&gt;
+	&lt;area aria-label=&quot;Link text&quot; /&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 2</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/45ef0c588326ff9dc7efc883da3b651163384032.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/about/contact.html&quot;&gt;Reach out&lt;/a&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/about/contact.html&quot;&gt;Contact us&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 3</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/b20e66/bf3cbb86a637d04ffea4fd63bb2430b639ebcdca.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;span onclick=&quot;location='/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/page1.html'&quot;&gt;
+		Contact Us
+	&lt;/span&gt;
+
+	&lt;span onclick=&quot;location='/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/page2.html'&quot;&gt;
+		Contact Us
+	&lt;/span&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
           </tbody>
         </table>
       </section>
@@ -4601,6 +5333,516 @@
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/e086e5/1d9a4d0eba21c8bb02580c46142ec75842bd3557.html" target="_blank">W3C</a></td>
         </tr>
         <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;label&gt;Date of birth&lt;/label&gt; &lt;input type=&quot;date&quot; /&gt;</code></pre></details></td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="rule-section partial">
+        <h3>
+          <span class="rule-status partial">67%</span>
+          Links with identical accessible names and same context serve equivalent purpose
+          <small>(fd3a94)</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG 2.4.4, WCAG 2.4.9 &middot;
+          Coverage: <strong>partial</strong> &middot;
+          16/24 consistent
+          <br><em>Ed11y flags links with identical accessible names. 7/8 failed detected. False positives occur on &quot;same name, same purpose&quot; passing cases where identical names ARE equivalent.</em>
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Test Case</th>
+              <th>Expected</th>
+              <th>Matched Keys</th>
+              <th>All Ed11y Results</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 1</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/c6927fede2d5da439b2d346f39d2ec8980212b31.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		Learn more (&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html&quot;&gt;About us&lt;/a
+		&gt;) and get in touch (
+		&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html&quot;&gt;About us&lt;/a&gt;)
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 2</td>
+          <td><code>passed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/e0d32d9583b2b545ca76295cff78e016a44854b6.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;div&gt;
+		Learn more (&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html&quot;&gt;About us&lt;/a
+		&gt;) and get in touch (&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/redirect.html&quot;
+			&gt;About us&lt;/a
+		&gt;)
+	&lt;/div&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 3</td>
+          <td><code>passed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/91abed1247fb6c9314457a6738343493056fe3bb.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		Learn more (&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html&quot;&gt;About us&lt;/a
+		&gt;) and get in touch (&lt;a
+			href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index-copy.html&quot;
+			&gt;About us&lt;/a
+		&gt;)
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 4</td>
+          <td><code>passed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/8e6c190e0d2ba8f37707910bd1b984b6885ab548.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		Learn more (&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/about/contact.html&quot;
+			&gt;Contact us&lt;/a
+		&gt;) and get in touch (
+		&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/careers/contact.html&quot;&gt;Contact us&lt;/a
+		&gt;)
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 5</td>
+          <td><code>passed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/b55973d2f813b2fa7d0841202c13f65e41ca8823.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		Learn more (&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/page1.html&quot;&gt;Call us&lt;/a
+		&gt;) and get in touch (&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/page2.html&quot;
+			&gt;Call us&lt;/a
+		&gt;)
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 6</td>
+          <td><code>passed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/19d5c2888e4434b3e0fb2d9ea5818808e8380422.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		Learn more (&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/page1.html&quot;
+			&gt;Contact us&lt;/a
+		&gt;) and get in touch (&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/page3.html&quot;
+			&gt;Contact us&lt;/a
+		&gt;)
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 7</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/fb1e5016cd1630a2839dc7d70d503babd2ccfefc.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		&lt;span
+			role=&quot;link&quot;
+			tabindex=&quot;0&quot;
+			onclick=&quot;location='/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html'&quot;
+		&gt;
+			My university
+		&lt;/span&gt;
+
+		&lt;span
+			role=&quot;link&quot;
+			tabindex=&quot;0&quot;
+			onclick=&quot;location='/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html'&quot;
+		&gt;
+			My university
+		&lt;/span&gt;
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 8</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>CONTRAST_WARNING_GRAPHIC, META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/0c9cee5afaadc35a08ce533448f02b50d6526eda.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		&lt;a href=&quot;https://act-rules.github.io/&quot;&gt;ACT rules&lt;/a&gt;
+
+		&lt;svg viewBox=&quot;0 0 100 100&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot;&gt;
+			&lt;a href=&quot;https://act-rules.github.io/&quot; aria-label=&quot;ACT rules&quot;&gt;
+				&lt;circle cx=&quot;50&quot; cy=&quot;40&quot; r=&quot;35&quot; /&gt;
+			&lt;/a&gt;
+		&lt;/svg&gt;
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 9</td>
+          <td><code>passed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/228c0a3d78557fb48a855d6733d50848a86f0d62.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		We are on social media:
+		&lt;a href=&quot;https://act-rules.github.io/&quot;&gt;ACT rules&lt;/a&gt;
+		&lt;a href=&quot;https://www.w3.org/community/act-r/&quot;&gt;ACT rules&lt;/a&gt;
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 1</td>
+          <td><code>failed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/9ceacbea5df44a14dc17df2089edb134f22decd3.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		To get in touch with us, you can either
+		&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/contact-us.html?page=1&quot;
+			&gt;contact us&lt;/a
+		&gt;
+		via chat or
+		&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/contact-us.html?page=2&quot;
+			&gt;contact us&lt;/a
+		&gt;
+		by phone.
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 2</td>
+          <td><code>failed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/8dc58c481c594488a331cd267974a324b97c9c98.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;W3C pages for ACT:&lt;/p&gt;
+	&lt;p&gt;&lt;a href=&quot;https://act-rules.github.io/&quot;&gt;ACT rules&lt;/a&gt;&lt;/p&gt;
+	&lt;p&gt;Community group for ACT:&lt;/p&gt;
+	&lt;p&gt;&lt;a href=&quot;https://www.w3.org/community/act-r/&quot;&gt;ACT rules&lt;/a&gt;&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 3</td>
+          <td><code>failed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>CONTRAST_WARNING, CONTRAST_WARNING, META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/ef75d42424140b163d7939aacc6a80c8dbc8816a.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		&lt;h2&gt;Contact us:&lt;/h2&gt;
+		&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/contact-us.html?page=1&quot; style=&quot;display:inline-block; background: url(/WAI/content-assets/wcag-act-rules/test-assets/shared/chat.png) 0 / 40px no-repeat; padding: 20px 0 20px 50px;&quot;&gt;Contact Us&lt;/a&gt;
+		&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/contact-us.html?page=2&quot; style=&quot;display:inline-block; background: url(/WAI/content-assets/wcag-act-rules/test-assets/shared/phone.png) 0 / 40px no-repeat; padding: 20px 0 20px 50px; margin-left: 40px;&quot;&gt;Contact Us&lt;/a&gt;
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 4</td>
+          <td><code>failed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/f92350be3a294ad1a41de6d7202f09bdd4e5d6c0.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;div&gt;
+		&lt;span style=&quot;text-align:center;&quot;&gt;Contact us&lt;/span&gt;
+		&lt;span style=&quot;display:flex; justify-content:space-around;&quot;&gt;
+			&lt;img src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/shared/chat.png&quot; alt=&quot;Chat&quot; style=&quot;max-width:50px;&quot; /&gt;
+			&lt;img src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/shared/phone.png&quot; alt=&quot;Phone&quot; style=&quot;max-width:50px;&quot; /&gt;
+		&lt;/span&gt;
+		&lt;span style=&quot;display:flex; justify-content:space-around;&quot;&gt;
+			&lt;a
+				href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/contact-us.html?page=60e950cff70bf1ec60a702086748ab4dec361514&quot;
+				&gt;Contact Us&lt;/a
+			&gt;
+			&lt;a
+				href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/contact-us.html?page=c1d4e0f067462f4b28716f028d9213a25eb82f28&quot;
+				&gt;Contact Us&lt;/a
+			&gt;
+		&lt;/span&gt;
+	&lt;/div&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 5</td>
+          <td><code>failed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/0b01e772dff47d4fd971ca4cfda2a9810843c10a.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;div&gt;
+		&lt;span style=&quot;text-align:center;&quot;&gt;Contact us&lt;/span&gt;
+		&lt;span style=&quot;display:flex; justify-content:space-around;&quot;&gt;
+			&lt;img src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/shared/chat.png&quot; alt=&quot;Chat&quot; style=&quot;max-width:50px;&quot; /&gt;
+			&lt;img src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/shared/phone.png&quot; alt=&quot;Phone&quot; style=&quot;max-width:50px;&quot; /&gt;
+		&lt;/span&gt;
+		&lt;span style=&quot;display:flex; justify-content:space-around;&quot;&gt;
+			&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/contact-us.html?page=3&quot;
+				&gt;Contact Us&lt;/a
+			&gt;
+			&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/contact-us.html?page=4&quot;
+				&gt;Contact Us&lt;/a
+			&gt;
+		&lt;/span&gt;
+	&lt;/div&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Failed Example 6</td>
+          <td><code>failed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/dddcd76a61f61fa6652f847b66cd77fdcf7724cf.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;div&gt;
+		&lt;span style=&quot;text-align:center;&quot;&gt;Contact us&lt;/span&gt;
+		&lt;span style=&quot;display:flex; justify-content:space-around;&quot;&gt;
+			&lt;img src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/shared/chat.png&quot; alt=&quot;Chat&quot; style=&quot;max-width:50px;&quot; /&gt;
+			&lt;img src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/shared/phone.png&quot; alt=&quot;Phone&quot; style=&quot;max-width:50px;&quot; /&gt;
+		&lt;/span&gt;
+		&lt;span style=&quot;display:flex; justify-content:space-around;&quot;&gt;
+			&lt;span
+				role=&quot;link&quot;
+				tabindex=&quot;0&quot;
+				onclick=&quot;location='/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/contact-us.html?page=1'&quot;
+				&gt;Contact Us&lt;/span
+			&gt;
+			&lt;span
+				role=&quot;link&quot;
+				tabindex=&quot;0&quot;
+				onclick=&quot;location='/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/contact-us.html?page=2'&quot;
+				&gt;Contact Us&lt;/span
+			&gt;
+		&lt;/span&gt;
+	&lt;/div&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 7</td>
+          <td><code>failed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>CONTRAST_WARNING_GRAPHIC, META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/7ebe961dbb4fb0e259fc3bc98a8f048170b063af.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		&lt;svg
+			enable-background=&quot;new 0 0 264 120&quot;
+			viewBox=&quot;-5 -20 80 50&quot;
+			xmlns=&quot;http://www.w3.org/2000/svg&quot;
+			style=&quot;max-width: 300px&quot;
+		&gt;
+			&lt;text&gt;Contact us&lt;/text&gt;
+			&lt;a
+				href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/contact-us.html?page=1&quot;
+				aria-label=&quot;Contact Us&quot;
+				style=&quot;scale: 0.2&quot;
+			&gt;
+				&lt;path
+					d=&quot;m212.0806 68.0717c-10.3917 10.3852-22.4311 20.3239-27.1905 15.5646-6.8075-6.8075-11.0088-12.7418-26.0285-.6696-15.0132 12.0657-3.4792 20.1139 3.1182 26.7047 7.6149 7.6149 36.0001.407 64.0571-27.6434 28.0504-28.057 35.2386-56.4422 27.6172-64.0571-6.5974-6.604-14.6062-18.1314-26.6719-3.1182-12.0723 15.0132-6.1444 19.2145.6761 26.0285 4.7397 4.7593-5.1925 16.7988-15.5777 27.1905z&quot;
+				/&gt;
+			&lt;/a&gt;
+			&lt;a
+				href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/contact-us.html?page=2&quot;
+				aria-label=&quot;Contact Us&quot;
+				style=&quot;scale: 0.2&quot;
+			&gt;
+				&lt;path
+					d=&quot;m105 7.5h-90c-8.2576 0-15 6.7497-15 15v52.5c0 8.2498 6.7424 15 15 15h30l30 22.5v-22.5h30c8.2498 0 15-6.7502 15-15v-52.5c0-8.2503-6.7502-15-15-15zm-80.7903 52.5c-6.2132 0-11.255-5.0372-11.255-11.25 0-6.2132 5.0418-11.25 11.255-11.25 6.2128 0 11.245 5.0418 11.245 11.25 0 6.2077-5.0322 11.25-11.245 11.25zm35.7953 0c-6.2128 0-11.255-5.0372-11.255-11.25 0-6.2132 5.0423-11.25 11.255-11.25 6.2132 0 11.245 5.0368 11.245 11.25 0 6.2128-5.0317 11.25-11.245 11.25zm35.7958 0c-6.2132 0-11.2555-5.0372-11.2555-11.25 0-6.2132 5.0423-11.25 11.2555-11.25 6.2128 0 11.2445 5.0368 11.2445 11.25 0 6.2128-5.0318 11.25-11.2445 11.25z&quot;
+				/&gt;
+			&lt;/a&gt;
+		&lt;/svg&gt;
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 8</td>
+          <td><code>failed</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/1379913f0770843f89d37ceaad3a63e36f07924e.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		&lt;span style=&quot;text-align:center;&quot;&gt;Contact us&lt;/span&gt;
+		&lt;span style=&quot;display:flex; justify-content:space-around;&quot;&gt;
+			&lt;img src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/shared/chat.png&quot; alt=&quot;Chat&quot; style=&quot;max-width:50px;&quot; /&gt;
+			&lt;img src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/shared/phone.png&quot; alt=&quot;Phone&quot; style=&quot;max-width:50px;&quot; /&gt;
+		&lt;/span&gt;
+		&lt;span style=&quot;display:flex; justify-content:space-around;&quot;&gt;
+			&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html&quot;&gt;Contact Us&lt;/a&gt;
+			&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/redirect1.html&quot;&gt;Contact Us&lt;/a&gt;
+		&lt;/span&gt;
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 1</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/547d69dca1d88658ee7036136b8cd29e05a28823.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;a&gt;Link text&lt;/a&gt;
+	&lt;area aria-label=&quot;Link text&quot; /&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 2</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/4902c330569df88302c98581dcd6c1a449e72783.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/about/contact.html&quot;&gt;Reach out&lt;/a&gt;
+		&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/about/contact.html&quot;&gt;Contact us&lt;/a&gt;
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 3</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/3d342b4c04e69cdfaa26d6258275ec9807903d56.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;ul&gt;
+		&lt;li&gt;
+			To learn more about us:
+			&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html&quot;&gt;Contact us&lt;/a&gt;
+		&lt;/li&gt;
+		&lt;li&gt;
+			To get in touch with us:
+			&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html&quot;&gt;Contact us&lt;/a&gt;
+		&lt;/li&gt;
+	&lt;/ul&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 4</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/ea07736554f372e47c098f3cb946d0bbbbd22d82.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		Learn more (&lt;span
+			onclick=&quot;location='/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/page1.html'&quot;
+			&gt;Contact Us &lt;/span
+		&gt;) and get in touch (&lt;span
+			onclick=&quot;location='/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/page2.html'&quot;
+			&gt;Contact Us &lt;/span
+		&gt;)
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 5</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/a799c111fc2dd2b2e6dade9bf227790d8cb33f68.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;div&gt;
+		You can learn more in the
+		&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html&quot;&gt;Contact us&lt;/a&gt; page.
+	&lt;/div&gt;
+	&lt;div&gt;
+		You can learn more in the
+		&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/links-with-identical-names-serve-equivalent-purpose-b20e66/index.html&quot;&gt;Contact us&lt;/a&gt; page.
+	&lt;/div&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Inapplicable Example 6</td>
+          <td><code>inapplicable</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>LINK_STOPWORD, LINK_STOPWORD, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/58087cbeb108ebf723ffc232c9996123a6eb168b.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div&gt;&lt;a href=&quot;https://www.w3.org/WAI/&quot;&gt;Read more&lt;/a&gt; about the W3C WAI&lt;/div&gt;
+	&lt;div&gt;&lt;a href=&quot;https://www.w3.org/International/&quot;&gt;Read more&lt;/a&gt; about the W3C internationalization&lt;/div&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 7</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HIDDEN_FOCUSABLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/9abd9bcfa7c5eb5000df1bd7e72440c6233566a5.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		We are on social media:
+		&lt;a href=&quot;https://act-rules.github.io/&quot;&gt;ACT rules&lt;/a&gt;
+		&lt;a aria-hidden=&quot;true&quot; href=&quot;https://www.w3.org/community/act-r/&quot;&gt;ACT rules&lt;/a&gt;
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
           </tbody>
         </table>
       </section>
