@@ -42,7 +42,7 @@
 
   <div class="summary">
     <div class="stat">
-      <div class="number">26</div>
+      <div class="number">32</div>
       <div class="label">Rules Tested</div>
     </div>
     <div class="stat">
@@ -50,11 +50,11 @@
       <div class="label">Fully Consistent</div>
     </div>
     <div class="stat">
-      <div class="number">306/434</div>
+      <div class="number">329/485</div>
       <div class="label">Test Cases Consistent</div>
     </div>
     <div class="stat">
-      <div class="number">71%</div>
+      <div class="number">68%</div>
       <div class="label">Overall Rate</div>
     </div>
   </div>
@@ -882,6 +882,194 @@
 
 			shadow.appendChild(template.content)
 		&lt;/script&gt;</code></pre></details></td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="rule-section partial">
+        <h3>
+          <span class="rule-status partial">55%</span>
+          Audio element content has transcript
+          <small>(2eb176)</small>
+        </h3>
+        <p class="rule-meta">
+          ARIA &middot;
+          Coverage: <strong>todo</strong> &middot;
+          6/11 consistent
+          <br><em>Ed11y flags audio elements for manual review. Cannot verify transcript presence. EMBED_AUDIO fires equally on failed and passed cases (zero signal).</em>
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Test Case</th>
+              <th>Expected</th>
+              <th>Matched Keys</th>
+              <th>All Ed11y Results</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 1</td>
+          <td><code>passed</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2eb176/85c98d1402dbc9c68ace2fbf5f063d145b8e5bd7.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; controls&gt;&lt;/audio&gt;
+	&lt;p&gt;
+		The above audio contains the following speech: We choose to go to the moon in this decade and do the other things,
+		not because they are easy, but because they are hard, because that goal will serve to organize and measure the best
+		of our energies and skills, because that challenge is one that we are willing to accept, one we are unwilling to
+		postpone, and one which we intend to win, and the others, too.
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 2</td>
+          <td><code>passed</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2eb176/d24c583b4697496be0aba15c259714da93ac209c.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; controls&gt;&lt;/audio&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech-transcript.html&quot;&gt;Transcript&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 3</td>
+          <td><code>passed</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2eb176/3d78bf5e3f2b717595db4df064b0ec542bae0d9b.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; autoplay&gt;&lt;/audio&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech-transcript.html&quot;&gt;Transcript&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 1</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2eb176/7cdf59c28089794dbbd75d81f29fb9adb9327cb2.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; controls&gt;&lt;/audio&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 2</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2eb176/58cd3c1ef1ce88b7878c9e11c4f610486faefbf6.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; controls&gt;&lt;/audio&gt;
+	&lt;p&gt;
+		The above audio contains the following speech: We choose to go to the cheese in this decade and do the other things,
+		not because they are easy, but because they are hard, because that goal will serve to organize and measure the best
+		of our energies and skills, because that challenge is one that we are willing to accept, one we are unwilling to
+		postpone, and one which we intend to win, and the others, too.
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 3</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2eb176/3a018f7d638bd2993d176f341edaee79fda3d55a.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; controls&gt;&lt;/audio&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech-incorrect-transcript.html&quot;&gt;Transcript&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 4</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2eb176/ff5548c1341eb4edc32a87d9a018d425a5a065e3.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; autoplay&gt;&lt;/audio&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech-incorrect-transcript.html&quot;&gt;Transcript&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 5</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2eb176/06b6ada6383efa2ffeaf67370b177090dfcdf5e1.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; controls&gt;&lt;/audio&gt;
+	&lt;p style=&quot;text-indent: -9999px;&quot;&gt;
+		The above audio contains the following speech: We choose to go to the moon in this decade and do the other things,
+		not because they are easy, but because they are hard, because that goal will serve to organize and measure the best
+		of our energies and skills, because that challenge is one that we are willing to accept, one we are unwilling to
+		postpone, and one which we intend to win, and the others, too.
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 6</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2eb176/d58c6252f96771666f71a65d199316108e709edd.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; controls&gt;&lt;/audio&gt;
+	&lt;p aria-hidden=&quot;true&quot;&gt;
+		The above audio contains the following speech: We choose to go to the moon in this decade and do the other things,
+		not because they are easy, but because they are hard, because that goal will serve to organize and measure the best
+		of our energies and skills, because that challenge is one that we are willing to accept, one we are unwilling to
+		postpone, and one which we intend to win, and the others, too.
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Inapplicable Example 1</td>
+          <td><code>inapplicable</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2eb176/eba170767ac1de0092d33a9bee2c0ecf2ebdfd46.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot;&gt;&lt;/audio&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Inapplicable Example 2</td>
+          <td><code>inapplicable</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/2eb176/381f800e41c8f1e72f1164ff0877bbb8446dc55d.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; controls style=&quot;display: none;&quot;&gt;&lt;/audio&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
           </tbody>
         </table>
       </section>
@@ -4384,6 +4572,189 @@
           </tbody>
         </table>
       </section>
+      <section class="rule-section inconsistent">
+        <h3>
+          <span class="rule-status inconsistent">44%</span>
+          Video element visual-only content has accessible alternative
+          <small>(c3232f)</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG 1.2.1 &middot;
+          Coverage: <strong>todo</strong> &middot;
+          4/9 consistent
+          <br><em>Ed11y flags video elements for manual review. Cannot verify alternative exists for visual-only content. Discovery: EMBED_VIDEO fires on 3/4 failed with near-zero signal.</em>
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Test Case</th>
+              <th>Expected</th>
+              <th>Matched Keys</th>
+              <th>All Ed11y Results</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 1</td>
+          <td><code>passed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c3232f/ce350e33e78f587703aa35b78fa319b9efe9291d.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;video controls&gt;
+  &lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/silent.mp4&quot; type=&quot;video/mp4&quot;&gt;&lt;/source&gt;
+  &lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/silent.webm&quot; type=&quot;video/webm&quot;&gt;&lt;/source&gt;
+&lt;/video&gt;
+&lt;p&gt;The above video shows a giant fat rabbit climbing out of a hole in the ground.
+He stretches, yawns, and then starts walking.
+Then he stops to scratch his bottom.&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 2</td>
+          <td><code>passed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c3232f/634bb07611c5d126e49caf4bfce8b6d50c872fce.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video controls&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/silent.mp4&quot; type=&quot;video/mp4&quot; /&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/silent.webm&quot; type=&quot;video/webm&quot; /&gt;
+	&lt;/video&gt;
+
+	&lt;audio controls&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/audio-description.mp3&quot; type=&quot;audio/mpeg&quot; /&gt;
+	&lt;/audio&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 3</td>
+          <td><code>passed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c3232f/481e55b81376491b363aab5c622e58fe6b63bace.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		Not being able to use your computer because your mouse doesn't work, is frustrating. Many people use only the
+		keyboard to navigate websites. Either through preference or circumstance. This is solved by keyboard compatibility.
+		Keyboard compatibility is described in WCAG. See the video below to watch the same information again in video form.
+	&lt;/p&gt;
+	&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video-with-captions-silent.mp4&quot; controls&gt;&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 1</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c3232f/5ed3a98f771c2069c1d4581ff5f85cc38d9b5ec0.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;video controls&gt;
+  &lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/silent.mp4&quot; type=&quot;video/mp4&quot;&gt;&lt;/source&gt;
+  &lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/silent.webm&quot; type=&quot;video/webm&quot;&gt;&lt;/source&gt;
+&lt;/video&gt;
+&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/incorrect-transcript.html&quot;&gt;Transcript&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 2</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c3232f/2e9bff37ba69e76a995b6339748eaad2f7a30aca.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video controls&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/silent.mp4&quot; type=&quot;video/mp4&quot; /&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/silent.webm&quot; type=&quot;video/webm&quot; /&gt;
+	&lt;/video&gt;
+
+	&lt;audio controls&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/incorrect-audio-description.mp3&quot; type=&quot;audio/mpeg&quot; /&gt;
+	&lt;/audio&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 3</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c3232f/0f884e5935b0e6b1bd809d550738772e32f439c5.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		Not being able to use your computer because your mouse doesn't work, is frustrating. Many people use only the
+		keyboard to navigate websites. Either through preference or circumstance. This is solved by keyboard compatibility.
+		Keyboard compatibility is described in WCAG.
+	&lt;/p&gt;
+	&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video-with-captions-silent.mp4&quot; controls&gt;&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Failed Example 4</td>
+          <td><code>failed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c3232f/91f0cca7d0cc5c6a757f72dbeed84bcc1b79625b.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video controls&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/silent.mp4&quot; type=&quot;video/mp4&quot; /&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/silent.webm&quot; type=&quot;video/webm&quot; /&gt;
+		&lt;track kind=&quot;descriptions&quot; src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/descriptions.vtt&quot; /&gt;
+	&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Inapplicable Example 1</td>
+          <td><code>inapplicable</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c3232f/91f5189004dff8c702eefb7214486bd18868fee1.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		Not being able to use your computer because your mouse doesn't work, is frustrating. Many people use only the
+		keyboard to navigate websites. Either through preference or circumstance. This is solved by keyboard compatibility.
+		Keyboard compatibility is described in WCAG. See the video below to watch the same information again in video form.
+	&lt;/p&gt;
+	&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video.mp4&quot; controls&gt;&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 2</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c3232f/dc2a0bf420d21c386d9a7027a888276c07271988.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video controls style=&quot;display: none;&quot;&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/silent.mp4&quot; type=&quot;video/mp4&quot; /&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/silent.webm&quot; type=&quot;video/webm&quot; /&gt;
+		&lt;track kind=&quot;descriptions&quot; src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/descriptions.vtt&quot; /&gt;
+	&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+          </tbody>
+        </table>
+      </section>
       <section class="rule-section partial">
         <h3>
           <span class="rule-status partial">68%</span>
@@ -4694,6 +5065,176 @@
         <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>See [&lt;a href=&quot;https://act-rules.github.io/&quot; role=&quot;doc-biblioref&quot;
 		&gt;&lt;img src=&quot;https://github.com/act-rules/act-rules.github.io/blob/develop/test-assets/shared/act-logo.png&quot; alt=&quot;&quot;/&gt;&lt;/a
 	&gt;]</code></pre></details></td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="rule-section inconsistent">
+        <h3>
+          <span class="rule-status inconsistent">33%</span>
+          Video element visual content has accessible alternative
+          <small>(c5a4ea)</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG 1.2.3, WCAG 1.2.5, WCAG 1.2.8 &middot;
+          Coverage: <strong>todo</strong> &middot;
+          3/9 consistent
+          <br><em>Ed11y flags video elements for manual review. Cannot verify audio description/transcript exists. Discovery: EMBED_VIDEO fires on 3/4 failed with negative signal (fires more on passed).</em>
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Test Case</th>
+              <th>Expected</th>
+              <th>Matched Keys</th>
+              <th>All Ed11y Results</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 1</td>
+          <td><code>passed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c5a4ea/830584542b47beaac2df52e84ceff7530be043fb.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video controls&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/video-with-voiceover.mp4&quot; type=&quot;video/mp4&quot; /&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/video-with-voiceover.webm&quot; type=&quot;video/webm&quot; /&gt;
+	&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 2</td>
+          <td><code>passed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c5a4ea/5168368fb6d8cc4ea41b679e312c84e283baea9f.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video controls&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/video.mp4&quot; type=&quot;video/mp4&quot; /&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/video.webm&quot; type=&quot;video/webm&quot; /&gt;
+	&lt;/video&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/transcript.html&quot;&gt;Transcript&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 3</td>
+          <td><code>passed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c5a4ea/91f5189004dff8c702eefb7214486bd18868fee1.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		Not being able to use your computer because your mouse doesn't work, is frustrating. Many people use only the
+		keyboard to navigate websites. Either through preference or circumstance. This is solved by keyboard compatibility.
+		Keyboard compatibility is described in WCAG. See the video below to watch the same information again in video form.
+	&lt;/p&gt;
+	&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video.mp4&quot; controls&gt;&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 1</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c5a4ea/4095c53d7b6550e5af6a9edf43ec7c803bc1e462.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video controls&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/video-with-incorrect-voiceover.mp4&quot; type=&quot;video/mp4&quot; /&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/video-with-incorrect-voiceover.webm&quot; type=&quot;video/webm&quot; /&gt;
+	&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 2</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c5a4ea/366b3437e37e58175a9edba0ce28a37e25d82902.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video controls&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/video.mp4&quot; type=&quot;video/mp4&quot; /&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/video.webm&quot; type=&quot;video/webm&quot; /&gt;
+	&lt;/video&gt;
+	&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/incorrect-transcript.html&quot;&gt;Transcript&lt;/a&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 3</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c5a4ea/4b86a2baaa324f721a4bf646b87993be599b82a1.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		Not being able to use your computer because your mouse doesn't work, is frustrating. Either through preference or
+		circumstance. This is solved by keyboard compatibility. Keyboard compatibility is described in WCAG. See the video
+		below to watch the same information again in video form.
+	&lt;/p&gt;
+	&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video.mp4&quot; controls&gt;&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Failed Example 4</td>
+          <td><code>failed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c5a4ea/92f8362bf7b6778410dd0a0f660918794c85df27.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video controls&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/video.mp4&quot; type=&quot;video/mp4&quot; /&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/video.webm&quot; type=&quot;video/webm&quot; /&gt;
+		&lt;track kind=&quot;descriptions&quot; src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/descriptions.vtt&quot; /&gt;
+	&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Inapplicable Example 1</td>
+          <td><code>inapplicable</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c5a4ea/8664da01669e891e6f0aa73cd85e71277961cc4c.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video controls&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/silent.mp4&quot; type=&quot;video/mp4&quot; /&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/silent.webm&quot; type=&quot;video/webm&quot; /&gt;
+	&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Inapplicable Example 2</td>
+          <td><code>inapplicable</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c5a4ea/1b605662e74aa7411e29dc56dfa4530efe95ae67.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video controls style=&quot;display: none;&quot;&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/video.mp4&quot; type=&quot;video/mp4&quot; /&gt;
+		&lt;source src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/rabbit-video/video.webm&quot; type=&quot;video/webm&quot; /&gt;
+	&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
           </tbody>
         </table>
       </section>
@@ -5333,6 +5874,410 @@
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/e086e5/1d9a4d0eba21c8bb02580c46142ec75842bd3557.html" target="_blank">W3C</a></td>
         </tr>
         <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;label&gt;Date of birth&lt;/label&gt; &lt;input type=&quot;date&quot; /&gt;</code></pre></details></td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="rule-section inconsistent">
+        <h3>
+          <span class="rule-status inconsistent">38%</span>
+          Audio element content has text alternative
+          <small>(e7aa44)</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG 1.2.1 &middot;
+          Coverage: <strong>todo</strong> &middot;
+          3/8 consistent
+          <br><em>Ed11y flags audio elements for manual review. Cannot verify that a text alternative exists. Discovery: EMBED_AUDIO fires on 2/2 failed but also 5 FP.</em>
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Test Case</th>
+              <th>Expected</th>
+              <th>Matched Keys</th>
+              <th>All Ed11y Results</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 1</td>
+          <td><code>passed</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/e7aa44/85c98d1402dbc9c68ace2fbf5f063d145b8e5bd7.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; controls&gt;&lt;/audio&gt;
+	&lt;p&gt;
+		The above audio contains the following speech: We choose to go to the moon in this decade and do the other things,
+		not because they are easy, but because they are hard, because that goal will serve to organize and measure the best
+		of our energies and skills, because that challenge is one that we are willing to accept, one we are unwilling to
+		postpone, and one which we intend to win, and the others, too.
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 2</td>
+          <td><code>passed</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/e7aa44/dedfb667190bd564527247550565cdea8ccefd3f.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		A part of a speech by John F. Kennedy: We choose to go to the moon in this decade and do the other things, not
+		because they are easy, but because they are hard, because that goal will serve to organize and measure the best of
+		our energies and skills, because that challenge is one that we are willing to accept, one we are unwilling to
+		postpone, and one which we intend to win, and the others, too.
+	&lt;/p&gt;
+	&lt;p&gt;
+		You can also listen to the audio file below to hear the above part of the speech.
+	&lt;/p&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; controls&gt;&lt;/audio&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 3</td>
+          <td><code>passed</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/e7aa44/fae177d6e342bce9e0b7ea3dad353d4253bd4e67.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; autoplay controls&gt;&lt;/audio&gt;
+	&lt;p&gt;
+		The above audio contains the following speech: We choose to go to the moon in this decade and do the other things,
+		not because they are easy, but because they are hard, because that goal will serve to organize and measure the best
+		of our energies and skills, because that challenge is one that we are willing to accept, one we are unwilling to
+		postpone, and one which we intend to win, and the others, too.
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 1</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/e7aa44/97850b2083474a9c7b9585c2a1cb16b85b370032.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; controls&gt;&lt;/audio&gt;
+	&lt;p&gt;
+		The above audio contains the following speech: We are going to the North Pole in this decade with puppies, not
+		because they are easy, but because they are cute, because that goal will serve to organize and measure the best of
+		our energies and skills, because that challenge is one that we are willing to accept, one we are unwilling to
+		postpone, and one which we intend to win, and the others, too.
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 2</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/e7aa44/ef13bb60f3547081df4e6e0e668ef5497644a734.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p style=&quot;display: none;&quot;&gt;
+		A part of a speech by John F. Kennedy: We choose to go to the moon in this decade and do the other things, not
+		because they are easy, but because they are hard, because that goal will serve to organize and measure the best of
+		our energies and skills, because that challenge is one that we are willing to accept, one we are unwilling to
+		postpone, and one which we intend to win, and the others, too.
+	&lt;/p&gt;
+	&lt;p&gt;
+		You can also listen to the audio file below to hear the above part of the speech.
+	&lt;/p&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; autoplay controls&gt;&lt;/audio&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Inapplicable Example 1</td>
+          <td><code>inapplicable</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/e7aa44/eba170767ac1de0092d33a9bee2c0ecf2ebdfd46.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot;&gt;&lt;/audio&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Inapplicable Example 2</td>
+          <td><code>inapplicable</code></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/e7aa44/1c9dada7fa918fd9cffdd6d4c3443107aee373f5.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		A part of a speech by John F. Kennedy: We choose to go to the moon in this decade and do the other things, not
+		because they are easy, but because they are hard, because that goal will serve to organize and measure the best of
+		our energies and skills, because that challenge is one that we are willing to accept, one we are unwilling to
+		postpone, and one which we intend to win, and the others, too.
+	&lt;/p&gt;
+	&lt;p&gt;
+		You can also listen to the audio file below to hear the above part of the speech.
+	&lt;/p&gt;
+	&lt;audio src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot; controls style=&quot;display: none;&quot;&gt;&lt;/audio&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Inapplicable Example 3</td>
+          <td><code>inapplicable</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/e7aa44/7162304a7c27feed90f68fdf4587c94cb47dd300.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		A part of a speech by John F. Kennedy: We choose to go to the moon in this decade and do the other things, not
+		because they are easy, but because they are hard, because that goal will serve to organize and measure the best of
+		our energies and skills, because that challenge is one that we are willing to accept, one we are unwilling to
+		postpone, and one which we intend to win, and the others, too.
+	&lt;/p&gt;
+	&lt;p&gt;
+		&lt;a href=&quot;/WAI/content-assets/wcag-act-rules/test-assets/moon-audio/moon-speech.mp3&quot;&gt;Download the speech as MP3&lt;/a&gt;
+	&lt;/p&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="rule-section partial">
+        <h3>
+          <span class="rule-status partial">50%</span>
+          Video element auditory content has accessible alternative
+          <small>(eac66b)</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG 1.2.2 &middot;
+          Coverage: <strong>todo</strong> &middot;
+          3/6 consistent
+          <br><em>Ed11y flags video elements for manual review. Cannot verify captions/alternatives exist. Discovery: EMBED_VIDEO fires on 2/2 failed with 3 FP.</em>
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Test Case</th>
+              <th>Expected</th>
+              <th>Matched Keys</th>
+              <th>All Ed11y Results</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 1</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/eac66b/9f640c8743b6ebee3942fc833f106984b5ee49bb.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video.mp4&quot; controls&gt;
+		&lt;track src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-caption.vtt&quot; kind=&quot;captions&quot; /&gt;
+	&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 2</td>
+          <td><code>passed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/eac66b/47dd719ce35a9aef8dddd58fc3b1c08956d92889.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		Web Accessibility Perspectives: Keyboard Accessibility. Not being able to use your computer because your mouse
+		doesn't work, is frustrating. Many people use only the keyboard to navigate websites. Either through preference or
+		circumstance. This is solved by keyboard compatibility. Keyboard compatibility is described in WCAG. See the video
+		below to watch the same information again in video form.
+	&lt;/p&gt;
+	&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video.mp4&quot; controls&gt;&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 1</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/eac66b/67da88481f2c979c57d48e085146a39938d6221a.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video.mp4&quot; controls&gt;&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 2</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/eac66b/4b86a2baaa324f721a4bf646b87993be599b82a1.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;p&gt;
+		Not being able to use your computer because your mouse doesn't work, is frustrating. Either through preference or
+		circumstance. This is solved by keyboard compatibility. Keyboard compatibility is described in WCAG. See the video
+		below to watch the same information again in video form.
+	&lt;/p&gt;
+	&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video.mp4&quot; controls&gt;&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Inapplicable Example 1</td>
+          <td><code>inapplicable</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/eac66b/13431678b898bf6d148b326375b719f4234cb741.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video.mp4&quot; controls style=&quot;display: none;&quot;&gt;&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Inapplicable Example 2</td>
+          <td><code>inapplicable</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/eac66b/4663502bcb6da984af2f46bbc105cb5b70d5a2b2.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+	&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video-silent.mp4&quot; controls&gt;&lt;/video&gt;
+&lt;/html&gt;</code></pre></details></td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="rule-section partial">
+        <h3>
+          <span class="rule-status partial">50%</span>
+          Video element auditory content has captions
+          <small>(f51b46)</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG 1.2.1 &middot;
+          Coverage: <strong>todo</strong> &middot;
+          4/8 consistent
+          <br><em>Ed11y flags video elements for manual review. Cannot verify captions exist. Discovery: EMBED_VIDEO fires on 3/4 failed with zero signal.</em>
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Test Case</th>
+              <th>Expected</th>
+              <th>Matched Keys</th>
+              <th>All Ed11y Results</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Passed Example 1</td>
+          <td><code>passed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/f51b46/107f5b9199edada98041895374e27e3c51fc6a3d.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video-with-captions.mp4&quot; controls&gt;&lt;/video&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Passed Example 2</td>
+          <td><code>passed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/f51b46/80bae3524849f9516dfdcdb647ecc44c6d439ac3.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video.mp4&quot; controls&gt;
+		&lt;track src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-caption.vtt&quot; kind=&quot;captions&quot; /&gt;
+	&lt;/video&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 1</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/f51b46/af732f8f4e215ef60d49f6ada1f513e8d9776aa1.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video.mp4&quot; controls&gt;&lt;/video&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Failed Example 2</td>
+          <td><code>failed</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/f51b46/b489643151f44cfeda7ad8356c1e46893c3d962c.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video.mp4&quot; controls&gt;
+		&lt;track src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-incorrect-caption.vtt&quot; kind=&quot;captions&quot; /&gt;
+	&lt;/video&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 3</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/f51b46/7a21303822a22edb9384d8956b95bcfe0c01a1fb.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;
+		The video below shows a man working on a keyboard. A voiceover is heard saying the following text: Web accessibility
+		perspectives. Keyboard compatibility. Not being able to use your computer because your mouse doesn't work, is
+		frustrating. Many people use only the keyboard to navigate websites. Either through preference or circumstance.
+	&lt;/p&gt;
+	&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video.mp4&quot; controls&gt;&lt;/video&gt;</code></pre></details></td></tr>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
+          <td>Failed Example 4</td>
+          <td><code>failed</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/f51b46/a4bf1f36113b22a1c9d34d7155269b72cf5721fc.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p id=&quot;text&quot;&gt;
+		The video below shows a man working on a keyboard. A voiceover is heard saying the following text: Web accessibility
+		perspectives. Keyboard compatibility. Not being able to use your computer because your mouse doesn't work, is
+		frustrating. Many people use only the keyboard to navigate websites. Either through preference or circumstance.
+	&lt;/p&gt;
+	&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video.mp4&quot; controls ariadescribedby=&quot;text&quot;&gt;&lt;/video&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Inapplicable Example 1</td>
+          <td><code>inapplicable</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/f51b46/38d4f61c98b1fe90c7e9c3d3eddd8d82f0596b53.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video-silent.mp4&quot; controls&gt;&lt;/video&gt;</code></pre></details></td></tr>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
+          <td>Inapplicable Example 2</td>
+          <td><code>inapplicable</code></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+          <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/f51b46/85f831671b50b4472c1a08a9108612c5d39571c2.html" target="_blank">W3C</a></td>
+        </tr>
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;video src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/perspective-video/perspective-video.mp4&quot; controls style=&quot;display: none;&quot;&gt;&lt;/video&gt;</code></pre></details></td></tr>
           </tbody>
         </table>
       </section>

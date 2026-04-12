@@ -110,11 +110,11 @@
       <div class="label">Partial</div>
     </div>
     <div class="stat">
-      <div class="number">7</div>
+      <div class="number">13</div>
       <div class="label">Todo</div>
     </div>
     <div class="stat">
-      <div class="number">67</div>
+      <div class="number">61</div>
       <div class="label">Unmapped</div>
     </div>
     <div class="stat">
@@ -3465,6 +3465,600 @@
           <td><a href="/testcases/afw4f7/8c33a0af471cc3c1abbb9f709afa6629b13daf3a.html?review=&amp;expected=failed&amp;keys=CONTRAST_ERROR%2CCONTRAST_WARNING&amp;rule=Text+has+minimum+contrast" target="_blank">Failed Example 11</a></td>
           <td><code></code></td>
           <td><code>HEADING_MISSING_ONE</code></td>
+        </tr></tbody>
+          </table>
+        </details>
+      </section>
+      <section class="rule-section todo" id="rule-e7aa44">
+        <h3>
+          <span class="status-badge todo">todo</span>
+          Audio element content has text alternative
+          <small>e7aa44 — proposed</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG: 1.2.1, G158 &middot; 3/8 consistent
+          &middot; Mapped keys: <code>EMBED_AUDIO</code>
+        </p>
+        <p class="notes"><em>Ed11y flags audio elements for manual review. Cannot verify that a text alternative exists. Discovery: EMBED_AUDIO fires on 2/2 failed but also 5 FP.</em></p>
+        
+        <div class="discovery-box">
+          <strong>Discovery signal:</strong><br><code>EMBED_AUDIO</code> 2/2 failed, signal 0.17 (5 FP)
+        </div>
+        
+        <details open>
+          <summary>8 test cases</summary>
+          <table>
+            <thead>
+              <tr>
+                <th>Result</th>
+                <th>Expected</th>
+                <th>Actual</th>
+                <th>Test Case</th>
+                <th>Matched Keys</th>
+                <th>All ed11y Results</th>
+              </tr>
+            </thead>
+            <tbody>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/e7aa44/85c98d1402dbc9c68ace2fbf5f063d145b8e5bd7.html?review=&amp;expected=passed&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Passed Example 1</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/e7aa44/dedfb667190bd564527247550565cdea8ccefd3f.html?review=&amp;expected=passed&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Passed Example 2</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/e7aa44/fae177d6e342bce9e0b7ea3dad353d4253bd4e67.html?review=&amp;expected=passed&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Passed Example 3</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/e7aa44/97850b2083474a9c7b9585c2a1cb16b85b370032.html?review=&amp;expected=failed&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Failed Example 1</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/e7aa44/ef13bb60f3547081df4e6e0e668ef5497644a734.html?review=&amp;expected=failed&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Failed Example 2</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-inapplicable">inapplicable</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/e7aa44/eba170767ac1de0092d33a9bee2c0ecf2ebdfd46.html?review=&amp;expected=inapplicable&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Inapplicable Example 1</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-inapplicable">inapplicable</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/e7aa44/1c9dada7fa918fd9cffdd6d4c3443107aee373f5.html?review=&amp;expected=inapplicable&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Inapplicable Example 2</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-inapplicable">inapplicable</code></td>
+          <td><code class="expected-passed">clear</code></td>
+          <td><a href="/testcases/e7aa44/7162304a7c27feed90f68fdf4587c94cb47dd300.html?review=&amp;expected=inapplicable&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Inapplicable Example 3</a></td>
+          <td><code></code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+        </tr></tbody>
+          </table>
+        </details>
+      </section>
+      <section class="rule-section todo" id="rule-2eb176">
+        <h3>
+          <span class="status-badge todo">todo</span>
+          Audio element content has transcript
+          <small>2eb176 — proposed</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG: (non-WCAG) &middot; 6/11 consistent
+          &middot; Mapped keys: <code>EMBED_AUDIO</code>
+        </p>
+        <p class="notes"><em>Ed11y flags audio elements for manual review. Cannot verify transcript presence. EMBED_AUDIO fires equally on failed and passed cases (zero signal).</em></p>
+        
+        
+        <details open>
+          <summary>11 test cases</summary>
+          <table>
+            <thead>
+              <tr>
+                <th>Result</th>
+                <th>Expected</th>
+                <th>Actual</th>
+                <th>Test Case</th>
+                <th>Matched Keys</th>
+                <th>All ed11y Results</th>
+              </tr>
+            </thead>
+            <tbody>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/2eb176/85c98d1402dbc9c68ace2fbf5f063d145b8e5bd7.html?review=&amp;expected=passed&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+transcript" target="_blank">Passed Example 1</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/2eb176/d24c583b4697496be0aba15c259714da93ac209c.html?review=&amp;expected=passed&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+transcript" target="_blank">Passed Example 2</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/2eb176/3d78bf5e3f2b717595db4df064b0ec542bae0d9b.html?review=&amp;expected=passed&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+transcript" target="_blank">Passed Example 3</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/2eb176/7cdf59c28089794dbbd75d81f29fb9adb9327cb2.html?review=&amp;expected=failed&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+transcript" target="_blank">Failed Example 1</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/2eb176/58cd3c1ef1ce88b7878c9e11c4f610486faefbf6.html?review=&amp;expected=failed&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+transcript" target="_blank">Failed Example 2</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/2eb176/3a018f7d638bd2993d176f341edaee79fda3d55a.html?review=&amp;expected=failed&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+transcript" target="_blank">Failed Example 3</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/2eb176/ff5548c1341eb4edc32a87d9a018d425a5a065e3.html?review=&amp;expected=failed&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+transcript" target="_blank">Failed Example 4</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/2eb176/06b6ada6383efa2ffeaf67370b177090dfcdf5e1.html?review=&amp;expected=failed&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+transcript" target="_blank">Failed Example 5</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/2eb176/d58c6252f96771666f71a65d199316108e709edd.html?review=&amp;expected=failed&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+transcript" target="_blank">Failed Example 6</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-inapplicable">inapplicable</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/2eb176/eba170767ac1de0092d33a9bee2c0ecf2ebdfd46.html?review=&amp;expected=inapplicable&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+transcript" target="_blank">Inapplicable Example 1</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-inapplicable">inapplicable</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/2eb176/381f800e41c8f1e72f1164ff0877bbb8446dc55d.html?review=&amp;expected=inapplicable&amp;keys=EMBED_AUDIO&amp;rule=Audio+element+content+has+transcript" target="_blank">Inapplicable Example 2</a></td>
+          <td><code>EMBED_AUDIO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO</code></td>
+        </tr></tbody>
+          </table>
+        </details>
+      </section>
+      <section class="rule-section todo" id="rule-eac66b">
+        <h3>
+          <span class="status-badge todo">todo</span>
+          Video element auditory content has accessible alternative
+          <small>eac66b — proposed</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG: 1.2.2, G87, G93, H95 &middot; 3/6 consistent
+          &middot; Mapped keys: <code>EMBED_VIDEO</code>
+        </p>
+        <p class="notes"><em>Ed11y flags video elements for manual review. Cannot verify captions/alternatives exist. Discovery: EMBED_VIDEO fires on 2/2 failed with 3 FP.</em></p>
+        
+        <div class="discovery-box">
+          <strong>Discovery signal:</strong><br><code>EMBED_VIDEO</code> 2/2 failed, signal 0.25 (3 FP)
+        </div>
+        
+        <details open>
+          <summary>6 test cases</summary>
+          <table>
+            <thead>
+              <tr>
+                <th>Result</th>
+                <th>Expected</th>
+                <th>Actual</th>
+                <th>Test Case</th>
+                <th>Matched Keys</th>
+                <th>All ed11y Results</th>
+              </tr>
+            </thead>
+            <tbody>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-passed">clear</code></td>
+          <td><a href="/testcases/eac66b/9f640c8743b6ebee3942fc833f106984b5ee49bb.html?review=&amp;expected=passed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+auditory+content+has+accessible+alternative" target="_blank">Passed Example 1</a></td>
+          <td><code></code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/eac66b/47dd719ce35a9aef8dddd58fc3b1c08956d92889.html?review=&amp;expected=passed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+auditory+content+has+accessible+alternative" target="_blank">Passed Example 2</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/eac66b/67da88481f2c979c57d48e085146a39938d6221a.html?review=&amp;expected=failed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+auditory+content+has+accessible+alternative" target="_blank">Failed Example 1</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/eac66b/4b86a2baaa324f721a4bf646b87993be599b82a1.html?review=&amp;expected=failed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+auditory+content+has+accessible+alternative" target="_blank">Failed Example 2</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-inapplicable">inapplicable</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/eac66b/13431678b898bf6d148b326375b719f4234cb741.html?review=&amp;expected=inapplicable&amp;keys=EMBED_VIDEO&amp;rule=Video+element+auditory+content+has+accessible+alternative" target="_blank">Inapplicable Example 1</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-inapplicable">inapplicable</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/eac66b/4663502bcb6da984af2f46bbc105cb5b70d5a2b2.html?review=&amp;expected=inapplicable&amp;keys=EMBED_VIDEO&amp;rule=Video+element+auditory+content+has+accessible+alternative" target="_blank">Inapplicable Example 2</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr></tbody>
+          </table>
+        </details>
+      </section>
+      <section class="rule-section todo" id="rule-f51b46">
+        <h3>
+          <span class="status-badge todo">todo</span>
+          Video element auditory content has captions
+          <small>f51b46 — proposed</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG: 1.2.1, G87, G93, H95 &middot; 4/8 consistent
+          &middot; Mapped keys: <code>EMBED_VIDEO</code>
+        </p>
+        <p class="notes"><em>Ed11y flags video elements for manual review. Cannot verify captions exist. Discovery: EMBED_VIDEO fires on 3/4 failed with zero signal.</em></p>
+        
+        
+        <details open>
+          <summary>8 test cases</summary>
+          <table>
+            <thead>
+              <tr>
+                <th>Result</th>
+                <th>Expected</th>
+                <th>Actual</th>
+                <th>Test Case</th>
+                <th>Matched Keys</th>
+                <th>All ed11y Results</th>
+              </tr>
+            </thead>
+            <tbody>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/f51b46/107f5b9199edada98041895374e27e3c51fc6a3d.html?review=&amp;expected=passed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Passed Example 1</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-passed">clear</code></td>
+          <td><a href="/testcases/f51b46/80bae3524849f9516dfdcdb647ecc44c6d439ac3.html?review=&amp;expected=passed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Passed Example 2</a></td>
+          <td><code></code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/f51b46/af732f8f4e215ef60d49f6ada1f513e8d9776aa1.html?review=&amp;expected=failed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Failed Example 1</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-passed">clear</code></td>
+          <td><a href="/testcases/f51b46/b489643151f44cfeda7ad8356c1e46893c3d962c.html?review=&amp;expected=failed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Failed Example 2</a></td>
+          <td><code></code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/f51b46/7a21303822a22edb9384d8956b95bcfe0c01a1fb.html?review=&amp;expected=failed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Failed Example 3</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/f51b46/a4bf1f36113b22a1c9d34d7155269b72cf5721fc.html?review=&amp;expected=failed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Failed Example 4</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-inapplicable">inapplicable</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/f51b46/38d4f61c98b1fe90c7e9c3d3eddd8d82f0596b53.html?review=&amp;expected=inapplicable&amp;keys=EMBED_VIDEO&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Inapplicable Example 1</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-inapplicable">inapplicable</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/f51b46/85f831671b50b4472c1a08a9108612c5d39571c2.html?review=&amp;expected=inapplicable&amp;keys=EMBED_VIDEO&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Inapplicable Example 2</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr></tbody>
+          </table>
+        </details>
+      </section>
+      <section class="rule-section todo" id="rule-c5a4ea">
+        <h3>
+          <span class="status-badge todo">todo</span>
+          Video element visual content has accessible alternative
+          <small>c5a4ea — proposed</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG: 1.2.3, 1.2.5, 1.2.8, G173, G69, G78, G8 &middot; 3/9 consistent
+          &middot; Mapped keys: <code>EMBED_VIDEO</code>
+        </p>
+        <p class="notes"><em>Ed11y flags video elements for manual review. Cannot verify audio description/transcript exists. Discovery: EMBED_VIDEO fires on 3/4 failed with negative signal (fires more on passed).</em></p>
+        
+        
+        <details open>
+          <summary>9 test cases</summary>
+          <table>
+            <thead>
+              <tr>
+                <th>Result</th>
+                <th>Expected</th>
+                <th>Actual</th>
+                <th>Test Case</th>
+                <th>Matched Keys</th>
+                <th>All ed11y Results</th>
+              </tr>
+            </thead>
+            <tbody>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c5a4ea/830584542b47beaac2df52e84ceff7530be043fb.html?review=&amp;expected=passed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Passed Example 1</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c5a4ea/5168368fb6d8cc4ea41b679e312c84e283baea9f.html?review=&amp;expected=passed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Passed Example 2</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c5a4ea/91f5189004dff8c702eefb7214486bd18868fee1.html?review=&amp;expected=passed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Passed Example 3</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c5a4ea/4095c53d7b6550e5af6a9edf43ec7c803bc1e462.html?review=&amp;expected=failed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Failed Example 1</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c5a4ea/366b3437e37e58175a9edba0ce28a37e25d82902.html?review=&amp;expected=failed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Failed Example 2</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c5a4ea/4b86a2baaa324f721a4bf646b87993be599b82a1.html?review=&amp;expected=failed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Failed Example 3</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-passed">clear</code></td>
+          <td><a href="/testcases/c5a4ea/92f8362bf7b6778410dd0a0f660918794c85df27.html?review=&amp;expected=failed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Failed Example 4</a></td>
+          <td><code></code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-inapplicable">inapplicable</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c5a4ea/8664da01669e891e6f0aa73cd85e71277961cc4c.html?review=&amp;expected=inapplicable&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Inapplicable Example 1</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-inapplicable">inapplicable</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c5a4ea/1b605662e74aa7411e29dc56dfa4530efe95ae67.html?review=&amp;expected=inapplicable&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Inapplicable Example 2</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr></tbody>
+          </table>
+        </details>
+      </section>
+      <section class="rule-section todo" id="rule-c3232f">
+        <h3>
+          <span class="status-badge todo">todo</span>
+          Video element visual-only content has accessible alternative
+          <small>c3232f — proposed</small>
+        </h3>
+        <p class="rule-meta">
+          WCAG: 1.2.1, G159, G166 &middot; 4/9 consistent
+          &middot; Mapped keys: <code>EMBED_VIDEO</code>
+        </p>
+        <p class="notes"><em>Ed11y flags video elements for manual review. Cannot verify alternative exists for visual-only content. Discovery: EMBED_VIDEO fires on 3/4 failed with near-zero signal.</em></p>
+        
+        
+        <details open>
+          <summary>9 test cases</summary>
+          <table>
+            <thead>
+              <tr>
+                <th>Result</th>
+                <th>Expected</th>
+                <th>Actual</th>
+                <th>Test Case</th>
+                <th>Matched Keys</th>
+                <th>All ed11y Results</th>
+              </tr>
+            </thead>
+            <tbody>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c3232f/ce350e33e78f587703aa35b78fa319b9efe9291d.html?review=&amp;expected=passed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Passed Example 1</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c3232f/634bb07611c5d126e49caf4bfce8b6d50c872fce.html?review=&amp;expected=passed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Passed Example 2</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-passed">passed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c3232f/481e55b81376491b363aab5c622e58fe6b63bace.html?review=&amp;expected=passed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Passed Example 3</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c3232f/5ed3a98f771c2069c1d4581ff5f85cc38d9b5ec0.html?review=&amp;expected=failed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Failed Example 1</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c3232f/2e9bff37ba69e76a995b6339748eaad2f7a30aca.html?review=&amp;expected=failed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Failed Example 2</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_AUDIO, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c3232f/0f884e5935b0e6b1bd809d550738772e32f439c5.html?review=&amp;expected=failed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Failed Example 3</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-failed">failed</code></td>
+          <td><code class="expected-passed">clear</code></td>
+          <td><a href="/testcases/c3232f/91f0cca7d0cc5c6a757f72dbeed84bcc1b79625b.html?review=&amp;expected=failed&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Failed Example 4</a></td>
+          <td><code></code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge fail">MISS</span></td>
+          <td><code class="expected-inapplicable">inapplicable</code></td>
+          <td><code class="expected-failed">flagged</code></td>
+          <td><a href="/testcases/c3232f/91f5189004dff8c702eefb7214486bd18868fee1.html?review=&amp;expected=inapplicable&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Inapplicable Example 1</a></td>
+          <td><code>EMBED_VIDEO</code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE, EMBED_VIDEO</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge pass">Correct</span></td>
+          <td><code class="expected-inapplicable">inapplicable</code></td>
+          <td><code class="expected-passed">clear</code></td>
+          <td><a href="/testcases/c3232f/dc2a0bf420d21c386d9a7027a888276c07271988.html?review=&amp;expected=inapplicable&amp;keys=EMBED_VIDEO&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Inapplicable Example 2</a></td>
+          <td><code></code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
         </tr></tbody>
           </table>
         </details>
@@ -6953,221 +7547,6 @@
           </table>
         </details>
       </section>
-      <section class="rule-section unmapped" id="rule-e7aa44">
-        <h3>
-          <span class="status-badge unmapped">unmapped</span>
-          Audio element content has text alternative
-          <small>e7aa44 — proposed</small>
-        </h3>
-        <p class="rule-meta">
-          WCAG: 1.2.1, G158 &middot; not tested
-          
-        </p>
-        
-        
-        <div class="discovery-box">
-          <strong>Discovery signal:</strong><br><code>EMBED_AUDIO</code> 2/2 failed, signal 0.17 (5 FP)
-        </div>
-        
-        <details>
-          <summary>8 test cases</summary>
-          <table>
-            <thead>
-              <tr>
-                <th>Result</th>
-                <th>Expected</th>
-                <th>Actual</th>
-                <th>Test Case</th>
-                <th>Matched Keys</th>
-                <th>All ed11y Results</th>
-              </tr>
-            </thead>
-            <tbody>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/e7aa44/85c98d1402dbc9c68ace2fbf5f063d145b8e5bd7.html?review=&amp;expected=passed&amp;keys=&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Passed Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/e7aa44/dedfb667190bd564527247550565cdea8ccefd3f.html?review=&amp;expected=passed&amp;keys=&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Passed Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/e7aa44/fae177d6e342bce9e0b7ea3dad353d4253bd4e67.html?review=&amp;expected=passed&amp;keys=&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Passed Example 3</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/e7aa44/97850b2083474a9c7b9585c2a1cb16b85b370032.html?review=&amp;expected=failed&amp;keys=&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Failed Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/e7aa44/ef13bb60f3547081df4e6e0e668ef5497644a734.html?review=&amp;expected=failed&amp;keys=&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Failed Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/e7aa44/eba170767ac1de0092d33a9bee2c0ecf2ebdfd46.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Inapplicable Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/e7aa44/1c9dada7fa918fd9cffdd6d4c3443107aee373f5.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Inapplicable Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/e7aa44/7162304a7c27feed90f68fdf4587c94cb47dd300.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Audio+element+content+has+text+alternative" target="_blank">Inapplicable Example 3</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr></tbody>
-          </table>
-        </details>
-      </section>
-      <section class="rule-section unmapped" id="rule-2eb176">
-        <h3>
-          <span class="status-badge unmapped">unmapped</span>
-          Audio element content has transcript
-          <small>2eb176 — proposed</small>
-        </h3>
-        <p class="rule-meta">
-          WCAG: (non-WCAG) &middot; not tested
-          
-        </p>
-        
-        
-        
-        <details>
-          <summary>11 test cases</summary>
-          <table>
-            <thead>
-              <tr>
-                <th>Result</th>
-                <th>Expected</th>
-                <th>Actual</th>
-                <th>Test Case</th>
-                <th>Matched Keys</th>
-                <th>All ed11y Results</th>
-              </tr>
-            </thead>
-            <tbody>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/2eb176/85c98d1402dbc9c68ace2fbf5f063d145b8e5bd7.html?review=&amp;expected=passed&amp;keys=&amp;rule=Audio+element+content+has+transcript" target="_blank">Passed Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/2eb176/d24c583b4697496be0aba15c259714da93ac209c.html?review=&amp;expected=passed&amp;keys=&amp;rule=Audio+element+content+has+transcript" target="_blank">Passed Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/2eb176/3d78bf5e3f2b717595db4df064b0ec542bae0d9b.html?review=&amp;expected=passed&amp;keys=&amp;rule=Audio+element+content+has+transcript" target="_blank">Passed Example 3</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/2eb176/7cdf59c28089794dbbd75d81f29fb9adb9327cb2.html?review=&amp;expected=failed&amp;keys=&amp;rule=Audio+element+content+has+transcript" target="_blank">Failed Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/2eb176/58cd3c1ef1ce88b7878c9e11c4f610486faefbf6.html?review=&amp;expected=failed&amp;keys=&amp;rule=Audio+element+content+has+transcript" target="_blank">Failed Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/2eb176/3a018f7d638bd2993d176f341edaee79fda3d55a.html?review=&amp;expected=failed&amp;keys=&amp;rule=Audio+element+content+has+transcript" target="_blank">Failed Example 3</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/2eb176/ff5548c1341eb4edc32a87d9a018d425a5a065e3.html?review=&amp;expected=failed&amp;keys=&amp;rule=Audio+element+content+has+transcript" target="_blank">Failed Example 4</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/2eb176/06b6ada6383efa2ffeaf67370b177090dfcdf5e1.html?review=&amp;expected=failed&amp;keys=&amp;rule=Audio+element+content+has+transcript" target="_blank">Failed Example 5</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/2eb176/d58c6252f96771666f71a65d199316108e709edd.html?review=&amp;expected=failed&amp;keys=&amp;rule=Audio+element+content+has+transcript" target="_blank">Failed Example 6</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/2eb176/eba170767ac1de0092d33a9bee2c0ecf2ebdfd46.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Audio+element+content+has+transcript" target="_blank">Inapplicable Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/2eb176/381f800e41c8f1e72f1164ff0877bbb8446dc55d.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Audio+element+content+has+transcript" target="_blank">Inapplicable Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr></tbody>
-          </table>
-        </details>
-      </section>
       <section class="rule-section unmapped" id="rule-afb423">
         <h3>
           <span class="status-badge unmapped">unmapped</span>
@@ -10375,181 +10754,6 @@
           </table>
         </details>
       </section>
-      <section class="rule-section unmapped" id="rule-eac66b">
-        <h3>
-          <span class="status-badge unmapped">unmapped</span>
-          Video element auditory content has accessible alternative
-          <small>eac66b — proposed</small>
-        </h3>
-        <p class="rule-meta">
-          WCAG: 1.2.2, G87, G93, H95 &middot; not tested
-          
-        </p>
-        
-        
-        <div class="discovery-box">
-          <strong>Discovery signal:</strong><br><code>EMBED_VIDEO</code> 2/2 failed, signal 0.25 (3 FP)
-        </div>
-        
-        <details>
-          <summary>6 test cases</summary>
-          <table>
-            <thead>
-              <tr>
-                <th>Result</th>
-                <th>Expected</th>
-                <th>Actual</th>
-                <th>Test Case</th>
-                <th>Matched Keys</th>
-                <th>All ed11y Results</th>
-              </tr>
-            </thead>
-            <tbody>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/eac66b/9f640c8743b6ebee3942fc833f106984b5ee49bb.html?review=&amp;expected=passed&amp;keys=&amp;rule=Video+element+auditory+content+has+accessible+alternative" target="_blank">Passed Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/eac66b/47dd719ce35a9aef8dddd58fc3b1c08956d92889.html?review=&amp;expected=passed&amp;keys=&amp;rule=Video+element+auditory+content+has+accessible+alternative" target="_blank">Passed Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/eac66b/67da88481f2c979c57d48e085146a39938d6221a.html?review=&amp;expected=failed&amp;keys=&amp;rule=Video+element+auditory+content+has+accessible+alternative" target="_blank">Failed Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/eac66b/4b86a2baaa324f721a4bf646b87993be599b82a1.html?review=&amp;expected=failed&amp;keys=&amp;rule=Video+element+auditory+content+has+accessible+alternative" target="_blank">Failed Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/eac66b/13431678b898bf6d148b326375b719f4234cb741.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Video+element+auditory+content+has+accessible+alternative" target="_blank">Inapplicable Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/eac66b/4663502bcb6da984af2f46bbc105cb5b70d5a2b2.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Video+element+auditory+content+has+accessible+alternative" target="_blank">Inapplicable Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr></tbody>
-          </table>
-        </details>
-      </section>
-      <section class="rule-section unmapped" id="rule-f51b46">
-        <h3>
-          <span class="status-badge unmapped">unmapped</span>
-          Video element auditory content has captions
-          <small>f51b46 — proposed</small>
-        </h3>
-        <p class="rule-meta">
-          WCAG: 1.2.1, G87, G93, H95 &middot; not tested
-          
-        </p>
-        
-        
-        
-        <details>
-          <summary>8 test cases</summary>
-          <table>
-            <thead>
-              <tr>
-                <th>Result</th>
-                <th>Expected</th>
-                <th>Actual</th>
-                <th>Test Case</th>
-                <th>Matched Keys</th>
-                <th>All ed11y Results</th>
-              </tr>
-            </thead>
-            <tbody>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/f51b46/107f5b9199edada98041895374e27e3c51fc6a3d.html?review=&amp;expected=passed&amp;keys=&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Passed Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/f51b46/80bae3524849f9516dfdcdb647ecc44c6d439ac3.html?review=&amp;expected=passed&amp;keys=&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Passed Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/f51b46/af732f8f4e215ef60d49f6ada1f513e8d9776aa1.html?review=&amp;expected=failed&amp;keys=&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Failed Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/f51b46/b489643151f44cfeda7ad8356c1e46893c3d962c.html?review=&amp;expected=failed&amp;keys=&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Failed Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/f51b46/7a21303822a22edb9384d8956b95bcfe0c01a1fb.html?review=&amp;expected=failed&amp;keys=&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Failed Example 3</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/f51b46/a4bf1f36113b22a1c9d34d7155269b72cf5721fc.html?review=&amp;expected=failed&amp;keys=&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Failed Example 4</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/f51b46/38d4f61c98b1fe90c7e9c3d3eddd8d82f0596b53.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Inapplicable Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/f51b46/85f831671b50b4472c1a08a9108612c5d39571c2.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Video+element+auditory+content+has+captions" target="_blank">Inapplicable Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr></tbody>
-          </table>
-        </details>
-      </section>
       <section class="rule-section unmapped" id="rule-ab4d13">
         <h3>
           <span class="status-badge unmapped">unmapped</span>
@@ -10630,108 +10834,6 @@
           <td><code class="expected-inapplicable">inapplicable</code></td>
           <td><span class="muted">—</span></td>
           <td><a href="/testcases/ab4d13/9ef7ab01f8a959d1343acbbaea8f512232e36343.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Video+element+content+is+media+alternative+for+text" target="_blank">Inapplicable Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr></tbody>
-          </table>
-        </details>
-      </section>
-      <section class="rule-section unmapped" id="rule-c5a4ea">
-        <h3>
-          <span class="status-badge unmapped">unmapped</span>
-          Video element visual content has accessible alternative
-          <small>c5a4ea — proposed</small>
-        </h3>
-        <p class="rule-meta">
-          WCAG: 1.2.3, 1.2.5, 1.2.8, G173, G69, G78, G8 &middot; not tested
-          
-        </p>
-        
-        
-        
-        <details>
-          <summary>9 test cases</summary>
-          <table>
-            <thead>
-              <tr>
-                <th>Result</th>
-                <th>Expected</th>
-                <th>Actual</th>
-                <th>Test Case</th>
-                <th>Matched Keys</th>
-                <th>All ed11y Results</th>
-              </tr>
-            </thead>
-            <tbody>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c5a4ea/830584542b47beaac2df52e84ceff7530be043fb.html?review=&amp;expected=passed&amp;keys=&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Passed Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c5a4ea/5168368fb6d8cc4ea41b679e312c84e283baea9f.html?review=&amp;expected=passed&amp;keys=&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Passed Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c5a4ea/91f5189004dff8c702eefb7214486bd18868fee1.html?review=&amp;expected=passed&amp;keys=&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Passed Example 3</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c5a4ea/4095c53d7b6550e5af6a9edf43ec7c803bc1e462.html?review=&amp;expected=failed&amp;keys=&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Failed Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c5a4ea/366b3437e37e58175a9edba0ce28a37e25d82902.html?review=&amp;expected=failed&amp;keys=&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Failed Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c5a4ea/4b86a2baaa324f721a4bf646b87993be599b82a1.html?review=&amp;expected=failed&amp;keys=&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Failed Example 3</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c5a4ea/92f8362bf7b6778410dd0a0f660918794c85df27.html?review=&amp;expected=failed&amp;keys=&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Failed Example 4</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c5a4ea/8664da01669e891e6f0aa73cd85e71277961cc4c.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Inapplicable Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c5a4ea/1b605662e74aa7411e29dc56dfa4530efe95ae67.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Video+element+visual+content+has+accessible+alternative" target="_blank">Inapplicable Example 2</a></td>
           <td><code></code></td>
           <td><code></code></td>
         </tr></tbody>
@@ -10904,108 +11006,6 @@
           <td><code class="expected-inapplicable">inapplicable</code></td>
           <td><span class="muted">—</span></td>
           <td><a href="/testcases/1ec09b/1b605662e74aa7411e29dc56dfa4530efe95ae67.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Video+element+visual+content+has+strict+accessible+alternative" target="_blank">Inapplicable Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr></tbody>
-          </table>
-        </details>
-      </section>
-      <section class="rule-section unmapped" id="rule-c3232f">
-        <h3>
-          <span class="status-badge unmapped">unmapped</span>
-          Video element visual-only content has accessible alternative
-          <small>c3232f — proposed</small>
-        </h3>
-        <p class="rule-meta">
-          WCAG: 1.2.1, G159, G166 &middot; not tested
-          
-        </p>
-        
-        
-        
-        <details>
-          <summary>9 test cases</summary>
-          <table>
-            <thead>
-              <tr>
-                <th>Result</th>
-                <th>Expected</th>
-                <th>Actual</th>
-                <th>Test Case</th>
-                <th>Matched Keys</th>
-                <th>All ed11y Results</th>
-              </tr>
-            </thead>
-            <tbody>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c3232f/ce350e33e78f587703aa35b78fa319b9efe9291d.html?review=&amp;expected=passed&amp;keys=&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Passed Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c3232f/634bb07611c5d126e49caf4bfce8b6d50c872fce.html?review=&amp;expected=passed&amp;keys=&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Passed Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-passed">passed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c3232f/481e55b81376491b363aab5c622e58fe6b63bace.html?review=&amp;expected=passed&amp;keys=&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Passed Example 3</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c3232f/5ed3a98f771c2069c1d4581ff5f85cc38d9b5ec0.html?review=&amp;expected=failed&amp;keys=&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Failed Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c3232f/2e9bff37ba69e76a995b6339748eaad2f7a30aca.html?review=&amp;expected=failed&amp;keys=&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Failed Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c3232f/0f884e5935b0e6b1bd809d550738772e32f439c5.html?review=&amp;expected=failed&amp;keys=&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Failed Example 3</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-failed">failed</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c3232f/91f0cca7d0cc5c6a757f72dbeed84bcc1b79625b.html?review=&amp;expected=failed&amp;keys=&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Failed Example 4</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c3232f/91f5189004dff8c702eefb7214486bd18868fee1.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Inapplicable Example 1</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
-        </tr>
-        <tr>
-          <td><span class="badge untested">—</span></td>
-          <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><span class="muted">—</span></td>
-          <td><a href="/testcases/c3232f/dc2a0bf420d21c386d9a7027a888276c07271988.html?review=&amp;expected=inapplicable&amp;keys=&amp;rule=Video+element+visual-only+content+has+accessible+alternative" target="_blank">Inapplicable Example 2</a></td>
           <td><code></code></td>
           <td><code></code></td>
         </tr></tbody>

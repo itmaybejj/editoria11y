@@ -415,6 +415,92 @@ export const actRuleMapping = {
     notes: 'Broader version of 5effbb (no context requirement). Ed11y catches links with only non-descriptive stopwords. 1/5 failed detected — only catches the most obvious non-descriptive patterns.',
     options: {},
   },
+
+  // ── Audio / Video ────────────────────────────────────────────────
+  // Ed11y flags the presence of audio/video elements as manual check prompts
+  // (e.g., "here's a video — does it have captions?"). It cannot verify
+  // whether captions/transcripts/audio descriptions actually exist.
+  // Signal is near-zero because EMBED_AUDIO/EMBED_VIDEO fire on both
+  // failed and passed test cases — ed11y detects the element, not the fix.
+
+  'e7aa44': {
+    ruleName: 'Audio element content has text alternative',
+    wcag: ['1.2.1'],
+    coverage: 'todo',
+    checkKeys: [
+      'EMBED_AUDIO',
+    ],
+    notes: 'Ed11y flags audio elements for manual review. Cannot verify that a text alternative exists. Discovery: EMBED_AUDIO fires on 2/2 failed but also 5 FP.',
+    options: {
+      embeddedContentPlugin: true,
+    },
+  },
+
+  '2eb176': {
+    ruleName: 'Audio element content has transcript',
+    wcag: [],
+    wcagNote: 'Non-WCAG rule',
+    coverage: 'todo',
+    checkKeys: [
+      'EMBED_AUDIO',
+    ],
+    notes: 'Ed11y flags audio elements for manual review. Cannot verify transcript presence. EMBED_AUDIO fires equally on failed and passed cases (zero signal).',
+    options: {
+      embeddedContentPlugin: true,
+    },
+  },
+
+  'eac66b': {
+    ruleName: 'Video element auditory content has accessible alternative',
+    wcag: ['1.2.2'],
+    coverage: 'todo',
+    checkKeys: [
+      'EMBED_VIDEO',
+    ],
+    notes: 'Ed11y flags video elements for manual review. Cannot verify captions/alternatives exist. Discovery: EMBED_VIDEO fires on 2/2 failed with 3 FP.',
+    options: {
+      embeddedContentPlugin: true,
+    },
+  },
+
+  'f51b46': {
+    ruleName: 'Video element auditory content has captions',
+    wcag: ['1.2.1'],
+    coverage: 'todo',
+    checkKeys: [
+      'EMBED_VIDEO',
+    ],
+    notes: 'Ed11y flags video elements for manual review. Cannot verify captions exist. Discovery: EMBED_VIDEO fires on 3/4 failed with zero signal.',
+    options: {
+      embeddedContentPlugin: true,
+    },
+  },
+
+  'c5a4ea': {
+    ruleName: 'Video element visual content has accessible alternative',
+    wcag: ['1.2.3', '1.2.5', '1.2.8'],
+    coverage: 'todo',
+    checkKeys: [
+      'EMBED_VIDEO',
+    ],
+    notes: 'Ed11y flags video elements for manual review. Cannot verify audio description/transcript exists. Discovery: EMBED_VIDEO fires on 3/4 failed with negative signal (fires more on passed).',
+    options: {
+      embeddedContentPlugin: true,
+    },
+  },
+
+  'c3232f': {
+    ruleName: 'Video element visual-only content has accessible alternative',
+    wcag: ['1.2.1'],
+    coverage: 'todo',
+    checkKeys: [
+      'EMBED_VIDEO',
+    ],
+    notes: 'Ed11y flags video elements for manual review. Cannot verify alternative exists for visual-only content. Discovery: EMBED_VIDEO fires on 3/4 failed with near-zero signal.',
+    options: {
+      embeddedContentPlugin: true,
+    },
+  },
 };
 
 /**
