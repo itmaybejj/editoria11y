@@ -365,6 +365,56 @@ export const actRuleMapping = {
       developerPlugin: true,
     },
   },
+
+  // ── Label in name ────────────────────────────────────────────────
+
+  '2ee8b8': {
+    ruleName: 'Visible label is part of accessible name',
+    wcag: ['2.5.3'],
+    coverage: 'partial',
+    checkKeys: [
+      'LABEL_IN_NAME',
+    ],
+    notes: 'Strong discovery signal (0.90). Ed11y checks if the visible label text is part of the accessible name. 5/5 failed detected with 1 false positive.',
+    options: {
+      developerPlugin: true,
+    },
+  },
+
+  // ── Link purpose (identical names) ───────────────────────────────
+
+  'fd3a94': {
+    ruleName: 'Links with identical accessible names and same context serve equivalent purpose',
+    wcag: ['2.4.4', '2.4.9'],
+    coverage: 'partial',
+    checkKeys: [
+      'LINK_IDENTICAL_NAME',
+    ],
+    notes: 'Ed11y flags links with identical accessible names. 7/8 failed detected. False positives occur on "same name, same purpose" passing cases where identical names ARE equivalent.',
+    options: {},
+  },
+
+  'b20e66': {
+    ruleName: 'Links with identical accessible names have equivalent purpose',
+    wcag: ['2.4.9'],
+    coverage: 'partial',
+    checkKeys: [
+      'LINK_IDENTICAL_NAME',
+    ],
+    notes: 'Broader version of fd3a94 (no context requirement). 5/6 failed detected. Same false positive pattern — identical names that do serve equivalent purpose.',
+    options: {},
+  },
+
+  'aizyf1': {
+    ruleName: 'Link is descriptive',
+    wcag: ['2.4.9'],
+    coverage: 'partial',
+    checkKeys: [
+      'LINK_STOPWORD',
+    ],
+    notes: 'Broader version of 5effbb (no context requirement). Ed11y catches links with only non-descriptive stopwords. 1/5 failed detected — only catches the most obvious non-descriptive patterns.',
+    options: {},
+  },
 };
 
 /**
