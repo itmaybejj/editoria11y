@@ -46,15 +46,15 @@
       <div class="label">Rules Tested</div>
     </div>
     <div class="stat">
-      <div class="number">5</div>
+      <div class="number">6</div>
       <div class="label">Fully Consistent</div>
     </div>
     <div class="stat">
-      <div class="number">329/485</div>
+      <div class="number">345/485</div>
       <div class="label">Test Cases Consistent</div>
     </div>
     <div class="stat">
-      <div class="number">68%</div>
+      <div class="number">71%</div>
       <div class="label">Overall Rate</div>
     </div>
   </div>
@@ -1431,15 +1431,15 @@
 	&lt;main&gt;
 		&lt;p id=&quot;main&quot;&gt;This is the main content.&lt;/p&gt;
 	&lt;/main&gt;</code></pre></details></td></tr>
-        <tr class="case-row pass">
-          <td class="status-cell pass">Consistent</td>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
           <td>Passed Example 3</td>
           <td><code>passed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/771c36b9967faec9926af86041d834b4a108a52e.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;See the description of &lt;a href=&quot;#desc&quot;&gt;this product&lt;/a&gt;.&lt;/p&gt;
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;See the description of &lt;a href=&quot;#desc&quot;&gt;this product&lt;/a&gt;.&lt;/p&gt;
 	
 	&lt;p id=&quot;desc&quot;&gt;This product consists of several web pages.&lt;/p&gt;</code></pre></details></td></tr>
         <tr class="case-row pass">
@@ -1453,15 +1453,15 @@
         <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;span role=&quot;link&quot; tabindex=&quot;0&quot; onclick=&quot;document.location+='#desc'&quot;&gt;See description of the product.&lt;/span&gt;
 	
 	&lt;p id=&quot;desc&quot;&gt;This product consists of several web pages.&lt;/p&gt;</code></pre></details></td></tr>
-        <tr class="case-row pass">
-          <td class="status-cell pass">Consistent</td>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
           <td>Passed Example 5</td>
           <td><code>passed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/b130285915a8ca42926a11553a5791f44b65d487.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;ul&gt;
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;ul&gt;
 		&lt;li&gt;
 			Ulysses
 			&lt;ul&gt;
@@ -1475,15 +1475,15 @@
 			&lt;/ul&gt;
 		&lt;/li&gt;
 	&lt;/ul&gt;</code></pre></details></td></tr>
-        <tr class="case-row pass">
-          <td class="status-cell pass">Consistent</td>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
           <td>Passed Example 6</td>
           <td><code>passed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/a1e9ff296f0728e180aeb920beacb26bf88ddb12.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;table&gt;
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;table&gt;
 		&lt;tr&gt;
 			&lt;th colspan=&quot;3&quot;&gt;Ulysses&lt;/th&gt;
 		&lt;/tr&gt;
@@ -1520,15 +1520,15 @@
 	&lt;main&gt;
 		&lt;p id=&quot;main&quot;&gt;This is the main content.&lt;/p&gt;
 	&lt;/main&gt;</code></pre></details></td></tr>
-        <tr class="case-row pass">
-          <td class="status-cell pass">Consistent</td>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
           <td>Passed Example 8</td>
           <td><code>passed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>HEADING_MISSING_ONE, TABLES_MISSING_HEADINGS</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE, TABLES_MISSING_HEADINGS</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/e4f70ef2843c6239d0bebe46b97a682bd901e749.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;table&gt;
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;table&gt;
 		&lt;tr&gt;
 			&lt;td&gt;
 				Download Ulysses in
@@ -1574,28 +1574,28 @@
         <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;#desc&quot;&gt;More&lt;/a&gt;
 	
 	&lt;p id=&quot;desc&quot;&gt;This product consists of several web pages.&lt;/p&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 2</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/bf3ba787eb7a6819ea1a6adccdfd1f30842ed788.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div role=&quot;link&quot; tabindex=&quot;0&quot; onclick=&quot;document.location+='#main'&quot;&gt;More&lt;/div&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div role=&quot;link&quot; tabindex=&quot;0&quot; onclick=&quot;document.location+='#main'&quot;&gt;More&lt;/div&gt;
 	
 	&lt;main&gt;
 		&lt;p id=&quot;main&quot;&gt;This is the main content.&lt;/p&gt;
 	&lt;/main&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 3</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>CONTRAST_WARNING_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>CONTRAST_WARNING_GRAPHIC, LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/e6a7c924092d2351c3a5b4361ccde7917ad23c66.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; x=&quot;0&quot; y=&quot;0&quot;&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; x=&quot;0&quot; y=&quot;0&quot;&gt;
 		&lt;a href=&quot;#main&quot;&gt;
 			&lt;text x=&quot;20&quot; y=&quot;20&quot;&gt;
 				Go
@@ -1606,29 +1606,29 @@
 	&lt;main&gt;
 		&lt;p id=&quot;main&quot;&gt;This is the main content.&lt;/p&gt;
 	&lt;/main&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 4</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/98f0638a038a244b0bde70ff316cde1be7ce9a3b.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;
 		The W3C held a workshop on June 9-10, 2005 at DERI Innsbruck (Austria), to gather information about potential
 		standardization work on Semantics in Web Services.
 	&lt;/p&gt;
 	
 	&lt;p&gt;&lt;a href=&quot;https://www.w3.org/2005/04/FSWS/workshop-report.html&quot;&gt;Workshop&lt;/a&gt;&lt;/p&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 5</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/5effbb/43730455b69439980b95151be477ca594e0d7556.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p style=&quot;font-weight: bold&quot;&gt;Ulysses&lt;/p&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p style=&quot;font-weight: bold&quot;&gt;Ulysses&lt;/p&gt;
 	&lt;ul&gt;
 		&lt;li&gt;&lt;a href=&quot;https://www.gutenberg.org/files/4300/4300-h/4300-h.htm&quot;&gt; HTML &lt;/a&gt;&lt;/li&gt;
 		&lt;li&gt;
@@ -1690,14 +1690,14 @@
       </section>
       <section class="rule-section partial">
         <h3>
-          <span class="rule-status partial">60%</span>
+          <span class="rule-status partial">80%</span>
           Element with aria-hidden has no content in sequential focus order
           <small>(6cfa84)</small>
         </h3>
         <p class="rule-meta">
           WCAG 4.1.2 &middot;
           Coverage: <strong>partial</strong> &middot;
-          9/15 consistent
+          12/15 consistent
           <br><em>Ed11y checks for aria-hidden focusable elements in images, links, buttons, and embeds. May not catch all element types the ACT rule covers.</em>
         </p>
         <table>
@@ -1742,15 +1742,15 @@
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/6cfa84/3c48f0e596f96b4bb701943356b6c179f41d383c.html" target="_blank">W3C</a></td>
         </tr>
         <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;input disabled aria-hidden=&quot;true&quot; /&gt;</code></pre></details></td></tr>
-        <tr class="case-row pass">
-          <td class="status-cell pass">Consistent</td>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
           <td>Passed Example 4</td>
           <td><code>passed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>BTN_ROLE_IN_NAME, QA_IN_PAGE_LINK, HEADING_MISSING_ONE</code></td>
+          <td><code>HIDDEN_FOCUSABLE</code></td>
+          <td><code>BTN_ROLE_IN_NAME, HIDDEN_FOCUSABLE, QA_IN_PAGE_LINK, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/6cfa84/d343bc6a2877b62d80153453c3781debc33e0b1d.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div
 		id=&quot;sampleModal&quot;
 		role=&quot;dialog&quot;
 		aria-label=&quot;Sample Modal&quot;
@@ -1798,37 +1798,37 @@
 		&lt;/svg&gt;
 		Hello ACT
 	&lt;/a&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 1</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
+          <td><code>HIDDEN_FOCUSABLE</code></td>
+          <td><code>HIDDEN_FOCUSABLE, LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/6cfa84/4e7955d592cbf361a55113fcd4524e979b16bb08.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div aria-hidden=&quot;true&quot;&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div aria-hidden=&quot;true&quot;&gt;
 		&lt;a href=&quot;/&quot; style=&quot;position:absolute; top:-999em&quot;&gt;Link&lt;/a&gt;
 	&lt;/div&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 2</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>LABELS_MISSING_LABEL, HEADING_MISSING_ONE</code></td>
+          <td><code>HIDDEN_FOCUSABLE</code></td>
+          <td><code>HIDDEN_FOCUSABLE, LABELS_MISSING_LABEL, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/6cfa84/2adaacc2f7b8d7a0d2d1496ad6f56aafd171f7fe.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div aria-hidden=&quot;true&quot;&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div aria-hidden=&quot;true&quot;&gt;
 		&lt;input aria-disabled=&quot;true&quot; /&gt;
 	&lt;/div&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 3</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>BTN_ROLE_IN_NAME, HEADING_MISSING_ONE</code></td>
+          <td><code>HIDDEN_FOCUSABLE</code></td>
+          <td><code>BTN_ROLE_IN_NAME, HIDDEN_FOCUSABLE, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/6cfa84/7d1d269e9ff9a8f396b2d638103379b6cf937225.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div aria-hidden=&quot;true&quot;&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div aria-hidden=&quot;true&quot;&gt;
 		&lt;div aria-hidden=&quot;false&quot;&gt;
 			&lt;button&gt;Some button&lt;/button&gt;
 		&lt;/div&gt;
@@ -1854,15 +1854,15 @@
 		&lt;summary&gt;Some button&lt;/summary&gt;
 		&lt;p&gt;Some details&lt;/p&gt;
 	&lt;/details&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 6</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>BTN_ROLE_IN_NAME, QA_IN_PAGE_LINK, HEADING_MISSING_ONE</code></td>
+          <td><code>HIDDEN_FOCUSABLE</code></td>
+          <td><code>BTN_ROLE_IN_NAME, HIDDEN_FOCUSABLE, QA_IN_PAGE_LINK, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/6cfa84/9812d828fef2da32081f4c0acce0c58912f071cb.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div
 		id=&quot;sampleModal&quot;
 		role=&quot;dialog&quot;
 		aria-label=&quot;Sample Modal&quot;
@@ -1939,15 +1939,15 @@
           </thead>
           <tbody>
             
-        <tr class="case-row pass">
-          <td class="status-cell pass">Consistent</td>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
           <td>Passed Example 1</td>
           <td><code>passed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>CONTRAST_ERROR_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>HEADING_MISSING_ONE, MISSING_ALT</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/7d6734/cc172d9a654d94e00505456845920c099fbabfa7.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;How many circles are there?&lt;/p&gt;
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;How many circles are there?&lt;/p&gt;
 	&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; role=&quot;img&quot; width=&quot;100&quot; height=&quot;100&quot;&gt;
 		&lt;title&gt;1 circle&lt;/title&gt;
 		&lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot; fill=&quot;yellow&quot;&gt;&lt;/circle&gt;
@@ -1973,65 +1973,65 @@
 			aria-label=&quot;1 circle&quot;
 		&gt;&lt;/circle&gt;
 	&lt;/svg&gt;</code></pre></details></td></tr>
-        <tr class="case-row pass">
-          <td class="status-cell pass">Consistent</td>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
           <td>Passed Example 3</td>
           <td><code>passed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>CONTRAST_ERROR_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>HEADING_MISSING_ONE, MISSING_ALT</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/7d6734/f2af674524641f89a409d5f91caf512b162d5778.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;How many circles are there?&lt;/p&gt;
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;How many circles are there?&lt;/p&gt;
 	&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; role=&quot;graphics-document&quot; width=&quot;100&quot; height=&quot;100&quot;&gt;
 		&lt;title&gt;1 circle&lt;/title&gt;
 		&lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot; fill=&quot;yellow&quot;&gt;&lt;/circle&gt;
 	&lt;/svg&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 1</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>HEADING_MISSING_ONE, MISSING_ALT</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/7d6734/2847ca922fa3564341094245c34ef3120167bc0b.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;How many circles are there?&lt;/p&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;How many circles are there?&lt;/p&gt;
 	&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; role=&quot;img&quot;&gt;
 		&lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot; stroke=&quot;green&quot; stroke-width=&quot;4&quot; fill=&quot;yellow&quot;&gt;&lt;/circle&gt;
 	&lt;/svg&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 2</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>CONTRAST_ERROR_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>HEADING_MISSING_ONE, MISSING_ALT</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/7d6734/e1724dd3a91aff66b84807df1b9dbbaeaf272189.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;How many circles are there?&lt;/p&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;How many circles are there?&lt;/p&gt;
 	&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; role=&quot;img&quot;&gt;
 		&lt;title&gt;&lt;/title&gt;
 		&lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot; fill=&quot;yellow&quot;&gt;&lt;/circle&gt;
 	&lt;/svg&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 3</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>HEADING_MISSING_ONE, MISSING_ALT</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/7d6734/c65600eae4b88d275675cb976ceac01b9a4f47e4.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;How many circles are there?&lt;/p&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;How many circles are there?&lt;/p&gt;
 	&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot;&gt;
 		&lt;circle role=&quot;graphics-symbol&quot; cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot; stroke=&quot;green&quot; stroke-width=&quot;4&quot; fill=&quot;yellow&quot;&gt;&lt;/circle&gt;
 	&lt;/svg&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 4</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>CONTRAST_WARNING_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>HEADING_MISSING_ONE, MISSING_ALT</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/7d6734/94396aaa5928a68aba7320ea3690ca6c302fdcab.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;How many circles are there?&lt;/p&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;How many circles are there?&lt;/p&gt;
 	&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; role=&quot;img&quot; width=&quot;100&quot; height=&quot;100&quot;&gt;
 		&lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot; fill=&quot;yellow&quot;&gt;&lt;/circle&gt;
 		&lt;text x=&quot;50%&quot; y=&quot;50%&quot; dominant-baseline=&quot;middle&quot; text-anchor=&quot;middle&quot;&gt;
@@ -2049,26 +2049,26 @@
         <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot;&gt;
 		&lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot; fill=&quot;yellow&quot;&gt;&lt;/circle&gt;
 	&lt;/svg&gt;</code></pre></details></td></tr>
-        <tr class="case-row pass">
-          <td class="status-cell pass">Consistent</td>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
           <td>Inapplicable Example 2</td>
           <td><code>inapplicable</code></td>
-          <td><code>(none)</code></td>
-          <td><code>CONTRAST_ERROR_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>HEADING_MISSING_ONE, MISSING_ALT</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/7d6734/b3c602b7aa172611a22304666dd8d81d6ce8d214.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; role=&quot;img&quot; aria-hidden=&quot;true&quot;&gt;
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; role=&quot;img&quot; aria-hidden=&quot;true&quot;&gt;
 		&lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot; fill=&quot;yellow&quot;&gt;&lt;/circle&gt;
 	&lt;/svg&gt;</code></pre></details></td></tr>
-        <tr class="case-row pass">
-          <td class="status-cell pass">Consistent</td>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
           <td>Inapplicable Example 3</td>
           <td><code>inapplicable</code></td>
-          <td><code>(none)</code></td>
-          <td><code>CONTRAST_ERROR_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>CONTRAST_ERROR_GRAPHIC, HEADING_MISSING_ONE, MISSING_ALT</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/7d6734/ec2a7a47c3850e8aacd971a445b90390b2ab73bb.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot;&gt;
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot;&gt;
 		&lt;circle role=&quot;graphics-object&quot; cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot; fill=&quot;yellow&quot;&gt;&lt;/circle&gt;
 	&lt;/svg&gt;</code></pre></details></td></tr>
           </tbody>
@@ -3081,16 +3081,16 @@
           </tbody>
         </table>
       </section>
-      <section class="rule-section partial">
+      <section class="rule-section consistent">
         <h3>
-          <span class="rule-status partial">67%</span>
+          <span class="rule-status consistent">100%</span>
           Link is descriptive
           <small>(aizyf1)</small>
         </h3>
         <p class="rule-meta">
           WCAG 2.4.9 &middot;
           Coverage: <strong>partial</strong> &middot;
-          8/12 consistent
+          12/12 consistent
           <br><em>Broader version of 5effbb (no context requirement). Ed11y catches links with only non-descriptive stopwords. 1/5 failed detected — only catches the most obvious non-descriptive patterns.</em>
         </p>
         <table>
@@ -3175,28 +3175,28 @@
         <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;a href=&quot;#desc&quot;&gt;More&lt;/a&gt;
 	
 	&lt;p id=&quot;desc&quot;&gt;This product consists of several web pages.&lt;/p&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 2</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/bf3ba787eb7a6819ea1a6adccdfd1f30842ed788.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div role=&quot;link&quot; tabindex=&quot;0&quot; onclick=&quot;document.location+='#main'&quot;&gt;More&lt;/div&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div role=&quot;link&quot; tabindex=&quot;0&quot; onclick=&quot;document.location+='#main'&quot;&gt;More&lt;/div&gt;
 	
 	&lt;main&gt;
 		&lt;p id=&quot;main&quot;&gt;This is the main content.&lt;/p&gt;
 	&lt;/main&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 3</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>CONTRAST_WARNING_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>CONTRAST_WARNING_GRAPHIC, LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/e6a7c924092d2351c3a5b4361ccde7917ad23c66.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; x=&quot;0&quot; y=&quot;0&quot;&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; x=&quot;0&quot; y=&quot;0&quot;&gt;
 		&lt;a href=&quot;#main&quot;&gt;
 			&lt;text x=&quot;20&quot; y=&quot;20&quot;&gt;
 				Go
@@ -3207,26 +3207,26 @@
 	&lt;main&gt;
 		&lt;p id=&quot;main&quot;&gt;This is the main content.&lt;/p&gt;
 	&lt;/main&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 4</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/771c36b9967faec9926af86041d834b4a108a52e.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;See the description of &lt;a href=&quot;#desc&quot;&gt;this product&lt;/a&gt;.&lt;/p&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;p&gt;See the description of &lt;a href=&quot;#desc&quot;&gt;this product&lt;/a&gt;.&lt;/p&gt;
 	
 	&lt;p id=&quot;desc&quot;&gt;This product consists of several web pages.&lt;/p&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 5</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/aizyf1/b130285915a8ca42926a11553a5791f44b65d487.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;ul&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;ul&gt;
 		&lt;li&gt;
 			Ulysses
 			&lt;ul&gt;
@@ -4360,16 +4360,16 @@
           </tbody>
         </table>
       </section>
-      <section class="rule-section inconsistent">
+      <section class="rule-section partial">
         <h3>
-          <span class="rule-status inconsistent">0%</span>
+          <span class="rule-status partial">69%</span>
           Meta element has no refresh delay (no exception)
           <small>(bisz58)</small>
         </h3>
         <p class="rule-meta">
           WCAG 2.2.4, WCAG 3.2.5 &middot;
           Coverage: <strong>full</strong> &middot;
-          0/13 consistent
+          9/13 consistent
           <br><em>Same ed11y check as bc659a. ACT has two rules for this with different WCAG mappings.</em>
         </p>
         <table>
@@ -4428,114 +4428,114 @@
 	&lt;meta http-equiv=&quot;refresh&quot; content=&quot;30&quot; /&gt;
 &lt;/head&gt;
 &lt;/html&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 2</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><em>no results</em></td>
+          <td><code>META_REFRESH</code></td>
+          <td><code>META_TITLE, META_REFRESH, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/bisz58/d0672e81d17313f7ef156f3bc6e43c68143a5f45.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
 	&lt;meta http-equiv=&quot;refresh&quot; content=&quot;72001; URL='https://w3.org'&quot; /&gt;
 &lt;/head&gt;
 &lt;/html&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Failed Example 3</td>
           <td><code>failed</code></td>
-          <td><code>(none)</code></td>
-          <td><em>no results</em></td>
+          <td><code>META_REFRESH</code></td>
+          <td><code>META_TITLE, META_REFRESH, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/bisz58/b8aad77e3ff2fa8d0272fac5362566ff79afad7f.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
 	&lt;meta http-equiv=&quot;refresh&quot; content=&quot;0: https://w3.org&quot; /&gt;
 	&lt;meta http-equiv=&quot;refresh&quot; content=&quot;72001; https://w3.org&quot; /&gt;
 &lt;/head&gt;
 &lt;/html&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Inapplicable Example 1</td>
           <td><code>inapplicable</code></td>
           <td><code>(none)</code></td>
-          <td><em>no results</em></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/bisz58/3761ce87e64549073f62df26071fbde9850e649e.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
 	&lt;meta http-equiv=&quot;refresh&quot; /&gt;
 &lt;/head&gt;
 &lt;/html&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Inapplicable Example 2</td>
           <td><code>inapplicable</code></td>
           <td><code>(none)</code></td>
-          <td><em>no results</em></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/bisz58/c73e036ba88dbbedf6b6a90b69328208eb1e14d0.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
 	&lt;meta content=&quot;72001&quot; /&gt;
 &lt;/head&gt;
 &lt;/html&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Inapplicable Example 3</td>
           <td><code>inapplicable</code></td>
           <td><code>(none)</code></td>
-          <td><em>no results</em></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/bisz58/31864b9243c7565e802c6b4f36faed5861a631d3.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
 	&lt;meta http-equiv=&quot;refresh&quot; content=&quot;0: http://example.com&quot; /&gt;
 &lt;/head&gt;
 &lt;/html&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Inapplicable Example 4</td>
           <td><code>inapplicable</code></td>
           <td><code>(none)</code></td>
-          <td><em>no results</em></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/bisz58/e6e51895cab42ee6adf2ade5b654808d830e673b.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
 	&lt;meta http-equiv=&quot;refresh&quot; content=&quot;-00.12 foo&quot; /&gt;
 &lt;/head&gt;
 &lt;/html&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Inapplicable Example 5</td>
           <td><code>inapplicable</code></td>
           <td><code>(none)</code></td>
-          <td><em>no results</em></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/bisz58/a32834c94a9dd1869e22ccfb0b7b753648c8d469.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
 	&lt;meta http-equiv=&quot;refresh&quot; content=&quot;; 72001&quot; /&gt;
 &lt;/head&gt;
 &lt;/html&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Inapplicable Example 6</td>
           <td><code>inapplicable</code></td>
           <td><code>(none)</code></td>
-          <td><em>no results</em></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/bisz58/c3cc2e9d19259f7a7ffa99818ac44d034127f01f.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
 	&lt;meta http-equiv=&quot;refresh&quot; content=&quot;&quot; /&gt;
@@ -4545,8 +4545,8 @@
           <td class="status-cell fail">INCONSISTENT</td>
           <td>Inapplicable Example 7</td>
           <td><code>inapplicable</code></td>
-          <td><code>(none)</code></td>
-          <td><em>no results</em></td>
+          <td><code>META_REFRESH</code></td>
+          <td><code>META_TITLE, META_REFRESH, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/bisz58/1846b9116a8563e653cee40753b4c904696851f9.html" target="_blank">W3C</a></td>
         </tr>
         <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
@@ -4555,15 +4555,15 @@
 	&lt;meta http-equiv=&quot;refresh&quot; content=&quot;+72001; http://w3.org&quot; /&gt;
 &lt;/head&gt;
 &lt;/html&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Inapplicable Example 8</td>
           <td><code>inapplicable</code></td>
           <td><code>(none)</code></td>
-          <td><em>no results</em></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/bisz58/0dcdacefc963adfbb2d3493e5468f8f12f0ac6de.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
 	&lt;meta http-equiv=&quot;refresh&quot; content=&quot;foo; URL='https://w3.org'&quot; /&gt;
@@ -4812,7 +4812,7 @@ Then he stops to scratch his bottom.&lt;/p&gt;
           <td>Passed Example 3</td>
           <td><code>passed</code></td>
           <td><code>(none)</code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_CLICK_HERE, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/c487ae/ada7438401aba500eb03f678b05b9821a758336a.html" target="_blank">W3C</a></td>
         </tr>
         <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;button role=&quot;link&quot; onclick=&quot;window.location.href='https://www.w3.org/WAI/'&quot;&gt;Click me for WAI!&lt;/button&gt;</code></pre></details></td></tr>
@@ -5359,7 +5359,7 @@ Then he stops to scratch his bottom.&lt;/p&gt;
           <td>Inapplicable Example 4</td>
           <td><code>inapplicable</code></td>
           <td><code>(none)</code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_GENERAL</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/cae760/058668cee446d08989bf24d5ce3413dc2cda9975.html" target="_blank">W3C</a></td>
         </tr>
         <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;iframe src=&quot;/WAI/content-assets/wcag-act-rules/test-assets/SC4-1-2-frame-doc.html&quot; role=&quot;none&quot;&gt; &lt;/iframe&gt;</code></pre></details></td></tr>
@@ -5607,14 +5607,14 @@ Then he stops to scratch his bottom.&lt;/p&gt;
       </section>
       <section class="rule-section partial">
         <h3>
-          <span class="rule-status partial">77%</span>
+          <span class="rule-status partial">82%</span>
           Form field has non-empty accessible name
           <small>(e086e5)</small>
         </h3>
         <p class="rule-meta">
           WCAG 1.3.1, WCAG 4.1.2 &middot;
           Coverage: <strong>partial</strong> &middot;
-          17/22 consistent
+          18/22 consistent
           <br><em>Ed11y checks common form inputs. ACT rule covers all form fields including select, textarea, and ARIA widget roles.</em>
         </p>
         <table>
@@ -5794,15 +5794,15 @@ Then he stops to scratch his bottom.&lt;/p&gt;
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/e086e5/43b93bc71597fdc7152a7920a78f27a3b27cf639.html" target="_blank">W3C</a></td>
         </tr>
         <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;input disabled aria-hidden=&quot;true&quot; aria-label=&quot;firstname&quot; /&gt;</code></pre></details></td></tr>
-        <tr class="case-row fail">
-          <td class="status-cell fail">INCONSISTENT</td>
+        <tr class="case-row pass">
+          <td class="status-cell pass">Consistent</td>
           <td>Inapplicable Example 3</td>
           <td><code>inapplicable</code></td>
-          <td><code>LABELS_MISSING_LABEL</code></td>
-          <td><code>LABELS_MISSING_LABEL, HEADING_MISSING_ONE</code></td>
+          <td><code>(none)</code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/e086e5/16a907322625e3b82c25f571eb9dd8fe897444f8.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;select role=&quot;none&quot; disabled&gt;
+        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;select role=&quot;none&quot; disabled&gt;
 		&lt;option value=&quot;volvo&quot;&gt;Volvo&lt;/option&gt;
 		&lt;option value=&quot;saab&quot;&gt;Saab&lt;/option&gt;
 		&lt;option value=&quot;opel&quot;&gt;Opel&lt;/option&gt;
@@ -6283,14 +6283,14 @@ Then he stops to scratch his bottom.&lt;/p&gt;
       </section>
       <section class="rule-section partial">
         <h3>
-          <span class="rule-status partial">67%</span>
+          <span class="rule-status partial">63%</span>
           Links with identical accessible names and same context serve equivalent purpose
           <small>(fd3a94)</small>
         </h3>
         <p class="rule-meta">
           WCAG 2.4.4, WCAG 2.4.9 &middot;
           Coverage: <strong>partial</strong> &middot;
-          16/24 consistent
+          15/24 consistent
           <br><em>Ed11y flags links with identical accessible names. 7/8 failed detected. False positives occur on &quot;same name, same purpose&quot; passing cases where identical names ARE equivalent.</em>
         </p>
         <table>
@@ -6772,15 +6772,15 @@ Then he stops to scratch his bottom.&lt;/p&gt;
         </tr>
         <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;div&gt;&lt;a href=&quot;https://www.w3.org/WAI/&quot;&gt;Read more&lt;/a&gt; about the W3C WAI&lt;/div&gt;
 	&lt;div&gt;&lt;a href=&quot;https://www.w3.org/International/&quot;&gt;Read more&lt;/a&gt; about the W3C internationalization&lt;/div&gt;</code></pre></details></td></tr>
-        <tr class="case-row pass">
-          <td class="status-cell pass">Consistent</td>
+        <tr class="case-row fail">
+          <td class="status-cell fail">INCONSISTENT</td>
           <td>Inapplicable Example 7</td>
           <td><code>inapplicable</code></td>
-          <td><code>(none)</code></td>
-          <td><code>META_TITLE, HIDDEN_FOCUSABLE, HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, HIDDEN_FOCUSABLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
           <td><a href="https://www.w3.org/WAI/content-assets/wcag-act-rules/testcases/fd3a94/9abd9bcfa7c5eb5000df1bd7e72440c6233566a5.html" target="_blank">W3C</a></td>
         </tr>
-        <tr class="snippet-row pass"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
+        <tr class="snippet-row fail"><td colspan="6"><details><summary>HTML source</summary><pre><code>&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 	&lt;p&gt;
 		We are on social media:

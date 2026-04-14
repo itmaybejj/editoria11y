@@ -1918,7 +1918,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:failed"
           },
           "test": {
             "title": "Link in context is descriptive",
@@ -1956,7 +1956,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:failed"
           },
           "test": {
             "title": "Link in context is descriptive",
@@ -1975,7 +1975,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:failed"
           },
           "test": {
             "title": "Link in context is descriptive",
@@ -2013,7 +2013,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:failed"
           },
           "test": {
             "title": "Link in context is descriptive",
@@ -2070,7 +2070,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Link in context is descriptive",
@@ -2089,7 +2089,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Link in context is descriptive",
@@ -2108,7 +2108,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Link in context is descriptive",
@@ -2127,7 +2127,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Link in context is descriptive",
@@ -2276,7 +2276,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:failed"
           },
           "test": {
             "title": "Element with aria-hidden has no content in sequential focus order",
@@ -2330,7 +2330,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Element with aria-hidden has no content in sequential focus order",
@@ -2348,7 +2348,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Element with aria-hidden has no content in sequential focus order",
@@ -2366,7 +2366,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Element with aria-hidden has no content in sequential focus order",
@@ -2420,7 +2420,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Element with aria-hidden has no content in sequential focus order",
@@ -2492,7 +2492,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:failed"
           },
           "test": {
             "title": "SVG element with explicit role has non-empty accessible name",
@@ -2528,7 +2528,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:failed"
           },
           "test": {
             "title": "SVG element with explicit role has non-empty accessible name",
@@ -2546,7 +2546,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "SVG element with explicit role has non-empty accessible name",
@@ -2564,7 +2564,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "SVG element with explicit role has non-empty accessible name",
@@ -2582,7 +2582,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "SVG element with explicit role has non-empty accessible name",
@@ -2600,7 +2600,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "SVG element with explicit role has non-empty accessible name",
@@ -2636,7 +2636,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:failed"
           },
           "test": {
             "title": "SVG element with explicit role has non-empty accessible name",
@@ -2654,7 +2654,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:failed"
           },
           "test": {
             "title": "SVG element with explicit role has non-empty accessible name",
@@ -4056,7 +4056,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Link is descriptive",
@@ -4074,7 +4074,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Link is descriptive",
@@ -4092,7 +4092,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Link is descriptive",
@@ -4110,7 +4110,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Link is descriptive",
@@ -5663,7 +5663,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:cantTell"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -5682,7 +5682,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:cantTell"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -5701,7 +5701,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:cantTell"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -5720,7 +5720,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:cantTell"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -5739,7 +5739,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:cantTell"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -5758,7 +5758,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:cantTell"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -5777,7 +5777,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:cantTell"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -5796,7 +5796,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:cantTell"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -5815,7 +5815,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:cantTell"
+            "outcome": "earl:failed"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -5834,7 +5834,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:cantTell"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Meta element has no refresh delay (no exception)",
@@ -7599,7 +7599,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:failed"
+            "outcome": "earl:passed"
           },
           "test": {
             "title": "Form field has non-empty accessible name",
@@ -8546,7 +8546,7 @@
         {
           "@type": "Assertion",
           "result": {
-            "outcome": "earl:passed"
+            "outcome": "earl:failed"
           },
           "test": {
             "title": "Links with identical accessible names and same context serve equivalent purpose",

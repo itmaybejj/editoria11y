@@ -148,7 +148,7 @@
           <small>6cfa84</small>
         </h3>
         <p class="rule-meta">
-          WCAG: 4.1.2 &middot; 9/15 consistent
+          WCAG: 4.1.2 &middot; 12/15 consistent
           &middot; Mapped keys: <code>HIDDEN_FOCUSABLE</code>
         </p>
         <p class="notes"><em>Ed11y checks for aria-hidden focusable elements in images, links, buttons, and embeds. May not catch all element types the ACT rule covers.</em></p>
@@ -193,12 +193,12 @@
           <td><code>LABELS_MISSING_LABEL, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge pass">Correct</span></td>
+          <td><span class="badge fail">MISS</span></td>
           <td><code class="expected-passed">passed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/6cfa84/d343bc6a2877b62d80153453c3781debc33e0b1d.html?review=&amp;expected=passed&amp;keys=HIDDEN_FOCUSABLE&amp;rule=Element+with+aria-hidden+has+no+content+in+sequential+focus+navigation" target="_blank">Passed Example 4</a></td>
-          <td><code></code></td>
-          <td><code>BTN_ROLE_IN_NAME, QA_IN_PAGE_LINK, HEADING_MISSING_ONE</code></td>
+          <td><code>HIDDEN_FOCUSABLE</code></td>
+          <td><code>BTN_ROLE_IN_NAME, HIDDEN_FOCUSABLE, QA_IN_PAGE_LINK, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
           <td><span class="badge pass">Correct</span></td>
@@ -217,28 +217,28 @@
           <td><code>QA_IN_PAGE_LINK, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/6cfa84/4e7955d592cbf361a55113fcd4524e979b16bb08.html?review=&amp;expected=failed&amp;keys=HIDDEN_FOCUSABLE&amp;rule=Element+with+aria-hidden+has+no+content+in+sequential+focus+navigation" target="_blank">Failed Example 1</a></td>
-          <td><code></code></td>
-          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
+          <td><code>HIDDEN_FOCUSABLE</code></td>
+          <td><code>HIDDEN_FOCUSABLE, LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/6cfa84/2adaacc2f7b8d7a0d2d1496ad6f56aafd171f7fe.html?review=&amp;expected=failed&amp;keys=HIDDEN_FOCUSABLE&amp;rule=Element+with+aria-hidden+has+no+content+in+sequential+focus+navigation" target="_blank">Failed Example 2</a></td>
-          <td><code></code></td>
-          <td><code>LABELS_MISSING_LABEL, HEADING_MISSING_ONE</code></td>
+          <td><code>HIDDEN_FOCUSABLE</code></td>
+          <td><code>HIDDEN_FOCUSABLE, LABELS_MISSING_LABEL, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/6cfa84/7d1d269e9ff9a8f396b2d638103379b6cf937225.html?review=&amp;expected=failed&amp;keys=HIDDEN_FOCUSABLE&amp;rule=Element+with+aria-hidden+has+no+content+in+sequential+focus+navigation" target="_blank">Failed Example 3</a></td>
-          <td><code></code></td>
-          <td><code>BTN_ROLE_IN_NAME, HEADING_MISSING_ONE</code></td>
+          <td><code>HIDDEN_FOCUSABLE</code></td>
+          <td><code>BTN_ROLE_IN_NAME, HIDDEN_FOCUSABLE, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
           <td><span class="badge fail">MISS</span></td>
@@ -257,12 +257,12 @@
           <td><code>HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/6cfa84/9812d828fef2da32081f4c0acce0c58912f071cb.html?review=&amp;expected=failed&amp;keys=HIDDEN_FOCUSABLE&amp;rule=Element+with+aria-hidden+has+no+content+in+sequential+focus+navigation" target="_blank">Failed Example 6</a></td>
-          <td><code></code></td>
-          <td><code>BTN_ROLE_IN_NAME, QA_IN_PAGE_LINK, HEADING_MISSING_ONE</code></td>
+          <td><code>HIDDEN_FOCUSABLE</code></td>
+          <td><code>BTN_ROLE_IN_NAME, HIDDEN_FOCUSABLE, QA_IN_PAGE_LINK, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
           <td><span class="badge pass">Correct</span></td>
@@ -298,7 +298,7 @@
           <small>e086e5</small>
         </h3>
         <p class="rule-meta">
-          WCAG: 1.3.1, 2.5.3, 4.1.2 &middot; 17/22 consistent
+          WCAG: 1.3.1, 2.5.3, 4.1.2 &middot; 18/22 consistent
           &middot; Mapped keys: <code>LABELS_MISSING_LABEL, LABELS_MISSING_IMAGE_INPUT, LABELS_NO_FOR_ATTRIBUTE</code>
         </p>
         <p class="notes"><em>Ed11y checks common form inputs. ACT rule covers all form fields including select, textarea, and ARIA widget roles.</em></p>
@@ -450,12 +450,12 @@
           <td><code>LABELS_ARIA_LABEL_INPUT, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><code class="expected-failed">flagged</code></td>
+          <td><code class="expected-passed">clear</code></td>
           <td><a href="/testcases/e086e5/16a907322625e3b82c25f571eb9dd8fe897444f8.html?review=&amp;expected=inapplicable&amp;keys=LABELS_MISSING_LABEL%2CLABELS_MISSING_IMAGE_INPUT%2CLABELS_NO_FOR_ATTRIBUTE&amp;rule=Form+field+has+non-empty+accessible+name" target="_blank">Inapplicable Example 3</a></td>
-          <td><code>LABELS_MISSING_LABEL</code></td>
-          <td><code>LABELS_MISSING_LABEL, HEADING_MISSING_ONE</code></td>
+          <td><code></code></td>
+          <td><code>HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
           <td><span class="badge pass">Correct</span></td>
@@ -1060,7 +1060,7 @@
           <td><code class="expected-passed">clear</code></td>
           <td><a href="/testcases/c487ae/ada7438401aba500eb03f678b05b9821a758336a.html?review=&amp;expected=passed&amp;keys=LINK_EMPTY%2CLINK_EMPTY_NO_LABEL%2CLINK_EMPTY_LABELLEDBY%2CLINK_IMAGE_NO_ALT_TEXT%2CLINK_UNPRONOUNCEABLE&amp;rule=Link+has+non-empty+accessible+name" target="_blank">Passed Example 3</a></td>
           <td><code></code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_CLICK_HERE, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
           <td><span class="badge pass">Correct</span></td>
@@ -1381,7 +1381,7 @@
           <td><code class="expected-passed">clear</code></td>
           <td><a href="/testcases/cae760/058668cee446d08989bf24d5ce3413dc2cda9975.html?review=&amp;expected=inapplicable&amp;keys=EMBED_MISSING_TITLE&amp;rule=Iframe+element+has+non-empty+accessible+name" target="_blank">Inapplicable Example 4</a></td>
           <td><code></code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>HEADING_MISSING_ONE, EMBED_GENERAL</code></td>
         </tr></tbody>
           </table>
         </details>
@@ -1433,12 +1433,12 @@
           <td><code>HEADING_MISSING_ONE, LINK_IMAGE_ALT</code></td>
         </tr>
         <tr>
-          <td><span class="badge pass">Correct</span></td>
+          <td><span class="badge fail">MISS</span></td>
           <td><code class="expected-passed">passed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/5effbb/771c36b9967faec9926af86041d834b4a108a52e.html?review=&amp;expected=passed&amp;keys=LINK_STOPWORD&amp;rule=Link+in+context+is+descriptive" target="_blank">Passed Example 3</a></td>
-          <td><code></code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
           <td><span class="badge pass">Correct</span></td>
@@ -1449,20 +1449,20 @@
           <td><code>HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge pass">Correct</span></td>
+          <td><span class="badge fail">MISS</span></td>
           <td><code class="expected-passed">passed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/5effbb/b130285915a8ca42926a11553a5791f44b65d487.html?review=&amp;expected=passed&amp;keys=LINK_STOPWORD&amp;rule=Link+in+context+is+descriptive" target="_blank">Passed Example 5</a></td>
-          <td><code></code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge pass">Correct</span></td>
+          <td><span class="badge fail">MISS</span></td>
           <td><code class="expected-passed">passed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/5effbb/a1e9ff296f0728e180aeb920beacb26bf88ddb12.html?review=&amp;expected=passed&amp;keys=LINK_STOPWORD&amp;rule=Link+in+context+is+descriptive" target="_blank">Passed Example 6</a></td>
-          <td><code></code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
           <td><span class="badge pass">Correct</span></td>
@@ -1473,12 +1473,12 @@
           <td><code>CONTRAST_WARNING_GRAPHIC, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge pass">Correct</span></td>
+          <td><span class="badge fail">MISS</span></td>
           <td><code class="expected-passed">passed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/5effbb/e4f70ef2843c6239d0bebe46b97a682bd901e749.html?review=&amp;expected=passed&amp;keys=LINK_STOPWORD&amp;rule=Link+in+context+is+descriptive" target="_blank">Passed Example 8</a></td>
-          <td><code></code></td>
-          <td><code>HEADING_MISSING_ONE, TABLES_MISSING_HEADINGS</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE, TABLES_MISSING_HEADINGS</code></td>
         </tr>
         <tr>
           <td><span class="badge pass">Correct</span></td>
@@ -1497,36 +1497,36 @@
           <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/5effbb/bf3ba787eb7a6819ea1a6adccdfd1f30842ed788.html?review=&amp;expected=failed&amp;keys=LINK_STOPWORD&amp;rule=Link+in+context+is+descriptive" target="_blank">Failed Example 2</a></td>
-          <td><code></code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/5effbb/e6a7c924092d2351c3a5b4361ccde7917ad23c66.html?review=&amp;expected=failed&amp;keys=LINK_STOPWORD&amp;rule=Link+in+context+is+descriptive" target="_blank">Failed Example 3</a></td>
-          <td><code></code></td>
-          <td><code>CONTRAST_WARNING_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>CONTRAST_WARNING_GRAPHIC, LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/5effbb/98f0638a038a244b0bde70ff316cde1be7ce9a3b.html?review=&amp;expected=failed&amp;keys=LINK_STOPWORD&amp;rule=Link+in+context+is+descriptive" target="_blank">Failed Example 4</a></td>
-          <td><code></code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/5effbb/43730455b69439980b95151be477ca594e0d7556.html?review=&amp;expected=failed&amp;keys=LINK_STOPWORD&amp;rule=Link+in+context+is+descriptive" target="_blank">Failed Example 5</a></td>
-          <td><code></code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
           <td><span class="badge pass">Correct</span></td>
@@ -1570,7 +1570,7 @@
           <small>aizyf1 — proposed</small>
         </h3>
         <p class="rule-meta">
-          WCAG: 2.4.9 &middot; 8/12 consistent
+          WCAG: 2.4.9 &middot; 12/12 consistent
           &middot; Mapped keys: <code>LINK_STOPWORD</code>
         </p>
         <p class="notes"><em>Broader version of 5effbb (no context requirement). Ed11y catches links with only non-descriptive stopwords. 1/5 failed detected — only catches the most obvious non-descriptive patterns.</em></p>
@@ -1634,36 +1634,36 @@
           <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/aizyf1/bf3ba787eb7a6819ea1a6adccdfd1f30842ed788.html?review=&amp;expected=failed&amp;keys=LINK_STOPWORD&amp;rule=Link+is+descriptive" target="_blank">Failed Example 2</a></td>
-          <td><code></code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/aizyf1/e6a7c924092d2351c3a5b4361ccde7917ad23c66.html?review=&amp;expected=failed&amp;keys=LINK_STOPWORD&amp;rule=Link+is+descriptive" target="_blank">Failed Example 3</a></td>
-          <td><code></code></td>
-          <td><code>CONTRAST_WARNING_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>CONTRAST_WARNING_GRAPHIC, LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/aizyf1/771c36b9967faec9926af86041d834b4a108a52e.html?review=&amp;expected=failed&amp;keys=LINK_STOPWORD&amp;rule=Link+is+descriptive" target="_blank">Failed Example 4</a></td>
-          <td><code></code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/aizyf1/b130285915a8ca42926a11553a5791f44b65d487.html?review=&amp;expected=failed&amp;keys=LINK_STOPWORD&amp;rule=Link+is+descriptive" target="_blank">Failed Example 5</a></td>
-          <td><code></code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_STOPWORD</code></td>
+          <td><code>LINK_STOPWORD, LINK_STOPWORD, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
           <td><span class="badge pass">Correct</span></td>
@@ -1699,7 +1699,7 @@
           <small>fd3a94 — proposed</small>
         </h3>
         <p class="rule-meta">
-          WCAG: 2.4.4, 2.4.9 &middot; 16/24 consistent
+          WCAG: 2.4.4, 2.4.9 &middot; 15/24 consistent
           &middot; Mapped keys: <code>LINK_IDENTICAL_NAME</code>
         </p>
         <p class="notes"><em>Ed11y flags links with identical accessible names. 7/8 failed detected. False positives occur on &quot;same name, same purpose&quot; passing cases where identical names ARE equivalent.</em></p>
@@ -1907,12 +1907,12 @@
           <td><code>LINK_STOPWORD, LINK_STOPWORD, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge pass">Correct</span></td>
+          <td><span class="badge fail">MISS</span></td>
           <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/fd3a94/9abd9bcfa7c5eb5000df1bd7e72440c6233566a5.html?review=&amp;expected=inapplicable&amp;keys=LINK_IDENTICAL_NAME&amp;rule=Links+with+identical+accessible+names+and+same+context+serve+equivalent+purpose" target="_blank">Inapplicable Example 7</a></td>
-          <td><code></code></td>
-          <td><code>META_TITLE, HIDDEN_FOCUSABLE, HEADING_MISSING_ONE</code></td>
+          <td><code>LINK_IDENTICAL_NAME</code></td>
+          <td><code>META_TITLE, HIDDEN_FOCUSABLE, LINK_IDENTICAL_NAME, HEADING_MISSING_ONE</code></td>
         </tr></tbody>
           </table>
         </details>
@@ -2769,12 +2769,12 @@
             </thead>
             <tbody>
         <tr>
-          <td><span class="badge pass">Correct</span></td>
+          <td><span class="badge fail">MISS</span></td>
           <td><code class="expected-passed">passed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/7d6734/cc172d9a654d94e00505456845920c099fbabfa7.html?review=&amp;expected=passed&amp;keys=MISSING_ALT&amp;rule=SVG+element+with+explicit+role+has+non-empty+accessible+name" target="_blank">Passed Example 1</a></td>
-          <td><code></code></td>
-          <td><code>CONTRAST_ERROR_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>HEADING_MISSING_ONE, MISSING_ALT</code></td>
         </tr>
         <tr>
           <td><span class="badge pass">Correct</span></td>
@@ -2785,44 +2785,44 @@
           <td><code>HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge pass">Correct</span></td>
+          <td><span class="badge fail">MISS</span></td>
           <td><code class="expected-passed">passed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/7d6734/f2af674524641f89a409d5f91caf512b162d5778.html?review=&amp;expected=passed&amp;keys=MISSING_ALT&amp;rule=SVG+element+with+explicit+role+has+non-empty+accessible+name" target="_blank">Passed Example 3</a></td>
-          <td><code></code></td>
-          <td><code>CONTRAST_ERROR_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>HEADING_MISSING_ONE, MISSING_ALT</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/7d6734/2847ca922fa3564341094245c34ef3120167bc0b.html?review=&amp;expected=failed&amp;keys=MISSING_ALT&amp;rule=SVG+element+with+explicit+role+has+non-empty+accessible+name" target="_blank">Failed Example 1</a></td>
-          <td><code></code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>HEADING_MISSING_ONE, MISSING_ALT</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/7d6734/e1724dd3a91aff66b84807df1b9dbbaeaf272189.html?review=&amp;expected=failed&amp;keys=MISSING_ALT&amp;rule=SVG+element+with+explicit+role+has+non-empty+accessible+name" target="_blank">Failed Example 2</a></td>
-          <td><code></code></td>
-          <td><code>CONTRAST_ERROR_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>HEADING_MISSING_ONE, MISSING_ALT</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/7d6734/c65600eae4b88d275675cb976ceac01b9a4f47e4.html?review=&amp;expected=failed&amp;keys=MISSING_ALT&amp;rule=SVG+element+with+explicit+role+has+non-empty+accessible+name" target="_blank">Failed Example 3</a></td>
-          <td><code></code></td>
-          <td><code>HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>HEADING_MISSING_ONE, MISSING_ALT</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/7d6734/94396aaa5928a68aba7320ea3690ca6c302fdcab.html?review=&amp;expected=failed&amp;keys=MISSING_ALT&amp;rule=SVG+element+with+explicit+role+has+non-empty+accessible+name" target="_blank">Failed Example 4</a></td>
-          <td><code></code></td>
-          <td><code>CONTRAST_WARNING_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>HEADING_MISSING_ONE, MISSING_ALT</code></td>
         </tr>
         <tr>
           <td><span class="badge pass">Correct</span></td>
@@ -2833,20 +2833,20 @@
           <td><code>CONTRAST_ERROR_GRAPHIC, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge pass">Correct</span></td>
+          <td><span class="badge fail">MISS</span></td>
           <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/7d6734/b3c602b7aa172611a22304666dd8d81d6ce8d214.html?review=&amp;expected=inapplicable&amp;keys=MISSING_ALT&amp;rule=SVG+element+with+explicit+role+has+non-empty+accessible+name" target="_blank">Inapplicable Example 2</a></td>
-          <td><code></code></td>
-          <td><code>CONTRAST_ERROR_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>HEADING_MISSING_ONE, MISSING_ALT</code></td>
         </tr>
         <tr>
-          <td><span class="badge pass">Correct</span></td>
+          <td><span class="badge fail">MISS</span></td>
           <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/7d6734/ec2a7a47c3850e8aacd971a445b90390b2ab73bb.html?review=&amp;expected=inapplicable&amp;keys=MISSING_ALT&amp;rule=SVG+element+with+explicit+role+has+non-empty+accessible+name" target="_blank">Inapplicable Example 3</a></td>
-          <td><code></code></td>
-          <td><code>CONTRAST_ERROR_GRAPHIC, HEADING_MISSING_ONE</code></td>
+          <td><code>MISSING_ALT</code></td>
+          <td><code>CONTRAST_ERROR_GRAPHIC, HEADING_MISSING_ONE, MISSING_ALT</code></td>
         </tr></tbody>
           </table>
         </details>
@@ -11962,7 +11962,7 @@
           <small>bisz58</small>
         </h3>
         <p class="rule-meta">
-          WCAG: 2.2.1, 2.2.4, 3.2.5, G110, H76 &middot; 0/13 consistent
+          WCAG: 2.2.1, 2.2.4, 3.2.5, G110, H76 &middot; 9/13 consistent
           &middot; Mapped keys: <code>META_REFRESH</code>
         </p>
         <p class="notes"><em>Same ed11y check as bc659a. ACT has two rules for this with different WCAG mappings.</em></p>
@@ -12010,84 +12010,84 @@
           <td><code></code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/bisz58/d0672e81d17313f7ef156f3bc6e43c68143a5f45.html?review=&amp;expected=failed&amp;keys=META_REFRESH&amp;rule=Meta+element+has+no+refresh+delay+%28no+exception%29" target="_blank">Failed Example 2</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
+          <td><code>META_REFRESH</code></td>
+          <td><code>META_TITLE, META_REFRESH, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-failed">failed</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/bisz58/b8aad77e3ff2fa8d0272fac5362566ff79afad7f.html?review=&amp;expected=failed&amp;keys=META_REFRESH&amp;rule=Meta+element+has+no+refresh+delay+%28no+exception%29" target="_blank">Failed Example 3</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
+          <td><code>META_REFRESH</code></td>
+          <td><code>META_TITLE, META_REFRESH, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-inapplicable">inapplicable</code></td>
           <td><code class="expected-passed">clear</code></td>
           <td><a href="/testcases/bisz58/3761ce87e64549073f62df26071fbde9850e649e.html?review=&amp;expected=inapplicable&amp;keys=META_REFRESH&amp;rule=Meta+element+has+no+refresh+delay+%28no+exception%29" target="_blank">Inapplicable Example 1</a></td>
           <td><code></code></td>
-          <td><code></code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-inapplicable">inapplicable</code></td>
           <td><code class="expected-passed">clear</code></td>
           <td><a href="/testcases/bisz58/c73e036ba88dbbedf6b6a90b69328208eb1e14d0.html?review=&amp;expected=inapplicable&amp;keys=META_REFRESH&amp;rule=Meta+element+has+no+refresh+delay+%28no+exception%29" target="_blank">Inapplicable Example 2</a></td>
           <td><code></code></td>
-          <td><code></code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-inapplicable">inapplicable</code></td>
           <td><code class="expected-passed">clear</code></td>
           <td><a href="/testcases/bisz58/31864b9243c7565e802c6b4f36faed5861a631d3.html?review=&amp;expected=inapplicable&amp;keys=META_REFRESH&amp;rule=Meta+element+has+no+refresh+delay+%28no+exception%29" target="_blank">Inapplicable Example 3</a></td>
           <td><code></code></td>
-          <td><code></code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-inapplicable">inapplicable</code></td>
           <td><code class="expected-passed">clear</code></td>
           <td><a href="/testcases/bisz58/e6e51895cab42ee6adf2ade5b654808d830e673b.html?review=&amp;expected=inapplicable&amp;keys=META_REFRESH&amp;rule=Meta+element+has+no+refresh+delay+%28no+exception%29" target="_blank">Inapplicable Example 4</a></td>
           <td><code></code></td>
-          <td><code></code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-inapplicable">inapplicable</code></td>
           <td><code class="expected-passed">clear</code></td>
           <td><a href="/testcases/bisz58/a32834c94a9dd1869e22ccfb0b7b753648c8d469.html?review=&amp;expected=inapplicable&amp;keys=META_REFRESH&amp;rule=Meta+element+has+no+refresh+delay+%28no+exception%29" target="_blank">Inapplicable Example 5</a></td>
           <td><code></code></td>
-          <td><code></code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-inapplicable">inapplicable</code></td>
           <td><code class="expected-passed">clear</code></td>
           <td><a href="/testcases/bisz58/c3cc2e9d19259f7a7ffa99818ac44d034127f01f.html?review=&amp;expected=inapplicable&amp;keys=META_REFRESH&amp;rule=Meta+element+has+no+refresh+delay+%28no+exception%29" target="_blank">Inapplicable Example 6</a></td>
           <td><code></code></td>
-          <td><code></code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
           <td><span class="badge fail">MISS</span></td>
           <td><code class="expected-inapplicable">inapplicable</code></td>
-          <td><code class="expected-passed">clear</code></td>
+          <td><code class="expected-failed">flagged</code></td>
           <td><a href="/testcases/bisz58/1846b9116a8563e653cee40753b4c904696851f9.html?review=&amp;expected=inapplicable&amp;keys=META_REFRESH&amp;rule=Meta+element+has+no+refresh+delay+%28no+exception%29" target="_blank">Inapplicable Example 7</a></td>
-          <td><code></code></td>
-          <td><code></code></td>
+          <td><code>META_REFRESH</code></td>
+          <td><code>META_TITLE, META_REFRESH, HEADING_MISSING_ONE</code></td>
         </tr>
         <tr>
-          <td><span class="badge fail">MISS</span></td>
+          <td><span class="badge pass">Correct</span></td>
           <td><code class="expected-inapplicable">inapplicable</code></td>
           <td><code class="expected-passed">clear</code></td>
           <td><a href="/testcases/bisz58/0dcdacefc963adfbb2d3493e5468f8f12f0ac6de.html?review=&amp;expected=inapplicable&amp;keys=META_REFRESH&amp;rule=Meta+element+has+no+refresh+delay+%28no+exception%29" target="_blank">Inapplicable Example 8</a></td>
           <td><code></code></td>
-          <td><code></code></td>
+          <td><code>META_TITLE, HEADING_MISSING_ONE</code></td>
         </tr></tbody>
           </table>
         </details>
