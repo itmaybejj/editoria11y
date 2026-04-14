@@ -494,7 +494,7 @@
 			* */
 			let beforeCall = performance.now();
 			let iterations = 1;
-			let runs = 50;
+			let runs = 4;
 			let average = 0;
 			let averageIterations = 1;
 			// Listen for event
@@ -506,26 +506,31 @@
 
 				if (iterations <= runs) {
 					window.setTimeout(() => {
-						const runLength = parseInt((performance.now() - beforeCall)) / (iterations);
-						if (runs - iterations === 5) {
-							average = runLength
-						}
-						if (average) {
-							average = average ? (average * (averageIterations) + runLength) / (averageIterations + 1) : runLength;
-							averageIterations++;
-							console.log(iterations + ': ' + runLength.toFixed(2) + 'ms run; ', average ? average.toFixed(2) + 'ms average;' : ' ');
-						}
-						else if (iterations.toString().endsWith('0') || iterations.toString().endsWith('5')) {
-							console.log(iterations + ': ' + runLength.toFixed(2) + 'ms run; ', average ? average.toFixed(2) + 'ms average;' : ' ');
+						if (iterations === 1) {
+							beforeCall = performance.now();
+						} else {
+							const runLength = parseInt((performance.now() - beforeCall)) / (iterations);
+							if (runs - iterations === 2) {
+								average = runLength
+							}
+							if (average) {
+								average = average ? (average * (averageIterations) + runLength) / (averageIterations + 1) : runLength;
+								averageIterations++;
+								console.log(iterations + ': ' + runLength.toFixed(2) + 'ms run; ', average ? average.toFixed(2) + 'ms average;' : ' ');
+							}
+							/*else if (iterations.toString().endsWith('0') || iterations.toString().endsWith('5')) {
+								console.log(iterations + ': ' + runLength.toFixed(2) + 'ms run; ', average ? average.toFixed(2) + 'ms average;' : ' ');
+							}*/
 						}
 
-						beforeCall = beforeCall + 200;
+
+						beforeCall = beforeCall + 1000;
 						iterations++;
 						Ed11y.reset();
 						Ed11y.UI.incremental = false;
 						Ed11y.UI.panelToggle.click();
 						//Ed11y.refresh();
-					}, 200);
+					}, 1000);
 				}
 			});
 
