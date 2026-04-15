@@ -30,6 +30,13 @@
 		"serve": "vite",
 		"dev": "npm run serve",
 		"test": "npx nightwatch tests --workers=4 --env=chrome",
+		"conformance:download": "node conformance/scripts/download-testcases.js",
+		"conformance:discover": "node conformance/scripts/discover-mappings.js",
+		"conformance:list": "node conformance/scripts/list-rules.js",
+		"conformance:test": "npx playwright test --config=conformance/playwright.config.js",
+		"conformance:report": "node conformance/scripts/generate-report.js && node conformance/scripts/generate-dev-report.js",
+		"conformance:dev-report": "node conformance/scripts/generate-dev-report.js",
+		"conformance": "npm run conformance:download && npm run conformance:test && npm run conformance:report && npm run conformance:dev-report",
 		"watch": "npm run build && chokidar \"./src/\" -i \"./src/js/version.js\" -c \"npm run build\""
 	},
 	"devDependencies": {

@@ -486,6 +486,54 @@
 		<script src="../dist/js/lang/de.umd.js"></script>
 		<script>
 
+			/*
+				* Performance tests
+				* */
+			/*
+			* Performance tests
+			* */
+			let beforeCall = performance.now();
+			let iterations = 1;
+			let runs = 4;
+			let average = 0;
+			let averageIterations = 1;
+			// Listen for event
+			document.addEventListener('ed11yResults', e => {
+				if (iterations === 1) {
+					console.log('2026-04-09 refactor took us from ~39ms to ~33ms average run; ~129 initial.')
+					console.log('results ready at: ' + parseInt(performance.now() - beforeCall));
+				}
+
+				if (iterations <= runs) {
+					window.setTimeout(() => {
+						if (iterations === 1) {
+							beforeCall = performance.now();
+						} else {
+							const runLength = parseInt((performance.now() - beforeCall)) / (iterations);
+							if (runs - iterations === 2) {
+								average = runLength
+							}
+							if (average) {
+								average = average ? (average * (averageIterations) + runLength) / (averageIterations + 1) : runLength;
+								averageIterations++;
+								console.log(iterations + ': ' + runLength.toFixed(2) + 'ms run; ', average ? average.toFixed(2) + 'ms average;' : ' ');
+							}
+							/*else if (iterations.toString().endsWith('0') || iterations.toString().endsWith('5')) {
+								console.log(iterations + ': ' + runLength.toFixed(2) + 'ms run; ', average ? average.toFixed(2) + 'ms average;' : ' ');
+							}*/
+						}
+
+
+						beforeCall = beforeCall + 1000;
+						iterations++;
+						Ed11y.reset();
+						Ed11y.UI.incremental = false;
+						Ed11y.UI.panelToggle.click();
+						//Ed11y.refresh();
+					}, 1000);
+				}
+			});
+
 			const editLinks = document.createElement('div');
 			const editIcon = document.createElement('span');
 			editIcon.classList.add('ed11y-custom-edit-icon');
@@ -508,6 +556,7 @@
 				})
 				console.log("Tests not on page", testsFound);*/
 			});
+
 			const ed11y = new Ed11y.Ed11y({
 				alertMode: 'assertive',
 				//baseFontSize: 18,

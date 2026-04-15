@@ -63,3 +63,19 @@ Language files in `src/lang/` (18+ languages). Each exports a translation object
 `tests/unit_tests.htm` — primary test page (false negatives + false positives)
 `tests/all_tests.cjs` — Nightwatch spec
 `nightwatch.conf.js` — test configuration (Chrome headless)
+
+### ACT Rule Conformance
+
+`conformance/` contains a W3C ACT Rules conformance test suite. It uses Playwright to inject ed11y in headless mode into standardized test case HTML pages and compare results against expected outcomes. The rule mapping in `conformance/mapping/act-rule-mapping.js` maps ACT rule IDs to ed11y check keys. Test cases and rule metadata are sourced from a shallow clone of the `w3c/wcag-act-rules` Git repo (cached in `conformance/.cache/repo/`). See DEVELOPMENT.md for full docs, or use `/map-act-rule` and `/conformance` commands.
+
+```bash
+npm run conformance:download    # Clone/update w3c/wcag-act-rules repo into .cache/
+npm run conformance:list        # List all ACT rules with mapping status
+npm run conformance:discover    # Run ed11y against ALL test cases to find mapping candidates
+npm run conformance:test        # Run conformance tests via Playwright
+npm run conformance:report      # Generate EARL + HTML reports
+npm run conformance:dev-report  # Generate dev report with all rules + review links
+npm run conformance             # Download + test + report (full pipeline)
+```
+
+The test case server (`node conformance/scripts/serve-testcases.js`) supports a `?review` parameter that injects ed11y into test case pages for manual review. The dev report links to these review URLs. Workflow: edit code, `npm run build`, refresh.

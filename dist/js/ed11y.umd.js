@@ -2065,34 +2065,7 @@ ${this.error.stack}
     }
     findShadowComponents(State.option);
     if (onlyForFilter) {
-      Elements.Found.Everything = find("*", "root", Constants.Exclusions.Sa11yElements);
-      Elements.Found.Contrast = Elements.Found.Everything.filter(($el) => {
-        const matchesSelector = Constants.Exclusions.Contrast.some(
-          (exclusion) => $el.matches(exclusion)
-        );
-        return !matchesSelector && !Constants.Exclusions.Contrast.includes($el);
-      });
-      Elements.Found.Images = Elements.Found.Everything.filter(
-        ($el) => $el.tagName === "IMG" && !Constants.Exclusions.Images.some((selector) => $el.matches(selector))
-      );
-      Elements.Found.Links = Elements.Found.Everything.filter(
-        ($el) => ($el.tagName === "A" || $el.tagName === "a") && $el.hasAttribute("href") && !$el.matches('[role="button"]') && // Exclude links with [role="button"]
-        !Constants.Exclusions.Links.some((selector) => $el.matches(selector))
-      );
-      Elements.Found.Headings = find(
-        'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
-        "root",
-        Constants.Exclusions.Headings
-      );
-      Elements.Found.ExcludedHeadings = Elements.Found.Headings.filter(
-        (heading) => Constants.Exclusions.Headings.some((exclusion) => heading.matches(exclusion))
-      );
-      Elements.Found.ExcludedOutlineHeadings = Elements.Found.Headings.filter(
-        (heading) => Constants.Exclusions.Outline.some((exclusion) => heading.matches(exclusion))
-      );
-      Elements.Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(
-        Elements.Found.ExcludedHeadings
-      );
+      Elements.initializeFilterElements();
     } else {
       State.headingOutline = [];
       Elements.initializeElements(State.option);
@@ -5704,9 +5677,12 @@ ${this.error.stack}
         UI.errorCount++;
       }
       State.results[i].position = "beforebegin";
+      if (!State.results[i].element) {
+        State.results[i].element = Elements.Found.Everything[0] ?? document.body;
+      }
       if (State.results[i].element.shadowRoot) {
         while (State.results[i].element.parentElement?.shadowRoot) {
-          State.results[i].element = location.parentElement;
+          State.results[i].element = State.results[i].element.parentElement;
         }
       }
       if (State.option.insertAnnotationBefore && State.results[i].element.closest(State.option.insertAnnotationBefore)) {
