@@ -344,8 +344,7 @@ export default {
     ACC_NAME: '<strong {B}>Dostępna nazwa</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Wskazówka!</strong> "Dostępna nazwa" to ostateczna etykieta, która jest przekazywana osobom korzystającym z technologii wspomagających i jest obliczana przez ARIA. Pomaga to im zrozumieć cel linku lub przycisku.',
-    HIDDEN_FOCUSABLE:
-      'Link lub przycisk ma atrybut <code>aria-hidden=&quot;true&quot;</code>, ale wciąż może być uzyskany za pomocą klawiatury. Jeśli zamierzasz ukryć zduplikowany link lub przycisk, dodaj również <code>tabindex=&quot;-1&quot;</code>. W przeciwnym razie atrybut <code>aria-hidden=&quot;true&quot;</code> nie powinien być używany dla elementów, które mogą otrzymać fokus. <hr> Dowiedz się więcej o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atrybucie aria-hidden.</a>',
+    HIDDEN_FOCUSABLE: 'Ten element może przyjąć fokus klawiatury, ale jest ukryty przed czytnikami ekranu za pomocą atrybutu <code>aria-hidden="true"</code> (na nim samym lub kontenerze nadrzędnym). Aby to naprawić, usuń atrybut aria-hidden lub usuń element z kolejności tabulacji. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Dowiedz się więcej o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atrybucie aria-hidden.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -365,7 +364,7 @@ export default {
       'Upewnij się, że parametr <code>maximum-scale</code> w <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta tagu widoku</a> nie jest mniejszy niż 2.',
     META_REFRESH: 'Strona nie powinna automatycznie odświeżać się przy użyciu meta tagu.',
     META_LANG_SUGGEST: 'Następujący kod języka <code>%(CODE)</code> jest nieprawidłowy. Czy chodziło o <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Kod języka strony <code>%(CODE)</code> jest nieprawidłowy. Proszę <a href="https://www.w3.org/International/questions/qa-html-language-declarations">zadeklarować prawidłowy język w tagu HTML.</a>',
+    META_LANG_VALID: 'Kod języka dla tego elementu jest nieprawidłowy. Aby to naprawić, zastąp atrybut lang prawidłowym kodem języka. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Dowiedz się więcej o <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarowaniu języka w HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Przycisk nie ma dostępnej nazwy opisującej jego cel.',

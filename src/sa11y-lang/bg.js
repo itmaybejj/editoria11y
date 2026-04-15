@@ -303,7 +303,7 @@ export default {
     EMBED_DATA_VIZ:
       'Подобни уиджети за визуализация на данни често са проблематични за хора, които използват клавиатура или екранен четец за навигация, и могат да създадат значителни трудности за хора със слабо зрение или цветна слепота. Препоръчително е да предоставите същата информация в алтернативен формат (текст или таблица) под уиджета. <hr> Научете повече за <a href="https://www.w3.org/WAI/tutorials/images/complex">сложните изображения.</a>',
     EMBED_MISSING_TITLE:
-      'Вграденото съдържание изисква достъпно име, което описва съдържанието му. Моля, посочете уникален атрибут <code>title</code> или <code>aria-label</code> на елемента <code>iframe</code>. Научете повече за <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrames.</a>.',
+      'Вграденото съдържание изисква достъпно име, което описва съдържанието му. Моля, посочете уникален атрибут <code>title</code> или <code>aria-label</code> на елемента <code>iframe</code>. Научете повече за <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrames.</a>',
     EMBED_GENERAL:
       'Невъзможно е да се провери вграденото съдържание. Моля, уверете се, че изображенията имат alt текст, видеоклиповете имат надписи, текстът е достатъчно контрастен, а интерактивните компоненти са <a href="https://webaim.org/techniques/keyboard/">достъпни от клавиатурата.</a>',
     EMBED_UNFOCUSABLE:
@@ -343,8 +343,7 @@ export default {
     ACC_NAME: '<strong {B}>Достъпно име</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Съвет!</strong> "Достъпното име" е крайната етикета, която се комуникира на хората, които използват помощни технологии. Това им помага да разберат целта на връзката или бутона.',
-    HIDDEN_FOCUSABLE:
-      'Връзката или бутонът има <code>aria-hidden=&quot;true&quot;</code>, но все още е достъпен чрез клавиатурата. Ако възнамерявате да скриете дублираща се връзка или бутон, добавете също <code>tabindex=&quot;-1&quot;</code>. В противен случай, <code>aria-hidden=&quot;true&quot;</code> не трябва да се използва върху елементи, които могат да получат фокус. <hr> Научете повече за <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">атрибута aria-hidden.</a>',
+    HIDDEN_FOCUSABLE: 'Този елемент може да получи фокус от клавиатурата, но е скрит от екранни четци чрез атрибут <code>aria-hidden="true"</code> (върху самия него или родителски контейнер). За да поправите това, премахнете атрибута aria-hidden или премахнете елемента от реда на табовете. <hr> <strong {B}>Елемент</strong> <pre><code>%(EL)</code></pre> <hr> Научете повече за <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">атрибута aria-hidden.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -364,7 +363,7 @@ export default {
       'Уверете се, че параметърът <code>maximum-scale</code> в <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta таг на изгледа</a> не е по-малък от 2.',
     META_REFRESH: 'Страницата не трябва да се обновява автоматично с помощта на meta таг.',
     META_LANG_SUGGEST: 'Следният езиков код <code>%(CODE)</code> не е валиден. Имахте предвид <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Езиковият код на страницата <code>%(CODE)</code> не е валиден. Моля, <a href="https://www.w3.org/International/questions/qa-html-language-declarations">обявете валиден език в HTML тага.</a>',
+    META_LANG_VALID: 'Езиковият код за този елемент не е валиден. За да поправите това, заменете атрибута lang с валиден езиков код. <hr> <strong {B}>Елемент</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Научете повече за <a href="https://www.w3.org/International/questions/qa-html-language-declarations">декларирането на език в HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Бутонът няма достъпно име, което да описва неговата цел.',

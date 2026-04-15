@@ -9,17 +9,18 @@ export default function checkLabels() {
   if (State.option.formLabelsPlugin) {
     Elements.Found.Inputs.forEach(($el) => {
       // Ignore completely hidden elements.
-      const ariaHidden = $el.getAttribute('aria-hidden') === 'true';
-      const negativeTabindex = $el.getAttribute('tabindex') === '-1';
-      const hidden = Utils.isElementHidden($el);
-      if (hidden || (ariaHidden && negativeTabindex)) return;
+      if (
+        Utils.isElementHidden($el) ||
+        Utils.isHiddenAndUnfocusable($el) ||
+        (Utils.isPresentational($el) && Utils.isDisabled($el))
+      )
+        return;
 
       // Compute accessible name on input.
       const computeName = computeAccessibleName($el);
       const inputName = Utils.removeWhitespace(computeName);
 
       // Get attributes.
-      const alt = $el.getAttribute('alt');
       const type = $el.getAttribute('type');
       const hasTitle = $el.getAttribute('title');
       const hasAria = $el.getAttribute('aria-label') || $el.getAttribute('aria-labelledby');
@@ -31,12 +32,7 @@ export default function checkLabels() {
 
       // Error: Input with type="image" without accessible name or alt.
       if (type === 'image') {
-        if (
-          State.option.checks.LABELS_MISSING_IMAGE_INPUT &&
-          (!alt || alt.trim() === '') &&
-          !hasAria &&
-          !hasTitle
-        ) {
+        if (State.option.checks.LABELS_MISSING_IMAGE_INPUT && inputName === '') {
           State.results.push({
             test: 'LABELS_MISSING_IMAGE_INPUT',
             element: $el,
@@ -142,7 +138,7 @@ export default function checkLabels() {
       }
 
       // Implicit label: <label>First name: <input type="text"/><label>
-      const closestLabel = $el.closest('label');
+      const closestLabel = Utils.getCachedClosest($el, 'label');
       const labelName = closestLabel ? computeAccessibleName(closestLabel) : '';
       if (closestLabel && labelName.length) return;
 

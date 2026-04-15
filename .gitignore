@@ -6,8 +6,14 @@ tests/performance.htm
 logs/
 node_modules/
 tests_output/
+test-results
 screens/
 .vscode/
+.claude/settings.local.json
+
+# temporary until act-rules is merged
+conformance/
+test-results/
 
 # IDE & System Related Files
 .buildpath
@@ -29,3 +35,12 @@ npm-debug.log
 # Windows
 Thumbs.db
 Desktop.ini
+
+# ACT Conformance testing
+conformance/.cache/
+conformance/reports/parts/
+conformance/reports/discovery-analysis.json
+conformance/reports/discovery-raw.json
+conformance/reports/playwright-results.json
+conformance/reports/conformance-data.json
+conformance/test-results/

@@ -7,35 +7,53 @@ import { State } from '../core/state';
 
 export default function checkDeveloper() {
   /* *************************************************************** */
-  /*  Error: Missing or invalid language tag.                        */
+  /* Error: Missing or invalid language tag.                        */
   /* *************************************************************** */
-  const report = (key, ...args) => {
+  const report = (key, $el, ...args) => {
     const rule = State.option.checks[key];
     if (!rule) return;
-    State.results.push({
+    const result = {
       test: key,
       type: rule.type || 'error',
       content: Lang.sprintf(rule.content || key, ...args),
       args: [...args],
       dismiss: Utils.prepareDismissal(key),
       developer: rule.developer || true,
-    });
+    };
+
+    if ($el) {
+      result.element = $el;
+    }
+    State.results.push(result);
   };
 
-  // 1. Check if missing.
+  // 1. Check Document Language (from the <html> tag).
   if (!Elements.Found.Language) {
-    report('META_LANG');
+    report('META_LANG', null);
   } else {
     const { valid, suggest } = Utils.validateLang(Elements.Found.Language, Lang._('LANG_CODE'));
     if (!valid) {
-      // 2. Suggest valid (en_us to en-us).
       if (suggest) {
-        report('META_LANG_SUGGEST', Elements.Found.Language, suggest);
+        report('META_LANG_SUGGEST', null, Elements.Found.Language, suggest);
       } else {
-        // 3. Not valid at all.
-        report('META_LANG_VALID', Elements.Found.Language);
+        report('META_LANG_VALID', null, 'html', Elements.Found.Language);
       }
     }
+  }
+
+  // 2. Validate all [lang] attributes.
+  if (Elements.Found.LangTags && Elements.Found.LangTags.length > 0) {
+    Elements.Found.LangTags.forEach(($el) => {
+      const langValue = $el.getAttribute('lang')?.trim();
+      const { valid, suggest } = Utils.validateLang(langValue, Lang._('LANG_CODE'));
+      if (!valid) {
+        if (suggest) {
+          report('META_LANG_SUGGEST', $el, langValue, suggest);
+        } else {
+          report('META_LANG_VALID', $el, $el.tagName.toLowerCase(), langValue);
+        }
+      }
+    });
   }
 
   /* *************************************************************** */
@@ -102,14 +120,17 @@ export default function checkDeveloper() {
   /*  Page shouldn't automatically refresh.     */
   /* ****************************************** */
   if (State.option.checks.META_REFRESH) {
-    const metaRefresh = document.querySelector('meta[http-equiv="refresh"]');
-    if (metaRefresh) {
+    const actuallyRefreshes = Array.from(
+      document.querySelectorAll('meta[http-equiv="refresh" i]'),
+    ).some((tag) => parseInt(tag.getAttribute('content'), 10) > 0);
+    if (actuallyRefreshes) {
+      const option = State.option.checks.META_REFRESH;
       State.results.push({
         test: 'META_REFRESH',
-        type: State.option.checks.META_REFRESH.type || 'error',
-        content: Lang.sprintf(State.option.checks.META_REFRESH.content || 'META_REFRESH'),
+        type: option.type || 'error',
+        content: Lang.sprintf(option.content || 'META_REFRESH'),
         dismiss: Utils.prepareDismissal('META_REFRESH'),
-        developer: State.option.checks.META_REFRESH.developer || true,
+        developer: option.developer ?? true,
       });
     }
   }
@@ -190,6 +211,14 @@ export default function checkDeveloper() {
     State.option.checks.LABEL_IN_NAME
   ) {
     Elements.Found.Buttons.forEach(($el) => {
+      // Explicitly hidden.
+      if (
+        Utils.isHiddenAndUnfocusable($el) ||
+        Utils.isElementHidden($el) ||
+        (Utils.isPresentational($el) && Utils.isDisabled($el))
+      )
+        return;
+
       const accName = computeAccessibleName($el);
       const buttonText = accName.replace(/'|"|-|\.|\s+/g, '').toLowerCase();
       const textContent = Utils.getText($el);
@@ -201,32 +230,6 @@ export default function checkDeveloper() {
         $el.getAttribute('aria-label');
       const hasAriaLabelledby =
         $el.querySelector(':scope [aria-labelledby]') || $el.getAttribute('aria-labelledby');
-      const ariaHidden = $el.getAttribute('aria-hidden') === 'true';
-      const negativeTabindex = $el.getAttribute('tabindex') === '-1';
-
-      // Button has aria-hidden but is still focusable.
-      if (ariaHidden) {
-        if (!negativeTabindex) {
-          if (State.option.checks.HIDDEN_FOCUSABLE) {
-            State.results.push({
-              test: 'HIDDEN_FOCUSABLE',
-              element: $el,
-              type: State.option.checks.HIDDEN_FOCUSABLE.type || 'error',
-              content: Lang.sprintf(
-                State.option.checks.HIDDEN_FOCUSABLE.content || 'HIDDEN_FOCUSABLE',
-              ),
-              dismiss: Utils.prepareDismissal(
-                `HIDDEN_FOCUSABLE ${$el.tagName + $el.id + $el.className + accName}`,
-              ),
-              dismissAll: State.option.checks.HIDDEN_FOCUSABLE.dismissAll
-                ? 'BTN_HIDDEN_FOCUSABLE'
-                : false,
-              developer: State.option.checks.HIDDEN_FOCUSABLE.developer || true,
-            });
-          }
-        }
-        return;
-      }
 
       // Button doesn't have an accessible name.
       if (buttonText.length === 0) {
@@ -313,7 +316,7 @@ export default function checkDeveloper() {
   /* ********************************************************** */
   if (State.option.checks.UNCONTAINED_LI) {
     Elements.Found.Lists.forEach(($el) => {
-      if (!$el.closest('ul, ol, menu')) {
+      if (!Utils.getCachedClosest($el, 'ul, ol, menu')) {
         const text = Utils.getText($el);
         State.results.push({
           test: 'UNCONTAINED_LI',
@@ -346,6 +349,46 @@ export default function checkDeveloper() {
         dismissAll: State.option.checks.TABINDEX_ATTR.dismissAll ? 'TABINDEX_ATTR' : false,
         developer: State.option.checks.TABINDEX_ATTR.developer || true,
       });
+    });
+  }
+
+  /* *************************************************************** */
+  /* Error: Focusable content hidden from screen readers.            */
+  /* *************************************************************** */
+  if (State.option.checks.HIDDEN_FOCUSABLE) {
+    const focusableElements = [
+      ...(Elements.Found.Links || []),
+      ...(Elements.Found.Buttons || []),
+      ...(Elements.Found.Inputs || []),
+      ...(Elements.Found.TabIndex || []),
+    ];
+    const flaggedForAriaHidden = new Set();
+    focusableElements.forEach(($el) => {
+      if (flaggedForAriaHidden.has($el)) return;
+      if ($el.hasAttribute('disabled')) return;
+      if (Utils.isNegativeTabindex($el)) return;
+      if (Utils.isElementHidden($el)) return;
+
+      const hiddenContainer = Utils.getCachedClosest($el, '[aria-hidden="true"]');
+      if (hiddenContainer) {
+        const outerHTML = Utils.truncateString($el.outerHTML, 100);
+        State.results.push({
+          test: 'HIDDEN_FOCUSABLE',
+          element: $el,
+          type: State.option.checks.HIDDEN_FOCUSABLE.type || 'error',
+          content: Lang.sprintf(
+            State.option.checks.HIDDEN_FOCUSABLE.content || 'HIDDEN_FOCUSABLE',
+            outerHTML,
+          ),
+          args: [outerHTML],
+          dismiss: Utils.prepareDismissal(
+            `HIDDEN_FOCUSABLE ${$el.tagName + $el.id + $el.className}`,
+          ),
+          dismissAll: State.option.checks.HIDDEN_FOCUSABLE.dismissAll ? 'HIDDEN_FOCUSABLE' : false,
+          developer: State.option.checks.HIDDEN_FOCUSABLE.developer || true,
+        });
+        flaggedForAriaHidden.add($el);
+      }
     });
   }
 

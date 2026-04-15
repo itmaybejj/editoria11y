@@ -264,8 +264,6 @@ export default {
       'Niet-beschrijvende of plaatshouder alt-tekst gevonden. Vervang de volgende alt-tekst door iets dat meer betekenis heeft. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>',
     SUS_ALT:
       'Hulptechnologieën geven al aan dat dit een afbeelding is, dus &quot;<strong {C}>%(ERROR)</strong>&quot; kan overbodig zijn. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>',
-    LINK_HIDDEN_FOCUSABLE:
-      'De link heeft <code>aria-hidden=&quot;true&quot;</code>, maar is nog steeds toegankelijk met het toetsenbord. Als je van plan bent om een overbodige of dubbele link te verbergen, voeg dan ook <code>tabindex=&quot;-1&quot;</code> toe.',
     LINK_IMAGE_NO_ALT_TEXT:
       'De afbeelding in de link is gemarkeerd als decoratief en er is geen linktekst. Voeg alt-tekst toe aan de afbeelding die de bestemming van de link beschrijft.',
     LINK_IMAGE_TEXT:
@@ -354,8 +352,7 @@ export default {
     ACC_NAME: '<strong {B}>Toegankelijk naam</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Tip!</strong> De "toegankelijke naam" is het uiteindelijke label dat wordt gecommuniceerd aan mensen die gebruik maken van ondersteunende technologie. Dit helpt hen om het doel van de link of knop te begrijpen.',
-    HIDDEN_FOCUSABLE:
-      'De link of knop heeft <code>aria-hidden=&quot;true&quot;</code>, maar is nog steeds via het toetsenbord toegankelijk. Als u een dubbele link of knop wilt verbergen, voeg dan ook <code>tabindex=&quot;-1&quot;</code> toe. Anders moet <code>aria-hidden=&quot;true&quot;</code> niet worden gebruikt op elementen die focus kunnen ontvangen. <hr> Lees meer over het <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden-attribuut.</a>',
+    HIDDEN_FOCUSABLE: 'Dit element kan toetsenbordfocus ontvangen, maar is verborgen voor schermlezers door een <code>aria-hidden="true"</code> attribuut (op zichzelf of een bovenliggende container). Om dit op te lossen, verwijdert u het aria-hidden attribuut of verwijdert u het element uit de tabvolgorde. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Lees meer over het <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden attribuut.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -375,7 +372,7 @@ export default {
       'Zorg ervoor dat de parameter <code>maximum-scale</code> in de <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta-tag van het viewport</a> niet kleiner is dan 2.',
     META_REFRESH: 'De pagina mag niet automatisch verversen met behulp van een meta-tag.',
     META_LANG_SUGGEST: 'De volgende taalcode <code>%(CODE)</code> is niet geldig. Bedoelde u <code>%(CODE)</code>?',
-    META_LANG_VALID: 'De taalcode van de pagina <code>%(CODE)</code> is niet geldig. <a href="https://www.w3.org/International/questions/qa-html-language-declarations">Declareer een geldige taal in de HTML-tag.</a>',
+    META_LANG_VALID: 'De taalcode voor dit element is niet geldig. Vervang het lang-attribuut door een geldige taalcode om dit op te lossen. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Lees meer over het <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declareren van taal in HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'De knop mist een toegankelijke naam die het doel beschrijft.',

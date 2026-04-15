@@ -344,8 +344,7 @@ export default {
     ACC_NAME: '<strong {B}>접근 가능한 이름</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>팁!</strong> "접근 가능한 이름"은 보조 기술을 사용하는 사람들에게 전달되는 최종 레이블이며 ARIA에 의해 계산됩니다. 이를 통해 링크 또는 버튼의 목적을 이해하는 데 도움이 됩니다.',
-    HIDDEN_FOCUSABLE:
-      '링크 또는 버튼에 <code>aria-hidden=&quot;true&quot;</code> 속성이 있지만 여전히 키보드로 포커스할 수 있습니다. 중복된 링크 또는 버튼을 숨기려면 <code>tabindex=&quot;-1&quot;</code> 속성을 추가하세요. 그렇지 않으면, 포커스를 받을 수 있는 요소에 <code>aria-hidden=&quot;true&quot;</code>를 사용해서는 안 됩니다. <hr> <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden 속성</a>에 대해 더 알아보세요.',
+    HIDDEN_FOCUSABLE: '이 요소는 키보드 포커스를 받을 수 있지만, 자신 또는 상위 컨테이너의 <code>aria-hidden="true"</code> 속성으로 인해 스크린 리더에서 숨겨져 있습니다. 문제를 해결하려면 aria-hidden 속성을 제거하거나 탭 순서에서 요소를 제거하세요. <hr> <strong {B}>요소</strong> <pre><code>%(EL)</code></pre> <hr> <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden 속성</a>에 대해 자세히 알아보세요.',
 
     // Developer
     DUPLICATE_ID:
@@ -365,7 +364,7 @@ export default {
       '<a href="https://developer.mozilla.org/ko/docs/Web/HTML/Viewport_meta_tag">뷰포트 메타 태그</a>에서 <code>maximum-scale</code> 매개변수가 2보다 작지 않도록 하십시오.',
     META_REFRESH: '페이지는 메타 태그를 사용하여 자동으로 새로고침되지 않아야 합니다.',
     META_LANG_SUGGEST: '다음 언어 코드 <code>%(CODE)</code>가 유효하지 않습니다. <code>%(CODE)</code>를 의미하셨나요?',
-    META_LANG_VALID: '페이지 언어 코드 <code>%(CODE)</code>가 유효하지 않습니다. <a href="https://www.w3.org/International/questions/qa-html-language-declarations">HTML 태그에 유효한 언어를 선언해 주세요.</a>',
+    META_LANG_VALID: '이 요소의 언어 코드가 유효하지 않습니다. 문제를 해결하려면 lang 속성을 유효한 언어 코드로 교체하세요. <hr> <strong {B}>요소</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> <a href="https://www.w3.org/International/questions/qa-html-language-declarations">HTML에서 언어 선언</a>에 대해 자세히 알아보세요.',
 
     // Buttons
     BTN_EMPTY: '버튼에 그 목적을 설명하는 접근 가능한 이름이 없습니다.',

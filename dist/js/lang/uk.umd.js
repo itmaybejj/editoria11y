@@ -265,7 +265,7 @@
       LINK_TEXT: "<strong {B}>Текст посилання</strong> <strong {C}>%(TEXT)</strong>",
       ACC_NAME: "<strong {B}>Доступне ім'я</strong> <strong {C}>%(TEXT)</strong>",
       ACC_NAME_TIP: '<hr><strong>Порада!</strong> "Доступна назва" - це остаточна мітка, яка передається людям, які використовують допоміжні технології, і яка обчислюється ARIA. Це допомагає їм зрозуміти мету посилання або кнопки.',
-      HIDDEN_FOCUSABLE: 'Посилання або кнопка мають <code>aria-hidden=&quot;true&quot;</code>, але все одно можуть отримувати фокус через клавіатуру. Якщо ви хочете приховати дубльоване посилання або кнопку, додайте також <code>tabindex=&quot;-1&quot;</code>. В іншому випадку атрибут <code>aria-hidden=&quot;true&quot;</code> не слід використовувати на елементах, які можуть отримати фокус. <hr> Дізнайтеся більше про <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">атрибут aria-hidden.</a>',
+      HIDDEN_FOCUSABLE: 'Цей елемент може отримувати фокус клавіатури, але прихований від зчитувачів екрана за допомогою атрибута <code>aria-hidden="true"</code> (на самому собі або на батьківському контейнері). Щоб виправити це, видаліть атрибут aria-hidden або видаліть елемент із порядку табуляції. <hr> <strong {B}>Елемент</strong> <pre><code>%(EL)</code></pre> <hr> Дізнайтеся більше про <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">атрибут aria-hidden.</a>',
       // Developer
       DUPLICATE_ID: "Виявлено <strong>дублікат ID</strong>. Відомо, що помилки дублювання ID можуть викликати проблеми для допоміжних технологій, коли вони намагаються взаємодіяти із вмістом. Будь ласка, видаліть або змініть наступний ідентифікатор. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
       UNCONTAINED_LI: "Всі елементи списку <code>&lt;li&gt;</code> повинні бути розміщені всередині елементів <code>&lt;ul&gt;</code> неупорядкованих або <code>&lt;ol&gt;</code> упорядкованих. Ця структура допомагає читачам екрана точно оголошувати список та його елементи.",
@@ -277,7 +277,7 @@
       META_MAX: 'Переконайтеся, що параметр <code>maximum-scale</code> у <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">мета-тезі перегляду</a> не менший за 2.',
       META_REFRESH: "Сторінка не повинна автоматично оновлюватися за допомогою мета-тегу.",
       META_LANG_SUGGEST: "Наступний код мови <code>%(CODE)</code> не є дійсним. Ви мали на увазі <code>%(CODE)</code>?",
-      META_LANG_VALID: 'Код мови сторінки <code>%(CODE)</code> не є дійсним. Будь ласка, <a href="https://www.w3.org/International/questions/qa-html-language-declarations">вкажіть дійсний код мови в тегу HTML.</a>',
+      META_LANG_VALID: 'Мовний код для цього елемента недійсний. Щоб виправити це, замініть атрибут lang дійсним мовним кодом. <hr> <strong {B}>Елемент</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Дізнайтеся більше про <a href="https://www.w3.org/International/questions/qa-html-language-declarations">декларування мови в HTML.</a>',
       // Buttons
       BTN_EMPTY: "Кнопка не має доступного імені, яке описує її призначення.",
       BTN_EMPTY_LABELLEDBY: "Кнопка має значення <code>aria-labelledby</code>, яке є порожнім або не відповідає значенню <code>id</code> іншого елемента на сторінці.",

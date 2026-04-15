@@ -256,19 +256,19 @@
       LINK_TEXT: "<strong {B}>Texto do link</strong> <strong {C}>%(TEXT)</strong>",
       ACC_NAME: "<strong {B}>Nome acessível</strong> <strong {C}>%(TEXT)</strong>",
       ACC_NAME_TIP: '<hr><strong>Dica!</strong> O "nome acessível" é o rótulo final que é comunicado às pessoas que usam tecnologia assistiva e é calculado pelo ARIA. Isso ajuda a entender o propósito do link ou botão.',
-      HIDDEN_FOCUSABLE: 'O link ou botão tem <code>aria-hidden=&quot;true&quot;</code>, mas ainda é focável pelo teclado. Se você pretende ocultar um link ou botão duplicado, adicione também <code>tabindex=&quot;-1&quot;</code>. Caso contrário, <code>aria-hidden=&quot;true&quot;</code> não deve ser usado em elementos que podem receber foco. <hr> Saiba mais sobre o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atributo aria-hidden.</a>',
+      HIDDEN_FOCUSABLE: 'Este elemento pode receber foco do teclado, mas está oculto para leitores de tela por um atributo <code>aria-hidden="true"</code> (nele mesmo ou em um contêiner pai). Para corrigir, remova o atributo aria-hidden ou remova o elemento da ordem de tabulação. <hr> <strong {B}>Elemento</strong> <pre><code>%(EL)</code></pre> <hr> Saiba mais sobre o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atributo aria-hidden.</a>',
       // Developer
       DUPLICATE_ID: "Encontrada <strong>identificação duplicada</strong>. Erros de ID duplicado são conhecidos por causar problemas para tecnologias assistivas quando elas estão tentando interagir com o conteúdo. Remova ou altere o seguinte ID. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
       UNCONTAINED_LI: "Todos os itens de lista <code>&lt;li&gt;</code> devem ser colocados dentro dos elementos <code>&lt;ul&gt;</code> não ordenados ou <code>&lt;ol&gt;</code> ordenados. Essa estrutura ajuda leitores de tela a anunciar a lista e seus itens com precisão.",
       TABINDEX_ATTR: "O elemento não deve ter um atributo <code>tabindex</code> maior que 0.",
       // Meta checks
-      META_LANG: 'O idioma da página não foi declarado! Por favor, <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare o idioma na tag HTML.</a>',
+      META_LANG: 'O idioma da página não foi declarado! Por favor, <a href="https://www.w3.org/International/questions/qa-html-language-declarations.pt-br.html">declare o idioma na tag HTML.</a>',
       META_TITLE: 'Título da página ausente! Forneça um <a href="https://developer.mozilla.org/pt-br/docs/Web/HTML/Element/title">título da página.</a>',
       META_SCALABLE: 'Remova o parâmetro <code>user-scalable="no"</code> na <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta tag do viewport</a> para permitir o zoom.',
       META_MAX: 'Certifique-se de que o parâmetro <code>maximum-scale</code> na <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta tag do viewport</a> não seja inferior a 2.',
       META_REFRESH: "A página não deve atualizar automaticamente usando uma meta tag.",
       META_LANG_SUGGEST: "O seguinte código de idioma <code>%(CODE)</code> não é válido. Você quis dizer <code>%(CODE)</code>?",
-      META_LANG_VALID: 'O código de idioma da página <code>%(CODE)</code> não é válido. Por favor, <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare um idioma válido na tag HTML.</a>',
+      META_LANG_VALID: 'O código de idioma para este elemento não é válido. Para corrigir, substitua o atributo lang por um código de idioma válido. <hr> <strong {B}>Elemento</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Saiba mais sobre a <a href="https://www.w3.org/International/questions/qa-html-language-declarations.pt-br.html">declaração de idioma em HTML.</a>',
       // Buttons
       BTN_EMPTY: "O botão está sem um nome acessível que descreva sua finalidade.",
       BTN_EMPTY_LABELLEDBY: "O botão tem um valor <code>aria-labelledby</code> que está vazio ou não corresponde ao valor <code>id</code> de outro elemento na página.",
@@ -303,7 +303,7 @@
       BG: "Fundo",
       NO_SUGGESTION: "Nenhuma combinação acessível pode ser encontrada apenas alterando a cor do texto. Tente alterar a cor do fundo.",
       // Page language
-      PAGE_LANG_CONFIDENCE: 'Mais da metade do texto nesta página parece estar em %(LIKELY_LANG), mas o idioma declarado da página é %(PAGE_LANG). Considere atualizar o <a href="https://www.w3.org/International/questions/qa-html-language-declarations">idioma declarado da página</a> para corresponder ao conteúdo.',
+      PAGE_LANG_CONFIDENCE: 'Mais da metade do texto nesta página parece estar em %(LIKELY_LANG), mas o idioma declarado da página é %(PAGE_LANG). Considere atualizar o <a href="https://www.w3.org/International/questions/qa-html-language-declarations.pt-br.html">idioma declarado da página</a> para corresponder ao conteúdo.',
       LANG_OF_PARTS: "O idioma da página foi declarado como %(PAGE_LANG), mas este conteúdo parece estar em %(LIKELY_LANG). Certifique-se de que o conteúdo esteja marcado adequadamente.",
       LANG_MISMATCH: "Este conteúdo parece estar em %(DETECTED_LANG), no entanto, foi marcado como %(WRONG_LANG).",
       LANG_OF_PARTS_ALT: "Este texto alternativo parece estar em %(LIKELY_LANG), mas o idioma da página foi declarado como %(PAGE_LANG). Certifique-se de que o texto alternativo esteja no mesmo idioma que o restante da página. <hr> {ALT} <strong {C}>%(ALT)</strong>",

@@ -256,7 +256,7 @@
       LINK_IMAGE_LONG_ALT: "リンクされた画像のaltテキストの説明が<strong>長すぎます</strong>。リンクされた画像のaltテキストは、画像の文字通りの説明ではなく、リンクの目的を説明する必要があります。<strong>リンク先のページのタイトルをaltテキストとして使用することを検討してください。</strong> <hr> {L} {ALT} <strong {B}>%(altLength) 文字</strong> <strong {C}>%(ALT_TEXT)</strong>",
       LINK_IMAGE_ALT: "画像リンクにはaltテキストが含まれています。altテキストがリンク先を説明していますか？<strong>リンク先のページのタイトルをaltテキストとして使用することを検討してください。</strong> <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
       LINK_IMAGE_ALT_AND_TEXT: "画像リンクには<strong>altテキストと周囲のリンクテキストの両方が含まれています。</strong> この画像が装飾用であり、他のページへの機能的なリンクとして使用されている場合は、画像を装飾用としてマークすることを検討してください。周囲のリンクテキストで十分です。<hr> {ALT} <strong {C}>%(ALT_TEXT)</strong> <hr> <strong {B}>アクセシブル名</strong> {L} <strong {C}>%(TEXT)</strong>",
-      IMAGE_FIGURE_DECORATIVE: '画像が<strong>装飾用</strong>としてマークされ、支援技術によって無視されます。<hr> キャプションが提供されていますが、ほとんどの場合、画像にはaltテキストも必要です。<ul><li>altテキストは画像の内容を簡潔に説明する必要があります。</li><li>キャプションは通常、画像を周囲のコンテンツに関連付けるための文脈を提供したり、特定の情報に注意を払ったりするために使用されます。</li></ul>詳細はこちら：<a href="https://thoughtbot.com/blog/alt-vs-figcaption#the-figcaption-element">altとfigcaptionの比較</a>。',
+      IMAGE_FIGURE_DECORATIVE: '画像が<strong>装飾用</strong>としてマークされ、支援技術によって無視されます。<hr> キャプションが提供されていますが、ほとんどの場合、画像にはaltテキストも必要です。<ul><li>altテキストは画像の内容を簡潔に説明する必要があります。</li><li>キャプションは通常、画像を周囲のコンテンツに関連付けるための文脈を提供したり、特定の情報に注意を払ったりするために使用されます。</li></ul>詳細はこちら：<a href="https://thoughtbot.com/blog/alt-vs-figcaption#the-figcaption-element">altとfigcaptionの比較。</a>',
       IMAGE_FIGURE_DUPLICATE_ALT: 'altとキャプションテキストにはまったく同じ単語を使用しないでください。スクリーンリーダーは情報を二重に発表します。<ul><li>altテキストは画像の内容を簡潔に説明する必要があります。</li><li>キャプションは通常、画像を周囲のコンテンツに関連付けるための文脈を提供したり、特定の情報に注意を払ったりするために使用されます。</li></ul>詳細はこちら：<a href="https://thoughtbot.com/blog/alt-vs-figcaption#the-figcaption-element">altとfigcaptionの比較</a> <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>',
       IMAGE_DECORATIVE: "画像が<strong>装飾用</strong>としてマークされ、支援技術によって無視されます。画像が物語やムード、重要な情報を伝えている場合は、altテキストを追加してください。",
       IMAGE_DECORATIVE_CAROUSEL: "画像は装飾的としてマークされていますが、カルーセルやギャラリー内のすべての画像には、すべての人に等しい体験を提供するために説明的な代替テキストを含める必要があります。",
@@ -297,7 +297,7 @@
       LINK_TEXT: "<strong {B}>リンクテキスト</strong> <strong {C}>%(TEXT)</strong>",
       ACC_NAME: "<strong {B}>アクセシブル名</strong> <strong {C}>%(TEXT)</strong>",
       ACC_NAME_TIP: '<hr><strong>ヒント!</strong> "アクセシブル名"は、支援技術を使用する人々に伝えられる最終的なラベルであり、ARIAによって計算されます。これにより、リンクやボタンの目的を理解するのに役立ちます。',
-      HIDDEN_FOCUSABLE: 'リンクやボタンに <code>aria-hidden=&quot;true&quot;</code> が設定されていますが、キーボードでフォーカス可能です。重複したリンクやボタンを非表示にする場合は、<code>tabindex=&quot;-1&quot;</code> も追加してください。それ以外の場合、フォーカスを受け取ることができる要素に <code>aria-hidden=&quot;true&quot;</code> を使用してはいけません。<hr> <a href="https://developer.mozilla.org/ja/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden 属性について</a>詳しく知る。',
+      HIDDEN_FOCUSABLE: 'この要素はキーボードフォーカスを受け取ることができますが、<code>aria-hidden="true"</code> 属性（自身または親コンテナにある）によってスクリーンリーダーから隠されています。修正するには、aria-hidden 属性を削除するか、要素をタブ順序から削除してください。 <hr> <strong {B}>要素</strong> <pre><code>%(EL)</code></pre> <hr> <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden 属性</a>の詳細をご覧ください。',
       // Developer
       DUPLICATE_ID: "重複した<strong>IDが見つかりました</strong>。重複したIDは、支援技術がコンテンツとの相互作用を試みる際に問題を引き起こすことが知られています。次のIDを削除または変更してください。<hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
       UNCONTAINED_LI: "すべての <code>&lt;li&gt;</code> リスト項目は、<code>&lt;ul&gt;</code> 順不同リストまたは <code>&lt;ol&gt;</code> 順序付きリストの要素内に配置する必要があります。この構造は、スクリーンリーダーがリストとその項目を正確に読み上げるのに役立ちます。",
@@ -309,7 +309,7 @@
       META_MAX: '<a href="https://developer.mozilla.org/ja/docs/Web/HTML/Viewport_meta_tag">ビューポートのメタタグ</a>の <code>maximum-scale</code> パラメータが 2 未満でないことを確認してください。',
       META_REFRESH: "ページはメタタグを使用して自動的に更新されるべきではありません。",
       META_LANG_SUGGEST: "次の言語コード <code>%(CODE)</code> は無効です。もしかして <code>%(CODE)</code> ですか？",
-      META_LANG_VALID: 'ページの言語コード <code>%(CODE)</code> は無効です。<a href="https://www.w3.org/International/questions/qa-html-language-declarations">HTMLタグで有効な言語を宣言してください。</a>',
+      META_LANG_VALID: 'この要素の言語コードが有効ではありません。修正するには、lang 属性を有効な言語コードに置き換えてください。 <hr> <strong {B}>要素</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> <a href="https://www.w3.org/International/questions/qa-html-language-declarations">HTML での言語宣言</a>の詳細をご覧ください。',
       // Buttons
       BTN_EMPTY: "ボタンにはその目的を説明するアクセシブルな名前がありません。",
       BTN_EMPTY_LABELLEDBY: "ボタンに空の <code>aria-labelledby</code> 値があるか、ページ上の他の要素の <code>id</code> と一致していません。",

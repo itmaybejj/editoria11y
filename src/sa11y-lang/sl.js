@@ -344,8 +344,7 @@ export default {
     ACC_NAME: '<strong {B}>Dostopno ime</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr> <strong>Nasvet!</strong> "Dostopno ime" je končna oznaka, ki se sporoča ljudem, ki uporabljajo pripomočke, in se izračuna z ARIA. To jim pomaga razumeti namen povezave ali gumba.',
-    HIDDEN_FOCUSABLE:
-      'Povezava ali gumb ima <code>aria-hidden=&quot;true&quot;</code>, vendar je še vedno dostopen s tipkovnico. Če nameravate skriti podvojeno povezavo ali gumb, dodajte tudi <code>tabindex=&quot;-1&quot;</code>. V nasprotnem primeru se <code>aria-hidden=&quot;true&quot;</code> ne sme uporabljati na elementih, ki lahko prejmejo fokus. <hr> Več o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atributu aria-hidden.</a>',
+    HIDDEN_FOCUSABLE: 'Ta element lahko prejme fokus tipkovnice, vendar je skrit pred bralniki zaslona z atributom <code>aria-hidden="true"</code> (na sebi ali na nadrejenem vsebniku). Če želite to popraviti, odstranite atribut aria-hidden ali odstranite element iz vrstnega reda zavihkov. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Preberite več o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atributu aria-hidden.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -365,7 +364,7 @@ export default {
       'Poskrbite, da parameter <code>maximum-scale</code> v <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta oznaki pogleda</a> ni manjši od 2.',
     META_REFRESH: 'Stran se ne sme samodejno osveževati z uporabo meta oznake.',
     META_LANG_SUGGEST: 'Naslednja jezikovna koda <code>%(CODE)</code> ni veljavna. Ali ste mislili <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Jezikovna koda strani <code>%(CODE)</code> ni veljavna. Prosimo, <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarirajte veljaven jezik v oznaki HTML.</a>',
+    META_LANG_VALID: 'Jezikovna koda za ta element ni veljavna. Če želite to popraviti, zamenjajte atribut lang z veljavno jezikovno kodo. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Preberite več o <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklariranju jezika v HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Gumb nima dostopnega imena, ki bi opisovalo njegov namen.',

@@ -137,7 +137,13 @@ const Sa11yStrings = {
       "view",
       "view our",
       "website",
-      "article"
+      "article",
+      "article",
+      "go",
+      "workshop",
+      "plain text",
+      "html",
+      "this product"
     ],
     CLICK: ["click"],
     NEW_WINDOW_PHRASES: [
@@ -257,7 +263,7 @@ const Sa11yStrings = {
     LINK_TEXT: "<strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>",
     ACC_NAME: "<strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
     ACC_NAME_TIP: `<hr><strong>Tip!</strong> The "accessible name" is the final label that gets communicated to people who use assistive technology. This helps them understand the link or button's purpose.`,
-    HIDDEN_FOCUSABLE: 'Link or button has <code>aria-hidden=&quot;true&quot;</code> but is still keyboard focusable. If you are intending to hide a duplicate link or button, add <code>tabindex=&quot;-1&quot;</code> as well. Otherwise, <code>aria-hidden=&quot;true&quot;</code> should not be used on elements that can receive focus. <hr> Learn more about the <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden attribute.</a>',
+    HIDDEN_FOCUSABLE: 'This element can receive keyboard focus, but is hidden from screen readers by an <code>aria-hidden="true"</code> attribute (on itself or a parent container). To fix, either remove the aria-hidden attribute or remove the element from the tab order. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Learn more about the <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden attribute.</a>',
     // Developer checks
     DUPLICATE_ID: "Found <strong>duplicate ID</strong>. Duplicate ID errors are known to cause problems for assistive technologies when they are trying to interact with content. Please remove or change the following ID. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
     UNCONTAINED_LI: "All <code>&lt;li&gt;</code> list items must be placed inside <code>&lt;ul&gt;</code> unordered or <code>&lt;ol&gt;</code> ordered elements. This structure helps screen readers announce the list and its items accurately. <hr> <strong {B}>List item</strong> <strong {C}>%(TEXT)</strong>",
@@ -269,7 +275,7 @@ const Sa11yStrings = {
     META_LANG: 'Page language not declared! Please <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare language on the HTML tag.</a>',
     META_REFRESH: "Page should not automatically refresh using a meta tag.",
     META_LANG_SUGGEST: "The following language code <code>%(CODE)</code> is not valid. Did you mean <code>%(CODE)</code>?",
-    META_LANG_VALID: 'The page language code <code>%(CODE)</code> is not valid. Please <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare a valid language on the HTML tag.</a>',
+    META_LANG_VALID: 'The language code for this element is not valid. To fix, replace the lang attribute with a valid language code. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Learn more about <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declaring language in HTML.</a>',
     // Buttons
     BTN_EMPTY: "Button is missing an accessible name that describes its purpose.",
     BTN_EMPTY_LABELLEDBY: "Button has an <code>aria-labelledby</code> value that is empty or does not match the <code>id</code> value of another element on the page.",
@@ -310,7 +316,9 @@ const Sa11yStrings = {
       "unmute",
       "fullscreen",
       "minimize",
-      "maximize"
+      "maximize",
+      "slide",
+      "modal"
     ],
     // Tables
     TABLES_MISSING_HEADINGS: 'Missing table headers! Accessible tables need HTML markup that indicates header cells and data cells which defines their relationship. This information provides context to people who use assistive technology. Tables should be used for tabular data only. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',

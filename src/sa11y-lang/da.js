@@ -345,8 +345,7 @@ export default {
     ACC_NAME: '<strong {B}>Tilgængeligt navn</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Tip!</strong> "Tilgængeligt navn" er den endelige etiket, der kommunikeres til personer, der bruger hjælpemidler. Dette hjælper dem med at forstå formålet med linket eller knappen.',
-    HIDDEN_FOCUSABLE:
-      'Link eller knap har <code>aria-hidden=&quot;true&quot;</code>, men kan stadig fokuseres med tastaturet. Hvis du ønsker at skjule et duplikeret link eller en knap, skal du også tilføje <code>tabindex=&quot;-1&quot;</code>. Ellers bør <code>aria-hidden=&quot;true&quot;</code> ikke bruges på elementer, der kan modtage fokus. <hr> Læs mere om <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden-attributten.</a>',
+    HIDDEN_FOCUSABLE: 'Dette element kan modtage tastaturfokus, men er skjult for skærmlæsere af en <code>aria-hidden="true"</code>-attribut (på sig selv eller en overordnet container). For at løse det skal du enten fjerne aria-hidden-attributten eller fjerne elementet fra tabulatorrækkefølgen. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Lær mere om <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden-attributten.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -366,7 +365,7 @@ export default {
       'Sørg for, at parameteren <code>maximum-scale</code> i <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">viewport meta-taggen</a> ikke er mindre end 2.',
     META_REFRESH: 'Siden bør ikke automatisk opdatere ved hjælp af et meta-tag.',
     META_LANG_SUGGEST: 'Følgende sprogkode <code>%(CODE)</code> er ikke gyldig. Ment du <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Sidens sprogkode <code>%(CODE)</code> er ikke gyldig. Venligst <a href="https://www.w3.org/International/questions/qa-html-language-declarations">erklær et gyldigt sprog på HTML-tagget.</a>',
+    META_LANG_VALID: 'Sprogkoden for dette element er ikke gyldig. For at løse det skal lang-attributten erstattes med en gyldig sprogkode. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Lær mere om <a href="https://www.w3.org/International/questions/qa-html-language-declarations">erklæring af sprog i HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Knappen mangler et tilgængeligt navn, der beskriver dens formål.',

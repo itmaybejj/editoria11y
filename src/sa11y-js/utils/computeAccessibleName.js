@@ -1,4 +1,5 @@
 import { State } from '../core/state';
+import * as Utils from '../utils/utils';
 
 /* Get text content of pseudo elements. */
 export const wrapPseudoContent = (element, string) => {
@@ -12,10 +13,8 @@ export const wrapPseudoContent = (element, string) => {
         : content.match(/"([^"]+)"/); // Content between quotes, e.g. "alt text";
     return match ? match[1] : '';
   };
-  const before = getAltText(
-    window.getComputedStyle(element, ':before').getPropertyValue('content'),
-  );
-  const after = getAltText(window.getComputedStyle(element, ':after').getPropertyValue('content'));
+  const before = getAltText(Utils.getCachedStyle(element, ':before').getPropertyValue('content'));
+  const after = getAltText(Utils.getCachedStyle(element, ':after').getPropertyValue('content'));
   return `${before}${string}${after}`;
 };
 
@@ -136,7 +135,7 @@ export const computeAccessibleName = (element, exclusions = [], recursing = 0) =
       const shadowChildren = node.shadowRoot.querySelectorAll('*');
       for (let i = 0; i < shadowChildren.length; i++) {
         const child = shadowChildren[i];
-        if (!excludeSelector || !child.closest(excludeSelector)) {
+        if (!excludeSelector || !Utils.getCachedClosest(child, excludeSelector)) {
           and(computeAccessibleName(child, exclusions, recursing + 1));
         }
       }
@@ -150,7 +149,7 @@ export const computeAccessibleName = (element, exclusions = [], recursing = 0) =
       continue;
     }
 
-    if (addTitleIfNoName && !node.closest('a')) {
+    if (addTitleIfNoName && !Utils.getCachedClosest(node, 'a')) {
       if (aText === computedText) {
         and(addTitleIfNoName);
       }
@@ -175,11 +174,13 @@ export const computeAccessibleName = (element, exclusions = [], recursing = 0) =
     }
 
     switch (node.tagName) {
-      case 'IMG':
-        if (node.hasAttribute('alt') && node.role !== 'presentation') {
+      case 'IMG': {
+        const role = node.getAttribute('role');
+        if (node.hasAttribute('alt') && role !== 'presentation' && role !== 'none') {
           and(node.getAttribute('alt'));
         }
         break;
+      }
       case 'SVG':
         if (node.role === 'img' || node.role === 'graphics-document') {
           and(computeAriaLabel(node));

@@ -18,7 +18,7 @@ export function documentLoadingCheck(callback) {
  * @returns {boolean} Returns true if visually hidden based on properties.
  */
 export function isScreenReaderOnly(element) {
-  const style = getComputedStyle(element);
+  const style = getCachedStyle(element);
 
   // Modern technique: clip-path inset(50%).
   if (style.getPropertyValue('clip-path').startsWith('inset(50%)')) {
@@ -59,7 +59,71 @@ export function isScreenReaderOnly(element) {
  * @returns {boolean} 'true' if the element is hidden (display: none).
  */
 export function isElementHidden(element) {
-  return element.hidden || getComputedStyle(element).getPropertyValue('display') === 'none';
+  if (element.hidden) return true;
+  const styles = getCachedStyle(element);
+  return (
+    styles.getPropertyValue('display') === 'none' ||
+    styles.getPropertyValue('visibility') === 'hidden'
+  );
+}
+
+/**
+ * Checks if an element is explicitly hidden from screen readers.
+ * Safely handles whitespace and case variations.
+ * @param {HTMLElement|Element} $el - The DOM element to evaluate.
+ * @returns {boolean} True if aria-hidden is "true".
+ */
+export function isAriaHidden($el) {
+  if (!$el || typeof $el.getAttribute !== 'function') return false;
+  return $el.getAttribute('aria-hidden')?.trim().toLowerCase() === 'true';
+}
+
+/**
+ * Checks if an element's semantics have been neutralized.
+ * Handles space-separated role lists (e.g., role="none presentation").
+ * @param {HTMLElement|Element} $el - The DOM element to evaluate.
+ * @returns {boolean} True if role includes "presentation" or "none".
+ */
+export function isPresentational($el) {
+  if (!$el || typeof $el.getAttribute !== 'function') return false;
+  const roleAttr = $el.getAttribute('role');
+  if (!roleAttr) return false;
+  return roleAttr
+    .toLowerCase()
+    .split(/\s+/)
+    .some((role) => role === 'presentation' || role === 'none');
+}
+
+/**
+ * Checks if an element is removed from sequential keyboard navigation.
+ * Uses the native DOM property for faster, safer numerical evaluation.
+ * @param {HTMLElement|Element} $el - The DOM element to evaluate.
+ * @returns {boolean} True if tabindex is negative.
+ */
+export function isNegativeTabindex($el) {
+  return $el && $el.tabIndex < 0;
+}
+
+/**
+ * Determines if an element is properly neutralized for both AT and keyboard users.
+ * Composes the individual utility functions for clean, reusable logic.
+ * @param {HTMLElement|Element} $el - The DOM element to evaluate.
+ * @returns {boolean} True if (role is presentation/none OR aria-hidden is true) AND tabindex is negative.
+ */
+export function isHiddenAndUnfocusable($el) {
+  return (isPresentational($el) || isAriaHidden($el)) && isNegativeTabindex($el);
+}
+
+/**
+ * Determines if an element is disabled natively or via ARIA.
+ * @param {HTMLElement|Element} $el - The DOM element to evaluate.
+ * @returns {boolean} True if the element has a disabled attribute/property or aria-disabled="true".
+ */
+export function isDisabled($el) {
+  if (!$el || typeof $el.getAttribute !== 'function') return false;
+  const isNativeDisabled = $el.hasAttribute('disabled') || $el.disabled === true;
+  const isAriaDisabled = $el.getAttribute('aria-disabled')?.trim().toLowerCase() === 'true';
+  return isNativeDisabled || isAriaDisabled;
 }
 
 /**
@@ -405,8 +469,76 @@ export function getText(element) {
   gotText.set(element, text);
   return text;
 }
+
+// Garbage collection.
 export function resetGetText() {
   gotText = new WeakMap();
+}
+
+let styleCaches = {};
+/**
+ * Retrieves the computed style for a given DOM node and optional pseudo-element.
+ * @param {Element|Node|null} node - The DOM element to evaluate.
+ * @param {string|null} [pseudoElt=null] - Optional pseudo-element (e.g., ':before').
+ * @returns {CSSStyleDeclaration|null} The computed styles.
+ */
+export const getCachedStyle = (node, pseudoElt = null) => {
+  if (!node) return null;
+
+  // Determine the cache key ('base' for standard styles).
+  const cacheKey = pseudoElt || 'base';
+
+  // Lazily create a WeakMap for this specific pseudo-element type if needed.
+  if (!styleCaches[cacheKey]) {
+    styleCaches[cacheKey] = new WeakMap();
+  }
+
+  // Fetch or compute the style.
+  const targetCache = styleCaches[cacheKey];
+  if (!targetCache.has(node)) {
+    targetCache.set(node, getComputedStyle(node, pseudoElt));
+  }
+
+  return targetCache.get(node);
+};
+
+// Garbage collection.
+export const resetStyleCache = () => {
+  styleCaches = {};
+};
+
+let parentCache = new WeakMap();
+/**
+ * Get cached parent element matching selector.
+ * Reduces DOM traversal by caching closest() results.
+ * @param {Element} element - The element to search from.
+ * @param {string} selector - CSS selector to match.
+ * @returns {Element|null} The matching parent or null.
+ */
+export function getCachedClosest(element, selector) {
+  // Safety check.
+  if (!element || !selector) return null;
+
+  // Get or create cache for this element.
+  if (!parentCache.has(element)) {
+    parentCache.set(element, new Map());
+  }
+
+  const elementCache = parentCache.get(element);
+
+  // Check if already cached.
+  if (elementCache.has(selector)) {
+    return elementCache.get(selector);
+  }
+
+  const result = element.closest(selector);
+  elementCache.set(selector, result);
+  return result;
+}
+
+// Garbage collection.
+export function resetParentCache() {
+  parentCache = new WeakMap();
 }
 
 /**
@@ -470,7 +602,7 @@ export function debounce(callback, wait) {
 export function findVisibleParent(element, property, value) {
   let $el = element;
   while ($el) {
-    const style = window.getComputedStyle($el);
+    const style = getCachedStyle($el);
     const propValue = style.getPropertyValue(property);
     if (propValue === value) {
       return $el;
@@ -708,8 +840,7 @@ export function getBestImageSource(element) {
   if (dataSrc) return resolveUrl(dataSrc);
 
   // Check <picture> sources.
-  const pictureSrcset = element
-    .closest('picture')
+  const pictureSrcset = getCachedClosest(element, 'picture')
     ?.querySelector('source[srcset]')
     ?.getAttribute('srcset');
   const pictureSrc = getLastSrc(pictureSrcset);
@@ -783,7 +914,7 @@ export function generateElementPreview(issueObject, convertBase64 = false) {
       const src = getBestImageSource(element);
       if (!src) return createCodeFallback();
 
-      const containerAnchor = element.closest('a[href]');
+      const containerAnchor = getCachedClosest(element, 'a[href]');
 
       const buildImgElement = (url) => {
         const img = document.createElement('img');
@@ -868,7 +999,7 @@ export function isVisibleTextInAccName($el, accName, exclusions = [], linkIgnore
   visibleText = removeWhitespace(visibleText).toLowerCase();
 
   // If visible text is just an x character, ignore.
-  if (visibleText === 'x') {
+  if (/^[x×✕✖✗✘]$/i.test(visibleText)) {
     return false;
   }
 

@@ -344,8 +344,7 @@ export default {
     ACC_NAME: '<strong {B}>Prístupné meno</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr><strong>Tip!</strong> "Prístupné meno" je konečná nálepka, ktorá sa komunikuje ľuďom používajúcim asistenčné technológie a ktorá sa počíta pomocou ARIA. Pomáha im to pochopiť účel odkazu alebo tlačidla.',
-    HIDDEN_FOCUSABLE:
-      'Odkaz alebo tlačidlo má <code>aria-hidden=&quot;true&quot;</code>, ale stále je prístupné cez klávesnicu. Ak chcete skryť duplikovaný odkaz alebo tlačidlo, pridajte aj <code>tabindex=&quot;-1&quot;</code>. Inak by sa <code>aria-hidden=&quot;true&quot;</code> nemalo používať na prvkoch, ktoré môžu získať fokus. <hr> Viac informácií o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atribúte aria-hidden.</a>',
+    HIDDEN_FOCUSABLE: 'Tento prvok môže prijať klávesový fokus, ale je skrytý pred čítačkami obrazovky atribútom <code>aria-hidden="true"</code> (na sebe alebo na nadradenom kontajneri). Ak to chcete napraviť, buď odstráňte atribút aria-hidden, alebo prvok odstráňte z poradia tabulátora. <hr> <strong {B}>Prvok</strong> <pre><code>%(EL)</code></pre> <hr> Ďalšie informácie o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atribúte aria-hidden.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -365,7 +364,7 @@ export default {
       'Uistite sa, že parameter <code>maximum-scale</code> v <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta značke zobrazenia</a> nie je menší ako 2.',
     META_REFRESH: 'Stránka by sa nemala automaticky obnovovať pomocou meta značky.',
     META_LANG_SUGGEST: 'Nasledujúci kód jazyka <code>%(CODE)</code> nie je platný. Mysleli ste <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Kód jazyka stránky <code>%(CODE)</code> nie je platný. Prosím <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarujte platný jazyk v HTML tagu.</a>',
+    META_LANG_VALID: 'Kód jazyka pre tento prvok nie je platný. Ak to chcete napraviť, nahraďte atribút lang platným kódom jazyka. <hr> <strong {B}>Prvok</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Ďalšie informácie o <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarovaní jazyka v HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Tlačidlu chýba prístupné meno, ktoré popisuje jeho účel.',

@@ -257,19 +257,19 @@ const Sa11yStrings = {
     LINK_TEXT: "<strong {B}>链接文本</strong> <strong {C}>%(TEXT)</strong>",
     ACC_NAME: "<strong {B}>可访问名称</strong> <strong {C}>%(TEXT)</strong>",
     ACC_NAME_TIP: "<hr> <strong>提示！</strong> “可访问名称”是传达给使用辅助技术的人的最终标签，并由 ARIA 计算。这有助于他们理解链接或按钮的目的。",
-    HIDDEN_FOCUSABLE: '链接或按钮已设置 <code>aria-hidden=&quot;true&quot;</code>，但仍然可以通过键盘聚焦。如果您打算隐藏重复的链接或按钮，请添加 <code>tabindex=&quot;-1&quot;</code>。否则，不应在可以接收焦点的元素上使用 <code>aria-hidden=&quot;true&quot;</code>。了解更多关于 <a href="https://developer.mozilla.org/zh-CH/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden 属性</a>。',
+    HIDDEN_FOCUSABLE: '此元素可以接收键盘焦点，但由于 <code>aria-hidden="true"</code> 属性（在自身或父级容器上），它对屏幕阅读器是隐藏的。要修复此问题，请移除 aria-hidden 属性，或将该元素从 Tab 键顺序中移除。 <hr> <strong {B}>元素</strong> <pre><code>%(EL)</code></pre> <hr> 了解有关 <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden 属性</a> 的更多信息。',
     // Developer
     DUPLICATE_ID: "发现<strong>重复的ID</strong>。众所周知, 当辅助技术试图与内容互动时, 重复的ID错误会给辅助技术带来问题。请删除或更改以下ID. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
     UNCONTAINED_LI: "所有 <code>&lt;li&gt;</code> 列表项必须放置在 <code>&lt;ul&gt;</code> 无序列表或 <code>&lt;ol&gt;</code> 有序列表元素内部。这个结构帮助屏幕阅读器准确地读取列表及其项。",
     TABINDEX_ATTR: "元素不应具有大于 0 的 <code>tabindex</code> 属性。",
     // Meta checks
-    META_LANG: '页面语言未声明!请<a href="https://www.w3.org/International/questions/qa-html-language-declarations">在HTML标签上声明语言。</a>',
+    META_LANG: '页面语言未声明!请<a href="https://www.w3.org/International/questions/qa-html-language-declarations.zh-hans.html">在HTML标签上声明语言。</a>',
     META_TITLE: '缺少页面标题!请提供一个<a href="https://developer.mozilla.org/zh/docs/Web/HTML/Element/title">页面标题。</a>',
     META_SCALABLE: '删除<a href="https://developer.mozilla.org/zh-CN/docs/Web/HTML/Viewport_meta_tag">视口元标签</a>中的 <code>user-scalable="no"</code> 参数，以允许缩放。',
     META_MAX: '确保<a href="https://developer.mozilla.org/zh-CN/docs/Web/HTML/Viewport_meta_tag">视口元标签</a>中的 <code>maximum-scale</code> 参数不少于 2。',
     META_REFRESH: "页面不应使用 meta 标签自动刷新。",
     META_LANG_SUGGEST: "以下语言代码 <code>%(CODE)</code> 无效。您是指 <code>%(CODE)</code> 吗？",
-    META_LANG_VALID: '页面语言代码 <code>%(CODE)</code> 无效。请在 <a href="https://www.w3.org/International/questions/qa-html-language-declarations">HTML 标签中声明有效的语言。</a>',
+    META_LANG_VALID: '此元素的语言代码无效。要修复此问题，请将 lang 属性替换为有效的语言代码。 <hr> <strong {B}>元素</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> 了解有关 <a href="https://www.w3.org/International/questions/qa-html-language-declarations.zh-hans.html">在 HTML 中声明语言</a> 的更多信息。',
     // Buttons
     BTN_EMPTY: "按钮缺少一个描述其用途的可访问名称。",
     BTN_EMPTY_LABELLEDBY: "按钮的<code>aria-labelledby</code>值为空或不匹配页面上其他元素的<code>id</code>值。",
@@ -304,7 +304,7 @@ const Sa11yStrings = {
     BG: "背景",
     NO_SUGGESTION: "仅更改文本颜色无法找到可访问的组合。请尝试更改背景颜色。",
     // Page language
-    PAGE_LANG_CONFIDENCE: '此页面超过一半的文本似乎是 %(LIKELY_LANG)，但声明的页面语言为 %(PAGE_LANG)。请考虑更新 <a href="https://www.w3.org/International/questions/qa-html-language-declarations">声明的页面语言</a> 以匹配内容。',
+    PAGE_LANG_CONFIDENCE: '此页面超过一半的文本似乎是 %(LIKELY_LANG)，但声明的页面语言为 %(PAGE_LANG)。请考虑更新 <a href="https://www.w3.org/International/questions/qa-html-language-declarations.zh-hans.html">声明的页面语言</a> 以匹配内容。',
     LANG_OF_PARTS: "页面语言声明为 %(PAGE_LANG)，但此内容似乎是 %(LIKELY_LANG)。请确保内容已正确标记。",
     LANG_MISMATCH: "此内容似乎是 %(DETECTED_LANG)，但被标记为 %(WRONG_LANG)。",
     LANG_OF_PARTS_ALT: "此替代文本似乎是 %(LIKELY_LANG)，但页面语言声明为 %(PAGE_LANG)。请确保替代文本与页面其他部分的语言一致。<hr> {ALT} <strong {C}>%(ALT)</strong>",

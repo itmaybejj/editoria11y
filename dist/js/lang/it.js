@@ -252,19 +252,19 @@ const Sa11yStrings = {
     LINK_TEXT: "<strong {B}>Testo del link</strong> <strong {C}>%(TEXT)</strong>",
     ACC_NAME: "<strong {B}>Nome accessibile</strong> <strong {C}>%(TEXT)</strong>",
     ACC_NAME_TIP: `<hr><strong>Consiglio!</strong> Il "nome accessibile" è l'etichetta finale comunicata alle persone che utilizzano tecnologie assistive e viene calcolata da ARIA. Questo aiuta a comprendere lo scopo del collegamento o del pulsante.`,
-    HIDDEN_FOCUSABLE: `Il link o il pulsante ha <code>aria-hidden=&quot;true&quot;</code> ma è ancora focalizzabile con la tastiera. Se intendi nascondere un link o un pulsante duplicato, aggiungi anche <code>tabindex=&quot;-1&quot;</code>. In caso contrario, <code>aria-hidden=&quot;true&quot;</code> non dovrebbe essere utilizzato su elementi che possono ricevere il focus. <hr> Scopri di più sull' <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">attributo aria-hidden.</a>`,
+    HIDDEN_FOCUSABLE: `Questo elemento può ricevere il focus della tastiera, ma è nascosto agli screen reader da un attributo <code>aria-hidden="true"</code> (su se stesso o su un contenitore genitore). Per risolvere il problema, rimuovi l'attributo aria-hidden o rimuovi l'elemento dall'ordine di tabulazione. <hr> <strong {B}>Elemento</strong> <pre><code>%(EL)</code></pre> <hr> Ulteriori informazioni sull'<a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">attributo aria-hidden.</a>`,
     // Developer
     DUPLICATE_ID: "Trovato <strong>ID duplicato</strong>. Gli errori di ID duplicato sono noti per causare problemi alle tecnologie assistive quando cercano di interagire con i contenuti. Si prega di rimuovere o modificare il seguente ID. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
     UNCONTAINED_LI: "Tutti gli elementi di elenco <code>&lt;li&gt;</code> devono essere inseriti all'interno di elementi <code>&lt;ul&gt;</code> non ordinati o <code>&lt;ol&gt;</code> ordinati. Questa struttura aiuta i lettori di schermo ad annunciare l'elenco e i suoi elementi con precisione.",
     TABINDEX_ATTR: "L'elemento non deve avere un attributo <code>tabindex</code> maggiore di 0.",
     // Meta checks
-    META_LANG: 'Lingua della pagina non dichiarata! Si prega di <a href="https://www.w3.org/International/questions/qa-html-language-declarations">dichiarare la lingua nel tag HTML.</a>',
+    META_LANG: 'Lingua della pagina non dichiarata! Si prega di <a href="https://www.w3.org/International/questions/qa-html-language-declarations.it.html">dichiarare la lingua nel tag HTML.</a>',
     META_TITLE: 'Titolo della pagina mancante! Si prega di fornire un <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title">titolo della pagina.</a>',
     META_SCALABLE: 'Rimuovi il parametro <code>user-scalable="no"</code> nel <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta tag del viewport</a> per consentire lo zoom.',
     META_MAX: 'Assicurati che il parametro <code>maximum-scale</code> nel <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta tag del viewport</a> non sia inferiore a 2.',
     META_REFRESH: "La pagina non dovrebbe aggiornarsi automaticamente utilizzando un tag meta.",
     META_LANG_SUGGEST: "Il seguente codice lingua <code>%(CODE)</code> non è valido. Intendevi <code>%(CODE)</code>?",
-    META_LANG_VALID: 'Il codice lingua della pagina <code>%(CODE)</code> non è valido. Per favore <a href="https://www.w3.org/International/questions/qa-html-language-declarations">dichiara una lingua valida nel tag HTML.</a>',
+    META_LANG_VALID: `Il codice della lingua per questo elemento non è valido. Per risolvere il problema, sostituisci l'attributo lang con un codice lingua valido. <hr> <strong {B}>Elemento</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Ulteriori informazioni sulla <a href="https://www.w3.org/International/questions/qa-html-language-declarations.it.html">dichiarazione della lingua in HTML.</a>`,
     // Buttons
     BTN_EMPTY: "Il pulsante è privo di un nome accessibile che descriva il suo scopo.",
     BTN_EMPTY_LABELLEDBY: "Il pulsante ha un valore <code>aria-labelledby</code> che è vuoto o non corrisponde al valore <code>id</code> di un altro elemento sulla pagina.",
@@ -299,7 +299,7 @@ const Sa11yStrings = {
     BG: "Sfondo",
     NO_SUGGESTION: "Non è possibile trovare una combinazione accessibile solo cambiando il colore del testo. Prova a cambiare il colore di sfondo.",
     // Page language
-    PAGE_LANG_CONFIDENCE: 'Più della metà del testo in questa pagina sembra essere in %(LIKELY_LANG), ma la lingua della pagina dichiarata è %(PAGE_LANG). Considera di aggiornare la <a href="https://www.w3.org/International/questions/qa-html-language-declarations">lingua della pagina dichiarata</a> per farla corrispondere al contenuto.',
+    PAGE_LANG_CONFIDENCE: 'Più della metà del testo in questa pagina sembra essere in %(LIKELY_LANG), ma la lingua della pagina dichiarata è %(PAGE_LANG). Considera di aggiornare la <a href="https://www.w3.org/International/questions/qa-html-language-declarations.it.html">lingua della pagina dichiarata</a> per farla corrispondere al contenuto.',
     LANG_OF_PARTS: "La lingua della pagina è stata dichiarata come %(PAGE_LANG), ma questo contenuto sembra essere in %(LIKELY_LANG). Assicurati che il contenuto sia contrassegnato in modo appropriato.",
     LANG_MISMATCH: "Questo contenuto sembra essere in %(DETECTED_LANG), tuttavia è stato contrassegnato come %(WRONG_LANG).",
     LANG_OF_PARTS_ALT: "Questo testo alternativo sembra essere in %(LIKELY_LANG), ma la lingua della pagina è stata dichiarata come %(PAGE_LANG). Assicurati che il testo alternativo sia nella stessa lingua del resto della pagina. <hr> {ALT} <strong {C}>%(ALT)</strong>",

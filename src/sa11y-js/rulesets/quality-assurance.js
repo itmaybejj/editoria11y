@@ -1,8 +1,6 @@
-import Constants from '../utils/constants';
 import Elements from '../utils/elements';
 import Lang from '../utils/lang';
 import * as Utils from '../utils/utils';
-import { computeAccessibleName } from '../utils/computeAccessibleName';
 import { State } from '../core/state';
 
 export default function checkQA() {
@@ -51,129 +49,6 @@ export default function checkQA() {
       }
     });
   }
-
-  /* ************************************************************** */
-  /*  Warning: Additional link checks.                              */
-  /* ************************************************************** */
-  Elements.Found.Links.forEach(($el) => {
-    if ($el.hasAttribute('href')) {
-      const href = $el.getAttribute('href');
-      const accName = Utils.removeWhitespace(
-        computeAccessibleName($el, Constants.Exclusions.LinkSpan),
-      );
-
-      // Has file extension.
-      const hasExtension = $el.matches(Constants.Global.documentSources);
-      const hasPDF = $el.matches('a[href$=".pdf"], a[href*=".pdf?"]');
-
-      // Check for broken same-page links and missing interactive semantics.
-      if (State.option.checks.QA_IN_PAGE_LINK || State.option.checks.LINK_MAYBE_BUTTON) {
-        const hasText = Utils.getText($el).length !== 0;
-        const ignored = $el.ariaHidden === 'true' && $el.getAttribute('tabindex') === '-1';
-
-        const hasAttributes =
-          $el.hasAttribute('role') ||
-          $el.hasAttribute('aria-haspopup') ||
-          $el.hasAttribute('aria-expanded') ||
-          $el.hasAttribute('onclick') ||
-          $el.hasAttribute('disabled') ||
-          !!$el.closest('nav, [role="navigation"]');
-
-        if ((href.startsWith('#') || href === '') && hasText && !ignored && !hasAttributes) {
-          const targetId = href.substring(1);
-          const ariaControls = $el.getAttribute('aria-controls');
-          const decoded = targetId ? decodeURIComponent(targetId) : '';
-          const encoded = targetId ? encodeURIComponent(targetId) : '';
-          const targetElement =
-            targetId &&
-            (document.getElementById(targetId) ||
-              (ariaControls && document.getElementById(ariaControls)) ||
-              (decoded !== targetId && document.getElementById(decoded)) ||
-              (encoded !== targetId && document.getElementById(encoded)) ||
-              document.querySelector(`a[name="${CSS.escape(targetId)}"]`));
-
-          // If reference ID doesn't exist (Target failed)
-          if (!targetElement) {
-            let isFauxButton = false;
-
-            // 1. Broken same page link AND most likely a button!
-            if (State.option.checks.LINK_MAYBE_BUTTON) {
-              const keywords = Lang._('POTENTIAL_UI_ELEMENTS');
-              const matchedKeyword = keywords.find((word) => accName.toLowerCase().includes(word));
-              if (matchedKeyword && accName.length <= 15) {
-                isFauxButton = true;
-                State.results.push({
-                  test: 'LINK_MAYBE_BUTTON',
-                  element: $el,
-                  type: State.option.checks.LINK_MAYBE_BUTTON.type || 'error',
-                  content: Lang.sprintf(
-                    State.option.checks.LINK_MAYBE_BUTTON.content || 'LINK_MAYBE_BUTTON',
-                    matchedKeyword,
-                    accName,
-                  ),
-                  args: [matchedKeyword, accName],
-                  inline: true,
-                  dismiss: Utils.prepareDismissal(`LINK_MAYBE_BUTTON_${matchedKeyword}`),
-                  dismissAll: State.option.checks.LINK_MAYBE_BUTTON.dismissAll
-                    ? 'LINK_MAYBE_BUTTON'
-                    : false,
-                  developer: State.option.checks.LINK_MAYBE_BUTTON.developer || true,
-                });
-              }
-            }
-
-            // 2. Mostly likely broken same-page link.
-            if (State.option.checks.QA_IN_PAGE_LINK && !isFauxButton) {
-              State.results.push({
-                test: 'QA_IN_PAGE_LINK',
-                element: $el,
-                type: State.option.checks.QA_IN_PAGE_LINK.type || 'error',
-                content: Lang.sprintf(
-                  State.option.checks.QA_IN_PAGE_LINK.content || 'QA_IN_PAGE_LINK',
-                  targetId,
-                  accName,
-                ),
-                args: [targetId, accName],
-                inline: true,
-                dismiss: Utils.prepareDismissal(`QA_IN_PAGE_LINK ${href}`),
-                dismissAll: State.option.checks.QA_IN_PAGE_LINK.dismissAll
-                  ? 'QA_IN_PAGE_LINK'
-                  : false,
-                developer: State.option.checks.QA_IN_PAGE_LINK.developer || false,
-              });
-            }
-          }
-        }
-      }
-
-      // Manually inspect documents & PDF for accessibility.
-      if (State.option.checks.QA_DOCUMENT && hasExtension) {
-        State.results.push({
-          test: 'QA_DOCUMENT',
-          element: $el,
-          type: State.option.checks.QA_DOCUMENT.type || 'warning',
-          content: Lang.sprintf(State.option.checks.QA_DOCUMENT.content || 'QA_DOCUMENT', accName),
-          args: [accName],
-          inline: true,
-          dismiss: Utils.prepareDismissal(`QA_DOCUMENT ${href}`),
-          dismissAll: State.option.checks.QA_DOCUMENT.dismissAll ? 'QA_DOCUMENT' : false,
-          developer: State.option.checks.QA_DOCUMENT.developer || false,
-        });
-      } else if (State.option.checks.QA_PDF && hasPDF) {
-        State.results.push({
-          test: 'QA_PDF',
-          element: $el,
-          type: State.option.checks.QA_PDF.type || 'warning',
-          content: Lang.sprintf(State.option.checks.QA_PDF.content || 'QA_PDF', accName),
-          args: [accName],
-          inline: true,
-          dismiss: Utils.prepareDismissal(`QA_PDF ${href}`),
-          dismissAll: State.option.checks.QA_PDF.dismissAll ? 'QA_PDF' : false,
-          developer: State.option.checks.QA_PDF.developer || false,
-        });
-      }
-    }
-  });
 
   /* *************************************************************** */
   /*  Warning: Find blockquotes used as headers.                     */
@@ -290,14 +165,14 @@ export default function checkQA() {
     // Find large text as heading.
     const ignoreParents = 'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level], blockquote, table';
     const computeLargeParagraphs = (p) => {
-      const size = getComputedStyle(p).fontSize.replace('px', '');
+      const size = parseFloat(Utils.getCachedStyle(p).fontSize);
       const getText = Utils.getText(p);
       const maybeSentence = getText.match(/[.;?!"]/) === null;
       const typicalHeadingLength = getText.length >= 4 && getText.length <= 120;
 
       if (
         size >= 24 &&
-        !p.closest(ignoreParents) &&
+        !Utils.getCachedClosest(p, ignoreParents) &&
         typicalHeadingLength &&
         maybeSentence &&
         !isPreviousElementAHeading(p)
@@ -318,7 +193,7 @@ export default function checkQA() {
         /^<\s*(?:strong|b)\b[^>]*>[\s\S]*?<\/\s*(?:strong|b)\s*>(?:<\s*\/?\s*br\s*>|$)/i.test(html);
 
       // Don't proceed if no match.
-      if (!likelyFakeHeading || p.closest(ignoreParents)) return;
+      if (!likelyFakeHeading || Utils.getCachedClosest(p, ignoreParents)) return;
 
       // Get fake heading text.
       const possibleHeading = p.querySelector('strong, b');
@@ -570,67 +445,73 @@ export default function checkQA() {
     });
   };
 
-  const computeStyle = ($el) => {
-    const style = getComputedStyle($el);
-    const { textDecorationLine, textAlign, fontSize } = style;
+  const checkUnderline = State.option.checks.QA_UNDERLINE;
+  const checkSmallText = State.option.checks.QA_SMALL_TEXT;
+  const checkJustify = State.option.checks.QA_JUSTIFY;
 
-    /* Check: Underlined text. */
-    const interactive =
+  if (checkUnderline || checkJustify || checkSmallText) {
+    const defaultSize = checkSmallText?.fontSize || 10;
+    const interactiveSelector =
       'a[href], button, abbr, [role="link"], [role="button"], [tabindex="0"], [onclick]';
-    if (
-      State.option.checks.QA_UNDERLINE &&
-      ($el.closest('u') || textDecorationLine === 'underline') &&
-      !$el.closest(interactive) &&
-      !$el.matches(interactive)
-    ) {
-      addUnderlineResult($el);
-    }
 
-    /* Check: Font size is greater than 0 and less than 10. */
-    const defaultSize = State.option.checks.QA_SMALL_TEXT.fontSize || 10;
-    const computedFontSize = parseFloat(fontSize);
+    // 3. Fast, allocation-free check for non-empty direct text nodes
+    const hasDirectText = (el) => {
+      let node = el.firstChild;
+      while (node) {
+        // nodeType 3 is a Text Node
+        if (node.nodeType === 3 && node.nodeValue.trim().length > 0) {
+          return true;
+        }
+        node = node.nextSibling;
+      }
+      return false;
+    };
 
-    // Compare with parent element's font size.
-    const parentFontSize = $el.parentElement
-      ? parseFloat(getComputedStyle($el.parentElement).fontSize)
-      : null;
-    const isInherited = parentFontSize === computedFontSize;
-
-    // Ensure the font size is specific to the element, not inherited.
-    const isSup = $el.closest('sup, sub') !== null;
-    const withinRange =
-      !isInherited && !isSup && computedFontSize > 1 && computedFontSize <= defaultSize;
-    if (State.option.checks.QA_SMALL_TEXT && withinRange) {
-      addSmallTextResult($el);
-    }
-
-    /* Check: Check if text is justify-aligned. */
-    const parentJustify = $el.parentElement ? getComputedStyle($el.parentElement).textAlign : null;
-    const justifyInherited = parentJustify === textAlign;
-    if (State.option.checks.QA_JUSTIFY && textAlign === 'justify' && !justifyInherited) {
-      addJustifyResult($el);
-    }
-  };
-
-  // Loop through all elements within the root area.
-  if (
-    State.option.checks.QA_UNDERLINE ||
-    State.option.checks.QA_JUSTIFY ||
-    State.option.checks.QA_SMALL_TEXT
-  ) {
+    // 4. Loop through elements
     for (let i = 0; i < Elements.Found.Everything.length; i++) {
       const $el = Elements.Found.Everything[i];
 
-      // Filter only text nodes.
-      const textString = Array.from($el.childNodes)
-        .filter((node) => node.nodeType === 3)
-        .map((node) => node.textContent)
-        .join('');
-      const text = textString.trim();
+      // Skip computing styles entirely if there's no text
+      if (!hasDirectText($el)) continue;
 
-      // Only if there's text!
-      if (text.length !== 0) {
-        computeStyle($el);
+      // Fetch styles using the cache
+      const style = Utils.getCachedStyle($el);
+      const parentStyle = Utils.getCachedStyle($el.parentElement);
+
+      /* Check: Underlined text */
+      if (checkUnderline) {
+        // Evaluate cheap style checks before triggering expensive closest traversals.
+        if (
+          (style.textDecorationLine === 'underline' || Utils.getCachedClosest($el, 'u')) &&
+          !$el.matches(interactiveSelector) &&
+          !Utils.getCachedClosest($el, interactiveSelector)
+        ) {
+          addUnderlineResult($el);
+        }
+      }
+
+      /* Check: Font size is greater than 0 and less than 10 */
+      if (checkSmallText) {
+        const computedFontSize = parseFloat(style.fontSize);
+
+        if (computedFontSize > 1 && computedFontSize <= defaultSize) {
+          const parentFontSize = parentStyle ? parseFloat(parentStyle.fontSize) : null;
+          const isInherited = parentFontSize === computedFontSize;
+
+          if (!isInherited && !Utils.getCachedClosest($el, 'sup, sub')) {
+            addSmallTextResult($el);
+          }
+        }
+      }
+
+      /* Check: Text is justify-aligned */
+      if (checkJustify && style.textAlign === 'justify') {
+        const parentJustify = parentStyle ? parentStyle.textAlign : null;
+        const justifyInherited = parentJustify === style.textAlign;
+
+        if (!justifyInherited) {
+          addJustifyResult($el);
+        }
       }
     }
   }

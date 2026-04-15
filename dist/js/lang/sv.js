@@ -272,7 +272,7 @@ const Sa11yStrings = {
     LINK_TEXT: "<strong {B}>Länktext</strong> <strong {C}>%(TEXT)</strong>",
     ACC_NAME: "<strong {B}>Tillgängligt namn</strong> <strong {C}>%(TEXT)</strong>",
     ACC_NAME_TIP: '<hr><strong>Tips!</strong> "Tillgängligt namn" är den slutliga etiketten som kommuniceras till personer som använder hjälpmedel och beräknas av ARIA. Detta hjälper dem att förstå syftet med länken eller knappen.',
-    HIDDEN_FOCUSABLE: 'Länken eller knappen har <code>aria-hidden=&quot;true&quot;</code>, men kan fortfarande fokuseras med hjälp av tangentbordet. Om du avser att dölja en duplicerad länk eller knapp, lägg även till <code>tabindex=&quot;-1&quot;</code>. Annars bör <code>aria-hidden=&quot;true&quot;</code> inte användas på element som kan ta emot fokus. <hr> Läs mer om <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden-attributet.</a>',
+    HIDDEN_FOCUSABLE: 'Det här elementet kan ta emot tangentbordsfokus, men är dolt för skärmläsare genom attributet <code>aria-hidden="true"</code> (på sig självt eller en överordnad behållare). För att åtgärda detta, ta antingen bort attributet aria-hidden eller ta bort elementet från tabbordningen. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Läs mer om <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">attributet aria-hidden.</a>',
     // Developer
     DUPLICATE_ID: "Hittade <strong>duplicerat ID</strong>. Dubbletterade ID:n är kända för att orsaka problem för hjälpmedelsverktyg när de försöker interagera med innehåll. Ta bort eller ändra följande ID. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
     UNCONTAINED_LI: "Alla <code>&lt;li&gt;</code> listobjekt måste placeras inuti <code>&lt;ul&gt;</code> oordnade eller <code>&lt;ol&gt;</code> ordnade element. Denna struktur hjälper skärmläsare att korrekt tillkännage listan och dess objekt.",
@@ -284,7 +284,7 @@ const Sa11yStrings = {
     META_MAX: 'Se till att parametern <code>maximum-scale</code> i <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta-taggen för vyport</a> inte är mindre än 2.',
     META_REFRESH: "Sidan ska inte automatiskt uppdateras med hjälp av en meta-tagg.",
     META_LANG_SUGGEST: "Följande språkkod <code>%(CODE)</code> är inte giltig. Menade du <code>%(CODE)</code>?",
-    META_LANG_VALID: 'Sidans språkkod <code>%(CODE)</code> är inte giltig. <a href="https://www.w3.org/International/questions/qa-html-language-declarations">Deklarera ett giltigt språk i HTML-taggen.</a>',
+    META_LANG_VALID: 'Språkkoden för detta element är inte giltig. För att åtgärda detta, ersätt lang-attributet med en giltig språkkod. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Läs mer om att <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarera språk i HTML.</a>',
     // Buttons
     BTN_EMPTY: "Knappen saknar ett tillgängligt namn som beskriver dess syfte.",
     BTN_EMPTY_LABELLEDBY: "Knappen har ett <code>aria-labelledby</code>-värde som är tomt eller inte matchar värdet <code>id</code> för ett annat element på sidan.",

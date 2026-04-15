@@ -341,8 +341,7 @@ export default {
     ACC_NAME: '<strong {B}>பயன்படுத்தும்படி ஆக்கப்பட்ட பெயர்</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
       '<hr> <strong>துணுக்கு!</strong> "பயன்படுத்தும்படியாக்கப்பட்ட பெயர்" என்பது உதவி தொழில்நுட்ப நபர்களுக்குத் தெரிவிக்கப்படும் இறுதி விவரமிடலாகும்.',
-    HIDDEN_FOCUSABLE:
-      '<code>aria-hidden="true"</code> உள்ளது, ஆனால் இன்னும் விசைப்பலகையின் மூலம் கவனம் செலுத்த முடியும். <code>tabindex="-1"</code> சேர்க்கவும்.',
+    HIDDEN_FOCUSABLE: 'இந்த உறுப்பிற்கு விசைப்பலகை மூலம் ஃபோகஸ் (keyboard focus) செய்ய முடியும், ஆனால் <code>aria-hidden="true"</code> எனும் பண்புக்கூறு காரணமாக (இந்த உறுப்பிலோ அல்லது அதன் பெற்றோர் கண்டெய்னரிலோ இருப்பதால்) திரை வாசிப்பான்களிடமிருந்து (screen readers) மறைக்கப்பட்டுள்ளது. இதைச் சரிசெய்ய, aria-hidden பண்புக்கூற்றை நீக்கவும் அல்லது டேப் வரிசையில் (tab order) இருந்து இந்த உறுப்பை நீக்கவும். <hr> <strong {B}>உறுப்பு</strong> <pre><code>%(EL)</code></pre> <hr> <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden பண்புக்கூறு</a> பற்றி மேலும் அறிக.',
 
     // Developer Checks
     DUPLICATE_ID:
@@ -358,7 +357,7 @@ export default {
     META_LANG: 'பக்கத்தின் மொழி அறிவிக்கப்படவில்லை! HTML அடையாளமிடலில் மொழியை அறிவிக்கவும்.',
     META_REFRESH: 'பக்கம் தானாகவே புதுப்பிக்கப்படக்கூடாது.',
     META_LANG_SUGGEST: 'பின்வரும் குறியீடு  <code>%(CODE)</code> செல்லாதது. நீங்கள் எழுத விரும்பியது இதுவா <code>%(CODE)</code>?',
-    META_LANG_VALID: 'பக்கத்தின் மொழிக் குறியீடு <code>%(CODE)</code> செல்லாதது. தயவுசெய்து <a href="https://www.w3.org/International/questions/qa-html-language-declarations"> HTML அடையாளமிடலில் செல்லுபடியாகும் ஒரு மொழியை அறிவியுங்கள்.</a>',
+    META_LANG_VALID: 'இந்த உறுப்பிற்கான மொழிக் குறியீடு செல்லுபடியாகாது. இதைச் சரிசெய்ய, lang பண்புக்கூற்றைச் (attribute) சரியான மொழிக் குறியீடாக மாற்றவும். <hr> <strong {B}>உறுப்பு</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> HTML-இல் <a href="https://www.w3.org/International/questions/qa-html-language-declarations">மொழியை அறிவிப்பது பற்றி மேலும் அறிக.</a>',
 
     // Buttons
     BTN_EMPTY: 'பயன்படுத்தும்படி ஆக்கப்பட்ட பெயர் பட்டனில் விடுபட்டுள்ளது.',
