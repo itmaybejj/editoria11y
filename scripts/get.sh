@@ -36,5 +36,12 @@ done < "$filename"
 
 npm install
 
+# Report any new Sa11y check keys or strings that arrived with this pull
+# and aren't yet mirrored in src/lang/baseAll.js. Non-fatal here; the same
+# check runs as a hard gate in CI via `npm run check:keys`.
+echo ""
+echo "Checking for new Sa11y test keys not yet mirrored in ed11y..."
+node scripts/check-test-keys.js || true
+
 # MacOS creates unwanted backup files
 # rm editoria11y.libraries.yml-E
