@@ -102,7 +102,7 @@ export class Ed11yElementTip extends HTMLElement {
     const title = content.querySelector('.title');
     const invisibleAlert = document.createElement('div');
     invisibleAlert.classList.add('invisible-alert');
-    title.prepend(invisibleAlert);
+    title.append(invisibleAlert);
     if (this.result.contrastDetails) {
       const contrastDiv = document.createElement('div');
       contrastDiv.classList.add('ed11y-contrast-tools');

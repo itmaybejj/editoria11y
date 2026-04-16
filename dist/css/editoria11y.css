@@ -72,13 +72,15 @@ ed11y-element-result {
   vertical-align: top;
   color: var(--ed11y-primaryText);
   background: var(--ed11y-primary);
+  z-index: 2;
   border: 1px solid;
   border-radius: 1em;
-  margin: 2px .25em -2px 0;
+  margin: 1px .25em -1px 0;
   padding: 0 .5em;
   font-size: 12px;
   font-weight: 400;
   display: inline-block;
+  position: relative;
 }
 
 .ed11y-wrapper .badge:has(.link-icon) {
@@ -983,6 +985,7 @@ button.ed11y-jump:hover .toggle-count {
   padding-inline: 2px;
   font-style: normal;
   font-weight: 500;
+  line-height: 1.25;
   display: inline-block;
 }
 
@@ -1007,7 +1010,7 @@ button.ed11y-jump:hover .toggle-count {
 .ed11y-tip-wrapper .invisible-alert:not(:empty) {
   color: #010101;
   background: var(--ed11y-warning);
-  margin: 0 6px 10px -1px;
+  margin: 10px 6px 0 -1px;
   padding: 13px 12px 12px 16px;
   font-size: 90%;
   font-style: italic;
@@ -1143,9 +1146,10 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 .ed11y-tip-wrapper .title {
+  opacity: .9;
   outline: #0000;
-  padding: 8px 1.5em .6125em 0;
-  font-size: 1.0625em;
+  padding: 10px 1.5em .6125em 0;
+  font-size: 1.125em;
   font-weight: bold;
 }
 
@@ -1371,7 +1375,7 @@ button.ed11y-jump:hover .toggle-count {
   margin-bottom: -.1em;
 }
 
-@media screen and (width <= 50rem) {
+@media screen and (width <= 640px) {
   .ed11y-tip-wrapper .error-badge {
     display: none;
   }
