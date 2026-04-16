@@ -2,6 +2,7 @@ import { default as Sa11yStrings } from '../sa11y-lang/sv.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
 const testNames = {
+	ARIA_INPUT_FIELD_NAME: 'Detta anpassade inmatningsfält saknar etikett',
 	ALT_FILE_EXT: 'Denna alt‑text är ett filnamn, inte en beskrivning',
 	ALT_MAYBE_BAD: 'Är detta en tydlig och koncis beskrivning av bilden?',
 	ALT_MAYBE_BAD_WARNING: 'Är detta en tydlig och koncis beskrivning av bilden?',
@@ -39,9 +40,15 @@ const testNames = {
 	IMAGE_FIGURE_DUPLICATE_ALT: 'Alt‑text ska inte vara identisk med bildtext',
 	LABELS_ARIA_LABEL_INPUT: 'Finns det en synlig etikett för detta fält?',
 	LABELS_INPUT_RESET: 'Behövs denna återställningsknapp?',
-	LABELS_MISSING_LABEL: 'Detta formulärfält är inte kopplat till en etikett',
+	LABELS_MISSING_IMAGE_INPUT: 'Bildknappen saknar alt‑text',
+	LABELS_MISSING_LABEL: 'Detta inmatningsfält har en tom etikett',
+	LABELS_NO_FOR_ATTRIBUTE: 'Detta inmatningsfält är inte kopplat till en etikett',
 	LABELS_PLACEHOLDER: 'Manuell granskning: platshållartext',
 	LABEL_IN_NAME: 'Den synliga etiketten matchar inte det tillgängliga namnet',
+	LANG_MISMATCH: 'Språktagg matchar inte innehållet',
+	LANG_OF_PARTS: 'Det här innehållet verkar vara på ett annat språk',
+	LANG_OF_PARTS_ALT: 'Den här alt‑texten verkar vara på ett annat språk',
+	LINK_LABEL: 'Länketikett',
 	LINK_ALT_FILE_EXT: 'Alt‑text i länk ska inte vara en URL',
 	LINK_ALT_MAYBE_BAD: 'Denna alt‑text i länk är kanske inte tydlig och koncis',
 	LINK_ALT_MAYBE_BAD_WARNING: 'Denna alt‑text i länk är kanske inte tydlig och koncis',
@@ -68,6 +75,8 @@ const testNames = {
 	LINK_SYMBOLS: 'Manuell granskning: är symboler eller emoji i länken meningsfulla?',
 	LINK_URL: 'Länktext ska inte vara en URL',
 	META_LANG: 'Meta‑tagg för sidans språk saknas',
+	META_LANG_SUGGEST: 'Menade du en annan språkkod?',
+	META_LANG_VALID: 'Språkkoden är inte giltig',
 	META_MAX: 'Meta‑tagg begränsar användarens möjlighet att zooma',
 	META_REFRESH: 'Meta‑tagg uppdaterar sidan automatiskt',
 	META_SCALABLE: 'Meta‑tagg inaktiverar zoomning',
@@ -75,6 +84,7 @@ const testNames = {
 	MISSING_ALT: 'Ogiltig HTML: bild utan alt‑attribut',
 	MISSING_ALT_LINK: 'Ogiltig HTML: länkad bild utan alt‑attribut',
 	MISSING_ALT_LINK_HAS_TEXT: 'Ogiltig HTML: bild i länk saknar alt‑attribut',
+	PAGE_LANG_CONFIDENCE: 'Sidans språk kanske inte matchar innehållet',
 	QA_BAD_LINK: 'Manuell granskning: länken kan vara ogiltig',
 	QA_BLOCKQUOTE: 'Bör detta blockcitat vara en rubrik?',
 	QA_DOCUMENT: 'Är detta dokument korrekt taggat för skärmläsare?',
@@ -92,6 +102,7 @@ const testNames = {
 	SUS_ALT: 'Finns det onödiga ord i denna alt‑text?',
 	TABINDEX_ATTR: 'Attributet tabindex kan störa läsordningen',
 	TABLES_EMPTY_HEADING: 'Denna tabellhuvudcell behöver text',
+	TABLES_INVALID_HEADERS_REF: 'Denna tabell har ogiltiga rubrikreferenser',
 	TABLES_MISSING_HEADINGS: 'Tabellen saknar rad‑ och/eller kolumnrubriker',
 	TABLES_SEMANTIC_HEADING: 'Innehållsrubriker bör inte användas inne i tabeller',
 	UNCONTAINED_LI: 'Ogiltig HTML‑lista',
@@ -110,6 +121,7 @@ const why = {
 };
 
 export const tips = {
+	ARIA_INPUT_FIELD_NAME: `<p><strong>Element:</strong> <code>%(EL)</code></p><p>${why.fix}Ange en giltig etikett; för anpassade inmatningselement innebär det ofta innertext, eller ett title‑, aria-label‑ eller aria-labelledby‑attribut.`,
 	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt‑text: <strong>"%(ALT_TEXT)"</strong></p><p>Skärmläsare läser upp denna URL, ofta tecken för tecken. Det ger sällan samma mening som att se bilden.</p><p><strong class="badge">Åtgärda</strong> Lägg till alt="" om detta är ren dekoration som bör ignoreras av skärmläsare, eller lägg till en beskrivande alt‑text.</p>${why.images}`,
 	ALT_MAYBE_BAD: `<p>Alt‑text: <strong>"%(alt)"</strong></p><p><strong class="badge">Åtgärda</strong> Ange en alt‑text som kort beskriver vad bilden betyder i detta sammanhang.</p>${why.images}`,
 	ALT_MAYBE_BAD_WARNING: `<p>Alt‑text: <strong>"%(alt)"</strong></p><p><strong class="badge">Åtgärda</strong> Ange en alt‑text som kort beskriver vad bilden betyder i detta sammanhang.</p>${why.images}`,
@@ -202,7 +214,7 @@ export const tips = {
 export const interfaceStrings = {
 	ALERT_CLOSE: 'Stäng',
 	ALT: 'Alt‑text: ',
-	CONSOLE_ERROR: 'Det uppstod ett problem med tillgänglighetskontrollen på denna sida. <a class="g-link">Rapportera på GitHub</a>.',
+	CONSOLE_ERROR: 'Det uppstod ett problem med tillgänglighetskontrollen på denna sida. <a class="g-link">Rapportera på GitHub</a>. Felsökningsinformation:',
 	DECORATIVE: 'Markerad som dekorativ',
 	DISMISS: 'Avfärda',
 	DISMISS_ALL: 'På denna sida: avfärda',

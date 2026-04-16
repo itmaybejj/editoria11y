@@ -318,8 +318,9 @@
     }
   };
   const testNames = {
+    ARIA_INPUT_FIELD_NAME: "Dette tilpassede inputfelt mangler en etiket",
     ALT_PLACEHOLDER: "Denne alt‑tekst beskriver ikke billedet",
-    LABELS_MISSING_LABEL: "Dette inputfelt er ikke tilknyttet en etiket",
+    LABELS_MISSING_LABEL: "Dette inputfelt har en tom etiket",
     LINK_IDENTICAL_NAME: "Links med samme tekst fører til forskellige sider",
     LINK_STOPWORD: "Dette link indeholder kun generiske ord",
     ALT_FILE_EXT: "Denne alt‑tekst er et filnavn, ikke en beskrivelse",
@@ -360,6 +361,9 @@
     LABELS_PLACEHOLDER: "Manuel kontrol: placeholder‑tekst",
     LABELS_INPUT_RESET: "Er denne “Nulstil”‑knap nødvendig?",
     LABEL_IN_NAME: "Den synlige etiket matcher ikke den usynlige etiket",
+    LANG_MISMATCH: "Sprogtag svarer ikke til indholdet",
+    LANG_OF_PARTS: "Dette indhold ser ud til at være på et andet sprog",
+    LANG_OF_PARTS_ALT: "Denne alt‑tekst ser ud til at være på et andet sprog",
     LINK_ALT_FILE_EXT: "Alt‑tekst brugt som link må ikke være en URL",
     LINK_ALT_MAYBE_BAD: "Denne alt‑tekst i linket er måske ikke klar og præcis",
     LINK_ALT_MAYBE_BAD_WARNING: "Denne alt‑tekst i linket er måske ikke klar og præcis",
@@ -376,6 +380,7 @@
     LINK_IMAGE_LONG_ALT: "Kan denne alt‑tekst i linket være kortere?",
     LINK_IMAGE_NO_ALT_TEXT: "Dette billede, som bruges som link, behøver alt‑tekst",
     LINK_IMAGE_TEXT: "Manuel kontrol: billede i link er markeret som dekorativt.",
+    LINK_LABEL: "Linketiket",
     LINK_MAYBE_BUTTON: "Dette link ligner noget, der burde være en knap",
     LINK_NEW_TAB: "Åbner dette link en ny fane uden advarsel?",
     LINK_PLACEHOLDER_ALT: "Dette billede‑link behøver meningsfuld alt‑tekst",
@@ -384,6 +389,8 @@
     LINK_SYMBOLS: "Manuel kontrol: er symboler/emoji i dette link meningsfulde?",
     LINK_URL: "Linktekst må ikke være en URL",
     META_LANG: "Meta‑tag for sidens sprog mangler",
+    META_LANG_SUGGEST: "Mente du en anden sprogkode?",
+    META_LANG_VALID: "Sprogkoden er ikke gyldig",
     META_MAX: "Meta‑tag begrænser, hvor meget brugeren kan zoome",
     META_REFRESH: "Meta‑tag opdaterer siden automatisk",
     META_SCALABLE: "Meta‑tag forhindrer brugeren i at zoome",
@@ -391,6 +398,7 @@
     MISSING_ALT: "Ugyldig HTML: billede uden alt‑attribut",
     MISSING_ALT_LINK: "Ugyldig HTML: billede i link uden alt‑attribut",
     MISSING_ALT_LINK_HAS_TEXT: "Ugyldig HTML: billede i link mangler alt‑attribut",
+    PAGE_LANG_CONFIDENCE: "Sidens sprog svarer muligvis ikke til indholdet",
     QA_BAD_LINK: "Manuel kontrol: linkdestination kan være ugyldig",
     QA_BLOCKQUOTE: "Skal dette citat være en overskrift?",
     QA_DOCUMENT: "Er dette dokument tagget til skærmlæsere?",
@@ -408,6 +416,7 @@
     SUS_ALT: "Er der overflødige ord i denne alt‑tekst?",
     TABINDEX_ATTR: "tabindex‑attribut forstyrrer læserækkefølgen",
     TABLES_EMPTY_HEADING: "Denne tabeloverskriftscelle skal indeholde tekst",
+    TABLES_INVALID_HEADERS_REF: "Denne tabel har ugyldige overskriftsreferencer",
     TABLES_MISSING_HEADINGS: "Denne tabel mangler række‑ og/eller kolonneoverskrifter",
     TABLES_SEMANTIC_HEADING: "Indholdsoverskrifter bør ikke bruges inde i tabeller",
     UNCONTAINED_LI: "Ugyldig HTML‑liste"
@@ -422,6 +431,7 @@
     <li>Ikke kort: "<a href="https://webaim.org/techniques/hypertext/link_text">Klik her for at lære mere om meningsfulde links</a>"</li></ul></div>`
   };
   const tips = {
+    ARIA_INPUT_FIELD_NAME: `<p><strong>Element:</strong> <code>%(EL)</code></p><p>${why.fix}Angiv et gyldigt label; for tilpassede inputelementer betyder det oftest indre tekst eller en title-, aria-label- eller aria-labelledby-attribut.`,
     ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt‑tekst: <strong>"%(ALT_TEXT)"</strong></p><p>Skærmlæsere læser denne URL op — ofte tegn for tegn. Det formidler sjældent samme betydning som at se billedet.</p><p><strong class="badge">Løsning</strong> Tilføj alt="" hvis billedet er ren dekoration, eller skriv en beskrivende alt‑tekst.</p>${why.images}`,
     ALT_MAYBE_BAD: `<p>Alt‑tekst: <strong>"%(alt)"</strong></p><p><strong class="badge">Løsning</strong> Sæt billedets alternative tekst til en kort og præcis beskrivelse af, hvad billedet betyder i denne sammenhæng.</p>${why.images}`,
     ALT_MAYBE_BAD_WARNING: `<p>Alt‑tekst: <strong>"%(alt)"</strong></p><p><strong class="badge">Løsning</strong> Sæt billedets alternative tekst til en kort og præcis beskrivelse af, hvad billedet betyder i denne sammenhæng.</p>${why.images}`,
@@ -514,7 +524,7 @@
   const interfaceStrings = {
     ALERT_CLOSE: "Luk",
     ALT: "Alt‑tekst: ",
-    CONSOLE_ERROR: 'Der opstod et problem med tilgængelighedskontrollen på denne side. <a class="g-link">Rapportér det på GitHub</a>.',
+    CONSOLE_ERROR: 'Der opstod et problem med tilgængelighedskontrollen på denne side. <a class="g-link">Rapportér det på GitHub</a>. Fejlfindingsoplysninger:',
     DECORATIVE: "Markeret som dekorativ",
     DISMISS: "Ignorer",
     DISMISS_ALL: "På denne side: ignorer",

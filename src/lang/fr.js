@@ -7,6 +7,7 @@ const testNames = {
 	ALT_MAYBE_BAD_WARNING: `S’agit‑il d’une description claire et concise de l’image ?`,
 	ALT_PLACEHOLDER: 'Ce texte alternatif ne décrit pas l’image', // updated
 	ALT_UNPRONOUNCEABLE: 'Ce texte alternatif est impossible à prononcer',
+	ARIA_INPUT_FIELD_NAME: `Ce champ de saisie personnalisé n’a pas d’étiquette`,
 	BTN_EMPTY: 'Le bouton n’a pas d’étiquette accessible',
 	BTN_EMPTY_LABELLEDBY: 'Le bouton possède une étiquette ARIA non valide',
 	BTN_ROLE_IN_NAME: 'Le nom du bouton répète le mot « button »',
@@ -41,7 +42,12 @@ const testNames = {
 	LABELS_PLACEHOLDER: 'Vérification manuelle : texte de remplacement',
 	LABELS_INPUT_RESET: 'Ce bouton de réinitialisation est‑il nécessaire ?',
 	LABEL_IN_NAME: 'L’étiquette visible ne correspond pas à l’étiquette invisible',
-	LABELS_MISSING_LABEL: 'Ce champ n’est pas connecté à une étiquette', // updated new
+	LABELS_MISSING_IMAGE_INPUT: `Ce bouton image n’a pas de texte alternatif`,
+	LABELS_MISSING_LABEL: `Ce champ a une étiquette vide`,
+	LABELS_NO_FOR_ATTRIBUTE: `Ce champ n’est pas connecté à une étiquette`,
+	LANG_MISMATCH: 'La balise de langue ne correspond pas au contenu',
+	LANG_OF_PARTS: 'Ce contenu semble être dans une autre langue',
+	LANG_OF_PARTS_ALT: 'Ce texte alternatif semble être dans une autre langue',
 	LINK_ALT_FILE_EXT: 'Un texte alternatif utilisé comme lien ne doit pas être une URL',
 	LINK_ALT_MAYBE_BAD: `Ce texte alternatif lié n’est peut‑être pas clair et concis`,
 	LINK_ALT_MAYBE_BAD_WARNING: `Ce texte alternatif lié n’est peut‑être pas clair et concis`,
@@ -59,6 +65,7 @@ const testNames = {
 	LINK_IMAGE_LONG_ALT: 'Ce texte alternatif lié peut‑il être plus court ?',
 	LINK_IMAGE_NO_ALT_TEXT: 'Cette image liée nécessite un texte alternatif',
 	LINK_IMAGE_TEXT: 'Vérification manuelle : image dans un lien marquée comme décorative.',
+	LINK_LABEL: 'Étiquette de lien',
 	LINK_MAYBE_BUTTON: 'Ce lien ressemble à un bouton',
 	LINK_NEW_TAB: 'Ce lien ouvre‑t‑il un nouvel onglet sans avertissement ?',
 	LINK_PLACEHOLDER_ALT: 'Cette image liée nécessite un texte alternatif significatif',
@@ -68,10 +75,13 @@ const testNames = {
 	LINK_SYMBOLS: 'Vérification manuelle : les symboles ou émojis dans ce lien sont‑ils significatifs ?',
 	LINK_URL: 'Le texte du lien ne doit pas être une URL',
 	META_LANG: 'Balise meta pour la langue manquante',
+	META_LANG_SUGGEST: 'Vouliez‑vous utiliser un code de langue différent ?',
+	META_LANG_VALID: 'Le code de langue n’est pas valide',
 	META_MAX: 'La balise meta limite l’agrandissement du texte',
 	META_REFRESH: 'La balise meta actualise automatiquement la page',
 	META_SCALABLE: 'La balise meta empêche l’agrandissement du texte',
 	META_TITLE: 'Balise meta du titre de page manquante',
+	PAGE_LANG_CONFIDENCE: 'La langue de la page peut ne pas correspondre au contenu',
 	MISSING_ALT: 'HTML invalide : image sans attribut alt',
 	MISSING_ALT_LINK: 'HTML invalide : image liée sans attribut alt',
 	MISSING_ALT_LINK_HAS_TEXT: 'HTML invalide : image dans un lien sans attribut alt',
@@ -93,6 +103,7 @@ const testNames = {
 	TABINDEX_ATTR: 'tabindex sur cet élément perturbe l’ordre de lecture',
 	TABLES_EMPTY_HEADING: 'Cette cellule d’en‑tête a besoin de texte',
 	TABLES_MISSING_HEADINGS: 'Ce tableau a besoin d’une ligne et/ou d’une colonne d’en‑têtes',
+	TABLES_INVALID_HEADERS_REF: `Ce tableau contient des références d'en‑têtes invalides`,
 	TABLES_SEMANTIC_HEADING: 'Les en‑têtes de contenu ne doivent pas être utilisés dans les tableaux',
 	UNCONTAINED_LI: 'Liste HTML invalide',
 };
@@ -136,6 +147,8 @@ const why = {
 };
 
 export const tips = {
+	ARIA_INPUT_FIELD_NAME: `<p><strong>Élément :</strong> <code>%(EL)</code></p><p>${why.fix}Fournissez une étiquette valide ; pour les éléments de saisie personnalisés, cela signifie souvent du texte interne, ou un attribut title, aria-label ou aria-labelledby.`,
+
 	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Texte alternatif : <strong>"%(ALT_TEXT)"</strong></p><p>Les lecteurs d’écran liront cette URL, souvent lettre par lettre. Cela ne transmet probablement pas la même signification que de voir l’image.</p><p>${why.fix}Ajoutez un texte alternatif vide (alt="") si cette image est purement décorative et doit être ignorée par les lecteurs d’écran, ou ajoutez un texte alternatif descriptif.</p>${why.images}`,
 
 	ALT_MAYBE_BAD: `<p>Texte alternatif : <strong>"%(alt)"</strong></p><p>${why.fix}Définissez le texte alternatif de cette image sur une description concise de ce que l’image signifie dans ce contexte.</p>${why.images}`,
@@ -316,7 +329,7 @@ const interfaceStrings = {
 	ALERT_CLOSE: 'Fermer',
 	ALT: 'Texte alternatif : ',
 	CONSOLE_ERROR:
-		'Un problème affecte le vérificateur d’accessibilité sur cette page. Veuillez <a class="g-link">le signaler sur GitHub</a>.', // updated new
+		`Un problème affecte le vérificateur d’accessibilité sur cette page. Veuillez <a class="g-link">le signaler sur GitHub</a>. Informations de débogage :`,
 	DECORATIVE: 'Marqué comme décoratif',
 	DISMISS: 'Ignorer',
 	DISMISS_ALL: 'Sur cette page : ignorer',

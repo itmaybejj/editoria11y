@@ -360,6 +360,7 @@ const Sa11yStrings = {
   }
 };
 const testNames = {
+  ARIA_INPUT_FIELD_NAME: "Diesem benutzerdefinierten Eingabefeld fehlt eine Beschriftung",
   ALT_FILE_EXT: "Dieser Alt‑Text ist ein Dateiname, keine Beschreibung",
   ALT_MAYBE_BAD: "Ist dies eine klare und prägnante Beschreibung des Bildes?",
   ALT_MAYBE_BAD_WARNING: "Ist dies eine klare und prägnante Beschreibung des Bildes?",
@@ -399,7 +400,12 @@ const testNames = {
   LABELS_PLACEHOLDER: "Manuelle Prüfung: Platzhaltertext",
   LABELS_INPUT_RESET: "Wird diese „Zurücksetzen“‑Schaltfläche benötigt?",
   LABEL_IN_NAME: "Sichtbare Beschriftung stimmt nicht mit der unsichtbaren überein",
-  LABELS_MISSING_LABEL: "Dieses Eingabefeld hat keine zugeordnete Beschriftung",
+  LABELS_MISSING_IMAGE_INPUT: "Dieses Bild-Eingabefeld hat keinen Alt-Text",
+  LABELS_MISSING_LABEL: "Dieses Eingabefeld hat eine leere Beschriftung",
+  LABELS_NO_FOR_ATTRIBUTE: "Dieses Eingabefeld ist nicht mit einer Beschriftung verbunden",
+  LANG_MISMATCH: "Sprach-Tag stimmt nicht mit dem Inhalt überein",
+  LANG_OF_PARTS: "Dieser Inhalt scheint in einer anderen Sprache zu sein",
+  LANG_OF_PARTS_ALT: "Dieser Alt-Text scheint in einer anderen Sprache zu sein",
   LINK_ALT_FILE_EXT: "Als Link verwendeter Alt‑Text sollte keine URL sein",
   LINK_ALT_MAYBE_BAD: "Dieser verlinkte Alt‑Text ist möglicherweise nicht klar und prägnant",
   LINK_ALT_MAYBE_BAD_WARNING: "Dieser verlinkte Alt‑Text ist möglicherweise nicht klar und prägnant",
@@ -417,6 +423,7 @@ const testNames = {
   LINK_IMAGE_LONG_ALT: "Kann dieser verlinkte Alt‑Text kürzer sein?",
   LINK_IMAGE_NO_ALT_TEXT: "Dieses verlinkte Bild benötigt Alt‑Text",
   LINK_IMAGE_TEXT: "Manuelle Prüfung: Bild in einem Link als dekorativ markiert.",
+  LINK_LABEL: "Linkbeschriftung",
   LINK_MAYBE_BUTTON: "Dieser Link sieht aus, als sollte er eine Schaltfläche sein",
   LINK_NEW_TAB: "Öffnet dieser Link eine neue Registerkarte ohne Hinweis?",
   LINK_PLACEHOLDER_ALT: "Dieses verlinkte Bild benötigt aussagekräftigen Alt‑Text",
@@ -426,6 +433,8 @@ const testNames = {
   LINK_SYMBOLS: "Manuelle Prüfung: Sind die Symbole oder Emojis in diesem Link sinnvoll?",
   LINK_URL: "Linktext sollte keine URL sein",
   META_LANG: "Meta‑Tag für die Seitensprache fehlt",
+  META_LANG_SUGGEST: "Meinten Sie einen anderen Sprachcode?",
+  META_LANG_VALID: "Sprachcode ist nicht gültig",
   META_MAX: "Meta‑Tag begrenzt die mögliche Textvergrößerung",
   META_REFRESH: "Meta‑Tag aktualisiert die Seite automatisch",
   META_SCALABLE: "Meta‑Tag verhindert die Vergrößerung von Text",
@@ -433,6 +442,7 @@ const testNames = {
   MISSING_ALT: "Ungültiges HTML: Bild ohne Alt‑Attribut",
   MISSING_ALT_LINK: "Ungültiges HTML: verlinktes Bild ohne Alt‑Attribut",
   MISSING_ALT_LINK_HAS_TEXT: "Ungültiges HTML: Bild im Link ohne Alt‑Attribut",
+  PAGE_LANG_CONFIDENCE: "Die Seitensprache stimmt möglicherweise nicht mit dem Inhalt überein",
   QA_BAD_LINK: "Manuelle Prüfung: Linkziel könnte ungültig sein",
   QA_BLOCKQUOTE: "Sollte dieses Zitat eine Überschrift sein?",
   QA_DOCUMENT: "Wurde dieses Dokument für Screenreader ausgezeichnet?",
@@ -450,6 +460,7 @@ const testNames = {
   SUS_ALT: "Enthält dieser Alt‑Text redundante Wörter?",
   TABINDEX_ATTR: "Das tabindex‑Attribut stört die Lesereihenfolge",
   TABLES_EMPTY_HEADING: "Diese Tabellenkopfzelle benötigt Text",
+  TABLES_INVALID_HEADERS_REF: "Diese Tabelle hat ungültige Header-Referenzen",
   TABLES_MISSING_HEADINGS: "Dieser Tabelle fehlen Kopfzeilen in Zeile und/oder Spalte",
   TABLES_SEMANTIC_HEADING: "Inhaltsüberschriften gehören nicht in Tabellen",
   UNCONTAINED_LI: "Ungültige HTML‑Liste"
@@ -473,6 +484,7 @@ const why = {
   imageLinks: `<div class="why"><p>Der Zweck von Alt‑Text ist, die <em>Bedeutung</em> eines Bildes zu vermitteln, nicht nur dessen Inhalt. Bei einem verlinkten Bild ist die Bedeutung das Linkziel:<ul><li>"<em>Eine Lupe</em>" beschreibt ein Bild, nicht einen Link.</li><li>"<em>Eine Such‑Lupe</em>" beschreibt verwirrend beide Dinge.</li><li>"<em>Suchen</em>" beschreibt das Linkziel korrekt.</li></ul></p></div>`
 };
 const tips = {
+  ARIA_INPUT_FIELD_NAME: `<p><strong>Element:</strong> <code>%(EL)</code></p><p>${why.fix}Geben Sie eine gültige Beschriftung an; bei benutzerdefinierten Eingabeelementen bedeutet das oft innenliegenden Text oder ein title-, aria-label- oder aria-labelledby-Attribut.`,
   ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt‑Text: <strong>"%(ALT_TEXT)"</strong></p><p>Screenreader lesen diese URL vor – oft Buchstabe für Buchstabe. Das vermittelt kaum die gleiche Bedeutung wie das Bild selbst.</p><p>${why.fix}Fügen Sie entweder ein leeres alt (alt="") hinzu, wenn dies eine bedeutungslose Dekoration ist, die ignoriert werden soll, oder fügen Sie einen beschreibenden Alt‑Text hinzu.</p>${why.images}`,
   ALT_MAYBE_BAD: `<p>Angegebene Beschreibung für dieses Bild: <strong>"%(alt)"</strong></p><p>${why.fix}Geben Sie einen kurzen Alt‑Text an, der beschreibt, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
   ALT_MAYBE_BAD_WARNING: `<p>Angegebene Beschreibung für dieses Bild: <strong>"%(alt)"</strong></p><p>${why.fix}Geben Sie einen kurzen Alt‑Text an, der beschreibt, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
@@ -565,7 +577,7 @@ const tips = {
 const interfaceStrings = {
   ALERT_CLOSE: "Schließen",
   ALT: "Alt‑Text: ",
-  CONSOLE_ERROR: 'Es gibt ein Problem mit dem Barrierefreiheitsprüfer auf dieser Seite. Bitte <a class="g-link">melden Sie es auf GitHub</a>.',
+  CONSOLE_ERROR: 'Es gibt ein Problem mit dem Barrierefreiheitsprüfer auf dieser Seite. Bitte <a class="g-link">melden Sie es auf GitHub</a>. Debug-Informationen:',
   DECORATIVE: "Als dekorativ markiert",
   DISMISS: "Ignorieren",
   DISMISS_ALL: "Auf dieser Seite: ignorieren",

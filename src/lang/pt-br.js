@@ -2,6 +2,7 @@ import { default as Sa11yStrings } from '../sa11y-lang/ptBR.js';
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
 const testNames = {
+	ARIA_INPUT_FIELD_NAME: 'Este campo de entrada personalizado não possui um rótulo',
 	ALT_FILE_EXT: 'Este texto alternativo é um nome de arquivo, não uma descrição',
 	ALT_MAYBE_BAD: 'Esta é uma descrição clara e concisa da imagem?',
 	ALT_MAYBE_BAD_WARNING: 'Esta é uma descrição clara e concisa da imagem?',
@@ -39,9 +40,14 @@ const testNames = {
 	IMAGE_FIGURE_DUPLICATE_ALT: 'O texto alternativo não deve ser idêntico à legenda',
 	LABELS_ARIA_LABEL_INPUT: 'Existe um rótulo visível para este campo?',
 	LABELS_INPUT_RESET: 'Este botão “Limpar/Redefinir” é necessário?',
-	LABELS_MISSING_LABEL: 'Este campo de entrada não está associado a um rótulo',
+	LABELS_MISSING_IMAGE_INPUT: 'Este campo de entrada de imagem não possui texto alternativo',
+	LABELS_MISSING_LABEL: 'Este campo de entrada possui um rótulo vazio',
+	LABELS_NO_FOR_ATTRIBUTE: 'Este campo de entrada não está conectado a um rótulo',
 	LABELS_PLACEHOLDER: 'Verificação manual: texto de placeholder',
 	LABEL_IN_NAME: 'O rótulo visível não corresponde ao nome acessível',
+	LANG_MISMATCH: 'A tag de idioma não corresponde ao conteúdo',
+	LANG_OF_PARTS: 'Este conteúdo parece estar em um idioma diferente',
+	LANG_OF_PARTS_ALT: 'Este texto alternativo parece estar em um idioma diferente',
 	LINK_ALT_FILE_EXT: 'Alt usado como link não deve ser uma URL',
 	LINK_ALT_MAYBE_BAD: 'O alt desta imagem em link pode não ser claro e conciso',
 	LINK_ALT_MAYBE_BAD_WARNING: 'O alt desta imagem em link pode não ser claro e conciso',
@@ -59,6 +65,7 @@ const testNames = {
 	LINK_IMAGE_LONG_ALT: 'O alt desta imagem usada como link pode ser mais curto?',
 	LINK_IMAGE_NO_ALT_TEXT: 'Esta imagem usada como link precisa de texto alternativo',
 	LINK_IMAGE_TEXT: 'Verificação manual: imagem dentro de link marcada como decorativa',
+	LINK_LABEL: 'Rótulo do link',
 	LINK_MAYBE_BUTTON: 'Este link parece que deveria ser um botão',
 	LINK_NEW_TAB: 'Este link abre nova aba sem aviso?',
 	LINK_PLACEHOLDER_ALT: 'Esta imagem usada como link precisa de texto alternativo significativo',
@@ -68,6 +75,8 @@ const testNames = {
 	LINK_SYMBOLS: 'Verificação manual: símbolos ou emojis no link são significativos?',
 	LINK_URL: 'O texto do link não deve ser uma URL',
 	META_LANG: 'Falta a meta tag que indica o idioma da página',
+	META_LANG_SUGGEST: 'Você quis dizer um código de idioma diferente?',
+	META_LANG_VALID: 'O código de idioma não é válido',
 	META_MAX: 'Meta tag limita o quanto usuário pode ampliar o texto',
 	META_REFRESH: 'Meta tag atualiza automaticamente a página',
 	META_SCALABLE: 'Meta tag impede que o usuário amplie o texto',
@@ -75,6 +84,7 @@ const testNames = {
 	MISSING_ALT: 'HTML inválido: imagem sem atributo alt',
 	MISSING_ALT_LINK: 'HTML inválido: imagem usada como link sem atributo alt',
 	MISSING_ALT_LINK_HAS_TEXT: 'HTML inválido: imagem dentro de link sem atributo alt',
+	PAGE_LANG_CONFIDENCE: 'O idioma da página pode não corresponder ao conteúdo',
 	QA_BAD_LINK: 'Verificação manual: o destino do link pode ser inválido',
 	QA_BLOCKQUOTE: 'Este bloco de citação deveria ser um cabeçalho?',
 	QA_DOCUMENT: 'Este documento está marcado corretamente para leitores de tela?',
@@ -92,6 +102,7 @@ const testNames = {
 	SUS_ALT: 'Existem palavras redundantes neste texto alternativo?',
 	TABINDEX_ATTR: 'O atributo tabindex pode interferir na ordem de leitura',
 	TABLES_EMPTY_HEADING: 'Esta célula de cabeçalho de tabela precisa de texto',
+	TABLES_INVALID_HEADERS_REF: 'Esta tabela possui referências de cabeçalho inválidas',
 	TABLES_MISSING_HEADINGS: 'Esta tabela está sem linha de cabeçalhos e/ou cabeçalhos de coluna',
 	TABLES_SEMANTIC_HEADING: 'Cabeçalhos de conteúdo não devem ser usados dentro de tabelas',
 	UNCONTAINED_LI: 'Lista HTML inválida',
@@ -180,6 +191,7 @@ export const tips = {
 
 
 
+	ARIA_INPUT_FIELD_NAME: `<p><strong>Elemento:</strong> <code>%(EL)</code></p><p>${why.fix}Forneça qualquer rótulo válido; para elementos de entrada personalizados isso geralmente significa texto interno, ou um atributo title, aria-label ou aria-labelledby.</p>`,
 	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Texto alternativo: <strong>"%(ALT_TEXT)"</strong></p><p>Leitores de tela lerão este URL, muitas vezes caractere por caractere. Isso provavelmente não transmite o mesmo significado que ver a imagem.</p><p>${why.fix}Adicione alt vazio (alt="") se for uma decoração sem significado que deve ser ignorada por leitores de tela, ou adicione um texto alternativo descritivo.</p>${why.images}`,
 	ALT_MAYBE_BAD: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Defina o texto alternativo como uma descrição concisa do que esta imagem significa neste contexto.</p>${why.images}`,
 	ALT_MAYBE_BAD_WARNING: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Defina o texto alternativo como uma descrição concisa do que esta imagem significa neste contexto.</p>${why.images}`,
@@ -273,7 +285,7 @@ export const tips = {
 export const interfaceStrings = {
 	ALERT_CLOSE: 'Fechar',
 	ALT: 'Texto alternativo: ',
-	CONSOLE_ERROR: 'Há um problema com o verificador de acessibilidade nesta página. <a class="g-link">Informe-o no GitHub</a>.',
+	CONSOLE_ERROR: 'Há um problema com o verificador de acessibilidade nesta página. <a class="g-link">Informe-o no GitHub</a>. Informações de depuração:',
 	DECORATIVE: 'Marcado como decorativo',
 	DISMISS: 'Ignorar',
 	DISMISS_ALL: 'Nesta página: ignorar',

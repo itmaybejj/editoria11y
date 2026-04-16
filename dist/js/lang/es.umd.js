@@ -318,6 +318,7 @@
     }
   };
   const testNames = {
+    ARIA_INPUT_FIELD_NAME: "A este campo de entrada personalizado le falta una etiqueta",
     ALT_FILE_EXT: "Este texto alternativo es un nombre de archivo, no una descripción",
     ALT_MAYBE_BAD: "¿Es esta una descripción clara y concisa de la imagen?",
     ALT_MAYBE_BAD_WARNING: "¿Es esta una descripción clara y concisa de la imagen?",
@@ -357,7 +358,9 @@
     LABELS_PLACEHOLDER: "Revisión manual: texto de marcador de posición",
     LABELS_INPUT_RESET: "¿Es necesario este botón de restablecer?",
     LABEL_IN_NAME: "La etiqueta visible no coincide con la etiqueta invisible",
-    LABELS_MISSING_LABEL: "Este campo no está conectado a una etiqueta",
+    LABELS_MISSING_IMAGE_INPUT: "A este campo de imagen le falta texto alternativo",
+    LABELS_MISSING_LABEL: "Este campo de entrada tiene una etiqueta vacía",
+    LABELS_NO_FOR_ATTRIBUTE: "Este campo de entrada no está conectado a una etiqueta",
     LINK_ALT_FILE_EXT: "El texto alternativo usado como vínculo no debe ser una URL",
     LINK_ALT_MAYBE_BAD: "Este texto alternativo vinculado podría no ser claro ni conciso",
     LINK_ALT_MAYBE_BAD_WARNING: "Este texto alternativo vinculado podría no ser claro ni conciso",
@@ -375,6 +378,7 @@
     LINK_IMAGE_LONG_ALT: "¿Puede este texto alternativo vinculado ser más corto?",
     LINK_IMAGE_NO_ALT_TEXT: "Esta imagen vinculada necesita texto alternativo",
     LINK_IMAGE_TEXT: "Revisión manual: imagen dentro de un enlace marcada como decorativa.",
+    LINK_LABEL: "Etiqueta de enlace",
     LINK_MAYBE_BUTTON: "Este enlace parece que debería ser un botón",
     LINK_NEW_TAB: "¿Este enlace abre una pestaña nueva sin advertencia?",
     LINK_PLACEHOLDER_ALT: "Esta imagen vinculada necesita un texto alternativo significativo",
@@ -383,11 +387,17 @@
     LINK_SUS_ALT: "¿El texto alternativo describe el enlace o la imagen?",
     LINK_SYMBOLS: "Revisión manual: ¿los símbolos o emojis en este enlace son significativos?",
     LINK_URL: "El texto del enlace no debe ser una URL",
+    LANG_MISMATCH: "La etiqueta de idioma no coincide con el contenido",
+    LANG_OF_PARTS: "Este contenido parece estar en un idioma diferente",
+    LANG_OF_PARTS_ALT: "Este texto alternativo parece estar en un idioma diferente",
     META_LANG: "Falta la metaetiqueta para el idioma de la página",
+    META_LANG_SUGGEST: "¿Quiso decir un código de idioma diferente?",
+    META_LANG_VALID: "El código de idioma no es válido",
     META_MAX: "La metaetiqueta limita cuánto pueden ampliar el texto los usuarios",
     META_REFRESH: "La metaetiqueta actualiza la página automáticamente",
     META_SCALABLE: "La metaetiqueta impide que los usuarios amplíen el texto",
     META_TITLE: "Falta la metaetiqueta para el título de la página",
+    PAGE_LANG_CONFIDENCE: "Es posible que el idioma de la página no coincida con el contenido",
     MISSING_ALT: "HTML no válido: la imagen no tiene atributo alt",
     MISSING_ALT_LINK: "HTML no válido: la imagen vinculada no tiene atributo alt",
     MISSING_ALT_LINK_HAS_TEXT: "HTML no válido: la imagen dentro de un enlace no tiene atributo alt",
@@ -408,6 +418,7 @@
     SUS_ALT: "¿Hay palabras redundantes en este texto alternativo?",
     TABINDEX_ATTR: "El atributo tabindex en este elemento interrumpe el orden de lectura",
     TABLES_EMPTY_HEADING: "Esta celda de encabezado necesita texto",
+    TABLES_INVALID_HEADERS_REF: "Esta tabla tiene referencias de encabezados no válidas",
     TABLES_MISSING_HEADINGS: "A esta tabla le falta una fila o columna de encabezados",
     TABLES_SEMANTIC_HEADING: "Los encabezados de contenido no deben usarse dentro de tablas",
     UNCONTAINED_LI: "Lista HTML no válida"
@@ -422,6 +433,7 @@
     imageLinks: `<div class="why"><p>Consejo: el propósito del texto alternativo es proporcionar una alternativa al significado de una imagen, no a su contenido superficial. En imágenes enlazadas, el significado es el destino del enlace:<ul><li>"<em>Una lupa</em>" describe una imagen, no un enlace.</li><li>"<em>Una lupa de búsqueda</em>" describe ambiguamente ambas cosas.</li><li>"<em>Buscar</em>" describe correctamente el destino del enlace.</li></ul></p></div>`
   };
   const tips = {
+    ARIA_INPUT_FIELD_NAME: `<p><strong>Elemento:</strong> <code>%(EL)</code></p><p>${why.fix}Proporcione cualquier etiqueta válida; para elementos de entrada personalizados eso suele ser texto interno, o un atributo title, aria-label o aria-labelledby.`,
     ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Texto alternativo: <strong>"%(ALT_TEXT)"</strong></p><p>Los lectores de pantalla dictarán esta URL, a menudo letra por letra. Esto probablemente no transmite el mismo significado que ver la imagen.</p><p>${why.fix}Agregue un alt vacío (alt="") si esto es una decoración sin significado que deba ser ignorada por los lectores de pantalla, o agregue un texto alternativo descriptivo.</p>${why.images}`,
     ALT_MAYBE_BAD: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Establezca el texto alternativo de esta imagen como una descripción concisa de lo que significa en este contexto.</p>${why.images}`,
     ALT_MAYBE_BAD_WARNING: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Establezca el texto alternativo de esta imagen como una descripción concisa de lo que significa en este contexto.</p>${why.images}`,
@@ -514,7 +526,7 @@
   const interfaceStrings = {
     ALERT_CLOSE: "Cerrar",
     ALT: "Texto alternativo: ",
-    CONSOLE_ERROR: 'Hay un problema con el comprobador de accesibilidad en esta página. Por favor <a class="g-link">repórtelo en GitHub</a>.',
+    CONSOLE_ERROR: 'Hay un problema con el comprobador de accesibilidad en esta página. Por favor <a class="g-link">repórtelo en GitHub</a>. Información de depuración:',
     DECORATIVE: "Marcado como decorativo",
     DISMISS: "Ignorar",
     DISMISS_ALL: "En esta página: ignorar",

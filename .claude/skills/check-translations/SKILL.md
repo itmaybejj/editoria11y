@@ -41,6 +41,8 @@ If there is a diff, summarize:
 
 Launch one Agent per language **in parallel** (use a single message with multiple Agent tool calls). Each agent receives the same English diff context.
 
+Deploy agents in batches. More than 9 agents at once may exceed API limits.
+
 ### Critical agent instructions
 
 Include ALL of the following rules in every agent prompt — these were learned from production failures:
