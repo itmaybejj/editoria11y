@@ -6,7 +6,7 @@ const testNames = {
 	ALT_FILE_EXT: 'Dieser Alt‑Text ist ein Dateiname, keine Beschreibung',
 	ALT_MAYBE_BAD: 'Ist dies eine klare und prägnante Beschreibung des Bildes?',
 	ALT_MAYBE_BAD_WARNING: 'Ist dies eine klare und prägnante Beschreibung des Bildes?',
-	ALT_PLACEHOLDER: 'Dieser Alt‑Text beschreibt das Bild nicht',
+	ALT_PLACEHOLDER: 'Dieser Alt‑Text ist möglicherweise ein Platzhalter',
 	ALT_UNPRONOUNCEABLE: 'Dieser Alt‑Text ist unaussprechlich',
 	BTN_EMPTY: 'Schaltfläche hat keine zugängliche Beschriftung',
 	BTN_EMPTY_LABELLEDBY: 'Schaltfläche hat ein ungültiges ARIA‑Label',
@@ -66,9 +66,9 @@ const testNames = {
 	LINK_IMAGE_NO_ALT_TEXT: 'Dieses verlinkte Bild benötigt Alt‑Text',
 	LINK_IMAGE_TEXT: 'Manuelle Prüfung: Bild in einem Link als dekorativ markiert.',
 	LINK_LABEL: 'Linkbeschriftung',
-	LINK_MAYBE_BUTTON: 'Dieser Link sieht aus, als sollte er eine Schaltfläche sein',
+	LINK_MAYBE_BUTTON: 'Ist dieser Link tatsächlich eine Schaltfläche?',
 	LINK_NEW_TAB: 'Öffnet dieser Link eine neue Registerkarte ohne Hinweis?',
-	LINK_PLACEHOLDER_ALT: 'Dieses verlinkte Bild benötigt aussagekräftigen Alt‑Text',
+	LINK_PLACEHOLDER_ALT: 'Dieser verlinkte Alt‑Text ist möglicherweise ein Platzhalter',
 	LINK_STOPWORD: 'Dieser Link enthält nur generische Wörter',
 	LINK_STOPWORD_ARIA: 'Aussagekräftiger Linktext ist nur für Screenreader‑Nutzende verfügbar',
 	LINK_SUS_ALT: 'Beschreibt dieser Alt‑Text das Bild oder den Link?',
@@ -151,7 +151,7 @@ const tips = {
 
 	BTN_TIP: `${why.buttons}`,
 
-	BTN_ROLE_IN_NAME: `<p><strong>Zugänglicher Name:</strong> <i>%(TEXT)</i></p><p>Screenreader verwenden das Wort „button", um anzukündigen, dass sie eine Schaltfläche beschreiben; dieses Wort ist daher redundant.</p><p>${why.fix}Die Beschriftung der Schaltfläche sollte ihrer Aktion entsprechen. Wenn die sichtbare Beschriftung ein Symbol statt Text ist, beschriften Sie die Schaltfläche mit der Bedeutung des Symbols, z. B. „Wiedergabe", „Suchen" oder „Menü".</p>`,
+	BTN_ROLE_IN_NAME: `<p><strong>Label für Screenreader:</strong> <i>%(TEXT)</i></p><p>Screenreader verwenden das Wort „button", um anzukündigen, dass sie eine Schaltfläche beschreiben; dieses Wort ist daher redundant.</p><p>${why.fix}Die Beschriftung der Schaltfläche sollte ihrer Aktion entsprechen. Wenn die sichtbare Beschriftung ein Symbol statt Text ist, beschriften Sie die Schaltfläche mit der Bedeutung des Symbols, z. B. „Wiedergabe", „Suchen" oder „Menü".</p>`,
 
 	CONTRAST_WARNING: 'Ein Hintergrundbild oder Farbverlauf verhindert, dass dieses Tool die tatsächliche Hintergrundfarbe sicher bestimmen kann. Nutzen Sie den Farbwähler unten für eine manuelle Prüfung.',
 
@@ -183,7 +183,7 @@ const tips = {
 
 	HEADING_SKIPPED_LEVEL: `<p>Diese Überschrift springt von <code>Ebene %(prevLevel)</code> zu <code>Ebene %(level)</code>. Für Screenreader klingt das, als fehle Inhalt.</p><p>${why.fix}Passen Sie die Ebenen an, damit die Struktur lückenlos ist.</p>${why.headings}`,
 
-	HIDDEN_FOCUSABLE: `<p><strong>Element:</strong> <code>%(ELEMENT)</code></p><p>Dieses interaktive Element hat <code>aria-hidden="true"</code>, ist aber weiterhin per Tastatur erreichbar. Wenn es wirklich verborgen sein soll, fügen Sie zusätzlich <code>tabindex="-1"</code> hinzu. Andernfalls entfernen Sie <code>aria-hidden</code>.</p>`,
+	HIDDEN_FOCUSABLE: `<p>Dieses interaktive Element hat <code>aria-hidden="true"</code>, ist aber weiterhin per Tastatur erreichbar. Wenn es wirklich verborgen sein soll, fügen Sie zusätzlich <code>tabindex="-1"</code> hinzu. Andernfalls entfernen Sie <code>aria-hidden</code>.</p><p><strong>Element:</strong> <code>%(ELEMENT)</code></p>`,
 
 	IMAGE_ALT_TOO_LONG: `<p>%(altLength) Zeichen im Alt‑Text: <i class="ed11y-small">%(ALT_TEXT)</i></p><p>${why.fix}Fassen Sie zusammen oder verschieben Sie Teile der Beschreibung in eine Bildunterschrift.</p><div class="why"><p>Tipp: Komplexe Bilder brauchen meist eine <strong>sichtbare</strong> Bildunterschrift oder eine alternative Beschreibung, die wichtige Details erläutert. Es ist in Ordnung, im Alt‑Text darauf zu verweisen:</p><ul><li>„Poster für den Tanz am Freitag; Details in der Bildunterschrift.“</li><li>„Diagramm: Fälle −10 % dieses Jahr; Details in der Tabelle.“</li></ul></div>`,
 
@@ -193,7 +193,7 @@ const tips = {
 
 	IMAGE_FIGURE_DECORATIVE: `<p>Dieses Bild wird von Hilfstechnologien ignoriert. Ergibt die Bildunterschrift ohne das Bild Sinn?</p><p>${why.fix}Wenn nicht, ergänzen Sie im Alt‑Text, was die Bildunterschrift nicht abdeckt.</p><div class="why"><p>Tipp: Bilder, Alt‑Texte und Bildunterschriften wirken zusammen:</p><ul><li>Bildunterschriften geben Kontext/Deutung.</li><li>Alt‑Texte beschreiben das Bild für Menschen, die es nicht sehen.</li></ul></div>`,
 
-	IMAGE_FIGURE_DUPLICATE_ALT: `<p>${why.fix}Passen Sie den Alt‑Text so an, dass er die visuelle Bedeutung beschreibt.</p><div class="why"><p>Tipp: Bilder, Alt‑Texte und Bildunterschriften wirken zusammen:</p><ul><li>Bildunterschriften liefern Kontext und Interpretation.</li><li>Alt‑Texte beschreiben das Bild für Menschen, die es nicht sehen.</li></ul></div>`,
+	IMAGE_FIGURE_DUPLICATE_ALT: `<p><strong>Doppelter Text: </strong><i>%(ALT_TEXT)</i></p><p>${why.fix}Beschreiben Sie im Alt‑Text die visuelle Bedeutung, die sonst fehlen würde.</p><div class="why"><p>Tipp: Bilder, Alt‑Texte und Bildunterschriften wirken zusammen:</p><ul><li>Bildunterschriften liefern Kontext und Interpretation.</li><li>Alt‑Texte beschreiben das Bild für Menschen, die es nicht sehen.</li></ul></div>`,
 
 	LABELS_ARIA_LABEL_INPUT: `<p><strong>Unsichtbare Feldbezeichnung:</strong> <i>%(TEXT)</i></p><p>Stellen Sie sicher, dass es eine sichtbare Beschriftung gibt, dass sie beim Eintippen sichtbar bleibt und der unsichtbaren Bezeichnung entspricht.</p><div class="why"><p>Platzhalter oder Titel verschwinden beim Tippen; das erschwert die Kontrolle und macht es leicht, die unsichtbare Bezeichnung zu vergessen.</p></div>`,
 
@@ -207,7 +207,7 @@ const tips = {
 
 	LABELS_PLACEHOLDER: `<p>Platzhalter verschwinden beim Tippen und haben oft zu wenig Kontrast – oder so viel, dass sie wie Inhalt wirken.</p><p>${why.fix}Sorgen Sie dafür, dass wichtige Informationen (Label, Hilfe, Format) sichtbar bleiben und erwägen Sie, auf Platzhalter zu verzichten.</p>`,
 
-	LABEL_IN_NAME: `<p><strong>Sichtbarer Text:</strong> <i>%(TEXT)</i></p><p><strong>Zugänglicher Name:</strong> <i>%(TEXT)</i></p><p>Der sichtbare Text dieses Elements scheint vom zugänglichen Namen abzuweichen. Das kann Screenreader‑Nutzende verwirren und die Sprachsteuerung beeinträchtigen.</p><p>${why.fix}Stellen Sie sicher, dass das sichtbare Label mit dem Text des unsichtbaren Labels beginnt und keine bedeutungstragenden Informationen enthält, die im unsichtbaren Label fehlen.</p>`,
+	LABEL_IN_NAME: `<p><strong>Sichtbarer Text:</strong> <i>%(TEXT)</i></p><p><strong>Label für Screenreader:</strong> <i>%(TEXT)</i></p><p>Der sichtbare Text dieses Elements scheint vom zugänglichen Namen abzuweichen. Das kann Screenreader‑Nutzende verwirren und die Sprachsteuerung beeinträchtigen.</p><p>${why.fix}Stellen Sie sicher, dass das sichtbare Label mit dem Text des unsichtbaren Labels beginnt und keine bedeutungstragenden Informationen enthält, die im unsichtbaren Label fehlen.</p>`,
 
 	LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt‑Text: <i>%(alt)</i></p><p>Dieser Alt‑Text ist wahrscheinlich ein Dateiname statt einer sinnvollen Bezeichnung für das Linkziel.</p><p>${why.fix}Setzen Sie den Alt‑Text dieses Bildes auf den Namen des Linkziels.</p><div class="why"><p>Alt‑Text soll die Bedeutung eines Bildes wiedergeben, nicht nur dessen Inhalt. Bei verlinkten Bildern ist die Bedeutung das Linkziel:</p><ul><li>„Seite mit Text" beschreibt das Bild, nicht den Link.</li><li>„IMG_1234.jpg" ist nur ein Dateiname.</li><li>„Anmeldeformular (doc)" ist eine Linkdestination.</li></ul></div>`,
 
@@ -232,7 +232,7 @@ const tips = {
 
 	LINK_IDENTICAL_NAME: `<p>Linktext: <i>%(TEXT)</i></p><p>${why.fix}Formulieren Sie Links zu unterschiedlichen Zielen um, sodass sie die eindeutigen Titel ihrer Ziele verwenden.</p>${why.links}`,
 
-	LINK_IMAGE_ALT: `<p>Stellen Sie sicher, dass dieser Alt‑Text das Linkziel beschreibt:</p><p> {L} {ALT} <i>%(ALT_TEXT)</i></p>${why.imageLinks}`,
+	LINK_IMAGE_ALT: `<p><strong>Alt‑Text:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Stellen Sie sicher, dass dieser Alt‑Text das Linkziel beschreibt, nicht nur den visuellen Inhalt des Bildes:</p>${why.imageLinks}`,
 
 	LINK_IMAGE_ALT_AND_TEXT: `<p><strong>Alt‑Text:</strong> <i>%(ALT_TEXT)</i></p><p><strong>Linktext einschließlich Alt‑Text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Bearbeiten oder entfernen Sie den Alt‑Text, wenn er irrelevante oder redundante Informationen hinzufügt.</p>${why.imageLinks}`,
 
@@ -242,7 +242,7 @@ const tips = {
 
 	LINK_IMAGE_TEXT: 'Das Bild ist als dekorativ markiert, obwohl der umgebende Text als Linkbeschriftung dient.',
 
-	LINK_MAYBE_BUTTON: `<p>Dieser Link hat ein ungültiges Ziel und enthält das Wort <i>%(NAME)</i>. Das deutet darauf hin, dass dies möglicherweise gar kein Link ist, sondern ein per Skript gesteuertes Verhalten auf der Seite auslöst.</p><p>${why.fix}Ersetzen Sie den Link durch eine <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">barrierefreie Schaltfläche</a> oder korrigieren Sie das Linkziel.</p><div class="why"><p>Tipp: Hilfstechnologien behandeln Schaltflächen und Links unterschiedlich. Das richtige HTML‑Element stellt sicher, dass Nutzende wissen, welche Tastenkombinationen sie verwenden und welche Aktion ausgelöst wird.</p></div>`,
+	LINK_MAYBE_BUTTON: `<p><strong>Link:</strong> <i>%(TEXT)</i></p><p>Dieser Link hat ein ungültiges Ziel und trägt einen Namen, der darauf hindeutet, dass er möglicherweise als Schaltfläche oder Umschalter statt als Link fungiert.</p><p>${why.fix}Verwenden Sie stattdessen ein <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">&lt;button&gt;</a>, oder korrigieren Sie das Linkziel.</p><div class="why"><p>Tipp: Hilfstechnologien behandeln Schaltflächen und Links unterschiedlich. Das richtige HTML‑Element stellt sicher, dass Nutzende wissen, welche Tastenkombinationen sie verwenden und welche Aktion ausgelöst wird.</p></div>`,
 
 	LINK_NEW_TAB: `<p>${why.fix}Öffnen Sie den Link im selben Tab oder <a href="https://itmaybejj.github.io/linkpurpose/">warnen Sie vorab</a>.</p><div class="why"><p>Nutzende können selbst in neuem Tab öffnen; erzwungene neue Tabs können verwirren, besonders wenn die Zurück‑Taste nicht wie erwartet funktioniert.</p><p>Ausnahme: In Formularen öffnen Links oft in neuem Tab, um Datenverlust zu vermeiden.</p></div>`,
 
@@ -286,7 +286,7 @@ const tips = {
 
 	QA_FAKE_LIST: `<p>${why.fix}Wenn <i>%(text)</i> Teil einer Liste ist, verwenden Sie Listenformatierung.</p><div class="why"><p>Listen haben visuelle und semantische Struktur:</p><ol><li>Einheitliche Einzüge erleichtern das Lesen.</li><li>Screenreader geben die Position an („Eintrag 3 von 7“).</li></ol><p>Ein Absatz mit einer vorangestellten Zahl ist keine echte Liste.</p></div>`,
 
-	QA_IN_PAGE_LINK: `<p><strong>ID:</strong> <code>%(ID)</code></p><p>Das Linkziel entspricht keinem Element auf dieser Seite.</p><div class="why"><p>Hinweis für Entwickler: Wenn es ein JS‑Handler ist, testen Sie die Tastaturbedienung, bevor Sie den Check ignorieren.</p></div>`,
+	QA_IN_PAGE_LINK: `<p><strong>Link:</strong> <i>%(TEXT)</i></p><p><strong>URL:</strong> <code>#%(ID)</code></p><p>Das Linkziel entspricht keinem Element auf dieser Seite.</p><div class="why"><p>Hinweis für Entwickler: Wenn es ein JS‑Handler ist, testen Sie die Tastaturbedienung, bevor Sie den Check ignorieren.</p></div>`,
 
 	QA_JUSTIFY: `<p>Blocksatz erzeugt unregelmäßige Lücken und erschwert das Lesen.</p><p>${why.fix}Verwenden Sie linksbündigen Text.</p>`,
 
@@ -304,11 +304,13 @@ const tips = {
 
 	QA_UPPERCASE: `<p>GROSSGESCHRIEBENE TEXTBLÖCKE SIND SCHWERER LESBAR UND WERDEN OFT ALS „SCHREIEN“ WAHRGENOMMEN.</p><p>${why.fix}Betonen Sie nur wenige Wörter auf einmal, vorzugsweise mit Fett statt Versalien.</p><div class="why"><p>Screenreader kündigen „fett“ nicht an. Nutzen Sie Überschriften für neue Themen.</p></div>`,
 
-	SUS_ALT: `<p>Der Alt‑Text enthält <i>%(alt)</i>, was wahrscheinlich redundant ist.</p><p>Alt‑Text: <i>%(ALT_TEXT)</i></p><p>${why.fix}Formulieren Sie den Alt‑Text so, dass er die Bildbedeutung kurz vermittelt.</p><div class="why"><p>Tipp: Screenreader kündigen ein Bild bereits an – „Bild/Foto von …" ist oft überflüssig.</p></div>`,
+	SUS_ALT: `<p>Der Alt‑Text dieses Bildes enthält das Wort <i>%(alt)</i>:</p><p><i>%(ALT_TEXT)</i></p><p>${why.fix}Formulieren Sie den Alt‑Text so, dass er die Bildbedeutung kurz vermittelt.</p><div class="why"><p>Tipp: Screenreader kündigen bereits an, dass sie ein Bild beschreiben, daher sind Formulierungen wie „Bild von" und „Foto von" meist überflüssig</p></div>`,
 
 	TABINDEX_ATTR: `<p>${why.fix}Verwenden Sie nie ein tabindex größer als "0". Ordnen Sie die HTML‑Elemente so, dass Tab‑, Lese‑ und visuelle Reihenfolge übereinstimmen.</p><div class="why"><p>Standardmäßig sind diese drei Reihenfolgen deckungsgleich.</p><p>Ein positives tabindex setzt ein Element an den Anfang der Tab‑Reihenfolge, <strong>nicht</strong> der visuellen; das führt zu Verwirrung.</p></div>`,
 
 	TABLES_EMPTY_HEADING: ` <p>${why.fix}Sorgen Sie dafür, dass jede Tabellenkopfzelle Text enthält.</p><div class="why"><p>Tipp: Screenreader nutzen Tabellenköpfe zur Orientierung in Tabellen.</p></div>`,
+
+	TABLES_INVALID_HEADERS_REF: `<p>Diese Tabelle versucht, eine bestimmte Datenzelle mit einer bestimmten Kopfzelle zu verknüpfen, aber die Header‑ID ist nicht auffindbar: <code>%(VALUE)</code>.</p><p>${why.fix}Stellen Sie sicher, dass jedes <code>headers</code>‑Attribut der ID einer Kopfzelle in derselben Tabelle entspricht.</p><div class="why">Tipp: <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Die manuelle Verwendung von ID‑Referenzen</a>, um Datenzellen mit Kopfzellen zu verknüpfen, ist aufwendig und fehleranfällig. Teilen Sie nach Möglichkeit komplexe Daten in kleinere Tabellen mit einfachen Kopfzeilen und ‑spalten auf.</div>`,
 
 	TABLES_MISSING_HEADINGS: ` <p>${why.fix}Geben Sie in den Tabelleneigenschaften an, ob Kopfzeilen in der ersten Zeile, ersten Spalte oder in beiden vorhanden sind.</p><div class="why"> <p>Tipp: Beim Betreten einer Spalte/Zeile wird der passende Kopf wiederholt. Wenn die Tabelle nur für Layoutzwecke dient, entfernen Sie die Tabellenformatierung.</p></div>`,
 

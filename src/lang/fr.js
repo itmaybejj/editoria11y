@@ -5,7 +5,7 @@ const testNames = {
 	ALT_FILE_EXT: 'Ce texte alternatif est un nom de fichier, pas une description',
 	ALT_MAYBE_BAD: `S’agit‑il d’une description claire et concise de l’image ?`,
 	ALT_MAYBE_BAD_WARNING: `S’agit‑il d’une description claire et concise de l’image ?`,
-	ALT_PLACEHOLDER: 'Ce texte alternatif ne décrit pas l’image', // updated
+	ALT_PLACEHOLDER: 'Ce texte alternatif est peut‑être un texte de remplacement', // updated
 	ALT_UNPRONOUNCEABLE: 'Ce texte alternatif est impossible à prononcer',
 	ARIA_INPUT_FIELD_NAME: `Ce champ de saisie personnalisé n’a pas d’étiquette`,
 	BTN_EMPTY: 'Le bouton n’a pas d’étiquette accessible',
@@ -66,9 +66,9 @@ const testNames = {
 	LINK_IMAGE_NO_ALT_TEXT: 'Cette image liée nécessite un texte alternatif',
 	LINK_IMAGE_TEXT: 'Vérification manuelle : image dans un lien marquée comme décorative.',
 	LINK_LABEL: 'Étiquette de lien',
-	LINK_MAYBE_BUTTON: 'Ce lien ressemble à un bouton',
+	LINK_MAYBE_BUTTON: 'Ce lien est‑il en réalité un bouton ?',
 	LINK_NEW_TAB: 'Ce lien ouvre‑t‑il un nouvel onglet sans avertissement ?',
-	LINK_PLACEHOLDER_ALT: 'Cette image liée nécessite un texte alternatif significatif',
+	LINK_PLACEHOLDER_ALT: 'Ce texte alternatif lié est peut‑être un texte de remplacement',
 	LINK_STOPWORD: 'Ce lien contient uniquement des mots génériques', // updated
 	LINK_STOPWORD_ARIA: 'Le texte du lien n’est significatif que pour les utilisateurs de lecteurs d’écran',
 	LINK_SUS_ALT: 'Le texte alternatif décrit‑il l’image ou le lien ?',
@@ -165,7 +165,7 @@ export const tips = {
 
 	BTN_TIP: `${why.buttons}`,
 
-	BTN_ROLE_IN_NAME: `<p><strong>Nom accessible :</strong> <i>%(TEXT)</i></p><p>Les lecteurs d’écran utilisent le mot « bouton » pour annoncer qu’ils décrivent un bouton ; ce mot est donc redondant.</p><p>${why.fix}L’étiquette du bouton doit correspondre à son action. Si l’étiquette visible est une icône plutôt qu’un texte, étiquetez le bouton selon la signification de l’icône, par exemple « Lecture », « Rechercher » ou « Menu ».</p>`,
+	BTN_ROLE_IN_NAME: `<p><strong>Étiquette pour lecteurs d’écran :</strong> <i>%(TEXT)</i></p><p>Les lecteurs d’écran utilisent le mot « bouton » pour annoncer qu’ils décrivent un bouton ; ce mot est donc redondant.</p><p>${why.fix}L’étiquette du bouton doit correspondre à son action. Si l’étiquette visible est une icône plutôt qu’un texte, étiquetez le bouton selon la signification de l’icône, par exemple « Lecture », « Rechercher » ou « Menu ».</p>`,
 
 	CONTRAST_WARNING: `Une image d’arrière-plan ou un dégradé empêche ce vérificateur de connaître précisément la couleur derrière ce texte. Utilisez l’outil pipette ci‑dessous pour vérifier manuellement.`,
 
@@ -197,7 +197,7 @@ export const tips = {
 
 	HEADING_SKIPPED_LEVEL: `<p>Cet en‑tête est passé de <code>niveau %(prevLevel)</code> à <code>niveau %(level)</code>. Pour un lecteur d’écran, cela donne l’impression qu’il manque du contenu.</p><p>${why.fix}Ajustez les niveaux pour former une structure correcte, sans saut.</p>${why.headings}`,
 
-	HIDDEN_FOCUSABLE: `<p><strong>Élément :</strong> <code>%(ELEMENT)</code></p><p>Cet élément interactif possède un attribut <code>aria-hidden="true"</code>, mais reste accessible au clavier. Si vous <strong>souhaitez</strong> le masquer pour les lecteurs d’écran, vous devez également ajouter <code>tabindex="-1"</code>. Sinon, supprimez l’attribut <code>aria-hidden="true"</code>.</p>`,
+	HIDDEN_FOCUSABLE: `<p>Cet élément interactif possède un attribut <code>aria-hidden="true"</code>, mais reste accessible au clavier. Si vous <strong>souhaitez</strong> le masquer pour les lecteurs d’écran, vous devez également ajouter <code>tabindex="-1"</code>. Sinon, supprimez l’attribut <code>aria-hidden="true"</code>.</p><p><strong>Élément :</strong> <code>%(ELEMENT)</code></p>`,
 
 	IMAGE_ALT_TOO_LONG: `<p>Les textes alternatifs sont lus comme une phrase continue par les lecteurs d’écran ; si quelque chose est manqué, il faut tout réécouter.</p><p>Le texte alternatif de %(altLength) caractères pour cette image est : <i class="ed11y-small">%(ALT_TEXT)</i></p><div class="why"><p>Astuce : les images complexes qui nécessitent plus qu’une phrase ont généralement besoin d’une légende <strong>visible</strong> ou d’une alternative décrivant/interprétant les points clés. Il est acceptable d’y renvoyer :</p><ul><li>"Affiche pour la danse de vendredi ; détails dans la légende."</li><li>"Graphique montrant une baisse de 10 % cette année ; détails dans le tableau."</li></ul></div>`,
 
@@ -207,7 +207,7 @@ export const tips = {
 
 	IMAGE_FIGURE_DECORATIVE: `<p>Cette image sera ignorée par les technologies d’assistance. La légende a‑t‑elle un sens sans l’image ?</p><p>${why.fix}Si la légende ne décrit pas la signification visuelle, fournissez un texte alternatif pour les éléments non décrits.</p><div class="why"><p>Astuce : images, alts et légendes fonctionnent ensemble :</p><ul><li>Les légendes visibles donnent du contexte.</li><li>Les textes alternatifs décrivent l’image pour ceux qui ne peuvent pas la voir.</li></ul></div>`,
 
-	IMAGE_FIGURE_DUPLICATE_ALT: `<p>${why.fix}Modifiez le texte alternatif pour décrire la signification visuelle de l’image.</p><div class="why"><p>Astuce : images, alts et légendes fonctionnent ensemble :</p><ul><li>Les légendes visibles donnent du contexte et une interprétation.</li><li>Les textes alternatifs décrivent l’image pour ceux qui ne peuvent pas la voir.</li></ul></div>`,
+	IMAGE_FIGURE_DUPLICATE_ALT: `<p><strong>Texte en double : </strong><i>%(ALT_TEXT)</i></p><p>${why.fix}Décrivez dans le texte alternatif toute signification visuelle manquante.</p><div class="why"><p>Astuce : images, alts et légendes fonctionnent ensemble :</p><ul><li>Les légendes visibles donnent du contexte et une interprétation.</li><li>Les textes alternatifs décrivent l’image pour ceux qui ne peuvent pas la voir.</li></ul></div>`,
 
 	LABELS_ARIA_LABEL_INPUT: `<p><strong>Étiquette invisible :</strong> <i>%(TEXT)</i></p><p>Vérifiez qu’il existe une étiquette visible, qu’elle reste visible quand du texte est saisi, et qu’elle correspond à l’étiquette invisible.</p><div class="why"><p>Des étiquettes visibles uniquement via <em>title</em> ou <em>placeholder</em> disparaissent dès la saisie, ce qui complique la relecture et facilite l’oubli de mettre à jour l’étiquette invisible.</p></div>`,
 
@@ -221,7 +221,7 @@ export const tips = {
 
 	LABELS_PLACEHOLDER: `<p>Le placeholder disparaît dès que l’on saisit du texte, et peut manquer de contraste ou ressembler à du contenu réel.</p><p>${why.fix}Assurez‑vous que les informations clés (étiquette, aide, instructions) restent visibles même lorsque le champ contient du texte.</p>`,
 
-	LABEL_IN_NAME: `<p><strong>Texte visible :</strong> <i>%(TEXT)</i></p><p><strong>Nom accessible :</strong> <i>%(TEXT)</i></p><p>Le texte visible de cet élément semble différent de son nom accessible. Cela peut dérouter les utilisateurs de lecteurs d’écran et gêner le contrôle vocal.</p><p>${why.fix}Assurez‑vous que l’étiquette visible commence par le texte de l’étiquette invisible et ne contient aucune information significative qui serait absente de l’étiquette invisible.</p>`, // updated to match baseAll
+	LABEL_IN_NAME: `<p><strong>Texte visible :</strong> <i>%(TEXT)</i></p><p><strong>Étiquette pour lecteurs d’écran :</strong> <i>%(TEXT)</i></p><p>Le texte visible de cet élément semble différent de son nom accessible. Cela peut dérouter les utilisateurs de lecteurs d’écran et gêner le contrôle vocal.</p><p>${why.fix}Assurez‑vous que l’étiquette visible commence par le texte de l’étiquette invisible et ne contient aucune information significative qui serait absente de l’étiquette invisible.</p>`, // updated to match baseAll
 
 	LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Texte alternatif : <i>%(alt)</i></p><p>Le texte alternatif de cette image est probablement un nom de fichier au lieu d’un libellé utile pour un lien.</p><p>${why.fix}Définissez le texte alternatif de cette image sur le nom de la destination du lien.</p><div class="why"> <p>Le texte alternatif doit refléter la signification, pas le contenu brut : pour une image liée, la signification est la destination du lien :</p><ul><li>"Page avec texte" décrit l’image, pas le lien.</li><li>"IMG_1234.jpg" est un simple nom de fichier.</li><li>"Formulaire d’inscription (doc)" est une vraie destination.</li></ul></div>`,
 
@@ -246,7 +246,7 @@ export const tips = {
 
 	LINK_IDENTICAL_NAME: `<p>Texte du lien : <i>%(TEXT)</i></p><p>${why.fix}Réécrivez les liens menant à des destinations différentes en utilisant les titres uniques de chaque destination.</p>${why.links}`,
 
-	LINK_IMAGE_ALT: `<p>Assurez‑vous que ce texte alternatif décrit la destination du lien :</p><p> {L} {ALT} <i>%(ALT_TEXT)</i></p>${why.imageLinks}`,
+	LINK_IMAGE_ALT: `<p><strong>Texte alternatif :</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Assurez‑vous que ce texte alternatif décrit la destination du lien, et non seulement le contenu visuel de l’image :</p>${why.imageLinks}`,
 
 	LINK_IMAGE_ALT_AND_TEXT: `<p><strong>Texte alternatif :</strong> <i>%(ALT_TEXT)</i></p><p><strong>Texte du lien incluant le texte alternatif :</strong> <i>%(TEXT)</i></p><p>${why.fix}Modifiez ou supprimez le texte alternatif s’il ajoute des informations non pertinentes ou redondantes.</p>${why.imageLinks}`,
 
@@ -256,7 +256,7 @@ export const tips = {
 
 	LINK_IMAGE_TEXT: `L’image est marquée comme décorative, mais le lien utilise le texte environnant comme libellé descriptif.`,
 
-	LINK_MAYBE_BUTTON: `<p>Ce lien a une cible invalide, et contient le mot <i>%(NAME)</i>. Cela suggère qu’il ne s’agit peut‑être pas d’un lien, mais qu’il contrôle un comportement scripté sur la page.</p><p>${why.fix}remplacez le lien par un <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">bouton accessible</a>, ou corrigez la destination du lien.</p><div class="why"><p>Astuce : les technologies d’assistance traitent les boutons et les liens différemment. Utiliser le bon élément HTML garantit que les utilisateurs connaissent les raccourcis clavier appropriés et l’action qui sera déclenchée.</p></div>`,
+	LINK_MAYBE_BUTTON: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>Ce lien a une cible invalide et porte un nom qui suggère qu’il fonctionne peut‑être comme un bouton ou un interrupteur plutôt que comme un lien.</p><p>${why.fix}Utilisez plutôt un <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">&lt;button&gt;</a>, ou corrigez la cible du lien.</p><div class="why"><p>Astuce : les technologies d’assistance traitent les boutons et les liens différemment. Utiliser le bon élément HTML garantit que les utilisateurs connaissent les raccourcis clavier appropriés et l’action qui sera déclenchée.</p></div>`,
 
 	LINK_NEW_TAB: `<p>${why.fix}Configurez ce lien pour s’ouvrir dans le même onglet, ou <a href="https://itmaybejj.github.io/linkpurpose/">prévoyez un avertissement aux utilisateurs</a> avant l’ouverture dans un nouvel onglet.</p><div class="why"><p>Les utilisateurs peuvent toujours choisir d’ouvrir un lien dans un nouvel onglet. Forcer l’ouverture peut être déroutant, surtout pour les technologies d’assistance.</p><p>Note : les liens dans les formulaires ouvrent souvent un nouvel onglet pour éviter la perte de données.</p></div>`,
 
@@ -300,7 +300,7 @@ export const tips = {
 
 	QA_FAKE_LIST: `<p>${why.fix}Si <i>%(text)</i> fait partie d’une liste, formatez‑le comme une liste.</p><div class="why"><p>Les listes ont une structure visuelle et technique :</p><ol><li>Elles alignent les éléments et facilitent la lecture.</li><li>Elles sont reconnues par les lecteurs d’écran, qui annoncent "élément 3 sur 7".</li></ol><p>Un paragraphe commençant par un numéro n’est pas une vraie liste.</p></div>`,
 
-	QA_IN_PAGE_LINK: `<p><strong>ID :</strong> <code>%(ID)</code></p><p>La cible de ce lien ne correspond à aucun élément de la page.</p><div class="why"><p>Note pour les développeurs : si le lien déclenche un événement JavaScript, testez son fonctionnement au clavier avant de l’ajouter à la liste d’exclusion.</p></div>`,
+	QA_IN_PAGE_LINK: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p><strong>URL :</strong> <code>#%(ID)</code></p><p>La cible de ce lien ne correspond à aucun élément de la page.</p><div class="why"><p>Note pour les développeurs : si le lien déclenche un événement JavaScript, testez son fonctionnement au clavier avant de l’ajouter à la liste d’exclusion.</p></div>`,
 
 	QA_JUSTIFY: `<p>Le texte justifié ajoute des espacements irréguliers entre les mots, ce qui rend la lecture plus difficile pour de nombreuses personnes.</p><p>${why.fix}Utilisez un alignement à gauche.</p>`,
 
@@ -318,11 +318,13 @@ export const tips = {
 
 	QA_UPPERCASE: `<p>LES BLOCS DE TEXTE EN MAJUSCULES SONT PLUS DIFFICILES À LIRE ET PEUVENT ÊTRE PERCUS COMME DES CRIS.</p><p>${why.fix}N’utilisez les majuscules que pour quelques mots à la fois ; préférez le gras.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas le gras. Utilisez un en‑tête si vous introduisez un nouveau sujet.</p></div>`,
 
-	SUS_ALT: `<p>Le texte alternatif contient le mot <i>%(alt)</i>, ce qui est probablement redondant :</p><p>Texte alternatif : <i>%(ALT_TEXT)</i></p><p>Pour corriger : reformulez le texte alternatif pour transmettre brièvement la signification de l’image.</p><div class="why"><p>Astuce : les lecteurs d’écran annoncent déjà qu’ils lisent la description d’une image. Des expressions comme "image de" ou "photo de" sont souvent redondantes.</p></div>`,
+	SUS_ALT: `<p>Le texte alternatif de cette image contient le mot <i>%(alt)</i> :</p><p><i>%(ALT_TEXT)</i></p><p>${why.fix}Reformulez le texte alternatif pour transmettre brièvement la signification de l’image.</p><div class="why"><p>Astuce : les lecteurs d’écran annoncent déjà qu’ils lisent la description d’une image. Des expressions comme "image de" ou "photo de" sont souvent redondantes.</p></div>`,
 
 	TABINDEX_ATTR: `<p>${why.fix}N’utilisez jamais une valeur de <code>tabindex</code> supérieure à "0" (ordre par défaut). Modifiez l’ordre des éléments dans le HTML pour que l’ordre visuel, de tabulation et de lecture restent identiques.</p><div class="why"><p>Par défaut, l’ordre visuel, l’ordre de tabulation et l’ordre de lecture sont alignés.</p><p>Un <em>tabindex</em> positif place l’élément au début du cycle de tabulation, <strong>mais pas dans l’ordre visuel</strong>, ce qui déroute les utilisateurs.</p></div>`,
 
 	TABLES_EMPTY_HEADING: ` <p>${why.fix}Assurez‑vous que chaque cellule d’en‑tête contient du texte.</p><div class="why"><p>Astuce : les lecteurs d’écran utilisent les en‑têtes pour orienter les utilisateurs dans un tableau.</p></div>`,
+
+	TABLES_INVALID_HEADERS_REF: `<p>Ce tableau essaie d’associer une cellule de données à une cellule d’en‑tête spécifique, mais l’ID de l’en‑tête est introuvable : <code>%(VALUE)</code>.</p><p>${why.fix}Assurez‑vous que chaque attribut <code>headers</code> correspond à l’ID d’une cellule d’en‑tête du même tableau.</p><div class="why">Astuce : <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">l’utilisation de références d’ID manuelles</a> pour associer des cellules de données à des cellules d’en‑tête est complexe et fragile. Quand c’est possible, divisez les données complexes en tableaux plus petits avec des lignes et colonnes d’en‑têtes simples.</div>`,
 
 	TABLES_MISSING_HEADINGS: ` <p>${why.fix}Modifiez les propriétés du tableau et indiquez si les en‑têtes se trouvent dans la première ligne, la première colonne ou les deux.</p><div class="why"> <p>Astuce : les lecteurs d’écran répètent l’en‑tête pertinent en entrant dans chaque ligne ou colonne.</p><p>Si ce tableau n’a pas d’en‑têtes car il sert de mise en page visuelle, remplacez‑le par autre chose qu’un tableau.</p></div>`,
 
