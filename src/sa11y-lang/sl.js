@@ -295,6 +295,7 @@ export default {
       'S tem vnosom ni povezana nobena oznaka. Dodajte <code>id</code> temu vnosu in dodajte ustrezen atribut <code>for</code> oznaki.',
     LABELS_PLACEHOLDER:
       'Izginjajoči tekst zavor se težko spomni, katera informacija spada v polje in otežuje ugotavljanje in popravljanje napak. Namesto tega razmislite o uporabi trajno vidnega namiga pred poljem obrazca. <hr> Več informacij: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Zavori v obrazcih so škodljivi.</a>',
+    ARIA_INPUT_FIELD_NAME: 'Vnosno ali preklopno polje ARIA nima dostopnega imena. Če želite to popraviti, navedite veljaven atribut <code>aria-labelledby</code>, <code>aria-label</code> ali <code>title</code>. Če je vnos preklopen (npr. potrditveno polje, stikalo, radio), bo težavo rešilo tudi dodajanje vidnega notranjega besedila. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -342,8 +343,7 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Besedilo povezave</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Dostopno ime</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr> <strong>Nasvet!</strong> "Dostopno ime" je končna oznaka, ki se sporoča ljudem, ki uporabljajo pripomočke, in se izračuna z ARIA. To jim pomaga razumeti namen povezave ali gumba.',
+    ACC_NAME_TIP: '<hr><strong>Nasvet!</strong> »Dostopno ime« je končna oznaka, ki se sporoči ljudem, ki uporabljajo podporno tehnologijo. To jim pomaga razumeti namen elementa.',
     HIDDEN_FOCUSABLE: 'Ta element lahko prejme fokus tipkovnice, vendar je skrit pred bralniki zaslona z atributom <code>aria-hidden="true"</code> (na sebi ali na nadrejenem vsebniku). Če želite to popraviti, odstranite atribut aria-hidden ali odstranite element iz vrstnega reda zavihkov. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Preberite več o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atributu aria-hidden.</a>',
 
     // Developer
@@ -387,6 +387,7 @@ export default {
       'Semantične naslove, kot sta Heading 2 ali Heading 3, lahko uporabljate samo za dele vsebine; <strong>ne</strong> v tabelah HTML. Namesto tega naslove tabel označite z elementom <code>&lt;th&gt;</code>. <hr> Preberite več o <a href="https://www.w3.org/WAI/tutorials/tables/">dostopnih tabelah.</a>',
     TABLES_EMPTY_HEADING:
       'Najden je prazen naglavni del tabele! Glave tabel ne smejo biti nikoli prazne. Pomembno je, da označite glave vrstic in/ali stolpcev in tako izrazite njihovo povezanost. Te informacije zagotavljajo kontekst za osebe, ki uporabljajo podporno tehnologijo. Ne pozabite, da je treba tabele uporabljati samo za tabelarične podatke. <hr> Preberite več o <a href="https://www.w3.org/WAI/tutorials/tables/">dostopnih tabelah.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Atribut <code>headers</code> vsebuje neveljavno sklic: <strong {C}>%(VALUE)</strong>. Sklicevati se mora na ID veljavne celice glave v isti tabeli. <hr> Preberite več o <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">uporabi atributov id in headers za povezovanje podatkovnih celic s celicami glave v podatkovnih tabelah.</a>',
 
     // Contrast
     CONTRAST_NORMAL: 'Besedilo običajne velikosti mora imeti kontrastno razmerje vsaj %(RATIO).',

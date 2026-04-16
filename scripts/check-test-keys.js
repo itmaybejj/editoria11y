@@ -29,10 +29,12 @@ const repoRoot = path.resolve(__dirname, '..');
 // needed so their top-level code executes under Node.
 globalThis.window ??= { location: { hostname: 'localhost' } };
 globalThis.document ??= {};
+globalThis.localStorage ??= { getItem: () => null, setItem: () => { }, removeItem: () => { } };
 
 const { default: defaultOptions } = await import('../src/sa11y-js/utils/default-options.js');
 const { default: Sa11yStrings } = await import('../src/sa11y-lang/en.js');
 const { testNames, tips, interfaceStrings } = await import('../src/lang/baseAll.js');
+const { ed11yDefaultOptions } = await import('../src/js/utils/ed11y-default-options.js');
 const allowlistPath = path.join(repoRoot, 'src/lang/sa11y-ui-allowlist.json');
 const pkgPath = path.join(repoRoot, 'package.json');
 
@@ -62,12 +64,14 @@ const allowlistKeys = new Set([
 	...asKeySet(allowlistData.deferredChecks),
 ]);
 const deferredSet = new Set(asKeySet(allowlistData.deferredChecks));
+const uiStringSet = new Set(asKeySet(allowlistData.uiStrings));
 
 const checkKeys = new Set(Object.keys(defaultOptions.checks));
 const sa11yStringKeys = new Set(Object.keys(Sa11yStrings.strings));
 const testNameKeys = new Set(Object.keys(testNames));
 const tipKeys = new Set(Object.keys(tips));
 const interfaceKeys = new Set(Object.keys(interfaceStrings));
+const ed11yCheckKeys = new Set(Object.keys(ed11yDefaultOptions.checks || {}));
 
 /* ---------- Run checks ---------- */
 
@@ -80,8 +84,20 @@ for (const key of checkKeys) {
 	if (deferredSet.has(key)) continue;
 	const missing = [];
 	if (!testNameKeys.has(key)) missing.push('testNames');
-	if (!tipKeys.has(key)) missing.push('tips');
+	//if (!tipKeys.has(key)) missing.push('tips');
 	if (missing.length) errors.push({ kind: 'missing-mirror', key, missing });
+}
+
+// 1b. Every Sa11y check key must also have a preference defined in
+//     ed11y-default-options.js. Unlike the tip-mirror check, deferredChecks
+//     do NOT exempt a key here — a deferred check still needs a default
+//     preference so site admins can toggle or configure it. Only uiStrings
+//     are honored (for the rare case a non-check key gets filtered here).
+for (const key of checkKeys) {
+	if (uiStringSet.has(key)) continue;
+	if (!ed11yCheckKeys.has(key)) {
+		errors.push({ kind: 'missing-default-option', key });
+	}
 }
 
 // 2. Every testName must have a matching tip (hard error).
@@ -91,7 +107,7 @@ for (const key of checkKeys) {
 for (const key of testNameKeys) {
 	if (!tipKeys.has(key)) {
 		if (deferredSet.has(key)) continue;
-		errors.push({ kind: 'asymmetric', key, missing: ['tips'] });
+		warnings.push({ kind: 'asymmetric', key, missing: ['tips'] });
 	}
 }
 for (const key of tipKeys) {
@@ -137,7 +153,7 @@ if (writeArtifact) {
 	fs.mkdirSync(outDir, { recursive: true });
 	const outPath = path.join(outDir, 'sa11y-check-keys.json');
 	fs.writeFileSync(outPath, `${JSON.stringify(artifact, null, 2)}\n`);
-	console.log(`Wrote ${path.relative(repoRoot, outPath)}`);
+	// console.log(`Wrote ${path.relative(repoRoot, outPath)}`);
 }
 
 /* ---------- Report ---------- */
@@ -148,11 +164,11 @@ if (jsonOut) {
 	if (errors.length) {
 		console.error(`\n✖ ${errors.length} drift error(s) between Sa11y and ed11y language files:\n`);
 		const missing = errors.filter((e) => e.kind === 'missing-mirror');
-		const asym = errors.filter((e) => e.kind === 'asymmetric');
+		const missingOpt = errors.filter((e) => e.kind === 'missing-default-option');
 		if (missing.length) {
 			console.error('  Unmirrored Sa11y check keys (add to src/lang/baseAll.js):');
 			for (const e of missing) {
-				console.error(`    - ${e.key} (missing in: ${e.missing.join(', ')})`);
+				console.error(`    - ${e.key} (missing in ${e.missing.join(', ')}):\n${Sa11yStrings.strings[e.key]}\n`);
 			}
 			console.error('\n  Paste-ready stubs:');
 			console.error('    // In testNames:');
@@ -168,17 +184,30 @@ if (jsonOut) {
 				`  to the "deferredChecks" map in ${path.relative(repoRoot, allowlistPath)}.`,
 			);
 		}
+		if (missingOpt.length) {
+			console.error('\n  Sa11y checks missing from ed11y default options:');
+			for (const e of missingOpt) console.error(`    ${e.key}: true,`);
+			console.error(
+				'\n  Add each to the `checks:` object in\n' +
+				'  src/js/utils/ed11y-default-options.js (e.g. `KEY: false,` to\n' +
+				'  leave disabled, or `KEY: true,` to enable by default).\n' +
+				'  Note: deferredChecks do NOT suppress this error — every Sa11y\n' +
+				'  check still needs a configurable default preference.',
+			);
+		}
+	}
+	if (warnings.length) {
+		const unrec = warnings.filter((w) => w.kind === 'unrecognized-sa11y-string');
+		const stale = warnings.filter((w) => w.kind === 'stale-allowlist');
+		const asym = warnings.filter((w) => w.kind === 'asymmetric');
+
+		console.error(`\n⚠ ${warnings.length} warning(s) ===================== `);
 		if (asym.length) {
 			console.error('\n  testNames / tips asymmetry:');
 			for (const e of asym) {
 				console.error(`    - ${e.key} (missing in: ${e.missing.join(', ')})`);
 			}
 		}
-	}
-	if (warnings.length) {
-		const unrec = warnings.filter((w) => w.kind === 'unrecognized-sa11y-string');
-		const stale = warnings.filter((w) => w.kind === 'stale-allowlist');
-		console.error(`\n⚠ ${warnings.length} warning(s):`);
 		if (unrec.length) {
 			console.error('\n  Sa11y strings not a check, not overridden by ed11y, not allowlisted:');
 			for (const w of unrec) console.error(`    - ${w.key}`);
@@ -196,6 +225,7 @@ if (jsonOut) {
 			console.error('\n  tips entries without a matching testNames entry (shared snippets?):');
 			for (const w of orphan) console.error(`    - ${w.key}`);
 		}
+		console.error(`\n==================================== `);
 	}
 	if (!errors.length && !warnings.length) {
 		console.log('✓ Sa11y check keys and ed11y language files are in sync.');

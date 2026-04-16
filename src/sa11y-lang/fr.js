@@ -297,6 +297,7 @@ export default {
       'Il n’y a pas d’étiquette associée à cette entrée. Veuillez ajouter un attribut <code>id</code> à cette entrée, et ajouter un attribut <code>for</code> correspondant à l’étiquette.',
     LABELS_PLACEHOLDER:
       'Le texte de remplacement qui disparaît rend difficile pour les gens de se souvenir de quelle information appartient à un champ et d’identifier et de corriger les problèmes de validation. En revanche, envisagez d\'utiliser un indice visible en permanence avant le champ du formulaire. <hr> En savoir plus: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Les espaces réservés dans les champs de formulaire sont nuisibles.</a>',
+    ARIA_INPUT_FIELD_NAME: 'Le champ de saisie ou d\'activation ARIA n\'a pas de nom accessible. Pour corriger cela, fournissez un attribut <code>aria-labelledby</code>, <code>aria-label</code> ou <code>title</code> valide. Si l\'entrée est commutable (ex: case à cocher, interrupteur, bouton radio), l\'ajout d\'un texte interne visible résoudra également ce problème. <hr> <strong {B}>Élément</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -344,8 +345,7 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Texte du lien</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Nom accessible</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Astuce !</strong> Le "nom accessible" est l\'étiquette finale qui est communiquée aux personnes utilisant des technologies d\'assistance et qui est calculée par ARIA. Cela les aide à comprendre le but du lien ou du bouton.',
+    ACC_NAME_TIP: '<hr><strong>Conseil !</strong> Le « nom accessible » est le libellé final communiqué aux personnes utilisant des technologies d\'assistance. Cela les aide à comprendre la fonction de l\'élément.',
     HIDDEN_FOCUSABLE: 'Cet élément peut recevoir le focus du clavier, mais il est masqué pour les lecteurs d\'écran par un attribut <code>aria-hidden="true"</code> (sur lui-même ou sur un conteneur parent). Pour corriger cela, supprimez l\'attribut aria-hidden ou supprimez l\'élément de l\'ordre de tabulation. <hr> <strong {B}>Élément</strong> <pre><code>%(EL)</code></pre> <hr> En savoir plus sur l\'<a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">attribut aria-hidden.</a>',
 
     // Developer
@@ -389,6 +389,7 @@ export default {
       'Les titres sémantiques tels que Titre 2 ou Titre 3 doivent être utilisées uniquement pour les sections de contenu ; <strong>non</strong> pour les tableaux HTML. Indiquez les en-têtes de tableau en utilisant plutôt l’élément <code>&lt;th&gt;</code>. <hr> En savoir plus sur les <a href="https://www.w3.org/WAI/tutorials/tables/">tableaux accessibles.</a>',
     TABLES_EMPTY_HEADING:
       'En-tête de tableau vide trouvé ! Les en-têtes de tableau ne devraient <strong>jamais</strong> être vides. Il est important de désigner les en-têtes de ligne et/ou de colonne pour définir leur relation. Cette information fournit le contexte aux personnes qui utilisent la technologie d’assistance. Veuillez garder à l’esprit que les tableaux devraient être utilisés pour les données tabulaires uniquement. <hr> En savoir plus sur les <a href="https://www.w3.org/WAI/tutorials/tables/">tableaux accessibles.</a>',
+    TABLES_INVALID_HEADERS_REF: 'L\'attribut <code>headers</code> contient une référence non valide : <strong {C}>%(VALUE)</strong>. Il doit faire référence à l\'ID d\'une cellule d\'en-tête valide au sein du même tableau. <hr> En savoir plus sur l\'<a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">utilisation des attributs id et headers pour associer des cellules de données à des cellules d\'en-tête dans les tableaux de données.</a>',
 
     // Contrast
     CONTRAST_NORMAL:

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="error">
 
 <head>
 	<meta charset="utf-8">
@@ -181,7 +181,6 @@
 			<label for="unsupported-placeholder">Color of placeholder cannot be calculated</label>
 			<div class="positive" style="background: transparent;"><input type="text" id="unsupported-placeholder"
 					placeholder="Rec2020 color space"></div>
-
 
 			<p>SVG graphic without enough contrast</p>
 			<div class="positive"><svg style="width: 16px; height: 16px;" xmlns="http://www.w3.org/2000/svg"
@@ -378,7 +377,7 @@
 				</tr>
 				<tr class="negative">
 					<th>Each</th>
-					<td>2 Seconds Long</td>
+					<td headers="broken-ref">2 Seconds Long</td>
 				</tr>
 			</tbody>
 		</table>
@@ -428,6 +427,12 @@
 		<div class="positive">
 			<input type="text" placeholder="Email">
 		</div>
+
+		<div class="positive"><label for="">Missing for attribute</label><input type="text" id="foo"></div>
+		<div class="positive">
+			<div role="checkbox"></div>
+		</div>
+
 
 		<div class="positive">
 			<p>Button with an accessible label different from its visible label.</p>
@@ -698,6 +703,7 @@
 					LABELS_ARIA_LABEL_INPUT: true,
 					LABELS_NO_FOR_ATTRIBUTE: true,
 					LABELS_PLACEHOLDER: true,
+					ARIA_INPUT_FIELD_NAME: true,
 
 					// Embedded content checks
 					EMBED_AUDIO: {

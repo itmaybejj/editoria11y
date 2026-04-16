@@ -294,6 +294,7 @@ export default {
       'Selle sisendiga ei ole seotud mingit märgistust. Palun lisage sellele sisendile <code>id</code> ja lisage sildile vastav <code>for</code> atribuut.',
     LABELS_PLACEHOLDER:
       'Kaduv tekstiväli teeb inimestele raskeks meeles pidada, milline teave kuulub väljale, ja tuvastada ning parandada valideerimisega seotud probleeme. Selle asemel kaaluge pidevalt nähtava vihje kasutamist enne vormivälja. <hr> Lisateavet leiate: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Vormiväljade kohatäidised on kahjulikud.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA sisestus- või lülitusväljal puudub juurdepääsetav nimi. Parandamiseks määrake kehtiv <code>aria-labelledby</code>, <code>aria-label</code> või <code>title</code> atribuut. Kui sisend on lülitatav (nt märkeruut, lüliti, raadionupp), lahendab selle ka nähtava sise-teksti lisamine. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -341,8 +342,7 @@ export default {
     // Shared
     ACC_NAME: '<strong {B}>Ligipääsetav nimi</strong> <strong {C}>%(TEXT)</strong>',
     LINK_TEXT: '<strong {B}>Lingi tekst</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Nõuanne!</strong> "Ligipääsetav nimi" on lõplik silt, mis edastatakse abivahendeid kasutavatele inimestele ja mille arvutamine toimub ARIA kaudu. See aitab neil mõista lingi või nupu eesmärki.',
+    ACC_NAME_TIP: '<hr><strong>Vihje!</strong> "Kättesaadav nimi" on lõplik silt, mis edastatakse abitehnoloogiat kasutavatele inimestele. See aitab neil mõista elemendi eesmärki.',
     HIDDEN_FOCUSABLE: 'See element võib saada klaviatuuri fookuse, kuid on ekraanilugejate eest peidetud atribuudiga <code>aria-hidden="true"</code> (kas elemendil endal või selle ülemkonteineril). Parandamiseks eemaldage atribuut aria-hidden või eemaldage element tabulaatori järjekorrast. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Lisateave <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atribuudi aria-hidden kohta.</a>',
 
     // Developer
@@ -386,6 +386,7 @@ export default {
       'Semantilisi pealkirju, nagu pealkiri 2 või pealkiri 3, tuleks kasutada ainult sisulõikudes; <strong>ei</strong> HTML-tabelites. Märkige tabelipealkirjad hoopis elemendi <code>&lt;th&gt;</code> abil. <hr> Lisateave <a href="https://www.w3.org/WAI/tutorials/tables/">juurdepääsetavate tabelite kohta.</a>',
     TABLES_EMPTY_HEADING:
       'Leitud on tühi tabeli päis! Tabeli päised ei tohiks <strong>ei tohiks</strong> kunagi</strong> olla tühjad. Oluline on määrata rea ja/või veeru päised, et anda edasi nende seos. See teave annab konteksti inimestele, kes kasutavad abivahendeid. Pidage meeles, et tabeleid tuleks kasutada ainult tabeliandmete jaoks. <hr> Lisateave <a href="https://www.w3.org/WAI/tutorials/tables/">juurdepääsetavate tabelite kohta.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Atribuut <code>headers</code> sisaldab vigast viidet: <strong {C}>%(VALUE)</strong>. See peab viitama kehtiva päiselahtri ID-le samas tabelis. <hr> Lisateave <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">atribuutide id ja headers kasutamise kohta andmelahtrite seostamiseks päiselahtritega andmetabelites.</a>',
 
     // Contrast
     CONTRAST_NORMAL: 'Tavalise suurusega tekstil peaks olema kontrastsuse suhe vähemalt %(RATIO).',

@@ -290,6 +290,7 @@ export default {
       'Tähän syötteeseen ei liity nimikettä. Lisää tälle syötteelle <code>id</code> ja lisää labeliin vastaava <code>for</code>-attribuutti.',
     LABELS_PLACEHOLDER:
       'Katoava paikkateksti ansiosta ihmisten on vaikeaa muistaa, mitä tietoa kenttään kuuluu, sekä tunnistaa ja korjata validointiongelmia. Sen sijaan harkitse pysyvän näkyvän vihjeen käyttöä ennen lomakekenttää. <hr> Lue lisää: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Paikkamerkit lomakekentissä ovat haitallisia.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA-syöttö- tai kytkinkentältä puuttuu esteetön nimi. Korjaa ongelma antamalla kelvollinen <code>aria-labelledby</code>-, <code>aria-label</code>- tai <code>title</code>-attribuutti. Jos syöte on kytkettävä (esim. valintaruutu, kytkin, valintapainike), myös näkyvän sisäisen tekstin lisääminen ratkaisee tämän. <hr> <strong {B}>Elementti</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -337,8 +338,7 @@ export default {
     // Shared
     ACC_NAME: '<strong {B}>Saavutettava nimi</strong> <strong {C}>%(TEXT)</strong>',
     LINK_TEXT: '<strong {B}>Linkkiteksti</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr> <strong>Vinkki!</strong> "Saavutettava nimi" on lopullinen etiketti, joka viestitään apuvälineitä käyttävien henkilöiden kanssa ja joka lasketaan ARIA:n avulla. Tämä auttaa heitä ymmärtämään linkin tai painikkeen tarkoituksen.',
+    ACC_NAME_TIP: '<hr><strong>Vinkki!</strong> "Esteetön nimi" on lopullinen nimi, joka välitetään avustavaa teknologiaa käyttäville henkilöille. Se auttaa heitä ymmärtämään elementin tarkoituksen.',
     HIDDEN_FOCUSABLE: 'Tämä elementti voi vastaanottaa näppäimistön kohdistuksen, mutta se on piilotettu ruudunlukuohjelmilta <code>aria-hidden="true"</code>-attribuutilla (joko elementissä itsessään tai sen isäntäsäiliössä). Korjaa ongelma joko poistamalla aria-hidden-attribuutti tai poistamalla elementti sarkainjärjestyksestä (tab order). <hr> <strong {B}>Elementti</strong> <pre><code>%(EL)</code></pre> <hr> Lue lisää <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden-attribuutista.</a>',
 
     // Developer
@@ -383,6 +383,7 @@ export default {
       'Semanttisia otsikoita, kuten Heading 2 tai Heading 3, tulisi käyttää vain sisällön osioissa; <strong>ei</strong> HTML-taulukoissa. Ilmoita taulukkootsikot sen sijaan <code>&lt;th&gt;</code>-elementillä. <hr> Lisätietoja <a href="https://www.w3.org/WAI/tutorials/tables/">saavutettavista taulukoista.</a>',
     TABLES_EMPTY_HEADING:
       'Tyhjä taulukkootsikko löytyi! Taulukkootsikoiden ei pitäisi <strong>ei koskaan</strong> olla tyhjiä. On tärkeää nimetä rivi- ja/tai sarakeotsikot, jotta niiden välinen suhde välittyy. Nämä tiedot tarjoavat kontekstin ihmisille, jotka käyttävät apuvälineteknologiaa. Muista, että taulukoita tulisi käyttää vain taulukkomuotoisiin tietoihin. <hr> Lisätietoja <a href="https://www.w3.org/WAI/tutorials/tables/">saavutettavista taulukoista.</a>',
+    TABLES_INVALID_HEADERS_REF: '<code>headers</code>-attribuutti sisältää virheellisen viittauksen: <strong {C}>%(VALUE)</strong>. Sen on viitattava kelvollisen otsikkosolun tunnukseen (ID) samassa taulukossa. <hr> Lue lisää <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">id- ja headers-attribuuttien käytöstä tietosolujen yhdistämiseksi otsikkosoluihin tietotaulukoissa.</a>',
 
     // Contrast
     CONTRAST_NORMAL: 'Normaalikokoisen tekstin tulee olla vähintään %(RATIO) kontrastisuhde.',

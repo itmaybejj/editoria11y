@@ -150,12 +150,8 @@ export default {
       'view our',
       'website',
       'article',
-      'article',
       'go',
       'workshop',
-      'plain text',
-      'html',
-      'this product',
     ],
     CLICK: ['click'],
     NEW_WINDOW_PHRASES: [
@@ -303,6 +299,7 @@ export default {
       'There is no label associated with this input. Please add an <code>id</code> to this input, and add a matching <code>for</code> attribute to the label.',
     LABELS_PLACEHOLDER:
       'Disappearing placeholder text makes it hard for people to remember what information belongs in a field and to identify and correct validation issues. Instead, consider using a permanently visible hint before the form field. <hr> Learn more: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Placeholders in form fields are harmful.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA input or toggle field is missing an accessible name. To fix, provide a valid <code>aria-labelledby</code>, <code>aria-label</code>, or <code>title</code> attribute. If the input is toggleable (e.g., checkbox, switch, radio), adding visible inner text will also resolve this. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -352,7 +349,7 @@ export default {
     LINK_TEXT: '<strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
-      '<hr><strong>Tip!</strong> The "accessible name" is the final label that gets communicated to people who use assistive technology. This helps them understand the link or button\'s purpose.',
+      '<hr><strong>Tip!</strong> The "accessible name" is the final label that gets communicated to people who use assistive technology. This helps them understand the element\'s purpose.',
     HIDDEN_FOCUSABLE: 'This element can receive keyboard focus, but is hidden from screen readers by an <code>aria-hidden="true"</code> attribute (on itself or a parent container). To fix, either remove the aria-hidden attribute or remove the element from the tab order. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Learn more about the <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden attribute.</a>',
 
     // Developer checks
@@ -398,6 +395,7 @@ export default {
       'Semantic headings such as Heading 2 or Heading 3 should only be used for sections of content; <strong>not</strong> in HTML tables. Indicate table headings using the <code>&lt;th&gt;</code> element instead. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
     TABLES_EMPTY_HEADING:
       'Empty table header found! Table headers should <strong>never</strong> be empty. It is important to designate row and/or column headers to convey their relationship. This information provides context to people who use assistive technology. Please keep in mind that tables should be used for tabular data only. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
+    TABLES_INVALID_HEADERS_REF: 'The <code>headers</code> attribute contains an invalid reference: <strong {C}>%(VALUE)</strong>. It must reference the ID of a valid header cell within the same table. <hr> Learn more about <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">using id and headers attributes to associate data cells with header cells in data tables.</a>',
 
     // Contrast
     CONTRAST_NORMAL: 'Normal-sized text should have at least a %(RATIO) ratio.',

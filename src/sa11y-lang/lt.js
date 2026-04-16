@@ -295,6 +295,7 @@ export default {
       'Su šia įvestimi nėra susieta jokia etiketė. Pridėkite <code>id</code> prie šios įvesties ir pridėkite atitinkamą <code>for</code> atributą prie etiketės.',
     LABELS_PLACEHOLDER:
       'Dingstantis vietos laikiklio tekstas apsunkina žmonėms atsiminti, kokia informacija priklauso laukeliui, ir nustatyti bei ištaisyti galiojimo problemas. Vietoj to, apsvarstykite galimybę naudoti nuolat matomą užuominą prieš formos laukelį. <hr> Sužinokite daugiau: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Vietos laikikliai formų laukeliuose yra žalingi.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA įvesties arba perjungimo laukui trūksta prieinamo pavadinimo. Norėdami tai ištaisyti, pateikite galiojantį <code>aria-labelledby</code>, <code>aria-label</code> arba <code>title</code> atributą. Jei įvestis yra perjungiama (pvz., žymimasis langelis, jungiklis, radijo mygtukas), matomo vidinio teksto pridėjimas taip pat išspręs šią problemą. <hr> <strong {B}>Elementas</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -342,8 +343,7 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Nuorodos tekstas</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Prieinamas pavadinimas</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Patarimas!</strong> "Prieinamas pavadinimas" yra galutinis etiketas, kuris perduodamas žmonėms, naudojantiems pagalbines technologijas, ir skaičiuojamas ARIA. Tai padeda jiems suprasti nuorodos ar mygtuko tikslą.',
+    ACC_NAME_TIP: '<hr><strong>Patarimas!</strong> „Prieinamas pavadinimas“ yra galutinė etiketė, kuri perduodama žmonėms, naudojantiems pagalbines technologijas. Tai padeda jiems suprasti elemento paskirtį.',
     HIDDEN_FOCUSABLE: 'Šis elementas gali gauti klaviatūros fokusavimą, tačiau jis yra paslėptas nuo ekrano skaitytuvų naudojant <code>aria-hidden="true"</code> atributą (pačiame elemente arba tėviniame konteineryje). Norėdami tai ištaisyti, pašalinkite atributą aria-hidden arba pašalinkite elementą iš tabuliavimo tvarkos. <hr> <strong {B}>Elementas</strong> <pre><code>%(EL)</code></pre> <hr> Sužinokite daugiau apie <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atributą aria-hidden.</a>',
 
     // Developer
@@ -387,6 +387,7 @@ export default {
       'Semantinės antraštės, pavyzdžiui, Heading 2 arba Heading 3, turėtų būti naudojamos tik turinio skyriams; <strong>ne</strong> HTML lentelėse. Vietoj to lentelių antraštes nurodykite naudodami elementą <code>&lt;th&gt;</code>. <hr> Sužinokite daugiau apie <a href="https://www.w3.org/WAI/tutorials/tables/">prieinamas lenteles.</a>',
     TABLES_EMPTY_HEADING:
       'Rasta tuščia lentelės antraštė! Lentelės antraštės <strong>niekada</strong> neturėtų būti tuščios. Svarbu nurodyti eilučių ir (arba) stulpelių antraštes, kad būtų išreikštas jų ryšys. Ši informacija suteikia kontekstą žmonėms, kurie naudojasi pagalbinėmis technologijomis. Atminkite, kad lentelės turėtų būti naudojamos tik lentelėms su lentelių duomenimis. <hr> Sužinokite daugiau apie <a href="https://www.w3.org/WAI/tutorials/tables/">prieinamas lenteles.</a>',
+    TABLES_INVALID_HEADERS_REF: '<code>headers</code> attribute yra neteisinga nuoroda: <strong {C}>%(VALUE)</strong>. Jis turi nurodyti galiojančio antraštės langelio ID toje pačioje lentelėje. <hr> Sužinokite daugiau apie <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">id ir headers atributų naudojimą duomenų langeliams susieti su antraštės langeliais duomenų lentelėse.</a>',
 
     // Contrast
     CONTRAST_NORMAL: 'Normalus dydžio tekstas turėtų turėti bent %(RATIO) kontrasto santykį.',

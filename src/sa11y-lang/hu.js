@@ -295,6 +295,7 @@ export default {
       'Ehhez a bemenethez nincs címke társítva. Kérjük, adjon hozzá egy <code>id</code>-t ehhez a bemenethez, és adjon hozzá egy megfelelő <code>for</code> attribútumot a címkéhez.',
     LABELS_PLACEHOLDER:
       'A eltűnő helyőrző szöveg megnehezíti az emberek számára, hogy emlékezzenek arra, hogy mely információk tartoznak egy mezőbe, és hogy azonosítsák és kijavítsák a validálási problémákat. Ehelyett fontolja meg, hogy állandóan látható tippet használjon a űrlapmező előtt. <hr> Tudjon meg többet: <a href="https://www.nngroup.com/articles/form-design-placeholders/">A helyőrzők a űrlapmezőkben károsak.</a>',
+    ARIA_INPUT_FIELD_NAME: 'Az ARIA beviteli vagy kapcsolómezőnek nincs akadálymentes neve. A javításhoz adjon meg egy érvényes <code>aria-labelledby</code>, <code>aria-label</code> vagy <code>title</code> attribútumot. Ha a bemenet kapcsolható (pl. jelölőnégyzet, kapcsoló, választógomb), a látható belső szöveg hozzáadása is megoldja ezt. <hr> <strong {B}>Elem</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -342,8 +343,7 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Hivatkozás szövege</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Hozzáférhető név</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr> <strong>Tippek!</strong> A "hozzáférhető név" az a végső címke, amelyet a segédeszközöket használó embereknek kommunikálnak, és amelyet az ARIA számít. Ez segít nekik megérteni a hivatkozás vagy gomb célját.',
+    ACC_NAME_TIP: '<hr><strong>Tipp!</strong> Az „akadálymentes név” az a végső címke, amelyet a segítő technológiát használók felé továbbítanak. Ez segít nekik megérteni az elem célját.',
     HIDDEN_FOCUSABLE: 'Ez az elem kaphat billentyűzet-fókuszt, de a képernyőolvasók elől rejtve van egy <code>aria-hidden="true"</code> attribútummal (önmagán vagy egy szülő konténeren). A javításhoz távolítsa el az aria-hidden attribútumot, vagy vegye ki az elemet a tabulátor-sorrendből. <hr> <strong {B}>Elem</strong> <pre><code>%(EL)</code></pre> <hr> Tudjon meg többet az <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden attribútumról.</a>',
 
     // Developer
@@ -387,6 +387,7 @@ export default {
       'Az olyan szemantikus címsorokat, mint a Heading 2 vagy Heading 3, csak a tartalmi részeknél szabad használni; <strong>nem</strong> a HTML táblázatokban. A táblázatcímeket ehelyett a <code>&lt;th&gt;</code> elemmel jelezze. <hr> Tudjon meg többet a <a href="https://www.w3.org/WAI/tutorials/tables/">elérhető táblázatokról.</a>',
     TABLES_EMPTY_HEADING:
       'Üres asztali fejlécet találtunk! A táblázat fejlécének <strong>soha</strong> nem szabad üresnek lennie. Fontos a sor- és/vagy oszlopfejlécek kijelölése a kapcsolatuk érzékeltetése érdekében. Ez az információ kontextust biztosít a segítő technológiát használó emberek számára. Ne feledje, hogy a táblázatok csak táblázatos adatokhoz használhatók. <hr> Tudjon meg többet a <a href="https://www.w3.org/WAI/tutorials/tables/">elérhető táblázatokról.</a>',
+    TABLES_INVALID_HEADERS_REF: 'A <code>headers</code> attribútum érvénytelen hivatkozást tartalmaz: <strong {C}>%(VALUE)</strong>. Egy ugyanazon a táblázaton belüli érvényes fejléccella azonosítójára (ID) kell hivatkoznia. <hr> Tudjon meg többet az <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">id és headers attribútumok használatáról az adatcellák és a fejléccellák összekapcsolásához adattáblázatokban.</a>',
 
     // Contrast
     CONTRAST_NORMAL: 'Teks ukuran normal harus memiliki rasio kontras setidaknya %(RATIO).',

@@ -342,6 +342,8 @@ export const ed11yDefaultOptions = {
     LINK_ALT_MAYBE_BAD: {
       minLength: 15,
     },
+    ALT_MAYBE_BAD_WARNING: true,
+    LINK_ALT_MAYBE_BAD_WARNING: true,
 
     // Sa11y: Link checks
     DUPLICATE_TITLE: false, // Todo pro.
@@ -366,6 +368,8 @@ export const ed11yDefaultOptions = {
       dismissAll: true,
     },
     LINK_FILE_EXT: false, // Todo test vs LinkPurpose.
+    LINK_UNPRONOUNCEABLE: true,
+    LINK_MAYBE_BUTTON: true,
 
     // Form label checks module not yet enabled.
     // Todo pro.
@@ -375,6 +379,7 @@ export const ed11yDefaultOptions = {
     LABELS_ARIA_LABEL_INPUT: false,
     LABELS_NO_FOR_ATTRIBUTE: false,
     LABELS_PLACEHOLDER: false,
+    ARIA_INPUT_FIELD_NAME: false,
 
     // Embedded content checks
     EMBED_AUDIO: {
@@ -407,6 +412,7 @@ export const ed11yDefaultOptions = {
     TABLES_MISSING_HEADINGS: true,
     TABLES_SEMANTIC_HEADING: true,
     TABLES_EMPTY_HEADING: true,
+    TABLES_INVALID_HEADERS_REF: true,
     QA_FAKE_HEADING: true,
     QA_FAKE_LIST: true,
     QA_UPPERCASE: true,
@@ -421,6 +427,14 @@ export const ed11yDefaultOptions = {
     META_SCALABLE: false, // Not interested.
     META_MAX: false, // Not interested.
     META_REFRESH: false, // Todo pro.
+    META_LANG_VALID: true,
+    META_LANG_SUGGEST: true,
+    PAGE_LANG_CONFIDENCE: true,
+
+    // Sa11y: Language checks
+    LANG_OF_PARTS: true,
+    LANG_MISMATCH: true,
+    LANG_OF_PARTS_ALT: true,
 
     // Sa11y: Developer checks
     // Todo pro.

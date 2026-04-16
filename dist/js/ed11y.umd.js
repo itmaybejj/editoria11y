@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.0-414
+			* @version 3.0.0-415
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -235,6 +235,7 @@
       LABELS_NO_FOR_ATTRIBUTE: true,
       LABELS_PLACEHOLDER: true,
       LABELS_ARIA_LABEL_INPUT: true,
+      ARIA_INPUT_FIELD_NAME: true,
       // Embedded content checks
       EMBED_AUDIO: {
         sources: ""
@@ -265,6 +266,7 @@
       TABLES_MISSING_HEADINGS: true,
       TABLES_SEMANTIC_HEADING: true,
       TABLES_EMPTY_HEADING: true,
+      TABLES_INVALID_HEADERS_REF: true,
       QA_FAKE_HEADING: true,
       QA_FAKE_LIST: true,
       QA_UPPERCASE: true,
@@ -1518,6 +1520,20 @@
       Found.CustomErrorLinks = [];
       Found.LangTags = [];
       const imageRoles = /* @__PURE__ */ new Set(["img", "graphics-document", "graphics-symbol", "graphics-object"]);
+      const ariaInputRoles = /* @__PURE__ */ new Set([
+        "textbox",
+        "searchbox",
+        "checkbox",
+        "radio",
+        "switch",
+        "slider",
+        "spinbutton",
+        "combobox",
+        "listbox",
+        "menuitemcheckbox",
+        "menuitemradio",
+        "radiogroup"
+      ]);
       for (let i = 0; i < Found.Everything.length; i++) {
         const $el = Found.Everything[i];
         const tag = $el.tagName;
@@ -1532,6 +1548,9 @@
             handledByRole = true;
           } else if (role === "button") {
             Found.Buttons.push($el);
+            handledByRole = true;
+          } else if (ariaInputRoles.has(role)) {
+            Found.Inputs.push($el);
             handledByRole = true;
           }
         }
@@ -1595,7 +1614,7 @@
               break;
           }
         }
-        if ($el.hasAttribute("tabindex") && $el.tabIndex > 0) Found.TabIndex.push($el);
+        if ($el.hasAttribute("tabindex") && $el.tabIndex >= 0) Found.TabIndex.push($el);
         if ($el.matches(nestedSources)) Found.NestedComponents.push($el);
         if (!contrastExcludedTags.has(tag)) {
           if (!getCachedClosest($el, contrastAncestorSelector)) {
@@ -1665,6 +1684,12 @@
       }
       Found.html = document.querySelector("html");
       Found.Language = Found.html.getAttribute("lang")?.trim();
+      Found.Focusable = [
+        ...Elements.Found.Links || [],
+        ...Elements.Found.Buttons || [],
+        ...Elements.Found.Inputs || [],
+        ...Elements.Found.TabIndex || []
+      ];
     }
     function initializeFilterElements() {
       buildContrastAttrSelector();
@@ -1744,7 +1769,7 @@
       });
     }
   }
-  const version = "3.0.0-414";
+  const version = "3.0.0-415";
   const spriteAlts = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>';
   const spriteClose = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>';
   const spriteCursor = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 256 512"><path fill="currentColor" d="M0 29C-1 47 12 62 29 64l8 1C71 67 96 95 96 128L96 224l-32 0c-18 0-32 14-32 32s14 32 32 32l32 0 0 96c0 33-26 61-59 64l-8 1C12 450-1 465 0 483s17 31 35 29l8-1c34-3 64-19 85-43c21 24 51 40 85 43l8 1c18 2 33-12 35-29s-12-33-29-35l-8-1C186 445 160 417 160 384l0-96 32 0c18 0 32-14 32-32s-14-32-32-32l-32 0 0-96c0-33 26-61 59-64l8-1c18-2 31-17 29-35S239-1 221 0l-8 1C179 4 149 20 128 44c-21-24-51-40-85-43l-8-1C17-1 2 12 0 29z"/></svg>';
@@ -2807,7 +2832,7 @@ ${this.error.stack}
       if (strippedLinkText.length !== 0) {
         if (seen[strippedLinkText] && !seen[href]) {
           const ignored = isHiddenAndUnfocusable($el);
-          const hasAttributes = $el.hasAttribute("role") || $el.hasAttribute("disabled");
+          const hasAttributes = $el.hasAttribute("role") || isDisabled($el);
           const condition = linkText.toLowerCase() !== textContentIgnoredStrings.toLowerCase();
           const diffAccName = condition ? `<hr> ${Lang._("ACC_NAME")}` : `<hr> ${Lang._("LINK_TEXT")}`;
           const variable = condition ? linkText : textContentIgnoredStrings;
@@ -2900,7 +2925,7 @@ ${this.error.stack}
       if (State.option.checks.QA_IN_PAGE_LINK || State.option.checks.LINK_MAYBE_BUTTON) {
         const hasText = getText($el).length !== 0;
         const ignored = isHiddenAndUnfocusable($el);
-        const hasAttributes = $el.hasAttribute("role") || $el.hasAttribute("aria-haspopup") || $el.hasAttribute("aria-expanded") || $el.hasAttribute("onclick") || $el.hasAttribute("disabled") || !!getCachedClosest($el, 'nav, [role="navigation"]');
+        const hasAttributes = $el.hasAttribute("role") || $el.hasAttribute("aria-haspopup") || $el.hasAttribute("aria-expanded") || $el.hasAttribute("onclick") || isDisabled($el) || !!getCachedClosest($el, 'nav, [role="navigation"]');
         const rawHref = $el.getAttribute("href");
         if ((!rawHref || rawHref.startsWith("#")) && hasText && !ignored && !hasAttributes) {
           const targetId = rawHref.substring(1);
@@ -3081,6 +3106,7 @@ ${this.error.stack}
         decorative = alt.match(altPlaceholderPattern)?.[0];
       }
       if (decorative) {
+        if (getCachedClosest($el, `button, [role='button']`)) return;
         const carouselSources = State.option.checks.IMAGE_DECORATIVE_CAROUSEL.sources;
         const carousel = carouselSources ? getCachedClosest($el, carouselSources) : "";
         if (carousel) {
@@ -3349,6 +3375,8 @@ ${this.error.stack}
         const type = $el.getAttribute("type");
         const hasTitle = $el.getAttribute("title");
         const hasAria = $el.getAttribute("aria-label") || $el.getAttribute("aria-labelledby");
+        const nativeTags = ["INPUT", "TEXTAREA", "SELECT", "METER", "PROGRESS"];
+        const isNativeInput = nativeTags.includes($el.tagName.toUpperCase());
         if (type === "submit" || type === "button" || type === "hidden") {
           return;
         }
@@ -3398,6 +3426,34 @@ ${this.error.stack}
             developer: State.option.checks.LABELS_PLACEHOLDER.developer || true
           });
         }
+        if (State.option.checks.ARIA_INPUT_FIELD_NAME && !isNativeInput) {
+          const toggles = [
+            "checkbox",
+            "menu",
+            "menuitemcheckbox",
+            "menuitemradio",
+            "radio",
+            "radiogroup",
+            "switch"
+          ];
+          const role = $el.getAttribute("role")?.trim().toLowerCase() || "";
+          const toggleRole = toggles.includes(role);
+          if (toggleRole && inputName.length !== 0) return;
+          if (inputName.length === 0) {
+            const outerHTML = truncateString($el.outerHTML, 100);
+            State.results.push({
+              test: "ARIA_INPUT_FIELD_NAME",
+              element: $el,
+              type: State.option.checks.ARIA_INPUT_FIELD_NAME.type || "error",
+              content: State.option.checks.ARIA_INPUT_FIELD_NAME.content ? Lang.sprintf(State.option.checks.ARIA_INPUT_FIELD_NAME.content) : Lang.sprintf(Lang._("ARIA_INPUT_FIELD_NAME") + Lang._("ACC_NAME_TIP"), outerHTML),
+              args: [outerHTML],
+              dismiss: prepareDismissal(`ARIA_INPUT_FIELD_NAME ${outerHTML}`),
+              dismissAll: State.option.checks.ARIA_INPUT_FIELD_NAME.dismissAll ? "ARIA_INPUT_FIELD_NAME" : false,
+              developer: State.option.checks.ARIA_INPUT_FIELD_NAME.developer || true
+            });
+            return;
+          }
+        }
         if (hasAria || hasTitle) {
           if (inputName.length === 0) {
             if (State.option.checks.LABELS_MISSING_LABEL) {
@@ -3435,9 +3491,11 @@ ${this.error.stack}
           }
           return;
         }
-        const closestLabel = getCachedClosest($el, "label");
-        const labelName = closestLabel ? computeAccessibleName(closestLabel) : "";
-        if (closestLabel && labelName.length) return;
+        if (isNativeInput) {
+          const closestLabel = getCachedClosest($el, "label");
+          const labelName = closestLabel ? computeAccessibleName(closestLabel) : "";
+          if (closestLabel && labelName.length || hasPlaceholder) return;
+        }
         const id = $el.getAttribute("id");
         if (id) {
           const hasMatchingLabel = Elements.Found.Labels.some(
@@ -3531,55 +3589,90 @@ ${this.error.stack}
       });
     }
     Elements.Found.Tables.forEach(($el) => {
-      if (isElementHidden($el) === false) {
-        const tableHeaders = $el.querySelectorAll("th");
-        const semanticHeadings = $el.querySelectorAll("h1, h2, h3, h4, h5, h6");
-        const firstRow = $el.querySelector("tr") ? $el.querySelector("tr").innerHTML : $el.innerHTML;
-        if (State.option.checks.TABLES_MISSING_HEADINGS && tableHeaders.length === 0) {
-          State.results.push({
-            test: "TABLES_MISSING_HEADINGS",
-            element: $el,
-            type: State.option.checks.TABLES_MISSING_HEADINGS.type || "error",
-            content: Lang.sprintf(
-              State.option.checks.TABLES_MISSING_HEADINGS.content || "TABLES_MISSING_HEADINGS"
-            ),
-            dismiss: prepareDismissal(`TABLES_MISSING_HEADINGS ${firstRow}`),
-            dismissAll: State.option.checks.TABLES_MISSING_HEADINGS.dismissAll ? "TABLES_MISSING_HEADINGS" : false,
-            developer: State.option.checks.TABLES_MISSING_HEADINGS.developer || false
-          });
-        }
-        if (State.option.checks.TABLES_SEMANTIC_HEADING && semanticHeadings.length > 0) {
-          semanticHeadings.forEach((heading) => {
-            State.results.push({
-              test: "TABLES_SEMANTIC_HEADING",
-              element: heading,
-              type: State.option.checks.TABLES_SEMANTIC_HEADING.type || "error",
-              content: Lang.sprintf(
-                State.option.checks.TABLES_SEMANTIC_HEADING.content || "TABLES_SEMANTIC_HEADING"
-              ),
-              dismiss: prepareDismissal(`TABLES_SEMANTIC_HEADING ${firstRow}`),
-              dismissAll: State.option.checks.TABLES_SEMANTIC_HEADING.dismissAll ? "TABLES_SEMANTIC_HEADING" : false,
-              developer: State.option.checks.TABLES_SEMANTIC_HEADING.developer || false
-            });
-          });
-        }
-        tableHeaders.forEach((th) => {
-          if (State.option.checks.TABLES_EMPTY_HEADING && th.textContent.trim().length === 0) {
-            State.results.push({
-              test: "TABLES_EMPTY_HEADING",
-              element: th,
-              type: State.option.checks.TABLES_EMPTY_HEADING.type || "error",
-              content: Lang.sprintf(
-                State.option.checks.TABLES_EMPTY_HEADING.content || "TABLES_EMPTY_HEADING"
-              ),
-              position: "afterbegin",
-              dismiss: prepareDismissal(`TABLES_EMPTY_HEADING ${firstRow}`),
-              dismissAll: State.option.checks.TABLES_EMPTY_HEADING.dismissAll ? "TABLES_EMPTY_HEADING" : false,
-              developer: State.option.checks.TABLES_EMPTY_HEADING.developer || false
-            });
+      if (isElementHidden($el)) return;
+      const role = $el.getAttribute("role")?.trim().toLowerCase();
+      if (role && !["table", "grid", "treegrid"].includes(role)) return;
+      const tableHeaders = $el.querySelectorAll('th, [role="columnheader"]');
+      const semanticHeadings = $el.querySelectorAll("h1, h2, h3, h4, h5, h6");
+      const firstRow = $el.querySelector("tr") ? $el.querySelector("tr").innerHTML : $el.innerHTML;
+      const invalidIds = [];
+      const cellsWithHeaders = $el.querySelectorAll("[headers]");
+      cellsWithHeaders.forEach((cell) => {
+        const headersAttr = cell.getAttribute("headers");
+        const headerIds = headersAttr.trim().split(/\s+/);
+        headerIds.forEach((id) => {
+          const referencedElement = $el.querySelector(`#${id}`);
+          const doesNotExist = !referencedElement;
+          const isNotInTable = referencedElement && !$el.contains(referencedElement);
+          let isNotHeader = true;
+          if (referencedElement) {
+            const tagName = referencedElement.tagName.toLowerCase();
+            const role2 = referencedElement.getAttribute("role")?.trim().toLowerCase();
+            if (tagName === "th" || role2 === "rowheader" || role2 === "columnheader")
+              isNotHeader = false;
           }
+          if (doesNotExist || isNotInTable || isNotHeader) invalidIds.push(id);
+        });
+      });
+      if (State.option.checks.TABLES_INVALID_HEADERS_REF && invalidIds.length > 0) {
+        State.results.push({
+          test: "TABLES_INVALID_HEADERS_REF",
+          element: $el,
+          type: State.option.checks.TABLES_INVALID_HEADERS_REF.type || "error",
+          content: Lang.sprintf(
+            State.option.checks.TABLES_INVALID_HEADERS_REF.content || "TABLES_INVALID_HEADERS_REF",
+            invalidIds.join(", ")
+          ),
+          args: [invalidIds.join(", ")],
+          dismiss: prepareDismissal(`TABLES_INVALID_HEADERS_REF ${firstRow}`),
+          dismissAll: State.option.checks.TABLES_INVALID_HEADERS_REF.dismissAll ? "TABLES_INVALID_HEADERS_REF" : false,
+          developer: State.option.checks.TABLES_INVALID_HEADERS_REF.developer || true
         });
       }
+      if (State.option.checks.TABLES_MISSING_HEADINGS && tableHeaders.length === 0) {
+        State.results.push({
+          test: "TABLES_MISSING_HEADINGS",
+          element: $el,
+          type: State.option.checks.TABLES_MISSING_HEADINGS.type || "error",
+          content: Lang.sprintf(
+            State.option.checks.TABLES_MISSING_HEADINGS.content || "TABLES_MISSING_HEADINGS"
+          ),
+          dismiss: prepareDismissal(`TABLES_MISSING_HEADINGS ${firstRow}`),
+          dismissAll: State.option.checks.TABLES_MISSING_HEADINGS.dismissAll ? "TABLES_MISSING_HEADINGS" : false,
+          developer: State.option.checks.TABLES_MISSING_HEADINGS.developer || false
+        });
+      }
+      if (State.option.checks.TABLES_SEMANTIC_HEADING && semanticHeadings.length > 0) {
+        semanticHeadings.forEach((heading) => {
+          State.results.push({
+            test: "TABLES_SEMANTIC_HEADING",
+            element: heading,
+            type: State.option.checks.TABLES_SEMANTIC_HEADING.type || "error",
+            content: Lang.sprintf(
+              State.option.checks.TABLES_SEMANTIC_HEADING.content || "TABLES_SEMANTIC_HEADING"
+            ),
+            dismiss: prepareDismissal(`TABLES_SEMANTIC_HEADING ${firstRow}`),
+            dismissAll: State.option.checks.TABLES_SEMANTIC_HEADING.dismissAll ? "TABLES_SEMANTIC_HEADING" : false,
+            developer: State.option.checks.TABLES_SEMANTIC_HEADING.developer || false
+          });
+        });
+      }
+      tableHeaders.forEach((th) => {
+        if (State.option.checks.TABLES_EMPTY_HEADING && th.textContent.trim().length === 0) {
+          State.results.push({
+            test: "TABLES_EMPTY_HEADING",
+            element: th,
+            type: State.option.checks.TABLES_EMPTY_HEADING.type || "error",
+            content: Lang.sprintf(
+              State.option.checks.TABLES_EMPTY_HEADING.content || "TABLES_EMPTY_HEADING"
+            ),
+            position: "afterbegin",
+            dismiss: prepareDismissal(`TABLES_EMPTY_HEADING ${firstRow}`),
+            dismissAll: State.option.checks.TABLES_EMPTY_HEADING.dismissAll ? "TABLES_EMPTY_HEADING" : false,
+            developer: State.option.checks.TABLES_EMPTY_HEADING.developer || false
+          });
+        }
+      });
     });
     if (State.option.checks.QA_FAKE_HEADING) {
       const addResult = (element, text) => {
@@ -4492,8 +4585,8 @@ ${this.error.stack}
       const fontSize = parseFloat(style.fontSize);
       if (opacity === 0 || fontSize === 0 || isElementHidden($el)) continue;
       if (isScreenReaderOnly($el)) continue;
-      const isDisabled2 = (node) => node && (node.matches?.(":disabled") || node.disabled || node.getAttribute?.("aria-disabled") === "true");
-      if (isDisabled2($el) || isDisabled2(getCachedClosest($el, "label")?.control)) continue;
+      if (isDisabled($el) || isDisabled(getCachedClosest($el, "label")?.control) || isDisabled(getCachedClosest($el, "fieldset")) || isDisabled(getCachedClosest($el, '[role="group"]')))
+        continue;
       if (!checkInputs && !/[\p{L}\p{N}]/u.test(text)) continue;
       const color = convertToRGBA(style.color, opacity);
       const getFontWeight = style.fontWeight;
@@ -5118,6 +5211,7 @@ ${this.error.stack}
     }
     if (State.option.checks.TABINDEX_ATTR) {
       Elements.Found.TabIndex.forEach(($el) => {
+        if ($el.tabIndex <= 0) return;
         State.results.push({
           test: "TABINDEX_ATTR",
           element: $el,
@@ -5130,18 +5224,11 @@ ${this.error.stack}
       });
     }
     if (State.option.checks.HIDDEN_FOCUSABLE) {
-      const focusableElements = [
-        ...Elements.Found.Links || [],
-        ...Elements.Found.Buttons || [],
-        ...Elements.Found.Inputs || [],
-        ...Elements.Found.TabIndex || []
-      ];
       const flaggedForAriaHidden = /* @__PURE__ */ new Set();
-      focusableElements.forEach(($el) => {
+      Elements.Found.Focusable.forEach(($el) => {
         if (flaggedForAriaHidden.has($el)) return;
-        if ($el.hasAttribute("disabled")) return;
-        if (isNegativeTabindex($el)) return;
-        if (isElementHidden($el)) return;
+        if (isDisabled($el) || isNegativeTabindex($el) || isElementHidden($el))
+          return;
         const hiddenContainer = getCachedClosest($el, '[aria-hidden="true"]');
         if (hiddenContainer) {
           const outerHTML = truncateString($el.outerHTML, 100);
@@ -8585,12 +8672,8 @@ ${this.error.stack}
         "view our",
         "website",
         "article",
-        "article",
         "go",
-        "workshop",
-        "plain text",
-        "html",
-        "this product"
+        "workshop"
       ],
       CLICK: ["click"],
       NEW_WINDOW_PHRASES: [
@@ -8684,6 +8767,7 @@ ${this.error.stack}
       LABELS_NO_FOR_ATTRIBUTE: "There is no label associated with this input. Add a <code>for</code> attribute to the label that matches the <code>id</code> of this input. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
       LABELS_MISSING_LABEL: "There is no label associated with this input. Please add an <code>id</code> to this input, and add a matching <code>for</code> attribute to the label.",
       LABELS_PLACEHOLDER: 'Disappearing placeholder text makes it hard for people to remember what information belongs in a field and to identify and correct validation issues. Instead, consider using a permanently visible hint before the form field. <hr> Learn more: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Placeholders in form fields are harmful.</a>',
+      ARIA_INPUT_FIELD_NAME: "ARIA input or toggle field is missing an accessible name. To fix, provide a valid <code>aria-labelledby</code>, <code>aria-label</code>, or <code>title</code> attribute. If the input is toggleable (e.g., checkbox, switch, radio), adding visible inner text will also resolve this. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>",
       // Embedded content
       EMBED_VIDEO: "Please ensure <strong>all videos have closed captioning.</strong> Providing captions for all audio and video content is a mandatory Level A requirement. Captions support people who are D/deaf or hard-of-hearing.",
       EMBED_AUDIO: "Please ensure to provide a <strong>transcript for all podcasts.</strong> Providing transcripts for audio content is a mandatory Level A requirement. Transcripts support people who are D/deaf or hard-of-hearing, but can benefit everyone. Consider placing the transcript below or within an accordion panel.",
@@ -8709,7 +8793,7 @@ ${this.error.stack}
       // Shared
       LINK_TEXT: "<strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>",
       ACC_NAME: "<strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
-      ACC_NAME_TIP: `<hr><strong>Tip!</strong> The "accessible name" is the final label that gets communicated to people who use assistive technology. This helps them understand the link or button's purpose.`,
+      ACC_NAME_TIP: `<hr><strong>Tip!</strong> The "accessible name" is the final label that gets communicated to people who use assistive technology. This helps them understand the element's purpose.`,
       HIDDEN_FOCUSABLE: 'This element can receive keyboard focus, but is hidden from screen readers by an <code>aria-hidden="true"</code> attribute (on itself or a parent container). To fix, either remove the aria-hidden attribute or remove the element from the tab order. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Learn more about the <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden attribute.</a>',
       // Developer checks
       DUPLICATE_ID: "Found <strong>duplicate ID</strong>. Duplicate ID errors are known to cause problems for assistive technologies when they are trying to interact with content. Please remove or change the following ID. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
@@ -8771,6 +8855,7 @@ ${this.error.stack}
       TABLES_MISSING_HEADINGS: 'Missing table headers! Accessible tables need HTML markup that indicates header cells and data cells which defines their relationship. This information provides context to people who use assistive technology. Tables should be used for tabular data only. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
       TABLES_SEMANTIC_HEADING: 'Semantic headings such as Heading 2 or Heading 3 should only be used for sections of content; <strong>not</strong> in HTML tables. Indicate table headings using the <code>&lt;th&gt;</code> element instead. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
       TABLES_EMPTY_HEADING: 'Empty table header found! Table headers should <strong>never</strong> be empty. It is important to designate row and/or column headers to convey their relationship. This information provides context to people who use assistive technology. Please keep in mind that tables should be used for tabular data only. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
+      TABLES_INVALID_HEADERS_REF: 'The <code>headers</code> attribute contains an invalid reference: <strong {C}>%(VALUE)</strong>. It must reference the ID of a valid header cell within the same table. <hr> Learn more about <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">using id and headers attributes to associate data cells with header cells in data tables.</a>',
       // Contrast
       CONTRAST_NORMAL: "Normal-sized text should have at least a %(RATIO) ratio.",
       CONTRAST_LARGE: "Large-sized text should have at least a %(RATIO) ratio.",
@@ -8806,6 +8891,7 @@ ${this.error.stack}
     ALT_MAYBE_BAD_WARNING: "Is this a clear and concise description of the image?",
     ALT_PLACEHOLDER: "This alt text sounds like a placeholder",
     ALT_UNPRONOUNCEABLE: "This alt text is unpronounceable",
+    ARIA_INPUT_FIELD_NAME: "This custom input field is missing a label",
     BTN_EMPTY: "Button is missing an accessible label",
     BTN_EMPTY_LABELLEDBY: "Button has an invalid ARIA label",
     BTN_ROLE_IN_NAME: 'Button name repeats the word "button"',
@@ -8840,7 +8926,12 @@ ${this.error.stack}
     LABELS_PLACEHOLDER: "Is this placeholder necessary?",
     LABELS_INPUT_RESET: "Is this reset button needed?",
     LABEL_IN_NAME: "Visible label does not match invisible label",
-    LABELS_MISSING_LABEL: "This input is not connected to a label",
+    LABELS_MISSING_IMAGE_INPUT: "This image input is missing alt text",
+    LABELS_MISSING_LABEL: "This input has an empty label",
+    LABELS_NO_FOR_ATTRIBUTE: "This input is not connected to a label",
+    LANG_MISMATCH: "Language tag does not match the content",
+    LANG_OF_PARTS: "This content appears to be in a different language",
+    LANG_OF_PARTS_ALT: "This alt text appears to be in a different language",
     LINK_ALT_FILE_EXT: "Alt text used as a link should not be a URL",
     LINK_ALT_MAYBE_BAD: "This linked alt might not be clear and concise",
     LINK_ALT_MAYBE_BAD_WARNING: "This linked alt might not be clear and concise",
@@ -8858,6 +8949,7 @@ ${this.error.stack}
     LINK_IMAGE_LONG_ALT: "Can this linked alt text be shorter?",
     LINK_IMAGE_NO_ALT_TEXT: "This linked image needs alt text",
     LINK_IMAGE_TEXT: "Does this linked image need a description?",
+    LINK_LABEL: "Link label",
     LINK_MAYBE_BUTTON: "This link looks like it should be a button",
     LINK_NEW_TAB: "Does this link open a new tab without warning?",
     LINK_PLACEHOLDER_ALT: "This linked alt text sounds like a placeholder",
@@ -8867,6 +8959,8 @@ ${this.error.stack}
     LINK_SYMBOLS: "Are the symbols or emoji in this link meaningful?",
     LINK_URL: "Link text should not be a URL",
     META_LANG: "Meta tag for page language missing",
+    META_LANG_SUGGEST: "Did you mean a different language code?",
+    META_LANG_VALID: "Language code is not valid",
     META_MAX: "Meta tag limits how much users can enlarge text",
     META_REFRESH: "Meta tag automatically refreshes page",
     META_SCALABLE: "Meta tag prevents users from enlarging text",
@@ -8874,6 +8968,7 @@ ${this.error.stack}
     MISSING_ALT: "Invalid HTML: image has no alt attribute",
     MISSING_ALT_LINK: "Invalid HTML: linked image missing alt attribute",
     MISSING_ALT_LINK_HAS_TEXT: "Invalid HTML: image in link missing alt attribute",
+    PAGE_LANG_CONFIDENCE: "Page language may not match the content",
     QA_BAD_LINK: "This link target may be invalid",
     QA_BLOCKQUOTE: "Should this quote be a heading?",
     QA_DOCUMENT: "Has this document been tagged for screen readers?",
@@ -8891,6 +8986,7 @@ ${this.error.stack}
     SUS_ALT: "Are there redundant words in this alt text?",
     TABINDEX_ATTR: "Tabindex attribute on this element breaks the reading order",
     TABLES_EMPTY_HEADING: "This header cell needs text",
+    TABLES_INVALID_HEADERS_REF: "This table has invalid headers references",
     TABLES_MISSING_HEADINGS: "This table needs a header row and/or column",
     TABLES_SEMANTIC_HEADING: "Content headings should not be used inside tables",
     UNCONTAINED_LI: "Invalid HTML list"
@@ -8910,6 +9006,7 @@ ${this.error.stack}
     ALT_MAYBE_BAD_WARNING: `<p>Alt text: <strong>"%(alt)"</strong></p><p>${why.fix}Set this image's alternative text to a concise description of what this image means in this context.</p>${why.images}`,
     ALT_PLACEHOLDER: `<p>Alt text: <strong>"%(alt)"</strong></p><p>${why.fix}Set this image's alternative text to a concise description of what this image means in this context.</p>${why.images}`,
     ALT_UNPRONOUNCEABLE: `<p>Alt text: "<strong>%(alt)</strong>"</p><p>This alt text only contains unpronounceable symbols and/or spaces. Screen readers will announce that an image is present and then pause awkwardly or say something unintelligible.</p><p>${why.fix}Add a descriptive alt, or provide a <em>completely</em> empty alt (alt="") if this is just an icon or spacer, and screen readers should ignore it.</p>${why.images}`,
+    ARIA_INPUT_FIELD_NAME: `<p><strong>Element:</strong> <code>%(EL)</code></p><p>${why.fix}Provide any valid label; for custom input elements that often means inner text, or a title, aria-label or aria-labelledby attribute.`,
     BTN_EMPTY: `<p>${why.fix}Use any valid method to tell screen readers what this button does, e.g. text, alt text on an icon, or a title attribute.</p>`,
     BTN_EMPTY_LABELLEDBY: `<p>This button has an <code>aria-labelledby</code> value that is empty or does not match the <code>ID</code> value of another element on the page.</p><p>${why.fix}Reconnect the ID to an element on the page, or remove this attribute and describe the button in another way.</p>`,
     BTN_TIP: `${why.buttons}`,
@@ -9447,6 +9544,8 @@ ${this.error.stack}
       LINK_ALT_MAYBE_BAD: {
         minLength: 15
       },
+      ALT_MAYBE_BAD_WARNING: true,
+      LINK_ALT_MAYBE_BAD_WARNING: true,
       // Sa11y: Link checks
       DUPLICATE_TITLE: false,
       // Todo pro.
@@ -9476,6 +9575,8 @@ ${this.error.stack}
       },
       LINK_FILE_EXT: false,
       // Todo test vs LinkPurpose.
+      LINK_UNPRONOUNCEABLE: true,
+      LINK_MAYBE_BUTTON: true,
       // Form label checks module not yet enabled.
       // Todo pro.
       LABELS_MISSING_IMAGE_INPUT: false,
@@ -9484,6 +9585,7 @@ ${this.error.stack}
       LABELS_ARIA_LABEL_INPUT: false,
       LABELS_NO_FOR_ATTRIBUTE: false,
       LABELS_PLACEHOLDER: false,
+      ARIA_INPUT_FIELD_NAME: false,
       // Embedded content checks
       EMBED_AUDIO: {
         sources: ""
@@ -9515,6 +9617,7 @@ ${this.error.stack}
       TABLES_MISSING_HEADINGS: true,
       TABLES_SEMANTIC_HEADING: true,
       TABLES_EMPTY_HEADING: true,
+      TABLES_INVALID_HEADERS_REF: true,
       QA_FAKE_HEADING: true,
       QA_FAKE_LIST: true,
       QA_UPPERCASE: true,
@@ -9535,6 +9638,13 @@ ${this.error.stack}
       // Not interested.
       META_REFRESH: false,
       // Todo pro.
+      META_LANG_VALID: true,
+      META_LANG_SUGGEST: true,
+      PAGE_LANG_CONFIDENCE: true,
+      // Sa11y: Language checks
+      LANG_OF_PARTS: true,
+      LANG_MISMATCH: true,
+      LANG_OF_PARTS_ALT: true,
       // Sa11y: Developer checks
       // Todo pro.
       DUPLICATE_ID: false,

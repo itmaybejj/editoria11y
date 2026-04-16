@@ -295,6 +295,7 @@ export default {
       'No hay ninguna etiqueta asociada con esta entrada. Agregue un <code>id</code> a esta entrada y agregue un atributo <code>for</code> coincidente a la etiqueta.',
     LABELS_PLACEHOLDER:
       'El texto del marcador de posición que desaparece dificulta que las personas recuerden qué información pertenece a un campo y a identificar y corregir problemas de validación. En su lugar, considere usar una pista permanentemente visible antes del campo del formulario. <hr> Obtenga más información: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Los marcadores de posición en los campos de formulario son dañinos.</a>',
+    ARIA_INPUT_FIELD_NAME: 'El campo de entrada o activación de ARIA no tiene un nombre accesible. Para solucionarlo, proporcione un atributo <code>aria-labelledby</code>, <code>aria-label</code> o <code>title</code> válido. Si la entrada es activable (por ejemplo, casilla de verificación, interruptor, radio), agregar texto interno visible también resolverá esto. <hr> <strong {B}>Elemento</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -344,8 +345,7 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Texto del enlace</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Nombre accesible</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr> <strong>Consejo!</strong> El "nombre accesible" es la etiqueta final que se comunica a las personas que utilizan tecnología de asistencia. Esto les ayuda a entender el propósito del enlace o botón.',
+    ACC_NAME_TIP: '<hr><strong>¡Consejo!</strong> El "nombre accesible" es la etiqueta final que se comunica a las personas que utilizan tecnologías de asistencia. Esto les ayuda a comprender el propósito del elemento.',
     HIDDEN_FOCUSABLE: 'Este elemento puede recibir el foco del teclado, pero está oculto para los lectores de pantalla mediante un atributo <code>aria-hidden="true"</code> (en sí mismo o en un contenedor principal). Para solucionarlo, elimine el atributo aria-hidden o elimine el elemento del orden de tabulación. <hr> <strong {B}>Elemento</strong> <pre><code>%(EL)</code></pre> <hr> Obtenga más información sobre el <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atributo aria-hidden.</a>',
 
     // Developer
@@ -389,6 +389,7 @@ export default {
       'Los encabezados semánticos como el Encabezado 2 o el Encabezado 3 solo deben usarse para secciones de contenido; <strong>no</strong> en tablas HTML. Indique los encabezados de la tabla usando el elemento <code>&lt;th&gt;</code> en su lugar. <hr> Más información sobre las <a href="https://www.w3.org/WAI/tutorials/tables/">tablas accesibles.</a>',
     TABLES_EMPTY_HEADING:
       '¡Encabezado de tabla vacío encontrado! Los encabezados de las tablas <strong>nunca</strong> deben estar vacíos. Es importante designar encabezados de fila y/o columna para transmitir su relación. Esta información brinda contexto a las personas que usan tecnología de asistencia. Tenga en cuenta que las tablas deben usarse solo para datos tabulares. <hr> Más información sobre las <a href="https://www.w3.org/WAI/tutorials/tables/">tablas accesibles.</a>',
+    TABLES_INVALID_HEADERS_REF: 'El atributo <code>headers</code> contiene una referencia no válida: <strong {C}>%(VALUE)</strong>. Debe hacer referencia al ID de una celda de encabezado válida dentro de la misma tabla. <hr> Obtenga más información sobre el <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">uso de los atributos id y headers para asociar celdas de datos con celdas de encabezado en tablas de datos.</a>',
 
     // Contrast
     CONTRAST_NORMAL:

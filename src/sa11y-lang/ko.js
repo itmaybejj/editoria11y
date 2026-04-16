@@ -295,6 +295,7 @@ export default {
       '이 입력과 연결된 레이블이 없습니다. 이 입력에 <code>아이디</code>를 추가하고 레이블에 일치하는 <code>용</code> 속성을 추가하세요.',
     LABELS_PLACEHOLDER:
       '사라지는 자리 표시자 텍스트는 사람들이 필드에 어떤 정보가 들어가야 하는지 기억하는 데 어려움을 주며 유효성 검사 문제를 식별하고 수정하기 어렵게 만듭니다. 대신, 양식 필드 앞에 항상 표시되는 힌트를 사용하는 것을 고려하십시오. <hr> 자세히 알아보세요: <a href="https://www.nngroup.com/articles/form-design-placeholders/">양식 필드의 자리 표시자는 유해합니다.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA 입력 또는 토글 필드에 액세스 가능한 이름이 누락되었습니다. 문제를 해결하려면 유효한 <code>aria-labelledby</code>, <code>aria-label</code> 또는 <code>title</code> 속성을 제공하세요. 입력이 토글 가능한 경우(예: 체크박스, 스위치, 라디오 버튼) 시각적인 내부 텍스트를 추가해도 이 문제가 해결됩니다. <hr> <strong {B}>요소</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -342,8 +343,7 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>링크 텍스트</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>접근 가능한 이름</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>팁!</strong> "접근 가능한 이름"은 보조 기술을 사용하는 사람들에게 전달되는 최종 레이블이며 ARIA에 의해 계산됩니다. 이를 통해 링크 또는 버튼의 목적을 이해하는 데 도움이 됩니다.',
+    ACC_NAME_TIP: '<hr><strong>팁!</strong> "액세스 가능한 이름"은 보조 기술을 사용하는 사람들에게 전달되는 최종 레이블입니다. 이는 그들이 요소의 목적을 이해하는 데 도움이 됩니다.',
     HIDDEN_FOCUSABLE: '이 요소는 키보드 포커스를 받을 수 있지만, 자신 또는 상위 컨테이너의 <code>aria-hidden="true"</code> 속성으로 인해 스크린 리더에서 숨겨져 있습니다. 문제를 해결하려면 aria-hidden 속성을 제거하거나 탭 순서에서 요소를 제거하세요. <hr> <strong {B}>요소</strong> <pre><code>%(EL)</code></pre> <hr> <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden 속성</a>에 대해 자세히 알아보세요.',
 
     // Developer
@@ -387,6 +387,7 @@ export default {
       '제목 2 또는 제목 3과 같은 시맨틱 제목은 콘텐츠 섹션에만 사용해야 하며, HTML 표에는 <strong>이 아닌</strong>을 사용해야 합니다. 대신 <code>&lt;th&gt;</code> 요소를 사용하여 표 제목을 표시하세요. <hr> <a href="https://www.w3.org/WAI/tutorials/tables/">액세스 가능한 표에 대해 자세히 알아보기.</a>',
     TABLES_EMPTY_HEADING:
       '빈 테이블 헤더가 발견되었습니다! 테이블 헤더는 비어 있으면 안 됩니다. 행 및/또는 열 머리글을 지정하여 관계를 전달하는 것이 중요합니다. 이 정보는 보조 기술을 사용하는 사람들에게 맥락을 제공합니다. 표는 표 형식의 데이터에만 사용해야 한다는 점에 유의하세요. <hr> <a href="https://www.w3.org/WAI/tutorials/tables/">액세스 가능한 테이블에 대해 자세히 알아보기.</a>',
+    TABLES_INVALID_HEADERS_REF: '<code>headers</code> 속성에 유효하지 않은 참조가 포함되어 있습니다: <strong {C}>%(VALUE)</strong>. 동일한 테이블 내의 유효한 헤더 셀 ID를 참조해야 합니다. <hr> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">데이터 테이블에서 id 및 headers 속성을 사용하여 데이터 셀을 헤더 셀과 연결하는 방법</a>에 대해 자세히 알아보세요.',
 
     // Contrast
     CONTRAST_NORMAL: '일반 크기의 텍스트는 최소 %(RATIO) 대비 비율을 가져야 합니다.',

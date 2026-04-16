@@ -170,6 +170,20 @@ const Elements = (function myElements() {
     Found.LangTags = [];
 
     const imageRoles = new Set(['img', 'graphics-document', 'graphics-symbol', 'graphics-object']);
+    const ariaInputRoles = new Set([
+      'textbox',
+      'searchbox',
+      'checkbox',
+      'radio',
+      'switch',
+      'slider',
+      'spinbutton',
+      'combobox',
+      'listbox',
+      'menuitemcheckbox',
+      'menuitemradio',
+      'radiogroup',
+    ]);
 
     // Iterate on Found.Everything based on tag name.
     for (let i = 0; i < Found.Everything.length; i++) {
@@ -188,6 +202,9 @@ const Elements = (function myElements() {
           handledByRole = true;
         } else if (role === 'button') {
           Found.Buttons.push($el);
+          handledByRole = true;
+        } else if (ariaInputRoles.has(role)) {
+          Found.Inputs.push($el);
           handledByRole = true;
         }
       }
@@ -258,7 +275,7 @@ const Elements = (function myElements() {
       }
 
       // Cross-cutting: tabindex
-      if ($el.hasAttribute('tabindex') && $el.tabIndex > 0) Found.TabIndex.push($el);
+      if ($el.hasAttribute('tabindex') && $el.tabIndex >= 0) Found.TabIndex.push($el);
 
       // Cross-cutting: Nested components.
       if (nestedSources && $el.matches(nestedSources)) Found.NestedComponents.push($el);
@@ -349,6 +366,14 @@ const Elements = (function myElements() {
     // Query <html> for lang attribute (may change on SPA navigation).
     Found.html = document.querySelector('html');
     Found.Language = Found.html.getAttribute('lang')?.trim();
+
+    // All focusable elements.
+    Found.Focusable = [
+      ...(Elements.Found.Links || []),
+      ...(Elements.Found.Buttons || []),
+      ...(Elements.Found.Inputs || []),
+      ...(Elements.Found.TabIndex || []),
+    ];
   }
 
   // Initialize.

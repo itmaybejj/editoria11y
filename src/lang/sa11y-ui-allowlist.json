@@ -90,6 +90,26 @@
     "LANG_UNSUPPORTED"
   ],
   "deferredChecks": {
-    "IMAGE_PASS": "Not implemented"
+    "IMAGE_PASS": "Good annotation, not implemented",
+    "LINK_LABEL": "Good annotation, not implemented",
+    "CONTRAST_INPUT": "inherit",
+    "CONTRAST_ERROR": "inherit",
+    "CONTRAST_PLACEHOLDER": "inherit",
+    "CONTRAST_PLACEHOLDER_UNSUPPORTED": "inherit",
+    "CONTRAST_ERROR_GRAPHIC": "inherit",
+    "CONTRAST_WARNING_GRAPHIC": "inherit",
+    "CONTRAST_UNSUPPORTED": "inherit",
+    "LABELS_MISSING_IMAGE_INPUT": "inherit",
+    "LABELS_NO_FOR_ATTRIBUTE": "inherit",
+    "LANG_MISMATCH": "inherit",
+    "LANG_OF_PARTS": "inherit",
+    "LANG_OF_PARTS_ALT": "inherit",
+    "META_LANG_SUGGEST": "inherit",
+    "META_LANG_VALID": "inherit",
+    "META_MAX": "inherit",
+    "META_SCALABLE": "inherit",
+    "PAGE_LANG_CONFIDENCE": "inherit",
+    "UNCONTAINED_LI": "inherit",
+    "TABLES_INVALID_HEADERS_REF": "inherit"
   }
 }

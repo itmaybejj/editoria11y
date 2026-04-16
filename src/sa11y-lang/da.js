@@ -296,6 +296,7 @@ export default {
       'Der er ingen label knyttet til dette input. Tilføj venligst et <code>id</code> til dette input, og tilføj en matchende <code>for</code>-attribut til etiketten.',
     LABELS_PLACEHOLDER:
       'Forbigående pladsholdertekst gør det svært for folk at huske, hvilken information der hører til i et felt, og at identificere og rette valideringsproblemer. Overvej i stedet at bruge et permanent synligt hint før formularfeltet. <hr> Læs mere: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Pladsholdere i formularfelter er skadelige.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA-input- eller skiftefelt mangler et tilgængeligt navn. For at løse det skal du angive en gyldig <code>aria-labelledby</code>-, <code>aria-label</code>- eller <code>title</code>-attribut. Hvis inputtet kan skiftes (f.eks. afkrydsningsfelt, kontakt, radioknap), vil tilføjelse af synlig indre tekst også løse dette. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -343,8 +344,7 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Linktekst</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Tilgængeligt navn</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Tip!</strong> "Tilgængeligt navn" er den endelige etiket, der kommunikeres til personer, der bruger hjælpemidler. Dette hjælper dem med at forstå formålet med linket eller knappen.',
+    ACC_NAME_TIP: '<hr><strong>Tip!</strong> Det "tilgængelige navn" er den endelige mærkat, der kommunikeres til folk, der bruger hjælpemidler. Dette hjælper dem med at forstå elementets formål.',
     HIDDEN_FOCUSABLE: 'Dette element kan modtage tastaturfokus, men er skjult for skærmlæsere af en <code>aria-hidden="true"</code>-attribut (på sig selv eller en overordnet container). For at løse det skal du enten fjerne aria-hidden-attributten eller fjerne elementet fra tabulatorrækkefølgen. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Lær mere om <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden-attributten.</a>',
 
     // Developer
@@ -388,6 +388,7 @@ export default {
       'Semantiske overskrifter som Heading 2 eller Heading 3 bør kun bruges til sektioner af indhold; <strong>ikke</strong> i HTML-tabeller. Angiv tabeloverskrifter ved hjælp af <code>&lt;th&gt;</code>-elementet i stedet. <hr> Få mere at vide om <a href="https://www.w3.org/WAI/tutorials/tables/">tilgængelige tabeller.</a>',
     TABLES_EMPTY_HEADING:
       'Tom tabeloverskrift fundet! Tabeloverskrifter bør <strong>aldrig</strong> være tomme. Det er vigtigt at udpege række- og/eller kolonneoverskrifter for at formidle deres relation. Disse oplysninger giver kontekst til personer, der bruger hjælpemidler. Husk, at tabeller kun bør bruges til tabeldata. <hr> Få mere at vide om <a href="https://www.w3.org/WAI/tutorials/tables/">tilgængelige tabeller.</a>',
+    TABLES_INVALID_HEADERS_REF: '<code>headers</code>-attributten indeholder en ugyldig reference: <strong {C}>%(VALUE)</strong>. Den skal referere til ID\'et på en gyldig overskriftscelle i den samme tabel. <hr> Lær mere om <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">brug af id- og headers-attributter til at knytte dataceller til overskriftsceller i datatabeller.</a>',
 
     // Contrast
     CONTRAST_NORMAL: 'Tekst i normal størrelse bør have en kontrastforhold på mindst %(RATIO).',

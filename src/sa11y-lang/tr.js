@@ -296,6 +296,7 @@ export default {
       'Bu girdiyle ilişkilendirilmiş bir etiket yok. Lütfen bu girdiye bir <code>id</code> ekleyin ve etikete eşleşen bir <code>for</code> niteliği ekleyin.',
     LABELS_PLACEHOLDER:
       'Kaybolan yer tutucu metin, insanların bir alana hangi bilginin ait olduğunu hatırlamalarını zorlaştırır ve hataları tanımlamayı ve düzeltmeyi zor hale getirir. Bunun yerine, form alanından önce kalıcı olarak görünür bir ipucu kullanmayı düşünün. <hr> Daha fazla bilgi: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Form alanlarındaki yer tutucular zararlıdır.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA giriş veya geçiş alanı erişilebilir bir ada sahip değil. Düzeltmek için geçerli bir <code>aria-labelledby</code>, <code>aria-label</code> veya <code>title</code> özniteliği sağlayın. Giriş değiştirilebilirse (örneğin, onay kutusu, anahtar, radyo düğmesi), görünür iç metin eklemek de bu sorunu çözecektir. <hr> <strong {B}>Öğe</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -343,8 +344,7 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Bağlantı metni</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Erişilebilir ad</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>İpucu!</strong> "Erişilebilir ad", yardımcı teknolojiyi kullanan kişilere iletilen son etikettir ve ARIA tarafından hesaplanır. Bu, bağlantının veya düğmenin amacını anlamalarına yardımcı olur.',
+    ACC_NAME_TIP: '<hr><strong>İpucu!</strong> "Erişilebilir ad", yardımcı teknoloji kullanan kişilere iletilen nihai etikettür. Bu, öğenin amacını anlamalarına yardımcı olur.',
     HIDDEN_FOCUSABLE: 'Bu öğe klavye odağı alabilir, ancak <code>aria-hidden="true"</code> özniteliği (kendi üzerinde veya üst kapsayıcıda) nedeniyle ekran okuyuculardan gizlenmiştir. Düzeltmek için aria-hidden özniteliğini kaldırın veya öğeyi sekme sırasından çıkarın. <hr> <strong {B}>Öğe</strong> <pre><code>%(EL)</code></pre> <hr> <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden özniteliği</a> hakkında daha fazla bilgi edinin.',
 
     // Developer
@@ -388,6 +388,7 @@ export default {
       'Heading 2 veya Heading 3 gibi anlamsal başlıklar yalnızca içerik bölümleri için kullanılmalıdır; HTML tablolarında <strong>değil</strong>. Bunun yerine tablo başlıklarını <code>&lt;th&gt;</code> öğesini kullanarak belirtin. <hr> <a href="https://www.w3.org/WAI/tutorials/tables/">erişilebilir tablolar hakkında daha fazla bilgi edinin.</a>',
     TABLES_EMPTY_HEADING:
       'Boş tablo başlığı bulundu! Tablo başlıkları <strong>asla</strong> boş olmamalıdır. İlişkilerini aktarmak için satır ve/veya sütun başlıklarını belirlemek önemlidir. Bu bilgi, yardımcı teknoloji kullanan kişilere bağlam sağlar. Lütfen tabloların yalnızca tablo halindeki veriler için kullanılması gerektiğini unutmayın. <hr> <a href="https://www.w3.org/WAI/tutorials/tables/">erişilebilir tablolar hakkında daha fazla bilgi edinin.</a>',
+    TABLES_INVALID_HEADERS_REF: '<code>headers</code> özniteliği geçersiz bir referans içeriyor: <strong {C}>%(VALUE)</strong>. Aynı tablo içindeki geçerli bir başlık hücresinin kimliğine (ID) atıfta bulunmalıdır. <hr> Veri tablolarındaki veri hücrelerini başlık hücreleriyle ilişkilendirmek için <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">id ve headers özniteliklerinin kullanımı</a> hakkında daha fazla bilgi edinin.',
 
     // Contrast
     CONTRAST_NORMAL: 'Normal boyuttaki metin en az %(RATIO) kontrast oranına sahip olmalıdır.',
