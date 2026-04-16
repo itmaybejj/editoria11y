@@ -644,7 +644,7 @@ const Constants = /* @__PURE__ */ (function myConstants() {
     Exclusions.HeaderSpan = State.option.headerIgnoreSpan ? State.option.headerIgnoreSpan.split(",").map(($el) => $el.trim()) : [];
     Exclusions.Outline = State.option.outlineIgnore ? State.option.outlineIgnore.split(",").map(($el) => $el.trim()) : [];
     Exclusions.Images = [
-      'img[role="presentation"]:not(a img[role="presentation"]), img[aria-hidden="true"]:not(a img[aria-hidden="true"]), img[role="none"]:not(a img[role="none"])'
+      'img[role="presentation"]:not(a img[role="presentation"]), img[aria-hidden="true"]:not(a img[aria-hidden="true"]), img[role="none"]:not(a img[role="none"]), [aria-hidden="true"][role="img"]'
     ];
     if (State.option.imageIgnore) {
       Exclusions.Images = State.option.imageIgnore.split(",").map(($el) => $el.trim()).concat(Exclusions.Images);
@@ -2934,7 +2934,10 @@ function checkLinkText() {
           if (State.option.checks.LINK_MAYBE_BUTTON) {
             const keywords = Lang._("POTENTIAL_UI_ELEMENTS");
             const matchedKeyword = keywords.find((word) => accName.toLowerCase().includes(word));
-            if (matchedKeyword && accName.length <= 15) {
+            const isSlide = Object.keys($el.dataset).some(
+              (key) => key.toLowerCase().includes("slide")
+            );
+            if ((matchedKeyword || isSlide) && accName.length <= 15) {
               isFauxButton = true;
               State.results.push({
                 test: "LINK_MAYBE_BUTTON",
@@ -2942,10 +2945,9 @@ function checkLinkText() {
                 type: State.option.checks.LINK_MAYBE_BUTTON.type || "error",
                 content: Lang.sprintf(
                   State.option.checks.LINK_MAYBE_BUTTON.content || "LINK_MAYBE_BUTTON",
-                  matchedKeyword,
                   accName
                 ),
-                args: [matchedKeyword, accName],
+                args: [accName],
                 inline: true,
                 dismiss: prepareDismissal(`LINK_MAYBE_BUTTON_${matchedKeyword}`),
                 dismissAll: State.option.checks.LINK_MAYBE_BUTTON.dismissAll ? "LINK_MAYBE_BUTTON" : false,
@@ -8810,7 +8812,7 @@ const Sa11yStrings = {
     BTN_TIP: ' Learn how to make an <a href="https://www.sarasoueidan.com/blog/accessible-icon-buttons/">accessible button.</a>',
     BTN_ROLE_IN_NAME: 'Do not include the word "button" in the name of a button. Screen readers already convey the role of an element in addition to its name. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>',
     LABEL_IN_NAME: "The visible text for this element appears to be different than the accessible name, which may cause confusion for assistive technologies users. Please review: <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
-    LINK_MAYBE_BUTTON: `This link has an invalid target, and the accessible name contains the word "<strong {C}>%(NAME)</strong>". This suggests that this might not be a link at all, and instead controls some scripted behaviour on the page. To fix, replace the link with an <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">accessible button</a>, or correct the link's destination. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tip!</strong> Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.`,
+    LINK_MAYBE_BUTTON: `This link has an invalid target. Although the accessible name or its attributes suggests that this might not be a link at all, and instead controls some scripted behaviour on the page. To fix, replace the link with an <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">accessible button</a>, or correct the link's destination. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tip!</strong> Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.`,
     POTENTIAL_UI_ELEMENTS: [
       "menu",
       "close",
@@ -8819,6 +8821,7 @@ const Sa11yStrings = {
       "expand",
       "collapse",
       "next",
+      "prev",
       "previous",
       "play",
       "pause",
@@ -9397,6 +9400,7 @@ const ed11yDefaultOptions = {
     bg: "#eff2ff",
     bgHighlight: "#7b1919",
     bgOutlines: "#276499",
+    code: "#a4c0fc",
     text: "#20160c",
     primary: "#276499",
     primaryText: "#eff2ff",
@@ -9420,6 +9424,7 @@ const ed11yDefaultOptions = {
     bg: "#0a2051",
     bgHighlight: "#7b1919",
     bgOutlines: "#f4f7ff",
+    code: "#cbd8f3",
     text: "#f4f7ff",
     primary: "#cbd8f3",
     // '#3052a0',
@@ -9444,6 +9449,7 @@ const ed11yDefaultOptions = {
     bg: "#fffffe",
     bgHighlight: "#7b1919",
     bgOutlines: "#0a307a",
+    code: "#a4c0fc",
     text: "#20160c",
     primary: "#0a307a",
     primaryText: "#fffdf7",

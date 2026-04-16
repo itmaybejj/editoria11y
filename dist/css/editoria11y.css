@@ -977,9 +977,11 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 .ed11y-tip-wrapper code, .ed11y-tip-wrapper i {
+  background-color: var(--ed11y-code, #cbd8f3);
   color: #000;
-  background-color: #b2d2ef;
-  padding-inline: .25em;
+  border-radius: 2px;
+  padding-inline: 2px;
+  font-style: normal;
   font-weight: 500;
   display: inline-block;
 }

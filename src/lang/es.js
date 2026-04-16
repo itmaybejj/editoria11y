@@ -75,7 +75,7 @@ const testNames = {
 	LANG_OF_PARTS_ALT: 'Este texto alternativo parece estar en un idioma diferente',
 	META_LANG: 'Falta la metaetiqueta para el idioma de la página',
 	META_LANG_SUGGEST: '¿Quiso decir un código de idioma diferente?',
-	META_LANG_VALID: 'El código de idioma no es válido',
+	META_LANG_VALID: 'El código de idioma de este elemento no es válido',
 	META_MAX: 'La metaetiqueta limita cuánto pueden ampliar el texto los usuarios',
 	META_REFRESH: 'La metaetiqueta actualiza la página automáticamente',
 	META_SCALABLE: 'La metaetiqueta impide que los usuarios amplíen el texto',
@@ -125,15 +125,15 @@ const why = {
 const tips = {
 	ARIA_INPUT_FIELD_NAME: `<p><strong>Elemento:</strong> <code>%(EL)</code></p><p>${why.fix}Proporcione cualquier etiqueta válida; para elementos de entrada personalizados eso suele ser texto interno, o un atributo title, aria-label o aria-labelledby.`,
 
-	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Texto alternativo: <strong>"%(ALT_TEXT)"</strong></p><p>Los lectores de pantalla dictarán esta URL, a menudo letra por letra. Esto probablemente no transmite el mismo significado que ver la imagen.</p><p>${why.fix}Agregue un alt vacío (alt="") si esto es una decoración sin significado que deba ser ignorada por los lectores de pantalla, o agregue un texto alternativo descriptivo.</p>${why.images}`,
+	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Texto alternativo: <i>%(ALT_TEXT)</i></p><p>Los lectores de pantalla dictarán esta URL, a menudo letra por letra. Esto probablemente no transmite el mismo significado que ver la imagen.</p><p>${why.fix}Agregue un alt vacío (alt="") si esto es una decoración sin significado que deba ser ignorada por los lectores de pantalla, o agregue un texto alternativo descriptivo.</p>${why.images}`,
 
-	ALT_MAYBE_BAD: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Establezca el texto alternativo de esta imagen como una descripción concisa de lo que significa en este contexto.</p>${why.images}`,
+	ALT_MAYBE_BAD: `<p>Texto alternativo: <i>%(alt)</i></p><p>${why.fix}Establezca el texto alternativo de esta imagen como una descripción concisa de lo que significa en este contexto.</p>${why.images}`,
 
-	ALT_MAYBE_BAD_WARNING: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Establezca el texto alternativo de esta imagen como una descripción concisa de lo que significa en este contexto.</p>${why.images}`,
+	ALT_MAYBE_BAD_WARNING: `<p>Texto alternativo: <i>%(alt)</i></p><p>${why.fix}Establezca el texto alternativo de esta imagen como una descripción concisa de lo que significa en este contexto.</p>${why.images}`,
 
-	ALT_PLACEHOLDER: `<p>Texto alternativo: <strong>"%(alt)"</strong></p><p>${why.fix}Establezca el texto alternativo de esta imagen como una descripción concisa de lo que significa en este contexto.</p>${why.images}`,
+	ALT_PLACEHOLDER: `<p>Texto alternativo: <i>%(alt)</i></p><p>${why.fix}Establezca el texto alternativo de esta imagen como una descripción concisa de lo que significa en este contexto.</p>${why.images}`,
 
-	ALT_UNPRONOUNCEABLE: `<p>Texto alternativo: "<strong>%(alt)</strong>"</p><p>Este texto alternativo solo contiene símbolos impronunciables y/o espacios. Los lectores de pantalla anunciarán que hay una imagen y luego harán una pausa incómoda o dirán algo ininteligible.</p><p>${why.fix}Agregue un texto alternativo descriptivo, o proporcione un alt <em>completamente</em> vacío (alt="") si esto es solo un ícono o separador que los lectores de pantalla deben ignorar.</p>${why.images}`,
+	ALT_UNPRONOUNCEABLE: `<p>Texto alternativo: <i>%(alt)</i></p><p>Este texto alternativo solo contiene símbolos impronunciables y/o espacios. Los lectores de pantalla anunciarán que hay una imagen y luego harán una pausa incómoda o dirán algo ininteligible.</p><p>${why.fix}Agregue un texto alternativo descriptivo, o proporcione un alt <em>completamente</em> vacío (alt="") si esto es solo un ícono o separador que los lectores de pantalla deben ignorar.</p>${why.images}`,
 
 	BTN_EMPTY: `<p>${why.fix}Use cualquier método válido para indicar a los lectores de pantalla qué hace este botón; por ejemplo: texto, texto alternativo en un icono o el atributo <code>title</code>.</p>`,
 
@@ -141,9 +141,11 @@ const tips = {
 
 	BTN_TIP: `${why.buttons}`,
 
+	BTN_ROLE_IN_NAME: `<p><strong>Nombre accesible:</strong> <i>%(TEXT)</i></p><p>Los lectores de pantalla usan la palabra «botón» para anunciar que están describiendo un botón, por lo que esta palabra es redundante.</p><p>${why.fix}La etiqueta del botón debe coincidir con su acción. Si la etiqueta visible es un ícono en lugar de texto, etiquete el botón con el significado del ícono, por ejemplo: «Reproducir», «Buscar» o «Menú».</p>`,
+
 	CONTRAST_WARNING: 'Una imagen de fondo o un degradado impide a este verificador determinar con seguridad el color detrás de este texto. Use el selector de color a continuación para verificar manualmente.',
 
-	DUPLICATE_ID: `<p>Los ID se usan en esta página para etiquetas o destinos de enlace, por lo que deben ser únicos.</p><p>${why.fix}Cambie este ID: <strong>#%(id)</strong></p><div class="why"><p>En la mayoría de los sistemas de gestión de contenido, esto proviene de un campo "name" o "id" en las propiedades del elemento. En HTML, es un atributo: <code>&lt;a id="MY-ID"&gt;</code></p></div>`,
+	DUPLICATE_ID: `<p>Los ID se usan en esta página para etiquetas o destinos de enlace, por lo que deben ser únicos.</p><p>${why.fix}Cambie este ID: <code>#%(id)</code></p><div class="why"><p>En la mayoría de los sistemas de gestión de contenido, esto proviene de un campo "name" o "id" en las propiedades del elemento. En HTML, es un atributo: <code>&lt;a id="MY-ID"&gt;</code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Elimine el texto del enlace o el atributo <code>title</code>.</p><div class="why"><p>Nota: los textos emergentes de <code>title</code> solo aparecen al pasar el puntero del ratón. No se ven al navegar en un teléfono o con el teclado, por lo que muchas personas nunca los verán. No deben contener información única o importante.</p></div>`,
 
@@ -161,7 +163,7 @@ const tips = {
 
 	HEADING_EMPTY: `<p>Los encabezados vacíos crean huecos confusos en el esquema de la página.</p><p>${why.fix}Agregue texto a este encabezado o elimine esta línea vacía.</p>${why.headings}`,
 
-	HEADING_EMPTY_WITH_IMAGE: `<p>Los encabezados vacíos crean huecos confusos en el esquema de la página.</p><p>${why.fix}Si esto no es un encabezado, cambie su formato de <strong {C}>Heading %(level)</strong> a <strong>Párrafo</strong>. De lo contrario, plasme el significado de la imagen en su alt.</p>${why.headings}`,
+	HEADING_EMPTY_WITH_IMAGE: `<p>Los encabezados vacíos crean huecos confusos en el esquema de la página.</p><p>${why.fix}Si esto no es un encabezado, cambie su formato de <code>Encabezado %(level)</code> a <code>Párrafo</code>. De lo contrario, plasme el significado de la imagen en su alt.</p>${why.headings}`,
 
 	HEADING_FIRST: `${why.fix}Asegúrese de que el título de la página esté marcado como Encabezado 1 o Encabezado 2. ${why.headings}`,
 
@@ -169,11 +171,11 @@ const tips = {
 
 	HEADING_MISSING_ONE: `<p>${why.fix}Marque el título de la página como un encabezado de nivel 1 para indicar el inicio del esquema del documento.</p>${why.headings}`,
 
-	HEADING_SKIPPED_LEVEL: `<p>Este encabezado saltó de <strong>nivel %(prevLevel) a nivel %(level)</strong>. Para un lector de pantalla, esto suena como si faltara contenido.</p><p>${why.fix}Ajuste los niveles para formar un esquema correcto, sin saltos.</p>${why.headings}`,
+	HEADING_SKIPPED_LEVEL: `<p>Este encabezado saltó de <code>nivel %(prevLevel)</code> a <code>nivel %(level)</code>. Para un lector de pantalla, esto suena como si faltara contenido.</p><p>${why.fix}Ajuste los niveles para formar un esquema correcto, sin saltos.</p>${why.headings}`,
 
-	HIDDEN_FOCUSABLE: `<p>Este elemento interactivo tiene un atributo <code>aria-hidden="true"</code>, pero sigue siendo accesible mediante teclado.</p><p>${why.fix}Si <strong>pretende</strong> ocultar este elemento a los lectores de pantalla, también debe agregar <code>tabindex="-1"</code>. De lo contrario, elimine el atributo <code>aria-hidden="true"</code>.</p>`,
+	HIDDEN_FOCUSABLE: `<p><strong>Elemento:</strong> <code>%(ELEMENT)</code></p><p>Este elemento interactivo tiene un atributo <code>aria-hidden="true"</code>, pero sigue siendo accesible mediante teclado.</p><p>${why.fix}Si <strong>pretende</strong> ocultar este elemento a los lectores de pantalla, también debe agregar <code>tabindex="-1"</code>. De lo contrario, elimine el atributo <code>aria-hidden="true"</code>.</p>`,
 
-	IMAGE_ALT_TOO_LONG: `<p>%(altLength) caracteres en el alt: <strong class="ed11y-small">%(ALT_TEXT)</strong></p><p>${why.fix}Resuma, o mueva parte de la descripción a un pie de foto.</p><div class="why"><p>Consejo: las imágenes complejas que transmiten más información de la que cabe en una frase suelen necesitar un pie de foto <strong>visible</strong> o una alternativa que describa o interprete los detalles clave. Está bien remitir a las personas usuarias de lectores de pantalla a ese texto:</p><ul><li>"Póster del baile del viernes; detalles en el pie de foto."</li><li>"Gráfico que muestra que los casos han bajado un 10% este año; detalles en la tabla."</li></ul></div>`,
+	IMAGE_ALT_TOO_LONG: `<p>%(altLength) caracteres en el alt: <i class="ed11y-small">%(ALT_TEXT)</i></p><p>${why.fix}Resuma, o mueva parte de la descripción a un pie de foto.</p><div class="why"><p>Consejo: las imágenes complejas que transmiten más información de la que cabe en una frase suelen necesitar un pie de foto <strong>visible</strong> o una alternativa que describa o interprete los detalles clave. Está bien remitir a las personas usuarias de lectores de pantalla a ese texto:</p><ul><li>"Póster del baile del viernes; detalles en el pie de foto."</li><li>"Gráfico que muestra que los casos han bajado un 10% este año; detalles en la tabla."</li></ul></div>`,
 
 	IMAGE_DECORATIVE: `<p>Esta imagen ha sido ocultada a los lectores de pantalla mediante un alt vacío. Solo las imágenes sin significado (íconos redundantes, texturas decorativas) deben ocultarse de esta manera.</p><p>${why.fix}Si esta imagen aporta valor a la página, proporcione un texto alternativo.</p>${why.images}`,
 
@@ -183,7 +185,7 @@ const tips = {
 
 	IMAGE_FIGURE_DUPLICATE_ALT: `<p>${why.fix}Cambie el texto alternativo para describir el significado visual de la imagen.</p><div class="why"><p>Consejo: las imágenes, los textos alternativos y las leyendas trabajan juntos:</p><ul><li>Las leyendas visibles proporcionan contexto e interpretación.</li><li>Los textos alternativos describen la imagen para quienes no pueden verla.</li></ul></div>`,
 
-	LABELS_ARIA_LABEL_INPUT: `<p><strong {B}>Etiqueta invisible del campo:</strong> <strong {C}>%(TEXT)</strong></p><p>Verifique que exista una etiqueta visible, que permanezca cuando se introduzca texto en este campo y que coincida con el nombre invisible del campo.</p><div class="why"><p>Etiquetar campos solo con un título o un marcador de posición hace que la etiqueta desaparezca visualmente cuando alguien empieza a escribir. Esto dificulta revisar el contenido cuando hay varios campos y facilita olvidar actualizar la etiqueta invisible.</p></div>`,
+	LABELS_ARIA_LABEL_INPUT: `<p><strong>Etiqueta invisible del campo:</strong> <i>%(TEXT)</i></p><p>Verifique que exista una etiqueta visible, que permanezca cuando se introduzca texto en este campo y que coincida con el nombre invisible del campo.</p><div class="why"><p>Etiquetar campos solo con un título o un marcador de posición hace que la etiqueta desaparezca visualmente cuando alguien empieza a escribir. Esto dificulta revisar el contenido cuando hay varios campos y facilita olvidar actualizar la etiqueta invisible.</p></div>`,
 
 	LABELS_INPUT_RESET: `<p>Los botones de restablecer pueden activarse por error con facilidad, provocando pérdida de datos sin oportunidad de cancelar o deshacer.</p><p>${why.fix}A menos que restablezca un único campo, considere eliminarlo o proporcionar una confirmación antes de ejecutar la acción.</p>`,
 
@@ -191,19 +193,19 @@ const tips = {
 
 	LABELS_MISSING_LABEL: `<p>${why.fix}Agregue un <code>id</code> a este campo y un atributo <code>for</code> correspondiente en la etiqueta.</p>`,
 
-	LABELS_NO_FOR_ATTRIBUTE: `No hay una etiqueta asociada con este campo. Agregue a la etiqueta un atributo <code>for</code> que coincida con el <code>id</code> de este campo. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>`,
+	LABELS_NO_FOR_ATTRIBUTE: `No hay una etiqueta asociada con este campo. Agregue a la etiqueta un atributo <code>for</code> que coincida con el <code>id</code> de este campo. <hr> <strong>ID:</strong> <code>#%(id)</code>`,
 
 	LABELS_PLACEHOLDER: `<p>El texto de marcador de posición desaparece en cuanto alguien empieza a escribir, y a menudo tiene muy poco contraste o tanto contraste que se confunde con contenido real.</p><p>${why.fix}Asegúrese de que la información clave (etiqueta del campo, texto de ayuda e instrucciones de formato) permanezca visible cuando el campo tenga contenido, y considere eliminar el marcador de posición por completo.</p>`,
 
-	LABEL_IN_NAME: `<p>El texto visible de este elemento parece distinto del nombre accesible. Esto puede causar confusión a quienes usan lectores de pantalla y afectar el control por voz.</p><p>${why.fix}Asegúrese de que la etiqueta visible comience con el texto de la etiqueta invisible y no contenga información significativa adicional.</p><p><strong>Etiqueta invisible:</strong> "%(TEXT)"</p>`,
+	LABEL_IN_NAME: `<p><strong>Texto visible:</strong> <i>%(TEXT)</i></p><p><strong>Nombre accesible:</strong> <i>%(TEXT)</i></p><p>El texto visible de este elemento parece distinto del nombre accesible. Esto puede causar confusión a quienes usan lectores de pantalla y afectar el control por voz.</p><p>${why.fix}Asegúrese de que la etiqueta visible comience con el texto de la etiqueta invisible y no contenga información significativa que falte en la etiqueta invisible.</p>`,
 
-	LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Texto alternativo: "<strong>%(alt)</strong>"</p><p>Este texto alternativo probablemente es un nombre de archivo en lugar de un nombre significativo para el destino del enlace.</p><p>${why.fix}Establezca el alt de esta imagen con el nombre del destino del enlace.</p><div class="why"><p>El propósito del texto alternativo es describir lo que la imagen significa, no lo que contiene. El significado de una imagen vinculada es el destino del enlace:</p><ul><li>"Página con texto" describe la imagen, no un enlace.</li><li>"IMG_1234.jpg" es solo un nombre de archivo.</li><li>"<strong><em>Formulario de registro (doc)</em></strong>" es un destino del enlace.</li></ul></p></div>`,
+	LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Texto alternativo: <i>%(alt)</i></p><p>Este texto alternativo probablemente es un nombre de archivo en lugar de un nombre significativo para el destino del enlace.</p><p>${why.fix}Establezca el alt de esta imagen con el nombre del destino del enlace.</p><div class="why"><p>El propósito del texto alternativo es describir lo que la imagen significa, no lo que contiene. El significado de una imagen vinculada es el destino del enlace:</p><ul><li>"Página con texto" describe la imagen, no un enlace.</li><li>"IMG_1234.jpg" es solo un nombre de archivo.</li><li>"Formulario de registro (doc)" es un destino del enlace.</li></ul></p></div>`,
 
-	LINK_ALT_MAYBE_BAD: `<p>Texto alternativo: "<strong>%(alt)</strong>"</p><p>${why.fix}Establezca el alt de esta imagen con el nombre del destino del enlace.</p>${why.imageLinks}`,
+	LINK_ALT_MAYBE_BAD: `<p>Texto alternativo: <i>%(alt)</i></p><p>${why.fix}Establezca el alt de esta imagen con el nombre del destino del enlace.</p>${why.imageLinks}`,
 
-	LINK_ALT_MAYBE_BAD_WARNING: `<p>Texto alternativo: "<strong>%(alt)</strong>"</p><p>${why.fix}Establezca el alt de esta imagen con el nombre del destino del enlace.</p>${why.imageLinks}`,
+	LINK_ALT_MAYBE_BAD_WARNING: `<p>Texto alternativo: <i>%(alt)</i></p><p>${why.fix}Establezca el alt de esta imagen con el nombre del destino del enlace.</p>${why.imageLinks}`,
 
-	LINK_ALT_UNPRONOUNCEABLE: `<p>El alt de esta imagen vinculada contiene solo símbolos impronunciables o espacios: <strong>"%(ALT_TEXT)"</strong>.</p><p>Los lectores de pantalla anunciarán que hay un enlace, pero no podrán describirlo.</p><p>${why.fix}Establezca el alt según la finalidad o el destino del enlace.</p>${why.imageLinks}`,
+	LINK_ALT_UNPRONOUNCEABLE: `<p>El alt de esta imagen vinculada contiene solo símbolos impronunciables o espacios: <i>%(ALT_TEXT)</i></p><p>Los lectores de pantalla anunciarán que hay un enlace, pero no podrán describirlo.</p><p>${why.fix}Establezca el alt según la finalidad o el destino del enlace.</p>${why.imageLinks}`,
 
 	LINK_CLICK_HERE: `La frase «haz clic» o «haz clic aquí» es redundante y desvía la atención del propósito del enlace.`,
 
@@ -218,35 +220,37 @@ const tips = {
 
 	LINK_FILE_EXT: `<p>Este enlace apunta a un archivo descargable (PDF, MP3, Zip, Word, etc.) sin advertencia.</p><p>${why.fix}Use texto o un ícono para <a href="https://itmaybejj.github.io/linkpurpose/">indicar el tipo de archivo</a> en el propio enlace.</p><p class="why">Para archivos grandes, considere incluir el tamaño. Ejemplo: "Informe anual (PDF, 3 MB)"</p>`,
 
-	LINK_IDENTICAL_NAME: `<p>Texto del enlace: "<strong>%(TEXT)</strong>"</p><p>${why.fix}Reescriba los enlaces que llevan a diferentes destinos usando los títulos únicos de cada destino.</p>${why.links}`,
+	LINK_IDENTICAL_NAME: `<p>Texto del enlace: <i>%(TEXT)</i></p><p>${why.fix}Reescriba los enlaces que llevan a diferentes destinos usando los títulos únicos de cada destino.</p>${why.links}`,
 
-	LINK_IMAGE_ALT: `Asegúrese de que este alt describa el destino del enlace:</p><p> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong></p>${why.imageLinks}`,
+	LINK_IMAGE_ALT: `<p>Asegúrese de que este alt describa el destino del enlace:</p><p> {L} {ALT} <i>%(ALT_TEXT)</i></p>${why.imageLinks}`,
 
-	LINK_IMAGE_ALT_AND_TEXT: `<p><span style="display: none;">%(ALT)</span>Enlace con alt incluido:<br>"<strong>%(LINK)</strong>"</p><p>${why.fix}Modifique o elimine el alt si añade información irrelevante o redundante.</p>${why.imageLinks}`,
+	LINK_IMAGE_ALT_AND_TEXT: `<p><strong>Texto alternativo:</strong> <i>%(ALT_TEXT)</i></p><p><strong>Texto del enlace incluido el texto alternativo:</strong> <i>%(TEXT)</i></p><p>${why.fix}Modifique o elimine el texto alternativo si añade información irrelevante o redundante.</p>${why.imageLinks}`,
 
-	LINK_IMAGE_LONG_ALT: `<p>%(altLength) caracteres en el alt: <strong class="ed11y-small">%(ALT_TEXT)</strong></p><p>${why.fix}Establezca el alt de esta imagen con el título del destino del enlace.</p><div class="why"><p>Los usuarios de lectores de pantalla suelen oír una lista de enlaces fuera de contexto. El alt de una imagen vinculada se convierte en el título del enlace en esa lista; por tanto, debe describir el destino, no el contenido de la imagen.</p></div>`,
+	LINK_IMAGE_LONG_ALT: `<p>%(altLength) caracteres en el alt: <i class="ed11y-small">%(ALT_TEXT)</i></p><p>${why.fix}Establezca el alt de esta imagen con el título del destino del enlace.</p><div class="why"><p>Los usuarios de lectores de pantalla suelen oír una lista de enlaces fuera de contexto. El alt de una imagen vinculada se convierte en el título del enlace en esa lista; por tanto, debe describir el destino, no el contenido de la imagen.</p></div>`,
 
 	LINK_IMAGE_NO_ALT_TEXT: `<p>Cuando un enlace envuelve una imagen, el alt de la imagen <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">proporciona el título del enlace</a>.</p><p>${why.fix}Establezca el texto alternativo con la finalidad o el destino del enlace.</p>${why.imageLinks}`,
 
 	LINK_IMAGE_TEXT: 'La imagen está marcada como decorativa, aunque el enlace utiliza el texto circundante como etiqueta descriptiva.',
 
-	LINK_MAYBE_BUTTON: `<p>Este enlace tiene un destino no válido y contiene la palabra "<strong>%(NAME)</strong>". Esto sugiere que podría no ser un enlace, sino que controla algún comportamiento programado en la página.</p><p>${why.fix}reemplace el enlace por un <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">botón accesible</a>, o corrija el destino del enlace.</p><div class="why"><p>Consejo: las tecnologías de asistencia tratan los botones y los enlaces de manera diferente. Usar el elemento HTML correcto asegura que las personas usuarias sepan qué atajos de teclado usar y qué acción se activará.</p></div>`,
+	LINK_MAYBE_BUTTON: `<p>Este enlace tiene un destino no válido y contiene la palabra <i>%(NAME)</i>. Esto sugiere que podría no ser un enlace, sino que controla algún comportamiento programado en la página.</p><p>${why.fix}reemplace el enlace por un <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">botón accesible</a>, o corrija el destino del enlace.</p><div class="why"><p>Consejo: las tecnologías de asistencia tratan los botones y los enlaces de manera diferente. Usar el elemento HTML correcto asegura que las personas usuarias sepan qué atajos de teclado usar y qué acción se activará.</p></div>`,
 
 	LINK_NEW_TAB: `<p>${why.fix}Configure este enlace para que se abra en la misma pestaña o <a href="https://itmaybejj.github.io/linkpurpose/">avise a las personas usuarias</a> con antelación.</p><div class="why"><p>Las personas siempre pueden elegir abrir un enlace en una pestaña nueva. Forzar una nueva pestaña sin aviso puede resultar confuso, especialmente para quienes usan tecnologías de asistencia.</p><p>Nota: los enlaces dentro de formularios suelen abrirse en otra pestaña para evitar la pérdida de datos.</p></div>`,
 
-	LINK_PLACEHOLDER_ALT: `<p>El alt de esta imagen vinculada es un marcador de posición: "<strong>%(alt)</strong>".</p><p>${why.fix}Use un alt que describa el destino del enlace.</p>${why.imageLinks}`,
+	LINK_PLACEHOLDER_ALT: `<p>El alt de esta imagen vinculada es un marcador de posición: <i>%(alt)</i>.</p><p>${why.fix}Use un alt que describa el destino del enlace.</p>${why.imageLinks}`,
 
-	LINK_STOPWORD: `<p>Este enlace contiene texto que no ayuda a describir su destino:<br><strong>%(text)</strong></p><p>${why.fix}Reescríbalo para describir su destino de manera concisa.</p>${why.links}`,
+	LINK_STOPWORD: `<p>Este enlace contiene texto que no ayuda a describir su destino:<br><i>%(text)</i></p><p>${why.fix}Reescríbalo para describir su destino de manera concisa.</p>${why.links}`,
 
-	LINK_STOPWORD_ARIA: `<p>Se proporcionó un nombre accesible mediante ARIA, pero el texto visible del enlace es genérico: "<strong {C}>%(ERROR)</strong>".</p><p>${why.fix}Escriba enlaces significativos para todas las personas y asegúrese de que la etiqueta visual coincida con el nombre accesible.</p>${why.links}`,
+	LINK_STOPWORD_ARIA: `<p>Se proporcionó un nombre accesible mediante ARIA, pero el texto visible del enlace es genérico: <i>%(ERROR)</i>.</p><p>${why.fix}Escriba enlaces significativos para todas las personas y asegúrese de que la etiqueta visual coincida con el nombre accesible.</p>${why.links}`,
 
-	LINK_SUS_ALT: `<p>El alt de esta imagen incluye la palabra "%(alt)", lo que normalmente indica que no describe el destino del enlace.</p><p>Texto alternativo: "<strong>%(ALT_TEXT)</strong>"</p><p>Para corregirlo: asegúrese de que el alt describa la finalidad o el destino del enlace.</p>${why.imageLinks}`,
+	LINK_SUS_ALT: `<p>El alt de esta imagen incluye la palabra <i>%(alt)</i>, lo que normalmente indica que no describe el destino del enlace.</p><p>Texto alternativo: <i>%(ALT_TEXT)</i></p><p>Para corregirlo: asegúrese de que el alt describa la finalidad o el destino del enlace.</p>${why.imageLinks}`,
 
-	LINK_SYMBOLS: `<p>Símbolo encontrado: <strong {C}>%(ERROR)</strong></p><p>${why.fix}Evite usar símbolos como llamadas a la acción dentro del texto del enlace a menos que estén ocultos a las tecnologías de asistencia. Los lectores de pantalla pueden leerlos en voz alta, lo que puede confundir.</p>`,
+	LINK_SYMBOLS: `<p>Símbolo encontrado: <i>%(ERROR)</i></p><p>${why.fix}Evite usar símbolos como llamadas a la acción dentro del texto del enlace a menos que estén ocultos a las tecnologías de asistencia. Los lectores de pantalla pueden leerlos en voz alta, lo que puede confundir.</p>`,
 
 	LINK_URL: `<p>${why.fix}Cambie este enlace para usar el título de su destino o su finalidad.</p><div class="why"><p>Las personas localizan contenido por sus enlaces —especialmente quienes usan lectores de pantalla—.</p><p>Las URL como texto de enlace son difíciles de recorrer y de buscar.</p></div>`,
 
 	META_LANG: `<p>${why.fix}Agregue un <a href="https://www.w3.org/International/questions/qa-html-language-declarations">atributo de idioma</a> en la etiqueta HTML de la página.</p><div class="why"><p>Consejo: los lectores de pantalla pronuncian las palabras según el idioma declarado. Un idioma incorrecto produce un discurso ininteligible.</p></div>`,
+
+	META_LANG_VALID: `<p><strong>Elemento:</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code></p><p>${why.fix}Reemplace el atributo lang con un código de idioma válido.</p><div class="why"><p>Consejo: las páginas y los elementos tienen <a href="https://www.w3.org/International/questions/qa-html-language-declarations">atributos de idioma</a> para que los lectores de pantalla y las herramientas de traducción lean el texto correctamente.</p></div>`,
 
 	META_MAX: `<p>Esta metaetiqueta limita cuánto pueden ampliar el texto las personas usuarias.</p><p>${why.fix}Ajuste o elimine esta limitación para permitir zoom completo.</p>`,
 
@@ -254,7 +258,7 @@ const tips = {
 
 	META_SCALABLE: `<p>Esta metaetiqueta impide que las personas amplíen el texto.</p><p>${why.fix}Permita zoom completo eliminando o ajustando este parámetro.</p>`,
 
-	META_TITLE: `<p>${why.fix}Agregue una etiqueta <code>&lt;title&gt;</code> dentro de la etiqueta <code>&lt;head&gt;</code> de la página.</p><div class="why"><p>Un <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">título breve y único</a> es esencial:</p><ul><li>Los motores de búsqueda lo usan para titular resultados.</li><li>Los navegadores lo usan para titular pestañas.</li><li>Los lectores de pantalla lo anuncian al cambiar de pestaña.</li></ul><p>Sin título, las personas ven u oyen una URL en bruto.</p></div>`,
+	META_TITLE: `<p>${why.fix}Agregue una etiqueta <code>&lt;title&gt;</code> dentro de la etiqueta <code>head</code> de la página.</p><div class="why"><p>Un <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">título breve y único</a> es esencial:</p><ul><li>Los motores de búsqueda lo usan para titular resultados.</li><li>Los navegadores lo usan para titular pestañas.</li><li>Los lectores de pantalla lo anuncian al cambiar de pestaña.</li></ul><p>Sin título, las personas ven u oyen una URL en bruto.</p></div>`,
 
 	MISSING_ALT: `<p>Cuando los lectores de pantalla encuentran una imagen sin atributo alt, leen la URL del archivo de imagen, a menudo letra por letra.</p><p>${why.fix}Agregue alt="" si la imagen debe ser ignorada, o un alt descriptivo si es significativa.</p>${why.images}`,
 
@@ -262,7 +266,7 @@ const tips = {
 
 	MISSING_ALT_LINK_HAS_TEXT: `<p>Esta imagen forma parte de un enlace con texto. Si el texto visible describe suficientemente el destino, agregue alt="" para que la imagen sea ignorada. En caso contrario, agregue un alt que describa ese destino.</p>${why.imageLinks}`,
 
-	QA_BAD_LINK: `<p>El enlace parece apuntar a un entorno de desarrollo:<br>{L} <strong {C}>%(LINK)</strong></p><p>${why.fix}Cámbielo a una ruta relativa (/folder) o a la URL pública.</p>`,
+	QA_BAD_LINK: `<p>El enlace parece apuntar a un entorno de desarrollo:<br>{L} <code>%(LINK)</code></p><p>${why.fix}Cámbielo a una ruta relativa (/folder) o a la URL pública.</p>`,
 
 	QA_BLOCKQUOTE: `<p>El formato <em>blockquote</em> indica a los lectores de pantalla que el texto debe anunciarse como una cita. Las citas cortas a menudo son, en realidad, encabezados.</p><p>${why.fix}Si esto es un encabezado, use un estilo de encabezado para que aparezca en el esquema de la página.</p>${why.headings}`,
 
@@ -270,9 +274,9 @@ const tips = {
 
 	QA_FAKE_HEADING: `<p>${why.fix}Si esta línea en negrita introduce un tema, reemplácela por un estilo de encabezado.</p><div class="why"><p>Consejo: los encabezados crean una tabla de contenido navegable para tecnologías de asistencia. Su número indica su nivel de anidación.</p></div>`,
 
-	QA_FAKE_LIST: `<p>${why.fix}Si "%(text)" forma parte de una lista, aplique formato de lista.</p><div class="why"><p>Las listas tienen estructura visual y técnica:</p><ol><li>Alinean sus elementos y mejoran la lectura.</li><li>Son legibles por máquina: los lectores de pantalla anuncian "ítem 3 de 7".</li></ol><p>Un párrafo que empieza con un número no es una lista real.</p></div>`,
+	QA_FAKE_LIST: `<p>${why.fix}Si <i>%(text)</i> forma parte de una lista, aplique formato de lista.</p><div class="why"><p>Las listas tienen estructura visual y técnica:</p><ol><li>Alinean sus elementos y mejoran la lectura.</li><li>Son legibles por máquina: los lectores de pantalla anuncian "ítem 3 de 7".</li></ol><p>Un párrafo que empieza con un número no es una lista real.</p></div>`,
 
-	QA_IN_PAGE_LINK: `<p>El destino de este enlace no coincide con ningún elemento de la página.</p><div class="why"><p>Nota para desarrolladores: si el enlace dispara un evento JavaScript, pruebe su funcionamiento con teclado antes de añadirlo a la lista de exclusión.</p></div>`,
+	QA_IN_PAGE_LINK: `<p><strong>ID:</strong> <code>%(ID)</code></p><p>El destino de este enlace no coincide con ningún elemento de la página.</p><div class="why"><p>Nota para desarrolladores: si el enlace dispara un evento JavaScript, pruebe su funcionamiento con teclado antes de añadirlo a la lista de exclusión.</p></div>`,
 
 	QA_JUSTIFY: `<p>El texto justificado añade espacios irregulares, lo que dificulta la lectura a muchas personas.</p><p>${why.fix}Use alineación a la izquierda.</p>`,
 
@@ -290,7 +294,7 @@ const tips = {
 
 	QA_UPPERCASE: `<p>LOS BLOQUES DE TEXTO EN MAYÚSCULAS SON MÁS DIFÍCILES DE LEER Y PUEDEN INTERPRETARSE COMO GRITOS.</p><p>${why.fix}Enfatice solo unas pocas palabras a la vez; preferentemente con negritas.</p><div class="why"><p>Nota: los lectores de pantalla no anuncian negritas. Use un encabezado si introduce un nuevo tema.</p></div>`,
 
-	SUS_ALT: `<p>El alt de esta imagen incluye la palabra "%(alt)", lo cual probablemente es redundante:</p><p>Texto alternativo: "<strong>%(ALT_TEXT)</strong>"</p><p>${why.fix}Reescriba el alt para transmitir brevemente el significado de la imagen.</p><div class="why"><p>Consejo: los lectores de pantalla ya anuncian que están describiendo una imagen, por lo que frases como "imagen de" suelen ser redundantes.</p><p>Solo es apropiado si esas palabras forman parte del contenido descrito:</p><ul><li>No redundante: "<em>Una foto en</em> un álbum de fotos mostrado a la clase."</li><li>Redundante: "<em>Foto de</em> una foto en un álbum…"</li></ul></div>`,
+	SUS_ALT: `<p>El alt de esta imagen incluye la palabra <i>%(alt)</i>, lo cual probablemente es redundante:</p><p>Texto alternativo: <i>%(ALT_TEXT)</i></p><p>${why.fix}Reescriba el alt para transmitir brevemente el significado de la imagen.</p><div class="why"><p>Consejo: los lectores de pantalla ya anuncian que están describiendo una imagen, por lo que frases como "imagen de" suelen ser redundantes.</p><p>Solo es apropiado si esas palabras forman parte del contenido descrito:</p><ul><li>No redundante: <em>Una foto en</em> un álbum de fotos mostrado a la clase.</li><li>Redundante: <em>Foto de</em> una foto en un álbum…</li></ul></div>`,
 
 	TABINDEX_ATTR: `<p>${why.fix}Nunca use valores de <code>tabindex</code> mayores que "0" (el orden predeterminado). Cambie el orden de los elementos en el HTML para que el orden visual, de tabulación y de lectura coincidan.</p><div class="why"><p>Por defecto, el orden visual, el orden de tabulación y el orden de lectura están alineados.</p><p>Asignar un <em>tabindex</em> positivo mueve un elemento al inicio del orden de tabulación, <strong>pero no del orden visual</strong>, lo que desorienta a las personas usuarias.</p></div>`,
 
