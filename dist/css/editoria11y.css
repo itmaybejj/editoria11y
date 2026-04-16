@@ -976,6 +976,18 @@ button.ed11y-jump:hover .toggle-count {
   display: block;
 }
 
+.ed11y-tip-wrapper code, .ed11y-tip-wrapper i {
+  color: #000;
+  background-color: #b2d2ef;
+  padding-inline: .25em;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.ed11y-tip-wrapper code {
+  font-family: monospace;
+}
+
 @keyframes ed11y-fade-in {
   0% {
     opacity: 0;
