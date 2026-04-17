@@ -219,6 +219,7 @@ export const interfaceStrings = {
 	DISMISS_ALL: 'On this page: ignore',
 	edit_page: 'Edit page',
 	edit_layout: 'Edit layout',
+	edit_media: 'Edit media',
 	edit_term: 'Edit term',
 	edit_user: 'Edit user',
 	IMAGES: 'Alt text',

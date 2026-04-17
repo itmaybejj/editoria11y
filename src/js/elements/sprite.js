@@ -35,3 +35,18 @@ export const spriteToggleWarnings =
 
 export const spriteVisualize =
   '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 10 512 512"><path fill="Currentcolor" d="M152 38c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 113C-2 104-2 88 7 79s25-9 34 0l22 22 55-61c9-10 24-11 34-2zm0 160c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 273c-9-9-9-25 0-34s25-9 35 0l22 22 55-61c9-10 24-11 34-2zM224 96c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zm0 160c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zM160 416c0-18 14-32 32-32l288 0c18 0 32 14 32 32s-14 32-32 32l-288 0c-18 0-32-14-32-32zM48 368a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/></svg>';
+
+export const sprites = {
+  alts: spriteAlts,
+  close: spriteClose,
+  cursor: spriteCursor,
+  dismiss: spriteDismiss,
+  unDismiss: spriteUnDismiss,
+  headings: spriteHeadings,
+  readability: spriteReadability,
+  next: spriteNext,
+  toggleErrors: spriteToggleErrors,
+  togglePass: spriteTogglePass,
+  toggleWarnings: spriteToggleWarnings,
+  visualize: spriteVisualize,
+};

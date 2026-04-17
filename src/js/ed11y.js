@@ -6,6 +6,7 @@ import { initialize } from './core/initialize.js';
 import { sanitizeHTML } from '../sa11y-js/utils/utils.js';
 import { createDismissalKey, getElements, findElements } from './utils/utils.js';
 import { State } from '../sa11y-js/core/state.js';
+import { sprites } from './elements/sprite.js';
 import { UI } from './core/ui.js';
 import version from './version.js';
 import ConsoleErrors from './elements/ed11y-console-error.js';
@@ -37,6 +38,7 @@ export {
   refresh,
   reset,
   sanitizeHTML,
+  sprites,
   version,
   Ed11y,
 };

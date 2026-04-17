@@ -1780,6 +1780,20 @@
   const spriteTogglePass = '<svg class="pass-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10.1699 19.1777"><path fill="currentColor" d="M3.7031,10.5527c-.3633-.6562-.6426-1.1387-.8379-1.4473l-.3105-.4863-.2344-.3574c-.5117-.7969-1.0449-1.4551-1.5996-1.9746.3164-.2617.6113-.3926.8848-.3926.3359,0,.6348.123.8965.3691s.5918.7148.9902,1.4062c.4531-1.4727,1.0293-2.8691,1.7285-4.1895.3867-.7188.7314-1.2021,1.0342-1.4502s.7041-.3721,1.2041-.3721c.2656,0,.5938.041.9844.123-1.0039.8086-1.8066,1.7695-2.4082,2.8828s-1.3789,3.0762-2.332,5.8887Z"/></svg>';
   const spriteToggleWarnings = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="close-icon" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>';
   const spriteVisualize = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 10 512 512"><path fill="Currentcolor" d="M152 38c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 113C-2 104-2 88 7 79s25-9 34 0l22 22 55-61c9-10 24-11 34-2zm0 160c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 273c-9-9-9-25 0-34s25-9 35 0l22 22 55-61c9-10 24-11 34-2zM224 96c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zm0 160c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zM160 416c0-18 14-32 32-32l288 0c18 0 32 14 32 32s-14 32-32 32l-288 0c-18 0-32-14-32-32zM48 368a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/></svg>';
+  const sprites = {
+    alts: spriteAlts,
+    close: spriteClose,
+    cursor: spriteCursor,
+    dismiss: spriteDismiss,
+    unDismiss: spriteUnDismiss,
+    headings: spriteHeadings,
+    readability: spriteReadability,
+    next: spriteNext,
+    toggleErrors: spriteToggleErrors,
+    togglePass: spriteTogglePass,
+    toggleWarnings: spriteToggleWarnings,
+    visualize: spriteVisualize
+  };
   class ConsoleErrors extends HTMLElement {
     constructor(error) {
       super();
@@ -9104,6 +9118,7 @@ ${this.error.stack}
     DISMISS_ALL: "On this page: ignore",
     edit_page: "Edit page",
     edit_layout: "Edit layout",
+    edit_media: "Edit media",
     edit_term: "Edit term",
     edit_user: "Edit user",
     IMAGES: "Alt text",
@@ -9918,6 +9933,7 @@ ${this.error.stack}
   exports2.refresh = refresh;
   exports2.reset = reset;
   exports2.sanitizeHTML = sanitizeHTML;
+  exports2.sprites = sprites;
   exports2.version = version;
   Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });
 }));
