@@ -63,13 +63,15 @@ ed11y-element-result {
 
 .ed11y-wrapper {
 	font-family:
-		var(--ed11y-baseFontFamily,
+		var(
+			--ed11y-baseFontFamily,
 			-apple-system,
 			BlinkMacSystemFont,
 			"Segoe UI",
 			Roboto,
 			"Helvetica Neue",
-			Arial),
+			Arial
+		),
 		sans-serif;
 	font-size: var(--ed11y-baseFontSize, 14px);
 	line-height: 1.5;
@@ -235,8 +237,8 @@ ed11y-element-result {
 	justify-items: end;
 	min-height: 35px;
 
-	&>button,
-	&>a {
+	& > button,
+	& > a {
 		min-width: 2.125em;
 		height: 2em;
 		padding: 0;
@@ -305,7 +307,6 @@ button.ed11y-jump {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
 	.ed11y-shut .ed11y-buttonbar a,
 	.ed11y-shut .ed11y-buttonbar button:not(#ed11y-toggle, .next) {
 		color: #111;
@@ -328,7 +329,7 @@ button.ed11y-jump {
 #ed11y-show-hidden {
 	grid-area: showHidden;
 
-	svg+svg,
+	svg + svg,
 	&[data-ed11y-pressed="true"] svg:first-child {
 		display: none;
 	}
@@ -338,7 +339,7 @@ button.ed11y-jump {
 	}
 
 	svg:first-child,
-	&[data-ed11y-pressed="true"] svg+svg {
+	&[data-ed11y-pressed="true"] svg + svg {
 		display: initial;
 	}
 }
@@ -351,7 +352,7 @@ button.ed11y-jump {
 
 #ed11y-reports-link,
 #ed11y-show-hidden:first-child,
-.ed11y-buttonbar [hidden]:first-child+#ed11y-visualize {
+.ed11y-buttonbar [hidden]:first-child + #ed11y-visualize {
 	padding: 0 6px 0 10px;
 	border-radius: 0.5em 0 0 0.5em;
 	box-shadow:
@@ -361,7 +362,7 @@ button.ed11y-jump {
 		2px 0 var(--ed11y-activeBackground);
 }
 
-.ed11y-buttonbar [hidden]:first-child+#ed11y-visualize {
+.ed11y-buttonbar [hidden]:first-child + #ed11y-visualize {
 	padding: 0 11px 0 10px;
 }
 
@@ -377,9 +378,8 @@ button.ed11y-jump {
 
 #ed11y-panel {
 	.ed11y-buttonbar {
-
-		&>a:hover,
-		&>button:not(#ed11y-toggle):hover {
+		& > a:hover,
+		& > button:not(#ed11y-toggle):hover {
 			z-index: 1;
 			box-shadow:
 				0 0 0 1px var(--ed11y-activePanelBorder),
@@ -401,8 +401,8 @@ button.ed11y-jump {
 			transition: color 0.2s ease-out;
 		}
 
-		&> :hover .ed11y-sr-only,
-		&> :focus-visible .ed11y-sr-only,
+		& > :hover .ed11y-sr-only,
+		& > :focus-visible .ed11y-sr-only,
 		.ed11y-preview .ed11y-sr-only {
 			top: -0.1875em;
 			right: 0;
@@ -446,8 +446,8 @@ button.ed11y-jump {
 
 /* todo 3.x: test*/
 .ed11y-pin-left .ed11y-buttonbar .ed11y-preview .ed11y-sr-only,
-.ed11y-pin-left .ed11y-buttonbar> :hover .ed11y-sr-only,
-.ed11y-pin-left .ed11y-buttonbar> :focus-visible .ed11y-sr-only {
+.ed11y-pin-left .ed11y-buttonbar > :hover .ed11y-sr-only,
+.ed11y-pin-left .ed11y-buttonbar > :focus-visible .ed11y-sr-only {
 	right: auto;
 	left: 0;
 }
@@ -505,10 +505,8 @@ button.ed11y-jump {
 }
 
 .ed11y-active #ed11y-toggle {
-
 	&:hover,
 	&:focus-visible {
-
 		.errors-icon,
 		.pass-icon {
 			display: none;
@@ -544,7 +542,7 @@ button.ed11y-jump {
 
 	#ed11y-reports-link,
 	#ed11y-show-hidden:first-child,
-	[hidden]:first-child+#ed11y-visualize {
+	[hidden]:first-child + #ed11y-visualize {
 		box-shadow:
 			-1px 0,
 			0 -1px,
@@ -556,7 +554,7 @@ button.ed11y-jump {
 		margin: 0 -4px;
 	}
 
-	.ed11y-buttonbar>*:not(.ed11y-jump) {
+	.ed11y-buttonbar > *:not(.ed11y-jump) {
 		width: 0;
 		min-width: 0;
 		overflow: hidden;
@@ -564,8 +562,8 @@ button.ed11y-jump {
 	}
 
 	&#ed11y-panel:not(.ed11y-pin-left) .ed11y-jump,
-	&#ed11y-panel:not(.ed11y-pin-left) .ed11y-buttonbar:hover>*,
-	&:has(:focus-visible) .ed11y-buttonbar>*:not(#ed11y-toggle) {
+	&#ed11y-panel:not(.ed11y-pin-left) .ed11y-buttonbar:hover > *,
+	&:has(:focus-visible) .ed11y-buttonbar > *:not(#ed11y-toggle) {
 		min-width: 2.125em;
 		overflow: visible;
 		opacity: 1;
@@ -657,18 +655,18 @@ button.ed11y-jump {
 	}
 }
 
-#ed11y-headings-tab summary>svg {
+#ed11y-headings-tab summary > svg {
 	width: 16px;
 	margin: 0 8px -3px -1px;
 }
 
-#ed11y-alts-tab summary>svg {
+#ed11y-alts-tab summary > svg {
 	width: 18px;
 	margin: 0 8px -3px -2px;
 }
 
 #ed11y-readability-tab {
-	summary>svg {
+	summary > svg {
 		width: 18px;
 		margin: 0 8px -3px -2px;
 	}
@@ -685,7 +683,7 @@ button.ed11y-jump {
 		&:has(br) {
 			font-size: 1em;
 
-			&+ul {
+			& + ul {
 				display: none;
 			}
 		}
@@ -809,7 +807,6 @@ button.ed11y-jump {
 	}
 
 	a.alt-parent {
-
 		&:hover,
 		&:focus-visible {
 			text-decoration: underline;
@@ -827,8 +824,8 @@ button.ed11y-jump {
 
 	.ed11y-warning,
 	.ed11y-error,
-	.ed11y-warning+li,
-	.ed11y-error+li {
+	.ed11y-warning + li,
+	.ed11y-error + li {
 		a {
 			box-shadow: none;
 		}
@@ -1051,41 +1048,49 @@ ed11y-element-result[data-ed11y-open="true"] {
 
 		&[data-direction="left"] {
 			margin: 0 calc(var(--ed11y-outlineWidth, 0px) + var(--ed11y-outlineWidth, 0px)) 0 0;
-			background: linear-gradient(45deg,
-					transparent 0%,
-					transparent 48%,
-					var(--ed11y-primary, #276499) 49%);
+			background: linear-gradient(
+				45deg,
+				transparent 0%,
+				transparent 48%,
+				var(--ed11y-primary, #276499) 49%
+			);
 
-			&+.tip {
+			& + .tip {
 				margin-right: calc(var(--ed11y-outlineWidth) + var(--ed11y-outlineWidth));
 			}
 		}
 
 		&[data-direction="under"] {
 			margin: calc(var(--ed11y-outlineWidth, 0px) + var(--ed11y-outlineWidth, 0px)) 0 0;
-			background: linear-gradient(-45deg,
-					transparent 0%,
-					transparent 48%,
-					var(--ed11y-primary, #276499) 49%);
+			background: linear-gradient(
+				-45deg,
+				transparent 0%,
+				transparent 48%,
+				var(--ed11y-primary, #276499) 49%
+			);
 		}
 
 		&[data-direction="above"] {
 			margin: 0 0 var(--ed11y-outlineWidth, 0) 0;
-			background: linear-gradient(135deg,
-					transparent 0%,
-					transparent 48%,
-					var(--ed11y-primary, #276499) 49%);
+			background: linear-gradient(
+				135deg,
+				transparent 0%,
+				transparent 48%,
+				var(--ed11y-primary, #276499) 49%
+			);
 
-			&+.tip {
+			& + .tip {
 				margin-bottom: calc(var(--ed11y-outlineWidth) + var(--ed11y-outlineWidth));
 			}
 		}
 
 		&[data-direction="right"] {
-			background: linear-gradient(-135deg,
-					transparent 0%,
-					transparent 48%,
-					var(--ed11y-primary, #276499) 49%);
+			background: linear-gradient(
+				-135deg,
+				transparent 0%,
+				transparent 48%,
+				var(--ed11y-primary, #276499) 49%
+			);
 		}
 	}
 
@@ -1175,19 +1180,19 @@ ed11y-element-result[data-ed11y-open="true"] {
 			border-left: 1px solid;
 		}
 
-		&>button,
-		&>summary {
+		& > button,
+		& > summary {
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			width: 2.75em;
 		}
 
-		summary>div {
+		summary > div {
 			display: inline-block;
 		}
 
-		&>details summary {
+		& > details summary {
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -1203,7 +1208,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 			}
 		}
 
-		&>details {
+		& > details {
 			grid-area: help;
 		}
 
@@ -1261,7 +1266,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 		}
 	}
 
-	.title+p {
+	.title + p {
 		margin-top: 0;
 	}
 
@@ -1302,7 +1307,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 	li {
 		line-height: 1.143;
 
-		&+li {
+		& + li {
 			margin-top: 0.5em;
 		}
 	}
@@ -1382,7 +1387,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 		padding: 0.5em 0 4px;
 	}
 
-	.message:has(#color-pickers:last-child)+.content-footer .count {
+	.message:has(#color-pickers:last-child) + .content-footer .count {
 		margin-top: -2em;
 	}
 
@@ -1396,7 +1401,6 @@ ed11y-element-result[data-ed11y-open="true"] {
 
 	.ed11y-custom-edit-links,
 	.ed11y-tip-buttons {
-
 		a,
 		button {
 			height: 2.5em;
@@ -1545,7 +1549,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 	bottom: 0;
 	left: 0;
 
-	&>span {
+	& > span {
 		position: absolute;
 		right: 0;
 		bottom: 12px;
@@ -1587,7 +1591,6 @@ ed11y-element-result.ed11y-preload,
 
 /* High contrast mode. */
 @media (forced-colors: active) {
-
 	.ed11y-wrapper .tip,
 	.ed11y-wrapper button,
 	.ed11y-wrapper summary,
@@ -1595,7 +1598,7 @@ ed11y-element-result.ed11y-preload,
 	.ed11y-wrapper button.toggle,
 	.ed11y-wrapper .ed11y-toggle-circle,
 	.ed11y-tip-header,
-	.ed11y-buttonbar>a {
+	.ed11y-buttonbar > a {
 		border: 2px ButtonBorder solid;
 	}
 
@@ -1604,7 +1607,6 @@ ed11y-element-result.ed11y-preload,
 	}
 
 	.ed11y-tip-header {
-
 		&,
 		button,
 		summary {
@@ -1614,17 +1616,17 @@ ed11y-element-result.ed11y-preload,
 
 	.ed11y-wrapper button:hover,
 	.ed11y-wrapper summary:hover,
-	.ed11y-buttonbar>a:hover {
+	.ed11y-buttonbar > a:hover {
 		outline: 3px solid;
 	}
 
 	.ed11y-buttonbar {
-		&>a {
+		& > a {
 			height: auto;
 		}
 
-		&> :hover .ed11y-sr-only,
-		&> :focus-visible .ed11y-sr-only {
+		& > :hover .ed11y-sr-only,
+		& > :focus-visible .ed11y-sr-only {
 			border: 2px ButtonBorder solid;
 		}
 	}

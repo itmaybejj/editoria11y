@@ -44,3 +44,7 @@ conformance/reports/discovery-raw.json
 conformance/reports/playwright-results.json
 conformance/reports/conformance-data.json
 conformance/test-results/
+
+#agents
+#/.claude/settings.local.json
+/.claude/scratch/
