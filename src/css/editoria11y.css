@@ -80,9 +80,9 @@ ed11y-element-result {
 
 	.badge {
 		display: inline-block;
-		vertical-align: top;
+		vertical-align: middle;
 		padding: 0 0.5em;
-		margin: 1px 0.25em -1px 0;
+		margin: -2px 0.25em 0 0;
 		font-size: 12px;
 		font-weight: 400;
 		color: var(--ed11y-primaryText);
@@ -91,6 +91,7 @@ ed11y-element-result {
 		border-radius: 1em;
 		position: relative;
 		z-index: 2;
+		line-height: 1.5;
 
 		&:has(.link-icon) {
 			display: none;
@@ -1270,7 +1271,8 @@ ed11y-element-result[data-ed11y-open="true"] {
 	}
 
 	.title {
-		padding: 10px 1.5em 0.6125em 0;
+		padding: 10px 0 0.6125em 0;
+		margin-right: 40px;
 		font-size: 1.125em;
 		font-weight: bold;
 		outline: transparent;
