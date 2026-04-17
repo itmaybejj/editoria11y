@@ -41,7 +41,15 @@ If there is a diff, summarize:
 
 Launch one Agent per language **in parallel** (use a single message with multiple Agent tool calls). Each agent receives the same English diff context.
 
-Deploy agents in batches. More than 9 agents at once may exceed API limits.
+Deploy the first 10 agents in one batch, then pipeline: launch another agent as soon as one finishes, rather than waiting for a full batch to complete.
+
+### Shared spec file (recommended when 3+ languages are affected)
+
+Instead of inlining the full English diff in every agent prompt, write the diff once to a shared file (e.g., `/tmp/ed11y-translation-spec.md`) and point each agent at it. This keeps per-prompt tokens low and guarantees consistency across languages. The spec file should contain:
+
+- The OLD/NEW English for every changed key
+- Recurring patterns to watch for (e.g., "all `Alt text:` prefixes are now wrapped in `<strong>...</strong>`")
+- The critical rules block
 
 ### Critical agent instructions
 
@@ -71,6 +79,21 @@ CRITICAL RULES FOR WRITING TRANSLATION FILES:
 
 6. Keep all HTML markup, ${why.fix}, %(NAME) placeholders, and URLs
    exactly as-is — only translate the human-readable text.
+
+7. INVISIBLE UNICODE HAZARD (especially fr.js): the Edit tool does byte-exact
+   matching on old_string. French uses U+202F (narrow no-break space) and
+   sometimes U+00A0 (no-break space) before ":", ";", "?", "!". These look
+   identical to regular spaces when displayed. Other languages may use
+   U+2011 (non-breaking hyphen) or U+2019 (curly apostrophe) inside words.
+   If Edit fails with "String to replace not found" on text that looks
+   correct, suspect invisible characters.
+
+8. ESCAPE HATCH: if Edit fails twice on what looks like the same string,
+   STOP LOOPING. Report back to the main process that Edit cannot match
+   the target — include the target text and the error. The main process
+   can inspect raw bytes via Bash + python3 and do the surgical edit.
+   Do not invent XXX/YYY marker strategies or try to guess Unicode
+   codepoints — those have historically left files corrupted.
 ```
 
 ### Agent prompt pattern

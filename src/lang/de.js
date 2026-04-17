@@ -76,7 +76,7 @@ const testNames = {
 	LINK_URL: 'Linktext sollte keine URL sein',
 	META_LANG: 'Meta‑Tag für die Seitensprache fehlt',
 	META_LANG_SUGGEST: 'Meinten Sie einen anderen Sprachcode?',
-	META_LANG_VALID: 'Der Sprachcode für dieses Element ist nicht gültig',
+	META_LANG_VALID: 'Ungültiger Sprachcode',
 	META_MAX: 'Meta‑Tag begrenzt die mögliche Textvergrößerung',
 	META_REFRESH: 'Meta‑Tag aktualisiert die Seite automatisch',
 	META_SCALABLE: 'Meta‑Tag verhindert die Vergrößerung von Text',
@@ -100,7 +100,7 @@ const testNames = {
 	QA_UNDERLINE: 'Nur Links sollten unterstrichen sein',
 	QA_UPPERCASE: 'Ist dieser GROSSBUCHSTABENTEXT notwendig?',
 	SUS_ALT: 'Enthält dieser Alt‑Text redundante Wörter?',
-	TABINDEX_ATTR: 'Das tabindex‑Attribut stört die Lesereihenfolge',
+	TABINDEX_ATTR: 'Tabindex‑Überschreibungen stören die Fokusreihenfolge',
 	TABLES_EMPTY_HEADING: 'Diese Tabellenkopfzelle benötigt Text',
 	TABLES_INVALID_HEADERS_REF: 'Diese Tabelle hat ungültige Header-Referenzen',
 	TABLES_MISSING_HEADINGS: 'Dieser Tabelle fehlen Kopfzeilen in Zeile und/oder Spalte',
@@ -135,15 +135,15 @@ const why = {
 const tips = {
 	ARIA_INPUT_FIELD_NAME: `<p><strong>Element:</strong> <code>%(EL)</code></p><p>${why.fix}Geben Sie eine gültige Beschriftung an; bei benutzerdefinierten Eingabeelementen bedeutet das oft innenliegenden Text oder ein title-, aria-label- oder aria-labelledby-Attribut.`,
 
-	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span>Alt‑Text: <i>%(ALT_TEXT)</i></p><p>Screenreader lesen diese URL vor – oft Buchstabe für Buchstabe. Das vermittelt kaum die gleiche Bedeutung wie das Bild selbst.</p><p>${why.fix}Fügen Sie entweder ein leeres alt (alt="") hinzu, wenn dies eine bedeutungslose Dekoration ist, die ignoriert werden soll, oder fügen Sie einen beschreibenden Alt‑Text hinzu.</p>${why.images}`,
+	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span><strong>Alt‑Text:</strong> <i>%(ALT_TEXT)</i></p><p>Screenreader lesen diese URL vor – oft Buchstabe für Buchstabe. Das vermittelt kaum die gleiche Bedeutung wie das Bild selbst.</p><p>${why.fix}Beschreiben Sie kurz, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
 
-	ALT_MAYBE_BAD: `<p>Angegebene Beschreibung für dieses Bild: <i>%(alt)</i></p><p>${why.fix}Geben Sie einen kurzen Alt‑Text an, der beschreibt, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
+	ALT_MAYBE_BAD: `<p><strong>Alt‑Text:</strong> <i>%(alt)</i></p><p>${why.fix}Beschreiben Sie kurz, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
 
-	ALT_MAYBE_BAD_WARNING: `<p>Angegebene Beschreibung für dieses Bild: <i>%(alt)</i></p><p>${why.fix}Geben Sie einen kurzen Alt‑Text an, der beschreibt, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
+	ALT_MAYBE_BAD_WARNING: `<p><strong>Alt‑Text:</strong> <i>%(alt)</i></p><p>${why.fix}Beschreiben Sie kurz, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
 
-	ALT_PLACEHOLDER: `<p>Angegebene Beschreibung für dieses Bild: <i>%(alt)</i></p><p>${why.fix}Geben Sie einen kurzen Alt‑Text an, der beschreibt, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
+	ALT_PLACEHOLDER: `<p><strong>Alt‑Text:</strong> <i>%(alt)</i></p><p>${why.fix}Beschreiben Sie kurz, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
 
-	ALT_UNPRONOUNCEABLE: `<p>Alt‑Text: <i>%(alt)</i></p><p>Dieser Alt‑Text enthält nur unaussprechliche Zeichen oder Leerzeichen. Screenreader kündigen ein Bild an und halten dann peinlich inne: „Bild: ____".</p><p>${why.fix}Fügen Sie einen beschreibenden Alt‑Text hinzu – oder lassen Sie den Alt‑Text <em>vollständig</em> leer (alt=""), wenn es sich nur um ein Icon/Abstandshalter handelt, der ignoriert werden soll.</p>${why.images}`,
+	ALT_UNPRONOUNCEABLE: `<p><strong>Alt‑Text:</strong> <i>%(alt)</i></p><p>Dieser Alt‑Text enthält nur unaussprechliche Zeichen oder Leerzeichen. Screenreader kündigen ein Bild an und halten dann peinlich inne: „Bild: ____".</p><p>${why.fix}Beschreiben Sie kurz, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
 
 	BTN_EMPTY: `<p>${why.fix}Verwenden Sie eine gültige Methode, um Screenreadern mitzuteilen, was diese Schaltfläche tut – z. B. Text, Alt‑Text auf einem Icon oder ein <code>title</code>‑Attribut.</p>`,
 
@@ -177,7 +177,7 @@ const tips = {
 
 	HEADING_FIRST: `${why.fix}Stellen Sie sicher, dass der Seitentitel als Überschrift der Ebene 1 oder 2 ausgezeichnet ist. ${why.headings}`,
 
-	HEADING_LONG: `<p>${why.fix}Wenn es kein feststehender Titel (z. B. Artikelname) ist, kürzen Sie ihn für besseres Überfliegen.</p>${why.headings}`,
+	HEADING_LONG: `<p>${why.fix}Wenn es kein feststehender Titel (z. B. Artikelname) ist, kürzen Sie ihn für besseres Überfliegen:<span hidden>%(drop)%(drop)</span></p><p><i>%(TEXT)</i></p>${why.headings}`,
 
 	HEADING_MISSING_ONE: `<p>${why.fix}Versehen Sie den Seitentitel mit Ebene‑1‑Überschrift, um den Beginn der Dokumentstruktur zu markieren.</p>${why.headings}`,
 
@@ -185,7 +185,7 @@ const tips = {
 
 	HIDDEN_FOCUSABLE: `<p>Dieses interaktive Element hat <code>aria-hidden="true"</code>, ist aber weiterhin per Tastatur erreichbar. Wenn es wirklich verborgen sein soll, fügen Sie zusätzlich <code>tabindex="-1"</code> hinzu. Andernfalls entfernen Sie <code>aria-hidden</code>.</p><p><strong>Element:</strong> <code>%(ELEMENT)</code></p>`,
 
-	IMAGE_ALT_TOO_LONG: `<p>%(altLength) Zeichen im Alt‑Text: <i class="ed11y-small">%(ALT_TEXT)</i></p><p>${why.fix}Fassen Sie zusammen oder verschieben Sie Teile der Beschreibung in eine Bildunterschrift.</p><div class="why"><p>Tipp: Komplexe Bilder brauchen meist eine <strong>sichtbare</strong> Bildunterschrift oder eine alternative Beschreibung, die wichtige Details erläutert. Es ist in Ordnung, im Alt‑Text darauf zu verweisen:</p><ul><li>„Poster für den Tanz am Freitag; Details in der Bildunterschrift.“</li><li>„Diagramm: Fälle −10 % dieses Jahr; Details in der Tabelle.“</li></ul></div>`,
+	IMAGE_ALT_TOO_LONG: `<p>Dieser Alt‑Text ist %(altLength) Zeichen lang: <i class="ed11y-small">%(ALT_TEXT)</i></p><p>${why.fix}Fassen Sie zusammen oder verschieben Sie Teile der Beschreibung in eine Bildunterschrift.</p><div class="why"><p>Tipp: Komplexe Bilder brauchen meist eine <strong>sichtbare</strong> Bildunterschrift oder eine alternative Beschreibung, die wichtige Details erläutert. Es ist in Ordnung, im Alt‑Text darauf zu verweisen:</p><ul><li>„Poster für den Tanz am Freitag; Details in der Bildunterschrift.“</li><li>„Diagramm: Fälle −10 % dieses Jahr; Details in der Tabelle.“</li></ul></div>`,
 
 	IMAGE_DECORATIVE: `<p>Dieses Bild wurde mit leerem Alt‑Text für Screenreader ausgeblendet. Nur bedeutungslose Bilder (redundante Icons, Texturen) sollten so ausgeblendet werden.</p><p>${why.fix}Wenn das Bild inhaltlichen Wert hat, geben Sie Alt‑Text an.</p>${why.images}`,
 
@@ -209,13 +209,13 @@ const tips = {
 
 	LABEL_IN_NAME: `<p><strong>Sichtbarer Text:</strong> <i>%(TEXT)</i></p><p><strong>Label für Screenreader:</strong> <i>%(TEXT)</i></p><p>Der sichtbare Text dieses Elements scheint vom zugänglichen Namen abzuweichen. Das kann Screenreader‑Nutzende verwirren und die Sprachsteuerung beeinträchtigen.</p><p>${why.fix}Stellen Sie sicher, dass das sichtbare Label mit dem Text des unsichtbaren Labels beginnt und keine bedeutungstragenden Informationen enthält, die im unsichtbaren Label fehlen.</p>`,
 
-	LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt‑Text: <i>%(alt)</i></p><p>Dieser Alt‑Text ist wahrscheinlich ein Dateiname statt einer sinnvollen Bezeichnung für das Linkziel.</p><p>${why.fix}Setzen Sie den Alt‑Text dieses Bildes auf den Namen des Linkziels.</p><div class="why"><p>Alt‑Text soll die Bedeutung eines Bildes wiedergeben, nicht nur dessen Inhalt. Bei verlinkten Bildern ist die Bedeutung das Linkziel:</p><ul><li>„Seite mit Text" beschreibt das Bild, nicht den Link.</li><li>„IMG_1234.jpg" ist nur ein Dateiname.</li><li>„Anmeldeformular (doc)" ist eine Linkdestination.</li></ul></div>`,
+	LINK_ALT_FILE_EXT: `<p><span style="display: none;">%(ALT)</span>Alt‑Text: <i>%(alt)</i></p><p>Dieser Alt‑Text ist wahrscheinlich ein Dateiname statt einer sinnvollen Bezeichnung für das Linkziel.</p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt‑Text für verlinkte Bilder.</p><div class="why"><p>Alt‑Text soll die Bedeutung eines Bildes wiedergeben, nicht nur dessen Inhalt. Bei verlinkten Bildern ist die Bedeutung das Linkziel:</p><ul><li>„Seite mit Text" beschreibt das Bild, nicht den Link.</li><li>„IMG_1234.jpg" ist nur ein Dateiname.</li><li>„Anmeldeformular (doc)" ist eine Linkdestination.</li></ul></div>`,
 
-	LINK_ALT_MAYBE_BAD: `<p>Alt‑Text: <i>%(alt)</i></p><p>${why.fix}Setzen Sie den Alt‑Text dieses Bildes auf den Namen des Linkziels.</p>${why.imageLinks}`,
+	LINK_ALT_MAYBE_BAD: `<p><strong>Alt‑Text:</strong> <i>%(alt)</i></p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt‑Text für verlinkte Bilder.</p>${why.imageLinks}`,
 
-	LINK_ALT_MAYBE_BAD_WARNING: `<p>Alt‑Text: <i>%(alt)</i></p><p>${why.fix}Setzen Sie den Alt‑Text dieses Bildes auf den Namen des Linkziels.</p>${why.imageLinks}`,
+	LINK_ALT_MAYBE_BAD_WARNING: `<p><strong>Alt‑Text:</strong> <i>%(alt)</i></p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt‑Text für verlinkte Bilder.</p>${why.imageLinks}`,
 
-	LINK_ALT_UNPRONOUNCEABLE: `<p>Der Alt‑Text dieses verlinkten Bildes besteht nur aus unaussprechlichen Symbolen/Leerzeichen: <i>%(ALT_TEXT)</i></p><p>Screenreader kündigen einen Link an, können ihn dann aber nicht beschreiben.</p><p>${why.fix}Setzen Sie den Alt‑Text auf das Linkziel oder den Zweck.</p>${why.imageLinks}`,
+	LINK_ALT_UNPRONOUNCEABLE: `<p>Der Alt‑Text dieses verlinkten Bildes besteht nur aus unaussprechlichen Symbolen/Leerzeichen: <i>%(ALT_TEXT)</i></p><p>Screenreader kündigen einen Link an, können ihn dann aber nicht beschreiben.</p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt‑Text für verlinkte Bilder.</p>${why.imageLinks}`,
 
 	LINK_CLICK_HERE: `Die Formulierungen „klicken“/„hier klicken“ sind überflüssig und lenken vom Linkzweck ab.`,
 
@@ -232,13 +232,13 @@ const tips = {
 
 	LINK_IDENTICAL_NAME: `<p>Linktext: <i>%(TEXT)</i></p><p>${why.fix}Formulieren Sie Links zu unterschiedlichen Zielen um, sodass sie die eindeutigen Titel ihrer Ziele verwenden.</p>${why.links}`,
 
-	LINK_IMAGE_ALT: `<p><strong>Alt‑Text:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Stellen Sie sicher, dass dieser Alt‑Text das Linkziel beschreibt, nicht nur den visuellen Inhalt des Bildes:</p>${why.imageLinks}`,
+	LINK_IMAGE_ALT: `<p><strong>Alt‑Text:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt‑Text für verlinkte Bilder.</p>${why.imageLinks}`,
 
 	LINK_IMAGE_ALT_AND_TEXT: `<p><strong>Alt‑Text:</strong> <i>%(ALT_TEXT)</i></p><p><strong>Linktext einschließlich Alt‑Text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Bearbeiten oder entfernen Sie den Alt‑Text, wenn er irrelevante oder redundante Informationen hinzufügt.</p>${why.imageLinks}`,
 
-	LINK_IMAGE_LONG_ALT: `<p>%(altLength) Zeichen im Alt‑Text: <i class="ed11y-small">%(ALT_TEXT)</i></p><p>${why.fix}Setzen Sie den Alt‑Text dieses Bildes auf den Titel der Linkdestination.</p><div class="why"><p>Screenreader‑Nutzende hören oft eine Liste von Links ohne Kontext. Der Alt‑Text eines verlinkten Bildes wird in dieser Liste als Linktitel vorgelesen; daher sollte er das Ziel beschreiben, nicht den Bildinhalt.</p></div>`,
+	LINK_IMAGE_LONG_ALT: `<p>Dieser Alt‑Text ist %(altLength) Zeichen lang: <i class="ed11y-small">%(ALT_TEXT)</i></p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt‑Text für verlinkte Bilder.</p><div class="why"><p>Screenreader‑Nutzende hören oft eine Liste von Links ohne Kontext. Der Alt‑Text eines verlinkten Bildes wird in dieser Liste als Linktitel vorgelesen; daher sollte er das Ziel beschreiben, nicht den Bildinhalt.</p></div>`,
 
-	LINK_IMAGE_NO_ALT_TEXT: `<p>Wenn ein Link ein Bild umschließt, liefert dessen Alt‑Text den Linktitel für Screenreader.</p><p>${why.fix}Setzen Sie den Alt‑Text auf Ziel oder Zweck des Links.</p>${why.imageLinks}`,
+	LINK_IMAGE_NO_ALT_TEXT: `<p>Wenn ein Link ein Bild umschließt, liefert dessen Alt‑Text den Linktitel für Screenreader.</p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt‑Text für verlinkte Bilder.</p>${why.imageLinks}`,
 
 	LINK_IMAGE_TEXT: 'Das Bild ist als dekorativ markiert, obwohl der umgebende Text als Linkbeschriftung dient.',
 
@@ -246,13 +246,13 @@ const tips = {
 
 	LINK_NEW_TAB: `<p>${why.fix}Öffnen Sie den Link im selben Tab oder <a href="https://itmaybejj.github.io/linkpurpose/">warnen Sie vorab</a>.</p><div class="why"><p>Nutzende können selbst in neuem Tab öffnen; erzwungene neue Tabs können verwirren, besonders wenn die Zurück‑Taste nicht wie erwartet funktioniert.</p><p>Ausnahme: In Formularen öffnen Links oft in neuem Tab, um Datenverlust zu vermeiden.</p></div>`,
 
-	LINK_PLACEHOLDER_ALT: `<p>Alt‑Text dieses verlinkten Bildes ist ein Platzhalter: <i>%(alt)</i>.</p><p>${why.fix}Setzen Sie den Alt‑Text auf die Linkdestination.</p>${why.imageLinks}`,
+	LINK_PLACEHOLDER_ALT: `<p><strong>Alt‑Text:</strong> <i>%(alt)</i>.</p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt‑Text für verlinkte Bilder.</p>${why.imageLinks}`,
 
 	LINK_STOPWORD: `<p>Dieser Link enthält nur generische Wörter:<br><i>%(text)</i></p><p>${why.fix}Formulieren Sie ihn so um, dass er sein Ziel beschreibt.</p>${why.links}`,
 
 	LINK_STOPWORD_ARIA: `<p>Es gibt einen ARIA‑Namen, aber der sichtbare Linktext ist generisch: <i>%(ERROR)</i>.</p><p>${why.fix}Schreiben Sie aussagekräftige Links für alle und stellen Sie sicher, dass sichtbares Label und zugänglicher Name übereinstimmen.</p>${why.links}`,
 
-	LINK_SUS_ALT: `<p>Der Alt‑Text dieses Bildes enthält das Wort <i>%(alt)</i>, was häufig bedeutet, dass nicht die Linkdestination beschrieben wird.</p><p>Alt‑Text: <i>%(ALT_TEXT)</i></p><p>So beheben: Stellen Sie sicher, dass der Alt‑Text Ziel oder Zweck des Links beschreibt.</p>${why.imageLinks}`,
+	LINK_SUS_ALT: `<p>Sofern „<i>%(alt)</i>" nicht das Linkziel beschreibt, beschreibt dieser Alt‑Text wahrscheinlich das Bild.</p><p><strong>Alt‑Text:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt‑Text für verlinkte Bilder.</p>${why.imageLinks}`,
 
 	LINK_SYMBOLS: `<p>Symbol gefunden: <i>%(ERROR)</i></p><p>${why.fix}Vermeiden Sie Symbole als Call‑to‑Action im Linktext, sofern sie nicht für Hilfstechnologien verborgen sind. Screenreader lesen Symbole möglicherweise vor, was verwirrend sein kann.</p>`,
 
@@ -270,19 +270,19 @@ const tips = {
 
 	META_TITLE: `<p>${why.fix}Fügen Sie im <code>head</code> ein <code>&lt;title&gt;</code> hinzu.</p><div class="why"><p>Ein <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">kurzer, eindeutiger Titel</a> ist wichtig:</p><ul><li>Suchmaschinen nutzen ihn für Ergebnisse.</li><li>Browser zeigen ihn auf Tabs.</li><li>Screenreader lesen ihn beim Tab‑Wechsel vor.</li></ul><p>Ohne Titel sehen/​hören Nutzende nur eine rohe URL.</p></div>`,
 
-	MISSING_ALT: `<p>Wenn ein Bild kein Alt‑Attribut hat, lesen Screenreader die Bild‑URL meist Buchstabe für Buchstabe vor.</p><p>${why.fix}Fügen Sie alt="" hinzu, wenn das Bild ignoriert werden soll, oder einen beschreibenden Alt‑Text, wenn es Bedeutung hat.</p>${why.images}`,
+	MISSING_ALT: `<p>Wenn ein Bild kein Alt‑Attribut hat, lesen Screenreader die Bild‑URL meist Buchstabe für Buchstabe vor.</p><p>${why.fix}Beschreiben Sie kurz, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
 
 	MISSING_ALT_LINK: `<p>Fehlt Alt am verlinkten Bild, lesen Screenreader die Bild‑URL – besonders problematisch.</p><p>${why.fix}Fügen Sie einen Alt‑Text hinzu, der die Linkdestination beschreibt.</p>${why.imageLinks}`,
 
-	MISSING_ALT_LINK_HAS_TEXT: `<p>Dieses Bild ist Teil eines Links mit Text. Wenn der sichtbare Text das Ziel beschreibt, setzen Sie alt="". Andernfalls fügen Sie einen Alt‑Text hinzu, der Ziel oder Zweck des Links beschreibt.</p>${why.imageLinks}`,
+	MISSING_ALT_LINK_HAS_TEXT: `<p>Dieses Bild ist Teil eines Links mit Text. Wenn der sichtbare Text das Ziel beschreibt, setzen Sie alt="". Andernfalls fügen Sie einen Alt‑Text hinzu, der hilft, Ziel oder Zweck des Links zu beschreiben.</p>${why.imageLinks}`,
 
 	QA_BAD_LINK: `<p>Der Link scheint auf ein Entwicklungsumfeld zu verweisen:<br>{L} <code>%(LINK)</code></p><p>${why.fix}Nutzen Sie einen relativen Pfad (/folder) oder die öffentliche URL.</p>`,
 
-	QA_BLOCKQUOTE: `<p><code>blockquote</code> signalisiert „Zitat“. Kurze Zitatblöcke sind oft Überschriften.</p><p>${why.fix}Wenn es eine Überschrift ist, verwenden Sie Überschriften‑Formatierung, damit sie in der Seitenstruktur auftaucht.</p>${why.headings}`,
+	QA_BLOCKQUOTE: `<p><strong>Verdächtig kurzes Zitat:</strong> <i>%(text)</i></p><p>${why.fix}Wenn es eine Überschrift und kein Zitat ist, markieren Sie es als Überschrift, damit es in der Seitenstruktur erscheint.</p>${why.headings}`,
 
 	QA_DOCUMENT: `<p>Verlinkte Dokumente gelten als Webinhalt und müssen ebenfalls barrierefrei sein. Prüfen Sie Überschriften, Tabellenköpfe und Alt‑Texte, und schließen Sie dann den Hinweis.</p><div class="why"><ul><li>Machen Sie Ihre <a href="https://support.google.com/docs/answer/6199477?hl=de">Google‑Dokumente/Präsentationen</a> barrierefrei.</li><li>Machen Sie Ihre <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Office‑Dokumente</a> barrierefrei.</li></ul></div>`,
 
-	QA_FAKE_HEADING: `<p>${why.fix}Wenn dieser fette Text ein Thema einleitet, ersetzen Sie die reine Fettung durch eine Überschrift.</p><div class="why"><p>Tipp: Überschriften erzeugen ein navigierbares Inhaltsverzeichnis für Hilfstechnologien.</p></div>`,
+	QA_FAKE_HEADING: `<p><strong>Fett gesetzter Text:</strong> <i>%(text)</i></p><p>${why.fix}Wenn dieser Text fett ist, um einen Themenwechsel zu markieren, markieren Sie ihn als Überschrift, damit Screenreader‑Nutzende damit auf der Seite navigieren können.</p><div class="why"><p>Tipp: Fett‑ und Kursivstile geben visuelle Hervorhebung, fügen aber nicht automatisch Text zum Inhaltsverzeichnis des Dokuments für Hilfstechnologien hinzu.</div>`,
 
 	QA_FAKE_LIST: `<p>${why.fix}Wenn <i>%(text)</i> Teil einer Liste ist, verwenden Sie Listenformatierung.</p><div class="why"><p>Listen haben visuelle und semantische Struktur:</p><ol><li>Einheitliche Einzüge erleichtern das Lesen.</li><li>Screenreader geben die Position an („Eintrag 3 von 7“).</li></ol><p>Ein Absatz mit einer vorangestellten Zahl ist keine echte Liste.</p></div>`,
 
@@ -304,9 +304,9 @@ const tips = {
 
 	QA_UPPERCASE: `<p>GROSSGESCHRIEBENE TEXTBLÖCKE SIND SCHWERER LESBAR UND WERDEN OFT ALS „SCHREIEN“ WAHRGENOMMEN.</p><p>${why.fix}Betonen Sie nur wenige Wörter auf einmal, vorzugsweise mit Fett statt Versalien.</p><div class="why"><p>Screenreader kündigen „fett“ nicht an. Nutzen Sie Überschriften für neue Themen.</p></div>`,
 
-	SUS_ALT: `<p>Der Alt‑Text dieses Bildes enthält das Wort <i>%(alt)</i>:</p><p><i>%(ALT_TEXT)</i></p><p>${why.fix}Formulieren Sie den Alt‑Text so, dass er die Bildbedeutung kurz vermittelt.</p><div class="why"><p>Tipp: Screenreader kündigen bereits an, dass sie ein Bild beschreiben, daher sind Formulierungen wie „Bild von" und „Foto von" meist überflüssig</p></div>`,
+	SUS_ALT: `<p>Der Alt‑Text dieses Bildes enthält das Wort „<i>%(alt)</i>." Screenreader kündigen bereits an, dass sie ein Bild beschreiben, daher sind Formulierungen wie „Bild von" und „Foto von" meist überflüssig.</p><p><strong>Alt‑Text:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Beschreiben Sie kurz, was dieses Bild in diesem Kontext bedeutet.</p><div class="why"><p>Tipp: Diese Formulierungen sind nicht überflüssig, wenn das Format selbst bedeutsam ist:<br>„Ein Foto einer Katze, gerahmt und an der Wand hängend."</div>`,
 
-	TABINDEX_ATTR: `<p>${why.fix}Verwenden Sie nie ein tabindex größer als "0". Ordnen Sie die HTML‑Elemente so, dass Tab‑, Lese‑ und visuelle Reihenfolge übereinstimmen.</p><div class="why"><p>Standardmäßig sind diese drei Reihenfolgen deckungsgleich.</p><p>Ein positives tabindex setzt ein Element an den Anfang der Tab‑Reihenfolge, <strong>nicht</strong> der visuellen; das führt zu Verwirrung.</p></div>`,
+	TABINDEX_ATTR: `<p>Tabindex‑Werte größer als 0 platzieren fokussierbare Elemente an einer anderen Stelle in der Fokusreihenfolge als ihren sichtbaren Text, was es Nutzenden von Hilfstechnologien erschwert, sie zu finden und zu bedienen.</p><p>${why.fix}Ordnen Sie stattdessen die HTML‑Elemente so um, dass Fokusreihenfolge und Lesereihenfolge übereinstimmen.</p><div class="why"><p>Tipp: Die visuelle Reihenfolge der Wörter auf der Seite und die Reihenfolge, in der Tastaturen die Elemente durchlaufen, sind in der Regel dieselbe.</p><p>Ein positives tabindex setzt ein Element an den Anfang der Tab‑Reihenfolge, <strong>aber nicht</strong> der visuellen oder Lesereihenfolge.</p></div>`,
 
 	TABLES_EMPTY_HEADING: ` <p>${why.fix}Sorgen Sie dafür, dass jede Tabellenkopfzelle Text enthält.</p><div class="why"><p>Tipp: Screenreader nutzen Tabellenköpfe zur Orientierung in Tabellen.</p></div>`,
 
