@@ -794,7 +794,7 @@ button.ed11y-jump:hover .toggle-count {
   padding: 0;
   font-size: clamp(1.14em, 1.5vw, 1.3125em);
   line-height: 1;
-  display: block;
+  display: inline-block;
   position: absolute;
 }
 
