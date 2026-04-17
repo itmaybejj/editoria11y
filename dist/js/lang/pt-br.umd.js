@@ -554,6 +554,7 @@
     dismissOnSite: "Em todas as páginas: marcar como OK",
     dismissalsHeader: "Não pretende corrigir isto?",
     edit_layout: "Editar layout",
+    edit_media: "Editar mídia",
     edit_page: "Editar página",
     edit_term: "Editar termo",
     edit_user: "Editar usuário",

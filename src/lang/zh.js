@@ -246,6 +246,7 @@ export const interfaceStrings = {
 	dismissOnSite: '在全站：标记为 OK',
 	dismissalsHeader: '不打算修复这个问题吗？',
 	edit_layout: '编辑布局',
+	edit_media: '编辑媒体',
 	edit_page: '编辑页面',
 	edit_term: '编辑术语',
 	edit_user: '编辑用户',

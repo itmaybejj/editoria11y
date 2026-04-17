@@ -598,6 +598,7 @@
     dismissOnSite: "サイト全体で「OK」にする",
     dismissalsHeader: "この問題を修正しない予定ですか？",
     edit_layout: "レイアウトを編集",
+    edit_media: "メディアを編集",
     edit_page: "ページを編集",
     edit_term: "用語を編集",
     edit_user: "ユーザーを編集",

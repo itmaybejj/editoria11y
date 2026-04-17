@@ -555,6 +555,7 @@ const interfaceStrings = {
   dismissOnSite: "På hele sitet: marker som OK",
   dismissalsHeader: "Tænker du ikke at løse dette?",
   edit_layout: "Rediger layout",
+  edit_media: "Rediger medie",
   edit_page: "Rediger side",
   edit_term: "Rediger term",
   edit_user: "Rediger bruger",

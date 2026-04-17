@@ -317,6 +317,7 @@ const interfaceStrings = {
 	DISMISS_ALL: 'En esta página: ignorar',
 	edit_page: 'Editar página',
 	edit_layout: 'Editar diseño',
+	edit_media: 'Editar medio',
 	edit_term: 'Editar término',
 	edit_user: 'Editar usuario',
 	IMAGES: 'Texto alternativo',

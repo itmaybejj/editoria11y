@@ -247,6 +247,7 @@ export const interfaceStrings = {
 	dismissOnSite: 'På alle sider: merk som OK',
 	dismissalsHeader: 'Har du ikke tenkt å rette dette?',
 	edit_layout: 'Rediger oppsett',
+	edit_media: 'Rediger media',
 	edit_page: 'Rediger side',
 	edit_term: 'Rediger term',
 	edit_user: 'Rediger bruker',

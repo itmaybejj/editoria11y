@@ -245,6 +245,7 @@ export const interfaceStrings = {
 	dismissOnSite: 'Op alle pagina’s: markeren als OK',
 	dismissalsHeader: 'Gaat u dit niet oplossen?',
 	edit_layout: 'Lay‑out bewerken',
+	edit_media: 'Media bewerken',
 	edit_page: 'Pagina bewerken',
 	edit_term: 'Term bewerken',
 	edit_user: 'Gebruiker bewerken',

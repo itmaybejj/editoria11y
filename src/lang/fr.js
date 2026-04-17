@@ -341,6 +341,7 @@ const interfaceStrings = {
 	DISMISS_ALL: 'Sur cette page : ignorer',
 	edit_page: 'Modifier la page',
 	edit_layout: 'Modifier la mise en page',
+	edit_media: 'Modifier le média',
 	edit_term: 'Modifier le terme',
 	edit_user: 'Modifier l’utilisateur',
 	IMAGES: 'Texte alternatif',

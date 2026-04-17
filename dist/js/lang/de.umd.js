@@ -590,6 +590,7 @@
     DISMISS_ALL: "Auf dieser Seite: ignorieren",
     edit_page: "Seite bearbeiten",
     edit_layout: "Layout bearbeiten",
+    edit_media: "Medium bearbeiten",
     edit_term: "Begriff bearbeiten",
     edit_user: "Benutzer bearbeiten",
     IMAGES: "Alt‑Text",

@@ -250,6 +250,7 @@ export const interfaceStrings = {
 	dismissOnSite: 'На всіх сторінках: позначити як OK',
 	dismissalsHeader: 'Не плануєте це виправляти?',
 	edit_layout: 'Редагувати макет',
+	edit_media: 'Редагувати медіа',
 	edit_page: 'Редагувати сторінку',
 	edit_term: 'Редагувати термін',
 	edit_user: 'Редагувати користувача',

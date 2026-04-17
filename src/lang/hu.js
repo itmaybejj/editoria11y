@@ -224,6 +224,7 @@ const interfaceStrings = {
 	DISMISS_ALL: 'Ezen az oldalon: elutasítás',
 	edit_page: 'Oldal szerkesztése',
 	edit_layout: 'Elrendezés szerkesztése',
+	edit_media: 'Média szerkesztése',
 	edit_term: 'Kifejezés szerkesztése',
 	edit_user: 'Felhasználó szerkesztése',
 	IMAGES: 'Alternatív szöveg',

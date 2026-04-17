@@ -244,6 +244,7 @@ export const interfaceStrings = {
 	dismissOnSite: 'Na wszystkich stronach: oznacz jako OK',
 	dismissalsHeader: 'Nie zamierzasz tego naprawić?',
 	edit_layout: 'Edytuj układ',
+	edit_media: 'Edytuj media',
 	edit_page: 'Edytuj stronę',
 	edit_term: 'Edytuj termin',
 	edit_user: 'Edytuj użytkownika',

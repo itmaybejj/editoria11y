@@ -314,6 +314,7 @@ const interfaceStrings = {
 	DISMISS_ALL: 'Σε αυτή τη σελίδα: απόκρυψη',
 	edit_page: 'Επεξεργασία σελίδας',
 	edit_layout: 'Επεξεργασία διάταξης',
+	edit_media: 'Επεξεργασία πολυμέσων',
 	edit_term: 'Επεξεργασία όρου',
 	edit_user: 'Επεξεργασία χρήστη',
 	IMAGES: 'Εναλλακτικό κείμενο',

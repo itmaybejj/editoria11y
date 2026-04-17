@@ -560,6 +560,7 @@
     dismissOnSite: "In tutte le pagine: segna come OK",
     dismissalsHeader: "Non intendi correggerlo?",
     edit_layout: "Modifica layout",
+    edit_media: "Modifica media",
     edit_page: "Modifica pagina",
     edit_term: "Modifica termine",
     edit_user: "Modifica utente",
