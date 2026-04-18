@@ -1,18 +1,7 @@
 import { UI } from '../core/ui.js';
 import { togglePanel, toggleShowDismissals } from '../core/run.js';
 import { visualize } from '../core/visualize';
-import {
-  spriteAlts,
-  spriteClose,
-  spriteDismiss,
-  spriteHeadings,
-  spriteNext,
-  spriteToggleErrors,
-  spriteTogglePass,
-  spriteToggleWarnings,
-  spriteUnDismiss,
-  spriteVisualize,
-} from './sprite.js';
+import sprite from './sprite.js';
 import { State } from '../../sa11y-js/core/state.js';
 
 export class Ed11yElementPanel extends HTMLElement {
@@ -20,17 +9,17 @@ export class Ed11yElementPanel extends HTMLElement {
     return `
     <div class='ed11y-buttonbar'>
       <button id='ed11y-show-hidden' data-ed11y-pressed='false' hidden>
-        ${spriteUnDismiss}
-        ${spriteDismiss}
+        ${sprite.unDismiss}
+        ${sprite.dismiss}
         <span class="ed11y-sr-only"></span>
       </button>
       <button id='ed11y-visualize' data-ed11y-pressed="false" class='ed11y-panel-fa'>
-        ${spriteVisualize}
+        ${sprite.visualize}
         <span class="ed11y-sr-only"></span>
       </button>
       <div id='ed11y-visualizers' class="content" hidden>
           <details id="ed11y-headings-tab">
-              <summary>${spriteHeadings}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
+              <summary>${sprite.headings}<span class="summary-title"></span><span class="close-details">${sprite.close}</span>
               </summary>
               <div class="details ed11y-small">
                   <p class="details-title"></p>
@@ -38,7 +27,7 @@ export class Ed11yElementPanel extends HTMLElement {
               </div>
           </details>
           <details id="ed11y-alts-tab">
-            <summary>${spriteAlts}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
+            <summary>${sprite.alts}<span class="summary-title"></span><span class="close-details">${sprite.close}</span>
             </summary>
             <div class="details ed11y-small">
                 <p class="details-title"></p>
@@ -46,8 +35,8 @@ export class Ed11yElementPanel extends HTMLElement {
             </div>
         </details>
         </div>
-      <button type='button' id='ed11y-toggle'><span class="ed11y-sr-only"></span><span class="ed11y-toggle-circle"><span class='icon'>${spriteToggleErrors}${spriteTogglePass}${spriteToggleWarnings}</span></span></button>
-      <button class='ed11y-jump next' data-ed11y-goto='0' aria-haspopup="dialog">${spriteNext}<span class='toggle-count'></span><span class='jump-next ed11y-sr-only'></span></button>
+      <button type='button' id='ed11y-toggle'><span class="ed11y-sr-only"></span><span class="ed11y-toggle-circle"><span class='icon'>${sprite.toggleErrors}${sprite.togglePass}${sprite.toggleWarnings}</span></span></button>
+      <button class='ed11y-jump next' data-ed11y-goto='0' aria-haspopup="dialog">${sprite.next}<span class='toggle-count'></span><span class='jump-next ed11y-sr-only'></span></button>
      </div>
     </div>
     <div id="ed11y-message" aria-live="polite"></div>

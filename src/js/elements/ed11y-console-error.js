@@ -1,7 +1,7 @@
 import Lang from '../../sa11y-js/utils/lang.js';
 import { sanitizeURL } from '../../sa11y-js/utils/utils';
 import version from '../version.js';
-import { spriteClose } from './sprite.js';
+import sprite from './sprite.js';
 import { State } from '../../sa11y-js/core/state.js';
 
 // Replaces Sa11y error with one that does not attach CSS.
@@ -43,7 +43,7 @@ ${this.error.stack}
 
     // 1. Create the Close Button.
     const closeWrapper = document.createElement('div');
-    closeWrapper.innerHTML = `<button class="close ed11y-tip-close" title="Close">${spriteClose}</button>`;
+    closeWrapper.innerHTML = `<button class="close ed11y-tip-close" title="Close">${sprite.close}</button>`;
     const closeBtn = closeWrapper.querySelector('.close');
     closeBtn.setAttribute('aria-label', Lang._('ALERT_CLOSE'));
 

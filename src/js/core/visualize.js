@@ -5,7 +5,7 @@ import * as Utils from '../../sa11y-js/utils/utils';
 import { alignAlts } from '../utils/align';
 import { getElements } from '../utils/utils';
 import checkReadability from '../../sa11y-js/rulesets/readability';
-import { spriteDismiss } from '../elements/sprite.js';
+import sprite from '../elements/sprite.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { UI } from './ui.js';
 
@@ -252,7 +252,7 @@ export function drawResult(result, index) {
     mark.toggle.style.setProperty('font-size', '16px');
   }
   if (mark.dismissed) {
-    mark.toggle.innerHTML = spriteDismiss;
+    mark.toggle.innerHTML = sprite.dismiss;
     mark.toggle.classList.add('dismissed');
   } else if (mark.dismissable) {
     mark.toggle.classList.add('dismissable');

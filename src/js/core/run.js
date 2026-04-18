@@ -38,7 +38,7 @@ import {
 } from '../utils/process-results.js';
 import { drawResult, showAltPanel, showHeadingsPanel, visualize } from './visualize';
 import checkReadability from '../../sa11y-js/rulesets/readability.js';
-import { spriteClose, spriteReadability } from '../elements/sprite.js';
+import sprite from '../elements/sprite.js';
 import { checkCustomRuleset } from '../rulesets/custom-ruleset.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
@@ -140,7 +140,7 @@ export function updatePanel() {
         const detailsTab = document.createElement('details');
         detailsTab.id = 'ed11y-readability-tab';
         detailsTab.innerHTML = `
-            <summary>${spriteReadability}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
+            <summary>${sprite.readability}<span class="summary-title"></span><span class="close-details">${sprite.close}</span>
             </summary>
             <div class="details">
 							<div id="readability-content">
