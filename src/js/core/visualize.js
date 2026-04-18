@@ -163,6 +163,10 @@ export function showHeadingsPanel() {
   if (!panelOutline) {
     return;
   }
+  const oldHeadingMarks = getElements('ed11y-element-heading-label', 'root', []);
+  oldHeadingMarks?.forEach((mark) => {
+    mark.remove();
+  });
   if (State.headingOutline.length) {
     panelOutline.innerHTML = '';
     State.headingOutline.forEach((result, i) => {
