@@ -430,7 +430,7 @@ const why = {
     <li>不简洁："<a href="https://webaim.org/techniques/hypertext/link_text">点击这里了解更多关于有意义的链接的信息</a>"</li></ul></div>`
 };
 const tips = {
-  ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span><strong>替代文本：</strong> <i>%(ALT_TEXT)</i></p><p>读屏软件会尝试逐字朗读此 URL，无法传达与看到图片相同的含义。</p><p>${why.fix}请在当前语境中简要描述此图像的含义。</p>${why.images}`,
+  ALT_FILE_EXT: `<p><span hidden>%(alt)</span><strong>替代文本：</strong> <i>%(ALT_TEXT)</i></p><p>读屏软件会尝试逐字朗读此 URL，无法传达与看到图片相同的含义。</p><p>${why.fix}请在当前语境中简要描述此图像的含义。</p>${why.images}`,
   ALT_MAYBE_BAD: `<p><strong>替代文本：</strong> <i>%(alt)</i></p><p>${why.fix}请在当前语境中简要描述此图像的含义。</p>${why.images}`,
   ALT_MAYBE_BAD_WARNING: `<p><strong>替代文本：</strong> <i>%(alt)</i></p><p>${why.fix}请在当前语境中简要描述此图像的含义。</p>${why.images}`,
   ALT_PLACEHOLDER: `<p><strong>替代文本：</strong> <i>%(alt)</i></p><p>${why.fix}请在当前语境中简要描述此图像的含义。</p>${why.images}`,
@@ -468,7 +468,7 @@ const tips = {
   LABELS_NO_FOR_ATTRIBUTE: `此输入字段未关联任何标签。请在标签中加入 <code>for</code> 属性，使其与该字段的 <code>id</code> 匹配。<hr> <strong>ID：</strong> <code>#%(ID)</code>`,
   LABELS_PLACEHOLDER: `<p>占位符文本若对比度良好，可能被误认为已输入内容；若对比度不足，又会难以辨认。随后它会在用户输入时消失，可能移除用户需要借以检查错误的信息。</p><p>${why.fix}请确保字段标签、帮助文本与格式说明在字段有内容时仍保持可见，并考虑移除占位符。</p>`,
   LABEL_IN_NAME: `<p><strong>可见文本：</strong> <i>%(VISIBLE)</i></p><p><strong>供读屏软件使用的标签：</strong> <i>%(LABEL)</i></p><p>该元素的可见文本似乎与其可访问名称不同。这可能导致读屏用户困惑，或导致语音控制失败。</p><p>${why.fix}请确保可见标签以不可见标签的文本开头，且不包含任何在不可见标签中缺失的重要信息。</p>`,
-  LINK_ALT_FILE_EXT: `<p>此替代文本可能是文件名，而非有意义的链接标签：<br><span style="display: none;">%(ALT)</span><i>%(alt)</i></p><p>${why.fix}对于作为链接的图像，请使用链接目标的标题作为替代文本。</p><div class="why"><p>替代文本应表达图像的意义。对于作为链接的图像，其意义是链接要前往的目标：</p><ul><li>"带文字的页面" 描述的是图像，而非链接。</li><li>"IMG_1234.jpg" 只是文件名。</li><li>"活动报名表（.doc）" 描述的是链接目标。</li></ul></div>`,
+  LINK_ALT_FILE_EXT: `<p>此替代文本可能是文件名，而非有意义的链接标签：<br><span hidden>%(ALT)</span><i>%(alt)</i></p><p>${why.fix}对于作为链接的图像，请使用链接目标的标题作为替代文本。</p><div class="why"><p>替代文本应表达图像的意义。对于作为链接的图像，其意义是链接要前往的目标：</p><ul><li>"带文字的页面" 描述的是图像，而非链接。</li><li>"IMG_1234.jpg" 只是文件名。</li><li>"活动报名表（.doc）" 描述的是链接目标。</li></ul></div>`,
   LINK_ALT_MAYBE_BAD: `<p><strong>替代文本：</strong> <i>%(alt)</i></p><p>${why.fix}对于作为链接的图像，请使用链接目标的标题作为替代文本。</p>${why.imageLinks}`,
   LINK_ALT_MAYBE_BAD_WARNING: `<p><strong>替代文本：</strong> <i>%(alt)</i></p><p>${why.fix}对于作为链接的图像，请使用链接目标的标题作为替代文本。</p>${why.imageLinks}`,
   LINK_ALT_UNPRONOUNCEABLE: `<p>该链接图片的替代文本仅包含不可发音的符号和/或空格：<i>%(ALT_TEXT)</i></p><p>读屏软件会宣布存在链接，但无法描述其含义。</p><p>${why.fix}对于作为链接的图像，请使用链接目标的标题作为替代文本。</p>${why.imageLinks}`,

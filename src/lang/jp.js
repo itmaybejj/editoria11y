@@ -119,7 +119,7 @@ const why = {
 };
 
 export const tips = {
-	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span><strong>Alt テキスト：</strong> <i>%(ALT_TEXT)</i></p><p>スクリーンリーダーはこの URL を発音しようと試みるため、画像を見たときと同じ意味にはなりません。</p><p>${why.fix}この画像がこの文脈で何を意味するのか、簡潔に説明してください。</p>${why.images}`,
+	ALT_FILE_EXT: `<p><span hidden>%(alt)</span><strong>Alt テキスト：</strong> <i>%(ALT_TEXT)</i></p><p>スクリーンリーダーはこの URL を発音しようと試みるため、画像を見たときと同じ意味にはなりません。</p><p>${why.fix}この画像がこの文脈で何を意味するのか、簡潔に説明してください。</p>${why.images}`,
 	ALT_MAYBE_BAD: `<p><strong>Alt テキスト：</strong> <i>%(alt)</i></p><p>${why.fix}この画像がこの文脈で何を意味するのか、簡潔に説明してください。</p>${why.images}`,
 	ALT_MAYBE_BAD_WARNING: `<p><strong>Alt テキスト：</strong> <i>%(alt)</i></p><p>${why.fix}この画像がこの文脈で何を意味するのか、簡潔に説明してください。</p>${why.images}`,
 	ALT_PLACEHOLDER: `<p><strong>Alt テキスト：</strong> <i>%(alt)</i></p><p>${why.fix}この画像がこの文脈で何を意味するのか、簡潔に説明してください。</p>${why.images}`,
@@ -157,7 +157,7 @@ export const tips = {
 	LABELS_NO_FOR_ATTRIBUTE: `この入力欄にはラベルが関連付けられていません。ラベルに <code>for</code> 属性を追加し、この入力欄の <code>id</code> と一致させてください。 <hr> <strong>ID:</strong> <code>#%(ID)</code>`,
 	LABELS_PLACEHOLDER: `<p>プレースホルダーはコントラストが十分であれば入力済みの内容と見分けがつきにくく、コントラストが不足していれば読みづらくなります。さらに入力を始めると消えてしまうため、エラーを確認するのに必要な情報が失われることがあります。</p><p>${why.fix}重要な情報（ラベル、ヘルプ、書式指示）は、フィールドに入力があっても見えるようにしてください。</p>`,
 	LABEL_IN_NAME: `<p><strong>可視テキスト：</strong> <i>%(VISIBLE)</i></p><p><strong>スクリーンリーダー用ラベル：</strong> <i>%(LABEL)</i></p><p>この要素の視覚的なテキストとアクセシブルネームが異なっている可能性があります。スクリーンリーダー利用者を混乱させたり、音声操作が正常に働かない可能性があります。</p><p>${why.fix}可視ラベルが非表示ラベルのテキストで始まり、非表示ラベルに含まれていない重要な情報が可視ラベルに含まれないようにしてください。</p>`,
-	LINK_ALT_FILE_EXT: `<p>この alt テキストは、意味のあるリンクラベルではなく、ファイル名である可能性があります：<br><span style="display: none;">%(ALT)</span><i>%(alt)</i></p><p>${why.fix}リンク画像の alt テキストには、リンク先のタイトルを使用してください。</p><div class="why"><p>alt テキストは画像が何を「意味するか」を伝えるためのものです。リンク画像の場合、その意味はリンク先です：</p><ul><li>"文字の書かれたページ" は画像の説明であり、リンクの説明ではありません。</li><li>"IMG_1234.jpg" はただのファイル名です。</li><li>"イベント申込書（.doc）" はリンク先の説明です。</li></ul></div>`,
+	LINK_ALT_FILE_EXT: `<p>この alt テキストは、意味のあるリンクラベルではなく、ファイル名である可能性があります：<br><span hidden>%(ALT)</span><i>%(alt)</i></p><p>${why.fix}リンク画像の alt テキストには、リンク先のタイトルを使用してください。</p><div class="why"><p>alt テキストは画像が何を「意味するか」を伝えるためのものです。リンク画像の場合、その意味はリンク先です：</p><ul><li>"文字の書かれたページ" は画像の説明であり、リンクの説明ではありません。</li><li>"IMG_1234.jpg" はただのファイル名です。</li><li>"イベント申込書（.doc）" はリンク先の説明です。</li></ul></div>`,
 	LINK_ALT_MAYBE_BAD: `<p><strong>Alt テキスト：</strong> <i>%(alt)</i></p><p>${why.fix}リンク画像の alt テキストには、リンク先のタイトルを使用してください。</p>${why.imageLinks}`,
 	LINK_ALT_MAYBE_BAD_WARNING: `<p><strong>Alt テキスト：</strong> <i>%(alt)</i></p><p>${why.fix}リンク画像の alt テキストには、リンク先のタイトルを使用してください。</p>${why.imageLinks}`,
 	LINK_ALT_UNPRONOUNCEABLE: `<p>このリンク画像の alt は発音できない文字や空白のみです：<i>%(ALT_TEXT)</i></p><p>スクリーンリーダーはリンクがあることを知らせますが、説明できません。</p><p>${why.fix}リンク画像の alt テキストには、リンク先のタイトルを使用してください。</p>${why.imageLinks}`,

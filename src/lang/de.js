@@ -134,7 +134,7 @@ const why = {
 const tips = {
 	ARIA_INPUT_FIELD_NAME: `<p><strong>Element:</strong> <code>%(EL)</code></p><p>${why.fix}Geben Sie eine gültige Beschriftung an; bei benutzerdefinierten Eingabeelementen bedeutet das oft innenliegenden Text oder ein title-, aria-label- oder aria-labelledby-Attribut.</p>`,
 
-	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span><strong>Alt‑Text:</strong> <i>%(ALT_TEXT)</i></p><p>Screenreader versuchen, diese URL auszusprechen – oft Buchstabe für Buchstabe. Das vermittelt kaum die gleiche Bedeutung wie das Bild selbst.</p><p>${why.fix}Beschreiben Sie kurz, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
+	ALT_FILE_EXT: `<p><span hidden>%(alt)</span><strong>Alt‑Text:</strong> <i>%(ALT_TEXT)</i></p><p>Screenreader versuchen, diese URL auszusprechen – oft Buchstabe für Buchstabe. Das vermittelt kaum die gleiche Bedeutung wie das Bild selbst.</p><p>${why.fix}Beschreiben Sie kurz, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
 
 	ALT_MAYBE_BAD: `<p><strong>Alt‑Text:</strong> <i>%(alt)</i></p><p>${why.fix}Beschreiben Sie kurz, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
 
@@ -208,7 +208,7 @@ const tips = {
 
 	LABEL_IN_NAME: `<p><strong>Sichtbarer Text:</strong> <i>%(VISIBLE)</i></p><p><strong>Label für Screenreader:</strong> <i>%(LABEL)</i></p><p>Der sichtbare Text dieses Elements scheint vom zugänglichen Namen abzuweichen. Das kann Screenreader‑Nutzende verwirren und die Sprachsteuerung beeinträchtigen.</p><p>${why.fix}Stellen Sie sicher, dass das sichtbare Label mit dem Text des unsichtbaren Labels beginnt und keine bedeutungstragenden Informationen enthält, die im unsichtbaren Label fehlen.</p>`,
 
-	LINK_ALT_FILE_EXT: `<p>Dieser Alt‑Text ist wahrscheinlich ein Dateiname statt einer sinnvollen Bezeichnung für das Linkziel:<br><span style="display: none;">%(ALT)</span><i>%(alt)</i></p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt‑Text für verlinkte Bilder.</p><div class="why"><p>Alt‑Text soll die Bedeutung eines Bildes wiedergeben, nicht nur dessen Inhalt. Bei verlinkten Bildern ist die Bedeutung das Linkziel:</p><ul><li>„Seite mit Text" beschreibt das Bild, nicht den Link.</li><li>„IMG_1234.jpg" ist nur ein Dateiname.</li><li>„Anmeldeformular (doc)" ist eine Linkdestination.</li></ul></div>`,
+	LINK_ALT_FILE_EXT: `<p>Dieser Alt‑Text ist wahrscheinlich ein Dateiname statt einer sinnvollen Bezeichnung für das Linkziel:<br><span hidden>%(ALT)</span><i>%(alt)</i></p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt‑Text für verlinkte Bilder.</p><div class="why"><p>Alt‑Text soll die Bedeutung eines Bildes wiedergeben, nicht nur dessen Inhalt. Bei verlinkten Bildern ist die Bedeutung das Linkziel:</p><ul><li>„Seite mit Text" beschreibt das Bild, nicht den Link.</li><li>„IMG_1234.jpg" ist nur ein Dateiname.</li><li>„Anmeldeformular (doc)" ist eine Linkdestination.</li></ul></div>`,
 
 	LINK_ALT_MAYBE_BAD: `<p><strong>Alt‑Text:</strong> <i>%(alt)</i></p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt‑Text für verlinkte Bilder.</p>${why.imageLinks}`,
 

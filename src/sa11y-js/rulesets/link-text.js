@@ -150,7 +150,7 @@ export default function checkLinkText() {
             type: State.option.checks.LINK_STOPWORD_ARIA.type || 'warning',
             content: Lang.sprintf(
               State.option.checks.LINK_STOPWORD_ARIA.content ||
-              Lang._('LINK_STOPWORD_ARIA') + Lang._('LINK_TIP'),
+                Lang._('LINK_STOPWORD_ARIA') + Lang._('LINK_TIP'),
               stopword,
               linkText,
             ),
@@ -174,7 +174,7 @@ export default function checkLinkText() {
             type: State.option.checks.LABEL_IN_NAME.type || 'warning',
             content: Lang.sprintf(
               State.option.checks.LABEL_IN_NAME.content ||
-              Lang._('LABEL_IN_NAME') + Lang._('ACC_NAME_TIP'),
+                Lang._('LABEL_IN_NAME') + Lang._('ACC_NAME_TIP'),
               textContentIgnoredStrings,
               linkText,
             ),
@@ -218,7 +218,7 @@ export default function checkLinkText() {
             type: State.option.checks.LINK_STOPWORD.type || 'error',
             content: Lang.sprintf(
               State.option.checks.LINK_STOPWORD.content ||
-              Lang._('LINK_STOPWORD') + Lang._('LINK_TIP'),
+                Lang._('LINK_STOPWORD') + Lang._('LINK_TIP'),
               linkText,
             ),
             args: [linkText],
@@ -416,7 +416,7 @@ export default function checkLinkText() {
             type: State.option.checks.LINK_UNPRONOUNCEABLE.type || 'error',
             content: Lang.sprintf(
               State.option.checks.LINK_UNPRONOUNCEABLE.content ||
-              Lang._('LINK_UNPRONOUNCEABLE') + Lang._('LINK_TIP'),
+                Lang._('LINK_UNPRONOUNCEABLE') + Lang._('LINK_TIP'),
               linkText,
             ),
             args: [linkText],
@@ -443,7 +443,7 @@ export default function checkLinkText() {
             type: State.option.checks.LINK_CLICK_HERE.type || 'warning',
             content: Lang.sprintf(
               State.option.checks.LINK_CLICK_HERE.content ||
-              Lang._('LINK_CLICK_HERE') + Lang._('LINK_TIP'),
+                Lang._('LINK_CLICK_HERE') + Lang._('LINK_TIP'),
               linkText,
             ),
             args: [linkText],
@@ -491,7 +491,7 @@ export default function checkLinkText() {
             type: State.option.checks.LINK_IDENTICAL_NAME.type || 'warning',
             content: Lang.sprintf(
               State.option.checks.LINK_IDENTICAL_NAME.content ||
-              Lang._('LINK_IDENTICAL_NAME') + diffAccName + Lang._('LINK_TIP'),
+                Lang._('LINK_IDENTICAL_NAME') + diffAccName + Lang._('LINK_TIP'),
               variable,
             ),
             args: [textContentIgnoredStrings, linkText],
@@ -559,9 +559,7 @@ export default function checkLinkText() {
 
     // Has file extension.
     const hasExtension = $el.matches(Constants.Global.documentSources);
-    const hasPDF = State.option.checks.QA_PDF.sources
-      ? $el.matches(State.option.checks.QA_PDF.sources)
-      : $el.matches('a[href$=".pdf"], a[href*=".pdf?"]');
+    const hasPDF = $el.matches('a[href$=".pdf"], a[href*=".pdf?"]');
 
     // Manually inspect documents & PDF for accessibility.
     if (State.option.checks.QA_DOCUMENT && hasExtension) {

@@ -2892,7 +2892,7 @@ function checkLinkText() {
       }
     }
     const hasExtension = $el.matches(Constants.Global.documentSources);
-    const hasPDF = State.option.checks.QA_PDF.sources ? $el.matches(State.option.checks.QA_PDF.sources) : $el.matches('a[href$=".pdf"], a[href*=".pdf?"]');
+    const hasPDF = $el.matches('a[href$=".pdf"], a[href*=".pdf?"]');
     if (State.option.checks.QA_DOCUMENT && hasExtension) {
       State.results.push({
         test: "QA_DOCUMENT",
@@ -7970,9 +7970,6 @@ function generateContrastTools(contrastDetails) {
   const hasBackgroundColor = background && background.type !== "image";
   const backgroundHex = hasBackgroundColor ? getHex(background) : "#000000";
   const foregroundHex = color ? getHex(color) : "#000000";
-  const hasFontWeight = fontWeight ? `font-weight:${fontWeight};` : "";
-  const hasFontSize = fontSize ? `font-size:${fontSize}px;` : "";
-  const textDecoration = textUnderline ? `text-decoration:${textUnderline};` : "";
   const unknownFG = color ? "" : 'class="unknown"';
   const unknownBG = background && background.type !== "image" ? "" : 'class="unknown"';
   const unknownFGText = color ? "" : `<span id="fg-input-unknown" class="visually-hidden">(${Lang._("UNKNOWN")})</span>`;
@@ -7990,7 +7987,7 @@ function generateContrastTools(contrastDetails) {
       <div id="contrast" class="badge">${Lang._("CONTRAST")}</div>
       <div id="value" class="badge">${displayedRatio}</div>
       <div id="good" class="badge good-contrast" hidden>${Lang._("GOOD")} <span class="good-icon"></span></div>
-      <div id="contrast-preview" style="color:${foregroundHex};${hasBackgroundColor ? `background:${backgroundHex};` : ""}${hasFontWeight + hasFontSize + textDecoration}"></div>
+      <div id="contrast-preview"></div>
       <div id="color-pickers">
         <label for="fg-text">${Lang._("FG")} ${unknownFGText}
           <div id="fg-color-wrapper" ${unknownFG}>
@@ -8003,7 +8000,13 @@ function generateContrastTools(contrastDetails) {
           </div>
         </label>
       </div>`;
-  contrastTools.querySelector("#contrast-preview").textContent = previewText;
+  const preview = contrastTools.querySelector("#contrast-preview");
+  preview.textContent = previewText;
+  preview.style.color = foregroundHex;
+  if (hasBackgroundColor) preview.style.background = backgroundHex;
+  if (fontWeight) preview.style.fontWeight = fontWeight;
+  if (fontSize) preview.style.fontSize = `${fontSize}px`;
+  if (textUnderline) preview.style.textDecoration = textUnderline;
   return contrastTools;
 }
 function initializeContrastTools(container, contrastDetails) {
@@ -9004,7 +9007,7 @@ const why = {
   imageLinks: `<div class="why"><p>Tip: the purpose of alt text is to provide an alternative for what an image means, not what it contains. The meaning of a linked image is the link destination:</p><ul><li>"<em>A magnifying glass</em>" describes an image, not a link.</li><li>"<em>A magnifying glass search</em>" confusingly describes both.</li><li>"<em>Search</em>" describes the link destination accurately.</li></ul></div>`
 };
 const tips = {
-  ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span><strong>Alt text:</strong> <i>%(ALT_TEXT)</i></p><p>Screen readers will attempt to pronounce this url, often one letter at a time. This probably does not provide the same meaning as seeing the image.</p><p>${why.fix}Concisely describe what this image means, in this context.</p>${why.images}`,
+  ALT_FILE_EXT: `<p><span hidden>%(alt)</span><strong>Alt text:</strong> <i>%(ALT_TEXT)</i></p><p>Screen readers will attempt to pronounce this url, often one letter at a time. This probably does not provide the same meaning as seeing the image.</p><p>${why.fix}Concisely describe what this image means, in this context.</p>${why.images}`,
   ALT_MAYBE_BAD: `<p><strong>Alt text:</strong> <i>%(alt)</i></p><p>${why.fix}Concisely describe what this image means, in this context.</p>${why.images}`,
   ALT_MAYBE_BAD_WARNING: `<p><strong>Alt text:</strong> <i>%(alt)</i></p><p>${why.fix}Concisely describe what this image means, in this context.</p>${why.images}`,
   ALT_PLACEHOLDER: `<p><strong>Alt text:</strong> <i>%(alt)</i></p><p>${why.fix}Concisely describe what this image means, in this context.</p>${why.images}`,
@@ -9042,7 +9045,7 @@ const tips = {
   LABELS_NO_FOR_ATTRIBUTE: "There is no label associated with this input. Add a <code>for</code> attribute to the label that matches the <code>id</code> of this input. <hr> <strong>ID:</strong> <code>#%(ID)</code>",
   LABELS_PLACEHOLDER: `<p>Placeholder text can be mistaken for previously entered content if it has good contrast, or be illegible if it does not. It then disappears on input, which may remove information users needed to check for errors.</p><p>${why.fix}Make sure key information like the field label, help text and format instructions remain visible when there is content in this field, and consider dropping the placeholder altogether.</p>`,
   LABEL_IN_NAME: `<p><strong>Visible text:</strong> <i>%(VISIBLE)</i></p><p><strong>Label for screen readers:</strong> <i>%(LABEL)</i></p><p>The visible text for this element appears to be different from the accessible name. This may cause confusion for screen reader users, and may break voice control.</p><p>${why.fix}Make sure the visible label starts with the text of the invisible label, and does not contain any meaningful information that is missing from the invisible label.</p>`,
-  LINK_ALT_FILE_EXT: `<p>This alt text is probably a filename instead of a meaningful label for a link:<br><span style="display: none;">%(ALT)</span><i>%(alt)</i></p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p><div class="why"> <p>The purpose of alt text is to provide an alternative for what an image means, not what it contains. The meaning of a linked image is the link destination:</p><ul><li>"Page with writing" describes the image, not a link.</li><li>"IMG_1234.jpg" is just a filename.</li><li>"Event registration form (.doc)" is a link destination.</li></ul></div>`,
+  LINK_ALT_FILE_EXT: `<p>This alt text is probably a filename instead of a meaningful label for a link:<br><span hidden>%(ALT)</span><i>%(alt)</i></p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p><div class="why"> <p>The purpose of alt text is to provide an alternative for what an image means, not what it contains. The meaning of a linked image is the link destination:</p><ul><li>"Page with writing" describes the image, not a link.</li><li>"IMG_1234.jpg" is just a filename.</li><li>"Event registration form (.doc)" is a link destination.</li></ul></div>`,
   LINK_ALT_MAYBE_BAD: `<p><strong>Alt text:</strong> <i>%(alt)</i></p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
   LINK_ALT_MAYBE_BAD_WARNING: `<p><strong>Alt text:</strong> <i>%(alt)</i></p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
   LINK_ALT_UNPRONOUNCEABLE: `<p>The alt text within this linked image only contains unpronounceable symbols and/or spaces: <i>%(ALT_TEXT)</i></p><p>Screen readers will announce there is a link, and then be unable to describe it.</p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,

@@ -125,7 +125,7 @@ const why = {
 const tips = {
 	ARIA_INPUT_FIELD_NAME: `<p><strong>Elemento:</strong> <code>%(EL)</code></p><p>${why.fix}Proporcione cualquier etiqueta válida; para elementos de entrada personalizados eso suele ser texto interno, o un atributo title, aria-label o aria-labelledby.</p>`,
 
-	ALT_FILE_EXT: `<p><span style="display: none">%(alt)</span><strong>Texto alternativo:</strong> <i>%(ALT_TEXT)</i></p><p>Los lectores de pantalla intentarán pronunciar esta URL, a menudo letra por letra. Esto probablemente no transmite el mismo significado que ver la imagen.</p><p>${why.fix}Describa de manera concisa lo que significa esta imagen en este contexto.</p>${why.images}`,
+	ALT_FILE_EXT: `<p><span hidden>%(alt)</span><strong>Texto alternativo:</strong> <i>%(ALT_TEXT)</i></p><p>Los lectores de pantalla intentarán pronunciar esta URL, a menudo letra por letra. Esto probablemente no transmite el mismo significado que ver la imagen.</p><p>${why.fix}Describa de manera concisa lo que significa esta imagen en este contexto.</p>${why.images}`,
 
 	ALT_MAYBE_BAD: `<p><strong>Texto alternativo:</strong> <i>%(alt)</i></p><p>${why.fix}Describa de manera concisa lo que significa esta imagen en este contexto.</p>${why.images}`,
 
@@ -199,7 +199,7 @@ const tips = {
 
 	LABEL_IN_NAME: `<p><strong>Texto visible:</strong> <i>%(VISIBLE)</i></p><p><strong>Etiqueta para lectores de pantalla:</strong> <i>%(LABEL)</i></p><p>El texto visible de este elemento parece distinto del nombre accesible. Esto puede causar confusión a quienes usan lectores de pantalla y afectar el control por voz.</p><p>${why.fix}Asegúrese de que la etiqueta visible comience con el texto de la etiqueta invisible y no contenga información significativa que falte en la etiqueta invisible.</p>`,
 
-	LINK_ALT_FILE_EXT: `<p>Este texto alternativo probablemente es un nombre de archivo en lugar de un nombre significativo para el destino del enlace:<br><span style="display: none;">%(ALT)</span><i>%(alt)</i></p><p>${why.fix}Use el título del destino del enlace como texto alternativo para las imágenes vinculadas.</p><div class="why"><p>El propósito del texto alternativo es describir lo que la imagen significa, no lo que contiene. El significado de una imagen vinculada es el destino del enlace:</p><ul><li>"Página con texto" describe la imagen, no un enlace.</li><li>"IMG_1234.jpg" es solo un nombre de archivo.</li><li>"Formulario de registro (doc)" es un destino del enlace.</li></ul></div>`,
+	LINK_ALT_FILE_EXT: `<p>Este texto alternativo probablemente es un nombre de archivo en lugar de un nombre significativo para el destino del enlace:<br><span hidden>%(ALT)</span><i>%(alt)</i></p><p>${why.fix}Use el título del destino del enlace como texto alternativo para las imágenes vinculadas.</p><div class="why"><p>El propósito del texto alternativo es describir lo que la imagen significa, no lo que contiene. El significado de una imagen vinculada es el destino del enlace:</p><ul><li>"Página con texto" describe la imagen, no un enlace.</li><li>"IMG_1234.jpg" es solo un nombre de archivo.</li><li>"Formulario de registro (doc)" es un destino del enlace.</li></ul></div>`,
 
 	LINK_ALT_MAYBE_BAD: `<p><strong>Texto alternativo:</strong> <i>%(alt)</i></p><p>${why.fix}Use el título del destino del enlace como texto alternativo para las imágenes vinculadas.</p>${why.imageLinks}`,
 
