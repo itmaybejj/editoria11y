@@ -408,7 +408,7 @@ export const ed11yDefaultOptions = {
     QA_IN_PAGE_LINK: true,
     QA_DOCUMENT: false, // Todo CMS consider.
     QA_PDF: {
-      sources: "a[href$='.pdf'], a[href*='.pdf?']",
+      sources: "a[href$='.pdf'], a[href*='.pdf?'], a[href*='/pdf/']",
       dismissAll: true,
     },
     QA_BLOCKQUOTE: true,
