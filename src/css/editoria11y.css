@@ -1520,6 +1520,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 :host(ed11y-element-heading-label.ed11y-element) {
 	position: absolute;
 	margin-top: -0.5em;
+	z-index: calc(var(--ed11y-buttonZIndex) - 2);
 }
 
 .ed11y-heading-wrapper {

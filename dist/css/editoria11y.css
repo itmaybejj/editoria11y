@@ -1384,6 +1384,7 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 :host(ed11y-element-heading-label.ed11y-element) {
+  z-index: calc(var(--ed11y-buttonZIndex) - 2);
   margin-top: -.5em;
   position: absolute;
 }
