@@ -80,15 +80,18 @@ ed11y-element-result {
 
 	.badge {
 		display: inline-block;
-		vertical-align: top;
+		vertical-align: middle;
 		padding: 0 0.5em;
-		margin: 2px 0.25em -2px 0;
+		margin: -2px 0.25em 0 0;
 		font-size: 12px;
 		font-weight: 400;
 		color: var(--ed11y-primaryText);
 		background: var(--ed11y-primary);
 		border: 1px solid;
 		border-radius: 1em;
+		position: relative;
+		z-index: 2;
+		line-height: 1.5;
 
 		&:has(.link-icon) {
 			display: none;
@@ -879,7 +882,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 	.toggle {
 		position: absolute;
 		z-index: 1;
-		display: block;
+		display: inline-block;
 		width: 2em;
 		height: 2em;
 		padding: 0;
@@ -1094,6 +1097,22 @@ ed11y-element-result[data-ed11y-open="true"] {
 	&.open .arrow {
 		display: block;
 	}
+
+	code,
+	i {
+		display: inline-block;
+		background-color: var(--ed11y-code, #cbd8f3);
+		padding-inline: 2px;
+		font-weight: 500;
+		color: #000;
+		font-style: normal;
+		border-radius: 2px;
+		line-height: 1.25;
+	}
+
+	code {
+		font-family: monospace;
+	}
 }
 
 @keyframes ed11y-fade-in {
@@ -1113,7 +1132,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 .ed11y-tip-wrapper {
 	.invisible-alert:not(:empty) {
 		padding: 13px 12px 12px 16px;
-		margin: 0 6px 10px -1px;
+		margin: 10px 6px 0px -1px;
 		font-size: 90%;
 		font-style: italic;
 		font-weight: bold;
@@ -1252,10 +1271,12 @@ ed11y-element-result[data-ed11y-open="true"] {
 	}
 
 	.title {
-		padding: 8px 1.5em 0.6125em 0;
-		font-size: 1.0625em;
+		padding: 10px 0 0.6125em 0;
+		margin-right: 40px;
+		font-size: 1.125em;
 		font-weight: bold;
 		outline: transparent;
+		opacity: 0.9;
 
 		&:focus {
 			outline: none;
@@ -1487,7 +1508,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 	margin-bottom: -0.1em;
 }
 
-@media screen and (max-width: 50rem) {
+@media screen and (max-width: 640px) {
 	.ed11y-tip-wrapper {
 		.error-badge {
 			display: none;
@@ -1499,6 +1520,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 :host(ed11y-element-heading-label.ed11y-element) {
 	position: absolute;
 	margin-top: -0.5em;
+	z-index: calc(var(--ed11y-buttonZIndex) - 2);
 }
 
 .ed11y-heading-wrapper {

@@ -313,6 +313,7 @@ export default {
       'Det finns ingen etikett associerad med detta inmatningsfält. Vänligen lägg till ett <code>id</code> till denna inmatning och lägg till ett matchande <code>for</code>-attribut till etiketten.',
     LABELS_PLACEHOLDER:
       'Försvinnande platshållartext gör det svårt för människor att komma ihåg vilken information som tillhör ett fält och gör det utmanande att identifiera och åtgärda fel. Överväg istället att använda en permanent synlig hint före formulärfältet. <hr> Läs mer: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Platshållare i formulärfält är skadliga.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA-inmatningsfält eller växlingsfält saknar ett tillgängligt namn. För att åtgärda detta, ange ett giltigt <code>aria-labelledby</code>-, <code>aria-label</code>- eller <code>title</code>-attribut. Om inmatningen är växlingsbar (t.ex. kryssruta, strömbrytare, radioknapp) löser även synlig inre text detta. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -360,10 +361,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Länktext</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Tillgängligt namn</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Tips!</strong> "Tillgängligt namn" är den slutliga etiketten som kommuniceras till personer som använder hjälpmedel och beräknas av ARIA. Detta hjälper dem att förstå syftet med länken eller knappen.',
-    HIDDEN_FOCUSABLE:
-      'Länken eller knappen har <code>aria-hidden=&quot;true&quot;</code>, men kan fortfarande fokuseras med hjälp av tangentbordet. Om du avser att dölja en duplicerad länk eller knapp, lägg även till <code>tabindex=&quot;-1&quot;</code>. Annars bör <code>aria-hidden=&quot;true&quot;</code> inte användas på element som kan ta emot fokus. <hr> Läs mer om <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden-attributet.</a>',
+    ACC_NAME_TIP: '<hr><strong>Tips!</strong> Det "tillgängliga namnet" är den slutliga etiketten som kommuniceras till personer som använder hjälpmedel. Detta hjälper dem att förstå elementets syfte.',
+    HIDDEN_FOCUSABLE: 'Det här elementet kan ta emot tangentbordsfokus, men är dolt för skärmläsare genom attributet <code>aria-hidden="true"</code> (på sig självt eller en överordnad behållare). För att åtgärda detta, ta antingen bort attributet aria-hidden eller ta bort elementet från tabbordningen. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Läs mer om <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">attributet aria-hidden.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -383,7 +382,7 @@ export default {
       'Se till att parametern <code>maximum-scale</code> i <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta-taggen för vyport</a> inte är mindre än 2.',
     META_REFRESH: 'Sidan ska inte automatiskt uppdateras med hjälp av en meta-tagg.',
     META_LANG_SUGGEST: 'Följande språkkod <code>%(CODE)</code> är inte giltig. Menade du <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Sidans språkkod <code>%(CODE)</code> är inte giltig. <a href="https://www.w3.org/International/questions/qa-html-language-declarations">Deklarera ett giltigt språk i HTML-taggen.</a>',
+    META_LANG_VALID: 'Språkkoden för detta element är inte giltig. För att åtgärda detta, ersätt lang-attributet med en giltig språkkod. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Läs mer om att <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarera språk i HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Knappen saknar ett tillgängligt namn som beskriver dess syfte.',
@@ -396,7 +395,7 @@ export default {
       'Inkludera inte ordet "knapp" i namnet på en knapp. Skärmläsare anger redan elementets roll utöver dess namn.',
     LABEL_IN_NAME:
       'Den synliga texten för detta element verkar skilja sig från det tillgängliga namnet, vilket kan orsaka förvirring för användare av hjälpmedelstekniker. Vänligen granska: <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Tillgängligt namn</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'Den här länken har ett ogiltigt mål och det tillgängliga namnet innehåller ordet "<strong>%(NAME)</strong>". Detta tyder på att det kanske inte alls är en länk, utan istället styr ett skriptat beteende på sidan. För att åtgärda detta, ersätt länken med en <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">tillgänglig knapp</a>, eller korrigera länkens mål. <hr> <strong>Tips!</strong> Hjälpmedelsteknik hanterar knappar och länkar på olika sätt. Genom att använda rätt HTML-element säkerställer du att användarna vet vilka kortkommandon de ska använda och vilken åtgärd som utlöses.',
+    LINK_MAYBE_BUTTON: 'Den här länken har ett ogiltigt mål. Även om det tillgängliga namnet eller dess attribut tyder på att detta kanske inte är en länk alls, utan istället styr något skriptat beteende på sidan. För att åtgärda detta, ersätt länken med en <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">tillgänglig knapp</a>, eller korrigera länkens mål. <hr> <strong {B}>Tillgängligt namn</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tips!</strong> Hjälpmedel behandlar knappar och länkar på olika sätt. Genom att använda rätt HTML-element säkerställer du att användarna vet vilka tangentbordsgenvägar de ska använda och vilken åtgärd som kommer att utlösas.',
     POTENTIAL_UI_ELEMENTS: ['meny', 'stäng', 'växla', 'öppna', 'expandera', 'fäll ihop', 'nästa', 'föregående', 'spela upp', 'pausa', 'undermeny', 'visa', 'dölj', 'rullgardinsmeny', 'bakåt', 'framåt', 'hoppa över', 'skicka', 'avbryt', 'spara', 'redigera', 'radera', 'ta bort', 'sök', 'filter', 'sortera', 'stopp', 'ljud av', 'ljud på', 'helskärm', 'minimera', 'maximera'],
 
     // Tables
@@ -406,6 +405,7 @@ export default {
       'Semantiska rubriker som Rubrik 2 eller Rubrik 3 bör endast användas för sektioner av innehåll; <strong>inte</strong> i HTML-tabeller. Ange tabellrubriker med <code>&lt;th&gt;</code>-elementet istället. <hr> Läs mer om <a href="https://www.w3.org/WAI/tutorials/tables/">tillgängliga tabeller.</a>',
     TABLES_EMPTY_HEADING:
       'Tom tabellrubrik hittades! Tabellrubriker får <strong>aldrig</strong> vara tomma. Det är viktigt att ange rad- och/eller kolumnrubriker för att förmedla deras relation. Informationen ger sammanhang till personer som använder hjälpmedelsverktyg. Tänk på att tabeller endast ska användas för tabelldata. <hr> Läs mer om <a href="https://www.w3.org/WAI/tutorials/tables/">tillgängliga tabeller.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Den här tabellen försöker koppla en specifik datacell till en specifik rubrikcell, men rubrikens ID kan inte hittas. Kontrollera att varje <code>headers</code>-attribut matchar ID för en rubrikcell i samma tabell. <hr> <strong {B}>Rubriker</strong> <code>%(VALUE)</code> <hr> <strong>Tips!</strong> Att <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">använda manuella ID-referenser</a> för att associera dataceller med rubrikceller är komplicerat och sårbart. Dela om möjligt upp komplexa data i mindre tabeller med enkla rubrikrader och -kolonner.',
 
     // Contrast
     CONTRAST_NORMAL: 'Text i normal storlek bör ha en kontrastförhållande på minst %(RATIO).',

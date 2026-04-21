@@ -296,6 +296,7 @@ export default {
       'Bu girdiyle ilişkilendirilmiş bir etiket yok. Lütfen bu girdiye bir <code>id</code> ekleyin ve etikete eşleşen bir <code>for</code> niteliği ekleyin.',
     LABELS_PLACEHOLDER:
       'Kaybolan yer tutucu metin, insanların bir alana hangi bilginin ait olduğunu hatırlamalarını zorlaştırır ve hataları tanımlamayı ve düzeltmeyi zor hale getirir. Bunun yerine, form alanından önce kalıcı olarak görünür bir ipucu kullanmayı düşünün. <hr> Daha fazla bilgi: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Form alanlarındaki yer tutucular zararlıdır.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA giriş veya geçiş alanı erişilebilir bir ada sahip değil. Düzeltmek için geçerli bir <code>aria-labelledby</code>, <code>aria-label</code> veya <code>title</code> özniteliği sağlayın. Giriş değiştirilebilirse (örneğin, onay kutusu, anahtar, radyo düğmesi), görünür iç metin eklemek de bu sorunu çözecektir. <hr> <strong {B}>Öğe</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -343,10 +344,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Bağlantı metni</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Erişilebilir ad</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>İpucu!</strong> "Erişilebilir ad", yardımcı teknolojiyi kullanan kişilere iletilen son etikettir ve ARIA tarafından hesaplanır. Bu, bağlantının veya düğmenin amacını anlamalarına yardımcı olur.',
-    HIDDEN_FOCUSABLE:
-      'Bağlantı veya düğme <code>aria-hidden=&quot;true&quot;</code> değerine sahip ancak hâlâ klavye ile odaklanabilir durumda. Bir kopya bağlantı veya düğmeyi gizlemeyi düşünüyorsanız, <code>tabindex=&quot;-1&quot;</code> ekleyin. Aksi takdirde, odak alabilen öğelerde <code>aria-hidden=&quot;true&quot;</code> kullanılmamalıdır. <hr> <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden özelliği</a> hakkında daha fazla bilgi edinin.',
+    ACC_NAME_TIP: '<hr><strong>İpucu!</strong> "Erişilebilir ad", yardımcı teknoloji kullanan kişilere iletilen nihai etikettür. Bu, öğenin amacını anlamalarına yardımcı olur.',
+    HIDDEN_FOCUSABLE: 'Bu öğe klavye odağı alabilir, ancak <code>aria-hidden="true"</code> özniteliği (kendi üzerinde veya üst kapsayıcıda) nedeniyle ekran okuyuculardan gizlenmiştir. Düzeltmek için aria-hidden özniteliğini kaldırın veya öğeyi sekme sırasından çıkarın. <hr> <strong {B}>Öğe</strong> <pre><code>%(EL)</code></pre> <hr> <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden özniteliği</a> hakkında daha fazla bilgi edinin.',
 
     // Developer
     DUPLICATE_ID:
@@ -366,7 +365,7 @@ export default {
       '<a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">Görünüm meta etiketi</a> içindeki <code>maximum-scale</code> parametresinin 2\'den küçük olmadığından emin olun.',
     META_REFRESH: 'Sayfa bir meta etiketi kullanılarak otomatik olarak yenilenmemelidir.',
     META_LANG_SUGGEST: 'Aşağıdaki dil kodu <code>%(CODE)</code> geçerli değil. Bunu mu demek istediniz: <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Sayfa dil kodu <code>%(CODE)</code> geçerli değil. Lütfen <a href="https://www.w3.org/International/questions/qa-html-language-declarations">HTML etiketinde geçerli bir dil belirtin.</a>',
+    META_LANG_VALID: 'Bu öğenin dil kodu geçerli değil. Düzeltmek için lang özniteliğini geçerli bir dil koduyla değiştirin. <hr> <strong {B}>Öğe</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> <a href="https://www.w3.org/International/questions/qa-html-language-declarations">HTML\'de dil bildirme</a> hakkında daha fazla bilgi edinin.',
 
     // Buttons
     BTN_EMPTY: 'Düğme, amacını açıklayan erişilebilir bir ada sahip değil.',
@@ -379,7 +378,7 @@ export default {
       'Bir düğmenin adında "düğme" kelimesini içermeyin. Ekran okuyucular zaten öğenin rolünü adıyla birlikte iletir.',
     LABEL_IN_NAME:
       'Bu öğe için görünen metin, erişilebilir ad ile farklı görünüyor, bu da yardımcı teknoloji kullanıcıları için kafa karışıklığına neden olabilir. Lütfen gözden geçirin: <hr> <strong {B}>Metin</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Erişilebilir Ad</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'Bu bağlantının geçersiz bir hedefi var ve erişilebilir ad "<strong>%(NAME)</strong>" kelimesini içeriyor. Bu, bunun bir bağlantı olmayabileceğini, bunun yerine sayfadaki bazı komut dosyası davranışlarını kontrol ettiğini gösteriyor. Düzeltmek için bağlantıyı <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">erişilebilir bir düğme</a> ile değiştirin veya bağlantının hedefini düzeltin. <hr> <strong>İpucu!</strong> Yardımcı teknolojiler düğmelere ve bağlantılara farklı şekilde davranır. Doğru HTML öğesinin kullanılması, kullanıcıların hangi klavye kısayollarını kullanacaklarını ve hangi eylemin tetikleneceğini bilmelerini sağlar.',
+    LINK_MAYBE_BUTTON: 'Bu bağlantının geçersiz bir hedefi var. Erişilebilir ad veya öznitelikleri bunun hiç bir bağlantı olmadığını, bunun yerine sayfadaki bazı komut dosyası davranışlarını kontrol ettiğini gösteriyor. Düzeltmek için bağlantıyı <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">erişilebilir bir düğme</a> ile değiştirin veya bağlantının hedefini düzeltin. <hr> <strong {B}>Erişilebilir Ad</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>İpucu!</strong> Yardımcı teknolojiler düğmelere ve bağlantılara farklı şekilde davranır. Doğru HTML öğesini kullanmak, kullanıcıların hangi klavye kısayollarını kullanacaklarını ve hangi eylemin tetikleneceğini bilmelerini sağlar.',
     POTENTIAL_UI_ELEMENTS: ['menü', 'kapat', 'değiştir', 'aç', 'genişlet', 'daralt', 'sonraki', 'önceki', 'oynat', 'duraklat', 'alt menü', 'göster', 'gizle', 'açılır menü', 'geri', 'ileri', 'atla', 'gönder', 'iptal', 'kaydet', 'düzenle', 'sil', 'kaldır', 'ara', 'filtre', 'sırala', 'dur', 'sessiz', 'sesi aç', 'tam ekran', 'küçült', 'büyüt'],
 
     // Tables
@@ -389,6 +388,7 @@ export default {
       'Heading 2 veya Heading 3 gibi anlamsal başlıklar yalnızca içerik bölümleri için kullanılmalıdır; HTML tablolarında <strong>değil</strong>. Bunun yerine tablo başlıklarını <code>&lt;th&gt;</code> öğesini kullanarak belirtin. <hr> <a href="https://www.w3.org/WAI/tutorials/tables/">erişilebilir tablolar hakkında daha fazla bilgi edinin.</a>',
     TABLES_EMPTY_HEADING:
       'Boş tablo başlığı bulundu! Tablo başlıkları <strong>asla</strong> boş olmamalıdır. İlişkilerini aktarmak için satır ve/veya sütun başlıklarını belirlemek önemlidir. Bu bilgi, yardımcı teknoloji kullanan kişilere bağlam sağlar. Lütfen tabloların yalnızca tablo halindeki veriler için kullanılması gerektiğini unutmayın. <hr> <a href="https://www.w3.org/WAI/tutorials/tables/">erişilebilir tablolar hakkında daha fazla bilgi edinin.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Bu tablo, belirli bir veri hücresini belirli bir başlık hücresiyle ilişkilendirmeye çalışıyor ancak başlık kimliği (ID) bulunamıyor. Her <code>headers</code> özniteliğinin aynı tablodaki bir başlık hücresinin kimliğiyle eşleştiğinden emin olun. <hr> <strong {B}>Başlıklar</strong> <code>%(VALUE)</code> <hr> <strong>İpucu!</strong> Veri hücrelerini başlık hücreleriyle ilişkilendirmek için <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">manuel kimlik (ID) referansları kullanmak</a> karmaşık ve kırılgandır. Mümkün olduğunda, karmaşık verileri basit başlık satırları ve sütunları olan daha küçük tablolara bölün.',
 
     // Contrast
     CONTRAST_NORMAL: 'Normal boyuttaki metin en az %(RATIO) kontrast oranına sahip olmalıdır.',

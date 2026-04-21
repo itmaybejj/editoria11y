@@ -2,7 +2,7 @@ import annotationStyles from '../../css/annotations.css?inline';
 import sharedStyles from '../../css/shared.css?inline';
 import Constants from '../utils/constants';
 import Lang from '../utils/lang';
-import { findVisibleParent, supportsAnchorPositioning } from '../utils/utils';
+import { findVisibleParent, supportsAnchorPositioning, getCachedClosest } from '../utils/utils';
 import { State } from '../core/state';
 
 // Annotation wrapper <annotation>
@@ -104,7 +104,9 @@ export function annotate(issue) {
       ? `, ${State.option.insertAnnotationBefore}`
       : '';
     const location =
-      element.closest(`a, button, [role="link"], [role="button"] ${insertBefore}`) || element;
+      getCachedClosest(element, `a, button, [role="link"], [role="button"] ${insertBefore}`) ||
+      getCachedClosest(element, 'svg') ||
+      element;
     location.insertAdjacentElement(position, annotation);
     annotation.shadowRoot.appendChild(buttonWrapper);
 
@@ -131,6 +133,7 @@ export function annotate(issue) {
 
     // Append to Page Issues.
     const listItem = document.createElement('li');
+    listItem.classList.add([type]);
     const heading = document.createElement('h3');
     heading.textContent = issueLabel;
     listItem.appendChild(heading);
@@ -138,7 +141,7 @@ export function annotate(issue) {
 
     // Debug mode.
     if (State.option.unitTestMode) {
-      const test = Lang.sprintf('<strong>Test ID:</strong> <code>%(TEST)</code>', issue.test);
+      const test = Lang.sprintf('<hr><strong>Test ID:</strong> <code>%(TEST)</code>', issue.test);
       listItem.append(test);
     }
 

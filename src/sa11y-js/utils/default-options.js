@@ -184,6 +184,7 @@ const defaultOptions = {
     LABELS_NO_FOR_ATTRIBUTE: true,
     LABELS_PLACEHOLDER: true,
     LABELS_ARIA_LABEL_INPUT: true,
+    ARIA_INPUT_FIELD_NAME: true,
 
     // Embedded content checks
     EMBED_AUDIO: {
@@ -210,12 +211,14 @@ const defaultOptions = {
       dismissAll: true,
     },
     QA_PDF: {
+      sources: '',
       dismissAll: true,
     },
     QA_BLOCKQUOTE: true,
     TABLES_MISSING_HEADINGS: true,
     TABLES_SEMANTIC_HEADING: true,
     TABLES_EMPTY_HEADING: true,
+    TABLES_INVALID_HEADERS_REF: true,
     QA_FAKE_HEADING: true,
     QA_FAKE_LIST: true,
     QA_UPPERCASE: true,

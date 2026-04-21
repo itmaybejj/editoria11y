@@ -69,16 +69,19 @@ ed11y-element-result {
 }
 
 .ed11y-wrapper .badge {
-  vertical-align: top;
+  vertical-align: middle;
   color: var(--ed11y-primaryText);
   background: var(--ed11y-primary);
+  z-index: 2;
   border: 1px solid;
   border-radius: 1em;
-  margin: 2px .25em -2px 0;
+  margin: -2px .25em 0 0;
   padding: 0 .5em;
   font-size: 12px;
   font-weight: 400;
+  line-height: 1.5;
   display: inline-block;
+  position: relative;
 }
 
 .ed11y-wrapper .badge:has(.link-icon) {
@@ -791,7 +794,7 @@ button.ed11y-jump:hover .toggle-count {
   padding: 0;
   font-size: clamp(1.14em, 1.5vw, 1.3125em);
   line-height: 1;
-  display: block;
+  display: inline-block;
   position: absolute;
 }
 
@@ -976,6 +979,21 @@ button.ed11y-jump:hover .toggle-count {
   display: block;
 }
 
+.ed11y-tip-wrapper code, .ed11y-tip-wrapper i {
+  background-color: var(--ed11y-code, #cbd8f3);
+  color: #000;
+  border-radius: 2px;
+  padding-inline: 2px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.25;
+  display: inline-block;
+}
+
+.ed11y-tip-wrapper code {
+  font-family: monospace;
+}
+
 @keyframes ed11y-fade-in {
   0% {
     opacity: 0;
@@ -993,7 +1011,7 @@ button.ed11y-jump:hover .toggle-count {
 .ed11y-tip-wrapper .invisible-alert:not(:empty) {
   color: #010101;
   background: var(--ed11y-warning);
-  margin: 0 6px 10px -1px;
+  margin: 10px 6px 0 -1px;
   padding: 13px 12px 12px 16px;
   font-size: 90%;
   font-style: italic;
@@ -1129,9 +1147,11 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 .ed11y-tip-wrapper .title {
+  opacity: .9;
   outline: #0000;
-  padding: 8px 1.5em .6125em 0;
-  font-size: 1.0625em;
+  margin-right: 40px;
+  padding: 10px 0 .6125em;
+  font-size: 1.125em;
   font-weight: bold;
 }
 
@@ -1357,13 +1377,14 @@ button.ed11y-jump:hover .toggle-count {
   margin-bottom: -.1em;
 }
 
-@media screen and (width <= 50rem) {
+@media screen and (width <= 640px) {
   .ed11y-tip-wrapper .error-badge {
     display: none;
   }
 }
 
 :host(ed11y-element-heading-label.ed11y-element) {
+  z-index: calc(var(--ed11y-buttonZIndex) - 2);
   margin-top: -.5em;
   position: absolute;
 }

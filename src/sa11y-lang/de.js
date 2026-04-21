@@ -341,6 +341,7 @@ export default {
       'Dieser Eingabe ist kein Label zugeordnet. Bitte füge dieser Eingabe eine <code>id</code> hinzu und füge dem Label ein passendes <code>for</code>-Attribut hinzu.',
     LABELS_PLACEHOLDER:
       'Verschwindender Platzhaltertext erschwert es den Menschen, sich daran zu erinnern, welche Informationen in ein Feld gehören, und Probleme mit der Validierung zu identifizieren und zu beheben. Erwägen Sie stattdessen, einen dauerhaft sichtbaren Hinweis vor dem Formularfeld zu verwenden. <hr> Erfahren Sie mehr: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Platzhalter in Formularfeldern sind schädlich.</a>',
+    ARIA_INPUT_FIELD_NAME: 'Dem ARIA-Eingabe- oder Umschaltfeld fehlt ein barrierefreier Name. Um dies zu beheben, geben Sie ein gültiges Attribut <code>aria-labelledby</code>, <code>aria-label</code> oder <code>title</code> an. Wenn die Eingabe umschaltbar е (z. B. Checkbox, Switch, Radiobutton), löst das Hinzufügen von sichtbarem innerem Text dieses Problem ebenfalls. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -388,10 +389,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Linktext</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Zugänglicher Name</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr> <strong>Hinweis!</strong> Der "zugängliche Name" ist das endgültige Etikett, das an Personen kommuniziert wird, die Hilfstechnologien verwenden. Dies hilft ihnen, den Zweck des Links oder der Schaltfläche zu verstehen.',
-    HIDDEN_FOCUSABLE:
-      'Der Link oder die Schaltfläche hat <code>aria-hidden=&quot;true&quot;</code>, ist jedoch weiterhin über die Tastatur fokussierbar. Wenn Sie beabsichtigen, einen doppelten Link oder eine Schaltfläche zu verstecken, fügen Sie auch <code>tabindex=&quot;-1&quot;</code> hinzu. Andernfalls sollte <code>aria-hidden=&quot;true&quot;</code> nicht bei fokussierbaren Elementen verwendet werden. <hr> Erfahren Sie mehr über das <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden-Attribut.</a>',
+    ACC_NAME_TIP: '<hr><strong>Tipp!</strong> Der „barrierefreie Name“ ist die endgültige Bezeichnung, die an Personen übermittelt wird, die unterstützende Technologien verwenden. Dies hilft ihnen, den Zweck des Elements zu verstehen.',
+    HIDDEN_FOCUSABLE: 'Dieses Element kann den Tastaturfokus erhalten, ist aber durch ein <code>aria-hidden="true"</code>-Attribut (bei sich selbst oder einem übergeordneten Container) vor Screenreadern verborgen. Um dies zu beheben, entfernen Sie entweder das aria-hidden-Attribut oder entfernen Sie das Element aus der Tab-Reihenfolge. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Erfahren Sie mehr über das <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden-Attribut.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -402,7 +401,7 @@ export default {
 
     // Meta checks
     META_LANG:
-      'Seitensprache nicht angegeben! Bitte <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklariere die Sprache im HTML-Tag.</a>',
+      'Seitensprache nicht angegeben! Bitte <a href="https://www.w3.org/International/questions/qa-html-language-declarations.de.html">deklariere die Sprache im HTML-Tag.</a>',
     META_TITLE:
       'Seitentitel fehlt! Bitte gib einen <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title">Seitentitel</a> an.',
     META_SCALABLE:
@@ -412,7 +411,7 @@ export default {
     META_REFRESH:
       'Die Seite sollte nicht automatisch mithilfe eines Meta-Tags aktualisiert werden.',
     META_LANG_SUGGEST: 'Der folgende Sprachcode <code>%(CODE)</code> ist ungültig. Meinten Sie <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Der Sprachcode der Seite <code>%(CODE)</code> ist ungültig. Bitte <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarieren Sie eine gültige Sprache im HTML-Tag.</a>',
+    META_LANG_VALID: 'Der Sprachcode für dieses Element ist ungültig. Um dies zu beheben, ersetzen Sie das lang-Attribut durch einen gültigen Sprachcode. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Erfahren Sie mehr über die <a href="https://www.w3.org/International/questions/qa-html-language-declarations.de.html">Sprachdeklaration in HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Der Schaltfläche fehlt ein zugänglicher Name, der ihren Zweck beschreibt.',
@@ -425,8 +424,8 @@ export default {
       'Fügen Sie das Wort „Schaltfläche“ nicht in den Namen einer Schaltfläche ein. Bildschirmlesegeräte geben bereits die Rolle eines Elements zusätzlich zu seinem Namen an.',
     LABEL_IN_NAME:
       'Der sichtbare Text dieses Elements scheint sich vom zugänglichen Namen zu unterscheiden, was für Benutzer von Hilfstechnologien verwirrend sein kann. Bitte überprüfen: <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Zugänglicher Name</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'Dieser Link hat ein ungültiges Ziel und der barrierefreie Name enthält das Wort „<strong>%(NAME)</strong>“. Dies deutet darauf hin, dass es sich möglicherweise gar nicht um einen Link handelt, sondern stattdessen ein skriptgesteuertes Verhalten auf der Seite steuert. Um dies zu beheben, ersetzen Sie den Link durch eine <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">barrierefreie Schaltfläche</a> oder korrigieren Sie das Ziel des Links. <hr> <strong>Tipp!</strong> Hilfsmittel behandeln Schaltflächen und Links unterschiedlich. Die Verwendung des richtigen HTML-Elements stellt sicher, dass die Benutzer wissen, welche Tastenkombinationen sie verwenden müssen und welche Aktion ausgelöst wird.',
-    POTENTIAL_UI_ELEMENTS: ['Menü', 'Schließen', 'Umschalten', 'Öffnen', 'Erweitern', 'Reduzieren', 'Weiter', 'Zurück', 'Abspielen', 'Pause', 'Untermenü', 'Anzeigen', 'Ausblenden', 'Dropdown', 'Zurück', 'Vorwärts', 'Überspringen', 'Absenden', 'Abbrechen', 'Speichern', 'Bearbeiten', 'Löschen', 'Entfernen', 'Suche', 'Filter', 'Sortieren', 'Stopp', 'Stummschalten', 'Ton an', 'Vollbild', 'Minimieren', 'Maximieren'],
+    LINK_MAYBE_BUTTON: 'Dieser Link hat ein ungültiges Ziel. Der barrierefreie Name oder die Attribute deuten darauf hin, dass es sich möglicherweise gar nicht um einen Link handelt, sondern stattdessen ein skriptgesteuertes Verhalten auf der Seite steuert. Um dies zu beheben, ersetzen Sie den Link durch eine <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">barrierefreie Schaltfläche</a> oder korrigieren Sie das Ziel des Links. <hr> <strong {B}>Barrierefreier Name</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tipp!</strong> Unterstützende Technologien behandeln Schaltflächen und Links unterschiedlich. Die Verwendung des richtigen HTML-Elements stellt sicher, dass die Benutzer wissen, welche Tastaturkürzel sie verwenden müssen und welche Aktion ausgelöst wird.',
+    POTENTIAL_UI_ELEMENTS: ['menü', 'schließen', 'umschalten', 'öffnen', 'erweitern', 'reduzieren', 'weiter', 'zurück', 'abspielen', 'pause', 'untermenü', 'anzeigen', 'ausblenden', 'dropdown', 'zurück', 'vorwärts', 'überspringen', 'absenden', 'abbrechen', 'speichern', 'bearbeiten', 'löschen', 'entfernen', 'suche', 'filter', 'sortieren', 'stopp', 'stummschalten', 'ton an', 'vollbild', 'minimieren', 'maximieren'],
 
     // Tables
     TABLES_MISSING_HEADINGS:
@@ -435,6 +434,7 @@ export default {
       'Semantische Überschriften wie Überschrift 2 oder Überschrift 3 sollten nur für Abschnitte des Inhalts verwendet werden; <strong>not</strong> in HTML-Tabellen. Gebe Tabellenüberschriften stattdessen mit dem <code>&lt;th&gt;</code> Element an. <hr> Erfahre mehr über <a href="https://www.w3.org/WAI/tutorials/tables/">barrierefreie Tabellen.</a>',
     TABLES_EMPTY_HEADING:
       'Leerer Tabellenkopf gefunden! Tabellenüberschriften sollten <strong>niemals</strong> leer sein. Es ist wichtig, Zeilen- und/oder Spaltenüberschriften zu benennen, um ihre Beziehung zu verdeutlichen. Diese Informationen bieten Menschen, die Hilfsmittel verwenden, einen Kontext. Bitte beachte, dass Tabellen nur für tabellarische Daten verwendet werden sollten. <hr> Erfahre mehr über <a href="https://www.w3.org/WAI/tutorials/tables/">barrierefreie Tabellen.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Diese Tabelle versucht, eine bestimmte Datenzelle mit einer bestimmten Kopfzeilenzelle zu verknüpfen, aber die Kopfzeilen-ID kann nicht gefunden werden. Stellen Sie sicher, dass jedes <code>headers</code>-Attribut mit der ID einer Kopfzeilenzelle in derselben Tabelle übereinstimmt. <hr> <strong {B}>Kopfzeilen</strong> <code>%(VALUE)</code> <hr> <strong>Tipp!</strong> Die <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Verwendung manueller ID-Referenzen</a> zur Verknüpfung von Datenzellen mit Kopfzeilenzellen ist kompliziert und fehleranfällig. Wenn möglich, unterteilen Sie komplexe Daten in kleinere Tabellen mit einfachen Kopfzeilen und -spalten.',
 
     // Contrast
     CONTRAST_NORMAL:
@@ -468,7 +468,7 @@ export default {
       'Es kann keine barrierefreie Kombination durch Ändern der Textfarbe gefunden werden. Versuchen Sie, die Hintergrundfarbe zu ändern.',
 
     // Page language
-    PAGE_LANG_CONFIDENCE: 'Mehr als die Hälfte des Textes auf dieser Seite scheint in %(LIKELY_LANG) zu sein, aber die deklarierte Seitensprache ist %(PAGE_LANG). Erwägen Sie, die <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarierte Seitensprache</a> so zu aktualisieren, dass sie dem Inhalt entspricht.',
+    PAGE_LANG_CONFIDENCE: 'Mehr als die Hälfte des Textes auf dieser Seite scheint in %(LIKELY_LANG) zu sein, aber die deklarierte Seitensprache ist %(PAGE_LANG). Erwägen Sie, die <a href="https://www.w3.org/International/questions/qa-html-language-declarations.de.html">deklarierte Seitensprache</a> so zu aktualisieren, dass sie dem Inhalt entspricht.',
     LANG_OF_PARTS: 'Die Seitensprache wurde als %(PAGE_LANG) deklariert, aber dieser Inhalt scheint in %(LIKELY_LANG) zu sein. Stellen Sie sicher, dass der Inhalt entsprechend gekennzeichnet ist.',
     LANG_MISMATCH: 'Dieser Inhalt scheint in %(DETECTED_LANG) zu sein, wurde jedoch als %(WRONG_LANG) gekennzeichnet.',
     LANG_OF_PARTS_ALT: 'Dieser Alternativtext scheint in %(LIKELY_LANG) zu sein, aber die Seitensprache wurde als %(PAGE_LANG) deklariert. Stellen Sie sicher, dass der Alternativtext in derselben Sprache wie der Rest der Seite verfasst ist. <hr> {ALT} <strong {C}>%(ALT)</strong>',

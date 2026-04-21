@@ -4,6 +4,7 @@ import Lang from '../utils/lang';
 import Elements from '../utils/elements';
 import { State } from '../core/state';
 import find from '../utils/find';
+import { pushResult } from '../utils/pushResult';
 
 // FIFO cache for language detection.
 const STORAGE_KEY = 'sa11y-lang-detection';
@@ -82,7 +83,11 @@ const setCache = (data) => {
   }
 };
 
+// This regex targets characters from non-Latin scripts (Han, Cyrillic, Arabic, etc.) by explicitly ignoring Latin letters, marks, spaces, punctuation, numbers, symbols, and control characters.
+const nonLatinRegex = /[^\p{Script=Latin}\p{M}\p{Z}\p{P}\p{N}\p{S}\p{C}]/u;
+
 export default async function checkPageLanguage() {
+  const start = performance.now();
   // Hard return if neither page language checks are enabled or if feature not supported.
   if (!State.option.langOfPartsPlugin) return;
   if (!(await getLanguageDetector())) return;
@@ -149,7 +154,7 @@ export default async function checkPageLanguage() {
         contentContainer.append(' ', Lang.sprintf('LANG_TIP'));
       }
 
-      State.results.push({
+      pushResult({
         element: getElement || null,
         test: cached.test,
         type: State.option.checks[cached.test].type || cached.type,
@@ -223,12 +228,21 @@ export default async function checkPageLanguage() {
 
     // Otherwise, iterate through every text node to check the language.
     // Break on the first detection of a node that doesn't match the expected language.
-    for (const node of Elements.Found.Everything) {
+    for (let i = 0; i < Elements.Found.Everything.length; i++) {
+      const node = Elements.Found.Everything[i];
       const isImage = node.nodeName === 'IMG';
 
       // Cheap check before running expensive text extraction and processing.
-      if (!isImage && (!node.textContent || node.textContent.length < 30)) {
-        continue;
+      if (!isImage) {
+        if (!node.textContent) continue;
+
+        const isShort = node.textContent.length < 30;
+        const hasNonEnglish = nonLatinRegex.test(node.textContent);
+
+        // Skip if it's short AND only contains standard English/Latin text
+        if (isShort && !hasNonEnglish) {
+          continue;
+        }
       }
 
       // Get text of the node (image alt text vs text nodes).
@@ -237,16 +251,16 @@ export default async function checkPageLanguage() {
         textString = node.alt || '';
       } else {
         textString = Array.from(node.childNodes)
-          .filter((child) => child.nodeType === Node.TEXT_NODE) // Using semantic constant instead of '3'
+          .filter((child) => child.nodeType === Node.TEXT_NODE)
           .map((child) => child.textContent)
           .join(' ');
       }
       const nodeText = Utils.normalizeString(textString);
 
-      // Skip nodes that are too short to accurately detect.
-      if (nodeText.length <= 30) continue;
+      /// Skip nodes that are too short to accurately detect, UNLESS they contain clearly non-English characters.
+      if (nodeText.length <= 30 && !nonLatinRegex.test(nodeText)) continue;
 
-      // Node data.
+      // Detect language sequentially
       const detectNode = await detector.detect(nodeText);
       const nodeLang = primary(detectNode[0].detectedLanguage);
       const nodeConfidence = detectNode[0].confidence;
@@ -269,7 +283,6 @@ export default async function checkPageLanguage() {
 
           // 2. No specific 'lang' attribute, but text contradicts page language.
         } else if (!langAttribute && nodeLang !== declared) {
-          // Image alt text is different language.
           if (isImage && node.alt) {
             test = 'LANG_OF_PARTS_ALT';
             content = Lang.sprintf(
@@ -280,7 +293,6 @@ export default async function checkPageLanguage() {
             );
             args = [nodeLang, declared, node.alt];
           } else {
-            // Text node is different language.
             test = 'LANG_OF_PARTS';
             content = Lang.sprintf(
               State.option.checks.LANG_OF_PARTS.content || 'LANG_OF_PARTS',
@@ -295,13 +307,12 @@ export default async function checkPageLanguage() {
           continue;
         }
 
-        // Set shared values.
+        // Set shared values and break out of the processing
         element = node;
         type = nodeConfidence >= 0.9 ? 'error' : 'warning';
         dismiss = Utils.prepareDismissal(nodeText.slice(0, 256));
         confidence = nodeConfidence;
 
-        // Cache the result.
         setCache({
           key: cacheKey,
           test: test,
@@ -312,6 +323,8 @@ export default async function checkPageLanguage() {
           textLength: pageText.length,
           declared: declared,
         });
+
+        // Break out of the loop on the first violation found
         break;
       }
     }
@@ -324,7 +337,7 @@ export default async function checkPageLanguage() {
     wrapper.append(content, ' ', Lang.sprintf('LANG_TIP'));
 
     // Push result.
-    State.results.push({
+    pushResult({
       element: element,
       test: test,
       type: State.option.checks[test].type || type,
@@ -334,6 +347,7 @@ export default async function checkPageLanguage() {
       cached: false,
       pageText: pageText.length,
       confidence: confidence,
+      time: `${(performance.now() - start).toFixed(2)}ms`,
     });
   }
 }

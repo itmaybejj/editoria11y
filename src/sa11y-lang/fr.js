@@ -297,6 +297,7 @@ export default {
       'Il n’y a pas d’étiquette associée à cette entrée. Veuillez ajouter un attribut <code>id</code> à cette entrée, et ajouter un attribut <code>for</code> correspondant à l’étiquette.',
     LABELS_PLACEHOLDER:
       'Le texte de remplacement qui disparaît rend difficile pour les gens de se souvenir de quelle information appartient à un champ et d’identifier et de corriger les problèmes de validation. En revanche, envisagez d\'utiliser un indice visible en permanence avant le champ du formulaire. <hr> En savoir plus: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Les espaces réservés dans les champs de formulaire sont nuisibles.</a>',
+    ARIA_INPUT_FIELD_NAME: 'Le champ de saisie ou d\'activation ARIA n\'a pas de nom accessible. Pour corriger cela, fournissez un attribut <code>aria-labelledby</code>, <code>aria-label</code> ou <code>title</code> valide. Si l\'entrée est commutable (ex: case à cocher, interrupteur, bouton radio), l\'ajout d\'un texte interne visible résoudra également ce problème. <hr> <strong {B}>Élément</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -344,10 +345,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Texte du lien</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Nom accessible</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Astuce !</strong> Le "nom accessible" est l\'étiquette finale qui est communiquée aux personnes utilisant des technologies d\'assistance et qui est calculée par ARIA. Cela les aide à comprendre le but du lien ou du bouton.',
-    HIDDEN_FOCUSABLE:
-      'Le lien ou le bouton a <code>aria-hidden=&quot;true&quot;</code> mais reste accessible via le clavier. Si vous avez l\'intention de masquer un lien ou un bouton dupliqué, ajoutez également<code>tabindex=&quot;-1&quot;</code>. Sinon, <code>aria-hidden=&quot;true&quot;</code> ne doit pas être utilisé sur des éléments pouvant recevoir le focus. <hr> En savoir plus sur l\' <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">attribut aria-hidden.</a>',
+    ACC_NAME_TIP: '<hr><strong>Conseil !</strong> Le « nom accessible » est le libellé final communiqué aux personnes utilisant des technologies d\'assistance. Cela les aide à comprendre la fonction de l\'élément.',
+    HIDDEN_FOCUSABLE: 'Cet élément peut recevoir le focus du clavier, mais il est masqué pour les lecteurs d\'écran par un attribut <code>aria-hidden="true"</code> (sur lui-même ou sur un conteneur parent). Pour corriger cela, supprimez l\'attribut aria-hidden ou supprimez l\'élément de l\'ordre de tabulation. <hr> <strong {B}>Élément</strong> <pre><code>%(EL)</code></pre> <hr> En savoir plus sur l\'<a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">attribut aria-hidden.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -358,7 +357,7 @@ export default {
 
     // Meta checks
     META_LANG:
-      'La langue de la page n’est pas indiquée ! Veuillez <a href="https://www.w3.org/International/questions/qa-html-language-declarations.fr">indiquer la langue sur la balise HTML.</a>',
+      'La langue de la page n’est pas indiquée ! Veuillez <a href="https://www.w3.org/International/questions/qa-html-language-declarations.fr.html">indiquer la langue sur la balise HTML.</a>',
     META_TITLE:
       'Titre de la page manquant ! Veuillez fournir un <a href="https://developer.mozilla.org/fr/docs/Web/HTML/Element/title">titre de page.</a>',
     META_SCALABLE:
@@ -367,7 +366,7 @@ export default {
       'Assurez-vous que le paramètre <code>maximum-scale</code> dans la <a href="https://developer.mozilla.org/fr/docs/Web/HTML/Viewport_meta_tag">balise meta viewport</a> n\'est pas inférieur à 2.',
     META_REFRESH: 'La page ne doit pas se rafraîchir automatiquement en utilisant une balise meta.',
     META_LANG_SUGGEST: 'Le code de langue suivant <code>%(CODE)</code> n\'est pas valide. Vouliez-vous dire <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Le code de langue de la page <code>%(CODE)</code> n\'est pas valide. Veuillez <a href="https://www.w3.org/International/questions/qa-html-language-declarations">déclarer une langue valide sur la balise HTML.</a>',
+    META_LANG_VALID: 'Le code de langue pour cet élément n\'est pas valide. Pour corriger cela, remplacez l\'attribut lang par un code de langue valide. <hr> <strong {B}>Élément</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> En savoir plus sur la <a href="https://www.w3.org/International/questions/qa-html-language-declarations.fr.html">déclaration de la langue en HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Le bouton manque d’un nom accessible qui décrit son objectif.',
@@ -380,7 +379,7 @@ export default {
       'N’incluez pas le mot « bouton » dans le nom d’un bouton. Les lecteurs d’écran annoncent déjà le rôle d’un élément en plus de son nom.',
     LABEL_IN_NAME:
       'Le texte visible pour cet élément semble différent du nom accessible, ce qui peut entraîner de la confusion pour les utilisateurs des technologies d’assistance. Veuillez vérifier : <hr> <strong {B}>Texte</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Nom Accessible</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'Ce lien a une cible non valide et le nom accessible contient le mot "<strong>%(NAME)</strong>". Cela suggère qu\'il ne s\'agit peut-être pas d\'un lien du tout, mais qu\'il contrôle plutôt un comportement scripté sur la page. Pour corriger cela, remplacez le lien par un <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">bouton accessible</a>, ou corrigez la destination du lien. <hr> <strong>Astuce !</strong> Les technologies d\'assistance traitent les boutons et les liens différemment. L\'utilisation du bon élément HTML garantit que les utilisateurs savent quels raccourcis clavier utiliser et quelle action sera déclenchée.',
+    LINK_MAYBE_BUTTON: 'Ce lien a une cible non valide. Bien que le nom accessible ou ses attributs suggèrent qu\'il ne s\'agisse pas du tout d\'un lien, mais qu\'il contrôle plutôt un comportement scripté sur la page. Pour corriger cela, remplacez le lien par un <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">bouton accessible</a> ou corrigez la destination du lien. <hr> <strong {B}>Nom accessible</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Conseil !</strong> Les technologies d\'assistance traitent les boutons et les liens différemment. L\'utilisation du bon élément HTML garantit que les utilisateurs savent quels raccourcis clavier utiliser et quelle action sera déclenchée.',
     POTENTIAL_UI_ELEMENTS: ['menu', 'fermer', 'basculer', 'ouvrir', 'développer', 'réduire', 'suivant', 'précédent', 'lire', 'pause', 'sous-menu', 'afficher', 'masquer', 'déroulant', 'retour', 'avancer', 'ignorer', 'envoyer', 'annuler', 'enregistrer', 'modifier', 'supprimer', 'retirer', 'rechercher', 'filtrer', 'trier', 'arrêter', 'muet', 'réactiver le son', 'plein écran', 'minimiser', 'maximiser'],
 
     // Tables
@@ -390,6 +389,7 @@ export default {
       'Les titres sémantiques tels que Titre 2 ou Titre 3 doivent être utilisées uniquement pour les sections de contenu ; <strong>non</strong> pour les tableaux HTML. Indiquez les en-têtes de tableau en utilisant plutôt l’élément <code>&lt;th&gt;</code>. <hr> En savoir plus sur les <a href="https://www.w3.org/WAI/tutorials/tables/">tableaux accessibles.</a>',
     TABLES_EMPTY_HEADING:
       'En-tête de tableau vide trouvé ! Les en-têtes de tableau ne devraient <strong>jamais</strong> être vides. Il est important de désigner les en-têtes de ligne et/ou de colonne pour définir leur relation. Cette information fournit le contexte aux personnes qui utilisent la technologie d’assistance. Veuillez garder à l’esprit que les tableaux devraient être utilisés pour les données tabulaires uniquement. <hr> En savoir plus sur les <a href="https://www.w3.org/WAI/tutorials/tables/">tableaux accessibles.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Ce tableau tente de lier une cellule de données spécifique à une cellule d\'en-tête spécifique, mais l\'ID de l\'en-tête est introuvable. Assurez-vous que chaque attribut <code>headers</code> correspond à l\'ID d\'une cellule d\'en-tête dans le même tableau. <hr> <strong {B}>En-têtes</strong> <code>%(VALUE)</code> <hr> <strong>Conseil !</strong> L\'<a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">utilisation de références d\'ID manuelles</a> pour associer des cellules de données à des cellules d\'en-tête est complexe et fragile. Si possible, divisez les données complexes en tableaux plus petits avec des lignes et des colonnes d\'en-tête simples.',
 
     // Contrast
     CONTRAST_NORMAL:
@@ -426,7 +426,7 @@ export default {
       "Aucune combinaison accessible ne peut être trouvée en modifiant uniquement la couleur du texte. Essayez de modifier la couleur de l'arrière-plan.",
 
     // Page language
-    PAGE_LANG_CONFIDENCE: 'Plus de la moitié du texte de cette page semble être en %(LIKELY_LANG), mais la langue déclarée de la page est %(PAGE_LANG). Envisagez de mettre à jour la <a href="https://www.w3.org/International/questions/qa-html-language-declarations">langue déclarée de la page</a> pour qu\'elle corresponde au contenu.',
+    PAGE_LANG_CONFIDENCE: 'Plus de la moitié du texte de cette page semble être en %(LIKELY_LANG), mais la langue déclarée de la page est %(PAGE_LANG). Envisagez de mettre à jour la <a href="https://www.w3.org/International/questions/qa-html-language-declarations.fr.html">langue déclarée de la page</a> pour qu\'elle corresponde au contenu.',
     LANG_OF_PARTS: 'La langue de la page a été déclarée comme %(PAGE_LANG), mais ce contenu semble être en %(LIKELY_LANG). Assurez-vous que le contenu est balisé de manière appropriée.',
     LANG_MISMATCH: 'Ce contenu semble être en %(DETECTED_LANG), cependant, il a été balisé comme %(WRONG_LANG).',
     LANG_OF_PARTS_ALT: 'Ce texte alternatif semble être en %(LIKELY_LANG), mais la langue de la page a été déclarée comme %(PAGE_LANG). Assurez-vous que le texte alternatif est dans la même langue que le reste de la page. <hr> {ALT} <strong {C}>%(ALT)</strong>',

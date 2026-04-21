@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="error">
 
 <head>
 	<meta charset="utf-8">
@@ -58,6 +58,11 @@
 
 			<p>Image with no alt attribute at all:</p>
 			<p class="positive"><img
+					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
+			</p>
+
+			<p>Image marked decorative:</p>
+			<p class="positive"><img alt=""
 					src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 120'%3E%3Crect width='240' height='120' fill='%23cccccc'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='26px' fill='%23333333'%3EImage%3C/text%3E%3C/svg%3E">
 			</p>
 
@@ -182,7 +187,6 @@
 			<div class="positive" style="background: transparent;"><input type="text" id="unsupported-placeholder"
 					placeholder="Rec2020 color space"></div>
 
-
 			<p>SVG graphic without enough contrast</p>
 			<div class="positive"><svg style="width: 16px; height: 16px;" xmlns="http://www.w3.org/2000/svg"
 					viewBox="0 0 512 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
@@ -294,7 +298,9 @@
 		<p class="positive"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" title="Hover me">Hover me</a></p>
 
 		<p>Links with attributes that remove them from the tab index:</p>
-		<p class="positive"><a href="./editable.htm" aria-hidden="true">Aria-hidden links without a negative
+		<p class="positive"><a href="./editable.htm" aria-hidden="true"
+				class="way too many classes to test source text truncation way too many classes to test source text truncation way too many classes to test source text truncation way too many classes to test source text truncation way too many classes to test source text truncation way too many classes to test source text truncation way too many classes to test source text truncation ">Aria-hidden
+				links without a negative
 				tabindex.</a></p>
 
 		<p>Links aria-labelledby attributes to elements with no text:</p>
@@ -378,7 +384,7 @@
 				</tr>
 				<tr class="negative">
 					<th>Each</th>
-					<td>2 Seconds Long</td>
+					<td headers="broken-ref">2 Seconds Long</td>
 				</tr>
 			</tbody>
 		</table>
@@ -428,6 +434,12 @@
 		<div class="positive">
 			<input type="text" placeholder="Email">
 		</div>
+
+		<div class="positive"><label for="">Missing for attribute</label><input type="text" id="foo"></div>
+		<div class="positive">
+			<div role="checkbox"></div>
+		</div>
+
 
 		<div class="positive">
 			<p>Button with an accessible label different from its visible label.</p>
@@ -486,6 +498,54 @@
 		<script src="../dist/js/lang/de.umd.js"></script>
 		<script>
 
+			/*
+				* Performance tests
+				* */
+			/*
+			* Performance tests
+			* */
+			let beforeCall = performance.now();
+			let iterations = 1;
+			let runs = 0;
+			let average = 0;
+			let averageIterations = 1;
+			// Listen for event
+			document.addEventListener('ed11yResults', e => {
+				if (iterations === 1) {
+					console.log('2026-04-09 refactor took us from ~39ms to ~33ms average run; ~129 initial.')
+					console.log('results ready at: ' + parseInt(performance.now() - beforeCall));
+				}
+
+				if (iterations <= runs) {
+					window.setTimeout(() => {
+						if (iterations === 1) {
+							beforeCall = performance.now();
+						} else {
+							const runLength = parseInt((performance.now() - beforeCall)) / (iterations);
+							if (runs - iterations === 2) {
+								average = runLength
+							}
+							if (average) {
+								average = average ? (average * (averageIterations) + runLength) / (averageIterations + 1) : runLength;
+								averageIterations++;
+								console.log(iterations + ': ' + runLength.toFixed(2) + 'ms run; ', average ? average.toFixed(2) + 'ms average;' : ' ');
+							}
+							/*else if (iterations.toString().endsWith('0') || iterations.toString().endsWith('5')) {
+								console.log(iterations + ': ' + runLength.toFixed(2) + 'ms run; ', average ? average.toFixed(2) + 'ms average;' : ' ');
+							}*/
+						}
+
+
+						beforeCall = beforeCall + 1000;
+						iterations++;
+						Ed11y.reset();
+						Ed11y.UI.incremental = false;
+						Ed11y.UI.panelToggle.click();
+						//Ed11y.refresh();
+					}, 1000);
+				}
+			});
+
 			const editLinks = document.createElement('div');
 			const editIcon = document.createElement('span');
 			editIcon.classList.add('ed11y-custom-edit-icon');
@@ -508,11 +568,12 @@
 				})
 				console.log("Tests not on page", testsFound);*/
 			});
+
 			const ed11y = new Ed11y.Ed11y({
 				alertMode: 'assertive',
 				//baseFontSize: 18,
 				//theme : 'sleekTheme',
-				//theme : 'darkTheme',
+				//theme: 'darkTheme',
 				headingsOnlyFromCheckRoots: true, // @todo merge this is gone. replaced with ignoreContentOutsideRoots. Does that work?
 				ignoreContentOutsideRoots: true,
 				//outlineExclude : '.utility', // @todo CMS this syntax changed for Sa11y to the below.
@@ -649,6 +710,7 @@
 					LABELS_ARIA_LABEL_INPUT: true,
 					LABELS_NO_FOR_ATTRIBUTE: true,
 					LABELS_PLACEHOLDER: true,
+					ARIA_INPUT_FIELD_NAME: true,
 
 					// Embedded content checks
 					EMBED_AUDIO: {

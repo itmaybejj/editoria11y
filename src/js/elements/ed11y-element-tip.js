@@ -6,7 +6,7 @@ import {
   generateContrastTools,
   initializeContrastTools,
 } from '../../sa11y-js/contrast/ui-tools.js';
-import { spriteClose, spriteCursor, spriteDismiss, spriteNext, spriteUnDismiss } from './sprite.js';
+import sprite from './sprite.js';
 import { UI } from '../core/ui.js';
 import { State } from '../../sa11y-js/core/state.js';
 
@@ -42,7 +42,7 @@ export class Ed11yElementTip extends HTMLElement {
     );
     this.wrapper.innerHTML = `
 		<div class="tip">
-			<button class="close ed11y-tip-close">${spriteClose}</button>
+			<button class="close ed11y-tip-close">${sprite.close}</button>
 			<div class="content">
 				<div class="message"></div>
 				<div class="content-footer">
@@ -55,8 +55,8 @@ export class Ed11yElementTip extends HTMLElement {
 				<div class="ed11y-tip-dismissals">
 					<details class="ed11y-bulk-actions dismiss ed11y-hidden"><summary></summary><div class="ed11y-bulk-actions-content"></div></details>
 				</div>
-				<button class="prev">${spriteNext}</button>
-				<button class="next">${spriteNext}</button>
+				<button class="prev">${sprite.next}</button>
+				<button class="next">${sprite.next}</button>
 		</div>
 		`;
 
@@ -102,7 +102,7 @@ export class Ed11yElementTip extends HTMLElement {
     const title = content.querySelector('.title');
     const invisibleAlert = document.createElement('div');
     invisibleAlert.classList.add('invisible-alert');
-    title.prepend(invisibleAlert);
+    title.append(invisibleAlert);
     if (this.result.contrastDetails) {
       const contrastDiv = document.createElement('div');
       contrastDiv.classList.add('ed11y-contrast-tools');
@@ -125,7 +125,7 @@ export class Ed11yElementTip extends HTMLElement {
         const focusTransfer = document.createElement('button');
         const transferIcon = document.createElement('span');
         transferIcon.classList.add('ed11y-transfer-icon');
-        transferIcon.innerHTML = spriteCursor;
+        transferIcon.innerHTML = sprite.cursor;
         focusTransfer.textContent = Lang._('transferFocus');
         focusTransfer.prepend(transferIcon);
         focusTransfer.classList.add('ed11y-tip-button', 'ed11y-transfer-focus');
@@ -151,7 +151,7 @@ export class Ed11yElementTip extends HTMLElement {
     if (this.dismissable) {
       const dismissIcon = document.createElement('span');
       dismissIcon.classList.add('ed11y-dismiss-icon');
-      dismissIcon.innerHTML = spriteDismiss;
+      dismissIcon.innerHTML = sprite.dismiss;
 
       // Dismissal Key is set in [5] if alert has been dismissed.
       if (UI.showDismissed && this.dismissed) {
@@ -165,7 +165,7 @@ export class Ed11yElementTip extends HTMLElement {
           const unDismissButton = document.createElement('button');
           const unDismissIcon = document.createElement('span');
           unDismissIcon.classList.add('ed11y-dismiss-icon');
-          unDismissIcon.innerHTML = spriteUnDismiss;
+          unDismissIcon.innerHTML = sprite.unDismiss;
           unDismissButton.classList.add('dismiss');
           unDismissButton.textContent = okd
             ? Lang._('unDismissOKButton')

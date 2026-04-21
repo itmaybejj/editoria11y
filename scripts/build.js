@@ -101,6 +101,8 @@ const runBuild = async (config) => {
 	const langs = [
 		'en-us',
 		'en',
+		'en-ca',
+		'en-gb',
 		'da',
 		'de',
 		'el',

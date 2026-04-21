@@ -293,6 +293,7 @@ export default {
       'Det er ingen etikett knyttet til denne inndataen. Legg til et <code>id</code> til denne inndataen, og legg til et matchende <code>for</code>-attributt til etiketten.',
     LABELS_PLACEHOLDER:
       'Forsvinner plassholdertekst gjør det vanskelig for folk å huske hvilken informasjon som hører til et felt, og gjør det utfordrende å identifisere og korrigere feil. Vurder i stedet å bruke et permanent synlig hint før skjema feltet. <hr> Lær mer: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Plassholdere i skjema felt er skadelige.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA-innfeltet eller bryterfeltet mangler et tilgjengelig navn. For å fikse dette, må du oppgi et gyldig <code>aria-labelledby</code>-, <code>aria-label</code>- eller <code>title</code>-attributt. Hvis inndataene kan veksles (f.eks. avmerkingsboks, bryter, radioknapp), vil det å legge til synlig indre tekst også løse dette. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -300,9 +301,9 @@ export default {
     EMBED_AUDIO:
       'Sørg for å levere en <strong>utskrift for alle podcaster.</strong> Det er et obligatorisk nivå A-krav å levere utskrifter for lydinnhold. Transkripsjoner er til hjelp for døve og hørselshemmede, men kan være til nytte for alle. Vurder å plassere transkripsjonen nedenfor eller i et trekkspillpanel.',
     EMBED_DATA_VIZ:
-      'Datavisualiseringswidgets som dette er ofte problematiske for personer som bruker tastatur eller skjermleser for å navigere, og kan by på betydelige problemer for personer med nedsatt syn eller fargeblindhet. Det anbefales å gi den samme informasjonen i et alternativt format (tekst eller tabell) under widgeten. <hr> Les mer om <a href="https://www.w3.org/WAI/tutorials/images/complex">komplekse bilder</a>.',
+      'Datavisualiseringswidgets som dette er ofte problematiske for personer som bruker tastatur eller skjermleser for å navigere, og kan by på betydelige problemer for personer med nedsatt syn eller fargeblindhet. Det anbefales å gi den samme informasjonen i et alternativt format (tekst eller tabell) under widgeten. <hr> Les mer om <a href="https://www.w3.org/WAI/tutorials/images/complex">komplekse bilder.</a>',
     EMBED_MISSING_TITLE:
-      'Innebygd innhold krever et tilgjengelig navn som beskriver innholdet. Oppgi et unikt <code>title</code> eller <code>aria-label</code>-attributt på <code>iframe</code>-elementet. Finn ut mer om <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrames.</a>.',
+      'Innebygd innhold krever et tilgjengelig navn som beskriver innholdet. Oppgi et unikt <code>title</code> eller <code>aria-label</code>-attributt på <code>iframe</code>-elementet. Finn ut mer om <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrames.</a>',
     EMBED_GENERAL:
       'Kunne ikke sjekke innebygd innhold. Kontroller at bilder har alt-tekst, videoer har bildetekster, tekst har tilstrekkelig kontrast og interaktive komponenter er <a href="https://webaim.org/techniques/keyboard/">tilgjengelige via tastaturet.</a>',
     EMBED_UNFOCUSABLE:
@@ -315,7 +316,7 @@ export default {
     QA_STRONG_ITALICS:
       'Fet og kursiv har en semantisk betydning, og bør <strong>ikke</strong> brukes til å fremheve hele avsnitt. Fet skrift skal brukes til å fremheve et ord eller en frase. Kursiv skal brukes til å fremheve egennavn (f.eks. bok- og artikkeltitler), fremmedord og sitater. Lange sitater bør formateres som blokksitater.',
     QA_PDF:
-      'Kan ikke sjekke om PDF-filer er tilgjengelige. PDF-filer regnes som nettinnhold og må også gjøres tilgjengelige. PDF-filer inneholder ofte problemer for personer som bruker skjermlesere (manglende strukturelle tagger eller manglende etiketter for skjemafelt) og personer med nedsatt syn (teksten flyter ikke ut igjen når den forstørres). <ul><li>Hvis dette er et skjema, bør du vurdere å bruke et tilgjengelig HTML-skjema som et alternativ.</li><li>Hvis dette er et dokument, bør du vurdere å konvertere det til en nettside.</li></ul> Ellers kan du sjekke om <a href="https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html">PDF-en er tilgjengelig i Acrobat DC.</a>.',
+      'Kan ikke sjekke om PDF-filer er tilgjengelige. PDF-filer regnes som nettinnhold og må også gjøres tilgjengelige. PDF-filer inneholder ofte problemer for personer som bruker skjermlesere (manglende strukturelle tagger eller manglende etiketter for skjemafelt) og personer med nedsatt syn (teksten flyter ikke ut igjen når den forstørres). <ul><li>Hvis dette er et skjema, bør du vurdere å bruke et tilgjengelig HTML-skjema som et alternativ.</li><li>Hvis dette er et dokument, bør du vurdere å konvertere det til en nettside.</li></ul> Ellers kan du sjekke om <a href="https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html">PDF-en er tilgjengelig i Acrobat DC.</a>',
     QA_DOCUMENT:
       'Kan ikke sjekke dokumentets tilgjengelighet. Lenkede dokumenter regnes som nettinnhold og må også gjøres tilgjengelige. Vennligst gå gjennom dette dokumentet manuelt. <ul><li>Gjør <a href="https://support.google.com/docs/answer/6199477?hl=nb">Google Workspace-dokumentet eller -presentasjonen mer tilgjengelig.</a></li><li>Gjør <a href="https://support.microsoft.com/nb/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Office-dokumenter mer tilgjengelige.</a></li></ul>',
     QA_BLOCKQUOTE:
@@ -340,10 +341,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Lenketekst</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Tilgjengelig navn</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Tips!</strong> "Tilgjengelig navn" er den endelige etiketten som kommuniseres til personer som bruker hjelpemidler, og beregnes av ARIA. Dette hjelper dem med å forstå formålet med lenken eller knappen.',
-    HIDDEN_FOCUSABLE:
-      'Lenken eller knappen har <code>aria-hidden=&quot;true&quot;</code>, men kan fortsatt fokuseres med tastaturet. Hvis du har til hensikt å skjule en duplikatlenke eller -knapp, legg også til <code>tabindex=&quot;-1&quot;</code>. Ellers bør <code>aria-hidden=&quot;true&quot;</code> ikke brukes på elementer som kan motta fokus. <hr> Lær mer om <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden-attributtet.</a>',
+    ACC_NAME_TIP: '<hr><strong>Tips!</strong> Det "tilgjengelige navnet" er den endelige etiketten som kommuniseres til folk som bruker hjelpemidler. Dette hjelper dem med å forstå formålet med elementet.',
+    HIDDEN_FOCUSABLE: 'Dette elementet kan motta tastaturfokus, men er skjult for skjermlesere med et <code>aria-hidden="true"</code>-attributt (på seg selv eller en overordnet beholder). For å fikse dette, må du enten fjerne aria-hidden-attributtet eller fjerne elementet fra tabulatorrekkefølgen. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Lær mer om <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">attributtet aria-hidden.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -354,16 +353,16 @@ export default {
 
     // Meta checks
     META_LANG:
-      'Sidens språk er ikke oppgitt! Vennligst <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarer språk i HTML-taggen.</a>.',
+      'Sidens språk er ikke oppgitt! Vennligst <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarer språk i HTML-taggen.</a>',
     META_TITLE:
-      'Manglende sidetittel! Vennligst oppgi en <a href="https://developer.mozilla.org/nb/docs/Web/HTML/Element/title">sidetittel.</a>.',
+      'Manglende sidetittel! Vennligst oppgi en <a href="https://developer.mozilla.org/nb/docs/Web/HTML/Element/title">sidetittel.</a>',
     META_SCALABLE:
       'Fjern parameteren <code>user-scalable="no"</code> i <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta-taggen for visningsområde</a> for å tillate zooming.',
     META_MAX:
       'Sørg for at parameteren <code>maximum-scale</code> i <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta-taggen for visningsområde</a> ikke er mindre enn 2.',
     META_REFRESH: 'Siden bør ikke automatisk oppdateres ved hjelp av en meta-tag.',
     META_LANG_SUGGEST: 'Følgende språkkode <code>%(CODE)</code> er ikke gyldig. Mente du <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Sidens språkkode <code>%(CODE)</code> er ikke gyldig. Vennligst <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarer et gyldig språk i HTML-taggen.</a>',
+    META_LANG_VALID: 'Språkkoden for dette elementet er ikke gyldig. For å fikse dette, erstatt lang-attributtet med en gyldig språkkode. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Lær mer om <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarering av språk i HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Knappen mangler et tilgjengelig navn som beskriver dens formål.',
@@ -376,16 +375,17 @@ export default {
       'Ikke inkluder ordet "knapp" i navnet på en knapp. Skjermlesere kunngjør allerede elementets rolle i tillegg til navnet.',
     LABEL_IN_NAME:
       'Den synlige teksten for dette elementet ser ut til å være forskjellig fra det tilgjengelige navnet, noe som kan føre til forvirring for brukere av hjelpemiddelsteknologi. Vennligst sjekk: <hr> <strong {B}>Tekst</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Tilgjengelig Navn</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'Denne lenken har et ugyldig mål, og det tilgjengelige navnet inneholder ordet "<strong>%(NAME)</strong>". Dette tyder på at dette kanskje ikke er en lenke i det hele tatt, men i stedet kontrollerer en skriptet oppførsel på siden. For å fikse dette, erstatt lenken med en <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">tilgjengelig knapp</a>, eller korriger lenkens destinasjon. <hr> <strong>Tips!</strong> Hjelpemiddelteknologi behandler knapper og lenker forskjellig. Bruk av riktig HTML-element sikrer at brukerne vet hvilke hurtigtaster de skal bruke og hvilken handling som vil bli utløst.',
+    LINK_MAYBE_BUTTON: 'Denne lenken har et ugyldig mål. Selv om det tilgjengelige navnet eller dets attributter antyder at dette kanskje ikke er en lenke i det hele tatt, men i stedet kontrollerer skriptet oppførsel på siden. For å fikse dette, erstatt lenken med en <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">tilgjengelig knapp</a>, eller korriger lenkens destinasjon. <hr> <strong {B}>Tilgjengelig navn</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tips!</strong> Hjelpemidler behandler knapper og lenker forskjellig. Bruk af riktig HTML-element sikrer at brukere vet hvilke tastatursnarveier de skal bruke og hvilken handling som vil bli utløst.',
     POTENTIAL_UI_ELEMENTS: ['meny', 'lukk', 'veksle', 'åpne', 'utvid', 'skjul', 'neste', 'forrige', 'spill av', 'pause', 'undermeny', 'vis', 'skjul', 'rullegardin', 'tilbake', 'fremover', 'hopp over', 'send inn', 'avbryt', 'lagre', 'rediger', 'slett', 'fjern', 'søk', 'filter', 'sorter', 'stopp', 'demp', 'opphev demping', 'fullskjerm', 'minimer', 'maksimer'],
 
     // Tables
     TABLES_MISSING_HEADINGS:
       'Manglende tabelloverskrifter! Universelt utformede tabeller trenger HTML-merking som angir overskriftsceller og dataceller, og som definerer forholdet mellom dem. Denne informasjonen gir kontekst til personer som bruker hjelpemidler. Tabeller bør kun brukes til tabelldata. <hr> Les mer om <a href="https://www.w3.org/WAI/tutorials/tables/">tilgjengelige tabeller.</a>',
     TABLES_SEMANTIC_HEADING:
-      'Semantiske overskrifter som overskrift 2 eller overskrift 3 skal bare brukes til innholdsseksjoner, <strong>ikke</strong> i HTML-tabeller. Angi tabelloverskrifter ved hjelp av <code>&lt;th&gt;</code>-elementet i stedet. <hr> Les mer om <a href="https://www.w3.org/WAI/tutorials/tables/">tilgjengelige tabeller</a>.',
+      'Semantiske overskrifter som overskrift 2 eller overskrift 3 skal bare brukes til innholdsseksjoner, <strong>ikke</strong> i HTML-tabeller. Angi tabelloverskrifter ved hjelp av <code>&lt;th&gt;</code>-elementet i stedet. <hr> Les mer om <a href="https://www.w3.org/WAI/tutorials/tables/">tilgjengelige tabeller.</a>',
     TABLES_EMPTY_HEADING:
       'Tom tabelloverskrift funnet! Tabelloverskrifter skal <strong>aldri</strong> være tomme. Det er viktig å utpeke rad- og/eller kolonneoverskrifter for å vise sammenhengen mellom dem. Denne informasjonen gir kontekst til personer som bruker hjelpemidler. Husk at tabeller kun skal brukes til tabelldata. <hr> Finn ut mer om <a href="https://www.w3.org/WAI/tutorials/tables/">tilgjengelige tabeller.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Denne tabellen forsøker å koble en spesifikk datacelle til en spesifikk overskriftscelle, men overskrifts-ID-en ble ikke funnet. Kontroller at hvert <code>headers</code>-attributt samsvarer med ID-en til en overskriftscelle i samme tabell. <hr> <strong {B}>Overskrifter</strong> <code>%(VALUE)</code> <hr> <strong>Tips!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Bruk av manuelle ID-referanser</a> for å koble dataceller til overskriftsceller er komplisert og sårbart. Når det er mulig, bør du dele opp komplekse data i mindre tabeller med enkle overskriftsrader og -kolonner.',
 
     // Contrast
     CONTRAST_NORMAL: 'Tekst i normal størrelse bør ha en kontrastforhold på minst %(RATIO).',

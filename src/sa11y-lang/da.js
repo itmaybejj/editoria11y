@@ -296,6 +296,7 @@ export default {
       'Der er ingen label knyttet til dette input. Tilføj venligst et <code>id</code> til dette input, og tilføj en matchende <code>for</code>-attribut til etiketten.',
     LABELS_PLACEHOLDER:
       'Forbigående pladsholdertekst gør det svært for folk at huske, hvilken information der hører til i et felt, og at identificere og rette valideringsproblemer. Overvej i stedet at bruge et permanent synligt hint før formularfeltet. <hr> Læs mere: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Pladsholdere i formularfelter er skadelige.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA-input- eller skiftefelt mangler et tilgængeligt navn. For at løse det skal du angive en gyldig <code>aria-labelledby</code>-, <code>aria-label</code>- eller <code>title</code>-attribut. Hvis inputtet kan skiftes (f.eks. afkrydsningsfelt, kontakt, radioknap), vil tilføjelse af synlig indre tekst også løse dette. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -343,10 +344,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Linktekst</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Tilgængeligt navn</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Tip!</strong> "Tilgængeligt navn" er den endelige etiket, der kommunikeres til personer, der bruger hjælpemidler. Dette hjælper dem med at forstå formålet med linket eller knappen.',
-    HIDDEN_FOCUSABLE:
-      'Link eller knap har <code>aria-hidden=&quot;true&quot;</code>, men kan stadig fokuseres med tastaturet. Hvis du ønsker at skjule et duplikeret link eller en knap, skal du også tilføje <code>tabindex=&quot;-1&quot;</code>. Ellers bør <code>aria-hidden=&quot;true&quot;</code> ikke bruges på elementer, der kan modtage fokus. <hr> Læs mere om <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden-attributten.</a>',
+    ACC_NAME_TIP: '<hr><strong>Tip!</strong> Det "tilgængelige navn" er den endelige mærkat, der kommunikeres til folk, der bruger hjælpemidler. Dette hjælper dem med at forstå elementets formål.',
+    HIDDEN_FOCUSABLE: 'Dette element kan modtage tastaturfokus, men er skjult for skærmlæsere af en <code>aria-hidden="true"</code>-attribut (på sig selv eller en overordnet container). For at løse det skal du enten fjerne aria-hidden-attributten eller fjerne elementet fra tabulatorrækkefølgen. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Lær mere om <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden-attributten.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -366,7 +365,7 @@ export default {
       'Sørg for, at parameteren <code>maximum-scale</code> i <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">viewport meta-taggen</a> ikke er mindre end 2.',
     META_REFRESH: 'Siden bør ikke automatisk opdatere ved hjælp af et meta-tag.',
     META_LANG_SUGGEST: 'Følgende sprogkode <code>%(CODE)</code> er ikke gyldig. Ment du <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Sidens sprogkode <code>%(CODE)</code> er ikke gyldig. Venligst <a href="https://www.w3.org/International/questions/qa-html-language-declarations">erklær et gyldigt sprog på HTML-tagget.</a>',
+    META_LANG_VALID: 'Sprogkoden for dette element er ikke gyldig. For at løse det skal lang-attributten erstattes med en gyldig sprogkode. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Lær mere om <a href="https://www.w3.org/International/questions/qa-html-language-declarations">erklæring af sprog i HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Knappen mangler et tilgængeligt navn, der beskriver dens formål.',
@@ -379,7 +378,7 @@ export default {
       'Inkluder ikke ordet "knap" i navnet på en knap. Skærmlæsere meddeler allerede elementets rolle ud over dets navn.',
     LABEL_IN_NAME:
       'Den synlige tekst for dette element ser ud til at være forskellig fra det tilgængelige navn, hvilket kan forårsage forvirring for brugere af hjælpeværktøjer. Gennemgå venligst: <hr> <strong {B}>Tekst</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Tilgængeligt navn</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'Dette link har en ugyldig destination, og det tilgængelige navn indeholder ordet "<strong>%(NAME)</strong>". Dette tyder på, at det måske slet ikke er et link, men i stedet styrer en scriptet adfærd på siden. For at løse det skal linket erstattes med en <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">tilgængelig knap</a>, eller linkets destination skal korrigeres. <hr> <strong>Tip!</strong> Hjælpemidler behandler knapper og links forskelligt. Brug af det korrekte HTML-element sikrer, at brugerne ved, hvilke tastaturgenveje de skal bruge, og hvilken handling der udløses.',
+    LINK_MAYBE_BUTTON: 'Dette link har en ugyldig destination. Selvom det tilgængelige navn eller dets attributter tyder på, at dette måske slet ikke er et link, men i stedet styrer en form for scriptet adfærd på siden. For at løse det skal du erstatte linket med en <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">tilgængelig knap</a> eller rette linkets destination. <hr> <strong {B}>Tilgængeligt navn</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tip!</strong> Hjælpemidler behandler knapper og links forskelligt. Brug af det korrekte HTML-element sikrer, at brugerne ved, hvilke tastaturgenveje de skal bruge, og hvilken handling der udløses.',
     POTENTIAL_UI_ELEMENTS: ['menu', 'luk', 'skift', 'åbn', 'udvid', 'skjul', 'næste', 'forrige', 'afspil', 'pause', 'undermenu', 'vis', 'skjul', 'rullemenu', 'tilbage', 'frem', 'spring over', 'indsend', 'annuller', 'gem', 'rediger', 'slet', 'fjern', 'søg', 'filter', 'sorter', 'stop', 'lydløs', 'slå lyd til', 'fuldskærm', 'minimer', 'maksimer'],
 
     // Tables
@@ -389,6 +388,7 @@ export default {
       'Semantiske overskrifter som Heading 2 eller Heading 3 bør kun bruges til sektioner af indhold; <strong>ikke</strong> i HTML-tabeller. Angiv tabeloverskrifter ved hjælp af <code>&lt;th&gt;</code>-elementet i stedet. <hr> Få mere at vide om <a href="https://www.w3.org/WAI/tutorials/tables/">tilgængelige tabeller.</a>',
     TABLES_EMPTY_HEADING:
       'Tom tabeloverskrift fundet! Tabeloverskrifter bør <strong>aldrig</strong> være tomme. Det er vigtigt at udpege række- og/eller kolonneoverskrifter for at formidle deres relation. Disse oplysninger giver kontekst til personer, der bruger hjælpemidler. Husk, at tabeller kun bør bruges til tabeldata. <hr> Få mere at vide om <a href="https://www.w3.org/WAI/tutorials/tables/">tilgængelige tabeller.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Denne tabel forsøger at knytte en specifik datacelle til en specifik overskriftscelle, men overskrifts-ID\'et kan ikke findes. Sørg for, at hver <code>headers</code>-attribut matcher ID\'et på en overskriftscelle i den samme tabel. <hr> <strong {B}>Overskrifter</strong> <code>%(VALUE)</code> <hr> <strong>Tip!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Brug af manuelle ID-referencer</a> til at knytte dataceller til overskriftsceller er kompliceret og skrøbeligt. Når det er muligt, bør du opdele komplekse data i mindre tabeller med enkle overskriftsrækker og -kolonner.',
 
     // Contrast
     CONTRAST_NORMAL: 'Tekst i normal størrelse bør have en kontrastforhold på mindst %(RATIO).',

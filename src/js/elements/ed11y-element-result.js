@@ -1,4 +1,9 @@
-import { alignTip, buildJumpList, editableHighlighter } from '../core/run.js';
+import {
+  alignTip,
+  buildJumpList,
+  editableHighlighter,
+  incrementalCheckDebounce,
+} from '../core/run.js';
 import { resetClass } from '../utils/utils.js';
 import { alignButtons } from '../utils/align.js';
 import { UI } from '../core/ui.js';
@@ -146,6 +151,14 @@ export class Ed11yElementResult extends HTMLElement {
         button: false,
         tip: false,
       };
+      // Re-arm any recheck that was deferred while this tip was open.
+      // incrementalCheck drops work on UI.tipOpen; without this we'd
+      // silently lose edits made while the tip was up.
+      if (UI.recheckPendingOnClose) {
+        UI.recheckPendingOnClose = false;
+        UI.interaction = true;
+        incrementalCheckDebounce();
+      }
     }
     this.setAttribute('data-ed11y-open', changeTo);
     this.open = changeTo;

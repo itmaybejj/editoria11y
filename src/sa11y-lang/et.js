@@ -294,6 +294,7 @@ export default {
       'Selle sisendiga ei ole seotud mingit märgistust. Palun lisage sellele sisendile <code>id</code> ja lisage sildile vastav <code>for</code> atribuut.',
     LABELS_PLACEHOLDER:
       'Kaduv tekstiväli teeb inimestele raskeks meeles pidada, milline teave kuulub väljale, ja tuvastada ning parandada valideerimisega seotud probleeme. Selle asemel kaaluge pidevalt nähtava vihje kasutamist enne vormivälja. <hr> Lisateavet leiate: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Vormiväljade kohatäidised on kahjulikud.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA sisestus- või lülitusväljal puudub juurdepääsetav nimi. Parandamiseks määrake kehtiv <code>aria-labelledby</code>, <code>aria-label</code> või <code>title</code> atribuut. Kui sisend on lülitatav (nt märkeruut, lüliti, raadionupp), lahendab selle ka nähtava sise-teksti lisamine. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -305,7 +306,7 @@ export default {
     EMBED_MISSING_TITLE:
       'Varjatud sisu vajab juurdepääsetavat nime, mis kirjeldab selle sisu. Andke <code>iframe</code> elemendile <code>tiitle</code> või <code>aria-label</code> atribuut unikaalne <code>tiitle</code> või <code>aria-label</code>. Lisateave <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrame\'i kohta.</a>',
     EMBED_GENERAL:
-      'Ei saa kontrollida varjatud sisu. Palun veenduge, et piltidel on alt-tekst, videote pealkirjad, tekst on piisavalt kontrastne ja interaktiivsed komponendid on <a href="https://webaim.org/techniques/keyboard/">tahvlile juurdepääsetavad.</a>.',
+      'Ei saa kontrollida varjatud sisu. Palun veenduge, et piltidel on alt-tekst, videote pealkirjad, tekst on piisavalt kontrastne ja interaktiivsed komponendid on <a href="https://webaim.org/techniques/keyboard/">tahvlile juurdepääsetavad.</a>',
     EMBED_UNFOCUSABLE:
       '<code>&lt;iframe&gt;</code> koos fookustamata elementidega ei tohiks olla <code>tabindex="-1"</code>. Manustatud sisu ei ole klaviatuuriga juurdepääsetav.',
 
@@ -316,7 +317,7 @@ export default {
     QA_STRONG_ITALICS:
       'Paks ja kursiivne märgistus on semantilise tähendusega ja neid ei tohiks <strong>ei</strong> kasutada tervete lõigete esiletõstmiseks. Häälestatud teksti tuleks kasutada selleks, et rõhutada sõna või fraasi tugevalt <strong>kõrge</strong>. Kursiivkirjas tuleks kasutada pärisnimede (st raamatute ja artiklite pealkirjade), võõrsõnade, jutumärkide esiletõstmiseks. Pikad tsitaadid tuleks vormistada plokktsitaatidena.',
     QA_PDF:
-      'Ei saa kontrollida PDF-failide juurdepääsetavust. PDF-failid loetakse veebisisuks ja need tuleb samuti juurdepääsetavaks muuta. PDF-failid sisaldavad sageli probleeme inimeste jaoks, kes kasutavad ekraanilugejaid (puuduvad struktuurilised märgised või vormiväljade märgised) ja inimeste jaoks, kellel on vaegnägemine (tekst ei voola suurendatud kujul tagasi). <ul><li>Kui tegemist on vormiga, kaaluge alternatiivina ligipääsetava HTML-vormi kasutamist.</li><li>Kui tegemist on dokumendiga, kaaluge selle teisendamist veebileheks.</li></ul> Muudel juhtudel kontrollige <a href="https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html">PDF-i ligipääsetavust Acrobat DC-s.</a>.',
+      'Ei saa kontrollida PDF-failide juurdepääsetavust. PDF-failid loetakse veebisisuks ja need tuleb samuti juurdepääsetavaks muuta. PDF-failid sisaldavad sageli probleeme inimeste jaoks, kes kasutavad ekraanilugejaid (puuduvad struktuurilised märgised või vormiväljade märgised) ja inimeste jaoks, kellel on vaegnägemine (tekst ei voola suurendatud kujul tagasi). <ul><li>Kui tegemist on vormiga, kaaluge alternatiivina ligipääsetava HTML-vormi kasutamist.</li><li>Kui tegemist on dokumendiga, kaaluge selle teisendamist veebileheks.</li></ul> Muudel juhtudel kontrollige <a href="https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html">PDF-i ligipääsetavust Acrobat DC-s.</a>',
     QA_DOCUMENT:
       'Ei saa kontrollida dokumendi juurdepääsetavust. Lingitud dokumente loetakse veebisisuks ja need tuleb samuti juurdepääsetavaks muuta. Palun vaadake see dokument käsitsi üle. <ul><li>Muuta oma <a href="https://support.google.com/docs/answer/6199477?hl=et">Google Workspace\'i dokument või esitlus ligipääsetavamaks.</a></li></li><li>Muuta oma <a href="https://support.microsoft.com/et/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Office\'i dokumendid ligipääsetavamaks.</a></li></ul>',
     QA_BLOCKQUOTE:
@@ -341,10 +342,8 @@ export default {
     // Shared
     ACC_NAME: '<strong {B}>Ligipääsetav nimi</strong> <strong {C}>%(TEXT)</strong>',
     LINK_TEXT: '<strong {B}>Lingi tekst</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Nõuanne!</strong> "Ligipääsetav nimi" on lõplik silt, mis edastatakse abivahendeid kasutavatele inimestele ja mille arvutamine toimub ARIA kaudu. See aitab neil mõista lingi või nupu eesmärki.',
-    HIDDEN_FOCUSABLE:
-      'Link või nupp on <code>aria-hidden=&quot;true&quot;</code>, kuid on endiselt klaviatuurilt fookustatav. Kui kavatsete peita dubleeritud lingi või nupu, lisage ka <code>tabindex=&quot;-1&quot;</code>. Vastasel juhul ei tohiks <code>aria-hidden=&quot;true&quot;</code> kasutada elementidel, mis saavad fookust. <hr> Lisateave <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden atribuudi kohta.</a>',
+    ACC_NAME_TIP: '<hr><strong>Vihje!</strong> "Kättesaadav nimi" on lõplik silt, mis edastatakse abitehnoloogiat kasutavatele inimestele. See aitab neil mõista elemendi eesmärki.',
+    HIDDEN_FOCUSABLE: 'See element võib saada klaviatuuri fookuse, kuid on ekraanilugejate eest peidetud atribuudiga <code>aria-hidden="true"</code> (kas elemendil endal või selle ülemkonteineril). Parandamiseks eemaldage atribuut aria-hidden või eemaldage element tabulaatori järjekorrast. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Lisateave <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atribuudi aria-hidden kohta.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -357,14 +356,14 @@ export default {
     META_LANG:
       'Lehekülje keel ei ole deklareeritud! Palun <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklareerige keel HTML-sildil.</a>',
     META_TITLE:
-      'Puudub lehekülje pealkiri! Palun sisestage <a href="https://developer.mozilla.org/et/docs/Web/HTML/Element/title">lehe pealkiri.</a>.',
+      'Puudub lehekülje pealkiri! Palun sisestage <a href="https://developer.mozilla.org/et/docs/Web/HTML/Element/title">lehe pealkiri.</a>',
     META_SCALABLE:
       'Eemaldage parameeter <code>user-scalable="no"</code> <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta sildi vaatest</a>, et lubada suumimist.',
     META_MAX:
       'Veenduge, et parameeter <code>maximum-scale</code> <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta sildi vaatest</a> ei oleks väiksem kui 2.',
     META_REFRESH: 'Lehte ei tohiks automaatselt värskendada, kasutades meta-silti.',
     META_LANG_SUGGEST: 'Järgmine keelekood <code>%(CODE)</code> ei ole kehtiv. Kas mõtlesite <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Lehe keelekood <code>%(CODE)</code> ei ole kehtiv. Palun <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklareerige HTML-märgendis kehtiv keel.</a>',
+    META_LANG_VALID: 'Selle elemendi keelekood ei ole kehtiv. Parandamiseks asendage lang-atribuut kehtiva keelekoodiga. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Lisateave <a href="https://www.w3.org/International/questions/qa-html-language-declarations">keele deklareerimise kohta HTML-is.</a>',
 
     // Buttons
     BTN_EMPTY: 'Nupul puudub ligipääsetav nimi, mis kirjeldaks selle eesmärki.',
@@ -377,7 +376,7 @@ export default {
       'Ära lisa sõna "nupp" nupu nimesse. Ekraani lugejad edastavad juba elemendi rolli lisaks selle nimele.',
     LABEL_IN_NAME:
       'Selle elemendi nähtav tekst näib olevat erinev ligipääsetavast nimest, mis võib tekitada segadust abivahendite kasutajatele. Palun vaata üle: <hr> <strong {B}>Tekst</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Ligipääsetav nimi</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'Sellel lingil on vigane sihtkoht ja selle juurdepääsetav nimi sisaldab sõna "<strong>%(NAME)</strong>". See viitab sellele, že tegu ei pruugi üldse olla lingiga, vaid see juhib hoopis mingit skriptitud käitumist lehel. Parandamiseks asendage link <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">juurdepääsetava nupuga</a> või parandage lingi sihtkoht. <hr> <strong>Nõuanne!</strong> Abitehnoloogiad käsitlevad nuppe ja linke erinevalt. Õige HTML-elemendi kasutamine tagab, et kasutajad teavad, milliseid kiirklahve kasutada ja milline tegevus käivitub.',
+    LINK_MAYBE_BUTTON: 'Sellel lingil on vigane sihtkoht. Kuigi kättesaadav nimi või selle atribuudid viitavad, et see ei pruugi üldse link olla, vaid juhib hoopis mingit skriptitud käitumist lehel. Parandamiseks asendage link <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">juurdepääsetava nupuga</a> või parandage lingi sihtkoht. <hr> <strong {B}>Kättesaadav nimi</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Vihje!</strong> Abitehnoloogiad käsitlevad nuppe ja linke erinevalt. Õige HTML-elemendi kasutamine tagab, et kasutajad teavad, milliseid klahvikombinatsioone kasutada ja milline tegevus käivitub.',
     POTENTIAL_UI_ELEMENTS: ['menüü', 'sulge', 'lülita', 'ava', 'laienda', 'ahenda', 'järgmine', 'eelmine', 'mängi', 'paus', 'alammenüü', 'näita', 'peida', 'rippmenüü', 'tagasi', 'edasi', 'jäta vahele', 'esita', 'tühista', 'salvesta', 'muuda', 'kustuta', 'eemalda', 'otsi', 'filtreeri', 'sorteeri', 'peata', 'vaigista', 'lülita heli sisse', 'täisekraan', 'minimeeri', 'maksimeeri'],
 
     // Tables
@@ -387,6 +386,7 @@ export default {
       'Semantilisi pealkirju, nagu pealkiri 2 või pealkiri 3, tuleks kasutada ainult sisulõikudes; <strong>ei</strong> HTML-tabelites. Märkige tabelipealkirjad hoopis elemendi <code>&lt;th&gt;</code> abil. <hr> Lisateave <a href="https://www.w3.org/WAI/tutorials/tables/">juurdepääsetavate tabelite kohta.</a>',
     TABLES_EMPTY_HEADING:
       'Leitud on tühi tabeli päis! Tabeli päised ei tohiks <strong>ei tohiks</strong> kunagi</strong> olla tühjad. Oluline on määrata rea ja/või veeru päised, et anda edasi nende seos. See teave annab konteksti inimestele, kes kasutavad abivahendeid. Pidage meeles, et tabeleid tuleks kasutada ainult tabeliandmete jaoks. <hr> Lisateave <a href="https://www.w3.org/WAI/tutorials/tables/">juurdepääsetavate tabelite kohta.</a>',
+    TABLES_INVALID_HEADERS_REF: 'See tabel püüab seostada konkreetset andmelahtrit konkreetse päiselahtriga, kuid päise ID-d ei leitud. Veenduge, at iga <code>headers</code>-atribuut vastaks samas tabelis oleva päiselahtri ID-le. <hr> <strong {B}>Päised</strong> <code>%(VALUE)</code> <hr> <strong>Vihje!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Manuaalsete ID-viidete kasutamine</a> andmelahtrite seostamiseks päiselahtritega on keeruline ja habras. Võimaluse korral jagage keerulised andmed väiksemateks tabeliteks, millel on lihtsad päiseread ja -veerud.',
 
     // Contrast
     CONTRAST_NORMAL: 'Tavalise suurusega tekstil peaks olema kontrastsuse suhe vähemalt %(RATIO).',

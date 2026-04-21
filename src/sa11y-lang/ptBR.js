@@ -292,6 +292,7 @@ export default {
       'Não há rótulo associado a essa entrada. Adicione um <code>id</code> a essa entrada e adicione um atributo <code>for</code> correspondente ao rótulo.',
     LABELS_PLACEHOLDER:
       'Texto de espaço reservado que desaparece torna difícil para as pessoas se lembrarem de quais informações pertencem a um campo e torna desafiador identificar e corrigir erros. Em vez disso, considere usar uma dica permanentemente visível antes do campo do formulário. <hr> Saiba mais: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Os espaços reservados nos campos de formulários são prejudiciais.</a>',
+    ARIA_INPUT_FIELD_NAME: 'O campo de entrada ou alternância ARIA não possui um nome acessível. Para corrigir, forneça um atributo <code>aria-labelledby</code>, <code>aria-label</code> ou <code>title</code> válido. Se a entrada for alternável (por exemplo, caixa de seleção, interruptor, rádio), a adição de texto interno visível também resolverá o problema. <hr> <strong {B}>Elemento</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -339,10 +340,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Texto do link</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Nome acessível</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Dica!</strong> O "nome acessível" é o rótulo final que é comunicado às pessoas que usam tecnologia assistiva e é calculado pelo ARIA. Isso ajuda a entender o propósito do link ou botão.',
-    HIDDEN_FOCUSABLE:
-      'O link ou botão tem <code>aria-hidden=&quot;true&quot;</code>, mas ainda é focável pelo teclado. Se você pretende ocultar um link ou botão duplicado, adicione também <code>tabindex=&quot;-1&quot;</code>. Caso contrário, <code>aria-hidden=&quot;true&quot;</code> não deve ser usado em elementos que podem receber foco. <hr> Saiba mais sobre o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atributo aria-hidden.</a>',
+    ACC_NAME_TIP: '<hr><strong>Dica!</strong> O "nome acessível" é o rótulo final que é comunicado às pessoas que usam tecnologia assistiva. Isso as ajuda a entender o propósito do elemento.',
+    HIDDEN_FOCUSABLE: 'Este elemento pode receber foco do teclado, mas está oculto para leitores de tela por um atributo <code>aria-hidden="true"</code> (nele mesmo ou em um contêiner pai). Para corrigir, remova o atributo aria-hidden ou remova o elemento da ordem de tabulação. <hr> <strong {B}>Elemento</strong> <pre><code>%(EL)</code></pre> <hr> Saiba mais sobre o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atributo aria-hidden.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -353,7 +352,7 @@ export default {
 
     // Meta checks
     META_LANG:
-      'O idioma da página não foi declarado! Por favor, <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare o idioma na tag HTML.</a>',
+      'O idioma da página não foi declarado! Por favor, <a href="https://www.w3.org/International/questions/qa-html-language-declarations.pt-br.html">declare o idioma na tag HTML.</a>',
     META_TITLE:
       'Título da página ausente! Forneça um <a href="https://developer.mozilla.org/pt-br/docs/Web/HTML/Element/title">título da página.</a>',
     META_SCALABLE:
@@ -362,7 +361,7 @@ export default {
       'Certifique-se de que o parâmetro <code>maximum-scale</code> na <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta tag do viewport</a> não seja inferior a 2.',
     META_REFRESH: 'A página não deve atualizar automaticamente usando uma meta tag.',
     META_LANG_SUGGEST: 'O seguinte código de idioma <code>%(CODE)</code> não é válido. Você quis dizer <code>%(CODE)</code>?',
-    META_LANG_VALID: 'O código de idioma da página <code>%(CODE)</code> não é válido. Por favor, <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare um idioma válido na tag HTML.</a>',
+    META_LANG_VALID: 'O código de idioma para este elemento não é válido. Para corrigir, substitua o atributo lang por um código de idioma válido. <hr> <strong {B}>Elemento</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Saiba mais sobre a <a href="https://www.w3.org/International/questions/qa-html-language-declarations.pt-br.html">declaração de idioma em HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'O botão está sem um nome acessível que descreva sua finalidade.',
@@ -375,7 +374,7 @@ export default {
       'Não inclua a palavra "botão" no nome de um botão. Os leitores de tela já informam o papel do elemento além do seu nome.',
     LABEL_IN_NAME:
       'O texto visível deste elemento parece ser diferente do nome acessível, o que pode causar confusão para os usuários de tecnologias assistivas. Por favor, revise: <hr> <strong {B}>Texto</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Nome Acessível</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'Este link tem um destino inválido e o nome acessível contém a palavra "<strong>%(NAME)</strong>". Isso sugere que pode não ser um link, mas sim um controle de comportamento programado na página. Para corrigir, substitua o link por um <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">botão acessível</a> ou corrija o destino do link. <hr> <strong>Dica!</strong> As tecnologias assistivas tratam botões e links de maneira diferente. O uso do elemento HTML correto garante que os usuários saibam quais atalhos de teclado usar e qual ação será disparada.',
+    LINK_MAYBE_BUTTON: 'Este link tem um destino inválido. Embora o nome acessível ou seus atributos sugiram que isso pode não ser um link, mas sim um controle de algum comportamento de script na página. Para corrigir, substitua o link por um <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">botão acessível</a> ou corrija o destino do link. <hr> <strong {B}>Nome Acessível</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Dica!</strong> As tecnologias assistivas tratam botões e links de maneira diferente. O uso do elemento HTML correto garante que os usuários saibam quais atalhos de teclado usar e qual ação será acionada.',
     POTENTIAL_UI_ELEMENTS: ['menu', 'fechar', 'alternar', 'abrir', 'expandir', 'recolher', 'próximo', 'anterior', 'reproduzir', 'pausar', 'submenu', 'mostrar', 'ocultar', 'suspenso', 'voltar', 'avançar', 'pular', 'enviar', 'cancelar', 'salvar', 'editar', 'excluir', 'remover', 'buscar', 'filtrar', 'ordenar', 'parar', 'mudo', 'ativar som', 'tela cheia', 'minimizar', 'maximizar'],
 
     // Tables
@@ -385,6 +384,7 @@ export default {
       'Os cabeçalhos semânticos, como Heading 2 ou Heading 3, devem ser usados somente para seções de conteúdo; <strong>não</strong> em tabelas HTML. Em vez disso, indique os cabeçalhos da tabela usando o elemento <code>&lt;th&gt;</code>. <hr> Saiba mais sobre <a href="https://www.w3.org/WAI/tutorials/tables/">tabelas acessíveis.</a>',
     TABLES_EMPTY_HEADING:
       'Encontrado um cabeçalho de tabela vazio! Os cabeçalhos de tabela <strong>nunca</strong> devem estar vazios. É importante designar os cabeçalhos de linha e/ou coluna para transmitir sua relação. Essas informações fornecem contexto para as pessoas que usam tecnologia assistiva. Lembre-se de que as tabelas devem ser usadas somente para dados tabulares. <hr> Saiba mais sobre <a href="https://www.w3.org/WAI/tutorials/tables/">tabelas acessíveis.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Esta tabela está tentando rotular uma célula de dados específica com uma célula de cabeçalho específica, mas o ID do cabeçalho não foi encontrado. Certifique-se de que cada atributo <code>headers</code> corresponda ao ID de uma célula de cabeçalho na mesma tabela. <hr> <strong {B}>Cabeçalhos</strong> <code>%(VALUE)</code> <hr> <strong>Dica!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">O uso de referências de ID manuais</a> para associar células de dados a células de cabeçalho é complicado e frágil. Quando possível, divida dados complexos em tabelas menores com linhas e colunas de cabeçalho simples.',
 
     // Contrast
     CONTRAST_NORMAL:
@@ -420,7 +420,7 @@ export default {
       'Nenhuma combinação acessível pode ser encontrada apenas alterando a cor do texto. Tente alterar a cor do fundo.',
 
     // Page language
-    PAGE_LANG_CONFIDENCE: 'Mais da metade do texto nesta página parece estar em %(LIKELY_LANG), mas o idioma declarado da página é %(PAGE_LANG). Considere atualizar o <a href="https://www.w3.org/International/questions/qa-html-language-declarations">idioma declarado da página</a> para corresponder ao conteúdo.',
+    PAGE_LANG_CONFIDENCE: 'Mais da metade do texto nesta página parece estar em %(LIKELY_LANG), mas o idioma declarado da página é %(PAGE_LANG). Considere atualizar o <a href="https://www.w3.org/International/questions/qa-html-language-declarations.pt-br.html">idioma declarado da página</a> para corresponder ao conteúdo.',
     LANG_OF_PARTS: 'O idioma da página foi declarado como %(PAGE_LANG), mas este conteúdo parece estar em %(LIKELY_LANG). Certifique-se de que o conteúdo esteja marcado adequadamente.',
     LANG_MISMATCH: 'Este conteúdo parece estar em %(DETECTED_LANG), no entanto, foi marcado como %(WRONG_LANG).',
     LANG_OF_PARTS_ALT: 'Este texto alternativo parece estar em %(LIKELY_LANG), mas o idioma da página foi declarado como %(PAGE_LANG). Certifique-se de que o texto alternativo esteja no mesmo idioma que o restante da página. <hr> {ALT} <strong {C}>%(ALT)</strong>',

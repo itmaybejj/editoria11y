@@ -148,6 +148,8 @@ export default {
       'view our',
       'website',
       'article',
+      'go',
+      'workshop',
     ],
     CLICK: ['click'],
     NEW_WINDOW_PHRASES: [
@@ -297,6 +299,7 @@ export default {
       'There is no label associated with this input. Please add an <code>id</code> to this input, and add a matching <code>for</code> attribute to the label.',
     LABELS_PLACEHOLDER:
       'Disappearing placeholder text makes it hard for people to remember what information belongs in a field and to identify and correct validation issues. Instead, consider using a permanently visible hint before the form field. <hr> Learn more: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Placeholders in form fields are harmful.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA input or toggle field is missing an accessible name. To fix, provide a valid <code>aria-labelledby</code>, <code>aria-label</code>, or <code>title</code> attribute. If the input is toggleable (e.g., checkbox, switch, radio), adding visible inner text will also resolve this. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -346,9 +349,8 @@ export default {
     LINK_TEXT: '<strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME_TIP:
-      '<hr><strong>Tip!</strong> The "accessible name" is the final label that gets communicated to people who use assistive technology. This helps them understand the link or button\'s purpose.',
-    HIDDEN_FOCUSABLE:
-      'Link or button has <code>aria-hidden=&quot;true&quot;</code> but is still keyboard focusable. If you are intending to hide a duplicate link or button, add <code>tabindex=&quot;-1&quot;</code> as well. Otherwise, <code>aria-hidden=&quot;true&quot;</code> should not be used on elements that can receive focus. <hr> Learn more about the <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden attribute.</a>',
+      '<hr><strong>Tip!</strong> The "accessible name" is the final label that gets communicated to people who use assistive technology. This helps them understand the element\'s purpose.',
+    HIDDEN_FOCUSABLE: 'This element can receive keyboard focus, but is hidden from screen readers by an <code>aria-hidden="true"</code> attribute (on itself or a parent container). To fix, either remove the aria-hidden attribute or remove the element from the tab order. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Learn more about the <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden attribute.</a>',
 
     // Developer checks
     DUPLICATE_ID:
@@ -368,7 +370,7 @@ export default {
       'Page language not declared! Please <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare language on the HTML tag.</a>',
     META_REFRESH: 'Page should not automatically refresh using a meta tag.',
     META_LANG_SUGGEST: 'The following language code <code>%(CODE)</code> is not valid. Did you mean <code>%(CODE)</code>?',
-    META_LANG_VALID: 'The page language code <code>%(CODE)</code> is not valid. Please <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare a valid language on the HTML tag.</a>',
+    META_LANG_VALID: 'The language code for this element is not valid. To fix, replace the lang attribute with a valid language code. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Learn more about <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declaring language in HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Button is missing an accessible name that describes its purpose.',
@@ -381,9 +383,9 @@ export default {
       'Do not include the word "button" in the name of a button. Screen readers already convey the role of an element in addition to its name. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>',
     LABEL_IN_NAME:
       'The visible text for this element appears to be different than the accessible name, which may cause confusion for assistive technologies users. Please review: <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'This link has an invalid target, and the accessible name contains the word "<strong {C}>%(NAME)</strong>". This suggests that this might not be a link at all, and instead controls some scripted behaviour on the page. To fix, replace the link with an <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">accessible button</a>, or correct the link\'s destination. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tip!</strong> Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.',
+    LINK_MAYBE_BUTTON: 'This link has an invalid target. Although the accessible name or its attributes suggests that this might not be a link at all, and instead controls some scripted behaviour on the page. To fix, replace the link with an <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">accessible button</a>, or correct the link\'s destination. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tip!</strong> Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.',
     POTENTIAL_UI_ELEMENTS: [
-      'menu', 'close', 'toggle', 'open', 'expand', 'collapse', 'next', 'previous', 'play', 'pause', 'submenu', 'show', 'hide', 'dropdown', 'back', 'forward', 'skip', 'submit', 'cancel', 'save', 'edit', 'delete', 'remove', 'search', 'filter', 'sort', 'stop', 'mute', 'unmute', 'fullscreen', 'minimize', 'maximize',
+      'menu', 'close', 'toggle', 'open', 'expand', 'collapse', 'next', 'prev', 'previous', 'play', 'pause', 'submenu', 'show', 'hide', 'dropdown', 'back', 'forward', 'skip', 'submit', 'cancel', 'save', 'edit', 'delete', 'remove', 'search', 'filter', 'sort', 'stop', 'mute', 'unmute', 'fullscreen', 'minimize', 'maximize', 'slide', 'modal',
     ],
 
     // Tables
@@ -393,6 +395,7 @@ export default {
       'Semantic headings such as Heading 2 or Heading 3 should only be used for sections of content; <strong>not</strong> in HTML tables. Indicate table headings using the <code>&lt;th&gt;</code> element instead. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
     TABLES_EMPTY_HEADING:
       'Empty table header found! Table headers should <strong>never</strong> be empty. It is important to designate row and/or column headers to convey their relationship. This information provides context to people who use assistive technology. Please keep in mind that tables should be used for tabular data only. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
+    TABLES_INVALID_HEADERS_REF: 'This table is attempting to label a specific data cell with a specific header cell, but the header ID cannot be found. Make sure each <code>headers</code> attribute matches the ID of a header cell in the same table. <hr> <strong {B}>Headers</strong> <code>%(VALUE)</code> <hr> <strong>Tip!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Using manual ID references</a> to associate data cells with header cells is complicated and fragile. When possible, break complex data into smaller tables with simple header rows and columns.',
 
     // Contrast
     CONTRAST_NORMAL: 'Normal-sized text should have at least a %(RATIO) ratio.',

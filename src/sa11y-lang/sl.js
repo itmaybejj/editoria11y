@@ -295,6 +295,7 @@ export default {
       'S tem vnosom ni povezana nobena oznaka. Dodajte <code>id</code> temu vnosu in dodajte ustrezen atribut <code>for</code> oznaki.',
     LABELS_PLACEHOLDER:
       'Izginjajoči tekst zavor se težko spomni, katera informacija spada v polje in otežuje ugotavljanje in popravljanje napak. Namesto tega razmislite o uporabi trajno vidnega namiga pred poljem obrazca. <hr> Več informacij: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Zavori v obrazcih so škodljivi.</a>',
+    ARIA_INPUT_FIELD_NAME: 'Vnosno ali preklopno polje ARIA nima dostopnega imena. Če želite to popraviti, navedite veljaven atribut <code>aria-labelledby</code>, <code>aria-label</code> ali <code>title</code>. Če je vnos preklopen (npr. potrditveno polje, stikalo, radio), bo težavo rešilo tudi dodajanje vidnega notranjega besedila. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -342,10 +343,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Besedilo povezave</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Dostopno ime</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr> <strong>Nasvet!</strong> "Dostopno ime" je končna oznaka, ki se sporoča ljudem, ki uporabljajo pripomočke, in se izračuna z ARIA. To jim pomaga razumeti namen povezave ali gumba.',
-    HIDDEN_FOCUSABLE:
-      'Povezava ali gumb ima <code>aria-hidden=&quot;true&quot;</code>, vendar je še vedno dostopen s tipkovnico. Če nameravate skriti podvojeno povezavo ali gumb, dodajte tudi <code>tabindex=&quot;-1&quot;</code>. V nasprotnem primeru se <code>aria-hidden=&quot;true&quot;</code> ne sme uporabljati na elementih, ki lahko prejmejo fokus. <hr> Več o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atributu aria-hidden.</a>',
+    ACC_NAME_TIP: '<hr><strong>Nasvet!</strong> »Dostopno ime« je končna oznaka, ki se sporoči ljudem, ki uporabljajo podporno tehnologijo. To jim pomaga razumeti namen elementa.',
+    HIDDEN_FOCUSABLE: 'Ta element lahko prejme fokus tipkovnice, vendar je skrit pred bralniki zaslona z atributom <code>aria-hidden="true"</code> (na sebi ali na nadrejenem vsebniku). Če želite to popraviti, odstranite atribut aria-hidden ali odstranite element iz vrstnega reda zavihkov. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Preberite več o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atributu aria-hidden.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -365,7 +364,7 @@ export default {
       'Poskrbite, da parameter <code>maximum-scale</code> v <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta oznaki pogleda</a> ni manjši od 2.',
     META_REFRESH: 'Stran se ne sme samodejno osveževati z uporabo meta oznake.',
     META_LANG_SUGGEST: 'Naslednja jezikovna koda <code>%(CODE)</code> ni veljavna. Ali ste mislili <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Jezikovna koda strani <code>%(CODE)</code> ni veljavna. Prosimo, <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarirajte veljaven jezik v oznaki HTML.</a>',
+    META_LANG_VALID: 'Jezikovna koda za ta element ni veljavna. Če želite to popraviti, zamenjajte atribut lang z veljavno jezikovno kodo. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Preberite več o <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklariranju jezika v HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Gumb nima dostopnega imena, ki bi opisovalo njegov namen.',
@@ -378,7 +377,7 @@ export default {
       'Ne vključujte besede „gumb“ v ime gumba. Bralniki zaslona že posredujejo vlogo elementa poleg njegovega imena.',
     LABEL_IN_NAME:
       'Vidno besedilo za ta element se zdi drugačno od dostopnega imena, kar lahko povzroči zmedo pri uporabnikih podpornih tehnologij. Preverite: <hr> <strong {B}>Besedilo</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Dostopno ime</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'Ta povezava ima neveljaven cilj, dostopno ime pa vsebuje besedo »<strong>%(NAME)</strong>«. To nakazuje, da to morda sploh ni povezava, ampak element, ki upravlja skriptno vedenje na strani. Če želite to popraviti, zamenjajte povezavo z <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">dostopnim gumbom</a> ali popravite cilj povezave. <hr> <strong>Nasvet!</strong> Asistivne tehnologije obravnavajo gumbe in povezave različno. Uporaba pravilnega elementa HTML zagotavlja, da uporabniki vedo, katere tipkovne bližnjice uporabiti in katero dejanje se bo sprožilo.',
+    LINK_MAYBE_BUTTON: 'Ta povezava ima neveljaven cilj. Čeprav dostopno ime ali njegovi atributi kažejo, da to sploh ni povezava, temveč nadzoruje neko skriptno vedenje na strani. Če želite to popraviti, zamenjajte povezavo z <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">dostopnim gumbom</a> ali popravite cilj povezave. <hr> <strong {B}>Dostopno ime</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Nasvet!</strong> Podporne tehnologije gumbe in povezave obravnavajo drugače. Uporaba pravilnega elementa HTML zagotavlja, da uporabniki vedo, katere bližnjice na tipkovnici uporabiti in katero dejanje se bo sprožilo.',
     POTENTIAL_UI_ELEMENTS: ['meni', 'zapri', 'preklopi', 'odpri', 'razširi', 'strni', 'naslednji', 'prejšnji', 'predvajaj', 'premor', 'podmeni', 'pokaži', 'skrij', 'spustni meni', 'nazaj', 'naprej', 'preskoči', 'pošlji', 'prekliči', 'shrani', 'uredi', 'izbriši', 'odstrani', 'išči', 'filter', 'razvrsti', 'ustavi', 'nemo', 'vklopi zvok', 'celozaslonski način', 'pomanjšaj', 'povečaj'],
 
     // Tables
@@ -388,6 +387,7 @@ export default {
       'Semantične naslove, kot sta Heading 2 ali Heading 3, lahko uporabljate samo za dele vsebine; <strong>ne</strong> v tabelah HTML. Namesto tega naslove tabel označite z elementom <code>&lt;th&gt;</code>. <hr> Preberite več o <a href="https://www.w3.org/WAI/tutorials/tables/">dostopnih tabelah.</a>',
     TABLES_EMPTY_HEADING:
       'Najden je prazen naglavni del tabele! Glave tabel ne smejo biti nikoli prazne. Pomembno je, da označite glave vrstic in/ali stolpcev in tako izrazite njihovo povezanost. Te informacije zagotavljajo kontekst za osebe, ki uporabljajo podporno tehnologijo. Ne pozabite, da je treba tabele uporabljati samo za tabelarične podatke. <hr> Preberite več o <a href="https://www.w3.org/WAI/tutorials/tables/">dostopnih tabelah.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Ta tabela poskuša označiti določeno podatkovno celico z določeno celico glave, vendar ID-ja glave ni mogoče najti. Prepričajte se, da se vsak atribut <code>headers</code> ujema z ID-jem celice glave v isti tabeli. <hr> <strong {B}>Glave</strong> <code>%(VALUE)</code> <hr> <strong>Nasvet!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Uporaba ročnih sklicev na ID</a> za povezovanje podatkovnih celic s celicami glave je zapletena in nestabilna. Če je mogoče, razdelite zapletene podatke v manjše tabele s preprostimi vrsticami in stolpci glave.',
 
     // Contrast
     CONTRAST_NORMAL: 'Besedilo običajne velikosti mora imeti kontrastno razmerje vsaj %(RATIO).',

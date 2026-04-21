@@ -287,6 +287,7 @@ export default {
       '没有与此输入相关的标签。请为这个输入添加一个<code>id</code>, 并为标签添加一个匹配的<code>for</code>属性。',
     LABELS_PLACEHOLDER:
       '消失的占位符文本使人们很难记住哪些信息属于某个字段，并使识别和纠正错误变得具有挑战性。相反，请考虑在表单字段之前使用永久可见的提示。<hr> 了解更多信息：<a href="https://www.nngroup.com/articles/form-design-placeholders/">表单字段中的占位符是有害的。</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA 输入或切换字段缺少可访问名称。要修复此问题，请提供有效的 <code>aria-labelledby</code>、<code>aria-label</code> 或 <code>title</code> 属性。如果输入是可切换的（例如：复选框、开关、单选按钮），添加可见的内部文本也将解决此问题。 <hr> <strong {B}>元素</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -333,10 +334,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>链接文本</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>可访问名称</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr> <strong>提示！</strong> “可访问名称”是传达给使用辅助技术的人的最终标签，并由 ARIA 计算。这有助于他们理解链接或按钮的目的。',
-    HIDDEN_FOCUSABLE:
-      '链接或按钮已设置 <code>aria-hidden=&quot;true&quot;</code>，但仍然可以通过键盘聚焦。如果您打算隐藏重复的链接或按钮，请添加 <code>tabindex=&quot;-1&quot;</code>。否则，不应在可以接收焦点的元素上使用 <code>aria-hidden=&quot;true&quot;</code>。了解更多关于 <a href="https://developer.mozilla.org/zh-CH/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden 属性</a>。',
+    ACC_NAME_TIP: '<hr><strong>提示！</strong>“可访问名称”是传达给使用辅助技术的人员的最终标签。这有助于他们了解该元素的用途。',
+    HIDDEN_FOCUSABLE: '此元素可以接收键盘焦点，但由于 <code>aria-hidden="true"</code> 属性（在自身或父级容器上），它对屏幕阅读器是隐藏的。要修复此问题，请移除 aria-hidden 属性，或将该元素从 Tab 键顺序中移除。 <hr> <strong {B}>元素</strong> <pre><code>%(EL)</code></pre> <hr> 了解有关 <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden 属性</a> 的更多信息。',
 
     // Developer
     DUPLICATE_ID:
@@ -347,7 +346,7 @@ export default {
 
     // Meta checks
     META_LANG:
-      '页面语言未声明!请<a href="https://www.w3.org/International/questions/qa-html-language-declarations">在HTML标签上声明语言。</a>',
+      '页面语言未声明!请<a href="https://www.w3.org/International/questions/qa-html-language-declarations.zh-hans.html">在HTML标签上声明语言。</a>',
     META_TITLE:
       '缺少页面标题!请提供一个<a href="https://developer.mozilla.org/zh/docs/Web/HTML/Element/title">页面标题。</a>',
     META_SCALABLE:
@@ -356,7 +355,7 @@ export default {
       '确保<a href="https://developer.mozilla.org/zh-CN/docs/Web/HTML/Viewport_meta_tag">视口元标签</a>中的 <code>maximum-scale</code> 参数不少于 2。',
     META_REFRESH: '页面不应使用 meta 标签自动刷新。',
     META_LANG_SUGGEST: '以下语言代码 <code>%(CODE)</code> 无效。您是指 <code>%(CODE)</code> 吗？',
-    META_LANG_VALID: '页面语言代码 <code>%(CODE)</code> 无效。请在 <a href="https://www.w3.org/International/questions/qa-html-language-declarations">HTML 标签中声明有效的语言。</a>',
+    META_LANG_VALID: '此元素的语言代码无效。要修复此问题，请将 lang 属性替换为有效的语言代码。 <hr> <strong {B}>元素</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> 了解有关 <a href="https://www.w3.org/International/questions/qa-html-language-declarations.zh-hans.html">在 HTML 中声明语言</a> 的更多信息。',
 
     // Buttons
     BTN_EMPTY: '按钮缺少一个描述其用途的可访问名称。',
@@ -368,7 +367,7 @@ export default {
     BTN_ROLE_IN_NAME: '不要在按钮的名称中包含“按钮”一词。屏幕阅读器已经会传达元素的角色和名称。',
     LABEL_IN_NAME:
       '此元素的可见文本似乎与可访问名称不同，可能会对辅助技术用户造成混淆。请检查：<hr> <strong {B}>文本</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>可访问名称</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: '此链接的目标无效，其辅助名称包含单词“<strong>%(NAME)</strong>”。这表明它可能根本不是链接，而是控制页面上的某些脚本行为。要修复此问题，请将链接替换为 <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">无障碍按钮</a>，或纠正链接的目标地址。 <hr> <strong>提示！</strong> 辅助技术对按钮和链接的处理方式不同。使用正确的 HTML 元素可确保用户了解应使用的键盘快捷键以及将触发的操作。',
+    LINK_MAYBE_BUTTON: '此链接的目标无效。虽然可访问名称或其属性表明这可能根本不是链接，而是控制页面上的某些脚本行为。要修复此问题，请将链接替换为 <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">可访问按钮</a>，或纠正链接的目的地。 <hr> <strong {B}>可访问名称</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>提示！</strong> 辅助技术处理按钮和链接的方式不同。使用正确的 HTML 元素可确保用户知道应使用哪些键盘快捷键以及将触发什么操作。',
     POTENTIAL_UI_ELEMENTS: ['菜单', '关闭', '切换', '打开', '展开', '折叠', '下一步', '上一步', '播放', '暂停', '子菜单', '显示', '隐藏', '下拉', '返回', '前进', '跳过', '提交', '取消', '保存', '编辑', '删除', '移除', '搜索', '筛选', '排序', '停止', '静音', '取消静音', '全屏', '最小化', '最大化'],
 
     // Tables
@@ -378,6 +377,7 @@ export default {
       '语义标题, 如Heading 2或Heading 3, 只能用于内容的章节；<strong>不能</strong>用于HTML表格。使用<code>&lt;th&gt;</code>元素来表示表格的标题。<hr> 了解更多关于<a href="https://www.w3.org/WAI/tutorials/tables/">可访问的表格。</a>',
     TABLES_EMPTY_HEADING:
       '发现空的表头!表头应该<strong>永远不会</strong>是空的。指定行和/或列的标题以表达它们的关系是很重要的。这一信息为使用辅助技术的人提供了背景。请记住, 表格应该只用于表格式数据。<hr> 了解更多关于<a href="https://www.w3.org/WAI/tutorials/tables/">可访问的表格。</a>',
+    TABLES_INVALID_HEADERS_REF: '此表格尝试将特定数据单元格与特定表头单元格相关联，但找不到该表头的 ID。请确保每个 <code>headers</code> 属性都与同一表格中表头单元格的 ID 相匹配。 <hr> <strong {B}>表头</strong> <code>%(VALUE)</code> <hr> <strong>提示！</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">使用手动 ID 引用</a> 来关联数据单元格与表头单元格既复杂又脆弱。如果可能，请将复杂数据拆分为具有简单表头行和列的小型表格。',
 
     // Contrast
     CONTRAST_NORMAL: '普通大小的文本应至少具有 %(RATIO) 的对比度。',
@@ -402,7 +402,7 @@ export default {
     NO_SUGGESTION: '仅更改文本颜色无法找到可访问的组合。请尝试更改背景颜色。',
 
     // Page language
-    PAGE_LANG_CONFIDENCE: '此页面超过一半的文本似乎是 %(LIKELY_LANG)，但声明的页面语言为 %(PAGE_LANG)。请考虑更新 <a href="https://www.w3.org/International/questions/qa-html-language-declarations">声明的页面语言</a> 以匹配内容。',
+    PAGE_LANG_CONFIDENCE: '此页面超过一半的文本似乎是 %(LIKELY_LANG)，但声明的页面语言为 %(PAGE_LANG)。请考虑更新 <a href="https://www.w3.org/International/questions/qa-html-language-declarations.zh-hans.html">声明的页面语言</a> 以匹配内容。',
     LANG_OF_PARTS: '页面语言声明为 %(PAGE_LANG)，但此内容似乎是 %(LIKELY_LANG)。请确保内容已正确标记。',
     LANG_MISMATCH: '此内容似乎是 %(DETECTED_LANG)，但被标记为 %(WRONG_LANG)。',
     LANG_OF_PARTS_ALT: '此替代文本似乎是 %(LIKELY_LANG)，但页面语言声明为 %(PAGE_LANG)。请确保替代文本与页面其他部分的语言一致。<hr> {ALT} <strong {C}>%(ALT)</strong>',

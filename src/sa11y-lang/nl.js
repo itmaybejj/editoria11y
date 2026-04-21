@@ -264,8 +264,6 @@ export default {
       'Niet-beschrijvende of plaatshouder alt-tekst gevonden. Vervang de volgende alt-tekst door iets dat meer betekenis heeft. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>',
     SUS_ALT:
       'Hulptechnologieën geven al aan dat dit een afbeelding is, dus &quot;<strong {C}>%(ERROR)</strong>&quot; kan overbodig zijn. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>',
-    LINK_HIDDEN_FOCUSABLE:
-      'De link heeft <code>aria-hidden=&quot;true&quot;</code>, maar is nog steeds toegankelijk met het toetsenbord. Als je van plan bent om een overbodige of dubbele link te verbergen, voeg dan ook <code>tabindex=&quot;-1&quot;</code> toe.',
     LINK_IMAGE_NO_ALT_TEXT:
       'De afbeelding in de link is gemarkeerd als decoratief en er is geen linktekst. Voeg alt-tekst toe aan de afbeelding die de bestemming van de link beschrijft.',
     LINK_IMAGE_TEXT:
@@ -305,6 +303,7 @@ export default {
       'Er is geen label gekoppeld aan deze ingang. Voeg een <code>id</code> toe aan deze invoer en voeg een overeenkomend <code>for</code> attribuut toe aan het label.',
     LABELS_PLACEHOLDER:
       'Verdwijnen van placeholdertekst maakt het moeilijk voor mensen om te onthouden welke informatie in een veld thuishoort en maakt het uitdagend om fouten te identificeren en te corrigeren. Overweeg in plaats daarvan om een permanent zichtbare hint voor het formulier veld te gebruiken. <hr> Leer meer: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Plaatsvervangers in formulier velden zijn schadelijk.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA-invoerveld of schakelveld mist een toegankelijke naam. Om dit op te lossen, moet u een geldig <code>aria-labelledby</code>, <code>aria-label</code> of <code>title</code> attribuut opgeven. Als de invoer schakelbaar is (bijv. selectievakje, schakelaar, keuzerondje), lost het toevoegen van zichtbare innerlijke tekst dit ook op. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -352,10 +351,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Linktekst</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Toegankelijk naam</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Tip!</strong> De "toegankelijke naam" is het uiteindelijke label dat wordt gecommuniceerd aan mensen die gebruik maken van ondersteunende technologie. Dit helpt hen om het doel van de link of knop te begrijpen.',
-    HIDDEN_FOCUSABLE:
-      'De link of knop heeft <code>aria-hidden=&quot;true&quot;</code>, maar is nog steeds via het toetsenbord toegankelijk. Als u een dubbele link of knop wilt verbergen, voeg dan ook <code>tabindex=&quot;-1&quot;</code> toe. Anders moet <code>aria-hidden=&quot;true&quot;</code> niet worden gebruikt op elementen die focus kunnen ontvangen. <hr> Lees meer over het <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden-attribuut.</a>',
+    ACC_NAME_TIP: '<hr><strong>Tip!</strong> De "toegankelijke naam" is het definitieve label dat wordt gecommuniceerd naar mensen die ondersteunende technologie gebruiken. Dit helpt hen het doel van het element te begrijpen.',
+    HIDDEN_FOCUSABLE: 'Dit element kan toetsenbordfocus ontvangen, maar is verborgen voor schermlezers door een <code>aria-hidden="true"</code> attribuut (op zichzelf of een bovenliggende container). Om dit op te lossen, verwijdert u het aria-hidden attribuut of verwijdert u het element uit de tabvolgorde. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Lees meer over het <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden attribuut.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -375,7 +372,7 @@ export default {
       'Zorg ervoor dat de parameter <code>maximum-scale</code> in de <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta-tag van het viewport</a> niet kleiner is dan 2.',
     META_REFRESH: 'De pagina mag niet automatisch verversen met behulp van een meta-tag.',
     META_LANG_SUGGEST: 'De volgende taalcode <code>%(CODE)</code> is niet geldig. Bedoelde u <code>%(CODE)</code>?',
-    META_LANG_VALID: 'De taalcode van de pagina <code>%(CODE)</code> is niet geldig. <a href="https://www.w3.org/International/questions/qa-html-language-declarations">Declareer een geldige taal in de HTML-tag.</a>',
+    META_LANG_VALID: 'De taalcode voor dit element is niet geldig. Vervang het lang-attribuut door een geldige taalcode om dit op te lossen. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Lees meer over het <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declareren van taal in HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'De knop mist een toegankelijke naam die het doel beschrijft.',
@@ -388,7 +385,7 @@ export default {
       'Gebruik het woord "knop" niet in de naam van een knop. Schermlezers vermelden al de rol van een element naast de naam.',
     LABEL_IN_NAME:
       'De zichtbare tekst voor dit element lijkt te verschillen van de toegankelijke naam, wat verwarring kan veroorzaken voor gebruikers van ondersteunende technologieën. Controleer alstublieft: <hr> <strong {B}>Tekst</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Toegankelijke Naam</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'Deze link heeft een ongeldig doel en de toegankelijke naam bevat het woord "<strong>%(NAME)</strong>". Dit suggereert dat dit misschien helemaal geen link is, maar in plaats daarvan gescript gedrag op de pagina aanstuurt. Vervang de link door een <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">toegankelijke knop</a> of corrigeer de bestemming van de link om dit op te lossen. <hr> <strong>Tip!</strong> Ondersteunende technologieën behandelen knoppen en links verschillend. Het gebruik van het juiste HTML-element zorgt ervoor dat gebruikers weten welke sneltoetsen ze moeten gebruiken en welke actie wordt geactiveerd.',
+    LINK_MAYBE_BUTTON: 'Deze link heeft een ongeldig doel. Hoewel de toegankelijke naam of de attributen ervan suggereren dat dit misschien helemaal geen link is, maar in plaats daarvan gescript gedrag op de pagina aanstuurt. Vervang de link door een <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">toegankelijke knop</a> om dit op te lossen, of corrigeer de bestemming van de link. <hr> <strong {B}>Toegankelijke naam</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tip!</strong> Ondersteunende technologieën behandelen knoppen und links anders. Het gebruik van het juiste HTML-element zorgt ervoor dat gebruikers weten welke sneltoetsen ze moeten gebruiken en welke actie wordt geactiveerd.',
     POTENTIAL_UI_ELEMENTS: ['menu', 'sluiten', 'schakelen', 'openen', 'uitvouwen', 'samenvouwen', 'volgende', 'vorige', 'afspelen', 'pauzeren', 'submenu', 'tonen', 'verbergen', 'dropdown', 'terug', 'vooruit', 'overslaan', 'verzenden', 'annuleren', 'opslaan', 'bewerken', 'verwijderen', 'verwijderen', 'zoeken', 'filteren', 'sorteren', 'stoppen', 'dempen', 'dempen opheffen', 'volledig scherm', 'minimaliseren', 'maximaliseren'],
 
     // Tables
@@ -398,6 +395,7 @@ export default {
       'Semantische koppen zoals Kop 2 of Kop 3 mogen alleen worden gebruikt voor gedeelten van de inhoud; <strong>niet</strong> in HTML-tabellen. Geef tabelkoppen aan met het <code>&lt;th&gt;</code>-element. <hr> Meer informatie over <a href="https://www.w3.org/WAI/tutorials/tables/">toegankelijke tabellen.</a>',
     TABLES_EMPTY_HEADING:
       'Lege tabelheader gevonden! Tabelkoppen mogen <strong>nooit</strong> leeg zijn. Het is belangrijk om rij- en/of kolomkoppen aan te geven om hun relatie duidelijk te maken. Deze informatie geeft context aan mensen die ondersteunende technologie gebruiken. Houd in gedachten dat tabellen alleen mogen worden gebruikt voor gegevens in tabelvorm. <hr> Meer informatie over <a href="https://www.w3.org/WAI/tutorials/tables/">toegankelijke tabellen.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Deze tabel probeert een specifieke datacel te labelen met een specifieke kopcel, maar de kop-ID kan niet worden gevonden. Zorg ervoor dat elk <code>headers</code>-attribuut overeenkomt met de ID van een kopcel in dezelfde tabel. <hr> <strong {B}>Koppen</strong> <code>%(VALUE)</code> <hr> <strong>Tip!</strong> Het <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">gebruik van handmatige ID-verwijzingen</a> om datacellen te koppelen aan kopcellen is ingewikkeld en foutgevoelig. Splits complexe gegevens indien mogelijk op in kleinere tabellen met eenvoudige koprijen en -kolommen.',
 
     // Contrast
     CONTRAST_NORMAL:

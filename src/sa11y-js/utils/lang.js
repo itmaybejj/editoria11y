@@ -10,18 +10,16 @@ const Lang = {
   sprintf(string, ...args) {
     let transString = this._(string);
     transString = this.prepHTML(transString);
-    const el = document.createElement('div');
-    const p = document.createElement('p');
-    p.innerHTML = transString;
-    el.appendChild(p);
-
-    // Replace placeholders with span markers.
     if (args?.length) {
       args.forEach((_arg, index) => {
-        p.innerHTML = p.innerHTML.replace(/%\([a-zA-Z_]+\)/, `<span data-arg='${index}'></span>`);
+        transString = transString.replace(/%\([a-zA-Z_]+\)/, `<span data-arg='${index}'></span>`);
       });
+    }
+    const el = document.createElement('div');
+    el.innerHTML = transString;
 
-      // Inject the actual values as textContent.
+    // Safely inject the actual values as textContent.
+    if (args?.length) {
       args.forEach((arg, index) => {
         const replacement = el.querySelector(`[data-arg="${index}"]`);
         if (!replacement || arg === null) return;

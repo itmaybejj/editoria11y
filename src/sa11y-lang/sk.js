@@ -295,6 +295,7 @@ export default {
       'K tomuto vstupu nie je priradený žiadny štítok. Prosím, pridajte <code>id</code> k tomuto vstupu a pridajte zodpovedajúci atribút <code>for</code> k štítku.',
     LABELS_PLACEHOLDER:
       'Zmiznutie textu zástupcu sťažuje ľuďom pamätať si, aké informácie patrí do poľa, a sťažuje identifikáciu a opravu chýb. Namiesto toho zvážte použitie trvalo viditeľnej nápovedy pred formulárovým poľom. <hr> Viac informácií: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Zástupcovia v poľách formulára sú škodliví.</a>',
+    ARIA_INPUT_FIELD_NAME: 'Vstupné alebo prepínacie pole ARIA postráda prístupný názov. Ak to chcete napraviť, zadajte platný atribút <code>aria-labelledby</code>, <code>aria-label</code> alebo <code>title</code>. Ak je vstup prepínateľný (napr. zaškrtávacie políčko, prepínač, rádio), problém vyrieši aj pridanie viditeľného vnútorného textu. <hr> <strong {B}>Prvok</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -342,10 +343,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Text odkazu</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Prístupné meno</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Tip!</strong> "Prístupné meno" je konečná nálepka, ktorá sa komunikuje ľuďom používajúcim asistenčné technológie a ktorá sa počíta pomocou ARIA. Pomáha im to pochopiť účel odkazu alebo tlačidla.',
-    HIDDEN_FOCUSABLE:
-      'Odkaz alebo tlačidlo má <code>aria-hidden=&quot;true&quot;</code>, ale stále je prístupné cez klávesnicu. Ak chcete skryť duplikovaný odkaz alebo tlačidlo, pridajte aj <code>tabindex=&quot;-1&quot;</code>. Inak by sa <code>aria-hidden=&quot;true&quot;</code> nemalo používať na prvkoch, ktoré môžu získať fokus. <hr> Viac informácií o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atribúte aria-hidden.</a>',
+    ACC_NAME_TIP: '<hr><strong>Tip!</strong> „Prístupný názov“ je konečný popis, ktorý sa oznamuje ľuďom používajúcim asistívne technológie. Pomáha im to pochopiť účel prvku.',
+    HIDDEN_FOCUSABLE: 'Tento prvok môže prijať klávesový fokus, ale je skrytý pred čítačkami obrazovky atribútom <code>aria-hidden="true"</code> (na sebe alebo na nadradenom kontajneri). Ak to chcete napraviť, buď odstráňte atribút aria-hidden, alebo prvok odstráňte z poradia tabulátora. <hr> <strong {B}>Prvok</strong> <pre><code>%(EL)</code></pre> <hr> Ďalšie informácie o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atribúte aria-hidden.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -365,7 +364,7 @@ export default {
       'Uistite sa, že parameter <code>maximum-scale</code> v <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta značke zobrazenia</a> nie je menší ako 2.',
     META_REFRESH: 'Stránka by sa nemala automaticky obnovovať pomocou meta značky.',
     META_LANG_SUGGEST: 'Nasledujúci kód jazyka <code>%(CODE)</code> nie je platný. Mysleli ste <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Kód jazyka stránky <code>%(CODE)</code> nie je platný. Prosím <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarujte platný jazyk v HTML tagu.</a>',
+    META_LANG_VALID: 'Kód jazyka pre tento prvok nie je platný. Ak to chcete napraviť, nahraďte atribút lang platným kódom jazyka. <hr> <strong {B}>Prvok</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Ďalšie informácie o <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarovaní jazyka v HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Tlačidlu chýba prístupné meno, ktoré popisuje jeho účel.',
@@ -378,7 +377,7 @@ export default {
       'Nezahŕňajte slovo „tlačidlo“ v názve tlačidla. Čítačky obrazovky už oznamujú úlohu prvku spolu s jeho názvom.',
     LABEL_IN_NAME:
       'Viditeľný text tohto prvku sa zdá byť iný ako prístupné meno, čo môže spôsobiť zmätok pre používateľov asistenčných technológií. Skontrolujte prosím: <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Prístupné meno</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'Tento odkaz má neplatný cieľ a prístupný názov obsahuje slovo „<strong>%(NAME)</strong>“. To naznačuje, že to možno vôbec nie je odkaz, ale prvok ovládajúci skriptované správanie na stránke. Ak to chcete napraviť, nahraďte odkaz <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">prístupným tlačidlom</a> alebo opravte cieľ odkazu. <hr> <strong>Tip!</strong> Asistenčné technológie zaobchádzajú s tlačidlami a odkazmi odlišne. Použitie správneho HTML prvku zaisťuje, že používatelia vedia, ktoré klávesové skratky majú použiť a aká akcia sa spustí.',
+    LINK_MAYBE_BUTTON: 'Tento odkaz má neplatný cieľ. Hoci prístupný názov alebo jeho atribúty naznačujú, že by sa nemuselo jednať o odkaz, ale namiesto toho ovláda nejaké skriptované správanie na stránke. Ak to chcete napraviť, nahraďte odkaz <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">prístupným tlačidlom</a> alebo opravte cieľ odkazu. <hr> <strong {B}>Prístupný názov</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tip!</strong> Asistívne technológie pristupujú k tlačidlám a odkazom odlišne. Použitie správneho prvku HTML zaisťuje, že používatelia vedia, ktoré klávesové skratky majú použiť a aká akcia sa spustí.',
     POTENTIAL_UI_ELEMENTS: ['menu', 'zatvoriť', 'prepnuť', 'otvoriť', 'rozbaliť', 'zbaliť', 'ďalší', 'predchádzajúci', 'prehrať', 'pozastaviť', 'podponuka', 'zobraziť', 'skryť', 'rozbaľovacia ponuka', 'späť', 'vpred', 'preskočiť', 'odoslať', 'zrušiť', 'uložiť', 'upraviť', 'vymazať', 'odstrániť', 'hľadať', 'filter', 'zoradiť', 'zastaviť', 'stlmiť', 'zrušiť stlmenie', 'celá obrazovka', 'minimalizovať', 'maximalizovať'],
 
     // Tables
@@ -388,6 +387,7 @@ export default {
       'Sémantické nadpisy, ako napríklad Nadpis 2 alebo Nadpis 3, by sa mali používať len pre časti obsahu; <strong>nie</strong> v tabuľkách HTML. Namiesto toho označte nadpisy tabuliek pomocou prvku <code>&lt;th&gt;</code>. <hr> Ďalšie informácie o <a href="https://www.w3.org/WAI/tutorials/tables/">prístupných tabuľkách.</a>',
     TABLES_EMPTY_HEADING:
       'Nájdené prázdne záhlavie tabuľky! Hlavičky tabuliek by <strong>nikdy</strong> nemali byť prázdne. Je dôležité označiť záhlavia riadkov a/alebo stĺpcov, aby sa vyjadril ich vzťah. Tieto informácie poskytujú kontext ľuďom, ktorí používajú asistenčné technológie. Majte na pamäti, že tabuľky by sa mali používať len pre tabuľkové údaje. <hr> Ďalšie informácie o <a href="https://www.w3.org/WAI/tutorials/tables/">prístupných tabuľkách.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Táto tabuľka sa pokúša označiť konkrétnu dátovú bunku konkrétnou bunkou hlavičky, ale ID hlavičky sa nepodarilo nájsť. Uistite sa, že každý atribút <code>headers</code> zodpovedá ID bunky hlavičky v tej istej tabuľke. <hr> <strong {B}>Hlavičky</strong> <code>%(VALUE)</code> <hr> <strong>Tip!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Používanie manuálnych odkazov na ID</a> na priradenie dátových buniek k bunkám hlavičky je komplikované a nespoľahlivé. Ak je to možné, rozdeľte zložité údaje do menších tabuliek s jednoduchými riadkami a stĺpcami hlavičky.',
 
     // Contrast
     CONTRAST_NORMAL: 'Text normálnej veľkosti by mal mať kontrastný pomer aspoň %(RATIO).',

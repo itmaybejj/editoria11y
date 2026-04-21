@@ -3,6 +3,7 @@ import {
   checkRunPrevent,
   firstVisibleParent,
   lagBounce,
+  matchAdoptions,
   newIncrementalResults,
   panelLabel,
   pauseObservers,
@@ -10,6 +11,8 @@ import {
   resetResults,
   resumeObservers,
   showError,
+  sweepOrphans,
+  teardownAllMarks,
   visible,
 } from '../utils/utils.js';
 import checkHeaders from '../../sa11y-js/rulesets/headers.js';
@@ -38,7 +41,7 @@ import {
 } from '../utils/process-results.js';
 import { drawResult, showAltPanel, showHeadingsPanel, visualize } from './visualize';
 import checkReadability from '../../sa11y-js/rulesets/readability.js';
-import { spriteClose, spriteReadability } from '../elements/sprite.js';
+import sprite from '../elements/sprite.js';
 import { checkCustomRuleset } from '../rulesets/custom-ruleset.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
@@ -80,6 +83,11 @@ export function updatePanel() {
   if (UI.inlineAlerts && document.querySelector('[contenteditable]')) {
     UI.forceFullCheck = true;
     UI.inlineAlerts = false;
+    // Inline-alert buttons are DOM siblings of their targets; editable-
+    // alert buttons are absolutely positioned inside UI.panelAttachTo. The
+    // layouts are incompatible, so drop all adopted mark state when the
+    // mode flips.
+    teardownAllMarks();
   }
 
   // Stash old values for incremental updates.
@@ -140,7 +148,7 @@ export function updatePanel() {
         const detailsTab = document.createElement('details');
         detailsTab.id = 'ed11y-readability-tab';
         detailsTab.innerHTML = `
-            <summary>${spriteReadability}<span class="summary-title"></span><span class="close-details">${spriteClose}</span>
+            <summary>${sprite.readability}<span class="summary-title"></span><span class="close-details">${sprite.close}</span>
             </summary>
             <div class="details">
 							<div id="readability-content">
@@ -392,11 +400,24 @@ export function buildJumpList() {
 
   // Sort from bottom to top so focus order after insert is top to bottom.
   State.results.sort((a, b) => b.sortPos - a.sortPos);
+  // Attach MarkEntry back-references to results that didn't get one at push
+  // time. Covers custom-ruleset.js direct pushes and event-based external
+  // tests that push to Ed11y.State.results from ed11yRunCustomTests
+  // listeners; idempotent if a back-reference is already set.
+  matchAdoptions();
   State.results?.forEach((result, i) => {
     if (result.element && (!result.dismissalStatus || UI.showDismissed)) {
       drawResult(result, i);
     }
   });
+  // After drawResult has adopted or created a mark for each live issue,
+  // any MarkEntry still carrying a stale runGen is an orphan: its
+  // (element, test) pair did not produce a drawn result in this run
+  // (either the issue resolved, or it's now dismissed-and-hidden). Tear
+  // it down. Running the sweep inside buildJumpList keeps all mark DOM
+  // churn within one RAF via showResults, so the browser only paints the
+  // net change. See docs/race-condition-plan.md.
+  sweepOrphans();
   UI.jumpList.forEach((el, i) => {
     el.dataset.ed11yJumpPosition = `${i}`;
     const newLabel = `${Lang._('ALERT_TEXT')} ${i + 1} / ${UI.jumpList.length - 1}, ${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}`;
@@ -452,28 +473,72 @@ export function dismissOne(dismissalType, test, dismissalKey) {
   }, 100);
 }
 
+// Refresh cached iframe offsets used by positionHighlight. Called by both
+// editableHighlighter (on show) and alignHighlights (on scroll/resize) so
+// the positioning formula always reads fresh frame rects.
+function updateFixedRootPositions() {
+  if (!State.option.fixedRoots) return;
+  UI.positionedFrames.length = 0;
+  State.option.fixedRoots.forEach((root) => {
+    if (root.framePositioner) {
+      UI.positionedFrames.push(root.framePositioner.getBoundingClientRect());
+    }
+  });
+}
+
+// Size and position a highlight element around `target`, accounting for
+// scroll position and any fixed-root frame offset. Shared between show-time
+// (editableHighlighter) and reposition-time (alignHighlights) so the two
+// paths can't disagree on geometry.
+function positionHighlight(el, target, result) {
+  let targetOffset = target.getBoundingClientRect();
+  if (!visible(target)) {
+    const visibleParent = firstVisibleParent(target);
+    if (visibleParent) targetOffset = visibleParent.getBoundingClientRect();
+  }
+  const framePositioner =
+    result.fixedRoot != null && UI.positionedFrames[result.fixedRoot]
+      ? UI.positionedFrames[result.fixedRoot]
+      : { top: 0, left: 0 };
+  el.style.setProperty('width', `${targetOffset.width + 6}px`);
+  el.style.setProperty('height', `${targetOffset.height + 6}px`);
+  el.style.setProperty('top', `${targetOffset.top + framePositioner.top + window.scrollY - 3}px`);
+  el.style.setProperty('left', `${targetOffset.left + framePositioner.left - 3}px`);
+}
+
 export function editableHighlighter(resultID, show, firstVisible) {
-  if (!show) {
-    UI.editableHighlight[resultID]?.highlight.style.setProperty('opacity', '0');
-    return;
-  }
   const result = State.results[resultID];
-  if (!result || (!firstVisible && !result.element)) {
+  if (!result) return;
+  const entry = result.markEntry;
+  // Phase 2 creates a MarkEntry for every drawn result. Dismissed-hidden
+  // results skip drawResult and have no entry; they also have no button to
+  // open a tip from, so we should not be called for them.
+  if (!entry) return;
+
+  if (!show) {
+    entry.highlight?.style.setProperty('opacity', '0');
     return;
   }
-  let el = UI.editableHighlight[resultID]?.highlight;
-  if (!el) {
+
+  if (!firstVisible && !result.element) return;
+
+  // Lazy-create the highlight on the mark entry. Owning it here (rather than
+  // in a parallel UI.editableHighlight map keyed by result index) means it
+  // lives and dies with the button — adoption across rechecks reuses it,
+  // orphan sweep tears it down.
+  let el = entry.highlight;
+  if (!el?.isConnected) {
+    el?.remove();
     el = document.createElement('ed11y-element-highlight');
     el.classList.add('ed11y-element');
-    UI.editableHighlight[resultID] = { highlight: el, resultID: resultID };
     el.style.setProperty('position', 'absolute');
     el.style.setProperty('pointer-events', 'none');
     UI.panelAttachTo.appendChild(el);
-  } else if (!el.parentElement) {
-    // detached due to reset.
-    document.body.appendChild(el);
+    entry.highlight = el;
   }
-  UI.editableHighlight[resultID].target = firstVisible ? firstVisible : result.element;
+
+  entry.highlightTarget = firstVisible || result.element;
+
   const zIndex = result.dismissalStatus
     ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)'
     : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
@@ -484,9 +549,14 @@ export function editableHighlighter(resultID, show, firstVisible) {
       : '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
   el.style.setProperty('box-shadow', outline);
   el.style.setProperty('border-radius', '3px');
-  el.style.setProperty('top', '0');
-  el.style.setProperty('left', '0');
-  alignHighlights();
+
+  // Position synchronously before revealing. Previously this set top/left to
+  // 0 then called alignHighlights, which only repositions the open tip's
+  // highlight — but toggleTip calls editableHighlighter before UI.openTip is
+  // set, so the first alignHighlights was a no-op and the highlight flashed
+  // at (0,0) until alignTip's RAF fired. See docs/race-condition-plan.md.
+  updateFixedRootPositions();
+  positionHighlight(el, entry.highlightTarget, result);
   el.style.setProperty('opacity', '1');
 }
 
@@ -732,15 +802,25 @@ export function jumpTo(next = true) {
   updateTipLocations();
 }
 
-export const incrementalAlign = lagBounce(() => {
-  if (!UI.running && !UI.alignPending) {
+// RAF-coalesced alignment. Multiple incrementalAlign() calls within one
+// frame collapse to a single realign on the next paint; if a check run is
+// in flight we defer to the following frame rather than racing layout.
+// Replaces a setTimeout-based lagBounce — align is rendering work, so
+// RAF is the right scheduling primitive.
+let alignRafPending = false;
+export function incrementalAlign() {
+  if (alignRafPending) return;
+  alignRafPending = true;
+  requestAnimationFrame(() => {
+    alignRafPending = false;
+    if (UI.running || UI.alignPending) {
+      incrementalAlign();
+      return;
+    }
     UI.scrollPending++;
     updateTipLocations();
-    UI.alignPending = false;
-  } else {
-    incrementalAlign();
-  }
-}, 10);
+  });
+}
 
 export function alignTip(button, toolTip, recheck = 0, reveal = false) {
   if (!toolTip) {
@@ -955,55 +1035,17 @@ export function updateTipLocations() {
   }
 }
 
+// Scroll/resize repositioning for the currently-open tip's highlight.
+// Only the open tip's highlight is visible, so iterating the whole mark
+// registry would be wasted work. Called from alignTip's tail on scroll,
+// resize, and tip-move.
 export function alignHighlights() {
-  // This duplicates code in alignButtons; can it be dropped?
-  if (State.option.fixedRoots && Object.keys(UI.editableHighlight).length > 0) {
-    UI.positionedFrames.length = 0;
-
-    State.option.fixedRoots.forEach((root) => {
-      if (root.framePositioner) {
-        UI.positionedFrames.push(root.framePositioner.getBoundingClientRect());
-      }
-    });
-  }
-
-  Object.values(UI.editableHighlight).every((el) => {
-    if (!State.results[el.resultID]) {
-      UI.interaction = true;
-      UI.forceFullCheck = true;
-      UI.editableHighlight = [];
-      incrementalCheckDebounce(true);
-      return false;
-    }
-
-    if (!Object.keys(UI.openTip.button).length) {
-      return false;
-    }
-    if (UI.openTip.button.dataset.ed11yResult !== el.resultID) {
-      return true;
-    }
-    const framePositioner =
-      State.results[el.resultID].fixedRoot &&
-      UI.positionedFrames[State.results[el.resultID].fixedRoot]
-        ? UI.positionedFrames[State.results[el.resultID].fixedRoot]
-        : { top: 0, left: 0 };
-
-    let targetOffset = el.target.getBoundingClientRect();
-    if (!visible(el.target)) {
-      // Invisible target.
-      const theVisibleParent = firstVisibleParent(el.target);
-      targetOffset = theVisibleParent ? theVisibleParent.getBoundingClientRect() : targetOffset;
-    }
-
-    el.highlight.style.setProperty('width', `${targetOffset.width + 6}px`);
-    el.highlight.style.setProperty(
-      'top',
-      `${targetOffset.top + framePositioner.top + window.scrollY - 3}px`,
-    );
-    el.highlight.style.setProperty('left', `${targetOffset.left + framePositioner.left - 3}px`);
-    el.highlight.style.setProperty('height', `${targetOffset.height + 6}px`);
-    return true;
-  });
+  const button = UI.openTip.button;
+  if (!button || typeof button !== 'object' || !button.result) return;
+  const entry = button.result.markEntry;
+  if (!entry?.highlight?.parentElement) return;
+  updateFixedRootPositions();
+  positionHighlight(entry.highlight, entry.highlightTarget || button.result.element, button.result);
 }
 
 export const slowIncremental = lagBounce(() => {
@@ -1182,7 +1224,6 @@ export function startObserver(root) {
     return 1;
   };
 
-  // Create an observer instance linked to the callback function
   const callback = (mutationList) => {
     let align = 0;
     for (const mutation of mutationList) {
@@ -1191,11 +1232,11 @@ export function startObserver(root) {
         mutation.target.parentElement &&
         mutation.target.parentElement.matches('[contenteditable] *, [contenteditable]')
       ) {
+        // Typing: realign now (RAF-coalesced), debounce a slow recheck.
         incrementalAlign();
         slowIncremental();
         return;
       } else if (mutation.type === 'childList') {
-        // Recheck if there are relevant node changes.
         if (mutation.removedNodes.length > 0) {
           align += 1;
         } else if (mutation.addedNodes.length > 0) {
@@ -1205,17 +1246,13 @@ export function startObserver(root) {
         }
       }
     }
-    // These are debounced
-    if (!align) {
-      return;
-    }
-    window.setTimeout(() => {
-      incrementalAlign(); // Immediately realign tips.
-      UI.alignPending = false;
-    }, 0);
-    window.setTimeout(() => {
-      incrementalCheckDebounce(); // Recheck after delay.
-    }, 0);
+    if (!align) return;
+    // Drop the previous setTimeout(0) shells: incrementalAlign already
+    // coalesces on RAF and incrementalCheckDebounce is already debounced,
+    // so deferring them through a macrotask added noise without changing
+    // behavior. See docs/race-condition-plan.md.
+    incrementalAlign();
+    incrementalCheckDebounce();
   };
 
   // Create an observer instance linked to the callback function
@@ -1336,6 +1373,10 @@ export function checkAll() {
   if (UI.tipOpen) {
     return false;
   }
+  // Bump run generation. Used to detect aborted/overlapping runs and as
+  // the liveness stamp for adopted mark entries (see MarkEntry.generation).
+  UI.runGen = (UI.runGen + 1) | 0;
+  UI.activeRunGen = UI.runGen;
   UI.disabled = false;
 
   if (checkRunPrevent()) {
@@ -1412,12 +1453,19 @@ export function checkAll() {
 }
 
 export async function continueCheck() {
+  // Capture the generation we started dispatching under. If a newer checkAll
+  // has bumped UI.runGen while we were awaiting async work, the results in
+  // State are about to be discarded anyway — bail before painting.
+  const runGenAtDispatch = UI.runGen;
   // Filter split configuration results.
   if (UI.splitConfiguration.active && State.results.length > 0) {
     await handleSyncOnlyResults();
   } else {
     await filterAlerts(false);
     syncResults(State.results);
+  }
+  if (UI.runGen !== runGenAtDispatch) {
+    return;
   }
   countAlerts();
 
@@ -1463,7 +1511,15 @@ export async function continueCheck() {
 export function incrementalCheck() {
   if (!UI.running) {
     UI.incrementalRetryPending = false;
-    if (UI.tipOpen || (!UI.interaction && !UI.forceFullCheck)) {
+    if (UI.tipOpen) {
+      // checkAll mutates State.results, which would strand the open tip's
+      // button/content in mid-swap. Remember there's pending work and let
+      // toggleTip(false) re-arm the debounce when the tip closes. Without
+      // this, edits made while a tip is open were silently lost.
+      UI.recheckPendingOnClose = true;
+      return;
+    }
+    if (!UI.interaction && !UI.forceFullCheck) {
       return;
     }
     UI.interaction = false;

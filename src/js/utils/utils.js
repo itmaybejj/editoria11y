@@ -191,52 +191,8 @@ export function buildElementList(onlyForFilter = false) {
 
   // Find and cache elements.
   if (onlyForFilter) {
-    // Split configuration; do not fully re-initialize Elements.Found for filters.
-
-    Elements.Found.Everything = find('*', 'root', Constants.Exclusions.Sa11yElements);
-
-    Elements.Found.Contrast = Elements.Found.Everything.filter(($el) => {
-      const matchesSelector = Constants.Exclusions.Contrast.some((exclusion) =>
-        $el.matches(exclusion),
-      );
-      return !matchesSelector && !Constants.Exclusions.Contrast.includes($el);
-    });
-
-    Elements.Found.Images = Elements.Found.Everything.filter(
-      ($el) =>
-        $el.tagName === 'IMG' &&
-        !Constants.Exclusions.Images.some((selector) => $el.matches(selector)),
-    );
-
-    Elements.Found.Links = Elements.Found.Everything.filter(
-      ($el) =>
-        ($el.tagName === 'A' || $el.tagName === 'a') &&
-        $el.hasAttribute('href') &&
-        !$el.matches('[role="button"]') && // Exclude links with [role="button"]
-        !Constants.Exclusions.Links.some((selector) => $el.matches(selector)),
-    );
-
-    // We want headings from the entire document for the Page Outline.
-    Elements.Found.Headings = find(
-      'h1, h2, h3, h4, h5, h6, [role="heading"][aria-level]',
-      'root',
-      Constants.Exclusions.Headings,
-    );
-
-    // Excluded via headerIgnore.
-    Elements.Found.ExcludedHeadings = Elements.Found.Headings.filter((heading) =>
-      Constants.Exclusions.Headings.some((exclusion) => heading.matches(exclusion)),
-    );
-
-    // Excluded via outlineIgnore.
-    Elements.Found.ExcludedOutlineHeadings = Elements.Found.Headings.filter((heading) =>
-      Constants.Exclusions.Outline.some((exclusion) => heading.matches(exclusion)),
-    );
-
-    // Merge both headerIgnore and outlineIgnore.
-    Elements.Found.OutlineIgnore = Elements.Found.ExcludedOutlineHeadings.concat(
-      Elements.Found.ExcludedHeadings,
-    );
+    // Split configuration; compute only the subset of collections needed.
+    Elements.initializeFilterElements();
   } else {
     State.headingOutline = [];
     Elements.initializeElements(State.option);
@@ -482,6 +438,67 @@ export function createDismissalKey(string) {
   return dismissDigest(State.option.pepper, prepareDismissal(string));
 }
 
+// Walk State.results and, for each (element, test) pair, attach a back-
+// reference to any existing MarkEntry. drawResult reads result.markEntry to
+// decide whether to adopt existing DOM or create a new mark.
+//
+// Running this as a single post-push pass (rather than hooking into
+// pushResult) covers every code path that lands results in State.results:
+// the standard pushResult call, custom-ruleset.js direct pushes, and the
+// event-based external custom tests that push to Ed11y.State.results from
+// their ed11yRunCustomTests listeners. Keeps the sa11y-js layer unpatched.
+export function matchAdoptions() {
+  for (const result of State.results) {
+    if (!result.element || result.markEntry) continue;
+    const byTest = UI.marks.get(result.element);
+    const existing = byTest?.get(result.test);
+    if (existing) {
+      result.markEntry = existing;
+    }
+  }
+}
+
+// Tear down one MarkEntry: remove its DOM nodes and unregister it from
+// UI.marks / UI.markRegistry. Idempotent. See docs/race-condition-plan.md.
+export function teardownMark(entry) {
+  if (entry.button?.parentElement) {
+    entry.button.remove();
+  }
+  if (entry.tip?.parentElement) {
+    entry.tip.remove();
+  }
+  if (entry.highlight?.parentElement) {
+    entry.highlight.remove();
+  }
+  const byTest = UI.marks.get(entry.element);
+  if (byTest) {
+    byTest.delete(entry.test);
+    if (byTest.size === 0) {
+      UI.marks.delete(entry.element);
+    }
+  }
+  UI.markRegistry.delete(entry);
+}
+
+// After drawResult has stamped all live entries with the current runGen,
+// any entry still carrying a stale generation represents an issue that
+// did not fire in this run. Remove it.
+export function sweepOrphans() {
+  for (const entry of [...UI.markRegistry]) {
+    if (entry.generation !== UI.runGen) {
+      teardownMark(entry);
+    }
+  }
+}
+
+// Full teardown of every registered mark. Used by reset() when the panel
+// is closing or the library is being disabled.
+export function teardownAllMarks() {
+  for (const entry of [...UI.markRegistry]) {
+    teardownMark(entry);
+  }
+}
+
 export function resetResults(incremental) {
   UI.jumpList = [];
   UI.tipOpen = false;
@@ -499,44 +516,37 @@ export function resetResults(incremental) {
     'ed11y-error-block',
     'ed11y-error-inline',
   ]);
-  // Reset insertions into body content.
+
   if (incremental) {
-    Elements.Found.reset = getElements('ed11y-element-highlight', 'document', []);
+    // Adoption path: leave result / tip / highlight DOM in place. pushResult
+    // has attached markEntry back-references to unchanged issues; drawResult
+    // will reuse their DOM and stamp them with the current runGen. After the
+    // draw loop, sweepOrphans() (called from buildJumpList) tears down any
+    // entry that was not re-stamped — i.e., issues that no longer fire.
+    //
+    // This replaces the previous pattern of removing highlights immediately
+    // and tearing down buttons/tips on a 100ms timer, which both caused
+    // flicker and left stale (element, test) state addressable by index
+    // during the overlap window. See docs/race-condition-plan.md.
   } else {
+    // Full teardown.
+    teardownAllMarks();
     Elements.Found.reset = getElements(
-      'ed11y-element-heading-label, ed11y-element-alt, ed11y-element-highlight',
+      'ed11y-element-heading-label, ed11y-element-alt',
       'document',
       [],
     );
+    Elements.Found.reset?.forEach((el) => {
+      el.remove();
+    });
   }
-  Elements.Found.reset?.forEach((el) => {
-    el.remove();
-  });
   UI.altMarks.clear();
-
-  // Flicker prevention -- leave old tip in place for 100ms.
-  Elements.Found.delayedReset = getElements(
-    'ed11y-element-result, ed11y-element-tip',
-    'document',
-    [],
-  );
-
-  window.setTimeout(
-    () => {
-      Elements.Found.delayedReset?.forEach((el) => {
-        el.remove();
-      });
-    },
-    100,
-    Elements.Found.delayedReset,
-  );
 
   if (typeof UI.panelJumpNext === 'function') {
     UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = UI.english
       ? Lang._('buttonFirstContent')
       : `${Lang._('SKIP_TO_ISSUE')} 1`;
   }
-  // Reset insertions into body content.
 }
 
 export function newIncrementalResults() {

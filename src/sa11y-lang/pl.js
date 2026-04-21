@@ -295,6 +295,7 @@ export default {
       'Z tym polem input nie jest skojarzona żadna etykieta (label). Dodaj do tego pola danych <code>id</code> i dodaj pasujący atrybut <code>for</code> do etykiety.',
     LABELS_PLACEHOLDER:
       'Znikający tekst zastępczy utrudnia ludziom zapamiętanie, jakie informacje powinny znaleźć się w polu, a także utrudnia identyfikację i poprawę błędów. Zamiast tego rozważ użycie trwale widocznej wskazówki przed polem formularza. <hr> Dowiedz się więcej: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Zastępniki w polach formularzy są szkodliwe.</a>',
+    ARIA_INPUT_FIELD_NAME: 'Pole wejściowe lub przełącznik ARIA nie ma nazwy dostępnej. Aby to naprawić, podaj prawidłowy atrybut <code>aria-labelledby</code>, <code>aria-label</code> lub <code>title</code>. Jeśli pole jest przełączalne (np. pole wyboru, przełącznik, przycisk radiowy), dodanie widocznego tekstu wewnętrznego również rozwiąże ten problem. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -342,10 +343,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Tekst linku</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Dostępna nazwa</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Wskazówka!</strong> "Dostępna nazwa" to ostateczna etykieta, która jest przekazywana osobom korzystającym z technologii wspomagających i jest obliczana przez ARIA. Pomaga to im zrozumieć cel linku lub przycisku.',
-    HIDDEN_FOCUSABLE:
-      'Link lub przycisk ma atrybut <code>aria-hidden=&quot;true&quot;</code>, ale wciąż może być uzyskany za pomocą klawiatury. Jeśli zamierzasz ukryć zduplikowany link lub przycisk, dodaj również <code>tabindex=&quot;-1&quot;</code>. W przeciwnym razie atrybut <code>aria-hidden=&quot;true&quot;</code> nie powinien być używany dla elementów, które mogą otrzymać fokus. <hr> Dowiedz się więcej o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atrybucie aria-hidden.</a>',
+    ACC_NAME_TIP: '<hr><strong>Wskazówka!</strong> „Nazwa dostępna” to ostateczna etykieta przekazywana osobom korzystającym z technologii wspomagających. Pomaga im to zrozumieć cel elementu.',
+    HIDDEN_FOCUSABLE: 'Ten element może przyjąć fokus klawiatury, ale jest ukryty przed czytnikami ekranu za pomocą atrybutu <code>aria-hidden="true"</code> (na nim samym lub kontenerze nadrzędnym). Aby to naprawić, usuń atrybut aria-hidden lub usuń element z kolejności tabulacji. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Dowiedz się więcej o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atrybucie aria-hidden.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -365,7 +364,7 @@ export default {
       'Upewnij się, że parametr <code>maximum-scale</code> w <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta tagu widoku</a> nie jest mniejszy niż 2.',
     META_REFRESH: 'Strona nie powinna automatycznie odświeżać się przy użyciu meta tagu.',
     META_LANG_SUGGEST: 'Następujący kod języka <code>%(CODE)</code> jest nieprawidłowy. Czy chodziło o <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Kod języka strony <code>%(CODE)</code> jest nieprawidłowy. Proszę <a href="https://www.w3.org/International/questions/qa-html-language-declarations">zadeklarować prawidłowy język w tagu HTML.</a>',
+    META_LANG_VALID: 'Kod języka dla tego elementu jest nieprawidłowy. Aby to naprawić, zastąp atrybut lang prawidłowym kodem języka. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Dowiedz się więcej o <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarowaniu języka w HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Przycisk nie ma dostępnej nazwy opisującej jego cel.',
@@ -378,7 +377,7 @@ export default {
       'Nie włączaj słowa „przycisk” w nazwie przycisku. Czytniki ekranowe już podają rolę elementu oprócz jego nazwy.',
     LABEL_IN_NAME:
       'Widoczny tekst tego elementu wydaje się różnić od dostępnej nazwy, co może wprowadzać w błąd użytkowników technologii wspomagających. Sprawdź: <hr> <strong {B}>Tekst</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Dostępna nazwa</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'Ten link ma nieprawidłowy cel, a nazwa dostępna zawiera słowo „<strong>%(NAME)</strong>”. Sugeruje to, że może to w ogóle nie być link, lecz element sterujący skryptowym zachowaniem na stronie. Aby to naprawić, zastąp link <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">dostępnym przyciskiem</a> lub popraw cel linku. <hr> <strong>Wskazówka!</strong> Technologie wspomagające traktują przyciski i linki w różny sposób. Użycie właściwego elementu HTML daje pewność, że użytkownicy wiedzą, jakich skrótów klawiszowych użyć i jaka akcja zostanie wywołana.',
+    LINK_MAYBE_BUTTON: 'Ten link ma nieprawidłowy cel. Chociaż nazwa dostępna lub jej atrybuty sugerują, że może to w ogóle nie być link, a zamiast tego kontroluje on pewne zachowanie skryptowe na stronie. Aby to naprawić, zastąp link <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">dostępnym przyciskiem</a> lub popraw cel linku. <hr> <strong {B}>Nazwa dostępna</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Wskazówka!</strong> Technologie wspomagające traktują przyciski i linki w różny sposób. Użycie właściwego elementu HTML gwarantuje, że użytkownicy będą wiedzieć, jakich skrótów klawiaturowych użyć i jakie działanie zostanie wywołane.',
     POTENTIAL_UI_ELEMENTS: ['menu', 'zamknij', 'przełącz', 'otwórz', 'rozwiń', 'zwiń', 'następny', 'poprzedni', 'odtwórz', 'pauza', 'podmenu', 'pokaż', 'ukryj', 'rozwijane', 'wstecz', 'dalej', 'pomiń', 'wyślij', 'anuluj', 'zapisz', 'edytuj', 'usuń', 'usuń', 'szukaj', 'filtr', 'sortuj', 'stop', 'wycisz', 'wyłącz wyciszenie', 'pełny ekran', 'minimalizuj', 'maksymalizuj'],
 
     // Tables
@@ -388,6 +387,7 @@ export default {
       'Nagłówki semantyczne, takie jak nagłówek H2 lub nagłówek H3, powinny być używane tylko w odniesieniu do sekcji treści; <strong>nie</strong> w tabelach HTML. Zamiast tego należy wskazać nagłówki tabeli przy użyciu elementu <strong>th</strong>. <hr> Dowiedz się więcej o <a href="https://www.w3.org/WAI/tutorials/tables/">dostępnych tabelach.</a>',
     TABLES_EMPTY_HEADING:
       'Wykryto pusty nagłówek tabeli! Nagłówki tabel <em>nigdy</em> nie powinny być puste. Ważne jest, aby wyznaczyć nagłówki wierszy i/lub kolumn, aby przekazać ich relację. Informacje te zapewniają kontekst osobom korzystającym z technologii wspomagających. Należy pamiętać, że tabele powinny być używane tylko dla danych tabelarycznych. <hr> Dowiedz się więcej o <a href="https://www.w3.org/WAI/tutorials/tables/">dostępnych tabelach.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Ta tabela próbuje powiązać konkretną komórkę danych z konkretną komórką nagłówka, ale nie można odnaleźć identyfikatora ID nagłówka. Upewnij się, że każdy atrybut <code>headers</code> odpowiada identyfikatorowi ID komórki nagłówka w tej samej tabeli. <hr> <strong {B}>Nagłówki</strong> <code>%(VALUE)</code> <hr> <strong>Wskazówka!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Ręczne używanie odwołań ID</a> do kojarzenia komórek danych z komórkami nagłówka jest skomplikowane i zawodne. Jeśli to możliwe, dziel złożone dane na mniejsze tabele z prostymi wierszami i kolumnami nagłówkowymi.',
 
     // Contrast
     CONTRAST_NORMAL:

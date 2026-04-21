@@ -196,9 +196,9 @@ export default {
     HEADING_LONG:
       'Záhlaví je dlouhé! Nadpisy by měly sloužit k uspořádání obsahu a vyjádření struktury. Měly by být stručné, informativní a jedinečné. Udržujte nadpisy kratší než %(MAX_LENGTH) znaků (ne delší než jedna věta). <hr> <strong {B}>%(HEADING_LENGTH) Znaků</strong>',
     HEADING_FIRST:
-      'Prvním nadpisem na stránce by obvykle měl být nadpis 1 nebo nadpis 2. Nadpis 1 by měl být začátkem hlavní části obsahu a je hlavním nadpisem, který popisuje celkový účel stránky. Více informací o <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">Struktuře nadpisů.</a>.',
+      'Prvním nadpisem na stránce by obvykle měl být nadpis 1 nebo nadpis 2. Nadpis 1 by měl být začátkem hlavní části obsahu a je hlavním nadpisem, který popisuje celkový účel stránky. Více informací o <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">Struktuře nadpisů.</a>',
     HEADING_MISSING_ONE:
-      'Chybějící nadpis 1. Nadpis 1 by měl být začátkem hlavní oblasti obsahu a je to hlavní nadpis, který popisuje celkový účel stránky. Více informací o <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">Struktuře nadpisů.</a>.',
+      'Chybějící nadpis 1. Nadpis 1 by měl být začátkem hlavní oblasti obsahu a je to hlavní nadpis, který popisuje celkový účel stránky. Více informací o <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">Struktuře nadpisů.</a>',
     HEADING_EMPTY_WITH_IMAGE:
       'Nadpis neobsahuje žádný text, ale obrázek. Pokud se nejedná o nadpis, změňte jeho formát z <strong {C}>Nadpis %(level)</strong> na <strong>Normální</strong> nebo <strong>Odstavec</strong>. V opačném případě přidejte k obrázku alt text, pokud není ozdobný.',
     PANEL_HEADING_MISSING_ONE: 'Chybí nadpis 1!',
@@ -296,6 +296,7 @@ export default {
       'K tomuto vstupu není přiřazen žádný štítek. Přidejte prosím k tomuto vstupu <code>id</code> a ke štítku přidejte odpovídající atribut <code>for</code>.',
     LABELS_PLACEHOLDER:
       'Zmizelé texty pro zástupné znaky ztěžují lidem zapamatování, jaké informace patří do pole, a identifikaci a opravu problémů s validací. Místo toho zvažte použití trvale viditelné nápovědy před polem formuláře. <hr> Přečtěte si více: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Zástupné znaky v polích formulářů jsou škodlivé.</a>',
+    ARIA_INPUT_FIELD_NAME: 'Vstupní nebo přepínací pole ARIA postrádá přístupný název. Chcete-li to napravit, zadejte platný atribut <code>aria-labelledby</code>, <code>aria-label</code> nebo <code>title</code>. Pokud je vstup přepínatelný (např. zaškrtávací políčko, přepínač, rádio), problém vyřeší také přidání viditelného vnitřního textu. <hr> <strong {B}>Prvek</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -305,9 +306,9 @@ export default {
     EMBED_DATA_VIZ:
       'Widgety pro vizualizaci dat, jako je tento, jsou často problematické pro lidi, kteří k navigaci používají klávesnici nebo čtečku obrazovky, a mohou představovat značné potíže pro lidi se slabým zrakem nebo barvoslepostí. Doporučujeme poskytovat stejné informace v alternativním (textovém nebo tabulkovém) formátu pod widgetem. <hr> Další informace o <a href="https://www.w3.org/WAI/tutorials/images/complex">komplexních obrázcích.</a>',
     EMBED_MISSING_TITLE:
-      'Vložený obsah vyžaduje přístupný název, který popisuje jeho obsah. Uveďte jedinečný atribut <code>title</code> nebo <code>aria-label</code> na elementu <code>iframe</code>. Další informace o <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrame.</a>.',
+      'Vložený obsah vyžaduje přístupný název, který popisuje jeho obsah. Uveďte jedinečný atribut <code>title</code> nebo <code>aria-label</code> na elementu <code>iframe</code>. Další informace o <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrame.</a>',
     EMBED_GENERAL:
-      'Nelze zkontrolovat vložený obsah. Ujistěte se prosím, že obrázky mají alt text, videa mají titulky, text je dostatečně kontrastní a interaktivní komponenty jsou <a href="https://webaim.org/techniques/keyboard/">přístupné z klávesnice.</a>.',
+      'Nelze zkontrolovat vložený obsah. Ujistěte se prosím, že obrázky mají alt text, videa mají titulky, text je dostatečně kontrastní a interaktivní komponenty jsou <a href="https://webaim.org/techniques/keyboard/">přístupné z klávesnice.</a>',
     EMBED_UNFOCUSABLE:
       '<code>&lt;iframe&gt;</code> s nezaměřitelnými prvky by nemělo mít <code>tabindex="-1"</code>. Vložený obsah nebude přístupný klávesnicí.',
 
@@ -318,7 +319,7 @@ export default {
     QA_STRONG_ITALICS:
       'Tučné písmo a kurzíva mají sémantický význam a neměly by se <strong>používat</strong> ke zvýraznění celých odstavců. Tučný text by měl být používán k výraznému <strong>zdůraznění</strong> slova nebo slovního spojení. Kurzíva by se měla používat ke zvýraznění vlastních jmen (tj. názvů knih a článků), cizích slov, citátů. Dlouhé citace by měly být formátovány jako blokové citace.',
     QA_PDF:
-      'Nelze zkontrolovat přístupnost souborů PDF. Soubory PDF jsou považovány za webový obsah a musí být také zpřístupněny. Soubory PDF často obsahují problémy pro lidi, kteří používají čtečky obrazovky (chybějící strukturální značky nebo chybějící popisky formulářových polí), a pro lidi se slabým zrakem (text se při zvětšení nezvětšuje). <ul><li>Jestliže se jedná o formulář, zvažte jako alternativu použití přístupného formuláře HTML.</li><li>Jestliže se jedná o dokument, zvažte jeho převedení na webovou stránku.</li></ul>V opačném případě zkontrolujte <a href="https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html">PDF pro přístupnost v Acrobatu DC.</a>.',
+      'Nelze zkontrolovat přístupnost souborů PDF. Soubory PDF jsou považovány za webový obsah a musí být také zpřístupněny. Soubory PDF často obsahují problémy pro lidi, kteří používají čtečky obrazovky (chybějící strukturální značky nebo chybějící popisky formulářových polí), a pro lidi se slabým zrakem (text se při zvětšení nezvětšuje). <ul><li>Jestliže se jedná o formulář, zvažte jako alternativu použití přístupného formuláře HTML.</li><li>Jestliže se jedná o dokument, zvažte jeho převedení na webovou stránku.</li></ul>V opačném případě zkontrolujte <a href="https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html">PDF pro přístupnost v Acrobatu DC.</a>',
     QA_DOCUMENT:
       'Nelze zkontrolovat přístupnost dokumentu. Propojené dokumenty jsou považovány za webový obsah a musí být rovněž zpřístupněny. Zkontrolujte prosím tento dokument ručně. <ul><li>Zpřístupněte svůj <a href="https://support.google.com/docs/answer/6199477?hl=en">dokument nebo prezentaci v prostředí Google Workspace.</a></li><li>Zpřístupněte své <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">dokumenty Office.</a></li></ul>',
     QA_BLOCKQUOTE:
@@ -326,7 +327,7 @@ export default {
     QA_FAKE_HEADING:
       'Je to nadpis? <strong {C}>%(TEXT)</strong> <hr> Řádek tučného nebo velkého textu může vypadat jako nadpis, ale člověk používající čtečku obrazovky nemůže poznat, že je důležitý, nebo přejít na jeho obsah. Tučný nebo velký text by nikdy neměl nahrazovat sémantické nadpisy (Nadpis 2 až Nadpis 6).',
     QA_FAKE_LIST:
-      'Snažíte se vytvořit seznam? Nalezena možná položka seznamu: <strong {C}>%(firstPrefix)</strong> <hr> Ujistěte se, že používáte sémantické seznamy tak, že místo nich použijete tlačítka pro formátování odrážek nebo čísel. Při použití sémantického seznamu jsou asistenční technologie schopny zprostředkovat informace, jako je celkový počet položek a relativní pozice každé položky v seznamu. Další informace o <a href="https://www.w3.org/WAI/tutorials/page-structure/content/#lists">sémantických seznamech.</a>.',
+      'Snažíte se vytvořit seznam? Nalezena možná položka seznamu: <strong {C}>%(firstPrefix)</strong> <hr> Ujistěte se, že používáte sémantické seznamy tak, že místo nich použijete tlačítka pro formátování odrážek nebo čísel. Při použití sémantického seznamu jsou asistenční technologie schopny zprostředkovat informace, jako je celkový počet položek a relativní pozice každé položky v seznamu. Další informace o <a href="https://www.w3.org/WAI/tutorials/page-structure/content/#lists">sémantických seznamech.</a>',
     QA_UPPERCASE:
       'Nalezena všechna velká písmena. Některé čtečky obrazovky mohou text psaný velkými písmeny interpretovat jako zkratku a budou číst každé písmeno zvlášť. Kromě toho se některým lidem všechna velká písmena hůře čtou a mohou působit dojmem, jako by se jednalo o KŘIK.',
     QA_UNDERLINE:
@@ -343,10 +344,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Text odkazu</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Přístupné jméno</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Tip!</strong> "Přístupné jméno" je konečný štítek, který je komunikován lidem používajícím asistenční technologie. To jim pomáhá pochopit účel odkazu nebo tlačítka.',
-    HIDDEN_FOCUSABLE:
-      'Odkaz nebo tlačítko má <code>aria-hidden=&quot;true&quot;</code>, ale je stále přístupné klávesnicí. Pokud máte v úmyslu skrýt duplicitní odkaz nebo tlačítko, přidejte také <code>tabindex=&quot;-1&quot;</code>. Jinak by se <code>aria-hidden=&quot;true&quot;</code> nemělo používat na prvcích, které mohou získat fokus. <hr> Další informace o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atributu aria-hidden.</a>',
+    ACC_NAME_TIP: '<hr><strong>Tip!</strong> „Přístupný název“ je konečný popisek, který se sděluje lidem používajícím asistivní technologie. Pomáhá jim pochopit účel prvku.',
+    HIDDEN_FOCUSABLE: 'Tento prvek může přijmout klávesový fokus, ale je skryt před čtečkami obrazovky atributem <code>aria-hidden="true"</code> (na sobě nebo na nadřazeném kontejneru). Chcete-li to napravit, buď odstraňte atribut aria-hidden, nebo prvek odstraňte z pořadí tabulátoru. <hr> <strong {B}>Prvek</strong> <pre><code>%(EL)</code></pre> <hr> Další informace o <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atributu aria-hidden.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -366,7 +365,7 @@ export default {
       'Ujistěte se, že parametr <code>maximum-scale</code> v <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta tagu pro viewport</a> není menší než 2.',
     META_REFRESH: 'Stránka by se neměla automaticky obnovovat pomocí meta tagu.',
     META_LANG_SUGGEST: 'Následující kód jazyka <code>%(CODE)</code> není platný. Mysleli jste <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Kód jazyka stránky <code>%(CODE)</code> není platný. Prosím <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarujte platný jazyk v tagu HTML.</a>',
+    META_LANG_VALID: 'Kód jazyka pro tento prvek není platný. Chcete-li to napravit, nahraďte atribut lang platným kódem jazyka. <hr> <strong {B}>Prvek</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Další informace o <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarování jazyka v HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Tlačítku chybí přístupné jméno, které popisuje jeho účel.',
@@ -379,7 +378,7 @@ export default {
       'Nezahrnujte slovo „tlačítko“ do názvu tlačítka. Čtečky obrazovky již oznamují roli prvku kromě jeho názvu.',
     LABEL_IN_NAME:
       'Viditelný text tohoto prvku se zdá být odlišný od přístupného jména, což může způsobit zmatek u uživatelů asistivních technologií. Prosím, zkontrolujte: <hr> <strong {B}>Теxt</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Přístupné jméno</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'Tento odkaz má neplatný cíl a přístupný název obsahuje slovo „<strong>%(NAME)</strong>“. To naznačuje, že se možná vůbec nejedná o odkaz, ale o prvek ovládající skriptované chování na stránce. Chcete-li to napravit, nahraďte odkaz <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">přístupným tlačítkem</a> nebo opravte cíl odkazu. <hr> <strong>Tip!</strong> Asistivní technologie zacházejí s tlačítky a odkazy odlišně. Použití správného HTML prvku zajišťuje, že uživatelé vědí, které klávesové zkratky mají použít a jaká akce se spustí.',
+    LINK_MAYBE_BUTTON: 'Tento odkaz má neplatný cíl. Přístupný název nebo jeho atributy naznačují, že by se vůbec nemuselo jednat o odkaz, ale místo toho ovládá nějaké skriptované chování na stránce. Chcete-li to napravit, nahraďte odkaz <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">přístupným tlačítkem</a> nebo opravte cíl odkazu. <hr> <strong {B}>Přístupný název</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tip!</strong> Asistivní technologie přistupují k tlačítkům a odkazům odlišně. Použití správného prvku HTML zajišťuje, že uživatelé vědí, které klávesové zkratky mají použít a jaká akce se spustí.',
     POTENTIAL_UI_ELEMENTS: ['menu', 'zavřít', 'přepnout', 'otevřít', 'rozbalit', 'sbalit', 'další', 'předchozí', 'přehrát', 'pozastavit', 'podnabídka', 'zobrazit', 'skrýt', 'rozbalovací nabídka', 'zpět', 'vpřed', 'přeskočit', 'odeslat', 'zrušit', 'uložit', 'upravit', 'smazat', 'odstranit', 'hledat', 'filtr', 'seřadit', 'zastavit', 'ztlumit', 'zrušit ztlumení', 'celá obrazovka', 'minimalizovat', 'maximalizovat'],
 
     // Tables
@@ -388,7 +387,8 @@ export default {
     TABLES_SEMANTIC_HEADING:
       'Sémantické nadpisy, jako je Nadpis 2 nebo Nadpis 3, by se měly používat pouze pro části obsahu; <strong>ne</strong> v tabulkách HTML. Nadpisy tabulek označujte místo toho pomocí elementu <code>&lt;th&gt;</code>. <hr> Další informace o <a href="https://www.w3.org/WAI/tutorials/tables/">přístupných tabulkách.</a>',
     TABLES_EMPTY_HEADING:
-      'Nalezeno prázdné záhlaví tabulky! Záhlaví tabulky by <strong>nikdy</strong> nemělo být prázdné. Je důležité označit záhlaví řádků a/nebo sloupců, aby byl vyjádřen jejich vztah. Tyto informace poskytují kontext osobám, které používají asistenční technologie. Mějte na paměti, že tabulky by se měly používat pouze pro tabulková data. <hr> Další informace o <a href="https://www.w3.org/WAI/tutorials/tables/">přístupných tabulkách.</a>.',
+      'Nalezeno prázdné záhlaví tabulky! Záhlaví tabulky by <strong>nikdy</strong> nemělo být prázdné. Je důležité označit záhlaví řádků a/nebo sloupců, aby byl vyjádřen jejich vztah. Tyto informace poskytují kontext osobám, které používají asistenční technologie. Mějte na paměti, že tabulky by se měly používat pouze pro tabulková data. <hr> Další informace o <a href="https://www.w3.org/WAI/tutorials/tables/">přístupných tabulkách.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Tato tabulka se pokouší označit konkrétní datovou buňku konkrétní buňkou záhlaví, ale ID záhlaví nelze najít. Ujistěte se, že každý atribut <code>headers</code> odpovídá ID buňky záhlaví ve stejné tabulce. <hr> <strong {B}>Záhlaví</strong> <code>%(VALUE)</code> <hr> <strong>Tip!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Používání ručních odkazů na ID</a> k propojení datových buněk s buňkami záhlaví je složité a nespolehlivé. Pokud je to možné, rozdělte složitá data do menších tabulek s jednoduchými řádky a sloupci záhlaví.',
 
     // Contrast
     CONTRAST_NORMAL: 'Text běžné velikosti by měl mít kontrastní poměr alespoň %(RATIO).',

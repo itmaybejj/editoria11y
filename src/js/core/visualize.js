@@ -5,7 +5,7 @@ import * as Utils from '../../sa11y-js/utils/utils';
 import { alignAlts } from '../utils/align';
 import { getElements } from '../utils/utils';
 import checkReadability from '../../sa11y-js/rulesets/readability';
-import { spriteDismiss } from '../elements/sprite.js';
+import sprite from '../elements/sprite.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { UI } from './ui.js';
 
@@ -163,6 +163,10 @@ export function showHeadingsPanel() {
   if (!panelOutline) {
     return;
   }
+  const oldHeadingMarks = getElements('ed11y-element-heading-label', 'root', []);
+  oldHeadingMarks?.forEach((mark) => {
+    mark.remove();
+  });
   if (State.headingOutline.length) {
     panelOutline.innerHTML = '';
     State.headingOutline.forEach((result, i) => {
@@ -208,6 +212,57 @@ export function showHeadingsPanel() {
 
 // Place markers on elements with issues
 export function drawResult(result, index) {
+  // Adoption path: pushResult has attached a back-reference to an existing
+  // MarkEntry when the same (element, test) pair fired in a prior run.
+  // Reuse the button DOM instead of rebuilding; tear down any previously
+  // built tip so it re-renders from the fresh result content on next open.
+  // See docs/race-condition-plan.md.
+  const adopted = result.markEntry;
+  // Any live MarkEntry whose button is still in the DOM is a valid adoption
+  // target. We don't guard against "two results claiming the same entry in
+  // one run" because buildJumpList is also called from fallback paths
+  // (jumpTo, toggleTip) without a fresh runGen bump — in those paths every
+  // entry already carries the current runGen and must still be adopted, not
+  // recreated.
+  if (adopted?.button?.isConnected) {
+    const mark = adopted.button;
+    mark.setAttribute('id', `ed11y-result-${index}`);
+    mark.setAttribute('data-ed11y-result', index);
+    mark.resultID = `${index}`;
+    mark.result = result;
+    mark.toggle.setAttribute('data-ed11y-result', `${index}`);
+
+    const nextDismissable = result.type !== 'error';
+    const nextDismissed = !!result.dismissalStatus;
+    if (mark.dismissable !== nextDismissable || mark.dismissed !== nextDismissed) {
+      mark.dismissable = nextDismissable;
+      mark.dismissed = nextDismissed;
+      mark.toggle.classList.toggle('dismissable', nextDismissable && !nextDismissed);
+      mark.toggle.classList.toggle('dismissed', nextDismissed);
+      mark.toggle.innerHTML = nextDismissed ? sprite.dismiss : '';
+    }
+
+    if (mark.tip) {
+      mark.tip.remove();
+      mark.tip = null;
+    }
+    mark.tipNeedsBuild = true;
+
+    // Inline-alert buttons are placed as DOM siblings of their target via
+    // insertAdjacentElement; if the target (or its surroundings) was
+    // reparented between runs the sibling position can be wrong. Re-anchor
+    // on every adopt in inline mode — cheap, and a no-op when unchanged.
+    if (UI.inlineAlerts && result.element) {
+      result.element.insertAdjacentElement(result.position, mark);
+    }
+
+    adopted.result = result;
+    adopted.generation = UI.runGen;
+    UI.jumpList.unshift(mark);
+    result.toggle = mark;
+    return;
+  }
+
   const mark = document.createElement('ed11y-element-result');
   if (UI.bodyStyle !== true) {
     // "Drawing" for first second.
@@ -252,7 +307,7 @@ export function drawResult(result, index) {
     mark.toggle.style.setProperty('font-size', '16px');
   }
   if (mark.dismissed) {
-    mark.toggle.innerHTML = spriteDismiss;
+    mark.toggle.innerHTML = sprite.dismiss;
     mark.toggle.classList.add('dismissed');
   } else if (mark.dismissable) {
     mark.toggle.classList.add('dismissable');
@@ -269,4 +324,25 @@ export function drawResult(result, index) {
 
   UI.jumpList.unshift(mark);
   State.results[index].toggle = mark;
+
+  // Register a new MarkEntry so future runs can adopt this button.
+  if (result.element) {
+    const entry = {
+      result,
+      button: mark,
+      tip: null,
+      highlight: null,
+      generation: UI.runGen,
+      element: result.element,
+      test: result.test,
+    };
+    let byTest = UI.marks.get(result.element);
+    if (!byTest) {
+      byTest = new Map();
+      UI.marks.set(result.element, byTest);
+    }
+    byTest.set(result.test, entry);
+    UI.markRegistry.add(entry);
+    result.markEntry = entry;
+  }
 }

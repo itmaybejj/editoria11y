@@ -3,6 +3,7 @@ import Lang from '../utils/lang';
 import { fontLookupAPCA } from './apca';
 import * as Contrast from './utils';
 import { convertToRGBA } from './convertColors';
+import * as Utils from '../utils/utils';
 
 /**
  * Inject contrast colour pickers into tooltip.
@@ -16,11 +17,6 @@ export function generateContrastTools(contrastDetails) {
   const hasBackgroundColor = background && background.type !== 'image';
   const backgroundHex = hasBackgroundColor ? Contrast.getHex(background) : '#000000';
   const foregroundHex = color ? Contrast.getHex(color) : '#000000';
-
-  // Other properties.
-  const hasFontWeight = fontWeight ? `font-weight:${fontWeight};` : '';
-  const hasFontSize = fontSize ? `font-size:${fontSize}px;` : '';
-  const textDecoration = textUnderline ? `text-decoration:${textUnderline};` : '';
 
   // If colour or background colour is unknown; visually indicate so.
   const unknownFG = color ? '' : 'class="unknown"';
@@ -50,7 +46,7 @@ export function generateContrastTools(contrastDetails) {
       <div id="contrast" class="badge">${Lang._('CONTRAST')}</div>
       <div id="value" class="badge">${displayedRatio}</div>
       <div id="good" class="badge good-contrast" hidden>${Lang._('GOOD')} <span class="good-icon"></span></div>
-      <div id="contrast-preview" style="color:${foregroundHex};${hasBackgroundColor ? `background:${backgroundHex};` : ''}${hasFontWeight + hasFontSize + textDecoration}"></div>
+      <div id="contrast-preview"></div>
       <div id="color-pickers">
         <label for="fg-text">${Lang._('FG')} ${unknownFGText}
           <div id="fg-color-wrapper" ${unknownFG}>
@@ -63,7 +59,13 @@ export function generateContrastTools(contrastDetails) {
           </div>
         </label>
       </div>`;
-  contrastTools.querySelector('#contrast-preview').textContent = previewText;
+  const preview = contrastTools.querySelector('#contrast-preview');
+  preview.textContent = previewText;
+  preview.style.color = foregroundHex;
+  if (hasBackgroundColor) preview.style.background = backgroundHex;
+  if (fontWeight) preview.style.fontWeight = fontWeight;
+  if (fontSize) preview.style.fontSize = `${fontSize}px`;
+  if (textUnderline) preview.style.textDecoration = textUnderline;
   return contrastTools;
 }
 
@@ -104,7 +106,7 @@ export function initializeContrastTools(container, contrastDetails) {
     }
 
     // Fallback to computed style.
-    const computed = getComputedStyle(contrastPreview).fontSize;
+    const computed = Utils.getCachedStyle(contrastPreview).fontSize;
     if (computed) {
       const match = computed.match(/([\d.]+)/);
       if (match) return parseFloat(match[1]);
@@ -248,7 +250,7 @@ export function generateColorSuggestion(contrastDetails) {
     !color ||
     !background ||
     background.type === 'image' ||
-    !(type === 'text' || type === 'svg-error' || type === 'input')
+    !(type === 'text' || type === 'svg-error' || type === 'input' || type === 'placeholder')
   ) {
     return;
   }

@@ -1,0 +1,432 @@
+{
+  "schemaVersion": 1,
+  "ed11yVersion": "3.0.0",
+  "sa11yVersion": "4.4.2",
+  "generatedAt": "2026-04-21T20:15:04.610Z",
+  "checks": {
+    "ALT_FILE_EXT": {
+      "title": "This alt text is a filename, not a description",
+      "deferred": false
+    },
+    "ALT_MAYBE_BAD": {
+      "title": "Is this a clear and concise description of the image?",
+      "deferred": false
+    },
+    "ALT_MAYBE_BAD_WARNING": {
+      "title": "Is this a clear and concise description of the image?",
+      "deferred": false
+    },
+    "ALT_PLACEHOLDER": {
+      "title": "This alt text may be a placeholder",
+      "deferred": false
+    },
+    "ALT_UNPRONOUNCEABLE": {
+      "title": "This alt text is unpronounceable",
+      "deferred": false
+    },
+    "ARIA_INPUT_FIELD_NAME": {
+      "title": "This custom input field is missing a label",
+      "deferred": false
+    },
+    "BTN_EMPTY": {
+      "title": "Button is missing an accessible label",
+      "deferred": false
+    },
+    "BTN_EMPTY_LABELLEDBY": {
+      "title": "Button has an invalid ARIA label",
+      "deferred": false
+    },
+    "BTN_ROLE_IN_NAME": {
+      "title": "Button name repeats the word \"button\"",
+      "deferred": false
+    },
+    "CONTRAST_ERROR": {
+      "title": "Text does not have enough contrast to be easily legible",
+      "deferred": true
+    },
+    "CONTRAST_ERROR_GRAPHIC": {
+      "title": "Graphic or icon does not have enough contrast",
+      "deferred": true
+    },
+    "CONTRAST_INPUT": {
+      "title": "Input does not provide enough contrast to be easily legible",
+      "deferred": true
+    },
+    "CONTRAST_PLACEHOLDER": {
+      "title": "Placeholder text does not have enough contrast to be easily legible",
+      "deferred": true
+    },
+    "CONTRAST_PLACEHOLDER_UNSUPPORTED": {
+      "title": "Does this placeholder text have enough contrast?",
+      "deferred": true
+    },
+    "CONTRAST_UNSUPPORTED": {
+      "title": null,
+      "deferred": true
+    },
+    "CONTRAST_WARNING": {
+      "title": "Does this text have enough contrast?",
+      "deferred": false
+    },
+    "CONTRAST_WARNING_GRAPHIC": {
+      "title": "Does this graphic or icon have enough contrast?",
+      "deferred": true
+    },
+    "DUPLICATE_ID": {
+      "title": "Duplicate ID attribute",
+      "deferred": false
+    },
+    "DUPLICATE_TITLE": {
+      "title": "This link has a tooltip with the same text as the link",
+      "deferred": false
+    },
+    "EMBED_AUDIO": {
+      "title": "Does this audio have a transcript?",
+      "deferred": false
+    },
+    "EMBED_DATA_VIZ": {
+      "title": "Is this visualization accessible?",
+      "deferred": false
+    },
+    "EMBED_GENERAL": {
+      "title": "Embedded iframes need manual checks",
+      "deferred": false
+    },
+    "EMBED_MISSING_TITLE": {
+      "title": "Frame missing \"title\" attribute",
+      "deferred": false
+    },
+    "EMBED_UNFOCUSABLE": {
+      "title": "Frame with tabindex=\"-1\" will not be keyboard accessible.",
+      "deferred": false
+    },
+    "EMBED_VIDEO": {
+      "title": "Is this video accurately captioned?",
+      "deferred": false
+    },
+    "HEADING_EMPTY": {
+      "title": "This heading has no text",
+      "deferred": false
+    },
+    "HEADING_EMPTY_WITH_IMAGE": {
+      "title": "This image is used as a heading, so it needs alt text",
+      "deferred": false
+    },
+    "HEADING_FIRST": {
+      "title": "The first heading on this page is a subheading",
+      "deferred": false
+    },
+    "HEADING_LONG": {
+      "title": "Can this heading be shorter?",
+      "deferred": false
+    },
+    "HEADING_MISSING_ONE": {
+      "title": "This page is missing a Heading 1",
+      "deferred": false
+    },
+    "HEADING_SKIPPED_LEVEL": {
+      "title": "This heading is tagged at the wrong level",
+      "deferred": false
+    },
+    "HIDDEN_FOCUSABLE": {
+      "title": "This element cannot be described by screen readers",
+      "deferred": false
+    },
+    "IMAGE_ALT_TOO_LONG": {
+      "title": "Can this alt text be shorter?",
+      "deferred": false
+    },
+    "IMAGE_DECORATIVE": {
+      "title": "Is this image actually meaningless?",
+      "deferred": false
+    },
+    "IMAGE_DECORATIVE_CAROUSEL": {
+      "title": "Image in a carousel or gallery marked as decorative",
+      "deferred": false
+    },
+    "IMAGE_FIGURE_DECORATIVE": {
+      "title": "This captioned image has no alt text",
+      "deferred": false
+    },
+    "IMAGE_FIGURE_DUPLICATE_ALT": {
+      "title": "Alt text should not be the same as caption text",
+      "deferred": false
+    },
+    "IMAGE_PASS": {
+      "title": null,
+      "deferred": true
+    },
+    "LABELS_ARIA_LABEL_INPUT": {
+      "title": "Is there a visible label for this field?",
+      "deferred": false
+    },
+    "LABELS_INPUT_RESET": {
+      "title": "Is this reset button needed?",
+      "deferred": false
+    },
+    "LABELS_MISSING_IMAGE_INPUT": {
+      "title": "This image input is missing alt text",
+      "deferred": true
+    },
+    "LABELS_MISSING_LABEL": {
+      "title": "This input has an empty label",
+      "deferred": false
+    },
+    "LABELS_NO_FOR_ATTRIBUTE": {
+      "title": "This input is not connected to a label",
+      "deferred": true
+    },
+    "LABELS_PLACEHOLDER": {
+      "title": "Prefer visible labels to placeholders",
+      "deferred": false
+    },
+    "LABEL_IN_NAME": {
+      "title": "Visible label does not match invisible label",
+      "deferred": false
+    },
+    "LANG_MISMATCH": {
+      "title": "Language tag does not match the content",
+      "deferred": true
+    },
+    "LANG_OF_PARTS": {
+      "title": "This content appears to be in a different language",
+      "deferred": true
+    },
+    "LANG_OF_PARTS_ALT": {
+      "title": "This alt text appears to be in a different language",
+      "deferred": true
+    },
+    "LINK_ALT_FILE_EXT": {
+      "title": "Alt text used as a link should not be a URL",
+      "deferred": false
+    },
+    "LINK_ALT_MAYBE_BAD": {
+      "title": "This linked alt might not be clear and concise",
+      "deferred": false
+    },
+    "LINK_ALT_MAYBE_BAD_WARNING": {
+      "title": "This linked alt might not be clear and concise",
+      "deferred": false
+    },
+    "LINK_ALT_UNPRONOUNCEABLE": {
+      "title": "Linked images need pronounceable alt text",
+      "deferred": false
+    },
+    "LINK_CLICK_HERE": {
+      "title": "This link contains \"click here\"",
+      "deferred": false
+    },
+    "LINK_DOI": {
+      "title": "Link article titles, not DOI numbers",
+      "deferred": false
+    },
+    "LINK_EMPTY": {
+      "title": "This link contains no words",
+      "deferred": false
+    },
+    "LINK_EMPTY_LABELLEDBY": {
+      "title": "Link with invalid \"aria-labelledby\" attribute",
+      "deferred": false
+    },
+    "LINK_EMPTY_NO_LABEL": {
+      "title": "This link needs a label",
+      "deferred": false
+    },
+    "LINK_FILE_EXT": {
+      "title": "Link points to a file without warning",
+      "deferred": false
+    },
+    "LINK_IDENTICAL_NAME": {
+      "title": "Links with the same text link to different pages",
+      "deferred": false
+    },
+    "LINK_IMAGE_ALT": {
+      "title": "Does this alt text describe the link or the image?",
+      "deferred": false
+    },
+    "LINK_IMAGE_ALT_AND_TEXT": {
+      "title": "Does this alt text make sense as part of this link?",
+      "deferred": false
+    },
+    "LINK_IMAGE_LONG_ALT": {
+      "title": "Can this linked alt text be shorter?",
+      "deferred": false
+    },
+    "LINK_IMAGE_NO_ALT_TEXT": {
+      "title": "This linked image needs alt text",
+      "deferred": false
+    },
+    "LINK_IMAGE_TEXT": {
+      "title": "Does this linked image need a description?",
+      "deferred": false
+    },
+    "LINK_LABEL": {
+      "title": "Link label",
+      "deferred": true
+    },
+    "LINK_MAYBE_BUTTON": {
+      "title": "Is this link actually a button?",
+      "deferred": false
+    },
+    "LINK_NEW_TAB": {
+      "title": "Does this link open a new tab without warning?",
+      "deferred": false
+    },
+    "LINK_PLACEHOLDER_ALT": {
+      "title": "This linked alt text may be a placeholder",
+      "deferred": false
+    },
+    "LINK_STOPWORD": {
+      "title": "This link only contains generic words",
+      "deferred": false
+    },
+    "LINK_STOPWORD_ARIA": {
+      "title": "The purpose of this link is visually hidden",
+      "deferred": false
+    },
+    "LINK_SUS_ALT": {
+      "title": "Does this image's alt describe the image or the link?",
+      "deferred": false
+    },
+    "LINK_SYMBOLS": {
+      "title": "Are the symbols or emoji in this link meaningful?",
+      "deferred": false
+    },
+    "LINK_UNPRONOUNCEABLE": {
+      "title": "This link is unpronounceable",
+      "deferred": false
+    },
+    "LINK_URL": {
+      "title": "Link text should not be a URL",
+      "deferred": false
+    },
+    "META_LANG": {
+      "title": "Meta tag for page language missing",
+      "deferred": false
+    },
+    "META_LANG_SUGGEST": {
+      "title": "Did you mean a different language code?",
+      "deferred": true
+    },
+    "META_LANG_VALID": {
+      "title": "Invalid language code",
+      "deferred": true
+    },
+    "META_MAX": {
+      "title": "Meta tag limits how much users can enlarge text",
+      "deferred": true
+    },
+    "META_REFRESH": {
+      "title": "Meta tag automatically refreshes page",
+      "deferred": false
+    },
+    "META_SCALABLE": {
+      "title": "Meta tag prevents users from enlarging text",
+      "deferred": true
+    },
+    "META_TITLE": {
+      "title": "Meta tag for page title missing",
+      "deferred": false
+    },
+    "MISSING_ALT": {
+      "title": "Invalid HTML: image has no alt attribute",
+      "deferred": false
+    },
+    "MISSING_ALT_LINK": {
+      "title": "Invalid HTML: linked image missing alt attribute",
+      "deferred": false
+    },
+    "MISSING_ALT_LINK_HAS_TEXT": {
+      "title": "Invalid HTML: image in link missing alt attribute",
+      "deferred": false
+    },
+    "PAGE_LANG_CONFIDENCE": {
+      "title": "Page language may not match the content",
+      "deferred": true
+    },
+    "QA_BAD_LINK": {
+      "title": "This link target may be invalid",
+      "deferred": false
+    },
+    "QA_BLOCKQUOTE": {
+      "title": "Should this quote be a heading?",
+      "deferred": false
+    },
+    "QA_DOCUMENT": {
+      "title": "Has this document been tagged for screen readers?",
+      "deferred": false
+    },
+    "QA_FAKE_HEADING": {
+      "title": "Should this bold text be a heading?",
+      "deferred": false
+    },
+    "QA_FAKE_LIST": {
+      "title": "Should this have list formatting?",
+      "deferred": false
+    },
+    "QA_IN_PAGE_LINK": {
+      "title": "Broken same-page link",
+      "deferred": false
+    },
+    "QA_JUSTIFY": {
+      "title": "Do not justify text",
+      "deferred": false
+    },
+    "QA_NESTED_COMPONENTS": {
+      "title": "Nested interactive layout components",
+      "deferred": false
+    },
+    "QA_PDF": {
+      "title": "Is there an alternative for this PDF?",
+      "deferred": false
+    },
+    "QA_SMALL_TEXT": {
+      "title": "Text is too small",
+      "deferred": false
+    },
+    "QA_STRONG_ITALICS": {
+      "title": "Large blocks of emphasized text are harder to read",
+      "deferred": false
+    },
+    "QA_SUBSCRIPT": {
+      "title": "Do not use sub/superscript as visual formatting",
+      "deferred": false
+    },
+    "QA_UNDERLINE": {
+      "title": "Only links should be underlined",
+      "deferred": false
+    },
+    "QA_UPPERCASE": {
+      "title": "Is this uppercase text needed?",
+      "deferred": false
+    },
+    "SUS_ALT": {
+      "title": "Are there redundant words in this alt text?",
+      "deferred": false
+    },
+    "TABINDEX_ATTR": {
+      "title": "Tabindex overrides interrupt the focus order",
+      "deferred": false
+    },
+    "TABLES_EMPTY_HEADING": {
+      "title": "This header cell needs text",
+      "deferred": false
+    },
+    "TABLES_INVALID_HEADERS_REF": {
+      "title": "This table has an invalid headers attribute",
+      "deferred": true
+    },
+    "TABLES_MISSING_HEADINGS": {
+      "title": "This table needs a header row and/or column",
+      "deferred": false
+    },
+    "TABLES_SEMANTIC_HEADING": {
+      "title": "Content headings should not be used inside tables",
+      "deferred": false
+    },
+    "UNCONTAINED_LI": {
+      "title": "Invalid HTML list",
+      "deferred": true
+    }
+  }
+}

@@ -1,7 +1,13 @@
 import version from '../version.js';
 
 export const UI = {
-  editableHighlight: {},
+  // Mark adoption registry. Populated by drawResult, consulted by the
+  // patched pushResult, swept for orphans after each run. Lets us reuse
+  // an existing button/tip/highlight across rechecks when the same
+  // (element, test) pair produces a result in the new run.
+  // See docs/race-condition-plan.md.
+  marks: new WeakMap(), // Element -> Map<test, MarkEntry>
+  markRegistry: new Set(), // iterable view of live MarkEntry
   imageAlts: [],
   attachCSS: () => {},
   panel: false,
@@ -19,6 +25,7 @@ export const UI = {
   version: version,
   english: true,
   running: false,
+  runGen: 0,
   watching: [],
   seen: [],
   ignore: '',
@@ -35,6 +42,7 @@ export const UI = {
   forceFullCheck: false,
   browserSpeed: 1,
   browserLag: 1,
+  recheckPendingOnClose: false,
   customTestsRemaining: 0,
   testsRemaining: 0,
   customTestTimeout: 0,

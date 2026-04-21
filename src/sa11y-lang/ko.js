@@ -295,6 +295,7 @@ export default {
       '이 입력과 연결된 레이블이 없습니다. 이 입력에 <code>아이디</code>를 추가하고 레이블에 일치하는 <code>용</code> 속성을 추가하세요.',
     LABELS_PLACEHOLDER:
       '사라지는 자리 표시자 텍스트는 사람들이 필드에 어떤 정보가 들어가야 하는지 기억하는 데 어려움을 주며 유효성 검사 문제를 식별하고 수정하기 어렵게 만듭니다. 대신, 양식 필드 앞에 항상 표시되는 힌트를 사용하는 것을 고려하십시오. <hr> 자세히 알아보세요: <a href="https://www.nngroup.com/articles/form-design-placeholders/">양식 필드의 자리 표시자는 유해합니다.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA 입력 또는 토글 필드에 액세스 가능한 이름이 누락되었습니다. 문제를 해결하려면 유효한 <code>aria-labelledby</code>, <code>aria-label</code> 또는 <code>title</code> 속성을 제공하세요. 입력이 토글 가능한 경우(예: 체크박스, 스위치, 라디오 버튼) 시각적인 내부 텍스트를 추가해도 이 문제가 해결됩니다. <hr> <strong {B}>요소</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -342,10 +343,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>링크 텍스트</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>접근 가능한 이름</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>팁!</strong> "접근 가능한 이름"은 보조 기술을 사용하는 사람들에게 전달되는 최종 레이블이며 ARIA에 의해 계산됩니다. 이를 통해 링크 또는 버튼의 목적을 이해하는 데 도움이 됩니다.',
-    HIDDEN_FOCUSABLE:
-      '링크 또는 버튼에 <code>aria-hidden=&quot;true&quot;</code> 속성이 있지만 여전히 키보드로 포커스할 수 있습니다. 중복된 링크 또는 버튼을 숨기려면 <code>tabindex=&quot;-1&quot;</code> 속성을 추가하세요. 그렇지 않으면, 포커스를 받을 수 있는 요소에 <code>aria-hidden=&quot;true&quot;</code>를 사용해서는 안 됩니다. <hr> <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden 속성</a>에 대해 더 알아보세요.',
+    ACC_NAME_TIP: '<hr><strong>팁!</strong> "액세스 가능한 이름"은 보조 기술을 사용하는 사람들에게 전달되는 최종 레이블입니다. 이는 그들이 요소의 목적을 이해하는 데 도움이 됩니다.',
+    HIDDEN_FOCUSABLE: '이 요소는 키보드 포커스를 받을 수 있지만, 자신 또는 상위 컨테이너의 <code>aria-hidden="true"</code> 속성으로 인해 스크린 리더에서 숨겨져 있습니다. 문제를 해결하려면 aria-hidden 속성을 제거하거나 탭 순서에서 요소를 제거하세요. <hr> <strong {B}>요소</strong> <pre><code>%(EL)</code></pre> <hr> <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden 속성</a>에 대해 자세히 알아보세요.',
 
     // Developer
     DUPLICATE_ID:
@@ -365,7 +364,7 @@ export default {
       '<a href="https://developer.mozilla.org/ko/docs/Web/HTML/Viewport_meta_tag">뷰포트 메타 태그</a>에서 <code>maximum-scale</code> 매개변수가 2보다 작지 않도록 하십시오.',
     META_REFRESH: '페이지는 메타 태그를 사용하여 자동으로 새로고침되지 않아야 합니다.',
     META_LANG_SUGGEST: '다음 언어 코드 <code>%(CODE)</code>가 유효하지 않습니다. <code>%(CODE)</code>를 의미하셨나요?',
-    META_LANG_VALID: '페이지 언어 코드 <code>%(CODE)</code>가 유효하지 않습니다. <a href="https://www.w3.org/International/questions/qa-html-language-declarations">HTML 태그에 유효한 언어를 선언해 주세요.</a>',
+    META_LANG_VALID: '이 요소의 언어 코드가 유효하지 않습니다. 문제를 해결하려면 lang 속성을 유효한 언어 코드로 교체하세요. <hr> <strong {B}>요소</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> <a href="https://www.w3.org/International/questions/qa-html-language-declarations">HTML에서 언어 선언</a>에 대해 자세히 알아보세요.',
 
     // Buttons
     BTN_EMPTY: '버튼에 그 목적을 설명하는 접근 가능한 이름이 없습니다.',
@@ -378,7 +377,7 @@ export default {
       '버튼 이름에 "버튼"이라는 단어를 포함하지 마십시오. 스크린 리더는 이름 외에도 요소의 역할을 전달합니다.',
     LABEL_IN_NAME:
       '이 요소의 표시되는 텍스트가 접근 가능한 이름과 다른 것처럼 보이며, 지원 기술을 사용하는 사용자에게 혼란을 줄 수 있습니다. 검토해 주세요: <hr> <strong {B}>텍스트</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>접근 가능한 이름</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: '이 링크에는 유효하지 않은 대상이 있으며, 접근 가능한 이름에 "<strong>%(NAME)</strong>"이라는 단어가 포함되어 있습니다. 이는 이것이 링크가 아니라 페이지의 일부 스크립트 동작을 제어하고 있음을 나타냅니다. 문제를 해결하려면 링크를 <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">접근 가능한 버튼</a>으로 교체하거나 링크의 대상을 수정하세요. <hr> <strong>팁!</strong> 보조 기술은 버튼과 링크를 다르게 취급합니다. 올바른 HTML 요소를 사용하면 사용자가 어떤 키보드 단축키를 사용해야 하는지, 어떤 동작이 트리거되는지 알 수 있습니다.',
+    LINK_MAYBE_BUTTON: '이 링크의 대상이 유효하지 않습니다. 액세스 가능한 이름이나 속성으로 볼 때, 이것은 링크가 아니라 페이지의 스크립트 동작을 제어하는 요소일 가능성이 높습니다. 문제를 해결하려면 링크를 <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">액세스 가능한 버튼</a>으로 교체하거나 링크의 목적지를 수정하세요. <hr> <strong {B}>액세스 가능한 이름</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>팁!</strong> 보조 기술은 버튼과 링크를 다르게 처리합니다. 올바른 HTML 요소를 사용하면 사용자가 어떤 키보드 단축키를 사용해야 하는지, 어떤 동작이 실행될지 이해할 수 있습니다.',
     POTENTIAL_UI_ELEMENTS: ['메뉴', '닫기', '토글', '열기', '확장', '축소', '다음', '이전', '재생', '일시 중지', '하위 메뉴', '표시', '숨기기', '드롭다운', '뒤로', '앞으로', '건너뛰기', '제출', '취소', '저장', '편집', '삭제', '제거', '검색', '필터', '정렬', '중지', '음소거', '음소거 해제', '전체 화면', '최소화', '최대화'],
 
     // Tables
@@ -388,6 +387,7 @@ export default {
       '제목 2 또는 제목 3과 같은 시맨틱 제목은 콘텐츠 섹션에만 사용해야 하며, HTML 표에는 <strong>이 아닌</strong>을 사용해야 합니다. 대신 <code>&lt;th&gt;</code> 요소를 사용하여 표 제목을 표시하세요. <hr> <a href="https://www.w3.org/WAI/tutorials/tables/">액세스 가능한 표에 대해 자세히 알아보기.</a>',
     TABLES_EMPTY_HEADING:
       '빈 테이블 헤더가 발견되었습니다! 테이블 헤더는 비어 있으면 안 됩니다. 행 및/또는 열 머리글을 지정하여 관계를 전달하는 것이 중요합니다. 이 정보는 보조 기술을 사용하는 사람들에게 맥락을 제공합니다. 표는 표 형식의 데이터에만 사용해야 한다는 점에 유의하세요. <hr> <a href="https://www.w3.org/WAI/tutorials/tables/">액세스 가능한 테이블에 대해 자세히 알아보기.</a>',
+    TABLES_INVALID_HEADERS_REF: '이 테이블은 특정 데이터 셀을 특정 헤더 셀로 레이블을 지정하려고 시도하지만, 헤더 ID를 찾을 수 없습니다. 각 <code>headers</code> 속성이 동일한 테이블 내의 헤더 셀 ID와 일치하는지 확인하세요. <hr> <strong {B}>헤더</strong> <code>%(VALUE)</code> <hr> <strong>팁!</strong> 데이터 셀을 헤더 셀과 연결하기 위해 <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">수동 ID 참조를 사용</a>하는 것은 복잡하고 관리가 어렵습니다. 가능하면 복잡한 데이터를 단순한 헤더 행과 열이 있는 작은 테이블로 나누세요.',
 
     // Contrast
     CONTRAST_NORMAL: '일반 크기의 텍스트는 최소 %(RATIO) 대비 비율을 가져야 합니다.',

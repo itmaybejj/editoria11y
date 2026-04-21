@@ -295,6 +295,7 @@ export default {
       'Su šia įvestimi nėra susieta jokia etiketė. Pridėkite <code>id</code> prie šios įvesties ir pridėkite atitinkamą <code>for</code> atributą prie etiketės.',
     LABELS_PLACEHOLDER:
       'Dingstantis vietos laikiklio tekstas apsunkina žmonėms atsiminti, kokia informacija priklauso laukeliui, ir nustatyti bei ištaisyti galiojimo problemas. Vietoj to, apsvarstykite galimybę naudoti nuolat matomą užuominą prieš formos laukelį. <hr> Sužinokite daugiau: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Vietos laikikliai formų laukeliuose yra žalingi.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA įvesties arba perjungimo laukui trūksta prieinamo pavadinimo. Norėdami tai ištaisyti, pateikite galiojantį <code>aria-labelledby</code>, <code>aria-label</code> arba <code>title</code> atributą. Jei įvestis yra perjungiama (pvz., žymimasis langelis, jungiklis, radijo mygtukas), matomo vidinio teksto pridėjimas taip pat išspręs šią problemą. <hr> <strong {B}>Elementas</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -304,7 +305,7 @@ export default {
     EMBED_DATA_VIZ:
       'Tokie duomenų vizualizavimo valdikliai dažnai kelia problemų žmonėms, kurie naudojasi klaviatūra arba ekrano skaitytuvu, ir gali kelti didelių sunkumų silpnaregiams arba spalvinio aklumo žmonėms. Rekomenduojama tą pačią informaciją pateikti alternatyviu (teksto arba lentelės) formatu po valdikliu. <hr> Sužinokite daugiau apie <a href="https://www.w3.org/WAI/tutorials/images/complex">sudėtingus vaizdus.</a>',
     EMBED_MISSING_TITLE:
-      'Įterptajam turiniui reikalingas prieinamas pavadinimas, apibūdinantis jo turinį. Elemente <code>iframe</code> nurodykite unikalų <code>title</code> arba <code>aria-label</code> atributą. Sužinokite daugiau apie <a href="https://web.dev/learn/accessibility/more-html#iframes">iRėmus.</a>.',
+      'Įterptajam turiniui reikalingas prieinamas pavadinimas, apibūdinantis jo turinį. Elemente <code>iframe</code> nurodykite unikalų <code>title</code> arba <code>aria-label</code> atributą. Sužinokite daugiau apie <a href="https://web.dev/learn/accessibility/more-html#iframes">iRėmus.</a>',
     EMBED_GENERAL:
       'Nepavyksta patikrinti įterpto turinio. Įsitikinkite, kad paveikslėliuose yra "alt" tekstas, vaizdo įrašuose - antraštės, tekstas pakankamai kontrastingas, o interaktyvūs komponentai yra <a href="https://webaim.org/techniques/keyboard/">prieinami klaviatūra.</a>',
     EMBED_UNFOCUSABLE:
@@ -325,7 +326,7 @@ export default {
     QA_FAKE_HEADING:
       'Ar tai antraštė? <strong {C}>%(TEXT)</strong> <hr> Paryškinto ar didelio teksto eilutė gali atrodyti kaip antraštė, tačiau ekrano skaitytuvu besinaudojantis žmogus negali pasakyti, kad ji yra svarbi, arba pereiti prie jos turinio. Paryškintas ar didelis tekstas niekada neturėtų pakeisti semantinių antraščių (nuo 2 iki 6 antraštės).',
     QA_FAKE_LIST:
-      'Ar bandote sudaryti sąrašą? Rastas galimas sąrašo elementas: <strong {C}>%(firstPrefix)</strong> <hr> Įsitikinkite, kad naudojate semantinius sąrašus, vietoj jų naudodami kulkų arba skaičių formatavimo mygtukus. Naudojant semantinį sąrašą pagalbinės technologijos gali perteikti tokią informaciją, kaip bendras elementų skaičius ir kiekvieno elemento santykinė padėtis sąraše. Sužinokite daugiau apie <a href="https://www.w3.org/WAI/tutorials/page-structure/content/#lists">semantinius sąrašus.</a>.',
+      'Ar bandote sudaryti sąrašą? Rastas galimas sąrašo elementas: <strong {C}>%(firstPrefix)</strong> <hr> Įsitikinkite, kad naudojate semantinius sąrašus, vietoj jų naudodami kulkų arba skaičių formatavimo mygtukus. Naudojant semantinį sąrašą pagalbinės technologijos gali perteikti tokią informaciją, kaip bendras elementų skaičius ir kiekvieno elemento santykinė padėtis sąraše. Sužinokite daugiau apie <a href="https://www.w3.org/WAI/tutorials/page-structure/content/#lists">semantinius sąrašus.</a>',
     QA_UPPERCASE:
       'Rastos visos didžiosios raidės. Kai kurie ekrano skaitytuvai tekstą visomis didžiosiomis raidėmis gali interpretuoti kaip akronimą ir skaityti kiekvieną raidę atskirai. Be to, kai kurie žmonės mano, kad visos didžiosios raidės yra sunkiau įskaitomos, ir tai gali sudaryti šauksmo įspūdį.',
     QA_UNDERLINE:
@@ -342,10 +343,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>Nuorodos tekstas</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>Prieinamas pavadinimas</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>Patarimas!</strong> "Prieinamas pavadinimas" yra galutinis etiketas, kuris perduodamas žmonėms, naudojantiems pagalbines technologijas, ir skaičiuojamas ARIA. Tai padeda jiems suprasti nuorodos ar mygtuko tikslą.',
-    HIDDEN_FOCUSABLE:
-      'Saites vai pogas atribūtam ir <code>aria-hidden=&quot;true&quot;</code>, bet tas ir joprojām fokusējams no tastatūras. Ja jūs vēlaties paslēpt dublējošu saiti vai pogu, pievienojiet arī <code>tabindex=&quot;-1&quot;</code>. Pretējā gadījumā <code>aria-hidden=&quot;true&quot;</code> nedrīkst izmantot elementiem, kas var saņemt fokusu. <hr> Uzziniet vairāk par <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden atribūtu.</a>',
+    ACC_NAME_TIP: '<hr><strong>Patarimas!</strong> „Prieinamas pavadinimas“ yra galutinė etiketė, kuri perduodama žmonėms, naudojantiems pagalbines technologijas. Tai padeda jiems suprasti elemento paskirtį.',
+    HIDDEN_FOCUSABLE: 'Šis elementas gali gauti klaviatūros fokusavimą, tačiau jis yra paslėptas nuo ekrano skaitytuvų naudojant <code>aria-hidden="true"</code> atributą (pačiame elemente arba tėviniame konteineryje). Norėdami tai ištaisyti, pašalinkite atributą aria-hidden arba pašalinkite elementą iš tabuliavimo tvarkos. <hr> <strong {B}>Elementas</strong> <pre><code>%(EL)</code></pre> <hr> Sužinokite daugiau apie <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">atributą aria-hidden.</a>',
 
     // Developer
     DUPLICATE_ID:
@@ -365,7 +364,7 @@ export default {
       'Įsitikinkite, kad <code>maximum-scale</code> parametras <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta žymos vaizde</a> nėra mažesnis nei 2.',
     META_REFRESH: 'Puslapis neturėtų automatiškai atsinaujinti naudojant meta žymę.',
     META_LANG_SUGGEST: 'Šis kalbos kodas <code>%(CODE)</code> yra negaliojantis. Ar turėjote omenyje <code>%(CODE)</code>?',
-    META_LANG_VALID: 'Puslapio kalbos kodas <code>%(CODE)</code> yra negaliojantis. Prašome <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklaruoti galiojančią kalbą HTML žymoje.</a>',
+    META_LANG_VALID: 'Šio elemento kalbos kodas negalioja. Norėdami tai ištaisyti, pakeiskite lang atributą galiojančiu kalbos kodu. <hr> <strong {B}>Elementas</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Sužinokite daugiau apie <a href="https://www.w3.org/International/questions/qa-html-language-declarations">kalbos deklaravimą HTML.</a>',
 
     // Buttons
     BTN_EMPTY: 'Mygtukas neturi prieinamo pavadinimo, kuris apibūdina jo paskirtį.',
@@ -378,7 +377,7 @@ export default {
       'Nepalikite žodžio „mygtukas“ mygtuko pavadinime. Ekrano skaitytuvai jau praneša elemento vaidmenį be jo pavadinimo.',
     LABEL_IN_NAME:
       'Matomas šio elemento tekstas atrodo skirtingas nei prieinamas pavadinimas, kas gali sukelti painiavą pagalbinių technologijų naudotojams. Peržiūrėkite: <hr> <strong {B}>Tekstas</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Prieinamas Pavadinimas</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'Ši nuoroda turi negaliojantį tikslą, o jos prieinamame pavadinime yra žodis „<strong>%(NAME)</strong>“. Tai rodo, kad tai gali būti visai ne nuoroda, o elementas, valdantis tam tikrą skriptų elgseną puslapyje. Norėdami tai ištaisyti, pakeiskite nuorodą <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">prieinamu mygtuku</a> arba ištaisykite nuorodos tikslą. <hr> <strong>Patarimas!</strong> Pagalbinės technologijos mygtukus ir nuorodas apdoroja skirtingai. Teisingo HTML elemento naudojimas užtikrina, kad naudotojai žinotų, kuriuos sparčiuosius klavišus naudoti ir koks veiksmas bus atliktas.',
+    LINK_MAYBE_BUTTON: 'Ši nuoroda turi negaliojantį tikslą. Nors prieinamas pavadinimas arba jo atributai rodo, kad tai gali būti visai ne nuoroda, o tam tikras puslapio scenarijaus elgsenos valdymas. Norėdami tai ištaisyti, pakeiskite nuorodą <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">prieinamu mygtuku</a> arba pataisykite nuorodos tikslą. <hr> <strong {B}>Prieinamas pavadinimas</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Patarimas!</strong> Pagalbinės technologijos mygtukus ir nuorodas apdoroja skirtingai. Tinkamo HTML elemento naudojimas užtikrina, kad vartotojai žinotų, kokius klaviatūros sparčiuosius klavišus naudoti ir koks veiksmas bus atliktas.',
     POTENTIAL_UI_ELEMENTS: ['meniu', 'uždaryti', 'perjungti', 'atidaryti', 'išskleisti', 'suskleisti', 'kitas', 'ankstesnis', 'leisti', 'pauzė', 'papildomas meniu', 'rodyti', 'slėpti', 'išskleidžiamasis meniu', 'atgal', 'pirmyn', 'praleisti', 'pateikti', 'atšaukti', 'išsaugoti', 'redaguoti', 'ištrinti', 'pašalinti', 'ieškoti', 'filtras', 'rūšiuoti', 'sustabdyti', 'nutildyti', 'atitildyti', 'visas ekranas', 'sumažinti', 'padidinti'],
 
     // Tables
@@ -388,6 +387,7 @@ export default {
       'Semantinės antraštės, pavyzdžiui, Heading 2 arba Heading 3, turėtų būti naudojamos tik turinio skyriams; <strong>ne</strong> HTML lentelėse. Vietoj to lentelių antraštes nurodykite naudodami elementą <code>&lt;th&gt;</code>. <hr> Sužinokite daugiau apie <a href="https://www.w3.org/WAI/tutorials/tables/">prieinamas lenteles.</a>',
     TABLES_EMPTY_HEADING:
       'Rasta tuščia lentelės antraštė! Lentelės antraštės <strong>niekada</strong> neturėtų būti tuščios. Svarbu nurodyti eilučių ir (arba) stulpelių antraštes, kad būtų išreikštas jų ryšys. Ši informacija suteikia kontekstą žmonėms, kurie naudojasi pagalbinėmis technologijomis. Atminkite, kad lentelės turėtų būti naudojamos tik lentelėms su lentelių duomenimis. <hr> Sužinokite daugiau apie <a href="https://www.w3.org/WAI/tutorials/tables/">prieinamas lenteles.</a>',
+    TABLES_INVALID_HEADERS_REF: 'Ši lentelė bando susieti konkretų duomenų langelį su konkrečiu antraštės langeliu, tačiau antraštės ID nerastas. Įsitikinkite, kad kiekvienas <code>headers</code> atributas atitinka antraštės langelio ID toje pačioje lentelėje. <hr> <strong {B}>Antraštės</strong> <code>%(VALUE)</code> <hr> <strong>Patarimas!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Rankinių ID nuorodų naudojimas</a> duomenų langeliams susieti su antraščių langeliais yra sudėtingas ir nepatikimas. Jei įmanoma, suskaidykite sudėtingus duomenis į mažesnes lenteles su paprastomis antraščių eilutėmis ir stulpeliais.',
 
     // Contrast
     CONTRAST_NORMAL: 'Normalus dydžio tekstas turėtų turėti bent %(RATIO) kontrasto santykį.',

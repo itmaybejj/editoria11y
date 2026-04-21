@@ -124,9 +124,12 @@ export function countAlerts() {
     }
 
     State.results[i].position = 'beforebegin';
+    if (!State.results[i].element) {
+      State.results[i].element = Elements.Found.Everything[0] ?? document.body;
+    }
     if (State.results[i].element.shadowRoot) {
       while (State.results[i].element.parentElement?.shadowRoot) {
-        State.results[i].element = location.parentElement;
+        State.results[i].element = State.results[i].element.parentElement;
       }
     }
     if (
@@ -213,8 +216,8 @@ export async function filterAlerts(splitConfiguration) {
 
     // todo postpone: we could remove active range from list if it is not in oldResults to prevent tagging while people are typing. But we'd have to walk the array. Expensive!
     /*if (UI.incremental && Ed11y.oldResults.length > 0) {
-			// Don't flag new issues in the active range while people are typing.
-		}*/
+      // Don't flag new issues in the active range while people are typing.
+    }*/
     const checkIgnored = State.option.ignoreByTest[results[i].test];
     if (checkIgnored && results[i].element.matches(checkIgnored)) {
       splice = true;

@@ -304,7 +304,7 @@ export default {
     LINK_IMAGE_ALT_AND_TEXT:
       '画像リンクには<strong>altテキストと周囲のリンクテキストの両方が含まれています。</strong> この画像が装飾用であり、他のページへの機能的なリンクとして使用されている場合は、画像を装飾用としてマークすることを検討してください。周囲のリンクテキストで十分です。<hr> {ALT} <strong {C}>%(ALT_TEXT)</strong> <hr> <strong {B}>アクセシブル名</strong> {L} <strong {C}>%(TEXT)</strong>',
     IMAGE_FIGURE_DECORATIVE:
-      '画像が<strong>装飾用</strong>としてマークされ、支援技術によって無視されます。<hr> キャプションが提供されていますが、ほとんどの場合、画像にはaltテキストも必要です。<ul><li>altテキストは画像の内容を簡潔に説明する必要があります。</li><li>キャプションは通常、画像を周囲のコンテンツに関連付けるための文脈を提供したり、特定の情報に注意を払ったりするために使用されます。</li></ul>詳細はこちら：<a href="https://thoughtbot.com/blog/alt-vs-figcaption#the-figcaption-element">altとfigcaptionの比較</a>。',
+      '画像が<strong>装飾用</strong>としてマークされ、支援技術によって無視されます。<hr> キャプションが提供されていますが、ほとんどの場合、画像にはaltテキストも必要です。<ul><li>altテキストは画像の内容を簡潔に説明する必要があります。</li><li>キャプションは通常、画像を周囲のコンテンツに関連付けるための文脈を提供したり、特定の情報に注意を払ったりするために使用されます。</li></ul>詳細はこちら：<a href="https://thoughtbot.com/blog/alt-vs-figcaption#the-figcaption-element">altとfigcaptionの比較。</a>',
     IMAGE_FIGURE_DUPLICATE_ALT:
       'altとキャプションテキストにはまったく同じ単語を使用しないでください。スクリーンリーダーは情報を二重に発表します。<ul><li>altテキストは画像の内容を簡潔に説明する必要があります。</li><li>キャプションは通常、画像を周囲のコンテンツに関連付けるための文脈を提供したり、特定の情報に注意を払ったりするために使用されます。</li></ul>詳細はこちら：<a href="https://thoughtbot.com/blog/alt-vs-figcaption#the-figcaption-element">altとfigcaptionの比較</a> <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>',
     IMAGE_DECORATIVE:
@@ -332,6 +332,7 @@ export default {
       'この入力フィールドに関連付けられたラベルがありません。この入力フィールドに<code>id</code>を追加し、ラベルに一致する<code>for</code>属性を追加してください。',
     LABELS_PLACEHOLDER:
       '消えるプレースホルダー テキストは、人々がフィールドに何の情報が属しているかを思い出すのを難しくし、検証の問題を特定して修正するのを困難にします。代わりに、フォームフィールドの前に常に表示されるヒントを使用することを検討してください。 <hr> 詳細はこちら: <a href="https://www.nngroup.com/articles/form-design-placeholders/">フォームフィールドのプレースホルダーは有害です。</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA 入力フィールドまたはトグルフィールドにアクセシブルな名前がありません。修正するには、有効な <code>aria-labelledby</code>、<code>aria-label</code>、または <code>title</code> 属性を指定してください。入力が切り替え可能な場合（チェックボックス、スイッチ、ラジオボタンなど）、表示可能な内部テキストを追加することでも解決します。 <hr> <strong {B}>要素</strong> <pre><code>%(EL)</code></pre>',
 
     // Embedded content
     EMBED_VIDEO:
@@ -379,10 +380,8 @@ export default {
     // Shared
     LINK_TEXT: '<strong {B}>リンクテキスト</strong> <strong {C}>%(TEXT)</strong>',
     ACC_NAME: '<strong {B}>アクセシブル名</strong> <strong {C}>%(TEXT)</strong>',
-    ACC_NAME_TIP:
-      '<hr><strong>ヒント!</strong> "アクセシブル名"は、支援技術を使用する人々に伝えられる最終的なラベルであり、ARIAによって計算されます。これにより、リンクやボタンの目的を理解するのに役立ちます。',
-    HIDDEN_FOCUSABLE:
-      'リンクやボタンに <code>aria-hidden=&quot;true&quot;</code> が設定されていますが、キーボードでフォーカス可能です。重複したリンクやボタンを非表示にする場合は、<code>tabindex=&quot;-1&quot;</code> も追加してください。それ以外の場合、フォーカスを受け取ることができる要素に <code>aria-hidden=&quot;true&quot;</code> を使用してはいけません。<hr> <a href="https://developer.mozilla.org/ja/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden 属性について</a>詳しく知る。',
+    ACC_NAME_TIP: '<hr><strong>ヒント！</strong>「アクセシブルな名前」とは、支援技術を使用するユーザーに伝えられる最終的なラベルのことです。これにより、ユーザーは要素の目的を理解できます。',
+    HIDDEN_FOCUSABLE: 'この要素はキーボードフォーカスを受け取ることができますが、<code>aria-hidden="true"</code> 属性（自身または親コンテナにある）によってスクリーンリーダーから隠されています。修正するには、aria-hidden 属性を削除するか、要素をタブ順序から削除してください。 <hr> <strong {B}>要素</strong> <pre><code>%(EL)</code></pre> <hr> <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden 属性</a>の詳細をご覧ください。',
 
     // Developer
     DUPLICATE_ID:
@@ -402,7 +401,7 @@ export default {
       '<a href="https://developer.mozilla.org/ja/docs/Web/HTML/Viewport_meta_tag">ビューポートのメタタグ</a>の <code>maximum-scale</code> パラメータが 2 未満でないことを確認してください。',
     META_REFRESH: 'ページはメタタグを使用して自動的に更新されるべきではありません。',
     META_LANG_SUGGEST: '次の言語コード <code>%(CODE)</code> は無効です。もしかして <code>%(CODE)</code> ですか？',
-    META_LANG_VALID: 'ページの言語コード <code>%(CODE)</code> は無効です。<a href="https://www.w3.org/International/questions/qa-html-language-declarations">HTMLタグで有効な言語を宣言してください。</a>',
+    META_LANG_VALID: 'この要素の言語コードが有効ではありません。修正するには、lang 属性を有効な言語コードに置き換えてください。 <hr> <strong {B}>要素</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> <a href="https://www.w3.org/International/questions/qa-html-language-declarations">HTML での言語宣言</a>の詳細をご覧ください。',
 
     // Buttons
     BTN_EMPTY: 'ボタンにはその目的を説明するアクセシブルな名前がありません。',
@@ -415,7 +414,7 @@ export default {
       'ボタンの名前に「ボタン」という単語を含めないでください。スクリーンリーダーは、名前に加えて要素の役割をすでに伝えています。',
     LABEL_IN_NAME:
       'この要素の表示されるテキストがアクセシブルな名前と異なっているようで、支援技術を使用するユーザーに混乱を招く可能性があります。確認してください：<hr> <strong {B}>文章</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>アクセシブルな名前</strong> <strong {C}>%(TEXT)</strong>',
-    LINK_MAYBE_BUTTON: 'このリンクには無効なターゲットがあり、アクセシブルな名前には「<strong>%(NAME)</strong>」という単語が含まれています。これは、これがリンクではなく、ページ上のスクリプト動作を制御している可能性があることを示唆しています。修正するには、リンクを <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">アクセシブルなボタン</a> に置き換えるか、リンク先を修正してください。 <hr> <strong>ヒント！</strong> 支援技術はボタンとリンクを異なる方法で処理します。正しいHTML要素を使用することで、ユーザーはどのキーボードショートカットを使用すべきか、どのアクションがトリガーされるかを知ることができます。',
+    LINK_MAYBE_BUTTON: 'このリンクには無効なターゲットが設定されています。アクセシブルな名前や属性から判断すると、これはリンクではなく、ページ上のスクリプト動作を制御するものである可能性があります。修正するには、リンクを<a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">アクセシブルなボタン</a>に置き換えるか、リンク先を修正してください。 <hr> <strong {B}>アクセシブルな名前</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>ヒント！</strong> 支援技術はボタンとリンクを異なるものとして扱います。正しい HTML 要素を使用することで、ユーザーはどのキーボードショートカットを使用すべきか、どのようなアクションが実行されるかを正確に把握できます。',
     POTENTIAL_UI_ELEMENTS: ['メニュー', '閉じる', '切り替え', '開く', '展開', '折りたたみ', '次へ', '前へ', '再生', '一時停止', 'サブメニュー', '表示', '非表示', 'ドロップダウン', '戻る', '進む', 'スキップ', '送信', 'キャンセル', '保存', '編集', '削除', '削除', '検索', 'フィルター', '並べ替え', '停止', 'ミュート', 'ミュート解除', '全画面', '最小化', '最大化'],
 
     // Tables
@@ -425,6 +424,7 @@ export default {
       '見出し2や見出し3などのセマンティックな見出しは、コンテンツのセクションにのみ使用すべきです。HTMLテーブルでは<strong>使用しないでください</strong>。代わりに<code>&lt;th&gt;</code>要素を使用してテーブルの見出しを示します。<hr> <a href="https://www.w3.org/WAI/tutorials/tables/">アクセシブルなテーブル</a>について詳しく学びます。',
     TABLES_EMPTY_HEADING:
       '空のテーブルヘッダーが見つかりました！テーブルヘッダーは<strong>空にしてはいけません</strong>。行や列のヘッダーを指定して関係性を伝えることが重要です。これにより、支援技術を使用する人々にコンテキストが提供されます。テーブルは表形式のデータのみに使用する必要があります。<hr> <a href="https://www.w3.org/WAI/tutorials/tables/">アクセシブルなテーブル</a>について詳しく学びます。',
+    TABLES_INVALID_HEADERS_REF: 'このテーブルは特定のデータセルを特定のヘッダーセルに関連付けようとしていますが、ヘッダー ID が見つかりません。各 <code>headers</code> 属性が、同じテーブル内のヘッダーセルの ID と一致していることを確認してください。 <hr> <strong {B}>ヘッダー</strong> <code>%(VALUE)</code> <hr> <strong>ヒント！</strong> データセルとヘッダーセルを関連付けるために <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">手動で ID 参照を使用する</a> 方法は、複雑で壊れやすくなります。可能であれば、複雑なデータは単純なヘッダー行と列を持つ小さなテーブルに分割してください。',
 
     // Contrast
     CONTRAST_NORMAL: '標準サイズのテキストは、少なくとも %(RATIO) のコントラスト比が必要です。',
