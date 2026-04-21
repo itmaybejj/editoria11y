@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "ed11yVersion": "3.0.0",
   "sa11yVersion": "4.4.2",
-  "generatedAt": "2026-04-21T16:53:00.089Z",
+  "generatedAt": "2026-04-21T20:15:04.610Z",
   "checks": {
     "ALT_FILE_EXT": {
       "title": "This alt text is a filename, not a description",

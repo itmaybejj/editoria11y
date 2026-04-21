@@ -3260,7 +3260,7 @@ ${this.error.stack}
           element: $el,
           args: [invalidIds.join(", ")],
           dismiss: firstRow,
-          devFallback: true
+          developer: true
         });
       }
       if (tableHeaders.length === 0) {
