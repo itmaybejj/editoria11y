@@ -9,7 +9,7 @@ tests_output/
 test-results
 screens/
 .vscode/
-.claude/settings.local.json
+.agents/settings.local.json
 
 # temporary until act-rules is merged
 conformance/
@@ -46,5 +46,6 @@ conformance/reports/conformance-data.json
 conformance/test-results/
 
 #agents
-/.claude/settings.local.json
-/.claude/scratch/
+/.agents/settings.local.json
+/.agents/scratch/
+/.claude
