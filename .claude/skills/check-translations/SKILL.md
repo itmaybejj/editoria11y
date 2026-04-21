@@ -156,6 +156,29 @@ to the Sa11y repo and other consuming projects.
 
 This report is for the developer to manually sync across repos — do NOT attempt to translate or modify `src/sa11y-lang/` files.
 
+## English dialect variants
+
+`src/lang/en-gb.js` (British) and `src/lang/en-ca.js` (Canadian) are thin
+dialect overlays over `baseAll.js`. They do NOT re-translate everything —
+they import `baseAll.js` and override only the keys that differ in spelling
+or word choice.
+
+When baseAll.js gains a new string that contains dialect-sensitive words
+(e.g. `color`, `colorblind`, `organize`, `visualize`, `emphasize`,
+`capitalize`, `-ize`/`-ise` verbs, `-or`/`-our` nouns), both dialect files
+may need a matching override entry:
+
+- **en-gb** (British): override `color→colour`, `organize→organise`,
+  `visualize→visualise`, `emphasize→emphasise`, `capitalize→capitalise`,
+  and any other `-ize`/`-our` differences.
+- **en-ca** (Canadian): override `-our` words only (`color→colour`,
+  `colorblind→colourblind`). Canadian English keeps American `-ize`
+  endings, so most other words stay as-is.
+
+Tips that embed `${why.headings}` need the whole tip rewritten in
+`en-gb.js` because the embedded block contains "organise". The list of
+affected tips is in `en-gb.js` — look at `britishTips`.
+
 ## Files to skip
 
 These are NOT translation targets — never modify them:
