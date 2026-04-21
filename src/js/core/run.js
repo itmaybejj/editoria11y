@@ -10,6 +10,8 @@ import {
   resetResults,
   resumeObservers,
   showError,
+  sweepOrphans,
+  teardownAllMarks,
   visible,
 } from '../utils/utils.js';
 import checkHeaders from '../../sa11y-js/rulesets/headers.js';
@@ -80,6 +82,11 @@ export function updatePanel() {
   if (UI.inlineAlerts && document.querySelector('[contenteditable]')) {
     UI.forceFullCheck = true;
     UI.inlineAlerts = false;
+    // Inline-alert buttons are DOM siblings of their targets; editable-
+    // alert buttons are absolutely positioned inside UI.panelAttachTo. The
+    // layouts are incompatible, so drop all adopted mark state when the
+    // mode flips.
+    teardownAllMarks();
   }
 
   // Stash old values for incremental updates.
@@ -397,6 +404,14 @@ export function buildJumpList() {
       drawResult(result, i);
     }
   });
+  // After drawResult has adopted or created a mark for each live issue,
+  // any MarkEntry still carrying a stale runGen is an orphan: its
+  // (element, test) pair did not produce a drawn result in this run
+  // (either the issue resolved, or it's now dismissed-and-hidden). Tear
+  // it down. Running the sweep inside buildJumpList keeps all mark DOM
+  // churn within one RAF via showResults, so the browser only paints the
+  // net change. See docs/race-condition-plan.md.
+  sweepOrphans();
   UI.jumpList.forEach((el, i) => {
     el.dataset.ed11yJumpPosition = `${i}`;
     const newLabel = `${Lang._('ALERT_TEXT')} ${i + 1} / ${UI.jumpList.length - 1}, ${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}`;
@@ -1336,6 +1351,10 @@ export function checkAll() {
   if (UI.tipOpen) {
     return false;
   }
+  // Bump run generation. Used to detect aborted/overlapping runs and as
+  // the liveness stamp for adopted mark entries (see MarkEntry.generation).
+  UI.runGen = (UI.runGen + 1) | 0;
+  UI.activeRunGen = UI.runGen;
   UI.disabled = false;
 
   if (checkRunPrevent()) {
@@ -1412,12 +1431,19 @@ export function checkAll() {
 }
 
 export async function continueCheck() {
+  // Capture the generation we started dispatching under. If a newer checkAll
+  // has bumped UI.runGen while we were awaiting async work, the results in
+  // State are about to be discarded anyway — bail before painting.
+  const runGenAtDispatch = UI.runGen;
   // Filter split configuration results.
   if (UI.splitConfiguration.active && State.results.length > 0) {
     await handleSyncOnlyResults();
   } else {
     await filterAlerts(false);
     syncResults(State.results);
+  }
+  if (UI.runGen !== runGenAtDispatch) {
+    return;
   }
   countAlerts();
 

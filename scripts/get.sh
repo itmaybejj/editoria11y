@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This is a simple script to pull down the specified Sa11y branch from github
-GIT_REF="5.0.0"
+GIT_REF="5.0.2"
 mkdir -p tmp/
 cd tmp/
 git clone git@github.com:ryersondmp/sa11y.git .
@@ -14,6 +14,9 @@ mv src/lang ../src/sa11y-lang
 # Patches
 # Don't inject Sa11y CSS into shadow components
 cp ../src/sa11y-patch/core/find-shadow-components.js ../src/sa11y-js/core/find-shadow-components.js
+# Adoption hook: pushResult attaches a MarkEntry back-reference so ed11y
+# can reuse button/tip/highlight DOM across rechecks (flicker + race fix).
+cp ../src/sa11y-patch/utils/pushResult.js ../src/sa11y-js/utils/pushResult.js
 
 cd ../
 rm -rf tmp
