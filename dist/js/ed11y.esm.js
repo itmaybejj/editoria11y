@@ -1915,7 +1915,6 @@ ${this.error.stack}
   }
 }
 const UI = {
-  editableHighlight: {},
   // Mark adoption registry. Populated by drawResult, consulted by the
   // patched pushResult, swept for orphans after each run. Lets us reuse
   // an existing button/tip/highlight across rechecks when the same
@@ -1959,6 +1958,7 @@ const UI = {
   forceFullCheck: false,
   browserSpeed: 1,
   browserLag: 1,
+  recheckPendingOnClose: false,
   customTestsRemaining: 0,
   testsRemaining: 0,
   customTestTimeout: 0,
@@ -6087,35 +6087,55 @@ function dismissOne(dismissalType, test, dismissalKey) {
     document.dispatchEvent(ed11yDismissalUpdate);
   }, 100);
 }
+function updateFixedRootPositions() {
+  if (!State.option.fixedRoots) return;
+  UI.positionedFrames.length = 0;
+  State.option.fixedRoots.forEach((root) => {
+    if (root.framePositioner) {
+      UI.positionedFrames.push(root.framePositioner.getBoundingClientRect());
+    }
+  });
+}
+function positionHighlight(el, target, result) {
+  let targetOffset = target.getBoundingClientRect();
+  if (!visible(target)) {
+    const visibleParent = firstVisibleParent(target);
+    if (visibleParent) targetOffset = visibleParent.getBoundingClientRect();
+  }
+  const framePositioner = result.fixedRoot != null && UI.positionedFrames[result.fixedRoot] ? UI.positionedFrames[result.fixedRoot] : { top: 0, left: 0 };
+  el.style.setProperty("width", `${targetOffset.width + 6}px`);
+  el.style.setProperty("height", `${targetOffset.height + 6}px`);
+  el.style.setProperty("top", `${targetOffset.top + framePositioner.top + window.scrollY - 3}px`);
+  el.style.setProperty("left", `${targetOffset.left + framePositioner.left - 3}px`);
+}
 function editableHighlighter(resultID, show, firstVisible) {
-  if (!show) {
-    UI.editableHighlight[resultID]?.highlight.style.setProperty("opacity", "0");
-    return;
-  }
   const result = State.results[resultID];
-  if (!result || !firstVisible && !result.element) {
+  if (!result) return;
+  const entry = result.markEntry;
+  if (!entry) return;
+  if (!show) {
+    entry.highlight?.style.setProperty("opacity", "0");
     return;
   }
-  let el = UI.editableHighlight[resultID]?.highlight;
-  if (!el) {
+  if (!firstVisible && !result.element) return;
+  let el = entry.highlight;
+  if (!el?.isConnected) {
+    el?.remove();
     el = document.createElement("ed11y-element-highlight");
     el.classList.add("ed11y-element");
-    UI.editableHighlight[resultID] = { highlight: el, resultID };
     el.style.setProperty("position", "absolute");
     el.style.setProperty("pointer-events", "none");
     UI.panelAttachTo.appendChild(el);
-  } else if (!el.parentElement) {
-    document.body.appendChild(el);
+    entry.highlight = el;
   }
-  UI.editableHighlight[resultID].target = firstVisible ? firstVisible : result.element;
+  entry.highlightTarget = firstVisible || result.element;
   const zIndex = result.dismissalStatus ? "calc(var(--ed11y-buttonZIndex, 9999) - 2)" : "calc(var(--ed11y-buttonZIndex, 9999) - 1)";
   el.style.setProperty("z-index", zIndex);
   const outline = result.type === "warning" ? "0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)" : "0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px";
   el.style.setProperty("box-shadow", outline);
   el.style.setProperty("border-radius", "3px");
-  el.style.setProperty("top", "0");
-  el.style.setProperty("left", "0");
-  alignHighlights();
+  updateFixedRootPositions();
+  positionHighlight(el, entry.highlightTarget, result);
   el.style.setProperty("opacity", "1");
 }
 function transferFocus() {
@@ -6326,15 +6346,20 @@ function jumpTo(next = true) {
   UI.scrollPending = 2;
   updateTipLocations();
 }
-const incrementalAlign = lagBounce(() => {
-  if (!UI.running && !UI.alignPending) {
+let alignRafPending = false;
+function incrementalAlign() {
+  if (alignRafPending) return;
+  alignRafPending = true;
+  requestAnimationFrame(() => {
+    alignRafPending = false;
+    if (UI.running || UI.alignPending) {
+      incrementalAlign();
+      return;
+    }
     UI.scrollPending++;
     updateTipLocations();
-    UI.alignPending = false;
-  } else {
-    incrementalAlign();
-  }
-}, 10);
+  });
+}
 function alignTip(button, toolTip, recheck = 0, reveal = false) {
   if (!toolTip) {
     return;
@@ -6508,43 +6533,12 @@ function updateTipLocations() {
   }
 }
 function alignHighlights() {
-  if (State.option.fixedRoots && Object.keys(UI.editableHighlight).length > 0) {
-    UI.positionedFrames.length = 0;
-    State.option.fixedRoots.forEach((root) => {
-      if (root.framePositioner) {
-        UI.positionedFrames.push(root.framePositioner.getBoundingClientRect());
-      }
-    });
-  }
-  Object.values(UI.editableHighlight).every((el) => {
-    if (!State.results[el.resultID]) {
-      UI.interaction = true;
-      UI.forceFullCheck = true;
-      UI.editableHighlight = [];
-      incrementalCheckDebounce(true);
-      return false;
-    }
-    if (!Object.keys(UI.openTip.button).length) {
-      return false;
-    }
-    if (UI.openTip.button.dataset.ed11yResult !== el.resultID) {
-      return true;
-    }
-    const framePositioner = State.results[el.resultID].fixedRoot && UI.positionedFrames[State.results[el.resultID].fixedRoot] ? UI.positionedFrames[State.results[el.resultID].fixedRoot] : { top: 0, left: 0 };
-    let targetOffset = el.target.getBoundingClientRect();
-    if (!visible(el.target)) {
-      const theVisibleParent = firstVisibleParent(el.target);
-      targetOffset = theVisibleParent ? theVisibleParent.getBoundingClientRect() : targetOffset;
-    }
-    el.highlight.style.setProperty("width", `${targetOffset.width + 6}px`);
-    el.highlight.style.setProperty(
-      "top",
-      `${targetOffset.top + framePositioner.top + window.scrollY - 3}px`
-    );
-    el.highlight.style.setProperty("left", `${targetOffset.left + framePositioner.left - 3}px`);
-    el.highlight.style.setProperty("height", `${targetOffset.height + 6}px`);
-    return true;
-  });
+  const button = UI.openTip.button;
+  if (!button || typeof button !== "object" || !button.result) return;
+  const entry = button.result.markEntry;
+  if (!entry?.highlight?.parentElement) return;
+  updateFixedRootPositions();
+  positionHighlight(entry.highlight, entry.highlightTarget || button.result.element, button.result);
 }
 const slowIncremental = lagBounce(() => {
   UI.interaction = true;
@@ -6690,16 +6684,9 @@ function startObserver(root) {
         }
       }
     }
-    if (!align) {
-      return;
-    }
-    window.setTimeout(() => {
-      incrementalAlign();
-      UI.alignPending = false;
-    }, 0);
-    window.setTimeout(() => {
-      incrementalCheckDebounce();
-    }, 0);
+    if (!align) return;
+    incrementalAlign();
+    incrementalCheckDebounce();
   };
   const observer = new MutationObserver(callback);
   observer.observe(root, config);
@@ -6924,7 +6911,11 @@ async function continueCheck() {
 function incrementalCheck() {
   if (!UI.running) {
     UI.incrementalRetryPending = false;
-    if (UI.tipOpen || !UI.interaction && !UI.forceFullCheck) {
+    if (UI.tipOpen) {
+      UI.recheckPendingOnClose = true;
+      return;
+    }
+    if (!UI.interaction && !UI.forceFullCheck) {
       return;
     }
     UI.interaction = false;
@@ -7270,6 +7261,11 @@ class Ed11yElementResult extends HTMLElement {
         button: false,
         tip: false
       };
+      if (UI.recheckPendingOnClose) {
+        UI.recheckPendingOnClose = false;
+        UI.interaction = true;
+        incrementalCheckDebounce();
+      }
     }
     this.setAttribute("data-ed11y-open", changeTo);
     this.open = changeTo;

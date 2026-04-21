@@ -1,7 +1,6 @@
 import version from '../version.js';
 
 export const UI = {
-  editableHighlight: {},
   // Mark adoption registry. Populated by drawResult, consulted by the
   // patched pushResult, swept for orphans after each run. Lets us reuse
   // an existing button/tip/highlight across rechecks when the same
@@ -43,6 +42,7 @@ export const UI = {
   forceFullCheck: false,
   browserSpeed: 1,
   browserLag: 1,
+  recheckPendingOnClose: false,
   customTestsRemaining: 0,
   testsRemaining: 0,
   customTestTimeout: 0,

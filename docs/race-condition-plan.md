@@ -111,7 +111,10 @@ flicker bugs in the dispatch/redraw pipeline.
 
 ## Phases (shippable independently)
 
-### Phase 1 — Generation scaffolding ([E])
+**Status:** All five phases implemented. See commit history for per-phase
+diffs.
+
+### Phase 1 — Generation scaffolding ([E]) — DONE
 
 - Add `UI.runGen` counter to `src/js/core/ui.js`.
 - Bump in `checkAll` (`src/js/core/run.js:1335`).
@@ -119,7 +122,7 @@ flicker bugs in the dispatch/redraw pipeline.
   on mismatch.
 - Defensive only, no visible behavior change. Ships alone.
 
-### Phase 2 — Adoption ([A] + [B])
+### Phase 2 — Adoption ([A] + [B]) — DONE
 
 - `src/sa11y-patch/utils/pushResult.js`: patched copy that looks up
   `UI.marks.get(element)?.get(test)` and returns existing result
@@ -140,7 +143,7 @@ flicker bugs in the dispatch/redraw pipeline.
 - Keep legacy `UI.editableHighlight` map for now; phase 3 will drop
   its revival path.
 
-### Phase 3 — Highlight hygiene + synchronous positioning ([C] + [D])
+### Phase 3 — Highlight hygiene + synchronous positioning ([C] + [D]) — DONE
 
 - Set highlight position inline in `editableHighlighter(id, true)`
   from target's bounding rect. Remove the (0,0) + alignHighlights
@@ -151,7 +154,7 @@ flicker bugs in the dispatch/redraw pipeline.
   `src/js/core/run.js:974`. In practice, after phase 2 this map may
   be replaced by `markEntry.highlight` references entirely.
 
-### Phase 4 — Observer callback cleanup ([F, scoped])
+### Phase 4 — Observer callback cleanup ([F, scoped]) — DONE
 
 - Drop redundant `setTimeout(0)` shells in the mutation observer
   callback at `src/js/core/run.js:1186-1218`.
@@ -160,7 +163,7 @@ flicker bugs in the dispatch/redraw pipeline.
 - No align/check coupling changes. Align continues to run on scroll
   without invoking any check path.
 
-### Phase 5 — Pending recheck on tip close ([G])
+### Phase 5 — Pending recheck on tip close ([G]) — DONE
 
 - `UI.recheckPendingOnClose` flag.
 - `incrementalCheck` sets it when early-returning due to `UI.tipOpen`.
