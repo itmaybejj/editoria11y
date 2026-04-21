@@ -3,6 +3,7 @@ import {
   checkRunPrevent,
   firstVisibleParent,
   lagBounce,
+  matchAdoptions,
   newIncrementalResults,
   panelLabel,
   pauseObservers,
@@ -399,6 +400,11 @@ export function buildJumpList() {
 
   // Sort from bottom to top so focus order after insert is top to bottom.
   State.results.sort((a, b) => b.sortPos - a.sortPos);
+  // Attach MarkEntry back-references to results that didn't get one at push
+  // time. Covers custom-ruleset.js direct pushes and event-based external
+  // tests that push to Ed11y.State.results from ed11yRunCustomTests
+  // listeners; idempotent if a back-reference is already set.
+  matchAdoptions();
   State.results?.forEach((result, i) => {
     if (result.element && (!result.dismissalStatus || UI.showDismissed)) {
       drawResult(result, i);

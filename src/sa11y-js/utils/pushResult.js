@@ -1,16 +1,6 @@
-import Lang from '../../sa11y-js/utils/lang';
-import * as Utils from '../../sa11y-js/utils/utils';
-import { State } from '../../sa11y-js/core/state';
-// EDITORIA11Y PATCH: imports UI from the editoria11y layer so pushResult can
-// look up an existing mark entry for this (element, test) pair and attach a
-// back-reference to it on the result. Adoption lets drawResult reuse the
-// already-rendered button/tip/highlight across rechecks instead of tearing
-// them down and rebuilding — a cheap fix for flicker and for the
-// stale-index race documented in docs/race-condition-plan.md.
-//
-// If this patch is shared upstream, this cross-layer import would become a
-// hook (e.g. State.onPushResult) so sa11y proper has no downstream deps.
-import { UI } from '../../js/core/ui.js';
+import Lang from './lang';
+import * as Utils from './utils';
+import { State } from '../core/state';
 
 export function pushResult({
   test,
@@ -50,23 +40,6 @@ export function pushResult({
     ...(margin && { margin }),
     ...customProps,
   };
-
-  // EDITORIA11Y PATCH: adoption lookup.
-  // If a MarkEntry already exists for this (element, test) pair from a
-  // previous run, attach a back-reference to it on the result. drawResult
-  // will reuse the existing DOM instead of rebuilding, and will stamp the
-  // entry with the current runGen at that point. Entries still carrying
-  // a stale runGen after draws run are orphans — their (element, test)
-  // pair did not produce a result in this run — and are torn down by
-  // sweepOrphans. See docs/race-condition-plan.md for the full flow.
-  if (element && UI.marks) {
-    const byTest = UI.marks.get(element);
-    const existing = byTest?.get(test);
-    if (existing) {
-      result.markEntry = existing;
-    }
-  }
-
   State.results.push(result);
   return result;
 }

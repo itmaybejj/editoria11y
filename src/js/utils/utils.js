@@ -438,6 +438,26 @@ export function createDismissalKey(string) {
   return dismissDigest(State.option.pepper, prepareDismissal(string));
 }
 
+// Walk State.results and, for each (element, test) pair, attach a back-
+// reference to any existing MarkEntry. drawResult reads result.markEntry to
+// decide whether to adopt existing DOM or create a new mark.
+//
+// Running this as a single post-push pass (rather than hooking into
+// pushResult) covers every code path that lands results in State.results:
+// the standard pushResult call, custom-ruleset.js direct pushes, and the
+// event-based external custom tests that push to Ed11y.State.results from
+// their ed11yRunCustomTests listeners. Keeps the sa11y-js layer unpatched.
+export function matchAdoptions() {
+  for (const result of State.results) {
+    if (!result.element || result.markEntry) continue;
+    const byTest = UI.marks.get(result.element);
+    const existing = byTest?.get(result.test);
+    if (existing) {
+      result.markEntry = existing;
+    }
+  }
+}
+
 // Tear down one MarkEntry: remove its DOM nodes and unregister it from
 // UI.marks / UI.markRegistry. Idempotent. See docs/race-condition-plan.md.
 export function teardownMark(entry) {

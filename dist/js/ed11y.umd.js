@@ -2343,6 +2343,16 @@ ${this.error.stack}
   function createDismissalKey(string) {
     return dismissDigest(State.option.pepper, prepareDismissal(string));
   }
+  function matchAdoptions() {
+    for (const result of State.results) {
+      if (!result.element || result.markEntry) continue;
+      const byTest = UI.marks.get(result.element);
+      const existing = byTest?.get(result.test);
+      if (existing) {
+        result.markEntry = existing;
+      }
+    }
+  }
   function teardownMark(entry) {
     if (entry.button?.parentElement) {
       entry.button.remove();
@@ -2459,13 +2469,6 @@ ${this.error.stack}
       ...margin && { margin },
       ...customProps
     };
-    if (element && UI.marks) {
-      const byTest = UI.marks.get(element);
-      const existing = byTest?.get(test);
-      if (existing) {
-        result.markEntry = existing;
-      }
-    }
     State.results.push(result);
     return result;
   }
@@ -4646,7 +4649,8 @@ ${this.error.stack}
     });
     const flaggedForAriaHidden = /* @__PURE__ */ new Set();
     Elements.Found.Focusable.forEach(($el) => {
-      if (flaggedForAriaHidden.has($el) || isDisabled($el) || isNegativeTabindex($el) || isElementHidden($el)) {
+      const isNativeDisabled = $el.hasAttribute("disabled") || $el.disabled === true;
+      if (flaggedForAriaHidden.has($el) || isNativeDisabled || isNegativeTabindex($el) || isElementHidden($el)) {
         return;
       }
       const ariaHiddenContainer = getCachedClosest($el, '[aria-hidden="true"]');
@@ -6040,6 +6044,7 @@ ${this.error.stack}
       State.results[i].sortPos = top;
     }
     State.results.sort((a, b) => b.sortPos - a.sortPos);
+    matchAdoptions();
     State.results?.forEach((result, i) => {
       if (result.element && (!result.dismissalStatus || UI.showDismissed)) {
         drawResult(result, i);
@@ -9357,7 +9362,6 @@ ${this.error.stack}
   exports2.elements = elements;
   exports2.findElements = findElements;
   exports2.getElements = getElements;
-  exports2.pushResult = pushResult$1;
   exports2.refresh = refresh;
   exports2.reset = reset;
   exports2.sanitizeHTML = sanitizeHTML;

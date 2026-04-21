@@ -2339,6 +2339,16 @@ function checkRunPrevent() {
 function createDismissalKey(string) {
   return dismissDigest(State.option.pepper, prepareDismissal(string));
 }
+function matchAdoptions() {
+  for (const result of State.results) {
+    if (!result.element || result.markEntry) continue;
+    const byTest = UI.marks.get(result.element);
+    const existing = byTest?.get(result.test);
+    if (existing) {
+      result.markEntry = existing;
+    }
+  }
+}
 function teardownMark(entry) {
   if (entry.button?.parentElement) {
     entry.button.remove();
@@ -2455,13 +2465,6 @@ function pushResult$1({
     ...margin && { margin },
     ...customProps
   };
-  if (element && UI.marks) {
-    const byTest = UI.marks.get(element);
-    const existing = byTest?.get(test);
-    if (existing) {
-      result.markEntry = existing;
-    }
-  }
   State.results.push(result);
   return result;
 }
@@ -4642,7 +4645,8 @@ function checkDeveloper() {
   });
   const flaggedForAriaHidden = /* @__PURE__ */ new Set();
   Elements.Found.Focusable.forEach(($el) => {
-    if (flaggedForAriaHidden.has($el) || isDisabled($el) || isNegativeTabindex($el) || isElementHidden($el)) {
+    const isNativeDisabled = $el.hasAttribute("disabled") || $el.disabled === true;
+    if (flaggedForAriaHidden.has($el) || isNativeDisabled || isNegativeTabindex($el) || isElementHidden($el)) {
       return;
     }
     const ariaHiddenContainer = getCachedClosest($el, '[aria-hidden="true"]');
@@ -6036,6 +6040,7 @@ function buildJumpList() {
     State.results[i].sortPos = top;
   }
   State.results.sort((a, b) => b.sortPos - a.sortPos);
+  matchAdoptions();
   State.results?.forEach((result, i) => {
     if (result.element && (!result.dismissalStatus || UI.showDismissed)) {
       drawResult(result, i);
@@ -9354,7 +9359,6 @@ export {
   elements,
   findElements,
   getElements,
-  pushResult$1 as pushResult,
   refresh,
   reset,
   sanitizeHTML,
