@@ -9353,6 +9353,7 @@ ${this.error.stack}
   exports2.elements = elements;
   exports2.findElements = findElements;
   exports2.getElements = getElements;
+  exports2.pushResult = pushResult$1;
   exports2.refresh = refresh;
   exports2.reset = reset;
   exports2.sanitizeHTML = sanitizeHTML;

@@ -7,6 +7,7 @@ import { sanitizeHTML } from '../sa11y-js/utils/utils.js';
 import { createDismissalKey, getElements, findElements } from './utils/utils.js';
 import { State } from '../sa11y-js/core/state.js';
 import sprite from './elements/sprite.js';
+import { pushResult } from '../sa11y-js/utils/pushResult.js';
 import { UI } from './core/ui.js';
 import version from './version.js';
 import ConsoleErrors from './elements/ed11y-console-error.js';
@@ -35,6 +36,7 @@ export {
   createDismissalKey,
   findElements, // Adds elements to the Elements.Found object.
   getElements, // Directly returns elements.
+  pushResult,
   refresh,
   reset,
   sanitizeHTML,

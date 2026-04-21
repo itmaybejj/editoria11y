@@ -9350,6 +9350,7 @@ export {
   elements,
   findElements,
   getElements,
+  pushResult$1 as pushResult,
   refresh,
   reset,
   sanitizeHTML,
