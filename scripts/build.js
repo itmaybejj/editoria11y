@@ -110,7 +110,7 @@ const runBuild = async (config) => {
 		'fr',
 		'hu',
 		'it',
-		'jp',
+		'ja',
 		'nb',
 		'nl',
 		'pl',
