@@ -33,10 +33,13 @@ export function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) 
   Constants.Root.areaToCheck = [];
   Constants.Root.Readability = [];
 
-  // If fixed roots provided.
+  // If fixed roots provided. fixedRoots is an array of
+  // { fixedRoot, framePositioner } wrappers; downstream code treats
+  // areaToCheck / Readability as plain element arrays, so unwrap.
   if (fixedRoots) {
-    Constants.Root.areaToCheck = fixedRoots;
-    Constants.Root.Readability = fixedRoots;
+    const rootElements = fixedRoots.map((entry) => entry?.fixedRoot).filter(Boolean);
+    Constants.Root.areaToCheck = rootElements;
+    Constants.Root.Readability = rootElements;
     return;
   }
 

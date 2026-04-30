@@ -23,8 +23,8 @@
 	"scripts": {
 		"build:css": "node scripts/build-css.js",
 		"build:js": "node scripts/build.js",
-		"build": "npm run lint:fix && rimraf dist && npm run build:css && node scripts/check-test-keys.js --emit-artifact && npm run build:js",
-		"check:keys": "node scripts/check-test-keys.js",
+		"build": "npm run lint:fix && rimraf dist && npm run build:css && node --import ./scripts/register-sa11y-hook.js scripts/check-test-keys.js --emit-artifact && npm run build:js",
+		"check:keys": "node --import ./scripts/register-sa11y-hook.js scripts/check-test-keys.js",
 		"lint": "biome check src",
 		"lint:fix": "biome check --write src",
 		"lint:fix-unsafe": "biome check --write --unsafe src",

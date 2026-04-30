@@ -93,7 +93,15 @@ ${this.error.stack}
       if (State.option) {
         const oldPepper = State.option.pepper;
         State.option.pepper = 'hidden';
-        optionsInfo.textContent += `Options: ${JSON.stringify(State.option)}`;
+        // Strip values that aren't safe to JSON.stringify: live DOM nodes
+        // (host pages such as Gutenberg decorate them with circular-reference
+        // React fibers) and other non-serializable types.
+        const safe = (_key, value) => {
+          if (value instanceof Node) return `[${value.nodeName || 'Node'}]`;
+          if (typeof value === 'function') return '[Function]';
+          return value;
+        };
+        optionsInfo.textContent += `Options: ${JSON.stringify(State.option, safe)}`;
         State.option.pepper = oldPepper;
       } else {
         optionsInfo.textContent += 'Options object is not available.';

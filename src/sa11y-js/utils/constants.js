@@ -160,10 +160,13 @@ const Constants = (function myConstants() {
     Root.areaToCheck = [];
     Root.Readability = [];
 
-    // If fixed roots provided.
+    // If fixed roots provided. fixedRoots is an array of
+    // { fixedRoot, framePositioner } wrappers; downstream code treats
+    // areaToCheck / Readability as plain element arrays, so unwrap.
     if (fixedRoots) {
-      Root.areaToCheck = fixedRoots;
-      Root.Readability = fixedRoots;
+      const rootElements = fixedRoots.map((entry) => entry?.fixedRoot).filter(Boolean);
+      Root.areaToCheck = rootElements;
+      Root.Readability = rootElements;
       return;
     }
 

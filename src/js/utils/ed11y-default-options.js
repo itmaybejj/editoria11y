@@ -1,3 +1,5 @@
+import { store } from '../../sa11y-js/utils/utils.js';
+
 export const ed11yDefaultOptions = {
   // Default options.
 
@@ -288,7 +290,7 @@ export const ed11yDefaultOptions = {
 
   editLinks: false, // Add links to edit content in tooltips.
 
-  userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
+  userPrefersShut: store.getItem('editoria11yShow') === '0',
 
   // Sa11y checks ==================
   checks: {

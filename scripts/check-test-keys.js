@@ -149,7 +149,7 @@ if (writeArtifact) {
 			}]),
 		),
 	};
-	const outDir = path.join(repoRoot, 'dist');
+	const outDir = path.join(repoRoot, 'scripts');
 	fs.mkdirSync(outDir, { recursive: true });
 	const outPath = path.join(outDir, 'sa11y-check-keys.json');
 	fs.writeFileSync(outPath, `${JSON.stringify(artifact, null, 2)}\n`);

@@ -45,7 +45,7 @@ import sprite from '../elements/sprite.js';
 import { checkCustomRuleset } from '../rulesets/custom-ruleset.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
-import { resetGetText } from '../../sa11y-js/utils/utils.js';
+import { resetGetText, store } from '../../sa11y-js/utils/utils.js';
 
 export function showResults() {
   buildJumpList();
@@ -114,7 +114,7 @@ export function updatePanel() {
       // We do not do this on incremental updates.
       // Todo question: should we not do this at all for contentEditable?
       UI.seen[encodeURI(State.option.currentPage)] = UI.totalCount;
-      localStorage.setItem('editoria11yResultCount', JSON.stringify(UI.seen));
+      store.setItem('editoria11yResultCount', JSON.stringify(UI.seen));
     } else {
       delete UI.seen[encodeURI(State.option.currentPage)];
     }
@@ -459,7 +459,7 @@ export function dismissOne(dismissalType, test, dismissalKey) {
 
   // Send record to storage or dispatch an event to an API.
   if (State.option.syncedDismissals === false) {
-    localStorage.setItem('ed11ydismissed', JSON.stringify(UI.dismissedAlerts));
+    store.setItem('ed11ydismissed', JSON.stringify(UI.dismissedAlerts));
   }
   const dismissalDetail = {
     dismissPage: State.option.currentPage,
@@ -1067,6 +1067,12 @@ export function windowResize() {
 }
 
 const scrollWatch = (container) => {
+  // Idempotent: re-attaching on every showResults() would leak listeners.
+  // Stamp at the document/element level; foreign docs (iframes) get their own stamp.
+  const stampHost =
+    typeof container.documentElement === 'object' ? container.documentElement : container;
+  if (stampHost?.dataset?.ed11yScrollWatch === 'true') return;
+  if (stampHost?.dataset) stampHost.dataset.ed11yScrollWatch = 'true';
   container.addEventListener(
     'scroll',
     () => {
@@ -1084,24 +1090,57 @@ const scrollWatch = (container) => {
   );
 };
 
-export function intersectionObservers() {
-  Elements.Found.editable?.forEach((editable) => {
-    scrollWatch(editable);
-  });
-
-  scrollWatch(document);
-
-  document.addEventListener(
+// Attaches selectionchange + interaction (keydown/click) listeners to a document.
+// Idempotent so it can be called from both initialize() and intersectionObservers()
+// and re-called after fixedRoots swaps without leaking listeners.
+export const attachIntegrationListeners = (doc) => {
+  if (!doc || doc.documentElement?.dataset?.ed11yIntegrationListeners === 'true') return;
+  doc.documentElement.dataset.ed11yIntegrationListeners = 'true';
+  doc.addEventListener(
+    'keydown',
+    () => {
+      UI.interaction = true;
+    },
+    { passive: true },
+  );
+  doc.addEventListener(
+    'click',
+    () => {
+      UI.interaction = true;
+    },
+    { passive: true },
+  );
+  doc.addEventListener(
     'selectionchange',
     () => {
       if (!UI.running) {
         selectionChanged();
       }
     },
-    {
-      passive: true,
-    },
+    { passive: true },
   );
+};
+
+export function intersectionObservers() {
+  Elements.Found.editable?.forEach((editable) => {
+    scrollWatch(editable);
+  });
+
+  scrollWatch(document);
+  attachIntegrationListeners(document);
+
+  // Cross-document: when fixedRoots point into iframes, attach scroll + interaction
+  // + selectionchange to those documents too so the library reacts to typing,
+  // scrolling, and selection changes inside the embedded canvas.
+  if (Array.isArray(State.option.fixedRoots)) {
+    State.option.fixedRoots.forEach((root) => {
+      const foreignDoc = root?.fixedRoot?.ownerDocument;
+      if (foreignDoc && foreignDoc !== document) {
+        scrollWatch(foreignDoc);
+        attachIntegrationListeners(foreignDoc);
+      }
+    });
+  }
 }
 
 export const selectionChanged = lagBounce(() => {
@@ -1391,8 +1430,11 @@ export function checkAll() {
 
   UI.roots = [];
   if (State.option.fixedRoots) {
+    // fixedRoots is an array of { fixedRoot, framePositioner } wrappers.
+    // Downstream code (utils.js stamping data-ed11y-root, startObserver,
+    // closest('[data-ed11y-root]')) expects raw elements — unwrap here.
     State.option.fixedRoots.forEach((root) => {
-      UI.roots.push(root);
+      if (root?.fixedRoot) UI.roots.push(root.fixedRoot);
     });
   } else {
     UI.roots = [...document.querySelectorAll(`:is(${State.option.checkRoot})`)];
@@ -1560,6 +1602,32 @@ export function refresh() {
   incrementalCheckDebounce();
 }
 
+// Replaces State.option.fixedRoots (and optionally editableContent), attaches
+// integration listeners to any newly-introduced documents, and forces a fresh
+// full check. Used by integrations that swap iframes at runtime (e.g. WordPress
+// block editor toggling Visual ↔ Code, or moving between posts without a full
+// page reload).
+//
+// Pass an empty array to clear fixedRoots — the library falls back to scanning
+// State.option.checkRoot against the outer document.
+export function setFixedRoots(newFixedRoots, newEditableContent) {
+  State.option.fixedRoots =
+    Array.isArray(newFixedRoots) && newFixedRoots.length > 0 ? newFixedRoots : false;
+  if (typeof newEditableContent !== 'undefined') {
+    State.option.editableContent = newEditableContent;
+  }
+  if (Array.isArray(newFixedRoots)) {
+    newFixedRoots.forEach((root) => {
+      const foreignDoc = root?.fixedRoot?.ownerDocument;
+      if (foreignDoc && foreignDoc !== document) {
+        attachIntegrationListeners(foreignDoc);
+      }
+    });
+  }
+  UI.forceFullCheck = true;
+  refresh();
+}
+
 export function resetPanel() {
   // Reset main panel.
   UI.visualizing = true; // so visualize function removes visualizers.
@@ -1672,13 +1740,13 @@ export function togglePanel() {
         checkAll();
 
         State.option.userPrefersShut = false;
-        localStorage.setItem('editoria11yShow', '1');
+        store.setItem('editoria11yShow', '1');
       } else {
         UI.showDismissed = false;
         UI.showPanel = false;
         reset();
         State.option.userPrefersShut = true;
-        localStorage.setItem('editoria11yShow', '0');
+        store.setItem('editoria11yShow', '0');
       }
       panelLabel();
     }

@@ -2,7 +2,7 @@ import Constants from '../../sa11y-js/utils/constants.js';
 import Lang from '../../sa11y-js/utils/lang.js';
 import { documentLoadingCheck, store } from '../../sa11y-js/utils/utils.js';
 import { checkRunPrevent, smush } from '../utils/utils.js';
-import { checkAll, continueCheck, windowResize } from './run.js';
+import { attachIntegrationListeners, checkAll, continueCheck, windowResize } from './run.js';
 import { Ed11yElementAlt } from '../elements/ed11y-element-alt.js';
 import { Ed11yElementResult } from '../elements/ed11y-element-result.js';
 import { Ed11yElementHeadingLabel, Ed11yElementPanel } from '../elements/ed11y-element-panel.js';
@@ -193,7 +193,7 @@ const postProcessOptions = (userOptions) => {
 
   // Build list of dismissed alerts
   if (State.option.syncedDismissals === false) {
-    UI.dismissedAlerts = localStorage.getItem('ed11ydismissed');
+    UI.dismissedAlerts = store.getItem('ed11ydismissed');
     UI.dismissedAlerts = UI.dismissedAlerts ? JSON.parse(UI.dismissedAlerts) : {};
   } else {
     UI.dismissedAlerts = {};
@@ -244,24 +244,21 @@ export async function initialize(userOptions) {
 
     // Set up observers.
     // Todo only needed if we are watching for changes.
-    window.addEventListener(
-      'keydown',
-      () => {
-        UI.interaction = true;
-      },
-      {
-        passive: true,
-      },
-    );
-    window.addEventListener(
-      'click',
-      () => {
-        UI.interaction = true;
-      },
-      {
-        passive: true,
-      },
-    );
+    attachIntegrationListeners(document);
+    // Cross-document: integrations that pass fixedRoots pointing into iframes
+    // need the same interaction/selection listeners attached to those documents,
+    // otherwise typing or selection inside the embedded canvas is invisible to
+    // the library. (intersectionObservers does the same walk for scroll, but it
+    // runs lazily on first showResults() — interaction listeners need to be
+    // ready before the user touches anything.)
+    if (Array.isArray(State.option.fixedRoots)) {
+      State.option.fixedRoots.forEach((root) => {
+        const foreignDoc = root?.fixedRoot?.ownerDocument;
+        if (foreignDoc && foreignDoc !== document) {
+          attachIntegrationListeners(foreignDoc);
+        }
+      });
+    }
     window.addEventListener(
       'resize',
       () => {
