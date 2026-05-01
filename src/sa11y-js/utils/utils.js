@@ -1130,21 +1130,63 @@ export function generateRegexString(input, matchStart = false) {
   return new RegExp(finalPattern, 'i');
 }
 
+// 128-bit non-cryptographic hash (cyrb128). Used only when SubtleCrypto is unavailable
+// (insecure HTTP origins, some headless/Node contexts). Dismiss digests are localStorage
+// keys, not security primitives, so collision resistance — not cryptographic strength —
+// is the only requirement.
+function cyrb128Hex(str) {
+  let h1 = 1779033703;
+  let h2 = 3144134277;
+  let h3 = 1013904242;
+  let h4 = 2773480762;
+  for (let i = 0; i < str.length; i++) {
+    const k = str.charCodeAt(i);
+    h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
+    h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
+    h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
+    h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);
+  }
+  h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);
+  h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
+  h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
+  h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
+  return [h1 ^ h2 ^ h3 ^ h4, h2 ^ h1, h3 ^ h1, h4 ^ h1]
+    .map((n) => (n >>> 0).toString(16).padStart(8, '0'))
+    .join('');
+}
+
+let dismissDigestFallbackWarned = false;
+
 /**
- * Generates a SHA-256 hex digest from a pepper + message combination, used for dismiss keys within localstorage. Yoinked from Editoria11y!
+ * Generates a hex digest from a pepper + message combination, used for dismiss keys within
+ * localStorage. Prefers SHA-256 via SubtleCrypto; falls back to a 128-bit non-cryptographic
+ * hash when SubtleCrypto is unavailable (insecure HTTP origins, headless/Node contexts).
+ * Yoinked from Editoria11y!
  * @async
  * @param {string} pepper - A secret or application-specific salt.
  * @param {string} message - The message or identifier to hash.
- * @returns {Promise<string>} A lowercase hexadecimal SHA-256 digest.
+ * @returns {Promise<string>} A lowercase hexadecimal digest (64 chars from SHA-256, 32 from the fallback).
  */
 export async function dismissDigest(pepper, message) {
-  const msgUint8 = new TextEncoder().encode(pepper + message);
-  const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgUint8);
-  if (Uint8Array.prototype.toHex) {
-    return new Uint8Array(hashBuffer).toHex();
+  const input = `${pepper}${message}`;
+  const subtle = globalThis.crypto?.subtle;
+  if (subtle?.digest) {
+    const msgUint8 = new TextEncoder().encode(input);
+    const hashBuffer = await subtle.digest('SHA-256', msgUint8);
+    if (Uint8Array.prototype.toHex) {
+      return new Uint8Array(hashBuffer).toHex();
+    }
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   }
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  if (!dismissDigestFallbackWarned) {
+    dismissDigestFallbackWarned = true;
+    // SubtleCrypto is gated behind secure contexts; warn so site authors can fix the deployment.
+    console.warn(
+      'Editoria11y: SubtleCrypto unavailable (likely an insecure http:// origin). Falling back to a non-cryptographic hash for dismiss keys. Serve the page over https or from localhost to silence this warning.'
+    );
+  }
+  return cyrb128Hex(input);
 }
 
 let langCache;
