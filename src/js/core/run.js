@@ -1056,7 +1056,7 @@ export const slowIncremental = lagBounce(() => {
 }, 500);
 
 export function windowResize() {
-  if (UI.panel?.classList.contains('ed11y-active') === true) {
+  if (UI.panel?.classList?.contains('ed11y-active') === true) {
     alignAlts();
     alignButtons();
   }
