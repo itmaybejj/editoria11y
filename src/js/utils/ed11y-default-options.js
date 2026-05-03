@@ -7,7 +7,7 @@ export const ed11yDefaultOptions = {
 
   // Target area to check
   checkRoot: false, // Editoria11y uses "checkRoots" below.
-  fixedRoots: false, // Array object pairs: 
+  fixedRoots: false, // Array object pairs:
   // { fixedRoot: element, framePositioner: element }
   // framePositioner is the wrapper element outside an iframe.
 

@@ -1682,9 +1682,15 @@ export function dismissThis(dismissalType, button) {
   }
 
   // Remove tip and reset borders around element
+  pauseObservers();
   reset();
+  const toClear = tip?.getRootNode()?.host;
+  if (toClear) {
+    toClear.remove();
+  }
   UI.showPanel = true;
   checkAll();
+  resumeObservers();
 
   const rememberGoto = UI.openJumpPosition;
 
@@ -1701,6 +1707,7 @@ export function dismissThis(dismissalType, button) {
     },
     500,
     rememberGoto,
+    tip,
   );
 }
 
