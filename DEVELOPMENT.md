@@ -1,6 +1,8 @@
 # Setup
 * Run `scripts/get.sh` to pull and patch Sa11y library files and install node dependencies.
-* git config core.hooksPath scripts/hooks
+* One-time per-clone git config:
+  * `git config core.hooksPath scripts/hooks` — installs the pre-commit hook (refuses direct commits to the protected branch and rebuilds dist/ when src/ is staged).
+  * `git config merge.theirs.driver "cp -f %B %A"` — registers the custom merge driver referenced by `.gitattributes` so build artifacts (`dist/**` and `scripts/sa11y-check-keys.json`) auto-resolve to the incoming version on `git pull`. They get rebuilt before every commit, so conflicts in them are never meaningful.
 * Run NPM scripts as needed:
   * `npm run watch` compiles and watches JS and CSS folders for changes.
   * `npm run build` compiles once.

@@ -141,7 +141,6 @@ if (writeArtifact) {
 		schemaVersion: 1,
 		ed11yVersion: pkg.version,
 		sa11yVersion: pkg.sa11yVersion,
-		generatedAt: new Date().toISOString(),
 		checks: Object.fromEntries(
 			[...checkKeys].sort().map((key) => [key, {
 				title: testNames[key] ?? null,
