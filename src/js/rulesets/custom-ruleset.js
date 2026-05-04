@@ -77,6 +77,8 @@ export function checkCustomRuleset() {
         elements.forEach((el) => {
           let text = Utils.getText(el);
           if (!cr.caseSensitive) {
+            cr.includeText = cr.includeText.map((inc) => inc.toLowerCase());
+            cr.excludeText = cr.excludeText.map((exc) => exc.toLowerCase());
             text = text.toLowerCase();
           }
           let match = false;
