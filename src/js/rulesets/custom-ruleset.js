@@ -9,6 +9,14 @@ export function prepareCustomRuleset() {
     Lang.testNames[cr.testKey] = cr.testName;
     Lang.langStrings[cr.testKey] =
       `<div class="title" tabindex="-1">${Utils.sanitizeHTML(cr.testName)}</div>${Utils.sanitizeHTML(cr.tipContent)}`;
+    if (!cr.caseSensitive) {
+      if (cr.includeText.length) {
+        cr.includeText = cr.includeText.map((inc) => inc.toLowerCase());
+      }
+      if (cr.excludeText.length) {
+        cr.excludeText = cr.excludeText.map((exc) => exc.toLowerCase());
+      }
+    }
   });
 }
 
@@ -77,8 +85,6 @@ export function checkCustomRuleset() {
         elements.forEach((el) => {
           let text = Utils.getText(el);
           if (!cr.caseSensitive) {
-            cr.includeText = cr.includeText.map((inc) => inc.toLowerCase());
-            cr.excludeText = cr.excludeText.map((exc) => exc.toLowerCase());
             text = text.toLowerCase();
           }
           let match = false;

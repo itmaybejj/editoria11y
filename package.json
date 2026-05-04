@@ -1,6 +1,6 @@
 {
 	"name": "editoria11y",
-	"version": "3.0.0",
+	"version": "3.0.1",
 	"sa11yVersion": "4.4.2",
 	"description": "Editoria11y is a content accessibility checker that shows results inline in Web pages and rich text editors.",
 	"main": "src/js/ed11y.js",

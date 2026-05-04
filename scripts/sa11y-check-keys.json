@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "ed11yVersion": "3.0.0",
+  "ed11yVersion": "3.0.1",
   "sa11yVersion": "4.4.2",
   "checks": {
     "ALT_FILE_EXT": {
