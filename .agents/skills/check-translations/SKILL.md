@@ -20,7 +20,7 @@ This skill runs in two modes depending on the state of each translation file:
 
 1. **Sync mode** (the common case): a translation already exists for a language; the skill diffs the English source between the translation's recorded commit and HEAD, and patches each language. This is described in Steps 1–2 below.
 
-2. **First-pass mode**: a stub file exists in `src/lang/` but the editoria11y-specific objects (`testNames`, `tips`, `interfaceStrings`) are empty. These languages are listed in `TRANSLATION_MANIFEST.json` under `pendingTranslations` and have `// UNTRANSLATED STUB` headers. They need a complete first translation pass, not a diff. See **First-pass translations** below.
+2. **First-pass mode**: a stub file exists in `src/lang/` but the editoria11y-specific objects (`testNames`, `tips`, `interfaceStrings`) are empty. Stubs carry an `// UNTRANSLATED STUB` header and are listed under `pendingTranslations` in `TRANSLATION_MANIFEST.json`. They need a complete first translation pass, not a diff, and live in `scripts/build.js` under a separate `pendingLangs` array (not built). See **First-pass translations** below. As of this writing there are no pending languages, but the workflow is documented for the next batch.
 
 ## Manifest location
 
@@ -189,71 +189,54 @@ affected tips is in `en-gb.js` — look at `britishTips`.
 
 ## First-pass translations
 
-When a `src/lang/<code>.js` file is a stub (`// UNTRANSLATED STUB` header, empty `testNames`/`tips`/`interfaceStrings`), the language needs a complete first translation pass instead of a diff. These languages are enumerated in `TRANSLATION_MANIFEST.json` → `pendingTranslations`, and they live in `scripts/build.js` under the `pendingLangs` array (separate from the active `langs` array — building them now would ship empty bundles).
-
-### Languages currently pending first-pass translation
-
-Source of truth: `TRANSLATION_MANIFEST.json` → `pendingTranslations`. As of wiring:
-
-| Code | Language    | Method                                       | Sa11y source           |
-|------|-------------|----------------------------------------------|------------------------|
-| bg   | Bulgarian   | machine                                      | `src/sa11y-lang/bg.js` |
-| cs   | Czech       | machine                                      | `src/sa11y-lang/cs.js` |
-| et   | Estonian    | machine                                      | `src/sa11y-lang/et.js` |
-| fi   | Finnish     | machine                                      | `src/sa11y-lang/fi.js` |
-| id   | Indonesian  | machine                                      | `src/sa11y-lang/id.js` |
-| ko   | Korean      | machine                                      | `src/sa11y-lang/ko.js` |
-| lt   | Lithuanian  | machine                                      | `src/sa11y-lang/lt.js` |
-| lv   | Latvian     | machine                                      | `src/sa11y-lang/lv.js` |
-| ro   | Romanian    | machine                                      | `src/sa11y-lang/ro.js` |
-| sk   | Slovak      | machine                                      | `src/sa11y-lang/sk.js` |
-| sl   | Slovenian   | machine                                      | `src/sa11y-lang/sl.js` |
-| **ta** | **Tamil** | **human — defer to Sa11y wording (special)** | `src/sa11y-lang/ta.js` |
-| tr   | Turkish     | machine                                      | `src/sa11y-lang/tr.js` |
+When a `src/lang/<code>.js` file is a stub (`// UNTRANSLATED STUB` header, empty `testNames`/`tips`/`interfaceStrings`), the language needs a complete first translation pass instead of a diff. Such stubs should be enumerated in `TRANSLATION_MANIFEST.json` under a `pendingTranslations` block, and the language code should live in `scripts/build.js` under a separate `pendingLangs` array (not in the active `langs` array — building a stub would ship a half-Sa11y, no-editoria11y bundle).
 
 ### Workflow for a first-pass translation
 
 1. Pick a fully-translated reference file in `src/lang/` whose tone you want to match (e.g. `da.js`, `de.js`, `es.js`). This is the *structural* model — same key set, same use of `${why.fix}`, `%(EL)`, etc.
-2. Read `src/lang/baseAll.js` and `src/lang/baseEnglishOnly.js` for the canonical English source strings to translate.
-3. For each pending language, launch one Agent (in parallel batches of 10, then pipelined). Each agent:
-   - Reads the stub file in `src/lang/<code>.js` to understand the import + export shape.
-   - Translates every key from `baseAll.js` + `baseEnglishOnly.js` into the target language.
-   - Uses targeted `Edit` calls to populate `testNames`, `why`, `tips`, and `interfaceStrings` in alphabetical order.
+2. Write a shared spec to `/tmp/claude/ed11y-translation-spec.md` with the workflow, file paths, and the critical-rules block. Per-language prompts can then be tiny (just "your CODE is X; read the spec; tone notes for this language").
+3. For each pending language, launch one Sonnet Agent. **Cap parallel dispatch at 8 agents** — the harness has a parallel-tool-call limit. With 13 languages, do batches of 7 + 6.
+4. Each translator agent:
+   - Reads the stub file, `baseAll.js`, `baseEnglishOnly.js`, and one reference translation.
+   - Translates every key from `baseAll.js` (NOT `baseEnglishOnly.js`) into the target language.
+   - Uses targeted `Edit` calls to populate `testNames`, `why`, `tips`, and `interfaceStrings`, matching the alphabetization in the reference file.
    - Removes the `// UNTRANSLATED STUB` comment block once the file is complete.
    - Runs `node -c src/lang/<code>.js` to verify syntax.
-4. After the agents complete:
-   - Move the language code from `pendingLangs` to `langs` in `scripts/build.js`.
+5. After translators complete, **dispatch Opus proofreaders** (one per language, again capped at 8 in parallel) using a parallel `/tmp/claude/ed11y-proofread-spec.md`. Proofreaders polish for native-speaker naturalness, terminology consistency, grammar, and punctuation conventions of the target language. Each proofreader edits in place and re-runs `node -c`.
+6. Promote the languages:
+   - Move each code from `pendingLangs` to `langs` in `scripts/build.js` (alphabetical order).
    - In `TRANSLATION_MANIFEST.json`, delete the entry from `pendingTranslations` and add it to `translations` with the current HEAD commit.
-   - Run `npm run build` and verify the new `dist/js/lang/<code>.js` and `<code>.umd.js` bundles are produced.
+   - Remove the `void pendingLangs;` line from `scripts/build.js` if `pendingLangs` is now empty.
+   - Run `npm run build` and verify `dist/js/lang/<code>.js` and `<code>.umd.js` bundles appear.
 
-### Tamil (ta) — special handling
+### Tamil (ta) — special handling whenever a Tamil stub is created
 
-Tamil is the only language in this batch that is **human-translated** in Sa11y rather than machine-translated. Treat the human translator's voice as authoritative.
+Tamil in Sa11y is **human-translated**, not machine-translated. Treat the human translator's voice as authoritative.
 
-When dispatching the Tamil agent (and ONLY the Tamil agent):
+If you ever create a new Tamil stub (or re-translate the existing `src/lang/ta.js` from scratch), the dispatching prompt for Tamil — and ONLY Tamil — must:
 
-1. Give the agent **a copy of the full contents of `src/sa11y-lang/ta.js`** in the prompt (read it and inline it, do not just reference the path — the agent needs the wording present).
-2. Add this directive to the prompt, verbatim:
+1. Include **a copy of the full contents of `src/sa11y-lang/ta.js`** inlined in the prompt (read it and inline it; do not just reference the path).
+2. Include a vocabulary-anchor table mapping common accessibility concepts (alt text, heading, link, screen reader, accessible name, label, input field, image, button, element, attribute, contrast, etc.) to the human translator's chosen Tamil terms. Pull these from `src/sa11y-lang/ta.js`.
+3. Include this directive verbatim:
 
    ```
    TAMIL-SPECIFIC: src/sa11y-lang/ta.js was written by a human translator,
    not by machine translation. Defer to its style, register, terminology,
    sentence rhythm, and word choice. Match how that file phrases analogous
-   accessibility concepts (e.g. how it renders "alt text", "heading",
-   "link", "screen reader") rather than inventing fresh terms or copying
-   tone from machine-translated sibling files. When in doubt, mirror the
-   Sa11y wording even if it would read differently in machine translation.
+   accessibility concepts rather than inventing fresh terms or copying tone
+   from machine-translated sibling files. When in doubt, mirror the Sa11y
+   wording even if it would read differently in machine translation.
    ```
 
-3. Do NOT include the standard "match the existing translation style and tone" line for Tamil — the stub file has no existing tone to match, and the directive above takes precedence.
-4. All other rules in the **Critical agent instructions** block still apply (no curly quotes, escape apostrophes, preserve placeholders, run `node -c`, etc.).
+4. Do NOT include the standard "match the existing translation style and tone of sibling files" instruction for Tamil — the directive above takes precedence.
+5. The Tamil proofreader prompt must apply the same directive: verify the translator deferred to the Sa11y voice and align any drifted terms back to it.
+6. All other rules in the critical-rules block still apply (no curly quotes, escape apostrophes, preserve placeholders, run `node -c`, etc.).
 
-### Notes for the next session resuming this work
+### Operational notes from the last batch
 
-- The stubs were created in this session — they parse but ship no editoria11y strings. Do not run `npm run build` expecting them to produce useful bundles until they are translated and moved into `langs`.
-- `scripts/build.js` references `pendingLangs` only via `void pendingLangs;` to avoid a lint "unused" warning. When emptying the array, also remove the `void` line to keep things tidy.
-- Bulgarian and Ukrainian use Cyrillic; Tamil uses Tamil script. Confirm the file is saved as UTF-8 (it should be, but check `file src/lang/<code>.js` if anything looks garbled).
-- The dev report and consuming CMS plugins (Drupal, WordPress) discover languages via the built `dist/js/lang/` files, NOT via `src/lang/`. So shipping a stub means no user-visible exposure of the half-built language until it is added to `langs`.
+- Each translator + proofreader pair costs roughly 60k–180k tokens depending on language complexity. The Lithuanian and Slovak proofreaders ran 100+ tool calls — that's normal for languages with rich case morphology.
+- Cyrillic (`bg`), Tamil script (`ta`), and accented Latin scripts all save fine as UTF-8 in `src/lang/`. If any character looks garbled in `git diff`, run `file src/lang/<code>.js` to confirm encoding.
+- The dev report and consuming CMS plugins (Drupal, WordPress) discover languages via the built `dist/js/lang/` files, NOT via `src/lang/`. So a stub in `pendingLangs` is invisible to end users until it's promoted to `langs`.
 
 ## Files to skip
 
