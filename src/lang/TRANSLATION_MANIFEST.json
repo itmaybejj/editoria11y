@@ -1,11 +1,27 @@
 {
-  "_comment": "Tracks the English source commit each translation was last synced to. Used by the check-translations skill to generate targeted diffs for translators.",
+  "_comment": "Tracks the English source commit each translation was last synced to. Used by the check-translations skill to generate targeted diffs for translators. A `null` commit in `translations` means the file is a wired-but-untranslated stub and needs an initial full translation pass — see `pendingTranslations` and the check-translations skill.",
   "englishSources": [
     "src/lang/baseAll.js",
     "src/lang/baseEnglishOnly.js",
     "src/sa11y-lang/en.js"
   ],
   "baseline": "590d1644b90fa47416f59fd98556d485f91e7981",
+  "pendingTranslations": {
+    "_comment": "Stub files exist in src/lang/ but contain no editoria11y-specific translations. They are imported from sa11y-lang for the Sa11y strings, and need a full first-pass translation of testNames + tips + interfaceStrings before being added to scripts/build.js `langs`. Tamil is human-translated upstream — see check-translations SKILL.md for special handling.",
+    "src/lang/bg.js": { "method": "machine", "sa11ySource": "src/sa11y-lang/bg.js" },
+    "src/lang/cs.js": { "method": "machine", "sa11ySource": "src/sa11y-lang/cs.js" },
+    "src/lang/et.js": { "method": "machine", "sa11ySource": "src/sa11y-lang/et.js" },
+    "src/lang/fi.js": { "method": "machine", "sa11ySource": "src/sa11y-lang/fi.js" },
+    "src/lang/id.js": { "method": "machine", "sa11ySource": "src/sa11y-lang/id.js" },
+    "src/lang/ko.js": { "method": "machine", "sa11ySource": "src/sa11y-lang/ko.js" },
+    "src/lang/lt.js": { "method": "machine", "sa11ySource": "src/sa11y-lang/lt.js" },
+    "src/lang/lv.js": { "method": "machine", "sa11ySource": "src/sa11y-lang/lv.js" },
+    "src/lang/ro.js": { "method": "machine", "sa11ySource": "src/sa11y-lang/ro.js" },
+    "src/lang/sk.js": { "method": "machine", "sa11ySource": "src/sa11y-lang/sk.js" },
+    "src/lang/sl.js": { "method": "machine", "sa11ySource": "src/sa11y-lang/sl.js" },
+    "src/lang/ta.js": { "method": "human-defer-to-sa11y", "sa11ySource": "src/sa11y-lang/ta.js", "note": "Tamil is human-translated in Sa11y. The translating agent MUST be given the Sa11y ta.js file and told to defer to its style, tone, and word choice." },
+    "src/lang/tr.js": { "method": "machine", "sa11ySource": "src/sa11y-lang/tr.js" }
+  },
   "translations": {
     "src/lang/da.js": "dbf7d5b87bcbafb8de46a7c81e3bcfe5a953ee21",
     "src/lang/de.js": "dbf7d5b87bcbafb8de46a7c81e3bcfe5a953ee21",

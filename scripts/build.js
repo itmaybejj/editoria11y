@@ -121,7 +121,36 @@ const runBuild = async (config) => {
 		'zh',
 	];
 
-	console.log(`Processing ${langs.length} language files...`);
+	/* Stubbed translations imported from sa11y-lang but NOT yet translated for
+	 * editoria11y-specific strings. The src/lang/<code>.js file exists with
+	 * empty testNames/tips/interfaceStrings; building these now would ship a
+	 * half-Sa11y, no-editoria11y bundle. As each is translated, MOVE its code
+	 * from `pendingLangs` into `langs` above. See
+	 * .agents/skills/check-translations/SKILL.md for the translation workflow.
+	 *
+	 * Note on naming: sa11y-lang uses `enUS`/`ptBR`/`ptPT`/`ua`; editoria11y
+	 * uses `en-us`/`pt-br`/`pt-pt`/`uk`. The `ko`/`ta`/etc codes below match
+	 * sa11y-lang directly. Tamil (`ta`) is HUMAN-translated upstream — see
+	 * the skill for special handling.
+	 */
+	const pendingLangs = [
+		'bg', // Bulgarian
+		'cs', // Czech
+		'et', // Estonian
+		'fi', // Finnish
+		'id', // Indonesian
+		'ko', // Korean
+		'lt', // Lithuanian
+		'lv', // Latvian
+		'ro', // Romanian
+		'sk', // Slovak
+		'sl', // Slovenian
+		'ta', // Tamil — human-translated in Sa11y; see SKILL.md
+		'tr', // Turkish
+	];
+	void pendingLangs;
+
+	console.log(`Processing ${langs.length} language files (${pendingLangs.length} pending translation)...`);
 
 	for (const lang of langs) {
 		const langEntry = path.resolve(dirname, `../src/lang/${lang}.js`);
