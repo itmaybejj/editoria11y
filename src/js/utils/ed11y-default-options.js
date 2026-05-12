@@ -364,17 +364,15 @@ export const ed11yDefaultOptions = {
     LINK_CLICK_HERE: false,
     LINK_DOI: true, // Todo consider.
     LINK_URL: {
-      maxLength: 40,
+      maxLength: 20,
     },
     LINK_LABEL: {
       dismissAll: true,
     },
     LINK_EMPTY: true,
     LINK_IDENTICAL_NAME: false, // Todo pro.
-    LINK_NEW_TAB: {
-      dismissAll: true,
-    },
-    LINK_FILE_EXT: false, // Todo test vs LinkPurpose.
+    LINK_NEW_TAB: true,
+    LINK_FILE_EXT: true,
     LINK_UNPRONOUNCEABLE: true,
     LINK_MAYBE_BUTTON: true,
 
@@ -399,15 +397,11 @@ export const ed11yDefaultOptions = {
       sources: '',
     },
     EMBED_UNFOCUSABLE: true,
-    EMBED_MISSING_TITLE: {
-      type: 'warning',
-    },
     EMBED_GENERAL: true,
+    EMBED_MISSING_TITLE: true,
 
     // Quality assurance checks
-    QA_BAD_LINK: {
-      sources: '',
-    },
+    QA_BAD_LINK: false, // useless without 'sources'.
     QA_STRONG_ITALICS: true,
     QA_IN_PAGE_LINK: true,
     QA_DOCUMENT: false, // Todo CMS consider.
