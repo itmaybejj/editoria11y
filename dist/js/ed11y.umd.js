@@ -9146,8 +9146,10 @@ ${this.error.stack}
       EMBED_GENERAL: true,
       EMBED_MISSING_TITLE: true,
       // Quality assurance checks
-      QA_BAD_LINK: false,
-      // useless without 'sources'.
+      QA_BAD_LINK: {
+        sources: ""
+      },
+      // useless without sources.
       QA_STRONG_ITALICS: true,
       QA_IN_PAGE_LINK: true,
       QA_DOCUMENT: false,
