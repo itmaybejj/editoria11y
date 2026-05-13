@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.1-512
+			* @version 3.0.1-513
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -417,11 +417,16 @@
       Global.scrollBehaviour = !reducedMotion || reducedMotion.matches ? "auto" : "smooth";
       Global.langDirection = Global.html.getAttribute("dir")?.trim()?.toLowerCase() === "rtl" ? "rtl" : "ltr";
       const documentSources = State.option.checks.QA_DOCUMENT.sources;
-      const defaultDocumentSources = 'a[href$=".doc"], a[href$=".docx"], a[href*=".doc?"], a[href*=".docx?"], a[href$=".ppt"], a[href$=".pptx"], a[href*=".ppt?"], a[href*=".pptx?"], a[href^="https://drive.google.com/file"], a[href^="https://docs.google."], a[href^="https://sway."]';
-      if (documentSources) {
-        Global.documentSources = `${defaultDocumentSources}, ${documentSources}`;
+      if (State.option.checks.QA_DOCUMENT !== false) {
+        const defaultDocumentSources = 'a[href$=".doc"], a[href$=".docx"], a[href*=".doc?"], a[href*=".docx?"], a[href$=".ppt"], a[href$=".pptx"], a[href*=".ppt?"], a[href*=".pptx?"], a[href^="https://drive.google.com/file"], a[href^="https://docs.google."], a[href^="https://sway."]';
+        Global.documentSources = State.option.checks.QA_DOCUMENT.sources ? `${defaultDocumentSources}, ${documentSources}` : defaultDocumentSources;
       } else {
-        Global.documentSources = defaultDocumentSources;
+        Global.documentSources = false;
+      }
+      if (State.option.checks.QA_PDF !== false) {
+        Global.pdfSources = State.option.checks.QA_PDF.sources ? State.option.checks.QA_PDF.sources : 'a[href$=".pdf"], a[href*=".pdf?"]';
+      } else {
+        Global.pdfSources = false;
       }
       Global.susAltWords = State.option.susAltStopWords ? State.option.susAltStopWords.split(",").map((word) => word.trim().toLowerCase()).filter(Boolean) : Lang._("SUS_ALT_STOPWORDS");
       Global.placeholderAltSet = new Set(Lang._("PLACEHOLDER_ALT_STOPWORDS"));
@@ -1839,7 +1844,7 @@
       });
     }
   }
-  const version = "3.0.1-512";
+  const version = "3.0.1-513";
   const sprite = {
     alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
     close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -2827,17 +2832,15 @@ ${this.error.stack}
           });
         }
       }
-      const hasExtension = $el.matches(Constants.Global.documentSources);
-      const hasPDF = State.option.checks.QA_PDF?.sources ? $el.matches(State.option.checks.QA_PDF.sources) : $el.matches('a[href$=".pdf"], a[href*=".pdf?"]');
-      if (hasExtension) {
+      if (Constants.Global.pdfSources && $el.matches(Constants.Global.pdfSources)) {
         logResult({
-          test: "QA_DOCUMENT",
+          test: "QA_PDF",
           args: [linkText],
           dismissSuffix: href
         });
-      } else if (hasPDF) {
+      } else if (Constants.Global.documentSources && $el.matches(Constants.Global.documentSources)) {
         logResult({
-          test: "QA_PDF",
+          test: "QA_DOCUMENT",
           args: [linkText],
           dismissSuffix: href
         });

@@ -34,13 +34,25 @@ const Constants = (function myConstants() {
 
     // Check for document types.
     const documentSources = State.option.checks.QA_DOCUMENT.sources;
-    const defaultDocumentSources =
+    
+    if (State.option.checks.QA_DOCUMENT !== false) {
+      const defaultDocumentSources =
       'a[href$=".doc"], a[href$=".docx"], a[href*=".doc?"], a[href*=".docx?"], a[href$=".ppt"], a[href$=".pptx"], a[href*=".ppt?"], a[href*=".pptx?"], a[href^="https://drive.google.com/file"], a[href^="https://docs.google."], a[href^="https://sway."]';
-    if (documentSources) {
-      Global.documentSources = `${defaultDocumentSources}, ${documentSources}`;
+      Global.documentSources = State.option.checks.QA_DOCUMENT.sources
+        ? `${defaultDocumentSources}, ${documentSources}`
+        : defaultDocumentSources;
     } else {
-      Global.documentSources = defaultDocumentSources;
+      Global.documentSources = false;
     }
+
+    if (State.option.checks.QA_PDF !== false) {
+      Global.pdfSources = State.option.checks.QA_PDF.sources
+        ? State.option.checks.QA_PDF.sources
+        : 'a[href$=".pdf"], a[href*=".pdf?"]';
+    } else {
+      Global.pdfSources = false;
+    }
+    
 
     /* ********************** */
     /*  Alt text module       */
