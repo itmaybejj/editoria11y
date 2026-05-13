@@ -298,7 +298,7 @@ export const tips = {
 
 	QA_FAKE_LIST: `<p>${why.fix}Si <i>%(TEXT)</i> fait partie d’une liste, formatez‑le comme une liste.</p><div class="why"><p>Les listes ont une structure visuelle et technique :</p><ol><li>Elles alignent les éléments et facilitent la lecture.</li><li>Elles sont reconnues par les lecteurs d’écran, qui annoncent "élément 3 sur 7".</li></ol><p>Un paragraphe commençant par un numéro n’est pas une vraie liste.</p></div>`,
 
-	QA_IN_PAGE_LINK: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p><strong>URL :</strong> <code>#%(ID)</code></p><p>La cible de ce lien ne correspond à aucun élément de la page.</p><div class="why"><p>Note pour les développeurs : si le lien déclenche un événement JavaScript, testez son fonctionnement au clavier avant de l’ajouter à la liste d’exclusion.</p></div>`,
+	QA_IN_PAGE_LINK: `<p><strong>URL :</strong> <i>#%(ID)</i></p><p><strong>Lien :</strong> <code>%(TEXT)</code></p><p>La cible de ce lien ne correspond à aucun élément de la page.</p><div class="why"><p>Note pour les développeurs : si le lien déclenche un événement JavaScript, testez son fonctionnement au clavier avant de l’ajouter à la liste d’exclusion.</p></div>`,
 
 	QA_JUSTIFY: `<p>Le texte justifié ajoute des espacements irréguliers entre les mots, ce qui rend la lecture plus difficile pour de nombreuses personnes.</p><p>${why.fix}Utilisez un alignement à gauche.</p>`,
 

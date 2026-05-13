@@ -276,7 +276,7 @@ const tips = {
 
 	QA_FAKE_LIST: `<p>${why.fix}Si <i>%(TEXT)</i> forma parte de una lista, aplique formato de lista.</p><div class="why"><p>Las listas tienen estructura visual y técnica:</p><ol><li>Alinean sus elementos y mejoran la lectura.</li><li>Son legibles por máquina: los lectores de pantalla anuncian "ítem 3 de 7".</li></ol><p>Un párrafo que empieza con un número no es una lista real.</p></div>`,
 
-	QA_IN_PAGE_LINK: `<p><strong>Enlace:</strong> <i>%(TEXT)</i></p><p><strong>URL:</strong> <code>#%(ID)</code></p><p>El destino de este enlace no coincide con ningún elemento de la página.</p><div class="why"><p>Nota para desarrolladores: si el enlace dispara un evento JavaScript, pruebe su funcionamiento con teclado antes de añadirlo a la lista de exclusión.</p></div>`,
+	QA_IN_PAGE_LINK: `<p><strong>URL:</strong> <i>#%(ID)</i></p><p><strong>Enlace:</strong> <code>%(TEXT)</code></p><p>El destino de este enlace no coincide con ningún elemento de la página.</p><div class="why"><p>Nota para desarrolladores: si el enlace dispara un evento JavaScript, pruebe su funcionamiento con teclado antes de añadirlo a la lista de exclusión.</p></div>`,
 
 	QA_JUSTIFY: `<p>El texto justificado añade espacios irregulares, lo que dificulta la lectura a muchas personas.</p><p>${why.fix}Use alineación a la izquierda.</p>`,
 

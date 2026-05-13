@@ -49,7 +49,7 @@ If there is a diff, summarize:
 
 Launch one Agent per language **in parallel** (use a single message with multiple Agent tool calls). Each agent receives the same English diff context.
 
-Deploy the first 10 agents in one batch, then pipeline: launch another agent as soon as one finishes, rather than waiting for a full batch to complete.
+Deploy the first 8 agents in one batch, then pipeline: launch another agent as soon as one finishes, rather than waiting for a full batch to complete. **8 is the user-confirmed safe ceiling on this account** (2026-05-10) — earlier 16-in-flight attempts hit transient server-side rate limits.
 
 ### Shared spec file (recommended when 3+ languages are affected)
 
@@ -130,6 +130,58 @@ Run `node -c [filepath]` when done to verify syntax.
 2. Fix any syntax errors (most likely: unescaped apostrophes or curly quotes)
 3. Update each translation's commit in `TRANSLATION_MANIFEST.json` to current HEAD
 
+### Agent output-budget limits (relevant for large diffs)
+
+Cross-repo lesson from the editoria11y-csa WordPress port and the
+Drupal `po-translations` skill (both maintain ~140 KB .po files of
+roughly the same content). The same sub-agent infrastructure powers
+all three workflows, so these limits apply here too:
+
+- **32 K output-token cap per response.** A sub-agent that tries to
+  `Write` a single file ≥30 KB hits the cap mid-stream and fails.
+- **600 s stream watchdog.** Even within the token cap, the `Write`
+  tool's `content` parameter streams character-by-character at the
+  model's generation rate. A 30 KB UTF-8 payload in CJK/Cyrillic
+  takes minutes; if no token reaches the parent within 600 s the
+  watchdog kills the agent.
+
+For this skill's typical workflow (diff-driven Edit calls, each
+touching 5–50 lines), these limits don't bite — `Edit` calls are
+small and the total tool_input streamed per agent is well under
+the cap. **The current `Edit`-based pattern is the correct choice
+for this skill.**
+
+If a future first-pass translation of a brand new language is needed
+(a stub file becomes a complete translation in one agent run), the
+agent may need to produce 300+ string edits, which can approach the
+limits. In that case use the **Python-dict-via-Bash escape hatch**
+proven on the WP port:
+
+1. Agent writes `scripts/scratch/translate_<LANG>.py` with a flat
+   `T = {'KEY_NAME': 'translated string', ...}` dict + a `main()`
+   that reads `src/lang/<lang>.js`, regex-replaces values inside
+   the `testNames`/`tips`/`interfaceStrings` objects by key, and
+   writes the file back.
+2. Agent runs the script via `Bash(node)` or `Bash(python3)`.
+
+This dodges both limits: the script is ~half the size of the
+equivalent edited .js file, and the actual file mutation happens
+server-side (invisible to the agent's output token budget). Use
+single-quoted Python strings (`T['KEY'] = 'value'`) so curly
+typographic quotes in translations don't conflict with delimiters.
+
+### Local fill vs agent dispatch — the break-even point
+
+For diffs with **≤15 changed keys per language**, fill them locally
+in the parent rather than dispatching an agent. Agent overhead is
+~150 K input tokens (file + diff context) + ~30 K output (Edit calls
++ reasoning) ≈ $2–4 at Sonnet rates. For ~10 keys that's $0.20–0.40
+per key — orders of magnitude worse than the parent's incremental
+cost in-context.
+
+For **~50+ changed keys per language**, an agent amortizes the
+input cost and is the cheaper path.
+
 ## Step 3: Report Sa11y English changes
 
 Always check for changes in the Sa11y English source, even if editoria11y strings haven't changed:
@@ -195,14 +247,14 @@ When a `src/lang/<code>.js` file is a stub (`// UNTRANSLATED STUB` header, empty
 
 1. Pick a fully-translated reference file in `src/lang/` whose tone you want to match (e.g. `da.js`, `de.js`, `es.js`). This is the *structural* model — same key set, same use of `${why.fix}`, `%(EL)`, etc.
 2. Write a shared spec to `/tmp/claude/ed11y-translation-spec.md` with the workflow, file paths, and the critical-rules block. Per-language prompts can then be tiny (just "your CODE is X; read the spec; tone notes for this language").
-3. For each pending language, launch one Sonnet Agent. **Cap parallel dispatch at 8 agents** — the harness has a parallel-tool-call limit. With 13 languages, do batches of 7 + 6.
+3. For each pending language, launch one agent. **Cap parallel dispatch at 8 agents** — the harness has a parallel-tool-call limit. Pipeline; as agents finish dispatch the next agent.
 4. Each translator agent:
    - Reads the stub file, `baseAll.js`, `baseEnglishOnly.js`, and one reference translation.
    - Translates every key from `baseAll.js` (NOT `baseEnglishOnly.js`) into the target language.
    - Uses targeted `Edit` calls to populate `testNames`, `why`, `tips`, and `interfaceStrings`, matching the alphabetization in the reference file.
    - Removes the `// UNTRANSLATED STUB` comment block once the file is complete.
    - Runs `node -c src/lang/<code>.js` to verify syntax.
-5. After translators complete, **dispatch Opus proofreaders** (one per language, again capped at 8 in parallel) using a parallel `/tmp/claude/ed11y-proofread-spec.md`. Proofreaders polish for native-speaker naturalness, terminology consistency, grammar, and punctuation conventions of the target language. Each proofreader edits in place and re-runs `node -c`.
+   - Ends the translation pass, then proofreads using `/tmp/claude/ed11y-proofread-spec.md`. Proofreaders polish for native-speaker naturalness, terminology consistency, grammar, and punctuation conventions of the target language. Each proofreader edits in place and re-runs `node -c`.
 6. Promote the languages:
    - Move each code from `pendingLangs` to `langs` in `scripts/build.js` (alphabetical order).
    - In `TRANSLATION_MANIFEST.json`, delete the entry from `pendingTranslations` and add it to `translations` with the current HEAD commit.

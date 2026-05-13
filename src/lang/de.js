@@ -285,7 +285,7 @@ const tips = {
 
 	QA_FAKE_LIST: `<p>${why.fix}Wenn <i>%(TEXT)</i> Teil einer Liste ist, verwenden Sie Listenformatierung.</p><div class="why"><p>Listen haben visuelle und semantische Struktur:</p><ol><li>Einheitliche Einzüge erleichtern das Lesen.</li><li>Screenreader geben die Position an („Eintrag 3 von 7“).</li></ol><p>Ein Absatz mit einer vorangestellten Zahl ist keine echte Liste.</p></div>`,
 
-	QA_IN_PAGE_LINK: `<p><strong>Link:</strong> <i>%(TEXT)</i></p><p><strong>URL:</strong> <code>#%(ID)</code></p><p>Das Linkziel entspricht keinem Element auf dieser Seite.</p><div class="why"><p>Hinweis für Entwickler: Wenn es ein JS‑Handler ist, testen Sie die Tastaturbedienung, bevor Sie den Check ignorieren.</p></div>`,
+	QA_IN_PAGE_LINK: `<p><strong>URL:</strong> <i>#%(ID)</i></p><p><strong>Link:</strong> <code>%(TEXT)</code></p><p>Das Linkziel entspricht keinem Element auf dieser Seite.</p><div class="why"><p>Hinweis für Entwickler: Wenn es ein JS‑Handler ist, testen Sie die Tastaturbedienung, bevor Sie den Check ignorieren.</p></div>`,
 
 	QA_JUSTIFY: `<p>Blocksatz erzeugt unregelmäßige Lücken und erschwert das Lesen.</p><p>${why.fix}Verwenden Sie linksbündigen Text.</p>`,
 
