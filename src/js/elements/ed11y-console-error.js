@@ -89,9 +89,33 @@ ${this.error.stack}
     p2.style.setProperty('overflow', 'auto');
 
     const optionsInfo = document.createElement('span');
+
+    const safeStringify = (obj) => {
+      const cache = new Set();
+      return JSON.stringify(obj, (_key, value) => {
+        // 1. Remove Circular References
+        if (typeof value === 'object' && value !== null) {
+          if (cache.has(value)) return; // Discard circular reference
+          cache.add(value);
+        }
+
+        // 2. Remove Non-Serializable Types
+        // Functions and undefined are omitted by default in objects,
+        // but this ensures they (and Symbols) are stripped elsewhere too.
+        if (typeof value === 'function' || typeof value === 'symbol' || value === undefined) {
+          return;
+        }
+
+        // 3. Handle problematic built-ins (Optional)
+        // Convert Map/Set to something readable or return undefined to remove
+        if (value instanceof Map || value instanceof Set) return;
+
+        return value;
+      });
+    };
+
     try {
       if (State.option) {
-        const oldPepper = State.option.pepper;
         State.option.pepper = 'hidden';
         // Strip values that aren't safe to JSON.stringify: live DOM nodes
         // (host pages such as Gutenberg decorate them with circular-reference
@@ -101,13 +125,11 @@ ${this.error.stack}
           if (typeof value === 'function') return '[Function]';
           return value;
         };
-        optionsInfo.textContent += `Options: ${JSON.stringify(State.option, safe)}`;
-        State.option.pepper = oldPepper;
+        optionsInfo.textContent += `Options: ${safeStringify(State.option, safe)}`;
       } else {
         optionsInfo.textContent += 'Options object is not available.';
       }
     } catch (e) {
-      optionsInfo.textContent += 'Options object is not available.';
       console.warn('State object is not accessible for error details.', e);
     }
     p2.append(optionsInfo);
