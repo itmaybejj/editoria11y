@@ -90,47 +90,171 @@ ${this.error.stack}
 
     const optionsInfo = document.createElement('span');
 
-    const safeStringify = (obj) => {
-      const cache = new Set();
-      return JSON.stringify(obj, (_key, value) => {
-        // 1. Remove Circular References
-        if (typeof value === 'object' && value !== null) {
-          if (cache.has(value)) return; // Discard circular reference
-          cache.add(value);
+    // Defensive stringifier. Every operation that can throw in Firefox
+    // (Object.keys / property access on cross-origin Window or Document
+    // objects, getters on React fibers attached to DOM nodes, JSON.stringify
+    // probing .toJSON on a foreign object) is wrapped in try/catch.
+    function safeStringify(root) {
+      const MAX_DEPTH = 8;
+      const seen = new WeakSet();
+
+      function quoteKey(k) {
+        try {
+          return JSON.stringify(String(k));
+        } catch (_e) {
+          return '"[unkey]"';
+        }
+      }
+
+      function isHostObject(val) {
+        // Detect DOM nodes, Window, and Document without triggering hostile
+        // getters. Each probe is independently guarded.
+        try {
+          if (typeof val.nodeType === 'number') return true;
+        } catch (_e) {
+          return true;
+        }
+        try {
+          if (val === val.window) return true;
+        } catch (_e) {
+          return true;
+        }
+        try {
+          if (typeof val.documentElement === 'object' && val.documentElement !== null) return true;
+        } catch (_e) {
+          return true;
+        }
+        return false;
+      }
+
+      function walk(val, depth) {
+        if (val === null) return 'null';
+        if (val === undefined) return undefined;
+
+        let type;
+        try {
+          type = typeof val;
+        } catch (_e) {
+          return '"[unreadable]"';
         }
 
-        // 2. Remove Non-Serializable Types
-        // Functions and undefined are omitted by default in objects,
-        // but this ensures they (and Symbols) are stripped elsewhere too.
-        if (typeof value === 'function' || typeof value === 'symbol' || value === undefined) {
-          return;
+        if (type === 'string') {
+          try {
+            return JSON.stringify(val);
+          } catch (_e) {
+            return '"[unstringifiable-string]"';
+          }
+        }
+        if (type === 'number') return Number.isFinite(val) ? String(val) : 'null';
+        if (type === 'boolean') return val ? 'true' : 'false';
+        if (type === 'bigint') return `"${String(val)}n"`;
+        if (type === 'function') return '"[Function]"';
+        if (type === 'symbol') return '"[Symbol]"';
+        if (type !== 'object') return '"[unknown]"';
+
+        if (depth >= MAX_DEPTH) return '"[MaxDepth]"';
+        if (isHostObject(val)) return '"[HostObject]"';
+
+        try {
+          if (seen.has(val)) return '"[Circular]"';
+          seen.add(val);
+        } catch (_e) {
+          return '"[unreadable-object]"';
         }
 
-        // 3. Handle problematic built-ins (Optional)
-        // Convert Map/Set to something readable or return undefined to remove
-        if (value instanceof Map || value instanceof Set) return;
+        let isArr = false;
+        try {
+          isArr = Array.isArray(val);
+        } catch (_e) {
+          /* fall through as object */
+        }
 
-        return value;
-      });
-    };
+        if (isArr) {
+          let len = 0;
+          try {
+            len = val.length >>> 0;
+          } catch (_e) {
+            return '"[unreadable-array]"';
+          }
+          const out = [];
+          for (let i = 0; i < len; i++) {
+            let child;
+            try {
+              child = val[i];
+            } catch (_e) {
+              out.push('"[unreadable-item]"');
+              continue;
+            }
+            const s = walk(child, depth + 1);
+            out.push(s === undefined ? 'null' : s);
+          }
+          return `[${out.join(',')}]`;
+        }
+
+        let keys = [];
+        try {
+          keys = Object.keys(val);
+        } catch (_e) {
+          return '"[unreadable-object]"';
+        }
+
+        const out = [];
+        for (const k of keys) {
+          // Skip framework-injected fiber/internal props proactively.
+          if (
+            typeof k === 'string' &&
+            (k.startsWith('__reactFiber') ||
+              k.startsWith('__reactProps') ||
+              k.startsWith('__reactEvents'))
+          ) {
+            out.push(`${quoteKey(k)}:"[ReactInternal]"`);
+            continue;
+          }
+          let child;
+          try {
+            child = val[k];
+          } catch (_e) {
+            out.push(`${quoteKey(k)}:"[unreadable-prop]"`);
+            continue;
+          }
+          const s = walk(child, depth + 1);
+          if (s !== undefined) out.push(`${quoteKey(k)}:${s}`);
+        }
+        return `{${out.join(',')}}`;
+      }
+
+      try {
+        const result = walk(root, 0);
+        return result === undefined ? 'null' : result;
+      } catch (e) {
+        try {
+          return `"[StringifyFailed: ${String(e?.message).replace(/"/g, "'")}]"`;
+        } catch (_e) {
+          return '"[StringifyFailed]"';
+        }
+      }
+    }
 
     try {
       if (State.option) {
-        State.option.pepper = 'hidden';
-        // Strip values that aren't safe to JSON.stringify: live DOM nodes
-        // (host pages such as Gutenberg decorate them with circular-reference
-        // React fibers) and other non-serializable types.
-        const safe = (_key, value) => {
-          if (value instanceof Node) return `[${value.nodeName || 'Node'}]`;
-          if (typeof value === 'function') return '[Function]';
-          return value;
-        };
-        optionsInfo.textContent += `Options: ${safeStringify(State.option, safe)}`;
+        try {
+          State.option.pepper = 'hidden';
+        } catch (_e) {
+          /* read-only option object */
+        }
+        optionsInfo.textContent += `Options: ${safeStringify(State.option)}`;
       } else {
         optionsInfo.textContent += 'Options object is not available.';
       }
     } catch (e) {
-      console.warn('State object is not accessible for error details.', e);
+      try {
+        optionsInfo.textContent += 'Options object could not be serialized.';
+      } catch (_e) {
+        /* nothing more we can do */
+      }
+      try {
+        console.warn('Editoria11y: options serialization failed.', e?.message);
+      } catch (_e) {}
     }
     p2.append(optionsInfo);
 
@@ -145,7 +269,7 @@ ${this.error.stack}
         wrapper.focus();
 
         const close = content.querySelector('.close');
-        close.addEventListener('click', () => {
+        close?.addEventListener('click', () => {
           wrapper.remove();
         });
       },

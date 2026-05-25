@@ -138,8 +138,11 @@ const Elements = (function myElements() {
     buildContrastAttrSelector();
 
     // Pre-split QA bad link sources.
-    const badLinkSourcesRaw = State.option.checks.QA_BAD_LINK.sources;
-    const badLinkSelectors = badLinkSourcesRaw.length
+    // editoria11y patch: integrations disable checks by setting them to `false`,
+    // so checks.QA_BAD_LINK may not be an object. Guard both accesses; do not
+    // drop on Sa11y resync without confirming upstream has the same fix.
+    const badLinkSourcesRaw = State.option.checks.QA_BAD_LINK?.sources;
+    const badLinkSelectors = badLinkSourcesRaw?.length
       ? badLinkSourcesRaw.split(',').map((s) => s.trim())
       : [];
 

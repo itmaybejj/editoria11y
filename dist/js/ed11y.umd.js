@@ -1572,8 +1572,8 @@
       _readabilityComputed = false;
       _readabilityValue = null;
       buildContrastAttrSelector();
-      const badLinkSourcesRaw = State.option.checks.QA_BAD_LINK.sources;
-      const badLinkSelectors = badLinkSourcesRaw.length ? badLinkSourcesRaw.split(",").map((s) => s.trim()) : [];
+      const badLinkSourcesRaw = State.option.checks.QA_BAD_LINK?.sources;
+      const badLinkSelectors = badLinkSourcesRaw?.length ? badLinkSourcesRaw.split(",").map((s) => s.trim()) : [];
       const nestedSources = State.option.checks.QA_NESTED_COMPONENTS.sources || '[role="tablist"], details';
       Found.Everything = find("*", "root", Constants.Exclusions.Sa11yElements);
       Found.Images = [];
@@ -1924,34 +1924,144 @@ ${this.error.stack}
       p2.style.setProperty("max-height", "min(66vh, 300px)");
       p2.style.setProperty("overflow", "auto");
       const optionsInfo = document.createElement("span");
-      const safeStringify = (obj) => {
-        const cache = /* @__PURE__ */ new Set();
-        return JSON.stringify(obj, (_key, value) => {
-          if (typeof value === "object" && value !== null) {
-            if (cache.has(value)) return;
-            cache.add(value);
+      function safeStringify(root) {
+        const MAX_DEPTH = 8;
+        const seen = /* @__PURE__ */ new WeakSet();
+        function quoteKey(k) {
+          try {
+            return JSON.stringify(String(k));
+          } catch (_e) {
+            return '"[unkey]"';
           }
-          if (typeof value === "function" || typeof value === "symbol" || value === void 0) {
-            return;
+        }
+        function isHostObject(val) {
+          try {
+            if (typeof val.nodeType === "number") return true;
+          } catch (_e) {
+            return true;
           }
-          if (value instanceof Map || value instanceof Set) return;
-          return value;
-        });
-      };
+          try {
+            if (val === val.window) return true;
+          } catch (_e) {
+            return true;
+          }
+          try {
+            if (typeof val.documentElement === "object" && val.documentElement !== null) return true;
+          } catch (_e) {
+            return true;
+          }
+          return false;
+        }
+        function walk(val, depth) {
+          if (val === null) return "null";
+          if (val === void 0) return void 0;
+          let type;
+          try {
+            type = typeof val;
+          } catch (_e) {
+            return '"[unreadable]"';
+          }
+          if (type === "string") {
+            try {
+              return JSON.stringify(val);
+            } catch (_e) {
+              return '"[unstringifiable-string]"';
+            }
+          }
+          if (type === "number") return Number.isFinite(val) ? String(val) : "null";
+          if (type === "boolean") return val ? "true" : "false";
+          if (type === "bigint") return `"${String(val)}n"`;
+          if (type === "function") return '"[Function]"';
+          if (type === "symbol") return '"[Symbol]"';
+          if (type !== "object") return '"[unknown]"';
+          if (depth >= MAX_DEPTH) return '"[MaxDepth]"';
+          if (isHostObject(val)) return '"[HostObject]"';
+          try {
+            if (seen.has(val)) return '"[Circular]"';
+            seen.add(val);
+          } catch (_e) {
+            return '"[unreadable-object]"';
+          }
+          let isArr = false;
+          try {
+            isArr = Array.isArray(val);
+          } catch (_e) {
+          }
+          if (isArr) {
+            let len = 0;
+            try {
+              len = val.length >>> 0;
+            } catch (_e) {
+              return '"[unreadable-array]"';
+            }
+            const out2 = [];
+            for (let i = 0; i < len; i++) {
+              let child;
+              try {
+                child = val[i];
+              } catch (_e) {
+                out2.push('"[unreadable-item]"');
+                continue;
+              }
+              const s = walk(child, depth + 1);
+              out2.push(s === void 0 ? "null" : s);
+            }
+            return `[${out2.join(",")}]`;
+          }
+          let keys = [];
+          try {
+            keys = Object.keys(val);
+          } catch (_e) {
+            return '"[unreadable-object]"';
+          }
+          const out = [];
+          for (const k of keys) {
+            if (typeof k === "string" && (k.startsWith("__reactFiber") || k.startsWith("__reactProps") || k.startsWith("__reactEvents"))) {
+              out.push(`${quoteKey(k)}:"[ReactInternal]"`);
+              continue;
+            }
+            let child;
+            try {
+              child = val[k];
+            } catch (_e) {
+              out.push(`${quoteKey(k)}:"[unreadable-prop]"`);
+              continue;
+            }
+            const s = walk(child, depth + 1);
+            if (s !== void 0) out.push(`${quoteKey(k)}:${s}`);
+          }
+          return `{${out.join(",")}}`;
+        }
+        try {
+          const result = walk(root, 0);
+          return result === void 0 ? "null" : result;
+        } catch (e) {
+          try {
+            return `"[StringifyFailed: ${String(e?.message).replace(/"/g, "'")}]"`;
+          } catch (_e) {
+            return '"[StringifyFailed]"';
+          }
+        }
+      }
       try {
         if (State.option) {
-          State.option.pepper = "hidden";
-          const safe = (_key, value) => {
-            if (value instanceof Node) return `[${value.nodeName || "Node"}]`;
-            if (typeof value === "function") return "[Function]";
-            return value;
-          };
-          optionsInfo.textContent += `Options: ${safeStringify(State.option, safe)}`;
+          try {
+            State.option.pepper = "hidden";
+          } catch (_e) {
+          }
+          optionsInfo.textContent += `Options: ${safeStringify(State.option)}`;
         } else {
           optionsInfo.textContent += "Options object is not available.";
         }
       } catch (e) {
-        console.warn("State object is not accessible for error details.", e);
+        try {
+          optionsInfo.textContent += "Options object could not be serialized.";
+        } catch (_e) {
+        }
+        try {
+          console.warn("Editoria11y: options serialization failed.", e?.message);
+        } catch (_e) {
+        }
       }
       p2.append(optionsInfo);
       content.append(h2, p1, p2);
@@ -1961,7 +2071,7 @@ ${this.error.stack}
         () => {
           wrapper.focus();
           const close = content.querySelector(".close");
-          close.addEventListener("click", () => {
+          close?.addEventListener("click", () => {
             wrapper.remove();
           });
         },
@@ -9443,11 +9553,14 @@ ${this.error.stack}
     constructor(userOptions) {
       if (CSS.supports("selector(:has(body))")) {
         initialize(userOptions).catch((error) => {
+          console.error("Editoria11y init failed:", error);
           customElements.define("ed11y-console-error", ConsoleErrors);
           const consoleErrors = new ConsoleErrors(error);
-          document.body.appendChild(consoleErrors);
-          UI.attachCSS(consoleErrors.shadowRoot.querySelector("*"));
-          throw Error(error);
+          document?.querySelector("*").appendChild(consoleErrors);
+          if (consoleErrors?.shadowRoot?.querySelector("*")) {
+            UI.attachCSS(consoleErrors.shadowRoot.querySelector("*"));
+          }
+          throw error;
         });
       }
     }
@@ -9470,3 +9583,4 @@ ${this.error.stack}
   exports2.version = version;
   Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });
 }));
+//# sourceMappingURL=ed11y.umd.js.map

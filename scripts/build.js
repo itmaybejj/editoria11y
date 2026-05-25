@@ -93,6 +93,7 @@ const runBuild = async (config) => {
 		build: {
 			emptyOutDir: false,
 			minify: false,
+			sourcemap: true,
 			outDir: 'dist/js',
 			lib: { entry: mainEntry, formats: ['umd'], name: 'Ed11y', fileName: () => 'ed11y.umd.js' },
 		},
@@ -182,6 +183,7 @@ const runBuild = async (config) => {
 		build: {
 			emptyOutDir: false,
 			minify: true,
+			sourcemap: true,
 			outDir: 'dist/js',
 			lib: { entry: mainEntry, formats: ['umd'], name: 'Ed11y', fileName: () => 'ed11y.umd.min.js' },
 		},
@@ -198,6 +200,7 @@ const runBuild = async (config) => {
 		build: {
 			emptyOutDir: false,
 			minify: false,
+			sourcemap: true,
 			outDir: 'dist/js',
 			lib: { entry: mainEntry, formats: ['es'], fileName: () => 'ed11y.esm.js' },
 		},
@@ -214,6 +217,7 @@ const runBuild = async (config) => {
 		build: {
 			emptyOutDir: false,
 			minify: true,
+			sourcemap: true,
 			outDir: 'dist/js',
 			lib: { entry: mainEntry, formats: ['es'], fileName: () => 'ed11y.esm.min.js' },
 		},

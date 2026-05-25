@@ -15,11 +15,14 @@ class Ed11y {
   constructor(userOptions) {
     if (CSS.supports('selector(:has(body))')) {
       initialize(userOptions).catch((error) => {
+        console.error('Editoria11y init failed:', error);
         customElements.define('ed11y-console-error', ConsoleErrors);
         const consoleErrors = new ConsoleErrors(error);
-        document.body.appendChild(consoleErrors);
-        UI.attachCSS(consoleErrors.shadowRoot.querySelector('*'));
-        throw Error(error);
+        document?.querySelector('*').appendChild(consoleErrors);
+        if (consoleErrors?.shadowRoot?.querySelector('*')) {
+          UI.attachCSS(consoleErrors.shadowRoot.querySelector('*'));
+        }
+        throw error;
       });
     }
   }
