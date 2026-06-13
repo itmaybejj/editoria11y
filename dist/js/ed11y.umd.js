@@ -499,9 +499,8 @@
       Root.areaToCheck = [];
       Root.Readability = [];
       if (fixedRoots) {
-        const rootElements = fixedRoots.map((entry) => entry?.fixedRoot).filter(Boolean);
-        Constants.Root.areaToCheck = rootElements;
-        Constants.Root.Readability = rootElements;
+        Root.areaToCheck = fixedRoots;
+        Root.Readability = fixedRoots;
         return;
       }
       try {
@@ -725,7 +724,7 @@
     if (desiredRoot === "document") {
       root.push(document.body);
       if (State.option.fixedRoots) {
-        root.push(State.option.fixedRoots.map((entry) => entry?.fixedRoot).filter(Boolean));
+        root.push(State.option.fixedRoots);
       }
     } else if (desiredRoot === "root") {
       root.push(Constants.Root.areaToCheck);
@@ -806,7 +805,7 @@
     return roleAttr.toLowerCase().split(/\s+/).some((role) => role === "presentation" || role === "none");
   }
   function isNegativeTabindex($el) {
-    return $el && $el.tabIndex < 0;
+    return $el?.hasAttribute("tabindex") && $el.tabIndex < 0;
   }
   function isHiddenAndUnfocusable($el) {
     return (isPresentational($el) || isAriaHidden($el)) && isNegativeTabindex($el);
@@ -824,8 +823,8 @@
     return isElementHidden(element);
   }
   function stripAllSpecialCharacters(string) {
-    if (!string) return "";
-    return string.replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
+    if (typeof string !== "string" && typeof string !== "number") return "";
+    return String(string).replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
   }
   const invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
   const htmlEntitiesRegex = /&#(\w+)(^\w|;)?/g;
@@ -1109,15 +1108,17 @@
     }
   }
   function removeWhitespace(string) {
-    if (!string) return "";
-    return string.replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+    if (typeof string !== "string" && typeof string !== "number") return "";
+    return String(string).replace(/\s+/g, " ").trim();
   }
   function normalizeString(string) {
-    return removeWhitespace(string.replace(/[\u0000-\u001F\u007F-\u009F]/g, ""));
+    if (typeof string !== "string" && typeof string !== "number") return "";
+    return removeWhitespace(String(string).replace(/[\u0000-\u001F\u007F-\u009F]/g, ""));
   }
   function truncateString(string, maxLength) {
-    const truncatedString = string.substring(0, maxLength).trimEnd();
-    return string.length > maxLength ? `${truncatedString}...` : string;
+    if (typeof string !== "string" && typeof string !== "number") return "";
+    const truncatedString = String(string).substring(0, maxLength).trimEnd();
+    return string.length > maxLength ? `${truncatedString}...` : String(string);
   }
   const store = {
     getItem(key) {
@@ -1589,9 +1590,9 @@
       ]);
       for (let i = 0; i < Found.Everything.length; i++) {
         const $el = Found.Everything[i];
-        if (!($el instanceof Element)) continue;
-        const tag = $el.tagName;
-        const role = $el.getAttribute("role")?.trim().toLowerCase();
+        if ($el?.nodeType !== 1) continue;
+        const tag = $el?.tagName;
+        const role = $el?.getAttribute("role")?.trim().toLowerCase();
         let handledByRole = false;
         if (role) {
           if (imageRoles.has(role) && !Constants.Exclusions.Images.some((s) => $el.matches(s))) {
@@ -1661,6 +1662,7 @@
             case "IFRAME":
             case "AUDIO":
             case "VIDEO":
+            case "EMBED":
               Found.iframes.push($el);
               break;
             case "svg":
@@ -3022,9 +3024,18 @@ ${this.error.stack}
       const match = altLowerCase.match(/\b\d{2,6}\s*x\s*\d{2,6}\b/);
       if (match) hit[0] = match[0];
     }
+    let wordsToCheck = [];
+    if (typeof Intl !== "undefined" && Intl.Segmenter) {
+      const segmenter = new Intl.Segmenter(void 0, { granularity: "word" });
+      const allWords = [...segmenter.segment(altLowerCase)].filter((segment) => segment.isWordLike).map((segment) => segment.segment);
+      wordsToCheck = [...allWords.slice(0, 2), ...allWords.slice(-1)];
+    } else {
+      const altOnlyLetters2 = removeWhitespace(altLowerCase.replace(/[^\p{L}\s]/gu, ""));
+      const allWords = altOnlyLetters2.split(/\s+/).filter(Boolean);
+      wordsToCheck = [...allWords.slice(0, 2), ...allWords.slice(-1)];
+    }
     for (const word of Constants.Global.susAltWords) {
-      const index = altLowerCase.indexOf(word);
-      if (index > -1 && index < 6) {
+      if (wordsToCheck.includes(word)) {
         hit[1] = word;
         break;
       }
@@ -5183,11 +5194,14 @@ ${this.error.stack}
       const aria = computeAriaLabel($el);
       const checkTitle = aria === "noAria" ? $el.getAttribute("title") || "" : aria;
       if (removeWhitespace(checkTitle).length === 0) {
+        const tagName = $el?.tagName.toLowerCase();
         pushResult$1({
           test: "EMBED_MISSING_TITLE",
           element: $el,
           dismiss: src($el),
-          developer: true
+          developer: true,
+          content: Lang.sprintf("EMBED_MISSING_TITLE", tagName),
+          args: [tagName]
         });
       }
     });
@@ -8479,7 +8493,7 @@ ${this.error.stack}
     EMBED_VIDEO: "Please ensure <strong>all videos have closed captioning.</strong> Providing captions for all audio and video content is a mandatory Level A requirement. Captions support people who are D/deaf or hard-of-hearing.",
     EMBED_AUDIO: "Please ensure to provide a <strong>transcript for all podcasts.</strong> Providing transcripts for audio content is a mandatory Level A requirement. Transcripts support people who are D/deaf or hard-of-hearing, but can benefit everyone. Consider placing the transcript below or within an accordion panel.",
     EMBED_DATA_VIZ: `Data visualization widgets like this are often problematic for people who use a keyboard or screen reader to navigate, and can present significant difficulties for people who have low vision or colorblindness. It's recommended to provide the same information in an alternative (text or table) format below the widget. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/images/complex">complex images.</a>`,
-    EMBED_MISSING_TITLE: 'Embedded content requires an accessible name that describes its contents. Please provide a unique <code>title</code> or <code>aria-label</code> attribute on the <code>iframe</code> element. Learn more about <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrames.</a>',
+    EMBED_MISSING_TITLE: 'Embedded content requires an accessible name that describes its contents. Please provide a unique <code>title</code> or <code>aria-label</code> attribute on the <code>&lt;%(ELEMENT)&gt;</code> element. Learn more about <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrames.</a>',
     EMBED_GENERAL: 'Unable to check embedded content. Please make sure that images have alt text, videos have captions, text has sufficient contrast, and interactive components are <a href="https://webaim.org/techniques/keyboard/">keyboard accessible.</a>',
     EMBED_UNFOCUSABLE: '<code>&lt;iframe&gt;</code> with focusable elements should not have <code>tabindex="-1"</code>. The embedded content will not be keyboard accessible.',
     // Quality assurance
