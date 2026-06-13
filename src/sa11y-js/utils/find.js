@@ -14,9 +14,7 @@ export default function find(selector, desiredRoot, exclude) {
   if (desiredRoot === 'document') {
     root.push(document.body);
     if (State.option.fixedRoots) {
-      // fixedRoots is an array of { fixedRoot, framePositioner } wrappers;
-      // push the underlying elements, not the wrapper objects.
-      root.push(State.option.fixedRoots.map((entry) => entry?.fixedRoot).filter(Boolean));
+      root.push(State.option.fixedRoots);
     }
   } else if (desiredRoot === 'root') {
     root.push(Constants.Root.areaToCheck);

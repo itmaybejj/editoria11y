@@ -57,9 +57,9 @@ const Constants = (function myConstants() {
     // Generate suspicious alt stop words list.
     Global.susAltWords = State.option.susAltStopWords
       ? State.option.susAltStopWords
-        .split(',')
-        .map((word) => word.trim().toLowerCase())
-        .filter(Boolean)
+          .split(',')
+          .map((word) => word.trim().toLowerCase())
+          .filter(Boolean)
       : Lang._('SUS_ALT_STOPWORDS');
 
     // Generate placeholder stop words set.
@@ -172,13 +172,10 @@ const Constants = (function myConstants() {
     Root.areaToCheck = [];
     Root.Readability = [];
 
-    // If fixed roots provided. fixedRoots is an array of
-    // { fixedRoot, framePositioner } wrappers; downstream code treats
-    // areaToCheck / Readability as plain element arrays, so unwrap.
+    // If fixed roots provided.
     if (fixedRoots) {
-      const rootElements = fixedRoots.map((entry) => entry?.fixedRoot).filter(Boolean);
-      Constants.Root.areaToCheck = rootElements;
-      Constants.Root.Readability = rootElements;
+      Root.areaToCheck = fixedRoots;
+      Root.Readability = fixedRoots;
       return;
     }
 
