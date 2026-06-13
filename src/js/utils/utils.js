@@ -29,7 +29,7 @@ export const smush = (obj1, obj2, skip = []) => {
   });
 };
 
-export function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
+export function ed11yInitializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
   Constants.Root.areaToCheck = [];
   Constants.Root.Readability = [];
 
@@ -173,7 +173,7 @@ export function buildElementList(onlyForFilter = false) {
     UI.ignoreAll = document.querySelector(`:is(${State.option.ignoreAllIfPresent})`) !== null;
   }
 
-  initializeRoot(State.option.checkRoot, State.option.checkRoot, State.option.fixedRoots);
+  ed11yInitializeRoot(State.option.checkRoot, State.option.checkRoot, State.option.fixedRoots);
 
   for (let i = 0; i < UI.roots.length; i++) {
     if (State.option.fixedRoots) {
@@ -568,7 +568,6 @@ export function newIncrementalResults() {
 }
 
 export function showError(error) {
-  customElements.define('sa11y-console-error', ConsoleErrors);
   const consoleErrors = new ConsoleErrors(error);
   document.body.appendChild(consoleErrors);
   UI.attachCSS(consoleErrors.shadowRoot.querySelector('*'));

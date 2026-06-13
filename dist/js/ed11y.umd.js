@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.1-524
+			* @version 3.0.1-613
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -159,6 +159,7 @@
         maxLength: 170
       },
       HEADING_MISSING_ONE: true,
+      HEADING_UNPRONOUNCEABLE: true,
       // Image checks
       MISSING_ALT_LINK: true,
       MISSING_ALT_LINK_HAS_TEXT: true,
@@ -306,6 +307,7 @@
       BTN_EMPTY_LABELLEDBY: true,
       BTN_ROLE_IN_NAME: true,
       LINK_MAYBE_BUTTON: true,
+      BTN_UNPRONOUNCEABLE: true,
       // Contrast checks
       CONTRAST_WARNING: {
         dismissAll: true
@@ -416,15 +418,14 @@
       }
       Global.scrollBehaviour = !reducedMotion || reducedMotion.matches ? "auto" : "smooth";
       Global.langDirection = Global.html.getAttribute("dir")?.trim()?.toLowerCase() === "rtl" ? "rtl" : "ltr";
-      const documentSources = State.option.checks.QA_DOCUMENT.sources;
       if (State.option.checks.QA_DOCUMENT !== false) {
         const defaultDocumentSources = 'a[href$=".doc"], a[href$=".docx"], a[href*=".doc?"], a[href*=".docx?"], a[href$=".ppt"], a[href$=".pptx"], a[href*=".ppt?"], a[href*=".pptx?"], a[href^="https://drive.google.com/file"], a[href^="https://docs.google."], a[href^="https://sway."]';
-        Global.documentSources = State.option.checks.QA_DOCUMENT.sources ? `${defaultDocumentSources}, ${documentSources}` : defaultDocumentSources;
+        Global.documentSources = State.option.checks.QA_DOCUMENT.sources ? `${defaultDocumentSources}, ${State.option.checks.QA_DOCUMENT.sources}` : defaultDocumentSources;
       } else {
         Global.documentSources = false;
       }
       if (State.option.checks.QA_PDF !== false) {
-        Global.pdfSources = State.option.checks.QA_PDF.sources ? State.option.checks.QA_PDF.sources : 'a[href$=".pdf"], a[href*=".pdf?"]';
+        Global.pdfSources = State.option.checks.QA_PDF.sources ? State.option.checks.QA_PDF.sources : 'a[href$=".pdf"], a[href*=".pdf?"], a[href*="/pdf/"], a[href*="/PDF/"]';
       } else {
         Global.pdfSources = false;
       }
@@ -432,6 +433,7 @@
       Global.placeholderAltSet = new Set(Lang._("PLACEHOLDER_ALT_STOPWORDS"));
       Global.altPlaceholderPattern = generateRegexString(State.option.altPlaceholder, true);
       Global.linkIgnoreStringPattern = generateRegexString(State.option.linkIgnoreStrings);
+      Global.unpronounceablePattern = /[\p{L}\p{N}\p{Extended_Pictographic}]/u;
       Global.extraPlaceholderStopWords = State.option.extraPlaceholderStopWords.split(",").map((word) => word.trim().toLowerCase()).filter(Boolean);
       Global.headerStringExclusionPattern = generateRegexString(State.option.headerIgnoreStrings);
       const customStopWords = State.option.linkStopWords ? State.option.linkStopWords.split(",").map((word) => word.toLowerCase().trim()) : [];
@@ -493,13 +495,13 @@
       Global.AllEmbeddedContent = `${Global.VideoSources}, ${Global.AudioSources}, ${Global.VisualizationSources}`;
     }
     const Root = {};
-    function initializeRoot2(desiredRoot, desiredReadabilityRoot, fixedRoots) {
+    function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
       Root.areaToCheck = [];
       Root.Readability = [];
       if (fixedRoots) {
         const rootElements = fixedRoots.map((entry) => entry?.fixedRoot).filter(Boolean);
-        Root.areaToCheck = rootElements;
-        Root.Readability = rootElements;
+        Constants.Root.areaToCheck = rootElements;
+        Constants.Root.Readability = rootElements;
         return;
       }
       try {
@@ -706,7 +708,7 @@
       Exclusions.Paragraphs = State.option.paragraphIgnore ? State.option.paragraphIgnore.split(",").map(($el) => $el.trim()) : [];
     }
     return {
-      initializeRoot: initializeRoot2,
+      initializeRoot,
       Root,
       initializeGlobal,
       Global,
@@ -1089,19 +1091,25 @@
   };
   let parentCache = /* @__PURE__ */ new WeakMap();
   function getCachedClosest(element, selector) {
-    if (!element || !selector) return null;
-    if (!parentCache.has(element)) {
-      parentCache.set(element, /* @__PURE__ */ new Map());
+    if (!(element instanceof Element)) return null;
+    if (typeof selector !== "string" || selector.trim() === "") return null;
+    try {
+      if (!parentCache.has(element)) {
+        parentCache.set(element, /* @__PURE__ */ new Map());
+      }
+      const elementCache = parentCache.get(element);
+      if (elementCache.has(selector)) {
+        return elementCache.get(selector);
+      }
+      const result = element.closest(selector);
+      elementCache.set(selector, result);
+      return result;
+    } catch {
+      return null;
     }
-    const elementCache = parentCache.get(element);
-    if (elementCache.has(selector)) {
-      return elementCache.get(selector);
-    }
-    const result = element.closest(selector);
-    elementCache.set(selector, result);
-    return result;
   }
   function removeWhitespace(string) {
+    if (!string) return "";
     return string.replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
   }
   function normalizeString(string) {
@@ -1209,44 +1217,14 @@
     const finalPattern = matchStart ? `^(?:${joinedPatterns})` : joinedPatterns;
     return new RegExp(finalPattern, "i");
   }
-  function cyrb128Hex(str) {
-    let h1 = 1779033703;
-    let h2 = 3144134277;
-    let h3 = 1013904242;
-    let h4 = 2773480762;
-    for (let i = 0; i < str.length; i++) {
-      const k = str.charCodeAt(i);
-      h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
-      h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
-      h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
-      h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);
-    }
-    h1 = Math.imul(h3 ^ h1 >>> 18, 597399067);
-    h2 = Math.imul(h4 ^ h2 >>> 22, 2869860233);
-    h3 = Math.imul(h1 ^ h3 >>> 17, 951274213);
-    h4 = Math.imul(h2 ^ h4 >>> 19, 2716044179);
-    return [h1 ^ h2 ^ h3 ^ h4, h2 ^ h1, h3 ^ h1, h4 ^ h1].map((n) => (n >>> 0).toString(16).padStart(8, "0")).join("");
-  }
-  let dismissDigestFallbackWarned = false;
   async function dismissDigest(pepper, message) {
-    const input = `${pepper}${message}`;
-    const subtle = globalThis.crypto?.subtle;
-    if (subtle?.digest) {
-      const msgUint8 = new TextEncoder().encode(input);
-      const hashBuffer = await subtle.digest("SHA-256", msgUint8);
-      if (Uint8Array.prototype.toHex) {
-        return new Uint8Array(hashBuffer).toHex();
-      }
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+    const msgUint8 = new TextEncoder().encode(pepper + message);
+    const hashBuffer = await window.crypto.subtle.digest("SHA-256", msgUint8);
+    if (Uint8Array.prototype.toHex) {
+      return new Uint8Array(hashBuffer).toHex();
     }
-    if (!dismissDigestFallbackWarned) {
-      dismissDigestFallbackWarned = true;
-      console.warn(
-        "Editoria11y: SubtleCrypto unavailable (likely an insecure http:// origin). Falling back to a non-cryptographic hash for dismiss keys. Serve the page over https or from localhost to silence this warning."
-      );
-    }
-    return cyrb128Hex(input);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   }
   let langCache;
   function validateLang(code, displayLangCode) {
@@ -1611,6 +1589,7 @@
       ]);
       for (let i = 0; i < Found.Everything.length; i++) {
         const $el = Found.Everything[i];
+        if (!($el instanceof Element)) continue;
         const tag = $el.tagName;
         const role = $el.getAttribute("role")?.trim().toLowerCase();
         let handledByRole = false;
@@ -1844,7 +1823,7 @@
       });
     }
   }
-  const version = "3.0.1-524";
+  const version = "3.0.1-613";
   const sprite = {
     alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
     close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -2186,7 +2165,7 @@ ${this.error.stack}
       }
     });
   };
-  function initializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
+  function ed11yInitializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
     Constants.Root.areaToCheck = [];
     Constants.Root.Readability = [];
     if (fixedRoots) {
@@ -2289,7 +2268,7 @@ ${this.error.stack}
     if (!UI.ignoreAll && !!State.option.ignoreAllIfPresent) {
       UI.ignoreAll = document.querySelector(`:is(${State.option.ignoreAllIfPresent})`) !== null;
     }
-    initializeRoot(State.option.checkRoot, State.option.checkRoot, State.option.fixedRoots);
+    ed11yInitializeRoot(State.option.checkRoot, State.option.checkRoot, State.option.fixedRoots);
     for (let i = 0; i < UI.roots.length; i++) {
       if (State.option.fixedRoots) {
         UI.roots[i].dataset.ed11yRoot = `${i}`;
@@ -2594,7 +2573,6 @@ ${this.error.stack}
     return changed;
   }
   function showError(error) {
-    customElements.define("sa11y-console-error", ConsoleErrors);
     const consoleErrors = new ConsoleErrors(error);
     document.body.appendChild(consoleErrors);
     UI.attachCSS(consoleErrors.shadowRoot.querySelector("*"));
@@ -2659,22 +2637,28 @@ ${this.error.stack}
         ...params
       });
       let result = null;
-      if (headingLength === 0) {
-        const image = $el.querySelector("img");
-        const alt = image?.getAttribute("alt");
-        if (image && (!alt || alt.trim() === "" || accName === "")) {
-          result = logResult({
-            test: "HEADING_EMPTY_WITH_IMAGE",
-            args: [level],
-            margin: "-15px 30px"
-          });
-        } else {
-          result = logResult({
-            test: "HEADING_EMPTY",
-            args: [level],
-            margin: "0"
-          });
-        }
+      const image = $el.querySelector("img");
+      const alt = image?.getAttribute("alt");
+      const hasEmptyImage = image && (!alt || alt.trim() === "" || accName === "");
+      const rawText = $el.textContent || "";
+      const isUnpronounceable = rawText?.trim() !== "" && !Constants.Global.unpronounceablePattern.test(headingText);
+      if (headingLength === 0 && hasEmptyImage) {
+        result = logResult({
+          test: "HEADING_EMPTY_WITH_IMAGE",
+          args: [level],
+          margin: "-15px 30px"
+        });
+      } else if (isUnpronounceable) {
+        result = logResult({
+          test: "HEADING_UNPRONOUNCEABLE",
+          args: [headingText]
+        });
+      } else if (headingLength === 0) {
+        result = logResult({
+          test: "HEADING_EMPTY",
+          args: [level],
+          margin: "0"
+        });
       } else if (level - prevLevel > 1 && (i !== 0 || headingStartsOverride)) {
         result = logResult({
           test: "HEADING_SKIPPED_LEVEL",
@@ -2719,7 +2703,6 @@ ${this.error.stack}
   const cssFileTypeSelectors = 'a[href$=".pdf"], a[href$=".doc"], a[href$=".docx"], a[href$=".zip"], a[href$=".mp3"], a[href$=".txt"], a[href$=".exe"], a[href$=".dmg"], a[href$=".rtf"], a[href$=".pptx"], a[href$=".ppt"], a[href$=".xls"], a[href$=".xlsx"], a[href$=".csv"], a[href$=".mp4"], a[href$=".mov"], a[href$=".avi"]';
   const citationPattern = /(doi\.org\/|dl\.acm\.org\/|link\.springer\.com\/|pubmed\.ncbi\.nlm\.nih\.gov\/|scholar\.google\.com\/|ieeexplore\.ieee\.org\/|researchgate\.net\/publication\/|sciencedirect\.com\/science\/article\/|10\.\d{4,}\/)[a-z0-9/.-]+/i;
   const urlEndings = /\b(?:\.edu\/|\.gob\/|\.gov\/|\.app\/|\.com\/|\.net\/|\.org\/|\.us\/|\.ca\/|\.de\/|\.icu\/|\.uk\/|\.ru\/|\.info\/|\.top\/|\.xyz\/|\.tk\/|\.cn\/|\.ga\/|\.cf\/|\.nl\/|\.io\/|\.fr\/|\.pe\/|\.nz\/|\.pt\/|\.es\/|\.pl\/|\.ua\/)\b/i;
-  const specialCharPattern = /[^a-zA-Z0-9]/;
   const htmlSymbols = /([<>↣↳←→↓«»↴]+)/;
   const checkStopWords = (textContent, stopWordsSet, stripStrings) => {
     const stripped = textContent.replace(stripStrings, "").trim();
@@ -2729,6 +2712,8 @@ ${this.error.stack}
   function checkLinkText() {
     const seen = {};
     Elements.Found.Links.forEach(($el) => {
+      let hasIssue = false;
+      let deferGoodLabel = null;
       const href = $el.href ? standardizeHref($el) : "";
       const titleAttr = $el.getAttribute("title");
       const targetBlank = $el.getAttribute("target")?.trim()?.toLowerCase() === "_blank";
@@ -2751,14 +2736,20 @@ ${this.error.stack}
       const containsNewWindowPhrases = lowercaseLinkText.match(Constants.Global.newWindowRegex)?.[0] || textContent.match(Constants.Global.newWindowRegex)?.[0];
       const containsFileTypePhrases = lowercaseLinkText.match(Constants.Global.fileTypeRegex)?.[0] || textContent.match(Constants.Global.fileTypeRegex)?.[0];
       const fileTypeMatch = $el.matches(cssFileTypeSelectors);
-      const logResult = (params) => pushResult$1({
-        element: $el,
-        type: params.type || "warning",
-        dismiss: params.dismiss || href,
-        inline: true,
-        ...params
-      });
-      if (!$el.querySelector("img")) {
+      const logResult = (params) => {
+        const type = params.type || "warning";
+        if (type === "error" || type === "warning") {
+          hasIssue = true;
+        }
+        return pushResult$1({
+          element: $el,
+          type,
+          dismiss: params.dismiss || href,
+          inline: true,
+          ...params
+        });
+      };
+      if (!$el.querySelector("img") || hasAria) {
         if (hasAria && linkText.length !== 0) {
           const excludeSpan = fnIgnore($el, Constants.Exclusions.LinkSpan);
           const visibleLinkText = getText(excludeSpan).replace(
@@ -2794,7 +2785,7 @@ ${this.error.stack}
             });
           } else {
             const accessibleName = removeWhitespace(computeAccessibleName($el));
-            logResult({
+            deferGoodLabel = {
               test: "LINK_LABEL",
               type: "good",
               args: [accessibleName],
@@ -2802,7 +2793,7 @@ ${this.error.stack}
               dismiss: strippedLinkText,
               position: "afterend",
               developer: true
-            });
+            };
           }
         }
         let oneStop = false;
@@ -2825,7 +2816,6 @@ ${this.error.stack}
           triggerStopWord();
         } else if (containsNewWindowPhrases === textContent || containsNewWindowPhrases === strippedLinkText) {
           triggerStopWord();
-          return;
         }
         if (linkText.length === 0) {
           if (hasAriaLabelledby) {
@@ -2871,7 +2861,6 @@ ${this.error.stack}
         const hasClickWord = strippedLinkText.match(Constants.Global.clickRegex)?.[0] || textContent.match(Constants.Global.clickRegex)?.[0];
         const isCitation = lowercaseLinkText.match(citationPattern)?.[0];
         const isUrlFragment = lowercaseLinkText.startsWith("www.") || lowercaseLinkText.startsWith("http") || Boolean(lowercaseLinkText.match(urlEndings));
-        const isSingleSpecialChar = linkText.length === 1 && specialCharPattern.test(linkText);
         const matchedSymbol = lowercaseLinkText.match(htmlSymbols)?.[0];
         if (isStopWord) {
           triggerStopWord();
@@ -2894,15 +2883,15 @@ ${this.error.stack}
             args: [matchedSymbol, linkText],
             dismiss: strippedLinkText
           });
-        } else if ((isSingleSpecialChar || matchedSymbol) && !titleAttr) {
+        } else if (!Constants.Global.unpronounceablePattern.test(linkText) && !titleAttr) {
+          const pua = /[\uE000-\uF8FF]/gu.test(linkText) ? "LINK_EMPTY_NO_LABEL" : "LINK_UNPRONOUNCEABLE";
           logResult({
-            test: "LINK_UNPRONOUNCEABLE",
+            test: pua,
             type: "error",
             args: [linkText],
-            content: Lang._("LINK_UNPRONOUNCEABLE") + Lang._("LINK_TIP"),
+            content: Lang._(pua) + Lang._("LINK_TIP"),
             position: "afterend"
           });
-          return;
         }
         if (hasClickWord) {
           logResult({
@@ -3001,6 +2990,9 @@ ${this.error.stack}
           }
         }
       }
+      if (deferGoodLabel && !hasIssue) {
+        logResult(deferGoodLabel);
+      }
     });
   }
   const url = [
@@ -3092,7 +3084,10 @@ ${this.error.stack}
           key = hasAria + src;
         }
       }
-      if (test && logResult({ test, dismiss: key })) return;
+      if (test) {
+        logResult({ test, dismiss: key });
+        return;
+      }
       const altText = removeWhitespace(alt);
       const figure = getCachedClosest($el, "figure");
       const figcaption = figure?.querySelector("figcaption");
@@ -3109,6 +3104,7 @@ ${this.error.stack}
           test = carousel.querySelectorAll("img").length === 1 ? "IMAGE_DECORATIVE" : "IMAGE_DECORATIVE_CAROUSEL";
           type = "warning";
         } else if (link) {
+          if (link.getAttribute("aria-label") || link.getAttribute("aria-labelledby")) return;
           test = linkTextLength === 0 ? "LINK_IMAGE_NO_ALT_TEXT" : "LINK_IMAGE_TEXT";
           type = linkTextLength === 0 ? "error" : "good";
           key = src + linkTextLength;
@@ -3127,7 +3123,7 @@ ${this.error.stack}
         }))
           return;
       }
-      if (alt.replace(/"|'|\?|\.|-|\s+/g, "") === "" && linkTextLength === 0) {
+      if (!Constants.Global.unpronounceablePattern.test(alt) && linkTextLength === 0) {
         logResult({
           test: link ? "LINK_ALT_UNPRONOUNCEABLE" : "ALT_UNPRONOUNCEABLE",
           args: [altText]
@@ -3161,11 +3157,12 @@ ${this.error.stack}
       const badAltTest = link ? "LINK_ALT_MAYBE_BAD" : "ALT_MAYBE_BAD";
       const minLength = State.option.checks[badAltTest]?.minLength || 15;
       const isTooLongSingleWord = new RegExp(`^\\S{${minLength},}$`);
-      const containsNonAlphaChar = /[^\p{L}\-,.!? ]/u.test(altText);
+      const containsNonAlphaChar = /[^\p{L}\p{M}\-,.!? «»—]/u.test(altText);
       const isBadFilename = new RegExp(`^(?=[^_-]*([_-][^_-]*){3,})\\S{${minLength},}$`).test(
         altText
       );
-      if (isBadFilename || isTooLongSingleWord.test(alt) && containsNonAlphaChar) {
+      const containsCJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(altText);
+      if (isBadFilename || !containsCJK && isTooLongSingleWord.test(alt) && containsNonAlphaChar) {
         logResult({
           test: badAltTest,
           args: [altText],
@@ -3207,7 +3204,7 @@ ${this.error.stack}
           const accName = removeWhitespace(
             linkAccName.replace(Constants.Global.linkIgnoreStringPattern, "")
           );
-          const tooltip = Lang.sprintf(
+          const tooltip2 = Lang.sprintf(
             linkTextLength === 0 ? Lang._("LINK_IMAGE_ALT") : Lang._("LINK_IMAGE_ALT_AND_TEXT") + Lang._("ACC_NAME_TIP"),
             altText,
             accName
@@ -3216,7 +3213,7 @@ ${this.error.stack}
             test: latTestName,
             type: "warning",
             args: [altText, accName],
-            content: latRule.content ? Lang.sprintf(latRule.content, altText, accName) : tooltip,
+            content: latRule.content ? Lang.sprintf(latRule.content, altText, accName) : tooltip2,
             dismiss: src + alt
           });
           return;
@@ -3235,6 +3232,8 @@ ${this.error.stack}
         logResult({
           test: "DUPLICATE_TITLE",
           type: "warning",
+          content: State.option.checks.DUPLICATE_TITLE.content ? Lang.sprintf(State.option.checks.DUPLICATE_TITLE.content, altText) : Lang.sprintf(`${Lang._("DUPLICATE_TITLE")}<hr>${Lang._("IMAGE_PASS")}`, altText),
+          args: [altText],
           inline: true,
           dismiss: alt
         });
@@ -4741,7 +4740,7 @@ ${this.error.stack}
       const dismissBase = $el.tagName + $el.id + $el.className;
       const hasAria = $el.querySelector(":scope [aria-labelledby], :scope [aria-label]") || $el.getAttribute("aria-labelledby") || $el.getAttribute("aria-label");
       const hasAriaLabelledby = $el.querySelector(":scope [aria-labelledby]") || $el.getAttribute("aria-labelledby");
-      if (buttonText.length === 0) {
+      if (buttonText.length === 0 || !Constants.Global.unpronounceablePattern.test(buttonText)) {
         if (hasAriaLabelledby) {
           pushResult$1({
             test: "BTN_EMPTY_LABELLEDBY",
@@ -4772,7 +4771,6 @@ ${this.error.stack}
           dismiss: dismissBase + accName,
           developer: true
         });
-        return;
       }
       if (accName.includes(Lang._("BTN"))) {
         pushResult$1({
@@ -8201,358 +8199,367 @@ ${this.error.stack}
       }
     }
   }
+  const ruleset = {
+    SUS_ALT_STOPWORDS: ["image", "graphic", "picture", "photo", "thumbnail", "icon", "portrait"],
+    PLACEHOLDER_ALT_STOPWORDS: [
+      "alt",
+      "chart",
+      "decorative",
+      "image",
+      "graphic",
+      "photo",
+      "portrait",
+      "placeholder",
+      "placeholder image",
+      "spacer",
+      "tbd",
+      "todo",
+      "to do",
+      "thumbnail",
+      "icon",
+      "test",
+      "hero image",
+      "hero image",
+      "hero slide",
+      "slide image",
+      "homepage feature image",
+      "featured image",
+      "untitled",
+      "untitled image",
+      "unnamed",
+      "copy",
+      "undefined"
+    ],
+    LINK_STOPWORDS: [
+      "click",
+      "click here",
+      "click here for more",
+      "click here to learn more",
+      "clicking here",
+      "check out",
+      "detailed here",
+      "discover",
+      "download",
+      "download here",
+      "explore",
+      "find out",
+      "find out more",
+      "form",
+      "here",
+      "info",
+      "information",
+      "link",
+      "learn",
+      "learn more",
+      "learn to",
+      "more",
+      "page",
+      "paper",
+      "read more",
+      "read",
+      "read this",
+      "this",
+      "this page",
+      "this link",
+      "this website",
+      "this form",
+      "view",
+      "view our",
+      "website",
+      "article",
+      "go",
+      "workshop"
+    ],
+    CLICK: ["click"],
+    NEW_WINDOW_PHRASES: [
+      "external",
+      "new tab",
+      "new window",
+      "pop-up",
+      "pop up",
+      "opens new tab",
+      "opens new window",
+      "opens in a new window",
+      "opens in a new tab"
+    ],
+    FILE_TYPE_PHRASES: [
+      "document",
+      "spreadsheet",
+      "calculation sheet",
+      "compressed file",
+      "archived file",
+      "worksheet",
+      "powerpoint",
+      "presentation",
+      "install",
+      "video",
+      "audio",
+      "pdf"
+    ],
+    POTENTIAL_UI_ELEMENTS: [
+      "menu",
+      "close",
+      "toggle",
+      "open",
+      "expand",
+      "collapse",
+      "next",
+      "prev",
+      "previous",
+      "play",
+      "pause",
+      "submenu",
+      "show",
+      "hide",
+      "dropdown",
+      "back",
+      "forward",
+      "skip",
+      "submit",
+      "cancel",
+      "save",
+      "edit",
+      "delete",
+      "remove",
+      "search",
+      "filter",
+      "sort",
+      "stop",
+      "mute",
+      "unmute",
+      "fullscreen",
+      "minimize",
+      "maximize",
+      "slide",
+      "modal"
+    ]
+  };
+  const ui = {
+    LANG_CODE: "en-US",
+    MAIN_TOGGLE_LABEL: "Check Accessibility",
+    CONTAINER_LABEL: "Accessibility Checker",
+    ERROR: "Error",
+    ERRORS: "Errors",
+    WARNING: "Warning",
+    WARNINGS: "Warnings",
+    GOOD: "Good",
+    REVIEW: "Review",
+    ON: "On",
+    OFF: "Off",
+    ALERT_TEXT: "Alert",
+    ALERT_CLOSE: "Close",
+    OUTLINE: "Outline",
+    READABILITY_DESC: "Shows the readability score in the <strong>Outline</strong> tab to help gauge reading difficulty.",
+    TITLE: "Title",
+    ALT: "ALT",
+    IMAGES: "Images",
+    EDIT: "Edit",
+    NO_IMAGES: "No images found.",
+    DECORATIVE: "Decorative",
+    MISSING: "Missing",
+    PAGE_ISSUES: "Page Issues",
+    SETTINGS: "Settings",
+    DEVELOPER_CHECKS: "Developer checks",
+    DEVELOPER_DESC: "Checks for issues that may need coding knowledge to fix, such as HTML attributes, forms, and more.",
+    DARK_MODE: "Dark mode",
+    SHORTCUT_SR: "Skip to issue. Keyboard shortcut: Alt S",
+    SKIP_TO_ISSUE: "Skip to issue",
+    NEW_TAB: "Opens new tab",
+    LINKED: "Linked",
+    PANEL_HEADING: "Accessibility check",
+    NO_ERRORS_FOUND: "No errors found.",
+    WARNINGS_FOUND: "warnings found.",
+    TOTAL_FOUND: "total issues found.",
+    NOT_VISIBLE: "Item is not visible; it may be hidden or inside of an accordion or tab component.",
+    MISSING_ROOT: "The full page was checked for accessibility because the target area <code>%(root)</code> does not exist.",
+    MISSING_READABILITY_ROOT: "The readability score is based on the <code>%(fallback)</code> content area, because the target area <code>%(root)</code> does not exist.",
+    SKIP_TO_PAGE_ISSUES: "Skip to Page Issues",
+    CONSOLE_ERROR: 'Sorry, but there is an issue with the accessibility checker on this page. Can you please <a href="https://forms.gle/sjzK9XykETaoqZv99">report it through this form</a> or on <a href="https://github.com/ryersondmp/sa11y/issues/new?title=Bug%20report">GitHub</a>?',
+    APPEARANCE: "Appearance",
+    MOVE_PANEL: "Move panel",
+    HIDDEN: "Hidden",
+    // Export
+    DATE: "Date",
+    PAGE_TITLE: "Page title",
+    RESULTS: "Results",
+    EXPORT_RESULTS: "Export results",
+    GENERATED: 'Results generated with <a href="https://sa11y.netlify.app">Sa11y.</a>',
+    PREVIEW: "Preview",
+    ELEMENT: "Element",
+    PATH: "Path",
+    // Dismiss
+    PANEL_DISMISS_BUTTON: "Show %(dismissCount) dismissed",
+    DISMISS: "Dismiss",
+    DISMISS_ALL: "Dismiss all",
+    DISMISSED: "Dismissed",
+    DISMISS_REMINDER: "Please note that warnings are only <strong>temporarily</strong> dismissed. Clearing your browser history and cookies will restore all previously dismissed warnings across all pages.",
+    // Colour filters
+    COLOUR_FILTER: "Color filter",
+    PROTANOPIA: "Protanopia",
+    DEUTERANOPIA: "Deuteranopia",
+    TRITANOPIA: "Tritanopia",
+    MONOCHROMACY: "Monochromacy",
+    COLOUR_FILTER_MESSAGE: "Check for elements that are difficult to perceive or distinguish against other colors.",
+    RED_EYE: "Red blind.",
+    GREEN_EYE: "Green blind.",
+    BLUE_EYE: "Blue blind.",
+    MONO_EYE: "Red, blue, and green blind.",
+    COLOUR_FILTER_HIGH_CONTRAST: "Color filters do not work in high contrast mode.",
+    // Readability
+    READABILITY: "Readability",
+    AVG_SENTENCE: "Average words per sentence:",
+    COMPLEX_WORDS: "Complex words:",
+    TOTAL_WORDS: "Words:",
+    VERY_DIFFICULT: "Very difficult",
+    DIFFICULT: "Difficult",
+    FAIRLY_DIFFICULT: "Fairly difficult",
+    READABILITY_NOT_ENOUGH: "Not enough content to calculate readability score."
+  };
+  const tooltip = {
+    // Headings
+    HEADING_SKIPPED_LEVEL: `Headings should not skip levels or jump from <strong>Heading %(PREV_LEVEL)</strong> to <strong {C}>Heading %(LEVEL)</strong>, as this disrupts the content's order and hierarchy, making it harder to follow. <hr> <strong {B}>Heading</strong> <strong {C}>%(HEADING)</strong> <hr> <strong>Tip!</strong> If this heading falls under the "<em>%(PREV_HEADING)</em>" section, then consider formatting it as a Heading %(level) instead.`,
+    HEADING_EMPTY: "Empty heading found! To fix, delete this line or change its format from <strong {C}>Heading %(level)</strong> to <strong>Normal</strong> or <strong>Paragraph</strong>.",
+    HEADING_LONG: "Heading is long! Headings should be used to organize content and convey structure. They should be brief, informative, and unique. Please keep headings less than %(MAX_LENGTH) characters (no more than a sentence). <hr> <strong {B}>Heading</strong> <strong {B}>%(HEADING_LENGTH) Characters</strong> <strong {C}>%(TEXT)</strong>",
+    HEADING_FIRST: 'The first heading on a page should usually be a Heading 1 or Heading 2. Heading 1 should be the start of the main content section, and is the main heading that describes the overall purpose of the page. Learn more about <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading structure.</a>',
+    HEADING_MISSING_ONE: 'Missing Heading 1. Heading 1 should be the start of the main content area, and is the main heading that describes the overall purpose of the page. Learn more about <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading structure.</a>',
+    HEADING_EMPTY_WITH_IMAGE: "Heading has no text, but contains an image. If this is not a heading, change its format from <strong {C}>Heading %(level)</strong> to <strong>Normal</strong> or <strong>Paragraph</strong>. Otherwise, please add alt text to the image if it is not decorative.",
+    HEADING_UNPRONOUNCEABLE: "Heading text only contains symbols or unpronounceable characters. If you think this is an error due to a copy/paste bug, consider deleting it. <hr> <strong {B}>Heading text</strong> <strong {C}>%(TEXT)</strong>",
+    PANEL_HEADING_MISSING_ONE: "Missing Heading 1!",
+    PANEL_NO_HEADINGS: "No headings found.",
+    // Links
+    LINK_EMPTY: "Remove empty links without any text.",
+    LINK_EMPTY_LABELLEDBY: "Link has an <code>aria-labelledby</code> value that is empty or does not match the <code>id</code> value of another element on the page.",
+    LINK_EMPTY_NO_LABEL: 'Link does not have discernible text that is visible to screen readers and other assistive technology. To fix: <ul><li>Add concise text that describes where the link takes you.</li><li>If it is an <a href="https://a11y-101.com/development/icons-and-links">icon link or SVG,</a> it is likely missing a descriptive label.</li><li>If you think this link is an error due to a copy/paste bug, consider deleting it.</li></ul>',
+    LINK_STOPWORD: "Link text may not be descriptive enough out of context. <hr> <strong {B}>Link text</strong> <strong {C}>%(ERROR)</strong>",
+    LINK_STOPWORD_ARIA: "Although an accessible name was provided, consider revising the visible link text. Phrases like &quot;<strong {C}>%(ERROR)</strong>&quot; are not meaningful.",
+    LINK_TIP: "<hr> <strong>Tip!</strong> Use clear and unique link text that describes the destination of the link, typically the page or document title.",
+    LINK_CLICK_HERE: 'The phrase "click" or "click here" places focus on mouse mechanics, when many people do not use a mouse or may be viewing this website on a mobile device. Consider using a different verb that relates to the task. <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
+    DUPLICATE_TITLE: 'The <code>title</code> attribute on links and images is meant to provide extra information, and should be <strong>different</strong> than the text or alt text. The title text appears when hovering over an element, but is not accessible with a keyboard or touch input. Consider <a href="https://www.a11yproject.com/posts/title-attributes/">avoiding the title attribute completely.</a>',
+    LINK_SYMBOLS: "Avoid using symbols as calls to action within link text unless they are hidden from assistive technologies. Screen readers may read the symbols out loud, which can be confusing. Consider removing: <strong {C}>%(ERROR)</strong> <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>",
+    LINK_URL: "Longer, less intelligible URLs used as link text might be difficult to comprehend with assistive technology. In most cases, it is better to use human-readable text instead of the URL. Short URLs (such as a site's homepage) are okay. <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>",
+    LINK_DOI: 'For web pages or online-only resources, the <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">APA Style guide</a> recommends using descriptive links by wrapping the URL or DOI of the work around its title. Longer, less intelligible URLs used as link text might be difficult to comprehend with assistive technology. <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_NEW_TAB: `Link opens in a new tab or window without warning. Doing so can be disorienting, especially for people who have difficulty perceiving visual content. Secondly, it is not always a good practice to control someone's experience or make decisions for them. Indicate that the link opens in a new window within the link text. Learn best practices when <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">opening links in new browser windows and tabs.</a>`,
+    LINK_FILE_EXT: 'Link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning. Indicate the file type within the link text. If it is a large file, consider including the file size. For example: "Executive Report (PDF, 3MB)" <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
+    LINK_IDENTICAL_NAME: "Multiple links on this page use the same link text but point to different places. This may cause confusion for assistive technology users. To fix, make this link text more descriptive.",
+    LINK_UNPRONOUNCEABLE: "Link text only contains symbols. If you think this link is an error due to a copy/paste bug, consider deleting it.  <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>",
+    // Images
+    ALT_UNPRONOUNCEABLE: "The alt text only contains unpronounceable symbols and/or spaces. Screen readers will announce the image and then pause. If the image is decorative, ensure there are no spaces within the alt text. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
+    LINK_ALT_UNPRONOUNCEABLE: "The alt text within this linked image only contains unpronounceable symbols and/or spaces. Screen readers will announce the image and then pause. Ensure the alt text describes the destination of the link. <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
+    MISSING_ALT_LINK_HAS_TEXT: "Image is being used as a link with surrounding text, although the alt attribute should be marked as decorative.",
+    MISSING_ALT_LINK: "Image is being used as a link but is missing alt text! Please ensure alt text describes where the link takes you.",
+    MISSING_ALT: "Missing alt text! If the image conveys a story, mood, or important information, make sure to describe it clearly.",
+    LINK_ALT_FILE_EXT: "Alt text should not include file extensions or image dimensions. Ensure the alt text describes the destination of the link, not a literal description of the image. Remove: <strong {C}>%(ERROR)</strong> <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
+    LINK_PLACEHOLDER_ALT: "Non-descript or placeholder alt text within a linked image found. Ensure the alt text describes the destination of the link, not a literal description of the image. Replace the following alt text. <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
+    LINK_SUS_ALT: "Assistive technologies already indicate that this is an image, so &quot;<strong {C}>%(ERROR)</strong>&quot; may be redundant. Ensure the alt text describes the destination of the link, not a literal description of the image. <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
+    ALT_FILE_EXT: "Alt text should not include file extensions or image dimensions. If the image conveys a story, mood, or important information, be sure to describe the image. Remove: <strong {C}>%(ERROR)</strong>. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
+    ALT_PLACEHOLDER: "Non-descript or placeholder alt text found. Replace the following alt text with something more meaningful. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
+    SUS_ALT: "Assistive technologies already indicate that this is an image, so &quot;<strong {C}>%(ERROR)</strong>&quot; may be redundant. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
+    LINK_IMAGE_NO_ALT_TEXT: "Image within link is marked as decorative and there is no link text. Please add alt text to the image that describes the destination of the link.",
+    LINK_IMAGE_TEXT: "Image is marked as decorative, although the link is using the surrounding text as a descriptive label.",
+    LINK_IMAGE_LONG_ALT: "Alt text description on a linked image is <strong>too long</strong>. The alt text on linked images should describe where the link takes you, not a literal description of the image. <strong>Consider using the title of the page it links to as the alt text.</strong> <hr> {L} {ALT} <strong {B}>%(altLength) Characters</strong> <strong {C}>%(ALT_TEXT)</strong>",
+    LINK_IMAGE_ALT: "Image link contains alt text. Does the alt text describe where the link takes you? <strong>Consider using the title of the page it links to as the alt text.</strong> <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
+    LINK_IMAGE_ALT_AND_TEXT: "Image link contains <strong>both alt text and surrounding link text.</strong> If this image is decorative and is being used as a functional link to another page, consider marking the image as decorative. The surrounding link text should suffice. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong> <hr> <strong {B}>Accessible Name</strong> {L} <strong {C}>%(TEXT)</strong>",
+    IMAGE_FIGURE_DECORATIVE: 'Image is marked as <strong>decorative</strong> and will be ignored by assistive technology. <hr> Although a <strong>caption</strong> was provided, the image should also have alt text in most cases. <ul><li>The alt text should provide a concise description of what is in the image.</li><li>The caption should usually provide context to relate the image back to the surrounding content, or give attention to a particular piece of information.</li></ul> Learn more: <a href="https://thoughtbot.com/blog/alt-vs-figcaption#the-figcaption-element">alt versus figcaption.</a>',
+    IMAGE_FIGURE_DUPLICATE_ALT: 'Do not use the exact same words for both the alt and caption text. Screen readers will announce the information twice.<ul><li>The alt text should provide a concise description of what is in the image.</li><li>The caption should usually provide context to relate the image back to the surrounding content, or give attention to a particular piece of information.</li></ul> Learn more: <a href="https://thoughtbot.com/blog/alt-vs-figcaption#the-figcaption-element">alt versus figcaption.</a> <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>',
+    IMAGE_DECORATIVE: "Image is marked as <strong>decorative</strong> and will be ignored by assistive technology. If the image conveys a story, mood, or important information, make sure to add alt text.",
+    IMAGE_DECORATIVE_CAROUSEL: "Image is marked as <strong>decorative</strong>, but all images in a carousel or gallery should include descriptive alt text to ensure an equivalent experience for everyone.",
+    IMAGE_ALT_TOO_LONG: "Alt text description is <strong>too long</strong>. Alt text should be concise, yet meaningful like a <em>tweet</em> (around 100 characters). If this is a complex image or a graph, consider putting the long description of the image in the text below or an accordion component. <hr> {ALT} <strong {B}>%(altLength) Characters</strong> <strong {C}>%(ALT_TEXT)</strong>",
+    IMAGE_PASS: "{ALT} <strong {C}>%(ALT_TEXT)</strong>",
+    LINK_ALT_MAYBE_BAD: "Image link has alt text that may not provide useful information or contains non-descript text. Ensure the alt text describes the destination of the link. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
+    ALT_MAYBE_BAD: "Alt text may not provide useful information or contains non-descript text. Improve the following alt text: <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
+    // Labels
+    LABELS_MISSING_IMAGE_INPUT: "Image button is missing alt text. Please add alt text to provide an accessible name. For example: <em>Search</em> or <em>Submit</em>.",
+    LABELS_INPUT_RESET: 'Reset buttons should not be used unless specifically needed because they are easy to activate by mistake. <hr> <strong>Tip!</strong> Learn why <a href="https://www.nngroup.com/articles/reset-and-cancel-buttons/">Reset and Cancel buttons pose usability issues.</a>',
+    LABELS_ARIA_LABEL_INPUT: "Input has an accessible name, although please ensure there is a visible label too. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
+    LABELS_NO_FOR_ATTRIBUTE: "There is no label associated with this input. Add a <code>for</code> attribute to the label that matches the <code>id</code> of this input. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
+    LABELS_MISSING_LABEL: "There is no label associated with this input. Please add an <code>id</code> to this input, and add a matching <code>for</code> attribute to the label.",
+    LABELS_PLACEHOLDER: 'Disappearing placeholder text makes it hard for people to remember what information belongs in a field and to identify and correct validation issues. Instead, consider using a permanently visible hint before the form field. <hr> Learn more: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Placeholders in form fields are harmful.</a>',
+    ARIA_INPUT_FIELD_NAME: 'ARIA input or toggle field is missing an accessible name. To fix, provide a valid <code>aria-labelledby</code>, <code>aria-label</code>, or <code>title</code> attribute. If the input is toggleable (e.g., checkbox, switch, radio), adding visible inner text will also resolve this. <div class="cp-none"><hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre></div>',
+    // Embedded content
+    EMBED_VIDEO: "Please ensure <strong>all videos have closed captioning.</strong> Providing captions for all audio and video content is a mandatory Level A requirement. Captions support people who are D/deaf or hard-of-hearing.",
+    EMBED_AUDIO: "Please ensure to provide a <strong>transcript for all podcasts.</strong> Providing transcripts for audio content is a mandatory Level A requirement. Transcripts support people who are D/deaf or hard-of-hearing, but can benefit everyone. Consider placing the transcript below or within an accordion panel.",
+    EMBED_DATA_VIZ: `Data visualization widgets like this are often problematic for people who use a keyboard or screen reader to navigate, and can present significant difficulties for people who have low vision or colorblindness. It's recommended to provide the same information in an alternative (text or table) format below the widget. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/images/complex">complex images.</a>`,
+    EMBED_MISSING_TITLE: 'Embedded content requires an accessible name that describes its contents. Please provide a unique <code>title</code> or <code>aria-label</code> attribute on the <code>iframe</code> element. Learn more about <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrames.</a>',
+    EMBED_GENERAL: 'Unable to check embedded content. Please make sure that images have alt text, videos have captions, text has sufficient contrast, and interactive components are <a href="https://webaim.org/techniques/keyboard/">keyboard accessible.</a>',
+    EMBED_UNFOCUSABLE: '<code>&lt;iframe&gt;</code> with focusable elements should not have <code>tabindex="-1"</code>. The embedded content will not be keyboard accessible.',
+    // Quality assurance
+    QA_BAD_LINK: "Bad link found. Link appears to point to a development environment. <hr> {L} <strong {C}>%(LINK)</strong>",
+    QA_STRONG_ITALICS: "Bold and italic tags have semantic meaning, and should <strong>not</strong> be used to highlight entire paragraphs. Bolded text should be used to provide strong <strong>emphasis</strong> on a word or phrase. Italics should be used to highlight proper names (i.e. book and article titles), foreign words, quotes. Long quotes should be formatted as a blockquote. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+    QA_PDF: 'Unable to check PDFs for accessibility. PDFs are considered web content and must be made accessible as well. PDFs often contain issues for people who use screen readers (missing structural tags or missing form field labels) and people who have low vision (text does not reflow when enlarged). <ul><li>If this is a form, consider using an accessible HTML form as an alternative.</li><li>If this is a document, consider converting it into a web page.</li></ul>Otherwise, please check <a href="https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html">PDF for accessibility in Acrobat DC.</a> <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
+    QA_DOCUMENT: 'Unable to check document for accessibility. Linked documents are considered web content and must be made accessible as well. Please manually review this document. <ul><li>Make your <a href="https://support.google.com/docs/answer/6199477?hl=en">Google Workspace document or presentation more accessible.</a></li><li>Make your <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Office documents more accessible.</a></li></ul> <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
+    QA_BLOCKQUOTE: "Should this blockquote be a heading? Blockquotes should be used for quotes only. If this is intended to be a heading, change this blockquote to a semantic heading (e.g. Heading 2 or Heading 3). <hr> <strong {B}>Blockquote</strong> <strong {C}>%(TEXT)</strong>",
+    QA_FAKE_HEADING: "Is this a heading? A line of bold or large text might look like a heading, but someone using a screen reader cannot tell that it is important or jump to its content. Bold or large text should never replace semantic headings (Heading 2 to Heading 6). <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+    QA_FAKE_LIST: 'Are you trying to create a list? Possible list item found: <strong {C}>%(PREFIX)</strong> <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> Make sure to use semantic lists by using the bullet or number formatting buttons instead. When using a semantic list, assistive technologies are able to convey information such as the total number of items and the relative position of each item in the list. Learn more about <a href="https://www.w3.org/WAI/tutorials/page-structure/content/#lists">semantic lists.</a>',
+    QA_UPPERCASE: "Found all caps. Some screen readers may interpret all caps text as an acronym and will read each letter individually. Additionally, some people find all caps more difficult to read and it may give the appearance of SHOUTING. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+    QA_UNDERLINE: "Underlined text can be confused with links. Consider using a different style such as <code>&lt;strong&gt;</code><strong>strong importance</strong><code>&lt;/strong&gt;</code> or <code>&lt;em&gt;</code><em>emphasis</em><code>&lt;/em&gt;</code>. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+    QA_SUBSCRIPT: "The subscript and superscript formatting options should only be used to change the position of text for typographical conventions or standards. It should <strong>not</strong> solely be used for presentation or appearance purposes. Formatting entire sentences poses readability issues. Appropriate use cases would include displaying exponents, ordinal numbers such as 4<sup>th</sup> instead of fourth, and chemical formulas (e.g. H<sub>2</sub>O). <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+    QA_IN_PAGE_LINK: "Broken same-page link. This link tries to navigate to a section of the page that cannot be found. To fix this, make sure the link matches the <code>id</code> of the element you want to jump to. <hr> <strong {B}>ID</strong> <strong {C}>#%(ID)</strong>",
+    QA_NESTED_COMPONENTS: "Avoid nesting interactive layout components, such as placing accordions within other accordions, or placing tabs inside accordions and vice versa. This can complicate navigation, increase cognitive overload, and lead to people overlooking content.",
+    QA_JUSTIFY: "Avoid using justified text, which aligns to both the left and right margins. This can be difficult for some people to read due to the uneven spaces between words. Use left-aligned text for better readability. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+    QA_SMALL_TEXT: "Small text is harder to read, particularly for those with low vision. To ensure better readability, avoid using font sizes smaller than the default. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+    // Shared
+    LINK_TEXT: "<strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>",
+    ACC_NAME: "<strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
+    ACC_NAME_TIP: `<hr><strong>Tip!</strong> The "accessible name" is the final label that gets communicated to people who use assistive technology. This helps them understand the element's purpose.`,
+    HIDDEN_FOCUSABLE: 'This element can receive keyboard focus, but is hidden from screen readers by an <code>aria-hidden="true"</code> attribute (on itself or a parent container). To fix, either remove the aria-hidden attribute or remove the element from the tab order. <div class="cp-none"><hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre></div> <hr> Learn more about the <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden attribute.</a>',
+    // Developer checks
+    DUPLICATE_ID: "Found <strong>duplicate ID</strong>. Duplicate ID errors are known to cause problems for assistive technologies when they are trying to interact with content. Please remove or change the following ID. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
+    UNCONTAINED_LI: "All <code>&lt;li&gt;</code> list items must be placed inside <code>&lt;ul&gt;</code> unordered or <code>&lt;ol&gt;</code> ordered elements. This structure helps screen readers announce the list and its items accurately. <hr> <strong {B}>List item</strong> <strong {C}>%(TEXT)</strong>",
+    TABINDEX_ATTR: "Element should not have a <code>tabindex</code> attribute greater than 0.",
+    // Meta checks
+    META_TITLE: 'Missing page title! Please provide a <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title">page title.</a>',
+    META_SCALABLE: 'Remove the <code>user-scalable="no"</code> parameter in the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">viewport meta tag</a> in order to allow zooming.',
+    META_MAX: 'Ensure the <code>maximum-scale</code> parameter in the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">viewport meta tag</a> is not less than 2.',
+    META_LANG: 'Page language not declared! Please <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare language on the HTML tag.</a>',
+    META_REFRESH: "Page should not automatically refresh using a meta tag.",
+    META_LANG_SUGGEST: "The following language code <code>%(CODE)</code> is not valid. Did you mean <code>%(CODE)</code>?",
+    META_LANG_VALID: 'The language code for this element is not valid. To fix, replace the lang attribute with a valid language code. <div class="cp-none"><hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code></div> <hr> Learn more about <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declaring language in HTML.</a>',
+    // Buttons
+    BTN_EMPTY: "Button is missing an accessible name that describes its purpose.",
+    BTN_EMPTY_LABELLEDBY: "Button has an <code>aria-labelledby</code> value that is empty or does not match the <code>id</code> value of another element on the page.",
+    BTN: "button",
+    BTN_TIP: ' Learn how to make an <a href="https://www.sarasoueidan.com/blog/accessible-icon-buttons/">accessible button.</a>',
+    BTN_ROLE_IN_NAME: 'Do not include the word "button" in the name of a button. Screen readers already convey the role of an element in addition to its name. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>',
+    LABEL_IN_NAME: "The visible text for this element appears to be different than the accessible name, which may cause confusion for assistive technologies users. Please review: <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
+    LINK_MAYBE_BUTTON: `This link has an invalid target. Although the accessible name or its attributes suggests that this might not be a link at all, and instead controls some scripted behaviour on the page. To fix, replace the link with an <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">accessible button</a>, or correct the link's destination. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tip!</strong> Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.`,
+    // Tables
+    TABLES_MISSING_HEADINGS: 'Missing table headers! Accessible tables need HTML markup that indicates header cells and data cells which defines their relationship. This information provides context to people who use assistive technology. Tables should be used for tabular data only. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
+    TABLES_SEMANTIC_HEADING: 'Semantic headings such as Heading 2 or Heading 3 should only be used for sections of content; <strong>not</strong> in HTML tables. Indicate table headings using the <code>&lt;th&gt;</code> element instead. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
+    TABLES_EMPTY_HEADING: 'Empty table header found! Table headers should <strong>never</strong> be empty. It is important to designate row and/or column headers to convey their relationship. This information provides context to people who use assistive technology. Please keep in mind that tables should be used for tabular data only. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
+    TABLES_INVALID_HEADERS_REF: 'This table is attempting to label a specific data cell with a specific header cell, but the header ID cannot be found. Make sure each <code>headers</code> attribute matches the ID of a header cell in the same table. <hr> <strong {B}>Headers</strong> <code>%(VALUE)</code> <hr> <strong>Tip!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Using manual ID references</a> to associate data cells with header cells is complicated and fragile. When possible, break complex data into smaller tables with simple header rows and columns.',
+    // Contrast
+    CONTRAST_NORMAL: "Normal-sized text should have at least a %(RATIO) ratio.",
+    CONTRAST_LARGE: "Large-sized text should have at least a %(RATIO) ratio.",
+    CONTRAST_ERROR: "Text does not have enough contrast with the background, making it harder to read.",
+    CONTRAST_WARNING: "The contrast of this text is unknown and needs to be manually reviewed. Ensure the text and the background have strong contrasting colors.",
+    CONTRAST_ERROR_GRAPHIC: "Graphic does not have enough contrast with the background, making it harder to see.",
+    CONTRAST_WARNING_GRAPHIC: "The contrast of this graphic is unknown and needs to be manually reviewed.",
+    CONTRAST_TIP_GRAPHIC: "Graphics and user interface elements should have at least a 3:1 ratio.",
+    CONTRAST_OPACITY: "Increase the opacity for better visibility.",
+    CONTRAST_APCA: "This is not enough contrast for any size text. Consider using this color and text size combination?",
+    CONTRAST_COLOR: "Consider using this color instead?",
+    CONTRAST_SIZE: "Consider making the text size larger for this color combination?",
+    CONTRAST_PLACEHOLDER: "Placeholder text within this input does not have enough contrast with the background, making it harder to read.",
+    CONTRAST_PLACEHOLDER_UNSUPPORTED: "The contrast of this placeholder text is unknown and needs to be manually reviewed. Ensure the text and the background have strong contrasting colours.",
+    CONTRAST_INPUT: "Text within this input does not have enough contrast with the background, making it harder to read.",
+    CONTRAST: "Contrast",
+    UNKNOWN: "Unknown",
+    FG: "Foreground",
+    BG: "Background",
+    NO_SUGGESTION: "No accessible combination can be found by changing the text color. Try changing the background color.",
+    // Language of parts
+    PAGE_LANG_CONFIDENCE: 'More than half of the text on this page appears to be %(LIKELY_LANG), but the declared page language is %(PAGE_LANG). Consider updating the <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declared page language</a> to match the content.',
+    LANG_OF_PARTS: "The page language was declared as %(PAGE_LANG), but this content appears to be %(LIKELY_LANG). Ensure the content is tagged appropriately. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+    LANG_MISMATCH: "This content appears to be %(DETECTED_LANG), however, it was tagged as %(WRONG_LANG). <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+    LANG_OF_PARTS_ALT: "This alt text appears to be %(LIKELY_LANG), but the page language was declared as %(PAGE_LANG). Ensure the alt text is in the same language as the rest of the page. <hr> {ALT} <strong {C}>%(ALT)</strong>",
+    LANG_TIP: '<hr><strong>Tip!</strong> Screen readers pronounce words using language tags. Pronouncing a language with a mismatched language pack produces unintelligible speech. Learn more about <a href="https://www.w3.org/WAI/WCAG22/Understanding/language-of-parts.html">language of parts.</a>',
+    LANG_UNSUPPORTED: "Language-related accessibility checks were skipped because automatic language detection isn’t supported in this browser."
+  };
   const Sa11yStrings = {
-    // English
     strings: {
-      LANG_CODE: "en-US",
-      MAIN_TOGGLE_LABEL: "Check Accessibility",
-      CONTAINER_LABEL: "Accessibility Checker",
-      ERROR: "Error",
-      ERRORS: "Errors",
-      WARNING: "Warning",
-      WARNINGS: "Warnings",
-      GOOD: "Good",
-      REVIEW: "Review",
-      ON: "On",
-      OFF: "Off",
-      ALERT_TEXT: "Alert",
-      ALERT_CLOSE: "Close",
-      OUTLINE: "Outline",
-      READABILITY_DESC: "Shows the readability score in the <strong>Outline</strong> tab to help gauge reading difficulty.",
-      TITLE: "Title",
-      ALT: "ALT",
-      IMAGES: "Images",
-      EDIT: "Edit",
-      NO_IMAGES: "No images found.",
-      DECORATIVE: "Decorative",
-      MISSING: "Missing",
-      PAGE_ISSUES: "Page Issues",
-      SETTINGS: "Settings",
-      DEVELOPER_CHECKS: "Developer checks",
-      DEVELOPER_DESC: "Checks for issues that may need coding knowledge to fix, such as HTML attributes, forms, and more.",
-      DARK_MODE: "Dark mode",
-      SHORTCUT_SR: "Skip to issue. Keyboard shortcut: Alt S",
-      SKIP_TO_ISSUE: "Skip to issue",
-      NEW_TAB: "Opens new tab",
-      LINKED: "Linked",
-      PANEL_HEADING: "Accessibility check",
-      NO_ERRORS_FOUND: "No errors found.",
-      WARNINGS_FOUND: "warnings found.",
-      TOTAL_FOUND: "total issues found.",
-      NOT_VISIBLE: "Item is not visible; it may be hidden or inside of an accordion or tab component.",
-      MISSING_ROOT: "The full page was checked for accessibility because the target area <code>%(root)</code> does not exist.",
-      MISSING_READABILITY_ROOT: "The readability score is based on the <code>%(fallback)</code> content area, because the target area <code>%(root)</code> does not exist.",
-      SKIP_TO_PAGE_ISSUES: "Skip to Page Issues",
-      CONSOLE_ERROR: 'Sorry, but there is an issue with the accessibility checker on this page. Can you please <a href="https://forms.gle/sjzK9XykETaoqZv99">report it through this form</a> or on <a href="https://github.com/ryersondmp/sa11y/issues/new?title=Bug%20report">GitHub</a>?',
-      APPEARANCE: "Appearance",
-      MOVE_PANEL: "Move panel",
-      HIDDEN: "Hidden",
-      // Export
-      DATE: "Date",
-      PAGE_TITLE: "Page title",
-      RESULTS: "Results",
-      EXPORT_RESULTS: "Export results",
-      GENERATED: 'Results generated with <a href="https://sa11y.netlify.app">Sa11y.</a>',
-      PREVIEW: "Preview",
-      ELEMENT: "Element",
-      PATH: "Path",
-      // Dismiss
-      PANEL_DISMISS_BUTTON: "Show %(dismissCount) dismissed",
-      DISMISS: "Dismiss",
-      DISMISS_ALL: "Dismiss all",
-      DISMISSED: "Dismissed",
-      DISMISS_REMINDER: "Please note that warnings are only <strong>temporarily</strong> dismissed. Clearing your browser history and cookies will restore all previously dismissed warnings across all pages.",
-      // Colour filters
-      COLOUR_FILTER: "Color filter",
-      PROTANOPIA: "Protanopia",
-      DEUTERANOPIA: "Deuteranopia",
-      TRITANOPIA: "Tritanopia",
-      MONOCHROMACY: "Monochromacy",
-      COLOUR_FILTER_MESSAGE: "Check for elements that are difficult to perceive or distinguish against other colors.",
-      RED_EYE: "Red blind.",
-      GREEN_EYE: "Green blind.",
-      BLUE_EYE: "Blue blind.",
-      MONO_EYE: "Red, blue, and green blind.",
-      COLOUR_FILTER_HIGH_CONTRAST: "Color filters do not work in high contrast mode.",
-      // Alternative text stop words
-      SUS_ALT_STOPWORDS: ["image", "graphic", "picture", "photo", "thumbnail", "icon"],
-      PLACEHOLDER_ALT_STOPWORDS: [
-        "alt",
-        "chart",
-        "decorative",
-        "image",
-        "graphic",
-        "photo",
-        "placeholder",
-        "placeholder image",
-        "spacer",
-        "tbd",
-        "todo",
-        "to do",
-        "thumbnail",
-        "icon",
-        "test",
-        "hero image",
-        "hero image",
-        "hero slide",
-        "slide image",
-        "homepage feature image",
-        "featured image",
-        "untitled",
-        "untitled image",
-        "unnamed",
-        "copy",
-        "undefined"
-      ],
-      LINK_STOPWORDS: [
-        "click",
-        "click here",
-        "click here for more",
-        "click here to learn more",
-        "clicking here",
-        "check out",
-        "detailed here",
-        "discover",
-        "download",
-        "download here",
-        "explore",
-        "find out",
-        "find out more",
-        "form",
-        "here",
-        "info",
-        "information",
-        "link",
-        "learn",
-        "learn more",
-        "learn to",
-        "more",
-        "page",
-        "paper",
-        "read more",
-        "read",
-        "read this",
-        "this",
-        "this page",
-        "this link",
-        "this website",
-        "this form",
-        "view",
-        "view our",
-        "website",
-        "article",
-        "go",
-        "workshop"
-      ],
-      CLICK: ["click"],
-      NEW_WINDOW_PHRASES: [
-        "external",
-        "new tab",
-        "new window",
-        "pop-up",
-        "pop up",
-        "opens new tab",
-        "opens new window",
-        "opens in a new window",
-        "opens in a new tab"
-      ],
-      FILE_TYPE_PHRASES: [
-        "document",
-        "spreadsheet",
-        "calculation sheet",
-        "compressed file",
-        "archived file",
-        "worksheet",
-        "powerpoint",
-        "presentation",
-        "install",
-        "video",
-        "audio",
-        "pdf"
-      ],
-      // Readability
-      READABILITY: "Readability",
-      AVG_SENTENCE: "Average words per sentence:",
-      COMPLEX_WORDS: "Complex words:",
-      TOTAL_WORDS: "Words:",
-      VERY_DIFFICULT: "Very difficult",
-      DIFFICULT: "Difficult",
-      FAIRLY_DIFFICULT: "Fairly difficult",
-      READABILITY_NOT_ENOUGH: "Not enough content to calculate readability score.",
-      // Headings
-      HEADING_SKIPPED_LEVEL: `Headings should not skip levels or jump from <strong>Heading %(PREV_LEVEL)</strong> to <strong {C}>Heading %(LEVEL)</strong>, as this disrupts the content's order and hierarchy, making it harder to follow. <hr> <strong {B}>Heading</strong> <strong {C}>%(HEADING)</strong> <hr> <strong>Tip!</strong> If this heading falls under the "<em>%(PREV_HEADING)</em>" section, then consider formatting it as a Heading %(level) instead.`,
-      HEADING_EMPTY: "Empty heading found! To fix, delete this line or change its format from <strong {C}>Heading %(level)</strong> to <strong>Normal</strong> or <strong>Paragraph</strong>.",
-      HEADING_LONG: "Heading is long! Headings should be used to organize content and convey structure. They should be brief, informative, and unique. Please keep headings less than %(MAX_LENGTH) characters (no more than a sentence). <hr> <strong {B}>Heading</strong> <strong {B}>%(HEADING_LENGTH) Characters</strong> <strong {C}>%(TEXT)</strong>",
-      HEADING_FIRST: 'The first heading on a page should usually be a Heading 1 or Heading 2. Heading 1 should be the start of the main content section, and is the main heading that describes the overall purpose of the page. Learn more about <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading structure.</a>',
-      HEADING_MISSING_ONE: 'Missing Heading 1. Heading 1 should be the start of the main content area, and is the main heading that describes the overall purpose of the page. Learn more about <a href="https://www.w3.org/WAI/tutorials/page-structure/headings/">heading structure.</a>',
-      HEADING_EMPTY_WITH_IMAGE: "Heading has no text, but contains an image. If this is not a heading, change its format from <strong {C}>Heading %(level)</strong> to <strong>Normal</strong> or <strong>Paragraph</strong>. Otherwise, please add alt text to the image if it is not decorative.",
-      PANEL_HEADING_MISSING_ONE: "Missing Heading 1!",
-      PANEL_NO_HEADINGS: "No headings found.",
-      // Links
-      LINK_EMPTY: "Remove empty links without any text.",
-      LINK_EMPTY_LABELLEDBY: "Link has an <code>aria-labelledby</code> value that is empty or does not match the <code>id</code> value of another element on the page.",
-      LINK_EMPTY_NO_LABEL: 'Link does not have discernible text that is visible to screen readers and other assistive technology. To fix: <ul><li>Add concise text that describes where the link takes you.</li><li>If it is an <a href="https://a11y-101.com/development/icons-and-links">icon link or SVG,</a> it is likely missing a descriptive label.</li><li>If you think this link is an error due to a copy/paste bug, consider deleting it.</li></ul>',
-      LINK_STOPWORD: "Link text may not be descriptive enough out of context. <hr> <strong {B}>Link text</strong> <strong {C}>%(ERROR)</strong>",
-      LINK_STOPWORD_ARIA: "Although an accessible name was provided, consider revising the visible link text. Phrases like &quot;<strong {C}>%(ERROR)</strong>&quot; are not meaningful.",
-      LINK_TIP: "<hr> <strong>Tip!</strong> Use clear and unique link text that describes the destination of the link, typically the page or document title.",
-      LINK_CLICK_HERE: 'The phrase "click" or "click here" places focus on mouse mechanics, when many people do not use a mouse or may be viewing this website on a mobile device. Consider using a different verb that relates to the task. <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
-      DUPLICATE_TITLE: 'The <code>title</code> attribute on links and images is meant to provide extra information, and should be <strong>different</strong> than the text or alt text. The title text appears when hovering over an element, but is not accessible with a keyboard or touch input. Consider <a href="https://www.a11yproject.com/posts/title-attributes/">avoiding the title attribute completely.</a>',
-      LINK_SYMBOLS: "Avoid using symbols as calls to action within link text unless they are hidden from assistive technologies. Screen readers may read the symbols out loud, which can be confusing. Consider removing: <strong {C}>%(ERROR)</strong> <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>",
-      LINK_URL: "Longer, less intelligible URLs used as link text might be difficult to comprehend with assistive technology. In most cases, it is better to use human-readable text instead of the URL. Short URLs (such as a site's homepage) are okay. <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>",
-      LINK_DOI: 'For web pages or online-only resources, the <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">APA Style guide</a> recommends using descriptive links by wrapping the URL or DOI of the work around its title. Longer, less intelligible URLs used as link text might be difficult to comprehend with assistive technology. <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
-      LINK_NEW_TAB: `Link opens in a new tab or window without warning. Doing so can be disorienting, especially for people who have difficulty perceiving visual content. Secondly, it is not always a good practice to control someone's experience or make decisions for them. Indicate that the link opens in a new window within the link text. Learn best practices when <a href="https://www.nngroup.com/articles/new-browser-windows-and-tabs/">opening links in new browser windows and tabs.</a>`,
-      LINK_FILE_EXT: 'Link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning. Indicate the file type within the link text. If it is a large file, consider including the file size. For example: "Executive Report (PDF, 3MB)" <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
-      LINK_IDENTICAL_NAME: "Multiple links on this page use the same link text but point to different places. This may cause confusion for assistive technology users. To fix, make this link text more descriptive.",
-      LINK_UNPRONOUNCEABLE: "Link text only contains symbols. If you think this link is an error due to a copy/paste bug, consider deleting it.  <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>",
-      // Images
-      ALT_UNPRONOUNCEABLE: "The alt text only contains unpronounceable symbols and/or spaces. Screen readers will announce the image and then pause. If the image is decorative, ensure there are no spaces within the alt text. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
-      LINK_ALT_UNPRONOUNCEABLE: "The alt text within this linked image only contains unpronounceable symbols and/or spaces. Screen readers will announce the image and then pause. Ensure the alt text describes the destination of the link. <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
-      MISSING_ALT_LINK_HAS_TEXT: "Image is being used as a link with surrounding text, although the alt attribute should be marked as decorative.",
-      MISSING_ALT_LINK: "Image is being used as a link but is missing alt text! Please ensure alt text describes where the link takes you.",
-      MISSING_ALT: "Missing alt text! If the image conveys a story, mood, or important information, make sure to describe it clearly.",
-      LINK_ALT_FILE_EXT: "Alt text should not include file extensions or image dimensions. Ensure the alt text describes the destination of the link, not a literal description of the image. Remove: <strong {C}>%(ERROR)</strong> <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
-      LINK_PLACEHOLDER_ALT: "Non-descript or placeholder alt text within a linked image found. Ensure the alt text describes the destination of the link, not a literal description of the image. Replace the following alt text. <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
-      LINK_SUS_ALT: "Assistive technologies already indicate that this is an image, so &quot;<strong {C}>%(ERROR)</strong>&quot; may be redundant. Ensure the alt text describes the destination of the link, not a literal description of the image. <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
-      ALT_FILE_EXT: "Alt text should not include file extensions or image dimensions. If the image conveys a story, mood, or important information, be sure to describe the image. Remove: <strong {C}>%(ERROR)</strong>. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
-      ALT_PLACEHOLDER: "Non-descript or placeholder alt text found. Replace the following alt text with something more meaningful. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
-      SUS_ALT: "Assistive technologies already indicate that this is an image, so &quot;<strong {C}>%(ERROR)</strong>&quot; may be redundant. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
-      LINK_IMAGE_NO_ALT_TEXT: "Image within link is marked as decorative and there is no link text. Please add alt text to the image that describes the destination of the link.",
-      LINK_IMAGE_TEXT: "Image is marked as decorative, although the link is using the surrounding text as a descriptive label.",
-      LINK_IMAGE_LONG_ALT: "Alt text description on a linked image is <strong>too long</strong>. The alt text on linked images should describe where the link takes you, not a literal description of the image. <strong>Consider using the title of the page it links to as the alt text.</strong> <hr> {L} {ALT} <strong {B}>%(altLength) Characters</strong> <strong {C}>%(ALT_TEXT)</strong>",
-      LINK_IMAGE_ALT: "Image link contains alt text. Does the alt text describe where the link takes you? <strong>Consider using the title of the page it links to as the alt text.</strong> <hr> {L} {ALT} <strong {C}>%(ALT_TEXT)</strong>",
-      LINK_IMAGE_ALT_AND_TEXT: "Image link contains <strong>both alt text and surrounding link text.</strong> If this image is decorative and is being used as a functional link to another page, consider marking the image as decorative. The surrounding link text should suffice. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong> <hr> <strong {B}>Accessible Name</strong> {L} <strong {C}>%(TEXT)</strong>",
-      IMAGE_FIGURE_DECORATIVE: 'Image is marked as <strong>decorative</strong> and will be ignored by assistive technology. <hr> Although a <strong>caption</strong> was provided, the image should also have alt text in most cases. <ul><li>The alt text should provide a concise description of what is in the image.</li><li>The caption should usually provide context to relate the image back to the surrounding content, or give attention to a particular piece of information.</li></ul> Learn more: <a href="https://thoughtbot.com/blog/alt-vs-figcaption#the-figcaption-element">alt versus figcaption.</a>',
-      IMAGE_FIGURE_DUPLICATE_ALT: 'Do not use the exact same words for both the alt and caption text. Screen readers will announce the information twice.<ul><li>The alt text should provide a concise description of what is in the image.</li><li>The caption should usually provide context to relate the image back to the surrounding content, or give attention to a particular piece of information.</li></ul> Learn more: <a href="https://thoughtbot.com/blog/alt-vs-figcaption#the-figcaption-element">alt versus figcaption.</a> <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>',
-      IMAGE_DECORATIVE: "Image is marked as <strong>decorative</strong> and will be ignored by assistive technology. If the image conveys a story, mood, or important information, make sure to add alt text.",
-      IMAGE_DECORATIVE_CAROUSEL: "Image is marked as <strong>decorative</strong>, but all images in a carousel or gallery should include descriptive alt text to ensure an equivalent experience for everyone.",
-      IMAGE_ALT_TOO_LONG: "Alt text description is <strong>too long</strong>. Alt text should be concise, yet meaningful like a <em>tweet</em> (around 100 characters). If this is a complex image or a graph, consider putting the long description of the image in the text below or an accordion component. <hr> {ALT} <strong {B}>%(altLength) Characters</strong> <strong {C}>%(ALT_TEXT)</strong>",
-      IMAGE_PASS: "{ALT} %(ALT_TEXT)",
-      LINK_ALT_MAYBE_BAD: "Image link has alt text that may not provide useful information or contains non-descript text. Ensure the alt text describes the destination of the link. <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
-      ALT_MAYBE_BAD: "Alt text may not provide useful information or contains non-descript text. Improve the following alt text: <hr> {ALT} <strong {C}>%(ALT_TEXT)</strong>",
-      // Labels
-      LABELS_MISSING_IMAGE_INPUT: "Image button is missing alt text. Please add alt text to provide an accessible name. For example: <em>Search</em> or <em>Submit</em>.",
-      LABELS_INPUT_RESET: 'Reset buttons should not be used unless specifically needed because they are easy to activate by mistake. <hr> <strong>Tip!</strong> Learn why <a href="https://www.nngroup.com/articles/reset-and-cancel-buttons/">Reset and Cancel buttons pose usability issues.</a>',
-      LABELS_ARIA_LABEL_INPUT: "Input has an accessible name, although please ensure there is a visible label too. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
-      LABELS_NO_FOR_ATTRIBUTE: "There is no label associated with this input. Add a <code>for</code> attribute to the label that matches the <code>id</code> of this input. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
-      LABELS_MISSING_LABEL: "There is no label associated with this input. Please add an <code>id</code> to this input, and add a matching <code>for</code> attribute to the label.",
-      LABELS_PLACEHOLDER: 'Disappearing placeholder text makes it hard for people to remember what information belongs in a field and to identify and correct validation issues. Instead, consider using a permanently visible hint before the form field. <hr> Learn more: <a href="https://www.nngroup.com/articles/form-design-placeholders/">Placeholders in form fields are harmful.</a>',
-      ARIA_INPUT_FIELD_NAME: "ARIA input or toggle field is missing an accessible name. To fix, provide a valid <code>aria-labelledby</code>, <code>aria-label</code>, or <code>title</code> attribute. If the input is toggleable (e.g., checkbox, switch, radio), adding visible inner text will also resolve this. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre>",
-      // Embedded content
-      EMBED_VIDEO: "Please ensure <strong>all videos have closed captioning.</strong> Providing captions for all audio and video content is a mandatory Level A requirement. Captions support people who are D/deaf or hard-of-hearing.",
-      EMBED_AUDIO: "Please ensure to provide a <strong>transcript for all podcasts.</strong> Providing transcripts for audio content is a mandatory Level A requirement. Transcripts support people who are D/deaf or hard-of-hearing, but can benefit everyone. Consider placing the transcript below or within an accordion panel.",
-      EMBED_DATA_VIZ: `Data visualization widgets like this are often problematic for people who use a keyboard or screen reader to navigate, and can present significant difficulties for people who have low vision or colorblindness. It's recommended to provide the same information in an alternative (text or table) format below the widget. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/images/complex">complex images.</a>`,
-      EMBED_MISSING_TITLE: 'Embedded content requires an accessible name that describes its contents. Please provide a unique <code>title</code> or <code>aria-label</code> attribute on the <code>iframe</code> element. Learn more about <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrames.</a>',
-      EMBED_GENERAL: 'Unable to check embedded content. Please make sure that images have alt text, videos have captions, text has sufficient contrast, and interactive components are <a href="https://webaim.org/techniques/keyboard/">keyboard accessible.</a>',
-      EMBED_UNFOCUSABLE: '<code>&lt;iframe&gt;</code> with focusable elements should not have <code>tabindex="-1"</code>. The embedded content will not be keyboard accessible.',
-      // Quality assurance
-      QA_BAD_LINK: "Bad link found. Link appears to point to a development environment. <hr> {L} <strong {C}>%(LINK)</strong>",
-      QA_STRONG_ITALICS: "Bold and italic tags have semantic meaning, and should <strong>not</strong> be used to highlight entire paragraphs. Bolded text should be used to provide strong <strong>emphasis</strong> on a word or phrase. Italics should be used to highlight proper names (i.e. book and article titles), foreign words, quotes. Long quotes should be formatted as a blockquote. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
-      QA_PDF: 'Unable to check PDFs for accessibility. PDFs are considered web content and must be made accessible as well. PDFs often contain issues for people who use screen readers (missing structural tags or missing form field labels) and people who have low vision (text does not reflow when enlarged). <ul><li>If this is a form, consider using an accessible HTML form as an alternative.</li><li>If this is a document, consider converting it into a web page.</li></ul>Otherwise, please check <a href="https://helpx.adobe.com/acrobat/using/create-verify-pdf-accessibility.html">PDF for accessibility in Acrobat DC.</a> <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
-      QA_DOCUMENT: 'Unable to check document for accessibility. Linked documents are considered web content and must be made accessible as well. Please manually review this document. <ul><li>Make your <a href="https://support.google.com/docs/answer/6199477?hl=en">Google Workspace document or presentation more accessible.</a></li><li>Make your <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Office documents more accessible.</a></li></ul> <hr> <strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>',
-      QA_BLOCKQUOTE: "Should this blockquote be a heading? Blockquotes should be used for quotes only. If this is intended to be a heading, change this blockquote to a semantic heading (e.g. Heading 2 or Heading 3). <hr> <strong {B}>Blockquote</strong> <strong {C}>%(TEXT)</strong>",
-      QA_FAKE_HEADING: "Is this a heading? A line of bold or large text might look like a heading, but someone using a screen reader cannot tell that it is important or jump to its content. Bold or large text should never replace semantic headings (Heading 2 to Heading 6). <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
-      QA_FAKE_LIST: 'Are you trying to create a list? Possible list item found: <strong {C}>%(PREFIX)</strong> <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> Make sure to use semantic lists by using the bullet or number formatting buttons instead. When using a semantic list, assistive technologies are able to convey information such as the total number of items and the relative position of each item in the list. Learn more about <a href="https://www.w3.org/WAI/tutorials/page-structure/content/#lists">semantic lists.</a>',
-      QA_UPPERCASE: "Found all caps. Some screen readers may interpret all caps text as an acronym and will read each letter individually. Additionally, some people find all caps more difficult to read and it may give the appearance of SHOUTING. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
-      QA_UNDERLINE: "Underlined text can be confused with links. Consider using a different style such as <code>&lt;strong&gt;</code><strong>strong importance</strong><code>&lt;/strong&gt;</code> or <code>&lt;em&gt;</code><em>emphasis</em><code>&lt;/em&gt;</code>. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
-      QA_SUBSCRIPT: "The subscript and superscript formatting options should only be used to change the position of text for typographical conventions or standards. It should <strong>not</strong> solely be used for presentation or appearance purposes. Formatting entire sentences poses readability issues. Appropriate use cases would include displaying exponents, ordinal numbers such as 4<sup>th</sup> instead of fourth, and chemical formulas (e.g. H<sub>2</sub>O). <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
-      QA_IN_PAGE_LINK: "Broken same-page link. This link tries to navigate to a section of the page that cannot be found. To fix this, make sure the link matches the <code>id</code> of the element you want to jump to. <hr> <strong {B}>ID</strong> <strong {C}>#%(ID)</strong>",
-      QA_NESTED_COMPONENTS: "Avoid nesting interactive layout components, such as placing accordions within other accordions, or placing tabs inside accordions and vice versa. This can complicate navigation, increase cognitive overload, and lead to people overlooking content.",
-      QA_JUSTIFY: "Avoid using justified text, which aligns to both the left and right margins. This can be difficult for some people to read due to the uneven spaces between words. Use left-aligned text for better readability. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
-      QA_SMALL_TEXT: "Small text is harder to read, particularly for those with low vision. To ensure better readability, avoid using font sizes smaller than the default. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
-      // Shared
-      LINK_TEXT: "<strong {B}>Link text</strong> <strong {C}>%(TEXT)</strong>",
-      ACC_NAME: "<strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
-      ACC_NAME_TIP: `<hr><strong>Tip!</strong> The "accessible name" is the final label that gets communicated to people who use assistive technology. This helps them understand the element's purpose.`,
-      HIDDEN_FOCUSABLE: 'This element can receive keyboard focus, but is hidden from screen readers by an <code>aria-hidden="true"</code> attribute (on itself or a parent container). To fix, either remove the aria-hidden attribute or remove the element from the tab order. <hr> <strong {B}>Element</strong> <pre><code>%(EL)</code></pre> <hr> Learn more about the <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden">aria-hidden attribute.</a>',
-      // Developer checks
-      DUPLICATE_ID: "Found <strong>duplicate ID</strong>. Duplicate ID errors are known to cause problems for assistive technologies when they are trying to interact with content. Please remove or change the following ID. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
-      UNCONTAINED_LI: "All <code>&lt;li&gt;</code> list items must be placed inside <code>&lt;ul&gt;</code> unordered or <code>&lt;ol&gt;</code> ordered elements. This structure helps screen readers announce the list and its items accurately. <hr> <strong {B}>List item</strong> <strong {C}>%(TEXT)</strong>",
-      TABINDEX_ATTR: "Element should not have a <code>tabindex</code> attribute greater than 0.",
-      // Meta checks
-      META_TITLE: 'Missing page title! Please provide a <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title">page title.</a>',
-      META_SCALABLE: 'Remove the <code>user-scalable="no"</code> parameter in the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">viewport meta tag</a> in order to allow zooming.',
-      META_MAX: 'Ensure the <code>maximum-scale</code> parameter in the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">viewport meta tag</a> is not less than 2.',
-      META_LANG: 'Page language not declared! Please <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare language on the HTML tag.</a>',
-      META_REFRESH: "Page should not automatically refresh using a meta tag.",
-      META_LANG_SUGGEST: "The following language code <code>%(CODE)</code> is not valid. Did you mean <code>%(CODE)</code>?",
-      META_LANG_VALID: 'The language code for this element is not valid. To fix, replace the lang attribute with a valid language code. <hr> <strong {B}>Element</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code> <hr> Learn more about <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declaring language in HTML.</a>',
-      // Buttons
-      BTN_EMPTY: "Button is missing an accessible name that describes its purpose.",
-      BTN_EMPTY_LABELLEDBY: "Button has an <code>aria-labelledby</code> value that is empty or does not match the <code>id</code> value of another element on the page.",
-      BTN: "button",
-      BTN_TIP: ' Learn how to make an <a href="https://www.sarasoueidan.com/blog/accessible-icon-buttons/">accessible button.</a>',
-      BTN_ROLE_IN_NAME: 'Do not include the word "button" in the name of a button. Screen readers already convey the role of an element in addition to its name. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>',
-      LABEL_IN_NAME: "The visible text for this element appears to be different than the accessible name, which may cause confusion for assistive technologies users. Please review: <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
-      LINK_MAYBE_BUTTON: `This link has an invalid target. Although the accessible name or its attributes suggests that this might not be a link at all, and instead controls some scripted behaviour on the page. To fix, replace the link with an <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">accessible button</a>, or correct the link's destination. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tip!</strong> Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.`,
-      POTENTIAL_UI_ELEMENTS: [
-        "menu",
-        "close",
-        "toggle",
-        "open",
-        "expand",
-        "collapse",
-        "next",
-        "prev",
-        "previous",
-        "play",
-        "pause",
-        "submenu",
-        "show",
-        "hide",
-        "dropdown",
-        "back",
-        "forward",
-        "skip",
-        "submit",
-        "cancel",
-        "save",
-        "edit",
-        "delete",
-        "remove",
-        "search",
-        "filter",
-        "sort",
-        "stop",
-        "mute",
-        "unmute",
-        "fullscreen",
-        "minimize",
-        "maximize",
-        "slide",
-        "modal"
-      ],
-      // Tables
-      TABLES_MISSING_HEADINGS: 'Missing table headers! Accessible tables need HTML markup that indicates header cells and data cells which defines their relationship. This information provides context to people who use assistive technology. Tables should be used for tabular data only. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
-      TABLES_SEMANTIC_HEADING: 'Semantic headings such as Heading 2 or Heading 3 should only be used for sections of content; <strong>not</strong> in HTML tables. Indicate table headings using the <code>&lt;th&gt;</code> element instead. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
-      TABLES_EMPTY_HEADING: 'Empty table header found! Table headers should <strong>never</strong> be empty. It is important to designate row and/or column headers to convey their relationship. This information provides context to people who use assistive technology. Please keep in mind that tables should be used for tabular data only. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
-      TABLES_INVALID_HEADERS_REF: 'This table is attempting to label a specific data cell with a specific header cell, but the header ID cannot be found. Make sure each <code>headers</code> attribute matches the ID of a header cell in the same table. <hr> <strong {B}>Headers</strong> <code>%(VALUE)</code> <hr> <strong>Tip!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Using manual ID references</a> to associate data cells with header cells is complicated and fragile. When possible, break complex data into smaller tables with simple header rows and columns.',
-      // Contrast
-      CONTRAST_NORMAL: "Normal-sized text should have at least a %(RATIO) ratio.",
-      CONTRAST_LARGE: "Large-sized text should have at least a %(RATIO) ratio.",
-      CONTRAST_ERROR: "Text does not have enough contrast with the background, making it harder to read.",
-      CONTRAST_WARNING: "The contrast of this text is unknown and needs to be manually reviewed. Ensure the text and the background have strong contrasting colors.",
-      CONTRAST_ERROR_GRAPHIC: "Graphic does not have enough contrast with the background, making it harder to see.",
-      CONTRAST_WARNING_GRAPHIC: "The contrast of this graphic is unknown and needs to be manually reviewed.",
-      CONTRAST_TIP_GRAPHIC: "Graphics and user interface elements should have at least a 3:1 ratio.",
-      CONTRAST_OPACITY: "Increase the opacity for better visibility.",
-      CONTRAST_APCA: "This is not enough contrast for any size text. Consider using this color and text size combination?",
-      CONTRAST_COLOR: "Consider using this color instead?",
-      CONTRAST_SIZE: "Consider making the text size larger for this color combination?",
-      CONTRAST_PLACEHOLDER: "Placeholder text within this input does not have enough contrast with the background, making it harder to read.",
-      CONTRAST_PLACEHOLDER_UNSUPPORTED: "The contrast of this placeholder text is unknown and needs to be manually reviewed. Ensure the text and the background have strong contrasting colours.",
-      CONTRAST_INPUT: "Text within this input does not have enough contrast with the background, making it harder to read.",
-      CONTRAST: "Contrast",
-      UNKNOWN: "Unknown",
-      FG: "Foreground",
-      BG: "Background",
-      NO_SUGGESTION: "No accessible combination can be found by changing the text color. Try changing the background color.",
-      // Language of parts
-      PAGE_LANG_CONFIDENCE: 'More than half of the text on this page appears to be %(LIKELY_LANG), but the declared page language is %(PAGE_LANG). Consider updating the <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declared page language</a> to match the content.',
-      LANG_OF_PARTS: "The page language was declared as %(PAGE_LANG), but this content appears to be %(LIKELY_LANG). Ensure the content is tagged appropriately. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
-      LANG_MISMATCH: "This content appears to be %(DETECTED_LANG), however, it was tagged as %(WRONG_LANG). <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
-      LANG_OF_PARTS_ALT: "This alt text appears to be %(LIKELY_LANG), but the page language was declared as %(PAGE_LANG). Ensure the alt text is in the same language as the rest of the page. <hr> {ALT} <strong {C}>%(ALT)</strong>",
-      LANG_TIP: '<hr><strong>Tip!</strong> Screen readers pronounce words using language tags. Pronouncing a language with a mismatched language pack produces unintelligible speech. Learn more about <a href="https://www.w3.org/WAI/WCAG22/Understanding/language-of-parts.html">language of parts.</a>',
-      LANG_UNSUPPORTED: "Language-related accessibility checks were skipped because automatic language detection isn’t supported in this browser."
+      ...ui,
+      ...ruleset,
+      ...tooltip
     }
   };
   const testNames = {
@@ -8563,6 +8570,7 @@ ${this.error.stack}
     ALT_UNPRONOUNCEABLE: "This alt text is unpronounceable",
     ARIA_INPUT_FIELD_NAME: "This custom input field is missing a label",
     BTN_EMPTY: "Button is missing an accessible label",
+    BTN_UNPRONOUNCEABLE: "This button is unpronounceable",
     BTN_EMPTY_LABELLEDBY: "Button has an invalid ARIA label",
     BTN_ROLE_IN_NAME: 'Button name repeats the word "button"',
     CONTRAST_ERROR: "Text does not have enough contrast to be easily legible",
@@ -8586,6 +8594,7 @@ ${this.error.stack}
     HEADING_LONG: "Can this heading be shorter?",
     HEADING_MISSING_ONE: "This page is missing a Heading 1",
     HEADING_SKIPPED_LEVEL: "This heading is tagged at the wrong level",
+    HEADING_UNPRONOUNCEABLE: "This heading is unpronounceable",
     HIDDEN_FOCUSABLE: "This element cannot be described by screen readers",
     IMAGE_ALT_TOO_LONG: "Can this alt text be shorter?",
     IMAGE_DECORATIVE: "Is this image actually meaningless?",
@@ -9173,6 +9182,8 @@ ${this.error.stack}
         maxLength: 170
       },
       HEADING_MISSING_ONE: false,
+      HEADING_UNPRONOUNCEABLE: true,
+      // @todo
       // Sa11y: Image checks
       MISSING_ALT_LINK: true,
       MISSING_ALT_LINK_HAS_TEXT: true,
@@ -9325,6 +9336,8 @@ ${this.error.stack}
       BTN_EMPTY: false,
       BTN_EMPTY_LABELLEDBY: false,
       BTN_ROLE_IN_NAME: false,
+      BTN_UNPRONOUNCEABLE: true,
+      // @todo
       // Sa11y: Contrast checks
       // Todo pro.
       CONTRAST_WARNING: false,
@@ -9552,9 +9565,9 @@ ${this.error.stack}
   class Ed11y {
     constructor(userOptions) {
       if (CSS.supports("selector(:has(body))")) {
+        customElements.define("sa11y-console-error", ConsoleErrors);
         initialize(userOptions).catch((error) => {
           console.error("Editoria11y init failed:", error);
-          customElements.define("ed11y-console-error", ConsoleErrors);
           const consoleErrors = new ConsoleErrors(error);
           document?.querySelector("*").appendChild(consoleErrors);
           if (consoleErrors?.shadowRoot?.querySelector("*")) {

@@ -39,6 +39,10 @@
       "title": "Button name repeats the word \"button\"",
       "deferred": false
     },
+    "BTN_UNPRONOUNCEABLE": {
+      "title": "This button is unpronounceable",
+      "deferred": false
+    },
     "CONTRAST_ERROR": {
       "title": "Text does not have enough contrast to be easily legible",
       "deferred": true
@@ -125,6 +129,10 @@
     },
     "HEADING_SKIPPED_LEVEL": {
       "title": "This heading is tagged at the wrong level",
+      "deferred": false
+    },
+    "HEADING_UNPRONOUNCEABLE": {
+      "title": "This heading is unpronounceable",
       "deferred": false
     },
     "HIDDEN_FOCUSABLE": {

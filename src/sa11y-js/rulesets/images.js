@@ -98,9 +98,9 @@ export default function checkImages() {
     // Process link text exclusions.
     const linkText = link
       ? Utils.fnIgnore(link, Constants.Exclusions.LinkSpan).textContent.replace(
-          Constants.Global.linkIgnoreStringPattern,
-          '',
-        )
+        Constants.Global.linkIgnoreStringPattern,
+        '',
+      )
       : '';
     const linkTextLength = Utils.removeWhitespace(linkText).length;
 
@@ -134,7 +134,10 @@ export default function checkImages() {
         key = hasAria + src;
       }
     }
-    if (test && logResult({ test: test, dismiss: key })) return;
+    if (test) {
+      logResult({ test: test, dismiss: key });
+      return;
+    }
 
     // Continue if alt is presenting.
     const altText = Utils.removeWhitespace(alt);
@@ -158,6 +161,7 @@ export default function checkImages() {
             : 'IMAGE_DECORATIVE_CAROUSEL';
         type = 'warning';
       } else if (link) {
+        if (link.getAttribute('aria-label') || link.getAttribute('aria-labelledby')) return;
         test = linkTextLength === 0 ? 'LINK_IMAGE_NO_ALT_TEXT' : 'LINK_IMAGE_TEXT';
         type = linkTextLength === 0 ? 'error' : 'good';
         key = src + linkTextLength;
@@ -181,7 +185,7 @@ export default function checkImages() {
     }
 
     // Unpronounceable alt text.
-    if (alt.replace(/"|'|\?|\.|-|\s+/g, '') === '' && linkTextLength === 0) {
+    if (!Constants.Global.unpronounceablePattern.test(alt) && linkTextLength === 0) {
       logResult({
         test: link ? 'LINK_ALT_UNPRONOUNCEABLE' : 'ALT_UNPRONOUNCEABLE',
         args: [altText],
@@ -219,11 +223,13 @@ export default function checkImages() {
     const badAltTest = link ? 'LINK_ALT_MAYBE_BAD' : 'ALT_MAYBE_BAD';
     const minLength = State.option.checks[badAltTest]?.minLength || 15;
     const isTooLongSingleWord = new RegExp(`^\\S{${minLength},}$`);
-    const containsNonAlphaChar = /[^\p{L}\-,.!? ]/u.test(altText);
+    const containsNonAlphaChar = /[^\p{L}\p{M}\-,.!? «»—]/u.test(altText);
     const isBadFilename = new RegExp(`^(?=[^_-]*([_-][^_-]*){3,})\\S{${minLength},}$`).test(
       altText,
     );
-    if (isBadFilename || (isTooLongSingleWord.test(alt) && containsNonAlphaChar)) {
+    const containsCJK =
+      /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(altText);
+    if (isBadFilename || (!containsCJK && isTooLongSingleWord.test(alt) && containsNonAlphaChar)) {
       logResult({
         test: badAltTest,
         args: [altText],
@@ -305,6 +311,10 @@ export default function checkImages() {
       logResult({
         test: 'DUPLICATE_TITLE',
         type: 'warning',
+        content: State.option.checks.DUPLICATE_TITLE.content
+          ? Lang.sprintf(State.option.checks.DUPLICATE_TITLE.content, altText)
+          : Lang.sprintf(`${Lang._('DUPLICATE_TITLE')}<hr>${Lang._('IMAGE_PASS')}`, altText),
+        args: [altText],
         inline: true,
         dismiss: alt,
       });

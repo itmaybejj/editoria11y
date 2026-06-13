@@ -14,9 +14,9 @@ import ConsoleErrors from './elements/ed11y-console-error.js';
 class Ed11y {
   constructor(userOptions) {
     if (CSS.supports('selector(:has(body))')) {
+      customElements.define('sa11y-console-error', ConsoleErrors);
       initialize(userOptions).catch((error) => {
         console.error('Editoria11y init failed:', error);
-        customElements.define('ed11y-console-error', ConsoleErrors);
         const consoleErrors = new ConsoleErrors(error);
         document?.querySelector('*').appendChild(consoleErrors);
         if (consoleErrors?.shadowRoot?.querySelector('*')) {

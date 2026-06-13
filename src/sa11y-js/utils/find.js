@@ -15,7 +15,7 @@ export default function find(selector, desiredRoot, exclude) {
     root.push(document.body);
     if (State.option.fixedRoots) {
       // fixedRoots is an array of { fixedRoot, framePositioner } wrappers;
-      // querySelectorAll runs against the raw element below.
+      // push the underlying elements, not the wrapper objects.
       root.push(State.option.fixedRoots.map((entry) => entry?.fixedRoot).filter(Boolean));
     }
   } else if (desiredRoot === 'root') {

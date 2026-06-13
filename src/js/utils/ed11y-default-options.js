@@ -309,6 +309,7 @@ export const ed11yDefaultOptions = {
       maxLength: 170,
     },
     HEADING_MISSING_ONE: false,
+    HEADING_UNPRONOUNCEABLE: true, // @todo
 
     // Sa11y: Image checks
     MISSING_ALT_LINK: true,
@@ -450,6 +451,7 @@ export const ed11yDefaultOptions = {
     BTN_EMPTY: false,
     BTN_EMPTY_LABELLEDBY: false,
     BTN_ROLE_IN_NAME: false,
+    BTN_UNPRONOUNCEABLE: true, // @todo
 
     // Sa11y: Contrast checks
     // Todo pro.

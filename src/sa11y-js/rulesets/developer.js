@@ -172,7 +172,7 @@ export default function checkDeveloper() {
       $el.querySelector(':scope [aria-labelledby]') || $el.getAttribute('aria-labelledby');
 
     // Button doesn't have an accessible name.
-    if (buttonText.length === 0) {
+    if (buttonText.length === 0 || !Constants.Global.unpronounceablePattern.test(buttonText)) {
       if (hasAriaLabelledby) {
         pushResult({
           test: 'BTN_EMPTY_LABELLEDBY',
@@ -205,7 +205,6 @@ export default function checkDeveloper() {
         dismiss: dismissBase + accName,
         developer: true,
       });
-      return;
     }
 
     // Has "button" in the accessible name.

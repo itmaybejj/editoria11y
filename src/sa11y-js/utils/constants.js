@@ -33,13 +33,11 @@ const Constants = (function myConstants() {
       Global.html.getAttribute('dir')?.trim()?.toLowerCase() === 'rtl' ? 'rtl' : 'ltr';
 
     // Check for document types.
-    const documentSources = State.option.checks.QA_DOCUMENT.sources;
-    
     if (State.option.checks.QA_DOCUMENT !== false) {
       const defaultDocumentSources =
-      'a[href$=".doc"], a[href$=".docx"], a[href*=".doc?"], a[href*=".docx?"], a[href$=".ppt"], a[href$=".pptx"], a[href*=".ppt?"], a[href*=".pptx?"], a[href^="https://drive.google.com/file"], a[href^="https://docs.google."], a[href^="https://sway."]';
+        'a[href$=".doc"], a[href$=".docx"], a[href*=".doc?"], a[href*=".docx?"], a[href$=".ppt"], a[href$=".pptx"], a[href*=".ppt?"], a[href*=".pptx?"], a[href^="https://drive.google.com/file"], a[href^="https://docs.google."], a[href^="https://sway."]';
       Global.documentSources = State.option.checks.QA_DOCUMENT.sources
-        ? `${defaultDocumentSources}, ${documentSources}`
+        ? `${defaultDocumentSources}, ${State.option.checks.QA_DOCUMENT.sources}`
         : defaultDocumentSources;
     } else {
       Global.documentSources = false;
@@ -48,11 +46,10 @@ const Constants = (function myConstants() {
     if (State.option.checks.QA_PDF !== false) {
       Global.pdfSources = State.option.checks.QA_PDF.sources
         ? State.option.checks.QA_PDF.sources
-        : 'a[href$=".pdf"], a[href*=".pdf?"]';
+        : 'a[href$=".pdf"], a[href*=".pdf?"], a[href*="/pdf/"], a[href*="/PDF/"]';
     } else {
       Global.pdfSources = false;
     }
-    
 
     /* ********************** */
     /*  Alt text module       */
@@ -60,9 +57,9 @@ const Constants = (function myConstants() {
     // Generate suspicious alt stop words list.
     Global.susAltWords = State.option.susAltStopWords
       ? State.option.susAltStopWords
-          .split(',')
-          .map((word) => word.trim().toLowerCase())
-          .filter(Boolean)
+        .split(',')
+        .map((word) => word.trim().toLowerCase())
+        .filter(Boolean)
       : Lang._('SUS_ALT_STOPWORDS');
 
     // Generate placeholder stop words set.
@@ -71,6 +68,9 @@ const Constants = (function myConstants() {
     // Generate placeholder stop words that are that the START of an alt string.
     Global.altPlaceholderPattern = generateRegexString(State.option.altPlaceholder, true);
     Global.linkIgnoreStringPattern = generateRegexString(State.option.linkIgnoreStrings);
+
+    // Unpronounceable characters.
+    Global.unpronounceablePattern = /[\p{L}\p{N}\p{Extended_Pictographic}]/u;
 
     // Generate supplied placeholder stop words.
     Global.extraPlaceholderStopWords = State.option.extraPlaceholderStopWords
@@ -177,8 +177,8 @@ const Constants = (function myConstants() {
     // areaToCheck / Readability as plain element arrays, so unwrap.
     if (fixedRoots) {
       const rootElements = fixedRoots.map((entry) => entry?.fixedRoot).filter(Boolean);
-      Root.areaToCheck = rootElements;
-      Root.Readability = rootElements;
+      Constants.Root.areaToCheck = rootElements;
+      Constants.Root.Readability = rootElements;
       return;
     }
 
@@ -419,9 +419,9 @@ const Constants = (function myConstants() {
       'base',
       'datalist',
       'datalist *',
-
       ...exclusions,
     ];
+
     if (State.option.contrastIgnore) {
       Exclusions.Contrast = State.option.contrastIgnore
         .split(',')
