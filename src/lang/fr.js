@@ -284,7 +284,7 @@ export const tips = {
 
 	META_SCALABLE: `<p>Cette balise meta empêche les utilisateurs d’agrandir le texte.</p><p>${why.fix}Permettez un zoom complet en supprimant ou ajustant ce paramètre.</p>`,
 
-	META_TITLE: `<p>${why.fix}Ajoutez une balise <code><title></code> dans l’élément <code>head</code> de la page.</p><div class="why"><p>Un <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">titre court et unique</a> est essentiel :</p><ul><li>Les moteurs de recherche l’utilisent pour les résultats.</li><li>Les navigateurs l’utilisent pour les onglets.</li><li>Les lecteurs d’écran l’annoncent lors des changements d’onglet.</li></ul><p>Sans titre, les utilisateurs n’obtiennent qu’une URL brute.</p></div>`,
+	META_TITLE: `<p>${why.fix}Ajoutez une balise <code>&lt;title&gt;</code> dans l’élément <code>head</code> de la page.</p><div class="why"><p>Un <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">titre court et unique</a> est essentiel :</p><ul><li>Les moteurs de recherche l’utilisent pour les résultats.</li><li>Les navigateurs l’utilisent pour les onglets.</li><li>Les lecteurs d’écran l’annoncent lors des changements d’onglet.</li></ul><p>Sans titre, les utilisateurs n’obtiennent qu’une URL brute.</p></div>`,
 
 	MISSING_ALT: `<p>Lorsqu’un lecteur d’écran rencontre une image sans attribut alt, il tente de prononcer l’URL du fichier image, souvent lettre par lettre.</p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p>${why.images}`,
 

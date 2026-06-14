@@ -128,7 +128,41 @@ Run `node -c [filepath]` when done to verify syntax.
 
 1. Run `npm run build` to verify everything compiles
 2. Fix any syntax errors (most likely: unescaped apostrophes or curly quotes)
-3. Update each translation's commit in `TRANSLATION_MANIFEST.json` to current HEAD
+3. **Run the markup linter** (see below) and fix anything it flags
+4. Update each translation's commit in `TRANSLATION_MANIFEST.json` to current HEAD
+
+### Markup validation (REQUIRED after any translation change)
+
+```bash
+node .agents/skills/check-translations/check-markup.mjs        # all locales
+node .agents/skills/check-translations/check-markup.mjs src/lang/fr.js  # one file
+```
+
+This linter renders each locale's tooltip strings (expanding `${why.*}`) and reports
+**unbalanced/misnested HTML tags** and **bare (unwrapped) URLs**. It imports each file in
+its own child process so the shared Sa11y-state mutations between `en`/`en-us`/`en-ca`/`en-gb`
+can't cross-contaminate. Exit code is non-zero on any finding (CI-friendly). It is NOT run by
+`npm run build`, so run it explicitly.
+
+Two recurring corruption classes it catches (both seen in the machine-translated bases — they
+do NOT come from this skill's diff-driven Edits, but a sync is the natural time to find them):
+
+- **Stripped anchors:** an `<a href="URL">` opening tag is lost, leaving the bare `URL` glued
+  to the (translated) link text and an orphan `</a>`. **Fix:** the bare URL is the English
+  canonical `href` as a prefix, so re-wrap it: replace the canonical URL (when NOT preceded by
+  `href="`) with `<a href="CANONICAL">`. Collect canonicals from `src/lang/baseAll.js` +
+  `src/sa11y-lang/en.js`; process longest-first to avoid prefix collisions
+  (e.g. `…/link_text` vs `…/link_text#alt_link`). Watch two edge cases the bulk pass misses and
+  must be hand-fixed: a bare URL sitting right after a literal text quote (`"`), and a URL whose
+  final path segment was itself machine-translated (e.g. pt-br turned `…/Elements/title` into
+  `…/Elements/título` and glued the link text on).
+- **Unescaped literal tags:** `<code><title></code>` / `<code><head></code>` should be
+  `<code>&lt;title&gt;</code>` etc. — the raw `<title>`/`<head>` open real elements that never
+  close. **Fix:** escape them (`<title>` → `&lt;title&gt;`).
+
+Also watch for stray/misnested `<p>`/`<span>` (e.g. a string that starts with text then `</p>`
+needs a leading `<p>`; a garbled `<span style="</span>` should be removed). Reconstruct the
+intended structure from a clean sibling locale (de/es) or the English source.
 
 ### Agent output-budget limits (relevant for large diffs)
 

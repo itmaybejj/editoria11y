@@ -510,7 +510,7 @@ const tips = {
   META_MAX: `<p>此 meta 标签限制了用户放大文本的能力。</p><p>${why.fix}请移除或调整该限制，以允许完全缩放。</p>`,
   META_REFRESH: `<p>不应通过 meta 标签自动刷新页面，这会在无提示的情况下打断用户，令其丢失阅读位置，并可能重置表单。</p><p>${why.fix}若需刷新内容，请使用 AJAX 在原位更新，或用 JavaScript 触发刷新并先提示用户，允许延迟。</p>`,
   META_SCALABLE: `<p>此 meta 标签阻止用户放大页面。</p><p>${why.fix}移除或调整以允许完全缩放。</p>`,
-  META_TITLE: `<p>${why.fix}请在页面的 <code>head</code> 中添加 <code><title></code> 标签。</p><div class="why"><p>许多体验依赖<a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">简短且唯一的标题</a>：</p><ul><li>搜索引擎用它作为结果标题。</li><li>浏览器用它作为标签页标题。</li><li>读屏软件在切换标签页时朗读它。</li></ul><p>没有页面标题时，人们只能看到/听到原始 URL。</p></div>`,
+  META_TITLE: `<p>${why.fix}请在页面的 <code>head</code> 中添加 <code>&lt;title&gt;</code> 标签。</p><div class="why"><p>许多体验依赖<a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">简短且唯一的标题</a>：</p><ul><li>搜索引擎用它作为结果标题。</li><li>浏览器用它作为标签页标题。</li><li>读屏软件在切换标签页时朗读它。</li></ul><p>没有页面标题时，人们只能看到/听到原始 URL。</p></div>`,
   MISSING_ALT: `<p>当读屏软件遇到没有 alt 属性的图片时，会尝试逐字朗读图片文件的 URL。</p><p>${why.fix}请在当前语境中简要描述此图像的含义。</p>${why.images}`,
   MISSING_ALT_LINK: `<p>当链接图片没有 alt 属性时，读屏软件会尝试朗读图片 URL，这对链接图片尤为糟糕。</p><p>${why.fix}请添加与链接目标一致的替代文本。</p>${why.imageLinks}`,
   MISSING_ALT_LINK_HAS_TEXT: `<p>该图片位于带文本的链接中。若可见文本足以描述链接目标，请为图片添加 alt="" 以使之被忽略；否则，请添加有助于描述链接目标或用途的替代文本。</p>${why.imageLinks}`,
