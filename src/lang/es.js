@@ -8,6 +8,7 @@ const testNames = {
 	ALT_PLACEHOLDER: 'Este texto alternativo podría ser un marcador de posición',
 	ALT_UNPRONOUNCEABLE: 'Este texto alternativo es impronunciable',
 	BTN_EMPTY: 'El botón no tiene una etiqueta accesible',
+	BTN_UNPRONOUNCEABLE: 'Este botón no se puede pronunciar',
 	BTN_EMPTY_LABELLEDBY: 'El botón tiene una etiqueta ARIA no válida',
 	BTN_ROLE_IN_NAME: 'El nombre del botón repite la palabra «botón»',
 	CONTRAST_ERROR: 'El texto no tiene suficiente contraste para ser fácilmente legible',
@@ -26,6 +27,7 @@ const testNames = {
 	EMBED_UNFOCUSABLE: 'Un frame con tabindex="‑1" no será accesible por teclado.',
 	EMBED_VIDEO: '¿Este video está correctamente subtitulado?',
 	HEADING_EMPTY: 'Este encabezado no tiene texto',
+	HEADING_UNPRONOUNCEABLE: 'Este encabezado no se puede pronunciar',
 	HEADING_EMPTY_WITH_IMAGE: 'Esta imagen se usa como encabezado, por lo que necesita texto alternativo',
 	HEADING_FIRST: 'El primer encabezado en esta página es un subtítulo',
 	HEADING_LONG: '¿Puede este encabezado ser más corto?',
@@ -142,6 +144,7 @@ const tips = {
 	BTN_TIP: `${why.buttons}`,
 
 	BTN_ROLE_IN_NAME: `<p><strong>Etiqueta para lectores de pantalla:</strong> <i>%(TEXT)</i></p><p>Los lectores de pantalla usan la palabra «botón» para anunciar que están describiendo un botón, por lo que esta palabra es repetitiva.</p><p>${why.fix}La etiqueta del botón debe coincidir con su acción. Si la etiqueta visible es un ícono en lugar de texto, etiquete el botón con el significado del ícono, por ejemplo: «Reproducir», «Buscar» o «Menú».</p>`,
+	BTN_UNPRONOUNCEABLE: `<p><strong>Texto del botón:</strong> <i>%(TEXT)</i></p><p>${why.fix}Añada texto, un título o un aria-label que describa su destino.</p><div class="why"><p>Consejo: Los lectores de pantalla no pueden describir botones que solo contengan espacios o símbolos. Quedan silenciosos ("Botón, [...pausa incómoda donde debería estar la etiqueta del botón...]"), o leen el nombre del símbolo.</p></div>`,
 
 	CONTRAST_WARNING: 'Una imagen de fondo o un degradado impide a este verificador determinar con seguridad el color detrás de este texto. Use el selector de color a continuación para verificar manualmente.',
 
@@ -162,6 +165,7 @@ const tips = {
 	EMBED_VIDEO: `<p>Este verificador no puede «ver» si los videos tienen subtítulos, ni determinar si alguien los ha revisado, por lo que se necesita una verificación manual.</p><p>${why.fix}Asegúrese de que haya disponibles <a href="https://www.w3.org/WAI/media/av/captions/">subtítulos precisos («CC»)</a>, y verifique que los hablantes y los efectos de sonido significativos estén correctamente identificados.</p>`,
 
 	HEADING_EMPTY: `<p>Los encabezados vacíos crean huecos confusos en el esquema de la página.</p><p>${why.fix}Agregue texto a este encabezado o elimine esta línea vacía.</p>${why.headings}`,
+	HEADING_UNPRONOUNCEABLE: `<p>Los encabezados vacíos crean huecos confusos en el esquema de la página.</p><p>${why.fix}Agregue texto legible a este encabezado, o conviértalo en un párrafo.</p>${why.headings}`,
 
 	HEADING_EMPTY_WITH_IMAGE: `<p>Los encabezados vacíos crean huecos confusos en el esquema de la página.</p><p>${why.fix}Si esto no es un encabezado, cambie su formato de <code>Encabezado %(level)</code> a <code>Párrafo</code>. De lo contrario, plasme el significado de la imagen en su alt.</p>${why.headings}`,
 
@@ -220,7 +224,7 @@ const tips = {
 
 	LINK_FILE_EXT: `<p><strong>Texto del enlace:</strong> <i>%(TEXT)</i></p><p>Este enlace apunta a un archivo descargable (PDF, MP3, Zip, Word, etc.) sin advertencia.</p><p>${why.fix}Use texto o un ícono para <a href="https://itmaybejj.github.io/linkpurpose/">indicar el tipo de archivo</a> en el propio enlace.</p><p class="why">Para archivos grandes, considere incluir el tamaño. Ejemplo: "Informe anual (PDF, 3 MB)"</p>`,
 
-	LINK_IDENTICAL_NAME: `<p>Texto del enlace: <i>%(TEXT)</i></p><p>${why.fix}Reescriba los enlaces que llevan a diferentes destinos usando los títulos únicos de cada destino.</p>${why.links}`,
+	LINK_IDENTICAL_NAME: `<p><strong>Texto del enlace:</strong> <i>%(TEXT)</i></p><p>${why.fix}Reescriba los enlaces que llevan a diferentes destinos usando los títulos únicos de cada destino.</p>${why.links}`,
 
 	LINK_IMAGE_ALT: `<p><strong>Texto alternativo:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Use el título del destino del enlace como texto alternativo para las imágenes vinculadas.</p>${why.imageLinks}`,
 

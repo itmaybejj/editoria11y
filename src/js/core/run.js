@@ -30,6 +30,7 @@ import {
   alignPanel,
   checkEditableIntersects,
   closestScrollable,
+  updateFixedRootPositions,
 } from '../utils/align.js';
 import checkEmbeddedContent from '../../sa11y-js/rulesets/embedded-content';
 import Constants from '../../sa11y-js/utils/constants';
@@ -471,19 +472,6 @@ export function dismissOne(dismissalType, test, dismissalKey) {
   window.setTimeout(() => {
     document.dispatchEvent(ed11yDismissalUpdate);
   }, 100);
-}
-
-// Refresh cached iframe offsets used by positionHighlight. Called by both
-// editableHighlighter (on show) and alignHighlights (on scroll/resize) so
-// the positioning formula always reads fresh frame rects.
-function updateFixedRootPositions() {
-  if (!State.option.fixedRoots) return;
-  UI.positionedFrames.length = 0;
-  State.option.fixedRoots.forEach((root) => {
-    if (root.framePositioner) {
-      UI.positionedFrames.push(root.framePositioner.getBoundingClientRect());
-    }
-  });
 }
 
 // Size and position a highlight element around `target`, accounting for
@@ -1134,7 +1122,7 @@ export function intersectionObservers() {
   // scrolling, and selection changes inside the embedded canvas.
   if (Array.isArray(State.option.fixedRoots)) {
     State.option.fixedRoots.forEach((root) => {
-      const foreignDoc = root?.fixedRoot?.ownerDocument;
+      const foreignDoc = root?.ownerDocument;
       if (foreignDoc && foreignDoc !== document) {
         scrollWatch(foreignDoc);
         attachIntegrationListeners(foreignDoc);
@@ -1430,11 +1418,12 @@ export function checkAll() {
 
   UI.roots = [];
   if (State.option.fixedRoots) {
-    // fixedRoots is an array of { fixedRoot, framePositioner } wrappers.
-    // Downstream code (utils.js stamping data-ed11y-root, startObserver,
-    // closest('[data-ed11y-root]')) expects raw elements — unwrap here.
+    // fixedRoots is an array of raw root elements (framePositioners is the
+    // parallel array of their frame wrappers). Downstream code stamps
+    // data-ed11y-root, runs startObserver, and uses closest('[data-ed11y-root]')
+    // directly on these elements.
     State.option.fixedRoots.forEach((root) => {
-      if (root?.fixedRoot) UI.roots.push(root.fixedRoot);
+      UI.roots.push(root);
     });
   } else {
     UI.roots = [...document.querySelectorAll(`:is(${State.option.checkRoot})`)];
@@ -1610,15 +1599,19 @@ export function refresh() {
 //
 // Pass an empty array to clear fixedRoots — the library falls back to scanning
 // State.option.checkRoot against the outer document.
-export function setFixedRoots(newFixedRoots, newEditableContent) {
+export function setFixedRoots(newFixedRoots, newFramePositioners, newEditableContent) {
   State.option.fixedRoots =
     Array.isArray(newFixedRoots) && newFixedRoots.length > 0 ? newFixedRoots : false;
+  State.option.framePositioners =
+    Array.isArray(newFramePositioners) && newFramePositioners.length > 0
+      ? newFramePositioners
+      : false;
   if (typeof newEditableContent !== 'undefined') {
     State.option.editableContent = newEditableContent;
   }
   if (Array.isArray(newFixedRoots)) {
     newFixedRoots.forEach((root) => {
-      const foreignDoc = root?.fixedRoot?.ownerDocument;
+      const foreignDoc = root?.ownerDocument;
       if (foreignDoc && foreignDoc !== document) {
         attachIntegrationListeners(foreignDoc);
       }

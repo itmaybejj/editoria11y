@@ -33,13 +33,9 @@ export function ed11yInitializeRoot(desiredRoot, desiredReadabilityRoot, fixedRo
   Constants.Root.areaToCheck = [];
   Constants.Root.Readability = [];
 
-  // If fixed roots provided. fixedRoots is an array of
-  // { fixedRoot, framePositioner } wrappers; downstream code treats
-  // areaToCheck / Readability as plain element arrays, so unwrap.
   if (fixedRoots) {
-    const rootElements = fixedRoots.map((entry) => entry?.fixedRoot).filter(Boolean);
-    Constants.Root.areaToCheck = rootElements;
-    Constants.Root.Readability = rootElements;
+    Constants.Root.areaToCheck = fixedRoots;
+    Constants.Root.Readability = fixedRoots;
     return;
   }
 

@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.1-613
+			* @version 3.0.1-614
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -61,6 +61,7 @@ const defaultOptions = {
   // Target area to check
   checkRoot: "body",
   fixedRoots: false,
+  framePositioners: false,
   // Exclusions
   containerIgnore: ".sa11y-ignore",
   contrastIgnore: ".sr-only",
@@ -495,9 +496,8 @@ const Constants = /* @__PURE__ */ (function myConstants() {
     Root.areaToCheck = [];
     Root.Readability = [];
     if (fixedRoots) {
-      const rootElements = fixedRoots.map((entry) => entry?.fixedRoot).filter(Boolean);
-      Constants.Root.areaToCheck = rootElements;
-      Constants.Root.Readability = rootElements;
+      Root.areaToCheck = fixedRoots;
+      Root.Readability = fixedRoots;
       return;
     }
     try {
@@ -721,7 +721,7 @@ function find(selector, desiredRoot, exclude) {
   if (desiredRoot === "document") {
     root.push(document.body);
     if (State.option.fixedRoots) {
-      root.push(State.option.fixedRoots.map((entry) => entry?.fixedRoot).filter(Boolean));
+      root.push(State.option.fixedRoots);
     }
   } else if (desiredRoot === "root") {
     root.push(Constants.Root.areaToCheck);
@@ -802,7 +802,7 @@ function isPresentational($el) {
   return roleAttr.toLowerCase().split(/\s+/).some((role) => role === "presentation" || role === "none");
 }
 function isNegativeTabindex($el) {
-  return $el && $el.tabIndex < 0;
+  return $el?.hasAttribute("tabindex") && $el.tabIndex < 0;
 }
 function isHiddenAndUnfocusable($el) {
   return (isPresentational($el) || isAriaHidden($el)) && isNegativeTabindex($el);
@@ -820,8 +820,8 @@ function isElementVisuallyHiddenOrHidden(element) {
   return isElementHidden(element);
 }
 function stripAllSpecialCharacters(string) {
-  if (!string) return "";
-  return string.replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
+  if (typeof string !== "string" && typeof string !== "number") return "";
+  return String(string).replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
 }
 const invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
 const htmlEntitiesRegex = /&#(\w+)(^\w|;)?/g;
@@ -1105,15 +1105,17 @@ function getCachedClosest(element, selector) {
   }
 }
 function removeWhitespace(string) {
-  if (!string) return "";
-  return string.replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+  if (typeof string !== "string" && typeof string !== "number") return "";
+  return String(string).replace(/\s+/g, " ").trim();
 }
 function normalizeString(string) {
-  return removeWhitespace(string.replace(/[\u0000-\u001F\u007F-\u009F]/g, ""));
+  if (typeof string !== "string" && typeof string !== "number") return "";
+  return removeWhitespace(String(string).replace(/[\u0000-\u001F\u007F-\u009F]/g, ""));
 }
 function truncateString(string, maxLength) {
-  const truncatedString = string.substring(0, maxLength).trimEnd();
-  return string.length > maxLength ? `${truncatedString}...` : string;
+  if (typeof string !== "string" && typeof string !== "number") return "";
+  const truncatedString = String(string).substring(0, maxLength).trimEnd();
+  return string.length > maxLength ? `${truncatedString}...` : String(string);
 }
 const store = {
   getItem(key) {
@@ -1585,9 +1587,9 @@ const Elements = (function myElements() {
     ]);
     for (let i = 0; i < Found.Everything.length; i++) {
       const $el = Found.Everything[i];
-      if (!($el instanceof Element)) continue;
-      const tag = $el.tagName;
-      const role = $el.getAttribute("role")?.trim().toLowerCase();
+      if ($el?.nodeType !== 1) continue;
+      const tag = $el?.tagName;
+      const role = $el?.getAttribute("role")?.trim().toLowerCase();
       let handledByRole = false;
       if (role) {
         if (imageRoles.has(role) && !Constants.Exclusions.Images.some((s) => $el.matches(s))) {
@@ -1657,6 +1659,7 @@ const Elements = (function myElements() {
           case "IFRAME":
           case "AUDIO":
           case "VIDEO":
+          case "EMBED":
             Found.iframes.push($el);
             break;
           case "svg":
@@ -1819,7 +1822,7 @@ function findShadowComponents(option) {
     });
   }
 }
-const version = "3.0.1-613";
+const version = "3.0.1-614";
 const sprite = {
   alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
   close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -2165,9 +2168,8 @@ function ed11yInitializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
   Constants.Root.areaToCheck = [];
   Constants.Root.Readability = [];
   if (fixedRoots) {
-    const rootElements = fixedRoots.map((entry) => entry?.fixedRoot).filter(Boolean);
-    Constants.Root.areaToCheck = rootElements;
-    Constants.Root.Readability = rootElements;
+    Constants.Root.areaToCheck = fixedRoots;
+    Constants.Root.Readability = fixedRoots;
     return;
   }
   try {
@@ -3018,9 +3020,18 @@ const containsAltTextStopWords = (alt) => {
     const match = altLowerCase.match(/\b\d{2,6}\s*x\s*\d{2,6}\b/);
     if (match) hit[0] = match[0];
   }
+  let wordsToCheck = [];
+  if (typeof Intl !== "undefined" && Intl.Segmenter) {
+    const segmenter = new Intl.Segmenter(void 0, { granularity: "word" });
+    const allWords = [...segmenter.segment(altLowerCase)].filter((segment) => segment.isWordLike).map((segment) => segment.segment);
+    wordsToCheck = [...allWords.slice(0, 2), ...allWords.slice(-1)];
+  } else {
+    const altOnlyLetters2 = removeWhitespace(altLowerCase.replace(/[^\p{L}\s]/gu, ""));
+    const allWords = altOnlyLetters2.split(/\s+/).filter(Boolean);
+    wordsToCheck = [...allWords.slice(0, 2), ...allWords.slice(-1)];
+  }
   for (const word of Constants.Global.susAltWords) {
-    const index = altLowerCase.indexOf(word);
-    if (index > -1 && index < 6) {
+    if (wordsToCheck.includes(word)) {
       hit[1] = word;
       break;
     }
@@ -4946,19 +4957,19 @@ function checkEditableIntersects(focusKnown = false) {
     }
   });
 }
+function updateFixedRootPositions() {
+  UI.positionedFrames.length = 0;
+  if (!Array.isArray(State.option.framePositioners)) return;
+  State.option.framePositioners.forEach((positioner) => {
+    UI.positionedFrames.push(positioner ? positioner.getBoundingClientRect() : { top: 0, left: 0 });
+  });
+}
 function alignButtons() {
   if (UI.jumpList.length === 0) {
     return;
   }
   UI.alignPending = true;
-  if (State.option.fixedRoots) {
-    UI.positionedFrames.length = 0;
-    State.option.fixedRoots.forEach((root) => {
-      if (root.framePositioner) {
-        UI.positionedFrames.push(root.framePositioner.getBoundingClientRect());
-      }
-    });
-  }
+  updateFixedRootPositions();
   let previousNudgeTop = 0;
   let previousNudgeLeft = 0;
   const scrollTop = window.scrollY;
@@ -5179,11 +5190,14 @@ function checkEmbeddedContent() {
     const aria = computeAriaLabel($el);
     const checkTitle = aria === "noAria" ? $el.getAttribute("title") || "" : aria;
     if (removeWhitespace(checkTitle).length === 0) {
+      const tagName = $el?.tagName.toLowerCase();
       pushResult$1({
         test: "EMBED_MISSING_TITLE",
         element: $el,
         dismiss: src($el),
-        developer: true
+        developer: true,
+        content: Lang.sprintf("EMBED_MISSING_TITLE", tagName),
+        args: [tagName]
       });
     }
   });
@@ -6263,15 +6277,6 @@ function dismissOne(dismissalType, test, dismissalKey) {
     document.dispatchEvent(ed11yDismissalUpdate);
   }, 100);
 }
-function updateFixedRootPositions() {
-  if (!State.option.fixedRoots) return;
-  UI.positionedFrames.length = 0;
-  State.option.fixedRoots.forEach((root) => {
-    if (root.framePositioner) {
-      UI.positionedFrames.push(root.framePositioner.getBoundingClientRect());
-    }
-  });
-}
 function positionHighlight(el, target, result) {
   let targetOffset = target.getBoundingClientRect();
   if (!visible(target)) {
@@ -6784,7 +6789,7 @@ function intersectionObservers() {
   attachIntegrationListeners(document);
   if (Array.isArray(State.option.fixedRoots)) {
     State.option.fixedRoots.forEach((root) => {
-      const foreignDoc = root?.fixedRoot?.ownerDocument;
+      const foreignDoc = root?.ownerDocument;
       if (foreignDoc && foreignDoc !== document) {
         scrollWatch(foreignDoc);
         attachIntegrationListeners(foreignDoc);
@@ -7017,7 +7022,7 @@ function checkAll() {
   UI.roots = [];
   if (State.option.fixedRoots) {
     State.option.fixedRoots.forEach((root) => {
-      if (root?.fixedRoot) UI.roots.push(root.fixedRoot);
+      UI.roots.push(root);
     });
   } else {
     UI.roots = [...document.querySelectorAll(`:is(${State.option.checkRoot})`)];
@@ -7155,14 +7160,15 @@ const incrementalCheckDebounce = lagBounce(() => {
 function refresh() {
   incrementalCheckDebounce();
 }
-function setFixedRoots(newFixedRoots, newEditableContent) {
+function setFixedRoots(newFixedRoots, newFramePositioners, newEditableContent) {
   State.option.fixedRoots = Array.isArray(newFixedRoots) && newFixedRoots.length > 0 ? newFixedRoots : false;
+  State.option.framePositioners = Array.isArray(newFramePositioners) && newFramePositioners.length > 0 ? newFramePositioners : false;
   if (typeof newEditableContent !== "undefined") {
     State.option.editableContent = newEditableContent;
   }
   if (Array.isArray(newFixedRoots)) {
     newFixedRoots.forEach((root) => {
-      const foreignDoc = root?.fixedRoot?.ownerDocument;
+      const foreignDoc = root?.ownerDocument;
       if (foreignDoc && foreignDoc !== document) {
         attachIntegrationListeners(foreignDoc);
       }
@@ -8475,7 +8481,7 @@ const tooltip = {
   EMBED_VIDEO: "Please ensure <strong>all videos have closed captioning.</strong> Providing captions for all audio and video content is a mandatory Level A requirement. Captions support people who are D/deaf or hard-of-hearing.",
   EMBED_AUDIO: "Please ensure to provide a <strong>transcript for all podcasts.</strong> Providing transcripts for audio content is a mandatory Level A requirement. Transcripts support people who are D/deaf or hard-of-hearing, but can benefit everyone. Consider placing the transcript below or within an accordion panel.",
   EMBED_DATA_VIZ: `Data visualization widgets like this are often problematic for people who use a keyboard or screen reader to navigate, and can present significant difficulties for people who have low vision or colorblindness. It's recommended to provide the same information in an alternative (text or table) format below the widget. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/images/complex">complex images.</a>`,
-  EMBED_MISSING_TITLE: 'Embedded content requires an accessible name that describes its contents. Please provide a unique <code>title</code> or <code>aria-label</code> attribute on the <code>iframe</code> element. Learn more about <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrames.</a>',
+  EMBED_MISSING_TITLE: 'Embedded content requires an accessible name that describes its contents. Please provide a unique <code>title</code> or <code>aria-label</code> attribute on the <code>&lt;%(ELEMENT)&gt;</code> element. Learn more about <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrames.</a>',
   EMBED_GENERAL: 'Unable to check embedded content. Please make sure that images have alt text, videos have captions, text has sufficient contrast, and interactive components are <a href="https://webaim.org/techniques/keyboard/">keyboard accessible.</a>',
   EMBED_UNFOCUSABLE: '<code>&lt;iframe&gt;</code> with focusable elements should not have <code>tabindex="-1"</code>. The embedded content will not be keyboard accessible.',
   // Quality assurance
@@ -8686,6 +8692,7 @@ const tips = {
   BTN_EMPTY_LABELLEDBY: `<p>This button has an <code>aria-labelledby</code> value that is empty or does not match the <code>ID</code> value of another element on the page.</p><p>${why.fix}Reconnect the ID to an element on the page, or remove this attribute and describe the button in another way.</p>`,
   BTN_TIP: `${why.buttons}`,
   BTN_ROLE_IN_NAME: `<p><strong>Label for screen readers:</strong> <i>%(TEXT)</i></p><p>Screen readers use the word "button" to announce they are describing a button, so this word is repetitive.</p><p>${why.fix}The button's label should match its action. If the visible label is an icon instead of text, label the button with the icon's meaning, e.g. "Play," "Search" or "Menu."</p>`,
+  BTN_UNPRONOUNCEABLE: `<p><strong>Button text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Add text, a title or an aria-label describing its destination.</p><div class="why"><p>Tip: screen readers cannot describe buttons that only contain spaces or symbols. They either fall silent ("Button, [...awkward pause where the button label should be...]"), or read the name of the symbol.</p></div>`,
   CONTRAST_WARNING: "A background image or gradient means this checker is not sure what color is behind this text. Use the color picker below to check manually.",
   DUPLICATE_ID: `<p>IDs are being used on this page for labels or link targets, which means they must be unique.</p><p>${why.fix}Change this ID: <code>#%(ID)</code></p><div class="why"><p>In most content management systems, this comes from a field called "name" or "id" in the element properties. In HTML, it is an attribute: <code>&lt;a id="MY-ID"&gt;</code></p></div>`,
   DUPLICATE_TITLE: `<p>${why.fix}Delete the link's text or <code>title</code> attribute.</p><div class="why"><p>Tip: <code>title</code> tooltips only appear when hovering with a mouse. They cannot be seen when navigating on a phone or with a keyboard, so many users will never see them. They should never contain unique or important information.</p></div>`,
@@ -8696,6 +8703,7 @@ const tips = {
   EMBED_UNFOCUSABLE: `<p>This attribute tells keyboards and assistive devices to skip over the element. Remove this attribute unless the iframe has no links, buttons, form elements, or scrollable content.</p>`,
   EMBED_VIDEO: `<p>This checker cannot "see" whether videos have captions, or tell if someone has proofread them, so a manual check is needed.</p><p>${why.fix}Check to make sure that <a href="https://www.w3.org/WAI/media/av/captions/">accurate captions ("CC") or subtitles</a> are available, and make sure speakers and meaningful sound effects are accurately identified.</p>`,
   HEADING_EMPTY: `<p>Empty headings create confusing gaps in the page outline.</p><p>${why.fix}Add text to this heading, or delete this empty line.</p>${why.headings}`,
+  HEADING_UNPRONOUNCEABLE: `<p>Empty headings create confusing gaps in the page outline.</p><p>${why.fix}Add human-readable text to this heading, or convert it to a paragraph.</p>${why.headings}`,
   HEADING_EMPTY_WITH_IMAGE: `<p>Empty headings create confusing gaps in the page outline.</p><p>${why.fix}If this is not a heading, change its format from <code>Heading %(level)</code> to <code>Paragraph</code>. Otherwise, put the meaning of the image in its alt.</p>${why.headings}`,
   HEADING_FIRST: `${why.fix}Make sure the page title is marked as a Heading 1 or Heading 2. ${why.headings}`,
   HEADING_LONG: `<p>${why.fix}Unless this heading is a fixed reference like the title of a published article, shorten it to help people skim:<span hidden>%(drop)%(drop)</span></p><p><i>%(TEXT)</i></p>${why.headings}`,
@@ -8883,9 +8891,11 @@ const ed11yDefaultOptions = {
   checkRoot: false,
   // Editoria11y uses "checkRoots" below.
   fixedRoots: false,
-  // Array object pairs:
-  // { fixedRoot: element, framePositioner: element }
-  // framePositioner is the wrapper element outside an iframe.
+  // Array of root elements to check, e.g. [editableEl].
+  framePositioners: false,
+  // Parallel array of wrapper elements outside each
+  // iframe; framePositioners[i] offsets annotations for fixedRoots[i]. Use
+  // false (or omit) when roots are in the main document.
   // Exclusions
   containerIgnore: "",
   contrastIgnore: ".sr-only",
@@ -9527,7 +9537,7 @@ async function initialize(userOptions) {
     attachIntegrationListeners(document);
     if (Array.isArray(State.option.fixedRoots)) {
       State.option.fixedRoots.forEach((root) => {
-        const foreignDoc = root?.fixedRoot?.ownerDocument;
+        const foreignDoc = root?.ownerDocument;
         if (foreignDoc && foreignDoc !== document) {
           attachIntegrationListeners(foreignDoc);
         }

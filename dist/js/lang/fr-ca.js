@@ -622,11 +622,16 @@ const interfaceStrings = {
   unDismissNotePermissions: "Cette vérification a été masquée par un administrateur",
   unDismissOKButton: "Restaurer cette alerte marquée comme OK"
 };
-const lang = {
+const lang$1 = {
   strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
   testNames
 };
+const dropPreHighSpace = (value) => typeof value === "string" ? value.replace(/[     ]+([?!;])/g, "$1") : value;
+const quebecify = (obj) => Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, dropPreHighSpace(value)]));
+const lang = {
+  strings: quebecify(lang$1.strings),
+  testNames: quebecify(lang$1.testNames)
+};
 export {
-  lang,
-  tips
+  lang
 };

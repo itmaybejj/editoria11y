@@ -183,6 +183,22 @@ export function checkEditableIntersects(focusKnown = false) {
   });
 }
 
+// Refresh cached iframe offsets used by positionHighlight (run.js) and
+// alignButtons. Called on show, scroll, and resize so the positioning formula
+// always reads fresh frame rects. positionedFrames is kept index-parallel to
+// State.option.fixedRoots: positionedFrames[i] is the rect of
+// framePositioners[i] (or a zero offset when that root has no frame), so a
+// result's data-ed11y-root index maps straight to its frame offset.
+export function updateFixedRootPositions() {
+  UI.positionedFrames.length = 0;
+  if (!Array.isArray(State.option.framePositioners)) return;
+  State.option.framePositioners.forEach((positioner) => {
+    // Push a zero offset for roots without a frame rather than skipping, so the
+    // array stays aligned with fixedRoots / data-ed11y-root indices.
+    UI.positionedFrames.push(positioner ? positioner.getBoundingClientRect() : { top: 0, left: 0 });
+  });
+}
+
 export function alignButtons() {
   if (UI.jumpList.length === 0) {
     return;
@@ -192,15 +208,7 @@ export function alignButtons() {
   // Reading and writing in a loop creates paint thrashing.
   // We iterate the array for reads, then iterate for writes.
 
-  if (State.option.fixedRoots) {
-    UI.positionedFrames.length = 0;
-
-    State.option.fixedRoots.forEach((root) => {
-      if (root.framePositioner) {
-        UI.positionedFrames.push(root.framePositioner.getBoundingClientRect());
-      }
-    });
-  }
+  updateFixedRootPositions();
 
   // Used for crude intersection detection.
   let previousNudgeTop = 0;

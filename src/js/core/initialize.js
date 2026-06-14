@@ -253,7 +253,7 @@ export async function initialize(userOptions) {
     // ready before the user touches anything.)
     if (Array.isArray(State.option.fixedRoots)) {
       State.option.fixedRoots.forEach((root) => {
-        const foreignDoc = root?.fixedRoot?.ownerDocument;
+        const foreignDoc = root?.ownerDocument;
         if (foreignDoc && foreignDoc !== document) {
           attachIntegrationListeners(foreignDoc);
         }

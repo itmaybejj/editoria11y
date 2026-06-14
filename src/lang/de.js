@@ -9,6 +9,7 @@ const testNames = {
 	ALT_PLACEHOLDER: 'Dieser Alt‑Text ist möglicherweise ein Platzhalter',
 	ALT_UNPRONOUNCEABLE: 'Dieser Alt‑Text ist unaussprechlich',
 	BTN_EMPTY: 'Schaltfläche hat keine zugängliche Beschriftung',
+	BTN_UNPRONOUNCEABLE: 'Diese Schaltfläche ist nicht aussprechbar',
 	BTN_EMPTY_LABELLEDBY: 'Schaltfläche hat ein ungültiges ARIA‑Label',
 	BTN_ROLE_IN_NAME: 'Der Name der Schaltfläche wiederholt das Wort „button“',
 	CONTRAST_ERROR: 'Der Text hat nicht genügend Kontrast, um gut lesbar zu sein',
@@ -27,6 +28,7 @@ const testNames = {
 	EMBED_UNFOCUSABLE: 'Frame mit tabindex="‑1" ist nicht per Tastatur erreichbar.',
 	EMBED_VIDEO: 'Ist dieses Video korrekt untertitelt?',
 	HEADING_EMPTY: 'Diese Überschrift hat keinen Text',
+	HEADING_UNPRONOUNCEABLE: 'Diese Überschrift ist nicht aussprechbar',
 	HEADING_EMPTY_WITH_IMAGE: 'Dieses Bild wird als Überschrift verwendet und benötigt deshalb Alt‑Text',
 	HEADING_FIRST: 'Die erste Überschrift auf dieser Seite ist eine Unterüberschrift',
 	HEADING_LONG: 'Kann diese Überschrift kürzer sein?',
@@ -151,6 +153,7 @@ const tips = {
 	BTN_TIP: `${why.buttons}`,
 
 	BTN_ROLE_IN_NAME: `<p><strong>Label für Screenreader:</strong> <i>%(TEXT)</i></p><p>Screenreader verwenden das Wort „button", um anzukündigen, dass sie eine Schaltfläche beschreiben; dieses Wort ist daher doppelt gemoppelt.</p><p>${why.fix}Die Beschriftung der Schaltfläche sollte ihrer Aktion entsprechen. Wenn die sichtbare Beschriftung ein Symbol statt Text ist, beschriften Sie die Schaltfläche mit der Bedeutung des Symbols, z. B. „Wiedergabe", „Suchen" oder „Menü".</p>`,
+	BTN_UNPRONOUNCEABLE: `<p><strong>Schaltflächentext:</strong> <i>%(TEXT)</i></p><p>${why.fix}Fügen Sie Text, einen Titel oder ein aria-label hinzu, das das Ziel beschreibt.</p><div class="why"><p>Tipp: Bildschirmleser können Schaltflächen, die nur Leerzeichen oder Symbole enthalten, nicht beschreiben. Sie werden entweder stumm ("Schaltfläche, [...unangenehme Pause, wo die Beschriftung sein sollte...]"), oder lesen den Namen des Symbols vor.</p></div>`,
 
 	CONTRAST_WARNING: 'Ein Hintergrundbild oder Farbverlauf verhindert, dass dieses Tool die tatsächliche Hintergrundfarbe sicher bestimmen kann. Nutzen Sie den Farbwähler unten für eine manuelle Prüfung.',
 
@@ -171,6 +174,7 @@ const tips = {
 	EMBED_VIDEO: `<p>Dieses Prüfwerkzeug kann nicht „sehen", ob Videos Untertitel haben, oder ob jemand sie Korrektur gelesen hat – eine manuelle Prüfung ist erforderlich.</p><p>${why.fix}Stellen Sie sicher, dass <a href="https://www.w3.org/WAI/media/av/captions/">korrekte Untertitel („CC") oder Untertitel</a> verfügbar sind, und dass Sprecher und bedeutsame Geräusche korrekt gekennzeichnet sind.</p>`,
 
 	HEADING_EMPTY: `<p>Leere Überschriften erzeugen Lücken in der Seitenstruktur.</p><p>${why.fix}Text hinzufügen oder die leere Zeile entfernen.</p>${why.headings}`,
+	HEADING_UNPRONOUNCEABLE: `<p>Leere Überschriften erzeugen Lücken in der Seitenstruktur.</p><p>${why.fix}Fügen Sie dieser Überschrift lesbaren Text hinzu oder wandeln Sie sie in einen Absatz um.</p>${why.headings}`,
 
 	HEADING_EMPTY_WITH_IMAGE: `<p>Leere Überschriften erzeugen Lücken in der Seitenstruktur.</p><p>${why.fix}Wenn dies keine Überschrift ist, ändern Sie das Format von <code>Überschrift %(level)</code> zu <code>Absatz</code>. Andernfalls gehört die Bildbedeutung in den Alt‑Text.</p>${why.headings}`,
 
@@ -229,7 +233,7 @@ const tips = {
 
 	LINK_FILE_EXT: `<p><strong>Linktext:</strong> <i>%(TEXT)</i></p><p>Dieser Link führt zu einer Datei (z. B. PDF, MP3, Zip, Word), ohne das anzuzeigen.</p><p>${why.fix}Geben Sie im Linktext den Dateityp an – z. B. per Text oder Icon (<a href="https://itmaybejj.github.io/linkpurpose/">Beispiele</a>).</p><p class="why">Bei großen Dateien nennen Sie die Größe, z. B. „Jahresbericht (PDF, 3 MB)“.</p>`,
 
-	LINK_IDENTICAL_NAME: `<p>Linktext: <i>%(TEXT)</i></p><p>${why.fix}Formulieren Sie Links zu unterschiedlichen Zielen um, sodass sie die eindeutigen Titel ihrer Ziele verwenden.</p>${why.links}`,
+	LINK_IDENTICAL_NAME: `<p><strong>Linktext:</strong> <i>%(TEXT)</i></p><p>${why.fix}Formulieren Sie Links zu unterschiedlichen Zielen um, sodass sie die eindeutigen Titel ihrer Ziele verwenden.</p>${why.links}`,
 
 	LINK_IMAGE_ALT: `<p><strong>Alt‑Text:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt‑Text für verlinkte Bilder.</p>${why.imageLinks}`,
 

@@ -1,5 +1,5 @@
 (function(global, factory) {
-  typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global.Ed11yLangFr = {}));
+  typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global["Ed11yLangFr-ca"] = {}));
 })(this, (function(exports2) {
   "use strict";
   const ruleset = {
@@ -626,11 +626,16 @@
     unDismissNotePermissions: "Cette vérification a été masquée par un administrateur",
     unDismissOKButton: "Restaurer cette alerte marquée comme OK"
   };
-  const lang = {
+  const lang$1 = {
     strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
     testNames
   };
+  const dropPreHighSpace = (value) => typeof value === "string" ? value.replace(/[     ]+([?!;])/g, "$1") : value;
+  const quebecify = (obj) => Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, dropPreHighSpace(value)]));
+  const lang = {
+    strings: quebecify(lang$1.strings),
+    testNames: quebecify(lang$1.testNames)
+  };
   exports2.lang = lang;
-  exports2.tips = tips;
   Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });
 }));

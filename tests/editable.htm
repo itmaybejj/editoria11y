@@ -162,12 +162,8 @@
                         hiddenHandlers: '[hidden]',
                         inlineAlerts: false,
                         lang: Ed11yLangEn.lang,
-                        fixedRoots: [
-                            {
-                                fixedRoot: document.querySelector('#editable-region'),
-                                framePositioner: document.body,
-                            },
-                        ],
+                        fixedRoots: [document.querySelector('#editable-region')],
+                        framePositioners: [document.body],
                         //linkIgnoreStrings: '\(link is external\)',
                         //customTests : 2,
                         splitConfiguration: {

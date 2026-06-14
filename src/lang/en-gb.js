@@ -31,6 +31,7 @@ const britishTips = {
 	HEADING_LONG: `<p>${why.fix}Unless this heading is a fixed reference like the title of a published article, shorten it to help people skim:<span hidden>%(drop)%(drop)</span></p><p><i>%(TEXT)</i></p>${why.headings}`,
 	HEADING_MISSING_ONE: `<p>${why.fix}Tag the page title as a level 1 heading, to mark the beginning of the document outline.</p>${why.headings}`,
 	HEADING_SKIPPED_LEVEL: `<p>This heading skipped from <code>level %(prevLevel)</code> to <code>level %(level)</code>. From a screen reader, this sounds like content is missing.</p><p>${why.fix}Adjust levels to form an accurate outline, without gaps.</p>${why.headings}`,
+	HEADING_UNPRONOUNCEABLE: `<p>Empty headings create confusing gaps in the page outline.</p><p>${why.fix}Add human-readable text to this heading, or convert it to a paragraph.</p>${why.headings}`,
 	QA_BLOCKQUOTE: `<p><strong>Suspiciously short quotation:</strong> <i>%(TEXT)</i></p><p>${why.fix}If this is a heading and not a quotation, tag it as a heading so it appears in the page outline.</p>${why.headings}`,
 };
 
