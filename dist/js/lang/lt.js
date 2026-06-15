@@ -325,7 +325,7 @@ const testNames = {
   ALT_MAYBE_BAD: "Ar tai aiškus ir glaustas vaizdo aprašymas?",
   ALT_MAYBE_BAD_WARNING: "Ar tai aiškus ir glaustas vaizdo aprašymas?",
   ALT_PLACEHOLDER: "Šis alternatyvusis tekstas gali būti tik vietaženklis",
-  ALT_UNPRONOUNCEABLE: "Šio alternatyvaus teksto neįmanoma perskaityti",
+  ALT_UNPRONOUNCEABLE: "Šio alternatyvaus teksto neįmanoma ištarti",
   ARIA_INPUT_FIELD_NAME: "Šiam pasirinktiniam įvesties laukui trūksta žymės",
   BTN_EMPTY: "Mygtukui trūksta prieinamo pavadinimo",
   BTN_UNPRONOUNCEABLE: "Šio mygtuko neįmanoma ištarti",

@@ -72,7 +72,7 @@ const testNames = {
 	LINK_PLACEHOLDER_ALT: 'Textul alternativ al acestui link pare să fie un text temporar',
 	LINK_STOPWORD: 'Acest link conține doar cuvinte generice',
 	LINK_STOPWORD_ARIA: 'Scopul acestui link este ascuns vizual',
-	LINK_SUS_ALT: 'Descrie textul alternativ al imaginii sau linkul?',
+	LINK_SUS_ALT: 'Acest text alternativ descrie imaginea sau linkul?',
 	LINK_SYMBOLS: 'Simbolurile sau emoji-urile din acest link sunt semnificative?',
 	LINK_UNPRONOUNCEABLE: 'Acest link nu poate fi pronunțat',
 	LINK_URL: 'Textul linkului nu trebuie să fie un URL',
