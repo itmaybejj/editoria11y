@@ -321,7 +321,8 @@
       ...ui,
       ...ruleset,
       ...tooltip
-    }
+    },
+    ruleset
   };
   const testNames = {
     ALT_FILE_EXT: "Το εναλλακτικό κείμενο (alt) είναι όνομα αρχείου, όχι περιγραφή",
@@ -619,7 +620,8 @@
   };
   const lang = {
     strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
-    testNames
+    testNames,
+    ruleset: Sa11yStrings.ruleset
   };
   exports2.lang = lang;
   Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });

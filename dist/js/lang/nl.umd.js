@@ -330,7 +330,8 @@
       ...ui,
       ...ruleset,
       ...tooltip
-    }
+    },
+    ruleset
   };
   const testNames = {
     ALT_FILE_EXT: "Deze alt‑tekst is een bestandsnaam, geen beschrijving",
@@ -603,7 +604,8 @@
   };
   const lang = {
     strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
-    testNames
+    testNames,
+    ruleset: Sa11yStrings.ruleset
   };
   exports2.interfaceStrings = interfaceStrings;
   exports2.lang = lang;

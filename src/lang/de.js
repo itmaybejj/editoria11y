@@ -384,4 +384,5 @@ const interfaceStrings = {
 export const lang = {
 	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
 	testNames: testNames,
+	ruleset: Sa11yStrings.ruleset,
 }

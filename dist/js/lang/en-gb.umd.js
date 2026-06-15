@@ -363,7 +363,8 @@
       ...ui,
       ...ruleset,
       ...tooltip
-    }
+    },
+    ruleset
   };
   const testNames = {
     ALT_FILE_EXT: "This alt text is a filename, not a description",
@@ -718,7 +719,8 @@
       britishTips,
       britishInterfaceStrings
     ),
-    testNames: Object.assign({}, testNames, britishTestNames)
+    testNames: Object.assign({}, testNames, britishTestNames),
+    ruleset: Object.assign({}, Sa11yStrings.ruleset, englishOverrides)
   };
   exports2.lang = lang;
   Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });

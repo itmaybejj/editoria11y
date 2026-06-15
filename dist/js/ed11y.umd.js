@@ -8598,7 +8598,8 @@ ${this.error.stack}
       ...ui,
       ...ruleset,
       ...tooltip
-    }
+    },
+    ruleset
   };
   const testNames = {
     ALT_FILE_EXT: "This alt text is a filename, not a description",
@@ -8918,7 +8919,8 @@ ${this.error.stack}
   };
   const lang = {
     strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips, englishOverrides),
-    testNames
+    testNames,
+    ruleset: Object.assign({}, Sa11yStrings.ruleset, englishOverrides)
   };
   const ed11yDefaultOptions = {
     // Default options.

@@ -319,7 +319,8 @@ const Sa11yStrings = {
     ...ui,
     ...ruleset,
     ...tooltip
-  }
+  },
+  ruleset
 };
 const testNames = {
   ALT_FILE_EXT: "Tento alternativní text je název souboru, ne popis",
@@ -596,7 +597,8 @@ const interfaceStrings = {
 };
 const lang = {
   strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
-  testNames
+  testNames,
+  ruleset: Sa11yStrings.ruleset
 };
 export {
   interfaceStrings,

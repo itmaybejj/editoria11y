@@ -29,4 +29,5 @@ export const lang = {
 		canadianTips,
 	),
 	testNames: testNames,
+	ruleset: Object.assign({}, Sa11yStrings.ruleset, englishOverrides),
 };

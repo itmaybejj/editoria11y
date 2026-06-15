@@ -324,7 +324,8 @@
       ...ui,
       ...ruleset,
       ...tooltip
-    }
+    },
+    ruleset
   };
   const testNames = {
     ALT_FILE_EXT: "Ce texte alternatif est un nom de fichier, pas une description",
@@ -628,7 +629,8 @@
   };
   const lang = {
     strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
-    testNames
+    testNames,
+    ruleset: Sa11yStrings.ruleset
   };
   exports2.lang = lang;
   exports2.tips = tips;

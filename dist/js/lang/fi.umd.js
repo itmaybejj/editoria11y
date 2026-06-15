@@ -318,7 +318,8 @@
       ...ui,
       ...ruleset,
       ...tooltip
-    }
+    },
+    ruleset
   };
   const testNames = {
     ALT_FILE_EXT: "Alt-teksti on tiedostonimi eikä kuvaus",
@@ -595,7 +596,8 @@
   };
   const lang = {
     strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
-    testNames
+    testNames,
+    ruleset: Sa11yStrings.ruleset
   };
   exports2.interfaceStrings = interfaceStrings;
   exports2.lang = lang;

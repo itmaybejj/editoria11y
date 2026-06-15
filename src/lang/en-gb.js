@@ -51,4 +51,5 @@ export const lang = {
 		britishInterfaceStrings,
 	),
 	testNames: Object.assign({}, testNames, britishTestNames),
+	ruleset: Object.assign({}, Sa11yStrings.ruleset, englishOverrides),
 };

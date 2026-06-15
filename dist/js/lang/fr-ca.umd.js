@@ -324,7 +324,8 @@
       ...ui,
       ...ruleset,
       ...tooltip
-    }
+    },
+    ruleset
   };
   const testNames = {
     ALT_FILE_EXT: "Ce texte alternatif est un nom de fichier, pas une description",
@@ -628,13 +629,17 @@
   };
   const lang$1 = {
     strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
-    testNames
+    testNames,
+    ruleset: Sa11yStrings.ruleset
   };
   const dropPreHighSpace = (value) => typeof value === "string" ? value.replace(/[     ]+([?!;])/g, "$1") : value;
   const quebecify = (obj) => Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, dropPreHighSpace(value)]));
   const lang = {
     strings: quebecify(lang$1.strings),
-    testNames: quebecify(lang$1.testNames)
+    testNames: quebecify(lang$1.testNames),
+    // Content-matching word lists are lexically identical to France French, and
+    // contain no high punctuation, so the ruleset is inherited from fr.js as-is.
+    ruleset: lang$1.ruleset
   };
   exports2.lang = lang;
   Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });

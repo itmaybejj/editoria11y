@@ -319,7 +319,8 @@ const Sa11yStrings = {
     ...ui,
     ...ruleset,
     ...tooltip
-  }
+  },
+  ruleset
 };
 const testNames = {
   ARIA_INPUT_FIELD_NAME: "A este campo de entrada personalizado le falta una etiqueta",
@@ -596,7 +597,8 @@ const interfaceStrings = {
 };
 const lang = {
   strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
-  testNames
+  testNames,
+  ruleset: Sa11yStrings.ruleset
 };
 export {
   lang

@@ -313,7 +313,8 @@ const Sa11yStrings = {
     ...ui,
     ...ruleset,
     ...tooltip
-  }
+  },
+  ruleset
 };
 const testNames = {
   ALT_FILE_EXT: "விவரிப்பு வாசகம் கோப்பு பெயராக உள்ளது, விவரணமாக இல்லை",
@@ -590,7 +591,8 @@ const interfaceStrings = {
 };
 const lang = {
   strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
-  testNames
+  testNames,
+  ruleset: Sa11yStrings.ruleset
 };
 export {
   interfaceStrings,

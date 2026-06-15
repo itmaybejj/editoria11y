@@ -365,7 +365,8 @@ const Sa11yStrings = {
     ...ui,
     ...ruleset,
     ...tooltip
-  }
+  },
+  ruleset
 };
 const testNames = {
   ARIA_INPUT_FIELD_NAME: "Diesem benutzerdefinierten Eingabefeld fehlt eine Beschriftung",
@@ -650,7 +651,8 @@ const interfaceStrings = {
 };
 const lang = {
   strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
-  testNames
+  testNames,
+  ruleset: Sa11yStrings.ruleset
 };
 export {
   lang

@@ -34,4 +34,7 @@ const quebecify = (obj) =>
 export const lang = {
 	strings: quebecify(frLang.strings),
 	testNames: quebecify(frLang.testNames),
+	// Content-matching word lists are lexically identical to France French, and
+	// contain no high punctuation, so the ruleset is inherited from fr.js as-is.
+	ruleset: frLang.ruleset,
 };
