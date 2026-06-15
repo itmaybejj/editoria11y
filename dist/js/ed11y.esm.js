@@ -2096,6 +2096,7 @@ const UI = {
   dismissedCount: 1,
   dismissedAlerts: {},
   activeRange: false,
+  activeRangeFrame: false,
   inlineAlerts: false,
   incremental: false,
   interaction: false,
@@ -4930,8 +4931,31 @@ function alignAlts() {
     el.style.setProperty("width", `${img.offsetWidth}px`);
   });
 }
+function editableFocused() {
+  const selector = "[contenteditable]:focus, [contenteditable] :focus";
+  if (document.querySelector(selector)) {
+    return true;
+  }
+  if (Array.isArray(State.option.fixedRoots)) {
+    return State.option.fixedRoots.some((root) => {
+      const doc = root?.ownerDocument;
+      return doc && doc !== document && !!doc.querySelector(selector);
+    });
+  }
+  return false;
+}
+function toMainDocRect(rect, frame) {
+  return {
+    top: rect.top + frame.top,
+    left: rect.left + frame.left,
+    bottom: rect.bottom + frame.top,
+    right: rect.right + frame.left
+  };
+}
+const ZERO_FRAME = { top: 0, left: 0 };
+const frameFor = (fixedRoot) => fixedRoot && UI.positionedFrames[fixedRoot] ? UI.positionedFrames[fixedRoot] : ZERO_FRAME;
 function checkEditableIntersects(focusKnown = false) {
-  if (!UI.activeRange || !focusKnown && !document.querySelector("[contenteditable]:focus, [contenteditable] :focus")) {
+  if (!UI.activeRange || !focusKnown && !editableFocused()) {
     UI.jumpList?.forEach((el) => {
       if (el.matches(".intersecting")) {
         el.classList.remove("intersecting");
@@ -4939,16 +4963,18 @@ function checkEditableIntersects(focusKnown = false) {
     });
     return;
   }
-  const activeRects = UI.activeRange.getBoundingClientRect();
+  updateFixedRootPositions();
+  const rangeRect = toMainDocRect(
+    UI.activeRange.getBoundingClientRect(),
+    frameFor(UI.activeRangeFrame)
+  );
   UI.jumpList?.forEach((el) => {
     const toggle = el.shadowRoot.querySelector(".toggle");
-    const framePositioner = el.result.fixedRoot && UI.positionedFrames[el.result.fixedRoot] ? UI.positionedFrames[el.result.fixedRoot] : { top: 0, left: 0 };
-    const rects = {};
-    rects.top = activeRects.top + framePositioner.top;
-    rects.left = activeRects.left + framePositioner.left;
-    rects.bottom = activeRects.bottom + framePositioner.top;
-    rects.right = activeRects.right + framePositioner.left;
-    if (intersect(rects, el.result.element.getBoundingClientRect(), 0) || intersect(rects, toggle.getBoundingClientRect(), 0)) {
+    const targetRect = toMainDocRect(
+      el.result.element.getBoundingClientRect(),
+      frameFor(el.result.fixedRoot)
+    );
+    if (intersect(rangeRect, targetRect, 0) || intersect(rangeRect, toggle.getBoundingClientRect(), 0)) {
       el.classList.add("intersecting");
       toggle.classList.add("intersecting");
     } else {
@@ -6775,7 +6801,7 @@ const attachIntegrationListeners = (doc) => {
     "selectionchange",
     () => {
       if (!UI.running) {
-        selectionChanged();
+        selectionChanged(doc);
       }
     },
     { passive: true }
@@ -6797,17 +6823,19 @@ function intersectionObservers() {
     });
   }
 }
-const selectionChanged = lagBounce(() => {
-  if (rangeChange()) {
+const selectionChanged = lagBounce((doc = document) => {
+  if (rangeChange(null, doc)) {
     updateTipLocations();
     checkEditableIntersects();
   }
 }, 100);
-function rangeChange(anchorNode) {
-  let anchor = window.getSelection()?.anchorNode;
+function rangeChange(anchorNode, doc = document) {
+  const selection = doc && typeof doc.getSelection === "function" ? doc.getSelection() : window.getSelection();
+  let anchor = selection?.anchorNode;
   const expandable = anchor?.parentNode && typeof anchor.parentNode === "object" && typeof anchor.parentNode.matches === "function";
   if (!anchor || expandable && (Array.prototype.includes.call(UI.roots, anchor.parentNode) || anchor.parentNode.matches('div[contenteditable="true"]'))) {
     UI.activeRange = false;
+    UI.activeRangeFrame = false;
     return false;
   }
   if (expandable) {
@@ -6816,7 +6844,7 @@ function rangeChange(anchorNode) {
       anchor = textParent;
     }
   }
-  const range = document.createRange();
+  const range = (anchor.ownerDocument || document).createRange();
   if (typeof anchor === "object") {
     range.setStartBefore(anchor);
     range.setEndAfter(anchor);
@@ -6824,6 +6852,7 @@ function rangeChange(anchorNode) {
   if (typeof range !== "object" || typeof range.getBoundingClientRect !== "function") {
     if (UI.activeRange) {
       UI.activeRange = false;
+      UI.activeRangeFrame = false;
       return true;
     } else {
       return false;
@@ -6831,6 +6860,9 @@ function rangeChange(anchorNode) {
   } else {
     const sameRange = UI.activeRange && range.startContainer === UI.activeRange.startContainer && range.startOffset === UI.activeRange.startOffset;
     UI.activeRange = range;
+    const anchorEl = anchor.nodeType === 1 ? anchor : anchor.parentElement;
+    const activeRoot = anchorEl?.closest?.("[data-ed11y-root]");
+    UI.activeRangeFrame = activeRoot ? activeRoot.dataset.ed11yRoot : false;
     return !sameRange;
   }
 }

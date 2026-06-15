@@ -1102,7 +1102,10 @@ export const attachIntegrationListeners = (doc) => {
     'selectionchange',
     () => {
       if (!UI.running) {
-        selectionChanged();
+        // Pass the document that fired so rangeChange reads its selection, not
+        // the top window's — cross-document (iframe) cursors live in their own
+        // document's selection.
+        selectionChanged(doc);
       }
     },
     { passive: true },
@@ -1131,15 +1134,17 @@ export function intersectionObservers() {
   }
 }
 
-export const selectionChanged = lagBounce(() => {
-  if (rangeChange()) {
+export const selectionChanged = lagBounce((doc = document) => {
+  if (rangeChange(null, doc)) {
     updateTipLocations();
     checkEditableIntersects();
   }
 }, 100);
 
-export function rangeChange(anchorNode) {
-  let anchor = anchorNode ? anchorNode : window.getSelection()?.anchorNode;
+export function rangeChange(anchorNode, doc = document) {
+  const selection =
+    doc && typeof doc.getSelection === 'function' ? doc.getSelection() : window.getSelection();
+  let anchor = anchorNode ? anchorNode : selection?.anchorNode;
   const expandable =
     anchor?.parentNode &&
     typeof anchor.parentNode === 'object' &&
@@ -1151,6 +1156,7 @@ export function rangeChange(anchorNode) {
         anchor.parentNode.matches('div[contenteditable="true"]')))
   ) {
     UI.activeRange = false;
+    UI.activeRangeFrame = false;
     return false;
   }
   if (expandable) {
@@ -1159,7 +1165,10 @@ export function rangeChange(anchorNode) {
       anchor = textParent;
     }
   }
-  const range = document.createRange();
+  // Build the range in the anchor's own document so a cross-document (iframe)
+  // selection measures against that frame's viewport; checkEditableIntersects
+  // then offsets it by the frame positioner to reach main-document coordinates.
+  const range = (anchor.ownerDocument || document).createRange();
   if (typeof anchor === 'object') {
     range.setStartBefore(anchor);
     range.setEndAfter(anchor);
@@ -1167,6 +1176,7 @@ export function rangeChange(anchorNode) {
   if (typeof range !== 'object' || typeof range.getBoundingClientRect !== 'function') {
     if (UI.activeRange) {
       UI.activeRange = false;
+      UI.activeRangeFrame = false;
       return true;
     } else {
       return false;
@@ -1177,6 +1187,11 @@ export function rangeChange(anchorNode) {
       range.startContainer === UI.activeRange.startContainer &&
       range.startOffset === UI.activeRange.startOffset;
     UI.activeRange = range;
+    // Record which fixedRoot the cursor sits in so its frame offset can be
+    // applied to the range — the cursor's frame may differ from a tip's frame.
+    const anchorEl = anchor.nodeType === 1 ? anchor : anchor.parentElement;
+    const activeRoot = anchorEl?.closest?.('[data-ed11y-root]');
+    UI.activeRangeFrame = activeRoot ? activeRoot.dataset.ed11yRoot : false;
     return !sameRange;
   }
 }
