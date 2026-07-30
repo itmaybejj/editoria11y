@@ -206,7 +206,9 @@ export function updatePanel() {
             UI.panelToggle.click();
           } else if (event.target.hasAttribute('data-ed11y-open')) {
             if (UI.tipOpen) {
-              UI.toggledFrom?.focus(); // todo is this still needed or handled by the next?
+              if (UI.toggledFrom) {
+                UI.toggledFrom.focus();
+              }
               UI.openTip.button.shadowRoot.querySelector('button').click();
             }
           }
@@ -1044,7 +1046,7 @@ export const slowIncremental = lagBounce(() => {
 }, 500);
 
 export function windowResize() {
-  if (UI.panel?.classList?.contains('ed11y-active') === true) {
+  if (UI.panel !== false && UI.panel.classList?.contains('ed11y-active') === true) {
     alignAlts();
     alignButtons();
   }
@@ -1649,8 +1651,8 @@ export function resetPanel() {
   }
 
   if (typeof UI.panel === 'object') {
-    UI.panel?.classList.add('ed11y-shut');
-    UI.panel?.classList.remove('ed11y-active');
+    UI.panel.classList.add('ed11y-shut');
+    UI.panel.classList.remove('ed11y-active');
     UI.panelToggle.ariaExpanded = false;
     if (!UI.showDismissed && typeof UI.panelShowDismissed === 'function') {
       UI.panelShowDismissed.setAttribute('data-ed11y-pressed', 'false');
@@ -1807,8 +1809,8 @@ export function disable() {
   document.documentElement.style.setProperty('--ed11y-activeColor', UI.theme.panelBarText);
   document.documentElement.style.setProperty('--ed11y-activeBorder', `${UI.theme.panelBarText}44`);
   document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
-  if (typeof UI.panelToggle.querySelector === 'function') {
-    UI.panel?.classList.remove('ed11y-errors', 'ed11y-warnings');
+  if (UI.panel !== false && typeof UI.panelToggle.querySelector === 'function') {
+    UI.panel.classList.remove('ed11y-errors', 'ed11y-warnings');
     UI.panelCount.textContent = 'i';
     UI.panelJumpNext.setAttribute('hidden', '');
     UI.panelToggle.classList.add('disabled');

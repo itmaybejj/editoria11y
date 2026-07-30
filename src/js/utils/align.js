@@ -67,7 +67,7 @@ export function closestScrollable(el) {
 
 // Applies parameters and avoids other widgets.
 export function alignPanel() {
-  if (typeof UI.panel?.classList?.add !== 'function') {
+  if (!UI.panel || typeof UI.panel.classList?.add !== 'function') {
     return false;
   }
   if (State.option.panelPosition === 'left') {

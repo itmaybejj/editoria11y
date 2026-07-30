@@ -11,7 +11,7 @@ import { UI } from './ui.js';
 
 export const showAltPanel = () => {
   // visualize image alts
-  const altList = UI.panel?.querySelector('#ed11y-alt-list');
+  const altList = UI.panel !== false && UI.panel.querySelector('#ed11y-alt-list');
   if (!altList) {
     return;
   }
@@ -159,7 +159,7 @@ const showReadability = () => {
 export function showHeadingsPanel() {
   // Visualize the document outline
 
-  const panelOutline = UI.panel?.querySelector('#ed11y-outline');
+  const panelOutline = UI.panel !== false && UI.panel.querySelector('#ed11y-outline');
   if (!panelOutline) {
     return;
   }

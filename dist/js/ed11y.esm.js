@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.1-729
+			* @version 3.0.1-730
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -1821,7 +1821,7 @@ function findShadowComponents(option) {
     });
   }
 }
-const version = "3.0.1-729";
+const version = "3.0.1-730";
 const sprite = {
   alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
   close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -3429,6 +3429,7 @@ function checkQA() {
     });
   }
   Elements.Found.Tables.forEach(($el) => {
+    if (!$el) return;
     if (isElementHidden($el)) return;
     const role = $el.getAttribute("role")?.trim().toLowerCase();
     if (role && !["table", "grid", "treegrid"].includes(role)) return;
@@ -3437,20 +3438,15 @@ function checkQA() {
     const firstRow = $el.querySelector("tr") ? $el.querySelector("tr").innerHTML : $el.innerHTML;
     const invalidIds = [];
     $el.querySelectorAll("[headers]").forEach((cell) => {
-      const headerIds = cell.getAttribute("headers").trim().split(/\s+/);
-      headerIds.forEach((id) => {
-        const referencedElement = $el.querySelector(`#${id}`);
-        const doesNotExist = !referencedElement;
-        const isNotInTable = referencedElement && !$el.contains(referencedElement);
-        let isNotHeader = true;
-        if (referencedElement) {
-          const tagName = referencedElement.tagName.toLowerCase();
-          const refRole = referencedElement.getAttribute("role")?.trim().toLowerCase();
-          if (tagName === "th" || refRole === "rowheader" || refRole === "columnheader") {
-            isNotHeader = false;
-          }
+      (cell.getAttribute("headers") || "").split(/\s+/).filter(Boolean).forEach((id) => {
+        try {
+          const ref = $el.querySelector(`#${CSS.escape(id)}`);
+          const role2 = ref?.getAttribute("role")?.trim().toLowerCase();
+          const isHeader = ref && (ref.tagName === "TH" || role2 === "rowheader" || role2 === "columnheader");
+          if (!isHeader) invalidIds.push(id);
+        } catch {
+          invalidIds.push(id);
         }
-        if (doesNotExist || isNotInTable || isNotHeader) invalidIds.push(id);
       });
     });
     if (invalidIds.length > 0) {
@@ -4912,7 +4908,7 @@ function closestScrollable(el) {
   }
 }
 function alignPanel() {
-  if (typeof UI.panel?.classList?.add !== "function") {
+  if (!UI.panel || typeof UI.panel.classList?.add !== "function") {
     return false;
   }
   if (State.option.panelPosition === "left") {
@@ -5640,7 +5636,7 @@ function checkReadability() {
   }
 }
 const showAltPanel = () => {
-  const altList = UI.panel?.querySelector("#ed11y-alt-list");
+  const altList = UI.panel !== false && UI.panel.querySelector("#ed11y-alt-list");
   if (!altList) {
     return;
   }
@@ -5771,7 +5767,7 @@ const showReadability = () => {
   }
 };
 function showHeadingsPanel() {
-  const panelOutline = UI.panel?.querySelector("#ed11y-outline");
+  const panelOutline = UI.panel !== false && UI.panel.querySelector("#ed11y-outline");
   if (!panelOutline) {
     return;
   }
@@ -6134,7 +6130,9 @@ function updatePanel() {
             UI.panelToggle.click();
           } else if (event.target.hasAttribute("data-ed11y-open")) {
             if (UI.tipOpen) {
-              UI.toggledFrom?.focus();
+              if (UI.toggledFrom) {
+                UI.toggledFrom.focus();
+              }
               UI.openTip.button.shadowRoot.querySelector("button").click();
             }
           }
@@ -6788,7 +6786,7 @@ const slowIncremental = lagBounce(() => {
   incrementalCheckDebounce();
 }, 500);
 function windowResize() {
-  if (UI.panel?.classList?.contains("ed11y-active") === true) {
+  if (UI.panel !== false && UI.panel.classList?.contains("ed11y-active") === true) {
     alignAlts();
     alignButtons();
   }
@@ -7253,8 +7251,8 @@ function resetPanel() {
     UI.panelToggleTitle.textContent = UI.dismissedCount === 1 ? Lang._("buttonShowHiddenAlert") : Lang.sprintf("PANEL_DISMISS_BUTTON", UI.dismissedCount).textContent;
   }
   if (typeof UI.panel === "object") {
-    UI.panel?.classList.add("ed11y-shut");
-    UI.panel?.classList.remove("ed11y-active");
+    UI.panel.classList.add("ed11y-shut");
+    UI.panel.classList.remove("ed11y-active");
     UI.panelToggle.ariaExpanded = false;
     if (!UI.showDismissed && typeof UI.panelShowDismissed === "function") {
       UI.panelShowDismissed.setAttribute("data-ed11y-pressed", "false");
@@ -7385,8 +7383,8 @@ function disable() {
   document.documentElement.style.setProperty("--ed11y-activeColor", UI.theme.panelBarText);
   document.documentElement.style.setProperty("--ed11y-activeBorder", `${UI.theme.panelBarText}44`);
   document.documentElement.style.setProperty("--ed11y-activePanelBorder", "transparent");
-  if (typeof UI.panelToggle.querySelector === "function") {
-    UI.panel?.classList.remove("ed11y-errors", "ed11y-warnings");
+  if (UI.panel !== false && typeof UI.panelToggle.querySelector === "function") {
+    UI.panel.classList.remove("ed11y-errors", "ed11y-warnings");
     UI.panelCount.textContent = "i";
     UI.panelJumpNext.setAttribute("hidden", "");
     UI.panelToggle.classList.add("disabled");

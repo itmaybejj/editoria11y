@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This is a simple script to pull down the specified Sa11y branch from github
-GIT_REF="5.0.8"
+GIT_REF="5.0.9"
 mkdir -p tmp/
 cd tmp/
 git clone git@github.com:ryersondmp/sa11y.git .
