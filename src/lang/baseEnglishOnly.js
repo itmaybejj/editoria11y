@@ -1,9 +1,6 @@
 export const englishOverrides = {
 
-  // @todo: Outline error explanations currently hidden.
-  /*errorOutlinePrefixSkippedLevel: '(flagged for skipped level)',
-  errorOutlinePrefixHeadingEmpty: '(empty heading)',
-  errorOutlinePrefixHeadingIsLong: '(flagged for length)',*/
+  // This is for ruleset-only overrides.
 
   SUS_ALT_STOPWORDS: [
     'image',
@@ -18,12 +15,12 @@ export const englishOverrides = {
     'todo',
     'copyright',
     'courtesy of',
-		'alt text',
+    'alt text',
   ],
-	// todo Ed11y test used to catch these at the end as well as the beginning.
-	extraPlaceholderStopWords: 'placeholder, alt text, tbd, todo, to do', // updated
-	// please add, please insert, add alt text
-	// @todo: photo by, photograph by, courtesy of as separate test.
+  // todo Ed11y test used to catch these at the end as well as the beginning.
+  extraPlaceholderStopWords: 'placeholder, alt text, tbd, todo, to do', // updated
+  // please add, please insert, add alt text
+  // @todo: photo by, photograph by, courtesy of as separate test.
 
   // Strings used in tests ==============================
 

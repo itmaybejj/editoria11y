@@ -639,10 +639,7 @@
     unDismissOKButton: "Restore this alert marked as OK"
   };
   const englishOverrides = {
-    // @todo: Outline error explanations currently hidden.
-    /*errorOutlinePrefixSkippedLevel: '(flagged for skipped level)',
-    errorOutlinePrefixHeadingEmpty: '(empty heading)',
-    errorOutlinePrefixHeadingIsLong: '(flagged for length)',*/
+    // This is for ruleset-only overrides.
     SUS_ALT_STOPWORDS: [
       "image",
       "graphic",

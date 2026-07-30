@@ -2,7 +2,6 @@ const defaultOptions = {
   // Target area to check
   checkRoot: 'body',
   fixedRoots: false,
-  framePositioners: false,
 
   // Exclusions
   containerIgnore: '.sa11y-ignore',

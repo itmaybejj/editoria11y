@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.1-614
+			* @version 3.0.1-729
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -61,7 +61,6 @@ const defaultOptions = {
   // Target area to check
   checkRoot: "body",
   fixedRoots: false,
-  framePositioners: false,
   // Exclusions
   containerIgnore: ".sa11y-ignore",
   contrastIgnore: ".sr-only",
@@ -1087,7 +1086,7 @@ const getCachedStyle = (node, pseudoElt = null) => {
 };
 let parentCache = /* @__PURE__ */ new WeakMap();
 function getCachedClosest(element, selector) {
-  if (!(element instanceof Element)) return null;
+  if (element?.nodeType !== 1) return null;
   if (typeof selector !== "string" || selector.trim() === "") return null;
   try {
     if (!parentCache.has(element)) {
@@ -1511,7 +1510,7 @@ const Elements = (function myElements() {
   function computePageText() {
     const elementSet = new Set(Found.Everything);
     return Found.Everything.filter(($el) => {
-      if ($el instanceof HTMLImageElement) return true;
+      if ($el.tagName === "IMG") return true;
       let parent = $el.parentElement;
       while (parent) {
         if (elementSet.has(parent)) return false;
@@ -1520,7 +1519,7 @@ const Elements = (function myElements() {
       return true;
     }).map(($el) => {
       let text = "";
-      if ($el instanceof HTMLImageElement) {
+      if ($el.tagName === "IMG") {
         text = $el.alt || "";
       } else if ($el.tagName === "LI") {
         text = Array.from($el.childNodes).filter((n) => n.nodeType === 3).map((n) => n.textContent).join(" ");
@@ -1588,8 +1587,8 @@ const Elements = (function myElements() {
     for (let i = 0; i < Found.Everything.length; i++) {
       const $el = Found.Everything[i];
       if ($el?.nodeType !== 1) continue;
-      const tag = $el?.tagName;
-      const role = $el?.getAttribute("role")?.trim().toLowerCase();
+      const tag = $el.tagName;
+      const role = $el.getAttribute("role")?.trim().toLowerCase();
       let handledByRole = false;
       if (role) {
         if (imageRoles.has(role) && !Constants.Exclusions.Images.some((s) => $el.matches(s))) {
@@ -1822,7 +1821,7 @@ function findShadowComponents(option) {
     });
   }
 }
-const version = "3.0.1-614";
+const version = "3.0.1-729";
 const sprite = {
   alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
   close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -3092,7 +3091,7 @@ function checkImages() {
         key = hasAria + src;
       }
     }
-    if (test) {
+    if (test && State.option.checks[test]) {
       logResult({ test, dismiss: key });
       return;
     }
@@ -3124,85 +3123,107 @@ function checkImages() {
         test = "IMAGE_DECORATIVE";
         type = "warning";
       }
-      if (test && logResult({
-        test,
-        type,
-        dismiss: key || src
-      }))
-        return;
+      if (test) {
+        if (State.option.checks[test]) {
+          logResult({ test, type, dismiss: key || src });
+          return;
+        } else {
+          if (!getCachedClosest($el, 'button, [role="button"]') && !Constants.Global.linkIgnoreStringPattern?.test(alt)) {
+            logResult({ test: "IMAGE_PASS", type: "good", args: [altText], dismiss: src + alt });
+          }
+          return;
+        }
+      }
     }
-    if (!Constants.Global.unpronounceablePattern.test(alt) && linkTextLength === 0) {
-      logResult({
-        test: link ? "LINK_ALT_UNPRONOUNCEABLE" : "ALT_UNPRONOUNCEABLE",
-        args: [altText]
-      });
-      return;
+    const unpTest = link ? "LINK_ALT_UNPRONOUNCEABLE" : "ALT_UNPRONOUNCEABLE";
+    if (State.option.checks[unpTest]) {
+      if (!Constants.Global.unpronounceablePattern.test(alt) && linkTextLength === 0) {
+        logResult({
+          test: unpTest,
+          args: [altText]
+        });
+        return;
+      }
     }
     const error = containsAltTextStopWords(altText);
-    if (error[0] !== null) {
-      logResult({
+    const qualityChecks = [
+      {
+        hit: error[0],
         test: link ? "LINK_ALT_FILE_EXT" : "ALT_FILE_EXT",
-        args: [error[0], altText],
-        dismiss: src + alt
-      });
-      return;
-    } else if (error[2] !== null) {
-      logResult({
+        type: "error",
+        args: [error[0], altText]
+      },
+      {
+        hit: error[2],
         test: link ? "LINK_PLACEHOLDER_ALT" : "ALT_PLACEHOLDER",
-        args: [altText],
-        dismiss: src + alt
-      });
-      return;
-    } else if (error[1] !== null) {
-      logResult({
+        type: "error",
+        args: [altText]
+      },
+      {
+        hit: error[1],
         test: link ? "LINK_SUS_ALT" : "SUS_ALT",
         type: "warning",
-        args: [error[1], altText],
-        dismiss: src + alt
-      });
-      return;
+        args: [error[1], altText]
+      }
+    ];
+    for (const check of qualityChecks) {
+      if (check.hit !== null && State.option.checks[check.test] !== false) {
+        logResult({
+          test: check.test,
+          type: check.type,
+          args: check.args,
+          dismiss: src + alt
+        });
+        return;
+      }
     }
     const badAltTest = link ? "LINK_ALT_MAYBE_BAD" : "ALT_MAYBE_BAD";
-    const minLength = State.option.checks[badAltTest]?.minLength || 15;
-    const isTooLongSingleWord = new RegExp(`^\\S{${minLength},}$`);
-    const containsNonAlphaChar = /[^\p{L}\p{M}\-,.!? «»—]/u.test(altText);
-    const isBadFilename = new RegExp(`^(?=[^_-]*([_-][^_-]*){3,})\\S{${minLength},}$`).test(
-      altText
-    );
-    const containsCJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(altText);
-    if (isBadFilename || !containsCJK && isTooLongSingleWord.test(alt) && containsNonAlphaChar) {
-      logResult({
-        test: badAltTest,
-        args: [altText],
-        dismiss: src + alt
-      });
-      return;
+    if (State.option.checks[badAltTest]) {
+      const minLength = State.option.checks[badAltTest]?.minLength || 15;
+      const isTooLongSingleWord = new RegExp(`^\\S{${minLength},}$`);
+      const containsNonAlphaChar = /[^\p{L}\p{M}\-,.!? «»—]/u.test(altText);
+      const isBadFilename = new RegExp(`^(?=[^_-]*([_-][^_-]*){3,})\\S{${minLength},}$`).test(
+        altText
+      );
+      const containsCJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(altText);
+      if (isBadFilename || !containsCJK && isTooLongSingleWord.test(alt) && containsNonAlphaChar) {
+        logResult({
+          test: badAltTest,
+          args: [altText],
+          dismiss: src + alt
+        });
+        return;
+      }
     }
     const warningTest = link ? "LINK_ALT_MAYBE_BAD_WARNING" : "ALT_MAYBE_BAD_WARNING";
-    const wordCount = altText.trim().split(/\s+/).length;
-    const delimiterCount = (altText.match(/[_-]/g) || []).length;
-    const hasTooMuchNoise = /^(?:\s*\d){5,}\s*$/.test(altText) || delimiterCount >= 3 && wordCount <= 2;
-    if (hasTooMuchNoise) {
-      logResult({
-        test: warningTest,
-        type: "warning",
-        content: badAltTest,
-        // We re-use this key for the tooltip.
-        args: [altText],
-        dismiss: `WARNING${src + alt}`
-      });
-      return;
+    if (State.option.checks[warningTest]) {
+      const wordCount = altText.trim().split(/\s+/).length;
+      const delimiterCount = (altText.match(/[_-]/g) || []).length;
+      const hasTooMuchNoise = /^(?:\s*\d){5,}\s*$/.test(altText) || delimiterCount >= 3 && wordCount <= 2;
+      if (hasTooMuchNoise) {
+        logResult({
+          test: warningTest,
+          type: "warning",
+          content: badAltTest,
+          // We re-use this key for the tooltip.
+          args: [altText],
+          dismiss: `WARNING${src + alt}`
+        });
+        return;
+      }
     }
     const tooLongTest = link ? "LINK_IMAGE_LONG_ALT" : "IMAGE_ALT_TOO_LONG";
-    const maxAltChars = State.option.checks[tooLongTest]?.maxLength || 250;
-    if (alt.length > maxAltChars) {
-      logResult({
-        test: tooLongTest,
-        type: "warning",
-        args: [alt.length, altText],
-        dismiss: src + alt
-      });
-      return;
+    if (State.option.checks[tooLongTest]) {
+      const maxAltChars = State.option.checks[tooLongTest]?.maxLength || 250;
+      if (alt.length > maxAltChars) {
+        logResult({
+          test: tooLongTest,
+          type: "warning",
+          args: [alt.length, altText],
+          dismiss: src + alt
+        });
+        return;
+      }
     }
     if (link && !Constants.Global.linkIgnoreStringPattern?.test(alt)) {
       const latTestName = linkTextLength === 0 ? "LINK_IMAGE_ALT" : "LINK_IMAGE_ALT_AND_TEXT";
@@ -3227,25 +3248,30 @@ function checkImages() {
         return;
       }
     }
-    if (figure && figcaption && figcaptionText.toLowerCase() === alt.toLowerCase()) {
-      logResult({
-        test: "IMAGE_FIGURE_DUPLICATE_ALT",
-        type: "warning",
-        args: [altText]
-      });
-      return;
+    if (State.option.checks.IMAGE_FIGURE_DUPLICATE_ALT) {
+      if (figure && figcaption && figcaptionText.toLowerCase() === alt.toLowerCase()) {
+        logResult({
+          test: "IMAGE_FIGURE_DUPLICATE_ALT",
+          type: "warning",
+          args: [altText]
+        });
+        return;
+      }
     }
-    const getVal = (attr) => $el.getAttribute(attr)?.trim().toLowerCase();
-    if ($el.hasAttribute("title") && getVal("title") === getVal("alt")) {
-      logResult({
-        test: "DUPLICATE_TITLE",
-        type: "warning",
-        content: State.option.checks.DUPLICATE_TITLE.content ? Lang.sprintf(State.option.checks.DUPLICATE_TITLE.content, altText) : Lang.sprintf(`${Lang._("DUPLICATE_TITLE")}<hr>${Lang._("IMAGE_PASS")}`, altText),
-        args: [altText],
-        inline: true,
-        dismiss: alt
-      });
-      return;
+    const duplicateTitleTest = State.option.checks.DUPLICATE_TITLE;
+    if (duplicateTitleTest) {
+      const getVal = (attr) => $el.getAttribute(attr)?.trim().toLowerCase();
+      if ($el.hasAttribute("title") && getVal("title") === getVal("alt")) {
+        logResult({
+          test: "DUPLICATE_TITLE",
+          type: "warning",
+          content: duplicateTitleTest.content ? Lang.sprintf(duplicateTitleTest.content, altText) : Lang.sprintf(`${Lang._("DUPLICATE_TITLE")}<hr>${Lang._("IMAGE_PASS")}`, altText),
+          args: [altText],
+          inline: true,
+          dismiss: alt
+        });
+        return;
+      }
     }
     if (!getCachedClosest($el, 'button, [role="button"]')) {
       if (Constants.Global.linkIgnoreStringPattern?.test(alt)) return;
@@ -3257,6 +3283,7 @@ function checkImages() {
       });
     }
   });
+  return;
 }
 function checkLabels() {
   if (!State.option.formLabelsPlugin) return;
@@ -3279,12 +3306,16 @@ function checkLabels() {
       ...params
     });
     if (type === "image") {
-      if (inputName === "") logResult({ test: "LABELS_MISSING_IMAGE_INPUT" });
-      return;
+      if (inputName === "" && State.option.checks.LABELS_MISSING_IMAGE_INPUT) {
+        logResult({ test: "LABELS_MISSING_IMAGE_INPUT" });
+        return;
+      }
     }
     if (type === "reset") {
-      logResult({ test: "LABELS_INPUT_RESET", type: "warning", developer: false });
-      return;
+      if (State.option.checks.LABELS_INPUT_RESET) {
+        logResult({ test: "LABELS_INPUT_RESET", type: "warning", developer: false });
+        return;
+      }
     }
     const hasPlaceholder = $el.placeholder && $el.placeholder !== 0;
     if (hasPlaceholder) {
@@ -3541,11 +3572,14 @@ function checkQA() {
           }
         }
         if (!hit) {
-          let textAfterBreak = p?.querySelector("br")?.nextSibling?.nodeValue;
-          if (textAfterBreak) {
-            textAfterBreak = textAfterBreak.replace(/<\/?[^>]+(>|$)/g, "").trim().substring(0, 2);
-            if (specialCharsMatch.test(textAfterBreak.charAt(0)) || firstPrefix === decrement(textAfterBreak) || isRoman && textAfterBreak.toLowerCase() === "ii" || !lastHitWasEmoji && textAfterBreak.match(emojiMatch)) {
-              hit = true;
+          const br = p?.querySelector("br");
+          if (br) {
+            let textAfterBreak = br.previousSibling?.textContent?.trim() ? br.nextSibling?.nodeValue : null;
+            if (textAfterBreak) {
+              textAfterBreak = textAfterBreak.replace(/<\/?[^>]+(>|$)/g, "").trim().substring(0, 2);
+              if (specialCharsMatch.test(textAfterBreak.charAt(0)) || firstPrefix === decrement(textAfterBreak) || isRoman && textAfterBreak.toLowerCase() === "ii" || !lastHitWasEmoji && textAfterBreak.match(emojiMatch)) {
+                hit = true;
+              }
             }
           }
         }
@@ -3939,14 +3973,14 @@ function getBackground($el, shadowDetection) {
     if (!node) return null;
     if (shadowDetection) {
       if (node.assignedSlot) return node.assignedSlot;
-      if (node instanceof ShadowRoot) return node.host;
+      if (node.nodeType === 11 && node.host) return node.host;
     }
     return node.parentElement || node.parentNode;
   };
   let targetEl = $el;
   let finalBackground = [255, 255, 255];
   while (targetEl && (targetEl.nodeType === 1 || targetEl.nodeType === 11)) {
-    if (targetEl instanceof ShadowRoot) {
+    if (targetEl.nodeType === 11 && targetEl.host) {
       targetEl = targetEl.host;
       continue;
     }
@@ -3962,7 +3996,7 @@ function getBackground($el, shadowDetection) {
         let parentEl = getVisualParent(targetEl);
         let parentBgColor = "rgba(255, 255, 255, 1)";
         while (parentEl && (parentEl.nodeType === 1 || parentEl.nodeType === 11)) {
-          if (parentEl instanceof ShadowRoot) {
+          if (parentEl.nodeType === 11 && parentEl.host) {
             parentEl = parentEl.host;
             continue;
           }
@@ -5205,13 +5239,15 @@ function checkEmbeddedContent() {
       return;
     }
     if (isNegativeTabindex($el)) {
-      pushResult$1({
-        test: "EMBED_UNFOCUSABLE",
-        element: $el,
-        dismiss: src($el),
-        developer: true
-      });
-      return;
+      if (State.option.checks.EMBED_UNFOCUSABLE) {
+        pushResult$1({
+          test: "EMBED_UNFOCUSABLE",
+          element: $el,
+          dismiss: src($el),
+          developer: true
+        });
+        return;
+      }
     }
     const aria = computeAriaLabel($el);
     const checkTitle = aria === "noAria" ? $el.getAttribute("title") || "" : aria;
@@ -8870,10 +8906,7 @@ const interfaceStrings = {
   unDismissOKButton: "Restore this alert marked as OK"
 };
 const englishOverrides = {
-  // @todo: Outline error explanations currently hidden.
-  /*errorOutlinePrefixSkippedLevel: '(flagged for skipped level)',
-  errorOutlinePrefixHeadingEmpty: '(empty heading)',
-  errorOutlinePrefixHeadingIsLong: '(flagged for length)',*/
+  // This is for ruleset-only overrides.
   SUS_ALT_STOPWORDS: [
     "image",
     "graphic",
