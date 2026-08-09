@@ -349,14 +349,48 @@ const handleInitialPanelInteraction = () => {
   hideInitialCount();
 };
 
+let pluralRules;
+let pluralRulesFor;
+
+/**
+ * CLDR plural category ("one", "two", "few", "many", "other") for a count in the
+ * active UI language. Returns "other" if the language code is unusable, which
+ * makes every language fall back to its single default form.
+ */
+const pluralCategory = (count) => {
+  const code = Lang.langStrings.LANG_CODE;
+  if (pluralRulesFor !== code) {
+    pluralRulesFor = code;
+    try {
+      pluralRules = new Intl.PluralRules(code);
+    } catch {
+      pluralRules = null;
+    }
+  }
+  return pluralRules ? pluralRules.select(count) : 'other';
+};
+
+/**
+ * Picks the string key for a counted phrase. Languages supply `${base}_${category}`
+ * only for the categories they actually inflect; anything absent falls back to
+ * `fallback`, so languages with a single plural form need no extra strings.
+ */
+export const pluralKey = (base, count, fallback = base) => {
+  const key = `${base}_${pluralCategory(count)}`;
+  return Lang.langStrings[key] ? key : fallback;
+};
+
 const initialPanel = (ifNo) => {
   if (UI.panelInitial && UI.totalCount >= UI.panelInitial) {
     UI.panelToggle.classList.add('ed11y-preview');
     UI.panelInitial = UI.totalCount;
+    UI.panelToggleTitle.innerHTML = '';
+    // 1 and 2 spell the number out; above that the count is prefixed to an inflected
+    // suffix. main_toggle_plural is the default; languages that inflect further add
+    // main_toggle_few / _many / _one / _two, keyed to their CLDR plural categories.
     if (UI.totalCount > 2) {
-      UI.panelToggleTitle.innerHTML = '';
-
-      UI.panelToggleTitle.textContent = `${UI.totalCount}${Lang._('main_toggle_plural')}`;
+      const suffix = pluralKey('main_toggle', UI.totalCount, 'main_toggle_plural');
+      UI.panelToggleTitle.textContent = `${UI.totalCount}${Lang._(suffix)}`;
     } else if (UI.totalCount > 1) {
       UI.panelToggleTitle.textContent = Lang._('main_toggle_2');
     } else {
