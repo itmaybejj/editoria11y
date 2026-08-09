@@ -267,12 +267,9 @@ export function updatePanel() {
         UI.panelShowDismissed.setAttribute('data-ed11y-pressed', 'false');
         UI.showDismissed = false;
       } else if (UI.dismissedCount === 1) {
-        const show = UI.english
-          ? Lang._('buttonShowHiddenAlert')
-          : Lang.sprintf(pluralKey('PANEL_DISMISS_BUTTON', 1), '1').textContent;
         UI.panelShowDismissed.querySelector('.ed11y-sr-only').textContent = UI.showDismissed
           ? preferredDismissHide
-          : show;
+          : Lang._('buttonShowHiddenAlert');
         UI.panelShowDismissed.dataset.ed11yPressed = `${UI.showDismissed}`;
         if (!UI.english) {
           UI.panelShowDismissed.ariaPressed = UI.showDismissed;

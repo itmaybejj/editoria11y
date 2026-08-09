@@ -45,7 +45,7 @@
 		"@playwright/test": "^1.58.2",
 		"browserslist": "^4.28.1",
 		"chokidar-cli": "^3.0.0",
-		"chromedriver": "^149.0.0",
+		"chromedriver": "^151.0.0",
 		"css-minify": "^2.1.0",
 		"eslint": "^9.39.1",
 		"lightningcss": "^1.31.1",

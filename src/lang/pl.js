@@ -229,7 +229,6 @@ export const interfaceStrings = {
 	NO_IMAGES: 'Nie znaleziono obrazów.',
 	OUTLINE: 'Nagłówki',
 	PANEL_DISMISS_BUTTON: `Pokaż %(dismissCount) ukrytych alertów`,
-	PANEL_DISMISS_BUTTON_one: `Pokaż %(dismissCount) ukryty alert`,
 	PANEL_DISMISS_BUTTON_few: `Pokaż %(dismissCount) ukryte alerty`,
 	PANEL_HEADING: 'Pokaż wizualizacje',
 	PANEL_HEADING_MISSING_ONE: 'Brakuje nagłówka poziomu 1.',

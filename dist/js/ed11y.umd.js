@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.1-730
+			* @version 3.0.1-809
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -1825,7 +1825,7 @@
       });
     }
   }
-  const version = "3.0.1-730";
+  const version = "3.0.1-809";
   const sprite = {
     alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
     close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -2409,13 +2409,32 @@ ${this.error.stack}
   const handleInitialPanelInteraction = () => {
     hideInitialCount();
   };
+  let pluralRules;
+  let pluralRulesFor;
+  const pluralCategory = (count) => {
+    const code = Lang.langStrings.LANG_CODE;
+    if (pluralRulesFor !== code) {
+      pluralRulesFor = code;
+      try {
+        pluralRules = new Intl.PluralRules(code);
+      } catch {
+        pluralRules = null;
+      }
+    }
+    return pluralRules ? pluralRules.select(count) : "other";
+  };
+  const pluralKey = (base, count, fallback = base) => {
+    const key = `${base}_${pluralCategory(count)}`;
+    return Lang.langStrings[key] ? key : fallback;
+  };
   const initialPanel = (ifNo) => {
     if (UI.panelInitial && UI.totalCount >= UI.panelInitial) {
       UI.panelToggle.classList.add("ed11y-preview");
       UI.panelInitial = UI.totalCount;
+      UI.panelToggleTitle.innerHTML = "";
       if (UI.totalCount > 2) {
-        UI.panelToggleTitle.innerHTML = "";
-        UI.panelToggleTitle.textContent = `${UI.totalCount}${Lang._("main_toggle_plural")}`;
+        const suffix = pluralKey("main_toggle", UI.totalCount, "main_toggle_plural");
+        UI.panelToggleTitle.textContent = `${UI.totalCount}${Lang._(suffix)}`;
       } else if (UI.totalCount > 1) {
         UI.panelToggleTitle.textContent = Lang._("main_toggle_2");
       } else {
@@ -6165,21 +6184,20 @@ ${this.error.stack}
         UI.showPanel = true;
         UI.panel.classList.remove("ed11y-shut");
         UI.panel.classList.add("ed11y-active");
-        const preferredDismissHide = UI.dismissedCount > 1 ? Lang.sprintf("buttonHideHiddenAlerts", UI.dismissedCount).textContent : Lang._("buttonHideHiddenAlert");
+        const preferredDismissHide = UI.dismissedCount > 1 ? Lang.sprintf(pluralKey("buttonHideHiddenAlerts", UI.dismissedCount), UI.dismissedCount).textContent : Lang._("buttonHideHiddenAlert");
         if (UI.dismissedCount === 0) {
           UI.panelShowDismissed.setAttribute("hidden", "");
           UI.panelShowDismissed.setAttribute("data-ed11y-pressed", "false");
           UI.showDismissed = false;
         } else if (UI.dismissedCount === 1) {
-          const show = UI.english ? Lang._("buttonShowHiddenAlert") : Lang.sprintf("PANEL_DISMISS_BUTTON", "1").textContent;
-          UI.panelShowDismissed.querySelector(".ed11y-sr-only").textContent = UI.showDismissed ? preferredDismissHide : show;
+          UI.panelShowDismissed.querySelector(".ed11y-sr-only").textContent = UI.showDismissed ? preferredDismissHide : Lang._("buttonShowHiddenAlert");
           UI.panelShowDismissed.dataset.ed11yPressed = `${UI.showDismissed}`;
           if (!UI.english) {
             UI.panelShowDismissed.ariaPressed = UI.showDismissed;
           }
           UI.panelShowDismissed.removeAttribute("hidden");
         } else {
-          UI.panelShowDismissed.querySelector(".ed11y-sr-only").textContent = UI.showDismissed ? preferredDismissHide : Lang.sprintf("PANEL_DISMISS_BUTTON", UI.dismissedCount).textContent;
+          UI.panelShowDismissed.querySelector(".ed11y-sr-only").textContent = UI.showDismissed ? preferredDismissHide : Lang.sprintf(pluralKey("PANEL_DISMISS_BUTTON", UI.dismissedCount), UI.dismissedCount).textContent;
           UI.panelShowDismissed.dataset.ed11yPressed = `${UI.showDismissed}`;
           if (!UI.english) {
             UI.panelShowDismissed.ariaPressed = UI.showDismissed;
@@ -6246,7 +6264,10 @@ ${this.error.stack}
         if (UI.dismissedCount > 0) {
           UI.panelCount.textContent = "i";
           if (!UI.showPanel) {
-            UI.panelToggleTitle.textContent = UI.dismissedCount > 1 ? Lang.sprintf("PANEL_DISMISS_BUTTON", UI.dismissedCount).textContent : Lang._("buttonShowHiddenAlert");
+            UI.panelToggleTitle.textContent = UI.dismissedCount > 1 ? Lang.sprintf(
+              pluralKey("PANEL_DISMISS_BUTTON", UI.dismissedCount),
+              UI.dismissedCount
+            ).textContent : Lang._("buttonShowHiddenAlert");
           }
         }
       }
@@ -7252,7 +7273,7 @@ ${this.error.stack}
     visualize();
     if (UI.totalCount === 0 && UI.dismissedCount > 0) {
       UI.panelCount.textContent = "i";
-      UI.panelToggleTitle.textContent = UI.dismissedCount === 1 ? Lang._("buttonShowHiddenAlert") : Lang.sprintf("PANEL_DISMISS_BUTTON", UI.dismissedCount).textContent;
+      UI.panelToggleTitle.textContent = UI.dismissedCount === 1 ? Lang._("buttonShowHiddenAlert") : Lang.sprintf(pluralKey("PANEL_DISMISS_BUTTON", UI.dismissedCount), UI.dismissedCount).textContent;
     }
     if (typeof UI.panel === "object") {
       UI.panel.classList.add("ed11y-shut");
@@ -7260,7 +7281,7 @@ ${this.error.stack}
       UI.panelToggle.ariaExpanded = false;
       if (!UI.showDismissed && typeof UI.panelShowDismissed === "function") {
         UI.panelShowDismissed.setAttribute("data-ed11y-pressed", "false");
-        UI.panelShowDismissed.querySelector(".ed11y-sr-only").textContent = UI.dismissedCount === 1 ? Lang._("buttonShowHiddenAlert") : Lang.sprintf("PANEL_DISMISS_BUTTON", UI.dismissedCount).textContent;
+        UI.panelShowDismissed.querySelector(".ed11y-sr-only").textContent = UI.dismissedCount === 1 ? Lang._("buttonShowHiddenAlert") : Lang.sprintf(pluralKey("PANEL_DISMISS_BUTTON", UI.dismissedCount), UI.dismissedCount).textContent;
       }
     }
   }

@@ -250,7 +250,6 @@ export const interfaceStrings = {
 	NOT_VISIBLE: 'Poznámka: tento obsah nemusí být viditelný. Hledejte ho uvnitř ohraničeného kontejneru.',
 	OUTLINE: 'Nadpisy',
 	PANEL_DISMISS_BUTTON: `Zobrazit %(dismissCount) skrytých upozornění`,
-	PANEL_DISMISS_BUTTON_one: `Zobrazit %(dismissCount) skryté upozornění`,
 	PANEL_DISMISS_BUTTON_few: `Zobrazit %(dismissCount) skrytá upozornění`,
 	PANEL_HEADING: 'Zobrazit vizualizace',
 	PANEL_HEADING_MISSING_ONE: 'Chybí nadpis 1. úrovně.',

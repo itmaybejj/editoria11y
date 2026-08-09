@@ -259,7 +259,6 @@ export const interfaceStrings = {
 	NO_IMAGES: 'Nenašli sa žiadne obrázky.',
 	OUTLINE: 'Nadpisy',
 	PANEL_DISMISS_BUTTON: `Zobraziť %(dismissCount) skrytých upozornení`,
-	PANEL_DISMISS_BUTTON_one: `Zobraziť %(dismissCount) skryté upozornenie`,
 	PANEL_DISMISS_BUTTON_few: `Zobraziť %(dismissCount) skryté upozornenia`,
 	PANEL_HEADING: 'Zobraziť vizualizácie',
 	PANEL_HEADING_MISSING_ONE: 'Chýba Nadpis 1.',

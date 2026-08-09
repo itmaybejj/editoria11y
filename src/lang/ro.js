@@ -237,7 +237,6 @@ export const interfaceStrings = {
 	NO_IMAGES: 'Nu s-au găsit imagini.',
 	OUTLINE: 'Titluri',
 	PANEL_DISMISS_BUTTON: `Afișați %(dismissCount) alerte ascunse`,
-	PANEL_DISMISS_BUTTON_one: `Afișați %(dismissCount) alertă ascunsă`,
 	PANEL_DISMISS_BUTTON_other: `Afișați %(dismissCount) de alerte ascunse`,
 	PANEL_HEADING: 'Afișați vizualizările',
 	PANEL_HEADING_MISSING_ONE: 'Lipsește Titlul 1.',
