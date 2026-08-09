@@ -363,7 +363,7 @@ const interfaceStrings = {
 	MISSING_ROOT: `Editoria11y no encontró ningún elemento que coincida con la configuración del área de verificación: <code>%(root)</code>`,
 	panelCheckAltText: `Verifique que cada imagen describa lo que significa en contexto y que no haya imágenes que contengan texto.`,
 	panelCheckOutline: `Esto muestra el esquema de encabezados. Verifique que coincida con la organización visual del contenido.`,
-	panel_HEADING_MISSING_ONE: 'Falta el Encabezado 1.',
+	PANEL_HEADING_MISSING_ONE: 'Falta el Encabezado 1.',
 	PANEL_NO_HEADINGS: 'No se encontraron encabezados.',
 	reportsLink: 'Abrir reportes del sitio',
 	toggleDisabled: 'No hay contenido disponible para que Editoria11y lo revise.',

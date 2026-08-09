@@ -585,7 +585,7 @@ const interfaceStrings = {
   MISSING_ROOT: `Az Editoria11y nem talált olyan elemeket, amelyek megfelelnek az ellenőrzési terület konfigurációjának: <code>%(root)</code>`,
   panelCheckAltText: `Ellenőrizze, hogy minden kép visszaadja‑e a jelentését a kontextusban, és hogy nincs‑e „képben lévő szöveg”.`,
   panelCheckOutline: `Ez megjeleníti a címsorstruktúrát. Ellenőrizze, hogy megfelel‑e a vizuális szerkezetnek.`,
-  panel_HEADING_MISSING_ONE: "Hiányzik az 1. szintű címsor.",
+  PANEL_HEADING_MISSING_ONE: "Hiányzik az 1. szintű címsor.",
   PANEL_NO_HEADINGS: "Nem találhatók címsorok.",
   reportsLink: "Webhelyjelentések megnyitása",
   toggleDisabled: "Nincs olyan tartalom, amit az Editoria11y ellenőrizni tudna.",

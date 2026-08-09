@@ -618,7 +618,7 @@
     MISSING_ROOT: `Editoria11y n'a trouvé aucun élément correspondant à la configuration de la zone de vérification : <code>%(root)</code>`,
     panelCheckAltText: `Vérifiez que chaque image décrit ce qu’elle signifie dans le contexte et qu’il n’y a pas d’images contenant du texte.`,
     panelCheckOutline: `Ceci affiche la structure des en‑têtes. Vérifiez qu’elle correspond à l’organisation visuelle du contenu.`,
-    panel_HEADING_MISSING_ONE: "En‑tête de niveau 1 manquant.",
+    PANEL_HEADING_MISSING_ONE: "En‑tête de niveau 1 manquant.",
     PANEL_NO_HEADINGS: "Aucun en‑tête trouvé.",
     reportsLink: "Ouvrir les rapports du site",
     toggleDisabled: "Aucun contenu disponible à vérifier pour Editoria11y.",

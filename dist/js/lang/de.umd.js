@@ -644,7 +644,7 @@
     MISSING_ROOT: `Editoria11y hat keine Elemente gefunden, die der Konfiguration des Prüfbereichs entsprachen: <code>%(root)</code>`,
     panelCheckAltText: `Prüfen Sie, dass jedes Bild seine Bedeutung im Kontext beschreibt und dass es keine Bilder mit eingebettetem Text gibt.`,
     panelCheckOutline: `Dies zeigt die Überschriftenstruktur. Stellen Sie sicher, dass sie der visuellen Struktur entspricht.`,
-    panel_HEADING_MISSING_ONE: "Überschrift Ebene 1 fehlt.",
+    PANEL_HEADING_MISSING_ONE: "Überschrift Ebene 1 fehlt.",
     PANEL_NO_HEADINGS: "Keine Überschriften gefunden.",
     reportsLink: "Website‑Berichte öffnen",
     toggleDisabled: "Für Editoria11y ist kein prüfbarer Inhalt verfügbar.",
