@@ -407,6 +407,7 @@ const initialPanel = (ifNo) => {
 
 export function panelLabel(show = UI.showPanel) {
   if (show) {
+    // @todo: Strings are now available to add other languages to the english branch.
     if (UI.english) {
       initialPanel(
         UI.totalCount > 0 ? Lang._('main_toggle_hide_alerts') : Lang._('main_toggle_hide'),

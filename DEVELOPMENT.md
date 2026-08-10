@@ -19,6 +19,24 @@ npm run dev    # starts at http://localhost:8080, opens /tests/all_tests.htm
 ```
 Stop with <kbd>Ctrl+C</kbd>.
 
+# Fixing Dev conflicts
+Ideally remember after a squash commit to run:
+```
+git checkout 3.0.x-dev
+git fetch origin
+git reset --hard origin/3.0.x
+git push --force-with-lease origin 3.0.x-dev
+```
+
+To resolve an existing conflict:
+```
+git checkout 3.0.x-dev
+git merge -s ours 3.0.x -m "Record squash merge of 3.0.x into 3.0.x-dev (no content change)"
+git push origin 3.0.x-dev
+```
+
+
+
 # ACT Rule Conformance Testing
 
 Editoria11y includes a test suite that measures conformance against the [W3C ACT Rules](https://www.w3.org/WAI/standards-guidelines/act/rules/) — standardized test cases for accessibility checkers.
