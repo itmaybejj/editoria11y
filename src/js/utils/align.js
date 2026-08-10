@@ -67,7 +67,7 @@ export function closestScrollable(el) {
 
 // Applies parameters and avoids other widgets.
 export function alignPanel() {
-  if (!UI.panelElement) {
+  if (!UI.panel || typeof UI.panel.classList?.add !== 'function') {
     return false;
   }
   if (State.option.panelPosition === 'left') {
@@ -138,14 +138,42 @@ export function alignAlts() {
   });
 }
 
+// Editing focus can live in the main document or inside a cross-document
+// fixedRoot (iframe), where the top document's active element is the <iframe>
+// itself — so check each relevant document for a focused editable.
+function editableFocused() {
+  const selector = '[contenteditable]:focus, [contenteditable] :focus';
+  if (document.querySelector(selector)) {
+    return true;
+  }
+  if (Array.isArray(State.option.fixedRoots)) {
+    return State.option.fixedRoots.some((root) => {
+      const doc = root?.ownerDocument;
+      return doc && doc !== document && !!doc.querySelector(selector);
+    });
+  }
+  return false;
+}
+
+// Offset an iframe-relative rect into main-document coordinates by its frame.
+function toMainDocRect(rect, frame) {
+  return {
+    top: rect.top + frame.top,
+    left: rect.left + frame.left,
+    bottom: rect.bottom + frame.top,
+    right: rect.right + frame.left,
+  };
+}
+
+const ZERO_FRAME = { top: 0, left: 0 };
+const frameFor = (fixedRoot) =>
+  fixedRoot && UI.positionedFrames[fixedRoot] ? UI.positionedFrames[fixedRoot] : ZERO_FRAME;
+
 /**
  * Hide tips that are in front of text currently being edited.
  * */
 export function checkEditableIntersects(focusKnown = false) {
-  if (
-    !UI.activeRange ||
-    (!focusKnown && !document.querySelector('[contenteditable]:focus, [contenteditable] :focus'))
-  ) {
+  if (!UI.activeRange || (!focusKnown && !editableFocused())) {
     // Reset classes to measure.
     UI.jumpList?.forEach((el) => {
       if (el.matches('.intersecting')) {
@@ -154,25 +182,31 @@ export function checkEditableIntersects(focusKnown = false) {
     });
     return;
   }
-  const activeRects = UI.activeRange.getBoundingClientRect();
+
+  // Refresh frame offsets so cross-document rects convert with current
+  // scroll/resize positions (this path can run without alignButtons firing).
+  updateFixedRootPositions();
+
+  // Convert the active range to main-document coordinates using the frame the
+  // cursor actually lives in, which may differ from any given tip's frame.
+  const rangeRect = toMainDocRect(
+    UI.activeRange.getBoundingClientRect(),
+    frameFor(UI.activeRangeFrame),
+  );
 
   UI.jumpList?.forEach((el) => {
     const toggle = el.shadowRoot.querySelector('.toggle');
 
-    const framePositioner =
-      el.result.fixedRoot && UI.positionedFrames[el.result.fixedRoot]
-        ? UI.positionedFrames[el.result.fixedRoot]
-        : { top: 0, left: 0 };
-
-    const rects = {};
-    rects.top = activeRects.top + framePositioner.top;
-    rects.left = activeRects.left + framePositioner.left;
-    rects.bottom = activeRects.bottom + framePositioner.top;
-    rects.right = activeRects.right + framePositioner.left;
+    // The flagged element is iframe-relative for fixedRoot results, so offset it
+    // by its own frame; the toggle is already positioned in the main document.
+    const targetRect = toMainDocRect(
+      el.result.element.getBoundingClientRect(),
+      frameFor(el.result.fixedRoot),
+    );
 
     if (
-      intersect(rects, el.result.element.getBoundingClientRect(), 0) ||
-      intersect(rects, toggle.getBoundingClientRect(), 0)
+      intersect(rangeRect, targetRect, 0) ||
+      intersect(rangeRect, toggle.getBoundingClientRect(), 0)
     ) {
       el.classList.add('intersecting');
       toggle.classList.add('intersecting');
@@ -180,6 +214,22 @@ export function checkEditableIntersects(focusKnown = false) {
       el.classList.remove('intersecting', 'was-intersecting');
       toggle.classList.remove('intersecting', 'was-intersecting');
     }
+  });
+}
+
+// Refresh cached iframe offsets used by positionHighlight (run.js) and
+// alignButtons. Called on show, scroll, and resize so the positioning formula
+// always reads fresh frame rects. positionedFrames is kept index-parallel to
+// State.option.fixedRoots: positionedFrames[i] is the rect of
+// framePositioners[i] (or a zero offset when that root has no frame), so a
+// result's data-ed11y-root index maps straight to its frame offset.
+export function updateFixedRootPositions() {
+  UI.positionedFrames.length = 0;
+  if (!Array.isArray(State.option.framePositioners)) return;
+  State.option.framePositioners.forEach((positioner) => {
+    // Push a zero offset for roots without a frame rather than skipping, so the
+    // array stays aligned with fixedRoots / data-ed11y-root indices.
+    UI.positionedFrames.push(positioner ? positioner.getBoundingClientRect() : { top: 0, left: 0 });
   });
 }
 
@@ -192,15 +242,7 @@ export function alignButtons() {
   // Reading and writing in a loop creates paint thrashing.
   // We iterate the array for reads, then iterate for writes.
 
-  if (State.option.fixedRoots) {
-    UI.positionedFrames.length = 0;
-
-    State.option.fixedRoots.forEach((root) => {
-      if (root.framePositioner) {
-        UI.positionedFrames.push(root.framePositioner.getBoundingClientRect());
-      }
-    });
-  }
+  updateFixedRootPositions();
 
   // Used for crude intersection detection.
   let previousNudgeTop = 0;

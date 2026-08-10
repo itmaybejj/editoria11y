@@ -277,6 +277,10 @@ button.ed11y-jump svg {
   display: none;
 }
 
+button.ed11y-jump:hover {
+  border-radius: 0 .45em .45em 0;
+}
+
 button.ed11y-jump:hover svg {
   display: initial;
   width: .643em;
@@ -415,14 +419,14 @@ button.ed11y-jump:hover .toggle-count {
   min-width: 1.5em;
   height: 1.5em;
   padding: .375em;
-  font-size: clamp(1em, 2vw, 1.2em);
+  font-size: 1.2em;
   transition: box-shadow .1s;
   display: flex;
   position: relative;
 }
 
 .ed11y-toggle-circle .close-icon {
-  width: .9em;
+  width: 1em;
   margin: 0;
 }
 
@@ -455,6 +459,11 @@ button.ed11y-jump:hover .toggle-count {
 
 #ed11y-toggle .errors-icon {
   width: .75em;
+}
+
+#ed11y-toggle:hover .ed11y-toggle-circle {
+  border: 1px solid #0000;
+  margin: -1px;
 }
 
 :is(.ed11y-active #ed11y-toggle:hover, .ed11y-active #ed11y-toggle:focus-visible) .errors-icon, :is(.ed11y-active #ed11y-toggle:hover, .ed11y-active #ed11y-toggle:focus-visible) .pass-icon {
@@ -525,9 +534,7 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 .ed11y-pass #ed11y-toggle:hover .ed11y-toggle-circle {
-  box-shadow: inset 0 0 0 1px #fffe,
-			inset 0 0 0 3px var(--ed11y-primary, #276499),
-			0 0 1px var(--ed11y-primary, #276499);
+  box-shadow: inset 0 0 0 1px var(--ed11y-activeBackground, #276499);
 }
 
 .ed11y-pass #ed11y-toggle:hover .ed11y-toggle-circle .close-icon {

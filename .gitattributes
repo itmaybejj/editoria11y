@@ -1,0 +1,8 @@
+# Build artifacts: always take incoming on merge/pull. They are regenerated
+# from src/ before every commit, so conflicts in them are never meaningful —
+# both branches produced the same logical output from different inputs.
+#
+# Requires a one-time per-clone setup of the `theirs` driver (see DEVELOPMENT.md):
+#   git config merge.theirs.driver "cp -f %B %A"
+dist/** merge=theirs
+scripts/sa11y-check-keys.json merge=theirs

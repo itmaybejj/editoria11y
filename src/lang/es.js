@@ -8,6 +8,7 @@ const testNames = {
 	ALT_PLACEHOLDER: 'Este texto alternativo podría ser un marcador de posición',
 	ALT_UNPRONOUNCEABLE: 'Este texto alternativo es impronunciable',
 	BTN_EMPTY: 'El botón no tiene una etiqueta accesible',
+	BTN_UNPRONOUNCEABLE: 'Este botón no se puede pronunciar',
 	BTN_EMPTY_LABELLEDBY: 'El botón tiene una etiqueta ARIA no válida',
 	BTN_ROLE_IN_NAME: 'El nombre del botón repite la palabra «botón»',
 	CONTRAST_ERROR: 'El texto no tiene suficiente contraste para ser fácilmente legible',
@@ -26,6 +27,7 @@ const testNames = {
 	EMBED_UNFOCUSABLE: 'Un frame con tabindex="‑1" no será accesible por teclado.',
 	EMBED_VIDEO: '¿Este video está correctamente subtitulado?',
 	HEADING_EMPTY: 'Este encabezado no tiene texto',
+	HEADING_UNPRONOUNCEABLE: 'Este encabezado no se puede pronunciar',
 	HEADING_EMPTY_WITH_IMAGE: 'Esta imagen se usa como encabezado, por lo que necesita texto alternativo',
 	HEADING_FIRST: 'El primer encabezado en esta página es un subtítulo',
 	HEADING_LONG: '¿Puede este encabezado ser más corto?',
@@ -35,7 +37,7 @@ const testNames = {
 	IMAGE_ALT_TOO_LONG: '¿Puede ser más breve este texto alternativo?',
 	IMAGE_DECORATIVE: '¿Esta imagen realmente no tiene significado?',
 	IMAGE_DECORATIVE_CAROUSEL: 'Imagen en un carrusel o galería marcada como decorativa',
-	IMAGE_FIGURE_DECORATIVE: 'Revisión manual: imagen con pie de foto sin texto alternativo',
+	IMAGE_FIGURE_DECORATIVE: 'Esta imagen con pie de foto no tiene texto alternativo',
 	IMAGE_FIGURE_DUPLICATE_ALT: 'El texto alternativo no debe ser igual al del pie de foto',
 	LABELS_ARIA_LABEL_INPUT: '¿Hay una etiqueta visible para este campo?',
 	LABELS_PLACEHOLDER: 'Prefiera etiquetas visibles a los marcadores de posición',
@@ -48,7 +50,7 @@ const testNames = {
 	LINK_ALT_MAYBE_BAD: 'Este texto alternativo vinculado podría no ser claro ni conciso',
 	LINK_ALT_MAYBE_BAD_WARNING: 'Este texto alternativo vinculado podría no ser claro ni conciso',
 	LINK_ALT_UNPRONOUNCEABLE: 'Las imágenes vinculadas necesitan texto alternativo pronunciable',
-	LINK_CLICK_HERE: 'Revisión manual: el enlace contiene «haz clic aquí»',
+	LINK_CLICK_HERE: 'Este enlace contiene «haz clic aquí»',
 	LINK_DOI: 'Vincula los títulos de artículos, no los números DOI',
 	LINK_EMPTY: 'Este enlace no contiene palabras.',
 	LINK_EMPTY_LABELLEDBY: 'Enlace con atributo «aria‑labelledby» no válido',
@@ -56,11 +58,11 @@ const testNames = {
 	LINK_UNPRONOUNCEABLE: 'Este enlace no se puede pronunciar',
 	LINK_FILE_EXT: 'El enlace apunta a un archivo sin advertencia',
 	LINK_IDENTICAL_NAME: 'Varios enlaces con el mismo texto dirigen a páginas diferentes',
-	LINK_IMAGE_ALT: 'Revisión manual: imagen vinculada con texto alternativo',
+	LINK_IMAGE_ALT: '¿Este texto alternativo describe el enlace o la imagen?',
 	LINK_IMAGE_ALT_AND_TEXT: '¿Este texto alternativo tiene sentido como parte del enlace?',
 	LINK_IMAGE_LONG_ALT: '¿Puede este texto alternativo vinculado ser más corto?',
 	LINK_IMAGE_NO_ALT_TEXT: 'Esta imagen vinculada necesita texto alternativo',
-	LINK_IMAGE_TEXT: 'Revisión manual: imagen dentro de un enlace marcada como decorativa.',
+	LINK_IMAGE_TEXT: '¿Esta imagen vinculada necesita una descripción?',
 	LINK_LABEL: 'Etiqueta de enlace',
 	LINK_MAYBE_BUTTON: '¿Es este enlace en realidad un botón?',
 	LINK_NEW_TAB: '¿Este enlace abre una pestaña nueva sin advertencia?',
@@ -68,7 +70,7 @@ const testNames = {
 	LINK_STOPWORD: 'Este enlace solo contiene palabras genéricas',
 	LINK_STOPWORD_ARIA: 'El propósito de este enlace está oculto visualmente',
 	LINK_SUS_ALT: '¿El texto alternativo describe el enlace o la imagen?',
-	LINK_SYMBOLS: 'Revisión manual: ¿los símbolos o emojis en este enlace son significativos?',
+	LINK_SYMBOLS: '¿Los símbolos o emojis en este enlace son significativos?',
 	LINK_URL: 'El texto del enlace no debe ser una URL',
 	LANG_MISMATCH: 'La etiqueta de idioma no coincide con el contenido',
 	LANG_OF_PARTS: 'Este contenido parece estar en un idioma diferente',
@@ -84,7 +86,7 @@ const testNames = {
 	MISSING_ALT: 'HTML no válido: la imagen no tiene atributo alt',
 	MISSING_ALT_LINK: 'HTML no válido: la imagen vinculada no tiene atributo alt',
 	MISSING_ALT_LINK_HAS_TEXT: 'HTML no válido: la imagen dentro de un enlace no tiene atributo alt',
-	QA_BAD_LINK: 'Revisión manual: el destino del enlace puede ser inválido',
+	QA_BAD_LINK: 'El destino de este enlace puede ser inválido',
 	QA_BLOCKQUOTE: '¿Debería esta cita ser un encabezado?',
 	QA_DOCUMENT: '¿Este documento ha sido etiquetado para lectores de pantalla?',
 	QA_FAKE_HEADING: '¿Este texto en negrita debería ser un encabezado?',
@@ -142,6 +144,7 @@ const tips = {
 	BTN_TIP: `${why.buttons}`,
 
 	BTN_ROLE_IN_NAME: `<p><strong>Etiqueta para lectores de pantalla:</strong> <i>%(TEXT)</i></p><p>Los lectores de pantalla usan la palabra «botón» para anunciar que están describiendo un botón, por lo que esta palabra es repetitiva.</p><p>${why.fix}La etiqueta del botón debe coincidir con su acción. Si la etiqueta visible es un ícono en lugar de texto, etiquete el botón con el significado del ícono, por ejemplo: «Reproducir», «Buscar» o «Menú».</p>`,
+	BTN_UNPRONOUNCEABLE: `<p><strong>Texto del botón:</strong> <i>%(TEXT)</i></p><p>${why.fix}Añada texto, un título o un aria-label que describa su destino.</p><div class="why"><p>Consejo: Los lectores de pantalla no pueden describir botones que solo contengan espacios o símbolos. Quedan silenciosos ("Botón, [...pausa incómoda donde debería estar la etiqueta del botón...]"), o leen el nombre del símbolo.</p></div>`,
 
 	CONTRAST_WARNING: 'Una imagen de fondo o un degradado impide a este verificador determinar con seguridad el color detrás de este texto. Use el selector de color a continuación para verificar manualmente.',
 
@@ -162,6 +165,7 @@ const tips = {
 	EMBED_VIDEO: `<p>Este verificador no puede «ver» si los videos tienen subtítulos, ni determinar si alguien los ha revisado, por lo que se necesita una verificación manual.</p><p>${why.fix}Asegúrese de que haya disponibles <a href="https://www.w3.org/WAI/media/av/captions/">subtítulos precisos («CC»)</a>, y verifique que los hablantes y los efectos de sonido significativos estén correctamente identificados.</p>`,
 
 	HEADING_EMPTY: `<p>Los encabezados vacíos crean huecos confusos en el esquema de la página.</p><p>${why.fix}Agregue texto a este encabezado o elimine esta línea vacía.</p>${why.headings}`,
+	HEADING_UNPRONOUNCEABLE: `<p>Los encabezados vacíos crean huecos confusos en el esquema de la página.</p><p>${why.fix}Agregue texto legible a este encabezado, o conviértalo en un párrafo.</p>${why.headings}`,
 
 	HEADING_EMPTY_WITH_IMAGE: `<p>Los encabezados vacíos crean huecos confusos en el esquema de la página.</p><p>${why.fix}Si esto no es un encabezado, cambie su formato de <code>Encabezado %(level)</code> a <code>Párrafo</code>. De lo contrario, plasme el significado de la imagen en su alt.</p>${why.headings}`,
 
@@ -220,7 +224,7 @@ const tips = {
 
 	LINK_FILE_EXT: `<p><strong>Texto del enlace:</strong> <i>%(TEXT)</i></p><p>Este enlace apunta a un archivo descargable (PDF, MP3, Zip, Word, etc.) sin advertencia.</p><p>${why.fix}Use texto o un ícono para <a href="https://itmaybejj.github.io/linkpurpose/">indicar el tipo de archivo</a> en el propio enlace.</p><p class="why">Para archivos grandes, considere incluir el tamaño. Ejemplo: "Informe anual (PDF, 3 MB)"</p>`,
 
-	LINK_IDENTICAL_NAME: `<p>Texto del enlace: <i>%(TEXT)</i></p><p>${why.fix}Reescriba los enlaces que llevan a diferentes destinos usando los títulos únicos de cada destino.</p>${why.links}`,
+	LINK_IDENTICAL_NAME: `<p><strong>Texto del enlace:</strong> <i>%(TEXT)</i></p><p>${why.fix}Reescriba los enlaces que llevan a diferentes destinos usando los títulos únicos de cada destino.</p>${why.links}`,
 
 	LINK_IMAGE_ALT: `<p><strong>Texto alternativo:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Use el título del destino del enlace como texto alternativo para las imágenes vinculadas.</p>${why.imageLinks}`,
 
@@ -276,7 +280,7 @@ const tips = {
 
 	QA_FAKE_LIST: `<p>${why.fix}Si <i>%(TEXT)</i> forma parte de una lista, aplique formato de lista.</p><div class="why"><p>Las listas tienen estructura visual y técnica:</p><ol><li>Alinean sus elementos y mejoran la lectura.</li><li>Son legibles por máquina: los lectores de pantalla anuncian "ítem 3 de 7".</li></ol><p>Un párrafo que empieza con un número no es una lista real.</p></div>`,
 
-	QA_IN_PAGE_LINK: `<p><strong>Enlace:</strong> <i>%(TEXT)</i></p><p><strong>URL:</strong> <code>#%(ID)</code></p><p>El destino de este enlace no coincide con ningún elemento de la página.</p><div class="why"><p>Nota para desarrolladores: si el enlace dispara un evento JavaScript, pruebe su funcionamiento con teclado antes de añadirlo a la lista de exclusión.</p></div>`,
+	QA_IN_PAGE_LINK: `<p><strong>URL:</strong> <i>#%(ID)</i></p><p><strong>Enlace:</strong> <code>%(TEXT)</code></p><p>El destino de este enlace no coincide con ningún elemento de la página.</p><div class="why"><p>Nota para desarrolladores: si el enlace dispara un evento JavaScript, pruebe su funcionamiento con teclado antes de añadirlo a la lista de exclusión.</p></div>`,
 
 	QA_JUSTIFY: `<p>El texto justificado añade espacios irregulares, lo que dificulta la lectura a muchas personas.</p><p>${why.fix}Use alineación a la izquierda.</p>`,
 
@@ -359,7 +363,7 @@ const interfaceStrings = {
 	MISSING_ROOT: `Editoria11y no encontró ningún elemento que coincida con la configuración del área de verificación: <code>%(root)</code>`,
 	panelCheckAltText: `Verifique que cada imagen describa lo que significa en contexto y que no haya imágenes que contengan texto.`,
 	panelCheckOutline: `Esto muestra el esquema de encabezados. Verifique que coincida con la organización visual del contenido.`,
-	panel_HEADING_MISSING_ONE: 'Falta el Encabezado 1.',
+	PANEL_HEADING_MISSING_ONE: 'Falta el Encabezado 1.',
 	PANEL_NO_HEADINGS: 'No se encontraron encabezados.',
 	reportsLink: 'Abrir reportes del sitio',
 	toggleDisabled: 'No hay contenido disponible para que Editoria11y lo revise.',
@@ -372,4 +376,5 @@ const interfaceStrings = {
 export const lang = {
 	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
 	testNames: testNames,
+	ruleset: Sa11yStrings.ruleset,
 }

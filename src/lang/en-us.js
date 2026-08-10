@@ -7,4 +7,5 @@ import { englishOverrides } from './baseEnglishOnly.js';
 export const lang = {
 	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips, englishOverrides),
 	testNames: testNames,
+	ruleset: Object.assign({}, Sa11yStrings.ruleset, englishOverrides),
 };

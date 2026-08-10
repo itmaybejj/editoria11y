@@ -1,6 +1,6 @@
 {
 	"name": "editoria11y",
-	"version": "3.0.0",
+	"version": "3.0.1",
 	"sa11yVersion": "4.4.2",
 	"description": "Editoria11y is a content accessibility checker that shows results inline in Web pages and rich text editors.",
 	"main": "src/js/ed11y.js",
@@ -23,8 +23,8 @@
 	"scripts": {
 		"build:css": "node scripts/build-css.js",
 		"build:js": "node scripts/build.js",
-		"build": "npm run lint:fix && rimraf dist && npm run build:css && node scripts/check-test-keys.js --emit-artifact && npm run build:js",
-		"check:keys": "node scripts/check-test-keys.js",
+		"build": "npm run lint:fix && rimraf dist && npm run build:css && npm run build:js",
+		"check:keys": "node --import ./scripts/register-sa11y-hook.js scripts/check-test-keys.js",
 		"lint": "biome check src",
 		"lint:fix": "biome check --write src",
 		"lint:fix-unsafe": "biome check --write --unsafe src",
@@ -45,7 +45,7 @@
 		"@playwright/test": "^1.58.2",
 		"browserslist": "^4.28.1",
 		"chokidar-cli": "^3.0.0",
-		"chromedriver": "^147.0.0",
+		"chromedriver": "^151.0.0",
 		"css-minify": "^2.1.0",
 		"eslint": "^9.39.1",
 		"lightningcss": "^1.31.1",

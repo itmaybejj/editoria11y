@@ -17,9 +17,6 @@ const citationPattern =
 const urlEndings =
   /\b(?:\.edu\/|\.gob\/|\.gov\/|\.app\/|\.com\/|\.net\/|\.org\/|\.us\/|\.ca\/|\.de\/|\.icu\/|\.uk\/|\.ru\/|\.info\/|\.top\/|\.xyz\/|\.tk\/|\.cn\/|\.ga\/|\.cf\/|\.nl\/|\.io\/|\.fr\/|\.pe\/|\.nz\/|\.pt\/|\.es\/|\.pl\/|\.ua\/)\b/i;
 
-// Regex pattern to match any special characters (that isn't alpha numeric)
-const specialCharPattern = /[^a-zA-Z0-9]/;
-
 // Regex pattern to match HTML symbols commonly used as CTAs in link text.
 const htmlSymbols = /([<>↣↳←→↓«»↴]+)/;
 
@@ -41,6 +38,10 @@ const checkStopWords = (textContent, stopWordsSet, stripStrings) => {
 export default function checkLinkText() {
   const seen = {};
   Elements.Found.Links.forEach(($el) => {
+    // Track if this element threw an error/warning to prevent showing a 'good' label
+    let hasIssue = false;
+    let deferGoodLabel = null;
+
     // Attributes.
     const href = $el.href ? Utils.standardizeHref($el) : '';
     const titleAttr = $el.getAttribute('title');
@@ -84,17 +85,25 @@ export default function checkLinkText() {
     const fileTypeMatch = $el.matches(cssFileTypeSelectors);
 
     // Push to results array.
-    const logResult = (params) =>
-      pushResult({
+    const logResult = (params) => {
+      const type = params.type || 'warning';
+
+      // If the log is an error or a warning, flag the element as having an issue
+      if (type === 'error' || type === 'warning') {
+        hasIssue = true;
+      }
+
+      return pushResult({
         element: $el,
-        type: params.type || 'warning',
+        type: type,
         dismiss: params.dismiss || href,
         inline: true,
         ...params,
       });
+    };
 
     // Do not conflict with alt text module.
-    if (!$el.querySelector('img')) {
+    if (!$el.querySelector('img') || hasAria) {
       // Links with ARIA
       if (hasAria && linkText.length !== 0) {
         // General warning for visible non-descript link text, regardless of ARIA label.
@@ -136,10 +145,10 @@ export default function checkLinkText() {
             developer: true,
           });
         } else {
-          // If the link has any ARIA, append a "Good" link button.
+          // If the link has any ARIA, queue up a "Good" link button.
           // Developer check: so full accessible name is exposed (without ignores).
           const accessibleName = Utils.removeWhitespace(computeAccessibleName($el));
-          logResult({
+          deferGoodLabel = {
             test: 'LINK_LABEL',
             type: 'good',
             args: [accessibleName],
@@ -147,7 +156,7 @@ export default function checkLinkText() {
             dismiss: strippedLinkText,
             position: 'afterend',
             developer: true,
-          });
+          };
         }
       }
 
@@ -180,13 +189,11 @@ export default function checkLinkText() {
         containsNewWindowPhrases === strippedLinkText
       ) {
         triggerStopWord();
-        return;
       }
 
       /* ******************* */
       /*  Empty hyperlinks   */
       /* ******************* */
-
       if (linkText.length === 0) {
         if (hasAriaLabelledby) {
           // Has ariaLabelledby attribute but empty accessible name.
@@ -231,7 +238,7 @@ export default function checkLinkText() {
       }
 
       /* ************************** */
-      /*  Link text quality checks. */
+      /* Link text quality checks. */
       /* ************************** */
 
       // 1. Check for exact stop words. Strip "new window" phrases by default.
@@ -255,10 +262,7 @@ export default function checkLinkText() {
         lowercaseLinkText.startsWith('http') ||
         Boolean(lowercaseLinkText.match(urlEndings));
 
-      // 5. Match special characters exactly 1 character in length.
-      const isSingleSpecialChar = linkText.length === 1 && specialCharPattern.test(linkText);
-
-      // 6. Match HTML symbols.
+      // 5. Match HTML symbols.
       const matchedSymbol = lowercaseLinkText.match(htmlSymbols)?.[0];
 
       if (isStopWord) {
@@ -290,16 +294,18 @@ export default function checkLinkText() {
           args: [matchedSymbol, linkText],
           dismiss: strippedLinkText,
         });
-      } else if ((isSingleSpecialChar || matchedSymbol) && !titleAttr) {
+      } else if (!Constants.Global.unpronounceablePattern.test(linkText) && !titleAttr) {
         // Link is ONLY a period, comma, or special character.
+        const pua = /[\uE000-\uF8FF]/gu.test(linkText)
+          ? 'LINK_EMPTY_NO_LABEL'
+          : 'LINK_UNPRONOUNCEABLE';
         logResult({
-          test: 'LINK_UNPRONOUNCEABLE',
+          test: pua,
           type: 'error',
           args: [linkText],
-          content: Lang._('LINK_UNPRONOUNCEABLE') + Lang._('LINK_TIP'),
+          content: Lang._(pua) + Lang._('LINK_TIP'),
           position: 'afterend',
         });
-        return;
       }
 
       // Uses "click here" in the link text or accessible name.
@@ -369,22 +375,17 @@ export default function checkLinkText() {
     }
 
     /* ************************************************************** */
-    /*  Additional link checks previously from quality-assurance.js   */
+    /* Additional link checks previously from quality-assurance.js   */
     /* ************************************************************** */
-    const hasExtension = $el.matches(Constants.Global.documentSources);
-    const hasPDF = State.option.checks.QA_PDF?.sources
-      ? $el.matches(State.option.checks.QA_PDF.sources)
-      : $el.matches('a[href$=".pdf"], a[href*=".pdf?"]');
-
-    if (hasExtension) {
+    if (Constants.Global.pdfSources && $el.matches(Constants.Global.pdfSources)) {
       logResult({
-        test: 'QA_DOCUMENT',
+        test: 'QA_PDF',
         args: [linkText],
         dismissSuffix: href,
       });
-    } else if (hasPDF) {
+    } else if (Constants.Global.documentSources && $el.matches(Constants.Global.documentSources)) {
       logResult({
-        test: 'QA_PDF',
+        test: 'QA_DOCUMENT',
         args: [linkText],
         dismissSuffix: href,
       });
@@ -450,6 +451,11 @@ export default function checkLinkText() {
           }
         }
       }
+    }
+
+    // Final check for this element: log the "Good" label if no issues were found.
+    if (deferGoodLabel && !hasIssue) {
+      logResult(deferGoodLabel);
     }
   });
 }

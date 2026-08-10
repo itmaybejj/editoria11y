@@ -56,6 +56,7 @@ export class Ed11yElementResult extends HTMLElement {
       host.setAttribute('data-ed11y-action', stateChange);
       if (stateChange === 'open') {
         window.setTimeout(() => {
+          // todo: what about fixed roots?
           const activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
           activeTip?.shadowRoot.querySelector('.title').focus();
         }, 500);

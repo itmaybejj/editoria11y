@@ -37,8 +37,10 @@ if git diff --cached --name-only --diff-filter=ACMR | grep -q '^src/'; then
 	npm run lint:fix
 	npm run build
 	npm run test
-	# Re-stage any dist/ files the build regenerated so the commit ships them.
-	git add dist/
+	# Re-stage any build artifacts the build regenerated so the commit ships
+	# them. sa11y-check-keys.json is emitted by check-test-keys.js during
+	# `npm run build` and lives outside dist/, so it needs to be added too.
+	git add dist/ scripts/sa11y-check-keys.json
 else
 	echo "→ No src/ changes staged; skipping build."
 fi

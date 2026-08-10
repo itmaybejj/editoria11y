@@ -36,6 +36,7 @@ export const UI = {
   dismissedCount: 1,
   dismissedAlerts: {},
   activeRange: false,
+  activeRangeFrame: false,
   inlineAlerts: false,
   incremental: false,
   interaction: false,

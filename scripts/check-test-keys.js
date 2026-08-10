@@ -19,8 +19,36 @@
  */
 
 import fs from 'node:fs';
+import { registerHooks } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+// Vendored Sa11y source uses extensionless relative imports (e.g.
+// `import find from './find'`), which Vite/Rollup resolve at build time but
+// Node's native ESM loader rejects. Retry such specifiers with a `.js`
+// extension so the dynamic imports below can load Sa11y under Node.
+registerHooks({
+	resolve(specifier, context, nextResolve) {
+		try {
+			return nextResolve(specifier, context);
+		} catch (err) {
+			if (err?.code === 'ERR_MODULE_NOT_FOUND' && /^\.{1,2}\//.test(specifier) && !path.extname(specifier)) {
+				return nextResolve(`${specifier}.js`, context);
+			}
+			throw err;
+		}
+	},
+});
+
+// Drift findings exit 1 (a blocking gate in CI). To let callers tell a real
+// crash apart from a drift report, remap unexpected failures to exit code 70.
+const onFatal = (err) => {
+	console.error('\n✖ check-test-keys.js crashed before completing the drift check:');
+	console.error(err?.stack || err);
+	process.exit(70);
+};
+process.on('uncaughtException', onFatal);
+process.on('unhandledRejection', onFatal);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
@@ -141,7 +169,6 @@ if (writeArtifact) {
 		schemaVersion: 1,
 		ed11yVersion: pkg.version,
 		sa11yVersion: pkg.sa11yVersion,
-		generatedAt: new Date().toISOString(),
 		checks: Object.fromEntries(
 			[...checkKeys].sort().map((key) => [key, {
 				title: testNames[key] ?? null,
@@ -149,7 +176,7 @@ if (writeArtifact) {
 			}]),
 		),
 	};
-	const outDir = path.join(repoRoot, 'dist');
+	const outDir = path.join(repoRoot, 'scripts');
 	fs.mkdirSync(outDir, { recursive: true });
 	const outPath = path.join(outDir, 'sa11y-check-keys.json');
 	fs.writeFileSync(outPath, `${JSON.stringify(artifact, null, 2)}\n`);

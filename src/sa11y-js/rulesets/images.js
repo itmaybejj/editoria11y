@@ -40,10 +40,24 @@ const containsAltTextStopWords = (alt) => {
     if (match) hit[0] = match[0];
   }
 
-  // 3) Suspicious alt words near the beginning of a string.
+  // 3) Suspicious alt words checking the first two and the last word.
+  let wordsToCheck = [];
+  // Check if the modern Segmenter API is supported in this environment.
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
+    const allWords = [...segmenter.segment(altLowerCase)]
+      .filter((segment) => segment.isWordLike)
+      .map((segment) => segment.segment);
+    // We want to check the first two words, and the very last word in the string.
+    wordsToCheck = [...allWords.slice(0, 2), ...allWords.slice(-1)];
+  } else {
+    // Fallback for older browsers that do not support Segmenter API.
+    const altOnlyLetters = Utils.removeWhitespace(altLowerCase.replace(/[^\p{L}\s]/gu, ''));
+    const allWords = altOnlyLetters.split(/\s+/).filter(Boolean);
+    wordsToCheck = [...allWords.slice(0, 2), ...allWords.slice(-1)];
+  }
   for (const word of Constants.Global.susAltWords) {
-    const index = altLowerCase.indexOf(word);
-    if (index > -1 && index < 6) {
+    if (wordsToCheck.includes(word)) {
       hit[1] = word;
       break;
     }
@@ -134,7 +148,10 @@ export default function checkImages() {
         key = hasAria + src;
       }
     }
-    if (test && logResult({ test: test, dismiss: key })) return;
+    if (test && State.option.checks[test]) {
+      logResult({ test: test, dismiss: key });
+      return;
+    }
 
     // Continue if alt is presenting.
     const altText = Utils.removeWhitespace(alt);
@@ -158,6 +175,7 @@ export default function checkImages() {
             : 'IMAGE_DECORATIVE_CAROUSEL';
         type = 'warning';
       } else if (link) {
+        if (link.getAttribute('aria-label') || link.getAttribute('aria-labelledby')) return;
         test = linkTextLength === 0 ? 'LINK_IMAGE_NO_ALT_TEXT' : 'LINK_IMAGE_TEXT';
         type = linkTextLength === 0 ? 'error' : 'good';
         key = src + linkTextLength;
@@ -169,97 +187,127 @@ export default function checkImages() {
         test = 'IMAGE_DECORATIVE';
         type = 'warning';
       }
-      if (
-        test &&
-        logResult({
-          test: test,
-          type: type,
-          dismiss: key || src,
-        })
-      )
-        return;
+
+      if (test) {
+        if (State.option.checks[test]) {
+          logResult({ test: test, type: type, dismiss: key || src });
+          return;
+        } else {
+          // If the decorative check is disabled, bypass remaining text quality rules
+          // and jump straight to the GOOD pass annotation.
+          if (
+            !Utils.getCachedClosest($el, 'button, [role="button"]') &&
+            !Constants.Global.linkIgnoreStringPattern?.test(alt)
+          ) {
+            logResult({ test: 'IMAGE_PASS', type: 'good', args: [altText], dismiss: src + alt });
+          }
+          return;
+        }
+      }
     }
 
     // Unpronounceable alt text.
-    if (alt.replace(/"|'|\?|\.|-|\s+/g, '') === '' && linkTextLength === 0) {
-      logResult({
-        test: link ? 'LINK_ALT_UNPRONOUNCEABLE' : 'ALT_UNPRONOUNCEABLE',
-        args: [altText],
-      });
-      return;
+    const unpTest = link ? 'LINK_ALT_UNPRONOUNCEABLE' : 'ALT_UNPRONOUNCEABLE';
+    if (State.option.checks[unpTest]) {
+      if (!Constants.Global.unpronounceablePattern.test(alt) && linkTextLength === 0) {
+        logResult({
+          test: unpTest,
+          args: [altText],
+        });
+        return;
+      }
     }
 
     // Alt text quality: checking for stop words, suspicious alts, placeholders.
     const error = containsAltTextStopWords(altText);
-    if (error[0] !== null) {
-      logResult({
+    const qualityChecks = [
+      {
+        hit: error[0],
         test: link ? 'LINK_ALT_FILE_EXT' : 'ALT_FILE_EXT',
+        type: 'error',
         args: [error[0], altText],
-        dismiss: src + alt,
-      });
-      return;
-    } else if (error[2] !== null) {
-      logResult({
+      },
+      {
+        hit: error[2],
         test: link ? 'LINK_PLACEHOLDER_ALT' : 'ALT_PLACEHOLDER',
+        type: 'error',
         args: [altText],
-        dismiss: src + alt,
-      });
-      return;
-    } else if (error[1] !== null) {
-      logResult({
+      },
+      {
+        hit: error[1],
         test: link ? 'LINK_SUS_ALT' : 'SUS_ALT',
         type: 'warning',
         args: [error[1], altText],
-        dismiss: src + alt,
-      });
-      return;
+      },
+    ];
+    for (const check of qualityChecks) {
+      if (check.hit !== null && State.option.checks[check.test] !== false) {
+        logResult({
+          test: check.test,
+          type: check.type,
+          args: check.args,
+          dismiss: src + alt,
+        });
+        return;
+      }
     }
 
     // Check for automatically generated bad alt text or filenames.
     const badAltTest = link ? 'LINK_ALT_MAYBE_BAD' : 'ALT_MAYBE_BAD';
-    const minLength = State.option.checks[badAltTest]?.minLength || 15;
-    const isTooLongSingleWord = new RegExp(`^\\S{${minLength},}$`);
-    const containsNonAlphaChar = /[^\p{L}\-,.!? ]/u.test(altText);
-    const isBadFilename = new RegExp(`^(?=[^_-]*([_-][^_-]*){3,})\\S{${minLength},}$`).test(
-      altText,
-    );
-    if (isBadFilename || (isTooLongSingleWord.test(alt) && containsNonAlphaChar)) {
-      logResult({
-        test: badAltTest,
-        args: [altText],
-        dismiss: src + alt,
-      });
-      return;
+    if (State.option.checks[badAltTest]) {
+      const minLength = State.option.checks[badAltTest]?.minLength || 15;
+      const isTooLongSingleWord = new RegExp(`^\\S{${minLength},}$`);
+      const containsNonAlphaChar = /[^\p{L}\p{M}\-,.!? «»—]/u.test(altText);
+      const isBadFilename = new RegExp(`^(?=[^_-]*([_-][^_-]*){3,})\\S{${minLength},}$`).test(
+        altText,
+      );
+      const containsCJK =
+        /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(altText);
+      if (
+        isBadFilename ||
+        (!containsCJK && isTooLongSingleWord.test(alt) && containsNonAlphaChar)
+      ) {
+        logResult({
+          test: badAltTest,
+          args: [altText],
+          dismiss: src + alt,
+        });
+        return;
+      }
     }
 
     // Warning check for potentially bad alt text (lower confidence).
     const warningTest = link ? 'LINK_ALT_MAYBE_BAD_WARNING' : 'ALT_MAYBE_BAD_WARNING';
-    const wordCount = altText.trim().split(/\s+/).length;
-    const delimiterCount = (altText.match(/[_-]/g) || []).length;
-    const hasTooMuchNoise =
-      /^(?:\s*\d){5,}\s*$/.test(altText) || (delimiterCount >= 3 && wordCount <= 2);
-    if (hasTooMuchNoise) {
-      logResult({
-        test: warningTest,
-        type: 'warning',
-        content: badAltTest, // We re-use this key for the tooltip.
-        args: [altText],
-        dismiss: `WARNING${src + alt}`,
-      });
-      return;
+    if (State.option.checks[warningTest]) {
+      const wordCount = altText.trim().split(/\s+/).length;
+      const delimiterCount = (altText.match(/[_-]/g) || []).length;
+      const hasTooMuchNoise =
+        /^(?:\s*\d){5,}\s*$/.test(altText) || (delimiterCount >= 3 && wordCount <= 2);
+      if (hasTooMuchNoise) {
+        logResult({
+          test: warningTest,
+          type: 'warning',
+          content: badAltTest, // We re-use this key for the tooltip.
+          args: [altText],
+          dismiss: `WARNING${src + alt}`,
+        });
+        return;
+      }
     }
 
     // Alt text is too long.
     const tooLongTest = link ? 'LINK_IMAGE_LONG_ALT' : 'IMAGE_ALT_TOO_LONG';
-    const maxAltChars = State.option.checks[tooLongTest]?.maxLength || 250;
-    if (alt.length > maxAltChars) {
-      logResult({
-        test: tooLongTest,
-        type: 'warning',
-        args: [alt.length, altText],
-        dismiss: src + alt,
-      });
-      return;
+    if (State.option.checks[tooLongTest]) {
+      const maxAltChars = State.option.checks[tooLongTest]?.maxLength || 250;
+      if (alt.length > maxAltChars) {
+        logResult({
+          test: tooLongTest,
+          type: 'warning',
+          args: [alt.length, altText],
+          dismiss: src + alt,
+        });
+        return;
+      }
     }
 
     // Has alt text and accompanying text.
@@ -290,25 +338,34 @@ export default function checkImages() {
     }
 
     // Figure image has duplicate alt and caption text.
-    if (figure && figcaption && figcaptionText.toLowerCase() === alt.toLowerCase()) {
-      logResult({
-        test: 'IMAGE_FIGURE_DUPLICATE_ALT',
-        type: 'warning',
-        args: [altText],
-      });
-      return;
+    if (State.option.checks.IMAGE_FIGURE_DUPLICATE_ALT) {
+      if (figure && figcaption && figcaptionText.toLowerCase() === alt.toLowerCase()) {
+        logResult({
+          test: 'IMAGE_FIGURE_DUPLICATE_ALT',
+          type: 'warning',
+          args: [altText],
+        });
+        return;
+      }
     }
 
     // Duplicate title and alt attribute.
-    const getVal = (attr) => $el.getAttribute(attr)?.trim().toLowerCase();
-    if ($el.hasAttribute('title') && getVal('title') === getVal('alt')) {
-      logResult({
-        test: 'DUPLICATE_TITLE',
-        type: 'warning',
-        inline: true,
-        dismiss: alt,
-      });
-      return;
+    const duplicateTitleTest = State.option.checks.DUPLICATE_TITLE;
+    if (duplicateTitleTest) {
+      const getVal = (attr) => $el.getAttribute(attr)?.trim().toLowerCase();
+      if ($el.hasAttribute('title') && getVal('title') === getVal('alt')) {
+        logResult({
+          test: 'DUPLICATE_TITLE',
+          type: 'warning',
+          content: duplicateTitleTest.content
+            ? Lang.sprintf(duplicateTitleTest.content, altText)
+            : Lang.sprintf(`${Lang._('DUPLICATE_TITLE')}<hr>${Lang._('IMAGE_PASS')}`, altText),
+          args: [altText],
+          inline: true,
+          dismiss: alt,
+        });
+        return;
+      }
     }
 
     // Passes.
@@ -322,4 +379,5 @@ export default function checkImages() {
       });
     }
   });
+  return;
 }

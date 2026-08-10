@@ -1,3 +1,5 @@
+import { store } from '../../sa11y-js/utils/utils.js';
+
 export const ed11yDefaultOptions = {
   // Default options.
 
@@ -5,7 +7,10 @@ export const ed11yDefaultOptions = {
 
   // Target area to check
   checkRoot: false, // Editoria11y uses "checkRoots" below.
-  fixedRoots: false, // Array of specific nodes, overrides previous.
+  fixedRoots: false, // Array of root elements to check, e.g. [editableEl].
+  framePositioners: false, // Parallel array of wrapper elements outside each
+  // iframe; framePositioners[i] offsets annotations for fixedRoots[i]. Use
+  // false (or omit) when roots are in the main document.
 
   // Exclusions
   containerIgnore: '',
@@ -288,7 +293,7 @@ export const ed11yDefaultOptions = {
 
   editLinks: false, // Add links to edit content in tooltips.
 
-  userPrefersShut: localStorage.getItem('editoria11yShow') === '0',
+  userPrefersShut: store.getItem('editoria11yShow') === '0',
 
   // Sa11y checks ==================
   checks: {
@@ -305,6 +310,7 @@ export const ed11yDefaultOptions = {
       maxLength: 170,
     },
     HEADING_MISSING_ONE: false,
+    HEADING_UNPRONOUNCEABLE: true, // @todo
 
     // Sa11y: Image checks
     MISSING_ALT_LINK: true,
@@ -360,17 +366,15 @@ export const ed11yDefaultOptions = {
     LINK_CLICK_HERE: false,
     LINK_DOI: true, // Todo consider.
     LINK_URL: {
-      maxLength: 40,
+      maxLength: 20,
     },
     LINK_LABEL: {
       dismissAll: true,
     },
     LINK_EMPTY: true,
     LINK_IDENTICAL_NAME: false, // Todo pro.
-    LINK_NEW_TAB: {
-      dismissAll: true,
-    },
-    LINK_FILE_EXT: false, // Todo test vs LinkPurpose.
+    LINK_NEW_TAB: true,
+    LINK_FILE_EXT: true,
     LINK_UNPRONOUNCEABLE: true,
     LINK_MAYBE_BUTTON: true,
 
@@ -395,15 +399,13 @@ export const ed11yDefaultOptions = {
       sources: '',
     },
     EMBED_UNFOCUSABLE: true,
-    EMBED_MISSING_TITLE: {
-      type: 'warning',
-    },
     EMBED_GENERAL: true,
+    EMBED_MISSING_TITLE: true,
 
     // Quality assurance checks
     QA_BAD_LINK: {
       sources: '',
-    },
+    }, // useless without sources.
     QA_STRONG_ITALICS: true,
     QA_IN_PAGE_LINK: true,
     QA_DOCUMENT: false, // Todo CMS consider.
@@ -450,6 +452,7 @@ export const ed11yDefaultOptions = {
     BTN_EMPTY: false,
     BTN_EMPTY_LABELLEDBY: false,
     BTN_ROLE_IN_NAME: false,
+    BTN_UNPRONOUNCEABLE: true, // @todo
 
     // Sa11y: Contrast checks
     // Todo pro.

@@ -294,6 +294,8 @@ button.ed11y-jump {
 	}
 
 	&:hover {
+		border-radius: 0 0.45em 0.45em 0;
+
 		svg {
 			display: initial;
 			width: 0.643em;
@@ -460,13 +462,13 @@ button.ed11y-jump {
 	min-width: 1.5em;
 	height: 1.5em;
 	padding: 0.375em;
-	font-size: clamp(1em, 2vw, 1.2em);
+	font-size: 1.2em;
 	border: 0;
 	border-radius: 100%;
 	transition: box-shadow 0.1s;
 
 	.close-icon {
-		width: 0.9em;
+		width: 1em;
 		margin: 0;
 	}
 
@@ -501,6 +503,11 @@ button.ed11y-jump {
 
 	.errors-icon {
 		width: 0.75em;
+	}
+
+	&:hover .ed11y-toggle-circle {
+		margin: -1px;
+		border: 1px solid transparent;
 	}
 }
 
@@ -592,10 +599,7 @@ button.ed11y-jump {
 	}
 
 	#ed11y-toggle:hover .ed11y-toggle-circle {
-		box-shadow:
-			inset 0 0 0 1px #fffe,
-			inset 0 0 0 3px var(--ed11y-primary, #276499),
-			0 0 1px var(--ed11y-primary, #276499);
+		box-shadow: inset 0 0 0 1px var(--ed11y-activeBackground, #276499);
 
 		.close-icon {
 			width: 0.75em;

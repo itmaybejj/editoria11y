@@ -1,7 +1,7 @@
 import Lang from '../sa11y-js/utils/lang';
 import { computeAccessibleName } from '../sa11y-js/utils/computeAccessibleName.js';
 import Elements from '../sa11y-js/utils/elements.js';
-import { reset, refresh } from './core/run.js';
+import { reset, refresh, setFixedRoots } from './core/run.js';
 import { initialize } from './core/initialize.js';
 import { sanitizeHTML } from '../sa11y-js/utils/utils.js';
 import { createDismissalKey, getElements, findElements } from './utils/utils.js';
@@ -14,12 +14,15 @@ import ConsoleErrors from './elements/ed11y-console-error.js';
 class Ed11y {
   constructor(userOptions) {
     if (CSS.supports('selector(:has(body))')) {
+      customElements.define('sa11y-console-error', ConsoleErrors);
       initialize(userOptions).catch((error) => {
-        customElements.define('ed11y-console-error', ConsoleErrors);
+        console.error('Editoria11y init failed:', error);
         const consoleErrors = new ConsoleErrors(error);
-        document.body.appendChild(consoleErrors);
-        UI.attachCSS(consoleErrors.shadowRoot.querySelector('*'));
-        throw Error(error);
+        document?.querySelector('*').appendChild(consoleErrors);
+        if (consoleErrors?.shadowRoot?.querySelector('*')) {
+          UI.attachCSS(consoleErrors.shadowRoot.querySelector('*'));
+        }
+        throw error;
       });
     }
   }
@@ -38,6 +41,7 @@ export {
   refresh,
   reset,
   sanitizeHTML,
+  setFixedRoots,
   sprite,
   version,
   Ed11y,

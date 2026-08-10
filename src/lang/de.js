@@ -9,6 +9,7 @@ const testNames = {
 	ALT_PLACEHOLDER: 'Dieser Alt‑Text ist möglicherweise ein Platzhalter',
 	ALT_UNPRONOUNCEABLE: 'Dieser Alt‑Text ist unaussprechlich',
 	BTN_EMPTY: 'Schaltfläche hat keine zugängliche Beschriftung',
+	BTN_UNPRONOUNCEABLE: 'Diese Schaltfläche ist nicht aussprechbar',
 	BTN_EMPTY_LABELLEDBY: 'Schaltfläche hat ein ungültiges ARIA‑Label',
 	BTN_ROLE_IN_NAME: 'Der Name der Schaltfläche wiederholt das Wort „button“',
 	CONTRAST_ERROR: 'Der Text hat nicht genügend Kontrast, um gut lesbar zu sein',
@@ -27,6 +28,7 @@ const testNames = {
 	EMBED_UNFOCUSABLE: 'Frame mit tabindex="‑1" ist nicht per Tastatur erreichbar.',
 	EMBED_VIDEO: 'Ist dieses Video korrekt untertitelt?',
 	HEADING_EMPTY: 'Diese Überschrift hat keinen Text',
+	HEADING_UNPRONOUNCEABLE: 'Diese Überschrift ist nicht aussprechbar',
 	HEADING_EMPTY_WITH_IMAGE: 'Dieses Bild wird als Überschrift verwendet und benötigt deshalb Alt‑Text',
 	HEADING_FIRST: 'Die erste Überschrift auf dieser Seite ist eine Unterüberschrift',
 	HEADING_LONG: 'Kann diese Überschrift kürzer sein?',
@@ -36,7 +38,7 @@ const testNames = {
 	IMAGE_ALT_TOO_LONG: 'Kann dieser Alt‑Text kürzer sein?',
 	IMAGE_DECORATIVE: 'Ist dieses Bild wirklich bedeutungslos?',
 	IMAGE_DECORATIVE_CAROUSEL: 'Bild in einem Karussell oder einer Galerie als dekorativ markiert',
-	IMAGE_FIGURE_DECORATIVE: 'Manuelle Prüfung: Bild mit Bildunterschrift ohne Alt‑Text',
+	IMAGE_FIGURE_DECORATIVE: 'Dieses Bild mit Bildunterschrift hat keinen Alt‑Text',
 	IMAGE_FIGURE_DUPLICATE_ALT: 'Alt‑Text sollte nicht identisch mit der Bildunterschrift sein',
 	LABELS_ARIA_LABEL_INPUT: 'Gibt es eine sichtbare Beschriftung für dieses Feld?',
 	LABELS_PLACEHOLDER: 'Sichtbare Beschriftungen bevorzugen statt Platzhalter',
@@ -52,7 +54,7 @@ const testNames = {
 	LINK_ALT_MAYBE_BAD: 'Dieser verlinkte Alt‑Text ist möglicherweise nicht klar und prägnant',
 	LINK_ALT_MAYBE_BAD_WARNING: 'Dieser verlinkte Alt‑Text ist möglicherweise nicht klar und prägnant',
 	LINK_ALT_UNPRONOUNCEABLE: 'Verlinkte Bilder benötigen aussprechbaren Alt‑Text',
-	LINK_CLICK_HERE: 'Manuelle Prüfung: Link enthält „Hier klicken“',
+	LINK_CLICK_HERE: 'Dieser Link enthält „Hier klicken“',
 	LINK_DOI: 'Artikel sollten über ihren Titel verlinkt werden, nicht über DOI‑Nummern',
 	LINK_EMPTY: 'Dieser Link enthält keine Wörter.',
 	LINK_EMPTY_LABELLEDBY: 'Link mit ungültigem „aria‑labelledby“‑Attribut',
@@ -60,11 +62,11 @@ const testNames = {
 	LINK_UNPRONOUNCEABLE: 'Dieser Link ist nicht aussprechbar',
 	LINK_FILE_EXT: 'Link führt zu einer Datei ohne vorherigen Hinweis',
 	LINK_IDENTICAL_NAME: 'Mehrere Links mit demselben Text führen zu verschiedenen Seiten',
-	LINK_IMAGE_ALT: 'Manuelle Prüfung: verlinktes Bild mit Alt‑Text',
+	LINK_IMAGE_ALT: 'Beschreibt dieser Alt‑Text den Link oder das Bild?',
 	LINK_IMAGE_ALT_AND_TEXT: 'Ergibt dieser Alt‑Text im Kontext dieses Links Sinn?',
 	LINK_IMAGE_LONG_ALT: 'Kann dieser verlinkte Alt‑Text kürzer sein?',
 	LINK_IMAGE_NO_ALT_TEXT: 'Dieses verlinkte Bild benötigt Alt‑Text',
-	LINK_IMAGE_TEXT: 'Manuelle Prüfung: Bild in einem Link als dekorativ markiert.',
+	LINK_IMAGE_TEXT: 'Benötigt dieses verlinkte Bild eine Beschreibung?',
 	LINK_LABEL: 'Linkbeschriftung',
 	LINK_MAYBE_BUTTON: 'Ist dieser Link tatsächlich eine Schaltfläche?',
 	LINK_NEW_TAB: 'Öffnet dieser Link eine neue Registerkarte ohne Hinweis?',
@@ -72,7 +74,7 @@ const testNames = {
 	LINK_STOPWORD: 'Dieser Link enthält nur generische Wörter',
 	LINK_STOPWORD_ARIA: 'Der Zweck dieses Links ist visuell verborgen',
 	LINK_SUS_ALT: 'Beschreibt dieser Alt‑Text das Bild oder den Link?',
-	LINK_SYMBOLS: 'Manuelle Prüfung: Sind die Symbole oder Emojis in diesem Link sinnvoll?',
+	LINK_SYMBOLS: 'Sind die Symbole oder Emojis in diesem Link sinnvoll?',
 	LINK_URL: 'Linktext sollte keine URL sein',
 	META_LANG: 'Meta‑Tag für die Seitensprache fehlt',
 	META_LANG_SUGGEST: 'Meinten Sie einen anderen Sprachcode?',
@@ -85,7 +87,7 @@ const testNames = {
 	MISSING_ALT_LINK: 'Ungültiges HTML: verlinktes Bild ohne Alt‑Attribut',
 	MISSING_ALT_LINK_HAS_TEXT: 'Ungültiges HTML: Bild im Link ohne Alt‑Attribut',
 	PAGE_LANG_CONFIDENCE: 'Die Seitensprache stimmt möglicherweise nicht mit dem Inhalt überein',
-	QA_BAD_LINK: 'Manuelle Prüfung: Linkziel könnte ungültig sein',
+	QA_BAD_LINK: 'Dieses Linkziel könnte ungültig sein',
 	QA_BLOCKQUOTE: 'Sollte dieses Zitat eine Überschrift sein?',
 	QA_DOCUMENT: 'Wurde dieses Dokument für Screenreader ausgezeichnet?',
 	QA_FAKE_HEADING: 'Sollte dieser fett gesetzte Text eine Überschrift sein?',
@@ -151,6 +153,7 @@ const tips = {
 	BTN_TIP: `${why.buttons}`,
 
 	BTN_ROLE_IN_NAME: `<p><strong>Label für Screenreader:</strong> <i>%(TEXT)</i></p><p>Screenreader verwenden das Wort „button", um anzukündigen, dass sie eine Schaltfläche beschreiben; dieses Wort ist daher doppelt gemoppelt.</p><p>${why.fix}Die Beschriftung der Schaltfläche sollte ihrer Aktion entsprechen. Wenn die sichtbare Beschriftung ein Symbol statt Text ist, beschriften Sie die Schaltfläche mit der Bedeutung des Symbols, z. B. „Wiedergabe", „Suchen" oder „Menü".</p>`,
+	BTN_UNPRONOUNCEABLE: `<p><strong>Schaltflächentext:</strong> <i>%(TEXT)</i></p><p>${why.fix}Fügen Sie Text, einen Titel oder ein aria-label hinzu, das das Ziel beschreibt.</p><div class="why"><p>Tipp: Bildschirmleser können Schaltflächen, die nur Leerzeichen oder Symbole enthalten, nicht beschreiben. Sie werden entweder stumm ("Schaltfläche, [...unangenehme Pause, wo die Beschriftung sein sollte...]"), oder lesen den Namen des Symbols vor.</p></div>`,
 
 	CONTRAST_WARNING: 'Ein Hintergrundbild oder Farbverlauf verhindert, dass dieses Tool die tatsächliche Hintergrundfarbe sicher bestimmen kann. Nutzen Sie den Farbwähler unten für eine manuelle Prüfung.',
 
@@ -171,6 +174,7 @@ const tips = {
 	EMBED_VIDEO: `<p>Dieses Prüfwerkzeug kann nicht „sehen", ob Videos Untertitel haben, oder ob jemand sie Korrektur gelesen hat – eine manuelle Prüfung ist erforderlich.</p><p>${why.fix}Stellen Sie sicher, dass <a href="https://www.w3.org/WAI/media/av/captions/">korrekte Untertitel („CC") oder Untertitel</a> verfügbar sind, und dass Sprecher und bedeutsame Geräusche korrekt gekennzeichnet sind.</p>`,
 
 	HEADING_EMPTY: `<p>Leere Überschriften erzeugen Lücken in der Seitenstruktur.</p><p>${why.fix}Text hinzufügen oder die leere Zeile entfernen.</p>${why.headings}`,
+	HEADING_UNPRONOUNCEABLE: `<p>Leere Überschriften erzeugen Lücken in der Seitenstruktur.</p><p>${why.fix}Fügen Sie dieser Überschrift lesbaren Text hinzu oder wandeln Sie sie in einen Absatz um.</p>${why.headings}`,
 
 	HEADING_EMPTY_WITH_IMAGE: `<p>Leere Überschriften erzeugen Lücken in der Seitenstruktur.</p><p>${why.fix}Wenn dies keine Überschrift ist, ändern Sie das Format von <code>Überschrift %(level)</code> zu <code>Absatz</code>. Andernfalls gehört die Bildbedeutung in den Alt‑Text.</p>${why.headings}`,
 
@@ -229,7 +233,7 @@ const tips = {
 
 	LINK_FILE_EXT: `<p><strong>Linktext:</strong> <i>%(TEXT)</i></p><p>Dieser Link führt zu einer Datei (z. B. PDF, MP3, Zip, Word), ohne das anzuzeigen.</p><p>${why.fix}Geben Sie im Linktext den Dateityp an – z. B. per Text oder Icon (<a href="https://itmaybejj.github.io/linkpurpose/">Beispiele</a>).</p><p class="why">Bei großen Dateien nennen Sie die Größe, z. B. „Jahresbericht (PDF, 3 MB)“.</p>`,
 
-	LINK_IDENTICAL_NAME: `<p>Linktext: <i>%(TEXT)</i></p><p>${why.fix}Formulieren Sie Links zu unterschiedlichen Zielen um, sodass sie die eindeutigen Titel ihrer Ziele verwenden.</p>${why.links}`,
+	LINK_IDENTICAL_NAME: `<p><strong>Linktext:</strong> <i>%(TEXT)</i></p><p>${why.fix}Formulieren Sie Links zu unterschiedlichen Zielen um, sodass sie die eindeutigen Titel ihrer Ziele verwenden.</p>${why.links}`,
 
 	LINK_IMAGE_ALT: `<p><strong>Alt‑Text:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt‑Text für verlinkte Bilder.</p>${why.imageLinks}`,
 
@@ -285,7 +289,7 @@ const tips = {
 
 	QA_FAKE_LIST: `<p>${why.fix}Wenn <i>%(TEXT)</i> Teil einer Liste ist, verwenden Sie Listenformatierung.</p><div class="why"><p>Listen haben visuelle und semantische Struktur:</p><ol><li>Einheitliche Einzüge erleichtern das Lesen.</li><li>Screenreader geben die Position an („Eintrag 3 von 7“).</li></ol><p>Ein Absatz mit einer vorangestellten Zahl ist keine echte Liste.</p></div>`,
 
-	QA_IN_PAGE_LINK: `<p><strong>Link:</strong> <i>%(TEXT)</i></p><p><strong>URL:</strong> <code>#%(ID)</code></p><p>Das Linkziel entspricht keinem Element auf dieser Seite.</p><div class="why"><p>Hinweis für Entwickler: Wenn es ein JS‑Handler ist, testen Sie die Tastaturbedienung, bevor Sie den Check ignorieren.</p></div>`,
+	QA_IN_PAGE_LINK: `<p><strong>URL:</strong> <i>#%(ID)</i></p><p><strong>Link:</strong> <code>%(TEXT)</code></p><p>Das Linkziel entspricht keinem Element auf dieser Seite.</p><div class="why"><p>Hinweis für Entwickler: Wenn es ein JS‑Handler ist, testen Sie die Tastaturbedienung, bevor Sie den Check ignorieren.</p></div>`,
 
 	QA_JUSTIFY: `<p>Blocksatz erzeugt unregelmäßige Lücken und erschwert das Lesen.</p><p>${why.fix}Verwenden Sie linksbündigen Text.</p>`,
 
@@ -367,7 +371,7 @@ const interfaceStrings = {
 	MISSING_ROOT: `Editoria11y hat keine Elemente gefunden, die der Konfiguration des Prüfbereichs entsprachen: <code>%(root)</code>`,
 	panelCheckAltText: `Prüfen Sie, dass jedes Bild seine Bedeutung im Kontext beschreibt und dass es keine Bilder mit eingebettetem Text gibt.`,
 	panelCheckOutline: `Dies zeigt die Überschriftenstruktur. Stellen Sie sicher, dass sie der visuellen Struktur entspricht.`,
-	panel_HEADING_MISSING_ONE: 'Überschrift Ebene 1 fehlt.',
+	PANEL_HEADING_MISSING_ONE: 'Überschrift Ebene 1 fehlt.',
 	PANEL_NO_HEADINGS: 'Keine Überschriften gefunden.',
 	reportsLink: 'Website‑Berichte öffnen',
 	toggleDisabled: 'Für Editoria11y ist kein prüfbarer Inhalt verfügbar.',
@@ -380,4 +384,5 @@ const interfaceStrings = {
 export const lang = {
 	strings: Object.assign(Sa11yStrings.strings, interfaceStrings, tips),
 	testNames: testNames,
+	ruleset: Sa11yStrings.ruleset,
 }

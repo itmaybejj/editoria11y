@@ -33,13 +33,22 @@ const Constants = (function myConstants() {
       Global.html.getAttribute('dir')?.trim()?.toLowerCase() === 'rtl' ? 'rtl' : 'ltr';
 
     // Check for document types.
-    const documentSources = State.option.checks.QA_DOCUMENT.sources;
-    const defaultDocumentSources =
-      'a[href$=".doc"], a[href$=".docx"], a[href*=".doc?"], a[href*=".docx?"], a[href$=".ppt"], a[href$=".pptx"], a[href*=".ppt?"], a[href*=".pptx?"], a[href^="https://drive.google.com/file"], a[href^="https://docs.google."], a[href^="https://sway."]';
-    if (documentSources) {
-      Global.documentSources = `${defaultDocumentSources}, ${documentSources}`;
+    if (State.option.checks.QA_DOCUMENT !== false) {
+      const defaultDocumentSources =
+        'a[href$=".doc"], a[href$=".docx"], a[href*=".doc?"], a[href*=".docx?"], a[href$=".ppt"], a[href$=".pptx"], a[href*=".ppt?"], a[href*=".pptx?"], a[href^="https://drive.google.com/file"], a[href^="https://docs.google."], a[href^="https://sway."]';
+      Global.documentSources = State.option.checks.QA_DOCUMENT.sources
+        ? `${defaultDocumentSources}, ${State.option.checks.QA_DOCUMENT.sources}`
+        : defaultDocumentSources;
     } else {
-      Global.documentSources = defaultDocumentSources;
+      Global.documentSources = false;
+    }
+
+    if (State.option.checks.QA_PDF !== false) {
+      Global.pdfSources = State.option.checks.QA_PDF.sources
+        ? State.option.checks.QA_PDF.sources
+        : 'a[href$=".pdf"], a[href*=".pdf?"], a[href*="/pdf/"], a[href*="/PDF/"]';
+    } else {
+      Global.pdfSources = false;
     }
 
     /* ********************** */
@@ -59,6 +68,9 @@ const Constants = (function myConstants() {
     // Generate placeholder stop words that are that the START of an alt string.
     Global.altPlaceholderPattern = generateRegexString(State.option.altPlaceholder, true);
     Global.linkIgnoreStringPattern = generateRegexString(State.option.linkIgnoreStrings);
+
+    // Unpronounceable characters.
+    Global.unpronounceablePattern = /[\p{L}\p{N}\p{Extended_Pictographic}]/u;
 
     // Generate supplied placeholder stop words.
     Global.extraPlaceholderStopWords = State.option.extraPlaceholderStopWords
@@ -404,9 +416,9 @@ const Constants = (function myConstants() {
       'base',
       'datalist',
       'datalist *',
-
       ...exclusions,
     ];
+
     if (State.option.contrastIgnore) {
       Exclusions.Contrast = State.option.contrastIgnore
         .split(',')

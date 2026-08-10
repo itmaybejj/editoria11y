@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This is a simple script to pull down the specified Sa11y branch from github
-GIT_REF="5.0.3"
+GIT_REF="5.0.9"
 mkdir -p tmp/
 cd tmp/
 git clone git@github.com:ryersondmp/sa11y.git .
@@ -37,11 +37,19 @@ done < "$filename"
 npm install
 
 # Report any new Sa11y check keys or strings that arrived with this pull
-# and aren't yet mirrored in src/lang/baseAll.js. Non-fatal here; the same
-# check runs as a hard gate in CI via `npm run check:keys`.
+# and aren't yet mirrored in src/lang/baseAll.js. Drift (exit 1) is non-fatal
+# here; the same check runs as a hard gate in CI via `npm run check:keys`.
+# But a crash or operational failure (exit >1) means the check never ran, so
+# surface that rather than swallowing it.
 echo ""
 echo "Checking for new Sa11y test keys not yet mirrored in ed11y..."
-node scripts/check-test-keys.js || true
+node scripts/check-test-keys.js
+check_status=$?
+if [ "$check_status" -gt 1 ]; then
+  echo ""
+  echo "WARNING: check-test-keys.js exited abnormally (code $check_status)."
+  echo "         The Sa11y key-drift check did not complete — investigate before relying on it."
+fi
 
 # MacOS creates unwanted backup files
 # rm editoria11y.libraries.yml-E

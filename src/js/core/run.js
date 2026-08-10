@@ -7,6 +7,7 @@ import {
   newIncrementalResults,
   panelLabel,
   pauseObservers,
+  pluralKey,
   resetClass,
   resetResults,
   resumeObservers,
@@ -30,6 +31,7 @@ import {
   alignPanel,
   checkEditableIntersects,
   closestScrollable,
+  updateFixedRootPositions,
 } from '../utils/align.js';
 import checkEmbeddedContent from '../../sa11y-js/rulesets/embedded-content';
 import Constants from '../../sa11y-js/utils/constants';
@@ -45,7 +47,7 @@ import sprite from '../elements/sprite.js';
 import { checkCustomRuleset } from '../rulesets/custom-ruleset.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
-import { resetGetText } from '../../sa11y-js/utils/utils.js';
+import { resetGetText, store } from '../../sa11y-js/utils/utils.js';
 
 export function showResults() {
   buildJumpList();
@@ -114,7 +116,7 @@ export function updatePanel() {
       // We do not do this on incremental updates.
       // Todo question: should we not do this at all for contentEditable?
       UI.seen[encodeURI(State.option.currentPage)] = UI.totalCount;
-      localStorage.setItem('editoria11yResultCount', JSON.stringify(UI.seen));
+      store.setItem('editoria11yResultCount', JSON.stringify(UI.seen));
     } else {
       delete UI.seen[encodeURI(State.option.currentPage)];
     }
@@ -205,7 +207,9 @@ export function updatePanel() {
             UI.panelToggle.click();
           } else if (event.target.hasAttribute('data-ed11y-open')) {
             if (UI.tipOpen) {
-              UI.toggledFrom?.focus(); // todo is this still needed or handled by the next?
+              if (UI.toggledFrom) {
+                UI.toggledFrom.focus();
+              }
               UI.openTip.button.shadowRoot.querySelector('button').click();
             }
           }
@@ -254,7 +258,8 @@ export function updatePanel() {
       // Prepare show hidden alerts button.
       const preferredDismissHide =
         UI.dismissedCount > 1
-          ? Lang.sprintf('buttonHideHiddenAlerts', UI.dismissedCount).textContent
+          ? Lang.sprintf(pluralKey('buttonHideHiddenAlerts', UI.dismissedCount), UI.dismissedCount)
+              .textContent
           : Lang._('buttonHideHiddenAlert');
       if (UI.dismissedCount === 0) {
         // Reset show hidden default option when irrelevant.
@@ -262,12 +267,9 @@ export function updatePanel() {
         UI.panelShowDismissed.setAttribute('data-ed11y-pressed', 'false');
         UI.showDismissed = false;
       } else if (UI.dismissedCount === 1) {
-        const show = UI.english
-          ? Lang._('buttonShowHiddenAlert')
-          : Lang.sprintf('PANEL_DISMISS_BUTTON', '1').textContent;
         UI.panelShowDismissed.querySelector('.ed11y-sr-only').textContent = UI.showDismissed
           ? preferredDismissHide
-          : show;
+          : Lang._('buttonShowHiddenAlert');
         UI.panelShowDismissed.dataset.ed11yPressed = `${UI.showDismissed}`;
         if (!UI.english) {
           UI.panelShowDismissed.ariaPressed = UI.showDismissed;
@@ -276,7 +278,8 @@ export function updatePanel() {
       } else {
         UI.panelShowDismissed.querySelector('.ed11y-sr-only').textContent = UI.showDismissed
           ? preferredDismissHide
-          : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount).textContent;
+          : Lang.sprintf(pluralKey('PANEL_DISMISS_BUTTON', UI.dismissedCount), UI.dismissedCount)
+              .textContent;
         UI.panelShowDismissed.dataset.ed11yPressed = `${UI.showDismissed}`;
         if (!UI.english) {
           UI.panelShowDismissed.ariaPressed = UI.showDismissed;
@@ -352,7 +355,10 @@ export function updatePanel() {
         if (!UI.showPanel) {
           UI.panelToggleTitle.textContent =
             UI.dismissedCount > 1
-              ? Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount).textContent
+              ? Lang.sprintf(
+                  pluralKey('PANEL_DISMISS_BUTTON', UI.dismissedCount),
+                  UI.dismissedCount,
+                ).textContent
               : Lang._('buttonShowHiddenAlert');
         }
       }
@@ -459,7 +465,7 @@ export function dismissOne(dismissalType, test, dismissalKey) {
 
   // Send record to storage or dispatch an event to an API.
   if (State.option.syncedDismissals === false) {
-    localStorage.setItem('ed11ydismissed', JSON.stringify(UI.dismissedAlerts));
+    store.setItem('ed11ydismissed', JSON.stringify(UI.dismissedAlerts));
   }
   const dismissalDetail = {
     dismissPage: State.option.currentPage,
@@ -471,19 +477,6 @@ export function dismissOne(dismissalType, test, dismissalKey) {
   window.setTimeout(() => {
     document.dispatchEvent(ed11yDismissalUpdate);
   }, 100);
-}
-
-// Refresh cached iframe offsets used by positionHighlight. Called by both
-// editableHighlighter (on show) and alignHighlights (on scroll/resize) so
-// the positioning formula always reads fresh frame rects.
-function updateFixedRootPositions() {
-  if (!State.option.fixedRoots) return;
-  UI.positionedFrames.length = 0;
-  State.option.fixedRoots.forEach((root) => {
-    if (root.framePositioner) {
-      UI.positionedFrames.push(root.framePositioner.getBoundingClientRect());
-    }
-  });
 }
 
 // Size and position a highlight element around `target`, accounting for
@@ -1056,7 +1049,7 @@ export const slowIncremental = lagBounce(() => {
 }, 500);
 
 export function windowResize() {
-  if (UI.panel?.classList.contains('ed11y-active') === true) {
+  if (UI.panel !== false && UI.panel.classList?.contains('ed11y-active') === true) {
     alignAlts();
     alignButtons();
   }
@@ -1067,6 +1060,12 @@ export function windowResize() {
 }
 
 const scrollWatch = (container) => {
+  // Idempotent: re-attaching on every showResults() would leak listeners.
+  // Stamp at the document/element level; foreign docs (iframes) get their own stamp.
+  const stampHost =
+    typeof container.documentElement === 'object' ? container.documentElement : container;
+  if (stampHost?.dataset?.ed11yScrollWatch === 'true') return;
+  if (stampHost?.dataset) stampHost.dataset.ed11yScrollWatch = 'true';
   container.addEventListener(
     'scroll',
     () => {
@@ -1084,35 +1083,73 @@ const scrollWatch = (container) => {
   );
 };
 
+// Attaches selectionchange + interaction (keydown/click) listeners to a document.
+// Idempotent so it can be called from both initialize() and intersectionObservers()
+// and re-called after fixedRoots swaps without leaking listeners.
+export const attachIntegrationListeners = (doc) => {
+  if (!doc || doc.documentElement?.dataset?.ed11yIntegrationListeners === 'true') return;
+  doc.documentElement.dataset.ed11yIntegrationListeners = 'true';
+  doc.addEventListener(
+    'keydown',
+    () => {
+      UI.interaction = true;
+    },
+    { passive: true },
+  );
+  doc.addEventListener(
+    'click',
+    () => {
+      UI.interaction = true;
+    },
+    { passive: true },
+  );
+  doc.addEventListener(
+    'selectionchange',
+    () => {
+      if (!UI.running) {
+        // Pass the document that fired so rangeChange reads its selection, not
+        // the top window's — cross-document (iframe) cursors live in their own
+        // document's selection.
+        selectionChanged(doc);
+      }
+    },
+    { passive: true },
+  );
+};
+
 export function intersectionObservers() {
   Elements.Found.editable?.forEach((editable) => {
     scrollWatch(editable);
   });
 
   scrollWatch(document);
+  attachIntegrationListeners(document);
 
-  document.addEventListener(
-    'selectionchange',
-    () => {
-      if (!UI.running) {
-        selectionChanged();
+  // Cross-document: when fixedRoots point into iframes, attach scroll + interaction
+  // + selectionchange to those documents too so the library reacts to typing,
+  // scrolling, and selection changes inside the embedded canvas.
+  if (Array.isArray(State.option.fixedRoots)) {
+    State.option.fixedRoots.forEach((root) => {
+      const foreignDoc = root?.ownerDocument;
+      if (foreignDoc && foreignDoc !== document) {
+        scrollWatch(foreignDoc);
+        attachIntegrationListeners(foreignDoc);
       }
-    },
-    {
-      passive: true,
-    },
-  );
+    });
+  }
 }
 
-export const selectionChanged = lagBounce(() => {
-  if (rangeChange()) {
+export const selectionChanged = lagBounce((doc = document) => {
+  if (rangeChange(null, doc)) {
     updateTipLocations();
     checkEditableIntersects();
   }
 }, 100);
 
-export function rangeChange(anchorNode) {
-  let anchor = anchorNode ? anchorNode : window.getSelection()?.anchorNode;
+export function rangeChange(anchorNode, doc = document) {
+  const selection =
+    doc && typeof doc.getSelection === 'function' ? doc.getSelection() : window.getSelection();
+  let anchor = anchorNode ? anchorNode : selection?.anchorNode;
   const expandable =
     anchor?.parentNode &&
     typeof anchor.parentNode === 'object' &&
@@ -1124,6 +1161,7 @@ export function rangeChange(anchorNode) {
         anchor.parentNode.matches('div[contenteditable="true"]')))
   ) {
     UI.activeRange = false;
+    UI.activeRangeFrame = false;
     return false;
   }
   if (expandable) {
@@ -1132,7 +1170,10 @@ export function rangeChange(anchorNode) {
       anchor = textParent;
     }
   }
-  const range = document.createRange();
+  // Build the range in the anchor's own document so a cross-document (iframe)
+  // selection measures against that frame's viewport; checkEditableIntersects
+  // then offsets it by the frame positioner to reach main-document coordinates.
+  const range = (anchor.ownerDocument || document).createRange();
   if (typeof anchor === 'object') {
     range.setStartBefore(anchor);
     range.setEndAfter(anchor);
@@ -1140,6 +1181,7 @@ export function rangeChange(anchorNode) {
   if (typeof range !== 'object' || typeof range.getBoundingClientRect !== 'function') {
     if (UI.activeRange) {
       UI.activeRange = false;
+      UI.activeRangeFrame = false;
       return true;
     } else {
       return false;
@@ -1150,6 +1192,11 @@ export function rangeChange(anchorNode) {
       range.startContainer === UI.activeRange.startContainer &&
       range.startOffset === UI.activeRange.startOffset;
     UI.activeRange = range;
+    // Record which fixedRoot the cursor sits in so its frame offset can be
+    // applied to the range — the cursor's frame may differ from a tip's frame.
+    const anchorEl = anchor.nodeType === 1 ? anchor : anchor.parentElement;
+    const activeRoot = anchorEl?.closest?.('[data-ed11y-root]');
+    UI.activeRangeFrame = activeRoot ? activeRoot.dataset.ed11yRoot : false;
     return !sameRange;
   }
 }
@@ -1391,6 +1438,10 @@ export function checkAll() {
 
   UI.roots = [];
   if (State.option.fixedRoots) {
+    // fixedRoots is an array of raw root elements (framePositioners is the
+    // parallel array of their frame wrappers). Downstream code stamps
+    // data-ed11y-root, runs startObserver, and uses closest('[data-ed11y-root]')
+    // directly on these elements.
     State.option.fixedRoots.forEach((root) => {
       UI.roots.push(root);
     });
@@ -1560,6 +1611,36 @@ export function refresh() {
   incrementalCheckDebounce();
 }
 
+// Replaces State.option.fixedRoots (and optionally editableContent), attaches
+// integration listeners to any newly-introduced documents, and forces a fresh
+// full check. Used by integrations that swap iframes at runtime (e.g. WordPress
+// block editor toggling Visual ↔ Code, or moving between posts without a full
+// page reload).
+//
+// Pass an empty array to clear fixedRoots — the library falls back to scanning
+// State.option.checkRoot against the outer document.
+export function setFixedRoots(newFixedRoots, newFramePositioners, newEditableContent) {
+  State.option.fixedRoots =
+    Array.isArray(newFixedRoots) && newFixedRoots.length > 0 ? newFixedRoots : false;
+  State.option.framePositioners =
+    Array.isArray(newFramePositioners) && newFramePositioners.length > 0
+      ? newFramePositioners
+      : false;
+  if (typeof newEditableContent !== 'undefined') {
+    State.option.editableContent = newEditableContent;
+  }
+  if (Array.isArray(newFixedRoots)) {
+    newFixedRoots.forEach((root) => {
+      const foreignDoc = root?.ownerDocument;
+      if (foreignDoc && foreignDoc !== document) {
+        attachIntegrationListeners(foreignDoc);
+      }
+    });
+  }
+  UI.forceFullCheck = true;
+  refresh();
+}
+
 export function resetPanel() {
   // Reset main panel.
   UI.visualizing = true; // so visualize function removes visualizers.
@@ -1569,19 +1650,21 @@ export function resetPanel() {
     UI.panelToggleTitle.textContent =
       UI.dismissedCount === 1
         ? Lang._('buttonShowHiddenAlert')
-        : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount).textContent;
+        : Lang.sprintf(pluralKey('PANEL_DISMISS_BUTTON', UI.dismissedCount), UI.dismissedCount)
+            .textContent;
   }
 
   if (typeof UI.panel === 'object') {
-    UI.panel?.classList.add('ed11y-shut');
-    UI.panel?.classList.remove('ed11y-active');
+    UI.panel.classList.add('ed11y-shut');
+    UI.panel.classList.remove('ed11y-active');
     UI.panelToggle.ariaExpanded = false;
     if (!UI.showDismissed && typeof UI.panelShowDismissed === 'function') {
       UI.panelShowDismissed.setAttribute('data-ed11y-pressed', 'false');
       UI.panelShowDismissed.querySelector('.ed11y-sr-only').textContent =
         UI.dismissedCount === 1
           ? Lang._('buttonShowHiddenAlert')
-          : Lang.sprintf('PANEL_DISMISS_BUTTON', UI.dismissedCount).textContent;
+          : Lang.sprintf(pluralKey('PANEL_DISMISS_BUTTON', UI.dismissedCount), UI.dismissedCount)
+              .textContent;
     }
   }
 }
@@ -1614,9 +1697,15 @@ export function dismissThis(dismissalType, button) {
   }
 
   // Remove tip and reset borders around element
+  pauseObservers();
   reset();
+  const toClear = tip?.getRootNode()?.host;
+  if (toClear) {
+    toClear.remove();
+  }
   UI.showPanel = true;
   checkAll();
+  resumeObservers();
 
   const rememberGoto = UI.openJumpPosition;
 
@@ -1633,6 +1722,7 @@ export function dismissThis(dismissalType, button) {
     },
     500,
     rememberGoto,
+    tip,
   );
 }
 
@@ -1672,13 +1762,13 @@ export function togglePanel() {
         checkAll();
 
         State.option.userPrefersShut = false;
-        localStorage.setItem('editoria11yShow', '1');
+        store.setItem('editoria11yShow', '1');
       } else {
         UI.showDismissed = false;
         UI.showPanel = false;
         reset();
         State.option.userPrefersShut = true;
-        localStorage.setItem('editoria11yShow', '0');
+        store.setItem('editoria11yShow', '0');
       }
       panelLabel();
     }
@@ -1724,8 +1814,8 @@ export function disable() {
   document.documentElement.style.setProperty('--ed11y-activeColor', UI.theme.panelBarText);
   document.documentElement.style.setProperty('--ed11y-activeBorder', `${UI.theme.panelBarText}44`);
   document.documentElement.style.setProperty('--ed11y-activePanelBorder', 'transparent');
-  if (typeof UI.panelToggle.querySelector === 'function') {
-    UI.panel?.classList.remove('ed11y-errors', 'ed11y-warnings');
+  if (UI.panel !== false && typeof UI.panelToggle.querySelector === 'function') {
+    UI.panel.classList.remove('ed11y-errors', 'ed11y-warnings');
     UI.panelCount.textContent = 'i';
     UI.panelJumpNext.setAttribute('hidden', '');
     UI.panelToggle.classList.add('disabled');

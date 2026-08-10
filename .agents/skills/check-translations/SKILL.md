@@ -14,6 +14,14 @@ Uses `src/lang/TRANSLATION_MANIFEST.json` to track which English commit each tra
 - **We do NOT translate**: `src/sa11y-lang/*.js` files (managed in the Sa11y repo)
 - **We do report**: changes in `src/sa11y-lang/en.js` for cross-repo sync review
 
+## Two modes of work
+
+This skill runs in two modes depending on the state of each translation file:
+
+1. **Sync mode** (the common case): a translation already exists for a language; the skill diffs the English source between the translation's recorded commit and HEAD, and patches each language. This is described in Steps 1–2 below.
+
+2. **First-pass mode**: a stub file exists in `src/lang/` but the editoria11y-specific objects (`testNames`, `tips`, `interfaceStrings`) are empty. Stubs carry an `// UNTRANSLATED STUB` header and are listed under `pendingTranslations` in `TRANSLATION_MANIFEST.json`. They need a complete first translation pass, not a diff, and live in `scripts/build.js` under a separate `pendingLangs` array (not built). See **First-pass translations** below. As of this writing there are no pending languages, but the workflow is documented for the next batch.
+
 ## Manifest location
 
 `src/lang/TRANSLATION_MANIFEST.json` — contains:
@@ -41,7 +49,7 @@ If there is a diff, summarize:
 
 Launch one Agent per language **in parallel** (use a single message with multiple Agent tool calls). Each agent receives the same English diff context.
 
-Deploy the first 10 agents in one batch, then pipeline: launch another agent as soon as one finishes, rather than waiting for a full batch to complete.
+Deploy the first 8 agents in one batch, then pipeline: launch another agent as soon as one finishes, rather than waiting for a full batch to complete. **8 is the user-confirmed safe ceiling on this account** (2026-05-10) — earlier 16-in-flight attempts hit transient server-side rate limits.
 
 ### Shared spec file (recommended when 3+ languages are affected)
 
@@ -120,7 +128,93 @@ Run `node -c [filepath]` when done to verify syntax.
 
 1. Run `npm run build` to verify everything compiles
 2. Fix any syntax errors (most likely: unescaped apostrophes or curly quotes)
-3. Update each translation's commit in `TRANSLATION_MANIFEST.json` to current HEAD
+3. **Run the markup linter** (see below) and fix anything it flags
+4. Update each translation's commit in `TRANSLATION_MANIFEST.json` to current HEAD
+
+### Markup validation (REQUIRED after any translation change)
+
+```bash
+node .agents/skills/check-translations/check-markup.mjs        # all locales
+node .agents/skills/check-translations/check-markup.mjs src/lang/fr.js  # one file
+```
+
+This linter renders each locale's tooltip strings (expanding `${why.*}`) and reports
+**unbalanced/misnested HTML tags** and **bare (unwrapped) URLs**. It imports each file in
+its own child process so the shared Sa11y-state mutations between `en`/`en-us`/`en-ca`/`en-gb`
+can't cross-contaminate. Exit code is non-zero on any finding (CI-friendly). It is NOT run by
+`npm run build`, so run it explicitly.
+
+Two recurring corruption classes it catches (both seen in the machine-translated bases — they
+do NOT come from this skill's diff-driven Edits, but a sync is the natural time to find them):
+
+- **Stripped anchors:** an `<a href="URL">` opening tag is lost, leaving the bare `URL` glued
+  to the (translated) link text and an orphan `</a>`. **Fix:** the bare URL is the English
+  canonical `href` as a prefix, so re-wrap it: replace the canonical URL (when NOT preceded by
+  `href="`) with `<a href="CANONICAL">`. Collect canonicals from `src/lang/baseAll.js` +
+  `src/sa11y-lang/en.js`; process longest-first to avoid prefix collisions
+  (e.g. `…/link_text` vs `…/link_text#alt_link`). Watch two edge cases the bulk pass misses and
+  must be hand-fixed: a bare URL sitting right after a literal text quote (`"`), and a URL whose
+  final path segment was itself machine-translated (e.g. pt-br turned `…/Elements/title` into
+  `…/Elements/título` and glued the link text on).
+- **Unescaped literal tags:** `<code><title></code>` / `<code><head></code>` should be
+  `<code>&lt;title&gt;</code>` etc. — the raw `<title>`/`<head>` open real elements that never
+  close. **Fix:** escape them (`<title>` → `&lt;title&gt;`).
+
+Also watch for stray/misnested `<p>`/`<span>` (e.g. a string that starts with text then `</p>`
+needs a leading `<p>`; a garbled `<span style="</span>` should be removed). Reconstruct the
+intended structure from a clean sibling locale (de/es) or the English source.
+
+### Agent output-budget limits (relevant for large diffs)
+
+Cross-repo lesson from the editoria11y-csa WordPress port and the
+Drupal `po-translations` skill (both maintain ~140 KB .po files of
+roughly the same content). The same sub-agent infrastructure powers
+all three workflows, so these limits apply here too:
+
+- **32 K output-token cap per response.** A sub-agent that tries to
+  `Write` a single file ≥30 KB hits the cap mid-stream and fails.
+- **600 s stream watchdog.** Even within the token cap, the `Write`
+  tool's `content` parameter streams character-by-character at the
+  model's generation rate. A 30 KB UTF-8 payload in CJK/Cyrillic
+  takes minutes; if no token reaches the parent within 600 s the
+  watchdog kills the agent.
+
+For this skill's typical workflow (diff-driven Edit calls, each
+touching 5–50 lines), these limits don't bite — `Edit` calls are
+small and the total tool_input streamed per agent is well under
+the cap. **The current `Edit`-based pattern is the correct choice
+for this skill.**
+
+If a future first-pass translation of a brand new language is needed
+(a stub file becomes a complete translation in one agent run), the
+agent may need to produce 300+ string edits, which can approach the
+limits. In that case use the **Python-dict-via-Bash escape hatch**
+proven on the WP port:
+
+1. Agent writes `scripts/scratch/translate_<LANG>.py` with a flat
+   `T = {'KEY_NAME': 'translated string', ...}` dict + a `main()`
+   that reads `src/lang/<lang>.js`, regex-replaces values inside
+   the `testNames`/`tips`/`interfaceStrings` objects by key, and
+   writes the file back.
+2. Agent runs the script via `Bash(node)` or `Bash(python3)`.
+
+This dodges both limits: the script is ~half the size of the
+equivalent edited .js file, and the actual file mutation happens
+server-side (invisible to the agent's output token budget). Use
+single-quoted Python strings (`T['KEY'] = 'value'`) so curly
+typographic quotes in translations don't conflict with delimiters.
+
+### Local fill vs agent dispatch — the break-even point
+
+For diffs with **≤15 changed keys per language**, fill them locally
+in the parent rather than dispatching an agent. Agent overhead is
+~150 K input tokens (file + diff context) + ~30 K output (Edit calls
++ reasoning) ≈ $2–4 at Sonnet rates. For ~10 keys that's $0.20–0.40
+per key — orders of magnitude worse than the parent's incremental
+cost in-context.
+
+For **~50+ changed keys per language**, an agent amortizes the
+input cost and is the cheaper path.
 
 ## Step 3: Report Sa11y English changes
 
@@ -179,6 +273,57 @@ Tips that embed `${why.headings}` need the whole tip rewritten in
 `en-gb.js` because the embedded block contains "organise". The list of
 affected tips is in `en-gb.js` — look at `britishTips`.
 
+## First-pass translations
+
+When a `src/lang/<code>.js` file is a stub (`// UNTRANSLATED STUB` header, empty `testNames`/`tips`/`interfaceStrings`), the language needs a complete first translation pass instead of a diff. Such stubs should be enumerated in `TRANSLATION_MANIFEST.json` under a `pendingTranslations` block, and the language code should live in `scripts/build.js` under a separate `pendingLangs` array (not in the active `langs` array — building a stub would ship a half-Sa11y, no-editoria11y bundle).
+
+### Workflow for a first-pass translation
+
+1. Pick a fully-translated reference file in `src/lang/` whose tone you want to match (e.g. `da.js`, `de.js`, `es.js`). This is the *structural* model — same key set, same use of `${why.fix}`, `%(EL)`, etc.
+2. Write a shared spec to `/tmp/claude/ed11y-translation-spec.md` with the workflow, file paths, and the critical-rules block. Per-language prompts can then be tiny (just "your CODE is X; read the spec; tone notes for this language").
+3. For each pending language, launch one agent. **Cap parallel dispatch at 8 agents** — the harness has a parallel-tool-call limit. Pipeline; as agents finish dispatch the next agent.
+4. Each translator agent:
+   - Reads the stub file, `baseAll.js`, `baseEnglishOnly.js`, and one reference translation.
+   - Translates every key from `baseAll.js` (NOT `baseEnglishOnly.js`) into the target language.
+   - Uses targeted `Edit` calls to populate `testNames`, `why`, `tips`, and `interfaceStrings`, matching the alphabetization in the reference file.
+   - Removes the `// UNTRANSLATED STUB` comment block once the file is complete.
+   - Runs `node -c src/lang/<code>.js` to verify syntax.
+   - Ends the translation pass, then proofreads using `/tmp/claude/ed11y-proofread-spec.md`. Proofreaders polish for native-speaker naturalness, terminology consistency, grammar, and punctuation conventions of the target language. Each proofreader edits in place and re-runs `node -c`.
+6. Promote the languages:
+   - Move each code from `pendingLangs` to `langs` in `scripts/build.js` (alphabetical order).
+   - In `TRANSLATION_MANIFEST.json`, delete the entry from `pendingTranslations` and add it to `translations` with the current HEAD commit.
+   - Remove the `void pendingLangs;` line from `scripts/build.js` if `pendingLangs` is now empty.
+   - Run `npm run build` and verify `dist/js/lang/<code>.js` and `<code>.umd.js` bundles appear.
+
+### Tamil (ta) — special handling whenever a Tamil stub is created
+
+Tamil in Sa11y is **human-translated**, not machine-translated. Treat the human translator's voice as authoritative.
+
+If you ever create a new Tamil stub (or re-translate the existing `src/lang/ta.js` from scratch), the dispatching prompt for Tamil — and ONLY Tamil — must:
+
+1. Include **a copy of the full contents of `src/sa11y-lang/ta.js`** inlined in the prompt (read it and inline it; do not just reference the path).
+2. Include a vocabulary-anchor table mapping common accessibility concepts (alt text, heading, link, screen reader, accessible name, label, input field, image, button, element, attribute, contrast, etc.) to the human translator's chosen Tamil terms. Pull these from `src/sa11y-lang/ta.js`.
+3. Include this directive verbatim:
+
+   ```
+   TAMIL-SPECIFIC: src/sa11y-lang/ta.js was written by a human translator,
+   not by machine translation. Defer to its style, register, terminology,
+   sentence rhythm, and word choice. Match how that file phrases analogous
+   accessibility concepts rather than inventing fresh terms or copying tone
+   from machine-translated sibling files. When in doubt, mirror the Sa11y
+   wording even if it would read differently in machine translation.
+   ```
+
+4. Do NOT include the standard "match the existing translation style and tone of sibling files" instruction for Tamil — the directive above takes precedence.
+5. The Tamil proofreader prompt must apply the same directive: verify the translator deferred to the Sa11y voice and align any drifted terms back to it.
+6. All other rules in the critical-rules block still apply (no curly quotes, escape apostrophes, preserve placeholders, run `node -c`, etc.).
+
+### Operational notes from the last batch
+
+- Each translator + proofreader pair costs roughly 60k–180k tokens depending on language complexity. The Lithuanian and Slovak proofreaders ran 100+ tool calls — that's normal for languages with rich case morphology.
+- Cyrillic (`bg`), Tamil script (`ta`), and accented Latin scripts all save fine as UTF-8 in `src/lang/`. If any character looks garbled in `git diff`, run `file src/lang/<code>.js` to confirm encoding.
+- The dev report and consuming CMS plugins (Drupal, WordPress) discover languages via the built `dist/js/lang/` files, NOT via `src/lang/`. So a stub in `pendingLangs` is invisible to end users until it's promoted to `langs`.
+
 ## Files to skip
 
 These are NOT translation targets — never modify them:
@@ -187,7 +332,7 @@ These are NOT translation targets — never modify them:
 - `src/lang/_template.js` — template file
 - `src/lang/baseAll.js` — English source (testNames, interfaceStrings, tips)
 - `src/lang/baseEnglishOnly.js` — English-only overrides
-- `src/sa11y-lang/*.js` — all Sa11y lang files (managed externally)
+- `src/sa11y-lang/*.js` — all Sa11y lang files (managed externally; **exception: read `src/sa11y-lang/ta.js` to feed the Tamil first-pass agent — see Tamil-specific handling above**)
 
 ## File structure reference
 
