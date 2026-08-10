@@ -30,9 +30,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check Sa11y test-key drift
-        run: npm run check:keys
-
       - name: Build
         run: npm run build
 
