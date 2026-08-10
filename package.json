@@ -26,6 +26,7 @@
 		"build": "npm run lint:fix && rimraf dist && npm run build:css && npm run build:js",
 		"check:keys": "node --import ./scripts/register-sa11y-hook.js scripts/check-test-keys.js",
 		"lint": "biome check src",
+		"lint:lang": "node scripts/proofread-lang.js",
 		"lint:fix": "biome check --write src",
 		"lint:fix-unsafe": "biome check --write --unsafe src",
 		"serve": "vite",
@@ -42,6 +43,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.6",
+		"acorn": "^8.15.0",
 		"@playwright/test": "^1.58.2",
 		"browserslist": "^4.28.1",
 		"chokidar-cli": "^3.0.0",
