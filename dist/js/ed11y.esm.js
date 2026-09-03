@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.1-810
+			* @version 3.0.1-902
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -1821,7 +1821,7 @@ function findShadowComponents(option) {
     });
   }
 }
-const version = "3.0.1-810";
+const version = "3.0.1-902";
 const sprite = {
   alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
   close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -2328,9 +2328,38 @@ function resetClass(classes) {
     });
   });
 }
+function checkVisibility(el, options = {}) {
+  if (typeof el.checkVisibility === "function") {
+    return el.checkVisibility(options);
+  }
+  if (!el.isConnected) {
+    return false;
+  }
+  const checkOpacity = !!(options.opacityProperty || options.checkOpacity);
+  const checkVisibilityProperty = !!(options.visibilityProperty || options.checkVisibilityCSS);
+  let node = el;
+  while (node) {
+    const style = window.getComputedStyle(node);
+    if (style.display === "none") {
+      return false;
+    }
+    if (checkOpacity && style.opacity === "0") {
+      return false;
+    }
+    if (node === el) {
+      if (checkVisibilityProperty && (style.visibility === "hidden" || style.visibility === "collapse")) {
+        return false;
+      }
+    } else if (style.contentVisibility === "hidden") {
+      return false;
+    }
+    node = node.parentElement || node.getRootNode()?.host || null;
+  }
+  return true;
+}
 function visibleElement(el) {
   if (el) {
-    if (!el.checkVisibility({
+    if (!checkVisibility(el, {
       opacityProperty: true,
       visibilityProperty: true
     })) {
@@ -2363,7 +2392,7 @@ function firstVisibleParent(el) {
   }
 }
 function elementNotHidden(el) {
-  return el.checkVisibility() && !el.closest('[aria-hidden="true"]');
+  return checkVisibility(el) && !el.closest('[aria-hidden="true"]');
 }
 function detectShadow(container) {
   if (State.option.autoDetectShadowComponents) {

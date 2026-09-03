@@ -247,13 +247,50 @@ export function resetClass(classes) {
   });
 }
 
+export function checkVisibility(el, options = {}) {
+  // Element.checkVisibility() is unavailable in Safari < 17.4, Chrome < 105, Firefox < 106.
+  // Approximates the native behavior for those browsers.
+  if (typeof el.checkVisibility === 'function') {
+    return el.checkVisibility(options);
+  }
+  if (!el.isConnected) {
+    return false;
+  }
+  const checkOpacity = !!(options.opacityProperty || options.checkOpacity);
+  const checkVisibilityProperty = !!(options.visibilityProperty || options.checkVisibilityCSS);
+  let node = el;
+  while (node) {
+    const style = window.getComputedStyle(node);
+    if (style.display === 'none') {
+      return false;
+    }
+    if (checkOpacity && style.opacity === '0') {
+      return false;
+    }
+    if (node === el) {
+      // Visibility is inherited, so only the element's computed value is needed.
+      if (
+        checkVisibilityProperty &&
+        (style.visibility === 'hidden' || style.visibility === 'collapse')
+      ) {
+        return false;
+      }
+    } else if (style.contentVisibility === 'hidden') {
+      return false;
+    }
+    // Walk the flat tree, crossing shadow boundaries.
+    node = node.parentElement || node.getRootNode()?.host || null;
+  }
+  return true;
+}
+
 export function visibleElement(el) {
   // Checks if this element is visible. Used in parent iterators.
   // false is definitely invisible, true requires continued iteration to tell.
   // Todo postpone: Check for offscreen?
   if (el) {
     if (
-      !el.checkVisibility({
+      !checkVisibility(el, {
         opacityProperty: true,
         visibilityProperty: true,
       })
@@ -303,7 +340,7 @@ export function firstVisibleParent(el) {
 
 export function elementNotHidden(el) {
   // Recurse element and ancestors to make sure it is visible
-  return el.checkVisibility() && !el.closest('[aria-hidden="true"]');
+  return checkVisibility(el) && !el.closest('[aria-hidden="true"]');
 }
 
 export function detectShadow(container) {
