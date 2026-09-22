@@ -14,9 +14,11 @@ export function syncResults(results) {
         detail: {
           results: results,
           incremental: UI.incremental,
+          userAction: UI.runOrigin,
         },
       }),
     );
+    UI.runOrigin = false;
   }
 }
 

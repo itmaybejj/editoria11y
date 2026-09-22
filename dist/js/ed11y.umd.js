@@ -2089,6 +2089,7 @@ ${this.error.stack}
     english: true,
     running: false,
     runGen: 0,
+    runOrigin: false,
     watching: [],
     seen: [],
     ignore: "",
@@ -5330,10 +5331,12 @@ ${this.error.stack}
           // @todo cms/document new detail
           detail: {
             results,
-            incremental: UI.incremental
+            incremental: UI.incremental,
+            userAction: UI.runOrigin
           }
         })
       );
+      UI.runOrigin = false;
     }
   }
   const pushResult = async (i, inContent) => {
@@ -7320,6 +7323,7 @@ ${this.error.stack}
     const tip = button.closest(".ed11y-wrapper");
     const test = tip.querySelector("[data-test]").dataset.test;
     const dismissKey = tip.dataset.ed11yDismiss;
+    UI.runOrigin = "dismissal";
     if (button.dataset.ed11yAll === "true") {
       State.results.forEach((result) => {
         if (result.test === test && (!result.dismissalStatus || result.dismissalStatus !== dismissalType)) {

@@ -26,6 +26,7 @@ export const UI = {
   english: true,
   running: false,
   runGen: 0,
+  runOrigin: false,
   watching: [],
   seen: [],
   ignore: '',

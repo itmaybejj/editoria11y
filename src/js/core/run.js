@@ -1680,6 +1680,7 @@ export function dismissThis(dismissalType, button) {
   const tip = button.closest('.ed11y-wrapper');
   const test = tip.querySelector('[data-test]').dataset.test;
   const dismissKey = tip.dataset.ed11yDismiss;
+  UI.runOrigin = 'dismissal';
 
   if (button.dataset.ed11yAll === 'true') {
     State.results.forEach((result) => {
