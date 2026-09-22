@@ -6385,9 +6385,7 @@ ${this.error.stack}
       dismissAction: dismissalType
     };
     const ed11yDismissalUpdate = new CustomEvent("ed11yDismissalUpdate", { detail: dismissalDetail });
-    window.setTimeout(() => {
-      document.dispatchEvent(ed11yDismissalUpdate);
-    }, 100);
+    document.dispatchEvent(ed11yDismissalUpdate);
   }
   function positionHighlight(el, target, result) {
     let targetOffset = target.getBoundingClientRect();

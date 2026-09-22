@@ -474,9 +474,7 @@ export function dismissOne(dismissalType, test, dismissalKey) {
     dismissAction: dismissalType,
   };
   const ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
-  window.setTimeout(() => {
-    document.dispatchEvent(ed11yDismissalUpdate);
-  }, 100);
+  document.dispatchEvent(ed11yDismissalUpdate);
 }
 
 // Size and position a highlight element around `target`, accounting for
