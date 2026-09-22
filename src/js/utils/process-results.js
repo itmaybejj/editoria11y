@@ -8,17 +8,15 @@ import { State } from '../../sa11y-js/core/state.js';
 export function syncResults(results) {
   // Dispatch event.
   if (!UI.incremental) {
-    window.setTimeout(() => {
-      document.dispatchEvent(
-        new CustomEvent('ed11yResults', {
-          // @todo cms/document new detail
-          detail: {
-            results: results,
-            incremental: UI.incremental,
-          },
-        }),
-      );
-    }, 0);
+    document.dispatchEvent(
+      new CustomEvent('ed11yResults', {
+        // @todo cms/document new detail
+        detail: {
+          results: results,
+          incremental: UI.incremental,
+        },
+      }),
+    );
   }
 }
 
