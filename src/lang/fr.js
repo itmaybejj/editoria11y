@@ -186,10 +186,10 @@ export const tips = {
 
 	EMBED_VIDEO: `<p>Ce vérificateur ne peut pas « voir » si les vidéos ont des sous-titres, ni si quelqu’un les a relus ; une vérification manuelle est donc nécessaire.</p><p>${why.fix}Assurez-vous que des <a href="https://www.w3.org/WAI/media/av/captions/">sous-titres (« CC ») précis</a> sont disponibles, et que les locuteurs et effets sonores significatifs sont correctement identifiés.</p>`,
 
-	HEADING_EMPTY: `<p>Les éléments de titre vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}Ajoutez du texte à cet éléments de titre ou supprimez cette ligne vide.</p>${why.headings}`,
-	HEADING_UNPRONOUNCEABLE: `<p>Les éléments de titre vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}Ajoutez du texte lisible à cet éléments de titre, ou convertissez-le en paragraphe.</p>${why.headings}`,
+	HEADING_EMPTY: `<p>Les éléments de titre vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}Ajoutez du texte à cet élément de titre ou supprimez cette ligne vide.</p>${why.headings}`,
+	HEADING_UNPRONOUNCEABLE: `<p>Les éléments de titre vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}Ajoutez du texte lisible à cet élément de titre, ou convertissez-le en paragraphe.</p>${why.headings}`,
 
-	HEADING_EMPTY_WITH_IMAGE: `<p>Les éléments de titre vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}S’il ne s’agit pas d’un titre, changez son style de <code>En-tête %(level)</code> à <code>Paragraphe</code>. Sinon, placez la signification de l’image dans son texte alternatif.</p>${why.headings}`,
+	HEADING_EMPTY_WITH_IMAGE: `<p>Les éléments de titre vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}S’il ne s’agit pas d’un titre, changez son élément de <code>Titre %(level)</code> à <code>Paragraphe</code>. Sinon, placez la signification de l’image dans son texte alternatif.</p>${why.headings}`,
 
 	HEADING_FIRST: `${why.fix}Assurez-vous que le titre de la page est marqué comme titre de niveau 1 ou 2. ${why.headings}`,
 
@@ -205,7 +205,7 @@ export const tips = {
 
 	IMAGE_DECORATIVE: `<p>Cette image a été masquée pour les lecteurs d’écran via un alt vide. Seules les images sans signification (icônes redondantes, textures décoratives) doivent être masquées ainsi.</p><p>${why.fix}Si cette image apporte une information, fournissez un texte alternatif.</p>${why.images}`,
 
-	IMAGE_DECORATIVE_CAROUSEL: `L’image est marquée comme <strong>décorative</strong>, mais dans un carrousel ou une galerie, chaque image doivent disposer d’un texte alternatif descriptif afin d’offrir une expérience équivalente à tous les utilisateurs.`,
+	IMAGE_DECORATIVE_CAROUSEL: `L’image est marquée comme <strong>décorative</strong>, mais dans un carrousel ou une galerie, chaque image doit disposer d’un texte alternatif descriptif afin d’offrir une expérience équivalente à tous les utilisateurs.`,
 
 	IMAGE_FIGURE_DECORATIVE: `<p>Cette image sera ignorée par les technologies d’assistance. La légende a-t-elle un sens sans l’image ?</p><p>${why.fix}Si la légende ne décrit pas la signification visuelle, fournissez un texte alternatif pour les éléments non décrits.</p><div class="why"><p>Astuce : images, alts et légendes fonctionnent ensemble :</p><ul><li>Les légendes visibles donnent du contexte.</li><li>Les textes alternatifs décrivent l’image pour ceux qui ne peuvent pas la voir.</li></ul></div>`,
 
@@ -318,7 +318,7 @@ export const tips = {
 
 	QA_UNDERLINE: `<p>Sur le Web, le texte souligné sert pour les liens, pas pour l’emphase. Les utilisateurs penseront qu’il est cliquable : <i><u>%(TEXT)</u></i></p><p>${why.fix} Utilisez <strong>gras</strong> ou <em>italique</em> pour l’emphase, et des éléments de titre pour la structure.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le soulignement. Seuls les élements de titre créent de la structure.</p></div>`,
 
-	QA_UPPERCASE: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>${why.fix}N’utilisez les majuscules que pour quelques mots à la fois pour l’emphase. LES BLOCS DE TEXTE EN MAJUSCULES SONT PLUS DIFFICILES À LIRE, ET DE NOMBREUX LECTEURS LES INTERPRÈTENT COMME DES CRIS.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le texte en majuscules. Utilisez un style de titre si ce texte emphatique introduit un changement de sujet ou un contenu d’importance critique.</p></div>`,
+	QA_UPPERCASE: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>${why.fix}N’utilisez les majuscules que pour quelques mots à la fois pour l’emphase. LES BLOCS DE TEXTE EN MAJUSCULES SONT PLUS DIFFICILES À LIRE, ET DE NOMBREUX LECTEURS LES INTERPRÈTENT COMME DES CRIS.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le texte en majuscules. Utilisez un élément de titre si ce texte emphatique introduit un changement de sujet ou un contenu d’importance critique.</p></div>`,
 	SUS_ALT: `<p>Le texte alternatif de cette image contient le mot « <i>%(alt)</i> ». Les lecteurs d’écran annoncent déjà qu’ils lisent la description d’une image, donc des expressions comme « image de » ou « photo de » sont généralement redondantes.</p><p><strong>Texte alternatif :</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p><div class="why"><p>Astuce : ces expressions méritent d’être conservées si le format lui-même a un sens :<br>« Une photo d’un chat, encadrée et accrochée au mur. »</p></div>`,
 
 	TABINDEX_ATTR: `<p>Les valeurs de tabindex supérieures à 0 déplacent les éléments focusables hors de leur ordre visuel, ce qui rend difficile pour les utilisateurs de technologies d’assistance de les localiser et de les utiliser.</p><p>${why.fix}Modifiez plutôt l’ordre des éléments dans le HTML, pour que l’ordre du focus et l’ordre de lecture correspondent.</p><div class="why"><p>Astuce : l’ordre visuel des mots sur la page et l’ordre dans lequel les claviers parcourent les éléments sont généralement les mêmes.</p><p>Attribuer un tabindex positif à un élément le déplace au début de l’ordre de tabulation, <strong>mais pas de l’ordre visuel ou de lecture</strong>.</p></div>`,
