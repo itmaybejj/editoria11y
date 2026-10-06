@@ -474,9 +474,7 @@ export function dismissOne(dismissalType, test, dismissalKey) {
     dismissAction: dismissalType,
   };
   const ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
-  window.setTimeout(() => {
-    document.dispatchEvent(ed11yDismissalUpdate);
-  }, 100);
+  document.dispatchEvent(ed11yDismissalUpdate);
 }
 
 // Size and position a highlight element around `target`, accounting for
@@ -1682,6 +1680,7 @@ export function dismissThis(dismissalType, button) {
   const tip = button.closest('.ed11y-wrapper');
   const test = tip.querySelector('[data-test]').dataset.test;
   const dismissKey = tip.dataset.ed11yDismiss;
+  UI.runOrigin = 'dismissal';
 
   if (button.dataset.ed11yAll === 'true') {
     State.results.forEach((result) => {

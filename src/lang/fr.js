@@ -5,13 +5,13 @@ const testNames = {
 	ALT_FILE_EXT: 'Ce texte alternatif est un nom de fichier, pas une description',
 	ALT_MAYBE_BAD: `S’agit-il d’une description claire et concise de l’image ?`,
 	ALT_MAYBE_BAD_WARNING: `S’agit-il d’une description claire et concise de l’image ?`,
-	ALT_PLACEHOLDER: 'Ce texte alternatif est peut-être un texte de remplacement', // updated
+	ALT_PLACEHOLDER: 'Ce texte alternatif semble être un texte générique', // updated
 	ALT_UNPRONOUNCEABLE: 'Ce texte alternatif est impossible à prononcer',
 	ARIA_INPUT_FIELD_NAME: `Ce champ de saisie personnalisé n’a pas d’étiquette`,
 	BTN_EMPTY: 'Le bouton n’a pas d’étiquette accessible',
 	BTN_UNPRONOUNCEABLE: 'Ce bouton est imprononçable',
 	BTN_EMPTY_LABELLEDBY: 'Le bouton possède une étiquette ARIA non valide',
-	BTN_ROLE_IN_NAME: 'Le nom du bouton répète le mot « button »',
+	BTN_ROLE_IN_NAME: 'Le nom du bouton répète le mot « bouton »',
 	CONTRAST_ERROR: 'Le texte n’a pas un contraste suffisant pour être facilement lisible',
 	CONTRAST_ERROR_GRAPHIC: 'Le graphique ou l’icône n’a pas un contraste suffisant',
 	CONTRAST_INPUT: 'Le champ de saisie n’a pas un contraste suffisant pour être facilement lisible',
@@ -24,8 +24,8 @@ const testNames = {
 	EMBED_AUDIO: 'Cet audio a-t-il une transcription ?',
 	EMBED_DATA_VIZ: 'Cette visualisation est-elle accessible ?',
 	EMBED_GENERAL: 'Les iframes intégrées nécessitent des vérifications manuelles',
-	EMBED_MISSING_TITLE: 'Le cadre ne possède pas d’attribut « title »',
-	EMBED_UNFOCUSABLE: 'Un frame avec tabindex="-1" ne sera pas accessible au clavier.',
+	EMBED_MISSING_TITLE: 'Cette iframe ne possède pas d’attribut « title »',
+	EMBED_UNFOCUSABLE: 'Un iframe avec tabindex="-1" ne sera pas accessible au clavier.',
 	EMBED_VIDEO: 'Cette vidéo est-elle correctement sous-titrée ?',
 	HEADING_EMPTY: 'Cet éléments de titre ne contient aucun texte',
 	HEADING_UNPRONOUNCEABLE: 'Ce titre est imprononçable',
@@ -50,11 +50,11 @@ const testNames = {
 	LANG_MISMATCH: 'La balise de langue ne correspond pas au contenu',
 	LANG_OF_PARTS: 'Ce contenu semble être dans une autre langue',
 	LANG_OF_PARTS_ALT: 'Ce texte alternatif semble être dans une autre langue',
-	LINK_ALT_FILE_EXT: 'Un texte alternatif utilisé comme lien ne doit pas être une URL',
-	LINK_ALT_MAYBE_BAD: `Ce texte alternatif lié n’est peut-être pas clair et concis`,
-	LINK_ALT_MAYBE_BAD_WARNING: `Ce texte alternatif lié n’est peut-être pas clair et concis`,
+	LINK_ALT_FILE_EXT: 'Le texte alternatif d’une image liée ne devrait pas être une URL',
+	LINK_ALT_MAYBE_BAD: `Le texte alternatif de ce lien n’est peut-être pas clair et concis`,
+	LINK_ALT_MAYBE_BAD_WARNING: `Le texte alternatif de ce lien n’est peut-être pas clair et concis`,
 	LINK_ALT_UNPRONOUNCEABLE: 'Les images liées doivent avoir un texte alternatif prononçable',
-	LINK_CLICK_HERE: 'Ce lien contient « cliquer ici »',
+	LINK_CLICK_HERE: 'Ce lien utilise un texte générique tel que « cliquez ici »',
 	LINK_DOI: "Liez les titres d’articles, pas les numéros DOI",
 	LINK_EMPTY: 'Ce lien ne contient aucun mot.',
 	LINK_EMPTY_LABELLEDBY: 'Lien avec attribut « aria-labelledby » non valide',
@@ -62,35 +62,35 @@ const testNames = {
 	LINK_UNPRONOUNCEABLE: 'Ce lien est imprononçable',
 	LINK_FILE_EXT: 'Ce lien pointe vers un fichier sans avertissement',
 	LINK_IDENTICAL_NAME: 'Des liens avec le même texte mènent à des pages différentes', // updated
-	LINK_IMAGE_ALT: 'Ce texte alternatif décrit-il le lien ou l’image ?',
-	LINK_IMAGE_ALT_AND_TEXT: 'Ce texte alternatif a-t-il un sens dans ce lien ?',
-	LINK_IMAGE_LONG_ALT: 'Ce texte alternatif lié peut-il être plus court ?',
-	LINK_IMAGE_NO_ALT_TEXT: 'Cette image liée nécessite un texte alternatif',
-	LINK_IMAGE_TEXT: 'Cette image liée a-t-elle besoin d’une description ?',
+	LINK_IMAGE_ALT: 'Ce texte alternatif décrit-il le lien ou l’image ?',
+	LINK_IMAGE_ALT_AND_TEXT: 'Ce texte alternatif a-t-il du sens dans le contexte de ce lien ?',
+	LINK_IMAGE_LONG_ALT: 'Le texte alternatif de ce lien peut-il être plus court ?',
+	LINK_IMAGE_NO_ALT_TEXT: 'Ce lien image nécessite un texte alternatif',
+	LINK_IMAGE_TEXT: 'Ce lien image a-t-elle besoin d’une description ?',
 	LINK_LABEL: 'Étiquette de lien',
 	LINK_MAYBE_BUTTON: 'Ce lien est-il en réalité un bouton ?',
 	LINK_NEW_TAB: 'Ce lien ouvre-t-il un nouvel onglet sans avertissement ?',
-	LINK_PLACEHOLDER_ALT: 'Ce texte alternatif lié est peut-être un texte de remplacement',
+	LINK_PLACEHOLDER_ALT: 'Le texte alternatif de ce lien est peut-être un texte de remplacement',
 	LINK_STOPWORD: 'Ce lien contient uniquement des mots génériques', // updated
-	LINK_STOPWORD_ARIA: 'L’objet de ce lien est visuellement masqué',
-	LINK_SUS_ALT: 'Le texte alternatif décrit-il l’image ou le lien ?',
+	LINK_STOPWORD_ARIA: 'L’objectif de ce lien est masqué visuellement',
+	LINK_SUS_ALT: 'Le texte alternatif de cette image décrit-il l’image ou le lien ?',
 	LINK_SYMBOLS: 'Les symboles ou émojis dans ce lien sont-ils significatifs ?',
 	LINK_URL: 'Le texte du lien ne doit pas être une URL',
-	META_LANG: 'Balise meta pour la langue manquante',
+	META_LANG: 'Balise meta de langue manquante',
 	META_LANG_SUGGEST: 'Vouliez-vous utiliser un code de langue différent ?',
 	META_LANG_VALID: 'Code de langue invalide',
 	META_MAX: 'La balise meta limite l’agrandissement du texte',
 	META_REFRESH: 'La balise meta actualise automatiquement la page',
 	META_SCALABLE: 'La balise meta empêche l’agrandissement du texte',
-	META_TITLE: 'Balise meta du titre de page manquante',
+	META_TITLE: 'Balise meta de titre de page manquante',
 	PAGE_LANG_CONFIDENCE: 'La langue de la page peut ne pas correspondre au contenu',
 	MISSING_ALT: 'HTML invalide : image sans attribut alt',
 	MISSING_ALT_LINK: 'HTML invalide : image liée sans attribut alt',
 	MISSING_ALT_LINK_HAS_TEXT: 'HTML invalide : image dans un lien sans attribut alt',
 	QA_BAD_LINK: 'La cible de ce lien est peut-être invalide',
-	QA_BLOCKQUOTE: 'Cette citation devrait-elle être un élément de titre ?',
-	QA_DOCUMENT: 'Ce document a-t-il été balisé pour les lecteurs d’écran ?',
-	QA_FAKE_HEADING: 'Ce texte en gras devrait-il être un élément de titre ?',
+	QA_BLOCKQUOTE: 'Cette citation devrait-elle être un titre ?',
+	QA_DOCUMENT: 'Ce document est-il correctement balisé pour les lecteurs d’écran ?',
+	QA_FAKE_HEADING: 'Ce texte en gras devrait-il être un titre ?',
 	QA_FAKE_LIST: 'Cela devrait-il utiliser un format de liste ?',
 	QA_IN_PAGE_LINK: 'Lien interne cassé',
 	QA_JUSTIFY: 'Ne pas justifier le texte',
@@ -170,7 +170,7 @@ export const tips = {
 
 	CONTRAST_WARNING: `Une image d’arrière-plan ou un dégradé empêche ce vérificateur de connaître précisément la couleur derrière ce texte. Utilisez l’outil pipette ci-dessous pour vérifier manuellement.`,
 
-	DUPLICATE_ID: `<p>Les ID sont utilisés sur cette page pour des étiquettes ou des cibles de lien, ce qui implique qu’ils doivent être uniques.</p><p>${why.fix}Modifiez cet ID : <code>#%(ID)</code></p><div class="why"><p>Dans la plupart des systèmes de gestion de contenu, cela provient d’un champ “name” ou “id” dans les propriétés de l’élément. En HTML, il s’agit d’un attribut : <code>&lt;a id=""></code></p></div>`,
+	DUPLICATE_ID: `<p>Les ID sont utilisés sur cette page pour des étiquettes ou des cibles de lien, ce qui implique qu’ils doivent être uniques.</p><p>${why.fix}Modifiez cet ID : <code>#%(ID)</code></p><div class="why"><p>Dans la plupart des systèmes de gestion de contenu, cela provient d’un champ « name » ou « id » dans les propriétés de l’élément. En HTML, il s’agit d’un attribut : <code>&lt;a id=""></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Supprimez le texte du lien ou l’attribut <code>title</code> du lien.</p><div class="why"><p>Note : les info-bulles <code>title</code> n’apparaissent qu’au survol de la souris. Elles ne sont pas visibles sur mobile ni au clavier ; de nombreux utilisateurs ne les verront jamais. Elles ne doivent jamais contenir d’information importante ou unique.</p></div>`,
 
@@ -191,13 +191,13 @@ export const tips = {
 
 	HEADING_EMPTY_WITH_IMAGE: `<p>Les éléments de titre vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}S’il ne s’agit pas d’un titre, changez son style de <code>En-tête %(level)</code> à <code>Paragraphe</code>. Sinon, placez la signification de l’image dans son texte alternatif.</p>${why.headings}`,
 
-	HEADING_FIRST: `${why.fix}Assurez-vous que le titre de la page est marqué comme En-tête de niveau 1 ou 2. ${why.headings}`,
+	HEADING_FIRST: `${why.fix}Assurez-vous que le titre de la page est marqué comme titre de niveau 1 ou 2. ${why.headings}`,
 
 	HEADING_LONG: `<p>${why.fix}À moins qu’il ne s’agisse d’un titre fixe (comme celui d’un article publié), raccourcissez-le pour faciliter le survol de lecture :<span hidden>%(drop)%(drop)</span></p><p><i>%(TEXT)</i></p>${why.headings}`,
 
-	HEADING_MISSING_ONE: `<p>${why.fix}Marquez le titre de la page comme en-tête de niveau 1 pour indiquer le début de la structure du document.</p>${why.headings}`,
+	HEADING_MISSING_ONE: `<p>${why.fix}Marquez le titre de la page comme titre de niveau 1 pour indiquer le début de la structure du document.</p>${why.headings}`,
 
-	HEADING_SKIPPED_LEVEL: `<p>Cet titre est passé de <code>niveau %(prevLevel)</code> à <code>niveau %(level)</code>. Pour un lecteur d’écran, cela donne l’impression qu’il manque du contenu.</p><p>${why.fix}Ajustez les niveaux pour former une structure correcte, sans saut.</p>${why.headings}`,
+	HEADING_SKIPPED_LEVEL: `<p>Ce titre est passé de <code>niveau %(prevLevel)</code> à <code>niveau %(level)</code>. Pour un lecteur d’écran, cela donne l’impression qu’il manque du contenu.</p><p>${why.fix}Ajustez les niveaux pour former une structure correcte, sans saut.</p>${why.headings}`,
 
 	HIDDEN_FOCUSABLE: `<p>Cet élément interactif possède un attribut <code>aria-hidden="true"</code>, mais reste accessible au clavier.</p><p>${why.fix}Si vous <strong>souhaitez</strong> le masquer pour les lecteurs d’écran, vous devez également ajouter <code>tabindex="-1"</code>. Sinon, supprimez l’attribut <code>aria-hidden="true"</code>.</p><p><strong>Élément :</strong> <code>%(ELEMENT)</code></p>`,
 
@@ -323,9 +323,9 @@ export const tips = {
 
 	TABINDEX_ATTR: `<p>Les valeurs de tabindex supérieures à 0 déplacent les éléments focusables hors de leur ordre visuel, ce qui rend difficile pour les utilisateurs de technologies d’assistance de les localiser et de les utiliser.</p><p>${why.fix}Modifiez plutôt l’ordre des éléments dans le HTML, pour que l’ordre du focus et l’ordre de lecture correspondent.</p><div class="why"><p>Astuce : l’ordre visuel des mots sur la page et l’ordre dans lequel les claviers parcourent les éléments sont généralement les mêmes.</p><p>Attribuer un tabindex positif à un élément le déplace au début de l’ordre de tabulation, <strong>mais pas de l’ordre visuel ou de lecture</strong>.</p></div>`,
 
-	TABLES_EMPTY_HEADING: ` <p>${why.fix}Assurez-vous que chaque cellule d’en-tête contient du texte.</p><div class="why"><p>Astuce : les lecteurs d’écran utilisent les en-têtes pour orienter les utilisateurs dans un tableau.</p></div>`,
+	TABLES_EMPTY_HEADING: ` <p>${why.fix}Assurez-vous que chaque cellule d’ête contient du texte.</p><div class="why"><p>Astuce : les lecteurs d’écran utilisent les en-têtes pour orienter les utilisateurs dans un tableau.</p></div>`,
 
-	TABLES_INVALID_HEADERS_REF: `<p>Ce tableau essaie d’associer une cellule de données à une cellule d’en-tête spécifique, mais l’ID de l’en-tête est introuvable : <code>%(VALUE)</code>.</p><p>${why.fix}Assurez-vous que chaque attribut <code>headers</code> correspond à l’ID d’une cellule d’en-tête du même tableau.</p><div class="why">Astuce : <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">l’utilisation de références d’ID manuelles</a> pour associer des cellules de données à des cellules d’en-tête est complexe et fragile. Quand c’est possible, divisez les données complexes en tableaux plus petits avec des lignes et colonnes d’en-têtes simples.</div>`,
+	TABLES_INVALID_HEADERS_REF: `<p>Ce tableau essaie d’associer une cellule de données à une cellule d’entête spécifique, mais l’ID de l’en-tête est introuvable : <code>%(VALUE)</code>.</p><p>${why.fix}Assurez-vous que chaque attribut <code>headers</code> correspond à l’ID d’une cellule d’en-ête du même tableau.</p><div class="why">Astuce : <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">l’utilisation de références d’ID manuelles</a> pour associer des cellules de données à des cellules d’en-tête est complexe et fragile. Quand c’est possible, divisez les données complexes en tableaux plus petits avec des lignes et colonnes d’en-êtes simples.</div>`,
 
 	TABLES_MISSING_HEADINGS: ` <p>${why.fix}Modifiez les propriétés du tableau et indiquez si les en-têtes se trouvent dans la première ligne, la première colonne ou les deux.</p><div class="why"> <p>Astuce : les lecteurs d’écran répètent l’en-tête pertinent en entrant dans chaque ligne ou colonne.</p><p>Si ce tableau n’a pas d’en-têtes car il sert de mise en page visuelle, remplacez-le par autre chose qu’un tableau.</p></div>`,
 
@@ -383,9 +383,9 @@ const interfaceStrings = {
 	main_toggle_plural: ` alertes d’accessibilité`,
 	MISSING_ROOT: `Editoria11y n’a trouvé aucun élément correspondant à la configuration de la zone de vérification : <code>%(root)</code>`,
 	panelCheckAltText: `Vérifiez que chaque image décrit ce qu’elle signifie dans le contexte et qu’il n’y a pas d’images contenant du texte.`,
-	panelCheckOutline: `Ceci affiche la structure des éléments de titre. Vérifiez qu’elle correspond à l’organisation visuelle du contenu.`,
-	PANEL_HEADING_MISSING_ONE: 'En-tête de niveau 1 manquant.',
-	PANEL_NO_HEADINGS: 'Aucun éléments de titre trouvé.',
+	panelCheckOutline: `Ceci affiche la structure des titres. Vérifiez qu’elle correspond à l’organisation visuelle du contenu.`,
+	PANEL_HEADING_MISSING_ONE: 'Titre de niveau 1 manquant.',
+	PANEL_NO_HEADINGS: 'Aucun titre trouvé.',
 	reportsLink: 'Ouvrir les rapports du site',
 	toggleDisabled: 'Aucun contenu disponible à vérifier pour Editoria11y.',
 	transferFocus: 'Modifier ce contenu',
