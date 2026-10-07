@@ -1,5 +1,5 @@
 import Elements from '../../sa11y-js/utils/elements';
-import { buildElementList } from './utils';
+import { buildElementList, rebuildExclusions } from './utils';
 import Constants from '../../sa11y-js/utils/constants';
 import { dismissDigest } from '../../sa11y-js/utils/utils.js';
 import { UI } from '../core/ui.js';
@@ -52,7 +52,10 @@ export async function handleSyncOnlyResults() {
   State.results.length = 0;
   await filterAlerts(true).then();
 
+  // Switch to the content configuration so the filter element lists reflect
+  // the (typically longer) editor-facing exclusions.
   Object.assign(State.option, UI.splitConfiguration.contentOptions);
+  rebuildExclusions();
 
   buildElementList(true);
 
@@ -104,8 +107,9 @@ export async function handleSyncOnlyResults() {
 
   syncResults(UI.splitConfiguration.devResults);
 
+  // Restore the dev configuration for the next run.
   Object.assign(State.option, UI.splitConfiguration.devOptions);
-  // @todo will this now lose checks?
+  rebuildExclusions();
 }
 
 export function countAlerts() {
