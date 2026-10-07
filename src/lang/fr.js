@@ -27,10 +27,10 @@ const testNames = {
 	EMBED_MISSING_TITLE: 'Cette iframe ne possède pas d’attribut « title »',
 	EMBED_UNFOCUSABLE: 'Un iframe avec tabindex="-1" ne sera pas accessible au clavier.',
 	EMBED_VIDEO: 'Cette vidéo est-elle correctement sous-titrée ?',
-	HEADING_EMPTY: 'Cet titre ne contient aucun texte',
-	HEADING_UNPRONOUNCEABLE: 'Cet titre est imprononçable',
+	HEADING_EMPTY: 'Cet éléments de titre ne contient aucun texte',
+	HEADING_UNPRONOUNCEABLE: 'Ce titre est imprononçable',
 	HEADING_EMPTY_WITH_IMAGE: 'Cette image est utilisée comme titre ; elle nécessite donc un texte alternatif',
-	HEADING_FIRST: 'Le premier titre de cette page est un sous-titre',
+	HEADING_FIRST: 'Le premier titre de cette page est un titre de niveau inférieur',
 	HEADING_LONG: 'Cet titre peut-il être raccourci ?',
 	HEADING_MISSING_ONE: 'Cette page n’a pas de titre de niveau 1',
 	HEADING_SKIPPED_LEVEL: 'Cet titre utilise un niveau incorrect',
@@ -119,10 +119,10 @@ const why = {
 <li>Boutons qui <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">mettent à jour l’état</a> :<br>« Lecture/Lecture, activé », « Détails, réduit/Détails, développé. »</li>
 </ul></div>`,
 
-	headings: `<div class="why"><p>Astuce : les titres et sous-titres organisent le contenu en une structure hiérarchique. Les utilisateurs de lecteurs d’écran s’appuient sur cette structure pour comprendre et parcourir une page :</p>
-<ul><li>titre niveau 1 : titre de page
-<ul><li>titre niveau 2 : sujets principaux
-<ul><li>titre niveau 3 : sous-sujets</li></ul></li></ul></li></ul>
+	headings: `<div class="why"><p>Astuce : les elements de titres organisent le contenu en une structure hiérarchique. Les utilisateurs de lecteurs d’écran s’appuient sur cette structure pour comprendre et parcourir une page :</p>
+<ul><li>Titre niveau 1 : titre de page
+<ul><li>Titre niveau 2 : sujets principaux
+<ul><li>Titre niveau 3 : sous-sujets</li></ul></li></ul></li></ul>
 </div>`,
 
 	images: `<div class="why"><p>Astuce : décrivez ce que signifie une image, pas seulement ce qu’elle contient. Selon le contexte, une photo d’un enfant donnant un coup de pied dans un ballon peut signifier :</p>
@@ -135,8 +135,8 @@ const why = {
 	links: `<div class="why"><p>Les utilisateurs repèrent les contenus par les liens et utilisent la recherche interne pour les trouver par nom ; des liens efficaces sont donc significatifs, uniques et concis :</p>
 <ul>
 <li>Idéal : « En savoir plus sur <a href="https://webaim.org/techniques/hypertext/link_text">les liens significatifs</a> »</li>
-<li>Pas unique : « <a href="https://webaim.org/techniques/hypertext/link_text">Cliquez ici</a> pour en savoir plus. »</li>
-<li>Pas concis : « <a href="https://webaim.org/techniques/hypertext/link_text">Cliquez ici pour en apprendre davantage sur les liens significatifs</a> »</li>
+<li>Insuffisamment explicite : « <a href="https://webaim.org/techniques/hypertext/link_text">Cliquez ici</a> pour en savoir plus. »</li>
+<li>Trop long : « <a href="https://webaim.org/techniques/hypertext/link_text">Cliquez ici pour en apprendre davantage sur les liens significatifs</a> »</li>
 </ul></div>`,
 
 	imageLinks: `<div class="why"><p>Le but du texte alternatif est de fournir une alternative au sens d’une image, pas à son contenu brut. Pour une image liée, le sens correspond à la destination du lien :</p><ul>
@@ -149,7 +149,7 @@ const why = {
 export const tips = {
 	ARIA_INPUT_FIELD_NAME: `<p><strong>Élément :</strong> <code>%(EL)</code></p><p>${why.fix}Fournissez une étiquette valide ; pour les éléments de saisie personnalisés, cela signifie souvent du texte interne, ou un attribut title, aria-label ou aria-labelledby.</p>`,
 
-	ALT_FILE_EXT: `<p><span hidden>%(alt)</span><strong>Texte alternatif :</strong> <i>%(ALT_TEXT)</i></p><p>Les lecteurs d’écran tenteront de prononcer cette URL, souvent lettre par lettre. Cela ne transmet probablement pas la même signification que de voir l’image.</p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p>${why.images}`,
+	ALT_FILE_EXT: `<p><span hidden>%(alt)</span><strong>Texte alternatif :</strong> <i>%(ALT_TEXT)</i></p><p>Les lecteurs d’écran tenteront de prononcer cette URL, souvent lettre par lettre. Cela ne communique probablement pas la même signification que de voir l’image.</p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p>${why.images}`,
 
 	ALT_MAYBE_BAD: `<p><strong>Texte alternatif :</strong> <i>%(alt)</i></p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p>${why.images}`,
 
@@ -157,7 +157,7 @@ export const tips = {
 
 	ALT_PLACEHOLDER: `<p><strong>Texte alternatif :</strong> <i>%(alt)</i></p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p>${why.images}`,
 
-	ALT_UNPRONOUNCEABLE: `<p><strong>Texte alternatif :</strong> <i>%(alt)</i></p><p>Ce texte alternatif ne contient que des symboles imprononçables et/ou des espaces. Les lecteurs d’écran annonceront qu’une image est présente, puis feront une pause embarrassante : « image : ____. »</p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p>${why.images}`,
+	ALT_UNPRONOUNCEABLE: `<p><strong>Texte alternatif :</strong> <i>%(alt)</i></p><p>Ce texte alternatif ne contient que des symboles imprononçables et/ou des espaces. Les lecteurs d’écran annonceront la présence d’une image, puis marqueront une pause ou prononceront quelque chose d’incompréhensible : « image : ____. »</p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p>${why.images}`,
 
 	BTN_EMPTY: `<p>${why.fix}Utilisez une méthode valide pour indiquer aux lecteurs d’écran l’action de ce bouton : texte, alt sur une icône ou attribut <code>title</code>.</p>`,
 
@@ -172,7 +172,7 @@ export const tips = {
 
 	DUPLICATE_ID: `<p>Les ID sont utilisés sur cette page pour des étiquettes ou des cibles de lien, ce qui implique qu’ils doivent être uniques.</p><p>${why.fix}Modifiez cet ID : <code>#%(ID)</code></p><div class="why"><p>Dans la plupart des systèmes de gestion de contenu, cela provient d’un champ « name » ou « id » dans les propriétés de l’élément. En HTML, il s’agit d’un attribut : <code>&lt;a id=""></code></p></div>`,
 
-	DUPLICATE_TITLE: `<p>${why.fix}Supprimez l’attribut <code>title</code> du lien.</p><div class="why"><p>Note : les info-bulles <code>title</code> n’apparaissent qu’au survol de la souris. Elles ne sont pas visibles sur mobile ni au clavier ; de nombreux utilisateurs ne les verront jamais. Elles ne doivent jamais contenir d’information importante ou unique.</p></div>`,
+	DUPLICATE_TITLE: `<p>${why.fix}Supprimez le texte du lien ou l’attribut <code>title</code> du lien.</p><div class="why"><p>Note : les info-bulles <code>title</code> n’apparaissent qu’au survol de la souris. Elles ne sont pas visibles sur mobile ni au clavier ; de nombreux utilisateurs ne les verront jamais. Elles ne doivent jamais contenir d’information importante ou unique.</p></div>`,
 
 	EMBED_AUDIO: `<p>Ce vérificateur ne peut pas déterminer si un lecteur audio dispose d’une transcription, ni si celle-ci est exacte.</p><p>${why.fix}Assurez-vous qu’une <a href="https://www.w3.org/WAI/media/av/transcribing/">transcription ou alternative textuelle</a> est disponible, et que les locuteurs et effets sonores significatifs sont correctement identifiés.</p>`,
 
@@ -186,10 +186,10 @@ export const tips = {
 
 	EMBED_VIDEO: `<p>Ce vérificateur ne peut pas « voir » si les vidéos ont des sous-titres, ni si quelqu’un les a relus ; une vérification manuelle est donc nécessaire.</p><p>${why.fix}Assurez-vous que des <a href="https://www.w3.org/WAI/media/av/captions/">sous-titres (« CC ») précis</a> sont disponibles, et que les locuteurs et effets sonores significatifs sont correctement identifiés.</p>`,
 
-	HEADING_EMPTY: `<p>Les titres vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}Ajoutez du texte à ce titre ou supprimez cette ligne vide.</p>${why.headings}`,
-	HEADING_UNPRONOUNCEABLE: `<p>Les titres vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}Ajoutez du texte lisible à ce titre, ou convertissez-le en paragraphe.</p>${why.headings}`,
+	HEADING_EMPTY: `<p>Les éléments de titre vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}Ajoutez du texte à cet élément de titre ou supprimez cette ligne vide.</p>${why.headings}`,
+	HEADING_UNPRONOUNCEABLE: `<p>Les éléments de titre vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}Ajoutez du texte lisible à cet élément de titre, ou convertissez-le en paragraphe.</p>${why.headings}`,
 
-	HEADING_EMPTY_WITH_IMAGE: `<p>Les titres vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}S’il ne s’agit pas d’un titre, changez son style de <code>ête %(level)</code> à <code>Paragraphe</code>. Sinon, placez la signification de l’image dans son texte alternatif.</p>${why.headings}`,
+	HEADING_EMPTY_WITH_IMAGE: `<p>Les éléments de titre vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}S’il ne s’agit pas d’un titre, changez son élément de <code>Titre %(level)</code> à <code>Paragraphe</code>. Sinon, placez la signification de l’image dans son texte alternatif.</p>${why.headings}`,
 
 	HEADING_FIRST: `${why.fix}Assurez-vous que le titre de la page est marqué comme titre de niveau 1 ou 2. ${why.headings}`,
 
@@ -205,7 +205,7 @@ export const tips = {
 
 	IMAGE_DECORATIVE: `<p>Cette image a été masquée pour les lecteurs d’écran via un alt vide. Seules les images sans signification (icônes redondantes, textures décoratives) doivent être masquées ainsi.</p><p>${why.fix}Si cette image apporte une information, fournissez un texte alternatif.</p>${why.images}`,
 
-	IMAGE_DECORATIVE_CAROUSEL: `L’image est marquée comme <strong>décorative</strong>, mais toutes les images dans un carrousel ou une galerie doivent avoir un texte alternatif descriptif.`,
+	IMAGE_DECORATIVE_CAROUSEL: `L’image est marquée comme <strong>décorative</strong>, mais dans un carrousel ou une galerie, chaque image doit disposer d’un texte alternatif descriptif afin d’offrir une expérience équivalente à tous les utilisateurs.`,
 
 	IMAGE_FIGURE_DECORATIVE: `<p>Cette image sera ignorée par les technologies d’assistance. La légende a-t-elle un sens sans l’image ?</p><p>${why.fix}Si la légende ne décrit pas la signification visuelle, fournissez un texte alternatif pour les éléments non décrits.</p><div class="why"><p>Astuce : images, alts et légendes fonctionnent ensemble :</p><ul><li>Les légendes visibles donnent du contexte.</li><li>Les textes alternatifs décrivent l’image pour ceux qui ne peuvent pas la voir.</li></ul></div>`,
 
@@ -221,7 +221,7 @@ export const tips = {
 
 	LABELS_NO_FOR_ATTRIBUTE: `Aucune étiquette n’est associée à ce champ. Ajoutez un attribut <code>for</code> à l’étiquette correspondant au <code>id</code> du champ. <hr> <strong>ID :</strong> <code>#%(ID)</code>`,
 
-	LABELS_PLACEHOLDER: `<p>Le texte de remplacement peut être confondu avec du contenu déjà saisi s’il a un bon contraste, ou être illisible s’il n’en a pas. Il disparaît ensuite dès la saisie, ce qui peut supprimer des informations dont les utilisateurs ont besoin pour vérifier leurs erreurs.</p><p>${why.fix}Assurez-vous que les informations clés (étiquette, aide, instructions) restent visibles même lorsque le champ contient du texte.</p>`,
+	LABELS_PLACEHOLDER: `<p>Le texte de remplacement peut être confondu avec du contenu déjà saisi s’il a un bon contraste, ou être illisible s’il n’en a pas. Il disparaît ensuite dès la saisie, ce qui peut supprimer des informations dont les utilisateurs ont besoin pour vérifier leurs erreurs.</p><p>${why.fix}Assurez-vous que les informations essentielles (étiquette, aide, format attendu) restent visibles lorsque le champ contient du texte, et envisagez de supprimer complètement le texte d'exemple (<code>placeholder</code>).'</p>`,
 
 	LABEL_IN_NAME: `<p><strong>Texte visible :</strong> <i>%(VISIBLE)</i></p><p><strong>Étiquette pour lecteurs d’écran :</strong> <i>%(LABEL)</i></p><p>Le texte visible de cet élément semble différent de son nom accessible. Cela peut dérouter les utilisateurs de lecteurs d’écran et gêner le contrôle vocal.</p><p>${why.fix}Assurez-vous que l’étiquette visible commence par le texte de l’étiquette invisible et ne contient aucune information significative qui serait absente de l’étiquette invisible.</p>`, // updated to match baseAll
 
@@ -239,7 +239,7 @@ export const tips = {
 
 	LINK_EMPTY: `<p>${why.fix}Ajoutez du texte décrivant sa destination, ou supprimez-le s’il s’agit simplement d’une faute de frappe ou d’un caractère d’espace lié.</p><div class="why"><p>Conseil : les lecteurs d’écran ne peuvent pas décrire les liens qui ne contiennent que des espaces ou des symboles. Ils restent soit silencieux (« Lien, [...pause maladroite là où le titre du lien devrait être...] »), soit lisent l’URL : « Lien, H-T-T-P-S barre oblique barre oblique exemple point com. »</p><p>Notez que les caractères d’espace liés peuvent être difficiles à supprimer dans certains éditeurs de contenu ; il est parfois nécessaire de supprimer « à travers l’écart » en supprimant et en retapant les mots de chaque côté d’un espace lié.</p></div>`,
 
-	LINK_EMPTY_LABELLEDBY: `<p>Ce lien possède un attribut <code>aria-labelledby</code> qui ne correspond à aucun <code>ID</code> sur la page.</p><p>${why.fix}Fournissez un ID valide ou supprimez cet attribut.</p>`,
+	LINK_EMPTY_LABELLEDBY: `<p>Ce lien possède un attribut <code>aria-labelledby</code> qui ne correspond à aucun <code>ID</code> sur la page.</p><p>${why.fix}Fournissez un ID valide ou supprimez cet attribut et décrivez le lien autrement.</p>`,
 
 	LINK_EMPTY_NO_LABEL: `<p>${why.fix}Ajoutez du texte décrivant sa destination, ou supprimez ce lien s’il s’agit d’un accident.</p><div class="why"><p>Les liens vides provoquent silence ou lecture des URL.</p><p>Les espaces liés nécessitent parfois de réécrire le texte environnant pour les supprimer.</p></div>`,
 	LINK_UNPRONOUNCEABLE: `<p><strong>Texte du lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Ajoutez du texte ou un titre décrivant sa destination, ou supprimez-le s’il s’agit simplement d’une faute de frappe ou d’un caractère d’espace lié.</p><div class="why"><p>Conseil : les lecteurs d’écran ne peuvent pas décrire les liens qui ne contiennent que des espaces ou des symboles. Ils restent soit silencieux (« Lien, [...pause maladroite là où le titre du lien devrait être...] »), soit lisent le nom du symbole.</p></div>`,
@@ -294,11 +294,11 @@ export const tips = {
 
 	QA_BAD_LINK: `<p>Le lien semble pointer vers un environnement de développement :<br>{L} <code>%(LINK)</code></p><p>${why.fix}Remplacez-le par un chemin relatif (/folder) ou par l’URL publique.</p>`,
 
-	QA_BLOCKQUOTE: `<p><strong>Citation suspicieusement courte :</strong> <i>%(TEXT)</i></p><p>${why.fix}Si ceci n’est pas une citation mais un titre, marquez-le comme titre pour qu’il apparaisse dans la structure de la page.</p>${why.headings}`,
+	QA_BLOCKQUOTE: `<p><strong>Citation suspicieusement courte :</strong> <i>%(TEXT)</i></p><p>${why.fix}Si ceci n’est pas une citation mais un titre, marquez-le comme élément de titre pour qu’il apparaisse dans la structure de la page.</p>${why.headings}`,
 
 	QA_DOCUMENT: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>Les documents liés sont considérés comme du contenu web et doivent également être accessibles. Vérifiez titres, tableaux et textes alternatifs, puis ignorez cette alerte.</p><ul class="why"><li>Rendre vos <a href="https://support.google.com/docs/answer/6199477?hl=fr">documents Google Workspace accessibles</a>.</li><li>Rendre vos <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">documents Office accessibles</a>.</li></ul>`,
 
-	QA_FAKE_HEADING: `<p><strong>Texte en gras :</strong> <i>%(TEXT)</i></p><p>${why.fix}Si ce texte est en gras pour marquer un changement de sujet, marquez-le comme titre afin que les utilisateurs de lecteurs d’écran puissent s’en servir pour naviguer dans la page.</p><div class="why"> <p>Astuce : les styles gras et italique apportent une emphase visuelle, mais n’ajoutent pas automatiquement de texte à la table des matières pour les technologies d’assistance.</p></div>`,
+	QA_FAKE_HEADING: `<p><strong>Texte en gras :</strong> <i>%(TEXT)</i></p><p>${why.fix}Si ce texte est en gras pour marquer un changement de sujet, marquez-le comme élément de titre afin que les utilisateurs de lecteurs d’écran puissent s’en servir pour naviguer dans la page.</p><div class="why"> <p>Astuce : les styles gras et italique apportent une emphase visuelle, mais n’ajoutent pas automatiquement de texte à la table des matières pour les technologies d’assistance.</p></div>`,
 
 	QA_FAKE_LIST: `<p>${why.fix}Si <i>%(TEXT)</i> fait partie d’une liste, formatez-le comme une liste.</p><div class="why"><p>Les listes ont une structure visuelle et technique :</p><ol><li>Elles alignent les éléments et facilitent la lecture.</li><li>Elles sont reconnues par les lecteurs d’écran, qui annoncent « élément 3 sur 7 ».</li></ol><p>Un paragraphe commençant par un numéro n’est pas une vraie liste.</p></div>`,
 
@@ -316,9 +316,9 @@ export const tips = {
 
 	QA_SUBSCRIPT: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>Les exposants et indices rendent le texte trop petit et difficile à lire. Ne les utilisez que pour des usages spécifiques : nombres ordinaux (4<sup>e</sup>), formules chimiques (H<sub>2</sub>O), références de notes.</p>`,
 
-	QA_UNDERLINE: `<p>Sur le Web, le texte souligné sert pour les liens, pas pour l’emphase. Les utilisateurs penseront qu’il est cliquable : <i><u>%(TEXT)</u></i></p><p>${why.fix} Utilisez <strong>gras</strong> ou <em>italique</em> pour l’emphase, et des titres pour la structure.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le soulignement. Seuls les titres créent de la structure.</p></div>`,
+	QA_UNDERLINE: `<p>Sur le Web, le texte souligné sert pour les liens, pas pour l’emphase. Les utilisateurs penseront qu’il est cliquable : <i><u>%(TEXT)</u></i></p><p>${why.fix} Utilisez <strong>gras</strong> ou <em>italique</em> pour l’emphase, et des éléments de titre pour la structure.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le soulignement. Seuls les élements de titre créent de la structure.</p></div>`,
 
-	QA_UPPERCASE: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>${why.fix}N’utilisez les majuscules que pour quelques mots à la fois pour l’emphase. LES BLOCS DE TEXTE EN MAJUSCULES SONT PLUS DIFFICILES À LIRE, ET DE NOMBREUX LECTEURS LES INTERPRÈTENT COMME DES CRIS.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le texte en majuscules. Utilisez un style d’ête si ce texte emphatique introduit un changement de sujet ou un contenu d’importance critique.</p></div>`,
+	QA_UPPERCASE: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>${why.fix}N’utilisez les majuscules que pour quelques mots à la fois pour l’emphase. LES BLOCS DE TEXTE EN MAJUSCULES SONT PLUS DIFFICILES À LIRE, ET DE NOMBREUX LECTEURS LES INTERPRÈTENT COMME DES CRIS.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le texte en majuscules. Utilisez un élément de titre si ce texte emphatique introduit un changement de sujet ou un contenu d’importance critique.</p></div>`,
 	SUS_ALT: `<p>Le texte alternatif de cette image contient le mot « <i>%(alt)</i> ». Les lecteurs d’écran annoncent déjà qu’ils lisent la description d’une image, donc des expressions comme « image de » ou « photo de » sont généralement redondantes.</p><p><strong>Texte alternatif :</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p><div class="why"><p>Astuce : ces expressions méritent d’être conservées si le format lui-même a un sens :<br>« Une photo d’un chat, encadrée et accrochée au mur. »</p></div>`,
 
 	TABINDEX_ATTR: `<p>Les valeurs de tabindex supérieures à 0 déplacent les éléments focusables hors de leur ordre visuel, ce qui rend difficile pour les utilisateurs de technologies d’assistance de les localiser et de les utiliser.</p><p>${why.fix}Modifiez plutôt l’ordre des éléments dans le HTML, pour que l’ordre du focus et l’ordre de lecture correspondent.</p><div class="why"><p>Astuce : l’ordre visuel des mots sur la page et l’ordre dans lequel les claviers parcourent les éléments sont généralement les mêmes.</p><p>Attribuer un tabindex positif à un élément le déplace au début de l’ordre de tabulation, <strong>mais pas de l’ordre visuel ou de lecture</strong>.</p></div>`,
@@ -329,7 +329,7 @@ export const tips = {
 
 	TABLES_MISSING_HEADINGS: ` <p>${why.fix}Modifiez les propriétés du tableau et indiquez si les en-têtes se trouvent dans la première ligne, la première colonne ou les deux.</p><div class="why"> <p>Astuce : les lecteurs d’écran répètent l’en-tête pertinent en entrant dans chaque ligne ou colonne.</p><p>Si ce tableau n’a pas d’en-têtes car il sert de mise en page visuelle, remplacez-le par autre chose qu’un tableau.</p></div>`,
 
-	TABLES_SEMANTIC_HEADING: ` <p>${why.fix}Supprimez ce format de titre (h2, h3). Fournissez plutôt des lignes ou colonnes d’en-têtes. Si vous avez besoin de plusieurs niveaux, utilisez plusieurs tableaux.</p><div class="why"> <p>Astuce : les en-têtes de tableau sont directionnels (ligne ou colonne). Les titres de contenu, eux, affectent tout ce qui suit.</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">Un <strong>en-tête de tableau</strong> en cellule 2 étiquette la cellule B. <br><br> Un <strong>en-tête de contenu</strong> étiquette les cellules 3, A, B, C, ainsi que ce texte et le pied de ce conseil.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`
+	TABLES_SEMANTIC_HEADING: ` <p>${why.fix}Supprimez ce format d’élément de titre (h2, h3). Fournissez plutôt des lignes ou colonnes d’en-têtes. Si vous avez besoin de plusieurs niveaux, utilisez plusieurs tableaux.</p><div class="why"> <p>Astuce : les en-têtes de tableau sont directionnels (ligne ou colonne). Les titres de contenu, eux, affectent tout ce qui suit.</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">Un <strong>en-tête de tableau</strong> en cellule 2 étiquette la cellule B. <br><br> Un <strong>titre de contenu</strong> étiquette les cellules 3, A, B, C, ainsi que ce texte et le pied de ce conseil.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`
 };
 
 const interfaceStrings = {
@@ -350,7 +350,7 @@ const interfaceStrings = {
 	MISSING: '(manquant !)',
 	NOT_VISIBLE: 'Note : ce contenu peut ne pas être visible. Cherchez-le dans le conteneur délimité.',
 	NO_IMAGES: 'Aucune image trouvée.',
-	OUTLINE: 'en-têtes',
+	OUTLINE: 'Titres',
 	PANEL_DISMISS_BUTTON: `Afficher %(dismissCount) alertes masquées`,
 	PANEL_HEADING: 'Afficher les visualisations',
 	SKIP_TO_ISSUE: 'Afficher l’alerte', // updated
@@ -368,7 +368,7 @@ const interfaceStrings = {
 	dismissOkTitle: 'Masque l’alerte pour tous les éditeurs',
 	dismissOnSite: 'Sur toutes les pages : marquer comme OK',
 	dismissalsHeader: 'Vous n’allez pas corriger ceci ?',
-	errorOutlinePrefixHeadingEmpty: '(titre vide)',
+	errorOutlinePrefixHeadingEmpty: '(éléments de titre vide)',
 	errorOutlinePrefixHeadingIsLong: '(signalé pour longueur)',
 	errorOutlinePrefixSkippedLevel: '(signalé pour niveau sauté)',
 	issueContent: 'Problème de contenu',
@@ -383,7 +383,7 @@ const interfaceStrings = {
 	main_toggle_plural: ` alertes d’accessibilité`,
 	MISSING_ROOT: `Editoria11y n’a trouvé aucun élément correspondant à la configuration de la zone de vérification : <code>%(root)</code>`,
 	panelCheckAltText: `Vérifiez que chaque image décrit ce qu’elle signifie dans le contexte et qu’il n’y a pas d’images contenant du texte.`,
-	panelCheckOutline: `Ceci affiche la structure des en-têtes. Vérifiez qu’elle correspond à l’organisation visuelle du contenu.`,
+	panelCheckOutline: `Ceci affiche la structure des titres. Vérifiez qu’elle correspond à l’organisation visuelle du contenu.`,
 	PANEL_HEADING_MISSING_ONE: 'Titre de niveau 1 manquant.',
 	PANEL_NO_HEADINGS: 'Aucun titre trouvé.',
 	reportsLink: 'Ouvrir les rapports du site',
