@@ -1,17 +1,18 @@
 import { default as Sa11yStrings } from '../sa11y-lang/fr.js';
-// Caution: uncorrected machine translation. Contact us on GitHub to contribute.
+// Translation last proofread on Oct 26, 2026 by @waako
+// Note: use "titre" or "éléments de titre" for general headings and "en-tête" for headers (table etc).
 
 const testNames = {
 	ALT_FILE_EXT: 'Ce texte alternatif est un nom de fichier, pas une description',
 	ALT_MAYBE_BAD: `S’agit-il d’une description claire et concise de l’image ?`,
 	ALT_MAYBE_BAD_WARNING: `S’agit-il d’une description claire et concise de l’image ?`,
-	ALT_PLACEHOLDER: 'Ce texte alternatif semble être un texte générique', // updated
+	ALT_PLACEHOLDER: 'Ce texte alternatif est peut-être un texte de remplacement',
 	ALT_UNPRONOUNCEABLE: 'Ce texte alternatif est impossible à prononcer',
 	ARIA_INPUT_FIELD_NAME: `Ce champ de saisie personnalisé n’a pas d’étiquette`,
 	BTN_EMPTY: 'Le bouton n’a pas d’étiquette accessible',
 	BTN_UNPRONOUNCEABLE: 'Ce bouton est imprononçable',
 	BTN_EMPTY_LABELLEDBY: 'Le bouton possède une étiquette ARIA non valide',
-	BTN_ROLE_IN_NAME: 'Le nom du bouton répète le mot « bouton »',
+	BTN_ROLE_IN_NAME: 'Le nom du bouton répète le mot « button »',
 	CONTRAST_ERROR: 'Le texte n’a pas un contraste suffisant pour être facilement lisible',
 	CONTRAST_ERROR_GRAPHIC: 'Le graphique ou l’icône n’a pas un contraste suffisant',
 	CONTRAST_INPUT: 'Le champ de saisie n’a pas un contraste suffisant pour être facilement lisible',
@@ -24,8 +25,8 @@ const testNames = {
 	EMBED_AUDIO: 'Cet audio a-t-il une transcription ?',
 	EMBED_DATA_VIZ: 'Cette visualisation est-elle accessible ?',
 	EMBED_GENERAL: 'Les iframes intégrées nécessitent des vérifications manuelles',
-	EMBED_MISSING_TITLE: 'Cette iframe ne possède pas d’attribut « title »',
-	EMBED_UNFOCUSABLE: 'Un iframe avec tabindex="-1" ne sera pas accessible au clavier.',
+	EMBED_MISSING_TITLE: 'Le cadre ne possède pas d’attribut « title »',
+	EMBED_UNFOCUSABLE: 'Un frame avec tabindex="-1" ne sera pas accessible au clavier.',
 	EMBED_VIDEO: 'Cette vidéo est-elle correctement sous-titrée ?',
 	HEADING_EMPTY: 'Cet titre ne contient aucun texte',
 	HEADING_UNPRONOUNCEABLE: 'Cet titre est imprononçable',
@@ -50,47 +51,47 @@ const testNames = {
 	LANG_MISMATCH: 'La balise de langue ne correspond pas au contenu',
 	LANG_OF_PARTS: 'Ce contenu semble être dans une autre langue',
 	LANG_OF_PARTS_ALT: 'Ce texte alternatif semble être dans une autre langue',
-	LINK_ALT_FILE_EXT: 'Le texte alternatif d’une image liée ne devrait pas être une URL',
-	LINK_ALT_MAYBE_BAD: `Le texte alternatif de ce lien n’est peut-être pas clair et concis`,
-	LINK_ALT_MAYBE_BAD_WARNING: `Le texte alternatif de ce lien n’est peut-être pas clair et concis`,
+	LINK_ALT_FILE_EXT: 'Un texte alternatif utilisé comme lien ne doit pas être une URL',
+	LINK_ALT_MAYBE_BAD: `Ce texte alternatif lié n’est peut-être pas clair et concis`,
+	LINK_ALT_MAYBE_BAD_WARNING: `Ce texte alternatif lié n’est peut-être pas clair et concis`,
 	LINK_ALT_UNPRONOUNCEABLE: 'Les images liées doivent avoir un texte alternatif prononçable',
-	LINK_CLICK_HERE: 'Ce lien utilise un texte générique tel que « cliquez ici »',
+	LINK_CLICK_HERE: 'Ce lien contient « cliquer ici »',
 	LINK_DOI: "Liez les titres d’articles, pas les numéros DOI",
 	LINK_EMPTY: 'Ce lien ne contient aucun mot.',
 	LINK_EMPTY_LABELLEDBY: 'Lien avec attribut « aria-labelledby » non valide',
 	LINK_EMPTY_NO_LABEL: 'Ce lien a besoin d’une étiquette',
 	LINK_UNPRONOUNCEABLE: 'Ce lien est imprononçable',
 	LINK_FILE_EXT: 'Ce lien pointe vers un fichier sans avertissement',
-	LINK_IDENTICAL_NAME: 'Des liens avec le même texte mènent à des pages différentes', // updated
+	LINK_IDENTICAL_NAME: 'Des liens avec le même texte mènent à des pages différentes',
 	LINK_IMAGE_ALT: 'Ce texte alternatif décrit-il le lien ou l’image ?',
-	LINK_IMAGE_ALT_AND_TEXT: 'Ce texte alternatif a-t-il du sens dans le contexte de ce lien ?',
-	LINK_IMAGE_LONG_ALT: 'Le texte alternatif de ce lien peut-il être plus court ?',
-	LINK_IMAGE_NO_ALT_TEXT: 'Ce lien image nécessite un texte alternatif',
-	LINK_IMAGE_TEXT: 'Ce lien image a-t-elle besoin d’une description ?',
+	LINK_IMAGE_ALT_AND_TEXT: 'Ce texte alternatif a-t-il un sens dans ce lien ?',
+	LINK_IMAGE_LONG_ALT: 'Ce texte alternatif lié peut-il être plus court ?',
+	LINK_IMAGE_NO_ALT_TEXT: 'Cette image liée nécessite un texte alternatif',
+	LINK_IMAGE_TEXT: 'Cette image liée a-t-elle besoin d’une description ?',
 	LINK_LABEL: 'Étiquette de lien',
 	LINK_MAYBE_BUTTON: 'Ce lien est-il en réalité un bouton ?',
 	LINK_NEW_TAB: 'Ce lien ouvre-t-il un nouvel onglet sans avertissement ?',
-	LINK_PLACEHOLDER_ALT: 'Le texte alternatif de ce lien est peut-être un texte de remplacement',
-	LINK_STOPWORD: 'Ce lien contient uniquement des mots génériques', // updated
-	LINK_STOPWORD_ARIA: 'L’objectif de ce lien est masqué visuellement',
-	LINK_SUS_ALT: 'Le texte alternatif de cette image décrit-il l’image ou le lien ?',
-	LINK_SYMBOLS: 'Les symboles ou émojis dans ce lien sont-ils significatifs ?',
+	LINK_PLACEHOLDER_ALT: 'Ce texte alternatif lié est peut-être un texte de remplacement',
+	LINK_STOPWORD: 'Ce lien contient uniquement des mots génériques',
+	LINK_STOPWORD_ARIA: 'L’objet de ce lien est visuellement masqué',
+	LINK_SUS_ALT: 'Le texte alternatif décrit-il l’image ou le lien ?',
+	LINK_SYMBOLS: 'Les symboles ou émojis dans ce lien sont-ils significatifs ?',
 	LINK_URL: 'Le texte du lien ne doit pas être une URL',
-	META_LANG: 'Balise meta de langue manquante',
+	META_LANG: 'Balise meta pour la langue manquante',
 	META_LANG_SUGGEST: 'Vouliez-vous utiliser un code de langue différent ?',
 	META_LANG_VALID: 'Code de langue invalide',
 	META_MAX: 'La balise meta limite l’agrandissement du texte',
 	META_REFRESH: 'La balise meta actualise automatiquement la page',
 	META_SCALABLE: 'La balise meta empêche l’agrandissement du texte',
-	META_TITLE: 'Balise meta de titre de page manquante',
+	META_TITLE: 'Balise meta du titre de page manquante',
 	PAGE_LANG_CONFIDENCE: 'La langue de la page peut ne pas correspondre au contenu',
 	MISSING_ALT: 'HTML invalide : image sans attribut alt',
 	MISSING_ALT_LINK: 'HTML invalide : image liée sans attribut alt',
 	MISSING_ALT_LINK_HAS_TEXT: 'HTML invalide : image dans un lien sans attribut alt',
 	QA_BAD_LINK: 'La cible de ce lien est peut-être invalide',
-	QA_BLOCKQUOTE: 'Cette citation devrait-elle être un titre ?',
-	QA_DOCUMENT: 'Ce document est-il correctement balisé pour les lecteurs d’écran ?',
-	QA_FAKE_HEADING: 'Ce texte en gras devrait-il être un titre ?',
+	QA_BLOCKQUOTE: 'Cette citation devrait-elle être un élément de titre ?',
+	QA_DOCUMENT: 'Ce document a-t-il été balisé pour les lecteurs d’écran ?',
+	QA_FAKE_HEADING: 'Ce texte en gras devrait-il être un élément de titre ?',
 	QA_FAKE_LIST: 'Cela devrait-il utiliser un format de liste ?',
 	QA_IN_PAGE_LINK: 'Lien interne cassé',
 	QA_JUSTIFY: 'Ne pas justifier le texte',
@@ -170,7 +171,7 @@ export const tips = {
 
 	CONTRAST_WARNING: `Une image d’arrière-plan ou un dégradé empêche ce vérificateur de connaître précisément la couleur derrière ce texte. Utilisez l’outil pipette ci-dessous pour vérifier manuellement.`,
 
-	DUPLICATE_ID: `<p>Les ID sont utilisés sur cette page pour des étiquettes ou des cibles de lien, ce qui implique qu’ils doivent être uniques.</p><p>${why.fix}Modifiez cet ID : <code>#%(ID)</code></p><div class="why"><p>Dans la plupart des systèmes de gestion de contenu, cela provient d’un champ « name » ou « id » dans les propriétés de l’élément. En HTML, il s’agit d’un attribut : <code>&lt;a id=""></code></p></div>`,
+	DUPLICATE_ID: `<p>Les ID sont utilisés sur cette page pour des étiquettes ou des cibles de lien, ce qui implique qu’ils doivent être uniques.</p><p>${why.fix}Modifiez cet ID : <code>#%(ID)</code></p><div class="why"><p>Dans la plupart des systèmes de gestion de contenu, cela provient d’un champ “name” ou “id” dans les propriétés de l’élément. En HTML, il s’agit d’un attribut : <code>&lt;a id=""></code></p></div>`,
 
 	DUPLICATE_TITLE: `<p>${why.fix}Supprimez l’attribut <code>title</code> du lien.</p><div class="why"><p>Note : les info-bulles <code>title</code> n’apparaissent qu’au survol de la souris. Elles ne sont pas visibles sur mobile ni au clavier ; de nombreux utilisateurs ne les verront jamais. Elles ne doivent jamais contenir d’information importante ou unique.</p></div>`,
 
@@ -197,11 +198,11 @@ export const tips = {
 
 	HEADING_MISSING_ONE: `<p>${why.fix}Marquez le titre de la page comme titre de niveau 1 pour indiquer le début de la structure du document.</p>${why.headings}`,
 
-	HEADING_SKIPPED_LEVEL: `<p>Ce titre est passé de <code>niveau %(prevLevel)</code> à <code>niveau %(level)</code>. Pour un lecteur d’écran, cela donne l’impression qu’il manque du contenu.</p><p>${why.fix}Ajustez les niveaux pour former une structure correcte, sans saut.</p>${why.headings}`,
+	HEADING_SKIPPED_LEVEL: `<p>Cet titre est passé de <code>niveau %(prevLevel)</code> à <code>niveau %(level)</code>. Pour un lecteur d’écran, cela donne l’impression qu’il manque du contenu.</p><p>${why.fix}Ajustez les niveaux pour former une structure correcte, sans saut.</p>${why.headings}`,
 
 	HIDDEN_FOCUSABLE: `<p>Cet élément interactif possède un attribut <code>aria-hidden="true"</code>, mais reste accessible au clavier.</p><p>${why.fix}Si vous <strong>souhaitez</strong> le masquer pour les lecteurs d’écran, vous devez également ajouter <code>tabindex="-1"</code>. Sinon, supprimez l’attribut <code>aria-hidden="true"</code>.</p><p><strong>Élément :</strong> <code>%(ELEMENT)</code></p>`,
 
-	IMAGE_ALT_TOO_LONG: `<p>Ce texte alternatif comporte %(altLength) caractères : <i class="ed11y-small">%(ALT_TEXT)</i></p><p>${why.fix}Résumez, ou déplacez une partie de la description dans une légende.</p><div class="why"><p>Astuce : les images complexes qui nécessitent plus qu’une phrase ont généralement besoin d’une légende <strong>visible</strong> ou d’une alternative décrivant/interprétant les points clés. Il est acceptable d’y renvoyer :</p><ul><li>« Affiche pour la danse de vendredi ; détails dans la légende. »</li><li>« Graphique montrant une baisse de 10 % cette année ; détails dans le tableau. »</li></ul></div>`,
+	IMAGE_ALT_TOO_LONG: `<p>Ce texte alternatif comporte %(altLength) caractères : <i class="ed11y-small">%(ALT_TEXT)</i></p><p>${why.fix}Résumez, ou déplacez une partie de la description dans une légende.</p><div class="why"><p>Astuce : les images complexes qui nécessitent plus qu’une phrase ont généralement besoin d’une légende <strong>visible</strong> ou d’une alternative décrivant/interprétant les points clés. Il est acceptable d’y renvoyer :</p><ul><li>« Affiche pour la danse de vendredi ; détails dans la légende. »</li><li>« Graphique montrant une baisse de 10 % cette année ; détails dans le tableau. »</li></ul></div>`,
 
 	IMAGE_DECORATIVE: `<p>Cette image a été masquée pour les lecteurs d’écran via un alt vide. Seules les images sans signification (icônes redondantes, textures décoratives) doivent être masquées ainsi.</p><p>${why.fix}Si cette image apporte une information, fournissez un texte alternatif.</p>${why.images}`,
 
@@ -217,13 +218,13 @@ export const tips = {
 
 	LABELS_MISSING_IMAGE_INPUT: `Le bouton image n’a pas de texte alternatif. Ajoutez-en un pour fournir un nom accessible, par exemple : <em>Chercher</em> ou <em>Envoyer</em>.`,
 
-	LABELS_MISSING_LABEL: `<p>${why.fix}Ajoutez un <code>id</code> à ce champ, et ajoutez un attribut <code>for</code> correspondant à l’étiquette.</p>`, // updated to mirror baseAll
+	LABELS_MISSING_LABEL: `<p>${why.fix}Ajoutez un <code>id</code> à ce champ, et ajoutez un attribut <code>for</code> correspondant à l’étiquette.</p>`,
 
 	LABELS_NO_FOR_ATTRIBUTE: `Aucune étiquette n’est associée à ce champ. Ajoutez un attribut <code>for</code> à l’étiquette correspondant au <code>id</code> du champ. <hr> <strong>ID :</strong> <code>#%(ID)</code>`,
 
-	LABELS_PLACEHOLDER: `<p>Le texte de remplacement peut être confondu avec du contenu déjà saisi s’il a un bon contraste, ou être illisible s’il n’en a pas. Il disparaît ensuite dès la saisie, ce qui peut supprimer des informations dont les utilisateurs ont besoin pour vérifier leurs erreurs.</p><p>${why.fix}Assurez-vous que les informations clés (étiquette, aide, instructions) restent visibles même lorsque le champ contient du texte.</p>`,
+	LABELS_PLACEHOLDER: `<p>Le texte de remplacement peut être confondu avec du contenu déjà saisi s’il a un bon contraste, ou être illisible s’il n’en a pas. Il disparaît ensuite dès la saisie, ce qui peut supprimer des informations dont les utilisateurs ont besoin pour vérifier leurs erreurs.</p><p>${why.fix}Assurez-vous que les informations essentielles (étiquette, aide, format attendu) restent visibles lorsque le champ contient du texte, et envisagez de supprimer complètement le texte d’exemple (<code>placeholder</code>).</p>`,
 
-	LABEL_IN_NAME: `<p><strong>Texte visible :</strong> <i>%(VISIBLE)</i></p><p><strong>Étiquette pour lecteurs d’écran :</strong> <i>%(LABEL)</i></p><p>Le texte visible de cet élément semble différent de son nom accessible. Cela peut dérouter les utilisateurs de lecteurs d’écran et gêner le contrôle vocal.</p><p>${why.fix}Assurez-vous que l’étiquette visible commence par le texte de l’étiquette invisible et ne contient aucune information significative qui serait absente de l’étiquette invisible.</p>`, // updated to match baseAll
+	LABEL_IN_NAME: `<p><strong>Texte visible :</strong> <i>%(VISIBLE)</i></p><p><strong>Étiquette pour lecteurs d’écran :</strong> <i>%(LABEL)</i></p><p>Le texte visible de cet élément semble différent de son nom accessible. Cela peut dérouter les utilisateurs de lecteurs d’écran et gêner le contrôle vocal.</p><p>${why.fix}Assurez-vous que l’étiquette visible commence par le texte de l’étiquette invisible et ne contient aucune information significative qui serait absente de l’étiquette invisible.</p>`,
 
 	LINK_ALT_FILE_EXT: `<p>Le texte alternatif de cette image est probablement un nom de fichier au lieu d’un libellé utile pour un lien :<br><span hidden>%(ALT)</span><i>%(alt)</i></p><p>${why.fix}Utilisez le titre de la destination du lien comme texte alternatif pour les images liées.</p><div class="why"> <p>Le texte alternatif doit refléter la signification, pas le contenu brut : pour une image liée, la signification est la destination du lien :</p><ul><li>« Page avec texte » décrit l’image, pas le lien.</li><li>« IMG_1234.jpg » est un simple nom de fichier.</li><li>« Formulaire d’inscription (doc) » est une vraie destination.</li></ul></div>`,
 
@@ -323,9 +324,9 @@ export const tips = {
 
 	TABINDEX_ATTR: `<p>Les valeurs de tabindex supérieures à 0 déplacent les éléments focusables hors de leur ordre visuel, ce qui rend difficile pour les utilisateurs de technologies d’assistance de les localiser et de les utiliser.</p><p>${why.fix}Modifiez plutôt l’ordre des éléments dans le HTML, pour que l’ordre du focus et l’ordre de lecture correspondent.</p><div class="why"><p>Astuce : l’ordre visuel des mots sur la page et l’ordre dans lequel les claviers parcourent les éléments sont généralement les mêmes.</p><p>Attribuer un tabindex positif à un élément le déplace au début de l’ordre de tabulation, <strong>mais pas de l’ordre visuel ou de lecture</strong>.</p></div>`,
 
-	TABLES_EMPTY_HEADING: ` <p>${why.fix}Assurez-vous que chaque cellule d’ête contient du texte.</p><div class="why"><p>Astuce : les lecteurs d’écran utilisent les en-têtes pour orienter les utilisateurs dans un tableau.</p></div>`,
+	TABLES_EMPTY_HEADING: ` <p>${why.fix}Assurez-vous que chaque cellule d’en-tête contient du texte.</p><div class="why"><p>Astuce : les lecteurs d’écran utilisent les en-têtes pour orienter les utilisateurs dans un tableau.</p></div>`,
 
-	TABLES_INVALID_HEADERS_REF: `<p>Ce tableau essaie d’associer une cellule de données à une cellule d’entête spécifique, mais l’ID de l’en-tête est introuvable : <code>%(VALUE)</code>.</p><p>${why.fix}Assurez-vous que chaque attribut <code>headers</code> correspond à l’ID d’une cellule d’en-ête du même tableau.</p><div class="why">Astuce : <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">l’utilisation de références d’ID manuelles</a> pour associer des cellules de données à des cellules d’en-tête est complexe et fragile. Quand c’est possible, divisez les données complexes en tableaux plus petits avec des lignes et colonnes d’en-êtes simples.</div>`,
+	TABLES_INVALID_HEADERS_REF: `<p>Ce tableau essaie d’associer une cellule de données à une cellule d’en-tête spécifique, mais l’ID de l’en-tête est introuvable : <code>%(VALUE)</code>.</p><p>${why.fix}Assurez-vous que chaque attribut <code>headers</code> correspond à l’ID d’une cellule d’en-tête du même tableau.</p><div class="why">Astuce : <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">l’utilisation de références d’ID manuelles</a> pour associer des cellules de données à des cellules d’en-tête est complexe et fragile. Quand c’est possible, divisez les données complexes en tableaux plus petits avec des lignes et colonnes d’en-têtes simples.</div>`,
 
 	TABLES_MISSING_HEADINGS: ` <p>${why.fix}Modifiez les propriétés du tableau et indiquez si les en-têtes se trouvent dans la première ligne, la première colonne ou les deux.</p><div class="why"> <p>Astuce : les lecteurs d’écran répètent l’en-tête pertinent en entrant dans chaque ligne ou colonne.</p><p>Si ce tableau n’a pas d’en-têtes car il sert de mise en page visuelle, remplacez-le par autre chose qu’un tableau.</p></div>`,
 
@@ -353,10 +354,10 @@ const interfaceStrings = {
 	OUTLINE: 'en-têtes',
 	PANEL_DISMISS_BUTTON: `Afficher %(dismissCount) alertes masquées`,
 	PANEL_HEADING: 'Afficher les visualisations',
-	SKIP_TO_ISSUE: 'Afficher l’alerte', // updated
+	SKIP_TO_ISSUE: 'Afficher l’alerte',
 	WARNING: 'vérification manuelle',
 	WARNINGS: 'vérifications manuelles',
-	buttonFirstContent: 'Afficher la première alerte', // updated
+	buttonFirstContent: 'Afficher la première alerte',
 	buttonHideHiddenAlert: 'Masquer l’alerte masquée',
 	buttonHideHiddenAlerts: `Masquer %(count) alertes masquées`,
 	buttonShowHiddenAlert: 'Afficher l’alerte masquée',
