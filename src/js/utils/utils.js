@@ -29,6 +29,31 @@ export const smush = (obj1, obj2, skip = []) => {
   });
 };
 
+/**
+ * Rebuild Constants.Exclusions from the current State.option.
+ * Called after configuration dev/content options are set or swapped,
+ * since find() and the element collectors read cached selector lists.
+ */
+export function rebuildExclusions() {
+  Constants.initializeExclusions();
+
+  // Override Sa11y's exclusion settings.
+  // This is separate because sometimes that's what we are looking for.
+  Constants.Exclusions.Sa11yElements = ['.ed11y-element', 'ed11y-element-heading-label'];
+
+  Constants.Exclusions.Container = ['style', 'script', 'noscript'];
+  if (State.option.containerIgnore) {
+    const containerSelectors = State.option.containerIgnore.split(',').map((item) => item.trim());
+    Constants.Exclusions.Container = Constants.Exclusions.Container.concat(
+      containerSelectors.flatMap((item) => [`${item} *`, item]),
+    );
+  }
+  if (State.option.ignoreElements) {
+    const elementSelectors = State.option.ignoreElements.split(',').map((item) => item.trim());
+    Constants.Exclusions.Container = Constants.Exclusions.Container.concat(elementSelectors);
+  }
+}
+
 export function ed11yInitializeRoot(desiredRoot, desiredReadabilityRoot, fixedRoots) {
   Constants.Root.areaToCheck = [];
   Constants.Root.Readability = [];

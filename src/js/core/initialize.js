@@ -1,7 +1,7 @@
 import Constants from '../../sa11y-js/utils/constants.js';
 import Lang from '../../sa11y-js/utils/lang.js';
 import { documentLoadingCheck, store } from '../../sa11y-js/utils/utils.js';
-import { checkRunPrevent, smush } from '../utils/utils.js';
+import { checkRunPrevent, rebuildExclusions, smush } from '../utils/utils.js';
 import { attachIntegrationListeners, checkAll, continueCheck, windowResize } from './run.js';
 import { Ed11yElementAlt } from '../elements/ed11y-element-alt.js';
 import { Ed11yElementResult } from '../elements/ed11y-element-result.js';
@@ -154,22 +154,8 @@ const preProcessOptions = async (userOptions) => {
 };
 
 const postProcessOptions = (userOptions) => {
-  // Override Sa11y's exclusion settings.
-
-  // This is separate because sometimes that's what we are looking for.
-  Constants.Exclusions.Sa11yElements = ['.ed11y-element', 'ed11y-element-heading-label'];
-
-  Constants.Exclusions.Container = ['style', 'script', 'noscript'];
-  if (State.option.containerIgnore) {
-    const containerSelectors = State.option.containerIgnore.split(',').map((item) => item.trim());
-    Constants.Exclusions.Container = Constants.Exclusions.Container.concat(
-      containerSelectors.flatMap((item) => [`${item} *`, item]),
-    );
-  }
-  if (userOptions.ignoreElements) {
-    const elementSelectors = userOptions.ignoreElements.split(',').map((item) => item.trim());
-    Constants.Exclusions.Container = Constants.Exclusions.Container.concat(elementSelectors);
-  }
+  // Build exclusion selector lists from the (dev, if split) options.
+  rebuildExclusions();
 
   Constants.Panel.readabilityInfo = document.createElement('div');
   Constants.Panel.readabilityDetails = document.createElement('div');
@@ -215,7 +201,6 @@ export async function initialize(userOptions) {
   Constants.initializeGlobal();
   // @todo CMS readability param
   Constants.initializeReadability();
-  Constants.initializeExclusions();
   postProcessOptions(userOptions);
   customElements.define('ed11y-element-alt', Ed11yElementAlt);
   customElements.define('ed11y-element-result', Ed11yElementResult);
