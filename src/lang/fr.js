@@ -28,13 +28,13 @@ const testNames = {
 	EMBED_MISSING_TITLE: 'Le cadre ne possède pas d’attribut « title »',
 	EMBED_UNFOCUSABLE: 'Un frame avec tabindex="-1" ne sera pas accessible au clavier.',
 	EMBED_VIDEO: 'Cette vidéo est-elle correctement sous-titrée ?',
-	HEADING_EMPTY: 'Cet éléments de titre ne contient aucun texte',
+	HEADING_EMPTY: 'Cet élément de titre ne contient aucun texte',
 	HEADING_UNPRONOUNCEABLE: 'Ce titre est imprononçable',
 	HEADING_EMPTY_WITH_IMAGE: 'Cette image est utilisée comme titre ; elle nécessite donc un texte alternatif',
 	HEADING_FIRST: 'Le premier titre de cette page est un titre de niveau inférieur',
-	HEADING_LONG: 'Cet titre peut-il être raccourci ?',
+	HEADING_LONG: 'Ce titre peut-il être raccourci ?',
 	HEADING_MISSING_ONE: 'Cette page n’a pas de titre de niveau 1',
-	HEADING_SKIPPED_LEVEL: 'Cet titre utilise un niveau incorrect',
+	HEADING_SKIPPED_LEVEL: 'Ce titre utilise un niveau incorrect',
 	HIDDEN_FOCUSABLE: 'Cet élément ne peut pas être décrit par les lecteurs d’écran',
 	IMAGE_ALT_TOO_LONG: 'Ce texte alternatif pourrait-il être plus court ?',
 	IMAGE_DECORATIVE: 'Cette image est-elle réellement dénuée de sens ?',
@@ -120,7 +120,7 @@ const why = {
 <li>Boutons qui <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">mettent à jour l’état</a> :<br>« Lecture/Lecture, activé », « Détails, réduit/Détails, développé. »</li>
 </ul></div>`,
 
-	headings: `<div class="why"><p>Astuce : les elements de titres organisent le contenu en une structure hiérarchique. Les utilisateurs de lecteurs d’écran s’appuient sur cette structure pour comprendre et parcourir une page :</p>
+	headings: `<div class="why"><p>Astuce : les éléments de titre organisent le contenu en une structure hiérarchique. Les utilisateurs de lecteurs d’écran s’appuient sur cette structure pour comprendre et parcourir une page :</p>
 <ul><li>Titre niveau 1 : titre de page
 <ul><li>Titre niveau 2 : sujets principaux
 <ul><li>Titre niveau 3 : sous-sujets</li></ul></li></ul></li></ul>
@@ -198,7 +198,7 @@ export const tips = {
 
 	HEADING_MISSING_ONE: `<p>${why.fix}Marquez le titre de la page comme titre de niveau 1 pour indiquer le début de la structure du document.</p>${why.headings}`,
 
-	HEADING_SKIPPED_LEVEL: `<p>Cet titre est passé de <code>niveau %(prevLevel)</code> à <code>niveau %(level)</code>. Pour un lecteur d’écran, cela donne l’impression qu’il manque du contenu.</p><p>${why.fix}Ajustez les niveaux pour former une structure correcte, sans saut.</p>${why.headings}`,
+	HEADING_SKIPPED_LEVEL: `<p>Ce titre est passé de <code>niveau %(prevLevel)</code> à <code>niveau %(level)</code>. Pour un lecteur d’écran, cela donne l’impression qu’il manque du contenu.</p><p>${why.fix}Ajustez les niveaux pour former une structure correcte, sans saut.</p>${why.headings}`,
 
 	HIDDEN_FOCUSABLE: `<p>Cet élément interactif possède un attribut <code>aria-hidden="true"</code>, mais reste accessible au clavier.</p><p>${why.fix}Si vous <strong>souhaitez</strong> le masquer pour les lecteurs d’écran, vous devez également ajouter <code>tabindex="-1"</code>. Sinon, supprimez l’attribut <code>aria-hidden="true"</code>.</p><p><strong>Élément :</strong> <code>%(ELEMENT)</code></p>`,
 
@@ -317,7 +317,7 @@ export const tips = {
 
 	QA_SUBSCRIPT: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>Les exposants et indices rendent le texte trop petit et difficile à lire. Ne les utilisez que pour des usages spécifiques : nombres ordinaux (4<sup>e</sup>), formules chimiques (H<sub>2</sub>O), références de notes.</p>`,
 
-	QA_UNDERLINE: `<p>Sur le Web, le texte souligné sert pour les liens, pas pour l’emphase. Les utilisateurs penseront qu’il est cliquable : <i><u>%(TEXT)</u></i></p><p>${why.fix} Utilisez <strong>gras</strong> ou <em>italique</em> pour l’emphase, et des éléments de titre pour la structure.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le soulignement. Seuls les élements de titre créent de la structure.</p></div>`,
+	QA_UNDERLINE: `<p>Sur le Web, le texte souligné sert pour les liens, pas pour l’emphase. Les utilisateurs penseront qu’il est cliquable : <i><u>%(TEXT)</u></i></p><p>${why.fix} Utilisez <strong>gras</strong> ou <em>italique</em> pour l’emphase, et des éléments de titre pour la structure.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le soulignement. Seuls les éléments de titre créent de la structure.</p></div>`,
 
 	QA_UPPERCASE: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>${why.fix}N’utilisez les majuscules que pour quelques mots à la fois pour l’emphase. LES BLOCS DE TEXTE EN MAJUSCULES SONT PLUS DIFFICILES À LIRE, ET DE NOMBREUX LECTEURS LES INTERPRÈTENT COMME DES CRIS.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le texte en majuscules. Utilisez un élément de titre si ce texte emphatique introduit un changement de sujet ou un contenu d’importance critique.</p></div>`,
 	SUS_ALT: `<p>Le texte alternatif de cette image contient le mot « <i>%(alt)</i> ». Les lecteurs d’écran annoncent déjà qu’ils lisent la description d’une image, donc des expressions comme « image de » ou « photo de » sont généralement redondantes.</p><p><strong>Texte alternatif :</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p><div class="why"><p>Astuce : ces expressions méritent d’être conservées si le format lui-même a un sens :<br>« Une photo d’un chat, encadrée et accrochée au mur. »</p></div>`,
@@ -369,7 +369,7 @@ const interfaceStrings = {
 	dismissOkTitle: 'Masque l’alerte pour tous les éditeurs',
 	dismissOnSite: 'Sur toutes les pages : marquer comme OK',
 	dismissalsHeader: 'Vous n’allez pas corriger ceci ?',
-	errorOutlinePrefixHeadingEmpty: '(éléments de titre vide)',
+	errorOutlinePrefixHeadingEmpty: '(élément de titre vide)',
 	errorOutlinePrefixHeadingIsLong: '(signalé pour longueur)',
 	errorOutlinePrefixSkippedLevel: '(signalé pour niveau sauté)',
 	issueContent: 'Problème de contenu',
