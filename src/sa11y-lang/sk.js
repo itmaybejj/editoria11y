@@ -1,4 +1,3 @@
-/*! WARNING: This is a machine-generated translation and may contain errors or inaccuracies. */
 // Slovak
 
 const ruleset = {

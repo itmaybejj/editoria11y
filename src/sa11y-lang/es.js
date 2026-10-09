@@ -97,7 +97,7 @@ const ruleset = {
 
 const ui = {
   LANG_CODE: 'es',
-  MAIN_TOGGLE_LABEL: 'Comprobar Accesibilidad',
+  MAIN_TOGGLE_LABEL: 'Comprobar accesibilidad',
   CONTAINER_LABEL: 'Comprobador de accesibilidad',
   ERROR: 'Error',
   ERRORS: 'Errores',
