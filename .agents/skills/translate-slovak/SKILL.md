@@ -35,6 +35,23 @@ Derived from a native-speaker rewrite of the machine-translated `src/sa11y-lang/
 | fragile (of code) | nespoľahlivý | krehký |
 | raw URL | holá URL adresa | surová URL adresa |
 | editors (people) | redaktori | editori |
+| linked (image, document, URL, space) | prepojený obrázok / dokument | odkazovaný |
+| HTML tag, meta tag | značka, meta značka, značka `<title>` | tag, meta atribút |
+| language tag / language code | jazyková značka / jazykový kód | jazykový atribút, kód jazyka |
+| focusable / focus order | zameriavateľný / poradie fokusu; "can receive keyboard focus" → môže prijať klávesový fokus | zamerateľný, poradie zamerania |
+| keyboard accessible | ovládateľný klávesnicou | prístupný/dostupný pomocou klávesnice |
+| descriptive (alt, link, label) | popisný | opisný |
+| label for screen readers | štítok pre čítačky obrazovky | popis pre čítačky obrazovky |
+| non-descript (alt text) | nevýstižný | bez popisu |
+| (screen reader) falls silent / pauses | odmlčí sa | je tichý, zastaví sa |
+| experience (equivalent ~) | zážitok | skúsenosť |
+| shouting (all caps) | krik | kričanie |
+| hard to read (contrast) | sťažuje čítanie; „aby sa dal ľahko čítať“ | na ľahkú čitateľnosť |
+| APA Style guide | štylistická príručka APA | štýlová príručka |
+| Search (button example) | Hľadať | Vyhľadať |
+| closed captions / subtitles | skryté titulky („CC“) / titulky | podtitulky |
+| Zip, Word Doc | ZIP, dokument Word | Zip, Word Doc |
+| bad link | chybný odkaz | zlé prepojenie |
 
 Note: the two files diverge deliberately on table headers — `sa11y-lang/sk.js` uses
 **záhlavie**, `lang/sk.js` uses **hlavička**. Both are correct; keep each file internally
@@ -51,6 +68,17 @@ consistent. No string from one surfaces beside the other in a tooltip.
 - **Statements stay statements.** English sentences ending in `.` must not become `?`.
 - **`sa zdá byť` is machine-translation filler.** Prefer `je zrejme …` or `sa líši od …`.
 - **`ani` after a negated verb**, not `alebo`: "nemal obsahovať prípony súborov **ani** rozmery".
+- **No comma before a single `alebo`** joining instructions ("nahraďte odkaz tlačidlom alebo opravte
+  cieľ odkazu"). Keep the comma in `buď …, alebo …` and in either/or questions
+  ("Opisuje … obrázok, alebo odkaz?").
+- **Inflect `štítok` correctly:** gen. *štítka* (do štítka, neviditeľného štítka), dat. *k štítku*.
+  Same for *riadok* → gen. *riadka*.
+- **"Unless" is not `pokiaľ … ne-`.** "Remove it unless the iframe has no links" means *remove it
+  if it has links*; translate the logic, not the words. Check every "unless" for an inverted meaning.
+- **Split long `alebo` chains into two sentences** when one option is conditional:
+  "Pridajte text, ktorý opisuje cieľ odkazu. Ak ide len o preklep, odkaz odstráňte."
+- **Mixed-gender agreement traps** ("hovoriaci a zvukové efekty sú identifikované") — rephrase
+  with an active verb instead: "prepis správne uvádza hovoriacich aj zvukové efekty".
 - Untranslated English left inside markup ("Head %(level)", "Normal", "Paragraph",
   "strong importance", "4<sup>th</sup>") is a red flag — translate it
   (Nadpis / Normálny / Odsek / silný dôraz / 4<sup>.</sup>).
@@ -90,15 +118,15 @@ the cycle at 21 or 101, unlike Polish, Ukrainian, Lithuanian and Slovene.
 | `main_toggle_2` | exactly 2 | Dve upozornenia na prístupnosť |
 | `main_toggle_few` | 3-4 | ` upozornenia na prístupnosť` |
 | `main_toggle_plural` | 5+ (fallback) | ` upozornení na prístupnosť` |
-| `PANEL_DISMISS_BUTTON_one` | 1 | Zobraziť %(dismissCount) skryté upozornenie |
 | `PANEL_DISMISS_BUTTON_few` | 2-4 | Zobraziť %(dismissCount) skryté upozornenia |
 | `PANEL_DISMISS_BUTTON` | 5+ (fallback) | Zobraziť %(dismissCount) skrytých upozornení |
 | `buttonHideHiddenAlerts_few` | 2-4 | Skryť %(count) skryté upozornenia |
 | `buttonHideHiddenAlerts` | 5+ (fallback) | Skryť %(count) skrytých upozornení |
 
 `main_toggle_1` and `main_toggle_2` spell the number out and match on the literal count, so they
-are not plural categories. `buttonHideHiddenAlerts` is only ever called with 2 or more, which is
-why Slovak needs no `_one` for it.
+are not plural categories. `PANEL_DISMISS_BUTTON` and `buttonHideHiddenAlerts` are only ever
+called with 2 or more (a count of 1 uses `buttonShowHiddenAlert` / `buttonHideHiddenAlert` in
+`src/js/core/run.js`), which is why Slovak needs no `_one` for either.
 
 Inflect the adjective too, not just the noun: *skryté upozornenia* (few) vs *skrytých upozornení*
 (other).
