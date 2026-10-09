@@ -221,7 +221,7 @@ const tooltip = {
   LINK_STOPWORD_ARIA:
     'Bien qu’un nom accessible ait été fourni, envisagez de réviser le texte visible du lien. Des expressions comme &quot;<strong {C}>%(ERROR)</strong>&quot; ne sont pas significatives.',
   LINK_TIP:
-    '<hr> <strong>Astuce !</strong> Utilisez un texte de lien clair et unique qui décrit la destination du lien, généralement le titre de la page ou du document.',
+    '<hr> <strong>Astuce !</strong> Utilisez un texte de lien clair et unique qui décrit la destination du lien, généralement le titre de la page ou du document.',
   LINK_CLICK_HERE:
     'La phrase « cliquer » ou « cliquez ici » met l’accent sur le mécanisme de la souris, alors que beaucoup de personnes n’utilisent pas de souris ou consultent ce site web sur un appareil mobile. Envisagez d’utiliser un verbe différent lié à la tâche.',
   DUPLICATE_TITLE:

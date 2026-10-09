@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.2-1007
+			* @version 3.0.2-1009
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -1825,7 +1825,7 @@
       });
     }
   }
-  const version = "3.0.2-1007";
+  const version = "3.0.2-1009";
   const sprite = {
     alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
     close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -4029,6 +4029,17 @@ ${this.error.stack}
     return weightMap[weight] || 400;
   }
   let backgroundCache = /* @__PURE__ */ new WeakMap();
+  function stackTranslucent(fg, bg) {
+    const fa = Math.max(Math.min(fg[3], 1), 0);
+    const ba = Math.max(Math.min(bg[3], 1), 0);
+    const outA = fa + ba * (1 - fa);
+    if (outA === 0) return [0, 0, 0, 0];
+    const out = [0, 0, 0, outA];
+    for (let i = 0; i < 3; i++) {
+      out[i] = (fg[i] * fa + bg[i] * ba * (1 - fa)) / outA;
+    }
+    return out;
+  }
   function getBackground($el, shadowDetection) {
     if (backgroundCache.has($el)) {
       return backgroundCache.get($el);
@@ -4041,6 +4052,46 @@ ${this.error.stack}
       }
       return node.parentElement || node.parentNode;
     };
+    const imageBackground = (el, styles, bgImage) => {
+      const own = convertToRGBA(styles.backgroundColor);
+      let base;
+      if (own !== "unsupported") {
+        if (own[3] === 1) {
+          base = own;
+        } else {
+          const behind = resolveAbove(el, own[3] > 0 ? own : null);
+          if (Array.isArray(behind)) base = behind;
+        }
+      }
+      return { type: "image", value: bgImage, ...base && { base } };
+    };
+    const resolveAbove = (fromEl, stacked) => {
+      let layers = stacked;
+      let parentEl = getVisualParent(fromEl);
+      while (parentEl && (parentEl.nodeType === 1 || parentEl.nodeType === 11)) {
+        if (parentEl.nodeType === 11 && parentEl.host) {
+          parentEl = parentEl.host;
+          continue;
+        }
+        const parentStyles = getCachedStyle(parentEl);
+        const parentBgImage = parentStyles.backgroundImage;
+        if (parentBgImage && parentBgImage !== "none") {
+          const image = imageBackground(parentEl, parentStyles, parentBgImage);
+          return layers ? { ...image, overlay: layers } : image;
+        }
+        const parentBg = convertToRGBA(parentStyles.backgroundColor);
+        if (parentBg === "unsupported") return "unsupported";
+        if (parentBg[3] === 1) {
+          return layers ? alphaBlend(layers, parentBg) : parentBg;
+        }
+        if (parentBg[3] > 0) {
+          layers = layers ? stackTranslucent(layers, parentBg) : parentBg;
+        }
+        if (parentEl.tagName === "HTML") break;
+        parentEl = getVisualParent(parentEl);
+      }
+      return layers ? alphaBlend(layers, [255, 255, 255]) : [255, 255, 255];
+    };
     let targetEl = $el;
     let finalBackground = [255, 255, 255];
     while (targetEl && (targetEl.nodeType === 1 || targetEl.nodeType === 11)) {
@@ -4051,32 +4102,13 @@ ${this.error.stack}
       const styles = getCachedStyle(targetEl);
       const bgImage = styles.backgroundImage;
       if (bgImage && bgImage !== "none") {
-        finalBackground = { type: "image", value: bgImage };
+        finalBackground = imageBackground(targetEl, styles, bgImage);
         break;
       }
       const bgColor = convertToRGBA(styles.backgroundColor);
       if (bgColor[3] !== 0 && bgColor !== "transparent") {
         if (bgColor[3] < 1) {
-          let parentEl = getVisualParent(targetEl);
-          let parentBgColor = "rgba(255, 255, 255, 1)";
-          while (parentEl && (parentEl.nodeType === 1 || parentEl.nodeType === 11)) {
-            if (parentEl.nodeType === 11 && parentEl.host) {
-              parentEl = parentEl.host;
-              continue;
-            }
-            const parentStyles = getCachedStyle(parentEl);
-            const currentParentBg = parentStyles.backgroundColor;
-            if (currentParentBg !== "rgba(0, 0, 0, 0)" && currentParentBg !== "transparent") {
-              parentBgColor = currentParentBg;
-              break;
-            }
-            parentEl = getVisualParent(parentEl);
-          }
-          if (parentBgColor === "rgba(0, 0, 0, 0)" || parentBgColor === "transparent") {
-            parentBgColor = "rgba(255, 255, 255, 1)";
-          }
-          const parentColor = convertToRGBA(parentBgColor);
-          finalBackground = alphaBlend(bgColor, parentColor);
+          finalBackground = resolveAbove(targetEl, bgColor);
           break;
         }
         finalBackground = bgColor;
@@ -4412,7 +4444,14 @@ ${this.error.stack}
       }
       if (color && color[3] === 0) continue;
       if (background.type === "image") {
-        const extractColours = extractColorFromString(background.value);
+        let extractColours = extractColorFromString(background.value);
+        if ((background.base || background.overlay) && extractColours?.length) {
+          extractColours = extractColours.map((stop) => {
+            let composited = background.base ? alphaBlend([...stop], background.base) : stop;
+            if (background.overlay) composited = alphaBlend([...background.overlay], composited);
+            return composited;
+          });
+        }
         const hasFailure = !extractColours || extractColours.some(
           (gradientStop) => checkElementContrast(
             $el,

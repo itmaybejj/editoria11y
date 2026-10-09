@@ -196,7 +196,7 @@
     LINK_EMPTY_NO_LABEL: 'Le lien ne comporte pas de texte perceptible (discernible) par les lecteurs d’écran ou autres technologies d’assistance. À corriger: <ul><li>Ajoutez un texte bref qui décrit où le lien vous mène.</li><li>S’il s’agit d’un <a href="https://a11y-101.com/development/icons-and-links/">lien d’icône SVG (vectoriel),</a> il manque alors une description.</li><li>Si ce lien est une erreur due à un bogue de copier/coller, tentez de supprimer.</li></ul>',
     LINK_STOPWORD: "Le texte du lien peut ne pas être suffisamment descriptif hors contexte : <strong {C}>%(ERROR)</strong>",
     LINK_STOPWORD_ARIA: "Bien qu’un nom accessible ait été fourni, envisagez de réviser le texte visible du lien. Des expressions comme &quot;<strong {C}>%(ERROR)</strong>&quot; ne sont pas significatives.",
-    LINK_TIP: "<hr> <strong>Astuce !</strong> Utilisez un texte de lien clair et unique qui décrit la destination du lien, généralement le titre de la page ou du document.",
+    LINK_TIP: "<hr> <strong>Astuce !</strong> Utilisez un texte de lien clair et unique qui décrit la destination du lien, généralement le titre de la page ou du document.",
     LINK_CLICK_HERE: "La phrase « cliquer » ou « cliquez ici » met l’accent sur le mécanisme de la souris, alors que beaucoup de personnes n’utilisent pas de souris ou consultent ce site web sur un appareil mobile. Envisagez d’utiliser un verbe différent lié à la tâche.",
     DUPLICATE_TITLE: 'L’attribut <code>title</code> sur les liens et les images est conçu pour fournir des informations supplémentaires et doit être <strong>différent</strong> du texte ou du texte alternatif. Le texte du titre apparaît lors du survol d’un élément, mais il n’est pas accessible avec un clavier ou une saisie tactile. Envisagez <a href="https://www.a11yproject.com/posts/title-attributes/">d’éviter complètement l’attribut title.</a>',
     LINK_SYMBOLS: "Évitez d’utiliser des symboles comme appels à l’action dans le texte des liens, sauf s’ils sont masqués aux technologies d’assistance. Les lecteurs d’écran peuvent lire les symboles à haute voix, ce qui peut prêter à confusion. Envisagez de les supprimer : <strong {C}>%(ERROR)</strong>",
@@ -353,13 +353,13 @@
     EMBED_MISSING_TITLE: "Le cadre ne possède pas d’attribut « title »",
     EMBED_UNFOCUSABLE: 'Un frame avec tabindex="-1" ne sera pas accessible au clavier.',
     EMBED_VIDEO: "Cette vidéo est-elle correctement sous-titrée ?",
-    HEADING_EMPTY: "Cet éléments de titre ne contient aucun texte",
+    HEADING_EMPTY: "Cet élément de titre ne contient aucun texte",
     HEADING_UNPRONOUNCEABLE: "Ce titre est imprononçable",
     HEADING_EMPTY_WITH_IMAGE: "Cette image est utilisée comme titre ; elle nécessite donc un texte alternatif",
     HEADING_FIRST: "Le premier titre de cette page est un titre de niveau inférieur",
-    HEADING_LONG: "Cet titre peut-il être raccourci ?",
+    HEADING_LONG: "Ce titre peut-il être raccourci ?",
     HEADING_MISSING_ONE: "Cette page n’a pas de titre de niveau 1",
-    HEADING_SKIPPED_LEVEL: "Cet titre utilise un niveau incorrect",
+    HEADING_SKIPPED_LEVEL: "Ce titre utilise un niveau incorrect",
     HIDDEN_FOCUSABLE: "Cet élément ne peut pas être décrit par les lecteurs d’écran",
     IMAGE_ALT_TOO_LONG: "Ce texte alternatif pourrait-il être plus court ?",
     IMAGE_DECORATIVE: "Cette image est-elle réellement dénuée de sens ?",
@@ -441,7 +441,7 @@
 <li>Boutons qui mettent à jour les libellés :<br>« Lecture/Pause », « Afficher les détails/Masquer les détails »</li>
 <li>Boutons qui <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">mettent à jour l’état</a> :<br>« Lecture/Lecture, activé », « Détails, réduit/Détails, développé. »</li>
 </ul></div>`,
-    headings: `<div class="why"><p>Astuce : les elements de titres organisent le contenu en une structure hiérarchique. Les utilisateurs de lecteurs d’écran s’appuient sur cette structure pour comprendre et parcourir une page :</p>
+    headings: `<div class="why"><p>Astuce : les éléments de titre organisent le contenu en une structure hiérarchique. Les utilisateurs de lecteurs d’écran s’appuient sur cette structure pour comprendre et parcourir une page :</p>
 <ul><li>Titre niveau 1 : titre de page
 <ul><li>Titre niveau 2 : sujets principaux
 <ul><li>Titre niveau 3 : sous-sujets</li></ul></li></ul></li></ul>
@@ -491,7 +491,7 @@
     HEADING_FIRST: `${why.fix}Assurez-vous que le titre de la page est marqué comme titre de niveau 1 ou 2. ${why.headings}`,
     HEADING_LONG: `<p>${why.fix}À moins qu’il ne s’agisse d’un titre fixe (comme celui d’un article publié), raccourcissez-le pour faciliter le survol de lecture :<span hidden>%(drop)%(drop)</span></p><p><i>%(TEXT)</i></p>${why.headings}`,
     HEADING_MISSING_ONE: `<p>${why.fix}Marquez le titre de la page comme titre de niveau 1 pour indiquer le début de la structure du document.</p>${why.headings}`,
-    HEADING_SKIPPED_LEVEL: `<p>Cet titre est passé de <code>niveau %(prevLevel)</code> à <code>niveau %(level)</code>. Pour un lecteur d’écran, cela donne l’impression qu’il manque du contenu.</p><p>${why.fix}Ajustez les niveaux pour former une structure correcte, sans saut.</p>${why.headings}`,
+    HEADING_SKIPPED_LEVEL: `<p>Ce titre est passé de <code>niveau %(prevLevel)</code> à <code>niveau %(level)</code>. Pour un lecteur d’écran, cela donne l’impression qu’il manque du contenu.</p><p>${why.fix}Ajustez les niveaux pour former une structure correcte, sans saut.</p>${why.headings}`,
     HIDDEN_FOCUSABLE: `<p>Cet élément interactif possède un attribut <code>aria-hidden="true"</code>, mais reste accessible au clavier.</p><p>${why.fix}Si vous <strong>souhaitez</strong> le masquer pour les lecteurs d’écran, vous devez également ajouter <code>tabindex="-1"</code>. Sinon, supprimez l’attribut <code>aria-hidden="true"</code>.</p><p><strong>Élément :</strong> <code>%(ELEMENT)</code></p>`,
     IMAGE_ALT_TOO_LONG: `<p>Ce texte alternatif comporte %(altLength) caractères : <i class="ed11y-small">%(ALT_TEXT)</i></p><p>${why.fix}Résumez, ou déplacez une partie de la description dans une légende.</p><div class="why"><p>Astuce : les images complexes qui nécessitent plus qu’une phrase ont généralement besoin d’une légende <strong>visible</strong> ou d’une alternative décrivant/interprétant les points clés. Il est acceptable d’y renvoyer :</p><ul><li>« Affiche pour la danse de vendredi ; détails dans la légende. »</li><li>« Graphique montrant une baisse de 10 % cette année ; détails dans le tableau. »</li></ul></div>`,
     IMAGE_DECORATIVE: `<p>Cette image a été masquée pour les lecteurs d’écran via un alt vide. Seules les images sans signification (icônes redondantes, textures décoratives) doivent être masquées ainsi.</p><p>${why.fix}Si cette image apporte une information, fournissez un texte alternatif.</p>${why.images}`,
@@ -551,7 +551,7 @@
     QA_SMALL_TEXT: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>${why.fix}Restez au-dessus de 80 % de la taille de police par défaut. Un texte trop petit est difficile à lire, particulièrement pour les personnes malvoyantes.</p>`,
     QA_STRONG_ITALICS: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>${why.fix}Réservez le gras et l’italique aux mots ou phrases clés.</p><div class="why"><p>Note : si c’est une citation, utilisez la balise <em>blockquote</em>.</p></div>`,
     QA_SUBSCRIPT: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>Les exposants et indices rendent le texte trop petit et difficile à lire. Ne les utilisez que pour des usages spécifiques : nombres ordinaux (4<sup>e</sup>), formules chimiques (H<sub>2</sub>O), références de notes.</p>`,
-    QA_UNDERLINE: `<p>Sur le Web, le texte souligné sert pour les liens, pas pour l’emphase. Les utilisateurs penseront qu’il est cliquable : <i><u>%(TEXT)</u></i></p><p>${why.fix} Utilisez <strong>gras</strong> ou <em>italique</em> pour l’emphase, et des éléments de titre pour la structure.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le soulignement. Seuls les élements de titre créent de la structure.</p></div>`,
+    QA_UNDERLINE: `<p>Sur le Web, le texte souligné sert pour les liens, pas pour l’emphase. Les utilisateurs penseront qu’il est cliquable : <i><u>%(TEXT)</u></i></p><p>${why.fix} Utilisez <strong>gras</strong> ou <em>italique</em> pour l’emphase, et des éléments de titre pour la structure.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le soulignement. Seuls les éléments de titre créent de la structure.</p></div>`,
     QA_UPPERCASE: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>${why.fix}N’utilisez les majuscules que pour quelques mots à la fois pour l’emphase. LES BLOCS DE TEXTE EN MAJUSCULES SONT PLUS DIFFICILES À LIRE, ET DE NOMBREUX LECTEURS LES INTERPRÈTENT COMME DES CRIS.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le texte en majuscules. Utilisez un élément de titre si ce texte emphatique introduit un changement de sujet ou un contenu d’importance critique.</p></div>`,
     SUS_ALT: `<p>Le texte alternatif de cette image contient le mot « <i>%(alt)</i> ». Les lecteurs d’écran annoncent déjà qu’ils lisent la description d’une image, donc des expressions comme « image de » ou « photo de » sont généralement redondantes.</p><p><strong>Texte alternatif :</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p><div class="why"><p>Astuce : ces expressions méritent d’être conservées si le format lui-même a un sens :<br>« Une photo d’un chat, encadrée et accrochée au mur. »</p></div>`,
     TABINDEX_ATTR: `<p>Les valeurs de tabindex supérieures à 0 déplacent les éléments focusables hors de leur ordre visuel, ce qui rend difficile pour les utilisateurs de technologies d’assistance de les localiser et de les utiliser.</p><p>${why.fix}Modifiez plutôt l’ordre des éléments dans le HTML, pour que l’ordre du focus et l’ordre de lecture correspondent.</p><div class="why"><p>Astuce : l’ordre visuel des mots sur la page et l’ordre dans lequel les claviers parcourent les éléments sont généralement les mêmes.</p><p>Attribuer un tabindex positif à un élément le déplace au début de l’ordre de tabulation, <strong>mais pas de l’ordre visuel ou de lecture</strong>.</p></div>`,
@@ -595,7 +595,7 @@
     dismissOkTitle: "Masque l’alerte pour tous les éditeurs",
     dismissOnSite: "Sur toutes les pages : marquer comme OK",
     dismissalsHeader: "Vous n’allez pas corriger ceci ?",
-    errorOutlinePrefixHeadingEmpty: "(éléments de titre vide)",
+    errorOutlinePrefixHeadingEmpty: "(élément de titre vide)",
     errorOutlinePrefixHeadingIsLong: "(signalé pour longueur)",
     errorOutlinePrefixSkippedLevel: "(signalé pour niveau sauté)",
     issueContent: "Problème de contenu",
