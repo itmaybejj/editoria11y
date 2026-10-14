@@ -112,7 +112,7 @@ const testNames = {
 };
 
 const why = {
-	fix: `<strong class="badge">À corriger</strong>`,
+	fix: `<strong class="badge">À corriger</strong> `,
 	check: `<strong class="badge">Vérification manuelle</strong>`,
 
 	buttons: `<div class="why"><p>Note : le nom accessible d’un bouton doit indiquer clairement ce qu’il fera une fois cliqué. Si cela change, l’état actuel doit être clair :</p><ul>
@@ -236,7 +236,7 @@ export const tips = {
 
 	LINK_CLICK_HERE: `<p><strong>Texte du lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Supprimez les mots redondants qui détournent l’attention de l’objet du lien.</p>${why.links}`,
 
-	LINK_DOI: `<p><strong>Texte du lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Liez le titre de l’article et laissez le DOI en texte simple, au lieu de lier le DOI et laisser le titre sans lien.</p><div class="why"><p>Selon les recommandations de l’APA, les liens doivent être descriptifs : ils aident les utilisateurs à trouver les contenus pertinents en parcourant uniquement les liens.</p><p>Les lecteurs d’écran peuvent ainsi annoncer des liens significatifs plutôt qu’une série de chiffres incompréhensibles.</p></div>`,
+	LINK_DOI: `<p><strong>Texte du lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Liez le titre de l’article et laissez le DOI en texte simple, au lieu de lier le DOI et laisser le titre sans lien.</p><div class="why"><p>Selon les <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">recommandations de l’APA</a>, les liens doivent être descriptifs : ils aident les utilisateurs à trouver les contenus pertinents en parcourant uniquement les liens.</p><p>Les lecteurs d’écran peuvent ainsi annoncer des liens significatifs plutôt qu’une série de chiffres incompréhensibles.</p></div>`,
 
 	LINK_EMPTY: `<p>${why.fix}Ajoutez du texte décrivant sa destination, ou supprimez-le s’il s’agit simplement d’une faute de frappe ou d’un caractère d’espace lié.</p><div class="why"><p>Conseil : les lecteurs d’écran ne peuvent pas décrire les liens qui ne contiennent que des espaces ou des symboles. Ils restent soit silencieux (« Lien, [...pause maladroite là où le titre du lien devrait être...] »), soit lisent l’URL : « Lien, H-T-T-P-S barre oblique barre oblique exemple point com. »</p><p>Notez que les caractères d’espace liés peuvent être difficiles à supprimer dans certains éditeurs de contenu ; il est parfois nécessaire de supprimer « à travers l’écart » en supprimant et en retapant les mots de chaque côté d’un espace lié.</p></div>`,
 
@@ -309,7 +309,7 @@ export const tips = {
 
 	QA_NESTED_COMPONENTS: `Évitez d’imbriquer des composants interactifs, tels que des accordéons dans d’autres accordéons ou des onglets dans des accordéons. Cela complique la navigation et peut faire manquer du contenu.`,
 
-	QA_PDF: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Faites l’une des actions suivantes puis ignorez cette alerte :</p><ul><li>Liez à une page web plutôt qu’à un PDF,</li><li>Ou fournissez également une version web ou éditable,</li><li>Ou assurez-vous que le PDF est accessible (titres, ordre de lecture, en-têtes de tableau, textes alternatifs).</li></ul><div class="why"><p>Les utilisateurs mobiles et les technologies d’assistance préfèrent largement les pages web aux PDFs, qui ne se reformatent pas pour mobile et manquent souvent de balisage nécessaire.</p></div>`,
+	QA_PDF: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Faites l’une des actions suivantes :</p><ul><li>Liez à une page web plutôt qu’à un PDF,</li><li>Ou fournissez également une version web ou éditable,</li><li>Ou assurez-vous que le PDF est accessible en <a href="https://webaim.org/techniques/acrobat/" target="_blank">vérifiant manuellement qu’il est balisé</a> (titres, ordre de lecture, en-têtes de tableau, textes alternatifs).</li></ul><div class="why"><p>Les utilisateurs mobiles et les technologies d’assistance préfèrent largement les pages web aux PDFs, qui ne se reformatent pas pour mobile et manquent souvent de balisage nécessaire.</p></div>`,
 
 	QA_SMALL_TEXT: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>${why.fix}Restez au-dessus de 80 % de la taille de police par défaut. Un texte trop petit est difficile à lire, particulièrement pour les personnes malvoyantes.</p>`,
 
