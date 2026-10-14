@@ -1,4 +1,5 @@
 import { default as Sa11yStrings } from '../sa11y-lang/ko.js';
+// Note: use "제목" for general headings and "머리글" for headers (table etc).
 // 기계 번역.
 
 const testNames = {

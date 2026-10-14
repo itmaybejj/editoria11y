@@ -1,4 +1,5 @@
 import { default as Sa11yStrings } from '../sa11y-lang/de.js';
+// Note: use "Überschrift" for general headings and "Tabellenkopf", "Kopfzelle", "Kopfzeile"/"Kopfspalte" for headers (table etc).
 // Machine translation.
 
 const testNames = {
@@ -105,7 +106,7 @@ const testNames = {
 	TABINDEX_ATTR: 'Tabindex-Überschreibungen stören die Fokusreihenfolge',
 	TABLES_EMPTY_HEADING: 'Diese Tabellenkopfzelle benötigt Text',
 	TABLES_INVALID_HEADERS_REF: 'Diese Tabelle hat ein ungültiges headers-Attribut',
-	TABLES_MISSING_HEADINGS: 'Dieser Tabelle fehlen Kopfzeilen in Zeile und/oder Spalte',
+	TABLES_MISSING_HEADINGS: 'Dieser Tabelle fehlt eine Kopfzeile und/oder Kopfspalte',
 	TABLES_SEMANTIC_HEADING: 'Inhaltsüberschriften gehören nicht in Tabellen',
 	UNCONTAINED_LI: 'Ungültige HTML-Liste',
 };
@@ -315,9 +316,9 @@ const tips = {
 
 	TABLES_INVALID_HEADERS_REF: `<p>Diese Tabelle versucht, eine bestimmte Datenzelle mit einer bestimmten Kopfzelle zu verknüpfen, aber die Header-ID ist nicht auffindbar: <code>%(VALUE)</code>.</p><p>${why.fix}Stellen Sie sicher, dass jedes <code>headers</code>-Attribut der ID einer Kopfzelle in derselben Tabelle entspricht.</p><div class="why">Tipp: <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Die manuelle Verwendung von ID-Referenzen</a>, um Datenzellen mit Kopfzellen zu verknüpfen, ist aufwendig und fehleranfällig. Teilen Sie nach Möglichkeit komplexe Daten in kleinere Tabellen mit einfachen Kopfzeilen und -spalten auf.</div>`,
 
-	TABLES_MISSING_HEADINGS: ` <p>${why.fix}Geben Sie in den Tabelleneigenschaften an, ob Kopfzeilen in der ersten Zeile, ersten Spalte oder in beiden vorhanden sind.</p><div class="why"> <p>Tipp: Beim Betreten einer Spalte/Zeile wird der passende Kopf wiederholt. Wenn die Tabelle nur für Layoutzwecke dient, entfernen Sie die Tabellenformatierung.</p></div>`,
+	TABLES_MISSING_HEADINGS: ` <p>${why.fix}Geben Sie in den Tabelleneigenschaften an, ob Kopfzellen in der ersten Zeile, ersten Spalte oder in beiden vorhanden sind.</p><div class="why"> <p>Tipp: Beim Betreten einer Spalte/Zeile wird die passende Kopfzelle wiederholt. Wenn die Tabelle nur für Layoutzwecke dient, entfernen Sie die Tabellenformatierung.</p></div>`,
 
-	TABLES_SEMANTIC_HEADING: ` <p>${why.fix}Entfernen Sie die Überschriften-Formatierung (h2, h3) aus der Tabelle. Verwenden Sie stattdessen Kopfzeilen. Wenn mehrere Ebenen nötig sind, teilen Sie die Daten auf mehrere Tabellen auf.</p><div class="why"> <p>Tipp: Tabellenköpfe sind gerichtet (Zeile oder Spalte). Inhaltsüberschriften würden alles Folgende beschriften, auch in anderen Spalten:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">Eine <strong>Tabellenkopf</strong>-Zelle in Spalte 2 beschriftet Zelle B. <br><br> Eine <strong>Inhaltsüberschrift</strong> in Zelle 2 würde 3, A, B und C sowie diesen Text und den Tooltip-Fuß betreffen.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`,
+	TABLES_SEMANTIC_HEADING: ` <p>${why.fix}Entfernen Sie die Überschriften-Formatierung (h2, h3) aus der Tabelle. Verwenden Sie stattdessen Kopfzeilen und -spalten. Wenn mehrere Ebenen nötig sind, teilen Sie die Daten auf mehrere Tabellen auf.</p><div class="why"> <p>Tipp: Tabellenköpfe sind gerichtet (Zeile oder Spalte). Inhaltsüberschriften würden alles Folgende beschriften, auch in anderen Spalten:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">Eine <strong>Tabellenkopf</strong>-Zelle in Spalte 2 beschriftet Zelle B. <br><br> Eine <strong>Inhaltsüberschrift</strong> in Zelle 2 würde 3, A, B und C sowie diesen Text und den Tooltip-Fuß betreffen.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`,
 }
 
 const interfaceStrings = {

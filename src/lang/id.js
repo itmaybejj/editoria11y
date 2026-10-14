@@ -1,4 +1,5 @@
 import { default as Sa11yStrings } from '../sa11y-lang/id.js';
+// Note: use "judul" for general headings and "header" for headers (table etc).
 // Terjemahan mesin (machine translation).
 
 const testNames = {

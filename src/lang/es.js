@@ -1,4 +1,5 @@
 import { default as Sa11yStrings } from '../sa11y-lang/es.js';
+// Note: use "encabezado" for general headings and "celda de encabezado" / "encabezado de tabla" for headers (table etc).
 
 const testNames = {
 	ARIA_INPUT_FIELD_NAME: 'A este campo de entrada personalizado le falta una etiqueta',
@@ -29,7 +30,7 @@ const testNames = {
 	HEADING_EMPTY: 'Este encabezado no tiene texto',
 	HEADING_UNPRONOUNCEABLE: 'Este encabezado no se puede pronunciar',
 	HEADING_EMPTY_WITH_IMAGE: 'Esta imagen se usa como encabezado, por lo que necesita texto alternativo',
-	HEADING_FIRST: 'El primer encabezado en esta página es un subtítulo',
+	HEADING_FIRST: 'El primer encabezado en esta página es un subencabezado',
 	HEADING_LONG: '¿Puede este encabezado ser más corto?',
 	HEADING_MISSING_ONE: 'A esta página le falta un Encabezado 1',
 	HEADING_SKIPPED_LEVEL: 'Este encabezado está etiquetado con un nivel incorrecto',
@@ -286,7 +287,7 @@ const tips = {
 
 	QA_NESTED_COMPONENTS: 'Evite anidar componentes interactivos, como colocar acordeones dentro de otros acordeones o pestañas dentro de acordeones. Esto complica la navegación y puede hacer que se pase por alto contenido.',
 
-	QA_PDF: `<p><strong>Enlace:</strong> <i>%(TEXT)</i></p><p>${why.fix}Haga una de las siguientes acciones y luego descarte esta alerta:</p><ul><li>Vincule a una página web en lugar del PDF,</li><li>o proporcione también una página web o un documento editable,</li><li>o, como mínimo, asegúrese de que el PDF sea accesible (títulos, orden de lectura por columnas, encabezados de tabla, textos alternativos).</li></ul><div class="why"><p>Las personas usuarias móviles y de tecnologías de asistencia suelen preferir páginas web a PDFs, que no se adaptan al tamaño de pantalla y a menudo carecen del etiquetado necesario.</p></div>`,
+	QA_PDF: `<p><strong>Enlace:</strong> <i>%(TEXT)</i></p><p>${why.fix}Haga una de las siguientes acciones y luego descarte esta alerta:</p><ul><li>Vincule a una página web en lugar del PDF,</li><li>o proporcione también una página web o un documento editable,</li><li>o, como mínimo, asegúrese de que el PDF sea accesible (encabezados, orden de lectura por columnas, encabezados de tabla, textos alternativos).</li></ul><div class="why"><p>Las personas usuarias móviles y de tecnologías de asistencia suelen preferir páginas web a PDFs, que no se adaptan al tamaño de pantalla y a menudo carecen del etiquetado necesario.</p></div>`,
 
 	QA_SMALL_TEXT: `<p><strong>Texto:</strong> <i>%(TEXT)</i></p><p>${why.fix}Manténgase por encima del 80 % del tamaño de fuente predeterminado. El texto pequeño es difícil de leer, especialmente para personas con baja visión.</p>`,
 
@@ -302,13 +303,13 @@ const tips = {
 
 	TABINDEX_ATTR: `<p>Los valores de tabindex mayores que 0 sacan los elementos enfocables de su orden visual, lo que dificulta a las personas usuarias de tecnologías de asistencia localizarlos y operarlos.</p><p>${why.fix}Cambie el orden de los elementos en el HTML para que el orden de foco y el orden de lectura coincidan.</p><div class="why"><p>Consejo: el orden visual de las palabras en la página y el orden en que el teclado tabula por los elementos suelen ser el mismo.</p><p>Asignar un tabindex positivo a un elemento lo mueve al inicio del orden de tabulación, <strong>pero no del orden visual ni de lectura</strong>.</p></div>`,
 
-	TABLES_EMPTY_HEADING: `<p>${why.fix}Asegúrese de que cada celda de encabezado contenga texto.</p><div class="why"><p>Consejo: los lectores de pantalla usan los encabezados para orientar a las personas dentro de una tabla.</p></div>`,
+	TABLES_EMPTY_HEADING: `<p>${why.fix}Asegúrese de que cada celda de encabezado contenga texto.</p><div class="why"><p>Consejo: los lectores de pantalla usan las celdas de encabezado para orientar a las personas dentro de una tabla.</p></div>`,
 
-	TABLES_INVALID_HEADERS_REF: `<p>Esta tabla intenta asociar una celda de datos concreta con una celda de encabezado concreta, pero no se encuentra el ID del encabezado: <code>%(VALUE)</code>.</p><p>${why.fix}Asegúrese de que cada atributo <code>headers</code> coincida con el ID de una celda de encabezado de la misma tabla.</p><div class="why">Consejo: <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">usar referencias de ID manuales</a> para asociar celdas de datos con celdas de encabezado es complicado y frágil. Cuando sea posible, divida los datos complejos en tablas más pequeñas con filas y columnas de encabezado simples.</div>`,
+	TABLES_INVALID_HEADERS_REF: `<p>Esta tabla intenta asociar una celda de datos concreta con una celda de encabezado concreta, pero no se encuentra el ID de la celda de encabezado: <code>%(VALUE)</code>.</p><p>${why.fix}Asegúrese de que cada atributo <code>headers</code> coincida con el ID de una celda de encabezado de la misma tabla.</p><div class="why">Consejo: <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">usar referencias de ID manuales</a> para asociar celdas de datos con celdas de encabezado es complicado y frágil. Cuando sea posible, divida los datos complejos en tablas más pequeñas con filas y columnas de encabezado simples.</div>`,
 
-	TABLES_MISSING_HEADINGS: `<p>${why.fix}Edite las propiedades de la tabla e indique si los encabezados están en la primera fila, la primera columna o en ambas.</p><div class="why"><p>Consejo: los lectores de pantalla repiten el encabezado pertinente al entrar en cada columna o fila. Si esta tabla no tiene encabezados porque solo se usa para diseño visual, elimine el formato de tabla y use columnas solo visuales.</p></div>`,
+	TABLES_MISSING_HEADINGS: `<p>${why.fix}Edite las propiedades de la tabla e indique si las celdas de encabezado están en la primera fila, la primera columna o en ambas.</p><div class="why"><p>Consejo: los lectores de pantalla repiten el encabezado de tabla pertinente al entrar en cada columna o fila. Si esta tabla no tiene celdas de encabezado porque solo se usa para diseño visual, elimine el formato de tabla y use columnas solo visuales.</p></div>`,
 
-	TABLES_SEMANTIC_HEADING: `<p>${why.fix}Elimine este formato de encabezado (h2, h3). Proporcione filas o columnas de encabezado en su lugar. Si necesita múltiples niveles de encabezado, divida la información en más de una tabla.</p><div class="why"><p>Consejo: los encabezados de tabla son direccionales (fila o columna). Los encabezados de contenido etiquetan todo lo que sigue, incluso en columnas no relacionadas:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">Un <strong>encabezado de tabla</strong> en la celda 2 etiqueta la celda B. <br><br> Un <strong>encabezado de contenido</strong> etiqueta las celdas 3, A, B y C, así como este texto y el pie de este tooltip.</td></tr><tr><td>A</td><td>B</td><td>C</td></tr></table></div>`,
+	TABLES_SEMANTIC_HEADING: `<p>${why.fix}Elimine este formato de encabezado (h2, h3). Proporcione filas o columnas de encabezado en su lugar. Si necesita varias filas de encabezado, divida la información en más de una tabla.</p><div class="why"><p>Consejo: los encabezados de tabla son direccionales (fila o columna). Los encabezados de contenido etiquetan todo lo que sigue, incluso en columnas no relacionadas:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">Un <strong>encabezado de tabla</strong> en la celda 2 etiqueta la celda B. <br><br> Un <strong>encabezado de contenido</strong> etiqueta las celdas 3, A, B y C, así como este texto y el pie de este tooltip.</td></tr><tr><td>A</td><td>B</td><td>C</td></tr></table></div>`,
 }
 
 const interfaceStrings = {

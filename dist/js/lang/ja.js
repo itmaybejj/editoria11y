@@ -461,9 +461,9 @@ const testNames = {
   QA_UPPERCASE: "この全文大文字表記は必要ですか？",
   SUS_ALT: "この alt テキストに不要な語句が含まれていますか？",
   TABINDEX_ATTR: "tabindex 属性が読み順に影響しています",
-  TABLES_EMPTY_HEADING: "この表見出しセルにはテキストが必要です",
+  TABLES_EMPTY_HEADING: "この表ヘッダーセルにはテキストが必要です",
   TABLES_INVALID_HEADERS_REF: "この表の headers 属性は無効です",
-  TABLES_MISSING_HEADINGS: "この表には行見出し／列見出しが不足しています",
+  TABLES_MISSING_HEADINGS: "この表にはヘッダー行／ヘッダー列が不足しています",
   TABLES_SEMANTIC_HEADING: "内容見出しを表内で使用すべきではありません",
   UNCONTAINED_LI: "無効な HTML リストです"
 };
@@ -554,13 +554,13 @@ const tips = {
   MISSING_ALT_LINK_HAS_TEXT: `<p>この画像はテキスト付きリンクの一部です。可視テキストが目的を十分説明していれば、画像は alt="" にしてください。そうでない場合は、目的を説明する alt を設定してください。</p>${why.imageLinks}`,
   QA_BAD_LINK: `<p>このリンクは開発環境（内部 URL）を指している可能性があります：<br>{L} <strong {C}>%(LINK)</strong></p><p>${why.fix}相対パス（/folder）か、公開 URL に変更してください。</p>`,
   QA_BLOCKQUOTE: `<p><strong>短すぎる引用：</strong> <i>%(TEXT)</i></p><p><code>blockquote</code> は引用として読み上げるようスクリーンリーダーに指示します。短い引用文の多くは実際には見出しです。</p><p>${why.fix}引用ではなく見出しである場合は、ページ構造に表示されるよう見出し書式に変更してください。</p>${why.headings}`,
-  QA_DOCUMENT: `<p><strong>リンク：</strong> <i>%(TEXT)</i></p><p>リンクされた文書も Web コンテンツとしてアクセシブルである必要があります。見出し、表の見出し、画像の alt が正しくタグ付けされていることを確認した上で、この警告を無視してください。</p><div class="why"><ul><li><a href="https://support.google.com/docs/answer/6199477?hl=en">Google Workspace 文書やプレゼンテーションをアクセシブルにする方法</a></li><li><a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Microsoft Office 文書をアクセシブルにする方法</a></li></ul></div>`,
+  QA_DOCUMENT: `<p><strong>リンク：</strong> <i>%(TEXT)</i></p><p>リンクされた文書も Web コンテンツとしてアクセシブルである必要があります。見出し、表ヘッダー、画像の alt が正しくタグ付けされていることを確認した上で、この警告を無視してください。</p><div class="why"><ul><li><a href="https://support.google.com/docs/answer/6199477?hl=en">Google Workspace 文書やプレゼンテーションをアクセシブルにする方法</a></li><li><a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">Microsoft Office 文書をアクセシブルにする方法</a></li></ul></div>`,
   QA_FAKE_HEADING: `<p><strong>太字テキスト：</strong> <i>%(TEXT)</i></p><p>${why.fix}この太字テキストが新しいトピックの導入であれば、視覚的強調ではなく見出しスタイルを使用してください。</p><div class="why"><p>見出しは支援技術のためのナビゲーション構造を作ります。</p></div>`,
   QA_FAKE_LIST: `<p>${why.fix}「%(TEXT)」がリスト項目であるべきなら、リスト形式にしてください。</p><div class="why"><p>リストは視覚・技術の両面で構造を提供します：</p><ol><li>整ったインデントで読みやすくなります。</li><li>スクリーンリーダーは「7 件中 3 件目」のように位置を読み上げます。</li></ol><p>先頭に数字を付けるだけではリストになりません。</p></div>`,
   QA_IN_PAGE_LINK: `<p><strong>URL：</strong> <i>#%(ID)</i></p><p><strong>リンク：</strong> <code>%(TEXT)</code></p><p>このページ内リンクのターゲットが存在しません。</p><div class="why"><p>開発者向け：JavaScript で処理している場合は、キーボード操作でも動作することを確認してください。</p></div>`,
   QA_JUSTIFY: `<p>両端揃えは不規則な空白を生み、多くの方にとって読みづらくなります。</p><p>${why.fix}左揃えを使用してください。</p>`,
   QA_NESTED_COMPONENTS: "アコーディオン内にアコーディオン、タブ内にタブなど、入れ子のインタラクティブ UI は避けてください。これはナビゲーションを複雑にし、内容を見落とす原因になります。",
-  QA_PDF: `<p><strong>リンク：</strong> <i>%(TEXT)</i></p><p>${why.fix}次のいずれかを行い、この警告を無視してください：</p><ul><li>PDF ではなく Web ページへリンクする</li><li>または、HTML 版／編集可能版の提供を追加する</li><li>または、少なくとも PDF にタグ・正しい読み順・表見出し・代替テキストがあることを確認する</li></ul><div class="why"><p>多くのモバイル／支援技術ユーザーは PDF より HTML ページを好みます。PDF は小さい画面で再流しが効かず、アクセシビリティのタグが不足しがちです。</p></div>`,
+  QA_PDF: `<p><strong>リンク：</strong> <i>%(TEXT)</i></p><p>${why.fix}次のいずれかを行い、この警告を無視してください：</p><ul><li>PDF ではなく Web ページへリンクする</li><li>または、HTML 版／編集可能版の提供を追加する</li><li>または、少なくとも PDF にタグ・正しい読み順・表ヘッダー・代替テキストがあることを確認する</li></ul><div class="why"><p>多くのモバイル／支援技術ユーザーは PDF より HTML ページを好みます。PDF は小さい画面で再流しが効かず、アクセシビリティのタグが不足しがちです。</p></div>`,
   QA_SMALL_TEXT: `<p><strong>テキスト：</strong> <i>%(TEXT)</i></p><p>${why.fix}標準フォントサイズの 80% 以上を保ってください。小さすぎる文字は、特に弱視の方にとって読みづらくなります。</p>`,
   QA_STRONG_ITALICS: `<p><strong>テキスト：</strong> <i>%(TEXT)</i></p><p>${why.fix}太字や斜体の多用は避け、要点のみに使用してください。</p><div class="why"><p>注：引用は <code>blockquote</code> を使用してください。</p></div>`,
   QA_SUBSCRIPT: `<p><strong>テキスト：</strong> <i>%(TEXT)</i></p><p>上付き・下付きは文字を小さくし、読みにくくします。序数（4<sup>th</sup>）、化学式（H<sub>2</sub>O）、脚注記号などに限って使用してください。</p>`,
@@ -569,9 +569,9 @@ const tips = {
   SUS_ALT: `<p>この画像の alt には「%(alt)」という語が含まれており、冗長である可能性があります。</p><p>Alt テキスト：「<strong>%(ALT_TEXT)</strong>」</p><p>${why.fix}画像が何を意味するのかを簡潔に伝える alt にしてください。</p><div class="why"><p>ヒント：スクリーンリーダーは alt を読む前に「画像」と伝えるため、「〜の画像」「〜の写真」といった語は通常不要です。ただし画像の内容自体を指す場合は例外です：</p><ul><li>冗長でない：「<em>クラスに見せているアルバムの「写真」</em>」</li><li>冗長：「<em>写真の</em> アルバムにある写真」</li></ul></div>`,
   // REVIEW
   TABINDEX_ATTR: `<p>${why.fix}tabindex の値に「0」より大きい数を使わないでください。HTML 内の要素順序を変更して、タブ順と読み上げ順、視覚的な並びを一致させてください。</p><div class="why"><p>ヒント：初期設定では視覚的な順序、キーボードのタブ順、スクリーンリーダーの読み上げ順はすべて一致しています。</p><p>正の tabindex を設定すると、タブ順だけが先頭に移動しますが、視覚順や読み上げ順は移動しません。支援技術利用者は説明と要素がページの両端に散らばってしまい、混乱します。</p></div>`,
-  TABLES_EMPTY_HEADING: ` <p>${why.fix}すべての表ヘッダーセルにテキストを含めてください。</p><div class="why"><p>ヒント：スクリーンリーダーは、セルに入る際に対応する見出しを手がかりに内容を理解します。</p></div>`,
-  TABLES_INVALID_HEADERS_REF: `<p>この表は特定のデータセルを特定のヘッダーセルで関連付けようとしていますが、参照されているヘッダー ID が見つかりません：<code>%(VALUE)</code>。</p><p>${why.fix}それぞれの <code>headers</code> 属性が、同じ表内のヘッダーセルの ID と一致していることを確認してください。</p><div class="why">ヒント：<a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">ID を手動で指定する方法</a>でデータセルとヘッダーセルを関連付けるのは複雑で壊れやすい手法です。可能であれば、複雑なデータは単純な見出し行・見出し列を持つ小さな表に分割してください。</div>`,
-  TABLES_MISSING_HEADINGS: ` <p>${why.fix}表の設定で、ヘッダーが最初の行・最初の列、またはその両方にあることを指定してください。</p><div class="why"> <p>ヒント：スクリーンリーダーは各セルで該当する行見出し／列見出しを読み上げます。</p><p>レイアウト目的のみの表は、表以外の方法に置き換えてください。</p></div>`,
+  TABLES_EMPTY_HEADING: ` <p>${why.fix}すべての表ヘッダーセルにテキストを含めてください。</p><div class="why"><p>ヒント：スクリーンリーダーは、セルに入る際に対応するヘッダーを手がかりに内容を理解します。</p></div>`,
+  TABLES_INVALID_HEADERS_REF: `<p>この表は特定のデータセルを特定のヘッダーセルで関連付けようとしていますが、参照されているヘッダー ID が見つかりません：<code>%(VALUE)</code>。</p><p>${why.fix}それぞれの <code>headers</code> 属性が、同じ表内のヘッダーセルの ID と一致していることを確認してください。</p><div class="why">ヒント：<a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">ID を手動で指定する方法</a>でデータセルとヘッダーセルを関連付けるのは複雑で壊れやすい手法です。可能であれば、複雑なデータは単純なヘッダー行・ヘッダー列を持つ小さな表に分割してください。</div>`,
+  TABLES_MISSING_HEADINGS: ` <p>${why.fix}表の設定で、ヘッダーが最初の行・最初の列、またはその両方にあることを指定してください。</p><div class="why"> <p>ヒント：スクリーンリーダーは各セルで該当する行ヘッダー／列ヘッダーを読み上げます。</p><p>レイアウト目的のみの表は、表以外の方法に置き換えてください。</p></div>`,
   TABLES_SEMANTIC_HEADING: ` <p>${why.fix}表の内部から（h2／h3 などの）内容見出しを削除し、行・列の表ヘッダーを使用してください。複数レベルが必要な場合は、表を分割してください。</p><div class="why"> <p>ヒント：表ヘッダーは行または列方向に作用します。一方、内容見出しはそれ以降の広い範囲に作用します。</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">セル 2 の<strong>表ヘッダー</strong>は B セルをラベル付けします。<br><br><strong>内容見出し</strong>をセル 2 に置くと、3・A・B・C と本文、注釈まで広く及びます。</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`
 };
 const interfaceStrings = {

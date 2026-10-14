@@ -428,7 +428,7 @@ const testNames = {
   TABLES_EMPTY_HEADING: "Cette cellule d’en-tête a besoin de texte",
   TABLES_MISSING_HEADINGS: "Ce tableau a besoin d’une ligne et/ou d’une colonne d’en-têtes",
   TABLES_INVALID_HEADERS_REF: `Ce tableau a un attribut headers invalide`,
-  TABLES_SEMANTIC_HEADING: "Les en-têtes de contenu ne doivent pas être utilisés dans les tableaux",
+  TABLES_SEMANTIC_HEADING: "Les titres de contenu ne doivent pas être utilisés dans les tableaux",
   UNCONTAINED_LI: "Liste HTML invalide"
 };
 const why = {

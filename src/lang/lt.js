@@ -1,4 +1,5 @@
 import { default as Sa11yStrings } from '../sa11y-lang/lt.js';
+// Note: use "antraštė" (or "turinio antraštė") for general headings and "lentelės antraštė" / "antraštės langelis" for headers (table etc).
 // Mašininis vertimas.
 
 const testNames = {
@@ -104,7 +105,7 @@ const testNames = {
 	SUS_ALT: 'Ar alternatyviame tekste yra nereikalingų žodžių?',
 	TABINDEX_ATTR: 'Tabindex perėjimai sutrikdo fokusavimo tvarką',
 	TABLES_EMPTY_HEADING: 'Šiame antraštės langelyje reikia teksto',
-	TABLES_INVALID_HEADERS_REF: 'Šioje lentelėje yra netinkamas antraščių atributas',
+	TABLES_INVALID_HEADERS_REF: 'Šioje lentelėje yra netinkamas atributas „headers“',
 	TABLES_MISSING_HEADINGS: 'Šiai lentelei reikia antraštės eilutės ir (arba) stulpelio',
 	TABLES_SEMANTIC_HEADING: 'Turinio antraštės neturėtų būti naudojamos lentelėse',
 	UNCONTAINED_LI: 'Netinkamas HTML sąrašas',
@@ -214,7 +215,7 @@ export const tips = {
 	TABLES_EMPTY_HEADING: `<p>${why.fix}Įsitikinkite, kad kiekviena antraštės ląstelė turi tekstą.</p><div class="why"><p>Patarimas: ekrano skaitytuvai naudoja antraštes, kad orientuotų vartotojus naršant lentelę. Atitinkama antraštė kartojama, kai žymeklis įeina į kiekvieną stulpelį arba eilutę.</p></div>`,
 	TABLES_INVALID_HEADERS_REF: `<p>Ši lentelė bando susieti konkrečią duomenų ląstelę su konkrečia antraštės ląstele, tačiau antraštės ID nerandamas: <code>%(VALUE)</code>.</p><p>${why.fix}Įsitikinkite, kad kiekvienas atributas <code>headers</code> atitinka tos pačios lentelės antraštės ląstelės ID.</p><div class="why">Patarimas: <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">rankinių ID nuorodų naudojimas</a> siejant duomenų ląsteles su antraštės ląstelėmis yra sudėtingas ir trapus. Kai įmanoma, suskirstykite sudėtingus duomenis į mažesnes lenteles su paprastomis antraštės eilutėmis ir stulpeliais.</div>`,
 	TABLES_MISSING_HEADINGS: `<p>${why.fix}Redaguokite lentelės ypatybes ir nurodykite, ar antraštės yra pirmoje eilutėje, pirmajame stulpelyje, ar abiejose.</p><div class="why"><p>Patarimas: ekrano skaitytuvai naudoja antraštes, kad orientuotų vartotojus naršant lentelę. Atitinkama antraštė kartojama, kai žymeklis įeina į kiekvieną stulpelį ar eilutę.</p><p>Jei ši lentelė neturi antraščių, nes naudojama tik vizualiniam išdėstymui, pašalinkite lentelės formatavimą ir vietoj jo naudokite tik vaizdinį stulpelių formatavimą.</p></div>`,
-	TABLES_SEMANTIC_HEADING: `<p>${why.fix}Pašalinkite šį antraštės (h2, h3) formatavimą. Vietoj to naudokite antraštės eilutes ir stulpelius. Jei reikia kelių antraštės eilučių, suskaidykite tai į daugiau nei vieną lentelę.</p><div class="why"><p>Patarimas: lentelių antraštės yra kryptingos: viena eilutė arba vienas stulpelis. Turinio antraštės žymi visą paskesnį tekstą, net ir nesusijusiuose stulpeliuose:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2"><strong>Lentelės antraštė</strong> 2-ojoje ląstelėje žymi ląstelę B. <br><br> <strong>Turinio antraštė</strong> 2-ojoje ląstelėje žymi ląsteles 3, A, B ir C, taip pat šį tekstą ir šio patarimo poraštę.</td></tr><tr><td>A</td><td>B</td><td>C</td></tr></table></div>`,
+	TABLES_SEMANTIC_HEADING: `<p>${why.fix}Pašalinkite šį turinio antraštės (h2, h3) formatavimą. Vietoj to naudokite lentelės antraštės eilutes ir stulpelius. Jei reikia kelių antraštės eilučių, suskaidykite tai į daugiau nei vieną lentelę.</p><div class="why"><p>Patarimas: lentelių antraštės yra kryptingos: viena eilutė arba vienas stulpelis. Turinio antraštės žymi visą paskesnį tekstą, net ir nesusijusiuose stulpeliuose:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2"><strong>Lentelės antraštė</strong> 2-ojoje ląstelėje žymi ląstelę B. <br><br> <strong>Turinio antraštė</strong> 2-ojoje ląstelėje žymi ląsteles 3, A, B ir C, taip pat šį tekstą ir šio patarimo poraštę.</td></tr><tr><td>A</td><td>B</td><td>C</td></tr></table></div>`,
 };
 
 export const interfaceStrings = {

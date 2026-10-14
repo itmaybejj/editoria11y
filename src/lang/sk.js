@@ -1,4 +1,5 @@
 import { default as Sa11yStrings } from '../sa11y-lang/sk.js';
+// Note: use "nadpis" for general headings and "hlavička" for headers (table etc).
 // Machine translation, glossary-aligned with the human-reviewed sa11y-lang/sk.js.
 // See .agents/skills/translate-slovak/SKILL.md before editing.
 

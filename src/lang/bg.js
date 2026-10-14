@@ -1,4 +1,5 @@
 import { default as Sa11yStrings } from '../sa11y-lang/bg.js';
+// Note: use "заглавие" for general headings and "заглавна клетка" / "заглавен ред" for headers (table etc).
 // Машинен превод.
 
 const testNames = {

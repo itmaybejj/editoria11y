@@ -1,4 +1,5 @@
 import { default as Sa11yStrings } from '../sa11y-lang/pl.js';
+// Note: use "nagłówek" for general headings and "nagłówek tabeli" or "komórka nagłówka" for headers (table etc).
 
 const testNames = {
 	ALT_PLACEHOLDER: 'Ten tekst alternatywny może być tekstem zastępczym',
@@ -141,11 +142,11 @@ export const tips = {
 	EMBED_VIDEO: `<p>To narzędzie nie jest w stanie „zobaczyć”, czy filmy mają napisy, ani stwierdzić, czy ktoś je sprawdził — konieczna jest ręczna weryfikacja.</p><p>${why.fix}Sprawdź, czy dostępne są <a href="https://www.w3.org/WAI/media/av/captions/">dokładne napisy („CC”) lub podpisy</a>, i upewnij się, że mówcy oraz znaczące efekty dźwiękowe są prawidłowo oznaczeni.</p>`,
 	HEADING_EMPTY: `<p>Puste nagłówki powodują luki w strukturze.</p><p>${why.fix}Dodaj treść albo usuń pustą linię.</p>${why.headings}`,
 	HEADING_UNPRONOUNCEABLE: `<p>Puste nagłówki powodują luki w strukturze.</p><p>${why.fix}Dodaj do tego nagłówka tekst zrozumiały dla człowieka albo zmień go w akapit.</p>${why.headings}`,
-	HEADING_EMPTY_WITH_IMAGE: `<p>Puste nagłówki zaburzają strukturę.</p><p>${why.fix}Jeśli to nie jest nagłówek, zmień format z <code>Nagłówka %(level)</code> na <code>Akapit</code>. Jeśli to nagłówek — opisz znaczenie obrazu w alt-tekście.</p>${why.headings}`,
+	HEADING_EMPTY_WITH_IMAGE: `<p>Puste nagłówki zaburzają strukturę.</p><p>${why.fix}Jeśli to nie jest nagłówek, zmień format <code>Nagłówek %(level)</code> na <code>Akapit</code>. Jeśli to nagłówek — opisz znaczenie obrazu w alt-tekście.</p>${why.headings}`,
 	HEADING_FIRST: `${why.fix}Upewnij się, że tytuł strony jest oznaczony jako Nagłówek 1 albo 2. ${why.headings}`,
 	HEADING_LONG: `<p>${why.fix}Jeśli ten nagłówek nie jest stałym odniesieniem, jak tytuł opublikowanego artykułu, skróć go dla lepszej skanowalności:<span hidden>%(drop)%(drop)</span></p><p><i>%(TEXT)</i></p>${why.headings}`,
 	HEADING_MISSING_ONE: `<p>${why.fix}Oznacz tytuł strony jako nagłówek poziomu 1 — to początek struktury dokumentu.</p>${why.headings}`,
-	HEADING_SKIPPED_LEVEL: `<p>Nagłówek przeskoczył z <code>poziomu %(prevLevel)</code> na <code>poziom %(level)</code>. Dla czytników brzmi to jak brak treści.</p><p>${why.fix}Ujednolić poziomy, aby zachować spójność.</p>${why.headings}`,
+	HEADING_SKIPPED_LEVEL: `<p>Nagłówek przeskoczył z <code>poziomu %(prevLevel)</code> na <code>poziom %(level)</code>. Dla czytników brzmi to jak brak treści.</p><p>${why.fix}Popraw poziomy, aby struktura była dokładna i bez luk.</p>${why.headings}`,
 	HIDDEN_FOCUSABLE: `<p>Element ma <code>aria-hidden="true"</code>, a mimo to może otrzymać fokus klawiatury.</p><p>${why.fix}Jeśli ma być niewidoczny dla czytników, dodaj też <code>tabindex="-1"</code>; w przeciwnym razie usuń <code>aria-hidden</code>.</p><p><strong>Element:</strong> <code>%(ELEMENT)</code></p>`,
 	IMAGE_ALT_TOO_LONG: `<p>Ten tekst alternatywny ma %(altLength) znaków: <i class="ed11y-small">%(ALT_TEXT)</i></p><p>${why.fix}Podsumuj go lub część opisu przenieś do podpisu pod obrazem.</p><div class="why"><p>Wskazówka: złożone obrazy, które przekazują więcej informacji niż mieści się w jednym zdaniu, zazwyczaj wymagają <strong>widocznego</strong> podpisu lub alternatywy opisującej najważniejsze szczegóły. Możesz skierować użytkowników czytników ekranu do takiego podpisu:</p><ul><li>„Plakat zapraszający na piątkową zabawę; szczegóły w podpisie.”</li><li>„Wykres pokazujący spadek liczby zgłoszeń o 10% w tym roku; szczegóły w tabeli.”</li></ul></div>`,
 	IMAGE_DECORATIVE: `<p>Obraz ukryto przed czytnikami przez alt="". Tylko obrazy bez znaczenia treściowego powinny być tak oznaczane.</p><p>${why.fix}Jeśli obraz wnosi treść, dodaj alt-tekst.</p>${why.images}`,

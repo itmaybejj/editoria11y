@@ -1,4 +1,5 @@
 import { default as Sa11yStrings } from '../sa11y-lang/hu.js';
+// Note: use "címsor" for general headings and "fejléc" for headers (table etc).
 
 // todo check each file for link integrity, and escaping of tags in code blocks.
 const testNames = {
@@ -103,7 +104,7 @@ const testNames = {
 	QA_UPPERCASE: 'Szükséges a CSUPA NAGYBETŰS szöveg?',
 	SUS_ALT: 'Felesleges szavak lehetnek az alt-szövegben',
 	TABINDEX_ATTR: 'A tabindex felülbírálás megzavarja a fókuszsorrendet',
-	TABLES_EMPTY_HEADING: 'A táblázat fejléccellája hiányzik',
+	TABLES_EMPTY_HEADING: 'Ebből a fejléccellából hiányzik a szöveg',
 	TABLES_INVALID_HEADERS_REF: 'A táblázat headers attribútuma érvénytelen',
 	TABLES_MISSING_HEADINGS: 'A táblázatból hiányoznak a sor-/oszlopfejlécek',
 	TABLES_SEMANTIC_HEADING: 'Tartalmi címsor nem használható táblázaton belül',
@@ -213,7 +214,7 @@ const tips = {
 	TABINDEX_ATTR: `<p>A 0-nál nagyobb tabindex értékek kiveszik a fókuszálható elemeket a vizuális sorrendjükből, ezért a kisegítő technológiák használói nehezen találják meg és kezelik őket.</p><p>${why.fix}A HTML-ben rendezze át az elemeket, hogy a fókuszsorrend és az olvasási sorrend egyezzen.</p><div class="why"><p>Tipp: az oldalon a szavak vizuális sorrendje és a Tab-sorrend rendszerint azonos.</p><p>A pozitív tabindex az elem fókuszsorrendjét a lista elejére helyezi, <strong>de nem változtatja meg a vizuális vagy olvasási sorrendet</strong>.</p></div>`,
 	TABLES_EMPTY_HEADING: ` <p>${why.fix}Biztosítsa, hogy minden táblázatfejléc tartalmazzon szöveget.</p><div class="why"><p>Tipp: a képernyőolvasók a fejlécből tudják meg, hogy milyen adatot látnak.</p></div>`,
 	TABLES_INVALID_HEADERS_REF: `<p>Ez a táblázat egy adott adatcellát próbál egy adott fejléccellához rendelni, de a fejléc azonosítója nem található: <code>%(VALUE)</code>.</p><p>${why.fix}Győződjön meg róla, hogy minden <code>headers</code> attribútum egy ugyanazon táblázaton belüli fejléccella azonosítójával egyezik meg.</p><div class="why">Tipp: az adatcellák és fejléccellák összekötése <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">kézi ID-hivatkozásokkal</a> bonyolult és sérülékeny. Ha lehetséges, bontsa az összetett adatokat több kisebb táblázatra, egyszerű fejlécsorokkal és -oszlopokkal.</div>`,
-	TABLES_MISSING_HEADINGS: ` <p>${why.fix}Adja meg a táblázat beállításaiban, hogy a fejléc az első sorban, az első oszlopban vagy mindkettőben található.</p><div class="why"> <p>Tipp: a képernyőolvasók minden cellánál ismétlik a vonatkozó sort vagy oszlopcímet.</p><p>Ha a táblázat csak elrendezési cél, kerülje a táblázat használatát.</p></div>`,
+	TABLES_MISSING_HEADINGS: ` <p>${why.fix}Adja meg a táblázat beállításaiban, hogy a fejléc az első sorban, az első oszlopban vagy mindkettőben található.</p><div class="why"> <p>Tipp: a képernyőolvasók minden cellánál ismétlik a vonatkozó sor- vagy oszlopfejlécet.</p><p>Ha a táblázat csak elrendezési célú, kerülje a táblázat használatát.</p></div>`,
 	TABLES_SEMANTIC_HEADING: ` <p>${why.fix}Távolítsa el a tartalmi címsort (h2, h3). Használjon inkább táblázatfejléceket. Ha több szint kell, bontsa több táblázatra.</p><div class="why"> <p>Magyarázat: a táblázatfejlécek irányhoz kötöttek (sor vagy oszlop). A tartalmi címsor az alatta következő teljes tartalomra hatással van.</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">A <strong>táblázatfejléc</strong> a 2. cellában a B cellát jelöli.<br><br> A <strong>tartalmi címsor</strong> a 2. cellában a 3., A, B, C cellákat, valamint ezt a szöveget és a lábjegyzetet is „címkézi”.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`,
 };
 
