@@ -241,7 +241,7 @@ const tips = {
 
 	LINK_NEW_TAB: `<p><strong>Texto del enlace:</strong> <i>%(TEXT)</i></p><p>${why.fix}Configure este enlace para que se abra en la misma pestaña o <a href="https://itmaybejj.github.io/linkpurpose/">avise a las personas usuarias</a> con antelación.</p><div class="why"><p>Las personas siempre pueden <em>elegir</em> abrir un enlace en una pestaña nueva. Cuando un enlace obliga a abrir una pestaña nueva, suele resultar confuso o molesto, especialmente para quienes usan tecnologías de asistencia y no entienden por qué ha dejado de funcionar el botón «Atrás» de su navegador.</p><p>Nota: los formularios son la excepción. Cuando alguien está rellenando un formulario, abrir un enlace en la misma ventana podría hacerle perder su trabajo, por lo que los enlaces dentro de formularios suelen abrirse en pestañas nuevas.</p></div>`,
 
-	LINK_PLACEHOLDER_ALT: `<p><strong>Texto alternativo:</strong> <i>%(alt)</i>.</p><p>${why.fix}Use el título del destino del enlace como texto alternativo para las imágenes vinculadas.</p>${why.imageLinks}`,
+	LINK_PLACEHOLDER_ALT: `<p><strong>Texto alternativo:</strong> <i>%(alt)</i></p><p>${why.fix}Use el título del destino del enlace como texto alternativo para las imágenes vinculadas.</p>${why.imageLinks}`,
 
 	LINK_STOPWORD: `<p>Texto del enlace: <i>%(ERROR)</i></p><p>${why.fix}Use un texto de enlace que describa su destino.</p>${why.links}`,
 

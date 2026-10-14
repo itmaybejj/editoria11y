@@ -250,7 +250,7 @@ const tips = {
 
 	LINK_NEW_TAB: `<p><strong>Linktext:</strong> <i>%(TEXT)</i></p><p>${why.fix}Stellen Sie den Link so ein, dass er im selben Tab geöffnet wird, oder <a href="https://itmaybejj.github.io/linkpurpose/">weisen Sie Nutzende vorher darauf hin</a>.</p><div class="why"><p>Lesende können jederzeit <em>selbst entscheiden</em>, einen Link in einem neuen Tab zu öffnen. Wenn ein Link das Öffnen eines neuen Tabs erzwingt, ist das oft verwirrend oder störend, besonders für Nutzende von Hilfstechnologien, die sich fragen, warum die „Zurück“-Schaltfläche ihres Browsers nicht mehr funktioniert.</p><p>Hinweis: Formulare sind die Ausnahme. Wenn jemand ein Formular ausfüllt, könnten durch das Öffnen eines Links im selben Fenster die bisherigen Eingaben verloren gehen; daher öffnen Links in Formularen meist in einem neuen Tab.</p></div>`,
 
-	LINK_PLACEHOLDER_ALT: `<p><strong>Alt-Text:</strong> <i>%(alt)</i>.</p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt-Text für verlinkte Bilder.</p>${why.imageLinks}`,
+	LINK_PLACEHOLDER_ALT: `<p><strong>Alt-Text:</strong> <i>%(alt)</i></p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt-Text für verlinkte Bilder.</p>${why.imageLinks}`,
 
 	LINK_STOPWORD: `<p>Linktext: <i>%(ERROR)</i></p><p>${why.fix}Verwenden Sie einen Linktext, der das Linkziel beschreibt.</p>${why.links}`,
 

@@ -500,7 +500,7 @@ const tips = {
   LINK_IMAGE_TEXT: "图片被标记为装饰性，但该链接使用周围文本作为描述性标签。",
   LINK_MAYBE_BUTTON: `<p><strong>链接：</strong><i>%(TEXT)</i></p><p>此链接的目标无效，且其名称表明它可能作为按钮或开关使用，而非真正的链接。</p><p>${why.fix}请使用 <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">&lt;button&gt;</a> 代替，或修正链接的目标地址。</p><div class="why"><p>提示：辅助技术对按钮和链接的处理方式不同。使用正确的 HTML 元素可确保用户了解应使用哪些键盘快捷键以及将触发何种操作。</p></div>`,
   LINK_NEW_TAB: `<p><strong>链接文本：</strong><i>%(TEXT)</i></p><p>${why.fix}将该链接设置为在同一标签页打开，或<a href="https://itmaybejj.github.io/linkpurpose/">事先告知用户</a>。</p><div class="why"><p>读者随时可以<em>自行选择</em>在新标签页中打开链接。如果链接强制打开新标签页，往往会让人困惑或烦恼，尤其是辅助设备用户，他们会疑惑浏览器的“后退”按钮为什么不起作用了。</p><p>注意：表单是例外。用户填写表单时，如果在同一窗口中打开链接，可能导致已填写的内容丢失，因此表单中的链接通常在新标签页中打开。</p></div>`,
-  LINK_PLACEHOLDER_ALT: `<p><strong>替代文本：</strong><i>%(alt)</i>。</p><p>${why.fix}对于作为链接的图片，请使用链接目标的标题作为替代文本。</p>${why.imageLinks}`,
+  LINK_PLACEHOLDER_ALT: `<p><strong>替代文本：</strong><i>%(alt)</i></p><p>${why.fix}对于作为链接的图片，请使用链接目标的标题作为替代文本。</p>${why.imageLinks}`,
   LINK_STOPWORD: `<p>链接文本：<i>%(ERROR)</i></p><p>${why.fix}使用能够描述目标的链接文本。</p>${why.links}`,
   LINK_STOPWORD_ARIA: `<p>已通过 ARIA 提供了一个不同的名称：</p><p><strong>可见文本：</strong><i>%(VISIBLE)</i></p><p><strong>隐藏文本：</strong><i>%(HIDDEN)</i></p><p>${why.fix}请为所有用户（而不仅是屏幕阅读器用户）提供有意义的链接文本，并确保每个元素的<a href="https://www.w3.org/WAI/WCAG22/Understanding/label-in-name.html">可见标签与其名称一致</a>，以便语音控制用户能够告诉浏览器要点击哪个链接。</p>${why.links}`,
   LINK_SUS_ALT: `<p>除非“<i>%(alt)</i>”描述的是链接的目标，否则此替代文本很可能描述的只是图片本身。</p><p><strong>替代文本：</strong><i>%(ALT_TEXT)</i></p><p>${why.fix}对于作为链接的图片，请使用链接目标的标题作为替代文本。</p>${why.imageLinks}`,

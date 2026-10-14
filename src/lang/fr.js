@@ -12,7 +12,7 @@ const testNames = {
 	BTN_EMPTY: 'Le bouton n’a pas d’étiquette accessible',
 	BTN_UNPRONOUNCEABLE: 'Ce bouton est imprononçable',
 	BTN_EMPTY_LABELLEDBY: 'Le bouton possède une étiquette ARIA non valide',
-	BTN_ROLE_IN_NAME: 'Le nom du bouton répète le mot « button »',
+	BTN_ROLE_IN_NAME: 'Le nom du bouton répète le mot « bouton »',
 	CONTRAST_ERROR: 'Le texte n’a pas un contraste suffisant pour être facilement lisible',
 	CONTRAST_ERROR_GRAPHIC: 'Le graphique ou l’icône n’a pas un contraste suffisant',
 	CONTRAST_INPUT: 'Le champ de saisie n’a pas un contraste suffisant pour être facilement lisible',
@@ -26,7 +26,7 @@ const testNames = {
 	EMBED_DATA_VIZ: 'Cette visualisation est-elle accessible ?',
 	EMBED_GENERAL: 'Les iframes intégrées nécessitent des vérifications manuelles',
 	EMBED_MISSING_TITLE: 'Le cadre ne possède pas d’attribut « title »',
-	EMBED_UNFOCUSABLE: 'Un frame avec tabindex="-1" ne sera pas accessible au clavier.',
+	EMBED_UNFOCUSABLE: 'Un cadre avec tabindex="-1" ne sera pas accessible au clavier.',
 	EMBED_VIDEO: 'Cette vidéo est-elle correctement sous-titrée ?',
 	HEADING_EMPTY: 'Cet élément de titre ne contient aucun texte',
 	HEADING_UNPRONOUNCEABLE: 'Ce titre est imprononçable',
@@ -57,7 +57,7 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'Les images liées doivent avoir un texte alternatif prononçable',
 	LINK_CLICK_HERE: 'Ce lien contient « cliquer ici »',
 	LINK_DOI: "Liez les titres d’articles, pas les numéros DOI",
-	LINK_EMPTY: 'Ce lien ne contient aucun mot.',
+	LINK_EMPTY: 'Ce lien ne contient aucun mot',
 	LINK_EMPTY_LABELLEDBY: 'Lien avec attribut « aria-labelledby » non valide',
 	LINK_EMPTY_NO_LABEL: 'Ce lien a besoin d’une étiquette',
 	LINK_UNPRONOUNCEABLE: 'Ce lien est imprononçable',
@@ -177,9 +177,9 @@ export const tips = {
 
 	EMBED_AUDIO: `<p>Ce vérificateur ne peut pas déterminer si un lecteur audio dispose d’une transcription, ni si celle-ci est exacte.</p><p>${why.fix}Assurez-vous qu’une <a href="https://www.w3.org/WAI/media/av/transcribing/">transcription ou alternative textuelle</a> est disponible, et que les locuteurs et effets sonores significatifs sont correctement identifiés.</p>`,
 
-	EMBED_DATA_VIZ: `<p>Les visualisations intégrées sont souvent difficiles, voire impossibles, à utiliser pour les technologies d’assistance ; elles peuvent être difficiles à comprendre pour les personnes malvoyantes ou daltoniennes, et nécessiter un défilement horizontal important sur mobile.</p><p>${why.fix}À moins que cette visualisation ne présente un contraste visuel élevé, soit entièrement utilisable au clavier <strong><em>et</em></strong> décrite par un lecteur d’écran, ajoutez un format équivalent (description textuelle, tableau de données ou feuille de calcul téléchargeable), puis ignorez cette alerte.</p>`,
+	EMBED_DATA_VIZ: `<p>Les visualisations intégrées sont souvent difficiles, voire impossibles, à utiliser pour les technologies d’assistance ; elles peuvent être difficiles à comprendre pour les personnes malvoyantes ou daltoniennes, et nécessiter un défilement horizontal important sur mobile.</p><p>${why.fix}À moins que cette visualisation ne présente un contraste visuel élevé, soit entièrement utilisable au clavier <strong><em>et</em></strong> décrite par un lecteur d’écran, ajoutez un format équivalent (description textuelle, tableau de données ou feuille de calcul téléchargeable).</p>`,
 
-	EMBED_GENERAL: `Les vérificateurs automatiques ne peuvent pas analyser le contenu des éléments intégrés. Assurez-vous que toutes les images ont un texte alternatif, que les vidéos ont des sous-titres, que le texte a un contraste suffisant et que les liens et boutons sont <a href="https://webaim.org/techniques/keyboard/">accessibles au clavier</a>, puis ignorez cette alerte.`,
+	EMBED_GENERAL: `Les vérificateurs automatiques ne peuvent pas analyser le contenu des éléments intégrés. Assurez-vous que toutes les images ont un texte alternatif, que les vidéos ont des sous-titres, que le texte a un contraste suffisant et que les liens et boutons sont <a href="https://webaim.org/techniques/keyboard/">accessibles au clavier</a>.`,
 
 	EMBED_MISSING_TITLE: `<p>Les contenus intégrés doivent avoir un nom accessible décrivant leur contenu pour les lecteurs d’écran.</p><p>${why.fix}Fournissez un attribut <code>title</code> ou <code>aria-label</code> unique.</p>`,
 
@@ -263,7 +263,7 @@ export const tips = {
 
 	LINK_NEW_TAB: `<p><strong>Texte du lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Configurez ce lien pour s’ouvrir dans le même onglet, ou <a href="https://itmaybejj.github.io/linkpurpose/">prévoyez un avertissement aux utilisateurs</a> avant l’ouverture dans un nouvel onglet.</p><div class="why"><p>Les utilisateurs peuvent toujours choisir d’ouvrir un lien dans un nouvel onglet. Forcer l’ouverture peut être déroutant, surtout pour les technologies d’assistance.</p><p>Note : les liens dans les formulaires ouvrent souvent un nouvel onglet pour éviter la perte de données.</p></div>`,
 
-	LINK_PLACEHOLDER_ALT: `<p><strong>Texte alternatif :</strong> <i>%(alt)</i>.</p><p>${why.fix}Utilisez le titre de la destination du lien comme texte alternatif pour les images liées.</p>${why.imageLinks}`,
+	LINK_PLACEHOLDER_ALT: `<p><strong>Texte alternatif :</strong> <i>%(alt)</i></p><p>${why.fix}Utilisez le titre de la destination du lien comme texte alternatif pour les images liées.</p>${why.imageLinks}`,
 
 	LINK_STOPWORD: `<p>Ce lien contient du texte qui n’aide pas à décrire sa destination :<br><i>%(ERROR)</i></p><p>${why.fix}Réécrivez ce lien pour décrire sa destination de manière concise.</p>${why.links}`,
 
@@ -297,7 +297,7 @@ export const tips = {
 
 	QA_BLOCKQUOTE: `<p><strong>Citation suspicieusement courte :</strong> <i>%(TEXT)</i></p><p>${why.fix}Si ceci n’est pas une citation mais un titre, marquez-le comme élément de titre pour qu’il apparaisse dans la structure de la page.</p>${why.headings}`,
 
-	QA_DOCUMENT: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>Les documents liés sont considérés comme du contenu web et doivent également être accessibles. Vérifiez titres, tableaux et textes alternatifs, puis ignorez cette alerte.</p><ul class="why"><li>Rendre vos <a href="https://support.google.com/docs/answer/6199477?hl=fr">documents Google Workspace accessibles</a>.</li><li>Rendre vos <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">documents Office accessibles</a>.</li></ul>`,
+	QA_DOCUMENT: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>Les documents liés sont considérés comme du contenu web et doivent également être accessibles. Vérifiez titres, tableaux et textes alternatifs.</p><ul class="why"><li>Rendre vos <a href="https://support.google.com/docs/answer/6199477?hl=fr">documents Google Workspace accessibles</a>.</li><li>Rendre vos <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">documents Office accessibles</a>.</li></ul>`,
 
 	QA_FAKE_HEADING: `<p><strong>Texte en gras :</strong> <i>%(TEXT)</i></p><p>${why.fix}Si ce texte est en gras pour marquer un changement de sujet, marquez-le comme élément de titre afin que les utilisateurs de lecteurs d’écran puissent s’en servir pour naviguer dans la page.</p><div class="why"> <p>Astuce : les styles gras et italique apportent une emphase visuelle, mais n’ajoutent pas automatiquement de texte à la table des matières pour les technologies d’assistance.</p></div>`,
 
