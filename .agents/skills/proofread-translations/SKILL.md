@@ -186,7 +186,8 @@ will see the editor's word next to ours.
 - Ask each agent to report: the number of keys changed, the most significant fixes, a terminology
   table with each term marked confirmed or unconfirmed and its source, the quote style and its
   source, decisions that need a human, problems seen in upstream `src/sa11y-lang/` (report them;
-  never edit those files), and the URLs it used.
+  never edit those files here — fixes go to the Sa11y repo, see **Sa11y lang files** below), and
+  the URLs it used.
 - Give a native-reviewed language only a light check (the Recurring-defects list and its
   glossary), not a rewrite.
 
@@ -221,6 +222,86 @@ meaning or added text, so a reading pass is still needed.
     - "browser tabs" for tab order;
     - "volume control" for voice control;
     - "accessible menus" for accordions.
+11. A whole string in another language: pasted from a sibling locale or never translated
+    (Indonesian in hu, Greek in es, Danish in nb, Czech "Nadpis"/"že" in sl and et).
+
+## Sa11y lang files (`src/sa11y-lang/`)
+
+These are copies of the Sa11y repo's `src/lang/*.js` (locally `/Users/jjameson/Sites/sa11y`; Sa11y
+names them `ptBR.js`/`ptPT.js`/`enUS.js` where we use `pt-br`/`pt-pt`/`en-us`). **Edit them in the
+Sa11y repo** and copy the result here; don't edit the copies here. Editoria11y shows Sa11y's `ui`
+strings (ON/OFF, ERROR, WARNING, ALERT_TEXT, colour filters…) in the same panel as its own, and
+matches page text with Sa11y's `ruleset` arrays, so both need the same care as `src/lang/`. Use the
+term choices in our `src/lang/<code>.js` header notes there too.
+
+In October 2026 every Sa11y language except Tamil was proofread: `ruleset` and `ui` in full, and
+`tooltip` for obvious errors only. Tooltips still lag behind the English in every file (sentences,
+`%(TEXT)` blocks and `{B}` badges that English added later). Syncing that is the Sa11y
+maintainer's job; don't mix it into a proofread. Files without the "machine-generated" header
+(de, es, fr, pl, sk, uk) are human-translated: objective fixes only.
+
+Sa11y's `biome.json` doesn't include `src/lang`, so the only validation is importing the file:
+
+```bash
+node .agents/skills/proofread-translations/check-sa11y-lang.mjs                    # src/sa11y-lang here
+node .agents/skills/proofread-translations/check-sa11y-lang.mjs ~/Sites/sa11y/src/lang de fr
+```
+
+Expected findings after the 2026-10 pass: `ta.js` (not proofread) and `es.js`
+`EXTRA EMBED_FOCUSABLE` (a stale key).
+
+### How the ruleset arrays are matched
+
+Know this before judging an entry. Since the 2026-10 fix, the lists and the page text go through
+the same normalization (`foldForMatching` / `normalizeStopWord` in Sa11y's
+`src/js/utils/utils.js`). The text is lowercased, and Greek accents, the dot of Turkish "İ" and
+dotless "ı" are folded. For exact stop word matches, punctuation is removed and combining marks
+(Tamil) are kept. So case and punctuation in an entry no longer matter. Before that fix,
+capitalized or punctuated entries, every Tamil entry and all-caps Greek or Turkish text silently
+never matched.
+
+| Array | Matched as | So an entry must be |
+| --- | --- | --- |
+| `LINK_STOPWORDS` | the WHOLE link text equals the entry (after a "new window" phrase is removed) | a complete lazy link text people really write: "klicken Sie hier", "lees verder" |
+| `SUS_ALT_STOPWORDS` | equals the 1st, 2nd or last word of the alt (`Intl.Segmenter`); Han/kana entries also match the start or end of the alt | a single word |
+| `PLACEHOLDER_ALT_STOPWORDS` | the WHOLE alt equals the entry | a complete placeholder alt |
+| `CLICK`, `NEW_WINDOW_PHRASES` | substring regex | a stem, or the inflected form real annotations use ("klikn", "w nowej karcie"). A nominative "nowa karta" never appears inside "otwiera się w nowej karcie" |
+| `POTENTIAL_UI_ELEMENTS` | substring of a link name of up to 15 characters that targets a missing anchor | a control label; avoid very short strings that hide inside common words |
+| `FILE_TYPE_PHRASES` | not read by any code | low priority |
+
+The mix of English and translated entries is intentional; keep the English ones. Every locale
+carries the full English `SUS_ALT_STOPWORDS` and `PLACEHOLDER_ALT_STOPWORDS` lists, so when `en.js`
+adds an entry, add it to each locale. Only German also carries the English `LINK_STOPWORDS`.
+
+### Sa11y-specific defects found in the 2026-10 pass
+
+These are in addition to the **Recurring defects** above:
+
+- **Wrong sense of short UI labels.**
+  - "issue" as a magazine *edition* (`SKIP_TO_ISSUE` in about eight languages).
+  - "On" as a preposition (zh 在, hu "A oldalon", et "Veebilehel", id "Pada").
+  - "Error" as a measurement error (zh 误差).
+  - `ALERT_TEXT` as "alarm" or "warning".
+  - "Red blind" as a red *window blind*.
+  
+  Use the language's switch-state words for ON/OFF, and its word for "notification" for `ALERT_TEXT`.
+- **Strings that sit next to a number.** `WARNINGS_FOUND` and `TOTAL_FOUND` follow a number in a
+  separate element, and `PANEL_DISMISS_BUTTON` contains one. Use a form that reads correctly
+  after any count: "Show dismissed (%(dismissCount))", or a dash form such as "– number of
+  warnings found" in Slavic, Baltic and Romanian.
+- **Placeholders that don't match English.** Some were renamed in English but not in the
+  translations (`%(firstPrefix)` → `%(PREFIX)` in all 28 files). Some were translated
+  (`%(επίπεδο)`). Both render as literal text.
+- **Markup corrupted by translation.**
+  - A translated `<strong>` (ko `<강함>`).
+  - `<code>for</code>` and `<code>id</code>` translated.
+  - HTML entities with full-width semicolons (zh `&lt；`).
+- **Corrupted Turkish entries.** Some contain U+0307, left by a non-locale `toLowerCase()` of "İ".
+- **Untranslated English examples.** The `QA_SUBSCRIPT` and `QA_UNDERLINE` examples ("4<sup>th</sup>
+  instead of fourth", "strong importance"/"emphasis") were left in English in most files. Apply
+  the ordinal-to-units rule from the translator rules above.
+- **Literal stopwords that nobody writes as link text.** For example "paper" as the material,
+  "learn" as "to study", "check out" as a hotel checkout, or "view" as a scenic view.
 
 ## Writing English tips that translate well
 
