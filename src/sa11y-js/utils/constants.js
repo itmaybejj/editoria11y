@@ -1,7 +1,7 @@
 import { createAlert } from '../interface/alert';
 import Lang from './lang';
 import { State } from '../core/state';
-import { generateRegexString } from './utils';
+import { generateRegexString, stripBidiControls } from './utils';
 
 const Constants = (function myConstants() {
   /* **************** */
@@ -66,7 +66,12 @@ const Constants = (function myConstants() {
     Global.placeholderAltSet = new Set(Lang._('PLACEHOLDER_ALT_STOPWORDS'));
 
     // Generate placeholder stop words that are that the START of an alt string.
-    Global.altPlaceholderPattern = generateRegexString(State.option.altPlaceholder, true);
+    // String entries lose bidi controls to match the alt cleaned the same way
+    // in the images ruleset; RegExp entries are the integrator's to author.
+    const altPlaceholder = Array.isArray(State.option.altPlaceholder)
+      ? State.option.altPlaceholder.map(stripBidiControls)
+      : stripBidiControls(State.option.altPlaceholder);
+    Global.altPlaceholderPattern = generateRegexString(altPlaceholder, true);
     Global.linkIgnoreStringPattern = generateRegexString(State.option.linkIgnoreStrings);
 
     // Unpronounceable characters.

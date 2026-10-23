@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.2-1014
+			* @version 3.0.2-1023
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -140,6 +140,7 @@
     // e.g. '.inner-node-hidden-in-CSS'
     // Shared properties for some checks
     altPlaceholder: [],
+    // Strings (prefix match) and/or RegExp objects (as authored).
     susAltStopWords: "",
     linkStopWords: "",
     extraPlaceholderStopWords: "",
@@ -431,7 +432,8 @@
       }
       Global.susAltWords = State.option.susAltStopWords ? State.option.susAltStopWords.split(",").map((word) => word.trim().toLowerCase()).filter(Boolean) : Lang._("SUS_ALT_STOPWORDS");
       Global.placeholderAltSet = new Set(Lang._("PLACEHOLDER_ALT_STOPWORDS"));
-      Global.altPlaceholderPattern = generateRegexString(State.option.altPlaceholder, true);
+      const altPlaceholder = Array.isArray(State.option.altPlaceholder) ? State.option.altPlaceholder.map(stripBidiControls) : stripBidiControls(State.option.altPlaceholder);
+      Global.altPlaceholderPattern = generateRegexString(altPlaceholder, true);
       Global.linkIgnoreStringPattern = generateRegexString(State.option.linkIgnoreStrings);
       Global.unpronounceablePattern = /[\p{L}\p{N}\p{Extended_Pictographic}]/u;
       Global.extraPlaceholderStopWords = State.option.extraPlaceholderStopWords.split(",").map((word) => word.trim().toLowerCase()).filter(Boolean);
@@ -1209,14 +1211,31 @@
     } else {
       return null;
     }
-    patterns = patterns.filter((p) => p && p.length > 0);
-    if (patterns.length === 0) return null;
+    const literals = patterns.filter((p) => typeof p === "string" && p.length > 0);
+    const regexes = patterns.filter((p) => p instanceof RegExp && p.source !== "(?:)");
+    if (literals.length === 0 && regexes.length === 0) return null;
     const escapeRegExp = (string) => {
       return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     };
-    const joinedPatterns = patterns.map(escapeRegExp).join("|");
-    const finalPattern = matchStart ? `^(?:${joinedPatterns})` : joinedPatterns;
-    return new RegExp(finalPattern, "i");
+    const parts = [];
+    if (literals.length) {
+      const joinedPatterns = literals.map(escapeRegExp).join("|");
+      parts.push(matchStart ? `^(?:${joinedPatterns})` : `(?:${joinedPatterns})`);
+    }
+    regexes.forEach((regex) => {
+      parts.push(`(?:${regex.source})`);
+    });
+    const finalPattern = parts.join("|");
+    const flags = regexes.some((regex) => regex.unicode) ? "iu" : "i";
+    try {
+      return new RegExp(finalPattern, flags);
+    } catch (error) {
+      console.warn("Sa11y: could not combine patterns into one RegExp.", input, error);
+      return null;
+    }
+  }
+  function stripBidiControls(text) {
+    return typeof text === "string" ? text.replace(/[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, "") : text;
   }
   async function dismissDigest(pepper, message) {
     const msgUint8 = new TextEncoder().encode(pepper + message);
@@ -1825,7 +1844,7 @@
       });
     }
   }
-  const version = "3.0.2-1014";
+  const version = "3.0.2-1023";
   const sprite = {
     alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
     close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -3168,8 +3187,8 @@ ${this.error.stack}
       const figcaption = figure?.querySelector("figcaption");
       const figcaptionText = figcaption ? getText(figcaption) : "";
       let decorative = alt === "";
-      if (!decorative && State.option.altPlaceholder.length) {
-        decorative = !!alt.match(Constants.Global.altPlaceholderPattern);
+      if (!decorative && Constants.Global.altPlaceholderPattern) {
+        decorative = !!stripBidiControls(alt).match(Constants.Global.altPlaceholderPattern);
       }
       if (decorative) {
         if (getCachedClosest($el, `button, [role='button']`)) return;
@@ -9341,9 +9360,11 @@ ${this.error.stack}
     // get from language pack
     linksMeaningless: false,
     // get from language pack
-    // @todo cms/document wp this was a string.
+    // CMS text shown in place of an empty alt (e.g. WP's "This image has an
+    // empty alt attribute; its file name is %s"). String entries match the start
+    // of the alt; RegExp entries are used as authored, for templates whose
+    // variable part can come first. Bidi control characters are ignored.
     altPlaceholder: [],
-    // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
     editLinks: false,
     // Add links to edit content in tooltips.
     userPrefersShut: store.getItem("editoria11yShow") === "0",

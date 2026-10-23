@@ -1104,8 +1104,12 @@ export function supportsAnchorPositioning() {
 
 /**
  * Generates a Regex pattern from an array OR a comma-separated string. Safely escapes all special characters.
- * @param {string[]|string} input - Array of strings (e.g. ['(External)']) OR string (e.g. "(External), [draft]").
- * @param {boolean} [exactMatch=false] - If true, wraps each pattern in word boundaries (\b) for whole-word matching.
+ * Arrays may mix strings and RegExp objects: strings are escaped literals (anchored to the start when
+ * matchStart is true); RegExp entries are used as authored, with their own anchors, for patterns a literal
+ * prefix cannot express (e.g. a CMS placeholder whose variable part comes first in some translations).
+ * The result is case-insensitive; of the RegExp entries' own flags, only `u` is carried over.
+ * @param {(string|RegExp)[]|string|RegExp} input - Array (e.g. ['(External)', /^Image \d+$/]), comma-separated string (e.g. "(External), [draft]"), or a single RegExp (returned as-is).
+ * @param {boolean} [matchStart=false] - If true, anchors the string entries to the start of the tested text.
  * @returns {RegExp|null} The compiled Regex object, or null if input is empty/invalid.
  */
 export function generateRegexString(input, matchStart = false) {
@@ -1125,8 +1129,9 @@ export function generateRegexString(input, matchStart = false) {
   }
 
   // Filter out empty entries to prevent matching 'everything' (empty regex issue).
-  patterns = patterns.filter((p) => p && p.length > 0);
-  if (patterns.length === 0) return null;
+  const literals = patterns.filter((p) => typeof p === 'string' && p.length > 0);
+  const regexes = patterns.filter((p) => p instanceof RegExp && p.source !== '(?:)');
+  if (literals.length === 0 && regexes.length === 0) return null;
 
   // Helper to escape special regex characters.
   const escapeRegExp = (string) => {
@@ -1134,13 +1139,42 @@ export function generateRegexString(input, matchStart = false) {
   };
 
   // Build the pattern string.
-  const joinedPatterns = patterns.map(escapeRegExp).join('|');
+  const parts = [];
+  if (literals.length) {
+    const joinedPatterns = literals.map(escapeRegExp).join('|');
+    // If matchStart is true, wrap in ^(?: ... ) to anchor the literal group to the start.
+    parts.push(matchStart ? `^(?:${joinedPatterns})` : `(?:${joinedPatterns})`);
+  }
+  regexes.forEach((regex) => {
+    parts.push(`(?:${regex.source})`);
+  });
+  const finalPattern = parts.join('|');
 
-  // If matchStart is true, wrap in ^(?: ... ) to anchor the entire group to the start.
-  const finalPattern = matchStart ? `^(?:${joinedPatterns})` : joinedPatterns;
+  // Compile final case-insensitive regex. A `u` entry may rely on \p{...} or
+  // code-point semantics, so it upgrades the whole pattern; a non-`u` entry
+  // that is invalid in unicode mode then fails to compile, which is reported
+  // rather than allowed to abort the caller's initialization.
+  const flags = regexes.some((regex) => regex.unicode) ? 'iu' : 'i';
+  try {
+    return new RegExp(finalPattern, flags);
+  } catch (error) {
+    console.warn('Sa11y: could not combine patterns into one RegExp.', input, error);
+    return null;
+  }
+}
 
-  // Compile final case-insensitive regex.
-  return new RegExp(finalPattern, 'i');
+/**
+ * Removes Unicode bidirectional formatting characters (LRM, RLM, ALM, embeddings, overrides, isolates).
+ * Translators and CMSes insert these around placeholders in right-to-left strings; they are invisible,
+ * so comparisons against configured text should ignore them. ZWJ/ZWNJ are kept: they are orthographic
+ * (e.g. Persian) and change the word.
+ * @param {string} text - Text to clean.
+ * @returns {string} The text without bidi control characters.
+ */
+export function stripBidiControls(text) {
+  return typeof text === 'string'
+    ? text.replace(/[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '')
+    : text;
 }
 
 /**

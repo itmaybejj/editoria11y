@@ -288,8 +288,11 @@ export const ed11yDefaultOptions = {
 
   linksUrls: false, // get from language pack
   linksMeaningless: false, // get from language pack
-  // @todo cms/document wp this was a string.
-  altPlaceholder: [], // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
+  // CMS text shown in place of an empty alt (e.g. WP's "This image has an
+  // empty alt attribute; its file name is %s"). String entries match the start
+  // of the alt; RegExp entries are used as authored, for templates whose
+  // variable part can come first. Bidi control characters are ignored.
+  altPlaceholder: [],
 
   editLinks: false, // Add links to edit content in tooltips.
 
