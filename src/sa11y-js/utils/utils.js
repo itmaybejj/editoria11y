@@ -155,6 +155,43 @@ export function stripAllSpecialCharacters(string) {
 }
 
 /**
+ * Lowercases a string for comparison against the localized word lists (ruleset stop words,
+ * phrases and UI words). Also folds the differences that come from text being written in
+ * capitals, so "ΜΕΝΟΥ" matches "μενού" and "İNDİR" / "TIKLA" match "indir" / "tıkla":
+ * Greek accents are removed, as is the combining dot that toLowerCase() leaves after the
+ * "i" of Turkish "İ", and dotless "ı" is folded to "i". Other diacritics are kept.
+ * Apply it to both the list entry and the page text.
+ * @param {string} string - The input text.
+ * @returns {string} The folded, NFC-normalized string.
+ */
+export function foldForMatching(string) {
+  if (typeof string !== 'string' && typeof string !== 'number') return '';
+  return String(string)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/(\p{Script=Greek})\p{M}+/gu, '$1')
+    .replace(/i̇/g, 'i')
+    .replace(/ı/g, 'i')
+    .normalize('NFC');
+}
+
+/**
+ * Normalizes a string for an EXACT comparison against stop word lists: folds it (see
+ * foldForMatching), removes punctuation and symbols, and collapses whitespace. Unlike
+ * stripAllSpecialCharacters, combining marks are kept, because in scripts such as Tamil they
+ * are part of the word. Apply it to both the list entries and the page text so that an entry
+ * containing punctuation (e.g. French "d’informations") still matches.
+ * @param {string} string - The input text.
+ * @returns {string} The normalized string.
+ */
+export function normalizeStopWord(string) {
+  return foldForMatching(string)
+    .replace(/[^\p{L}\p{M}\p{N}\s]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
  * Sanitize URLs.
  */
 const invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
@@ -1107,20 +1144,24 @@ export function supportsAnchorPositioning() {
  * Arrays may mix strings and RegExp objects: strings are escaped literals (anchored to the start when
  * matchStart is true); RegExp entries are used as authored, with their own anchors, for patterns a literal
  * prefix cannot express (e.g. a CMS placeholder whose variable part comes first in some translations).
- * The result is case-insensitive; of the RegExp entries' own flags, only `u` is carried over.
- * @param {(string|RegExp)[]|string|RegExp} input - Array (e.g. ['(External)', /^Image \d+$/]), comma-separated string (e.g. "(External), [draft]"), or a single RegExp (returned as-is).
+ * A single RegExp is treated like a one-entry array, so it matches the same way it would inside one.
+ *
+ * Flags: the result is always case-insensitive (`i`). Of the RegExp entries' own flags, only `u` is
+ * carried over (it upgrades the whole pattern). `g` and `y` are dropped on purpose, because their
+ * lastIndex state would make repeated tests flaky. `m` and `s` are not supported: they are dropped
+ * with a console warning, because they would change the meaning of the other entries.
+ * @param {(string|RegExp)[]|string|RegExp} input - Array (e.g. ['(External)', /^Image \d+$/]), comma-separated string (e.g. "(External), [draft]"), or a single RegExp.
  * @param {boolean} [matchStart=false] - If true, anchors the string entries to the start of the tested text.
  * @returns {RegExp|null} The compiled Regex object, or null if input is empty/invalid.
  */
 export function generateRegexString(input, matchStart = false) {
   if (!input) return null;
 
-  // Return RegExp directly.
-  if (input instanceof RegExp) return input;
-
   // Normalize input.
   let patterns = [];
-  if (Array.isArray(input)) {
+  if (input instanceof RegExp) {
+    patterns = [input];
+  } else if (Array.isArray(input)) {
     patterns = input;
   } else if (typeof input === 'string') {
     patterns = input.split(',').map((s) => s.trim());
@@ -1146,6 +1187,11 @@ export function generateRegexString(input, matchStart = false) {
     parts.push(matchStart ? `^(?:${joinedPatterns})` : `(?:${joinedPatterns})`);
   }
   regexes.forEach((regex) => {
+    if (regex.multiline || regex.dotAll) {
+      console.warn(
+        `Sa11y: the "m" and "s" flags are not supported when combining patterns; ignoring them on /${regex.source}/${regex.flags}.`,
+      );
+    }
     parts.push(`(?:${regex.source})`);
   });
   const finalPattern = parts.join('|');
