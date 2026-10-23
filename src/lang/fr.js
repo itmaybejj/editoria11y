@@ -12,7 +12,7 @@ const testNames = {
 	BTN_EMPTY: 'Le bouton n’a pas d’étiquette accessible',
 	BTN_UNPRONOUNCEABLE: 'Ce bouton est imprononçable',
 	BTN_EMPTY_LABELLEDBY: 'Le bouton possède une étiquette ARIA non valide',
-	BTN_ROLE_IN_NAME: 'Le nom du bouton répète le mot « button »',
+	BTN_ROLE_IN_NAME: 'Le nom du bouton répète le mot « bouton »',
 	CONTRAST_ERROR: 'Le texte n’a pas un contraste suffisant pour être facilement lisible',
 	CONTRAST_ERROR_GRAPHIC: 'Le graphique ou l’icône n’a pas un contraste suffisant',
 	CONTRAST_INPUT: 'Le champ de saisie n’a pas un contraste suffisant pour être facilement lisible',
@@ -26,15 +26,15 @@ const testNames = {
 	EMBED_DATA_VIZ: 'Cette visualisation est-elle accessible ?',
 	EMBED_GENERAL: 'Les iframes intégrées nécessitent des vérifications manuelles',
 	EMBED_MISSING_TITLE: 'Le cadre ne possède pas d’attribut « title »',
-	EMBED_UNFOCUSABLE: 'Un frame avec tabindex="-1" ne sera pas accessible au clavier.',
+	EMBED_UNFOCUSABLE: 'Un cadre avec tabindex="-1" ne sera pas accessible au clavier.',
 	EMBED_VIDEO: 'Cette vidéo est-elle correctement sous-titrée ?',
-	HEADING_EMPTY: 'Cet éléments de titre ne contient aucun texte',
+	HEADING_EMPTY: 'Cet élément de titre ne contient aucun texte',
 	HEADING_UNPRONOUNCEABLE: 'Ce titre est imprononçable',
 	HEADING_EMPTY_WITH_IMAGE: 'Cette image est utilisée comme titre ; elle nécessite donc un texte alternatif',
 	HEADING_FIRST: 'Le premier titre de cette page est un titre de niveau inférieur',
-	HEADING_LONG: 'Cet titre peut-il être raccourci ?',
+	HEADING_LONG: 'Ce titre peut-il être raccourci ?',
 	HEADING_MISSING_ONE: 'Cette page n’a pas de titre de niveau 1',
-	HEADING_SKIPPED_LEVEL: 'Cet titre utilise un niveau incorrect',
+	HEADING_SKIPPED_LEVEL: 'Ce titre utilise un niveau incorrect',
 	HIDDEN_FOCUSABLE: 'Cet élément ne peut pas être décrit par les lecteurs d’écran',
 	IMAGE_ALT_TOO_LONG: 'Ce texte alternatif pourrait-il être plus court ?',
 	IMAGE_DECORATIVE: 'Cette image est-elle réellement dénuée de sens ?',
@@ -57,7 +57,7 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'Les images liées doivent avoir un texte alternatif prononçable',
 	LINK_CLICK_HERE: 'Ce lien contient « cliquer ici »',
 	LINK_DOI: "Liez les titres d’articles, pas les numéros DOI",
-	LINK_EMPTY: 'Ce lien ne contient aucun mot.',
+	LINK_EMPTY: 'Ce lien ne contient aucun mot',
 	LINK_EMPTY_LABELLEDBY: 'Lien avec attribut « aria-labelledby » non valide',
 	LINK_EMPTY_NO_LABEL: 'Ce lien a besoin d’une étiquette',
 	LINK_UNPRONOUNCEABLE: 'Ce lien est imprononçable',
@@ -107,12 +107,12 @@ const testNames = {
 	TABLES_EMPTY_HEADING: 'Cette cellule d’en-tête a besoin de texte',
 	TABLES_MISSING_HEADINGS: 'Ce tableau a besoin d’une ligne et/ou d’une colonne d’en-têtes',
 	TABLES_INVALID_HEADERS_REF: `Ce tableau a un attribut headers invalide`,
-	TABLES_SEMANTIC_HEADING: 'Les en-têtes de contenu ne doivent pas être utilisés dans les tableaux',
+	TABLES_SEMANTIC_HEADING: 'Les titres de contenu ne doivent pas être utilisés dans les tableaux',
 	UNCONTAINED_LI: 'Liste HTML invalide',
 };
 
 const why = {
-	fix: `<strong class="badge">À corriger</strong>`,
+	fix: `<strong class="badge">À corriger</strong> `,
 	check: `<strong class="badge">Vérification manuelle</strong>`,
 
 	buttons: `<div class="why"><p>Note : le nom accessible d’un bouton doit indiquer clairement ce qu’il fera une fois cliqué. Si cela change, l’état actuel doit être clair :</p><ul>
@@ -120,7 +120,7 @@ const why = {
 <li>Boutons qui <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">mettent à jour l’état</a> :<br>« Lecture/Lecture, activé », « Détails, réduit/Détails, développé. »</li>
 </ul></div>`,
 
-	headings: `<div class="why"><p>Astuce : les elements de titres organisent le contenu en une structure hiérarchique. Les utilisateurs de lecteurs d’écran s’appuient sur cette structure pour comprendre et parcourir une page :</p>
+	headings: `<div class="why"><p>Astuce : les éléments de titre organisent le contenu en une structure hiérarchique. Les utilisateurs de lecteurs d’écran s’appuient sur cette structure pour comprendre et parcourir une page :</p>
 <ul><li>Titre niveau 1 : titre de page
 <ul><li>Titre niveau 2 : sujets principaux
 <ul><li>Titre niveau 3 : sous-sujets</li></ul></li></ul></li></ul>
@@ -177,9 +177,9 @@ export const tips = {
 
 	EMBED_AUDIO: `<p>Ce vérificateur ne peut pas déterminer si un lecteur audio dispose d’une transcription, ni si celle-ci est exacte.</p><p>${why.fix}Assurez-vous qu’une <a href="https://www.w3.org/WAI/media/av/transcribing/">transcription ou alternative textuelle</a> est disponible, et que les locuteurs et effets sonores significatifs sont correctement identifiés.</p>`,
 
-	EMBED_DATA_VIZ: `<p>Les visualisations intégrées sont souvent difficiles, voire impossibles, à utiliser pour les technologies d’assistance ; elles peuvent être difficiles à comprendre pour les personnes malvoyantes ou daltoniennes, et nécessiter un défilement horizontal important sur mobile.</p><p>${why.fix}À moins que cette visualisation ne présente un contraste visuel élevé, soit entièrement utilisable au clavier <strong><em>et</em></strong> décrite par un lecteur d’écran, ajoutez un format équivalent (description textuelle, tableau de données ou feuille de calcul téléchargeable), puis ignorez cette alerte.</p>`,
+	EMBED_DATA_VIZ: `<p>Les visualisations intégrées sont souvent difficiles, voire impossibles, à utiliser pour les technologies d’assistance ; elles peuvent être difficiles à comprendre pour les personnes malvoyantes ou daltoniennes, et nécessiter un défilement horizontal important sur mobile.</p><p>${why.fix}À moins que cette visualisation ne présente un contraste visuel élevé, soit entièrement utilisable au clavier <strong><em>et</em></strong> décrite par un lecteur d’écran, ajoutez un format équivalent (description textuelle, tableau de données ou feuille de calcul téléchargeable).</p>`,
 
-	EMBED_GENERAL: `Les vérificateurs automatiques ne peuvent pas analyser le contenu des éléments intégrés. Assurez-vous que toutes les images ont un texte alternatif, que les vidéos ont des sous-titres, que le texte a un contraste suffisant et que les liens et boutons sont <a href="https://webaim.org/techniques/keyboard/">accessibles au clavier</a>, puis ignorez cette alerte.`,
+	EMBED_GENERAL: `Les vérificateurs automatiques ne peuvent pas analyser le contenu des éléments intégrés. Assurez-vous que toutes les images ont un texte alternatif, que les vidéos ont des sous-titres, que le texte a un contraste suffisant et que les liens et boutons sont <a href="https://webaim.org/techniques/keyboard/">accessibles au clavier</a>.`,
 
 	EMBED_MISSING_TITLE: `<p>Les contenus intégrés doivent avoir un nom accessible décrivant leur contenu pour les lecteurs d’écran.</p><p>${why.fix}Fournissez un attribut <code>title</code> ou <code>aria-label</code> unique.</p>`,
 
@@ -198,7 +198,7 @@ export const tips = {
 
 	HEADING_MISSING_ONE: `<p>${why.fix}Marquez le titre de la page comme titre de niveau 1 pour indiquer le début de la structure du document.</p>${why.headings}`,
 
-	HEADING_SKIPPED_LEVEL: `<p>Cet titre est passé de <code>niveau %(prevLevel)</code> à <code>niveau %(level)</code>. Pour un lecteur d’écran, cela donne l’impression qu’il manque du contenu.</p><p>${why.fix}Ajustez les niveaux pour former une structure correcte, sans saut.</p>${why.headings}`,
+	HEADING_SKIPPED_LEVEL: `<p>Ce titre est passé de <code>niveau %(prevLevel)</code> à <code>niveau %(level)</code>. Pour un lecteur d’écran, cela donne l’impression qu’il manque du contenu.</p><p>${why.fix}Ajustez les niveaux pour former une structure correcte, sans saut.</p>${why.headings}`,
 
 	HIDDEN_FOCUSABLE: `<p>Cet élément interactif possède un attribut <code>aria-hidden="true"</code>, mais reste accessible au clavier.</p><p>${why.fix}Si vous <strong>souhaitez</strong> le masquer pour les lecteurs d’écran, vous devez également ajouter <code>tabindex="-1"</code>. Sinon, supprimez l’attribut <code>aria-hidden="true"</code>.</p><p><strong>Élément :</strong> <code>%(ELEMENT)</code></p>`,
 
@@ -236,7 +236,7 @@ export const tips = {
 
 	LINK_CLICK_HERE: `<p><strong>Texte du lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Supprimez les mots redondants qui détournent l’attention de l’objet du lien.</p>${why.links}`,
 
-	LINK_DOI: `<p><strong>Texte du lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Liez le titre de l’article et laissez le DOI en texte simple, au lieu de lier le DOI et laisser le titre sans lien.</p><div class="why"><p>Selon les recommandations de l’APA, les liens doivent être descriptifs : ils aident les utilisateurs à trouver les contenus pertinents en parcourant uniquement les liens.</p><p>Les lecteurs d’écran peuvent ainsi annoncer des liens significatifs plutôt qu’une série de chiffres incompréhensibles.</p></div>`,
+	LINK_DOI: `<p><strong>Texte du lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Liez le titre de l’article et laissez le DOI en texte simple, au lieu de lier le DOI et laisser le titre sans lien.</p><div class="why"><p>Selon les <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">recommandations de l’APA</a>, les liens doivent être descriptifs : ils aident les utilisateurs à trouver les contenus pertinents en parcourant uniquement les liens.</p><p>Les lecteurs d’écran peuvent ainsi annoncer des liens significatifs plutôt qu’une série de chiffres incompréhensibles.</p></div>`,
 
 	LINK_EMPTY: `<p>${why.fix}Ajoutez du texte décrivant sa destination, ou supprimez-le s’il s’agit simplement d’une faute de frappe ou d’un caractère d’espace lié.</p><div class="why"><p>Conseil : les lecteurs d’écran ne peuvent pas décrire les liens qui ne contiennent que des espaces ou des symboles. Ils restent soit silencieux (« Lien, [...pause maladroite là où le titre du lien devrait être...] »), soit lisent l’URL : « Lien, H-T-T-P-S barre oblique barre oblique exemple point com. »</p><p>Notez que les caractères d’espace liés peuvent être difficiles à supprimer dans certains éditeurs de contenu ; il est parfois nécessaire de supprimer « à travers l’écart » en supprimant et en retapant les mots de chaque côté d’un espace lié.</p></div>`,
 
@@ -263,7 +263,7 @@ export const tips = {
 
 	LINK_NEW_TAB: `<p><strong>Texte du lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Configurez ce lien pour s’ouvrir dans le même onglet, ou <a href="https://itmaybejj.github.io/linkpurpose/">prévoyez un avertissement aux utilisateurs</a> avant l’ouverture dans un nouvel onglet.</p><div class="why"><p>Les utilisateurs peuvent toujours choisir d’ouvrir un lien dans un nouvel onglet. Forcer l’ouverture peut être déroutant, surtout pour les technologies d’assistance.</p><p>Note : les liens dans les formulaires ouvrent souvent un nouvel onglet pour éviter la perte de données.</p></div>`,
 
-	LINK_PLACEHOLDER_ALT: `<p><strong>Texte alternatif :</strong> <i>%(alt)</i>.</p><p>${why.fix}Utilisez le titre de la destination du lien comme texte alternatif pour les images liées.</p>${why.imageLinks}`,
+	LINK_PLACEHOLDER_ALT: `<p><strong>Texte alternatif :</strong> <i>%(alt)</i></p><p>${why.fix}Utilisez le titre de la destination du lien comme texte alternatif pour les images liées.</p>${why.imageLinks}`,
 
 	LINK_STOPWORD: `<p>Ce lien contient du texte qui n’aide pas à décrire sa destination :<br><i>%(ERROR)</i></p><p>${why.fix}Réécrivez ce lien pour décrire sa destination de manière concise.</p>${why.links}`,
 
@@ -297,7 +297,7 @@ export const tips = {
 
 	QA_BLOCKQUOTE: `<p><strong>Citation suspicieusement courte :</strong> <i>%(TEXT)</i></p><p>${why.fix}Si ceci n’est pas une citation mais un titre, marquez-le comme élément de titre pour qu’il apparaisse dans la structure de la page.</p>${why.headings}`,
 
-	QA_DOCUMENT: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>Les documents liés sont considérés comme du contenu web et doivent également être accessibles. Vérifiez titres, tableaux et textes alternatifs, puis ignorez cette alerte.</p><ul class="why"><li>Rendre vos <a href="https://support.google.com/docs/answer/6199477?hl=fr">documents Google Workspace accessibles</a>.</li><li>Rendre vos <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">documents Office accessibles</a>.</li></ul>`,
+	QA_DOCUMENT: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>Les documents liés sont considérés comme du contenu web et doivent également être accessibles. Vérifiez titres, tableaux et textes alternatifs.</p><ul class="why"><li>Rendre vos <a href="https://support.google.com/docs/answer/6199477?hl=fr">documents Google Workspace accessibles</a>.</li><li>Rendre vos <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">documents Office accessibles</a>.</li></ul>`,
 
 	QA_FAKE_HEADING: `<p><strong>Texte en gras :</strong> <i>%(TEXT)</i></p><p>${why.fix}Si ce texte est en gras pour marquer un changement de sujet, marquez-le comme élément de titre afin que les utilisateurs de lecteurs d’écran puissent s’en servir pour naviguer dans la page.</p><div class="why"> <p>Astuce : les styles gras et italique apportent une emphase visuelle, mais n’ajoutent pas automatiquement de texte à la table des matières pour les technologies d’assistance.</p></div>`,
 
@@ -309,7 +309,7 @@ export const tips = {
 
 	QA_NESTED_COMPONENTS: `Évitez d’imbriquer des composants interactifs, tels que des accordéons dans d’autres accordéons ou des onglets dans des accordéons. Cela complique la navigation et peut faire manquer du contenu.`,
 
-	QA_PDF: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Faites l’une des actions suivantes puis ignorez cette alerte :</p><ul><li>Liez à une page web plutôt qu’à un PDF,</li><li>Ou fournissez également une version web ou éditable,</li><li>Ou assurez-vous que le PDF est accessible (titres, ordre de lecture, en-têtes de tableau, textes alternatifs).</li></ul><div class="why"><p>Les utilisateurs mobiles et les technologies d’assistance préfèrent largement les pages web aux PDFs, qui ne se reformatent pas pour mobile et manquent souvent de balisage nécessaire.</p></div>`,
+	QA_PDF: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Faites l’une des actions suivantes :</p><ul><li>Liez à une page web plutôt qu’à un PDF,</li><li>Ou fournissez également une version web ou éditable,</li><li>Ou assurez-vous que le PDF est accessible en <a href="https://webaim.org/techniques/acrobat/" target="_blank">vérifiant manuellement qu’il est balisé</a> (titres, ordre de lecture, en-têtes de tableau, textes alternatifs).</li></ul><div class="why"><p>Les utilisateurs mobiles et les technologies d’assistance préfèrent largement les pages web aux PDFs, qui ne se reformatent pas pour mobile et manquent souvent de balisage nécessaire.</p></div>`,
 
 	QA_SMALL_TEXT: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>${why.fix}Restez au-dessus de 80 % de la taille de police par défaut. Un texte trop petit est difficile à lire, particulièrement pour les personnes malvoyantes.</p>`,
 
@@ -317,7 +317,7 @@ export const tips = {
 
 	QA_SUBSCRIPT: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>Les exposants et indices rendent le texte trop petit et difficile à lire. Ne les utilisez que pour des usages spécifiques : nombres ordinaux (4<sup>e</sup>), formules chimiques (H<sub>2</sub>O), références de notes.</p>`,
 
-	QA_UNDERLINE: `<p>Sur le Web, le texte souligné sert pour les liens, pas pour l’emphase. Les utilisateurs penseront qu’il est cliquable : <i><u>%(TEXT)</u></i></p><p>${why.fix} Utilisez <strong>gras</strong> ou <em>italique</em> pour l’emphase, et des éléments de titre pour la structure.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le soulignement. Seuls les élements de titre créent de la structure.</p></div>`,
+	QA_UNDERLINE: `<p>Sur le Web, le texte souligné sert pour les liens, pas pour l’emphase. Les utilisateurs penseront qu’il est cliquable : <i><u>%(TEXT)</u></i></p><p>${why.fix} Utilisez <strong>gras</strong> ou <em>italique</em> pour l’emphase, et des éléments de titre pour la structure.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le soulignement. Seuls les éléments de titre créent de la structure.</p></div>`,
 
 	QA_UPPERCASE: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>${why.fix}N’utilisez les majuscules que pour quelques mots à la fois pour l’emphase. LES BLOCS DE TEXTE EN MAJUSCULES SONT PLUS DIFFICILES À LIRE, ET DE NOMBREUX LECTEURS LES INTERPRÈTENT COMME DES CRIS.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le texte en majuscules. Utilisez un élément de titre si ce texte emphatique introduit un changement de sujet ou un contenu d’importance critique.</p></div>`,
 	SUS_ALT: `<p>Le texte alternatif de cette image contient le mot « <i>%(alt)</i> ». Les lecteurs d’écran annoncent déjà qu’ils lisent la description d’une image, donc des expressions comme « image de » ou « photo de » sont généralement redondantes.</p><p><strong>Texte alternatif :</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p><div class="why"><p>Astuce : ces expressions méritent d’être conservées si le format lui-même a un sens :<br>« Une photo d’un chat, encadrée et accrochée au mur. »</p></div>`,
@@ -369,7 +369,7 @@ const interfaceStrings = {
 	dismissOkTitle: 'Masque l’alerte pour tous les éditeurs',
 	dismissOnSite: 'Sur toutes les pages : marquer comme OK',
 	dismissalsHeader: 'Vous n’allez pas corriger ceci ?',
-	errorOutlinePrefixHeadingEmpty: '(éléments de titre vide)',
+	errorOutlinePrefixHeadingEmpty: '(élément de titre vide)',
 	errorOutlinePrefixHeadingIsLong: '(signalé pour longueur)',
 	errorOutlinePrefixSkippedLevel: '(signalé pour niveau sauté)',
 	issueContent: 'Problème de contenu',

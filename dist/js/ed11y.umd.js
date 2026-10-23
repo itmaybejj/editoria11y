@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.2-1007
+			* @version 3.0.2-1023
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -140,6 +140,7 @@
     // e.g. '.inner-node-hidden-in-CSS'
     // Shared properties for some checks
     altPlaceholder: [],
+    // Strings (prefix match) and/or RegExp objects (as authored).
     susAltStopWords: "",
     linkStopWords: "",
     extraPlaceholderStopWords: "",
@@ -430,19 +431,22 @@
         Global.pdfSources = false;
       }
       Global.susAltWords = State.option.susAltStopWords ? State.option.susAltStopWords.split(",").map((word) => word.trim().toLowerCase()).filter(Boolean) : Lang._("SUS_ALT_STOPWORDS");
-      Global.placeholderAltSet = new Set(Lang._("PLACEHOLDER_ALT_STOPWORDS"));
-      Global.altPlaceholderPattern = generateRegexString(State.option.altPlaceholder, true);
+      Global.placeholderAltSet = new Set(Lang._("PLACEHOLDER_ALT_STOPWORDS").map(foldForMatching));
+      const altPlaceholder = Array.isArray(State.option.altPlaceholder) ? State.option.altPlaceholder.map(stripBidiControls) : stripBidiControls(State.option.altPlaceholder);
+      Global.altPlaceholderPattern = generateRegexString(altPlaceholder, true);
       Global.linkIgnoreStringPattern = generateRegexString(State.option.linkIgnoreStrings);
       Global.unpronounceablePattern = /[\p{L}\p{N}\p{Extended_Pictographic}]/u;
-      Global.extraPlaceholderStopWords = State.option.extraPlaceholderStopWords.split(",").map((word) => word.trim().toLowerCase()).filter(Boolean);
+      Global.extraPlaceholderStopWords = State.option.extraPlaceholderStopWords.split(",").map((word) => foldForMatching(word.trim())).filter(Boolean);
       Global.headerStringExclusionPattern = generateRegexString(State.option.headerIgnoreStrings);
       const customStopWords = State.option.linkStopWords ? State.option.linkStopWords.split(",").map((word) => word.toLowerCase().trim()) : [];
-      Global.linkStopWords = /* @__PURE__ */ new Set([...Lang._("LINK_STOPWORDS"), ...customStopWords]);
+      Global.linkStopWords = new Set(
+        [...Lang._("LINK_STOPWORDS"), ...customStopWords].map(normalizeStopWord).filter(Boolean)
+      );
       Global.linkIgnoreStrings = new Set(
         State.option.linkIgnoreStrings.map((word) => word.toLowerCase())
       );
-      Global.clickRegex = generateRegexString(Lang._("CLICK"));
-      Global.newWindowRegex = generateRegexString(Lang._("NEW_WINDOW_PHRASES"));
+      Global.clickRegex = generateRegexString(Lang._("CLICK").map(foldForMatching));
+      Global.newWindowRegex = generateRegexString(Lang._("NEW_WINDOW_PHRASES").map(foldForMatching));
       const defaultFileTypes = [
         "pdf",
         "doc",
@@ -826,6 +830,13 @@
     if (typeof string !== "string" && typeof string !== "number") return "";
     return String(string).replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
   }
+  function foldForMatching(string) {
+    if (typeof string !== "string" && typeof string !== "number") return "";
+    return String(string).toLowerCase().normalize("NFD").replace(new RegExp("(\\p{Script=Greek})\\p{M}+", "gu"), "$1").replace(/i̇/g, "i").replace(/ı/g, "i").normalize("NFC");
+  }
+  function normalizeStopWord(string) {
+    return foldForMatching(string).replace(/[^\p{L}\p{M}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
+  }
   const invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
   const htmlEntitiesRegex = /&#(\w+)(^\w|;)?/g;
   const htmlCtrlEntityRegex = /&(newline|tab);/gi;
@@ -1200,23 +1211,46 @@
   }
   function generateRegexString(input, matchStart = false) {
     if (!input) return null;
-    if (input instanceof RegExp) return input;
     let patterns = [];
-    if (Array.isArray(input)) {
+    if (input instanceof RegExp) {
+      patterns = [input];
+    } else if (Array.isArray(input)) {
       patterns = input;
     } else if (typeof input === "string") {
       patterns = input.split(",").map((s) => s.trim());
     } else {
       return null;
     }
-    patterns = patterns.filter((p) => p && p.length > 0);
-    if (patterns.length === 0) return null;
+    const literals = patterns.filter((p) => typeof p === "string" && p.length > 0);
+    const regexes = patterns.filter((p) => p instanceof RegExp && p.source !== "(?:)");
+    if (literals.length === 0 && regexes.length === 0) return null;
     const escapeRegExp = (string) => {
       return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     };
-    const joinedPatterns = patterns.map(escapeRegExp).join("|");
-    const finalPattern = matchStart ? `^(?:${joinedPatterns})` : joinedPatterns;
-    return new RegExp(finalPattern, "i");
+    const parts = [];
+    if (literals.length) {
+      const joinedPatterns = literals.map(escapeRegExp).join("|");
+      parts.push(matchStart ? `^(?:${joinedPatterns})` : `(?:${joinedPatterns})`);
+    }
+    regexes.forEach((regex) => {
+      if (regex.multiline || regex.dotAll) {
+        console.warn(
+          `Sa11y: the "m" and "s" flags are not supported when combining patterns; ignoring them on /${regex.source}/${regex.flags}.`
+        );
+      }
+      parts.push(`(?:${regex.source})`);
+    });
+    const finalPattern = parts.join("|");
+    const flags = regexes.some((regex) => regex.unicode) ? "iu" : "i";
+    try {
+      return new RegExp(finalPattern, flags);
+    } catch (error) {
+      console.warn("Sa11y: could not combine patterns into one RegExp.", input, error);
+      return null;
+    }
+  }
+  function stripBidiControls(text) {
+    return typeof text === "string" ? text.replace(/[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, "") : text;
   }
   async function dismissDigest(pepper, message) {
     const msgUint8 = new TextEncoder().encode(pepper + message);
@@ -1825,7 +1859,7 @@
       });
     }
   }
-  const version = "3.0.2-1007";
+  const version = "3.0.2-1023";
   const sprite = {
     alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
     close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -2771,7 +2805,7 @@ ${this.error.stack}
   const urlEndings = /\b(?:\.edu\/|\.gob\/|\.gov\/|\.app\/|\.com\/|\.net\/|\.org\/|\.us\/|\.ca\/|\.de\/|\.icu\/|\.uk\/|\.ru\/|\.info\/|\.top\/|\.xyz\/|\.tk\/|\.cn\/|\.ga\/|\.cf\/|\.nl\/|\.io\/|\.fr\/|\.pe\/|\.nz\/|\.pt\/|\.es\/|\.pl\/|\.ua\/)\b/i;
   const htmlSymbols = /([<>↣↳←→↓«»↴]+)/;
   const checkStopWords = (textContent, stopWordsSet, stripStrings) => {
-    const stripped = textContent.replace(stripStrings, "").trim();
+    const stripped = (stripStrings ? textContent.replace(stripStrings, "") : textContent).replace(/\s+/g, " ").trim();
     if (stopWordsSet.has(stripped)) return stripped;
     return null;
   };
@@ -2796,10 +2830,13 @@ ${this.error.stack}
       const strippedLinkText = stripAllSpecialCharacters(lowercaseLinkText);
       const rawTextContent = getText($el);
       const textContent = rawTextContent.toLowerCase();
+      const foldedLinkText = foldForMatching(linkText);
+      const normalizedLinkText = normalizeStopWord(linkText);
+      const foldedTextContent = foldForMatching(rawTextContent);
       const textContentIgnoredStrings = getText(
         fnIgnore($el, Constants.Exclusions.LinkSpan)
       ).replace(Constants.Global.linkIgnorePattern, "");
-      const containsNewWindowPhrases = lowercaseLinkText.match(Constants.Global.newWindowRegex)?.[0] || textContent.match(Constants.Global.newWindowRegex)?.[0];
+      const containsNewWindowPhrases = foldedLinkText.match(Constants.Global.newWindowRegex)?.[0] || foldedTextContent.match(Constants.Global.newWindowRegex)?.[0];
       const containsFileTypePhrases = lowercaseLinkText.match(Constants.Global.fileTypeRegex)?.[0] || textContent.match(Constants.Global.fileTypeRegex)?.[0];
       const fileTypeMatch = $el.matches(cssFileTypeSelectors);
       const logResult = (params) => {
@@ -2823,7 +2860,7 @@ ${this.error.stack}
             ""
           );
           const stopword = checkStopWords(
-            stripAllSpecialCharacters(visibleLinkText),
+            normalizeStopWord(visibleLinkText),
             Constants.Global.linkStopWords
           );
           const visibleTextInName = isVisibleTextInAccName(
@@ -2880,7 +2917,7 @@ ${this.error.stack}
         const isLinkIgnoreStrings = checkStopWords(textContent, Constants.Global.linkIgnoreStrings);
         if (isLinkIgnoreStrings === textContent || isLinkIgnoreStrings === strippedLinkText) {
           triggerStopWord();
-        } else if (containsNewWindowPhrases === textContent || containsNewWindowPhrases === strippedLinkText) {
+        } else if (containsNewWindowPhrases === foldedTextContent || containsNewWindowPhrases === normalizedLinkText) {
           triggerStopWord();
         }
         if (linkText.length === 0) {
@@ -2920,11 +2957,11 @@ ${this.error.stack}
           return;
         }
         const isStopWord = checkStopWords(
-          strippedLinkText,
+          normalizedLinkText,
           Constants.Global.linkStopWords,
           Constants.Global.newWindowRegex
         );
-        const hasClickWord = strippedLinkText.match(Constants.Global.clickRegex)?.[0] || textContent.match(Constants.Global.clickRegex)?.[0];
+        const hasClickWord = normalizedLinkText.match(Constants.Global.clickRegex)?.[0] || foldedTextContent.match(Constants.Global.clickRegex)?.[0];
         const isCitation = lowercaseLinkText.match(citationPattern)?.[0];
         const isUrlFragment = lowercaseLinkText.startsWith("www.") || lowercaseLinkText.startsWith("http") || Boolean(lowercaseLinkText.match(urlEndings));
         const matchedSymbol = lowercaseLinkText.match(htmlSymbols)?.[0];
@@ -3030,8 +3067,9 @@ ${this.error.stack}
           const targetElement = targetId && (document.getElementById(targetId) || ariaControls && document.getElementById(ariaControls) || decodeURIComponent(targetId) !== targetId && document.getElementById(decodeURIComponent(targetId)) || encodeURIComponent(targetId) !== targetId && document.getElementById(encodeURIComponent(targetId)) || document.querySelector(`a[name="${CSS.escape(targetId)}"]`));
           if (!targetElement) {
             let isFauxButton = false;
+            const foldedAccName = foldForMatching(accName);
             const matchedKeyword = Lang._("POTENTIAL_UI_ELEMENTS").find(
-              (word) => accName.toLowerCase().includes(word)
+              (word) => foldedAccName.includes(foldForMatching(word))
             );
             const isSlide = Object.keys($el.dataset).some(
               (key) => key.toLowerCase().includes("slide")
@@ -3074,9 +3112,10 @@ ${this.error.stack}
     ".heic",
     "http"
   ];
+  const noSpaceScript = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;
   const containsAltTextStopWords = (alt) => {
-    const altLowerCase = removeWhitespace(alt).toLowerCase();
-    const altOnlyLetters = removeWhitespace(altLowerCase.replace(/[^\p{L}\s]/gu, ""));
+    const altLowerCase = foldForMatching(removeWhitespace(alt));
+    const altOnlyLetters = removeWhitespace(altLowerCase.replace(/[^\p{L}\p{M}\s]/gu, ""));
     const hit = [null, null, null];
     for (const urlHit of url) {
       if (altLowerCase.includes(urlHit)) {
@@ -3094,12 +3133,14 @@ ${this.error.stack}
       const allWords = [...segmenter.segment(altLowerCase)].filter((segment) => segment.isWordLike).map((segment) => segment.segment);
       wordsToCheck = [...allWords.slice(0, 2), ...allWords.slice(-1)];
     } else {
-      const altOnlyLetters2 = removeWhitespace(altLowerCase.replace(/[^\p{L}\s]/gu, ""));
+      const altOnlyLetters2 = removeWhitespace(altLowerCase.replace(/[^\p{L}\p{M}\s]/gu, ""));
       const allWords = altOnlyLetters2.split(/\s+/).filter(Boolean);
       wordsToCheck = [...allWords.slice(0, 2), ...allWords.slice(-1)];
     }
+    const altNoSpaces = altOnlyLetters.replace(/\s/g, "");
     for (const word of Constants.Global.susAltWords) {
-      if (wordsToCheck.includes(word)) {
+      const foldedWord = foldForMatching(word);
+      if (wordsToCheck.includes(foldedWord) || noSpaceScript.test(foldedWord) && (altNoSpaces.startsWith(foldedWord) || altNoSpaces.endsWith(foldedWord))) {
         hit[1] = word;
         break;
       }
@@ -3168,8 +3209,8 @@ ${this.error.stack}
       const figcaption = figure?.querySelector("figcaption");
       const figcaptionText = figcaption ? getText(figcaption) : "";
       let decorative = alt === "";
-      if (!decorative && State.option.altPlaceholder.length) {
-        decorative = !!alt.match(Constants.Global.altPlaceholderPattern);
+      if (!decorative && Constants.Global.altPlaceholderPattern) {
+        decorative = !!stripBidiControls(alt).match(Constants.Global.altPlaceholderPattern);
       }
       if (decorative) {
         if (getCachedClosest($el, `button, [role='button']`)) return;
@@ -4029,6 +4070,17 @@ ${this.error.stack}
     return weightMap[weight] || 400;
   }
   let backgroundCache = /* @__PURE__ */ new WeakMap();
+  function stackTranslucent(fg, bg) {
+    const fa = Math.max(Math.min(fg[3], 1), 0);
+    const ba = Math.max(Math.min(bg[3], 1), 0);
+    const outA = fa + ba * (1 - fa);
+    if (outA === 0) return [0, 0, 0, 0];
+    const out = [0, 0, 0, outA];
+    for (let i = 0; i < 3; i++) {
+      out[i] = (fg[i] * fa + bg[i] * ba * (1 - fa)) / outA;
+    }
+    return out;
+  }
   function getBackground($el, shadowDetection) {
     if (backgroundCache.has($el)) {
       return backgroundCache.get($el);
@@ -4041,6 +4093,46 @@ ${this.error.stack}
       }
       return node.parentElement || node.parentNode;
     };
+    const imageBackground = (el, styles, bgImage) => {
+      const own = convertToRGBA(styles.backgroundColor);
+      let base;
+      if (own !== "unsupported") {
+        if (own[3] === 1) {
+          base = own;
+        } else {
+          const behind = resolveAbove(el, own[3] > 0 ? own : null);
+          if (Array.isArray(behind)) base = behind;
+        }
+      }
+      return { type: "image", value: bgImage, ...base && { base } };
+    };
+    const resolveAbove = (fromEl, stacked) => {
+      let layers = stacked;
+      let parentEl = getVisualParent(fromEl);
+      while (parentEl && (parentEl.nodeType === 1 || parentEl.nodeType === 11)) {
+        if (parentEl.nodeType === 11 && parentEl.host) {
+          parentEl = parentEl.host;
+          continue;
+        }
+        const parentStyles = getCachedStyle(parentEl);
+        const parentBgImage = parentStyles.backgroundImage;
+        if (parentBgImage && parentBgImage !== "none") {
+          const image = imageBackground(parentEl, parentStyles, parentBgImage);
+          return layers ? { ...image, overlay: layers } : image;
+        }
+        const parentBg = convertToRGBA(parentStyles.backgroundColor);
+        if (parentBg === "unsupported") return "unsupported";
+        if (parentBg[3] === 1) {
+          return layers ? alphaBlend(layers, parentBg) : parentBg;
+        }
+        if (parentBg[3] > 0) {
+          layers = layers ? stackTranslucent(layers, parentBg) : parentBg;
+        }
+        if (parentEl.tagName === "HTML") break;
+        parentEl = getVisualParent(parentEl);
+      }
+      return layers ? alphaBlend(layers, [255, 255, 255]) : [255, 255, 255];
+    };
     let targetEl = $el;
     let finalBackground = [255, 255, 255];
     while (targetEl && (targetEl.nodeType === 1 || targetEl.nodeType === 11)) {
@@ -4051,32 +4143,13 @@ ${this.error.stack}
       const styles = getCachedStyle(targetEl);
       const bgImage = styles.backgroundImage;
       if (bgImage && bgImage !== "none") {
-        finalBackground = { type: "image", value: bgImage };
+        finalBackground = imageBackground(targetEl, styles, bgImage);
         break;
       }
       const bgColor = convertToRGBA(styles.backgroundColor);
       if (bgColor[3] !== 0 && bgColor !== "transparent") {
         if (bgColor[3] < 1) {
-          let parentEl = getVisualParent(targetEl);
-          let parentBgColor = "rgba(255, 255, 255, 1)";
-          while (parentEl && (parentEl.nodeType === 1 || parentEl.nodeType === 11)) {
-            if (parentEl.nodeType === 11 && parentEl.host) {
-              parentEl = parentEl.host;
-              continue;
-            }
-            const parentStyles = getCachedStyle(parentEl);
-            const currentParentBg = parentStyles.backgroundColor;
-            if (currentParentBg !== "rgba(0, 0, 0, 0)" && currentParentBg !== "transparent") {
-              parentBgColor = currentParentBg;
-              break;
-            }
-            parentEl = getVisualParent(parentEl);
-          }
-          if (parentBgColor === "rgba(0, 0, 0, 0)" || parentBgColor === "transparent") {
-            parentBgColor = "rgba(255, 255, 255, 1)";
-          }
-          const parentColor = convertToRGBA(parentBgColor);
-          finalBackground = alphaBlend(bgColor, parentColor);
+          finalBackground = resolveAbove(targetEl, bgColor);
           break;
         }
         finalBackground = bgColor;
@@ -4412,7 +4485,14 @@ ${this.error.stack}
       }
       if (color && color[3] === 0) continue;
       if (background.type === "image") {
-        const extractColours = extractColorFromString(background.value);
+        let extractColours = extractColorFromString(background.value);
+        if ((background.base || background.overlay) && extractColours?.length) {
+          extractColours = extractColours.map((stop) => {
+            let composited = background.base ? alphaBlend([...stop], background.base) : stop;
+            if (background.overlay) composited = alphaBlend([...background.overlay], composited);
+            return composited;
+          });
+        }
         const hasFailure = !extractColours || extractColours.some(
           (gradientStop) => checkElementContrast(
             $el,
@@ -8830,7 +8910,7 @@ ${this.error.stack}
     BTN_EMPTY_LABELLEDBY: `<p>This button has an <code>aria-labelledby</code> value that is empty or does not match the <code>ID</code> value of another element on the page.</p><p>${why.fix}Reconnect the ID to an element on the page, or remove this attribute and describe the button in another way.</p>`,
     BTN_TIP: `${why.buttons}`,
     BTN_ROLE_IN_NAME: `<p><strong>Label for screen readers:</strong> <i>%(TEXT)</i></p><p>Screen readers use the word "button" to announce they are describing a button, so this word is repetitive.</p><p>${why.fix}The button's label should match its action. If the visible label is an icon instead of text, label the button with the icon's meaning, e.g. "Play," "Search" or "Menu."</p>`,
-    BTN_UNPRONOUNCEABLE: `<p><strong>Button text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Add text, a title or an aria-label describing its destination.</p><div class="why"><p>Tip: screen readers cannot describe buttons that only contain spaces or symbols. They either fall silent ("Button, [...awkward pause where the button label should be...]"), or read the name of the symbol.</p></div>`,
+    BTN_UNPRONOUNCEABLE: `<p><strong>Button text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Add text, a title or an aria-label describing what it does.</p><div class="why"><p>Tip: screen readers cannot describe buttons that only contain spaces or symbols. They either fall silent ("Button, [...awkward pause where the button label should be...]"), or read the name of the symbol.</p></div>`,
     CONTRAST_WARNING: "A background image or gradient means this checker is not sure what color is behind this text. Use the color picker below to check manually.",
     DUPLICATE_ID: `<p>IDs are being used on this page for labels or link targets, which means they must be unique.</p><p>${why.fix}Change this ID: <code>#%(ID)</code></p><div class="why"><p>In most content management systems, this comes from a field called "name" or "id" in the element properties. In HTML, it is an attribute: <code>&lt;a id="MY-ID"&gt;</code></p></div>`,
     DUPLICATE_TITLE: `<p>${why.fix}Delete the link's text or <code>title</code> attribute.</p><div class="why"><p>Tip: <code>title</code> tooltips only appear when hovering with a mouse. They cannot be seen when navigating on a phone or with a keyboard, so many users will never see them. They should never contain unique or important information.</p></div>`,
@@ -8867,7 +8947,7 @@ ${this.error.stack}
     LINK_CLICK_HERE: `<p><strong>Link text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Remove redundant words that distract from the link's purpose.</p>${why.links}`,
     LINK_DOI: `<p><strong>Link text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Link the article title and provide the DOI number as plain text, rather than linking the DOI number and leaving the article title as plain text.</p><div class="why"><p>The <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">APA Style guide</a> recommends using descriptive links on websites because users skim by links and use in-page search for links by name. Users are much more likely to notice articles of interest when the title is linked.</p><p>This also allows screen readers to describe each link meaningfully, rather than speaking a meaningless sequence of numbers.</p></div>`,
     LINK_EMPTY: `<p>${why.fix}Add text describing its destination, or delete it if it is just a typo or linked space character.</p><div class="why"><p>Tip: screen readers cannot describe links that only contain spaces or symbols. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the URL: "Link, H-T-T-P-S forward-slash forward-slash example dot com."</p><p>Note that linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p></div>`,
-    LINK_EMPTY_LABELLEDBY: `<p>This link has an <code>aria-labelledby</code> attribute that does not match the <code>ID</code> of any element on the page.</p><p>${why.fix}Provide a valid <code>ID</code>, or remove this attribute and describe the button in another way.</p>`,
+    LINK_EMPTY_LABELLEDBY: `<p>This link has an <code>aria-labelledby</code> attribute that does not match the <code>ID</code> of any element on the page.</p><p>${why.fix}Provide a valid <code>ID</code>, or remove this attribute and describe the link in another way.</p>`,
     LINK_EMPTY_NO_LABEL: `<p>${why.fix}Add text describing its destination, or delete it if it is just a typo like a linked space character.</p><div class="why"><p>Tip: screen readers cannot describe empty links. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the URL: "Link, H-T-T-P-S forward-slash forward-slash example dot com."</p><p>Note that linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p></div>`,
     LINK_UNPRONOUNCEABLE: `<p><strong>Link text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Add text or a title describing its destination, or delete it if it is just a typo or linked space character.</p><div class="why"><p>Tip: screen readers cannot describe links that only contain spaces or symbols. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the name of the symbol.</p></div>`,
     LINK_FILE_EXT: `<p><strong>Link text:</strong> <i>%(TEXT)</i></p><p>This link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning.</p><p>${why.fix}Use text or an icon to <a href="https://itmaybejj.github.io/linkpurpose/">indicate the file type</a> within the link text.</p><p class="why">For large files, consider including the file size. For example: "Executive Report (PDF, 3MB)"</p>`,
@@ -8879,7 +8959,7 @@ ${this.error.stack}
     LINK_IMAGE_TEXT: "Image is marked as decorative, although the link is using the surrounding text as a descriptive label.",
     LINK_MAYBE_BUTTON: `<p><strong>Link:</strong> <i>%(TEXT)</i></p><p>This link has an invalid target, and has a name that suggests it might be working as a button or toggle instead of a link.</p><p>${why.fix}Use a <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">&lt;button&gt;</a> instead, or correct the link's target.</p><div class="why"><p>Tip: Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.</p></div>`,
     LINK_NEW_TAB: `<p><strong>Link text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Set this link to open in the same tab, or <a href="https://itmaybejj.github.io/linkpurpose/">warn users</a> first.</p><div class="why"><p>Readers can always <em>choose</em> to open a link in a new tab. When a link forces open a new tab, it is often confusing or annoying, especially for assistive device users who wonder why their browser's "back" button stopped working.</p><p>Note: forms are the exception. When the user is filling out a form, opening a link in the same window could cause them to lose their work, so links within forms usually open in new tabs.</p></div>`,
-    LINK_PLACEHOLDER_ALT: `<p><strong>Alt text:</strong> <i>%(alt)</i>.</p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
+    LINK_PLACEHOLDER_ALT: `<p><strong>Alt text:</strong> <i>%(alt)</i></p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
     LINK_STOPWORD: `<p>Link text: <i>%(ERROR)</i></p><p>${why.fix}Use link text that describes its destination.</p>${why.links}`,
     LINK_STOPWORD_ARIA: `<p>A different name was provided using ARIA:</p><p><strong>Visible text:</strong> <i>%(VISIBLE)</i></p><p><strong>Hidden text:</strong> <i>%(HIDDEN)</i></p><p>${why.fix}Write meaningful links for everyone, not just screen reader users, and make sure each element's <a href="https://www.w3.org/WAI/WCAG22/Understanding/label-in-name.html">visual label matches its name</a>, so that voice control users can tell their browser which link to click.</p>${why.links}`,
     LINK_SUS_ALT: `<p>Unless "<i>%(alt)</i>" describes the link's destination, this alt probably describes the image.</p><p><strong>Alt text:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
@@ -9302,9 +9382,11 @@ ${this.error.stack}
     // get from language pack
     linksMeaningless: false,
     // get from language pack
-    // @todo cms/document wp this was a string.
+    // CMS text shown in place of an empty alt (e.g. WP's "This image has an
+    // empty alt attribute; its file name is %s"). String entries match the start
+    // of the alt; RegExp entries are used as authored, for templates whose
+    // variable part can come first. Bidi control characters are ignored.
     altPlaceholder: [],
-    // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
     editLinks: false,
     // Add links to edit content in tooltips.
     userPrefersShut: store.getItem("editoria11yShow") === "0",
