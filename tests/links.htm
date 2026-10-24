@@ -13,7 +13,9 @@
 	<p>
 		This page simulates a CMS link checker pushing results through the
 		<code>customTests</code> handshake. Append <code>?noOk</code> to the URL to
-		test the button set shown to users who may not mark links OK.
+		test the button set shown to users who may not mark things OK, or
+		<code>?noMark</code> to have the checker withhold link marks through
+		<code>data.allowMark</code> while the page still allows OK.
 	</p>
 	<p class="broken"><a id="broken-link" href="/no-such-page">A link the checker found broken</a></p>
 	<p class="manual"><a id="manual-link" href="https://example.com/locked">A link the checker could not verify</a></p>
@@ -43,13 +45,17 @@
 	document.addEventListener('ed11yRunCustomTests', () => {
 		registerLinkStrings();
 		const Lang = Ed11y.Lang;
+		const data = { hash: 'abc123', href: '/no-such-page', status: 'broken' };
+		if (window.location.search.includes('noMark')) {
+			data.allowMark = false;
+		}
 		Ed11y.State.results.push({
 			test: 'LINK_BROKEN',
 			element: document.getElementById('broken-link'),
 			type: 'link',
 			content: Lang.sprintf('LINK_BROKEN'),
 			dismiss: 'LINK_BROKEN|/no-such-page',
-			data: { hash: 'abc123', href: '/no-such-page', status: 'broken' },
+			data,
 		});
 		Ed11y.State.results.push({
 			test: 'LINK_MANUAL',

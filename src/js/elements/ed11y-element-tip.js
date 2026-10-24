@@ -360,7 +360,16 @@ export class Ed11yElementTip extends HTMLElement {
   // Link-check results get two actions: accept the link (Mark OK, or Ignore
   // for users who may not mark things OK) or confirm it is broken. No bulk
   // actions: each link target is its own decision.
+  //
+  // Mark OK and Mark broken are site-wide marks on the link, so the checker
+  // that pushed the result may grant them separately from the page-level
+  // allowOK option by setting a boolean `allowMark` in the result's data.
+  // Without it the page option decides.
   drawLinkActions(buttonBar, dismissIcon) {
+    const allowMark =
+      typeof this.result.data?.allowMark === 'boolean'
+        ? this.result.data.allowMark
+        : State.option.allowOK;
     const makeButton = (classes, text, title, icon) => {
       const button = document.createElement('button');
       button.classList.add('dismiss', ...classes);
@@ -376,7 +385,7 @@ export class Ed11yElementTip extends HTMLElement {
       return button;
     };
 
-    if (State.option.allowOK) {
+    if (allowMark) {
       const check = document.createElement('span');
       check.setAttribute('aria-hidden', 'true');
       check.textContent = '✓';
@@ -403,19 +412,22 @@ export class Ed11yElementTip extends HTMLElement {
       buttonBar.append(ignoreButton);
     }
 
-    const brokenIcon = document.createElement('span');
-    brokenIcon.classList.add('ed11y-dismiss-icon');
-    brokenIcon.innerHTML = sprite.linkBroken;
-    const brokenButton = makeButton(
-      ['broken'],
-      Lang._('dismissBrokenButton'),
-      Lang._('dismissBrokenTitle'),
-      brokenIcon,
-    );
-    brokenButton.addEventListener('click', (e) => {
-      dismissThis('broken', e.target.closest('button'));
-    });
-    buttonBar.append(brokenButton);
+    // Marking a link broken is a site-wide mark like Mark OK.
+    if (allowMark) {
+      const brokenIcon = document.createElement('span');
+      brokenIcon.classList.add('ed11y-dismiss-icon');
+      brokenIcon.innerHTML = sprite.linkBroken;
+      const brokenButton = makeButton(
+        ['broken'],
+        Lang._('dismissBrokenButton'),
+        Lang._('dismissBrokenTitle'),
+        brokenIcon,
+      );
+      brokenButton.addEventListener('click', (e) => {
+        dismissThis('broken', e.target.closest('button'));
+      });
+      buttonBar.append(brokenButton);
+    }
   }
 
   disconnectedCallback() {

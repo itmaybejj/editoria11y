@@ -182,8 +182,36 @@ describe('Link checker result types', function () {
       [],
       (result) => {
         browser.assert.ok(result.value.includes('Ignore'), 'Ignore offered');
-        browser.assert.ok(result.value.includes('Mark broken'), 'Mark broken offered');
+        browser.assert.ok(!result.value.includes('Mark broken'), 'Mark broken withheld with Mark OK');
         browser.assert.ok(!result.value.includes('Mark OK'), 'Mark OK withheld');
+      },
+    );
+  });
+
+  it('lets the checker withhold marks per result through data.allowMark', function (browser) {
+    browser.navigateTo(`${absolutePath}?noMark`);
+    browser.waitForElementPresent('.broken ed11y-element-result', 2000);
+    browser.execute(function () {
+      document
+        .querySelector('.broken ed11y-element-result')
+        .shadowRoot.querySelector('.toggle')
+        .click();
+    });
+    browser.waitForElementPresent('ed11y-element-tip[data-ed11y-open="true"]', 2000);
+    browser.execute(
+      function () {
+        const tip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]').shadowRoot;
+        return {
+          allowOK: Ed11y.State.option.allowOK,
+          buttons: Array.from(tip.querySelectorAll('.ed11y-tip-dismissals button')).map((b) =>
+            b.textContent.trim(),
+          ),
+        };
+      },
+      [],
+      (result) => {
+        browser.assert.ok(result.value.allowOK, 'Page still allows OK for other results');
+        browser.assert.deepEqual(result.value.buttons, ['Ignore'], 'Only Ignore offered for this link');
       },
     );
     browser.end();
