@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Link checker result types</title>
+	<link href="./tests.css" rel="stylesheet">
+	<link href="../dist/css/editoria11y.css" rel="stylesheet">
+</head>
+<body>
+<main>
+	<h1>Link checker result types</h1>
+	<p>
+		This page simulates a CMS link checker pushing results through the
+		<code>customTests</code> handshake. Append <code>?noOk</code> to the URL to
+		test the button set shown to users who may not mark links OK.
+	</p>
+	<p class="broken"><a id="broken-link" href="/no-such-page">A link the checker found broken</a></p>
+	<p class="manual"><a id="manual-link" href="https://example.com/locked">A link the checker could not verify</a></p>
+	<p class="fine"><a id="fine-link" href="/">A link with nothing to report</a></p>
+</main>
+
+<script src="../dist/js/ed11y.umd.js"></script>
+<script src="../dist/js/lang/en.umd.js"></script>
+<script>
+	window.ed11yTestEvents = [];
+	document.addEventListener('ed11yDismissalUpdate', (e) => {
+		window.ed11yTestEvents.push(e.detail);
+	});
+
+	// Register tip strings the way a CMS integration would (see
+	// src/js/rulesets/custom-ruleset.js for the same pattern).
+	const registerLinkStrings = () => {
+		const Lang = Ed11y.Lang;
+		Lang.testNames.LINK_BROKEN = 'Broken link';
+		Lang.langStrings.LINK_BROKEN =
+			'<div class="title" tabindex="-1">Broken link</div><p>The last check of this link returned a 404.</p>';
+		Lang.testNames.LINK_MANUAL = 'Link needs a manual check';
+		Lang.langStrings.LINK_MANUAL =
+			'<div class="title" tabindex="-1">Link needs a manual check</div><p>The destination blocked the automatic check. Open the link to confirm it works.</p>';
+	};
+
+	document.addEventListener('ed11yRunCustomTests', () => {
+		registerLinkStrings();
+		const Lang = Ed11y.Lang;
+		Ed11y.State.results.push({
+			test: 'LINK_BROKEN',
+			element: document.getElementById('broken-link'),
+			type: 'link',
+			content: Lang.sprintf('LINK_BROKEN'),
+			dismiss: 'LINK_BROKEN|/no-such-page',
+			data: { hash: 'abc123', href: '/no-such-page', status: 'broken' },
+		});
+		Ed11y.State.results.push({
+			test: 'LINK_MANUAL',
+			element: document.getElementById('manual-link'),
+			type: 'linkManual',
+			content: Lang.sprintf('LINK_MANUAL'),
+			dismiss: 'LINK_MANUAL|https://example.com/locked',
+			data: { hash: 'def456', href: 'https://example.com/locked', status: 'unverifiable' },
+		});
+		document.dispatchEvent(new CustomEvent('ed11yResume'));
+	});
+
+	const ed11y = new Ed11y.Ed11y({
+		alertMode: 'assertive',
+		checkRoot: 'main',
+		lang: Ed11yLangEn.lang,
+		customTests: 1,
+		allowOK: !window.location.search.includes('noOk'),
+		allowHide: true,
+	});
+</script>
+</body>
+</html>

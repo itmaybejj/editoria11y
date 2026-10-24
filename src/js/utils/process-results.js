@@ -4,6 +4,7 @@ import Constants from '../../sa11y-js/utils/constants';
 import { dismissDigest } from '../../sa11y-js/utils/utils.js';
 import { UI } from '../core/ui.js';
 import { State } from '../../sa11y-js/core/state.js';
+import { isManualLink } from './result-types.js';
 
 export function syncResults(results) {
   // Dispatch event.
@@ -121,6 +122,15 @@ export function countAlerts() {
   for (let i = State.results.length - 1; i >= 0; i--) {
     if (State.results[i].dismissalStatus) {
       UI.dismissedCount++;
+    } else if (isManualLink(State.results[i])) {
+      // Unverifiable links sit behind the "show hidden alerts" toggle and
+      // share its count, except while the visualizers are open, when they
+      // are on the page and count as manual checks.
+      if (UI.visualizing && !UI.showDismissed) {
+        UI.warningCount++;
+      } else {
+        UI.dismissedCount++;
+      }
     } else if (State.results[i].type === 'warning') {
       UI.warningCount++;
     } else {

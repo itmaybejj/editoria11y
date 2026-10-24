@@ -45,6 +45,7 @@ import { drawResult, showAltPanel, showHeadingsPanel, visualize } from './visual
 import checkReadability from '../../sa11y-js/rulesets/readability.js';
 import sprite from '../elements/sprite.js';
 import { checkCustomRuleset } from '../rulesets/custom-ruleset.js';
+import { isManualLink, shouldDraw } from '../utils/result-types.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { resetGetText, store } from '../../sa11y-js/utils/utils.js';
@@ -412,7 +413,7 @@ export function buildJumpList() {
   // listeners; idempotent if a back-reference is already set.
   matchAdoptions();
   State.results?.forEach((result, i) => {
-    if (result.element && (!result.dismissalStatus || UI.showDismissed)) {
+    if (result.element && shouldDraw(result)) {
       drawResult(result, i);
     }
   });
@@ -434,17 +435,39 @@ export function buildJumpList() {
   resumeObservers();
 }
 
-export function dismissOne(dismissalType, test, dismissalKey) {
+// Tell integrations about a user action on a result. `result` is optional
+// (legacy callers pass only the identifying strings); when present, its type
+// and any opaque `data` an external test attached travel along, so a CMS can
+// route link-check actions to a different endpoint than accessibility
+// dismissals.
+function dispatchDismissalUpdate(dismissalType, test, dismissalKey, result) {
+  const dismissalDetail = {
+    dismissPage: State.option.currentPage,
+    dismissTest: test,
+    dismissKey: dismissalKey,
+    dismissAction: dismissalType,
+    dismissType: result?.type ?? null,
+    dismissData: result?.data ?? null,
+  };
+  document.dispatchEvent(new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail }));
+}
+
+export function dismissOne(dismissalType, test, dismissalKey, result = null) {
   // Update dismissal record.
   if (UI.dismissKeys[dismissalKey]) {
     dismissalKey = UI.dismissKeys[dismissalKey];
   }
   if (dismissalType === 'reset') {
-    delete UI.dismissedAlerts[State.option.currentPage][test][dismissalKey];
-    if (Object.keys(UI.dismissedAlerts[State.option.currentPage][test]).length === 0) {
-      delete UI.dismissedAlerts[State.option.currentPage][test];
+    // Guarded: a result supplied with a dismissalStatus by an external test
+    // may have no matching record here.
+    const pageDismissals = UI.dismissedAlerts[State.option.currentPage];
+    if (pageDismissals?.[test]) {
+      delete pageDismissals[test][dismissalKey];
+      if (Object.keys(pageDismissals[test]).length === 0) {
+        delete pageDismissals[test];
+      }
     }
-    if (Object.keys(UI.dismissedAlerts[State.option.currentPage]).length === 0) {
+    if (pageDismissals && Object.keys(pageDismissals).length === 0) {
       delete UI.dismissedAlerts[State.option.currentPage];
     }
     //window.requestAnimationFrame(() => updatePanel());
@@ -467,14 +490,7 @@ export function dismissOne(dismissalType, test, dismissalKey) {
   if (State.option.syncedDismissals === false) {
     store.setItem('ed11ydismissed', JSON.stringify(UI.dismissedAlerts));
   }
-  const dismissalDetail = {
-    dismissPage: State.option.currentPage,
-    dismissTest: test,
-    dismissKey: dismissalKey,
-    dismissAction: dismissalType,
-  };
-  const ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
-  document.dispatchEvent(ed11yDismissalUpdate);
+  dispatchDismissalUpdate(dismissalType, test, dismissalKey, result);
 }
 
 // Size and position a highlight element around `target`, accounting for
@@ -534,10 +550,15 @@ export function editableHighlighter(resultID, show, firstVisible) {
     ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)'
     : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
   el.style.setProperty('z-index', zIndex);
-  const outline =
-    result.type === 'warning'
-      ? '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)'
-      : '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
+  let outline =
+    '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
+  if (result.type === 'warning') {
+    outline =
+      '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)';
+  } else if (result.type === 'linkManual') {
+    outline =
+      '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-linkManual, #6b4ea5), 0 0 0 3px var(--ed11y-linkManual, #6b4ea5), 0 0 0 4px var(--ed11y-primary)';
+  }
   el.style.setProperty('box-shadow', outline);
   el.style.setProperty('border-radius', '3px');
 
@@ -1667,12 +1688,26 @@ export function resetPanel() {
   }
 }
 
+// Opening or closing the visualizers changes which manual-check links are on
+// the page (see result-types.js). Repaint only when such results exist, so
+// pages without a link checker keep the cheap toggle.
+export function repaintAfterVisualizerToggle() {
+  if (!State.results.some((result) => isManualLink(result))) {
+    return;
+  }
+  UI.forceFullCheck = true;
+  UI.showPanel = true;
+  resetResults();
+  incrementalCheck();
+}
+
 // @todo is this abstraction still needed?
 window.addEventListener('ed11yEndVisualization', () => {
   UI.visualizing = false;
   pauseObservers();
   visualize();
   resumeObservers();
+  repaintAfterVisualizerToggle();
 });
 
 export function dismissThis(dismissalType, button) {
@@ -1680,19 +1715,24 @@ export function dismissThis(dismissalType, button) {
   const tip = button.closest('.ed11y-wrapper');
   const test = tip.querySelector('[data-test]').dataset.test;
   const dismissKey = tip.dataset.ed11yDismiss;
+  const tipResult = tip.getRootNode()?.host?.result ?? null;
   UI.runOrigin = 'dismissal';
 
-  if (button.dataset.ed11yAll === 'true') {
+  if (dismissalType === 'broken') {
+    // Not a dismissal: nothing is recorded and the result stays visible.
+    // The integration that pushed the link result owns what "broken" means.
+    dispatchDismissalUpdate(dismissalType, test, dismissKey, tipResult);
+  } else if (button.dataset.ed11yAll === 'true') {
     State.results.forEach((result) => {
       if (
         result.test === test &&
         (!result.dismissalStatus || result.dismissalStatus !== dismissalType)
       ) {
-        dismissOne(dismissalType, test, result.dismiss);
+        dismissOne(dismissalType, test, result.dismiss, result);
       }
     });
   } else {
-    dismissOne(dismissalType, test, dismissKey);
+    dismissOne(dismissalType, test, dismissKey, tipResult);
   }
 
   // Remove tip and reset borders around element

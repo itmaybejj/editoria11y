@@ -8,6 +8,29 @@ import checkReadability from '../../sa11y-js/rulesets/readability';
 import sprite from '../elements/sprite.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { UI } from './ui.js';
+import { LINK_RESULT_TYPES, isLinkResult } from '../utils/result-types.js';
+
+// Link-check results reuse the dismissable toggle but carry their own class,
+// icon and label. Runs on create and on every adoption, because a target can
+// move between `link` and `linkManual` across rechecks without changing the
+// dismissable/dismissed pair that the adoption path already compares.
+const decorateLinkToggle = (toggle, result, dismissed) => {
+  const wasLink =
+    toggle.classList.contains('ed11y-link') || toggle.classList.contains('ed11y-link-manual');
+  toggle.classList.remove('ed11y-link', 'ed11y-link-manual');
+  if (isLinkResult(result)) {
+    const linkType = LINK_RESULT_TYPES[result.type];
+    toggle.classList.add(linkType.className);
+    toggle.setAttribute('aria-label', Lang._(linkType.badge));
+    toggle.innerHTML = dismissed ? sprite.dismiss : sprite.linkBroken;
+  } else if (wasLink) {
+    toggle.setAttribute(
+      'aria-label',
+      result.type !== 'error' ? Lang._('WARNING') : Lang._('ERROR'),
+    );
+    toggle.innerHTML = dismissed ? sprite.dismiss : '';
+  }
+};
 
 export const showAltPanel = () => {
   // visualize image alts
@@ -241,6 +264,7 @@ export function drawResult(result, index) {
       mark.toggle.classList.toggle('dismissed', nextDismissed);
       mark.toggle.innerHTML = nextDismissed ? sprite.dismiss : '';
     }
+    decorateLinkToggle(mark.toggle, result, nextDismissed);
 
     if (mark.tip) {
       mark.tip.remove();
@@ -312,6 +336,7 @@ export function drawResult(result, index) {
   } else if (mark.dismissable) {
     mark.toggle.classList.add('dismissable');
   }
+  decorateLinkToggle(mark.toggle, mark.result, mark.dismissed);
   mark.wrapper.appendChild(mark.toggle);
   mark.toggle.addEventListener('click', mark.toggleClick);
   mark.toggle.addEventListener('focus', mark.handleFocus);

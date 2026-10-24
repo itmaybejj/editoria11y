@@ -77,7 +77,14 @@ export const ed11yDefaultOptions = {
   contrastAlgorithm: 'AA',
 
   // Other plugins
-  customTests: 0, // Wait for external JS to insert results.
+  // Wait for external JS to insert results. Each external test listens for
+  // `ed11yRunCustomTests`, pushes objects shaped like
+  // { test, element, type, content, dismiss } onto Ed11y.State.results, then
+  // dispatches `ed11yResume`. Besides 'error' and 'warning', external tests
+  // may push `type: 'link'` (broken link) or `type: 'linkManual'`
+  // (unverifiable link); see utils/result-types.js. Any extra `data` object
+  // on the result is echoed back in `ed11yResults` and `ed11yDismissalUpdate`.
+  customTests: 0,
   customRules: [], // Rulebuilder. Provide an array of objects:
   /**
    * [
@@ -230,6 +237,8 @@ export const ed11yDefaultOptions = {
     warningText: '#20160c',
     alert: 'rgb(184, 5, 25)',
     alertText: '#f4f7ff',
+    linkManual: '#6b4ea5',
+    linkManualText: '#fffdf7',
   },
   darkTheme: {
     bg: '#0a2051',
@@ -253,6 +262,8 @@ export const ed11yDefaultOptions = {
     warningText: '#20160c',
     alert: 'rgb(184, 5, 25)',
     alertText: '#f4f7ff',
+    linkManual: '#9b84d1',
+    linkManualText: '#00081d',
   },
   lightTheme: {
     bg: '#fffffe',
@@ -276,6 +287,8 @@ export const ed11yDefaultOptions = {
     warningText: '#20160c',
     alert: 'rgb(184, 5, 25)',
     alertText: '#f4f7ff',
+    linkManual: '#6b4ea5',
+    linkManualText: '#fffdf7',
   },
   // Base z-index for buttons.
   // 1299 maximizes TinyMCE compatibility.

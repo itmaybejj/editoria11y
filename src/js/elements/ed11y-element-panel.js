@@ -1,5 +1,5 @@
 import { UI } from '../core/ui.js';
-import { togglePanel, toggleShowDismissals } from '../core/run.js';
+import { repaintAfterVisualizerToggle, togglePanel, toggleShowDismissals } from '../core/run.js';
 import { visualize } from '../core/visualize';
 import sprite from './sprite.js';
 import { State } from '../../sa11y-js/core/state.js';
@@ -91,9 +91,11 @@ export class Ed11yElementPanel extends HTMLElement {
           togglePanel();
           window.setTimeout(() => {
             visualize();
+            repaintAfterVisualizerToggle();
           }, 500);
         } else {
           visualize();
+          repaintAfterVisualizerToggle();
         }
         break;
       default:

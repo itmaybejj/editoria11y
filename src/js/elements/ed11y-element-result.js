@@ -94,7 +94,9 @@ export class Ed11yElementResult extends HTMLElement {
       this.buildTip();
     }
     this.toggle.setAttribute('aria-expanded', changeTo);
-    const highlightOutline = this.dismissable ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
+    // Broken links are dismissable but read as errors, so they get the red ring.
+    const highlightOutline =
+      this.dismissable && this.result.type !== 'link' ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
     if (UI.inlineAlerts) {
       resetClass([
         'ed11y-hidden-highlight',

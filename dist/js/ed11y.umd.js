@@ -1705,7 +1705,7 @@
           }
         }
         if ($el.hasAttribute("tabindex") && $el.tabIndex >= 0) Found.TabIndex.push($el);
-        if ($el.matches(nestedSources)) Found.NestedComponents.push($el);
+        if (nestedSources && $el.matches(nestedSources)) Found.NestedComponents.push($el);
         if (!contrastExcludedTags.has(tag)) {
           if (!getCachedClosest($el, contrastAncestorSelector)) {
             if (!contrastAttrSelector || !$el.matches(contrastAttrSelector)) {
@@ -1872,6 +1872,8 @@
     toggleErrors: '<svg class="errors-icon" xmlns="http://www.w3.org/2000/svg" width="10" aria-hidden="true" viewBox="0 0 448 512"><path fill="currentColor" d="M64 32C64 14 50 0 32 0S0 14 0 32L0 64 0 368 0 480c0 18 14 32 32 32s32-14 32-32l0-128 64-16c41-10 85-5 123 13c44.2 22 96 25 142 7l35-13c13-5 21-17 21-30l0-248c0-23-24-38-45-28l-10 5c-46 23-101 23-147 0c-35-18-75-22-114-13L64 48l0-16z"></path></svg>',
     togglePass: '<svg class="pass-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10.1699 19.1777"><path fill="currentColor" d="M3.7031,10.5527c-.3633-.6562-.6426-1.1387-.8379-1.4473l-.3105-.4863-.2344-.3574c-.5117-.7969-1.0449-1.4551-1.5996-1.9746.3164-.2617.6113-.3926.8848-.3926.3359,0,.6348.123.8965.3691s.5918.7148.9902,1.4062c.4531-1.4727,1.0293-2.8691,1.7285-4.1895.3867-.7188.7314-1.2021,1.0342-1.4502s.7041-.3721,1.2041-.3721c.2656,0,.5938.041.9844.123-1.0039.8086-1.8066,1.7695-2.4082,2.8828s-1.3789,3.0762-2.332,5.8887Z"/></svg>',
     toggleWarnings: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="close-icon" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
+    // Broken chain: two link halves pulled apart along a diagonal.
+    linkBroken: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><g fill="none" stroke="currentColor" stroke-width="56" stroke-linecap="round"><path d="M196 316 136 376a76 76 0 0 1-108-108l88-88a76 76 0 0 1 108 0"/><path d="M316 196l60-60a76 76 0 0 1 108 108l-88 88a76 76 0 0 1-108 0"/><path d="M232 128v-56M128 232H72M280 384v56M384 280h56"/></g></svg>',
     visualize: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 10 512 512"><path fill="Currentcolor" d="M152 38c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 113C-2 104-2 88 7 79s25-9 34 0l22 22 55-61c9-10 24-11 34-2zm0 160c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 273c-9-9-9-25 0-34s25-9 35 0l22 22 55-61c9-10 24-11 34-2zM224 96c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zm0 160c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zM160 416c0-18 14-32 32-32l288 0c18 0 32 14 32 32s-14 32-32 32l-288 0c-18 0-32-14-32-32zM48 368a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/></svg>'
   };
   class ConsoleErrors extends HTMLElement {
@@ -5419,6 +5421,14 @@ ${this.error.stack}
       });
     });
   }
+  const LINK_RESULT_TYPES = {
+    link: { badge: "linkBrokenBadge", className: "ed11y-link" },
+    linkManual: { badge: "linkManualBadge", className: "ed11y-link-manual" }
+  };
+  const isLinkResult = (result) => typeof result?.type === "string" && Object.hasOwn(LINK_RESULT_TYPES, result.type);
+  const isManualLink = (result) => result?.type === "linkManual";
+  const isHiddenByDefault = (result) => !!result?.dismissalStatus || isManualLink(result);
+  const shouldDraw = (result) => !isHiddenByDefault(result) || UI.showDismissed || isManualLink(result) && !result.dismissalStatus && UI.visualizing;
   function syncResults(results) {
     if (!UI.incremental) {
       document.dispatchEvent(
@@ -5516,6 +5526,12 @@ ${this.error.stack}
     for (let i = State.results.length - 1; i >= 0; i--) {
       if (State.results[i].dismissalStatus) {
         UI.dismissedCount++;
+      } else if (isManualLink(State.results[i])) {
+        if (UI.visualizing && !UI.showDismissed) {
+          UI.warningCount++;
+        } else {
+          UI.dismissedCount++;
+        }
       } else if (State.results[i].type === "warning") {
         UI.warningCount++;
       } else {
@@ -5785,6 +5801,22 @@ ${this.error.stack}
       Constants.Panel.readabilityInfo.innerHTML = `<br>${Lang._("READABILITY_NOT_ENOUGH")}`;
     }
   }
+  const decorateLinkToggle = (toggle, result, dismissed) => {
+    const wasLink = toggle.classList.contains("ed11y-link") || toggle.classList.contains("ed11y-link-manual");
+    toggle.classList.remove("ed11y-link", "ed11y-link-manual");
+    if (isLinkResult(result)) {
+      const linkType = LINK_RESULT_TYPES[result.type];
+      toggle.classList.add(linkType.className);
+      toggle.setAttribute("aria-label", Lang._(linkType.badge));
+      toggle.innerHTML = dismissed ? sprite.dismiss : sprite.linkBroken;
+    } else if (wasLink) {
+      toggle.setAttribute(
+        "aria-label",
+        result.type !== "error" ? Lang._("WARNING") : Lang._("ERROR")
+      );
+      toggle.innerHTML = dismissed ? sprite.dismiss : "";
+    }
+  };
   const showAltPanel = () => {
     const altList = UI.panel !== false && UI.panel.querySelector("#ed11y-alt-list");
     if (!altList) {
@@ -5982,6 +6014,7 @@ ${this.error.stack}
         mark2.toggle.classList.toggle("dismissed", nextDismissed);
         mark2.toggle.innerHTML = nextDismissed ? sprite.dismiss : "";
       }
+      decorateLinkToggle(mark2.toggle, result, nextDismissed);
       if (mark2.tip) {
         mark2.tip.remove();
         mark2.tip = null;
@@ -6037,6 +6070,7 @@ ${this.error.stack}
     } else if (mark.dismissable) {
       mark.toggle.classList.add("dismissable");
     }
+    decorateLinkToggle(mark.toggle, mark.result, mark.dismissed);
     mark.wrapper.appendChild(mark.toggle);
     mark.toggle.addEventListener("click", mark.toggleClick);
     mark.toggle.addEventListener("focus", mark.handleFocus);
@@ -6435,7 +6469,7 @@ ${this.error.stack}
     State.results.sort((a, b) => b.sortPos - a.sortPos);
     matchAdoptions();
     State.results?.forEach((result, i) => {
-      if (result.element && (!result.dismissalStatus || UI.showDismissed)) {
+      if (result.element && shouldDraw(result)) {
         drawResult(result, i);
       }
     });
@@ -6449,16 +6483,30 @@ ${this.error.stack}
     document.dispatchEvent(tipsPainted);
     resumeObservers();
   }
-  function dismissOne(dismissalType, test, dismissalKey) {
+  function dispatchDismissalUpdate(dismissalType, test, dismissalKey, result) {
+    const dismissalDetail = {
+      dismissPage: State.option.currentPage,
+      dismissTest: test,
+      dismissKey: dismissalKey,
+      dismissAction: dismissalType,
+      dismissType: result?.type ?? null,
+      dismissData: result?.data ?? null
+    };
+    document.dispatchEvent(new CustomEvent("ed11yDismissalUpdate", { detail: dismissalDetail }));
+  }
+  function dismissOne(dismissalType, test, dismissalKey, result = null) {
     if (UI.dismissKeys[dismissalKey]) {
       dismissalKey = UI.dismissKeys[dismissalKey];
     }
     if (dismissalType === "reset") {
-      delete UI.dismissedAlerts[State.option.currentPage][test][dismissalKey];
-      if (Object.keys(UI.dismissedAlerts[State.option.currentPage][test]).length === 0) {
-        delete UI.dismissedAlerts[State.option.currentPage][test];
+      const pageDismissals = UI.dismissedAlerts[State.option.currentPage];
+      if (pageDismissals?.[test]) {
+        delete pageDismissals[test][dismissalKey];
+        if (Object.keys(pageDismissals[test]).length === 0) {
+          delete pageDismissals[test];
+        }
       }
-      if (Object.keys(UI.dismissedAlerts[State.option.currentPage]).length === 0) {
+      if (pageDismissals && Object.keys(pageDismissals).length === 0) {
         delete UI.dismissedAlerts[State.option.currentPage];
       }
     } else {
@@ -6478,14 +6526,7 @@ ${this.error.stack}
     if (State.option.syncedDismissals === false) {
       store.setItem("ed11ydismissed", JSON.stringify(UI.dismissedAlerts));
     }
-    const dismissalDetail = {
-      dismissPage: State.option.currentPage,
-      dismissTest: test,
-      dismissKey: dismissalKey,
-      dismissAction: dismissalType
-    };
-    const ed11yDismissalUpdate = new CustomEvent("ed11yDismissalUpdate", { detail: dismissalDetail });
-    document.dispatchEvent(ed11yDismissalUpdate);
+    dispatchDismissalUpdate(dismissalType, test, dismissalKey, result);
   }
   function positionHighlight(el, target, result) {
     let targetOffset = target.getBoundingClientRect();
@@ -6522,7 +6563,12 @@ ${this.error.stack}
     entry.highlightTarget = firstVisible || result.element;
     const zIndex = result.dismissalStatus ? "calc(var(--ed11y-buttonZIndex, 9999) - 2)" : "calc(var(--ed11y-buttonZIndex, 9999) - 1)";
     el.style.setProperty("z-index", zIndex);
-    const outline = result.type === "warning" ? "0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)" : "0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px";
+    let outline = "0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px";
+    if (result.type === "warning") {
+      outline = "0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)";
+    } else if (result.type === "linkManual") {
+      outline = "0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-linkManual, #6b4ea5), 0 0 0 3px var(--ed11y-linkManual, #6b4ea5), 0 0 0 4px var(--ed11y-primary)";
+    }
     el.style.setProperty("box-shadow", outline);
     el.style.setProperty("border-radius", "3px");
     updateFixedRootPositions();
@@ -7410,25 +7456,38 @@ ${this.error.stack}
       }
     }
   }
+  function repaintAfterVisualizerToggle() {
+    if (!State.results.some((result) => isManualLink(result))) {
+      return;
+    }
+    UI.forceFullCheck = true;
+    UI.showPanel = true;
+    resetResults();
+    incrementalCheck();
+  }
   window.addEventListener("ed11yEndVisualization", () => {
     UI.visualizing = false;
     pauseObservers();
     visualize();
     resumeObservers();
+    repaintAfterVisualizerToggle();
   });
   function dismissThis(dismissalType, button) {
     const tip = button.closest(".ed11y-wrapper");
     const test = tip.querySelector("[data-test]").dataset.test;
     const dismissKey = tip.dataset.ed11yDismiss;
+    const tipResult = tip.getRootNode()?.host?.result ?? null;
     UI.runOrigin = "dismissal";
-    if (button.dataset.ed11yAll === "true") {
+    if (dismissalType === "broken") {
+      dispatchDismissalUpdate(dismissalType, test, dismissKey, tipResult);
+    } else if (button.dataset.ed11yAll === "true") {
       State.results.forEach((result) => {
         if (result.test === test && (!result.dismissalStatus || result.dismissalStatus !== dismissalType)) {
-          dismissOne(dismissalType, test, result.dismiss);
+          dismissOne(dismissalType, test, result.dismiss, result);
         }
       });
     } else {
-      dismissOne(dismissalType, test, dismissKey);
+      dismissOne(dismissalType, test, dismissKey, tipResult);
     }
     pauseObservers();
     reset();
@@ -7657,7 +7716,7 @@ ${this.error.stack}
         this.buildTip();
       }
       this.toggle.setAttribute("aria-expanded", changeTo);
-      const highlightOutline = this.dismissable ? "ed11y-ring-yellow" : "ed11y-ring-red";
+      const highlightOutline = this.dismissable && this.result.type !== "link" ? "ed11y-ring-yellow" : "ed11y-ring-red";
       if (UI.inlineAlerts) {
         resetClass([
           "ed11y-hidden-highlight",
@@ -7822,9 +7881,11 @@ ${this.error.stack}
             togglePanel();
             window.setTimeout(() => {
               visualize();
+              repaintAfterVisualizerToggle();
             }, 500);
           } else {
             visualize();
+            repaintAfterVisualizerToggle();
           }
           break;
       }
@@ -8109,6 +8170,11 @@ ${this.error.stack}
       this.issuePrev = this.issueIndex > 0 ? this.issueIndex : UI.jumpList.length;
       this.dismissable = this.result.type !== "error";
       this.dismissed = !!this.result.dismissalStatus;
+      this.isLink = isLinkResult(this.result);
+      let badge = this.dismissable ? Lang._("WARNING") : Lang._("ERROR");
+      if (this.isLink) {
+        badge = Lang._(LINK_RESULT_TYPES[this.result.type].badge);
+      }
       this.wrapper = document.createElement("div");
       this.wrapper.setAttribute("role", "dialog");
       this.wrapper.dataset.ed11yDismiss = this.result.dismiss;
@@ -8130,7 +8196,7 @@ ${this.error.stack}
 				</div>
 			</div>
 			<div class="footer">
-				<div class="error-badge">${this.dismissable ? Lang._("WARNING") : Lang._("ERROR")}</div>
+				<div class="error-badge">${badge}</div>
 				<div class="ed11y-tip-dismissals">
 					<details class="ed11y-bulk-actions dismiss ed11y-hidden"><summary></summary><div class="ed11y-bulk-actions-content"></div></details>
 				</div>
@@ -8139,6 +8205,9 @@ ${this.error.stack}
 		</div>
 		`;
       this.wrapper.querySelector(".content").dataset.test = this.result.test;
+      if (this.isLink) {
+        this.wrapper.querySelector(".error-badge").classList.add(LINK_RESULT_TYPES[this.result.type].className);
+      }
       this.addEventListener("mouseover", this.handleHover, {
         passive: true
       });
@@ -8215,7 +8284,7 @@ ${this.error.stack}
         dismissIcon.classList.add("ed11y-dismiss-icon");
         dismissIcon.innerHTML = sprite.dismiss;
         if (UI.showDismissed && this.dismissed) {
-          const okd = UI.dismissedAlerts[State.option.currentPage][this.result.test][this.result.dismiss] === "ok";
+          const okd = this.result.dismissalStatus === "ok";
           if (okd && State.option.allowOK || !okd) {
             const unDismissButton = document.createElement("button");
             const unDismissIcon = document.createElement("span");
@@ -8235,6 +8304,8 @@ ${this.error.stack}
             restoreNote.textContent = Lang._("unDismissNotePermissions");
             buttonBar.prepend(restoreNote);
           }
+        } else if (this.isLink) {
+          this.drawLinkActions(buttonBar, dismissIcon);
         } else {
           const pageActions = this.wrapper.querySelector(".ed11y-bulk-actions");
           const pageActionsSummary = pageActions.querySelector("summary");
@@ -8381,6 +8452,64 @@ ${this.error.stack}
       });
       this.initialized = true;
       this.rendering = false;
+    }
+    // Link-check results get two actions: accept the link (Mark OK, or Ignore
+    // for users who may not mark things OK) or confirm it is broken. No bulk
+    // actions: each link target is its own decision.
+    drawLinkActions(buttonBar, dismissIcon) {
+      const makeButton = (classes, text, title, icon) => {
+        const button = document.createElement("button");
+        button.classList.add("dismiss", ...classes);
+        if (title && State.option.syncedDismissals) {
+          button.setAttribute("title", title);
+        }
+        const label = document.createElement("span");
+        label.classList.add("text");
+        label.textContent = text;
+        button.append(label);
+        button.prepend(icon);
+        button.dataset.ed11yAll = "false";
+        return button;
+      };
+      if (State.option.allowOK) {
+        const check = document.createElement("span");
+        check.setAttribute("aria-hidden", "true");
+        check.textContent = "✓";
+        const okButton = makeButton(
+          ["ok"],
+          Lang._("dismissOkButtonContent"),
+          Lang._("dismissOkTitle"),
+          check
+        );
+        okButton.addEventListener("click", (e) => {
+          dismissThis("ok", e.target.closest("button"));
+        });
+        buttonBar.append(okButton);
+      } else if (State.option.allowHide) {
+        const ignoreButton = makeButton(
+          ["ignore"],
+          Lang._("DISMISS"),
+          Lang._("dismissHideTitle"),
+          dismissIcon.cloneNode(true)
+        );
+        ignoreButton.addEventListener("click", (e) => {
+          dismissThis("hide", e.target.closest("button"));
+        });
+        buttonBar.append(ignoreButton);
+      }
+      const brokenIcon = document.createElement("span");
+      brokenIcon.classList.add("ed11y-dismiss-icon");
+      brokenIcon.innerHTML = sprite.linkBroken;
+      const brokenButton = makeButton(
+        ["broken"],
+        Lang._("dismissBrokenButton"),
+        Lang._("dismissBrokenTitle"),
+        brokenIcon
+      );
+      brokenButton.addEventListener("click", (e) => {
+        dismissThis("broken", e.target.closest("button"));
+      });
+      buttonBar.append(brokenButton);
     }
     disconnectedCallback() {
       if (this._handleDocumentClick) {
@@ -9023,6 +9152,8 @@ ${this.error.stack}
     buttonShowHiddenAlert: "Show hidden alert",
     buttonToolsActive: "Hide visualizers",
     dismissActions: `Similar`,
+    dismissBrokenButton: "Mark broken",
+    dismissBrokenTitle: "Reports this link as broken to all editors",
     dismissHideTitle: "Only hides alert for you",
     dismissOkAllButton: "On this page: mark OK",
     dismissOkButtonContent: "Mark OK",
@@ -9035,6 +9166,8 @@ ${this.error.stack}
     issueContent: "Content issue",
     issueDeveloper: "Developer issue",
     issueTemplate: "Template issue",
+    linkBrokenBadge: "Broken link",
+    linkManualBadge: "Link needs a manual check",
     main_toggle_hide: "Hide accessibility tools",
     main_toggle_hide_alerts: "Hide accessibility alerts",
     main_toggle_show: "Show accessibility tools",
@@ -9170,8 +9303,14 @@ ${this.error.stack}
     contrastPlugin: false,
     contrastAlgorithm: "AA",
     // Other plugins
+    // Wait for external JS to insert results. Each external test listens for
+    // `ed11yRunCustomTests`, pushes objects shaped like
+    // { test, element, type, content, dismiss } onto Ed11y.State.results, then
+    // dispatches `ed11yResume`. Besides 'error' and 'warning', external tests
+    // may push `type: 'link'` (broken link) or `type: 'linkManual'`
+    // (unverifiable link); see utils/result-types.js. Any extra `data` object
+    // on the result is echoed back in `ed11yResults` and `ed11yDismissalUpdate`.
     customTests: 0,
-    // Wait for external JS to insert results.
     customRules: [],
     // Rulebuilder. Provide an array of objects:
     /**
@@ -9322,7 +9461,9 @@ ${this.error.stack}
       warning: "rgb(250, 216, 89)",
       warningText: "#20160c",
       alert: "rgb(184, 5, 25)",
-      alertText: "#f4f7ff"
+      alertText: "#f4f7ff",
+      linkManual: "#6b4ea5",
+      linkManualText: "#fffdf7"
     },
     darkTheme: {
       bg: "#0a2051",
@@ -9347,7 +9488,9 @@ ${this.error.stack}
       warning: "rgb(250, 216, 89)",
       warningText: "#20160c",
       alert: "rgb(184, 5, 25)",
-      alertText: "#f4f7ff"
+      alertText: "#f4f7ff",
+      linkManual: "#9b84d1",
+      linkManualText: "#00081d"
     },
     lightTheme: {
       bg: "#fffffe",
@@ -9370,7 +9513,9 @@ ${this.error.stack}
       warning: "rgb(250, 216, 89)",
       warningText: "#20160c",
       alert: "rgb(184, 5, 25)",
-      alertText: "#f4f7ff"
+      alertText: "#f4f7ff",
+      linkManual: "#6b4ea5",
+      linkManualText: "#fffdf7"
     },
     // Base z-index for buttons.
     // 1299 maximizes TinyMCE compatibility.

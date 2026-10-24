@@ -9,6 +9,7 @@ import {
 import sprite from './sprite.js';
 import { UI } from '../core/ui.js';
 import { State } from '../../sa11y-js/core/state.js';
+import { LINK_RESULT_TYPES, isLinkResult } from '../utils/result-types.js';
 
 export class Ed11yElementTip extends HTMLElement {
   connectedCallback() {
@@ -29,6 +30,11 @@ export class Ed11yElementTip extends HTMLElement {
 
     this.dismissable = this.result.type !== 'error';
     this.dismissed = !!this.result.dismissalStatus;
+    this.isLink = isLinkResult(this.result);
+    let badge = this.dismissable ? Lang._('WARNING') : Lang._('ERROR');
+    if (this.isLink) {
+      badge = Lang._(LINK_RESULT_TYPES[this.result.type].badge);
+    }
 
     this.wrapper = document.createElement('div');
     this.wrapper.setAttribute('role', 'dialog');
@@ -51,7 +57,7 @@ export class Ed11yElementTip extends HTMLElement {
 				</div>
 			</div>
 			<div class="footer">
-				<div class="error-badge">${this.dismissable ? Lang._('WARNING') : Lang._('ERROR')}</div>
+				<div class="error-badge">${badge}</div>
 				<div class="ed11y-tip-dismissals">
 					<details class="ed11y-bulk-actions dismiss ed11y-hidden"><summary></summary><div class="ed11y-bulk-actions-content"></div></details>
 				</div>
@@ -61,6 +67,11 @@ export class Ed11yElementTip extends HTMLElement {
 		`;
 
     this.wrapper.querySelector('.content').dataset.test = this.result.test;
+    if (this.isLink) {
+      this.wrapper
+        .querySelector('.error-badge')
+        .classList.add(LINK_RESULT_TYPES[this.result.type].className);
+    }
 
     this.addEventListener('mouseover', this.handleHover, {
       passive: true,
@@ -155,11 +166,10 @@ export class Ed11yElementTip extends HTMLElement {
 
       // Dismissal Key is set in [5] if alert has been dismissed.
       if (UI.showDismissed && this.dismissed) {
-        // Check if user has permission to reset this alert.
-
-        const okd =
-          UI.dismissedAlerts[State.option.currentPage][this.result.test][this.result.dismiss] ===
-          'ok';
+        // Check if user has permission to reset this alert. The result
+        // carries the status copied from the dismissal record, or supplied
+        // directly by an external test that tracks its own dismissals.
+        const okd = this.result.dismissalStatus === 'ok';
         if ((okd && State.option.allowOK) || !okd) {
           // User can restore this alert.
           const unDismissButton = document.createElement('button');
@@ -182,6 +192,8 @@ export class Ed11yElementTip extends HTMLElement {
           restoreNote.textContent = Lang._('unDismissNotePermissions');
           buttonBar.prepend(restoreNote);
         }
+      } else if (this.isLink) {
+        this.drawLinkActions(buttonBar, dismissIcon);
       } else {
         const pageActions = this.wrapper.querySelector('.ed11y-bulk-actions');
         const pageActionsSummary = pageActions.querySelector('summary');
@@ -343,6 +355,67 @@ export class Ed11yElementTip extends HTMLElement {
     });
     this.initialized = true;
     this.rendering = false;
+  }
+
+  // Link-check results get two actions: accept the link (Mark OK, or Ignore
+  // for users who may not mark things OK) or confirm it is broken. No bulk
+  // actions: each link target is its own decision.
+  drawLinkActions(buttonBar, dismissIcon) {
+    const makeButton = (classes, text, title, icon) => {
+      const button = document.createElement('button');
+      button.classList.add('dismiss', ...classes);
+      if (title && State.option.syncedDismissals) {
+        button.setAttribute('title', title);
+      }
+      const label = document.createElement('span');
+      label.classList.add('text');
+      label.textContent = text;
+      button.append(label);
+      button.prepend(icon);
+      button.dataset.ed11yAll = 'false';
+      return button;
+    };
+
+    if (State.option.allowOK) {
+      const check = document.createElement('span');
+      check.setAttribute('aria-hidden', 'true');
+      check.textContent = '✓';
+      const okButton = makeButton(
+        ['ok'],
+        Lang._('dismissOkButtonContent'),
+        Lang._('dismissOkTitle'),
+        check,
+      );
+      okButton.addEventListener('click', (e) => {
+        dismissThis('ok', e.target.closest('button'));
+      });
+      buttonBar.append(okButton);
+    } else if (State.option.allowHide) {
+      const ignoreButton = makeButton(
+        ['ignore'],
+        Lang._('DISMISS'),
+        Lang._('dismissHideTitle'),
+        dismissIcon.cloneNode(true),
+      );
+      ignoreButton.addEventListener('click', (e) => {
+        dismissThis('hide', e.target.closest('button'));
+      });
+      buttonBar.append(ignoreButton);
+    }
+
+    const brokenIcon = document.createElement('span');
+    brokenIcon.classList.add('ed11y-dismiss-icon');
+    brokenIcon.innerHTML = sprite.linkBroken;
+    const brokenButton = makeButton(
+      ['broken'],
+      Lang._('dismissBrokenButton'),
+      Lang._('dismissBrokenTitle'),
+      brokenIcon,
+    );
+    brokenButton.addEventListener('click', (e) => {
+      dismissThis('broken', e.target.closest('button'));
+    });
+    buttonBar.append(brokenButton);
   }
 
   disconnectedCallback() {
