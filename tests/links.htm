@@ -19,6 +19,8 @@
 	</p>
 	<p class="broken"><a id="broken-link" href="/no-such-page">A link the checker found broken</a></p>
 	<p class="manual"><a id="manual-link" href="https://example.com/locked">A link the checker could not verify</a></p>
+	<p class="okd"><a id="okd-link" href="/marked-ok">A broken link an editor marked OK</a></p>
+	<p class="ignored"><a id="ignored-link" href="https://example.com/ignored">A broken link this editor ignored</a></p>
 	<p class="fine"><a id="fine-link" href="/">A link with nothing to report</a></p>
 </main>
 
@@ -64,6 +66,27 @@
 			content: Lang.sprintf('LINK_MANUAL'),
 			dismiss: 'LINK_MANUAL|https://example.com/locked',
 			data: { hash: 'def456', href: 'https://example.com/locked', status: 'unverifiable' },
+		});
+		// Results the checker already holds a verdict for arrive with a
+		// dismissalStatus and stay hidden until hidden alerts are shown. The
+		// first also hands its content over as a string, as integrations may.
+		Ed11y.State.results.push({
+			test: 'LINK_BROKEN',
+			element: document.getElementById('okd-link'),
+			type: 'link',
+			content: Lang.langStrings.LINK_BROKEN,
+			dismiss: 'LINK_BROKEN|/marked-ok',
+			dismissalStatus: 'ok',
+			data: { hash: 'ok789', href: '/marked-ok', status: 'broken', action: 'ok' },
+		});
+		Ed11y.State.results.push({
+			test: 'LINK_BROKEN',
+			element: document.getElementById('ignored-link'),
+			type: 'link',
+			content: Lang.sprintf('LINK_BROKEN'),
+			dismiss: 'LINK_BROKEN|https://example.com/ignored',
+			dismissalStatus: 'hide',
+			data: { hash: 'hide012', href: 'https://example.com/ignored', status: 'broken' },
 		});
 		document.dispatchEvent(new CustomEvent('ed11yResume'));
 	});

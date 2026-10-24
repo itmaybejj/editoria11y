@@ -38,7 +38,11 @@ describe('Link checker result types', function () {
           'Toggle is labelled as a broken link',
         );
         browser.assert.equal(result.value.errorCount, 1, 'Broken link counts as an issue');
-        browser.assert.equal(result.value.dismissedCount, 1, 'Manual check counts as hidden');
+        browser.assert.equal(
+          result.value.dismissedCount,
+          3,
+          'Manual check, marked-OK link and ignored link count as hidden',
+        );
       },
     );
 
@@ -71,7 +75,7 @@ describe('Link checker result types', function () {
     );
   });
 
-  it('offers Mark OK and Mark broken, and reports a broken action without a dismissal', function (browser) {
+  it('offers only Mark OK on a broken link', function (browser) {
     browser.execute(function () {
       document
         .querySelector('.broken ed11y-element-result')
@@ -92,6 +96,47 @@ describe('Link checker result types', function () {
       [],
       (result) => {
         browser.assert.equal(result.value.badge, 'Broken link', 'Badge names the link class');
+        browser.assert.deepEqual(
+          result.value.buttons,
+          ['Mark OK'],
+          'A link the checker calls broken only offers Mark OK',
+        );
+      },
+    );
+    browser.execute(function () {
+      document
+        .querySelector('ed11y-element-tip[data-ed11y-open="true"]')
+        .shadowRoot.querySelector('.close')
+        .click();
+    });
+    browser.waitForElementNotPresent('ed11y-element-tip[data-ed11y-open="true"]', 2000);
+  });
+
+  it('offers both verdicts on a manual check, and reports a broken action without a dismissal', function (browser) {
+    browser.execute(function () {
+      document
+        .querySelector('.manual ed11y-element-result')
+        .shadowRoot.querySelector('.toggle')
+        .click();
+    });
+    browser.waitForElementPresent('ed11y-element-tip[data-ed11y-open="true"]', 2000);
+    browser.execute(
+      function () {
+        const tip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]').shadowRoot;
+        return {
+          badge: tip.querySelector('.error-badge').textContent.trim(),
+          buttons: Array.from(tip.querySelectorAll('.ed11y-tip-dismissals button')).map((b) =>
+            b.textContent.trim(),
+          ),
+        };
+      },
+      [],
+      (result) => {
+        browser.assert.equal(
+          result.value.badge,
+          'Link needs a manual check',
+          'Badge names the link class',
+        );
         browser.assert.ok(result.value.buttons.includes('Mark OK'), 'Mark OK offered');
         browser.assert.ok(result.value.buttons.includes('Mark broken'), 'Mark broken offered');
         browser.assert.ok(!result.value.buttons.includes('Ignore'), 'Ignore hidden when OK allowed');
@@ -111,17 +156,96 @@ describe('Link checker result types', function () {
         const page = Ed11y.State.option.currentPage;
         return {
           last: last,
-          recorded: !!(Ed11y.UI.dismissedAlerts[page] && Ed11y.UI.dismissedAlerts[page].LINK_BROKEN),
-          stillPainted: !!document.querySelector('.broken ed11y-element-result'),
+          recorded: !!(Ed11y.UI.dismissedAlerts[page] && Ed11y.UI.dismissedAlerts[page].LINK_MANUAL),
+          stillPainted: !!document.querySelector('.manual ed11y-element-result'),
         };
       },
       [],
       (result) => {
         browser.assert.equal(result.value.last.dismissAction, 'broken', 'Broken action dispatched');
-        browser.assert.equal(result.value.last.dismissType, 'link', 'Result type travels with it');
-        browser.assert.equal(result.value.last.dismissData.hash, 'abc123', 'Opaque data travels');
+        browser.assert.equal(result.value.last.dismissType, 'linkManual', 'Result type travels with it');
+        browser.assert.equal(result.value.last.dismissData.hash, 'def456', 'Opaque data travels');
         browser.assert.ok(!result.value.recorded, 'Mark broken is not stored as a dismissal');
-        browser.assert.ok(result.value.stillPainted, 'Broken link stays visible after marking');
+        browser.assert.ok(result.value.stillPainted, 'The link stays visible after marking');
+      },
+    );
+  });
+
+  it('shows Restore on marked-OK and ignored links', function (browser) {
+    // Hidden alerts are still shown from the first test.
+    browser.waitForElementPresent('.okd ed11y-element-result', 2000);
+    browser.execute(function () {
+      document.querySelector('.okd ed11y-element-result').shadowRoot.querySelector('.toggle').click();
+    });
+    browser.waitForElementPresent('ed11y-element-tip[data-ed11y-open="true"]', 2000);
+    browser.execute(
+      function () {
+        const tip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]').shadowRoot;
+        return {
+          title: tip.querySelector('.message .title')?.textContent.trim(),
+          buttons: Array.from(tip.querySelectorAll('.ed11y-tip-dismissals button')).map((b) =>
+            b.textContent.trim(),
+          ),
+        };
+      },
+      [],
+      (result) => {
+        browser.assert.equal(result.value.title, 'Broken link', 'String content renders with its title');
+        browser.assert.deepEqual(
+          result.value.buttons,
+          ['Restore this alert marked as OK'],
+          'Only Restore on a marked-OK link',
+        );
+      },
+    );
+    browser.execute(function () {
+      document
+        .querySelector('ed11y-element-tip[data-ed11y-open="true"]')
+        .shadowRoot.querySelector('.close')
+        .click();
+    });
+    browser.waitForElementNotPresent('ed11y-element-tip[data-ed11y-open="true"]', 2000);
+
+    browser.execute(function () {
+      document
+        .querySelector('.ignored ed11y-element-result')
+        .shadowRoot.querySelector('.toggle')
+        .click();
+    });
+    browser.waitForElementPresent('ed11y-element-tip[data-ed11y-open="true"]', 2000);
+    browser.execute(
+      function () {
+        const tip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]').shadowRoot;
+        return Array.from(tip.querySelectorAll('.ed11y-tip-dismissals button')).map((b) =>
+          b.textContent.trim(),
+        );
+      },
+      [],
+      (result) => {
+        browser.assert.deepEqual(
+          result.value,
+          ['Restore this ignored alert'],
+          'Only Restore on an ignored link',
+        );
+      },
+    );
+    browser.execute(function () {
+      document
+        .querySelector('ed11y-element-tip[data-ed11y-open="true"]')
+        .shadowRoot.querySelector('.ed11y-tip-dismissals button')
+        .click();
+    });
+    browser.pause(600);
+    browser.execute(
+      function () {
+        const last = window.ed11yTestEvents[window.ed11yTestEvents.length - 1];
+        return { action: last.dismissAction, type: last.dismissType, hash: last.dismissData.hash };
+      },
+      [],
+      (result) => {
+        browser.assert.equal(result.value.action, 'reset', 'Restore dispatches a reset');
+        browser.assert.equal(result.value.type, 'link', 'Result type travels with it');
+        browser.assert.equal(result.value.hash, 'hide012', 'Opaque data travels');
       },
     );
   });
@@ -148,8 +272,12 @@ describe('Link checker result types', function () {
       [],
       (result) => {
         browser.assert.equal(result.value.warningCount, 1, 'Manual check counted while visualizing');
-        browser.assert.equal(result.value.dismissedCount, 0, 'Nothing counted as hidden');
-        browser.assert.equal(result.value.totalCount, 2, 'Both links in the total');
+        browser.assert.equal(
+          result.value.dismissedCount,
+          2,
+          'Only the marked-OK and ignored links count as hidden',
+        );
+        browser.assert.equal(result.value.totalCount, 2, 'Broken and manual links in the total');
       },
     );
     // Closing the visualizers hides it again.

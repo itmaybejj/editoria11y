@@ -10,10 +10,14 @@ import { UI } from '../core/ui.js';
 //               rate limited). Kept off the page until the user shows hidden
 //               alerts or opens the visualizer panel.
 //
-// Both offer "Mark OK" (or "Ignore" when OK is not allowed) and "Mark broken".
-// "Mark broken" is not a dismissal: it is dispatched through
+// A broken link offers "Mark OK" (or "Ignore" when OK is not allowed); a
+// manual check offers that and "Mark broken". A result pushed with
+// `dismissalStatus: 'ok'` (the checker records a site-wide Mark OK) or
+// `'hide'` is hidden like any dismissed alert and offers "Restore" when
+// revealed. "Mark broken" is not a dismissal: it is dispatched through
 // `ed11yDismissalUpdate` with `dismissAction: 'broken'` for the integration
-// that pushed the result to act on.
+// that pushed the result to act on, as "Restore" is with
+// `dismissAction: 'reset'`.
 export const LINK_RESULT_TYPES = {
   link: { badge: 'linkBrokenBadge', className: 'ed11y-link' },
   linkManual: { badge: 'linkManualBadge', className: 'ed11y-link-manual' },

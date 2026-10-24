@@ -9,7 +9,7 @@ import {
 import sprite from './sprite.js';
 import { UI } from '../core/ui.js';
 import { State } from '../../sa11y-js/core/state.js';
-import { LINK_RESULT_TYPES, isLinkResult } from '../utils/result-types.js';
+import { LINK_RESULT_TYPES, isLinkResult, isManualLink } from '../utils/result-types.js';
 
 export class Ed11yElementTip extends HTMLElement {
   connectedCallback() {
@@ -82,6 +82,13 @@ export class Ed11yElementTip extends HTMLElement {
     this.tip = this.wrapper.querySelector('.tip');
 
     const content = this.wrapper.querySelector('.message');
+    // Lang.sprintf() hands over an element; external tests pushing results
+    // through the customTests handshake may hand over an HTML string.
+    if (typeof this.result.content === 'string') {
+      const wrapped = document.createElement('div');
+      wrapped.innerHTML = this.result.content;
+      this.result.content = wrapped;
+    }
     if (this.result.content.querySelector('.title')) {
       // Sent by Ed11y
       content.appendChild(this.result.content);
@@ -164,8 +171,11 @@ export class Ed11yElementTip extends HTMLElement {
       dismissIcon.classList.add('ed11y-dismiss-icon');
       dismissIcon.innerHTML = sprite.dismiss;
 
-      // Dismissal Key is set in [5] if alert has been dismissed.
-      if (UI.showDismissed && this.dismissed) {
+      // Link-check results choose their buttons by their own state.
+      if (this.isLink) {
+        this.drawLinkActions(buttonBar, dismissIcon);
+      } else if (UI.showDismissed && this.dismissed) {
+        // Dismissal Key is set in [5] if alert has been dismissed.
         // Check if user has permission to reset this alert. The result
         // carries the status copied from the dismissal record, or supplied
         // directly by an external test that tracks its own dismissals.
@@ -192,8 +202,6 @@ export class Ed11yElementTip extends HTMLElement {
           restoreNote.textContent = Lang._('unDismissNotePermissions');
           buttonBar.prepend(restoreNote);
         }
-      } else if (this.isLink) {
-        this.drawLinkActions(buttonBar, dismissIcon);
       } else {
         const pageActions = this.wrapper.querySelector('.ed11y-bulk-actions');
         const pageActionsSummary = pageActions.querySelector('summary');
@@ -357,9 +365,16 @@ export class Ed11yElementTip extends HTMLElement {
     this.rendering = false;
   }
 
-  // Link-check results get two actions: accept the link (Mark OK, or Ignore
-  // for users who may not mark things OK) or confirm it is broken. No bulk
-  // actions: each link target is its own decision.
+  // Link-check results offer only the verdicts that would change anything.
+  // No bulk actions: each link target is its own decision.
+  //
+  //   broken (type "link")        Mark OK, or Ignore for users who may not
+  //                               mark things OK.
+  //   manual check ("linkManual") Mark OK or Ignore, plus Mark broken.
+  //   marked OK (dismissalStatus  Restore, which clears the mark so the
+  //   "ok", shown with hidden     checker decides again.
+  //   alerts)
+  //   ignored ("hide")            Restore, as for any ignored alert.
   //
   // Mark OK and Mark broken are site-wide marks on the link, so the checker
   // that pushed the result may grant them separately from the page-level
@@ -384,6 +399,54 @@ export class Ed11yElementTip extends HTMLElement {
       button.dataset.ed11yAll = 'false';
       return button;
     };
+    const markBroken = () => {
+      const brokenIcon = document.createElement('span');
+      brokenIcon.classList.add('ed11y-dismiss-icon');
+      brokenIcon.innerHTML = sprite.linkBroken;
+      const brokenButton = makeButton(
+        ['broken'],
+        Lang._('dismissBrokenButton'),
+        Lang._('dismissBrokenTitle'),
+        brokenIcon,
+      );
+      brokenButton.addEventListener('click', (e) => {
+        dismissThis('broken', e.target.closest('button'));
+      });
+      buttonBar.append(brokenButton);
+    };
+
+    if (this.result.dismissalStatus === 'hide') {
+      // The editor's own Ignore; anyone may take it back.
+      const restoreIcon = document.createElement('span');
+      restoreIcon.classList.add('ed11y-dismiss-icon');
+      restoreIcon.innerHTML = sprite.unDismiss;
+      const restoreButton = makeButton([], Lang._('unDismissHideButton'), null, restoreIcon);
+      restoreButton.addEventListener('click', (e) => {
+        dismissThis('reset', e.target.closest('button'));
+      });
+      buttonBar.append(restoreButton);
+      return;
+    }
+
+    if (this.result.dismissalStatus === 'ok') {
+      // Restore clears the site-wide mark so the checker decides again.
+      if (allowMark) {
+        const restoreIcon = document.createElement('span');
+        restoreIcon.classList.add('ed11y-dismiss-icon');
+        restoreIcon.innerHTML = sprite.unDismiss;
+        const restoreButton = makeButton([], Lang._('unDismissOKButton'), null, restoreIcon);
+        restoreButton.addEventListener('click', (e) => {
+          dismissThis('reset', e.target.closest('button'));
+        });
+        buttonBar.append(restoreButton);
+      } else {
+        const note = document.createElement('div');
+        note.classList.add('dismissed-note');
+        note.textContent = Lang._('unDismissNotePermissions');
+        buttonBar.prepend(note);
+      }
+      return;
+    }
 
     if (allowMark) {
       const check = document.createElement('span');
@@ -412,21 +475,10 @@ export class Ed11yElementTip extends HTMLElement {
       buttonBar.append(ignoreButton);
     }
 
-    // Marking a link broken is a site-wide mark like Mark OK.
-    if (allowMark) {
-      const brokenIcon = document.createElement('span');
-      brokenIcon.classList.add('ed11y-dismiss-icon');
-      brokenIcon.innerHTML = sprite.linkBroken;
-      const brokenButton = makeButton(
-        ['broken'],
-        Lang._('dismissBrokenButton'),
-        Lang._('dismissBrokenTitle'),
-        brokenIcon,
-      );
-      brokenButton.addEventListener('click', (e) => {
-        dismissThis('broken', e.target.closest('button'));
-      });
-      buttonBar.append(brokenButton);
+    // A link the checker already calls broken gains nothing from a second
+    // verdict; a manual check is the one place the editor decides either way.
+    if (allowMark && isManualLink(this.result)) {
+      markBroken();
     }
   }
 

@@ -1868,8 +1868,7 @@ const sprite = {
   toggleErrors: '<svg class="errors-icon" xmlns="http://www.w3.org/2000/svg" width="10" aria-hidden="true" viewBox="0 0 448 512"><path fill="currentColor" d="M64 32C64 14 50 0 32 0S0 14 0 32L0 64 0 368 0 480c0 18 14 32 32 32s32-14 32-32l0-128 64-16c41-10 85-5 123 13c44.2 22 96 25 142 7l35-13c13-5 21-17 21-30l0-248c0-23-24-38-45-28l-10 5c-46 23-101 23-147 0c-35-18-75-22-114-13L64 48l0-16z"></path></svg>',
   togglePass: '<svg class="pass-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10.1699 19.1777"><path fill="currentColor" d="M3.7031,10.5527c-.3633-.6562-.6426-1.1387-.8379-1.4473l-.3105-.4863-.2344-.3574c-.5117-.7969-1.0449-1.4551-1.5996-1.9746.3164-.2617.6113-.3926.8848-.3926.3359,0,.6348.123.8965.3691s.5918.7148.9902,1.4062c.4531-1.4727,1.0293-2.8691,1.7285-4.1895.3867-.7188.7314-1.2021,1.0342-1.4502s.7041-.3721,1.2041-.3721c.2656,0,.5938.041.9844.123-1.0039.8086-1.8066,1.7695-2.4082,2.8828s-1.3789,3.0762-2.332,5.8887Z"/></svg>',
   toggleWarnings: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="close-icon" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
-  // Broken chain: two link halves pulled apart along a diagonal.
-  linkBroken: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><g fill="none" stroke="currentColor" stroke-width="56" stroke-linecap="round"><path d="M196 316 136 376a76 76 0 0 1-108-108l88-88a76 76 0 0 1 108 0"/><path d="M316 196l60-60a76 76 0 0 1 108 108l-88 88a76 76 0 0 1-108 0"/><path d="M232 128v-56M128 232H72M280 384v56M384 280h56"/></g></svg>',
+  linkBroken: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 50 640 640"><path fill="currentColor" d="M452 160C435 160 419 165 405 173C389 157 371 143 350 133C378 109 414 96 452 96C538 96 608 166 608 253C608 294 592 334 562 363L491 434C462 464 422 480 381 480C294 480 224 410 224 324C224 322 224 321 224 319C225 301 239 287 257 288C275 288 289 303 288 321C288 322 288 323 288 323C288 375 330 416 381 416C405 416 429 406 446 389L517 318C534 300 544 277 544 252C544 201 503 160 452 160zM307 237C305 237 303 235 301.7 234.2C289.1 227.7 274.7 224 259.6 224C235.1 224 211.6 233.7 194.2 251.1L123.1 322.2C106 340 96 363 96 388C96 439 137 480 189 480C205 480 221 476 235 468C251 484 269 497 290 507C262 531 226 544 189 544C102 544 32 474 32 388C32 346 49 306 78 277L149 206C178 177 218 160 260 160C346 160 416 231 416 317C416 318 416 320 416 321C416 339 401 353 383 352C366 352 352 337 352 319C352 319 352 318 352 317C352 283 334 254 307 238z"/></svg>',
   visualize: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 10 512 512"><path fill="Currentcolor" d="M152 38c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 113C-2 104-2 88 7 79s25-9 34 0l22 22 55-61c9-10 24-11 34-2zm0 160c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 273c-9-9-9-25 0-34s25-9 35 0l22 22 55-61c9-10 24-11 34-2zM224 96c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zm0 160c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zM160 416c0-18 14-32 32-32l288 0c18 0 32 14 32 32s-14 32-32 32l-288 0c-18 0-32-14-32-32zM48 368a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/></svg>'
 };
 class ConsoleErrors extends HTMLElement {
@@ -8210,6 +8209,11 @@ class Ed11yElementTip extends HTMLElement {
     UI.attachCSS(this.wrapper);
     this.tip = this.wrapper.querySelector(".tip");
     const content = this.wrapper.querySelector(".message");
+    if (typeof this.result.content === "string") {
+      const wrapped = document.createElement("div");
+      wrapped.innerHTML = this.result.content;
+      this.result.content = wrapped;
+    }
     if (this.result.content.querySelector(".title")) {
       content.appendChild(this.result.content);
       const sallyTips = content.querySelectorAll("hr, hr ~ *");
@@ -8279,7 +8283,9 @@ class Ed11yElementTip extends HTMLElement {
       const dismissIcon = document.createElement("span");
       dismissIcon.classList.add("ed11y-dismiss-icon");
       dismissIcon.innerHTML = sprite.dismiss;
-      if (UI.showDismissed && this.dismissed) {
+      if (this.isLink) {
+        this.drawLinkActions(buttonBar, dismissIcon);
+      } else if (UI.showDismissed && this.dismissed) {
         const okd = this.result.dismissalStatus === "ok";
         if (okd && State.option.allowOK || !okd) {
           const unDismissButton = document.createElement("button");
@@ -8300,8 +8306,6 @@ class Ed11yElementTip extends HTMLElement {
           restoreNote.textContent = Lang._("unDismissNotePermissions");
           buttonBar.prepend(restoreNote);
         }
-      } else if (this.isLink) {
-        this.drawLinkActions(buttonBar, dismissIcon);
       } else {
         const pageActions = this.wrapper.querySelector(".ed11y-bulk-actions");
         const pageActionsSummary = pageActions.querySelector("summary");
@@ -8449,9 +8453,16 @@ class Ed11yElementTip extends HTMLElement {
     this.initialized = true;
     this.rendering = false;
   }
-  // Link-check results get two actions: accept the link (Mark OK, or Ignore
-  // for users who may not mark things OK) or confirm it is broken. No bulk
-  // actions: each link target is its own decision.
+  // Link-check results offer only the verdicts that would change anything.
+  // No bulk actions: each link target is its own decision.
+  //
+  //   broken (type "link")        Mark OK, or Ignore for users who may not
+  //                               mark things OK.
+  //   manual check ("linkManual") Mark OK or Ignore, plus Mark broken.
+  //   marked OK (dismissalStatus  Restore, which clears the mark so the
+  //   "ok", shown with hidden     checker decides again.
+  //   alerts)
+  //   ignored ("hide")            Restore, as for any ignored alert.
   //
   // Mark OK and Mark broken are site-wide marks on the link, so the checker
   // that pushed the result may grant them separately from the page-level
@@ -8473,6 +8484,50 @@ class Ed11yElementTip extends HTMLElement {
       button.dataset.ed11yAll = "false";
       return button;
     };
+    const markBroken = () => {
+      const brokenIcon = document.createElement("span");
+      brokenIcon.classList.add("ed11y-dismiss-icon");
+      brokenIcon.innerHTML = sprite.linkBroken;
+      const brokenButton = makeButton(
+        ["broken"],
+        Lang._("dismissBrokenButton"),
+        Lang._("dismissBrokenTitle"),
+        brokenIcon
+      );
+      brokenButton.addEventListener("click", (e) => {
+        dismissThis("broken", e.target.closest("button"));
+      });
+      buttonBar.append(brokenButton);
+    };
+    if (this.result.dismissalStatus === "hide") {
+      const restoreIcon = document.createElement("span");
+      restoreIcon.classList.add("ed11y-dismiss-icon");
+      restoreIcon.innerHTML = sprite.unDismiss;
+      const restoreButton = makeButton([], Lang._("unDismissHideButton"), null, restoreIcon);
+      restoreButton.addEventListener("click", (e) => {
+        dismissThis("reset", e.target.closest("button"));
+      });
+      buttonBar.append(restoreButton);
+      return;
+    }
+    if (this.result.dismissalStatus === "ok") {
+      if (allowMark) {
+        const restoreIcon = document.createElement("span");
+        restoreIcon.classList.add("ed11y-dismiss-icon");
+        restoreIcon.innerHTML = sprite.unDismiss;
+        const restoreButton = makeButton([], Lang._("unDismissOKButton"), null, restoreIcon);
+        restoreButton.addEventListener("click", (e) => {
+          dismissThis("reset", e.target.closest("button"));
+        });
+        buttonBar.append(restoreButton);
+      } else {
+        const note = document.createElement("div");
+        note.classList.add("dismissed-note");
+        note.textContent = Lang._("unDismissNotePermissions");
+        buttonBar.prepend(note);
+      }
+      return;
+    }
     if (allowMark) {
       const check = document.createElement("span");
       check.setAttribute("aria-hidden", "true");
@@ -8499,20 +8554,8 @@ class Ed11yElementTip extends HTMLElement {
       });
       buttonBar.append(ignoreButton);
     }
-    if (allowMark) {
-      const brokenIcon = document.createElement("span");
-      brokenIcon.classList.add("ed11y-dismiss-icon");
-      brokenIcon.innerHTML = sprite.linkBroken;
-      const brokenButton = makeButton(
-        ["broken"],
-        Lang._("dismissBrokenButton"),
-        Lang._("dismissBrokenTitle"),
-        brokenIcon
-      );
-      brokenButton.addEventListener("click", (e) => {
-        dismissThis("broken", e.target.closest("button"));
-      });
-      buttonBar.append(brokenButton);
+    if (allowMark && isManualLink(this.result)) {
+      markBroken();
     }
   }
   disconnectedCallback() {
