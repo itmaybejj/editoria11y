@@ -8,21 +8,29 @@ import checkReadability from '../../sa11y-js/rulesets/readability';
 import sprite from '../elements/sprite.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { UI } from './ui.js';
-import { LINK_RESULT_TYPES, isLinkResult } from '../utils/result-types.js';
+import {
+  LINK_CLASS,
+  LINK_RESULT_TYPES,
+  isLinkResult,
+  isWarningStyled,
+} from '../utils/result-types.js';
 
-// Link-check results reuse the dismissable toggle but carry their own class,
-// icon and label. Runs on create and on every adoption, because a target can
-// move between `link` and `linkManual` across rechecks without changing the
+const linkTypeClasses = Object.values(LINK_RESULT_TYPES).map((type) => type.className);
+
+// Paints the toggle with the error or warning colors of the result's
+// severity; link-check results also get their own class, icon and label.
+// Runs on create and on every adoption, because a target can move between
+// `link` and `linkManual` across rechecks without changing the
 // dismissable/dismissed pair that the adoption path already compares.
-const decorateLinkToggle = (toggle, result, dismissed) => {
-  const wasLink =
-    toggle.classList.contains('ed11y-link') || toggle.classList.contains('ed11y-link-manual');
-  toggle.classList.remove('ed11y-link', 'ed11y-link-manual');
+const decorateToggle = (toggle, result, dismissed) => {
+  const wasLink = toggle.classList.contains(LINK_CLASS);
+  toggle.classList.remove(LINK_CLASS, ...linkTypeClasses);
+  toggle.classList.toggle('dismissable', isWarningStyled(result) && !dismissed);
   if (isLinkResult(result)) {
     const linkType = LINK_RESULT_TYPES[result.type];
-    toggle.classList.add(linkType.className);
+    toggle.classList.add(LINK_CLASS, linkType.className);
     toggle.setAttribute('aria-label', Lang._(linkType.badge));
-    toggle.innerHTML = dismissed ? sprite.dismiss : sprite.linkBroken;
+    toggle.innerHTML = dismissed ? sprite.linkHidden : sprite.linkBroken;
   } else if (wasLink) {
     toggle.setAttribute(
       'aria-label',
@@ -260,11 +268,10 @@ export function drawResult(result, index) {
     if (mark.dismissable !== nextDismissable || mark.dismissed !== nextDismissed) {
       mark.dismissable = nextDismissable;
       mark.dismissed = nextDismissed;
-      mark.toggle.classList.toggle('dismissable', nextDismissable && !nextDismissed);
       mark.toggle.classList.toggle('dismissed', nextDismissed);
       mark.toggle.innerHTML = nextDismissed ? sprite.dismiss : '';
     }
-    decorateLinkToggle(mark.toggle, result, nextDismissed);
+    decorateToggle(mark.toggle, result, nextDismissed);
 
     if (mark.tip) {
       mark.tip.remove();
@@ -333,10 +340,8 @@ export function drawResult(result, index) {
   if (mark.dismissed) {
     mark.toggle.innerHTML = sprite.dismiss;
     mark.toggle.classList.add('dismissed');
-  } else if (mark.dismissable) {
-    mark.toggle.classList.add('dismissable');
   }
-  decorateLinkToggle(mark.toggle, mark.result, mark.dismissed);
+  decorateToggle(mark.toggle, mark.result, mark.dismissed);
   mark.wrapper.appendChild(mark.toggle);
   mark.toggle.addEventListener('click', mark.toggleClick);
   mark.toggle.addEventListener('focus', mark.handleFocus);

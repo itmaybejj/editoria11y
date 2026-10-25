@@ -1867,12 +1867,13 @@
     dismiss: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>',
     unDismiss: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="-30 0 640 512"><path fill="Currentcolor" d="M288 32c-81 0-146 37-193 81C49 156 17 208 3 244c-3 8-3 17 0 25C17 304 49 356 95 399C142.5 443 207 480 288 480s146-37 193-81c47-44 78-95 93-131c3-8 3-17 0-25c-15-36-46-88-93-131C434 69 369 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35-29 64-64 64c-7 0-14-1-20-3c-6-2-12 2-12 7c.3 7 1 14 3 21c14 51 66 82 118 68s82-66 68-118c-11-42-48-69-89-71c-6-.2-9 6-7 12c2 6 3 13 3 20z"></path></svg>',
     headings: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M0 96C0 78 14 64 32 64l384 0c18 0 32 14 32 32s-14 32-32 32L32 128C14 128 0 114 0 96zM64 256c0-18 14-32 32-32l384 0c18 0 32 14 32 32s-14 32-32 32L96 288c-18 0-32-14-32-32zM448 416c0 18-14 32-32 32L32 448c-18 0-32-14-32-32s14-32 32-32l384 0c18 0 32 14 32 32z"></path></svg>',
-    readability: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" aria-hidden="true"><path fill="currentColor" d="M528.3 46.5l-139.8 0c-48.1 0-89.9 33.3-100.4 80.3-10.6-47-52.3-80.3-100.4-80.3L48 46.5C21.5 46.5 0 68 0 94.5L0 340.3c0 26.5 21.5 48 48 48l89.7 0c102.2 0 132.7 24.4 147.3 75 .7 2.8 5.2 2.8 6 0 14.7-50.6 45.2-75 147.3-75l89.7 0c26.5 0 48-21.5 48-48l0-245.7c0-26.4-21.3-47.9-47.7-48.1zM242 311.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zM501.3 311.8c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.8c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.8-.1 0z"/></svg>',
+    readability: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" aria-hidden="true"><path fill="currentColor" d="M528 47l-140 0c-48 0-90 33-100 80-11-47-52-80-100-80L48 47C22 47 0 68 0 95L0 340c0 27 22 48 48 48l90 0c102 0 133 24 147 75 .7 2.8 5.2 2.8 6 0 15-51 45-75 147-75l90 0c27 0 48-21 48-48l0-246c0-26-21-48-48-48zM242 312c0 1.9-1.5 3.5-3.5 3.5l-160 0c-1.9 0-3.5-1.5-3.5-3.5l0-23c0-1.9 1.5-3.5 3.5-3.5l160 0c1.9 0 3.5 1.5 3.5 3.5l0 23-.1 0zm0-61c0 1.9-1.5 3.5-3.5 3.5l-160 0c-1.9 0-3.5-1.5-3.5-3.5l0-23c0-1.9 1.5-3.5 3.5-3.5l160 0c1.9 0 3.5 1.5 3.5 3.5l0 23-.1 0zm0-61c0 1.9-1.5 3.5-3.5 3.5l-160 0c-1.9 0-3.5-1.5-3.5-3.5l0-23c0-1.9 1.5-3.5 3.5-3.5l160 0c1.9 0 3.5 1.5 3.5 3.5l0 23-.1 0zM501 312c0 1.9-1.5 3.5-3.5 3.5l-160 0c-1.9 0-3.5-1.5-3.5-3.5l0-23c0-1.9 1.5-3.5 3.5-3.5l160 0c1.9 0 3.5 1.5 3.5 3.5l0 23-.1 0zm0-61c0 1.9-1.5 3.5-3.5 3.5l-160 0c-1.9 0-3.5-1.5-3.5-3.5l0-23c0-1.9 1.5-3.5 3.5-3.5l160 0c1.9 0 3.5 1.5 3.5 3.5l0 23-.1 0zm0-61c0 1.9-1.5 3.5-3.5 3.5l-160 0c-1.9 0-3.5-1.5-3.5-3.5l0-23c0-1.9 1.5-3.5 3.5-3.5l160 0c1.9 0 3.5 1.5 3.5 3.5l0 23-.1 0z"/></svg>',
     next: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="11" viewBox="0 -15 90 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m30 00 50 50-50 50" stroke-width="18"></path></svg>',
     toggleErrors: '<svg class="errors-icon" xmlns="http://www.w3.org/2000/svg" width="10" aria-hidden="true" viewBox="0 0 448 512"><path fill="currentColor" d="M64 32C64 14 50 0 32 0S0 14 0 32L0 64 0 368 0 480c0 18 14 32 32 32s32-14 32-32l0-128 64-16c41-10 85-5 123 13c44.2 22 96 25 142 7l35-13c13-5 21-17 21-30l0-248c0-23-24-38-45-28l-10 5c-46 23-101 23-147 0c-35-18-75-22-114-13L64 48l0-16z"></path></svg>',
-    togglePass: '<svg class="pass-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10.1699 19.1777"><path fill="currentColor" d="M3.7031,10.5527c-.3633-.6562-.6426-1.1387-.8379-1.4473l-.3105-.4863-.2344-.3574c-.5117-.7969-1.0449-1.4551-1.5996-1.9746.3164-.2617.6113-.3926.8848-.3926.3359,0,.6348.123.8965.3691s.5918.7148.9902,1.4062c.4531-1.4727,1.0293-2.8691,1.7285-4.1895.3867-.7188.7314-1.2021,1.0342-1.4502s.7041-.3721,1.2041-.3721c.2656,0,.5938.041.9844.123-1.0039.8086-1.8066,1.7695-2.4082,2.8828s-1.3789,3.0762-2.332,5.8887Z"/></svg>',
+    togglePass: '<svg class="pass-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10 19"><path fill="currentColor" d="M3.7,11c-.36-.66-.64-1.1-.84-1.4l-.31-.49-.23-.36c-.51-.8-1-1.5-1.6-2 .32-.26.61-.39.88-.39.34,0,.63.12.9.37s.59.71.99,1.4c.45-1.5,1-2.9,1.7-4.2.39-.72.73-1.2,1-1.5s.7-.37,1.2-.37c.27,0,.59.041.98.12-1 .81-1.8,1.8-2.4,2.9s-1.4,3.1-2.3,5.9Z"/></svg>',
     toggleWarnings: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="close-icon" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
-    linkBroken: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 50 640 640"><path fill="currentColor" d="M452 160C435 160 419 165 405 173C389 157 371 143 350 133C378 109 414 96 452 96C538 96 608 166 608 253C608 294 592 334 562 363L491 434C462 464 422 480 381 480C294 480 224 410 224 324C224 322 224 321 224 319C225 301 239 287 257 288C275 288 289 303 288 321C288 322 288 323 288 323C288 375 330 416 381 416C405 416 429 406 446 389L517 318C534 300 544 277 544 252C544 201 503 160 452 160zM307 237C305 237 303 235 301.7 234.2C289.1 227.7 274.7 224 259.6 224C235.1 224 211.6 233.7 194.2 251.1L123.1 322.2C106 340 96 363 96 388C96 439 137 480 189 480C205 480 221 476 235 468C251 484 269 497 290 507C262 531 226 544 189 544C102 544 32 474 32 388C32 346 49 306 78 277L149 206C178 177 218 160 260 160C346 160 416 231 416 317C416 318 416 320 416 321C416 339 401 353 383 352C366 352 352 337 352 319C352 319 352 318 352 317C352 283 334 254 307 238z"/></svg>',
+    linkBroken: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 50 640 640"><path fill="currentColor" d="M452 160C435 160 419 165 405 173C389 157 371 143 350 133C378 109 414 96 452 96C538 96 608 166 608 253C608 294 592 334 562 363L491 434C462 464 422 480 381 480C294 480 224 410 224 324C224 322 224 321 224 319C225 301 239 287 257 288C275 288 289 303 288 321C288 322 288 323 288 323C288 375 330 416 381 416C405 416 429 406 446 389L517 318C534 300 544 277 544 252C544 201 503 160 452 160zM307 237C305 237 303 235 302 234C289 228 275 224 260 224C235 224 212 234 194 251L123 322C106 340 96 363 96 388C96 439 137 480 189 480C205 480 221 476 235 468C251 484 269 497 290 507C262 531 226 544 189 544C102 544 32 474 32 388C32 346 49 306 78 277L149 206C178 177 218 160 260 160C346 160 416 231 416 317C416 318 416 320 416 321C416 339 401 353 383 352C366 352 352 337 352 319C352 319 352 318 352 317C352 283 334 254 307 238z"/></svg>',
+    linkHidden: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 50 640 640"><path fill="currentColor" d="M73 39C64 30 48 30 39 39C30 49 30 64 39 73L567 601C576 611 592 611 601 601C610 592 610 577 601 567L479 445C483 442 487 438 491 434L562 363C591 334 608 294 608 253C608 166 538 96 451 96C414 96 378 109 350 133C370 143 389 157 405 173C419 165 435 160 451 160C503 160 544 202 544 253C544 277 534 301 517 318L446 389C442 393 438 397 433 400L386 352C402 351 415 338 416 321C416 320 416 318 416 317C416 231 346 160 259 160C240 160 221 164 204 170L73 39zM258 224C259 224 259 224 260 224C275 224 289 228 302 234C304 235 305 237 307 237C334 254 352 283 352 317C352 317 352 318 352 318L258 224zM378 480L224 326C225 410 294 479 378 480zM172 274L126 228L78 277C49 306 32 346 32 387C32 474 102 544 189 544C226 544 262 531 290 507C270 497 251 483 235 467C221 475 205 480 189 480C137 480 96 438 96 387C96 363 106 339 123 322L172 273z"/></svg>',
     visualize: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 10 512 512"><path fill="Currentcolor" d="M152 38c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 113C-2 104-2 88 7 79s25-9 34 0l22 22 55-61c9-10 24-11 34-2zm0 160c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 273c-9-9-9-25 0-34s25-9 35 0l22 22 55-61c9-10 24-11 34-2zM224 96c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zm0 160c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zM160 416c0-18 14-32 32-32l288 0c18 0 32 14 32 32s-14 32-32 32l-288 0c-18 0-32-14-32-32zM48 368a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/></svg>'
   };
   class ConsoleErrors extends HTMLElement {
@@ -5420,11 +5421,13 @@ ${this.error.stack}
       });
     });
   }
+  const LINK_CLASS = "ed11y-link";
   const LINK_RESULT_TYPES = {
-    link: { badge: "linkBrokenBadge", className: "ed11y-link" },
-    linkManual: { badge: "linkManualBadge", className: "ed11y-link-manual" }
+    link: { badge: "linkBrokenBadge", className: "ed11y-link-broken", severity: "error" },
+    linkManual: { badge: "linkManualBadge", className: "ed11y-link-manual", severity: "warning" }
   };
   const isLinkResult = (result) => typeof result?.type === "string" && Object.hasOwn(LINK_RESULT_TYPES, result.type);
+  const isWarningStyled = (result) => result?.type !== "error" && LINK_RESULT_TYPES[result?.type]?.severity !== "error";
   const isManualLink = (result) => result?.type === "linkManual";
   const isHiddenByDefault = (result) => !!result?.dismissalStatus || isManualLink(result);
   const shouldDraw = (result) => !isHiddenByDefault(result) || UI.showDismissed || isManualLink(result) && !result.dismissalStatus && UI.visualizing;
@@ -5800,14 +5803,16 @@ ${this.error.stack}
       Constants.Panel.readabilityInfo.innerHTML = `<br>${Lang._("READABILITY_NOT_ENOUGH")}`;
     }
   }
-  const decorateLinkToggle = (toggle, result, dismissed) => {
-    const wasLink = toggle.classList.contains("ed11y-link") || toggle.classList.contains("ed11y-link-manual");
-    toggle.classList.remove("ed11y-link", "ed11y-link-manual");
+  const linkTypeClasses = Object.values(LINK_RESULT_TYPES).map((type) => type.className);
+  const decorateToggle = (toggle, result, dismissed) => {
+    const wasLink = toggle.classList.contains(LINK_CLASS);
+    toggle.classList.remove(LINK_CLASS, ...linkTypeClasses);
+    toggle.classList.toggle("dismissable", isWarningStyled(result) && !dismissed);
     if (isLinkResult(result)) {
       const linkType = LINK_RESULT_TYPES[result.type];
-      toggle.classList.add(linkType.className);
+      toggle.classList.add(LINK_CLASS, linkType.className);
       toggle.setAttribute("aria-label", Lang._(linkType.badge));
-      toggle.innerHTML = dismissed ? sprite.dismiss : sprite.linkBroken;
+      toggle.innerHTML = dismissed ? sprite.linkHidden : sprite.linkBroken;
     } else if (wasLink) {
       toggle.setAttribute(
         "aria-label",
@@ -6009,11 +6014,10 @@ ${this.error.stack}
       if (mark2.dismissable !== nextDismissable || mark2.dismissed !== nextDismissed) {
         mark2.dismissable = nextDismissable;
         mark2.dismissed = nextDismissed;
-        mark2.toggle.classList.toggle("dismissable", nextDismissable && !nextDismissed);
         mark2.toggle.classList.toggle("dismissed", nextDismissed);
         mark2.toggle.innerHTML = nextDismissed ? sprite.dismiss : "";
       }
-      decorateLinkToggle(mark2.toggle, result, nextDismissed);
+      decorateToggle(mark2.toggle, result, nextDismissed);
       if (mark2.tip) {
         mark2.tip.remove();
         mark2.tip = null;
@@ -6066,10 +6070,8 @@ ${this.error.stack}
     if (mark.dismissed) {
       mark.toggle.innerHTML = sprite.dismiss;
       mark.toggle.classList.add("dismissed");
-    } else if (mark.dismissable) {
-      mark.toggle.classList.add("dismissable");
     }
-    decorateLinkToggle(mark.toggle, mark.result, mark.dismissed);
+    decorateToggle(mark.toggle, mark.result, mark.dismissed);
     mark.wrapper.appendChild(mark.toggle);
     mark.toggle.addEventListener("click", mark.toggleClick);
     mark.toggle.addEventListener("focus", mark.handleFocus);
@@ -6563,10 +6565,8 @@ ${this.error.stack}
     const zIndex = result.dismissalStatus ? "calc(var(--ed11y-buttonZIndex, 9999) - 2)" : "calc(var(--ed11y-buttonZIndex, 9999) - 1)";
     el.style.setProperty("z-index", zIndex);
     let outline = "0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px";
-    if (result.type === "warning") {
+    if (isWarningStyled(result)) {
       outline = "0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)";
-    } else if (result.type === "linkManual") {
-      outline = "0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-linkManual, #6b4ea5), 0 0 0 3px var(--ed11y-linkManual, #6b4ea5), 0 0 0 4px var(--ed11y-primary)";
     }
     el.style.setProperty("box-shadow", outline);
     el.style.setProperty("border-radius", "3px");
@@ -7715,7 +7715,7 @@ ${this.error.stack}
         this.buildTip();
       }
       this.toggle.setAttribute("aria-expanded", changeTo);
-      const highlightOutline = this.dismissable && this.result.type !== "link" ? "ed11y-ring-yellow" : "ed11y-ring-red";
+      const highlightOutline = isWarningStyled(this.result) ? "ed11y-ring-yellow" : "ed11y-ring-red";
       if (UI.inlineAlerts) {
         resetClass([
           "ed11y-hidden-highlight",
@@ -8205,7 +8205,11 @@ ${this.error.stack}
 		`;
       this.wrapper.querySelector(".content").dataset.test = this.result.test;
       if (this.isLink) {
-        this.wrapper.querySelector(".error-badge").classList.add(LINK_RESULT_TYPES[this.result.type].className);
+        this.wrapper.querySelector(".error-badge").classList.add(
+          LINK_CLASS,
+          LINK_RESULT_TYPES[this.result.type].className,
+          isWarningStyled(this.result) ? "ed11y-warning" : "ed11y-alert"
+        );
       }
       this.addEventListener("mouseover", this.handleHover, {
         passive: true
@@ -9204,7 +9208,7 @@ ${this.error.stack}
     buttonToolsActive: "Hide visualizers",
     dismissActions: `Similar`,
     dismissBrokenButton: "Mark broken",
-    dismissBrokenTitle: "Reports this link as broken to all editors",
+    dismissBrokenTitle: "Reports this broken link to all editors",
     dismissHideTitle: "Only hides alert for you",
     dismissOkAllButton: "On this page: mark OK",
     dismissOkButtonContent: "Mark OK",
@@ -9218,7 +9222,7 @@ ${this.error.stack}
     issueDeveloper: "Developer issue",
     issueTemplate: "Template issue",
     linkBrokenBadge: "Broken link",
-    linkManualBadge: "Link needs a manual check",
+    linkManualBadge: "Check this link",
     main_toggle_hide: "Hide accessibility tools",
     main_toggle_hide_alerts: "Hide accessibility alerts",
     main_toggle_show: "Show accessibility tools",
@@ -9512,9 +9516,7 @@ ${this.error.stack}
       warning: "rgb(250, 216, 89)",
       warningText: "#20160c",
       alert: "rgb(184, 5, 25)",
-      alertText: "#f4f7ff",
-      linkManual: "#6b4ea5",
-      linkManualText: "#fffdf7"
+      alertText: "#f4f7ff"
     },
     darkTheme: {
       bg: "#0a2051",
@@ -9539,9 +9541,7 @@ ${this.error.stack}
       warning: "rgb(250, 216, 89)",
       warningText: "#20160c",
       alert: "rgb(184, 5, 25)",
-      alertText: "#f4f7ff",
-      linkManual: "#9b84d1",
-      linkManualText: "#00081d"
+      alertText: "#f4f7ff"
     },
     lightTheme: {
       bg: "#fffffe",
@@ -9564,9 +9564,7 @@ ${this.error.stack}
       warning: "rgb(250, 216, 89)",
       warningText: "#20160c",
       alert: "rgb(184, 5, 25)",
-      alertText: "#f4f7ff",
-      linkManual: "#6b4ea5",
-      linkManualText: "#fffdf7"
+      alertText: "#f4f7ff"
     },
     // Base z-index for buttons.
     // 1299 maximizes TinyMCE compatibility.

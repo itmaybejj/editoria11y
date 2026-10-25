@@ -237,8 +237,6 @@ export const ed11yDefaultOptions = {
     warningText: '#20160c',
     alert: 'rgb(184, 5, 25)',
     alertText: '#f4f7ff',
-    linkManual: '#6b4ea5',
-    linkManualText: '#fffdf7',
   },
   darkTheme: {
     bg: '#0a2051',
@@ -262,8 +260,6 @@ export const ed11yDefaultOptions = {
     warningText: '#20160c',
     alert: 'rgb(184, 5, 25)',
     alertText: '#f4f7ff',
-    linkManual: '#9b84d1',
-    linkManualText: '#00081d',
   },
   lightTheme: {
     bg: '#fffffe',
@@ -287,8 +283,6 @@ export const ed11yDefaultOptions = {
     warningText: '#20160c',
     alert: 'rgb(184, 5, 25)',
     alertText: '#f4f7ff',
-    linkManual: '#6b4ea5',
-    linkManualText: '#fffdf7',
   },
   // Base z-index for buttons.
   // 1299 maximizes TinyMCE compatibility.

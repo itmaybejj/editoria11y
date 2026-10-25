@@ -45,7 +45,7 @@ import { drawResult, showAltPanel, showHeadingsPanel, visualize } from './visual
 import checkReadability from '../../sa11y-js/rulesets/readability.js';
 import sprite from '../elements/sprite.js';
 import { checkCustomRuleset } from '../rulesets/custom-ruleset.js';
-import { isManualLink, shouldDraw } from '../utils/result-types.js';
+import { isManualLink, isWarningStyled, shouldDraw } from '../utils/result-types.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { resetGetText, store } from '../../sa11y-js/utils/utils.js';
@@ -552,12 +552,9 @@ export function editableHighlighter(resultID, show, firstVisible) {
   el.style.setProperty('z-index', zIndex);
   let outline =
     '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
-  if (result.type === 'warning') {
+  if (isWarningStyled(result)) {
     outline =
       '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)';
-  } else if (result.type === 'linkManual') {
-    outline =
-      '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-linkManual, #6b4ea5), 0 0 0 3px var(--ed11y-linkManual, #6b4ea5), 0 0 0 4px var(--ed11y-primary)';
   }
   el.style.setProperty('box-shadow', outline);
   el.style.setProperty('border-radius', '3px');

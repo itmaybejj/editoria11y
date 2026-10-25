@@ -28,9 +28,33 @@
 <script src="../dist/js/lang/en.umd.js"></script>
 <script>
 	window.ed11yTestEvents = [];
+
+	// The checker's own record of editor verdicts, keyed by the opaque hash
+	// it hands Editoria11y in each result's data. A real integration would
+	// persist these; here they live until the page reloads.
+	const linkVerdicts = { ok789: 'ok', hide012: 'hide' };
+
 	document.addEventListener('ed11yDismissalUpdate', (e) => {
 		window.ed11yTestEvents.push(e.detail);
+		const hash = e.detail.dismissData?.hash;
+		if (!hash) {
+			return;
+		}
+		if (e.detail.dismissAction === 'reset') {
+			delete linkVerdicts[hash];
+		} else if (e.detail.dismissAction === 'ok' || e.detail.dismissAction === 'hide') {
+			linkVerdicts[hash] = e.detail.dismissAction;
+		}
 	});
+
+	// Results arrive with whatever verdict the checker currently holds.
+	const withVerdict = (result) => {
+		const verdict = linkVerdicts[result.data.hash];
+		if (verdict) {
+			result.dismissalStatus = verdict;
+		}
+		return result;
+	};
 
 	// Register tip strings the way a CMS integration would (see
 	// src/js/rulesets/custom-ruleset.js for the same pattern).
@@ -51,43 +75,41 @@
 		if (window.location.search.includes('noMark')) {
 			data.allowMark = false;
 		}
-		Ed11y.State.results.push({
+		Ed11y.State.results.push(withVerdict({
 			test: 'LINK_BROKEN',
 			element: document.getElementById('broken-link'),
 			type: 'link',
 			content: Lang.sprintf('LINK_BROKEN'),
 			dismiss: 'LINK_BROKEN|/no-such-page',
 			data,
-		});
-		Ed11y.State.results.push({
+		}));
+		Ed11y.State.results.push(withVerdict({
 			test: 'LINK_MANUAL',
 			element: document.getElementById('manual-link'),
 			type: 'linkManual',
 			content: Lang.sprintf('LINK_MANUAL'),
 			dismiss: 'LINK_MANUAL|https://example.com/locked',
 			data: { hash: 'def456', href: 'https://example.com/locked', status: 'unverifiable' },
-		});
+		}));
 		// Results the checker already holds a verdict for arrive with a
 		// dismissalStatus and stay hidden until hidden alerts are shown. The
 		// first also hands its content over as a string, as integrations may.
-		Ed11y.State.results.push({
+		Ed11y.State.results.push(withVerdict({
 			test: 'LINK_BROKEN',
 			element: document.getElementById('okd-link'),
 			type: 'link',
 			content: Lang.langStrings.LINK_BROKEN,
 			dismiss: 'LINK_BROKEN|/marked-ok',
-			dismissalStatus: 'ok',
 			data: { hash: 'ok789', href: '/marked-ok', status: 'broken', action: 'ok' },
-		});
-		Ed11y.State.results.push({
+		}));
+		Ed11y.State.results.push(withVerdict({
 			test: 'LINK_BROKEN',
 			element: document.getElementById('ignored-link'),
 			type: 'link',
 			content: Lang.sprintf('LINK_BROKEN'),
 			dismiss: 'LINK_BROKEN|https://example.com/ignored',
-			dismissalStatus: 'hide',
 			data: { hash: 'hide012', href: 'https://example.com/ignored', status: 'broken' },
-		});
+		}));
 		document.dispatchEvent(new CustomEvent('ed11yResume'));
 	});
 

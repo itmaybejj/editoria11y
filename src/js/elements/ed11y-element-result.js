@@ -7,6 +7,7 @@ import {
 import { resetClass } from '../utils/utils.js';
 import { alignButtons } from '../utils/align.js';
 import { UI } from '../core/ui.js';
+import { isWarningStyled } from '../utils/result-types.js';
 
 export class Ed11yElementResult extends HTMLElement {
   connectedCallback() {
@@ -94,9 +95,7 @@ export class Ed11yElementResult extends HTMLElement {
       this.buildTip();
     }
     this.toggle.setAttribute('aria-expanded', changeTo);
-    // Broken links are dismissable but read as errors, so they get the red ring.
-    const highlightOutline =
-      this.dismissable && this.result.type !== 'link' ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
+    const highlightOutline = isWarningStyled(this.result) ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
     if (UI.inlineAlerts) {
       resetClass([
         'ed11y-hidden-highlight',

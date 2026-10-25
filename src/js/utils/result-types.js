@@ -18,13 +18,24 @@ import { UI } from '../core/ui.js';
 // `ed11yDismissalUpdate` with `dismissAction: 'broken'` for the integration
 // that pushed the result to act on, as "Restore" is with
 // `dismissAction: 'reset'`.
+//
+// Colors come from the result's status, not its type: `severity` picks the
+// same alert (error) or warning styling the built-in checks use. The shared
+// `ed11y-link` class only swaps the glyph for an icon; `className` is a
+// per-type hook for themes and tests and carries no styles of its own.
+export const LINK_CLASS = 'ed11y-link';
 export const LINK_RESULT_TYPES = {
-  link: { badge: 'linkBrokenBadge', className: 'ed11y-link' },
-  linkManual: { badge: 'linkManualBadge', className: 'ed11y-link-manual' },
+  link: { badge: 'linkBrokenBadge', className: 'ed11y-link-broken', severity: 'error' },
+  linkManual: { badge: 'linkManualBadge', className: 'ed11y-link-manual', severity: 'warning' },
 };
 
 export const isLinkResult = (result) =>
   typeof result?.type === 'string' && Object.hasOwn(LINK_RESULT_TYPES, result.type);
+
+// Whether a result is painted with warning (yellow) rather than alert (red)
+// colors. Broken links can be marked OK, but still read as errors.
+export const isWarningStyled = (result) =>
+  result?.type !== 'error' && LINK_RESULT_TYPES[result?.type]?.severity !== 'error';
 
 export const isManualLink = (result) => result?.type === 'linkManual';
 

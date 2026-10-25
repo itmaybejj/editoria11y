@@ -9,7 +9,13 @@ import {
 import sprite from './sprite.js';
 import { UI } from '../core/ui.js';
 import { State } from '../../sa11y-js/core/state.js';
-import { LINK_RESULT_TYPES, isLinkResult, isManualLink } from '../utils/result-types.js';
+import {
+  LINK_CLASS,
+  LINK_RESULT_TYPES,
+  isLinkResult,
+  isManualLink,
+  isWarningStyled,
+} from '../utils/result-types.js';
 
 export class Ed11yElementTip extends HTMLElement {
   connectedCallback() {
@@ -68,9 +74,14 @@ export class Ed11yElementTip extends HTMLElement {
 
     this.wrapper.querySelector('.content').dataset.test = this.result.test;
     if (this.isLink) {
+      // Link badges stand out from the footer in the colors of their severity.
       this.wrapper
         .querySelector('.error-badge')
-        .classList.add(LINK_RESULT_TYPES[this.result.type].className);
+        .classList.add(
+          LINK_CLASS,
+          LINK_RESULT_TYPES[this.result.type].className,
+          isWarningStyled(this.result) ? 'ed11y-warning' : 'ed11y-alert',
+        );
     }
 
     this.addEventListener('mouseover', this.handleHover, {

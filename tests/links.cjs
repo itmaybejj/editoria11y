@@ -32,6 +32,10 @@ describe('Link checker result types', function () {
       [],
       (result) => {
         browser.assert.ok(result.value.className.includes('ed11y-link'), 'Toggle carries link class');
+        browser.assert.ok(
+          !result.value.className.includes('dismissable'),
+          'Broken link toggle uses the error colors',
+        );
         browser.assert.ok(result.value.hasIcon, 'Toggle shows the broken-link icon');
         browser.assert.ok(
           result.value.label.includes('Broken link'),
@@ -68,6 +72,10 @@ describe('Link checker result types', function () {
           'Manual toggle carries its own class',
         );
         browser.assert.ok(
+          result.value.className.includes('dismissable'),
+          'Manual toggle uses the warning colors',
+        );
+        browser.assert.ok(
           result.value.label.includes('manual'),
           'Manual toggle label mentions a manual check',
         );
@@ -88,6 +96,7 @@ describe('Link checker result types', function () {
         const tip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]').shadowRoot;
         return {
           badge: tip.querySelector('.error-badge').textContent.trim(),
+          badgeClass: tip.querySelector('.error-badge').className,
           buttons: Array.from(tip.querySelectorAll('.ed11y-tip-dismissals button')).map((b) =>
             b.textContent.trim(),
           ),
@@ -96,6 +105,7 @@ describe('Link checker result types', function () {
       [],
       (result) => {
         browser.assert.equal(result.value.badge, 'Broken link', 'Badge names the link class');
+        browser.assert.ok(result.value.badgeClass.includes('ed11y-alert'), 'Badge uses the error colors');
         browser.assert.deepEqual(
           result.value.buttons,
           ['Mark OK'],
@@ -125,6 +135,7 @@ describe('Link checker result types', function () {
         const tip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]').shadowRoot;
         return {
           badge: tip.querySelector('.error-badge').textContent.trim(),
+          badgeClass: tip.querySelector('.error-badge').className,
           buttons: Array.from(tip.querySelectorAll('.ed11y-tip-dismissals button')).map((b) =>
             b.textContent.trim(),
           ),
@@ -136,6 +147,10 @@ describe('Link checker result types', function () {
           result.value.badge,
           'Link needs a manual check',
           'Badge names the link class',
+        );
+        browser.assert.ok(
+          result.value.badgeClass.includes('ed11y-warning'),
+          'Badge uses the warning colors',
         );
         browser.assert.ok(result.value.buttons.includes('Mark OK'), 'Mark OK offered');
         browser.assert.ok(result.value.buttons.includes('Mark broken'), 'Mark broken offered');
@@ -246,6 +261,22 @@ describe('Link checker result types', function () {
         browser.assert.equal(result.value.action, 'reset', 'Restore dispatches a reset');
         browser.assert.equal(result.value.type, 'link', 'Result type travels with it');
         browser.assert.equal(result.value.hash, 'hide012', 'Opaque data travels');
+      },
+    );
+    browser.execute(
+      function () {
+        const toggle = document
+          .querySelector('.ignored ed11y-element-result')
+          ?.shadowRoot.querySelector('.toggle');
+        return {
+          dismissed: toggle?.classList.contains('dismissed'),
+          status: Ed11y.State.results.find((r) => r.data?.hash === 'hide012')?.dismissalStatus,
+        };
+      },
+      [],
+      (result) => {
+        browser.assert.strictEqual(result.value.dismissed, false, 'Restored link is drawn as active');
+        browser.assert.ok(!result.value.status, 'Restored link arrives without a verdict');
       },
     );
   });
