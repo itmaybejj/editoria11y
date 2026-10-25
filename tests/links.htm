@@ -14,8 +14,10 @@
 		This page simulates a CMS link checker handing its flagged links to the
 		library through the <code>brokenLinks</code> option. Append
 		<code>?noOk</code> to the URL to test the button set shown to users who may
-		not mark things OK, or <code>?noMark</code> to withhold link marks through
-		<code>allowLinkMarks</code> while the page still allows OK.
+		not mark things OK, <code>?noMark</code> to withhold link marks through
+		<code>allowLinkMarks</code> while the page still allows OK, or
+		<code>?deferChecks</code> to keep unverifiable links behind the visualizers
+		through <code>brokenLinksShowChecks</code>.
 	</p>
 	<p class="broken"><a id="broken-link" href="/no-such-page">A link the checker found broken</a></p>
 	<p class="unpublished"><a id="unpublished-link" href="/en/node/5">A link to unpublished content, matched through a stripped path prefix</a></p>
@@ -64,6 +66,10 @@
 	};
 	if (window.location.search.includes('noMark')) {
 		options.allowLinkMarks = false;
+	}
+	if (window.location.search.includes('deferChecks')) {
+		// Only redirects are shown as ordinary manual checks.
+		options.brokenLinksShowChecks = ['redirect'];
 	}
 
 	const ed11y = new Ed11y.Ed11y(options);

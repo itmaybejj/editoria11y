@@ -48,21 +48,19 @@ describe('Link checker results', function () {
 
   before((browser) => browser.navigateTo(absolutePath));
 
-  it('paints broken links and hides manual checks until hidden alerts are shown', function (browser) {
+  it('paints broken links as errors and unverifiable links as manual checks', function (browser) {
     browser.waitForElementPresent('ed11y-element-result', 2000);
     browser.assert.elementPresent('.broken ed11y-element-result', 'Broken link gets a result button');
     browser.assert.elementPresent(
       '.unpublished ed11y-element-result',
       'Stored path matches the anchor once the language prefix is stripped',
     );
-    browser.assert.not.elementPresent(
+    browser.assert.elementPresent(
       '.manual ed11y-element-result',
-      'Manual-check link is hidden by default',
+      'Manual-check link is painted like any other manual check',
     );
-    browser.assert.not.elementPresent(
-      '.redirect ed11y-element-result',
-      'Redirecting link is a manual check, hidden by default',
-    );
+    browser.assert.elementPresent('.redirect ed11y-element-result', 'Redirecting link is painted');
+    browser.assert.not.elementPresent('.okd ed11y-element-result', 'Marked-OK link is hidden');
     browser.assert.not.elementPresent('.fine ed11y-element-result', 'Unflagged link is untouched');
 
     browser.execute(
@@ -75,6 +73,7 @@ describe('Link checker results', function () {
           label: toggle.getAttribute('aria-label'),
           hasIcon: !!toggle.querySelector('svg'),
           errorCount: Ed11y.UI.errorCount,
+          warningCount: Ed11y.UI.warningCount,
           dismissedCount: Ed11y.UI.dismissedCount,
           linkResults: Ed11y.State.results.filter((r) => r.data?.hash).length,
         };
@@ -92,23 +91,16 @@ describe('Link checker results', function () {
           'Toggle is labelled as a broken link',
         );
         browser.assert.equal(result.value.errorCount, 2, 'Broken and unpublished links count as issues');
+        browser.assert.equal(result.value.warningCount, 2, 'Unverifiable and redirect count as manual checks');
         browser.assert.equal(
           result.value.dismissedCount,
-          4,
-          'Manual check, redirect, marked-OK link and ignored link count as hidden',
+          2,
+          'Marked-OK link and ignored link count as hidden',
         );
         browser.assert.equal(result.value.linkResults, 6, 'A flagged link absent from the page produces no result');
       },
     );
 
-    // Reveal hidden alerts; the manual check should now be painted.
-    browser.execute(function () {
-      document
-        .querySelector('ed11y-element-panel')
-        .shadowRoot.querySelector('#ed11y-show-hidden')
-        .click();
-    });
-    browser.waitForElementPresent('.manual ed11y-element-result', 2000);
     browser.execute(
       function () {
         const toggle = document
@@ -132,6 +124,15 @@ describe('Link checker results', function () {
         );
       },
     );
+
+    // Reveal hidden alerts for the Restore tests below.
+    browser.execute(function () {
+      document
+        .querySelector('ed11y-element-panel')
+        .shadowRoot.querySelector('#ed11y-show-hidden')
+        .click();
+    });
+    browser.waitForElementPresent('.okd ed11y-element-result', 2000);
   });
 
   it('offers only Mark OK on a broken link and shows its target', function (browser) {
@@ -179,7 +180,7 @@ describe('Link checker results', function () {
         return {
           last: last,
           recorded: !!(
-            Ed11y.UI.dismissedAlerts[page] && Ed11y.UI.dismissedAlerts[page].LINK_UNVERIFIABLE
+            Ed11y.UI.dismissedAlerts[page] && Ed11y.UI.dismissedAlerts[page].HREF_UNVERIFIABLE
           ),
           stillPainted: !!document.querySelector('.manual ed11y-element-result'),
         };
@@ -187,7 +188,7 @@ describe('Link checker results', function () {
       [],
       (result) => {
         browser.assert.equal(result.value.last.dismissAction, 'broken', 'Broken action dispatched');
-        browser.assert.equal(result.value.last.dismissTest, 'LINK_UNVERIFIABLE', 'Test key travels');
+        browser.assert.equal(result.value.last.dismissTest, 'HREF_UNVERIFIABLE', 'Test key travels');
         browser.assert.equal(result.value.last.dismissType, 'linkManual', 'Result type travels with it');
         browser.assert.equal(result.value.last.dismissData.hash, 'def456', 'Opaque hash travels');
         browser.assert.equal(
@@ -276,10 +277,34 @@ describe('Link checker results', function () {
     );
   });
 
-  it('reveals manual checks while the visualizers are open', function (browser) {
-    browser.navigateTo(absolutePath);
+  it('keeps checks left out of brokenLinksShowChecks behind the visualizers', function (browser) {
+    browser.navigateTo(`${absolutePath}?deferChecks`);
     browser.waitForElementPresent('.broken ed11y-element-result', 2000);
-    browser.assert.not.elementPresent('.manual ed11y-element-result', 'Hidden before visualizing');
+    browser.assert.not.elementPresent('.manual ed11y-element-result', 'Unverifiable link waits');
+    browser.assert.elementPresent('.redirect ed11y-element-result', 'Listed status is painted');
+    browser.execute(
+      function () {
+        return {
+          warningCount: Ed11y.UI.warningCount,
+          dismissedCount: Ed11y.UI.dismissedCount,
+          visualizerOnly: Ed11y.State.results.filter((r) => r.visualizerOnly).map((r) => r.test),
+        };
+      },
+      [],
+      (result) => {
+        browser.assert.equal(result.value.warningCount, 1, 'Only the redirect counts as a manual check');
+        browser.assert.equal(
+          result.value.dismissedCount,
+          3,
+          'The waiting check shares the hidden count with the dismissed links',
+        );
+        browser.assert.deepEqual(
+          result.value.visualizerOnly,
+          ['HREF_UNVERIFIABLE'],
+          'Only the unlisted status is flagged visualizer-only',
+        );
+      },
+    );
     browser.execute(function () {
       document
         .querySelector('ed11y-element-panel')
@@ -337,7 +362,7 @@ describe('Link checker results', function () {
         browser.assert.equal(rows.length, 6, 'One row per flagged link found on the page');
         browser.assert.deepEqual(
           rows.map((r) => r.status),
-          ['Broken', 'Unpublished', 'Unverified', 'Redirects', 'Marked OK', 'Ignored'],
+          ['Broken', 'Unpublished', 'Unverified', 'Redirected', 'Marked OK', 'Ignored'],
           'Rows follow page order and carry a text badge',
         );
         browser.assert.equal(rows[0].text, '/no-such-page', 'Internal path shown as stored');

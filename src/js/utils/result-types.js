@@ -7,8 +7,10 @@ import { UI } from '../core/ui.js';
 //   link        The checker found the target broken. Counted as an issue and
 //               painted immediately.
 //   linkManual  The checker could not verify the target (blocked, login wall,
-//               rate limited). Kept off the page until the user shows hidden
-//               alerts or opens the visualizer panel.
+//               rate limited). A manual check like any other, unless the
+//               result carries `visualizerOnly: true`, which keeps it off the
+//               page until the user shows hidden alerts or opens the
+//               visualizer panel (see the brokenLinksShowChecks option).
 //
 // A broken link offers "Mark OK" (or "Ignore" when OK is not allowed); a
 // manual check offers that and "Mark broken". A result pushed with
@@ -39,15 +41,18 @@ export const isWarningStyled = (result) =>
 
 export const isManualLink = (result) => result?.type === 'linkManual';
 
-// Manual-check links surface in either "show hidden alerts" mode or while the
-// visualizers (outline, alts, readability) are open.
-export const manualLinksRevealed = () => UI.showDismissed || UI.visualizing;
+// Results a site has asked to keep off the page until the visualizers are
+// open, so a long list of unverifiable links does not bury everything else.
+// They surface in either "show hidden alerts" mode or while the visualizers
+// (outline, alts, links, readability) are open, and count as hidden alerts
+// until then.
+export const isVisualizerOnly = (result) => result?.visualizerOnly === true;
 
 // Results that stay off the page until the user asks to see hidden alerts.
-export const isHiddenByDefault = (result) => !!result?.dismissalStatus || isManualLink(result);
+export const isHiddenByDefault = (result) => !!result?.dismissalStatus || isVisualizerOnly(result);
 
 // Whether a result gets a button on the page in the current panel state.
 export const shouldDraw = (result) =>
   !isHiddenByDefault(result) ||
   UI.showDismissed ||
-  (isManualLink(result) && !result.dismissalStatus && UI.visualizing);
+  (isVisualizerOnly(result) && !result.dismissalStatus && UI.visualizing);

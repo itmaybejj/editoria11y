@@ -5429,8 +5429,9 @@ ${this.error.stack}
   const isLinkResult = (result) => typeof result?.type === "string" && Object.hasOwn(LINK_RESULT_TYPES, result.type);
   const isWarningStyled = (result) => result?.type !== "error" && LINK_RESULT_TYPES[result?.type]?.severity !== "error";
   const isManualLink = (result) => result?.type === "linkManual";
-  const isHiddenByDefault = (result) => !!result?.dismissalStatus || isManualLink(result);
-  const shouldDraw = (result) => !isHiddenByDefault(result) || UI.showDismissed || isManualLink(result) && !result.dismissalStatus && UI.visualizing;
+  const isVisualizerOnly = (result) => result?.visualizerOnly === true;
+  const isHiddenByDefault = (result) => !!result?.dismissalStatus || isVisualizerOnly(result);
+  const shouldDraw = (result) => !isHiddenByDefault(result) || UI.showDismissed || isVisualizerOnly(result) && !result.dismissalStatus && UI.visualizing;
   function syncResults(results) {
     if (!UI.incremental) {
       document.dispatchEvent(
@@ -5528,13 +5529,13 @@ ${this.error.stack}
     for (let i = State.results.length - 1; i >= 0; i--) {
       if (State.results[i].dismissalStatus) {
         UI.dismissedCount++;
-      } else if (isManualLink(State.results[i])) {
-        if (UI.visualizing && !UI.showDismissed) {
+      } else if (isVisualizerOnly(State.results[i])) {
+        if (UI.visualizing) {
           UI.warningCount++;
         } else {
           UI.dismissedCount++;
         }
-      } else if (State.results[i].type === "warning") {
+      } else if (isWarningStyled(State.results[i])) {
         UI.warningCount++;
       } else {
         UI.errorCount++;
@@ -5804,16 +5805,20 @@ ${this.error.stack}
     }
   }
   const LINK_STATUSES = {
-    broken: { test: "LINK_BROKEN", type: "link", label: "linkStatusBroken" },
-    unpublished: { test: "LINK_UNPUBLISHED", type: "link", label: "linkStatusUnpublished" },
-    markedBroken: { test: "LINK_MARKED_BROKEN", type: "link", label: "linkStatusMarkedBroken" },
-    access: { test: "LINK_ACCESS", type: "linkManual", label: "linkStatusAccess" },
-    unverifiable: { test: "LINK_UNVERIFIABLE", type: "linkManual", label: "linkStatusUnverifiable" },
-    redirect: { test: "LINK_REDIRECT", type: "linkManual", label: "linkStatusRedirect" }
+    broken: { test: "HREF_BROKEN", type: "link", label: "linkStatusBroken" },
+    unpublished: { test: "HREF_UNPUBLISHED", type: "link", label: "linkStatusUnpublished" },
+    markedBroken: { test: "HREF_MARKED_BROKEN", type: "link", label: "linkStatusMarkedBroken" },
+    access: { test: "HREF_ACCESS", type: "linkManual", label: "linkStatusAccess" },
+    unverifiable: { test: "HREF_UNVERIFIABLE", type: "linkManual", label: "linkStatusUnverifiable" },
+    redirect: { test: "HREF_REDIRECT", type: "linkManual", label: "linkStatusRedirect" }
   };
   const DISMISSED_LABELS = { ok: "linkDismissedOk", hide: "linkDismissedHide" };
   const isKnownLinkStatus = (status) => typeof status === "string" && Object.hasOwn(LINK_STATUSES, status);
   const isKnownDismissal = (dismissed) => typeof dismissed === "string" && Object.hasOwn(DISMISSED_LABELS, dismissed);
+  const MANUAL_LINK_STATUSES = Object.keys(LINK_STATUSES).filter(
+    (status) => LINK_STATUSES[status].type === "linkManual"
+  );
+  const showsLinkCheck = (status) => Array.isArray(State.option.brokenLinksShowChecks) && State.option.brokenLinksShowChecks.includes(status);
   const linkMarksAllowed = () => typeof State.option.allowLinkMarks === "boolean" ? State.option.allowLinkMarks : !!State.option.allowOK;
   const linkStatusLabel = (entry) => {
     if (isKnownDismissal(entry.dismissed)) {
@@ -5879,6 +5884,17 @@ ${this.error.stack}
       }
       return true;
     });
+    if (!Array.isArray(State.option.brokenLinksShowChecks)) {
+      console.warn("Editoria11y: brokenLinksShowChecks must be an array of statuses.");
+      State.option.brokenLinksShowChecks = [...MANUAL_LINK_STATUSES];
+    }
+    State.option.brokenLinksShowChecks.forEach((status) => {
+      if (!MANUAL_LINK_STATUSES.includes(status)) {
+        console.warn(
+          `Editoria11y: brokenLinksShowChecks lists "${status}", which is not a manual check.`
+        );
+      }
+    });
   }
   const indexEntries = () => {
     const byHref = /* @__PURE__ */ new Map();
@@ -5895,19 +5911,20 @@ ${this.error.stack}
   };
   const buildContent = (entry, status) => {
     const content = Lang.sprintf(status.test, entry.redirectsTo ?? null);
-    const title = document.createElement("div");
-    title.classList.add("title");
-    title.setAttribute("tabindex", "-1");
-    title.textContent = Lang.testNames[status.test] ?? status.test;
-    content.prepend(title);
     const target = document.createElement("p");
+    const linkWrap = document.createElement("i");
     const link = document.createElement("a");
     link.classList.add("ed11y-link-target");
     link.href = entry.href;
     link.setAttribute("target", "_blank");
     link.setAttribute("rel", "noopener noreferrer");
+    const prefix = document.createElement("strong");
     link.textContent = displayHref(entry.href);
-    target.append(link);
+    prefix.textContent = entry.redirectsTo ? Lang._("linkRedirectTarget") : Lang._("linksCheckThis");
+    prefix.textContent += " ";
+    target.append(prefix);
+    linkWrap.append(link);
+    target.append(linkWrap);
     content.append(target);
     return content;
   };
@@ -5937,6 +5954,9 @@ ${this.error.stack}
       };
       if (entry.dismissed) {
         result.dismissalStatus = entry.dismissed;
+      }
+      if (status.type === "linkManual" && !showsLinkCheck(entry.status)) {
+        result.visualizerOnly = true;
       }
       State.results.push(result);
     }
@@ -7693,7 +7713,7 @@ ${this.error.stack}
     }
   }
   function repaintAfterVisualizerToggle() {
-    if (!State.results.some((result) => isManualLink(result))) {
+    if (!State.results.some((result) => isVisualizerOnly(result))) {
       return;
     }
     UI.forceFullCheck = true;
@@ -9279,12 +9299,12 @@ ${this.error.stack}
     LINK_MAYBE_BUTTON: "Is this link actually a button?",
     LINK_NEW_TAB: "Does this link open a new tab without warning?",
     // Link checker results (see rulesets/broken-links.js).
-    LINK_BROKEN: "Broken link",
-    LINK_UNPUBLISHED: "Link to unpublished content",
-    LINK_MARKED_BROKEN: "Link marked broken by an editor",
-    LINK_ACCESS: "Link to restricted content",
-    LINK_UNVERIFIABLE: "Link needs a manual check",
-    LINK_REDIRECT: "Link redirects to a different site",
+    HREF_BROKEN: "Broken link",
+    HREF_UNPUBLISHED: "Link to unpublished content",
+    HREF_MARKED_BROKEN: "Link marked broken by an editor",
+    HREF_ACCESS: "Link to restricted content",
+    HREF_UNVERIFIABLE: "Link needs a manual check",
+    HREF_REDIRECT: "Link redirects to a different site",
     LINK_PLACEHOLDER_ALT: "This linked alt text may be a placeholder",
     LINK_STOPWORD: "This link only contains generic words",
     LINK_STOPWORD_ARIA: "The purpose of this link is visually hidden",
@@ -9393,12 +9413,12 @@ ${this.error.stack}
     LINK_IMAGE_TEXT: "Image is marked as decorative, although the link is using the surrounding text as a descriptive label.",
     LINK_MAYBE_BUTTON: `<p><strong>Link:</strong> <i>%(TEXT)</i></p><p>This link has an invalid target, and has a name that suggests it might be working as a button or toggle instead of a link.</p><p>${why.fix}Use a <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">&lt;button&gt;</a> instead, or correct the link's target.</p><div class="why"><p>Tip: Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.</p></div>`,
     // Link checker results. The ruleset appends the link target after these.
-    LINK_BROKEN: "<p>The link checker could not reach this link. It may have moved or been removed:</p>",
-    LINK_UNPUBLISHED: "<p>This link points to content that is unpublished:</p>",
-    LINK_MARKED_BROKEN: "<p>An editor marked this link as broken:</p>",
-    LINK_ACCESS: "<p>This link points to content that anonymous visitors cannot see. Confirm that this is intentional:</p>",
-    LINK_UNVERIFIABLE: "<p>The link checker could not verify this link; the site may block automated requests. Check it manually:</p>",
-    LINK_REDIRECT: "<p>This link now lands on another site. Confirm that the new destination is what you meant to link to, or link to it directly:</p><p>%(redirectsTo)</p>",
+    HREF_BROKEN: "<p>The link checker could not reach this link. It may have moved or been deleted:</p>",
+    HREF_UNPUBLISHED: "<p>Please publish the linked page or update this link:</p>",
+    HREF_MARKED_BROKEN: "<p>An editor marked this link as broken:</p>",
+    HREF_ACCESS: "<p>This link points to content that anonymous visitors cannot see. Confirm that this is intentional:</p>",
+    HREF_UNVERIFIABLE: "<p>The linked site is blocking automated link checking. Please check this URL manually and confirm it works as expected:</p>",
+    HREF_REDIRECT: "<p>Confirm that the linked URL below is the correct redirect, or update this link with a new URL.</p><p><strong>Original:</strong> %(redirectsTo)</p>",
     LINK_NEW_TAB: `<p><strong>Link text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Set this link to open in the same tab, or <a href="https://itmaybejj.github.io/linkpurpose/">warn users</a> first.</p><div class="why"><p>Readers can always <em>choose</em> to open a link in a new tab. When a link forces open a new tab, it is often confusing or annoying, especially for assistive device users who wonder why their browser's "back" button stopped working.</p><p>Note: forms are the exception. When the user is filling out a form, opening a link in the same window could cause them to lose their work, so links within forms usually open in new tabs.</p></div>`,
     LINK_PLACEHOLDER_ALT: `<p><strong>Alt text:</strong> <i>%(alt)</i></p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
     LINK_STOPWORD: `<p>Link text: <i>%(ERROR)</i></p><p>${why.fix}Use link text that describes its destination.</p>${why.links}`,
@@ -9488,9 +9508,12 @@ ${this.error.stack}
     linkStatusMarkedBroken: "Marked broken",
     linkStatusAccess: "Restricted",
     linkStatusUnverifiable: "Unverified",
-    linkStatusRedirect: "Redirects",
+    linkStatusRedirect: "Redirected",
     linkDismissedOk: "Marked OK",
     linkDismissedHide: "Ignored",
+    linksCheckThis: "URL to check:",
+    linkRedirectOriginal: "Original:",
+    linkRedirectTarget: "Redirects to:",
     main_toggle_hide: "Hide accessibility tools",
     main_toggle_hide_alerts: "Hide accessibility alerts",
     main_toggle_show: "Show accessibility tools",
@@ -9685,6 +9708,13 @@ ${this.error.stack}
     // Path prefixes the checker strips from internal links before storing
     // them, e.g. a subdirectory base path or a language prefix: ['/en'].
     brokenLinksPathPrefixes: [],
+    // Which link checker manual checks ('access', 'unverifiable', 'redirect')
+    // are painted like any other manual check. Statuses removed from this list
+    // hide until the visualizer panel opens. A site with many links the checker
+    // cannot verify is overwhelming; this convert checking to a manual task:
+    //   brokenLinksShowChecks: ['redirect'],  // unverifiable and access hide
+    //   brokenLinksShowChecks: [],            // every manual check hides
+    brokenLinksShowChecks: ["access", "unverifiable", "redirect"],
     // Whether editors may Mark OK and Mark broken on flagged links. Null
     // follows allowOK.
     allowLinkMarks: null,

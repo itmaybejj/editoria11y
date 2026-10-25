@@ -722,8 +722,7 @@ button.ed11y-jump:hover .toggle-count {
   grid-template-columns: 2.375em 1fr;
   grid-template-areas: "mark status"
                        "mark link";
-  align-items: center;
-  gap: 2px 8px;
+  column-gap: 8px;
   margin: 8px 0 8px -8px;
   padding: 6px 8px;
   display: grid;
@@ -736,7 +735,18 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 #ed11y-link-list .ed11y-link-row-mark .toggle {
+  border: 0;
   border-radius: 50%;
+}
+
+#ed11y-link-list .ed11y-link-row-mark .ed11y-link-broken {
+  color: var(--ed11y-alert, #b80519);
+  background-color: #fff;
+}
+
+#ed11y-link-list .ed11y-link-row-mark .dismissed {
+  background-color: var(--ed11y-ok, #1f5381);
+  color: #fff;
 }
 
 #ed11y-link-list .ed11y-link-status {

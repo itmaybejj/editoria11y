@@ -4,7 +4,7 @@ import Constants from '../../sa11y-js/utils/constants';
 import { dismissDigest } from '../../sa11y-js/utils/utils.js';
 import { UI } from '../core/ui.js';
 import { State } from '../../sa11y-js/core/state.js';
-import { isManualLink } from './result-types.js';
+import { isVisualizerOnly, isWarningStyled } from './result-types.js';
 
 export function syncResults(results) {
   // Dispatch event.
@@ -122,16 +122,17 @@ export function countAlerts() {
   for (let i = State.results.length - 1; i >= 0; i--) {
     if (State.results[i].dismissalStatus) {
       UI.dismissedCount++;
-    } else if (isManualLink(State.results[i])) {
-      // Unverifiable links sit behind the "show hidden alerts" toggle and
-      // share its count, except while the visualizers are open, when they
-      // are on the page and count as manual checks.
-      if (UI.visualizing && !UI.showDismissed) {
+    } else if (isVisualizerOnly(State.results[i])) {
+      // Checks a site keeps behind the visualizers share the "show hidden
+      // alerts" count, except while the visualizers are open, when they are
+      // on the page and count as manual checks.
+      if (UI.visualizing) {
         UI.warningCount++;
       } else {
         UI.dismissedCount++;
       }
-    } else if (State.results[i].type === 'warning') {
+    } else if (isWarningStyled(State.results[i])) {
+      // Warnings and link checks painted as manual checks.
       UI.warningCount++;
     } else {
       UI.errorCount++;

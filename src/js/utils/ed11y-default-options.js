@@ -133,6 +133,13 @@ export const ed11yDefaultOptions = {
   // Path prefixes the checker strips from internal links before storing
   // them, e.g. a subdirectory base path or a language prefix: ['/en'].
   brokenLinksPathPrefixes: [],
+  // Which link checker manual checks ('access', 'unverifiable', 'redirect')
+  // are painted like any other manual check. Statuses removed from this list
+  // hide until the visualizer panel opens. A site with many links the checker
+  // cannot verify is overwhelming; this convert checking to a manual task:
+  //   brokenLinksShowChecks: ['redirect'],  // unverifiable and access hide
+  //   brokenLinksShowChecks: [],            // every manual check hides
+  brokenLinksShowChecks: ['access', 'unverifiable', 'redirect'],
   // Whether editors may Mark OK and Mark broken on flagged links. Null
   // follows allowOK.
   allowLinkMarks: null,

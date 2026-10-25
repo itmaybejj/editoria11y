@@ -7,20 +7,21 @@ import { State } from '../../sa11y-js/core/state.js';
 //
 // The checker hands its findings over in the `brokenLinks` option (see
 // ed11y-default-options.js). Each status maps to a test key, a result type
-// (`link` is painted as an error, `linkManual` sits behind "show hidden
-// alerts"; see utils/result-types.js) and a short label for the Links
-// visualizer. Status describes the problem; an entry's separate `dismissed`
+// (`link` is painted as an error, `linkManual` as a manual check; see
+// utils/result-types.js) and a short label for the Links visualizer. A
+// manual-check status left out of `brokenLinksShowChecks` is painted only
+// while the visualizers are open or hidden alerts are shown. Status describes the problem; an entry's separate `dismissed`
 // field carries the verdict on it (`ok`: an editor marked the link OK for
 // every page; `hide`: this editor ignored the alert). Dismissed entries
 // arrive hidden and offer Restore, which clears the verdict here so the
 // link is painted with its real status until the checker says otherwise.
 export const LINK_STATUSES = {
-  broken: { test: 'LINK_BROKEN', type: 'link', label: 'linkStatusBroken' },
-  unpublished: { test: 'LINK_UNPUBLISHED', type: 'link', label: 'linkStatusUnpublished' },
-  markedBroken: { test: 'LINK_MARKED_BROKEN', type: 'link', label: 'linkStatusMarkedBroken' },
-  access: { test: 'LINK_ACCESS', type: 'linkManual', label: 'linkStatusAccess' },
-  unverifiable: { test: 'LINK_UNVERIFIABLE', type: 'linkManual', label: 'linkStatusUnverifiable' },
-  redirect: { test: 'LINK_REDIRECT', type: 'linkManual', label: 'linkStatusRedirect' },
+  broken: { test: 'HREF_BROKEN', type: 'link', label: 'linkStatusBroken' },
+  unpublished: { test: 'HREF_UNPUBLISHED', type: 'link', label: 'linkStatusUnpublished' },
+  markedBroken: { test: 'HREF_MARKED_BROKEN', type: 'link', label: 'linkStatusMarkedBroken' },
+  access: { test: 'HREF_ACCESS', type: 'linkManual', label: 'linkStatusAccess' },
+  unverifiable: { test: 'HREF_UNVERIFIABLE', type: 'linkManual', label: 'linkStatusUnverifiable' },
+  redirect: { test: 'HREF_REDIRECT', type: 'linkManual', label: 'linkStatusRedirect' },
 };
 
 const DISMISSED_LABELS = { ok: 'linkDismissedOk', hide: 'linkDismissedHide' };
@@ -30,6 +31,15 @@ export const isKnownLinkStatus = (status) =>
 
 export const isKnownDismissal = (dismissed) =>
   typeof dismissed === 'string' && Object.hasOwn(DISMISSED_LABELS, dismissed);
+
+export const MANUAL_LINK_STATUSES = Object.keys(LINK_STATUSES).filter(
+  (status) => LINK_STATUSES[status].type === 'linkManual',
+);
+
+// Whether a manual-check status is painted like any other manual check.
+export const showsLinkCheck = (status) =>
+  Array.isArray(State.option.brokenLinksShowChecks) &&
+  State.option.brokenLinksShowChecks.includes(status);
 
 // Whether editors may Mark OK and Mark broken on flagged links.
 export const linkMarksAllowed = () =>
@@ -121,6 +131,18 @@ export function prepareBrokenLinks() {
     }
     return true;
   });
+
+  if (!Array.isArray(State.option.brokenLinksShowChecks)) {
+    console.warn('Editoria11y: brokenLinksShowChecks must be an array of statuses.');
+    State.option.brokenLinksShowChecks = [...MANUAL_LINK_STATUSES];
+  }
+  State.option.brokenLinksShowChecks.forEach((status) => {
+    if (!MANUAL_LINK_STATUSES.includes(status)) {
+      console.warn(
+        `Editoria11y: brokenLinksShowChecks lists "${status}", which is not a manual check.`,
+      );
+    }
+  });
 }
 
 // Keys an entry can be found under: the canonical form and, as a fallback
@@ -143,19 +165,20 @@ const indexEntries = () => {
 // editor can open it. The href is set as text, never HTML.
 const buildContent = (entry, status) => {
   const content = Lang.sprintf(status.test, entry.redirectsTo ?? null);
-  const title = document.createElement('div');
-  title.classList.add('title');
-  title.setAttribute('tabindex', '-1');
-  title.textContent = Lang.testNames[status.test] ?? status.test;
-  content.prepend(title);
   const target = document.createElement('p');
+  const linkWrap = document.createElement('i');
   const link = document.createElement('a');
   link.classList.add('ed11y-link-target');
   link.href = entry.href;
   link.setAttribute('target', '_blank');
   link.setAttribute('rel', 'noopener noreferrer');
+  const prefix = document.createElement('strong');
   link.textContent = displayHref(entry.href);
-  target.append(link);
+  prefix.textContent = entry.redirectsTo ? Lang._('linkRedirectTarget') : Lang._('linksCheckThis');
+  prefix.textContent += ' ';
+  target.append(prefix);
+  linkWrap.append(link);
+  target.append(linkWrap);
   content.append(target);
   return content;
 };
@@ -186,6 +209,9 @@ export function checkBrokenLinks() {
     };
     if (entry.dismissed) {
       result.dismissalStatus = entry.dismissed;
+    }
+    if (status.type === 'linkManual' && !showsLinkCheck(entry.status)) {
+      result.visualizerOnly = true;
     }
     State.results.push(result);
   }

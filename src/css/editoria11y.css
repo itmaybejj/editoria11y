@@ -807,12 +807,10 @@ button.ed11y-jump {
 		grid-template-areas:
 			"mark status"
 			"mark link";
-		align-items: center;
 		padding: 6px 8px;
 		margin: 8px 0 8px -8px;
 		border-radius: 4px;
 		column-gap: 8px;
-		row-gap: 2px;
 		box-shadow:
 			0 0 0 3px var(--ed11y-bg, #fffffe),
 			0 -3px 1px var(--ed11y-primary, #276499);
@@ -826,6 +824,15 @@ button.ed11y-jump {
 		/* The panel squares its buttons; keep the on-page circle. */
 		.toggle {
 			border-radius: 50%;
+			border: 0;
+		}
+		.ed11y-link-broken {
+			background-color: #fff;
+			color: var(--ed11y-alert, #b80519);
+		}
+		.dismissed {
+			background-color: var(--ed11y-ok, #1f5381);
+			color: #fff;
 		}
 	}
 

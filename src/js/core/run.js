@@ -52,7 +52,7 @@ import checkReadability from '../../sa11y-js/rulesets/readability.js';
 import sprite from '../elements/sprite.js';
 import { checkCustomRuleset } from '../rulesets/custom-ruleset.js';
 import { checkBrokenLinks, forgetLinkVerdict } from '../rulesets/broken-links.js';
-import { isManualLink, isWarningStyled, shouldDraw } from '../utils/result-types.js';
+import { isVisualizerOnly, isWarningStyled, shouldDraw } from '../utils/result-types.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { resetGetText, store } from '../../sa11y-js/utils/utils.js';
@@ -1724,11 +1724,11 @@ export function resetPanel() {
   }
 }
 
-// Opening or closing the visualizers changes which manual-check links are on
-// the page (see result-types.js). Repaint only when such results exist, so
-// pages without a link checker keep the cheap toggle.
+// Opening or closing the visualizers changes which visualizer-only checks
+// are on the page (see result-types.js). Repaint only when such results
+// exist, so pages without a link checker keep the cheap toggle.
 export function repaintAfterVisualizerToggle() {
-  if (!State.results.some((result) => isManualLink(result))) {
+  if (!State.results.some((result) => isVisualizerOnly(result))) {
     return;
   }
   UI.forceFullCheck = true;
