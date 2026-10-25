@@ -41,10 +41,17 @@ import {
   handleSyncOnlyResults,
   syncResults,
 } from '../utils/process-results.js';
-import { drawResult, showAltPanel, showHeadingsPanel, visualize } from './visualize';
+import {
+  drawResult,
+  showAltPanel,
+  showHeadingsPanel,
+  showLinksPanel,
+  visualize,
+} from './visualize';
 import checkReadability from '../../sa11y-js/rulesets/readability.js';
 import sprite from '../elements/sprite.js';
 import { checkCustomRuleset } from '../rulesets/custom-ruleset.js';
+import { checkBrokenLinks, forgetLinkVerdict } from '../rulesets/broken-links.js';
 import { isManualLink, isWarningStyled, shouldDraw } from '../utils/result-types.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
@@ -52,6 +59,10 @@ import { resetGetText, store } from '../../sa11y-js/utils/utils.js';
 
 export function showResults() {
   buildJumpList();
+  if (UI.visualizing) {
+    // Rows point at the buttons drawn just now.
+    showLinksPanel();
+  }
   // Announce that buttons have been placed.
   document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
   alignButtons();
@@ -166,6 +177,27 @@ export function updatePanel() {
           .appendChild(Constants.Panel.readabilityDetails);
         UI.panel.querySelector('#ed11y-readability-tab .summary-title').textContent =
           Lang._('READABILITY');
+      }
+      if (State.option.brokenLinks?.length) {
+        const linksTab = document.createElement('details');
+        linksTab.id = 'ed11y-links-tab';
+        linksTab.innerHTML = `
+            <summary>${sprite.linkBroken}<span class="summary-title"></span><span class="close-details">${sprite.close}</span>
+            </summary>
+            <div class="details ed11y-small">
+              <p class="details-title"></p>
+              <ul id="ed11y-link-list"></ul>
+            </div>`;
+        linksTab.querySelector('.summary-title').textContent = Lang._('LINKS');
+        linksTab.querySelector('.details-title').textContent = Lang._('panelCheckLinks');
+        // Every flagged link is listed, so the list is only useful with the
+        // hidden ones on the page.
+        linksTab.addEventListener('toggle', () => {
+          if (linksTab.open && !UI.showDismissed) {
+            setShowDismissals(true);
+          }
+        });
+        UI.panel.querySelector('#ed11y-visualizers').appendChild(linksTab);
       }
 
       window.setTimeout(
@@ -458,6 +490,7 @@ export function dismissOne(dismissalType, test, dismissalKey, result = null) {
     dismissalKey = UI.dismissKeys[dismissalKey];
   }
   if (dismissalType === 'reset') {
+    forgetLinkVerdict(result);
     // Guarded: a result supplied with a dismissalStatus by an external test
     // may have no matching record here.
     const pageDismissals = UI.dismissedAlerts[State.option.currentPage];
@@ -1392,6 +1425,9 @@ const enqueueTests = (queue) => {
     case 'checkDeveloper':
       safeRun(checkDeveloper);
       break;
+    case 'checkBrokenLinks':
+      safeRun(checkBrokenLinks);
+      break;
   }
   UI.testsRemaining--;
   if (queue.length > 0) {
@@ -1494,6 +1530,9 @@ export function checkAll() {
   }
   if (State.option.contrastPlugin) {
     queue.push('checkContrast');
+  }
+  if (State.option.brokenLinks?.length) {
+    queue.push('checkBrokenLinks');
   }
   UI.testsRemaining = queue.length;
 
@@ -1762,17 +1801,21 @@ export function dismissThis(dismissalType, button) {
   );
 }
 
-export function toggleShowDismissals() {
+// Shows or hides dismissed alerts and repaints.
+export function setShowDismissals(show) {
   // todo postpone: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
   UI.ignoreAll = false;
-  UI.showDismissed = !UI.showDismissed;
+  UI.showDismissed = show;
   //reset();
   UI.forceFullCheck = true;
   UI.showPanel = true;
   resetResults();
   incrementalCheck();
-
   UI.panelShowDismissed.setAttribute('data-ed11y-pressed', `${UI.showDismissed}`);
+}
+
+export function toggleShowDismissals() {
+  setShowDismissals(!UI.showDismissed);
   window.setTimeout(() => {
     UI.panelShowDismissed.focus();
   }, 0);

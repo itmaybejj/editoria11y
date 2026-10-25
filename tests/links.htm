@@ -3,22 +3,24 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Link checker result types</title>
+	<title>Link checker results</title>
 	<link href="./tests.css" rel="stylesheet">
 	<link href="../dist/css/editoria11y.css" rel="stylesheet">
 </head>
 <body>
 <main>
-	<h1>Link checker result types</h1>
+	<h1>Link checker results</h1>
 	<p>
-		This page simulates a CMS link checker pushing results through the
-		<code>customTests</code> handshake. Append <code>?noOk</code> to the URL to
-		test the button set shown to users who may not mark things OK, or
-		<code>?noMark</code> to have the checker withhold link marks through
-		<code>data.allowMark</code> while the page still allows OK.
+		This page simulates a CMS link checker handing its flagged links to the
+		library through the <code>brokenLinks</code> option. Append
+		<code>?noOk</code> to the URL to test the button set shown to users who may
+		not mark things OK, or <code>?noMark</code> to withhold link marks through
+		<code>allowLinkMarks</code> while the page still allows OK.
 	</p>
 	<p class="broken"><a id="broken-link" href="/no-such-page">A link the checker found broken</a></p>
-	<p class="manual"><a id="manual-link" href="https://example.com/locked">A link the checker could not verify</a></p>
+	<p class="unpublished"><a id="unpublished-link" href="/en/node/5">A link to unpublished content, matched through a stripped path prefix</a></p>
+	<p class="manual"><a id="manual-link" href="https://example.com/locked#section">A link the checker could not verify</a></p>
+	<p class="redirect"><a id="redirect-link" href="https://example.com/moved">A link that redirects to another site</a></p>
 	<p class="okd"><a id="okd-link" href="/marked-ok">A broken link an editor marked OK</a></p>
 	<p class="ignored"><a id="ignored-link" href="https://example.com/ignored">A broken link this editor ignored</a></p>
 	<p class="fine"><a id="fine-link" href="/">A link with nothing to report</a></p>
@@ -29,98 +31,42 @@
 <script>
 	window.ed11yTestEvents = [];
 
-	// The checker's own record of editor verdicts, keyed by the opaque hash
-	// it hands Editoria11y in each result's data. A real integration would
-	// persist these; here they live until the page reloads.
-	const linkVerdicts = { ok789: 'ok', hide012: 'hide' };
-
+	// A real integration posts these to its server; here they are only
+	// recorded so the spec can inspect them.
 	document.addEventListener('ed11yDismissalUpdate', (e) => {
 		window.ed11yTestEvents.push(e.detail);
-		const hash = e.detail.dismissData?.hash;
-		if (!hash) {
-			return;
-		}
-		if (e.detail.dismissAction === 'reset') {
-			delete linkVerdicts[hash];
-		} else if (e.detail.dismissAction === 'ok' || e.detail.dismissAction === 'hide') {
-			linkVerdicts[hash] = e.detail.dismissAction;
-		}
 	});
 
-	// Results arrive with whatever verdict the checker currently holds.
-	const withVerdict = (result) => {
-		const verdict = linkVerdicts[result.data.hash];
-		if (verdict) {
-			result.dismissalStatus = verdict;
-		}
-		return result;
-	};
-
-	// Register tip strings the way a CMS integration would (see
-	// src/js/rulesets/custom-ruleset.js for the same pattern).
-	const registerLinkStrings = () => {
-		const Lang = Ed11y.Lang;
-		Lang.testNames.LINK_BROKEN = 'Broken link';
-		Lang.langStrings.LINK_BROKEN =
-			'<div class="title" tabindex="-1">Broken link</div><p>The last check of this link returned a 404.</p>';
-		Lang.testNames.LINK_MANUAL = 'Link needs a manual check';
-		Lang.langStrings.LINK_MANUAL =
-			'<div class="title" tabindex="-1">Link needs a manual check</div><p>The destination blocked the automatic check. Open the link to confirm it works.</p>';
-	};
-
-	document.addEventListener('ed11yRunCustomTests', () => {
-		registerLinkStrings();
-		const Lang = Ed11y.Lang;
-		const data = { hash: 'abc123', href: '/no-such-page', status: 'broken' };
-		if (window.location.search.includes('noMark')) {
-			data.allowMark = false;
-		}
-		Ed11y.State.results.push(withVerdict({
-			test: 'LINK_BROKEN',
-			element: document.getElementById('broken-link'),
-			type: 'link',
-			content: Lang.sprintf('LINK_BROKEN'),
-			dismiss: 'LINK_BROKEN|/no-such-page',
-			data,
-		}));
-		Ed11y.State.results.push(withVerdict({
-			test: 'LINK_MANUAL',
-			element: document.getElementById('manual-link'),
-			type: 'linkManual',
-			content: Lang.sprintf('LINK_MANUAL'),
-			dismiss: 'LINK_MANUAL|https://example.com/locked',
-			data: { hash: 'def456', href: 'https://example.com/locked', status: 'unverifiable' },
-		}));
-		// Results the checker already holds a verdict for arrive with a
-		// dismissalStatus and stay hidden until hidden alerts are shown. The
-		// first also hands its content over as a string, as integrations may.
-		Ed11y.State.results.push(withVerdict({
-			test: 'LINK_BROKEN',
-			element: document.getElementById('okd-link'),
-			type: 'link',
-			content: Lang.langStrings.LINK_BROKEN,
-			dismiss: 'LINK_BROKEN|/marked-ok',
-			data: { hash: 'ok789', href: '/marked-ok', status: 'broken', action: 'ok' },
-		}));
-		Ed11y.State.results.push(withVerdict({
-			test: 'LINK_BROKEN',
-			element: document.getElementById('ignored-link'),
-			type: 'link',
-			content: Lang.sprintf('LINK_BROKEN'),
-			dismiss: 'LINK_BROKEN|https://example.com/ignored',
-			data: { hash: 'hide012', href: 'https://example.com/ignored', status: 'broken' },
-		}));
-		document.dispatchEvent(new CustomEvent('ed11yResume'));
-	});
-
-	const ed11y = new Ed11y.Ed11y({
+	const options = {
 		alertMode: 'assertive',
 		checkRoot: 'main',
 		lang: Ed11yLangEn.lang,
-		customTests: 1,
 		allowOK: !window.location.search.includes('noOk'),
 		allowHide: true,
-	});
+		// The checker stores internal links as root-relative paths with the
+		// language prefix stripped, the way Drupal's UrlNormalizer does.
+		brokenLinksPathPrefixes: ['/en'],
+		brokenLinks: [
+			{ href: '/no-such-page', status: 'broken', hash: 'abc123' },
+			{ href: '/node/5', status: 'unpublished', hash: 'node5' },
+			{ href: 'https://example.com/locked', status: 'unverifiable', hash: 'def456' },
+			{
+				href: 'https://example.com/moved',
+				status: 'redirect',
+				redirectsTo: 'https://other.example.org/landing',
+				hash: 'redir1',
+			},
+			{ href: '/marked-ok', status: 'broken', dismissed: 'ok', hash: 'ok789' },
+			{ href: 'https://example.com/ignored', status: 'broken', dismissed: 'hide', hash: 'hide012' },
+			// Not on the page: must not produce a result or a panel row.
+			{ href: 'https://example.com/absent', status: 'broken', hash: 'absent' },
+		],
+	};
+	if (window.location.search.includes('noMark')) {
+		options.allowLinkMarks = false;
+	}
+
+	const ed11y = new Ed11y.Ed11y(options);
 </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.2-1024
+			* @version 3.0.2-1025
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -1855,7 +1855,7 @@ function findShadowComponents(option) {
     });
   }
 }
-const version = "3.0.2-1024";
+const version = "3.0.2-1025";
 const sprite = {
   alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
   close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -5799,6 +5799,149 @@ function checkReadability() {
     Constants.Panel.readabilityInfo.innerHTML = `<br>${Lang._("READABILITY_NOT_ENOUGH")}`;
   }
 }
+const LINK_STATUSES = {
+  broken: { test: "LINK_BROKEN", type: "link", label: "linkStatusBroken" },
+  unpublished: { test: "LINK_UNPUBLISHED", type: "link", label: "linkStatusUnpublished" },
+  markedBroken: { test: "LINK_MARKED_BROKEN", type: "link", label: "linkStatusMarkedBroken" },
+  access: { test: "LINK_ACCESS", type: "linkManual", label: "linkStatusAccess" },
+  unverifiable: { test: "LINK_UNVERIFIABLE", type: "linkManual", label: "linkStatusUnverifiable" },
+  redirect: { test: "LINK_REDIRECT", type: "linkManual", label: "linkStatusRedirect" }
+};
+const DISMISSED_LABELS = { ok: "linkDismissedOk", hide: "linkDismissedHide" };
+const isKnownLinkStatus = (status) => typeof status === "string" && Object.hasOwn(LINK_STATUSES, status);
+const isKnownDismissal = (dismissed) => typeof dismissed === "string" && Object.hasOwn(DISMISSED_LABELS, dismissed);
+const linkMarksAllowed = () => typeof State.option.allowLinkMarks === "boolean" ? State.option.allowLinkMarks : !!State.option.allowOK;
+const linkStatusLabel = (entry) => {
+  if (isKnownDismissal(entry.dismissed)) {
+    return Lang._(DISMISSED_LABELS[entry.dismissed]);
+  }
+  return isKnownLinkStatus(entry.status) ? Lang._(LINK_STATUSES[entry.status].label) : entry.status;
+};
+const displayHref = (href) => String(href).replace(/^https?:\/\//i, "");
+const stripPrefix = (path, prefix) => {
+  const clean = String(prefix ?? "").replace(/\/+$/, "");
+  if (!clean || !path.startsWith(clean)) {
+    return path;
+  }
+  const rest = path.slice(clean.length);
+  if (rest === "" || rest.startsWith("?")) {
+    return `/${rest}`;
+  }
+  return rest.startsWith("/") ? rest : path;
+};
+const canonicalHref = (href, options = State.option, base = document.baseURI) => {
+  let url2;
+  try {
+    url2 = new URL(String(href), base);
+  } catch {
+    return null;
+  }
+  if (url2.protocol !== "http:" && url2.protocol !== "https:" && url2.protocol !== "file:") {
+    return null;
+  }
+  const search = url2.search === "?" ? "" : url2.search;
+  const host = url2.host.toLowerCase();
+  const internalHosts = Array.isArray(options.brokenLinksInternalHosts) ? options.brokenLinksInternalHosts.map((h) => String(h).toLowerCase()) : [];
+  if (host === window.location.host.toLowerCase() || internalHosts.includes(host)) {
+    let path = url2.pathname;
+    const prefixes = Array.isArray(options.brokenLinksPathPrefixes) ? options.brokenLinksPathPrefixes : [];
+    for (const prefix of prefixes) {
+      path = stripPrefix(path, prefix);
+    }
+    return `${path || "/"}${search}`;
+  }
+  return `${url2.origin}${url2.pathname}${search}`;
+};
+function prepareBrokenLinks() {
+  if (!Array.isArray(State.option.brokenLinks)) {
+    if (State.option.brokenLinks) {
+      console.warn("Editoria11y: brokenLinks must be an array of { href, status } objects.");
+    }
+    State.option.brokenLinks = [];
+    return;
+  }
+  State.option.brokenLinks = State.option.brokenLinks.filter((entry) => {
+    const valid = entry && typeof entry.href === "string" && entry.href && isKnownLinkStatus(entry.status);
+    if (!valid) {
+      console.warn(
+        "Editoria11y: skipped a brokenLinks entry without a valid href and status.",
+        entry
+      );
+      return false;
+    }
+    if (entry.dismissed && !isKnownDismissal(entry.dismissed)) {
+      console.warn(`Editoria11y: ignored an unknown brokenLinks dismissal "${entry.dismissed}".`);
+      delete entry.dismissed;
+    }
+    return true;
+  });
+}
+const indexEntries = () => {
+  const byHref = /* @__PURE__ */ new Map();
+  for (const entry of State.option.brokenLinks) {
+    const canonical = canonicalHref(entry.href);
+    if (canonical && !byHref.has(canonical)) {
+      byHref.set(canonical, entry);
+    }
+    if (!byHref.has(entry.href)) {
+      byHref.set(entry.href, entry);
+    }
+  }
+  return byHref;
+};
+const buildContent = (entry, status) => {
+  const content = Lang.sprintf(status.test, entry.redirectsTo ?? null);
+  const title = document.createElement("div");
+  title.classList.add("title");
+  title.setAttribute("tabindex", "-1");
+  title.textContent = Lang.testNames[status.test] ?? status.test;
+  content.prepend(title);
+  const target = document.createElement("p");
+  const link = document.createElement("a");
+  link.classList.add("ed11y-link-target");
+  link.href = entry.href;
+  link.setAttribute("target", "_blank");
+  link.setAttribute("rel", "noopener noreferrer");
+  link.textContent = displayHref(entry.href);
+  target.append(link);
+  content.append(target);
+  return content;
+};
+function checkBrokenLinks() {
+  if (!State.option.brokenLinks?.length) {
+    return;
+  }
+  const byHref = indexEntries();
+  for (const anchor of Elements.Found.Links) {
+    if (!anchor.matches("a[href]")) {
+      continue;
+    }
+    const entry = byHref.get(canonicalHref(anchor.href)) ?? byHref.get(anchor.getAttribute("href"));
+    if (!entry) {
+      continue;
+    }
+    const status = LINK_STATUSES[entry.status];
+    const hash = entry.hash ?? entry.href;
+    const result = {
+      test: status.test,
+      element: anchor,
+      type: status.type,
+      content: buildContent(entry, status),
+      dismiss: prepareDismissal(`link${hash}`),
+      data: { hash, href: entry.href, status: entry.status, redirectsTo: entry.redirectsTo },
+      brokenLink: entry
+    };
+    if (entry.dismissed) {
+      result.dismissalStatus = entry.dismissed;
+    }
+    State.results.push(result);
+  }
+}
+function forgetLinkVerdict(result) {
+  if (result?.brokenLink) {
+    delete result.brokenLink.dismissed;
+  }
+}
 const linkTypeClasses = Object.values(LINK_RESULT_TYPES).map((type) => type.className);
 const decorateToggle = (toggle, result, dismissed) => {
   const wasLink = toggle.classList.contains(LINK_CLASS);
@@ -5908,6 +6051,70 @@ const showAltPanel = () => {
     altList.appendChild(noImages);
   }
 };
+const showLinksPanel = () => {
+  const linkList = UI.panel !== false && UI.panel.querySelector("#ed11y-link-list");
+  if (!linkList) {
+    return;
+  }
+  linkList.innerHTML = "";
+  const links = State.results.filter((result) => isLinkResult(result) && result.brokenLink);
+  links.reverse();
+  if (links.length === 0) {
+    const none = document.createElement("p");
+    const em = document.createElement("em");
+    em.textContent = Lang._("PANEL_NO_LINKS");
+    none.append(em);
+    linkList.append(none);
+    return;
+  }
+  links.forEach((result) => {
+    const entry = result.brokenLink;
+    const dismissed = !!result.dismissalStatus;
+    const li = document.createElement("li");
+    li.classList.add("ed11y-link-row");
+    if (!dismissed) {
+      li.classList.add(isWarningStyled(result) ? "ed11y-warning" : "ed11y-error");
+    }
+    const markWrapper = document.createElement("span");
+    markWrapper.classList.add("ed11y-result-wrapper", "ed11y-link-row-mark");
+    const button = document.createElement("button");
+    button.setAttribute("type", "button");
+    button.classList.add("toggle");
+    if (dismissed) {
+      button.classList.add("dismissed");
+    }
+    decorateToggle(button, result, dismissed);
+    button.setAttribute("title", Lang._("linkJumpTitle"));
+    button.setAttribute(
+      "aria-label",
+      `${Lang._("linkJumpTitle")}: ${linkStatusLabel(entry)}, ${displayHref(entry.href)}`
+    );
+    const index = State.results.indexOf(result);
+    if (index > -1) {
+      button.dataset.ed11yResult = `${index}`;
+    }
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      const mark = result.toggle;
+      if (!mark?.isConnected || mark.dataset.ed11yJumpPosition === void 0) {
+        return;
+      }
+      UI.openJumpPosition = Number.parseInt(mark.dataset.ed11yJumpPosition, 10) - 1;
+      jumpTo();
+    });
+    markWrapper.append(button);
+    const status = document.createElement("span");
+    status.classList.add("ed11y-link-status");
+    status.textContent = linkStatusLabel(entry);
+    const link = document.createElement("a");
+    link.href = entry.href;
+    link.setAttribute("target", "_blank");
+    link.setAttribute("rel", "noopener noreferrer");
+    link.textContent = displayHref(entry.href);
+    li.append(markWrapper, status, link);
+    linkList.append(li);
+  });
+};
 function visualize() {
   if (!UI.panel) {
     return;
@@ -5936,6 +6143,7 @@ function visualize() {
   UI.panel.querySelector("#ed11y-visualizers").removeAttribute("hidden");
   showAltPanel();
   showHeadingsPanel();
+  showLinksPanel();
   if (State.option.readabilityPlugin) {
     showReadability();
   }
@@ -6193,6 +6401,9 @@ function checkCustomRuleset() {
 }
 function showResults() {
   buildJumpList();
+  if (UI.visualizing) {
+    showLinksPanel();
+  }
   document.dispatchEvent(new CustomEvent("ed11yPanelOpened"));
   alignButtons();
   if (!UI.inlineAlerts) {
@@ -6280,6 +6491,25 @@ function updatePanel() {
         UI.panel.querySelector("#readability-info").appendChild(Constants.Panel.readabilityInfo);
         UI.panel.querySelector("#readability-details").appendChild(Constants.Panel.readabilityDetails);
         UI.panel.querySelector("#ed11y-readability-tab .summary-title").textContent = Lang._("READABILITY");
+      }
+      if (State.option.brokenLinks?.length) {
+        const linksTab = document.createElement("details");
+        linksTab.id = "ed11y-links-tab";
+        linksTab.innerHTML = `
+            <summary>${sprite.linkBroken}<span class="summary-title"></span><span class="close-details">${sprite.close}</span>
+            </summary>
+            <div class="details ed11y-small">
+              <p class="details-title"></p>
+              <ul id="ed11y-link-list"></ul>
+            </div>`;
+        linksTab.querySelector(".summary-title").textContent = Lang._("LINKS");
+        linksTab.querySelector(".details-title").textContent = Lang._("panelCheckLinks");
+        linksTab.addEventListener("toggle", () => {
+          if (linksTab.open && !UI.showDismissed) {
+            setShowDismissals(true);
+          }
+        });
+        UI.panel.querySelector("#ed11y-visualizers").appendChild(linksTab);
       }
       window.setTimeout(
         () => {
@@ -6496,6 +6726,7 @@ function dismissOne(dismissalType, test, dismissalKey, result = null) {
     dismissalKey = UI.dismissKeys[dismissalKey];
   }
   if (dismissalType === "reset") {
+    forgetLinkVerdict(result);
     const pageDismissals = UI.dismissedAlerts[State.option.currentPage];
     if (pageDismissals?.[test]) {
       delete pageDismissals[test][dismissalKey];
@@ -7225,6 +7456,9 @@ const enqueueTests = (queue) => {
     case "checkDeveloper":
       safeRun(checkDeveloper);
       break;
+    case "checkBrokenLinks":
+      safeRun(checkBrokenLinks);
+      break;
   }
   UI.testsRemaining--;
   if (queue.length > 0) {
@@ -7306,6 +7540,9 @@ function checkAll() {
   }
   if (State.option.contrastPlugin) {
     queue.push("checkContrast");
+  }
+  if (State.option.brokenLinks?.length) {
+    queue.push("checkBrokenLinks");
   }
   UI.testsRemaining = queue.length;
   if (State.option.customTests > 0) {
@@ -7510,14 +7747,17 @@ function dismissThis(dismissalType, button) {
     tip
   );
 }
-function toggleShowDismissals() {
+function setShowDismissals(show) {
   UI.ignoreAll = false;
-  UI.showDismissed = !UI.showDismissed;
+  UI.showDismissed = show;
   UI.forceFullCheck = true;
   UI.showPanel = true;
   resetResults();
   incrementalCheck();
   UI.panelShowDismissed.setAttribute("data-ed11y-pressed", `${UI.showDismissed}`);
+}
+function toggleShowDismissals() {
+  setShowDismissals(!UI.showDismissed);
   window.setTimeout(() => {
     UI.panelShowDismissed.focus();
   }, 0);
@@ -7845,18 +8085,22 @@ class Ed11yElementPanel extends HTMLElement {
       panelTabs.forEach((tab) => {
         tab.addEventListener("click", this.handleBarClick);
       });
-      const altDetails = wrapper.querySelector("#ed11y-alts-tab");
-      const headingDetails = wrapper.querySelector("#ed11y-headings-tab");
-      altDetails.addEventListener("toggle", () => {
-        if (altDetails.open && headingDetails.open) {
-          headingDetails.removeAttribute("open");
-        }
-      });
-      headingDetails.addEventListener("toggle", () => {
-        if (altDetails.open && headingDetails.open) {
-          altDetails.removeAttribute("open");
-        }
-      });
+      const visualizers = wrapper.querySelector("#ed11y-visualizers");
+      visualizers.addEventListener(
+        "toggle",
+        (event) => {
+          const opened = event.target;
+          if (!opened.open || opened.parentElement !== visualizers) {
+            return;
+          }
+          visualizers.querySelectorAll(":scope > details[open]").forEach((details) => {
+            if (details !== opened) {
+              details.removeAttribute("open");
+            }
+          });
+        },
+        true
+      );
       this.initialized = true;
     }
   }
@@ -8168,7 +8412,7 @@ class Ed11yElementTip extends HTMLElement {
     this.isLink = isLinkResult(this.result);
     let badge = this.dismissable ? Lang._("WARNING") : Lang._("ERROR");
     if (this.isLink) {
-      badge = Lang._(LINK_RESULT_TYPES[this.result.type].badge);
+      badge = this.dismissed ? Lang._("linkHiddenBadge") : Lang._(LINK_RESULT_TYPES[this.result.type].badge);
     }
     this.wrapper = document.createElement("div");
     this.wrapper.setAttribute("role", "dialog");
@@ -8468,12 +8712,11 @@ class Ed11yElementTip extends HTMLElement {
   //   alerts)
   //   ignored ("hide")            Restore, as for any ignored alert.
   //
-  // Mark OK and Mark broken are site-wide marks on the link, so the checker
-  // that pushed the result may grant them separately from the page-level
-  // allowOK option by setting a boolean `allowMark` in the result's data.
-  // Without it the page option decides.
+  // Mark OK and Mark broken are site-wide marks on the link, so a site may
+  // grant them separately from the page-level allowOK option through
+  // allowLinkMarks.
   drawLinkActions(buttonBar, dismissIcon) {
-    const allowMark = typeof this.result.data?.allowMark === "boolean" ? this.result.data.allowMark : State.option.allowOK;
+    const allowMark = linkMarksAllowed();
     const makeButton = (classes, text, title, icon) => {
       const button = document.createElement("button");
       button.classList.add("dismiss", ...classes);
@@ -9031,6 +9274,13 @@ const testNames = {
   LINK_LABEL: "Link label",
   LINK_MAYBE_BUTTON: "Is this link actually a button?",
   LINK_NEW_TAB: "Does this link open a new tab without warning?",
+  // Link checker results (see rulesets/broken-links.js).
+  LINK_BROKEN: "Broken link",
+  LINK_UNPUBLISHED: "Link to unpublished content",
+  LINK_MARKED_BROKEN: "Link marked broken by an editor",
+  LINK_ACCESS: "Link to restricted content",
+  LINK_UNVERIFIABLE: "Link needs a manual check",
+  LINK_REDIRECT: "Link redirects to a different site",
   LINK_PLACEHOLDER_ALT: "This linked alt text may be a placeholder",
   LINK_STOPWORD: "This link only contains generic words",
   LINK_STOPWORD_ARIA: "The purpose of this link is visually hidden",
@@ -9138,6 +9388,13 @@ const tips = {
   LINK_IMAGE_NO_ALT_TEXT: `<p>When a link is wrapped around an image, the image's alt text <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">provides the link's title for screen readers</a>.</p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
   LINK_IMAGE_TEXT: "Image is marked as decorative, although the link is using the surrounding text as a descriptive label.",
   LINK_MAYBE_BUTTON: `<p><strong>Link:</strong> <i>%(TEXT)</i></p><p>This link has an invalid target, and has a name that suggests it might be working as a button or toggle instead of a link.</p><p>${why.fix}Use a <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">&lt;button&gt;</a> instead, or correct the link's target.</p><div class="why"><p>Tip: Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.</p></div>`,
+  // Link checker results. The ruleset appends the link target after these.
+  LINK_BROKEN: "<p>The link checker could not reach this link. It may have moved or been removed:</p>",
+  LINK_UNPUBLISHED: "<p>This link points to content that is unpublished:</p>",
+  LINK_MARKED_BROKEN: "<p>An editor marked this link as broken:</p>",
+  LINK_ACCESS: "<p>This link points to content that anonymous visitors cannot see. Confirm that this is intentional:</p>",
+  LINK_UNVERIFIABLE: "<p>The link checker could not verify this link; the site may block automated requests. Check it manually:</p>",
+  LINK_REDIRECT: "<p>This link now lands on another site. Confirm that the new destination is what you meant to link to, or link to it directly:</p><p>%(redirectsTo)</p>",
   LINK_NEW_TAB: `<p><strong>Link text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Set this link to open in the same tab, or <a href="https://itmaybejj.github.io/linkpurpose/">warn users</a> first.</p><div class="why"><p>Readers can always <em>choose</em> to open a link in a new tab. When a link forces open a new tab, it is often confusing or annoying, especially for assistive device users who wonder why their browser's "back" button stopped working.</p><p>Note: forms are the exception. When the user is filling out a form, opening a link in the same window could cause them to lose their work, so links within forms usually open in new tabs.</p></div>`,
   LINK_PLACEHOLDER_ALT: `<p><strong>Alt text:</strong> <i>%(alt)</i></p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
   LINK_STOPWORD: `<p>Link text: <i>%(ERROR)</i></p><p>${why.fix}Use link text that describes its destination.</p>${why.links}`,
@@ -9186,6 +9443,7 @@ const interfaceStrings = {
   edit_term: "Edit term",
   edit_user: "Edit user",
   IMAGES: "Alt text",
+  LINKS: "Links",
   MAIN_TOGGLE_LABEL: "Toggle accessibility tools",
   MISSING: "(missing!)",
   NOT_VISIBLE: "Note: this content may not be visible. Look for it inside the outlined container.",
@@ -9219,6 +9477,16 @@ const interfaceStrings = {
   issueTemplate: "Template issue",
   linkBrokenBadge: "Broken link",
   linkManualBadge: "Check this link",
+  linkHiddenBadge: "Hidden link alert",
+  linkJumpTitle: "Jump to alert",
+  linkStatusBroken: "Broken",
+  linkStatusUnpublished: "Unpublished",
+  linkStatusMarkedBroken: "Marked broken",
+  linkStatusAccess: "Restricted",
+  linkStatusUnverifiable: "Unverified",
+  linkStatusRedirect: "Redirects",
+  linkDismissedOk: "Marked OK",
+  linkDismissedHide: "Ignored",
   main_toggle_hide: "Hide accessibility tools",
   main_toggle_hide_alerts: "Hide accessibility alerts",
   main_toggle_show: "Show accessibility tools",
@@ -9229,8 +9497,10 @@ const interfaceStrings = {
   MISSING_ROOT: `Editoria11y did not find any elements that matched the check area configuration: <code>%(root)</code>`,
   panelCheckAltText: "Check that each image describes what it means in context, and that there are no images of text.",
   panelCheckOutline: "This shows the heading outline. Check that it matches how the content is organized visually.",
+  panelCheckLinks: "Links the site link checker could not confirm. Open each one, then mark it OK or broken.",
   PANEL_HEADING_MISSING_ONE: "Missing Heading 1.",
   PANEL_NO_HEADINGS: "No headings found.",
+  PANEL_NO_LINKS: "No flagged links found on this page.",
   reportsLink: "Open site reports",
   toggleDisabled: "No content available for Editoria11y to check.",
   transferFocus: "Edit this content",
@@ -9359,8 +9629,10 @@ const ed11yDefaultOptions = {
   // { test, element, type, content, dismiss } onto Ed11y.State.results, then
   // dispatches `ed11yResume`. Besides 'error' and 'warning', external tests
   // may push `type: 'link'` (broken link) or `type: 'linkManual'`
-  // (unverifiable link); see utils/result-types.js. Any extra `data` object
-  // on the result is echoed back in `ed11yResults` and `ed11yDismissalUpdate`.
+  // (unverifiable link); see utils/result-types.js, or hand link checker
+  // results over through `brokenLinks` below instead. Any extra `data`
+  // object on the result is echoed back in `ed11yResults` and
+  // `ed11yDismissalUpdate`.
   customTests: 0,
   customRules: [],
   // Rulebuilder. Provide an array of objects:
@@ -9386,6 +9658,32 @@ const ed11yDefaultOptions = {
    *  }
    * ]
    */
+  // Link checker results. List links to flag. Setting any enables
+  // the Broken Links panel in the visualizer.
+  // Editor actions emit an `ed11yDismissalUpdate` event with
+  // a `hash`, `href` and `status` in `dismissData`. See
+  // rulesets/broken-links.js for the status table. Provide:
+  /**
+   * {
+   *  href         Required. The URL as the checker stored it.
+   *  status       Required. The problem: 'broken' | 'unpublished' |
+   *               'access' | 'unverifiable' | 'redirect' | 'markedBroken'
+   *  dismissed    The verdict, if any: 'ok' (an editor marked the link OK
+   *               site-wide) or 'hide' (this editor ignored the alert).
+   *  redirectsTo  Where a 'redirect' link now lands.
+   *  hash         Opaque id echoed back in events. Defaults to the href.
+   * }
+   */
+  brokenLinks: [],
+  // Hosts whose links the checker stores as root-relative paths. The page's
+  // own host always counts.
+  brokenLinksInternalHosts: [],
+  // Path prefixes the checker strips from internal links before storing
+  // them, e.g. a subdirectory base path or a language prefix: ['/en'].
+  brokenLinksPathPrefixes: [],
+  // Whether editors may Mark OK and Mark broken on flagged links. Null
+  // follows allowOK.
+  allowLinkMarks: null,
   linksAdvancedPlugin: true,
   formLabelsPlugin: true,
   embeddedContentPlugin: true,
@@ -9847,6 +10145,7 @@ const preProcessOptions = async (userOptions) => {
   if (State.option.customRules) {
     prepareCustomRuleset();
   }
+  prepareBrokenLinks();
   UI.english = Lang.langStrings.LANG_CODE.startsWith("en");
   if (UI.english) {
     State.option.extraPlaceholderStopWords = userOptions.extraPlaceholderStopWords ? `${userOptions.extraPlaceholderStopWords}, ${Lang.langStrings.extraPlaceholderStopWords}` : Lang.langStrings.extraPlaceholderStopWords;

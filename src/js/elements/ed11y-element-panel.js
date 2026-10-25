@@ -58,19 +58,26 @@ export class Ed11yElementPanel extends HTMLElement {
       panelTabs.forEach((tab) => {
         tab.addEventListener('click', this.handleBarClick);
       });
-      const altDetails = wrapper.querySelector('#ed11y-alts-tab');
+      // One visualizer open at a time. `toggle` does not bubble, so listen
+      // in the capture phase; this also covers tabs added later (links,
+      // readability).
       // @todo postpone: make clickable in editable mode.
-      const headingDetails = wrapper.querySelector('#ed11y-headings-tab');
-      altDetails.addEventListener('toggle', () => {
-        if (altDetails.open && headingDetails.open) {
-          headingDetails.removeAttribute('open');
-        }
-      });
-      headingDetails.addEventListener('toggle', () => {
-        if (altDetails.open && headingDetails.open) {
-          altDetails.removeAttribute('open');
-        }
-      });
+      const visualizers = wrapper.querySelector('#ed11y-visualizers');
+      visualizers.addEventListener(
+        'toggle',
+        (event) => {
+          const opened = event.target;
+          if (!opened.open || opened.parentElement !== visualizers) {
+            return;
+          }
+          visualizers.querySelectorAll(':scope > details[open]').forEach((details) => {
+            if (details !== opened) {
+              details.removeAttribute('open');
+            }
+          });
+        },
+        true,
+      );
       this.initialized = true;
     }
   }

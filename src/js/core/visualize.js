@@ -14,6 +14,8 @@ import {
   isLinkResult,
   isWarningStyled,
 } from '../utils/result-types.js';
+import { displayHref, linkStatusLabel } from '../rulesets/broken-links.js';
+import { jumpTo } from './run.js';
 
 const linkTypeClasses = Object.values(LINK_RESULT_TYPES).map((type) => type.className);
 
@@ -143,6 +145,81 @@ export const showAltPanel = () => {
   }
 };
 
+// Lists the link checker's flagged links. Each row carries a copy of the
+// result's toggle styling that jumps to the alert, a status label and the
+// target. Built after buttons are drawn (showResults) so rows can point at
+// them; opening the tab shows hidden alerts first so every row has one.
+export const showLinksPanel = () => {
+  const linkList = UI.panel !== false && UI.panel.querySelector('#ed11y-link-list');
+  if (!linkList) {
+    return;
+  }
+  linkList.innerHTML = '';
+  // Results are sorted bottom to top for the jump list; show page order.
+  const links = State.results.filter((result) => isLinkResult(result) && result.brokenLink);
+  links.reverse();
+  if (links.length === 0) {
+    const none = document.createElement('p');
+    const em = document.createElement('em');
+    em.textContent = Lang._('PANEL_NO_LINKS');
+    none.append(em);
+    linkList.append(none);
+    return;
+  }
+  links.forEach((result) => {
+    const entry = result.brokenLink;
+    const dismissed = !!result.dismissalStatus;
+    const li = document.createElement('li');
+    li.classList.add('ed11y-link-row');
+    if (!dismissed) {
+      li.classList.add(isWarningStyled(result) ? 'ed11y-warning' : 'ed11y-error');
+    }
+
+    // Same markup as the on-page button so it takes the same styles.
+    const markWrapper = document.createElement('span');
+    markWrapper.classList.add('ed11y-result-wrapper', 'ed11y-link-row-mark');
+    const button = document.createElement('button');
+    button.setAttribute('type', 'button');
+    button.classList.add('toggle');
+    if (dismissed) {
+      button.classList.add('dismissed');
+    }
+    decorateToggle(button, result, dismissed);
+    button.setAttribute('title', Lang._('linkJumpTitle'));
+    button.setAttribute(
+      'aria-label',
+      `${Lang._('linkJumpTitle')}: ${linkStatusLabel(entry)}, ${displayHref(entry.href)}`,
+    );
+    const index = State.results.indexOf(result);
+    if (index > -1) {
+      button.dataset.ed11yResult = `${index}`;
+    }
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      const mark = result.toggle;
+      if (!mark?.isConnected || mark.dataset.ed11yJumpPosition === undefined) {
+        return;
+      }
+      UI.openJumpPosition = Number.parseInt(mark.dataset.ed11yJumpPosition, 10) - 1;
+      jumpTo();
+    });
+    markWrapper.append(button);
+
+    const status = document.createElement('span');
+    status.classList.add('ed11y-link-status');
+    status.textContent = linkStatusLabel(entry);
+
+    const link = document.createElement('a');
+    link.href = entry.href;
+    link.setAttribute('target', '_blank');
+    link.setAttribute('rel', 'noopener noreferrer');
+    link.textContent = displayHref(entry.href);
+
+    li.append(markWrapper, status, link);
+    linkList.append(li);
+  });
+};
+
 export function visualize() {
   if (!UI.panel) {
     return;
@@ -172,6 +249,7 @@ export function visualize() {
   UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
   showAltPanel();
   showHeadingsPanel();
+  showLinksPanel();
   if (State.option.readabilityPlugin) {
     showReadability();
   }

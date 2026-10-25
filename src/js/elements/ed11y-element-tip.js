@@ -16,6 +16,7 @@ import {
   isManualLink,
   isWarningStyled,
 } from '../utils/result-types.js';
+import { linkMarksAllowed } from '../rulesets/broken-links.js';
 
 export class Ed11yElementTip extends HTMLElement {
   connectedCallback() {
@@ -39,7 +40,10 @@ export class Ed11yElementTip extends HTMLElement {
     this.isLink = isLinkResult(this.result);
     let badge = this.dismissable ? Lang._('WARNING') : Lang._('ERROR');
     if (this.isLink) {
-      badge = Lang._(LINK_RESULT_TYPES[this.result.type].badge);
+      // A hidden link alert is neither broken nor a check until restored.
+      badge = this.dismissed
+        ? Lang._('linkHiddenBadge')
+        : Lang._(LINK_RESULT_TYPES[this.result.type].badge);
     }
 
     this.wrapper = document.createElement('div');
@@ -387,15 +391,11 @@ export class Ed11yElementTip extends HTMLElement {
   //   alerts)
   //   ignored ("hide")            Restore, as for any ignored alert.
   //
-  // Mark OK and Mark broken are site-wide marks on the link, so the checker
-  // that pushed the result may grant them separately from the page-level
-  // allowOK option by setting a boolean `allowMark` in the result's data.
-  // Without it the page option decides.
+  // Mark OK and Mark broken are site-wide marks on the link, so a site may
+  // grant them separately from the page-level allowOK option through
+  // allowLinkMarks.
   drawLinkActions(buttonBar, dismissIcon) {
-    const allowMark =
-      typeof this.result.data?.allowMark === 'boolean'
-        ? this.result.data.allowMark
-        : State.option.allowOK;
+    const allowMark = linkMarksAllowed();
     const makeButton = (classes, text, title, icon) => {
       const button = document.createElement('button');
       button.classList.add('dismiss', ...classes);

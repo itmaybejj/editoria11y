@@ -12,6 +12,7 @@ import { State } from '../../sa11y-js/core/state.js';
 import { UI } from './ui.js';
 import { ed11yDefaultOptions } from '../utils/ed11y-default-options.js';
 import { prepareCustomRuleset } from '../rulesets/custom-ruleset.js';
+import { prepareBrokenLinks } from '../rulesets/broken-links.js';
 
 const validateSelectorOptions = (userOptions) => {
   const selectorKeys = [
@@ -94,6 +95,7 @@ const preProcessOptions = async (userOptions) => {
   if (State.option.customRules) {
     prepareCustomRuleset();
   }
+  prepareBrokenLinks();
 
   UI.english = Lang.langStrings.LANG_CODE.startsWith('en');
 

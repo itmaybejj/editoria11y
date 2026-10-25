@@ -82,8 +82,10 @@ export const ed11yDefaultOptions = {
   // { test, element, type, content, dismiss } onto Ed11y.State.results, then
   // dispatches `ed11yResume`. Besides 'error' and 'warning', external tests
   // may push `type: 'link'` (broken link) or `type: 'linkManual'`
-  // (unverifiable link); see utils/result-types.js. Any extra `data` object
-  // on the result is echoed back in `ed11yResults` and `ed11yDismissalUpdate`.
+  // (unverifiable link); see utils/result-types.js, or hand link checker
+  // results over through `brokenLinks` below instead. Any extra `data`
+  // object on the result is echoed back in `ed11yResults` and
+  // `ed11yDismissalUpdate`.
   customTests: 0,
   customRules: [], // Rulebuilder. Provide an array of objects:
   /**
@@ -108,6 +110,32 @@ export const ed11yDefaultOptions = {
    *  }
    * ]
    */
+  // Link checker results. List links to flag. Setting any enables
+  // the Broken Links panel in the visualizer.
+  // Editor actions emit an `ed11yDismissalUpdate` event with
+  // a `hash`, `href` and `status` in `dismissData`. See
+  // rulesets/broken-links.js for the status table. Provide:
+  /**
+   * {
+   *  href         Required. The URL as the checker stored it.
+   *  status       Required. The problem: 'broken' | 'unpublished' |
+   *               'access' | 'unverifiable' | 'redirect' | 'markedBroken'
+   *  dismissed    The verdict, if any: 'ok' (an editor marked the link OK
+   *               site-wide) or 'hide' (this editor ignored the alert).
+   *  redirectsTo  Where a 'redirect' link now lands.
+   *  hash         Opaque id echoed back in events. Defaults to the href.
+   * }
+   */
+  brokenLinks: [],
+  // Hosts whose links the checker stores as root-relative paths. The page's
+  // own host always counts.
+  brokenLinksInternalHosts: [],
+  // Path prefixes the checker strips from internal links before storing
+  // them, e.g. a subdirectory base path or a language prefix: ['/en'].
+  brokenLinksPathPrefixes: [],
+  // Whether editors may Mark OK and Mark broken on flagged links. Null
+  // follows allowOK.
+  allowLinkMarks: null,
   linksAdvancedPlugin: true,
   formLabelsPlugin: true,
   embeddedContentPlugin: true,

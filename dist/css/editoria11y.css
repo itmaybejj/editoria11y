@@ -591,6 +591,11 @@ button.ed11y-jump:hover .toggle-count {
   margin: 0 8px -3px -2px;
 }
 
+#ed11y-links-tab summary > svg {
+  width: 17px;
+  margin: 0 8px -3px -2px;
+}
+
 #ed11y-readability-tab summary > svg {
   width: 18px;
   margin: 0 8px -3px -2px;
@@ -677,7 +682,7 @@ button.ed11y-jump:hover .toggle-count {
   box-shadow: inset 0 0 1px #000;
 }
 
-#ed11y-outline, #ed11y-alt-list {
+#ed11y-outline, #ed11y-alt-list, #ed11y-link-list {
   padding: 0;
   list-style: none;
 }
@@ -703,6 +708,54 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 #ed11y-outline a:hover {
+  text-decoration: underline;
+}
+
+#ed11y-link-list {
+  margin: 0 4px 0 6px;
+}
+
+#ed11y-link-list li {
+  box-shadow: 0 0 0 3px var(--ed11y-bg, #fffffe),
+			0 -3px 1px var(--ed11y-primary, #276499);
+  border-radius: 4px;
+  grid-template-columns: 2.375em 1fr;
+  grid-template-areas: "mark status"
+                       "mark link";
+  align-items: center;
+  gap: 2px 8px;
+  margin: 8px 0 8px -8px;
+  padding: 6px 8px;
+  display: grid;
+}
+
+#ed11y-link-list .ed11y-link-row-mark {
+  grid-area: mark;
+  font-size: 14px;
+  position: relative;
+}
+
+#ed11y-link-list .ed11y-link-row-mark .toggle {
+  border-radius: 50%;
+}
+
+#ed11y-link-list .ed11y-link-status {
+  grid-area: status;
+  font-weight: 600;
+}
+
+#ed11y-link-list a {
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  grid-area: link;
+  font-weight: 300;
+  display: -webkit-box;
+  overflow: hidden;
+}
+
+#ed11y-link-list a:hover, #ed11y-link-list a:focus-visible {
   text-decoration: underline;
 }
 
@@ -1360,6 +1413,13 @@ button.ed11y-jump:hover .toggle-count {
   color: var(--ed11y-primary, #fffffe);
   background: var(--ed11y-primaryText, #276499);
   border-radius: 0 var(--ed11y-borderRadius, 1px) 0 0;
+}
+
+.ed11y-tip-wrapper .ed11y-link-target {
+  overflow-wrap: anywhere;
+  text-underline-offset: 3px;
+  font-family: monospace;
+  text-decoration-style: dotted;
 }
 
 .ed11y-tip-wrapper .dismissed-note {
