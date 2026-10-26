@@ -14,11 +14,12 @@
 	<script src="../dist/js/lang/en.umd.js"></script>
 	<script>
 		// ?sheet=relative-urls or ?sheet=with-import picks the override sheet.
-		// ?serve-as=<type> asks the test server to mislabel it.
+		// ?sheet-type=<type> asks the e2e test server to serve it with that
+		// Content-Type (forwarded to the sheet as ?serve-as=).
 		const params = new URLSearchParams(location.search);
 		const sheet = params.get('sheet') || 'relative-urls';
-		const serveAs = params.has('serve-as')
-			? `?serve-as=${encodeURIComponent(params.get('serve-as'))}`
+		const serveAs = params.has('sheet-type')
+			? `?serve-as=${encodeURIComponent(params.get('sheet-type'))}`
 			: '';
 		new Ed11y.Ed11y({
 			alertMode: 'assertive',
