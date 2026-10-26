@@ -19,8 +19,8 @@ class Ed11y {
         console.error('Editoria11y init failed:', error);
         const consoleErrors = new ConsoleErrors(error);
         document?.querySelector('*').appendChild(consoleErrors);
-        if (consoleErrors?.shadowRoot?.querySelector('*')) {
-          UI.attachCSS(consoleErrors.shadowRoot.querySelector('*'));
+        if (consoleErrors?.shadowRoot) {
+          UI.attachCSS(consoleErrors.shadowRoot);
         }
         throw error;
       });

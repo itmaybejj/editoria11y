@@ -426,7 +426,7 @@ export function drawResult(result, index) {
   mark.toggle.addEventListener('mouseover', mark.handleHover);
   mark.tipNeedsBuild = true;
 
-  UI.attachCSS(mark.wrapper);
+  UI.attachCSS(shadow);
 
   shadow.appendChild(mark.wrapper);
 

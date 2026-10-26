@@ -13,6 +13,7 @@ import { UI } from './ui.js';
 import { ed11yDefaultOptions } from '../utils/ed11y-default-options.js';
 import { prepareCustomRuleset } from '../rulesets/custom-ruleset.js';
 import { prepareBrokenLinks } from '../rulesets/broken-links.js';
+import { SharedStyles } from '../utils/shared-styles.js';
 
 const validateSelectorOptions = (userOptions) => {
   const selectorKeys = [
@@ -67,24 +68,10 @@ const preProcessOptions = async (userOptions) => {
       console.warn('Editoria11y CSS file parameter is missing; attempting to load from CDN.');
     }
   }
-  const cssBundle = document.createElement('div');
-  cssBundle.classList.add('ed11y-style');
-  cssBundle.setAttribute('hidden', '');
-  cssUrls?.forEach((sheet) => {
-    const cssLink = document.createElement('link');
-    cssLink.setAttribute('rel', 'stylesheet');
-    // @todo after merge possibly lost some preload functionality.
-    cssLink.setAttribute('media', 'all');
-    if (sheet.indexOf('?') < 0) {
-      sheet = `${sheet}?ver=${UI.version}`;
-    }
-    cssLink.setAttribute('href', sheet);
-    cssBundle.append(cssLink);
-  });
-  UI.attachCSS = (appendTo) => {
-    const link = cssBundle.cloneNode(true);
-    appendTo.appendChild(link);
-  };
+  const sharedStyles = new SharedStyles(
+    (cssUrls ?? []).map((sheet) => (sheet.indexOf('?') < 0 ? `${sheet}?ver=${UI.version}` : sheet)),
+  );
+  UI.attachCSS = (target) => sharedStyles.attach(target);
   Lang.testNames = State.option.lang.testNames;
   const titles = Object.entries(Lang.testNames);
   for (let i = 0; i < titles.length; i++) {

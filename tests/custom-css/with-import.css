@@ -1,0 +1,2 @@
+/* Constructed stylesheets drop @import, so this sheet must load via <link>. */
+@import url(imported.css);

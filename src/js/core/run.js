@@ -150,7 +150,7 @@ export function updatePanel() {
       UI.panelElement.classList.add('ed11y-preload');
       document.body.appendChild(UI.panelElement);
       UI.panel = UI.panelElement.shadowRoot.getElementById('ed11y-panel');
-      UI.attachCSS(UI.panel);
+      UI.attachCSS(UI.panelElement.shadowRoot);
       UI.panelToggle = UI.panel.querySelector('#ed11y-toggle');
       UI.panelToggleTitle = UI.panel.querySelector('#ed11y-toggle .ed11y-sr-only');
       UI.panelCount = UI.panel.querySelector('.toggle-count');
@@ -666,7 +666,7 @@ export function paintReady() {
   // May be redundant, but preloads unbundled files.
   if (document.querySelector('body')) {
     // May be redundant, but preloads unbundled files.
-    UI.attachCSS(document.querySelector('body'));
+    UI.attachCSS(document);
   }
 
   UI.roots.forEach((root) => {

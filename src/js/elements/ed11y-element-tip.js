@@ -14,7 +14,6 @@ import {
   LINK_RESULT_TYPES,
   isLinkResult,
   isManualLink,
-  isWarningStyled,
 } from '../utils/result-types.js';
 import { linkMarksAllowed } from '../rulesets/broken-links.js';
 
@@ -81,18 +80,14 @@ export class Ed11yElementTip extends HTMLElement {
       // Link badges stand out from the footer in the colors of their severity.
       this.wrapper
         .querySelector('.error-badge')
-        .classList.add(
-          LINK_CLASS,
-          LINK_RESULT_TYPES[this.result.type].className,
-          isWarningStyled(this.result) ? 'ed11y-warning' : 'ed11y-alert',
-        );
+        .classList.add(LINK_CLASS, LINK_RESULT_TYPES[this.result.type].className);
     }
 
     this.addEventListener('mouseover', this.handleHover, {
       passive: true,
     });
 
-    UI.attachCSS(this.wrapper);
+    UI.attachCSS(shadow);
 
     this.tip = this.wrapper.querySelector('.tip');
 

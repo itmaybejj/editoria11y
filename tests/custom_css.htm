@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Custom cssUrls</title>
+</head>
+<body>
+	<main>
+		<h1>Custom cssUrls</h1>
+		<p>An image with no alt text gives the page a result button to inspect.</p>
+		<img src="custom-css/check.svg">
+	</main>
+	<script src="../dist/js/ed11y.umd.js"></script>
+	<script src="../dist/js/lang/en.umd.js"></script>
+	<script>
+		// ?sheet=relative-urls or ?sheet=with-import picks the override sheet.
+		// ?serve-as=<type> asks the test server to mislabel it.
+		const params = new URLSearchParams(location.search);
+		const sheet = params.get('sheet') || 'relative-urls';
+		const serveAs = params.has('serve-as')
+			? `?serve-as=${encodeURIComponent(params.get('serve-as'))}`
+			: '';
+		new Ed11y.Ed11y({
+			alertMode: 'assertive',
+			checkRoot: 'main',
+			lang: Ed11yLangEn.lang,
+			cssUrls: ['../dist/css/editoria11y.css', `./custom-css/${sheet}.css${serveAs}`],
+		});
+	</script>
+</body>
+</html>

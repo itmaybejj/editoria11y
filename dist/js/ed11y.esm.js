@@ -2469,7 +2469,7 @@ function detectShadow(container) {
     const providedShadow = container.querySelectorAll(State.option.shadowComponents);
     providedShadow.forEach((component) => {
       if (component.shadowRoot && component.shadowRoot.mode === "open") {
-        if (!container.matches("[data-ed11y-has-shadow-root]")) {
+        if (!component.matches("[data-ed11y-has-shadow-root]")) {
           component.setAttribute("data-ed11y-has-shadow-root", "true");
           UI.attachCSS(component.shadowRoot);
           UI.attachCSS(component);
@@ -2673,7 +2673,7 @@ function newIncrementalResults() {
 function showError(error) {
   const consoleErrors = new ConsoleErrors(error);
   document.body.appendChild(consoleErrors);
-  UI.attachCSS(consoleErrors.shadowRoot.querySelector("*"));
+  UI.attachCSS(consoleErrors.shadowRoot);
   throw Error(error);
 }
 function pushResult$1({
@@ -6301,7 +6301,7 @@ function drawResult(result, index) {
   mark.toggle.addEventListener("focus", mark.handleFocus);
   mark.toggle.addEventListener("mouseover", mark.handleHover);
   mark.tipNeedsBuild = true;
-  UI.attachCSS(mark.wrapper);
+  UI.attachCSS(shadow);
   shadow.appendChild(mark.wrapper);
   UI.jumpList.unshift(mark);
   State.results[index].toggle = mark;
@@ -6487,7 +6487,7 @@ function updatePanel() {
       UI.panelElement.classList.add("ed11y-preload");
       document.body.appendChild(UI.panelElement);
       UI.panel = UI.panelElement.shadowRoot.getElementById("ed11y-panel");
-      UI.attachCSS(UI.panel);
+      UI.attachCSS(UI.panelElement.shadowRoot);
       UI.panelToggle = UI.panel.querySelector("#ed11y-toggle");
       UI.panelToggleTitle = UI.panel.querySelector("#ed11y-toggle .ed11y-sr-only");
       UI.panelCount = UI.panel.querySelector(".toggle-count");
@@ -6877,7 +6877,7 @@ function paintReady() {
     document.documentElement.style.setProperty(`--ed11y-${key}`, `${value}`);
   }
   if (document.querySelector("body")) {
-    UI.attachCSS(document.querySelector("body"));
+    UI.attachCSS(document);
   }
   UI.roots.forEach((root) => {
     if (State.option.shadowComponents) {
@@ -7889,7 +7889,7 @@ class Ed11yElementAlt extends HTMLElement {
         altSpan.classList.add(`ed11y-pass`);
       }
       altTextWrapper.appendChild(altSpan);
-      UI.attachCSS(altTextWrapper);
+      UI.attachCSS(shadow);
       shadow.appendChild(altTextWrapper);
       this.initialized = true;
     }
@@ -8465,16 +8465,12 @@ class Ed11yElementTip extends HTMLElement {
 		`;
     this.wrapper.querySelector(".content").dataset.test = this.result.test;
     if (this.isLink) {
-      this.wrapper.querySelector(".error-badge").classList.add(
-        LINK_CLASS,
-        LINK_RESULT_TYPES[this.result.type].className,
-        isWarningStyled(this.result) ? "ed11y-warning" : "ed11y-alert"
-      );
+      this.wrapper.querySelector(".error-badge").classList.add(LINK_CLASS, LINK_RESULT_TYPES[this.result.type].className);
     }
     this.addEventListener("mouseover", this.handleHover, {
       passive: true
     });
-    UI.attachCSS(this.wrapper);
+    UI.attachCSS(shadow);
     this.tip = this.wrapper.querySelector(".tip");
     const content = this.wrapper.querySelector(".message");
     if (typeof this.result.content === "string") {
@@ -10098,6 +10094,152 @@ const ed11yDefaultOptions = {
     // EMBED_CUSTOM: { sources: '#embed', },
   }
 };
+const CSS_REFERENCES = /\/\*[\s\S]*?\*\/|"(?:[^"\\\n]|\\[\s\S])*"|'(?:[^'\\\n]|\\[\s\S])*'|\burl\(\s*(?:"((?:[^"\\\n]|\\[\s\S])*)"|'((?:[^'\\\n]|\\[\s\S])*)'|([^\s"'()]*))\s*\)|(@import\b)|(\bimage-set\()/gi;
+const ABSOLUTE_REFERENCE = /^(?:[a-z][a-z\d+.-]*:|\/\/|#)/i;
+class UnshareableCssError extends Error {
+}
+class SharedStyles {
+  /**
+   * @param {string[]} urls Stylesheet URLs, already cache-busted.
+   */
+  constructor(urls) {
+    this.urls = urls;
+    this.linkBundle = SharedStyles.buildLinkBundle(urls);
+    this.sheets = [];
+    this.pendingRoots = /* @__PURE__ */ new Set();
+    this.mode = SharedStyles.supported() ? "adopt" : "link";
+    if (this.mode === "adopt") {
+      this.sheets = urls.map(() => new CSSStyleSheet());
+      this.ready = this.load();
+    } else {
+      this.ready = Promise.resolve();
+    }
+  }
+  static supported() {
+    return typeof CSSStyleSheet !== "undefined" && "replace" in CSSStyleSheet.prototype && "adoptedStyleSheets" in Document.prototype && "adoptedStyleSheets" in ShadowRoot.prototype;
+  }
+  static absolute(url2) {
+    return new URL(url2, document.baseURI).href;
+  }
+  /**
+   * Rewrites relative url()s in a stylesheet to absolute URLs.
+   *
+   * @param {string} css Stylesheet text.
+   * @param {string} sheetUrl Absolute URL the text was fetched from.
+   * @returns {string}
+   * @throws {UnshareableCssError} If the CSS needs <link> loading to work.
+   */
+  static absolutizeUrls(css, sheetUrl) {
+    return css.replace(CSS_REFERENCES, (token, double, single, bare, atImport, imageSet) => {
+      if (atImport) {
+        throw new UnshareableCssError(`@import in ${sheetUrl}`);
+      }
+      if (imageSet) {
+        throw new UnshareableCssError(`image-set() in ${sheetUrl}`);
+      }
+      const ref = double ?? single ?? bare;
+      if (ref === void 0 || ref === "" || ABSOLUTE_REFERENCE.test(ref)) {
+        return token;
+      }
+      if (ref.includes("\\")) {
+        throw new UnshareableCssError(`escaped url() in ${sheetUrl}`);
+      }
+      return `url("${new URL(ref, sheetUrl).href}")`;
+    });
+  }
+  static buildLinkBundle(urls) {
+    const bundle = document.createElement("div");
+    bundle.classList.add("ed11y-style");
+    bundle.setAttribute("hidden", "");
+    urls.forEach((url2) => {
+      const link = document.createElement("link");
+      link.setAttribute("rel", "stylesheet");
+      link.setAttribute("media", "all");
+      link.setAttribute("href", url2);
+      bundle.append(link);
+    });
+    return bundle;
+  }
+  async load() {
+    try {
+      const texts = await Promise.all(
+        this.urls.map(async (url2) => {
+          const response = await fetch(url2, { headers: { Accept: "text/css,*/*;q=0.1" } });
+          if (!response.ok) {
+            throw new Error(`${response.status} ${response.statusText} for ${url2}`);
+          }
+          const type = response.headers.get("Content-Type");
+          if (type && type.split(";")[0].trim().toLowerCase() !== "text/css") {
+            throw new UnshareableCssError(`${url2} was served as ${type}, not text/css`);
+          }
+          return response.text();
+        })
+      );
+      const rewritten = texts.map(
+        (text, i) => SharedStyles.absolutizeUrls(text, SharedStyles.absolute(this.urls[i]))
+      );
+      await Promise.all(rewritten.map((text, i) => this.sheets[i].replace(text)));
+    } catch (error) {
+      console.warn("Editoria11y: could not share stylesheets; falling back to <link>.", error);
+      this.mode = "link";
+      this.pendingRoots.forEach((root) => {
+        root.adoptedStyleSheets = root.adoptedStyleSheets.filter((s) => !this.sheets.includes(s));
+        this.appendLinks(SharedStyles.linkTarget(root));
+      });
+      this.sheets = [];
+    } finally {
+      this.pendingRoots.clear();
+      this.pendingRoots = null;
+    }
+  }
+  /**
+   * Resolves what to style: a Document or ShadowRoot as given, otherwise the
+   * root node an element is connected to. Detached elements return null.
+   *
+   * @param {Node} target
+   * @returns {Document|ShadowRoot|null}
+   */
+  static resolveRoot(target) {
+    if (target instanceof Document || target instanceof ShadowRoot) {
+      return target;
+    }
+    const root = target?.getRootNode?.();
+    return root instanceof Document || root instanceof ShadowRoot ? root : null;
+  }
+  /** A document cannot take a second child element, so its links go in <head>. */
+  static linkTarget(root) {
+    return root instanceof Document ? root.head || root.body : root;
+  }
+  appendLinks(target) {
+    for (const child of target.children) {
+      if (child.classList.contains("ed11y-style")) {
+        return;
+      }
+    }
+    target.appendChild(this.linkBundle.cloneNode(true));
+  }
+  /**
+   * Styles a document, a shadow root, or the root an element is connected to.
+   * Safe to call repeatedly on the same target.
+   *
+   * @param {Document|ShadowRoot|Element} target
+   */
+  attach(target) {
+    if (!target) {
+      return;
+    }
+    const root = SharedStyles.resolveRoot(target);
+    if (this.mode === "link" || !root) {
+      this.appendLinks(root ? SharedStyles.linkTarget(root) : target);
+      return;
+    }
+    const missing = this.sheets.filter((sheet) => !root.adoptedStyleSheets.includes(sheet));
+    if (missing.length) {
+      root.adoptedStyleSheets = [...root.adoptedStyleSheets, ...missing];
+    }
+    this.pendingRoots?.add(root);
+  }
+}
 const validateSelectorOptions = (userOptions) => {
   const selectorKeys = [
     "checkRoot",
@@ -10150,23 +10292,10 @@ const preProcessOptions = async (userOptions) => {
       console.warn("Editoria11y CSS file parameter is missing; attempting to load from CDN.");
     }
   }
-  const cssBundle = document.createElement("div");
-  cssBundle.classList.add("ed11y-style");
-  cssBundle.setAttribute("hidden", "");
-  cssUrls?.forEach((sheet) => {
-    const cssLink = document.createElement("link");
-    cssLink.setAttribute("rel", "stylesheet");
-    cssLink.setAttribute("media", "all");
-    if (sheet.indexOf("?") < 0) {
-      sheet = `${sheet}?ver=${UI.version}`;
-    }
-    cssLink.setAttribute("href", sheet);
-    cssBundle.append(cssLink);
-  });
-  UI.attachCSS = (appendTo) => {
-    const link = cssBundle.cloneNode(true);
-    appendTo.appendChild(link);
-  };
+  const sharedStyles = new SharedStyles(
+    (cssUrls ?? []).map((sheet) => sheet.indexOf("?") < 0 ? `${sheet}?ver=${UI.version}` : sheet)
+  );
+  UI.attachCSS = (target) => sharedStyles.attach(target);
   Lang.testNames = State.option.lang.testNames;
   const titles = Object.entries(Lang.testNames);
   for (let i = 0; i < titles.length; i++) {
@@ -10301,8 +10430,8 @@ class Ed11y {
         console.error("Editoria11y init failed:", error);
         const consoleErrors = new ConsoleErrors(error);
         document?.querySelector("*").appendChild(consoleErrors);
-        if (consoleErrors?.shadowRoot?.querySelector("*")) {
-          UI.attachCSS(consoleErrors.shadowRoot.querySelector("*"));
+        if (consoleErrors?.shadowRoot) {
+          UI.attachCSS(consoleErrors.shadowRoot);
         }
         throw error;
       });

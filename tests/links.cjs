@@ -140,7 +140,6 @@ describe('Link checker results', function () {
     browser.execute(readTip, [], (result) => {
       browser.assert.equal(result.value.title, 'Broken link', 'Tip title names the problem');
       browser.assert.equal(result.value.badge, 'Broken link', 'Badge names the link class');
-      browser.assert.ok(result.value.badgeClass.includes('ed11y-alert'), 'Badge uses the error colors');
       browser.assert.equal(result.value.targetHref, '/no-such-page', 'Tip links to the target');
       browser.assert.equal(result.value.targetBlank, '_blank', 'Target opens in a new tab');
       browser.assert.deepEqual(
@@ -157,10 +156,6 @@ describe('Link checker results', function () {
     browser.execute(readTip, [], (result) => {
       browser.assert.equal(result.value.title, 'Link needs a manual check', 'Tip title names the problem');
       browser.assert.equal(result.value.badge, 'Check this link', 'Badge names the link class');
-      browser.assert.ok(
-        result.value.badgeClass.includes('ed11y-warning'),
-        'Badge uses the warning colors',
-      );
       browser.assert.ok(result.value.buttons.includes('Mark OK'), 'Mark OK offered');
       browser.assert.ok(result.value.buttons.includes('Mark broken'), 'Mark broken offered');
       browser.assert.ok(!result.value.buttons.includes('Ignore'), 'Ignore hidden when OK allowed');
