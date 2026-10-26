@@ -133,6 +133,11 @@ export const ed11yDefaultOptions = {
   // Path prefixes the checker strips from internal links before storing
   // them, e.g. a subdirectory base path or a language prefix: ['/en'].
   brokenLinksPathPrefixes: [],
+  // Where to look for the flagged links: a CSS selector for the containers
+  // the checker harvested, e.g. 'body' when it read menus and footers too.
+  // False paints only links inside the check roots. Container ignores
+  // (containerIgnore, ignoreElements) apply either way.
+  brokenLinksRoots: false,
   // Which link checker manual checks ('access', 'unverifiable', 'redirect')
   // are painted like any other manual check. Statuses removed from this list
   // hide until the visualizer panel opens. A site with many links the checker

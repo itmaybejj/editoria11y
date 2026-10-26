@@ -1,5 +1,7 @@
+import Constants from '../../sa11y-js/utils/constants.js';
 import Lang from '../../sa11y-js/utils/lang.js';
 import Elements from '../../sa11y-js/utils/elements.js';
+import find from '../../sa11y-js/utils/find.js';
 import * as Utils from '../../sa11y-js/utils/utils.js';
 import { State } from '../../sa11y-js/core/state.js';
 
@@ -132,6 +134,11 @@ export function prepareBrokenLinks() {
     return true;
   });
 
+  if (State.option.brokenLinksRoots && typeof State.option.brokenLinksRoots !== 'string') {
+    console.warn('Editoria11y: brokenLinksRoots must be a CSS selector string.');
+    State.option.brokenLinksRoots = false;
+  }
+
   if (!Array.isArray(State.option.brokenLinksShowChecks)) {
     console.warn('Editoria11y: brokenLinksShowChecks must be an array of statuses.');
     State.option.brokenLinksShowChecks = [...MANUAL_LINK_STATUSES];
@@ -183,12 +190,29 @@ const buildContent = (entry, status) => {
   return content;
 };
 
+// The anchors to match against the entries: the links inside the check
+// roots, or, when `brokenLinksRoots` names the containers the checker
+// harvested (menus and footers sit outside a typical content root), every
+// anchor in those. Container ignores apply either way through find().
+export const linkAnchors = () => {
+  const roots = State.option.brokenLinksRoots;
+  if (typeof roots !== 'string' || !roots.trim()) {
+    return Elements.Found.Links;
+  }
+  try {
+    return find('a[href]', roots, Constants.Exclusions.Sa11yElements);
+  } catch (error) {
+    console.warn(`Editoria11y: could not search brokenLinksRoots "${roots}".`, error);
+    return Elements.Found.Links;
+  }
+};
+
 export function checkBrokenLinks() {
   if (!State.option.brokenLinks?.length) {
     return;
   }
   const byHref = indexEntries();
-  for (const anchor of Elements.Found.Links) {
+  for (const anchor of linkAnchors()) {
     if (!anchor.matches('a[href]')) {
       continue;
     }

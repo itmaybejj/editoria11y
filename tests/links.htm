@@ -27,6 +27,10 @@
 	<p class="ignored"><a id="ignored-link" href="https://example.com/ignored">A broken link this editor ignored</a></p>
 	<p class="fine"><a id="fine-link" href="/">A link with nothing to report</a></p>
 </main>
+<nav class="sitenav" aria-label="Site">
+	<!-- Outside the check root; painted only with ?allRoots (brokenLinksRoots). -->
+	<a id="nav-link" href="/no-such-page">A broken link in the site navigation</a>
+</nav>
 
 <script src="../dist/js/ed11y.umd.js"></script>
 <script src="../dist/js/lang/en.umd.js"></script>
@@ -48,6 +52,9 @@
 		// The checker stores internal links as root-relative paths with the
 		// language prefix stripped, the way Drupal's UrlNormalizer does.
 		brokenLinksPathPrefixes: ['/en'],
+		// With ?allRoots the checker harvested the whole page, so flagged links
+		// are painted beyond the check root (the navigation link).
+		brokenLinksRoots: window.location.search.includes('allRoots') ? 'body' : false,
 		brokenLinks: [
 			{ href: '/no-such-page', status: 'broken', hash: 'abc123' },
 			{ href: '/node/5', status: 'unpublished', hash: 'node5' },

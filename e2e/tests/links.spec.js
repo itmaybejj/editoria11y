@@ -339,6 +339,23 @@ test.describe('Link checker results', () => {
     await closeTip(page);
   });
 
+  test('paints links outside the check root only where brokenLinksRoots points', async ({
+    page,
+  }) => {
+    await gotoPainted(page, PAGE);
+    expect(await hasResult(page, 'sitenav'), 'Navigation link outside the root is skipped').toBe(
+      false,
+    );
+
+    await gotoPainted(page, `${PAGE}?allRoots`);
+    expect(await hasResult(page, 'sitenav'), 'Navigation link painted through the roots').toBe(
+      true,
+    );
+    expect(await hasResult(page, 'broken'), 'Links inside the root are still painted').toBe(true);
+    const count = await page.evaluate(counts);
+    expect(count.errorCount, 'The navigation link joins the issue count').toBe(3);
+  });
+
   test('shows Ignore instead of Mark OK when OK is not allowed', async ({ page }) => {
     await gotoPainted(page, `${PAGE}?noOk`);
     await openTip(page, 'broken');
