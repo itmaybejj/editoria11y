@@ -392,7 +392,7 @@ export function detectShadow(container) {
     const providedShadow = container.querySelectorAll(State.option.shadowComponents);
     providedShadow.forEach((component) => {
       if (component.shadowRoot && component.shadowRoot.mode === 'open') {
-        if (!container.matches('[data-ed11y-has-shadow-root]')) {
+        if (!component.matches('[data-ed11y-has-shadow-root]')) {
           component.setAttribute('data-ed11y-has-shadow-root', 'true');
           UI.attachCSS(component.shadowRoot);
           UI.attachCSS(component);
@@ -663,6 +663,6 @@ export function newIncrementalResults() {
 export function showError(error) {
   const consoleErrors = new ConsoleErrors(error);
   document.body.appendChild(consoleErrors);
-  UI.attachCSS(consoleErrors.shadowRoot.querySelector('*'));
+  UI.attachCSS(consoleErrors.shadowRoot);
   throw Error(error);
 }

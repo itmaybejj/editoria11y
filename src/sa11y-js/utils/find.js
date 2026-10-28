@@ -19,7 +19,8 @@ export default function find(selector, desiredRoot, exclude) {
   } else if (desiredRoot === 'root') {
     root.push(Constants.Root.areaToCheck);
   } else {
-    root.push(document.querySelectorAll(desiredRoot));
+    // Spread: flat() below only unwraps arrays, not a NodeList.
+    root.push(...document.querySelectorAll(desiredRoot));
   }
 
   // Exclusions are returned as an array & need to become a string for selector.

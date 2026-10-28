@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Link checker results</title>
+	<link href="./tests.css" rel="stylesheet">
+	<link href="../dist/css/editoria11y.css" rel="stylesheet">
+</head>
+<body>
+<main>
+	<h1>Link checker results</h1>
+	<p>
+		This page simulates a CMS link checker handing its flagged links to the
+		library through the <code>brokenLinks</code> option. Append
+		<code>?noOk</code> to the URL to test the button set shown to users who may
+		not mark things OK, <code>?noMark</code> to withhold link marks through
+		<code>allowLinkMarks</code> while the page still allows OK, or
+		<code>?deferChecks</code> to keep unverifiable links behind the visualizers
+		through <code>brokenLinksShowChecks</code>.
+	</p>
+	<p class="broken"><a id="broken-link" href="/no-such-page">A link the checker found broken</a></p>
+	<p class="unpublished"><a id="unpublished-link" href="/en/node/5">A link to unpublished content, matched through a stripped path prefix</a></p>
+	<p class="manual"><a id="manual-link" href="https://example.com/locked#section">A link the checker could not verify</a></p>
+	<p class="redirect"><a id="redirect-link" href="https://example.com/moved">A link that redirects to another site</a></p>
+	<p class="okd"><a id="okd-link" href="/marked-ok">A broken link an editor marked OK</a></p>
+	<p class="ignored"><a id="ignored-link" href="https://example.com/ignored">A broken link this editor ignored</a></p>
+	<p class="fine"><a id="fine-link" href="/">A link with nothing to report</a></p>
+</main>
+<nav class="sitenav" aria-label="Site">
+	<!-- Outside the check root; painted only with ?allRoots (brokenLinksRoots). -->
+	<a id="nav-link" href="/no-such-page">A broken link in the site navigation</a>
+</nav>
+
+<script src="../dist/js/ed11y.umd.js"></script>
+<script src="../dist/js/lang/en.umd.js"></script>
+<script>
+	window.ed11yTestEvents = [];
+
+	// A real integration posts these to its server; here they are only
+	// recorded so the spec can inspect them.
+	document.addEventListener('ed11yDismissalUpdate', (e) => {
+		window.ed11yTestEvents.push(e.detail);
+	});
+
+	const options = {
+		alertMode: 'assertive',
+		checkRoot: 'main',
+		lang: Ed11yLangEn.lang,
+		allowOK: !window.location.search.includes('noOk'),
+		allowHide: true,
+		// The checker stores internal links as root-relative paths with the
+		// language prefix stripped, the way Drupal's UrlNormalizer does.
+		brokenLinksPathPrefixes: ['/en'],
+		// With ?allRoots the checker harvested the whole page, so flagged links
+		// are painted beyond the check root (the navigation link).
+		brokenLinksRoots: window.location.search.includes('allRoots') ? 'body' : false,
+		brokenLinks: [
+			{ href: '/no-such-page', status: 'broken', hash: 'abc123' },
+			{ href: '/node/5', status: 'unpublished', hash: 'node5' },
+			{ href: 'https://example.com/locked', status: 'unverifiable', hash: 'def456' },
+			{
+				href: 'https://example.com/moved',
+				status: 'redirect',
+				redirectsTo: 'https://other.example.org/landing',
+				hash: 'redir1',
+			},
+			{ href: '/marked-ok', status: 'broken', dismissed: 'ok', hash: 'ok789' },
+			{ href: 'https://example.com/ignored', status: 'broken', dismissed: 'hide', hash: 'hide012' },
+			// Not on the page: must not produce a result or a panel row.
+			{ href: 'https://example.com/absent', status: 'broken', hash: 'absent' },
+		],
+	};
+	if (window.location.search.includes('noMark')) {
+		options.allowLinkMarks = false;
+	}
+	if (window.location.search.includes('deferChecks')) {
+		// Only redirects are shown as ordinary manual checks.
+		options.brokenLinksShowChecks = ['redirect'];
+	}
+
+	const ed11y = new Ed11y.Ed11y(options);
+</script>
+</body>
+</html>

@@ -16,12 +16,17 @@ npm run lint         # Lint src/ with Biome
 npm run lint:fix     # Auto-fix lint issues
 npm run dev          # Start Vite dev server at localhost:8080, opens /tests/all_tests.htm
 npm run watch        # Watch src/ and rebuild on changes
-npm run test         # Run Nightwatch browser tests (Chrome headless, 4 workers)
+npm test             # Run Playwright browser tests in Docker (works in the agent sandbox)
+npm run test:host    # Same tests on the host's Playwright browsers
 ```
 
 ### Running tests
 
-Tests use Nightwatch (browser automation) against HTML test pages. There is no built-in way to run a single test file via npm; run the dev server (`npm run dev`) and open individual test pages manually for development. The main test suite runs against `tests/all_tests.htm`.
+Browser tests use Playwright and live in `e2e/tests/`. `npm test` runs them in the official Playwright Docker image matching the installed `@playwright/test` version. Filter by title with `npm test -- --grep "<title>"`, or by file with `npm test -- links`. Output lands in `e2e/test-results/` (each failure has an `error-context.md` with the error and a page snapshot) and `e2e/report/` (both git-ignored).
+
+**Agents: always use `npm test`.** The macOS sandbox blocks browsers from starting at all (Chromium's mach-port check-in is denied) and blocks binding local ports, so `npm run test:host` and `npm run dev` cannot run inside it. Docker works because the container runs outside the sandbox. The container has no network, so tests must not depend on the internet. Test pages load `dist/`, so run `npm run build` (or `npm run build:js`) before testing source changes.
+
+For manual checks, run the dev server (`npm run dev`) and open test pages. The main pages are `tests/all_tests.htm` and `tests/unit_tests.htm`.
 
 ## Architecture
 
@@ -61,8 +66,13 @@ Language files in `src/lang/` (18+ languages). Each exports a translation object
 
 `tests/all_tests.htm` — one positive for each test
 `tests/unit_tests.htm` — primary test page (false negatives + false positives)
-`tests/all_tests.cjs` — Nightwatch spec
-`nightwatch.conf.js` — test configuration (Chrome headless)
+`e2e/tests/checks.spec.js` — every `.positive` on `all_tests.htm` gets a result, no `.negative` does
+`e2e/tests/links.spec.js` — link checker results (`tests/links.htm`)
+`e2e/tests/styles.spec.js` — shared stylesheet adoption and `<link>` fallback
+`e2e/tests/helpers.js` — wait for Editoria11y paints (`ed11yResultsPainted`) instead of fixed pauses; click panel buttons
+`e2e/server.js` — static server for e2e. Serves the repo root; a `.css` request without `Accept: text/css` gets a JS module (as Vite does), and `?serve-as=<type>` overrides the Content-Type
+`e2e/playwright.config.js` — Playwright configuration; `scripts/test-docker.js` — Docker runner
+`tests/custom_css.htm`, `tests/custom-css/` — custom `cssUrls` fixture page and sheets
 
 ### ACT Rule Conformance
 

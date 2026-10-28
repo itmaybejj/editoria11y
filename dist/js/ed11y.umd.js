@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.2-1007
+			* @version 3.0.2-1026
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -140,6 +140,7 @@
     // e.g. '.inner-node-hidden-in-CSS'
     // Shared properties for some checks
     altPlaceholder: [],
+    // Strings (prefix match) and/or RegExp objects (as authored).
     susAltStopWords: "",
     linkStopWords: "",
     extraPlaceholderStopWords: "",
@@ -430,19 +431,22 @@
         Global.pdfSources = false;
       }
       Global.susAltWords = State.option.susAltStopWords ? State.option.susAltStopWords.split(",").map((word) => word.trim().toLowerCase()).filter(Boolean) : Lang._("SUS_ALT_STOPWORDS");
-      Global.placeholderAltSet = new Set(Lang._("PLACEHOLDER_ALT_STOPWORDS"));
-      Global.altPlaceholderPattern = generateRegexString(State.option.altPlaceholder, true);
+      Global.placeholderAltSet = new Set(Lang._("PLACEHOLDER_ALT_STOPWORDS").map(foldForMatching));
+      const altPlaceholder = Array.isArray(State.option.altPlaceholder) ? State.option.altPlaceholder.map(stripBidiControls) : stripBidiControls(State.option.altPlaceholder);
+      Global.altPlaceholderPattern = generateRegexString(altPlaceholder, true);
       Global.linkIgnoreStringPattern = generateRegexString(State.option.linkIgnoreStrings);
       Global.unpronounceablePattern = /[\p{L}\p{N}\p{Extended_Pictographic}]/u;
-      Global.extraPlaceholderStopWords = State.option.extraPlaceholderStopWords.split(",").map((word) => word.trim().toLowerCase()).filter(Boolean);
+      Global.extraPlaceholderStopWords = State.option.extraPlaceholderStopWords.split(",").map((word) => foldForMatching(word.trim())).filter(Boolean);
       Global.headerStringExclusionPattern = generateRegexString(State.option.headerIgnoreStrings);
       const customStopWords = State.option.linkStopWords ? State.option.linkStopWords.split(",").map((word) => word.toLowerCase().trim()) : [];
-      Global.linkStopWords = /* @__PURE__ */ new Set([...Lang._("LINK_STOPWORDS"), ...customStopWords]);
+      Global.linkStopWords = new Set(
+        [...Lang._("LINK_STOPWORDS"), ...customStopWords].map(normalizeStopWord).filter(Boolean)
+      );
       Global.linkIgnoreStrings = new Set(
         State.option.linkIgnoreStrings.map((word) => word.toLowerCase())
       );
-      Global.clickRegex = generateRegexString(Lang._("CLICK"));
-      Global.newWindowRegex = generateRegexString(Lang._("NEW_WINDOW_PHRASES"));
+      Global.clickRegex = generateRegexString(Lang._("CLICK").map(foldForMatching));
+      Global.newWindowRegex = generateRegexString(Lang._("NEW_WINDOW_PHRASES").map(foldForMatching));
       const defaultFileTypes = [
         "pdf",
         "doc",
@@ -729,7 +733,7 @@
     } else if (desiredRoot === "root") {
       root.push(Constants.Root.areaToCheck);
     } else {
-      root.push(document.querySelectorAll(desiredRoot));
+      root.push(...document.querySelectorAll(desiredRoot));
     }
     const exclusions = Constants.Exclusions.Container.join(", ");
     const additionalExclusions = exclude?.join(", ") || "";
@@ -825,6 +829,13 @@
   function stripAllSpecialCharacters(string) {
     if (typeof string !== "string" && typeof string !== "number") return "";
     return String(string).replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
+  }
+  function foldForMatching(string) {
+    if (typeof string !== "string" && typeof string !== "number") return "";
+    return String(string).toLowerCase().normalize("NFD").replace(new RegExp("(\\p{Script=Greek})\\p{M}+", "gu"), "$1").replace(/i̇/g, "i").replace(/ı/g, "i").normalize("NFC");
+  }
+  function normalizeStopWord(string) {
+    return foldForMatching(string).replace(/[^\p{L}\p{M}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
   }
   const invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
   const htmlEntitiesRegex = /&#(\w+)(^\w|;)?/g;
@@ -1200,23 +1211,46 @@
   }
   function generateRegexString(input, matchStart = false) {
     if (!input) return null;
-    if (input instanceof RegExp) return input;
     let patterns = [];
-    if (Array.isArray(input)) {
+    if (input instanceof RegExp) {
+      patterns = [input];
+    } else if (Array.isArray(input)) {
       patterns = input;
     } else if (typeof input === "string") {
       patterns = input.split(",").map((s) => s.trim());
     } else {
       return null;
     }
-    patterns = patterns.filter((p) => p && p.length > 0);
-    if (patterns.length === 0) return null;
+    const literals = patterns.filter((p) => typeof p === "string" && p.length > 0);
+    const regexes = patterns.filter((p) => p instanceof RegExp && p.source !== "(?:)");
+    if (literals.length === 0 && regexes.length === 0) return null;
     const escapeRegExp = (string) => {
       return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     };
-    const joinedPatterns = patterns.map(escapeRegExp).join("|");
-    const finalPattern = matchStart ? `^(?:${joinedPatterns})` : joinedPatterns;
-    return new RegExp(finalPattern, "i");
+    const parts = [];
+    if (literals.length) {
+      const joinedPatterns = literals.map(escapeRegExp).join("|");
+      parts.push(matchStart ? `^(?:${joinedPatterns})` : `(?:${joinedPatterns})`);
+    }
+    regexes.forEach((regex) => {
+      if (regex.multiline || regex.dotAll) {
+        console.warn(
+          `Sa11y: the "m" and "s" flags are not supported when combining patterns; ignoring them on /${regex.source}/${regex.flags}.`
+        );
+      }
+      parts.push(`(?:${regex.source})`);
+    });
+    const finalPattern = parts.join("|");
+    const flags = regexes.some((regex) => regex.unicode) ? "iu" : "i";
+    try {
+      return new RegExp(finalPattern, flags);
+    } catch (error) {
+      console.warn("Sa11y: could not combine patterns into one RegExp.", input, error);
+      return null;
+    }
+  }
+  function stripBidiControls(text) {
+    return typeof text === "string" ? text.replace(/[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, "") : text;
   }
   async function dismissDigest(pepper, message) {
     const msgUint8 = new TextEncoder().encode(pepper + message);
@@ -1671,7 +1705,7 @@
           }
         }
         if ($el.hasAttribute("tabindex") && $el.tabIndex >= 0) Found.TabIndex.push($el);
-        if ($el.matches(nestedSources)) Found.NestedComponents.push($el);
+        if (nestedSources && $el.matches(nestedSources)) Found.NestedComponents.push($el);
         if (!contrastExcludedTags.has(tag)) {
           if (!getCachedClosest($el, contrastAncestorSelector)) {
             if (!contrastAttrSelector || !$el.matches(contrastAttrSelector)) {
@@ -1825,7 +1859,7 @@
       });
     }
   }
-  const version = "3.0.2-1007";
+  const version = "3.0.2-1026";
   const sprite = {
     alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
     close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -1833,11 +1867,13 @@
     dismiss: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="Currentcolor" d="M39 5C28-3 13-1 5 9S-1 35 9 43l592 464c10 8 26 6 34-4s6-26-4-34L526 387c39-41 66-86 78-118c3-8 3-17 0-25c-15-36-46-88-93-131C466 69 401 32 320 32c-68 0-125 26-169 61L39 5zM223 150C249 126 283 112 320 112c80 0 144 65 144 144c0 25-6 48-17 69L408 295c8-19 11-41 5-63c-11-42-48-69-89-71c-6-0-9 6-7 12c2 6 3 13 3 20c0 10-2 20-7 28l-90-71zM373 390c-16 7-34 10-53 10c-80 0-144-65-144-144c0-7 1-14 1-20L83 162C60 191 44 221 35 244c-3 8-3 17 0 25c15 36 46 86 93 131C175 443 239 480 320 480c47 0 89-13 126-33L373 390z"/></svg>',
     unDismiss: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="-30 0 640 512"><path fill="Currentcolor" d="M288 32c-81 0-146 37-193 81C49 156 17 208 3 244c-3 8-3 17 0 25C17 304 49 356 95 399C142.5 443 207 480 288 480s146-37 193-81c47-44 78-95 93-131c3-8 3-17 0-25c-15-36-46-88-93-131C434 69 369 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35-29 64-64 64c-7 0-14-1-20-3c-6-2-12 2-12 7c.3 7 1 14 3 21c14 51 66 82 118 68s82-66 68-118c-11-42-48-69-89-71c-6-.2-9 6-7 12c2 6 3 13 3 20z"></path></svg>',
     headings: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M0 96C0 78 14 64 32 64l384 0c18 0 32 14 32 32s-14 32-32 32L32 128C14 128 0 114 0 96zM64 256c0-18 14-32 32-32l384 0c18 0 32 14 32 32s-14 32-32 32L96 288c-18 0-32-14-32-32zM448 416c0 18-14 32-32 32L32 448c-18 0-32-14-32-32s14-32 32-32l384 0c18 0 32 14 32 32z"></path></svg>',
-    readability: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" aria-hidden="true"><path fill="currentColor" d="M528.3 46.5l-139.8 0c-48.1 0-89.9 33.3-100.4 80.3-10.6-47-52.3-80.3-100.4-80.3L48 46.5C21.5 46.5 0 68 0 94.5L0 340.3c0 26.5 21.5 48 48 48l89.7 0c102.2 0 132.7 24.4 147.3 75 .7 2.8 5.2 2.8 6 0 14.7-50.6 45.2-75 147.3-75l89.7 0c26.5 0 48-21.5 48-48l0-245.7c0-26.4-21.3-47.9-47.7-48.1zM242 311.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zM501.3 311.8c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.9c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.9-.1 0zm0-60.9c0 1.9-1.5 3.5-3.5 3.5l-160.3 0c-1.9 0-3.5-1.5-3.5-3.5l0-22.8c0-1.9 1.5-3.5 3.5-3.5l160.4 0c1.9 0 3.5 1.5 3.5 3.5l0 22.8-.1 0z"/></svg>',
+    readability: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" aria-hidden="true"><path fill="currentColor" d="M528 47l-140 0c-48 0-90 33-100 80-11-47-52-80-100-80L48 47C22 47 0 68 0 95L0 340c0 27 22 48 48 48l90 0c102 0 133 24 147 75 .7 2.8 5.2 2.8 6 0 15-51 45-75 147-75l90 0c27 0 48-21 48-48l0-246c0-26-21-48-48-48zM242 312c0 1.9-1.5 3.5-3.5 3.5l-160 0c-1.9 0-3.5-1.5-3.5-3.5l0-23c0-1.9 1.5-3.5 3.5-3.5l160 0c1.9 0 3.5 1.5 3.5 3.5l0 23-.1 0zm0-61c0 1.9-1.5 3.5-3.5 3.5l-160 0c-1.9 0-3.5-1.5-3.5-3.5l0-23c0-1.9 1.5-3.5 3.5-3.5l160 0c1.9 0 3.5 1.5 3.5 3.5l0 23-.1 0zm0-61c0 1.9-1.5 3.5-3.5 3.5l-160 0c-1.9 0-3.5-1.5-3.5-3.5l0-23c0-1.9 1.5-3.5 3.5-3.5l160 0c1.9 0 3.5 1.5 3.5 3.5l0 23-.1 0zM501 312c0 1.9-1.5 3.5-3.5 3.5l-160 0c-1.9 0-3.5-1.5-3.5-3.5l0-23c0-1.9 1.5-3.5 3.5-3.5l160 0c1.9 0 3.5 1.5 3.5 3.5l0 23-.1 0zm0-61c0 1.9-1.5 3.5-3.5 3.5l-160 0c-1.9 0-3.5-1.5-3.5-3.5l0-23c0-1.9 1.5-3.5 3.5-3.5l160 0c1.9 0 3.5 1.5 3.5 3.5l0 23-.1 0zm0-61c0 1.9-1.5 3.5-3.5 3.5l-160 0c-1.9 0-3.5-1.5-3.5-3.5l0-23c0-1.9 1.5-3.5 3.5-3.5l160 0c1.9 0 3.5 1.5 3.5 3.5l0 23-.1 0z"/></svg>',
     next: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="11" viewBox="0 -15 90 120"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m30 00 50 50-50 50" stroke-width="18"></path></svg>',
     toggleErrors: '<svg class="errors-icon" xmlns="http://www.w3.org/2000/svg" width="10" aria-hidden="true" viewBox="0 0 448 512"><path fill="currentColor" d="M64 32C64 14 50 0 32 0S0 14 0 32L0 64 0 368 0 480c0 18 14 32 32 32s32-14 32-32l0-128 64-16c41-10 85-5 123 13c44.2 22 96 25 142 7l35-13c13-5 21-17 21-30l0-248c0-23-24-38-45-28l-10 5c-46 23-101 23-147 0c-35-18-75-22-114-13L64 48l0-16z"></path></svg>',
-    togglePass: '<svg class="pass-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10.1699 19.1777"><path fill="currentColor" d="M3.7031,10.5527c-.3633-.6562-.6426-1.1387-.8379-1.4473l-.3105-.4863-.2344-.3574c-.5117-.7969-1.0449-1.4551-1.5996-1.9746.3164-.2617.6113-.3926.8848-.3926.3359,0,.6348.123.8965.3691s.5918.7148.9902,1.4062c.4531-1.4727,1.0293-2.8691,1.7285-4.1895.3867-.7188.7314-1.2021,1.0342-1.4502s.7041-.3721,1.2041-.3721c.2656,0,.5938.041.9844.123-1.0039.8086-1.8066,1.7695-2.4082,2.8828s-1.3789,3.0762-2.332,5.8887Z"/></svg>',
+    togglePass: '<svg class="pass-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-.75 -3.5 10 19"><path fill="currentColor" d="M3.7,11c-.36-.66-.64-1.1-.84-1.4l-.31-.49-.23-.36c-.51-.8-1-1.5-1.6-2 .32-.26.61-.39.88-.39.34,0,.63.12.9.37s.59.71.99,1.4c.45-1.5,1-2.9,1.7-4.2.39-.72.73-1.2,1-1.5s.7-.37,1.2-.37c.27,0,.59.041.98.12-1 .81-1.8,1.8-2.4,2.9s-1.4,3.1-2.3,5.9Z"/></svg>',
     toggleWarnings: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="close-icon" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
+    linkBroken: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 50 640 640"><path fill="currentColor" d="M452 160C435 160 419 165 405 173C389 157 371 143 350 133C378 109 414 96 452 96C538 96 608 166 608 253C608 294 592 334 562 363L491 434C462 464 422 480 381 480C294 480 224 410 224 324C224 322 224 321 224 319C225 301 239 287 257 288C275 288 289 303 288 321C288 322 288 323 288 323C288 375 330 416 381 416C405 416 429 406 446 389L517 318C534 300 544 277 544 252C544 201 503 160 452 160zM307 237C305 237 303 235 302 234C289 228 275 224 260 224C235 224 212 234 194 251L123 322C106 340 96 363 96 388C96 439 137 480 189 480C205 480 221 476 235 468C251 484 269 497 290 507C262 531 226 544 189 544C102 544 32 474 32 388C32 346 49 306 78 277L149 206C178 177 218 160 260 160C346 160 416 231 416 317C416 318 416 320 416 321C416 339 401 353 383 352C366 352 352 337 352 319C352 319 352 318 352 317C352 283 334 254 307 238z"/></svg>',
+    linkHidden: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 50 640 640"><path fill="currentColor" d="M73 39C64 30 48 30 39 39C30 49 30 64 39 73L567 601C576 611 592 611 601 601C610 592 610 577 601 567L479 445C483 442 487 438 491 434L562 363C591 334 608 294 608 253C608 166 538 96 451 96C414 96 378 109 350 133C370 143 389 157 405 173C419 165 435 160 451 160C503 160 544 202 544 253C544 277 534 301 517 318L446 389C442 393 438 397 433 400L386 352C402 351 415 338 416 321C416 320 416 318 416 317C416 231 346 160 259 160C240 160 221 164 204 170L73 39zM258 224C259 224 259 224 260 224C275 224 289 228 302 234C304 235 305 237 307 237C334 254 352 283 352 317C352 317 352 318 352 318L258 224zM378 480L224 326C225 410 294 479 378 480zM172 274L126 228L78 277C49 306 32 346 32 387C32 474 102 544 189 544C226 544 262 531 290 507C270 497 251 483 235 467C221 475 205 480 189 480C137 480 96 438 96 387C96 363 106 339 123 322L172 273z"/></svg>',
     visualize: '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="10" viewBox="0 10 512 512"><path fill="Currentcolor" d="M152 38c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 113C-2 104-2 88 7 79s25-9 34 0l22 22 55-61c9-10 24-11 34-2zm0 160c10 9 11 24 2 34l-72 80c-4 5-11 8-17 8s-13-2-18-7L7 273c-9-9-9-25 0-34s25-9 35 0l22 22 55-61c9-10 24-11 34-2zM224 96c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zm0 160c0-18 14-32 32-32l224 0c18 0 32 14 32 32s-14 32-32 32l-224 0c-18 0-32-14-32-32zM160 416c0-18 14-32 32-32l288 0c18 0 32 14 32 32s-14 32-32 32l-288 0c-18 0-32-14-32-32zM48 368a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/></svg>'
   };
   class ConsoleErrors extends HTMLElement {
@@ -2437,7 +2473,7 @@ ${this.error.stack}
       const providedShadow = container.querySelectorAll(State.option.shadowComponents);
       providedShadow.forEach((component) => {
         if (component.shadowRoot && component.shadowRoot.mode === "open") {
-          if (!container.matches("[data-ed11y-has-shadow-root]")) {
+          if (!component.matches("[data-ed11y-has-shadow-root]")) {
             component.setAttribute("data-ed11y-has-shadow-root", "true");
             UI.attachCSS(component.shadowRoot);
             UI.attachCSS(component);
@@ -2641,7 +2677,7 @@ ${this.error.stack}
   function showError(error) {
     const consoleErrors = new ConsoleErrors(error);
     document.body.appendChild(consoleErrors);
-    UI.attachCSS(consoleErrors.shadowRoot.querySelector("*"));
+    UI.attachCSS(consoleErrors.shadowRoot);
     throw Error(error);
   }
   function pushResult$1({
@@ -2771,7 +2807,7 @@ ${this.error.stack}
   const urlEndings = /\b(?:\.edu\/|\.gob\/|\.gov\/|\.app\/|\.com\/|\.net\/|\.org\/|\.us\/|\.ca\/|\.de\/|\.icu\/|\.uk\/|\.ru\/|\.info\/|\.top\/|\.xyz\/|\.tk\/|\.cn\/|\.ga\/|\.cf\/|\.nl\/|\.io\/|\.fr\/|\.pe\/|\.nz\/|\.pt\/|\.es\/|\.pl\/|\.ua\/)\b/i;
   const htmlSymbols = /([<>↣↳←→↓«»↴]+)/;
   const checkStopWords = (textContent, stopWordsSet, stripStrings) => {
-    const stripped = textContent.replace(stripStrings, "").trim();
+    const stripped = (stripStrings ? textContent.replace(stripStrings, "") : textContent).replace(/\s+/g, " ").trim();
     if (stopWordsSet.has(stripped)) return stripped;
     return null;
   };
@@ -2796,10 +2832,13 @@ ${this.error.stack}
       const strippedLinkText = stripAllSpecialCharacters(lowercaseLinkText);
       const rawTextContent = getText($el);
       const textContent = rawTextContent.toLowerCase();
+      const foldedLinkText = foldForMatching(linkText);
+      const normalizedLinkText = normalizeStopWord(linkText);
+      const foldedTextContent = foldForMatching(rawTextContent);
       const textContentIgnoredStrings = getText(
         fnIgnore($el, Constants.Exclusions.LinkSpan)
       ).replace(Constants.Global.linkIgnorePattern, "");
-      const containsNewWindowPhrases = lowercaseLinkText.match(Constants.Global.newWindowRegex)?.[0] || textContent.match(Constants.Global.newWindowRegex)?.[0];
+      const containsNewWindowPhrases = foldedLinkText.match(Constants.Global.newWindowRegex)?.[0] || foldedTextContent.match(Constants.Global.newWindowRegex)?.[0];
       const containsFileTypePhrases = lowercaseLinkText.match(Constants.Global.fileTypeRegex)?.[0] || textContent.match(Constants.Global.fileTypeRegex)?.[0];
       const fileTypeMatch = $el.matches(cssFileTypeSelectors);
       const logResult = (params) => {
@@ -2823,7 +2862,7 @@ ${this.error.stack}
             ""
           );
           const stopword = checkStopWords(
-            stripAllSpecialCharacters(visibleLinkText),
+            normalizeStopWord(visibleLinkText),
             Constants.Global.linkStopWords
           );
           const visibleTextInName = isVisibleTextInAccName(
@@ -2880,7 +2919,7 @@ ${this.error.stack}
         const isLinkIgnoreStrings = checkStopWords(textContent, Constants.Global.linkIgnoreStrings);
         if (isLinkIgnoreStrings === textContent || isLinkIgnoreStrings === strippedLinkText) {
           triggerStopWord();
-        } else if (containsNewWindowPhrases === textContent || containsNewWindowPhrases === strippedLinkText) {
+        } else if (containsNewWindowPhrases === foldedTextContent || containsNewWindowPhrases === normalizedLinkText) {
           triggerStopWord();
         }
         if (linkText.length === 0) {
@@ -2920,11 +2959,11 @@ ${this.error.stack}
           return;
         }
         const isStopWord = checkStopWords(
-          strippedLinkText,
+          normalizedLinkText,
           Constants.Global.linkStopWords,
           Constants.Global.newWindowRegex
         );
-        const hasClickWord = strippedLinkText.match(Constants.Global.clickRegex)?.[0] || textContent.match(Constants.Global.clickRegex)?.[0];
+        const hasClickWord = normalizedLinkText.match(Constants.Global.clickRegex)?.[0] || foldedTextContent.match(Constants.Global.clickRegex)?.[0];
         const isCitation = lowercaseLinkText.match(citationPattern)?.[0];
         const isUrlFragment = lowercaseLinkText.startsWith("www.") || lowercaseLinkText.startsWith("http") || Boolean(lowercaseLinkText.match(urlEndings));
         const matchedSymbol = lowercaseLinkText.match(htmlSymbols)?.[0];
@@ -3030,8 +3069,9 @@ ${this.error.stack}
           const targetElement = targetId && (document.getElementById(targetId) || ariaControls && document.getElementById(ariaControls) || decodeURIComponent(targetId) !== targetId && document.getElementById(decodeURIComponent(targetId)) || encodeURIComponent(targetId) !== targetId && document.getElementById(encodeURIComponent(targetId)) || document.querySelector(`a[name="${CSS.escape(targetId)}"]`));
           if (!targetElement) {
             let isFauxButton = false;
+            const foldedAccName = foldForMatching(accName);
             const matchedKeyword = Lang._("POTENTIAL_UI_ELEMENTS").find(
-              (word) => accName.toLowerCase().includes(word)
+              (word) => foldedAccName.includes(foldForMatching(word))
             );
             const isSlide = Object.keys($el.dataset).some(
               (key) => key.toLowerCase().includes("slide")
@@ -3074,9 +3114,10 @@ ${this.error.stack}
     ".heic",
     "http"
   ];
+  const noSpaceScript = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;
   const containsAltTextStopWords = (alt) => {
-    const altLowerCase = removeWhitespace(alt).toLowerCase();
-    const altOnlyLetters = removeWhitespace(altLowerCase.replace(/[^\p{L}\s]/gu, ""));
+    const altLowerCase = foldForMatching(removeWhitespace(alt));
+    const altOnlyLetters = removeWhitespace(altLowerCase.replace(/[^\p{L}\p{M}\s]/gu, ""));
     const hit = [null, null, null];
     for (const urlHit of url) {
       if (altLowerCase.includes(urlHit)) {
@@ -3094,12 +3135,14 @@ ${this.error.stack}
       const allWords = [...segmenter.segment(altLowerCase)].filter((segment) => segment.isWordLike).map((segment) => segment.segment);
       wordsToCheck = [...allWords.slice(0, 2), ...allWords.slice(-1)];
     } else {
-      const altOnlyLetters2 = removeWhitespace(altLowerCase.replace(/[^\p{L}\s]/gu, ""));
+      const altOnlyLetters2 = removeWhitespace(altLowerCase.replace(/[^\p{L}\p{M}\s]/gu, ""));
       const allWords = altOnlyLetters2.split(/\s+/).filter(Boolean);
       wordsToCheck = [...allWords.slice(0, 2), ...allWords.slice(-1)];
     }
+    const altNoSpaces = altOnlyLetters.replace(/\s/g, "");
     for (const word of Constants.Global.susAltWords) {
-      if (wordsToCheck.includes(word)) {
+      const foldedWord = foldForMatching(word);
+      if (wordsToCheck.includes(foldedWord) || noSpaceScript.test(foldedWord) && (altNoSpaces.startsWith(foldedWord) || altNoSpaces.endsWith(foldedWord))) {
         hit[1] = word;
         break;
       }
@@ -3168,8 +3211,8 @@ ${this.error.stack}
       const figcaption = figure?.querySelector("figcaption");
       const figcaptionText = figcaption ? getText(figcaption) : "";
       let decorative = alt === "";
-      if (!decorative && State.option.altPlaceholder.length) {
-        decorative = !!alt.match(Constants.Global.altPlaceholderPattern);
+      if (!decorative && Constants.Global.altPlaceholderPattern) {
+        decorative = !!stripBidiControls(alt).match(Constants.Global.altPlaceholderPattern);
       }
       if (decorative) {
         if (getCachedClosest($el, `button, [role='button']`)) return;
@@ -4029,6 +4072,17 @@ ${this.error.stack}
     return weightMap[weight] || 400;
   }
   let backgroundCache = /* @__PURE__ */ new WeakMap();
+  function stackTranslucent(fg, bg) {
+    const fa = Math.max(Math.min(fg[3], 1), 0);
+    const ba = Math.max(Math.min(bg[3], 1), 0);
+    const outA = fa + ba * (1 - fa);
+    if (outA === 0) return [0, 0, 0, 0];
+    const out = [0, 0, 0, outA];
+    for (let i = 0; i < 3; i++) {
+      out[i] = (fg[i] * fa + bg[i] * ba * (1 - fa)) / outA;
+    }
+    return out;
+  }
   function getBackground($el, shadowDetection) {
     if (backgroundCache.has($el)) {
       return backgroundCache.get($el);
@@ -4041,6 +4095,46 @@ ${this.error.stack}
       }
       return node.parentElement || node.parentNode;
     };
+    const imageBackground = (el, styles, bgImage) => {
+      const own = convertToRGBA(styles.backgroundColor);
+      let base;
+      if (own !== "unsupported") {
+        if (own[3] === 1) {
+          base = own;
+        } else {
+          const behind = resolveAbove(el, own[3] > 0 ? own : null);
+          if (Array.isArray(behind)) base = behind;
+        }
+      }
+      return { type: "image", value: bgImage, ...base && { base } };
+    };
+    const resolveAbove = (fromEl, stacked) => {
+      let layers = stacked;
+      let parentEl = getVisualParent(fromEl);
+      while (parentEl && (parentEl.nodeType === 1 || parentEl.nodeType === 11)) {
+        if (parentEl.nodeType === 11 && parentEl.host) {
+          parentEl = parentEl.host;
+          continue;
+        }
+        const parentStyles = getCachedStyle(parentEl);
+        const parentBgImage = parentStyles.backgroundImage;
+        if (parentBgImage && parentBgImage !== "none") {
+          const image = imageBackground(parentEl, parentStyles, parentBgImage);
+          return layers ? { ...image, overlay: layers } : image;
+        }
+        const parentBg = convertToRGBA(parentStyles.backgroundColor);
+        if (parentBg === "unsupported") return "unsupported";
+        if (parentBg[3] === 1) {
+          return layers ? alphaBlend(layers, parentBg) : parentBg;
+        }
+        if (parentBg[3] > 0) {
+          layers = layers ? stackTranslucent(layers, parentBg) : parentBg;
+        }
+        if (parentEl.tagName === "HTML") break;
+        parentEl = getVisualParent(parentEl);
+      }
+      return layers ? alphaBlend(layers, [255, 255, 255]) : [255, 255, 255];
+    };
     let targetEl = $el;
     let finalBackground = [255, 255, 255];
     while (targetEl && (targetEl.nodeType === 1 || targetEl.nodeType === 11)) {
@@ -4051,32 +4145,13 @@ ${this.error.stack}
       const styles = getCachedStyle(targetEl);
       const bgImage = styles.backgroundImage;
       if (bgImage && bgImage !== "none") {
-        finalBackground = { type: "image", value: bgImage };
+        finalBackground = imageBackground(targetEl, styles, bgImage);
         break;
       }
       const bgColor = convertToRGBA(styles.backgroundColor);
       if (bgColor[3] !== 0 && bgColor !== "transparent") {
         if (bgColor[3] < 1) {
-          let parentEl = getVisualParent(targetEl);
-          let parentBgColor = "rgba(255, 255, 255, 1)";
-          while (parentEl && (parentEl.nodeType === 1 || parentEl.nodeType === 11)) {
-            if (parentEl.nodeType === 11 && parentEl.host) {
-              parentEl = parentEl.host;
-              continue;
-            }
-            const parentStyles = getCachedStyle(parentEl);
-            const currentParentBg = parentStyles.backgroundColor;
-            if (currentParentBg !== "rgba(0, 0, 0, 0)" && currentParentBg !== "transparent") {
-              parentBgColor = currentParentBg;
-              break;
-            }
-            parentEl = getVisualParent(parentEl);
-          }
-          if (parentBgColor === "rgba(0, 0, 0, 0)" || parentBgColor === "transparent") {
-            parentBgColor = "rgba(255, 255, 255, 1)";
-          }
-          const parentColor = convertToRGBA(parentBgColor);
-          finalBackground = alphaBlend(bgColor, parentColor);
+          finalBackground = resolveAbove(targetEl, bgColor);
           break;
         }
         finalBackground = bgColor;
@@ -4412,7 +4487,14 @@ ${this.error.stack}
       }
       if (color && color[3] === 0) continue;
       if (background.type === "image") {
-        const extractColours = extractColorFromString(background.value);
+        let extractColours = extractColorFromString(background.value);
+        if ((background.base || background.overlay) && extractColours?.length) {
+          extractColours = extractColours.map((stop) => {
+            let composited = background.base ? alphaBlend([...stop], background.base) : stop;
+            if (background.overlay) composited = alphaBlend([...background.overlay], composited);
+            return composited;
+          });
+        }
         const hasFailure = !extractColours || extractColours.some(
           (gradientStop) => checkElementContrast(
             $el,
@@ -5339,6 +5421,17 @@ ${this.error.stack}
       });
     });
   }
+  const LINK_CLASS = "ed11y-link";
+  const LINK_RESULT_TYPES = {
+    link: { badge: "linkBrokenBadge", className: "ed11y-link-broken", severity: "error" },
+    linkManual: { badge: "linkManualBadge", className: "ed11y-link-manual", severity: "warning" }
+  };
+  const isLinkResult = (result) => typeof result?.type === "string" && Object.hasOwn(LINK_RESULT_TYPES, result.type);
+  const isWarningStyled = (result) => result?.type !== "error" && LINK_RESULT_TYPES[result?.type]?.severity !== "error";
+  const isManualLink = (result) => result?.type === "linkManual";
+  const isVisualizerOnly = (result) => result?.visualizerOnly === true;
+  const isHiddenByDefault = (result) => !!result?.dismissalStatus || isVisualizerOnly(result);
+  const shouldDraw = (result) => !isHiddenByDefault(result) || UI.showDismissed || isVisualizerOnly(result) && !result.dismissalStatus && UI.visualizing;
   function syncResults(results) {
     if (!UI.incremental) {
       document.dispatchEvent(
@@ -5436,7 +5529,13 @@ ${this.error.stack}
     for (let i = State.results.length - 1; i >= 0; i--) {
       if (State.results[i].dismissalStatus) {
         UI.dismissedCount++;
-      } else if (State.results[i].type === "warning") {
+      } else if (isVisualizerOnly(State.results[i])) {
+        if (UI.visualizing) {
+          UI.warningCount++;
+        } else {
+          UI.dismissedCount++;
+        }
+      } else if (isWarningStyled(State.results[i])) {
         UI.warningCount++;
       } else {
         UI.errorCount++;
@@ -5705,6 +5804,202 @@ ${this.error.stack}
       Constants.Panel.readabilityInfo.innerHTML = `<br>${Lang._("READABILITY_NOT_ENOUGH")}`;
     }
   }
+  const LINK_STATUSES = {
+    broken: { test: "HREF_BROKEN", type: "link", label: "linkStatusBroken" },
+    unpublished: { test: "HREF_UNPUBLISHED", type: "link", label: "linkStatusUnpublished" },
+    markedBroken: { test: "HREF_MARKED_BROKEN", type: "link", label: "linkStatusMarkedBroken" },
+    access: { test: "HREF_ACCESS", type: "linkManual", label: "linkStatusAccess" },
+    unverifiable: { test: "HREF_UNVERIFIABLE", type: "linkManual", label: "linkStatusUnverifiable" },
+    redirect: { test: "HREF_REDIRECT", type: "linkManual", label: "linkStatusRedirect" }
+  };
+  const DISMISSED_LABELS = { ok: "linkDismissedOk", hide: "linkDismissedHide" };
+  const isKnownLinkStatus = (status) => typeof status === "string" && Object.hasOwn(LINK_STATUSES, status);
+  const isKnownDismissal = (dismissed) => typeof dismissed === "string" && Object.hasOwn(DISMISSED_LABELS, dismissed);
+  const MANUAL_LINK_STATUSES = Object.keys(LINK_STATUSES).filter(
+    (status) => LINK_STATUSES[status].type === "linkManual"
+  );
+  const showsLinkCheck = (status) => Array.isArray(State.option.brokenLinksShowChecks) && State.option.brokenLinksShowChecks.includes(status);
+  const linkMarksAllowed = () => typeof State.option.allowLinkMarks === "boolean" ? State.option.allowLinkMarks : !!State.option.allowOK;
+  const linkStatusLabel = (entry) => {
+    if (isKnownDismissal(entry.dismissed)) {
+      return Lang._(DISMISSED_LABELS[entry.dismissed]);
+    }
+    return isKnownLinkStatus(entry.status) ? Lang._(LINK_STATUSES[entry.status].label) : entry.status;
+  };
+  const displayHref = (href) => String(href).replace(/^https?:\/\//i, "");
+  const stripPrefix = (path, prefix) => {
+    const clean = String(prefix ?? "").replace(/\/+$/, "");
+    if (!clean || !path.startsWith(clean)) {
+      return path;
+    }
+    const rest = path.slice(clean.length);
+    if (rest === "" || rest.startsWith("?")) {
+      return `/${rest}`;
+    }
+    return rest.startsWith("/") ? rest : path;
+  };
+  const canonicalHref = (href, options = State.option, base = document.baseURI) => {
+    let url2;
+    try {
+      url2 = new URL(String(href), base);
+    } catch {
+      return null;
+    }
+    if (url2.protocol !== "http:" && url2.protocol !== "https:" && url2.protocol !== "file:") {
+      return null;
+    }
+    const search = url2.search === "?" ? "" : url2.search;
+    const host = url2.host.toLowerCase();
+    const internalHosts = Array.isArray(options.brokenLinksInternalHosts) ? options.brokenLinksInternalHosts.map((h) => String(h).toLowerCase()) : [];
+    if (host === window.location.host.toLowerCase() || internalHosts.includes(host)) {
+      let path = url2.pathname;
+      const prefixes = Array.isArray(options.brokenLinksPathPrefixes) ? options.brokenLinksPathPrefixes : [];
+      for (const prefix of prefixes) {
+        path = stripPrefix(path, prefix);
+      }
+      return `${path || "/"}${search}`;
+    }
+    return `${url2.origin}${url2.pathname}${search}`;
+  };
+  function prepareBrokenLinks() {
+    if (!Array.isArray(State.option.brokenLinks)) {
+      if (State.option.brokenLinks) {
+        console.warn("Editoria11y: brokenLinks must be an array of { href, status } objects.");
+      }
+      State.option.brokenLinks = [];
+      return;
+    }
+    State.option.brokenLinks = State.option.brokenLinks.filter((entry) => {
+      const valid = entry && typeof entry.href === "string" && entry.href && isKnownLinkStatus(entry.status);
+      if (!valid) {
+        console.warn(
+          "Editoria11y: skipped a brokenLinks entry without a valid href and status.",
+          entry
+        );
+        return false;
+      }
+      if (entry.dismissed && !isKnownDismissal(entry.dismissed)) {
+        console.warn(`Editoria11y: ignored an unknown brokenLinks dismissal "${entry.dismissed}".`);
+        delete entry.dismissed;
+      }
+      return true;
+    });
+    if (State.option.brokenLinksRoots && typeof State.option.brokenLinksRoots !== "string") {
+      console.warn("Editoria11y: brokenLinksRoots must be a CSS selector string.");
+      State.option.brokenLinksRoots = false;
+    }
+    if (!Array.isArray(State.option.brokenLinksShowChecks)) {
+      console.warn("Editoria11y: brokenLinksShowChecks must be an array of statuses.");
+      State.option.brokenLinksShowChecks = [...MANUAL_LINK_STATUSES];
+    }
+    State.option.brokenLinksShowChecks.forEach((status) => {
+      if (!MANUAL_LINK_STATUSES.includes(status)) {
+        console.warn(
+          `Editoria11y: brokenLinksShowChecks lists "${status}", which is not a manual check.`
+        );
+      }
+    });
+  }
+  const indexEntries = () => {
+    const byHref = /* @__PURE__ */ new Map();
+    for (const entry of State.option.brokenLinks) {
+      const canonical = canonicalHref(entry.href);
+      if (canonical && !byHref.has(canonical)) {
+        byHref.set(canonical, entry);
+      }
+      if (!byHref.has(entry.href)) {
+        byHref.set(entry.href, entry);
+      }
+    }
+    return byHref;
+  };
+  const buildContent = (entry, status) => {
+    const content = Lang.sprintf(status.test, entry.redirectsTo ?? null);
+    const target = document.createElement("p");
+    const linkWrap = document.createElement("i");
+    const link = document.createElement("a");
+    link.classList.add("ed11y-link-target");
+    link.href = entry.href;
+    link.setAttribute("target", "_blank");
+    link.setAttribute("rel", "noopener noreferrer");
+    const prefix = document.createElement("strong");
+    link.textContent = displayHref(entry.href);
+    prefix.textContent = entry.redirectsTo ? Lang._("linkRedirectTarget") : Lang._("linksCheckThis");
+    prefix.textContent += " ";
+    target.append(prefix);
+    linkWrap.append(link);
+    target.append(linkWrap);
+    content.append(target);
+    return content;
+  };
+  const linkAnchors = () => {
+    const roots = State.option.brokenLinksRoots;
+    if (typeof roots !== "string" || !roots.trim()) {
+      return Elements.Found.Links;
+    }
+    try {
+      return find("a[href]", roots, Constants.Exclusions.Sa11yElements);
+    } catch (error) {
+      console.warn(`Editoria11y: could not search brokenLinksRoots "${roots}".`, error);
+      return Elements.Found.Links;
+    }
+  };
+  function checkBrokenLinks() {
+    if (!State.option.brokenLinks?.length) {
+      return;
+    }
+    const byHref = indexEntries();
+    for (const anchor of linkAnchors()) {
+      if (!anchor.matches("a[href]")) {
+        continue;
+      }
+      const entry = byHref.get(canonicalHref(anchor.href)) ?? byHref.get(anchor.getAttribute("href"));
+      if (!entry) {
+        continue;
+      }
+      const status = LINK_STATUSES[entry.status];
+      const hash = entry.hash ?? entry.href;
+      const result = {
+        test: status.test,
+        element: anchor,
+        type: status.type,
+        content: buildContent(entry, status),
+        dismiss: prepareDismissal(`link${hash}`),
+        data: { hash, href: entry.href, status: entry.status, redirectsTo: entry.redirectsTo },
+        brokenLink: entry
+      };
+      if (entry.dismissed) {
+        result.dismissalStatus = entry.dismissed;
+      }
+      if (status.type === "linkManual" && !showsLinkCheck(entry.status)) {
+        result.visualizerOnly = true;
+      }
+      State.results.push(result);
+    }
+  }
+  function forgetLinkVerdict(result) {
+    if (result?.brokenLink) {
+      delete result.brokenLink.dismissed;
+    }
+  }
+  const linkTypeClasses = Object.values(LINK_RESULT_TYPES).map((type) => type.className);
+  const decorateToggle = (toggle, result, dismissed) => {
+    const wasLink = toggle.classList.contains(LINK_CLASS);
+    toggle.classList.remove(LINK_CLASS, ...linkTypeClasses);
+    toggle.classList.toggle("dismissable", isWarningStyled(result) && !dismissed);
+    if (isLinkResult(result)) {
+      const linkType = LINK_RESULT_TYPES[result.type];
+      toggle.classList.add(LINK_CLASS, linkType.className);
+      toggle.setAttribute("aria-label", Lang._(linkType.badge));
+      toggle.innerHTML = dismissed ? sprite.linkHidden : sprite.linkBroken;
+    } else if (wasLink) {
+      toggle.setAttribute(
+        "aria-label",
+        result.type !== "error" ? Lang._("WARNING") : Lang._("ERROR")
+      );
+      toggle.innerHTML = dismissed ? sprite.dismiss : "";
+    }
+  };
   const showAltPanel = () => {
     const altList = UI.panel !== false && UI.panel.querySelector("#ed11y-alt-list");
     if (!altList) {
@@ -5796,6 +6091,70 @@ ${this.error.stack}
       altList.appendChild(noImages);
     }
   };
+  const showLinksPanel = () => {
+    const linkList = UI.panel !== false && UI.panel.querySelector("#ed11y-link-list");
+    if (!linkList) {
+      return;
+    }
+    linkList.innerHTML = "";
+    const links = State.results.filter((result) => isLinkResult(result) && result.brokenLink);
+    links.reverse();
+    if (links.length === 0) {
+      const none = document.createElement("p");
+      const em = document.createElement("em");
+      em.textContent = Lang._("PANEL_NO_LINKS");
+      none.append(em);
+      linkList.append(none);
+      return;
+    }
+    links.forEach((result) => {
+      const entry = result.brokenLink;
+      const dismissed = !!result.dismissalStatus;
+      const li = document.createElement("li");
+      li.classList.add("ed11y-link-row");
+      if (!dismissed) {
+        li.classList.add(isWarningStyled(result) ? "ed11y-warning" : "ed11y-error");
+      }
+      const markWrapper = document.createElement("span");
+      markWrapper.classList.add("ed11y-result-wrapper", "ed11y-link-row-mark");
+      const button = document.createElement("button");
+      button.setAttribute("type", "button");
+      button.classList.add("toggle");
+      if (dismissed) {
+        button.classList.add("dismissed");
+      }
+      decorateToggle(button, result, dismissed);
+      button.setAttribute("title", Lang._("linkJumpTitle"));
+      button.setAttribute(
+        "aria-label",
+        `${Lang._("linkJumpTitle")}: ${linkStatusLabel(entry)}, ${displayHref(entry.href)}`
+      );
+      const index = State.results.indexOf(result);
+      if (index > -1) {
+        button.dataset.ed11yResult = `${index}`;
+      }
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        const mark = result.toggle;
+        if (!mark?.isConnected || mark.dataset.ed11yJumpPosition === void 0) {
+          return;
+        }
+        UI.openJumpPosition = Number.parseInt(mark.dataset.ed11yJumpPosition, 10) - 1;
+        jumpTo();
+      });
+      markWrapper.append(button);
+      const status = document.createElement("span");
+      status.classList.add("ed11y-link-status");
+      status.textContent = linkStatusLabel(entry);
+      const link = document.createElement("a");
+      link.href = entry.href;
+      link.setAttribute("target", "_blank");
+      link.setAttribute("rel", "noopener noreferrer");
+      link.textContent = displayHref(entry.href);
+      li.append(markWrapper, status, link);
+      linkList.append(li);
+    });
+  };
   function visualize() {
     if (!UI.panel) {
       return;
@@ -5824,6 +6183,7 @@ ${this.error.stack}
     UI.panel.querySelector("#ed11y-visualizers").removeAttribute("hidden");
     showAltPanel();
     showHeadingsPanel();
+    showLinksPanel();
     if (State.option.readabilityPlugin) {
       showReadability();
     }
@@ -5898,10 +6258,10 @@ ${this.error.stack}
       if (mark2.dismissable !== nextDismissable || mark2.dismissed !== nextDismissed) {
         mark2.dismissable = nextDismissable;
         mark2.dismissed = nextDismissed;
-        mark2.toggle.classList.toggle("dismissable", nextDismissable && !nextDismissed);
         mark2.toggle.classList.toggle("dismissed", nextDismissed);
         mark2.toggle.innerHTML = nextDismissed ? sprite.dismiss : "";
       }
+      decorateToggle(mark2.toggle, result, nextDismissed);
       if (mark2.tip) {
         mark2.tip.remove();
         mark2.tip = null;
@@ -5954,15 +6314,14 @@ ${this.error.stack}
     if (mark.dismissed) {
       mark.toggle.innerHTML = sprite.dismiss;
       mark.toggle.classList.add("dismissed");
-    } else if (mark.dismissable) {
-      mark.toggle.classList.add("dismissable");
     }
+    decorateToggle(mark.toggle, mark.result, mark.dismissed);
     mark.wrapper.appendChild(mark.toggle);
     mark.toggle.addEventListener("click", mark.toggleClick);
     mark.toggle.addEventListener("focus", mark.handleFocus);
     mark.toggle.addEventListener("mouseover", mark.handleHover);
     mark.tipNeedsBuild = true;
-    UI.attachCSS(mark.wrapper);
+    UI.attachCSS(shadow);
     shadow.appendChild(mark.wrapper);
     UI.jumpList.unshift(mark);
     State.results[index].toggle = mark;
@@ -6082,6 +6441,9 @@ ${this.error.stack}
   }
   function showResults() {
     buildJumpList();
+    if (UI.visualizing) {
+      showLinksPanel();
+    }
     document.dispatchEvent(new CustomEvent("ed11yPanelOpened"));
     alignButtons();
     if (!UI.inlineAlerts) {
@@ -6145,7 +6507,7 @@ ${this.error.stack}
         UI.panelElement.classList.add("ed11y-preload");
         document.body.appendChild(UI.panelElement);
         UI.panel = UI.panelElement.shadowRoot.getElementById("ed11y-panel");
-        UI.attachCSS(UI.panel);
+        UI.attachCSS(UI.panelElement.shadowRoot);
         UI.panelToggle = UI.panel.querySelector("#ed11y-toggle");
         UI.panelToggleTitle = UI.panel.querySelector("#ed11y-toggle .ed11y-sr-only");
         UI.panelCount = UI.panel.querySelector(".toggle-count");
@@ -6169,6 +6531,25 @@ ${this.error.stack}
           UI.panel.querySelector("#readability-info").appendChild(Constants.Panel.readabilityInfo);
           UI.panel.querySelector("#readability-details").appendChild(Constants.Panel.readabilityDetails);
           UI.panel.querySelector("#ed11y-readability-tab .summary-title").textContent = Lang._("READABILITY");
+        }
+        if (State.option.brokenLinks?.length) {
+          const linksTab = document.createElement("details");
+          linksTab.id = "ed11y-links-tab";
+          linksTab.innerHTML = `
+            <summary>${sprite.linkBroken}<span class="summary-title"></span><span class="close-details">${sprite.close}</span>
+            </summary>
+            <div class="details ed11y-small">
+              <p class="details-title"></p>
+              <ul id="ed11y-link-list"></ul>
+            </div>`;
+          linksTab.querySelector(".summary-title").textContent = Lang._("LINKS");
+          linksTab.querySelector(".details-title").textContent = Lang._("panelCheckLinks");
+          linksTab.addEventListener("toggle", () => {
+            if (linksTab.open && !UI.showDismissed) {
+              setShowDismissals(true);
+            }
+          });
+          UI.panel.querySelector("#ed11y-visualizers").appendChild(linksTab);
         }
         window.setTimeout(
           () => {
@@ -6355,7 +6736,7 @@ ${this.error.stack}
     State.results.sort((a, b) => b.sortPos - a.sortPos);
     matchAdoptions();
     State.results?.forEach((result, i) => {
-      if (result.element && (!result.dismissalStatus || UI.showDismissed)) {
+      if (result.element && shouldDraw(result)) {
         drawResult(result, i);
       }
     });
@@ -6369,16 +6750,31 @@ ${this.error.stack}
     document.dispatchEvent(tipsPainted);
     resumeObservers();
   }
-  function dismissOne(dismissalType, test, dismissalKey) {
+  function dispatchDismissalUpdate(dismissalType, test, dismissalKey, result) {
+    const dismissalDetail = {
+      dismissPage: State.option.currentPage,
+      dismissTest: test,
+      dismissKey: dismissalKey,
+      dismissAction: dismissalType,
+      dismissType: result?.type ?? null,
+      dismissData: result?.data ?? null
+    };
+    document.dispatchEvent(new CustomEvent("ed11yDismissalUpdate", { detail: dismissalDetail }));
+  }
+  function dismissOne(dismissalType, test, dismissalKey, result = null) {
     if (UI.dismissKeys[dismissalKey]) {
       dismissalKey = UI.dismissKeys[dismissalKey];
     }
     if (dismissalType === "reset") {
-      delete UI.dismissedAlerts[State.option.currentPage][test][dismissalKey];
-      if (Object.keys(UI.dismissedAlerts[State.option.currentPage][test]).length === 0) {
-        delete UI.dismissedAlerts[State.option.currentPage][test];
+      forgetLinkVerdict(result);
+      const pageDismissals = UI.dismissedAlerts[State.option.currentPage];
+      if (pageDismissals?.[test]) {
+        delete pageDismissals[test][dismissalKey];
+        if (Object.keys(pageDismissals[test]).length === 0) {
+          delete pageDismissals[test];
+        }
       }
-      if (Object.keys(UI.dismissedAlerts[State.option.currentPage]).length === 0) {
+      if (pageDismissals && Object.keys(pageDismissals).length === 0) {
         delete UI.dismissedAlerts[State.option.currentPage];
       }
     } else {
@@ -6398,14 +6794,7 @@ ${this.error.stack}
     if (State.option.syncedDismissals === false) {
       store.setItem("ed11ydismissed", JSON.stringify(UI.dismissedAlerts));
     }
-    const dismissalDetail = {
-      dismissPage: State.option.currentPage,
-      dismissTest: test,
-      dismissKey: dismissalKey,
-      dismissAction: dismissalType
-    };
-    const ed11yDismissalUpdate = new CustomEvent("ed11yDismissalUpdate", { detail: dismissalDetail });
-    document.dispatchEvent(ed11yDismissalUpdate);
+    dispatchDismissalUpdate(dismissalType, test, dismissalKey, result);
   }
   function positionHighlight(el, target, result) {
     let targetOffset = target.getBoundingClientRect();
@@ -6442,7 +6831,10 @@ ${this.error.stack}
     entry.highlightTarget = firstVisible || result.element;
     const zIndex = result.dismissalStatus ? "calc(var(--ed11y-buttonZIndex, 9999) - 2)" : "calc(var(--ed11y-buttonZIndex, 9999) - 1)";
     el.style.setProperty("z-index", zIndex);
-    const outline = result.type === "warning" ? "0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)" : "0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px";
+    let outline = "0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px";
+    if (isWarningStyled(result)) {
+      outline = "0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)";
+    }
     el.style.setProperty("box-shadow", outline);
     el.style.setProperty("border-radius", "3px");
     updateFixedRootPositions();
@@ -6505,7 +6897,7 @@ ${this.error.stack}
       document.documentElement.style.setProperty(`--ed11y-${key}`, `${value}`);
     }
     if (document.querySelector("body")) {
-      UI.attachCSS(document.querySelector("body"));
+      UI.attachCSS(document);
     }
     UI.roots.forEach((root) => {
       if (State.option.shadowComponents) {
@@ -7104,6 +7496,9 @@ ${this.error.stack}
       case "checkDeveloper":
         safeRun(checkDeveloper);
         break;
+      case "checkBrokenLinks":
+        safeRun(checkBrokenLinks);
+        break;
     }
     UI.testsRemaining--;
     if (queue.length > 0) {
@@ -7185,6 +7580,9 @@ ${this.error.stack}
     }
     if (State.option.contrastPlugin) {
       queue.push("checkContrast");
+    }
+    if (State.option.brokenLinks?.length) {
+      queue.push("checkBrokenLinks");
     }
     UI.testsRemaining = queue.length;
     if (State.option.customTests > 0) {
@@ -7330,25 +7728,38 @@ ${this.error.stack}
       }
     }
   }
+  function repaintAfterVisualizerToggle() {
+    if (!State.results.some((result) => isVisualizerOnly(result))) {
+      return;
+    }
+    UI.forceFullCheck = true;
+    UI.showPanel = true;
+    resetResults();
+    incrementalCheck();
+  }
   window.addEventListener("ed11yEndVisualization", () => {
     UI.visualizing = false;
     pauseObservers();
     visualize();
     resumeObservers();
+    repaintAfterVisualizerToggle();
   });
   function dismissThis(dismissalType, button) {
     const tip = button.closest(".ed11y-wrapper");
     const test = tip.querySelector("[data-test]").dataset.test;
     const dismissKey = tip.dataset.ed11yDismiss;
+    const tipResult = tip.getRootNode()?.host?.result ?? null;
     UI.runOrigin = "dismissal";
-    if (button.dataset.ed11yAll === "true") {
+    if (dismissalType === "broken") {
+      dispatchDismissalUpdate(dismissalType, test, dismissKey, tipResult);
+    } else if (button.dataset.ed11yAll === "true") {
       State.results.forEach((result) => {
         if (result.test === test && (!result.dismissalStatus || result.dismissalStatus !== dismissalType)) {
-          dismissOne(dismissalType, test, result.dismiss);
+          dismissOne(dismissalType, test, result.dismiss, result);
         }
       });
     } else {
-      dismissOne(dismissalType, test, dismissKey);
+      dismissOne(dismissalType, test, dismissKey, tipResult);
     }
     pauseObservers();
     reset();
@@ -7376,14 +7787,17 @@ ${this.error.stack}
       tip
     );
   }
-  function toggleShowDismissals() {
+  function setShowDismissals(show) {
     UI.ignoreAll = false;
-    UI.showDismissed = !UI.showDismissed;
+    UI.showDismissed = show;
     UI.forceFullCheck = true;
     UI.showPanel = true;
     resetResults();
     incrementalCheck();
     UI.panelShowDismissed.setAttribute("data-ed11y-pressed", `${UI.showDismissed}`);
+  }
+  function toggleShowDismissals() {
+    setShowDismissals(!UI.showDismissed);
     window.setTimeout(() => {
       UI.panelShowDismissed.focus();
     }, 0);
@@ -7495,7 +7909,7 @@ ${this.error.stack}
           altSpan.classList.add(`ed11y-pass`);
         }
         altTextWrapper.appendChild(altSpan);
-        UI.attachCSS(altTextWrapper);
+        UI.attachCSS(shadow);
         shadow.appendChild(altTextWrapper);
         this.initialized = true;
       }
@@ -7577,7 +7991,7 @@ ${this.error.stack}
         this.buildTip();
       }
       this.toggle.setAttribute("aria-expanded", changeTo);
-      const highlightOutline = this.dismissable ? "ed11y-ring-yellow" : "ed11y-ring-red";
+      const highlightOutline = isWarningStyled(this.result) ? "ed11y-ring-yellow" : "ed11y-ring-red";
       if (UI.inlineAlerts) {
         resetClass([
           "ed11y-hidden-highlight",
@@ -7711,18 +8125,22 @@ ${this.error.stack}
         panelTabs.forEach((tab) => {
           tab.addEventListener("click", this.handleBarClick);
         });
-        const altDetails = wrapper.querySelector("#ed11y-alts-tab");
-        const headingDetails = wrapper.querySelector("#ed11y-headings-tab");
-        altDetails.addEventListener("toggle", () => {
-          if (altDetails.open && headingDetails.open) {
-            headingDetails.removeAttribute("open");
-          }
-        });
-        headingDetails.addEventListener("toggle", () => {
-          if (altDetails.open && headingDetails.open) {
-            altDetails.removeAttribute("open");
-          }
-        });
+        const visualizers = wrapper.querySelector("#ed11y-visualizers");
+        visualizers.addEventListener(
+          "toggle",
+          (event) => {
+            const opened = event.target;
+            if (!opened.open || opened.parentElement !== visualizers) {
+              return;
+            }
+            visualizers.querySelectorAll(":scope > details[open]").forEach((details) => {
+              if (details !== opened) {
+                details.removeAttribute("open");
+              }
+            });
+          },
+          true
+        );
         this.initialized = true;
       }
     }
@@ -7742,9 +8160,11 @@ ${this.error.stack}
             togglePanel();
             window.setTimeout(() => {
               visualize();
+              repaintAfterVisualizerToggle();
             }, 500);
           } else {
             visualize();
+            repaintAfterVisualizerToggle();
           }
           break;
       }
@@ -8029,6 +8449,11 @@ ${this.error.stack}
       this.issuePrev = this.issueIndex > 0 ? this.issueIndex : UI.jumpList.length;
       this.dismissable = this.result.type !== "error";
       this.dismissed = !!this.result.dismissalStatus;
+      this.isLink = isLinkResult(this.result);
+      let badge = this.dismissable ? Lang._("WARNING") : Lang._("ERROR");
+      if (this.isLink) {
+        badge = this.dismissed ? Lang._("linkHiddenBadge") : Lang._(LINK_RESULT_TYPES[this.result.type].badge);
+      }
       this.wrapper = document.createElement("div");
       this.wrapper.setAttribute("role", "dialog");
       this.wrapper.dataset.ed11yDismiss = this.result.dismiss;
@@ -8050,7 +8475,7 @@ ${this.error.stack}
 				</div>
 			</div>
 			<div class="footer">
-				<div class="error-badge">${this.dismissable ? Lang._("WARNING") : Lang._("ERROR")}</div>
+				<div class="error-badge">${badge}</div>
 				<div class="ed11y-tip-dismissals">
 					<details class="ed11y-bulk-actions dismiss ed11y-hidden"><summary></summary><div class="ed11y-bulk-actions-content"></div></details>
 				</div>
@@ -8059,12 +8484,20 @@ ${this.error.stack}
 		</div>
 		`;
       this.wrapper.querySelector(".content").dataset.test = this.result.test;
+      if (this.isLink) {
+        this.wrapper.querySelector(".error-badge").classList.add(LINK_CLASS, LINK_RESULT_TYPES[this.result.type].className);
+      }
       this.addEventListener("mouseover", this.handleHover, {
         passive: true
       });
-      UI.attachCSS(this.wrapper);
+      UI.attachCSS(shadow);
       this.tip = this.wrapper.querySelector(".tip");
       const content = this.wrapper.querySelector(".message");
+      if (typeof this.result.content === "string") {
+        const wrapped = document.createElement("div");
+        wrapped.innerHTML = this.result.content;
+        this.result.content = wrapped;
+      }
       if (this.result.content.querySelector(".title")) {
         content.appendChild(this.result.content);
         const sallyTips = content.querySelectorAll("hr, hr ~ *");
@@ -8134,8 +8567,10 @@ ${this.error.stack}
         const dismissIcon = document.createElement("span");
         dismissIcon.classList.add("ed11y-dismiss-icon");
         dismissIcon.innerHTML = sprite.dismiss;
-        if (UI.showDismissed && this.dismissed) {
-          const okd = UI.dismissedAlerts[State.option.currentPage][this.result.test][this.result.dismiss] === "ok";
+        if (this.isLink) {
+          this.drawLinkActions(buttonBar, dismissIcon);
+        } else if (UI.showDismissed && this.dismissed) {
+          const okd = this.result.dismissalStatus === "ok";
           if (okd && State.option.allowOK || !okd) {
             const unDismissButton = document.createElement("button");
             const unDismissIcon = document.createElement("span");
@@ -8301,6 +8736,110 @@ ${this.error.stack}
       });
       this.initialized = true;
       this.rendering = false;
+    }
+    // Link-check results offer only the verdicts that would change anything.
+    // No bulk actions: each link target is its own decision.
+    //
+    //   broken (type "link")        Mark OK, or Ignore for users who may not
+    //                               mark things OK.
+    //   manual check ("linkManual") Mark OK or Ignore, plus Mark broken.
+    //   marked OK (dismissalStatus  Restore, which clears the mark so the
+    //   "ok", shown with hidden     checker decides again.
+    //   alerts)
+    //   ignored ("hide")            Restore, as for any ignored alert.
+    //
+    // Mark OK and Mark broken are site-wide marks on the link, so a site may
+    // grant them separately from the page-level allowOK option through
+    // allowLinkMarks.
+    drawLinkActions(buttonBar, dismissIcon) {
+      const allowMark = linkMarksAllowed();
+      const makeButton = (classes, text, title, icon) => {
+        const button = document.createElement("button");
+        button.classList.add("dismiss", ...classes);
+        if (title && State.option.syncedDismissals) {
+          button.setAttribute("title", title);
+        }
+        const label = document.createElement("span");
+        label.classList.add("text");
+        label.textContent = text;
+        button.append(label);
+        button.prepend(icon);
+        button.dataset.ed11yAll = "false";
+        return button;
+      };
+      const markBroken = () => {
+        const brokenIcon = document.createElement("span");
+        brokenIcon.classList.add("ed11y-dismiss-icon");
+        brokenIcon.innerHTML = sprite.linkBroken;
+        const brokenButton = makeButton(
+          ["broken"],
+          Lang._("dismissBrokenButton"),
+          Lang._("dismissBrokenTitle"),
+          brokenIcon
+        );
+        brokenButton.addEventListener("click", (e) => {
+          dismissThis("broken", e.target.closest("button"));
+        });
+        buttonBar.append(brokenButton);
+      };
+      if (this.result.dismissalStatus === "hide") {
+        const restoreIcon = document.createElement("span");
+        restoreIcon.classList.add("ed11y-dismiss-icon");
+        restoreIcon.innerHTML = sprite.unDismiss;
+        const restoreButton = makeButton([], Lang._("unDismissHideButton"), null, restoreIcon);
+        restoreButton.addEventListener("click", (e) => {
+          dismissThis("reset", e.target.closest("button"));
+        });
+        buttonBar.append(restoreButton);
+        return;
+      }
+      if (this.result.dismissalStatus === "ok") {
+        if (allowMark) {
+          const restoreIcon = document.createElement("span");
+          restoreIcon.classList.add("ed11y-dismiss-icon");
+          restoreIcon.innerHTML = sprite.unDismiss;
+          const restoreButton = makeButton([], Lang._("unDismissOKButton"), null, restoreIcon);
+          restoreButton.addEventListener("click", (e) => {
+            dismissThis("reset", e.target.closest("button"));
+          });
+          buttonBar.append(restoreButton);
+        } else {
+          const note = document.createElement("div");
+          note.classList.add("dismissed-note");
+          note.textContent = Lang._("unDismissNotePermissions");
+          buttonBar.prepend(note);
+        }
+        return;
+      }
+      if (allowMark) {
+        const check = document.createElement("span");
+        check.setAttribute("aria-hidden", "true");
+        check.textContent = "✓";
+        const okButton = makeButton(
+          ["ok"],
+          Lang._("dismissOkButtonContent"),
+          Lang._("dismissOkTitle"),
+          check
+        );
+        okButton.addEventListener("click", (e) => {
+          dismissThis("ok", e.target.closest("button"));
+        });
+        buttonBar.append(okButton);
+      } else if (State.option.allowHide) {
+        const ignoreButton = makeButton(
+          ["ignore"],
+          Lang._("DISMISS"),
+          Lang._("dismissHideTitle"),
+          dismissIcon.cloneNode(true)
+        );
+        ignoreButton.addEventListener("click", (e) => {
+          dismissThis("hide", e.target.closest("button"));
+        });
+        buttonBar.append(ignoreButton);
+      }
+      if (allowMark && isManualLink(this.result)) {
+        markBroken();
+      }
     }
     disconnectedCallback() {
       if (this._handleDocumentClick) {
@@ -8771,6 +9310,13 @@ ${this.error.stack}
     LINK_LABEL: "Link label",
     LINK_MAYBE_BUTTON: "Is this link actually a button?",
     LINK_NEW_TAB: "Does this link open a new tab without warning?",
+    // Link checker results (see rulesets/broken-links.js).
+    HREF_BROKEN: "Broken link",
+    HREF_UNPUBLISHED: "Link to unpublished content",
+    HREF_MARKED_BROKEN: "Link marked broken by an editor",
+    HREF_ACCESS: "Link to restricted content",
+    HREF_UNVERIFIABLE: "Link needs a manual check",
+    HREF_REDIRECT: "Link redirects to a different site",
     LINK_PLACEHOLDER_ALT: "This linked alt text may be a placeholder",
     LINK_STOPWORD: "This link only contains generic words",
     LINK_STOPWORD_ARIA: "The purpose of this link is visually hidden",
@@ -8830,7 +9376,7 @@ ${this.error.stack}
     BTN_EMPTY_LABELLEDBY: `<p>This button has an <code>aria-labelledby</code> value that is empty or does not match the <code>ID</code> value of another element on the page.</p><p>${why.fix}Reconnect the ID to an element on the page, or remove this attribute and describe the button in another way.</p>`,
     BTN_TIP: `${why.buttons}`,
     BTN_ROLE_IN_NAME: `<p><strong>Label for screen readers:</strong> <i>%(TEXT)</i></p><p>Screen readers use the word "button" to announce they are describing a button, so this word is repetitive.</p><p>${why.fix}The button's label should match its action. If the visible label is an icon instead of text, label the button with the icon's meaning, e.g. "Play," "Search" or "Menu."</p>`,
-    BTN_UNPRONOUNCEABLE: `<p><strong>Button text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Add text, a title or an aria-label describing its destination.</p><div class="why"><p>Tip: screen readers cannot describe buttons that only contain spaces or symbols. They either fall silent ("Button, [...awkward pause where the button label should be...]"), or read the name of the symbol.</p></div>`,
+    BTN_UNPRONOUNCEABLE: `<p><strong>Button text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Add text, a title or an aria-label describing what it does.</p><div class="why"><p>Tip: screen readers cannot describe buttons that only contain spaces or symbols. They either fall silent ("Button, [...awkward pause where the button label should be...]"), or read the name of the symbol.</p></div>`,
     CONTRAST_WARNING: "A background image or gradient means this checker is not sure what color is behind this text. Use the color picker below to check manually.",
     DUPLICATE_ID: `<p>IDs are being used on this page for labels or link targets, which means they must be unique.</p><p>${why.fix}Change this ID: <code>#%(ID)</code></p><div class="why"><p>In most content management systems, this comes from a field called "name" or "id" in the element properties. In HTML, it is an attribute: <code>&lt;a id="MY-ID"&gt;</code></p></div>`,
     DUPLICATE_TITLE: `<p>${why.fix}Delete the link's text or <code>title</code> attribute.</p><div class="why"><p>Tip: <code>title</code> tooltips only appear when hovering with a mouse. They cannot be seen when navigating on a phone or with a keyboard, so many users will never see them. They should never contain unique or important information.</p></div>`,
@@ -8867,7 +9413,7 @@ ${this.error.stack}
     LINK_CLICK_HERE: `<p><strong>Link text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Remove redundant words that distract from the link's purpose.</p>${why.links}`,
     LINK_DOI: `<p><strong>Link text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Link the article title and provide the DOI number as plain text, rather than linking the DOI number and leaving the article title as plain text.</p><div class="why"><p>The <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">APA Style guide</a> recommends using descriptive links on websites because users skim by links and use in-page search for links by name. Users are much more likely to notice articles of interest when the title is linked.</p><p>This also allows screen readers to describe each link meaningfully, rather than speaking a meaningless sequence of numbers.</p></div>`,
     LINK_EMPTY: `<p>${why.fix}Add text describing its destination, or delete it if it is just a typo or linked space character.</p><div class="why"><p>Tip: screen readers cannot describe links that only contain spaces or symbols. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the URL: "Link, H-T-T-P-S forward-slash forward-slash example dot com."</p><p>Note that linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p></div>`,
-    LINK_EMPTY_LABELLEDBY: `<p>This link has an <code>aria-labelledby</code> attribute that does not match the <code>ID</code> of any element on the page.</p><p>${why.fix}Provide a valid <code>ID</code>, or remove this attribute and describe the button in another way.</p>`,
+    LINK_EMPTY_LABELLEDBY: `<p>This link has an <code>aria-labelledby</code> attribute that does not match the <code>ID</code> of any element on the page.</p><p>${why.fix}Provide a valid <code>ID</code>, or remove this attribute and describe the link in another way.</p>`,
     LINK_EMPTY_NO_LABEL: `<p>${why.fix}Add text describing its destination, or delete it if it is just a typo like a linked space character.</p><div class="why"><p>Tip: screen readers cannot describe empty links. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the URL: "Link, H-T-T-P-S forward-slash forward-slash example dot com."</p><p>Note that linked space characters can be hard to delete in some content editors; it is sometimes necessary to delete "across the gap" by removing and retyping the words on both sides of a linked space.</p></div>`,
     LINK_UNPRONOUNCEABLE: `<p><strong>Link text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Add text or a title describing its destination, or delete it if it is just a typo or linked space character.</p><div class="why"><p>Tip: screen readers cannot describe links that only contain spaces or symbols. They either fall silent ("Link, [...awkward pause where the link title should be...]"), or read the name of the symbol.</p></div>`,
     LINK_FILE_EXT: `<p><strong>Link text:</strong> <i>%(TEXT)</i></p><p>This link points to a PDF or downloadable file (e.g. MP3, Zip, Word Doc) without warning.</p><p>${why.fix}Use text or an icon to <a href="https://itmaybejj.github.io/linkpurpose/">indicate the file type</a> within the link text.</p><p class="why">For large files, consider including the file size. For example: "Executive Report (PDF, 3MB)"</p>`,
@@ -8878,8 +9424,15 @@ ${this.error.stack}
     LINK_IMAGE_NO_ALT_TEXT: `<p>When a link is wrapped around an image, the image's alt text <a href="https://webaim.org/techniques/hypertext/link_text#alt_link">provides the link's title for screen readers</a>.</p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
     LINK_IMAGE_TEXT: "Image is marked as decorative, although the link is using the surrounding text as a descriptive label.",
     LINK_MAYBE_BUTTON: `<p><strong>Link:</strong> <i>%(TEXT)</i></p><p>This link has an invalid target, and has a name that suggests it might be working as a button or toggle instead of a link.</p><p>${why.fix}Use a <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">&lt;button&gt;</a> instead, or correct the link's target.</p><div class="why"><p>Tip: Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.</p></div>`,
+    // Link checker results. The ruleset appends the link target after these.
+    HREF_BROKEN: "<p>The link checker could not reach this link. It may have moved or been deleted:</p>",
+    HREF_UNPUBLISHED: "<p>Please publish the linked page or update this link:</p>",
+    HREF_MARKED_BROKEN: "<p>An editor marked this link as broken:</p>",
+    HREF_ACCESS: "<p>This link points to content that anonymous visitors cannot see. Confirm that this is intentional:</p>",
+    HREF_UNVERIFIABLE: "<p>The linked site is blocking automated link checking. Please check this URL manually and confirm it works as expected:</p>",
+    HREF_REDIRECT: "<p>Confirm that the linked URL below is the correct redirect, or update this link with a new URL.</p><p><strong>Original:</strong> %(redirectsTo)</p>",
     LINK_NEW_TAB: `<p><strong>Link text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Set this link to open in the same tab, or <a href="https://itmaybejj.github.io/linkpurpose/">warn users</a> first.</p><div class="why"><p>Readers can always <em>choose</em> to open a link in a new tab. When a link forces open a new tab, it is often confusing or annoying, especially for assistive device users who wonder why their browser's "back" button stopped working.</p><p>Note: forms are the exception. When the user is filling out a form, opening a link in the same window could cause them to lose their work, so links within forms usually open in new tabs.</p></div>`,
-    LINK_PLACEHOLDER_ALT: `<p><strong>Alt text:</strong> <i>%(alt)</i>.</p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
+    LINK_PLACEHOLDER_ALT: `<p><strong>Alt text:</strong> <i>%(alt)</i></p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
     LINK_STOPWORD: `<p>Link text: <i>%(ERROR)</i></p><p>${why.fix}Use link text that describes its destination.</p>${why.links}`,
     LINK_STOPWORD_ARIA: `<p>A different name was provided using ARIA:</p><p><strong>Visible text:</strong> <i>%(VISIBLE)</i></p><p><strong>Hidden text:</strong> <i>%(HIDDEN)</i></p><p>${why.fix}Write meaningful links for everyone, not just screen reader users, and make sure each element's <a href="https://www.w3.org/WAI/WCAG22/Understanding/label-in-name.html">visual label matches its name</a>, so that voice control users can tell their browser which link to click.</p>${why.links}`,
     LINK_SUS_ALT: `<p>Unless "<i>%(alt)</i>" describes the link's destination, this alt probably describes the image.</p><p><strong>Alt text:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
@@ -8926,6 +9479,7 @@ ${this.error.stack}
     edit_term: "Edit term",
     edit_user: "Edit user",
     IMAGES: "Alt text",
+    LINKS: "Links",
     MAIN_TOGGLE_LABEL: "Toggle accessibility tools",
     MISSING: "(missing!)",
     NOT_VISIBLE: "Note: this content may not be visible. Look for it inside the outlined container.",
@@ -8943,6 +9497,8 @@ ${this.error.stack}
     buttonShowHiddenAlert: "Show hidden alert",
     buttonToolsActive: "Hide visualizers",
     dismissActions: `Similar`,
+    dismissBrokenButton: "Mark broken",
+    dismissBrokenTitle: "Reports this broken link to all editors",
     dismissHideTitle: "Only hides alert for you",
     dismissOkAllButton: "On this page: mark OK",
     dismissOkButtonContent: "Mark OK",
@@ -8955,6 +9511,21 @@ ${this.error.stack}
     issueContent: "Content issue",
     issueDeveloper: "Developer issue",
     issueTemplate: "Template issue",
+    linkBrokenBadge: "Broken link",
+    linkManualBadge: "Check this link",
+    linkHiddenBadge: "Hidden link alert",
+    linkJumpTitle: "Jump to alert",
+    linkStatusBroken: "Broken",
+    linkStatusUnpublished: "Unpublished",
+    linkStatusMarkedBroken: "Marked broken",
+    linkStatusAccess: "Restricted",
+    linkStatusUnverifiable: "Unverified",
+    linkStatusRedirect: "Redirected",
+    linkDismissedOk: "Marked OK",
+    linkDismissedHide: "Ignored",
+    linksCheckThis: "URL to check:",
+    linkRedirectOriginal: "Original:",
+    linkRedirectTarget: "Redirects to:",
     main_toggle_hide: "Hide accessibility tools",
     main_toggle_hide_alerts: "Hide accessibility alerts",
     main_toggle_show: "Show accessibility tools",
@@ -8965,8 +9536,10 @@ ${this.error.stack}
     MISSING_ROOT: `Editoria11y did not find any elements that matched the check area configuration: <code>%(root)</code>`,
     panelCheckAltText: "Check that each image describes what it means in context, and that there are no images of text.",
     panelCheckOutline: "This shows the heading outline. Check that it matches how the content is organized visually.",
+    panelCheckLinks: "These links need a manual check. The target pages may be missing, redirected or blocking crawlers.",
     PANEL_HEADING_MISSING_ONE: "Missing Heading 1.",
     PANEL_NO_HEADINGS: "No headings found.",
+    PANEL_NO_LINKS: "No flagged links found on this page.",
     reportsLink: "Open site reports",
     toggleDisabled: "No content available for Editoria11y to check.",
     transferFocus: "Edit this content",
@@ -9090,8 +9663,16 @@ ${this.error.stack}
     contrastPlugin: false,
     contrastAlgorithm: "AA",
     // Other plugins
+    // Wait for external JS to insert results. Each external test listens for
+    // `ed11yRunCustomTests`, pushes objects shaped like
+    // { test, element, type, content, dismiss } onto Ed11y.State.results, then
+    // dispatches `ed11yResume`. Besides 'error' and 'warning', external tests
+    // may push `type: 'link'` (broken link) or `type: 'linkManual'`
+    // (unverifiable link); see utils/result-types.js, or hand link checker
+    // results over through `brokenLinks` below instead. Any extra `data`
+    // object on the result is echoed back in `ed11yResults` and
+    // `ed11yDismissalUpdate`.
     customTests: 0,
-    // Wait for external JS to insert results.
     customRules: [],
     // Rulebuilder. Provide an array of objects:
     /**
@@ -9116,6 +9697,44 @@ ${this.error.stack}
      *  }
      * ]
      */
+    // Link checker results. List links to flag. Setting any enables
+    // the Broken Links panel in the visualizer.
+    // Editor actions emit an `ed11yDismissalUpdate` event with
+    // a `hash`, `href` and `status` in `dismissData`. See
+    // rulesets/broken-links.js for the status table. Provide:
+    /**
+     * {
+     *  href         Required. The URL as the checker stored it.
+     *  status       Required. The problem: 'broken' | 'unpublished' |
+     *               'access' | 'unverifiable' | 'redirect' | 'markedBroken'
+     *  dismissed    The verdict, if any: 'ok' (an editor marked the link OK
+     *               site-wide) or 'hide' (this editor ignored the alert).
+     *  redirectsTo  Where a 'redirect' link now lands.
+     *  hash         Opaque id echoed back in events. Defaults to the href.
+     * }
+     */
+    brokenLinks: [],
+    // Hosts whose links the checker stores as root-relative paths. The page's
+    // own host always counts.
+    brokenLinksInternalHosts: [],
+    // Path prefixes the checker strips from internal links before storing
+    // them, e.g. a subdirectory base path or a language prefix: ['/en'].
+    brokenLinksPathPrefixes: [],
+    // Where to look for the flagged links: a CSS selector for the containers
+    // the checker harvested, e.g. 'body' when it read menus and footers too.
+    // False paints only links inside the check roots. Container ignores
+    // (containerIgnore, ignoreElements) apply either way.
+    brokenLinksRoots: false,
+    // Which link checker manual checks ('access', 'unverifiable', 'redirect')
+    // are painted like any other manual check. Statuses removed from this list
+    // hide until the visualizer panel opens. A site with many links the checker
+    // cannot verify is overwhelming; this convert checking to a manual task:
+    //   brokenLinksShowChecks: ['redirect'],  // unverifiable and access hide
+    //   brokenLinksShowChecks: [],            // every manual check hides
+    brokenLinksShowChecks: ["access", "unverifiable", "redirect"],
+    // Whether editors may Mark OK and Mark broken on flagged links. Null
+    // follows allowOK.
+    allowLinkMarks: null,
     linksAdvancedPlugin: true,
     formLabelsPlugin: true,
     embeddedContentPlugin: true,
@@ -9302,9 +9921,11 @@ ${this.error.stack}
     // get from language pack
     linksMeaningless: false,
     // get from language pack
-    // @todo cms/document wp this was a string.
+    // CMS text shown in place of an empty alt (e.g. WP's "This image has an
+    // empty alt attribute; its file name is %s"). String entries match the start
+    // of the alt; RegExp entries are used as authored, for templates whose
+    // variable part can come first. Bidi control characters are ignored.
     altPlaceholder: [],
-    // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
     editLinks: false,
     // Add links to edit content in tooltips.
     userPrefersShut: store.getItem("editoria11yShow") === "0",
@@ -9498,6 +10119,152 @@ ${this.error.stack}
       // EMBED_CUSTOM: { sources: '#embed', },
     }
   };
+  const CSS_REFERENCES = /\/\*[\s\S]*?\*\/|"(?:[^"\\\n]|\\[\s\S])*"|'(?:[^'\\\n]|\\[\s\S])*'|\burl\(\s*(?:"((?:[^"\\\n]|\\[\s\S])*)"|'((?:[^'\\\n]|\\[\s\S])*)'|([^\s"'()]*))\s*\)|(@import\b)|(\bimage-set\()/gi;
+  const ABSOLUTE_REFERENCE = /^(?:[a-z][a-z\d+.-]*:|\/\/|#)/i;
+  class UnshareableCssError extends Error {
+  }
+  class SharedStyles {
+    /**
+     * @param {string[]} urls Stylesheet URLs, already cache-busted.
+     */
+    constructor(urls) {
+      this.urls = urls;
+      this.linkBundle = SharedStyles.buildLinkBundle(urls);
+      this.sheets = [];
+      this.pendingRoots = /* @__PURE__ */ new Set();
+      this.mode = SharedStyles.supported() ? "adopt" : "link";
+      if (this.mode === "adopt") {
+        this.sheets = urls.map(() => new CSSStyleSheet());
+        this.ready = this.load();
+      } else {
+        this.ready = Promise.resolve();
+      }
+    }
+    static supported() {
+      return typeof CSSStyleSheet !== "undefined" && "replace" in CSSStyleSheet.prototype && "adoptedStyleSheets" in Document.prototype && "adoptedStyleSheets" in ShadowRoot.prototype;
+    }
+    static absolute(url2) {
+      return new URL(url2, document.baseURI).href;
+    }
+    /**
+     * Rewrites relative url()s in a stylesheet to absolute URLs.
+     *
+     * @param {string} css Stylesheet text.
+     * @param {string} sheetUrl Absolute URL the text was fetched from.
+     * @returns {string}
+     * @throws {UnshareableCssError} If the CSS needs <link> loading to work.
+     */
+    static absolutizeUrls(css, sheetUrl) {
+      return css.replace(CSS_REFERENCES, (token, double, single, bare, atImport, imageSet) => {
+        if (atImport) {
+          throw new UnshareableCssError(`@import in ${sheetUrl}`);
+        }
+        if (imageSet) {
+          throw new UnshareableCssError(`image-set() in ${sheetUrl}`);
+        }
+        const ref = double ?? single ?? bare;
+        if (ref === void 0 || ref === "" || ABSOLUTE_REFERENCE.test(ref)) {
+          return token;
+        }
+        if (ref.includes("\\")) {
+          throw new UnshareableCssError(`escaped url() in ${sheetUrl}`);
+        }
+        return `url("${new URL(ref, sheetUrl).href}")`;
+      });
+    }
+    static buildLinkBundle(urls) {
+      const bundle = document.createElement("div");
+      bundle.classList.add("ed11y-style");
+      bundle.setAttribute("hidden", "");
+      urls.forEach((url2) => {
+        const link = document.createElement("link");
+        link.setAttribute("rel", "stylesheet");
+        link.setAttribute("media", "all");
+        link.setAttribute("href", url2);
+        bundle.append(link);
+      });
+      return bundle;
+    }
+    async load() {
+      try {
+        const texts = await Promise.all(
+          this.urls.map(async (url2) => {
+            const response = await fetch(url2, { headers: { Accept: "text/css,*/*;q=0.1" } });
+            if (!response.ok) {
+              throw new Error(`${response.status} ${response.statusText} for ${url2}`);
+            }
+            const type = response.headers.get("Content-Type");
+            if (type && type.split(";")[0].trim().toLowerCase() !== "text/css") {
+              throw new UnshareableCssError(`${url2} was served as ${type}, not text/css`);
+            }
+            return response.text();
+          })
+        );
+        const rewritten = texts.map(
+          (text, i) => SharedStyles.absolutizeUrls(text, SharedStyles.absolute(this.urls[i]))
+        );
+        await Promise.all(rewritten.map((text, i) => this.sheets[i].replace(text)));
+      } catch (error) {
+        console.warn("Editoria11y: could not share stylesheets; falling back to <link>.", error);
+        this.mode = "link";
+        this.pendingRoots.forEach((root) => {
+          root.adoptedStyleSheets = root.adoptedStyleSheets.filter((s) => !this.sheets.includes(s));
+          this.appendLinks(SharedStyles.linkTarget(root));
+        });
+        this.sheets = [];
+      } finally {
+        this.pendingRoots.clear();
+        this.pendingRoots = null;
+      }
+    }
+    /**
+     * Resolves what to style: a Document or ShadowRoot as given, otherwise the
+     * root node an element is connected to. Detached elements return null.
+     *
+     * @param {Node} target
+     * @returns {Document|ShadowRoot|null}
+     */
+    static resolveRoot(target) {
+      if (target instanceof Document || target instanceof ShadowRoot) {
+        return target;
+      }
+      const root = target?.getRootNode?.();
+      return root instanceof Document || root instanceof ShadowRoot ? root : null;
+    }
+    /** A document cannot take a second child element, so its links go in <head>. */
+    static linkTarget(root) {
+      return root instanceof Document ? root.head || root.body : root;
+    }
+    appendLinks(target) {
+      for (const child of target.children) {
+        if (child.classList.contains("ed11y-style")) {
+          return;
+        }
+      }
+      target.appendChild(this.linkBundle.cloneNode(true));
+    }
+    /**
+     * Styles a document, a shadow root, or the root an element is connected to.
+     * Safe to call repeatedly on the same target.
+     *
+     * @param {Document|ShadowRoot|Element} target
+     */
+    attach(target) {
+      if (!target) {
+        return;
+      }
+      const root = SharedStyles.resolveRoot(target);
+      if (this.mode === "link" || !root) {
+        this.appendLinks(root ? SharedStyles.linkTarget(root) : target);
+        return;
+      }
+      const missing = this.sheets.filter((sheet) => !root.adoptedStyleSheets.includes(sheet));
+      if (missing.length) {
+        root.adoptedStyleSheets = [...root.adoptedStyleSheets, ...missing];
+      }
+      this.pendingRoots?.add(root);
+    }
+  }
   const validateSelectorOptions = (userOptions) => {
     const selectorKeys = [
       "checkRoot",
@@ -9550,23 +10317,10 @@ ${this.error.stack}
         console.warn("Editoria11y CSS file parameter is missing; attempting to load from CDN.");
       }
     }
-    const cssBundle = document.createElement("div");
-    cssBundle.classList.add("ed11y-style");
-    cssBundle.setAttribute("hidden", "");
-    cssUrls?.forEach((sheet) => {
-      const cssLink = document.createElement("link");
-      cssLink.setAttribute("rel", "stylesheet");
-      cssLink.setAttribute("media", "all");
-      if (sheet.indexOf("?") < 0) {
-        sheet = `${sheet}?ver=${UI.version}`;
-      }
-      cssLink.setAttribute("href", sheet);
-      cssBundle.append(cssLink);
-    });
-    UI.attachCSS = (appendTo) => {
-      const link = cssBundle.cloneNode(true);
-      appendTo.appendChild(link);
-    };
+    const sharedStyles = new SharedStyles(
+      (cssUrls ?? []).map((sheet) => sheet.indexOf("?") < 0 ? `${sheet}?ver=${UI.version}` : sheet)
+    );
+    UI.attachCSS = (target) => sharedStyles.attach(target);
     Lang.testNames = State.option.lang.testNames;
     const titles = Object.entries(Lang.testNames);
     for (let i = 0; i < titles.length; i++) {
@@ -9575,6 +10329,7 @@ ${this.error.stack}
     if (State.option.customRules) {
       prepareCustomRuleset();
     }
+    prepareBrokenLinks();
     UI.english = Lang.langStrings.LANG_CODE.startsWith("en");
     if (UI.english) {
       State.option.extraPlaceholderStopWords = userOptions.extraPlaceholderStopWords ? `${userOptions.extraPlaceholderStopWords}, ${Lang.langStrings.extraPlaceholderStopWords}` : Lang.langStrings.extraPlaceholderStopWords;
@@ -9700,8 +10455,8 @@ ${this.error.stack}
           console.error("Editoria11y init failed:", error);
           const consoleErrors = new ConsoleErrors(error);
           document?.querySelector("*").appendChild(consoleErrors);
-          if (consoleErrors?.shadowRoot?.querySelector("*")) {
-            UI.attachCSS(consoleErrors.shadowRoot.querySelector("*"));
+          if (consoleErrors?.shadowRoot) {
+            UI.attachCSS(consoleErrors.shadowRoot);
           }
           throw error;
         });

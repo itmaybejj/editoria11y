@@ -8,6 +8,39 @@ import checkReadability from '../../sa11y-js/rulesets/readability';
 import sprite from '../elements/sprite.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { UI } from './ui.js';
+import {
+  LINK_CLASS,
+  LINK_RESULT_TYPES,
+  isLinkResult,
+  isWarningStyled,
+} from '../utils/result-types.js';
+import { displayHref, linkStatusLabel } from '../rulesets/broken-links.js';
+import { jumpTo } from './run.js';
+
+const linkTypeClasses = Object.values(LINK_RESULT_TYPES).map((type) => type.className);
+
+// Paints the toggle with the error or warning colors of the result's
+// severity; link-check results also get their own class, icon and label.
+// Runs on create and on every adoption, because a target can move between
+// `link` and `linkManual` across rechecks without changing the
+// dismissable/dismissed pair that the adoption path already compares.
+const decorateToggle = (toggle, result, dismissed) => {
+  const wasLink = toggle.classList.contains(LINK_CLASS);
+  toggle.classList.remove(LINK_CLASS, ...linkTypeClasses);
+  toggle.classList.toggle('dismissable', isWarningStyled(result) && !dismissed);
+  if (isLinkResult(result)) {
+    const linkType = LINK_RESULT_TYPES[result.type];
+    toggle.classList.add(LINK_CLASS, linkType.className);
+    toggle.setAttribute('aria-label', Lang._(linkType.badge));
+    toggle.innerHTML = dismissed ? sprite.linkHidden : sprite.linkBroken;
+  } else if (wasLink) {
+    toggle.setAttribute(
+      'aria-label',
+      result.type !== 'error' ? Lang._('WARNING') : Lang._('ERROR'),
+    );
+    toggle.innerHTML = dismissed ? sprite.dismiss : '';
+  }
+};
 
 export const showAltPanel = () => {
   // visualize image alts
@@ -112,6 +145,81 @@ export const showAltPanel = () => {
   }
 };
 
+// Lists the link checker's flagged links. Each row carries a copy of the
+// result's toggle styling that jumps to the alert, a status label and the
+// target. Built after buttons are drawn (showResults) so rows can point at
+// them; opening the tab shows hidden alerts first so every row has one.
+export const showLinksPanel = () => {
+  const linkList = UI.panel !== false && UI.panel.querySelector('#ed11y-link-list');
+  if (!linkList) {
+    return;
+  }
+  linkList.innerHTML = '';
+  // Results are sorted bottom to top for the jump list; show page order.
+  const links = State.results.filter((result) => isLinkResult(result) && result.brokenLink);
+  links.reverse();
+  if (links.length === 0) {
+    const none = document.createElement('p');
+    const em = document.createElement('em');
+    em.textContent = Lang._('PANEL_NO_LINKS');
+    none.append(em);
+    linkList.append(none);
+    return;
+  }
+  links.forEach((result) => {
+    const entry = result.brokenLink;
+    const dismissed = !!result.dismissalStatus;
+    const li = document.createElement('li');
+    li.classList.add('ed11y-link-row');
+    if (!dismissed) {
+      li.classList.add(isWarningStyled(result) ? 'ed11y-warning' : 'ed11y-error');
+    }
+
+    // Same markup as the on-page button so it takes the same styles.
+    const markWrapper = document.createElement('span');
+    markWrapper.classList.add('ed11y-result-wrapper', 'ed11y-link-row-mark');
+    const button = document.createElement('button');
+    button.setAttribute('type', 'button');
+    button.classList.add('toggle');
+    if (dismissed) {
+      button.classList.add('dismissed');
+    }
+    decorateToggle(button, result, dismissed);
+    button.setAttribute('title', Lang._('linkJumpTitle'));
+    button.setAttribute(
+      'aria-label',
+      `${Lang._('linkJumpTitle')}: ${linkStatusLabel(entry)}, ${displayHref(entry.href)}`,
+    );
+    const index = State.results.indexOf(result);
+    if (index > -1) {
+      button.dataset.ed11yResult = `${index}`;
+    }
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      const mark = result.toggle;
+      if (!mark?.isConnected || mark.dataset.ed11yJumpPosition === undefined) {
+        return;
+      }
+      UI.openJumpPosition = Number.parseInt(mark.dataset.ed11yJumpPosition, 10) - 1;
+      jumpTo();
+    });
+    markWrapper.append(button);
+
+    const status = document.createElement('span');
+    status.classList.add('ed11y-link-status');
+    status.textContent = linkStatusLabel(entry);
+
+    const link = document.createElement('a');
+    link.href = entry.href;
+    link.setAttribute('target', '_blank');
+    link.setAttribute('rel', 'noopener noreferrer');
+    link.textContent = displayHref(entry.href);
+
+    li.append(markWrapper, status, link);
+    linkList.append(li);
+  });
+};
+
 export function visualize() {
   if (!UI.panel) {
     return;
@@ -141,6 +249,7 @@ export function visualize() {
   UI.panel.querySelector('#ed11y-visualizers').removeAttribute('hidden');
   showAltPanel();
   showHeadingsPanel();
+  showLinksPanel();
   if (State.option.readabilityPlugin) {
     showReadability();
   }
@@ -237,10 +346,10 @@ export function drawResult(result, index) {
     if (mark.dismissable !== nextDismissable || mark.dismissed !== nextDismissed) {
       mark.dismissable = nextDismissable;
       mark.dismissed = nextDismissed;
-      mark.toggle.classList.toggle('dismissable', nextDismissable && !nextDismissed);
       mark.toggle.classList.toggle('dismissed', nextDismissed);
       mark.toggle.innerHTML = nextDismissed ? sprite.dismiss : '';
     }
+    decorateToggle(mark.toggle, result, nextDismissed);
 
     if (mark.tip) {
       mark.tip.remove();
@@ -309,16 +418,15 @@ export function drawResult(result, index) {
   if (mark.dismissed) {
     mark.toggle.innerHTML = sprite.dismiss;
     mark.toggle.classList.add('dismissed');
-  } else if (mark.dismissable) {
-    mark.toggle.classList.add('dismissable');
   }
+  decorateToggle(mark.toggle, mark.result, mark.dismissed);
   mark.wrapper.appendChild(mark.toggle);
   mark.toggle.addEventListener('click', mark.toggleClick);
   mark.toggle.addEventListener('focus', mark.handleFocus);
   mark.toggle.addEventListener('mouseover', mark.handleHover);
   mark.tipNeedsBuild = true;
 
-  UI.attachCSS(mark.wrapper);
+  UI.attachCSS(shadow);
 
   shadow.appendChild(mark.wrapper);
 

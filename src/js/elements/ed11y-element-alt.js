@@ -26,7 +26,7 @@ export class Ed11yElementAlt extends HTMLElement {
         altSpan.classList.add(`ed11y-pass`);
       }
       altTextWrapper.appendChild(altSpan);
-      UI.attachCSS(altTextWrapper);
+      UI.attachCSS(shadow);
       shadow.appendChild(altTextWrapper);
       this.initialized = true;
     }
