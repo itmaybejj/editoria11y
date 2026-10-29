@@ -24,6 +24,44 @@ export const LINK_STATUSES = {
   access: { test: 'HREF_ACCESS', type: 'linkManual', label: 'linkStatusAccess' },
   unverifiable: { test: 'HREF_UNVERIFIABLE', type: 'linkManual', label: 'linkStatusUnverifiable' },
   redirect: { test: 'HREF_REDIRECT', type: 'linkManual', label: 'linkStatusRedirect' },
+  serverError: { test: 'HREF_SERVER_ERROR', type: 'linkManual', label: 'linkStatusServerError' },
+};
+
+// An entry's optional `reason` (the checker's machine reason) picks a more
+// specific test and label within its status. Reasons are listed per status
+// so a reason never changes the result type; a reason not listed under the
+// entry's status falls back to the status's own test and label.
+export const LINK_REASONS = {
+  broken: {
+    invalid_host: { test: 'HREF_BAD_HOST', label: 'linkReasonBadHost' },
+    malformed_url: { test: 'HREF_MALFORMED', label: 'linkReasonMalformed' },
+    scheme_typo: { test: 'HREF_SCHEME_TYPO', label: 'linkReasonSchemeTypo' },
+    missing_scheme: { test: 'HREF_MISSING_HTTPS', label: 'linkReasonMissingHttps' },
+    missing_mailto: { test: 'HREF_MISSING_MAILTO', label: 'linkReasonMissingMailto' },
+    invalid_email: { test: 'HREF_EMAIL_INVALID', label: 'linkReasonEmailInvalid' },
+    invalid_phone: { test: 'HREF_PHONE_INVALID', label: 'linkReasonPhoneInvalid' },
+    local_file: { test: 'HREF_LOCAL_FILE', label: 'linkReasonLocalFile' },
+  },
+  unverifiable: {
+    private: { test: 'HREF_PRIVATE', label: 'linkReasonPrivate' },
+    private_address: { test: 'HREF_PRIVATE', label: 'linkReasonPrivate' },
+    ftp_link: { test: 'HREF_FTP', label: 'linkReasonFtp' },
+    app_scheme: { test: 'HREF_APP_LINK', label: 'linkReasonAppLink' },
+  },
+  redirect: {
+    redirect_scheme: { test: 'HREF_REDIRECT_APP', label: 'linkReasonRedirectApp' },
+  },
+};
+
+// The test and label for an entry: its reason's when listed, else its status's.
+const describeEntry = (entry) => {
+  const status = LINK_STATUSES[entry.status];
+  const reason =
+    typeof entry.reason === 'string' &&
+    Object.hasOwn(LINK_REASONS[entry.status] ?? {}, entry.reason)
+      ? LINK_REASONS[entry.status][entry.reason]
+      : null;
+  return { ...status, ...reason };
 };
 
 const DISMISSED_LABELS = { ok: 'linkDismissedOk', hide: 'linkDismissedHide' };
@@ -55,7 +93,7 @@ export const linkStatusLabel = (entry) => {
   if (isKnownDismissal(entry.dismissed)) {
     return Lang._(DISMISSED_LABELS[entry.dismissed]);
   }
-  return isKnownLinkStatus(entry.status) ? Lang._(LINK_STATUSES[entry.status].label) : entry.status;
+  return isKnownLinkStatus(entry.status) ? Lang._(describeEntry(entry).label) : entry.status;
 };
 
 // Display form of a stored href: scheme dropped, as the eye reads it.
@@ -77,8 +115,10 @@ const stripPrefix = (path, prefix) => {
 
 // The form both sides of a match are reduced to: for internal links the
 // root-relative path and query with configured prefixes stripped, for
-// external links the origin, path and query. Fragments never count. Returns
-// null for anything that is not an http(s) URL (mailto:, tel:, javascript:).
+// external links the origin, path and query, and for any other scheme
+// (mailto:, tel:, file:, app links) the browser's serialization, which folds
+// the scheme's case. Fragments never count. Returns null for an href the
+// browser cannot parse; those are matched by the raw attribute.
 export const canonicalHref = (href, options = State.option, base = document.baseURI) => {
   let url;
   try {
@@ -86,8 +126,9 @@ export const canonicalHref = (href, options = State.option, base = document.base
   } catch {
     return null;
   }
-  if (url.protocol !== 'http:' && url.protocol !== 'https:' && url.protocol !== 'file:') {
-    return null;
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    url.hash = '';
+    return url.href;
   }
   const search = url.search === '?' ? '' : url.search;
   const host = url.host.toLowerCase();
@@ -170,8 +211,8 @@ const indexEntries = () => {
 
 // Tip content: the test's explanation, then the target as a link so the
 // editor can open it. The href is set as text, never HTML.
-const buildContent = (entry, status) => {
-  const content = Lang.sprintf(status.test, entry.redirectsTo ?? null);
+const buildContent = (entry, test) => {
+  const content = Lang.sprintf(test, entry.redirectsTo ?? null);
   const target = document.createElement('p');
   const linkWrap = document.createElement('i');
   const link = document.createElement('a');
@@ -181,7 +222,10 @@ const buildContent = (entry, status) => {
   link.setAttribute('rel', 'noopener noreferrer');
   const prefix = document.createElement('strong');
   link.textContent = displayHref(entry.href);
-  prefix.textContent = entry.redirectsTo ? Lang._('linkRedirectTarget') : Lang._('linksCheckThis');
+  // The tip names the destination; this is the link as written.
+  prefix.textContent = entry.redirectsTo
+    ? Lang._('linkRedirectOriginal')
+    : Lang._('linksCheckThis');
   prefix.textContent += ' ';
   target.append(prefix);
   linkWrap.append(link);
@@ -220,13 +264,13 @@ export function checkBrokenLinks() {
     if (!entry) {
       continue;
     }
-    const status = LINK_STATUSES[entry.status];
+    const status = describeEntry(entry);
     const hash = entry.hash ?? entry.href;
     const result = {
       test: status.test,
       element: anchor,
       type: status.type,
-      content: buildContent(entry, status),
+      content: buildContent(entry, status.test),
       dismiss: Utils.prepareDismissal(`link${hash}`),
       data: { hash, href: entry.href, status: entry.status, redirectsTo: entry.redirectsTo },
       brokenLink: entry,

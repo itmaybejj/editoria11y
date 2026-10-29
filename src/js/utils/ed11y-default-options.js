@@ -119,7 +119,11 @@ export const ed11yDefaultOptions = {
    * {
    *  href         Required. The URL as the checker stored it.
    *  status       Required. The problem: 'broken' | 'unpublished' |
-   *               'access' | 'unverifiable' | 'redirect' | 'markedBroken'
+   *               'access' | 'unverifiable' | 'redirect' | 'serverError' |
+   *               'markedBroken'
+   *  reason       The checker's machine reason, e.g. 'invalid_email'. A
+   *               reason listed under the status in LINK_REASONS gets its
+   *               own title and tip; any other falls back to the status.
    *  dismissed    The verdict, if any: 'ok' (an editor marked the link OK
    *               site-wide) or 'hide' (this editor ignored the alert).
    *  redirectsTo  Where a 'redirect' link now lands.
@@ -138,13 +142,14 @@ export const ed11yDefaultOptions = {
   // False paints only links inside the check roots. Container ignores
   // (containerIgnore, ignoreElements) apply either way.
   brokenLinksRoots: false,
-  // Which link checker manual checks ('access', 'unverifiable', 'redirect')
+  // Which link checker manual checks ('access', 'unverifiable', 'redirect',
+  // 'serverError')
   // are painted like any other manual check. Statuses removed from this list
   // hide until the visualizer panel opens. A site with many links the checker
   // cannot verify is overwhelming; this convert checking to a manual task:
   //   brokenLinksShowChecks: ['redirect'],  // unverifiable and access hide
   //   brokenLinksShowChecks: [],            // every manual check hides
-  brokenLinksShowChecks: ['access', 'unverifiable', 'redirect'],
+  brokenLinksShowChecks: ['access', 'unverifiable', 'redirect', 'serverError'],
   // Whether editors may Mark OK and Mark broken on flagged links. Null
   // follows allowOK.
   allowLinkMarks: null,

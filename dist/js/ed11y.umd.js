@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.2-1026
+			* @version 3.0.2-1028
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -1859,7 +1859,7 @@
       });
     }
   }
-  const version = "3.0.2-1026";
+  const version = "3.0.2-1028";
   const sprite = {
     alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
     close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -5810,7 +5810,34 @@ ${this.error.stack}
     markedBroken: { test: "HREF_MARKED_BROKEN", type: "link", label: "linkStatusMarkedBroken" },
     access: { test: "HREF_ACCESS", type: "linkManual", label: "linkStatusAccess" },
     unverifiable: { test: "HREF_UNVERIFIABLE", type: "linkManual", label: "linkStatusUnverifiable" },
-    redirect: { test: "HREF_REDIRECT", type: "linkManual", label: "linkStatusRedirect" }
+    redirect: { test: "HREF_REDIRECT", type: "linkManual", label: "linkStatusRedirect" },
+    serverError: { test: "HREF_SERVER_ERROR", type: "linkManual", label: "linkStatusServerError" }
+  };
+  const LINK_REASONS = {
+    broken: {
+      invalid_host: { test: "HREF_BAD_HOST", label: "linkReasonBadHost" },
+      malformed_url: { test: "HREF_MALFORMED", label: "linkReasonMalformed" },
+      scheme_typo: { test: "HREF_SCHEME_TYPO", label: "linkReasonSchemeTypo" },
+      missing_scheme: { test: "HREF_MISSING_HTTPS", label: "linkReasonMissingHttps" },
+      missing_mailto: { test: "HREF_MISSING_MAILTO", label: "linkReasonMissingMailto" },
+      invalid_email: { test: "HREF_EMAIL_INVALID", label: "linkReasonEmailInvalid" },
+      invalid_phone: { test: "HREF_PHONE_INVALID", label: "linkReasonPhoneInvalid" },
+      local_file: { test: "HREF_LOCAL_FILE", label: "linkReasonLocalFile" }
+    },
+    unverifiable: {
+      private: { test: "HREF_PRIVATE", label: "linkReasonPrivate" },
+      private_address: { test: "HREF_PRIVATE", label: "linkReasonPrivate" },
+      ftp_link: { test: "HREF_FTP", label: "linkReasonFtp" },
+      app_scheme: { test: "HREF_APP_LINK", label: "linkReasonAppLink" }
+    },
+    redirect: {
+      redirect_scheme: { test: "HREF_REDIRECT_APP", label: "linkReasonRedirectApp" }
+    }
+  };
+  const describeEntry = (entry) => {
+    const status = LINK_STATUSES[entry.status];
+    const reason = typeof entry.reason === "string" && Object.hasOwn(LINK_REASONS[entry.status] ?? {}, entry.reason) ? LINK_REASONS[entry.status][entry.reason] : null;
+    return { ...status, ...reason };
   };
   const DISMISSED_LABELS = { ok: "linkDismissedOk", hide: "linkDismissedHide" };
   const isKnownLinkStatus = (status) => typeof status === "string" && Object.hasOwn(LINK_STATUSES, status);
@@ -5824,7 +5851,7 @@ ${this.error.stack}
     if (isKnownDismissal(entry.dismissed)) {
       return Lang._(DISMISSED_LABELS[entry.dismissed]);
     }
-    return isKnownLinkStatus(entry.status) ? Lang._(LINK_STATUSES[entry.status].label) : entry.status;
+    return isKnownLinkStatus(entry.status) ? Lang._(describeEntry(entry).label) : entry.status;
   };
   const displayHref = (href) => String(href).replace(/^https?:\/\//i, "");
   const stripPrefix = (path, prefix) => {
@@ -5845,8 +5872,9 @@ ${this.error.stack}
     } catch {
       return null;
     }
-    if (url2.protocol !== "http:" && url2.protocol !== "https:" && url2.protocol !== "file:") {
-      return null;
+    if (url2.protocol !== "http:" && url2.protocol !== "https:") {
+      url2.hash = "";
+      return url2.href;
     }
     const search = url2.search === "?" ? "" : url2.search;
     const host = url2.host.toLowerCase();
@@ -5913,8 +5941,8 @@ ${this.error.stack}
     }
     return byHref;
   };
-  const buildContent = (entry, status) => {
-    const content = Lang.sprintf(status.test, entry.redirectsTo ?? null);
+  const buildContent = (entry, test) => {
+    const content = Lang.sprintf(test, entry.redirectsTo ?? null);
     const target = document.createElement("p");
     const linkWrap = document.createElement("i");
     const link = document.createElement("a");
@@ -5924,7 +5952,7 @@ ${this.error.stack}
     link.setAttribute("rel", "noopener noreferrer");
     const prefix = document.createElement("strong");
     link.textContent = displayHref(entry.href);
-    prefix.textContent = entry.redirectsTo ? Lang._("linkRedirectTarget") : Lang._("linksCheckThis");
+    prefix.textContent = entry.redirectsTo ? Lang._("linkRedirectOriginal") : Lang._("linksCheckThis");
     prefix.textContent += " ";
     target.append(prefix);
     linkWrap.append(link);
@@ -5957,13 +5985,13 @@ ${this.error.stack}
       if (!entry) {
         continue;
       }
-      const status = LINK_STATUSES[entry.status];
+      const status = describeEntry(entry);
       const hash = entry.hash ?? entry.href;
       const result = {
         test: status.test,
         element: anchor,
         type: status.type,
-        content: buildContent(entry, status),
+        content: buildContent(entry, status.test),
         dismiss: prepareDismissal(`link${hash}`),
         data: { hash, href: entry.href, status: entry.status, redirectsTo: entry.redirectsTo },
         brokenLink: entry
@@ -6743,7 +6771,7 @@ ${this.error.stack}
     sweepOrphans();
     UI.jumpList.forEach((el, i) => {
       el.dataset.ed11yJumpPosition = `${i}`;
-      const newLabel = `${Lang._("ALERT_TEXT")} ${i + 1} / ${UI.jumpList.length - 1}, ${el.shadowRoot.querySelector(".toggle").getAttribute("aria-label")}`;
+      const newLabel = `${Lang._("ALERT_TEXT")} ${i + 1} / ${UI.jumpList.length},${el.shadowRoot.querySelector(".toggle").getAttribute("aria-label")}`;
       el.shadowRoot.querySelector(".toggle").setAttribute("aria-label", newLabel);
     });
     const tipsPainted = new CustomEvent("ed11yResultsPainted");
@@ -9311,12 +9339,26 @@ ${this.error.stack}
     LINK_MAYBE_BUTTON: "Is this link actually a button?",
     LINK_NEW_TAB: "Does this link open a new tab without warning?",
     // Link checker results (see rulesets/broken-links.js).
-    HREF_BROKEN: "Broken link",
-    HREF_UNPUBLISHED: "Link to unpublished content",
-    HREF_MARKED_BROKEN: "Link marked broken by an editor",
-    HREF_ACCESS: "Link to restricted content",
-    HREF_UNVERIFIABLE: "Link needs a manual check",
-    HREF_REDIRECT: "Link redirects to a different site",
+    HREF_BROKEN: "This link is broken",
+    HREF_UNPUBLISHED: "Did you mean to link to an unpublished page?",
+    HREF_MARKED_BROKEN: "This link was marked broken by an editor",
+    HREF_ACCESS: "Did you mean to link to password-protected content?",
+    HREF_UNVERIFIABLE: "This link needs a manual check",
+    HREF_REDIRECT: "This link redirects to a different site",
+    HREF_SERVER_ERROR: "The linked site may be down",
+    // Link checker reasons, which refine the statuses above.
+    HREF_BAD_HOST: "This link is broken",
+    HREF_MALFORMED: "This link address has a typo",
+    HREF_SCHEME_TYPO: "This link address starts with a typo",
+    HREF_MISSING_HTTPS: 'This link is missing "https://"',
+    HREF_MISSING_MAILTO: 'This email link is missing "mailto:"',
+    HREF_EMAIL_INVALID: "This email link has no valid address",
+    HREF_PHONE_INVALID: "This phone link has no number to dial",
+    HREF_LOCAL_FILE: `This link points to a file on someone's computer`,
+    HREF_PRIVATE: "This link needs a manual check",
+    HREF_FTP: "FTP links no longer open in browsers",
+    HREF_APP_LINK: "This link opens an app",
+    HREF_REDIRECT_APP: "This link redirects to an app or email address",
     LINK_PLACEHOLDER_ALT: "This linked alt text may be a placeholder",
     LINK_STOPWORD: "This link only contains generic words",
     LINK_STOPWORD_ARIA: "The purpose of this link is visually hidden",
@@ -9425,12 +9467,25 @@ ${this.error.stack}
     LINK_IMAGE_TEXT: "Image is marked as decorative, although the link is using the surrounding text as a descriptive label.",
     LINK_MAYBE_BUTTON: `<p><strong>Link:</strong> <i>%(TEXT)</i></p><p>This link has an invalid target, and has a name that suggests it might be working as a button or toggle instead of a link.</p><p>${why.fix}Use a <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">&lt;button&gt;</a> instead, or correct the link's target.</p><div class="why"><p>Tip: Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.</p></div>`,
     // Link checker results. The ruleset appends the link target after these.
-    HREF_BROKEN: "<p>The link checker could not reach this link. It may have moved or been deleted:</p>",
+    HREF_BROKEN: "<p>The target page did not exist when last checked. Please confirm it is gone, then fix or remove this link:</p>",
     HREF_UNPUBLISHED: "<p>Please publish the linked page or update this link:</p>",
-    HREF_MARKED_BROKEN: "<p>An editor marked this link as broken:</p>",
+    HREF_MARKED_BROKEN: "<p>Please update this link if it is still broken:</p>",
     HREF_ACCESS: "<p>This link points to content that anonymous visitors cannot see. Confirm that this is intentional:</p>",
-    HREF_UNVERIFIABLE: "<p>The linked site is blocking automated link checking. Please check this URL manually and confirm it works as expected:</p>",
-    HREF_REDIRECT: "<p>Confirm that the linked URL below is the correct redirect, or update this link with a new URL.</p><p><strong>Original:</strong> %(redirectsTo)</p>",
+    HREF_UNVERIFIABLE: "<p>The link might be fine, but the server blocked the link checker. Please open the link and confirm it works:</p>",
+    HREF_REDIRECT: "<p>Please confirm the redirect is valid, and consider updating the link to the new address.</p><p><strong>Redirects to:</strong> %(redirectsTo)</p>",
+    HREF_SERVER_ERROR: "<p>The linked site returned an error or did not respond. Open the link and confirm it works:</p>",
+    HREF_BAD_HOST: "<p>The site name in this link is not valid. Look for a typo:</p>",
+    HREF_MALFORMED: "<p>The address may contain a space or a character that is not allowed in links:</p>",
+    HREF_SCHEME_TYPO: '<p>The start of this link (such as "https://" or "mailto:") is misspelled or incomplete, so browsers cannot open it:</p>',
+    HREF_MISSING_HTTPS: '<p>Without "https://" at the start, browsers treat this address as a page on this site, and no such page exists. Add "https://" to the start of this link:</p>',
+    HREF_MISSING_MAILTO: '<p>Add "mailto:" to the start of a link to an email address:</p>',
+    HREF_EMAIL_INVALID: '<p>The link starts with "mailto:", so clicking it will open an email program, but it is not followed by a valid email address. If this should open a web page, replace "mailto:" with "https://":</p>',
+    HREF_PHONE_INVALID: '<p>Phones can only dial digits, so this link will not place a call. After "tel:" in the link address, use only the number, such as tel:+1-555-010-0199. The visible link text can still spell a word:</p>',
+    HREF_LOCAL_FILE: "<p>The link points to a file on the computer where the page was written; the link will not work for other people. Upload the file to the site and link to it there:</p>",
+    HREF_PRIVATE: `<p>This link points to a private address, such as an intranet or a personal computer. Confirm that this is intentional, or link to a public address:</p>`,
+    HREF_FTP: '<p>Web browsers cannot open "ftp:" links. Check whether the file is also available at an "https://" address, or provide users with instructions for downloading file transfer software:</p>',
+    HREF_APP_LINK: "<p>This link opens another program, such as a calendar, meeting or music app, instead of a web page. Confirm it opens the right app, and that visitors without that app have another way to reach this content:</p>",
+    HREF_REDIRECT_APP: "<p>This link forwards visitors to an app or an email address instead of a web page. Confirm that this is intentional, or update the link.</p><p><strong>Redirects to:</strong> %(redirectsTo)</p>",
     LINK_NEW_TAB: `<p><strong>Link text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Set this link to open in the same tab, or <a href="https://itmaybejj.github.io/linkpurpose/">warn users</a> first.</p><div class="why"><p>Readers can always <em>choose</em> to open a link in a new tab. When a link forces open a new tab, it is often confusing or annoying, especially for assistive device users who wonder why their browser's "back" button stopped working.</p><p>Note: forms are the exception. When the user is filling out a form, opening a link in the same window could cause them to lose their work, so links within forms usually open in new tabs.</p></div>`,
     LINK_PLACEHOLDER_ALT: `<p><strong>Alt text:</strong> <i>%(alt)</i></p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
     LINK_STOPWORD: `<p>Link text: <i>%(ERROR)</i></p><p>${why.fix}Use link text that describes its destination.</p>${why.links}`,
@@ -9521,11 +9576,23 @@ ${this.error.stack}
     linkStatusAccess: "Restricted",
     linkStatusUnverifiable: "Unverified",
     linkStatusRedirect: "Redirected",
+    linkStatusServerError: "Not responding",
+    linkReasonBadHost: "Bad site name",
+    linkReasonMalformed: "Malformed",
+    linkReasonSchemeTypo: "Typo",
+    linkReasonMissingHttps: "Missing https://",
+    linkReasonMissingMailto: "Missing mailto:",
+    linkReasonEmailInvalid: "Bad email",
+    linkReasonPhoneInvalid: "Bad phone number",
+    linkReasonLocalFile: "Local file",
+    linkReasonPrivate: "Private network",
+    linkReasonFtp: "FTP",
+    linkReasonAppLink: "Opens an app",
+    linkReasonRedirectApp: "Redirects to app",
     linkDismissedOk: "Marked OK",
     linkDismissedHide: "Ignored",
     linksCheckThis: "URL to check:",
     linkRedirectOriginal: "Original:",
-    linkRedirectTarget: "Redirects to:",
     main_toggle_hide: "Hide accessibility tools",
     main_toggle_hide_alerts: "Hide accessibility alerts",
     main_toggle_show: "Show accessibility tools",
@@ -9706,7 +9773,11 @@ ${this.error.stack}
      * {
      *  href         Required. The URL as the checker stored it.
      *  status       Required. The problem: 'broken' | 'unpublished' |
-     *               'access' | 'unverifiable' | 'redirect' | 'markedBroken'
+     *               'access' | 'unverifiable' | 'redirect' | 'serverError' |
+     *               'markedBroken'
+     *  reason       The checker's machine reason, e.g. 'invalid_email'. A
+     *               reason listed under the status in LINK_REASONS gets its
+     *               own title and tip; any other falls back to the status.
      *  dismissed    The verdict, if any: 'ok' (an editor marked the link OK
      *               site-wide) or 'hide' (this editor ignored the alert).
      *  redirectsTo  Where a 'redirect' link now lands.
@@ -9725,13 +9796,14 @@ ${this.error.stack}
     // False paints only links inside the check roots. Container ignores
     // (containerIgnore, ignoreElements) apply either way.
     brokenLinksRoots: false,
-    // Which link checker manual checks ('access', 'unverifiable', 'redirect')
+    // Which link checker manual checks ('access', 'unverifiable', 'redirect',
+    // 'serverError')
     // are painted like any other manual check. Statuses removed from this list
     // hide until the visualizer panel opens. A site with many links the checker
     // cannot verify is overwhelming; this convert checking to a manual task:
     //   brokenLinksShowChecks: ['redirect'],  // unverifiable and access hide
     //   brokenLinksShowChecks: [],            // every manual check hides
-    brokenLinksShowChecks: ["access", "unverifiable", "redirect"],
+    brokenLinksShowChecks: ["access", "unverifiable", "redirect", "serverError"],
     // Whether editors may Mark OK and Mark broken on flagged links. Null
     // follows allowOK.
     allowLinkMarks: null,

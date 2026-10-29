@@ -459,7 +459,7 @@ export function buildJumpList() {
   sweepOrphans();
   UI.jumpList.forEach((el, i) => {
     el.dataset.ed11yJumpPosition = `${i}`;
-    const newLabel = `${Lang._('ALERT_TEXT')} ${i + 1} / ${UI.jumpList.length - 1}, ${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}`;
+    const newLabel = `${Lang._('ALERT_TEXT')} ${i + 1} / ${UI.jumpList.length},${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}`;
     el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
   });
   const tipsPainted = new CustomEvent('ed11yResultsPainted');

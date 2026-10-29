@@ -17,7 +17,8 @@
 		not mark things OK, <code>?noMark</code> to withhold link marks through
 		<code>allowLinkMarks</code> while the page still allows OK, or
 		<code>?deferChecks</code> to keep unverifiable links behind the visualizers
-		through <code>brokenLinksShowChecks</code>.
+		through <code>brokenLinksShowChecks</code>. Append <code>?reasons</code>
+		to flag the links the checker explains with a reason.
 	</p>
 	<p class="broken"><a id="broken-link" href="/no-such-page">A link the checker found broken</a></p>
 	<p class="unpublished"><a id="unpublished-link" href="/en/node/5">A link to unpublished content, matched through a stripped path prefix</a></p>
@@ -26,6 +27,12 @@
 	<p class="okd"><a id="okd-link" href="/marked-ok">A broken link an editor marked OK</a></p>
 	<p class="ignored"><a id="ignored-link" href="https://example.com/ignored">A broken link this editor ignored</a></p>
 	<p class="fine"><a id="fine-link" href="/">A link with nothing to report</a></p>
+	<!-- Flagged only with ?reasons: links the checker explains with a reason. -->
+	<p class="bad-email"><a id="bad-email-link" href="MAILTO:someone#top">An email link without an address, written with an uppercase scheme and a fragment</a></p>
+	<p class="local-file"><a id="local-file-link" href="file:///C:/Users/me/report.pdf#page=2">A link to a file on the author's computer</a></p>
+	<p class="app-link"><a id="app-link" href="zoommtg://zoom.us/join?confno=123">A link that opens an app</a></p>
+	<p class="server-error"><a id="server-error-link" href="https://example.com/down">A link to a site that is not responding</a></p>
+	<p class="redirect-app"><a id="redirect-app-link" href="https://example.com/contact">A link that redirects to an email address</a></p>
 </main>
 <nav class="sitenav" aria-label="Site">
 	<!-- Outside the check root; painted only with ?allRoots (brokenLinksRoots). -->
@@ -56,7 +63,8 @@
 		// are painted beyond the check root (the navigation link).
 		brokenLinksRoots: window.location.search.includes('allRoots') ? 'body' : false,
 		brokenLinks: [
-			{ href: '/no-such-page', status: 'broken', hash: 'abc123' },
+			// A reason the library has no tip for falls back to the status's own.
+			{ href: '/no-such-page', status: 'broken', reason: 'no_route', hash: 'abc123' },
 			{ href: '/node/5', status: 'unpublished', hash: 'node5' },
 			{ href: 'https://example.com/locked', status: 'unverifiable', hash: 'def456' },
 			{
@@ -71,6 +79,33 @@
 			{ href: 'https://example.com/absent', status: 'broken', hash: 'absent' },
 		],
 	};
+	if (window.location.search.includes('reasons')) {
+		// Non-web links are stored as the browser serializes them: scheme
+		// folded, fragment dropped.
+		options.brokenLinks.push(
+			{ href: 'mailto:someone', status: 'broken', reason: 'invalid_email', hash: 'email1' },
+			{
+				href: 'file:///C:/Users/me/report.pdf',
+				status: 'broken',
+				reason: 'local_file',
+				hash: 'file1',
+			},
+			{
+				href: 'zoommtg://zoom.us/join?confno=123',
+				status: 'unverifiable',
+				reason: 'app_scheme',
+				hash: 'app1',
+			},
+			{ href: 'https://example.com/down', status: 'serverError', reason: 'timeout', hash: 'down1' },
+			{
+				href: 'https://example.com/contact',
+				status: 'redirect',
+				reason: 'redirect_scheme',
+				redirectsTo: 'mailto:info@example.org',
+				hash: 'redir2',
+			},
+		);
+	}
 	if (window.location.search.includes('noMark')) {
 		options.allowLinkMarks = false;
 	}

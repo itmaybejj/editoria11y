@@ -136,7 +136,7 @@ test.describe('Link checker results', () => {
     await gotoPainted(page, PAGE);
     await openTip(page, 'broken');
     const tip = await page.evaluate(readTip);
-    expect(tip.title, 'Tip title names the problem').toBe('Broken link');
+    expect(tip.title, 'Tip title names the problem').toBe('This link is broken');
     expect(tip.badge, 'Badge names the link class').toBe('Broken link');
     expect(tip.targetHref, 'Tip links to the target').toBe('/no-such-page');
     expect(tip.targetBlank, 'Target opens in a new tab').toBe('_blank');
@@ -150,7 +150,7 @@ test.describe('Link checker results', () => {
     await gotoPainted(page, PAGE);
     await openTip(page, 'manual');
     const tip = await page.evaluate(readTip);
-    expect(tip.title, 'Tip title names the problem').toBe('Link needs a manual check');
+    expect(tip.title, 'Tip title names the problem').toBe('This link needs a manual check');
     expect(tip.badge, 'Badge names the link class').toBe('Check this link');
     expect(tip.buttons, 'Mark OK offered').toContain('Mark OK');
     expect(tip.buttons, 'Mark broken offered').toContain('Mark broken');
@@ -179,11 +179,83 @@ test.describe('Link checker results', () => {
     await gotoPainted(page, PAGE);
     await openTip(page, 'redirect');
     const tip = await page.evaluate(readTip);
-    expect(tip.title, 'Tip title names the problem').toBe('Link redirects to a different site');
-    expect(tip.text, 'Tip shows where the link now lands').toContain('other.example.org/landing');
+    expect(tip.title, 'Tip title names the problem').toBe('This link redirects to a different site');
+    expect(tip.text, 'Tip shows where the link now lands').toContain(
+      'Redirects to: https://other.example.org/landing',
+    );
+    expect(tip.text, 'The link as written is labelled as the original').toContain(
+      'Original: example.com/moved',
+    );
     expect(tip.targetHref, 'Tip links to the target').toBe('https://example.com/moved');
     expect(tip.buttons, 'Redirects are manual checks').toContain('Mark broken');
     await closeTip(page);
+  });
+
+  test('falls back to the status tip for a reason it has no tip for', async ({ page }) => {
+    await gotoPainted(page, PAGE);
+    await openTip(page, 'broken');
+    const tip = await page.evaluate(readTip);
+    expect(tip.title, 'The no_route reason uses the broken tip').toBe('This link is broken');
+  });
+
+  // One page load per tip. The first three are matched by their browser
+  // serialization, not as web addresses.
+  for (const [cls, title, badge] of [
+    ['bad-email', 'This email link has no valid address', 'Broken link'],
+    ['local-file', "This link points to a file on someone's computer", 'Broken link'],
+    ['app-link', 'This link opens an app', 'Check this link'],
+    ['server-error', 'The linked site may be down', 'Check this link'],
+    ['redirect-app', 'This link redirects to an app or email address', 'Check this link'],
+  ]) {
+    test(`explains ${cls} with the tip for its reason, keeping the type of its status`, async ({
+      page,
+    }) => {
+      await gotoPainted(page, `${PAGE}?reasons`);
+      expect(await hasResult(page, cls), `${cls} is painted`).toBe(true);
+      await openTip(page, cls);
+      const tip = await page.evaluate(readTip);
+      expect(tip.title, 'Tip names the reason').toBe(title);
+      expect(tip.badge, 'Badge follows the status').toBe(badge);
+      if (cls === 'redirect-app') {
+        expect(tip.text, 'Tip names where the link now leads').toContain(
+          'Redirects to: mailto:info@example.org',
+        );
+      }
+    });
+  }
+
+  test('counts links with a reason by their status, and numbers every alert', async ({ page }) => {
+    await gotoPainted(page, `${PAGE}?reasons`);
+    const count = await page.evaluate(counts);
+    expect(count.errorCount, 'Two more broken links count as issues').toBe(4);
+    expect(count.warningCount, 'Three more manual checks').toBe(5);
+    const labels = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('ed11y-element-result')).map((r) =>
+        r.shadowRoot.querySelector('.toggle').getAttribute('aria-label'),
+      ),
+    );
+    expect(labels[0], 'First alert counts every alert').toMatch(/^Alert 1 \/ 9,/);
+    expect(labels.at(-1), 'Last alert is numbered as the total').toMatch(/^Alert 9 \/ 9,/);
+  });
+
+  test('labels links with a reason by that reason in the Links visualizer', async ({ page }) => {
+    // Visualizing repaints only when a result waits behind the visualizers.
+    await gotoPainted(page, `${PAGE}?reasons&deferChecks`);
+    await visualize(page);
+    const statuses = await page.evaluate(() =>
+      Array.from(
+        document
+          .querySelector('ed11y-element-panel')
+          .shadowRoot.querySelectorAll('#ed11y-link-list .ed11y-link-status'),
+      ).map((s) => s.textContent.trim()),
+    );
+    expect(statuses.slice(6), 'Reason labels follow the status labels').toEqual([
+      'Bad email',
+      'Local file',
+      'Opens an app',
+      'Not responding',
+      'Redirects to app',
+    ]);
   });
 
   test('shows Restore on marked-OK and ignored links, and clears the verdict once restored', async ({
@@ -194,7 +266,7 @@ test.describe('Link checker results', () => {
 
     await openTip(page, 'okd');
     let tip = await page.evaluate(readTip);
-    expect(tip.title, 'Marked-OK link keeps its finding').toBe('Broken link');
+    expect(tip.title, 'Marked-OK link keeps its finding').toBe('This link is broken');
     expect(tip.badge, 'Hidden links get a neutral badge').toBe('Hidden link alert');
     expect(tip.buttons, 'Only Restore on a marked-OK link').toEqual([
       'Restore this alert marked as OK',
@@ -335,7 +407,7 @@ test.describe('Link checker results', () => {
     });
     await page.waitForSelector(OPEN_TIP, PRESENT);
     const tip = await page.evaluate(readTip);
-    expect(tip.title, 'The row opened its own alert').toBe('Link needs a manual check');
+    expect(tip.title, 'The row opened its own alert').toBe('This link needs a manual check');
     await closeTip(page);
   });
 
