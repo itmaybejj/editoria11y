@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.2-1028
+			* @version 3.0.2-1030
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -1855,7 +1855,7 @@ function findShadowComponents(option) {
     });
   }
 }
-const version = "3.0.2-1028";
+const version = "3.0.2-1030";
 const sprite = {
   alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
   close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -5800,6 +5800,112 @@ function checkReadability() {
     Constants.Panel.readabilityInfo.innerHTML = `<br>${Lang._("READABILITY_NOT_ENOUGH")}`;
   }
 }
+const stripPrefix = (path, prefix) => {
+  const clean = String(prefix ?? "").replace(/\/+$/, "");
+  if (!clean || !path.startsWith(clean)) {
+    return path;
+  }
+  const rest = path.slice(clean.length);
+  if (rest === "") {
+    return "/";
+  }
+  return rest.startsWith("/") ? rest : path;
+};
+const paramName = (pair) => {
+  const name = pair.split("=", 1)[0];
+  try {
+    return decodeURIComponent(name);
+  } catch {
+    return name;
+  }
+};
+const isWeb = (url2) => url2.protocol === "http:" || url2.protocol === "https:";
+const REDACTED_CREDENTIALS = "***";
+const hasCredentials = (url2) => url2.username !== "" || url2.password !== "";
+class UrlNormalizer {
+  /**
+   * @param {Object} [config]
+   * @param {string[]} [config.internalHosts] Hosts (with any port) of this site.
+   * @param {string[]} [config.prefixes] Path prefixes to strip, in order.
+   * @param {?string[]} [config.preserve] Parameters that identify an internal
+   *   link. Any other is dropped; null keeps every parameter.
+   * @param {string[]} [config.strip] Parameters always dropped.
+   * @param {string} [config.base] Resolves relative hrefs; without it they do
+   *   not parse.
+   */
+  constructor({ internalHosts, prefixes, preserve, strip, base } = {}) {
+    this.internalHosts = new Set(
+      (Array.isArray(internalHosts) ? internalHosts : []).map((host) => String(host).toLowerCase())
+    );
+    this.prefixes = Array.isArray(prefixes) ? prefixes : [];
+    this.preserve = Array.isArray(preserve) ? new Set(preserve) : null;
+    this.strip = new Set(Array.isArray(strip) ? strip : []);
+    this.base = base;
+  }
+  // The canonical form with its whole query. For rules that read parameters
+  // the stored form drops, such as an ignored "?destination=" route.
+  canonical(href) {
+    return this.reduce(href, (url2) => url2.search);
+  }
+  // The form the checker stores: canonical, less the dropped parameters.
+  identity(href) {
+    return this.reduce(href, (url2) => this.filteredSearch(url2));
+  }
+  // The URL as written but without the dropped parameters, for reporting an
+  // anchor to the server. Returns what it was given when there is nothing to
+  // filter or the URL does not parse.
+  stripParams(href) {
+    const url2 = this.parse(href);
+    if (!url2 || !this.isInternal(url2)) {
+      return href;
+    }
+    url2.search = this.filteredSearch(url2);
+    return url2.href;
+  }
+  // Whether a parsed URL is a web link to this site, without credentials.
+  isInternal(url2) {
+    return isWeb(url2) && !hasCredentials(url2) && this.internalHosts.has(url2.host.toLowerCase());
+  }
+  parse(href) {
+    try {
+      return new URL(String(href), this.base);
+    } catch {
+      return null;
+    }
+  }
+  reduce(href, internalSearch) {
+    const url2 = this.parse(href);
+    if (!url2) {
+      return null;
+    }
+    if (hasCredentials(url2)) {
+      url2.username = REDACTED_CREDENTIALS;
+      url2.password = "";
+      url2.hash = "";
+      return url2.href;
+    }
+    if (!isWeb(url2)) {
+      url2.hash = "";
+      return url2.href;
+    }
+    if (this.isInternal(url2)) {
+      const path = this.prefixes.reduce(stripPrefix, url2.pathname);
+      return `${path}${internalSearch(url2)}`;
+    }
+    return `${url2.origin}${url2.pathname}${url2.search}`;
+  }
+  // Names are compared decoded; pairs keep their encoding and order.
+  filteredSearch(url2) {
+    const kept = url2.search.slice(1).split("&").filter((pair) => {
+      if (pair === "") {
+        return false;
+      }
+      const name = paramName(pair);
+      return !this.strip.has(name) && (this.preserve === null || this.preserve.has(name));
+    });
+    return kept.length ? `?${kept.join("&")}` : "";
+  }
+}
 const LINK_STATUSES = {
   broken: { test: "HREF_BROKEN", type: "link", label: "linkStatusBroken" },
   unpublished: { test: "HREF_UNPUBLISHED", type: "link", label: "linkStatusUnpublished" },
@@ -5823,6 +5929,7 @@ const LINK_REASONS = {
   unverifiable: {
     private: { test: "HREF_PRIVATE", label: "linkReasonPrivate" },
     private_address: { test: "HREF_PRIVATE", label: "linkReasonPrivate" },
+    userinfo: { test: "HREF_USERINFO", label: "linkReasonUserinfo" },
     ftp_link: { test: "HREF_FTP", label: "linkReasonFtp" },
     app_scheme: { test: "HREF_APP_LINK", label: "linkReasonAppLink" }
   },
@@ -5850,41 +5957,16 @@ const linkStatusLabel = (entry) => {
   return isKnownLinkStatus(entry.status) ? Lang._(describeEntry(entry).label) : entry.status;
 };
 const displayHref = (href) => String(href).replace(/^https?:\/\//i, "");
-const stripPrefix = (path, prefix) => {
-  const clean = String(prefix ?? "").replace(/\/+$/, "");
-  if (!clean || !path.startsWith(clean)) {
-    return path;
-  }
-  const rest = path.slice(clean.length);
-  if (rest === "" || rest.startsWith("?")) {
-    return `/${rest}`;
-  }
-  return rest.startsWith("/") ? rest : path;
-};
-const canonicalHref = (href, options = State.option, base = document.baseURI) => {
-  let url2;
-  try {
-    url2 = new URL(String(href), base);
-  } catch {
-    return null;
-  }
-  if (url2.protocol !== "http:" && url2.protocol !== "https:") {
-    url2.hash = "";
-    return url2.href;
-  }
-  const search = url2.search === "?" ? "" : url2.search;
-  const host = url2.host.toLowerCase();
-  const internalHosts = Array.isArray(options.brokenLinksInternalHosts) ? options.brokenLinksInternalHosts.map((h) => String(h).toLowerCase()) : [];
-  if (host === window.location.host.toLowerCase() || internalHosts.includes(host)) {
-    let path = url2.pathname;
-    const prefixes = Array.isArray(options.brokenLinksPathPrefixes) ? options.brokenLinksPathPrefixes : [];
-    for (const prefix of prefixes) {
-      path = stripPrefix(path, prefix);
-    }
-    return `${path || "/"}${search}`;
-  }
-  return `${url2.origin}${url2.pathname}${search}`;
-};
+const matchNormalizer = () => new UrlNormalizer({
+  internalHosts: [
+    window.location.host,
+    ...Array.isArray(State.option.brokenLinksInternalHosts) ? State.option.brokenLinksInternalHosts : []
+  ],
+  prefixes: State.option.brokenLinksPathPrefixes,
+  preserve: State.option.brokenLinksPreserveParams,
+  strip: State.option.brokenLinksStripParams,
+  base: document.baseURI
+});
 function prepareBrokenLinks() {
   if (!Array.isArray(State.option.brokenLinks)) {
     if (State.option.brokenLinks) {
@@ -5908,6 +5990,16 @@ function prepareBrokenLinks() {
     }
     return true;
   });
+  const preserve = State.option.brokenLinksPreserveParams;
+  if (preserve !== null && preserve !== void 0 && !Array.isArray(preserve)) {
+    console.warn("Editoria11y: brokenLinksPreserveParams must be an array of names or null.");
+    State.option.brokenLinksPreserveParams = null;
+  }
+  const strip = State.option.brokenLinksStripParams;
+  if (strip !== void 0 && !Array.isArray(strip)) {
+    console.warn("Editoria11y: brokenLinksStripParams must be an array of names.");
+    State.option.brokenLinksStripParams = [];
+  }
   if (State.option.brokenLinksRoots && typeof State.option.brokenLinksRoots !== "string") {
     console.warn("Editoria11y: brokenLinksRoots must be a CSS selector string.");
     State.option.brokenLinksRoots = false;
@@ -5924,12 +6016,12 @@ function prepareBrokenLinks() {
     }
   });
 }
-const indexEntries = () => {
+const indexEntries = (normalizer) => {
   const byHref = /* @__PURE__ */ new Map();
   for (const entry of State.option.brokenLinks) {
-    const canonical = canonicalHref(entry.href);
-    if (canonical && !byHref.has(canonical)) {
-      byHref.set(canonical, entry);
+    const identity = normalizer.identity(entry.href);
+    if (identity && !byHref.has(identity)) {
+      byHref.set(identity, entry);
     }
     if (!byHref.has(entry.href)) {
       byHref.set(entry.href, entry);
@@ -5972,12 +6064,13 @@ function checkBrokenLinks() {
   if (!State.option.brokenLinks?.length) {
     return;
   }
-  const byHref = indexEntries();
+  const normalizer = matchNormalizer();
+  const byHref = indexEntries(normalizer);
   for (const anchor of linkAnchors()) {
     if (!anchor.matches("a[href]")) {
       continue;
     }
-    const entry = byHref.get(canonicalHref(anchor.href)) ?? byHref.get(anchor.getAttribute("href"));
+    const entry = byHref.get(normalizer.identity(anchor.href)) ?? byHref.get(anchor.getAttribute("href"));
     if (!entry) {
       continue;
     }
@@ -9352,6 +9445,7 @@ const testNames = {
   HREF_PHONE_INVALID: "This phone link has no number to dial",
   HREF_LOCAL_FILE: `This link points to a file on someone's computer`,
   HREF_PRIVATE: "This link needs a manual check",
+  HREF_USERINFO: "This link contains a username or password",
   HREF_FTP: "FTP links no longer open in browsers",
   HREF_APP_LINK: "This link opens an app",
   HREF_REDIRECT_APP: "This link redirects to an app or email address",
@@ -9479,6 +9573,7 @@ const tips = {
   HREF_PHONE_INVALID: '<p>Phones can only dial digits, so this link will not place a call. After "tel:" in the link address, use only the number, such as tel:+1-555-010-0199. The visible link text can still spell a word:</p>',
   HREF_LOCAL_FILE: "<p>The link points to a file on the computer where the page was written; the link will not work for other people. Upload the file to the site and link to it there:</p>",
   HREF_PRIVATE: `<p>This link points to a private address, such as an intranet or a personal computer. Confirm that this is intentional, or link to a public address:</p>`,
+  HREF_USERINFO: `<p>Anyone who can view this page can read the username or password written into this link's address. Remove it from the link and, if it is a real password, change it. This link was not checked:</p>`,
   HREF_FTP: '<p>Web browsers cannot open "ftp:" links. Check whether the file is also available at an "https://" address, or provide users with instructions for downloading file transfer software:</p>',
   HREF_APP_LINK: "<p>This link opens another program, such as a calendar, meeting or music app, instead of a web page. Confirm it opens the right app, and that visitors without that app have another way to reach this content:</p>",
   HREF_REDIRECT_APP: "<p>This link forwards visitors to an app or an email address instead of a web page. Confirm that this is intentional, or update the link.</p><p><strong>Redirects to:</strong> %(redirectsTo)</p>",
@@ -9582,6 +9677,7 @@ const interfaceStrings = {
   linkReasonPhoneInvalid: "Bad phone number",
   linkReasonLocalFile: "Local file",
   linkReasonPrivate: "Private network",
+  linkReasonUserinfo: "Username or password",
   linkReasonFtp: "FTP",
   linkReasonAppLink: "Opens an app",
   linkReasonRedirectApp: "Redirects to app",
@@ -9787,6 +9883,13 @@ const ed11yDefaultOptions = {
   // Path prefixes the checker strips from internal links before storing
   // them, e.g. a subdirectory base path or a language prefix: ['/en'].
   brokenLinksPathPrefixes: [],
+  // Query parameters that identify an internal link when the checker stores
+  // only some of them; an anchor is matched without the others, e.g. an image
+  // token: ['page']. Null keeps every parameter. External links are untouched.
+  brokenLinksPreserveParams: null,
+  // Query parameters the checker always drops from internal links, even with
+  // no preserve list, e.g. those a report adds to its links: ['ed1ref'].
+  brokenLinksStripParams: [],
   // Where to look for the flagged links: a CSS selector for the containers
   // the checker harvested, e.g. 'body' when it read menus and footers too.
   // False paints only links inside the check roots. Container ignores
@@ -10537,6 +10640,7 @@ export {
   Lang,
   State,
   UI,
+  UrlNormalizer,
   computeAccessibleName,
   createDismissalKey,
   elements,

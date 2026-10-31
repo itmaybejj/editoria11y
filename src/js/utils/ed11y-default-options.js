@@ -137,6 +137,13 @@ export const ed11yDefaultOptions = {
   // Path prefixes the checker strips from internal links before storing
   // them, e.g. a subdirectory base path or a language prefix: ['/en'].
   brokenLinksPathPrefixes: [],
+  // Query parameters that identify an internal link when the checker stores
+  // only some of them; an anchor is matched without the others, e.g. an image
+  // token: ['page']. Null keeps every parameter. External links are untouched.
+  brokenLinksPreserveParams: null,
+  // Query parameters the checker always drops from internal links, even with
+  // no preserve list, e.g. those a report adds to its links: ['ed1ref'].
+  brokenLinksStripParams: [],
   // Where to look for the flagged links: a CSS selector for the containers
   // the checker harvested, e.g. 'body' when it read menus and footers too.
   // False paints only links inside the check roots. Container ignores

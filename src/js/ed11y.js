@@ -5,6 +5,7 @@ import { reset, refresh, setFixedRoots } from './core/run.js';
 import { initialize } from './core/initialize.js';
 import { sanitizeHTML } from '../sa11y-js/utils/utils.js';
 import { createDismissalKey, getElements, findElements } from './utils/utils.js';
+import { UrlNormalizer } from './utils/url-normalizer.js';
 import { State } from '../sa11y-js/core/state.js';
 import sprite from './elements/sprite.js';
 import { UI } from './core/ui.js';
@@ -34,6 +35,7 @@ export {
   Lang,
   State,
   UI,
+  UrlNormalizer,
   computeAccessibleName,
   createDismissalKey,
   findElements, // Adds elements to the Elements.Found object.

@@ -228,14 +228,14 @@ test.describe('Link checker results', () => {
     await gotoPainted(page, `${PAGE}?reasons`);
     const count = await page.evaluate(counts);
     expect(count.errorCount, 'Two more broken links count as issues').toBe(4);
-    expect(count.warningCount, 'Three more manual checks').toBe(5);
+    expect(count.warningCount, 'Four more manual checks').toBe(6);
     const labels = await page.evaluate(() =>
       Array.from(document.querySelectorAll('ed11y-element-result')).map((r) =>
         r.shadowRoot.querySelector('.toggle').getAttribute('aria-label'),
       ),
     );
-    expect(labels[0], 'First alert counts every alert').toMatch(/^Alert 1 \/ 9,/);
-    expect(labels.at(-1), 'Last alert is numbered as the total').toMatch(/^Alert 9 \/ 9,/);
+    expect(labels[0], 'First alert counts every alert').toMatch(/^Alert 1 \/ 10,/);
+    expect(labels.at(-1), 'Last alert is numbered as the total').toMatch(/^Alert 10 \/ 10,/);
   });
 
   test('labels links with a reason by that reason in the Links visualizer', async ({ page }) => {
@@ -255,6 +255,7 @@ test.describe('Link checker results', () => {
       'Opens an app',
       'Not responding',
       'Redirects to app',
+      'Username or password',
     ]);
   });
 
@@ -450,5 +451,76 @@ test.describe('Link checker results', () => {
     }));
     expect(value.allowOK, 'Page still allows OK for other results').toBe(true);
     expect(value.buttons, 'Only Ignore offered for links').toEqual(['Ignore']);
+  });
+
+  test('matches anchors whose internal links carry parameters the checker does not store', async ({
+    page,
+  }) => {
+    await gotoPainted(page, `${PAGE}?params`);
+    expect(await hasResult(page, 'derivative'), 'A parameter off the preserve list').toBe(true);
+    expect(await hasResult(page, 'report-param'), 'A parameter on the strip list').toBe(true);
+    expect(await hasResult(page, 'kept-param'), 'A preserved parameter still matches').toBe(true);
+    expect(await hasResult(page, 'other-page'), 'A preserved parameter still tells links apart').toBe(
+      false,
+    );
+    expect(await hasResult(page, 'external-param'), 'External queries are part of the link').toBe(
+      false,
+    );
+
+    const hashes = await page.evaluate(() =>
+      Ed11y.State.results
+        .filter((result) => result.element.closest('.derivative, .derivative-again'))
+        .map((result) => result.data.hash),
+    );
+    expect(hashes, 'Spellings of one stored link share its entry').toEqual([
+      'derivative1',
+      'derivative1',
+    ]);
+  });
+
+  test('keeps every parameter unless the checker lists which it drops', async ({ page }) => {
+    await gotoPainted(page, `${PAGE}?params&noFilter`);
+    expect(await hasResult(page, 'derivative'), 'The token still tells the link apart').toBe(false);
+    expect(await hasResult(page, 'report-param'), 'Report parameters are not special').toBe(false);
+  });
+
+  test('warns about parameter lists of the wrong type and keeps every parameter', async ({
+    page,
+  }) => {
+    const warnings = [];
+    page.on('console', (message) => {
+      if (message.type() === 'warning') {
+        warnings.push(message.text());
+      }
+    });
+    await gotoPainted(page, `${PAGE}?params&badParams`);
+    expect(warnings.join('\n')).toContain('brokenLinksPreserveParams must be');
+    expect(warnings.join('\n')).toContain('brokenLinksStripParams must be');
+    expect(await hasResult(page, 'derivative'), 'Bad lists filter nothing').toBe(false);
+  });
+
+  test('explains a link with credentials without repeating them', async ({ page }) => {
+    await gotoPainted(page, `${PAGE}?reasons`);
+    expect(await hasResult(page, 'userinfo-clean'), 'The clean address is another link').toBe(
+      false,
+    );
+    await openTip(page, 'userinfo');
+    const tip = await page.evaluate(readTip);
+    expect(tip.title).toBe('This link contains a username or password');
+    expect(tip.badge).toBe('Check this link');
+    expect(tip.targetHref).toBe('https://***@example.com/private');
+    expect(tip.text, 'The password stays out of the tip').not.toContain('secret');
+  });
+
+  test('exposes the normalizer to integrations', async ({ page }) => {
+    await gotoPainted(page, PAGE);
+    const identity = await page.evaluate(() =>
+      new Ed11y.UrlNormalizer({
+        internalHosts: ['example.com'],
+        prefixes: ['/en'],
+        preserve: ['page'],
+      }).identity('https://example.com/en/list?page=2&utm=y#top'),
+    );
+    expect(identity).toBe('/list?page=2');
   });
 });

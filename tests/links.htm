@@ -18,7 +18,9 @@
 		<code>allowLinkMarks</code> while the page still allows OK, or
 		<code>?deferChecks</code> to keep unverifiable links behind the visualizers
 		through <code>brokenLinksShowChecks</code>. Append <code>?reasons</code>
-		to flag the links the checker explains with a reason.
+		to flag the links the checker explains with a reason, or <code>?params</code>
+		to flag links whose anchors carry parameters the checker does not store
+		(<code>?params&amp;noFilter</code> leaves out the lists that describe them).
 	</p>
 	<p class="broken"><a id="broken-link" href="/no-such-page">A link the checker found broken</a></p>
 	<p class="unpublished"><a id="unpublished-link" href="/en/node/5">A link to unpublished content, matched through a stripped path prefix</a></p>
@@ -33,6 +35,15 @@
 	<p class="app-link"><a id="app-link" href="zoommtg://zoom.us/join?confno=123">A link that opens an app</a></p>
 	<p class="server-error"><a id="server-error-link" href="https://example.com/down">A link to a site that is not responding</a></p>
 	<p class="redirect-app"><a id="redirect-app-link" href="https://example.com/contact">A link that redirects to an email address</a></p>
+	<p class="userinfo"><a id="userinfo-link" href="https://user:secret@example.com/private">A link with a password in its address</a></p>
+	<p class="userinfo-clean"><a id="userinfo-clean-link" href="https://example.com/private">The same address without the password</a></p>
+	<!-- Flagged only with ?params: the checker stores these without some of their parameters. -->
+	<p class="derivative"><a id="derivative-link" href="/styles/large/a.jpg?itok=abc">An image link with a token</a></p>
+	<p class="derivative-again"><a id="derivative-again-link" href="/styles/large/a.jpg?itok=def">The same image with another token</a></p>
+	<p class="report-param"><a id="report-param-link" href="/en/report-target?ed1ref=%2Fnode%2F1">A link opened from a report</a></p>
+	<p class="kept-param"><a id="kept-param-link" href="/listing?page=2&amp;utm_source=mail">A link with a parameter that identifies it and one that does not</a></p>
+	<p class="other-page"><a id="other-page-link" href="/listing?page=3">A link that differs by a parameter that identifies it</a></p>
+	<p class="external-param"><a id="external-param-link" href="https://example.com/photo.jpg?itok=abc">An external link with the same parameter</a></p>
 </main>
 <nav class="sitenav" aria-label="Site">
 	<!-- Outside the check root; painted only with ?allRoots (brokenLinksRoots). -->
@@ -104,7 +115,30 @@
 				redirectsTo: 'mailto:info@example.org',
 				hash: 'redir2',
 			},
+			// The checker stores a marker in place of the credentials.
+			{
+				href: 'https://***@example.com/private',
+				status: 'unverifiable',
+				reason: 'userinfo',
+				hash: 'cred1',
+			},
 		);
+	}
+	if (window.location.search.includes('params')) {
+		if (!window.location.search.includes('noFilter')) {
+			options.brokenLinksPreserveParams = ['page'];
+			options.brokenLinksStripParams = ['ed1ref'];
+		}
+		options.brokenLinks.push(
+			{ href: '/styles/large/a.jpg', status: 'broken', hash: 'derivative1' },
+			{ href: '/report-target', status: 'broken', hash: 'report1' },
+			{ href: '/listing?page=2', status: 'broken', hash: 'listing2' },
+			{ href: 'https://example.com/photo.jpg', status: 'broken', hash: 'photo1' },
+		);
+	}
+	if (window.location.search.includes('badParams')) {
+		options.brokenLinksPreserveParams = 'page';
+		options.brokenLinksStripParams = 'ed1ref';
 	}
 	if (window.location.search.includes('noMark')) {
 		options.allowLinkMarks = false;
