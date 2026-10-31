@@ -9,6 +9,13 @@ import {
 import sprite from './sprite.js';
 import { UI } from '../core/ui.js';
 import { State } from '../../sa11y-js/core/state.js';
+import {
+  LINK_CLASS,
+  LINK_RESULT_TYPES,
+  isLinkResult,
+  isManualLink,
+} from '../utils/result-types.js';
+import { linkMarksAllowed } from '../rulesets/broken-links.js';
 
 export class Ed11yElementTip extends HTMLElement {
   connectedCallback() {
@@ -29,6 +36,14 @@ export class Ed11yElementTip extends HTMLElement {
 
     this.dismissable = this.result.type !== 'error';
     this.dismissed = !!this.result.dismissalStatus;
+    this.isLink = isLinkResult(this.result);
+    let badge = this.dismissable ? Lang._('WARNING') : Lang._('ERROR');
+    if (this.isLink) {
+      // A hidden link alert is neither broken nor a check until restored.
+      badge = this.dismissed
+        ? Lang._('linkHiddenBadge')
+        : Lang._(LINK_RESULT_TYPES[this.result.type].badge);
+    }
 
     this.wrapper = document.createElement('div');
     this.wrapper.setAttribute('role', 'dialog');
@@ -51,7 +66,7 @@ export class Ed11yElementTip extends HTMLElement {
 				</div>
 			</div>
 			<div class="footer">
-				<div class="error-badge">${this.dismissable ? Lang._('WARNING') : Lang._('ERROR')}</div>
+				<div class="error-badge">${badge}</div>
 				<div class="ed11y-tip-dismissals">
 					<details class="ed11y-bulk-actions dismiss ed11y-hidden"><summary></summary><div class="ed11y-bulk-actions-content"></div></details>
 				</div>
@@ -61,16 +76,29 @@ export class Ed11yElementTip extends HTMLElement {
 		`;
 
     this.wrapper.querySelector('.content').dataset.test = this.result.test;
+    if (this.isLink) {
+      // Link badges stand out from the footer in the colors of their severity.
+      this.wrapper
+        .querySelector('.error-badge')
+        .classList.add(LINK_CLASS, LINK_RESULT_TYPES[this.result.type].className);
+    }
 
     this.addEventListener('mouseover', this.handleHover, {
       passive: true,
     });
 
-    UI.attachCSS(this.wrapper);
+    UI.attachCSS(shadow);
 
     this.tip = this.wrapper.querySelector('.tip');
 
     const content = this.wrapper.querySelector('.message');
+    // Lang.sprintf() hands over an element; external tests pushing results
+    // through the customTests handshake may hand over an HTML string.
+    if (typeof this.result.content === 'string') {
+      const wrapped = document.createElement('div');
+      wrapped.innerHTML = this.result.content;
+      this.result.content = wrapped;
+    }
     if (this.result.content.querySelector('.title')) {
       // Sent by Ed11y
       content.appendChild(this.result.content);
@@ -153,13 +181,15 @@ export class Ed11yElementTip extends HTMLElement {
       dismissIcon.classList.add('ed11y-dismiss-icon');
       dismissIcon.innerHTML = sprite.dismiss;
 
-      // Dismissal Key is set in [5] if alert has been dismissed.
-      if (UI.showDismissed && this.dismissed) {
-        // Check if user has permission to reset this alert.
-
-        const okd =
-          UI.dismissedAlerts[State.option.currentPage][this.result.test][this.result.dismiss] ===
-          'ok';
+      // Link-check results choose their buttons by their own state.
+      if (this.isLink) {
+        this.drawLinkActions(buttonBar, dismissIcon);
+      } else if (UI.showDismissed && this.dismissed) {
+        // Dismissal Key is set in [5] if alert has been dismissed.
+        // Check if user has permission to reset this alert. The result
+        // carries the status copied from the dismissal record, or supplied
+        // directly by an external test that tracks its own dismissals.
+        const okd = this.result.dismissalStatus === 'ok';
         if ((okd && State.option.allowOK) || !okd) {
           // User can restore this alert.
           const unDismissButton = document.createElement('button');
@@ -343,6 +373,119 @@ export class Ed11yElementTip extends HTMLElement {
     });
     this.initialized = true;
     this.rendering = false;
+  }
+
+  // Link-check results offer only the verdicts that would change anything.
+  // No bulk actions: each link target is its own decision.
+  //
+  //   broken (type "link")        Mark OK, or Ignore for users who may not
+  //                               mark things OK.
+  //   manual check ("linkManual") Mark OK or Ignore, plus Mark broken.
+  //   marked OK (dismissalStatus  Restore, which clears the mark so the
+  //   "ok", shown with hidden     checker decides again.
+  //   alerts)
+  //   ignored ("hide")            Restore, as for any ignored alert.
+  //
+  // Mark OK and Mark broken are site-wide marks on the link, so a site may
+  // grant them separately from the page-level allowOK option through
+  // allowLinkMarks.
+  drawLinkActions(buttonBar, dismissIcon) {
+    const allowMark = linkMarksAllowed();
+    const makeButton = (classes, text, title, icon) => {
+      const button = document.createElement('button');
+      button.classList.add('dismiss', ...classes);
+      if (title && State.option.syncedDismissals) {
+        button.setAttribute('title', title);
+      }
+      const label = document.createElement('span');
+      label.classList.add('text');
+      label.textContent = text;
+      button.append(label);
+      button.prepend(icon);
+      button.dataset.ed11yAll = 'false';
+      return button;
+    };
+    const markBroken = () => {
+      const brokenIcon = document.createElement('span');
+      brokenIcon.classList.add('ed11y-dismiss-icon');
+      brokenIcon.innerHTML = sprite.linkBroken;
+      const brokenButton = makeButton(
+        ['broken'],
+        Lang._('dismissBrokenButton'),
+        Lang._('dismissBrokenTitle'),
+        brokenIcon,
+      );
+      brokenButton.addEventListener('click', (e) => {
+        dismissThis('broken', e.target.closest('button'));
+      });
+      buttonBar.append(brokenButton);
+    };
+
+    if (this.result.dismissalStatus === 'hide') {
+      // The editor's own Ignore; anyone may take it back.
+      const restoreIcon = document.createElement('span');
+      restoreIcon.classList.add('ed11y-dismiss-icon');
+      restoreIcon.innerHTML = sprite.unDismiss;
+      const restoreButton = makeButton([], Lang._('unDismissHideButton'), null, restoreIcon);
+      restoreButton.addEventListener('click', (e) => {
+        dismissThis('reset', e.target.closest('button'));
+      });
+      buttonBar.append(restoreButton);
+      return;
+    }
+
+    if (this.result.dismissalStatus === 'ok') {
+      // Restore clears the site-wide mark so the checker decides again.
+      if (allowMark) {
+        const restoreIcon = document.createElement('span');
+        restoreIcon.classList.add('ed11y-dismiss-icon');
+        restoreIcon.innerHTML = sprite.unDismiss;
+        const restoreButton = makeButton([], Lang._('unDismissOKButton'), null, restoreIcon);
+        restoreButton.addEventListener('click', (e) => {
+          dismissThis('reset', e.target.closest('button'));
+        });
+        buttonBar.append(restoreButton);
+      } else {
+        const note = document.createElement('div');
+        note.classList.add('dismissed-note');
+        note.textContent = Lang._('unDismissNotePermissions');
+        buttonBar.prepend(note);
+      }
+      return;
+    }
+
+    if (allowMark) {
+      const check = document.createElement('span');
+      check.setAttribute('aria-hidden', 'true');
+      check.textContent = '✓';
+      const okButton = makeButton(
+        ['ok'],
+        Lang._('dismissOkButtonContent'),
+        Lang._('dismissOkTitle'),
+        check,
+      );
+      okButton.addEventListener('click', (e) => {
+        dismissThis('ok', e.target.closest('button'));
+      });
+      buttonBar.append(okButton);
+    } else if (State.option.allowHide) {
+      const ignoreButton = makeButton(
+        ['ignore'],
+        Lang._('DISMISS'),
+        Lang._('dismissHideTitle'),
+        dismissIcon.cloneNode(true),
+      );
+      ignoreButton.addEventListener('click', (e) => {
+        dismissThis('hide', e.target.closest('button'));
+      });
+      buttonBar.append(ignoreButton);
+    }
+
+    // A link the checker already calls broken gains nothing from a second
+    // verdict; a manual check is the one place the editor decides either way.
+    if (allowMark && isManualLink(this.result)) {
+      markBroken();
+    }
   }
 
   disconnectedCallback() {

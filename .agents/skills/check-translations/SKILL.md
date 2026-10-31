@@ -104,6 +104,16 @@ CRITICAL RULES FOR WRITING TRANSLATION FILES:
    codepoints — those have historically left files corrupted.
 ```
 
+### Translator rules and recurring defects
+
+Before writing or reviewing translated text, read `.agents/skills/proofread-translations/SKILL.md`.
+It holds the translator rules (heading vs table header vs caption terms, placeholders in
+inflected languages, localizing English-only examples, quotation marks, plurals), the
+verification sources (CKEditor 5 and WordPress `.po` files, Microsoft style guides), and the
+checklist of defects found in every machine-translated locale. Include its **Recurring
+defects** checklist in agent specs. Each locale's own term choices are in the `// Note:`
+comments at the top of its file.
+
 ### Agent prompt pattern
 
 ```
@@ -129,7 +139,12 @@ Run `node -c [filepath]` when done to verify syntax.
 1. Run `npm run build` to verify everything compiles
 2. Fix any syntax errors (most likely: unescaped apostrophes or curly quotes)
 3. **Run the markup linter** (see below) and fix anything it flags
-4. Update each translation's commit in `TRANSLATION_MANIFEST.json` to current HEAD
+4. **Run the structure check** and fix anything it flags:
+   `node .agents/skills/check-translations/check-keys.mjs` — compares every locale with
+   `baseAll.js` for missing keys, `%(placeholder)` sets, `<a href>` counts, a `why.fix` badge
+   glued to the next word, and a `BTN_ROLE_IN_NAME` test name that doesn't quote Sa11y's
+   localized `BTN` word.
+5. Update each translation's commit in `TRANSLATION_MANIFEST.json` to current HEAD
 
 ### Markup validation (REQUIRED after any translation change)
 

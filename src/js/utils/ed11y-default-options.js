@@ -77,7 +77,16 @@ export const ed11yDefaultOptions = {
   contrastAlgorithm: 'AA',
 
   // Other plugins
-  customTests: 0, // Wait for external JS to insert results.
+  // Wait for external JS to insert results. Each external test listens for
+  // `ed11yRunCustomTests`, pushes objects shaped like
+  // { test, element, type, content, dismiss } onto Ed11y.State.results, then
+  // dispatches `ed11yResume`. Besides 'error' and 'warning', external tests
+  // may push `type: 'link'` (broken link) or `type: 'linkManual'`
+  // (unverifiable link); see utils/result-types.js, or hand link checker
+  // results over through `brokenLinks` below instead. Any extra `data`
+  // object on the result is echoed back in `ed11yResults` and
+  // `ed11yDismissalUpdate`.
+  customTests: 0,
   customRules: [], // Rulebuilder. Provide an array of objects:
   /**
    * [
@@ -101,6 +110,56 @@ export const ed11yDefaultOptions = {
    *  }
    * ]
    */
+  // Link checker results. List links to flag. Setting any enables
+  // the Broken Links panel in the visualizer.
+  // Editor actions emit an `ed11yDismissalUpdate` event with
+  // a `hash`, `href` and `status` in `dismissData`. See
+  // rulesets/broken-links.js for the status table. Provide:
+  /**
+   * {
+   *  href         Required. The URL as the checker stored it.
+   *  status       Required. The problem: 'broken' | 'unpublished' |
+   *               'access' | 'unverifiable' | 'redirect' | 'serverError' |
+   *               'markedBroken'
+   *  reason       The checker's machine reason, e.g. 'invalid_email'. A
+   *               reason listed under the status in LINK_REASONS gets its
+   *               own title and tip; any other falls back to the status.
+   *  dismissed    The verdict, if any: 'ok' (an editor marked the link OK
+   *               site-wide) or 'hide' (this editor ignored the alert).
+   *  redirectsTo  Where a 'redirect' link now lands.
+   *  hash         Opaque id echoed back in events. Defaults to the href.
+   * }
+   */
+  brokenLinks: [],
+  // Hosts whose links the checker stores as root-relative paths. The page's
+  // own host always counts.
+  brokenLinksInternalHosts: [],
+  // Path prefixes the checker strips from internal links before storing
+  // them, e.g. a subdirectory base path or a language prefix: ['/en'].
+  brokenLinksPathPrefixes: [],
+  // Query parameters that identify an internal link when the checker stores
+  // only some of them; an anchor is matched without the others, e.g. an image
+  // token: ['page']. Null keeps every parameter. External links are untouched.
+  brokenLinksPreserveParams: null,
+  // Query parameters the checker always drops from internal links, even with
+  // no preserve list, e.g. those a report adds to its links: ['ed1ref'].
+  brokenLinksStripParams: [],
+  // Where to look for the flagged links: a CSS selector for the containers
+  // the checker harvested, e.g. 'body' when it read menus and footers too.
+  // False paints only links inside the check roots. Container ignores
+  // (containerIgnore, ignoreElements) apply either way.
+  brokenLinksRoots: false,
+  // Which link checker manual checks ('access', 'unverifiable', 'redirect',
+  // 'serverError')
+  // are painted like any other manual check. Statuses removed from this list
+  // hide until the visualizer panel opens. A site with many links the checker
+  // cannot verify is overwhelming; this convert checking to a manual task:
+  //   brokenLinksShowChecks: ['redirect'],  // unverifiable and access hide
+  //   brokenLinksShowChecks: [],            // every manual check hides
+  brokenLinksShowChecks: ['access', 'unverifiable', 'redirect', 'serverError'],
+  // Whether editors may Mark OK and Mark broken on flagged links. Null
+  // follows allowOK.
+  allowLinkMarks: null,
   linksAdvancedPlugin: true,
   formLabelsPlugin: true,
   embeddedContentPlugin: true,
@@ -288,8 +347,11 @@ export const ed11yDefaultOptions = {
 
   linksUrls: false, // get from language pack
   linksMeaningless: false, // get from language pack
-  // @todo cms/document wp this was a string.
-  altPlaceholder: [], // WP uses 'This image has an empty alt attribute; it's filename is etc.jpg'
+  // CMS text shown in place of an empty alt (e.g. WP's "This image has an
+  // empty alt attribute; its file name is %s"). String entries match the start
+  // of the alt; RegExp entries are used as authored, for templates whose
+  // variable part can come first. Bidi control characters are ignored.
+  altPlaceholder: [],
 
   editLinks: false, // Add links to edit content in tooltips.
 

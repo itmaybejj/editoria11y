@@ -1,0 +1,12 @@
+/* Override sheet with relative references, as a custom cssUrls entry might
+   ship. url(comment.svg) in this comment must not be rewritten. */
+.ed11y-result-wrapper .toggle {
+  cursor: url(check.svg), pointer;
+  /* Custom properties keep their tokens as written, exposing the rewrite. */
+  --ed11y-test-unquoted: url(check.svg);
+  --ed11y-test-quoted: url('../custom-css/check.svg');
+  --ed11y-test-root: url("/tests/custom-css/check.svg");
+  --ed11y-test-data: url(data:image/gif;base64,R0lGODlhAQABAAAAACw=);
+  --ed11y-test-fragment: url(#mask);
+  --ed11y-test-string: "url(not-a-url.svg)";
+}
