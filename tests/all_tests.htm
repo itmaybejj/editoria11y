@@ -169,7 +169,7 @@
 				<p style="background: #ccc; color: #ddd;">Super legible.</p>
 			</div>
 			<p>Color needs a manual check:</p>
-			<div class="positive">
+			<div class="negative">
 				<p
 					style="background: linear-gradient(45deg,#ccc 25%,#0000 25% 75%,#ccc 75%,#ccc),linear-gradient(45deg,#ccc 25%,#0000 25% 75%,#ccc 75%,#ccc)">
 					And incalculable.</p>
@@ -266,9 +266,18 @@
 		<p>Links with the same names go different places</p>
 		<p class="positive"><a href="https://www.youtube.com/watch?v=fjOeJssZX_Q">Turtles</a> <a
 				href="https://www.youtube.com/watch?v=cWppAbqm9I8">Turtles</a></p>
+		<div class="todo-negative">A good point<a name="_ftnref1" href="#_ftn1">[ft1]</a>, and another good point<a
+				name="_ftnref2" href="#_ftn2">[ft2]</a>
+			<p class=""><a href="#_ftnref1" name="_ftn1"><span>[ft1]</span></a> Is it though?</p>
+		</div>
+		<div class="todo-negative">
+			<p><a href="#_ftnref2" name="_ftn2"><span>[ft2]</span></a> Maybe?</p>
+		</div>
+
 
 		<p id="links-titled-with-doi">Links only labelled with a DOI number:</p>
-		<p class="positive"><a href="https://doi.org/10.1145/3493612.3520468">doi.org/10.1145/3493612.3520468</a></p>
+		<p class="positive"><a href="https://doi.org/10.1145/3493612.3520468">doi.org/10.1145/3493612.3520468</a>
+		</p>
 
 		<p id="links-titled-with-click">Links with meaningless labels:</p>
 		<p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs"
@@ -282,7 +291,8 @@
 						d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376C296.3 401.1 253.9 416 208 416 93.1 416 0 322.9 0 208S93.1 0 208 0 416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
 				</svg></a></p>
 
-		<p id="links-that-open-in-a-new-window-without-an-external-link-icon-or-text-warning">Links that open in a new
+		<p id="links-that-open-in-a-new-window-without-an-external-link-icon-or-text-warning">Links that open in a
+			new
 			window without an external link icon or text warning</h3>
 
 		<p class="positive"><a href="https://www.youtube.com/watch?v=DLzxrzFCyOs" target="_blank">Alert for opens-in
@@ -292,7 +302,8 @@
 		<p class="positive"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ#.pdf" class="">Have fun.</a></p>
 
 		<p id="links-to-doc">Links to other documents</p>
-		<p class="positive"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ#.doc" class="">A fake doc link.</a></p>
+		<p class="positive"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ#.doc" class="">A fake doc link.</a>
+		</p>
 
 		<p id="links-redundant">Links with redundant title attributes</p>
 		<p class="positive"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" title="Hover me">Hover me</a></p>
@@ -396,15 +407,19 @@
 
 		<p class="positive"><u>Underlined text</u></p>
 
-		<p class="positive"><em>A little italics is fine, but large blocks of of emphasized text are not very legible. A
-				little is acceptable of course, but there are limits, and a whole paragraph is way too much. This, for
-				example, is a whole paragraph. It's kind of hard to read, isn't it? But this test does not trip until it
+		<p class="positive"><em>A little italics is fine, but large blocks of of emphasized text are not very
+				legible. A
+				little is acceptable of course, but there are limits, and a whole paragraph is way too much. This,
+				for
+				example, is a whole paragraph. It's kind of hard to read, isn't it? But this test does not trip
+				until it
 				is this long, so you should not see false positives in your content unless you write really big
 				paragraphs like this regularly.</em></p>
 
 		<p class="positive" style="text-align: justify;">Justified text</p>
 
-		<p class="positive">Excessive superscript or subscript; <sub>subscript should be used for small references and
+		<p class="positive">Excessive superscript or subscript; <sub>subscript should be used for small references
+				and
 				footnotes, not entire sentences or paragraphs.</sub></p>
 
 		<p class="positive"><span style="font-size: 10px;">Teeny fonts</span></p>

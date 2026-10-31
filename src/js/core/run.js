@@ -41,16 +41,28 @@ import {
   handleSyncOnlyResults,
   syncResults,
 } from '../utils/process-results.js';
-import { drawResult, showAltPanel, showHeadingsPanel, visualize } from './visualize';
+import {
+  drawResult,
+  showAltPanel,
+  showHeadingsPanel,
+  showLinksPanel,
+  visualize,
+} from './visualize';
 import checkReadability from '../../sa11y-js/rulesets/readability.js';
 import sprite from '../elements/sprite.js';
 import { checkCustomRuleset } from '../rulesets/custom-ruleset.js';
+import { checkBrokenLinks, forgetLinkVerdict } from '../rulesets/broken-links.js';
+import { isVisualizerOnly, isWarningStyled, shouldDraw } from '../utils/result-types.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { resetGetText, store } from '../../sa11y-js/utils/utils.js';
 
 export function showResults() {
   buildJumpList();
+  if (UI.visualizing) {
+    // Rows point at the buttons drawn just now.
+    showLinksPanel();
+  }
   // Announce that buttons have been placed.
   document.dispatchEvent(new CustomEvent('ed11yPanelOpened'));
   alignButtons();
@@ -138,7 +150,7 @@ export function updatePanel() {
       UI.panelElement.classList.add('ed11y-preload');
       document.body.appendChild(UI.panelElement);
       UI.panel = UI.panelElement.shadowRoot.getElementById('ed11y-panel');
-      UI.attachCSS(UI.panel);
+      UI.attachCSS(UI.panelElement.shadowRoot);
       UI.panelToggle = UI.panel.querySelector('#ed11y-toggle');
       UI.panelToggleTitle = UI.panel.querySelector('#ed11y-toggle .ed11y-sr-only');
       UI.panelCount = UI.panel.querySelector('.toggle-count');
@@ -165,6 +177,27 @@ export function updatePanel() {
           .appendChild(Constants.Panel.readabilityDetails);
         UI.panel.querySelector('#ed11y-readability-tab .summary-title').textContent =
           Lang._('READABILITY');
+      }
+      if (State.option.brokenLinks?.length) {
+        const linksTab = document.createElement('details');
+        linksTab.id = 'ed11y-links-tab';
+        linksTab.innerHTML = `
+            <summary>${sprite.linkBroken}<span class="summary-title"></span><span class="close-details">${sprite.close}</span>
+            </summary>
+            <div class="details ed11y-small">
+              <p class="details-title"></p>
+              <ul id="ed11y-link-list"></ul>
+            </div>`;
+        linksTab.querySelector('.summary-title').textContent = Lang._('LINKS');
+        linksTab.querySelector('.details-title').textContent = Lang._('panelCheckLinks');
+        // Every flagged link is listed, so the list is only useful with the
+        // hidden ones on the page.
+        linksTab.addEventListener('toggle', () => {
+          if (linksTab.open && !UI.showDismissed) {
+            setShowDismissals(true);
+          }
+        });
+        UI.panel.querySelector('#ed11y-visualizers').appendChild(linksTab);
       }
 
       window.setTimeout(
@@ -412,7 +445,7 @@ export function buildJumpList() {
   // listeners; idempotent if a back-reference is already set.
   matchAdoptions();
   State.results?.forEach((result, i) => {
-    if (result.element && (!result.dismissalStatus || UI.showDismissed)) {
+    if (result.element && shouldDraw(result)) {
       drawResult(result, i);
     }
   });
@@ -426,7 +459,7 @@ export function buildJumpList() {
   sweepOrphans();
   UI.jumpList.forEach((el, i) => {
     el.dataset.ed11yJumpPosition = `${i}`;
-    const newLabel = `${Lang._('ALERT_TEXT')} ${i + 1} / ${UI.jumpList.length - 1}, ${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}`;
+    const newLabel = `${Lang._('ALERT_TEXT')} ${i + 1} / ${UI.jumpList.length},${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}`;
     el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
   });
   const tipsPainted = new CustomEvent('ed11yResultsPainted');
@@ -434,17 +467,40 @@ export function buildJumpList() {
   resumeObservers();
 }
 
-export function dismissOne(dismissalType, test, dismissalKey) {
+// Tell integrations about a user action on a result. `result` is optional
+// (legacy callers pass only the identifying strings); when present, its type
+// and any opaque `data` an external test attached travel along, so a CMS can
+// route link-check actions to a different endpoint than accessibility
+// dismissals.
+function dispatchDismissalUpdate(dismissalType, test, dismissalKey, result) {
+  const dismissalDetail = {
+    dismissPage: State.option.currentPage,
+    dismissTest: test,
+    dismissKey: dismissalKey,
+    dismissAction: dismissalType,
+    dismissType: result?.type ?? null,
+    dismissData: result?.data ?? null,
+  };
+  document.dispatchEvent(new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail }));
+}
+
+export function dismissOne(dismissalType, test, dismissalKey, result = null) {
   // Update dismissal record.
   if (UI.dismissKeys[dismissalKey]) {
     dismissalKey = UI.dismissKeys[dismissalKey];
   }
   if (dismissalType === 'reset') {
-    delete UI.dismissedAlerts[State.option.currentPage][test][dismissalKey];
-    if (Object.keys(UI.dismissedAlerts[State.option.currentPage][test]).length === 0) {
-      delete UI.dismissedAlerts[State.option.currentPage][test];
+    forgetLinkVerdict(result);
+    // Guarded: a result supplied with a dismissalStatus by an external test
+    // may have no matching record here.
+    const pageDismissals = UI.dismissedAlerts[State.option.currentPage];
+    if (pageDismissals?.[test]) {
+      delete pageDismissals[test][dismissalKey];
+      if (Object.keys(pageDismissals[test]).length === 0) {
+        delete pageDismissals[test];
+      }
     }
-    if (Object.keys(UI.dismissedAlerts[State.option.currentPage]).length === 0) {
+    if (pageDismissals && Object.keys(pageDismissals).length === 0) {
       delete UI.dismissedAlerts[State.option.currentPage];
     }
     //window.requestAnimationFrame(() => updatePanel());
@@ -467,14 +523,7 @@ export function dismissOne(dismissalType, test, dismissalKey) {
   if (State.option.syncedDismissals === false) {
     store.setItem('ed11ydismissed', JSON.stringify(UI.dismissedAlerts));
   }
-  const dismissalDetail = {
-    dismissPage: State.option.currentPage,
-    dismissTest: test,
-    dismissKey: dismissalKey,
-    dismissAction: dismissalType,
-  };
-  const ed11yDismissalUpdate = new CustomEvent('ed11yDismissalUpdate', { detail: dismissalDetail });
-  document.dispatchEvent(ed11yDismissalUpdate);
+  dispatchDismissalUpdate(dismissalType, test, dismissalKey, result);
 }
 
 // Size and position a highlight element around `target`, accounting for
@@ -534,10 +583,12 @@ export function editableHighlighter(resultID, show, firstVisible) {
     ? 'calc(var(--ed11y-buttonZIndex, 9999) - 2)'
     : 'calc(var(--ed11y-buttonZIndex, 9999) - 1)';
   el.style.setProperty('z-index', zIndex);
-  const outline =
-    result.type === 'warning'
-      ? '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)'
-      : '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
+  let outline =
+    '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-alert, #b80519), 0 0 0 3px var(--ed11y-alert, #b80519), 0 0 1px 3px';
+  if (isWarningStyled(result)) {
+    outline =
+      '0 0 0 1px #fff, inset 0 0 0 2px var(--ed11y-warning, #fad859), 0 0 0 3px var(--ed11y-warning, #fad859), 0 0 0 4px var(--ed11y-primary)';
+  }
   el.style.setProperty('box-shadow', outline);
   el.style.setProperty('border-radius', '3px');
 
@@ -615,7 +666,7 @@ export function paintReady() {
   // May be redundant, but preloads unbundled files.
   if (document.querySelector('body')) {
     // May be redundant, but preloads unbundled files.
-    UI.attachCSS(document.querySelector('body'));
+    UI.attachCSS(document);
   }
 
   UI.roots.forEach((root) => {
@@ -1374,6 +1425,9 @@ const enqueueTests = (queue) => {
     case 'checkDeveloper':
       safeRun(checkDeveloper);
       break;
+    case 'checkBrokenLinks':
+      safeRun(checkBrokenLinks);
+      break;
   }
   UI.testsRemaining--;
   if (queue.length > 0) {
@@ -1476,6 +1530,9 @@ export function checkAll() {
   }
   if (State.option.contrastPlugin) {
     queue.push('checkContrast');
+  }
+  if (State.option.brokenLinks?.length) {
+    queue.push('checkBrokenLinks');
   }
   UI.testsRemaining = queue.length;
 
@@ -1667,12 +1724,26 @@ export function resetPanel() {
   }
 }
 
+// Opening or closing the visualizers changes which visualizer-only checks
+// are on the page (see result-types.js). Repaint only when such results
+// exist, so pages without a link checker keep the cheap toggle.
+export function repaintAfterVisualizerToggle() {
+  if (!State.results.some((result) => isVisualizerOnly(result))) {
+    return;
+  }
+  UI.forceFullCheck = true;
+  UI.showPanel = true;
+  resetResults();
+  incrementalCheck();
+}
+
 // @todo is this abstraction still needed?
 window.addEventListener('ed11yEndVisualization', () => {
   UI.visualizing = false;
   pauseObservers();
   visualize();
   resumeObservers();
+  repaintAfterVisualizerToggle();
 });
 
 export function dismissThis(dismissalType, button) {
@@ -1680,19 +1751,24 @@ export function dismissThis(dismissalType, button) {
   const tip = button.closest('.ed11y-wrapper');
   const test = tip.querySelector('[data-test]').dataset.test;
   const dismissKey = tip.dataset.ed11yDismiss;
+  const tipResult = tip.getRootNode()?.host?.result ?? null;
   UI.runOrigin = 'dismissal';
 
-  if (button.dataset.ed11yAll === 'true') {
+  if (dismissalType === 'broken') {
+    // Not a dismissal: nothing is recorded and the result stays visible.
+    // The integration that pushed the link result owns what "broken" means.
+    dispatchDismissalUpdate(dismissalType, test, dismissKey, tipResult);
+  } else if (button.dataset.ed11yAll === 'true') {
     State.results.forEach((result) => {
       if (
         result.test === test &&
         (!result.dismissalStatus || result.dismissalStatus !== dismissalType)
       ) {
-        dismissOne(dismissalType, test, result.dismiss);
+        dismissOne(dismissalType, test, result.dismiss, result);
       }
     });
   } else {
-    dismissOne(dismissalType, test, dismissKey);
+    dismissOne(dismissalType, test, dismissKey, tipResult);
   }
 
   // Remove tip and reset borders around element
@@ -1725,17 +1801,21 @@ export function dismissThis(dismissalType, button) {
   );
 }
 
-export function toggleShowDismissals() {
+// Shows or hides dismissed alerts and repaints.
+export function setShowDismissals(show) {
   // todo postpone: if user has allowHide but not allowOK or vice versa, this temporarily clears both.
   UI.ignoreAll = false;
-  UI.showDismissed = !UI.showDismissed;
+  UI.showDismissed = show;
   //reset();
   UI.forceFullCheck = true;
   UI.showPanel = true;
   resetResults();
   incrementalCheck();
-
   UI.panelShowDismissed.setAttribute('data-ed11y-pressed', `${UI.showDismissed}`);
+}
+
+export function toggleShowDismissals() {
+  setShowDismissals(!UI.showDismissed);
   window.setTimeout(() => {
     UI.panelShowDismissed.focus();
   }, 0);

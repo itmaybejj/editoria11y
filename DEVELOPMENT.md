@@ -7,9 +7,26 @@
   * `npm run watch` compiles and watches JS and CSS folders for changes.
   * `npm run build` compiles once.
   * `npm run lint` lints
-  * `npm run test` runs nightwatch tests. 
-    * Note that the ChromeDriver dependency needs to be updated with almost every version of Chrome and may be out of date in the repo.
-    * Note the first test after a computer reboot often times out. Run it twice before assuming ChromeDriver is the problem.
+  * `npm test` runs the Playwright browser tests (`e2e/`) in Docker. See [Browser tests in Docker](#browser-tests-in-docker).
+
+# Browser tests in Docker
+
+Browser specs use Playwright and live in `e2e/tests/`. They load the HTML pages in `tests/`.
+
+```bash
+npm test                                  # all specs
+npm test -- links                         # one spec file
+npm test -- --grep "file://"              # filter by test title
+npx playwright show-report e2e/report     # open the last HTML report
+```
+
+* Needs Docker Desktop (or a Docker daemon) running. The first run pulls `mcr.microsoft.com/playwright:v<version>-noble` (about 2 GB).
+* `scripts/test-docker.js` reads the installed `@playwright/test` version and uses the image with the same tag, so the runner and its browsers always match. Updating `@playwright/test` in `package.json` is all an upgrade needs; the next run pulls the new image.
+* The container runs with no network. `e2e/server.js` serves the repo root inside the container, so pages load `dist/` and `src/` as they do in development. Run `npm run build` first when testing source changes.
+* `npm run test:host` runs the same specs on the host instead. It needs Playwright's browsers installed locally (`npx playwright install chromium`).
+* Why Docker: AI coding agents run commands inside a macOS sandbox that stops browsers from starting and blocks local ports. Docker containers run outside that sandbox, so agents can run these tests unattended.
+* Wait for conditions, not time: `e2e/tests/helpers.js` has `gotoPainted()` and `repaintAfter()`, which wait for Editoria11y's `ed11yResultsPainted` event. Wait for result buttons and tips with `{ state: 'attached' }`; custom-element hosts often have no box, so Playwright's default visibility check never passes. Check light-DOM presence with `page.evaluate(() => document.querySelector(...))`, because Playwright locators pierce shadow roots.
+* `e2e/server.js` imitates two real-server behaviors for tests: a `.css` request without `Accept: text/css` gets a JavaScript module (as the Vite dev server does), and `?serve-as=<type>` sets the response Content-Type.
 
 # Dev server
 

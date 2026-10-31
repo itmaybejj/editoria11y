@@ -5,6 +5,7 @@ import { reset, refresh, setFixedRoots } from './core/run.js';
 import { initialize } from './core/initialize.js';
 import { sanitizeHTML } from '../sa11y-js/utils/utils.js';
 import { createDismissalKey, getElements, findElements } from './utils/utils.js';
+import { UrlNormalizer } from './utils/url-normalizer.js';
 import { State } from '../sa11y-js/core/state.js';
 import sprite from './elements/sprite.js';
 import { UI } from './core/ui.js';
@@ -19,8 +20,8 @@ class Ed11y {
         console.error('Editoria11y init failed:', error);
         const consoleErrors = new ConsoleErrors(error);
         document?.querySelector('*').appendChild(consoleErrors);
-        if (consoleErrors?.shadowRoot?.querySelector('*')) {
-          UI.attachCSS(consoleErrors.shadowRoot.querySelector('*'));
+        if (consoleErrors?.shadowRoot) {
+          UI.attachCSS(consoleErrors.shadowRoot);
         }
         throw error;
       });
@@ -34,6 +35,7 @@ export {
   Lang,
   State,
   UI,
+  UrlNormalizer,
   computeAccessibleName,
   createDismissalKey,
   findElements, // Adds elements to the Elements.Found object.

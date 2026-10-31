@@ -669,6 +669,11 @@ button.ed11y-jump {
 	margin: 0 8px -3px -2px;
 }
 
+#ed11y-links-tab summary > svg {
+	width: 17px;
+	margin: 0 8px -3px -2px;
+}
+
 #ed11y-readability-tab {
 	summary > svg {
 		width: 18px;
@@ -760,7 +765,8 @@ button.ed11y-jump {
 }
 
 #ed11y-outline,
-#ed11y-alt-list {
+#ed11y-alt-list,
+#ed11y-link-list {
 	padding: 0;
 	list-style: none;
 }
@@ -784,6 +790,69 @@ button.ed11y-jump {
 		}
 
 		&:hover {
+			text-decoration: underline;
+		}
+	}
+}
+
+/* Link checker rows: jump button and status on one line, the target on the
+   next, clamped to two lines. The button is a copy of the on-page result
+   toggle (see .ed11y-result-wrapper .toggle). */
+#ed11y-link-list {
+	margin: 0 4px 0 6px;
+
+	li {
+		display: grid;
+		grid-template-columns: 2.375em 1fr;
+		grid-template-areas:
+			"mark status"
+			"mark link";
+		padding: 6px 8px;
+		margin: 8px 0 8px -8px;
+		border-radius: 4px;
+		column-gap: 8px;
+		box-shadow:
+			0 0 0 3px var(--ed11y-bg, #fffffe),
+			0 -3px 1px var(--ed11y-primary, #276499);
+	}
+
+	.ed11y-link-row-mark {
+		position: relative;
+		grid-area: mark;
+		font-size: 14px;
+
+		/* The panel squares its buttons; keep the on-page circle. */
+		.toggle {
+			border-radius: 50%;
+			border: 0;
+		}
+		.ed11y-link-broken {
+			background-color: #fff;
+			color: var(--ed11y-alert, #b80519);
+		}
+		.dismissed {
+			background-color: var(--ed11y-ok, #1f5381);
+			color: #fff;
+		}
+	}
+
+	.ed11y-link-status {
+		grid-area: status;
+		font-weight: 600;
+	}
+
+	a {
+		grid-area: link;
+		display: -webkit-box;
+		overflow: hidden;
+		overflow-wrap: anywhere;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		font-weight: 300;
+
+		&:hover,
+		&:focus-visible {
 			text-decoration: underline;
 		}
 	}
@@ -959,6 +1028,20 @@ ed11y-element-result[data-ed11y-open="true"] {
 					inset 0 0 0 3px var(--ed11y-warning, #fad859),
 					inset 0 0 0 4px #444,
 					inset 0 0 0 6px var(--ed11y-warning, #fad859);
+			}
+		}
+
+		/* Link-check results: icon instead of a glyph. Colors come from
+		   .dismissable (or its absence), like any other result. */
+		&.ed11y-link {
+			&::before {
+				content: "";
+			}
+
+			svg {
+				width: 0.9em;
+				margin: 0.2em 0 0;
+				vertical-align: top;
 			}
 		}
 	}
@@ -1479,6 +1562,14 @@ ed11y-element-result[data-ed11y-open="true"] {
 		border-radius: 0 var(--ed11y-borderRadius, 1px) 0 0;
 	}
 
+	/* Target of a link checker result. */
+	.ed11y-link-target {
+		font-family: monospace;
+		overflow-wrap: anywhere;
+		text-decoration-style: dotted;
+		text-underline-offset: 3px;
+	}
+
 	.dismissed-note {
 		display: inline-block;
 		padding: 0.5em 1em;
@@ -1504,6 +1595,22 @@ ed11y-element-result[data-ed11y-open="true"] {
 		line-height: 1;
 		font-size: 14px;
 		opacity: 0.9;
+
+		&.ed11y-alert {
+			color: var(--ed11y-alertText, #f4f7ff);
+			background: var(--ed11y-alert, #b80519);
+			opacity: 1;
+		}
+
+		&.ed11y-warning {
+			color: var(--ed11y-warningText, #20160c);
+			background: var(--ed11y-warning, #fad859);
+			opacity: 1;
+		}
+	}
+
+	.dismiss.broken .ed11y-dismiss-icon svg {
+		width: 1em;
 	}
 }
 

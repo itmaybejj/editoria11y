@@ -46,7 +46,9 @@ function checkTags(html) {
 }
 
 function checkUrls(html) {
-  const errs = []; const re = /https?:\/\/[^\s"'<>)]+/g; let m;
+  // Typographic and CJK quotes end a URL too, so a quoted bare scheme ("https://" in
+  // the locale's quotes) is not taken for a URL.
+  const errs = []; const re = /https?:\/\/[^\s"'<>)„“”«»‚‘’「」『』《》]+/g; let m;
   while ((m = re.exec(html))) {
     const before = html.slice(Math.max(0, m.index - 60), m.index);
     if (/(href|src|cite|action)\s*=\s*["']?$/i.test(before)) continue; // inside an attribute

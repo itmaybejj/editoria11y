@@ -12,7 +12,7 @@ const testNames = {
 	BTN_EMPTY: 'Le bouton n’a pas d’étiquette accessible',
 	BTN_UNPRONOUNCEABLE: 'Ce bouton est imprononçable',
 	BTN_EMPTY_LABELLEDBY: 'Le bouton possède une étiquette ARIA non valide',
-	BTN_ROLE_IN_NAME: 'Le nom du bouton répète le mot « button »',
+	BTN_ROLE_IN_NAME: 'Le nom du bouton répète le mot « bouton »',
 	CONTRAST_ERROR: 'Le texte n’a pas un contraste suffisant pour être facilement lisible',
 	CONTRAST_ERROR_GRAPHIC: 'Le graphique ou l’icône n’a pas un contraste suffisant',
 	CONTRAST_INPUT: 'Le champ de saisie n’a pas un contraste suffisant pour être facilement lisible',
@@ -26,15 +26,15 @@ const testNames = {
 	EMBED_DATA_VIZ: 'Cette visualisation est-elle accessible ?',
 	EMBED_GENERAL: 'Les iframes intégrées nécessitent des vérifications manuelles',
 	EMBED_MISSING_TITLE: 'Le cadre ne possède pas d’attribut « title »',
-	EMBED_UNFOCUSABLE: 'Un frame avec tabindex="-1" ne sera pas accessible au clavier.',
+	EMBED_UNFOCUSABLE: 'Un cadre avec tabindex="-1" ne sera pas accessible au clavier.',
 	EMBED_VIDEO: 'Cette vidéo est-elle correctement sous-titrée ?',
-	HEADING_EMPTY: 'Cet éléments de titre ne contient aucun texte',
+	HEADING_EMPTY: 'Cet élément de titre ne contient aucun texte',
 	HEADING_UNPRONOUNCEABLE: 'Ce titre est imprononçable',
 	HEADING_EMPTY_WITH_IMAGE: 'Cette image est utilisée comme titre ; elle nécessite donc un texte alternatif',
 	HEADING_FIRST: 'Le premier titre de cette page est un titre de niveau inférieur',
-	HEADING_LONG: 'Cet titre peut-il être raccourci ?',
+	HEADING_LONG: 'Ce titre peut-il être raccourci ?',
 	HEADING_MISSING_ONE: 'Cette page n’a pas de titre de niveau 1',
-	HEADING_SKIPPED_LEVEL: 'Cet titre utilise un niveau incorrect',
+	HEADING_SKIPPED_LEVEL: 'Ce titre utilise un niveau incorrect',
 	HIDDEN_FOCUSABLE: 'Cet élément ne peut pas être décrit par les lecteurs d’écran',
 	IMAGE_ALT_TOO_LONG: 'Ce texte alternatif pourrait-il être plus court ?',
 	IMAGE_DECORATIVE: 'Cette image est-elle réellement dénuée de sens ?',
@@ -57,7 +57,7 @@ const testNames = {
 	LINK_ALT_UNPRONOUNCEABLE: 'Les images liées doivent avoir un texte alternatif prononçable',
 	LINK_CLICK_HERE: 'Ce lien contient « cliquer ici »',
 	LINK_DOI: "Liez les titres d’articles, pas les numéros DOI",
-	LINK_EMPTY: 'Ce lien ne contient aucun mot.',
+	LINK_EMPTY: 'Ce lien ne contient aucun mot',
 	LINK_EMPTY_LABELLEDBY: 'Lien avec attribut « aria-labelledby » non valide',
 	LINK_EMPTY_NO_LABEL: 'Ce lien a besoin d’une étiquette',
 	LINK_UNPRONOUNCEABLE: 'Ce lien est imprononçable',
@@ -71,6 +71,28 @@ const testNames = {
 	LINK_LABEL: 'Étiquette de lien',
 	LINK_MAYBE_BUTTON: 'Ce lien est-il en réalité un bouton ?',
 	LINK_NEW_TAB: 'Ce lien ouvre-t-il un nouvel onglet sans avertissement ?',
+	// Link checker results (see rulesets/broken-links.js).
+	HREF_BROKEN: 'Ce lien est brisé',
+	HREF_UNPUBLISHED: 'Vouliez-vous créer un lien vers une page non publiée ?',
+	HREF_MARKED_BROKEN: 'Ce lien a été marqué comme brisé par un éditeur',
+	HREF_ACCESS: 'Vouliez-vous créer un lien vers un contenu protégé par mot de passe ?',
+	HREF_UNVERIFIABLE: 'Ce lien nécessite une vérification manuelle',
+	HREF_REDIRECT: 'Ce lien redirige vers un autre site',
+	HREF_SERVER_ERROR: 'Le site lié est peut-être hors service',
+	// Link checker reasons, which refine the statuses above.
+	HREF_BAD_HOST: 'Ce lien est brisé',
+	HREF_MALFORMED: 'L’adresse de ce lien contient une faute de frappe',
+	HREF_SCHEME_TYPO: 'L’adresse de ce lien commence par une faute de frappe',
+	HREF_MISSING_HTTPS: 'Il manque « https:// » à ce lien',
+	HREF_MISSING_MAILTO: 'Il manque « mailto: » à ce lien vers une adresse électronique',
+	HREF_EMAIL_INVALID: 'Ce lien vers une adresse électronique ne contient aucune adresse valide',
+	HREF_PHONE_INVALID: 'Ce lien téléphonique ne contient aucun numéro à composer',
+	HREF_LOCAL_FILE: 'Ce lien pointe vers un fichier situé sur l’ordinateur de quelqu’un',
+	HREF_PRIVATE: 'Ce lien nécessite une vérification manuelle',
+	HREF_USERINFO: 'Ce lien contient un nom d’utilisateur ou un mot de passe',
+	HREF_FTP: 'Les liens FTP ne s’ouvrent plus dans les navigateurs',
+	HREF_APP_LINK: 'Ce lien ouvre une application',
+	HREF_REDIRECT_APP: 'Ce lien redirige vers une application ou une adresse électronique',
 	LINK_PLACEHOLDER_ALT: 'Ce texte alternatif lié est peut-être un texte de remplacement',
 	LINK_STOPWORD: 'Ce lien contient uniquement des mots génériques',
 	LINK_STOPWORD_ARIA: 'L’objet de ce lien est visuellement masqué',
@@ -107,12 +129,12 @@ const testNames = {
 	TABLES_EMPTY_HEADING: 'Cette cellule d’en-tête a besoin de texte',
 	TABLES_MISSING_HEADINGS: 'Ce tableau a besoin d’une ligne et/ou d’une colonne d’en-têtes',
 	TABLES_INVALID_HEADERS_REF: `Ce tableau a un attribut headers invalide`,
-	TABLES_SEMANTIC_HEADING: 'Les en-têtes de contenu ne doivent pas être utilisés dans les tableaux',
+	TABLES_SEMANTIC_HEADING: 'Les titres de contenu ne doivent pas être utilisés dans les tableaux',
 	UNCONTAINED_LI: 'Liste HTML invalide',
 };
 
 const why = {
-	fix: `<strong class="badge">À corriger</strong>`,
+	fix: `<strong class="badge">À corriger</strong> `,
 	check: `<strong class="badge">Vérification manuelle</strong>`,
 
 	buttons: `<div class="why"><p>Note : le nom accessible d’un bouton doit indiquer clairement ce qu’il fera une fois cliqué. Si cela change, l’état actuel doit être clair :</p><ul>
@@ -120,7 +142,7 @@ const why = {
 <li>Boutons qui <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role#associated_aria_roles_states_and_properties">mettent à jour l’état</a> :<br>« Lecture/Lecture, activé », « Détails, réduit/Détails, développé. »</li>
 </ul></div>`,
 
-	headings: `<div class="why"><p>Astuce : les elements de titres organisent le contenu en une structure hiérarchique. Les utilisateurs de lecteurs d’écran s’appuient sur cette structure pour comprendre et parcourir une page :</p>
+	headings: `<div class="why"><p>Astuce : les éléments de titre organisent le contenu en une structure hiérarchique. Les utilisateurs de lecteurs d’écran s’appuient sur cette structure pour comprendre et parcourir une page :</p>
 <ul><li>Titre niveau 1 : titre de page
 <ul><li>Titre niveau 2 : sujets principaux
 <ul><li>Titre niveau 3 : sous-sujets</li></ul></li></ul></li></ul>
@@ -177,9 +199,9 @@ export const tips = {
 
 	EMBED_AUDIO: `<p>Ce vérificateur ne peut pas déterminer si un lecteur audio dispose d’une transcription, ni si celle-ci est exacte.</p><p>${why.fix}Assurez-vous qu’une <a href="https://www.w3.org/WAI/media/av/transcribing/">transcription ou alternative textuelle</a> est disponible, et que les locuteurs et effets sonores significatifs sont correctement identifiés.</p>`,
 
-	EMBED_DATA_VIZ: `<p>Les visualisations intégrées sont souvent difficiles, voire impossibles, à utiliser pour les technologies d’assistance ; elles peuvent être difficiles à comprendre pour les personnes malvoyantes ou daltoniennes, et nécessiter un défilement horizontal important sur mobile.</p><p>${why.fix}À moins que cette visualisation ne présente un contraste visuel élevé, soit entièrement utilisable au clavier <strong><em>et</em></strong> décrite par un lecteur d’écran, ajoutez un format équivalent (description textuelle, tableau de données ou feuille de calcul téléchargeable), puis ignorez cette alerte.</p>`,
+	EMBED_DATA_VIZ: `<p>Les visualisations intégrées sont souvent difficiles, voire impossibles, à utiliser pour les technologies d’assistance ; elles peuvent être difficiles à comprendre pour les personnes malvoyantes ou daltoniennes, et nécessiter un défilement horizontal important sur mobile.</p><p>${why.fix}À moins que cette visualisation ne présente un contraste visuel élevé, soit entièrement utilisable au clavier <strong><em>et</em></strong> décrite par un lecteur d’écran, ajoutez un format équivalent (description textuelle, tableau de données ou feuille de calcul téléchargeable).</p>`,
 
-	EMBED_GENERAL: `Les vérificateurs automatiques ne peuvent pas analyser le contenu des éléments intégrés. Assurez-vous que toutes les images ont un texte alternatif, que les vidéos ont des sous-titres, que le texte a un contraste suffisant et que les liens et boutons sont <a href="https://webaim.org/techniques/keyboard/">accessibles au clavier</a>, puis ignorez cette alerte.`,
+	EMBED_GENERAL: `Les vérificateurs automatiques ne peuvent pas analyser le contenu des éléments intégrés. Assurez-vous que toutes les images ont un texte alternatif, que les vidéos ont des sous-titres, que le texte a un contraste suffisant et que les liens et boutons sont <a href="https://webaim.org/techniques/keyboard/">accessibles au clavier</a>.`,
 
 	EMBED_MISSING_TITLE: `<p>Les contenus intégrés doivent avoir un nom accessible décrivant leur contenu pour les lecteurs d’écran.</p><p>${why.fix}Fournissez un attribut <code>title</code> ou <code>aria-label</code> unique.</p>`,
 
@@ -198,7 +220,7 @@ export const tips = {
 
 	HEADING_MISSING_ONE: `<p>${why.fix}Marquez le titre de la page comme titre de niveau 1 pour indiquer le début de la structure du document.</p>${why.headings}`,
 
-	HEADING_SKIPPED_LEVEL: `<p>Cet titre est passé de <code>niveau %(prevLevel)</code> à <code>niveau %(level)</code>. Pour un lecteur d’écran, cela donne l’impression qu’il manque du contenu.</p><p>${why.fix}Ajustez les niveaux pour former une structure correcte, sans saut.</p>${why.headings}`,
+	HEADING_SKIPPED_LEVEL: `<p>Ce titre est passé de <code>niveau %(prevLevel)</code> à <code>niveau %(level)</code>. Pour un lecteur d’écran, cela donne l’impression qu’il manque du contenu.</p><p>${why.fix}Ajustez les niveaux pour former une structure correcte, sans saut.</p>${why.headings}`,
 
 	HIDDEN_FOCUSABLE: `<p>Cet élément interactif possède un attribut <code>aria-hidden="true"</code>, mais reste accessible au clavier.</p><p>${why.fix}Si vous <strong>souhaitez</strong> le masquer pour les lecteurs d’écran, vous devez également ajouter <code>tabindex="-1"</code>. Sinon, supprimez l’attribut <code>aria-hidden="true"</code>.</p><p><strong>Élément :</strong> <code>%(ELEMENT)</code></p>`,
 
@@ -236,7 +258,7 @@ export const tips = {
 
 	LINK_CLICK_HERE: `<p><strong>Texte du lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Supprimez les mots redondants qui détournent l’attention de l’objet du lien.</p>${why.links}`,
 
-	LINK_DOI: `<p><strong>Texte du lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Liez le titre de l’article et laissez le DOI en texte simple, au lieu de lier le DOI et laisser le titre sans lien.</p><div class="why"><p>Selon les recommandations de l’APA, les liens doivent être descriptifs : ils aident les utilisateurs à trouver les contenus pertinents en parcourant uniquement les liens.</p><p>Les lecteurs d’écran peuvent ainsi annoncer des liens significatifs plutôt qu’une série de chiffres incompréhensibles.</p></div>`,
+	LINK_DOI: `<p><strong>Texte du lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Liez le titre de l’article et laissez le DOI en texte simple, au lieu de lier le DOI et laisser le titre sans lien.</p><div class="why"><p>Selon les <a href="https://apastyle.apa.org/style-grammar-guidelines/paper-format/accessibility/urls#:~:text=descriptive%20links">recommandations de l’APA</a>, les liens doivent être descriptifs : ils aident les utilisateurs à trouver les contenus pertinents en parcourant uniquement les liens.</p><p>Les lecteurs d’écran peuvent ainsi annoncer des liens significatifs plutôt qu’une série de chiffres incompréhensibles.</p></div>`,
 
 	LINK_EMPTY: `<p>${why.fix}Ajoutez du texte décrivant sa destination, ou supprimez-le s’il s’agit simplement d’une faute de frappe ou d’un caractère d’espace lié.</p><div class="why"><p>Conseil : les lecteurs d’écran ne peuvent pas décrire les liens qui ne contiennent que des espaces ou des symboles. Ils restent soit silencieux (« Lien, [...pause maladroite là où le titre du lien devrait être...] »), soit lisent l’URL : « Lien, H-T-T-P-S barre oblique barre oblique exemple point com. »</p><p>Notez que les caractères d’espace liés peuvent être difficiles à supprimer dans certains éditeurs de contenu ; il est parfois nécessaire de supprimer « à travers l’écart » en supprimant et en retapant les mots de chaque côté d’un espace lié.</p></div>`,
 
@@ -261,9 +283,31 @@ export const tips = {
 
 	LINK_MAYBE_BUTTON: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>Ce lien a une cible invalide et porte un nom qui suggère qu’il fonctionne peut-être comme un bouton ou un interrupteur plutôt que comme un lien.</p><p>${why.fix}Utilisez plutôt un <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">&lt;button&gt;</a>, ou corrigez la cible du lien.</p><div class="why"><p>Astuce : les technologies d’assistance traitent les boutons et les liens différemment. Utiliser le bon élément HTML garantit que les utilisateurs connaissent les raccourcis clavier appropriés et l’action qui sera déclenchée.</p></div>`,
 
+	// Link checker results. The ruleset appends the link target after these.
+	HREF_BROKEN: `<p>La page cible n’existait pas lors de la dernière vérification. Veuillez confirmer qu’elle n’existe plus, puis corriger ou supprimer ce lien :</p>`,
+	HREF_UNPUBLISHED: `<p>Veuillez publier la page liée ou mettre à jour ce lien :</p>`,
+	HREF_MARKED_BROKEN: `<p>Veuillez mettre à jour ce lien s’il est toujours brisé :</p>`,
+	HREF_ACCESS: `<p>Ce lien pointe vers un contenu que les visiteurs non connectés ne peuvent pas voir. Confirmez que c’est intentionnel :</p>`,
+	HREF_UNVERIFIABLE: `<p>Le lien fonctionne peut-être, mais le serveur a bloqué le vérificateur de liens. Veuillez ouvrir le lien et confirmer qu’il fonctionne :</p>`,
+	HREF_REDIRECT: `<p>Veuillez confirmer que la redirection est valide et envisager de mettre à jour le lien avec la nouvelle adresse.</p><p><strong>Redirige vers :</strong> %(redirectsTo)</p>`,
+	HREF_SERVER_ERROR: `<p>Le site lié a renvoyé une erreur ou n’a pas répondu. Ouvrez le lien et confirmez qu’il fonctionne :</p>`,
+	HREF_BAD_HOST: `<p>Le nom du site dans ce lien n’est pas valide. Cherchez une faute de frappe :</p>`,
+	HREF_MALFORMED: `<p>L’adresse contient peut-être un espace ou un caractère non autorisé dans les liens :</p>`,
+	HREF_SCHEME_TYPO: `<p>Le début de ce lien (par exemple « https:// » ou « mailto: ») est mal orthographié ou incomplet ; les navigateurs ne peuvent donc pas l’ouvrir :</p>`,
+	HREF_MISSING_HTTPS: `<p>Sans « https:// » au début, les navigateurs traitent cette adresse comme une page de ce site, et aucune page de ce type n’existe. Ajoutez « https:// » au début de ce lien :</p>`,
+	HREF_MISSING_MAILTO: `<p>Ajoutez « mailto: » au début d’un lien vers une adresse électronique :</p>`,
+	HREF_EMAIL_INVALID: `<p>Le lien commence par « mailto: » ; un clic ouvrira donc un logiciel de messagerie, mais aucune adresse électronique valide ne suit. Si ce lien doit ouvrir une page web, remplacez « mailto: » par « https:// » :</p>`,
+	HREF_PHONE_INVALID: `<p>Les téléphones ne peuvent composer que des chiffres ; ce lien ne permettra donc pas de passer un appel. Après « tel: » dans l’adresse du lien, indiquez uniquement le numéro, par exemple tel:+1-555-010-0199. Le texte visible du lien peut tout de même former un mot :</p>`,
+	HREF_LOCAL_FILE: `<p>Le lien pointe vers un fichier situé sur l’ordinateur où la page a été rédigée ; il ne fonctionnera pas pour les autres personnes. Mettez le fichier en ligne sur le site, puis créez un lien vers celui-ci :</p>`,
+	HREF_PRIVATE: `<p>Ce lien pointe vers une adresse privée, comme un intranet ou un ordinateur personnel. Confirmez que c’est intentionnel, ou créez un lien vers une adresse publique :</p>`,
+	HREF_USERINFO: `<p>Toute personne pouvant consulter cette page peut lire le nom d’utilisateur ou le mot de passe inscrit dans l’adresse de ce lien. Retirez-le du lien et, s’il s’agit d’un vrai mot de passe, changez-le. Ce lien n’a pas été vérifié :</p>`,
+	HREF_FTP: `<p>Les navigateurs web ne peuvent pas ouvrir les liens « ftp: ». Vérifiez si le fichier est également disponible à une adresse « https:// », ou fournissez aux utilisateurs des instructions pour télécharger un logiciel de transfert de fichiers :</p>`,
+	HREF_APP_LINK: `<p>Ce lien ouvre un autre programme, comme une application d’agenda, de réunion ou de musique, au lieu d’une page web. Confirmez qu’il ouvre la bonne application, et que les visiteurs qui ne disposent pas de cette application ont un autre moyen d’accéder à ce contenu :</p>`,
+	HREF_REDIRECT_APP: `<p>Ce lien redirige les visiteurs vers une application ou une adresse électronique au lieu d’une page web. Confirmez que c’est intentionnel, ou mettez à jour le lien.</p><p><strong>Redirige vers :</strong> %(redirectsTo)</p>`,
+
 	LINK_NEW_TAB: `<p><strong>Texte du lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Configurez ce lien pour s’ouvrir dans le même onglet, ou <a href="https://itmaybejj.github.io/linkpurpose/">prévoyez un avertissement aux utilisateurs</a> avant l’ouverture dans un nouvel onglet.</p><div class="why"><p>Les utilisateurs peuvent toujours choisir d’ouvrir un lien dans un nouvel onglet. Forcer l’ouverture peut être déroutant, surtout pour les technologies d’assistance.</p><p>Note : les liens dans les formulaires ouvrent souvent un nouvel onglet pour éviter la perte de données.</p></div>`,
 
-	LINK_PLACEHOLDER_ALT: `<p><strong>Texte alternatif :</strong> <i>%(alt)</i>.</p><p>${why.fix}Utilisez le titre de la destination du lien comme texte alternatif pour les images liées.</p>${why.imageLinks}`,
+	LINK_PLACEHOLDER_ALT: `<p><strong>Texte alternatif :</strong> <i>%(alt)</i></p><p>${why.fix}Utilisez le titre de la destination du lien comme texte alternatif pour les images liées.</p>${why.imageLinks}`,
 
 	LINK_STOPWORD: `<p>Ce lien contient du texte qui n’aide pas à décrire sa destination :<br><i>%(ERROR)</i></p><p>${why.fix}Réécrivez ce lien pour décrire sa destination de manière concise.</p>${why.links}`,
 
@@ -297,7 +341,7 @@ export const tips = {
 
 	QA_BLOCKQUOTE: `<p><strong>Citation suspicieusement courte :</strong> <i>%(TEXT)</i></p><p>${why.fix}Si ceci n’est pas une citation mais un titre, marquez-le comme élément de titre pour qu’il apparaisse dans la structure de la page.</p>${why.headings}`,
 
-	QA_DOCUMENT: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>Les documents liés sont considérés comme du contenu web et doivent également être accessibles. Vérifiez titres, tableaux et textes alternatifs, puis ignorez cette alerte.</p><ul class="why"><li>Rendre vos <a href="https://support.google.com/docs/answer/6199477?hl=fr">documents Google Workspace accessibles</a>.</li><li>Rendre vos <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">documents Office accessibles</a>.</li></ul>`,
+	QA_DOCUMENT: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>Les documents liés sont considérés comme du contenu web et doivent également être accessibles. Vérifiez titres, tableaux et textes alternatifs.</p><ul class="why"><li>Rendre vos <a href="https://support.google.com/docs/answer/6199477?hl=fr">documents Google Workspace accessibles</a>.</li><li>Rendre vos <a href="https://support.microsoft.com/en-us/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">documents Office accessibles</a>.</li></ul>`,
 
 	QA_FAKE_HEADING: `<p><strong>Texte en gras :</strong> <i>%(TEXT)</i></p><p>${why.fix}Si ce texte est en gras pour marquer un changement de sujet, marquez-le comme élément de titre afin que les utilisateurs de lecteurs d’écran puissent s’en servir pour naviguer dans la page.</p><div class="why"> <p>Astuce : les styles gras et italique apportent une emphase visuelle, mais n’ajoutent pas automatiquement de texte à la table des matières pour les technologies d’assistance.</p></div>`,
 
@@ -309,7 +353,7 @@ export const tips = {
 
 	QA_NESTED_COMPONENTS: `Évitez d’imbriquer des composants interactifs, tels que des accordéons dans d’autres accordéons ou des onglets dans des accordéons. Cela complique la navigation et peut faire manquer du contenu.`,
 
-	QA_PDF: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Faites l’une des actions suivantes puis ignorez cette alerte :</p><ul><li>Liez à une page web plutôt qu’à un PDF,</li><li>Ou fournissez également une version web ou éditable,</li><li>Ou assurez-vous que le PDF est accessible (titres, ordre de lecture, en-têtes de tableau, textes alternatifs).</li></ul><div class="why"><p>Les utilisateurs mobiles et les technologies d’assistance préfèrent largement les pages web aux PDFs, qui ne se reformatent pas pour mobile et manquent souvent de balisage nécessaire.</p></div>`,
+	QA_PDF: `<p><strong>Lien :</strong> <i>%(TEXT)</i></p><p>${why.fix}Faites l’une des actions suivantes :</p><ul><li>Liez à une page web plutôt qu’à un PDF,</li><li>Ou fournissez également une version web ou éditable,</li><li>Ou assurez-vous que le PDF est accessible en <a href="https://webaim.org/techniques/acrobat/" target="_blank">vérifiant manuellement qu’il est balisé</a> (titres, ordre de lecture, en-têtes de tableau, textes alternatifs).</li></ul><div class="why"><p>Les utilisateurs mobiles et les technologies d’assistance préfèrent largement les pages web aux PDFs, qui ne se reformatent pas pour mobile et manquent souvent de balisage nécessaire.</p></div>`,
 
 	QA_SMALL_TEXT: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>${why.fix}Restez au-dessus de 80 % de la taille de police par défaut. Un texte trop petit est difficile à lire, particulièrement pour les personnes malvoyantes.</p>`,
 
@@ -317,7 +361,7 @@ export const tips = {
 
 	QA_SUBSCRIPT: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>Les exposants et indices rendent le texte trop petit et difficile à lire. Ne les utilisez que pour des usages spécifiques : nombres ordinaux (4<sup>e</sup>), formules chimiques (H<sub>2</sub>O), références de notes.</p>`,
 
-	QA_UNDERLINE: `<p>Sur le Web, le texte souligné sert pour les liens, pas pour l’emphase. Les utilisateurs penseront qu’il est cliquable : <i><u>%(TEXT)</u></i></p><p>${why.fix} Utilisez <strong>gras</strong> ou <em>italique</em> pour l’emphase, et des éléments de titre pour la structure.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le soulignement. Seuls les élements de titre créent de la structure.</p></div>`,
+	QA_UNDERLINE: `<p>Sur le Web, le texte souligné sert pour les liens, pas pour l’emphase. Les utilisateurs penseront qu’il est cliquable : <i><u>%(TEXT)</u></i></p><p>${why.fix} Utilisez <strong>gras</strong> ou <em>italique</em> pour l’emphase, et des éléments de titre pour la structure.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le soulignement. Seuls les éléments de titre créent de la structure.</p></div>`,
 
 	QA_UPPERCASE: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>${why.fix}N’utilisez les majuscules que pour quelques mots à la fois pour l’emphase. LES BLOCS DE TEXTE EN MAJUSCULES SONT PLUS DIFFICILES À LIRE, ET DE NOMBREUX LECTEURS LES INTERPRÈTENT COMME DES CRIS.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le texte en majuscules. Utilisez un élément de titre si ce texte emphatique introduit un changement de sujet ou un contenu d’importance critique.</p></div>`,
 	SUS_ALT: `<p>Le texte alternatif de cette image contient le mot « <i>%(alt)</i> ». Les lecteurs d’écran annoncent déjà qu’ils lisent la description d’une image, donc des expressions comme « image de » ou « photo de » sont généralement redondantes.</p><p><strong>Texte alternatif :</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p><div class="why"><p>Astuce : ces expressions méritent d’être conservées si le format lui-même a un sens :<br>« Une photo d’un chat, encadrée et accrochée au mur. »</p></div>`,
@@ -347,6 +391,7 @@ const interfaceStrings = {
 	edit_term: 'Modifier le terme',
 	edit_user: 'Modifier l’utilisateur',
 	IMAGES: 'Texte alternatif',
+	LINKS: 'Liens',
 	MAIN_TOGGLE_LABEL: 'Activer les outils d’accessibilité',
 	MISSING: '(manquant !)',
 	NOT_VISIBLE: 'Note : ce contenu peut ne pas être visible. Cherchez-le dans le conteneur délimité.',
@@ -363,19 +408,49 @@ const interfaceStrings = {
 	buttonShowHiddenAlert: 'Afficher l’alerte masquée',
 	buttonToolsActive: 'Masquer les visualisations',
 	dismissActions: `Similaires`,
-	dismissHideTitle: 'Masque seulement l’alerte pour vous',
+	dismissBrokenButton: 'Marquer comme brisé',
+	dismissBrokenTitle: 'Signale ce lien brisé à tous les éditeurs',
+	dismissHideTitle:'Masque seulement l’alerte pour vous',
 	dismissOkAllButton: 'Sur cette page : marquer comme OK',
 	dismissOkButtonContent: 'Marquer comme OK',
 	dismissOkTitle: 'Masque l’alerte pour tous les éditeurs',
 	dismissOnSite: 'Sur toutes les pages : marquer comme OK',
 	dismissalsHeader: 'Vous n’allez pas corriger ceci ?',
-	errorOutlinePrefixHeadingEmpty: '(éléments de titre vide)',
+	errorOutlinePrefixHeadingEmpty: '(élément de titre vide)',
 	errorOutlinePrefixHeadingIsLong: '(signalé pour longueur)',
 	errorOutlinePrefixSkippedLevel: '(signalé pour niveau sauté)',
 	issueContent: 'Problème de contenu',
 	issueDeveloper: 'Problème de développement',
 	issueTemplate: 'Problème de modèle',
-	main_toggle_hide: 'Masquer les outils d’accessibilité',
+	linkBrokenBadge: 'Lien brisé',
+	linkManualBadge: 'Vérifiez ce lien',
+	linkHiddenBadge: 'Alerte de lien masquée',
+	linkJumpTitle: 'Aller à l’alerte',
+	linkStatusBroken: 'Brisé',
+	linkStatusUnpublished: 'Non publié',
+	linkStatusMarkedBroken: 'Marqué comme brisé',
+	linkStatusAccess: 'Accès restreint',
+	linkStatusUnverifiable: 'Non vérifié',
+	linkStatusRedirect: 'Redirigé',
+	linkStatusServerError: 'Sans réponse',
+	linkReasonBadHost: 'Nom de site invalide',
+	linkReasonMalformed: 'Mal formé',
+	linkReasonSchemeTypo: 'Faute de frappe',
+	linkReasonMissingHttps: 'https:// manquant',
+	linkReasonMissingMailto: 'mailto: manquant',
+	linkReasonEmailInvalid: 'Adresse électronique invalide',
+	linkReasonPhoneInvalid: 'Numéro de téléphone invalide',
+	linkReasonLocalFile: 'Fichier local',
+	linkReasonPrivate: 'Réseau privé',
+	linkReasonUserinfo: 'Nom d’utilisateur ou mot de passe',
+	linkReasonFtp: 'FTP',
+	linkReasonAppLink: 'Ouvre une application',
+	linkReasonRedirectApp: 'Redirige vers une application',
+	linkDismissedOk: 'Marqué comme OK',
+	linkDismissedHide: 'Ignoré',
+	linksCheckThis: 'URL à vérifier :',
+	linkRedirectOriginal: 'Adresse d’origine :',
+	main_toggle_hide:'Masquer les outils d’accessibilité',
 	main_toggle_hide_alerts: 'Masquer les alertes d’accessibilité',
 	main_toggle_show: 'Afficher les outils d’accessibilité',
 	main_toggle_show_alerts: 'Afficher les alertes d’accessibilité',
@@ -385,8 +460,10 @@ const interfaceStrings = {
 	MISSING_ROOT: `Editoria11y n’a trouvé aucun élément correspondant à la configuration de la zone de vérification : <code>%(root)</code>`,
 	panelCheckAltText: `Vérifiez que chaque image décrit ce qu’elle signifie dans le contexte et qu’il n’y a pas d’images contenant du texte.`,
 	panelCheckOutline: `Ceci affiche la structure des titres. Vérifiez qu’elle correspond à l’organisation visuelle du contenu.`,
+	panelCheckLinks: `Ces liens nécessitent une vérification manuelle. Les pages cibles sont peut-être manquantes ou redirigées, ou bloquent les robots d’indexation.`,
 	PANEL_HEADING_MISSING_ONE: 'Titre de niveau 1 manquant.',
 	PANEL_NO_HEADINGS: 'Aucun titre trouvé.',
+	PANEL_NO_LINKS: 'Aucun lien signalé sur cette page.',
 	reportsLink: 'Ouvrir les rapports du site',
 	toggleDisabled: 'Aucun contenu disponible à vérifier pour Editoria11y.',
 	transferFocus: 'Modifier ce contenu',
