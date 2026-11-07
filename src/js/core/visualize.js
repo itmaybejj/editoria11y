@@ -293,7 +293,7 @@ export function showHeadingsPanel() {
       const leftPad = 7 * result.headingLevel - 7;
       const li = document.createElement('li');
       li.classList.add(`level${result.headingLevel}`);
-      li.style.setProperty('margin-left', `${leftPad}px`);
+      li.style.setProperty('margin-inline-start', `${leftPad}px`);
       const levelPrefix = document.createElement('strong');
       levelPrefix.textContent = `H${result.headingLevel}: `;
       const userText = document.createElement('span');
