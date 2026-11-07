@@ -21,6 +21,7 @@ export const UI = {
   panelJumpNext: {},
   panelShowDismissed: {},
   theme: {},
+  baseFont: document.createElement('div'),
 
   version: version,
   english: true,

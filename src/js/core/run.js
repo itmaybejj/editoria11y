@@ -662,6 +662,11 @@ export function paintReady() {
   for (const [key, value] of Object.entries(UI.theme)) {
     document.documentElement.style.setProperty(`--ed11y-${key}`, `${value}`);
   }
+  UI.baseFont.style.setProperty('visibility', 'hidden');
+  UI.baseFont.style.setProperty('pointer-events', 'none');
+  UI.baseFont.style.setProperty('width', '1rem');
+  UI.baseFont.ariaHidden = true;
+  document.documentElement.appendChild(UI.baseFont);
 
   // May be redundant, but preloads unbundled files.
   if (document.querySelector('body')) {
@@ -893,6 +898,20 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
     );
   }
 
+  let containWidth = window.innerWidth;
+  if (
+    UI.baseFont &&
+    (containWidth < 20 * UI.baseFont.clientWidth ||
+      window.innerHeight < 20 * UI.baseFont.clientWidth)
+  ) {
+    // No room for tip.
+    tip.removeAttribute('style');
+    tip.classList.add('overflow');
+    return;
+  } else {
+    tip.classList.remove('overflow');
+  }
+
   const mark = button.getRootNode().host;
   const resultNum = button.dataset.ed11yResult;
   const result = State.results[resultNum];
@@ -908,7 +927,6 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
 
   let containTop = scrollTop;
   let containLeft = 0;
-  let containWidth = window.innerWidth;
   let containBottom = window.innerHeight + scrollTop;
   let absoluteBottom = containBottom;
 
@@ -972,7 +990,7 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
       containTop + tipHeight + 30 < containBottom
     ) {
       direction = 'left';
-    } else if (buttonTop + tipHeight + buttonSize > absoluteBottom) {
+    } else if (buttonTop + tipHeight + buttonSize > absoluteBottom && buttonTop - tipHeight > 0) {
       // It REALLY doesn't fit below.
       direction = 'above';
     }

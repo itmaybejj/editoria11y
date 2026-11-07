@@ -45,14 +45,6 @@ git reset --hard origin/3.0.x
 git push --force-with-lease origin 3.0.x-dev
 ```
 
-To resolve an existing conflict:
-```
-git checkout 3.0.x-dev
-git merge -s ours 3.0.x -m "Record squash merge of 3.0.x into 3.0.x-dev (no content change)"
-git push origin 3.0.x-dev
-```
-
-
 
 # ACT Rule Conformance Testing
 

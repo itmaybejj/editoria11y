@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.2-1030
+			* @version 3.0.2-1106
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -1859,7 +1859,7 @@
       });
     }
   }
-  const version = "3.0.2-1030";
+  const version = "3.0.2-1106";
   const sprite = {
     alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
     close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -2121,6 +2121,7 @@ ${this.error.stack}
     panelJumpNext: {},
     panelShowDismissed: {},
     theme: {},
+    baseFont: document.createElement("div"),
     version,
     english: true,
     running: false,
@@ -7017,6 +7018,11 @@ ${this.error.stack}
     for (const [key, value] of Object.entries(UI.theme)) {
       document.documentElement.style.setProperty(`--ed11y-${key}`, `${value}`);
     }
+    UI.baseFont.style.setProperty("visibility", "hidden");
+    UI.baseFont.style.setProperty("pointer-events", "none");
+    UI.baseFont.style.setProperty("width", "1rem");
+    UI.baseFont.ariaHidden = true;
+    document.documentElement.appendChild(UI.baseFont);
     if (document.querySelector("body")) {
       UI.attachCSS(document);
     }
@@ -7208,6 +7214,14 @@ ${this.error.stack}
         tip
       );
     }
+    let containWidth = window.innerWidth;
+    if (UI.baseFont && (containWidth < 20 * UI.baseFont.clientWidth || window.innerHeight < 20 * UI.baseFont.clientWidth)) {
+      tip.removeAttribute("style");
+      tip.classList.add("overflow");
+      return;
+    } else {
+      tip.classList.remove("overflow");
+    }
     const mark = button.getRootNode().host;
     const resultNum = button.dataset.ed11yResult;
     const result = State.results[resultNum];
@@ -7219,7 +7233,6 @@ ${this.error.stack}
     let buttonTop = buttonOffset.top + scrollTop;
     let containTop = scrollTop;
     let containLeft = 0;
-    let containWidth = window.innerWidth;
     let containBottom = window.innerHeight + scrollTop;
     let absoluteBottom = containBottom;
     if (!UI.inlineAlerts && result.scrollableParent) {
@@ -7259,7 +7272,7 @@ ${this.error.stack}
         direction = "above";
       } else if (containLeft < buttonLeft - (buttonSize + tipWidth + 30) && containTop + tipHeight + 30 < containBottom) {
         direction = "left";
-      } else if (buttonTop + tipHeight + buttonSize > absoluteBottom) {
+      } else if (buttonTop + tipHeight + buttonSize > absoluteBottom && buttonTop - tipHeight > 0) {
         direction = "above";
       }
     }
@@ -10005,8 +10018,8 @@ ${this.error.stack}
     checkVisible: true,
     // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
     hiddenHandlers: "",
-    panelOffsetX: "25px",
-    panelOffsetY: "25px",
+    panelOffsetX: "min(25px, 2vw)",
+    panelOffsetY: "min(25px, 2vh)",
     panelNoCover: "",
     // select other buttons to avoid.
     panelAttachTo: document.body,

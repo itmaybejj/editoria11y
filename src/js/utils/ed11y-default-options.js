@@ -257,8 +257,8 @@ export const ed11yDefaultOptions = {
   // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
   hiddenHandlers: '',
 
-  panelOffsetX: '25px',
-  panelOffsetY: '25px',
+  panelOffsetX: 'min(25px, 2vw)',
+  panelOffsetY: 'min(25px, 2vh)',
   panelNoCover: '', // select other buttons to avoid.
   panelAttachTo: document.body,
 
