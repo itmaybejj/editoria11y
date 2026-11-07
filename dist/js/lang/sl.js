@@ -604,6 +604,8 @@ const interfaceStrings = {
   PANEL_NO_HEADINGS: "Ni najdenih naslovov.",
   PANEL_NO_LINKS: "Na tej strani ni najdenih povezav z opozorili.",
   SKIP_TO_ISSUE: "Prikaži opozorilo",
+  buttonNext: "Naslednje",
+  buttonPrev: "Prejšnje",
   WARNING: "Ročno preverjanje",
   WARNINGS: "ročna preverjanja",
   buttonFirstContent: "Prikaži prvo opozorilo",

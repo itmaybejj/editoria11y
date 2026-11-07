@@ -598,6 +598,8 @@ const interfaceStrings = {
   PANEL_NO_HEADINGS: "Ingen overskrifter fundet.",
   PANEL_NO_LINKS: "Ingen markerede links fundet på denne side.",
   SKIP_TO_ISSUE: "Vis advarsel",
+  buttonNext: "Næste",
+  buttonPrev: "Forrige",
   WARNING: "Manuel kontrol",
   WARNINGS: "manuelle kontroller",
   buttonFirstContent: "Vis første advarsel",

@@ -379,6 +379,8 @@ const interfaceStrings = {
 	PANEL_DISMISS_BUTTON: `Mostrar %(dismissCount) alertas ocultas`,
 	PANEL_HEADING: 'Mostrar visualizadores',
 	SKIP_TO_ISSUE: 'Mostrar alerta',
+	buttonNext: 'Siguiente',
+	buttonPrev: 'Anterior',
 	WARNING: 'Revisión manual',
 	WARNINGS: 'revisiones manuales',
 	buttonFirstContent: 'Mostrar la primera alerta',

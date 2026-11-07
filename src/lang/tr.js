@@ -286,6 +286,8 @@ export const interfaceStrings = {
 	PANEL_NO_HEADINGS: 'Başlık bulunamadı.',
 	PANEL_NO_LINKS: 'Bu sayfada sorunlu bağlantı bulunamadı.',
 	SKIP_TO_ISSUE: 'Uyarıyı göster',
+	buttonNext: 'Sonraki',
+	buttonPrev: 'Önceki',
 	WARNING: 'Elle kontrol',
 	WARNINGS: 'elle kontroller',
 	buttonFirstContent: 'İlk uyarıyı göster',

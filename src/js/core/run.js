@@ -791,38 +791,26 @@ export function jumpTo(next = true) {
     return false;
   }
   UI.viaJump = true;
-  // Determine target result.
-  const goMax = UI.jumpList.length - 1;
-  let goNum = next ? +UI.openJumpPosition + 1 : +UI.openJumpPosition - 1;
-  if (goNum < 0) {
-    // Reached end of loop or dismissal pushed us out of loop
-    goNum = goMax;
-    UI.nextText = `${Lang._('SKIP_TO_ISSUE')} 1`;
-  } else if (goNum > goMax) {
-    goNum = 0;
-    UI.nextText = `${Lang._('SKIP_TO_ISSUE')} ${goNum + 1}`;
-  } else {
-    let showNum = Number.isNaN(goNum) ? 2 : goNum + 2;
-    if (showNum > goMax + 1) {
-      showNum = 1;
-    }
-    UI.nextText = `${Lang._('SKIP_TO_ISSUE')} ${showNum}`;
-  }
-  UI.openJumpPosition = goNum;
-  window.setTimeout(() => {
-    UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = UI.nextText;
-  }, 250);
-
   resetClass(['ed11y-hidden-highlight']);
   if (UI.jumpList.length === 0) {
     buildJumpList();
   }
-  // Find next or first result in the dom ordered list of results.
-  let goto = UI.jumpList[goNum];
-  if (!goto) {
-    goto = UI.jumpList[0];
-    UI.openJumpPosition = 0;
+  // Determine target result, looping at either end.
+  const count = UI.jumpList.length;
+  if (count === 0) {
+    UI.viaJump = false;
+    return false;
   }
+  const current = Number.isInteger(+UI.openJumpPosition) ? +UI.openJumpPosition : -1;
+  const goNum = (((next ? current + 1 : current - 1) % count) + count) % count;
+  UI.openJumpPosition = goNum;
+  const goto = UI.jumpList[goNum];
+  // Label the "next" button with the issue it will open (1-indexed).
+  UI.nextText = `${Lang._('SKIP_TO_ISSUE')} ${((goNum + 1) % count) + 1}`;
+  window.setTimeout(() => {
+    UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = UI.nextText;
+  }, 250);
+
   const result = goto.getAttribute('data-ed11y-result');
   const gotoResult = State.results[result];
   const target = gotoResult.element;

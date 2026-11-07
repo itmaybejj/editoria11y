@@ -650,6 +650,8 @@ const interfaceStrings = {
   panelCheckLinks: "Tyto odkazy vyžadují ruční kontrolu. Cílové stránky mohou chybět, být přesměrovány nebo blokovat prohledávací roboty.",
   reportsLink: "Otevřít přehledy webu",
   SKIP_TO_ISSUE: "Zobrazit upozornění",
+  buttonNext: "Další",
+  buttonPrev: "Předchozí",
   toggleDisabled: "Pro Editoria11y není k dispozici žádný obsah ke kontrole.",
   transferFocus: "Upravit tento obsah",
   unDismissHideButton: "Obnovit toto ignorované upozornění",

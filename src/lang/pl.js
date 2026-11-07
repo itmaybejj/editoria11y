@@ -280,6 +280,8 @@ export const interfaceStrings = {
 	PANEL_NO_HEADINGS: 'Nie znaleziono nagłówków.',
 	PANEL_NO_LINKS: 'Nie znaleziono na tej stronie linków wymagających uwagi.',
 	SKIP_TO_ISSUE: 'Pokaż alert',
+	buttonNext: 'Następny',
+	buttonPrev: 'Poprzedni',
 	WARNING: 'Ręczna weryfikacja',
 	WARNINGS: 'ręczne weryfikacje',
 	buttonFirstContent: 'Pokaż pierwszy alert',

@@ -635,6 +635,8 @@ const interfaceStrings = {
   PANEL_NO_HEADINGS: "見出しが見つかりません。",
   PANEL_NO_LINKS: "このページに警告のあるリンクは見つかりません。",
   SKIP_TO_ISSUE: "警告を表示",
+  buttonNext: "次へ",
+  buttonPrev: "前へ",
   WARNING: "手動チェック",
   WARNINGS: "手動チェック",
   buttonFirstContent: "最初の警告を表示",

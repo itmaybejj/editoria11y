@@ -597,6 +597,8 @@
     PANEL_NO_HEADINGS: "Nenhum título encontrado.",
     PANEL_NO_LINKS: "Nenhum link sinalizado encontrado nesta página.",
     SKIP_TO_ISSUE: "Mostrar alerta",
+    buttonNext: "Próximo",
+    buttonPrev: "Anterior",
     WARNING: "Verificação manual",
     WARNINGS: "verificações manuais",
     buttonFirstContent: "Mostrar primeiro alerta",

@@ -288,6 +288,8 @@ export const interfaceStrings = {
 	PANEL_NO_HEADINGS: 'Nu s-au găsit titluri.',
 	PANEL_NO_LINKS: 'Nu s-au găsit linkuri semnalate pe această pagină.',
 	SKIP_TO_ISSUE: 'Afișați alerta',
+	buttonNext: 'Următoarea',
+	buttonPrev: 'Anterioara',
 	WARNING: 'Verificare manuală',
 	WARNINGS: 'verificări manuale',
 	buttonFirstContent: 'Afișați prima alertă',

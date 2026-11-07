@@ -316,6 +316,7 @@ export class Ed11yElementTip extends HTMLElement {
     if (UI.jumpList.length > 1) {
       this.prev = this.wrapper.querySelector('.prev');
       this.prev.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issuePrev}`);
+      this.prev.setAttribute('aria-label', Lang._('buttonPrev'));
       this.prev.addEventListener('click', (event) => {
         event.preventDefault();
         jumpTo(false);
@@ -323,6 +324,7 @@ export class Ed11yElementTip extends HTMLElement {
 
       this.next = this.wrapper.querySelector('.next');
       this.next.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issueNext}`);
+      this.next.setAttribute('aria-label', Lang._('buttonNext'));
       this.next.addEventListener('click', (event) => {
         event.preventDefault();
         jumpTo();

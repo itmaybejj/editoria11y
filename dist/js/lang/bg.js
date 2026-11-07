@@ -595,6 +595,8 @@ const interfaceStrings = {
   PANEL_NO_HEADINGS: "Не са намерени заглавия.",
   PANEL_NO_LINKS: "На тази страница не са намерени отбелязани връзки.",
   SKIP_TO_ISSUE: "Покажи предупреждението",
+  buttonNext: "Следващо",
+  buttonPrev: "Предишно",
   WARNING: "Ръчна проверка",
   WARNINGS: "ръчни проверки",
   buttonFirstContent: "Покажи първото предупреждение",

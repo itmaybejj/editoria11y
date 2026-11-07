@@ -377,6 +377,8 @@ const interfaceStrings = {
 	PANEL_DISMISS_BUTTON: `Εμφάνιση %(dismissCount) κρυφών ειδοποιήσεων`,
 	PANEL_HEADING: 'Εμφάνιση οπτικοποιήσεων',
 	SKIP_TO_ISSUE: 'Εμφάνιση ειδοποίησης',
+	buttonNext: 'Επόμενη',
+	buttonPrev: 'Προηγούμενη',
 	WARNING: 'Χειροκίνητος έλεγχος',
 	WARNINGS: 'χειροκίνητοι έλεγχοι',
 	buttonFirstContent: 'Εμφάνιση πρώτης ειδοποίησης',

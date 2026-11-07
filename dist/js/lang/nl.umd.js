@@ -608,6 +608,8 @@
     PANEL_NO_HEADINGS: "Geen koppen gevonden.",
     PANEL_NO_LINKS: "Geen links met meldingen gevonden op deze pagina.",
     SKIP_TO_ISSUE: "Melding tonen",
+    buttonNext: "Volgende",
+    buttonPrev: "Vorige",
     WARNING: "Handmatige controle",
     WARNINGS: "handmatige controles",
     buttonFirstContent: "Eerste melding tonen",

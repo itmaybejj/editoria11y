@@ -290,6 +290,8 @@ export const interfaceStrings = {
 	PANEL_NO_HEADINGS: 'Nessuna intestazione trovata.',
 	PANEL_NO_LINKS: 'Nessun link segnalato trovato in questa pagina.',
 	SKIP_TO_ISSUE: 'Mostra avviso',
+	buttonNext: 'Successivo',
+	buttonPrev: 'Precedente',
 	WARNING: 'Verifica manuale',
 	WARNINGS: 'verifiche manuali',
 	buttonFirstContent: 'Mostra il primo avviso',

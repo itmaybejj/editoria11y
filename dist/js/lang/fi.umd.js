@@ -597,6 +597,8 @@
     PANEL_NO_HEADINGS: "Otsikoita ei löytynyt.",
     PANEL_NO_LINKS: "Tältä sivulta ei löytynyt tarkistettavia linkkejä.",
     SKIP_TO_ISSUE: "Näytä hälytys",
+    buttonNext: "Seuraava",
+    buttonPrev: "Edellinen",
     WARNING: "Manuaalinen tarkistus",
     WARNINGS: "manuaaliset tarkistukset",
     buttonFirstContent: "Näytä ensimmäinen hälytys",

@@ -289,6 +289,8 @@ export const interfaceStrings = {
 	PANEL_NO_HEADINGS: 'Antraščių nerasta.',
 	PANEL_NO_LINKS: 'Šiame puslapyje nuorodų su įspėjimais nerasta.',
 	SKIP_TO_ISSUE: 'Rodyti įspėjimą',
+	buttonNext: 'Kitas',
+	buttonPrev: 'Ankstesnis',
 	WARNING: 'Rankinis patikrinimas',
 	WARNINGS: 'rankiniai patikrinimai',
 	buttonFirstContent: 'Rodyti pirmąjį įspėjimą',

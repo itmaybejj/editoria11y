@@ -584,6 +584,8 @@
   const interfaceStrings = {
     CONSOLE_ERROR: 'Az akadálymentességi ellenőrző hibát észlelt ezen az oldalon. Kérjük, <a class="g-link">jelentse a GitHubon</a>. Hibakeresési információ:',
     SKIP_TO_ISSUE: "Figyelmeztetés megjelenítése",
+    buttonNext: "Következő",
+    buttonPrev: "Előző",
     buttonFirstContent: "Első figyelmeztetés megjelenítése",
     ALERT_CLOSE: "Bezárás",
     ALT: "Alt szöveg: ",

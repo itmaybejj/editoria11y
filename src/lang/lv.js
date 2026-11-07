@@ -284,6 +284,8 @@ export const interfaceStrings = {
 	PANEL_NO_HEADINGS: 'Nav atrasts neviens virsraksts.',
 	PANEL_NO_LINKS: 'Šajā lapā nav atrasta neviena saite ar brīdinājumu.',
 	SKIP_TO_ISSUE: 'Rādīt brīdinājumu',
+	buttonNext: 'Nākamais',
+	buttonPrev: 'Iepriekšējais',
 	WARNING: 'Manuāla pārbaude',
 	WARNINGS: 'manuālas pārbaudes',
 	buttonFirstContent: 'Rādīt pirmo brīdinājumu',

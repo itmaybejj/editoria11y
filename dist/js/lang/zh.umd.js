@@ -603,6 +603,8 @@
     PANEL_NO_HEADINGS: "未找到标题。",
     PANEL_NO_LINKS: "本页未发现需要关注的链接。",
     SKIP_TO_ISSUE: "显示提示",
+    buttonNext: "下一个",
+    buttonPrev: "上一个",
     WARNING: "手动检查",
     WARNINGS: "手动检查",
     buttonFirstContent: "显示第一条提示",

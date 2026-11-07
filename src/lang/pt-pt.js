@@ -284,6 +284,8 @@ export const interfaceStrings = {
 	PANEL_NO_HEADINGS: 'Nenhum título encontrado.',
 	PANEL_NO_LINKS: 'Não foram encontradas ligações assinaladas nesta página.',
 	SKIP_TO_ISSUE: 'Mostrar alerta',
+	buttonNext: 'Seguinte',
+	buttonPrev: 'Anterior',
 	WARNING: 'Verificação manual',
 	WARNINGS: 'verificações manuais',
 	buttonFirstContent: 'Mostrar primeiro alerta',

@@ -731,6 +731,8 @@
     panelCheckLinks: "Tieto odkazy vyžadujú manuálnu kontrolu. Cieľové stránky môžu chýbať, presmerúvať inam alebo blokovať prehľadávacie roboty.",
     reportsLink: "Otvoriť správy webu",
     SKIP_TO_ISSUE: "Zobraziť upozornenie",
+    buttonNext: "Ďalšie",
+    buttonPrev: "Predchádzajúce",
     toggleDisabled: "Editoria11y nemá k dispozícii žiadny obsah na kontrolu.",
     transferFocus: "Upraviť tento obsah",
     unDismissHideButton: "Obnoviť toto ignorované upozornenie",

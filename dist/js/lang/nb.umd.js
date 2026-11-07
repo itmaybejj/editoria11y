@@ -598,6 +598,8 @@
     PANEL_NO_HEADINGS: "Ingen overskrifter funnet.",
     PANEL_NO_LINKS: "Ingen flaggede lenker funnet på denne siden.",
     SKIP_TO_ISSUE: "Vis varsel",
+    buttonNext: "Neste",
+    buttonPrev: "Forrige",
     WARNING: "Manuell kontroll",
     WARNINGS: "manuelle kontroller",
     buttonFirstContent: "Vis første varsel",

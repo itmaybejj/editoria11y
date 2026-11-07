@@ -618,6 +618,8 @@
     PANEL_NO_HEADINGS: "Inga rubriker hittades.",
     PANEL_NO_LINKS: "Inga flaggade länkar hittades på den här sidan.",
     SKIP_TO_ISSUE: "Visa varning",
+    buttonNext: "Nästa",
+    buttonPrev: "Föregående",
     WARNING: "Manuell kontroll",
     WARNINGS: "manuella kontroller",
     buttonFirstContent: "Visa första varningen",

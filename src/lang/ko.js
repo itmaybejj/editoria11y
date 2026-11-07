@@ -281,6 +281,8 @@ export const interfaceStrings = {
 	PANEL_NO_HEADINGS: '제목을 찾을 수 없습니다.',
 	PANEL_NO_LINKS: '이 페이지에서 문제로 표시된 링크를 찾을 수 없습니다.',
 	SKIP_TO_ISSUE: '알림 표시',
+	buttonNext: '다음',
+	buttonPrev: '이전',
 	WARNING: '수동 확인',
 	WARNINGS: '수동 확인',
 	buttonFirstContent: '첫 번째 알림 표시',

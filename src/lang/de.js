@@ -386,6 +386,8 @@ const interfaceStrings = {
 	PANEL_DISMISS_BUTTON: `%(dismissCount) ausgeblendete Meldungen anzeigen`,
 	PANEL_HEADING: 'Visualisierungen anzeigen',
 	SKIP_TO_ISSUE: 'Meldung anzeigen',
+	buttonNext: 'Nächste',
+	buttonPrev: 'Vorherige',
 	WARNING: 'Manuelle Prüfung',
 	WARNINGS: 'manuelle Prüfungen',
 	buttonFirstContent: 'Erste Meldung anzeigen',

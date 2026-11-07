@@ -82,7 +82,7 @@ export const UI = {
 
   /* Annotations initial states */
   jumpList: [],
-  openJumpPosition: Number - 1,
+  openJumpPosition: -1,
   viaJump: false,
   toggledFrom: false,
   scrollPending: 0,

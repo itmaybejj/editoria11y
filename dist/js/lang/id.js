@@ -596,6 +596,8 @@ const interfaceStrings = {
   PANEL_NO_HEADINGS: "Tidak ada judul yang ditemukan.",
   PANEL_NO_LINKS: "Tidak ada tautan yang ditandai di halaman ini.",
   SKIP_TO_ISSUE: "Tampilkan peringatan",
+  buttonNext: "Berikutnya",
+  buttonPrev: "Sebelumnya",
   WARNING: "Pemeriksaan manual",
   WARNINGS: "pemeriksaan manual",
   buttonFirstContent: "Tampilkan peringatan pertama",

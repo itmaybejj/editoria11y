@@ -625,6 +625,8 @@
     PANEL_DISMISS_BUTTON: `Afficher %(dismissCount) alertes masquées`,
     PANEL_HEADING: "Afficher les visualisations",
     SKIP_TO_ISSUE: "Afficher l’alerte",
+    buttonNext: "Suivante",
+    buttonPrev: "Précédente",
     WARNING: "vérification manuelle",
     WARNINGS: "vérifications manuelles",
     buttonFirstContent: "Afficher la première alerte",

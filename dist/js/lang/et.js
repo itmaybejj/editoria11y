@@ -596,6 +596,8 @@ const interfaceStrings = {
   PANEL_NO_HEADINGS: "Pealkirju ei leitud.",
   PANEL_NO_LINKS: "Sellel lehel ei leitud tähelepanu vajavaid linke.",
   SKIP_TO_ISSUE: "Kuva teade",
+  buttonNext: "Järgmine",
+  buttonPrev: "Eelmine",
   WARNING: "Käsitsi kontroll",
   WARNINGS: "käsitsi kontrollid",
   buttonFirstContent: "Kuva esimene teade",

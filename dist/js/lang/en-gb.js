@@ -638,6 +638,8 @@ const interfaceStrings = {
   PANEL_DISMISS_BUTTON: `Show %(dismissCount) hidden alerts`,
   PANEL_HEADING: "Show visualizers",
   SKIP_TO_ISSUE: "Show alert",
+  buttonNext: "Next",
+  buttonPrev: "Previous",
   WARNING: "Manual check",
   WARNINGS: "manual checks",
   // Not in use?
