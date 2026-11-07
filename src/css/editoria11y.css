@@ -1258,6 +1258,8 @@ ed11y-element-result[data-ed11y-open="true"] {
 		font-style: normal;
 		border-radius: 2px;
 		line-height: 1.25;
+		/* Code and quoted content take their direction from their own text, not the tip's. */
+		unicode-bidi: plaintext;
 	}
 
 	code {

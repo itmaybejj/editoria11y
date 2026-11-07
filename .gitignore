@@ -16,6 +16,7 @@ test-results/
 .settings
 .idea
 .vscode
+.temp
 npm-debug.log
 
 # OSX
@@ -32,7 +33,6 @@ Thumbs.db
 Desktop.ini
 
 # Playwright e2e output
-e2e/
 e2e/test-results/
 e2e/report/
 

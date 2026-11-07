@@ -69,6 +69,7 @@ Language files in `src/lang/` (18+ languages). Each exports a translation object
 `e2e/tests/checks.spec.js` — every `.positive` on `all_tests.htm` gets a result, no `.negative` does
 `e2e/tests/links.spec.js` — link checker results (`tests/links.htm`)
 `e2e/tests/styles.spec.js` — shared stylesheet adoption and `<link>` fallback
+`e2e/tests/languages.spec.js` — every `dist/js/lang/` bundle gives each result on `all_tests.htm` a translated title and no unfilled `%(placeholder)`
 `e2e/tests/helpers.js` — wait for Editoria11y paints (`ed11yResultsPainted`) instead of fixed pauses; click panel buttons
 `e2e/server.js` — static server for e2e. Serves the repo root; a `.css` request without `Accept: text/css` gets a JS module (as Vite does), and `?serve-as=<type>` overrides the Content-Type
 `e2e/playwright.config.js` — Playwright configuration; `scripts/test-docker.js` — Docker runner
