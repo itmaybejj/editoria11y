@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { bundle, browserslistToTargets } from 'lightningcss';
-import browserslist from 'browserslist';
+import { bundle } from 'lightningcss';
+import { lightningOptions } from './utils.js';
 
 // We only need to compile sa11y.css, as the remaining files are minified via other utility function and imported via js into web components.
 const cssFiles = [
@@ -10,7 +10,6 @@ const cssFiles = [
 
 const srcDir = 'src/css';
 const distDir = 'dist/css';
-const targets = browserslistToTargets(browserslist('defaults, not IE 11'));
 
 (async () => {
 	if (!fs.existsSync(distDir)) {
@@ -25,7 +24,7 @@ const targets = browserslistToTargets(browserslist('defaults, not IE 11'));
 		const bundleConfig = {
 			filename: inputPath,
 			sourceMap: false,
-			targets,
+			...lightningOptions,
 		};
 
 		try {
