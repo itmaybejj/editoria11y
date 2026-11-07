@@ -837,6 +837,23 @@
   function normalizeStopWord(string) {
     return foldForMatching(string).replace(/[^\p{L}\p{M}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
   }
+  let wordSegmenter;
+  function containsWord(text, word) {
+    const haystack = foldForMatching(text);
+    const needle = foldForMatching(word);
+    if (!needle) return false;
+    if (typeof Intl !== "undefined" && Intl.Segmenter) {
+      wordSegmenter ??= new Intl.Segmenter(void 0, { granularity: "word" });
+      for (const { segment, isWordLike } of wordSegmenter.segment(haystack)) {
+        if (isWordLike && segment === needle) return true;
+      }
+      return false;
+    }
+    const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(?<![\\p{L}\\p{M}\\p{N}])${escaped}(?![\\p{L}\\p{M}\\p{N}])`, "u").test(
+      haystack
+    );
+  }
   const invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
   const htmlEntitiesRegex = /&#(\w+)(^\w|;)?/g;
   const htmlCtrlEntityRegex = /&(newline|tab);/gi;
@@ -4961,7 +4978,7 @@ ${this.error.stack}
           developer: true
         });
       }
-      if (accName.includes(Lang._("BTN"))) {
+      if (containsWord(accName, Lang._("BTN"))) {
         pushResult$1({
           test: "BTN_ROLE_IN_NAME",
           element: $el,
