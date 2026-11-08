@@ -1250,6 +1250,20 @@ button.ed11y-jump:hover .toggle-count {
   transform: scaleX(var(--ed11y-flip));
 }
 
+.ed11y-tip-wrapper .footer.overflow, .ed11y-tip-wrapper .overflow .footer {
+  grid-template: "badge badge badge" 2.124em
+                 "buttons buttons buttons" 2.124em
+                 "previous focus next" 2.124em
+                 / 1fr 1fr 1fr;
+}
+
+:is(.ed11y-tip-wrapper .footer.overflow, .ed11y-tip-wrapper .overflow .footer) button, :is(.ed11y-tip-wrapper .footer.overflow, .ed11y-tip-wrapper .overflow .footer) summary {
+  border: 0;
+  width: 100%;
+  padding-top: 1px;
+  box-shadow: inset 0 0 0 1px;
+}
+
 .ed11y-tip-wrapper .ed11y-tip-help-content {
   color: var(--ed11y-primaryText, #fffdf7);
   text-align: start;
@@ -1793,19 +1807,5 @@ ed11y-element-result[data-ed11y-open="false"]:not(:hover, :focus) {
     z-index: calc(var(--ed11y-buttonZIndex) + 10);
     position: fixed;
     inset: 0;
-  }
-
-  .ed11y-tip-wrapper .footer {
-    grid-template: "badge badge badge" 2.124em
-                   "buttons buttons buttons" 2.124em
-                   "previous focus next" 2.124em
-                   / 1fr 1fr 1fr;
-  }
-
-  .ed11y-tip-wrapper .footer button, .ed11y-tip-wrapper .footer summary {
-    border: 0;
-    width: 100%;
-    padding-top: 1px;
-    box-shadow: inset 0 0 0 1px;
   }
 }

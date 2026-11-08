@@ -7262,8 +7262,19 @@ function alignTip(button, toolTip, recheck = 0, reveal = false) {
   const containRight = Math.min(window.innerWidth, containLeft + containWidth);
   const tipWidth = tip.offsetWidth;
   const tipHeight = tip.offsetHeight;
+  const footer = tip.querySelector(".footer");
+  const footerElements = tip.querySelectorAll(".footer > *");
+  let footerWidth = 0;
+  footerElements?.forEach((el) => {
+    footerWidth += el.clientWidth;
+  });
   toolTip.style.setProperty("top", `${buttonOffset.top + scrollTop}px`);
   toolTip.style.setProperty("left", `${buttonOffset.left + leftAdd}px`);
+  if (footerWidth > tipWidth + 5) {
+    footer.classList.add("overflow");
+  } else {
+    footer.classList.remove("overflow");
+  }
   let direction = "under";
   if (buttonTop === 0 && buttonLeft === 0) {
     direction = "whompWhomp";
