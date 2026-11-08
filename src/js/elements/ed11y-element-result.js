@@ -23,7 +23,12 @@ export class Ed11yElementResult extends HTMLElement {
   handleHover(event) {
     event.preventDefault();
     const host = this.getRootNode().host;
-    if (!this.classList.contains('intersecting') && host.open !== true && host.racing === false) {
+    if (
+      !this.classList.contains('intersecting') &&
+      host.open !== true &&
+      host.racing === false &&
+      window.innerWidth > 320
+    ) {
       this.open = true;
       host.racing = true;
       host.toggleTip(true);
