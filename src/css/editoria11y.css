@@ -1117,29 +1117,6 @@ ed11y-element-result[data-ed11y-open="true"] {
 		border-bottom: 0;
 		border-radius: var(--ed11y-borderRadius);
 		box-shadow: 0 0 0 var(--ed11y-outlineWidth, 0) var(--ed11y-bg, #fffffe);
-		&.overflow {
-			width: auto;
-			min-width: 0;
-			margin: 0;
-			top: 0;
-			right: 0;
-			bottom: 0;
-			left: 0;
-			position: fixed;
-			overflow: auto;
-			border-radius: 0;
-			.title {
-				padding: 1vw;
-				margin: 33px 0 0;
-			}
-			.content {
-				padding: 1vw 1vw 10px;
-				min-height: calc(100vh - 7em);
-			}
-			.content-footer {
-				flex-direction: column;
-			}
-		}
 	}
 
 	.close {
@@ -1170,6 +1147,29 @@ ed11y-element-result[data-ed11y-open="true"] {
 
 	&.open .tip {
 		display: block;
+		&.overflow {
+			width: auto;
+			min-width: 0;
+			margin: 0;
+			inset: 0;
+			position: fixed;
+			overflow: auto;
+			border-radius: 0;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			overscroll-behavior: contain;
+			.title {
+				padding: 1vw 0;
+				margin: 33px 0 0;
+			}
+			.content {
+				padding: 2vw 2vw 10px;
+			}
+			.content-footer {
+				flex-direction: column;
+			}
+		}
 	}
 
 	.arrow {

@@ -1008,7 +1008,7 @@ button.ed11y-jump:hover .toggle-count {
   min-width: 0;
   margin: 0;
   position: fixed;
-  inset: 0;
+  inset: 2%;
   overflow: auto;
 }
 
@@ -1018,7 +1018,7 @@ button.ed11y-jump:hover .toggle-count {
 }
 
 .ed11y-tip-wrapper .tip.overflow .content {
-  min-height: calc(100vh - 7em);
+  min-height: calc(96vh - 7em);
   padding: 1vw 1vw 10px;
 }
 
