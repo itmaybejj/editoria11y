@@ -662,6 +662,11 @@ export function paintReady() {
   for (const [key, value] of Object.entries(UI.theme)) {
     document.documentElement.style.setProperty(`--ed11y-${key}`, `${value}`);
   }
+  UI.baseFont.style.setProperty('visibility', 'hidden');
+  UI.baseFont.style.setProperty('pointer-events', 'none');
+  UI.baseFont.style.setProperty('width', '1rem');
+  UI.baseFont.ariaHidden = true;
+  document.documentElement.appendChild(UI.baseFont);
 
   // May be redundant, but preloads unbundled files.
   if (document.querySelector('body')) {
@@ -786,38 +791,26 @@ export function jumpTo(next = true) {
     return false;
   }
   UI.viaJump = true;
-  // Determine target result.
-  const goMax = UI.jumpList.length - 1;
-  let goNum = next ? +UI.openJumpPosition + 1 : +UI.openJumpPosition - 1;
-  if (goNum < 0) {
-    // Reached end of loop or dismissal pushed us out of loop
-    goNum = goMax;
-    UI.nextText = `${Lang._('SKIP_TO_ISSUE')} 1`;
-  } else if (goNum > goMax) {
-    goNum = 0;
-    UI.nextText = `${Lang._('SKIP_TO_ISSUE')} ${goNum + 1}`;
-  } else {
-    let showNum = Number.isNaN(goNum) ? 2 : goNum + 2;
-    if (showNum > goMax + 1) {
-      showNum = 1;
-    }
-    UI.nextText = `${Lang._('SKIP_TO_ISSUE')} ${showNum}`;
-  }
-  UI.openJumpPosition = goNum;
-  window.setTimeout(() => {
-    UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = UI.nextText;
-  }, 250);
-
   resetClass(['ed11y-hidden-highlight']);
   if (UI.jumpList.length === 0) {
     buildJumpList();
   }
-  // Find next or first result in the dom ordered list of results.
-  let goto = UI.jumpList[goNum];
-  if (!goto) {
-    goto = UI.jumpList[0];
-    UI.openJumpPosition = 0;
+  // Determine target result, looping at either end.
+  const count = UI.jumpList.length;
+  if (count === 0) {
+    UI.viaJump = false;
+    return false;
   }
+  const current = Number.isInteger(+UI.openJumpPosition) ? +UI.openJumpPosition : -1;
+  const goNum = (((next ? current + 1 : current - 1) % count) + count) % count;
+  UI.openJumpPosition = goNum;
+  const goto = UI.jumpList[goNum];
+  // Label the "next" button with the issue it will open (1-indexed).
+  UI.nextText = `${Lang._('SKIP_TO_ISSUE')} ${((goNum + 1) % count) + 1}`;
+  window.setTimeout(() => {
+    UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = UI.nextText;
+  }, 250);
+
   const result = goto.getAttribute('data-ed11y-result');
   const gotoResult = State.results[result];
   const target = gotoResult.element;
@@ -893,6 +886,20 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
     );
   }
 
+  let containWidth = window.innerWidth;
+  if (
+    UI.baseFont &&
+    (containWidth < 20 * UI.baseFont.clientWidth ||
+      window.innerHeight < 20 * UI.baseFont.clientWidth)
+  ) {
+    // No room for tip.
+    tip.removeAttribute('style');
+    tip.classList.add('overflow');
+    return;
+  } else {
+    tip.classList.remove('overflow');
+  }
+
   const mark = button.getRootNode().host;
   const resultNum = button.dataset.ed11yResult;
   const result = State.results[resultNum];
@@ -908,7 +915,6 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
 
   let containTop = scrollTop;
   let containLeft = 0;
-  let containWidth = window.innerWidth;
   let containBottom = window.innerHeight + scrollTop;
   let absoluteBottom = containBottom;
 
@@ -949,9 +955,20 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
   // Read layout dimensions before writing position to avoid forced reflow.
   const tipWidth = tip.offsetWidth;
   const tipHeight = tip.offsetHeight;
+  const footer = tip.querySelector('.footer');
+  const footerElements = tip.querySelectorAll('.footer > *');
+  let footerWidth = 0;
+  footerElements?.forEach((el) => {
+    footerWidth += el.clientWidth;
+  });
 
   toolTip.style.setProperty('top', `${buttonOffset.top + scrollTop}px`);
   toolTip.style.setProperty('left', `${buttonOffset.left + leftAdd}px`);
+  if (footerWidth > tipWidth + 5) {
+    footer.classList.add('overflow');
+  } else {
+    footer.classList.remove('overflow');
+  }
 
   let direction = 'under';
 
@@ -972,7 +989,7 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
       containTop + tipHeight + 30 < containBottom
     ) {
       direction = 'left';
-    } else if (buttonTop + tipHeight + buttonSize > absoluteBottom) {
+    } else if (buttonTop + tipHeight + buttonSize > absoluteBottom && buttonTop - tipHeight > 0) {
       // It REALLY doesn't fit below.
       direction = 'above';
     }

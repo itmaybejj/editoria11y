@@ -7,6 +7,7 @@
   ],
   "baseline": "590d1644b90fa47416f59fd98556d485f91e7981",
   "translations": {
+    "src/lang/ar.js": "e8d11bb84b10e1538d28029ea89066ac04f83c40",
     "src/lang/bg.js": "635553c5cb37becf3ca6d98640270f359f134d1d",
     "src/lang/cs.js": "635553c5cb37becf3ca6d98640270f359f134d1d",
     "src/lang/da.js": "635553c5cb37becf3ca6d98640270f359f134d1d",
@@ -40,6 +41,7 @@
     "src/lang/tr.js": "635553c5cb37becf3ca6d98640270f359f134d1d",
     "src/lang/uk.js": "635553c5cb37becf3ca6d98640270f359f134d1d",
     "src/lang/zh.js": "635553c5cb37becf3ca6d98640270f359f134d1d",
+    "src/sa11y-lang/ar.js": "e8d11bb84b10e1538d28029ea89066ac04f83c40",
     "src/sa11y-lang/bg.js": "590d1644b90fa47416f59fd98556d485f91e7981",
     "src/sa11y-lang/cs.js": "590d1644b90fa47416f59fd98556d485f91e7981",
     "src/sa11y-lang/da.js": "590d1644b90fa47416f59fd98556d485f91e7981",
@@ -68,7 +70,7 @@
     "src/sa11y-lang/sv.js": "590d1644b90fa47416f59fd98556d485f91e7981",
     "src/sa11y-lang/ta.js": "590d1644b90fa47416f59fd98556d485f91e7981",
     "src/sa11y-lang/tr.js": "590d1644b90fa47416f59fd98556d485f91e7981",
-    "src/sa11y-lang/ua.js": "590d1644b90fa47416f59fd98556d485f91e7981",
+    "src/sa11y-lang/uk.js": "590d1644b90fa47416f59fd98556d485f91e7981",
     "src/sa11y-lang/zh.js": "590d1644b90fa47416f59fd98556d485f91e7981"
   }
 }

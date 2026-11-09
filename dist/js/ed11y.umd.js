@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.2-1030
+			* @version 3.0.2-1108
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -836,6 +836,23 @@
   }
   function normalizeStopWord(string) {
     return foldForMatching(string).replace(/[^\p{L}\p{M}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
+  }
+  let wordSegmenter;
+  function containsWord(text, word) {
+    const haystack = foldForMatching(text);
+    const needle = foldForMatching(word);
+    if (!needle) return false;
+    if (typeof Intl !== "undefined" && Intl.Segmenter) {
+      wordSegmenter ??= new Intl.Segmenter(void 0, { granularity: "word" });
+      for (const { segment, isWordLike } of wordSegmenter.segment(haystack)) {
+        if (isWordLike && segment === needle) return true;
+      }
+      return false;
+    }
+    const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(?<![\\p{L}\\p{M}\\p{N}])${escaped}(?![\\p{L}\\p{M}\\p{N}])`, "u").test(
+      haystack
+    );
   }
   const invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
   const htmlEntitiesRegex = /&#(\w+)(^\w|;)?/g;
@@ -1859,7 +1876,7 @@
       });
     }
   }
-  const version = "3.0.2-1030";
+  const version = "3.0.2-1108";
   const sprite = {
     alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
     close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -2121,6 +2138,7 @@ ${this.error.stack}
     panelJumpNext: {},
     panelShowDismissed: {},
     theme: {},
+    baseFont: document.createElement("div"),
     version,
     english: true,
     running: false,
@@ -2178,7 +2196,7 @@ ${this.error.stack}
     visualizing: false,
     /* Annotations initial states */
     jumpList: [],
-    openJumpPosition: Number - 1,
+    openJumpPosition: -1,
     viaJump: false,
     toggledFrom: false,
     scrollPending: 0,
@@ -4960,7 +4978,7 @@ ${this.error.stack}
           developer: true
         });
       }
-      if (accName.includes(Lang._("BTN"))) {
+      if (containsWord(accName, Lang._("BTN"))) {
         pushResult$1({
           test: "BTN_ROLE_IN_NAME",
           element: $el,
@@ -6341,7 +6359,7 @@ ${this.error.stack}
         const leftPad = 7 * result.headingLevel - 7;
         const li = document.createElement("li");
         li.classList.add(`level${result.headingLevel}`);
-        li.style.setProperty("margin-left", `${leftPad}px`);
+        li.style.setProperty("margin-inline-start", `${leftPad}px`);
         const levelPrefix = document.createElement("strong");
         levelPrefix.textContent = `H${result.headingLevel}: `;
         const userText = document.createElement("span");
@@ -7017,6 +7035,11 @@ ${this.error.stack}
     for (const [key, value] of Object.entries(UI.theme)) {
       document.documentElement.style.setProperty(`--ed11y-${key}`, `${value}`);
     }
+    UI.baseFont.style.setProperty("visibility", "hidden");
+    UI.baseFont.style.setProperty("pointer-events", "none");
+    UI.baseFont.style.setProperty("width", "1rem");
+    UI.baseFont.ariaHidden = true;
+    document.documentElement.appendChild(UI.baseFont);
     if (document.querySelector("body")) {
       UI.attachCSS(document);
     }
@@ -7124,34 +7147,23 @@ ${this.error.stack}
       return false;
     }
     UI.viaJump = true;
-    const goMax = UI.jumpList.length - 1;
-    let goNum = next ? +UI.openJumpPosition + 1 : +UI.openJumpPosition - 1;
-    if (goNum < 0) {
-      goNum = goMax;
-      UI.nextText = `${Lang._("SKIP_TO_ISSUE")} 1`;
-    } else if (goNum > goMax) {
-      goNum = 0;
-      UI.nextText = `${Lang._("SKIP_TO_ISSUE")} ${goNum + 1}`;
-    } else {
-      let showNum = Number.isNaN(goNum) ? 2 : goNum + 2;
-      if (showNum > goMax + 1) {
-        showNum = 1;
-      }
-      UI.nextText = `${Lang._("SKIP_TO_ISSUE")} ${showNum}`;
-    }
-    UI.openJumpPosition = goNum;
-    window.setTimeout(() => {
-      UI.panelJumpNext.querySelector(".ed11y-sr-only").textContent = UI.nextText;
-    }, 250);
     resetClass(["ed11y-hidden-highlight"]);
     if (UI.jumpList.length === 0) {
       buildJumpList();
     }
-    let goto = UI.jumpList[goNum];
-    if (!goto) {
-      goto = UI.jumpList[0];
-      UI.openJumpPosition = 0;
+    const count = UI.jumpList.length;
+    if (count === 0) {
+      UI.viaJump = false;
+      return false;
     }
+    const current = Number.isInteger(+UI.openJumpPosition) ? +UI.openJumpPosition : -1;
+    const goNum = ((next ? current + 1 : current - 1) % count + count) % count;
+    UI.openJumpPosition = goNum;
+    const goto = UI.jumpList[goNum];
+    UI.nextText = `${Lang._("SKIP_TO_ISSUE")} ${(goNum + 1) % count + 1}`;
+    window.setTimeout(() => {
+      UI.panelJumpNext.querySelector(".ed11y-sr-only").textContent = UI.nextText;
+    }, 250);
     const result = goto.getAttribute("data-ed11y-result");
     const gotoResult = State.results[result];
     const target = gotoResult.element;
@@ -7208,6 +7220,14 @@ ${this.error.stack}
         tip
       );
     }
+    let containWidth = window.innerWidth;
+    if (UI.baseFont && (containWidth < 20 * UI.baseFont.clientWidth || window.innerHeight < 20 * UI.baseFont.clientWidth)) {
+      tip.removeAttribute("style");
+      tip.classList.add("overflow");
+      return;
+    } else {
+      tip.classList.remove("overflow");
+    }
     const mark = button.getRootNode().host;
     const resultNum = button.dataset.ed11yResult;
     const result = State.results[resultNum];
@@ -7219,7 +7239,6 @@ ${this.error.stack}
     let buttonTop = buttonOffset.top + scrollTop;
     let containTop = scrollTop;
     let containLeft = 0;
-    let containWidth = window.innerWidth;
     let containBottom = window.innerHeight + scrollTop;
     let absoluteBottom = containBottom;
     if (!UI.inlineAlerts && result.scrollableParent) {
@@ -7247,8 +7266,19 @@ ${this.error.stack}
     const containRight = Math.min(window.innerWidth, containLeft + containWidth);
     const tipWidth = tip.offsetWidth;
     const tipHeight = tip.offsetHeight;
+    const footer = tip.querySelector(".footer");
+    const footerElements = tip.querySelectorAll(".footer > *");
+    let footerWidth = 0;
+    footerElements?.forEach((el) => {
+      footerWidth += el.clientWidth;
+    });
     toolTip.style.setProperty("top", `${buttonOffset.top + scrollTop}px`);
     toolTip.style.setProperty("left", `${buttonOffset.left + leftAdd}px`);
+    if (footerWidth > tipWidth + 5) {
+      footer.classList.add("overflow");
+    } else {
+      footer.classList.remove("overflow");
+    }
     let direction = "under";
     if (buttonTop === 0 && buttonLeft === 0) {
       direction = "whompWhomp";
@@ -7259,7 +7289,7 @@ ${this.error.stack}
         direction = "above";
       } else if (containLeft < buttonLeft - (buttonSize + tipWidth + 30) && containTop + tipHeight + 30 < containBottom) {
         direction = "left";
-      } else if (buttonTop + tipHeight + buttonSize > absoluteBottom) {
+      } else if (buttonTop + tipHeight + buttonSize > absoluteBottom && buttonTop - tipHeight > 0) {
         direction = "above";
       }
     }
@@ -8048,7 +8078,7 @@ ${this.error.stack}
     handleHover(event) {
       event.preventDefault();
       const host = this.getRootNode().host;
-      if (!this.classList.contains("intersecting") && host.open !== true && host.racing === false) {
+      if (!this.classList.contains("intersecting") && host.open !== true && host.racing === false && window.innerWidth > 320) {
         this.open = true;
         host.racing = true;
         host.toggleTip(true);
@@ -8805,12 +8835,14 @@ ${this.error.stack}
       if (UI.jumpList.length > 1) {
         this.prev = this.wrapper.querySelector(".prev");
         this.prev.setAttribute("title", `${Lang._("SKIP_TO_ISSUE")} ${this.issuePrev}`);
+        this.prev.setAttribute("aria-label", Lang._("buttonPrev"));
         this.prev.addEventListener("click", (event) => {
           event.preventDefault();
           jumpTo(false);
         });
         this.next = this.wrapper.querySelector(".next");
         this.next.setAttribute("title", `${Lang._("SKIP_TO_ISSUE")} ${this.issueNext}`);
+        this.next.setAttribute("aria-label", Lang._("buttonNext"));
         this.next.addEventListener("click", (event) => {
           event.preventDefault();
           jumpTo();
@@ -9539,9 +9571,9 @@ ${this.error.stack}
     LABELS_INPUT_RESET: `<p>Reset buttons are easy to activate by mistake, causing data loss without an opportunity to cancel or undo.</p><p>${why.fix}Unless this is resetting a single field, consider removing it or providing a method to cancel before executing the action.</p>`,
     LABELS_MISSING_IMAGE_INPUT: "Image button is missing alt text. Please add alt text to provide an accessible name. For example: <em>Search</em> or <em>Submit</em>.",
     LABELS_MISSING_LABEL: `<p>${why.fix}Add an <code>id</code> to this input, and add a matching <code>for</code> attribute to the label.</p>`,
-    LABELS_NO_FOR_ATTRIBUTE: "There is no label associated with this input. Add a <code>for</code> attribute to the label that matches the <code>id</code> of this input. <hr> <strong>ID:</strong> <code>#%(ID)</code>",
+    LABELS_NO_FOR_ATTRIBUTE: "<p>There is no label associated with this input. Add a <code>for</code> attribute to the label that matches the <code>id</code> of this input.</p><p><strong>ID:</strong> <code>#%(ID)</code></p>",
     LABELS_PLACEHOLDER: `<p>Placeholder text can be mistaken for previously entered content if it has good contrast, or be illegible if it does not. It then disappears on input, which may remove information users needed to check for errors.</p><p>${why.fix}Make sure key information like the field label, help text and format instructions remain visible when there is content in this field, and consider dropping the placeholder altogether.</p>`,
-    LABEL_IN_NAME: `<p><strong>Visible text:</strong> <i>%(VISIBLE)</i></p><p><strong>Label for screen readers:</strong> <i>%(LABEL)</i></p><p>The visible text for this element appears to be different from the accessible name. This may cause confusion for screen reader users, and may break voice control.</p><p>${why.fix}Make sure the visible label starts with the text of the invisible label, and does not contain any meaningful information that is missing from the invisible label.</p>`,
+    LABEL_IN_NAME: `<p><strong>Visible text:</strong> <i>%(VISIBLE)</i></p><p><strong>Label for screen readers:</strong> <i>%(LABEL)</i></p><p>The visible text for this element appears to be different from the accessible name. This may cause confusion for screen reader users, and may break voice control.</p><p>${why.fix}Make sure the invisible label starts with the text of the visible label, and does not contain any meaningful information that is missing from the visible label.</p>`,
     LINK_ALT_FILE_EXT: `<p>This alt text is probably a filename instead of a meaningful label for a link:<br><span hidden>%(ALT)</span><i>%(alt)</i></p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p><div class="why"> <p>The purpose of alt text is to provide an alternative for what an image means, not what it contains. The meaning of a linked image is the link destination:</p><ul><li>"Page with writing" describes the image, not a link.</li><li>"IMG_1234.jpg" is just a filename.</li><li>"Event registration form (.doc)" is a link destination.</li></ul></div>`,
     LINK_ALT_MAYBE_BAD: `<p><strong>Alt text:</strong> <i>%(alt)</i></p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
     LINK_ALT_MAYBE_BAD_WARNING: `<p><strong>Alt text:</strong> <i>%(alt)</i></p><p>${why.fix}Use the title of the link destination as alt text for linked images.</p>${why.imageLinks}`,
@@ -9638,6 +9670,8 @@ ${this.error.stack}
     PANEL_DISMISS_BUTTON: `Show %(dismissCount) hidden alerts`,
     PANEL_HEADING: "Show visualizers",
     SKIP_TO_ISSUE: "Show alert",
+    buttonNext: "Next",
+    buttonPrev: "Previous",
     WARNING: "Manual check",
     WARNINGS: "manual checks",
     // Not in use?
@@ -10005,8 +10039,8 @@ ${this.error.stack}
     checkVisible: true,
     // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
     hiddenHandlers: "",
-    panelOffsetX: "25px",
-    panelOffsetY: "25px",
+    panelOffsetX: "min(25px, 2vw)",
+    panelOffsetY: "min(25px, 2vh)",
     panelNoCover: "",
     // select other buttons to avoid.
     panelAttachTo: document.body,

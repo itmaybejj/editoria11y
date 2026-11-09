@@ -233,7 +233,7 @@ const tips = {
 
 	LABELS_PLACEHOLDER: `<p>Platzhaltertext kann bei gutem Kontrast mit zuvor eingegebenem Inhalt verwechselt werden oder bei schlechtem Kontrast unleserlich sein. Er verschwindet zudem bei der Eingabe, wodurch Informationen verloren gehen können, die Nutzende zur Fehlerkontrolle benötigen.</p><p>${why.fix}Sorgen Sie dafür, dass wichtige Informationen wie die Feldbeschriftung, Hilfetexte und Formatvorgaben sichtbar bleiben, wenn das Feld Inhalt enthält, und erwägen Sie, ganz auf den Platzhalter zu verzichten.</p>`,
 
-	LABEL_IN_NAME: `<p><strong>Sichtbarer Text:</strong> <i>%(VISIBLE)</i></p><p><strong>Beschriftung für Screenreader:</strong> <i>%(LABEL)</i></p><p>Der sichtbare Text dieses Elements scheint vom zugänglichen Namen abzuweichen. Das kann Screenreader-Nutzende verwirren und die Sprachsteuerung beeinträchtigen.</p><p>${why.fix}Stellen Sie sicher, dass die sichtbare Beschriftung mit dem Text der unsichtbaren Beschriftung beginnt und keine bedeutungstragenden Informationen enthält, die in der unsichtbaren Beschriftung fehlen.</p>`,
+	LABEL_IN_NAME: `<p><strong>Sichtbarer Text:</strong> <i>%(VISIBLE)</i></p><p><strong>Beschriftung für Screenreader:</strong> <i>%(LABEL)</i></p><p>Der sichtbare Text dieses Elements scheint vom zugänglichen Namen abzuweichen. Das kann Screenreader-Nutzende verwirren und die Sprachsteuerung beeinträchtigen.</p><p>${why.fix}Stellen Sie sicher, dass die unsichtbare Beschriftung mit dem Text der sichtbaren Beschriftung beginnt und keine bedeutungstragenden Informationen enthält, die in der sichtbaren Beschriftung fehlen.</p>`,
 
 	LINK_ALT_FILE_EXT: `<p>Dieser Alt-Text ist wahrscheinlich ein Dateiname statt einer aussagekräftigen Beschriftung für einen Link:<br><span hidden>%(ALT)</span><i>%(alt)</i></p><p>${why.fix}Verwenden Sie den Titel des Linkziels als Alt-Text für verlinkte Bilder.</p><div class="why"><p>Alt-Text soll die Bedeutung eines Bildes wiedergeben, nicht nur dessen Inhalt. Bei verlinkten Bildern ist die Bedeutung das Linkziel:</p><ul><li>„Seite mit Text“ beschreibt das Bild, nicht den Link.</li><li>„IMG_1234.jpg“ ist nur ein Dateiname.</li><li>„Anmeldeformular für die Veranstaltung (.doc)“ ist ein Linkziel.</li></ul></div>`,
 
@@ -386,6 +386,8 @@ const interfaceStrings = {
 	PANEL_DISMISS_BUTTON: `%(dismissCount) ausgeblendete Meldungen anzeigen`,
 	PANEL_HEADING: 'Visualisierungen anzeigen',
 	SKIP_TO_ISSUE: 'Meldung anzeigen',
+	buttonNext: 'Nächste',
+	buttonPrev: 'Vorherige',
 	WARNING: 'Manuelle Prüfung',
 	WARNINGS: 'manuelle Prüfungen',
 	buttonFirstContent: 'Erste Meldung anzeigen',

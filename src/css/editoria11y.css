@@ -77,12 +77,20 @@ ed11y-element-result {
 	line-height: 1.5;
 	opacity: 1 !important;
 	word-wrap: break-word;
+	/* Multiplies horizontal offsets that have no logical property
+	   (box-shadow, transform) so they mirror on right-to-left pages. */
+	--ed11y-flip: 1;
+
+	&:dir(rtl) {
+		--ed11y-flip: -1;
+	}
 
 	.badge {
 		display: inline-block;
 		vertical-align: middle;
 		padding: 0 0.5em;
-		margin: -2px 0.25em 0 0;
+		margin: -2px 0 0;
+		margin-inline-end: 0.25em;
 		font-size: 12px;
 		font-weight: 400;
 		color: var(--ed11y-primaryText);
@@ -155,7 +163,8 @@ ed11y-element-result {
 
 		button {
 			padding: 7px 5px;
-			margin: 5px 0 5px 1px;
+			margin: 5px 0;
+			margin-inline-start: 1px;
 			color: inherit;
 			background: inherit;
 			border: 1px var(--ed11y-button, transparent) solid;
@@ -173,7 +182,8 @@ ed11y-element-result {
 			top: 0;
 			z-index: 1;
 			width: auto;
-			padding: 6px 10px 6px 0;
+			padding: 6px 0;
+			padding-inline-end: 10px;
 			font-weight: 400;
 			color: var(--ed11y-primaryText);
 			cursor: pointer;
@@ -201,12 +211,13 @@ ed11y-element-result {
 		}
 
 		.details {
-			padding: 0 8px 8px 13px;
+			padding: 0 0 8px;
+			padding-inline: 13px 8px;
 		}
 	}
 
 	&:has(details[open]) .content {
-		width: clamp(160px, 50vw, 280px);
+		width: clamp(20rem, 50vw, 280px);
 	}
 
 	button[hidden] {
@@ -250,13 +261,14 @@ ed11y-element-result {
 		box-shadow:
 			0 1px var(--ed11y-activePanelBorder),
 			0 -1px var(--ed11y-activePanelBorder),
-			-1px 0 var(--ed11y-activeBorder),
+			calc(-1px * var(--ed11y-flip)) 0 var(--ed11y-activeBorder),
 			2px 0 var(--ed11y-activeBackground),
 			-2px 0 var(--ed11y-activeBackground);
 
 		svg {
 			width: 1.071em;
-			margin: 5px -1px 3px 0;
+			margin: 5px 0 3px;
+			margin-inline-end: -1px;
 			vertical-align: top;
 			opacity: 0.98;
 		}
@@ -276,17 +288,19 @@ ed11y-element-result {
 
 button.ed11y-jump {
 	grid-area: next;
-	margin-left: -6px;
-	padding-left: 3px;
-	border-radius: 0 0.5em 0.5em 0;
+	margin-inline-start: -6px;
+	padding-inline-start: 3px;
+	border-start-end-radius: 0.5em;
+	border-end-end-radius: 0.5em;
 	box-shadow:
 		0 0 0 1px var(--ed11y-activePanelBorder),
-		-2px 0 var(--ed11y-activeBackground);
+		calc(-2px * var(--ed11y-flip)) 0 var(--ed11y-activeBackground);
 
 	.toggle-count {
 		display: block;
 		min-width: 1.375em;
-		padding: 0 6px 0 9px;
+		padding: 0;
+		padding-inline: 9px 6px;
 	}
 
 	svg {
@@ -294,12 +308,15 @@ button.ed11y-jump {
 	}
 
 	&:hover {
-		border-radius: 0 0.45em 0.45em 0;
+		border-start-end-radius: 0.45em;
+		border-end-end-radius: 0.45em;
 
 		svg {
 			display: initial;
 			width: 0.643em;
-			margin: 0.5em 0 0 5%;
+			margin: 0.5em 0 0;
+			margin-inline-start: 5%;
+			transform: scaleX(var(--ed11y-flip));
 		}
 
 		.toggle-count {
@@ -316,7 +333,7 @@ button.ed11y-jump {
 		box-shadow:
 			0 1px,
 			0 -1px,
-			-1px 0;
+			calc(-1px * var(--ed11y-flip)) 0;
 		transition:
 			background-color 0.2s ease-in,
 			opacity 0.2s ease-in,
@@ -337,7 +354,8 @@ button.ed11y-jump {
 	}
 
 	svg {
-		margin: 5px 1px 2px 0;
+		margin: 5px 0 2px;
+		margin-inline-end: 1px;
 	}
 
 	svg:first-child,
@@ -348,33 +366,37 @@ button.ed11y-jump {
 
 #ed11y-visualize {
 	grid-area: visualize;
-	padding: 0 12px 0 6px;
-	margin-right: -3px;
+	padding: 0;
+	padding-inline: 6px 12px;
+	margin-inline-end: -3px;
 }
 
 #ed11y-reports-link,
 #ed11y-show-hidden:first-child,
 .ed11y-buttonbar [hidden]:first-child + #ed11y-visualize {
-	padding: 0 6px 0 10px;
-	border-radius: 0.5em 0 0 0.5em;
+	padding: 0;
+	padding-inline: 10px 6px;
+	border-start-start-radius: 0.5em;
+	border-end-start-radius: 0.5em;
 	box-shadow:
-		-1px 0 var(--ed11y-activePanelBorder),
+		calc(-1px * var(--ed11y-flip)) 0 var(--ed11y-activePanelBorder),
 		0 -1px var(--ed11y-activePanelBorder),
 		0 1px var(--ed11y-activePanelBorder),
-		2px 0 var(--ed11y-activeBackground);
+		calc(2px * var(--ed11y-flip)) 0 var(--ed11y-activeBackground);
 }
 
 .ed11y-buttonbar [hidden]:first-child + #ed11y-visualize {
-	padding: 0 11px 0 10px;
+	padding-inline: 10px 11px;
 }
 
 #ed11y-reports-link {
-	padding: 0 0 0 4px;
+	padding-inline: 4px 0;
 	grid-area: reports;
 
 	svg {
 		width: 1em;
-		margin: 0.5em 0 0 -1px;
+		margin: 0.5em 0 0;
+		margin-inline-start: -1px;
 	}
 }
 
@@ -393,9 +415,9 @@ button.ed11y-jump {
 		button[aria-pressed="true"],
 		#ed11y-visualize[data-ed11y-pressed="true"] {
 			box-shadow:
-				inset 1px 1px 3px 1px #000,
+				inset calc(1px * var(--ed11y-flip)) 1px 3px 1px #000,
 				0 0 0 1px var(--ed11y-activeBackground),
-				7px 0 var(--ed11y-activeBackground);
+				calc(7px * var(--ed11y-flip)) 0 var(--ed11y-activeBackground);
 		}
 
 		button .ed11y-sr-only {
@@ -439,8 +461,9 @@ button.ed11y-jump {
 	}
 
 	details[open] .close-details svg {
-		float: right;
-		margin: 2px 0 0 10px;
+		float: inline-end;
+		margin: 2px 0 0;
+		margin-inline-start: 10px;
 		display: block;
 		width: 12px;
 	}
@@ -489,7 +512,7 @@ button.ed11y-jump {
 	overflow: visible;
 	font-size: 1em;
 	background: transparent;
-	border-right: 0;
+	border-inline-end: 0;
 	box-shadow: none;
 	opacity: 1;
 	grid-area: toggle;
@@ -543,7 +566,7 @@ button.ed11y-jump {
 		box-shadow:
 			0 1px,
 			0 -1px,
-			-1px 0;
+			calc(-1px * var(--ed11y-flip)) 0;
 		transition: all 0.2s;
 	}
 
@@ -551,10 +574,10 @@ button.ed11y-jump {
 	#ed11y-show-hidden:first-child,
 	[hidden]:first-child + #ed11y-visualize {
 		box-shadow:
-			-1px 0,
+			calc(-1px * var(--ed11y-flip)) 0,
 			0 -1px,
 			0 1px,
-			2px 0;
+			calc(2px * var(--ed11y-flip)) 0;
 	}
 
 	#ed11y-toggle {
@@ -655,29 +678,33 @@ button.ed11y-jump {
 	}
 
 	#ed11y-visualize {
-		padding-right: 10px;
+		padding-inline-end: 10px;
 	}
 }
 
 #ed11y-headings-tab summary > svg {
 	width: 16px;
-	margin: 0 8px -3px -1px;
+	margin: 0 0 -3px;
+	margin-inline: -1px 8px;
 }
 
 #ed11y-alts-tab summary > svg {
 	width: 18px;
-	margin: 0 8px -3px -2px;
+	margin: 0 0 -3px;
+	margin-inline: -2px 8px;
 }
 
 #ed11y-links-tab summary > svg {
 	width: 17px;
-	margin: 0 8px -3px -2px;
+	margin: 0 0 -3px;
+	margin-inline: -2px 8px;
 }
 
 #ed11y-readability-tab {
 	summary > svg {
 		width: 18px;
-		margin: 0 8px -3px -2px;
+		margin: 0 0 -3px;
+		margin-inline: -2px 8px;
 	}
 
 	strong {
@@ -772,12 +799,14 @@ button.ed11y-jump {
 }
 
 #ed11y-outline {
-	margin: 0 0 0 -7px;
+	margin: 0;
+	margin-inline-start: -7px;
 
 	li {
 		padding: 3px 8px;
 		margin: 5px -8px;
-		border-radius: 12px 0 0 12px;
+		border-start-start-radius: 12px;
+		border-end-start-radius: 12px;
 	}
 
 	a {
@@ -799,7 +828,8 @@ button.ed11y-jump {
    next, clamped to two lines. The button is a copy of the on-page result
    toggle (see .ed11y-result-wrapper .toggle). */
 #ed11y-link-list {
-	margin: 0 4px 0 6px;
+	margin: 0;
+	margin-inline: 6px 4px;
 
 	li {
 		display: grid;
@@ -808,7 +838,8 @@ button.ed11y-jump {
 			"mark status"
 			"mark link";
 		padding: 6px 8px;
-		margin: 8px 0 8px -8px;
+		margin: 8px 0;
+		margin-inline-start: -8px;
 		border-radius: 4px;
 		column-gap: 8px;
 		box-shadow:
@@ -859,10 +890,11 @@ button.ed11y-jump {
 }
 
 #ed11y-alt-list {
-	margin: 0 4px 0 6px;
+	margin: 0;
+	margin-inline: 6px 4px;
 
 	li {
-		margin-left: -8px;
+		margin-inline-start: -8px;
 	}
 
 	.alt-parent {
@@ -1089,21 +1121,22 @@ ed11y-element-result[data-ed11y-open="true"] {
 
 	.close {
 		position: absolute;
-		right: 0;
+		inset-inline-end: 0;
 		width: 32px;
 		height: 32px;
-		border-radius: 0 calc(var(--ed11y-borderRadius) - 2px);
-		box-shadow: -1px 1px;
+		border-start-end-radius: calc(var(--ed11y-borderRadius) - 2px);
+		border-end-start-radius: calc(var(--ed11y-borderRadius) - 2px);
+		box-shadow: calc(-1px * var(--ed11y-flip)) 1px;
 
 		&:hover {
 			color: var(--ed11y-primary, #276499);
 			background: var(--ed11y-primaryText, #fffffe);
-			box-shadow: inset 1px -1px var(--ed11y-primary, #276499);
+			box-shadow: inset calc(1px * var(--ed11y-flip)) -1px var(--ed11y-primary, #276499);
 		}
 
 		svg {
 			width: 12px;
-			margin-left: 2px;
+			margin-inline-start: 2px;
 		}
 	}
 
@@ -1114,6 +1147,29 @@ ed11y-element-result[data-ed11y-open="true"] {
 
 	&.open .tip {
 		display: block;
+		&.overflow {
+			width: auto;
+			min-width: 0;
+			margin: 0;
+			inset: 0;
+			position: fixed;
+			overflow: auto;
+			border-radius: 0;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			overscroll-behavior: contain;
+			.title {
+				padding: 1vw 0;
+				margin: 33px 0 0;
+			}
+			.content {
+				padding: 2vw 2vw 10px;
+			}
+			.content-footer {
+				flex-direction: column;
+			}
+		}
 	}
 
 	.arrow {
@@ -1195,6 +1251,8 @@ ed11y-element-result[data-ed11y-open="true"] {
 		font-style: normal;
 		border-radius: 2px;
 		line-height: 1.25;
+		/* Code and quoted content take their direction from their own text, not the tip's. */
+		unicode-bidi: plaintext;
 	}
 
 	code {
@@ -1218,8 +1276,10 @@ ed11y-element-result[data-ed11y-open="true"] {
 
 .ed11y-tip-wrapper {
 	.invisible-alert:not(:empty) {
-		padding: 13px 12px 12px 16px;
-		margin: 10px 6px 0px -1px;
+		padding: 13px 0 12px;
+		padding-inline: 16px 12px;
+		margin: 10px 0 0;
+		margin-inline: -1px 6px;
 		font-size: 90%;
 		font-style: italic;
 		font-weight: bold;
@@ -1264,7 +1324,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 		button,
 		summary {
 			line-height: 1;
-			border-left: 1px solid;
+			border-inline-start: 1px solid;
 		}
 
 		& > button,
@@ -1313,12 +1373,30 @@ ed11y-element-result[data-ed11y-open="true"] {
 		grid-area: previous;
 
 		svg {
-			transform: rotate(180deg) translateY(-1px);
+			transform: rotate(180deg) translateY(-1px) scaleX(var(--ed11y-flip));
 		}
 	}
 
 	.next {
 		grid-area: next;
+
+		svg {
+			transform: scaleX(var(--ed11y-flip));
+		}
+	}
+
+	.footer.overflow,
+	.overflow .footer {
+		grid-template-rows: 2.124em 2.124em 2.124em;
+		grid-template-columns: 1fr 1fr 1fr;
+		grid-template-areas: "badge badge badge" "buttons buttons buttons" "previous focus next";
+		button,
+		summary {
+			border: 0;
+			box-shadow: inset 0 0 0 1px;
+			padding-top: 1px;
+			width: 100%;
+		}
 	}
 
 	.ed11y-tip-help-content {
@@ -1359,7 +1437,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 
 	.title {
 		padding: 10px 0 0.6125em 0;
-		margin-right: 40px;
+		margin-inline-end: 40px;
 		font-size: 1.125em;
 		font-weight: bold;
 		outline: transparent;
@@ -1372,7 +1450,8 @@ ed11y-element-result[data-ed11y-open="true"] {
 	}
 
 	.content {
-		padding: 0 13px 1.14em 16px;
+		padding: 0 0 1.14em;
+		padding-inline: 16px 13px;
 	}
 
 	button {
@@ -1383,11 +1462,11 @@ ed11y-element-result[data-ed11y-open="true"] {
 	}
 
 	ul {
-		margin-block: 0.643em;
-		padding-inline-start: 20px;
+		margin-block: min(9px, 3vw);
+		padding-inline-start: min(20px, 5vw);
 
 		&:last-child {
-			margin-block-end: 0.321em;
+			margin-block-end: 4.5px;
 		}
 	}
 
@@ -1458,7 +1537,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 		span {
 			display: inline-flex;
 			align-items: center;
-			margin-right: 6px;
+			margin-inline-end: 6px;
 		}
 	}
 
@@ -1491,7 +1570,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 		a,
 		button {
 			height: 2.5em;
-			margin-right: 1px;
+			margin-inline-end: 1px;
 			color: var(--ed11y-bg, #fffffe);
 			text-decoration: none;
 			background: var(--ed11y-text, #20160c);
@@ -1501,25 +1580,26 @@ ed11y-element-result[data-ed11y-open="true"] {
 			}
 
 			&:first-child {
-				border-top-left-radius: var(--ed11y-borderRadius, 1px);
-				border-bottom-left-radius: var(--ed11y-borderRadius, 1px);
+				border-start-start-radius: var(--ed11y-borderRadius, 1px);
+				border-end-start-radius: var(--ed11y-borderRadius, 1px);
 			}
 
 			&:last-child {
-				border-top-right-radius: var(--ed11y-borderRadius, 1px);
-				border-bottom-right-radius: var(--ed11y-borderRadius, 1px);
+				border-start-end-radius: var(--ed11y-borderRadius, 1px);
+				border-end-end-radius: var(--ed11y-borderRadius, 1px);
 			}
 		}
 
 		.ed11y-transfer-icon svg {
 			height: 12px;
-			margin: 0 2px 0 0;
+			margin: 0;
+			margin-inline-end: 2px;
 		}
 
 		.ed11y-custom-edit-icon {
 			display: inline-block;
 			width: 0.8375em;
-			margin-right: 0.325em;
+			margin-inline-end: 0.325em;
 			vertical-align: middle;
 		}
 	}
@@ -1537,7 +1617,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 
 	.ed11y-bulk-actions-content {
 		position: absolute;
-		right: 0;
+		inset-inline-end: 0;
 		bottom: 2.75em;
 		z-index: 1;
 		display: flex;
@@ -1545,7 +1625,8 @@ ed11y-element-result[data-ed11y-open="true"] {
 		align-items: baseline;
 		width: max-content;
 		padding-bottom: 1em;
-		margin: -1px 0 0 -1px;
+		margin: -1px 0 0;
+		margin-inline-start: -1px;
 		background: var(--ed11y-primary, #fffffe);
 		border: 1px solid var(--ed11y-primaryText, #fffffe);
 
@@ -1559,7 +1640,8 @@ ed11y-element-result[data-ed11y-open="true"] {
 	.dismiss[open] {
 		color: var(--ed11y-primary, #fffffe);
 		background: var(--ed11y-primaryText, #276499);
-		border-radius: 0 var(--ed11y-borderRadius, 1px) 0 0;
+		border-radius: 0;
+		border-start-end-radius: var(--ed11y-borderRadius, 1px);
 	}
 
 	/* Target of a link checker result. */
@@ -1619,14 +1701,6 @@ ed11y-element-result[data-ed11y-open="true"] {
 	margin-bottom: -0.1em;
 }
 
-@media screen and (max-width: 640px) {
-	.ed11y-tip-wrapper {
-		.error-badge {
-			display: none;
-		}
-	}
-}
-
 /* Heading level visualizer ============= */
 :host(ed11y-element-heading-label.ed11y-element) {
 	position: absolute;
@@ -1636,7 +1710,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 
 .ed11y-heading-wrapper {
 	padding: 0 0.5em;
-	margin-left: 35px;
+	margin-inline-start: 35px;
 	font-weight: 400;
 	line-height: 1.2;
 	color: var(--ed11y-primaryText, #fffdf7);
@@ -1851,9 +1925,11 @@ ed11y-element-result.ed11y-preload,
 	}
 
 	#contrast {
-		margin-right: -0.5em;
-		border-right: 0;
-		border-radius: 1em 0 0 1em;
+		margin-inline-end: -0.5em;
+		border-inline-end: 0;
+		border-radius: 0;
+		border-start-start-radius: 1em;
+		border-end-start-radius: 1em;
 
 		&::after {
 			content: ":";
@@ -1861,9 +1937,11 @@ ed11y-element-result.ed11y-preload,
 	}
 
 	#value {
-		padding-left: 0;
-		border-left: 0;
-		border-radius: 0 1em 1em 0;
+		padding-inline-start: 0;
+		border-inline-start: 0;
+		border-radius: 0;
+		border-start-end-radius: 1em;
+		border-end-end-radius: 1em;
 	}
 
 	.good-contrast {
@@ -1900,5 +1978,18 @@ ed11y-element-result.ed11y-preload,
 	.error {
 		border: 1px dashed;
 		padding: 1em;
+	}
+}
+
+/* 320 */
+/* @todo: focus looping */
+@media (max-height: 20rem), (max-width: 30rem) {
+	#ed11y-visualizers details[open] {
+		position: fixed;
+		inset: 0;
+		max-height: none;
+		min-width: 0;
+		background: var(--ed11y-bg);
+		z-index: calc(var(--ed11y-buttonZIndex) + 10);
 	}
 }
