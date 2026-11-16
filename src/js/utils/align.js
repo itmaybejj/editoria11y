@@ -65,6 +65,25 @@ export function closestScrollable(el) {
   }
 }
 
+export function focusLoop(wrapper) {
+  const focusLoopLeft = document.createElement('div');
+  focusLoopLeft.setAttribute('tabIndex', '0');
+  focusLoopLeft.classList.add('focus-looper');
+  const focusLoopRight = document.createElement('div');
+  focusLoopRight.setAttribute('tabindex', '0');
+  focusLoopRight.classList.add('focus-looper')
+  wrapper.appendChild(focusLoopLeft);
+  wrapper.appendChild(focusLoopRight);
+  const focusables = wrapper.querySelectorAll('a, button, [tabindex="0"]');
+  const count = focusables.length;
+  focusables[0].addEventListener('focus', () => {
+    focusables[count - 2].focus();
+  });
+  focusables[count - 1].addEventListener('focus', () => {
+    focusables[1].focus();
+  });
+}
+
 // Applies parameters and avoids other widgets.
 export function alignPanel() {
   if (!UI.panel || typeof UI.panel.classList?.add !== 'function') {

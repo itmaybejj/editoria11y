@@ -1104,6 +1104,8 @@ ed11y-element-result[data-ed11y-open="true"] {
 	position: relative;
 	overflow: visible;
 	color: var(--ed11y-text, #20160c);
+	border: none;
+	background: transparent;
 
 	.tip {
 		position: absolute;
@@ -1145,7 +1147,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 		background: var(--ed11y-warning);
 	}
 
-	&.open .tip {
+	&[open] .tip {
 		display: block;
 		&.overflow {
 			width: auto;
@@ -1237,7 +1239,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 		}
 	}
 
-	&.open .arrow {
+	&[open] .arrow {
 		display: block;
 	}
 

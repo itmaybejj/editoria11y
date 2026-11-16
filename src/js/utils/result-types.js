@@ -25,19 +25,18 @@ import { UI } from '../core/ui.js';
 // same alert (error) or warning styling the built-in checks use. The shared
 // `ed11y-link` class only swaps the glyph for an icon; `className` is a
 // per-type hook for themes and tests and carries no styles of its own.
-export const LINK_CLASS = 'ed11y-link';
-export const LINK_RESULT_TYPES = {
+export const linkTypes = {
   link: { badge: 'linkBrokenBadge', className: 'ed11y-link-broken', severity: 'error' },
   linkManual: { badge: 'linkManualBadge', className: 'ed11y-link-manual', severity: 'warning' },
 };
 
 export const isLinkResult = (result) =>
-  typeof result?.type === 'string' && Object.hasOwn(LINK_RESULT_TYPES, result.type);
+  typeof result?.type === 'string' && Object.hasOwn(linkTypes, result.type);
 
 // Whether a result is painted with warning (yellow) rather than alert (red)
 // colors. Broken links can be marked OK, but still read as errors.
 export const isWarningStyled = (result) =>
-  result?.type !== 'error' && LINK_RESULT_TYPES[result?.type]?.severity !== 'error';
+  result?.type !== 'error' && linkTypes[result?.type]?.severity !== 'error';
 
 export const isManualLink = (result) => result?.type === 'linkManual';
 

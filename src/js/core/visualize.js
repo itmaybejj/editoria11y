@@ -9,15 +9,14 @@ import sprite from '../elements/sprite.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { UI } from './ui.js';
 import {
-  LINK_CLASS,
-  LINK_RESULT_TYPES,
+  linkTypes,
   isLinkResult,
   isWarningStyled,
 } from '../utils/result-types.js';
 import { displayHref, linkStatusLabel } from '../rulesets/broken-links.js';
 import { jumpTo } from './run.js';
 
-const linkTypeClasses = Object.values(LINK_RESULT_TYPES).map((type) => type.className);
+const linkTypeClasses = Object.values(linkTypes).map((type) => type.className);
 
 // Paints the toggle with the error or warning colors of the result's
 // severity; link-check results also get their own class, icon and label.
@@ -25,12 +24,12 @@ const linkTypeClasses = Object.values(LINK_RESULT_TYPES).map((type) => type.clas
 // `link` and `linkManual` across rechecks without changing the
 // dismissable/dismissed pair that the adoption path already compares.
 const decorateToggle = (toggle, result, dismissed) => {
-  const wasLink = toggle.classList.contains(LINK_CLASS);
-  toggle.classList.remove(LINK_CLASS, ...linkTypeClasses);
+  const wasLink = toggle.classList.contains('ed11y-link');
+  toggle.classList.remove('ed11y-link', ...linkTypeClasses);
   toggle.classList.toggle('dismissable', isWarningStyled(result) && !dismissed);
   if (isLinkResult(result)) {
-    const linkType = LINK_RESULT_TYPES[result.type];
-    toggle.classList.add(LINK_CLASS, linkType.className);
+    const linkType = linkTypes[result.type];
+    toggle.classList.add('ed11y-link', linkType.className);
     toggle.setAttribute('aria-label', Lang._(linkType.badge));
     toggle.innerHTML = dismissed ? sprite.linkHidden : sprite.linkBroken;
   } else if (wasLink) {

@@ -984,6 +984,8 @@ button.ed11y-jump:hover .toggle-count {
 
 .ed11y-tip-wrapper {
   color: var(--ed11y-text, #20160c);
+  background: none;
+  border: none;
   position: relative;
   overflow: visible;
 }
@@ -1000,30 +1002,6 @@ button.ed11y-jump:hover .toggle-count {
   border-bottom: 0;
   display: none;
   position: absolute;
-}
-
-.ed11y-tip-wrapper .tip.overflow {
-  border-radius: 0;
-  width: auto;
-  min-width: 0;
-  margin: 0;
-  position: fixed;
-  inset: 2%;
-  overflow: auto;
-}
-
-.ed11y-tip-wrapper .tip.overflow .title {
-  margin: 33px 0 0;
-  padding: 1vw;
-}
-
-.ed11y-tip-wrapper .tip.overflow .content {
-  min-height: calc(96vh - 7em);
-  padding: 1vw 1vw 10px;
-}
-
-.ed11y-tip-wrapper .tip.overflow .content-footer {
-  flex-direction: column;
 }
 
 .ed11y-tip-wrapper .close {
@@ -1052,8 +1030,35 @@ button.ed11y-jump:hover .toggle-count {
   background: var(--ed11y-warning);
 }
 
-.ed11y-tip-wrapper.open .tip {
+.ed11y-tip-wrapper[open] .tip {
   display: block;
+}
+
+.ed11y-tip-wrapper[open] .tip.overflow {
+  overscroll-behavior: contain;
+  border-radius: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+}
+
+.ed11y-tip-wrapper[open] .tip.overflow .title {
+  margin: 33px 0 0;
+  padding: 1vw 0;
+}
+
+.ed11y-tip-wrapper[open] .tip.overflow .content {
+  padding: 2vw 2vw 10px;
+}
+
+.ed11y-tip-wrapper[open] .tip.overflow .content-footer {
+  flex-direction: column;
 }
 
 .ed11y-tip-wrapper .arrow {
@@ -1112,7 +1117,7 @@ button.ed11y-jump:hover .toggle-count {
 				var(--ed11y-primary, #276499) 49%);
 }
 
-.ed11y-tip-wrapper.open .arrow {
+.ed11y-tip-wrapper[open] .arrow {
   display: block;
 }
 

@@ -8601,8 +8601,7 @@ class Ed11yElementTip extends HTMLElement {
     if (this.isLink) {
       badge = this.dismissed ? Lang._("linkHiddenBadge") : Lang._(LINK_RESULT_TYPES[this.result.type].badge);
     }
-    this.wrapper = document.createElement("div");
-    this.wrapper.setAttribute("role", "dialog");
+    this.wrapper = document.createElement("dialog");
     this.wrapper.dataset.ed11yDismiss = this.result.dismiss;
     this.wrapper.classList.add("ed11y-tip-wrapper", "ed11y-wrapper");
     this.wrapper.style.setProperty("opacity", "0");
@@ -8867,22 +8866,8 @@ class Ed11yElementTip extends HTMLElement {
     };
     document.addEventListener("click", this._handleDocumentClick);
     shadow.appendChild(this.wrapper);
-    const focusLoopLeft = document.createElement("div");
-    focusLoopLeft.setAttribute("tabIndex", "0");
-    const focusLoopRight = document.createElement("div");
-    focusLoopRight.setAttribute("tabindex", "0");
-    this.wrapper.appendChild(focusLoopLeft);
     this.wrapper.appendChild(arrow);
     this.wrapper.appendChild(this.tip);
-    this.wrapper.appendChild(focusLoopRight);
-    const focusables = this.wrapper.querySelectorAll('a, button, [tabindex="0"]');
-    const count = focusables.length;
-    focusables[0].addEventListener("focus", () => {
-      focusables[count - 2].focus();
-    });
-    focusables[count - 1].addEventListener("focus", () => {
-      focusables[1].focus();
-    });
     this.initialized = true;
     this.rendering = false;
   }
@@ -8998,10 +8983,14 @@ class Ed11yElementTip extends HTMLElement {
   }
   toggleTip(changeTo) {
     if (changeTo) {
-      this.wrapper.classList.add("open");
+      if (window.innerWidth < 320 || window.innerHeight < 320) {
+        this.wrapper.showModal();
+      } else {
+        this.wrapper.show();
+      }
       alertOnInvisibleTip(this.result.toggle, this.result.element);
     } else {
-      this.wrapper.classList.remove("open");
+      this.wrapper.requestClose();
     }
     this.setAttribute("data-ed11y-open", changeTo);
   }

@@ -31,6 +31,7 @@ import {
   alignPanel,
   checkEditableIntersects,
   closestScrollable,
+  focusLoop,
   updateFixedRootPositions,
 } from '../utils/align.js';
 import checkEmbeddedContent from '../../sa11y-js/rulesets/embedded-content';
@@ -178,6 +179,7 @@ export function updatePanel() {
         UI.panel.querySelector('#ed11y-readability-tab .summary-title').textContent =
           Lang._('READABILITY');
       }
+      focusLoop(detailsTab);
       if (State.option.brokenLinks?.length) {
         const linksTab = document.createElement('details');
         linksTab.id = 'ed11y-links-tab';
@@ -197,6 +199,7 @@ export function updatePanel() {
             setShowDismissals(true);
           }
         });
+        focusLoop(linksTab);
         UI.panel.querySelector('#ed11y-visualizers').appendChild(linksTab);
       }
 
