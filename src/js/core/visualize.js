@@ -402,7 +402,6 @@ export function drawResult(result, index) {
   mark.toggle.setAttribute('class', 'toggle');
   const label = mark.dismissable ? Lang._('WARNING') : Lang._('ERROR');
   mark.toggle.setAttribute('aria-label', label);
-  mark.toggle.setAttribute('aria-expanded', 'false');
   mark.toggle.setAttribute('aria-haspopup', 'dialog');
   mark.toggle.setAttribute('data-ed11y-result', mark.dataset.ed11yResult);
   mark.toggle.setAttribute('data-ed11y-ready', 'false');

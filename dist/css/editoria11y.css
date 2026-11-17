@@ -986,6 +986,7 @@ button.ed11y-jump:hover .toggle-count {
   color: var(--ed11y-text, #20160c);
   background: none;
   border: none;
+  padding: 0;
   position: relative;
   overflow: visible;
 }

@@ -327,8 +327,8 @@ test.describe('Link checker results', () => {
         r.shadowRoot.querySelector('.toggle').getAttribute('aria-label'),
       ),
     );
-    expect(labels[0], 'First alert counts every alert').toMatch(/^Alert 1 \/ 10,/);
-    expect(labels.at(-1), 'Last alert is numbered as the total').toMatch(/^Alert 10 \/ 10,/);
+    expect(labels[0], 'First alert counts every alert').toMatch(/^Alert 1,/);
+    expect(labels.at(-1), 'Last alert is numbered as the total').toMatch(/^Alert 10,/);
   });
 
   test('labels links with a reason by that reason in the Links visualizer', async ({ page }) => {

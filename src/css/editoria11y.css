@@ -857,10 +857,12 @@ button.ed11y-jump {
 			border-radius: 50%;
 			border: 0;
 		}
+
 		.ed11y-link-broken {
 			background-color: #fff;
 			color: var(--ed11y-alert, #b80519);
 		}
+
 		.dismissed {
 			background-color: var(--ed11y-ok, #1f5381);
 			color: #fff;
@@ -1106,6 +1108,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 	color: var(--ed11y-text, #20160c);
 	border: none;
 	background: transparent;
+	padding: 0;
 
 	.tip {
 		position: absolute;
@@ -1149,6 +1152,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 
 	&[open] .tip {
 		display: block;
+
 		&.overflow {
 			width: auto;
 			min-width: 0;
@@ -1161,13 +1165,16 @@ ed11y-element-result[data-ed11y-open="true"] {
 			flex-direction: column;
 			justify-content: space-between;
 			overscroll-behavior: contain;
+
 			.title {
 				padding: 1vw 0;
 				margin: 33px 0 0;
 			}
+
 			.content {
 				padding: 2vw 2vw 10px;
 			}
+
 			.content-footer {
 				flex-direction: column;
 			}
@@ -1392,6 +1399,7 @@ ed11y-element-result[data-ed11y-open="true"] {
 		grid-template-rows: 2.124em 2.124em 2.124em;
 		grid-template-columns: 1fr 1fr 1fr;
 		grid-template-areas: "badge badge badge" "buttons buttons buttons" "previous focus next";
+
 		button,
 		summary {
 			border: 0;

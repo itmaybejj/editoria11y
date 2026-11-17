@@ -462,7 +462,11 @@ export function buildJumpList() {
   sweepOrphans();
   UI.jumpList.forEach((el, i) => {
     el.dataset.ed11yJumpPosition = `${i}`;
-    const newLabel = `${Lang._('ALERT_TEXT')} ${i + 1} / ${UI.jumpList.length},${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}`;
+    let oldLabel = el.shadowRoot.querySelector('.toggle').getAttribute('aria-label');
+    if (oldLabel?.includes(',')) {
+      oldLabel = oldLabel.split(',').slice(1).join(',').trim();
+    }
+    const newLabel = `${Lang._('ALERT_TEXT')} ${i + 1}, ${oldLabel}`;
     el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
   });
   const tipsPainted = new CustomEvent('ed11yResultsPainted');
@@ -707,7 +711,7 @@ export function alertOnInvisibleTip(button, target) {
       new CustomEvent('ed11yShowHidden', {
         detail: {
           result: button.getAttribute('data-ed11y-result'),
-          viaJump: UI.viaJump,
+          viaJump: UI.viaJump === 'jump',
         },
       }),
     );
@@ -738,7 +742,7 @@ export function alertOnInvisibleTip(button, target) {
         const tipAlert = UI.openTip.tip?.shadowRoot.querySelector('.invisible-alert');
         tipAlert.textContent = alertMessage;
       }
-      if (UI.viaJump) {
+      if (UI.viaJump === 'jump') {
         const scrollPin =
           window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600)
             ? 'center'
@@ -766,28 +770,7 @@ export function alertOnInvisibleTip(button, target) {
       // handler clicking outside it. Reopen it, unless the user closed it.
       if (!activeTip && !button.userClosed) {
         button.setAttribute('data-ed11y-action', 'open');
-        if (UI.viaJump) {
-          window.setTimeout(() => {
-            // Race conditions are fun.
-            const activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-            if (UI.viaJump) {
-              activeTip?.shadowRoot.querySelector('.close').focus();
-            }
-          }, 100);
-        }
-      } else {
-        if (UI.viaJump) {
-          window.setTimeout(
-            () => {
-              // Race conditions are fun.
-              activeTip?.shadowRoot.querySelector('.close').focus();
-            },
-            100,
-            activeTip,
-          );
-        }
       }
-      UI.viaJump = false;
     },
     delay,
     button,
@@ -799,7 +782,7 @@ export function jumpTo(next = true) {
   if (!UI.showPanel) {
     return false;
   }
-  UI.viaJump = true;
+  UI.viaJump = 'jump';
   resetClass(['ed11y-hidden-highlight']);
   if (UI.jumpList.length === 0) {
     buildJumpList();
@@ -807,7 +790,6 @@ export function jumpTo(next = true) {
   // Determine target result, looping at either end.
   const count = UI.jumpList.length;
   if (count === 0) {
-    UI.viaJump = false;
     return false;
   }
   const current = Number.isInteger(+UI.openJumpPosition) ? +UI.openJumpPosition : -1;
@@ -818,7 +800,7 @@ export function jumpTo(next = true) {
   UI.nextText = `${Lang._('SKIP_TO_ISSUE')} ${((goNum + 1) % count) + 1}`;
   window.setTimeout(() => {
     UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = UI.nextText;
-  }, 250);
+  }, 1000);
 
   const result = goto.getAttribute('data-ed11y-result');
   const gotoResult = State.results[result];

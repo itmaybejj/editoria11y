@@ -3,7 +3,6 @@ import { repaintAfterVisualizerToggle, togglePanel, toggleShowDismissals } from 
 import { visualize } from '../core/visualize';
 import sprite from './sprite.js';
 import { State } from '../../sa11y-js/core/state.js';
-import { focusLoop } from '../utils/align.js';
 
 export class Ed11yElementPanel extends HTMLElement {
   template() {
@@ -59,10 +58,12 @@ export class Ed11yElementPanel extends HTMLElement {
       panelTabs.forEach((tab) => {
         tab.addEventListener('click', this.handleBarClick);
       });
-      const detailElements = wrapper.querySelectorAll('details');
+      // @Todo: less than 320px focus looping
+      /*const detailElements = wrapper.querySelectorAll('details');
       detailElements.forEach((el) => {
         focusLoop(el);
-      });
+      });*/
+
       // One visualizer open at a time. `toggle` does not bubble, so listen
       // in the capture phase; this also covers tabs added later (links,
       // readability).

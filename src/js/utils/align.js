@@ -72,7 +72,7 @@ export function focusLoop(wrapper) {
   const focusLoopRight = document.createElement('div');
   focusLoopRight.setAttribute('tabindex', '0');
   focusLoopRight.classList.add('focus-looper');
-  wrapper.appendChild(focusLoopLeft);
+  wrapper.insertAdjacentElement('afterbegin', focusLoopLeft);
   wrapper.appendChild(focusLoopRight);
   const focusables = wrapper.querySelectorAll('a, button, [tabindex="0"]');
   const count = focusables.length;

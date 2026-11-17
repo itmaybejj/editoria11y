@@ -28,8 +28,6 @@ export class Ed11yElementTip extends HTMLElement {
     this.style.setProperty('outline', '0px solid transparent');
     const shadow = this.attachShadow({ mode: 'open' });
     this.issueIndex = Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition, 10);
-    this.issueNext = this.issueIndex < UI.jumpList.length - 1 ? this.issueIndex + 2 : 1;
-    this.issuePrev = this.issueIndex > 0 ? this.issueIndex : UI.jumpList.length;
 
     this.dismissable = this.result.type !== 'error';
     this.dismissed = !!this.result.dismissalStatus;
@@ -310,7 +308,6 @@ export class Ed11yElementTip extends HTMLElement {
     }
     if (UI.jumpList.length > 1) {
       this.prev = this.wrapper.querySelector('.prev');
-      this.prev.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issuePrev}`);
       this.prev.setAttribute('aria-label', Lang._('buttonPrev'));
       this.prev.addEventListener('click', (event) => {
         event.preventDefault();
@@ -318,7 +315,6 @@ export class Ed11yElementTip extends HTMLElement {
       });
 
       this.next = this.wrapper.querySelector('.next');
-      this.next.setAttribute('title', `${Lang._('SKIP_TO_ISSUE')} ${this.issueNext}`);
       this.next.setAttribute('aria-label', Lang._('buttonNext'));
       this.next.addEventListener('click', (event) => {
         event.preventDefault();

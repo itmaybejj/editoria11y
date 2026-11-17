@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.3-1116
+			* @version 3.0.3-1117
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -1872,7 +1872,7 @@ function findShadowComponents(option) {
     });
   }
 }
-const version = "3.0.3-1116";
+const version = "3.0.3-1117";
 const sprite = {
   alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
   close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -5079,7 +5079,7 @@ function focusLoop(wrapper) {
   const focusLoopRight = document.createElement("div");
   focusLoopRight.setAttribute("tabindex", "0");
   focusLoopRight.classList.add("focus-looper");
-  wrapper.appendChild(focusLoopLeft);
+  wrapper.insertAdjacentElement("afterbegin", focusLoopLeft);
   wrapper.appendChild(focusLoopRight);
   const focusables = wrapper.querySelectorAll('a, button, [tabindex="0"]');
   const count = focusables.length;
@@ -6500,7 +6500,6 @@ function drawResult(result, index) {
   mark.toggle.setAttribute("class", "toggle");
   const label = mark.dismissable ? Lang._("WARNING") : Lang._("ERROR");
   mark.toggle.setAttribute("aria-label", label);
-  mark.toggle.setAttribute("aria-expanded", "false");
   mark.toggle.setAttribute("aria-haspopup", "dialog");
   mark.toggle.setAttribute("data-ed11y-result", mark.dataset.ed11yResult);
   mark.toggle.setAttribute("data-ed11y-ready", "false");
@@ -6942,7 +6941,11 @@ function buildJumpList() {
   sweepOrphans();
   UI.jumpList.forEach((el, i) => {
     el.dataset.ed11yJumpPosition = `${i}`;
-    const newLabel = `${Lang._("ALERT_TEXT")} ${i + 1} / ${UI.jumpList.length},${el.shadowRoot.querySelector(".toggle").getAttribute("aria-label")}`;
+    let oldLabel = el.shadowRoot.querySelector(".toggle").getAttribute("aria-label");
+    if (oldLabel?.includes(",")) {
+      oldLabel = oldLabel.split(",").slice(1).join(",").trim();
+    }
+    const newLabel = `${Lang._("ALERT_TEXT")} ${i + 1}, ${oldLabel}`;
     el.shadowRoot.querySelector(".toggle").setAttribute("aria-label", newLabel);
   });
   const tipsPainted = new CustomEvent("ed11yResultsPainted");
@@ -7127,7 +7130,7 @@ function alertOnInvisibleTip(button, target) {
       new CustomEvent("ed11yShowHidden", {
         detail: {
           result: button.getAttribute("data-ed11y-result"),
-          viaJump: UI.viaJump
+          viaJump: UI.viaJump === "jump"
         }
       })
     );
@@ -7155,7 +7158,7 @@ function alertOnInvisibleTip(button, target) {
         const tipAlert = UI.openTip.tip?.shadowRoot.querySelector(".invisible-alert");
         tipAlert.textContent = alertMessage;
       }
-      if (UI.viaJump) {
+      if (UI.viaJump === "jump") {
         const scrollPin = window.innerHeight > 900 || window.innerWidth > 800 && window.innerHeight > 600 ? "center" : "start";
         let scrollTarget = UI.inlineAlerts ? button2 : target2;
         if (button2.dataset.ed11yHiddenResult || !visible(scrollTarget)) {
@@ -7178,26 +7181,7 @@ function alertOnInvisibleTip(button, target) {
       const activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
       if (!activeTip && !button2.userClosed) {
         button2.setAttribute("data-ed11y-action", "open");
-        if (UI.viaJump) {
-          window.setTimeout(() => {
-            const activeTip2 = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-            if (UI.viaJump) {
-              activeTip2?.shadowRoot.querySelector(".close").focus();
-            }
-          }, 100);
-        }
-      } else {
-        if (UI.viaJump) {
-          window.setTimeout(
-            () => {
-              activeTip?.shadowRoot.querySelector(".close").focus();
-            },
-            100,
-            activeTip
-          );
-        }
       }
-      UI.viaJump = false;
     },
     delay,
     button,
@@ -7208,14 +7192,13 @@ function jumpTo(next = true) {
   if (!UI.showPanel) {
     return false;
   }
-  UI.viaJump = true;
+  UI.viaJump = "jump";
   resetClass(["ed11y-hidden-highlight"]);
   if (UI.jumpList.length === 0) {
     buildJumpList();
   }
   const count = UI.jumpList.length;
   if (count === 0) {
-    UI.viaJump = false;
     return false;
   }
   const current = Number.isInteger(+UI.openJumpPosition) ? +UI.openJumpPosition : -1;
@@ -7225,7 +7208,7 @@ function jumpTo(next = true) {
   UI.nextText = `${Lang._("SKIP_TO_ISSUE")} ${(goNum + 1) % count + 1}`;
   window.setTimeout(() => {
     UI.panelJumpNext.querySelector(".ed11y-sr-only").textContent = UI.nextText;
-  }, 250);
+  }, 1e3);
   const result = goto.getAttribute("data-ed11y-result");
   const gotoResult = State.results[result];
   const target = gotoResult.element;
@@ -8164,6 +8147,7 @@ class Ed11yElementResult extends HTMLElement {
   }
   toggleClick(event) {
     event.preventDefault();
+    UI.viaJump = "toggle";
     const host = this.getRootNode().host;
     if (host.racing === false) {
       host.racing = true;
@@ -8173,12 +8157,6 @@ class Ed11yElementResult extends HTMLElement {
         host.userClosed = true;
       }
       host.setAttribute("data-ed11y-action", stateChange);
-      if (stateChange === "open") {
-        window.setTimeout(() => {
-          const activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-          activeTip?.shadowRoot.querySelector(".close").focus();
-        }, 250);
-      }
       window.setTimeout(
         () => {
           host.racing = false;
@@ -8188,8 +8166,8 @@ class Ed11yElementResult extends HTMLElement {
       );
     }
   }
-  closeOtherTips() {
-    if (UI.tipOpen) {
+  closeOtherTips(tip) {
+    if (UI.tipOpen && UI.openTip.button !== tip) {
       UI.openTip.button.setAttribute("data-ed11y-action", "close");
     }
   }
@@ -8207,7 +8185,6 @@ class Ed11yElementResult extends HTMLElement {
     if (this.tipNeedsBuild) {
       this.buildTip();
     }
-    this.toggle.setAttribute("aria-expanded", changeTo);
     const highlightOutline = isWarningStyled(this.result) ? "ed11y-ring-yellow" : "ed11y-ring-red";
     if (UI.inlineAlerts) {
       resetClass([
@@ -8234,7 +8211,20 @@ class Ed11yElementResult extends HTMLElement {
           }
         })
       );
-      this.closeOtherTips();
+      if (UI.viaJump) {
+        window.setTimeout(() => {
+          if (UI.openTip.tip === this.tip) {
+            this.tip.shadowRoot.querySelector(".close")?.focus();
+          }
+        }, 500);
+      }
+      UI.viaJump = false;
+      this.closeOtherTips(this);
+      UI.tipOpen = true;
+      UI.openTip = {
+        button: this,
+        tip: this.tip
+      };
       this.tip.setAttribute("data-ed11y-action", "open");
       if (UI.inlineAlerts) {
         this.result.element.classList.add(highlightOutline);
@@ -8245,11 +8235,6 @@ class Ed11yElementResult extends HTMLElement {
         buildJumpList();
       }
       UI.openJumpPosition = Number(this.getAttribute("data-ed11y-jump-position"));
-      UI.tipOpen = true;
-      UI.openTip = {
-        button: this,
-        tip: this.tip
-      };
       this.result.highlight?.style.setProperty("opacity", "1");
     } else {
       document.dispatchEvent(
@@ -8342,10 +8327,6 @@ class Ed11yElementPanel extends HTMLElement {
       const panelTabs = wrapper.querySelectorAll(".ed11y-buttonbar button");
       panelTabs.forEach((tab) => {
         tab.addEventListener("click", this.handleBarClick);
-      });
-      const detailElements = wrapper.querySelectorAll("details");
-      detailElements.forEach((el) => {
-        focusLoop(el);
       });
       const visualizers = wrapper.querySelector("#ed11y-visualizers");
       visualizers.addEventListener(
@@ -8667,8 +8648,6 @@ class Ed11yElementTip extends HTMLElement {
     this.style.setProperty("outline", "0px solid transparent");
     const shadow = this.attachShadow({ mode: "open" });
     this.issueIndex = Number.parseInt(this.result.toggle.dataset.ed11yJumpPosition, 10);
-    this.issueNext = this.issueIndex < UI.jumpList.length - 1 ? this.issueIndex + 2 : 1;
-    this.issuePrev = this.issueIndex > 0 ? this.issueIndex : UI.jumpList.length;
     this.dismissable = this.result.type !== "error";
     this.dismissed = !!this.result.dismissalStatus;
     this.isLink = isLinkResult(this.result);
@@ -8902,14 +8881,12 @@ class Ed11yElementTip extends HTMLElement {
     }
     if (UI.jumpList.length > 1) {
       this.prev = this.wrapper.querySelector(".prev");
-      this.prev.setAttribute("title", `${Lang._("SKIP_TO_ISSUE")} ${this.issuePrev}`);
       this.prev.setAttribute("aria-label", Lang._("buttonPrev"));
       this.prev.addEventListener("click", (event) => {
         event.preventDefault();
         jumpTo(false);
       });
       this.next = this.wrapper.querySelector(".next");
-      this.next.setAttribute("title", `${Lang._("SKIP_TO_ISSUE")} ${this.issueNext}`);
       this.next.setAttribute("aria-label", Lang._("buttonNext"));
       this.next.addEventListener("click", (event) => {
         event.preventDefault();
