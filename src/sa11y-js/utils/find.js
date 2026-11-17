@@ -19,7 +19,7 @@ export default function find(selector, desiredRoot, exclude) {
   } else if (desiredRoot === 'root') {
     root.push(Constants.Root.areaToCheck);
   } else {
-    // Spread: flat() below only unwraps arrays, not a NodeList.
+    // Needs spread: a later flat() only unwraps arrays.
     root.push(...document.querySelectorAll(desiredRoot));
   }
 

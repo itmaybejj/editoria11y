@@ -8,7 +8,8 @@ const port = Number(process.env.E2E_PORT || 8855);
 export default defineConfig({
   testDir: './tests',
   outputDir: './test-results',
-  timeout: 30_000,
+  // Pages are local and small; a test that needs longer is hung, not slow.
+  timeout: 2_000,
   // Every test loads its own page, so tests within a file can run in parallel.
   fullyParallel: true,
   // Fail fast locally; CI gets one retry for flaky timing.
@@ -20,6 +21,12 @@ export default defineConfig({
     headless: true,
     trace: 'retain-on-failure',
   },
+  projects: [
+    { name: 'e2e', testIgnore: '**/performance.spec.js' },
+    // Benchmark (performance.spec.js). Runs after the e2e tests so they do not compete for CPU.
+    // Alone: npm run test:perf
+    { name: 'perf', testMatch: '**/performance.spec.js', dependencies: ['e2e'] },
+  ],
   webServer: {
     command: 'node e2e/server.js',
     url: `http://127.0.0.1:${port}/tests/all_tests.htm`,

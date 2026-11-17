@@ -104,6 +104,7 @@ const runBuild = async (config) => {
 		'en',
 		'en-ca',
 		'en-gb',
+		'ar',
 		'bg',
 		'cs',
 		'da',

@@ -62,7 +62,7 @@ globalThis.localStorage ??= { getItem: () => null, setItem: () => { }, removeIte
 const { default: defaultOptions } = await import('../src/sa11y-js/utils/default-options.js');
 const { default: Sa11yStrings } = await import('../src/sa11y-lang/en.js');
 const { testNames, tips, interfaceStrings } = await import('../src/lang/baseAll.js');
-const { ed11yDefaultOptions } = await import('../src/js/utils/ed11y-default-options.js');
+const { defaults } = await import('../src/js/utils/defaults.js');
 const allowlistPath = path.join(repoRoot, 'src/lang/sa11y-ui-allowlist.json');
 const pkgPath = path.join(repoRoot, 'package.json');
 
@@ -99,7 +99,7 @@ const sa11yStringKeys = new Set(Object.keys(Sa11yStrings.strings));
 const testNameKeys = new Set(Object.keys(testNames));
 const tipKeys = new Set(Object.keys(tips));
 const interfaceKeys = new Set(Object.keys(interfaceStrings));
-const ed11yCheckKeys = new Set(Object.keys(ed11yDefaultOptions.checks || {}));
+const ed11yCheckKeys = new Set(Object.keys(defaults.checks || {}));
 
 /* ---------- Run checks ---------- */
 
@@ -117,7 +117,7 @@ for (const key of checkKeys) {
 }
 
 // 1b. Every Sa11y check key must also have a preference defined in
-//     ed11y-default-options.js. Unlike the tip-mirror check, deferredChecks
+//     defaults.js. Unlike the tip-mirror check, deferredChecks
 //     do NOT exempt a key here — a deferred check still needs a default
 //     preference so site admins can toggle or configure it. Only uiStrings
 //     are honored (for the rare case a non-check key gets filtered here).
@@ -216,7 +216,7 @@ if (jsonOut) {
 			for (const e of missingOpt) console.error(`    ${e.key}: true,`);
 			console.error(
 				'\n  Add each to the `checks:` object in\n' +
-				'  src/js/utils/ed11y-default-options.js (e.g. `KEY: false,` to\n' +
+				'  src/js/utils/defaults.js (e.g. `KEY: false,` to\n' +
 				'  leave disabled, or `KEY: true,` to enable by default).\n' +
 				'  Note: deferredChecks do NOT suppress this error — every Sa11y\n' +
 				'  check still needs a configurable default preference.',

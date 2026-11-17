@@ -10,7 +10,7 @@ import { Ed11yElementTip } from '../elements/ed11y-element-tip.js';
 import { lang } from '../../lang/en-us.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { UI } from './ui.js';
-import { ed11yDefaultOptions } from '../utils/ed11y-default-options.js';
+import { defaults } from '../utils/defaults.js';
 import { prepareCustomRuleset } from '../rulesets/custom-ruleset.js';
 import { prepareBrokenLinks } from '../rulesets/broken-links.js';
 import { SharedStyles } from '../utils/shared-styles.js';
@@ -47,9 +47,9 @@ const validateSelectorOptions = (userOptions) => {
 
 const preProcessOptions = async (userOptions) => {
   validateSelectorOptions(userOptions);
-  smush(State.option, ed11yDefaultOptions, ['checks']);
+  smush(State.option, defaults, ['checks']);
   smush(State.option, userOptions, ['checks']);
-  Object.assign(State.option.checks, ed11yDefaultOptions.checks, userOptions.checks);
+  Object.assign(State.option.checks, defaults.checks, userOptions.checks);
   if (!userOptions.lang) {
     State.option.lang = lang;
   }

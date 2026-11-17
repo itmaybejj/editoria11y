@@ -1,0 +1,19 @@
+{
+  "recorded": "2026-11-17",
+  "elements": 9493,
+  "results": 750,
+  "fingerprint": -738569089,
+  "medians": {
+    "total": 178.2,
+    "buildElementList": 25.3,
+    "checkContrast": 67.3,
+    "checkDeveloper": 3.3,
+    "checkLabels": 0.2,
+    "checkLinkText": 64.5,
+    "checkHeaders": 0.9,
+    "checkImages": 3.1,
+    "checkEmbeddedContent": 0,
+    "checkCustomRuleset": 0,
+    "checkQA": 20.7
+  }
+}

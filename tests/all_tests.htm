@@ -240,6 +240,22 @@
 			<iframe title="example" sandbox="" tabindex="-1" src="./iframe.htm"></iframe>
 		</div>
 
+		<p>Autoplaying video with no controls or pause button:</p>
+		<div class="positive">
+			<video autoplay muted loop width="320" height="180"></video>
+		</div>
+
+		<p>Details element with an empty summary:</p>
+		<div class="positive">
+			<details>
+				<summary></summary>Hidden content with no label.
+			</details>
+		</div>
+
+		<p>SVG without an accessible name:</p>
+		<div class="positive"><svg style="width: 32px; height: 32px;" xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#0a5f8a" /></svg></div>
+
 		<p>Nested interactive components</p>
 		<div class="positive">
 			<details>
@@ -399,6 +415,30 @@
 				</tr>
 			</tbody>
 		</table>
+
+		<h3 id="layout-tables">Tables likely used for layout</h3>
+
+		<table class="positive">
+			<tbody>
+				<tr>
+					<th>Single column table</th>
+				</tr>
+				<tr>
+					<td>Row one</td>
+				</tr>
+				<tr>
+					<td>Row two</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<table class="positive">
+			<tbody>
+				<tr>
+					<td>Single cell table</td>
+				</tr>
+			</tbody>
+		</table>
 		<h2 id="legibility">Legibility</h2>
 
 		<div class="positive">
@@ -472,6 +512,16 @@
 		</div>
 
 		<div class="positive">
+			<p>Button with redundant label, capitalized.</p>
+			<button>Submit Button</button>
+		</div>
+
+		<div class="negative">
+			<p>Button whose name has "button" only inside another word.</p>
+			<button>Unbutton the coat</button>
+		</div>
+
+		<div class="positive">
 			<p>Reset button.</p>
 			<input type="reset">
 		</div>
@@ -509,8 +559,8 @@
 
 		<script src="../dist/js/ed11y.umd.js"></script>
 		<script src="../dist/js/lang/en.umd.js"></script>
-		<script src="../dist/js/lang/es.umd.js"></script>
-		<script src="../dist/js/lang/de.umd.js"></script>
+		<!--<script src="../dist/js/lang/es.umd.js"></script>
+		<script src="../dist/js/lang/de.umd.js"></script>-->
 		<script>
 
 			/*

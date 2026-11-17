@@ -23,7 +23,12 @@ export class Ed11yElementResult extends HTMLElement {
   handleHover(event) {
     event.preventDefault();
     const host = this.getRootNode().host;
-    if (!this.classList.contains('intersecting') && host.open !== true && host.racing === false) {
+    if (
+      !this.classList.contains('intersecting') &&
+      host.open !== true &&
+      host.racing === false &&
+      window.innerWidth > 320
+    ) {
       this.open = true;
       host.racing = true;
       host.toggleTip(true);
@@ -48,20 +53,18 @@ export class Ed11yElementResult extends HTMLElement {
 
   toggleClick(event) {
     event.preventDefault();
+    UI.viaJump = 'toggle';
     const host = this.getRootNode().host;
     // Todo: fast rechecks and double clicks not being correctly intercepted.
     if (host.racing === false) {
       host.racing = true;
       UI.toggledFrom = this;
       const stateChange = host.getAttribute('data-ed11y-open') === 'false' ? 'open' : 'close';
-      host.setAttribute('data-ed11y-action', stateChange);
-      if (stateChange === 'open') {
-        window.setTimeout(() => {
-          // todo: what about fixed roots?
-          const activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-          activeTip?.shadowRoot.querySelector('.title').focus();
-        }, 500);
+      if (stateChange === 'close') {
+        // Keep alertOnInvisibleTip() from reopening it.
+        host.userClosed = true;
       }
+      host.setAttribute('data-ed11y-action', stateChange);
       window.setTimeout(
         () => {
           host.racing = false;
@@ -72,8 +75,8 @@ export class Ed11yElementResult extends HTMLElement {
     }
   }
 
-  closeOtherTips() {
-    if (UI.tipOpen) {
+  closeOtherTips(tip) {
+    if (UI.tipOpen && UI.openTip.button !== tip) {
       UI.openTip.button.setAttribute('data-ed11y-action', 'close');
     }
   }
@@ -94,7 +97,6 @@ export class Ed11yElementResult extends HTMLElement {
     if (this.tipNeedsBuild) {
       this.buildTip();
     }
-    this.toggle.setAttribute('aria-expanded', changeTo);
     const highlightOutline = isWarningStyled(this.result) ? 'ed11y-ring-yellow' : 'ed11y-ring-red';
     if (UI.inlineAlerts) {
       resetClass([
@@ -110,6 +112,7 @@ export class Ed11yElementResult extends HTMLElement {
       editableHighlighter(this.resultID, changeTo);
     }
     if (changeTo === true) {
+      this.userClosed = false;
       this.tip.style.setProperty('opacity', '0');
       // Allow for themes to reveal hidden tips
       document.dispatchEvent(
@@ -121,7 +124,20 @@ export class Ed11yElementResult extends HTMLElement {
           },
         }),
       );
-      this.closeOtherTips();
+      if (UI.viaJump) {
+        window.setTimeout(() => {
+          if (UI.openTip.tip === this.tip) {
+            this.tip.shadowRoot.querySelector('.close')?.focus();
+          }
+        }, 500);
+      }
+      UI.viaJump = false;
+      this.closeOtherTips(this);
+      UI.tipOpen = true;
+      UI.openTip = {
+        button: this,
+        tip: this.tip,
+      };
       this.tip.setAttribute('data-ed11y-action', 'open');
       if (UI.inlineAlerts) {
         this.result.element.classList.add(highlightOutline);
@@ -133,11 +149,6 @@ export class Ed11yElementResult extends HTMLElement {
         buildJumpList();
       }
       UI.openJumpPosition = Number(this.getAttribute('data-ed11y-jump-position'));
-      UI.tipOpen = true;
-      UI.openTip = {
-        button: this,
-        tip: this.tip,
-      };
       this.result.highlight?.style.setProperty('opacity', '1');
     } else {
       // Allow for themes to restore original DOM/CSS

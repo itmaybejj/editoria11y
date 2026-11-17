@@ -8,16 +8,11 @@ import checkReadability from '../../sa11y-js/rulesets/readability';
 import sprite from '../elements/sprite.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { UI } from './ui.js';
-import {
-  LINK_CLASS,
-  LINK_RESULT_TYPES,
-  isLinkResult,
-  isWarningStyled,
-} from '../utils/result-types.js';
+import { linkTypes, isLinkResult, isWarningStyled } from '../utils/result-types.js';
 import { displayHref, linkStatusLabel } from '../rulesets/broken-links.js';
 import { jumpTo } from './run.js';
 
-const linkTypeClasses = Object.values(LINK_RESULT_TYPES).map((type) => type.className);
+const linkTypeClasses = Object.values(linkTypes).map((type) => type.className);
 
 // Paints the toggle with the error or warning colors of the result's
 // severity; link-check results also get their own class, icon and label.
@@ -25,12 +20,12 @@ const linkTypeClasses = Object.values(LINK_RESULT_TYPES).map((type) => type.clas
 // `link` and `linkManual` across rechecks without changing the
 // dismissable/dismissed pair that the adoption path already compares.
 const decorateToggle = (toggle, result, dismissed) => {
-  const wasLink = toggle.classList.contains(LINK_CLASS);
-  toggle.classList.remove(LINK_CLASS, ...linkTypeClasses);
+  const wasLink = toggle.classList.contains('ed11y-link');
+  toggle.classList.remove('ed11y-link', ...linkTypeClasses);
   toggle.classList.toggle('dismissable', isWarningStyled(result) && !dismissed);
   if (isLinkResult(result)) {
-    const linkType = LINK_RESULT_TYPES[result.type];
-    toggle.classList.add(LINK_CLASS, linkType.className);
+    const linkType = linkTypes[result.type];
+    toggle.classList.add('ed11y-link', linkType.className);
     toggle.setAttribute('aria-label', Lang._(linkType.badge));
     toggle.innerHTML = dismissed ? sprite.linkHidden : sprite.linkBroken;
   } else if (wasLink) {
@@ -293,7 +288,7 @@ export function showHeadingsPanel() {
       const leftPad = 7 * result.headingLevel - 7;
       const li = document.createElement('li');
       li.classList.add(`level${result.headingLevel}`);
-      li.style.setProperty('margin-left', `${leftPad}px`);
+      li.style.setProperty('margin-inline-start', `${leftPad}px`);
       const levelPrefix = document.createElement('strong');
       levelPrefix.textContent = `H${result.headingLevel}: `;
       const userText = document.createElement('span');
@@ -407,7 +402,6 @@ export function drawResult(result, index) {
   mark.toggle.setAttribute('class', 'toggle');
   const label = mark.dismissable ? Lang._('WARNING') : Lang._('ERROR');
   mark.toggle.setAttribute('aria-label', label);
-  mark.toggle.setAttribute('aria-expanded', 'false');
   mark.toggle.setAttribute('aria-haspopup', 'dialog');
   mark.toggle.setAttribute('data-ed11y-result', mark.dataset.ed11yResult);
   mark.toggle.setAttribute('data-ed11y-ready', 'false');

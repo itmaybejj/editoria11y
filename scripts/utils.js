@@ -1,7 +1,17 @@
-import { transform, browserslistToTargets } from 'lightningcss';
+import { transform, browserslistToTargets, Features } from 'lightningcss';
 import browserslist from 'browserslist';
 
-const targets = browserslistToTargets(browserslist('defaults, not IE 11'));
+/**
+ * Shared lightningcss options for every CSS build.
+ *
+ * :dir() is excluded because lightningcss would otherwise rewrite it as a
+ * list of :lang() selectors for RTL languages, which never matches a page
+ * that sets dir="rtl" with any other lang (e.g. tests/rtl.htm).
+ */
+export const lightningOptions = {
+	targets: browserslistToTargets(browserslist('defaults, not IE 11')),
+	exclude: Features.DirSelector,
+};
 
 /**
  * CSS injection plugin.
@@ -16,7 +26,7 @@ export const injectCSSintoJS = () => ({
 					code: Buffer.from(code),
 					minify: true,
 					sourceMap: false,
-					targets: targets,
+					...lightningOptions,
 				});
 				return { code: minified.toString() };
 			} catch (e) {

@@ -28,6 +28,7 @@ const testNames = {
 	EMBED_MISSING_TITLE: 'Le cadre ne possède pas d’attribut « title »',
 	EMBED_UNFOCUSABLE: 'Un cadre avec tabindex="-1" ne sera pas accessible au clavier.',
 	EMBED_VIDEO: 'Cette vidéo est-elle correctement sous-titrée ?',
+	EMBED_VIDEO_AUTOPLAY: 'Les utilisateurs peuvent-ils mettre cette vidéo en pause ?',
 	HEADING_EMPTY: 'Cet élément de titre ne contient aucun texte',
 	HEADING_UNPRONOUNCEABLE: 'Ce titre est imprononçable',
 	HEADING_EMPTY_WITH_IMAGE: 'Cette image est utilisée comme titre ; elle nécessite donc un texte alternatif',
@@ -106,6 +107,7 @@ const testNames = {
 	META_REFRESH: 'La balise meta actualise automatiquement la page',
 	META_SCALABLE: 'La balise meta empêche l’agrandissement du texte',
 	META_TITLE: 'Balise meta du titre de page manquante',
+	META_TITLE_UNDESCRIPTIVE: 'Le titre de la page décrit-il le contenu de façon unique ?',
 	PAGE_LANG_CONFIDENCE: 'La langue de la page peut ne pas correspondre au contenu',
 	MISSING_ALT: 'HTML invalide : image sans attribut alt',
 	MISSING_ALT_LINK: 'HTML invalide : image liée sans attribut alt',
@@ -124,12 +126,16 @@ const testNames = {
 	QA_SUBSCRIPT: 'Ne pas utiliser l’exposant ou l’indice comme mise en forme visuelle',
 	QA_UNDERLINE: 'Seuls les liens doivent être soulignés',
 	QA_UPPERCASE: 'Ce texte en majuscules est-il nécessaire ?',
+	SUMMARY_EMPTY: 'Il manque l’élément summary dans cet élément details',
 	SUS_ALT: 'Ce texte alternatif contient-il des mots redondants ?',
+	SVG_NO_ACCESSIBLE_NAME: 'Cet SVG n’a pas de nom accessible',
 	TABINDEX_ATTR: 'Les surcharges tabindex interrompent l’ordre du focus',
 	TABLES_EMPTY_HEADING: 'Cette cellule d’en-tête a besoin de texte',
 	TABLES_MISSING_HEADINGS: 'Ce tableau a besoin d’une ligne et/ou d’une colonne d’en-têtes',
 	TABLES_INVALID_HEADERS_REF: `Ce tableau a un attribut headers invalide`,
 	TABLES_SEMANTIC_HEADING: 'Les titres de contenu ne doivent pas être utilisés dans les tableaux',
+	TABLES_SINGLE_CELL: 'Utiliser un autre élément plutôt qu’un tableau à cellule unique',
+	TABLES_SINGLE_COLUMN: 'Utiliser un autre élément plutôt qu’un tableau à colonne unique',
 	UNCONTAINED_LI: 'Liste HTML invalide',
 };
 
@@ -208,6 +214,7 @@ export const tips = {
 	EMBED_UNFOCUSABLE: `<p>Cet attribut indique au clavier et aux technologies d’assistance d’ignorer cet élément. Supprimez cet attribut, sauf si l’iframe ne contient aucun lien, bouton, champ de formulaire ni contenu défilable.</p>`,
 
 	EMBED_VIDEO: `<p>Ce vérificateur ne peut pas « voir » si les vidéos ont des sous-titres, ni si quelqu’un les a relus ; une vérification manuelle est donc nécessaire.</p><p>${why.fix}Assurez-vous que des <a href="https://www.w3.org/WAI/media/av/captions/">sous-titres (« CC ») précis</a> sont disponibles, et que les locuteurs et effets sonores significatifs sont correctement identifiés.</p>`,
+	EMBED_VIDEO_AUTOPLAY: `<p>Les personnes sujettes au mal des transports et à la surcharge cognitive <a href="https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide.html">ont besoin de pouvoir mettre les vidéos en pause</a>.</p><p>${why.fix}Ajoutez l’attribut <code>controls</code>, fournissez un bouton de pause visible ou supprimez l’attribut <code>autoplay</code>.</p>`,
 
 	HEADING_EMPTY: `<p>Les éléments de titre vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}Ajoutez du texte à cet élément de titre ou supprimez cette ligne vide.</p>${why.headings}`,
 	HEADING_UNPRONOUNCEABLE: `<p>Les éléments de titre vides créent des lacunes confuses dans la structure de la page.</p><p>${why.fix}Ajoutez du texte lisible à cet élément de titre, ou convertissez-le en paragraphe.</p>${why.headings}`,
@@ -242,11 +249,11 @@ export const tips = {
 
 	LABELS_MISSING_LABEL: `<p>${why.fix}Ajoutez un <code>id</code> à ce champ, et ajoutez un attribut <code>for</code> correspondant à l’étiquette.</p>`,
 
-	LABELS_NO_FOR_ATTRIBUTE: `Aucune étiquette n’est associée à ce champ. Ajoutez un attribut <code>for</code> à l’étiquette correspondant au <code>id</code> du champ. <hr> <strong>ID :</strong> <code>#%(ID)</code>`,
+	LABELS_NO_FOR_ATTRIBUTE: `<p>Aucune étiquette n’est associée à ce champ. Ajoutez un attribut <code>for</code> à l’étiquette correspondant au <code>id</code> du champ.</p><p><strong>ID :</strong> <code>#%(ID)</code></p>`,
 
 	LABELS_PLACEHOLDER: `<p>Le texte de remplacement peut être confondu avec du contenu déjà saisi s’il a un bon contraste, ou être illisible s’il n’en a pas. Il disparaît ensuite dès la saisie, ce qui peut supprimer des informations dont les utilisateurs ont besoin pour vérifier leurs erreurs.</p><p>${why.fix}Assurez-vous que les informations essentielles (étiquette, aide, format attendu) restent visibles lorsque le champ contient du texte, et envisagez de supprimer complètement le texte d’exemple (<code>placeholder</code>).</p>`,
 
-	LABEL_IN_NAME: `<p><strong>Texte visible :</strong> <i>%(VISIBLE)</i></p><p><strong>Étiquette pour lecteurs d’écran :</strong> <i>%(LABEL)</i></p><p>Le texte visible de cet élément semble différent de son nom accessible. Cela peut dérouter les utilisateurs de lecteurs d’écran et gêner le contrôle vocal.</p><p>${why.fix}Assurez-vous que l’étiquette visible commence par le texte de l’étiquette invisible et ne contient aucune information significative qui serait absente de l’étiquette invisible.</p>`,
+	LABEL_IN_NAME: `<p><strong>Texte visible :</strong> <i>%(VISIBLE)</i></p><p><strong>Étiquette pour lecteurs d’écran :</strong> <i>%(LABEL)</i></p><p>Le texte visible de cet élément semble différent de son nom accessible. Cela peut dérouter les utilisateurs de lecteurs d’écran et gêner le contrôle vocal.</p><p>${why.fix}Assurez-vous que l’étiquette invisible commence par le texte de l’étiquette visible et ne contient aucune information significative qui serait absente de l’étiquette visible.</p>`,
 
 	LINK_ALT_FILE_EXT: `<p>Le texte alternatif de cette image est probablement un nom de fichier au lieu d’un libellé utile pour un lien :<br><span hidden>%(ALT)</span><i>%(alt)</i></p><p>${why.fix}Utilisez le titre de la destination du lien comme texte alternatif pour les images liées.</p><div class="why"> <p>Le texte alternatif doit refléter la signification, pas le contenu brut : pour une image liée, la signification est la destination du lien :</p><ul><li>« Page avec texte » décrit l’image, pas le lien.</li><li>« IMG_1234.jpg » est un simple nom de fichier.</li><li>« Formulaire d’inscription (doc) » est une vraie destination.</li></ul></div>`,
 
@@ -330,6 +337,7 @@ export const tips = {
 	META_SCALABLE: `<p>Cette balise meta empêche les utilisateurs d’agrandir le texte.</p><p>${why.fix}Permettez un zoom complet en supprimant ou ajustant ce paramètre.</p>`,
 
 	META_TITLE: `<p>${why.fix}Ajoutez une balise <code>&lt;title&gt;</code> dans l’élément <code>head</code> de la page.</p><div class="why"><p>Un <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">titre court et unique</a> est essentiel :</p><ul><li>Les moteurs de recherche l’utilisent pour les résultats.</li><li>Les navigateurs l’utilisent pour les onglets.</li><li>Les lecteurs d’écran l’annoncent lors des changements d’onglet.</li></ul><p>Sans titre, les utilisateurs n’obtiennent qu’une URL brute.</p></div>`,
+	META_TITLE_UNDESCRIPTIVE: `<p>Le titre de la page « <i>%(TEXT)</i> » pourrait ne pas être descriptif ni indiquer de façon unique le sujet ou l’objectif de cette page.</p><p>${why.fix}Les lecteurs d’écran utilisent le titre de la page pour nommer les fenêtres, et les moteurs de recherche pour intituler les résultats. Rédigez un titre de page unique, concis et qui décrit clairement le contenu de la page.</p>`,
 
 	MISSING_ALT: `<p>Lorsqu’un lecteur d’écran rencontre une image sans attribut alt, il tente de prononcer l’URL du fichier image, souvent lettre par lettre.</p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p>${why.images}`,
 
@@ -364,7 +372,9 @@ export const tips = {
 	QA_UNDERLINE: `<p>Sur le Web, le texte souligné sert pour les liens, pas pour l’emphase. Les utilisateurs penseront qu’il est cliquable : <i><u>%(TEXT)</u></i></p><p>${why.fix} Utilisez <strong>gras</strong> ou <em>italique</em> pour l’emphase, et des éléments de titre pour la structure.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le soulignement. Seuls les éléments de titre créent de la structure.</p></div>`,
 
 	QA_UPPERCASE: `<p><strong>Texte :</strong> <i>%(TEXT)</i></p><p>${why.fix}N’utilisez les majuscules que pour quelques mots à la fois pour l’emphase. LES BLOCS DE TEXTE EN MAJUSCULES SONT PLUS DIFFICILES À LIRE, ET DE NOMBREUX LECTEURS LES INTERPRÈTENT COMME DES CRIS.</p><div class="why"><p>Note : les lecteurs d’écran n’annoncent pas les mises en forme visuelles comme le texte en majuscules. Utilisez un élément de titre si ce texte emphatique introduit un changement de sujet ou un contenu d’importance critique.</p></div>`,
+	SUMMARY_EMPTY: `<p>Les éléments details créent un accordéon cliquable, qui affiche le texte de <code>&lt;summary&gt;</code> sous forme de bouton révélant plus de détails. Sans texte de résumé, les utilisateurs de lecteurs d’écran ne peuvent pas entendre à quoi sert le bouton.</p>`,
 	SUS_ALT: `<p>Le texte alternatif de cette image contient le mot « <i>%(alt)</i> ». Les lecteurs d’écran annoncent déjà qu’ils lisent la description d’une image, donc des expressions comme « image de » ou « photo de » sont généralement redondantes.</p><p><strong>Texte alternatif :</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Décrivez brièvement ce que signifie cette image, dans ce contexte.</p><div class="why"><p>Astuce : ces expressions méritent d’être conservées si le format lui-même a un sens :<br>« Une photo d’un chat, encadrée et accrochée au mur. »</p></div>`,
+	SVG_NO_ACCESSIBLE_NAME: `<p>Certains lecteurs d’écran annonceront cet SVG comme une image sans étiquette, car il n’a pas de nom accessible et n’est pas masqué. Ajoutez une étiquette accessible (ou <code>&lt;title&gt;</code>) s’il a une signification, ou masquez-le pour les lecteurs d’écran s’il est purement décoratif (<code>aria-hidden="true"</code>).</p>`,
 
 	TABINDEX_ATTR: `<p>Les valeurs de tabindex supérieures à 0 déplacent les éléments focusables hors de leur ordre visuel, ce qui rend difficile pour les utilisateurs de technologies d’assistance de les localiser et de les utiliser.</p><p>${why.fix}Modifiez plutôt l’ordre des éléments dans le HTML, pour que l’ordre du focus et l’ordre de lecture correspondent.</p><div class="why"><p>Astuce : l’ordre visuel des mots sur la page et l’ordre dans lequel les claviers parcourent les éléments sont généralement les mêmes.</p><p>Attribuer un tabindex positif à un élément le déplace au début de l’ordre de tabulation, <strong>mais pas de l’ordre visuel ou de lecture</strong>.</p></div>`,
 
@@ -374,7 +384,9 @@ export const tips = {
 
 	TABLES_MISSING_HEADINGS: ` <p>${why.fix}Modifiez les propriétés du tableau et indiquez si les en-têtes se trouvent dans la première ligne, la première colonne ou les deux.</p><div class="why"> <p>Astuce : les lecteurs d’écran répètent l’en-tête pertinent en entrant dans chaque ligne ou colonne.</p><p>Si ce tableau n’a pas d’en-têtes car il sert de mise en page visuelle, remplacez-le par autre chose qu’un tableau.</p></div>`,
 
-	TABLES_SEMANTIC_HEADING: ` <p>${why.fix}Supprimez ce format d’élément de titre (h2, h3). Fournissez plutôt des lignes ou colonnes d’en-têtes. Si vous avez besoin de plusieurs niveaux, utilisez plusieurs tableaux.</p><div class="why"> <p>Astuce : les en-têtes de tableau sont directionnels (ligne ou colonne). Les titres de contenu, eux, affectent tout ce qui suit.</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">Un <strong>en-tête de tableau</strong> en cellule 2 étiquette la cellule B. <br><br> Un <strong>titre de contenu</strong> étiquette les cellules 3, A, B, C, ainsi que ce texte et le pied de ce conseil.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`
+	TABLES_SEMANTIC_HEADING: ` <p>${why.fix}Supprimez ce format d’élément de titre (h2, h3). Fournissez plutôt des lignes ou colonnes d’en-têtes. Si vous avez besoin de plusieurs niveaux, utilisez plusieurs tableaux.</p><div class="why"> <p>Astuce : les en-têtes de tableau sont directionnels (ligne ou colonne). Les titres de contenu, eux, affectent tout ce qui suit.</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">Un <strong>en-tête de tableau</strong> en cellule 2 étiquette la cellule B. <br><br> Un <strong>titre de contenu</strong> étiquette les cellules 3, A, B, C, ainsi que ce texte et le pied de ce conseil.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`,
+	TABLES_SINGLE_COLUMN: `<p>Les tableaux à colonne unique sont souvent utilisés pour la mise en page visuelle plutôt que pour des données tabulaires. Cela déroute les utilisateurs de lecteurs d’écran, qui doivent s’arrêter pour écouter des descriptions structurelles destinées aux grilles de données, par exemple <em>« tableau, 5 lignes, 1 colonne »</em>.</p><p>${why.fix}Supprimez la mise en forme de tableau et utilisez une liste ou un autre élément de mise en page purement visuel.</p>`,
+	TABLES_SINGLE_CELL: `<p>Les tableaux à cellule unique sont souvent des erreurs de copier-coller, ou sont ajoutés pour obtenir des bordures visuelles. Cela déroute les utilisateurs de lecteurs d’écran, qui doivent s’arrêter pour écouter des descriptions structurelles destinées aux grilles de données : <em>« Tableau, 1 ligne, 1 colonne, ligne 1 colonne 1. »</em></p><p>${why.fix}Supprimez la mise en forme de tableau et utilisez d’autres options de style pour mettre ce contenu en valeur.</p>`,
 };
 
 const interfaceStrings = {
@@ -400,6 +412,8 @@ const interfaceStrings = {
 	PANEL_DISMISS_BUTTON: `Afficher %(dismissCount) alertes masquées`,
 	PANEL_HEADING: 'Afficher les visualisations',
 	SKIP_TO_ISSUE: 'Afficher l’alerte',
+	buttonNext: 'Suivante',
+	buttonPrev: 'Précédente',
 	WARNING: 'vérification manuelle',
 	WARNINGS: 'vérifications manuelles',
 	buttonFirstContent: 'Afficher la première alerte',

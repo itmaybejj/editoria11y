@@ -28,7 +28,7 @@ Research the ACT rule and propose a mapping:
 3. **Check rule metadata** in `conformance/.cache/wcag-mapping.json` — find the rule's WCAG criteria, type, and deprecation status
 
 4. **Search ed11y rulesets** for relevant checks:
-   - Read `src/js/utils/ed11y-default-options.js` to find all check IDs
+   - Read `src/js/utils/defaults.js` to find all check IDs
    - Search `src/sa11y-js/rulesets/` for checks that test the same thing the ACT rule tests
    - Pay attention to: what elements are selected, what conditions trigger the check, whether the check is enabled by default
 

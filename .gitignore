@@ -1,7 +1,9 @@
 # Ignore build and test artifacts.
 tests/tinymce/
-tests/performance.htm
 node_modules/
+logs/
+screens/
+tests_output/
 test-results
 .vscode/
 .agents/settings.local.json
@@ -16,6 +18,7 @@ test-results/
 .settings
 .idea
 .vscode
+.temp
 npm-debug.log
 
 # OSX
@@ -32,7 +35,6 @@ Thumbs.db
 Desktop.ini
 
 # Playwright e2e output
-e2e/
 e2e/test-results/
 e2e/report/
 

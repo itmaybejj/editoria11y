@@ -1,7 +1,7 @@
 import { UI } from '../core/ui.js';
 
 // Result types pushed by external link checkers through the `customTests`
-// handshake (see ed11y-default-options.js). They ride the normal result
+// handshake (see defaults.js). They ride the normal result
 // pipeline but get their own toggle styling, tip badge and action buttons:
 //
 //   link        The checker found the target broken. Counted as an issue and
@@ -16,28 +16,28 @@ import { UI } from '../core/ui.js';
 // manual check offers that and "Mark broken". A result pushed with
 // `dismissalStatus: 'ok'` (the checker records a site-wide Mark OK) or
 // `'hide'` is hidden like any dismissed alert and offers "Restore" when
-// revealed. "Mark broken" is not a dismissal: it is dispatched through
-// `ed11yDismissalUpdate` with `dismissAction: 'broken'` for the integration
-// that pushed the result to act on, as "Restore" is with
-// `dismissAction: 'reset'`.
+// revealed. "Mark broken" is not a dismissal: the link is repainted as
+// marked broken and the action is dispatched through `ed11yDismissalUpdate`
+// with `dismissAction: 'broken'` for the integration that pushed the result
+// to store, as "Restore" is with `dismissAction: 'reset'` (see
+// applyLinkVerdict() in rulesets/broken-links.js).
 //
 // Colors come from the result's status, not its type: `severity` picks the
 // same alert (error) or warning styling the built-in checks use. The shared
 // `ed11y-link` class only swaps the glyph for an icon; `className` is a
 // per-type hook for themes and tests and carries no styles of its own.
-export const LINK_CLASS = 'ed11y-link';
-export const LINK_RESULT_TYPES = {
+export const linkTypes = {
   link: { badge: 'linkBrokenBadge', className: 'ed11y-link-broken', severity: 'error' },
   linkManual: { badge: 'linkManualBadge', className: 'ed11y-link-manual', severity: 'warning' },
 };
 
 export const isLinkResult = (result) =>
-  typeof result?.type === 'string' && Object.hasOwn(LINK_RESULT_TYPES, result.type);
+  typeof result?.type === 'string' && Object.hasOwn(linkTypes, result.type);
 
 // Whether a result is painted with warning (yellow) rather than alert (red)
 // colors. Broken links can be marked OK, but still read as errors.
 export const isWarningStyled = (result) =>
-  result?.type !== 'error' && LINK_RESULT_TYPES[result?.type]?.severity !== 'error';
+  result?.type !== 'error' && linkTypes[result?.type]?.severity !== 'error';
 
 export const isManualLink = (result) => result?.type === 'linkManual';
 

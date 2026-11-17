@@ -39,6 +39,27 @@ const checkStopWords = (textContent, stopWordsSet, stripStrings) => {
 // Main check link text function.
 export default function checkLinkText() {
   const seen = {};
+
+  // Values of every a[name] on the page, collected once on first use. Looking each one up
+  // with querySelector rescanned the whole document for every unresolved same-page link.
+  let anchorNames = null;
+  const hasNamedAnchor = (name) => {
+    if (!anchorNames) {
+      anchorNames = new Set();
+      for (const a of document.querySelectorAll('a[name]')) anchorNames.add(a.getAttribute('name'));
+    }
+    return anchorNames.has(name);
+  };
+
+  // decodeURIComponent throws on a malformed escape such as "#100%".
+  const safeDecode = (value) => {
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  };
+
   Elements.Found.Links.forEach(($el) => {
     // Track if this element threw an error/warning to prevent showing a 'good' label
     let hasIssue = false;
@@ -217,10 +238,10 @@ export default function checkLinkText() {
           if (State.option.linkIgnoreSpan) {
             const spanEl = $el.querySelector(State.option.linkIgnoreSpan);
             if (spanEl) {
-              const spanText = Utils.stripAllSpecialCharacters(spanEl.textContent)
-                .trim()
-                .toLowerCase();
-              if (spanText === textContent) {
+              // Normalize both sides the same way; textContent keeps punctuation such as the
+              // parentheses in "(opens in new window)", so a stripped span text never matched it.
+              const spanText = Utils.normalizeStopWord(spanEl.textContent);
+              if (spanText && spanText === Utils.normalizeStopWord(rawTextContent)) {
                 triggerStopWord();
                 hasStopWordWarning = true;
               }
@@ -418,20 +439,20 @@ export default function checkLinkText() {
       ) {
         const targetId = rawHref?.substring(1);
         const ariaControls = $el.getAttribute('aria-controls');
-        const targetElement =
+        const decodedId = targetId && safeDecode(targetId);
+        const encodedId = targetId && encodeURIComponent(targetId);
+        const targetExists =
           targetId &&
           (document.getElementById(targetId) ||
             (ariaControls && document.getElementById(ariaControls)) ||
-            (decodeURIComponent(targetId) !== targetId &&
-              document.getElementById(decodeURIComponent(targetId))) ||
-            (encodeURIComponent(targetId) !== targetId &&
-              document.getElementById(encodeURIComponent(targetId))) ||
-            document.querySelector(`a[name="${CSS.escape(targetId)}"]`));
+            (decodedId !== targetId && document.getElementById(decodedId)) ||
+            (encodedId !== targetId && document.getElementById(encodedId)) ||
+            hasNamedAnchor(targetId));
 
-        if (!targetElement) {
+        if (!targetExists) {
           let isFauxButton = false;
           const foldedAccName = Utils.foldForMatching(accName);
-          const matchedKeyword = Lang._('POTENTIAL_UI_ELEMENTS').find((word) =>
+          const matchedKeyword = Lang.list('POTENTIAL_UI_ELEMENTS').find((word) =>
             foldedAccName.includes(Utils.foldForMatching(word)),
           );
           const isSlide = Object.keys($el.dataset).some((key) =>

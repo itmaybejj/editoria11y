@@ -1,6 +1,6 @@
 {
 	"name": "editoria11y",
-	"version": "3.0.2",
+	"version": "3.0.3",
 	"sa11yVersion": "4.4.2",
 	"description": "Editoria11y is a content accessibility checker that shows results inline in Web pages and rich text editors.",
 	"main": "src/js/ed11y.js",
@@ -33,6 +33,8 @@
 		"dev": "npm run serve",
 		"test": "node scripts/test-docker.js",
 		"test:host": "playwright test --config=e2e/playwright.config.js",
+		"test:perf": "node scripts/test-docker.js --project=perf --no-deps",
+		"test:perf:host": "playwright test --config=e2e/playwright.config.js --project=perf --no-deps",
 		"conformance:download": "node conformance/scripts/download-testcases.js",
 		"conformance:discover": "node conformance/scripts/discover-mappings.js",
 		"conformance:list": "node conformance/scripts/list-rules.js",

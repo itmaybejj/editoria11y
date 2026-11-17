@@ -1,6 +1,6 @@
 import { store } from '../../sa11y-js/utils/utils.js';
 
-export const ed11yDefaultOptions = {
+export const defaults = {
   // Default options.
 
   // Sa11y properties =======================
@@ -126,6 +126,12 @@ export const ed11yDefaultOptions = {
    *               own title and tip; any other falls back to the status.
    *  dismissed    The verdict, if any: 'ok' (an editor marked the link OK
    *               site-wide) or 'hide' (this editor ignored the alert).
+   *  checkerStatus  With status 'markedBroken': the checker's own finding,
+   *               painted once the mark is lifted (Mark OK, or Restore by
+   *               an editor who may mark links). Any status but
+   *               'markedBroken', or 'unflagged' when the checker alone
+   *               would not flag the link. Without it, a lifted mark stays
+   *               painted until the page reloads.
    *  redirectsTo  Where a 'redirect' link now lands.
    *  hash         Opaque id echoed back in events. Defaults to the href.
    * }
@@ -257,8 +263,8 @@ export const ed11yDefaultOptions = {
   // Selector list for elements where the tip opening JS should wait for your theme to modify the DOM or CSS before opening the tip.
   hiddenHandlers: '',
 
-  panelOffsetX: '25px',
-  panelOffsetY: '25px',
+  panelOffsetX: 'min(25px, 2vw)',
+  panelOffsetY: 'min(25px, 2vh)',
   panelNoCover: '', // select other buttons to avoid.
   panelAttachTo: document.body,
 
@@ -415,6 +421,7 @@ export const ed11yDefaultOptions = {
     },
     ALT_MAYBE_BAD_WARNING: true,
     LINK_ALT_MAYBE_BAD_WARNING: true,
+    SVG_NO_ACCESSIBLE_NAME: true,
 
     // Sa11y: Link checks
     DUPLICATE_TITLE: false, // Todo pro.
@@ -476,10 +483,6 @@ export const ed11yDefaultOptions = {
       dismissAll: true,
     },
     QA_BLOCKQUOTE: true,
-    TABLES_MISSING_HEADINGS: true,
-    TABLES_SEMANTIC_HEADING: true,
-    TABLES_EMPTY_HEADING: true,
-    TABLES_INVALID_HEADERS_REF: true,
     QA_FAKE_HEADING: true,
     QA_FAKE_LIST: true,
     QA_UPPERCASE: true,
@@ -488,15 +491,23 @@ export const ed11yDefaultOptions = {
     QA_NESTED_COMPONENTS: false, // Todo pro.
     QA_JUSTIFY: true, // Todo pro.
     QA_SMALL_TEXT: false, // Todo pro.
+    SUMMARY_EMPTY: true,
+    TABLES_MISSING_HEADINGS: true,
+    TABLES_SEMANTIC_HEADING: true,
+    TABLES_EMPTY_HEADING: true,
+    TABLES_INVALID_HEADERS_REF: true,
+    TABLES_SINGLE_COLUMN: true,
+    TABLES_SINGLE_CELL: true,
 
     // Sa11y: Meta checks
     META_LANG: false, // Todo pro.
     META_SCALABLE: false, // Not interested.
     META_MAX: false, // Not interested.
     META_REFRESH: false, // Todo pro.
-    META_LANG_VALID: true,
-    META_LANG_SUGGEST: true,
-    PAGE_LANG_CONFIDENCE: true,
+    META_LANG_VALID: false,
+    META_LANG_SUGGEST: false,
+    META_TITLE_UNDESCRIPTIVE: false,
+    PAGE_LANG_CONFIDENCE: false,
 
     // Sa11y: Language checks
     LANG_OF_PARTS: true,
@@ -504,7 +515,6 @@ export const ed11yDefaultOptions = {
     LANG_OF_PARTS_ALT: true,
 
     // Sa11y: Developer checks
-    // Todo pro.
     DUPLICATE_ID: false,
     META_TITLE: false,
     UNCONTAINED_LI: false,
@@ -515,6 +525,7 @@ export const ed11yDefaultOptions = {
     BTN_EMPTY_LABELLEDBY: false,
     BTN_ROLE_IN_NAME: false,
     BTN_UNPRONOUNCEABLE: true, // @todo
+    EMBED_VIDEO_AUTOPLAY: true,
 
     // Sa11y: Contrast checks
     // Todo pro.

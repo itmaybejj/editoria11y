@@ -31,6 +31,7 @@ import {
   alignPanel,
   checkEditableIntersects,
   closestScrollable,
+  focusLoop,
   updateFixedRootPositions,
 } from '../utils/align.js';
 import checkEmbeddedContent from '../../sa11y-js/rulesets/embedded-content';
@@ -51,11 +52,12 @@ import {
 import checkReadability from '../../sa11y-js/rulesets/readability.js';
 import sprite from '../elements/sprite.js';
 import { checkCustomRuleset } from '../rulesets/custom-ruleset.js';
-import { checkBrokenLinks, forgetLinkVerdict } from '../rulesets/broken-links.js';
+import { applyLinkVerdict, checkBrokenLinks } from '../rulesets/broken-links.js';
 import { isVisualizerOnly, isWarningStyled, shouldDraw } from '../utils/result-types.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
-import { resetGetText, store } from '../../sa11y-js/utils/utils.js';
+import { store } from '../../sa11y-js/utils/utils.js';
+import resetCaches from '../../sa11y-js/core/reset-caches.js';
 
 export function showResults() {
   buildJumpList();
@@ -177,6 +179,7 @@ export function updatePanel() {
           .appendChild(Constants.Panel.readabilityDetails);
         UI.panel.querySelector('#ed11y-readability-tab .summary-title').textContent =
           Lang._('READABILITY');
+        focusLoop(detailsTab);
       }
       if (State.option.brokenLinks?.length) {
         const linksTab = document.createElement('details');
@@ -197,6 +200,7 @@ export function updatePanel() {
             setShowDismissals(true);
           }
         });
+        focusLoop(linksTab);
         UI.panel.querySelector('#ed11y-visualizers').appendChild(linksTab);
       }
 
@@ -459,7 +463,11 @@ export function buildJumpList() {
   sweepOrphans();
   UI.jumpList.forEach((el, i) => {
     el.dataset.ed11yJumpPosition = `${i}`;
-    const newLabel = `${Lang._('ALERT_TEXT')} ${i + 1} / ${UI.jumpList.length},${el.shadowRoot.querySelector('.toggle').getAttribute('aria-label')}`;
+    let oldLabel = el.shadowRoot.querySelector('.toggle').getAttribute('aria-label');
+    if (oldLabel?.includes(',')) {
+      oldLabel = oldLabel.split(',').slice(1).join(',').trim();
+    }
+    const newLabel = `${Lang._('ALERT_TEXT')} ${i + 1}, ${oldLabel}`;
     el.shadowRoot.querySelector('.toggle').setAttribute('aria-label', newLabel);
   });
   const tipsPainted = new CustomEvent('ed11yResultsPainted');
@@ -489,10 +497,12 @@ export function dismissOne(dismissalType, test, dismissalKey, result = null) {
   if (UI.dismissKeys[dismissalKey]) {
     dismissalKey = UI.dismissKeys[dismissalKey];
   }
+  // Link verdicts live on the checker's entry; see applyLinkVerdict().
+  const isLinkVerdict = applyLinkVerdict(result, dismissalType);
   if (dismissalType === 'reset') {
-    forgetLinkVerdict(result);
     // Guarded: a result supplied with a dismissalStatus by an external test
-    // may have no matching record here.
+    // may have no matching record here. Link results are cleaned too, in
+    // case a record was stored for them before.
     const pageDismissals = UI.dismissedAlerts[State.option.currentPage];
     if (pageDismissals?.[test]) {
       delete pageDismissals[test][dismissalKey];
@@ -504,6 +514,8 @@ export function dismissOne(dismissalType, test, dismissalKey, result = null) {
       delete UI.dismissedAlerts[State.option.currentPage];
     }
     //window.requestAnimationFrame(() => updatePanel());
+  } else if (isLinkVerdict) {
+    UI.panelShowDismissed.removeAttribute('hidden');
   } else {
     const dismissal = {};
     dismissal[dismissalKey] = dismissalType;
@@ -662,6 +674,11 @@ export function paintReady() {
   for (const [key, value] of Object.entries(UI.theme)) {
     document.documentElement.style.setProperty(`--ed11y-${key}`, `${value}`);
   }
+  UI.baseFont.style.setProperty('visibility', 'hidden');
+  UI.baseFont.style.setProperty('pointer-events', 'none');
+  UI.baseFont.style.setProperty('width', '1rem');
+  UI.baseFont.ariaHidden = true;
+  document.documentElement.appendChild(UI.baseFont);
 
   // May be redundant, but preloads unbundled files.
   if (document.querySelector('body')) {
@@ -695,7 +712,7 @@ export function alertOnInvisibleTip(button, target) {
       new CustomEvent('ed11yShowHidden', {
         detail: {
           result: button.getAttribute('data-ed11y-result'),
-          viaJump: UI.viaJump,
+          viaJump: UI.viaJump === 'jump',
         },
       }),
     );
@@ -726,7 +743,7 @@ export function alertOnInvisibleTip(button, target) {
         const tipAlert = UI.openTip.tip?.shadowRoot.querySelector('.invisible-alert');
         tipAlert.textContent = alertMessage;
       }
-      if (UI.viaJump) {
+      if (UI.viaJump === 'jump') {
         const scrollPin =
           window.innerHeight > 900 || (window.innerWidth > 800 && window.innerHeight > 600)
             ? 'center'
@@ -750,30 +767,11 @@ export function alertOnInvisibleTip(button, target) {
         }
       }
       const activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-      if (!activeTip) {
+      // Something shut the tip during the delay, e.g. a theme's reveal
+      // handler clicking outside it. Reopen it, unless the user closed it.
+      if (!activeTip && !button.userClosed) {
         button.setAttribute('data-ed11y-action', 'open');
-        if (UI.viaJump) {
-          window.setTimeout(() => {
-            // Race conditions are fun.
-            const activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-            if (UI.viaJump) {
-              activeTip?.shadowRoot.querySelector('.title').focus();
-            }
-          }, 100);
-        }
-      } else {
-        if (UI.viaJump) {
-          window.setTimeout(
-            () => {
-              // Race conditions are fun.
-              activeTip?.shadowRoot.querySelector('.title').focus();
-            },
-            100,
-            activeTip,
-          );
-        }
       }
-      UI.viaJump = false;
     },
     delay,
     button,
@@ -785,39 +783,26 @@ export function jumpTo(next = true) {
   if (!UI.showPanel) {
     return false;
   }
-  UI.viaJump = true;
-  // Determine target result.
-  const goMax = UI.jumpList.length - 1;
-  let goNum = next ? +UI.openJumpPosition + 1 : +UI.openJumpPosition - 1;
-  if (goNum < 0) {
-    // Reached end of loop or dismissal pushed us out of loop
-    goNum = goMax;
-    UI.nextText = `${Lang._('SKIP_TO_ISSUE')} 1`;
-  } else if (goNum > goMax) {
-    goNum = 0;
-    UI.nextText = `${Lang._('SKIP_TO_ISSUE')} ${goNum + 1}`;
-  } else {
-    let showNum = Number.isNaN(goNum) ? 2 : goNum + 2;
-    if (showNum > goMax + 1) {
-      showNum = 1;
-    }
-    UI.nextText = `${Lang._('SKIP_TO_ISSUE')} ${showNum}`;
-  }
-  UI.openJumpPosition = goNum;
-  window.setTimeout(() => {
-    UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = UI.nextText;
-  }, 250);
-
+  UI.viaJump = 'jump';
   resetClass(['ed11y-hidden-highlight']);
   if (UI.jumpList.length === 0) {
     buildJumpList();
   }
-  // Find next or first result in the dom ordered list of results.
-  let goto = UI.jumpList[goNum];
-  if (!goto) {
-    goto = UI.jumpList[0];
-    UI.openJumpPosition = 0;
+  // Determine target result, looping at either end.
+  const count = UI.jumpList.length;
+  if (count === 0) {
+    return false;
   }
+  const current = Number.isInteger(+UI.openJumpPosition) ? +UI.openJumpPosition : -1;
+  const goNum = (((next ? current + 1 : current - 1) % count) + count) % count;
+  UI.openJumpPosition = goNum;
+  const goto = UI.jumpList[goNum];
+  // Label the "next" button with the issue it will open (1-indexed).
+  UI.nextText = `${Lang._('SKIP_TO_ISSUE')} ${((goNum + 1) % count) + 1}`;
+  window.setTimeout(() => {
+    UI.panelJumpNext.querySelector('.ed11y-sr-only').textContent = UI.nextText;
+  }, 1000);
+
   const result = goto.getAttribute('data-ed11y-result');
   const gotoResult = State.results[result];
   const target = gotoResult.element;
@@ -893,6 +878,20 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
     );
   }
 
+  let containWidth = window.innerWidth;
+  if (
+    UI.baseFont &&
+    (containWidth < 20 * UI.baseFont.clientWidth ||
+      window.innerHeight < 20 * UI.baseFont.clientWidth)
+  ) {
+    // No room for tip.
+    tip.removeAttribute('style');
+    tip.classList.add('overflow');
+    return;
+  } else {
+    tip.classList.remove('overflow');
+  }
+
   const mark = button.getRootNode().host;
   const resultNum = button.dataset.ed11yResult;
   const result = State.results[resultNum];
@@ -908,7 +907,6 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
 
   let containTop = scrollTop;
   let containLeft = 0;
-  let containWidth = window.innerWidth;
   let containBottom = window.innerHeight + scrollTop;
   let absoluteBottom = containBottom;
 
@@ -949,9 +947,20 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
   // Read layout dimensions before writing position to avoid forced reflow.
   const tipWidth = tip.offsetWidth;
   const tipHeight = tip.offsetHeight;
+  const footer = tip.querySelector('.footer');
+  const footerElements = tip.querySelectorAll('.footer > *');
+  let footerWidth = 0;
+  footerElements?.forEach((el) => {
+    footerWidth += el.clientWidth;
+  });
 
   toolTip.style.setProperty('top', `${buttonOffset.top + scrollTop}px`);
   toolTip.style.setProperty('left', `${buttonOffset.left + leftAdd}px`);
+  if (footerWidth > tipWidth + 5) {
+    footer.classList.add('overflow');
+  } else {
+    footer.classList.remove('overflow');
+  }
 
   let direction = 'under';
 
@@ -972,7 +981,7 @@ export function alignTip(button, toolTip, recheck = 0, reveal = false) {
       containTop + tipHeight + 30 < containBottom
     ) {
       direction = 'left';
-    } else if (buttonTop + tipHeight + buttonSize > absoluteBottom) {
+    } else if (buttonTop + tipHeight + buttonSize > absoluteBottom && buttonTop - tipHeight > 0) {
       // It REALLY doesn't fit below.
       direction = 'above';
     }
@@ -1395,38 +1404,42 @@ export function startObserver(root) {
   }, 1000);
 }
 
-const safeRun = (fn) => {
+// Runs one ruleset and records its time in UI.runTimings. The names are passed explicitly
+// because the minified build renames functions.
+const safeRun = (fn, name) => {
+  const start = performance.now();
   try {
     fn();
   } catch (error) {
     showError(error);
   }
+  UI.runTimings[name] = performance.now() - start;
 };
 
 const enqueueTests = (queue) => {
   const test = queue.pop();
   switch (test) {
     case 'group1':
-      safeRun(checkHeaders);
-      safeRun(checkImages);
-      safeRun(checkEmbeddedContent);
-      safeRun(checkCustomRuleset);
-      safeRun(checkQA);
+      safeRun(checkHeaders, 'checkHeaders');
+      safeRun(checkImages, 'checkImages');
+      safeRun(checkEmbeddedContent, 'checkEmbeddedContent');
+      safeRun(checkCustomRuleset, 'checkCustomRuleset');
+      safeRun(checkQA, 'checkQA');
       break;
     case 'group2':
-      safeRun(checkLinkText);
+      safeRun(checkLinkText, 'checkLinkText');
       break;
     case 'checkLabels':
-      safeRun(checkLabels);
+      safeRun(checkLabels, 'checkLabels');
       break;
     case 'checkContrast':
-      safeRun(checkContrast);
+      safeRun(checkContrast, 'checkContrast');
       break;
     case 'checkDeveloper':
-      safeRun(checkDeveloper);
+      safeRun(checkDeveloper, 'checkDeveloper');
       break;
     case 'checkBrokenLinks':
-      safeRun(checkBrokenLinks);
+      safeRun(checkBrokenLinks, 'checkBrokenLinks');
       break;
   }
   UI.testsRemaining--;
@@ -1472,6 +1485,12 @@ export function checkAll() {
   if (UI.tipOpen) {
     return false;
   }
+  // Sa11y's caches only hold for one run: they store results for ancestors as well as for the
+  // elements checked, so after the page changes a stale entry would also be used for new
+  // elements below that ancestor.
+  resetCaches();
+  UI.runTimings = {};
+
   // Bump run generation. Used to detect aborted/overlapping runs and as
   // the liveness stamp for adopted mark entries (see MarkEntry.generation).
   UI.runGen = (UI.runGen + 1) | 0;
@@ -1517,7 +1536,9 @@ export function checkAll() {
   State.results.length = 0;
   UI.splitConfiguration.devResults.length = 0;
 
+  const buildStart = performance.now();
   buildElementList();
+  UI.runTimings.buildElementList = performance.now() - buildStart;
 
   // Call rulesets.
   const queue = ['group1', 'group2'];
@@ -1630,7 +1651,6 @@ export function incrementalCheck() {
     }
     UI.interaction = false;
     UI.running = true;
-    resetGetText();
     let runTime = performance.now();
     UI.incremental = true;
     if (UI.disabled && UI.closedByDisable) {
@@ -1755,8 +1775,10 @@ export function dismissThis(dismissalType, button) {
   UI.runOrigin = 'dismissal';
 
   if (dismissalType === 'broken') {
-    // Not a dismissal: nothing is recorded and the result stays visible.
-    // The integration that pushed the link result owns what "broken" means.
+    // Not a dismissal: nothing is recorded and the result stays visible,
+    // repainted as marked broken. The integration that pushed the link
+    // result is told, and stores the mark.
+    applyLinkVerdict(tipResult, dismissalType);
     dispatchDismissalUpdate(dismissalType, test, dismissKey, tipResult);
   } else if (button.dataset.ed11yAll === 'true') {
     State.results.forEach((result) => {
@@ -1909,6 +1931,8 @@ export function reset() {
   pauseObservers();
   resetResults();
   resetPanel();
+  // checkAll clears these too; this frees the memory while Editoria11y is idle.
+  resetCaches();
   UI.incremental = false;
   UI.running = false;
   UI.showPanel = false;

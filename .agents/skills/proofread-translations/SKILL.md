@@ -320,5 +320,5 @@ These are notes for whoever edits `src/lang/baseAll.js`:
 - **When you change English wording,** the translations keep the old meaning until a sync runs.
   The October 2026 pass found "then dismiss this alert", "describe the button" (in a link tip) and
   "its destination" (in a button tip) all surviving in translations after the English had changed.
-  Run `check-translations` after every English edit, and update `TRANSLATION_MANIFEST.json` once
-  the translations are synced.
+  Run `check-translations` after every English edit, and update `translation-snapshot.json`
+  (`english-snapshot.mjs --update`) once every locale is synced.

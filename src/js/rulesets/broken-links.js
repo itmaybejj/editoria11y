@@ -9,7 +9,7 @@ import { UrlNormalizer } from '../utils/url-normalizer.js';
 // Paints a CMS link checker's flagged links as results.
 //
 // The checker hands its findings over in the `brokenLinks` option (see
-// ed11y-default-options.js). Each status maps to a test key, a result type
+// defaults.js). Each status maps to a test key, a result type
 // (`link` is painted as an error, `linkManual` as a manual check; see
 // utils/result-types.js) and a short label for the Links visualizer. A
 // manual-check status left out of `brokenLinksShowChecks` is painted only
@@ -68,8 +68,17 @@ const describeEntry = (entry) => {
 
 const DISMISSED_LABELS = { ok: 'linkDismissedOk', hide: 'linkDismissedHide' };
 
+// An entry's `checkerStatus` when the checker's own finding would not flag
+// the link at all (it works, or an error is not yet confirmed). Lifting the
+// broken mark from such an entry stops it being painted.
+export const UNFLAGGED = 'unflagged';
+
 export const isKnownLinkStatus = (status) =>
   typeof status === 'string' && Object.hasOwn(LINK_STATUSES, status);
+
+// What an entry's broken mark can be lifted to.
+const isKnownCheckerStatus = (status) =>
+  status === UNFLAGGED || (isKnownLinkStatus(status) && status !== 'markedBroken');
 
 export const isKnownDismissal = (dismissed) =>
   typeof dismissed === 'string' && Object.hasOwn(DISMISSED_LABELS, dismissed);
@@ -140,6 +149,17 @@ export function prepareBrokenLinks() {
     if (entry.dismissed && !isKnownDismissal(entry.dismissed)) {
       console.warn(`Editoria11y: ignored an unknown brokenLinks dismissal "${entry.dismissed}".`);
       delete entry.dismissed;
+    }
+    if (Object.hasOwn(entry, 'checkerStatus')) {
+      if (entry.status !== 'markedBroken') {
+        // Only a broken mark is lifted to it; the status already is the finding.
+        delete entry.checkerStatus;
+      } else if (!isKnownCheckerStatus(entry.checkerStatus)) {
+        console.warn(
+          `Editoria11y: ignored an unknown brokenLinks checkerStatus "${entry.checkerStatus}".`,
+        );
+        delete entry.checkerStatus;
+      }
     }
     return true;
   });
@@ -243,7 +263,8 @@ export function checkBrokenLinks() {
     }
     const entry =
       byHref.get(normalizer.identity(anchor.href)) ?? byHref.get(anchor.getAttribute('href'));
-    if (!entry) {
+    // An unflagged entry had its broken mark lifted and has nothing to show.
+    if (!entry || entry.status === UNFLAGGED) {
       continue;
     }
     const status = describeEntry(entry);
@@ -267,11 +288,58 @@ export function checkBrokenLinks() {
   }
 }
 
-// Called when an editor restores a link alert. The checker is told through
-// `ed11yDismissalUpdate`; clear the verdict here too so the next check
-// paints the link with its real status instead of hiding it again.
-export function forgetLinkVerdict(result) {
-  if (result?.brokenLink) {
-    delete result.brokenLink.dismissed;
+// Lifts an editor's Mark broken so the link is painted with the checker's
+// own finding: the status it had when marked on this page, or the entry's
+// `checkerStatus` as the integration supplied it. An entry marked without
+// either stays marked until the integration reloads it.
+const liftBrokenMark = (entry) => {
+  if (entry.status !== 'markedBroken' || !isKnownCheckerStatus(entry.checkerStatus)) {
+    return;
+  }
+  entry.status = entry.checkerStatus;
+  delete entry.checkerStatus;
+};
+
+// Applies an editor's action on a link result to its entry, so the repaint
+// that follows the click shows the new verdict at once. The checker is told
+// separately through `ed11yDismissalUpdate`. Link verdicts live on the entry
+// rather than in the test-keyed dismissal records, because Mark broken and
+// lifting it change the result's test.
+//
+//   broken  Painted as marked broken. The checker's status is remembered.
+//   ok      Hidden as marked OK. A site-wide Mark OK replaces Mark broken.
+//   hide    Hidden for this editor; any broken mark stays.
+//   reset   Verdict cleared; an editor who may mark links also lifts the
+//           broken mark, as Restore clears the site-wide mark.
+//
+// Returns whether the result was a link result and the action was applied.
+export function applyLinkVerdict(result, action) {
+  const entry = result?.brokenLink;
+  if (!entry) {
+    return false;
+  }
+  switch (action) {
+    case 'broken':
+      if (entry.status !== 'markedBroken') {
+        entry.checkerStatus = entry.status;
+        entry.status = 'markedBroken';
+      }
+      delete entry.dismissed;
+      return true;
+    case 'ok':
+      liftBrokenMark(entry);
+      entry.dismissed = 'ok';
+      return true;
+    case 'hide':
+      entry.dismissed = 'hide';
+      return true;
+    case 'reset':
+      delete entry.dismissed;
+      if (linkMarksAllowed()) {
+        liftBrokenMark(entry);
+      }
+      return true;
+    default:
+      return false;
   }
 }

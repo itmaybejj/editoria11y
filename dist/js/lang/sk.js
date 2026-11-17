@@ -95,7 +95,7 @@ const ruleset = {
     "ísť",
     "workshop"
   ],
-  CLICK: ["kliknúť", "kliknutie", "click"],
+  CLICK: ["kliknúť", "kliknite", "kliknutie", "click"],
   NEW_WINDOW_PHRASES: [
     "externé",
     "nová karta",
@@ -157,6 +157,41 @@ const ruleset = {
     "maximalizovať",
     "snímka",
     "modálne okno"
+  ],
+  META_TITLE_UNDESCRIPTIVE_STRINGS: [
+    "bez názvu",
+    "dokument",
+    "stránka",
+    "názov",
+    "predvolený",
+    "index",
+    "nový",
+    "zástupný text",
+    "webová stránka",
+    "bez názvu",
+    "vložte názov sem",
+    "ahoj svet",
+    "moja aplikácia",
+    "moja stránka",
+    "moja webová stránka",
+    "názov stránky",
+    "váš názov stránky",
+    "príklad domény",
+    "untitled",
+    "undefined",
+    "title",
+    "document",
+    "placeholder"
+  ],
+  // Titles that are non-descriptive at the START of a title ("Untitled document").
+  // Keep these specific: the list above is only matched as a whole title or with a number.
+  META_TITLE_UNDESCRIPTIVE_PREFIXES: [
+    "bez názvu",
+    "vložte názov sem",
+    "untitled",
+    "no title",
+    "undefined",
+    "placeholder"
   ]
 };
 const ui = {
@@ -193,8 +228,8 @@ const ui = {
   LINKED: "Prepojené",
   PANEL_HEADING: "Kontrola prístupnosti",
   NO_ERRORS_FOUND: "Nenašli sa žiadne chyby.",
-  WARNINGS_FOUND: "nájdených upozornení.",
-  TOTAL_FOUND: "nájdených problémov spolu.",
+  WARNINGS_FOUND: "— počet nájdených upozornení.",
+  TOTAL_FOUND: "— celkový počet nájdených problémov.",
   NOT_VISIBLE: "Položka, ktorú sa snažíte zobraziť, nie je viditeľná; môže byť skrytá alebo sa nachádza v komponente akordeónu alebo karty.",
   MISSING_ROOT: "Celá stránka bola skontrolovaná z hľadiska prístupnosti, pretože cieľová oblasť <code>%(root)</code> neexistuje.",
   MISSING_READABILITY_ROOT: "Skóre čitateľnosti je založené na obsahovej oblasti <code>%(fallback)</code>, pretože cieľová oblasť <code>%(root)</code> neexistuje.",
@@ -213,7 +248,7 @@ const ui = {
   ELEMENT: "Prvok",
   PATH: "Cesta",
   // Dismiss
-  PANEL_DISMISS_BUTTON: "Zobraziť %(dismissCount) zamietnutých",
+  PANEL_DISMISS_BUTTON: "Zobraziť zamietnuté (%(dismissCount))",
   DISMISS: "Zamietnuť",
   DISMISS_ALL: "Zamietnuť všetko",
   DISMISSED: "Zamietnuté",
@@ -308,6 +343,7 @@ const tooltip = {
   EMBED_MISSING_TITLE: 'Vložený obsah vyžaduje prístupný názov, ktorý opisuje jeho obsah. Uveďte jedinečný atribút <code>title</code> alebo <code>aria-label</code> na prvku <code>&lt;%(ELEMENT)&gt;</code>. Viac informácií o <a href="https://web.dev/learn/accessibility/more-html#iframes">prvkoch iFrame.</a>',
   EMBED_GENERAL: 'Vložený obsah sa nedá skontrolovať. Uistite sa, že obrázky majú alternatívny text, videá majú titulky, text má dostatočný kontrast a interaktívne komponenty sú <a href="https://webaim.org/techniques/keyboard/">ovládateľné klávesnicou.</a>',
   EMBED_UNFOCUSABLE: 'Prvok <code>&lt;iframe&gt;</code> so zameriavateľnými prvkami by nemal mať <code>tabindex="-1"</code>. Vložený obsah potom nebude ovládateľný klávesnicou.',
+  EMBED_VIDEO_AUTOPLAY: 'Automaticky prehrávané videá, ktoré nemožno pozastaviť, môžu ľudí rozptyľovať a narúšať fungovanie čítačiek obrazovky. Zabezpečte, aby používatelia mohli video zastaviť pridaním atribútu <code>controls</code>, poskytnutím viditeľného tlačidla pozastavenia alebo odstránením atribútu <code>autoplay</code>. <hr> Ďalšie informácie o <a href="https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide.html">pozastavení, zastavení a skrytí.</a>',
   // Quality assurance
   QA_BAD_LINK: "Bol nájdený chybný odkaz. Zdá sa, že odkaz smeruje na vývojové prostredie. <hr> {L} <strong {C}>%(LINK)</strong> <hr> <strong {B}>Text odkazu</strong> <strong {C}>%(TEXT)</strong>",
   QA_STRONG_ITALICS: "Značky pre tučné písmo a kurzívu majú sémantický význam a <strong>nemali</strong> by sa používať na zvýraznenie celých odsekov. Tučné písmo by sa malo používať na výrazné <strong>zdôraznenie</strong> slova alebo frázy. Kurzíva by sa mala používať na zvýraznenie vlastných mien (napr. názvov kníh a článkov), cudzích slov a citátov. Dlhé citáty by mali byť formátované ako blokový citát. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
@@ -318,7 +354,7 @@ const tooltip = {
   QA_FAKE_LIST: 'Snažíte sa vytvoriť zoznam? Bola nájdená možná položka zoznamu: <strong {C}>%(PREFIX)</strong> <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> Uistite sa, že namiesto toho používate sémantické zoznamy pomocou tlačidiel na formátovanie odrážok alebo čísel. Pri použití sémantického zoznamu dokážu asistenčné technológie sprostredkovať informácie, ako je celkový počet položiek a relatívna pozícia každej položky v zozname. Viac informácií o <a href="https://www.w3.org/WAI/tutorials/page-structure/content/#lists">sémantických zoznamoch.</a>',
   QA_UPPERCASE: "Bol nájdený text písaný veľkými písmenami. Niektoré čítačky obrazovky môžu text písaný veľkými písmenami interpretovať ako skratku a prečítajú každé písmeno samostatne. Niektorým ľuďom sa navyše veľké písmená čítajú ťažšie a môže to pôsobiť dojmom KRIKU. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
   QA_UNDERLINE: "Podčiarknutý text sa dá zameniť s odkazmi. Zvážte použitie iného štýlu, napríklad <code>&lt;strong&gt;</code><strong>silný dôraz</strong><code>&lt;/strong&gt;</code> alebo <code>&lt;em&gt;</code><em>zdôraznenie</em><code>&lt;/em&gt;</code>. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
-  QA_SUBSCRIPT: "Formátovanie dolného a horného indexu by sa malo používať iba na zmenu polohy textu na základe typografických konvencií alebo noriem. <strong>Nemalo</strong> by sa používať výlučne na prezentačné alebo vzhľadové účely. Formátovanie celých viet spôsobuje problémy s čitateľnosťou. Medzi vhodné prípady použitia patrí zobrazovanie exponentov, poradových čísel (napr. 4<sup>.</sup> namiesto štvrtý) a chemických vzorcov (napr. H<sub>2</sub>O). <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
+  QA_SUBSCRIPT: "Formátovanie dolného a horného indexu by sa malo používať iba na zmenu polohy textu na základe typografických konvencií alebo noriem. <strong>Nemalo</strong> by sa používať výlučne na prezentačné alebo vzhľadové účely. Formátovanie celých viet spôsobuje problémy s čitateľnosťou. Medzi vhodné prípady použitia patrí zobrazovanie exponentov, jednotiek (napr. m<sup>2</sup>) a chemických vzorcov (napr. H<sub>2</sub>O). <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
   QA_IN_PAGE_LINK: "Nefunkčný odkaz v rámci stránky. Tento odkaz sa pokúša prejsť do časti stránky, ktorú sa nepodarilo nájsť. Ak to chcete opraviť, uistite sa, že odkaz zodpovedá <code>id</code> prvku, na ktorý chcete prejsť. <hr> <strong {B}>ID</strong> <strong {C}>#%(ID)</strong> <hr> <strong {B}>Text odkazu</strong> <strong {C}>%(TEXT)</strong>",
   QA_NESTED_COMPONENTS: "Vyhnite sa vnáraniu interaktívnych rozvrhových komponentov, ako je umiestňovanie akordeónov do iných akordeónov alebo záložiek do akordeónov a naopak. Môže to skomplikovať navigáciu, zvýšiť kognitívnu záťaž a viesť k tomu, že ľudia obsah prehliadnu.",
   QA_JUSTIFY: "Vyhnite sa používaniu textu zarovnaného do bloku, ktorý je zarovnaný súčasne k ľavému aj pravému okraju. Pre niektorých ľudí môže byť ťažké ho čítať kvôli nerovnomerným medzerám medzi slovami. Pre lepšiu čitateľnosť použite text zarovnaný vľavo. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
@@ -332,8 +368,11 @@ const tooltip = {
   DUPLICATE_ID: "Bolo nájdené <strong>duplicitné ID</strong>. Je známe, že chyby duplicitného ID spôsobujú asistenčným technológiám problémy pri pokuse o interakciu s obsahom. Odstráňte alebo zmeňte nasledujúce ID. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
   UNCONTAINED_LI: "Všetky položky zoznamu <code>&lt;li&gt;</code> musia byť umiestnené vo vnútri neusporiadaného prvku <code>&lt;ul&gt;</code> alebo usporiadaného prvku <code>&lt;ol&gt;</code>. Táto štruktúra pomáha čítačkám obrazovky presne oznamovať zoznam a jeho položky. <hr> <strong {B}>Položka zoznamu</strong> <strong {C}>%(TEXT)</strong>",
   TABINDEX_ATTR: "Prvok by nemal mať atribút <code>tabindex</code> väčší ako 0.",
+  SVG_NO_ACCESSIBLE_NAME: 'Niektoré čítačky obrazovky oznámia toto SVG ako neoznačený obrázok, pretože nemá prístupný názov a nie je skryté. Pridajte prístupný štítok (alebo <code>&lt;title&gt;</code>), ak má význam, alebo ho skryte pred čítačkami obrazovky, ak je len dekoratívny (<code>aria-hidden="true"</code>). <hr> Ďalšie informácie o <a href="https://a11y-101.com/development/svg">prístupných SVG.</a>',
+  SUMMARY_EMPTY: "Prvok <code>&lt;summary&gt;</code> vnútri <code>&lt;details&gt;</code> nemá prístupný názov. Pridajte opisný text do prvku <code>&lt;summary&gt;</code>.",
   // Meta checks
   META_TITLE: 'Chýba názov stránky! Uveďte prosím <a href="https://developer.mozilla.org/sk/docs/Web/HTML/Element/title">názov stránky.</a>',
+  META_TITLE_UNDESCRIPTIVE: 'Názov stránky "<em>%(TEXT)</em>" nemusí byť popisný alebo nemusí obsahovať predmet alebo účel stránky. Názvy stránok by mali byť jedinečné, stručné a jasne popisovať obsah stránky. Zistite viac o <a href="https://www.w3.org/WAI/WCAG22/Understanding/page-titled.html">zmysluplných názvoch stránok.</a>',
   META_SCALABLE: 'Odstráňte parameter <code>user-scalable="no"</code> v <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta značke viewport</a>, aby ste umožnili priblíženie.',
   META_MAX: 'Uistite sa, že parameter <code>maximum-scale</code> v <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta značke viewport</a> nie je menší ako 2.',
   META_LANG: 'Jazyk stránky nie je deklarovaný! Prosím <a href="https://www.w3.org/International/questions/qa-html-language-declarations">deklarujte jazyk v značke HTML.</a>',
@@ -349,8 +388,10 @@ const tooltip = {
   LABEL_IN_NAME: "Viditeľný text tohto prvku sa líši od jeho prístupného názvu, čo môže spôsobiť zmätok u používateľov asistenčných technológií. Skontrolujte prosím: <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Prístupný názov</strong> <strong {C}>%(TEXT)</strong>",
   LINK_MAYBE_BUTTON: 'Tento odkaz má neplatný cieľ. Prístupný názov alebo jeho atribúty naznačujú, že vôbec nemusí ísť o odkaz, ale namiesto toho ovláda nejaké skriptované správanie na stránke. Ak to chcete opraviť, nahraďte odkaz <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">prístupným tlačidlom</a> alebo opravte cieľ odkazu. <hr> <strong {B}>Prístupný názov</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tip!</strong> Asistenčné technológie pristupujú k tlačidlám a odkazom odlišne. Použitie správneho prvku HTML zabezpečuje, že používatelia vedia, ktoré klávesové skratky majú použiť a akú akciu spustia.',
   // Tables
+  TABLES_SINGLE_COLUMN: 'Je toto tabuľka? Jednostĺpcové tabuľky sa často používajú na rozloženie alebo zoznamy namiesto tabuľkových dát. To môže byť mätúce pre ľudí používajúcich čítačky obrazovky, ktorí musia zastaviť a počúvať štrukturálne popisy určené pre dátové mriežky, napríklad <em>"tabuľka, 5 riadkov, 1 stĺpec"</em>. Odstráňte tabuľku a použite radšej zoznam.',
+  TABLES_SINGLE_CELL: 'Je toto tabuľka? Jednobunkové tabuľky sa často používajú na vizuálne orámovanie alebo zvýrazňovacie kontajnery namiesto tabuľkových dát. To môže byť mätúce pre ľudí používajúcich čítačky obrazovky, ktorí musia zastaviť a počúvať štrukturálne popisy určené pre dátové mriežky: <em>"Tabuľka, 1 riadok, 1 stĺpec, Riadok 1 Stĺpec 1."</em> Odstráňte tabuľku a použite iné možnosti štýlovania na upútanie pozornosti na tento obsah.',
   TABLES_MISSING_HEADINGS: 'Chýbajú záhlavia tabuľky! Prístupné tabuľky potrebujú značky HTML, ktoré označujú bunky záhlavia a dátové bunky a definujú ich vzájomný vzťah. Tieto informácie poskytujú kontext ľuďom, ktorí používajú asistenčné technológie. Tabuľky by sa mali používať iba na tabuľkové údaje. <hr> Viac informácií o <a href="https://www.w3.org/WAI/tutorials/tables/">prístupných tabuľkách.</a>',
-  TABLES_SEMANTIC_HEADING: 'Sémantické nadpisy, ako Nadpis 2 alebo Nadpis 3, by sa mali používať iba pre časti obsahu; <strong>nie</strong> v tabuľkách HTML. Nadpisy tabuľky namiesto toho označte pomocou prvku <code>&lt;th&gt;</code>. <hr> Viac informácií o <a href="https://www.w3.org/WAI/tutorials/tables/">prístupných tabuľkách.</a>',
+  TABLES_SEMANTIC_HEADING: 'Sémantické nadpisy, ako Nadpis 2 alebo Nadpis 3, by sa mali používať iba pre časti obsahu; <strong>nie</strong> v tabuľkách HTML. Záhlavia tabuľky namiesto toho označte pomocou prvku <code>&lt;th&gt;</code>. <hr> Viac informácií o <a href="https://www.w3.org/WAI/tutorials/tables/">prístupných tabuľkách.</a>',
   TABLES_EMPTY_HEADING: 'Bolo nájdené prázdne záhlavie tabuľky! Záhlavia tabuľky by <strong>nikdy</strong> nemali byť prázdne. Je dôležité označiť záhlavia riadkov a/alebo stĺpcov, aby bol vyjadrený ich vzájomný vzťah. Tieto informácie poskytujú kontext ľuďom, ktorí používajú asistenčné technológie. Majte na pamäti, že tabuľky by sa mali používať iba na tabuľkové údaje. <hr> Viac informácií o <a href="https://www.w3.org/WAI/tutorials/tables/">prístupných tabuľkách.</a>',
   TABLES_INVALID_HEADERS_REF: 'Táto tabuľka sa pokúša označiť konkrétnu dátovú bunku konkrétnou bunkou záhlavia, ale ID záhlavia sa nepodarilo nájsť. Uistite sa, že každý atribút <code>headers</code> zodpovedá ID bunky záhlavia v tej istej tabuľke. <hr> <strong {B}>Headers</strong> <code>%(VALUE)</code> <hr> <strong>Tip!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Používanie ručných odkazov na ID</a> na priradenie dátových buniek k bunkám záhlavia je komplikované a nespoľahlivé. Ak je to možné, rozdeľte zložité údaje do menších tabuliek s jednoduchými riadkami a stĺpcami záhlavia.',
   // Contrast
@@ -415,6 +456,7 @@ const testNames = {
   EMBED_MISSING_TITLE: "Rámcu chýba atribút „title“",
   EMBED_UNFOCUSABLE: 'Rámec s tabindex="-1" nebude ovládateľný klávesnicou.',
   EMBED_VIDEO: "Má toto video presné titulky?",
+  EMBED_VIDEO_AUTOPLAY: "Majú používatelia možnosť toto video pozastaviť?",
   HEADING_EMPTY: "Tento nadpis neobsahuje žiadny text",
   HEADING_UNPRONOUNCEABLE: "Tento nadpis nie je vysloviteľný",
   HEADING_EMPTY_WITH_IMAGE: "Tento obrázok je použitý ako nadpis, preto potrebuje alternatívny text",
@@ -493,6 +535,7 @@ const testNames = {
   META_REFRESH: "Meta značka automaticky obnovuje stránku",
   META_SCALABLE: "Meta značka zabraňuje používateľom zväčšiť text",
   META_TITLE: "Chýba značka s názvom stránky",
+  META_TITLE_UNDESCRIPTIVE: "Opisuje názov stránky jedinečne jej obsah?",
   MISSING_ALT: "Neplatné HTML: obrázok nemá atribút alt",
   MISSING_ALT_LINK: "Neplatné HTML: prepojenému obrázku chýba atribút alt",
   MISSING_ALT_LINK_HAS_TEXT: "Neplatné HTML: obrázku v odkaze chýba atribút alt",
@@ -511,12 +554,16 @@ const testNames = {
   QA_SUBSCRIPT: "Nepoužívajte dolný/horný index na vizuálne formátovanie",
   QA_UNDERLINE: "Podčiarknuté by mali byť iba odkazy",
   QA_UPPERCASE: "Je tento text písaný veľkými písmenami naozaj potrebný?",
+  SUMMARY_EMPTY: "Tomuto prvku details chýba prvok summary",
   SUS_ALT: "Obsahuje tento alternatívny text nadbytočné slová?",
+  SVG_NO_ACCESSIBLE_NAME: "Toto SVG nemá prístupný názov",
   TABINDEX_ATTR: "Hodnoty tabindex narúšajú poradie fokusu",
   TABLES_EMPTY_HEADING: "Táto bunka hlavičky potrebuje text",
   TABLES_INVALID_HEADERS_REF: "Táto tabuľka má neplatný atribút headers",
   TABLES_MISSING_HEADINGS: "Táto tabuľka potrebuje riadok a/alebo stĺpec hlavičky",
   TABLES_SEMANTIC_HEADING: "Obsahové nadpisy by sa nemali používať vnútri tabuliek",
+  TABLES_SINGLE_CELL: "Namiesto tabuľky s jedinou bunkou použite iný prvok",
+  TABLES_SINGLE_COLUMN: "Namiesto tabuľky s jediným stĺpcom použite iný prvok",
   UNCONTAINED_LI: "Neplatný HTML zoznam"
 };
 const why = {
@@ -549,6 +596,7 @@ const tips = {
   EMBED_MISSING_TITLE: `<p>Vložené prvky potrebujú prístupný názov, ktorý čítačkám obrazovky opisuje ich obsah.</p><p>${why.fix}Uveďte jedinečný atribút <code>title</code> alebo <code>aria-label</code>.</p>`,
   EMBED_UNFOCUSABLE: `<p>Tento atribút spôsobí, že klávesnica a asistenčné technológie tento prvok preskočia. Odstráňte ho, ak iframe obsahuje odkazy, tlačidlá, formulárové prvky alebo posúvateľný obsah.</p>`,
   EMBED_VIDEO: `<p>Tento nástroj nedokáže „vidieť“, či majú videá titulky, ani zistiť, či ich niekto skontroloval, preto je potrebná manuálna kontrola.</p><p>${why.fix}Skontrolujte, či sú dostupné <a href="https://www.w3.org/WAI/media/av/captions/">presné skryté titulky („CC“) alebo titulky</a>, a uistite sa, že správne uvádzajú hovoriacich aj dôležité zvukové efekty.</p>`,
+  EMBED_VIDEO_AUTOPLAY: `<p>Ľudia náchylní na nevoľnosť z pohybu a kognitívne preťaženie <a href="https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide.html">potrebujú mať možnosť videá pozastaviť</a>.</p><p>${why.fix}Pridajte atribút <code>controls</code>, zabezpečte viditeľné tlačidlo pozastavenia alebo odstráňte atribút <code>autoplay</code>.</p>`,
   HEADING_EMPTY: `<p>Prázdne nadpisy vytvárajú mätúce medzery v osnove stránky.</p><p>${why.fix}Pridajte do tohto nadpisu text alebo odstráňte tento prázdny riadok.</p>${why.headings}`,
   HEADING_UNPRONOUNCEABLE: `<p>Prázdne nadpisy vytvárajú mätúce medzery v osnove stránky.</p><p>${why.fix}Pridajte do tohto nadpisu zrozumiteľný text alebo ho zmeňte na odsek.</p>${why.headings}`,
   HEADING_EMPTY_WITH_IMAGE: `<p>Prázdne nadpisy vytvárajú mätúce medzery v osnove stránky.</p><p>${why.fix}Ak toto nemá byť nadpis, zmeňte jeho formát z <code>Nadpis %(level)</code> na <code>Odsek</code>. V opačnom prípade uveďte význam obrázka v jeho alternatívnom texte.</p>${why.headings}`,
@@ -562,12 +610,12 @@ const tips = {
   IMAGE_DECORATIVE_CAROUSEL: "Obrázok je označený ako <strong>dekoratívny</strong>, ale všetky obrázky v karuseli alebo galérii by mali mať popisný alternatívny text, aby bol zabezpečený rovnocenný zážitok pre všetkých.",
   IMAGE_FIGURE_DECORATIVE: `<p>Tento obrázok budú asistenčné technológie ignorovať. Bude popis pod obrázkom dávať zmysel aj bez obrázka?</p><p>${why.fix}Ak popis neopisuje vizuálny význam obrázka, doplňte alternatívny text pre to, čo popis neobsahuje.</p><div class="why"><p>Tip: obrázok, alternatívny text a popis pod obrázkom fungujú spoločne:</p><ul><li>Viditeľný popis pod obrázkom poskytuje kontext a interpretáciu obrázka.</li><li>Neviditeľný alternatívny text opisuje obrázok ľuďom, ktorí ho nevidia, aby vedeli, čoho sa popis týka.</li></ul></div>`,
   IMAGE_FIGURE_DUPLICATE_ALT: `<p><strong>Duplicitný text: </strong><i>%(ALT_TEXT)</i></p><p>${why.fix}V alternatívnom texte opíšte akýkoľvek chýbajúci vizuálny význam.</p><div class="why"><p>Tip: obrázok, alternatívny text a popis pod obrázkom fungujú spoločne:</p><ul><li>Viditeľný popis pod obrázkom poskytuje kontext a interpretáciu obrázka.</li><li>Neviditeľný alternatívny text opisuje obrázok ľuďom, ktorí ho nevidia, aby vedeli, čoho sa popis týka.</li></ul></div>`,
-  LABEL_IN_NAME: `<p><strong>Viditeľný text:</strong> <i>%(VISIBLE)</i></p><p><strong>Štítok pre čítačky obrazovky:</strong> <i>%(LABEL)</i></p><p>Viditeľný text tohto prvku sa líši od jeho prístupného názvu. Môže to mýliť používateľov čítačiek obrazovky a narušiť hlasové ovládanie.</p><p>${why.fix}Uistite sa, že viditeľný štítok začína textom neviditeľného štítka a neobsahuje žiadne dôležité informácie, ktoré v neviditeľnom štítku chýbajú.</p>`,
+  LABEL_IN_NAME: `<p><strong>Viditeľný text:</strong> <i>%(VISIBLE)</i></p><p><strong>Štítok pre čítačky obrazovky:</strong> <i>%(LABEL)</i></p><p>Viditeľný text tohto prvku sa líši od jeho prístupného názvu. Môže to mýliť používateľov čítačiek obrazovky a narušiť hlasové ovládanie.</p><p>${why.fix}Uistite sa, že neviditeľný štítok začína textom viditeľného štítka a neobsahuje žiadne dôležité informácie, ktoré vo viditeľnom štítku chýbajú.</p>`,
   LABELS_ARIA_LABEL_INPUT: '<p><strong>Neviditeľný štítok poľa:</strong> <i>%(TEXT)</i></p><p>Skontrolujte, či má pole viditeľný štítok, či zostane viditeľný aj vtedy, keď je v poli text, a či zodpovedá neviditeľnému názvu poľa.</p><div class="why"><p>Ak sú polia označené iba pomocou atribútu title alebo zástupného textu, štítok vizuálne zmizne hneď, ako niekto začne písať. Ľudia potom ťažko kontrolujú zadané údaje, keď je na stránke viacero polí. Tiež sa ľahko zabudne aktualizovať neviditeľný štítok poľa.</p></div>',
   LABELS_INPUT_RESET: `<p>Tlačidlá na resetovanie sa ľahko aktivujú omylom a spôsobujú stratu údajov bez možnosti akciu zrušiť alebo vrátiť späť.</p><p>${why.fix}Pokiaľ toto tlačidlo neresetuje iba jedno pole, zvážte jeho odstránenie alebo pridajte možnosť zrušiť akciu pred jej vykonaním.</p>`,
   LABELS_MISSING_IMAGE_INPUT: "Obrázkovému tlačidlu chýba alternatívny text. Pridajte alternatívny text, aby ste poskytli prístupný názov. Napríklad: <em>Hľadať</em> alebo <em>Odoslať</em>.",
   LABELS_MISSING_LABEL: `<p>${why.fix}Pridajte k tomuto vstupnému poľu atribút <code>id</code> a k štítku zodpovedajúci atribút <code>for</code>.</p>`,
-  LABELS_NO_FOR_ATTRIBUTE: "S týmto vstupným poľom nie je spojený žiadny štítok. Pridajte k štítku atribút <code>for</code>, ktorý zodpovedá atribútu <code>id</code> tohto vstupného poľa. <hr> <strong>ID:</strong> <code>#%(ID)</code>",
+  LABELS_NO_FOR_ATTRIBUTE: "<p>S týmto vstupným poľom nie je spojený žiadny štítok. Pridajte k štítku atribút <code>for</code>, ktorý zodpovedá atribútu <code>id</code> tohto vstupného poľa.</p><p><strong>ID:</strong> <code>#%(ID)</code></p>",
   LABELS_PLACEHOLDER: `<p>Zástupný text si pri dobrom kontraste možno pomýliť s už zadaným obsahom a pri nedostatočnom kontraste je nečitateľný. Pri písaní navyše zmizne, a s ním aj informácie, ktoré používatelia mohli potrebovať na kontrolu chýb.</p><p>${why.fix}Uistite sa, že kľúčové informácie, ako sú štítok poľa, pomocný text a pokyny k formátu, zostanú viditeľné aj vtedy, keď je v poli obsah, a zvážte úplné vypustenie zástupného textu.</p>`,
   LINK_ALT_FILE_EXT: `<p>Tento alternatívny text je pravdepodobne názov súboru namiesto zmysluplného štítka odkazu:<br><span hidden>%(ALT)</span><i>%(alt)</i></p><p>${why.fix}Ako alternatívny text prepojených obrázkov použite názov cieľa odkazu.</p><div class="why"><p>Účelom alternatívneho textu je poskytnúť alternatívu k tomu, čo obrázok znamená, nie len k tomu, čo zobrazuje. Významom prepojeného obrázka je cieľ odkazu:</p><ul><li>„Stránka s textom“ opisuje obrázok, nie odkaz.</li><li>„IMG_1234.jpg“ je len názov súboru.</li><li>„Formulár na registráciu na podujatie (.doc)“ je cieľ odkazu.</li></ul></div>`,
   LINK_ALT_MAYBE_BAD: `<p><strong>Alternatívny text:</strong> <i>%(alt)</i></p><p>${why.fix}Ako alternatívny text prepojených obrázkov použite názov cieľa odkazu.</p>${why.imageLinks}`,
@@ -621,6 +669,7 @@ const tips = {
   META_REFRESH: `<p>Stránky by sa nemali automaticky obnovovať pomocou meta značky. Obnovenie preruší používateľa bez upozornenia a bez možnosti mu zabrániť, používateľ stratí miesto, kde práve čítal, a môže prísť o rozpracovaný formulár.</p><p>${why.fix}Na obnovenie obsahu na tej istej stránke použite AJAX, ktorý obnoví iba príslušné sekcie bez opätovného načítania, alebo obnovenie spúšťajte pomocou JavaScriptu, aby bolo možné používateľa vopred upozorniť a dať mu možnosť obnovenie odložiť.</p>`,
   META_SCALABLE: `<p>Táto meta značka zabraňuje priblíženiu.</p><p>${why.fix}Odstránením alebo úpravou atribútu povoľte plné priblíženie.</p>`,
   META_TITLE: `<p>${why.fix}Pridajte značku <code>&lt;title&gt;</code> do prvku <code>head</code> stránky.</p><div class="why"><p>Tip: mnohé aspekty prehliadania závisia od <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">krátkej a jedinečnej značky title</a>:</p><ul><li>Vyhľadávače z nej preberajú názvy výsledkov.</li><li>Prehliadače z nej preberajú názvy kariet.</li><li>Čítačky obrazovky ju vyslovujú pri prepínaní kariet.</li></ul><p>Bez názvu stránky ľudia namiesto neho vidia/počujú holú URL adresu.</p></div>`,
+  META_TITLE_UNDESCRIPTIVE: `<p>Názov stránky „<i>%(TEXT)</i>“ možno nie je popisný alebo nevyjadruje jedinečne tému ani účel tejto stránky.</p><p>${why.fix}Čítačky obrazovky používajú názvy stránok ako názvy okien a vyhľadávače ako názvy výsledkov. Napíšte názov stránky, ktorý je jedinečný, stručný a jasne opisuje obsah stránky.</p>`,
   MISSING_ALT: `<p>Keď čítačky obrazovky narazia na obrázok úplne bez atribútu alt, pokúsia sa namiesto toho vysloviť URL adresu súboru obrázka, často po jednom písmene.</p><p>${why.fix}Stručne opíšte, čo tento obrázok v danom kontexte znamená.</p>${why.images}`,
   MISSING_ALT_LINK: `<p>Keď čítačky obrazovky narazia na obrázok úplne bez atribútu alt, pokúsia sa namiesto toho vysloviť URL adresu súboru obrázka, často po jednom písmene. Pri prepojených obrázkoch je to obzvlášť problematické.</p><p>${why.fix}Pridajte alternatívny text, ktorý zodpovedá cieľu odkazu.</p>${why.imageLinks} `,
   MISSING_ALT_LINK_HAS_TEXT: `<p>Tento obrázok je súčasťou odkazu s textom. Ak viditeľný text postačuje na opis odkazu, pridajte prázdny atribút alt (alt=""), aby čítačky obrazovky tento obrázok ignorovali. V opačnom prípade pridajte alternatívny text, ktorý pomôže opísať cieľ alebo účel odkazu.</p>${why.imageLinks}`,
@@ -638,12 +687,16 @@ const tips = {
   QA_SUBSCRIPT: `<p><strong>Text:</strong> <i>%(TEXT)</i></p><p>Formátovanie dolným a horným indexom spôsobuje, že text je pre mnohých ľudí príliš malý na pohodlné čítanie. Malo by sa používať iba pre jednotlivé slová alebo výrazy, napríklad poradové čísla (4<sup>.</sup>), chemické vzorce (H<sub>2</sub>O) a odkazy na poznámky pod čiarou.</p>`,
   QA_UNDERLINE: `<p>Podčiarknutý text sa na webe používa pre odkazy, nie na zdôraznenie. Používatelia si budú myslieť, že naň môžu kliknúť: <i><u>%(TEXT)</u></i></p><p>${why.fix}Na zdôraznenie použite <strong>tučné písmo</strong> alebo <em>kurzívu</em>, na štruktúru nadpisy.</p><div class="why"><p>Poznámka: čítačky obrazovky neoznamujú čisto vizuálne formátovanie, ako je podčiarknutie. Do osnovy stránky pridávajú text iba nadpisy.</p></div>`,
   QA_UPPERCASE: `<p><strong>Text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Veľkými písmenami zdôraznite iba niekoľko slov. VEĽKÉ BLOKY TEXTU PÍSANÉ VEĽKÝMI PÍSMENAMI SA ČÍTAJÚ ŤAŽŠIE A MNOHÍ ČITATELIA ICH VNÍMAJÚ AKO KRIK.</p><div class="why"><p>Poznámka: čítačky obrazovky neoznamujú čisto vizuálne formátovanie, ako sú veľké písmená. Ak tento zdôraznený text uvádza zmenu témy alebo kriticky dôležitý obsah, použite radšej štýl nadpisu.</p></div>`,
+  SUMMARY_EMPTY: `<p>Prvky details vytvárajú klikateľný akordeón, ktorý zobrazuje text prvku <code>&lt;summary&gt;</code> ako tlačidlo odkrývajúce ďalšie podrobnosti. Bez textu v prvku summary ľudia, ktorí používajú čítačky obrazovky, nemôžu počuť, čo tlačidlo robí.</p>`,
   SUS_ALT: `<p>Alternatívny text tohto obrázka obsahuje slovo „<i>%(alt)</i>“. Čítačky obrazovky pri čítaní alternatívneho textu oznamujú, že opisujú obrázok, takže slová ako „obrázok“ a „fotografia“ sú zvyčajne nadbytočné.</p><p><strong>Alternatívny text:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Stručne opíšte, čo tento obrázok v danom kontexte znamená.</p><div class="why"><p>Tip: tieto slová sa oplatí ponechať vtedy, keď je zmysluplný samotný formát:<br>„Fotografia mačky, zarámovaná a zavesená na stene.“</p></div>`,
+  SVG_NO_ACCESSIBLE_NAME: `<p>Niektoré čítačky obrazovky oznámia toto SVG ako obrázok bez štítka, pretože nemá prístupný názov a nie je skryté. Ak nesie význam, pridajte prístupný štítok (alebo <code>&lt;title&gt;</code>). Ak je čisto dekoratívne, skryte ho pred čítačkami obrazovky (<code>aria-hidden="true"</code>).</p>`,
   TABINDEX_ATTR: `<p>Hodnoty tabindex väčšie ako 0 presúvajú zameriavateľné prvky mimo ich vizuálneho poradia, čím používateľom asistenčných technológií sťažujú ich nájdenie a ovládanie.</p><p>${why.fix}Namiesto toho zmeňte poradie prvkov v HTML tak, aby poradie fokusu zodpovedalo poradiu čítania.</p><div class="why"><p>Tip: vizuálne poradie slov na stránke a poradie, v akom klávesnica prechádza prvkami, sú zvyčajne totožné.</p><p>Priradenie kladnej hodnoty tabindex presunie prvok na začiatok poradia tabulátora, <strong>ale nie na začiatok vizuálneho poradia ani poradia čítania</strong>.</p></div>`,
   TABLES_EMPTY_HEADING: `<p>${why.fix}Uistite sa, že každá bunka hlavičky obsahuje text.</p><div class="why"><p>Tip: čítačky obrazovky používajú hlavičky na orientáciu používateľov pri prechádzaní tabuľky. Príslušná hlavička zaznie vždy, keď kurzor vstúpi do nového stĺpca alebo riadka.</p></div>`,
   TABLES_INVALID_HEADERS_REF: `<p>Táto tabuľka sa pokúša priradiť konkrétnu dátovú bunku ku konkrétnej bunke hlavičky, no ID hlavičky sa nenašlo: <code>%(VALUE)</code>.</p><p>${why.fix}Uistite sa, že každý atribút <code>headers</code> zodpovedá ID bunky hlavičky v tej istej tabuľke.</p><div class="why">Tip: <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">používanie manuálnych odkazov na ID</a> na priradenie dátových buniek k bunkám hlavičky je komplikované a nespoľahlivé. Ak je to možné, rozdeľte zložité údaje do menších tabuliek s jednoduchými riadkami a stĺpcami hlavičky.</div>`,
   TABLES_MISSING_HEADINGS: `<p>${why.fix}Upravte vlastnosti tabuľky a určte, či sú hlavičky umiestnené v prvom riadku, v prvom stĺpci alebo v oboch.</p><div class="why"><p>Tip: čítačky obrazovky používajú hlavičky na orientáciu používateľov pri prechádzaní tabuľky. Príslušná hlavička zaznie vždy, keď kurzor vstúpi do nového stĺpca alebo riadka.</p><p>Ak táto tabuľka nemá hlavičky, pretože slúži iba na vizuálne rozloženie, odstráňte formátovanie tabuľky a namiesto neho použite čisto vizuálne formátovanie do stĺpcov.</p></div>`,
-  TABLES_SEMANTIC_HEADING: `<p>${why.fix}Odstráňte toto formátovanie nadpisu (h2, h3). Namiesto toho použite riadky a stĺpce hlavičky. Ak potrebujete viacero riadkov hlavičky, rozdeľte tabuľku na viacero tabuliek.</p><div class="why"><p>Tip: hlavičky tabuliek sú smerové: označujú jeden riadok alebo stĺpec. Obsahové nadpisy označujú všetok nasledujúci text, aj v nesúvisiacich stĺpcoch:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2"><strong>Hlavička tabuľky</strong> v bunke 2 označuje bunku B. <br><br> <strong>Obsahový nadpis</strong> v bunke 2 označuje bunky 3, A, B a C, ako aj tento text a pätičku tohto tooltipu.</td></tr><tr><td>A</td><td>B</td><td>C</td></tr></table></div>`
+  TABLES_SEMANTIC_HEADING: `<p>${why.fix}Odstráňte toto formátovanie nadpisu (h2, h3). Namiesto toho použite riadky a stĺpce hlavičky. Ak potrebujete viacero riadkov hlavičky, rozdeľte tabuľku na viacero tabuliek.</p><div class="why"><p>Tip: hlavičky tabuliek sú smerové: označujú jeden riadok alebo stĺpec. Obsahové nadpisy označujú všetok nasledujúci text, aj v nesúvisiacich stĺpcoch:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2"><strong>Hlavička tabuľky</strong> v bunke 2 označuje bunku B. <br><br> <strong>Obsahový nadpis</strong> v bunke 2 označuje bunky 3, A, B a C, ako aj tento text a pätičku tohto tooltipu.</td></tr><tr><td>A</td><td>B</td><td>C</td></tr></table></div>`,
+  TABLES_SINGLE_COLUMN: `<p>Tabuľky s jediným stĺpcom často neslúžia na tabuľkové údaje, ale na vizuálny dizajn. Pre ľudí, ktorí používajú čítačky obrazovky, je to mätúce, pretože sa musia zastaviť a vypočuť si opisy štruktúry určené pre tabuľky s údajmi, napríklad <em>„tabuľka, 5 riadkov, 1 stĺpec“</em>.</p><p>${why.fix}Odstráňte formátovanie tabuľky a použite zoznam alebo iný prvok, ktorý slúži iba na vizuálne rozloženie.</p>`,
+  TABLES_SINGLE_CELL: `<p>Tabuľky s jedinou bunkou často vzniknú chybou pri kopírovaní a vkladaní alebo sa pridávajú kvôli vizuálnemu orámovaniu. Pre ľudí, ktorí používajú čítačky obrazovky, je to mätúce, pretože sa musia zastaviť a vypočuť si opisy štruktúry určené pre tabuľky s údajmi: <em>„Tabuľka, 1 riadok, 1 stĺpec, riadok 1 stĺpec 1“</em>.</p><p>${why.fix}Odstráňte formátovanie tabuľky a použite iné možnosti štýlovania, aby ste upútali pozornosť na tento obsah.</p>`
 };
 const interfaceStrings = {
   ALERT_CLOSE: "Zavrieť",
@@ -727,6 +780,8 @@ const interfaceStrings = {
   panelCheckLinks: "Tieto odkazy vyžadujú manuálnu kontrolu. Cieľové stránky môžu chýbať, presmerúvať inam alebo blokovať prehľadávacie roboty.",
   reportsLink: "Otvoriť správy webu",
   SKIP_TO_ISSUE: "Zobraziť upozornenie",
+  buttonNext: "Ďalšie",
+  buttonPrev: "Predchádzajúce",
   toggleDisabled: "Editoria11y nemá k dispozícii žiadny obsah na kontrolu.",
   transferFocus: "Upraviť tento obsah",
   unDismissHideButton: "Obnoviť toto ignorované upozornenie",

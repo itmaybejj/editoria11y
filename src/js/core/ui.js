@@ -21,11 +21,15 @@ export const UI = {
   panelJumpNext: {},
   panelShowDismissed: {},
   theme: {},
+  baseFont: document.createElement('div'),
 
   version: version,
   english: true,
   running: false,
   runGen: 0,
+  // Milliseconds each phase of the latest check took, by name (see safeRun in run.js).
+  // Read by tests/performance.htm; also handy when investigating a slow page.
+  runTimings: {},
   runOrigin: false,
   watching: [],
   seen: [],
@@ -81,7 +85,7 @@ export const UI = {
 
   /* Annotations initial states */
   jumpList: [],
-  openJumpPosition: Number - 1,
+  openJumpPosition: -1,
   viaJump: false,
   toggledFrom: false,
   scrollPending: 0,
@@ -91,6 +95,7 @@ export const UI = {
     button: {},
     tip: {},
   },
+  uniqueId: 0,
   positionedFrames: [],
   recentlyAddedNodes: new WeakMap(),
 };
