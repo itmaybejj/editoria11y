@@ -27,6 +27,9 @@ export const UI = {
   english: true,
   running: false,
   runGen: 0,
+  // Milliseconds each phase of the latest check took, by name (see safeRun in run.js).
+  // Read by tests/performance.htm; also handy when investigating a slow page.
+  runTimings: {},
   runOrigin: false,
   watching: [],
   seen: [],

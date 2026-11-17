@@ -33,6 +33,8 @@
 		"dev": "npm run serve",
 		"test": "node scripts/test-docker.js",
 		"test:host": "playwright test --config=e2e/playwright.config.js",
+		"test:perf": "node scripts/test-docker.js --project=perf --no-deps",
+		"test:perf:host": "playwright test --config=e2e/playwright.config.js --project=perf --no-deps",
 		"conformance:download": "node conformance/scripts/download-testcases.js",
 		"conformance:discover": "node conformance/scripts/discover-mappings.js",
 		"conformance:list": "node conformance/scripts/list-rules.js",

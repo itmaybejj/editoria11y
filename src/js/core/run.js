@@ -56,7 +56,8 @@ import { applyLinkVerdict, checkBrokenLinks } from '../rulesets/broken-links.js'
 import { isVisualizerOnly, isWarningStyled, shouldDraw } from '../utils/result-types.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
-import { resetGetText, store } from '../../sa11y-js/utils/utils.js';
+import { store } from '../../sa11y-js/utils/utils.js';
+import resetCaches from '../../sa11y-js/core/reset-caches.js';
 
 export function showResults() {
   buildJumpList();
@@ -1403,38 +1404,42 @@ export function startObserver(root) {
   }, 1000);
 }
 
-const safeRun = (fn) => {
+// Runs one ruleset and records its time in UI.runTimings. The names are passed explicitly
+// because the minified build renames functions.
+const safeRun = (fn, name) => {
+  const start = performance.now();
   try {
     fn();
   } catch (error) {
     showError(error);
   }
+  UI.runTimings[name] = performance.now() - start;
 };
 
 const enqueueTests = (queue) => {
   const test = queue.pop();
   switch (test) {
     case 'group1':
-      safeRun(checkHeaders);
-      safeRun(checkImages);
-      safeRun(checkEmbeddedContent);
-      safeRun(checkCustomRuleset);
-      safeRun(checkQA);
+      safeRun(checkHeaders, 'checkHeaders');
+      safeRun(checkImages, 'checkImages');
+      safeRun(checkEmbeddedContent, 'checkEmbeddedContent');
+      safeRun(checkCustomRuleset, 'checkCustomRuleset');
+      safeRun(checkQA, 'checkQA');
       break;
     case 'group2':
-      safeRun(checkLinkText);
+      safeRun(checkLinkText, 'checkLinkText');
       break;
     case 'checkLabels':
-      safeRun(checkLabels);
+      safeRun(checkLabels, 'checkLabels');
       break;
     case 'checkContrast':
-      safeRun(checkContrast);
+      safeRun(checkContrast, 'checkContrast');
       break;
     case 'checkDeveloper':
-      safeRun(checkDeveloper);
+      safeRun(checkDeveloper, 'checkDeveloper');
       break;
     case 'checkBrokenLinks':
-      safeRun(checkBrokenLinks);
+      safeRun(checkBrokenLinks, 'checkBrokenLinks');
       break;
   }
   UI.testsRemaining--;
@@ -1480,6 +1485,12 @@ export function checkAll() {
   if (UI.tipOpen) {
     return false;
   }
+  // Sa11y's caches only hold for one run: they store results for ancestors as well as for the
+  // elements checked, so after the page changes a stale entry would also be used for new
+  // elements below that ancestor.
+  resetCaches();
+  UI.runTimings = {};
+
   // Bump run generation. Used to detect aborted/overlapping runs and as
   // the liveness stamp for adopted mark entries (see MarkEntry.generation).
   UI.runGen = (UI.runGen + 1) | 0;
@@ -1525,7 +1536,9 @@ export function checkAll() {
   State.results.length = 0;
   UI.splitConfiguration.devResults.length = 0;
 
+  const buildStart = performance.now();
   buildElementList();
+  UI.runTimings.buildElementList = performance.now() - buildStart;
 
   // Call rulesets.
   const queue = ['group1', 'group2'];
@@ -1638,7 +1651,6 @@ export function incrementalCheck() {
     }
     UI.interaction = false;
     UI.running = true;
-    resetGetText();
     let runTime = performance.now();
     UI.incremental = true;
     if (UI.disabled && UI.closedByDisable) {
@@ -1919,6 +1931,8 @@ export function reset() {
   pauseObservers();
   resetResults();
   resetPanel();
+  // checkAll clears these too; this frees the memory while Editoria11y is idle.
+  resetCaches();
   UI.incremental = false;
   UI.running = false;
   UI.showPanel = false;

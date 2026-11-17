@@ -21,6 +21,12 @@ export default defineConfig({
     headless: true,
     trace: 'retain-on-failure',
   },
+  projects: [
+    { name: 'e2e', testIgnore: '**/performance.spec.js' },
+    // Benchmark (performance.spec.js). Runs after the e2e tests so they do not compete for CPU.
+    // Alone: npm run test:perf
+    { name: 'perf', testMatch: '**/performance.spec.js', dependencies: ['e2e'] },
+  ],
   webServer: {
     command: 'node e2e/server.js',
     url: `http://127.0.0.1:${port}/tests/all_tests.htm`,

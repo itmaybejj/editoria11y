@@ -1,6 +1,5 @@
 # Ignore build and test artifacts.
 tests/tinymce/
-tests/performance.htm
 node_modules/
 logs/
 screens/

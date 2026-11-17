@@ -45,6 +45,11 @@ const args = [
   ...(process.getuid ? ['--user', `${process.getuid()}:${process.getgid()}`] : []),
   '-e',
   'HOME=/tmp',
+  // Pass through the performance benchmark switches (see e2e/tests/performance.spec.js), and
+  // npm's log level so `npm test --verbose` reaches it. `-e NAME` copies the host value.
+  ...['PERF_BASELINE', 'PERF_VERBOSE', 'npm_config_loglevel']
+    .filter((name) => process.env[name])
+    .flatMap((name) => ['-e', name]),
   '-v',
   `${repoRoot}:/work`,
   '-w',
