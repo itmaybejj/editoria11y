@@ -16,10 +16,11 @@ import { UI } from '../core/ui.js';
 // manual check offers that and "Mark broken". A result pushed with
 // `dismissalStatus: 'ok'` (the checker records a site-wide Mark OK) or
 // `'hide'` is hidden like any dismissed alert and offers "Restore" when
-// revealed. "Mark broken" is not a dismissal: it is dispatched through
-// `ed11yDismissalUpdate` with `dismissAction: 'broken'` for the integration
-// that pushed the result to act on, as "Restore" is with
-// `dismissAction: 'reset'`.
+// revealed. "Mark broken" is not a dismissal: the link is repainted as
+// marked broken and the action is dispatched through `ed11yDismissalUpdate`
+// with `dismissAction: 'broken'` for the integration that pushed the result
+// to store, as "Restore" is with `dismissAction: 'reset'` (see
+// applyLinkVerdict() in rulesets/broken-links.js).
 //
 // Colors come from the result's status, not its type: `severity` picks the
 // same alert (error) or warning styling the built-in checks use. The shared

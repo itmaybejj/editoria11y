@@ -1,6 +1,8 @@
 import { alertOnInvisibleTip, dismissThis, jumpTo, transferFocus } from '../core/run.js';
 import Lang from '../../sa11y-js/utils/lang.js';
-import { focusLoop, getElements, hideInitialCount} from '../utils/utils.js';
+import { getElements, hideInitialCount } from '../utils/utils.js';
+import { focusLoop } from '../utils/align.js';
+
 import {
   generateColorSuggestion,
   generateContrastTools,
@@ -9,11 +11,7 @@ import {
 import sprite from './sprite.js';
 import { UI } from '../core/ui.js';
 import { State } from '../../sa11y-js/core/state.js';
-import {
-  linkTypes,
-  isLinkResult,
-  isManualLink,
-} from '../utils/result-types.js';
+import { linkTypes, isLinkResult, isManualLink } from '../utils/result-types.js';
 import { linkMarksAllowed } from '../rulesets/broken-links.js';
 
 export class Ed11yElementTip extends HTMLElement {
@@ -48,11 +46,6 @@ export class Ed11yElementTip extends HTMLElement {
     this.wrapper.dataset.ed11yDismiss = this.result.dismiss;
     this.wrapper.classList.add('ed11y-tip-wrapper', 'ed11y-wrapper');
     this.wrapper.style.setProperty('opacity', '0');
-    this.wrapper.setAttribute(
-      'aria-label',
-      `${Lang._('ALERT_TEXT')}
-        ${this.issueIndex + 1}`,
-    );
     this.wrapper.innerHTML = `
 		<div class="tip">
 			<button class="close ed11y-tip-close">${sprite.close}</button>
@@ -97,7 +90,8 @@ export class Ed11yElementTip extends HTMLElement {
       wrapped.innerHTML = this.result.content;
       this.result.content = wrapped;
     }
-    if (this.result.content.querySelector('.title')) {
+    let contentTitle = this.result.content.querySelector('.title');
+    if (contentTitle) {
       // Sent by Ed11y
       content.appendChild(this.result.content);
       // Strip Sa11y plaintext tips.
@@ -116,19 +110,22 @@ export class Ed11yElementTip extends HTMLElement {
       // Sent by Sa11y
       // This removes Sa11y's injected "Tip!" additions:
       const innerContent = document.createElement('div');
-      const firstSentence = document.createElement('div');
-      firstSentence.classList.add('title');
-      firstSentence.setAttribute('tabindex', '-1');
-      firstSentence.style.setProperty('position', 'absolute');
-      innerContent.append(firstSentence);
+      contentTitle = document.createElement('div');
+      contentTitle.classList.add('title');
+      contentTitle.setAttribute('tabindex', '-1');
+      contentTitle.style.setProperty('position', 'absolute');
+      innerContent.append(contentTitle);
       innerContent.appendChild(this.result.content);
       content.append(innerContent);
       console.warn(`Editoria11y tip title not found for ${this.result.test}.`);
     }
-    const title = content.querySelector('.title');
+    //const theTitle = this.wrapper.querySelector('.title');
     const invisibleAlert = document.createElement('div');
     invisibleAlert.classList.add('invisible-alert');
-    title.append(invisibleAlert);
+    contentTitle.append(invisibleAlert);
+    UI.uniqueId++;
+    contentTitle.setAttribute('id', `ed11y-title-${UI.uniqueId}`);
+    this.wrapper.setAttribute('aria-labelledby', `ed11y-title-${UI.uniqueId}`);
     if (this.result.contrastDetails) {
       const contrastDiv = document.createElement('div');
       contrastDiv.classList.add('ed11y-contrast-tools');
@@ -342,13 +339,23 @@ export class Ed11yElementTip extends HTMLElement {
         }
         // todo postpone: track if this tip was opened by the next button. If so, transfer focus back to it instead
         this.setAttribute('data-ed11y-action', 'shut');
-        this.result?.toggle?.setAttribute('data-ed11y-action', 'shut');
+        if (this.result?.toggle) {
+          // Keep alertOnInvisibleTip() from reopening it.
+          this.result.toggle.userClosed = true;
+          this.result.toggle.setAttribute('data-ed11y-action', 'shut');
+        }
       }
     });
     this._handleDocumentClick = (event) => {
       // Close tip when mouse is clicked outside it.
       if (this.open && !event.target.closest('.ed11y-element')) {
         const toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', 'document', []);
+        if (toggle[0] && event.isTrusted) {
+          // A real click away is deliberate. Scripted clicks are not: a theme
+          // revealing a hidden alert may click, and alertOnInvisibleTip()
+          // reopens the tip that click closed.
+          toggle[0].userClosed = true;
+        }
         toggle[0]?.setAttribute('data-ed11y-action', 'shut');
         this.setAttribute('data-ed11y-action', 'shut');
       }

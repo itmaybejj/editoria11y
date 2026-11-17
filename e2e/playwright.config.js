@@ -8,7 +8,8 @@ const port = Number(process.env.E2E_PORT || 8855);
 export default defineConfig({
   testDir: './tests',
   outputDir: './test-results',
-  timeout: 30_000,
+  // Pages are local and small; a test that needs longer is hung, not slow.
+  timeout: 2_000,
   // Every test loads its own page, so tests within a file can run in parallel.
   fullyParallel: true,
   // Fail fast locally; CI gets one retry for flaky timing.

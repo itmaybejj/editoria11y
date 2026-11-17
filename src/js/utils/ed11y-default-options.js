@@ -126,6 +126,12 @@ export const ed11yDefaultOptions = {
    *               own title and tip; any other falls back to the status.
    *  dismissed    The verdict, if any: 'ok' (an editor marked the link OK
    *               site-wide) or 'hide' (this editor ignored the alert).
+   *  checkerStatus  With status 'markedBroken': the checker's own finding,
+   *               painted once the mark is lifted (Mark OK, or Restore by
+   *               an editor who may mark links). Any status but
+   *               'markedBroken', or 'unflagged' when the checker alone
+   *               would not flag the link. Without it, a lifted mark stays
+   *               painted until the page reloads.
    *  redirectsTo  Where a 'redirect' link now lands.
    *  hash         Opaque id echoed back in events. Defaults to the href.
    * }

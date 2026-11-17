@@ -59,13 +59,17 @@ export class Ed11yElementResult extends HTMLElement {
       host.racing = true;
       UI.toggledFrom = this;
       const stateChange = host.getAttribute('data-ed11y-open') === 'false' ? 'open' : 'close';
+      if (stateChange === 'close') {
+        // Keep alertOnInvisibleTip() from reopening it.
+        host.userClosed = true;
+      }
       host.setAttribute('data-ed11y-action', stateChange);
       if (stateChange === 'open') {
         window.setTimeout(() => {
           // todo: what about fixed roots?
           const activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-          activeTip?.shadowRoot.querySelector('.title').focus();
-        }, 500);
+          activeTip?.shadowRoot.querySelector('.close').focus();
+        }, 250);
       }
       window.setTimeout(
         () => {
@@ -115,6 +119,7 @@ export class Ed11yElementResult extends HTMLElement {
       editableHighlighter(this.resultID, changeTo);
     }
     if (changeTo === true) {
+      this.userClosed = false;
       this.tip.style.setProperty('opacity', '0');
       // Allow for themes to reveal hidden tips
       document.dispatchEvent(

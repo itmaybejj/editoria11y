@@ -92,6 +92,7 @@ export const UI = {
     button: {},
     tip: {},
   },
+  uniqueId: 0,
   positionedFrames: [],
   recentlyAddedNodes: new WeakMap(),
 };

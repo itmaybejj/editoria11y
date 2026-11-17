@@ -56,6 +56,15 @@ async function clickTipButton(page, selector) {
   await page.waitForFunction((count) => window.ed11yTestEvents.length > count, before);
 }
 
+/** The serializable parts of the link result for `hash`. */
+const readLinkResult = (page, hash) =>
+  page.evaluate((h) => {
+    const result = Ed11y.State.results.find((r) => r.data?.hash === h);
+    return result
+      ? { test: result.test, type: result.type, dismissalStatus: result.dismissalStatus }
+      : null;
+  }, hash);
+
 /** Light-DOM check for a result button; Playwright locators would pierce shadow roots. */
 const hasResult = (page, containerClass) =>
   page.evaluate((cls) => !!document.querySelector(`.${cls} ed11y-element-result`), containerClass);
@@ -160,12 +169,17 @@ test.describe('Link checker results', () => {
     await repaintAfter(page, () => clickTipButton(page, '.dismiss.broken'));
     const value = await page.evaluate(() => {
       const page = Ed11y.State.option.currentPage;
+      const toggle = document
+        .querySelector('.manual ed11y-element-result')
+        ?.shadowRoot.querySelector('.toggle');
       return {
         last: window.ed11yTestEvents.at(-1),
         recorded: !!Ed11y.UI.dismissedAlerts[page]?.HREF_UNVERIFIABLE,
-        stillPainted: !!document.querySelector('.manual ed11y-element-result'),
+        stillPainted: !!toggle,
+        className: toggle?.className,
       };
     });
+    value.result = await readLinkResult(page, 'def456');
     expect(value.last.dismissAction, 'Broken action dispatched').toBe('broken');
     expect(value.last.dismissTest, 'Test key travels').toBe('HREF_UNVERIFIABLE');
     expect(value.last.dismissType, 'Result type travels with it').toBe('linkManual');
@@ -173,6 +187,85 @@ test.describe('Link checker results', () => {
     expect(value.last.dismissData.href, 'Stored href travels').toBe('https://example.com/locked');
     expect(value.recorded, 'Mark broken is not stored as a dismissal').toBe(false);
     expect(value.stillPainted, 'The link stays visible after marking').toBe(true);
+    expect(value.result.test, 'Repainted as marked broken').toBe('HREF_MARKED_BROKEN');
+    expect(value.result.type, 'Repainted as a broken link').toBe('link');
+    expect(value.className, 'Toggle uses the broken-link colors').not.toContain('dismissable');
+
+    await openTip(page, 'manual');
+    const marked = await page.evaluate(readTip);
+    expect(marked.badge, 'Badge names the link class').toBe('Broken link');
+    expect(marked.buttons, 'Mark broken is no longer offered').toEqual(['Mark OK']);
+  });
+
+  test('returns a link marked broken to its checked status when marked OK and restored', async ({
+    page,
+  }) => {
+    await gotoPainted(page, PAGE);
+    await openTip(page, 'manual');
+    await repaintAfter(page, () => clickTipButton(page, '.dismiss.broken'));
+
+    // Mark OK replaces the broken mark and hides the link.
+    await openTip(page, 'manual');
+    await repaintAfter(page, () => clickTipButton(page, '.dismiss.ok'));
+    let value = await page.evaluate(() => ({
+      last: window.ed11yTestEvents.at(-1),
+      painted: !!document.querySelector('.manual ed11y-element-result'),
+    }));
+    value.result = await readLinkResult(page, 'def456');
+    expect(value.last.dismissAction, 'OK action dispatched').toBe('ok');
+    expect(value.painted, 'Marked-OK link is hidden').toBe(false);
+    expect(value.result.dismissalStatus, 'Result carries the OK verdict').toBe('ok');
+    expect(value.result.test, 'Back to the checker finding').toBe('HREF_UNVERIFIABLE');
+
+    // Restore clears the verdict and paints the checker's finding again.
+    await showHidden(page);
+    await openTip(page, 'manual');
+    await repaintAfter(page, () => clickTipButton(page, '.ed11y-tip-dismissals button'));
+    value = await page.evaluate(() => ({
+      last: window.ed11yTestEvents.at(-1),
+    }));
+    value.result = await readLinkResult(page, 'def456');
+    expect(value.last.dismissAction, 'Restore dispatches a reset').toBe('reset');
+    expect(value.result.dismissalStatus, 'Restored result carries no verdict').toBeFalsy();
+    expect(value.result.type, 'Painted as a manual check again').toBe('linkManual');
+    expect(value.result.test, 'With the checker finding').toBe('HREF_UNVERIFIABLE');
+  });
+
+  test('lifts a mark that arrived with the page to the checker status it came with', async ({
+    page,
+  }) => {
+    await gotoPainted(page, `${PAGE}?marked`);
+    let result = await readLinkResult(page, 'marked1');
+    expect(result.test, 'Painted as marked broken').toBe('HREF_MARKED_BROKEN');
+    expect(result.type, 'As a broken link').toBe('link');
+
+    await openTip(page, 'marked-gated');
+    await repaintAfter(page, () => clickTipButton(page, '.dismiss.ok'));
+    result = await readLinkResult(page, 'marked1');
+    expect(result.dismissalStatus, 'Marked OK').toBe('ok');
+    expect(result.test, 'Mark OK replaces the broken mark').toBe('HREF_ACCESS');
+
+    await showHidden(page);
+    await openTip(page, 'marked-gated');
+    await repaintAfter(page, () => clickTipButton(page, '.ed11y-tip-dismissals button'));
+    result = await readLinkResult(page, 'marked1');
+    expect(result.dismissalStatus, 'Restored').toBeFalsy();
+    expect(result.type, 'Painted with the checker finding').toBe('linkManual');
+    expect(result.test, 'Which the entry carried').toBe('HREF_ACCESS');
+  });
+
+  test('stops painting a marked link the checker alone would not flag once marked OK', async ({
+    page,
+  }) => {
+    await gotoPainted(page, `${PAGE}?marked`);
+    expect(await hasResult(page, 'marked-works'), 'Painted while marked').toBe(true);
+    await openTip(page, 'marked-works');
+    await repaintAfter(page, () => clickTipButton(page, '.dismiss.ok'));
+    expect(await readLinkResult(page, 'marked2'), 'No result once the mark is lifted').toBeNull();
+
+    // Not among the hidden alerts either: the checker has nothing to report.
+    await showHidden(page);
+    expect(await hasResult(page, 'marked-works'), 'Not painted with hidden alerts').toBe(false);
   });
 
   test('names the destination of a link that redirects to another site', async ({ page }) => {

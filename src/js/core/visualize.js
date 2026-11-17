@@ -8,11 +8,7 @@ import checkReadability from '../../sa11y-js/rulesets/readability';
 import sprite from '../elements/sprite.js';
 import { State } from '../../sa11y-js/core/state.js';
 import { UI } from './ui.js';
-import {
-  linkTypes,
-  isLinkResult,
-  isWarningStyled,
-} from '../utils/result-types.js';
+import { linkTypes, isLinkResult, isWarningStyled } from '../utils/result-types.js';
 import { displayHref, linkStatusLabel } from '../rulesets/broken-links.js';
 import { jumpTo } from './run.js';
 

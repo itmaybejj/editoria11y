@@ -58,6 +58,9 @@ function readResults() {
 
 for (const code of langs) {
   test(`results render in ${code}`, async ({ page }) => {
+    // Each language renders every tip on all_tests.htm: about 1s alone, more
+    // when the suite runs in parallel.
+    test.setTimeout(5_000);
     await useLanguage(page, code);
     await gotoPainted(page, '/tests/all_tests.htm');
     const results = await page.evaluate(readResults);

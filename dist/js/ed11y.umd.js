@@ -1,6 +1,6 @@
 /*!
 			* Editoria11y accessibility checker
-			* @version 3.0.2-1108
+			* @version 3.0.3-1116
 			* @author John Jameson
 			* @license GPLv2
 			* @copyright © 2026 Princeton University.
@@ -1876,7 +1876,7 @@
       });
     }
   }
-  const version = "3.0.2-1108";
+  const version = "3.0.3-1116";
   const sprite = {
     alts: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 576 512"><path fill="currentColor" d="M160 80l352 0c9 0 16 7 16 16l0 224c0 8.8-7.2 16-16 16l-21 0L388 179c-4-7-12-11-20-11s-16 4-20 11l-52 80-12-17c-5-6-12-10-19-10s-15 4-19 10L176 336 160 336c-9 0-16-7-16-16l0-224c0-9 7-16 16-16zM96 96l0 224c0 35 29 64 64 64l352 0c35 0 64-29 64-64l0-224c0-35-29-64-64-64L160 32c-35 0-64 29-64 64zM48 120c0-13-11-24-24-24S0 107 0 120L0 344c0 75 61 136 136 136l320 0c13 0 24-11 24-24s-11-24-24-24l-320 0c-49 0-88-39-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"></path></svg>',
     close: '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 384 512"><path fill="currentColor" d="M343 151c13-13 13-33 0-46s-33-13-45 0L192 211 87 105c-13-13-33-13-45 0s-13 33 0 45L147 256 41 361c-13 13-13 33 0 45s33 13 45 0L192 301 297 407c13 13 33 13 45 0s13-33 0-45L237 256 343 151z"></path></svg>',
@@ -2206,6 +2206,7 @@ ${this.error.stack}
       button: {},
       tip: {}
     },
+    uniqueId: 0,
     positionedFrames: [],
     recentlyAddedNodes: /* @__PURE__ */ new WeakMap()
   };
@@ -5075,6 +5076,24 @@ ${this.error.stack}
       return false;
     }
   }
+  function focusLoop(wrapper) {
+    const focusLoopLeft = document.createElement("div");
+    focusLoopLeft.setAttribute("tabIndex", "0");
+    focusLoopLeft.classList.add("focus-looper");
+    const focusLoopRight = document.createElement("div");
+    focusLoopRight.setAttribute("tabindex", "0");
+    focusLoopRight.classList.add("focus-looper");
+    wrapper.appendChild(focusLoopLeft);
+    wrapper.appendChild(focusLoopRight);
+    const focusables = wrapper.querySelectorAll('a, button, [tabindex="0"]');
+    const count = focusables.length;
+    focusables[0].addEventListener("focus", () => {
+      focusables[count - 2].focus();
+    });
+    focusables[count - 1].addEventListener("focus", () => {
+      focusables[1].focus();
+    });
+  }
   function alignPanel() {
     if (!UI.panel || typeof UI.panel.classList?.add !== "function") {
       return false;
@@ -5439,13 +5458,12 @@ ${this.error.stack}
       });
     });
   }
-  const LINK_CLASS = "ed11y-link";
-  const LINK_RESULT_TYPES = {
+  const linkTypes = {
     link: { badge: "linkBrokenBadge", className: "ed11y-link-broken", severity: "error" },
     linkManual: { badge: "linkManualBadge", className: "ed11y-link-manual", severity: "warning" }
   };
-  const isLinkResult = (result) => typeof result?.type === "string" && Object.hasOwn(LINK_RESULT_TYPES, result.type);
-  const isWarningStyled = (result) => result?.type !== "error" && LINK_RESULT_TYPES[result?.type]?.severity !== "error";
+  const isLinkResult = (result) => typeof result?.type === "string" && Object.hasOwn(linkTypes, result.type);
+  const isWarningStyled = (result) => result?.type !== "error" && linkTypes[result?.type]?.severity !== "error";
   const isManualLink = (result) => result?.type === "linkManual";
   const isVisualizerOnly = (result) => result?.visualizerOnly === true;
   const isHiddenByDefault = (result) => !!result?.dismissalStatus || isVisualizerOnly(result);
@@ -5965,7 +5983,9 @@ ${this.error.stack}
     return { ...status, ...reason };
   };
   const DISMISSED_LABELS = { ok: "linkDismissedOk", hide: "linkDismissedHide" };
+  const UNFLAGGED = "unflagged";
   const isKnownLinkStatus = (status) => typeof status === "string" && Object.hasOwn(LINK_STATUSES, status);
+  const isKnownCheckerStatus = (status) => status === UNFLAGGED || isKnownLinkStatus(status) && status !== "markedBroken";
   const isKnownDismissal = (dismissed) => typeof dismissed === "string" && Object.hasOwn(DISMISSED_LABELS, dismissed);
   const MANUAL_LINK_STATUSES = Object.keys(LINK_STATUSES).filter(
     (status) => LINK_STATUSES[status].type === "linkManual"
@@ -6009,6 +6029,16 @@ ${this.error.stack}
       if (entry.dismissed && !isKnownDismissal(entry.dismissed)) {
         console.warn(`Editoria11y: ignored an unknown brokenLinks dismissal "${entry.dismissed}".`);
         delete entry.dismissed;
+      }
+      if (Object.hasOwn(entry, "checkerStatus")) {
+        if (entry.status !== "markedBroken") {
+          delete entry.checkerStatus;
+        } else if (!isKnownCheckerStatus(entry.checkerStatus)) {
+          console.warn(
+            `Editoria11y: ignored an unknown brokenLinks checkerStatus "${entry.checkerStatus}".`
+          );
+          delete entry.checkerStatus;
+        }
       }
       return true;
     });
@@ -6093,7 +6123,7 @@ ${this.error.stack}
         continue;
       }
       const entry = byHref.get(normalizer.identity(anchor.href)) ?? byHref.get(anchor.getAttribute("href"));
-      if (!entry) {
+      if (!entry || entry.status === UNFLAGGED) {
         continue;
       }
       const status = describeEntry(entry);
@@ -6116,19 +6146,51 @@ ${this.error.stack}
       State.results.push(result);
     }
   }
-  function forgetLinkVerdict(result) {
-    if (result?.brokenLink) {
-      delete result.brokenLink.dismissed;
+  const liftBrokenMark = (entry) => {
+    if (entry.status !== "markedBroken" || !isKnownCheckerStatus(entry.checkerStatus)) {
+      return;
+    }
+    entry.status = entry.checkerStatus;
+    delete entry.checkerStatus;
+  };
+  function applyLinkVerdict(result, action) {
+    const entry = result?.brokenLink;
+    if (!entry) {
+      return false;
+    }
+    switch (action) {
+      case "broken":
+        if (entry.status !== "markedBroken") {
+          entry.checkerStatus = entry.status;
+          entry.status = "markedBroken";
+        }
+        delete entry.dismissed;
+        return true;
+      case "ok":
+        liftBrokenMark(entry);
+        entry.dismissed = "ok";
+        return true;
+      case "hide":
+        entry.dismissed = "hide";
+        return true;
+      case "reset":
+        delete entry.dismissed;
+        if (linkMarksAllowed()) {
+          liftBrokenMark(entry);
+        }
+        return true;
+      default:
+        return false;
     }
   }
-  const linkTypeClasses = Object.values(LINK_RESULT_TYPES).map((type) => type.className);
+  const linkTypeClasses = Object.values(linkTypes).map((type) => type.className);
   const decorateToggle = (toggle, result, dismissed) => {
-    const wasLink = toggle.classList.contains(LINK_CLASS);
-    toggle.classList.remove(LINK_CLASS, ...linkTypeClasses);
+    const wasLink = toggle.classList.contains("ed11y-link");
+    toggle.classList.remove("ed11y-link", ...linkTypeClasses);
     toggle.classList.toggle("dismissable", isWarningStyled(result) && !dismissed);
     if (isLinkResult(result)) {
-      const linkType = LINK_RESULT_TYPES[result.type];
-      toggle.classList.add(LINK_CLASS, linkType.className);
+      const linkType = linkTypes[result.type];
+      toggle.classList.add("ed11y-link", linkType.className);
       toggle.setAttribute("aria-label", Lang._(linkType.badge));
       toggle.innerHTML = dismissed ? sprite.linkHidden : sprite.linkBroken;
     } else if (wasLink) {
@@ -6670,6 +6732,7 @@ ${this.error.stack}
           UI.panel.querySelector("#readability-info").appendChild(Constants.Panel.readabilityInfo);
           UI.panel.querySelector("#readability-details").appendChild(Constants.Panel.readabilityDetails);
           UI.panel.querySelector("#ed11y-readability-tab .summary-title").textContent = Lang._("READABILITY");
+          focusLoop(detailsTab);
         }
         if (State.option.brokenLinks?.length) {
           const linksTab = document.createElement("details");
@@ -6688,6 +6751,7 @@ ${this.error.stack}
               setShowDismissals(true);
             }
           });
+          focusLoop(linksTab);
           UI.panel.querySelector("#ed11y-visualizers").appendChild(linksTab);
         }
         window.setTimeout(
@@ -6904,8 +6968,8 @@ ${this.error.stack}
     if (UI.dismissKeys[dismissalKey]) {
       dismissalKey = UI.dismissKeys[dismissalKey];
     }
+    const isLinkVerdict = applyLinkVerdict(result, dismissalType);
     if (dismissalType === "reset") {
-      forgetLinkVerdict(result);
       const pageDismissals = UI.dismissedAlerts[State.option.currentPage];
       if (pageDismissals?.[test]) {
         delete pageDismissals[test][dismissalKey];
@@ -6916,6 +6980,8 @@ ${this.error.stack}
       if (pageDismissals && Object.keys(pageDismissals).length === 0) {
         delete UI.dismissedAlerts[State.option.currentPage];
       }
+    } else if (isLinkVerdict) {
+      UI.panelShowDismissed.removeAttribute("hidden");
     } else {
       const dismissal = {};
       dismissal[dismissalKey] = dismissalType;
@@ -7114,13 +7180,13 @@ ${this.error.stack}
           }
         }
         const activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-        if (!activeTip) {
+        if (!activeTip && !button2.userClosed) {
           button2.setAttribute("data-ed11y-action", "open");
           if (UI.viaJump) {
             window.setTimeout(() => {
               const activeTip2 = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
               if (UI.viaJump) {
-                activeTip2?.shadowRoot.querySelector(".title").focus();
+                activeTip2?.shadowRoot.querySelector(".close").focus();
               }
             }, 100);
           }
@@ -7128,7 +7194,7 @@ ${this.error.stack}
           if (UI.viaJump) {
             window.setTimeout(
               () => {
-                activeTip?.shadowRoot.querySelector(".title").focus();
+                activeTip?.shadowRoot.querySelector(".close").focus();
               },
               100,
               activeTip
@@ -7902,6 +7968,7 @@ ${this.error.stack}
     const tipResult = tip.getRootNode()?.host?.result ?? null;
     UI.runOrigin = "dismissal";
     if (dismissalType === "broken") {
+      applyLinkVerdict(tipResult, dismissalType);
       dispatchDismissalUpdate(dismissalType, test, dismissKey, tipResult);
     } else if (button.dataset.ed11yAll === "true") {
       State.results.forEach((result) => {
@@ -8106,12 +8173,15 @@ ${this.error.stack}
         host.racing = true;
         UI.toggledFrom = this;
         const stateChange = host.getAttribute("data-ed11y-open") === "false" ? "open" : "close";
+        if (stateChange === "close") {
+          host.userClosed = true;
+        }
         host.setAttribute("data-ed11y-action", stateChange);
         if (stateChange === "open") {
           window.setTimeout(() => {
             const activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-            activeTip?.shadowRoot.querySelector(".title").focus();
-          }, 500);
+            activeTip?.shadowRoot.querySelector(".close").focus();
+          }, 250);
         }
         window.setTimeout(
           () => {
@@ -8157,6 +8227,7 @@ ${this.error.stack}
         editableHighlighter(this.resultID, changeTo);
       }
       if (changeTo === true) {
+        this.userClosed = false;
         this.tip.style.setProperty("opacity", "0");
         document.dispatchEvent(
           new CustomEvent("ed11yPop", {
@@ -8275,6 +8346,10 @@ ${this.error.stack}
         const panelTabs = wrapper.querySelectorAll(".ed11y-buttonbar button");
         panelTabs.forEach((tab) => {
           tab.addEventListener("click", this.handleBarClick);
+        });
+        const detailElements = wrapper.querySelectorAll("details");
+        detailElements.forEach((el) => {
+          focusLoop(el);
         });
         const visualizers = wrapper.querySelector("#ed11y-visualizers");
         visualizers.addEventListener(
@@ -8603,17 +8678,12 @@ ${this.error.stack}
       this.isLink = isLinkResult(this.result);
       let badge = this.dismissable ? Lang._("WARNING") : Lang._("ERROR");
       if (this.isLink) {
-        badge = this.dismissed ? Lang._("linkHiddenBadge") : Lang._(LINK_RESULT_TYPES[this.result.type].badge);
+        badge = this.dismissed ? Lang._("linkHiddenBadge") : Lang._(linkTypes[this.result.type].badge);
       }
       this.wrapper = document.createElement("dialog");
       this.wrapper.dataset.ed11yDismiss = this.result.dismiss;
       this.wrapper.classList.add("ed11y-tip-wrapper", "ed11y-wrapper");
       this.wrapper.style.setProperty("opacity", "0");
-      this.wrapper.setAttribute(
-        "aria-label",
-        `${Lang._("ALERT_TEXT")}
-        ${this.issueIndex + 1}`
-      );
       this.wrapper.innerHTML = `
 		<div class="tip">
 			<button class="close ed11y-tip-close">${sprite.close}</button>
@@ -8635,7 +8705,7 @@ ${this.error.stack}
 		`;
       this.wrapper.querySelector(".content").dataset.test = this.result.test;
       if (this.isLink) {
-        this.wrapper.querySelector(".error-badge").classList.add(LINK_CLASS, LINK_RESULT_TYPES[this.result.type].className);
+        this.wrapper.querySelector(".error-badge").classList.add("ed11y-link", linkTypes[this.result.type].className);
       }
       this.addEventListener("mouseover", this.handleHover, {
         passive: true
@@ -8648,7 +8718,8 @@ ${this.error.stack}
         wrapped.innerHTML = this.result.content;
         this.result.content = wrapped;
       }
-      if (this.result.content.querySelector(".title")) {
+      let contentTitle = this.result.content.querySelector(".title");
+      if (contentTitle) {
         content.appendChild(this.result.content);
         const sallyTips = content.querySelectorAll("hr, hr ~ *");
         if (sallyTips) {
@@ -8663,19 +8734,21 @@ ${this.error.stack}
         }
       } else {
         const innerContent = document.createElement("div");
-        const firstSentence = document.createElement("div");
-        firstSentence.classList.add("title");
-        firstSentence.setAttribute("tabindex", "-1");
-        firstSentence.style.setProperty("position", "absolute");
-        innerContent.append(firstSentence);
+        contentTitle = document.createElement("div");
+        contentTitle.classList.add("title");
+        contentTitle.setAttribute("tabindex", "-1");
+        contentTitle.style.setProperty("position", "absolute");
+        innerContent.append(contentTitle);
         innerContent.appendChild(this.result.content);
         content.append(innerContent);
         console.warn(`Editoria11y tip title not found for ${this.result.test}.`);
       }
-      const title = content.querySelector(".title");
       const invisibleAlert = document.createElement("div");
       invisibleAlert.classList.add("invisible-alert");
-      title.append(invisibleAlert);
+      contentTitle.append(invisibleAlert);
+      UI.uniqueId++;
+      contentTitle.setAttribute("id", `ed11y-title-${UI.uniqueId}`);
+      this.wrapper.setAttribute("aria-labelledby", `ed11y-title-${UI.uniqueId}`);
       if (this.result.contrastDetails) {
         const contrastDiv = document.createElement("div");
         contrastDiv.classList.add("ed11y-contrast-tools");
@@ -8858,20 +8931,27 @@ ${this.error.stack}
             UI.toggledFrom.focus();
           }
           this.setAttribute("data-ed11y-action", "shut");
-          this.result?.toggle?.setAttribute("data-ed11y-action", "shut");
+          if (this.result?.toggle) {
+            this.result.toggle.userClosed = true;
+            this.result.toggle.setAttribute("data-ed11y-action", "shut");
+          }
         }
       });
       this._handleDocumentClick = (event) => {
         if (this.open && !event.target.closest(".ed11y-element")) {
           const toggle = getElements('ed11y-element-result[data-ed11y-open="true"]', "document", []);
+          if (toggle[0] && event.isTrusted) {
+            toggle[0].userClosed = true;
+          }
           toggle[0]?.setAttribute("data-ed11y-action", "shut");
           this.setAttribute("data-ed11y-action", "shut");
         }
       };
       document.addEventListener("click", this._handleDocumentClick);
-      shadow.appendChild(this.wrapper);
       this.wrapper.appendChild(arrow);
       this.wrapper.appendChild(this.tip);
+      shadow.appendChild(this.wrapper);
+      focusLoop(this.wrapper);
       this.initialized = true;
       this.rendering = false;
     }
@@ -9899,6 +9979,12 @@ ${this.error.stack}
      *               own title and tip; any other falls back to the status.
      *  dismissed    The verdict, if any: 'ok' (an editor marked the link OK
      *               site-wide) or 'hide' (this editor ignored the alert).
+     *  checkerStatus  With status 'markedBroken': the checker's own finding,
+     *               painted once the mark is lifted (Mark OK, or Restore by
+     *               an editor who may mark links). Any status but
+     *               'markedBroken', or 'unflagged' when the checker alone
+     *               would not flag the link. Without it, a lifted mark stays
+     *               painted until the page reloads.
      *  redirectsTo  Where a 'redirect' link now lands.
      *  hash         Opaque id echoed back in events. Defaults to the href.
      * }

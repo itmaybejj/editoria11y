@@ -37,6 +37,9 @@
 	<p class="redirect-app"><a id="redirect-app-link" href="https://example.com/contact">A link that redirects to an email address</a></p>
 	<p class="userinfo"><a id="userinfo-link" href="https://user:secret@example.com/private">A link with a password in its address</a></p>
 	<p class="userinfo-clean"><a id="userinfo-clean-link" href="https://example.com/private">The same address without the password</a></p>
+	<!-- Flagged only with ?marked: links an editor marked broken before this page loaded. -->
+	<p class="marked-gated"><a id="marked-gated-link" href="https://example.com/gated">A link behind a login, marked broken</a></p>
+	<p class="marked-works"><a id="marked-works-link" href="https://example.com/works">A working link, marked broken</a></p>
 	<!-- Flagged only with ?params: the checker stores these without some of their parameters. -->
 	<p class="derivative"><a id="derivative-link" href="/styles/large/a.jpg?itok=abc">An image link with a token</a></p>
 	<p class="derivative-again"><a id="derivative-again-link" href="/styles/large/a.jpg?itok=def">The same image with another token</a></p>
@@ -121,6 +124,24 @@
 				status: 'unverifiable',
 				reason: 'userinfo',
 				hash: 'cred1',
+			},
+		);
+	}
+	if (window.location.search.includes('marked')) {
+		// The checker's own finding travels with the mark, so lifting the mark
+		// can paint it without a reload.
+		options.brokenLinks.push(
+			{
+				href: 'https://example.com/gated',
+				status: 'markedBroken',
+				checkerStatus: 'access',
+				hash: 'marked1',
+			},
+			{
+				href: 'https://example.com/works',
+				status: 'markedBroken',
+				checkerStatus: 'unflagged',
+				hash: 'marked2',
 			},
 		);
 	}

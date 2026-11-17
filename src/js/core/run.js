@@ -52,7 +52,7 @@ import {
 import checkReadability from '../../sa11y-js/rulesets/readability.js';
 import sprite from '../elements/sprite.js';
 import { checkCustomRuleset } from '../rulesets/custom-ruleset.js';
-import { checkBrokenLinks, forgetLinkVerdict } from '../rulesets/broken-links.js';
+import { applyLinkVerdict, checkBrokenLinks } from '../rulesets/broken-links.js';
 import { isVisualizerOnly, isWarningStyled, shouldDraw } from '../utils/result-types.js';
 import { UI } from './ui.js';
 import { State } from '../../sa11y-js/core/state.js';
@@ -178,8 +178,8 @@ export function updatePanel() {
           .appendChild(Constants.Panel.readabilityDetails);
         UI.panel.querySelector('#ed11y-readability-tab .summary-title').textContent =
           Lang._('READABILITY');
+        focusLoop(detailsTab);
       }
-      focusLoop(detailsTab);
       if (State.option.brokenLinks?.length) {
         const linksTab = document.createElement('details');
         linksTab.id = 'ed11y-links-tab';
@@ -492,10 +492,12 @@ export function dismissOne(dismissalType, test, dismissalKey, result = null) {
   if (UI.dismissKeys[dismissalKey]) {
     dismissalKey = UI.dismissKeys[dismissalKey];
   }
+  // Link verdicts live on the checker's entry; see applyLinkVerdict().
+  const isLinkVerdict = applyLinkVerdict(result, dismissalType);
   if (dismissalType === 'reset') {
-    forgetLinkVerdict(result);
     // Guarded: a result supplied with a dismissalStatus by an external test
-    // may have no matching record here.
+    // may have no matching record here. Link results are cleaned too, in
+    // case a record was stored for them before.
     const pageDismissals = UI.dismissedAlerts[State.option.currentPage];
     if (pageDismissals?.[test]) {
       delete pageDismissals[test][dismissalKey];
@@ -507,6 +509,8 @@ export function dismissOne(dismissalType, test, dismissalKey, result = null) {
       delete UI.dismissedAlerts[State.option.currentPage];
     }
     //window.requestAnimationFrame(() => updatePanel());
+  } else if (isLinkVerdict) {
+    UI.panelShowDismissed.removeAttribute('hidden');
   } else {
     const dismissal = {};
     dismissal[dismissalKey] = dismissalType;
@@ -758,14 +762,16 @@ export function alertOnInvisibleTip(button, target) {
         }
       }
       const activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
-      if (!activeTip) {
+      // Something shut the tip during the delay, e.g. a theme's reveal
+      // handler clicking outside it. Reopen it, unless the user closed it.
+      if (!activeTip && !button.userClosed) {
         button.setAttribute('data-ed11y-action', 'open');
         if (UI.viaJump) {
           window.setTimeout(() => {
             // Race conditions are fun.
             const activeTip = document.querySelector('ed11y-element-tip[data-ed11y-open="true"]');
             if (UI.viaJump) {
-              activeTip?.shadowRoot.querySelector('.title').focus();
+              activeTip?.shadowRoot.querySelector('.close').focus();
             }
           }, 100);
         }
@@ -774,7 +780,7 @@ export function alertOnInvisibleTip(button, target) {
           window.setTimeout(
             () => {
               // Race conditions are fun.
-              activeTip?.shadowRoot.querySelector('.title').focus();
+              activeTip?.shadowRoot.querySelector('.close').focus();
             },
             100,
             activeTip,
@@ -1775,8 +1781,10 @@ export function dismissThis(dismissalType, button) {
   UI.runOrigin = 'dismissal';
 
   if (dismissalType === 'broken') {
-    // Not a dismissal: nothing is recorded and the result stays visible.
-    // The integration that pushed the link result owns what "broken" means.
+    // Not a dismissal: nothing is recorded and the result stays visible,
+    // repainted as marked broken. The integration that pushed the link
+    // result is told, and stores the mark.
+    applyLinkVerdict(tipResult, dismissalType);
     dispatchDismissalUpdate(dismissalType, test, dismissKey, tipResult);
   } else if (button.dataset.ed11yAll === 'true') {
     State.results.forEach((result) => {

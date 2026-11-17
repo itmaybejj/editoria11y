@@ -2,6 +2,9 @@
 tests/tinymce/
 tests/performance.htm
 node_modules/
+logs/
+screens/
+tests_output/
 test-results
 .vscode/
 .agents/settings.local.json
