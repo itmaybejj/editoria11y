@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "ed11yVersion": "3.0.1",
-  "sa11yVersion": "4.4.2",
+  "ed11yVersion": "3.0.3",
+  "sa11yVersion": "dev-5.1.1",
   "checks": {
     "ALT_FILE_EXT": {
       "title": "This alt text is a filename, not a description",
@@ -105,6 +105,10 @@
     },
     "EMBED_VIDEO": {
       "title": "Is this video accurately captioned?",
+      "deferred": false
+    },
+    "EMBED_VIDEO_AUTOPLAY": {
+      "title": "Is there a way for users to pause this video?",
       "deferred": false
     },
     "HEADING_EMPTY": {
@@ -335,6 +339,10 @@
       "title": "Meta tag for page title missing",
       "deferred": false
     },
+    "META_TITLE_UNDESCRIPTIVE": {
+      "title": "Does the page title uniquely describe the content?",
+      "deferred": false
+    },
     "MISSING_ALT": {
       "title": "Invalid HTML: image has no alt attribute",
       "deferred": false
@@ -407,8 +415,16 @@
       "title": "Is this uppercase text needed?",
       "deferred": false
     },
+    "SUMMARY_EMPTY": {
+      "title": "This details element is missing its summary",
+      "deferred": false
+    },
     "SUS_ALT": {
       "title": "Are there redundant words in this alt text?",
+      "deferred": false
+    },
+    "SVG_NO_ACCESSIBLE_NAME": {
+      "title": "This SVG has no accessible name",
       "deferred": false
     },
     "TABINDEX_ATTR": {
@@ -429,6 +445,14 @@
     },
     "TABLES_SEMANTIC_HEADING": {
       "title": "Content headings should not be used inside tables",
+      "deferred": false
+    },
+    "TABLES_SINGLE_CELL": {
+      "title": "Use another element instead of a single cell table",
+      "deferred": false
+    },
+    "TABLES_SINGLE_COLUMN": {
+      "title": "Use another element instead of a single column table",
       "deferred": false
     },
     "UNCONTAINED_LI": {

@@ -1,7 +1,7 @@
 {
 	"name": "editoria11y",
 	"version": "3.0.3",
-	"sa11yVersion": "4.4.2",
+	"sa11yVersion": "dev-5.1.1",
 	"description": "Editoria11y is a content accessibility checker that shows results inline in Web pages and rich text editors.",
 	"main": "src/js/ed11y.js",
 	"type": "module",
@@ -31,7 +31,7 @@
 		"lint:fix-unsafe": "biome check --write --unsafe src",
 		"serve": "vite",
 		"dev": "npm run serve",
-		"test": "node scripts/test-docker.js",
+		"test": "npm run check:keys -- --emit-artifact && node scripts/test-docker.js",
 		"test:host": "playwright test --config=e2e/playwright.config.js",
 		"test:perf": "node scripts/test-docker.js --project=perf --no-deps",
 		"test:perf:host": "playwright test --config=e2e/playwright.config.js --project=perf --no-deps",

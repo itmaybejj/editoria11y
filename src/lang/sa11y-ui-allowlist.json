@@ -54,6 +54,8 @@
     "LINK_TEXT",
     "LINK_TIP",
     "LINKED",
+    "META_TITLE_UNDESCRIPTIVE_PREFIXES",
+    "META_TITLE_UNDESCRIPTIVE_STRINGS",
     "MISSING_READABILITY_ROOT",
     "MONO_EYE",
     "MONOCHROMACY",
@@ -87,7 +89,7 @@
     "TRITANOPIA",
     "UNKNOWN",
     "VERY_DIFFICULT",
-    "WARNINGS_FOUND",
+    "WARNINGS_FOUND"
   ],
   "deferredChecks": {
     "IMAGE_PASS": "Good annotation, not implemented",
