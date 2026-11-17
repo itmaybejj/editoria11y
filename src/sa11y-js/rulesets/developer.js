@@ -66,11 +66,37 @@ export default function checkDeveloper() {
   }
 
   /* *************************************************************** */
-  /*  Check for missing meta page title <title>                      */
+  /*  Check for missing or potentially non-descriptive page titles.  */
   /* *************************************************************** */
   const metaTitle = document.querySelector('title:not(svg title)');
-  if (!metaTitle || Utils.getText(metaTitle).length === 0) {
+  const title = metaTitle ? Utils.getText(metaTitle).trim() : '';
+  if (!title) {
     pushResult({ test: 'META_TITLE', developer: true });
+  } else {
+    const normalizedTitle = title.replace(/\s+/g, ' ').toLowerCase();
+    // Compare case-insensitively. Lang._() returns the key itself when a language file lacks the list.
+    const undescriptiveStrings = Lang._('META_TITLE_UNDESCRIPTIVE_STRINGS');
+    const undescriptive = new Set(
+      Array.isArray(undescriptiveStrings)
+        ? undescriptiveStrings.map((string) => string.toLowerCase())
+        : [],
+    );
+    const startingWord = normalizedTitle.split(/[\s-]+/)[0];
+    let flag = null;
+    if (undescriptive.has(normalizedTitle)) {
+      flag = 'error';
+    } else if (undescriptive.has(startingWord)) {
+      flag = /[\s-]*\d+$/.test(normalizedTitle.slice(startingWord.length)) ? 'error' : 'warning';
+    }
+    if (flag) {
+      pushResult({
+        test: 'META_TITLE_UNDESCRIPTIVE',
+        type: flag,
+        args: [title],
+        developer: true,
+        dismiss: title,
+      });
+    }
   }
 
   /* ********************************************* */
@@ -157,7 +183,13 @@ export default function checkDeveloper() {
   Elements.Found.Buttons.forEach(($el) => {
     // Ignore explicitly hidden.
     const presentation = Utils.isPresentational($el) && Utils.isDisabled($el);
-    if (presentation || Utils.isHiddenAndUnfocusable($el) || Utils.isElementHidden($el)) return;
+    if (
+      presentation ||
+      $el.hasAttribute('inert') ||
+      Utils.isHiddenAndUnfocusable($el) ||
+      Utils.isElementHidden($el)
+    )
+      return;
 
     // Has ARIA.
     const accName = computeAccessibleName($el);
@@ -238,6 +270,24 @@ export default function checkDeveloper() {
   });
 
   /* ****************************************** */
+  /*  Summary missing accessible name.          */
+  /* ****************************************** */
+  Elements.Found.Summary.forEach(($el) => {
+    const details = $el.parentElement;
+    const isControl =
+      details?.tagName === 'DETAILS' && details.querySelector(':scope > summary') === $el;
+    if (!isControl || computeAccessibleName($el).trim()) return;
+    pushResult({
+      test: 'SUMMARY_EMPTY',
+      element: details,
+      args: [details],
+      content: Lang._('SUMMARY_EMPTY') + Lang._('ACC_NAME_TIP'),
+      dismiss: $el.outerHTML,
+      developer: true,
+    });
+  });
+
+  /* ****************************************** */
   /*  No tabindex values greater than 0.        */
   /* ****************************************** */
   Elements.Found.TabIndex.forEach(($el) => {
@@ -283,4 +333,30 @@ export default function checkDeveloper() {
       }
     }
   });
+
+  /* *********************************************************** */
+  /*  Warning: SVGs without an accessible name.                  */
+  /* *********************************************************** */
+  if (State.option.checks.SVG_NO_ACCESSIBLE_NAME) {
+    Elements.Found.Svg.forEach((element) => {
+      if (
+        Utils.isPresentational(element) ||
+        Utils.hasAriaHiddenAncestor(element) ||
+        Utils.isElementHidden(element) ||
+        computeAccessibleName(element).trim() ||
+        Utils.getCachedClosest(element, 'a[href], button, [role="link"], [role="button"]')
+      ) {
+        return;
+      }
+
+      pushResult({
+        test: 'SVG_NO_ACCESSIBLE_NAME',
+        element,
+        type: 'warning',
+        args: [element],
+        developer: true,
+        dismiss: element.outerHTML,
+      });
+    });
+  }
 }

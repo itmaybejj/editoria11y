@@ -479,7 +479,7 @@ const Constants = (function myConstants() {
     }
 
     // Ignore specific links
-    Exclusions.Links = ['.anchorjs-link', '[aria-hidden="true"][tabindex^="-"]'];
+    Exclusions.Links = ['.anchorjs-link', '[aria-hidden="true"][tabindex^="-"], [inert]'];
     if (State.option.linkIgnore) {
       Exclusions.Links = State.option.linkIgnore
         .split(',')

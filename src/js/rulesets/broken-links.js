@@ -9,7 +9,7 @@ import { UrlNormalizer } from '../utils/url-normalizer.js';
 // Paints a CMS link checker's flagged links as results.
 //
 // The checker hands its findings over in the `brokenLinks` option (see
-// ed11y-default-options.js). Each status maps to a test key, a result type
+// defaults.js). Each status maps to a test key, a result type
 // (`link` is painted as an error, `linkManual` as a manual check; see
 // utils/result-types.js) and a short label for the Links visualizer. A
 // manual-check status left out of `brokenLinksShowChecks` is painted only

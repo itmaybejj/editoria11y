@@ -28,6 +28,7 @@ const testNames = {
 	EMBED_MISSING_TITLE: 'Frame ohne „title“-Attribut',
 	EMBED_UNFOCUSABLE: 'Frame mit tabindex="-1" ist nicht per Tastatur erreichbar.',
 	EMBED_VIDEO: 'Ist dieses Video korrekt untertitelt?',
+	EMBED_VIDEO_AUTOPLAY: 'Gibt es für Nutzende eine Möglichkeit, dieses Video anzuhalten?',
 	HEADING_EMPTY: 'Diese Überschrift hat keinen Text',
 	HEADING_UNPRONOUNCEABLE: 'Diese Überschrift ist nicht aussprechbar',
 	HEADING_EMPTY_WITH_IMAGE: 'Dieses Bild wird als Überschrift verwendet und benötigt deshalb Alt-Text',
@@ -106,6 +107,7 @@ const testNames = {
 	META_REFRESH: 'Meta-Tag aktualisiert die Seite automatisch',
 	META_SCALABLE: 'Meta-Tag verhindert die Vergrößerung von Text',
 	META_TITLE: 'Meta-Tag für den Seitentitel fehlt',
+	META_TITLE_UNDESCRIPTIVE: 'Beschreibt der Seitentitel den Inhalt eindeutig?',
 	MISSING_ALT: 'Ungültiges HTML: Bild ohne Alt-Attribut',
 	MISSING_ALT_LINK: 'Ungültiges HTML: verlinktes Bild ohne Alt-Attribut',
 	MISSING_ALT_LINK_HAS_TEXT: 'Ungültiges HTML: Bild im Link ohne Alt-Attribut',
@@ -124,12 +126,16 @@ const testNames = {
 	QA_SUBSCRIPT: 'Hoch-/Tiefstellung nicht als reine visuelle Formatierung verwenden',
 	QA_UNDERLINE: 'Nur Links sollten unterstrichen sein',
 	QA_UPPERCASE: 'Ist dieser Text in Großbuchstaben notwendig?',
+	SUMMARY_EMPTY: 'Diesem details-Element fehlt der summary-Text',
 	SUS_ALT: 'Enthält dieser Alt-Text redundante Wörter?',
+	SVG_NO_ACCESSIBLE_NAME: 'Dieses SVG hat keinen zugänglichen Namen',
 	TABINDEX_ATTR: 'Tabindex-Überschreibungen stören die Fokusreihenfolge',
 	TABLES_EMPTY_HEADING: 'Diese Kopfzelle benötigt Text',
 	TABLES_INVALID_HEADERS_REF: 'Diese Tabelle hat ein ungültiges headers-Attribut',
 	TABLES_MISSING_HEADINGS: 'Dieser Tabelle fehlt eine Kopfzeile und/oder Kopfspalte',
 	TABLES_SEMANTIC_HEADING: 'Inhaltsüberschriften gehören nicht in Tabellen',
+	TABLES_SINGLE_CELL: 'Statt einer einzelligen Tabelle ein anderes Element verwenden',
+	TABLES_SINGLE_COLUMN: 'Statt einer einspaltigen Tabelle ein anderes Element verwenden',
 	UNCONTAINED_LI: 'Ungültige HTML-Liste',
 };
 
@@ -195,6 +201,7 @@ const tips = {
 	EMBED_UNFOCUSABLE: `<p>Dieses Attribut weist Tastaturen und Hilfstechnologien an, das Element zu überspringen. Entfernen Sie dieses Attribut, es sei denn, das iFrame enthält keine Links, Schaltflächen, Formularelemente oder scrollbaren Inhalte.</p>`,
 
 	EMBED_VIDEO: `<p>Dieses Prüfwerkzeug kann nicht „sehen“, ob Videos Untertitel haben oder ob jemand sie Korrektur gelesen hat – eine manuelle Prüfung ist erforderlich.</p><p>${why.fix}Stellen Sie sicher, dass <a href="https://www.w3.org/WAI/media/av/captions/">korrekte Untertitel für Hörgeschädigte („CC“) oder Untertitel</a> verfügbar sind und dass Sprechende und bedeutsame Geräusche korrekt angegeben sind.</p>`,
+	EMBED_VIDEO_AUTOPLAY: `<p>Menschen, die zu Bewegungsübelkeit und kognitiver Überlastung neigen, <a href="https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide.html">brauchen eine Möglichkeit, Videos anzuhalten</a>.</p><p>${why.fix}Fügen Sie das Attribut <code>controls</code> hinzu, stellen Sie eine sichtbare Pause-Schaltfläche bereit oder entfernen Sie das Attribut <code>autoplay</code>.</p>`,
 
 	HEADING_EMPTY: `<p>Leere Überschriften erzeugen verwirrende Lücken in der Seitenstruktur.</p><p>${why.fix}Fügen Sie dieser Überschrift Text hinzu oder löschen Sie diese leere Zeile.</p>${why.headings}`,
 	HEADING_UNPRONOUNCEABLE: `<p>Leere Überschriften erzeugen verwirrende Lücken in der Seitenstruktur.</p><p>${why.fix}Fügen Sie dieser Überschrift für Menschen lesbaren Text hinzu oder wandeln Sie sie in einen Absatz um.</p>${why.headings}`,
@@ -229,7 +236,7 @@ const tips = {
 
 	LABELS_MISSING_LABEL: `<p>${why.fix}Fügen Sie diesem Eingabefeld eine <code>id</code> hinzu und dem zugehörigen <code>label</code>-Element ein passendes <code>for</code>-Attribut.</p>`,
 
-	LABELS_NO_FOR_ATTRIBUTE: 'Diesem Eingabefeld ist keine Beschriftung zugeordnet. Fügen Sie dem <code>label</code>-Element ein <code>for</code>-Attribut hinzu, das der <code>id</code> dieses Eingabefelds entspricht. <hr> <strong>ID:</strong> <code>#%(ID)</code>',
+	LABELS_NO_FOR_ATTRIBUTE: '<p>Diesem Eingabefeld ist keine Beschriftung zugeordnet. Fügen Sie dem <code>label</code>-Element ein <code>for</code>-Attribut hinzu, das der <code>id</code> dieses Eingabefelds entspricht.</p><p><strong>ID:</strong> <code>#%(ID)</code></p>',
 
 	LABELS_PLACEHOLDER: `<p>Platzhaltertext kann bei gutem Kontrast mit zuvor eingegebenem Inhalt verwechselt werden oder bei schlechtem Kontrast unleserlich sein. Er verschwindet zudem bei der Eingabe, wodurch Informationen verloren gehen können, die Nutzende zur Fehlerkontrolle benötigen.</p><p>${why.fix}Sorgen Sie dafür, dass wichtige Informationen wie die Feldbeschriftung, Hilfetexte und Formatvorgaben sichtbar bleiben, wenn das Feld Inhalt enthält, und erwägen Sie, ganz auf den Platzhalter zu verzichten.</p>`,
 
@@ -316,6 +323,7 @@ const tips = {
 	META_SCALABLE: `<p>Dieses Meta-Tag verhindert die Textvergrößerung.</p><p>${why.fix}Erlauben Sie komplettes Zoomen durch Entfernen oder Anpassen des Tags.</p>`,
 
 	META_TITLE: `<p>${why.fix}Fügen Sie dem <code>head</code>-Element der Seite ein <code>&lt;title&gt;</code>-Tag hinzu.</p><div class="why"><p>Tipp: Vieles beim Surfen hängt von einem <a href="https://developer.mozilla.org/de/docs/Web/HTML/Reference/Elements/title">kurzen und eindeutigen title-Tag</a> ab:</p><ul><li>Suchmaschinen verwenden ihn als Titel der Suchergebnisse.</li><li>Browser verwenden ihn als Titel der Tabs.</li><li>Screenreader lesen ihn beim Wechseln zwischen Tabs vor.</li></ul><p>Ohne Seitentitel sehen bzw. hören Nutzende stattdessen nur eine reine URL.</p></div>`,
+	META_TITLE_UNDESCRIPTIVE: `<p>Der Seitentitel „<i>%(TEXT)</i>“ ist möglicherweise nicht aussagekräftig oder gibt Thema oder Zweck dieser Seite nicht eindeutig wieder.</p><p>${why.fix}Screenreader verwenden Seitentitel als Titel von Fenstern, Suchmaschinen als Titel von Suchergebnissen. Schreiben Sie einen eindeutigen, prägnanten Seitentitel, der den Seiteninhalt klar beschreibt.</p>`,
 
 	MISSING_ALT: `<p>Wenn Screenreader auf ein Bild ganz ohne Alt-Attribut stoßen, versuchen sie stattdessen, die URL der Bilddatei auszusprechen, oft Buchstabe für Buchstabe.</p><p>${why.fix}Beschreiben Sie kurz, was dieses Bild in diesem Kontext bedeutet.</p>${why.images}`,
 
@@ -350,8 +358,10 @@ const tips = {
 	QA_UNDERLINE: `<p>Unterstrichener Text im Web wird für Links verwendet, nicht zur Hervorhebung. Nutzende werden denken, dass sie hierauf klicken können: <i><u>%(TEXT)</u></i></p><p>${why.fix}Verwenden Sie <strong>Fettschrift</strong> oder <em>Kursivschrift</em> zur Hervorhebung und Überschriften für die Struktur.</p><div class="why"><p>Hinweis: Screenreader sagen rein visuelle Formatierungen wie Unterstreichungen nicht an. Nur Überschriften fügen der Seitenstruktur Text hinzu.</p></div>`,
 
 	QA_UPPERCASE: `<p><strong>Text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Schreiben Sie nur wenige Wörter zur Hervorhebung groß. GROSSGESCHRIEBENE TEXTBLÖCKE SIND SCHWERER LESBAR, UND VIELE LESENDE EMPFINDEN SIE ALS „SCHREIEN“.</p><div class="why"><p>Hinweis: Screenreader kündigen rein visuelle Formatierungen wie Großbuchstaben nicht an. Nutzen Sie stattdessen einen Überschriftenstil, wenn dieser hervorgehobene Text einen Themenwechsel oder besonders wichtige Inhalte einleitet.</p></div>`,
+	SUMMARY_EMPTY: `<p>Das details-Element erzeugt ein anklickbares Akkordeon, das den <code>&lt;summary&gt;</code>-Text als Schaltfläche anzeigt, die weitere Details einblendet. Ohne summary-Text können Screenreader-Nutzende nicht hören, was die Schaltfläche tut.</p>`,
 
 	SUS_ALT: `<p>Der Alt-Text dieses Bildes enthält das Wort „<i>%(alt)</i>“. Screenreader kündigen bereits an, dass sie ein Bild beschreiben, daher sind Formulierungen wie „Bild von“ und „Foto von“ meist überflüssig.</p><p><strong>Alt-Text:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Beschreiben Sie kurz, was dieses Bild in diesem Kontext bedeutet.</p><div class="why"><p>Tipp: Diese Formulierungen sollten Sie beibehalten, wenn das Format selbst bedeutsam ist:<br>„Ein Foto einer Katze, gerahmt an der Wand hängend.“</p></div>`,
+	SVG_NO_ACCESSIBLE_NAME: `<p>Einige Screenreader kündigen dieses SVG als unbeschriftetes Bild an, weil es keinen zugänglichen Namen hat und nicht ausgeblendet ist. Fügen Sie eine zugängliche Beschriftung (oder <code>&lt;title&gt;</code>) hinzu, wenn es eine Bedeutung vermittelt, oder blenden Sie es für Screenreader aus, wenn es rein dekorativ ist (<code>aria-hidden="true"</code>).</p>`,
 
 	TABINDEX_ATTR: `<p>Tabindex-Werte größer als 0 verschieben fokussierbare Elemente aus ihrer visuellen Reihenfolge heraus, was es Nutzenden von Hilfstechnologien erschwert, sie zu finden und zu bedienen.</p><p>${why.fix}Ordnen Sie stattdessen die HTML-Elemente so um, dass Fokusreihenfolge und Lesereihenfolge übereinstimmen.</p><div class="why"><p>Tipp: Die visuelle Reihenfolge der Wörter auf der Seite und die Reihenfolge, in der Tastaturen die Elemente durchlaufen, sind in der Regel dieselbe.</p><p>Ein positiver tabindex-Wert setzt ein Element an den Anfang der Tab-Reihenfolge, <strong>aber nicht an den Anfang der visuellen oder der Lesereihenfolge</strong>.</p></div>`,
 
@@ -362,6 +372,8 @@ const tips = {
 	TABLES_MISSING_HEADINGS: `<p>${why.fix}Bearbeiten Sie die Tabelleneigenschaften und legen Sie fest, ob sich Tabellenköpfe in der ersten Zeile, der ersten Spalte oder in beiden befinden.</p><div class="why"> <p>Tipp: Screenreader nutzen Tabellenköpfe, um Nutzende beim Erkunden einer Tabelle zu orientieren. Der zugehörige Tabellenkopf wird jeweils wiederholt, wenn der Cursor eine neue Spalte oder Zeile erreicht.</p><p>Wenn diese Tabelle keine Tabellenköpfe hat, weil sie nur für das visuelle Layout verwendet wird, entfernen Sie die Tabellenformatierung und verwenden Sie stattdessen eine rein visuelle Spaltenformatierung.</p></div> `,
 
 	TABLES_SEMANTIC_HEADING: `<p>${why.fix}Entfernen Sie diese Überschriften-Formatierung (h2, h3). Verwenden Sie stattdessen Kopfzeilen und Kopfspalten. Wenn Sie mehrere Kopfzeilen benötigen, teilen Sie die Tabelle in mehrere Tabellen auf.</p><div class="why"> <p>Tipp: Tabellenköpfe sind gerichtet: Sie gelten für eine Zeile oder Spalte. Inhaltsüberschriften beschriften den gesamten nachfolgenden Text, auch in Spalten, die nichts damit zu tun haben:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">Ein <strong>Tabellenkopf</strong> in Zelle 2 beschriftet Zelle B. <br><br> Eine <strong>Inhaltsüberschrift</strong> in Zelle 2 beschriftet die Zellen 3, A, B und C sowie diesen Text und die Fußzeile dieses Tooltips.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`,
+	TABLES_SINGLE_COLUMN: `<p>Einspaltige Tabellen werden oft für die visuelle Gestaltung statt für tabellarische Daten verwendet. Das ist für Screenreader-Nutzende verwirrend, die innehalten und sich Strukturbeschreibungen anhören müssen, die für Datentabellen gedacht sind, zum Beispiel <em>„Tabelle, 5 Zeilen, 1 Spalte“</em>.</p><p>${why.fix}Entfernen Sie die Tabellenformatierung und verwenden Sie eine Liste oder ein anderes rein visuelles Layout-Element.</p>`,
+	TABLES_SINGLE_CELL: `<p>Einzellige Tabellen sind oft Fehler beim Kopieren und Einfügen oder werden für optische Rahmen hinzugefügt. Das ist für Screenreader-Nutzende verwirrend, die innehalten und sich Strukturbeschreibungen anhören müssen, die für Datentabellen gedacht sind: <em>„Tabelle, 1 Zeile, 1 Spalte, Zeile 1 Spalte 1.“</em></p><p>${why.fix}Entfernen Sie die Tabellenformatierung und nutzen Sie andere Gestaltungsmöglichkeiten, um die Aufmerksamkeit auf diesen Inhalt zu lenken.</p>`,
 }
 
 const interfaceStrings = {

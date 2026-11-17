@@ -1,7 +1,7 @@
 import { UI } from '../core/ui.js';
 
 // Result types pushed by external link checkers through the `customTests`
-// handshake (see ed11y-default-options.js). They ride the normal result
+// handshake (see defaults.js). They ride the normal result
 // pipeline but get their own toggle styling, tip badge and action buttons:
 //
 //   link        The checker found the target broken. Counted as an issue and

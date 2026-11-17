@@ -169,7 +169,7 @@ The mapping lives in `conformance/mapping/act-rule-mapping.js`. Each entry maps 
 
 **To add a new rule:**
 1. Find the ACT rule at https://www.w3.org/WAI/standards-guidelines/act/rules/
-2. Identify which ed11y check keys correspond (see `src/js/utils/ed11y-default-options.js` for all check IDs)
+2. Identify which ed11y check keys correspond (see `src/js/utils/defaults.js` for all check IDs)
 3. Add an entry to `actRuleMapping` in the mapping file
 4. Run `npm run conformance:download` to fetch the new test cases
 5. Run `npm run conformance:test` and review results

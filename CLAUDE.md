@@ -52,7 +52,7 @@ All UI is implemented as custom elements (`ed11y-element-panel`, `ed11y-element-
 
 ### Configuration
 
-`src/js/utils/ed11y-default-options.js` defines 100+ configurable properties. Options are merged at initialization time and control which checks run, which elements are ignored, theme, language, and editor integration.
+`src/js/utils/defaults.js` defines 100+ configurable properties. Options are merged at initialization time and control which checks run, which elements are ignored, theme, language, and editor integration.
 
 ### Internationalization
 

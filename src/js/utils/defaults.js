@@ -1,6 +1,6 @@
 import { store } from '../../sa11y-js/utils/utils.js';
 
-export const ed11yDefaultOptions = {
+export const defaults = {
   // Default options.
 
   // Sa11y properties =======================
@@ -421,6 +421,7 @@ export const ed11yDefaultOptions = {
     },
     ALT_MAYBE_BAD_WARNING: true,
     LINK_ALT_MAYBE_BAD_WARNING: true,
+    SVG_NO_ACCESSIBLE_NAME: true,
 
     // Sa11y: Link checks
     DUPLICATE_TITLE: false, // Todo pro.
@@ -482,10 +483,6 @@ export const ed11yDefaultOptions = {
       dismissAll: true,
     },
     QA_BLOCKQUOTE: true,
-    TABLES_MISSING_HEADINGS: true,
-    TABLES_SEMANTIC_HEADING: true,
-    TABLES_EMPTY_HEADING: true,
-    TABLES_INVALID_HEADERS_REF: true,
     QA_FAKE_HEADING: true,
     QA_FAKE_LIST: true,
     QA_UPPERCASE: true,
@@ -494,15 +491,23 @@ export const ed11yDefaultOptions = {
     QA_NESTED_COMPONENTS: false, // Todo pro.
     QA_JUSTIFY: true, // Todo pro.
     QA_SMALL_TEXT: false, // Todo pro.
+    SUMMARY_EMPTY: true,
+    TABLES_MISSING_HEADINGS: true,
+    TABLES_SEMANTIC_HEADING: true,
+    TABLES_EMPTY_HEADING: true,
+    TABLES_INVALID_HEADERS_REF: true,
+    TABLES_SINGLE_COLUMN: true,
+    TABLES_SINGLE_CELL: true,
 
     // Sa11y: Meta checks
     META_LANG: false, // Todo pro.
     META_SCALABLE: false, // Not interested.
     META_MAX: false, // Not interested.
     META_REFRESH: false, // Todo pro.
-    META_LANG_VALID: true,
-    META_LANG_SUGGEST: true,
-    PAGE_LANG_CONFIDENCE: true,
+    META_LANG_VALID: false,
+    META_LANG_SUGGEST: false,
+    META_TITLE_UNDESCRIPTIVE: false,
+    PAGE_LANG_CONFIDENCE: false,
 
     // Sa11y: Language checks
     LANG_OF_PARTS: true,
@@ -510,7 +515,6 @@ export const ed11yDefaultOptions = {
     LANG_OF_PARTS_ALT: true,
 
     // Sa11y: Developer checks
-    // Todo pro.
     DUPLICATE_ID: false,
     META_TITLE: false,
     UNCONTAINED_LI: false,
@@ -521,6 +525,7 @@ export const ed11yDefaultOptions = {
     BTN_EMPTY_LABELLEDBY: false,
     BTN_ROLE_IN_NAME: false,
     BTN_UNPRONOUNCEABLE: true, // @todo
+    EMBED_VIDEO_AUTOPLAY: true,
 
     // Sa11y: Contrast checks
     // Todo pro.

@@ -245,6 +245,7 @@
       EMBED_VIDEO: {
         sources: ""
       },
+      EMBED_VIDEO_AUTOPLAY: true,
       EMBED_DATA_VIZ: {
         sources: ""
       },
@@ -266,6 +267,8 @@
         dismissAll: true
       },
       QA_BLOCKQUOTE: true,
+      TABLES_SINGLE_COLUMN: true,
+      TABLES_SINGLE_CELL: true,
       TABLES_MISSING_HEADINGS: true,
       TABLES_SEMANTIC_HEADING: true,
       TABLES_EMPTY_HEADING: true,
@@ -300,6 +303,7 @@
       // Developer checks
       DUPLICATE_ID: true,
       META_TITLE: true,
+      META_TITLE_UNDESCRIPTIVE: true,
       UNCONTAINED_LI: true,
       TABINDEX_ATTR: true,
       HIDDEN_FOCUSABLE: true,
@@ -309,6 +313,8 @@
       BTN_ROLE_IN_NAME: true,
       LINK_MAYBE_BUTTON: true,
       BTN_UNPRONOUNCEABLE: true,
+      SVG_NO_ACCESSIBLE_NAME: true,
+      SUMMARY_EMPTY: true,
       // Contrast checks
       CONTRAST_WARNING: {
         dismissAll: true
@@ -703,7 +709,7 @@
       if (State.option.imageIgnore) {
         Exclusions.Images = State.option.imageIgnore.split(",").map(($el) => $el.trim()).concat(Exclusions.Images);
       }
-      Exclusions.Links = [".anchorjs-link", '[aria-hidden="true"][tabindex^="-"]'];
+      Exclusions.Links = [".anchorjs-link", '[aria-hidden="true"][tabindex^="-"], [inert]'];
       if (State.option.linkIgnore) {
         Exclusions.Links = State.option.linkIgnore.split(",").map(($el) => $el.trim()).concat(Exclusions.Links);
       }
@@ -802,6 +808,14 @@
     if (!$el || typeof $el.getAttribute !== "function") return false;
     return $el.getAttribute("aria-hidden")?.trim().toLowerCase() === "true";
   }
+  function hasAriaHiddenAncestor(element) {
+    let current = element;
+    while (current) {
+      if (isAriaHidden(current)) return true;
+      current = current.parentElement;
+    }
+    return false;
+  }
   function isPresentational($el) {
     if (!$el || typeof $el.getAttribute !== "function") return false;
     const roleAttr = $el.getAttribute("role");
@@ -828,51 +842,72 @@
   }
   function stripAllSpecialCharacters(string) {
     if (typeof string !== "string" && typeof string !== "number") return "";
-    return String(string).replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
+    return String(string).replace(/[^\p{L}\p{M}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
   }
+  const arabicOptionalMarksRegex = /[ً-ْٖ-ٰٟـ]/g;
   function foldForMatching(string) {
     if (typeof string !== "string" && typeof string !== "number") return "";
-    return String(string).toLowerCase().normalize("NFD").replace(new RegExp("(\\p{Script=Greek})\\p{M}+", "gu"), "$1").replace(/i̇/g, "i").replace(/ı/g, "i").normalize("NFC");
+    return String(string).toLowerCase().normalize("NFD").replace(new RegExp("(\\p{Script=Greek})\\p{M}+", "gu"), "$1").replace(/i\u0307|\u0131/g, "i").replace(arabicOptionalMarksRegex, "").normalize("NFC");
   }
   function normalizeStopWord(string) {
     return foldForMatching(string).replace(/[^\p{L}\p{M}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
   }
-  let wordSegmenter;
-  function containsWord(text, word) {
+  const wordSegmenters = /* @__PURE__ */ new Map();
+  function getWordSegmenter(locale) {
+    if (typeof Intl === "undefined" || typeof Intl.Segmenter !== "function") return null;
+    const key = typeof locale === "string" ? locale : "";
+    let segmenter = wordSegmenters.get(key);
+    if (!segmenter) {
+      try {
+        segmenter = new Intl.Segmenter(key || void 0, { granularity: "word" });
+      } catch {
+        segmenter = new Intl.Segmenter(void 0, { granularity: "word" });
+      }
+      wordSegmenters.set(key, segmenter);
+    }
+    return segmenter;
+  }
+  function containsWord(text, word, segmenter = getWordSegmenter(Lang._("LANG_CODE"))) {
     const haystack = foldForMatching(text);
     const needle = foldForMatching(word);
     if (!needle) return false;
-    if (typeof Intl !== "undefined" && Intl.Segmenter) {
-      wordSegmenter ??= new Intl.Segmenter(void 0, { granularity: "word" });
-      for (const { segment, isWordLike } of wordSegmenter.segment(haystack)) {
+    if (segmenter) {
+      for (const { segment, isWordLike } of segmenter.segment(haystack)) {
         if (isWordLike && segment === needle) return true;
       }
       return false;
     }
     const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    return new RegExp(`(?<![\\p{L}\\p{M}\\p{N}])${escaped}(?![\\p{L}\\p{M}\\p{N}])`, "u").test(
+    return new RegExp(`(?:^|[^\\p{L}\\p{M}\\p{N}])${escaped}(?![\\p{L}\\p{M}\\p{N}])`, "u").test(
       haystack
     );
   }
-  const invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
-  const htmlEntitiesRegex = /&#(\w+)(^\w|;)?/g;
+  const invalidProtocolRegex = /^\W*(javascript|data|vbscript)/i;
+  const htmlEntitiesRegex = /&#(?:x([0-9a-f]+)|(\d+));?/gi;
   const htmlCtrlEntityRegex = /&(newline|tab);/gi;
   const ctrlCharactersRegex = (
-    // biome-ignore lint/suspicious/noControlCharactersInRegex: original lib.
-    /[\u0000-\u001F\u007F-\u009F\u2000-\u200D\uFEFF]/gim
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: Matching control characters is the purpose.
+    /[\u0000-\u001F\u007F-\u009F\u2000-\u200D\uFEFF]/g
   );
-  const urlSchemeRegex = /^.+(:|&colon;)/gim;
+  const urlSchemeRegex = /^.+?(:|&colon;)/i;
   const whitespaceEscapeCharsRegex = /(\\|%5[cC])((%(6[eE]|72|74))|[nrt])/g;
+  const base64ImageRegex = /^data:image\/(?:png|gif|jpe?g|webp|avif|bmp|x-icon);base64,[a-z0-9+/=\t\n\f\r ]*$/i;
   const relativeFirstCharacters = [".", "/"];
   const BLANK_URL = "about:blank";
   function isRelativeUrlWithoutProtocol(url2) {
     return relativeFirstCharacters.indexOf(url2[0]) > -1;
   }
+  function decodeCharacterReference(hex, dec) {
+    const codePoint = hex !== void 0 ? Number.parseInt(hex, 16) : Number.parseInt(dec, 10);
+    const isInvalid = !Number.isFinite(codePoint) || codePoint === 0 || codePoint > 1114111 || codePoint >= 55296 && codePoint <= 57343;
+    return isInvalid ? "�" : String.fromCodePoint(codePoint);
+  }
   function decodeHtmlCharacters(str) {
     const removedNullByte = str.replace(ctrlCharactersRegex, "");
-    return removedNullByte.replace(htmlEntitiesRegex, (match, dec) => {
-      return String.fromCharCode(dec);
-    });
+    return removedNullByte.replace(
+      htmlEntitiesRegex,
+      (_match, hex, dec) => decodeCharacterReference(hex, dec)
+    );
   }
   function isValidUrl(url2) {
     if (typeof URL.canParse === "function") {
@@ -894,10 +929,10 @@
   };
   function sanitizeURL(url2) {
     if (!url2 || typeof url2 !== "string") return BLANK_URL;
-    const isBase64Data = /^data:([a-z]+\/[a-z0-9-+.]+)?;base64,/i.test(url2.trim());
-    if (isBase64Data) return url2.trim();
+    const trimmedInput = url2.trim();
+    if (base64ImageRegex.test(trimmedInput)) return trimmedInput;
     let charsToDecode;
-    let decodedUrl = decodeURIs(url2.trim());
+    let decodedUrl = decodeURIs(trimmedInput);
     do {
       decodedUrl = decodeHtmlCharacters(decodedUrl).replace(htmlCtrlEntityRegex, "").replace(ctrlCharactersRegex, "").replace(whitespaceEscapeCharsRegex, "").trim();
       decodedUrl = decodeURIs(decodedUrl);
@@ -1096,7 +1131,7 @@
       return gotText.get(element);
     }
     const ignore = fnIgnore(element);
-    const text = ignore.textContent.replace(/[\r\n]+/g, "").replace(/\s+/g, " ").trim();
+    const text = removeWhitespace(ignore.textContent);
     gotText.set(element, text);
     return text;
   }
@@ -1139,9 +1174,10 @@
     if (typeof string !== "string" && typeof string !== "number") return "";
     return String(string).replace(/\s+/g, " ").trim();
   }
+  const junkCharactersRegex = /[\u0000-\u0008\u000E-\u001F\u007F-\u009F\uE000-\uF8FF]/g;
   function normalizeString(string) {
     if (typeof string !== "string" && typeof string !== "number") return "";
-    return removeWhitespace(String(string).replace(/[\u0000-\u001F\u007F-\u009F]/g, ""));
+    return removeWhitespace(String(string).replace(junkCharactersRegex, ""));
   }
   function truncateString(string, maxLength) {
     if (typeof string !== "string" && typeof string !== "number") return "";
@@ -1177,18 +1213,91 @@
     }
   };
   function prepareDismissal(string) {
-    return String(string).replace(/([^0-9a-zA-Z])/g, "").substring(0, 256);
+    return String(string).replace(/[^\p{L}\p{N}]/gu, "").substring(0, 256);
+  }
+  const srcsetIntegerRegex = /^\d+$/;
+  const srcsetFloatRegex = /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?$/;
+  function parseSrcsetDescriptors(descriptors) {
+    let width = null;
+    let density = null;
+    let height = null;
+    for (const descriptor of descriptors.split(/\s+/)) {
+      if (!descriptor) continue;
+      const value = descriptor.slice(0, -1);
+      const type = descriptor.slice(-1);
+      if (type === "w" && srcsetIntegerRegex.test(value)) {
+        if (width !== null || density !== null) return null;
+        width = Number(value);
+        if (width === 0) return null;
+      } else if (type === "x" && srcsetFloatRegex.test(value)) {
+        if (width !== null || density !== null || height !== null) return null;
+        density = Number(value);
+        if (!Number.isFinite(density) || density <= 0) return null;
+      } else if (type === "h" && srcsetIntegerRegex.test(value)) {
+        if (height !== null || density !== null) return null;
+        height = Number(value);
+        if (height === 0) return null;
+      } else {
+        return null;
+      }
+    }
+    if (height !== null && width === null) return null;
+    return { width, density: density ?? 1 };
+  }
+  function parseSrcset(srcset) {
+    if (typeof srcset !== "string") return [];
+    const candidates = [];
+    const length = srcset.length;
+    let position = 0;
+    while (position < length) {
+      while (position < length && /[\s,]/.test(srcset[position])) position += 1;
+      if (position >= length) break;
+      const urlStart = position;
+      while (position < length && !/\s/.test(srcset[position])) position += 1;
+      let url2 = srcset.slice(urlStart, position);
+      let descriptors = "";
+      if (url2.endsWith(",")) {
+        url2 = url2.replace(/,+$/, "");
+      } else {
+        const descriptorStart = position;
+        let inParens = false;
+        while (position < length) {
+          const char = srcset[position];
+          if (char === "(") inParens = true;
+          else if (char === ")") inParens = false;
+          else if (char === "," && !inParens) break;
+          position += 1;
+        }
+        descriptors = srcset.slice(descriptorStart, position).trim();
+        position += 1;
+      }
+      if (!url2) continue;
+      const parsed = parseSrcsetDescriptors(descriptors);
+      if (parsed) candidates.push({ url: url2, ...parsed });
+    }
+    return candidates;
+  }
+  function getSmallestSrc(srcset) {
+    const candidates = parseSrcset(srcset);
+    if (!candidates.length) return void 0;
+    const withWidth = candidates.filter((c) => c.width !== null);
+    const pool = withWidth.length ? withWidth : candidates;
+    const size = (c) => withWidth.length ? c.width : c.density;
+    return pool.reduce((smallest, c) => size(c) < size(smallest) ? c : smallest).url;
   }
   function getBestImageSource(element) {
-    const getLastSrc = (src) => src?.split(/,\s+/).pop()?.trim()?.split(/\s+/)[0];
-    const resolveUrl = (src) => src ? new URL(src, window.location.href).href : null;
-    const dataSrc = getLastSrc(element.getAttribute("data-src") || element.getAttribute("srcset"));
-    if (dataSrc) return resolveUrl(dataSrc);
-    const pictureSrcset = getCachedClosest(element, "picture")?.querySelector("source[srcset]")?.getAttribute("srcset");
-    const pictureSrc = getLastSrc(pictureSrcset);
-    if (pictureSrc) return resolveUrl(pictureSrc);
-    return resolveUrl(element.getAttribute("src"));
+    const resolveUrl = (src) => {
+      if (!src) return null;
+      try {
+        return new URL(src, window.location.href).href;
+      } catch {
+        return null;
+      }
+    };
+    const pictureSrcset = () => getCachedClosest(element, "picture")?.querySelector("source[srcset]")?.getAttribute("srcset");
+    return resolveUrl(element.getAttribute("data-src")?.trim()) || resolveUrl(getSmallestSrc(element.getAttribute("data-srcset"))) || resolveUrl(getSmallestSrc(element.getAttribute("srcset"))) || resolveUrl(getSmallestSrc(pictureSrcset())) || resolveUrl(element.getAttribute("src"));
   }
+  const emojiRegex = /[\p{Emoji_Presentation}\p{Extended_Pictographic}\p{Emoji_Modifier}]|\u200D|\uFE0E|\uFE0F|\u20E3/gu;
   function isVisibleTextInAccName($el, accName, exclusions = [], linkIgnoreStrings) {
     let text = "";
     const excludeSelector = exclusions?.length ? exclusions.join(",") : "";
@@ -1208,10 +1317,9 @@
         text += stripIgnored(getText(node));
       }
     });
-    const emojiRegex = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu;
     let visibleText = text.replace(emojiRegex, "");
     visibleText = removeWhitespace(visibleText).toLowerCase();
-    if (/^[x×✕✖✗✘]$/i.test(visibleText)) {
+    if (/^[x×✕✖✗✘]$/.test(visibleText)) {
       return false;
     }
     return visibleText.length !== 0 && !accName.toLowerCase().includes(visibleText);
@@ -1608,6 +1716,7 @@
       Found.Everything = find("*", "root", Constants.Exclusions.Sa11yElements);
       Found.Images = [];
       Found.Links = [];
+      Found.Summary = [];
       Found.Paragraphs = [];
       Found.Lists = [];
       Found.Blockquotes = [];
@@ -1718,6 +1827,9 @@
               break;
             case "svg":
               Found.Svg.push($el);
+              break;
+            case "SUMMARY":
+              Found.Summary.push($el);
               break;
           }
         }
@@ -2954,8 +3066,8 @@ ${this.error.stack}
             if (State.option.linkIgnoreSpan) {
               const spanEl = $el.querySelector(State.option.linkIgnoreSpan);
               if (spanEl) {
-                const spanText = stripAllSpecialCharacters(spanEl.textContent).trim().toLowerCase();
-                if (spanText === textContent) {
+                const spanText = normalizeStopWord(spanEl.textContent);
+                if (spanText && spanText === normalizeStopWord(rawTextContent)) {
                   triggerStopWord();
                   hasStopWordWarning = true;
                 }
@@ -3148,16 +3260,12 @@ ${this.error.stack}
       const match = altLowerCase.match(/\b\d{2,6}\s*x\s*\d{2,6}\b/);
       if (match) hit[0] = match[0];
     }
-    let wordsToCheck = [];
-    if (typeof Intl !== "undefined" && Intl.Segmenter) {
-      const segmenter = new Intl.Segmenter(void 0, { granularity: "word" });
-      const allWords = [...segmenter.segment(altLowerCase)].filter((segment) => segment.isWordLike).map((segment) => segment.segment);
-      wordsToCheck = [...allWords.slice(0, 2), ...allWords.slice(-1)];
-    } else {
-      const altOnlyLetters2 = removeWhitespace(altLowerCase.replace(/[^\p{L}\p{M}\s]/gu, ""));
-      const allWords = altOnlyLetters2.split(/\s+/).filter(Boolean);
-      wordsToCheck = [...allWords.slice(0, 2), ...allWords.slice(-1)];
-    }
+    const segmenter = getWordSegmenter(Lang._("LANG_CODE"));
+    const allWords = segmenter ? [...segmenter.segment(altLowerCase)].filter((segment) => segment.isWordLike).map((segment) => segment.segment) : (
+      // Fallback for browsers without Intl.Segmenter.
+      altOnlyLetters.split(/\s+/).filter(Boolean)
+    );
+    const wordsToCheck = [...allWords.slice(0, 2), ...allWords.slice(-1)];
     const altNoSpaces = altOnlyLetters.replace(/\s/g, "");
     for (const word of Constants.Global.susAltWords) {
       const foldedWord = foldForMatching(word);
@@ -3327,9 +3435,13 @@ ${this.error.stack}
       }
       const warningTest = link ? "LINK_ALT_MAYBE_BAD_WARNING" : "ALT_MAYBE_BAD_WARNING";
       if (State.option.checks[warningTest]) {
-        const wordCount = altText.trim().split(/\s+/).length;
-        const delimiterCount = (altText.match(/[_-]/g) || []).length;
-        const hasTooMuchNoise = /^(?:\s*\d){5,}\s*$/.test(altText) || delimiterCount >= 3 && wordCount <= 2;
+        const words = altText.trim().split(/\s+/);
+        const wordCount = words.length;
+        const totalDelimiterCount = (altText.match(/[_-]/g) || []).length;
+        const isNumberString = /^(?:\s*\d){5,}\s*$/.test(altText);
+        const isPureFilename = totalDelimiterCount >= 4 && wordCount <= 2;
+        const containsSlug = words.some((word) => (word.match(/[_-]/g) || []).length >= 4);
+        const hasTooMuchNoise = isNumberString || isPureFilename || containsSlug;
         if (hasTooMuchNoise) {
           logResult({
             test: warningTest,
@@ -3419,7 +3531,8 @@ ${this.error.stack}
     if (!State.option.formLabelsPlugin) return;
     Elements.Found.Inputs.forEach(($el) => {
       const presentation = isPresentational($el) && isDisabled($el);
-      if (isElementHidden($el) || isHiddenAndUnfocusable($el) || presentation) return;
+      if (isElementHidden($el) || isHiddenAndUnfocusable($el) || presentation || $el.hasAttribute("inert"))
+        return;
       const computeName = computeAccessibleName($el);
       const inputName = removeWhitespace(computeName);
       const type = $el.getAttribute("type");
@@ -3588,7 +3701,33 @@ ${this.error.stack}
           developer: true
         });
       }
-      if (tableHeaders.length === 0) {
+      const rows = Array.from($el.rows);
+      let rowGroup = null;
+      let remainingRowSpan = 0;
+      const singleColumn = rows.length > 0 && rows.every((row) => {
+        if (row.parentElement !== rowGroup) {
+          rowGroup = row.parentElement;
+          remainingRowSpan = 0;
+        }
+        if (remainingRowSpan > 0) {
+          remainingRowSpan -= 1;
+          return row.cells.length === 0;
+        }
+        if (row.cells.length !== 1 || row.cells[0].colSpan !== 1) return false;
+        remainingRowSpan = row.cells[0].rowSpan === 0 ? Infinity : row.cells[0].rowSpan - 1;
+        return true;
+      });
+      const layoutRule = singleColumn ? rows.length === 1 ? "TABLES_SINGLE_CELL" : "TABLES_SINGLE_COLUMN" : null;
+      const layoutWarningEnabled = layoutRule && State.option.checks[layoutRule];
+      if (layoutWarningEnabled) {
+        pushResult$1({
+          test: layoutRule,
+          element: $el,
+          type: "warning",
+          dismiss: firstRow
+        });
+      }
+      if (tableHeaders.length === 0 && !(layoutWarningEnabled && layoutRule === "TABLES_SINGLE_CELL")) {
         pushResult$1({
           test: "TABLES_MISSING_HEADINGS",
           element: $el,
@@ -4875,8 +5014,31 @@ ${this.error.stack}
       });
     }
     const metaTitle = document.querySelector("title:not(svg title)");
-    if (!metaTitle || getText(metaTitle).length === 0) {
+    const title = metaTitle ? getText(metaTitle).trim() : "";
+    if (!title) {
       pushResult$1({ test: "META_TITLE", developer: true });
+    } else {
+      const normalizedTitle = title.replace(/\s+/g, " ").toLowerCase();
+      const undescriptiveStrings = Lang._("META_TITLE_UNDESCRIPTIVE_STRINGS");
+      const undescriptive = new Set(
+        Array.isArray(undescriptiveStrings) ? undescriptiveStrings.map((string) => string.toLowerCase()) : []
+      );
+      const startingWord = normalizedTitle.split(/[\s-]+/)[0];
+      let flag = null;
+      if (undescriptive.has(normalizedTitle)) {
+        flag = "error";
+      } else if (undescriptive.has(startingWord)) {
+        flag = /[\s-]*\d+$/.test(normalizedTitle.slice(startingWord.length)) ? "error" : "warning";
+      }
+      if (flag) {
+        pushResult$1({
+          test: "META_TITLE_UNDESCRIPTIVE",
+          type: flag,
+          args: [title],
+          developer: true,
+          dismiss: title
+        });
+      }
     }
     const content = document.querySelector('meta[name="viewport"]')?.getAttribute("content");
     if (content) {
@@ -4940,7 +5102,8 @@ ${this.error.stack}
     }
     Elements.Found.Buttons.forEach(($el) => {
       const presentation = isPresentational($el) && isDisabled($el);
-      if (presentation || isHiddenAndUnfocusable($el) || isElementHidden($el)) return;
+      if (presentation || $el.hasAttribute("inert") || isHiddenAndUnfocusable($el) || isElementHidden($el))
+        return;
       const accName = computeAccessibleName($el);
       const buttonText = accName.replace(/['"-\.\s]+/g, "").toLowerCase();
       const textContent = getText($el);
@@ -5003,6 +5166,19 @@ ${this.error.stack}
         });
       }
     });
+    Elements.Found.Summary.forEach(($el) => {
+      const details = $el.parentElement;
+      const isControl = details?.tagName === "DETAILS" && details.querySelector(":scope > summary") === $el;
+      if (!isControl || computeAccessibleName($el).trim()) return;
+      pushResult$1({
+        test: "SUMMARY_EMPTY",
+        element: details,
+        args: [details],
+        content: Lang._("SUMMARY_EMPTY") + Lang._("ACC_NAME_TIP"),
+        dismiss: $el.outerHTML,
+        developer: true
+      });
+    });
     Elements.Found.TabIndex.forEach(($el) => {
       if ($el.tabIndex > 0) {
         pushResult$1({
@@ -5035,6 +5211,21 @@ ${this.error.stack}
         }
       }
     });
+    if (State.option.checks.SVG_NO_ACCESSIBLE_NAME) {
+      Elements.Found.Svg.forEach((element) => {
+        if (isPresentational(element) || hasAriaHiddenAncestor(element) || isElementHidden(element) || computeAccessibleName(element).trim() || getCachedClosest(element, 'a[href], button, [role="link"], [role="button"]')) {
+          return;
+        }
+        pushResult$1({
+          test: "SVG_NO_ACCESSIBLE_NAME",
+          element,
+          type: "warning",
+          args: [element],
+          developer: true,
+          dismiss: element.outerHTML
+        });
+      });
+    }
   }
   const intersect = (a, b, x = 10) => {
     return a.left - x <= b.right && b.left - x <= a.right && a.top - x <= b.bottom && b.top - x <= a.bottom;
@@ -5408,6 +5599,38 @@ ${this.error.stack}
           dismiss: src($el)
         });
       }
+      if (State.option.checks.EMBED_VIDEO_AUTOPLAY) {
+        let pauseControlFor = function(video) {
+          const root = video.getRootNode();
+          if (!root?.querySelectorAll) return null;
+          const selector = 'button[aria-controls], [role="button"][aria-controls], input[type="button"][aria-controls]';
+          const isVisible = (el) => el.checkVisibility ? el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }) : el.offsetWidth > 0 || el.offsetHeight > 0;
+          for (const control of root.querySelectorAll(selector)) {
+            if (control.disabled || control.getAttribute("aria-disabled") === "true" || !isVisible(control))
+              continue;
+            const ids = control.getAttribute("aria-controls").trim().split(/\s+/);
+            const hasTarget = ids.some((id) => {
+              const target = root.getElementById ? root.getElementById(id) : root.querySelector?.(`#${CSS.escape(id)}`);
+              return target?.contains(video);
+            });
+            if (hasTarget) return control;
+          }
+          return null;
+        };
+        if (!$el.autoplay && !$el.loop) return;
+        if ($el.controls) return;
+        const rect = $el.getBoundingClientRect();
+        if (rect.width < 64 && rect.height < 64) return;
+        if ($el.paused && $el.readyState >= 2) return;
+        if (pauseControlFor($el)) return;
+        pushResult$1({
+          element: $el,
+          test: "EMBED_VIDEO_AUTOPLAY",
+          type: "warning",
+          developer: true,
+          dismiss: src($el)
+        });
+      }
     });
     Elements.Found.Visualizations.forEach(($el) => {
       pushResult$1({
@@ -5418,7 +5641,7 @@ ${this.error.stack}
       });
     });
     Elements.Found.iframes.forEach(($el) => {
-      if (isElementHidden($el) || isHiddenAndUnfocusable($el) || isPresentational($el) || ["VIDEO", "AUDIO"].includes($el.tagName)) {
+      if (isElementHidden($el) || isHiddenAndUnfocusable($el) || isPresentational($el) || $el.hasAttribute("inert") || ["VIDEO", "AUDIO"].includes($el.tagName)) {
         return;
       }
       if (isNegativeTabindex($el)) {
@@ -5447,7 +5670,7 @@ ${this.error.stack}
       }
     });
     Elements.Found.EmbeddedContent.forEach(($el) => {
-      if (isElementHidden($el) || isHiddenAndUnfocusable($el) || ["VIDEO", "AUDIO"].includes($el.tagName)) {
+      if (isElementHidden($el) || isHiddenAndUnfocusable($el) || $el.hasAttribute("inert") || ["VIDEO", "AUDIO"].includes($el.tagName)) {
         return;
       }
       pushResult$1({
@@ -9209,6 +9432,26 @@ ${this.error.stack}
       "maximize",
       "slide",
       "modal"
+    ],
+    META_TITLE_UNDESCRIPTIVE_STRINGS: [
+      "untitled",
+      "document",
+      "page",
+      "title",
+      "default",
+      "undefined",
+      "index",
+      "new",
+      "placeholder",
+      "webpage",
+      "no title",
+      "insert title here",
+      "hello world",
+      "my app",
+      "my site",
+      "my website",
+      "site title",
+      "your site title"
     ]
   };
   const ui = {
@@ -9359,6 +9602,7 @@ ${this.error.stack}
     EMBED_MISSING_TITLE: 'Embedded content requires an accessible name that describes its contents. Please provide a unique <code>title</code> or <code>aria-label</code> attribute on the <code>&lt;%(ELEMENT)&gt;</code> element. Learn more about <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrames.</a>',
     EMBED_GENERAL: 'Unable to check embedded content. Please make sure that images have alt text, videos have captions, text has sufficient contrast, and interactive components are <a href="https://webaim.org/techniques/keyboard/">keyboard accessible.</a>',
     EMBED_UNFOCUSABLE: '<code>&lt;iframe&gt;</code> with focusable elements should not have <code>tabindex="-1"</code>. The embedded content will not be keyboard accessible.',
+    EMBED_VIDEO_AUTOPLAY: 'Auto-playing videos that cannot be paused can distract people and interfere with screen readers. Please ensure users can stop the video by adding the <code>controls</code> attribute, providing a visible pause button, or removing the <code>autoplay</code> attribute. <hr> Learn more about <a href="https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide.html">Pause, Stop, Hide.</a>',
     // Quality assurance
     QA_BAD_LINK: "Bad link found. Link appears to point to a development environment. <hr> {L} <strong {C}>%(LINK)</strong>",
     QA_STRONG_ITALICS: "Bold and italic tags have semantic meaning, and should <strong>not</strong> be used to highlight entire paragraphs. Bolded text should be used to provide strong <strong>emphasis</strong> on a word or phrase. Italics should be used to highlight proper names (i.e. book and article titles), foreign words, quotes. Long quotes should be formatted as a blockquote. <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong>",
@@ -9383,8 +9627,11 @@ ${this.error.stack}
     DUPLICATE_ID: "Found <strong>duplicate ID</strong>. Duplicate ID errors are known to cause problems for assistive technologies when they are trying to interact with content. Please remove or change the following ID. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
     UNCONTAINED_LI: "All <code>&lt;li&gt;</code> list items must be placed inside <code>&lt;ul&gt;</code> unordered or <code>&lt;ol&gt;</code> ordered elements. This structure helps screen readers announce the list and its items accurately. <hr> <strong {B}>List item</strong> <strong {C}>%(TEXT)</strong>",
     TABINDEX_ATTR: "Element should not have a <code>tabindex</code> attribute greater than 0.",
+    SVG_NO_ACCESSIBLE_NAME: `Some screen readers will announce this SVG as an unlabeled image because it lacks an accessible name and is not hidden. Add an accessible label (or <code>&lt;title&gt;</code>) if it conveys meaning, or hide it from screen readers if it's purely decorative (<code>aria-hidden="true"</code>). <hr> Learn more about <a href="https://a11y-101.com/development/svg">accessible SVGs.</a>`,
+    SUMMARY_EMPTY: "Summary element within the <code>&lt;details&gt;</code> has no accessible name. Add descriptive text inside the <code>&lt;summary&gt;</code> element.",
     // Meta checks
     META_TITLE: 'Missing page title! Please provide a <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title">page title.</a>',
+    META_TITLE_UNDESCRIPTIVE: 'The page title "<em>%(TEXT)</em>" may not be descriptive or convey the subject or purpose of the page. Page titles should be unique, concise, and clearly describe the page content. Learn more about <a href="https://www.w3.org/WAI/WCAG22/Understanding/page-titled.html">meaningful page titles.</a>',
     META_SCALABLE: 'Remove the <code>user-scalable="no"</code> parameter in the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">viewport meta tag</a> in order to allow zooming.',
     META_MAX: 'Ensure the <code>maximum-scale</code> parameter in the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">viewport meta tag</a> is not less than 2.',
     META_LANG: 'Page language not declared! Please <a href="https://www.w3.org/International/questions/qa-html-language-declarations">declare language on the HTML tag.</a>',
@@ -9400,6 +9647,8 @@ ${this.error.stack}
     LABEL_IN_NAME: "The visible text for this element appears to be different than the accessible name, which may cause confusion for assistive technologies users. Please review: <hr> <strong {B}>Text</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong>",
     LINK_MAYBE_BUTTON: `This link has an invalid target. Although the accessible name or its attributes suggests that this might not be a link at all, and instead controls some scripted behaviour on the page. To fix, replace the link with an <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">accessible button</a>, or correct the link's destination. <hr> <strong {B}>Accessible Name</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Tip!</strong> Assistive technologies treat buttons and links differently. Using the correct HTML element ensures users know which keyboard shortcuts to use and what action will trigger.`,
     // Tables
+    TABLES_SINGLE_COLUMN: 'Is this a table? Single-column tables are often used for layout or lists rather than tabular data. This may be confusing for people using screen readers, who have to stop and listen to structural descriptions intended for data grids, for example <em>"table, 5 rows, 1 column"</em>. Remove the table and use a list instead.',
+    TABLES_SINGLE_CELL: 'Is this a table? Single-cell tables are often used for visual borders or callout containers rather than tabular data. This may be confusing for people using screen readers, who have to stop and listen to structural descriptions intended for data grids: <em>"Table, 1 row, 1 column, Row 1 Column 1."</em> Remove the table and use other styling options to bring attention to this content.',
     TABLES_MISSING_HEADINGS: 'Missing table headers! Accessible tables need HTML markup that indicates header cells and data cells which defines their relationship. This information provides context to people who use assistive technology. Tables should be used for tabular data only. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
     TABLES_SEMANTIC_HEADING: 'Semantic headings such as Heading 2 or Heading 3 should only be used for sections of content; <strong>not</strong> in HTML tables. Indicate table headings using the <code>&lt;th&gt;</code> element instead. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
     TABLES_EMPTY_HEADING: 'Empty table header found! Table headers should <strong>never</strong> be empty. It is important to designate row and/or column headers to convey their relationship. This information provides context to people who use assistive technology. Please keep in mind that tables should be used for tabular data only. <hr> Learn more about <a href="https://www.w3.org/WAI/tutorials/tables/">accessible tables.</a>',
@@ -9466,6 +9715,7 @@ ${this.error.stack}
     EMBED_MISSING_TITLE: 'Frame missing "title" attribute',
     EMBED_UNFOCUSABLE: 'Frame with tabindex="-1" will not be keyboard accessible.',
     EMBED_VIDEO: "Is this video accurately captioned?",
+    EMBED_VIDEO_AUTOPLAY: "Is there a way for users to pause this video?",
     HEADING_EMPTY: "This heading has no text",
     HEADING_EMPTY_WITH_IMAGE: "This image is used as a heading, so it needs alt text",
     HEADING_FIRST: "The first heading on this page is a subheading",
@@ -9544,6 +9794,7 @@ ${this.error.stack}
     META_REFRESH: "Meta tag automatically refreshes page",
     META_SCALABLE: "Meta tag prevents users from enlarging text",
     META_TITLE: "Meta tag for page title missing",
+    META_TITLE_UNDESCRIPTIVE: "Does the page title uniquely describe the content?",
     MISSING_ALT: "Invalid HTML: image has no alt attribute",
     MISSING_ALT_LINK: "Invalid HTML: linked image missing alt attribute",
     MISSING_ALT_LINK_HAS_TEXT: "Invalid HTML: image in link missing alt attribute",
@@ -9562,12 +9813,16 @@ ${this.error.stack}
     QA_SUBSCRIPT: "Do not use sub/superscript as visual formatting",
     QA_UNDERLINE: "Only links should be underlined",
     QA_UPPERCASE: "Is this uppercase text needed?",
+    SUMMARY_EMPTY: "This details element is missing its summary",
     SUS_ALT: "Are there redundant words in this alt text?",
+    SVG_NO_ACCESSIBLE_NAME: "This SVG has no accessible name",
     TABINDEX_ATTR: "Tabindex overrides interrupt the focus order",
     TABLES_EMPTY_HEADING: "This header cell needs text",
     TABLES_INVALID_HEADERS_REF: "This table has an invalid headers attribute",
     TABLES_MISSING_HEADINGS: "This table needs a header row and/or column",
     TABLES_SEMANTIC_HEADING: "Content headings should not be used inside tables",
+    TABLES_SINGLE_CELL: "Use another element instead of a single cell table",
+    TABLES_SINGLE_COLUMN: "Use another element instead of a single column table",
     UNCONTAINED_LI: "Invalid HTML list"
   };
   const why = {
@@ -9600,6 +9855,7 @@ ${this.error.stack}
     EMBED_MISSING_TITLE: `<p>Embeds need an accessible name that describes their contents for screen readers.</p><p>${why.fix}Provide a unique <code>title</code> or <code>aria-label</code> attribute.</p>`,
     EMBED_UNFOCUSABLE: `<p>This attribute tells keyboards and assistive devices to skip over the element. Remove this attribute unless the iframe has no links, buttons, form elements, or scrollable content.</p>`,
     EMBED_VIDEO: `<p>This checker cannot "see" whether videos have captions, or tell if someone has proofread them, so a manual check is needed.</p><p>${why.fix}Check to make sure that <a href="https://www.w3.org/WAI/media/av/captions/">accurate captions ("CC") or subtitles</a> are available, and make sure speakers and meaningful sound effects are accurately identified.</p>`,
+    EMBED_VIDEO_AUTOPLAY: `<p>People prone to motion sickness and cognitive overload <a href="https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide.html">need a way to pause videos</a>.</p><p>${why.fix}Add the <code>controls</code> attribute, provide a visible pause button, or remove the <code>autoplay</code> attribute.</p>`,
     HEADING_EMPTY: `<p>Empty headings create confusing gaps in the page outline.</p><p>${why.fix}Add text to this heading, or delete this empty line.</p>${why.headings}`,
     HEADING_UNPRONOUNCEABLE: `<p>Empty headings create confusing gaps in the page outline.</p><p>${why.fix}Add human-readable text to this heading, or convert it to a paragraph.</p>${why.headings}`,
     HEADING_EMPTY_WITH_IMAGE: `<p>Empty headings create confusing gaps in the page outline.</p><p>${why.fix}If this is not a heading, change its format from <code>Heading %(level)</code> to <code>Paragraph</code>. Otherwise, put the meaning of the image in its alt.</p>${why.headings}`,
@@ -9670,6 +9926,7 @@ ${this.error.stack}
     META_LANG_VALID: `<p><strong>Element:</strong> <code>&lt;%(ELEMENT) lang="%(CODE)"&gt;</code></p><p>${why.fix}Replace the lang attribute with a valid language code.</p><div class="why"><p>Tip: pages and elements have <a href="https://www.w3.org/International/questions/qa-html-language-declarations">language attributes</a> so that screen readers and translation tools read the text correctly.</p></div>`,
     META_REFRESH: `<p>Pages should not automatically refresh using a meta tag. This interrupts the user without warning or the ability to prevent refresh, makes them lose their place while reading, and can reset form progress.</p><p>${why.fix}To refresh content on the same page, use AJAX to refresh sections in place without a reload, or use JavaScript to trigger the reload, so the user can be warned first and have the option to delay the event.</p>`,
     META_TITLE: `<p>${why.fix}Add a <code>&lt;title&gt;</code> tag to the page's <code>head</code> element.</p><div class="why"><p>Tip: many parts of the browsing experience depend on a <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">short and unique title tag</a>:</p><ul><li>Search engines use it to title results.</li><li>Browsers use it to title tabs.</li><li>Screen readers speak it when switching tabs.</li></ul><p>Without a page title, people see/hear a raw URL instead.</p></div>`,
+    META_TITLE_UNDESCRIPTIVE: `<p>The page title "<i>%(TEXT)</i>" may not be descriptive or uniquely convey the subject or purpose of this page.</p><p>${why.fix}Page titles are used by screen readers to title windows and search engines to title results. Write a page title that is unique, concise, and clearly describes the page content.</p>`,
     MISSING_ALT: `<p>When screen readers encounter an image with no alt attribute at all, they attempt to pronounce the url of the image file instead, often one letter at a time.</p>	<p>${why.fix}Concisely describe what this image means, in this context.</p>${why.images}`,
     MISSING_ALT_LINK: `<p>When screen readers encounter an image with no alt attribute at all, they attempt to pronounce the url of the image file instead, often one letter at a time. This is especially a problem for linked images.</p><p>${why.fix}Add alt text that matches the link's destination.</p>${why.imageLinks} `,
     MISSING_ALT_LINK_HAS_TEXT: `<p>This image is part of a link with text. If the visible text is sufficient to describe the link, add an empty alt (alt="") to tell screen readers to ignore this image. Otherwise, add an alt that helps describe the link's destination or purpose.</p>${why.imageLinks}`,
@@ -9687,12 +9944,16 @@ ${this.error.stack}
     QA_SUBSCRIPT: `<p><strong>Text:</strong> <i>%(TEXT)</i></p><p>Subscript and superscript formatting makes text too small to be easily read for many people. It should only be used for individual words or phrases, such as ordinal numbers (4<sup>th</sup>), chemical formulas (H<sub>2</sub>O) and references to footnotes.</p>`,
     QA_UNDERLINE: `<p>Underlined text on the Web is used for links, not emphasis. Users will think they can click this: <i><u>%(TEXT)</u></i></p><p>${why.fix} Use <strong>bold</strong> or <em>italic</em> for emphasis, and headings for structure.</p><div class="why"><p>Note: screen readers do not announce visual-only formatting like underlines. Only headings add text to the page outline.</p></div>`,
     QA_UPPERCASE: `<p><strong>Text:</strong> <i>%(TEXT)</i></p><p>${why.fix}Only capitalize a few words for emphasis. LARGE BLOCKS OF UPPERCASE TEXT ARE MORE DIFFICULT TO READ, AND MANY READERS INTERPRET THEM AS SHOUTING.</p><div class="why"><p>Note: screen readers do not announce visual-only formatting like uppercase text. Use a heading style instead if this emphasized text introduces a topic change or critically important content.</p></div>`,
+    SUMMARY_EMPTY: `<p>Details elements create a clickable accordion, displaying the <code>&lt;summary&gt;</code> text as a button that reveals more details. Without summary text, people using screen readers cannot hear what the button does.</p>`,
     SUS_ALT: `<p>This image's alt text includes the word "<i>%(alt)</i>." Screen readers announce they are describing an image when reading alt text, so phrases like "image of" and "photo of" are usually redundant.</p><p><strong>Alt text:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Concisely describe what this image means, in this context.</p><div class="why"><p>Tip: these phrases are worth keeping if the format itself is meaningful:<br>"A photo of a cat, framed and hanging on the wall."</p></div>`,
+    SVG_NO_ACCESSIBLE_NAME: `<p>Some screen readers will announce this SVG as an unlabeled image because it lacks an accessible name and is not hidden. Add an accessible label (or <code>&lt;title&gt;</code>) if it conveys meaning, or hide it from screen readers if it's purely decorative (<code>aria-hidden="true"</code>).</p>`,
     TABINDEX_ATTR: `<p>Tabindex values greater than 0 move focusable elements out of their visual order, making it difficult for assistive device users to locate and operate them.</p><p>${why.fix}Change the order of elements in the HTML instead, so that focus order and reading order match.</p><div class="why"><p>Tip: the visual order of words on the page and the order keyboards tab through elements are usually the same.</p><p>Assigning a positive tabindex to an element moves it to the beginning of the tab order, <strong>but not the visual or reading order</strong>.</p></div>`,
     TABLES_EMPTY_HEADING: `<p>${why.fix}Make sure each header cell contains text.</p><div class="why"><p>Tip: screen readers use headers to orient users as they explore a table. The relevant header repeats as the cursor enters each column or row.</p></div>`,
     TABLES_INVALID_HEADERS_REF: `<p>This table is attempting to label a specific data cell with a specific header cell, but the header ID cannot be found: <code>%(VALUE)</code>.</p><p>${why.fix}Make sure each <code>headers</code> attribute matches the ID of a header cell in the same table.</p><div class="why">Tip: <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">using manual ID references</a> to associate data cells with header cells is complicated and fragile. When possible, break complex data into smaller tables with simple header rows and columns.</div>`,
     TABLES_MISSING_HEADINGS: `<p>${why.fix}Edit the table's properties and specify whether headers have been placed in the first row, column or both.</p><div class="why"> <p>Tip: screen readers use headers to orient users as they explore a table. The relevant header repeats as the cursor enters each column or row.</p><p>If this table has no headers because it is only being used for visual layout, remove the table formatting and use visual-only column formatting instead.</p></div> `,
-    TABLES_SEMANTIC_HEADING: `<p>${why.fix}Remove this heading (h2, h3) formatting. Provide header rows and columns instead. If you need multiple header rows, break this into more than one table.</p><div class="why"> <p>Tip: Table headers are directional: one row or column. Content headings label all subsequent text, even in unrelated columns:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">A <strong>table header</strong> in cell 2 labels cell B. <br><br> A <strong>content heading</strong> in cell 2 labels cells 3, A, B and C, as well as this text and this tooltip's footer.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`
+    TABLES_SEMANTIC_HEADING: `<p>${why.fix}Remove this heading (h2, h3) formatting. Provide header rows and columns instead. If you need multiple header rows, break this into more than one table.</p><div class="why"> <p>Tip: Table headers are directional: one row or column. Content headings label all subsequent text, even in unrelated columns:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">A <strong>table header</strong> in cell 2 labels cell B. <br><br> A <strong>content heading</strong> in cell 2 labels cells 3, A, B and C, as well as this text and this tooltip's footer.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`,
+    TABLES_SINGLE_COLUMN: `<p>Single-column tables are often used for visual design rather than tabular data. This is confusing for people using screen readers, who have to stop and listen to structural descriptions intended for data grids, for example <em>"table, 5 rows, 1 column"</em>.</p><p>${why.fix}Remove the table formatting and use a list or other visual-only layout element.</p>`,
+    TABLES_SINGLE_CELL: `<p>Single-cell tables are often copy and paste mistakes, or added for visual borders. This is confusing for people using screen readers, who have to stop and listen to structural descriptions intended for data grids: <em>"Table, 1 row, 1 column, Row 1 Column 1."</em></p><p>${why.fix}Remove the table formatting and use other styling options to bring attention to this content.</p>`
   };
   const interfaceStrings = {
     ALERT_CLOSE: "Close",
@@ -9836,7 +10097,7 @@ ${this.error.stack}
     testNames,
     ruleset: Object.assign({}, Sa11yStrings.ruleset, englishOverrides)
   };
-  const ed11yDefaultOptions = {
+  const defaults = {
     // Default options.
     // Sa11y properties =======================
     // Target area to check
@@ -10254,6 +10515,7 @@ ${this.error.stack}
       },
       ALT_MAYBE_BAD_WARNING: true,
       LINK_ALT_MAYBE_BAD_WARNING: true,
+      SVG_NO_ACCESSIBLE_NAME: true,
       // Sa11y: Link checks
       DUPLICATE_TITLE: false,
       // Todo pro.
@@ -10318,10 +10580,6 @@ ${this.error.stack}
         dismissAll: true
       },
       QA_BLOCKQUOTE: true,
-      TABLES_MISSING_HEADINGS: true,
-      TABLES_SEMANTIC_HEADING: true,
-      TABLES_EMPTY_HEADING: true,
-      TABLES_INVALID_HEADERS_REF: true,
       QA_FAKE_HEADING: true,
       QA_FAKE_LIST: true,
       QA_UPPERCASE: true,
@@ -10333,6 +10591,13 @@ ${this.error.stack}
       // Todo pro.
       QA_SMALL_TEXT: false,
       // Todo pro.
+      SUMMARY_EMPTY: true,
+      TABLES_MISSING_HEADINGS: true,
+      TABLES_SEMANTIC_HEADING: true,
+      TABLES_EMPTY_HEADING: true,
+      TABLES_INVALID_HEADERS_REF: true,
+      TABLES_SINGLE_COLUMN: true,
+      TABLES_SINGLE_CELL: true,
       // Sa11y: Meta checks
       META_LANG: false,
       // Todo pro.
@@ -10342,15 +10607,15 @@ ${this.error.stack}
       // Not interested.
       META_REFRESH: false,
       // Todo pro.
-      META_LANG_VALID: true,
-      META_LANG_SUGGEST: true,
-      PAGE_LANG_CONFIDENCE: true,
+      META_LANG_VALID: false,
+      META_LANG_SUGGEST: false,
+      META_TITLE_UNDESCRIPTIVE: false,
+      PAGE_LANG_CONFIDENCE: false,
       // Sa11y: Language checks
       LANG_OF_PARTS: true,
       LANG_MISMATCH: true,
       LANG_OF_PARTS_ALT: true,
       // Sa11y: Developer checks
-      // Todo pro.
       DUPLICATE_ID: false,
       META_TITLE: false,
       UNCONTAINED_LI: false,
@@ -10362,6 +10627,7 @@ ${this.error.stack}
       BTN_ROLE_IN_NAME: false,
       BTN_UNPRONOUNCEABLE: true,
       // @todo
+      EMBED_VIDEO_AUTOPLAY: true,
       // Sa11y: Contrast checks
       // Todo pro.
       CONTRAST_WARNING: false,
@@ -10557,9 +10823,9 @@ ${this.error.stack}
   };
   const preProcessOptions = async (userOptions) => {
     validateSelectorOptions(userOptions);
-    smush(State.option, ed11yDefaultOptions, ["checks"]);
+    smush(State.option, defaults, ["checks"]);
     smush(State.option, userOptions, ["checks"]);
-    Object.assign(State.option.checks, ed11yDefaultOptions.checks, userOptions.checks);
+    Object.assign(State.option.checks, defaults.checks, userOptions.checks);
     if (!userOptions.lang) {
       State.option.lang = lang;
     }

@@ -11,7 +11,8 @@ const ruleset = {
     "picture",
     "photo",
     "thumbnail",
-    "icon"
+    "icon",
+    "portrait"
   ],
   PLACEHOLDER_ALT_STOPWORDS: [
     "alt",
@@ -28,10 +29,6 @@ const ruleset = {
     "placeholder image",
     "spacer",
     "chart",
-    "decorative",
-    "placeholder",
-    "placeholder image",
-    "spacer",
     "tbd",
     "todo",
     "to do",
@@ -41,14 +38,22 @@ const ruleset = {
     "hero slide",
     "homepage feature image",
     "featured image",
-    "untitled"
+    "untitled",
+    "graphic",
+    "portrait",
+    "test",
+    "slide image",
+    "untitled image",
+    "unnamed",
+    "copy",
+    "undefined"
   ],
   LINK_STOPWORDS: [
     "kliknij",
     "kliknij tutaj",
     "kliknij tu",
-    "kliknij tutaj, aby dowiedzieć się więcej",
-    "kliknij tu, aby dowiedzieć się więcej",
+    "kliknij tutaj aby dowiedzieć się więcej",
+    "kliknij tu aby dowiedzieć się więcej",
     "check out",
     "pobierz",
     "pobierz tutaj",
@@ -62,7 +67,7 @@ const ruleset = {
     "czytaj",
     "czytaj więcej",
     "czytaj to",
-    "wiecej",
+    "więcej",
     "czytaj tu",
     "to",
     "tę stronę",
@@ -75,8 +80,8 @@ const ruleset = {
     "witrynę",
     "artykuł"
   ],
-  CLICK: ["click", "kliknięcie"],
-  NEW_WINDOW_PHRASES: ["zewnętrzny", "nowa karta", "nowe okno", "pop-up", "pop up"],
+  CLICK: ["click", "kliknięcie", "klikn"],
+  NEW_WINDOW_PHRASES: ["zewnętrzny", "nowa karta", "nowej karcie", "nowe okno", "nowym oknie", "pop-up", "pop up"],
   FILE_TYPE_PHRASES: [
     "dokument",
     "arkusz kalkulacyjny",
@@ -91,7 +96,7 @@ const ruleset = {
     "audio",
     "pdf"
   ],
-  POTENTIAL_UI_ELEMENTS: ["menu", "zamknij", "przełącz", "otwórz", "rozwiń", "zwiń", "następny", "poprzedni", "odtwórz", "pauza", "podmenu", "pokaż", "ukryj", "rozwijane", "wstecz", "dalej", "pomiń", "wyślij", "anuluj", "zapisz", "edytuj", "usuń", "usuń", "szukaj", "filtr", "sortuj", "stop", "wycisz", "wyłącz wyciszenie", "pełny ekran", "minimalizuj", "maksymalizuj"]
+  POTENTIAL_UI_ELEMENTS: ["menu", "zamknij", "przełącz", "otwórz", "rozwiń", "zwiń", "następny", "poprzedni", "odtwórz", "pauza", "podmenu", "pokaż", "ukryj", "rozwijane", "wstecz", "dalej", "pomiń", "wyślij", "anuluj", "zapisz", "edytuj", "usuń", "szukaj", "filtr", "sortuj", "stop", "wycisz", "wyłącz wyciszenie", "pełny ekran", "minimalizuj", "maksymalizuj"]
 };
 const ui = {
   LANG_CODE: "pl",
@@ -121,14 +126,14 @@ const ui = {
   DEVELOPER_CHECKS: "Kontrole dewelopera",
   DEVELOPER_DESC: "Sprawdza problemy, których naprawa może wymagać znajomości kodowania, takie jak atrybuty HTML, formularze i inne.",
   DARK_MODE: "Tryb ciemny",
-  SHORTCUT_SR: "Przejdź do problemu. Klawisze skrótu: lewy Option",
+  SHORTCUT_SR: "Przejdź do problemu. Skrót klawiaturowy: Alt S",
   SKIP_TO_ISSUE: "Przejdź do problemu",
   NEW_TAB: "Otwórz na nowej karcie",
   LINKED: "Połączony",
   PANEL_HEADING: "Testuj dostępność",
   NO_ERRORS_FOUND: "Nie znaleziono błędów.",
-  WARNINGS_FOUND: "ostrzeżeń do przeglądu.",
-  TOTAL_FOUND: "ogółem wykrytych problemów.",
+  WARNINGS_FOUND: "– liczba ostrzeżeń do przeglądu.",
+  TOTAL_FOUND: "– łączna liczba wykrytych problemów.",
   NOT_VISIBLE: "Element, który próbujesz wyświetlić, nie jest widoczny; może być ukryty lub znajdować się wewnątrz akordeonu lub karty.",
   MISSING_ROOT: "Sprawdzono dostępność całej strony, ponieważ obszar docelowy nie istnieje: <code>%(root)</code>",
   MISSING_READABILITY_ROOT: "Ocena czytelności opiera się na obszarze treści <code>%(fallback)</code>, ponieważ docelowy obszar <code>%(root)</code> nie istnieje.",
@@ -138,7 +143,7 @@ const ui = {
   MOVE_PANEL: "Przenieś panel",
   HIDDEN: "Ukryty",
   // Dismiss
-  PANEL_DISMISS_BUTTON: "Pokaż %(dismissCount) odrzucone",
+  PANEL_DISMISS_BUTTON: "Pokaż odrzucone (%(dismissCount))",
   DISMISS: "Odrzuć",
   DISMISS_ALL: "Odrzuć wszystko",
   DISMISSED: "Odrzucone",
@@ -172,7 +177,33 @@ const ui = {
   VERY_DIFFICULT: "Bardzo trudne",
   DIFFICULT: "Trudne",
   FAIRLY_DIFFICULT: "Dość trudne",
-  READABILITY_NOT_ENOUGH: "Za mało treści, aby ocenić czytelność."
+  READABILITY_NOT_ENOUGH: "Za mało treści, aby ocenić czytelność.",
+  META_TITLE_UNDESCRIPTIVE_STRINGS: [
+    "bez tytułu",
+    "dokument",
+    "strona",
+    "tytuł",
+    "domyślny",
+    "indeks",
+    "nowy",
+    "symbol zastępczy",
+    "strona internetowa",
+    "bez tytułu",
+    "wstaw tytuł tutaj",
+    "cześć świecie",
+    "moja aplikacja",
+    "moja strona",
+    "moja strona internetowa",
+    "tytuł witryny",
+    "tytuł twojej witryny",
+    "przykładowa domena",
+    "untitled",
+    "undefined",
+    "title",
+    "document",
+    "index",
+    "placeholder"
+  ]
 };
 const tooltip = {
   // Headings
@@ -241,6 +272,7 @@ const tooltip = {
   EMBED_MISSING_TITLE: 'Osadzona zawartość wymaga dostępnej nazwy, która opisuje jej treść. Dodaj unikalny <code>title</code> lub atrybutu <code>aria-label</code> do elementu <code>&lt;%(ELEMENT)&gt;</code>. Dowiedz się więcej o <a href="https://web.dev/learn/accessibility/more-html#iframes">iFrame.</a>',
   EMBED_GENERAL: 'Nie można sprawdzić treści osadzonej. Upewnij się, że obrazy mają tekst alt, filmy mają napisy rozszerzone, tekst ma odpowiedni kontrast, a elementy interaktywne są <a href="https://webaim.org/techniques/keyboard/">dostępne z klawiatury.</a>',
   EMBED_UNFOCUSABLE: '&lt;code&gt;&lt;iframe&gt;&lt;/code&gt; z elementami, które można wybrać, nie powinno mieć <code>tabindex="-1"</code>. Osadzona zawartość nie będzie dostępna za pomocą klawiatury.',
+  EMBED_VIDEO_AUTOPLAY: 'Filmy odtwarzane automatycznie, których nie można wstrzymać, mogą rozpraszać ludzi i zakłócać działanie czytników ekranu. Upewnij się, że użytkownicy mogą zatrzymać film, dodając atrybut <code>controls</code>, zapewniając widoczny przycisk pauzy lub usuwając atrybut <code>autoplay</code>. <hr> Dowiedz się więcej o <a href="https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide.html">wstrzymywaniu, zatrzymywaniu i ukrywaniu.</a>',
   // Quality assurance
   QA_BAD_LINK: "Podejrzane łącze. Łącze wydaje się wskazywać środowisko programistyczne. <hr> {L} <strong {C}>%(LINK)</strong>",
   QA_IN_PAGE_LINK: "Uszkodzony link wewnątrzstronicowy. Ten link próbuje prowadzić do sekcji strony, której nie można znaleźć. Aby to naprawit, upewnij się, że link pasuje do identyfikatora <code>id</code> elementu, do którego chcesz przejść.",
@@ -249,10 +281,10 @@ const tooltip = {
   QA_DOCUMENT: 'Nie można sprawdzić dokumentu pod kątem dostępności. Powiązane dokumenty są uważane za treści internetowe i również muszą być dostępne. Sprawdź ten dokument ręcznie. <ul><li>Zwiększ dostępność <a href="https://support.google.com/docs/answer/6199477?hl=pl">dokumentu lub prezentacji Google Workspace.</a></li><li>Zwiększ dostępność <a href="https://support.microsoft.com/pl-pl/office/create-accessible-office-documents-868ecfcd-4f00-4224-b881-a65537a7c155">dokumentów pakietu Office.</a></li></ul>',
   QA_BLOCKQUOTE: "Czy to jest nagłówek? <strong {C}>%(TEXT)</strong> <hr> Element blockquote powinien być używany tylko do cytatów. Jeśli ma to być nagłówek, zmień ten blockquote na nagłówek semantyczny (np. Nagłówek H2 lub Nagłówek H3).",
   QA_FAKE_HEADING: "Czy to jest nagłówek? <strong {C}>%(TEXT)</strong> <hr> Wiersz pogrubionego lub dużego tekstu może wyglądać jak nagłówek, ale osoba korzystająca z czytnika ekranu nie może stwierdzić, że jest on istotny lub przejść do jego treści. Pogrubiony lub duży tekst nigdy nie powinien zastępować nagłówków semantycznych (od Nagłówka H2 do Nagłówka H6).",
-  QA_FAKE_LIST: 'Czy próbujesz utworzyć listę? Wykryto możliwe elementy listy: <strong {C}>%(firstPrefix)</strong> <hr> Upewnij się, że używasz list semantycznych, zamiast stosowania znaków punktowania (np. myślników) lub liczb. Podczas korzystania z list semantycznych technologie wspomagające są w stanie przekazać takie informacje, jak ogólna liczba elementów i względna pozycja każdego elementu na liście. Dowiedz się więcej o <a href="https://www.w3.org/WAI/tutorials/page-structure/content/#lists">semantycznych listach.</a>',
+  QA_FAKE_LIST: 'Czy próbujesz utworzyć listę? Wykryto możliwe elementy listy: <strong {C}>%(PREFIX)</strong> <hr> Upewnij się, że używasz list semantycznych, zamiast stosowania znaków punktowania (np. myślników) lub liczb. Podczas korzystania z list semantycznych technologie wspomagające są w stanie przekazać takie informacje, jak ogólna liczba elementów i względna pozycja każdego elementu na liście. Dowiedz się więcej o <a href="https://www.w3.org/WAI/tutorials/page-structure/content/#lists">semantycznych listach.</a>',
   QA_UPPERCASE: "Wykryto WSZYSTKIE WIELKIE LITERY. Niektóre czytniki ekranu interpretują cały tekst wielkimi literami jako akronim i będą czytać każdą literę odrębnie. Ponadto, wszystkie wielkie litery są trudniejsze do odczytania i sprawiają wrażenie KRZYKU.",
   QA_UNDERLINE: "Podkreślony tekst można pomylić z linkami. Rozważ użycie innego stylu, takiego jak &lt;strong&gt;<strong>silne znaczenie</strong>&lt;/strong&gt; lub &lt;em&gt;<em>nacisk</em>&lt;/em&gt;.",
-  QA_SUBSCRIPT: "Opcji formatowania indeksu dolnego i indeksu górnego należy używać wyłącznie do zmiany pozycji tekstu w celu dostosowania do konwencji lub standardów typograficznych. Powinna <strong>nie</strong> być używana wyłącznie do celów prezentacji lub wyglądu. Formatowanie całych zdań stwarza problemy z czytelnością. Odpowiednie przypadki użycia obejmują wyświetlanie wykładników, liczb porządkowych, takich jak 4<sup>th</sup> zamiast czwartej, oraz wzorów chemicznych (H<sub>2</sub>O).",
+  QA_SUBSCRIPT: "Opcji formatowania indeksu dolnego i indeksu górnego należy używać wyłącznie do zmiany pozycji tekstu w celu dostosowania do konwencji lub standardów typograficznych. <strong>Nie</strong> należy ich używać wyłącznie do celów prezentacji lub wyglądu. Formatowanie całych zdań stwarza problemy z czytelnością. Odpowiednie przypadki użycia obejmują wyświetlanie wykładników, jednostek, takich jak m<sup>2</sup>, oraz wzorów chemicznych (H<sub>2</sub>O).",
   QA_NESTED_COMPONENTS: "Unikaj zagnieżdżania interaktywnych komponentów układu, takich jak umieszczanie akordeonów w zakładkach lub zakładek w akordeonach. Może to skomplikować nawigację, zwiększyć obciążenie poznawcze i prowadzić do pomijania treści.",
   QA_JUSTIFY: "Unikaj stosowania wyjustowanego tekstu, który jest wyrównany zarówno do lewego, jak i prawego marginesu. Może to być trudne do odczytania dla niektórych osób ze względu na nierówne odstępy między słowami. Używaj tekstu wyrównanego do lewej strony dla lepszej czytelności.",
   QA_SMALL_TEXT: "Mały tekst jest trudniejszy do odczytania, szczególnie dla osób słabowidzących. Aby zapewnić lepszą czytelność, unikaj używania czcionek mniejszych niż domyślne.",
@@ -265,9 +297,12 @@ const tooltip = {
   DUPLICATE_ID: "Znaleziono <strong>duplikat ID</strong>. Wiadomo, że błędy zduplikowanego ID powodują problemy dla technologii pomocniczych podczas próby interakcji z treścią. Usuń lub zmień następujący ID. <hr> <strong {B}>ID</strong> <strong {C}>#%(id)</strong>",
   UNCONTAINED_LI: "Wszystkie elementy listy <code>&lt;li&gt;</code> muszą być umieszczone wewnątrz elementów <code>&lt;ul&gt;</code> nieuporządkowanych lub <code>&lt;ol&gt;</code> uporządkowanych. Ta struktura pomaga czytnikom ekranu dokładnie ogłaszać listę i jej elementy.",
   TABINDEX_ATTR: "Element nie powinien mieć atrybutu <code>tabindex</code> większego niż 0.",
+  SVG_NO_ACCESSIBLE_NAME: 'Niektóre czytniki ekranu ogłoszą ten element SVG jako obraz bez etykiety, ponieważ brakuje mu dostępnej nazwy i nie jest ukryty. Dodaj dostępną etykietę (lub <code>&lt;title&gt;</code>), jeśli przekazuje ona znaczenie, lub ukryj go przed czytnikami ekranu, jeśli pełni funkcję wyłącznie dekoracyjną (<code>aria-hidden="true"</code>). <hr> Dowiedz się więcej o <a href="https://a11y-101.com/development/svg">dostępnych plikach SVG.</a>',
+  SUMMARY_EMPTY: "Element <code>&lt;summary&gt;</code> wewnątrz <code>&lt;details&gt;</code> nie ma dostępnej nazwy. Dodaj opisowy tekst wewnątrz elementu <code>&lt;summary&gt;</code>.",
   // Meta checks
   META_LANG: 'Język strony nie zadeklarowany! <a href="https://www.w3.org/International/questions/qa-html-language-declarations">Zadeklaruj język w znaczniku HTML.</a>',
   META_TITLE: 'Brak tytułu strony! Podaj <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title">tytuł strony.</a>',
+  META_TITLE_UNDESCRIPTIVE: 'Tytuł strony "<em>%(TEXT)</em>" może nie być opisowy lub może nie oddawać tematu lub celu strony. Tytuły stron powinny być unikalne, zwięzłe i wyraźnie opisywać zawartość strony. Dowiedz się więcej o <a href="https://www.w3.org/WAI/WCAG22/Understanding/page-titled.html">znaczących tytułach stron.</a>',
   META_SCALABLE: 'Usuń parametr <code>user-scalable="no"</code> w <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta tagu widoku</a>, aby umożliwić powiększanie.',
   META_MAX: 'Upewnij się, że parametr <code>maximum-scale</code> w <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">meta tagu widoku</a> nie jest mniejszy niż 2.',
   META_REFRESH: "Strona nie powinna automatycznie odświeżać się przy użyciu meta tagu.",
@@ -282,10 +317,12 @@ const tooltip = {
   LABEL_IN_NAME: "Widoczny tekst tego elementu wydaje się różnić od dostępnej nazwy, co może wprowadzać w błąd użytkowników technologii wspomagających. Sprawdź: <hr> <strong {B}>Tekst</strong> <strong {C}>%(TEXT)</strong> <hr> <strong {B}>Dostępna nazwa</strong> <strong {C}>%(TEXT)</strong>",
   LINK_MAYBE_BUTTON: 'Ten link ma nieprawidłowy cel. Chociaż nazwa dostępna lub jej atrybuty sugerują, że może to w ogóle nie być link, a zamiast tego kontroluje on pewne zachowanie skryptowe na stronie. Aby to naprawić, zastąp link <a href="https://www.w3.org/WAI/ARIA/apg/patterns/button/">dostępnym przyciskiem</a> lub popraw cel linku. <hr> <strong {B}>Nazwa dostępna</strong> <strong {C}>%(TEXT)</strong> <hr> <strong>Wskazówka!</strong> Technologie wspomagające traktują przyciski i linki w różny sposób. Użycie właściwego elementu HTML gwarantuje, że użytkownicy będą wiedzieć, jakich skrótów klawiaturowych użyć i jakie działanie zostanie wywołane.',
   // Tables
+  TABLES_SINGLE_COLUMN: 'Czy to jest tabela? Tabele jednokolumnowe są często używane do układu strony lub list, a nie do danych tabelarycznych. Może to być mylące dla osób korzystających z czytników ekranu, które muszą zatrzymać się i wysłuchać opisów strukturalnych przeznaczonych dla siatek danych, na przykład <em>"tabela, 5 wierszy, 1 kolumna"</em>. Usuń tabelę i zamiast niej użyj listy.',
+  TABLES_SINGLE_CELL: 'Czy to jest tabela? Tabele jednokomórkowe są często używane do tworzenia wizualnych obramowań lub kontenerów wyróżniających, a nie do prezentacji danych tabelarycznych. Może to być mylące dla osób korzystających z czytników ekranu, które muszą zatrzymać się i wysłuchać opisu struktury przeznaczonego dla siatek danych: <em>"Tabela, 1 wiersz, 1 kolumna, Wiersz 1 Kolumna 1."</em> Usuń tabelę i użyj innych opcji stylizacji, aby zwrócić uwagę na tę treść.',
   TABLES_MISSING_HEADINGS: 'Brak nagłówków tabeli! Dostępne tabele wymagają znaczników HTML, które wskazują komórki nagłówków i komórki danych, które definiują ich relację. Informacje te zapewniają kontekst osobom korzystającym z technologii wspomagających. Tabele powinny być używane tylko dla danych tabelarycznych.<hr>Dowiedz się więcej o <a href="https://www.w3.org/WAI/tutorials/tables/">dostępnych tabelach.</a>',
   TABLES_SEMANTIC_HEADING: 'Nagłówki semantyczne, takie jak nagłówek H2 lub nagłówek H3, powinny być używane tylko w odniesieniu do sekcji treści; <strong>nie</strong> w tabelach HTML. Zamiast tego należy wskazać nagłówki tabeli przy użyciu elementu <strong>th</strong>. <hr> Dowiedz się więcej o <a href="https://www.w3.org/WAI/tutorials/tables/">dostępnych tabelach.</a>',
   TABLES_EMPTY_HEADING: 'Wykryto pusty nagłówek tabeli! Nagłówki tabel <em>nigdy</em> nie powinny być puste. Ważne jest, aby wyznaczyć nagłówki wierszy i/lub kolumn, aby przekazać ich relację. Informacje te zapewniają kontekst osobom korzystającym z technologii wspomagających. Należy pamiętać, że tabele powinny być używane tylko dla danych tabelarycznych. <hr> Dowiedz się więcej o <a href="https://www.w3.org/WAI/tutorials/tables/">dostępnych tabelach.</a>',
-  TABLES_INVALID_HEADERS_REF: 'Ta tabela próbuje powiązać konkretną komórkę danych z konkretną komórką nagłówka, ale nie można odnaleźć identyfikatora ID nagłówka. Upewnij się, że każdy atrybut <code>headers</code> odpowiada identyfikatorowi ID komórki nagłówka w tej samej tabeli. <hr> <strong {B}>Nagłówki</strong> <code>%(VALUE)</code> <hr> <strong>Wskazówka!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Ręczne używanie odwołań ID</a> do kojarzenia komórek danych z komórkami nagłówka jest skomplikowane i zawodne. Jeśli to możliwe, dziel złożone dane na mniejsze tabele z prostymi wierszami i kolumnami nagłówkowymi.',
+  TABLES_INVALID_HEADERS_REF: 'Ta tabela próbuje powiązać konkretną komórkę danych z konkretną komórką nagłówka, ale nie można odnaleźć identyfikatora ID komórki nagłówka. Upewnij się, że każdy atrybut <code>headers</code> odpowiada identyfikatorowi ID komórki nagłówka w tej samej tabeli. <hr> <strong {B}>Komórki nagłówka</strong> <code>%(VALUE)</code> <hr> <strong>Wskazówka!</strong> <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">Ręczne używanie odwołań ID</a> do kojarzenia komórek danych z komórkami nagłówka jest skomplikowane i zawodne. Jeśli to możliwe, dziel złożone dane na mniejsze tabele z prostymi wierszami i kolumnami nagłówkowymi.',
   // Contrast
   CONTRAST_NORMAL: "Tekst normalnej wielkości powinien mieć współczynnik kontrastu co najmniej %(RATIO).",
   CONTRAST_LARGE: "Tekst dużej wielkości powinien mieć współczynnik kontrastu co najmniej %(RATIO).",
@@ -350,6 +387,7 @@ const testNames = {
   EMBED_MISSING_TITLE: "Brak atrybutu „title” w ramce (iframe)",
   EMBED_UNFOCUSABLE: 'Ramka z tabindex="-1" nie będzie dostępna z klawiatury',
   EMBED_VIDEO: "Czy ten film ma poprawne napisy?",
+  EMBED_VIDEO_AUTOPLAY: "Czy użytkownicy mają możliwość wstrzymania tego filmu?",
   HEADING_EMPTY: "Ten nagłówek nie zawiera tekstu",
   HEADING_UNPRONOUNCEABLE: "Ten nagłówek jest niewymawialny",
   HEADING_EMPTY_WITH_IMAGE: "Ten obraz jest użyty jako nagłówek, więc wymaga tekstu alternatywnego",
@@ -426,6 +464,7 @@ const testNames = {
   META_REFRESH: "Metatag automatycznie odświeża stronę",
   META_SCALABLE: "Metatag uniemożliwia użytkownikom powiększanie tekstu",
   META_TITLE: "Brakuje metatagu z tytułem strony",
+  META_TITLE_UNDESCRIPTIVE: "Czy tytuł strony w unikalny sposób opisuje jej treść?",
   MISSING_ALT: "Nieprawidłowy HTML: obraz bez atrybutu alt",
   MISSING_ALT_LINK: "Nieprawidłowy HTML: obraz-link bez atrybutu alt",
   MISSING_ALT_LINK_HAS_TEXT: "Nieprawidłowy HTML: obraz w linku bez atrybutu alt",
@@ -444,12 +483,16 @@ const testNames = {
   QA_SUBSCRIPT: "Nie używaj indeksu dolnego ani górnego jako formatowania wizualnego",
   QA_UNDERLINE: "Podkreślać należy tylko linki",
   QA_UPPERCASE: "Czy WIELKIE LITERY są tu konieczne?",
+  SUMMARY_EMPTY: "Temu elementowi details brakuje elementu summary",
   SUS_ALT: "Czy w tym tekście alternatywnym są zbędne słowa?",
+  SVG_NO_ACCESSIBLE_NAME: "Ta grafika SVG nie ma dostępnej nazwy",
   TABINDEX_ATTR: "Nadpisania tabindex zakłócają kolejność fokusu",
   TABLES_EMPTY_HEADING: "Ta komórka nagłówka wymaga tekstu",
   TABLES_INVALID_HEADERS_REF: "Ta tabela ma nieprawidłowy atrybut headers",
   TABLES_MISSING_HEADINGS: "Ta tabela wymaga wiersza nagłówka i/lub kolumny nagłówka",
   TABLES_SEMANTIC_HEADING: "Nagłówków treści nie należy używać w tabelach",
+  TABLES_SINGLE_CELL: "Zamiast tabeli z jedną komórką użyj innego elementu",
+  TABLES_SINGLE_COLUMN: "Zamiast tabeli z jedną kolumną użyj innego elementu",
   UNCONTAINED_LI: "Nieprawidłowa lista HTML"
 };
 const why = {
@@ -481,6 +524,7 @@ const tips = {
   EMBED_MISSING_TITLE: `<p>Osadzone elementy potrzebują dostępnej nazwy, która opisuje ich zawartość dla czytników ekranu.</p><p>${why.fix}Dodaj unikalny atrybut <code>title</code> lub <code>aria-label</code>.</p>`,
   EMBED_UNFOCUSABLE: `<p>Ten atrybut nakazuje klawiaturom i urządzeniom wspomagającym pominięcie elementu. Usuń ten atrybut, chyba że iframe nie zawiera żadnych linków, przycisków, pól formularza ani przewijalnej treści.</p>`,
   EMBED_VIDEO: `<p>To narzędzie nie jest w stanie „zobaczyć”, czy filmy mają napisy, ani stwierdzić, czy ktoś je sprawdził — konieczna jest ręczna weryfikacja.</p><p>${why.fix}Sprawdź, czy dostępne są <a href="https://www.w3.org/WAI/media/av/captions/">dokładne napisy dla niesłyszących („CC”) lub napisy</a>, i upewnij się, że mówcy oraz znaczące efekty dźwiękowe są prawidłowo oznaczeni.</p>`,
+  EMBED_VIDEO_AUTOPLAY: `<p>Osoby podatne na chorobę lokomocyjną i przeciążenie poznawcze <a href="https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide.html">potrzebują możliwości wstrzymania filmów</a>.</p><p>${why.fix}Dodaj atrybut <code>controls</code>, zapewnij widoczny przycisk pauzy albo usuń atrybut <code>autoplay</code>.</p>`,
   HEADING_EMPTY: `<p>Puste nagłówki tworzą mylące luki w strukturze strony.</p><p>${why.fix}Dodaj tekst do tego nagłówka albo usuń tę pustą linię.</p>${why.headings}`,
   HEADING_UNPRONOUNCEABLE: `<p>Puste nagłówki tworzą mylące luki w strukturze strony.</p><p>${why.fix}Dodaj do tego nagłówka tekst zrozumiały dla człowieka albo zmień go w akapit.</p>${why.headings}`,
   HEADING_EMPTY_WITH_IMAGE: `<p>Puste nagłówki tworzą mylące luki w strukturze strony.</p><p>${why.fix}Jeśli to nie jest nagłówek, zmień jego format z <code>Nagłówek %(level)</code> na <code>Akapit</code>. W przeciwnym razie opisz znaczenie obrazu w jego tekście alternatywnym.</p>${why.headings}`,
@@ -498,7 +542,7 @@ const tips = {
   LABELS_INPUT_RESET: `<p>Przyciski resetowania łatwo aktywować przez pomyłkę, co powoduje utratę danych bez możliwości anulowania lub cofnięcia.</p><p>${why.fix}Jeśli ten przycisk nie resetuje pojedynczego pola, rozważ jego usunięcie lub zapewnienie możliwości anulowania przed wykonaniem akcji.</p>`,
   LABELS_MISSING_IMAGE_INPUT: "Przycisk graficzny nie ma tekstu alternatywnego. Dodaj tekst alternatywny, aby nadać mu dostępną nazwę. Na przykład: <em>Szukaj</em> lub <em>Wyślij</em>.",
   LABELS_MISSING_LABEL: `<p>${why.fix}Dodaj atrybut <code>id</code> do tego pola oraz odpowiadający mu atrybut <code>for</code> do etykiety.</p>`,
-  LABELS_NO_FOR_ATTRIBUTE: `To pole nie ma powiązanej etykiety. Dodaj do etykiety atrybut <code>for</code>, dopasowany do <code>id</code> tego pola. <hr> <strong>ID:</strong> <code>#%(ID)</code>`,
+  LABELS_NO_FOR_ATTRIBUTE: `<p>To pole nie ma powiązanej etykiety. Dodaj do etykiety atrybut <code>for</code>, dopasowany do <code>id</code> tego pola.</p><p><strong>ID:</strong> <code>#%(ID)</code></p>`,
   LABELS_PLACEHOLDER: `<p>Tekst zastępczy może zostać pomylony z wcześniej wprowadzoną treścią, jeśli ma dobry kontrast, lub być nieczytelny, jeśli go nie ma. Następnie znika po wpisaniu danych, co może usunąć informacje potrzebne użytkownikom do sprawdzenia błędów.</p><p>${why.fix}Upewnij się, że kluczowe informacje, takie jak etykieta pola, tekst pomocy i instrukcje dotyczące formatu, pozostają widoczne, gdy w polu jest treść, i rozważ całkowitą rezygnację z tekstu zastępczego.</p>`,
   LABEL_IN_NAME: `<p><strong>Widoczny tekst:</strong> <i>%(VISIBLE)</i></p><p><strong>Etykieta dla czytników ekranu:</strong> <i>%(LABEL)</i></p><p>Widoczny tekst tego elementu różni się od jego dostępnej nazwy. Może to wprowadzać w błąd użytkowników czytników ekranu oraz zakłócać sterowanie głosowe.</p><p>${why.fix}Upewnij się, że niewidoczna etykieta zaczyna się od tekstu widocznej etykiety i nie zawiera żadnych istotnych informacji, których brakuje w widocznej etykiecie.</p>`,
   LINK_ALT_FILE_EXT: `<p>Ten tekst alternatywny prawdopodobnie jest nazwą pliku, a nie znaczącą nazwą linku:<br><span hidden>%(ALT)</span><i>%(alt)</i></p><p>${why.fix}Jako tekstu alternatywnego obrazów-linków używaj tytułu celu linku.</p><div class="why"> <p>Cel tekstu alternatywnego to opisanie, co obraz znaczy. W przypadku obrazu będącego linkiem oznacza to cel linku:</p><ul><li>„Strona z tekstem” opisuje obraz, nie link.</li><li>„IMG_1234.jpg” to tylko nazwa pliku.</li><li>„Formularz zgłoszeniowy wydarzenia (.doc)” opisuje cel linku.</li></ul></div>`,
@@ -553,6 +597,7 @@ const tips = {
   META_REFRESH: `<p>Strony nie powinny odświeżać się automatycznie za pomocą metatagu. Przerywa to pracę użytkownika bez ostrzeżenia i bez możliwości zapobieżenia odświeżeniu, sprawia, że gubi on miejsce, w którym czytał, i może skasować postęp w wypełnianiu formularza.</p><p>${why.fix}Aby odświeżyć treść na tej samej stronie, użyj AJAX do odświeżenia sekcji w miejscu, bez przeładowania strony, lub użyj JavaScriptu do wywołania przeładowania, tak aby użytkownik mógł zostać najpierw ostrzeżony i miał możliwość jego opóźnienia.</p>`,
   META_SCALABLE: `<p>Ten metatag uniemożliwia użytkownikom powiększanie tekstu.</p><p>${why.fix}Zmień lub usuń to ustawienie, aby umożliwić powiększanie.</p>`,
   META_TITLE: `<p>${why.fix}Dodaj znacznik <code>&lt;title&gt;</code> do elementu <code>head</code> strony.</p><div class="why"><p>Wskazówka: wiele elementów przeglądania stron zależy od <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">krótkiego i unikalnego znacznika tytułu</a>:</p><ul><li>Wyszukiwarki używają go jako tytułu wyników.</li><li>Przeglądarki używają go jako tytułu kart.</li><li>Czytniki ekranu odczytują go przy przełączaniu kart.</li></ul><p>Bez tytułu strony użytkownicy widzą lub słyszą zamiast niego surowy adres URL.</p></div>`,
+  META_TITLE_UNDESCRIPTIVE: `<p>Tytuł strony „<i>%(TEXT)</i>” może nie być opisowy albo nie oddawać w unikalny sposób tematu lub celu tej strony.</p><p>${why.fix}Czytniki ekranu używają tytułów stron jako nazw okien, a wyszukiwarki jako tytułów wyników. Napisz tytuł strony, który jest unikalny, zwięzły i jasno opisuje treść strony.</p>`,
   MISSING_ALT: `<p>Gdy czytniki ekranu napotykają obraz w ogóle pozbawiony atrybutu alt, próbują zamiast tego wymówić adres URL pliku obrazu, często litera po literze.</p><p>${why.fix}Krótko opisz, co ten obraz oznacza w danym kontekście.</p>${why.images}`,
   MISSING_ALT_LINK: `<p>Gdy czytniki ekranu napotykają obraz w ogóle pozbawiony atrybutu alt, próbują zamiast tego wymówić adres URL pliku obrazu, często litera po literze. Jest to szczególnie problematyczne w przypadku obrazów-linków.</p><p>${why.fix}Dodaj tekst alternatywny zgodny z celem linku.</p>${why.imageLinks}`,
   MISSING_ALT_LINK_HAS_TEXT: `<p>Ten obraz jest częścią linku z tekstem. Jeśli widoczny tekst wystarczająco opisuje link, dodaj pusty atrybut alt (alt=""), aby czytniki ekranu zignorowały ten obraz. W przeciwnym razie dodaj tekst alternatywny, który pomoże opisać cel lub przeznaczenie linku.</p>${why.imageLinks}`,
@@ -570,12 +615,16 @@ const tips = {
   QA_SUBSCRIPT: `<p><strong>Tekst:</strong> <i>%(TEXT)</i></p><p>Indeks dolny i górny sprawia, że tekst jest zbyt mały, by wiele osób mogło go łatwo przeczytać. Należy go używać tylko dla pojedynczych słów lub wyrażeń, np. w jednostkach miary (m<sup>2</sup>), wzorach chemicznych (H<sub>2</sub>O) i odwołaniach do przypisów.</p>`,
   QA_UNDERLINE: `<p>Podkreślony tekst w internecie oznacza linki, a nie wyróżnienie. Użytkownicy pomyślą, że mogą to kliknąć: <i><u>%(TEXT)</u></i></p><p>${why.fix}Do wyróżniania używaj <strong>pogrubienia</strong> lub <em>kursywy</em>, a do nadawania struktury — nagłówków.</p><div class="why"><p>Uwaga: czytniki ekranu nie ogłaszają formatowania wyłącznie wizualnego, takiego jak podkreślenia. Tylko nagłówki dodają tekst do struktury strony.</p></div>`,
   QA_UPPERCASE: `<p><strong>Tekst:</strong> <i>%(TEXT)</i></p><p>${why.fix}Wyróżniaj wielkimi literami tylko kilka słów. DUŻE BLOKI TEKSTU WIELKIMI LITERAMI SĄ TRUDNIEJSZE DO CZYTANIA, A WIELU CZYTELNIKÓW ODBIERA JE JAK KRZYK.</p><div class="why"><p>Uwaga: czytniki ekranu nie zapowiadają formatowania wyłącznie wizualnego, takiego jak tekst pisany wielkimi literami. Jeśli ten wyróżniony tekst wprowadza zmianę tematu lub szczególnie ważną treść, użyj stylu nagłówka.</p></div>`,
+  SUMMARY_EMPTY: `<p>Elementy details tworzą klikalny akordeon, wyświetlając tekst elementu <code>&lt;summary&gt;</code> jako przycisk, który odsłania dodatkowe szczegóły. Bez tekstu w elemencie summary osoby korzystające z czytników ekranu nie usłyszą, do czego służy ten przycisk.</p>`,
   SUS_ALT: `<p>Tekst alternatywny tego obrazu zawiera słowo „<i>%(alt)</i>”. Czytniki ekranu informują użytkownika, że opisują obraz, więc zwroty typu „obraz przedstawiający” lub „zdjęcie przedstawiające” zwykle są zbędne.</p><p><strong>Tekst alternatywny:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Krótko opisz, co ten obraz oznacza w danym kontekście.</p><div class="why"><p>Wskazówka: te zwroty warto zachować, jeśli sam format ma znaczenie:<br>„Zdjęcie kota, oprawione i wiszące na ścianie.”</p></div>`,
+  SVG_NO_ACCESSIBLE_NAME: `<p>Niektóre czytniki ekranu odczytają tę grafikę SVG jako obraz bez etykiety, ponieważ nie ma ona dostępnej nazwy i nie jest ukryta. Dodaj dostępną etykietę (lub <code>&lt;title&gt;</code>), jeśli grafika przekazuje znaczenie, albo ukryj ją przed czytnikami ekranu, jeśli jest czysto dekoracyjna (<code>aria-hidden="true"</code>).</p>`,
   TABINDEX_ATTR: `<p>Wartości tabindex większe niż 0 przenoszą elementy otrzymujące fokus poza ich wizualną kolejność, co utrudnia użytkownikom technologii wspomagających ich odnalezienie i obsługę.</p><p>${why.fix}Zmień kolejność elementów w HTML tak, aby kolejność fokusu i kolejność odczytu były spójne.</p><div class="why"><p>Wskazówka: wizualna kolejność słów na stronie i kolejność nawigacji tabulatorem są zwykle takie same.</p><p>Dodatni tabindex przenosi element na początek kolejności tabulacji, <strong>ale nie zmienia kolejności wizualnej ani odczytu</strong>.</p></div>`,
   TABLES_EMPTY_HEADING: `<p>${why.fix}Upewnij się, że każda komórka nagłówka zawiera tekst.</p><div class="why"><p>Wskazówka: czytniki ekranu używają nagłówków tabeli, aby pomóc użytkownikom orientować się podczas przeglądania tabeli. Odpowiedni nagłówek jest odczytywany ponownie, gdy kursor przechodzi do kolejnej kolumny lub wiersza.</p></div>`,
   TABLES_INVALID_HEADERS_REF: `<p>Ta tabela próbuje powiązać konkretną komórkę danych z konkretną komórką nagłówka, ale nie można znaleźć identyfikatora tej komórki nagłówka: <code>%(VALUE)</code>.</p><p>${why.fix}Upewnij się, że każdy atrybut <code>headers</code> odpowiada identyfikatorowi komórki nagłówka w tej samej tabeli.</p><div class="why">Wskazówka: <a href="https://www.w3.org/WAI/WCAG22/Techniques/html/H43">ręczne odwołania przez ID</a> wiążące komórki danych z komórkami nagłówka są skomplikowane i zawodne. W miarę możliwości dziel złożone dane na mniejsze tabele z prostymi wierszami i kolumnami nagłówka.</div>`,
   TABLES_MISSING_HEADINGS: `<p>${why.fix}Otwórz właściwości tabeli i określ, czy nagłówki tabeli znajdują się w pierwszym wierszu, w pierwszej kolumnie, czy w obu.</p><div class="why"> <p>Wskazówka: czytniki ekranu używają nagłówków tabeli, aby pomóc użytkownikom orientować się podczas przeglądania tabeli. Odpowiedni nagłówek jest odczytywany ponownie, gdy kursor przechodzi do kolejnej kolumny lub wiersza.</p><p>Jeśli ta tabela nie ma nagłówków, ponieważ służy tylko do wizualnego układu treści, usuń formatowanie tabeli i zamiast niego użyj czysto wizualnego formatowania kolumn.</p></div> `,
-  TABLES_SEMANTIC_HEADING: `<p>${why.fix}Usuń to formatowanie nagłówka (h2, h3). Zamiast niego użyj wierszy i kolumn nagłówka. Jeśli potrzebujesz kilku wierszy nagłówka, podziel tę tabelę na kilka tabel.</p><div class="why"> <p>Wskazówka: nagłówki tabeli działają w jednym kierunku: w jednym wierszu lub jednej kolumnie. Nagłówki treści opisują cały następujący po nich tekst, nawet w niepowiązanych kolumnach:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2"><strong>Nagłówek tabeli</strong> w komórce 2 opisuje komórkę B. <br><br> <strong>Nagłówek treści</strong> w komórce 2 opisuje komórki 3, A, B i C, a także ten tekst i stopkę tej podpowiedzi.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`
+  TABLES_SEMANTIC_HEADING: `<p>${why.fix}Usuń to formatowanie nagłówka (h2, h3). Zamiast niego użyj wierszy i kolumn nagłówka. Jeśli potrzebujesz kilku wierszy nagłówka, podziel tę tabelę na kilka tabel.</p><div class="why"> <p>Wskazówka: nagłówki tabeli działają w jednym kierunku: w jednym wierszu lub jednej kolumnie. Nagłówki treści opisują cały następujący po nich tekst, nawet w niepowiązanych kolumnach:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2"><strong>Nagłówek tabeli</strong> w komórce 2 opisuje komórkę B. <br><br> <strong>Nagłówek treści</strong> w komórce 2 opisuje komórki 3, A, B i C, a także ten tekst i stopkę tej podpowiedzi.</td></tr> <tr><td>A</td><td>B</td><td>C</td></tr></table> </div>`,
+  TABLES_SINGLE_COLUMN: `<p>Tabele z jedną kolumną są często używane ze względów wizualnych, a nie do prezentowania danych tabelarycznych. Jest to mylące dla osób korzystających z czytników ekranu, które muszą się zatrzymać i wysłuchać opisów struktury przeznaczonych dla tabel z danymi, na przykład <em>„tabela, 5 wierszy, 1 kolumna”</em>.</p><p>${why.fix}Usuń formatowanie tabeli i użyj listy lub innego elementu służącego wyłącznie do układu wizualnego.</p>`,
+  TABLES_SINGLE_CELL: `<p>Tabele z jedną komórką często powstają w wyniku błędów przy kopiowaniu i wklejaniu albo są dodawane dla uzyskania wizualnych obramowań. Jest to mylące dla osób korzystających z czytników ekranu, które muszą się zatrzymać i wysłuchać opisów struktury przeznaczonych dla tabel z danymi: <em>„Tabela, 1 wiersz, 1 kolumna, wiersz 1 kolumna 1”</em>.</p><p>${why.fix}Usuń formatowanie tabeli i użyj innych opcji stylu, aby zwrócić uwagę na tę treść.</p>`
 };
 const interfaceStrings = {
   ALERT_CLOSE: "Zamknij",

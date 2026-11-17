@@ -34,14 +34,12 @@ const ruleset = {
     'نص نائب',
     'عنصر نائب',
     'صورة نائبة',
-    // Matching keeps diacritics, so list forms with and without tanwin.
+    // Harakat (tanwin, shadda...) are ignored when matching; list the bare spelling only.
     'مؤقت',
     'نص مؤقت',
     'صورة مؤقتة',
     'يحدد لاحقا',
-    'يحدد لاحقًا',
     'سيحدد لاحقا',
-    'سيحدد لاحقًا',
     'فاصل',
     'اختبار',
     'تجربة',
@@ -117,9 +115,7 @@ const ruleset = {
     'أكمل القراءة',
     'متابعة القراءة',
     'اعرف المزيد',
-    // Matching keeps diacritics, so list the common shadda spelling too.
     'تعرف على المزيد',
-    'تعرّف على المزيد',
     'لمعرفة المزيد',
     'مزيد من المعلومات',
     'للمزيد من التفاصيل',
@@ -186,6 +182,32 @@ const ruleset = {
   POTENTIAL_UI_ELEMENTS: [
     'القائمة', 'قائمة', 'إغلاق', 'اغلاق', 'تبديل', 'فتح', 'توسيع', 'التالي', 'السابق', 'تشغيل', 'إيقاف', 'ايقاف', 'إظهار', 'اظهار', 'إخفاء', 'اخفاء', 'رجوع', 'للأمام', 'للخلف', 'تخطي', 'إرسال', 'ارسال', 'إلغاء', 'الغاء', 'حفظ', 'تحرير', 'تعديل', 'حذف', 'إزالة', 'ازالة', 'بحث', 'تصفية', 'فرز', 'كتم', 'ملء الشاشة', 'تصغير', 'تكبير', 'شريحة', 'منبثقة',
     'menu', 'close', 'toggle', 'open', 'expand', 'collapse', 'next', 'prev', 'previous', 'play', 'pause', 'submenu', 'show', 'hide', 'dropdown', 'back', 'forward', 'skip', 'submit', 'cancel', 'save', 'edit', 'delete', 'remove', 'search', 'filter', 'sort', 'stop', 'mute', 'unmute', 'fullscreen', 'minimize', 'maximize', 'slide', 'modal',
+  ],
+  META_TITLE_UNDESCRIPTIVE_STRINGS: [
+    'بدون عنوان',
+    'وثيقة',
+    'صفحة',
+    'عنوان',
+    'افتراضي',
+    'فهرس',
+    'جديد',
+    'عنصر نائب',
+    'صفحة ويب',
+    'بدون عنوان',
+    'أدرج العنوان هنا',
+    'مرحبا بالعالم',
+    'تطبيقي',
+    'موقعي',
+    'موقع الويب الخاص بي',
+    'عنوان الموقع',
+    'عنوان موقعك',
+    'مجال مثال',
+    'untitled',
+    'undefined',
+    'title',
+    'document',
+    'index',
+    'placeholder',
   ],
 };
 
@@ -458,6 +480,8 @@ const tooltip = {
   // Meta checks
   META_TITLE:
     'الصفحة بلا عنوان. يُرجى إضافة <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title">عنوان للصفحة.</a>',
+  META_TITLE_UNDESCRIPTIVE:
+    'قد لا يكون عنوان الصفحة "<em>%(TEXT)</em>" وصفياً أو قد لا ينقل الموضوع أو الغرض من الصفحة. يجب أن تكون عناوين الصفحات فريدة وموجزة وتصف بوضوح محتوى الصفحة. تعرف على المزيد حول <a href="https://www.w3.org/WAI/WCAG22/Understanding/page-titled.html">عناوين الصفحات ذات المعنى.</a>',
   META_SCALABLE:
     'احذف المعامل <code>user-scalable="no"</code> من <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag">وسم meta الخاص بإطار العرض (viewport)</a> للسماح بالتكبير.',
   META_MAX:

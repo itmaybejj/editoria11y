@@ -28,6 +28,7 @@ const testNames = {
 	EMBED_MISSING_TITLE: 'Al marco le falta el atributo «title»',
 	EMBED_UNFOCUSABLE: 'Un marco con tabindex="-1" no será accesible con el teclado.',
 	EMBED_VIDEO: '¿Este video está correctamente subtitulado?',
+	EMBED_VIDEO_AUTOPLAY: '¿Hay alguna forma de que las personas pausen este video?',
 	HEADING_EMPTY: 'Este encabezado no tiene texto',
 	HEADING_UNPRONOUNCEABLE: 'Este encabezado no se puede pronunciar',
 	HEADING_EMPTY_WITH_IMAGE: 'Esta imagen se usa como encabezado, por lo que necesita texto alternativo',
@@ -106,6 +107,7 @@ const testNames = {
 	META_REFRESH: 'La metaetiqueta actualiza la página automáticamente',
 	META_SCALABLE: 'La metaetiqueta impide que los usuarios amplíen el texto',
 	META_TITLE: 'Falta la metaetiqueta para el título de la página',
+	META_TITLE_UNDESCRIPTIVE: '¿El título de la página describe el contenido de forma única?',
 	PAGE_LANG_CONFIDENCE: 'Es posible que el idioma de la página no coincida con el contenido',
 	MISSING_ALT: 'HTML no válido: la imagen no tiene atributo alt',
 	MISSING_ALT_LINK: 'HTML no válido: la imagen vinculada no tiene atributo alt',
@@ -124,12 +126,16 @@ const testNames = {
 	QA_SUBSCRIPT: 'No usar superíndices o subíndices como formato visual',
 	QA_UNDERLINE: 'Solo los enlaces deben subrayarse',
 	QA_UPPERCASE: '¿Este texto en mayúsculas es necesario?',
+	SUMMARY_EMPTY: 'A este elemento details le falta el elemento summary',
 	SUS_ALT: '¿Hay palabras redundantes en este texto alternativo?',
+	SVG_NO_ACCESSIBLE_NAME: 'Este SVG no tiene nombre accesible',
 	TABINDEX_ATTR: 'Los valores de tabindex personalizados alteran el orden del foco',
 	TABLES_EMPTY_HEADING: 'Esta celda de cabecera necesita texto',
 	TABLES_INVALID_HEADERS_REF: 'Esta tabla tiene un atributo headers no válido',
 	TABLES_MISSING_HEADINGS: 'A esta tabla le falta una fila o columna de cabecera (o ambas)',
 	TABLES_SEMANTIC_HEADING: 'Los encabezados de contenido no deben usarse dentro de tablas',
+	TABLES_SINGLE_CELL: 'Usar otro elemento en lugar de una tabla de una sola celda',
+	TABLES_SINGLE_COLUMN: 'Usar otro elemento en lugar de una tabla de una sola columna',
 	UNCONTAINED_LI: 'Lista HTML no válida',
 };
 
@@ -186,6 +192,7 @@ const tips = {
 	EMBED_UNFOCUSABLE: `<p>Este atributo indica a los teclados y tecnologías de asistencia que omitan este elemento. Elimine este atributo a menos que el iframe no tenga enlaces, botones, elementos de formulario ni contenido desplazable.</p>`,
 
 	EMBED_VIDEO: `<p>Este verificador no puede «ver» si los videos tienen subtítulos, ni determinar si alguien los ha revisado, por lo que se necesita una verificación manual.</p><p>${why.fix}Asegúrese de que haya disponibles <a href="https://www.w3.org/WAI/media/av/captions/">subtítulos para personas sordas («CC») o subtítulos precisos</a>, y verifique que los hablantes y los efectos de sonido significativos estén correctamente identificados.</p>`,
+	EMBED_VIDEO_AUTOPLAY: `<p>Las personas propensas al mareo por movimiento y a la sobrecarga cognitiva <a href="https://www.w3.org/WAI/WCAG21/Understanding/pause-stop-hide.html">necesitan una forma de pausar los videos</a>.</p><p>${why.fix}Agregue el atributo <code>controls</code>, proporcione un botón de pausa visible o elimine el atributo <code>autoplay</code>.</p>`,
 
 	HEADING_EMPTY: `<p>Los encabezados vacíos crean huecos confusos en el esquema de la página.</p><p>${why.fix}Agregue texto a este encabezado o elimine esta línea vacía.</p>${why.headings}`,
 	HEADING_UNPRONOUNCEABLE: `<p>Los encabezados vacíos crean huecos confusos en el esquema de la página.</p><p>${why.fix}Agregue texto legible para las personas a este encabezado, o conviértalo en un párrafo.</p>${why.headings}`,
@@ -220,7 +227,7 @@ const tips = {
 
 	LABELS_MISSING_LABEL: `<p>${why.fix}Agregue un <code>id</code> a este campo y un atributo <code>for</code> correspondiente en la etiqueta.</p>`,
 
-	LABELS_NO_FOR_ATTRIBUTE: `No hay una etiqueta asociada con este campo. Agregue a la etiqueta un atributo <code>for</code> que coincida con el <code>id</code> de este campo. <hr> <strong>ID:</strong> <code>#%(ID)</code>`,
+	LABELS_NO_FOR_ATTRIBUTE: `<p>No hay una etiqueta asociada con este campo. Agregue a la etiqueta un atributo <code>for</code> que coincida con el <code>id</code> de este campo.</p><p><strong>ID:</strong> <code>#%(ID)</code></p>`,
 
 	LABELS_PLACEHOLDER: `<p>El texto de marcador de posición puede confundirse con contenido ya introducido si tiene buen contraste, o resultar ilegible si no lo tiene. Además desaparece al escribir, lo que puede ocultar información que las personas usuarias necesitaban para comprobar errores.</p><p>${why.fix}Asegúrese de que la información clave (etiqueta del campo, texto de ayuda e instrucciones de formato) permanezca visible cuando el campo tenga contenido, y considere eliminar el marcador de posición por completo.</p>`,
 
@@ -308,6 +315,7 @@ const tips = {
 	META_SCALABLE: `<p>Esta metaetiqueta impide que las personas amplíen el texto.</p><p>${why.fix}Permita zoom completo eliminando o ajustando este parámetro.</p>`,
 
 	META_TITLE: `<p>${why.fix}Agregue una etiqueta <code>&lt;title&gt;</code> al elemento <code>head</code> de la página.</p><div class="why"><p>Consejo: muchos aspectos de la navegación dependen de una <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title">etiqueta de título breve y única</a>:</p><ul><li>Los motores de búsqueda lo usan para titular resultados.</li><li>Los navegadores lo usan para titular pestañas.</li><li>Los lectores de pantalla lo anuncian al cambiar de pestaña.</li></ul><p>Sin título, las personas ven u oyen una URL en bruto.</p></div>`,
+	META_TITLE_UNDESCRIPTIVE: `<p>Es posible que el título de la página «<i>%(TEXT)</i>» no sea descriptivo o no transmita de forma única el tema o el propósito de esta página.</p><p>${why.fix}Los lectores de pantalla usan el título de la página para titular las ventanas, y los motores de búsqueda, para titular los resultados. Escriba un título de página único, conciso y que describa claramente el contenido de la página.</p>`,
 
 	MISSING_ALT: `<p>Cuando los lectores de pantalla encuentran una imagen sin atributo alt, intentan pronunciar la URL del archivo de imagen, a menudo letra por letra.</p><p>${why.fix}Describa de manera concisa lo que significa esta imagen en este contexto.</p>${why.images}`,
 
@@ -342,8 +350,10 @@ const tips = {
 	QA_UNDERLINE: `<p>En la Web, el subrayado se usa para enlaces, no para énfasis. Las personas creerán que pueden hacer clic en esto: <i><u>%(TEXT)</u></i></p><p>${why.fix}Use <strong>negrita</strong> o <em>cursiva</em> para énfasis, y encabezados para la estructura.</p><div class="why"><p>Nota: los lectores de pantalla no anuncian el formato solo visual, como el subrayado. Solo los encabezados añaden texto al esquema de la página.</p></div>`,
 
 	QA_UPPERCASE: `<p><strong>Texto:</strong> <i>%(TEXT)</i></p><p>${why.fix}Use mayúsculas solo en unas pocas palabras para enfatizar. LOS BLOQUES DE TEXTO EN MAYÚSCULAS SON MÁS DIFÍCILES DE LEER, Y MUCHAS PERSONAS LOS INTERPRETAN COMO GRITOS.</p><div class="why"><p>Nota: los lectores de pantalla no anuncian el formato solo visual como el texto en mayúsculas. Use un estilo de encabezado si este texto destacado introduce un cambio de tema o contenido de importancia crítica.</p></div>`,
+	SUMMARY_EMPTY: `<p>Los elementos details crean un acordeón en el que se puede hacer clic, que muestra el texto de <code>&lt;summary&gt;</code> como un botón que revela más detalles. Sin texto de resumen, quienes usan lectores de pantalla no pueden oír qué hace el botón.</p>`,
 
 	SUS_ALT: `<p>El alt de esta imagen incluye la palabra «<i>%(alt)</i>». Los lectores de pantalla anuncian que están describiendo una imagen cuando leen el texto alternativo, por lo que frases como «imagen de» o «foto de» suelen ser redundantes.</p><p><strong>Texto alternativo:</strong> <i>%(ALT_TEXT)</i></p><p>${why.fix}Describa de manera concisa lo que significa esta imagen en este contexto.</p><div class="why"><p>Consejo: estas frases vale la pena conservarlas si el formato en sí tiene significado:<br>«Una foto de un gato, enmarcada y colgada en la pared».</p></div>`,
+	SVG_NO_ACCESSIBLE_NAME: `<p>Algunos lectores de pantalla anunciarán este SVG como una imagen sin etiqueta, porque no tiene nombre accesible y no está oculto. Añada una etiqueta accesible (o <code>&lt;title&gt;</code>) si transmite significado, u ocúltelo a los lectores de pantalla si es puramente decorativo (<code>aria-hidden="true"</code>).</p>`,
 
 	TABINDEX_ATTR: `<p>Los valores de tabindex mayores que 0 sacan los elementos enfocables de su orden visual, lo que dificulta a las personas usuarias de tecnologías de asistencia localizarlos y operarlos.</p><p>${why.fix}Cambie el orden de los elementos en el HTML para que el orden de foco y el orden de lectura coincidan.</p><div class="why"><p>Consejo: el orden visual de las palabras en la página y el orden en que el teclado tabula por los elementos suelen ser el mismo.</p><p>Asignar un tabindex positivo a un elemento lo mueve al inicio del orden de tabulación, <strong>pero no del orden visual ni de lectura</strong>.</p></div>`,
 
@@ -354,6 +364,8 @@ const tips = {
 	TABLES_MISSING_HEADINGS: `<p>${why.fix}Edite las propiedades de la tabla e indique si las cabeceras están en la primera fila, en la primera columna o en ambas.</p><div class="why"> <p>Consejo: los lectores de pantalla usan las cabeceras para orientar a las personas mientras exploran una tabla. La cabecera correspondiente se repite cada vez que el cursor entra en una columna o fila.</p><p>Si esta tabla no tiene cabeceras porque solo se usa para el diseño visual, elimine el formato de tabla y use en su lugar un formato de columnas solo visual.</p></div> `,
 
 	TABLES_SEMANTIC_HEADING: `<p>${why.fix}Elimine este formato de encabezado (h2, h3). Use en su lugar filas y columnas de cabecera. Si necesita varias filas de cabecera, divida la información en más de una tabla.</p><div class="why"><p>Consejo: las cabeceras de tabla son direccionales: una fila o una columna. Los encabezados de contenido etiquetan todo el texto que sigue, incluso en columnas no relacionadas:</p><table><tr><th>1</th><th>2</th><th>3</th><td rowspan="2">Una <strong>cabecera de tabla</strong> en la celda 2 etiqueta la celda B. <br><br> Un <strong>encabezado de contenido</strong> en la celda 2 etiqueta las celdas 3, A, B y C, así como este texto y el pie de este texto emergente.</td></tr><tr><td>A</td><td>B</td><td>C</td></tr></table></div>`,
+	TABLES_SINGLE_COLUMN: `<p>Las tablas de una sola columna suelen usarse para el diseño visual en lugar de para datos tabulares. Esto resulta confuso para quienes usan lectores de pantalla, que tienen que detenerse a escuchar descripciones estructurales pensadas para cuadrículas de datos, por ejemplo <em>«tabla, 5 filas, 1 columna»</em>.</p><p>${why.fix}Elimine el formato de tabla y use una lista u otro elemento de diseño solo visual.</p>`,
+	TABLES_SINGLE_CELL: `<p>Las tablas de una sola celda suelen ser errores al copiar y pegar, o se añaden para obtener bordes visuales. Esto resulta confuso para quienes usan lectores de pantalla, que tienen que detenerse a escuchar descripciones estructurales pensadas para cuadrículas de datos: <em>«Tabla, 1 fila, 1 columna, fila 1 columna 1»</em>.</p><p>${why.fix}Elimine el formato de tabla y use otras opciones de estilo para destacar este contenido.</p>`,
 }
 
 const interfaceStrings = {
