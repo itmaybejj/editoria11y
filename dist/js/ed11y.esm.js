@@ -10717,8 +10717,7 @@ const defaults = {
   // e.g. '.inner-node-hidden-in-CSS'
   // Shared properties for some checks
   susAltStopWords: "",
-  linkStopWords: "follow us on",
-  // @todo go upstream
+  linkStopWords: "",
   extraPlaceholderStopWords: "",
   imageWithinLightbox: "",
   initialHeadingLevel: [],
