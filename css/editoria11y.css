@@ -319,7 +319,7 @@ button.ed11y-jump {
       color: var(--ed11y-activeColor);
       box-shadow: 0 0 1px;
       padding: 0 .5em;
-      text-align: left;
+      text-align: start;
       right: 0;
       white-space: nowrap;
       width: auto;
@@ -334,9 +334,9 @@ button.ed11y-jump {
   }
 }
 
-/* todo 3.x: test*/
-.ed11y-pin-left .ed11y-buttonbar >:hover .ed11y-sr-only,
-.ed11y-pin-left .ed11y-buttonbar >:focus-visible .ed11y-sr-only {
+/* Must out-rank the #ed11y-panel tooltip rule above, or its right: 0 wins. */
+#ed11y-panel.ed11y-pin-left .ed11y-buttonbar >:hover .ed11y-sr-only,
+#ed11y-panel.ed11y-pin-left .ed11y-buttonbar >:focus-visible .ed11y-sr-only {
   right: auto;
   left: 0;
 }
@@ -379,7 +379,7 @@ button.ed11y-jump {
   font-size: 1em;
   padding: 0;
   width: auto;
-  border-right: 0;
+  border-inline-end: 0;
   margin: 0 -3px;
   z-index: 2;
 
@@ -576,7 +576,7 @@ button.ed11y-jump {
 
 #ed11y-alt-list {
   li {
-    margin-left: -8px;
+    margin-inline-start: -8px;
   }
 
   .alt-parent {
@@ -834,7 +834,7 @@ ed11y-element-result[data-ed11y-open='true'] {
     justify-content: center;
     align-items: center;
     width: 2.75em;
-    border-left: 1px solid;
+    border-inline-start: 1px solid;
     line-height: 1;
   }
 
@@ -892,7 +892,7 @@ ed11y-element-result[data-ed11y-open='true'] {
   position: absolute;
   inset: 1px 1px 2.1em;
   border-bottom: 1px solid var(--ed11y-bg);
-  text-align: left;
+  text-align: start;
   background: var(--ed11y-primary, #276499);
   color: var(--ed11y-primaryText, #fffdf7);
   padding: .5em 1em 1em;
@@ -901,7 +901,7 @@ ed11y-element-result[data-ed11y-open='true'] {
 }
 
 .ed11y-tip-count {
-  padding-right: .8em;
+  padding-inline-end: .8em;
   font-size: .857em;
 }
 
@@ -1001,7 +1001,7 @@ ed11y-element-result[data-ed11y-open='true'] {
     span {
       display: inline-flex;
       align-items: center;
-      margin-right: 6px;
+      margin-inline-end: 6px;
     }
   }
 
@@ -1081,7 +1081,7 @@ ed11y-element-result[data-ed11y-open='true'] {
   display: inline-block;
   width: .8375em;
   vertical-align: middle;
-  margin-right: .325em;
+  margin-inline-end: .325em;
 }
 
 /* Heading level visualizer ============= */
@@ -1098,7 +1098,7 @@ ed11y-element-result[data-ed11y-open='true'] {
   padding: 0 .5em;
   line-height: 1.2;
   border-radius: var(--ed11y-borderRadius, 1px);
-  margin-left: 35px;
+  margin-inline-start: 35px;
   font-weight: 400;
 }
 
@@ -1197,4 +1197,91 @@ ed11y-element-result.ed11y-preload,
     border: 0;
     margin: 0 -5px;
   }
+}
+
+/* Right to left ======================== */
+/* The button bar's grid already runs from the right on a right-to-left page,
+   so its buttons come in mirrored order. What rounds, overlaps or shadows one
+   side of a button is mirrored with them: the outer ends, the overlaps that
+   join the buttons into one bar, and the icon nudges.
+   Box shadows have no logical form, so each rule here restates an LTR rule
+   above with :dir(rtl) added; keep its specificity at or above the original.
+   Keep :dir() out of LTR selector lists: browsers without :dir() support
+   drop the whole list, and should fall back to the LTR rules instead. */
+.ed11y-buttonbar:dir(rtl) > button,
+.ed11y-buttonbar:dir(rtl) > a {
+  box-shadow: 0 1px var(--ed11y-activePanelBorder), 0 -1px var(--ed11y-activePanelBorder), 1px 0 var(--ed11y-activeBorder), -2px 0 var(--ed11y-activeBackground), 2px 0 var(--ed11y-activeBackground);
+}
+
+.ed11y-buttonbar:dir(rtl) > button svg,
+.ed11y-buttonbar:dir(rtl) > a svg {
+  margin: 5px 0 3px -1px;
+}
+
+button.ed11y-jump:dir(rtl) {
+  margin-left: 0;
+  margin-right: -3px;
+  border-radius: .5em 0 0 .5em;
+  box-shadow: 0 0 0 1px var(--ed11y-activePanelBorder), 2px 0 var(--ed11y-activeBackground);
+}
+
+button.ed11y-jump:dir(rtl) .toggle-count {
+  padding: 0 8px 0 6px;
+}
+
+/* The "next" arrow points outward, toward the bar's left end. */
+button.ed11y-jump:dir(rtl):hover .hover-icon {
+  margin: .4em 5% 0 0;
+  transform: scaleX(-1);
+}
+
+#ed11y-show-hidden:dir(rtl) svg {
+  margin: 5px 1px 2px 0;
+}
+
+#ed11y-visualize:dir(rtl) {
+  padding: 0 6px 0 12px;
+  margin-right: 0;
+  margin-left: -3px;
+}
+
+.ed11y-errors #ed11y-visualize:dir(rtl) {
+  padding-left: 10px;
+}
+
+#ed11y-reports-link:dir(rtl),
+#ed11y-show-hidden:first-child:dir(rtl),
+.ed11y-buttonbar [hidden]:first-child + #ed11y-visualize:dir(rtl) {
+  border-radius: 0 .5em .5em 0;
+  box-shadow: 1px 0 var(--ed11y-activePanelBorder), 0 -1px var(--ed11y-activePanelBorder), 0 1px var(--ed11y-activePanelBorder), -2px 0 var(--ed11y-activeBackground);
+  padding: 0 10px 0 6px;
+}
+
+.ed11y-buttonbar [hidden]:first-child + #ed11y-visualize:dir(rtl) {
+  padding: 0 10px 0 11px;
+}
+
+#ed11y-reports-link:dir(rtl) {
+  padding: 0 4px 0 0;
+}
+
+#ed11y-reports-link:dir(rtl) svg {
+  margin: .375em -1px 0 0;
+}
+
+#ed11y-panel:dir(rtl) .ed11y-buttonbar button[data-ed11y-pressed="true"],
+#ed11y-panel:dir(rtl) .ed11y-buttonbar button[aria-pressed="true"],
+#ed11y-panel:dir(rtl) .ed11y-buttonbar #ed11y-visualize[data-ed11y-pressed="true"] {
+  box-shadow: inset -1px 1px 3px 1px black, 0 0 0 1px var(--ed11y-activeBackground), -7px 0 var(--ed11y-activeBackground);
+}
+
+.ed11y-shut:dir(rtl) a,
+.ed11y-shut:dir(rtl) button:not(#ed11y-toggle, .next) {
+  box-shadow: 0 1px, 0 -1px, 1px 0;
+}
+
+.ed11y-shut:dir(rtl) #ed11y-reports-link,
+.ed11y-shut:dir(rtl) #ed11y-show-hidden:first-child,
+.ed11y-shut:dir(rtl) [hidden]:first-child + #ed11y-visualize {
+  box-shadow: 1px 0, 0 -1px, 0 1px, -2px 0;
 }

@@ -1808,61 +1808,61 @@ class Ed11y {
       };
 
       switch (direction) {
-        case 'under':
-          nudgeX = align(containRight, buttonLeft, tipWidth, 'horizontal');
-          arrow.style.setProperty('top', buttonSize + 'px');
-          arrow.style.setProperty('right', 'auto');
-          arrow.style.setProperty('bottom', 'auto');
-          arrow.style.setProperty('left', buttonSize / 2 - 10 + 'px');
-          tip.style.setProperty('top', buttonSize + 10 + 'px');
-          tip.style.setProperty('right', 'auto');
-          tip.style.setProperty('bottom', 'auto');
-          tip.style.setProperty('left', '-4px');
-          break;
-        case 'above':
-          nudgeX = align(containRight, buttonLeft, tipWidth, 'horizontal');
-          arrow.style.setProperty('top', 'auto');
-          arrow.style.setProperty('right', 'auto');
-          arrow.style.setProperty('bottom', '2px');
-          arrow.style.setProperty('left', buttonSize / 2 - 10 + 'px');
-          tip.style.setProperty('top', 'auto');
-          tip.style.setProperty('right', 'auto');
-          tip.style.setProperty('bottom', '12px');
-          tip.style.setProperty('left', '-4px');
-          break;
-        case 'right':
-          nudgeY = align(containBottom, buttonTop, tipHeight, 'vertical');
-          arrow.style.setProperty('top', buttonSize / 2 - 10 + 'px');
-          arrow.style.setProperty('right', 'auto');
-          arrow.style.setProperty('bottom', 'auto');
-          arrow.style.setProperty('left', buttonSize + 'px');
-          tip.style.setProperty('top', '-4px');
-          tip.style.setProperty('right', 'auto');
-          tip.style.setProperty('bottom', 'auto');
-          tip.style.setProperty('left', buttonSize + 10 + 'px');
-          break;
-        case 'left':
-          nudgeY = align(containBottom, buttonTop, tipHeight, 'vertical');
-          arrow.style.setProperty('top', buttonSize / 2 - 10 + 'px');
-          arrow.style.setProperty('right', '0');
-          arrow.style.setProperty('bottom', 'auto');
-          arrow.style.setProperty('left', 'auto');
-          tip.style.setProperty('top', '-4px');
-          tip.style.setProperty('right', '10px');
-          tip.style.setProperty('bottom', 'auto');
-          tip.style.setProperty('left', 'auto');
-          break;
-        case 'whompwhomp':
-          nudgeY = align(containBottom, buttonTop, tipHeight, 'horizontal');
-          arrow.style.setProperty('top', '0');
-          arrow.style.setProperty('right', '0');
-          arrow.style.setProperty('bottom', '0');
-          arrow.style.setProperty('left', '0');
-          tip.style.setProperty('top', `calc(50vh - ${tipWidth / 2}px)`);
-          tip.style.setProperty('right', 'auto');
-          tip.style.setProperty('bottom', 'auto');
-          tip.style.setProperty('left', `calc(50vh - ${tipHeight / 2}px)`);
-          break;
+      case 'under':
+        nudgeX = align(containRight, buttonLeft, tipWidth, 'horizontal');
+        arrow.style.setProperty('top', buttonSize + 'px');
+        arrow.style.setProperty('right', 'auto');
+        arrow.style.setProperty('bottom', 'auto');
+        arrow.style.setProperty('left', buttonSize / 2 - 10 + 'px');
+        tip.style.setProperty('top', buttonSize + 10 + 'px');
+        tip.style.setProperty('right', 'auto');
+        tip.style.setProperty('bottom', 'auto');
+        tip.style.setProperty('left', '-4px');
+        break;
+      case 'above':
+        nudgeX = align(containRight, buttonLeft, tipWidth, 'horizontal');
+        arrow.style.setProperty('top', 'auto');
+        arrow.style.setProperty('right', 'auto');
+        arrow.style.setProperty('bottom', '2px');
+        arrow.style.setProperty('left', buttonSize / 2 - 10 + 'px');
+        tip.style.setProperty('top', 'auto');
+        tip.style.setProperty('right', 'auto');
+        tip.style.setProperty('bottom', '12px');
+        tip.style.setProperty('left', '-4px');
+        break;
+      case 'right':
+        nudgeY = align(containBottom, buttonTop, tipHeight, 'vertical');
+        arrow.style.setProperty('top', buttonSize / 2 - 10 + 'px');
+        arrow.style.setProperty('right', 'auto');
+        arrow.style.setProperty('bottom', 'auto');
+        arrow.style.setProperty('left', buttonSize + 'px');
+        tip.style.setProperty('top', '-4px');
+        tip.style.setProperty('right', 'auto');
+        tip.style.setProperty('bottom', 'auto');
+        tip.style.setProperty('left', buttonSize + 10 + 'px');
+        break;
+      case 'left':
+        nudgeY = align(containBottom, buttonTop, tipHeight, 'vertical');
+        arrow.style.setProperty('top', buttonSize / 2 - 10 + 'px');
+        arrow.style.setProperty('right', '0');
+        arrow.style.setProperty('bottom', 'auto');
+        arrow.style.setProperty('left', 'auto');
+        tip.style.setProperty('top', '-4px');
+        tip.style.setProperty('right', '10px');
+        tip.style.setProperty('bottom', 'auto');
+        tip.style.setProperty('left', 'auto');
+        break;
+      case 'whompwhomp':
+        nudgeY = align(containBottom, buttonTop, tipHeight, 'horizontal');
+        arrow.style.setProperty('top', '0');
+        arrow.style.setProperty('right', '0');
+        arrow.style.setProperty('bottom', '0');
+        arrow.style.setProperty('left', '0');
+        tip.style.setProperty('top', `calc(50vh - ${tipWidth / 2}px)`);
+        tip.style.setProperty('right', 'auto');
+        tip.style.setProperty('bottom', 'auto');
+        tip.style.setProperty('left', `calc(50vh - ${tipHeight / 2}px)`);
+        break;
       }
       if (nudgeX || nudgeY) {
         tip.style.setProperty('transform', `translate(${nudgeX}px, ${nudgeY}px)`);
@@ -2950,63 +2950,63 @@ class Ed11y {
         }
 
         switch (treeWalker.currentNode.tagName) {
-          case 'STYLE':
-          case 'NOSCRIPT':
-            // Skip style elements
+        case 'STYLE':
+        case 'NOSCRIPT':
+          // Skip style elements
+          if (!Ed11y.nextTreeBranch(treeWalker)) {
+            break walker;
+          }
+          continue;
+        case 'IMG':
+          if (treeWalker.currentNode.hasAttribute('alt') &&
+              !treeWalker.currentNode.matches('[role="presentation"]')) {
+            computedText += treeWalker.currentNode.getAttribute('alt');
+          }
+          continue;
+        case 'SVG':
+        case 'svg':
+          if (treeWalker.currentNode.getAttribute('role') === 'img' && treeWalker.currentNode.hasAttribute('alt')) {
+            computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, treeWalker.currentNode.getAttribute('alt'));
             if (!Ed11y.nextTreeBranch(treeWalker)) {
               break walker;
             }
-            continue;
-          case 'IMG':
-            if (treeWalker.currentNode.hasAttribute('alt') &&
-              !treeWalker.currentNode.matches('[role="presentation"]')) {
-              computedText += treeWalker.currentNode.getAttribute('alt');
-            }
-            continue;
-          case 'SVG':
-          case 'svg':
-            if (treeWalker.currentNode.getAttribute('role') === 'img' && treeWalker.currentNode.hasAttribute('alt')) {
-              computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, treeWalker.currentNode.getAttribute('alt'));
-              if (!Ed11y.nextTreeBranch(treeWalker)) {
-                break walker;
+          }
+          continue;
+        case 'A':
+          if (treeWalker.currentNode.hasAttribute('title')) {
+            addTitleIfNoName = treeWalker.currentNode.getAttribute('title');
+            aText = computedText;
+          } else {
+            // Reset
+            addTitleIfNoName = false;
+            aText = false;
+          }
+          computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
+          break;
+        case 'INPUT':
+          computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
+          if (treeWalker.currentNode.hasAttribute('title')) {
+            addTitleIfNoName = treeWalker.currentNode.getAttribute('title');
+          }
+          break;
+        case 'SLOT':
+          if (treeWalker.currentNode.assignedNodes()) {
+            // Slots have specific shadow DOM methods.
+            const children = treeWalker.currentNode.assignedNodes();
+            children?.forEach(child => {
+              if (child.nodeType === Node.ELEMENT_NODE) {
+                computedText += Ed11y.computeText(child);
+              } else if (child.nodeType === Node.TEXT_NODE) {
+                computedText += Ed11y.flattenText(child.nodeValue);
               }
-            }
-            continue;
-          case 'A':
-            if (treeWalker.currentNode.hasAttribute('title')) {
-              addTitleIfNoName = treeWalker.currentNode.getAttribute('title');
-              aText = computedText;
-            } else {
-              // Reset
-              addTitleIfNoName = false;
-              aText = false;
-            }
-            computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
-            break;
-          case 'INPUT':
-            computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
-            if (treeWalker.currentNode.hasAttribute('title')) {
-              addTitleIfNoName = treeWalker.currentNode.getAttribute('title');
-            }
-            break;
-          case 'SLOT':
-            if (treeWalker.currentNode.assignedNodes()) {
-              // Slots have specific shadow DOM methods.
-              const children = treeWalker.currentNode.assignedNodes();
-              children?.forEach(child => {
-                if (child.nodeType === Node.ELEMENT_NODE) {
-                  computedText += Ed11y.computeText(child);
-                } else if (child.nodeType === Node.TEXT_NODE) {
-                  computedText += Ed11y.flattenText(child.nodeValue);
-                }
-              });
-            }
-            computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
-            break;
-          default:
-            // Other tags continue as-is.
-            computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
-            break;
+            });
+          }
+          computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
+          break;
+        default:
+          // Other tags continue as-is.
+          computedText += Ed11y.wrapPseudoContent(treeWalker.currentNode, '');
+          break;
         }
       }
       // At end of loop, add last title element if need be.
@@ -3039,10 +3039,10 @@ class Ed11y {
       event.preventDefault();
       let key = event.keyCode;
       switch (key) {
-        case 13: // enter
-        case 32: // space
-          event.target.click();
-          break;
+      case 13: // enter
+      case 32: // space
+        event.target.click();
+        break;
       }
     };
 
