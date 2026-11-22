@@ -193,7 +193,7 @@ export const defaults = {
 
   // Shared properties for some checks
   susAltStopWords: '',
-  linkStopWords: 'follow us on', // @todo go upstream
+  linkStopWords: '',
   extraPlaceholderStopWords: '',
   imageWithinLightbox: '',
   initialHeadingLevel: [],
